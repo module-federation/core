@@ -1,31 +1,83 @@
+import fs from 'fs';
 import path from 'path';
-import { getIPV4, isWebTarget, skipByTarget } from './utils';
-import { moduleFederationPlugin, encodeName } from '@module-federation/sdk';
-import { PluginOptions } from '../types';
-import { LOCALHOST, PLUGIN_IDENTIFIER } from '../constant';
 import {
-  autoDeleteSplitChunkCacheGroups,
   addDataFetchExposes,
+  autoDeleteSplitChunkCacheGroups,
 } from '@module-federation/rsbuild-plugin/utils';
+import {
+  encodeName,
+  type moduleFederationPlugin,
+} from '@module-federation/sdk';
+import { PLUGIN_IDENTIFIER } from '../constant';
 import logger from '../logger';
+import type { PluginOptions } from '../types';
+import { isWebTarget, skipByTarget } from './utils';
 import { isDev } from './utils';
 
-import type { InternalModernPluginOptions } from '../types';
 import type {
   AppTools,
-  Rspack,
   AppUserConfig,
   CliPlugin,
+  Rspack,
 } from '@modern-js/app-tools';
 import type { BundlerChainConfig } from '../interfaces/bundler';
+import type { InternalModernPluginOptions } from '../types';
 
 const defaultPath = path.resolve(process.cwd(), 'module-federation.config.ts');
-
-export type ConfigType = Rspack.Configuration;
 
 type RuntimePluginEntry = NonNullable<
   moduleFederationPlugin.ModuleFederationPluginOptions['runtimePlugins']
 >[number];
+
+const RSC_LAYER = 'react-server-components';
+const RSC_BRIDGE_EXPOSE = './__rspack_rsc_bridge__';
+const RSC_CLIENT_BROWSER_SHARED_KEY = 'react-server-dom-rspack/client.browser';
+
+const resolveFirstExistingPath = (
+  candidatePaths: string[],
+  fallbackPath: string,
+) =>
+  candidatePaths.find((candidatePath) => fs.existsSync(candidatePath)) ||
+  fallbackPath;
+
+const RSC_BRIDGE_RUNTIME_PLUGIN = resolveFirstExistingPath(
+  [
+    path.resolve(__dirname, './mfRuntimePlugins/rsc-bridge-runtime-plugin.ts'),
+    path.resolve(__dirname, './mfRuntimePlugins/rsc-bridge-runtime-plugin.js'),
+    path.resolve(
+      __dirname,
+      '../esm/cli/mfRuntimePlugins/rsc-bridge-runtime-plugin.mjs',
+    ),
+  ],
+  require.resolve('@module-federation/modern-js-v3/rsc-bridge-runtime-plugin'),
+);
+
+const RSC_BRIDGE_EXPOSE_MODULE = resolveFirstExistingPath(
+  [
+    path.resolve(__dirname, '../runtime/rsc-bridge-expose.ts'),
+    path.resolve(__dirname, '../runtime/rsc-bridge-expose.js'),
+    path.resolve(__dirname, '../esm/runtime/rsc-bridge-expose.mjs'),
+  ],
+  require.resolve('@module-federation/modern-js-v3/rsc-bridge-expose'),
+);
+
+const RSC_CLIENT_CALLBACK_BOOTSTRAP_MODULE = resolveFirstExistingPath(
+  [
+    path.resolve(__dirname, '../runtime/rsc-client-callback-bootstrap.js'),
+    path.resolve(__dirname, '../esm/runtime/rsc-client-callback-bootstrap.mjs'),
+    path.resolve(
+      path.dirname(RSC_BRIDGE_EXPOSE_MODULE),
+      'rsc-client-callback-bootstrap.js',
+    ),
+    path.resolve(
+      path.dirname(RSC_BRIDGE_EXPOSE_MODULE),
+      'rsc-client-callback-bootstrap.mjs',
+    ),
+  ],
+  path.resolve(__dirname, '../runtime/rsc-client-callback-bootstrap.js'),
+);
+
+export type ConfigType = Rspack.Configuration;
 
 export function setEnv(enableSSR: boolean) {
   if (enableSSR) {
@@ -116,11 +168,217 @@ const patchDTSConfig = (
   }
 };
 
+const hasRemotes = (
+  remotes: moduleFederationPlugin.ModuleFederationPluginOptions['remotes'],
+): boolean => {
+  if (!remotes) {
+    return false;
+  }
+  if (Array.isArray(remotes)) {
+    return remotes.length > 0;
+  }
+  if (typeof remotes === 'string') {
+    return (remotes as string).length > 0;
+  }
+  return Object.keys(remotes as Record<string, unknown>).length > 0;
+};
+
+const hasExposes = (
+  exposes: moduleFederationPlugin.ModuleFederationPluginOptions['exposes'],
+) => {
+  if (!exposes) {
+    return false;
+  }
+  if (Array.isArray(exposes)) {
+    return exposes.length > 0;
+  }
+  return Object.keys(exposes).length > 0;
+};
+
+const isRscMfEnabled = (
+  mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
+) => Boolean((mfConfig.experiments as { rsc?: boolean } | undefined)?.rsc);
+
+const normalizeExposeConfig = (
+  exposeConfig: moduleFederationPlugin.ExposesObject[string],
+) => {
+  if (typeof exposeConfig === 'string' || Array.isArray(exposeConfig)) {
+    return {
+      import: exposeConfig,
+    };
+  }
+
+  if (
+    exposeConfig &&
+    typeof exposeConfig === 'object' &&
+    'import' in exposeConfig
+  ) {
+    return {
+      ...(exposeConfig as unknown as Record<string, unknown>),
+      import: (exposeConfig as { import: string | string[] }).import,
+    };
+  }
+
+  return {
+    import: exposeConfig as string,
+  };
+};
+
+const setRscExposeConfig = (
+  mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
+) => {
+  if (!mfConfig.exposes) {
+    return;
+  }
+
+  const normalizedExposes: moduleFederationPlugin.ExposesObject = {};
+
+  const appendExpose = (
+    exposeKey: string,
+    exposeConfig: moduleFederationPlugin.ExposesObject[string],
+  ) => {
+    const normalizedConfig = normalizeExposeConfig(exposeConfig);
+    const importList = Array.isArray(normalizedConfig.import)
+      ? [...normalizedConfig.import]
+      : [normalizedConfig.import];
+    const normalizedImportList =
+      exposeKey === RSC_BRIDGE_EXPOSE
+        ? importList
+        : [
+            RSC_CLIENT_CALLBACK_BOOTSTRAP_MODULE,
+            ...importList.filter(
+              (importPath) =>
+                importPath !== RSC_CLIENT_CALLBACK_BOOTSTRAP_MODULE,
+            ),
+          ];
+    const normalizedImport =
+      normalizedImportList.length === 1
+        ? normalizedImportList[0]
+        : normalizedImportList;
+    normalizedExposes[exposeKey] = {
+      ...normalizedConfig,
+      import: normalizedImport,
+      layer: RSC_LAYER,
+    } as moduleFederationPlugin.ExposesConfig;
+  };
+
+  if (Array.isArray(mfConfig.exposes)) {
+    for (const exposeItem of mfConfig.exposes) {
+      if (typeof exposeItem === 'string') {
+        appendExpose(exposeItem, exposeItem);
+        continue;
+      }
+      for (const [exposeKey, exposeConfig] of Object.entries(exposeItem)) {
+        appendExpose(exposeKey, exposeConfig);
+      }
+    }
+  } else {
+    for (const [exposeKey, exposeConfig] of Object.entries(mfConfig.exposes)) {
+      appendExpose(exposeKey, exposeConfig);
+    }
+  }
+
+  if (
+    !Object.prototype.hasOwnProperty.call(normalizedExposes, RSC_BRIDGE_EXPOSE)
+  ) {
+    normalizedExposes[RSC_BRIDGE_EXPOSE] = {
+      import: RSC_BRIDGE_EXPOSE_MODULE,
+      layer: RSC_LAYER,
+    } as moduleFederationPlugin.ExposesConfig;
+  }
+
+  mfConfig.exposes = normalizedExposes;
+};
+
+const assertRscMfConfig = ({
+  mfConfig,
+  isServer,
+  runtimePlugins,
+}: {
+  mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions;
+  isServer: boolean;
+  runtimePlugins: RuntimePluginEntry[];
+}) => {
+  if (!isRscMfEnabled(mfConfig)) {
+    return;
+  }
+
+  const asyncStartupEnabled =
+    (mfConfig.experiments as { asyncStartup?: boolean } | undefined)
+      ?.asyncStartup === true;
+  if (!asyncStartupEnabled) {
+    throw new Error(
+      `${PLUGIN_IDENTIFIER} experiments.rsc requires experiments.asyncStartup = true`,
+    );
+  }
+
+  if (!isServer) {
+    return;
+  }
+
+  const nodeRuntimePluginPath = require.resolve(
+    '@module-federation/node/runtimePlugin',
+  );
+  const hasNodeRuntimePlugin = runtimePlugins.some((runtimePlugin) => {
+    const runtimePluginPath =
+      typeof runtimePlugin === 'string' ? runtimePlugin : runtimePlugin[0];
+    return runtimePluginPath === nodeRuntimePluginPath;
+  });
+
+  if (!hasNodeRuntimePlugin) {
+    throw new Error(
+      `${PLUGIN_IDENTIFIER} experiments.rsc requires @module-federation/node/runtimePlugin in runtimePlugins`,
+    );
+  }
+};
+
+const patchRscClientBrowserSharedConfig = (
+  mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
+  isServer: boolean,
+) => {
+  if (isServer || !mfConfig.shared) {
+    return;
+  }
+
+  const patchSharedRecord = (sharedRecord: Record<string, unknown>) => {
+    const clientBrowserShared = sharedRecord[RSC_CLIENT_BROWSER_SHARED_KEY] as
+      | Record<string, unknown>
+      | undefined;
+    if (!clientBrowserShared || Array.isArray(clientBrowserShared)) {
+      return;
+    }
+    const shareScope = clientBrowserShared.shareScope;
+    if (typeof shareScope === 'string' && shareScope !== 'default') {
+      clientBrowserShared.import = false;
+    }
+  };
+
+  if (Array.isArray(mfConfig.shared)) {
+    for (const sharedConfig of mfConfig.shared) {
+      if (!sharedConfig || typeof sharedConfig !== 'object') {
+        continue;
+      }
+      patchSharedRecord(sharedConfig as Record<string, unknown>);
+    }
+    return;
+  }
+
+  if (typeof mfConfig.shared === 'object') {
+    patchSharedRecord(mfConfig.shared as Record<string, unknown>);
+  }
+};
+
 export const patchMFConfig = (
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
   isServer: boolean,
 ) => {
+  const rscEnabled = isRscMfEnabled(mfConfig);
   addDataFetchExposes(mfConfig.exposes, isServer);
+
+  if (rscEnabled) {
+    setRscExposeConfig(mfConfig);
+    patchRscClientBrowserSharedConfig(mfConfig, isServer);
+  }
 
   if (mfConfig.remoteType === undefined) {
     mfConfig.remoteType = 'script';
@@ -141,6 +399,9 @@ export const patchMFConfig = (
     runtimePlugins,
   );
 
+  if (rscEnabled && hasRemotes(mfConfig.remotes)) {
+    injectRuntimePlugins(RSC_BRIDGE_RUNTIME_PLUGIN, runtimePlugins);
+  }
   if (isServer) {
     injectRuntimePlugins(
       require.resolve('@module-federation/node/runtimePlugin'),
@@ -175,6 +436,12 @@ export const patchMFConfig = (
     }
   }
 
+  assertRscMfConfig({
+    mfConfig,
+    isServer,
+    runtimePlugins,
+  });
+
   mfConfig.runtimePlugins = runtimePlugins;
 
   if (!isServer) {
@@ -205,6 +472,195 @@ function patchIgnoreWarning(chain: BundlerChainConfig) {
   });
   chain.ignoreWarnings(ignoreWarnings);
 }
+
+const patchProjectNodeModulesResolution = (chain: BundlerChainConfig) => {
+  const projectNodeModulesPath = path.resolve(process.cwd(), 'node_modules');
+  if (!fs.existsSync(projectNodeModulesPath)) {
+    return;
+  }
+
+  const resolveModules = chain.resolve.modules as {
+    values?: () => string[];
+    clear: () => unknown;
+    add: (value: string) => unknown;
+  };
+  resolveModules.clear();
+  resolveModules.add(projectNodeModulesPath);
+  resolveModules.add('node_modules');
+};
+
+const patchServerOnlyAlias = (chain: BundlerChainConfig) => {
+  const serverOnlyEmptyPath = path.resolve(
+    process.cwd(),
+    'node_modules/server-only/empty.js',
+  );
+  if (!fs.existsSync(serverOnlyEmptyPath)) {
+    return;
+  }
+
+  const aliasChain = chain.resolve.alias as {
+    has?: (key: string) => boolean;
+    set: (key: string, value: string) => unknown;
+  };
+  const hasServerOnlyAlias =
+    typeof aliasChain.has === 'function'
+      ? aliasChain.has('server-only$')
+      : false;
+  if (!hasServerOnlyAlias) {
+    aliasChain.set('server-only$', serverOnlyEmptyPath);
+  }
+};
+
+const resolveProjectDependency = (request: string) => {
+  try {
+    return require.resolve(request, { paths: [process.cwd()] });
+  } catch {
+    try {
+      return require.resolve(request);
+    } catch {
+      return undefined;
+    }
+  }
+};
+
+const getExposeImports = (
+  exposeConfig: moduleFederationPlugin.ExposesObject[string],
+): string[] => {
+  if (typeof exposeConfig === 'string') {
+    return [exposeConfig];
+  }
+  if (Array.isArray(exposeConfig)) {
+    return exposeConfig.filter(
+      (importPath): importPath is string => typeof importPath === 'string',
+    );
+  }
+  if (
+    exposeConfig &&
+    typeof exposeConfig === 'object' &&
+    'import' in exposeConfig
+  ) {
+    const exposeImport = (exposeConfig as { import?: unknown }).import;
+    if (typeof exposeImport === 'string') {
+      return [exposeImport];
+    }
+    if (Array.isArray(exposeImport)) {
+      return exposeImport.filter(
+        (importPath): importPath is string => typeof importPath === 'string',
+      );
+    }
+  }
+  return [];
+};
+
+const collectExposeImportDirectories = (
+  exposes: moduleFederationPlugin.ModuleFederationPluginOptions['exposes'],
+) => {
+  if (!exposes) {
+    return [];
+  }
+
+  const exposeEntries = Array.isArray(exposes)
+    ? exposes.flatMap((exposeItem) =>
+        typeof exposeItem === 'string'
+          ? [[exposeItem, exposeItem] as const]
+          : (Object.entries(exposeItem || {}) as Array<
+              readonly [string, moduleFederationPlugin.ExposesObject[string]]
+            >),
+      )
+    : (Object.entries(exposes) as Array<
+        readonly [string, moduleFederationPlugin.ExposesObject[string]]
+      >);
+
+  const directories = new Set<string>();
+  for (const [exposeKey, exposeConfig] of exposeEntries) {
+    if (exposeKey === RSC_BRIDGE_EXPOSE) {
+      continue;
+    }
+    for (const importPath of getExposeImports(exposeConfig)) {
+      if (!importPath || !importPath.startsWith('.')) {
+        continue;
+      }
+      directories.add(path.dirname(path.resolve(process.cwd(), importPath)));
+    }
+  }
+
+  return Array.from(directories);
+};
+
+const patchRscRemoteComponentLayer = (
+  chain: BundlerChainConfig,
+  mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
+) => {
+  const includeDirectories = collectExposeImportDirectories(mfConfig.exposes);
+  if (includeDirectories.length === 0) {
+    return;
+  }
+
+  const ruleChain = chain.module
+    .rule('rsc-mf-remote-components-layer')
+    .test(/\.[cm]?[jt]sx?$/);
+
+  for (const includeDirectory of includeDirectories) {
+    ruleChain.include.add(includeDirectory);
+  }
+
+  ruleChain.layer(RSC_LAYER);
+};
+
+const patchRscServerJsxRuntimeResolution = (chain: BundlerChainConfig) => {
+  const pluginId = 'rsc-mf-react-server-jsx-runtime';
+  if (chain.plugins.has(pluginId)) {
+    return;
+  }
+
+  const reactPackagePath = resolveProjectDependency('react/package.json');
+  if (!reactPackagePath) {
+    return;
+  }
+  const reactDir = path.dirname(reactPackagePath);
+  const reactJsxRuntimeServerPath = path.join(
+    reactDir,
+    'jsx-runtime.react-server.js',
+  );
+  const reactJsxDevRuntimeServerPath = path.join(
+    reactDir,
+    'jsx-dev-runtime.react-server.js',
+  );
+
+  if (
+    !fs.existsSync(reactJsxRuntimeServerPath) ||
+    !fs.existsSync(reactJsxDevRuntimeServerPath)
+  ) {
+    return;
+  }
+
+  const { NormalModuleReplacementPlugin } = require('@rspack/core') as {
+    NormalModuleReplacementPlugin: new (...args: unknown[]) => unknown;
+  };
+
+  chain.plugin(pluginId).use(NormalModuleReplacementPlugin, [
+    /^react\/jsx(?:-dev)?-runtime$/,
+    (resource: {
+      request?: string;
+      contextInfo?: {
+        issuerLayer?: string;
+      };
+    }) => {
+      if (resource.contextInfo?.issuerLayer !== RSC_LAYER) {
+        return;
+      }
+
+      if (resource.request === 'react/jsx-runtime') {
+        resource.request = reactJsxRuntimeServerPath;
+      } else if (resource.request === 'react/jsx-dev-runtime') {
+        resource.request = reactJsxDevRuntimeServerPath;
+      }
+    },
+  ]);
+};
+
+const normalizePublicPath = (publicPath: string) =>
+  publicPath.endsWith('/') ? publicPath.slice(0, -1) : publicPath;
 
 export function addMyTypes2Ignored(
   chain: BundlerChainConfig,
@@ -266,10 +722,36 @@ export function patchBundlerConfig(options: {
   enableSSR: boolean;
 }) {
   const { chain, modernjsConfig, isServer, mfConfig, enableSSR } = options;
+  const rscMfEnabled = isRscMfEnabled(mfConfig);
 
   chain.optimization.delete('runtimeChunk');
 
   patchIgnoreWarning(chain);
+
+  if (rscMfEnabled && isServer) {
+    chain.resolve.conditionNames.add('react-server');
+  }
+
+  if (rscMfEnabled && hasExposes(mfConfig.exposes)) {
+    patchProjectNodeModulesResolution(chain);
+    patchServerOnlyAlias(chain);
+
+    const assetPrefix = modernjsConfig.output?.assetPrefix;
+    if (typeof assetPrefix === 'string' && assetPrefix.trim()) {
+      const normalizedAssetPrefix = normalizePublicPath(assetPrefix.trim());
+      chain.output.publicPath(
+        isServer
+          ? `${normalizedAssetPrefix}/bundles/`
+          : `${normalizedAssetPrefix}/`,
+      );
+    }
+    if (!isServer) {
+      chain.optimization.splitChunks(false);
+    } else {
+      patchRscRemoteComponentLayer(chain, mfConfig);
+      patchRscServerJsxRuntimeResolution(chain);
+    }
+  }
 
   if (!chain.output.get('chunkLoadingGlobal')) {
     chain.output.chunkLoadingGlobal(`chunk_${mfConfig.name}`);
@@ -350,6 +832,7 @@ export const moduleFederationConfigPlugin = (
     const enableSSR = Boolean(
       userConfig.userConfig?.ssr ?? Boolean(modernjsConfig?.server?.ssr),
     );
+    const enableRsc = Boolean(modernjsConfig?.server?.rsc);
 
     api.modifyBundlerChain((chain) => {
       const target = chain.get('target');
@@ -366,14 +849,14 @@ export const moduleFederationConfigPlugin = (
         chain,
         isServer: !isWeb,
         modernjsConfig,
-        mfConfig,
+        mfConfig: targetMFConfig,
         enableSSR,
       });
 
       if (isWeb) {
         userConfig.distOutputDir =
           chain.output.get('path') || path.resolve(process.cwd(), 'dist');
-      } else if (enableSSR) {
+      } else if (enableSSR && !enableRsc) {
         userConfig.userConfig ||= {};
         userConfig.userConfig.ssr ||= {};
         if (userConfig.userConfig.ssr === true) {
@@ -432,7 +915,8 @@ export const moduleFederationConfigPlugin = (
           },
         },
         source: {
-          enableAsyncEntry: modernjsConfig.source?.enableAsyncEntry ?? true,
+          enableAsyncEntry:
+            modernjsConfig.source?.enableAsyncEntry ?? !enableRsc,
         },
         dev: {
           assetPrefix: modernjsConfig?.dev?.assetPrefix
