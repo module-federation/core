@@ -1,4 +1,5 @@
 import type { moduleFederationPlugin } from '@module-federation/sdk';
+import CoreFederationRuntimePlugin from '../lib/container/runtime/FederationRuntimePlugin';
 import BaseWrapperPlugin from './BaseWrapperPlugin';
 
 const PLUGIN_NAME = 'FederationRuntimePlugin';
@@ -7,11 +8,7 @@ export default class FederationRuntimePlugin extends BaseWrapperPlugin {
   entryFilePath: string;
 
   constructor(options?: moduleFederationPlugin.ModuleFederationPluginOptions) {
-    super(
-      options,
-      PLUGIN_NAME,
-      '../lib/container/runtime/FederationRuntimePlugin',
-    );
+    super(options, PLUGIN_NAME, CoreFederationRuntimePlugin);
     this.entryFilePath = '';
   }
 
