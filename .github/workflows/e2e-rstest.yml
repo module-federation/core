@@ -1,0 +1,84 @@
+name: E2E Test for Rstest Demos
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  e2e-rstest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Cache Tool Downloads
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache
+          key: ${{ runner.os }}-toolcache-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-toolcache-
+
+      - name: Set Playwright cache status
+        run: |
+          if [ -d "$HOME/.cache/ms-playwright" ] || [ -d "$HOME/.cache/Cypress" ]; then
+            echo "PLAYWRIGHT_CACHE_HIT=true" >> "$GITHUB_ENV"
+          else
+            echo "PLAYWRIGHT_CACHE_HIT=false" >> "$GITHUB_ENV"
+          fi
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
+
+      - name: Set Nx SHA
+        uses: nrwl/nx-set-shas@v4
+
+      - name: Set SKIP_DEVTOOLS_POSTINSTALL environment variable
+        run: echo "SKIP_DEVTOOLS_POSTINSTALL=true" >> "$GITHUB_ENV"
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Cypress
+        run: npx cypress install
+
+      - name: Run Build for All
+        run: npx nx run-many --targets=build --projects=tag:type:pkg
+
+      - name: Run condition check script
+        id: check-ci
+        run: |
+          ci_status=0
+          node tools/scripts/ci-is-affected.mjs --appName=rstest-demo,rstest-remote-demo,rstest-rsbuild-demo,rstest-rslib-demo || ci_status=$?
+          if [ "$ci_status" -eq 0 ]; then
+            echo "run-e2e=true" >> "$GITHUB_OUTPUT"
+          elif [ "$ci_status" -eq 1 ]; then
+            echo "run-e2e=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ci-is-affected failed with unexpected exit code: $ci_status" >&2
+            exit "$ci_status"
+          fi
+
+      - name: E2E Test for rstest demos
+        if: steps.check-ci.outputs.run-e2e == 'true'
+        run: |
+          npx kill-port --port 3015,3016,3025,3035,3115,3125,3135 || true
+          npx nx run rstest-demo:test-node
+          npx nx run rstest-demo:test-browser
+          npx nx run rstest-rsbuild-demo:test-node
+          npx nx run rstest-rsbuild-demo:test-browser
+          npx nx run rstest-rslib-demo:test-node
+          npx nx run rstest-rslib-demo:test-browser
+          lsof -ti tcp:3015,3016,3025,3035,3115,3125,3135 | xargs kill || true
