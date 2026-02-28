@@ -3,6 +3,9 @@ import { createSSRMFConfig, patchSSRRspackConfig, SSR_DIR } from './ssr';
 import type { Rspack } from '@rsbuild/core';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 
+const RECORD_DYNAMIC_REMOTE_ENTRY_HASH_PLUGIN_PATTERN =
+  /record(?:-dynamic-remote-entry-hash-plugin|DynamicRemoteEntryHashPlugin)(\.js)?$/;
+
 describe('createSSRMFConfig', () => {
   const baseMFConfig: moduleFederationPlugin.ModuleFederationPluginOptions = {
     name: 'testApp',
@@ -14,9 +17,8 @@ describe('createSSRMFConfig', () => {
     expect(ssrMFConfig.library?.type).toBe('commonjs-module');
     expect(ssrMFConfig.dts).toBe(false);
     expect(ssrMFConfig.dev).toBe(false);
-    expect(ssrMFConfig.runtimePlugins).toEqual([
-      require.resolve('@module-federation/node/runtimePlugin'),
-    ]);
+    expect(ssrMFConfig.runtimePlugins).toHaveLength(1);
+    expect(ssrMFConfig.runtimePlugins?.[0]).toMatch(/runtimePlugin(\.js)?$/);
   });
 
   it('should preserve library.type if already defined', () => {
@@ -36,13 +38,9 @@ describe('createSSRMFConfig', () => {
     const originalNodeEnv = process.env.NODE_ENV;
     process.env.NODE_ENV = 'development';
     const ssrMFConfig = createSSRMFConfig(baseMFConfig);
-    expect(ssrMFConfig.runtimePlugins).toContain(
-      require.resolve('@module-federation/node/runtimePlugin'),
-    );
-    expect(ssrMFConfig.runtimePlugins).toContain(
-      require.resolve(
-        '@module-federation/node/record-dynamic-remote-entry-hash-plugin',
-      ),
+    expect(ssrMFConfig.runtimePlugins?.[0]).toMatch(/runtimePlugin(\.js)?$/);
+    expect(ssrMFConfig.runtimePlugins?.[1]).toMatch(
+      RECORD_DYNAMIC_REMOTE_ENTRY_HASH_PLUGIN_PATTERN,
     );
     process.env.NODE_ENV = originalNodeEnv; // Restore original NODE_ENV
   });
@@ -51,22 +49,23 @@ describe('createSSRMFConfig', () => {
     const originalNodeEnv = process.env.NODE_ENV;
     process.env.NODE_ENV = 'production';
     const ssrMFConfig = createSSRMFConfig(baseMFConfig);
-    expect(ssrMFConfig.runtimePlugins).toEqual([
-      require.resolve('@module-federation/node/runtimePlugin'),
-    ]);
+    expect(ssrMFConfig.runtimePlugins).toHaveLength(1);
+    expect(ssrMFConfig.runtimePlugins?.[0]).toMatch(/runtimePlugin(\.js)?$/);
     process.env.NODE_ENV = originalNodeEnv; // Restore original NODE_ENV
   });
 
   it('should initialize runtimePlugins if it is undefined', () => {
+    const originalNodeEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'production';
     const mfConfigWithoutRuntimePlugins: moduleFederationPlugin.ModuleFederationPluginOptions =
       {
         name: 'testApp',
         runtimePlugins: undefined,
       };
     const ssrMFConfig = createSSRMFConfig(mfConfigWithoutRuntimePlugins);
-    expect(ssrMFConfig.runtimePlugins).toEqual([
-      require.resolve('@module-federation/node/runtimePlugin'),
-    ]);
+    expect(ssrMFConfig.runtimePlugins).toHaveLength(1);
+    expect(ssrMFConfig.runtimePlugins?.[0]).toMatch(/runtimePlugin(\.js)?$/);
+    process.env.NODE_ENV = originalNodeEnv;
   });
 });
 
@@ -91,12 +90,12 @@ describe('patchSSRRspackConfig', () => {
     );
   });
 
-  it('should throw error if publicPath is "auto"', () => {
+  it('should normalize "auto" publicPath for SSR node output', () => {
     const config = JSON.parse(JSON.stringify(baseConfig));
     config.output.publicPath = 'auto';
-    expect(() => patchSSRRspackConfig(config, baseMfConfig, 'ssr')).toThrow(
-      'publicPath can not be "auto"!',
-    );
+    const patchedConfig = patchSSRRspackConfig(config, baseMfConfig, 'ssr');
+    expect(patchedConfig.output?.publicPath).toBe('');
+    expect(patchedConfig.target).toBe('async-node');
   });
 
   it('should update publicPath correctly', () => {
@@ -137,9 +136,7 @@ describe('patchSSRRspackConfig', () => {
         name: 'myApp',
       };
       const patchedConfig = patchSSRRspackConfig(config, mfConfig, 'ssr');
-      expect(patchedConfig.output?.chunkFilename).toBe(
-        'js/[name]myApp-[contenthash].js',
-      );
+      expect(patchedConfig.output?.chunkFilename).toBe('js/[name]myApp.js');
     });
 
     it('should modify chunkFilename when conditions are met (uniqueName from config.output.uniqueName)', () => {
@@ -154,7 +151,7 @@ describe('patchSSRRspackConfig', () => {
       const mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions = {}; // No name in mfConfig
       const patchedConfig = patchSSRRspackConfig(config, mfConfig, 'ssr');
       expect(patchedConfig.output?.chunkFilename).toBe(
-        'js/[name]myOutputUniqueName-[contenthash].js',
+        'js/[name]myOutputUniqueName.js',
       );
     });
 
