@@ -31,26 +31,44 @@ import { bindLoggerToCompiler } from '@module-federation/sdk';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import logger from '../../logger';
 
-const isEsmBuild = process.env.IS_ESM_BUILD === 'true';
-
-type BuildFormatPaths = {
-  esm: {
-    packageDistPath: string;
-    localRelativePath: string;
-  };
-  cjs: {
-    packageDistPath: string;
-    localRelativePath: string;
-  };
+type DistOrLocalPath = {
+  packageDistPath: string;
+  localRelativePath: string;
 };
 
-const resolveDistOrLocalPath = (paths: BuildFormatPaths): string => {
-  const activePaths = isEsmBuild ? paths.esm : paths.cjs;
+const runtimePluginPaths: DistOrLocalPath =
+  process.env.IS_ESM_BUILD === 'true'
+    ? {
+        packageDistPath:
+          '@module-federation/nextjs-mf/dist/src/plugins/container/runtimePlugin.mjs',
+        localRelativePath: '../container/runtimePlugin.mjs',
+      }
+    : {
+        packageDistPath:
+          '@module-federation/nextjs-mf/dist/src/plugins/container/runtimePlugin.js',
+        localRelativePath: '../container/runtimePlugin.js',
+      };
+
+const noopPaths: DistOrLocalPath =
+  process.env.IS_ESM_BUILD === 'true'
+    ? {
+        packageDistPath:
+          '@module-federation/nextjs-mf/dist/src/federation-noop.mjs',
+        localRelativePath: '../../federation-noop.mjs',
+      }
+    : {
+        packageDistPath:
+          '@module-federation/nextjs-mf/dist/src/federation-noop.js',
+        localRelativePath: '../../federation-noop.js',
+      };
+
+const resolveDistOrLocalPath = (paths: DistOrLocalPath): string => {
+  const { packageDistPath, localRelativePath } = paths;
 
   try {
-    return require.resolve(activePaths.packageDistPath);
+    return require.resolve(packageDistPath);
   } catch {
-    return require.resolve(activePaths.localRelativePath);
+    return require.resolve(localRelativePath);
   }
 };
 /**
@@ -225,18 +243,7 @@ export class NextFederationPlugin {
         ...(isServer
           ? [require.resolve('@module-federation/node/runtimePlugin')]
           : []),
-        resolveDistOrLocalPath({
-          esm: {
-            packageDistPath:
-              '@module-federation/nextjs-mf/dist/src/plugins/container/runtimePlugin.mjs',
-            localRelativePath: '../container/runtimePlugin.mjs',
-          },
-          cjs: {
-            packageDistPath:
-              '@module-federation/nextjs-mf/dist/src/plugins/container/runtimePlugin.js',
-            localRelativePath: '../container/runtimePlugin.js',
-          },
-        }),
+        resolveDistOrLocalPath(runtimePluginPaths),
         ...(this._options.runtimePlugins || []),
       ].map((plugin) => plugin + '?runtimePlugin'),
       //@ts-ignore
@@ -266,18 +273,7 @@ export class NextFederationPlugin {
   }
 
   private getNoopPath(): string {
-    return resolveDistOrLocalPath({
-      esm: {
-        packageDistPath:
-          '@module-federation/nextjs-mf/dist/src/federation-noop.mjs',
-        localRelativePath: '../../federation-noop.mjs',
-      },
-      cjs: {
-        packageDistPath:
-          '@module-federation/nextjs-mf/dist/src/federation-noop.js',
-        localRelativePath: '../../federation-noop.js',
-      },
-    });
+    return resolveDistOrLocalPath(noopPaths);
   }
 }
 

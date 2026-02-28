@@ -14,26 +14,44 @@ import {
 } from '../../loaders/helpers';
 import path from 'path';
 
-const isEsmBuild = process.env.IS_ESM_BUILD === 'true';
-
-type BuildFormatPaths = {
-  esm: {
-    packageDistPath: string;
-    localRelativePath: string;
-  };
-  cjs: {
-    packageDistPath: string;
-    localRelativePath: string;
-  };
+type DistOrLocalPath = {
+  packageDistPath: string;
+  localRelativePath: string;
 };
 
-const resolveDistOrLocalPath = (paths: BuildFormatPaths): string => {
-  const activePaths = isEsmBuild ? paths.esm : paths.cjs;
+const fixImageLoaderPaths: DistOrLocalPath =
+  process.env.IS_ESM_BUILD === 'true'
+    ? {
+        packageDistPath:
+          '@module-federation/nextjs-mf/dist/src/loaders/fixImageLoader.mjs',
+        localRelativePath: '../../loaders/fixImageLoader.mjs',
+      }
+    : {
+        packageDistPath:
+          '@module-federation/nextjs-mf/dist/src/loaders/fixImageLoader.js',
+        localRelativePath: '../../loaders/fixImageLoader',
+      };
+
+const fixUrlLoaderPaths: DistOrLocalPath =
+  process.env.IS_ESM_BUILD === 'true'
+    ? {
+        packageDistPath:
+          '@module-federation/nextjs-mf/dist/src/loaders/fixUrlLoader.mjs',
+        localRelativePath: '../../loaders/fixUrlLoader.mjs',
+      }
+    : {
+        packageDistPath:
+          '@module-federation/nextjs-mf/dist/src/loaders/fixUrlLoader.js',
+        localRelativePath: '../../loaders/fixUrlLoader',
+      };
+
+const resolveDistOrLocalPath = (paths: DistOrLocalPath): string => {
+  const { packageDistPath, localRelativePath } = paths;
 
   try {
-    return require.resolve(activePaths.packageDistPath);
+    return require.resolve(packageDistPath);
   } catch {
-    return require.resolve(activePaths.localRelativePath);
+    return require.resolve(localRelativePath);
   }
 };
 /**
@@ -75,35 +93,13 @@ export const applyPathFixes = (
         hasLoader(typedRule, 'next-image-loader')
       ) {
         injectRuleLoader(typedRule, {
-          loader: resolveDistOrLocalPath({
-            esm: {
-              packageDistPath:
-                '@module-federation/nextjs-mf/dist/src/loaders/fixImageLoader.mjs',
-              localRelativePath: '../../loaders/fixImageLoader.mjs',
-            },
-            cjs: {
-              packageDistPath:
-                '@module-federation/nextjs-mf/dist/src/loaders/fixImageLoader.js',
-              localRelativePath: '../../loaders/fixImageLoader',
-            },
-          }),
+          loader: resolveDistOrLocalPath(fixImageLoaderPaths),
         });
       }
 
       if (options.enableUrlLoaderFix && hasLoader(typedRule, 'url-loader')) {
         injectRuleLoader(typedRule, {
-          loader: resolveDistOrLocalPath({
-            esm: {
-              packageDistPath:
-                '@module-federation/nextjs-mf/dist/src/loaders/fixUrlLoader.mjs',
-              localRelativePath: '../../loaders/fixUrlLoader.mjs',
-            },
-            cjs: {
-              packageDistPath:
-                '@module-federation/nextjs-mf/dist/src/loaders/fixUrlLoader.js',
-              localRelativePath: '../../loaders/fixUrlLoader',
-            },
-          }),
+          loader: resolveDistOrLocalPath(fixUrlLoaderPaths),
         });
       }
     }
