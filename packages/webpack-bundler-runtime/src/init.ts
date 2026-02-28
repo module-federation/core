@@ -3,8 +3,11 @@ import {
   getRemoteEntry,
   type ModuleFederationRuntimePlugin,
 } from '@module-federation/runtime';
-import { ShareArgs } from '@module-federation/runtime/types';
+import type { ShareArgs } from '@module-federation/runtime/types';
 import helpers from '@module-federation/runtime/helpers';
+import { unloadRemotePlugin } from './unload-remote-plugin';
+
+const WEBPACK_REQUIRE_SYMBOL = Symbol.for('mf_webpack_require');
 
 export function init({ webpackRequire }: { webpackRequire: WebpackRequire }) {
   const { initOptions, runtime, sharedFallback, bundlerRuntime, libraryType } =
@@ -125,6 +128,16 @@ export function init({ webpackRequire }: { webpackRequire: WebpackRequire }) {
     };
 
   initOptions.plugins ||= [];
-  initOptions.plugins.push(treeShakingSharePlugin());
-  return runtime!.init(initOptions);
+  const hasPlugin = (name: string) =>
+    initOptions.plugins?.some((plugin) => plugin?.name === name);
+  if (!hasPlugin('tree-shake-plugin')) {
+    initOptions.plugins.push(treeShakingSharePlugin());
+  }
+  if (!hasPlugin('unload-remote-plugin')) {
+    initOptions.plugins.push(unloadRemotePlugin());
+  }
+  const instance = runtime!.init(initOptions);
+  (instance as unknown as Record<symbol, unknown>)[WEBPACK_REQUIRE_SYMBOL] =
+    webpackRequire;
+  return instance;
 }

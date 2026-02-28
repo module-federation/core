@@ -72,6 +72,16 @@ export class RemoteHandler {
       remote: Remote;
       origin: ModuleFederation;
     }>('registerRemote'),
+    afterRemoveRemote: new SyncHook<
+      [
+        {
+          remote: Remote;
+          origin: ModuleFederation;
+          loaded: boolean;
+        },
+      ],
+      void
+    >('afterRemoveRemote'),
     beforeRequest: new AsyncWaterfallHook<{
       id: string;
       options: Options;
@@ -192,6 +202,17 @@ export class RemoteHandler {
       const idWithName = id.replace(alias, name);
       this.idToRemoteMap[idWithName] = { name: remote.name, expose };
     }
+  }
+
+  unloadRemote(nameOrAlias: string): boolean {
+    const remote = this.host.options.remotes.find(
+      (item) => item.name === nameOrAlias || item.alias === nameOrAlias,
+    );
+    if (!remote) {
+      return false;
+    }
+    this.removeRemote(remote);
+    return true;
   }
 
   // eslint-disable-next-line max-lines-per-function
@@ -472,8 +493,16 @@ export class RemoteHandler {
         host.options.remotes.splice(remoteIndex, 1);
       }
       const loadedModule = host.moduleCache.get(remote.name);
+      const remoteInfo = loadedModule
+        ? loadedModule.remoteInfo
+        : getRemoteInfo(remote);
+
+      if (remoteInfo.entry) {
+        host.snapshotHandler.manifestCache.delete(remoteInfo.entry);
+      }
+
+      // Only clean global/share state when this host actually loaded the remote.
       if (loadedModule) {
-        const remoteInfo = loadedModule.remoteInfo;
         const key = remoteInfo.entryGlobalName as keyof typeof CurrentGlobal;
 
         if (CurrentGlobal[key]) {
@@ -486,15 +515,11 @@ export class RemoteHandler {
             CurrentGlobal[key] = undefined;
           }
         }
-        const remoteEntryUniqueKey = getRemoteEntryUniqueKey(
-          loadedModule.remoteInfo,
-        );
+        const remoteEntryUniqueKey = getRemoteEntryUniqueKey(remoteInfo);
 
         if (globalLoading[remoteEntryUniqueKey]) {
           delete globalLoading[remoteEntryUniqueKey];
         }
-
-        host.snapshotHandler.manifestCache.delete(remoteInfo.entry);
 
         // delete unloaded shared and instance
         let remoteInsId = remoteInfo.buildVersion
@@ -574,27 +599,51 @@ export class RemoteHandler {
           );
           CurrentGlobal.__FEDERATION__.__INSTANCES__.splice(remoteInsIndex, 1);
         }
+      }
 
-        const { hostGlobalSnapshot } = getGlobalRemoteInfo(remote, host);
-        if (hostGlobalSnapshot) {
-          const remoteKey =
-            hostGlobalSnapshot &&
-            'remotesInfo' in hostGlobalSnapshot &&
-            hostGlobalSnapshot.remotesInfo &&
-            getInfoWithoutType(hostGlobalSnapshot.remotesInfo, remote.name).key;
-          if (remoteKey) {
-            delete hostGlobalSnapshot.remotesInfo[remoteKey];
-            if (
-              //eslint-disable-next-line no-extra-boolean-cast
-              Boolean(Global.__FEDERATION__.__MANIFEST_LOADING__[remoteKey])
-            ) {
-              delete Global.__FEDERATION__.__MANIFEST_LOADING__[remoteKey];
-            }
+      host.moduleCache.delete(remote.name);
+      Object.keys(this.idToRemoteMap).forEach((id) => {
+        if (this.idToRemoteMap[id]?.name === remote.name) {
+          delete this.idToRemoteMap[id];
+        }
+      });
+
+      const remotePrefixes = [remote.name, remote.alias].filter(
+        Boolean,
+      ) as string[];
+      const preloadedMap = Global.__FEDERATION__.__PRELOADED_MAP__;
+      Array.from(preloadedMap.keys()).forEach((key) => {
+        if (
+          remotePrefixes.some(
+            (prefix) => key === prefix || key.startsWith(`${prefix}/`),
+          )
+        ) {
+          preloadedMap.delete(key);
+        }
+      });
+
+      const { hostGlobalSnapshot } = getGlobalRemoteInfo(remote, host);
+      if (hostGlobalSnapshot) {
+        const remoteKey =
+          hostGlobalSnapshot &&
+          'remotesInfo' in hostGlobalSnapshot &&
+          hostGlobalSnapshot.remotesInfo &&
+          getInfoWithoutType(hostGlobalSnapshot.remotesInfo, remote.name).key;
+        if (remoteKey) {
+          delete hostGlobalSnapshot.remotesInfo[remoteKey];
+          if (
+            //eslint-disable-next-line no-extra-boolean-cast
+            Boolean(Global.__FEDERATION__.__MANIFEST_LOADING__[remoteKey])
+          ) {
+            delete Global.__FEDERATION__.__MANIFEST_LOADING__[remoteKey];
           }
         }
-
-        host.moduleCache.delete(remote.name);
       }
+      this.hooks.lifecycle.afterRemoveRemote.emit({
+        remote,
+        origin: host,
+        loaded: Boolean(loadedModule),
+      });
     } catch (err) {
       logger.log('removeRemote fail: ', err);
     }
