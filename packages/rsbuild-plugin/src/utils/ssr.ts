@@ -15,6 +15,22 @@ import type { moduleFederationPlugin } from '@module-federation/sdk';
 const require = createRequire(import.meta.url);
 const resolve = require.resolve;
 
+function resolveOrRequest(request: string): string {
+  try {
+    return resolve(request);
+  } catch {
+    return request;
+  }
+}
+
+function safeRequire<T>(request: string): T | undefined {
+  try {
+    return require(request) as T;
+  } catch {
+    return undefined;
+  }
+}
+
 export const SSR_DIR = 'ssr';
 export const SSR_ENV_NAME = 'mf-ssr';
 export const ENV_NAME = 'mf';
@@ -32,12 +48,25 @@ export function patchNodeConfig(
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
 ) {
   config.output ||= {};
+  if (config.output.publicPath === 'auto') {
+    config.output.publicPath = '';
+  }
   config.target = 'async-node';
-  // @module-federation/node/universe-entry-chunk-tracker-plugin only export cjs
+  // Force node federation output to CJS + async chunk loading.
+  // This prevents browser jsonp runtime handlers from leaking into SSR remotes.
+  config.output.module = false;
+  config.output.chunkFormat = 'commonjs';
+  config.output.chunkLoading = 'async-node';
+  delete config.output.chunkLoadingGlobal;
+  const UniverseEntryChunkTrackerPluginModule = safeRequire<{
+    default?: new () => Rspack.RspackPluginInstance;
+  }>('@module-federation/node/universe-entry-chunk-tracker-plugin');
   const UniverseEntryChunkTrackerPlugin =
-    require('@module-federation/node/universe-entry-chunk-tracker-plugin').default;
+    UniverseEntryChunkTrackerPluginModule?.default;
   config.plugins ||= [];
-  isDev() && config.plugins.push(new UniverseEntryChunkTrackerPlugin());
+  if (isDev() && UniverseEntryChunkTrackerPlugin) {
+    config.plugins.push(new UniverseEntryChunkTrackerPlugin());
+  }
 
   const uniqueName = mfConfig.name || config.output?.uniqueName;
   const chunkFileName = config.output.chunkFilename;
@@ -46,8 +75,10 @@ export function patchNodeConfig(
     uniqueName &&
     !chunkFileName.includes(uniqueName)
   ) {
-    const suffix = `${encodeName(uniqueName)}-[contenthash].js`;
-    config.output.chunkFilename = chunkFileName.replace('.js', suffix);
+    const encodedName = encodeName(uniqueName);
+    config.output.chunkFilename = chunkFileName.endsWith('.js')
+      ? chunkFileName.replace(/\.js$/, `${encodedName}.js`)
+      : `${chunkFileName}${encodedName}`;
   }
 }
 
@@ -65,12 +96,10 @@ export function patchSSRRspackConfig(
       throw new Error('publicPath must be string!');
     }
     const publicPath = config.output.publicPath;
-    if (publicPath === 'auto') {
-      throw new Error('publicPath can not be "auto"!');
+    if (publicPath !== 'auto') {
+      const publicPathWithSSRDir = `${publicPath}${ssrDir}/`;
+      config.output.publicPath = publicPathWithSSRDir;
     }
-
-    const publicPathWithSSRDir = `${publicPath}${ssrDir}/`;
-    config.output.publicPath = publicPathWithSSRDir;
   }
 
   if (callerName === CALL_NAME_MAP.RSPRESS && resetEntry) {
@@ -158,12 +187,11 @@ export function patchNodeMFConfig(
   mfConfig.runtimePlugins = [...(mfConfig.runtimePlugins || [])];
 
   mfConfig.runtimePlugins.push(
-    resolve('@module-federation/node/runtimePlugin'),
+    resolveOrRequest('@module-federation/node/runtimePlugin'),
   );
   if (isDev()) {
     mfConfig.runtimePlugins.push(
-      // @ts-ignore
-      resolve(
+      resolveOrRequest(
         '@module-federation/node/record-dynamic-remote-entry-hash-plugin',
       ),
     );
