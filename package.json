@@ -304,6 +304,7 @@
     "terser-webpack-plugin": "^5.3.10",
     "ts-jest": "29.1.5",
     "ts-node": "10.9.1",
+    "tsdown": "0.20.3",
     "tslib": "2.8.1",
     "tsup": "7.3.0",
     "typescript": "5.8.2",
