@@ -24,7 +24,8 @@ module.exports = async (something, context, unlinked) => {
   });
   if (unlinked) return m;
   await m.link(() => {});
-  if (m.instantiate) m.instantiate();
+  // Do not call instantiate(): Node's link() already performs instantiation.
+  // Calling instantiate() on a linked module throws in Node 20+.
   await m.evaluate();
   return m;
 };
