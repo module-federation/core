@@ -6,7 +6,7 @@ import {
   SEPARATOR,
   MANIFEST_EXT,
 } from './constant';
-import { getProcessEnv, isBrowserEnvValue, isReactNativeEnv } from './env';
+import { getProcessEnv, isBrowserEnv, isReactNativeEnv } from './env';
 
 const LOG_CATEGORY = '[ Federation Runtime ]';
 
@@ -190,9 +190,10 @@ const getResourceUrl = (module: ModuleInfo, sourceUrl: string): string => {
     return `${publicPath}${sourceUrl}`;
   } else if ('publicPath' in module) {
     if (
-      !isBrowserEnvValue &&
+      !isBrowserEnv() &&
       !isReactNativeEnv() &&
-      'ssrPublicPath' in module
+      'ssrPublicPath' in module &&
+      typeof module.ssrPublicPath === 'string'
     ) {
       return `${module.ssrPublicPath}${sourceUrl}`;
     }
