@@ -6,6 +6,7 @@
   "keywords": [
     "Module Federation"
   ],
+  "type": "commonjs",
   "files": [
     "dist/",
     "README.md"
