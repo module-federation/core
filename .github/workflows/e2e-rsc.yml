@@ -1,0 +1,87 @@
+# .github/workflows/e2e-rsc.yml
+name: E2E RSC Demo
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  e2e-rsc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Cache Tool Downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache
+          key: ${{ runner.os }}-toolcache-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-toolcache-
+
+      - name: Set Playwright cache status
+        run: |
+          if [ -d "$HOME/.cache/ms-playwright" ] || [ -d "$HOME/.cache/Cypress" ]; then
+            echo "PLAYWRIGHT_CACHE_HIT=true" >> "$GITHUB_ENV"
+          else
+            echo "PLAYWRIGHT_CACHE_HIT=false" >> "$GITHUB_ENV"
+          fi
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: '10.28.0'
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Set Nx SHA
+        uses: nrwl/nx-set-shas@v3
+
+      - name: Set SKIP_DEVTOOLS_POSTINSTALL environment variable
+        run: echo "SKIP_DEVTOOLS_POSTINSTALL=true" >> "$GITHUB_ENV"
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Install Playwright Browsers
+        run: pnpm -C apps/rsc-demo/e2e exec playwright install --with-deps chromium
+
+      - name: Run Build for All Packages
+        run: npx nx run-many --targets=build --projects=tag:type:pkg
+
+      - name: Build RSC Demo
+        run: npx nx run rsc-demo:build
+
+      - name: Verify SSR Registry Source (MF Manifest)
+        run: |
+          echo "Checking mf-manifest.ssr.json additionalData.rsc.clientComponents..."
+          node -e "const mf=require('./apps/rsc-demo/app1/build/mf-manifest.ssr.json'); const cc=mf?.additionalData?.rsc?.clientComponents||mf?.rsc?.clientComponents||{}; if(!Object.keys(cc).length){console.error('ERROR: app1 mf-manifest.ssr.json missing rsc.clientComponents'); process.exit(1)}"
+          node -e "const mf=require('./apps/rsc-demo/app2/build/mf-manifest.ssr.json'); const cc=mf?.additionalData?.rsc?.clientComponents||mf?.rsc?.clientComponents||{}; if(!Object.keys(cc).length){console.error('ERROR: app2 mf-manifest.ssr.json missing rsc.clientComponents'); process.exit(1)}"
+          echo "SSR registry verified via mf-manifest.ssr.json in both apps"
+
+      - name: Verify Manifest Files
+        run: |
+          echo "Checking manifest files..."
+          test -f apps/rsc-demo/app1/build/react-client-manifest.json || (echo "ERROR: react-client-manifest.json missing in app1" && exit 1)
+          test -f apps/rsc-demo/app1/build/react-ssr-manifest.json || (echo "ERROR: react-ssr-manifest.json missing in app1" && exit 1)
+          test -f apps/rsc-demo/app1/build/react-server-actions-manifest.json || (echo "ERROR: react-server-actions-manifest.json missing in app1" && exit 1)
+          test -f apps/rsc-demo/app2/build/react-client-manifest.json || (echo "ERROR: react-client-manifest.json missing in app2" && exit 1)
+          test -f apps/rsc-demo/app2/build/react-ssr-manifest.json || (echo "ERROR: react-ssr-manifest.json missing in app2" && exit 1)
+          test -f apps/rsc-demo/app2/build/react-server-actions-manifest.json || (echo "ERROR: react-server-actions-manifest.json missing in app2" && exit 1)
+          echo "All manifest files present"
+
+      - name: Run RSC Tests (Node)
+        run: npx nx run rsc-demo:test:rsc
+
+      - name: Run RSC E2E Tests (Playwright)
+        run: npx nx run rsc-demo:test:e2e

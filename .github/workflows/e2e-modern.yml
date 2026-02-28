@@ -70,7 +70,7 @@ jobs:
           fi
 
       - name: E2E Test for ModernJS
-        if: steps.check-ci.outputs.run-e2e == 'true'
+        if: steps.check-ci.outputs.affected == 'true'
         run: npx kill-port --port 4001 && npx nx run-many --target=test:e2e --projects=modernjs --parallel=1 && npx kill-port --port 4001
 
       - name: Kill ports

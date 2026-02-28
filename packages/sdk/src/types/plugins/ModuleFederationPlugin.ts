@@ -118,10 +118,57 @@ export interface AdditionalDataOptions {
   compilation: webpack.Compilation;
   bundler: 'webpack' | 'rspack';
 }
+
+export interface ManifestRscOptions {
+  /**
+   * Logical layer name for the current build (e.g. "client", "ssr", "rsc").
+   * Used by runtimes to select appropriate share scopes / conditions.
+   */
+  layer?: string;
+  /**
+   * Share scope to use for this layer (e.g. "client", "rsc", "default").
+   */
+  shareScope?: string;
+  /**
+   * True when this build targets the React Server Components ("react-server")
+   * runtime. When omitted, it may be inferred from the build configuration.
+   */
+  isRSC?: boolean;
+  /**
+   * Webpack condition names used by this build (e.g. ["react-server","node",...]).
+   */
+  conditionNames?: string[];
+  /**
+   * Optional remote metadata for runtimes (URLs, endpoints, etc).
+   */
+  remote?: {
+    name?: string;
+    url?: string;
+    actionsEndpoint?: string;
+    serverContainer?: string;
+    [key: string]: unknown;
+  };
+  /**
+   * Optional map of expose key -> type (e.g. client-component, server-action).
+   */
+  exposeTypes?: Record<string, string>;
+  /**
+   * Optional URLs to RSC-related manifests for this build.
+   */
+  serverActionsManifest?: string;
+  clientManifest?: string;
+  /**
+   * Optional client component registry (typically auto-populated from
+   * react-client-manifest.json / react-ssr-manifest.json).
+   */
+  clientComponents?: Record<string, unknown>;
+  [key: string]: unknown;
+}
 export interface PluginManifestOptions {
   filePath?: string;
   disableAssetsAnalyze?: boolean;
   fileName?: string;
+  rsc?: ManifestRscOptions;
   additionalData?: (
     options: AdditionalDataOptions,
   ) => Promise<void | Stats> | Stats | void;

@@ -70,9 +70,9 @@ jobs:
           fi
 
       - name: E2E Test for Manifest Demo Development
-        if: steps.check-ci.outputs.run-e2e == 'true'
+        if: steps.check-ci.outputs.affected == 'true'
         run: node tools/scripts/run-manifest-e2e.mjs --mode=dev
 
       - name: E2E Test for Manifest Demo Production
-        if: steps.check-ci.outputs.run-e2e == 'true'
+        if: steps.check-ci.outputs.affected == 'true'
         run: node tools/scripts/run-manifest-e2e.mjs --mode=prod
