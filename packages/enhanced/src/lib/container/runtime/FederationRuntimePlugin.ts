@@ -34,30 +34,8 @@ const { mkdirpSync } = require(
   normalizeWebpackPath('webpack/lib/util/fs'),
 ) as typeof import('webpack/lib/util/fs');
 
-function isEsmOutputBuild(compiler: Compiler): boolean {
-  if (compiler.options.experiments?.outputModule) {
-    return true;
-  }
-
-  if (compiler.options.output?.module) {
-    return true;
-  }
-
-  const library = compiler.options.output?.library;
-  if (
-    library &&
-    typeof library === 'object' &&
-    !Array.isArray(library) &&
-    'type' in library
-  ) {
-    return library.type === 'module';
-  }
-
-  return false;
-}
-
-function resolveRuntimePaths(preferEsm: boolean, implementation?: string) {
-  const ext = preferEsm ? '.js' : '.cjs';
+function resolveRuntimePaths(implementation?: string) {
+  const ext = process.env.IS_ESM_BUILD === 'true' ? '.js' : '.cjs';
   const runtimeToolsSpec = `@module-federation/runtime-tools/dist/index${ext}`;
   const bundlerRuntimeSpec = `@module-federation/webpack-bundler-runtime/dist/index${ext}`;
   const runtimeSpec = `@module-federation/runtime/dist/index${ext}`;
@@ -80,7 +58,7 @@ const {
   runtimeToolsPath: RuntimeToolsPath,
   bundlerRuntimePath: BundlerRuntimePath,
   runtimePath: RuntimePath,
-} = resolveRuntimePaths(true);
+} = resolveRuntimePaths();
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
 const onceForCompiler = new WeakSet<Compiler>();
@@ -381,10 +359,7 @@ class FederationRuntimePlugin {
     const { implementation } = this.options || {};
     const alias: any = compiler.options.resolve.alias || {};
 
-    const resolvedPaths = resolveRuntimePaths(
-      isEsmOutputBuild(compiler),
-      implementation,
-    );
+    const resolvedPaths = resolveRuntimePaths(implementation);
 
     this.runtimeToolsPath = resolvedPaths.runtimeToolsPath;
     this.bundlerRuntimePath = resolvedPaths.bundlerRuntimePath;
@@ -467,10 +442,7 @@ class FederationRuntimePlugin {
         compiler.options.output.uniqueName || `container_${Date.now()}`;
     }
 
-    const resolvedPaths = resolveRuntimePaths(
-      isEsmOutputBuild(compiler),
-      this.options?.implementation,
-    );
+    const resolvedPaths = resolveRuntimePaths(this.options?.implementation);
     this.bundlerRuntimePath = resolvedPaths.bundlerRuntimePath;
     this.runtimePath = resolvedPaths.runtimePath;
     this.runtimeToolsPath = resolvedPaths.runtimeToolsPath;
