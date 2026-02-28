@@ -29,8 +29,6 @@ type CacheGroup = CacheGroups[string];
 
 declare const __VERSION__: string;
 
-const RuntimeToolsPath = require.resolve('@module-federation/runtime-tools');
-
 export const PLUGIN_NAME = 'RspackModuleFederationPlugin';
 export class ModuleFederationPlugin implements RspackPluginInstance {
   readonly name = PLUGIN_NAME;
@@ -136,7 +134,12 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       }).apply(compiler);
     }
 
-    const implementationPath = options.implementation || RuntimeToolsPath;
+    const runtimeToolsSpecifier =
+      process.env['IS_ESM_BUILD'] === 'true'
+        ? '@module-federation/runtime-tools/dist/index.js'
+        : '@module-federation/runtime-tools/dist/index.cjs';
+    const implementationPath =
+      options.implementation || require.resolve(runtimeToolsSpecifier);
     options.implementation = implementationPath;
     let disableManifest = options.manifest === false;
     let disableDts = options.dts === false;
@@ -163,33 +166,26 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       options as unknown as ModuleFederationPluginOptions,
     ).apply(compiler);
 
-    const resolveRuntimePath = (candidates: string[]) => {
-      for (const candidate of candidates) {
-        try {
-          return require.resolve(candidate, {
-            paths: [implementationPath],
-          });
-        } catch {}
-      }
+    const runtimeEntrySpecifier =
+      process.env['IS_ESM_BUILD'] === 'true'
+        ? '@module-federation/runtime/dist/index.js'
+        : '@module-federation/runtime/dist/index.cjs';
+    let runtimePath: string;
+    try {
+      runtimePath = require.resolve(runtimeEntrySpecifier, {
+        paths: [implementationPath],
+      });
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : String(err);
       throw new Error(
-        `[ ModuleFederationPlugin ]: Unable to resolve runtime entry from ${candidates.join(
-          ', ',
-        )}`,
+        `[ ModuleFederationPlugin ]: Unable to resolve runtime entry at ${runtimeEntrySpecifier} (paths: [${implementationPath}]): ${detail}`,
       );
-    };
-
-    const runtimeESMPath = resolveRuntimePath([
-      '@module-federation/runtime/dist/index.js',
-      '@module-federation/runtime/dist/index.esm.js',
-      '@module-federation/runtime/dist/index.cjs',
-      '@module-federation/runtime/dist/index.cjs.cjs',
-      '@module-federation/runtime',
-    ]);
+    }
 
     compiler.hooks.afterPlugins.tap('PatchAliasWebpackPlugin', () => {
       compiler.options.resolve.alias = {
         ...compiler.options.resolve.alias,
-        '@module-federation/runtime$': runtimeESMPath,
+        '@module-federation/runtime$': runtimePath,
       };
     });
 
