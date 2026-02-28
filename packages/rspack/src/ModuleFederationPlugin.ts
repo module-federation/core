@@ -28,13 +28,7 @@ type CacheGroups = NonUndefined<NonFalseSplitChunks['cacheGroups']>;
 type CacheGroup = CacheGroups[string];
 
 declare const __VERSION__: string;
-declare global {
-  namespace NodeJS {
-    interface ProcessEnv {
-      IS_ESM_BUILD?: string;
-    }
-  }
-}
+declare const __IS_ESM_BUILD__: boolean;
 
 export const PLUGIN_NAME = 'RspackModuleFederationPlugin';
 export class ModuleFederationPlugin implements RspackPluginInstance {
@@ -141,10 +135,9 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       }).apply(compiler);
     }
 
-    const runtimeToolsSpecifier =
-      process.env.IS_ESM_BUILD === 'true'
-        ? '@module-federation/runtime-tools/dist/index.js'
-        : '@module-federation/runtime-tools/dist/index.cjs';
+    const runtimeToolsSpecifier = __IS_ESM_BUILD__
+      ? '@module-federation/runtime-tools/dist/index.js'
+      : '@module-federation/runtime-tools/dist/index.cjs';
     const implementationPath =
       options.implementation || require.resolve(runtimeToolsSpecifier);
     options.implementation = implementationPath;
@@ -173,10 +166,9 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       options as unknown as ModuleFederationPluginOptions,
     ).apply(compiler);
 
-    const runtimeEntrySpecifier =
-      process.env.IS_ESM_BUILD === 'true'
-        ? '@module-federation/runtime/dist/index.js'
-        : '@module-federation/runtime/dist/index.cjs';
+    const runtimeEntrySpecifier = __IS_ESM_BUILD__
+      ? '@module-federation/runtime/dist/index.js'
+      : '@module-federation/runtime/dist/index.cjs';
     let runtimePath: string;
     try {
       runtimePath = require.resolve(runtimeEntrySpecifier, {
