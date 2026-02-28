@@ -268,11 +268,13 @@ export class NextFederationPlugin {
   private getNoopPath(): string {
     return resolveDistOrLocalPath({
       esm: {
-        packageDistPath: '@module-federation/nextjs-mf/dist/src/federation-noop.mjs',
+        packageDistPath:
+          '@module-federation/nextjs-mf/dist/src/federation-noop.mjs',
         localRelativePath: '../../federation-noop.mjs',
       },
       cjs: {
-        packageDistPath: '@module-federation/nextjs-mf/dist/src/federation-noop.js',
+        packageDistPath:
+          '@module-federation/nextjs-mf/dist/src/federation-noop.js',
         localRelativePath: '../../federation-noop.js',
       },
     });
