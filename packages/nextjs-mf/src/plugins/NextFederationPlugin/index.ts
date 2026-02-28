@@ -31,14 +31,26 @@ import { bindLoggerToCompiler } from '@module-federation/sdk';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import logger from '../../logger';
 
-const resolveDistOrLocalPath = (
-  packageDistPath: string,
-  localRelativePath: string,
-): string => {
+const isEsmBuild = process.env.IS_ESM_BUILD === 'true';
+
+type BuildFormatPaths = {
+  esm: {
+    packageDistPath: string;
+    localRelativePath: string;
+  };
+  cjs: {
+    packageDistPath: string;
+    localRelativePath: string;
+  };
+};
+
+const resolveDistOrLocalPath = (paths: BuildFormatPaths): string => {
+  const activePaths = isEsmBuild ? paths.esm : paths.cjs;
+
   try {
-    return require.resolve(packageDistPath);
+    return require.resolve(activePaths.packageDistPath);
   } catch {
-    return require.resolve(localRelativePath);
+    return require.resolve(activePaths.localRelativePath);
   }
 };
 /**
@@ -213,10 +225,18 @@ export class NextFederationPlugin {
         ...(isServer
           ? [require.resolve('@module-federation/node/runtimePlugin')]
           : []),
-        resolveDistOrLocalPath(
-          '@module-federation/nextjs-mf/dist/src/plugins/container/runtimePlugin.js',
-          '../container/runtimePlugin.js',
-        ),
+        resolveDistOrLocalPath({
+          esm: {
+            packageDistPath:
+              '@module-federation/nextjs-mf/dist/src/plugins/container/runtimePlugin.mjs',
+            localRelativePath: '../container/runtimePlugin.mjs',
+          },
+          cjs: {
+            packageDistPath:
+              '@module-federation/nextjs-mf/dist/src/plugins/container/runtimePlugin.js',
+            localRelativePath: '../container/runtimePlugin.js',
+          },
+        }),
         ...(this._options.runtimePlugins || []),
       ].map((plugin) => plugin + '?runtimePlugin'),
       //@ts-ignore
@@ -246,10 +266,16 @@ export class NextFederationPlugin {
   }
 
   private getNoopPath(): string {
-    return resolveDistOrLocalPath(
-      '@module-federation/nextjs-mf/dist/src/federation-noop.js',
-      '../../federation-noop.js',
-    );
+    return resolveDistOrLocalPath({
+      esm: {
+        packageDistPath: '@module-federation/nextjs-mf/dist/src/federation-noop.mjs',
+        localRelativePath: '../../federation-noop.mjs',
+      },
+      cjs: {
+        packageDistPath: '@module-federation/nextjs-mf/dist/src/federation-noop.js',
+        localRelativePath: '../../federation-noop.js',
+      },
+    });
   }
 }
 
