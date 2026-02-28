@@ -16,7 +16,6 @@ export default defineConfig({
       bundle: false,
       outBase: 'src',
       define: {
-        __IS_ESM_BUILD__: JSON.stringify(true),
         'process.env.IS_ESM_BUILD': JSON.stringify('true'),
       },
       dts: {
@@ -30,7 +29,6 @@ export default defineConfig({
       bundle: false,
       outBase: 'src',
       define: {
-        __IS_ESM_BUILD__: JSON.stringify(false),
         'process.env.IS_ESM_BUILD': JSON.stringify('false'),
       },
       dts: false,

@@ -20,7 +20,6 @@ import { SHARED_STRATEGY } from '../constant';
 const { RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
-declare const __IS_ESM_BUILD__: boolean;
 
 const createBundlerLogger: typeof createLogger =
   typeof createInfrastructureLogger === 'function'
@@ -62,9 +61,8 @@ export class PrefetchPlugin implements WebpackPluginInstance {
       this.options.runtimePlugins = [];
     }
 
-    const runtimePluginFile = __IS_ESM_BUILD__
-      ? '../plugin.js'
-      : '../plugin.cjs';
+    const runtimePluginFile =
+      process.env.IS_ESM_BUILD === 'true' ? '../plugin.js' : '../plugin.cjs';
     const runtimePath = path.resolve(__dirname, runtimePluginFile);
     if (!fs.existsSync(runtimePath)) {
       throw new Error(
