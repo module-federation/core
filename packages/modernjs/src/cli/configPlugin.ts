@@ -1,3 +1,4 @@
+import fs from 'fs';
 import path from 'path';
 import { getIPV4, isWebTarget, skipByTarget } from './utils';
 import { moduleFederationPlugin, encodeName } from '@module-federation/sdk';
@@ -46,9 +47,17 @@ const resolvePackageFile = (
   esmRelativePath: string,
   cjsRelativePath: string,
 ): string => {
-  const packageRoot = path.dirname(
-    require.resolve(`${packageName}/package.json`),
-  );
+  const packageEntry = require.resolve(packageName);
+  let packageRoot = path.dirname(packageEntry);
+  while (!fs.existsSync(path.join(packageRoot, 'package.json'))) {
+    const parentDir = path.dirname(packageRoot);
+    if (parentDir === packageRoot) {
+      throw new Error(
+        `Unable to resolve package root for ${packageName} from ${packageEntry}`,
+      );
+    }
+    packageRoot = parentDir;
+  }
 
   return require.resolve(
     path.join(
