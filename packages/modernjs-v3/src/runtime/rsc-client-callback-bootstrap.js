@@ -344,7 +344,7 @@ function getWrappedChunkLoader(chunkLoader) {
 
 function hookChunkLoaderInstall() {
   const webpackRequire = getWebpackRequire();
-  if (!webpackRequire || webpackRequire[CALLBACK_CHUNK_LOADER_HOOK_FLAG]) {
+  if (!webpackRequire) {
     return;
   }
 
@@ -352,7 +352,11 @@ function hookChunkLoaderInstall() {
     webpackRequire,
     'e',
   );
-  if (chunkLoaderDescriptor?.configurable === false) {
+  if (
+    webpackRequire[CALLBACK_CHUNK_LOADER_HOOK_FLAG] &&
+    isFunction(chunkLoaderDescriptor?.get) &&
+    chunkLoaderDescriptor.get[CALLBACK_CHUNK_LOADER_HOOK_FLAG]
+  ) {
     return;
   }
 
@@ -366,6 +370,20 @@ function hookChunkLoaderInstall() {
     return;
   }
 
+  if (chunkLoaderDescriptor?.configurable === false) {
+    const wrappedChunkLoader = getWrappedChunkLoader(hookState.chunkLoader);
+    if (isFunction(chunkLoaderDescriptor?.set)) {
+      chunkLoaderDescriptor.set.call(webpackRequire, wrappedChunkLoader);
+      webpackRequire[CALLBACK_CHUNK_LOADER_HOOK_FLAG] = true;
+      return;
+    }
+    if (chunkLoaderDescriptor?.writable !== false) {
+      Reflect.set(webpackRequire, 'e', wrappedChunkLoader);
+      webpackRequire[CALLBACK_CHUNK_LOADER_HOOK_FLAG] = true;
+    }
+    return;
+  }
+
   const readChunkLoader = () => {
     if (isFunction(chunkLoaderDescriptor?.get)) {
       const nextChunkLoader = chunkLoaderDescriptor.get.call(webpackRequire);
@@ -376,15 +394,18 @@ function hookChunkLoaderInstall() {
     return hookState.chunkLoader;
   };
 
+  const wrappedChunkLoaderGetter = function () {
+    const chunkLoader = readChunkLoader();
+    return isFunction(chunkLoader)
+      ? getWrappedChunkLoader(chunkLoader)
+      : chunkLoader;
+  };
+  wrappedChunkLoaderGetter[CALLBACK_CHUNK_LOADER_HOOK_FLAG] = true;
+
   Object.defineProperty(webpackRequire, 'e', {
     configurable: true,
     enumerable: chunkLoaderDescriptor?.enumerable ?? true,
-    get() {
-      const chunkLoader = readChunkLoader();
-      return isFunction(chunkLoader)
-        ? getWrappedChunkLoader(chunkLoader)
-        : chunkLoader;
-    },
+    get: wrappedChunkLoaderGetter,
     set(nextChunkLoader) {
       if (isFunction(chunkLoaderDescriptor?.set)) {
         chunkLoaderDescriptor.set.call(webpackRequire, nextChunkLoader);
