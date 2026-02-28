@@ -6,5 +6,4 @@ export const CALL_NAME_MAP = {
   RSLIB: 'rslib',
 };
 export const RSPRESS_BUNDLER_CONFIG_NAME = 'node';
-export const RSPRESS_SSG_MD_ENV_NAME = 'node_md';
 export const RSPRESS_SSR_DIR = 'ssr';

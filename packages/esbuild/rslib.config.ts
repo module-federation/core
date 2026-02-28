@@ -17,10 +17,8 @@ export default defineConfig({
     {
       format: 'esm',
       syntax: 'es2021',
-      bundle: false,
-      outBase: 'src',
+      bundle: true,
       dts: {
-        bundle: false,
         distPath: './dist',
       },
     },
@@ -28,19 +26,16 @@ export default defineConfig({
     {
       format: 'cjs',
       syntax: 'es2021',
-      bundle: false,
-      outBase: 'src',
+      bundle: true,
       dts: false, // Only generate types once for ESM
     },
   ],
   // Shared configurations
   source: {
     entry: {
-      index: [
-        './src/**/*.{ts,tsx,js,jsx}',
-        '!./src/**/*.spec.*',
-        '!./src/**/*.test.*',
-      ],
+      index: './src/index.ts',
+      plugin: './src/adapters/lib/plugin.ts',
+      build: './src/build.ts',
     },
     define: {
       __VERSION__: JSON.stringify(pkg.version),
@@ -50,7 +45,6 @@ export default defineConfig({
   },
   output: {
     target: 'node',
-    minify: false,
     distPath: {
       root: './dist',
     },

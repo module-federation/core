@@ -8,6 +8,14 @@ export default defineConfig({
     __BROWSER__: false,
     __VERSION__: '"unknown"',
   },
+  resolve: {
+    alias: {
+      '@module-federation/micro-effect': path.resolve(
+        __dirname,
+        '../micro-effect/src/index.ts',
+      ),
+    },
+  },
   plugins: [nxViteTsPaths()],
   test: {
     environment: 'jsdom',

@@ -47,10 +47,18 @@ export function pluginModuleFederation(
         singleton: true,
         requiredVersion: false,
       },
-      'react-router-dom': {
-        singleton: true,
-        requiredVersion: false,
-      },
+      // '@rspress/core/shiki-transformers': {
+      //   singleton: true,
+      //   requiredVersion: false,
+      // },
+      // '@rspress/core/theme': {
+      //   singleton: true,
+      //   requiredVersion: false,
+      // },
+      // '@rspress/core/theme-original': {
+      //   singleton: true,
+      //   requiredVersion: false,
+      // },
       ...mfConfig.shared,
     };
   }

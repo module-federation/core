@@ -6,7 +6,7 @@ import type {
   TransformerConfigT,
 } from 'metro-config';
 import type { FileSystem } from 'metro-file-map';
-import type { Server as MetroServer } from './metro-compat';
+import type MetroServer from 'metro/src/Server';
 
 type EnhanceMiddleware = ServerConfigT['enhanceMiddleware'];
 type GetTransformOptions = TransformerConfigT['getTransformOptions'];

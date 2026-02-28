@@ -30,37 +30,61 @@ export function formatPreloadArgs(
   preloadArgs: Array<PreloadRemoteArgs>,
 ): PreloadOptions {
   return preloadArgs.map((args) => {
-    const remoteInfo = matchRemote(remotes, args.nameOrAlias);
+    const remote = matchRemote(remotes, args.nameOrAlias);
     assert(
-      remoteInfo,
-      `Unable to preload ${args.nameOrAlias} as it is not included in ${
-        !remoteInfo &&
-        safeToString({
-          remoteInfo,
-          remotes,
-        })
-      }`,
+      remote,
+      `Unable to preload ${args.nameOrAlias} as it is not included in ${!remote && safeToString({ remoteInfo: remote, remotes })}`,
     );
-    return {
-      remote: remoteInfo,
-      preloadConfig: defaultPreloadArgs(args),
-    };
+    return { remote, preloadConfig: defaultPreloadArgs(args) };
   });
 }
 
 export function normalizePreloadExposes(exposes?: string[]): string[] {
-  if (!exposes) {
-    return [];
-  }
+  if (!exposes) return [];
+  return exposes.map((e) =>
+    e === '.' ? e : e.startsWith('./') ? e.slice(2) : e,
+  );
+}
 
-  return exposes.map((expose) => {
-    if (expose === '.') {
-      return expose;
+function attachElements(
+  type: 'link' | 'script',
+  urls: string[],
+  host: ModuleFederation,
+  attrs: Record<string, string>,
+  extraOpts?: { needDeleteLink?: boolean; needDeleteScript?: boolean },
+): void {
+  urls.forEach((url) => {
+    if (type === 'link') {
+      const { link, needAttach } = createLink({
+        url,
+        cb: () => {},
+        attrs,
+        createLinkHook: (u, a) => {
+          const res = host.loaderHook.lifecycle.createLink.emit({
+            url: u,
+            attrs: a,
+          });
+          return res instanceof HTMLLinkElement ? res : undefined;
+        },
+        ...extraOpts,
+      });
+      needAttach && document.head.appendChild(link);
+    } else {
+      const { script, needAttach } = createScript({
+        url,
+        cb: () => {},
+        attrs,
+        createScriptHook: (u: string, a: any) => {
+          const res = host.loaderHook.lifecycle.createScript.emit({
+            url: u,
+            attrs: a,
+          });
+          return res instanceof HTMLScriptElement ? res : undefined;
+        },
+        ...extraOpts,
+      });
+      needAttach && document.head.appendChild(script);
     }
-    if (expose.startsWith('./')) {
-      return expose.replace('./', '');
-    }
-    return expose;
   });
 }
 
@@ -68,7 +92,6 @@ export function preloadAssets(
   remoteInfo: RemoteInfo,
   host: ModuleFederation,
   assets: PreloadAssets,
-  // It is used to distinguish preload from load remote parallel loading
   useLinkPreload = true,
 ): void {
   const { cssAssets, jsAssetsWithoutEntry, entryAssets } = assets;
@@ -77,127 +100,37 @@ export function preloadAssets(
     entryAssets.forEach((asset) => {
       const { moduleInfo } = asset;
       const module = host.moduleCache.get(remoteInfo.name);
-      if (module) {
-        getRemoteEntry({
-          origin: host,
-          remoteInfo: moduleInfo,
-          remoteEntryExports: module.remoteEntryExports,
-        });
-      } else {
-        getRemoteEntry({
-          origin: host,
-          remoteInfo: moduleInfo,
-          remoteEntryExports: undefined,
-        });
-      }
+      getRemoteEntry({
+        origin: host,
+        remoteInfo: moduleInfo,
+        remoteEntryExports: module ? module.remoteEntryExports : undefined,
+      });
     });
 
     if (useLinkPreload) {
-      const defaultAttrs = {
-        rel: 'preload',
-        as: 'style',
-      };
-      cssAssets.forEach((cssUrl) => {
-        const { link: cssEl, needAttach } = createLink({
-          url: cssUrl,
-          cb: () => {
-            // noop
-          },
-          attrs: defaultAttrs,
-          createLinkHook: (url, attrs) => {
-            const res = host.loaderHook.lifecycle.createLink.emit({
-              url,
-              attrs,
-            });
-            if (res instanceof HTMLLinkElement) {
-              return res;
-            }
-            return;
-          },
-        });
-
-        needAttach && document.head.appendChild(cssEl);
-      });
-    } else {
-      const defaultAttrs = {
-        rel: 'stylesheet',
-        type: 'text/css',
-      };
-      cssAssets.forEach((cssUrl) => {
-        const { link: cssEl, needAttach } = createLink({
-          url: cssUrl,
-          cb: () => {
-            // noop
-          },
-          attrs: defaultAttrs,
-          createLinkHook: (url, attrs) => {
-            const res = host.loaderHook.lifecycle.createLink.emit({
-              url,
-              attrs,
-            });
-            if (res instanceof HTMLLinkElement) {
-              return res;
-            }
-            return;
-          },
-          needDeleteLink: false,
-        });
-
-        needAttach && document.head.appendChild(cssEl);
-      });
-    }
-
-    if (useLinkPreload) {
-      const defaultAttrs = {
+      attachElements('link', cssAssets, host, { rel: 'preload', as: 'style' });
+      attachElements('link', jsAssetsWithoutEntry, host, {
         rel: 'preload',
         as: 'script',
-      };
-      jsAssetsWithoutEntry.forEach((jsUrl) => {
-        const { link: linkEl, needAttach } = createLink({
-          url: jsUrl,
-          cb: () => {
-            // noop
-          },
-          attrs: defaultAttrs,
-          createLinkHook: (url: string, attrs) => {
-            const res = host.loaderHook.lifecycle.createLink.emit({
-              url,
-              attrs,
-            });
-            if (res instanceof HTMLLinkElement) {
-              return res;
-            }
-            return;
-          },
-        });
-        needAttach && document.head.appendChild(linkEl);
       });
     } else {
-      const defaultAttrs = {
-        fetchpriority: 'high',
-        type: remoteInfo?.type === 'module' ? 'module' : 'text/javascript',
-      };
-      jsAssetsWithoutEntry.forEach((jsUrl) => {
-        const { script: scriptEl, needAttach } = createScript({
-          url: jsUrl,
-          cb: () => {
-            // noop
-          },
-          attrs: defaultAttrs,
-          createScriptHook: (url: string, attrs: any) => {
-            const res = host.loaderHook.lifecycle.createScript.emit({
-              url,
-              attrs,
-            });
-            if (res instanceof HTMLScriptElement) {
-              return res;
-            }
-            return;
-          },
-          needDeleteScript: true,
-        });
-        needAttach && document.head.appendChild(scriptEl);
-      });
+      attachElements(
+        'link',
+        cssAssets,
+        host,
+        { rel: 'stylesheet', type: 'text/css' },
+        { needDeleteLink: false },
+      );
+      attachElements(
+        'script',
+        jsAssetsWithoutEntry,
+        host,
+        {
+          fetchpriority: 'high',
+          type: remoteInfo?.type === 'module' ? 'module' : 'text/javascript',
+        },
+        { needDeleteScript: true },
+      );
     }
   }
 }

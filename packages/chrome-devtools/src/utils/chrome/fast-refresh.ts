@@ -1,5 +1,7 @@
-import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime';
-import type { Shared } from '@module-federation/runtime/types';
+import type {
+  ModuleFederationRuntimePlugin,
+  Shared,
+} from '@module-federation/runtime/types';
 import { loadScript, createScript } from '@module-federation/sdk';
 
 import { isObject, getUnpkgUrl } from '../index';

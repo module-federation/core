@@ -57,18 +57,8 @@ jobs:
 
       - name: Run condition check script
         id: check-ci
-        run: |
-          ci_status=0
-          node tools/scripts/ci-is-affected.mjs --appName=node-local-remote,node-remote,node-dynamic-remote-new-version,node-dynamic-remote || ci_status=$?
-          if [ "$ci_status" -eq 0 ]; then
-            echo "run-e2e=true" >> "$GITHUB_OUTPUT"
-          elif [ "$ci_status" -eq 1 ]; then
-            echo "run-e2e=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "ci-is-affected failed with unexpected exit code: $ci_status" >&2
-            exit "$ci_status"
-          fi
+        run: node tools/scripts/ci-is-affected.mjs --appName=node-local-remote,node-remote,node-dynamic-remote-new-version,node-dynamic-remote
 
       - name: E2E Node Federation
-        if: steps.check-ci.outputs.run-e2e == 'true'
+        if: steps.check-ci.outcome == 'success'
         run: npx nx run-many --target=serve --projects=node-local-remote,node-remote,node-dynamic-remote-new-version,node-dynamic-remote --parallel=10 & echo "done" && sleep 25 && npx nx run-many --target=serve --projects=node-host & sleep 5 && npx wait-on tcp:3333 && npx nx run node-host-e2e:test:e2e

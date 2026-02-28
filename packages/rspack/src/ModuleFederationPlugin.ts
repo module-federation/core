@@ -136,8 +136,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       }).apply(compiler);
     }
 
-    const implementationPath = options.implementation || RuntimeToolsPath;
-    options.implementation = implementationPath;
+    options.implementation = options.implementation || RuntimeToolsPath;
     let disableManifest = options.manifest === false;
     let disableDts = options.dts === false;
 
@@ -163,28 +162,10 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       options as unknown as ModuleFederationPluginOptions,
     ).apply(compiler);
 
-    const resolveRuntimePath = (candidates: string[]) => {
-      for (const candidate of candidates) {
-        try {
-          return require.resolve(candidate, {
-            paths: [implementationPath],
-          });
-        } catch {}
-      }
-      throw new Error(
-        `[ ModuleFederationPlugin ]: Unable to resolve runtime entry from ${candidates.join(
-          ', ',
-        )}`,
-      );
-    };
-
-    const runtimeESMPath = resolveRuntimePath([
-      '@module-federation/runtime/dist/index.js',
+    const runtimeESMPath = require.resolve(
       '@module-federation/runtime/dist/index.esm.js',
-      '@module-federation/runtime/dist/index.cjs',
-      '@module-federation/runtime/dist/index.cjs.cjs',
-      '@module-federation/runtime',
-    ]);
+      { paths: [options.implementation] },
+    );
 
     compiler.hooks.afterPlugins.tap('PatchAliasWebpackPlugin', () => {
       compiler.options.resolve.alias = {

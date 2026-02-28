@@ -28,12 +28,4 @@ const federation: Federation = {
   attachShareScopeMap,
   bundlerRuntimeOptions: {},
 };
-
-// Keep CJS interop stable for consumers that iterate required keys directly.
-export { runtime, attachShareScopeMap };
-export const instance = federation.instance;
-export const initOptions = federation.initOptions;
-export const bundlerRuntime = federation.bundlerRuntime;
-export const bundlerRuntimeOptions = federation.bundlerRuntimeOptions;
-
 export default federation;

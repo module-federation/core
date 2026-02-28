@@ -2,14 +2,11 @@ import {
   isBrowserEnv,
   warn,
   composeKeyWithSeparator,
+  safeToString,
   ModuleInfo,
   GlobalModuleInfo,
 } from '@module-federation/sdk';
-import {
-  getShortErrorMsg,
-  RUNTIME_004,
-  runtimeDescMap,
-} from '@module-federation/error-codes';
+import { RUNTIME_002, RUNTIME_004 } from '@module-federation/error-codes';
 import {
   Global,
   getInfoWithoutType,
@@ -25,7 +22,11 @@ import {
   Remote,
   RemoteInfo,
   RemoteEntryExports,
+  InitScope,
+  ShareScopeMap,
+  RemoteEntryInitOptions,
   CallFrom,
+  GlobalShareScopeMap,
 } from '../type';
 import { ModuleFederation } from '../core';
 import {
@@ -37,16 +38,65 @@ import {
 } from '../utils/hooks';
 import {
   assert,
+  error,
+  getFMId,
+  getRemoteEntry,
   getRemoteInfo,
   getRemoteEntryUniqueKey,
   matchRemoteWithNameAndExpose,
+  processModuleAlias,
   logger,
+  runtimeError,
 } from '../utils';
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { Module, ModuleOptions } from '../module';
 import { formatPreloadArgs, preloadAssets } from '../utils/preload';
-import { getGlobalShareScope } from '../utils/share';
+import { getGlobalShareScope } from '../shared';
 import { getGlobalRemoteInfo } from '../plugins/snapshot/SnapshotHandler';
+import { Effect } from '@module-federation/micro-effect';
+
+function collectRemoteShareKeys(
+  globalShareScopeMap: GlobalShareScopeMap,
+  remoteName: string,
+): {
+  keysToDelete: Array<[string, string, string, string]>;
+  allUnused: boolean;
+} {
+  let allUnused = true;
+  const keysToDelete: Array<[string, string, string, string]> = [];
+  for (const instId of Object.keys(globalShareScopeMap)) {
+    const scopes = globalShareScopeMap[instId];
+    if (!scopes) continue;
+    for (const scope of Object.keys(scopes)) {
+      const names = scopes[scope];
+      if (!names) continue;
+      for (const name of Object.keys(names)) {
+        const versions = names[name];
+        if (!versions) continue;
+        for (const version of Object.keys(versions)) {
+          const shared = versions[version];
+          if (
+            !shared ||
+            typeof shared !== 'object' ||
+            shared.from !== remoteName
+          )
+            continue;
+          if (shared.loaded || shared.loading) {
+            shared.useIn = shared.useIn.filter((h) => h !== remoteName);
+            if (shared.useIn.length) {
+              allUnused = false;
+            } else {
+              keysToDelete.push([instId, scope, name, version]);
+            }
+          } else {
+            keysToDelete.push([instId, scope, name, version]);
+          }
+        }
+      }
+    }
+  }
+  return { keysToDelete, allUnused };
+}
 
 export interface LoadRemoteMatch {
   id: string;
@@ -58,6 +108,45 @@ export interface LoadRemoteMatch {
   remoteInfo: RemoteInfo;
   remoteSnapshot?: ModuleInfo;
 }
+
+// --- Effect programs ---
+
+const preloadRemoteEffect = (
+  handler: RemoteHandler,
+  preloadOptions: Array<PreloadRemoteArgs>,
+): Effect.Effect<void> =>
+  Effect.gen(function* () {
+    const { host } = handler;
+    yield* Effect.promise(() =>
+      handler.hooks.lifecycle.beforePreloadRemote.emit({
+        preloadOps: preloadOptions,
+        options: host.options,
+        origin: host,
+      }),
+    );
+    yield* Effect.forEach(
+      formatPreloadArgs(host.options.remotes, preloadOptions),
+      (ops) =>
+        Effect.promise(async () => {
+          const remoteInfo = getRemoteInfo(ops.remote);
+          const { globalSnapshot, remoteSnapshot } =
+            await host.snapshotHandler.loadRemoteSnapshotInfo({
+              moduleInfo: ops.remote,
+            });
+          const assets =
+            await handler.hooks.lifecycle.generatePreloadAssets.emit({
+              origin: host,
+              preloadOptions: ops,
+              remote: ops.remote,
+              remoteInfo,
+              globalSnapshot,
+              remoteSnapshot,
+            });
+          if (assets) preloadAssets(remoteInfo, host, assets);
+        }),
+      { concurrency: 'parallel' },
+    );
+  });
 
 export class RemoteHandler {
   host: ModuleFederation;
@@ -145,12 +234,6 @@ export class RemoteHandler {
       ],
       Promise<PreloadAssets>
     >('generatePreloadAssets'),
-    // not used yet
-    afterPreloadRemote: new AsyncHook<{
-      preloadOps: Array<PreloadRemoteArgs>;
-      options: Options;
-      origin: ModuleFederation;
-    }>(),
     // TODO: Move to loaderHook
     loadEntry: new AsyncHook<
       [
@@ -172,10 +255,12 @@ export class RemoteHandler {
   formatAndRegisterRemote(globalOptions: Options, userOptions: UserOptions) {
     const userRemotes = userOptions.remotes || [];
 
-    return userRemotes.reduce((res, remote) => {
-      this.registerRemote(remote, res, { force: false });
-      return res;
-    }, globalOptions.remotes);
+    return userRemotes.reduce(
+      (res, remote) => (
+        this.registerRemote(remote, res, { force: false }), res
+      ),
+      globalOptions.remotes,
+    );
   }
 
   setIdToRemoteMap(id: string, remoteMatchInfo: LoadRemoteMatch) {
@@ -202,16 +287,7 @@ export class RemoteHandler {
   ): Promise<T | null> {
     const { host } = this;
     try {
-      const { loadFactory = true } = options || {
-        loadFactory: true,
-      };
-      // 1. Validate the parameters of the retrieved module. There are two module request methods: pkgName + expose and alias + expose.
-      // 2. Request the snapshot information of the current host and globally store the obtained snapshot information. The retrieved module information is partially offline and partially online. The online module information will retrieve the modules used online.
-      // 3. Retrieve the detailed information of the current module from global (remoteEntry address, expose resource address)
-      // 4. After retrieving remoteEntry, call the init of the module, and then retrieve the exported content of the module through get
-      // id: pkgName(@federation/app1) + expose(button) = @federation/app1/button
-      // id: alias(app1) + expose(button) = app1/button
-      // id: alias(app1/utils) + expose(loadash/sort) = app1/utils/loadash/sort
+      const loadFactory = options?.loadFactory !== false;
       const { module, moduleOptions, remoteMatchInfo } =
         await this.getRemoteModuleAndOptions({
           id,
@@ -250,7 +326,7 @@ export class RemoteHandler {
 
       return moduleOrFactory;
     } catch (error) {
-      const { from = 'runtime' } = options || { from: 'runtime' };
+      const from = options?.from ?? 'runtime';
 
       const failOver = await this.hooks.lifecycle.errorLoadRemote.emit({
         id,
@@ -270,51 +346,16 @@ export class RemoteHandler {
 
   // eslint-disable-next-line @typescript-eslint/member-ordering
   async preloadRemote(preloadOptions: Array<PreloadRemoteArgs>): Promise<void> {
-    const { host } = this;
-
-    await this.hooks.lifecycle.beforePreloadRemote.emit({
-      preloadOps: preloadOptions,
-      options: host.options,
-      origin: host,
-    });
-
-    const preloadOps: PreloadOptions = formatPreloadArgs(
-      host.options.remotes,
-      preloadOptions,
-    );
-
-    await Promise.all(
-      preloadOps.map(async (ops) => {
-        const { remote } = ops;
-        const remoteInfo = getRemoteInfo(remote);
-        const { globalSnapshot, remoteSnapshot } =
-          await host.snapshotHandler.loadRemoteSnapshotInfo({
-            moduleInfo: remote,
-          });
-
-        const assets = await this.hooks.lifecycle.generatePreloadAssets.emit({
-          origin: host,
-          preloadOptions: ops,
-          remote,
-          remoteInfo,
-          globalSnapshot,
-          remoteSnapshot,
-        });
-        if (!assets) {
-          return;
-        }
-        preloadAssets(remoteInfo, host, assets);
-      }),
-    );
+    return Effect.runPromise(preloadRemoteEffect(this, preloadOptions));
   }
 
   registerRemotes(remotes: Remote[], options?: { force?: boolean }): void {
     const { host } = this;
-    remotes.forEach((remote) => {
+    remotes.forEach((remote) =>
       this.registerRemote(remote, host.options.remotes, {
         force: options?.force,
-      });
-    });
+      }),
+    );
   }
 
   async getRemoteModuleAndOptions(options: { id: string }): Promise<{
@@ -324,32 +365,20 @@ export class RemoteHandler {
   }> {
     const { host } = this;
     const { id } = options;
-    let loadRemoteArgs;
-
-    try {
-      loadRemoteArgs = await this.hooks.lifecycle.beforeRequest.emit({
-        id,
-        options: host.options,
-        origin: host,
+    const loadRemoteArgs = await this.hooks.lifecycle.beforeRequest
+      .emit({ id, options: host.options, origin: host })
+      .catch(async (error) => {
+        const fallback = (await this.hooks.lifecycle.errorLoadRemote.emit({
+          id,
+          options: host.options,
+          origin: host,
+          from: 'runtime',
+          error,
+          lifecycle: 'beforeRequest',
+        })) as { id: string; options: Options; origin: ModuleFederation };
+        if (!fallback) throw error;
+        return fallback;
       });
-    } catch (error) {
-      loadRemoteArgs = (await this.hooks.lifecycle.errorLoadRemote.emit({
-        id,
-        options: host.options,
-        origin: host,
-        from: 'runtime',
-        error,
-        lifecycle: 'beforeRequest',
-      })) as {
-        id: string;
-        options: Options;
-        origin: ModuleFederation;
-      };
-
-      if (!loadRemoteArgs) {
-        throw error;
-      }
-    }
 
     const { id: idRes } = loadRemoteArgs;
 
@@ -359,14 +388,12 @@ export class RemoteHandler {
     );
     assert(
       remoteSplitInfo,
-      getShortErrorMsg(RUNTIME_004, runtimeDescMap, {
+      runtimeError(RUNTIME_004, {
         hostName: host.options.name,
         requestId: idRes,
       }),
     );
-
-    const { remote: rawRemote } = remoteSplitInfo;
-    const remoteInfo = getRemoteInfo(rawRemote);
+    const remoteInfo = getRemoteInfo(remoteSplitInfo.remote);
     const matchInfo =
       await host.sharedHandler.hooks.lifecycle.afterResolve.emit({
         id: idRes,
@@ -381,17 +408,10 @@ export class RemoteHandler {
       remote && expose,
       `The 'beforeRequest' hook was executed, but it failed to return the correct 'remote' and 'expose' values while loading ${idRes}.`,
     );
-    let module: Module | undefined = host.moduleCache.get(remote.name);
-
-    const moduleOptions: ModuleOptions = {
-      host: host,
-      remoteInfo,
-    };
-
-    if (!module) {
-      module = new Module(moduleOptions);
-      host.moduleCache.set(remote.name, module);
-    }
+    const moduleOptions: ModuleOptions = { host, remoteInfo };
+    const cached = host.moduleCache.get(remote.name);
+    const module = cached ?? new Module(moduleOptions);
+    if (!cached) host.moduleCache.set(remote.name, module);
     return {
       module,
       moduleOptions,
@@ -407,8 +427,6 @@ export class RemoteHandler {
     const { host } = this;
     const normalizeRemote = () => {
       if (remote.alias) {
-        // Validate if alias equals the prefix of remote.name and remote.alias, if so, throw an error
-        // As multi-level path references cannot guarantee unique names, alias being a prefix of remote.name is not supported
         const findEqual = targetRemotes.find(
           (item) =>
             remote.alias &&
@@ -417,48 +435,174 @@ export class RemoteHandler {
         );
         assert(
           !findEqual,
-          `The alias ${remote.alias} of remote ${
-            remote.name
-          } is not allowed to be the prefix of ${
-            findEqual && findEqual.name
-          } name or alias`,
+          `The alias ${remote.alias} of remote ${remote.name} is not allowed to be the prefix of ${findEqual && findEqual.name} name or alias`,
         );
       }
-      // Set the remote entry to a complete path
       if ('entry' in remote) {
         if (isBrowserEnv() && !remote.entry.startsWith('http')) {
           remote.entry = new URL(remote.entry, window.location.origin).href;
         }
       }
-      if (!remote.shareScope) {
-        remote.shareScope = DEFAULT_SCOPE;
-      }
-      if (!remote.type) {
-        remote.type = DEFAULT_REMOTE_TYPE;
-      }
+      if (!remote.shareScope) remote.shareScope = DEFAULT_SCOPE;
+      if (!remote.type) remote.type = DEFAULT_REMOTE_TYPE;
     };
     this.hooks.lifecycle.beforeRegisterRemote.emit({ remote, origin: host });
     const registeredRemote = targetRemotes.find(
       (item) => item.name === remote.name,
     );
-    if (!registeredRemote) {
-      normalizeRemote();
-      targetRemotes.push(remote);
-      this.hooks.lifecycle.registerRemote.emit({ remote, origin: host });
-    } else {
-      const messages = [
-        `The remote "${remote.name}" is already registered.`,
-        'Please note that overriding it may cause unexpected errors.',
-      ];
-      if (options?.force) {
-        // remove registered remote
-        this.removeRemote(registeredRemote);
-        normalizeRemote();
-        targetRemotes.push(remote);
-        this.hooks.lifecycle.registerRemote.emit({ remote, origin: host });
-        warn(messages.join(' '));
-      }
+    if (registeredRemote) {
+      if (!options?.force) return;
+      this.removeRemote(registeredRemote);
+      warn(
+        `The remote "${remote.name}" is already registered. Please note that overriding it may cause unexpected errors.`,
+      );
     }
+    normalizeRemote();
+    targetRemotes.push(remote);
+    this.hooks.lifecycle.registerRemote.emit({ remote, origin: host });
+  }
+
+  _ensureEntry(
+    mod: Module,
+    options: {
+      init?: boolean;
+      id?: string;
+      remoteSnapshot?: ModuleInfo;
+    } = {},
+  ): Effect.Effect<RemoteEntryExports> {
+    return Effect.gen(function* () {
+      let remoteEntryExports = mod.remoteEntryExports;
+      if (!remoteEntryExports) {
+        remoteEntryExports = (yield* Effect.promise(() =>
+          getRemoteEntry({
+            origin: mod.host,
+            remoteInfo: mod.remoteInfo,
+            remoteEntryExports: mod.remoteEntryExports,
+          }),
+        )) as RemoteEntryExports | undefined;
+
+        assert(
+          remoteEntryExports,
+          `remoteEntryExports is undefined \n ${safeToString(mod.remoteInfo)}`,
+        );
+        mod.remoteEntryExports = remoteEntryExports;
+      }
+
+      if (options.init && !mod.inited) {
+        if (mod.initPromise) {
+          yield* Effect.promise(() => mod.initPromise as Promise<void>);
+          return remoteEntryExports;
+        }
+
+        mod.initing = true;
+        mod.initPromise = (async () => {
+          const hostShareScopeMap = mod.host.shareScopeMap;
+          const shareScopeValue = mod.remoteInfo.shareScope || 'default';
+          const shareScopeKeys = Array.isArray(shareScopeValue)
+            ? shareScopeValue
+            : [shareScopeValue];
+          shareScopeKeys.forEach((key) => {
+            hostShareScopeMap[key] ||= {};
+          });
+
+          const remoteEntryInitOptions: RemoteEntryInitOptions = {
+            version: mod.remoteInfo.version || '',
+            shareScopeKeys: Array.isArray(shareScopeValue)
+              ? shareScopeKeys
+              : shareScopeValue,
+          };
+          Object.defineProperty(remoteEntryInitOptions, 'shareScopeMap', {
+            value: hostShareScopeMap,
+            enumerable: false,
+          });
+
+          const initScope: InitScope = [];
+          const initContainerOptions =
+            await mod.host.hooks.lifecycle.beforeInitContainer.emit({
+              shareScope: hostShareScopeMap[shareScopeKeys[0]],
+              // @ts-ignore shareScopeMap will be set by Object.defineProperty
+              remoteEntryInitOptions,
+              initScope,
+              remoteInfo: mod.remoteInfo,
+              origin: mod.host,
+            });
+
+          if (typeof remoteEntryExports?.init === 'undefined') {
+            error(
+              runtimeError(RUNTIME_002, {
+                hostName: mod.host.name,
+                remoteName: mod.remoteInfo.name,
+                remoteEntryUrl: mod.remoteInfo.entry,
+                remoteEntryKey: mod.remoteInfo.entryGlobalName,
+              }),
+            );
+          }
+
+          await remoteEntryExports.init(
+            initContainerOptions.shareScope,
+            initContainerOptions.initScope,
+            initContainerOptions.remoteEntryInitOptions,
+          );
+
+          await mod.host.hooks.lifecycle.initContainer.emit({
+            ...initContainerOptions,
+            id: options.id,
+            remoteSnapshot: options.remoteSnapshot,
+            remoteEntryExports,
+          });
+          mod.inited = true;
+        })();
+
+        try {
+          yield* Effect.promise(() => mod.initPromise as Promise<void>);
+        } finally {
+          mod.initing = false;
+          mod.initPromise = undefined;
+        }
+      }
+
+      return remoteEntryExports;
+    });
+  }
+
+  _getModule(
+    mod: Module,
+    id: string,
+    expose: string,
+    options?: { loadFactory?: boolean },
+    remoteSnapshot?: ModuleInfo,
+  ): Effect.Effect<any> {
+    const handler = this;
+    return Effect.gen(function* () {
+      const { loadFactory = true } = options || { loadFactory: true };
+      const remoteEntryExports = yield* handler._ensureEntry(mod, {
+        init: true,
+        id,
+        remoteSnapshot,
+      });
+      mod.lib = remoteEntryExports;
+
+      const moduleFactory = yield* Effect.promise(async () => {
+        const result =
+          await mod.host.loaderHook.lifecycle.getModuleFactory.emit({
+            remoteEntryExports,
+            expose,
+            moduleInfo: mod.remoteInfo,
+          });
+        return result || (await remoteEntryExports.get(expose));
+      });
+
+      assert(
+        moduleFactory,
+        `${getFMId(mod.remoteInfo)} remote don't export ${expose}.`,
+      );
+      const wrapModuleFactory = mod.wraperFactory(
+        moduleFactory,
+        processModuleAlias(mod.remoteInfo.name, expose),
+      );
+      if (!loadFactory) return wrapModuleFactory;
+      return yield* Effect.promise(() => wrapModuleFactory());
+    });
   }
 
   private removeRemote(remote: Remote): void {
@@ -468,133 +612,74 @@ export class RemoteHandler {
       const remoteIndex = host.options.remotes.findIndex(
         (item) => item.name === name,
       );
-      if (remoteIndex !== -1) {
-        host.options.remotes.splice(remoteIndex, 1);
-      }
+      if (remoteIndex !== -1) host.options.remotes.splice(remoteIndex, 1);
       const loadedModule = host.moduleCache.get(remote.name);
-      if (loadedModule) {
-        const remoteInfo = loadedModule.remoteInfo;
-        const key = remoteInfo.entryGlobalName as keyof typeof CurrentGlobal;
+      if (!loadedModule) return;
+      const remoteInfo = loadedModule.remoteInfo;
+      const key = remoteInfo.entryGlobalName as keyof typeof CurrentGlobal;
 
-        if (CurrentGlobal[key]) {
-          if (
-            Object.getOwnPropertyDescriptor(CurrentGlobal, key)?.configurable
-          ) {
-            delete CurrentGlobal[key];
-          } else {
-            // @ts-ignore
-            CurrentGlobal[key] = undefined;
-          }
-        }
-        const remoteEntryUniqueKey = getRemoteEntryUniqueKey(
-          loadedModule.remoteInfo,
+      if (CurrentGlobal[key]) {
+        if (Object.getOwnPropertyDescriptor(CurrentGlobal, key)?.configurable)
+          delete CurrentGlobal[key];
+        // @ts-ignore
+        else CurrentGlobal[key] = undefined;
+      }
+      const remoteEntryUniqueKey = getRemoteEntryUniqueKey(
+        loadedModule.remoteInfo,
+      );
+      if (globalLoading[remoteEntryUniqueKey])
+        delete globalLoading[remoteEntryUniqueKey];
+      host.snapshotHandler.manifestCache.delete(remoteInfo.entry);
+
+      let remoteInsId = remoteInfo.buildVersion
+        ? composeKeyWithSeparator(remoteInfo.name, remoteInfo.buildVersion)
+        : remoteInfo.name;
+      const remoteInsIndex =
+        CurrentGlobal.__FEDERATION__.__INSTANCES__.findIndex((ins) =>
+          remoteInfo.buildVersion
+            ? ins.options.id === remoteInsId
+            : ins.name === remoteInsId,
+        );
+      if (remoteInsIndex !== -1) {
+        const remoteIns =
+          CurrentGlobal.__FEDERATION__.__INSTANCES__[remoteInsIndex];
+        remoteInsId = remoteIns.options.id || remoteInsId;
+        const globalShareScopeMap = getGlobalShareScope();
+
+        const { keysToDelete, allUnused } = collectRemoteShareKeys(
+          globalShareScopeMap,
+          remoteInfo.name,
         );
 
-        if (globalLoading[remoteEntryUniqueKey]) {
-          delete globalLoading[remoteEntryUniqueKey];
+        if (allUnused) {
+          remoteIns.shareScopeMap = {};
+          delete globalShareScopeMap[remoteInsId];
         }
-
-        host.snapshotHandler.manifestCache.delete(remoteInfo.entry);
-
-        // delete unloaded shared and instance
-        let remoteInsId = remoteInfo.buildVersion
-          ? composeKeyWithSeparator(remoteInfo.name, remoteInfo.buildVersion)
-          : remoteInfo.name;
-        const remoteInsIndex =
-          CurrentGlobal.__FEDERATION__.__INSTANCES__.findIndex((ins) => {
-            if (remoteInfo.buildVersion) {
-              return ins.options.id === remoteInsId;
-            } else {
-              return ins.name === remoteInsId;
-            }
-          });
-        if (remoteInsIndex !== -1) {
-          const remoteIns =
-            CurrentGlobal.__FEDERATION__.__INSTANCES__[remoteInsIndex];
-          remoteInsId = remoteIns.options.id || remoteInsId;
-          const globalShareScopeMap = getGlobalShareScope();
-
-          let isAllSharedNotUsed = true;
-          const needDeleteKeys: Array<[string, string, string, string]> = [];
-          Object.keys(globalShareScopeMap).forEach((instId) => {
-            const shareScopeMap = globalShareScopeMap[instId];
-            shareScopeMap &&
-              Object.keys(shareScopeMap).forEach((shareScope) => {
-                const shareScopeVal = shareScopeMap[shareScope];
-                shareScopeVal &&
-                  Object.keys(shareScopeVal).forEach((shareName) => {
-                    const sharedPkgs = shareScopeVal[shareName];
-                    sharedPkgs &&
-                      Object.keys(sharedPkgs).forEach((shareVersion) => {
-                        const shared = sharedPkgs[shareVersion];
-                        if (
-                          shared &&
-                          typeof shared === 'object' &&
-                          shared.from === remoteInfo.name
-                        ) {
-                          if (shared.loaded || shared.loading) {
-                            shared.useIn = shared.useIn.filter(
-                              (usedHostName) =>
-                                usedHostName !== remoteInfo.name,
-                            );
-                            if (shared.useIn.length) {
-                              isAllSharedNotUsed = false;
-                            } else {
-                              needDeleteKeys.push([
-                                instId,
-                                shareScope,
-                                shareName,
-                                shareVersion,
-                              ]);
-                            }
-                          } else {
-                            needDeleteKeys.push([
-                              instId,
-                              shareScope,
-                              shareName,
-                              shareVersion,
-                            ]);
-                          }
-                        }
-                      });
-                  });
-              });
-          });
-
-          if (isAllSharedNotUsed) {
-            remoteIns.shareScopeMap = {};
-            delete globalShareScopeMap[remoteInsId];
-          }
-          needDeleteKeys.forEach(
-            ([insId, shareScope, shareName, shareVersion]) => {
-              delete globalShareScopeMap[insId]?.[shareScope]?.[shareName]?.[
-                shareVersion
-              ];
-            },
-          );
-          CurrentGlobal.__FEDERATION__.__INSTANCES__.splice(remoteInsIndex, 1);
-        }
-
-        const { hostGlobalSnapshot } = getGlobalRemoteInfo(remote, host);
-        if (hostGlobalSnapshot) {
-          const remoteKey =
-            hostGlobalSnapshot &&
-            'remotesInfo' in hostGlobalSnapshot &&
-            hostGlobalSnapshot.remotesInfo &&
-            getInfoWithoutType(hostGlobalSnapshot.remotesInfo, remote.name).key;
-          if (remoteKey) {
-            delete hostGlobalSnapshot.remotesInfo[remoteKey];
-            if (
-              //eslint-disable-next-line no-extra-boolean-cast
-              Boolean(Global.__FEDERATION__.__MANIFEST_LOADING__[remoteKey])
-            ) {
-              delete Global.__FEDERATION__.__MANIFEST_LOADING__[remoteKey];
-            }
-          }
-        }
-
-        host.moduleCache.delete(remote.name);
+        keysToDelete.forEach(([insId, shareScope, shareName, shareVersion]) => {
+          delete globalShareScopeMap[insId]?.[shareScope]?.[shareName]?.[
+            shareVersion
+          ];
+        });
+        CurrentGlobal.__FEDERATION__.__INSTANCES__.splice(remoteInsIndex, 1);
       }
+
+      const { hostGlobalSnapshot } = getGlobalRemoteInfo(remote, host);
+      if (
+        hostGlobalSnapshot &&
+        'remotesInfo' in hostGlobalSnapshot &&
+        hostGlobalSnapshot.remotesInfo
+      ) {
+        const remoteKey = getInfoWithoutType(
+          hostGlobalSnapshot.remotesInfo,
+          remote.name,
+        ).key;
+        if (remoteKey) {
+          delete hostGlobalSnapshot.remotesInfo[remoteKey];
+          delete Global.__FEDERATION__.__MANIFEST_LOADING__[remoteKey];
+        }
+      }
+
+      host.moduleCache.delete(remote.name);
     } catch (err) {
       logger.log('removeRemote fail: ', err);
     }

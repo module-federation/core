@@ -10,15 +10,11 @@ const {withModuleFederation} = require('@module-federation/metro');
  * @type {import('@react-native/metro-config').MetroConfig}
  */
 const config = {
-  resolver: {
-    extraNodeModules: {
-      '@babel/runtime': path.resolve(__dirname, 'node_modules/@babel/runtime'),
-    },
-    useWatchman: false,
-  },
+  resolver: {useWatchman: false},
   watchFolders: [
     path.resolve(__dirname, '../../node_modules'),
-    path.resolve(__dirname, '../../packages'),
+    path.resolve(__dirname, '../../packages/core'),
+    path.resolve(__dirname, '../../packages/metro-core'),
   ],
 };
 

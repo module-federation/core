@@ -4,80 +4,104 @@ import {
   composeKeyWithSeparator,
   isBrowserEnv,
 } from '@module-federation/sdk';
+import { Effect } from '@module-federation/micro-effect';
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { ModuleFederation } from '../core';
 import { globalLoading, getRemoteEntryExports } from '../global';
 import { Remote, RemoteEntryExports, RemoteInfo } from '../type';
-import { assert } from './logger';
-import {
-  RUNTIME_001,
-  RUNTIME_008,
-  getShortErrorMsg,
-  runtimeDescMap,
-} from '@module-federation/error-codes';
-
+import { assert, runtimeError } from './logger';
+import { singleFlight } from './tool';
+import { RUNTIME_001, RUNTIME_008 } from '@module-federation/error-codes';
+import { ScriptLoadFailed } from '../effect/errors';
 // Declare the ENV_TARGET constant that will be defined by DefinePlugin
 declare const ENV_TARGET: 'web' | 'node';
 const importCallback = '.then(callbacks[0]).catch(callbacks[1])';
-
-async function loadEsmEntry({
-  entry,
-  remoteEntryExports,
-}: {
-  entry: string;
-  remoteEntryExports: RemoteEntryExports | undefined;
-}): Promise<RemoteEntryExports> {
-  return new Promise<RemoteEntryExports>((resolve, reject) => {
-    try {
-      if (!remoteEntryExports) {
-        if (typeof FEDERATION_ALLOW_NEW_FUNCTION !== 'undefined') {
-          new Function('callbacks', `import("${entry}")${importCallback}`)([
-            resolve,
-            reject,
-          ]);
-        } else {
-          import(/* webpackIgnore: true */ /* @vite-ignore */ entry)
-            .then(resolve)
-            .catch(reject);
-        }
-      } else {
-        resolve(remoteEntryExports);
-      }
-    } catch (e) {
-      reject(e);
-    }
-  });
+// --- createScriptHook adapters ---
+function makeDomCreateScriptAdapter(
+  loaderHook: ModuleFederation['loaderHook'],
+) {
+  return (url: string, attrs: Record<string, any> = {}) => {
+    const res = loaderHook.lifecycle.createScript.emit({ url, attrs });
+    if (!res) return;
+    if (res instanceof HTMLScriptElement) return res;
+    return 'script' in res || 'timeout' in res ? res : undefined;
+  };
 }
-
-async function loadSystemJsEntry({
-  entry,
-  remoteEntryExports,
-}: {
-  entry: string;
-  remoteEntryExports: RemoteEntryExports | undefined;
-}): Promise<RemoteEntryExports> {
-  return new Promise<RemoteEntryExports>((resolve, reject) => {
-    try {
-      if (!remoteEntryExports) {
-        //@ts-ignore
-        if (typeof __system_context__ === 'undefined') {
-          //@ts-ignore
-          System.import(entry).then(resolve).catch(reject);
-        } else {
-          new Function(
-            'callbacks',
-            `System.import("${entry}")${importCallback}`,
-          )([resolve, reject]);
-        }
-      } else {
-        resolve(remoteEntryExports);
-      }
-    } catch (e) {
-      reject(e);
-    }
-  });
+function makeNodeCreateScriptAdapter(
+  loaderHook: ModuleFederation['loaderHook'],
+) {
+  return (url: string, attrs: Record<string, any> = {}) => {
+    const res = loaderHook.lifecycle.createScript.emit({ url, attrs });
+    if (!res) return;
+    return 'url' in res ? res : undefined;
+  };
 }
-
+// --- Effect programs for each loader function ---
+const createDynamicImportEffect =
+  (
+    doImport: (
+      entry: string,
+      resolve: (value: RemoteEntryExports) => void,
+      reject: (reason?: any) => void,
+    ) => void,
+    errorLabel: string,
+  ) =>
+  ({
+    entry,
+    remoteEntryExports,
+  }: {
+    entry: string;
+    remoteEntryExports: RemoteEntryExports | undefined;
+  }): Effect.Effect<RemoteEntryExports, ScriptLoadFailed> =>
+    Effect.tryPromise({
+      try: () =>
+        new Promise<RemoteEntryExports>((resolve, reject) => {
+          try {
+            if (!remoteEntryExports) {
+              doImport(entry, resolve, reject);
+            } else {
+              resolve(remoteEntryExports);
+            }
+          } catch (e) {
+            reject(e);
+          }
+        }),
+      catch: () =>
+        new ScriptLoadFailed({
+          remoteName: errorLabel,
+          resourceUrl: entry,
+        }),
+    });
+const loadEsmEntryEffect = createDynamicImportEffect(
+  (entry, resolve, reject) => {
+    if (typeof FEDERATION_ALLOW_NEW_FUNCTION !== 'undefined') {
+      new Function('callbacks', `import("${entry}")${importCallback}`)([
+        resolve,
+        reject,
+      ]);
+    } else {
+      import(/* webpackIgnore: true */ /* @vite-ignore */ entry)
+        .then(resolve)
+        .catch(reject);
+    }
+  },
+  'esm-entry',
+);
+const loadSystemJsEntryEffect = createDynamicImportEffect(
+  (entry, resolve, reject) => {
+    //@ts-ignore
+    if (typeof __system_context__ === 'undefined') {
+      //@ts-ignore
+      System.import(entry).then(resolve).catch(reject);
+    } else {
+      new Function('callbacks', `System.import("${entry}")${importCallback}`)([
+        resolve,
+        reject,
+      ]);
+    }
+  },
+  'system-entry',
+);
 function handleRemoteEntryLoaded(
   name: string,
   globalName: string,
@@ -87,20 +111,17 @@ function handleRemoteEntryLoaded(
     name,
     globalName,
   );
-
   assert(
     entryExports,
-    getShortErrorMsg(RUNTIME_001, runtimeDescMap, {
+    runtimeError(RUNTIME_001, {
       remoteName: name,
       remoteEntryUrl: entry,
       remoteEntryKey,
     }),
   );
-
   return entryExports;
 }
-
-async function loadEntryScript({
+const loadEntryScriptEffect = ({
   name,
   globalName,
   entry,
@@ -112,52 +133,30 @@ async function loadEntryScript({
   entry: string;
   loaderHook: ModuleFederation['loaderHook'];
   getEntryUrl?: (url: string) => string;
-}): Promise<RemoteEntryExports> {
-  const { entryExports: remoteEntryExports } = getRemoteEntryExports(
-    name,
-    globalName,
-  );
-
-  if (remoteEntryExports) {
-    return remoteEntryExports;
-  }
-
-  // if getEntryUrl is passed, use the getEntryUrl to get the entry url
-  const url = getEntryUrl ? getEntryUrl(entry) : entry;
-  return loadScript(url, {
-    attrs: {},
-    createScriptHook: (url, attrs) => {
-      const res = loaderHook.lifecycle.createScript.emit({ url, attrs });
-
-      if (!res) return;
-
-      if (res instanceof HTMLScriptElement) {
-        return res;
-      }
-
-      if ('script' in res || 'timeout' in res) {
-        return res;
-      }
-
-      return;
-    },
-  })
-    .then(() => {
-      return handleRemoteEntryLoaded(name, globalName, entry);
-    })
-    .catch((e) => {
-      assert(
-        undefined,
-        getShortErrorMsg(RUNTIME_008, runtimeDescMap, {
+}): Effect.Effect<RemoteEntryExports, ScriptLoadFailed> =>
+  Effect.gen(function* () {
+    const { entryExports: remoteEntryExports } = getRemoteEntryExports(
+      name,
+      globalName,
+    );
+    if (remoteEntryExports) {
+      return remoteEntryExports;
+    }
+    const url = getEntryUrl ? getEntryUrl(entry) : entry;
+    return yield* Effect.tryPromise({
+      try: () =>
+        loadScript(url, {
+          attrs: {},
+          createScriptHook: makeDomCreateScriptAdapter(loaderHook),
+        }).then(() => handleRemoteEntryLoaded(name, globalName, entry)),
+      catch: () =>
+        new ScriptLoadFailed({
           remoteName: name,
           resourceUrl: entry,
         }),
-      );
-      throw e;
     });
-}
-
-async function loadEntryDom({
+  });
+const loadEntryDomEffect = ({
   remoteInfo,
   remoteEntryExports,
   loaderHook,
@@ -167,16 +166,16 @@ async function loadEntryDom({
   remoteEntryExports?: RemoteEntryExports;
   loaderHook: ModuleFederation['loaderHook'];
   getEntryUrl?: (url: string) => string;
-}) {
+}): Effect.Effect<RemoteEntryExports, ScriptLoadFailed> => {
   const { entry, entryGlobalName: globalName, name, type } = remoteInfo;
   switch (type) {
     case 'esm':
     case 'module':
-      return loadEsmEntry({ entry, remoteEntryExports });
+      return loadEsmEntryEffect({ entry, remoteEntryExports });
     case 'system':
-      return loadSystemJsEntry({ entry, remoteEntryExports });
+      return loadSystemJsEntryEffect({ entry, remoteEntryExports });
     default:
-      return loadEntryScript({
+      return loadEntryScriptEffect({
         entry,
         globalName,
         name,
@@ -184,54 +183,76 @@ async function loadEntryDom({
         getEntryUrl,
       });
   }
-}
-
-async function loadEntryNode({
+};
+const loadEntryNodeEffect = ({
   remoteInfo,
   loaderHook,
 }: {
   remoteInfo: RemoteInfo;
   loaderHook: ModuleFederation['loaderHook'];
-}) {
+}): Effect.Effect<RemoteEntryExports, ScriptLoadFailed> => {
   const { entry, entryGlobalName: globalName, name, type } = remoteInfo;
   const { entryExports: remoteEntryExports } = getRemoteEntryExports(
     name,
     globalName,
   );
-
   if (remoteEntryExports) {
-    return remoteEntryExports;
+    return Effect.succeed(remoteEntryExports);
   }
-
-  return loadScriptNode(entry, {
-    attrs: { name, globalName, type },
-    loaderHook: {
-      createScriptHook: (url: string, attrs: Record<string, any> = {}) => {
-        const res = loaderHook.lifecycle.createScript.emit({ url, attrs });
-
-        if (!res) return;
-
-        if ('url' in res) {
-          return res;
-        }
-
-        return;
-      },
-    },
-  })
-    .then(() => {
-      return handleRemoteEntryLoaded(name, globalName, entry);
-    })
-    .catch((e) => {
-      throw e;
+  return Effect.tryPromise({
+    try: () =>
+      loadScriptNode(entry, {
+        attrs: { name, globalName, type },
+        loaderHook: {
+          createScriptHook: makeNodeCreateScriptAdapter(loaderHook),
+        },
+      }).then(() => handleRemoteEntryLoaded(name, globalName, entry)),
+    catch: () =>
+      new ScriptLoadFailed({
+        remoteName: name,
+        resourceUrl: entry,
+      }),
+  });
+};
+// --- Effect program for getRemoteEntry ---
+const getRemoteEntryEffect = (params: {
+  origin: ModuleFederation;
+  remoteInfo: RemoteInfo;
+  remoteEntryExports?: RemoteEntryExports | undefined;
+  loaderHook: ModuleFederation['loaderHook'];
+  loadEntryHook: ModuleFederation['remoteHandler']['hooks']['lifecycle']['loadEntry'];
+  getEntryUrl?: (url: string) => string;
+}): Effect.Effect<RemoteEntryExports | void, ScriptLoadFailed> =>
+  Effect.gen(function* () {
+    const hookResult = yield* Effect.promise(async () => {
+      const res = await params.loadEntryHook.emit({
+        loaderHook: params.loaderHook,
+        remoteInfo: params.remoteInfo,
+        remoteEntryExports: params.remoteEntryExports,
+      });
+      return res as unknown as RemoteEntryExports | undefined;
     });
-}
-
+    if (hookResult) return hookResult;
+    const isWeb =
+      typeof ENV_TARGET !== 'undefined' ? ENV_TARGET === 'web' : isBrowserEnv();
+    if (isWeb) {
+      return yield* loadEntryDomEffect({
+        remoteInfo: params.remoteInfo,
+        remoteEntryExports: params.remoteEntryExports,
+        loaderHook: params.loaderHook,
+        getEntryUrl: params.getEntryUrl,
+      });
+    }
+    return yield* loadEntryNodeEffect({
+      remoteInfo: params.remoteInfo,
+      loaderHook: params.loaderHook,
+    });
+  });
+// --- Public API (signatures unchanged) ---
 export function getRemoteEntryUniqueKey(remoteInfo: RemoteInfo): string {
   const { entry, name } = remoteInfo;
   return composeKeyWithSeparator(name, entry);
 }
-
 export async function getRemoteEntry(params: {
   origin: ModuleFederation;
   remoteInfo: RemoteInfo;
@@ -250,69 +271,76 @@ export async function getRemoteEntry(params: {
   if (remoteEntryExports) {
     return remoteEntryExports;
   }
-
-  if (!globalLoading[uniqueKey]) {
+  return singleFlight(globalLoading, uniqueKey, () => {
     const loadEntryHook = origin.remoteHandler.hooks.lifecycle.loadEntry;
     const loaderHook = origin.loaderHook;
-
-    globalLoading[uniqueKey] = loadEntryHook
-      .emit({
-        loaderHook,
-        remoteInfo,
-        remoteEntryExports,
-      })
-      .then((res) => {
-        if (res) {
-          return res;
-        }
-        // Use ENV_TARGET if defined, otherwise fallback to isBrowserEnv, must keep this
-        const isWebEnvironment =
-          typeof ENV_TARGET !== 'undefined'
-            ? ENV_TARGET === 'web'
-            : isBrowserEnv();
-
-        return isWebEnvironment
-          ? loadEntryDom({
-              remoteInfo,
-              remoteEntryExports,
-              loaderHook,
-              getEntryUrl,
-            })
-          : loadEntryNode({ remoteInfo, loaderHook });
-      })
-      .catch(async (err) => {
-        const uniqueKey = getRemoteEntryUniqueKey(remoteInfo);
-        const isScriptLoadError =
-          err instanceof Error && err.message.includes(RUNTIME_008);
-
-        if (isScriptLoadError && !_inErrorHandling) {
-          const wrappedGetRemoteEntry = (
-            params: Parameters<typeof getRemoteEntry>[0],
-          ) => {
-            return getRemoteEntry({ ...params, _inErrorHandling: true });
-          };
-
-          const RemoteEntryExports =
-            await origin.loaderHook.lifecycle.loadEntryError.emit({
-              getRemoteEntry: wrappedGetRemoteEntry,
-              origin,
-              remoteInfo: remoteInfo,
-              remoteEntryExports,
-              globalLoading,
-              uniqueKey,
-            });
-
-          if (RemoteEntryExports) {
-            return RemoteEntryExports;
+    const markLoadEntryError = (error: Error) => {
+      (error as Error & { __mfLoadEntryError?: true }).__mfLoadEntryError =
+        true;
+      return error;
+    };
+    const recoverFromLoadEntryError = (
+      resourceUrl: string | undefined,
+      remoteName: string,
+    ) =>
+      Effect.tryPromise({
+        try: async () => {
+          if (!_inErrorHandling) {
+            const recovered =
+              await origin.loaderHook.lifecycle.loadEntryError.emit({
+                getRemoteEntry: (p) =>
+                  getRemoteEntry({ ...p, _inErrorHandling: true }),
+                origin,
+                remoteInfo,
+                remoteEntryExports,
+                globalLoading,
+                uniqueKey,
+              });
+            if (recovered)
+              return recovered as RemoteEntryExports | void | undefined;
           }
-        }
-        throw err;
+          throw markLoadEntryError(
+            new Error(
+              runtimeError(RUNTIME_008, {
+                remoteName,
+                resourceUrl,
+              }),
+            ),
+          );
+        },
+        catch: (e) => e as Error,
       });
-  }
-
-  return globalLoading[uniqueKey];
+    // Run the Effect program, bridging back to Promise for the globalLoading cache
+    const effectProgram = getRemoteEntryEffect({
+      origin,
+      remoteInfo,
+      remoteEntryExports,
+      loaderHook,
+      loadEntryHook,
+      getEntryUrl,
+    }).pipe(
+      Effect.catchTag('ScriptLoadFailed', (err) =>
+        recoverFromLoadEntryError(err.resourceUrl, err.remoteName),
+      ),
+      Effect.catch((err) => {
+        if (
+          !(err as any)?.__mfLoadEntryError &&
+          err instanceof Error &&
+          err.message.includes(RUNTIME_008)
+        ) {
+          return recoverFromLoadEntryError(
+            getEntryUrl ? getEntryUrl(remoteInfo.entry) : remoteInfo.entry,
+            remoteInfo.name,
+          );
+        }
+        return Effect.fail(err as Error);
+      }),
+    );
+    return Effect.runPromise(effectProgram).catch((err) => {
+      throw err;
+    }) as Promise<void | RemoteEntryExports>;
+  });
 }
-
 export function getRemoteInfo(remote: Remote): RemoteInfo {
   return {
     ...remote,

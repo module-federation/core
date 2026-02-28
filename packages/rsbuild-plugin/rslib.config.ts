@@ -7,34 +7,28 @@ export default defineConfig({
     {
       format: 'esm',
       syntax: 'es2021',
-      bundle: false,
-      outBase: 'src',
+      bundle: true,
       dts: {
-        bundle: false,
         distPath: './dist',
       },
     },
     {
       format: 'cjs',
       syntax: 'es2021',
-      bundle: false,
-      outBase: 'src',
+      bundle: true,
       dts: false,
     },
   ],
   source: {
     entry: {
-      index: [
-        './src/**/*.{ts,tsx,js,jsx}',
-        '!./src/**/*.spec.*',
-        '!./src/**/*.test.*',
-      ],
+      index: './src/cli/index.ts',
+      utils: './src/utils/index.ts',
+      constant: './src/constant.ts',
     },
     tsconfigPath: './tsconfig.lib.json',
   },
   output: {
     target: 'node',
-    minify: false,
     distPath: {
       root: './dist',
     },

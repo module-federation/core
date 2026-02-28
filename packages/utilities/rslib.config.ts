@@ -2,7 +2,8 @@ import { pluginPublint } from 'rsbuild-plugin-publint';
 import { defineConfig } from '@rslib/core';
 
 export default defineConfig({
-  plugins: [pluginPublint()],
+  // Cast to bridge transient rsbuild type version skew in CI lockfile combos.
+  plugins: [pluginPublint() as unknown as never],
   lib: [
     {
       format: 'esm',

@@ -1,0 +1,54 @@
+{
+  "name": "micro-effect",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/micro-effect/src",
+  "projectType": "library",
+  "tags": ["type:pkg"],
+  "targets": {
+    "build": {
+      "executor": "@nx/rollup:rollup",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "parallel": false,
+        "outputPath": "packages/micro-effect/dist",
+        "main": "packages/micro-effect/src/index.ts",
+        "tsConfig": "packages/micro-effect/tsconfig.lib.json",
+        "rollupConfig": "packages/micro-effect/rollup.config.js",
+        "assets": [],
+        "project": "packages/micro-effect/package.json",
+        "compiler": "tsc",
+        "format": ["cjs", "esm"],
+        "generatePackageJson": false,
+        "useLegacyTypescriptPlugin": false
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": false,
+        "commands": [
+          {
+            "command": "vitest run -u -c packages/micro-effect/vitest.config.ts",
+            "forwardAllArgs": false
+          }
+        ]
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "packages/micro-effect/**/*.ts",
+          "packages/micro-effect/package.json"
+        ]
+      }
+    }
+  }
+}

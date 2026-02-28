@@ -1,4 +1,8 @@
 import { createLogger } from '@module-federation/sdk';
+import {
+  getShortErrorMsg,
+  runtimeDescMap,
+} from '@module-federation/error-codes';
 
 const LOG_CATEGORY = '[ Federation Runtime ]';
 // FIXME: pre-bundle ?
@@ -36,6 +40,14 @@ export function warn(msg: Parameters<typeof console.warn>[0]): void {
 
 export function log(...args: unknown[]) {
   logger.log(...args);
+}
+
+export function runtimeError(
+  code: string,
+  context: Record<string, any>,
+  suffix?: string,
+): string {
+  return getShortErrorMsg(code, runtimeDescMap, context, suffix);
 }
 
 export { logger };
