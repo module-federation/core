@@ -55,10 +55,6 @@ function getWebpackRequire() {
   if (typeof __webpack_require__ !== 'undefined') {
     return __webpack_require__;
   }
-  const runtime = globalThis.__webpack_require__;
-  if (isFunction(runtime) || isObject(runtime)) {
-    return runtime;
-  }
   return undefined;
 }
 
