@@ -19,7 +19,7 @@ type BridgeModule = {
 };
 
 type ActionMapRecord = Record<string, { alias: string; rawActionId: string }>;
-type ActionRemapWaiter = (prefixedActionId: string) => void;
+type ActionRemapWaiter = (prefixedActionId: string | false) => void;
 type ActionRemapWaiterMap = Map<string, ActionRemapWaiter[]>;
 type ActionRemapMap = Record<string, string | false>;
 type WebpackRequireRuntime = {
@@ -78,6 +78,9 @@ const assertNoConflict = (
 const getNamespacedModuleId = (alias: string, rawId: string | number) =>
   `${MODULE_PREFIX}${alias}:${String(rawId)}`;
 
+const getNamespacedClientManifestKey = (alias: string, key: string | number) =>
+  `${MODULE_PREFIX}${alias}:${String(key)}`;
+
 const getActionRemapMap = () => {
   const globalState = globalThis as typeof globalThis & {
     [ACTION_REMAP_GLOBAL_KEY]?: ActionRemapMap;
@@ -121,7 +124,7 @@ const registerActionRemap = (rawActionId: string, prefixedActionId: string) => {
   remapMap[rawActionId] = false;
   const waiters = remapWaiters.get(rawActionId);
   if (waiters?.length) {
-    waiters.forEach((waiter) => waiter(rawActionId));
+    waiters.forEach((waiter) => waiter(false));
     remapWaiters.delete(rawActionId);
   }
 };
@@ -361,6 +364,10 @@ const rscBridgeRuntimePlugin = (): ModuleFederationRuntimePlugin => {
       for (const [key, value] of Object.entries(
         remoteManifest.clientManifest,
       )) {
+        const scopedClientManifestKey = getNamespacedClientManifestKey(
+          alias,
+          key,
+        );
         const nextValue = isObject(value) ? { ...value } : value;
         if (isObject(nextValue) && nextValue.id != null) {
           const namespacedClientId = getNamespacedModuleId(alias, nextValue.id);
@@ -369,12 +376,14 @@ const rscBridgeRuntimePlugin = (): ModuleFederationRuntimePlugin => {
         }
         assertNoConflict(
           hostManifest.clientManifest as Record<string, any>,
-          key,
+          scopedClientManifestKey,
           nextValue,
           alias,
           'clientManifest',
         );
-        (hostManifest.clientManifest as Record<string, any>)[key] = nextValue;
+        (hostManifest.clientManifest as Record<string, any>)[
+          scopedClientManifestKey
+        ] = nextValue;
       }
     }
 

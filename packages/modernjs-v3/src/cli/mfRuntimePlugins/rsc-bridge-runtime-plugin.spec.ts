@@ -128,9 +128,9 @@ describe('rsc-bridge-runtime-plugin', () => {
     ).__webpack_require__!;
     const hostManifest = webpackRequire.rscM!;
 
-    expect(hostManifest.clientManifest?.clientRef?.id).toBe(
-      'remote-module:rscRemote:123',
-    );
+    expect(
+      hostManifest.clientManifest?.['remote-module:rscRemote:clientRef']?.id,
+    ).toBe('remote-module:rscRemote:123');
     expect(hostManifest.serverConsumerModuleMap).toHaveProperty(
       'remote-module:rscRemote:123',
     );
@@ -192,6 +192,65 @@ describe('rsc-bridge-runtime-plugin', () => {
     );
     expect(getActionRemapMap().asyncRawAction).toBe(
       'remote:rscRemote:asyncRawAction',
+    );
+  });
+
+  it('namespaces clientManifest keys per alias for same remote export key', async () => {
+    const plugin = rscBridgeRuntimePlugin();
+
+    const loadRemote = vi.fn(async (request: string) => {
+      if (request.startsWith('rscRemoteA/')) {
+        return {
+          getManifest: () => ({
+            clientManifest: {
+              sharedClientRef: {
+                id: '123',
+                name: 'default',
+                chunks: [],
+              },
+            },
+          }),
+          executeAction: vi.fn(async () => undefined),
+        };
+      }
+
+      return {
+        getManifest: () => ({
+          clientManifest: {
+            sharedClientRef: {
+              id: '123',
+              name: 'default',
+              chunks: [],
+            },
+          },
+        }),
+        executeAction: vi.fn(async () => undefined),
+      };
+    });
+
+    await plugin.onLoad?.({
+      remote: { alias: 'rscRemoteA' },
+      options: { name: 'rscHost' },
+      origin: { loadRemote },
+    } as any);
+
+    await plugin.onLoad?.({
+      remote: { alias: 'rscRemoteB' },
+      options: { name: 'rscHost' },
+      origin: { loadRemote },
+    } as any);
+
+    const webpackRequire = (
+      globalThis as typeof globalThis & {
+        __webpack_require__?: WebpackRequireRuntime;
+      }
+    ).__webpack_require__!;
+
+    expect(webpackRequire.rscM?.clientManifest).toHaveProperty(
+      'remote-module:rscRemoteA:sharedClientRef',
+    );
+    expect(webpackRequire.rscM?.clientManifest).toHaveProperty(
+      'remote-module:rscRemoteB:sharedClientRef',
     );
   });
 
@@ -273,7 +332,7 @@ describe('rsc-bridge-runtime-plugin', () => {
     webpackRequire.rscM = {
       serverManifest: {},
       clientManifest: {
-        sharedKey: {
+        'remote-module:rscRemote:sharedKey': {
           id: 'remote-module:existingRemote:123',
           name: 'default',
           chunks: [],

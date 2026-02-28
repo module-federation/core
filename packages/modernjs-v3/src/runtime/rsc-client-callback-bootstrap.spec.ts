@@ -41,7 +41,16 @@ describe('rsc-client-callback-bootstrap', () => {
     expect(source).toContain('const CALLBACK_INSTALL_RETRY_DELAY_MS = 50;');
     expect(source).toContain('const MAX_CALLBACK_INSTALL_ATTEMPTS = 120;');
     expect(source).toContain('function hookChunkLoaderInstall()');
-    expect(source).toContain('webpackRequire.e = wrappedChunkLoader;');
+    expect(source).toContain("Object.defineProperty(webpackRequire, 'e', {");
+    expect(source).not.toContain('webpackRequire.e = wrappedChunkLoader;');
+  });
+
+  it('fails closed when raw action ids become ambiguous across remotes', () => {
+    const source = getBootstrapSource();
+
+    expect(source).toContain('if (remappedId === false) {');
+    expect(source).toContain('Ambiguous remote action id');
+    expect(source).not.toContain('if (remappedId === false) {\n    return id;');
   });
 
   it('does not cache fallback alias resolution before runtime is available', () => {
