@@ -3,7 +3,7 @@ import { defineConfig } from '@rslib/core';
 import pkg from './package.json';
 
 export default defineConfig({
-  lib: [{ format: 'esm' }],
+  lib: [{ format: 'esm', autoExtension: true }],
   plugins: [pluginPublint()],
   source: {
     define: {

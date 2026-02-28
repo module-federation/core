@@ -18,8 +18,99 @@ export const { usedChunks } = globalThis;
 const loadHostStats = () => {
   try {
     //@ts-ignore
-    return __non_webpack_require__('../federated-stats.json');
-  } catch (e) {
+    const statsPath = '../federated-stats.json';
+    //@ts-ignore
+    const fsModule = __non_webpack_require__('fs') as typeof import('fs');
+    //@ts-ignore
+    const pathModule = __non_webpack_require__('path') as typeof import('path');
+    const absoluteStatsPath = pathModule.join(
+      __dirname,
+      '../federated-stats.json',
+    );
+    // #region agent log
+    fetch('http://127.0.0.1:7414/ingest/989a0b49-843c-45a9-b79d-4027ab5a19e4', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Debug-Session-Id': '7e9739',
+      },
+      body: JSON.stringify({
+        sessionId: '7e9739',
+        runId: 'nested-webpack-run1',
+        hypothesisId: 'H2',
+        location: 'packages/node/src/utils/flush-chunks.ts:loadHostStats',
+        message: 'attempting runtime stats load',
+        data: {
+          dirname: __dirname,
+          statsPath,
+          absoluteStatsPath,
+          statsExists: fsModule.existsSync(absoluteStatsPath),
+          hasNonWebpackRequire: typeof __non_webpack_require__ === 'function',
+        },
+        timestamp: Date.now(),
+      }),
+    }).catch(() => {});
+    // #endregion
+    //@ts-ignore
+    return __non_webpack_require__(absoluteStatsPath);
+  } catch (e: any) {
+    try {
+      //@ts-ignore
+      const fsModule = __non_webpack_require__('fs') as typeof import('fs');
+      //@ts-ignore
+      const pathModule = __non_webpack_require__(
+        'path',
+      ) as typeof import('path');
+      const absoluteStatsPath = pathModule.join(
+        __dirname,
+        '../federated-stats.json',
+      );
+      if (fsModule.existsSync(absoluteStatsPath)) {
+        const raw = fsModule.readFileSync(absoluteStatsPath, 'utf-8');
+        // #region agent log
+        fetch(
+          'http://127.0.0.1:7414/ingest/989a0b49-843c-45a9-b79d-4027ab5a19e4',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Debug-Session-Id': '7e9739',
+            },
+            body: JSON.stringify({
+              sessionId: '7e9739',
+              runId: 'nested-webpack-postfix1',
+              hypothesisId: 'H2',
+              location: 'packages/node/src/utils/flush-chunks.ts:loadHostStats',
+              message: 'fallback loaded stats via fs.readFileSync',
+              data: { absoluteStatsPath, rawLength: raw.length },
+              timestamp: Date.now(),
+            }),
+          },
+        ).catch(() => {});
+        // #endregion
+        return JSON.parse(raw);
+      }
+    } catch {
+      // fallback to empty below
+    }
+    // #region agent log
+    fetch('http://127.0.0.1:7414/ingest/989a0b49-843c-45a9-b79d-4027ab5a19e4', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Debug-Session-Id': '7e9739',
+      },
+      body: JSON.stringify({
+        sessionId: '7e9739',
+        runId: 'nested-webpack-postfix1',
+        hypothesisId: 'H2',
+        location: 'packages/node/src/utils/flush-chunks.ts:loadHostStats',
+        message: 'runtime stats load failed',
+        data: { errorMessage: e?.message || String(e) },
+        timestamp: Date.now(),
+      }),
+    }).catch(() => {});
+    // #endregion
     return {};
   }
 };
@@ -118,6 +209,27 @@ const processChunk = async (chunk, shareMap, hostStats) => {
     const statsFile = knownRemotes[remote].entry
       .replace(remoteName, 'federated-stats.json')
       .replace('ssr', 'chunks');
+    // #region agent log
+    const remoteEntryUrl = (knownRemotes as Record<string, { entry: string }>)[
+      remote
+    ]?.entry;
+    fetch('http://127.0.0.1:7414/ingest/989a0b49-843c-45a9-b79d-4027ab5a19e4', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Debug-Session-Id': '7e9739',
+      },
+      body: JSON.stringify({
+        sessionId: '7e9739',
+        runId: 'nested-webpack-run1',
+        hypothesisId: 'H4',
+        location: 'packages/node/src/utils/flush-chunks.ts:processChunk',
+        message: 'computed federated stats URL',
+        data: { remote, request, remoteEntry: remoteEntryUrl, statsFile },
+        timestamp: Date.now(),
+      }),
+    }).catch(() => {});
+    // #endregion
     let stats = {};
 
     try {

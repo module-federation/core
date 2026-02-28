@@ -552,7 +552,11 @@ describe('runtimePlugin', () => {
       loadChunk('url', 'test-chunk', '/dist', mockCallback, {});
 
       // Fix the parameter order to match the implementation: (remoteName, chunkName)
-      expect(resolveUrlSpy).toHaveBeenCalledWith('/dist', 'test-chunk');
+      expect(resolveUrlSpy).toHaveBeenCalledWith(
+        '/dist',
+        'test-chunk',
+        expect.any(Object),
+      );
       expect(mockFetchAndRun).toHaveBeenCalled();
       expect(mockCallback).toHaveBeenCalledWith(null, mockChunk);
 
@@ -872,6 +876,60 @@ describe('runtimePlugin', () => {
         expect((global as any).__webpack_require__.f.readFileVm).toBeDefined();
         expect(typeof (global as any).__webpack_require__.f.readFileVm).toBe(
           'function',
+        );
+      }
+    });
+
+    it('should patch handlers on injected webpackRequire from runtime options', () => {
+      const hostRequireHandler = jest.fn();
+      const hostReadFileVmHandler = jest.fn();
+      (global as any).__webpack_require__.f = {
+        require: hostRequireHandler,
+        readFileVm: hostReadFileVmHandler,
+      };
+
+      const injectedWebpackRequire = {
+        ...mockWebpackRequire,
+        l: jest.fn(),
+        f: {
+          require: jest.fn(),
+          readFileVm: jest.fn(),
+        },
+      };
+      const originalInjectedRequire = injectedWebpackRequire.f.require;
+      const originalInjectedReadFileVm = injectedWebpackRequire.f.readFileVm;
+
+      const mockArgs = {
+        options: {
+          webpackRequire: injectedWebpackRequire,
+        },
+        origin: {
+          loaderHook: {
+            lifecycle: {
+              fetch: {
+                emit: jest.fn().mockResolvedValue(null),
+              },
+            },
+          },
+        } as unknown as ModuleFederation,
+      } as any;
+
+      if (plugin.beforeInit) {
+        plugin.beforeInit(mockArgs);
+
+        expect(injectedWebpackRequire.f.require).not.toBe(
+          originalInjectedRequire,
+        );
+        expect(injectedWebpackRequire.f.readFileVm).not.toBe(
+          originalInjectedReadFileVm,
+        );
+        expect(typeof injectedWebpackRequire.l).toBe('function');
+
+        expect((global as any).__webpack_require__.f.require).toBe(
+          hostRequireHandler,
+        );
+        expect((global as any).__webpack_require__.f.readFileVm).toBe(
+          hostReadFileVmHandler,
         );
       }
     });

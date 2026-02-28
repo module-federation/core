@@ -1,6 +1,9 @@
 import FederationRuntimePlugin from '../../../src/lib/container/runtime/FederationRuntimePlugin';
 import type { Compiler } from 'webpack';
-import { rs, Mock } from '@rstest/core';
+import { rs } from '@rstest/core';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
 
 // Use rs.hoisted() to create mock functions that are hoisted along with rs.mock()
 const mocks = rs.hoisted(() => ({
@@ -189,18 +192,51 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
     });
   });
 
-  describe('runtime bootstrap guards', () => {
-    it('rehydrates bundler runtime when runtime exists but bundlerRuntime is missing', () => {
+  describe('runtime bootstrap template and runtime path preference', () => {
+    it('should preserve the previous federation bootstrap merge semantics', () => {
+      const optionsWithPlugins = {
+        ...mockOptions,
+        runtimePlugins: ['plugin1.js'],
+      };
       const template = FederationRuntimePlugin.getTemplate(
         compiler as Compiler,
-        mockOptions,
-        'bundler-runtime.js',
-        {},
+        optionsWithPlugins,
+        '/runtime/dist/index.cjs',
       );
 
       expect(template).toContain(
-        'if(!__webpack_require__.federation.runtime || !__webpack_require__.federation.bundlerRuntime)',
+        'if(!__webpack_require__.federation.runtime || !__webpack_require__.federation.bundlerRuntime){',
       );
+      expect(template).toContain(
+        'var prevFederation = __webpack_require__.federation;',
+      );
+      expect(template).not.toContain(
+        '__webpack_require__.federation.initOptions = __webpack_require__.federation.initOptions || {};',
+      );
+    });
+
+    it('should fall back to index.js when index.esm.js does not exist', () => {
+      const tempDir = fs.mkdtempSync(
+        path.join(os.tmpdir(), 'mf-runtime-path-test-'),
+      );
+      const runtimeDir = path.join(tempDir, 'runtime', 'dist');
+      fs.mkdirSync(runtimeDir, { recursive: true });
+      const runtimeIndexPath = path.join(runtimeDir, 'index.js');
+      fs.writeFileSync(runtimeIndexPath, 'module.exports = {};');
+
+      try {
+        const template = FederationRuntimePlugin.getTemplate(
+          compiler as Compiler,
+          mockOptions,
+          path.join(runtimeDir, 'index.cjs'),
+        );
+
+        expect(template).toContain(
+          `import federation from '${runtimeIndexPath.replace(/\\/g, '/')}';`,
+        );
+      } finally {
+        fs.rmSync(tempDir, { recursive: true, force: true });
+      }
     });
   });
 

@@ -26,6 +26,8 @@ import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 import { createSchemaValidation } from '../../utils';
 import TreeShakingSharedPlugin from '../sharing/tree-shaking/TreeShakingSharedPlugin';
 
+declare const __VERSION__: string;
+
 const isValidExternalsType = require(
   normalizeWebpackPath(
     'webpack/schemas/plugins/container/ExternalsType.check.js',
@@ -237,9 +239,10 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     });
 
     if (!disableManifest) {
-      const pkg = require('../../../../package.json');
+      const pluginVersion =
+        typeof __VERSION__ === 'string' && __VERSION__ ? __VERSION__ : '0.0.0';
       this._statsPlugin = new StatsPlugin(options, {
-        pluginVersion: pkg.version,
+        pluginVersion,
         bundler: 'webpack',
       });
       this._statsPlugin.apply(compiler);

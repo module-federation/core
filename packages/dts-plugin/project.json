@@ -9,14 +9,8 @@
       "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/packages/dts-plugin/dist"],
       "options": {
-        "parallel": false,
-        "cwd": "packages/dts-plugin",
-        "commands": [
-          "tsdown --config ./tsdown.config.ts",
-          "sleep 1",
-          "cp package.json ./dist",
-          "cp *.md ./dist"
-        ]
+        "command": "rslib build",
+        "cwd": "packages/dts-plugin"
       }
     },
     "test": {

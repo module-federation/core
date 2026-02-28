@@ -39,7 +39,7 @@
   "exports": {
     ".": {
       "import": {
-        "types": "./dist/index.d.ts",
+        "types": "./dist/index.d.mts",
         "default": "./dist/index.mjs"
       },
       "require": {
@@ -49,7 +49,7 @@
     },
     "./plugin": {
       "import": {
-        "types": "./dist/plugin.d.ts",
+        "types": "./dist/plugin.d.mts",
         "default": "./dist/plugin.mjs"
       },
       "require": {
@@ -59,7 +59,7 @@
     },
     "./remote-entry-plugin": {
       "import": {
-        "types": "./dist/remote-entry-plugin.d.ts",
+        "types": "./dist/remote-entry-plugin.d.mts",
         "default": "./dist/remote-entry-plugin.mjs"
       },
       "require": {

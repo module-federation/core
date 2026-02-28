@@ -6,12 +6,12 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "browser": {
-    "url": false
-  },
   "license": "MIT",
   "publishConfig": {
     "access": "public"
+  },
+  "browser": {
+    "url": false
   },
   "repository": {
     "type": "git",
@@ -29,7 +29,7 @@
         "default": "./dist/index.js"
       },
       "require": {
-        "types": "./dist/index.d.ts",
+        "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
       }
     },
@@ -39,7 +39,7 @@
         "default": "./dist/helpers.js"
       },
       "require": {
-        "types": "./dist/helpers.d.ts",
+        "types": "./dist/helpers.d.cts",
         "default": "./dist/helpers.cjs"
       }
     },
@@ -49,7 +49,7 @@
         "default": "./dist/types.js"
       },
       "require": {
-        "types": "./dist/types.d.ts",
+        "types": "./dist/types.d.cts",
         "default": "./dist/types.cjs"
       }
     },
@@ -59,7 +59,7 @@
         "default": "./dist/core.js"
       },
       "require": {
-        "types": "./dist/core.d.ts",
+        "types": "./dist/core.d.cts",
         "default": "./dist/core.cjs"
       }
     },

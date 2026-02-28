@@ -8,11 +8,46 @@ declare global {
   var moduleGraphDirty: boolean;
 }
 
+const __mfDebugState =
+  (globalThis as any).__mfDebugState ||
+  ((globalThis as any).__mfDebugState = {
+    hotReloadGetRequireLogs: 0,
+    hotReloadEntryReloadLogs: 0,
+  });
+
 const getRequire = (): NodeRequire => {
   //@ts-ignore
-  return typeof __non_webpack_require__ !== 'undefined'
-    ? (__non_webpack_require__ as NodeRequire)
-    : eval('require');
+  const createdRequire =
+    typeof __non_webpack_require__ !== 'undefined'
+      ? (__non_webpack_require__ as NodeRequire)
+      : // eslint-disable-next-line no-eval
+        (eval('require') as NodeRequire);
+  if (__mfDebugState.hotReloadGetRequireLogs < 3) {
+    __mfDebugState.hotReloadGetRequireLogs += 1;
+    // #region agent log
+    fetch('http://127.0.0.1:7414/ingest/989a0b49-843c-45a9-b79d-4027ab5a19e4', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Debug-Session-Id': '7e9739',
+      },
+      body: JSON.stringify({
+        sessionId: '7e9739',
+        runId: 'nested-webpack-run1',
+        hypothesisId: 'H1',
+        location: 'packages/node/src/utils/hot-reload.ts:getRequire',
+        message: 'resolved node require binding',
+        data: {
+          filename: __filename,
+          hasResolve: typeof createdRequire.resolve === 'function',
+          cacheSize: Object.keys(createdRequire.cache || {}).length,
+        },
+        timestamp: Date.now(),
+      }),
+    }).catch(() => {});
+    // #endregion
+  }
+  return createdRequire;
 };
 
 function callsites(): any[] {
@@ -170,9 +205,87 @@ export const performReload = async (
     });
   } else {
     for (const entry of entries) {
+      if (__mfDebugState.hotReloadEntryReloadLogs < 8) {
+        __mfDebugState.hotReloadEntryReloadLogs += 1;
+        // #region agent log
+        fetch(
+          'http://127.0.0.1:7414/ingest/989a0b49-843c-45a9-b79d-4027ab5a19e4',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Debug-Session-Id': '7e9739',
+            },
+            body: JSON.stringify({
+              sessionId: '7e9739',
+              runId: 'nested-webpack-run1',
+              hypothesisId: 'H5',
+              location: 'packages/node/src/utils/hot-reload.ts:performReload',
+              message: 'reloading entry from entryChunkCache',
+              data: { entry, entriesSize: entries.size },
+              timestamp: Date.now(),
+            }),
+          },
+        ).catch(() => {});
+        // #endregion
+      }
       decache(entry);
       //reload entries again
-      await getRequire()(entry);
+      try {
+        await getRequire()(entry);
+      } catch (e: any) {
+        const msg = e?.message || String(e);
+        if (
+          typeof msg === 'string' &&
+          msg.includes('Cannot find module') &&
+          msg.includes(entry)
+        ) {
+          // #region agent log
+          fetch(
+            'http://127.0.0.1:7414/ingest/989a0b49-843c-45a9-b79d-4027ab5a19e4',
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-Debug-Session-Id': '7e9739',
+              },
+              body: JSON.stringify({
+                sessionId: '7e9739',
+                runId: 'nested-webpack-postfix2',
+                hypothesisId: 'H5',
+                location: 'packages/node/src/utils/hot-reload.ts:performReload',
+                message: 'skipping missing entry during reload',
+                data: { entry, errorMessage: msg },
+                timestamp: Date.now(),
+              }),
+            },
+          ).catch(() => {});
+          // #endregion
+          continue;
+        }
+        // #region agent log
+        fetch(
+          'http://127.0.0.1:7414/ingest/989a0b49-843c-45a9-b79d-4027ab5a19e4',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Debug-Session-Id': '7e9739',
+            },
+            body: JSON.stringify({
+              sessionId: '7e9739',
+              runId: 'nested-webpack-run1',
+              hypothesisId: 'H5',
+              location: 'packages/node/src/utils/hot-reload.ts:performReload',
+              message: 'entry reload threw',
+              data: { entry, errorMessage: e?.message || String(e) },
+              timestamp: Date.now(),
+            }),
+          },
+        ).catch(() => {});
+        // #endregion
+        throw e;
+      }
     }
   }
 

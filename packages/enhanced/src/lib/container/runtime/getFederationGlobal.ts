@@ -51,6 +51,7 @@ function getFederationGlobal(
         `bundlerRuntimeOptions: { remotes: { remoteInfos: ${remoteInfos}, webpackRequire: ${runtimeGlobals.require},idToRemoteMap: {}, chunkMapping: {},idToExternalAndNameMapping: {} } }`,
       ]),
       '};',
+      `${federationGlobal}.initOptions.webpackRequire = ${runtimeGlobals.require};`,
     ]),
     `${runtimeGlobals.require}.consumesLoadingData = {}`,
     `${runtimeGlobals.require}.remotesLoadingData = {}`,

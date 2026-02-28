@@ -6,6 +6,7 @@ export default defineConfig({
   lib: [
     {
       format: 'esm',
+      autoExtension: true,
       syntax: 'es2021',
       bundle: true,
       dts: {
@@ -14,6 +15,7 @@ export default defineConfig({
     },
     {
       format: 'cjs',
+      autoExtension: true,
       syntax: 'es2021',
       bundle: true,
       dts: false,

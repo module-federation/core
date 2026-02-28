@@ -3,7 +3,7 @@
   "version": "2.0.1",
   "author": "hanric <hanric.zhang@gmail.com>",
   "main": "./dist/index.js",
-  "module": "./dist/esm/index.mjs",
+  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "license": "MIT",
   "repository": {
@@ -21,8 +21,8 @@
   "exports": {
     ".": {
       "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/esm/index.mjs"
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
       },
       "require": {
         "types": "./dist/index.d.ts",
@@ -31,21 +31,21 @@
     },
     "./core": {
       "import": {
-        "types": "./dist/core.d.ts",
-        "default": "./dist/esm/core.mjs"
+        "types": "./dist/core/index.d.mts",
+        "default": "./dist/core.mjs"
       },
       "require": {
-        "types": "./dist/core.d.ts",
+        "types": "./dist/core/index.d.ts",
         "default": "./dist/core.js"
       }
     },
     "./dynamic-remote-type-hints-plugin": {
       "import": {
-        "types": "./dist/dynamic-remote-type-hints-plugin.d.ts",
-        "default": "./dist/esm/dynamic-remote-type-hints-plugin.mjs"
+        "types": "./dist/runtime-plugins/dynamic-remote-type-hints-plugin.d.mts",
+        "default": "./dist/dynamic-remote-type-hints-plugin.mjs"
       },
       "require": {
-        "types": "./dist/dynamic-remote-type-hints-plugin.d.ts",
+        "types": "./dist/runtime-plugins/dynamic-remote-type-hints-plugin.d.ts",
         "default": "./dist/dynamic-remote-type-hints-plugin.js"
       }
     },
@@ -57,10 +57,10 @@
         "./dist/index.d.ts"
       ],
       "core": [
-        "./dist/core.d.ts"
+        "./dist/core/index.d.ts"
       ],
       "dynamic-remote-type-hints-plugin": [
-        "./dist/dynamic-remote-type-hints-plugin.d.ts"
+        "./dist/runtime-plugins/dynamic-remote-type-hints-plugin.d.ts"
       ]
     }
   },

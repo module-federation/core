@@ -34,7 +34,7 @@
     "build:watch": "rslib build --watch"
   },
   "devDependencies": {
-    "@rslib/core": "^0.9.2",
+    "@rslib/core": "^0.19.6",
     "@rspress/core": "2.0.3",
     "@types/html-to-text": "^9.0.4",
     "@types/lodash-es": "^4.17.12",

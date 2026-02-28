@@ -1,6 +1,5 @@
 import {
   loadScript,
-  loadScriptNode,
   composeKeyWithSeparator,
   isBrowserEnv,
 } from '@module-federation/sdk';
@@ -18,7 +17,60 @@ import {
 
 // Declare the ENV_TARGET constant that will be defined by DefinePlugin
 declare const ENV_TARGET: 'web' | 'node';
+declare const require: undefined | ((specifier: string) => unknown);
 const importCallback = '.then(callbacks[0]).catch(callbacks[1])';
+
+type LoadScriptNode = (
+  url: string,
+  info: {
+    attrs?: Record<string, any>;
+    loaderHook?: {
+      createScriptHook?: (url: string, attrs?: Record<string, any>) => any;
+    };
+  },
+) => Promise<void>;
+
+function loadSdkNodeModule():
+  | {
+      loadScriptNode?: LoadScriptNode;
+      default?: LoadScriptNode | { loadScriptNode?: LoadScriptNode };
+    }
+  | undefined {
+  if (typeof require !== 'function') {
+    return undefined;
+  }
+
+  // Use an indirect require to prevent browser bundles from inlining sdk/node.
+  const runtimeRequire = new Function(
+    'req',
+    'specifier',
+    'return req(specifier);',
+  ) as (req: (specifier: string) => unknown, specifier: string) => unknown;
+
+  return runtimeRequire(require, '@module-federation/sdk/node') as {
+    loadScriptNode?: LoadScriptNode;
+    default?: LoadScriptNode | { loadScriptNode?: LoadScriptNode };
+  };
+}
+
+function getLoadScriptNode(): LoadScriptNode {
+  const sdkNode = loadSdkNodeModule();
+  if (sdkNode) {
+    const candidate =
+      sdkNode.loadScriptNode ||
+      (typeof sdkNode.default === 'function'
+        ? sdkNode.default
+        : sdkNode.default?.loadScriptNode);
+
+    if (typeof candidate === 'function') {
+      return candidate;
+    }
+  }
+
+  throw new Error(
+    'loadScriptNode is unavailable in @module-federation/sdk/node',
+  );
+}
 
 async function loadEsmEntry({
   entry,
@@ -31,10 +83,10 @@ async function loadEsmEntry({
     try {
       if (!remoteEntryExports) {
         if (typeof FEDERATION_ALLOW_NEW_FUNCTION !== 'undefined') {
-          new Function('callbacks', `import("${entry}")${importCallback}`)([
-            resolve,
-            reject,
-          ]);
+          new Function('callbacks', 'entry', `import(entry)${importCallback}`)(
+            [resolve, reject],
+            entry,
+          );
         } else {
           import(/* webpackIgnore: true */ /* @vite-ignore */ entry)
             .then(resolve)
@@ -145,7 +197,7 @@ async function loadEntryScript({
     .then(() => {
       return handleRemoteEntryLoaded(name, globalName, entry);
     })
-    .catch((e) => {
+    .catch((e: unknown) => {
       assert(
         undefined,
         getShortErrorMsg(RUNTIME_008, runtimeDescMap, {
@@ -203,6 +255,8 @@ async function loadEntryNode({
     return remoteEntryExports;
   }
 
+  const loadScriptNode = getLoadScriptNode();
+
   return loadScriptNode(entry, {
     attrs: { name, globalName, type },
     loaderHook: {
@@ -222,7 +276,7 @@ async function loadEntryNode({
     .then(() => {
       return handleRemoteEntryLoaded(name, globalName, entry);
     })
-    .catch((e) => {
+    .catch((e: unknown) => {
       throw e;
     });
 }

@@ -22,63 +22,64 @@
         "default": "./dist/index.mjs"
       },
       "require": {
-        "types": "./dist/index.d.cts",
-        "default": "./dist/index.cjs"
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
       }
     },
     "./rollup": {
+      "require": {
+        "types": "./dist/rollup.d.ts",
+        "default": "./dist/rollup.js"
+      },
       "import": {
         "types": "./dist/rollup.d.mts",
         "default": "./dist/rollup.mjs"
-      },
-      "require": {
-        "types": "./dist/rollup.d.cts",
-        "default": "./dist/rollup.cjs"
       }
     },
     "./vite": {
+      "require": {
+        "types": "./dist/vite.d.ts",
+        "default": "./dist/vite.js"
+      },
       "import": {
         "types": "./dist/vite.d.mts",
         "default": "./dist/vite.mjs"
-      },
-      "require": {
-        "types": "./dist/vite.d.cts",
-        "default": "./dist/vite.cjs"
       }
     },
     "./webpack": {
+      "require": {
+        "types": "./dist/webpack.d.ts",
+        "default": "./dist/webpack.js"
+      },
       "import": {
         "types": "./dist/webpack.d.mts",
         "default": "./dist/webpack.mjs"
-      },
-      "require": {
-        "types": "./dist/webpack.d.cts",
-        "default": "./dist/webpack.cjs"
       }
     },
     "./esbuild": {
+      "require": {
+        "types": "./dist/esbuild.d.ts",
+        "default": "./dist/esbuild.js"
+      },
       "import": {
         "types": "./dist/esbuild.d.mts",
         "default": "./dist/esbuild.mjs"
-      },
-      "require": {
-        "types": "./dist/esbuild.d.cts",
-        "default": "./dist/esbuild.cjs"
       }
     },
     "./rspack": {
+      "require": {
+        "types": "./dist/rspack.d.ts",
+        "default": "./dist/rspack.js"
+      },
       "import": {
         "types": "./dist/rspack.d.mts",
         "default": "./dist/rspack.mjs"
-      },
-      "require": {
-        "types": "./dist/rspack.d.cts",
-        "default": "./dist/rspack.cjs"
       }
     }
   },
-  "main": "./dist/index.cjs",
-  "types": "./dist/index.d.cts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "author": "Matteo Pietro Dazzi <matteopietro.dazzi@gmail.com> (https://github.com/ilteoood)",
   "repository": {
     "type": "git",

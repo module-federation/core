@@ -6,30 +6,25 @@ export default defineConfig({
   lib: [
     {
       format: 'esm',
+      autoExtension: true,
       syntax: 'es2021',
       bundle: false,
       outBase: 'src',
-      define: {
-        'process.env.IS_ESM_BUILD': JSON.stringify('true'),
-      },
       dts: {
+        autoExtension: true,
         bundle: false,
         distPath: './dist',
-        autoExtension: true,
       },
     },
     {
       format: 'cjs',
+      autoExtension: true,
       syntax: 'es2021',
       bundle: false,
       outBase: 'src',
-      define: {
-        'process.env.IS_ESM_BUILD': JSON.stringify('false'),
-      },
       dts: {
-        bundle: false,
-        distPath: './dist',
         autoExtension: true,
+        distPath: './dist',
       },
     },
   ],

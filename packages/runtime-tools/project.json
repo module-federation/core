@@ -9,14 +9,8 @@
       "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/packages/runtime-tools/dist"],
       "options": {
-        "parallel": false,
-        "cwd": "packages/runtime-tools",
-        "commands": [
-          {
-            "command": "tsdown --config tsdown.config.ts",
-            "forwardAllArgs": false
-          }
-        ]
+        "command": "rslib build",
+        "cwd": "packages/runtime-tools"
       },
       "dependsOn": [
         {
