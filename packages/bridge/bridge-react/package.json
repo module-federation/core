@@ -168,6 +168,6 @@
     "vite-plugin-dts": "^4.3.0",
     "@module-federation/runtime": "workspace:*",
     "@module-federation/runtime-core": "workspace:*",
-    "hono": "4.11.10"
+    "hono": "4.12.2"
   }
 }
