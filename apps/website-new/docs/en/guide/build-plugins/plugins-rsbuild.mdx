@@ -92,7 +92,10 @@ If you need to use the Module Federation runtime capabilities, please install [@
 export declare const pluginModuleFederation: (moduleFederationOptions: ModuleFederationOptions, rsbuildOptions?: RSBUILD_PLUGIN_OPTIONS) => RsbuildPlugin;
 
 type RSBUILD_PLUGIN_OPTIONS = {
+  target?: 'web' | 'node' | 'dual';
   ssr?: boolean;
+  ssrDir?: string;
+  environment?: string;
 }
 ```
 
@@ -109,7 +112,7 @@ Additional configuration for the Rsbuild plugin.
 
 :::tip
 
-Only supported when used as a global plugin in Rslib.
+`target: 'dual'` is only supported when used as a global plugin in Rslib/Rspress.
 
 :::
 
@@ -119,6 +122,46 @@ Only supported when used as a global plugin in Rslib.
 Used to specify the target runtime environment for the output. When set to `dual`, it builds both Web (browser) output and Node.js (SSR) output.
 
 After generating SSR output with `target: 'dual'`, you can refer to [Create a Modern.js Consumer](../../../practice/frameworks/modern/index), create a consumer, and integrate the corresponding Rslib SSR producer for development.
+
+For Rsbuild app SSR, use `target: 'node'` with `environment` to apply Module Federation to a specific app environment.
+
+```ts title='rsbuild.config.ts'
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+import { defineConfig } from '@rsbuild/core';
+
+export default defineConfig({
+  environments: {
+    client: {},
+    ssr: {},
+  },
+  plugins: [
+    pluginModuleFederation(
+      {
+        name: 'host',
+        remotes: {
+          remote: 'remote@http://localhost:3001/mf-manifest.json',
+        },
+      },
+      {
+        target: 'node',
+        environment: 'ssr',
+      },
+    ),
+  ],
+});
+```
+
+#### environment
+
+* Type: `string`
+* Default: auto-detected by caller/tooling:
+  * Rslib: `'mf'`
+  * Rsbuild app + `target: 'web'`: `'web'`
+  * Rsbuild app + `target: 'node'`: `'node'`
+  * Rspress + `target: 'web'`: `'web'`
+  * Rspress + `target: 'node'`: `'node'`
+
+Environment name used by `target: 'node'` to select which environment config receives Node-target federation behavior.
 
 
 #### ssr

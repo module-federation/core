@@ -92,7 +92,10 @@ export default defineConfig({
 export declare const pluginModuleFederation: (moduleFederationOptions: ModuleFederationOptions, rsbuildOptions?: RSBUILD_PLUGIN_OPTIONS) => RsbuildPlugin;
 
 type RSBUILD_PLUGIN_OPTIONS = {
+  target?: 'web' | 'node' | 'dual';
   ssr?: boolean;
+  ssrDir?: string;
+  environment?: string;
 }
 ```
 
@@ -108,7 +111,7 @@ Rsbuild 插件额外配置。
 
 :::tip
 
-仅支持 Rslib 全局插件。
+`target: 'dual'` 仅支持 Rslib/Rspress 全局插件。
 
 :::
 
@@ -118,6 +121,46 @@ Rsbuild 插件额外配置。
 用于指定产物的运行目标环境。当设置为 `dual` 时，会同时构建 Web（浏览器）产物与 Node.js（SSR）产物。
 
 使用 `target: 'dual'` 生成 SSR 产物后，可参考 [创建 Modern.js 消费者](../../../practice/frameworks/modern/index) 创建消费者，并接入对应的 Rslib SSR 生产者进行开发。
+
+对于 Rsbuild App 的 SSR，可使用 `target: 'node'` + `environment`，将 Module Federation 应用到指定环境。
+
+```ts title='rsbuild.config.ts'
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+import { defineConfig } from '@rsbuild/core';
+
+export default defineConfig({
+  environments: {
+    client: {},
+    ssr: {},
+  },
+  plugins: [
+    pluginModuleFederation(
+      {
+        name: 'host',
+        remotes: {
+          remote: 'remote@http://localhost:3001/mf-manifest.json',
+        },
+      },
+      {
+        target: 'node',
+        environment: 'ssr',
+      },
+    ),
+  ],
+});
+```
+
+#### environment
+
+* 类型：`string`
+* 默认值：按调用方/工具自动推断：
+  * Rslib：`'mf'`
+  * Rsbuild App + `target: 'web'`：`'web'`
+  * Rsbuild App + `target: 'node'`：`'node'`
+  * Rspress + `target: 'web'`：`'web'`
+  * Rspress + `target: 'node'`：`'node'`
+
+在 `target: 'node'` 下用于指定要应用 Node Federation 行为的环境名称。
 
 
 #### ssr
