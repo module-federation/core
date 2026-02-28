@@ -8,7 +8,11 @@ const NEXT_WAIT_TARGETS = ['tcp:3000', 'tcp:3001', 'tcp:3002'];
 
 const KILL_PORT_ARGS = ['npx', 'kill-port', '3000', '3001', '3002'];
 
-const E2E_APPS = ['3000-home', '3001-shop', '3002-checkout'];
+const E2E_APPS = [
+  '@module-federation/3000-home',
+  '@module-federation/3001-shop',
+  '@module-federation/3002-checkout',
+];
 
 // Marks child processes that run in their own process group so we can safely signal the group.
 const DETACHED_PROCESS_GROUP = Symbol('detachedProcessGroup');
@@ -17,13 +21,13 @@ const SCENARIOS = {
   dev: {
     label: 'next.js development',
     serveCmd: [
-      'npx',
-      'nx',
-      'run-many',
-      '--target=serve',
-      '--configuration=development',
-      `--projects=${E2E_APPS.join(',')}`,
-      '--parallel=3',
+      'pnpm',
+      'exec',
+      'turbo',
+      'run',
+      'serve:development',
+      ...E2E_APPS.map((appName) => `--filter=${appName}`),
+      '--concurrency=3',
     ],
     e2eApps: E2E_APPS,
     waitTargets: NEXT_WAIT_TARGETS,
@@ -31,22 +35,22 @@ const SCENARIOS = {
   prod: {
     label: 'next.js production',
     buildCmd: [
-      'npx',
-      'nx',
-      'run-many',
-      '--target=build',
-      '--configuration=production',
-      `--projects=${E2E_APPS.join(',')}`,
-      '--parallel=3',
+      'pnpm',
+      'exec',
+      'turbo',
+      'run',
+      'build:production',
+      ...E2E_APPS.map((appName) => `--filter=${appName}`),
+      '--concurrency=3',
     ],
     serveCmd: [
-      'npx',
-      'nx',
-      'run-many',
-      '--target=serve',
-      '--configuration=production',
-      `--projects=${E2E_APPS.join(',')}`,
-      '--parallel=3',
+      'pnpm',
+      'exec',
+      'turbo',
+      'run',
+      'serve:production',
+      ...E2E_APPS.map((appName) => `--filter=${appName}`),
+      '--concurrency=3',
     ],
     e2eApps: E2E_APPS,
     waitTargets: NEXT_WAIT_TARGETS,
@@ -135,7 +139,7 @@ async function runScenario(name) {
       await runGuardedCommand(
         `running e2e tests for ${app}`,
         serveExitPromise,
-        () => spawnWithPromise('npx', ['nx', 'run', `${app}:e2e`]),
+        () => spawnWithPromise('pnpm', ['--filter', app, 'run', 'e2e']),
         () => shutdownRequested,
       );
       console.log(`[next-e2e] Finished e2e tests for ${app}`);

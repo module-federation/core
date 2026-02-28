@@ -5,13 +5,17 @@
   "scripts": {
     "reset": "npx rimraf ./**/node_modules",
     "dev": "modern dev",
-    "build": "modern build",
+    "build": "cd apps/host ; pnpm run build",
     "start": "modern start",
-    "serve": "modern serve",
+    "serve": "cd apps/modern-component-data-fetch/host ; pnpm run dev",
     "new": "modern new",
     "lint": "modern lint",
     "upgrade": "modern upgrade",
-    "inspect": "modern inspect"
+    "inspect": "modern inspect",
+    "e2e": "pnpm exec cypress run --project apps/modern-component-data-fetch/host --e2e --config baseUrl=http://localhost:5001 --browser chrome",
+    "e2e:development": "pnpm exec cypress open --project apps/modern-component-data-fetch/host --e2e --config baseUrl=http://localhost:5001 --browser electron",
+    "test:e2e": "pnpm --filter modernjs-ssr-data-fetch-host run e2e",
+    "test:e2e:watch": "pnpm --filter modernjs-ssr-data-fetch-host run e2e"
   },
   "engines": {
     "node": ">=16.18.1"

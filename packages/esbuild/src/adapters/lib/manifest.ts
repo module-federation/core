@@ -98,7 +98,7 @@ export const writeRemoteManifest = async (config: any, result: BuildResult) => {
   const envType =
     process.env['NODE_ENV'] === 'development'
       ? 'local'
-      : process.env['NODE_ENV'] ?? '';
+      : (process.env['NODE_ENV'] ?? '');
   const publicPath = config.publicPath || 'auto';
   let containerName: string = '';
 

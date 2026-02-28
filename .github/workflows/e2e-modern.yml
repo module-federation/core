@@ -14,22 +14,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Cache Tool Downloads
-        uses: actions/cache@v5
-        with:
-          path: ~/.cache
-          key: ${{ runner.os }}-toolcache-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-toolcache-
-
-      - name: Set Playwright cache status
-        run: |
-          if [ -d "$HOME/.cache/ms-playwright" ] || [ -d "$HOME/.cache/Cypress" ]; then
-            echo "PLAYWRIGHT_CACHE_HIT=true" >> "$GITHUB_ENV"
-          else
-            echo "PLAYWRIGHT_CACHE_HIT=false" >> "$GITHUB_ENV"
-          fi
-
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 
@@ -40,38 +24,5 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
 
-      - name: Set Nx SHA
-        uses: nrwl/nx-set-shas@v4
-
-      - name: Set SKIP_DEVTOOLS_POSTINSTALL environment variable
-        run: echo "SKIP_DEVTOOLS_POSTINSTALL=true" >> "$GITHUB_ENV"
-
-      - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Install Cypress
-        run: npx cypress install
-
-      - name: Run Build for All
-        run: npx nx run-many --targets=build --projects=tag:type:pkg
-
-      - name: Run condition check script
-        id: check-ci
-        run: |
-          ci_status=0
-          node tools/scripts/ci-is-affected.mjs --appName=modernjs || ci_status=$?
-          if [ "$ci_status" -eq 0 ]; then
-            echo "run-e2e=true" >> "$GITHUB_OUTPUT"
-          elif [ "$ci_status" -eq 1 ]; then
-            echo "run-e2e=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "ci-is-affected failed with unexpected exit code: $ci_status" >&2
-            exit "$ci_status"
-          fi
-
-      - name: E2E Test for ModernJS
-        if: steps.check-ci.outputs.run-e2e == 'true'
-        run: npx kill-port --port 4001 && npx nx run-many --target=test:e2e --projects=modernjs --parallel=1 && npx kill-port --port 4001
-
-      - name: Kill ports
-        run: npx kill-port --port 4001
+      - name: Run local CI parity job
+        run: pnpm run ci:local --only=e2e-modern

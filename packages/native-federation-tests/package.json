@@ -93,5 +93,11 @@
     "rambda": "^9.2.1",
     "tsdown": "0.20.3",
     "unplugin": "^1.10.1"
+  },
+  "scripts": {
+    "build": "tsdown --config tsdown.config.ts && cp package.json dist && cp *.md dist",
+    "lint": "pnpm exec eslint \"packages/native-federation-tests/**/*.ts\"",
+    "test": "pnpm exec vitest run --passWithNoTests --config packages/native-federation-tests/vite.config.mts",
+    "pre-release": "pnpm --filter @module-federation/native-federation-tests run test && pnpm --filter @module-federation/native-federation-tests run build"
   }
 }

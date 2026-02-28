@@ -43,14 +43,11 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
 
-      - name: Set Nx SHA
-        uses: nrwl/nx-set-shas@v4
-
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
         # assemble-release-plan is forked, so need to build it before execute pnpm changeset version
       - name: Build Internal Changesets Dependencies
-        run: npx nx build assemble-release-plan
+        run: pnpm --filter @changesets/assemble-release-plan run build
 
       - name: Create Release Pull Request
         uses: module-federation/actions@v2

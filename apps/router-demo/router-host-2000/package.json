@@ -4,8 +4,14 @@
   "version": "1.0.34",
   "scripts": {
     "dev": "FEDERATION_DEBUG=true rsbuild dev --open",
-    "build": "rsbuild build",
-    "preview": "rsbuild preview"
+    "build": "npm run build --prefix apps/router-demo/router-host-2000",
+    "preview": "rsbuild preview",
+    "test": "npm run test --prefix apps/router-demo/router-host-2000",
+    "serve": "npm run dev --prefix apps/router-demo/router-host-2000",
+    "e2e": "pnpm exec cypress run --project apps/router-demo/router-host-2000 --e2e --config baseUrl=http://localhost:2000 --browser chrome",
+    "e2e:development": "pnpm exec cypress open --project apps/router-demo/router-host-2000 --e2e --config baseUrl=http://localhost:2000 --browser electron",
+    "e2e:ci": "pnpm exec cypress run --project apps/router-demo/router-host-2000 --e2e --config baseUrl=http://localhost:2000 --browser chrome",
+    "test:e2e": "pnpm exec concurrently \"lsof -i:2000 || pnpm --filter host run serve\" \"pnpm exec wait-on tcp:2000 && pnpm --filter host run e2e:ci\""
   },
   "dependencies": {
     "@ant-design/icons": "^5.3.6",

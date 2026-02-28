@@ -7,7 +7,7 @@ update-commit-messages.sh
 /out-tsc
 /build
 /docs
-/.nx
+/.turbo
 # dependencies
 node_modules
 ./webpack-lib

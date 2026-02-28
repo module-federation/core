@@ -10,7 +10,10 @@
     "access": "public"
   },
   "scripts": {
-    "build": "rslib build"
+    "build": "cd packages/modernjs-v3 ; pnpm run build || (sleep 2 && pnpm run build) && cp packages/modernjs-v3/LICENSE packages/modernjs-v3/dist",
+    "lint": "pnpm exec eslint \"packages/modernjs-v3/**/*.ts\"",
+    "test": "pnpm exec vitest run --passWithNoTests --config packages/modernjs-v3/vite.config.mts",
+    "pre-release": "pnpm --filter @module-federation/modern-js-v3 run test && pnpm --filter @module-federation/modern-js-v3 run build"
   },
   "repository": {
     "type": "git",

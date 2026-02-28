@@ -5,5 +5,16 @@
     "@module-federation/node": "workspace:*",
     "@module-federation/enhanced": "workspace:*",
     "@module-federation/runtime": "workspace:*"
+  },
+  "scripts": {
+    "build": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-host/webpack.config.js --output-path apps/node-host/dist --mode production",
+    "build:development": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-host/webpack.config.js --output-path apps/node-host/dist --mode development",
+    "build:production": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-host/webpack.config.js --output-path apps/node-host/dist --mode production",
+    "serve": "pnpm --filter node-host run build:development && node apps/node-host/dist/main.js",
+    "serve:development": "pnpm --filter node-host run build:development && node apps/node-host/dist/main.js",
+    "serve:production": "pnpm --filter node-host run build:production && node apps/node-host/dist/main.js",
+    "lint": "pnpm exec eslint apps/node-host/**/*.ts",
+    "test": "pnpm exec jest --config apps/node-host/jest.config.ts --passWithNoTests",
+    "test:ci": "pnpm exec jest --config apps/node-host/jest.config.ts --passWithNoTests --ci --coverage"
   }
 }

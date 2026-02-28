@@ -16,12 +16,12 @@
     "treeshake-server": "bin/treeshake-server.js"
   },
   "scripts": {
-    "build": "pnpm -C ../treeshake-frontend build && rslib build && node scripts/copy-frontend.js",
-    "lint": "biome lint src scripts",
+    "build": "pnpm -C packages/treeshake-server build",
+    "lint": "pnpm -C packages/treeshake-server lint",
     "prestart": "npm run build",
     "dev": "node scripts/dev.js",
     "start": "node dist/server.js",
-    "test": "node ../../scripts/ensure-playwright.js && rstest"
+    "test": "pnpm -C packages/treeshake-server test"
   },
   "files": [
     "bin/",

@@ -40,7 +40,7 @@ const SCENARIOS = {
   dev: {
     label: 'router development',
     serveCmd: ['pnpm', 'run', 'app:router:dev'],
-    e2eCmd: ['npx', 'nx', 'run', 'router-host-2000:e2e', '--configuration=ci'],
+    e2eCmd: ['pnpm', '--filter', 'host', 'run', 'e2e:ci'],
     waitTargets: ROUTER_WAIT_TARGETS,
   },
 };

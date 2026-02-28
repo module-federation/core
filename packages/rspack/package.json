@@ -93,5 +93,12 @@
     "vue-tsc": {
       "optional": true
     }
+  },
+  "scripts": {
+    "build": "rslib build",
+    "lint": "pnpm exec eslint \"packages/rspack/**/*.ts\" \"packages/rspack/package.json\"",
+    "test": "pnpm exec jest --config packages/rspack/jest.config.js --passWithNoTests",
+    "test:ci": "pnpm exec jest --config packages/rspack/jest.config.js --passWithNoTests --ci --coverage",
+    "pre-release": "pnpm --filter @module-federation/rspack run test && pnpm --filter @module-federation/rspack run build"
   }
 }

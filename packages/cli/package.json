@@ -38,5 +38,11 @@
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {
+    "build": "rslib build",
+    "lint": "pnpm exec eslint \"packages/cli/**/*.ts\" \"packages/cli/package.json\"",
+    "test": "rstest run -c packages/cli/rstest.config.ts",
+    "pre-release": "pnpm --filter @module-federation/cli run test && pnpm --filter @module-federation/cli run build"
   }
 }

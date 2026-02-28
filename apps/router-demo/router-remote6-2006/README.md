@@ -13,8 +13,9 @@ A Module Federation remote application demonstrating React Router v7 integration
 ## React Router v7 Highlights
 
 This demo showcases React Router v7 new features:
+
 - Enhanced data loading patterns
-- Better TypeScript support  
+- Better TypeScript support
 - Improved error boundaries
 - Future-ready APIs
 - Better performance

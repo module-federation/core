@@ -21,5 +21,10 @@
   },
   "peerDependencies": {
     "@rslib/core": ">=0.10.0"
+  },
+  "scripts": {
+    "build": "node -e \"require('fs').rmSync('tools/rslib-plugin/dist',{recursive:true,force:true})\" && pnpm -C tools/rslib-plugin exec tsdown --config tsdown.config.ts && cp tools/rslib-plugin/*.md tools/rslib-plugin/dist && cp tools/rslib-plugin/package.json tools/rslib-plugin/dist && cp tools/rslib-plugin/executors.json tools/rslib-plugin/dist && mkdir -p tools/rslib-plugin/dist/src/executors/build tools/rslib-plugin/dist/src/executors/dev tools/rslib-plugin/dist/src/executors/echo && cp tools/rslib-plugin/src/executors/build/schema.json tools/rslib-plugin/dist/src/executors/build/schema.json && cp tools/rslib-plugin/src/executors/dev/schema.json tools/rslib-plugin/dist/src/executors/dev/schema.json && cp tools/rslib-plugin/src/executors/echo/schema.json tools/rslib-plugin/dist/src/executors/echo/schema.json",
+    "lint": "pnpm exec eslint \"tools/rslib-plugin/**/*.ts\" \"tools/rslib-plugin/package.json\"",
+    "test": "pnpm exec jest --config tools/rslib-plugin/jest.config.ts --passWithNoTests"
   }
 }

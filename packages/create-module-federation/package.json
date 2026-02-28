@@ -15,7 +15,10 @@
   },
   "type": "module",
   "scripts": {
-    "build": "rslib build"
+    "build": "cd packages/create-module-federation ; pnpm run build && cp packages/create-module-federation/LICENSE packages/create-module-federation/dist",
+    "lint": "pnpm exec eslint \"packages/create-module-federation/**/*.ts\" \"packages/create-module-federation/package.json\"",
+    "test": "node packages/create-module-federation/scripts/verify-rslib-templates.mjs",
+    "pre-release": "pnpm --filter create-module-federation run test && pnpm --filter create-module-federation run build"
   },
   "exports": {
     ".": "./dist/index.js"

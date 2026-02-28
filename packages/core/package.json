@@ -20,5 +20,11 @@
   },
   "peerDependencies": {
     "webpack": "^5.40.0"
+  },
+  "scripts": {
+    "build": "node -e \"require('fs').rmSync('packages/core/dist',{recursive:true,force:true})\" && pnpm -C packages/core exec tsdown --config tsdown.config.ts && cp packages/core/*.md packages/core/dist",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint \"packages/core/**/*.ts\"",
+    "test": "pnpm exec jest --config packages/core/jest.config.ts --passWithNoTests",
+    "pre-release": "pnpm --filter @module-federation/core run test && pnpm --filter @module-federation/core run build"
   }
 }

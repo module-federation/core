@@ -3,9 +3,10 @@
   "private": true,
   "version": "1.0.44",
   "scripts": {
-    "dev": "rsbuild dev",
-    "build": "rsbuild build",
-    "preview": "rsbuild preview"
+    "dev": "npm run dev",
+    "build": "npm run build",
+    "preview": "rsbuild preview",
+    "serve": "npm run dev"
   },
   "dependencies": {
     "@module-federation/enhanced": "workspace:*",

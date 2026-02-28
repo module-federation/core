@@ -15,5 +15,15 @@
     "@types/react": "18.3.11",
     "@types/react-dom": "18.3.0",
     "react-refresh": "0.14.2"
+  },
+  "scripts": {
+    "build": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/react-ts-host/webpack.config.js --mode production",
+    "build:development": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/react-ts-host/webpack.config.js --mode development",
+    "build:production": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/react-ts-host/webpack.config.js --mode production",
+    "serve": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/react-ts-host/webpack.config.js --mode production --port 3003 --no-hot",
+    "serve:development": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/react-ts-host/webpack.config.js --mode development --port 3003",
+    "serve:production": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/react-ts-host/webpack.config.js --mode production --port 3003 --no-hot",
+    "lint": "pnpm exec eslint apps/react-ts-host/**/*.{ts,tsx,js,jsx}",
+    "serve-static": "pnpm exec serve apps/react-ts-host/dist -l 3003 --cors"
   }
 }

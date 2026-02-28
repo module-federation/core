@@ -58,5 +58,11 @@
         "./dist/type.d.ts"
       ]
     }
+  },
+  "scripts": {
+    "build": "rslib build",
+    "lint": "pnpm exec eslint \"packages/utilities/**/*.ts\"",
+    "test": "pnpm exec jest --config packages/utilities/jest.config.ts --passWithNoTests",
+    "pre-release": "pnpm --filter @module-federation/utilities run test && pnpm --filter @module-federation/utilities run build"
   }
 }

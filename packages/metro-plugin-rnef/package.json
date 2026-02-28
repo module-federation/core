@@ -34,8 +34,9 @@
     "default": "./dist/index.js"
   },
   "scripts": {
-    "build": "rslib build",
-    "typecheck": "tsc --noEmit"
+    "build": "pnpm build",
+    "typecheck": "tsc --noEmit",
+    "lint": "pnpm exec eslint \"packages/metro-plugin-rnef/**/*.{js,ts}\""
   },
   "peerDependencies": {
     "@module-federation/metro": "workspace:*",

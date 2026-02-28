@@ -8,7 +8,17 @@
   },
   "scripts": {
     "dev": "rslib mf-dev",
-    "build": "rslib build"
+    "build": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-remote/webpack.config.js --output-path apps/node-remote/dist --mode production",
+    "build:development": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-remote/webpack.config.js --output-path apps/node-remote/dist --mode development",
+    "build:production": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-remote/webpack.config.js --output-path apps/node-remote/dist --mode production",
+    "build:rslib": "npm run build --prefix apps/node-remote",
+    "serve:rslib": "npm run dev --prefix apps/node-remote",
+    "serve": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/node-remote/webpack.config.js --output-path apps/node-remote/dist --mode development --port 3022 --no-hot",
+    "serve:development": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/node-remote/webpack.config.js --output-path apps/node-remote/dist --mode development --port 3022 --no-hot",
+    "serve:production": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/node-remote/webpack.config.js --output-path apps/node-remote/dist --mode production --port 3022 --no-hot",
+    "lint": "pnpm exec eslint apps/node-remote/**/*.{ts,tsx,js,jsx}",
+    "test": "pnpm exec jest --config apps/node-remote/jest.config.ts --passWithNoTests",
+    "test:ci": "pnpm exec jest --config apps/node-remote/jest.config.ts --passWithNoTests --ci --coverage"
   },
   "devDependencies": {
     "@rslib/core": "^0.9.0"

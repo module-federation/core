@@ -24,14 +24,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Cache Tool Downloads
-        uses: actions/cache@v5
-        with:
-          path: ~/.cache
-          key: ${{ runner.os }}-toolcache-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-toolcache-
-
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 
@@ -42,70 +34,8 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
 
-      - name: Remove cached node_modules
-        run: rm -rf node_modules .nx
-
-      - name: Set Playwright cache status
-        run: |
-          if [ -d "$HOME/.cache/ms-playwright" ] || [ -d "$HOME/.cache/Cypress" ]; then
-            echo "PLAYWRIGHT_CACHE_HIT=true" >> "$GITHUB_ENV"
-          else
-            echo "PLAYWRIGHT_CACHE_HIT=false" >> "$GITHUB_ENV"
-          fi
-
-      - name: Set Nx SHA
-        uses: nrwl/nx-set-shas@v4
-
-      - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Install Playwright Browsers
-        run: pnpm exec playwright install --force
-
-      - name: Install Cypress
-        # if: steps.browsers-cache.outputs.cache-hit != 'true'
-        run: npx cypress install
-
-      - name: Check Code Format
-        run: npx nx format:check
-
-      - name: Verify Rslib Template Publint Wiring
-        run: node packages/create-module-federation/scripts/verify-rslib-templates.mjs
-
-      - name: Verify Package Rslib Publint Wiring
-        run: node tools/scripts/verify-rslib-publint-coverage.mjs
-
-      - name: Verify Publint Workflow Coverage
-        run: node tools/scripts/verify-publint-workflow-coverage.mjs
-
-      - name: Print Number of CPU Cores
-        run: nproc
-
-      - name: Run Build for All
-        run: |
-          npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4 --skip-nx-cache
-          npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4
-
-      - name: Check Package Publishing Compatibility
-        run: |
-          for pkg in packages/*; do
-            if [ -f "$pkg/package.json" ] && \
-               [ "$pkg" != "packages/assemble-release-plan" ] && \
-               [ "$pkg" != "packages/chrome-devtools" ] && \
-               [ "$pkg" != "packages/core" ] && \
-               [ "$pkg" != "packages/modernjs" ] && \
-               [ "$pkg" != "packages/utilities" ]; then
-              echo "Checking $pkg..."
-              npx publint "$pkg"
-            fi
-          done
-
-      - name: Warm Nx Cache
-        run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4
-
-      - name: Run Affected Test
-        timeout-minutes: 10
-        run: npx nx affected -t test --parallel=3 --exclude='*,!tag:type:pkg'
+      - name: Run local CI parity job
+        run: pnpm run ci:local --only=build-and-test
 
   e2e-modern:
     needs: checkout-install

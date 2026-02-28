@@ -12,16 +12,19 @@
     "storybook": "storybook dev -p 6006",
     "reset": "npx rimraf ./**/node_modules",
     "dev": "modern-app dev",
-    "build": "modern-app build && node postpack.js",
+    "build": "pnpm -C packages/chrome-devtools build:lib",
     "build:debug": "DEBUG=true modern-app build && node postpack.js",
     "build:lib": "rm -rf dist && modern-module build -c modern.lib.config.ts",
     "release": "npm publish --tag canary",
-    "test": "vitest run",
+    "test": "pnpm -C packages/chrome-devtools test",
     "test:e2e": "E2ETEST=true pnpm build && playwright test",
     "test:e2e:ui": "E2ETEST=true  pnpm build && playwright test --ui",
     "start": "modern-app start",
     "serve": "modern-app serve",
-    "postinstall": "bash install-deps.bash"
+    "postinstall": "bash install-deps.bash",
+    "build:chrome-plugins": "pnpm -C packages/chrome-devtools build",
+    "e2e:devtools": "pnpm -C packages/chrome-devtools test:e2e",
+    "e2e:devtools:ui": "pnpm -C packages/chrome-devtools test:e2e:ui"
   },
   "files": [
     "dist/",

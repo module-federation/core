@@ -24,8 +24,9 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "build": "npm run build --prefix packages/bridge/bridge-react-webpack-plugin",
+    "preview": "vite preview",
+    "test": "vitest run -c packages/bridge/bridge-react-webpack-plugin/vitest.config.ts"
   },
   "dependencies": {
     "@module-federation/sdk": "workspace:*",

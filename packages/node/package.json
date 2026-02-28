@@ -122,5 +122,11 @@
     "webpack": {
       "optional": true
     }
+  },
+  "scripts": {
+    "build": "tsdown --config tsdown.config.mts",
+    "lint": "pnpm exec eslint \"packages/node/**/*.js\" \"packages/node/**/*.ts\"",
+    "test": "pnpm exec jest --config packages/node/jest.config.js --passWithNoTests",
+    "pre-release": "pnpm --filter @module-federation/node run test && pnpm --filter @module-federation/node run build && rm -f ./packages/node/dist/package.json"
   }
 }

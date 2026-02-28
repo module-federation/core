@@ -5,15 +5,19 @@
   "scripts": {
     "reset": "npx rimraf ./**/node_modules",
     "dev": "modern dev",
-    "build": "modern build",
-    "build:re-shake": "SECONDARY_SHARED_TREE_SHAKING=true modern build",
+    "build": "cd apps/shared-tree-shaking/with-server/host ; pnpm run build",
+    "build:re-shake": "cd apps/shared-tree-shaking/with-server/host ; pnpm run build:re-shake",
     "start": "modern start",
-    "serve": "modern serve",
-    "serve:re-shake": "serve dist-test -C -p 3003",
+    "serve": "cd apps/shared-tree-shaking/with-server/host ; pnpm run serve",
+    "serve:re-shake": "cd apps/shared-tree-shaking/with-server/host ; pnpm run serve:re-shake",
     "new": "modern new",
     "lint": "modern lint",
     "upgrade": "modern upgrade",
-    "inspect": "modern inspect"
+    "inspect": "modern inspect",
+    "serve:all": "pnpm --filter shared-tree-shaking-with-server-host run build && pnpm --filter shared-tree-shaking-with-server-host run build:re-shake && pnpm --filter shared-tree-shaking-with-server-provider run build && pnpm --filter shared-tree-shaking-with-server-host run serve & pnpm --filter shared-tree-shaking-with-server-provider run serve & pnpm --filter shared-tree-shaking-with-server-host run serve:re-shake",
+    "e2e": "pnpm exec cypress run --config-file apps/shared-tree-shaking/with-server/host/cypress.config.ts --browser chrome --config baseUrl=http://localhost:3001",
+    "e2e:development": "pnpm exec cypress open --config-file apps/shared-tree-shaking/with-server/host/cypress.config.ts --browser chrome --config baseUrl=http://localhost:3001",
+    "test:e2e": "pnpm --filter shared-tree-shaking-with-server-host run build && pnpm --filter shared-tree-shaking-with-server-host run build:re-shake && pnpm --filter shared-tree-shaking-with-server-provider run build && pnpm --filter shared-tree-shaking-with-server-host run serve & pnpm --filter shared-tree-shaking-with-server-provider run serve & pnpm --filter shared-tree-shaking-with-server-host run serve:re-shake & sleep 10 && pnpm --filter shared-tree-shaking-with-server-host run e2e"
   },
   "engines": {
     "node": ">=16.18.1"

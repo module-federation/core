@@ -4,8 +4,10 @@
   "version": "1.0.34",
   "scripts": {
     "dev": "rsbuild dev",
-    "build": "rsbuild build",
-    "preview": "rsbuild preview"
+    "build": "npm run build --prefix apps/router-demo/router-remote3-2003",
+    "preview": "rsbuild preview",
+    "test": "npm run test --prefix apps/router-demo/router-remote3-2003",
+    "serve": "npm run dev --prefix apps/router-demo/router-remote3-2003"
   },
   "dependencies": {
     "@module-federation/bridge-vue3": "workspace:*",

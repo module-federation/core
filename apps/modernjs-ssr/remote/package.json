@@ -5,12 +5,15 @@
   "scripts": {
     "reset": "npx rimraf ./**/node_modules",
     "dev": "modern dev",
-    "build": "modern build",
+    "build": "cd apps/modernjs-ssr/remote ; pnpm run build",
     "start": "modern start",
-    "serve": "modern serve",
+    "serve": "cd apps/modernjs-ssr/remote ; pnpm run dev",
     "new": "modern new",
     "lint": "modern lint",
-    "upgrade": "modern upgrade"
+    "upgrade": "modern upgrade",
+    "e2e": "pnpm exec cypress run --project apps/modernjs-ssr/remote --e2e --config baseUrl=http://localhost:4001 --browser chrome",
+    "e2e:development": "pnpm exec cypress open --project apps/modernjs-ssr/remote --e2e --config baseUrl=http://localhost:4001 --browser electron",
+    "test:e2e": "pnpm exec concurrently \"lsof -i :8080 || pnpm --filter modernjs-ssr-remote run serve & echo 'done'\" \"sleep 20 && pnpm --filter modernjs-ssr-remote run e2e\""
   },
   "engines": {
     "node": ">=16.18.1"

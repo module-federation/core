@@ -5,10 +5,10 @@
   "scripts": {
     "reset": "npx rimraf ./**/node_modules",
     "dev": "modern dev",
-    "build": "modern build",
+    "build": "cd apps/shared-tree-shaking/with-server/provider ; pnpm run build",
     "build:shake": "SECONDARY_SHARED_TREE_SHAKING=true modern build",
     "start": "modern start",
-    "serve": "serve dist -C -p 3002",
+    "serve": "cd apps/shared-tree-shaking/with-server/provider ; pnpm run serve",
     "new": "modern new",
     "lint": "modern lint",
     "upgrade": "modern upgrade"

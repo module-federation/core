@@ -40,5 +40,11 @@
     "@types/fs-extra": "9.0.13",
     "@types/node": "^20.19.5",
     "@types/react": "^18.3.11"
+  },
+  "scripts": {
+    "build": "tsup --config packages/third-party-dts-extractor/tsup.config.ts && cp packages/third-party-dts-extractor/package.json packages/third-party-dts-extractor/dist && cp packages/third-party-dts-extractor/*.md packages/third-party-dts-extractor/dist",
+    "lint": "pnpm exec eslint \"packages/third-party-dts-extractor/**/*.ts\"",
+    "test": "pnpm exec vitest run --passWithNoTests --config packages/third-party-dts-extractor/vite.config.mts",
+    "pre-release": "pnpm --filter @module-federation/third-party-dts-extractor run test && pnpm --filter @module-federation/third-party-dts-extractor run build"
   }
 }

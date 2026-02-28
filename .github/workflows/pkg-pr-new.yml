@@ -35,28 +35,11 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
 
-      - name: Cache Tool Downloads
-        uses: actions/cache@v5
-        with:
-          path: ~/.cache
-          key: ${{ runner.os }}-toolcache-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-toolcache-
-
-      - name: Remove cached node_modules
-        run: rm -rf node_modules .nx
-
-      - name: Set Nx SHA
-        uses: nrwl/nx-set-shas@v4
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Build package workspace targets
-        run: |
-          # Some package dts builds are intermittently flaky in CI; retry once.
-          npx nx run-many --targets=build --projects=tag:type:pkg --skip-nx-cache || \
-            (sleep 5 && npx nx run-many --targets=build --projects=tag:type:pkg --skip-nx-cache)
+        run: pnpm run build:pkg
 
       - name: Publish pkg.pr.new previews
         run: node tools/scripts/publish-pkg-pr-new-previews.mjs

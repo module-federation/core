@@ -36,5 +36,10 @@
     "@module-federation/metro": "workspace:*",
     "@typescript-eslint/eslint-plugin": "8.54.0",
     "@typescript-eslint/parser": "8.54.0"
+  },
+  "scripts": {
+    "build": "echo 'No build needed for metro-plugin-rnc-cli - pure JavaScript package'",
+    "test": "pnpm exec jest --config packages/metro-plugin-rnc-cli/jest.config.ts --passWithNoTests --watchman=false",
+    "lint": "pnpm exec eslint \"packages/metro-plugin-rnc-cli/**/*.{js,ts}\""
   }
 }

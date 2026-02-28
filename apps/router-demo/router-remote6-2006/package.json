@@ -4,8 +4,10 @@
   "version": "2.0.1",
   "scripts": {
     "dev": "rsbuild dev",
-    "build": "rsbuild build",
-    "preview": "rsbuild preview"
+    "build": "npm run build --prefix apps/router-demo/router-remote6-2006",
+    "preview": "rsbuild preview",
+    "test": "npm run test --prefix apps/router-demo/router-remote6-2006",
+    "serve": "npm run dev --prefix apps/router-demo/router-remote6-2006"
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",

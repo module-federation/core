@@ -2,14 +2,20 @@
   "private": true,
   "name": "app-router-4001",
   "scripts": {
-    "build": "next build",
+    "build": "npx next build",
     "dev": "NEXT_PRIVATE_LOCAL_WEBPACK=true next dev -p 4001",
-    "lint": "next lint",
+    "lint": "pnpm exec eslint apps/next-app-router/next-app-router-4001/**/*.{ts,tsx,js,jsx}",
     "lint-staged": "lint-staged",
     "prettier": "prettier --write --ignore-unknown .",
     "prettier:check": "prettier --check --ignore-unknown .",
     "start": "next start",
-    "test": "pnpm prettier:check && pnpm lint"
+    "test": "pnpm prettier:check && pnpm lint",
+    "build:development": "npx next build",
+    "build:production": "npx next build",
+    "serve": "pnpm dev",
+    "e2e": "pnpm exec cypress run --project apps/next-app-router/next-app-router-4001 --e2e --config baseUrl=http://localhost:4001 --key 27e40c91-5ac3-4433-8a87-651d10f51cf6",
+    "e2e:production": "pnpm exec cypress run --project apps/next-app-router/next-app-router-4001 --e2e --config baseUrl=http://localhost:4001 --key 27e40c91-5ac3-4433-8a87-651d10f51cf6",
+    "test:e2e": "pnpm exec concurrently \"lsof -i :4001 || pnpm --filter app-router-4001 run serve\" \"sleep 4 && pnpm --filter app-router-4001 run e2e\""
   },
   "git": {
     "pre-commit": "lint-staged"

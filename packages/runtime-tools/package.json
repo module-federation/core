@@ -81,5 +81,10 @@
   "dependencies": {
     "@module-federation/runtime": "workspace:*",
     "@module-federation/webpack-bundler-runtime": "workspace:*"
+  },
+  "scripts": {
+    "build": "tsdown --config tsdown.config.ts",
+    "lint": "pnpm exec eslint \"packages/runtime-tools/**/*.ts\" \"packages/runtime-tools/package.json\"",
+    "test": "pnpm exec jest --config packages/runtime-tools/jest.config.cjs --passWithNoTests"
   }
 }

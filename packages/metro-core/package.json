@@ -56,10 +56,11 @@
     }
   },
   "scripts": {
-    "build": "rslib build",
-    "test": "vitest run --config vitest.config.mts",
+    "build": "pnpm build",
+    "test": "pnpm exec vitest run --passWithNoTests --config packages/metro-core/vitest.config.mts",
     "test:watch": "vitest --config vitest.config.mts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "pnpm exec eslint \"packages/metro-core/**/*.{ts,tsx,js,jsx}\""
   },
   "dependencies": {
     "@expo/metro-runtime": "^5.0.4",

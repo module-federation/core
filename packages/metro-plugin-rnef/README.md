@@ -15,8 +15,8 @@ npm install --save-dev @module-federation/metro-plugin-rnef
 3. Add the plugin to your RNEF configuration (typically in `rnef.config.mjs`):
 
 ```typescript
-import { pluginMetro } from "@rnef/plugin-metro";
-import moduleFederation from "@module-federation/metro-plugin-rnef";
+import { pluginMetro } from '@rnef/plugin-metro';
+import moduleFederation from '@module-federation/metro-plugin-rnef';
 
 /** @type {import('@rnef/config').Config} */
 export default {

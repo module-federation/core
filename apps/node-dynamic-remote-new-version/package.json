@@ -5,5 +5,16 @@
     "@module-federation/node": "workspace:*",
     "lodash": "4.17.23"
   },
-  "version": null
+  "version": "1.0.0",
+  "scripts": {
+    "build": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-dynamic-remote-new-version/webpack.config.js --output-path apps/node-dynamic-remote-new-version/dist --mode production",
+    "build:development": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-dynamic-remote-new-version/webpack.config.js --output-path apps/node-dynamic-remote-new-version/dist --mode development",
+    "build:production": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/node-dynamic-remote-new-version/webpack.config.js --output-path apps/node-dynamic-remote-new-version/dist --mode production",
+    "serve": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/node-dynamic-remote-new-version/webpack.config.js --output-path apps/node-dynamic-remote-new-version/dist --mode development --port 3027",
+    "serve:development": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/node-dynamic-remote-new-version/webpack.config.js --output-path apps/node-dynamic-remote-new-version/dist --mode development --port 3027",
+    "serve:production": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/node-dynamic-remote-new-version/webpack.config.js --output-path apps/node-dynamic-remote-new-version/dist --mode production --port 3027 --no-hot",
+    "lint": "pnpm exec eslint apps/node-dynamic-remote-new-version/**/*.{ts,tsx,js,jsx}",
+    "test": "pnpm exec jest --config apps/node-dynamic-remote-new-version/jest.config.ts --passWithNoTests",
+    "test:ci": "pnpm exec jest --config apps/node-dynamic-remote-new-version/jest.config.ts --passWithNoTests --ci --coverage"
+  }
 }

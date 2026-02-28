@@ -1,0 +1,71 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", "build/**", ".next/**", "out/**", "lib/**"]
+    },
+    "build:*": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", "build/**", ".next/**", "out/**", "lib/**"]
+    },
+    "lint": {
+      "outputs": []
+    },
+    "lint:*": {
+      "outputs": []
+    },
+    "test": {
+      "dependsOn": ["build"],
+      "outputs": ["coverage/**"]
+    },
+    "test:*": {
+      "dependsOn": ["build"],
+      "outputs": ["coverage/**"]
+    },
+    "e2e": {
+      "cache": false
+    },
+    "e2e:*": {
+      "cache": false
+    },
+    "test:e2e": {
+      "cache": false
+    },
+    "test:e2e:*": {
+      "cache": false
+    },
+    "serve": {
+      "cache": false,
+      "persistent": true
+    },
+    "serve:*": {
+      "cache": false,
+      "persistent": true
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "dev:*": {
+      "cache": false,
+      "persistent": true
+    },
+    "start": {
+      "cache": false,
+      "persistent": true
+    },
+    "start:*": {
+      "cache": false,
+      "persistent": true
+    },
+    "pre-release": {
+      "dependsOn": ["build", "test"],
+      "outputs": []
+    },
+    "pre-release:*": {
+      "dependsOn": ["build", "test"],
+      "outputs": []
+    }
+  }
+}

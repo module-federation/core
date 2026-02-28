@@ -49,5 +49,10 @@
   },
   "devDependencies": {
     "@module-federation/runtime-tools": "workspace:*"
+  },
+  "scripts": {
+    "build": "tsdown --config tsdown.config.ts --filter inject-external-runtime-core-plugin-build",
+    "lint": "pnpm exec eslint \"packages/runtime-plugins/inject-external-runtime-core-plugin/**/*.ts\" \"packages/runtime-plugins/inject-external-runtime-core-plugin/package.json\"",
+    "pre-release": "pnpm --filter @module-federation/inject-external-runtime-core-plugin run build"
   }
 }

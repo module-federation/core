@@ -1,5 +1,11 @@
-import { execSync } from 'child_process';
+import { execSync } from 'node:child_process';
+import { readdirSync, readFileSync } from 'node:fs';
+import { dirname, relative, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import yargs from 'yargs';
+
+const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
+const ROOT = resolve(SCRIPT_DIR, '../..');
 
 const argv = yargs(process.argv.slice(2))
   .option('appName', {
@@ -15,28 +21,115 @@ const argv = yargs(process.argv.slice(2))
   .strict(false)
   .parseSync();
 
-let { appName, base, head } = argv;
+const appNames = argv.appName
+  .split(',')
+  .map((name) => name.trim())
+  .filter(Boolean);
 
-const hasGitRef = (ref) => {
+if (appNames.length === 0) {
+  console.log('No valid app names were provided.');
+  process.exit(1);
+}
+
+const base = resolveBase(argv.base);
+const head = resolveHead(argv.head);
+
+if (!base || !head) {
+  console.warn(
+    `Unable to resolve a valid base/head commit (base=${base}, head=${head}). Running e2e by default.`,
+  );
+  process.exit(0);
+}
+
+if (base === head) {
+  console.warn(
+    `Resolved base and head are identical (${base}). Running e2e by default.`,
+  );
+  process.exit(0);
+}
+
+const projectGraph = loadProjectGraph();
+let changedFiles = [];
+try {
+  changedFiles = execSync(`git diff --name-only ${base} ${head}`, {
+    cwd: ROOT,
+    encoding: 'utf-8',
+  })
+    .split('\n')
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+} catch (error) {
+  console.warn(
+    `Failed to evaluate changed files for base=${base} head=${head}. Running e2e by default.`,
+  );
+  if (error instanceof Error) {
+    console.warn(error.message);
+  }
+  process.exit(0);
+}
+
+if (changedFiles.length === 0) {
+  console.log(
+    `appNames: ${appNames.join(',')} , base=${base} head=${head}, no changed files detected.`,
+  );
+  process.exit(1);
+}
+
+const affectedProjects = new Set();
+let hasUnmappedChange = false;
+for (const changedFile of changedFiles) {
+  const project = resolveProjectForPath(changedFile, projectGraph.projects);
+  if (!project) {
+    hasUnmappedChange = true;
+    continue;
+  }
+  affectedProjects.add(project.name);
+}
+
+if (hasUnmappedChange) {
+  console.warn(
+    `Detected changed files outside known project roots for base=${base} head=${head}. Running e2e by default.`,
+  );
+  process.exit(0);
+}
+
+const isAffected = appNames.some((name) =>
+  isRequestedAppAffected(name, affectedProjects),
+);
+
+if (isAffected) {
+  console.log(
+    `appNames: ${appNames.join(',')} , base=${base} head=${head}, conditions met, executing e2e CI.`,
+  );
+  process.exit(0);
+}
+
+console.log(
+  `appNames: ${appNames.join(',')} , base=${base} head=${head}, conditions not met, skipping e2e CI.`,
+);
+process.exit(1);
+
+function hasGitRef(ref) {
   if (!ref) {
     return false;
   }
   try {
     execSync(`git rev-parse --verify --quiet "${ref}^{commit}"`, {
+      cwd: ROOT,
       stdio: 'ignore',
     });
     return true;
   } catch {
     return false;
   }
-};
+}
 
-const resolveBase = (requestedBase) => {
+function resolveBase(requestedBase) {
   if (hasGitRef(requestedBase)) {
     return requestedBase;
   }
-  if (hasGitRef(process.env.NX_BASE)) {
-    return process.env.NX_BASE;
+  if (hasGitRef(process.env.CI_LOCAL_BASE_REF)) {
+    return process.env.CI_LOCAL_BASE_REF;
   }
   if (hasGitRef('origin/main')) {
     return 'origin/main';
@@ -48,79 +141,85 @@ const resolveBase = (requestedBase) => {
     return 'HEAD~1';
   }
   return null;
-};
+}
 
-const resolveHead = (requestedHead) => {
+function resolveHead(requestedHead) {
   if (hasGitRef(requestedHead)) {
     return requestedHead;
-  }
-  if (hasGitRef(process.env.NX_HEAD)) {
-    return process.env.NX_HEAD;
   }
   if (hasGitRef('HEAD')) {
     return 'HEAD';
   }
   return null;
-};
-
-base = resolveBase(base);
-head = resolveHead(head);
-
-const appNames = appName
-  .split(',')
-  .map((name) => name.trim())
-  .filter(Boolean);
-
-if (appNames.length === 0) {
-  console.log('No valid app names were provided.');
-  process.exit(1);
 }
 
-if (!base || !head) {
-  // Fail open for uncertain git state so CI does not skip required e2e checks.
-  console.warn(
-    `Unable to resolve a valid base/head commit (base=${base}, head=${head}). Running e2e by default.`,
-  );
-  process.exit(0);
+function loadProjectGraph() {
+  const projectFiles = collectProjectFiles(ROOT);
+  const projects = projectFiles
+    .map((projectFile) => {
+      const root = dirname(projectFile);
+      const relativeRoot = normalizePath(relative(ROOT, root));
+      const projectJson = JSON.parse(readFileSync(projectFile, 'utf-8'));
+      if (!projectJson?.name) {
+        return null;
+      }
+      return { name: projectJson.name, root: relativeRoot };
+    })
+    .filter(Boolean)
+    .sort((left, right) => right.root.length - left.root.length);
+
+  return { projects };
 }
 
-if (base === head) {
-  // Same commit cannot produce an affected diff; run e2e to avoid false skips.
-  console.warn(
-    `Resolved base and head are identical (${base}). Running e2e by default.`,
-  );
-  process.exit(0);
-}
-
-let affectedProjectsOutput = [];
-try {
-  affectedProjectsOutput = execSync(
-    `npx nx show projects --affected --base=${base} --head=${head}`,
-  )
-    .toString()
-    .split('\n')
-    .map((p) => p.trim())
-    .filter(Boolean);
-} catch (error) {
-  console.warn(
-    `Failed to evaluate affected projects for base=${base} head=${head}. Running e2e by default.`,
-  );
-  if (error instanceof Error) {
-    console.warn(error.message);
+function collectProjectFiles(rootDir) {
+  const results = [];
+  const queue = [rootDir];
+  while (queue.length > 0) {
+    const current = queue.pop();
+    for (const entry of readdirSync(current, { withFileTypes: true })) {
+      if (entry.name === '.git' || entry.name === 'node_modules') {
+        continue;
+      }
+      const next = resolve(current, entry.name);
+      if (entry.isDirectory()) {
+        queue.push(next);
+        continue;
+      }
+      if (entry.isFile() && entry.name === 'project.json') {
+        results.push(next);
+      }
+    }
   }
-  process.exit(0);
+  return results;
 }
 
-const isAffected = affectedProjectsOutput.some((p) => appNames.includes(p));
+function resolveProjectForPath(filePath, projects) {
+  const normalizedPath = normalizePath(filePath);
+  for (const project of projects) {
+    if (
+      normalizedPath === project.root ||
+      normalizedPath.startsWith(`${project.root}/`)
+    ) {
+      return project;
+    }
+  }
+  return null;
+}
 
-if (isAffected) {
-  console.log(
-    `appNames: ${appNames} , base=${base} head=${head}, conditions met, executing e2e CI.`,
-  );
-  process.exit(0);
-} else {
-  console.log(
-    `appNames: ${appNames} , base=${base} head=${head}, conditions not met, skipping e2e CI.`,
-  );
-  process.exit(1);
+function isRequestedAppAffected(requestedName, affectedProjects) {
+  if (affectedProjects.has(requestedName)) {
+    return true;
+  }
+  if (requestedName === 'modernjs') {
+    for (const projectName of affectedProjects) {
+      if (projectName.startsWith('modernjs-')) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function normalizePath(value) {
+  return value.replace(/\\/g, '/');
 }

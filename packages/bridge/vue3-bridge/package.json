@@ -29,7 +29,7 @@
   ],
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "npm run build --prefix packages/bridge/vue3-bridge",
     "preview": "vite preview",
     "test": "vitest"
   },

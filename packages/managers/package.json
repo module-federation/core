@@ -50,5 +50,12 @@
         "./dist/index.d.ts"
       ]
     }
+  },
+  "scripts": {
+    "build": "rslib build",
+    "lint": "pnpm exec eslint \"packages/managers/**/*.ts\" \"packages/managers/package.json\"",
+    "test": "pnpm exec jest --config packages/managers/jest.config.js --passWithNoTests",
+    "test:ci": "pnpm exec jest --config packages/managers/jest.config.js --passWithNoTests --ci --coverage",
+    "pre-release": "pnpm --filter @module-federation/managers run test && pnpm --filter @module-federation/managers run build"
   }
 }

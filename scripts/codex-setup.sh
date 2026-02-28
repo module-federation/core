@@ -9,19 +9,12 @@ if [ "${#install_args[@]}" -gt 0 ] && [ "${install_args[0]}" = "--" ]; then
 fi
 
 run_install() {
-  local daemon_value="$1"
-  shift
-
   local -a args=("$@")
   local log_file
   log_file="$(mktemp -t codex-setup-pnpm.XXXXXX.log)"
 
   set +e
-  if [ -n "$daemon_value" ]; then
-    NX_DAEMON="$daemon_value" pnpm install "${args[@]}" 2>&1 | tee "$log_file"
-  else
-    pnpm install "${args[@]}" 2>&1 | tee "$log_file"
-  fi
+  pnpm install "${args[@]}" 2>&1 | tee "$log_file"
   local install_exit_code=${PIPESTATUS[0]}
   set -e
 
@@ -33,11 +26,7 @@ run_install() {
   if grep -Eq "ENOENT: no such file or directory, open '.*node_modules/\\.pnpm/.*/package\\.json'" "$log_file"; then
     echo "[codex-setup] Transient pnpm virtual-store ENOENT detected. Retrying install once."
     set +e
-    if [ -n "$daemon_value" ]; then
-      NX_DAEMON="$daemon_value" pnpm install "${args[@]}"
-    else
-      pnpm install "${args[@]}"
-    fi
+    pnpm install "${args[@]}"
     install_exit_code=$?
     set -e
   fi
@@ -55,19 +44,16 @@ else
 fi
 
 if [ -n "$git_dir" ] && [ "$git_dir" != "$git_common_dir" ]; then
-  echo "[codex-setup] Git worktree detected. Running install with NX_DAEMON=false."
+  echo "[codex-setup] Git worktree detected."
   if [ "${#install_args[@]}" -gt 0 ]; then
-    run_install "false" "${install_args[@]}"
+    run_install "${install_args[@]}"
   else
-    run_install "false"
+    run_install
   fi
-
-  echo "[codex-setup] Priming Nx project graph cache for daemon-disabled commands."
-  NX_DAEMON=false pnpm exec nx show projects --json >/dev/null || true
 else
   if [ "${#install_args[@]}" -gt 0 ]; then
-    run_install "" "${install_args[@]}"
+    run_install "${install_args[@]}"
   else
-    run_install ""
+    run_install
   fi
 fi

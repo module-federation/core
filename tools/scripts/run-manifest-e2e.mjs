@@ -28,27 +28,13 @@ const SCENARIOS = {
   dev: {
     label: 'manifest development',
     serveCmd: ['pnpm', 'run', 'app:manifest:dev'],
-    e2eCmd: [
-      'npx',
-      'nx',
-      'run-many',
-      '--target=e2e',
-      '--projects=manifest-webpack-host',
-      '--parallel=2',
-    ],
+    e2eCmd: ['pnpm', '--filter', '3008-webpack-host', 'run', 'e2e'],
     waitTargets: MANIFEST_WAIT_TARGETS,
   },
   prod: {
     label: 'manifest production',
     serveCmd: ['pnpm', 'run', 'app:manifest:prod'],
-    e2eCmd: [
-      'npx',
-      'nx',
-      'run-many',
-      '--target=e2e',
-      '--projects=manifest-webpack-host',
-      '--parallel=1',
-    ],
+    e2eCmd: ['pnpm', '--filter', '3008-webpack-host', 'run', 'e2e'],
     waitTargets: MANIFEST_WAIT_TARGETS,
   },
 };

@@ -3,5 +3,10 @@
   "private": true,
   "dependencies": {
     "@module-federation/node": "workspace:*"
+  },
+  "scripts": {
+    "e2e": "pnpm exec jest --config apps/node-host-e2e/jest.config.ts --passWithNoTests",
+    "test:e2e": "sleep 10 && pnpm --filter node-host-e2e run e2e && lsof -ti tcp:3022,3023,3333,3026,3027 | xargs kill",
+    "lint": "pnpm exec eslint apps/node-host-e2e/**/*.{js,ts}"
   }
 }

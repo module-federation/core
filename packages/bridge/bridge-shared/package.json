@@ -17,7 +17,7 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "npm run build --prefix packages/bridge/bridge-shared",
     "preview": "vite preview"
   },
   "devDependencies": {

@@ -19,7 +19,7 @@
   },
   "scripts": {
     "test": "echo 'skip'",
-    "build": "preconstruct build",
+    "build": "npm run build --prefix packages/assemble-release-plan",
     "watch": "preconstruct watch",
     "postinstall": "preconstruct dev",
     "lint": "yarn eslint . --ext .ts,.tsx,.js",
