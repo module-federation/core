@@ -133,6 +133,8 @@
     "overrides": {
       "@changesets/assemble-release-plan": "workspace:*",
       "ajv": "8.18.0",
+      "eslint>ajv": "6.12.6",
+      "@eslint/eslintrc>ajv": "6.12.6",
       "schema-utils@3.3.0>ajv": "6.12.6"
     },
     "onlyBuiltDependencies": [
@@ -236,8 +238,8 @@
     "@types/node-fetch": "2.6.11",
     "@types/pidusage": "2.0.5",
     "@types/webpack-sources": "3.2.3",
-    "@typescript-eslint/eslint-plugin": "7.18.0",
-    "@typescript-eslint/parser": "7.18.0",
+    "@typescript-eslint/eslint-plugin": "8.56.1",
+    "@typescript-eslint/parser": "8.56.1",
     "@vitest/coverage-istanbul": "1.6.0",
     "@vitest/coverage-v8": "1.6.0",
     "@vitest/ui": "1.6.0",

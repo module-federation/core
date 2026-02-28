@@ -21,7 +21,7 @@
       "executor": "nx:run-commands",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "command": "pnpm exec eslint \"packages/core/**/*.ts\"",
+        "command": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint \"packages/core/**/*.ts\"",
         "forwardAllArgs": false
       }
     },
