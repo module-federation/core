@@ -14,46 +14,23 @@ import {
 } from '../../loaders/helpers';
 import path from 'path';
 
-type DistOrLocalPath = {
-  packageDistPath: string;
-  localRelativePath: string;
-};
-
-const fixImageLoaderPaths: DistOrLocalPath =
+const resolveFixImageLoaderPath = (): string =>
   process.env.IS_ESM_BUILD === 'true'
-    ? {
-        packageDistPath:
-          '@module-federation/nextjs-mf/dist/src/loaders/fixImageLoader.mjs',
-        localRelativePath: '../../loaders/fixImageLoader.mjs',
-      }
-    : {
-        packageDistPath:
-          '@module-federation/nextjs-mf/dist/src/loaders/fixImageLoader.js',
-        localRelativePath: '../../loaders/fixImageLoader',
-      };
+    ? require.resolve(
+        '@module-federation/nextjs-mf/dist/src/loaders/fixImageLoader.mjs',
+      )
+    : require.resolve(
+        '@module-federation/nextjs-mf/dist/src/loaders/fixImageLoader.js',
+      );
 
-const fixUrlLoaderPaths: DistOrLocalPath =
+const resolveFixUrlLoaderPath = (): string =>
   process.env.IS_ESM_BUILD === 'true'
-    ? {
-        packageDistPath:
-          '@module-federation/nextjs-mf/dist/src/loaders/fixUrlLoader.mjs',
-        localRelativePath: '../../loaders/fixUrlLoader.mjs',
-      }
-    : {
-        packageDistPath:
-          '@module-federation/nextjs-mf/dist/src/loaders/fixUrlLoader.js',
-        localRelativePath: '../../loaders/fixUrlLoader',
-      };
-
-const resolveDistOrLocalPath = (paths: DistOrLocalPath): string => {
-  const { packageDistPath, localRelativePath } = paths;
-
-  try {
-    return require.resolve(packageDistPath);
-  } catch {
-    return require.resolve(localRelativePath);
-  }
-};
+    ? require.resolve(
+        '@module-federation/nextjs-mf/dist/src/loaders/fixUrlLoader.mjs',
+      )
+    : require.resolve(
+        '@module-federation/nextjs-mf/dist/src/loaders/fixUrlLoader.js',
+      );
 /**
  * Set up default shared values based on the environment.
  * @param {boolean} isServer - Boolean indicating if the code is running on the server.
@@ -93,13 +70,13 @@ export const applyPathFixes = (
         hasLoader(typedRule, 'next-image-loader')
       ) {
         injectRuleLoader(typedRule, {
-          loader: resolveDistOrLocalPath(fixImageLoaderPaths),
+          loader: resolveFixImageLoaderPath(),
         });
       }
 
       if (options.enableUrlLoaderFix && hasLoader(typedRule, 'url-loader')) {
         injectRuleLoader(typedRule, {
-          loader: resolveDistOrLocalPath(fixUrlLoaderPaths),
+          loader: resolveFixUrlLoaderPath(),
         });
       }
     }
