@@ -49,6 +49,15 @@ describe('getResourceUrl', () => {
     expect(result).toBe('https://ssr.com/test.js');
   });
 
+  test('should fallback to publicPath when ssrPublicPath is undefined', () => {
+    const publicPath = 'https://public.com/';
+    module = { publicPath, ssrPublicPath: undefined } as ModuleInfo;
+    (isBrowserEnv as jest.Mock).mockReturnValue(false);
+    (isReactNativeEnv as jest.Mock).mockReturnValue(false);
+    const result = getResourceUrl(module, sourceUrl);
+    expect(result).toBe('https://public.com/test.js');
+  });
+
   test('should log warning and return empty string when no public path info', () => {
     module = {} as ModuleInfo;
     const consoleWarnSpy = jest.spyOn(console, 'warn');
