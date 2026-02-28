@@ -20,18 +20,19 @@
       ]
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
+      "executor": "nx:run-commands",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["packages/utilities/**/*.ts"]
+        "command": "pnpm exec eslint \"packages/utilities/**/*.ts\"",
+        "forwardAllArgs": false
       }
     },
     "test": {
-      "executor": "@nx/jest:jest",
+      "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/coverage/packages/utilities"],
       "options": {
-        "jestConfig": "packages/utilities/jest.config.ts",
-        "passWithNoTests": true
+        "command": "pnpm exec jest --config packages/utilities/jest.config.ts --passWithNoTests",
+        "forwardAllArgs": false
       }
     },
     "pre-release": {

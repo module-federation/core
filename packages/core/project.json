@@ -6,28 +6,31 @@
   "tags": ["type:pkg"],
   "targets": {
     "build": {
-      "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/packages/core/dist"],
       "options": {
-        "outputPath": "packages/core/dist",
-        "main": "packages/core/src/index.ts",
-        "tsConfig": "packages/core/tsconfig.lib.json",
-        "assets": ["packages/core/*.md"]
+        "parallel": false,
+        "commands": [
+          "node -e \"require('fs').rmSync('packages/core/dist',{recursive:true,force:true})\"",
+          "pnpm exec tsc -p packages/core/tsconfig.lib.json --outDir packages/core/dist --rootDir packages/core",
+          "cp packages/core/*.md packages/core/dist"
+        ]
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
+      "executor": "nx:run-commands",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["packages/core/**/*.ts"]
+        "command": "pnpm exec eslint \"packages/core/**/*.ts\"",
+        "forwardAllArgs": false
       }
     },
     "test": {
-      "executor": "@nx/jest:jest",
+      "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/coverage/packages/core"],
       "options": {
-        "jestConfig": "packages/core/jest.config.ts",
-        "passWithNoTests": true
+        "command": "pnpm exec jest --config packages/core/jest.config.ts --passWithNoTests",
+        "forwardAllArgs": false
       }
     },
     "pre-release": {

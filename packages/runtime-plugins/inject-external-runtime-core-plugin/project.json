@@ -28,13 +28,11 @@
       ]
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
+      "executor": "nx:run-commands",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "packages/runtime-plugins/inject-external-runtime-core-plugin/**/*.ts",
-          "packages/runtime-plugins/inject-external-runtime-core-plugin/package.json"
-        ]
+        "command": "pnpm exec eslint \"packages/runtime-plugins/inject-external-runtime-core-plugin/**/*.ts\" \"packages/runtime-plugins/inject-external-runtime-core-plugin/package.json\"",
+        "forwardAllArgs": false
       }
     },
     "pre-release": {

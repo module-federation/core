@@ -26,44 +26,19 @@
       ]
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
+      "executor": "nx:run-commands",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "packages/runtime-tools/**/*.ts",
-          "packages/runtime-tools/package.json"
-        ]
+        "command": "pnpm exec eslint \"packages/runtime-tools/**/*.ts\" \"packages/runtime-tools/package.json\"",
+        "forwardAllArgs": false
       }
-    },
-    "release": {
-      "executor": "nx:run-commands",
-      "options": {
-        "parallel": false,
-        "commands": [
-          {
-            "command": "nx run runtime:test",
-            "forwardAllArgs": false
-          },
-          {
-            "command": "nx run runtime:build",
-            "forwardAllArgs": false
-          },
-          {
-            "command": "nx run runtime:semantic-release",
-            "forwardAllArgs": true
-          }
-        ]
-      }
-    },
-    "semantic-release": {
-      "executor": "@goestav/nx-semantic-release:semantic-release"
     },
     "test": {
-      "executor": "@nx/jest:jest",
+      "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/coverage/packages/core"],
       "options": {
-        "jestConfig": "packages/runtime-tools/jest.config.cjs",
-        "passWithNoTests": true
+        "command": "pnpm exec jest --config packages/runtime-tools/jest.config.cjs --passWithNoTests",
+        "forwardAllArgs": false
       }
     }
   }

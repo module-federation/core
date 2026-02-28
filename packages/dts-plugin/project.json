@@ -32,17 +32,19 @@
       }
     },
     "test-impl": {
-      "executor": "@nx/vite:test",
-      "outputs": ["{workspaceRoot}/coverage/packages/dts-plugin"]
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/coverage/packages/dts-plugin"],
+      "options": {
+        "command": "pnpm exec vitest run --passWithNoTests --config packages/dts-plugin/vite.config.mts",
+        "forwardAllArgs": false
+      }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
+      "executor": "nx:run-commands",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "packages/dts-plugin/**/*.ts",
-          "packages/dts-plugin/package.json"
-        ]
+        "command": "pnpm exec eslint \"packages/dts-plugin/**/*.ts\" \"packages/dts-plugin/package.json\"",
+        "forwardAllArgs": false
       }
     },
     "build-debug": {

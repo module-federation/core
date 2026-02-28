@@ -29,19 +29,14 @@
       }
     },
     "e2e": {
-      "executor": "@nx/cypress:cypress",
+      "executor": "nx:run-commands",
       "options": {
-        "cypressConfig": "apps/shared-tree-shaking/no-server/host/cypress.config.ts",
-        "testingType": "e2e",
-        "baseUrl": "http://localhost:3001",
-        "browser": "chrome"
+        "command": "pnpm exec cypress run --config-file apps/shared-tree-shaking/no-server/host/cypress.config.ts --browser chrome --config baseUrl=http://localhost:3001",
+        "forwardAllArgs": false
       },
       "configurations": {
         "development": {
-          "runnerUi": true,
-          "browser": "chrome",
-          "exit": false,
-          "watch": true
+          "command": "pnpm exec cypress open --config-file apps/shared-tree-shaking/no-server/host/cypress.config.ts --browser chrome --config baseUrl=http://localhost:3001"
         }
       }
     },

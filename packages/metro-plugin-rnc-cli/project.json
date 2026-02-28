@@ -17,16 +17,19 @@
       }
     },
     "test": {
-      "executor": "@nx/jest:jest",
+      "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "packages/metro-plugin-rnc-cli/jest.config.ts",
-        "passWithNoTests": true,
-        "watchman": false
+        "command": "pnpm exec jest --config packages/metro-plugin-rnc-cli/jest.config.ts --passWithNoTests --watchman=false",
+        "forwardAllArgs": false
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint"
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec eslint \"packages/metro-plugin-rnc-cli/**/*.{js,ts}\"",
+        "forwardAllArgs": false
+      }
     }
   }
 }

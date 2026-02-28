@@ -26,26 +26,23 @@
       ]
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
+      "executor": "nx:run-commands",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "packages/webpack-bundler-runtime/**/*.ts",
-          "packages/webpack-bundler-runtime/package.json"
-        ]
+        "command": "pnpm exec eslint \"packages/webpack-bundler-runtime/**/*.ts\" \"packages/webpack-bundler-runtime/package.json\"",
+        "forwardAllArgs": false
       }
     },
     "test": {
-      "executor": "@nx/jest:jest",
+      "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "packages/webpack-bundler-runtime/jest.config.cjs",
-        "passWithNoTests": true
+        "command": "pnpm exec jest --config packages/webpack-bundler-runtime/jest.config.cjs --passWithNoTests",
+        "forwardAllArgs": false
       },
       "configurations": {
         "ci": {
-          "ci": true,
-          "codeCoverage": true
+          "command": "pnpm exec jest --config packages/webpack-bundler-runtime/jest.config.cjs --passWithNoTests --ci --coverage"
         }
       }
     },
