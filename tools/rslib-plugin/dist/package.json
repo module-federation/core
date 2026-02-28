@@ -21,6 +21,5 @@
   },
   "peerDependencies": {
     "@rslib/core": ">=0.10.0"
-  },
-  "types": "./src/index.d.ts"
+  }
 }

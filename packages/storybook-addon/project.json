@@ -13,7 +13,7 @@
         "parallel": false,
         "commands": [
           "node -e \"require('fs').rmSync('packages/storybook-addon/dist',{recursive:true,force:true})\"",
-          "pnpm exec tsc -p packages/storybook-addon/tsconfig.lib.json --outDir packages/storybook-addon/dist --rootDir packages/storybook-addon",
+          "pnpm -C packages/storybook-addon exec tsdown --config tsdown.config.ts",
           "cp packages/storybook-addon/*.md packages/storybook-addon/dist"
         ]
       },

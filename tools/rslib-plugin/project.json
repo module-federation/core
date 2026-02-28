@@ -12,7 +12,7 @@
         "parallel": false,
         "commands": [
           "node -e \"require('fs').rmSync('tools/rslib-plugin/dist',{recursive:true,force:true})\"",
-          "pnpm exec tsc -p tools/rslib-plugin/tsconfig.json --outDir tools/rslib-plugin/dist",
+          "pnpm -C tools/rslib-plugin exec tsdown --config tsdown.config.ts",
           "cp tools/rslib-plugin/*.md tools/rslib-plugin/dist",
           "cp tools/rslib-plugin/package.json tools/rslib-plugin/dist",
           "cp tools/rslib-plugin/executors.json tools/rslib-plugin/dist",

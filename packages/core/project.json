@@ -12,7 +12,7 @@
         "parallel": false,
         "commands": [
           "node -e \"require('fs').rmSync('packages/core/dist',{recursive:true,force:true})\"",
-          "pnpm exec tsc -p packages/core/tsconfig.lib.json --outDir packages/core/dist --rootDir packages/core",
+          "pnpm -C packages/core exec tsdown --config tsdown.config.ts",
           "cp packages/core/*.md packages/core/dist"
         ]
       }

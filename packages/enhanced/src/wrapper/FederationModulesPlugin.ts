@@ -9,9 +9,13 @@ export default class FederationModulesPlugin extends BaseWrapperPlugin {
   }
 
   static getCompilationHooks(compilation: Compilation) {
-    const CoreFederationModulesPlugin =
-      require('../lib/container/runtime/FederationModulesPlugin')
-        .default as typeof import('../lib/container/runtime/FederationModulesPlugin').default;
+    const coreModule =
+      require('../lib/container/runtime/FederationModulesPlugin') as {
+        default?: typeof import('../lib/container/runtime/FederationModulesPlugin').default;
+        getCompilationHooks?: typeof import('../lib/container/runtime/FederationModulesPlugin').default.getCompilationHooks;
+      };
+    const CoreFederationModulesPlugin = (coreModule.default ??
+      coreModule) as typeof import('../lib/container/runtime/FederationModulesPlugin').default;
     return CoreFederationModulesPlugin.getCompilationHooks(compilation);
   }
 
