@@ -3,7 +3,7 @@
   "version": "2.0.1",
   "author": "hanric <hanric.zhang@gmail.com>",
   "main": "./dist/index.js",
-  "module": "./dist/index.js",
+  "module": "./dist/esm/index.mjs",
   "types": "./dist/index.d.ts",
   "license": "MIT",
   "repository": {
@@ -20,17 +20,34 @@
   ],
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "require": "./dist/index.js"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/esm/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
     },
     "./core": {
-      "import": "./dist/core.js",
-      "require": "./dist/core.js"
+      "import": {
+        "types": "./dist/core.d.ts",
+        "default": "./dist/esm/core.mjs"
+      },
+      "require": {
+        "types": "./dist/core.d.ts",
+        "default": "./dist/core.js"
+      }
     },
     "./dynamic-remote-type-hints-plugin": {
-      "types": "./dist/dynamic-remote-type-hints-plugin.d.ts",
-      "import": "./dist/esm/dynamic-remote-type-hints-plugin.js",
-      "require": "./dist/dynamic-remote-type-hints-plugin.js"
+      "import": {
+        "types": "./dist/dynamic-remote-type-hints-plugin.d.ts",
+        "default": "./dist/esm/dynamic-remote-type-hints-plugin.mjs"
+      },
+      "require": {
+        "types": "./dist/dynamic-remote-type-hints-plugin.d.ts",
+        "default": "./dist/dynamic-remote-type-hints-plugin.js"
+      }
     },
     "./*": "./*"
   },

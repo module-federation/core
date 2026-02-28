@@ -1,7 +1,7 @@
 import ansiColors from 'ansi-colors';
 import { resolve } from 'path';
 import { mergeDeepRight, mergeRight } from 'rambda';
-import { build } from 'tsup';
+import { build } from 'tsdown';
 import { UnpluginOptions, createUnplugin } from 'unplugin';
 
 import { retrieveHostConfig } from './configurations/hostPlugin';
@@ -26,10 +26,16 @@ export const NativeFederationTestsRemote = createUnplugin(
       name: 'native-federation-tests/remote',
       async writeBundle() {
         const buildConfig = mergeRight(remoteOptions.additionalBundlerConfig, {
-          external: externalDeps.map(
-            (externalDep) => new RegExp(`^${externalDep}`),
-          ),
+          external: [
+            /^[^./]/,
+            ...externalDeps.map((externalDep) => new RegExp(`^${externalDep}`)),
+          ],
           entry: mapComponentsToExpose,
+          format: ['cjs'],
+          dts: false,
+          outExtensions: () => ({
+            js: '.js',
+          }),
           outDir: compiledFilesFolder,
           silent: true,
         });
