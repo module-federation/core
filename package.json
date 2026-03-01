@@ -167,7 +167,7 @@
     "openai": "^4.72.0",
     "rambda": "7.5.0",
     "regenerator-runtime": "0.14.1",
-    "sharp": "^0.33.4",
+    "sharp": "^0.34.5",
     "storybook": "8.6.17",
     "tapable": "2.2.1",
     "typedoc": "0.25.8",
