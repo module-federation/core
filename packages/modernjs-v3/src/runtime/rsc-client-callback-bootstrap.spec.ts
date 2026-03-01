@@ -36,9 +36,15 @@ function flushMicrotasks() {
 function evaluateBootstrap({
   runtimeRequire,
   windowObject,
+  setTimeoutImpl,
 }: {
   runtimeRequire: Record<string, any>;
   windowObject?: Record<string, any>;
+  setTimeoutImpl?: (
+    callback: (...args: any[]) => void,
+    ms?: number,
+    ...args: any[]
+  ) => any;
 }) {
   const source = stripImports(fs.readFileSync(BOOTSTRAP_FILE_PATH, 'utf-8'));
   const resolvedActionIds: Array<(id: string) => Promise<string>> = [];
@@ -56,7 +62,7 @@ function evaluateBootstrap({
     setServerCallback: importedRuntime.setServerCallback,
     fetch: fetchMock,
     clearTimeout: vi.fn(),
-    setTimeout: vi.fn(() => 1),
+    setTimeout: setTimeoutImpl ?? vi.fn(() => 1),
     queueMicrotask: (cb: () => void) => cb(),
     window: windowObject,
     globalThis: undefined as any,
@@ -291,5 +297,51 @@ describe('rsc-client-callback-bootstrap', () => {
     await expect(resolveActionId!('rawAction')).rejects.toThrow(
       /Ambiguous remote action id "rawAction"/,
     );
+  });
+
+  it('keeps host-local action ids unprefixed when a single remote alias exists', async () => {
+    const runtimeRequire = {
+      e: vi.fn(async () => undefined),
+      c: {},
+      federation: {
+        instance: {
+          options: {
+            remotes: [{ alias: 'rscRemote' }],
+          },
+        },
+      },
+      rscM: {
+        serverManifest: {
+          hostAction: { id: 'hostAction' },
+        },
+      },
+    };
+    const { resolveActionId } = evaluateBootstrap({
+      runtimeRequire,
+      setTimeoutImpl: ((callback: (...args: any[]) => void) => {
+        queueMicrotask(() => callback());
+        return 1;
+      }) as typeof setTimeout,
+    });
+
+    await expect(resolveActionId!('hostAction')).resolves.toBe('hostAction');
+  });
+
+  it('does not mark hook install when getter-only chunk loader cannot be replaced', () => {
+    const originalChunkLoader = vi.fn(async () => 'chunk-loaded');
+    const runtimeRequire: Record<string, any> = { c: {} };
+    Object.defineProperty(runtimeRequire, 'e', {
+      configurable: false,
+      enumerable: true,
+      get() {
+        return originalChunkLoader;
+      },
+    });
+
+    evaluateBootstrap({ runtimeRequire });
+
+    expect(
+      runtimeRequire.__MODERN_RSC_MF_CALLBACK_CHUNK_LOADER_HOOKED__,
+    ).not.toBe(true);
   });
 });

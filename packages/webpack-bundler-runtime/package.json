@@ -31,24 +31,24 @@
   },
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": {
-        "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
       },
       "require": {
-        "types": "./dist/index.d.ts",
         "default": "./dist/index.cjs"
-      }
+      },
+      "default": "./dist/index.js"
     },
     "./constant": {
+      "types": "./dist/constant.d.ts",
       "import": {
-        "types": "./dist/constant.d.ts",
         "default": "./dist/constant.js"
       },
       "require": {
-        "types": "./dist/constant.d.ts",
         "default": "./dist/constant.cjs"
-      }
+      },
+      "default": "./dist/constant.js"
     },
     "./*": "./*"
   },

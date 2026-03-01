@@ -30,14 +30,14 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": {
-        "types": "./dist/index.d.mts",
         "default": "./dist/index.mjs"
       },
       "require": {
-        "types": "./dist/index.d.ts",
         "default": "./dist/index.cjs"
-      }
+      },
+      "default": "./dist/index.mjs"
     }
   },
   "typesVersions": {

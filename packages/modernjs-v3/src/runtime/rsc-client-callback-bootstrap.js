@@ -77,6 +77,32 @@ function getActionRemapMap() {
   return map;
 }
 
+function getHostServerManifest() {
+  const webpackRequire = getWebpackRequire();
+  if (
+    webpackRequire &&
+    isObject(webpackRequire.rscM) &&
+    isObject(webpackRequire.rscM.serverManifest)
+  ) {
+    return webpackRequire.rscM.serverManifest;
+  }
+  if (
+    isObject(globalThis.__rspack_rsc_manifest__) &&
+    isObject(globalThis.__rspack_rsc_manifest__.serverManifest)
+  ) {
+    return globalThis.__rspack_rsc_manifest__.serverManifest;
+  }
+  return undefined;
+}
+
+function hasHostServerAction(rawId) {
+  const serverManifest = getHostServerManifest();
+  if (!isObject(serverManifest)) {
+    return false;
+  }
+  return Object.prototype.hasOwnProperty.call(serverManifest, rawId);
+}
+
 function resolveFallbackRemoteAlias() {
   if (hasResolvedFallbackAlias) {
     return fallbackRemoteAlias;
@@ -214,34 +240,42 @@ function waitForActionRemap(rawId) {
 }
 
 async function resolveActionId(id) {
-  if (typeof id === 'string' && id.startsWith(ACTION_PREFIX)) {
-    return id;
+  const rawId = String(id);
+  if (rawId.startsWith(ACTION_PREFIX)) {
+    return rawId;
   }
 
   const remapMap = getActionRemapMap();
-  const remappedId = remapMap[id];
+  const remappedId = remapMap[rawId];
   if (typeof remappedId === 'string') {
     return remappedId;
   }
   if (remappedId === false) {
     throw new Error(
-      `[modern-js-v3:rsc-bridge] Ambiguous remote action id "${id}" cannot be resolved safely.`,
+      `[modern-js-v3:rsc-bridge] Ambiguous remote action id "${rawId}" cannot be resolved safely.`,
     );
+  }
+
+  const waitedRemappedId = await waitForActionRemap(rawId);
+  if (waitedRemappedId === false) {
+    throw new Error(
+      `[modern-js-v3:rsc-bridge] Ambiguous remote action id "${rawId}" cannot be resolved safely.`,
+    );
+  }
+  if (typeof waitedRemappedId === 'string' && waitedRemappedId !== rawId) {
+    return waitedRemappedId;
+  }
+  if (hasHostServerAction(rawId)) {
+    return rawId;
   }
 
   const fallbackAlias = resolveFallbackRemoteAlias();
   if (typeof fallbackAlias === 'string' && fallbackAlias) {
-    const prefixedId = `${ACTION_PREFIX}${fallbackAlias}:${id}`;
-    remapMap[id] = prefixedId;
+    const prefixedId = `${ACTION_PREFIX}${fallbackAlias}:${rawId}`;
+    remapMap[rawId] = prefixedId;
     return prefixedId;
   }
 
-  const waitedRemappedId = await waitForActionRemap(id);
-  if (waitedRemappedId === false) {
-    throw new Error(
-      `[modern-js-v3:rsc-bridge] Ambiguous remote action id "${id}" cannot be resolved safely.`,
-    );
-  }
   return waitedRemappedId;
 }
 
@@ -424,8 +458,8 @@ function hookChunkLoaderInstall() {
   );
   if (
     webpackRequire[CALLBACK_CHUNK_LOADER_HOOK_FLAG] &&
-    isFunction(chunkLoaderDescriptor?.get) &&
-    chunkLoaderDescriptor.get[CALLBACK_CHUNK_LOADER_HOOK_FLAG]
+    (!isFunction(chunkLoaderDescriptor?.get) ||
+      chunkLoaderDescriptor.get[CALLBACK_CHUNK_LOADER_HOOK_FLAG])
   ) {
     return;
   }
@@ -448,8 +482,14 @@ function hookChunkLoaderInstall() {
       return;
     }
     if (chunkLoaderDescriptor?.writable !== false) {
-      Reflect.set(webpackRequire, 'e', wrappedChunkLoader);
-      webpackRequire[CALLBACK_CHUNK_LOADER_HOOK_FLAG] = true;
+      const didSetChunkLoader = Reflect.set(
+        webpackRequire,
+        'e',
+        wrappedChunkLoader,
+      );
+      if (didSetChunkLoader && webpackRequire.e === wrappedChunkLoader) {
+        webpackRequire[CALLBACK_CHUNK_LOADER_HOOK_FLAG] = true;
+      }
     }
     return;
   }

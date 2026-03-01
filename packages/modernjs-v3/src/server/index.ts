@@ -69,12 +69,11 @@ const staticServePlugin = (): ServerPlugin => ({
   setup: (api) => {
     try {
       const serverCoreNodeEntry = resolveServerCoreNodeEntry();
-      if (!serverCoreNodeEntry) {
-        return;
-      }
-      const { registerBundleLoaderStrategy } = require(serverCoreNodeEntry);
-      if (typeof registerBundleLoaderStrategy === 'function') {
-        registerBundleLoaderStrategy(mfAsyncStartupLoaderStrategy);
+      if (serverCoreNodeEntry) {
+        const { registerBundleLoaderStrategy } = require(serverCoreNodeEntry);
+        if (typeof registerBundleLoaderStrategy === 'function') {
+          registerBundleLoaderStrategy(mfAsyncStartupLoaderStrategy);
+        }
       }
     } catch {
       // registerBundleLoaderStrategy may not exist in all @modern-js/server-core versions
