@@ -46,6 +46,19 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
         # assemble-release-plan is forked, so need to build it before execute pnpm changeset version
+
+      - name: Restore Turborepo cache
+        uses: actions/cache@v5
+        with:
+          path: |
+            .turbo
+            **/.turbo
+          key: ${{ runner.os }}-turbo-${{ github.workflow }}-${{ github.job }}-${{ github.ref_name }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-${{ github.workflow }}-${{ github.job }}-${{ github.ref_name }}-
+            ${{ runner.os }}-turbo-${{ github.workflow }}-${{ github.job }}-
+            ${{ runner.os }}-turbo-
+
       - name: Build Internal Changesets Dependencies
         run: pnpm --filter @changesets/assemble-release-plan run build
 

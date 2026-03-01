@@ -33,6 +33,18 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Restore Turborepo cache
+        uses: actions/cache@v5
+        with:
+          path: |
+            .turbo
+            **/.turbo
+          key: ${{ runner.os }}-turbo-${{ github.workflow }}-${{ github.job }}-${{ github.ref_name }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-${{ github.workflow }}-${{ github.job }}-${{ github.ref_name }}-
+            ${{ runner.os }}-turbo-${{ github.workflow }}-${{ github.job }}-
+            ${{ runner.os }}-turbo-
+
       - name: Build packages (current)
         run: pnpm run build:pkg
 
@@ -46,6 +58,16 @@ jobs:
           echo "BASE_REF=$BASE_REF" >> "$GITHUB_ENV"
           echo "BASE_PATH=$BASE_PATH" >> "$GITHUB_ENV"
           git worktree add "$BASE_PATH" "$BASE_REF"
+
+      - name: Restore Turborepo cache (base worktree)
+        uses: actions/cache@v5
+        with:
+          path: ${{ env.BASE_PATH }}/.turbo
+          key: ${{ runner.os }}-turbo-base-${{ github.workflow }}-${{ github.job }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-base-${{ github.workflow }}-${{ github.job }}-
+            ${{ runner.os }}-turbo-base-${{ github.workflow }}-
+            ${{ runner.os }}-turbo-base-
 
       - name: Install dependencies (base)
         run: pnpm install --frozen-lockfile
