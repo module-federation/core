@@ -7,6 +7,7 @@ export default defineConfig({
     ssr: {
       mode: 'stream',
     },
+    port: 3056,
   },
 
   tools: {

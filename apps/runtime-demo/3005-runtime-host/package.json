@@ -30,6 +30,6 @@
     "serve-static": "pnpm exec serve dist -l 3005 --cors",
     "e2e": "pnpm exec cypress run --project . --e2e --config baseUrl=http://127.0.0.1:3005 --browser chrome",
     "e2e:development": "pnpm exec cypress open --project . --e2e --config baseUrl=http://127.0.0.1:3005 --browser electron",
-    "test:e2e": "pnpm exec concurrently \"lsof -i :3005 || pnpm --filter runtime-host run serve:development\" \"lsof -i :3006 || pnpm --filter runtime-remote1 run serve:development\" \"lsof -i :3007 || pnpm --filter runtime-remote2 run serve:development\" \"npx wait-on --timeout 180000 tcp:3005 tcp:3006 tcp:3007 http-get://127.0.0.1:3005/ http-get://127.0.0.1:3006/mf-manifest.json http-get://127.0.0.1:3007/mf-manifest.json && pnpm --filter runtime-host run e2e\""
+    "test:e2e": "pnpm -w exec node tools/scripts/run-runtime-e2e.mjs --mode=dev"
   }
 }
