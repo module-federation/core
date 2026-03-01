@@ -47,13 +47,13 @@ jobs:
         run: npx cypress install
 
       - name: Build shared packages
-        run: pnpm exec turbo run build --filter=./packages/** --concurrency=20
+        run: pnpm run build:pkg
 
       - name: Check CI conditions
         id: check-ci
         run: |
           ci_status=0
-          node tools/scripts/ci-is-affected.mjs --appName=3000-home || ci_status=$?
+          node tools/scripts/ci-is-affected.mjs --appName=@module-federation/3000-home || ci_status=$?
           if [ "$ci_status" -eq 0 ]; then
             echo "run-e2e=true" >> "$GITHUB_OUTPUT"
           elif [ "$ci_status" -eq 1 ]; then

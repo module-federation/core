@@ -51,7 +51,7 @@ jobs:
             ${{ runner.os }}-turbo-
 
       - name: Build package workspace targets
-        run: pnpm exec turbo run build --filter=./packages/** --concurrency=20
+        run: pnpm run build:pkg
 
       - name: Publish pkg.pr.new previews
         run: node tools/scripts/publish-pkg-pr-new-previews.mjs

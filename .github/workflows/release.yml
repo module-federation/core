@@ -79,7 +79,7 @@ jobs:
       - name: Build and test Packages
         run: |
           git fetch origin main
-          pnpm exec turbo run build --filter=./packages/** --concurrency=20
+          pnpm run build:pkg
           ls -l packages/*/dist packages/*/package.json
 
       - name: Publish latest version

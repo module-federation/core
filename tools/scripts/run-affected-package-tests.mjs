@@ -1,48 +1,60 @@
 #!/usr/bin/env node
 import { spawnSync } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(SCRIPT_DIR, '../..');
 
-const requestedBase = parseBaseArg(process.argv.slice(2));
-const baseRef = resolveBaseRef(requestedBase);
+main();
 
-if (!baseRef) {
-  console.warn(
-    '[affected-tests] Unable to resolve base ref. Skipping affected package tests.',
+function main() {
+  const requestedBase = parseBaseArg(process.argv.slice(2));
+  const baseRef = resolveBaseRef(requestedBase);
+  const headRef = 'HEAD';
+
+  if (!baseRef) {
+    console.warn(
+      '[affected-tests] Unable to resolve base ref. Skipping affected package tests.',
+    );
+    process.exit(0);
+  }
+
+  if (!hasGitRef(headRef)) {
+    console.warn(
+      '[affected-tests] Unable to resolve head ref. Skipping affected package tests.',
+    );
+    process.exit(0);
+  }
+
+  const affectedPackageTargets = getAffectedPackageTestTargets(
+    baseRef,
+    headRef,
   );
-  process.exit(0);
-}
+  if (affectedPackageTargets.length === 0) {
+    console.log(
+      `[affected-tests] No affected package turbo:test tasks detected (${baseRef}..${headRef}).`,
+    );
+    process.exit(0);
+  }
 
-const changedFiles = getChangedFiles(baseRef, 'HEAD');
-const globalTestImpact = hasGlobalTestImpactChange(changedFiles);
-const affectedPackages = globalTestImpact
-  ? getAffectedPackageTestTargets(baseRef)
-  : getPackageTestTargetsFromChanges(changedFiles);
-
-if (affectedPackages.length === 0) {
   console.log(
-    `[affected-tests] No affected package test targets detected (${baseRef}..HEAD) based on test-relevant changes.`,
+    `[affected-tests] Running turbo:test for ${affectedPackageTargets.length} affected package(s): ${affectedPackageTargets.join(', ')}`,
   );
-  process.exit(0);
-}
 
-console.log(
-  `[affected-tests] Running tests for ${affectedPackages.length} affected package(s): ${affectedPackages.join(', ')}`,
-);
-const testArgs = ['exec', 'turbo', 'run', 'test'];
-for (const packageName of affectedPackages) {
-  testArgs.push(`--filter=${packageName}`);
+  const args = ['exec', 'turbo', 'run', 'turbo:test'];
+  for (const packageName of affectedPackageTargets) {
+    args.push(`--filter=${packageName}`);
+  }
+
+  const testRun = spawnSync('pnpm', args, {
+    cwd: ROOT,
+    stdio: 'inherit',
+    env: process.env,
+  });
+
+  process.exit(testRun.status ?? 1);
 }
-const testRun = spawnSync('pnpm', testArgs, {
-  cwd: ROOT,
-  stdio: 'inherit',
-  env: process.env,
-});
-process.exit(testRun.status ?? 1);
 
 function parseBaseArg(argv) {
   for (let i = 0; i < argv.length; i += 1) {
@@ -98,176 +110,167 @@ function hasGitRef(ref) {
   return result.status === 0;
 }
 
-function getChangedFiles(baseRef, headRef) {
-  const result = spawnSync('git', ['diff', '--name-only', baseRef, headRef], {
-    cwd: ROOT,
-    stdio: 'pipe',
-    encoding: 'utf-8',
-  });
+function getAffectedPackageTestTargets(baseRef, headRef) {
+  const result = spawnSync(
+    'pnpm',
+    ['exec', 'turbo', 'run', 'turbo:test', '--affected', '--dry-run=json'],
+    {
+      cwd: ROOT,
+      stdio: 'pipe',
+      encoding: 'utf-8',
+      maxBuffer: 1024 * 1024 * 128,
+      env: {
+        ...process.env,
+        TURBO_SCM_BASE: baseRef,
+        TURBO_SCM_HEAD: headRef,
+      },
+    },
+  );
+
   if (result.status !== 0) {
     throw new Error(
-      `[affected-tests] Failed to evaluate changed files for ${baseRef}..${headRef}: ${result.stderr || result.stdout}`,
+      `[affected-tests] Failed to compute affected turbo:test graph from Turbo: ${result.stderr || result.stdout}`,
     );
   }
-  return result.stdout
-    .split('\n')
-    .map((entry) => entry.trim())
-    .filter(Boolean);
-}
 
-function hasGlobalTestImpactChange(changedFiles) {
-  void changedFiles;
-  return false;
-}
-
-function getPackageTestTargetsFromChanges(changedFiles) {
-  const changedPackageNames = getChangedPackagesWithTestImpact(changedFiles);
-  if (changedPackageNames.length === 0) {
-    return [];
-  }
-
-  const filters = changedPackageNames.map(
-    (packageName) => `--filter=${packageName}`,
-  );
-  const dryRunResult = runTurboDryRun(['test', ...filters, '--dry-run=json']);
-  return parsePackageTestTargetsFromDryRun(dryRunResult.stdout);
-}
-
-function getChangedPackagesWithTestImpact(changedFiles) {
-  const packageNames = new Set();
-  const packageCache = new Map();
-  for (const changedFile of changedFiles) {
-    const packageInfo = resolvePackageForFile(changedFile, packageCache);
-    if (!packageInfo) {
-      continue;
-    }
-    const relativeFile = normalizePath(
-      changedFile.slice(`${packageInfo.relativeRoot}/`.length),
-    );
-    if (!shouldTriggerPackageTests(relativeFile)) {
-      continue;
-    }
-    packageNames.add(packageInfo.name);
-  }
-  return Array.from(packageNames).sort();
-}
-
-function resolvePackageForFile(changedFile, cache) {
-  const normalizedPath = normalizePath(changedFile);
-  if (!normalizedPath.startsWith('packages/')) {
-    return null;
-  }
-
-  const absolutePath = resolve(ROOT, normalizedPath);
-  let current = dirname(absolutePath);
-  const packagesRoot = resolve(ROOT, 'packages');
-
-  while (current.startsWith(packagesRoot)) {
-    if (cache.has(current)) {
-      return cache.get(current);
-    }
-
-    const packageJsonPath = resolve(current, 'package.json');
-    if (existsSync(packageJsonPath)) {
-      try {
-        const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
-        const relativeRoot = normalizePath(current.slice(ROOT.length + 1));
-        const packageInfo =
-          typeof packageJson?.name === 'string' && packageJson.name
-            ? { name: packageJson.name, relativeRoot }
-            : null;
-        cache.set(current, packageInfo);
-        return packageInfo;
-      } catch {
-        cache.set(current, null);
-        return null;
-      }
-    }
-    const parent = dirname(current);
-    if (parent === current) {
-      break;
-    }
-    current = parent;
-  }
-  return null;
-}
-
-function shouldTriggerPackageTests(relativeFilePath) {
-  if (
-    relativeFilePath.startsWith('src/') ||
-    relativeFilePath.startsWith('test/') ||
-    relativeFilePath.startsWith('tests/') ||
-    relativeFilePath.startsWith('__tests__/')
-  ) {
-    return true;
-  }
-
-  if (/\.(spec|test)\.[cm]?[jt]sx?$/.test(relativeFilePath)) {
-    return true;
-  }
-
-  return (
-    relativeFilePath.startsWith('jest.config.') ||
-    relativeFilePath.startsWith('vitest.config.') ||
-    relativeFilePath.startsWith('vite.config.') ||
-    relativeFilePath.startsWith('tsconfig.spec')
-  );
-}
-
-function runTurboDryRun(runArgs) {
-  const dryRunResult = spawnSync('pnpm', ['exec', 'turbo', 'run', ...runArgs], {
-    cwd: ROOT,
-    stdio: 'pipe',
-    encoding: 'utf-8',
-    env: process.env,
-  });
-  if (dryRunResult.status !== 0) {
-    throw new Error(
-      `[affected-tests] Failed to compute affected test graph from Turbo: ${dryRunResult.stderr || dryRunResult.stdout}`,
+  let dryRunJson;
+  try {
+    dryRunJson = parseJsonFromTurboOutput(result.stdout ?? '');
+  } catch {
+    dryRunJson = parseJsonFromTurboOutput(
+      `${result.stdout ?? ''}\n${result.stderr ?? ''}`,
     );
   }
-  return dryRunResult;
-}
-
-function getAffectedPackageTestTargets(baseRef) {
-  const dryRunResult = runTurboDryRun([
-    'test',
-    `--filter=...[${baseRef}]`,
-    '--dry-run=json',
-  ]);
-  return parsePackageTestTargetsFromDryRun(dryRunResult.stdout);
-}
-
-function parsePackageTestTargetsFromDryRun(outputText) {
-  const output = outputText?.trim();
-  if (!output) {
-    return [];
-  }
-
-  const dryRunJson = JSON.parse(output);
   const tasks = Array.isArray(dryRunJson?.tasks) ? dryRunJson.tasks : [];
   const packageNames = new Set();
+
   for (const task of tasks) {
     if (!task || typeof task !== 'object') {
       continue;
     }
-    if (typeof task.taskId !== 'string' || !task.taskId.endsWith('#test')) {
-      continue;
-    }
-    if (typeof task.package !== 'string' || !task.package) {
-      continue;
-    }
-    if (typeof task.directory !== 'string') {
+
+    const taskId = typeof task.taskId === 'string' ? task.taskId : '';
+    const taskName = typeof task.task === 'string' ? task.task : '';
+    if (taskName !== 'turbo:test' && !taskId.endsWith('#turbo:test')) {
       continue;
     }
 
+    if (typeof task.directory !== 'string') {
+      continue;
+    }
     const taskDirectory = normalizePath(task.directory);
     if (!taskDirectory.startsWith('packages/')) {
       continue;
     }
-    packageNames.add(task.package);
+
+    if (typeof task.package === 'string' && task.package) {
+      packageNames.add(task.package);
+      continue;
+    }
+
+    const [taskPackageName] = taskId.split('#');
+    if (taskPackageName) {
+      packageNames.add(taskPackageName);
+    }
   }
+
   return Array.from(packageNames).sort();
+}
+
+function parseJsonFromTurboOutput(outputText) {
+  const raw = outputText?.trim();
+  if (!raw) {
+    throw new Error('[affected-tests] Turbo dry-run output is empty.');
+  }
+
+  const directParse = tryParseJson(raw);
+  if (directParse.ok) {
+    return directParse.value;
+  }
+
+  for (let index = 0; index < raw.length; index += 1) {
+    const char = raw[index];
+    if (char !== '{' && char !== '[') {
+      continue;
+    }
+
+    const toEndParse = tryParseJson(raw.slice(index));
+    if (toEndParse.ok) {
+      return toEndParse.value;
+    }
+
+    const balancedCandidate = extractBalancedJson(raw, index);
+    if (!balancedCandidate) {
+      continue;
+    }
+
+    const balancedParse = tryParseJson(balancedCandidate);
+    if (balancedParse.ok) {
+      return balancedParse.value;
+    }
+  }
+
+  throw new Error(
+    '[affected-tests] Unable to locate JSON payload in Turbo output.',
+  );
+}
+
+function tryParseJson(value) {
+  try {
+    return { ok: true, value: JSON.parse(value) };
+  } catch {
+    return { ok: false, value: null };
+  }
+}
+
+function extractBalancedJson(text, startIndex) {
+  const stack = [];
+  let inString = false;
+  let escaping = false;
+
+  for (let index = startIndex; index < text.length; index += 1) {
+    const char = text[index];
+
+    if (inString) {
+      if (escaping) {
+        escaping = false;
+        continue;
+      }
+      if (char === '\\') {
+        escaping = true;
+        continue;
+      }
+      if (char === '"') {
+        inString = false;
+      }
+      continue;
+    }
+
+    if (char === '"') {
+      inString = true;
+      continue;
+    }
+
+    if (char === '{') {
+      stack.push('}');
+      continue;
+    }
+    if (char === '[') {
+      stack.push(']');
+      continue;
+    }
+    if (char === '}' || char === ']') {
+      const expected = stack.pop();
+      if (expected !== char) {
+        return null;
+      }
+      if (stack.length === 0) {
+        return text.slice(startIndex, index + 1);
+      }
+    }
+  }
+
+  return null;
 }
 
 function normalizePath(filePath) {
