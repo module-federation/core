@@ -39,7 +39,7 @@ const MODERN_SERVE_CMD = [
   'run',
   'dev',
   ...MODERN_APPS.map((appName) => `--filter=${appName}`),
-  '--concurrency=10',
+  '--concurrency=20',
 ];
 const MODERN_HOST_E2E_CMD = [
   'pnpm',

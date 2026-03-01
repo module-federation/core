@@ -18,8 +18,15 @@ const E2E_APPS = [
   '@module-federation/3001-shop',
   '@module-federation/3002-checkout',
 ];
-const NEXT_SERVE_CONCURRENCY = Math.max(E2E_APPS.length, 1);
-const NEXT_BUILD_CONCURRENCY = Math.max(E2E_APPS.length, 1);
+const TURBO_CONCURRENCY_FLOOR = 20;
+const NEXT_SERVE_CONCURRENCY = Math.max(
+  TURBO_CONCURRENCY_FLOOR,
+  E2E_APPS.length,
+);
+const NEXT_BUILD_CONCURRENCY = Math.max(
+  TURBO_CONCURRENCY_FLOOR,
+  E2E_APPS.length,
+);
 
 function turboRun(task, apps, options = {}) {
   const args = [
