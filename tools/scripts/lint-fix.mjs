@@ -1,11 +1,21 @@
 #!/usr/bin/env node
 import { execSync, spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { basename, dirname, extname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(SCRIPT_DIR, '../..');
+const LINTABLE_EXTENSIONS = new Set([
+  '.js',
+  '.jsx',
+  '.ts',
+  '.tsx',
+  '.mjs',
+  '.cjs',
+  '.mts',
+  '.cts',
+]);
 
 main();
 
@@ -74,6 +84,10 @@ function getChangedPackages(changedFiles) {
   const packages = new Set();
 
   for (const changedFile of changedFiles) {
+    if (!shouldTriggerPackageLint(changedFile)) {
+      continue;
+    }
+
     const packageJsonPath = findNearestPackageJson(changedFile);
     if (!packageJsonPath) {
       continue;
@@ -94,6 +108,24 @@ function getChangedPackages(changedFiles) {
   }
 
   return Array.from(packages).sort();
+}
+
+function shouldTriggerPackageLint(relativeFilePath) {
+  const fileName = basename(relativeFilePath);
+  if (fileName === 'package.json') {
+    return false;
+  }
+
+  if (
+    fileName.startsWith('.eslintrc') ||
+    fileName === 'eslint.config.js' ||
+    fileName === 'eslint.config.cjs' ||
+    fileName === 'eslint.config.mjs'
+  ) {
+    return true;
+  }
+
+  return LINTABLE_EXTENSIONS.has(extname(relativeFilePath));
 }
 
 function findNearestPackageJson(relativeFilePath) {

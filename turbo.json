@@ -5,34 +5,25 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**", "build/**", ".next/**", "out/**", "lib/**"]
     },
-    "build:*": {
+    "build:development": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", "build/**", ".next/**", "out/**", "lib/**"]
+    },
+    "build:production": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**", "build/**", ".next/**", "out/**", "lib/**"]
     },
     "lint": {
       "outputs": []
     },
-    "lint:*": {
-      "outputs": []
-    },
     "test": {
-      "dependsOn": ["build"],
-      "outputs": ["coverage/**"]
-    },
-    "test:*": {
       "dependsOn": ["build"],
       "outputs": ["coverage/**"]
     },
     "e2e": {
       "cache": false
     },
-    "e2e:*": {
-      "cache": false
-    },
     "test:e2e": {
-      "cache": false
-    },
-    "test:e2e:*": {
       "cache": false
     },
     "test:e2e:production": {
@@ -42,7 +33,11 @@
       "cache": false,
       "persistent": true
     },
-    "serve:*": {
+    "serve:development": {
+      "cache": false,
+      "persistent": true
+    },
+    "serve:production": {
       "cache": false,
       "persistent": true
     },
@@ -50,23 +45,11 @@
       "cache": false,
       "persistent": true
     },
-    "dev:*": {
-      "cache": false,
-      "persistent": true
-    },
     "start": {
       "cache": false,
       "persistent": true
     },
-    "start:*": {
-      "cache": false,
-      "persistent": true
-    },
     "pre-release": {
-      "dependsOn": ["build", "test"],
-      "outputs": []
-    },
-    "pre-release:*": {
       "dependsOn": ["build", "test"],
       "outputs": []
     }
