@@ -35,6 +35,10 @@ function turboRun(task, apps, options = {}) {
     args.push(`--concurrency=${options.concurrency}`);
   }
 
+  if (options.only) {
+    args.push('--only');
+  }
+
   return args;
 }
 
@@ -135,7 +139,7 @@ async function runScenario(name) {
     // Run e2e tests for each app sequentially
     for (const app of scenario.e2eApps) {
       console.log(`\n[next-e2e] Running e2e tests for ${app}`);
-      const e2eCmd = turboRun('e2e', [app]);
+      const e2eCmd = turboRun('e2e', [app], { only: true });
       await runGuardedCommand(
         `running e2e tests for ${app}`,
         serveExitPromise,
