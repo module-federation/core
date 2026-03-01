@@ -4,17 +4,14 @@
     "outDir": "../../dist/out-tsc",
     "types": [
       "node",
-      "@nx/react/typings/cssmodule.d.ts",
-      "@nx/react/typings/image.d.ts"
+      "../../typings/cssmodule.d.ts",
+      "../../typings/image.d.ts"
     ],
     "paths": {
       "*": ["./@mf-types/*"]
     }
   },
-  "files": [
-    "../../node_modules/@nx/react/typings/cssmodule.d.ts",
-    "../../node_modules/@nx/react/typings/image.d.ts"
-  ],
+  "files": ["../../typings/cssmodule.d.ts", "../../typings/image.d.ts"],
   "exclude": [
     "jest.config.ts",
     "**/*.spec.ts",

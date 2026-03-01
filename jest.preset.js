@@ -1,15 +1,10 @@
-const nxPreset = require('@nx/jest/preset').default;
+const path = require('path');
 
 module.exports = {
-  ...nxPreset,
-  /* TODO: Update to latest Jest snapshotFormat
-   * By default Nx has kept the older style of Jest Snapshot formats
-   * to prevent breaking of any existing tests with snapshots.
-   * It's recommend you update to the latest format.
-   * You can do this by removing snapshotFormat property
-   * and running tests with --update-snapshot flag.
-   * Example: "nx affected --targets=test --update-snapshot"
-   * More info: https://jestjs.io/docs/upgrading-to-jest29#snapshot-format
-   */
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'html'],
+  moduleNameMapper: {
+    '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|bmp|avif)$':
+      path.join(__dirname, '__mocks__', 'fileMock.js'),
+  },
   snapshotFormat: { escapeString: true, printBasicPrototype: true },
 };

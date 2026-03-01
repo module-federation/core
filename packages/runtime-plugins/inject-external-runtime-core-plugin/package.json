@@ -52,7 +52,7 @@
   },
   "scripts": {
     "build": "tsdown --config tsdown.config.ts --filter inject-external-runtime-core-plugin-build",
-    "lint": "pnpm exec eslint \"packages/runtime-plugins/inject-external-runtime-core-plugin/**/*.ts\" \"packages/runtime-plugins/inject-external-runtime-core-plugin/package.json\"",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",
     "pre-release": "pnpm --filter @module-federation/inject-external-runtime-core-plugin run build"
   }
 }

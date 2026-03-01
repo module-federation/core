@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "rspress dev",
-    "build": "npm run build",
+    "build": "rspress build",
     "preview": "rspress preview",
     "serve": "npm run dev"
   },

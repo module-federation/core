@@ -1,10 +1,6 @@
 {
   "presets": [
-    [
-      "@nx/web/babel",
-      {
-        "useBuiltIns": "usage"
-      }
-    ]
+    ["@babel/preset-env", { "useBuiltIns": "usage" }],
+    ["@babel/preset-typescript", { "allowDeclareFields": true }]
   ]
 }

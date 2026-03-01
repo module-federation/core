@@ -10,9 +10,9 @@
     "access": "public"
   },
   "scripts": {
-    "build": "cd packages/modernjs ; pnpm run build || (sleep 2 && pnpm run build) && cp packages/modernjs/LICENSE packages/modernjs/dist",
-    "lint": "pnpm exec eslint \"packages/modernjs/**/*.ts\"",
-    "test": "pnpm exec vitest run --passWithNoTests --config packages/modernjs/vite.config.mts",
+    "build": "rslib build",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\"",
+    "test": "pnpm exec vitest run --passWithNoTests --config vite.config.mts",
     "pre-release": "pnpm --filter @module-federation/modern-js run test && pnpm --filter @module-federation/modern-js run build"
   },
   "repository": {

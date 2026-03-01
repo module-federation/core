@@ -75,8 +75,8 @@
   },
   "scripts": {
     "build": "rslib build",
-    "lint": "pnpm exec eslint \"packages/rsbuild-plugin/**/*.ts\" \"packages/rsbuild-plugin/package.json\"",
-    "test": "pnpm exec vitest run --passWithNoTests --config packages/rsbuild-plugin/vite.config.mts",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",
+    "test": "pnpm exec vitest run --passWithNoTests --config vite.config.mts",
     "pre-release": "pnpm --filter @module-federation/rsbuild-plugin run test && pnpm --filter @module-federation/rsbuild-plugin run build"
   }
 }

@@ -84,7 +84,7 @@
   },
   "scripts": {
     "build": "tsdown --config tsdown.config.ts",
-    "lint": "pnpm exec eslint \"packages/runtime-tools/**/*.ts\" \"packages/runtime-tools/package.json\"",
-    "test": "pnpm exec jest --config packages/runtime-tools/jest.config.cjs --passWithNoTests"
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",
+    "test": "pnpm exec jest --config jest.config.cjs --passWithNoTests"
   }
 }

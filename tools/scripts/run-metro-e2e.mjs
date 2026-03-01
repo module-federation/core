@@ -4,7 +4,6 @@ import { constants } from 'node:fs';
 import { access, mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-process.env.NX_TUI = 'false';
 process.env.CI = process.env.CI ?? 'true';
 
 const DETACHED_PROCESS_GROUP = Symbol('detachedProcessGroup');

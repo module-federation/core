@@ -19,17 +19,17 @@
     "react-dom": "18.3.1"
   },
   "scripts": {
-    "build": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/bundle-size/webpack.config.js --mode production",
-    "build:development": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/bundle-size/webpack.config.js --mode development",
-    "build:production": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/bundle-size/webpack.config.js --mode production",
-    "serve": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/bundle-size/webpack.config.js --mode production --port 3005 --no-hot",
-    "serve:development": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/bundle-size/webpack.config.js --mode development --port 3005",
-    "serve:production": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/bundle-size/webpack.config.js --mode production --port 3005 --no-hot",
-    "lint": "pnpm exec eslint apps/bundle-size/**/*.{ts,tsx,js,jsx}",
-    "serve-static": "pnpm exec serve apps/bundle-size/dist -l 3005 --cors",
-    "e2e": "pnpm exec cypress run --project apps/bundle-size --e2e --config baseUrl=http://127.0.0.1:3005 --browser chrome",
-    "e2e:development": "pnpm exec cypress open --project apps/bundle-size --e2e --config baseUrl=http://127.0.0.1:3005 --browser electron",
+    "build": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config webpack.config.js --mode production",
+    "build:development": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config webpack.config.js --mode development",
+    "build:production": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config webpack.config.js --mode production",
+    "serve": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config webpack.config.js --mode production --port 3005 --no-hot",
+    "serve:development": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config webpack.config.js --mode development --port 3005",
+    "serve:production": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config webpack.config.js --mode production --port 3005 --no-hot",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules **/*.{ts,tsx,js,jsx}",
+    "serve-static": "pnpm exec serve dist -l 3005 --cors",
+    "e2e": "pnpm exec cypress run --project . --e2e --config baseUrl=http://127.0.0.1:3005 --browser chrome",
+    "e2e:development": "pnpm exec cypress open --project . --e2e --config baseUrl=http://127.0.0.1:3005 --browser electron",
     "test:e2e": "pnpm exec concurrently \"lsof -i :3005 || pnpm --filter bundle-size run serve\" \"sleep 4 && pnpm --filter bundle-size run e2e\"",
-    "getsize": "pnpm --filter bundle-size run build:production && sleep 1 && if [ -f apps/bundle-size/dist/remoteEntry.js ] ; then ls -lah apps/bundle-size/dist/remoteEntry.js | awk '{print \"remoteEntry.js size: \" $5}' && gzip -c apps/bundle-size/dist/remoteEntry.js | wc -c | awk '{print \"gzip size: \" $1 \" bytes\"}' && brotli -c apps/bundle-size/dist/remoteEntry.js | wc -c | awk '{print \"brotli size: \" $1 \" bytes\"}' ; else echo \"remoteEntry.js not found\" ; fi"
+    "getsize": "pnpm --filter bundle-size run build:production && sleep 1 && if [ -f dist/remoteEntry.js ] ; then ls -lah dist/remoteEntry.js | awk '{print \"remoteEntry.js size: \" $5}' && gzip -c dist/remoteEntry.js | wc -c | awk '{print \"gzip size: \" $1 \" bytes\"}' && brotli -c dist/remoteEntry.js | wc -c | awk '{print \"brotli size: \" $1 \" bytes\"}' ; else echo \"remoteEntry.js not found\" ; fi"
   }
 }

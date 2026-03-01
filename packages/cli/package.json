@@ -41,8 +41,8 @@
   },
   "scripts": {
     "build": "rslib build",
-    "lint": "pnpm exec eslint \"packages/cli/**/*.ts\" \"packages/cli/package.json\"",
-    "test": "rstest run -c packages/cli/rstest.config.ts",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",
+    "test": "rstest run -c rstest.config.ts",
     "pre-release": "pnpm --filter @module-federation/cli run test && pnpm --filter @module-federation/cli run build"
   }
 }

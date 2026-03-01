@@ -12,11 +12,11 @@
   "module": "./dist/esm/index.mjs",
   "types": "./dist/cjs/index.d.ts",
   "scripts": {
-    "build": "npm run build --prefix apps/rslib-module",
-    "dev": "npm run dev --prefix apps/rslib-module",
+    "build": "rslib build",
+    "dev": "rslib mf-dev",
     "build:watch": "rslib build --watch",
-    "serve": "npm run serve --prefix apps/rslib-module",
-    "storybook": "npm run storybook --prefix apps/rslib-module"
+    "serve": "pnpm build && http-server -p 3001 ./dist/ --cors",
+    "storybook": "storybook dev -p 6006"
   },
   "devDependencies": {
     "@module-federation/enhanced": "workspace:*",

@@ -108,9 +108,9 @@
   },
   "scripts": {
     "generate:schema": "node src/scripts/compile-schema.js",
-    "build": "node -e \"require('fs').rmSync('packages/enhanced/dist',{recursive:true,force:true})\" && pnpm -C packages/enhanced exec tsdown --config tsdown.config.ts && cp packages/enhanced/*.md packages/enhanced/dist && node -e \"const fs=require('fs');const path=require('path');const src='packages/enhanced/src';const dst='packages/enhanced/dist/src';(function w(d){for(const e of fs.readdirSync(d,{withFileTypes:true})){const p=path.join(d,e.name);if(e.isDirectory())w(p);else if(e.name.endsWith('.d.ts')){const rel=path.relative(src,p);const out=path.join(dst,rel);fs.mkdirSync(path.dirname(out),{recursive:true});fs.copyFileSync(p,out);}}})(src);\"",
-    "lint": "pnpm exec eslint \"packages/enhanced/**/*.ts\"",
-    "test": "node packages/enhanced/test/scripts/ensure-reshake-fixtures.js && NODE_OPTIONS=\"--experimental-vm-modules --max-old-space-size=24576\" npx rstest -c packages/enhanced/rstest.config.ts && NODE_OPTIONS=\"--experimental-vm-modules --max-old-space-size=24576\" npx rstest -c packages/enhanced/rstest.treeshake.serial.config.ts",
+    "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && pnpm -C . exec tsdown --config tsdown.config.ts && cp *.md dist && node -e \"const fs=require('fs');const path=require('path');const src='src';const dst='dist/src';(function w(d){for(const e of fs.readdirSync(d,{withFileTypes:true})){const p=path.join(d,e.name);if(e.isDirectory())w(p);else if(e.name.endsWith('.d.ts')){const rel=path.relative(src,p);const out=path.join(dst,rel);fs.mkdirSync(path.dirname(out),{recursive:true});fs.copyFileSync(p,out);}}})(src);\"",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\"",
+    "test": "node test/scripts/ensure-reshake-fixtures.js && NODE_OPTIONS=\"--experimental-vm-modules --max-old-space-size=24576\" npx rstest -c rstest.config.ts && NODE_OPTIONS=\"--experimental-vm-modules --max-old-space-size=24576\" npx rstest -c rstest.treeshake.serial.config.ts",
     "pre-release": "pnpm --filter @module-federation/enhanced run test && pnpm --filter @module-federation/enhanced run build"
   }
 }

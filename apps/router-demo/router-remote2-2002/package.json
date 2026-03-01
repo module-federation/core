@@ -4,10 +4,10 @@
   "version": "1.0.34",
   "scripts": {
     "dev": "rsbuild dev",
-    "build": "npm run build --prefix apps/router-demo/router-remote2-2002",
+    "build": "rsbuild build",
     "preview": "rsbuild preview",
-    "test": "npm run test --prefix apps/router-demo/router-remote2-2002",
-    "serve": "npm run dev --prefix apps/router-demo/router-remote2-2002"
+    "test": "pnpm exec vitest --passWithNoTests",
+    "serve": "pnpm run dev"
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",

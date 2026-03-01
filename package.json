@@ -37,7 +37,7 @@
     "app:router:dev": "pnpm exec turbo run serve --filter=host --filter=host-v5 --filter=host-vue3 --filter=remote1 --filter=remote2 --filter=remote3 --filter=remote4 --filter=remote5 --filter=remote6 --concurrency=10",
     "app:next-router:dev": "pnpm exec turbo run serve --filter=next-app-router-4000 --filter=next-app-router-4001",
     "serve:website": "pnpm --filter website-new run serve",
-    "build:website": "NX_TUI=false pnpm --filter website-new run build",
+    "build:website": "pnpm --filter website-new run build",
     "extract-i18n:website": "pnpm --filter website-new run extract-i18n",
     "sync:webpack:types": "node ./scripts/sync-webpack-unbundled-types.mjs",
     "sync:pullMFTypes": "concurrently \"node ./packages/enhanced/pullts.js\"",
@@ -68,31 +68,9 @@
           "@changesets/assemble-release-plan": "workspace:*"
         }
       },
-      "@nx/rollup": {
-        "dependencies": {
-          "typescript": "*"
-        }
-      },
-      "@nx/js": {
-        "dependencies": {
-          "typescript": "*"
-        }
-      },
-      "nx": {
-        "dependencies": {
-          "prettier": "*"
-        }
-      },
       "next": {
         "dependencies": {
           "webpack": "*"
-        }
-      },
-      "@nx/module-federation": {
-        "peerDependenciesMeta": {
-          "next": {
-            "optional": true
-          }
         }
       },
       "@storybook/nextjs": {
@@ -147,7 +125,6 @@
       "esbuild",
       "fsevents",
       "msw",
-      "nx",
       "sharp",
       "unrs-resolver"
     ]
@@ -176,34 +153,18 @@
   "devDependencies": {
     "@babel/core": "^7.28.0",
     "@babel/plugin-transform-react-jsx": "7.27.1",
+    "@babel/preset-env": "^7.28.0",
     "@babel/preset-react": "^7.27.1",
+    "@babel/preset-typescript": "^7.28.0",
     "@changesets/cli": "^2.27.9",
     "@chromatic-com/storybook": "^1.7.0",
     "@commitlint/cli": "^19.4.1",
     "@commitlint/config-conventional": "19.5.0",
-    "@commitlint/config-nx-scopes": "19.5.0",
     "@commitlint/cz-commitlint": "19.5.0",
     "@fontsource/roboto": "5.1.0",
     "@fontsource/roboto-mono": "5.1.0",
     "@module-federation/enhanced": "workspace:*",
     "@module-federation/node": "workspace:*",
-    "@nx/cypress": "21.2.3",
-    "@nx/devkit": "21.2.3",
-    "@nx/esbuild": "21.2.3",
-    "@nx/eslint": "21.2.3",
-    "@nx/eslint-plugin": "21.2.3",
-    "@nx/express": "21.2.3",
-    "@nx/jest": "21.2.3",
-    "@nx/js": "21.2.3",
-    "@nx/module-federation": "21.2.3",
-    "@nx/node": "21.2.3",
-    "@nx/react": "21.2.3",
-    "@nx/rollup": "21.2.3",
-    "@nx/rspack": "21.2.3",
-    "@nx/storybook": "21.2.3",
-    "@nx/vite": "21.2.3",
-    "@nx/web": "21.2.3",
-    "@nx/webpack": "21.2.3",
     "@playwright/test": "1.57.0",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.15",
     "@rollup/plugin-alias": "5.1.1",
@@ -272,11 +233,11 @@
     "jest-environment-node": "29.7.0",
     "jiti": "2.4.2",
     "js-yaml": "4.1.0",
+    "jsonc-eslint-parser": "^3.1.0",
     "kill-port": "^2.0.1",
     "mime-types": "2.1.35",
     "msw": "^1.2.1",
     "node-fetch": "~3.3.2",
-    "nx": "21.2.3",
     "open": "^10.1.0",
     "postcss-calc": "9.0.1",
     "postcss-custom-properties": "13.3.12",
@@ -286,7 +247,6 @@
     "prettier-eslint": "16.3.0",
     "prettier-plugin-tailwindcss": "0.5.14",
     "publint": "^0.3.13",
-    "qwik-nx": "^3.1.1",
     "react-refresh": "0.14.2",
     "rimraf": "^6.0.1",
     "rollup-plugin-copy": "3.5.0",

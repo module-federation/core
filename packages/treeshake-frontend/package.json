@@ -3,14 +3,14 @@
   "version": "2.0.1",
   "scripts": {
     "dev": "rsbuild dev",
-    "build": "pnpm -C packages/treeshake-frontend build",
+    "build": "rsbuild build && rslib build",
     "build:adapter": "rslib build",
-    "lint": "pnpm -C packages/treeshake-frontend lint",
+    "lint": "eslint .",
     "preview": "rsbuild preview",
     "e2e:serve": "node scripts/e2e-server.js",
     "test:e2e": "node ../../scripts/ensure-playwright.js && pnpm --filter @module-federation/treeshake-server build && pnpm run build && rstest run -c rstest.config.ts",
-    "test": "pnpm -C packages/treeshake-frontend test:e2e",
-    "e2e": "pnpm -C packages/treeshake-frontend test:e2e"
+    "test": "pnpm -C . test:e2e",
+    "e2e": "pnpm -C . test:e2e"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

@@ -2,12 +2,12 @@
   "name": "modernjs-ssr-dynamic-remote",
   "private": true,
   "scripts": {
-    "build": "cd apps/modernjs-ssr/dynamic-remote ; pnpm run build",
-    "serve": "cd apps/modernjs-ssr/dynamic-remote ; pnpm run dev",
-    "dev": "cd apps/modernjs-ssr/dynamic-remote ; pnpm run dev",
+    "build": "rslib build",
+    "serve": "rslib mf-dev",
+    "dev": "rslib mf-dev",
     "storybook": "storybook dev -p 6006",
-    "e2e": "pnpm exec cypress run --project apps/modernjs-ssr/dynamic-remote --e2e --config baseUrl=http://localhost:4001 --browser chrome",
-    "e2e:development": "pnpm exec cypress open --project apps/modernjs-ssr/dynamic-remote --e2e --config baseUrl=http://localhost:4001 --browser electron",
+    "e2e": "pnpm exec cypress run --project . --e2e --config baseUrl=http://localhost:4001 --browser chrome",
+    "e2e:development": "pnpm exec cypress open --project . --e2e --config baseUrl=http://localhost:4001 --browser electron",
     "test:e2e": "pnpm exec concurrently \"lsof -i :8080 || pnpm --filter modernjs-ssr-dynamic-remote run serve & echo 'done'\" \"sleep 20 && pnpm --filter modernjs-ssr-dynamic-remote run e2e\""
   },
   "main": "./dist/cjs/index.js",

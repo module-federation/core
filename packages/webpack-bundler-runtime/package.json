@@ -64,9 +64,9 @@
   },
   "scripts": {
     "build": "tsdown --config tsdown.config.ts --filter webpack-bundler-runtime-build",
-    "lint": "pnpm exec eslint \"packages/webpack-bundler-runtime/**/*.ts\" \"packages/webpack-bundler-runtime/package.json\"",
-    "test": "pnpm exec jest --config packages/webpack-bundler-runtime/jest.config.cjs --passWithNoTests",
-    "test:ci": "pnpm exec jest --config packages/webpack-bundler-runtime/jest.config.cjs --passWithNoTests --ci --coverage",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",
+    "test": "pnpm exec jest --config jest.config.cjs --passWithNoTests",
+    "test:ci": "pnpm exec jest --config jest.config.cjs --passWithNoTests --ci --coverage",
     "pre-release": "pnpm --filter @module-federation/webpack-bundler-runtime run test && pnpm --filter @module-federation/webpack-bundler-runtime run build"
   }
 }

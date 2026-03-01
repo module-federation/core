@@ -128,9 +128,9 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "npm run build --prefix packages/bridge/bridge-react",
+    "build": "vite build",
     "preview": "vite preview",
-    "test": "pnpm exec jest --config packages/bridge/bridge-react/jest.config.ts --passWithNoTests"
+    "test": "pnpm exec jest --config jest.config.ts --passWithNoTests"
   },
   "dependencies": {
     "@module-federation/bridge-shared": "workspace:*",

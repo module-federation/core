@@ -1,6 +1,6 @@
 import { execSync } from 'node:child_process';
 import { readdirSync, readFileSync } from 'node:fs';
-import { dirname, relative, resolve } from 'node:path';
+import { basename, dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import yargs from 'yargs';
 
@@ -83,7 +83,7 @@ for (const changedFile of changedFiles) {
     hasUnmappedChange = true;
     continue;
   }
-  affectedProjects.add(project.name);
+  affectedProjects.add(project);
 }
 
 if (hasUnmappedChange) {
@@ -154,16 +154,37 @@ function resolveHead(requestedHead) {
 }
 
 function loadProjectGraph() {
-  const projectFiles = collectProjectFiles(ROOT);
-  const projects = projectFiles
-    .map((projectFile) => {
-      const root = dirname(projectFile);
+  const packageFiles = collectPackageFiles(ROOT);
+  const projects = packageFiles
+    .map((packageFile) => {
+      const root = dirname(packageFile);
       const relativeRoot = normalizePath(relative(ROOT, root));
-      const projectJson = JSON.parse(readFileSync(projectFile, 'utf-8'));
-      if (!projectJson?.name) {
-        return null;
+      const packageJson = JSON.parse(readFileSync(packageFile, 'utf-8'));
+      const aliases = new Set();
+
+      if (typeof packageJson?.name === 'string' && packageJson.name) {
+        aliases.add(packageJson.name);
+        if (packageJson.name.startsWith('@')) {
+          const [, unscopedName] = packageJson.name.split('/');
+          if (unscopedName) {
+            aliases.add(unscopedName);
+          }
+        }
       }
-      return { name: projectJson.name, root: relativeRoot };
+
+      const folderName = basename(relativeRoot);
+      if (folderName) {
+        aliases.add(folderName);
+        if (folderName.startsWith('metro-')) {
+          aliases.add(folderName.slice('metro-'.length));
+        }
+      }
+
+      for (const alias of getLegacyAliases(relativeRoot)) {
+        aliases.add(alias);
+      }
+
+      return { root: relativeRoot, aliases };
     })
     .filter(Boolean)
     .sort((left, right) => right.root.length - left.root.length);
@@ -171,7 +192,7 @@ function loadProjectGraph() {
   return { projects };
 }
 
-function collectProjectFiles(rootDir) {
+function collectPackageFiles(rootDir) {
   const results = [];
   const queue = [rootDir];
   while (queue.length > 0) {
@@ -185,7 +206,11 @@ function collectProjectFiles(rootDir) {
         queue.push(next);
         continue;
       }
-      if (entry.isFile() && entry.name === 'project.json') {
+      if (entry.isFile() && entry.name === 'package.json') {
+        const relativePath = normalizePath(relative(rootDir, next));
+        if (relativePath === 'package.json') {
+          continue;
+        }
         results.push(next);
       }
     }
@@ -207,17 +232,127 @@ function resolveProjectForPath(filePath, projects) {
 }
 
 function isRequestedAppAffected(requestedName, affectedProjects) {
-  if (affectedProjects.has(requestedName)) {
-    return true;
+  for (const project of affectedProjects) {
+    if (project.aliases.has(requestedName)) {
+      return true;
+    }
   }
   if (requestedName === 'modernjs') {
-    for (const projectName of affectedProjects) {
-      if (projectName.startsWith('modernjs-')) {
-        return true;
+    for (const project of affectedProjects) {
+      for (const alias of project.aliases) {
+        if (alias.startsWith('modernjs-')) {
+          return true;
+        }
       }
     }
   }
   return false;
+}
+
+function getLegacyAliases(relativeRoot) {
+  if (relativeRoot === 'apps/manifest-demo/webpack-host') {
+    return ['manifest-webpack-host', '3008-webpack-host'];
+  }
+  if (relativeRoot === 'apps/runtime-demo/3005-runtime-host') {
+    return ['runtime-host'];
+  }
+  if (relativeRoot === 'apps/runtime-demo/3006-runtime-remote') {
+    return ['runtime-remote1'];
+  }
+  if (relativeRoot === 'apps/runtime-demo/3007-runtime-remote') {
+    return ['runtime-remote2'];
+  }
+  if (relativeRoot === 'apps/router-demo/router-host-2000') {
+    return ['host'];
+  }
+  if (relativeRoot === 'apps/router-demo/router-host-v5-2200') {
+    return ['host-v5'];
+  }
+  if (relativeRoot === 'apps/router-demo/router-host-vue3-2100') {
+    return ['host-vue3'];
+  }
+  if (relativeRoot === 'apps/router-demo/router-remote1-2001') {
+    return ['remote1'];
+  }
+  if (relativeRoot === 'apps/router-demo/router-remote2-2002') {
+    return ['remote2'];
+  }
+  if (relativeRoot === 'apps/router-demo/router-remote3-2003') {
+    return ['remote3'];
+  }
+  if (relativeRoot === 'apps/router-demo/router-remote4-2004') {
+    return ['remote4'];
+  }
+  if (relativeRoot === 'apps/router-demo/router-remote5-2005') {
+    return ['remote5'];
+  }
+  if (relativeRoot === 'apps/router-demo/router-remote6-2006') {
+    return ['remote6'];
+  }
+  if (relativeRoot === 'apps/modern-component-data-fetch/host') {
+    return ['modernjs-ssr-data-fetch-host'];
+  }
+  if (relativeRoot === 'apps/modern-component-data-fetch/provider') {
+    return ['modernjs-ssr-data-fetch-provider'];
+  }
+  if (relativeRoot === 'apps/modern-component-data-fetch/provider-csr') {
+    return ['modernjs-ssr-data-fetch-provider-csr'];
+  }
+  if (relativeRoot === 'apps/modernjs-ssr/host') {
+    return ['modernjs-ssr-host'];
+  }
+  if (relativeRoot === 'apps/modernjs-ssr/remote') {
+    return ['modernjs-ssr-remote'];
+  }
+  if (relativeRoot === 'apps/modernjs-ssr/remote-new-version') {
+    return ['modernjs-ssr-remote-new-version'];
+  }
+  if (relativeRoot === 'apps/modernjs-ssr/nested-remote') {
+    return ['modernjs-ssr-nested-remote'];
+  }
+  if (relativeRoot === 'apps/modernjs-ssr/dynamic-remote') {
+    return ['modernjs-ssr-dynamic-remote'];
+  }
+  if (relativeRoot === 'apps/modernjs-ssr/dynamic-remote-new-version') {
+    return ['modernjs-ssr-dynamic-remote-new-version'];
+  }
+  if (relativeRoot === 'apps/modernjs-ssr/dynamic-nested-remote') {
+    return ['modernjs-ssr-dynamic-nested-remote'];
+  }
+  if (relativeRoot === 'apps/node-host') {
+    return ['node-host'];
+  }
+  if (relativeRoot === 'apps/node-host-e2e') {
+    return ['node-host-e2e'];
+  }
+  if (relativeRoot === 'apps/node-local-remote') {
+    return ['node-local-remote'];
+  }
+  if (relativeRoot === 'apps/node-remote') {
+    return ['node-remote'];
+  }
+  if (relativeRoot === 'apps/node-dynamic-remote') {
+    return ['node-dynamic-remote'];
+  }
+  if (relativeRoot === 'apps/node-dynamic-remote-new-version') {
+    return ['node-dynamic-remote-new-version'];
+  }
+  if (relativeRoot === 'apps/next-app-router/next-app-router-4000') {
+    return ['next-app-router-4000'];
+  }
+  if (relativeRoot === 'apps/next-app-router/next-app-router-4001') {
+    return ['next-app-router-4001'];
+  }
+  if (relativeRoot === 'apps/3000-home') {
+    return ['3000-home'];
+  }
+  if (relativeRoot === 'apps/3001-shop') {
+    return ['3001-shop'];
+  }
+  if (relativeRoot === 'apps/3002-checkout') {
+    return ['3002-checkout'];
+  }
+  return [];
 }
 
 function normalizePath(value) {

@@ -99,10 +99,10 @@
     }
   },
   "scripts": {
-    "build": "node -e \"require('fs').rmSync('packages/storybook-addon/dist',{recursive:true,force:true})\" && pnpm -C packages/storybook-addon exec tsdown --config tsdown.config.ts && cp packages/storybook-addon/*.md packages/storybook-addon/dist",
-    "lint": "pnpm exec eslint \"packages/storybook-addon/**/*.ts\"",
-    "test": "pnpm exec jest --config packages/storybook-addon/jest.config.ts --passWithNoTests",
-    "test:ci": "pnpm exec jest --config packages/storybook-addon/jest.config.ts --passWithNoTests --ci --coverage",
+    "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && pnpm -C . exec tsdown --config tsdown.config.ts && cp *.md dist",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\"",
+    "test": "pnpm exec jest --config jest.config.ts --passWithNoTests",
+    "test:ci": "pnpm exec jest --config jest.config.ts --passWithNoTests --ci --coverage",
     "pre-release": "pnpm --filter @module-federation/storybook-addon run test && pnpm --filter @module-federation/storybook-addon run build"
   }
 }

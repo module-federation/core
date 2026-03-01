@@ -103,8 +103,8 @@
   "scripts": {
     "build": "tsdown --config ./tsdown.config.ts && sleep 1 && cp package.json ./dist && cp *.md ./dist",
     "test": "node -e \"require('fs').rmSync('dist-test',{recursive:true,force:true,maxRetries:20,retryDelay:50})\" && pnpm --filter @module-federation/dts-plugin run test-impl",
-    "test-impl": "pnpm exec vitest run --passWithNoTests --config packages/dts-plugin/vite.config.mts",
-    "lint": "pnpm exec eslint \"packages/dts-plugin/**/*.ts\" \"packages/dts-plugin/package.json\"",
+    "test-impl": "pnpm exec vitest run --passWithNoTests --config vite.config.mts",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",
     "build-debug": "FEDERATION_DEBUG=true pnpm --filter @module-federation/dts-plugin run build",
     "pre-release": "pnpm --filter @module-federation/dts-plugin run test && pnpm --filter @module-federation/dts-plugin run build"
   }

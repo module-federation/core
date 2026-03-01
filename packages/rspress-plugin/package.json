@@ -30,9 +30,9 @@
   "module": "./dist/index.js",
   "types": "./dist/plugin.d.ts",
   "scripts": {
-    "build": "pnpm -C packages/rspress-plugin build",
+    "build": "rslib build",
     "build:watch": "rslib build --watch",
-    "dev": "pnpm -C packages/rspress-plugin dev",
+    "dev": "pnpm -C . dev",
     "pre-release": "pnpm --filter @module-federation/webpack-bundler-runtime run build"
   },
   "devDependencies": {

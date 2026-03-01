@@ -63,9 +63,9 @@
   },
   "scripts": {
     "build": "tsdown --config tsdown.config.ts",
-    "lint": "pnpm exec eslint \"packages/sdk/**/*.ts\" \"packages/sdk/package.json\"",
-    "test": "pnpm exec jest --config packages/sdk/jest.config.cjs --passWithNoTests",
-    "test:ci": "pnpm exec jest --config packages/sdk/jest.config.cjs --passWithNoTests --ci --coverage",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",
+    "test": "pnpm exec jest --config jest.config.cjs --passWithNoTests",
+    "test:ci": "pnpm exec jest --config jest.config.cjs --passWithNoTests --ci --coverage",
     "pre-release": "pnpm --filter @module-federation/sdk run test && pnpm --filter @module-federation/sdk run build"
   }
 }

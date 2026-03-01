@@ -28,10 +28,10 @@
     "directory": "packages/typescript"
   },
   "scripts": {
-    "build": "node -e \"require('fs').rmSync('packages/typescript/dist',{recursive:true,force:true})\" && pnpm -C packages/typescript exec tsdown --config tsdown.config.ts && cp packages/typescript/*.md packages/typescript/dist",
-    "lint": "pnpm exec eslint \"packages/typescript/**/*.ts\"",
-    "test": "pnpm exec jest --config packages/typescript/jest.config.ts --passWithNoTests",
-    "test:ci": "pnpm exec jest --config packages/typescript/jest.config.ts --passWithNoTests --ci --coverage",
+    "build": "tsc",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\"",
+    "test": "pnpm exec jest --config jest.config.ts --passWithNoTests",
+    "test:ci": "pnpm exec jest --config jest.config.ts --passWithNoTests --ci --coverage",
     "pre-release": "pnpm --filter @module-federation/typescript run test && pnpm --filter @module-federation/typescript run build"
   },
   "peerDependencies": {

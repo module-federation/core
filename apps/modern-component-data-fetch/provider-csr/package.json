@@ -3,12 +3,12 @@
   "private": true,
   "version": "0.1.34",
   "scripts": {
-    "build": "npm run build --prefix apps/modern-component-data-fetch/provider-csr",
-    "dev": "npm run dev --prefix apps/modern-component-data-fetch/provider-csr",
+    "build": "rslib build",
+    "dev": "rslib mf-dev",
     "build:watch": "rslib build --watch",
-    "serve": "npm run dev --prefix apps/modern-component-data-fetch/provider-csr",
-    "e2e": "pnpm exec cypress run --project apps/modern-component-data-fetch/provider-csr --e2e --config baseUrl=http://localhost:4001 --browser chrome",
-    "e2e:development": "pnpm exec cypress open --project apps/modern-component-data-fetch/provider-csr --e2e --config baseUrl=http://localhost:4001 --browser electron",
+    "serve": "pnpm run dev",
+    "e2e": "pnpm exec cypress run --project . --e2e --config baseUrl=http://localhost:4001 --browser chrome",
+    "e2e:development": "pnpm exec cypress open --project . --e2e --config baseUrl=http://localhost:4001 --browser electron",
     "test:e2e": "pnpm exec concurrently \"lsof -i :8080 || pnpm --filter modernjs-ssr-data-fetch-provider-csr run serve & echo 'done'\" \"sleep 20 && pnpm --filter modernjs-ssr-data-fetch-provider-csr run e2e\""
   },
   "devDependencies": {

@@ -107,8 +107,8 @@
   },
   "scripts": {
     "build": "tsdown --config tsdown.config.ts && cp package.json dist && cp *.md dist",
-    "lint": "pnpm exec eslint \"packages/native-federation-typescript/**/*.ts\"",
-    "test": "pnpm exec vitest run --passWithNoTests --config packages/native-federation-typescript/vite.config.mts",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\"",
+    "test": "pnpm exec vitest run --passWithNoTests --config vite.config.mts",
     "pre-release": "pnpm --filter @module-federation/native-federation-typescript run test && pnpm --filter @module-federation/native-federation-typescript run build"
   }
 }

@@ -54,9 +54,9 @@
   },
   "scripts": {
     "build": "rslib build",
-    "lint": "pnpm exec eslint \"packages/manifest/**/*.ts\" \"packages/manifest/package.json\"",
-    "test": "pnpm exec jest --config packages/manifest/jest.config.js --passWithNoTests",
-    "test:ci": "pnpm exec jest --config packages/manifest/jest.config.js --passWithNoTests --ci --coverage",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",
+    "test": "pnpm exec jest --config jest.config.js --passWithNoTests",
+    "test:ci": "pnpm exec jest --config jest.config.js --passWithNoTests --ci --coverage",
     "pre-release": "pnpm --filter @module-federation/manifest run test && pnpm --filter @module-federation/manifest run build"
   }
 }
