@@ -16,11 +16,17 @@ const CALLBACK_CHUNK_LOADER_HOOK_FLAG =
   '__MODERN_RSC_MF_CALLBACK_CHUNK_LOADER_HOOKED__';
 const CALLBACK_CHUNK_LOADER_WRAPPED_FLAG =
   '__MODERN_RSC_MF_CALLBACK_CHUNK_LOADER_WRAPPED__';
+const CALLBACK_CHUNK_HANDLER_HOOK_FLAG =
+  '__MODERN_RSC_MF_CALLBACK_CHUNK_HANDLER_HOOKED__';
+const CALLBACK_CHUNK_HANDLER_KEY = '__MODERN_RSC_MF_CALLBACK_CHUNK_HANDLER__';
+const CALLBACK_CHUNK_HANDLER_WRAPPED_FLAG =
+  '__MODERN_RSC_MF_CALLBACK_CHUNK_HANDLER_WRAPPED__';
 let hasResolvedFallbackAlias = false;
 let fallbackRemoteAlias;
 let callbackInstallAttempts = 0;
 const installedClientBrowserRuntimes = new WeakSet();
 const wrappedChunkLoaders = new WeakMap();
+const wrappedChunkHandlers = new WeakMap();
 
 function isObject(value) {
   return typeof value === 'object' && value !== null;
@@ -342,6 +348,71 @@ function getWrappedChunkLoader(chunkLoader) {
   return wrappedChunkLoader;
 }
 
+function queueCallbackInstallAfterChunkLoad(promises) {
+  if (!Array.isArray(promises)) {
+    installServerCallbacks();
+    return;
+  }
+
+  const pendingPromises = promises.slice();
+  promises.push(
+    Promise.allSettled(pendingPromises)
+      .catch(() => undefined)
+      .then(() => {
+        installServerCallbacks();
+      }),
+  );
+}
+
+function getWrappedChunkHandler(chunkHandler) {
+  if (!isFunction(chunkHandler)) {
+    return chunkHandler;
+  }
+  if (chunkHandler[CALLBACK_CHUNK_HANDLER_WRAPPED_FLAG]) {
+    return chunkHandler;
+  }
+
+  const cachedWrappedChunkHandler = wrappedChunkHandlers.get(chunkHandler);
+  if (cachedWrappedChunkHandler) {
+    return cachedWrappedChunkHandler;
+  }
+
+  const wrappedChunkHandler = function (...args) {
+    chunkHandler.apply(this, args);
+    queueCallbackInstallAfterChunkLoad(args[1]);
+  };
+  wrappedChunkHandler[CALLBACK_CHUNK_HANDLER_WRAPPED_FLAG] = true;
+  wrappedChunkHandlers.set(chunkHandler, wrappedChunkHandler);
+  return wrappedChunkHandler;
+}
+
+function hookEnsureChunkHandlersInstall() {
+  const webpackRequire = getWebpackRequire();
+  if (!webpackRequire || !isObject(webpackRequire.f)) {
+    return false;
+  }
+
+  const chunkHandlers = webpackRequire.f;
+  if (chunkHandlers[CALLBACK_CHUNK_HANDLER_HOOK_FLAG]) {
+    return true;
+  }
+
+  const existingChunkHandler = chunkHandlers[CALLBACK_CHUNK_HANDLER_KEY];
+  if (isFunction(existingChunkHandler)) {
+    chunkHandlers[CALLBACK_CHUNK_HANDLER_KEY] =
+      getWrappedChunkHandler(existingChunkHandler);
+  } else {
+    const callbackInstallChunkHandler = function (_chunkId, promises) {
+      queueCallbackInstallAfterChunkLoad(promises);
+    };
+    callbackInstallChunkHandler[CALLBACK_CHUNK_HANDLER_WRAPPED_FLAG] = true;
+    chunkHandlers[CALLBACK_CHUNK_HANDLER_KEY] = callbackInstallChunkHandler;
+  }
+
+  chunkHandlers[CALLBACK_CHUNK_HANDLER_HOOK_FLAG] = true;
+  return true;
+}
+
 function hookChunkLoaderInstall() {
   const webpackRequire = getWebpackRequire();
   if (!webpackRequire) {
@@ -418,7 +489,10 @@ function hookChunkLoaderInstall() {
 }
 
 function runInstallAttempt() {
-  hookChunkLoaderInstall();
+  const hasEnsureChunkHandlersHook = hookEnsureChunkHandlersInstall();
+  if (!hasEnsureChunkHandlersHook) {
+    hookChunkLoaderInstall();
+  }
   installServerCallbacks();
   callbackInstallAttempts += 1;
 
