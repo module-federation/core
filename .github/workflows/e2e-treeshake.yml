@@ -26,5 +26,33 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
 
-      - name: Run local CI parity job
-        run: pnpm run ci:local --only=e2e-treeshake
+      - name: Export SKIP_DEVTOOLS_POSTINSTALL
+        run: echo "SKIP_DEVTOOLS_POSTINSTALL=true" >> "$GITHUB_ENV"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build shared packages
+        run: pnpm run build:pkg
+
+      - name: Check CI conditions
+        id: check-ci
+        run: |
+          ci_status=0
+          node tools/scripts/ci-is-affected.mjs --appName=treeshake-server,treeshake-frontend || ci_status=$?
+          if [ "$ci_status" -eq 0 ]; then
+            echo "run-e2e=true" >> "$GITHUB_OUTPUT"
+          elif [ "$ci_status" -eq 1 ]; then
+            echo "run-e2e=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ci-is-affected failed with unexpected exit code: $ci_status" >&2
+            exit "$ci_status"
+          fi
+
+      - name: E2E Treeshake Server
+        if: steps.check-ci.outputs.run-e2e == 'true'
+        run: pnpm --filter @module-federation/treeshake-server run test
+
+      - name: E2E Treeshake Frontend
+        if: steps.check-ci.outputs.run-e2e == 'true'
+        run: pnpm --filter @module-federation/treeshake-frontend run e2e

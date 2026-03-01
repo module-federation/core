@@ -24,5 +24,32 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
 
-      - name: Run local CI parity job
-        run: pnpm run ci:local --only=e2e-runtime
+      - name: Export SKIP_DEVTOOLS_POSTINSTALL
+        run: echo "SKIP_DEVTOOLS_POSTINSTALL=true" >> "$GITHUB_ENV"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Cypress
+        run: npx cypress install
+
+      - name: Build shared packages
+        run: pnpm run build:pkg
+
+      - name: Check CI conditions
+        id: check-ci
+        run: |
+          ci_status=0
+          node tools/scripts/ci-is-affected.mjs --appName=3005-runtime-host || ci_status=$?
+          if [ "$ci_status" -eq 0 ]; then
+            echo "run-e2e=true" >> "$GITHUB_OUTPUT"
+          elif [ "$ci_status" -eq 1 ]; then
+            echo "run-e2e=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ci-is-affected failed with unexpected exit code: $ci_status" >&2
+            exit "$ci_status"
+          fi
+
+      - name: E2E Test for Runtime Demo
+        if: steps.check-ci.outputs.run-e2e == 'true'
+        run: pnpm exec turbo run test:e2e --filter=runtime-host

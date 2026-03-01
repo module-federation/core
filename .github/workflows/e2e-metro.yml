@@ -23,5 +23,32 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
 
-      - name: Run local CI parity job
-        run: pnpm run ci:local --only=build-metro
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify Rslib Template Publint Wiring
+        run: node packages/create-module-federation/scripts/verify-rslib-templates.mjs
+
+      - name: Verify Package Rslib Publint Wiring
+        run: node tools/scripts/verify-rslib-publint-coverage.mjs
+
+      - name: Verify Publint Workflow Coverage
+        run: node tools/scripts/verify-publint-workflow-coverage.mjs
+
+      - name: Build shared packages
+        run: pnpm run build:pkg
+
+      - name: Check metro package publishing compatibility
+        run: |
+          for pkg in packages/metro-*; do
+            if [ -f "$pkg/package.json" ]; then
+              echo "Checking $pkg..."
+              npx publint "$pkg"
+            fi
+          done
+
+      - name: Test metro packages
+        run: pnpm exec turbo run test --filter=@module-federation/metro*
+
+      - name: Lint metro packages
+        run: pnpm exec turbo run lint --filter=@module-federation/metro*

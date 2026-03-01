@@ -23,5 +23,32 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
 
-      - name: Run local CI parity job
-        run: pnpm run ci:local --only=e2e-modern-ssr
+      - name: Export SKIP_DEVTOOLS_POSTINSTALL
+        run: echo "SKIP_DEVTOOLS_POSTINSTALL=true" >> "$GITHUB_ENV"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Cypress
+        run: npx cypress install
+
+      - name: Build shared packages
+        run: pnpm run build:pkg
+
+      - name: Check CI conditions
+        id: check-ci
+        run: |
+          ci_status=0
+          node tools/scripts/ci-is-affected.mjs --appName=modernjs || ci_status=$?
+          if [ "$ci_status" -eq 0 ]; then
+            echo "run-e2e=true" >> "$GITHUB_OUTPUT"
+          elif [ "$ci_status" -eq 1 ]; then
+            echo "run-e2e=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ci-is-affected failed with unexpected exit code: $ci_status" >&2
+            exit "$ci_status"
+          fi
+
+      - name: E2E Test for ModernJS SSR
+        if: steps.check-ci.outputs.run-e2e == 'true'
+        run: lsof -ti tcp:3050,3051,3052,3053,3054,3055,3056 | xargs -r kill && pnpm run app:modern:dev & sleep 30 && for port in 3050 3051 3052 3053 3054 3055 3056; do while true; do response=$(curl -s http://127.0.0.1:$port/mf-manifest.json); if echo "$response" | jq empty >/dev/null 2>&1; then break; fi; sleep 1; done; done

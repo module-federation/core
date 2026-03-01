@@ -30,5 +30,40 @@ jobs:
           cache: pnpm
           cache-dependency-path: '**/pnpm-lock.yaml'
 
-      - name: Run local CI parity job
-        run: pnpm run ci:local --only=bundle-size
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages (current)
+        run: pnpm run build:pkg
+
+      - name: Measure bundle sizes (current)
+        run: node scripts/bundle-size-report.mjs --output current.json
+
+      - name: Prepare base worktree
+        run: |
+          BASE_REF=${CI_LOCAL_BASE_REF:-origin/main}
+          BASE_PATH=".ci-local-base-${RANDOM}-${RANDOM}"
+          echo "BASE_REF=$BASE_REF" >> "$GITHUB_ENV"
+          echo "BASE_PATH=$BASE_PATH" >> "$GITHUB_ENV"
+          git worktree add "$BASE_PATH" "$BASE_REF"
+
+      - name: Install dependencies (base)
+        run: pnpm install --frozen-lockfile
+        working-directory: ${{ env.BASE_PATH }}
+
+      - name: Build packages (base)
+        run: pnpm run build:pkg
+        working-directory: ${{ env.BASE_PATH }}
+
+      - name: Measure bundle sizes (base)
+        run: node scripts/bundle-size-report.mjs --output base.json --packages-dir "${{ env.BASE_PATH }}/packages"
+
+      - name: Compare bundle sizes
+        run: node scripts/bundle-size-report.mjs --compare base.json --current current.json --output stats.txt
+
+      - name: Cleanup base worktree
+        if: always()
+        run: |
+          if [ -n "${BASE_PATH:-}" ] && [ -d "${BASE_PATH}" ]; then
+            git worktree remove --force "${BASE_PATH}"
+          fi

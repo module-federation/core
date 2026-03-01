@@ -34,8 +34,43 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
 
-      - name: Run local CI parity job
-        run: pnpm run ci:local --only=build-and-test
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Cypress
+        run: npx cypress install
+
+      - name: Check code format
+        run: pnpm exec prettier --check .
+
+      - name: Verify Rslib Template Publint Wiring
+        run: node packages/create-module-federation/scripts/verify-rslib-templates.mjs
+
+      - name: Verify Package Rslib Publint Wiring
+        run: node tools/scripts/verify-rslib-publint-coverage.mjs
+
+      - name: Verify Publint Workflow Coverage
+        run: node tools/scripts/verify-publint-workflow-coverage.mjs
+
+      - name: Build packages
+        run: pnpm run build:pkg
+
+      - name: Check Package Publishing Compatibility
+        run: |
+          for pkg in packages/*; do
+            if [ -f "$pkg/package.json" ] && \
+               [ "$pkg" != "packages/assemble-release-plan" ] && \
+               [ "$pkg" != "packages/chrome-devtools" ] && \
+               [ "$pkg" != "packages/core" ] && \
+               [ "$pkg" != "packages/modernjs" ] && \
+               [ "$pkg" != "packages/utilities" ]; then
+              echo "Checking $pkg..."
+              npx publint "$pkg"
+            fi
+          done
+
+      - name: Run affected package tests
+        run: node tools/scripts/run-affected-package-tests.mjs
 
   e2e-modern:
     needs: checkout-install

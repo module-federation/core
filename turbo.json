@@ -21,12 +21,15 @@
       "outputs": []
     },
     "e2e": {
+      "dependsOn": ["^build"],
       "cache": false
     },
     "test:e2e": {
+      "dependsOn": ["^build"],
       "cache": false
     },
     "test:e2e:production": {
+      "dependsOn": ["build", "^build"],
       "cache": false
     },
     "serve": {

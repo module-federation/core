@@ -1020,128 +1020,13 @@ async function runTurboTaskIfAffected(
 }
 
 async function runChangedPackageTests(ctx) {
-  const base = resolveGitRefForDiff(process.env.CI_LOCAL_BASE_REF);
-
-  if (!base) {
-    logStepSkip(
-      ctx,
-      `Unable to resolve base ref for affected package tests (base=${base}).`,
-    );
-    return;
-  }
-
-  const packageNames = getAffectedPackageTestTargets(base);
-  if (packageNames.length === 0) {
-    logStepSkip(
-      ctx,
-      `No affected package tests detected via Turbo graph (${base}..HEAD).`,
-    );
-    return;
-  }
-
-  console.log(
-    `[ci:local] ${ctx.jobName} -> Running tests for ${packageNames.length} affected package(s): ${packageNames.join(', ')}`,
-  );
-  const args = ['exec', 'turbo', 'run', 'test'];
-  for (const packageName of packageNames) {
-    args.push(`--filter=${packageName}`);
-  }
-  await runCommand('pnpm', args, ctx);
-}
-
-function resolveGitRefForDiff(preferredRef) {
-  if (hasGitRef(preferredRef)) {
-    return preferredRef;
-  }
-  const fallbackRefs = ['origin/main', 'main', 'HEAD~1'];
-  for (const ref of fallbackRefs) {
-    if (hasGitRef(ref)) {
-      return ref;
-    }
-  }
-  return null;
-}
-
-function hasGitRef(ref) {
-  if (!ref) {
-    return false;
-  }
-  const result = spawnSync(
-    'git',
-    ['rev-parse', '--verify', '--quiet', `${ref}^{commit}`],
-    {
-      cwd: ROOT,
-      stdio: 'ignore',
+  await runCommand('node', ['tools/scripts/run-affected-package-tests.mjs'], {
+    ...ctx,
+    env: {
+      ...ctx.env,
+      CI_BASE_REF: process.env.CI_LOCAL_BASE_REF ?? '',
     },
-  );
-  return result.status === 0;
-}
-
-function getAffectedPackageTestTargets(baseRef) {
-  const dryRunResult = spawnSync(
-    'pnpm',
-    [
-      'exec',
-      'turbo',
-      'run',
-      'test',
-      `--filter=...[${baseRef}]`,
-      '--dry-run=json',
-    ],
-    {
-      cwd: ROOT,
-      stdio: 'pipe',
-      encoding: 'utf-8',
-      env: process.env,
-    },
-  );
-  if (dryRunResult.status !== 0) {
-    throw new Error(
-      `[ci:local] Failed to compute affected test graph from Turbo: ${dryRunResult.stderr || dryRunResult.stdout}`,
-    );
-  }
-
-  const output = dryRunResult.stdout?.trim();
-  if (!output) {
-    return [];
-  }
-
-  let dryRunJson;
-  try {
-    dryRunJson = JSON.parse(output);
-  } catch (error) {
-    throw new Error(
-      `[ci:local] Failed to parse Turbo dry-run output: ${error instanceof Error ? error.message : String(error)}`,
-    );
-  }
-
-  const packageNames = new Set();
-  const tasks = Array.isArray(dryRunJson?.tasks) ? dryRunJson.tasks : [];
-  for (const task of tasks) {
-    if (!task || typeof task !== 'object') {
-      continue;
-    }
-    if (typeof task.taskId !== 'string' || !task.taskId.endsWith('#test')) {
-      continue;
-    }
-    if (typeof task.package !== 'string' || !task.package) {
-      continue;
-    }
-    if (typeof task.directory !== 'string') {
-      continue;
-    }
-
-    const taskDirectory = normalizePath(task.directory);
-    if (!taskDirectory.startsWith('packages/')) {
-      continue;
-    }
-    packageNames.add(task.package);
-  }
-  return Array.from(packageNames).sort();
-}
-
-function normalizePath(filePath) {
-  return filePath.replaceAll('\\', '/');
+  });
 }
 
 function runCommand(command, args = [], options = {}) {

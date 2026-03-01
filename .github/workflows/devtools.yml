@@ -34,5 +34,23 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
 
-      - name: Run local CI parity job
-        run: pnpm run ci:local --only=devtools
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile && find . -maxdepth 6 -type d \( -name ".cache" -o -name ".modern-js" \) -exec rm -rf {} +
+
+      - name: Install Cypress
+        run: npx cypress install
+
+      - name: Build shared packages
+        run: pnpm run build:pkg
+
+      - name: Install xvfb
+        run: sudo apt-get update && sudo apt-get install xvfb
+
+      - name: E2E Chrome Devtools Dev
+        run: npx kill-port 3009 3010 3011 3012 3013 4001 && pnpm run app:manifest:dev & echo "done" && npx wait-on tcp:3009 tcp:3010 tcp:3011 tcp:3012 tcp:3013 && sleep 10 && pnpm --filter @module-federation/devtools run e2e:devtools
+
+      - name: E2E Chrome Devtools Prod
+        run: npx kill-port 3009 3010 3011 3012 3013 4001 && npx kill-port 3009 3010 3011 3012 3013 4001 && pnpm run app:manifest:prod & echo "done" && npx wait-on tcp:3009 tcp:3010 tcp:3011 tcp:3012 tcp:3013 && sleep 30 && pnpm --filter @module-federation/devtools run e2e:devtools
+
+      - name: Kill devtools ports
+        run: npx kill-port 3013 3009 3010 3011 3012 4001 || true

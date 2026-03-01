@@ -4,7 +4,7 @@ on:
   workflow_call:
 
 jobs:
-  e2e-runtime:
+  e2e-shared-tree-shaking:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -23,5 +23,36 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
 
-      - name: Run local CI parity job
-        run: pnpm run ci:local --only=e2e-shared-tree-shaking
+      - name: Export SKIP_DEVTOOLS_POSTINSTALL
+        run: echo "SKIP_DEVTOOLS_POSTINSTALL=true" >> "$GITHUB_ENV"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Cypress
+        run: npx cypress install
+
+      - name: Build shared packages
+        run: pnpm run build:pkg
+
+      - name: Check CI conditions
+        id: check-ci
+        run: |
+          ci_status=0
+          node tools/scripts/ci-is-affected.mjs --appName=shared-tree-shaking-with-server-host || ci_status=$?
+          if [ "$ci_status" -eq 0 ]; then
+            echo "run-e2e=true" >> "$GITHUB_OUTPUT"
+          elif [ "$ci_status" -eq 1 ]; then
+            echo "run-e2e=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ci-is-affected failed with unexpected exit code: $ci_status" >&2
+            exit "$ci_status"
+          fi
+
+      - name: E2E Shared Tree Shaking (runtime-infer)
+        if: steps.check-ci.outputs.run-e2e == 'true'
+        run: npx kill-port --port 3001,3002 && pnpm --filter shared-tree-shaking-no-server-host run test:e2e && lsof -ti tcp:3001,3002 | xargs kill
+
+      - name: E2E Shared Tree Shaking (server-calc)
+        if: steps.check-ci.outputs.run-e2e == 'true'
+        run: npx kill-port --port 3001,3002,3003 && pnpm --filter shared-tree-shaking-with-server-host run test:e2e && lsof -ti tcp:3001,3002,3003 | xargs kill
