@@ -31,7 +31,7 @@
     "build": "pnpm exec turbo run build --filter=./packages/* --filter=./packages/bridge/* --filter=./packages/runtime-plugins/* --concurrency=5",
     "build:pkg": "pnpm exec turbo run build --filter=./packages/* --filter=./packages/bridge/* --filter=./packages/runtime-plugins/*",
     "test:pkg": "pnpm exec turbo run test --filter=./packages/* --filter=./packages/bridge/* --filter=./packages/runtime-plugins/*",
-    "lint-fix": "pnpm exec prettier --write .",
+    "lint-fix": "node tools/scripts/lint-fix.mjs",
     "trigger-release": "node -e 'import(\"open\").then(open => open.default(\"https://github.com/module-federation/core/actions/workflows/trigger-release.yml\"))'",
     "serve:next": "pnpm exec turbo run serve --filter=@module-federation/3000-home --filter=@module-federation/3001-shop --filter=@module-federation/3002-checkout --filter=next-app-router-4000 --filter=next-app-router-4001 --concurrency=3",
     "app:router:dev": "pnpm exec turbo run serve --filter=host --filter=host-v5 --filter=host-vue3 --filter=remote1 --filter=remote2 --filter=remote3 --filter=remote4 --filter=remote5 --filter=remote6 --concurrency=10",
