@@ -181,10 +181,7 @@ const jobs = [
           logStepSkip(ctx, 'Not affected by current changes.');
           return;
         }
-        await runShell(
-          'npx kill-port --port 4001 && pnpm --filter modernjs-ssr-host run test:e2e && npx kill-port --port 4001',
-          ctx,
-        );
+        await runCommand('pnpm', ['run', 'e2e:modern'], ctx);
       }),
     ],
   },
@@ -194,11 +191,9 @@ const jobs = [
     steps: [
       setupE2E(),
       step('E2E Test for Runtime Demo', (ctx) =>
-        runTurboTaskIfAffected(ctx, {
-          affectedAppName: '3005-runtime-host',
-          taskName: 'test:e2e',
-          filters: ['runtime-host'],
-        }),
+        runIfAffected(ctx, '3005-runtime-host', () =>
+          runCommand('pnpm', ['run', 'e2e:runtime'], ctx),
+        ),
       ),
     ],
   },
@@ -208,18 +203,14 @@ const jobs = [
     steps: [
       setupE2E(),
       step('E2E Test for Manifest Demo (dev)', (ctx) =>
-        runTurboTaskIfAffected(ctx, {
-          affectedAppName: 'manifest-webpack-host',
-          taskName: 'test:e2e',
-          filters: ['3008-webpack-host'],
-        }),
+        runIfAffected(ctx, 'manifest-webpack-host', () =>
+          runCommand('pnpm', ['run', 'e2e:manifest:dev'], ctx),
+        ),
       ),
       step('E2E Test for Manifest Demo (prod)', (ctx) =>
-        runTurboTaskIfAffected(ctx, {
-          affectedAppName: 'manifest-webpack-host',
-          taskName: 'test:e2e:production',
-          filters: ['3008-webpack-host'],
-        }),
+        runIfAffected(ctx, 'manifest-webpack-host', () =>
+          runCommand('pnpm', ['run', 'e2e:manifest:prod'], ctx),
+        ),
       ),
     ],
   },
@@ -239,10 +230,7 @@ const jobs = [
           logStepSkip(ctx, 'Not affected by current changes.');
           return;
         }
-        await runShell(
-          'pnpm run app:node:dev & sleep 25 && npx wait-on tcp:3333 && pnpm --filter node-host-e2e run test:e2e',
-          ctx,
-        );
+        await runCommand('pnpm', ['run', 'e2e:node'], ctx);
       }),
     ],
   },
@@ -256,11 +244,7 @@ const jobs = [
       setupE2E(),
       step('E2E Test for Next.js Dev', (ctx) =>
         runIfAffected(ctx, '3000-home', () =>
-          runCommand(
-            'node',
-            ['tools/scripts/run-next-e2e.mjs', '--mode=dev'],
-            ctx,
-          ),
+          runCommand('pnpm', ['run', 'e2e:next:dev'], ctx),
         ),
       ),
     ],
@@ -272,11 +256,7 @@ const jobs = [
       setupE2E(),
       step('E2E Test for Next.js Prod', (ctx) =>
         runIfAffected(ctx, '3000-home', () =>
-          runCommand(
-            'node',
-            ['tools/scripts/run-next-e2e.mjs', '--mode=prod'],
-            ctx,
-          ),
+          runCommand('pnpm', ['run', 'e2e:next:prod'], ctx),
         ),
       ),
     ],
@@ -302,22 +282,14 @@ const jobs = [
           logStepSkip(ctx, 'Not affected by current changes.');
           return;
         }
-        await runCommand(
-          'pnpm',
-          ['--filter', '@module-federation/treeshake-server', 'run', 'test'],
-          ctx,
-        );
+        await runCommand('pnpm', ['run', 'e2e:treeshake:server'], ctx);
       }),
       step('E2E Treeshake Frontend', async (ctx) => {
         if (!ctx.state.shouldRun) {
           logStepSkip(ctx, 'Not affected by current changes.');
           return;
         }
-        await runCommand(
-          'pnpm',
-          ['--filter', '@module-federation/treeshake-frontend', 'run', 'e2e'],
-          ctx,
-        );
+        await runCommand('pnpm', ['run', 'e2e:treeshake:frontend'], ctx);
       }),
     ],
   },
@@ -334,10 +306,7 @@ const jobs = [
           logStepSkip(ctx, 'Not affected by current changes.');
           return;
         }
-        await runShell(
-          'lsof -ti tcp:3050,3051,3052,3053,3054,3055,3056 | xargs -r kill && pnpm run app:modern:dev & sleep 30 && for port in 3050 3051 3052 3053 3054 3055 3056; do while true; do response=$(curl -s http://127.0.0.1:$port/mf-manifest.json); if echo "$response" | jq empty >/dev/null 2>&1; then break; fi; sleep 1; done; done',
-          ctx,
-        );
+        await runCommand('pnpm', ['run', 'e2e:modern:ssr'], ctx);
       }),
     ],
   },
@@ -357,11 +326,7 @@ const jobs = [
           logStepSkip(ctx, 'Not affected by current changes.');
           return;
         }
-        await runCommand(
-          'node',
-          ['tools/scripts/run-router-e2e.mjs', '--mode=dev'],
-          ctx,
-        );
+        await runCommand('pnpm', ['run', 'e2e:router'], ctx);
       }),
     ],
   },
@@ -498,8 +463,9 @@ const jobs = [
           logStepSkip(ctx, 'Not affected by current changes.');
           return;
         }
-        await runShell(
-          'npx kill-port --port 3001,3002 && pnpm --filter shared-tree-shaking-no-server-host run test:e2e && lsof -ti tcp:3001,3002 | xargs kill',
+        await runCommand(
+          'pnpm',
+          ['run', 'e2e:shared-tree-shaking:runtime-infer'],
           ctx,
         );
       }),
@@ -508,8 +474,9 @@ const jobs = [
           logStepSkip(ctx, 'Not affected by current changes.');
           return;
         }
-        await runShell(
-          'npx kill-port --port 3001,3002,3003 && pnpm --filter shared-tree-shaking-with-server-host run test:e2e && lsof -ti tcp:3001,3002,3003 | xargs kill',
+        await runCommand(
+          'pnpm',
+          ['run', 'e2e:shared-tree-shaking:server-calc'],
           ctx,
         );
       }),
@@ -535,16 +502,10 @@ const jobs = [
         runShell('sudo apt-get update && sudo apt-get install xvfb', ctx),
       ),
       step('E2E Chrome Devtools Dev', (ctx) =>
-        runShell(
-          'npx kill-port 3009 3010 3011 3012 3013 4001 && pnpm run app:manifest:dev & echo "done" && npx wait-on tcp:3009 tcp:3010 tcp:3011 tcp:3012 tcp:3013 && sleep 10 && pnpm --filter @module-federation/devtools run e2e:devtools',
-          ctx,
-        ),
+        runCommand('pnpm', ['run', 'e2e:devtools:dev'], ctx),
       ),
       step('E2E Chrome Devtools Prod', (ctx) =>
-        runShell(
-          'npx kill-port 3009 3010 3011 3012 3013 4001 && npx kill-port 3009 3010 3011 3012 3013 4001 && pnpm run app:manifest:prod & echo "done" && npx wait-on tcp:3009 tcp:3010 tcp:3011 tcp:3012 tcp:3013 && sleep 30 && pnpm --filter @module-federation/devtools run e2e:devtools',
-          ctx,
-        ),
+        runCommand('pnpm', ['run', 'e2e:devtools:prod'], ctx),
       ),
       step('Kill devtools ports', (ctx) =>
         runShell('npx kill-port 3013 3009 3010 3011 3012 4001 || true', ctx),
@@ -1004,19 +965,6 @@ async function runIfAffected(ctx, affectedAppName, run) {
     return;
   }
   await run();
-}
-
-async function runTurboTaskIfAffected(
-  ctx,
-  { affectedAppName, taskName, filters = [] },
-) {
-  await runIfAffected(ctx, affectedAppName, async () => {
-    const args = ['exec', 'turbo', 'run', taskName];
-    for (const filter of filters) {
-      args.push(`--filter=${filter}`);
-    }
-    await runCommand('pnpm', args, ctx);
-  });
 }
 
 async function runChangedPackageTests(ctx) {
