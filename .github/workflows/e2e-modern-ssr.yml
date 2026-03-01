@@ -49,6 +49,6 @@ jobs:
             exit "$ci_status"
           fi
 
-      - name: E2E Test for ModernJS SSR
+      - name: Manifest verification for ModernJS SSR
         if: steps.check-ci.outputs.run-e2e == 'true'
-        run: lsof -ti tcp:3050,3051,3052,3053,3054,3055,3056 | xargs -r kill && pnpm run app:modern:dev & sleep 30 && for port in 3050 3051 3052 3053 3054 3055 3056; do while true; do response=$(curl -s http://127.0.0.1:$port/mf-manifest.json); if echo "$response" | jq empty >/dev/null 2>&1; then break; fi; sleep 1; done; done
+        run: node tools/scripts/run-modern-e2e.mjs --mode=manifest

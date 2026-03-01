@@ -50,6 +50,6 @@ jobs:
             exit "$ci_status"
           fi
 
-      - name: E2E Test for ModernJS
+      - name: Host E2E Test for ModernJS
         if: steps.check-ci.outputs.run-e2e == 'true'
-        run: npx kill-port --port 4001 && pnpm --filter modernjs-ssr-host run test:e2e && npx kill-port --port 4001
+        run: node tools/scripts/run-modern-e2e.mjs --mode=test
