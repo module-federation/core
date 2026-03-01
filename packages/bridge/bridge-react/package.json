@@ -130,7 +130,9 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "pnpm exec jest --config jest.config.ts --passWithNoTests"
+    "test": "pnpm exec jest --config jest.config.ts --passWithNoTests",
+    "turbo:build": "pnpm run build",
+    "turbo:test": "pnpm run test"
   },
   "dependencies": {
     "@module-federation/bridge-shared": "workspace:*",

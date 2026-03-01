@@ -27,7 +27,10 @@
     "changeset": "packages/cli/bin.js",
     "check-all": "yarn test && yarn types:check && yarn lint && yarn format",
     "version-packages": "changeset version && yarn format:fix",
-    "release": "yarn build && changeset publish"
+    "release": "yarn build && changeset publish",
+    "turbo:build": "pnpm run build",
+    "turbo:test": "pnpm run test",
+    "turbo:lint": "pnpm run lint"
   },
   "license": "MIT",
   "repository": {

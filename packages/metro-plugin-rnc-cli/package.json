@@ -40,6 +40,9 @@
   "scripts": {
     "build": "echo 'No build needed for metro-plugin-rnc-cli - pure JavaScript package'",
     "test": "pnpm exec jest --config jest.config.ts --passWithNoTests --watchman=false",
-    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.{js,ts}\""
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.{js,ts}\"",
+    "turbo:build": "pnpm run build",
+    "turbo:test": "pnpm run test",
+    "turbo:lint": "pnpm run lint"
   }
 }

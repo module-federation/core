@@ -52,6 +52,9 @@
     "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",
     "test": "pnpm exec jest --config jest.config.js --passWithNoTests",
     "test:ci": "pnpm exec jest --config jest.config.js --passWithNoTests --ci --coverage",
-    "pre-release": "pnpm --filter @module-federation/error-codes run test && pnpm --filter @module-federation/error-codes run build"
+    "pre-release": "pnpm --filter @module-federation/error-codes run test && pnpm --filter @module-federation/error-codes run build",
+    "turbo:build": "pnpm run build",
+    "turbo:test": "pnpm run test",
+    "turbo:lint": "pnpm run lint"
   }
 }

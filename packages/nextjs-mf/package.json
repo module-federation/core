@@ -25,7 +25,10 @@
     "build": "tsdown --config tsdown.config.mts",
     "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.js\" \"**/*.ts\"",
     "test": "pnpm exec jest --config jest.config.js --passWithNoTests",
-    "pre-release": "pnpm --filter @module-federation/nextjs-mf run test && pnpm --filter @module-federation/nextjs-mf run build && rm -f ./dist/package.json"
+    "pre-release": "pnpm --filter @module-federation/nextjs-mf run test && pnpm --filter @module-federation/nextjs-mf run build && rm -f ./dist/package.json",
+    "turbo:build": "pnpm run build",
+    "turbo:test": "pnpm run test",
+    "turbo:lint": "pnpm run lint"
   },
   "exports": {
     ".": {

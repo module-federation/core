@@ -40,12 +40,12 @@
     "e2e:devtools:dev": "npx kill-port 3009 3010 3011 3012 3013 4001 && pnpm run app:manifest:dev & echo \"done\" && npx wait-on tcp:3009 tcp:3010 tcp:3011 tcp:3012 tcp:3013 && sleep 10 && pnpm exec turbo run e2e:devtools --filter=@module-federation/devtools",
     "e2e:devtools:prod": "npx kill-port 3009 3010 3011 3012 3013 4001 && npx kill-port 3009 3010 3011 3012 3013 4001 && pnpm run app:manifest:prod & echo \"done\" && npx wait-on tcp:3009 tcp:3010 tcp:3011 tcp:3012 tcp:3013 && sleep 30 && pnpm exec turbo run e2e:devtools --filter=@module-federation/devtools",
     "enhanced:rstest": "pnpm --filter @module-federation/enhanced run build && NODE_OPTIONS=--experimental-vm-modules npx rstest -c packages/enhanced/rstest.config.ts",
-    "lint": "pnpm exec turbo run lint",
+    "lint": "pnpm run turbo:lint:pkg",
     "test": "pnpm exec turbo run test",
     "test:affected": "pnpm exec turbo run test --affected",
-    "build": "pnpm exec turbo run build --filter=./packages/** --concurrency=20",
-    "build:pkg": "pnpm exec turbo run build --filter=./packages/**",
-    "test:pkg": "pnpm exec turbo run test --filter=./packages/**",
+    "build": "pnpm run turbo:build:pkg -- --concurrency=20",
+    "build:pkg": "pnpm run turbo:build:pkg",
+    "test:pkg": "pnpm run turbo:test:pkg",
     "lint-fix": "node tools/scripts/lint-fix.mjs",
     "trigger-release": "node -e 'import(\"open\").then(open => open.default(\"https://github.com/module-federation/core/actions/workflows/trigger-release.yml\"))'",
     "serve:next": "pnpm exec turbo run serve --filter=@module-federation/3000-home --filter=@module-federation/3001-shop --filter=@module-federation/3002-checkout --filter=next-app-router-4000 --filter=next-app-router-4001 --concurrency=20",
@@ -74,7 +74,10 @@
     "commitgen:staged": "./commit-gen.js --path ./packages --staged",
     "commitgen:main": "./commit-gen.js --path ./packages",
     "changeset:status": "changeset status",
-    "generate:schema": "pnpm --filter @module-federation/enhanced run generate:schema && pnpm exec prettier --write ."
+    "generate:schema": "pnpm --filter @module-federation/enhanced run generate:schema && pnpm exec prettier --write .",
+    "turbo:build:pkg": "pnpm exec turbo run turbo:build --filter=./packages/**",
+    "turbo:test:pkg": "pnpm exec turbo run turbo:test --filter=./packages/**",
+    "turbo:lint:pkg": "pnpm exec turbo run turbo:lint --filter=./packages/**"
   },
   "pnpm": {
     "packageExtensions": {

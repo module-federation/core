@@ -24,7 +24,9 @@
     "postinstall": "bash install-deps.bash",
     "build:chrome-plugins": "pnpm -C . build",
     "e2e:devtools": "pnpm -C . test:e2e",
-    "e2e:devtools:ui": "pnpm -C . test:e2e:ui"
+    "e2e:devtools:ui": "pnpm -C . test:e2e:ui",
+    "turbo:build": "pnpm run build",
+    "turbo:test": "pnpm run test"
   },
   "files": [
     "dist/",

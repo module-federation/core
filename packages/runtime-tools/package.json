@@ -85,6 +85,9 @@
   "scripts": {
     "build": "tsdown --config tsdown.config.ts",
     "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",
-    "test": "pnpm exec jest --config jest.config.cjs --passWithNoTests"
+    "test": "pnpm exec jest --config jest.config.cjs --passWithNoTests",
+    "turbo:build": "pnpm run build",
+    "turbo:test": "pnpm run test",
+    "turbo:lint": "pnpm run lint"
   }
 }
