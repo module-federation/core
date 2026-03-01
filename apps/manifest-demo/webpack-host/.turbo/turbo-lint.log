@@ -1,7 +1,0 @@
-
-> 3008-webpack-host@0.0.0 lint /workspace/apps/manifest-demo/webpack-host
-> ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --no-error-on-unmatched-pattern --ignore-pattern node_modules **/*.{ts,tsx,js,jsx}
-
-../../..                                 |  WARN  Unsupported engine: wanted: {"node":"^20"} (current: {"node":"v22.22.0","pnpm":"10.28.0"})
-(node:51433) ESLintRCWarning: You are using an eslintrc configuration file, which is deprecated and support will be removed in v10.0.0. Please migrate to an eslint.config.js file. See https://eslint.org/docs/latest/use/configure/migration-guide for details. An eslintrc configuration file is used because you have the ESLINT_USE_FLAT_CONFIG environment variable set to false. If you want to use an eslint.config.js file, remove the environment variable. If you want to find the location of the eslintrc configuration file, use the --debug flag.
-(Use `node --trace-warnings ...` to show where the warning was created)
