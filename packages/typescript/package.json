@@ -28,7 +28,7 @@
     "directory": "packages/typescript"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p tsconfig.lib.json",
     "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\"",
     "test": "pnpm exec jest --config jest.config.ts --passWithNoTests",
     "test:ci": "pnpm exec jest --config jest.config.ts --passWithNoTests --ci --coverage",
