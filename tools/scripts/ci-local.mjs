@@ -141,6 +141,19 @@ const jobs = [
       step('Build shared packages', (ctx) =>
         runCommand('pnpm', ['run', 'build:pkg'], ctx),
       ),
+      step('Check metro package publishing compatibility (publint)', (ctx) =>
+        runShell(
+          `
+            for pkg in packages/metro-*; do
+              if [ -f "$pkg/package.json" ]; then
+                echo "Checking $pkg..."
+                npx publint "$pkg"
+              fi
+            done
+          `,
+          ctx,
+        ),
+      ),
       step('Test metro packages', (ctx) =>
         runCommand(
           'pnpm',
