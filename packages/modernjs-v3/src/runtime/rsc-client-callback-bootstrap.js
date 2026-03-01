@@ -354,18 +354,13 @@ function queueCallbackInstallAfterChunkLoad(promises) {
     return;
   }
 
-  let callbackInstallPromise;
-  callbackInstallPromise = Promise.resolve()
-    .then(() =>
-      Promise.allSettled(
-        promises.filter((promise) => promise !== callbackInstallPromise),
-      ),
-    )
-    .catch(() => undefined)
-    .then(() => {
-      installServerCallbacks();
-    });
-  promises.push(callbackInstallPromise);
+  Promise.resolve().then(() => {
+    Promise.allSettled(promises.slice())
+      .catch(() => undefined)
+      .then(() => {
+        installServerCallbacks();
+      });
+  });
 }
 
 function getWrappedChunkHandler(chunkHandler) {
