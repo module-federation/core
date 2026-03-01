@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { spawn, spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
-import { dirname, join, relative, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 process.env.CI = process.env.CI ?? 'true';
@@ -1021,28 +1021,26 @@ async function runTurboTaskIfAffected(
 
 async function runChangedPackageTests(ctx) {
   const base = resolveGitRefForDiff(process.env.CI_LOCAL_BASE_REF);
-  const head = resolveGitRefForDiff(process.env.CI_LOCAL_HEAD_REF ?? 'HEAD');
 
-  if (!base || !head) {
+  if (!base) {
     logStepSkip(
       ctx,
-      `Unable to resolve git refs for affected package tests (base=${base}, head=${head}).`,
+      `Unable to resolve base ref for affected package tests (base=${base}).`,
     );
     return;
   }
 
-  const changedFiles = getChangedFiles(base, head);
-  const packageNames = getTestRelevantChangedPackages(changedFiles);
+  const packageNames = getAffectedPackageTestTargets(base);
   if (packageNames.length === 0) {
     logStepSkip(
       ctx,
-      `No test-relevant package changes detected (${base}..${head}).`,
+      `No affected package tests detected via Turbo graph (${base}..HEAD).`,
     );
     return;
   }
 
   console.log(
-    `[ci:local] ${ctx.jobName} -> Running tests for ${packageNames.length} changed package(s): ${packageNames.join(', ')}`,
+    `[ci:local] ${ctx.jobName} -> Running tests for ${packageNames.length} affected package(s): ${packageNames.join(', ')}`,
   );
   const args = ['exec', 'turbo', 'run', 'test'];
   for (const packageName of packageNames) {
@@ -1079,95 +1077,71 @@ function hasGitRef(ref) {
   return result.status === 0;
 }
 
-function getChangedFiles(base, head) {
-  const result = spawnSync('git', ['diff', '--name-only', base, head], {
-    cwd: ROOT,
-    stdio: 'pipe',
-    encoding: 'utf-8',
-  });
-  if (result.status !== 0) {
+function getAffectedPackageTestTargets(baseRef) {
+  const dryRunResult = spawnSync(
+    'pnpm',
+    [
+      'exec',
+      'turbo',
+      'run',
+      'test',
+      `--filter=...[${baseRef}]`,
+      '--dry-run=json',
+    ],
+    {
+      cwd: ROOT,
+      stdio: 'pipe',
+      encoding: 'utf-8',
+      env: process.env,
+    },
+  );
+  if (dryRunResult.status !== 0) {
     throw new Error(
-      `[ci:local] Failed to evaluate changed files for ${base}..${head}: ${result.stderr || result.stdout}`,
+      `[ci:local] Failed to compute affected test graph from Turbo: ${dryRunResult.stderr || dryRunResult.stdout}`,
     );
   }
-  return result.stdout
-    .split('\n')
-    .map((entry) => entry.trim())
-    .filter(Boolean);
-}
 
-function getTestRelevantChangedPackages(changedFiles) {
-  const packageCache = new Map();
-  const packageNames = new Set();
-
-  for (const changedFile of changedFiles) {
-    const packageInfo = resolvePackageForFile(changedFile, packageCache);
-    if (!packageInfo) {
-      continue;
-    }
-    const packageRelativePath = relative(
-      packageInfo.rootPath,
-      resolve(ROOT, changedFile),
-    ).replaceAll('\\', '/');
-    if (!shouldTriggerPackageTest(packageRelativePath)) {
-      continue;
-    }
-    packageNames.add(packageInfo.name);
+  const output = dryRunResult.stdout?.trim();
+  if (!output) {
+    return [];
   }
 
+  let dryRunJson;
+  try {
+    dryRunJson = JSON.parse(output);
+  } catch (error) {
+    throw new Error(
+      `[ci:local] Failed to parse Turbo dry-run output: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+
+  const packageNames = new Set();
+  const tasks = Array.isArray(dryRunJson?.tasks) ? dryRunJson.tasks : [];
+  for (const task of tasks) {
+    if (!task || typeof task !== 'object') {
+      continue;
+    }
+    if (typeof task.taskId !== 'string' || !task.taskId.endsWith('#test')) {
+      continue;
+    }
+    if (typeof task.package !== 'string' || !task.package) {
+      continue;
+    }
+    if (typeof task.directory !== 'string') {
+      continue;
+    }
+
+    const taskDirectory = normalizePath(task.directory);
+    if (!taskDirectory.startsWith('packages/')) {
+      continue;
+    }
+    packageNames.add(task.package);
+  }
   return Array.from(packageNames).sort();
 }
 
-function resolvePackageForFile(changedFile, cache) {
-  const absolutePath = resolve(ROOT, changedFile);
-  let current = dirname(absolutePath);
-  const packagesRoot = resolve(ROOT, 'packages');
-
-  while (current.startsWith(packagesRoot)) {
-    if (cache.has(current)) {
-      return cache.get(current);
-    }
-    const packageJsonPath = join(current, 'package.json');
-    if (existsSync(packageJsonPath)) {
-      try {
-        const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
-        const packageInfo =
-          typeof packageJson?.name === 'string' && packageJson.name
-            ? { name: packageJson.name, rootPath: current }
-            : null;
-        cache.set(current, packageInfo);
-        return packageInfo;
-      } catch {
-        cache.set(current, null);
-        return null;
-      }
-    }
-    const parent = dirname(current);
-    if (parent === current) {
-      break;
-    }
-    current = parent;
-  }
-  return null;
-}
-
-function shouldTriggerPackageTest(packageRelativePath) {
-  const normalized = packageRelativePath.replaceAll('\\', '/');
-
-  if (
-    normalized.startsWith('src/') ||
-    normalized.startsWith('test/') ||
-    normalized.startsWith('tests/') ||
-    normalized.startsWith('__tests__/')
-  ) {
-    return true;
-  }
-
-  if (/\.(spec|test)\.[cm]?[jt]sx?$/.test(normalized)) {
-    return true;
-  }
-
-  return false;
+function normalizePath(filePath) {
+  return filePath.replaceAll('\\', '/');
 }
 
 function runCommand(command, args = [], options = {}) {
