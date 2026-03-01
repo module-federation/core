@@ -25,13 +25,7 @@ If prose docs conflict with workflows (for example `README.md` or `CONTRIBUTING.
 - pnpm: `10.28.0` (from `package.json` `packageManager`)
 - Package manager: pnpm only
 
-Preferred setup for agents:
-
-```bash
-pnpm run setup:codex
-```
-
-Fallback setup:
+Recommended setup for agents:
 
 ```bash
 corepack enable
@@ -49,7 +43,8 @@ Use these rules whenever the checkout is a git worktree (typically `git rev-pars
 1. Setup/install via:
 
 ```bash
-pnpm run setup:codex -- --frozen-lockfile
+corepack enable
+pnpm install --frozen-lockfile
 ```
 
 2. Run workspace tasks via Turbo/package scripts:

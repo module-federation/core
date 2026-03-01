@@ -20,7 +20,6 @@
   "license": "MIT",
   "scripts": {
     "turbo": "turbo",
-    "setup:codex": "./scripts/codex-setup.sh",
     "commit": "cz",
     "docs": "typedoc",
     "f": "pnpm exec prettier --write .",
