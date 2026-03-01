@@ -77,13 +77,7 @@ Wrapper script also exists: `pnpm run lint-fix`.
 
 ### Package Pipeline Parity (`tag:type:pkg`)
 
-- Cold-cache package build:
-
-```bash
-pnpm run build:pkg
-```
-
-- Warm-cache package build:
+- Package build (Turbo cache handled automatically):
 
 ```bash
 pnpm run build:pkg

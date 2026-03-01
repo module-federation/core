@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { spawn, spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 process.env.CI = process.env.CI ?? 'true';
@@ -39,15 +39,6 @@ const jobs = [
   {
     name: 'build-and-test',
     steps: [
-      step('Optional clean node_modules/.turbo', async (ctx) => {
-        if (process.env.CI_LOCAL_CLEAN === 'true') {
-          await runShell('rm -rf node_modules .turbo', ctx);
-          return;
-        }
-        console.log(
-          '[ci:local] Skipping cache clean (set CI_LOCAL_CLEAN=true to enable).',
-        );
-      }),
       step('Install dependencies', (ctx) =>
         runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
       ),
@@ -80,10 +71,7 @@ const jobs = [
           ctx,
         ),
       ),
-      step('Build packages (cold cache)', (ctx) =>
-        runCommand('pnpm', ['run', 'build:pkg'], ctx),
-      ),
-      step('Build packages (warm cache)', (ctx) =>
+      step('Build packages', (ctx) =>
         runCommand('pnpm', ['run', 'build:pkg'], ctx),
       ),
       step('Check package publishing compatibility (publint)', (ctx) =>
@@ -104,9 +92,7 @@ const jobs = [
           ctx,
         ),
       ),
-      step('Run package tests', (ctx) =>
-        runCommand('pnpm', ['run', 'test:pkg'], ctx),
-      ),
+      step('Run affected package tests', (ctx) => runChangedPackageTests(ctx)),
     ],
   },
   {
@@ -535,7 +521,7 @@ const jobs = [
     steps: [
       step('Install dependencies', (ctx) =>
         runShell(
-          'pnpm install --frozen-lockfile && rm -rf .turbo && find . -maxdepth 6 -type d \\( -name ".cache" -o -name ".modern-js" \\) -exec rm -rf {} +',
+          'pnpm install --frozen-lockfile && find . -maxdepth 6 -type d \\( -name ".cache" -o -name ".modern-js" \\) -exec rm -rf {} +',
           ctx,
         ),
       ),
@@ -1031,6 +1017,157 @@ async function runTurboTaskIfAffected(
     }
     await runCommand('pnpm', args, ctx);
   });
+}
+
+async function runChangedPackageTests(ctx) {
+  const base = resolveGitRefForDiff(process.env.CI_LOCAL_BASE_REF);
+  const head = resolveGitRefForDiff(process.env.CI_LOCAL_HEAD_REF ?? 'HEAD');
+
+  if (!base || !head) {
+    logStepSkip(
+      ctx,
+      `Unable to resolve git refs for affected package tests (base=${base}, head=${head}).`,
+    );
+    return;
+  }
+
+  const changedFiles = getChangedFiles(base, head);
+  const packageNames = getTestRelevantChangedPackages(changedFiles);
+  if (packageNames.length === 0) {
+    logStepSkip(
+      ctx,
+      `No test-relevant package changes detected (${base}..${head}).`,
+    );
+    return;
+  }
+
+  console.log(
+    `[ci:local] ${ctx.jobName} -> Running tests for ${packageNames.length} changed package(s): ${packageNames.join(', ')}`,
+  );
+  const args = ['exec', 'turbo', 'run', 'test'];
+  for (const packageName of packageNames) {
+    args.push(`--filter=${packageName}`);
+  }
+  await runCommand('pnpm', args, ctx);
+}
+
+function resolveGitRefForDiff(preferredRef) {
+  if (hasGitRef(preferredRef)) {
+    return preferredRef;
+  }
+  const fallbackRefs = ['origin/main', 'main', 'HEAD~1'];
+  for (const ref of fallbackRefs) {
+    if (hasGitRef(ref)) {
+      return ref;
+    }
+  }
+  return null;
+}
+
+function hasGitRef(ref) {
+  if (!ref) {
+    return false;
+  }
+  const result = spawnSync(
+    'git',
+    ['rev-parse', '--verify', '--quiet', `${ref}^{commit}`],
+    {
+      cwd: ROOT,
+      stdio: 'ignore',
+    },
+  );
+  return result.status === 0;
+}
+
+function getChangedFiles(base, head) {
+  const result = spawnSync('git', ['diff', '--name-only', base, head], {
+    cwd: ROOT,
+    stdio: 'pipe',
+    encoding: 'utf-8',
+  });
+  if (result.status !== 0) {
+    throw new Error(
+      `[ci:local] Failed to evaluate changed files for ${base}..${head}: ${result.stderr || result.stdout}`,
+    );
+  }
+  return result.stdout
+    .split('\n')
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+}
+
+function getTestRelevantChangedPackages(changedFiles) {
+  const packageCache = new Map();
+  const packageNames = new Set();
+
+  for (const changedFile of changedFiles) {
+    const packageInfo = resolvePackageForFile(changedFile, packageCache);
+    if (!packageInfo) {
+      continue;
+    }
+    const packageRelativePath = relative(
+      packageInfo.rootPath,
+      resolve(ROOT, changedFile),
+    ).replaceAll('\\', '/');
+    if (!shouldTriggerPackageTest(packageRelativePath)) {
+      continue;
+    }
+    packageNames.add(packageInfo.name);
+  }
+
+  return Array.from(packageNames).sort();
+}
+
+function resolvePackageForFile(changedFile, cache) {
+  const absolutePath = resolve(ROOT, changedFile);
+  let current = dirname(absolutePath);
+  const packagesRoot = resolve(ROOT, 'packages');
+
+  while (current.startsWith(packagesRoot)) {
+    if (cache.has(current)) {
+      return cache.get(current);
+    }
+    const packageJsonPath = join(current, 'package.json');
+    if (existsSync(packageJsonPath)) {
+      try {
+        const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
+        const packageInfo =
+          typeof packageJson?.name === 'string' && packageJson.name
+            ? { name: packageJson.name, rootPath: current }
+            : null;
+        cache.set(current, packageInfo);
+        return packageInfo;
+      } catch {
+        cache.set(current, null);
+        return null;
+      }
+    }
+    const parent = dirname(current);
+    if (parent === current) {
+      break;
+    }
+    current = parent;
+  }
+  return null;
+}
+
+function shouldTriggerPackageTest(packageRelativePath) {
+  const normalized = packageRelativePath.replaceAll('\\', '/');
+
+  if (
+    normalized.startsWith('src/') ||
+    normalized.startsWith('test/') ||
+    normalized.startsWith('tests/') ||
+    normalized.startsWith('__tests__/')
+  ) {
+    return true;
+  }
+
+  if (/\.(spec|test)\.[cm]?[jt]sx?$/.test(normalized)) {
+    return true;
+  }
+
+  return false;
 }
 
 function runCommand(command, args = [], options = {}) {

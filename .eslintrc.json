@@ -19,6 +19,7 @@
     {
       "files": ["*.js", "*.jsx"],
       "extends": ["eslint:recommended"],
+      "parserOptions": { "ecmaVersion": 2020, "sourceType": "module" },
       "rules": {
         "@typescript-eslint/no-useless-constructor": "off",
         "no-extra-semi": "error"
