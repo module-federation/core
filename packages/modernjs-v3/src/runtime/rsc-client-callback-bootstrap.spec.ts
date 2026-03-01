@@ -134,6 +134,48 @@ describe('rsc-client-callback-bootstrap', () => {
     expect(lateRuntime.setServerCallback).toHaveBeenCalledTimes(1);
   });
 
+  it('waits for handlers added after the hook to settle before installing callbacks', async () => {
+    const runtimeRequire: Record<string, any> = {
+      c: {},
+      f: {},
+    };
+    const originalChunkLoader = vi.fn(async (chunkId: string) => {
+      const promises: Promise<unknown>[] = [];
+      for (const handler of Object.values(runtimeRequire.f)) {
+        if (typeof handler === 'function') {
+          handler(chunkId, promises);
+        }
+      }
+      await Promise.all(promises);
+      return 'chunk-loaded';
+    });
+    runtimeRequire.e = originalChunkLoader;
+
+    evaluateBootstrap({ runtimeRequire });
+
+    const lateRuntime = createClientRuntimeModule();
+    runtimeRequire.f.zzzLateChunkHandler = vi.fn(
+      (_chunkId: string, promises: Promise<unknown>[]) => {
+        promises.push(
+          new Promise<void>((resolve) => {
+            setTimeout(() => {
+              runtimeRequire.c['late-runtime-module'] = {
+                exports: lateRuntime,
+              };
+              resolve();
+            }, 0);
+          }),
+        );
+      },
+    );
+
+    await runtimeRequire.e('late-runtime');
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await flushMicrotasks();
+
+    expect(lateRuntime.setServerCallback).toHaveBeenCalledTimes(1);
+  });
+
   it('wraps existing callback chunk handler and still installs late callbacks', async () => {
     const existingCallbackChunkHandler = vi.fn(
       (_chunkId: string, promises: Promise<unknown>[]) => {
