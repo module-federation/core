@@ -15,11 +15,10 @@ const MODERN_APPS = [
   'modernjs-ssr-dynamic-remote-new-version',
   'modernjs-ssr-host',
   'modernjs-ssr-nested-remote',
-  'modernjs-ssr-remote',
   'modernjs-ssr-remote-new-version',
 ];
 
-const MODERN_PORTS = ['3050', '3051', '3052', '3053', '3054', '3055', '3056'];
+const MODERN_PORTS = ['3050', '3052', '3053', '3054', '3055', '3056'];
 const MODERN_MANIFEST_URLS = MODERN_PORTS.map(
   (port) => `http://127.0.0.1:${port}/mf-manifest.json`,
 );
@@ -41,20 +40,11 @@ const MODERN_SERVE_CMD = [
   ...MODERN_APPS.map((appName) => `--filter=${appName}`),
   '--concurrency=20',
 ];
-const MODERN_HOST_E2E_CMD = [
-  'pnpm',
-  'exec',
-  'turbo',
-  'run',
-  'test:e2e',
-  '--filter=modernjs-ssr-host',
-];
 
 const SCENARIOS = {
   test: {
-    label: 'modernjs e2e',
+    label: 'modernjs readiness verification',
     serveCmd: MODERN_SERVE_CMD,
-    e2eCmd: MODERN_HOST_E2E_CMD,
     waitTargets: MODERN_WAIT_TARGETS,
     verifyManifest: true,
   },

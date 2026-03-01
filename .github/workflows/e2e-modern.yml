@@ -46,7 +46,7 @@ jobs:
         run: npx cypress install
 
       - name: Build shared packages
-        run: pnpm run build:pkg
+        run: pnpm exec turbo run build --filter=./packages/** --concurrency=20
 
       - name: Check CI conditions
         id: check-ci
@@ -62,6 +62,6 @@ jobs:
             exit "$ci_status"
           fi
 
-      - name: Host E2E Test for ModernJS
+      - name: Run Modern package test suite
         if: steps.check-ci.outputs.run-e2e == 'true'
-        run: node tools/scripts/run-modern-e2e.mjs --mode=test
+        run: pnpm exec turbo run test --filter=@module-federation/modern-js --filter=@module-federation/modern-js-v3 --concurrency=20

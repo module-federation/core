@@ -46,7 +46,7 @@ jobs:
         run: npx cypress install
 
       - name: Build shared packages
-        run: pnpm run build:pkg
+        run: pnpm exec turbo run build --filter=./packages/** --concurrency=20
 
       - name: Check CI conditions
         id: check-ci
@@ -64,4 +64,4 @@ jobs:
 
       - name: E2E Node Federation
         if: steps.check-ci.outputs.run-e2e == 'true'
-        run: pnpm run app:node:dev & sleep 25 && npx wait-on tcp:3333 && pnpm --filter node-host-e2e run test:e2e
+        run: pnpm run app:node:dev & sleep 25 && npx wait-on tcp:3333 && pnpm exec turbo run test:e2e --filter=node-host-e2e --only

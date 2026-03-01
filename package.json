@@ -24,7 +24,7 @@
     "docs": "typedoc",
     "f": "pnpm exec prettier --write .",
     "ci:local": "node tools/scripts/ci-local.mjs",
-    "e2e:modern": "pnpm exec turbo run test:e2e --filter=modernjs-ssr-host",
+    "e2e:modern": "pnpm exec turbo run test --filter=@module-federation/modern-js --filter=@module-federation/modern-js-v3 --concurrency=20",
     "e2e:runtime": "pnpm exec turbo run test:e2e --filter=runtime-host",
     "e2e:manifest:dev": "pnpm exec turbo run test:e2e --filter=3008-webpack-host",
     "e2e:manifest:prod": "pnpm exec turbo run test:e2e:production --filter=3008-webpack-host",

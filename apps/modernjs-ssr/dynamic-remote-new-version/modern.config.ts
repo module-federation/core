@@ -11,7 +11,7 @@ export default defineConfig({
   },
 
   tools: {
-    webpack: (config) => {
+    rspack: (config) => {
       config.output!.uniqueName = 'modernjs-ssr-dynamic-remote-new-version';
       config.output!.chunkLoadingGlobal =
         'modernjs-ssr-dynamic-remote-new-version';

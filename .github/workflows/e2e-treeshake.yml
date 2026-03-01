@@ -45,7 +45,7 @@ jobs:
             ${{ runner.os }}-turbo-
 
       - name: Build shared packages
-        run: pnpm run build:pkg
+        run: pnpm exec turbo run build --filter=./packages/** --concurrency=20
 
       - name: Check CI conditions
         id: check-ci
@@ -63,8 +63,8 @@ jobs:
 
       - name: E2E Treeshake Server
         if: steps.check-ci.outputs.run-e2e == 'true'
-        run: pnpm --filter @module-federation/treeshake-server run test
+        run: pnpm exec turbo run test --filter=@module-federation/treeshake-server --only
 
       - name: E2E Treeshake Frontend
         if: steps.check-ci.outputs.run-e2e == 'true'
-        run: pnpm --filter @module-federation/treeshake-frontend run e2e
+        run: pnpm exec turbo run e2e --filter=@module-federation/treeshake-frontend --only

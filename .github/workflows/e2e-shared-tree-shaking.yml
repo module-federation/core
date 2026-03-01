@@ -45,7 +45,7 @@ jobs:
         run: npx cypress install
 
       - name: Build shared packages
-        run: pnpm run build:pkg
+        run: pnpm exec turbo run build --filter=./packages/** --concurrency=20
 
       - name: Check CI conditions
         id: check-ci
@@ -63,8 +63,8 @@ jobs:
 
       - name: E2E Shared Tree Shaking (runtime-infer)
         if: steps.check-ci.outputs.run-e2e == 'true'
-        run: npx kill-port --port 3001,3002 && pnpm --filter shared-tree-shaking-no-server-host run test:e2e && lsof -ti tcp:3001,3002 | xargs kill
+        run: npx kill-port --port 3001,3002 && pnpm exec turbo run test:e2e --filter=shared-tree-shaking-no-server-host --only && lsof -ti tcp:3001,3002 | xargs kill
 
       - name: E2E Shared Tree Shaking (server-calc)
         if: steps.check-ci.outputs.run-e2e == 'true'
-        run: npx kill-port --port 3001,3002,3003 && pnpm --filter shared-tree-shaking-with-server-host run test:e2e && lsof -ti tcp:3001,3002,3003 | xargs kill
+        run: npx kill-port --port 3001,3002,3003 && pnpm exec turbo run test:e2e --filter=shared-tree-shaking-with-server-host --only && lsof -ti tcp:3001,3002,3003 | xargs kill

@@ -60,7 +60,7 @@ jobs:
             ${{ runner.os }}-turbo-
 
       - name: Build Internal Changesets Dependencies
-        run: pnpm --filter @changesets/assemble-release-plan run build
+        run: pnpm exec turbo run build --filter=@changesets/assemble-release-plan --concurrency=20
 
       - name: Create Release Pull Request
         uses: module-federation/actions@v2

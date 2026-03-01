@@ -5,6 +5,10 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**", "build/**", ".next/**", "out/**", "lib/**"]
     },
+    "@module-federation/metro-plugin-rnc-cli#build": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
     "build:development": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**", "build/**", ".next/**", "out/**", "lib/**"]
