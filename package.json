@@ -27,6 +27,7 @@
     "enhanced:rstest": "pnpm --filter @module-federation/enhanced run build && NODE_OPTIONS=--experimental-vm-modules npx rstest -c packages/enhanced/rstest.config.ts",
     "lint": "pnpm exec turbo run lint",
     "test": "pnpm exec turbo run test",
+    "test:affected": "pnpm exec turbo run test --affected",
     "build": "pnpm exec turbo run build --filter=./packages/* --filter=./packages/bridge/* --filter=./packages/runtime-plugins/* --concurrency=5",
     "build:pkg": "pnpm exec turbo run build --filter=./packages/* --filter=./packages/bridge/* --filter=./packages/runtime-plugins/*",
     "test:pkg": "pnpm exec turbo run test --filter=./packages/* --filter=./packages/bridge/* --filter=./packages/runtime-plugins/*",

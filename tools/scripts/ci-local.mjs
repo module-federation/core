@@ -194,19 +194,13 @@ const jobs = [
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
       setupE2E(),
-      step('Check CI conditions', async (ctx) => {
-        ctx.state.shouldRun = await ciIsAffected('3005-runtime-host', ctx);
-      }),
-      step('E2E Test for Runtime Demo', async (ctx) => {
-        if (!ctx.state.shouldRun) {
-          logStepSkip(ctx, 'Not affected by current changes.');
-          return;
-        }
-        await runShell(
-          'npx kill-port --port 3005,3006,3007 && pnpm run app:runtime:dev & echo "done" && sleep 20 && pnpm --filter runtime-host run test:e2e && lsof -ti tcp:3005,3006,3007 | xargs kill',
-          ctx,
-        );
-      }),
+      step('E2E Test for Runtime Demo', (ctx) =>
+        runTurboTaskIfAffected(ctx, {
+          affectedAppName: '3005-runtime-host',
+          taskName: 'test:e2e',
+          filters: ['runtime-host'],
+        }),
+      ),
     ],
   },
   {
@@ -214,31 +208,20 @@ const jobs = [
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
       setupE2E(),
-      step('Check CI conditions', async (ctx) => {
-        ctx.state.shouldRun = await ciIsAffected('manifest-webpack-host', ctx);
-      }),
-      step('E2E Test for Manifest Demo (dev)', async (ctx) => {
-        if (!ctx.state.shouldRun) {
-          logStepSkip(ctx, 'Not affected by current changes.');
-          return;
-        }
-        await runCommand(
-          'node',
-          ['tools/scripts/run-manifest-e2e.mjs', '--mode=dev'],
-          ctx,
-        );
-      }),
-      step('E2E Test for Manifest Demo (prod)', async (ctx) => {
-        if (!ctx.state.shouldRun) {
-          logStepSkip(ctx, 'Not affected by current changes.');
-          return;
-        }
-        await runCommand(
-          'node',
-          ['tools/scripts/run-manifest-e2e.mjs', '--mode=prod'],
-          ctx,
-        );
-      }),
+      step('E2E Test for Manifest Demo (dev)', (ctx) =>
+        runTurboTaskIfAffected(ctx, {
+          affectedAppName: 'manifest-webpack-host',
+          taskName: 'test:e2e',
+          filters: ['3008-webpack-host'],
+        }),
+      ),
+      step('E2E Test for Manifest Demo (prod)', (ctx) =>
+        runTurboTaskIfAffected(ctx, {
+          affectedAppName: 'manifest-webpack-host',
+          taskName: 'test:e2e:production',
+          filters: ['3008-webpack-host'],
+        }),
+      ),
     ],
   },
   {
@@ -272,20 +255,15 @@ const jobs = [
     },
     steps: [
       setupE2E(),
-      step('Check CI conditions', async (ctx) => {
-        ctx.state.shouldRun = await ciIsAffected('3000-home', ctx);
-      }),
-      step('E2E Test for Next.js Dev', async (ctx) => {
-        if (!ctx.state.shouldRun) {
-          logStepSkip(ctx, 'Not affected by current changes.');
-          return;
-        }
-        await runCommand(
-          'node',
-          ['tools/scripts/run-next-e2e.mjs', '--mode=dev'],
-          ctx,
-        );
-      }),
+      step('E2E Test for Next.js Dev', (ctx) =>
+        runIfAffected(ctx, '3000-home', () =>
+          runCommand(
+            'node',
+            ['tools/scripts/run-next-e2e.mjs', '--mode=dev'],
+            ctx,
+          ),
+        ),
+      ),
     ],
   },
   {
@@ -293,20 +271,15 @@ const jobs = [
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
       setupE2E(),
-      step('Check CI conditions', async (ctx) => {
-        ctx.state.shouldRun = await ciIsAffected('3000-home', ctx);
-      }),
-      step('E2E Test for Next.js Prod', async (ctx) => {
-        if (!ctx.state.shouldRun) {
-          logStepSkip(ctx, 'Not affected by current changes.');
-          return;
-        }
-        await runCommand(
-          'node',
-          ['tools/scripts/run-next-e2e.mjs', '--mode=prod'],
-          ctx,
-        );
-      }),
+      step('E2E Test for Next.js Prod', (ctx) =>
+        runIfAffected(ctx, '3000-home', () =>
+          runCommand(
+            'node',
+            ['tools/scripts/run-next-e2e.mjs', '--mode=prod'],
+            ctx,
+          ),
+        ),
+      ),
     ],
   },
   {
@@ -1023,6 +996,28 @@ function getSelectableJobNames(jobList) {
     }
   }
   return names;
+}
+
+async function runIfAffected(ctx, affectedAppName, run) {
+  const shouldRun = await ciIsAffected(affectedAppName, ctx);
+  if (!shouldRun) {
+    logStepSkip(ctx, 'Not affected by current changes.');
+    return;
+  }
+  await run();
+}
+
+async function runTurboTaskIfAffected(
+  ctx,
+  { affectedAppName, taskName, filters = [] },
+) {
+  await runIfAffected(ctx, affectedAppName, async () => {
+    const args = ['exec', 'turbo', 'run', taskName];
+    for (const filter of filters) {
+      args.push(`--filter=${filter}`);
+    }
+    await runCommand('pnpm', args, ctx);
+  });
 }
 
 function runCommand(command, args = [], options = {}) {

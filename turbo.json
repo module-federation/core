@@ -35,6 +35,9 @@
     "test:e2e:*": {
       "cache": false
     },
+    "test:e2e:production": {
+      "cache": false
+    },
     "serve": {
       "cache": false,
       "persistent": true
