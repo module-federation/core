@@ -4,8 +4,8 @@ import vm from 'vm';
 import type { BundleLoaderStrategy } from '@modern-js/server-core/node';
 import fs from 'fs-extra';
 
-const ASYNC_NODE_STARTUP_CALL =
-  'var __webpack_exports__ = __webpack_require__.x();';
+const ASYNC_NODE_STARTUP_CALL_PATTERN =
+  /var\s+__webpack_exports__\s*=\s*__webpack_require__\.x\(\s*\)\s*;/;
 const ENCODED_HMR_CLIENT_BOOTSTRAP_CALL =
   /__webpack_require__\("data:text\/javascript,[^"]*"\);\s*/g;
 
@@ -35,14 +35,14 @@ export const mfAsyncStartupLoaderStrategy: BundleLoaderStrategy = async (
     );
 
     if (
-      !sanitizedBundleCode.includes(ASYNC_NODE_STARTUP_CALL) ||
+      !ASYNC_NODE_STARTUP_CALL_PATTERN.test(sanitizedBundleCode) ||
       !sanitizedBundleCode.includes('__webpack_require__.mfAsyncStartup')
     ) {
       return undefined;
     }
 
     const patchedCode = sanitizedBundleCode.replace(
-      ASYNC_NODE_STARTUP_CALL,
+      ASYNC_NODE_STARTUP_CALL_PATTERN,
       'var __webpack_exports__ = __webpack_require__.x({}, []);',
     );
 

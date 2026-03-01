@@ -12,11 +12,21 @@ const ACTION_REMAP_WAITERS_KEY = '__MODERN_RSC_MF_ACTION_ID_MAP_WAITERS__';
 const ACTION_REMAP_WAIT_TIMEOUT_MS = 3000;
 const CALLBACK_INSTALL_RETRY_DELAY_MS = 50;
 const MAX_CALLBACK_INSTALL_ATTEMPTS = 120;
-const CALLBACK_CHUNK_LOADER_HOOK_FLAG = '__MODERN_RSC_MF_CALLBACK_HOOKED__';
+const CALLBACK_CHUNK_LOADER_HOOK_FLAG =
+  '__MODERN_RSC_MF_CALLBACK_CHUNK_LOADER_HOOKED__';
+const CALLBACK_CHUNK_LOADER_WRAPPED_FLAG =
+  '__MODERN_RSC_MF_CALLBACK_CHUNK_LOADER_WRAPPED__';
+const CALLBACK_CHUNK_HANDLER_HOOK_FLAG =
+  '__MODERN_RSC_MF_CALLBACK_CHUNK_HANDLER_HOOKED__';
+const CALLBACK_CHUNK_HANDLER_KEY = '__MODERN_RSC_MF_CALLBACK_CHUNK_HANDLER__';
+const CALLBACK_CHUNK_HANDLER_WRAPPED_FLAG =
+  '__MODERN_RSC_MF_CALLBACK_CHUNK_HANDLER_WRAPPED__';
 let hasResolvedFallbackAlias = false;
 let fallbackRemoteAlias;
 let callbackInstallAttempts = 0;
 const installedClientBrowserRuntimes = new WeakSet();
+const wrappedChunkLoaders = new WeakMap();
+const wrappedChunkHandlers = new WeakMap();
 
 function isObject(value) {
   return typeof value === 'object' && value !== null;
@@ -65,6 +75,32 @@ function getActionRemapMap() {
     return globalThis[ACTION_REMAP_GLOBAL_KEY];
   }
   return map;
+}
+
+function getHostServerManifest() {
+  const webpackRequire = getWebpackRequire();
+  if (
+    webpackRequire &&
+    isObject(webpackRequire.rscM) &&
+    isObject(webpackRequire.rscM.serverManifest)
+  ) {
+    return webpackRequire.rscM.serverManifest;
+  }
+  if (
+    isObject(globalThis.__rspack_rsc_manifest__) &&
+    isObject(globalThis.__rspack_rsc_manifest__.serverManifest)
+  ) {
+    return globalThis.__rspack_rsc_manifest__.serverManifest;
+  }
+  return undefined;
+}
+
+function hasHostServerAction(rawId) {
+  const serverManifest = getHostServerManifest();
+  if (!isObject(serverManifest)) {
+    return false;
+  }
+  return Object.prototype.hasOwnProperty.call(serverManifest, rawId);
 }
 
 function resolveFallbackRemoteAlias() {
@@ -204,27 +240,43 @@ function waitForActionRemap(rawId) {
 }
 
 async function resolveActionId(id) {
-  if (typeof id === 'string' && id.startsWith(ACTION_PREFIX)) {
-    return id;
+  const rawId = String(id);
+  if (rawId.startsWith(ACTION_PREFIX)) {
+    return rawId;
   }
 
   const remapMap = getActionRemapMap();
-  const remappedId = remapMap[id];
+  const remappedId = remapMap[rawId];
   if (typeof remappedId === 'string') {
     return remappedId;
   }
   if (remappedId === false) {
-    return id;
+    throw new Error(
+      `[modern-js-v3:rsc-bridge] Ambiguous remote action id "${rawId}" cannot be resolved safely.`,
+    );
+  }
+
+  const waitedRemappedId = await waitForActionRemap(rawId);
+  if (waitedRemappedId === false) {
+    throw new Error(
+      `[modern-js-v3:rsc-bridge] Ambiguous remote action id "${rawId}" cannot be resolved safely.`,
+    );
+  }
+  if (typeof waitedRemappedId === 'string' && waitedRemappedId !== rawId) {
+    return waitedRemappedId;
+  }
+  if (hasHostServerAction(rawId)) {
+    return rawId;
   }
 
   const fallbackAlias = resolveFallbackRemoteAlias();
   if (typeof fallbackAlias === 'string' && fallbackAlias) {
-    const prefixedId = `${ACTION_PREFIX}${fallbackAlias}:${id}`;
-    remapMap[id] = prefixedId;
+    const prefixedId = `${ACTION_PREFIX}${fallbackAlias}:${rawId}`;
+    remapMap[rawId] = prefixedId;
     return prefixedId;
   }
 
-  return waitForActionRemap(id);
+  return waitedRemappedId;
 }
 
 function createServerCallback(runtime) {
@@ -302,15 +354,17 @@ function installServerCallbacks() {
   return installedCount;
 }
 
-function hookChunkLoaderInstall() {
-  const webpackRequire = getWebpackRequire();
-  if (!webpackRequire || !isFunction(webpackRequire.e)) {
-    return;
+function getWrappedChunkLoader(chunkLoader) {
+  if (!isFunction(chunkLoader)) {
+    return chunkLoader;
+  }
+  if (chunkLoader[CALLBACK_CHUNK_LOADER_WRAPPED_FLAG]) {
+    return chunkLoader;
   }
 
-  const chunkLoader = webpackRequire.e;
-  if (chunkLoader[CALLBACK_CHUNK_LOADER_HOOK_FLAG]) {
-    return;
+  const cachedWrappedLoader = wrappedChunkLoaders.get(chunkLoader);
+  if (cachedWrappedLoader) {
+    return cachedWrappedLoader;
   }
 
   const wrappedChunkLoader = function (...args) {
@@ -322,12 +376,162 @@ function hookChunkLoaderInstall() {
       });
     return chunkLoadResult;
   };
-  wrappedChunkLoader[CALLBACK_CHUNK_LOADER_HOOK_FLAG] = true;
-  webpackRequire.e = wrappedChunkLoader;
+
+  wrappedChunkLoader[CALLBACK_CHUNK_LOADER_WRAPPED_FLAG] = true;
+  wrappedChunkLoaders.set(chunkLoader, wrappedChunkLoader);
+  return wrappedChunkLoader;
+}
+
+function queueCallbackInstallAfterChunkLoad(promises) {
+  if (!Array.isArray(promises)) {
+    installServerCallbacks();
+    return;
+  }
+
+  Promise.resolve().then(() => {
+    Promise.allSettled(promises.slice())
+      .catch(() => undefined)
+      .then(() => {
+        installServerCallbacks();
+      });
+  });
+}
+
+function getWrappedChunkHandler(chunkHandler) {
+  if (!isFunction(chunkHandler)) {
+    return chunkHandler;
+  }
+  if (chunkHandler[CALLBACK_CHUNK_HANDLER_WRAPPED_FLAG]) {
+    return chunkHandler;
+  }
+
+  const cachedWrappedChunkHandler = wrappedChunkHandlers.get(chunkHandler);
+  if (cachedWrappedChunkHandler) {
+    return cachedWrappedChunkHandler;
+  }
+
+  const wrappedChunkHandler = function (...args) {
+    chunkHandler.apply(this, args);
+    queueCallbackInstallAfterChunkLoad(args[1]);
+  };
+  wrappedChunkHandler[CALLBACK_CHUNK_HANDLER_WRAPPED_FLAG] = true;
+  wrappedChunkHandlers.set(chunkHandler, wrappedChunkHandler);
+  return wrappedChunkHandler;
+}
+
+function hookEnsureChunkHandlersInstall() {
+  const webpackRequire = getWebpackRequire();
+  if (!webpackRequire || !isObject(webpackRequire.f)) {
+    return false;
+  }
+
+  const chunkHandlers = webpackRequire.f;
+  if (chunkHandlers[CALLBACK_CHUNK_HANDLER_HOOK_FLAG]) {
+    return true;
+  }
+
+  const existingChunkHandler = chunkHandlers[CALLBACK_CHUNK_HANDLER_KEY];
+  if (isFunction(existingChunkHandler)) {
+    chunkHandlers[CALLBACK_CHUNK_HANDLER_KEY] =
+      getWrappedChunkHandler(existingChunkHandler);
+  } else {
+    const callbackInstallChunkHandler = function (_chunkId, promises) {
+      queueCallbackInstallAfterChunkLoad(promises);
+    };
+    callbackInstallChunkHandler[CALLBACK_CHUNK_HANDLER_WRAPPED_FLAG] = true;
+    chunkHandlers[CALLBACK_CHUNK_HANDLER_KEY] = callbackInstallChunkHandler;
+  }
+
+  chunkHandlers[CALLBACK_CHUNK_HANDLER_HOOK_FLAG] = true;
+  return true;
+}
+
+function hookChunkLoaderInstall() {
+  const webpackRequire = getWebpackRequire();
+  if (!webpackRequire) {
+    return;
+  }
+
+  const chunkLoaderDescriptor = Object.getOwnPropertyDescriptor(
+    webpackRequire,
+    'e',
+  );
+  if (
+    webpackRequire[CALLBACK_CHUNK_LOADER_HOOK_FLAG] &&
+    (!isFunction(chunkLoaderDescriptor?.get) ||
+      chunkLoaderDescriptor.get[CALLBACK_CHUNK_LOADER_HOOK_FLAG])
+  ) {
+    return;
+  }
+
+  const hookState = {
+    chunkLoader: isFunction(chunkLoaderDescriptor?.get)
+      ? chunkLoaderDescriptor.get.call(webpackRequire)
+      : webpackRequire.e,
+  };
+
+  if (!isFunction(hookState.chunkLoader)) {
+    return;
+  }
+
+  if (chunkLoaderDescriptor?.configurable === false) {
+    const wrappedChunkLoader = getWrappedChunkLoader(hookState.chunkLoader);
+    if (isFunction(chunkLoaderDescriptor?.set)) {
+      chunkLoaderDescriptor.set.call(webpackRequire, wrappedChunkLoader);
+      webpackRequire[CALLBACK_CHUNK_LOADER_HOOK_FLAG] = true;
+      return;
+    }
+    if (chunkLoaderDescriptor?.writable !== false) {
+      const didSetChunkLoader = Reflect.set(
+        webpackRequire,
+        'e',
+        wrappedChunkLoader,
+      );
+      if (didSetChunkLoader && webpackRequire.e === wrappedChunkLoader) {
+        webpackRequire[CALLBACK_CHUNK_LOADER_HOOK_FLAG] = true;
+      }
+    }
+    return;
+  }
+
+  const readChunkLoader = () => {
+    if (isFunction(chunkLoaderDescriptor?.get)) {
+      const nextChunkLoader = chunkLoaderDescriptor.get.call(webpackRequire);
+      if (isFunction(nextChunkLoader)) {
+        hookState.chunkLoader = nextChunkLoader;
+      }
+    }
+    return hookState.chunkLoader;
+  };
+
+  const wrappedChunkLoaderGetter = function () {
+    const chunkLoader = readChunkLoader();
+    return isFunction(chunkLoader)
+      ? getWrappedChunkLoader(chunkLoader)
+      : chunkLoader;
+  };
+  wrappedChunkLoaderGetter[CALLBACK_CHUNK_LOADER_HOOK_FLAG] = true;
+
+  Object.defineProperty(webpackRequire, 'e', {
+    configurable: true,
+    enumerable: chunkLoaderDescriptor?.enumerable ?? true,
+    get: wrappedChunkLoaderGetter,
+    set(nextChunkLoader) {
+      if (isFunction(chunkLoaderDescriptor?.set)) {
+        chunkLoaderDescriptor.set.call(webpackRequire, nextChunkLoader);
+      }
+      hookState.chunkLoader = nextChunkLoader;
+    },
+  });
+
+  webpackRequire[CALLBACK_CHUNK_LOADER_HOOK_FLAG] = true;
 }
 
 function runInstallAttempt() {
-  hookChunkLoaderInstall();
+  const hasEnsureChunkHandlersHook = hookEnsureChunkHandlersInstall();
+  if (!hasEnsureChunkHandlersHook) {
+    hookChunkLoaderInstall();
+  }
   installServerCallbacks();
   callbackInstallAttempts += 1;
 

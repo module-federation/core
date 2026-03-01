@@ -19,7 +19,8 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.es.js",
-      "require": "./dist/index.cjs.js"
+      "require": "./dist/index.cjs.js",
+      "default": "./dist/index.es.js"
     },
     "./base": {
       "types": "./dist/base.d.ts",
@@ -64,17 +65,20 @@
     "./lazy-utils": {
       "types": "./dist/lazy-utils.d.ts",
       "import": "./dist/lazy-utils.es.js",
-      "require": "./dist/lazy-utils.cjs.js"
+      "require": "./dist/lazy-utils.cjs.js",
+      "default": "./dist/lazy-utils.es.js"
     },
     "./data-fetch-utils": {
       "types": "./dist/data-fetch-utils.d.ts",
       "import": "./dist/data-fetch-utils.es.js",
-      "require": "./dist/data-fetch-utils.cjs.js"
+      "require": "./dist/data-fetch-utils.cjs.js",
+      "default": "./dist/data-fetch-utils.es.js"
     },
     "./data-fetch-server-middleware": {
       "types": "./dist/data-fetch-server-middleware.d.ts",
       "import": "./dist/data-fetch-server-middleware.es.js",
-      "require": "./dist/data-fetch-server-middleware.cjs.js"
+      "require": "./dist/data-fetch-server-middleware.cjs.js",
+      "default": "./dist/data-fetch-server-middleware.es.js"
     },
     "./lazy-load-component-plugin": {
       "types": "./dist/lazy-load-component-plugin.d.ts",

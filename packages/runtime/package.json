@@ -24,44 +24,44 @@
   ],
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": {
-        "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
       },
       "require": {
-        "types": "./dist/index.d.ts",
         "default": "./dist/index.cjs"
-      }
+      },
+      "default": "./dist/index.js"
     },
     "./helpers": {
+      "types": "./dist/helpers.d.ts",
       "import": {
-        "types": "./dist/helpers.d.ts",
         "default": "./dist/helpers.js"
       },
       "require": {
-        "types": "./dist/helpers.d.ts",
         "default": "./dist/helpers.cjs"
-      }
+      },
+      "default": "./dist/helpers.js"
     },
     "./types": {
+      "types": "./dist/types.d.ts",
       "import": {
-        "types": "./dist/types.d.ts",
         "default": "./dist/types.js"
       },
       "require": {
-        "types": "./dist/types.d.ts",
         "default": "./dist/types.cjs"
-      }
+      },
+      "default": "./dist/types.js"
     },
     "./core": {
+      "types": "./dist/core.d.ts",
       "import": {
-        "types": "./dist/core.d.ts",
         "default": "./dist/core.js"
       },
       "require": {
-        "types": "./dist/core.d.ts",
         "default": "./dist/core.cjs"
-      }
+      },
+      "default": "./dist/core.js"
     },
     "./*": "./*"
   },

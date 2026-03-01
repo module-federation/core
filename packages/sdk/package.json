@@ -31,24 +31,24 @@
   },
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": {
-        "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
       },
       "require": {
-        "types": "./dist/index.d.ts",
         "default": "./dist/index.cjs"
-      }
+      },
+      "default": "./dist/index.js"
     },
     "./normalize-webpack-path": {
+      "types": "./dist/normalize-webpack-path.d.ts",
       "import": {
-        "types": "./dist/normalize-webpack-path.d.ts",
         "default": "./dist/normalize-webpack-path.js"
       },
       "require": {
-        "types": "./dist/normalize-webpack-path.d.ts",
         "default": "./dist/normalize-webpack-path.cjs"
-      }
+      },
+      "default": "./dist/normalize-webpack-path.js"
     }
   },
   "typesVersions": {

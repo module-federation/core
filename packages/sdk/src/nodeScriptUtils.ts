@@ -1,5 +1,5 @@
-const ASYNC_NODE_STARTUP_CALL =
-  'var __webpack_exports__ = __webpack_require__.x();';
+const ASYNC_NODE_STARTUP_CALL_PATTERN =
+  /var\s+__webpack_exports__\s*=\s*__webpack_require__\.x\(\s*\)\s*;/;
 const ENCODED_HMR_CLIENT_BOOTSTRAP_CALL =
   /__webpack_require__\("data:text\/javascript,[^"]*"\);\s*/g;
 
@@ -19,11 +19,11 @@ export const patchNodeRemoteEntryCode = (
   let patchedCode = code.replace(ENCODED_HMR_CLIENT_BOOTSTRAP_CALL, '');
 
   if (
-    patchedCode.includes(ASYNC_NODE_STARTUP_CALL) &&
+    ASYNC_NODE_STARTUP_CALL_PATTERN.test(patchedCode) &&
     patchedCode.includes('__webpack_require__.mfAsyncStartup')
   ) {
     patchedCode = patchedCode.replace(
-      ASYNC_NODE_STARTUP_CALL,
+      ASYNC_NODE_STARTUP_CALL_PATTERN,
       'var __webpack_exports__ = __webpack_require__.x({}, []);',
     );
   }
