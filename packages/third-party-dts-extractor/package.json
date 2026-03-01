@@ -40,5 +40,11 @@
     "@types/fs-extra": "9.0.13",
     "@types/node": "^20.19.5",
     "@types/react": "^18.3.11"
+  },
+  "scripts": {
+    "build": "tsup --config tsup.config.ts --outDir dist && cp package.json dist && cp *.md dist",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\"",
+    "test": "pnpm exec vitest run --passWithNoTests --config vite.config.mts",
+    "pre-release": "pnpm --filter @module-federation/third-party-dts-extractor run test && pnpm --filter @module-federation/third-party-dts-extractor run build"
   }
 }

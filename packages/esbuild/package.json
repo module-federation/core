@@ -62,5 +62,11 @@
   },
   "devDependencies": {
     "@rslib/core": "^0.12.4"
+  },
+  "scripts": {
+    "build": "rslib build",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",
+    "build-debug": "FEDERATION_DEBUG=true rslib build",
+    "pre-release": "pnpm --filter @module-federation/esbuild run build"
   }
 }

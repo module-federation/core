@@ -16,47 +16,76 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout PR
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 20
           cache: pnpm
+          cache-dependency-path: '**/pnpm-lock.yaml'
 
-      - name: Install dependencies (PR)
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build packages (PR)
-        run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4 --skip-nx-cache
+      - name: Restore Turborepo cache
+        uses: actions/cache@v5
+        with:
+          path: |
+            .turbo
+            **/.turbo
+          key: ${{ runner.os }}-turbo-${{ github.workflow }}-${{ github.job }}-${{ github.ref_name }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-${{ github.workflow }}-${{ github.job }}-${{ github.ref_name }}-
+            ${{ runner.os }}-turbo-${{ github.workflow }}-${{ github.job }}-
+            ${{ runner.os }}-turbo-
 
-      - name: Measure bundle sizes (PR)
+      - name: Build packages (current)
+        run: pnpm exec turbo run build --filter=./packages/** --concurrency=20
+
+      - name: Measure bundle sizes (current)
         run: node scripts/bundle-size-report.mjs --output current.json
 
-      - name: Checkout base branch
-        uses: actions/checkout@v4
+      - name: Prepare base worktree
+        run: |
+          BASE_REF=${CI_LOCAL_BASE_REF:-origin/main}
+          BASE_PATH=".ci-local-base-${RANDOM}-${RANDOM}"
+          echo "BASE_REF=$BASE_REF" >> "$GITHUB_ENV"
+          echo "BASE_PATH=$BASE_PATH" >> "$GITHUB_ENV"
+          git worktree add "$BASE_PATH" "$BASE_REF"
+
+      - name: Restore Turborepo cache (base worktree)
+        uses: actions/cache@v5
         with:
-          ref: ${{ github.event.pull_request.base.sha }}
-          path: base
+          path: ${{ env.BASE_PATH }}/.turbo
+          key: ${{ runner.os }}-turbo-base-${{ github.workflow }}-${{ github.job }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-base-${{ github.workflow }}-${{ github.job }}-
+            ${{ runner.os }}-turbo-base-${{ github.workflow }}-
+            ${{ runner.os }}-turbo-base-
 
       - name: Install dependencies (base)
-        run: cd base && pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
+        working-directory: ${{ env.BASE_PATH }}
 
       - name: Build packages (base)
-        run: cd base && npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4 --skip-nx-cache
+        run: pnpm exec turbo run build --filter=./packages/** --concurrency=20
+        working-directory: ${{ env.BASE_PATH }}
 
       - name: Measure bundle sizes (base)
-        run: node scripts/bundle-size-report.mjs --output base.json --packages-dir base/packages
+        run: node scripts/bundle-size-report.mjs --output base.json --packages-dir "${{ env.BASE_PATH }}/packages"
 
       - name: Compare bundle sizes
         run: node scripts/bundle-size-report.mjs --compare base.json --current current.json --output stats.txt
 
-      - name: Upload bundle size stats
-        uses: actions/upload-artifact@v4
-        with:
-          name: bundle-size-stats
-          path: stats.txt
-          retention-days: 5
+      - name: Cleanup base worktree
+        if: always()
+        run: |
+          if [ -n "${BASE_PATH:-}" ] && [ -d "${BASE_PATH}" ]; then
+            git worktree remove --force "${BASE_PATH}"
+          fi

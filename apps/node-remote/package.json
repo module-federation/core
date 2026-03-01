@@ -8,7 +8,17 @@
   },
   "scripts": {
     "dev": "rslib mf-dev",
-    "build": "rslib build"
+    "build": "rslib build",
+    "build:development": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config webpack.config.js --output-path dist --mode development",
+    "build:production": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config webpack.config.js --output-path dist --mode production",
+    "build:rslib": "pnpm run build",
+    "serve:rslib": "pnpm run dev",
+    "serve": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config webpack.config.js --output-path dist --mode development --port 3022 --no-hot",
+    "serve:development": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config webpack.config.js --output-path dist --mode development --port 3022 --no-hot",
+    "serve:production": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config webpack.config.js --output-path dist --mode production --port 3022 --no-hot",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules **/*.{ts,tsx,js,jsx}",
+    "test": "pnpm exec jest --config jest.config.ts --passWithNoTests",
+    "test:ci": "pnpm exec jest --config jest.config.ts --passWithNoTests --ci --coverage"
   },
   "devDependencies": {
     "@rslib/core": "^0.9.0"

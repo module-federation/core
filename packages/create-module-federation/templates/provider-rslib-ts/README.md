@@ -12,8 +12,6 @@ pnpm build
 
 Dev package
 
-
 ```
 pnpm mf-dev
 ```
-

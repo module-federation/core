@@ -7,7 +7,8 @@ update-commit-messages.sh
 /out-tsc
 /build
 /docs
-/.nx
+/.turbo
+**/.turbo/
 # dependencies
 node_modules
 ./webpack-lib
@@ -81,8 +82,6 @@ packages/enhanced/test/js
 
 vite.config.*.timestamp*
 vitest.config.*.timestamp*
-.cursor/rules/nx-rules.mdc
-.github/instructions/nx.instructions.md
 .temp-commit-msg
 
 # website-new

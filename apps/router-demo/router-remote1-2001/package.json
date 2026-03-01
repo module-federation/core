@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "rsbuild dev",
     "build": "DEBUG=true rsbuild build",
-    "preview": "rsbuild preview"
+    "preview": "rsbuild preview",
+    "test": "pnpm exec vitest --passWithNoTests",
+    "serve": "pnpm run dev"
   },
   "dependencies": {
     "@module-federation/bridge-react": "workspace:*",

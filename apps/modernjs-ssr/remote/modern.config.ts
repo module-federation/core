@@ -4,7 +4,7 @@ import { moduleFederationPlugin } from '@module-federation/modern-js-v3';
 // https://modernjs.dev/en/configure/app/usage
 export default defineConfig({
   output: {
-    assetPrefix: 'http://localhost:8080',
+    assetPrefix: 'http://localhost:3051',
   },
 
   plugins: [appTools(), moduleFederationPlugin()],
@@ -12,5 +12,6 @@ export default defineConfig({
     ssr: {
       mode: 'stream',
     },
+    port: 3051,
   },
 });

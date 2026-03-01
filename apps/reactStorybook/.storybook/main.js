@@ -6,7 +6,6 @@ module.exports = {
   stories: ['../src/app/**/*.mdx', '../src/app/**/*.stories.@(js|jsx|ts|tsx)'],
 
   addons: [
-    getAbsolutePath('@nx/react/plugins/storybook'),
     {
       name: getAbsolutePath('@module-federation/storybook-addon'),
       options: {
@@ -31,7 +30,7 @@ module.exports = {
 
 // To customize your webpack configuration you can use the webpackFinal field.
 // Check https://storybook.js.org/docs/react/builders/webpack#extending-storybooks-webpack-config
-// and https://nx.dev/packages/storybook/documents/custom-builder-configs
+// for additional Storybook builder configuration guidance.
 
 function getAbsolutePath(value) {
   return dirname(require.resolve(join(value, 'package.json')));

@@ -24,14 +24,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Cache Tool Downloads
-        uses: actions/cache@v5
-        with:
-          path: ~/.cache
-          key: ${{ runner.os }}-toolcache-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-toolcache-
-
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 
@@ -42,57 +34,35 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
 
-      - name: Set Playwright cache status
-        run: |
-          if [ -d "$HOME/.cache/ms-playwright" ] || [ -d "$HOME/.cache/Cypress" ]; then
-            echo "PLAYWRIGHT_CACHE_HIT=true" >> "$GITHUB_ENV"
-          else
-            echo "PLAYWRIGHT_CACHE_HIT=false" >> "$GITHUB_ENV"
-          fi
-
-      - name: Set Nx SHA
-        uses: nrwl/nx-set-shas@v4
-
-      - name: Install Dependencies
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile && find . -maxdepth 6 -type d \( -name ".cache" -o -name ".modern-js" \) -exec rm -rf {} +
+
+      - name: Restore Turborepo cache
+        uses: actions/cache@v5
+        with:
+          path: |
+            .turbo
+            **/.turbo
+          key: ${{ runner.os }}-turbo-${{ github.workflow }}-${{ github.job }}-${{ github.ref_name }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-${{ github.workflow }}-${{ github.job }}-${{ github.ref_name }}-
+            ${{ runner.os }}-turbo-${{ github.workflow }}-${{ github.job }}-
+            ${{ runner.os }}-turbo-
 
       - name: Install Cypress
         run: npx cypress install
 
-      - name: Run Affected Build
-        run: npx nx run-many --targets=build --projects=tag:type:pkg
+      - name: Build shared packages
+        run: pnpm exec turbo run build --filter=./packages/** --concurrency=20
 
-      - name: Configuration xvfb
-        shell: bash
+      - name: Install xvfb
         run: sudo apt-get update && sudo apt-get install xvfb
 
       - name: E2E Chrome Devtools Dev
-        uses: nick-fields/retry@v3
-        with:
-          timeout_minutes: 15
-          max_attempts: 3
-          command: |
-            npx kill-port 3009 3010 3011 3012 3013 4001 &&
-            pnpm run app:manifest:dev & echo "done" && \
-            npx wait-on tcp:3009 tcp:3010 tcp:3011 tcp:3012 tcp:3013 && \
-            sleep 10 &&
-            npx nx e2e:devtools chrome-devtools
+        run: npx kill-port 3009 3010 3011 3012 3013 4001 && pnpm run app:manifest:dev & echo "done" && npx wait-on tcp:3009 tcp:3010 tcp:3011 tcp:3012 tcp:3013 && sleep 10 && pnpm exec turbo run test:e2e --filter=@module-federation/devtools --only
 
       - name: E2E Chrome Devtools Prod
-        uses: nick-fields/retry@v3
-        with:
-          timeout_minutes: 15
-          max_attempts: 3
-          command: |
-            npx kill-port 3009 3010 3011 3012 3013 4001 &&
-            npx kill-port 3009 3010 3011 3012 3013 4001 &&
-            pnpm run app:manifest:prod & echo "done" && \
-            npx wait-on tcp:3009 tcp:3010 tcp:3011 tcp:3012 tcp:3013 && \
-            sleep 30 &&
-            npx nx e2e:devtools chrome-devtools
+        run: npx kill-port 3009 3010 3011 3012 3013 4001 && npx kill-port 3009 3010 3011 3012 3013 4001 && pnpm run app:manifest:prod & echo "done" && npx wait-on tcp:3009 tcp:3010 tcp:3011 tcp:3012 tcp:3013 && sleep 30 && pnpm exec turbo run test:e2e --filter=@module-federation/devtools --only
 
-      - name: kill port
-        run: npx kill-port 3013 3009 3010 3011 3012 4001; exit 0
-
-      - name: Kill All Node Processes
-        run: pkill -f node || true
+      - name: Kill devtools ports
+        run: npx kill-port 3013 3009 3010 3011 3012 4001 || true

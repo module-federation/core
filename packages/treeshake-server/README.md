@@ -29,14 +29,8 @@ The CLI always embeds the UI. You can only override where it is served from:
 ## Library usage (custom adapters + middlewares)
 
 ```ts
-import {
-  createAdapterRegistry,
-  createAdapterDeps,
-  createApp,
-  createServer,
-  LocalAdapter,
-} from "@module-federation/treeshake-server";
-import { createTreeshakeFrontendAdapter } from "@module-federation/treeshake-frontend/adapter";
+import { createAdapterRegistry, createAdapterDeps, createApp, createServer, LocalAdapter } from '@module-federation/treeshake-server';
+import { createTreeshakeFrontendAdapter } from '@module-federation/treeshake-frontend/adapter';
 
 const registry = createAdapterRegistry([
   new LocalAdapter(),
@@ -45,27 +39,27 @@ const registry = createAdapterRegistry([
 
 const deps = await createAdapterDeps({
   registry,
-  adapterId: "local", // or your custom adapter id
+  adapterId: 'local', // or your custom adapter id
 });
 
 const app = createApp(deps, {
   appExtensions: [
     (appInstance) => {
-      appInstance.use("*", async (c, next) => {
-        c.res.headers.set("x-treeshake", "true");
+      appInstance.use('*', async (c, next) => {
+        c.res.headers.set('x-treeshake', 'true');
         await next();
       });
     },
   ],
   frontendAdapters: [
     createTreeshakeFrontendAdapter({
-      basePath: "/tree-shaking",
-      distDir: "/path/to/treeshake-frontend/dist",
+      basePath: '/tree-shaking',
+      distDir: '/path/to/treeshake-frontend/dist',
     }),
   ],
 });
 
-createServer({ app, port: 3000, hostname: "0.0.0.0" });
+createServer({ app, port: 3000, hostname: '0.0.0.0' });
 ```
 
 In library mode you control the adapter registry, middleware, and frontend embedding.

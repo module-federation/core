@@ -21,7 +21,11 @@
     "README.md"
   ],
   "scripts": {
-    "postinstall": "echo \"Deprecation Notice: We intend to deprecate 'nextjs-mf'. Please see https://github.com/module-federation/core/issues/3153 for more details.\""
+    "postinstall": "echo \"Deprecation Notice: We intend to deprecate 'nextjs-mf'. Please see https://github.com/module-federation/core/issues/3153 for more details.\"",
+    "build": "tsdown --config tsdown.config.mts",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.js\" \"**/*.ts\"",
+    "test": "pnpm exec jest --config jest.config.js --passWithNoTests",
+    "pre-release": "pnpm --filter @module-federation/nextjs-mf run test && pnpm --filter @module-federation/nextjs-mf run build && rm -f ./dist/package.json"
   },
   "exports": {
     ".": {

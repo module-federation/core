@@ -93,5 +93,12 @@
     "vue-tsc": {
       "optional": true
     }
+  },
+  "scripts": {
+    "build": "rslib build",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",
+    "test": "pnpm exec jest --config jest.config.js --passWithNoTests",
+    "test:ci": "pnpm exec jest --config jest.config.js --passWithNoTests --ci --coverage",
+    "pre-release": "pnpm --filter @module-federation/rspack run test && pnpm --filter @module-federation/rspack run build"
   }
 }

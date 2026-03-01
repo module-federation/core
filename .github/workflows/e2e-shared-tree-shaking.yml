@@ -4,7 +4,7 @@ on:
   workflow_call:
 
 jobs:
-  e2e-runtime:
+  e2e-shared-tree-shaking:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -12,22 +12,6 @@ jobs:
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
-
-      - name: Cache Tool Downloads
-        uses: actions/cache@v5
-        with:
-          path: ~/.cache
-          key: ${{ runner.os }}-toolcache-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-toolcache-
-
-      - name: Set Playwright cache status
-        run: |
-          if [ -d "$HOME/.cache/ms-playwright" ] || [ -d "$HOME/.cache/Cypress" ]; then
-            echo "PLAYWRIGHT_CACHE_HIT=true" >> "$GITHUB_ENV"
-          else
-            echo "PLAYWRIGHT_CACHE_HIT=false" >> "$GITHUB_ENV"
-          fi
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -39,22 +23,31 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
 
-      - name: Set Nx SHA
-        uses: nrwl/nx-set-shas@v4
-
-      - name: Set SKIP_DEVTOOLS_POSTINSTALL environment variable
+      - name: Export SKIP_DEVTOOLS_POSTINSTALL
         run: echo "SKIP_DEVTOOLS_POSTINSTALL=true" >> "$GITHUB_ENV"
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Restore Turborepo cache
+        uses: actions/cache@v5
+        with:
+          path: |
+            .turbo
+            **/.turbo
+          key: ${{ runner.os }}-turbo-${{ github.workflow }}-${{ github.job }}-${{ github.ref_name }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-${{ github.workflow }}-${{ github.job }}-${{ github.ref_name }}-
+            ${{ runner.os }}-turbo-${{ github.workflow }}-${{ github.job }}-
+            ${{ runner.os }}-turbo-
 
       - name: Install Cypress
         run: npx cypress install
 
-      - name: Run Build for All
-        run: npx nx run-many --targets=build --projects=tag:type:pkg
+      - name: Build shared packages
+        run: pnpm exec turbo run build --filter=./packages/** --concurrency=20
 
-      - name: Run condition check script
+      - name: Check CI conditions
         id: check-ci
         run: |
           ci_status=0
@@ -68,10 +61,10 @@ jobs:
             exit "$ci_status"
           fi
 
-      - name: E2E Test for Shared Tree Shaking Demo - Mode runtime-infer
+      - name: E2E Shared Tree Shaking (runtime-infer)
         if: steps.check-ci.outputs.run-e2e == 'true'
-        run: npx kill-port --port 3001,3002 && nx run shared-tree-shaking-no-server-host:test:e2e && lsof -ti tcp:3001,3002 | xargs kill
+        run: npx kill-port --port 3001,3002 && pnpm exec turbo run test:e2e --filter=shared-tree-shaking-no-server-host --only && lsof -ti tcp:3001,3002 | xargs kill
 
-      - name: E2E Test for Shared Tree Shaking Demo - Mode server-calc
+      - name: E2E Shared Tree Shaking (server-calc)
         if: steps.check-ci.outputs.run-e2e == 'true'
-        run: npx kill-port --port 3001,3002,3003 && nx run shared-tree-shaking-with-server-host:test:e2e && lsof -ti tcp:3001,3002,3003 | xargs kill
+        run: npx kill-port --port 3001,3002,3003 && pnpm exec turbo run test:e2e --filter=shared-tree-shaking-with-server-host --only && lsof -ti tcp:3001,3002,3003 | xargs kill

@@ -12,7 +12,10 @@
     "new": "modern new",
     "lint": "modern lint",
     "upgrade": "modern upgrade",
-    "inspect": "modern inspect"
+    "inspect": "modern inspect",
+    "e2e": "pnpm exec cypress run --config-file cypress.config.ts --browser chrome --config baseUrl=http://localhost:3001",
+    "e2e:development": "pnpm exec cypress open --config-file cypress.config.ts --browser chrome --config baseUrl=http://localhost:3001",
+    "test:e2e": "pnpm --filter shared-tree-shaking-no-server-host run build && pnpm --filter shared-tree-shaking-no-server-provider run build && pnpm --filter shared-tree-shaking-no-server-host run serve & pnpm --filter shared-tree-shaking-no-server-provider run serve & sleep 10 && pnpm --filter shared-tree-shaking-no-server-host run e2e"
   },
   "engines": {
     "node": ">=16.18.1"

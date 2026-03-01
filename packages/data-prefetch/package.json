@@ -12,7 +12,11 @@
     "directory": "packages/data-prefetch"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build": "rslib build",
+    "test:ci": "pnpm exec jest --config jest.config.cjs --passWithNoTests --ci --coverage",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",
+    "pre-release": "pnpm --filter @module-federation/data-prefetch run test && pnpm --filter @module-federation/data-prefetch run build"
   },
   "publishConfig": {
     "access": "public"

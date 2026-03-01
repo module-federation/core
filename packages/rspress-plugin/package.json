@@ -31,7 +31,9 @@
   "types": "./dist/plugin.d.ts",
   "scripts": {
     "build": "rslib build",
-    "build:watch": "rslib build --watch"
+    "build:watch": "rslib build --watch",
+    "dev": "pnpm -C . dev",
+    "pre-release": "pnpm --filter @module-federation/webpack-bundler-runtime run build"
   },
   "devDependencies": {
     "@rslib/core": "^0.9.2",

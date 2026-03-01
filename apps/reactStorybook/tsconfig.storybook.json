@@ -5,9 +5,9 @@
     "outDir": ""
   },
   "files": [
-    "../../node_modules/@nx/react/typings/styled-jsx.d.ts",
-    "../../node_modules/@nx/react/typings/cssmodule.d.ts",
-    "../../node_modules/@nx/react/typings/image.d.ts"
+    "../../typings/styled-jsx.d.ts",
+    "../../typings/cssmodule.d.ts",
+    "../../typings/image.d.ts"
   ],
   "exclude": [
     "src/**/*.spec.ts",

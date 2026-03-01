@@ -12,5 +12,13 @@
     "@types/react-dom": "18.3.0",
     "file-loader": "6.2.0",
     "react-refresh": "0.14.2"
+  },
+  "scripts": {
+    "build": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec rspack build --config rspack.config.js --mode production",
+    "build:development": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec rspack build --config rspack.config.js --mode development",
+    "build:production": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec rspack build --config rspack.config.js --mode production",
+    "serve": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec rspack serve --config rspack.config.js --mode production --port 3004 --no-hot",
+    "serve:development": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec rspack serve --config rspack.config.js --mode development --port 3004",
+    "serve:production": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec rspack serve --config rspack.config.js --mode production --port 3004 --no-hot"
   }
 }

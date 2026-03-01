@@ -1,0 +1,64 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", "build/**", ".next/**", "out/**", "lib/**"]
+    },
+    "@module-federation/metro-plugin-rnc-cli#build": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "build:development": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", "build/**", ".next/**", "out/**", "lib/**"]
+    },
+    "build:production": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", "build/**", ".next/**", "out/**", "lib/**"]
+    },
+    "lint": {
+      "outputs": []
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "e2e": {
+      "dependsOn": ["^build"],
+      "cache": false
+    },
+    "test:e2e": {
+      "dependsOn": ["^build"],
+      "cache": false
+    },
+    "test:e2e:production": {
+      "dependsOn": ["build", "^build"],
+      "cache": false
+    },
+    "serve": {
+      "cache": false,
+      "persistent": true
+    },
+    "serve:development": {
+      "cache": false,
+      "persistent": true
+    },
+    "serve:production": {
+      "cache": false,
+      "persistent": true
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "start": {
+      "cache": false,
+      "persistent": true
+    },
+    "pre-release": {
+      "dependsOn": ["build", "test"],
+      "outputs": []
+    }
+  }
+}

@@ -15,7 +15,10 @@
   },
   "type": "module",
   "scripts": {
-    "build": "rslib build"
+    "build": "rslib build",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",
+    "test": "node scripts/verify-rslib-templates.mjs",
+    "pre-release": "pnpm --filter create-module-federation run test && pnpm --filter create-module-federation run build"
   },
   "exports": {
     ".": "./dist/index.js"

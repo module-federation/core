@@ -54,5 +54,12 @@
   "dependencies": {
     "@module-federation/sdk": "workspace:*",
     "@module-federation/error-codes": "workspace:*"
+  },
+  "scripts": {
+    "build": "tsdown --config tsdown.config.ts",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",
+    "build-debug": "RUNTIME_CORE_TSDOWN_MODE=debug tsdown --config tsdown.config.ts",
+    "pre-release": "pnpm --filter @module-federation/runtime-core run test && pnpm --filter @module-federation/runtime-core run build",
+    "test": "vitest run -u -c vitest.config.ts"
   }
 }

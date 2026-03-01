@@ -2,6 +2,9 @@
 
 How AI coding agents should operate in this repository.
 
+> **Important migration note (Turborepo):**
+> Nx orchestration has been removed from this repository. Prefer Turbo + package scripts for all build/test/lint workflows.
+
 ## Scope and Precedence
 
 - Scope: this file applies to the full repository root.
@@ -22,13 +25,7 @@ If prose docs conflict with workflows (for example `README.md` or `CONTRIBUTING.
 - pnpm: `10.28.0` (from `package.json` `packageManager`)
 - Package manager: pnpm only
 
-Preferred setup for agents:
-
-```bash
-pnpm run setup:codex
-```
-
-Fallback setup:
+Recommended setup for agents:
 
 ```bash
 corepack enable
@@ -37,7 +34,7 @@ pnpm install --frozen-lockfile
 
 Worktree safety rule:
 
-- In git worktree contexts, prefer `pnpm run nx:safe -- <nx args>` to avoid Nx daemon issues.
+- In git worktree contexts, prefer running Turbo/package scripts directly (`pnpm exec turbo ...` / `pnpm --filter ... run ...`).
 
 ### Worktree Mode (Required in Worktrees)
 
@@ -46,20 +43,15 @@ Use these rules whenever the checkout is a git worktree (typically `git rev-pars
 1. Setup/install via:
 
 ```bash
-pnpm run setup:codex -- --frozen-lockfile
+corepack enable
+pnpm install --frozen-lockfile
 ```
 
-2. Run Nx commands via:
+2. Run workspace tasks via Turbo/package scripts:
 
 ```bash
-pnpm run nx:safe -- <nx args>
-```
-
-3. Avoid plain `pnpm nx ...` for routine worktree commands unless `NX_DAEMON=false` is set explicitly.
-4. If Nx reports missing projects or stale graph/cache behavior, refresh graph cache with:
-
-```bash
-NX_DAEMON=false pnpm exec nx show projects --json >/dev/null
+pnpm exec turbo run <task>
+pnpm --filter <package-name> run <script>
 ```
 
 
@@ -72,35 +64,29 @@ Use these as defaults unless the task explicitly requires something else.
 - CI-equivalent format gate:
 
 ```bash
-npx nx format:check
+pnpm exec prettier --check .
 ```
 
 - Local format fix:
 
 ```bash
-nx format:write --uncommitted
+pnpm exec prettier --write .
 ```
 
 Wrapper script also exists: `pnpm run lint-fix`.
 
 ### Package Pipeline Parity (`tag:type:pkg`)
 
-- Cold-cache package build:
+- Package build (Turbo cache handled automatically):
 
 ```bash
-npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4 --skip-nx-cache
+pnpm run build:pkg
 ```
 
-- Warm-cache package build:
+- Package tests:
 
 ```bash
-npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4
-```
-
-- Affected package tests:
-
-```bash
-npx nx affected -t test --parallel=3 --exclude='*,!tag:type:pkg'
+pnpm run test:pkg
 ```
 
 ### Metro Pipeline Parity (`tag:type:metro`)
@@ -108,19 +94,19 @@ npx nx affected -t test --parallel=3 --exclude='*,!tag:type:pkg'
 - Build pkg + metro:
 
 ```bash
-npx nx run-many --targets=build --projects=tag:type:pkg,tag:type:metro --parallel=4 --skip-nx-cache
+pnpm run build:pkg
 ```
 
-- Affected metro tests:
+- Metro tests:
 
 ```bash
-npx nx affected -t test --parallel=2 --exclude='*,!tag:type:metro'
+pnpm exec turbo run test --filter=@module-federation/metro*
 ```
 
 - Metro lint:
 
 ```bash
-npx nx run-many --targets=lint --projects=tag:type:metro --parallel=2
+pnpm exec turbo run lint --filter=@module-federation/metro*
 ```
 
 ### E2E Parity via Local CI Runner
@@ -161,8 +147,8 @@ Run the smallest deterministic set that matches the change type.
 
 | Change type | Required checks | Optional checks |
 | --- | --- | --- |
-| Docs-only (no code/config behavior change) | none by default; run only checks explicitly requested by user | `npx nx format:check` |
-| Package code in `packages/*` (non-metro) | `npx nx format:check`; cold + warm pkg build; affected pkg tests | targeted project test/build commands |
+| Docs-only (no code/config behavior change) | none by default; run only checks explicitly requested by user | `pnpm exec prettier --check .` |
+| Package code in `packages/*` (non-metro) | `pnpm exec prettier --check .`; package build; package tests | targeted project test/build commands |
 | Metro package code (`tag:type:metro`) | metro parity set (build pkg+metro, affected metro tests, metro lint) | E2E metro job via `ci:local` when relevant |
 | App/E2E-related changes in `apps/*` or E2E scripts/workflows | `pnpm run ci:local --only=<matching-job>` | additional related `ci:local` jobs |
 | Release workflow/release tooling changes | release sanity commands only, no publish | package/metro builds if impacted |
@@ -171,7 +157,7 @@ Release sanity commands (no publish):
 
 ```bash
 pnpm install --frozen-lockfile --ignore-scripts
-npx nx build assemble-release-plan
+pnpm --filter @changesets/assemble-release-plan run build
 ```
 
 For every handoff, agents must report:
@@ -206,13 +192,13 @@ Current hooks:
 Guidance:
 
 - This AGENTS update does not change hook behavior.
-- Keep commit messages compatible with conventional commits and repo commitlint config (`@commitlint/config-conventional` + `@commitlint/config-nx-scopes`).
+- Keep commit messages compatible with conventional commits (`@commitlint/config-conventional`).
 
 ## Operating Rules
 
 - Keep changes minimal and directly scoped to the user request.
 - Prefer modifying existing files over creating new files.
-- Reuse existing Nx targets and scripts; do not introduce parallel tooling without need.
+- Reuse existing Turbo tasks and package scripts; do not introduce redundant tooling without need.
 - Preserve public API compatibility unless user requests a breaking change.
 - Never switch package manager or lockfile strategy.
 - Do not alter CI/release mechanics unless explicitly requested.

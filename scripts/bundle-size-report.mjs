@@ -121,7 +121,7 @@ function gzipSize(filePath) {
 
 // ── Discovery ────────────────────────────────────────────────────────────────
 
-/** Find all packages tagged with type:pkg */
+/** Find package directories from workspace package manifests */
 function discoverPackages(packagesDir) {
   const packages = [];
   const searchDirs = [packagesDir];
@@ -144,20 +144,18 @@ function discoverPackages(packagesDir) {
     for (const entry of entries) {
       if (!entry.isDirectory()) continue;
       const pkgDir = join(searchDir, entry.name);
-      const projectJsonPath = join(pkgDir, 'project.json');
-      if (!existsSync(projectJsonPath)) continue;
+      const packageJsonPath = join(pkgDir, 'package.json');
+      if (!existsSync(packageJsonPath)) continue;
 
       try {
-        const projectJson = JSON.parse(readFileSync(projectJsonPath, 'utf8'));
-        const tags = projectJson.tags || [];
-        if (tags.includes('type:pkg')) {
-          packages.push({
-            name: projectJson.name || entry.name,
-            dir: pkgDir,
-          });
-        }
+        const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
+        if (!packageJson?.name) continue;
+        packages.push({
+          name: packageJson.name,
+          dir: pkgDir,
+        });
       } catch {
-        // Skip packages with invalid project.json
+        // Skip packages with invalid package.json
       }
     }
   }

@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "rsbuild dev",
     "build": "rsbuild build",
-    "preview": "rsbuild preview"
+    "preview": "rsbuild preview",
+    "serve": "pnpm dev"
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",

@@ -18,10 +18,13 @@
     "release": "npm publish --tag canary",
     "test": "vitest run",
     "test:e2e": "E2ETEST=true pnpm build && playwright test",
-    "test:e2e:ui": "E2ETEST=true  pnpm build && playwright test --ui",
+    "test:e2e:ui": "E2ETEST=true pnpm build && playwright test --ui",
     "start": "modern-app start",
     "serve": "modern-app serve",
-    "postinstall": "bash install-deps.bash"
+    "postinstall": "bash install-deps.bash",
+    "build:chrome-plugins": "pnpm -C . build",
+    "e2e:devtools": "pnpm -C . test:e2e",
+    "e2e:devtools:ui": "pnpm -C . test:e2e:ui"
   },
   "files": [
     "dist/",
