@@ -122,11 +122,7 @@ async function runScenario(name) {
 
   try {
     // Wait for all servers to be ready
-    const { factory: waitFactory, note: waitFactoryNote } =
-      getWaitFactory(scenario);
-    if (waitFactoryNote) {
-      console.log(waitFactoryNote);
-    }
+    const waitFactory = getWaitFactory(scenario);
 
     await runGuardedCommand(
       'waiting for next.js servers',
@@ -188,15 +184,10 @@ async function runKillPort() {
 function getWaitFactory(scenario) {
   const waitTargets = scenario.waitTargets ?? [];
   if (!waitTargets.length) {
-    return {
-      factory: () =>
-        spawnWithPromise(process.execPath, ['-e', 'process.exit(0)']),
-    };
+    return () => spawnWithPromise(process.execPath, ['-e', 'process.exit(0)']);
   }
 
-  return {
-    factory: () => spawnWithPromise('npx', ['wait-on', ...waitTargets]),
-  };
+  return () => spawnWithPromise('npx', ['wait-on', ...waitTargets]);
 }
 
 main().catch((error) => {

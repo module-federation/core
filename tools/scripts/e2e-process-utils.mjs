@@ -87,7 +87,7 @@ export async function shutdownServe(proc, exitPromise) {
   return exitPromise;
 }
 
-export function sendSignal(proc, signal) {
+function sendSignal(proc, signal) {
   if (proc.exitCode !== null || proc.signalCode !== null) {
     return;
   }
@@ -112,7 +112,7 @@ export function sendSignal(proc, signal) {
   }
 }
 
-export function waitWithTimeout(promise, timeoutMs) {
+function waitWithTimeout(promise, timeoutMs) {
   return new Promise((resolve, reject) => {
     let settled = false;
 

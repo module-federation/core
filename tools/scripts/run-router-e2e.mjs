@@ -100,11 +100,7 @@ async function runScenario(name) {
   });
 
   try {
-    const { factory: waitFactory, note: waitFactoryNote } =
-      getWaitFactory(scenario);
-    if (waitFactoryNote) {
-      console.log(waitFactoryNote);
-    }
+    const waitFactory = getWaitFactory(scenario);
 
     await runGuardedCommand(
       'waiting for router demo ports',
@@ -174,20 +170,15 @@ async function runKillPort() {
 function getWaitFactory(scenario) {
   const waitTargets = scenario.waitTargets ?? [];
   if (!waitTargets.length) {
-    return {
-      factory: () =>
-        spawnWithPromise(process.execPath, ['-e', 'process.exit(0)']),
-    };
+    return () => spawnWithPromise(process.execPath, ['-e', 'process.exit(0)']);
   }
 
-  return {
-    factory: () =>
-      spawnWithPromise('npx', [
-        'wait-on',
-        `--timeout=${ROUTER_WAIT_TIMEOUT_MS}`,
-        ...waitTargets,
-      ]),
-  };
+  return () =>
+    spawnWithPromise('npx', [
+      'wait-on',
+      `--timeout=${ROUTER_WAIT_TIMEOUT_MS}`,
+      ...waitTargets,
+    ]);
 }
 
 main().catch((error) => {

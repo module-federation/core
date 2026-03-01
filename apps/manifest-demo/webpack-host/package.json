@@ -28,7 +28,7 @@
     "serve-static": "pnpm exec serve dist -l 3013 --cors",
     "e2e": "pnpm exec cypress run --project . --e2e --config baseUrl=http://localhost:3013 --browser chrome",
     "e2e:development": "pnpm exec cypress open --project . --e2e --config baseUrl=http://localhost:3013 --browser electron",
-    "test:e2e": "pnpm exec concurrently \"lsof -i :3013 || pnpm --filter 3008-webpack-host run serve:development\" \"npx wait-on --timeout 240000 tcp:3009 tcp:3010 tcp:3011 tcp:3012 tcp:3013 http-get://localhost:3009/mf-manifest.json http-get://localhost:3010/mf-manifest.json http-get://localhost:3011/mf-manifest.json http-get://localhost:3012/remoteEntry.js http-get://localhost:3013/ && pnpm --filter 3008-webpack-host run e2e\"",
+    "test:e2e": "pnpm -w exec node tools/scripts/run-manifest-e2e.mjs --mode=dev",
     "test:e2e:production": "pnpm -w exec node tools/scripts/run-manifest-e2e.mjs --mode=prod"
   }
 }

@@ -8,6 +8,7 @@ update-commit-messages.sh
 /build
 /docs
 /.turbo
+**/.turbo/
 # dependencies
 node_modules
 ./webpack-lib
