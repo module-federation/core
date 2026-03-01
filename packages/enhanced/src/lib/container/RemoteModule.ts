@@ -148,6 +148,22 @@ class RemoteModule extends Module {
   }
 
   /**
+   * @returns {string} the export type
+   *
+   * "dynamic" means: Check at runtime if __esModule is set.
+   * When set: namespace = { ...exports, default: exports }
+   * When not set: namespace = { default: exports }
+   */
+  // @ts-ignore
+  override getExportsType():
+    | 'namespace'
+    | 'default-only'
+    | 'default-with-named'
+    | 'dynamic' {
+    return 'dynamic';
+  }
+
+  /**
    * @returns {Set<string>} types available (do not mutate)
    */
   override getSourceTypes(): Set<string> {

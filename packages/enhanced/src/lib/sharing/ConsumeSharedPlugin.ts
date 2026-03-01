@@ -699,57 +699,6 @@ class ConsumeSharedPlugin {
           },
         );
 
-        // Add finishModules hook to copy buildMeta/buildInfo from fallback modules *after* webpack's export analysis
-        // Running earlier causes failures, so we intentionally execute later than plugins like FlagDependencyExportsPlugin.
-        // This still follows webpack's pattern used by FlagDependencyExportsPlugin and InferAsyncModulesPlugin, but with a
-        // later stage. Based on webpack's Compilation.js: finishModules (line 2833) runs before seal (line 2920).
-        compilation.hooks.finishModules.tapAsync(
-          {
-            name: PLUGIN_NAME,
-            stage: 10, // Run after FlagDependencyExportsPlugin (default stage 0)
-          },
-          (modules, callback) => {
-            for (const module of modules) {
-              // Only process ConsumeSharedModule instances with fallback dependencies
-              if (
-                !(module instanceof ConsumeSharedModule) ||
-                !module.options.import
-              ) {
-                continue;
-              }
-
-              let dependency;
-              if (module.options.eager) {
-                // For eager mode, get the fallback directly from dependencies
-                dependency = module.dependencies[0];
-              } else {
-                // For async mode, get it from the async dependencies block
-                dependency = module.blocks[0]?.dependencies[0];
-              }
-
-              if (dependency) {
-                const fallbackModule =
-                  compilation.moduleGraph.getModule(dependency);
-                if (
-                  fallbackModule &&
-                  fallbackModule.buildMeta &&
-                  fallbackModule.buildInfo
-                ) {
-                  // Copy buildMeta and buildInfo following webpack's DelegatedModule pattern: this.buildMeta = { ...delegateData.buildMeta };
-                  // This ensures ConsumeSharedModule inherits ESM/CJS detection (exportsType) and other optimization metadata
-                  module.buildMeta = { ...fallbackModule.buildMeta };
-                  module.buildInfo = { ...fallbackModule.buildInfo };
-                  // Mark all exports as provided, to avoid webpack's export analysis from marking them as unused since we copy buildMeta
-                  compilation.moduleGraph
-                    .getExportsInfo(module)
-                    .setUnknownExportsProvided();
-                }
-              }
-            }
-            callback();
-          },
-        );
-
         compilation.hooks.additionalTreeRuntimeRequirements.tap(
           PLUGIN_NAME,
           (chunk, set) => {
