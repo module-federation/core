@@ -42,6 +42,62 @@ To get started with Module Federation, see the [Quick Start](https://module-fede
 
 Come and chat with us on [Discussions](https://github.com/module-federation/universe/discussions) or [Discord](https://discord.gg/n69NnT3ACV)! The Module federation team and users are active there, and we're always looking for contributions.
 
+## 🧪 Rslib Monorepo Harness
+
+This repository includes a workspace-level Rslib harness that can orchestrate
+multiple `rslib.config.*` projects from the repo root (including nested project
+definitions via harness config files).
+
+Quick examples:
+
+- List resolved projects:
+
+  ```bash
+  pnpm run rslib:harness list
+  ```
+
+- List resolved projects as JSON:
+
+  ```bash
+  pnpm run rslib:harness list --json
+  ```
+
+  `--json` also implies list output when used with other commands.
+
+- Emit a machine-readable dry-run command plan:
+
+  ```bash
+  pnpm run rslib:harness:build --project create-module-federation --json --dry-run
+  ```
+
+  For non-`list` commands, `--json` is only supported with `--dry-run`.
+
+- Build a single project by name/path filter:
+
+  ```bash
+  pnpm run rslib:harness:build --project create-module-federation
+  ```
+
+- Show commands without executing:
+
+  ```bash
+  pnpm run rslib:harness:build --project create-module-federation --dry-run
+  ```
+
+- Inspect one project's generated config outputs:
+
+  ```bash
+  pnpm run rslib:harness:inspect --project create-module-federation
+  ```
+
+- Verify harness coverage against repo Rslib configs:
+
+  ```bash
+  pnpm run verify:rslib-harness
+  ```
+
+The default root harness config is `rslib.harness.config.mjs`.
+
 ## 🤝 Contribution
 
 > New contributors welcome!
