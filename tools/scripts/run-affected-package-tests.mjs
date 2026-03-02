@@ -27,25 +27,40 @@ function main() {
     process.exit(0);
   }
 
+  const changedFiles = getChangedFiles(baseRef, headRef);
+  const changedPackagesWithTestImpact =
+    getChangedPackagesWithTestImpact(changedFiles);
+  if (changedPackagesWithTestImpact.length === 0) {
+    console.log(
+      `[affected-tests] No package test-impact changes detected (${baseRef}..${headRef}). Skipping affected package tests.`,
+    );
+    process.exit(0);
+  }
+
   const affectedPackageTargets = getAffectedPackageTestTargets(
     baseRef,
     headRef,
   );
-  if (affectedPackageTargets.length === 0) {
+  const runnablePackageTargets = intersectSortedUnique(
+    affectedPackageTargets,
+    changedPackagesWithTestImpact,
+  );
+  if (runnablePackageTargets.length === 0) {
     console.log(
-      `[affected-tests] No affected package turbo:test tasks detected (${baseRef}..${headRef}).`,
+      `[affected-tests] No affected package turbo:test tasks detected (${baseRef}..${headRef}) after test-impact filtering.`,
     );
     process.exit(0);
   }
 
   console.log(
-    `[affected-tests] Running turbo:test for ${affectedPackageTargets.length} affected package(s): ${affectedPackageTargets.join(', ')}`,
+    `[affected-tests] Running turbo:test for ${runnablePackageTargets.length} affected package(s): ${runnablePackageTargets.join(', ')}`,
   );
 
   const args = ['exec', 'turbo', 'run', 'turbo:test'];
-  for (const packageName of affectedPackageTargets) {
+  for (const packageName of runnablePackageTargets) {
     args.push(`--filter=${packageName}`);
   }
+  args.push('--concurrency=50%');
 
   const testRun = spawnSync('pnpm', args, {
     cwd: ROOT,
@@ -108,6 +123,148 @@ function hasGitRef(ref) {
     },
   );
   return result.status === 0;
+}
+
+function getChangedFiles(baseRef, headRef) {
+  const result = spawnSync('git', ['diff', '--name-only', baseRef, headRef], {
+    cwd: ROOT,
+    stdio: 'pipe',
+    encoding: 'utf-8',
+  });
+  if (result.status !== 0) {
+    throw new Error(
+      `[affected-tests] Failed to evaluate changed files for ${baseRef}..${headRef}: ${result.stderr || result.stdout}`,
+    );
+  }
+  return result.stdout
+    .split('\n')
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+}
+
+function getChangedPackagesWithTestImpact(changedFiles) {
+  if (!Array.isArray(changedFiles) || changedFiles.length === 0) {
+    return [];
+  }
+
+  const workspacePackages = getWorkspacePackages();
+  if (workspacePackages.length === 0) {
+    return [];
+  }
+
+  const changedPackageNames = new Set();
+
+  for (const changedFile of changedFiles) {
+    const normalizedPath = normalizePath(changedFile);
+    const packageInfo = resolvePackageForPath(
+      normalizedPath,
+      workspacePackages,
+    );
+    if (!packageInfo) {
+      continue;
+    }
+
+    const relativeFilePath = getRelativePathWithinPackage(
+      normalizedPath,
+      packageInfo.path,
+    );
+    if (!relativeFilePath || !shouldTriggerPackageTests(relativeFilePath)) {
+      continue;
+    }
+
+    changedPackageNames.add(packageInfo.name);
+  }
+
+  return Array.from(changedPackageNames).sort();
+}
+
+function getWorkspacePackages() {
+  const result = spawnSync(
+    'pnpm',
+    ['exec', 'turbo', 'ls', '--filter=./packages/**', '--output=json'],
+    {
+      cwd: ROOT,
+      stdio: 'pipe',
+      encoding: 'utf-8',
+      maxBuffer: 1024 * 1024 * 64,
+      env: process.env,
+    },
+  );
+
+  if (result.status !== 0) {
+    throw new Error(
+      `[affected-tests] Failed to list workspace packages from Turbo: ${result.stderr || result.stdout}`,
+    );
+  }
+
+  const payload = parseJsonFromTurboOutput(result.stdout ?? '');
+  const items = Array.isArray(payload?.packages?.items)
+    ? payload.packages.items
+    : [];
+
+  return items
+    .filter(
+      (entry) =>
+        entry &&
+        typeof entry.name === 'string' &&
+        entry.name &&
+        typeof entry.path === 'string' &&
+        entry.path,
+    )
+    .map((entry) => ({
+      name: entry.name,
+      path: normalizePath(entry.path).replace(/\/+$/, ''),
+    }))
+    .sort((a, b) => b.path.length - a.path.length);
+}
+
+function resolvePackageForPath(changedFilePath, workspacePackages) {
+  for (const packageInfo of workspacePackages) {
+    if (
+      changedFilePath === packageInfo.path ||
+      changedFilePath.startsWith(`${packageInfo.path}/`)
+    ) {
+      return packageInfo;
+    }
+  }
+  return null;
+}
+
+function getRelativePathWithinPackage(changedFilePath, packagePath) {
+  if (changedFilePath === packagePath) {
+    return '';
+  }
+  if (!changedFilePath.startsWith(`${packagePath}/`)) {
+    return null;
+  }
+  return changedFilePath.slice(packagePath.length + 1);
+}
+
+function shouldTriggerPackageTests(relativeFilePath) {
+  if (!relativeFilePath) {
+    return false;
+  }
+
+  if (
+    relativeFilePath.startsWith('src/') ||
+    relativeFilePath.startsWith('test/') ||
+    relativeFilePath.startsWith('tests/') ||
+    relativeFilePath.startsWith('__tests__/')
+  ) {
+    return true;
+  }
+
+  if (/\.(spec|test)\.[cm]?[jt]sx?$/.test(relativeFilePath)) {
+    return true;
+  }
+
+  return (
+    relativeFilePath.startsWith('jest.config.') ||
+    relativeFilePath.startsWith('vitest.config.') ||
+    relativeFilePath.startsWith('rstest.config.') ||
+    relativeFilePath.startsWith('vite.config.') ||
+    relativeFilePath.startsWith('tsconfig.spec')
+  );
 }
 
 function getAffectedPackageTestTargets(baseRef, headRef) {
@@ -175,6 +332,19 @@ function getAffectedPackageTestTargets(baseRef, headRef) {
   }
 
   return Array.from(packageNames).sort();
+}
+
+function intersectSortedUnique(left, right) {
+  const rightSet = new Set(Array.isArray(right) ? right : []);
+  const intersection = [];
+
+  for (const value of Array.isArray(left) ? left : []) {
+    if (rightSet.has(value)) {
+      intersection.push(value);
+    }
+  }
+
+  return intersection;
 }
 
 function parseJsonFromTurboOutput(outputText) {
