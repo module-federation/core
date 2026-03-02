@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-const babelTransformer = require('__BABEL_TRANSFORMER_PATH__');
+const babelTransformer = require(__BABEL_TRANSFORMER_PATH__);
 const babelPlugins = __BABEL_PLUGINS__;
 /* eslint-enable no-undef */
 
