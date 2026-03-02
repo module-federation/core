@@ -1,7 +1,6 @@
 import * as path from 'path';
 import { defineConfig } from '@rspress/core';
 import { moduleFederationPluginOverview } from './src/moduleFederationPluginOverview';
-import { pluginLlms } from '@rspress/plugin-llms';
 // import { pluginAnnotationWords } from 'rspress-plugin-annotation-words';
 import { pluginSass } from '@rsbuild/plugin-sass';
 import { pluginModuleFederation } from '@module-federation/rspress-plugin';
@@ -9,7 +8,7 @@ import mfConfig from './module-federation.config';
 
 export default defineConfig({
   root: path.join(__dirname, 'docs'),
-  // llms: true,
+  llms: true,
   title: 'Module federation',
   description:
     'Module Federation is a concept that allows developers to share code and resources across multiple JavaScript applications',
@@ -55,7 +54,6 @@ export default defineConfig({
     // pluginAnnotationWords({
     //   wordsMapPath: 'words-map.json',
     // }),
-    pluginLlms(),
     pluginModuleFederation(mfConfig),
   ],
   builderConfig: {
