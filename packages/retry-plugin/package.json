@@ -43,6 +43,9 @@
     "test": "vitest run -u -c vitest.config.ts",
     "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",
     "build-debug": "FEDERATION_DEBUG=true pnpm --filter @module-federation/retry-plugin run build",
-    "pre-release": "pnpm --filter @module-federation/retry-plugin run test && pnpm --filter @module-federation/retry-plugin run build"
+    "pre-release": "pnpm --filter @module-federation/retry-plugin run test && pnpm --filter @module-federation/retry-plugin run build",
+    "turbo:build": "pnpm run build",
+    "turbo:test": "pnpm run test",
+    "turbo:lint": "pnpm run lint"
   }
 }

@@ -174,7 +174,10 @@ const jobs = [
     steps: [
       setupE2E(),
       step('Check CI conditions', async (ctx) => {
-        ctx.state.shouldRun = await ciIsAffected('modernjs', ctx);
+        ctx.state.shouldRun = await ciIsAffected(
+          '@module-federation/modern-js,@module-federation/modern-js-v3,modernjs-ssr-host,modernjs-ssr-remote,modernjs-ssr-remote-new-version,modernjs-ssr-nested-remote,modernjs-ssr-dynamic-remote,modernjs-ssr-dynamic-remote-new-version,modernjs-ssr-dynamic-nested-remote,modernjs-ssr-data-fetch-host,modernjs-ssr-data-fetch-provider,modernjs-ssr-data-fetch-provider-csr',
+          ctx,
+        );
       }),
       step('E2E Test for ModernJS', async (ctx) => {
         if (!ctx.state.shouldRun) {
@@ -191,7 +194,7 @@ const jobs = [
     steps: [
       setupE2E(),
       step('E2E Test for Runtime Demo', (ctx) =>
-        runIfAffected(ctx, '3005-runtime-host', () =>
+        runIfAffected(ctx, 'runtime-host', () =>
           runCommand('pnpm', ['run', 'e2e:runtime'], ctx),
         ),
       ),
@@ -203,12 +206,12 @@ const jobs = [
     steps: [
       setupE2E(),
       step('E2E Test for Manifest Demo (dev)', (ctx) =>
-        runIfAffected(ctx, 'manifest-webpack-host', () =>
+        runIfAffected(ctx, '3008-webpack-host', () =>
           runCommand('pnpm', ['run', 'e2e:manifest:dev'], ctx),
         ),
       ),
       step('E2E Test for Manifest Demo (prod)', (ctx) =>
-        runIfAffected(ctx, 'manifest-webpack-host', () =>
+        runIfAffected(ctx, '3008-webpack-host', () =>
           runCommand('pnpm', ['run', 'e2e:manifest:prod'], ctx),
         ),
       ),
@@ -243,7 +246,7 @@ const jobs = [
     steps: [
       setupE2E(),
       step('E2E Test for Next.js Dev', (ctx) =>
-        runIfAffected(ctx, '3000-home', () =>
+        runIfAffected(ctx, '@module-federation/3000-home', () =>
           runCommand('pnpm', ['run', 'e2e:next:dev'], ctx),
         ),
       ),
@@ -255,7 +258,7 @@ const jobs = [
     steps: [
       setupE2E(),
       step('E2E Test for Next.js Prod', (ctx) =>
-        runIfAffected(ctx, '3000-home', () =>
+        runIfAffected(ctx, '@module-federation/3000-home', () =>
           runCommand('pnpm', ['run', 'e2e:next:prod'], ctx),
         ),
       ),
@@ -273,7 +276,7 @@ const jobs = [
       ),
       step('Check CI conditions', async (ctx) => {
         ctx.state.shouldRun = await ciIsAffected(
-          'treeshake-server,treeshake-frontend',
+          '@module-federation/treeshake-server,@module-federation/treeshake-frontend',
           ctx,
         );
       }),
@@ -299,7 +302,10 @@ const jobs = [
     steps: [
       setupE2E(),
       step('Check CI conditions', async (ctx) => {
-        ctx.state.shouldRun = await ciIsAffected('modernjs', ctx);
+        ctx.state.shouldRun = await ciIsAffected(
+          '@module-federation/modern-js,@module-federation/modern-js-v3,modernjs-ssr-host,modernjs-ssr-remote,modernjs-ssr-remote-new-version,modernjs-ssr-nested-remote,modernjs-ssr-dynamic-remote,modernjs-ssr-dynamic-remote-new-version,modernjs-ssr-dynamic-nested-remote,modernjs-ssr-data-fetch-host,modernjs-ssr-data-fetch-provider,modernjs-ssr-data-fetch-provider-csr',
+          ctx,
+        );
       }),
       step('E2E Test for ModernJS SSR', async (ctx) => {
         if (!ctx.state.shouldRun) {
@@ -317,7 +323,7 @@ const jobs = [
       setupE2E(),
       step('Check CI conditions', async (ctx) => {
         ctx.state.shouldRun = await ciIsAffected(
-          'router-host-2000,router-host-v5-2200,router-host-vue3-2100,router-remote1-2001,router-remote2-2002,router-remote3-2003,router-remote4-2004',
+          'host,host-v5,host-vue3,remote1,remote2,remote3,remote4',
           ctx,
         );
       }),

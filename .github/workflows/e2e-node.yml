@@ -46,7 +46,7 @@ jobs:
         run: npx cypress install
 
       - name: Build shared packages
-        run: pnpm exec turbo run build --filter=./packages/** --concurrency=20
+        run: pnpm run build:pkg
 
       - name: Check CI conditions
         id: check-ci

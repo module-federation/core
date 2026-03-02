@@ -60,6 +60,9 @@
     "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",
     "build-debug": "RUNTIME_CORE_TSDOWN_MODE=debug tsdown --config tsdown.config.ts",
     "pre-release": "pnpm --filter @module-federation/runtime-core run test && pnpm --filter @module-federation/runtime-core run build",
-    "test": "vitest run -u -c vitest.config.ts"
+    "test": "vitest run -u -c vitest.config.ts",
+    "turbo:build": "pnpm run build",
+    "turbo:test": "pnpm run test",
+    "turbo:lint": "pnpm run lint"
   }
 }
