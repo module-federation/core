@@ -30,6 +30,7 @@ import {
 import { fileLog, logger } from '../../server';
 import { axiosGet, cloneDeepOptions, isDebugMode } from './utils';
 import { UpdateMode } from '../../server/constant';
+import { syncRemoteTypesPackage } from './virtualRemotePackage';
 
 export const MODULE_DTS_MANAGER_IDENTIFIER = 'MF DTS Manager';
 
@@ -436,6 +437,21 @@ class DTSManager {
       const { downloadPromisesResult, hostOptions } =
         await this.consumeArchiveTypes(options.host);
 
+      await Promise.all(
+        downloadPromisesResult.map(async (item) => {
+          if (item.status === 'rejected' || !item.value) {
+            return;
+          }
+
+          const [alias, destinationPath] = item.value;
+          await syncRemoteTypesPackage({
+            context: hostOptions.context,
+            remoteAlias: alias,
+            remoteTypesFolder: destinationPath,
+          });
+        }),
+      );
+
       // download apiTypes
       if (hostOptions.consumeAPITypes) {
         await Promise.all(
@@ -523,6 +539,11 @@ class DTSManager {
               zipUrl: remoteTarPath || requiredRemoteInfo.zipUrl,
             },
           );
+          await syncRemoteTypesPackage({
+            context: hostOptions.context,
+            remoteAlias: _alias,
+            remoteTypesFolder: destinationPath,
+          });
           const addNew = await this.downloadAPITypes(
             requiredRemoteInfo,
             destinationPath,
