@@ -116,28 +116,54 @@ describe('validateOptions', () => {
     ).toThrow('shared');
   });
 
-  it('accepts dts as a boolean or object', () => {
+  it('throws for windows-style relative shared module names', () => {
     expect(() =>
       validateOptions({
         ...getValidConfig(),
-        dts: true,
+        shared: {
+          ...getValidConfig().shared,
+          '.\\local-shared': {
+            singleton: false,
+            eager: false,
+            version: '1.0.0',
+            requiredVersion: '1.0.0',
+          },
+        },
       } as any),
-    ).not.toThrow();
-
-    expect(() =>
-      validateOptions({
-        ...getValidConfig(),
-        dts: { generateAPITypes: true },
-      } as any),
-    ).not.toThrow();
+    ).toThrow('Relative paths are not supported');
   });
 
-  it('throws for invalid dts type', () => {
+  it('throws for windows-style absolute shared module names', () => {
     expect(() =>
       validateOptions({
         ...getValidConfig(),
-        dts: 1,
+        shared: {
+          ...getValidConfig().shared,
+          'C:\\project\\shared\\module': {
+            singleton: false,
+            eager: false,
+            version: '1.0.0',
+            requiredVersion: '1.0.0',
+          },
+        },
       } as any),
-    ).toThrow("Option 'dts' must be a boolean or a plain object.");
+    ).toThrow('Absolute paths are not supported');
+  });
+
+  it('throws for UNC absolute shared module names', () => {
+    expect(() =>
+      validateOptions({
+        ...getValidConfig(),
+        shared: {
+          ...getValidConfig().shared,
+          '\\\\server\\share\\module': {
+            singleton: false,
+            eager: false,
+            version: '1.0.0',
+            requiredVersion: '1.0.0',
+          },
+        },
+      } as any),
+    ).toThrow('Absolute paths are not supported');
   });
 });

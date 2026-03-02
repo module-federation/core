@@ -41,7 +41,10 @@ export function createBabelTransformer({
   ].filter(Boolean);
 
   const babelTransformer = transformerTemplate
-    .replaceAll('__BABEL_TRANSFORMER_PATH__', originalBabelTransformerPath)
+    .replaceAll(
+      '__BABEL_TRANSFORMER_PATH__',
+      JSON.stringify(originalBabelTransformerPath),
+    )
     .replaceAll('__BABEL_PLUGINS__', JSON.stringify(plugins));
 
   fs.writeFileSync(outputPath, babelTransformer, 'utf-8');
