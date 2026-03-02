@@ -102,4 +102,38 @@ describe('ModuleFederation', () => {
     // Value is different from the registered remote
     expect(newApp1Res).toBe('hello app1 entry2');
   });
+
+  it('preserves import map entries when entryFormat is importmap', () => {
+    const entry = 'webpack_remote';
+    const FM = new ModuleFederation({
+      name: '@federation/instance',
+      remotes: [
+        {
+          name: '@register-remotes/importmap',
+          entry,
+          entryFormat: 'importmap',
+          type: 'module',
+        },
+      ],
+    });
+
+    expect(FM.options.remotes[0].entry).toBe(entry);
+  });
+
+  it('normalizes relative entries to absolute urls by default', () => {
+    const entry = '/static/remoteEntry.js';
+    const FM = new ModuleFederation({
+      name: '@federation/instance',
+      remotes: [
+        {
+          name: '@register-remotes/relative',
+          entry,
+        },
+      ],
+    });
+
+    expect(FM.options.remotes[0].entry).toBe(
+      new URL(entry, window.location.origin).href,
+    );
+  });
 });

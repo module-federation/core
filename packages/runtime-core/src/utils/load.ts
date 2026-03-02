@@ -320,5 +320,6 @@ export function getRemoteInfo(remote: Remote): RemoteInfo {
     type: remote.type || DEFAULT_REMOTE_TYPE,
     entryGlobalName: remote.entryGlobalName || remote.name,
     shareScope: remote.shareScope || DEFAULT_SCOPE,
+    entryFormat: remote.entryFormat,
   };
 }

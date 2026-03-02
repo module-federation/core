@@ -12,11 +12,14 @@ export type PartialOptional<T, K extends keyof T> = Omit<T, K> & {
   [P in K]-?: T[P];
 };
 
+export type RemoteEntryFormat = 'url' | 'importmap';
+
 export interface RemoteInfoCommon {
   alias?: string;
   shareScope?: string | string[];
   type?: RemoteEntryType;
   entryGlobalName?: string;
+  entryFormat?: RemoteEntryFormat;
 }
 
 export type RemoteInfoOptionalVersion = {
@@ -40,6 +43,7 @@ export interface RemoteInfo {
   type: RemoteEntryType;
   entryGlobalName: string;
   shareScope: string | string[];
+  entryFormat?: RemoteEntryFormat;
 }
 
 export type HostInfo = Pick<
@@ -74,6 +78,7 @@ type SharedBaseArgs = {
   strategy?: 'version-first' | 'loaded-first';
   loaded?: boolean;
   treeShaking?: TreeShakingArgs;
+  import?: string | false;
 };
 
 export type SharedGetter = (() => () => Module) | (() => Promise<() => Module>);
@@ -96,6 +101,7 @@ export type Shared = {
   lib?: () => Module;
   loaded?: boolean;
   loading?: null | Promise<any>;
+  import?: string | false;
   // compatibility with previous shared
   eager?: boolean;
   /**

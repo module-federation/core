@@ -554,6 +554,8 @@ graph TB
     style OptCheck fill:#f96,stroke:#333,stroke-width:2px
 ```
 
+Import map entry preservation is controlled separately via `FEDERATION_OPTIMIZE_NO_IMPORTMAP`, allowing builds that do not use import maps to tree-shake that logic from runtime-core.
+
 ### Share Scope Management
 
 ```mermaid
