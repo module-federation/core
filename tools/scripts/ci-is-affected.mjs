@@ -1,6 +1,5 @@
-import { execSync } from 'node:child_process';
-import { readdirSync, readFileSync } from 'node:fs';
-import { basename, dirname, relative, resolve } from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import yargs from 'yargs';
 
@@ -48,54 +47,60 @@ if (base === head) {
   process.exit(0);
 }
 
-const projectGraph = loadProjectGraph();
-let changedFiles = [];
-try {
-  changedFiles = execSync(`git diff --name-only ${base} ${head}`, {
+const turboResult = spawnSync(
+  'pnpm',
+  ['exec', 'turbo', 'ls', '--affected', '--output=json'],
+  {
     cwd: ROOT,
+    stdio: 'pipe',
     encoding: 'utf-8',
-  })
-    .split('\n')
-    .map((entry) => entry.trim())
-    .filter(Boolean);
-} catch (error) {
-  console.warn(
-    `Failed to evaluate changed files for base=${base} head=${head}. Running e2e by default.`,
-  );
-  if (error instanceof Error) {
-    console.warn(error.message);
-  }
-  process.exit(0);
-}
-
-if (changedFiles.length === 0) {
-  console.log(
-    `appNames: ${appNames.join(',')} , base=${base} head=${head}, no changed files detected.`,
-  );
-  process.exit(1);
-}
-
-const affectedProjects = new Set();
-let hasUnmappedChange = false;
-for (const changedFile of changedFiles) {
-  const project = resolveProjectForPath(changedFile, projectGraph.projects);
-  if (!project) {
-    hasUnmappedChange = true;
-    continue;
-  }
-  affectedProjects.add(project);
-}
-
-if (hasUnmappedChange) {
-  console.warn(
-    `Detected changed files outside known project roots for base=${base} head=${head}. Running e2e by default.`,
-  );
-  process.exit(0);
-}
-
-const isAffected = appNames.some((name) =>
-  isRequestedAppAffected(name, affectedProjects),
+    maxBuffer: 1024 * 1024 * 64,
+    env: {
+      ...process.env,
+      TURBO_SCM_BASE: base,
+      TURBO_SCM_HEAD: head,
+    },
+  },
 );
+
+if (turboResult.status !== 0) {
+  console.warn(
+    `Failed to evaluate Turbo affected packages for base=${base} head=${head}. Running e2e by default.`,
+  );
+  if (turboResult.stderr?.trim()) {
+    console.warn(turboResult.stderr.trim());
+  } else if (turboResult.stdout?.trim()) {
+    console.warn(turboResult.stdout.trim());
+  }
+  process.exit(0);
+}
+
+let affectedPackageNames;
+try {
+  affectedPackageNames = parseAffectedPackages(turboResult.stdout ?? '');
+} catch {
+  try {
+    affectedPackageNames = parseAffectedPackages(
+      `${turboResult.stdout ?? ''}\n${turboResult.stderr ?? ''}`,
+    );
+  } catch {
+    console.warn(
+      `Unable to parse Turbo affected output for base=${base} head=${head}. Running e2e by default.`,
+    );
+    process.exit(0);
+  }
+}
+
+const matchableAffectedNames = new Set();
+for (const packageName of affectedPackageNames) {
+  matchableAffectedNames.add(packageName);
+  const unscoped = toUnscopedName(packageName);
+  if (unscoped) {
+    matchableAffectedNames.add(unscoped);
+  }
+}
+
+const isAffected = appNames.some((name) => matchableAffectedNames.has(name));
 
 if (isAffected) {
   console.log(
@@ -110,251 +115,298 @@ console.log(
 process.exit(1);
 
 function hasGitRef(ref) {
-  if (!ref) {
+  if (!ref || !ref.trim()) {
     return false;
   }
-  try {
-    execSync(`git rev-parse --verify --quiet "${ref}^{commit}"`, {
+  const result = spawnSync(
+    'git',
+    ['rev-parse', '--verify', '--quiet', `${ref}^{commit}`],
+    {
       cwd: ROOT,
       stdio: 'ignore',
-    });
-    return true;
-  } catch {
-    return false;
-  }
+    },
+  );
+  return result.status === 0;
 }
 
 function resolveBase(requestedBase) {
-  if (hasGitRef(requestedBase)) {
-    return requestedBase;
-  }
-  if (hasGitRef(process.env.CI_LOCAL_BASE_REF)) {
-    return process.env.CI_LOCAL_BASE_REF;
-  }
-  if (hasGitRef('origin/main')) {
-    return 'origin/main';
-  }
-  if (hasGitRef('main')) {
-    return 'main';
-  }
-  if (hasGitRef('HEAD~1')) {
-    return 'HEAD~1';
+  const candidates = [
+    ...expandRefCandidates(requestedBase),
+    ...expandRefCandidates(process.env.CI_LOCAL_BASE_REF),
+    ...expandRefCandidates(process.env.CI_BASE_REF),
+    ...expandRefCandidates(process.env.GITHUB_BASE_REF),
+    'origin/main',
+    'main',
+    'HEAD~1',
+  ];
+
+  for (const candidate of candidates) {
+    if (hasGitRef(candidate)) {
+      return candidate;
+    }
   }
   return null;
 }
 
 function resolveHead(requestedHead) {
-  if (hasGitRef(requestedHead)) {
-    return requestedHead;
-  }
-  if (hasGitRef('HEAD')) {
-    return 'HEAD';
-  }
-  return null;
-}
+  const candidates = [
+    ...expandRefCandidates(requestedHead),
+    ...expandRefCandidates(process.env.CI_LOCAL_HEAD_REF),
+    ...expandRefCandidates(process.env.CI_HEAD_REF),
+    ...expandRefCandidates(process.env.GITHUB_SHA),
+    'HEAD',
+  ];
 
-function loadProjectGraph() {
-  const packageFiles = collectPackageFiles(ROOT);
-  const projects = packageFiles
-    .map((packageFile) => {
-      const root = dirname(packageFile);
-      const relativeRoot = normalizePath(relative(ROOT, root));
-      const packageJson = JSON.parse(readFileSync(packageFile, 'utf-8'));
-      const aliases = new Set();
-
-      if (typeof packageJson?.name === 'string' && packageJson.name) {
-        aliases.add(packageJson.name);
-        if (packageJson.name.startsWith('@')) {
-          const [, unscopedName] = packageJson.name.split('/');
-          if (unscopedName) {
-            aliases.add(unscopedName);
-          }
-        }
-      }
-
-      const folderName = basename(relativeRoot);
-      if (folderName) {
-        aliases.add(folderName);
-        if (folderName.startsWith('metro-')) {
-          aliases.add(folderName.slice('metro-'.length));
-        }
-      }
-
-      for (const alias of getLegacyAliases(relativeRoot)) {
-        aliases.add(alias);
-      }
-
-      return { root: relativeRoot, aliases };
-    })
-    .filter(Boolean)
-    .sort((left, right) => right.root.length - left.root.length);
-
-  return { projects };
-}
-
-function collectPackageFiles(rootDir) {
-  const results = [];
-  const queue = [rootDir];
-  while (queue.length > 0) {
-    const current = queue.pop();
-    for (const entry of readdirSync(current, { withFileTypes: true })) {
-      if (entry.name === '.git' || entry.name === 'node_modules') {
-        continue;
-      }
-      const next = resolve(current, entry.name);
-      if (entry.isDirectory()) {
-        queue.push(next);
-        continue;
-      }
-      if (entry.isFile() && entry.name === 'package.json') {
-        const relativePath = normalizePath(relative(rootDir, next));
-        if (relativePath === 'package.json') {
-          continue;
-        }
-        results.push(next);
-      }
-    }
-  }
-  return results;
-}
-
-function resolveProjectForPath(filePath, projects) {
-  const normalizedPath = normalizePath(filePath);
-  for (const project of projects) {
-    if (
-      normalizedPath === project.root ||
-      normalizedPath.startsWith(`${project.root}/`)
-    ) {
-      return project;
+  for (const candidate of candidates) {
+    if (hasGitRef(candidate)) {
+      return candidate;
     }
   }
   return null;
 }
 
-function isRequestedAppAffected(requestedName, affectedProjects) {
-  for (const project of affectedProjects) {
-    if (project.aliases.has(requestedName)) {
-      return true;
+function expandRefCandidates(ref) {
+  if (!ref || !ref.trim()) {
+    return [];
+  }
+
+  const normalized = ref.trim();
+  const candidates = new Set([normalized]);
+
+  if (normalized.startsWith('refs/heads/')) {
+    const branchName = normalized.slice('refs/heads/'.length);
+    if (branchName) {
+      candidates.add(branchName);
+      candidates.add(`origin/${branchName}`);
+    }
+  } else if (normalized.startsWith('origin/')) {
+    const localBranch = normalized.slice('origin/'.length);
+    if (localBranch) {
+      candidates.add(localBranch);
+    }
+  } else {
+    candidates.add(`origin/${normalized}`);
+  }
+
+  return Array.from(candidates);
+}
+
+function parseAffectedPackages(outputText) {
+  const payload = parseJsonFromTurboOutput(outputText);
+  const packageNames = new Set();
+
+  if (Array.isArray(payload)) {
+    collectPackageNamesFromList(payload, packageNames);
+    return packageNames;
+  }
+
+  if (!payload || typeof payload !== 'object') {
+    return packageNames;
+  }
+
+  if (Array.isArray(payload.items)) {
+    collectPackageNamesFromList(payload.items, packageNames);
+  }
+
+  if ('packages' in payload) {
+    collectPackageNamesFromContainer(payload.packages, packageNames);
+  }
+
+  if (packageNames.size === 0 && typeof payload.name === 'string') {
+    addPackageName(payload.name, packageNames);
+  }
+
+  return packageNames;
+}
+
+function collectPackageNamesFromContainer(container, packageNames) {
+  if (!container) {
+    return;
+  }
+
+  if (Array.isArray(container)) {
+    collectPackageNamesFromList(container, packageNames);
+    return;
+  }
+
+  if (typeof container !== 'object') {
+    return;
+  }
+
+  if (typeof container.name === 'string') {
+    addPackageName(container.name, packageNames);
+  }
+
+  if (Array.isArray(container.items)) {
+    collectPackageNamesFromList(container.items, packageNames);
+  }
+
+  if (Array.isArray(container.packages)) {
+    collectPackageNamesFromList(container.packages, packageNames);
+  }
+
+  for (const [key, value] of Object.entries(container)) {
+    const valueLooksLikePackageEntry =
+      value &&
+      typeof value === 'object' &&
+      !Array.isArray(value) &&
+      ('path' in value || 'name' in value || 'package' in value);
+
+    if (valueLooksLikePackageEntry && isPackageNameCandidate(key)) {
+      packageNames.add(key);
+    }
+    if (value && typeof value === 'object' && typeof value.name === 'string') {
+      addPackageName(value.name, packageNames);
     }
   }
-  if (requestedName === 'modernjs') {
-    for (const project of affectedProjects) {
-      for (const alias of project.aliases) {
-        if (alias.startsWith('modernjs-')) {
-          return true;
-        }
+}
+
+function collectPackageNamesFromList(list, packageNames) {
+  for (const entry of list) {
+    if (typeof entry === 'string') {
+      addPackageName(entry, packageNames);
+      continue;
+    }
+    if (!entry || typeof entry !== 'object') {
+      continue;
+    }
+
+    if (typeof entry.name === 'string') {
+      addPackageName(entry.name, packageNames);
+      continue;
+    }
+
+    if (typeof entry.package === 'string') {
+      addPackageName(entry.package, packageNames);
+      continue;
+    }
+
+    if (Array.isArray(entry.items)) {
+      collectPackageNamesFromList(entry.items, packageNames);
+    }
+  }
+}
+
+function addPackageName(name, packageNames) {
+  if (isPackageNameCandidate(name)) {
+    packageNames.add(name);
+  }
+}
+
+function isPackageNameCandidate(value) {
+  if (typeof value !== 'string') {
+    return false;
+  }
+  if (!value || value === '//') {
+    return false;
+  }
+  if (value.includes('#') || value.includes('\\') || value.includes(' ')) {
+    return false;
+  }
+  if (value.startsWith('@')) {
+    return /^@[^/]+\/[^/]+$/.test(value);
+  }
+  return !value.includes('/');
+}
+
+function toUnscopedName(value) {
+  if (typeof value !== 'string' || !value.startsWith('@')) {
+    return null;
+  }
+  const [, unscoped] = value.split('/');
+  return unscoped || null;
+}
+
+function parseJsonFromTurboOutput(outputText) {
+  const raw = outputText?.trim();
+  if (!raw) {
+    throw new Error('Turbo output is empty.');
+  }
+
+  const directParse = tryParseJson(raw);
+  if (directParse.ok) {
+    return directParse.value;
+  }
+
+  for (let index = 0; index < raw.length; index += 1) {
+    const char = raw[index];
+    if (char !== '{' && char !== '[') {
+      continue;
+    }
+
+    const toEndParse = tryParseJson(raw.slice(index));
+    if (toEndParse.ok) {
+      return toEndParse.value;
+    }
+
+    const balancedCandidate = extractBalancedJson(raw, index);
+    if (!balancedCandidate) {
+      continue;
+    }
+
+    const balancedParse = tryParseJson(balancedCandidate);
+    if (balancedParse.ok) {
+      return balancedParse.value;
+    }
+  }
+
+  throw new Error('Unable to locate JSON payload in Turbo output.');
+}
+
+function tryParseJson(value) {
+  try {
+    return { ok: true, value: JSON.parse(value) };
+  } catch {
+    return { ok: false, value: null };
+  }
+}
+
+function extractBalancedJson(text, startIndex) {
+  const stack = [];
+  let inString = false;
+  let escaping = false;
+
+  for (let index = startIndex; index < text.length; index += 1) {
+    const char = text[index];
+
+    if (inString) {
+      if (escaping) {
+        escaping = false;
+        continue;
+      }
+      if (char === '\\') {
+        escaping = true;
+        continue;
+      }
+      if (char === '"') {
+        inString = false;
+      }
+      continue;
+    }
+
+    if (char === '"') {
+      inString = true;
+      continue;
+    }
+
+    if (char === '{') {
+      stack.push('}');
+      continue;
+    }
+    if (char === '[') {
+      stack.push(']');
+      continue;
+    }
+    if (char === '}' || char === ']') {
+      const expected = stack.pop();
+      if (expected !== char) {
+        return null;
+      }
+      if (stack.length === 0) {
+        return text.slice(startIndex, index + 1);
       }
     }
   }
-  return false;
-}
 
-function getLegacyAliases(relativeRoot) {
-  if (relativeRoot === 'apps/manifest-demo/webpack-host') {
-    return ['manifest-webpack-host', '3008-webpack-host'];
-  }
-  if (relativeRoot === 'apps/runtime-demo/3005-runtime-host') {
-    return ['runtime-host'];
-  }
-  if (relativeRoot === 'apps/runtime-demo/3006-runtime-remote') {
-    return ['runtime-remote1'];
-  }
-  if (relativeRoot === 'apps/runtime-demo/3007-runtime-remote') {
-    return ['runtime-remote2'];
-  }
-  if (relativeRoot === 'apps/router-demo/router-host-2000') {
-    return ['host'];
-  }
-  if (relativeRoot === 'apps/router-demo/router-host-v5-2200') {
-    return ['host-v5'];
-  }
-  if (relativeRoot === 'apps/router-demo/router-host-vue3-2100') {
-    return ['host-vue3'];
-  }
-  if (relativeRoot === 'apps/router-demo/router-remote1-2001') {
-    return ['remote1'];
-  }
-  if (relativeRoot === 'apps/router-demo/router-remote2-2002') {
-    return ['remote2'];
-  }
-  if (relativeRoot === 'apps/router-demo/router-remote3-2003') {
-    return ['remote3'];
-  }
-  if (relativeRoot === 'apps/router-demo/router-remote4-2004') {
-    return ['remote4'];
-  }
-  if (relativeRoot === 'apps/router-demo/router-remote5-2005') {
-    return ['remote5'];
-  }
-  if (relativeRoot === 'apps/router-demo/router-remote6-2006') {
-    return ['remote6'];
-  }
-  if (relativeRoot === 'apps/modern-component-data-fetch/host') {
-    return ['modernjs-ssr-data-fetch-host'];
-  }
-  if (relativeRoot === 'apps/modern-component-data-fetch/provider') {
-    return ['modernjs-ssr-data-fetch-provider'];
-  }
-  if (relativeRoot === 'apps/modern-component-data-fetch/provider-csr') {
-    return ['modernjs-ssr-data-fetch-provider-csr'];
-  }
-  if (relativeRoot === 'apps/modernjs-ssr/host') {
-    return ['modernjs-ssr-host'];
-  }
-  if (relativeRoot === 'apps/modernjs-ssr/remote') {
-    return ['modernjs-ssr-remote'];
-  }
-  if (relativeRoot === 'apps/modernjs-ssr/remote-new-version') {
-    return ['modernjs-ssr-remote-new-version'];
-  }
-  if (relativeRoot === 'apps/modernjs-ssr/nested-remote') {
-    return ['modernjs-ssr-nested-remote'];
-  }
-  if (relativeRoot === 'apps/modernjs-ssr/dynamic-remote') {
-    return ['modernjs-ssr-dynamic-remote'];
-  }
-  if (relativeRoot === 'apps/modernjs-ssr/dynamic-remote-new-version') {
-    return ['modernjs-ssr-dynamic-remote-new-version'];
-  }
-  if (relativeRoot === 'apps/modernjs-ssr/dynamic-nested-remote') {
-    return ['modernjs-ssr-dynamic-nested-remote'];
-  }
-  if (relativeRoot === 'apps/node-host') {
-    return ['node-host'];
-  }
-  if (relativeRoot === 'apps/node-host-e2e') {
-    return ['node-host-e2e'];
-  }
-  if (relativeRoot === 'apps/node-local-remote') {
-    return ['node-local-remote'];
-  }
-  if (relativeRoot === 'apps/node-remote') {
-    return ['node-remote'];
-  }
-  if (relativeRoot === 'apps/node-dynamic-remote') {
-    return ['node-dynamic-remote'];
-  }
-  if (relativeRoot === 'apps/node-dynamic-remote-new-version') {
-    return ['node-dynamic-remote-new-version'];
-  }
-  if (relativeRoot === 'apps/next-app-router/next-app-router-4000') {
-    return ['next-app-router-4000'];
-  }
-  if (relativeRoot === 'apps/next-app-router/next-app-router-4001') {
-    return ['next-app-router-4001'];
-  }
-  if (relativeRoot === 'apps/3000-home') {
-    return ['3000-home'];
-  }
-  if (relativeRoot === 'apps/3001-shop') {
-    return ['3001-shop'];
-  }
-  if (relativeRoot === 'apps/3002-checkout') {
-    return ['3002-checkout'];
-  }
-  return [];
-}
-
-function normalizePath(value) {
-  return value.replace(/\\/g, '/');
+  return null;
 }

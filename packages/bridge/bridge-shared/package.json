@@ -18,7 +18,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "turbo:build": "pnpm run build"
   },
   "devDependencies": {
     "@types/node": "^20.19.5",

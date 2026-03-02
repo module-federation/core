@@ -45,13 +45,13 @@ jobs:
             ${{ runner.os }}-turbo-
 
       - name: Build shared packages
-        run: pnpm exec turbo run build --filter=./packages/** --concurrency=20
+        run: pnpm run build:pkg
 
       - name: Check CI conditions
         id: check-ci
         run: |
           ci_status=0
-          node tools/scripts/ci-is-affected.mjs --appName=treeshake-server,treeshake-frontend || ci_status=$?
+          node tools/scripts/ci-is-affected.mjs --appName=@module-federation/treeshake-server,@module-federation/treeshake-frontend || ci_status=$?
           if [ "$ci_status" -eq 0 ]; then
             echo "run-e2e=true" >> "$GITHUB_OUTPUT"
           elif [ "$ci_status" -eq 1 ]; then

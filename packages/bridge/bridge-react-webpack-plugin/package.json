@@ -26,7 +26,9 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "vitest run -c vitest.config.ts"
+    "test": "vitest run -c vitest.config.ts",
+    "turbo:build": "pnpm run build",
+    "turbo:test": "pnpm run test"
   },
   "dependencies": {
     "@module-federation/sdk": "workspace:*",

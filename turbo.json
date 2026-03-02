@@ -59,6 +59,17 @@
     "pre-release": {
       "dependsOn": ["build", "test"],
       "outputs": []
+    },
+    "turbo:build": {
+      "dependsOn": ["^turbo:build"],
+      "outputs": ["dist/**", "build/**", ".next/**", "out/**", "lib/**"]
+    },
+    "turbo:test": {
+      "dependsOn": ["turbo:build", "^turbo:build"],
+      "outputs": []
+    },
+    "turbo:lint": {
+      "outputs": []
     }
   }
 }

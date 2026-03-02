@@ -21,7 +21,10 @@
     "prestart": "npm run build",
     "dev": "node scripts/dev.js",
     "start": "node dist/server.js",
-    "test": "node ../../scripts/ensure-playwright.js && rstest"
+    "test": "node ../../scripts/ensure-playwright.js && rstest",
+    "turbo:build": "pnpm run build",
+    "turbo:test": "pnpm run test",
+    "turbo:lint": "pnpm run lint"
   },
   "files": [
     "bin/",

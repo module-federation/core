@@ -98,6 +98,9 @@
     "build": "tsdown --config tsdown.config.ts && cp package.json dist && cp *.md dist",
     "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\"",
     "test": "pnpm exec vitest run --passWithNoTests --config vite.config.mts",
-    "pre-release": "pnpm --filter @module-federation/native-federation-tests run test && pnpm --filter @module-federation/native-federation-tests run build"
+    "pre-release": "pnpm --filter @module-federation/native-federation-tests run test && pnpm --filter @module-federation/native-federation-tests run build",
+    "turbo:build": "pnpm run build",
+    "turbo:test": "pnpm run test",
+    "turbo:lint": "pnpm run lint"
   }
 }

@@ -48,7 +48,7 @@ jobs:
         run: node tools/scripts/verify-publint-workflow-coverage.mjs
 
       - name: Build shared packages
-        run: pnpm exec turbo run build --filter=./packages/** --concurrency=20
+        run: pnpm run build:pkg
 
       - name: Check metro package publishing compatibility
         run: |

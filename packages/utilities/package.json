@@ -63,6 +63,9 @@
     "build": "rslib build",
     "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\"",
     "test": "pnpm exec jest --config jest.config.ts --passWithNoTests",
-    "pre-release": "pnpm --filter @module-federation/utilities run test && pnpm --filter @module-federation/utilities run build"
+    "pre-release": "pnpm --filter @module-federation/utilities run test && pnpm --filter @module-federation/utilities run build",
+    "turbo:build": "pnpm run build",
+    "turbo:test": "pnpm run test",
+    "turbo:lint": "pnpm run lint"
   }
 }

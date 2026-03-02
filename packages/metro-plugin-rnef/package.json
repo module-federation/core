@@ -36,7 +36,9 @@
   "scripts": {
     "build": "rslib build",
     "typecheck": "tsc --noEmit",
-    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.{js,ts}\""
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.{js,ts}\"",
+    "turbo:build": "pnpm run build",
+    "turbo:lint": "pnpm run lint"
   },
   "peerDependencies": {
     "@module-federation/metro": "workspace:*",

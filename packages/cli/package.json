@@ -43,6 +43,9 @@
     "build": "rslib build",
     "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",
     "test": "rstest run -c rstest.config.ts",
-    "pre-release": "pnpm --filter @module-federation/cli run test && pnpm --filter @module-federation/cli run build"
+    "pre-release": "pnpm --filter @module-federation/cli run test && pnpm --filter @module-federation/cli run build",
+    "turbo:build": "pnpm run build",
+    "turbo:test": "pnpm run test",
+    "turbo:lint": "pnpm run lint"
   }
 }

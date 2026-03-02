@@ -46,13 +46,13 @@ jobs:
         run: npx cypress install
 
       - name: Build shared packages
-        run: pnpm exec turbo run build --filter=./packages/** --concurrency=20
+        run: pnpm run build:pkg
 
       - name: Check CI conditions
         id: check-ci
         run: |
           ci_status=0
-          node tools/scripts/ci-is-affected.mjs --appName=router-host-2000,router-host-v5-2200,router-host-vue3-2100,router-remote1-2001,router-remote2-2002,router-remote3-2003,router-remote4-2004 || ci_status=$?
+          node tools/scripts/ci-is-affected.mjs --appName=host,host-v5,host-vue3,remote1,remote2,remote3,remote4 || ci_status=$?
           if [ "$ci_status" -eq 0 ]; then
             echo "run-e2e=true" >> "$GITHUB_OUTPUT"
           elif [ "$ci_status" -eq 1 ]; then

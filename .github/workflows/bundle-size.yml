@@ -46,7 +46,7 @@ jobs:
             ${{ runner.os }}-turbo-
 
       - name: Build packages (current)
-        run: pnpm exec turbo run build --filter=./packages/** --concurrency=20
+        run: pnpm run build:pkg
 
       - name: Measure bundle sizes (current)
         run: node scripts/bundle-size-report.mjs --output current.json
@@ -74,7 +74,7 @@ jobs:
         working-directory: ${{ env.BASE_PATH }}
 
       - name: Build packages (base)
-        run: pnpm exec turbo run build --filter=./packages/** --concurrency=20
+        run: pnpm run build:pkg
         working-directory: ${{ env.BASE_PATH }}
 
       - name: Measure bundle sizes (base)
