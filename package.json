@@ -45,7 +45,7 @@
     "test:affected": "pnpm exec turbo run test --affected",
     "build": "pnpm exec turbo run turbo:build --filter=./packages/** --concurrency=20",
     "build:pkg": "pnpm run turbo:build:pkg",
-    "test:pkg": "pnpm run turbo:test:pkg",
+    "test:pkg": "pnpm exec turbo run turbo:test --filter=./packages/**",
     "lint-fix": "node tools/scripts/lint-fix.mjs",
     "trigger-release": "node -e 'import(\"open\").then(open => open.default(\"https://github.com/module-federation/core/actions/workflows/trigger-release.yml\"))'",
     "serve:next": "pnpm exec turbo run serve --filter=@module-federation/3000-home --filter=@module-federation/3001-shop --filter=@module-federation/3002-checkout --filter=next-app-router-4000 --filter=next-app-router-4001 --concurrency=20",
@@ -76,7 +76,6 @@
     "changeset:status": "changeset status",
     "generate:schema": "pnpm --filter @module-federation/enhanced run generate:schema && pnpm exec prettier --write .",
     "turbo:build:pkg": "pnpm exec turbo run turbo:build --filter=./packages/**",
-    "turbo:test:pkg": "pnpm exec turbo run turbo:test --filter=./packages/**",
     "turbo:lint:pkg": "pnpm exec turbo run turbo:lint --filter=./packages/**"
   },
   "pnpm": {
