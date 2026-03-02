@@ -1,5 +1,5 @@
 import {
-  isBrowserEnv,
+  isBrowserEnvValue,
   warn,
   composeKeyWithSeparator,
   ModuleInfo,
@@ -426,7 +426,7 @@ export class RemoteHandler {
       }
       // Set the remote entry to a complete path
       if ('entry' in remote) {
-        if (isBrowserEnv() && !remote.entry.startsWith('http')) {
+        if (isBrowserEnvValue && !remote.entry.startsWith('http')) {
           remote.entry = new URL(remote.entry, window.location.origin).href;
         }
       }

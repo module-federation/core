@@ -1,7 +1,7 @@
 import {
   ModuleInfo,
   getResourceUrl,
-  isBrowserEnv,
+  isBrowserEnvValue,
 } from '@module-federation/sdk';
 import { ModuleFederationRuntimePlugin } from '../../type/plugin';
 import {
@@ -26,7 +26,7 @@ export function assignRemoteInfo(
 
   let entryUrl = getResourceUrl(remoteSnapshot, remoteEntryInfo.url);
 
-  if (!isBrowserEnv() && !entryUrl.startsWith('http')) {
+  if (!isBrowserEnvValue && !entryUrl.startsWith('http')) {
     entryUrl = `https:${entryUrl}`;
   }
 

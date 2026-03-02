@@ -1,4 +1,7 @@
-import { isBrowserEnv, composeKeyWithSeparator } from '@module-federation/sdk';
+import {
+  isBrowserEnvValue,
+  composeKeyWithSeparator,
+} from '@module-federation/sdk';
 import logger from './logger';
 import {
   DOWNGRADE_KEY,
@@ -153,7 +156,7 @@ export async function fetchData(
       _id: id,
     });
   };
-  if (isBrowserEnv()) {
+  if (isBrowserEnvValue) {
     const dataFetchItem = getDataFetchItem(id);
     if (!dataFetchItem) {
       throw new Error(`dataFetchItem not found, id: ${id}`);

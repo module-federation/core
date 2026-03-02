@@ -1,8 +1,12 @@
 #!/usr/bin/env node
-// Bundle Size Report — zero-dependency measurement & comparison script
+// Bundle Size Report — measurement & comparison script
 // Usage:
 //   Measure: node scripts/bundle-size-report.mjs --output sizes.json [--packages-dir packages]
 //   Compare: node scripts/bundle-size-report.mjs --compare base.json --current current.json --output stats.txt
+// Output includes:
+//   - package dist total (raw)
+//   - ESM entry gzip
+//   - web/node bundles (gzip, ENV_TARGET=web/node)
 
 import {
   readFileSync,
@@ -10,8 +14,10 @@ import {
   readdirSync,
   statSync,
   existsSync,
+  mkdirSync,
 } from 'fs';
-import { join, resolve, relative } from 'path';
+import { join, resolve, relative, extname } from 'path';
+import { tmpdir } from 'os';
 import { gzipSync } from 'zlib';
 
 const ROOT = resolve(import.meta.dirname, '..');
@@ -55,6 +61,34 @@ function formatDelta(current, base) {
   return absPct > 5 ? `**${text}**` : text;
 }
 
+function formatMaybe(bytes) {
+  return typeof bytes === 'number' ? formatBytes(bytes) : 'n/a';
+}
+
+function formatDeltaMaybe(current, base) {
+  if (typeof current !== 'number' || typeof base !== 'number') return 'n/a';
+  return formatDelta(current, base);
+}
+
+let rslibPromise;
+
+const ASSET_RULES = [
+  { test: /\.(css|scss|sass|less|styl)$/i, type: 'asset/resource' },
+  {
+    test: /\.(png|jpe?g|gif|svg|webp|avif|woff2?|ttf|eot)$/i,
+    type: 'asset/resource',
+  },
+];
+
+const JS_EXTENSIONS = new Set(['.js', '.mjs', '.cjs']);
+
+async function loadRslib() {
+  if (!rslibPromise) {
+    rslibPromise = import('@rslib/core');
+  }
+  return rslibPromise;
+}
+
 /** Recursively sum all file sizes in a directory, excluding .map files */
 function dirSize(dir) {
   let total = 0;
@@ -75,11 +109,19 @@ function dirSize(dir) {
 }
 
 /** Detect the main ESM entry file from package.json */
-function findEsmEntry(pkgDir) {
+function readPackageJson(pkgDir) {
   const pkgJsonPath = join(pkgDir, 'package.json');
   if (!existsSync(pkgJsonPath)) return null;
+  try {
+    return JSON.parse(readFileSync(pkgJsonPath, 'utf8'));
+  } catch {
+    return null;
+  }
+}
 
-  const pkg = JSON.parse(readFileSync(pkgJsonPath, 'utf8'));
+/** Detect the main ESM entry file from package.json */
+function findEsmEntry(pkgDir, pkg) {
+  if (!pkg) return null;
 
   // Try module field first
   if (pkg.module) {
@@ -112,11 +154,128 @@ function findEsmEntry(pkgDir) {
   return null;
 }
 
+function createTempDir(pkgName, target) {
+  const stamp = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const dir = join(tmpdir(), 'mf-bundle-size', pkgName, target, stamp);
+  mkdirSync(dir, { recursive: true });
+  return dir;
+}
+
+function findBundleOutput(distDir, entryName) {
+  if (!existsSync(distDir)) return null;
+  const matches = [];
+  const stack = [distDir];
+
+  while (stack.length) {
+    const dir = stack.pop();
+    const entries = readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = join(dir, entry.name);
+      if (entry.isDirectory()) {
+        stack.push(fullPath);
+        continue;
+      }
+      if (!entry.isFile()) continue;
+      if (entry.name.endsWith('.map') || entry.name.endsWith('.d.ts')) continue;
+      const ext = extname(entry.name);
+      if (!JS_EXTENSIONS.has(ext)) continue;
+      if (!entry.name.startsWith(entryName)) continue;
+      matches.push(fullPath);
+    }
+  }
+
+  if (!matches.length) return null;
+  const extOrder = ['.mjs', '.js', '.cjs'];
+  matches.sort((a, b) => {
+    const aExt = extname(a);
+    const bExt = extname(b);
+    const aRank = extOrder.indexOf(aExt);
+    const bRank = extOrder.indexOf(bExt);
+    if (aRank !== bRank) return aRank - bRank;
+    return a.length - b.length;
+  });
+
+  return matches[0];
+}
+
 /** Get gzip size of a file */
 function gzipSize(filePath) {
   if (!filePath || !existsSync(filePath)) return 0;
   const content = readFileSync(filePath);
   return gzipSync(content, { level: 9 }).length;
+}
+
+async function bundleEntry(entryPath, options) {
+  if (!entryPath || !existsSync(entryPath)) {
+    return { bytes: null, gzip: null, error: 'entry not found' };
+  }
+
+  try {
+    const { build } = await loadRslib();
+    const entryName = options.entryName || 'bundle';
+    const distRoot = createTempDir(
+      options.packageName || 'pkg',
+      options.target,
+    );
+
+    await build(
+      {
+        lib: [
+          {
+            id: `${entryName}-${options.target}`,
+            format: 'esm',
+            bundle: true,
+            dts: false,
+            syntax: 'es2021',
+            autoExternal: true,
+          },
+        ],
+        source: {
+          entry: {
+            [entryName]: entryPath,
+          },
+          define: options.define,
+        },
+        output: {
+          target: options.target,
+          distPath: {
+            root: distRoot,
+          },
+          cleanDistPath: true,
+          minify: true,
+          externals: [/^[^./]/],
+          externalsType: 'module',
+        },
+        tools: {
+          rspack: (config) => {
+            config.module ??= {};
+            config.module.rules = [
+              ...(config.module.rules || []),
+              ...ASSET_RULES,
+            ];
+          },
+        },
+      },
+      {
+        root: ROOT,
+      },
+    );
+
+    const outputPath = findBundleOutput(distRoot, entryName);
+    if (!outputPath) {
+      return { bytes: null, gzip: null, error: 'bundle output not found' };
+    }
+
+    const bytes = statSync(outputPath).size;
+    const gzip = gzipSize(outputPath);
+    return { bytes, gzip };
+  } catch (error) {
+    return {
+      bytes: null,
+      gzip: null,
+      error: error?.message ? error.message : String(error),
+    };
+  }
 }
 
 // ── Discovery ────────────────────────────────────────────────────────────────
@@ -167,20 +326,53 @@ function discoverPackages(packagesDir) {
 
 // ── Measure ──────────────────────────────────────────────────────────────────
 
-function measure(packagesDir) {
+async function measure(packagesDir) {
   const packages = discoverPackages(packagesDir);
   const results = {};
 
   for (const pkg of packages) {
+    const pkgJson = readPackageJson(pkg.dir);
     const distDir = join(pkg.dir, 'dist');
     const totalSize = dirSize(distDir);
-    const esmEntry = findEsmEntry(pkg.dir);
+    const esmEntry = findEsmEntry(pkg.dir, pkgJson);
     const esmGzip = gzipSize(esmEntry);
+    let webBundle = { bytes: null, gzip: null };
+    let nodeBundle = { bytes: null, gzip: null };
+    const bundleErrors = {};
+
+    if (esmEntry) {
+      const [webResult, nodeResult] = await Promise.all([
+        bundleEntry(esmEntry, {
+          target: 'web',
+          packageName: pkg.name,
+          entryName: 'bundle',
+          define: { ENV_TARGET: JSON.stringify('web') },
+        }),
+        bundleEntry(esmEntry, {
+          target: 'node',
+          packageName: pkg.name,
+          entryName: 'bundle',
+          define: { ENV_TARGET: JSON.stringify('node') },
+        }),
+      ]);
+
+      webBundle = webResult;
+      nodeBundle = nodeResult;
+
+      if (webResult.error) bundleErrors.web = webResult.error;
+      if (nodeResult.error) bundleErrors.node = nodeResult.error;
+    }
 
     results[pkg.name] = {
       totalDist: totalSize,
       esmGzip,
       esmEntry: esmEntry ? relative(pkg.dir, esmEntry) : null,
+      webBundleBytes: webBundle.bytes,
+      webBundleGzip: webBundle.gzip,
+      nodeBundleBytes: nodeBundle.bytes,
+      nodeBundleGzip: nodeBundle.gzip,
+      bundleEntry: esmEntry ? relative(pkg.dir, esmEntry) : null,
+      bundleErrors: Object.keys(bundleErrors).length ? bundleErrors : null,
     };
   }
 
@@ -196,29 +388,83 @@ function compare(baseData, currentData) {
   ]);
   const changed = [];
   let unchangedCount = 0;
-  let totalDistBase = 0;
-  let totalDistCurrent = 0;
-  let totalEsmBase = 0;
-  let totalEsmCurrent = 0;
+
+  const distMetrics = [
+    { key: 'totalDist', label: 'Total dist (raw)' },
+    { key: 'esmGzip', label: 'ESM gzip' },
+  ];
+
+  const bundleMetrics = [
+    { key: 'webBundleGzip', label: 'Web bundle (gzip)' },
+    { key: 'nodeBundleGzip', label: 'Node bundle (gzip)' },
+  ];
+
+  const allMetrics = [...distMetrics, ...bundleMetrics];
 
   for (const name of [...allPackages].sort()) {
-    const base = baseData[name] || { totalDist: 0, esmGzip: 0 };
-    const current = currentData[name] || { totalDist: 0, esmGzip: 0 };
+    const base = baseData[name] || {};
+    const current = currentData[name] || {};
 
-    totalDistBase += base.totalDist;
-    totalDistCurrent += current.totalDist;
-    totalEsmBase += base.esmGzip;
-    totalEsmCurrent += current.esmGzip;
+    const hasChange = allMetrics.some(({ key }) => {
+      const baseValue = base[key];
+      const currentValue = current[key];
+      if (typeof baseValue === 'number' && typeof currentValue === 'number') {
+        return baseValue !== currentValue;
+      }
+      return typeof baseValue === 'number' || typeof currentValue === 'number';
+    });
 
-    const distChanged = base.totalDist !== current.totalDist;
-    const esmChanged = base.esmGzip !== current.esmGzip;
-
-    if (distChanged || esmChanged) {
+    if (hasChange) {
       changed.push({ name, base, current });
     } else {
       unchangedCount++;
     }
   }
+
+  const sumMetric = (data, key) =>
+    Object.values(data).reduce((sum, item) => {
+      const value = item?.[key];
+      return typeof value === 'number' ? sum + value : sum;
+    }, 0);
+
+  const totalDistBase = sumMetric(baseData, 'totalDist');
+  const totalDistCurrent = sumMetric(currentData, 'totalDist');
+  const totalEsmBase = sumMetric(baseData, 'esmGzip');
+  const totalEsmCurrent = sumMetric(currentData, 'esmGzip');
+  const totalWebBase = sumMetric(baseData, 'webBundleGzip');
+  const totalWebCurrent = sumMetric(currentData, 'webBundleGzip');
+  const totalNodeBase = sumMetric(baseData, 'nodeBundleGzip');
+  const totalNodeCurrent = sumMetric(currentData, 'nodeBundleGzip');
+
+  const buildTable = (title, metrics) => {
+    if (changed.length === 0) return [];
+    const rows = [];
+    rows.push(`### ${title}`);
+    rows.push('');
+
+    const headers = ['Package'];
+    for (const metric of metrics) {
+      headers.push(metric.label, 'Delta');
+    }
+    rows.push(`| ${headers.join(' | ')} |`);
+    rows.push(`| ${headers.map(() => '---').join(' | ')} |`);
+
+    for (const { name, base, current } of changed) {
+      const cells = [`\`${name}\``];
+      for (const metric of metrics) {
+        const currentValue = current[metric.key];
+        const baseValue = base[metric.key];
+        cells.push(
+          formatMaybe(currentValue),
+          formatDeltaMaybe(currentValue, baseValue),
+        );
+      }
+      rows.push(`| ${cells.join(' | ')} |`);
+    }
+
+    rows.push('');
+    return rows;
+  };
 
   // Build markdown
   const lines = [];
@@ -233,41 +479,49 @@ function compare(baseData, currentData) {
       `${changed.length} package(s) changed, ${unchangedCount} unchanged.`,
     );
     lines.push('');
-    lines.push('| Package | Total dist | Delta | ESM gzip | Delta |');
-    lines.push('|---------|-----------|-------|----------|-------|');
-
-    // Sort by absolute dist delta descending
-    changed.sort((a, b) => {
-      const aDelta = Math.abs(a.current.totalDist - a.base.totalDist);
-      const bDelta = Math.abs(b.current.totalDist - b.base.totalDist);
-      return bDelta - aDelta;
-    });
-
-    for (const { name, base, current } of changed) {
-      const distDelta = formatDelta(current.totalDist, base.totalDist);
-      const esmDelta = formatDelta(current.esmGzip, base.esmGzip);
-      lines.push(
-        `| \`${name}\` | ${formatBytes(current.totalDist)} | ${distDelta} | ${formatBytes(current.esmGzip)} | ${esmDelta} |`,
-      );
-    }
-
-    lines.push('');
   }
 
+  lines.push(...buildTable('Package dist + ESM entry', distMetrics));
+  lines.push(...buildTable('Bundle targets', bundleMetrics));
+
   lines.push(
-    `**Total dist:** ${formatBytes(totalDistCurrent)} (${formatDelta(totalDistCurrent, totalDistBase)})`,
+    `**Total dist (raw):** ${formatBytes(totalDistCurrent)} (${formatDelta(totalDistCurrent, totalDistBase)})`,
   );
   lines.push(
     `**Total ESM gzip:** ${formatBytes(totalEsmCurrent)} (${formatDelta(totalEsmCurrent, totalEsmBase)})`,
   );
+  lines.push(
+    `**Total web bundle (gzip):** ${formatBytes(totalWebCurrent)} (${formatDelta(totalWebCurrent, totalWebBase)})`,
+  );
+  lines.push(
+    `**Total node bundle (gzip):** ${formatBytes(totalNodeCurrent)} (${formatDelta(totalNodeCurrent, totalNodeBase)})`,
+  );
   lines.push('');
+  lines.push(
+    '_Bundle sizes are generated with rslib (Rspack). Web/node bundles set ENV_TARGET and enable tree-shaking. Bare imports are externalized to keep sizes consistent with prior reporting, and assets are emitted as resources._',
+  );
+  lines.push('');
+
+  const errored = Object.entries(currentData).filter(
+    ([, data]) => data?.bundleErrors,
+  );
+  if (errored.length) {
+    lines.push('### Bundle errors');
+    for (const [name, data] of errored) {
+      const parts = Object.entries(data.bundleErrors).map(
+        ([target, error]) => `${target}: ${error}`,
+      );
+      lines.push(`- \`${name}\`: ${parts.join('; ')}`);
+    }
+    lines.push('');
+  }
 
   return lines.join('\n');
 }
 
 // ── Main ─────────────────────────────────────────────────────────────────────
 
-function main() {
+async function main() {
   const args = parseArgs(process.argv);
 
   if (args.compare) {
@@ -298,7 +552,7 @@ function main() {
     const outputPath = resolve(args.output || 'bundle-sizes.json');
 
     console.log(`Scanning packages in ${packagesDir}...`);
-    const results = measure(packagesDir);
+    const results = await measure(packagesDir);
     const packageCount = Object.keys(results).length;
 
     writeFileSync(outputPath, JSON.stringify(results, null, 2), 'utf8');
@@ -307,17 +561,29 @@ function main() {
     // Print summary
     let totalDist = 0;
     let totalEsm = 0;
+    let totalWeb = 0;
+    let totalNode = 0;
     for (const [name, data] of Object.entries(results)) {
       totalDist += data.totalDist;
       totalEsm += data.esmGzip;
+      if (typeof data.webBundleGzip === 'number')
+        totalWeb += data.webBundleGzip;
+      if (typeof data.nodeBundleGzip === 'number')
+        totalNode += data.nodeBundleGzip;
+      const bundleErrorNote = data.bundleErrors
+        ? ` (bundle errors: ${Object.keys(data.bundleErrors).join(', ')})`
+        : '';
       console.log(
-        `  ${name}: dist=${formatBytes(data.totalDist)}, esm-gzip=${formatBytes(data.esmGzip)}`,
+        `  ${name}: dist=${formatBytes(data.totalDist)}, esm-gzip=${formatBytes(data.esmGzip)}, web-gzip=${formatMaybe(data.webBundleGzip)}, node-gzip=${formatMaybe(data.nodeBundleGzip)}${bundleErrorNote}`,
       );
     }
     console.log(
-      `Total dist: ${formatBytes(totalDist)}, Total ESM gzip: ${formatBytes(totalEsm)}`,
+      `Total dist: ${formatBytes(totalDist)}, Total ESM gzip: ${formatBytes(totalEsm)}, Total web gzip: ${formatBytes(totalWeb)}, Total node gzip: ${formatBytes(totalNode)}`,
     );
   }
 }
 
-main();
+main().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});
