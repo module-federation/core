@@ -20,15 +20,20 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
+      "executor": "nx:run-commands",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["packages/native-federation-tests/**/*.ts"]
+        "command": "pnpm exec eslint \"packages/native-federation-tests/**/*.ts\"",
+        "forwardAllArgs": false
       }
     },
     "test": {
-      "executor": "@nx/vite:test",
-      "outputs": ["{workspaceRoot}/coverage/packages/native-federation-tests"]
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/coverage/packages/native-federation-tests"],
+      "options": {
+        "command": "pnpm exec vitest run --passWithNoTests --config packages/native-federation-tests/vite.config.mts",
+        "forwardAllArgs": false
+      }
     },
     "pre-release": {
       "executor": "nx:run-commands",

@@ -6,40 +6,37 @@
   "tags": ["type:plugin"],
   "targets": {
     "build": {
-      "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/tools/rslib-plugin/dist"],
       "options": {
-        "outputPath": "tools/rslib-plugin/dist",
-        "main": "tools/rslib-plugin/src/index.ts",
-        "tsConfig": "tools/rslib-plugin/tsconfig.json",
-        "assets": [
-          "tools/rslib-plugin/*.md",
-          "tools/rslib-plugin/package.json",
-          "tools/rslib-plugin/executors.json",
-          {
-            "input": "tools/rslib-plugin/src",
-            "glob": "**/schema.json",
-            "output": "src"
-          }
+        "parallel": false,
+        "commands": [
+          "node -e \"require('fs').rmSync('tools/rslib-plugin/dist',{recursive:true,force:true})\"",
+          "pnpm -C tools/rslib-plugin exec tsdown --config tsdown.config.ts",
+          "cp tools/rslib-plugin/*.md tools/rslib-plugin/dist",
+          "cp tools/rslib-plugin/package.json tools/rslib-plugin/dist",
+          "cp tools/rslib-plugin/executors.json tools/rslib-plugin/dist",
+          "mkdir -p tools/rslib-plugin/dist/src/executors/build tools/rslib-plugin/dist/src/executors/dev tools/rslib-plugin/dist/src/executors/echo",
+          "cp tools/rslib-plugin/src/executors/build/schema.json tools/rslib-plugin/dist/src/executors/build/schema.json",
+          "cp tools/rslib-plugin/src/executors/dev/schema.json tools/rslib-plugin/dist/src/executors/dev/schema.json",
+          "cp tools/rslib-plugin/src/executors/echo/schema.json tools/rslib-plugin/dist/src/executors/echo/schema.json"
         ]
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
+      "executor": "nx:run-commands",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "tools/rslib-plugin/**/*.ts",
-          "tools/rslib-plugin/package.json"
-        ]
+        "command": "pnpm exec eslint \"tools/rslib-plugin/**/*.ts\" \"tools/rslib-plugin/package.json\"",
+        "forwardAllArgs": false
       }
     },
     "test": {
-      "executor": "@nx/jest:jest",
+      "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/coverage/tools/rslib-plugin"],
       "options": {
-        "jestConfig": "tools/rslib-plugin/jest.config.ts",
-        "passWithNoTests": true
+        "command": "pnpm exec jest --config tools/rslib-plugin/jest.config.ts --passWithNoTests",
+        "forwardAllArgs": false
       }
     }
   }

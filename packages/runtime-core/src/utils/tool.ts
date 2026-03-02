@@ -57,7 +57,6 @@ export function isObject(val: any): boolean {
 
 export const objectToString = Object.prototype.toString;
 
-// eslint-disable-next-line @typescript-eslint/ban-types
 export function isPlainObject(val: any): val is object {
   return objectToString.call(val) === '[object Object]';
 }

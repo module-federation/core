@@ -13,17 +13,19 @@
       }
     },
     "test": {
-      "executor": "@nx/vite:test",
+      "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "configFile": "packages/metro-core/vitest.config.mts"
+        "command": "pnpm exec vitest run --passWithNoTests --config packages/metro-core/vitest.config.mts",
+        "forwardAllArgs": false
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
+      "executor": "nx:run-commands",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["packages/metro-core/**/*.{ts,tsx,js,jsx}"]
+        "command": "pnpm exec eslint \"packages/metro-core/**/*.{ts,tsx,js,jsx}\"",
+        "forwardAllArgs": false
       }
     }
   }

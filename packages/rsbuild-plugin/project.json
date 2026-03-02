@@ -20,18 +20,20 @@
       ]
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
+      "executor": "nx:run-commands",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "packages/rsbuild-plugin/**/*.ts",
-          "packages/rsbuild-plugin/package.json"
-        ]
+        "command": "pnpm exec eslint \"packages/rsbuild-plugin/**/*.ts\" \"packages/rsbuild-plugin/package.json\"",
+        "forwardAllArgs": false
       }
     },
     "test": {
-      "executor": "@nx/vite:test",
-      "outputs": ["{workspaceRoot}/coverage/packages/rsbuild-plugin"]
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/coverage/packages/rsbuild-plugin"],
+      "options": {
+        "command": "pnpm exec vitest run --passWithNoTests --config packages/rsbuild-plugin/vite.config.mts",
+        "forwardAllArgs": false
+      }
     },
     "pre-release": {
       "executor": "nx:run-commands",

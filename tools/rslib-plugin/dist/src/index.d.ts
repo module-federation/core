@@ -1,6 +1,4 @@
-export { default as buildExecutor } from './executors/build/executor';
-export { default as devExecutor } from './executors/dev/executor';
-export { default as echoExecutor } from './executors/echo/executor';
-export type { RslibBuildExecutorOptions } from './executors/build/executor';
-export type { RslibDevExecutorOptions } from './executors/dev/executor';
-export type { EchoExecutorOptions } from './executors/echo/executor';
+import rslibBuildExecutor, { RslibBuildExecutorOptions } from "./executors/build/executor.js";
+import rslibDevExecutor, { RslibDevExecutorOptions } from "./executors/dev/executor.js";
+import echoExecutor, { EchoExecutorOptions } from "./executors/echo/executor.js";
+export { type EchoExecutorOptions, type RslibBuildExecutorOptions, type RslibDevExecutorOptions, rslibBuildExecutor as buildExecutor, rslibDevExecutor as devExecutor, echoExecutor };

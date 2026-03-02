@@ -13,20 +13,15 @@
       }
     },
     "build": {
-      "executor": "@nx/js:tsc",
+      "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/packages/enhanced/dist"],
       "options": {
-        "outputPath": "packages/enhanced/dist",
-        "main": "packages/enhanced/src/index.ts",
-        "tsConfig": "packages/enhanced/tsconfig.lib.json",
-        "assets": [
-          "packages/enhanced/*.md",
-          {
-            "glob": "src/**/*.d.ts",
-            "input": "packages/enhanced",
-            "ignore": [],
-            "output": ""
-          }
+        "parallel": false,
+        "commands": [
+          "node -e \"require('fs').rmSync('packages/enhanced/dist',{recursive:true,force:true})\"",
+          "pnpm -C packages/enhanced exec tsdown --config tsdown.config.ts",
+          "cp packages/enhanced/*.md packages/enhanced/dist",
+          "node -e \"const fs=require('fs');const path=require('path');const src='packages/enhanced/src';const dst='packages/enhanced/dist/src';(function w(d){for(const e of fs.readdirSync(d,{withFileTypes:true})){const p=path.join(d,e.name);if(e.isDirectory())w(p);else if(e.name.endsWith('.d.ts')){const rel=path.relative(src,p);const out=path.join(dst,rel);fs.mkdirSync(path.dirname(out),{recursive:true});fs.copyFileSync(p,out);}}})(src);\""
         ]
       },
       "dependsOn": [
@@ -37,10 +32,11 @@
       ]
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
+      "executor": "nx:run-commands",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["packages/enhanced/**/*.ts"]
+        "command": "pnpm exec eslint \"packages/enhanced/**/*.ts\"",
+        "forwardAllArgs": false
       }
     },
     "test": {

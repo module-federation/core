@@ -13,7 +13,11 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint"
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec eslint \"packages/metro-plugin-rnef/**/*.{js,ts}\"",
+        "forwardAllArgs": false
+      }
     }
   }
 }

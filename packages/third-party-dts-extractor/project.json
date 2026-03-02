@@ -19,15 +19,22 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
+      "executor": "nx:run-commands",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["packages/third-party-dts-extractor/**/*.ts"]
+        "command": "pnpm exec eslint \"packages/third-party-dts-extractor/**/*.ts\"",
+        "forwardAllArgs": false
       }
     },
     "test": {
-      "executor": "@nx/vite:test",
-      "outputs": ["{workspaceRoot}/coverage/packages/third-party-dts-extractor"]
+      "executor": "nx:run-commands",
+      "outputs": [
+        "{workspaceRoot}/coverage/packages/third-party-dts-extractor"
+      ],
+      "options": {
+        "command": "pnpm exec vitest run --passWithNoTests --config packages/third-party-dts-extractor/vite.config.mts",
+        "forwardAllArgs": false
+      }
     },
     "pre-release": {
       "executor": "nx:run-commands",
@@ -44,9 +51,6 @@
           }
         ]
       }
-    },
-    "semantic-release": {
-      "executor": "@goestav/nx-semantic-release:semantic-release"
     }
   }
 }

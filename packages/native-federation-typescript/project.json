@@ -20,17 +20,22 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
+      "executor": "nx:run-commands",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["packages/native-federation-typescript/**/*.ts"]
+        "command": "pnpm exec eslint \"packages/native-federation-typescript/**/*.ts\"",
+        "forwardAllArgs": false
       }
     },
     "test": {
-      "executor": "@nx/vite:test",
+      "executor": "nx:run-commands",
       "outputs": [
         "{workspaceRoot}/coverage/packages/native-federation-typescript"
-      ]
+      ],
+      "options": {
+        "command": "pnpm exec vitest run --passWithNoTests --config packages/native-federation-typescript/vite.config.mts",
+        "forwardAllArgs": false
+      }
     },
     "pre-release": {
       "executor": "nx:run-commands",
@@ -47,9 +52,6 @@
           }
         ]
       }
-    },
-    "semantic-release": {
-      "executor": "@goestav/nx-semantic-release:semantic-release"
     }
   }
 }

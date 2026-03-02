@@ -20,8 +20,7 @@ const responseMatchInfo: {
   [key: string]: MatchInfo;
 } = {};
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-function injector(current: Function, methodName: string) {
+function injector(current: (...args: Array<any>) => any, methodName: string) {
   return function (this: Element) {
     const index = methodName === 'insertAdjacentElement' ? 1 : 0;
     // eslint-disable-next-line prefer-rest-params

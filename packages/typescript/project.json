@@ -6,14 +6,15 @@
   "tags": ["type:pkg"],
   "targets": {
     "build": {
-      "executor": "@nx/js:tsc",
+      "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/packages/typescript/dist"],
       "options": {
-        "outputPath": "packages/typescript/dist",
-        "main": "packages/typescript/src/index.ts",
-        "tsConfig": "packages/typescript/tsconfig.lib.json",
-        "assets": ["packages/typescript/*.md"],
-        "skipTypeCheck": true
+        "parallel": false,
+        "commands": [
+          "node -e \"require('fs').rmSync('packages/typescript/dist',{recursive:true,force:true})\"",
+          "pnpm -C packages/typescript exec tsdown --config tsdown.config.ts",
+          "cp packages/typescript/*.md packages/typescript/dist"
+        ]
       },
       "dependsOn": [
         {
@@ -23,23 +24,23 @@
       ]
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
+      "executor": "nx:run-commands",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["packages/typescript/**/*.ts"]
+        "command": "pnpm exec eslint \"packages/typescript/**/*.ts\"",
+        "forwardAllArgs": false
       }
     },
     "test": {
-      "executor": "@nx/jest:jest",
+      "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "packages/typescript/jest.config.ts",
-        "passWithNoTests": true
+        "command": "pnpm exec jest --config packages/typescript/jest.config.ts --passWithNoTests",
+        "forwardAllArgs": false
       },
       "configurations": {
         "ci": {
-          "ci": true,
-          "codeCoverage": true
+          "command": "pnpm exec jest --config packages/typescript/jest.config.ts --passWithNoTests --ci --coverage"
         }
       }
     },

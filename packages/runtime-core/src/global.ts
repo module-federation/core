@@ -140,7 +140,6 @@ export function setGlobalFederationConstructor(
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-types
 export function getInfoWithoutType<T extends object>(
   target: T,
   key: keyof T,

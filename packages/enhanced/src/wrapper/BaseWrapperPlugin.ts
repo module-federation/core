@@ -20,12 +20,12 @@ export default abstract class BaseWrapperPlugin
   protected _options: any;
   name: string;
   protected pluginName: string;
-  protected coreModulePath: string;
+  protected corePlugin: any;
 
-  constructor(options: any, pluginName: string, coreModulePath: string) {
+  constructor(options: any, pluginName: string, corePlugin: any) {
     this._options = options;
     this.pluginName = pluginName;
-    this.coreModulePath = coreModulePath;
+    this.corePlugin = corePlugin;
     this.name = pluginName;
   }
 
@@ -34,8 +34,7 @@ export default abstract class BaseWrapperPlugin
     process.env['FEDERATION_WEBPACK_PATH'] =
       process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
 
-    // Dynamically import core plugin
-    const CorePlugin = require(this.coreModulePath).default as any;
+    const CorePlugin = this.corePlugin;
 
     // Create core plugin instance and apply it
     this.createCorePluginInstance(CorePlugin, compiler);

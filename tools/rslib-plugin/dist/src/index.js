@@ -1,14 +1,8 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.echoExecutor = exports.devExecutor = exports.buildExecutor = void 0;
-// Export executors
-var executor_1 = require("./executors/build/executor");
-Object.defineProperty(exports, "buildExecutor", { enumerable: true, get: function () { return __importDefault(executor_1).default; } });
-var executor_2 = require("./executors/dev/executor");
-Object.defineProperty(exports, "devExecutor", { enumerable: true, get: function () { return __importDefault(executor_2).default; } });
-var executor_3 = require("./executors/echo/executor");
-Object.defineProperty(exports, "echoExecutor", { enumerable: true, get: function () { return __importDefault(executor_3).default; } });
-//# sourceMappingURL=index.js.map
+Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+const require_executors_build_executor = require('./executors/build/executor.js');
+const require_executors_dev_executor = require('./executors/dev/executor.js');
+const require_executors_echo_executor = require('./executors/echo/executor.js');
+
+exports.buildExecutor = require_executors_build_executor;
+exports.devExecutor = require_executors_dev_executor;
+exports.echoExecutor = require_executors_echo_executor;

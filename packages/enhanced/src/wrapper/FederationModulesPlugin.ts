@@ -1,17 +1,15 @@
 import type { Compilation } from 'webpack';
+import CoreFederationModulesPlugin from '../lib/container/runtime/FederationModulesPlugin';
 import BaseWrapperPlugin from './BaseWrapperPlugin';
 
 const PLUGIN_NAME = 'FederationModulesPlugin';
 
 export default class FederationModulesPlugin extends BaseWrapperPlugin {
   constructor() {
-    super({}, PLUGIN_NAME, '../lib/container/runtime/FederationModulesPlugin');
+    super({}, PLUGIN_NAME, CoreFederationModulesPlugin);
   }
 
   static getCompilationHooks(compilation: Compilation) {
-    const CoreFederationModulesPlugin =
-      require('../lib/container/runtime/FederationModulesPlugin')
-        .default as typeof import('../lib/container/runtime/FederationModulesPlugin').default;
     return CoreFederationModulesPlugin.getCompilationHooks(compilation);
   }
 

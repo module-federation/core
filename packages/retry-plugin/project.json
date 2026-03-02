@@ -31,13 +31,11 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
+      "executor": "nx:run-commands",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "packages/retry-plugin/**/*.ts",
-          "packages/retry-plugin/package.json"
-        ]
+        "command": "pnpm exec eslint \"packages/retry-plugin/**/*.ts\" \"packages/retry-plugin/package.json\"",
+        "forwardAllArgs": false
       }
     },
     "build-debug": {
