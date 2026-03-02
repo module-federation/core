@@ -15,6 +15,9 @@ export default defineConfig({
       syntax: 'es2021',
       bundle: false,
       outBase: 'src',
+      define: {
+        'process.env.IS_ESM_BUILD': JSON.stringify('true'),
+      },
       dts: {
         bundle: false,
         distPath: './dist',
@@ -25,6 +28,9 @@ export default defineConfig({
       syntax: 'es2021',
       bundle: false,
       outBase: 'src',
+      define: {
+        'process.env.IS_ESM_BUILD': JSON.stringify('false'),
+      },
       dts: false,
     },
   ],

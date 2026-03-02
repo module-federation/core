@@ -10,6 +10,7 @@ import type {
   NextFederationPluginOptions,
 } from './next-fragments';
 import type { Compiler, WebpackPluginInstance } from 'webpack';
+import path from 'path';
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import CopyFederationPlugin from '../CopyFederationPlugin';
 import { exposeNextjsPages } from '../../loaders/nextPageMapLoader';
@@ -31,15 +32,37 @@ import { bindLoggerToCompiler } from '@module-federation/sdk';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import logger from '../../logger';
 
-const resolveDistOrLocalPath = (
-  packageDistPath: string,
-  localRelativePath: string,
-): string => {
-  try {
-    return require.resolve(packageDistPath);
-  } catch {
-    return require.resolve(localRelativePath);
-  }
+const resolveRuntimePluginPath = (): string =>
+  process.env.IS_ESM_BUILD === 'true'
+    ? require.resolve(
+        '@module-federation/nextjs-mf/dist/src/plugins/container/runtimePlugin.mjs',
+      )
+    : require.resolve(
+        '@module-federation/nextjs-mf/dist/src/plugins/container/runtimePlugin.js',
+      );
+
+const resolveNoopPath = (): string =>
+  process.env.IS_ESM_BUILD === 'true'
+    ? require.resolve(
+        '@module-federation/nextjs-mf/dist/src/federation-noop.mjs',
+      )
+    : require.resolve(
+        '@module-federation/nextjs-mf/dist/src/federation-noop.js',
+      );
+
+const resolveNodeRuntimePluginPath = (): string => {
+  const nodePackageRoot = path.dirname(
+    require.resolve('@module-federation/node/package.json'),
+  );
+
+  return require.resolve(
+    path.join(
+      nodePackageRoot,
+      process.env.IS_ESM_BUILD === 'true'
+        ? 'dist/src/runtimePlugin.mjs'
+        : 'dist/src/runtimePlugin.js',
+    ),
+  );
 };
 /**
  * NextFederationPlugin is a webpack plugin that handles Next.js application federation using Module Federation.
@@ -210,13 +233,8 @@ export class NextFederationPlugin {
       runtime: false,
       remoteType: 'script',
       runtimePlugins: [
-        ...(isServer
-          ? [require.resolve('@module-federation/node/runtimePlugin')]
-          : []),
-        resolveDistOrLocalPath(
-          '@module-federation/nextjs-mf/dist/src/plugins/container/runtimePlugin.js',
-          '../container/runtimePlugin.js',
-        ),
+        ...(isServer ? [resolveNodeRuntimePluginPath()] : []),
+        resolveRuntimePluginPath(),
         ...(this._options.runtimePlugins || []),
       ].map((plugin) => plugin + '?runtimePlugin'),
       //@ts-ignore
@@ -246,10 +264,7 @@ export class NextFederationPlugin {
   }
 
   private getNoopPath(): string {
-    return resolveDistOrLocalPath(
-      '@module-federation/nextjs-mf/dist/src/federation-noop.js',
-      '../../federation-noop.js',
-    );
+    return resolveNoopPath();
   }
 }
 

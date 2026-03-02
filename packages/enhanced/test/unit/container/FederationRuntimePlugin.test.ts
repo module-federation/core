@@ -206,8 +206,18 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
 
   describe('runtime module resolution compatibility', () => {
     const normalizePath = (filePath: string) => filePath.replace(/\\/g, '/');
+    const originalIsEsmBuild = process.env.IS_ESM_BUILD;
 
-    it('prefers cjs runtime entry for non-module compiler output', () => {
+    afterEach(() => {
+      if (originalIsEsmBuild === undefined) {
+        delete process.env.IS_ESM_BUILD;
+      } else {
+        process.env.IS_ESM_BUILD = originalIsEsmBuild;
+      }
+    });
+
+    it('prefers cjs runtime entry when IS_ESM_BUILD is false', () => {
+      process.env.IS_ESM_BUILD = 'false';
       const plugin = new FederationRuntimePlugin({
         implementation: '/legacy/runtime-tools',
       } as any);
@@ -220,14 +230,15 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
       );
     });
 
-    it('prefers esm runtime entry for module compiler output', () => {
+    it('prefers esm runtime entry when IS_ESM_BUILD is true', () => {
+      process.env.IS_ESM_BUILD = 'true';
       const plugin = new FederationRuntimePlugin({
         implementation: '/legacy/runtime-tools',
       } as any);
       const runtimePath = plugin.getRuntimeAlias({
         options: {
           resolve: { alias: {} },
-          output: { module: true },
+          output: {},
         },
       } as unknown as Compiler);
 
@@ -236,7 +247,8 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
       );
     });
 
-    it('resolves runtime-tools alias for non-module builds even when runtime alias is preset', () => {
+    it('resolves runtime-tools alias for CJS mode when runtime alias is preset', () => {
+      process.env.IS_ESM_BUILD = 'false';
       const plugin = new FederationRuntimePlugin({} as any);
       const compiler = {
         options: {
@@ -258,14 +270,15 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
       ).toMatch(/\/runtime-tools\/dist\/index\.cjs(?:\.cjs)?$/);
     });
 
-    it('resolves runtime-tools alias for module builds when runtime alias is preset', () => {
+    it('resolves runtime-tools alias for ESM mode when runtime alias is preset', () => {
+      process.env.IS_ESM_BUILD = 'true';
       const plugin = new FederationRuntimePlugin({} as any);
       const compiler = {
         options: {
           resolve: {
             alias: { '@module-federation/runtime$': '/custom/runtime' },
           },
-          output: { module: true },
+          output: {},
         },
       } as unknown as Compiler;
 
