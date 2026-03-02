@@ -61,7 +61,23 @@ export class PrefetchPlugin implements WebpackPluginInstance {
       this.options.runtimePlugins = [];
     }
 
-    const runtimePath = path.resolve(__dirname, './plugin.esm.js');
+    const runtimePluginCandidates =
+      process.env.IS_ESM_BUILD === 'true'
+        ? ['../plugin.js', '../plugin.cjs']
+        : ['../plugin.cjs', '../plugin.js'];
+    const runtimePath = runtimePluginCandidates
+      .map((candidate) => path.resolve(__dirname, candidate))
+      .find((candidatePath) => fs.existsSync(candidatePath));
+    if (!runtimePath) {
+      throw new Error(
+        [
+          '[Module Federation Data Prefetch]: Unable to resolve runtime plugin file.',
+          `Checked paths: ${runtimePluginCandidates
+            .map((candidate) => path.resolve(__dirname, candidate))
+            .join(', ')}`,
+        ].join('\n'),
+      );
+    }
     if (!this.options.runtimePlugins?.includes(runtimePath)) {
       this.options.runtimePlugins!.push(runtimePath);
     }

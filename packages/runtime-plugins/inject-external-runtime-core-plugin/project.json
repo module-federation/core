@@ -6,20 +6,26 @@
   "tags": ["type:pkg"],
   "targets": {
     "build": {
-      "executor": "@nx/rollup:rollup",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
+      "outputs": [
+        "{workspaceRoot}/packages/runtime-plugins/inject-external-runtime-core-plugin/dist"
+      ],
       "options": {
-        "outputPath": "packages/runtime-plugins/inject-external-runtime-core-plugin/dist",
-        "main": "packages/runtime-plugins/inject-external-runtime-core-plugin/src/index.ts",
-        "tsConfig": "packages/runtime-plugins/inject-external-runtime-core-plugin/tsconfig.lib.json",
-        "assets": [],
-        "project": "packages/runtime-plugins/inject-external-runtime-core-plugin/package.json",
-        "rollupConfig": "packages/runtime-plugins/inject-external-runtime-core-plugin/rollup.config.cjs",
-        "compiler": "tsc",
-        "generatePackageJson": false,
-        "format": ["cjs", "esm"],
-        "useLegacyTypescriptPlugin": false
-      }
+        "parallel": false,
+        "cwd": "packages/runtime-plugins/inject-external-runtime-core-plugin",
+        "commands": [
+          {
+            "command": "tsdown --config tsdown.config.ts --filter inject-external-runtime-core-plugin-build",
+            "forwardAllArgs": false
+          }
+        ]
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
     },
     "lint": {
       "executor": "@nx/eslint:lint",
