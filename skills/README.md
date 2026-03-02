@@ -10,9 +10,8 @@ This directory contains general diagnostic Skills for **Module Federation (open 
 | `bridge-usage/` | `mf-bridge-check` | Non-standard Bridge API usage, sub-app integration issues |
 | `config-check/` | `mf-config-check` | exposes config format errors, path not found |
 | `shared-deps/` | `mf-shared-deps` | Shared dependency version conflicts |
-| `type-001/` | `mf-type-check` | TS type files missing, tsconfig not configured |
+| `type-check/` | `mf-type-check` | TS type files missing, tsconfig not configured |
 | `performance/` | `mf-perf` | Slow HMR, slow build speed |
-| `version-compat/` | `mf-version-check` | MF package and build tool version mismatch |
 | `runtime-008/` | `mf-runtime-008` | remoteEntry cannot be loaded (URL issues) |
 | `module-info/` | `mf-module-info` | Fetch remote module metadata (publicPath, remoteEntry, type files, SSR) |
 
