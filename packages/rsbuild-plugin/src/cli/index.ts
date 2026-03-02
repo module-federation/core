@@ -5,7 +5,6 @@ import {
   PLUGIN_NAME,
 } from '@module-federation/enhanced/rspack';
 import { isRequiredVersion, getManifestFileName } from '@module-federation/sdk';
-import pkgJson from '../../package.json';
 import logger from '../logger';
 import {
   isRegExp,
@@ -61,9 +60,10 @@ type ExposedAPIType = {
 };
 export type { ModuleFederationOptions, ExposedAPIType };
 
+declare const __RSBUILD_PLUGIN_NAME__: string;
 const RSBUILD_PLUGIN_MODULE_FEDERATION_NAME =
   'rsbuild:module-federation-enhanced';
-const RSBUILD_PLUGIN_NAME = '@module-federation/rsbuild-plugin';
+const RSBUILD_PLUGIN_NAME = __RSBUILD_PLUGIN_NAME__;
 
 export { RSBUILD_PLUGIN_MODULE_FEDERATION_NAME, PLUGIN_NAME, SSR_DIR };
 
@@ -468,7 +468,7 @@ export const pluginModuleFederation = (
                 const match = shared.some((dep) => {
                   if (
                     (ext as RegExp).test(dep) ||
-                    (ext as RegExp).test(pkgJson.name)
+                    (ext as RegExp).test(RSBUILD_PLUGIN_NAME)
                   ) {
                     sharedModule = dep;
                     return true;
@@ -481,7 +481,7 @@ export const pluginModuleFederation = (
               }
 
               if (typeof ext === 'string') {
-                if (ext === pkgJson.name) {
+                if (ext === RSBUILD_PLUGIN_NAME) {
                   return false;
                 }
 
