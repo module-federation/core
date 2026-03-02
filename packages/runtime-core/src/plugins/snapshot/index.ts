@@ -4,6 +4,7 @@ import {
   isBrowserEnv,
 } from '@module-federation/sdk';
 import { ModuleFederationRuntimePlugin } from '../../type/plugin';
+import { RUNTIME_010, runtimeDescMap } from '@module-federation/error-codes';
 import {
   error,
   isPureRemoteEntry,
@@ -19,9 +20,7 @@ export function assignRemoteInfo(
 ): void {
   const remoteEntryInfo = getRemoteEntryInfoFromSnapshot(remoteSnapshot);
   if (!remoteEntryInfo.url) {
-    error(
-      `The attribute remoteEntry of ${remoteInfo.name} must not be undefined.`,
-    );
+    error(RUNTIME_010, runtimeDescMap, { remoteName: remoteInfo.name });
   }
 
   let entryUrl = getResourceUrl(remoteSnapshot, remoteEntryInfo.url);

@@ -12,6 +12,10 @@
         "parallel": false,
         "outputPath": "packages/error-codes/dist",
         "main": "packages/error-codes/src/index.ts",
+        "additionalEntryPoints": [
+          "packages/error-codes/src/browser.ts",
+          "packages/error-codes/src/node.ts"
+        ],
         "tsConfig": "packages/error-codes/tsconfig.lib.json",
         "rollupConfig": "packages/error-codes/rollup.config.js",
         "assets": [],

@@ -1,9 +1,6 @@
 import { pluginModuleFederation as rsbuildPluginModuleFederation } from '@module-federation/rsbuild-plugin';
-import {
-  getShortErrorMsg,
-  BUILD_002,
-  buildDescMap,
-} from '@module-federation/error-codes';
+import { BUILD_002, buildDescMap } from '@module-federation/error-codes';
+import { logAndReport } from '@module-federation/error-codes/node';
 
 import logger from './logger';
 
@@ -110,10 +107,24 @@ export function pluginModuleFederation(
                 config.output.publicPath === 'auto') &&
               mfConfig.exposes
             ) {
-              logger.error(
-                getShortErrorMsg(BUILD_002, buildDescMap, {
+              logAndReport(
+                BUILD_002,
+                buildDescMap,
+                {
                   publicPath: config.output.publicPath,
-                }),
+                },
+                logger.error.bind(logger),
+                undefined,
+                {
+                  bundler: { name: 'rsbuild' },
+                  mfConfig: {
+                    name: mfConfig.name,
+                    filename: mfConfig.filename,
+                    exposes: mfConfig.exposes as
+                      | Record<string, string>
+                      | undefined,
+                  },
+                },
               );
               process.exit(1);
             }

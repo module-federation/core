@@ -17,7 +17,7 @@ Organize and display the version information collected in `results[0].context.de
 
 | Package | Description |
 |---|---|
-| `@module-federation/core` | MF core package |
+| `@module-federation/enhanced` | MF core package |
 | `@module-federation/runtime` | MF runtime |
 | `@rsbuild/core` | Rsbuild |
 | `@rspack/core` | Rspack |
@@ -25,5 +25,5 @@ Organize and display the version information collected in `results[0].context.de
 
 Notes (only show installed packages):
 
-- If `@module-federation/core` is significantly outdated, upgrade to the latest stable version
+- If `@module-federation/enhanced` is significantly outdated, upgrade to the latest stable version
 - If the version combination has known issues, guide the user to consult the corresponding version's changelog or migration guide

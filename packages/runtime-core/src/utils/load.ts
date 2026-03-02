@@ -8,11 +8,10 @@ import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { ModuleFederation } from '../core';
 import { globalLoading, getRemoteEntryExports } from '../global';
 import { Remote, RemoteEntryExports, RemoteInfo } from '../type';
-import { assert } from './logger';
+import { error } from './logger';
 import {
   RUNTIME_001,
   RUNTIME_008,
-  getShortErrorMsg,
   runtimeDescMap,
 } from '@module-federation/error-codes';
 
@@ -88,14 +87,13 @@ function handleRemoteEntryLoaded(
     globalName,
   );
 
-  assert(
-    entryExports,
-    getShortErrorMsg(RUNTIME_001, runtimeDescMap, {
+  if (!entryExports) {
+    error(RUNTIME_001, runtimeDescMap, {
       remoteName: name,
       remoteEntryUrl: entry,
       remoteEntryKey,
-    }),
-  );
+    });
+  }
 
   return entryExports;
 }
@@ -145,15 +143,11 @@ async function loadEntryScript({
     .then(() => {
       return handleRemoteEntryLoaded(name, globalName, entry);
     })
-    .catch((e) => {
-      assert(
-        undefined,
-        getShortErrorMsg(RUNTIME_008, runtimeDescMap, {
-          remoteName: name,
-          resourceUrl: entry,
-        }),
-      );
-      throw e;
+    .catch(() => {
+      error(RUNTIME_008, runtimeDescMap, {
+        remoteName: name,
+        resourceUrl: entry,
+      });
     });
 }
 

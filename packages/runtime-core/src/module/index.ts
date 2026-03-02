@@ -1,7 +1,12 @@
-import { getFMId, assert, error, processModuleAlias } from '../utils';
+import {
+  getFMId,
+  assert,
+  error,
+  processModuleAlias,
+  optionsToMFContext,
+} from '../utils';
 import { safeToString, ModuleInfo } from '@module-federation/sdk';
 import {
-  getShortErrorMsg,
   RUNTIME_002,
   RUNTIME_008,
   runtimeDescMap,
@@ -133,12 +138,16 @@ class Module {
 
       if (typeof remoteEntryExports?.init === 'undefined') {
         error(
-          getShortErrorMsg(RUNTIME_002, runtimeDescMap, {
+          RUNTIME_002,
+          runtimeDescMap,
+          {
             hostName: this.host.name,
             remoteName: this.remoteInfo.name,
             remoteEntryUrl: this.remoteInfo.entry,
             remoteEntryKey: this.remoteInfo.entryGlobalName,
-          }),
+          },
+          undefined,
+          optionsToMFContext(this.host.options),
         );
       }
 

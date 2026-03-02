@@ -13,7 +13,7 @@ export {
   getInfoWithoutType,
 } from './global';
 export type { UserOptions, ModuleFederationRuntimePlugin } from './type';
-export { assert } from './utils/logger';
+export { assert, error } from './utils/logger';
 export { registerGlobalPlugins } from './global';
 export {
   getRemoteEntry,
