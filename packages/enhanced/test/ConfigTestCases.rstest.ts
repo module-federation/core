@@ -1116,8 +1116,6 @@ export const describeCases = (config: any) => {
                                   );
                                 },
                               );
-                              if ((esm as any).instantiate)
-                                (esm as any).instantiate();
                               await esm.evaluate();
                               if (esmMode === 'evaluated') return esm as any;
                               const ns = (esm as any).namespace;
