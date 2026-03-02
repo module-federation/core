@@ -105,6 +105,34 @@ export const generateTypesAPI = ({
   return fn(dtsManagerOptions);
 };
 
+const WINDOWS_ABSOLUTE_PATH_REGEXP = /^[a-zA-Z]:[\\/]/;
+
+export const isSafeRelativePath = (relativePath: string) => {
+  return (
+    Boolean(relativePath) &&
+    !relativePath.startsWith('..') &&
+    !path.isAbsolute(relativePath) &&
+    !WINDOWS_ABSOLUTE_PATH_REGEXP.test(relativePath)
+  );
+};
+
+export const resolveEmitAssetName = ({
+  compilerOutputPath,
+  assetPath,
+  fallbackName,
+}: {
+  compilerOutputPath: string;
+  assetPath: string | undefined;
+  fallbackName: string | undefined;
+}) => {
+  if (!assetPath) {
+    return fallbackName;
+  }
+
+  const relativePath = path.relative(compilerOutputPath, assetPath);
+  return isSafeRelativePath(relativePath) ? relativePath : fallbackName;
+};
+
 export class GenerateTypesPlugin implements WebpackPluginInstance {
   pluginOptions: moduleFederationPlugin.ModuleFederationPluginOptions;
   dtsOptions: moduleFederationPlugin.PluginDtsOptions;
@@ -160,20 +188,16 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
         // Compute asset names relative to compiler output path.
         // When user sets a custom outputDir, the zip/api files may be in a subdirectory
         // of the compiler output, so we need the relative path for correct asset emission.
-        let emitZipName = zipName;
-        let emitApiFileName = apiFileName;
-        if (zipTypesPath && compilerOutputPath) {
-          const relZip = path.relative(compilerOutputPath, zipTypesPath);
-          if (relZip && !relZip.startsWith('..')) {
-            emitZipName = relZip;
-          }
-        }
-        if (apiTypesPath && compilerOutputPath) {
-          const relApi = path.relative(compilerOutputPath, apiTypesPath);
-          if (relApi && !relApi.startsWith('..')) {
-            emitApiFileName = relApi;
-          }
-        }
+        const emitZipName = resolveEmitAssetName({
+          compilerOutputPath,
+          assetPath: zipTypesPath,
+          fallbackName: zipName,
+        });
+        const emitApiFileName = resolveEmitAssetName({
+          compilerOutputPath,
+          assetPath: apiTypesPath,
+          fallbackName: apiFileName,
+        });
 
         if (isProd && emitZipName && compilation.getAsset(emitZipName)) {
           callback();

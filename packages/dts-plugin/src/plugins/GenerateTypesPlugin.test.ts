@@ -1,6 +1,10 @@
 import path from 'path';
 import { describe, expect, it } from 'vitest';
-import { normalizeGenerateTypesOptions } from './GenerateTypesPlugin';
+import {
+  isSafeRelativePath,
+  normalizeGenerateTypesOptions,
+  resolveEmitAssetName,
+} from './GenerateTypesPlugin';
 
 describe('GenerateTypesPlugin', () => {
   const basePluginOptions = {
@@ -110,12 +114,14 @@ describe('GenerateTypesPlugin', () => {
 
       const relZip = path.relative(compilerOutputPath, zipTypesPath);
       // When the relative path starts with '..', the plugin should fall back to basename
-      expect(relZip.startsWith('..')).toBe(true);
+      expect(isSafeRelativePath(relZip)).toBe(false);
 
       // Verify fallback behavior
-      const emitZipName = relZip.startsWith('..')
-        ? path.basename(zipTypesPath)
-        : relZip;
+      const emitZipName = resolveEmitAssetName({
+        compilerOutputPath,
+        assetPath: zipTypesPath,
+        fallbackName: path.basename(zipTypesPath),
+      });
       expect(emitZipName).toBe('@mf-types.zip');
     });
 
@@ -145,6 +151,29 @@ describe('GenerateTypesPlugin', () => {
 
       const relZip = path.relative(compilerOutputPath, zipTypesPath);
       expect(relZip).toBe(path.join('production', 'my-types.zip'));
+    });
+
+    it('should treat windows cross-drive path as unsafe relative path', () => {
+      const relZip = path.win32.relative(
+        'C:\\dist',
+        'D:\\types\\@mf-types.zip',
+      );
+      expect(relZip).toBe('D:\\types\\@mf-types.zip');
+      expect(isSafeRelativePath(relZip)).toBe(false);
+    });
+
+    it('should resolve relative asset name for nested output directory', () => {
+      const emitZipName = resolveEmitAssetName({
+        compilerOutputPath: path.resolve('/project', 'dist'),
+        assetPath: path.resolve(
+          '/project',
+          'dist',
+          'production',
+          '@mf-types.zip',
+        ),
+        fallbackName: '@mf-types.zip',
+      });
+      expect(emitZipName).toBe(path.join('production', '@mf-types.zip'));
     });
   });
 });
