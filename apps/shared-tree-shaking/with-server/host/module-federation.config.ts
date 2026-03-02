@@ -7,6 +7,9 @@ const isSecondarySharedTreeShaking = Boolean(
 
 export default createModuleFederationConfig({
   name: 'mf_host',
+  experiments: {
+    asyncStartup: true,
+  },
   remotes: {
     mf_remote: 'provider@http://localhost:3002/mf-manifest.json',
   },

@@ -5,6 +5,9 @@ export default createModuleFederationConfig({
   exposes: {
     '.': './src/components/ProviderComponent.tsx',
   },
+  experiments: {
+    asyncStartup: true,
+  },
   shared: {
     react: { singleton: true },
     'react-dom': { singleton: true },

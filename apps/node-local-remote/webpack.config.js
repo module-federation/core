@@ -68,6 +68,9 @@ module.exports = (_env, argv = {}) => {
         exposes: {
           './test': './src/expose.js',
         },
+        experiments: {
+          asyncStartup: true,
+        },
       }),
     ],
     watchOptions: {
