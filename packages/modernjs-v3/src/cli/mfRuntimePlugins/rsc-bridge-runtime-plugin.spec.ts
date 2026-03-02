@@ -25,6 +25,7 @@ const createWebpackRequireRuntime = (): WebpackRequireRuntime => ({
     serverConsumerModuleMap: {},
   },
 });
+let runtimeRequire: WebpackRequireRuntime;
 
 const getActionRemapMap = () =>
   (
@@ -36,18 +37,11 @@ const getActionRemapMap = () =>
 describe('rsc-bridge-runtime-plugin', () => {
   beforeEach(() => {
     vi.useFakeTimers();
-    (
-      globalThis as typeof globalThis & {
-        __webpack_require__?: WebpackRequireRuntime;
-      }
-    ).__webpack_require__ = createWebpackRequireRuntime();
-    (
-      globalThis as typeof globalThis & {
-        window?: { __MODERN_JS_ENTRY_NAME?: string };
-      }
-    ).window = {
+    runtimeRequire = createWebpackRequireRuntime();
+    vi.stubGlobal('__webpack_require__', runtimeRequire);
+    vi.stubGlobal('window', {
       __MODERN_JS_ENTRY_NAME: 'server-component-root',
-    };
+    });
     delete (
       globalThis as typeof globalThis & {
         [ACTION_REMAP_GLOBAL_KEY]?: Record<string, string | false>;
@@ -58,16 +52,7 @@ describe('rsc-bridge-runtime-plugin', () => {
   afterEach(() => {
     vi.clearAllTimers();
     vi.useRealTimers();
-    delete (
-      globalThis as typeof globalThis & {
-        __webpack_require__?: WebpackRequireRuntime;
-      }
-    ).__webpack_require__;
-    delete (
-      globalThis as typeof globalThis & {
-        window?: { __MODERN_JS_ENTRY_NAME?: string };
-      }
-    ).window;
+    vi.unstubAllGlobals();
     delete (globalThis as typeof globalThis & { fetch?: unknown }).fetch;
     delete (
       globalThis as typeof globalThis & {
@@ -121,11 +106,7 @@ describe('rsc-bridge-runtime-plugin', () => {
     expect(loadRemote).toHaveBeenCalledTimes(1);
     expect(loadRemote).toHaveBeenCalledWith('rscRemote/__rspack_rsc_bridge__');
 
-    const webpackRequire = (
-      globalThis as typeof globalThis & {
-        __webpack_require__?: WebpackRequireRuntime;
-      }
-    ).__webpack_require__!;
+    const webpackRequire = runtimeRequire;
     const hostManifest = webpackRequire.rscM!;
 
     expect(
@@ -182,11 +163,7 @@ describe('rsc-bridge-runtime-plugin', () => {
       },
     } as any);
 
-    const webpackRequire = (
-      globalThis as typeof globalThis & {
-        __webpack_require__?: WebpackRequireRuntime;
-      }
-    ).__webpack_require__!;
+    const webpackRequire = runtimeRequire;
     expect(webpackRequire.rscM?.serverManifest).toHaveProperty(
       'remote:rscRemote:asyncRawAction',
     );
@@ -240,11 +217,7 @@ describe('rsc-bridge-runtime-plugin', () => {
       origin: { loadRemote },
     } as any);
 
-    const webpackRequire = (
-      globalThis as typeof globalThis & {
-        __webpack_require__?: WebpackRequireRuntime;
-      }
-    ).__webpack_require__!;
+    const webpackRequire = runtimeRequire;
 
     expect(webpackRequire.rscM?.clientManifest).toHaveProperty(
       'remote-module:rscRemoteA:sharedClientRef',
@@ -293,11 +266,7 @@ describe('rsc-bridge-runtime-plugin', () => {
       executeAction: vi.fn(async () => undefined),
     }));
 
-    const webpackRequire = (
-      globalThis as typeof globalThis & {
-        __webpack_require__?: WebpackRequireRuntime;
-      }
-    ).__webpack_require__!;
+    const webpackRequire = runtimeRequire;
     (
       webpackRequire as WebpackRequireRuntime & {
         federation?: {
@@ -324,11 +293,7 @@ describe('rsc-bridge-runtime-plugin', () => {
   });
 
   it('throws deterministic conflict errors when manifests disagree', async () => {
-    const webpackRequire = (
-      globalThis as typeof globalThis & {
-        __webpack_require__?: WebpackRequireRuntime;
-      }
-    ).__webpack_require__!;
+    const webpackRequire = runtimeRequire;
     webpackRequire.rscM = {
       serverManifest: {},
       clientManifest: {

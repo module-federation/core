@@ -133,13 +133,7 @@ const getWebpackRequireIfAvailable = (): WebpackRequireRuntime | undefined => {
   if (typeof __webpack_require__ !== 'undefined') {
     return __webpack_require__;
   }
-
-  const runtime = (
-    globalThis as typeof globalThis & {
-      __webpack_require__?: WebpackRequireRuntime;
-    }
-  ).__webpack_require__;
-  return isObject(runtime) ? (runtime as WebpackRequireRuntime) : undefined;
+  return undefined;
 };
 
 const getWebpackRequire = (): WebpackRequireRuntime => {
