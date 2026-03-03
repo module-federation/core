@@ -229,16 +229,57 @@ class StatsManager {
     const assets: Record<string, StatsAssets> = {};
 
     chunks.forEach((chunk) => {
-      if (
-        typeof chunk.name === 'string' &&
-        exposeFileNameImportMap[chunk.name]
-      ) {
-        // TODO: support multiple import
-        const exposeKey = exposeFileNameImportMap[chunk.name][0];
-        assets[getFileNameWithOutExt(exposeKey)] = getAssetsByChunk(
-          chunk,
-          entryPointNames,
-        );
+      if (typeof chunk.name !== 'string') return;
+
+      // Support split chunks caused by splitChunks.maxSize:
+      // A chunk named "__federation_expose_Foo" may be split into
+      // "__federation_expose_Foo-<hash>" chunks, so we match both exact
+      // and prefix+dash patterns.
+      const matchedKey =
+        exposeFileNameImportMap[chunk.name] !== undefined
+          ? chunk.name
+          : Object.keys(exposeFileNameImportMap).find((key) =>
+              chunk.name!.startsWith(key + '-'),
+            );
+
+      if (!matchedKey) return;
+
+      // TODO: support multiple import
+      const exposeKey = exposeFileNameImportMap[matchedKey][0];
+      const assetKey = getFileNameWithOutExt(exposeKey);
+      const chunkAssets = getAssetsByChunk(chunk, entryPointNames);
+
+      if (!assets[assetKey]) {
+        assets[assetKey] = chunkAssets;
+      } else {
+        // Merge split chunk assets, deduplicating with Set
+        assets[assetKey] = {
+          js: {
+            sync: [
+              ...new Set([...assets[assetKey].js.sync, ...chunkAssets.js.sync]),
+            ],
+            async: [
+              ...new Set([
+                ...assets[assetKey].js.async,
+                ...chunkAssets.js.async,
+              ]),
+            ],
+          },
+          css: {
+            sync: [
+              ...new Set([
+                ...assets[assetKey].css.sync,
+                ...chunkAssets.css.sync,
+              ]),
+            ],
+            async: [
+              ...new Set([
+                ...assets[assetKey].css.async,
+                ...chunkAssets.css.async,
+              ]),
+            ],
+          },
+        };
       }
     });
 
