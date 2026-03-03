@@ -14,14 +14,14 @@ npx skills add module-federation/core
 
 | Directory | Skill Name | Use Case |
 |---|---|---|
-| `docs/` | `mf-docs` | Real-time MF 2.0 docs assistant — answers questions by fetching live docs from module-federation.io |
-| `context-fetcher/` | `mf-context` | Collects project MF configuration context; the data foundation for all diagnostic Skills |
-| `module-info/` | `mf-module-info` | Fetch a remote module's full info (publicPath, remoteEntry, exposes/remotes/shared from mf-manifest.json) |
-| `type-check/` | `mf-type-check` | Type file generation failures, remote types not pulled, tsconfig paths missing |
-| `shared-deps/` | `mf-shared-deps` | shared/externals conflicts, antd/arco transformImport blocking sharing, multiple versions in build artifacts |
-| `performance/` | `mf-perf` | Slow HMR, slow build speed, DTS bottleneck (includes guided ts-go migration) |
-| `config-check/` | `mf-config-check` | Wrong MF plugin for bundler, missing asyncStartup, exposes key/path errors |
-| `bridge-usage/` | `mf-bridge-check` | Non-standard Bridge API usage, sub-app integration issues |
+| `mf-docs/` | `mf-docs` | Real-time MF 2.0 docs assistant — answers questions by fetching live docs from module-federation.io |
+| `mf-context/` | `mf-context` | Collects project MF configuration context; the data foundation for all diagnostic Skills |
+| `mf-module-info/` | `mf-module-info` | Fetch a remote module's full info (publicPath, remoteEntry, exposes/remotes/shared from mf-manifest.json) |
+| `mf-type-check/` | `mf-type-check` | Type file generation failures, remote types not pulled, tsconfig paths missing |
+| `mf-shared-deps/` | `mf-shared-deps` | shared/externals conflicts, antd/arco transformImport blocking sharing, multiple versions in build artifacts |
+| `mf-perf/` | `mf-perf` | Slow HMR, slow build speed, DTS bottleneck (includes guided ts-go migration) |
+| `mf-config-check/` | `mf-config-check` | Wrong MF plugin for bundler, missing asyncStartup, exposes key/path errors |
+| `mf-bridge-check/` | `mf-bridge-check` | Non-standard Bridge API usage, sub-app integration issues |
 
 ## How It Works
 
