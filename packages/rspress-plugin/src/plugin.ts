@@ -101,7 +101,6 @@ export function pluginModuleFederation(
       config.builderConfig.plugins.push(
         rsbuildPluginModuleFederation(mfConfig, {
           target: enableSSG ? 'dual' : 'web',
-          environment: 'node',
           ssrDir: 'mf-ssg',
         }),
       );

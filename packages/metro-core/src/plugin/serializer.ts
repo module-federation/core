@@ -1,11 +1,14 @@
 import path from 'node:path';
 import type { Module, ReadOnlyGraph, SerializerOptions } from 'metro';
 import type { SerializerConfigT } from 'metro-config';
-import baseJSBundle from 'metro/src/DeltaBundler/Serializers/baseJSBundle';
-import CountingSet from 'metro/src/lib/CountingSet';
-import bundleToString from 'metro/src/lib/bundleToString';
 import type { ModuleFederationConfigNormalized, ShareObject } from '../types';
 import { ConfigError } from '../utils/errors';
+import { toPosixPath } from './helpers';
+import {
+  CountingSet,
+  baseJSBundle,
+  bundleToString,
+} from '../utils/metro-compat';
 
 type CustomSerializer = SerializerConfigT['customSerializer'];
 
@@ -141,7 +144,7 @@ function generateVirtualModule(name: string, code: string): Module {
   return {
     dependencies: new Map(),
     getSource: (): Buffer => Buffer.from(code),
-    inverseDependencies: new CountingSet(),
+    inverseDependencies: new CountingSet<string>(),
     path: name,
     output: [
       {
@@ -171,15 +174,32 @@ function getBundlePath(
   isUsingMFBundleCommand: boolean,
 ) {
   const relativeEntryPath = path.relative(projectRoot, entryPoint);
+  const normalizedRelativeEntryPath = normalizeEntryPath(relativeEntryPath);
   if (!isUsingMFBundleCommand) {
     const { dir, name } = path.parse(relativeEntryPath);
     return path.format({ dir, name, ext: '' });
   }
 
   // try to match with an exposed module first
-  const exposedMatchedKey = Object.keys(exposes).find((exposeKey) =>
-    exposes[exposeKey].match(relativeEntryPath),
+  const exposeEntries = Object.entries(exposes).map(
+    ([exposeKey, exposePath]) => {
+      return {
+        exposeKey,
+        normalizedExposePath: normalizeEntryPath(exposePath),
+      };
+    },
   );
+  const exactMatch = exposeEntries.find(({ normalizedExposePath }) => {
+    return normalizedExposePath === normalizedRelativeEntryPath;
+  });
+  const extensionlessMatch = exposeEntries.find(({ normalizedExposePath }) => {
+    return (
+      removePathExtension(normalizedExposePath) ===
+      removePathExtension(normalizedRelativeEntryPath)
+    );
+  });
+  const exposedMatchedKey =
+    exactMatch?.exposeKey ?? extensionlessMatch?.exposeKey;
 
   if (exposedMatchedKey) {
     // handle as exposed module
@@ -198,6 +218,16 @@ function getBundlePath(
       'If you believe this is not a configuration issue, please report it as a bug. ' +
       `Debug info: entryPoint="${entryPoint}", projectRoot="${projectRoot}", exposesKeys=[${Object.keys(exposes).join(', ')}]`,
   );
+}
+
+function normalizeEntryPath(value: string) {
+  const normalized = toPosixPath(path.normalize(value));
+  return normalized.startsWith('./') ? normalized.slice(2) : normalized;
+}
+
+function removePathExtension(value: string) {
+  const parsed = path.posix.parse(value);
+  return path.posix.format({ dir: parsed.dir, name: parsed.name, ext: '' });
 }
 
 function getBundleCode(
