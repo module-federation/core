@@ -17,40 +17,87 @@ function parseArgs(argv) {
   return args;
 }
 
-// Compare semver major.minor prefix: "^18.0.0" vs "18.2.0" → compatible
-// Returns true if actual version satisfies the required range prefix (major only for ^, major.minor for ~)
-function isSemverCompatible(required, actual) {
-  const req = required.replace(/^[~^>=<\s]+/, '');
-  const [reqMajor, reqMinor] = req.split('.');
-  const [actMajor, actMinor] = actual.replace(/^[~^>=<\s]+/, '').split('.');
-  if (required.startsWith('^')) return reqMajor === actMajor;
-  if (required.startsWith('~'))
-    return reqMajor === actMajor && reqMinor === actMinor;
-  // exact / no prefix: compare first two segments
-  return reqMajor === actMajor && reqMinor === actMinor;
+const UI_LIBS = ['antd', '@ant-design/pro', 'arco', '@arco-design/web-react'];
+
+function checkExternalsConflict(ctx, results) {
+  const shared = (ctx.mfConfig && ctx.mfConfig.shared) || {};
+  const externals = (ctx.mfConfig && ctx.mfConfig.externals) || {};
+  const sharedKeys = Object.keys(shared);
+  const externalKeys = Array.isArray(externals)
+    ? externals
+    : Object.keys(externals);
+
+  sharedKeys.forEach((name) => {
+    if (externalKeys.includes(name)) {
+      results.push({
+        code: 'SHARED-EXTERNALS-CONFLICT',
+        severity: 'warning',
+        message: `"${name}" is configured in both shared and externals. Remove it from one of the two to avoid runtime failures.`,
+        context: { name },
+      });
+    }
+  });
+}
+
+function checkTransformImport(ctx, results) {
+  const shared = (ctx.mfConfig && ctx.mfConfig.shared) || {};
+  const deps = ctx.dependencies || {};
+  const bundler = (ctx.bundler && ctx.bundler.name) || '';
+
+  const sharedUiLibs = Object.keys(shared).filter((name) =>
+    UI_LIBS.some((lib) => name === lib || name.startsWith(lib + '/')),
+  );
+  if (sharedUiLibs.length === 0) return;
+
+  const hasBabelPluginImport = !!deps['babel-plugin-import'];
+  const isModernOrRsbuild = bundler === 'rsbuild' || bundler === 'modernjs';
+
+  if (hasBabelPluginImport || isModernOrRsbuild) {
+    const fix = isModernOrRsbuild
+      ? 'Set `source.transformImport = false` in your Modern.js / Rsbuild config.'
+      : 'Remove `babel-plugin-import` from your Babel config.';
+    sharedUiLibs.forEach((name) => {
+      results.push({
+        code: 'SHARED-TRANSFORM-IMPORT',
+        severity: 'warning',
+        message: `"${name}" is in shared but transformImport / babel-plugin-import is active, which prevents sharing. ${fix}`,
+        context: { name, bundler },
+      });
+    });
+  }
+}
+
+function checkMultiVersion(ctx, results) {
+  const artifacts = ctx.buildArtifacts || {};
+  const manifest = artifacts.mfManifest;
+  if (!manifest) return;
+
+  const versionMap = {};
+  const exposes = manifest.exposes || [];
+  exposes.forEach((item) => {
+    const { name, version } = item;
+    if (!name || !version) return;
+    if (!versionMap[name]) versionMap[name] = new Set();
+    versionMap[name].add(version);
+  });
+
+  Object.entries(versionMap).forEach(([name, versions]) => {
+    if (versions.size > 1) {
+      results.push({
+        code: 'SHARED-MULTI-VERSION',
+        severity: 'warning',
+        message: `Shared package "${name}" has multiple versions in build artifacts: ${[...versions].join(', ')}. Add an alias in your bundler config to resolve to a single version.`,
+        context: { name, versions: [...versions] },
+      });
+    }
+  });
 }
 
 function main(ctx) {
   const results = [];
-  const shared = (ctx.mfConfig && ctx.mfConfig.shared) || {};
-  const deps = ctx.dependencies || {};
-
-  Object.entries(shared).forEach(([name, value]) => {
-    const cfg =
-      typeof value === 'string' ? { requiredVersion: value } : value || {};
-    const required = cfg.requiredVersion;
-    const actual = deps[name];
-    if (!required || !actual) return;
-    if (!isSemverCompatible(required, actual)) {
-      results.push({
-        code: 'SHARED-DEPS',
-        severity: 'warning',
-        message: `Shared dependency "${name}": requiredVersion "${required}" is incompatible with installed version "${actual}". Please verify alignment between host and remotes.`,
-        context: { requiredVersion: required, actualVersion: actual },
-      });
-    }
-  });
-
+  checkExternalsConflict(ctx, results);
+  checkTransformImport(ctx, results);
+  checkMultiVersion(ctx, results);
   process.stdout.write(
     `${JSON.stringify({ context: ctx, results }, null, 2)}\n`,
   );

@@ -48,5 +48,10 @@
     "type":"dir-section-header",
     "name":"troubleshooting",
     "label":"Troubleshooting"
+  },
+  {
+    "type": "dir-section-header",
+    "name": "ai-skills",
+    "label": "AI Skills"
   }
 ]

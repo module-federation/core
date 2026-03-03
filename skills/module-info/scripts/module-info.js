@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 
-// TODO: finish
+const https = require('https');
+const http = require('http');
+
 function parseArgs(argv) {
   const args = {};
   for (let i = 2; i < argv.length; i++) {
@@ -28,33 +30,69 @@ function extractRemoteUrl(remoteValue) {
   return atIndex >= 0 ? raw.slice(atIndex + 1) : raw;
 }
 
-function main(ctx, moduleName) {
-  const remotes = (ctx.mfConfig && ctx.mfConfig.remotes) || {};
-  const remoteValue = remotes[moduleName];
+function getPublicPath(remoteEntry) {
+  const lastSlash = remoteEntry.lastIndexOf('/');
+  return lastSlash >= 0
+    ? remoteEntry.slice(0, lastSlash + 1)
+    : `${remoteEntry}/`;
+}
 
-  if (!remoteValue) {
-    process.stdout.write(
-      JSON.stringify(
-        {
-          error: `Remote "${moduleName}" not found`,
-          availableRemotes: Object.keys(remotes),
-        },
-        null,
-        2,
-      ) + '\n',
-    );
-    return;
+function fetchJson(url) {
+  return new Promise((resolve) => {
+    const client = url.startsWith('https') ? https : http;
+    client
+      .get(url, (res) => {
+        let data = '';
+        res.on('data', (chunk) => (data += chunk));
+        res.on('end', () => {
+          try {
+            resolve({ ok: true, data: JSON.parse(data) });
+          } catch {
+            resolve({ ok: false, error: `Failed to parse JSON from ${url}` });
+          }
+        });
+      })
+      .on('error', (err) => {
+        resolve({ ok: false, error: err.message });
+      });
+  });
+}
+
+function extractManifestInfo(manifest) {
+  if (!manifest) return null;
+  return {
+    exposes: manifest.exposes || [],
+    remotes: manifest.remotes || [],
+    shared: manifest.shared || [],
+  };
+}
+
+async function main(ctx, moduleName, explicitUrl) {
+  let remoteEntry = explicitUrl || null;
+
+  if (!remoteEntry) {
+    const remotes = (ctx.mfConfig && ctx.mfConfig.remotes) || {};
+    const remoteValue = remotes[moduleName];
+    if (!remoteValue) {
+      process.stdout.write(
+        JSON.stringify(
+          {
+            error: `Remote "${moduleName}" not found in mfConfig.remotes`,
+            availableRemotes: Object.keys(remotes),
+          },
+          null,
+          2,
+        ) + '\n',
+      );
+      return;
+    }
+    remoteEntry = extractRemoteUrl(remoteValue);
   }
-
-  const remoteEntry = extractRemoteUrl(remoteValue);
 
   if (!remoteEntry) {
     process.stdout.write(
       JSON.stringify(
-        {
-          error: `Cannot resolve URL for remote "${moduleName}"`,
-          rawValue: remoteValue,
-        },
+        { error: `Cannot resolve remoteEntry URL for "${moduleName}"` },
         null,
         2,
       ) + '\n',
@@ -62,32 +100,32 @@ function main(ctx, moduleName) {
     return;
   }
 
-  const lastSlash = remoteEntry.lastIndexOf('/');
-  const publicPath =
-    lastSlash >= 0 ? remoteEntry.slice(0, lastSlash + 1) : `${remoteEntry}/`;
+  const publicPath = getPublicPath(remoteEntry);
+  const typesZip = `${publicPath}@mf-types.zip`;
 
-  // TODO: user-defined logic — fill in checks below as needed
+  const manifestUrl = `${publicPath}mf-manifest.json`;
+  const manifestRes = await fetchJson(manifestUrl);
+  const manifest = manifestRes.ok
+    ? extractManifestInfo(manifestRes.data)
+    : null;
 
-  const infoList = [
-    'publicPath',
-    'remoteEntry',
-    'typesZip',
-    'typesApi',
-    'hasSsr',
-  ];
+  const ssrManifestRes = await fetchJson(
+    `${publicPath}mf-manifest.server.json`,
+  );
+  const hasSsr = ssrManifestRes.ok;
 
   const result = {
     moduleName,
     publicPath,
     remoteEntry,
-    typesZip: `${publicPath}@mf-types.zip`,
-    typesApi: null, // TODO: detect / verify
-    hasSsr: null, // TODO: detect SSR artifacts
+    typesZip,
+    typesApi: null,
+    hasSsr,
+    manifest,
+    manifestError: manifestRes.ok ? undefined : manifestRes.error,
   };
 
-  process.stdout.write(
-    JSON.stringify({ context: ctx, infoList, result }, null, 2) + '\n',
-  );
+  process.stdout.write(JSON.stringify({ result }, null, 2) + '\n');
 }
 
 const args = parseArgs(process.argv);
@@ -97,4 +135,9 @@ if (!args.module) {
   process.exit(1);
 }
 
-main(JSON.parse(args.context), args.module);
+main(JSON.parse(args.context || '{}'), args.module, args.url || null).catch(
+  (err) => {
+    process.stderr.write(`Error: ${err.message}\n`);
+    process.exit(1);
+  },
+);

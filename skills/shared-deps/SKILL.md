@@ -1,8 +1,8 @@
 ---
 name: mf-shared-deps
-description: Check Module Federation shared dependency configuration: detect whether shared.requiredVersion is compatible with the actually installed version, and surface potential runtime dependency conflicts. Use when host and remote use different versions of shared dependencies such as React or UI libraries.
+description: Check Module Federation shared dependency configuration: detect shared/externals conflicts, antd/arco transformImport blocking shared deps, and multiple versions of the same shared package in build artifacts. Use when shared dependencies fail to be shared, or host and remote load duplicate instances of a library.
 argument-hint: [project-root]
-allowed-tools: Bash(node *)
+allowed-tools: Bash(node *) Read Glob
 ---
 
 **Step 1**: Call the `mf-context` Skill (pass `$ARGUMENTS`) to collect MFContext.
@@ -15,14 +15,22 @@ node scripts/shared-config-check.js --context '<MFContext-JSON>'
 
 Process each item in the output `results` array:
 
-**SHARED-DEPS · warning — Version incompatibility**
-- `shared[name].requiredVersion` is incompatible with the locally installed version
-- Show details: the declared `requiredVersion` vs the actually installed `actualVersion`
-- Recommended actions:
-  1. Align the version of this dependency across the host and all remote projects
-  2. Or adjust the `requiredVersion` range to be compatible with the currently installed version
-  3. Check whether this dependency appears in both `externals` and `shared` (duplicate configuration can cause issues)
+**SHARED-EXTERNALS-CONFLICT · warning — same library in both `shared` and `externals`**
+- `shared` and `externals` are not mutually exclusive in config, but the same library must not appear in both — it causes the module to be excluded from the bundle while also being declared as shared, leading to runtime failures
+- Show the conflicting library name and guide the user to remove it from one of the two configs
+
+**SHARED-TRANSFORM-IMPORT · warning — antd/arco UI library shared but `transformImport` is active**
+- `babel-plugin-import` (or the built-in `transformImport` in Modern.js / Rsbuild) rewrites import paths at build time, which prevents the shared dep from being recognized and causes sharing to fail silently
+- Fix:
+  - Modern.js / Rsbuild: set `source.transformImport = false` to disable the built-in behavior
+  - Other bundlers: remove `babel-plugin-import` from the Babel config
+- Show which UI library triggered the warning
+
+**SHARED-MULTI-VERSION · warning — multiple versions of the same shared package detected**
+- The build artifacts contain more than one version of a shared package, meaning the version negotiation failed and both host and remote are each bundling their own copy
+- Recommended fix: add an `alias` in the bundler config so all projects resolve to the same physical file
+- Show the detected versions
 
 **When results is empty**
-- Inform the user that the current shared config version declarations are compatible with local dependencies
-- Note: version compatibility needs to be verified jointly across the host and all remotes; only a single local-side check has been completed here
+- Inform the user that no shared dependency conflicts were detected in this project
+- Remind them that a complete picture requires running the same check in both the host and every remote
