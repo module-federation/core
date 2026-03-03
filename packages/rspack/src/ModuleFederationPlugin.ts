@@ -92,6 +92,15 @@ function validateRscNodeRuntimePlugin(
     );
   }
 
+  if (
+    (options.experiments as { asyncStartup?: boolean } | undefined)
+      ?.asyncStartup !== true
+  ) {
+    throw new Error(
+      '[ModuleFederationPlugin.rsc] Invalid configuration:\n`experiments.asyncStartup` must be `true`.',
+    );
+  }
+
   if (!hasNodeRuntimePlugin(options.runtimePlugins)) {
     throw new Error(
       `[ModuleFederationPlugin.rsc] Invalid configuration:\n\`runtimePlugins\` must include "${NODE_RUNTIME_PLUGIN}".`,
