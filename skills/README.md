@@ -1,20 +1,30 @@
-# MF Skills
+# MF Agent Skills
 
-This directory contains general diagnostic Skills for **Module Federation (open source)**, with no dependency on any company-internal infrastructure. They can be used in any MF-based project.
+This directory contains **Agent Skills** for Module Federation 2.0 — loadable instruction sets for AI coding assistants (Claude Code, Cursor, Windsurf, and more) that give them built-in knowledge of MF internals. No dependency on any company-internal infrastructure; works in any MF-based project.
+
+For full documentation, see **[module-federation.io/guide/ai-skills](https://module-federation.io/guide/ai-skills)**.
+
+## Installation
+
+```bash
+npx skills add module-federation/core
+```
 
 ## Skill List
 
 | Directory | Skill Name | Use Case |
 |---|---|---|
+| `docs/` | `mf-docs` | Real-time MF 2.0 docs assistant — answers questions by fetching live docs from module-federation.io |
 | `context-fetcher/` | `mf-context` | Collects project MF configuration context; the data foundation for all diagnostic Skills |
+| `module-info/` | `mf-module-info` | Fetch a remote module's full info (publicPath, remoteEntry, exposes/remotes/shared from mf-manifest.json) |
+| `type-check/` | `mf-type-check` | Type file generation failures, remote types not pulled, tsconfig paths missing |
+| `shared-deps/` | `mf-shared-deps` | shared/externals conflicts, antd/arco transformImport blocking sharing, multiple versions in build artifacts |
+| `performance/` | `mf-perf` | Slow HMR, slow build speed, DTS bottleneck (includes guided ts-go migration) |
+| `config-check/` | `mf-config-check` | Wrong MF plugin for bundler, missing asyncStartup, exposes key/path errors |
 | `bridge-usage/` | `mf-bridge-check` | Non-standard Bridge API usage, sub-app integration issues |
-| `config-check/` | `mf-config-check` | exposes config format errors, path not found |
-| `shared-deps/` | `mf-shared-deps` | Shared dependency version conflicts |
-| `type-check/` | `mf-type-check` | TS type files missing, tsconfig not configured |
-| `performance/` | `mf-perf` | Slow HMR, slow build speed |
-| `runtime-008/` | `mf-runtime-008` | remoteEntry cannot be loaded (URL issues) |
-| `module-info/` | `mf-module-info` | Fetch remote module metadata (publicPath, remoteEntry, type files, SSR) |
 
-## Script Notes
+## How It Works
 
-Each diagnostic Skill runs in two steps: the Agent first calls the `mf-context` Skill to collect MFContext, then passes the MFContext as a JSON string via the `--context` argument to the corresponding `scripts/*.js`. Each diagnostic script is a standalone module with no dependency on the internal implementation of `context-fetcher`.
+Each diagnostic Skill runs in two steps: the agent first calls `mf-context` to collect MFContext, then passes it as a JSON string via `--context` to the corresponding `scripts/*.js`. Each script is standalone with no dependency on the internal implementation of `context-fetcher`.
+
+`mf-docs` works independently — it fetches relevant pages from `module-federation.io` at query time and answers based on the live content.
