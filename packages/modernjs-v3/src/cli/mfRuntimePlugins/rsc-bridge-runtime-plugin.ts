@@ -4,7 +4,6 @@ const RSC_BRIDGE_EXPOSE = '__rspack_rsc_bridge__';
 const ACTION_PREFIX = 'remote:';
 const MODULE_PREFIX = 'remote-module:';
 const ACTION_REMAP_GLOBAL_KEY = '__MODERN_RSC_MF_ACTION_ID_MAP__';
-const ACTION_REMAP_WAITERS_KEY = '__MODERN_RSC_MF_ACTION_ID_MAP_WAITERS__';
 const PROXY_MODULE_PREFIX = '__modernjs_mf_rsc_action_proxy__:';
 
 type ManifestLike = {
@@ -19,8 +18,6 @@ type BridgeModule = {
 };
 
 type ActionMapRecord = Record<string, { alias: string; rawActionId: string }>;
-type ActionRemapWaiter = (prefixedActionId: string | false) => void;
-type ActionRemapWaiterMap = Map<string, ActionRemapWaiter[]>;
 type ActionRemapMap = Record<string, string | false>;
 type WebpackRequireRuntime = {
   m?: Record<string, (module: { exports: any }) => void>;
@@ -84,7 +81,6 @@ const getNamespacedClientManifestKey = (alias: string, key: string | number) =>
 const getActionRemapMap = () => {
   const globalState = globalThis as typeof globalThis & {
     [ACTION_REMAP_GLOBAL_KEY]?: ActionRemapMap;
-    [ACTION_REMAP_WAITERS_KEY]?: ActionRemapWaiterMap;
   };
   if (!isObject(globalState[ACTION_REMAP_GLOBAL_KEY])) {
     globalState[ACTION_REMAP_GLOBAL_KEY] = {};
@@ -92,29 +88,11 @@ const getActionRemapMap = () => {
   return globalState[ACTION_REMAP_GLOBAL_KEY] as ActionRemapMap;
 };
 
-const getActionRemapWaiters = () => {
-  const globalState = globalThis as typeof globalThis & {
-    [ACTION_REMAP_WAITERS_KEY]?: ActionRemapWaiterMap;
-  };
-  const existingWaiters = globalState[ACTION_REMAP_WAITERS_KEY];
-  if (!(existingWaiters instanceof Map)) {
-    globalState[ACTION_REMAP_WAITERS_KEY] = new Map();
-    return globalState[ACTION_REMAP_WAITERS_KEY] as ActionRemapWaiterMap;
-  }
-  return existingWaiters;
-};
-
 const registerActionRemap = (rawActionId: string, prefixedActionId: string) => {
   const remapMap = getActionRemapMap();
-  const remapWaiters = getActionRemapWaiters();
   const existingValue = remapMap[rawActionId];
   if (typeof existingValue === 'undefined') {
     remapMap[rawActionId] = prefixedActionId;
-    const waiters = remapWaiters.get(rawActionId);
-    if (waiters?.length) {
-      waiters.forEach((waiter) => waiter(prefixedActionId));
-      remapWaiters.delete(rawActionId);
-    }
     return;
   }
   if (existingValue === prefixedActionId) {
@@ -122,11 +100,6 @@ const registerActionRemap = (rawActionId: string, prefixedActionId: string) => {
   }
   // Ambiguous mapping across remotes; skip unsafe remap.
   remapMap[rawActionId] = false;
-  const waiters = remapWaiters.get(rawActionId);
-  if (waiters?.length) {
-    waiters.forEach((waiter) => waiter(false));
-    remapWaiters.delete(rawActionId);
-  }
 };
 
 const getWebpackRequireIfAvailable = (): WebpackRequireRuntime | undefined => {

@@ -36,15 +36,9 @@ function flushMicrotasks() {
 function evaluateBootstrap({
   runtimeRequire,
   windowObject,
-  setTimeoutImpl,
 }: {
   runtimeRequire: Record<string, any>;
   windowObject?: Record<string, any>;
-  setTimeoutImpl?: (
-    callback: (...args: any[]) => void,
-    ms?: number,
-    ...args: any[]
-  ) => any;
 }) {
   const source = stripImports(fs.readFileSync(BOOTSTRAP_FILE_PATH, 'utf-8'));
   const resolvedActionIds: Array<(id: string) => Promise<string>> = [];
@@ -62,7 +56,7 @@ function evaluateBootstrap({
     setServerCallback: importedRuntime.setServerCallback,
     fetch: fetchMock,
     clearTimeout: vi.fn(),
-    setTimeout: setTimeoutImpl ?? vi.fn(() => 1),
+    setTimeout: vi.fn(() => 1),
     queueMicrotask: (cb: () => void) => cb(),
     window: windowObject,
     globalThis: undefined as any,
@@ -318,13 +312,31 @@ describe('rsc-client-callback-bootstrap', () => {
     };
     const { resolveActionId } = evaluateBootstrap({
       runtimeRequire,
-      setTimeoutImpl: ((callback: (...args: any[]) => void) => {
-        queueMicrotask(() => callback());
-        return 1;
-      }) as typeof setTimeout,
     });
 
     await expect(resolveActionId!('hostAction')).resolves.toBe('hostAction');
+  });
+
+  it('throws when a raw action id cannot be resolved deterministically', async () => {
+    const runtimeRequire = {
+      e: vi.fn(async () => undefined),
+      c: {},
+      federation: {
+        instance: {
+          options: {
+            remotes: [{ alias: 'remoteA' }, { alias: 'remoteB' }],
+          },
+        },
+      },
+      rscM: {
+        serverManifest: {},
+      },
+    };
+    const { resolveActionId } = evaluateBootstrap({ runtimeRequire });
+
+    await expect(resolveActionId!('rawAction')).rejects.toThrow(
+      /Unable to resolve raw action id "rawAction"/,
+    );
   });
 
   it('does not mark hook install when getter-only chunk loader cannot be replaced', () => {

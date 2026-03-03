@@ -8,8 +8,6 @@ import {
 
 const ACTION_PREFIX = 'remote:';
 const ACTION_REMAP_GLOBAL_KEY = '__MODERN_RSC_MF_ACTION_ID_MAP__';
-const ACTION_REMAP_WAITERS_KEY = '__MODERN_RSC_MF_ACTION_ID_MAP_WAITERS__';
-const ACTION_REMAP_WAIT_TIMEOUT_MS = 3000;
 const CALLBACK_INSTALL_RETRY_DELAY_MS = 50;
 const MAX_CALLBACK_INSTALL_ATTEMPTS = 120;
 const CALLBACK_CHUNK_LOADER_HOOK_FLAG =
@@ -187,16 +185,6 @@ function resolveFallbackRemoteAlias() {
   return undefined;
 }
 
-function getActionRemapWaiters() {
-  const waiters = globalThis[ACTION_REMAP_WAITERS_KEY];
-  if (!(waiters instanceof Map)) {
-    const nextWaiters = new Map();
-    globalThis[ACTION_REMAP_WAITERS_KEY] = nextWaiters;
-    return nextWaiters;
-  }
-  return waiters;
-}
-
 function resolveActionEndpoint() {
   if (!globalThis.window) {
     return '/';
@@ -207,36 +195,6 @@ function resolveActionEndpoint() {
     return '/';
   }
   return `/${entryName}`;
-}
-
-function waitForActionRemap(rawId) {
-  const waiters = getActionRemapWaiters();
-  return new Promise((resolve) => {
-    let settled = false;
-    const resolveOnce = (value) => {
-      if (settled) {
-        return;
-      }
-      settled = true;
-      clearTimeout(timeoutHandle);
-      resolve(value);
-    };
-
-    const list = waiters.get(rawId) || [];
-    list.push(resolveOnce);
-    waiters.set(rawId, list);
-
-    const timeoutHandle = setTimeout(() => {
-      const current = waiters.get(rawId) || [];
-      const next = current.filter((waiter) => waiter !== resolveOnce);
-      if (next.length === 0) {
-        waiters.delete(rawId);
-      } else {
-        waiters.set(rawId, next);
-      }
-      resolveOnce(rawId);
-    }, ACTION_REMAP_WAIT_TIMEOUT_MS);
-  });
 }
 
 async function resolveActionId(id) {
@@ -255,16 +213,6 @@ async function resolveActionId(id) {
       `[modern-js-v3:rsc-bridge] Ambiguous remote action id "${rawId}" cannot be resolved safely.`,
     );
   }
-
-  const waitedRemappedId = await waitForActionRemap(rawId);
-  if (waitedRemappedId === false) {
-    throw new Error(
-      `[modern-js-v3:rsc-bridge] Ambiguous remote action id "${rawId}" cannot be resolved safely.`,
-    );
-  }
-  if (typeof waitedRemappedId === 'string' && waitedRemappedId !== rawId) {
-    return waitedRemappedId;
-  }
   if (hasHostServerAction(rawId)) {
     return rawId;
   }
@@ -276,7 +224,9 @@ async function resolveActionId(id) {
     return prefixedId;
   }
 
-  return waitedRemappedId;
+  throw new Error(
+    `[modern-js-v3:rsc-bridge] Unable to resolve raw action id "${rawId}". Use a prefixed action id or ensure the remote alias manifest is merged before invoking the action.`,
+  );
 }
 
 function createServerCallback(runtime) {
