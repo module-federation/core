@@ -47,6 +47,14 @@ function isNodeLikeTarget(target: unknown): boolean {
   return targets.some((value) => value.includes('node'));
 }
 
+function hasAsyncNodeTarget(target: unknown): boolean {
+  if (target === false) {
+    return false;
+  }
+  const targets = getTargetValues(target);
+  return targets.some((value) => value.includes('async-node'));
+}
+
 function hasNodeRuntimePlugin(
   runtimePlugins: moduleFederationPlugin.ModuleFederationPluginOptions['runtimePlugins'],
 ): boolean {
@@ -76,6 +84,12 @@ function validateRscNodeRuntimePlugin(
 
   if (!isRscEnabled || !isNodeLikeTarget(target)) {
     return;
+  }
+
+  if (!hasAsyncNodeTarget(target)) {
+    throw new Error(
+      '[ModuleFederationPlugin.rsc] Invalid configuration:\n`target` must include `"async-node"`.',
+    );
   }
 
   if (!hasNodeRuntimePlugin(options.runtimePlugins)) {
