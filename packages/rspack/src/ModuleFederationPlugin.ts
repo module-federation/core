@@ -30,6 +30,57 @@ type CacheGroup = CacheGroups[string];
 declare const __VERSION__: string;
 
 const RuntimeToolsPath = require.resolve('@module-federation/runtime-tools');
+const NODE_RUNTIME_PLUGIN = '@module-federation/node/runtimePlugin';
+
+function getTargetValues(target: unknown): string[] {
+  if (Array.isArray(target)) {
+    return target.filter((item): item is string => typeof item === 'string');
+  }
+  return typeof target === 'string' ? [target] : [];
+}
+
+function isNodeLikeTarget(target: unknown): boolean {
+  if (target === false) {
+    return false;
+  }
+  const targets = getTargetValues(target);
+  return targets.some((value) => value.includes('node'));
+}
+
+function hasNodeRuntimePlugin(
+  runtimePlugins: moduleFederationPlugin.ModuleFederationPluginOptions['runtimePlugins'],
+): boolean {
+  if (!Array.isArray(runtimePlugins)) {
+    return false;
+  }
+
+  return runtimePlugins.some((plugin) => {
+    const entry = Array.isArray(plugin) ? plugin[0] : plugin;
+    if (typeof entry !== 'string') {
+      return false;
+    }
+    return (
+      entry === NODE_RUNTIME_PLUGIN ||
+      entry.includes('@module-federation/node/runtimePlugin') ||
+      entry.includes('@module-federation/node/dist/src/runtimePlugin')
+    );
+  });
+}
+
+function validateRscNodeRuntimePlugin(
+  options: moduleFederationPlugin.ModuleFederationPluginOptions,
+  target: unknown,
+): void {
+  if (options.experiments?.rsc !== true || !isNodeLikeTarget(target)) {
+    return;
+  }
+
+  if (!hasNodeRuntimePlugin(options.runtimePlugins)) {
+    throw new Error(
+      `[ModuleFederationPlugin.rsc] Invalid configuration:\n\`runtimePlugins\` must include "${NODE_RUNTIME_PLUGIN}".`,
+    );
+  }
+}
 
 export const PLUGIN_NAME = 'RspackModuleFederationPlugin';
 export class ModuleFederationPlugin implements RspackPluginInstance {
@@ -98,6 +149,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
   apply(compiler: Compiler): void {
     bindLoggerToCompiler(logger, compiler, PLUGIN_NAME);
     const { _options: options } = this;
+    validateRscNodeRuntimePlugin(options, compiler.options.target);
 
     if (!options.name) {
       throw new Error('[ ModuleFederationPlugin ]: name is required');

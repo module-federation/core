@@ -208,13 +208,13 @@ async function resolveActionId(id) {
   if (typeof remappedId === 'string') {
     return remappedId;
   }
+  if (hasHostServerAction(rawId)) {
+    return rawId;
+  }
   if (remappedId === false) {
     throw new Error(
       `[modern-js-v3:rsc-bridge] Ambiguous remote action id "${rawId}" cannot be resolved safely.`,
     );
-  }
-  if (hasHostServerAction(rawId)) {
-    return rawId;
   }
 
   const fallbackAlias = resolveFallbackRemoteAlias();

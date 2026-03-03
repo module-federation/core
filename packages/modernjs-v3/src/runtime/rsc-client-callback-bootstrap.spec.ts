@@ -317,6 +317,29 @@ describe('rsc-client-callback-bootstrap', () => {
     await expect(resolveActionId!('hostAction')).resolves.toBe('hostAction');
   });
 
+  it('prefers host-local actions over ambiguous remap markers', async () => {
+    const runtimeRequire = {
+      e: vi.fn(async () => undefined),
+      c: {},
+      federation: {
+        instance: {
+          options: {
+            remotes: [{ alias: 'remoteA' }, { alias: 'remoteB' }],
+          },
+        },
+      },
+      rscM: {
+        serverManifest: {
+          hostAction: { id: 'hostAction' },
+        },
+      },
+    };
+    const { context, resolveActionId } = evaluateBootstrap({ runtimeRequire });
+    context.__MODERN_RSC_MF_ACTION_ID_MAP__ = { hostAction: false };
+
+    await expect(resolveActionId!('hostAction')).resolves.toBe('hostAction');
+  });
+
   it('throws when a raw action id cannot be resolved deterministically', async () => {
     const runtimeRequire = {
       e: vi.fn(async () => undefined),
