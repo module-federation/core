@@ -14,28 +14,8 @@ vi.mock('../../src/plugin/babel-transformer', () => ({
   ),
 }));
 
-vi.mock('../../src/utils/federated-remote-types', () => ({
-  maybeGenerateFederatedRemoteTypes: vi.fn(async () => undefined),
-  applyTypesMetaToManifest: vi.fn(
-    (manifest: Record<string, any>, typesMeta) => {
-      if (!typesMeta?.zipName && !typesMeta?.apiFileName) {
-        return manifest;
-      }
-      manifest.metaData = manifest.metaData || {};
-      manifest.metaData.types = manifest.metaData.types || {};
-      if (typesMeta.zipName) {
-        manifest.metaData.types.zip = typesMeta.zipName;
-      }
-      if (typesMeta.apiFileName) {
-        manifest.metaData.types.api = typesMeta.apiFileName;
-      }
-      return manifest;
-    },
-  ),
-}));
-
+import { toPosixPath } from '../../src/plugin/helpers';
 import { withModuleFederation } from '../../src/plugin';
-import * as federatedTypes from '../../src/utils/federated-remote-types';
 
 let projectCount = 0;
 
@@ -104,7 +84,6 @@ describe('withModuleFederation', () => {
     delete (global as any).__METRO_FEDERATION_HOST_ENTRY_PATH;
     delete (global as any).__METRO_FEDERATION_REMOTE_ENTRY_PATH;
     delete (global as any).__METRO_FEDERATION_MANIFEST_PATH;
-    delete (global as any).__METRO_FEDERATION_DTS_ASSETS;
     vol.reset();
     vi.restoreAllMocks();
   });
@@ -123,7 +102,7 @@ describe('withModuleFederation', () => {
     const normalized = (global as any).__METRO_FEDERATION_CONFIG;
     const tmpDirPath = path.join(projectRoot, 'node_modules', '.mf');
     expect(normalized.plugins).toContain(
-      path.relative(tmpDirPath, runtimePluginPath),
+      toPosixPath(path.relative(tmpDirPath, runtimePluginPath)),
     );
   });
 
@@ -164,52 +143,5 @@ describe('withModuleFederation', () => {
       .filter((entry) => String(entry).includes('runtimePlugins[0][1]'));
 
     expect(warnings).toHaveLength(1);
-  });
-
-  it('generates dts assets for remote in start mode and rewrites dev URLs', async () => {
-    const projectRoot = createProjectRoot();
-    const metroConfig = createMetroConfig(projectRoot);
-    const tmpDirPath = path.join(projectRoot, 'node_modules', '.mf-metro');
-    const generateTypesSpy = vi.mocked(
-      federatedTypes.maybeGenerateFederatedRemoteTypes,
-    );
-    generateTypesSpy.mockResolvedValueOnce({
-      zipName: '@mf-types.zip',
-      apiFileName: '@mf-types.d.ts',
-    });
-
-    const updatedConfig = withModuleFederation(metroConfig, {
-      ...getValidConfig(),
-      exposes: {
-        './button': './src/button.ts',
-      },
-      dts: true,
-    } as any);
-
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    await new Promise((resolve) => setTimeout(resolve, 0));
-
-    expect(generateTypesSpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        projectRoot,
-        outputDir: tmpDirPath,
-      }),
-    );
-    expect((global as any).__METRO_FEDERATION_DTS_ASSETS).toEqual({
-      zipName: '@mf-types.zip',
-      apiFileName: '@mf-types.d.ts',
-    });
-
-    const rewrittenZip =
-      updatedConfig.server.rewriteRequestUrl('/@mf-types.zip');
-    const rewrittenApi =
-      updatedConfig.server.rewriteRequestUrl('/@mf-types.d.ts');
-    expect(rewrittenZip).toContain('/node_modules/.mf-metro/@mf-types.zip');
-    expect(rewrittenApi).toContain('/node_modules/.mf-metro/@mf-types.d.ts');
-
-    const manifestPath = (global as any).__METRO_FEDERATION_MANIFEST_PATH;
-    const manifest = JSON.parse(vol.readFileSync(manifestPath, 'utf-8'));
-    expect(manifest.metaData.types.zip).toBe('@mf-types.zip');
-    expect(manifest.metaData.types.api).toBe('@mf-types.d.ts');
   });
 });
