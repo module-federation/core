@@ -14,8 +14,6 @@ const CALLBACK_CHUNK_LOADER_HOOK_FLAG =
   '__MODERN_RSC_MF_CALLBACK_CHUNK_LOADER_HOOKED__';
 const CALLBACK_CHUNK_LOADER_WRAPPED_FLAG =
   '__MODERN_RSC_MF_CALLBACK_CHUNK_LOADER_WRAPPED__';
-const CALLBACK_CHUNK_HANDLER_HOOK_FLAG =
-  '__MODERN_RSC_MF_CALLBACK_CHUNK_HANDLER_HOOKED__';
 const CALLBACK_CHUNK_HANDLER_KEY = '__MODERN_RSC_MF_CALLBACK_CHUNK_HANDLER__';
 const CALLBACK_CHUNK_HANDLER_WRAPPED_FLAG =
   '__MODERN_RSC_MF_CALLBACK_CHUNK_HANDLER_WRAPPED__';
@@ -26,6 +24,7 @@ const actionRemapMapFallback = Object.create(null);
 const installedClientBrowserRuntimes = new WeakSet();
 const wrappedChunkLoaders = new WeakMap();
 const wrappedChunkHandlers = new WeakMap();
+const hookedChunkHandlers = new WeakSet();
 
 function isObject(value) {
   return typeof value === 'object' && value !== null;
@@ -378,7 +377,7 @@ function hookEnsureChunkHandlersInstall() {
   }
 
   const chunkHandlers = webpackRequire.f;
-  if (chunkHandlers[CALLBACK_CHUNK_HANDLER_HOOK_FLAG]) {
+  if (hookedChunkHandlers.has(chunkHandlers)) {
     return true;
   }
 
@@ -394,7 +393,7 @@ function hookEnsureChunkHandlersInstall() {
     chunkHandlers[CALLBACK_CHUNK_HANDLER_KEY] = callbackInstallChunkHandler;
   }
 
-  chunkHandlers[CALLBACK_CHUNK_HANDLER_HOOK_FLAG] = true;
+  hookedChunkHandlers.add(chunkHandlers);
   return true;
 }
 
