@@ -40,3 +40,7 @@ export function prepareTmpDir(projectRootPath: string) {
   fs.mkdirSync(tmpDirPath, { recursive: true });
   return tmpDirPath;
 }
+
+export function toPosixPath(value: string) {
+  return value.replaceAll('\\', '/');
+}

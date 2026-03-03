@@ -6,6 +6,7 @@ import type {
   ShareObject,
 } from '../types';
 import { DEFAULT_ENTRY_FILENAME } from './constants';
+import { toPosixPath } from './helpers';
 
 interface ProjectConfig {
   projectRoot: string;
@@ -20,7 +21,7 @@ export function normalizeOptions(
   const remotes = getNormalizedRemotes(options);
   const exposes = getNormalizedExposes(options);
   const shareStrategy = getNormalizedShareStrategy(options);
-  const plugins = getNormalizedPlugins(options, { projectRoot, tmpDirPath });
+  const plugins = getNormalizedPlugins(options, tmpDirPath, projectRoot);
 
   return {
     // validated in validateOptions before normalization
@@ -103,9 +104,9 @@ function getNormalizedShareStrategy(options: ModuleFederationConfig) {
 
 function getNormalizedPlugins(
   options: ModuleFederationConfig,
-  paths: { projectRoot: string; tmpDirPath: string },
+  tmpDirPath: string,
+  projectRoot: string,
 ) {
-  const { projectRoot, tmpDirPath } = paths;
   const runtimePlugins = getNormalizedRuntimePlugins(options);
   const plugins = options.plugins ?? [];
 
@@ -117,7 +118,8 @@ function getNormalizedPlugins(
   ];
 
   const deduplicatedPlugins = Array.from(new Set(allPlugins));
-  // Make local file paths relative to the tmp dir; keep bare package specifiers as-is.
+
+  // make local file paths relative to the tmp dir; keep package specifiers unchanged
   return deduplicatedPlugins.map((pluginPath) => {
     if (!isLocalPluginPath(pluginPath, projectRoot)) {
       return pluginPath;
@@ -125,7 +127,7 @@ function getNormalizedPlugins(
     const resolvedPluginPath = path.isAbsolute(pluginPath)
       ? pluginPath
       : path.resolve(projectRoot, pluginPath);
-    return path.relative(tmpDirPath, resolvedPluginPath);
+    return toPosixPath(path.relative(tmpDirPath, resolvedPluginPath));
   });
 }
 
