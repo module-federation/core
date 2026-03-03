@@ -71,7 +71,10 @@ function validateRscNodeRuntimePlugin(
   options: moduleFederationPlugin.ModuleFederationPluginOptions,
   target: unknown,
 ): void {
-  if (options.experiments?.rsc !== true || !isNodeLikeTarget(target)) {
+  const isRscEnabled =
+    (options.experiments as { rsc?: boolean } | undefined)?.rsc === true;
+
+  if (!isRscEnabled || !isNodeLikeTarget(target)) {
     return;
   }
 
