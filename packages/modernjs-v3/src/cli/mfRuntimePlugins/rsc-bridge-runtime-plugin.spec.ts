@@ -15,6 +15,9 @@ type WebpackRequireRuntime = {
 
 const ACTION_REMAP_GLOBAL_KEY = '__MODERN_RSC_MF_ACTION_ID_MAP__';
 const PROXY_MODULE_PREFIX = '__modernjs_mf_rsc_action_proxy__:';
+type FederationState = {
+  [ACTION_REMAP_GLOBAL_KEY]?: Record<string, string | false>;
+};
 
 const createWebpackRequireRuntime = (): WebpackRequireRuntime => ({
   m: {},
@@ -27,38 +30,33 @@ const createWebpackRequireRuntime = (): WebpackRequireRuntime => ({
 });
 let runtimeRequire: WebpackRequireRuntime;
 
+const getFederationState = () =>
+  global as typeof global & {
+    __FEDERATION__?: FederationState;
+    fetch?: unknown;
+  };
+
 const getActionRemapMap = () =>
-  (
-    globalThis as typeof globalThis & {
-      [ACTION_REMAP_GLOBAL_KEY]?: Record<string, string | false>;
-    }
-  )[ACTION_REMAP_GLOBAL_KEY] || {};
+  getFederationState().__FEDERATION__?.[ACTION_REMAP_GLOBAL_KEY] || {};
 
 describe('rsc-bridge-runtime-plugin', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     runtimeRequire = createWebpackRequireRuntime();
     vi.stubGlobal('__webpack_require__', runtimeRequire);
+    vi.stubGlobal('__FEDERATION__', {});
     vi.stubGlobal('window', {
       __MODERN_JS_ENTRY_NAME: 'server-component-root',
     });
-    delete (
-      globalThis as typeof globalThis & {
-        [ACTION_REMAP_GLOBAL_KEY]?: Record<string, string | false>;
-      }
-    )[ACTION_REMAP_GLOBAL_KEY];
+    delete getFederationState().__FEDERATION__?.[ACTION_REMAP_GLOBAL_KEY];
   });
 
   afterEach(() => {
     vi.clearAllTimers();
     vi.useRealTimers();
     vi.unstubAllGlobals();
-    delete (globalThis as typeof globalThis & { fetch?: unknown }).fetch;
-    delete (
-      globalThis as typeof globalThis & {
-        [ACTION_REMAP_GLOBAL_KEY]?: Record<string, string | false>;
-      }
-    )[ACTION_REMAP_GLOBAL_KEY];
+    delete getFederationState().fetch;
+    delete getFederationState().__FEDERATION__?.[ACTION_REMAP_GLOBAL_KEY];
   });
 
   it('merges remote manifest, registers action remap, and installs proxy dispatcher', async () => {

@@ -22,6 +22,7 @@ const CALLBACK_CHUNK_HANDLER_WRAPPED_FLAG =
 let hasResolvedFallbackAlias = false;
 let fallbackRemoteAlias;
 let callbackInstallAttempts = 0;
+const actionRemapMapFallback = Object.create(null);
 const installedClientBrowserRuntimes = new WeakSet();
 const wrappedChunkLoaders = new WeakMap();
 const wrappedChunkHandlers = new WeakMap();
@@ -67,10 +68,17 @@ function getWebpackRequire() {
 }
 
 function getActionRemapMap() {
-  const map = globalThis[ACTION_REMAP_GLOBAL_KEY];
+  const federationState =
+    typeof __FEDERATION__ !== 'undefined' && isObject(__FEDERATION__)
+      ? __FEDERATION__
+      : undefined;
+  if (!federationState) {
+    return actionRemapMapFallback;
+  }
+  const map = federationState[ACTION_REMAP_GLOBAL_KEY];
   if (!isObject(map)) {
-    globalThis[ACTION_REMAP_GLOBAL_KEY] = Object.create(null);
-    return globalThis[ACTION_REMAP_GLOBAL_KEY];
+    federationState[ACTION_REMAP_GLOBAL_KEY] = Object.create(null);
+    return federationState[ACTION_REMAP_GLOBAL_KEY];
   }
   return map;
 }
@@ -83,12 +91,6 @@ function getHostServerManifest() {
     isObject(webpackRequire.rscM.serverManifest)
   ) {
     return webpackRequire.rscM.serverManifest;
-  }
-  if (
-    isObject(globalThis.__rspack_rsc_manifest__) &&
-    isObject(globalThis.__rspack_rsc_manifest__.serverManifest)
-  ) {
-    return globalThis.__rspack_rsc_manifest__.serverManifest;
   }
   return undefined;
 }
@@ -157,13 +159,13 @@ function resolveFallbackRemoteAlias() {
     return fallbackRemoteAlias;
   }
 
-  if (aliasSet.size === 0 && !globalThis.window) {
+  if (aliasSet.size === 0 && typeof window === 'undefined') {
     return undefined;
   }
 
-  if (globalThis.window) {
-    const containerAliases = Object.keys(globalThis.window).filter((alias) => {
-      const candidate = globalThis.window[alias];
+  if (typeof window !== 'undefined') {
+    const containerAliases = Object.keys(window).filter((alias) => {
+      const candidate = window[alias];
       return (
         isObject(candidate) &&
         isFunction(candidate.get) &&
@@ -186,7 +188,7 @@ function resolveFallbackRemoteAlias() {
 }
 
 function resolveActionEndpoint() {
-  if (!globalThis.window) {
+  if (typeof window === 'undefined') {
     return '/';
   }
 

@@ -59,7 +59,7 @@ function evaluateBootstrap({
     setTimeout: vi.fn(() => 1),
     queueMicrotask: (cb: () => void) => cb(),
     window: windowObject,
-    globalThis: undefined as any,
+    __FEDERATION__: {},
     Response,
     Promise,
     Object,
@@ -74,7 +74,6 @@ function evaluateBootstrap({
     console,
     process: { env: {} },
   };
-  context.globalThis = context;
 
   vm.runInNewContext(source, context, {
     filename: BOOTSTRAP_FILE_PATH,
@@ -286,7 +285,9 @@ describe('rsc-client-callback-bootstrap', () => {
     const { context, resolveActionId } = evaluateBootstrap({ runtimeRequire });
 
     expect(resolveActionId).toBeTypeOf('function');
-    context.__MODERN_RSC_MF_ACTION_ID_MAP__ = { rawAction: false };
+    context.__FEDERATION__.__MODERN_RSC_MF_ACTION_ID_MAP__ = {
+      rawAction: false,
+    };
 
     await expect(resolveActionId!('rawAction')).rejects.toThrow(
       /Ambiguous remote action id "rawAction"/,
@@ -335,7 +336,9 @@ describe('rsc-client-callback-bootstrap', () => {
       },
     };
     const { context, resolveActionId } = evaluateBootstrap({ runtimeRequire });
-    context.__MODERN_RSC_MF_ACTION_ID_MAP__ = { hostAction: false };
+    context.__FEDERATION__.__MODERN_RSC_MF_ACTION_ID_MAP__ = {
+      hostAction: false,
+    };
 
     await expect(resolveActionId!('hostAction')).resolves.toBe('hostAction');
   });

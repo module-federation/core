@@ -62,7 +62,7 @@ export const resolveNodeScriptExports = async (
 
   const globalContainer =
     typeof globalName === 'string'
-      ? (globalThis as Record<string, unknown>)[globalName]
+      ? (global as Record<string, unknown>)[globalName]
       : undefined;
 
   if (

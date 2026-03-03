@@ -19,6 +19,9 @@ type BridgeModule = {
 
 type ActionMapRecord = Record<string, { alias: string; rawActionId: string }>;
 type ActionRemapMap = Record<string, string | false>;
+type FederationState = {
+  [ACTION_REMAP_GLOBAL_KEY]?: ActionRemapMap;
+};
 type WebpackRequireRuntime = {
   m?: Record<string, (module: { exports: any }) => void>;
   c?: Record<string, { exports?: unknown }>;
@@ -31,6 +34,7 @@ type WebpackRequireRuntime = {
 };
 
 declare const __webpack_require__: WebpackRequireRuntime;
+declare const __FEDERATION__: FederationState | undefined;
 
 const isObject = (value: unknown): value is Record<string, any> =>
   typeof value === 'object' && value !== null;
@@ -78,14 +82,24 @@ const getNamespacedModuleId = (alias: string, rawId: string | number) =>
 const getNamespacedClientManifestKey = (alias: string, key: string | number) =>
   `${MODULE_PREFIX}${alias}:${String(key)}`;
 
-const getActionRemapMap = () => {
-  const globalState = globalThis as typeof globalThis & {
-    [ACTION_REMAP_GLOBAL_KEY]?: ActionRemapMap;
-  };
-  if (!isObject(globalState[ACTION_REMAP_GLOBAL_KEY])) {
-    globalState[ACTION_REMAP_GLOBAL_KEY] = {};
+const actionRemapMapFallback: ActionRemapMap = {};
+
+const getFederationState = (): FederationState | undefined => {
+  if (typeof __FEDERATION__ !== 'undefined' && isObject(__FEDERATION__)) {
+    return __FEDERATION__;
   }
-  return globalState[ACTION_REMAP_GLOBAL_KEY] as ActionRemapMap;
+  return undefined;
+};
+
+const getActionRemapMap = () => {
+  const federationState = getFederationState();
+  if (!federationState) {
+    return actionRemapMapFallback;
+  }
+  if (!isObject(federationState[ACTION_REMAP_GLOBAL_KEY])) {
+    federationState[ACTION_REMAP_GLOBAL_KEY] = {};
+  }
+  return federationState[ACTION_REMAP_GLOBAL_KEY] as ActionRemapMap;
 };
 
 const registerActionRemap = (rawActionId: string, prefixedActionId: string) => {
