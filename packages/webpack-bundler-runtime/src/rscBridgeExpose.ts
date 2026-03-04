@@ -18,21 +18,45 @@ type ManifestLike = {
 };
 
 type WebpackRequireRuntime = {
+  (moduleId: string): unknown;
   initializeExposesData?: {
     moduleMap?: Record<string, () => Promise<() => unknown> | (() => unknown)>;
   };
+  I?: (shareScope: string, initScope?: unknown) => unknown;
   rscM?: ManifestLike;
 };
 
 declare const __webpack_require__: WebpackRequireRuntime;
 
+const shouldDebug =
+  typeof process !== 'undefined' && Boolean(process.env?.RSC_MF_DEBUG);
+
+const debugLog = (message: string, data?: Record<string, unknown>) => {
+  if (!shouldDebug) {
+    return;
+  }
+  if (data) {
+    // eslint-disable-next-line no-console
+    console.error('[mf:rsc-bridge-expose]', message, data);
+    return;
+  }
+  // eslint-disable-next-line no-console
+  console.error('[mf:rsc-bridge-expose]', message);
+};
+
 const CLIENT_REFERENCE_SYMBOL = Symbol.for('react.client.reference');
 const BRIDGE_EXPOSE_KEY = './__rspack_rsc_bridge__';
+const RSC_SSR_EXPOSE_PREFIX = './__rspack_rsc_ssr__/';
 
 const actionReferenceCache: Record<string, (...args: unknown[]) => unknown> =
   Object.create(null);
 const clientExposeMap: Record<string, string> = Object.create(null);
+const ssrModuleCache: Record<string, unknown> = Object.create(null);
+const ssrExposeByServerModuleId: Record<string, string> = Object.create(null);
+const shareScopeInitPromises: Partial<Record<string, Promise<void>>> =
+  Object.create(null);
 let scannedExposes = false;
+let scannedSsrExposeMap = false;
 
 const isObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null;
@@ -101,12 +125,109 @@ const inspectExportValue = (value: unknown, exposeName: string) => {
   }
 };
 
+const toSsrExposeKey = (exposeName: string) => {
+  if (!exposeName) {
+    return '';
+  }
+  const normalized = exposeName.startsWith('./')
+    ? exposeName.slice(2)
+    : exposeName;
+  return `${RSC_SSR_EXPOSE_PREFIX}${normalized}`;
+};
+
+const resolveClientManifestEntry = (
+  clientManifest: Record<string, ManifestExport>,
+  clientReferenceId: string,
+): ManifestExport | null => {
+  if (Object.prototype.hasOwnProperty.call(clientManifest, clientReferenceId)) {
+    return clientManifest[clientReferenceId] as ManifestExport;
+  }
+  const hashIndex = clientReferenceId.lastIndexOf('#');
+  if (hashIndex >= 0) {
+    const withoutHash = clientReferenceId.slice(0, hashIndex);
+    if (Object.prototype.hasOwnProperty.call(clientManifest, withoutHash)) {
+      return clientManifest[withoutHash] as ManifestExport;
+    }
+  }
+  return null;
+};
+
+const collectClientReferenceIdsFromExports = (
+  exportsValue: unknown,
+  ids: string[],
+) => {
+  const maybeRef = exportsValue as { $$id?: unknown } | undefined;
+  if (
+    typeof exportsValue === 'function' &&
+    typeof maybeRef?.$$id === 'string'
+  ) {
+    ids.push(maybeRef.$$id);
+  }
+  if (!isObject(exportsValue)) {
+    return;
+  }
+  for (const nestedValue of Object.values(exportsValue)) {
+    const maybeNestedRef = nestedValue as { $$id?: unknown } | undefined;
+    if (
+      typeof nestedValue === 'function' &&
+      typeof maybeNestedRef?.$$id === 'string'
+    ) {
+      ids.push(maybeNestedRef.$$id);
+    }
+  }
+};
+
 const resolveFactoryExports = async (getFactory: () => unknown) => {
   const factory = await Promise.resolve(getFactory());
   if (typeof factory === 'function') {
     return (factory as () => unknown)();
   }
   return factory;
+};
+
+const getShareScopesForServerModuleId = (moduleId: string) => {
+  const scopes = new Set<string>(['default']);
+  if (moduleId.startsWith('(server-side-rendering)/')) {
+    scopes.add('ssr');
+  }
+  if (moduleId.startsWith('(react-server-components)/')) {
+    scopes.add('rsc');
+  }
+  return Array.from(scopes);
+};
+
+const ensureShareScopeInitialized = async (shareScope: string) => {
+  if (!shareScope || typeof __webpack_require__.I !== 'function') {
+    return;
+  }
+  const existing = shareScopeInitPromises[shareScope];
+  if (existing) {
+    await existing;
+    return;
+  }
+
+  const initPromise = (async () => {
+    const initResult = __webpack_require__.I!(shareScope);
+    if (
+      initResult &&
+      typeof (initResult as Promise<unknown>).then === 'function'
+    ) {
+      await initResult;
+    }
+  })().catch((error: unknown) => {
+    delete shareScopeInitPromises[shareScope];
+    throw error;
+  });
+
+  shareScopeInitPromises[shareScope] = initPromise;
+  await initPromise;
+};
+
+const ensureShareScopesForModuleId = async (moduleId: string) => {
+  const shareScopes = getShareScopesForServerModuleId(moduleId);
+  await Promise.all(
+    shareScopes.map((shareScope) => ensureShareScopeInitialized(shareScope)),
+  );
 };
 
 const scanExposedModules = async () => {
@@ -136,6 +257,114 @@ const scanExposedModules = async () => {
   }
 };
 
+const buildSsrExposeMap = async () => {
+  if (scannedSsrExposeMap) {
+    return;
+  }
+  scannedSsrExposeMap = true;
+
+  const moduleMap = __webpack_require__.initializeExposesData?.moduleMap;
+  const manifest = isObject(__webpack_require__.rscM)
+    ? (__webpack_require__.rscM as ManifestLike)
+    : undefined;
+  const clientManifest = isObject(manifest?.clientManifest)
+    ? (manifest!.clientManifest as Record<string, ManifestExport>)
+    : undefined;
+  const serverConsumerModuleMap = isObject(manifest?.serverConsumerModuleMap)
+    ? (manifest!.serverConsumerModuleMap as Record<string, ManifestNode>)
+    : undefined;
+
+  if (!isObject(moduleMap) || !clientManifest || !serverConsumerModuleMap) {
+    return;
+  }
+
+  for (const [exposeName, getFactory] of Object.entries(moduleMap)) {
+    if (
+      exposeName === BRIDGE_EXPOSE_KEY ||
+      exposeName.startsWith(RSC_SSR_EXPOSE_PREFIX) ||
+      typeof getFactory !== 'function'
+    ) {
+      continue;
+    }
+    const hiddenSsrExpose = toSsrExposeKey(exposeName);
+    if (
+      !hiddenSsrExpose ||
+      !Object.prototype.hasOwnProperty.call(moduleMap, hiddenSsrExpose)
+    ) {
+      continue;
+    }
+
+    try {
+      const exportsValue = await resolveFactoryExports(getFactory);
+      const referenceIds: string[] = [];
+      collectClientReferenceIdsFromExports(exportsValue, referenceIds);
+      if (isObject(exportsValue) && isObject(exportsValue['default'])) {
+        collectClientReferenceIdsFromExports(
+          exportsValue['default'],
+          referenceIds,
+        );
+      }
+      debugLog('buildSsrExposeMap:refs', {
+        exposeName,
+        hiddenSsrExpose,
+        referenceIds,
+      });
+
+      for (const referenceId of referenceIds) {
+        const clientEntry = resolveClientManifestEntry(
+          clientManifest,
+          referenceId,
+        );
+        if (!clientEntry || clientEntry.id == null) {
+          debugLog('buildSsrExposeMap:missingClientEntry', {
+            exposeName,
+            referenceId,
+          });
+          continue;
+        }
+        const consumerNode = serverConsumerModuleMap[String(clientEntry.id)];
+        if (!isObject(consumerNode)) {
+          debugLog('buildSsrExposeMap:missingConsumerNode', {
+            exposeName,
+            referenceId,
+            clientEntryId: String(clientEntry.id),
+          });
+          continue;
+        }
+        const consumerTarget = (consumerNode as ManifestNode)['*'];
+        if (!isObject(consumerTarget) || consumerTarget.id == null) {
+          debugLog('buildSsrExposeMap:missingConsumerTarget', {
+            exposeName,
+            referenceId,
+            clientEntryId: String(clientEntry.id),
+            consumerNodeKeys: Object.keys(consumerNode as ManifestNode),
+          });
+          continue;
+        }
+        const serverModuleId = String(consumerTarget.id);
+        if (
+          !Object.prototype.hasOwnProperty.call(
+            ssrExposeByServerModuleId,
+            serverModuleId,
+          )
+        ) {
+          ssrExposeByServerModuleId[serverModuleId] = hiddenSsrExpose;
+          debugLog('buildSsrExposeMap:set', {
+            exposeName,
+            serverModuleId,
+            hiddenSsrExpose,
+          });
+        }
+      }
+    } catch {
+      debugLog('buildSsrExposeMap:exposeLoadError', {
+        exposeName,
+        hiddenSsrExpose,
+      });
+    }
+  }
+};
+
 export async function getManifest(): Promise<ManifestLike> {
   await scanExposedModules();
   const manifest = isObject(__webpack_require__.rscM)
@@ -159,4 +388,67 @@ export async function executeAction(actionId: string, args: unknown[]) {
     );
   }
   return action(...(Array.isArray(args) ? args : []));
+}
+
+export async function preloadSSRModule(moduleId: string) {
+  const normalizedModuleId = String(moduleId);
+  if (
+    Object.prototype.hasOwnProperty.call(ssrModuleCache, normalizedModuleId)
+  ) {
+    return ssrModuleCache[normalizedModuleId];
+  }
+
+  await scanExposedModules();
+  await buildSsrExposeMap();
+  await ensureShareScopesForModuleId(normalizedModuleId);
+
+  const shareScopeMap = (__webpack_require__ as unknown as { S?: any }).S;
+  const ssrReact = shareScopeMap?.ssr?.react;
+  debugLog('preloadSSRModule:shareState', {
+    moduleId: normalizedModuleId,
+    shareScopeKeys: shareScopeMap ? Object.keys(shareScopeMap) : [],
+    ssrReactVersions: isObject(ssrReact) ? Object.keys(ssrReact) : [],
+  });
+
+  const moduleMap = __webpack_require__.initializeExposesData?.moduleMap;
+  const hiddenSsrExpose = ssrExposeByServerModuleId[normalizedModuleId];
+  debugLog('preloadSSRModule:hiddenExpose', {
+    moduleId: normalizedModuleId,
+    hiddenSsrExpose: hiddenSsrExpose || '',
+    hasHiddenExposeFactory:
+      isObject(moduleMap) &&
+      typeof hiddenSsrExpose === 'string' &&
+      typeof moduleMap[hiddenSsrExpose] === 'function',
+  });
+  if (
+    isObject(moduleMap) &&
+    typeof hiddenSsrExpose === 'string' &&
+    typeof moduleMap[hiddenSsrExpose] === 'function'
+  ) {
+    const moduleExports = await resolveFactoryExports(
+      moduleMap[hiddenSsrExpose]!,
+    );
+    ssrModuleCache[normalizedModuleId] = moduleExports;
+    return moduleExports;
+  }
+
+  const required = __webpack_require__(normalizedModuleId);
+  const resolved =
+    required && typeof (required as Promise<unknown>).then === 'function'
+      ? await (required as Promise<unknown>)
+      : required;
+  ssrModuleCache[normalizedModuleId] = resolved;
+  return resolved;
+}
+
+export function getSSRModule(moduleId: string) {
+  const normalizedModuleId = String(moduleId);
+  if (
+    Object.prototype.hasOwnProperty.call(ssrModuleCache, normalizedModuleId)
+  ) {
+    return ssrModuleCache[normalizedModuleId];
+  }
+  throw new Error(
+    `[rsc-bridge-expose] SSR module "${normalizedModuleId}" was requested before preload.`,
+  );
 }
