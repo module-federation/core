@@ -45,8 +45,10 @@ type WebpackRequireRuntime = {
   c?: Record<string, { exports?: unknown }>;
   rscM?: ManifestLike;
   remotesLoadingData?: {
+    chunkMapping?: Record<string, Array<string | number>>;
     moduleIdToRemoteDataMapping?: Record<string, RemoteDataItem>;
   };
+  u?: (chunkId: string | number) => string;
   federation?: {
     instance?: {
       loadRemote?: (request: string) => Promise<BridgeModule>;
@@ -511,6 +513,47 @@ const rscBridgeRuntimePlugin = () => {
   const aliasMergePromises: Partial<Record<string, Promise<void>>> = {};
   const mergedRemoteAliases = new Set<string>();
   const actionMap: ActionMapRecord = Object.create(null);
+  const hostRemoteChunkPairsCache: Record<
+    string,
+    Array<string | number> | null
+  > = Object.create(null);
+
+  const getHostChunkPairsForModule = (moduleId: string) => {
+    const cached = hostRemoteChunkPairsCache[moduleId];
+    if (cached !== undefined) {
+      return cached || undefined;
+    }
+
+    const chunkMapping = __webpack_require__.remotesLoadingData?.chunkMapping;
+    if (!isObject(chunkMapping)) {
+      hostRemoteChunkPairsCache[moduleId] = null;
+      return undefined;
+    }
+
+    const chunkPairs: Array<string | number> = [];
+    for (const [chunkId, moduleIds] of Object.entries(chunkMapping)) {
+      if (!Array.isArray(moduleIds)) {
+        continue;
+      }
+      if (!moduleIds.some((candidate) => String(candidate) == moduleId)) {
+        continue;
+      }
+      chunkPairs.push(chunkId);
+      if (typeof __webpack_require__.u === 'function') {
+        chunkPairs.push(__webpack_require__.u(chunkId));
+      } else {
+        chunkPairs.push(`${chunkId}.js`);
+      }
+    }
+
+    if (chunkPairs.length === 0) {
+      hostRemoteChunkPairsCache[moduleId] = null;
+      return undefined;
+    }
+
+    hostRemoteChunkPairsCache[moduleId] = chunkPairs;
+    return chunkPairs;
+  };
 
   const ensureBridge = async (alias: string, args?: any) => {
     const existingBridgePromise = bridgePromises[alias];
@@ -605,6 +648,14 @@ const rscBridgeRuntimePlugin = () => {
 
         if (isObject(nextValue)) {
           nextValue.id = finalClientModuleId;
+          if (resolvedClientModuleId) {
+            const hostChunkPairs = getHostChunkPairsForModule(
+              resolvedClientModuleId,
+            );
+            if (hostChunkPairs) {
+              nextValue.chunks = hostChunkPairs;
+            }
+          }
         }
 
         assertNoConflict(
