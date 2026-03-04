@@ -666,6 +666,17 @@ const rscBridgeRuntimePlugin = () => {
       );
       (hostManifest.serverManifest as Record<string, any>)[prefixedActionId] =
         hostActionEntry;
+
+      assertNoConflict(
+        hostManifest.serverManifest as Record<string, any>,
+        rawActionId,
+        hostActionEntry,
+        alias,
+        'serverManifest',
+      );
+      (hostManifest.serverManifest as Record<string, any>)[rawActionId] =
+        hostActionEntry;
+
       actionMap[prefixedActionId] = { alias, rawActionId };
       registerActionRemap(rawActionId, prefixedActionId);
     }
