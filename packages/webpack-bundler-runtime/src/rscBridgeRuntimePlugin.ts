@@ -791,6 +791,8 @@ const rscBridgeRuntimePlugin = () => {
       : {};
     const resolvedClientIdsByRawId: Record<string, string> =
       Object.create(null);
+    const resolvedClientIdKindByRawId: Record<string, 'wrapper' | 'fallback'> =
+      Object.create(null);
 
     if (isObject(remoteManifest.clientManifest)) {
       for (const [rawClientManifestKey, value] of Object.entries(
@@ -823,8 +825,12 @@ const rscBridgeRuntimePlugin = () => {
           ? getNamespacedModuleId(alias, rawRemoteClientModuleId)
           : getNamespacedModuleId(alias, rawClientManifestKey);
 
+        const nextClientIdKind = resolvedClientModuleId
+          ? 'wrapper'
+          : 'fallback';
         let finalClientModuleId =
           resolvedClientModuleId || fallbackClientModuleId;
+        let finalClientIdKind: 'wrapper' | 'fallback' = nextClientIdKind;
 
         if (isObject(nextValue)) {
           nextValue.id = finalClientModuleId;
@@ -862,55 +868,61 @@ const rscBridgeRuntimePlugin = () => {
         }
         const existingResolvedId =
           resolvedClientIdsByRawId[rawRemoteClientModuleId];
+        const existingResolvedKind =
+          resolvedClientIdKindByRawId[rawRemoteClientModuleId];
         if (existingResolvedId && existingResolvedId !== finalClientModuleId) {
-          const existingIsWrapper = existingResolvedId.startsWith(
-            `webpack/container/remote/${alias}/`,
-          );
-          const nextIsWrapper = finalClientModuleId.startsWith(
-            `webpack/container/remote/${alias}/`,
-          );
-
-          if (existingIsWrapper || !nextIsWrapper) {
+          // Resolve duplicate raw ids deterministically without relying on
+          // module id string patterns:
+          // 1) keep previously resolved wrapper ids
+          // 2) otherwise keep existing fallback over a new fallback
+          // 3) upgrade existing fallback to wrapper when one is discovered
+          if (
+            existingResolvedKind === 'wrapper' ||
+            finalClientIdKind === 'fallback'
+          ) {
             finalClientModuleId = existingResolvedId;
+            finalClientIdKind = existingResolvedKind || 'fallback';
             if (isObject(nextValue)) {
               nextValue.id = finalClientModuleId;
-              nextValue.chunks = [];
+              if (finalClientIdKind === 'wrapper') {
+                nextValue.chunks = [];
+              }
             }
-          } else {
-            resolvedClientIdsByRawId[rawRemoteClientModuleId] =
-              finalClientModuleId;
           }
-        } else {
-          resolvedClientIdsByRawId[rawRemoteClientModuleId] =
-            finalClientModuleId;
         }
+        resolvedClientIdsByRawId[rawRemoteClientModuleId] = finalClientModuleId;
+        resolvedClientIdKindByRawId[rawRemoteClientModuleId] =
+          finalClientIdKind;
         const prefixedRawRemoteClientModuleId =
           rawRemoteClientModuleId.startsWith(SSR_LAYER_PREFIX)
             ? rawRemoteClientModuleId
             : `${SSR_LAYER_PREFIX}${rawRemoteClientModuleId}`;
         const existingPrefixedResolvedId =
           resolvedClientIdsByRawId[prefixedRawRemoteClientModuleId];
+        const existingPrefixedResolvedKind =
+          resolvedClientIdKindByRawId[prefixedRawRemoteClientModuleId];
         if (
           existingPrefixedResolvedId &&
           existingPrefixedResolvedId !== finalClientModuleId
         ) {
-          const existingPrefixedIsWrapper =
-            existingPrefixedResolvedId.startsWith(
-              `webpack/container/remote/${alias}/`,
-            );
-          const nextPrefixedIsWrapper = finalClientModuleId.startsWith(
-            `webpack/container/remote/${alias}/`,
-          );
-          if (existingPrefixedIsWrapper || !nextPrefixedIsWrapper) {
+          if (
+            existingPrefixedResolvedKind === 'wrapper' ||
+            finalClientIdKind === 'fallback'
+          ) {
             finalClientModuleId = existingPrefixedResolvedId;
+            finalClientIdKind = existingPrefixedResolvedKind || 'fallback';
             if (isObject(nextValue)) {
               nextValue.id = finalClientModuleId;
-              nextValue.chunks = [];
+              if (finalClientIdKind === 'wrapper') {
+                nextValue.chunks = [];
+              }
             }
           }
         }
         resolvedClientIdsByRawId[prefixedRawRemoteClientModuleId] =
           finalClientModuleId;
+        resolvedClientIdKindByRawId[prefixedRawRemoteClientModuleId] =
+          finalClientIdKind;
       }
     }
 
