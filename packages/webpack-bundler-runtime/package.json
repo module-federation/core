@@ -50,6 +50,26 @@
       },
       "default": "./dist/constant.js"
     },
+    "./rsc-bridge-runtime-plugin": {
+      "types": "./dist/rsc-bridge-runtime-plugin.d.ts",
+      "import": {
+        "default": "./dist/rsc-bridge-runtime-plugin.js"
+      },
+      "require": {
+        "default": "./dist/rsc-bridge-runtime-plugin.cjs"
+      },
+      "default": "./dist/rsc-bridge-runtime-plugin.js"
+    },
+    "./rsc-bridge-expose": {
+      "types": "./dist/rsc-bridge-expose.d.ts",
+      "import": {
+        "default": "./dist/rsc-bridge-expose.js"
+      },
+      "require": {
+        "default": "./dist/rsc-bridge-expose.cjs"
+      },
+      "default": "./dist/rsc-bridge-expose.js"
+    },
     "./*": "./*"
   },
   "typesVersions": {
@@ -59,6 +79,12 @@
       ],
       "constant": [
         "./dist/constant.d.ts"
+      ],
+      "rsc-bridge-runtime-plugin": [
+        "./dist/rsc-bridge-runtime-plugin.d.ts"
+      ],
+      "rsc-bridge-expose": [
+        "./dist/rsc-bridge-expose.d.ts"
       ]
     }
   }
