@@ -446,6 +446,25 @@ const installActionProxyModule = ({
   __webpack_require__.m![ACTION_PROXY_MODULE_ID] = (module: {
     exports: any;
   }) => {
+    const getActionFn = (property: string) => {
+      const actionRef = actionMap[property];
+      if (!actionRef) {
+        return undefined;
+      }
+      return async (...args: unknown[]) => {
+        const bridge = await ensureBridge(actionRef.alias);
+        if (typeof bridge.executeAction !== 'function') {
+          throw new Error(
+            `[mf:rsc-bridge] Missing executeAction bridge method for remote "${actionRef.alias}"`,
+          );
+        }
+        return bridge.executeAction(
+          actionRef.rawActionId,
+          Array.isArray(args) ? args : [],
+        );
+      };
+    };
+
     module.exports = new Proxy(
       {},
       {
@@ -456,22 +475,31 @@ const installActionProxyModule = ({
           if (typeof property !== 'string') {
             return undefined;
           }
-          const actionRef = actionMap[property];
-          if (!actionRef) {
+          return getActionFn(property);
+        },
+        has(_target, property) {
+          return (
+            typeof property === 'string' &&
+            Object.prototype.hasOwnProperty.call(actionMap, property)
+          );
+        },
+        getOwnPropertyDescriptor(_target, property) {
+          if (
+            typeof property !== 'string' ||
+            !Object.prototype.hasOwnProperty.call(actionMap, property)
+          ) {
             return undefined;
           }
-          return async (...args: unknown[]) => {
-            const bridge = await ensureBridge(actionRef.alias);
-            if (typeof bridge.executeAction !== 'function') {
-              throw new Error(
-                `[mf:rsc-bridge] Missing executeAction bridge method for remote "${actionRef.alias}"`,
-              );
-            }
-            return bridge.executeAction(
-              actionRef.rawActionId,
-              Array.isArray(args) ? args : [],
-            );
+          return {
+            configurable: true,
+            enumerable: true,
+            get() {
+              return getActionFn(property);
+            },
           };
+        },
+        ownKeys() {
+          return Object.keys(actionMap);
         },
       },
     );
