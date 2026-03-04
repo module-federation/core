@@ -197,6 +197,27 @@ const registerActionRemap = (rawActionId: string, prefixedActionId: string) => {
   );
 };
 
+const registerActionProxyExport = (
+  actionMap: ActionMapRecord,
+  actionExportName: string,
+  actionRef: { alias: string; rawActionId: string },
+) => {
+  const existing = actionMap[actionExportName];
+  if (!existing) {
+    actionMap[actionExportName] = actionRef;
+    return;
+  }
+  if (
+    existing.alias === actionRef.alias &&
+    existing.rawActionId === actionRef.rawActionId
+  ) {
+    return;
+  }
+  throw new Error(
+    `[mf:rsc-bridge] Conflicting action export "${actionExportName}" mapped to multiple remotes`,
+  );
+};
+
 const remapConsumerNode = (
   alias: string,
   value: unknown,
@@ -648,7 +669,7 @@ const rscBridgeRuntimePlugin = () => {
       remoteManifest.serverManifest,
     )) {
       const prefixedActionId = `${ACTION_PREFIX}${alias}:${rawActionId}`;
-      const hostActionEntry = {
+      const prefixedHostActionEntry = {
         id: proxyModuleId,
         name: prefixedActionId,
         chunks: [],
@@ -660,24 +681,36 @@ const rscBridgeRuntimePlugin = () => {
       assertNoConflict(
         hostManifest.serverManifest as Record<string, any>,
         prefixedActionId,
-        hostActionEntry,
+        prefixedHostActionEntry,
         alias,
         'serverManifest',
       );
       (hostManifest.serverManifest as Record<string, any>)[prefixedActionId] =
-        hostActionEntry;
+        prefixedHostActionEntry;
+
+      const rawHostActionEntry = {
+        ...prefixedHostActionEntry,
+        name: rawActionId,
+      };
 
       assertNoConflict(
         hostManifest.serverManifest as Record<string, any>,
         rawActionId,
-        hostActionEntry,
+        rawHostActionEntry,
         alias,
         'serverManifest',
       );
       (hostManifest.serverManifest as Record<string, any>)[rawActionId] =
-        hostActionEntry;
+        rawHostActionEntry;
 
-      actionMap[prefixedActionId] = { alias, rawActionId };
+      registerActionProxyExport(actionMap, prefixedActionId, {
+        alias,
+        rawActionId,
+      });
+      registerActionProxyExport(actionMap, rawActionId, {
+        alias,
+        rawActionId,
+      });
       registerActionRemap(rawActionId, prefixedActionId);
     }
   };
