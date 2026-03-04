@@ -6,7 +6,7 @@ import type { GlobalModuleInfo } from '@module-federation/sdk';
 import { I18nextProvider, useTranslation } from 'react-i18next';
 
 import './init';
-import { IconRefresh } from '@arco-design/web-react/icon';
+import { IconRefresh, IconBug, IconCheck } from '@arco-design/web-react/icon';
 import ProxyLayout from './component/Layout';
 import Dependency from './component/DependencyGraph';
 import ModuleInfo from './component/ModuleInfo';
@@ -20,7 +20,10 @@ import {
   separateType,
   syncActiveTab,
 } from './utils';
-import { MESSAGE_ACTIVE_TAB_CHANGED } from './utils/chrome/messages';
+import {
+  MESSAGE_ACTIVE_TAB_CHANGED,
+  MESSAGE_MF_DIAGNOSTIC,
+} from './utils/chrome/messages';
 import { useDevtoolsTheme, DevtoolsTheme } from './hooks/useDevtoolsTheme';
 import i18n from './i18n';
 
@@ -136,6 +139,8 @@ const InnerApp = (props: RootComponentProps) => {
   const [activePanel, setActivePanel] = useState<TabKey>('proxy');
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [latestDiagnostic, setLatestDiagnostic] = useState<object | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const panelSyncReadyRef = useRef(false);
 
@@ -263,11 +268,26 @@ const InnerApp = (props: RootComponentProps) => {
     };
 
     const onMessage = (
-      message: { type?: string; tabId?: number },
+      message: {
+        type?: string;
+        tabId?: number;
+        diagnostic?: object | null;
+        data?: { mfDiagnostic?: object };
+      },
       _sender: chrome.runtime.MessageSender,
       _sendResponse: (response?: any) => void,
     ) => {
+      if (message?.type === MESSAGE_MF_DIAGNOSTIC) {
+        if (message.data?.mfDiagnostic) {
+          setLatestDiagnostic(message.data.mfDiagnostic);
+        }
+      }
       if (message?.type === MESSAGE_ACTIVE_TAB_CHANGED) {
+        if (message.diagnostic) {
+          setLatestDiagnostic(message.diagnostic);
+        } else {
+          setLatestDiagnostic(null);
+        }
         updateActiveTab(message.tabId);
       }
     };
@@ -329,6 +349,15 @@ const InnerApp = (props: RootComponentProps) => {
         );
       }
     }
+  };
+
+  const handleCopyDiagnostic = async () => {
+    if (!latestDiagnostic) return;
+    await navigator.clipboard.writeText(
+      JSON.stringify(latestDiagnostic, null, 2),
+    );
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const resetModuleInfo = useCallback(() => {
@@ -455,6 +484,21 @@ const InnerApp = (props: RootComponentProps) => {
                 theme={effectiveTheme}
                 onToggle={handleThemeToggle}
               />
+              <Tooltip
+                content={
+                  latestDiagnostic
+                    ? t('app.header.diagnostic.tooltip.active')
+                    : t('app.header.diagnostic.tooltip.empty')
+                }
+              >
+                <Button
+                  size="default"
+                  disabled={!latestDiagnostic}
+                  icon={copied ? <IconCheck /> : <IconBug />}
+                  onClick={handleCopyDiagnostic}
+                  className={`${btnStyles.themeToggle} ${latestDiagnostic ? btnStyles.diagnosticActive : ''}`}
+                />
+              </Tooltip>
               <Tooltip content={t('app.header.refresh.tooltip')}>
                 <Button
                   size="default"

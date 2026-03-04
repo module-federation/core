@@ -109,10 +109,7 @@ async function main(ctx, moduleName, explicitUrl) {
     ? extractManifestInfo(manifestRes.data)
     : null;
 
-  const ssrManifestRes = await fetchJson(
-    `${publicPath}mf-manifest.server.json`,
-  );
-  const hasSsr = ssrManifestRes.ok;
+  const hasSsr = manifestRes.ssrRemoteEntry;
 
   const result = {
     moduleName,

@@ -25,9 +25,11 @@ Find config files in the following priority order (`.ts` / `.mts` take precedenc
 | Priority | Filename |
 |---|---|
 | 1 | `module-federation.config.{ts,mts,js,mjs,cjs}` |
-| 2 | `rspack.config.{ts,mts,js,mjs,cjs}` |
-| 3 | `rsbuild.config.{ts,mts,js,mjs,cjs}` |
-| 4 | `webpack.config.{ts,js}` |
+| 2 | `rsbuild.config.{ts,mts,js,mjs,cjs}` |
+| 3 | `rspack.config.{ts,mts,js,mjs,cjs}` |
+| 4 | `modern.config.{ts,mts,js,mjs,cjs}` |
+| 5 | `next.config.{ts,mts,js,mjs,cjs}` |
+| 6 | `webpack.config.{ts,js}` |
 
 Read the first matched file and extract the `remotes`, `exposes`, and `shared` fields. Determine the bundler from the filename (`rspack` / `rsbuild` / `webpack`).
 
