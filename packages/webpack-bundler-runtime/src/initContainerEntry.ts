@@ -85,8 +85,35 @@ export function initContainerEntry(
   }
 
   if (!Array.isArray(shareScopeKey)) {
+    const key = shareScopeKey || 'default';
+    if (Array.isArray(hostShareScopeKeys)) {
+      const uniqueHostKeys = Array.from(new Set(hostShareScopeKeys));
+      const additionalHostKeys = uniqueHostKeys.filter(
+        (hostKey) => hostKey !== key,
+      );
+      if (additionalHostKeys.length > 0) {
+        // Initialize host-provided scopes as well so layered shares (ssr/rsc)
+        // are available even when the remote container's declared scope is "default".
+        // @ts-ignore
+        const primaryResult = webpackRequire.I(key, initScope);
+        // @ts-ignore
+        const additionalResults = additionalHostKeys.map((hostKey) =>
+          webpackRequire.I(hostKey, initScope),
+        );
+        const asyncResults = [primaryResult, ...additionalResults].filter(
+          (result): result is Promise<unknown> =>
+            Boolean(
+              result && typeof (result as Promise<unknown>).then === 'function',
+            ),
+        );
+        if (asyncResults.length > 0) {
+          return Promise.all(asyncResults).then(() => primaryResult);
+        }
+        return primaryResult;
+      }
+    }
     // @ts-ignore
-    return webpackRequire.I(shareScopeKey || 'default', initScope);
+    return webpackRequire.I(key, initScope);
   }
 
   var proxyInitializeSharing = Boolean(
