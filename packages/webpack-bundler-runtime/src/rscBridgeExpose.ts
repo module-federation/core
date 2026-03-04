@@ -47,6 +47,7 @@ const debugLog = (message: string, data?: Record<string, unknown>) => {
 const CLIENT_REFERENCE_SYMBOL = Symbol.for('react.client.reference');
 const BRIDGE_EXPOSE_KEY = './__rspack_rsc_bridge__';
 const RSC_SSR_EXPOSE_PREFIX = './__rspack_rsc_ssr__/';
+const SSR_LAYER_PREFIX = '(server-side-rendering)/';
 
 const actionReferenceCache: Record<string, (...args: unknown[]) => unknown> =
   Object.create(null);
@@ -133,6 +134,32 @@ const toSsrExposeKey = (exposeName: string) => {
     ? exposeName.slice(2)
     : exposeName;
   return `${RSC_SSR_EXPOSE_PREFIX}${normalized}`;
+};
+
+const stripSsrLayerPrefix = (moduleId: string) =>
+  moduleId.startsWith(SSR_LAYER_PREFIX)
+    ? moduleId.slice(SSR_LAYER_PREFIX.length)
+    : moduleId;
+
+const resolveHiddenSsrExposeFromClientExposeMap = (
+  moduleId: string,
+  moduleMap?: Record<string, () => Promise<() => unknown> | (() => unknown)>,
+) => {
+  if (!isObject(moduleMap)) {
+    return '';
+  }
+  const moduleIdCandidates = [moduleId, stripSsrLayerPrefix(moduleId)];
+  for (const moduleIdCandidate of moduleIdCandidates) {
+    const exposeName = clientExposeMap[moduleIdCandidate];
+    if (typeof exposeName !== 'string' || !exposeName) {
+      continue;
+    }
+    const hiddenExpose = toSsrExposeKey(exposeName);
+    if (hiddenExpose && typeof moduleMap[hiddenExpose] === 'function') {
+      return hiddenExpose;
+    }
+  }
+  return '';
 };
 
 const resolveClientManifestEntry = (
@@ -411,7 +438,9 @@ export async function preloadSSRModule(moduleId: string) {
   });
 
   const moduleMap = __webpack_require__.initializeExposesData?.moduleMap;
-  const hiddenSsrExpose = ssrExposeByServerModuleId[normalizedModuleId];
+  const hiddenSsrExpose =
+    ssrExposeByServerModuleId[normalizedModuleId] ||
+    resolveHiddenSsrExposeFromClientExposeMap(normalizedModuleId, moduleMap);
   debugLog('preloadSSRModule:hiddenExpose', {
     moduleId: normalizedModuleId,
     hiddenSsrExpose: hiddenSsrExpose || '',
