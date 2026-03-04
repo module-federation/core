@@ -1,21 +1,5 @@
 import { InitContainerEntryOptions, WebpackRequire } from './types';
 
-const shouldDebug =
-  typeof process !== 'undefined' && Boolean(process.env?.RSC_MF_DEBUG);
-
-const debugLog = (message: string, data?: Record<string, unknown>) => {
-  if (!shouldDebug) {
-    return;
-  }
-  if (data) {
-    // eslint-disable-next-line no-console
-    console.error('[mf:initContainerEntry]', message, data);
-    return;
-  }
-  // eslint-disable-next-line no-console
-  console.error('[mf:initContainerEntry]', message);
-};
-
 export function initContainerEntry(
   options: InitContainerEntryOptions,
 ): WebpackRequire['I'] | void {
@@ -44,86 +28,80 @@ export function initContainerEntry(
 
   const hostShareScopeKeys = remoteEntryInitOptions?.shareScopeKeys;
   const hostShareScopeMap = remoteEntryInitOptions?.shareScopeMap;
-  const normalizedHostShareScopeKeys = Array.isArray(hostShareScopeKeys)
-    ? hostShareScopeKeys
-    : typeof hostShareScopeKeys === 'string' && hostShareScopeKeys
-      ? [hostShareScopeKeys]
-      : [];
-  const normalizedContainerShareScopeKeys = Array.isArray(shareScopeKey)
-    ? shareScopeKey
-    : [shareScopeKey || 'default'];
 
-  const shareScopeKeysForInit = Array.from(
-    new Set(
-      normalizedHostShareScopeKeys.length
-        ? normalizedHostShareScopeKeys
-        : normalizedContainerShareScopeKeys,
-    ),
-  );
+  // host: 'default' remote: 'default'  remote['default'] = hostShareScopeMap['default']
+  // host: ['default', 'scope1'] remote: 'default'  remote['default'] = hostShareScopeMap['default']; remote['scope1'] = hostShareScopeMap['scop1']
+  // host: 'default' remote: ['default','scope1']  remote['default'] = hostShareScopeMap['default']; remote['scope1'] = hostShareScopeMap['scope1'] = {}
+  // host: ['scope1','default'] remote: ['scope1','scope2'] => remote['scope1'] = hostShareScopeMap['scope1']; remote['scope2'] = hostShareScopeMap['scope2'] = {};
+  if (!shareScopeKey || typeof shareScopeKey === 'string') {
+    const key = shareScopeKey || 'default';
+    if (Array.isArray(hostShareScopeKeys)) {
+      // const sc = hostShareScopeMap![key];
+      // if (!sc) {
+      //   throw new Error('shareScopeKey is not exist in hostShareScopeMap');
+      // }
+      // federationInstance.initShareScopeMap(key, sc, {
+      //   hostShareScopeMap: remoteEntryInitOptions?.shareScopeMap || {},
+      // });
 
-  debugLog('input', {
-    shareScopeKey: Array.isArray(shareScopeKey)
-      ? shareScopeKey.join(',')
-      : shareScopeKey || 'default',
-    hostShareScopeKeys: shareScopeKeysForInit.join(','),
-    hostShareScopeMapKeys: hostShareScopeMap
-      ? Object.keys(hostShareScopeMap).join(',')
-      : '',
-  });
-
-  shareScopeKeysForInit.forEach((scopeKey, index) => {
-    let scopeValue = shareScope;
-    if (hostShareScopeMap) {
-      if (!hostShareScopeMap[scopeKey]) {
-        hostShareScopeMap[scopeKey] = {};
-      }
-      scopeValue = hostShareScopeMap[scopeKey];
-    } else if (index > 0) {
-      scopeValue = {};
+      hostShareScopeKeys.forEach((hostKey) => {
+        if (!hostShareScopeMap![hostKey]) {
+          hostShareScopeMap![hostKey] = {};
+        }
+        const sc = hostShareScopeMap![hostKey];
+        federationInstance.initShareScopeMap(hostKey, sc, {
+          hostShareScopeMap: remoteEntryInitOptions?.shareScopeMap || {},
+        });
+      });
+    } else {
+      federationInstance.initShareScopeMap(key, shareScope, {
+        hostShareScopeMap: remoteEntryInitOptions?.shareScopeMap || {},
+      });
     }
-    federationInstance.initShareScopeMap(scopeKey, scopeValue, {
-      hostShareScopeMap: remoteEntryInitOptions?.shareScopeMap || {},
+  } else {
+    shareScopeKey.forEach((key) => {
+      if (!hostShareScopeKeys || !hostShareScopeMap) {
+        federationInstance.initShareScopeMap(key, shareScope, {
+          hostShareScopeMap: remoteEntryInitOptions?.shareScopeMap || {},
+        });
+        return;
+      }
+
+      if (!hostShareScopeMap[key]) {
+        hostShareScopeMap[key] = {};
+      }
+      const sc = hostShareScopeMap[key];
+      federationInstance.initShareScopeMap(key, sc, {
+        hostShareScopeMap: remoteEntryInitOptions?.shareScopeMap || {},
+      });
     });
-  });
+  }
 
   if (webpackRequire.federation.attachShareScopeMap) {
     webpackRequire.federation.attachShareScopeMap(webpackRequire);
   }
-  const remoteShareScopeMap = (federationInstance as any).shareScopeMap;
-  debugLog('post-initShareScopeMap', {
-    remoteShareScopeMapKeys: remoteShareScopeMap
-      ? Object.keys(remoteShareScopeMap).join(',')
-      : '',
-    sameSsrRef:
-      Boolean(hostShareScopeMap?.ssr) &&
-      remoteShareScopeMap?.ssr === hostShareScopeMap?.ssr,
-    sameRscRef:
-      Boolean(hostShareScopeMap?.rsc) &&
-      remoteShareScopeMap?.rsc === hostShareScopeMap?.rsc,
-    sameDefaultRef:
-      Boolean(hostShareScopeMap?.default) &&
-      remoteShareScopeMap?.default === hostShareScopeMap?.default,
-  });
   if (typeof webpackRequire.federation.prefetch === 'function') {
     webpackRequire.federation.prefetch();
   }
 
-  if (shareScopeKeysForInit.length === 1) {
+  if (!Array.isArray(shareScopeKey)) {
     // @ts-ignore
-    return webpackRequire.I(shareScopeKeysForInit[0], initScope);
+    return webpackRequire.I(shareScopeKey || 'default', initScope);
   }
 
-  const proxyInitializeSharing = Boolean(
+  var proxyInitializeSharing = Boolean(
     webpackRequire.federation.initOptions.shared,
   );
 
   if (proxyInitializeSharing) {
     // @ts-ignore
-    return webpackRequire.I(shareScopeKeysForInit, initScope);
+    return webpackRequire.I(shareScopeKey, initScope);
   }
-
   // @ts-ignore
   return Promise.all(
-    shareScopeKeysForInit.map((key) => webpackRequire.I(key, initScope)),
+    shareScopeKey.map((key) => {
+      // @ts-ignore
+      return webpackRequire.I(key, initScope);
+    }),
   ).then(() => true);
 }
