@@ -823,7 +823,7 @@ const rscBridgeRuntimePlugin = () => {
           ? getNamespacedModuleId(alias, rawRemoteClientModuleId)
           : getNamespacedModuleId(alias, rawClientManifestKey);
 
-        const finalClientModuleId =
+        let finalClientModuleId =
           resolvedClientModuleId || fallbackClientModuleId;
 
         if (isObject(nextValue)) {
@@ -863,11 +863,27 @@ const rscBridgeRuntimePlugin = () => {
         const existingResolvedId =
           resolvedClientIdsByRawId[rawRemoteClientModuleId];
         if (existingResolvedId && existingResolvedId !== finalClientModuleId) {
-          throw new Error(
-            `[mf:rsc-bridge] Conflicting client module resolution for raw id "${rawRemoteClientModuleId}" in remote "${alias}"`,
+          const existingIsWrapper = existingResolvedId.startsWith(
+            `webpack/container/remote/${alias}/`,
           );
+          const nextIsWrapper = finalClientModuleId.startsWith(
+            `webpack/container/remote/${alias}/`,
+          );
+
+          if (existingIsWrapper || !nextIsWrapper) {
+            finalClientModuleId = existingResolvedId;
+            if (isObject(nextValue)) {
+              nextValue.id = finalClientModuleId;
+              nextValue.chunks = [];
+            }
+          } else {
+            resolvedClientIdsByRawId[rawRemoteClientModuleId] =
+              finalClientModuleId;
+          }
+        } else {
+          resolvedClientIdsByRawId[rawRemoteClientModuleId] =
+            finalClientModuleId;
         }
-        resolvedClientIdsByRawId[rawRemoteClientModuleId] = finalClientModuleId;
         const prefixedRawRemoteClientModuleId =
           rawRemoteClientModuleId.startsWith(SSR_LAYER_PREFIX)
             ? rawRemoteClientModuleId
@@ -878,9 +894,20 @@ const rscBridgeRuntimePlugin = () => {
           existingPrefixedResolvedId &&
           existingPrefixedResolvedId !== finalClientModuleId
         ) {
-          throw new Error(
-            `[mf:rsc-bridge] Conflicting client module resolution for raw id "${prefixedRawRemoteClientModuleId}" in remote "${alias}"`,
+          const existingPrefixedIsWrapper =
+            existingPrefixedResolvedId.startsWith(
+              `webpack/container/remote/${alias}/`,
+            );
+          const nextPrefixedIsWrapper = finalClientModuleId.startsWith(
+            `webpack/container/remote/${alias}/`,
           );
+          if (existingPrefixedIsWrapper || !nextPrefixedIsWrapper) {
+            finalClientModuleId = existingPrefixedResolvedId;
+            if (isObject(nextValue)) {
+              nextValue.id = finalClientModuleId;
+              nextValue.chunks = [];
+            }
+          }
         }
         resolvedClientIdsByRawId[prefixedRawRemoteClientModuleId] =
           finalClientModuleId;
