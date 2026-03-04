@@ -28,6 +28,12 @@ export function initContainerEntry(
 
   const hostShareScopeKeys = remoteEntryInitOptions?.shareScopeKeys;
   const hostShareScopeMap = remoteEntryInitOptions?.shareScopeMap;
+  const hasHostShareScopeArray = Array.isArray(hostShareScopeKeys);
+  const normalizedHostShareScopeKeys = Array.isArray(hostShareScopeKeys)
+    ? hostShareScopeKeys
+    : typeof hostShareScopeKeys === 'string' && hostShareScopeKeys
+      ? [hostShareScopeKeys]
+      : [];
 
   // host: 'default' remote: 'default'  remote['default'] = hostShareScopeMap['default']
   // host: ['default', 'scope1'] remote: 'default'  remote['default'] = hostShareScopeMap['default']; remote['scope1'] = hostShareScopeMap['scop1']
@@ -35,7 +41,7 @@ export function initContainerEntry(
   // host: ['scope1','default'] remote: ['scope1','scope2'] => remote['scope1'] = hostShareScopeMap['scope1']; remote['scope2'] = hostShareScopeMap['scope2'] = {};
   if (!shareScopeKey || typeof shareScopeKey === 'string') {
     const key = shareScopeKey || 'default';
-    if (Array.isArray(hostShareScopeKeys)) {
+    if (normalizedHostShareScopeKeys.length > 0) {
       // const sc = hostShareScopeMap![key];
       // if (!sc) {
       //   throw new Error('shareScopeKey is not exist in hostShareScopeMap');
@@ -43,12 +49,29 @@ export function initContainerEntry(
       // federationInstance.initShareScopeMap(key, sc, {
       //   hostShareScopeMap: remoteEntryInitOptions?.shareScopeMap || {},
       // });
+      const shareScopeKeysToInit = Array.from(
+        new Set(
+          hasHostShareScopeArray
+            ? normalizedHostShareScopeKeys
+            : normalizedHostShareScopeKeys.includes(key)
+              ? normalizedHostShareScopeKeys
+              : [key, ...normalizedHostShareScopeKeys],
+        ),
+      );
 
-      hostShareScopeKeys.forEach((hostKey) => {
-        if (!hostShareScopeMap![hostKey]) {
-          hostShareScopeMap![hostKey] = {};
+      shareScopeKeysToInit.forEach((hostKey, index) => {
+        if (!hostShareScopeMap?.[hostKey]) {
+          if (hostShareScopeMap) {
+            hostShareScopeMap[hostKey] = hasHostShareScopeArray
+              ? {}
+              : hostKey === key || index === 0
+                ? shareScope
+                : {};
+          }
         }
-        const sc = hostShareScopeMap![hostKey];
+        const sc =
+          hostShareScopeMap?.[hostKey] ||
+          (hasHostShareScopeArray ? {} : shareScope);
         federationInstance.initShareScopeMap(hostKey, sc, {
           hostShareScopeMap: remoteEntryInitOptions?.shareScopeMap || {},
         });
@@ -86,8 +109,8 @@ export function initContainerEntry(
 
   if (!Array.isArray(shareScopeKey)) {
     const key = shareScopeKey || 'default';
-    if (Array.isArray(hostShareScopeKeys)) {
-      const uniqueHostKeys = Array.from(new Set(hostShareScopeKeys));
+    if (normalizedHostShareScopeKeys.length > 0) {
+      const uniqueHostKeys = Array.from(new Set(normalizedHostShareScopeKeys));
       const additionalHostKeys = uniqueHostKeys.filter(
         (hostKey) => hostKey !== key,
       );
