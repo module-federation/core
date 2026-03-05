@@ -66,7 +66,7 @@ const exposes = {
   // [`./shared-tree-shaking-overview-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/performance/shared-treeshaking.mdx`,
   [`./node-${LANGUAGE}`]: `./docs/${LANGUAGE}/blog/node.mdx`,
   // ai-skills
-  [`./ai-skills-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/ai-skills/index.mdx`,
+  // [`./ai-skills-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/ai-skills/index.mdx`,
 };
 
 export default createModuleFederationConfig({

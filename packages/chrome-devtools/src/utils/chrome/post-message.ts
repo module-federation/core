@@ -47,7 +47,3 @@ if (!window?.__FEDERATION__.__GLOBAL_PLUGIN__) {
 }
 
 window.__FEDERATION__.__GLOBAL_PLUGIN__?.push(getModuleInfo());
-
-window.addEventListener('mf:diagnostic', ((e: CustomEvent) => {
-  window.postMessage({ mfDiagnostic: e.detail }, '*');
-}) as EventListener);

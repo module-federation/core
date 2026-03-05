@@ -22,13 +22,6 @@ const resources = {
             label: 'Refresh',
             tooltip: 'Resync Federation information for the current page.',
           },
-          diagnostic: {
-            tooltip: {
-              active:
-                'Click to copy error info — paste it to AI Agent for diagnosis.',
-              empty: 'No runtime errors captured yet.',
-            },
-          },
           scope: {
             label: 'Focus Tab',
             waiting: 'Waiting for target',
@@ -266,12 +259,6 @@ const resources = {
           refresh: {
             label: '刷新',
             tooltip: '重新同步当前页面的 Federation 信息。',
-          },
-          diagnostic: {
-            tooltip: {
-              active: '点击复制报错信息，粘贴给 AI Agent 进行诊断。',
-              empty: '暂无运行时报错。',
-            },
           },
           scope: {
             label: '当前标签页',

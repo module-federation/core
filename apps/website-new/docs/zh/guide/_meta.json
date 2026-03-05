@@ -51,7 +51,7 @@
   },
   {
     "type": "dir-section-header",
-    "name": "ai-skills",
-    "label": "AI Skills"
+    "name": "ai",
+    "label": "AI"
   }
 ]

@@ -1,14 +1,11 @@
 import {
   MESSAGE_ACTIVE_TAB_CHANGED,
-  MESSAGE_MF_DIAGNOSTIC,
   MESSAGE_OPEN_SIDE_PANEL,
 } from '../utils/chrome/messages';
 
 const SIDE_PANEL_PATH = 'html/main/index.html';
 
 const getSidePanel = () => (chrome as any)?.sidePanel;
-
-const tabDiagnostics = new Map<number, object>();
 
 const resolveTabId = async (tabId?: number) => {
   if (typeof tabId === 'number') {
@@ -26,7 +23,6 @@ const broadcastActiveTab = (tabId: number) => {
     chrome.runtime.sendMessage({
       type: MESSAGE_ACTIVE_TAB_CHANGED,
       tabId,
-      diagnostic: tabDiagnostics.get(tabId) ?? null,
     });
   } catch (error) {
     console.warn(
@@ -99,7 +95,7 @@ chrome.action.onClicked.addListener(async (tab) => {
   }
 });
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message?.type === MESSAGE_OPEN_SIDE_PANEL) {
     openSidePanel(message.tabId)
       .then((options) => sendResponse({ ok: true, options }))
@@ -107,19 +103,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         sendResponse({ ok: false, message: String(error) }),
       );
     return true;
-  }
-  if (message?.type === MESSAGE_MF_DIAGNOSTIC) {
-    const tabId = sender.tab?.id;
-    if (typeof tabId === 'number' && message.data?.mfDiagnostic) {
-      tabDiagnostics.set(tabId, message.data.mfDiagnostic);
-    }
-    chrome.runtime
-      .sendMessage({
-        type: MESSAGE_MF_DIAGNOSTIC,
-        data: message.data,
-      })
-      .catch(() => {});
-    return undefined;
   }
   return undefined;
 });
@@ -156,7 +139,6 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 });
 
 chrome.tabs.onRemoved.addListener(async (tabId) => {
-  tabDiagnostics.delete(tabId);
   try {
     const FormID = 'FormID';
     const data = await chrome.storage.sync.get(FormID);
