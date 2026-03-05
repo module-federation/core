@@ -2,6 +2,7 @@ const RSC_BRIDGE_EXPOSE = '__rspack_rsc_bridge__';
 const ACTION_PREFIX = 'remote:';
 const MODULE_PREFIX = 'remote-module:';
 const SSR_LAYER_PREFIX = '(server-side-rendering)/';
+const RSC_LAYER_PREFIX = '(react-server-components)/';
 const ACTION_REMAP_GLOBAL_KEY = '__RSPACK_RSC_MF_ACTION_ID_MAP__';
 const ACTION_PROXY_MODULE_ID = '__rspack_mf_rsc_action_proxy__';
 
@@ -53,6 +54,16 @@ type RemoteDataItem = {
   remoteName: string;
 };
 
+type ConsumeDataItem = {
+  shareKey?: string;
+};
+
+type ConsumeHandlerItem = {
+  shareKey?: string;
+};
+
+type ClientModuleResolutionKind = 'shared' | 'remote';
+
 type WebpackRequireRuntime = {
   m?: Record<string, (module: { exports: any }) => void>;
   c?: Record<string, { exports?: unknown }>;
@@ -61,10 +72,14 @@ type WebpackRequireRuntime = {
     chunkMapping?: Record<string, Array<string | number>>;
     moduleIdToRemoteDataMapping?: Record<string, RemoteDataItem>;
   };
+  consumesLoadingData?: {
+    moduleIdToConsumeDataMapping?: Record<string, ConsumeDataItem>;
+  };
   u?: (chunkId: string | number) => string;
   federation?: {
     instance?: {
       loadRemote?: (request: string) => Promise<BridgeModule>;
+      loadShareSync?: (shareKey: string) => (() => unknown) | false;
       options?: {
         remotes?: Array<{
           name: string;
@@ -89,6 +104,7 @@ type WebpackRequireRuntime = {
         >;
       };
     };
+    consumesLoadingModuleToHandlerMapping?: Record<string, ConsumeHandlerItem>;
   };
 };
 
@@ -158,11 +174,46 @@ const getNamespacedModuleId = (alias: string, rawId: string | number) =>
 const getNamespacedClientManifestKey = (alias: string, key: string | number) =>
   `${MODULE_PREFIX}${alias}:${String(key)}`;
 
-const stripSsrLayerPrefix = (moduleId: string | number) => {
+const namespaceModuleIdDeterministically = (
+  alias: string,
+  rawId: string | number,
+) => {
+  const normalizedRawId = String(rawId);
+  const namespaceLayerId = (layerPrefix: string) => {
+    const unprefixedId = normalizedRawId.slice(layerPrefix.length);
+    return unprefixedId.startsWith(MODULE_PREFIX)
+      ? normalizedRawId
+      : `${layerPrefix}${getNamespacedModuleId(alias, unprefixedId)}`;
+  };
+  if (normalizedRawId.startsWith(SSR_LAYER_PREFIX)) {
+    return namespaceLayerId(SSR_LAYER_PREFIX);
+  }
+  if (normalizedRawId.startsWith(RSC_LAYER_PREFIX)) {
+    return namespaceLayerId(RSC_LAYER_PREFIX);
+  }
+  return normalizedRawId.startsWith(MODULE_PREFIX)
+    ? normalizedRawId
+    : getNamespacedModuleId(alias, normalizedRawId);
+};
+
+const isNamespacedRemoteIdForAlias = (alias: string, moduleId: string) => {
+  const aliasPrefix = `${MODULE_PREFIX}${alias}:`;
+  return (
+    moduleId.startsWith(aliasPrefix) ||
+    moduleId.startsWith(`${SSR_LAYER_PREFIX}${aliasPrefix}`) ||
+    moduleId.startsWith(`${RSC_LAYER_PREFIX}${aliasPrefix}`)
+  );
+};
+
+const stripLayerPrefix = (moduleId: string | number) => {
   const normalizedModuleId = String(moduleId);
-  return normalizedModuleId.startsWith(SSR_LAYER_PREFIX)
-    ? normalizedModuleId.slice(SSR_LAYER_PREFIX.length)
-    : normalizedModuleId;
+  if (normalizedModuleId.startsWith(SSR_LAYER_PREFIX)) {
+    return normalizedModuleId.slice(SSR_LAYER_PREFIX.length);
+  }
+  if (normalizedModuleId.startsWith(RSC_LAYER_PREFIX)) {
+    return normalizedModuleId.slice(RSC_LAYER_PREFIX.length);
+  }
+  return normalizedModuleId;
 };
 
 const resolveClientModuleIdFromMap = (
@@ -178,7 +229,7 @@ const resolveClientModuleIdFromMap = (
   ) {
     return resolvedClientIdsByRawId[normalizedRawId];
   }
-  const unprefixedRawId = stripSsrLayerPrefix(normalizedRawId);
+  const unprefixedRawId = stripLayerPrefix(normalizedRawId);
   if (
     unprefixedRawId !== normalizedRawId &&
     Object.prototype.hasOwnProperty.call(
@@ -191,6 +242,81 @@ const resolveClientModuleIdFromMap = (
   return undefined;
 };
 
+const getClientManifestKeyWithoutHash = (rawClientManifestKey: string) => {
+  const hashIndex = rawClientManifestKey.indexOf('#');
+  return hashIndex >= 0
+    ? rawClientManifestKey.slice(0, hashIndex)
+    : rawClientManifestKey;
+};
+
+const resolveSharedConsumeModuleId = (
+  rawClientManifestKey: string,
+): string | undefined => {
+  const candidateShareKeys = new Set<string>([
+    getClientManifestKeyWithoutHash(rawClientManifestKey),
+  ]);
+
+  const handlerMapping =
+    __webpack_require__.federation?.consumesLoadingModuleToHandlerMapping;
+  if (isObject(handlerMapping)) {
+    for (const [moduleId, handlerValue] of Object.entries(handlerMapping)) {
+      if (
+        !isObject(handlerValue) ||
+        typeof handlerValue.shareKey !== 'string'
+      ) {
+        continue;
+      }
+      if (candidateShareKeys.has(handlerValue.shareKey)) {
+        return String(moduleId);
+      }
+    }
+  }
+
+  const consumeDataMapping =
+    __webpack_require__.consumesLoadingData?.moduleIdToConsumeDataMapping;
+  if (isObject(consumeDataMapping)) {
+    for (const [moduleId, consumeData] of Object.entries(consumeDataMapping)) {
+      if (!isObject(consumeData) || typeof consumeData.shareKey !== 'string') {
+        continue;
+      }
+      if (candidateShareKeys.has(consumeData.shareKey)) {
+        return String(moduleId);
+      }
+    }
+  }
+
+  return undefined;
+};
+
+const resolveShareKeyFromClientManifestKey = (
+  rawClientManifestKey: string,
+): string | undefined => {
+  const keyWithoutHash = getClientManifestKeyWithoutHash(rawClientManifestKey);
+  if (!keyWithoutHash || keyWithoutHash.startsWith(MODULE_PREFIX)) {
+    return undefined;
+  }
+  if (keyWithoutHash.startsWith('.') || keyWithoutHash.startsWith('/')) {
+    return undefined;
+  }
+  if (/^[A-Za-z]:[\\/]/.test(keyWithoutHash) || keyWithoutHash.includes('\\')) {
+    return undefined;
+  }
+  return keyWithoutHash;
+};
+
+const getClientModuleResolutionPriority = (
+  resolutionKind: ClientModuleResolutionKind | undefined,
+) => {
+  switch (resolutionKind) {
+    case 'shared':
+      return 2;
+    case 'remote':
+      return 1;
+    default:
+      return 0;
+  }
+};
+
 const normalizeExpose = (expose: string) => {
   if (!expose || expose === '.') {
     return '.';
@@ -198,15 +324,52 @@ const normalizeExpose = (expose: string) => {
   return expose.startsWith('./') ? expose : `./${expose}`;
 };
 
-const normalizeExposeCandidates = (expose: string): string[] => {
-  const normalized = normalizeExpose(expose);
-  if (normalized === '.') {
-    return ['.'];
+const getRemoteClientReferenceModuleId = (alias: string, expose: string) => {
+  const normalizedExpose = normalizeExpose(expose);
+  const exposeToken = normalizedExpose.startsWith('./')
+    ? normalizedExpose.slice(2)
+    : normalizedExpose;
+  return getNamespacedModuleId(alias, exposeToken || '.');
+};
+
+const resolveClientEntryExpose = (
+  rawClientManifestKey: string,
+  entryName: string | undefined,
+  clientExposes: Record<string, string>,
+): string | undefined => {
+  const rawClientManifestKeyWithoutHash =
+    getClientManifestKeyWithoutHash(rawClientManifestKey);
+
+  const manifestKeys = Array.from(
+    new Set(
+      rawClientManifestKey === rawClientManifestKeyWithoutHash
+        ? [rawClientManifestKey]
+        : [rawClientManifestKey, rawClientManifestKeyWithoutHash],
+    ),
+  );
+
+  if (entryName && entryName !== '*' && entryName !== '__esModule') {
+    for (const rawClientManifestKeyCandidate of manifestKeys) {
+      const exposedByFullKey =
+        clientExposes[`${rawClientManifestKeyCandidate}#${entryName}`];
+      if (typeof exposedByFullKey === 'string' && exposedByFullKey) {
+        return normalizeExpose(exposedByFullKey);
+      }
+    }
   }
-  if (normalized.startsWith('./')) {
-    return [normalized, normalized.slice(2)];
+
+  for (const rawClientManifestKeyCandidate of manifestKeys) {
+    const exposedByKey = clientExposes[rawClientManifestKeyCandidate];
+    if (typeof exposedByKey === 'string' && exposedByKey) {
+      return normalizeExpose(exposedByKey);
+    }
   }
-  return [normalized, `./${normalized}`];
+
+  if (entryName && entryName !== '*' && entryName !== '__esModule') {
+    return normalizeExpose(entryName);
+  }
+
+  return undefined;
 };
 
 const getFederationState = (): FederationState | undefined => {
@@ -362,164 +525,27 @@ const resolveExposeSpecifier = (args: any): string => {
 const isBridgeExposeRequest = (args: any) =>
   resolveExposeSpecifier(args).includes(RSC_BRIDGE_EXPOSE);
 
-const getRemoteNameCandidates = (alias: string): Set<string> => {
-  const candidates = new Set<string>([alias]);
-
-  const remoteInfos =
-    __webpack_require__.federation?.bundlerRuntimeOptions?.remotes?.remoteInfos;
-  const aliasRemoteInfos = remoteInfos?.[alias];
-  if (Array.isArray(aliasRemoteInfos)) {
-    for (const remoteInfo of aliasRemoteInfos) {
-      if (typeof remoteInfo?.name === 'string' && remoteInfo.name) {
-        candidates.add(remoteInfo.name);
-      }
-    }
-  }
-
-  const remotes = __webpack_require__.federation?.instance?.options?.remotes;
-  if (Array.isArray(remotes)) {
-    for (const remote of remotes) {
-      if (!remote || typeof remote.name !== 'string') {
-        continue;
-      }
-      if (remote.alias === alias || remote.name === alias) {
-        candidates.add(remote.name);
-        if (typeof remote.alias === 'string' && remote.alias) {
-          candidates.add(remote.alias);
-        }
-      }
-    }
-  }
-
-  return candidates;
-};
-
-const remoteWrapperModuleIdIndexCache: Record<
-  string,
-  Record<string, string>
-> = Object.create(null);
-
-const buildRemoteWrapperModuleIdIndex = (
-  alias: string,
-): Record<string, string> => {
+const resolveBridgeFromLoadArgs = async (
+  args: any,
+): Promise<BridgeModule | undefined> => {
   if (
-    Object.prototype.hasOwnProperty.call(remoteWrapperModuleIdIndexCache, alias)
+    isObject(args?.exposeModule) &&
+    typeof args.exposeModule.getManifest === 'function' &&
+    typeof args.exposeModule.executeAction === 'function'
   ) {
-    return remoteWrapperModuleIdIndexCache[alias];
+    return args.exposeModule as BridgeModule;
   }
 
-  const exposeToModuleId: Record<string, string> = Object.create(null);
-  const remoteNameCandidates = getRemoteNameCandidates(alias);
-  const mapping =
-    __webpack_require__.remotesLoadingData?.moduleIdToRemoteDataMapping || {};
-
-  for (const [moduleId, remoteData] of Object.entries(mapping)) {
-    if (!isObject(remoteData)) {
-      continue;
-    }
+  if (typeof args?.exposeModuleFactory === 'function') {
+    const bridgeCandidate = await Promise.resolve(args.exposeModuleFactory());
     if (
-      typeof remoteData.remoteName !== 'string' ||
-      !remoteNameCandidates.has(remoteData.remoteName)
+      isObject(bridgeCandidate) &&
+      typeof bridgeCandidate.getManifest === 'function' &&
+      typeof bridgeCandidate.executeAction === 'function'
     ) {
-      continue;
-    }
-    if (typeof remoteData.name !== 'string' || !remoteData.name) {
-      continue;
-    }
-
-    for (const exposeKey of normalizeExposeCandidates(remoteData.name)) {
-      if (!Object.prototype.hasOwnProperty.call(exposeToModuleId, exposeKey)) {
-        exposeToModuleId[exposeKey] = moduleId;
-        continue;
-      }
-      if (exposeToModuleId[exposeKey] !== moduleId) {
-        throw new Error(
-          `[mf:rsc-bridge] Conflicting wrapper module id for "${alias}/${exposeKey}"`,
-        );
-      }
+      return bridgeCandidate as BridgeModule;
     }
   }
-
-  remoteWrapperModuleIdIndexCache[alias] = exposeToModuleId;
-  return exposeToModuleId;
-};
-
-const resolveRemoteWrapperModuleId = (
-  alias: string,
-  expose: string,
-): string | undefined => {
-  const bundlerRuntimeResolver =
-    __webpack_require__.federation?.bundlerRuntime?.resolveRemoteModuleId;
-
-  for (const exposeCandidate of normalizeExposeCandidates(expose)) {
-    const resolvedByBundlerRuntime =
-      typeof bundlerRuntimeResolver === 'function'
-        ? bundlerRuntimeResolver({
-            webpackRequire: __webpack_require__,
-            alias,
-            expose: exposeCandidate,
-          })
-        : undefined;
-    if (
-      typeof resolvedByBundlerRuntime === 'string' &&
-      resolvedByBundlerRuntime
-    ) {
-      return resolvedByBundlerRuntime;
-    }
-  }
-
-  const exposeToModuleId = buildRemoteWrapperModuleIdIndex(alias);
-  for (const exposeCandidate of normalizeExposeCandidates(expose)) {
-    const resolvedByIndex = exposeToModuleId[exposeCandidate];
-    if (typeof resolvedByIndex === 'string' && resolvedByIndex) {
-      return resolvedByIndex;
-    }
-  }
-  return undefined;
-};
-
-const resolveClientEntryExpose = (
-  rawClientManifestKey: string,
-  entryName: string | undefined,
-  clientExposes: Record<string, string>,
-): string | undefined => {
-  const rawClientManifestKeyWithoutHash = (() => {
-    const hashIndex = rawClientManifestKey.indexOf('#');
-    return hashIndex >= 0
-      ? rawClientManifestKey.slice(0, hashIndex)
-      : rawClientManifestKey;
-  })();
-
-  const manifestKeys = Array.from(
-    new Set(
-      rawClientManifestKey === rawClientManifestKeyWithoutHash
-        ? [rawClientManifestKey]
-        : [rawClientManifestKey, rawClientManifestKeyWithoutHash],
-    ),
-  );
-
-  if (entryName && entryName !== '*' && entryName !== '__esModule') {
-    for (const rawClientManifestKeyCandidate of manifestKeys) {
-      const exposedByFullKey =
-        clientExposes[`${rawClientManifestKeyCandidate}#${entryName}`];
-      if (typeof exposedByFullKey === 'string' && exposedByFullKey) {
-        return normalizeExpose(exposedByFullKey);
-      }
-    }
-  }
-
-  for (const rawClientManifestKeyCandidate of manifestKeys) {
-    const exposedByKey = clientExposes[rawClientManifestKeyCandidate];
-    if (typeof exposedByKey === 'string' && exposedByKey) {
-      return normalizeExpose(exposedByKey);
-    }
-  }
-
-  if (entryName && entryName !== '*' && entryName !== '__esModule') {
-    return normalizeExpose(entryName);
-  }
-
-  return undefined;
 };
 
 const installActionProxyModule = ({
@@ -608,6 +634,19 @@ const rscBridgeRuntimePlugin = () => {
   const ssrModuleExportsByNamespacedId: Record<string, unknown> =
     Object.create(null);
   const ssrModulePreloadPromises: Partial<Record<string, Promise<void>>> = {};
+  const syntheticSharedShareKeyByModuleId: Record<string, string> =
+    Object.create(null);
+  const syntheticSharedExportsByModuleId: Record<string, unknown> =
+    Object.create(null);
+  const syntheticRemoteRequestByModuleId: Record<string, string> =
+    Object.create(null);
+  const syntheticRemoteExportsByModuleId: Record<string, unknown> =
+    Object.create(null);
+  const syntheticRemotePromiseByModuleId: Record<
+    string,
+    Promise<unknown>
+  > = Object.create(null);
+  const seededRemoteClientModuleIds = new Set<string>();
 
   const ensureSsrModuleFactory = (
     namespacedModuleId: string,
@@ -634,6 +673,142 @@ const rscBridgeRuntimePlugin = () => {
       }
       module.exports = ssrModuleExportsByNamespacedId[namespacedModuleId];
     };
+  };
+
+  const installSyntheticSharedClientModuleFactory = (
+    moduleId: string,
+    shareKey: string,
+  ) => {
+    const existingShareKey = syntheticSharedShareKeyByModuleId[moduleId];
+    if (existingShareKey && existingShareKey !== shareKey) {
+      throw new Error(
+        `[mf:rsc-bridge] Conflicting shared client reference for "${moduleId}" between "${existingShareKey}" and "${shareKey}"`,
+      );
+    }
+    syntheticSharedShareKeyByModuleId[moduleId] = shareKey;
+
+    if (!isObject(__webpack_require__.m)) {
+      __webpack_require__.m = {};
+    }
+    if (__webpack_require__.m?.[moduleId]) {
+      return;
+    }
+
+    __webpack_require__.m![moduleId] = (module: { exports: unknown }) => {
+      if (
+        Object.prototype.hasOwnProperty.call(
+          syntheticSharedExportsByModuleId,
+          moduleId,
+        )
+      ) {
+        module.exports = syntheticSharedExportsByModuleId[moduleId];
+        return;
+      }
+      const federationInstance = __webpack_require__.federation?.instance;
+      if (
+        !federationInstance ||
+        typeof federationInstance.loadShareSync !== 'function'
+      ) {
+        throw new Error(
+          `[mf:rsc-bridge] Missing loadShareSync for shared client reference "${shareKey}"`,
+        );
+      }
+      const sharedFactory = federationInstance.loadShareSync(shareKey);
+      if (typeof sharedFactory !== 'function') {
+        throw new Error(
+          `[mf:rsc-bridge] Shared client reference "${shareKey}" is unavailable synchronously`,
+        );
+      }
+      const sharedExports = sharedFactory();
+      syntheticSharedExportsByModuleId[moduleId] = sharedExports;
+      module.exports = sharedExports;
+    };
+  };
+
+  const installSyntheticRemoteClientModuleFactory = (
+    moduleId: string,
+    alias: string,
+    expose: string,
+  ) => {
+    const normalizedExpose = normalizeExpose(expose);
+    const remoteRequest = `${alias}/${normalizedExpose.startsWith('./') ? normalizedExpose.slice(2) : normalizedExpose}`;
+    const existingRequest = syntheticRemoteRequestByModuleId[moduleId];
+    if (existingRequest && existingRequest !== remoteRequest) {
+      throw new Error(
+        `[mf:rsc-bridge] Conflicting remote client reference for "${moduleId}" between "${existingRequest}" and "${remoteRequest}"`,
+      );
+    }
+    syntheticRemoteRequestByModuleId[moduleId] = remoteRequest;
+
+    if (!isObject(__webpack_require__.m)) {
+      __webpack_require__.m = {};
+    }
+
+    __webpack_require__.m![moduleId] = (module: { exports: unknown }) => {
+      if (
+        Object.prototype.hasOwnProperty.call(
+          syntheticRemoteExportsByModuleId,
+          moduleId,
+        )
+      ) {
+        module.exports = syntheticRemoteExportsByModuleId[moduleId];
+        return;
+      }
+
+      let pending = syntheticRemotePromiseByModuleId[moduleId];
+      if (!pending) {
+        const runtimeInstance = __webpack_require__.federation?.instance;
+        if (
+          !runtimeInstance ||
+          typeof runtimeInstance.loadRemote !== 'function'
+        ) {
+          throw new Error(
+            `[mf:rsc-bridge] Missing loadRemote for remote client reference "${remoteRequest}"`,
+          );
+        }
+        pending = Promise.resolve(
+          runtimeInstance.loadRemote(remoteRequest),
+        ).then((exportsValue) => {
+          syntheticRemoteExportsByModuleId[moduleId] = exportsValue;
+          return exportsValue;
+        });
+        syntheticRemotePromiseByModuleId[moduleId] = pending;
+      }
+
+      module.exports = pending;
+    };
+  };
+
+  const seedRemoteClientModuleFactoriesFromRuntimeMapping = () => {
+    const moduleIdToRemoteDataMapping =
+      __webpack_require__.remotesLoadingData?.moduleIdToRemoteDataMapping;
+    if (!isObject(moduleIdToRemoteDataMapping)) {
+      return;
+    }
+    for (const remoteData of Object.values(moduleIdToRemoteDataMapping)) {
+      if (!isObject(remoteData)) {
+        continue;
+      }
+      const remoteAlias =
+        typeof remoteData.remoteName === 'string' ? remoteData.remoteName : '';
+      const expose = typeof remoteData.name === 'string' ? remoteData.name : '';
+      if (!remoteAlias || !expose) {
+        continue;
+      }
+      const clientModuleId = getRemoteClientReferenceModuleId(
+        remoteAlias,
+        expose,
+      );
+      if (seededRemoteClientModuleIds.has(clientModuleId)) {
+        continue;
+      }
+      installSyntheticRemoteClientModuleFactory(
+        clientModuleId,
+        remoteAlias,
+        expose,
+      );
+      seededRemoteClientModuleIds.add(clientModuleId);
+    }
   };
 
   const ensureBridge = async (alias: string, args?: any) => {
@@ -764,7 +939,10 @@ const rscBridgeRuntimePlugin = () => {
     exposeHint?: string,
     args?: any,
   ) => {
-    const namespacedModuleId = getNamespacedModuleId(alias, rawServerModuleId);
+    const namespacedModuleId = namespaceModuleIdDeterministically(
+      alias,
+      rawServerModuleId,
+    );
     ensureSsrModuleFactory(namespacedModuleId, rawServerModuleId);
 
     if (
@@ -827,8 +1005,14 @@ const rscBridgeRuntimePlugin = () => {
       : {};
     const resolvedClientIdsByRawId: Record<string, string> =
       Object.create(null);
-    const resolvedClientIdKindByRawId: Record<string, 'wrapper' | 'fallback'> =
-      Object.create(null);
+    const resolvedClientIdKindByRawId: Record<
+      string,
+      ClientModuleResolutionKind
+    > = Object.create(null);
+    const clientManifestEntriesByRawId: Record<
+      string,
+      Array<ManifestExport>
+    > = Object.create(null);
 
     if (isObject(remoteManifest.clientManifest)) {
       for (const [rawClientManifestKey, value] of Object.entries(
@@ -852,52 +1036,161 @@ const rscBridgeRuntimePlugin = () => {
           entryName,
           clientExposes,
         );
-
-        const resolvedClientModuleId = entryExpose
-          ? resolveRemoteWrapperModuleId(alias, entryExpose)
-          : undefined;
+        const resolvedLocalSharedClientModuleId =
+          resolveSharedConsumeModuleId(rawClientManifestKey);
+        const resolvedShareKey = resolvedLocalSharedClientModuleId
+          ? undefined
+          : resolveShareKeyFromClientManifestKey(rawClientManifestKey);
+        const resolvedRemoteExposeClientModuleId =
+          entryExpose && !resolvedLocalSharedClientModuleId
+            ? getRemoteClientReferenceModuleId(alias, entryExpose)
+            : undefined;
 
         const fallbackClientModuleId = rawRemoteClientModuleId
-          ? getNamespacedModuleId(alias, rawRemoteClientModuleId)
-          : getNamespacedModuleId(alias, rawClientManifestKey);
+          ? namespaceModuleIdDeterministically(alias, rawRemoteClientModuleId)
+          : namespaceModuleIdDeterministically(alias, rawClientManifestKey);
+        const resolvedSyntheticSharedClientModuleId =
+          !resolvedLocalSharedClientModuleId &&
+          resolvedShareKey &&
+          rawRemoteClientModuleId
+            ? namespaceModuleIdDeterministically(alias, rawRemoteClientModuleId)
+            : undefined;
+        if (resolvedSyntheticSharedClientModuleId && resolvedShareKey) {
+          installSyntheticSharedClientModuleFactory(
+            resolvedSyntheticSharedClientModuleId,
+            resolvedShareKey,
+          );
+        }
 
-        const nextClientIdKind = resolvedClientModuleId
-          ? 'wrapper'
-          : 'fallback';
+        const nextClientIdKind: ClientModuleResolutionKind =
+          resolvedLocalSharedClientModuleId ||
+          resolvedSyntheticSharedClientModuleId
+            ? 'shared'
+            : 'remote';
         let finalClientModuleId =
-          resolvedClientModuleId || fallbackClientModuleId;
-        let finalClientIdKind: 'wrapper' | 'fallback' = nextClientIdKind;
+          resolvedLocalSharedClientModuleId ||
+          resolvedSyntheticSharedClientModuleId ||
+          resolvedRemoteExposeClientModuleId ||
+          fallbackClientModuleId;
+        let finalClientIdKind: ClientModuleResolutionKind = nextClientIdKind;
 
         if (isObject(nextValue)) {
           nextValue.id = finalClientModuleId;
-          if (resolvedClientModuleId) {
-            // Resolved wrapper module ids are expected to already exist in the
-            // browser runtime graph.
+          if (finalClientIdKind === 'shared') {
             nextValue.chunks = [];
+          } else if (entryExpose) {
+            installSyntheticRemoteClientModuleFactory(
+              finalClientModuleId,
+              alias,
+              entryExpose,
+            );
+            nextValue.chunks = [];
+            nextValue.async = true;
+          }
+        }
+        const clientManifest = hostManifest.clientManifest as Record<
+          string,
+          any
+        >;
+        const upsertClientManifestEntry = (
+          key: string,
+          entry: unknown,
+          preferIncomingNonNamespaced: boolean,
+        ) => {
+          if (!Object.prototype.hasOwnProperty.call(clientManifest, key)) {
+            clientManifest[key] = entry;
+            return entry;
+          }
+          const existingEntry = clientManifest[key];
+          if (stableStringify(existingEntry) === stableStringify(entry)) {
+            return existingEntry;
+          }
+          if (
+            isObject(existingEntry) &&
+            isObject(entry) &&
+            existingEntry.id != null &&
+            entry.id != null
+          ) {
+            const existingId = String(existingEntry.id);
+            const nextId = String(entry.id);
+            const existingIsNamespaced = isNamespacedRemoteIdForAlias(
+              alias,
+              existingId,
+            );
+            const nextIsNamespaced = isNamespacedRemoteIdForAlias(
+              alias,
+              nextId,
+            );
+            if (!existingIsNamespaced && !nextIsNamespaced) {
+              if (preferIncomingNonNamespaced && existingId !== nextId) {
+                clientManifest[key] = entry;
+                return entry;
+              }
+              return existingEntry;
+            }
+            if (!existingIsNamespaced && nextIsNamespaced) {
+              return existingEntry;
+            }
+            if (existingIsNamespaced && !nextIsNamespaced) {
+              clientManifest[key] = entry;
+              return entry;
+            }
+          }
+          throw new Error(
+            `[mf:rsc-bridge] clientManifest conflict for "${key}" while merging remote "${alias}"`,
+          );
+        };
+
+        const scopedAssignedValue = upsertClientManifestEntry(
+          scopedClientManifestKey,
+          nextValue,
+          false,
+        );
+        const rawAssignedValue = upsertClientManifestEntry(
+          rawClientManifestKey,
+          nextValue,
+          false,
+        );
+        const preferredAssignedValue = isObject(rawAssignedValue)
+          ? rawAssignedValue
+          : scopedAssignedValue;
+
+        if (
+          isObject(preferredAssignedValue) &&
+          preferredAssignedValue.id != null
+        ) {
+          finalClientModuleId = String(preferredAssignedValue.id);
+          if (!isNamespacedRemoteIdForAlias(alias, finalClientModuleId)) {
+            finalClientIdKind = 'shared';
+          }
+          if (isObject(nextValue)) {
+            nextValue.id = finalClientModuleId;
+            if (finalClientIdKind === 'shared') {
+              nextValue.chunks = [];
+            } else if (entryExpose) {
+              installSyntheticRemoteClientModuleFactory(
+                finalClientModuleId,
+                alias,
+                entryExpose,
+              );
+              nextValue.chunks = [];
+              nextValue.async = true;
+            }
           }
         }
 
-        assertNoConflict(
-          hostManifest.clientManifest as Record<string, any>,
-          scopedClientManifestKey,
-          nextValue,
-          alias,
-          'clientManifest',
-        );
-        (hostManifest.clientManifest as Record<string, any>)[
-          scopedClientManifestKey
-        ] = nextValue;
-
-        assertNoConflict(
-          hostManifest.clientManifest as Record<string, any>,
-          rawClientManifestKey,
-          nextValue,
-          alias,
-          'clientManifest',
-        );
-        (hostManifest.clientManifest as Record<string, any>)[
-          rawClientManifestKey
-        ] = nextValue;
+        if (isObject(nextValue) && rawRemoteClientModuleId) {
+          if (
+            !Array.isArray(
+              clientManifestEntriesByRawId[rawRemoteClientModuleId],
+            )
+          ) {
+            clientManifestEntriesByRawId[rawRemoteClientModuleId] = [];
+          }
+          clientManifestEntriesByRawId[rawRemoteClientModuleId].push(
+            nextValue as ManifestExport,
+          );
+        }
 
         if (!rawRemoteClientModuleId) {
           continue;
@@ -907,21 +1200,24 @@ const rscBridgeRuntimePlugin = () => {
         const existingResolvedKind =
           resolvedClientIdKindByRawId[rawRemoteClientModuleId];
         if (existingResolvedId && existingResolvedId !== finalClientModuleId) {
-          // Resolve duplicate raw ids deterministically without relying on
-          // module id string patterns:
-          // 1) keep previously resolved wrapper ids
-          // 2) otherwise keep existing fallback over a new fallback
-          // 3) upgrade existing fallback to wrapper when one is discovered
           if (
-            existingResolvedKind === 'wrapper' ||
-            finalClientIdKind === 'fallback'
+            getClientModuleResolutionPriority(existingResolvedKind) >=
+            getClientModuleResolutionPriority(finalClientIdKind)
           ) {
             finalClientModuleId = existingResolvedId;
-            finalClientIdKind = existingResolvedKind || 'fallback';
+            finalClientIdKind = existingResolvedKind || 'remote';
             if (isObject(nextValue)) {
               nextValue.id = finalClientModuleId;
-              if (finalClientIdKind === 'wrapper') {
+              if (finalClientIdKind === 'shared') {
                 nextValue.chunks = [];
+              } else if (entryExpose) {
+                installSyntheticRemoteClientModuleFactory(
+                  finalClientModuleId,
+                  alias,
+                  entryExpose,
+                );
+                nextValue.chunks = [];
+                nextValue.async = true;
               }
             }
           }
@@ -942,15 +1238,23 @@ const rscBridgeRuntimePlugin = () => {
           existingPrefixedResolvedId !== finalClientModuleId
         ) {
           if (
-            existingPrefixedResolvedKind === 'wrapper' ||
-            finalClientIdKind === 'fallback'
+            getClientModuleResolutionPriority(existingPrefixedResolvedKind) >=
+            getClientModuleResolutionPriority(finalClientIdKind)
           ) {
             finalClientModuleId = existingPrefixedResolvedId;
-            finalClientIdKind = existingPrefixedResolvedKind || 'fallback';
+            finalClientIdKind = existingPrefixedResolvedKind || 'remote';
             if (isObject(nextValue)) {
               nextValue.id = finalClientModuleId;
-              if (finalClientIdKind === 'wrapper') {
+              if (finalClientIdKind === 'shared') {
                 nextValue.chunks = [];
+              } else if (entryExpose) {
+                installSyntheticRemoteClientModuleFactory(
+                  finalClientModuleId,
+                  alias,
+                  entryExpose,
+                );
+                nextValue.chunks = [];
+                nextValue.async = true;
               }
             }
           }
@@ -959,6 +1263,24 @@ const rscBridgeRuntimePlugin = () => {
           finalClientModuleId;
         resolvedClientIdKindByRawId[prefixedRawRemoteClientModuleId] =
           finalClientIdKind;
+        const rawIdEntries =
+          clientManifestEntriesByRawId[rawRemoteClientModuleId];
+        if (Array.isArray(rawIdEntries)) {
+          for (const entryValue of rawIdEntries) {
+            entryValue.id = finalClientModuleId;
+            if (finalClientIdKind === 'shared') {
+              entryValue.chunks = [];
+            } else if (entryExpose) {
+              installSyntheticRemoteClientModuleFactory(
+                finalClientModuleId,
+                alias,
+                entryExpose,
+              );
+              entryValue.chunks = [];
+              entryValue.async = true;
+            }
+          }
+        }
       }
     }
 
@@ -970,7 +1292,7 @@ const rscBridgeRuntimePlugin = () => {
         const inferredExposeHint = inferExposeHintFromConsumerNode(value);
         const resolvedModuleId =
           resolveClientModuleIdFromMap(resolvedClientIdsByRawId, rawModuleId) ||
-          getNamespacedModuleId(alias, rawModuleId);
+          namespaceModuleIdDeterministically(alias, rawModuleId);
 
         const nextValue = remapConsumerNode(
           value,
@@ -979,7 +1301,7 @@ const rscBridgeRuntimePlugin = () => {
               exportName !== '*' && exportName !== '__esModule'
                 ? normalizeExpose(exportName)
                 : inferredExposeHint;
-            const namespacedServerModuleId = getNamespacedModuleId(
+            const namespacedServerModuleId = namespaceModuleIdDeterministically(
               alias,
               rawServerModuleId,
             );
@@ -995,32 +1317,34 @@ const rscBridgeRuntimePlugin = () => {
           },
         );
 
-        assertNoConflict(
-          hostManifest.serverConsumerModuleMap as Record<string, any>,
-          resolvedModuleId,
-          nextValue,
-          alias,
-          'serverConsumerModuleMap',
-        );
-        (hostManifest.serverConsumerModuleMap as Record<string, any>)[
-          resolvedModuleId
-        ] = nextValue;
+        const serverConsumerModuleMap =
+          hostManifest.serverConsumerModuleMap as Record<string, any>;
+        const upsertServerConsumerNode = (key: string, node: unknown) => {
+          if (
+            !Object.prototype.hasOwnProperty.call(serverConsumerModuleMap, key)
+          ) {
+            serverConsumerModuleMap[key] = node;
+            return;
+          }
+          const existingNode = serverConsumerModuleMap[key];
+          if (stableStringify(existingNode) === stableStringify(node)) {
+            return;
+          }
+          if (!isNamespacedRemoteIdForAlias(alias, key)) {
+            return;
+          }
+          throw new Error(
+            `[mf:rsc-bridge] serverConsumerModuleMap conflict for "${key}" while merging remote "${alias}"`,
+          );
+        };
+        upsertServerConsumerNode(resolvedModuleId, nextValue);
 
         const prefixedResolvedModuleId = resolvedModuleId.startsWith(
           SSR_LAYER_PREFIX,
         )
           ? resolvedModuleId
           : `${SSR_LAYER_PREFIX}${resolvedModuleId}`;
-        assertNoConflict(
-          hostManifest.serverConsumerModuleMap as Record<string, any>,
-          prefixedResolvedModuleId,
-          nextValue,
-          alias,
-          'serverConsumerModuleMap',
-        );
-        (hostManifest.serverConsumerModuleMap as Record<string, any>)[
-          prefixedResolvedModuleId
-        ] = nextValue;
+        upsertServerConsumerNode(prefixedResolvedModuleId, nextValue);
       }
       if (ssrPreloadPromises.length > 0) {
         await Promise.all(ssrPreloadPromises);
@@ -1131,9 +1455,6 @@ const rscBridgeRuntimePlugin = () => {
   };
 
   const ensureRemoteAliasMerged = async (alias: string, args: any) => {
-    if (isBridgeExposeRequest(args)) {
-      return;
-    }
     const existingMergePromise = aliasMergePromises[alias];
     if (existingMergePromise) {
       await existingMergePromise;
@@ -1149,7 +1470,16 @@ const rscBridgeRuntimePlugin = () => {
         ensureBridge,
       });
 
-      const bridge = await ensureBridge(alias, args);
+      let bridge: BridgeModule | undefined;
+      if (isBridgeExposeRequest(args)) {
+        bridge = await resolveBridgeFromLoadArgs(args);
+        if (!bridge) {
+          return;
+        }
+        bridgePromises[alias] = Promise.resolve(bridge);
+      } else {
+        bridge = await ensureBridge(alias, args);
+      }
       const remoteManifest =
         typeof bridge.getManifest === 'function'
           ? await Promise.resolve(bridge.getManifest())
@@ -1172,19 +1502,29 @@ const rscBridgeRuntimePlugin = () => {
     }
   };
 
+  seedRemoteClientModuleFactoriesFromRuntimeMapping();
+
   return {
     name: 'rspack-rsc-bridge-runtime-plugin',
     async afterResolve(args: any) {
+      seedRemoteClientModuleFactoriesFromRuntimeMapping();
       const alias = resolveRemoteAlias(args);
       if (!alias) {
+        return args;
+      }
+      if (isBridgeExposeRequest(args)) {
         return args;
       }
       await ensureRemoteAliasMerged(alias, args);
       return args;
     },
     async onLoad(args: any) {
+      seedRemoteClientModuleFactoriesFromRuntimeMapping();
       const alias = resolveRemoteAlias(args);
       if (!alias) {
+        return args;
+      }
+      if (isBridgeExposeRequest(args) && aliasMergePromises[alias]) {
         return args;
       }
       await ensureRemoteAliasMerged(alias, args);
