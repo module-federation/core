@@ -1,5 +1,13 @@
 # @module-federation/managers
 
+## 2.1.0
+
+### Patch Changes
+
+- 918294f: Add missing release coverage for packages moved to the new build implementation and standardized ESM/CJS artifact outputs. This ensures package versioning and publish automation include the remaining affected packages on this branch.
+- Updated dependencies [918294f]
+  - @module-federation/sdk@2.1.0
+
 ## 2.0.1
 
 ### Patch Changes
