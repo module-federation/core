@@ -1,16 +1,28 @@
 # @module-federation/modern-js
 
-## 2.70.6
+## 2.1.0
+
+### Minor Changes
+
+- 6caee05: refactor: remove remote ip strategy feature
 
 ### Patch Changes
 
-- @module-federation/cli@2.0.1
-- @module-federation/enhanced@2.0.1
-- @module-federation/bridge-react@2.0.1
-- @module-federation/runtime@2.0.1
-- @module-federation/node@2.7.32
-- @module-federation/rsbuild-plugin@2.0.1
-- @module-federation/sdk@2.0.1
+- 918294f: Add missing release coverage for packages moved to the new build implementation and standardized ESM/CJS artifact outputs. This ensures package versioning and publish automation include the remaining affected packages on this branch.
+- Updated dependencies [987716a]
+- Updated dependencies [918294f]
+- Updated dependencies [918294f]
+- Updated dependencies [dfbf05f]
+- Updated dependencies [0172491]
+- Updated dependencies [a0faa70]
+- Updated dependencies [918294f]
+  - @module-federation/enhanced@2.1.0
+  - @module-federation/runtime@2.1.0
+  - @module-federation/cli@2.1.0
+  - @module-federation/rsbuild-plugin@2.1.0
+  - @module-federation/node@2.7.33
+  - @module-federation/sdk@2.1.0
+  - @module-federation/bridge-react@2.1.0
 
 ## 0.24.2
 
