@@ -1,0 +1,81 @@
+{
+  "name": "react-notes",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": "^20",
+    "pnpm": "^10"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@babel/core": "7.21.3",
+    "@babel/plugin-transform-modules-commonjs": "^7.21.2",
+    "@babel/preset-react": "^7.18.6",
+    "@babel/register": "^7.21.0",
+    "acorn-jsx": "^5.3.2",
+    "acorn-loose": "^8.3.0",
+    "babel-loader": "8.3.0",
+    "busboy": "^1.6.0",
+    "compression": "^1.7.4",
+    "concurrently": "^7.6.0",
+    "date-fns": "^2.29.3",
+    "excerpts": "^0.0.3",
+    "express": "^4.18.2",
+    "html-webpack-plugin": "5.5.0",
+    "marked": "^4.2.12",
+    "nodemon": "^2.0.21",
+    "pg": "^8.10.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "react-error-boundary": "^3.1.4",
+    "@module-federation/react-server-dom-webpack": "workspace:*",
+    "resolve": "1.22.1",
+    "rimraf": "^4.4.0",
+    "sanitize-html": "^2.10.0",
+    "server-only": "^0.0.1",
+    "webpack": "5.76.2"
+  },
+  "devDependencies": {
+    "@module-federation/enhanced": "workspace:*",
+    "@module-federation/runtime": "workspace:*",
+    "@playwright/test": "^1.48.2",
+    "cross-env": "^7.0.3",
+    "jsdom": "^24.1.1",
+    "prettier": "1.19.1",
+    "supertest": "^7.1.4"
+  },
+  "scripts": {
+    "start": "pnpm --filter app1 start",
+    "start:app1": "pnpm --filter app1 start",
+    "start:app2": "pnpm --filter app2 start",
+    "start:prod": "pnpm --filter app1 start:prod",
+    "build": "pnpm --filter app2 build && pnpm --filter app1 build",
+    "build:app1": "pnpm --filter app1 build",
+    "build:app2": "pnpm --filter app2 build",
+    "build:mf": "pnpm --filter app2 build && pnpm --filter app1 build",
+    "test": "pnpm run build && pnpm --filter e2e test:rsc && pnpm --filter e2e test:e2e:rsc",
+    "test:all": "pnpm run build && pnpm --filter e2e test:rsc && pnpm --filter e2e test:e2e:rsc",
+    "test:e2e": "pnpm run build && pnpm --filter e2e test:e2e:rsc",
+    "test:e2e:rsc": "pnpm run build && pnpm --filter e2e test:e2e:rsc",
+    "test:e2e:mf": "echo \"mf e2e skipped\"",
+    "test:rsc": "pnpm --filter e2e test:rsc",
+    "test:mf": "echo \"mf tests skipped\"",
+    "prettier": "prettier --write **/*.js"
+  },
+  "babel": {
+    "presets": [
+      [
+        "@babel/preset-react",
+        {
+          "runtime": "automatic"
+        }
+      ]
+    ]
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "build/*"
+    ]
+  }
+}

@@ -507,6 +507,7 @@ const t = {
               disableAssetsAnalyze: { type: 'boolean' },
               fileName: { type: 'string' },
               additionalData: { instanceof: 'Function' },
+              rsc: { type: 'object' },
             },
             additionalProperties: !1,
           },
@@ -4994,7 +4995,8 @@ function D(
                                                               t &&
                                                             'fileName' !== t &&
                                                             'additionalData' !==
-                                                              t
+                                                              t &&
+                                                            'rsc' !== t
                                                           ) {
                                                             const e = {
                                                               params: {
@@ -5074,7 +5076,7 @@ function D(
                                                                 }
                                                                 N = t === c;
                                                               } else N = !0;
-                                                              if (N)
+                                                              if (N) {
                                                                 if (
                                                                   void 0 !==
                                                                   e.additionalData
@@ -5101,6 +5103,41 @@ function D(
                                                                   }
                                                                   N = t === c;
                                                                 } else N = !0;
+                                                                if (N)
+                                                                  if (
+                                                                    void 0 !==
+                                                                    e.rsc
+                                                                  ) {
+                                                                    let t =
+                                                                      e.rsc;
+                                                                    const r = c;
+                                                                    if (
+                                                                      !t ||
+                                                                      'object' !=
+                                                                        typeof t ||
+                                                                      Array.isArray(
+                                                                        t,
+                                                                      )
+                                                                    ) {
+                                                                      const e =
+                                                                        {
+                                                                          params:
+                                                                            {
+                                                                              type: 'object',
+                                                                            },
+                                                                        };
+                                                                      null === u
+                                                                        ? (u = [
+                                                                            e,
+                                                                          ])
+                                                                        : u.push(
+                                                                            e,
+                                                                          ),
+                                                                        c++;
+                                                                    }
+                                                                    N = r === c;
+                                                                  } else N = !0;
+                                                              }
                                                             }
                                                           }
                                                         }
