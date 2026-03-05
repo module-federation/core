@@ -1,0 +1,58 @@
+{
+  "name": "rstest-rsbuild-demo",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/rstest-rsbuild/src",
+  "projectType": "application",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "rsbuild build",
+        "cwd": "apps/rstest-rsbuild"
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "rsbuild dev --host 127.0.0.1 --port 3025",
+        "cwd": "apps/rstest-rsbuild"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "rstest run",
+        "cwd": "apps/rstest-rsbuild"
+      }
+    },
+    "test:node": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "rstest run -c rstest.node.config.ts",
+        "cwd": "apps/rstest-rsbuild"
+      }
+    },
+    "test-node": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "rstest run -c rstest.node.config.ts",
+        "cwd": "apps/rstest-rsbuild"
+      }
+    },
+    "test:browser": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "rstest run -c rstest.browser.config.ts",
+        "cwd": "apps/rstest-rsbuild"
+      }
+    },
+    "test-browser": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "rstest run -c rstest.browser.config.ts",
+        "cwd": "apps/rstest-rsbuild"
+      }
+    }
+  }
+}
