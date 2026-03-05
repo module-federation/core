@@ -3,8 +3,6 @@ import {
   infrastructureLogger,
   type moduleFederationPlugin,
 } from '@module-federation/sdk';
-
-import CoreModuleFederationPlugin from '../lib/container/ModuleFederationPlugin';
 import type IModuleFederationPlugin from '../lib/container/ModuleFederationPlugin';
 
 import path from 'node:path';
@@ -18,7 +16,7 @@ export default class ModuleFederationPlugin extends BaseWrapperPlugin {
   private _mfPlugin?: IModuleFederationPlugin;
 
   constructor(options: moduleFederationPlugin.ModuleFederationPluginOptions) {
-    super(options, PLUGIN_NAME, CoreModuleFederationPlugin);
+    super(options, PLUGIN_NAME, '../lib/container/ModuleFederationPlugin');
   }
 
   protected override createCorePluginInstance(
