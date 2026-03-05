@@ -528,11 +528,23 @@ export async function preloadSSRModule(moduleId: string, exposeHint?: string) {
     typeof hiddenSsrExpose === 'string' &&
     typeof moduleMap[hiddenSsrExpose] === 'function'
   ) {
-    const moduleExports = await resolveFactoryExports(
-      moduleMap[hiddenSsrExpose]!,
-    );
-    ssrModuleCache[normalizedModuleId] = moduleExports;
-    return moduleExports;
+    // Prime remote chunks through the hidden expose, then read the requested
+    // server module id from the runtime graph.
+    await resolveFactoryExports(moduleMap[hiddenSsrExpose]!);
+    let resolvedModuleExports: unknown;
+    try {
+      const required = __webpack_require__(normalizedModuleId);
+      resolvedModuleExports =
+        required && typeof (required as Promise<unknown>).then === 'function'
+          ? await (required as Promise<unknown>)
+          : required;
+    } catch (error) {
+      throw new Error(
+        `[rsc-bridge-expose] Hidden SSR expose "${hiddenSsrExpose}" loaded but server module "${normalizedModuleId}" is unavailable: ${String(error)}`,
+      );
+    }
+    ssrModuleCache[normalizedModuleId] = resolvedModuleExports;
+    return resolvedModuleExports;
   }
 
   throw new Error(
