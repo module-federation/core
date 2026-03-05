@@ -1,8 +1,4 @@
-import {
-  helpers,
-  type IGlobalUtils,
-  type IShareUtils,
-} from '@module-federation/runtime-core';
+import { helpers } from '@module-federation/runtime-core';
 import { getGlobalFederationInstance } from './utils';
 
 export type {
@@ -10,33 +6,16 @@ export type {
   IShareUtils,
 } from '@module-federation/runtime-core';
 
-type RuntimeGlobalUtils = IGlobalUtils & {
-  getGlobalFederationInstance: typeof getGlobalFederationInstance;
+export default {
+  ...helpers,
+  global: {
+    ...helpers.global,
+    getGlobalFederationInstance,
+  },
+} as {
+  global: typeof helpers.global & {
+    getGlobalFederationInstance: typeof getGlobalFederationInstance;
+  };
+  share: typeof helpers.share;
+  utils: typeof helpers.utils;
 };
-
-export const global: RuntimeGlobalUtils = {
-  ...helpers.global,
-  getGlobalFederationInstance,
-};
-
-export const share: IShareUtils = helpers.share;
-
-export interface IRuntimeUtils {
-  matchRemoteWithNameAndExpose: typeof import('@module-federation/runtime-core').matchRemoteWithNameAndExpose;
-  preloadAssets: (...args: any[]) => void;
-  getRemoteInfo: typeof import('@module-federation/runtime-core').getRemoteInfo;
-}
-
-export const utils: IRuntimeUtils = helpers.utils;
-
-const runtimeHelpers: {
-  global: RuntimeGlobalUtils;
-  share: IShareUtils;
-  utils: IRuntimeUtils;
-} = {
-  global,
-  share,
-  utils,
-};
-
-export default runtimeHelpers;

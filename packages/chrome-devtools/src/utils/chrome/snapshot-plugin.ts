@@ -1,7 +1,7 @@
 import { MODULE_DEVTOOL_IDENTIFIER } from '@module-federation/sdk';
 import runtimeHelpers from '@module-federation/runtime/helpers';
 
-import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime';
+import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime/types';
 
 import { definePropertyGlobalVal } from '../sdk';
 

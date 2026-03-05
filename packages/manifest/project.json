@@ -6,18 +6,21 @@
   "tags": ["type:pkg"],
   "targets": {
     "build": {
-      "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/packages/manifest/dist"],
+      "executor": "@nx/rollup:rollup",
+      "outputs": ["{options.outputPath}"],
       "options": {
-        "command": "rslib build",
-        "cwd": "packages/manifest"
-      },
-      "dependsOn": [
-        {
-          "target": "build",
-          "dependencies": true
-        }
-      ]
+        "outputPath": "packages/manifest/dist",
+        "main": "packages/manifest/src/index.ts",
+        "tsConfig": "packages/manifest/tsconfig.lib.json",
+        "assets": [],
+        "external": ["@module-federation/*"],
+        "project": "packages/manifest/package.json",
+        "rollupConfig": "packages/manifest/rollup.config.js",
+        "compiler": "tsc",
+        "format": ["cjs", "esm"],
+        "generatePackageJson": false,
+        "useLegacyTypescriptPlugin": false
+      }
     },
     "lint": {
       "executor": "@nx/eslint:lint",

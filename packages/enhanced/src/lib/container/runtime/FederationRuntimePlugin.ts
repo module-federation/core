@@ -34,98 +34,21 @@ const { mkdirpSync } = require(
   normalizeWebpackPath('webpack/lib/util/fs'),
 ) as typeof import('webpack/lib/util/fs');
 
-function resolveModule(
-  candidates: string[],
-  options?: NodeJS.RequireResolveOptions,
-): string {
-  let lastError: unknown;
-  for (const candidate of candidates) {
-    try {
-      return require.resolve(candidate, options);
-    } catch (error) {
-      lastError = error;
-    }
-  }
-
-  throw (
-    lastError ??
-    new Error(`Unable to resolve any module from: ${candidates.join(', ')}`)
-  );
-}
-
-function isEsmOutputBuild(compiler: Compiler): boolean {
-  if (compiler.options.experiments?.outputModule) {
-    return true;
-  }
-
-  if (compiler.options.output?.module) {
-    return true;
-  }
-
-  const library = compiler.options.output?.library;
-  if (
-    library &&
-    typeof library === 'object' &&
-    !Array.isArray(library) &&
-    'type' in library
-  ) {
-    return library.type === 'module';
-  }
-
-  return false;
-}
-
-function getModuleCandidates(
-  packageName: string,
-  preferEsm: boolean,
-): string[] {
-  const preferred = preferEsm
-    ? [`${packageName}/dist/index.js`, `${packageName}/dist/index.cjs`]
-    : [`${packageName}/dist/index.cjs`, `${packageName}/dist/index.js`];
-
-  const legacyFallback = preferEsm
-    ? [`${packageName}/dist/index.esm.js`, `${packageName}/dist/index.cjs.cjs`]
-    : [`${packageName}/dist/index.cjs.cjs`, `${packageName}/dist/index.esm.js`];
-
-  // Keep legacy dist entry names as fallbacks for mixed plugin/runtime versions.
-  // Resolve package root last to avoid accidentally selecting a CJS export when
-  // an explicit ESM fallback file exists in legacy runtime layouts.
-  return [...preferred, ...legacyFallback, packageName];
-}
-
-function resolveRuntimePaths(preferEsm: boolean, implementation?: string) {
-  const runtimeToolsCandidates = getModuleCandidates(
-    '@module-federation/runtime-tools',
-    preferEsm,
-  );
-  const bundlerRuntimeCandidates = getModuleCandidates(
-    '@module-federation/webpack-bundler-runtime',
-    preferEsm,
-  );
-  const runtimeCandidates = getModuleCandidates(
-    '@module-federation/runtime',
-    preferEsm,
-  );
-
-  const runtimeToolsPath = resolveModule(runtimeToolsCandidates);
-  const modulePaths = implementation ? [implementation] : [runtimeToolsPath];
-
-  return {
-    runtimeToolsPath,
-    bundlerRuntimePath: resolveModule(bundlerRuntimeCandidates, {
-      paths: modulePaths,
-    }),
-    runtimePath: resolveModule(runtimeCandidates, {
-      paths: modulePaths,
-    }),
-  };
-}
-
-const {
-  runtimeToolsPath: RuntimeToolsPath,
-  bundlerRuntimePath: BundlerRuntimePath,
-  runtimePath: RuntimePath,
-} = resolveRuntimePaths(true);
+const RuntimeToolsPath = require.resolve(
+  '@module-federation/runtime-tools/dist/index.esm.js',
+);
+const BundlerRuntimePath = require.resolve(
+  '@module-federation/webpack-bundler-runtime/dist/index.esm.js',
+  {
+    paths: [RuntimeToolsPath],
+  },
+);
+const RuntimePath = require.resolve(
+  '@module-federation/runtime/dist/index.esm.js',
+  {
+    paths: [RuntimeToolsPath],
+  },
+);
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
 const onceForCompiler = new WeakSet<Compiler>();
@@ -135,16 +58,12 @@ class FederationRuntimePlugin {
   options?: moduleFederationPlugin.ModuleFederationPluginOptions;
   entryFilePath: string;
   bundlerRuntimePath: string;
-  runtimePath: string;
-  runtimeToolsPath: string;
   federationRuntimeDependency?: FederationRuntimeDependency; // Add this line
 
   constructor(options?: moduleFederationPlugin.ModuleFederationPluginOptions) {
     this.options = options ? { ...options } : undefined;
     this.entryFilePath = '';
     this.bundlerRuntimePath = BundlerRuntimePath;
-    this.runtimePath = RuntimePath;
-    this.runtimeToolsPath = RuntimeToolsPath;
     this.federationRuntimeDependency = undefined; // Initialize as undefined
   }
 
@@ -424,24 +343,23 @@ class FederationRuntimePlugin {
 
   getRuntimeAlias(compiler: Compiler) {
     const { implementation } = this.options || {};
+    let runtimePath = RuntimePath;
     const alias: any = compiler.options.resolve.alias || {};
 
-    const resolvedPaths = resolveRuntimePaths(
-      isEsmOutputBuild(compiler),
-      implementation,
-    );
-
-    this.runtimeToolsPath = resolvedPaths.runtimeToolsPath;
-    this.bundlerRuntimePath = resolvedPaths.bundlerRuntimePath;
-
     if (alias['@module-federation/runtime$']) {
-      this.runtimePath = alias['@module-federation/runtime$'];
-      return this.runtimePath;
+      runtimePath = alias['@module-federation/runtime$'];
+    } else {
+      if (implementation) {
+        runtimePath = require.resolve(
+          `@module-federation/runtime/dist/index.esm.js`,
+          {
+            paths: [implementation],
+          },
+        );
+      }
     }
 
-    this.runtimePath = resolvedPaths.runtimePath;
-
-    return this.runtimePath;
+    return runtimePath;
   }
 
   setRuntimeAlias(compiler: Compiler) {
@@ -453,7 +371,7 @@ class FederationRuntimePlugin {
     alias['@module-federation/runtime-tools$'] =
       alias['@module-federation/runtime-tools$'] ||
       implementation ||
-      this.runtimeToolsPath;
+      RuntimeToolsPath;
 
     // Set up aliases for the federation runtime and tools
     // This ensures that the correct versions are used throughout the project
@@ -512,13 +430,14 @@ class FederationRuntimePlugin {
         compiler.options.output.uniqueName || `container_${Date.now()}`;
     }
 
-    const resolvedPaths = resolveRuntimePaths(
-      isEsmOutputBuild(compiler),
-      this.options?.implementation,
-    );
-    this.bundlerRuntimePath = resolvedPaths.bundlerRuntimePath;
-    this.runtimePath = resolvedPaths.runtimePath;
-    this.runtimeToolsPath = resolvedPaths.runtimeToolsPath;
+    if (this.options?.implementation) {
+      this.bundlerRuntimePath = require.resolve(
+        '@module-federation/webpack-bundler-runtime/dist/index.esm.js',
+        {
+          paths: [this.options.implementation],
+        },
+      );
+    }
 
     this.entryFilePath = this.getFilePath(compiler);
 

@@ -39,17 +39,13 @@ import { DEFAULT_SCOPE } from './constant';
 import { SnapshotHandler } from './plugins/snapshot/SnapshotHandler';
 import { SharedHandler } from './shared';
 import { RemoteHandler } from './remote';
-import { formatShareConfigs } from './utils/share';
-
-// Declare the global constant that will be defined by DefinePlugin
-// Default to true if not defined (e.g., when runtime-core is used outside of webpack)
-// so that snapshot functionality is included by default.
+import { formatShareConfigs } from './shared';
+// Snapshot enabled unless explicitly disabled by DefinePlugin.
 declare const FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN: boolean;
 const USE_SNAPSHOT =
   typeof FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN === 'boolean'
     ? !FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN
-    : true; // Default to true (use snapshot) when not explicitly defined
-
+    : true;
 export class ModuleFederation {
   options: Options;
   hooks = new PluginSystem({
@@ -57,21 +53,12 @@ export class ModuleFederation {
       userOptions: UserOptions;
       options: Options;
       origin: ModuleFederation;
-      /**
-       * @deprecated shareInfo will be removed soon, please use userOptions directly!
-       */
       shareInfo: ShareInfos;
     }>('beforeInit'),
     init: new SyncHook<
-      [
-        {
-          options: Options;
-          origin: ModuleFederation;
-        },
-      ],
+      [{ options: Options; origin: ModuleFederation }],
       void
     >(),
-    // maybe will change, temporarily for internal use only
     beforeInitContainer: new AsyncWaterfallHook<{
       shareScope: ShareScopeMap[string];
       initScope: InitScope;
@@ -79,7 +66,6 @@ export class ModuleFederation {
       remoteInfo: RemoteInfo;
       origin: ModuleFederation;
     }>('beforeInitContainer'),
-    // maybe will change, temporarily for internal use only
     initContainer: new AsyncWaterfallHook<{
       shareScope: ShareScopeMap[string];
       initScope: InitScope;
@@ -99,32 +85,16 @@ export class ModuleFederation {
   remoteHandler: RemoteHandler;
   shareScopeMap: ShareScopeMap;
   loaderHook = new PluginSystem({
-    // FIXME: may not be suitable , not open to the public yet
     getModuleInfo: new SyncHook<
-      [
-        {
-          target: Record<string, any>;
-          key: any;
-        },
-      ],
+      [{ target: Record<string, any>; key: any }],
       { value: any | undefined; key: string } | void
     >(),
     createScript: new SyncHook<
-      [
-        {
-          url: string;
-          attrs?: Record<string, any>;
-        },
-      ],
+      [{ url: string; attrs?: Record<string, any> }],
       CreateScriptHookReturn
     >(),
     createLink: new SyncHook<
-      [
-        {
-          url: string;
-          attrs?: Record<string, any>;
-        },
-      ],
+      [{ url: string; attrs?: Record<string, any> }],
       HTMLLinkElement | void
     >(),
     fetch: new AsyncHook<
@@ -177,7 +147,6 @@ export class ModuleFederation {
     >(),
   });
   moduleInfo?: GlobalModuleInfo[string];
-
   constructor(userOptions: UserOptions) {
     const plugins = USE_SNAPSHOT
       ? [snapshotPlugin(), generatePreloadAssetsPlugin()]
@@ -192,7 +161,6 @@ export class ModuleFederation {
       shared: {},
       inBrowser: isBrowserEnv(),
     };
-
     this.name = userOptions.name;
     this.options = defaultOptions;
     this.snapshotHandler = new SnapshotHandler(this);
@@ -205,19 +173,15 @@ export class ModuleFederation {
     ]);
     this.options = this.formatOptions(defaultOptions, userOptions);
   }
-
   initOptions(userOptions: UserOptions): Options {
     if (userOptions.name && userOptions.name !== this.options.name) {
       error(getShortErrorMsg(RUNTIME_010, runtimeDescMap));
     }
     this.registerPlugins(userOptions.plugins);
     const options = this.formatOptions(this.options, userOptions);
-
     this.options = options;
-
     return options;
   }
-
   async loadShare<T>(
     pkgName: string,
     extraOptions?: {
@@ -227,7 +191,6 @@ export class ModuleFederation {
   ): Promise<false | (() => T | undefined)> {
     return this.sharedHandler.loadShare(pkgName, extraOptions);
   }
-
   // The lib function will only be available if the shared set by eager or runtime init is set or the shared is successfully loaded.
   // 1. If the loaded shared already exists globally, then it will be reused
   // 2. If lib exists in local shared, it will be used directly
@@ -242,7 +205,6 @@ export class ModuleFederation {
   ): () => T | never {
     return this.sharedHandler.loadShareSync(pkgName, extraOptions);
   }
-
   initializeSharing(
     shareScopeName = DEFAULT_SCOPE,
     extraOptions?: {
@@ -253,7 +215,6 @@ export class ModuleFederation {
   ): Array<Promise<void>> {
     return this.sharedHandler.initializeSharing(shareScopeName, extraOptions);
   }
-
   initRawContainer(
     name: string,
     url: string,
@@ -261,13 +222,10 @@ export class ModuleFederation {
   ): Module {
     const remoteInfo = getRemoteInfo({ name, entry: url });
     const module = new Module({ host: this, remoteInfo });
-
     module.remoteEntryExports = container;
     this.moduleCache.set(name, module);
-
     return module;
   }
-
   // eslint-disable-next-line max-lines-per-function
   // eslint-disable-next-line @typescript-eslint/member-ordering
   async loadRemote<T>(
@@ -276,12 +234,10 @@ export class ModuleFederation {
   ): Promise<T | null> {
     return this.remoteHandler.loadRemote(id, options);
   }
-
   // eslint-disable-next-line @typescript-eslint/member-ordering
   async preloadRemote(preloadOptions: Array<PreloadRemoteArgs>): Promise<void> {
     return this.remoteHandler.preloadRemote(preloadOptions);
   }
-
   initShareScopeMap(
     scopeName: string,
     shareScope: ShareScopeMap[string],
@@ -289,7 +245,6 @@ export class ModuleFederation {
   ): void {
     this.sharedHandler.initShareScopeMap(scopeName, shareScope, extraOptions);
   }
-
   formatOptions(globalOptions: Options, userOptions: UserOptions): Options {
     const { allShareInfos: shared } = formatShareConfigs(
       globalOptions,
@@ -302,27 +257,18 @@ export class ModuleFederation {
         options: globalOptions,
         shareInfo: shared,
       });
-
     const remotes = this.remoteHandler.formatAndRegisterRemote(
       globalOptionsRes,
       userOptionsRes,
     );
-
     const { allShareInfos } = this.sharedHandler.registerShared(
       globalOptionsRes,
       userOptionsRes,
     );
-
     const plugins = [...globalOptionsRes.plugins];
-
-    if (userOptionsRes.plugins) {
-      userOptionsRes.plugins.forEach((plugin) => {
-        if (!plugins.includes(plugin)) {
-          plugins.push(plugin);
-        }
-      });
+    for (const p of userOptionsRes.plugins || []) {
+      if (!plugins.includes(p)) plugins.push(p);
     }
-
     const optionsRes: Options = {
       ...globalOptions,
       ...userOptions,
@@ -330,29 +276,23 @@ export class ModuleFederation {
       remotes,
       shared: allShareInfos,
     };
-
     this.hooks.lifecycle.init.emit({
       origin: this,
       options: optionsRes,
     });
     return optionsRes;
   }
-
   registerPlugins(plugins: UserOptions['plugins']) {
-    const pluginRes = registerPlugins(plugins, this);
-    // Merge plugin
-    this.options.plugins = this.options.plugins.reduce((res, plugin) => {
-      if (!plugin) return res;
-      if (res && !res.find((item) => item.name === plugin.name)) {
-        res.push(plugin);
-      }
-      return res;
-    }, pluginRes || []);
+    const base: Options['plugins'] = registerPlugins(plugins, this) || [];
+    for (const plugin of this.options.plugins) {
+      if (plugin && !base.find((item) => item.name === plugin.name))
+        base.push(plugin);
+    }
+    this.options.plugins = base;
   }
   registerRemotes(remotes: Remote[], options?: { force?: boolean }): void {
     return this.remoteHandler.registerRemotes(remotes, options);
   }
-
   registerShared(shared: UserOptions['shared']) {
     this.sharedHandler.registerShared(this.options, {
       ...this.options,

@@ -26,6 +26,7 @@
       "@module-federation/error-codes",
       "@module-federation/inject-external-runtime-core-plugin",
       "@module-federation/runtime-core",
+      "@module-federation/micro-effect",
       "create-module-federation",
       "@module-federation/cli",
       "@module-federation/rspress-plugin",

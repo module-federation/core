@@ -10,7 +10,7 @@
  * installed Metro version, ensuring compatibility with both versions.
  */
 
-// Type-only imports — resolved at compile-time via metro/src/*.d.ts, erased at runtime
+// Type-only imports - resolved at compile-time via metro/src/*.d.ts, erased at runtime
 import type DefaultServer from 'metro/src/Server';
 import type DefaultBaseJSBundle from 'metro/src/DeltaBundler/Serializers/baseJSBundle';
 import type DefaultCountingSet from 'metro/src/lib/CountingSet';

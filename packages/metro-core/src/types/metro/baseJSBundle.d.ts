@@ -1,10 +1,10 @@
-declare module 'metro/src/DeltaBundler/Serializers/baseJSBundle' {
-  import type {
-    Module,
-    ReadOnlyGraph,
-    SerializerOptions,
-  } from 'metro/src/DeltaBundler/types';
+import type {
+  Module,
+  ReadOnlyGraph,
+  SerializerOptions,
+} from 'metro/src/DeltaBundler/types';
 
+declare module 'metro/src/DeltaBundler/Serializers/baseJSBundle' {
   interface Bundle {
     modules: readonly [number, string][];
     post: string;

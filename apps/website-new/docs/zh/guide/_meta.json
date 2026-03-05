@@ -26,16 +26,6 @@
   },
   {
     "type": "dir-section-header",
-    "name": "performance",
-    "label": "性能优化"
-  },
-  {
-    "type": "dir-section-header",
-    "name": "advanced",
-    "label": "高级能力"
-  },
-  {
-    "type": "dir-section-header",
     "name": "deployment",
     "label": "部署"
   },

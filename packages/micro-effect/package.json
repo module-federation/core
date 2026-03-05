@@ -1,0 +1,43 @@
+{
+  "name": "@module-federation/micro-effect",
+  "description": "Micro Effect runtime for Module Federation - lightweight drop-in replacement for effect-smol",
+  "author": "zhanghang <hanric.zhang@gmail.com>",
+  "public": true,
+  "sideEffects": false,
+  "version": "0.23.0",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/module-federation/core.git",
+    "directory": "packages/micro-effect"
+  },
+  "keywords": [
+    "Module Federation",
+    "effect",
+    "micro-effect"
+  ],
+  "files": [
+    "dist/",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/index.cjs.js",
+  "module": "./dist/index.esm.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.esm.mjs",
+      "require": "./dist/index.cjs.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/index.d.ts"
+      ]
+    }
+  }
+}

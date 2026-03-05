@@ -1,4 +1,4 @@
-import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime';
+import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime/types';
 import { createWebsocket } from '../server/createWebsocket';
 import {
   AddDynamicRemoteAction,
