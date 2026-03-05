@@ -275,6 +275,143 @@ const collectServerModuleChunkIds = (
   return chunkIds;
 };
 
+const stripLayerPrefix = (moduleId: string) => {
+  if (moduleId.startsWith(SSR_LAYER_PREFIX)) {
+    return moduleId.slice(SSR_LAYER_PREFIX.length);
+  }
+  if (moduleId.startsWith(RSC_LAYER_PREFIX)) {
+    return moduleId.slice(RSC_LAYER_PREFIX.length);
+  }
+  return moduleId;
+};
+
+const getClientManifestKeysByModuleId = (
+  clientManifest: Record<string, ManifestExport>,
+  clientModuleId: string,
+) =>
+  Object.entries(clientManifest)
+    .filter(([, value]) => String(value.id) === clientModuleId)
+    .map(([key]) => key);
+
+const selectClientReferenceKey = (
+  candidateKeys: string[],
+  exportName: string,
+  exportValue?: ManifestExport,
+) => {
+  if (candidateKeys.length === 0) {
+    return '';
+  }
+  if (typeof exportValue?.name === 'string' && exportValue.name !== '*') {
+    const byManifestName = candidateKeys.find((key) =>
+      key.endsWith(`#${exportValue.name}`),
+    );
+    if (byManifestName) {
+      return byManifestName;
+    }
+  }
+  if (exportName !== '*' && exportName !== '__esModule') {
+    const byExportName = candidateKeys.find((key) =>
+      key.endsWith(`#${exportName}`),
+    );
+    if (byExportName) {
+      return byExportName;
+    }
+  }
+  const withoutHash = candidateKeys.find((key) => !key.includes('#'));
+  if (withoutHash) {
+    return withoutHash;
+  }
+  return candidateKeys[0];
+};
+
+const createSyntheticClientReference = (
+  referenceId: string,
+  asyncValue: boolean,
+) => {
+  const referenceFn = function syntheticClientReference() {
+    throw new Error(
+      `Attempted to call client reference "${referenceId}" from the server`,
+    );
+  } as ((...args: unknown[]) => never) & {
+    $$typeof?: symbol;
+    $$id?: string;
+    $$async?: boolean;
+  };
+  referenceFn.$$typeof = CLIENT_REFERENCE_SYMBOL;
+  referenceFn.$$id = referenceId;
+  referenceFn.$$async = asyncValue;
+  return referenceFn;
+};
+
+const buildSyntheticSsrModuleFromManifest = (
+  moduleId: string,
+  manifest?: ManifestLike,
+) => {
+  const clientManifest = isObject(manifest?.clientManifest)
+    ? (manifest!.clientManifest as Record<string, ManifestExport>)
+    : undefined;
+  const serverConsumerModuleMap = isObject(manifest?.serverConsumerModuleMap)
+    ? (manifest!.serverConsumerModuleMap as Record<string, ManifestNode>)
+    : undefined;
+  if (!clientManifest || !serverConsumerModuleMap) {
+    return null;
+  }
+
+  for (const [rawClientModuleId, node] of Object.entries(
+    serverConsumerModuleMap,
+  )) {
+    if (!isObject(node)) {
+      continue;
+    }
+    const normalizedClientModuleId = stripLayerPrefix(rawClientModuleId);
+    const clientManifestKeys = getClientManifestKeysByModuleId(
+      clientManifest,
+      normalizedClientModuleId,
+    );
+    if (clientManifestKeys.length === 0) {
+      continue;
+    }
+
+    const syntheticExports: Record<string, unknown> = Object.create(null);
+    for (const [exportName, exportValue] of Object.entries(node)) {
+      if (!isObject(exportValue) || exportValue.id == null) {
+        continue;
+      }
+      if (String(exportValue.id) !== moduleId) {
+        continue;
+      }
+
+      const manifestExport = exportValue as ManifestExport;
+      const referenceKey = selectClientReferenceKey(
+        clientManifestKeys,
+        exportName,
+        manifestExport,
+      );
+      if (!referenceKey) {
+        continue;
+      }
+      const syntheticRef = createSyntheticClientReference(
+        referenceKey,
+        Boolean(manifestExport.async),
+      );
+      if (exportName === '*') {
+        syntheticExports.default = syntheticRef;
+        continue;
+      }
+      if (exportName === '__esModule') {
+        continue;
+      }
+      syntheticExports[exportName] = syntheticRef;
+    }
+
+    if (Object.keys(syntheticExports).length > 0) {
+      return syntheticExports;
+    }
+  }
+
+  return null;
+};
+
 const preloadServerModuleChunks = async (
   moduleId: string,
   manifest?: ManifestLike,
@@ -608,6 +745,15 @@ export async function preloadSSRModule(moduleId: string, exposeHint?: string) {
         error: String(error),
       });
     }
+  }
+
+  const syntheticModuleFromManifest = buildSyntheticSsrModuleFromManifest(
+    normalizedModuleId,
+    manifest,
+  );
+  if (syntheticModuleFromManifest) {
+    ssrModuleCache[normalizedModuleId] = syntheticModuleFromManifest;
+    return syntheticModuleFromManifest;
   }
 
   const shareScopeMap = (__webpack_require__ as unknown as { S?: any }).S;
