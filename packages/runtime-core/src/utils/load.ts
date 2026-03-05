@@ -157,7 +157,6 @@ async function loadEntryScript({
       throw e;
     });
 }
-
 async function loadEntryDom({
   remoteInfo,
   remoteEntryExports,

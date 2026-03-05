@@ -1,5 +1,13 @@
 # @module-federation/bridge-react
 
+## 2.1.0
+
+### Patch Changes
+
+- Updated dependencies [918294f]
+  - @module-federation/sdk@2.1.0
+  - @module-federation/bridge-shared@2.1.0
+
 ## 2.0.1
 
 ### Patch Changes
