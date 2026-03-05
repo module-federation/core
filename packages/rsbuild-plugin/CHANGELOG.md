@@ -1,5 +1,18 @@
 # @module-federation/rsbuild-plugin
 
+## 2.1.0
+
+### Patch Changes
+
+- dfbf05f: Fix app-mode `target: 'node'` handling to respect custom `environment` names, improve missing-environment errors, auto-detect default environment names by caller/tooling when `environment` is omitted, and ensure selected node-target environments still receive federation plugin injection for commonjs-like SSR outputs.
+- Updated dependencies [987716a]
+- Updated dependencies [0172491]
+- Updated dependencies [a0faa70]
+- Updated dependencies [918294f]
+  - @module-federation/enhanced@2.1.0
+  - @module-federation/node@2.7.33
+  - @module-federation/sdk@2.1.0
+
 ## 2.0.1
 
 ### Patch Changes

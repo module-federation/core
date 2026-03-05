@@ -18,7 +18,12 @@ import {
   RemoteEntryInitOptions,
   CallFrom,
 } from './type';
-import { getBuilderId, registerPlugins, getRemoteEntry } from './utils';
+import { getBuilderId, registerPlugins, getRemoteEntry, error } from './utils';
+import {
+  getShortErrorMsg,
+  RUNTIME_010,
+  runtimeDescMap,
+} from '@module-federation/error-codes';
 import { Module } from './module';
 import {
   AsyncHook,
@@ -169,6 +174,9 @@ export class ModuleFederation {
     this.options = this.formatOptions(defaultOptions, userOptions);
   }
   initOptions(userOptions: UserOptions): Options {
+    if (userOptions.name && userOptions.name !== this.options.name) {
+      error(getShortErrorMsg(RUNTIME_010, runtimeDescMap));
+    }
     this.registerPlugins(userOptions.plugins);
     const options = this.formatOptions(this.options, userOptions);
     this.options = options;
