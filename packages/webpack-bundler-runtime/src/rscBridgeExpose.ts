@@ -163,6 +163,27 @@ const resolveHiddenSsrExposeFromClientExposeMap = (
   return '';
 };
 
+const resolveHiddenSsrExposeFromHint = (
+  exposeHint: string | undefined,
+  moduleMap?: Record<string, () => Promise<() => unknown> | (() => unknown)>,
+) => {
+  if (!exposeHint || !isObject(moduleMap)) {
+    return '';
+  }
+  const normalizedExpose = normalizeExpose(exposeHint);
+  const hiddenExpose = normalizedExpose.startsWith(RSC_SSR_EXPOSE_PREFIX)
+    ? normalizedExpose
+    : toSsrExposeKey(normalizedExpose);
+  if (
+    hiddenExpose &&
+    typeof hiddenExpose === 'string' &&
+    typeof moduleMap[hiddenExpose] === 'function'
+  ) {
+    return hiddenExpose;
+  }
+  return '';
+};
+
 const resolveClientManifestEntry = (
   clientManifest: Record<string, ManifestExport>,
   clientReferenceId: string,
@@ -451,7 +472,7 @@ export async function executeAction(actionId: string, args: unknown[]) {
   return action(...(Array.isArray(args) ? args : []));
 }
 
-export async function preloadSSRModule(moduleId: string) {
+export async function preloadSSRModule(moduleId: string, exposeHint?: string) {
   const normalizedModuleId = String(moduleId);
   if (
     Object.prototype.hasOwnProperty.call(ssrModuleCache, normalizedModuleId)
@@ -475,7 +496,12 @@ export async function preloadSSRModule(moduleId: string) {
   });
 
   const moduleMap = __webpack_require__.initializeExposesData?.moduleMap;
+  const hiddenExposeFromHint = resolveHiddenSsrExposeFromHint(
+    typeof exposeHint === 'string' ? exposeHint : undefined,
+    moduleMap,
+  );
   let hiddenSsrExpose =
+    hiddenExposeFromHint ||
     ssrExposeByServerModuleId[normalizedModuleId] ||
     resolveHiddenSsrExposeFromClientExposeMap(normalizedModuleId, moduleMap);
   if (!hiddenSsrExpose) {
@@ -483,11 +509,14 @@ export async function preloadSSRModule(moduleId: string) {
     await ensureShareScopeInitialized('rsc');
     await buildSsrExposeMap(true);
     hiddenSsrExpose =
+      hiddenExposeFromHint ||
       ssrExposeByServerModuleId[normalizedModuleId] ||
       resolveHiddenSsrExposeFromClientExposeMap(normalizedModuleId, moduleMap);
   }
   debugLog('preloadSSRModule:hiddenExpose', {
     moduleId: normalizedModuleId,
+    exposeHint: exposeHint || '',
+    hiddenExposeFromHint: hiddenExposeFromHint || '',
     hiddenSsrExpose: hiddenSsrExpose || '',
     hasHiddenExposeFactory:
       isObject(moduleMap) &&

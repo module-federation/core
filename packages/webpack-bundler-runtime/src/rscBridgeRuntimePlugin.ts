@@ -35,7 +35,10 @@ type ManifestLike = {
 type BridgeModule = {
   getManifest?: () => ManifestLike | Promise<ManifestLike>;
   executeAction?: (actionId: string, args: unknown[]) => Promise<unknown>;
-  preloadSSRModule?: (moduleId: string) => Promise<unknown>;
+  preloadSSRModule?: (
+    moduleId: string,
+    exposeHint?: string,
+  ) => Promise<unknown>;
   getSSRModule?: (moduleId: string) => unknown;
 };
 
@@ -265,7 +268,7 @@ const registerActionProxyExport = (
 
 const remapConsumerNode = (
   value: unknown,
-  mapServerModuleId: (rawServerModuleId: string) => string,
+  mapServerModuleId: (rawServerModuleId: string, exportName: string) => string,
 ) => {
   if (!isObject(value)) {
     return value;
@@ -277,11 +280,43 @@ const remapConsumerNode = (
         : exportValue;
       if (isObject(nextExportValue) && nextExportValue['id'] != null) {
         const rawId = String(nextExportValue['id']);
-        nextExportValue['id'] = mapServerModuleId(rawId);
+        nextExportValue['id'] = mapServerModuleId(rawId, exportName);
       }
       return [exportName, nextExportValue];
     }),
   );
+};
+
+const inferExposeHintFromConsumerNode = (node: unknown): string | undefined => {
+  if (!isObject(node)) {
+    return undefined;
+  }
+
+  for (const [exportName, exportValue] of Object.entries(node)) {
+    if (exportName !== '*' && exportName !== '__esModule') {
+      return normalizeExpose(exportName);
+    }
+    if (
+      isObject(exportValue) &&
+      typeof exportValue['name'] === 'string' &&
+      exportValue['name'] !== '*' &&
+      exportValue['name'] !== '__esModule'
+    ) {
+      return normalizeExpose(exportValue['name']);
+    }
+  }
+
+  const starValue = node['*'];
+  if (
+    isObject(starValue) &&
+    typeof starValue['name'] === 'string' &&
+    starValue['name'] !== '*' &&
+    starValue['name'] !== '__esModule'
+  ) {
+    return normalizeExpose(starValue['name']);
+  }
+
+  return undefined;
 };
 
 const resolveRemoteAlias = (args: any): string | undefined => {
@@ -726,6 +761,7 @@ const rscBridgeRuntimePlugin = () => {
   const preloadSsrModule = async (
     alias: string,
     rawServerModuleId: string,
+    exposeHint?: string,
     args?: any,
   ) => {
     const namespacedModuleId = getNamespacedModuleId(alias, rawServerModuleId);
@@ -750,7 +786,7 @@ const rscBridgeRuntimePlugin = () => {
       const bridge = await ensureBridge(alias, args);
       if (typeof bridge.preloadSSRModule === 'function') {
         ssrModuleExportsByNamespacedId[namespacedModuleId] =
-          await bridge.preloadSSRModule(rawServerModuleId);
+          await bridge.preloadSSRModule(rawServerModuleId, exposeHint);
         return;
       }
       if (typeof bridge.getSSRModule === 'function') {
@@ -759,7 +795,7 @@ const rscBridgeRuntimePlugin = () => {
         return;
       }
       throw new Error(
-        `[mf:rsc-bridge] Remote "${alias}" does not expose preloadSSRModule/getSSRModule for "${rawServerModuleId}"`,
+        `[mf:rsc-bridge] Remote "${alias}" does not expose preloadSSRModule/getSSRModule for "${rawServerModuleId}"${exposeHint ? ` (hint: ${exposeHint})` : ''}`,
       );
     })()
       .catch((error: unknown) => {
@@ -931,20 +967,33 @@ const rscBridgeRuntimePlugin = () => {
       for (const [rawModuleId, value] of Object.entries(
         remoteManifest.serverConsumerModuleMap,
       )) {
+        const inferredExposeHint = inferExposeHintFromConsumerNode(value);
         const resolvedModuleId =
           resolveClientModuleIdFromMap(resolvedClientIdsByRawId, rawModuleId) ||
           getNamespacedModuleId(alias, rawModuleId);
 
-        const nextValue = remapConsumerNode(value, (rawServerModuleId) => {
-          const namespacedServerModuleId = getNamespacedModuleId(
-            alias,
-            rawServerModuleId,
-          );
-          ssrPreloadPromises.push(
-            preloadSsrModule(alias, rawServerModuleId, args),
-          );
-          return namespacedServerModuleId;
-        });
+        const nextValue = remapConsumerNode(
+          value,
+          (rawServerModuleId, exportName) => {
+            const exportScopedHint =
+              exportName !== '*' && exportName !== '__esModule'
+                ? normalizeExpose(exportName)
+                : inferredExposeHint;
+            const namespacedServerModuleId = getNamespacedModuleId(
+              alias,
+              rawServerModuleId,
+            );
+            ssrPreloadPromises.push(
+              preloadSsrModule(
+                alias,
+                rawServerModuleId,
+                exportScopedHint,
+                args,
+              ),
+            );
+            return namespacedServerModuleId;
+          },
+        );
 
         assertNoConflict(
           hostManifest.serverConsumerModuleMap as Record<string, any>,
