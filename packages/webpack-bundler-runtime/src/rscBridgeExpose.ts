@@ -48,6 +48,7 @@ const CLIENT_REFERENCE_SYMBOL = Symbol.for('react.client.reference');
 const BRIDGE_EXPOSE_KEY = './__rspack_rsc_bridge__';
 const RSC_SSR_EXPOSE_PREFIX = './__rspack_rsc_ssr__/';
 const SSR_LAYER_PREFIX = '(server-side-rendering)/';
+const RSC_LAYER_PREFIX = '(react-server-components)/';
 
 const actionReferenceCache: Record<string, (...args: unknown[]) => unknown> =
   Object.create(null);
@@ -212,13 +213,43 @@ const resolveFactoryExports = async (getFactory: () => unknown) => {
   return factory;
 };
 
-const getShareScopesForServerModuleId = (moduleId: string) => {
+const getShareScopesForServerModuleId = (
+  moduleId: string,
+  manifest?: ManifestLike,
+) => {
   const scopes = new Set<string>(['default']);
   if (moduleId.startsWith('(server-side-rendering)/')) {
     scopes.add('ssr');
   }
   if (moduleId.startsWith('(react-server-components)/')) {
     scopes.add('rsc');
+  }
+  const serverConsumerModuleMap = isObject(manifest?.serverConsumerModuleMap)
+    ? (manifest!.serverConsumerModuleMap as Record<string, ManifestNode>)
+    : undefined;
+  if (serverConsumerModuleMap) {
+    const unprefixedModuleId = moduleId.startsWith(SSR_LAYER_PREFIX)
+      ? moduleId.slice(SSR_LAYER_PREFIX.length)
+      : moduleId.startsWith(RSC_LAYER_PREFIX)
+        ? moduleId.slice(RSC_LAYER_PREFIX.length)
+        : moduleId;
+
+    if (
+      Object.prototype.hasOwnProperty.call(
+        serverConsumerModuleMap,
+        `${SSR_LAYER_PREFIX}${unprefixedModuleId}`,
+      )
+    ) {
+      scopes.add('ssr');
+    }
+    if (
+      Object.prototype.hasOwnProperty.call(
+        serverConsumerModuleMap,
+        `${RSC_LAYER_PREFIX}${unprefixedModuleId}`,
+      )
+    ) {
+      scopes.add('rsc');
+    }
   }
   return Array.from(scopes);
 };
@@ -250,8 +281,11 @@ const ensureShareScopeInitialized = async (shareScope: string) => {
   await initPromise;
 };
 
-const ensureShareScopesForModuleId = async (moduleId: string) => {
-  const shareScopes = getShareScopesForServerModuleId(moduleId);
+const ensureShareScopesForModuleId = async (
+  moduleId: string,
+  manifest?: ManifestLike,
+) => {
+  const shareScopes = getShareScopesForServerModuleId(moduleId, manifest);
   await Promise.all(
     shareScopes.map((shareScope) => ensureShareScopeInitialized(shareScope)),
   );
@@ -284,8 +318,8 @@ const scanExposedModules = async () => {
   }
 };
 
-const buildSsrExposeMap = async () => {
-  if (scannedSsrExposeMap) {
+const buildSsrExposeMap = async (force = false) => {
+  if (scannedSsrExposeMap && !force) {
     return;
   }
   scannedSsrExposeMap = true;
@@ -426,8 +460,11 @@ export async function preloadSSRModule(moduleId: string) {
   }
 
   await scanExposedModules();
+  const manifest = isObject(__webpack_require__.rscM)
+    ? (__webpack_require__.rscM as ManifestLike)
+    : undefined;
+  await ensureShareScopesForModuleId(normalizedModuleId, manifest);
   await buildSsrExposeMap();
-  await ensureShareScopesForModuleId(normalizedModuleId);
 
   const shareScopeMap = (__webpack_require__ as unknown as { S?: any }).S;
   const ssrReact = shareScopeMap?.ssr?.react;
@@ -438,9 +475,17 @@ export async function preloadSSRModule(moduleId: string) {
   });
 
   const moduleMap = __webpack_require__.initializeExposesData?.moduleMap;
-  const hiddenSsrExpose =
+  let hiddenSsrExpose =
     ssrExposeByServerModuleId[normalizedModuleId] ||
     resolveHiddenSsrExposeFromClientExposeMap(normalizedModuleId, moduleMap);
+  if (!hiddenSsrExpose) {
+    await ensureShareScopeInitialized('ssr');
+    await ensureShareScopeInitialized('rsc');
+    await buildSsrExposeMap(true);
+    hiddenSsrExpose =
+      ssrExposeByServerModuleId[normalizedModuleId] ||
+      resolveHiddenSsrExposeFromClientExposeMap(normalizedModuleId, moduleMap);
+  }
   debugLog('preloadSSRModule:hiddenExpose', {
     moduleId: normalizedModuleId,
     hiddenSsrExpose: hiddenSsrExpose || '',
@@ -461,13 +506,9 @@ export async function preloadSSRModule(moduleId: string) {
     return moduleExports;
   }
 
-  const required = __webpack_require__(normalizedModuleId);
-  const resolved =
-    required && typeof (required as Promise<unknown>).then === 'function'
-      ? await (required as Promise<unknown>)
-      : required;
-  ssrModuleCache[normalizedModuleId] = resolved;
-  return resolved;
+  throw new Error(
+    `[rsc-bridge-expose] Missing hidden SSR expose for "${normalizedModuleId}". Bridge mapping failed; no raw module-id fallback is allowed.`,
+  );
 }
 
 export function getSSRModule(moduleId: string) {
