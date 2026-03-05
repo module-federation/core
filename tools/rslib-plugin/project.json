@@ -13,13 +13,7 @@
         "commands": [
           "node -e \"require('fs').rmSync('tools/rslib-plugin/dist',{recursive:true,force:true})\"",
           "pnpm -C tools/rslib-plugin exec tsdown --config tsdown.config.ts",
-          "cp tools/rslib-plugin/*.md tools/rslib-plugin/dist",
-          "cp tools/rslib-plugin/package.json tools/rslib-plugin/dist",
-          "cp tools/rslib-plugin/executors.json tools/rslib-plugin/dist",
-          "mkdir -p tools/rslib-plugin/dist/src/executors/build tools/rslib-plugin/dist/src/executors/dev tools/rslib-plugin/dist/src/executors/echo",
-          "cp tools/rslib-plugin/src/executors/build/schema.json tools/rslib-plugin/dist/src/executors/build/schema.json",
-          "cp tools/rslib-plugin/src/executors/dev/schema.json tools/rslib-plugin/dist/src/executors/dev/schema.json",
-          "cp tools/rslib-plugin/src/executors/echo/schema.json tools/rslib-plugin/dist/src/executors/echo/schema.json"
+          "node -e \"const fs=require('fs');const path=require('path');const src='tools/rslib-plugin';const dst='tools/rslib-plugin/dist';for(const f of fs.readdirSync(src)){if(f.endsWith('.md'))fs.cpSync(path.join(src,f),path.join(dst,f));}for(const f of ['package.json','executors.json'])fs.cpSync(path.join(src,f),path.join(dst,f));for(const n of ['build','dev','echo']){const d=path.join(dst,'src/executors',n);fs.mkdirSync(d,{recursive:true});fs.cpSync(path.join(src,'src/executors',n,'schema.json'),path.join(d,'schema.json'));}\""
         ]
       }
     },

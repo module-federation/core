@@ -13,7 +13,7 @@
         "commands": [
           "node -e \"require('fs').rmSync('packages/core/dist',{recursive:true,force:true})\"",
           "pnpm -C packages/core exec tsdown --config tsdown.config.ts",
-          "cp packages/core/*.md packages/core/dist"
+          "node -e \"const fs=require('fs');const path=require('path');const src='packages/core';const dst='packages/core/dist';for(const f of fs.readdirSync(src)){if(f.endsWith('.md'))fs.cpSync(path.join(src,f),path.join(dst,f));}\""
         ]
       }
     },

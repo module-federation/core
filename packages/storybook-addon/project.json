@@ -14,7 +14,7 @@
         "commands": [
           "node -e \"require('fs').rmSync('packages/storybook-addon/dist',{recursive:true,force:true})\"",
           "pnpm -C packages/storybook-addon exec tsdown --config tsdown.config.ts",
-          "cp packages/storybook-addon/*.md packages/storybook-addon/dist"
+          "node -e \"const fs=require('fs');const path=require('path');const src='packages/storybook-addon';const dst='packages/storybook-addon/dist';for(const f of fs.readdirSync(src)){if(f.endsWith('.md'))fs.cpSync(path.join(src,f),path.join(dst,f));}\""
         ]
       },
       "dependsOn": [
