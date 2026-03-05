@@ -59,6 +59,51 @@ pnpm --filter <package-name> run <script>
 
 Use these as defaults unless the task explicitly requires something else.
 
+### Turbo Task Primer (How to Run Tasks)
+
+- List effective tasks:
+
+```bash
+pnpm exec turbo run build --dry=json
+```
+
+- Run a task across the workspace:
+
+```bash
+pnpm exec turbo run <task>
+```
+
+- Run a task for packages only:
+
+```bash
+pnpm exec turbo run <task> --filter=./packages/**
+```
+
+- Run a task for one package:
+
+```bash
+pnpm exec turbo run <task> --filter=@module-federation/<pkg>
+```
+
+- Run a package script directly (bypasses workspace fanout):
+
+```bash
+pnpm --filter @module-federation/<pkg> run <script>
+```
+
+- Disable cache for validation/debug runs:
+
+```bash
+pnpm exec turbo run <task> --force
+```
+
+- Common Turbo tasks defined in `turbo.json`:
+  - `build`
+  - `test` (depends on `^build`)
+  - `lint`
+  - `e2e` / `test:e2e` / `test:e2e:production`
+  - `turbo:build` / `turbo:test` / `turbo:lint` (repo-standard package pipeline tasks)
+
 ### Formatting
 
 - CI-equivalent format gate:
@@ -75,7 +120,7 @@ pnpm exec prettier --write .
 
 Wrapper script also exists: `pnpm run lint-fix`.
 
-### Package Pipeline Parity (`tag:type:pkg`)
+### Package Pipeline Parity
 
 - Package build (Turbo cache handled automatically):
 
@@ -89,7 +134,21 @@ pnpm run build:pkg
 pnpm run test:pkg
 ```
 
-### Metro Pipeline Parity (`tag:type:metro`)
+- Package lint:
+
+```bash
+pnpm run lint
+```
+
+- Underlying Turbo commands used by these wrappers:
+
+```bash
+pnpm exec turbo run turbo:build --filter=./packages/**
+pnpm exec turbo run turbo:test --filter=./packages/**
+pnpm exec turbo run turbo:lint --filter=./packages/**
+```
+
+### Metro Pipeline Parity
 
 - Build pkg + metro:
 
@@ -100,13 +159,13 @@ pnpm run build:pkg
 - Metro tests:
 
 ```bash
-pnpm exec turbo run test --filter=@module-federation/metro*
+pnpm exec turbo run test --filter=@module-federation/metro --filter=@module-federation/metro-plugin-rnef --filter=@module-federation/metro-plugin-rnc-cli
 ```
 
 - Metro lint:
 
 ```bash
-pnpm exec turbo run lint --filter=@module-federation/metro*
+pnpm exec turbo run lint --filter=@module-federation/metro --filter=@module-federation/metro-plugin-rnef --filter=@module-federation/metro-plugin-rnc-cli
 ```
 
 ### E2E Parity via Local CI Runner
@@ -149,7 +208,7 @@ Run the smallest deterministic set that matches the change type.
 | --- | --- | --- |
 | Docs-only (no code/config behavior change) | none by default; run only checks explicitly requested by user | `pnpm exec prettier --check .` |
 | Package code in `packages/*` (non-metro) | `pnpm exec prettier --check .`; package build; package tests | targeted project test/build commands |
-| Metro package code (`tag:type:metro`) | metro parity set (build pkg+metro, affected metro tests, metro lint) | E2E metro job via `ci:local` when relevant |
+| Metro package code (`packages/metro-*`) | metro parity set (build pkg+metro, metro tests, metro lint) | E2E metro job via `ci:local` when relevant |
 | App/E2E-related changes in `apps/*` or E2E scripts/workflows | `pnpm run ci:local --only=<matching-job>` | additional related `ci:local` jobs |
 | Release workflow/release tooling changes | release sanity commands only, no publish | package/metro builds if impacted |
 
