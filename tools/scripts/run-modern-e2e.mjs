@@ -18,7 +18,7 @@ const MODERN_APPS = [
   'modernjs-ssr-remote-new-version',
 ];
 
-const MODERN_PORTS = ['3050', '3052', '3053', '3054', '3055', '3056'];
+const MODERN_PORTS = ['3050', '3051', '3052', '3053', '3054', '3055', '3056'];
 const MODERN_MANIFEST_URLS = MODERN_PORTS.map(
   (port) => `http://127.0.0.1:${port}/mf-manifest.json`,
 );

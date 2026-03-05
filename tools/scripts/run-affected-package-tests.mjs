@@ -245,6 +245,14 @@ function shouldTriggerPackageTests(relativeFilePath) {
     return false;
   }
 
+  if (relativeFilePath === 'package.json') {
+    return true;
+  }
+
+  if (/^tsconfig(?:\..+)?\.json$/.test(relativeFilePath)) {
+    return true;
+  }
+
   if (
     relativeFilePath.startsWith('src/') ||
     relativeFilePath.startsWith('test/') ||
@@ -263,6 +271,11 @@ function shouldTriggerPackageTests(relativeFilePath) {
     relativeFilePath.startsWith('vitest.config.') ||
     relativeFilePath.startsWith('rstest.config.') ||
     relativeFilePath.startsWith('vite.config.') ||
+    relativeFilePath.startsWith('webpack.config.') ||
+    relativeFilePath.startsWith('rspack.config.') ||
+    relativeFilePath.startsWith('rsbuild.config.') ||
+    relativeFilePath.startsWith('rslib.config.') ||
+    relativeFilePath.startsWith('babel.config.') ||
     relativeFilePath.startsWith('tsconfig.spec')
   );
 }
