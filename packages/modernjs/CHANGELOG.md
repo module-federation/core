@@ -1,6 +1,6 @@
 # @module-federation/modern-js
 
-## 2.71.0
+## 2.1.0
 
 ### Minor Changes
 
@@ -23,18 +23,6 @@
   - @module-federation/node@2.7.33
   - @module-federation/sdk@2.1.0
   - @module-federation/bridge-react@2.1.0
-
-## 2.70.6
-
-### Patch Changes
-
-- @module-federation/cli@2.0.1
-- @module-federation/enhanced@2.0.1
-- @module-federation/bridge-react@2.0.1
-- @module-federation/runtime@2.0.1
-- @module-federation/node@2.7.32
-- @module-federation/rsbuild-plugin@2.0.1
-- @module-federation/sdk@2.0.1
 
 ## 0.24.2
 
