@@ -9,14 +9,8 @@
       "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/packages/runtime/dist"],
       "options": {
-        "parallel": false,
-        "cwd": "packages/runtime",
-        "commands": [
-          {
-            "command": "tsdown --config tsdown.config.ts",
-            "forwardAllArgs": false
-          }
-        ]
+        "command": "rslib build",
+        "cwd": "packages/runtime"
       },
       "dependsOn": [
         {
@@ -39,10 +33,9 @@
       "executor": "nx:run-commands",
       "options": {
         "parallel": false,
-        "cwd": "packages/runtime",
         "commands": [
           {
-            "command": "RUNTIME_TSDOWN_MODE=debug tsdown --config tsdown.config.ts",
+            "command": "FEDERATION_DEBUG=true nx run runtime:build --skip-nx-cache",
             "forwardAllArgs": false
           }
         ]

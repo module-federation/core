@@ -1,9 +1,6 @@
-import runtimeCoreDefault, * as runtimeCoreNamespace from '@module-federation/runtime-tools/runtime-core';
+import * as runtimeCore from '@module-federation/runtime-tools/runtime-core';
 
 import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime-tools/runtime-core';
-const runtimeCore =
-  (runtimeCoreDefault as typeof runtimeCoreNamespace | undefined) ??
-  runtimeCoreNamespace;
 declare global {
   var __VERSION__: string;
   var _FEDERATION_RUNTIME_CORE: typeof runtimeCore;
@@ -18,16 +15,16 @@ function injectExternalRuntimeCorePlugin(): ModuleFederationRuntimePlugin {
     name: 'inject-external-runtime-core-plugin',
     version: __VERSION__,
     beforeInit(args) {
-      const globalRef = (
-        runtimeCore as typeof runtimeCore & {
-          Global?: typeof runtimeCore.Global;
-        }
-      ).Global;
-      if (!globalRef || typeof globalRef !== 'object') {
-        return args;
-      }
       const name = args.options.name;
       const version = __VERSION__;
+
+      // Use the real host global rather than runtimeCore.Global, since Global can be
+      // missing (tree-shaken/re-export-only) or be a sandboxed view in some MF setups.
+      const globalRef = globalThis as typeof globalThis & {
+        _FEDERATION_RUNTIME_CORE?: typeof runtimeCore;
+        _FEDERATION_RUNTIME_CORE_FROM?: { version: string; name: string };
+      };
+
       if (
         globalRef._FEDERATION_RUNTIME_CORE &&
         globalRef._FEDERATION_RUNTIME_CORE_FROM &&

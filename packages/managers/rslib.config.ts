@@ -6,24 +6,25 @@ export default defineConfig({
   lib: [
     {
       format: 'esm',
+      autoExtension: true,
       syntax: 'es2021',
       bundle: false,
       outBase: 'src',
       dts: {
+        autoExtension: true,
         bundle: false,
         distPath: './dist',
-        autoExtension: true,
       },
     },
     {
       format: 'cjs',
+      autoExtension: true,
       syntax: 'es2021',
       bundle: false,
       outBase: 'src',
       dts: {
-        bundle: false,
-        distPath: './dist',
         autoExtension: true,
+        distPath: './dist',
       },
     },
   ],

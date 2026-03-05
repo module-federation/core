@@ -9,14 +9,8 @@
       "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/packages/webpack-bundler-runtime/dist"],
       "options": {
-        "parallel": false,
-        "cwd": "packages/webpack-bundler-runtime",
-        "commands": [
-          {
-            "command": "tsdown --config tsdown.config.ts --filter webpack-bundler-runtime-build",
-            "forwardAllArgs": false
-          }
-        ]
+        "command": "rslib build",
+        "cwd": "packages/webpack-bundler-runtime"
       },
       "dependsOn": [
         {

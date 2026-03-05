@@ -16,6 +16,7 @@ export default defineConfig({
     {
       ...shared,
       format: 'esm',
+      autoExtension: true,
       output: {
         distPath: {
           root: './dist/esm',
@@ -25,6 +26,7 @@ export default defineConfig({
     {
       ...shared,
       format: 'cjs',
+      autoExtension: true,
       output: {
         distPath: {
           root: './dist/cjs',
@@ -34,6 +36,7 @@ export default defineConfig({
     {
       ...shared,
       format: 'mf',
+      autoExtension: true,
       output: {
         // set unpkg cdn as assetPrefix if you want to publish
         assetPrefix:

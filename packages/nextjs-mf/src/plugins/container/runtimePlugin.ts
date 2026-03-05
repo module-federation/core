@@ -1,6 +1,15 @@
 import { ModuleFederationRuntimePlugin } from '@module-federation/runtime';
 
 export default function (): ModuleFederationRuntimePlugin {
+  const debugState =
+    (globalThis as any).__mfNextRuntimeDebugState ||
+    ((globalThis as any).__mfNextRuntimeDebugState = {
+      errorLoadRemoteLogs: 0,
+      snapshotLogs: 0,
+      resolveShareLogs: 0,
+      beforeRequestLogs: 0,
+    });
+
   return {
     name: 'next-internal-plugin',
     createScript: function (args: {
@@ -28,6 +37,41 @@ export default function (): ModuleFederationRuntimePlugin {
       const id = args.id;
       const error = args.error;
       const from = args.from;
+      const remoteName = id.split('/').shift();
+      const matchedRemote = args?.origin?.options?.remotes?.find?.(
+        (remote: any) => remote?.name === remoteName,
+      );
+      if (debugState.errorLoadRemoteLogs < 20) {
+        debugState.errorLoadRemoteLogs += 1;
+        // #region agent log
+        fetch(
+          'http://127.0.0.1:7414/ingest/989a0b49-843c-45a9-b79d-4027ab5a19e4',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Debug-Session-Id': '7e9739',
+            },
+            body: JSON.stringify({
+              sessionId: '7e9739',
+              runId: 'nested-webpack-run5',
+              hypothesisId: 'H12',
+              location:
+                'packages/nextjs-mf/src/plugins/container/runtimePlugin.ts:errorLoadRemote',
+              message: 'errorLoadRemote triggered',
+              data: {
+                id,
+                from,
+                errorMessage: error?.message || String(error),
+                remoteName,
+                matchedRemoteEntry: matchedRemote?.entry,
+              },
+              timestamp: Date.now(),
+            }),
+          },
+        ).catch(() => {});
+        // #endregion
+      }
       //@ts-ignore
       globalThis.moduleGraphDirty = true;
       console.error(id, 'offline');
@@ -61,7 +105,7 @@ export default function (): ModuleFederationRuntimePlugin {
 
       return mod;
     },
-    beforeInit: function (args) {
+    beforeInit: function (args: any) {
       if (!globalThis.usedChunks) globalThis.usedChunks = new Set();
       if (
         typeof __webpack_runtime_id__ === 'string' &&
@@ -97,10 +141,73 @@ export default function (): ModuleFederationRuntimePlugin {
         return remote.name === remoteName;
       });
       if (!remote) return args;
+      const entryBefore = remote.entry;
       if (remote && remote.entry && remote.entry.includes('?t=')) {
+        if (debugState.beforeRequestLogs < 30) {
+          debugState.beforeRequestLogs += 1;
+          // #region agent log
+          fetch(
+            'http://127.0.0.1:7414/ingest/989a0b49-843c-45a9-b79d-4027ab5a19e4',
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-Debug-Session-Id': '7e9739',
+              },
+              body: JSON.stringify({
+                sessionId: '7e9739',
+                runId: 'nested-webpack-run5',
+                hypothesisId: 'H12',
+                location:
+                  'packages/nextjs-mf/src/plugins/container/runtimePlugin.ts:beforeRequest',
+                message: 'beforeRequest kept timestamped remote entry',
+                data: {
+                  id,
+                  remoteName,
+                  entryBefore,
+                  entryAfter: remote.entry,
+                  inBrowser: Boolean(options?.inBrowser),
+                },
+                timestamp: Date.now(),
+              }),
+            },
+          ).catch(() => {});
+          // #endregion
+        }
         return args;
       }
       remote.entry = remote.entry + '?t=' + Date.now();
+      if (debugState.beforeRequestLogs < 30) {
+        debugState.beforeRequestLogs += 1;
+        // #region agent log
+        fetch(
+          'http://127.0.0.1:7414/ingest/989a0b49-843c-45a9-b79d-4027ab5a19e4',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Debug-Session-Id': '7e9739',
+            },
+            body: JSON.stringify({
+              sessionId: '7e9739',
+              runId: 'nested-webpack-run5',
+              hypothesisId: 'H12',
+              location:
+                'packages/nextjs-mf/src/plugins/container/runtimePlugin.ts:beforeRequest',
+              message: 'beforeRequest appended timestamp to remote entry',
+              data: {
+                id,
+                remoteName,
+                entryBefore,
+                entryAfter: remote.entry,
+                inBrowser: Boolean(options?.inBrowser),
+              },
+              timestamp: Date.now(),
+            }),
+          },
+        ).catch(() => {});
+        // #endregion
+      }
       return args;
     },
     afterResolve: function (args: any) {
@@ -182,8 +289,12 @@ export default function (): ModuleFederationRuntimePlugin {
 
       return args;
     },
-    loadRemoteSnapshot(args) {
+    loadRemoteSnapshot(args: any) {
       const { from, remoteSnapshot, manifestUrl, manifestJson, options } = args;
+      const originalPublicPath =
+        remoteSnapshot && 'publicPath' in remoteSnapshot
+          ? remoteSnapshot.publicPath
+          : undefined;
 
       // ensure snapshot is loaded from manifest
       if (
@@ -214,6 +325,39 @@ export default function (): ModuleFederationRuntimePlugin {
         manifestJson.metaData.publicPath = remoteSnapshot.publicPath;
       }
 
+      if (debugState.snapshotLogs < 20) {
+        debugState.snapshotLogs += 1;
+        // #region agent log
+        fetch(
+          'http://127.0.0.1:7414/ingest/989a0b49-843c-45a9-b79d-4027ab5a19e4',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Debug-Session-Id': '7e9739',
+            },
+            body: JSON.stringify({
+              sessionId: '7e9739',
+              runId: 'nested-webpack-run5',
+              hypothesisId: 'H12',
+              location:
+                'packages/nextjs-mf/src/plugins/container/runtimePlugin.ts:loadRemoteSnapshot',
+              message: 'normalized remote snapshot publicPath',
+              data: {
+                from,
+                manifestUrl,
+                inBrowser: options?.inBrowser,
+                originalPublicPath,
+                resolvedPublicPath: remoteSnapshot.publicPath,
+                manifestMetaPublicPath: manifestJson?.metaData?.publicPath,
+              },
+              timestamp: Date.now(),
+            }),
+          },
+        ).catch(() => {});
+        // #endregion
+      }
+
       return args;
     },
     resolveShare: function (args: any) {
@@ -240,6 +384,37 @@ export default function (): ModuleFederationRuntimePlugin {
       args.resolver = function () {
         shareScopeMap[scope][pkgName][version] =
           host.options.shared[pkgName][0];
+        if (debugState.resolveShareLogs < 20) {
+          debugState.resolveShareLogs += 1;
+          // #region agent log
+          fetch(
+            'http://127.0.0.1:7414/ingest/989a0b49-843c-45a9-b79d-4027ab5a19e4',
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-Debug-Session-Id': '7e9739',
+              },
+              body: JSON.stringify({
+                sessionId: '7e9739',
+                runId: 'nested-webpack-run2',
+                hypothesisId: 'H8',
+                location:
+                  'packages/nextjs-mf/src/plugins/container/runtimePlugin.ts:resolveShare',
+                message: 'resolveShare pinned host singleton',
+                data: {
+                  pkgName,
+                  scope,
+                  version,
+                  hostName: host?.name,
+                  hasShared: Boolean(host?.options?.shared?.[pkgName]?.[0]),
+                },
+                timestamp: Date.now(),
+              }),
+            },
+          ).catch(() => {});
+          // #endregion
+        }
         return {
           shared: shareScopeMap[scope][pkgName][version],
           useTreesShaking: false,

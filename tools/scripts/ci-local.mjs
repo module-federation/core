@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { spawn, spawnSync } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { existsSync, readFileSync, watch } from 'node:fs';
+import { dirname, join, resolve, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 process.env.NX_TUI = 'false';
@@ -907,8 +907,16 @@ async function main() {
     printParity();
     return;
   }
+  if (args.watch) {
+    await runWatchMode();
+    return;
+  }
+  await runSelectedJobs();
+}
+
+async function runSelectedJobs(parentCtx = {}) {
   for (const job of jobs) {
-    await runJob(job);
+    await runJob(job, parentCtx);
   }
 }
 
@@ -1103,8 +1111,15 @@ function printHelp() {
   console.log('');
   console.log('Options:');
   console.log('  --list                  List available jobs');
+  console.log('  --watch                 Watch files and rerun selected jobs');
   console.log(
     '  --only=<jobs>           Run only specific comma-separated jobs (repeatable)',
+  );
+  console.log(
+    '  --watch-path=<path>     Limit watch scope (repeatable, relative to repo root)',
+  );
+  console.log(
+    '  --watch-debounce-ms=<n> Debounce milliseconds before rerun (default: 800)',
   );
   console.log(
     '  --print-parity          Print derived node/pnpm parity settings',
@@ -1120,6 +1135,10 @@ function printHelp() {
     '  node tools/scripts/ci-local.mjs --only=build-metro --only=actionlint',
   );
   console.log('  node tools/scripts/ci-local.mjs --list --only=build-metro');
+  console.log('  node tools/scripts/ci-local.mjs --watch --only=e2e-next-dev');
+  console.log(
+    '  node tools/scripts/ci-local.mjs --watch --watch-path=apps --watch-debounce-ms=1200',
+  );
   console.log('  node tools/scripts/ci-local.mjs --print-parity');
   console.log(
     '  node tools/scripts/ci-local.mjs --strict-parity --only=build-and-test',
@@ -1130,6 +1149,9 @@ function parseArgs(argv) {
   const result = {
     help: false,
     list: false,
+    watch: false,
+    watchDebounceMs: 800,
+    watchPathTokens: [],
     only: null,
     onlyTokens: [],
     printParity: false,
@@ -1139,8 +1161,15 @@ function parseArgs(argv) {
   };
   for (let i = 2; i < argv.length; i += 1) {
     const arg = argv[i];
+    if (arg === '--') {
+      continue;
+    }
     if (arg === '--list') {
       result.list = true;
+      continue;
+    }
+    if (arg === '--watch') {
+      result.watch = true;
       continue;
     }
     if (arg === '--help' || arg === '-h') {
@@ -1161,6 +1190,49 @@ function parseArgs(argv) {
       result.onlyTokens.push(arg.slice('--only='.length));
       continue;
     }
+    if (arg === '--watch-path') {
+      const watchPath = argv[i + 1];
+      if (!watchPath || watchPath.startsWith('--')) {
+        result.errors.push('Missing value for --watch-path.');
+        continue;
+      }
+      result.watchPathTokens.push(watchPath);
+      i += 1;
+      continue;
+    }
+    if (arg.startsWith('--watch-path=')) {
+      result.watchPathTokens.push(arg.slice('--watch-path='.length));
+      continue;
+    }
+    if (arg === '--watch-debounce-ms') {
+      const debounceValue = argv[i + 1];
+      if (!debounceValue || debounceValue.startsWith('--')) {
+        result.errors.push('Missing value for --watch-debounce-ms.');
+        continue;
+      }
+      const parsed = Number.parseInt(debounceValue, 10);
+      if (!Number.isInteger(parsed) || parsed <= 0) {
+        result.errors.push(
+          `Invalid --watch-debounce-ms value "${debounceValue}". Expected a positive integer.`,
+        );
+      } else {
+        result.watchDebounceMs = parsed;
+      }
+      i += 1;
+      continue;
+    }
+    if (arg.startsWith('--watch-debounce-ms=')) {
+      const debounceValue = arg.slice('--watch-debounce-ms='.length);
+      const parsed = Number.parseInt(debounceValue, 10);
+      if (!Number.isInteger(parsed) || parsed <= 0) {
+        result.errors.push(
+          `Invalid --watch-debounce-ms value "${debounceValue}". Expected a positive integer.`,
+        );
+      } else {
+        result.watchDebounceMs = parsed;
+      }
+      continue;
+    }
     if (arg === '--print-parity') {
       result.printParity = true;
       continue;
@@ -1174,6 +1246,16 @@ function parseArgs(argv) {
   if (result.onlyTokens.length > 0) {
     result.only = result.onlyTokens.join(',');
   }
+  result.watchPaths = Array.from(
+    new Set(
+      result.watchPathTokens
+        .join(',')
+        .split(',')
+        .map((token) => token.trim())
+        .filter(Boolean),
+    ),
+  );
+  delete result.watchPathTokens;
   delete result.onlyTokens;
   return result;
 }
@@ -1208,6 +1290,27 @@ function validateArgs() {
     }
   }
 
+  if (
+    !Number.isInteger(args.watchDebounceMs) ||
+    Number(args.watchDebounceMs) <= 0
+  ) {
+    issues.push(
+      `Invalid --watch-debounce-ms value "${args.watchDebounceMs}". Expected a positive integer.`,
+    );
+  }
+
+  if (args.watchPaths.length > 0) {
+    const missingWatchPaths = args.watchPaths.filter((watchPath) => {
+      const absolutePath = resolve(ROOT, watchPath);
+      return !existsSync(absolutePath);
+    });
+    if (missingWatchPaths.length > 0) {
+      issues.push(
+        `Unknown --watch-path value(s): ${missingWatchPaths.join(', ')}.`,
+      );
+    }
+  }
+
   if (issues.length > 0) {
     throw new Error(`[ci:local] ${issues.join(' ')}`);
   }
@@ -1238,40 +1341,295 @@ function getSelectableJobNames(jobList) {
   return names;
 }
 
+function createAbortError(command, args) {
+  const error = new Error(`Aborted: ${command} ${args.join(' ')}`);
+  error.name = 'AbortError';
+  return error;
+}
+
 function runCommand(command, args = [], options = {}) {
-  const { env = {}, cwd, allowFailure = false } = options;
+  const {
+    env = {},
+    cwd,
+    allowFailure = false,
+    signal,
+    detached = false,
+  } = options;
+
+  if (signal?.aborted) {
+    return Promise.reject(createAbortError(command, args));
+  }
 
   const child = spawn(command, args, {
     stdio: 'inherit',
     env,
     cwd,
+    detached: Boolean(detached),
   });
 
+  let exited = false;
+  const killChild = (killSignal) => {
+    if (!child.pid) {
+      return;
+    }
+    if (process.platform !== 'win32') {
+      try {
+        // When detached, the child is the process-group leader.
+        process.kill(-child.pid, killSignal);
+      } catch {
+        // ignore
+      }
+    }
+    try {
+      child.kill(killSignal);
+    } catch {
+      // ignore
+    }
+  };
+
+  let abortTimers = [];
+  const onAbort = () => {
+    killChild('SIGINT');
+    abortTimers.push(
+      setTimeout(() => {
+        if (!exited) {
+          killChild('SIGTERM');
+        }
+      }, 2000),
+    );
+    abortTimers.push(
+      setTimeout(() => {
+        if (!exited) {
+          killChild('SIGKILL');
+        }
+      }, 7000),
+    );
+  };
+
+  if (signal) {
+    signal.addEventListener('abort', onAbort, { once: true });
+  }
+
+  const cleanupAbort = () => {
+    if (signal) {
+      try {
+        signal.removeEventListener('abort', onAbort);
+      } catch {
+        // ignore
+      }
+    }
+    for (const timer of abortTimers) {
+      clearTimeout(timer);
+    }
+    abortTimers = [];
+  };
+
   return new Promise((resolve, reject) => {
-    child.on('exit', (code, signal) => {
+    child.on('exit', (code, exitSignal) => {
+      exited = true;
+      cleanupAbort();
+
+      if (signal?.aborted) {
+        reject(createAbortError(command, args));
+        return;
+      }
+
       if (code === 0) {
-        resolve({ code, signal });
+        resolve({ code, signal: exitSignal });
         return;
       }
       if (allowFailure) {
-        resolve({ code, signal });
+        resolve({ code, signal: exitSignal });
         return;
       }
       reject(
         new Error(
           `${command} ${args.join(' ')} exited with ${formatExit({
             code,
-            signal,
+            signal: exitSignal,
           })}`,
         ),
       );
     });
-    child.on('error', reject);
+    child.on('error', (error) => {
+      exited = true;
+      cleanupAbort();
+      reject(error);
+    });
   });
 }
 
 function runShell(command, options = {}) {
   return runCommand('bash', ['-lc', command], options);
+}
+
+async function runWatchMode() {
+  const watchRoots = resolveWatchRoots();
+  const debounceMs = args.watchDebounceMs;
+  const watchers = [];
+  let debounceTimer = null;
+  let pendingReason = null;
+  let runInFlight = false;
+  let abortController = null;
+
+  const closeWatchers = () => {
+    for (const watcher of watchers) {
+      try {
+        watcher.close();
+      } catch {
+        // ignore watcher close errors
+      }
+    }
+  };
+
+  const runOnce = async (reason) => {
+    abortController = new AbortController();
+    const runCtx = { signal: abortController.signal, detached: true };
+
+    console.log(`[ci:local] Watch run start: ${reason}`);
+    try {
+      await runSelectedJobs(runCtx);
+    } catch (error) {
+      if (error?.name === 'AbortError') {
+        console.log('[ci:local] Watch run aborted (restart queued).');
+      } else {
+        console.error(`[ci:local] Watch run failed: ${error.message}`);
+      }
+    }
+  };
+
+  const runLoop = async (reason) => {
+    if (runInFlight) {
+      return;
+    }
+    runInFlight = true;
+    let nextReason = reason;
+    while (nextReason) {
+      const currentReason = nextReason;
+      nextReason = null;
+      await runOnce(currentReason);
+
+      if (pendingReason) {
+        nextReason = pendingReason;
+        pendingReason = null;
+      }
+    }
+    abortController = null;
+    runInFlight = false;
+  };
+
+  const scheduleRestart = (reason) => {
+    pendingReason = reason;
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+    }
+    debounceTimer = setTimeout(() => {
+      debounceTimer = null;
+      if (runInFlight && abortController && !abortController.signal.aborted) {
+        console.log(`[ci:local] Restarting due to: ${pendingReason}`);
+        abortController.abort();
+        return;
+      }
+      const next = pendingReason;
+      pendingReason = null;
+      if (next) {
+        void runLoop(next);
+      }
+    }, debounceMs);
+  };
+
+  const onFileEvent = (eventType, filename, watchRoot) => {
+    if (!filename) {
+      scheduleRestart(`watch event (${eventType})`);
+      return;
+    }
+    const changedAbsolutePath = resolve(watchRoot, filename.toString());
+    const changedRelativePath = normalizeWatchPath(
+      relative(ROOT, changedAbsolutePath),
+    );
+    if (!changedRelativePath || changedRelativePath.startsWith('..')) {
+      return;
+    }
+    if (shouldIgnoreWatchPath(changedRelativePath)) {
+      return;
+    }
+    console.log(`[ci:local] Change detected: ${changedRelativePath}`);
+    scheduleRestart(`change in ${changedRelativePath}`);
+  };
+
+  for (const watchRoot of watchRoots) {
+    try {
+      watchers.push(
+        watch(watchRoot, { recursive: true }, (eventType, filename) =>
+          onFileEvent(eventType, filename, watchRoot),
+        ),
+      );
+    } catch (error) {
+      console.warn(
+        `[ci:local] Recursive watch unavailable for ${watchRoot}: ${error.message}. Falling back to non-recursive watch.`,
+      );
+      watchers.push(
+        watch(watchRoot, { recursive: false }, (eventType, filename) =>
+          onFileEvent(eventType, filename, watchRoot),
+        ),
+      );
+    }
+  }
+
+  console.log(
+    `[ci:local] Watch mode enabled (${debounceMs}ms debounce). Watching: ${watchRoots.join(', ')}`,
+  );
+  console.log(
+    '[ci:local] Ignoring .git/ and any paths ignored by git (git check-ignore).',
+  );
+
+  await runLoop('initial run');
+
+  await new Promise((resolvePromise) => {
+    const stop = () => {
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
+      if (abortController && !abortController.signal.aborted) {
+        abortController.abort();
+      }
+      closeWatchers();
+      resolvePromise();
+    };
+    process.once('SIGINT', stop);
+    process.once('SIGTERM', stop);
+  });
+}
+
+function resolveWatchRoots() {
+  const configuredRoots = args.watchPaths.length > 0 ? args.watchPaths : ['.'];
+  return configuredRoots
+    .map((watchPath) => resolve(ROOT, watchPath))
+    .filter((absolutePath) => existsSync(absolutePath));
+}
+
+function normalizeWatchPath(filePath) {
+  return filePath.replace(/\\/g, '/');
+}
+
+function shouldIgnoreWatchPath(repoRelativePath) {
+  const normalized = normalizeWatchPath(repoRelativePath);
+  if (!normalized) {
+    return true;
+  }
+  if (normalized === '.git' || normalized.startsWith('.git/')) {
+    return true;
+  }
+  return isGitIgnored(normalized);
+}
+
+function isGitIgnored(repoRelativePath) {
+  const result = spawnSync('git', ['check-ignore', '-q', repoRelativePath], {
+    cwd: ROOT,
+    env: process.env,
+    stdio: 'ignore',
+  });
+  return result.status === 0;
 }
 
 async function shutdownLocalAndroidEmulators(ctx) {

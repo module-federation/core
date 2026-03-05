@@ -6,14 +6,18 @@
   "tags": ["type:pkg"],
   "targets": {
     "build": {
-      "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/packages/core/dist"],
       "options": {
-        "outputPath": "packages/core/dist",
-        "main": "packages/core/src/index.ts",
-        "tsConfig": "packages/core/tsconfig.lib.json",
-        "assets": ["packages/core/*.md"]
-      }
+        "command": "rslib build",
+        "cwd": "packages/core"
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "dependencies": true
+        }
+      ]
     },
     "lint": {
       "executor": "@nx/eslint:lint",

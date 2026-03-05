@@ -9,14 +9,8 @@
       "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/packages/node/dist"],
       "options": {
-        "parallel": false,
-        "cwd": "packages/node",
-        "commands": [
-          {
-            "command": "tsdown --config tsdown.config.mts",
-            "forwardAllArgs": false
-          }
-        ]
+        "command": "rslib build",
+        "cwd": "packages/node"
       },
       "dependsOn": [
         {
@@ -54,7 +48,7 @@
             "forwardAllArgs": false
           },
           {
-            "command": "rm -f ./packages/node/dist/package.json",
+            "command": "rm ./packages/node/dist/package.json",
             "forwardAllArgs": false
           }
         ]
