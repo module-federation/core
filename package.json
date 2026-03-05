@@ -253,7 +253,7 @@
     "css-loader": "^6.11.0",
     "cypress": "14.3.3",
     "directory-tree": "3.5.2",
-    "esbuild": "0.25.0",
+    "esbuild": "0.27.3",
     "eslint": "9.39.3",
     "eslint-config-prettier": "10.1.5",
     "eslint-plugin-cypress": "^2.13.4",
