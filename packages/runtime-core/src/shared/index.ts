@@ -164,7 +164,7 @@ export class SharedHandler {
     // Assert that shareInfoRes exists, if not, throw an error
     assert(
       shareOptionsRes,
-      `Cannot find ${pkgName} Share in the ${host.options.name}. Please ensure that the ${pkgName} Share parameters have been injected`,
+      `Cannot find shared "${pkgName}" in host "${host.options.name}". Ensure the shared config for "${pkgName}" is declared in the federation plugin options and the host has been initialized before loading shares.`,
     );
 
     const { shared: registeredShared, useTreesShaking } =
@@ -330,6 +330,9 @@ export class SharedHandler {
             lifecycle: 'beforeLoadShare',
             origin: host,
           })) as RemoteEntryExports;
+        if (!remoteEntryExports) {
+          return;
+        }
       } finally {
         // prevent self load loop: when host load self , the initTokens is not the same
         if (remoteEntryExports?.init && !module.initing) {

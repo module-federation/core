@@ -246,8 +246,9 @@ export class SnapshotHandler {
       } else {
         error(
           getShortErrorMsg(RUNTIME_007, runtimeDescMap, {
-            hostName: moduleInfo.name,
-            hostVersion: moduleInfo.version,
+            remoteName: moduleInfo.name,
+            remoteVersion: moduleInfo.version,
+            hostName: this.HostInstance.options.name,
             globalSnapshot: JSON.stringify(globalSnapshotRes),
           }),
         );
@@ -324,7 +325,7 @@ export class SnapshotHandler {
 
       assert(
         manifestJson.metaData && manifestJson.exposes && manifestJson.shared,
-        `${manifestUrl} is not a federation manifest`,
+        `"${manifestUrl}" is not a valid federation manifest for remote "${moduleInfo.name}". Missing required fields: ${[!manifestJson.metaData && 'metaData', !manifestJson.exposes && 'exposes', !manifestJson.shared && 'shared'].filter(Boolean).join(', ')}.`,
       );
       this.manifestCache.set(manifestUrl, manifestJson);
       return manifestJson;
