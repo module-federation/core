@@ -1,5 +1,13 @@
 # @module-federation/devtools
 
+## 2.1.0
+
+### Patch Changes
+
+- 5f85a56: fix(devtools): initialize missing **FEDERATION** defaults to avoid runtime undefined access in devtools integration.
+- Updated dependencies [918294f]
+  - @module-federation/sdk@2.1.0
+
 ## 2.0.1
 
 ### Patch Changes

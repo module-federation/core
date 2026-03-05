@@ -1,5 +1,23 @@
 # @module-federation/rspack
 
+## 2.1.0
+
+### Patch Changes
+
+- 918294f: Add runtime-safe access helpers for webpack require, webpack share-scope globals, and ignored dynamic imports, and migrate core/node runtime loaders to use these helpers. The helpers are exposed via a standalone `@module-federation/sdk/bundler` entrypoint so they can be built and consumed independently from the SDK main index bundle.
+- Updated dependencies [6235711]
+- Updated dependencies [5a4f503]
+- Updated dependencies [918294f]
+- Updated dependencies [5954fe7]
+- Updated dependencies [918294f]
+  - @module-federation/dts-plugin@2.1.0
+  - @module-federation/manifest@2.1.0
+  - @module-federation/managers@2.1.0
+  - @module-federation/sdk@2.1.0
+  - @module-federation/runtime-tools@2.1.0
+  - @module-federation/inject-external-runtime-core-plugin@2.1.0
+  - @module-federation/bridge-react-webpack-plugin@2.1.0
+
 ## 2.0.1
 
 ### Patch Changes

@@ -1,5 +1,23 @@
 # @module-federation/rspress-plugin
 
+## 2.1.0
+
+### Patch Changes
+
+- da4c722: fix(rspress-plugin): auto infer environment
+- e787fd3: fix(rspress-plugin): set config.ssg.experimentalWorker true if enable ssg-md
+- Updated dependencies [987716a]
+- Updated dependencies [918294f]
+- Updated dependencies [24bf84d]
+- Updated dependencies [dfbf05f]
+- Updated dependencies [0172491]
+- Updated dependencies [a0faa70]
+- Updated dependencies [918294f]
+  - @module-federation/enhanced@2.1.0
+  - @module-federation/error-codes@2.1.0
+  - @module-federation/rsbuild-plugin@2.1.0
+  - @module-federation/sdk@2.1.0
+
 ## 2.0.1
 
 ### Patch Changes
