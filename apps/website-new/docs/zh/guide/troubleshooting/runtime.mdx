@@ -17,6 +17,7 @@ import Runtime from '@components/zh/runtime/index';
 - [RUNTIME-007](#runtime-007)
 - [RUNTIME-008](#runtime-008)
 - [RUNTIME-009](#runtime-009)
+- [RUNTIME-010](#runtime-010)
 
 ## RUNTIME-001
 
@@ -159,6 +160,19 @@ Runtime 运行时资源加载失败报错，可能原因为网络不稳定导致
 ### 解决方法
 
 <Runtime />
+
+## RUNTIME-010
+
+<ErrorCodeTitle code='RUNTIME-010'/>
+
+### 原因
+
+在实例已初始化后，调用 `initOptions` 时传入了与初始化时不同的 `name`。`name` 是实例的唯一标识，初始化后不可更改。
+
+### 解决方法
+
+- 若需要使用不同 `name` 的实例，请使用 `createInstance` API 创建新实例，而非修改现有实例的 `name`。
+- 若无需更改 `name`，则在调用 `initOptions` 时去掉 `name` 字段或保持与初始化时一致。
 
 ## 常见问题（无错误码）
 
