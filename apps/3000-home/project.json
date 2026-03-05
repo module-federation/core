@@ -10,7 +10,7 @@
       "cache": false,
       "defaultConfiguration": "production",
       "options": {
-        "command": "npx next build",
+        "command": "NEXT_PRIVATE_LOCAL_WEBPACK=true npx next build --webpack",
         "cwd": "apps/3000-home"
       },
       "configurations": {
@@ -28,12 +28,12 @@
       "executor": "nx:run-commands",
       "defaultConfiguration": "development",
       "options": {
-        "command": "npx next dev -p 3000",
+        "command": "NEXT_PRIVATE_LOCAL_WEBPACK=true npx next dev --webpack -p 3000",
         "cwd": "apps/3000-home"
       },
       "configurations": {
         "development": {
-          "command": "npx next dev -p 3000"
+          "command": "NEXT_PRIVATE_LOCAL_WEBPACK=true npx next dev --webpack -p 3000"
         },
         "production": {
           "command": "npx next start -p 3000"

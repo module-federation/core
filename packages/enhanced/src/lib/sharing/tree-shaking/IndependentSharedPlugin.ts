@@ -24,6 +24,7 @@ import type { SharedConfig } from '../../../declarations/plugins/sharing/SharePl
 import ConsumeSharedPlugin from '../ConsumeSharedPlugin';
 import { NormalizedSharedOptions } from '../SharePlugin';
 import IndependentSharedRuntimeModule from './IndependentSharedRuntimeModule';
+import { getWebpackSources } from '../../webpackCompat';
 
 const IGNORED_ENTRY = 'ignored-entry';
 
@@ -205,7 +206,7 @@ export default class IndependentSharedPlugin {
 
             compilation.updateAsset(
               StatsFileName,
-              new compiler.webpack.sources.RawSource(
+              new (getWebpackSources(compiler).RawSource)(
                 JSON.stringify(statsContent),
               ),
             );
@@ -246,35 +247,58 @@ export default class IndependentSharedPlugin {
         if (!shareConfig.treeShaking) {
           return;
         }
-        const shareRequests = shareRequestsMap[shareName].requests;
-        await Promise.all(
-          shareRequests.map(async ([request, version]) => {
-            const sharedConfig = sharedOptions.find(
-              ([name]) => name === shareName,
-            )?.[1];
-            const [shareFileName, globalName, sharedVersion] =
-              await this.createIndependentCompiler(parentCompiler, {
-                shareRequestsMap,
-                currentShare: {
-                  shareName,
-                  version,
-                  request,
-                  independentShareFileName: sharedConfig?.treeShaking?.filename,
-                },
-              });
-            if (typeof shareFileName === 'string') {
-              this.buildAssets[shareName] ||= [];
-              this.buildAssets[shareName].push([
-                path.join(
-                  resolveOutputDir(outputDir, shareName),
-                  shareFileName,
-                ),
-                sharedVersion,
-                globalName,
-              ]);
-            }
-          }),
+
+        const shareRequests = shareRequestsMap[shareName]?.requests || [];
+        if (!shareRequests.length) {
+          return;
+        }
+
+        // De-dupe identical (request, version) pairs. Duplicate requests can
+        // happen when a package is both directly imported and also imported by
+        // another shared package.
+        const seen = new Set<string>();
+        const uniqueShareRequests: [string, string][] = [];
+        for (const [request, version] of shareRequests) {
+          const key = `${version}@@${request}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          uniqueShareRequests.push([request, version]);
+        }
+
+        // Ensure we don't keep stale outputs for this share across builds.
+        // Each request/version compilation emits into `${version}/...` under this
+        // directory, so we clean once per shareName, and keep per-compiler
+        // `output.clean` disabled to avoid inter-compiler races.
+        const fullShareOutputDir = path.resolve(
+          parentCompiler.outputPath,
+          resolveOutputDir(outputDir, shareName),
         );
+        try {
+          fs.rmSync(fullShareOutputDir, { recursive: true, force: true });
+        } catch {
+          // ignore
+        }
+
+        for (const [request, version] of uniqueShareRequests) {
+          const [shareFileName, globalName, sharedVersion] =
+            await this.createIndependentCompiler(parentCompiler, {
+              shareRequestsMap,
+              currentShare: {
+                shareName,
+                version,
+                request,
+                independentShareFileName: shareConfig?.treeShaking?.filename,
+              },
+            });
+          if (typeof shareFileName === 'string') {
+            this.buildAssets[shareName] ||= [];
+            this.buildAssets[shareName].push([
+              path.join(resolveOutputDir(outputDir, shareName), shareFileName),
+              sharedVersion,
+              globalName,
+            ]);
+          }
+        }
       }),
     );
 
@@ -379,7 +403,11 @@ export default class IndependentSharedPlugin {
       // 输出配置
       output: {
         path: fullOutputDir,
-        clean: true,
+        // For the initial "collector" compilation we want a clean directory.
+        // For per-share compilations, avoid cleaning the whole output directory
+        // on every compiler run to prevent deleting outputs produced by other
+        // (possibly concurrent) share builds.
+        clean: !extraOptions,
         publicPath: parentConfig.output?.publicPath || 'auto',
       },
 

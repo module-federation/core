@@ -1,4 +1,29 @@
-import Shop from 'shop/pages/shop/index';
-const Page = Shop;
-Page.getInitialProps = Shop.getInitialProps;
-export default Page;
+import * as React from 'react';
+
+function ShopFallback() {
+  return <h1>Shop Page</h1>;
+}
+
+export default function ShopProxy(props) {
+  const [RemoteShop, setRemoteShop] = React.useState(null);
+
+  React.useEffect(() => {
+    let isMounted = true;
+
+    import('shop/pages/shop/index').then((mod) => {
+      if (isMounted) {
+        setRemoteShop(() => mod.default);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  if (!RemoteShop) {
+    return <ShopFallback />;
+  }
+
+  return <RemoteShop {...props} />;
+}

@@ -9,7 +9,7 @@
       "executor": "nx:run-commands",
       "defaultConfiguration": "production",
       "options": {
-        "command": "npx next build",
+        "command": "npx next build --webpack",
         "cwd": "apps/next-app-router/next-app-router-4001"
       },
       "configurations": {
@@ -37,38 +37,35 @@
       ]
     },
     "lint": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "command": "pnpm exec eslint apps/next-app-router/next-app-router-4001/**/*.{ts,tsx,js,jsx}",
-        "forwardAllArgs": false
+        "lintFilePatterns": ["apps/next-app-router-4001/**/*.{ts,tsx,js,jsx}"]
       }
     },
     "e2e": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/cypress:cypress",
       "options": {
-        "command": "pnpm exec cypress run --project apps/next-app-router/next-app-router-4001 --e2e --config baseUrl=http://localhost:4001 --key 27e40c91-5ac3-4433-8a87-651d10f51cf6",
-        "forwardAllArgs": false
+        "cypressConfig": "apps/next-app-router/next-app-router-4001/cypress.config.ts",
+        "testingType": "e2e",
+        "baseUrl": "http://localhost:4001",
+        "key": "27e40c91-5ac3-4433-8a87-651d10f51cf6"
       },
       "configurations": {
         "production": {
-          "command": "pnpm exec cypress run --project apps/next-app-router/next-app-router-4001 --e2e --config baseUrl=http://localhost:4001 --key 27e40c91-5ac3-4433-8a87-651d10f51cf6"
+          "devServerTarget": "next-app-router-4001:serve:production"
         }
       }
     },
     "test:e2e": {
       "executor": "nx:run-commands",
       "options": {
-        "parallel": true,
-        "commands": [
-          {
-            "command": "lsof -i :4001 || nx run next-app-router-4001:serve",
-            "forwardAllArgs": false
-          },
-          {
-            "command": "sleep 4 && nx run next-app-router-4001:e2e",
-            "forwardAllArgs": true
-          }
-        ]
+        "command": "node tools/scripts/run-next-app-router-e2e.mjs --mode=dev"
+      },
+      "configurations": {
+        "production": {
+          "command": "node tools/scripts/run-next-app-router-e2e.mjs --mode=prod"
+        }
       }
     }
   }

@@ -1,16 +1,10 @@
 import type webpack from 'webpack';
-import { resolve } from 'node:path';
+import path from 'path';
 
 export function getWebpackPath(
   compiler: webpack.Compiler,
   options: { framework: 'nextjs' | 'other' } = { framework: 'other' },
 ): string {
-  const resolveWithContext = new Function(
-    'id',
-    'options',
-    'return typeof require === "undefined" ? "" : require.resolve(id, options)',
-  ) as (id: string, options?: { paths?: string[] }) => string;
-
   try {
     // @ts-ignore just throw err
     compiler.webpack();
@@ -32,18 +26,34 @@ export function getWebpackPath(
       }
       return '';
     }
-    return resolveWithContext('webpack', { paths: [webpackPath] });
+    return require.resolve('webpack', { paths: [webpackPath] });
   }
 }
 
 export const normalizeWebpackPath = (fullPath: string): string => {
-  if (fullPath === 'webpack') {
-    return process.env['FEDERATION_WEBPACK_PATH'] || fullPath;
+  const federationWebpackPath = process.env['FEDERATION_WEBPACK_PATH'];
+
+  // Next.js webpack bridge points to its compiled bundle entry. For deep webpack
+  // internals we should keep native requests so Node/Next hook resolution can
+  // pick the best available target (Next-compiled alias or local webpack).
+  if (
+    federationWebpackPath &&
+    federationWebpackPath.includes('/next/dist/compiled/webpack/')
+  ) {
+    if (fullPath === 'webpack') {
+      return federationWebpackPath;
+    }
+
+    return fullPath;
   }
 
-  if (process.env['FEDERATION_WEBPACK_PATH']) {
-    return resolve(
-      process.env['FEDERATION_WEBPACK_PATH'],
+  if (fullPath === 'webpack') {
+    return federationWebpackPath || fullPath;
+  }
+
+  if (federationWebpackPath) {
+    return path.resolve(
+      federationWebpackPath,
       fullPath.replace('webpack', '../../'),
     );
   }

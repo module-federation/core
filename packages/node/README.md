@@ -173,6 +173,35 @@ revalidate().then((shouldReload) => {
 });
 ```
 
+### ensureRemoteHotReload (recommended for Next SSR production)
+
+`revalidate()` is synchronous from the request path perspective if you `await` it in `_document` or middleware.  
+For production SSR servers with steady traffic, a better pattern is to run revalidation in the background and only "touch" it from requests.
+
+```js
+import {
+  ensureRemoteHotReload,
+  flushChunks,
+} from '@module-federation/node/utils';
+
+const hotReloadController = ensureRemoteHotReload({
+  intervalMs: Number(process.env.MF_REMOTE_REVALIDATE_INTERVAL_MS || 10_000),
+  immediate: true,
+});
+
+// next/pages _document
+MyDocument.getInitialProps = async (ctx) => {
+  // non-blocking: no request latency from remote hash checks
+  hotReloadController.touch();
+
+  const initialProps = await Document.getInitialProps(ctx);
+  const chunks = await flushChunks();
+  return { ...initialProps, chunks };
+};
+```
+
+This approach avoids request-time fetch storms while still updating the in-memory federation graph when remote entries change.
+
 _Note_: To ensure that changes made to files in remotes are picked up `revalidate`, you can set the remotes webpack [output.filename](https://webpack.js.org/configuration/output/#outputfilename) to `[name]-[contenthash].js` (or similar). This will cause the remoteEntry.js file to be regenerated with a unique hash every time a new build occurs. The revalidate method intelligently detects changes by comparing the hashes of the remoteEntry.js files. By incorporating [contenthash] into the remote's webpack configuration, you enable the shell to seamlessly incorporate the updated files from the remotes.
 
 **Hot reloading Express.js**
