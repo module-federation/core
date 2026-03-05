@@ -1,11 +1,10 @@
 import type { ProvideSharedPluginOptions } from '../declarations/plugins/sharing/ProvideSharedPlugin';
-import CoreProvideSharedPlugin from '../lib/sharing/ProvideSharedPlugin';
 import BaseWrapperPlugin from './BaseWrapperPlugin';
 
 const PLUGIN_NAME = 'ProvideSharedPlugin';
 
 export default class ProvideSharedPlugin extends BaseWrapperPlugin {
   constructor(options: ProvideSharedPluginOptions) {
-    super(options, PLUGIN_NAME, CoreProvideSharedPlugin);
+    super(options, PLUGIN_NAME, '../lib/sharing/ProvideSharedPlugin');
   }
 }
