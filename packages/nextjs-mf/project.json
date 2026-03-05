@@ -26,11 +26,13 @@
       }
     },
     "lint": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "command": "pnpm exec eslint \"packages/nextjs-mf/**/*.js\" \"packages/nextjs-mf/**/*.ts\"",
-        "forwardAllArgs": false
+        "lintFilePatterns": [
+          "packages/nextjs-mf/**/*.js",
+          "packages/nextjs-mf/**/*.ts"
+        ]
       }
     },
     "test": {

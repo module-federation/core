@@ -20,11 +20,13 @@
       ]
     },
     "lint": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "command": "pnpm exec eslint \"packages/rsbuild-plugin/**/*.ts\" \"packages/rsbuild-plugin/package.json\"",
-        "forwardAllArgs": false
+        "lintFilePatterns": [
+          "packages/rsbuild-plugin/**/*.ts",
+          "packages/rsbuild-plugin/package.json"
+        ]
       }
     },
     "test": {

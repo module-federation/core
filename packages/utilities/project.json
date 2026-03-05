@@ -20,11 +20,10 @@
       ]
     },
     "lint": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "command": "pnpm exec eslint \"packages/utilities/**/*.ts\"",
-        "forwardAllArgs": false
+        "lintFilePatterns": ["packages/utilities/**/*.ts"]
       }
     },
     "test": {

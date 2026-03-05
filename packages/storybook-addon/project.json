@@ -25,11 +25,10 @@
       ]
     },
     "lint": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "command": "pnpm exec eslint \"packages/storybook-addon/**/*.ts\"",
-        "forwardAllArgs": false
+        "lintFilePatterns": ["packages/storybook-addon/**/*.ts"]
       }
     },
     "test": {

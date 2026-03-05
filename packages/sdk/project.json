@@ -26,11 +26,13 @@
       ]
     },
     "lint": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "command": "pnpm exec eslint \"packages/sdk/**/*.ts\" \"packages/sdk/package.json\"",
-        "forwardAllArgs": false
+        "lintFilePatterns": [
+          "packages/sdk/**/*.ts",
+          "packages/sdk/package.json"
+        ]
       }
     },
     "test": {

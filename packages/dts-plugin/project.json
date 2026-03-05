@@ -40,11 +40,13 @@
       }
     },
     "lint": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "command": "pnpm exec eslint \"packages/dts-plugin/**/*.ts\" \"packages/dts-plugin/package.json\"",
-        "forwardAllArgs": false
+        "lintFilePatterns": [
+          "packages/dts-plugin/**/*.ts",
+          "packages/dts-plugin/package.json"
+        ]
       }
     },
     "build-debug": {

@@ -26,11 +26,13 @@
       ]
     },
     "lint": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "command": "pnpm exec eslint \"packages/runtime-core/**/*.ts\" \"packages/runtime-core/package.json\"",
-        "forwardAllArgs": false
+        "lintFilePatterns": [
+          "packages/runtime-core/**/*.ts",
+          "packages/runtime-core/package.json"
+        ]
       }
     },
     "build-debug": {

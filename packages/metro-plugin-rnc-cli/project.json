@@ -25,11 +25,7 @@
       }
     },
     "lint": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "pnpm exec eslint \"packages/metro-plugin-rnc-cli/**/*.{js,ts}\"",
-        "forwardAllArgs": false
-      }
+      "executor": "@nx/eslint:lint"
     }
   }
 }

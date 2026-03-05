@@ -24,11 +24,10 @@
       ]
     },
     "lint": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "command": "pnpm exec eslint \"packages/typescript/**/*.ts\"",
-        "forwardAllArgs": false
+        "lintFilePatterns": ["packages/typescript/**/*.ts"]
       }
     },
     "test": {

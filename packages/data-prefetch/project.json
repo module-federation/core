@@ -33,11 +33,13 @@
       }
     },
     "lint": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "command": "pnpm exec eslint \"packages/data-prefetch/**/*.ts\" \"packages/data-prefetch/package.json\"",
-        "forwardAllArgs": false
+        "lintFilePatterns": [
+          "packages/data-prefetch/**/*.ts",
+          "packages/data-prefetch/package.json"
+        ]
       }
     },
     "pre-release": {

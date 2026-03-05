@@ -22,11 +22,13 @@
       }
     },
     "lint": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "command": "pnpm exec eslint \"packages/create-module-federation/**/*.ts\" \"packages/create-module-federation/package.json\"",
-        "forwardAllArgs": false
+        "lintFilePatterns": [
+          "packages/create-module-federation/**/*.ts",
+          "packages/create-module-federation/package.json"
+        ]
       }
     },
     "test": {

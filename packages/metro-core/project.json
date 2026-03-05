@@ -21,11 +21,10 @@
       }
     },
     "lint": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "command": "pnpm exec eslint \"packages/metro-core/**/*.{ts,tsx,js,jsx}\"",
-        "forwardAllArgs": false
+        "lintFilePatterns": ["packages/metro-core/**/*.{ts,tsx,js,jsx}"]
       }
     }
   }
