@@ -7,7 +7,11 @@ export default class FederationRuntimePlugin extends BaseWrapperPlugin {
   entryFilePath: string;
 
   constructor(options?: moduleFederationPlugin.ModuleFederationPluginOptions) {
-    super(options, PLUGIN_NAME, '../lib/container/runtime/FederationRuntimePlugin');
+    super(
+      options,
+      PLUGIN_NAME,
+      '../lib/container/runtime/FederationRuntimePlugin',
+    );
     this.entryFilePath = '';
   }
 
