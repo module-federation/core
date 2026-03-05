@@ -1,6 +1,7 @@
 const RSC_BRIDGE_EXPOSE = '__rspack_rsc_bridge__';
 const ACTION_PREFIX = 'remote:';
 const MODULE_PREFIX = 'remote-module:';
+const SERVER_MODULE_PREFIX = 'remote-server-module:';
 const SSR_LAYER_PREFIX = '(server-side-rendering)/';
 const RSC_LAYER_PREFIX = '(react-server-components)/';
 const ACTION_REMAP_GLOBAL_KEY = '__RSPACK_RSC_MF_ACTION_ID_MAP__';
@@ -171,6 +172,9 @@ const ensureHostManifest = () => {
 const getNamespacedModuleId = (alias: string, rawId: string | number) =>
   `${MODULE_PREFIX}${alias}:${String(rawId)}`;
 
+const getNamespacedServerModuleId = (alias: string, rawId: string | number) =>
+  `${SERVER_MODULE_PREFIX}${alias}:${String(rawId)}`;
+
 const getNamespacedClientManifestKey = (alias: string, key: string | number) =>
   `${MODULE_PREFIX}${alias}:${String(key)}`;
 
@@ -196,6 +200,28 @@ const namespaceModuleIdDeterministically = (
     : getNamespacedModuleId(alias, normalizedRawId);
 };
 
+const namespaceServerModuleIdDeterministically = (
+  alias: string,
+  rawId: string | number,
+) => {
+  const normalizedRawId = String(rawId);
+  const namespaceLayerId = (layerPrefix: string) => {
+    const unprefixedId = normalizedRawId.slice(layerPrefix.length);
+    return unprefixedId.startsWith(SERVER_MODULE_PREFIX)
+      ? normalizedRawId
+      : `${layerPrefix}${getNamespacedServerModuleId(alias, unprefixedId)}`;
+  };
+  if (normalizedRawId.startsWith(SSR_LAYER_PREFIX)) {
+    return namespaceLayerId(SSR_LAYER_PREFIX);
+  }
+  if (normalizedRawId.startsWith(RSC_LAYER_PREFIX)) {
+    return namespaceLayerId(RSC_LAYER_PREFIX);
+  }
+  return normalizedRawId.startsWith(SERVER_MODULE_PREFIX)
+    ? normalizedRawId
+    : getNamespacedServerModuleId(alias, normalizedRawId);
+};
+
 const isNamespacedRemoteIdForAlias = (alias: string, moduleId: string) => {
   const aliasPrefix = `${MODULE_PREFIX}${alias}:`;
   return (
@@ -216,6 +242,27 @@ const stripLayerPrefix = (moduleId: string | number) => {
   return normalizedModuleId;
 };
 
+const applyLayerPrefixFromRawId = (
+  rawModuleId: string,
+  resolvedModuleId: string,
+) => {
+  const normalizedResolvedModuleId = String(resolvedModuleId);
+  const unprefixedResolvedModuleId = stripLayerPrefix(
+    normalizedResolvedModuleId,
+  );
+  if (rawModuleId.startsWith(SSR_LAYER_PREFIX)) {
+    return normalizedResolvedModuleId.startsWith(SSR_LAYER_PREFIX)
+      ? normalizedResolvedModuleId
+      : `${SSR_LAYER_PREFIX}${unprefixedResolvedModuleId}`;
+  }
+  if (rawModuleId.startsWith(RSC_LAYER_PREFIX)) {
+    return normalizedResolvedModuleId.startsWith(RSC_LAYER_PREFIX)
+      ? normalizedResolvedModuleId
+      : `${RSC_LAYER_PREFIX}${unprefixedResolvedModuleId}`;
+  }
+  return normalizedResolvedModuleId;
+};
+
 const resolveClientModuleIdFromMap = (
   resolvedClientIdsByRawId: Record<string, string>,
   rawId: string | number,
@@ -227,7 +274,10 @@ const resolveClientModuleIdFromMap = (
       normalizedRawId,
     )
   ) {
-    return resolvedClientIdsByRawId[normalizedRawId];
+    return applyLayerPrefixFromRawId(
+      normalizedRawId,
+      resolvedClientIdsByRawId[normalizedRawId],
+    );
   }
   const unprefixedRawId = stripLayerPrefix(normalizedRawId);
   if (
@@ -237,7 +287,10 @@ const resolveClientModuleIdFromMap = (
       unprefixedRawId,
     )
   ) {
-    return resolvedClientIdsByRawId[unprefixedRawId];
+    return applyLayerPrefixFromRawId(
+      normalizedRawId,
+      resolvedClientIdsByRawId[unprefixedRawId],
+    );
   }
   return undefined;
 };
@@ -330,6 +383,29 @@ const getRemoteClientReferenceModuleId = (alias: string, expose: string) => {
     ? normalizedExpose.slice(2)
     : normalizedExpose;
   return getNamespacedModuleId(alias, exposeToken || '.');
+};
+
+const parseRemoteClientReferenceModuleId = (
+  moduleId: string,
+): { alias: string; expose: string } | undefined => {
+  const normalizedModuleId = stripLayerPrefix(moduleId);
+  if (!normalizedModuleId.startsWith(MODULE_PREFIX)) {
+    return undefined;
+  }
+  const namespacedToken = normalizedModuleId.slice(MODULE_PREFIX.length);
+  const aliasSeparatorIndex = namespacedToken.indexOf(':');
+  if (aliasSeparatorIndex <= 0) {
+    return undefined;
+  }
+  const alias = namespacedToken.slice(0, aliasSeparatorIndex).trim();
+  const exposeToken = namespacedToken.slice(aliasSeparatorIndex + 1).trim();
+  if (!alias || !exposeToken) {
+    return undefined;
+  }
+  return {
+    alias,
+    expose: normalizeExpose(exposeToken),
+  };
 };
 
 const resolveClientEntryExpose = (
@@ -640,13 +716,22 @@ const rscBridgeRuntimePlugin = () => {
     Object.create(null);
   const syntheticRemoteRequestByModuleId: Record<string, string> =
     Object.create(null);
+  const resolvedRemoteRequestByModuleId: Record<string, string> =
+    Object.create(null);
   const syntheticRemoteExportsByModuleId: Record<string, unknown> =
     Object.create(null);
   const syntheticRemotePromiseByModuleId: Record<
     string,
     Promise<unknown>
   > = Object.create(null);
+  const exposeTokenByServerModuleIdByAlias: Record<
+    string,
+    Record<string, string>
+  > = Object.create(null);
+  const exposeTokenMapPromiseByAlias: Partial<Record<string, Promise<void>>> =
+    {};
   const seededRemoteClientModuleIds = new Set<string>();
+  let lazyRemoteFactoryPrototypeInstalled = false;
 
   const ensureSsrModuleFactory = (
     namespacedModuleId: string,
@@ -740,6 +825,182 @@ const rscBridgeRuntimePlugin = () => {
     }
     syntheticRemoteRequestByModuleId[moduleId] = remoteRequest;
 
+    const exposeTokenFromModuleId =
+      parseRemoteClientReferenceModuleId(moduleId)?.expose;
+    const normalizedExposeToken =
+      exposeTokenFromModuleId && exposeTokenFromModuleId.startsWith('./')
+        ? exposeTokenFromModuleId.slice(2)
+        : exposeTokenFromModuleId || '';
+
+    const ensureExposeTokenMapForAlias = async () => {
+      if (
+        isObject(exposeTokenByServerModuleIdByAlias[alias]) &&
+        Object.keys(exposeTokenByServerModuleIdByAlias[alias]).length > 0
+      ) {
+        return;
+      }
+      const existingPromise = exposeTokenMapPromiseByAlias[alias];
+      if (existingPromise) {
+        await existingPromise;
+        return;
+      }
+
+      const buildPromise = (async () => {
+        const bridge = await ensureBridge(alias);
+        if (typeof bridge.getManifest !== 'function') {
+          return;
+        }
+        const bridgeManifest = await Promise.resolve(bridge.getManifest());
+        if (!isObject(bridgeManifest)) {
+          return;
+        }
+
+        const clientManifest = isObject(bridgeManifest.clientManifest)
+          ? (bridgeManifest.clientManifest as Record<string, ManifestExport>)
+          : undefined;
+        const serverConsumerModuleMap = isObject(
+          bridgeManifest.serverConsumerModuleMap,
+        )
+          ? (bridgeManifest.serverConsumerModuleMap as Record<
+              string,
+              ManifestNode
+            >)
+          : undefined;
+        if (!clientManifest || !serverConsumerModuleMap) {
+          return;
+        }
+
+        const clientExposes = isObject(bridgeManifest.clientExposes)
+          ? (bridgeManifest.clientExposes as Record<string, string>)
+          : {};
+        const exposeTokenByClientModuleId: Record<string, string> =
+          Object.create(null);
+
+        for (const [rawClientManifestKey, clientEntry] of Object.entries(
+          clientManifest,
+        )) {
+          if (!isObject(clientEntry) || clientEntry.id == null) {
+            continue;
+          }
+          const entryName =
+            typeof clientEntry.name === 'string' ? clientEntry.name : undefined;
+          const entryExpose = resolveClientEntryExpose(
+            rawClientManifestKey,
+            entryName,
+            clientExposes,
+          );
+          if (!entryExpose) {
+            continue;
+          }
+          const exposeToken = entryExpose.startsWith('./')
+            ? entryExpose.slice(2)
+            : entryExpose;
+          if (!exposeToken) {
+            continue;
+          }
+          const clientModuleId = stripLayerPrefix(String(clientEntry.id));
+          if (
+            !Object.prototype.hasOwnProperty.call(
+              exposeTokenByClientModuleId,
+              clientModuleId,
+            )
+          ) {
+            exposeTokenByClientModuleId[clientModuleId] = exposeToken;
+          }
+        }
+
+        const nextExposeTokenMap: Record<string, string> = Object.create(null);
+        for (const [rawServerConsumerModuleId, node] of Object.entries(
+          serverConsumerModuleMap,
+        )) {
+          if (!isObject(node)) {
+            continue;
+          }
+          const rawClientModuleId = stripLayerPrefix(rawServerConsumerModuleId);
+          const exposeToken = exposeTokenByClientModuleId[rawClientModuleId];
+          if (!exposeToken) {
+            continue;
+          }
+          if (
+            !Object.prototype.hasOwnProperty.call(
+              nextExposeTokenMap,
+              rawClientModuleId,
+            )
+          ) {
+            nextExposeTokenMap[rawClientModuleId] = exposeToken;
+          }
+
+          for (const nodeEntry of Object.values(node)) {
+            if (!isObject(nodeEntry) || nodeEntry.id == null) {
+              continue;
+            }
+            const rawServerModuleId = stripLayerPrefix(String(nodeEntry.id));
+            if (
+              !Object.prototype.hasOwnProperty.call(
+                nextExposeTokenMap,
+                rawServerModuleId,
+              )
+            ) {
+              nextExposeTokenMap[rawServerModuleId] = exposeToken;
+            }
+          }
+        }
+
+        exposeTokenByServerModuleIdByAlias[alias] = nextExposeTokenMap;
+      })()
+        .catch((error: unknown) => {
+          delete exposeTokenMapPromiseByAlias[alias];
+          throw error;
+        })
+        .finally(() => {
+          delete exposeTokenMapPromiseByAlias[alias];
+        });
+
+      exposeTokenMapPromiseByAlias[alias] = buildPromise;
+      await buildPromise;
+    };
+
+    const isLikelyOpaqueExposeToken =
+      !normalizedExposeToken || /^\d+$/.test(normalizedExposeToken);
+
+    const resolveRemoteRequest = async () => {
+      if (
+        Object.prototype.hasOwnProperty.call(
+          resolvedRemoteRequestByModuleId,
+          moduleId,
+        )
+      ) {
+        return resolvedRemoteRequestByModuleId[moduleId];
+      }
+
+      let resolvedRemoteRequest = remoteRequest;
+      const exposeTokenByServerModuleId =
+        exposeTokenByServerModuleIdByAlias[alias];
+      const remappedExposeToken =
+        (isObject(exposeTokenByServerModuleId) &&
+          typeof exposeTokenByServerModuleId[normalizedExposeToken] ===
+            'string' &&
+          exposeTokenByServerModuleId[normalizedExposeToken]) ||
+        '';
+      if (remappedExposeToken) {
+        resolvedRemoteRequest = `${alias}/${remappedExposeToken}`;
+      } else if (isLikelyOpaqueExposeToken) {
+        await ensureExposeTokenMapForAlias();
+        const nextExposeTokenMap =
+          exposeTokenByServerModuleIdByAlias[alias] || Object.create(null);
+        const fallbackExposeToken =
+          typeof nextExposeTokenMap[normalizedExposeToken] === 'string'
+            ? nextExposeTokenMap[normalizedExposeToken]
+            : '';
+        if (fallbackExposeToken) {
+          resolvedRemoteRequest = `${alias}/${fallbackExposeToken}`;
+        }
+      }
+
+      resolvedRemoteRequestByModuleId[moduleId] = resolvedRemoteRequest;
+      return resolvedRemoteRequest;
+    };
+
     if (!isObject(__webpack_require__.m)) {
       __webpack_require__.m = {};
     }
@@ -766,12 +1027,32 @@ const rscBridgeRuntimePlugin = () => {
             `[mf:rsc-bridge] Missing loadRemote for remote client reference "${remoteRequest}"`,
           );
         }
-        pending = Promise.resolve(
-          runtimeInstance.loadRemote(remoteRequest),
-        ).then((exportsValue) => {
-          syntheticRemoteExportsByModuleId[moduleId] = exportsValue;
-          return exportsValue;
-        });
+        pending = resolveRemoteRequest()
+          .then((resolvedRemoteRequest) =>
+            Promise.resolve(runtimeInstance.loadRemote(resolvedRemoteRequest)),
+          )
+          .catch(async (error: unknown) => {
+            await ensureExposeTokenMapForAlias();
+            const exposeTokenMap =
+              exposeTokenByServerModuleIdByAlias[alias] || Object.create(null);
+            const fallbackExposeToken =
+              typeof exposeTokenMap[normalizedExposeToken] === 'string'
+                ? exposeTokenMap[normalizedExposeToken]
+                : '';
+            if (!fallbackExposeToken) {
+              throw error;
+            }
+            const fallbackRequest = `${alias}/${fallbackExposeToken}`;
+            if (fallbackRequest === remoteRequest) {
+              throw error;
+            }
+            resolvedRemoteRequestByModuleId[moduleId] = fallbackRequest;
+            return Promise.resolve(runtimeInstance.loadRemote(fallbackRequest));
+          })
+          .then((exportsValue) => {
+            syntheticRemoteExportsByModuleId[moduleId] = exportsValue;
+            return exportsValue;
+          });
         syntheticRemotePromiseByModuleId[moduleId] = pending;
       }
 
@@ -779,7 +1060,82 @@ const rscBridgeRuntimePlugin = () => {
     };
   };
 
+  const ensureLazyRemoteClientFactoryPrototype = () => {
+    if (lazyRemoteFactoryPrototypeInstalled) {
+      return;
+    }
+    if (!isObject(__webpack_require__.m)) {
+      __webpack_require__.m = {};
+    }
+    const moduleFactories = __webpack_require__.m as Record<string, any>;
+    const previousPrototype = Object.getPrototypeOf(moduleFactories);
+    const fallbackPrototype = new Proxy(previousPrototype ?? Object.prototype, {
+      get(target, property, receiver) {
+        if (
+          typeof property === 'string' &&
+          !Object.prototype.hasOwnProperty.call(moduleFactories, property)
+        ) {
+          const parsedModuleId = parseRemoteClientReferenceModuleId(property);
+          if (parsedModuleId) {
+            installSyntheticRemoteClientModuleFactory(
+              property,
+              parsedModuleId.alias,
+              parsedModuleId.expose,
+            );
+            if (
+              Object.prototype.hasOwnProperty.call(moduleFactories, property)
+            ) {
+              return moduleFactories[property];
+            }
+          }
+        }
+        return Reflect.get(target, property, receiver);
+      },
+      has(target, property) {
+        if (
+          typeof property === 'string' &&
+          !Object.prototype.hasOwnProperty.call(moduleFactories, property)
+        ) {
+          const parsedModuleId = parseRemoteClientReferenceModuleId(property);
+          if (parsedModuleId) {
+            installSyntheticRemoteClientModuleFactory(
+              property,
+              parsedModuleId.alias,
+              parsedModuleId.expose,
+            );
+          }
+        }
+        return (
+          Object.prototype.hasOwnProperty.call(moduleFactories, property) ||
+          Reflect.has(target, property)
+        );
+      },
+      getOwnPropertyDescriptor(target, property) {
+        if (
+          typeof property === 'string' &&
+          !Object.prototype.hasOwnProperty.call(moduleFactories, property)
+        ) {
+          const parsedModuleId = parseRemoteClientReferenceModuleId(property);
+          if (parsedModuleId) {
+            installSyntheticRemoteClientModuleFactory(
+              property,
+              parsedModuleId.alias,
+              parsedModuleId.expose,
+            );
+          }
+        }
+        return (
+          Object.getOwnPropertyDescriptor(moduleFactories, property) ||
+          Reflect.getOwnPropertyDescriptor(target, property)
+        );
+      },
+    });
+    Object.setPrototypeOf(moduleFactories, fallbackPrototype);
+    lazyRemoteFactoryPrototypeInstalled = true;
+  };
+
   const seedRemoteClientModuleFactoriesFromRuntimeMapping = () => {
+    ensureLazyRemoteClientFactoryPrototype();
     const moduleIdToRemoteDataMapping =
       __webpack_require__.remotesLoadingData?.moduleIdToRemoteDataMapping;
     if (!isObject(moduleIdToRemoteDataMapping)) {
@@ -939,7 +1295,7 @@ const rscBridgeRuntimePlugin = () => {
     exposeHint?: string,
     args?: any,
   ) => {
-    const namespacedModuleId = namespaceModuleIdDeterministically(
+    const namespacedModuleId = namespaceServerModuleIdDeterministically(
       alias,
       rawServerModuleId,
     );
@@ -1285,26 +1641,41 @@ const rscBridgeRuntimePlugin = () => {
     }
 
     if (isObject(remoteManifest.serverConsumerModuleMap)) {
+      const remoteServerConsumerModuleMap =
+        remoteManifest.serverConsumerModuleMap as Record<string, ManifestNode>;
       const ssrPreloadPromises: Array<Promise<string>> = [];
       for (const [rawModuleId, value] of Object.entries(
-        remoteManifest.serverConsumerModuleMap,
+        remoteServerConsumerModuleMap,
       )) {
-        const inferredExposeHint = inferExposeHintFromConsumerNode(value);
+        const normalizedRawModuleId = String(rawModuleId);
+        const rscLayerFallbackNode = normalizedRawModuleId.startsWith(
+          RSC_LAYER_PREFIX,
+        )
+          ? remoteServerConsumerModuleMap[
+              `${SSR_LAYER_PREFIX}${stripLayerPrefix(normalizedRawModuleId)}`
+            ] ||
+            remoteServerConsumerModuleMap[
+              stripLayerPrefix(normalizedRawModuleId)
+            ]
+          : undefined;
+        const sourceNode = rscLayerFallbackNode || value;
+        const inferredExposeHint = inferExposeHintFromConsumerNode(sourceNode);
         const resolvedModuleId =
           resolveClientModuleIdFromMap(resolvedClientIdsByRawId, rawModuleId) ||
           namespaceModuleIdDeterministically(alias, rawModuleId);
 
         const nextValue = remapConsumerNode(
-          value,
+          sourceNode,
           (rawServerModuleId, exportName) => {
             const exportScopedHint =
               exportName !== '*' && exportName !== '__esModule'
                 ? normalizeExpose(exportName)
                 : inferredExposeHint;
-            const namespacedServerModuleId = namespaceModuleIdDeterministically(
-              alias,
-              rawServerModuleId,
-            );
+            const namespacedServerModuleId =
+              namespaceServerModuleIdDeterministically(
+                alias,
+                rawServerModuleId,
+              );
             ssrPreloadPromises.push(
               preloadSsrModule(
                 alias,
@@ -1319,7 +1690,11 @@ const rscBridgeRuntimePlugin = () => {
 
         const serverConsumerModuleMap =
           hostManifest.serverConsumerModuleMap as Record<string, any>;
-        const upsertServerConsumerNode = (key: string, node: unknown) => {
+        const upsertServerConsumerNode = (
+          key: string,
+          node: unknown,
+          preferIncoming = false,
+        ) => {
           if (
             !Object.prototype.hasOwnProperty.call(serverConsumerModuleMap, key)
           ) {
@@ -1330,6 +1705,10 @@ const rscBridgeRuntimePlugin = () => {
           if (stableStringify(existingNode) === stableStringify(node)) {
             return;
           }
+          if (preferIncoming) {
+            serverConsumerModuleMap[key] = node;
+            return;
+          }
           if (!isNamespacedRemoteIdForAlias(alias, key)) {
             return;
           }
@@ -1337,14 +1716,29 @@ const rscBridgeRuntimePlugin = () => {
             `[mf:rsc-bridge] serverConsumerModuleMap conflict for "${key}" while merging remote "${alias}"`,
           );
         };
-        upsertServerConsumerNode(resolvedModuleId, nextValue);
+        const isLayerSpecificRawModuleId =
+          rawModuleId.startsWith(SSR_LAYER_PREFIX) ||
+          rawModuleId.startsWith(RSC_LAYER_PREFIX);
+        const shouldPreferIncomingLayerSpecificNode =
+          isLayerSpecificRawModuleId &&
+          isNamespacedRemoteIdForAlias(alias, resolvedModuleId);
+        upsertServerConsumerNode(
+          resolvedModuleId,
+          nextValue,
+          shouldPreferIncomingLayerSpecificNode,
+        );
 
-        const prefixedResolvedModuleId = resolvedModuleId.startsWith(
-          SSR_LAYER_PREFIX,
-        )
-          ? resolvedModuleId
-          : `${SSR_LAYER_PREFIX}${resolvedModuleId}`;
-        upsertServerConsumerNode(prefixedResolvedModuleId, nextValue);
+        const prefixedResolvedModuleId =
+          resolvedModuleId.startsWith(SSR_LAYER_PREFIX) ||
+          resolvedModuleId.startsWith(RSC_LAYER_PREFIX)
+            ? resolvedModuleId
+            : `${SSR_LAYER_PREFIX}${resolvedModuleId}`;
+        upsertServerConsumerNode(
+          prefixedResolvedModuleId,
+          nextValue,
+          shouldPreferIncomingLayerSpecificNode &&
+            isNamespacedRemoteIdForAlias(alias, prefixedResolvedModuleId),
+        );
       }
       if (ssrPreloadPromises.length > 0) {
         await Promise.all(ssrPreloadPromises);

@@ -22,6 +22,9 @@ type WebpackRequireRuntime = {
   initializeExposesData?: {
     moduleMap?: Record<string, () => Promise<() => unknown> | (() => unknown)>;
   };
+  initializeSharingData?: {
+    scopeToSharingDataMapping?: Record<string, unknown>;
+  };
   e?: (chunkId: string | number) => unknown;
   I?: (shareScope: string, initScope?: unknown) => unknown;
   rscM?: ManifestLike;
@@ -478,6 +481,15 @@ const getShareScopesForServerModuleId = (
   manifest?: ManifestLike,
 ) => {
   const scopes = new Set<string>(['default']);
+  const declaredShareScopes =
+    __webpack_require__.initializeSharingData?.scopeToSharingDataMapping;
+  if (isObject(declaredShareScopes)) {
+    for (const shareScope of Object.keys(declaredShareScopes)) {
+      if (shareScope) {
+        scopes.add(shareScope);
+      }
+    }
+  }
   if (moduleId.startsWith('(server-side-rendering)/')) {
     scopes.add('ssr');
   }
@@ -747,15 +759,6 @@ export async function preloadSSRModule(moduleId: string, exposeHint?: string) {
     }
   }
 
-  const syntheticModuleFromManifest = buildSyntheticSsrModuleFromManifest(
-    normalizedModuleId,
-    manifest,
-  );
-  if (syntheticModuleFromManifest) {
-    ssrModuleCache[normalizedModuleId] = syntheticModuleFromManifest;
-    return syntheticModuleFromManifest;
-  }
-
   const shareScopeMap = (__webpack_require__ as unknown as { S?: any }).S;
   const ssrReact = shareScopeMap?.ssr?.react;
   debugLog('preloadSSRModule:shareState', {
@@ -812,8 +815,48 @@ export async function preloadSSRModule(moduleId: string, exposeHint?: string) {
         `[rsc-bridge-expose] Hidden SSR expose "${hiddenSsrExpose}" loaded but server module "${normalizedModuleId}" is unavailable: ${String(error)}`,
       );
     }
+    if (shouldDebug) {
+      const exportKeys = isObject(resolvedModuleExports)
+        ? Object.keys(resolvedModuleExports as Record<string, unknown>)
+        : [];
+      const sampleExportValue =
+        isObject(resolvedModuleExports) && exportKeys.length > 0
+          ? (resolvedModuleExports as Record<string, unknown>)[exportKeys[0]]
+          : resolvedModuleExports;
+      const sampleClientReferenceType =
+        (typeof sampleExportValue === 'function' ||
+          isObject(sampleExportValue)) &&
+        sampleExportValue != null &&
+        '$$typeof' in (sampleExportValue as Record<string, unknown>)
+          ? String((sampleExportValue as Record<string, unknown>)['$$typeof'])
+          : '';
+      const sampleClientReferenceId =
+        (typeof sampleExportValue === 'function' ||
+          isObject(sampleExportValue)) &&
+        sampleExportValue != null &&
+        '$$id' in (sampleExportValue as Record<string, unknown>)
+          ? String((sampleExportValue as Record<string, unknown>)['$$id'])
+          : '';
+      debugLog('preloadSSRModule:resolvedExports', {
+        moduleId: normalizedModuleId,
+        hiddenSsrExpose,
+        exportKeys,
+        sampleType: typeof sampleExportValue,
+        sampleClientReferenceType,
+        sampleClientReferenceId,
+      });
+    }
     ssrModuleCache[normalizedModuleId] = resolvedModuleExports;
     return resolvedModuleExports;
+  }
+
+  const syntheticModuleFromManifest = buildSyntheticSsrModuleFromManifest(
+    normalizedModuleId,
+    manifest,
+  );
+  if (syntheticModuleFromManifest) {
+    ssrModuleCache[normalizedModuleId] = syntheticModuleFromManifest;
+    return syntheticModuleFromManifest;
   }
 
   throw new Error(
