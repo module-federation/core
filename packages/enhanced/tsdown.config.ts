@@ -4,13 +4,13 @@ export default defineConfig([
   {
     name: 'enhanced-build',
     cwd: import.meta.dirname,
-    entry: {
-      index: 'src/index.ts',
-      webpack: 'src/webpack.ts',
-      rspack: 'src/rspack.ts',
-      runtime: 'src/runtime.ts',
-      prefetch: 'src/prefetch.ts',
-    },
+    // Emit the full source tree so lazy runtime requires inside wrapper classes
+    // continue to resolve internal modules from dist/src/** like the old tsc build.
+    entry: [
+      'src/**/*.{ts,tsx,js,mts,cts}',
+      '!src/**/*.d.ts',
+      '!src/scripts/**',
+    ],
     tsconfig: 'tsconfig.lib.json',
     outDir: 'dist/src',
     format: ['cjs'],
