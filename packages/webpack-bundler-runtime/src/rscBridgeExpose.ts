@@ -22,6 +22,7 @@ type WebpackRequireRuntime = {
   initializeExposesData?: {
     moduleMap?: Record<string, () => Promise<() => unknown> | (() => unknown)>;
   };
+  e?: (chunkId: string | number) => unknown;
   I?: (shareScope: string, initScope?: unknown) => unknown;
   rscM?: ManifestLike;
 };
@@ -199,6 +200,107 @@ const resolveClientManifestEntry = (
     }
   }
   return null;
+};
+
+const extractChunkIds = (chunks: Array<string | number>) => {
+  const chunkIds: Array<string | number> = [];
+  const pushChunkId = (chunkId: string | number) => {
+    if (!chunkIds.includes(chunkId)) {
+      chunkIds.push(chunkId);
+    }
+  };
+
+  for (let i = 0; i < chunks.length; i += 1) {
+    const chunkValue = chunks[i];
+    if (typeof chunkValue !== 'string' && typeof chunkValue !== 'number') {
+      continue;
+    }
+
+    const nextValue = chunks[i + 1];
+    if (
+      typeof nextValue === 'string' &&
+      (nextValue.endsWith('.js') ||
+        nextValue.endsWith('.cjs') ||
+        nextValue.endsWith('.mjs'))
+    ) {
+      pushChunkId(chunkValue);
+      i += 1;
+      continue;
+    }
+
+    pushChunkId(chunkValue);
+  }
+
+  return chunkIds;
+};
+
+const collectServerModuleChunkIds = (
+  moduleId: string,
+  manifest?: ManifestLike,
+) => {
+  const serverConsumerModuleMap = isObject(manifest?.serverConsumerModuleMap)
+    ? (manifest!.serverConsumerModuleMap as Record<string, ManifestNode>)
+    : undefined;
+  if (!serverConsumerModuleMap) {
+    return [];
+  }
+
+  const chunkIds: Array<string | number> = [];
+  const pushChunkIds = (nextChunkIds: Array<string | number>) => {
+    for (const chunkId of nextChunkIds) {
+      if (!chunkIds.includes(chunkId)) {
+        chunkIds.push(chunkId);
+      }
+    }
+  };
+
+  for (const node of Object.values(serverConsumerModuleMap)) {
+    if (!isObject(node)) {
+      continue;
+    }
+    for (const exportValue of Object.values(node)) {
+      if (!isObject(exportValue) || exportValue.id == null) {
+        continue;
+      }
+      if (String(exportValue.id) !== moduleId) {
+        continue;
+      }
+      const chunks = Array.isArray(exportValue.chunks)
+        ? (exportValue.chunks as Array<string | number>)
+        : [];
+      pushChunkIds(extractChunkIds(chunks));
+    }
+  }
+
+  return chunkIds;
+};
+
+const preloadServerModuleChunks = async (
+  moduleId: string,
+  manifest?: ManifestLike,
+) => {
+  const chunkIds = collectServerModuleChunkIds(moduleId, manifest);
+  if (chunkIds.length === 0) {
+    return false;
+  }
+  if (typeof __webpack_require__.e !== 'function') {
+    throw new Error(
+      `[rsc-bridge-expose] Chunk loader "__webpack_require__.e" is unavailable while preloading server module "${moduleId}"`,
+    );
+  }
+  await Promise.all(
+    chunkIds.map((chunkId) => {
+      const loadResult = __webpack_require__.e!(chunkId);
+      if (
+        loadResult &&
+        typeof (loadResult as Promise<unknown>).then === 'function'
+      ) {
+        return loadResult as Promise<unknown>;
+      }
+      return Promise.resolve(loadResult);
+    }),
+  );
+  return true;
 };
 
 const collectClientReferenceIdsFromExports = (
@@ -486,6 +588,27 @@ export async function preloadSSRModule(moduleId: string, exposeHint?: string) {
     : undefined;
   await ensureShareScopesForModuleId(normalizedModuleId, manifest);
   await buildSsrExposeMap();
+
+  const didPreloadChunksFromManifest = await preloadServerModuleChunks(
+    normalizedModuleId,
+    manifest,
+  );
+  if (didPreloadChunksFromManifest) {
+    try {
+      const required = __webpack_require__(normalizedModuleId);
+      const resolvedModuleExports =
+        required && typeof (required as Promise<unknown>).then === 'function'
+          ? await (required as Promise<unknown>)
+          : required;
+      ssrModuleCache[normalizedModuleId] = resolvedModuleExports;
+      return resolvedModuleExports;
+    } catch (error) {
+      debugLog('preloadSSRModule:manifestChunkRequireFailed', {
+        moduleId: normalizedModuleId,
+        error: String(error),
+      });
+    }
+  }
 
   const shareScopeMap = (__webpack_require__ as unknown as { S?: any }).S;
   const ssrReact = shareScopeMap?.ssr?.react;
