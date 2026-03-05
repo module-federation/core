@@ -1,5 +1,22 @@
 # @module-federation/nextjs-mf
 
+## 8.8.57
+
+### Patch Changes
+
+- 918294f: Add missing release coverage for packages moved to the new build implementation and standardized ESM/CJS artifact outputs. This ensures package versioning and publish automation include the remaining affected packages on this branch.
+- Updated dependencies [987716a]
+- Updated dependencies [918294f]
+- Updated dependencies [203c950]
+- Updated dependencies [0172491]
+- Updated dependencies [a0faa70]
+- Updated dependencies [918294f]
+  - @module-federation/enhanced@2.1.0
+  - @module-federation/runtime@2.1.0
+  - @module-federation/webpack-bundler-runtime@2.1.0
+  - @module-federation/node@2.7.33
+  - @module-federation/sdk@2.1.0
+
 ## 8.8.56
 
 ### Patch Changes
