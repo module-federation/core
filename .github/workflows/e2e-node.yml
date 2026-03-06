@@ -64,4 +64,4 @@ jobs:
 
       - name: E2E Node Federation
         if: steps.check-ci.outputs.run-e2e == 'true'
-        run: pnpm exec turbo run serve:development --filter=node-local-remote --filter=node-remote --filter=node-dynamic-remote-new-version --filter=node-dynamic-remote --concurrency=10 & echo "done" && sleep 25 && pnpm exec turbo run serve:development --filter=node-host & sleep 5 && npx wait-on tcp:3333 && pnpm exec turbo run test:e2e --filter=node-host-e2e --only
+        run: pnpm run e2e:node

@@ -106,19 +106,30 @@ async function processFilesWithConcurrencyLimit(files, limit) {
 }
 
 async function main() {
+  const formattedFiles = [];
   if (argv.path) {
     await processFile(argv.path);
+    formattedFiles.push(argv.path);
   } else if (argv.pattern) {
     console.log('pattern', argv.pattern);
     try {
       const files = await glob.glob(argv.pattern);
       await processFilesWithConcurrencyLimit(files, 3); // Process files with concurrency limit of 3
+      formattedFiles.push(...files);
     } catch (err) {
       console.error('Error finding files:', err.message);
       process.exit(1);
     }
   }
-  execSync('nx format:write');
+  if (formattedFiles.length > 0) {
+    execFileSync(
+      'pnpm',
+      ['exec', 'prettier', '--write', '--ignore-unknown', ...formattedFiles],
+      {
+        stdio: 'inherit',
+      },
+    );
+  }
 }
 
 main();
