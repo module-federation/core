@@ -115,7 +115,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     new RemoteEntryPlugin(options).apply(compiler);
 
     if (options.experiments?.provideExternalRuntime) {
-      if (options.exposes) {
+      if (containerManager.enable) {
         throw new Error(
           'You can only set provideExternalRuntime: true in pure consumer which not expose modules.',
         );
