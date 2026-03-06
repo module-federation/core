@@ -1,6 +1,4 @@
-# AI & Module Federation
-
-This page collects resources that help large language models understand and work with Module Federation 2.0 more effectively.
+# Module Federation for AI
 
 ## Helping AI Understand MF 2.0
 
@@ -36,6 +34,20 @@ For one-off questions, prepend the following to your message so the AI consults 
 Before answering, please read https://module-federation.io/llms.txt to learn about the latest Module Federation 2.0 documentation, then answer my question.
 ```
 
+### mf-docs Skill
+
+If you use an AI editor that supports Skills (Claude Code, Cursor, Windsurf, etc.), install the `mf-docs` skill — it automatically fetches the latest docs from `module-federation.io` before every MF-related answer, with no manual copy-pasting required:
+
+```bash
+npx skills add module-federation/core --skill mf-docs -y
+```
+
+Then trigger it directly:
+
+```
+/mf-docs What's the difference between singleton and requiredVersion in shared?
+```
+
 ---
 
 ## Agent Skills
@@ -43,6 +55,7 @@ Before answering, please read https://module-federation.io/llms.txt to learn abo
 If you use an AI editor such as Claude Code, Cursor, or Windsurf, you can install **MF Agent Skills** — a set of pre-built instruction sets that give AI the ability to handle MF 2.0-specific tasks, including:
 
 - Fetching the latest docs in real time to answer configuration questions
+- Adding Module Federation to an existing project in one command
 - Diagnosing type errors, shared dependency conflicts, and config issues
 - Inspecting remote module information
 

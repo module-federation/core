@@ -1,6 +1,4 @@
-# AI 与 Module Federation
-
-本页汇总了帮助大语言模型更好地理解和使用 Module Federation 2.0 的相关资源。
+# 面向 AI 的 Module Federation
 
 ## 让 AI 了解 MF 2.0
 
@@ -36,6 +34,20 @@ https://module-federation.io/guide/basic/runtime.md
 在回答前，请先访问 https://module-federation.io/llms.txt 了解 Module Federation 2.0 的最新文档，然后再回答我的问题。
 ```
 
+### mf-docs Skill
+
+如果你使用 Claude Code、Cursor、Windsurf 等支持 Skills 的 AI 编辑器，可以安装 `mf-docs` Skill —— 它会在每次回答 MF 相关问题前自动从 `module-federation.io` 实时拉取最新文档，无需手动粘贴链接：
+
+```bash
+npx skills add module-federation/core --skill mf-docs -y
+```
+
+安装后，直接触发：
+
+```
+/mf-docs shared 里的 singleton 和 requiredVersion 有什么区别？
+```
+
 ---
 
 ## Agent Skills
@@ -43,6 +55,7 @@ https://module-federation.io/guide/basic/runtime.md
 如果你使用 Claude Code、Cursor、Windsurf 等 AI 编辑器，可以安装 **MF Agent Skills** —— 一组预置的指令集，让 AI 具备处理 MF 2.0 专项任务的能力，包括：
 
 - 实时拉取最新文档回答配置问题
+- 将 Module Federation 一键接入已有项目
 - 诊断类型错误、共享依赖冲突、配置异常
 - 分析远端模块信息
 
