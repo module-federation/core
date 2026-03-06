@@ -31,7 +31,7 @@ function setupE2E() {
   return step('Setup E2E dependencies and package build', async (ctx) => {
     await runCommand('pnpm', ['install', '--frozen-lockfile'], ctx);
     await runCommand('npx', ['cypress', 'install'], ctx);
-    await runCommand('pnpm', ['run', 'build:pkg'], ctx);
+    await runCommand('pnpm', ['run', 'build:packages'], ctx);
   });
 }
 
@@ -71,8 +71,11 @@ const jobs = [
           ctx,
         ),
       ),
+      step('Verify Turbo Conventions', (ctx) =>
+        runCommand('pnpm', ['run', 'verify:turbo'], ctx),
+      ),
       step('Build packages', (ctx) =>
-        runCommand('pnpm', ['run', 'build:pkg'], ctx),
+        runCommand('pnpm', ['run', 'build:packages'], ctx),
       ),
       step('Check package publishing compatibility (publint)', (ctx) =>
         runShell(
@@ -124,8 +127,11 @@ const jobs = [
           ctx,
         ),
       ),
+      step('Verify Turbo Conventions', (ctx) =>
+        runCommand('pnpm', ['run', 'verify:turbo'], ctx),
+      ),
       step('Build shared packages', (ctx) =>
-        runCommand('pnpm', ['run', 'build:pkg'], ctx),
+        runCommand('pnpm', ['run', 'build:packages'], ctx),
       ),
       step('Check metro package publishing compatibility (publint)', (ctx) =>
         runShell(
@@ -272,7 +278,7 @@ const jobs = [
         runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
       ),
       step('Build packages', (ctx) =>
-        runCommand('pnpm', ['run', 'build:pkg'], ctx),
+        runCommand('pnpm', ['run', 'build:packages'], ctx),
       ),
       step('Check CI conditions', async (ctx) => {
         ctx.state.shouldRun = await ciIsAffected(
@@ -374,7 +380,7 @@ const jobs = [
         runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
       ),
       step('Build shared packages', (ctx) =>
-        runCommand('pnpm', ['run', 'build:pkg'], ctx),
+        runCommand('pnpm', ['run', 'build:packages'], ctx),
       ),
       step('Check CI conditions', async (ctx) => {
         ctx.state.shouldRun = await ciIsAffected(ctx.env.METRO_APP_NAME, ctx);
@@ -414,7 +420,7 @@ const jobs = [
         runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
       ),
       step('Build shared packages', (ctx) =>
-        runCommand('pnpm', ['run', 'build:pkg'], ctx),
+        runCommand('pnpm', ['run', 'build:packages'], ctx),
       ),
       step('Check CI conditions', async (ctx) => {
         ctx.state.shouldRun = await ciIsAffected(ctx.env.METRO_APP_NAME, ctx);
@@ -502,7 +508,7 @@ const jobs = [
         runCommand('npx', ['cypress', 'install'], ctx),
       ),
       step('Build packages', (ctx) =>
-        runCommand('pnpm', ['run', 'build:pkg'], ctx),
+        runCommand('pnpm', ['run', 'build:packages'], ctx),
       ),
       step('Install xvfb', (ctx) =>
         runShell('sudo apt-get update && sudo apt-get install xvfb', ctx),
@@ -530,7 +536,7 @@ const jobs = [
         runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
       ),
       step('Build packages (current)', (ctx) =>
-        runCommand('pnpm', ['run', 'build:pkg'], ctx),
+        runCommand('pnpm', ['run', 'build:packages'], ctx),
       ),
       step('Measure bundle sizes (current)', (ctx) =>
         runCommand(
@@ -557,7 +563,7 @@ const jobs = [
         }),
       ),
       step('Build packages (base)', (ctx) =>
-        runCommand('pnpm', ['run', 'build:pkg'], {
+        runCommand('pnpm', ['run', 'build:packages'], {
           ...ctx,
           cwd: ctx.state.basePath,
         }),

@@ -45,7 +45,7 @@ jobs:
         run: npx cypress install
 
       - name: Build shared packages
-        run: pnpm run build:pkg
+        run: pnpm run build:packages
 
       - name: Check CI conditions
         id: check-ci

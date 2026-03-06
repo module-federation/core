@@ -64,8 +64,11 @@ jobs:
       - name: Verify Publint Workflow Coverage
         run: node tools/scripts/verify-publint-workflow-coverage.mjs
 
+      - name: Verify Turbo Conventions
+        run: pnpm run verify:turbo
+
       - name: Build packages
-        run: pnpm run build:pkg
+        run: pnpm run build:packages
 
       - name: Check Package Publishing Compatibility
         run: |

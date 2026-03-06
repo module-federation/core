@@ -79,7 +79,7 @@ jobs:
       - name: Build and test Packages
         run: |
           git fetch origin main
-          pnpm run build:pkg
+          pnpm run build:packages
           ls -l packages/*/dist packages/*/package.json
 
       - name: Publish latest version

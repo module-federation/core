@@ -8,12 +8,9 @@
     "lint": "eslint .",
     "preview": "rsbuild preview",
     "e2e:serve": "node scripts/e2e-server.js",
-    "test:e2e": "node ../../scripts/ensure-playwright.js && pnpm --filter @module-federation/treeshake-server build && pnpm run build && rstest run -c rstest.config.ts",
+    "test:e2e": "node ../../scripts/ensure-playwright.js && pnpm exec turbo run build --filter=@module-federation/treeshake-server && pnpm run build && rstest run -c rstest.config.ts",
     "test": "pnpm -C . test:e2e",
-    "e2e": "pnpm -C . test:e2e",
-    "turbo:build": "pnpm run build",
-    "turbo:test": "pnpm run test",
-    "turbo:lint": "pnpm run lint"
+    "e2e": "pnpm -C . test:e2e"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

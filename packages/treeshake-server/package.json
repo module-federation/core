@@ -16,15 +16,12 @@
     "treeshake-server": "bin/treeshake-server.js"
   },
   "scripts": {
-    "build": "pnpm -C ../treeshake-frontend build && rslib build && node scripts/copy-frontend.js",
+    "build": "rslib build && node scripts/copy-frontend.js",
     "lint": "biome lint src scripts",
-    "prestart": "npm run build",
+    "prestart": "pnpm exec turbo run build --filter=@module-federation/treeshake-server",
     "dev": "node scripts/dev.js",
     "start": "node dist/server.js",
-    "test": "node ../../scripts/ensure-playwright.js && rstest",
-    "turbo:build": "pnpm run build",
-    "turbo:test": "pnpm run test",
-    "turbo:lint": "pnpm run lint"
+    "test": "node ../../scripts/ensure-playwright.js && rstest"
   },
   "files": [
     "bin/",

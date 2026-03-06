@@ -102,7 +102,6 @@ pnpm exec turbo run <task> --force
   - `test` (depends on `^build`)
   - `lint`
   - `e2e` / `test:e2e` / `test:e2e:production`
-  - `turbo:build` / `turbo:test` / `turbo:lint` (repo-standard package pipeline tasks)
 
 ### Formatting
 
@@ -125,35 +124,29 @@ Wrapper script also exists: `pnpm run lint-fix`.
 - Package build (Turbo cache handled automatically):
 
 ```bash
-pnpm run build:pkg
+pnpm run build:packages
 ```
 
 - Package tests:
 
 ```bash
-pnpm run test:pkg
+pnpm run test:packages
 ```
 
 - Package lint:
 
 ```bash
-pnpm run lint
+pnpm run lint:packages
 ```
 
-- Underlying Turbo commands used by these wrappers:
-
-```bash
-pnpm exec turbo run turbo:build --filter=./packages/**
-pnpm exec turbo run turbo:test --filter=./packages/**
-pnpm exec turbo run turbo:lint --filter=./packages/**
-```
+Root build/lint scripts delegate to the package pipeline scripts.
 
 ### Metro Pipeline Parity
 
 - Build pkg + metro:
 
 ```bash
-pnpm run build:pkg
+pnpm run build:packages
 ```
 
 - Metro tests:

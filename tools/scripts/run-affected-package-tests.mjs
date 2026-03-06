@@ -29,30 +29,27 @@ function main() {
 
   const changedFiles = getChangedFiles(baseRef, headRef);
   const testImpactRoots = getChangedPackagesWithTestImpact(changedFiles);
-  if (testImpactRoots.length === 0) {
-    console.log(
-      `[affected-tests] No package test-impact changes detected (${baseRef}..${headRef}). Skipping affected package tests.`,
-    );
-    process.exit(0);
-  }
-
   const affectedPackageTargets = getAffectedPackageTestTargets(
     baseRef,
     headRef,
   );
-  if (affectedPackageTargets.length === 0) {
+  const combinedTargets = mergeAffectedTargets(
+    testImpactRoots,
+    affectedPackageTargets,
+  );
+  if (combinedTargets.length === 0) {
     console.log(
-      `[affected-tests] No affected package turbo:test tasks detected (${baseRef}..${headRef}) after test-impact filtering.`,
+      `[affected-tests] No affected package test tasks detected (${baseRef}..${headRef}). Skipping affected package tests.`,
     );
     process.exit(0);
   }
 
   console.log(
-    `[affected-tests] Running turbo:test for ${affectedPackageTargets.length} affected package(s) from ${testImpactRoots.length} impact root(s): ${affectedPackageTargets.join(', ')}`,
+    `[affected-tests] Running turbo test for ${combinedTargets.length} affected package(s) from ${testImpactRoots.length} impact root(s): ${combinedTargets.join(', ')}`,
   );
 
-  const args = ['exec', 'turbo', 'run', 'turbo:test'];
-  for (const packageName of affectedPackageTargets) {
+  const args = ['exec', 'turbo', 'run', 'test'];
+  for (const packageName of combinedTargets) {
     args.push(`--filter=${packageName}`);
   }
   args.push('--concurrency=50%');
@@ -262,71 +259,27 @@ function shouldTriggerPackageTests(relativeFilePath) {
     return false;
   }
 
-  if (isExtensionlessImpactPath(relativeFilePath)) {
-    return true;
+  // Default to "impacting" for package-local changes to avoid false negatives.
+  // Only skip obvious root-level documentation/legal metadata files.
+  const segments = relativeFilePath.split('/');
+  if (segments.length === 1) {
+    const fileName = segments[0];
+    if (
+      /^(?:README|CHANGELOG|LICENSE|NOTICE|AUTHORS|CONTRIBUTING|CODEOWNERS)(?:\..+)?$/i.test(
+        fileName,
+      )
+    ) {
+      return false;
+    }
   }
 
-  if (relativeFilePath === 'package.json') {
-    return true;
-  }
-
-  if (/^tsconfig(?:\..+)?\.json$/.test(relativeFilePath)) {
-    return true;
-  }
-
-  if (
-    relativeFilePath.startsWith('src/') ||
-    relativeFilePath.startsWith('test/') ||
-    relativeFilePath.startsWith('tests/') ||
-    relativeFilePath.startsWith('__tests__/') ||
-    relativeFilePath.startsWith('scripts/') ||
-    relativeFilePath.startsWith('script/') ||
-    relativeFilePath.startsWith('bin/')
-  ) {
-    return true;
-  }
-
-  if (/\.(spec|test)\.[cm]?[jt]sx?$/.test(relativeFilePath)) {
-    return true;
-  }
-
-  if (
-    /\.(?:[cm]?[jt]sx?|json|ya?ml|toml|graphql|gql|sql|sh)$/i.test(
-      relativeFilePath,
-    )
-  ) {
-    return true;
-  }
-
-  return (
-    relativeFilePath.startsWith('jest.config.') ||
-    relativeFilePath.startsWith('vitest.config.') ||
-    relativeFilePath.startsWith('rstest.config.') ||
-    relativeFilePath.startsWith('vite.config.') ||
-    relativeFilePath.startsWith('webpack.config.') ||
-    relativeFilePath.startsWith('rspack.config.') ||
-    relativeFilePath.startsWith('rsbuild.config.') ||
-    relativeFilePath.startsWith('rslib.config.') ||
-    relativeFilePath.startsWith('babel.config.') ||
-    relativeFilePath.startsWith('tsconfig.spec')
-  );
-}
-
-function isExtensionlessImpactPath(relativeFilePath) {
-  const fileName = relativeFilePath.split('/').pop() ?? '';
-  if (!fileName || fileName.startsWith('.') || fileName.includes('.')) {
-    return false;
-  }
-
-  return !/^(?:README|CHANGELOG|LICENSE|NOTICE|AUTHORS|CONTRIBUTING|CODEOWNERS)$/i.test(
-    fileName,
-  );
+  return true;
 }
 
 function getAffectedPackageTestTargets(baseRef, headRef) {
   const result = spawnSync(
     'pnpm',
-    ['exec', 'turbo', 'run', 'turbo:test', '--affected', '--dry-run=json'],
+    ['exec', 'turbo', 'run', 'test', '--affected', '--dry-run=json'],
     {
       cwd: ROOT,
       stdio: 'pipe',
@@ -342,7 +295,7 @@ function getAffectedPackageTestTargets(baseRef, headRef) {
 
   if (result.status !== 0) {
     throw new Error(
-      `[affected-tests] Failed to compute affected turbo:test graph from Turbo: ${result.stderr || result.stdout}`,
+      `[affected-tests] Failed to compute affected test graph from Turbo: ${result.stderr || result.stdout}`,
     );
   }
 
@@ -364,7 +317,7 @@ function getAffectedPackageTestTargets(baseRef, headRef) {
 
     const taskId = typeof task.taskId === 'string' ? task.taskId : '';
     const taskName = typeof task.task === 'string' ? task.task : '';
-    if (taskName !== 'turbo:test' && !taskId.endsWith('#turbo:test')) {
+    if (taskName !== 'test' && !taskId.endsWith('#test')) {
       continue;
     }
 
@@ -488,4 +441,19 @@ function extractBalancedJson(text, startIndex) {
 
 function normalizePath(filePath) {
   return filePath.replaceAll('\\', '/');
+}
+
+function mergeAffectedTargets(testImpactRoots, affectedTargets) {
+  const combined = new Set();
+  for (const value of testImpactRoots ?? []) {
+    if (value) {
+      combined.add(value);
+    }
+  }
+  for (const value of affectedTargets ?? []) {
+    if (value) {
+      combined.add(value);
+    }
+  }
+  return Array.from(combined).sort();
 }

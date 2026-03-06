@@ -53,7 +53,7 @@ jobs:
         run: pnpm --filter @module-federation/devtools exec playwright install chromium
 
       - name: Build shared packages
-        run: pnpm run build:pkg
+        run: pnpm run build:packages
 
       - name: Install xvfb
         run: sudo apt-get update && sudo apt-get install xvfb

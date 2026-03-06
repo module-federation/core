@@ -30,9 +30,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "vitest",
-    "turbo:build": "pnpm run build",
-    "turbo:test": "pnpm run test"
+    "test": "vitest"
   },
   "peerDependencies": {
     "vue": "=3",
