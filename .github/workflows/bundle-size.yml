@@ -53,14 +53,18 @@ jobs:
 
       - name: Prepare base worktree
         run: |
-          BASE_REF=${CI_LOCAL_BASE_REF:-origin/main}
+          BASE_REF=${CI_LOCAL_BASE_REF:-${{ github.event.pull_request.base.sha }}}
           BASE_PATH=".ci-local-base-${RANDOM}-${RANDOM}"
-          LOCAL_BASE_REF="${BASE_REF#origin/}"
           echo "BASE_REF=$BASE_REF" >> "$GITHUB_ENV"
           echo "BASE_PATH=$BASE_PATH" >> "$GITHUB_ENV"
-          echo "LOCAL_BASE_REF=$LOCAL_BASE_REF" >> "$GITHUB_ENV"
           git worktree add "$BASE_PATH" "$BASE_REF"
-          git -C "$BASE_PATH" branch -f "$LOCAL_BASE_REF" "$BASE_REF" || true
+          case "$BASE_REF" in
+            origin/*)
+              LOCAL_BASE_REF="${BASE_REF#origin/}"
+              echo "LOCAL_BASE_REF=$LOCAL_BASE_REF" >> "$GITHUB_ENV"
+              git -C "$BASE_PATH" branch -f "$LOCAL_BASE_REF" "$BASE_REF" || true
+              ;;
+          esac
 
       - name: Restore Turborepo cache (base worktree)
         uses: actions/cache@v5

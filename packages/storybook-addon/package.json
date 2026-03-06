@@ -53,6 +53,7 @@
     "@module-federation/sdk": "workspace:*"
   },
   "devDependencies": {
+    "@nx/module-federation": ">= 16.0.0",
     "jest-fixed-jsdom": "^0.0.9",
     "@module-federation/utilities": "workspace:*",
     "@rsbuild/core": "2.0.0-beta.2",
@@ -80,6 +81,9 @@
       "optional": true
     },
     "@nx/react": {
+      "optional": true
+    },
+    "@nx/module-federation": {
       "optional": true
     },
     "@nx/webpack": {
