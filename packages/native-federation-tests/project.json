@@ -27,8 +27,12 @@
       }
     },
     "test": {
-      "executor": "@nx/vite:test",
-      "outputs": ["{workspaceRoot}/coverage/packages/native-federation-tests"]
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/coverage/packages/native-federation-tests"],
+      "options": {
+        "command": "pnpm exec vitest run --passWithNoTests --config packages/native-federation-tests/vite.config.mts",
+        "forwardAllArgs": false
+      }
     },
     "pre-release": {
       "executor": "nx:run-commands",
