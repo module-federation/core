@@ -53,6 +53,7 @@ https://github.com/module-federation/core/tree/main/skills
 | [`mf-docs`](#mf-docs) ⭐ | `/mf-docs` | 询问关于 Module Federation 2.0 配置或 API 的任何问题 | [skills/mf-docs](https://github.com/module-federation/core/tree/main/skills/mf-docs) |
 | [`mf-context`](#mf-context) | `/mf-context` | 快速查看项目的 MF 配置 | [skills/mf-context](https://github.com/module-federation/core/tree/main/skills/mf-context) |
 | [`mf-module-info`](#mf-module-info) | `/mf-module-info` | 查看远端模块的完整信息（exposes / remotes / shared） | [skills/mf-module-info](https://github.com/module-federation/core/tree/main/skills/mf-module-info) |
+| [`mf-integrate`](#mf-integrate) | `/mf-integrate` | 将 Module Federation 接入已有项目，自动生成生产者 / 消费者配置 | [skills/mf-integrate](https://github.com/module-federation/core/tree/main/skills/mf-integrate) |
 | [`mf-type-check`](#mf-type-check) | `/mf-type-check` | TypeScript 类型报错，或 `@mf-types` 目录缺失 | [skills/mf-type-check](https://github.com/module-federation/core/tree/main/skills/mf-type-check) |
 | [`mf-shared-deps`](#mf-shared-deps) | `/mf-shared-deps` | 共享依赖失效、版本冲突或重复打包 | [skills/mf-shared-deps](https://github.com/module-federation/core/tree/main/skills/mf-shared-deps) |
 | [`mf-perf`](#mf-perf) | `/mf-perf` | 本地开发时 HMR 或构建速度过慢 | [skills/mf-perf](https://github.com/module-federation/core/tree/main/skills/mf-perf) |
@@ -144,6 +145,35 @@ shared 里的 singleton 和 requiredVersion 有什么区别？
 | `exposes` | 该模块对外暴露的模块列表 |
 | `remotes` | 该模块依赖的远端列表 |
 | `shared` | 该模块声明的共享依赖 |
+
+---
+
+## mf-integrate
+
+将 Module Federation 接入已有项目。Skill 会自动检测当前项目的构建器，收集必要参数（应用名、角色、模块路径），然后生成完整配置并安装依赖。默认角色为**消费者**，可一键接入公开 Demo 生产者立即看到效果。
+
+**支持的构建器：** Rsbuild、Rspack、Webpack、Modern.js、Next.js（已弃用，仅 Pages Router）、Vite
+
+**使用方式：**
+```
+/mf-integrate [project-root]
+```
+
+**交互流程：**
+
+1. 自动检测构建器和已有 MF 配置
+2. 询问角色：`consumer`（默认）/ `provider` / `both`
+3. 询问应用名（建议取自 `package.json` 的 `name`）
+4. 消费者：选择接入公开 Demo 生产者，或填写自定义 remote URL
+5. 生产者：填写要暴露的模块路径
+6. 询问是否自动将远程组件插入入口文件以立即预览
+
+**全新项目？**
+
+如果目录下没有检测到构建器，Skill 会引导你使用以下命令从模板创建：
+```bash
+npm create module-federation@latest
+```
 
 ---
 

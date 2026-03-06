@@ -53,6 +53,7 @@ https://github.com/module-federation/core/tree/main/skills
 | [`mf-docs`](#mf-docs) ⭐ | `/mf-docs` | Ask any question about Module Federation 2.0 configuration or APIs | [skills/mf-docs](https://github.com/module-federation/core/tree/main/skills/mf-docs) |
 | [`mf-context`](#mf-context) | `/mf-context` | Inspect your project's MF configuration at a glance | [skills/mf-context](https://github.com/module-federation/core/tree/main/skills/mf-context) |
 | [`mf-module-info`](#mf-module-info) | `/mf-module-info` | Inspect a remote module's full info (exposes / remotes / shared) | [skills/mf-module-info](https://github.com/module-federation/core/tree/main/skills/mf-module-info) |
+| [`mf-integrate`](#mf-integrate) | `/mf-integrate` | Add Module Federation to an existing project — generates provider / consumer config automatically | [skills/mf-integrate](https://github.com/module-federation/core/tree/main/skills/mf-integrate) |
 | [`mf-type-check`](#mf-type-check) | `/mf-type-check` | TypeScript type errors or missing `@mf-types` folder | [skills/mf-type-check](https://github.com/module-federation/core/tree/main/skills/mf-type-check) |
 | [`mf-shared-deps`](#mf-shared-deps) | `/mf-shared-deps` | Shared deps not working, version conflicts, or duplicate bundling | [skills/mf-shared-deps](https://github.com/module-federation/core/tree/main/skills/mf-shared-deps) |
 | [`mf-perf`](#mf-perf) | `/mf-perf` | Slow HMR or slow build speed in local development | [skills/mf-perf](https://github.com/module-federation/core/tree/main/skills/mf-perf) |
@@ -144,6 +145,35 @@ To inspect the current project's own configuration, use `mf-context` instead.
 | `exposes` | Modules this remote exposes |
 | `remotes` | Remotes this module depends on |
 | `shared` | Shared dependencies declared by this module |
+
+---
+
+## mf-integrate
+
+Adds Module Federation to an existing project. The skill auto-detects your bundler, collects the required parameters (app name, role, module paths), generates complete configuration files, and installs the necessary packages. The default role is **consumer** — you can connect to the public demo provider immediately to see MF in action.
+
+**Supported bundlers:** Rsbuild, Rspack, Webpack, Modern.js, Next.js (deprecated, Pages Router only), Vite
+
+**Usage:**
+```
+/mf-integrate [project-root]
+```
+
+**Interactive flow:**
+
+1. Auto-detect bundler and existing MF configuration
+2. Choose role: `consumer` (default) / `provider` / `both`
+3. Enter app name (suggested from `package.json` `name` field)
+4. Consumer: connect to the public demo provider, or provide custom remote URLs
+5. Provider: specify the modules to expose
+6. Optionally auto-insert the remote component into the entry file for an instant preview
+
+**Starting from scratch?**
+
+If no bundler is detected, the skill will prompt you to create a new project from a template:
+```bash
+npm create module-federation@latest
+```
 
 ---
 
