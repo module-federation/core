@@ -52,6 +52,9 @@ jobs:
       - name: Install Cypress
         run: npx cypress install
 
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install chromium
+
       - name: Build shared packages
         run: pnpm run build:pkg
 
