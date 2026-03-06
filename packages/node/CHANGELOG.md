@@ -1,5 +1,19 @@
 # @module-federation/node
 
+## 2.7.33
+
+### Patch Changes
+
+- 918294f: Add runtime-safe access helpers for webpack require, webpack share-scope globals, and ignored dynamic imports, and migrate core/node runtime loaders to use these helpers. The helpers are exposed via a standalone `@module-federation/sdk/bundler` entrypoint so they can be built and consumed independently from the SDK main index bundle.
+- Updated dependencies [987716a]
+- Updated dependencies [918294f]
+- Updated dependencies [0172491]
+- Updated dependencies [a0faa70]
+- Updated dependencies [918294f]
+  - @module-federation/enhanced@2.1.0
+  - @module-federation/runtime@2.1.0
+  - @module-federation/sdk@2.1.0
+
 ## 2.7.32
 
 ### Patch Changes

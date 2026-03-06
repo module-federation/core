@@ -150,7 +150,6 @@ async function loadEntryScript({
       });
     });
 }
-
 async function loadEntryDom({
   remoteInfo,
   remoteEntryExports,

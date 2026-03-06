@@ -25,6 +25,7 @@ export type ModuleOptions = ConstructorParameters<typeof Module>[0];
 export function createRemoteEntryInitOptions(
   remoteInfo: RemoteInfo,
   hostShareScopeMap: ShareScopeMap,
+  rawInitScope?: InitScope,
 ): Record<string, any> {
   const localShareScopeMap = hostShareScopeMap;
 
@@ -57,7 +58,7 @@ export function createRemoteEntryInitOptions(
 
   // TODO: compate legacy init params, should use shareScopeMap if exist
   const shareScope = localShareScopeMap[shareScopeKeys[0]];
-  const initScope: InitScope = [];
+  const initScope: InitScope = rawInitScope ?? [];
 
   return {
     remoteEntryInitOptions,
@@ -108,7 +109,11 @@ class Module {
 
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 
-  async init(id?: string, remoteSnapshot?: ModuleInfo) {
+  async init(
+    id?: string,
+    remoteSnapshot?: ModuleInfo,
+    rawInitScope?: InitScope,
+  ) {
     // Get remoteEntry.js
     const remoteEntryExports = await this.getEntry();
 
@@ -124,7 +129,11 @@ class Module {
     this.initing = true;
     this.initPromise = (async () => {
       const { remoteEntryInitOptions, shareScope, initScope } =
-        createRemoteEntryInitOptions(this.remoteInfo, this.host.shareScopeMap);
+        createRemoteEntryInitOptions(
+          this.remoteInfo,
+          this.host.shareScopeMap,
+          rawInitScope,
+        );
 
       const initContainerOptions =
         await this.host.hooks.lifecycle.beforeInitContainer.emit({

@@ -67,7 +67,11 @@ export function generateSnapshotFromManifest(
 
   const getPublicPath = (): string => {
     if ('publicPath' in manifest.metaData) {
-      if (manifest.metaData.publicPath === 'auto' && version) {
+      if (
+        (manifest.metaData.publicPath === 'auto' ||
+          manifest.metaData.publicPath === '') &&
+        version
+      ) {
         // use same implementation as publicPath auto runtime module implements
         return inferAutoPublicPath(version);
       }
@@ -178,8 +182,10 @@ export function generateSnapshotFromManifest(
     remoteSnapshot = {
       ...basicRemoteSnapshot,
       publicPath: getPublicPath(),
-      ssrPublicPath: manifest.metaData.ssrPublicPath,
     };
+    if (typeof manifest.metaData.ssrPublicPath === 'string') {
+      remoteSnapshot.ssrPublicPath = manifest.metaData.ssrPublicPath;
+    }
   } else {
     remoteSnapshot = {
       ...basicRemoteSnapshot,

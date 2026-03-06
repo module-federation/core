@@ -181,6 +181,9 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     const runtimeESMPath = resolveRuntimePath([
       '@module-federation/runtime/dist/index.js',
       '@module-federation/runtime/dist/index.esm.js',
+      '@module-federation/runtime/dist/index.cjs',
+      '@module-federation/runtime/dist/index.cjs.cjs',
+      '@module-federation/runtime',
     ]);
 
     compiler.hooks.afterPlugins.tap('PatchAliasWebpackPlugin', () => {

@@ -1,3 +1,6 @@
+import React from 'react';
+import ShareScopeAlignmentPlayground from '@components/common/ShareScopeAlignmentPlayground';
+
 # Shared Dependency Isolation: Multiple Share Scopes
 
 > Split `shared` dependencies into multiple named shared pools (for example `default`, `scope1`). Dependencies are only reused within the same pool.
@@ -13,7 +16,7 @@ The key idea of multiple share scopes is: **move shared dependency registration 
 
 ## Configuration Quick Map
 
-The easiest mental model is to focus on what you configure on producer, consumer, and each shared entry:
+The simplest way to understand multiple share scopes is to focus on what you configure on the producer, the consumer, and each shared entry. You don’t need to learn runtime internal data structures or variable names.
 
 * **Producer (remote)**: use [shareScope](../../configure/shareScope) to declare which share scopes this remote initializes (default: `default`, supports `string | string[]`).
 * **Consumer (host)**: use [remotes[remote].shareScope](../../configure/remotes#sharescope) to declare which share scopes the host aligns with that remote (default: `default`).
@@ -25,12 +28,26 @@ When the host initializes a remote, it first aligns the share scopes based on bo
 
 Below, **HostShareScope** refers to `remotes[remote].shareScope` on the host, and **RemoteShareScope** refers to `shareScope` on the remote.
 
+:::warning Note
+
+Although both `shareScope` and `remotes[remote].shareScope` accept `string | string[]`, don’t use arrays casually, especially `['default']` or `[]`:
+
+* **Single scope**: use a string (for example `'default'`), not `['default']`. Based on the runtime implementation, `'default'` and `['default']` follow different branches for alignment/initialization. If the host uses an array and the remote uses a string, the remote aligns scopes using the host’s list; if the remote uses an array, it only processes the remote’s list.
+* **Empty array `[]`**: results in no scopes being initialized (no `default`, no alignment), which is almost certainly a misconfiguration.
+
+:::
+
 | HostShareScope (remotes[remote].shareScope) | RemoteShareScope (shareScope) | Share Pool Alignment (pseudo code) | Outcome (key points) |
 | --- | --- | --- | --- |
 | `'default'` | `'default'` | `remote['default'] = host['default']` | The `default` shared pool is fully shared between host and remote. |
 | `['default','scope1']` | `'default'` | `remote['default'] = host['default']; remote['scope1'] = host['scope1'] ?? {}` | The remote prepares both pools, but **only initializes shared deps for RemoteShareScope** (so only `default` is initialized). To actually resolve shared deps from `scope1`, the remote must also be configured with multiple share scopes. |
 | `'default'` | `['default','scope1']` | `remote['default'] = host['default']; remote['scope1'] = {}` | The remote initializes both `default`/`scope1`, but the host only provides `default`. `scope1` becomes `{}`, so deps assigned to `scope1` **cannot be reused from the host** (typically falling back to the remote’s own provided/local deps). |
 | `['scope1','default']` | `['scope1','scope2']` | `remote['scope1'] = host['scope1']; remote['scope2'] = host['scope2'] ?? {}` | `scope1` is aligned (reuses the host’s `scope1`). If the host has no `scope2`, it becomes `{}`. The remote initializes shared deps for its RemoteShareScope (so it will try to initialize `scope1/scope2`). |
+
+### Playground
+
+{props.shareScopeAlignmentPlayground ||
+  React.createElement(ShareScopeAlignmentPlayground)}
 
 Notes:
 
@@ -227,4 +244,3 @@ export function scopeAliasPlugin(): ModuleFederationRuntimePlugin {
   };
 }
 ```
-

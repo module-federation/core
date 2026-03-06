@@ -1,6 +1,6 @@
 /*
-	MIT License http://www.opensource.org/licenses/mit-license.php
-	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
+  MIT License http://www.opensource.org/licenses/mit-license.php
+  Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
 */
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { Compilation } from 'webpack';
@@ -132,7 +132,7 @@ class RemoteRuntimeModule extends RuntimeModule {
             });
             if (externalModuleId !== null && externalModuleId !== undefined) {
               moduleIdToRemoteDataMapping[id] = {
-                shareScope: shareScope as string,
+                shareScope: shareScope,
                 name,
                 externalModuleId: externalModuleId as string | number,
                 // Preserve the extracted remote name so lazy updates can

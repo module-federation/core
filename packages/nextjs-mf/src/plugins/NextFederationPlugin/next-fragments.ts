@@ -13,6 +13,17 @@ import {
   findLoaderForResource,
 } from '../../loaders/helpers';
 import path from 'path';
+
+const resolveDistOrLocalPath = (
+  packageDistPath: string,
+  localRelativePath: string,
+): string => {
+  try {
+    return require.resolve(packageDistPath);
+  } catch {
+    return require.resolve(localRelativePath);
+  }
+};
 /**
  * Set up default shared values based on the environment.
  * @param {boolean} isServer - Boolean indicating if the code is running on the server.
@@ -52,13 +63,19 @@ export const applyPathFixes = (
         hasLoader(typedRule, 'next-image-loader')
       ) {
         injectRuleLoader(typedRule, {
-          loader: require.resolve('../../loaders/fixImageLoader'),
+          loader: resolveDistOrLocalPath(
+            '@module-federation/nextjs-mf/dist/src/loaders/fixImageLoader.js',
+            '../../loaders/fixImageLoader',
+          ),
         });
       }
 
       if (options.enableUrlLoaderFix && hasLoader(typedRule, 'url-loader')) {
         injectRuleLoader(typedRule, {
-          loader: require.resolve('../../loaders/fixUrlLoader'),
+          loader: resolveDistOrLocalPath(
+            '@module-federation/nextjs-mf/dist/src/loaders/fixUrlLoader.js',
+            '../../loaders/fixUrlLoader',
+          ),
         });
       }
     }
