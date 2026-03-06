@@ -64,7 +64,7 @@
     "sync:pullMFTypes": "concurrently \"node ./packages/enhanced/pullts.js\"",
     "app:next:dev": "pnpm exec turbo run serve:development --filter=@module-federation/3000-home --filter=@module-federation/3001-shop --filter=@module-federation/3002-checkout",
     "app:next:build": "pnpm exec turbo run build:production --filter=@module-federation/3000-home --filter=@module-federation/3001-shop --filter=@module-federation/3002-checkout --concurrency=20",
-    "app:next:prod": "pnpm exec turbo run serve:production --filter=@module-federation/3000-home --filter=@module-federation/3001-shop --filter=@module-federation/3002-checkout",
+    "app:next:prod": "pnpm run app:next:build && pnpm exec turbo run serve:production --filter=@module-federation/3000-home --filter=@module-federation/3001-shop --filter=@module-federation/3002-checkout",
     "app:node:build": "pnpm exec turbo run build --filter=node-host --filter=node-local-remote --filter=node-remote --filter=node-dynamic-remote-new-version --filter=node-dynamic-remote --concurrency=6",
     "app:node:dev": "pnpm exec turbo run serve:development --filter=node-host --filter=node-local-remote --filter=node-remote --filter=node-dynamic-remote-new-version --filter=node-dynamic-remote --concurrency=20",
     "app:runtime:build": "pnpm exec turbo run build --filter=runtime-host --filter=runtime-remote1 --filter=runtime-remote2 --concurrency=6",
