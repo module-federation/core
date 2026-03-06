@@ -9,7 +9,7 @@ getInstance()!.registerPlugins([lazyLoadComponentPlugin()]);
 const RemoteSSRComponent = getInstance()!.createLazyComponent({
   loader: () => import('remote/Button'),
   loading: 'loading...',
-  export: 'default',
+  export: 'Button',
   fallback: ({ error }) => {
     if (error instanceof Error && error.message.includes('not exist')) {
       return <div>fallback - not existed id</div>;

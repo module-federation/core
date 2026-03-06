@@ -6,8 +6,7 @@ export default createModuleFederationConfig({
     './Content': './src/components/Content.tsx',
   },
   shared: {
-    react: { singleton: false, requiredVersion: false },
-    'react-dom': { singleton: false, requiredVersion: false },
+    react: { singleton: true },
+    'react-dom': { singleton: true },
   },
-  dts: false,
 });

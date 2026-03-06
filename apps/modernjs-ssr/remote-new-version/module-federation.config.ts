@@ -5,8 +5,7 @@ export default createModuleFederationConfig({
     './Image': './src/components/Image.tsx',
   },
   shared: {
-    react: { singleton: false, requiredVersion: false },
-    'react-dom': { singleton: false, requiredVersion: false },
+    react: { singleton: true },
+    'react-dom': { singleton: true },
   },
-  dts: false,
 });
