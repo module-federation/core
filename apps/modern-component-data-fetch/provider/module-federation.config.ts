@@ -1,6 +1,9 @@
 import { createModuleFederationConfig } from '@module-federation/modern-js-v3';
 export default createModuleFederationConfig({
   name: 'provider',
+  experiments: {
+    asyncStartup: true,
+  },
   filename: 'remoteEntry.js',
   exposes: {
     './BasicComponent': './src/components/BasicComponent/index.tsx',
