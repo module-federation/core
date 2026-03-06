@@ -46,7 +46,7 @@ global.fetch = jest.fn().mockResolvedValue({
   text: jest.fn().mockResolvedValue('// mock chunk content'),
 });
 
-const mockWebpackRequire = {
+const mockWebpackRequire = Object.assign(jest.fn(), {
   u: jest.fn((chunkId: string) => `/chunks/${chunkId}.js`),
   p: 'http://localhost:3000/',
   m: {},
@@ -72,7 +72,7 @@ const mockWebpackRequire = {
     require: jest.fn(),
     readFileVm: jest.fn(),
   },
-};
+});
 
 const mockNonWebpackRequire = jest.fn().mockImplementation((id: string) => {
   if (id === 'path') return require('path');
@@ -682,7 +682,7 @@ describe('runtimePlugin', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       // Set up webpack_require properties needed for the test
-      (global as any).__webpack_require__ = {
+      (global as any).__webpack_require__ = Object.assign(jest.fn(), {
         ...mockWebpackRequire,
         federation: {
           chunkMatcher: jest.fn().mockReturnValue(true),
@@ -693,7 +693,7 @@ describe('runtimePlugin', () => {
           require: undefined,
           readFileVm: undefined,
         },
-      };
+      });
     });
 
     it('should return a handler for chunk loading and reuse existing promises', () => {
@@ -755,13 +755,13 @@ describe('runtimePlugin', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       // Reset webpack require to ensure f exists with require already defined
-      (global as any).__webpack_require__ = {
+      (global as any).__webpack_require__ = Object.assign(jest.fn(), {
         ...mockWebpackRequire,
         f: {
           require: jest.fn(), // This needs to exist for the function to patch it
           readFileVm: jest.fn(), // This needs to exist for the function to patch it
         },
-      };
+      });
       // Mock console.warn for testing
       console.warn = jest.fn();
     });
@@ -804,7 +804,7 @@ describe('runtimePlugin', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       // Reset webpack require to ensure clean state
-      (global as any).__webpack_require__ = {
+      (global as any).__webpack_require__ = Object.assign(jest.fn(), {
         ...mockWebpackRequire,
         federation: {
           ...mockWebpackRequire.federation,
@@ -819,7 +819,7 @@ describe('runtimePlugin', () => {
           require: undefined,
           readFileVm: undefined,
         },
-      };
+      });
     });
 
     it('should return the provided args', () => {
@@ -880,7 +880,7 @@ describe('runtimePlugin', () => {
   describe('webpack chunk loading', () => {
     beforeEach(() => {
       // Reset the webpack require object to ensure it's properly initialized
-      (global as any).__webpack_require__ = {
+      (global as any).__webpack_require__ = Object.assign(jest.fn(), {
         ...mockWebpackRequire,
         federation: {
           ...mockWebpackRequire.federation,
@@ -895,7 +895,7 @@ describe('runtimePlugin', () => {
           require: jest.fn(),
           readFileVm: jest.fn(),
         },
-      };
+      });
 
       const mockArgs = {
         origin: {
@@ -1018,7 +1018,7 @@ describe('runtimePlugin', () => {
   describe('Webpack require functionality', () => {
     beforeEach(() => {
       // Ensure the webpack require object is properly initialized
-      (global as any).__webpack_require__ = {
+      (global as any).__webpack_require__ = Object.assign(jest.fn(), {
         ...mockWebpackRequire,
         federation: {
           ...mockWebpackRequire.federation,
@@ -1033,7 +1033,7 @@ describe('runtimePlugin', () => {
           require: jest.fn(),
           readFileVm: jest.fn(),
         },
-      };
+      });
 
       const mockArgs = {
         origin: {
@@ -1122,7 +1122,7 @@ describe('runtimePlugin', () => {
   describe('Remote entry loading', () => {
     beforeEach(() => {
       // Ensure the webpack require object is properly initialized
-      (global as any).__webpack_require__ = {
+      (global as any).__webpack_require__ = Object.assign(jest.fn(), {
         ...mockWebpackRequire,
         federation: {
           ...mockWebpackRequire.federation,
@@ -1137,7 +1137,7 @@ describe('runtimePlugin', () => {
           require: jest.fn(),
           readFileVm: jest.fn(),
         },
-      };
+      });
 
       const mockArgs = {
         origin: {

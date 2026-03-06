@@ -3,8 +3,10 @@ import {
   RemoteVars,
   RuntimeRemote,
   RuntimeRemotesMap,
+  WebpackRequire,
   WebpackRemoteContainer,
 } from '../types';
+import { getWebpackRequireOrThrow } from '@module-federation/sdk/bundler';
 
 const pure = typeof process !== 'undefined' ? process.env['REMOTES'] || {} : {};
 export const remoteVars = pure as RemoteVars;
@@ -34,6 +36,9 @@ export const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
         : // @ts-ignore
           reference.asyncContainer();
   } else {
+    const webpackRequire =
+      getWebpackRequireOrThrow() as unknown as WebpackRequire;
+
     // This casting is just to satisfy typescript,
     // In reality remoteGlobal will always be a string;
     const remoteGlobal = reference.global as unknown as string;
@@ -83,7 +88,7 @@ export const loadScript = (keyOrRuntimeRemoteItem: string | RuntimeRemote) => {
         return resolveRemoteGlobal();
       }
 
-      (__webpack_require__ as any).l(
+      webpackRequire.l(
         reference.url,
         function (event: Event) {
           //@ts-ignore

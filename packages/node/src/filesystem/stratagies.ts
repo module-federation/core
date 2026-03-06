@@ -5,12 +5,16 @@ export async function fileSystemRunInContextStrategy(
   remotes: Remotes,
   callback: CallbackFunction,
 ) {
+  const {
+    getWebpackRequireOrThrow,
+  } = require('@module-federation/sdk/bundler');
+  const webpackRequire = getWebpackRequireOrThrow() as any;
   const fs = require('fs');
   const path = require('path');
   const vm = require('vm');
   const filename = path.join(
     __dirname,
-    rootOutputDir + __webpack_require__.u(chunkId),
+    rootOutputDir + webpackRequire.u(chunkId),
   );
   if (fs.existsSync(filename)) {
     fs.readFile(filename, 'utf-8', (err: Error, content: string) => {
@@ -45,9 +49,13 @@ export async function httpEvalStrategy(
   remotes: Remotes,
   callback: CallbackFunction,
 ) {
+  const {
+    getWebpackRequireOrThrow,
+  } = require('@module-federation/sdk/bundler');
+  const webpackRequire = getWebpackRequireOrThrow() as any;
   let url;
   try {
-    url = new URL(chunkName, __webpack_require__.p);
+    url = new URL(chunkName, webpackRequire.p);
   } catch (e) {
     console.error(
       'module-federation: failed to construct absolute chunk path of',
@@ -102,6 +110,10 @@ export async function httpVmStrategy(
   remotes: Remotes,
   callback: CallbackFunction,
 ): Promise<void> {
+  const {
+    getWebpackRequireOrThrow,
+  } = require('@module-federation/sdk/bundler');
+  const webpackRequire = getWebpackRequireOrThrow() as any;
   const http = require('http') as typeof import('http');
   const https = require('https') as typeof import('https');
   const vm = require('vm') as typeof import('vm');
@@ -110,7 +122,7 @@ export async function httpVmStrategy(
   const globalThisVal = new Function('return globalThis')();
 
   try {
-    url = new URL(chunkName, __webpack_require__.p);
+    url = new URL(chunkName, webpackRequire.p);
   } catch (e) {
     console.error(
       'module-federation: failed to construct absolute chunk path of',
