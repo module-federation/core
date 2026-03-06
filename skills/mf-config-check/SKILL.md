@@ -1,6 +1,6 @@
 ---
 name: mf-config-check
-description: Check Module Federation build configuration: verify correct MF plugin for the bundler, async entry configuration, exposes key format, and exposes path existence. Use when modules cannot be correctly exposed, expected modules are missing from the build output, or runtime initialization errors occur.
+description: "Check Module Federation build configuration: verify correct MF plugin for the bundler, async entry configuration, exposes key format, and exposes path existence. Use when modules cannot be correctly exposed, expected modules are missing from the build output, or runtime initialization errors occur."
 argument-hint: [project-root]
 allowed-tools: Bash(node *) Read Glob
 ---

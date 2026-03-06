@@ -1,6 +1,6 @@
 ---
 name: mf-module-info
-description: Fetch metadata and manifest info for a remote Module Federation module — publicPath, remoteEntry, type file URLs, and the module's remotes/exposes/shared from its mf-manifest.json. Two modes: (1) inside a consumer project, pass only the remote name and the entry URL is resolved from mfConfig.remotes; (2) outside a consumer project, pass the remote name plus its remoteEntry URL directly. To inspect the current project's own config, use mf-context instead.
+description: "Fetch metadata and manifest info for a remote Module Federation module — publicPath, remoteEntry, type file URLs, and the module's remotes/exposes/shared from its mf-manifest.json. Two modes: (1) inside a consumer project, pass only the remote name and the entry URL is resolved from mfConfig.remotes; (2) outside a consumer project, pass the remote name plus its remoteEntry URL directly. To inspect the current project's own config, use mf-context instead."
 argument-hint: <module-name> [remoteEntry-url] [project-root]
 allowed-tools: Bash(node *)
 ---

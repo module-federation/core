@@ -1,6 +1,6 @@
 ---
 name: mf-bridge-check
-description: Check Module Federation Bridge usage: verify that producers correctly export export-app, and that consumers use the recommended Bridge API. Use when micro-frontend sub-app integration is unstable or errors occur.
+description: "Check Module Federation Bridge usage: verify that producers correctly export export-app, and that consumers use the recommended Bridge API. Use when micro-frontend sub-app integration is unstable or errors occur."
 argument-hint: [project-root]
 allowed-tools: Bash(node *)
 ---

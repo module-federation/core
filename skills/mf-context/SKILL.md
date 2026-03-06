@@ -1,6 +1,6 @@
 ---
 name: mf-context
-description: Collects the current project's Module Federation context (MFContext) and outputs a structured summary. Serves as the data foundation for all MF diagnostic Skills; can also be called standalone to quickly understand the project's MF configuration.
+description: "Collects the current project's Module Federation context (MFContext) and outputs a structured summary. Serves as the data foundation for all MF diagnostic Skills; can also be called standalone to quickly understand the project's MF configuration."
 argument-hint: [project-root]
 allowed-tools: Read Glob
 ---

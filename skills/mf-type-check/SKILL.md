@@ -1,6 +1,6 @@
 ---
 name: mf-type-check
-description: Diagnose Module Federation type issues across three categories: (1) producer type file generation failures (TYPE-001), (2) consumer failing to pull remote types, (3) tsconfig not configured to consume remote types. Use when the user encounters TS type errors, missing @mf-types folder, or cannot consume remote module types.
+description: "Diagnose Module Federation type issues across three categories: (1) producer type file generation failures (TYPE-001), (2) consumer failing to pull remote types, (3) tsconfig not configured to consume remote types. Use when the user encounters TS type errors, missing @mf-types folder, or cannot consume remote module types."
 argument-hint: [project-root]
 allowed-tools: Bash(node *), Bash(npx tsc*), Bash(npx mf dts*)
 ---

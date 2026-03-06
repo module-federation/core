@@ -1,6 +1,6 @@
 ---
 name: mf-shared-deps
-description: Check Module Federation shared dependency configuration: detect shared/externals conflicts, antd/arco transformImport blocking shared deps, and multiple versions of the same shared package in build artifacts. Use when shared dependencies fail to be shared, or host and remote load duplicate instances of a library.
+description: "Check Module Federation shared dependency configuration: detect shared/externals conflicts, antd/arco transformImport blocking shared deps, and multiple versions of the same shared package in build artifacts. Use when shared dependencies fail to be shared, or host and remote load duplicate instances of a library."
 argument-hint: [project-root]
 allowed-tools: Bash(node *) Read Glob
 ---

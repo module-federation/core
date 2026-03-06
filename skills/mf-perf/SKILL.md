@@ -1,6 +1,6 @@
 ---
 name: mf-perf
-description: Check Module Federation local development performance configuration: detect whether recommended performance optimization options are enabled to alleviate slow HMR and slow build speed.
+description: "Check Module Federation local development performance configuration: detect whether recommended performance optimization options are enabled to alleviate slow HMR and slow build speed."
 argument-hint: [project-root]
 allowed-tools: Bash(node *)
 ---

@@ -1,6 +1,6 @@
 ---
 name: mf-docs
-description: Answer questions about Module Federation (MF) — configuration, runtime API, build plugins (Webpack/Rspack/Rsbuild/Vite), framework integration (React/Vue/Next.js/Modern.js/Angular), shared dependencies, exposes, remotes, debugging, troubleshooting, and micro-frontend architecture. Use this skill when the user asks anything about module federation, remote modules, shared deps, mf-manifest, federation runtime, or micro-frontends with MF.
+description: "Answer questions about Module Federation (MF) — configuration, runtime API, build plugins (Webpack/Rspack/Rsbuild/Vite), framework integration (React/Vue/Next.js/Modern.js/Angular), shared dependencies, exposes, remotes, debugging, troubleshooting, and micro-frontend architecture. Use this skill when the user asks anything about module federation, remote modules, shared deps, mf-manifest, federation runtime, or micro-frontends with MF."
 compatibility: Requires internet access to fetch documentation from module-federation.io
 allowed-tools: WebFetch
 metadata:
