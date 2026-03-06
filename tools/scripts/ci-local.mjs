@@ -562,12 +562,7 @@ const jobs = [
           cwd: ctx.state.basePath,
         }),
       ),
-      step('Build packages (base)', (ctx) =>
-        runCommand('pnpm', ['run', 'build:packages'], {
-          ...ctx,
-          cwd: ctx.state.basePath,
-        }),
-      ),
+      step('Build packages (base)', (ctx) => runBasePackagesBuild(ctx)),
       step('Measure bundle sizes (base)', (ctx) =>
         runCommand(
           'node',
@@ -642,6 +637,66 @@ async function main() {
   for (const job of jobs) {
     await runJob(job);
   }
+}
+
+async function runBasePackagesBuild(ctx) {
+  const baseCtx = { ...ctx, cwd: ctx.state.basePath };
+  const rootPackageJsonPath = join(ctx.state.basePath, 'package.json');
+  let basePackageJson = null;
+  try {
+    basePackageJson = JSON.parse(readFileSync(rootPackageJsonPath, 'utf-8'));
+  } catch {
+    basePackageJson = null;
+  }
+
+  const buildPackagesScript = basePackageJson?.scripts?.['build:packages'];
+  if (typeof buildPackagesScript === 'string' && buildPackagesScript.trim()) {
+    if (/\bnx\b/.test(buildPackagesScript)) {
+      await runCommand(
+        'npx',
+        [
+          'nx',
+          'run-many',
+          '--target=build',
+          '--parallel=10',
+          '--projects=tag:type:pkg',
+        ],
+        { ...baseCtx, env: { ...baseCtx.env, NX_TUI: 'false' } },
+      );
+      return;
+    }
+
+    await runCommand('pnpm', ['run', 'build:packages'], baseCtx);
+    return;
+  }
+
+  if (existsSync(join(ctx.state.basePath, 'turbo.json'))) {
+    await runCommand(
+      'pnpm',
+      [
+        'exec',
+        'turbo',
+        'run',
+        'build',
+        '--filter=./packages/**',
+        '--concurrency=10',
+      ],
+      baseCtx,
+    );
+    return;
+  }
+
+  await runCommand(
+    'npx',
+    [
+      'nx',
+      'run-many',
+      '--target=build',
+      '--parallel=10',
+      '--projects=tag:type:pkg',
+    ],
+    { ...baseCtx, env: { ...baseCtx.env, NX_TUI: 'false' } },
+  );
 }
 
 function preflight() {

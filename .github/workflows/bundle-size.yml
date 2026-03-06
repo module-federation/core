@@ -74,7 +74,16 @@ jobs:
         working-directory: ${{ env.BASE_PATH }}
 
       - name: Build packages (base)
-        run: pnpm run build:packages
+        run: |
+          if pnpm run build:packages; then
+            echo "Built base packages with root build:packages script."
+          elif [ -f turbo.json ]; then
+            echo "Falling back to Turbo package build on base worktree."
+            pnpm exec turbo run build --filter=./packages/** --concurrency=10
+          else
+            echo "Falling back to Nx package build on base worktree."
+            NX_TUI=false npx nx run-many --target=build --parallel=10 --projects=tag:type:pkg
+          fi
         working-directory: ${{ env.BASE_PATH }}
 
       - name: Measure bundle sizes (base)
