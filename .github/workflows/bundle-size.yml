@@ -83,6 +83,12 @@ jobs:
       - name: Compare bundle sizes
         run: node scripts/bundle-size-report.mjs --compare base.json --current current.json --output stats.txt
 
+      - name: Upload bundle size stats artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-size-stats
+          path: stats.txt
+
       - name: Cleanup base worktree
         if: always()
         run: |

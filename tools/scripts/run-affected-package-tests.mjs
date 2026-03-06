@@ -152,6 +152,10 @@ function getChangedPackagesWithTestImpact(changedFiles) {
     return [];
   }
 
+  if (hasGlobalPackageTestImpact(changedFiles)) {
+    return workspacePackages.map((packageInfo) => packageInfo.name).sort();
+  }
+
   const changedPackageNames = new Set();
 
   for (const changedFile of changedFiles) {
@@ -176,6 +180,24 @@ function getChangedPackagesWithTestImpact(changedFiles) {
   }
 
   return Array.from(changedPackageNames).sort();
+}
+
+function hasGlobalPackageTestImpact(changedFiles) {
+  return changedFiles.some((changedFile) =>
+    isGlobalPackageTestImpactPath(normalizePath(changedFile)),
+  );
+}
+
+function isGlobalPackageTestImpactPath(changedFilePath) {
+  return (
+    changedFilePath === 'package.json' ||
+    changedFilePath === 'pnpm-lock.yaml' ||
+    changedFilePath === 'pnpm-workspace.yaml' ||
+    changedFilePath === 'turbo.json' ||
+    changedFilePath === 'tsconfig.base.json' ||
+    /^jest\.(?:preset|config)\.[cm]?[jt]s$/.test(changedFilePath) ||
+    /^babel\.config\.(?:json|[cm]?[jt]s)$/.test(changedFilePath)
+  );
 }
 
 function getWorkspacePackages() {

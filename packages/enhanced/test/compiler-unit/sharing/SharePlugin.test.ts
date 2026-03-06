@@ -5,8 +5,8 @@
 
 import { rs } from '@rstest/core';
 import { createMockCompiler } from '../utils';
-import webpack from 'webpack';
 import path from 'path';
+import type { Compiler, Compilation } from 'webpack';
 import SharePlugin from '../../../src/lib/sharing/SharePlugin';
 
 // Use rs.hoisted() to create mock functions that are hoisted along with rs.mock()
@@ -33,8 +33,8 @@ import ConsumeSharedPlugin from '../../../src/lib/sharing/ConsumeSharedPlugin';
 import ProvideSharedPlugin from '../../../src/lib/sharing/ProvideSharedPlugin';
 
 describe('SharePlugin Compiler Integration', () => {
-  let mockCompiler: webpack.Compiler;
-  let mockCompilation: webpack.Compilation;
+  let mockCompiler: Compiler;
+  let mockCompilation: Compilation;
 
   beforeEach(() => {
     mockCompiler = createMockCompiler();

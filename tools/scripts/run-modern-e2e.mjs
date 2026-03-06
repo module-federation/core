@@ -15,6 +15,7 @@ const MODERN_APPS = [
   'modernjs-ssr-dynamic-remote-new-version',
   'modernjs-ssr-host',
   'modernjs-ssr-nested-remote',
+  'modernjs-ssr-remote',
   'modernjs-ssr-remote-new-version',
 ];
 
