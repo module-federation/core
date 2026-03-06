@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { spawnSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -77,8 +78,12 @@ function parseBaseArg(argv) {
 }
 
 function resolveBaseRef(preferredRef) {
+  const headCommit = resolveGitCommit('HEAD');
   if (hasGitRef(preferredRef)) {
-    return preferredRef;
+    const preferredCommit = resolveGitCommit(preferredRef);
+    if (!headCommit || preferredCommit !== headCommit) {
+      return preferredRef;
+    }
   }
 
   const refs = [];
@@ -96,9 +101,22 @@ function resolveBaseRef(preferredRef) {
 
   for (const ref of refs) {
     if (hasGitRef(ref)) {
-      return ref;
+      const candidateCommit = resolveGitCommit(ref);
+      if (!headCommit || candidateCommit !== headCommit) {
+        return ref;
+      }
     }
   }
+
+  for (const ref of getPreviousCommitCandidates()) {
+    if (hasGitRef(ref)) {
+      const candidateCommit = resolveGitCommit(ref);
+      if (!headCommit || candidateCommit !== headCommit) {
+        return ref;
+      }
+    }
+  }
+
   return null;
 }
 
@@ -115,6 +133,28 @@ function hasGitRef(ref) {
     },
   );
   return result.status === 0;
+}
+
+function resolveGitCommit(ref) {
+  if (!ref) {
+    return null;
+  }
+
+  const result = spawnSync(
+    'git',
+    ['rev-parse', '--verify', '--quiet', `${ref}^{commit}`],
+    {
+      cwd: ROOT,
+      stdio: 'pipe',
+      encoding: 'utf-8',
+    },
+  );
+
+  if (result.status !== 0) {
+    return null;
+  }
+
+  return result.stdout.trim() || null;
 }
 
 function getChangedFiles(baseRef, headRef) {
@@ -187,9 +227,35 @@ function isGlobalPackageTestImpactPath(changedFilePath) {
     changedFilePath === 'pnpm-workspace.yaml' ||
     changedFilePath === 'turbo.json' ||
     changedFilePath === 'tsconfig.base.json' ||
+    changedFilePath.startsWith('scripts/') ||
+    changedFilePath.startsWith('tools/scripts/') ||
     /^jest\.(?:preset|config)\.[cm]?[jt]s$/.test(changedFilePath) ||
     /^babel\.config\.(?:json|[cm]?[jt]s)$/.test(changedFilePath)
   );
+}
+
+function getPreviousCommitCandidates() {
+  const refs = new Set();
+
+  if (process.env.GITHUB_EVENT_BEFORE) {
+    refs.add(process.env.GITHUB_EVENT_BEFORE);
+  }
+
+  const eventPath = process.env.GITHUB_EVENT_PATH;
+  if (eventPath) {
+    try {
+      const payload = JSON.parse(readFileSync(eventPath, 'utf-8'));
+      if (typeof payload?.before === 'string' && payload.before) {
+        refs.add(payload.before);
+      }
+    } catch {
+      // Ignore invalid GitHub event payloads.
+    }
+  }
+
+  refs.add('HEAD~1');
+
+  return Array.from(refs);
 }
 
 function getWorkspacePackages() {

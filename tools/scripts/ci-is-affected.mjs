@@ -5,6 +5,19 @@ import yargs from 'yargs';
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(SCRIPT_DIR, '../..');
+const GLOBAL_E2E_INPUT_PATTERNS = [
+  'package.json',
+  'tools/scripts/ci-is-affected.mjs',
+  'tools/scripts/e2e-process-utils.mjs',
+  'tools/scripts/run-manifest-e2e.mjs',
+  'tools/scripts/run-modern-e2e.mjs',
+  'tools/scripts/run-metro-e2e.mjs',
+  'tools/scripts/run-next-e2e.mjs',
+  'tools/scripts/run-node-e2e.mjs',
+  'tools/scripts/run-router-e2e.mjs',
+  'tools/scripts/run-runtime-e2e.mjs',
+  'scripts/ensure-playwright.js',
+];
 
 const argv = yargs(process.argv.slice(2))
   .option('appName', {
@@ -43,6 +56,24 @@ if (!base || !head) {
 if (base === head) {
   console.warn(
     `Resolved base and head are identical (${base}). Running e2e by default.`,
+  );
+  process.exit(0);
+}
+
+const changedFiles = listChangedFiles(base, head);
+
+if (!changedFiles) {
+  console.warn(
+    `Unable to resolve changed files for base=${base} head=${head}. Running e2e by default.`,
+  );
+  process.exit(0);
+}
+
+const changedGlobalE2EInputs = changedFiles.filter(isGlobalE2EInput);
+
+if (changedGlobalE2EInputs.length > 0) {
+  console.log(
+    `Detected shared e2e harness changes (${changedGlobalE2EInputs.join(', ')}). Running e2e CI.`,
   );
   process.exit(0);
 }
@@ -163,6 +194,36 @@ function resolveHead(requestedHead) {
     }
   }
   return null;
+}
+
+function listChangedFiles(baseRef, headRef) {
+  const result = spawnSync(
+    'git',
+    ['diff', '--name-only', '--diff-filter=ACMR', baseRef, headRef],
+    {
+      cwd: ROOT,
+      stdio: 'pipe',
+      encoding: 'utf-8',
+      maxBuffer: 1024 * 1024 * 8,
+    },
+  );
+
+  if (result.status !== 0) {
+    return null;
+  }
+
+  return result.stdout
+    .split('\n')
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+}
+
+function isGlobalE2EInput(relativePath) {
+  return GLOBAL_E2E_INPUT_PATTERNS.some(
+    (pattern) =>
+      relativePath === pattern ||
+      (pattern.endsWith('/') && relativePath.startsWith(pattern)),
+  );
 }
 
 function expandRefCandidates(ref) {
