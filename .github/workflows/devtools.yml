@@ -11,9 +11,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
-env:
-  PLAYWRIGHT_BROWSERS_PATH: 0
-
 jobs:
   main:
     runs-on: ubuntu-latest
@@ -53,7 +50,7 @@ jobs:
         run: npx cypress install
 
       - name: Install Playwright browsers
-        run: pnpm exec playwright install chromium
+        run: pnpm --filter @module-federation/devtools exec playwright install chromium
 
       - name: Build shared packages
         run: pnpm run build:pkg

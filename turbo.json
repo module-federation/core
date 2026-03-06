@@ -1,5 +1,9 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalPassThroughEnv": [
+    "NEXT_PRIVATE_LOCAL_WEBPACK",
+    "PLAYWRIGHT_BROWSERS_PATH"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
