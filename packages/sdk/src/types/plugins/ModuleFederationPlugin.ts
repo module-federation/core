@@ -162,6 +162,8 @@ export interface DtsRemoteOptions {
   tsConfigPath?: string;
   typesFolder?: string;
   compiledTypesFolder?: string;
+  /** Custom base output directory for generated types. When set, types will be emitted to this directory instead of the default compiler output directory. */
+  outputDir?: string;
   deleteTypesFolder?: boolean;
   additionalFilesToCompile?: string[];
   compileInChildProcess?: boolean;
