@@ -22,7 +22,7 @@
     "@module-federation/webpack-bundler-runtime": "workspace:*",
     "@types/node": "^20.19.5",
     "concurrently": "^8.2.2",
-    "esbuild": "^0.25.0",
+    "esbuild": "^0.27.3",
     "json5": "^2.2.1",
     "live-server": "^1.1.0",
     "typescript": "^4.8.2"
