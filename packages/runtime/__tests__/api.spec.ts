@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { init } from '../src';
+import { describe, it, expect, vi } from 'vitest';
+import { init, getInstance, createInstance } from '../src';
 
 // eslint-disable-next-line max-lines-per-function
 describe('api', () => {
@@ -82,6 +82,25 @@ describe('api', () => {
       remotes: [],
     });
     expect(FM3).not.toBe(FM4);
+  });
+  it('getInstance resolves the global instance after reset', async () => {
+    const FM = init({
+      name: '@federation/get-instance-global',
+      remotes: [],
+    });
+
+    vi.resetModules();
+    const { getInstance: getInstanceAfterReset } = await import('../src');
+    expect(getInstanceAfterReset('@federation/get-instance-global')).toBe(FM);
+  });
+
+  it('createInstance updates getInstance', () => {
+    const FM = createInstance({
+      name: '@federation/create-instance',
+      remotes: [],
+    });
+
+    expect(getInstance('@federation/create-instance')).toBe(FM);
   });
 
   it('alias check', () => {
