@@ -63,6 +63,8 @@ const exposes = {
   [`./error-load-remote-${LANGUAGE}`]: `./docs/${LANGUAGE}/blog/error-load-remote.mdx`,
 
   [`./node-${LANGUAGE}`]: `./docs/${LANGUAGE}/blog/node.mdx`,
+  // ai-skills
+  // [`./ai-skills-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/ai-skills/index.mdx`,
 
   // advanced
   [`./advanced-multiple-shared-scope-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/advanced/multiple-shared-scope.mdx`,
