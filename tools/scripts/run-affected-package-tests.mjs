@@ -262,6 +262,10 @@ function shouldTriggerPackageTests(relativeFilePath) {
     return false;
   }
 
+  if (isExtensionlessImpactPath(relativeFilePath)) {
+    return true;
+  }
+
   if (relativeFilePath === 'package.json') {
     return true;
   }
@@ -305,6 +309,17 @@ function shouldTriggerPackageTests(relativeFilePath) {
     relativeFilePath.startsWith('rslib.config.') ||
     relativeFilePath.startsWith('babel.config.') ||
     relativeFilePath.startsWith('tsconfig.spec')
+  );
+}
+
+function isExtensionlessImpactPath(relativeFilePath) {
+  const fileName = relativeFilePath.split('/').pop() ?? '';
+  if (!fileName || fileName.startsWith('.') || fileName.includes('.')) {
+    return false;
+  }
+
+  return !/^(?:README|CHANGELOG|LICENSE|NOTICE|AUTHORS|CONTRIBUTING|CODEOWNERS)$/i.test(
+    fileName,
   );
 }
 
