@@ -55,9 +55,12 @@ jobs:
         run: |
           BASE_REF=${CI_LOCAL_BASE_REF:-origin/main}
           BASE_PATH=".ci-local-base-${RANDOM}-${RANDOM}"
+          LOCAL_BASE_REF="${BASE_REF#origin/}"
           echo "BASE_REF=$BASE_REF" >> "$GITHUB_ENV"
           echo "BASE_PATH=$BASE_PATH" >> "$GITHUB_ENV"
+          echo "LOCAL_BASE_REF=$LOCAL_BASE_REF" >> "$GITHUB_ENV"
           git worktree add "$BASE_PATH" "$BASE_REF"
+          git -C "$BASE_PATH" branch -f "$LOCAL_BASE_REF" "$BASE_REF" || true
 
       - name: Restore Turborepo cache (base worktree)
         uses: actions/cache@v5
@@ -81,8 +84,8 @@ jobs:
             echo "Falling back to Turbo package build on base worktree."
             pnpm exec turbo run build --filter=./packages/** --concurrency=10
           else
-            echo "Falling back to Nx package build on base worktree."
-            NX_TUI=false npx nx run-many --target=build --parallel=10 --projects=tag:type:pkg
+            echo "Unable to build base packages: missing build:packages script and turbo.json" >&2
+            exit 1
           fi
         working-directory: ${{ env.BASE_PATH }}
 

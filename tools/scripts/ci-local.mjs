@@ -547,14 +547,23 @@ const jobs = [
       ),
       step('Prepare base worktree', async (ctx) => {
         const baseRef = process.env.CI_LOCAL_BASE_REF ?? 'origin/main';
+        const localBaseRef = baseRef.startsWith('origin/')
+          ? baseRef.slice('origin/'.length)
+          : baseRef;
         const basePath = join(ROOT, `.ci-local-base-${Date.now()}`);
         if (existsSync(basePath)) {
           throw new Error(`Base worktree path already exists: ${basePath}`);
         }
         ctx.state.baseRef = baseRef;
+        ctx.state.localBaseRef = localBaseRef;
         ctx.state.basePath = basePath;
         console.log(`[ci:local] Using base ref ${baseRef}`);
         await runCommand('git', ['worktree', 'add', basePath, baseRef], ctx);
+        await runCommand(
+          'git',
+          ['-C', basePath, 'branch', '-f', localBaseRef, baseRef],
+          ctx,
+        );
       }),
       step('Install dependencies (base)', (ctx) =>
         runCommand('pnpm', ['install', '--frozen-lockfile'], {
@@ -651,21 +660,6 @@ async function runBasePackagesBuild(ctx) {
 
   const buildPackagesScript = basePackageJson?.scripts?.['build:packages'];
   if (typeof buildPackagesScript === 'string' && buildPackagesScript.trim()) {
-    if (/\bnx\b/.test(buildPackagesScript)) {
-      await runCommand(
-        'npx',
-        [
-          'nx',
-          'run-many',
-          '--target=build',
-          '--parallel=10',
-          '--projects=tag:type:pkg',
-        ],
-        { ...baseCtx, env: { ...baseCtx.env, NX_TUI: 'false' } },
-      );
-      return;
-    }
-
     await runCommand('pnpm', ['run', 'build:packages'], baseCtx);
     return;
   }
@@ -686,16 +680,8 @@ async function runBasePackagesBuild(ctx) {
     return;
   }
 
-  await runCommand(
-    'npx',
-    [
-      'nx',
-      'run-many',
-      '--target=build',
-      '--parallel=10',
-      '--projects=tag:type:pkg',
-    ],
-    { ...baseCtx, env: { ...baseCtx.env, NX_TUI: 'false' } },
+  throw new Error(
+    '[ci:local] Base worktree has no build:packages script and no turbo.json; cannot build base packages.',
   );
 }
 
