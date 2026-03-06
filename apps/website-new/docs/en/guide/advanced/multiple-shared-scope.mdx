@@ -54,6 +54,23 @@ Notes:
 * If a scope does not exist on the host, the host will treat it as `{}` for this initialization, so it won’t crash due to missing scope names.
 * With multiple share scopes, the remote will try to initialize all scopes listed in RemoteShareScope.
 
+## Example: React 17 and React 18 Side-by-Side
+
+The [multiple-share-scope example](https://github.com/module-federation/module-federation-examples/tree/master/multiple-share-scope) shows how to load a React 17 remote and a React 18 remote in the same host, with their React instances completely isolated.
+
+**Application structure:**
+
+| App | Port | Description |
+| --- | --- | --- |
+| `host` | 8080 | Host app consuming both remotes |
+| `provider-react-17` | 8081 | Remote built with React 17 |
+| `provider-react-18` | 8082 | Remote built with React 18 |
+
+**Share scope design:**
+
+* `default` scope — carries React 17 (`react17` / `react-dom17` package aliases)
+* `react18` scope — carries React 18 (`react` / `react-dom`)
+
 ## Build Plugin Configuration
 
 You typically configure share scopes at three levels:
@@ -62,71 +79,108 @@ You typically configure share scopes at three levels:
 2. **Host (consumer)**: which scopes the host aligns with that remote ([remotes[remote].shareScope](../../configure/remotes#sharescope)).
 3. **Shared entry**: which scope a dependency belongs to (`shared[pkg].shareScope`, see [shared.shareScope](../../configure/shared#sharescope)).
 
-### Producer
+### Producer (React 17 remote)
 
-```ts title="remote/rspack.config.ts"
-import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
+`provider-react-17` uses only the default scope — no `shareScope` configuration needed:
 
-export default {
-  plugins: [
-    new ModuleFederationPlugin({
-      name: 'app_remote',
-      filename: 'remoteEntry.js',
-      exposes: {
-        './Button': './src/Button',
-      },
-      shareScope: ['default', 'scope1'],
-      shared: {
-        react: {
-          singleton: true,
-          requiredVersion: false,
-          shareScope: 'default',
-        },
-        'react-dom': {
-          singleton: true,
-          requiredVersion: false,
-          shareScope: 'default',
-        },
-        '@company/design-system': {
-          singleton: true,
-          requiredVersion: false,
-          shareScope: 'scope1',
-        },
-      },
-    }),
-  ],
-};
+```ts title=”provider-react-17/module-federation.config.ts”
+import { createModuleFederationConfig } from '@module-federation/modern-js';
+
+export default createModuleFederationConfig({
+  name: 'provider17',
+  exposes: {
+    './LandingPage': './src/components/LandingPage.tsx',
+  },
+  shared: {
+    react: { singleton: true },
+    'react-dom': { singleton: true },
+  },
+});
+```
+
+### Producer (React 18 remote)
+
+`provider-react-18` needs an isolated `react18` scope so its React 18 instance doesn't conflict with React 17:
+
+```ts title=”provider-react-18/module-federation.config.ts”
+import { createModuleFederationConfig } from '@module-federation/modern-js';
+
+export default createModuleFederationConfig({
+  name: 'provider18',
+  exposes: {
+    './LandingPage': './src/components/LandingPage.tsx',
+  },
+  shareScope: ['react18', 'default'],
+  shared: {
+    react: {
+      shareScope: 'react18',
+      singleton: true,
+    },
+    'react-dom': {
+      shareScope: 'react18',
+      singleton: true,
+    },
+  },
+});
 ```
 
 Key points:
 
-* `shareScope: ['default','scope1']` controls which pools the remote initializes at runtime.
-* `shared[pkg].shareScope` decides which pool a dependency participates in. If `@company/design-system` is in `scope1`, it only participates in version selection and reuse within the `scope1` pool.
+* `shareScope: ['react18', 'default']` declares that this remote initializes both the `react18` and `default` shared pools.
+* `shared[pkg].shareScope: 'react18'` registers react/react-dom into the isolated `react18` pool, preventing any version merging or singleton conflicts with the React 17 in `default`.
 
-### Consumer
+### Consumer (host)
 
-```ts title="host/rspack.config.ts"
-import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
+The host installs both `react17`/`react-dom17` (aliased as `npm:react@^17`) and the regular `react`/`react-dom` (React 18), placing each into the appropriate scope:
 
-export default {
-  plugins: [
-    new ModuleFederationPlugin({
-      name: 'app_host',
-      remotes: {
-        app_remote: {
-          external: 'app_remote@http://localhost:2001/remoteEntry.js',
-          shareScope: ['default', 'scope1'],
-        },
-      },
-    }),
-  ],
-};
+```ts title=”host/module-federation.config.ts”
+import { createModuleFederationConfig } from '@module-federation/modern-js';
+
+export default createModuleFederationConfig({
+  name: 'host',
+  remotes: {
+    provider17: {
+      external: 'provider17@http://localhost:8081/mf-manifest.json',
+      // no shareScope — defaults to 'default', aligned with provider17
+    },
+    provider18: {
+      external: 'provider18@http://localhost:8082/mf-manifest.json',
+      shareScope: ['react18', 'default'], // pass both scopes into provider18
+    },
+  },
+  shared: {
+    // React 18: registered in the react18 scope
+    react: {
+      singleton: true,
+      shareScope: 'react18',
+    },
+    'react-dom': {
+      singleton: true,
+      shareScope: 'react18',
+    },
+    // React 17: registered in the default scope via package alias
+    react17: {
+      shareKey: 'react',
+      request: 'react17',
+      shareScope: 'default',
+      singleton: true,
+    },
+    'react-dom17': {
+      shareKey: 'react-dom',
+      request: 'react-dom17',
+      shareScope: 'default',
+      singleton: true,
+    },
+  },
+});
 ```
 
 Key points:
 
-* `remotes[remote].shareScope` controls which pools the host aligns when initializing that remote.
-* If the host uses multiple scopes but the remote uses a single scope, the pools are aligned but the remote only initializes shared deps for its single scope. For multi-scope reuse to “really work”, the host and remote usually need to agree on the same scopes.
+* `remotes[remote].shareScope` determines which scopes the host passes to the remote during initialization.
+* `provider17` has no `shareScope`, so it uses the `default` pool and only sees React 17.
+* `provider18` gets `['react18', 'default']`, so the host passes both scope maps to it — `provider18`'s React 18 shared deps can then reuse the host's `react18` pool.
+* `shareKey` / `request` let `react17` participate in sharing under the `react` key, so `provider17` resolves `react` in the `default` scope and matches this entry.
 
 ## Pure Runtime (Runtime API)
 
@@ -135,36 +189,46 @@ If you don’t rely on build-time `remotes` (or you want to register `remotes/sh
 * Multi-scope remotes: use `registerRemotes` / `createInstance({ remotes })` and set `shareScope: string | string[]` in the remote config.
 * Shared entry scope: use `registerShared` / `createInstance({ shared })` and set `scope: string | string[]` in the shared config (note the field name is `scope` here).
 
+The following mirrors the React 17/18 coexistence example above:
+
 ```ts title="host/runtime.ts"
-import React from 'react';
-import { registerRemotes, registerShared } from '@module-federation/enhanced/runtime';
+import React from ‘react’;
+import React17 from ‘react17’; // npm:react@^17 alias
+import { registerRemotes, registerShared } from ‘@module-federation/enhanced/runtime’;
 
 registerRemotes([
   {
-    name: 'app_remote',
-    alias: 'remote',
-    entry: 'http://localhost:2001/mf-manifest.json',
-    shareScope: ['default', 'scope1'],
+    name: ‘provider17’,
+    entry: ‘http://localhost:8081/mf-manifest.json’,
+    // no shareScope — defaults to ‘default’
+  },
+  {
+    name: ‘provider18’,
+    entry: ‘http://localhost:8082/mf-manifest.json’,
+    shareScope: [‘react18’, ‘default’],
   },
 ]);
 
 registerShared({
+  // React 18 in the react18 scope
   react: {
-    version: '18.0.0',
-    scope: 'default',
+    version: ‘18.3.1’,
+    scope: ‘react18’,
     lib: () => React,
     shareConfig: {
       singleton: true,
-      requiredVersion: '^18.0.0',
+      requiredVersion: ‘^18.0.0’,
     },
   },
-  '@company/design-system': {
-    version: '1.2.3',
-    scope: 'scope1',
-    lib: () => require('@company/design-system'),
+  // React 17 in the default scope under the ‘react’ shareKey
+  react17: {
+    shareKey: ‘react’,
+    version: ‘17.0.2’,
+    scope: ‘default’,
+    lib: () => React17,
     shareConfig: {
       singleton: true,
-      requiredVersion: false,
+      requiredVersion: ‘^17.0.0’,
     },
   },
 });
