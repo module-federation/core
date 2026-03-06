@@ -11,6 +11,7 @@ import { getSharedFallbackGetter } from './getSharedFallbackGetter';
 import { resolveRemoteModuleId } from './resolveRemoteModuleId';
 
 export * from './types';
+export * from './rscManifest';
 
 const federation: Federation = {
   runtime,

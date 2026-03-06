@@ -13,10 +13,10 @@ import {
 
 import { StatsPlugin } from '@module-federation/manifest';
 import { ContainerManager, utils } from '@module-federation/managers';
-import { DtsPlugin } from '@module-federation/dts-plugin';
 import ReactBridgePlugin from '@module-federation/bridge-react-webpack-plugin';
 import path from 'node:path';
 import fs from 'node:fs';
+import { createRequire } from 'node:module';
 import { RemoteEntryPlugin } from './RemoteEntryPlugin';
 import logger from './logger';
 
@@ -29,8 +29,20 @@ type CacheGroup = CacheGroups[string];
 
 declare const __VERSION__: string;
 
-const RuntimeToolsPath = require.resolve('@module-federation/runtime-tools');
+const RUNTIME_TOOLS_REQUEST = '@module-federation/runtime-tools';
 const NODE_RUNTIME_PLUGIN = '@module-federation/node/runtimePlugin';
+const runtimeRequire: NodeJS.Require = createRequire(
+  path.join(process.cwd(), '__mf_rspack_runtime__.cjs'),
+);
+
+type DtsPluginRuntimeInstance = {
+  apply(compiler: Compiler): void;
+  addRuntimePlugins(): void;
+};
+
+type DtsPluginConstructor = new (
+  options: moduleFederationPlugin.ModuleFederationPluginOptions,
+) => DtsPluginRuntimeInstance;
 
 function getTargetValues(target: unknown): string[] {
   if (Array.isArray(target)) {
@@ -102,10 +114,30 @@ function validateRscNodeRuntimePlugin(
   }
 
   if (!hasNodeRuntimePlugin(options.runtimePlugins)) {
-    throw new Error(
-      `[ModuleFederationPlugin.rsc] Invalid configuration:\n\`runtimePlugins\` must include "${NODE_RUNTIME_PLUGIN}".`,
-    );
+    options.runtimePlugins = [
+      ...(options.runtimePlugins || []),
+      NODE_RUNTIME_PLUGIN,
+    ];
   }
+}
+
+function resolveFromCompilerContext(
+  request: string,
+  compilerContext: string,
+): string {
+  try {
+    return runtimeRequire.resolve(request, {
+      paths: [compilerContext],
+    });
+  } catch {}
+
+  return runtimeRequire.resolve(request);
+}
+
+function loadDtsPlugin(): DtsPluginConstructor {
+  const request = ['@module-federation', 'dts-plugin'].join('/');
+  const load = (id: string) => runtimeRequire(id);
+  return (load(request) as { DtsPlugin: DtsPluginConstructor }).DtsPlugin;
 }
 
 export const PLUGIN_NAME = 'RspackModuleFederationPlugin';
@@ -201,7 +233,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
 
       const runtimePlugins = options.runtimePlugins || [];
       options.runtimePlugins = runtimePlugins.concat(
-        require.resolve(
+        runtimeRequire.resolve(
           '@module-federation/inject-external-runtime-core-plugin',
         ),
       );
@@ -214,12 +246,15 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       }).apply(compiler);
     }
 
-    const implementationPath = options.implementation || RuntimeToolsPath;
+    const implementationPath = options.implementation
+      ? resolveFromCompilerContext(options.implementation, compiler.context)
+      : resolveFromCompilerContext(RUNTIME_TOOLS_REQUEST, compiler.context);
     options.implementation = implementationPath;
     let disableManifest = options.manifest === false;
     let disableDts = options.dts === false;
 
     if (!disableDts) {
+      const DtsPlugin = loadDtsPlugin();
       const dtsPlugin = new DtsPlugin(options);
       // @ts-ignore
       dtsPlugin.apply(compiler);
@@ -242,12 +277,15 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     ).apply(compiler);
 
     const resolveRuntimePath = (candidates: string[]) => {
+      const resolvePaths = [compiler.context, path.dirname(implementationPath)];
       for (const candidate of candidates) {
-        try {
-          return require.resolve(candidate, {
-            paths: [implementationPath],
-          });
-        } catch {}
+        for (const resolvePath of resolvePaths) {
+          try {
+            return runtimeRequire.resolve(candidate, {
+              paths: [resolvePath],
+            });
+          } catch {}
+        }
       }
       throw new Error(
         `[ ModuleFederationPlugin ]: Unable to resolve runtime entry from ${candidates.join(

@@ -1,3 +1,12 @@
+import {
+  type ManifestExport,
+  type ManifestLike,
+  type ManifestNode,
+  type RscBridgeModuleV1 as BridgeModule,
+  getClientManifestKeyWithoutHash,
+  resolveClientReferenceEntry,
+} from './rscManifest';
+
 const RSC_BRIDGE_EXPOSE = '__rspack_rsc_bridge__';
 const ACTION_PREFIX = 'remote:';
 const MODULE_PREFIX = 'remote-module:';
@@ -6,43 +15,6 @@ const SSR_LAYER_PREFIX = '(server-side-rendering)/';
 const RSC_LAYER_PREFIX = '(react-server-components)/';
 const ACTION_REMAP_GLOBAL_KEY = '__RSPACK_RSC_MF_ACTION_ID_MAP__';
 const ACTION_PROXY_MODULE_ID = '__rspack_mf_rsc_action_proxy__';
-
-type ManifestExport = {
-  id: string;
-  name: string;
-  chunks?: Array<string | number>;
-  async?: boolean;
-};
-
-type ManifestNode = Record<string, ManifestExport>;
-
-type ManifestLike = {
-  serverManifest?: Record<string, ManifestExport>;
-  clientManifest?: Record<string, ManifestExport>;
-  serverConsumerModuleMap?: Record<string, ManifestNode>;
-  moduleLoading?: unknown;
-  entryCssFiles?: Record<string, unknown> | Array<unknown>;
-  entryJsFiles?: Array<unknown> | Record<string, unknown>;
-  remoteManifests?: Record<
-    string,
-    {
-      moduleLoading?: unknown;
-      entryCssFiles?: unknown;
-      entryJsFiles?: unknown;
-    }
-  >;
-  clientExposes?: Record<string, string>;
-};
-
-type BridgeModule = {
-  getManifest?: () => ManifestLike | Promise<ManifestLike>;
-  executeAction?: (actionId: string, args: unknown[]) => Promise<unknown>;
-  preloadSSRModule?: (
-    moduleId: string,
-    exposeHint?: string,
-  ) => Promise<unknown>;
-  getSSRModule?: (moduleId: string) => unknown;
-};
 
 type ActionMapRecord = Record<string, { alias: string; rawActionId: string }>;
 type ActionRemapMap = Record<string, string>;
@@ -295,20 +267,16 @@ const resolveClientModuleIdFromMap = (
   return undefined;
 };
 
-const getClientManifestKeyWithoutHash = (rawClientManifestKey: string) => {
-  const hashIndex = rawClientManifestKey.indexOf('#');
-  return hashIndex >= 0
-    ? rawClientManifestKey.slice(0, hashIndex)
-    : rawClientManifestKey;
-};
-
-const resolveSharedConsumeModuleId = (
-  rawClientManifestKey: string,
-): string | undefined => {
-  const candidateShareKeys = new Set<string>([
-    getClientManifestKeyWithoutHash(rawClientManifestKey),
-  ]);
-
+const createSharedConsumeModuleIdIndex = () => {
+  const shareKeyToModuleId: Record<string, string> = Object.create(null);
+  const assignShareKey = (moduleId: string, shareKey: string) => {
+    if (!shareKey) {
+      return;
+    }
+    if (!Object.prototype.hasOwnProperty.call(shareKeyToModuleId, shareKey)) {
+      shareKeyToModuleId[shareKey] = String(moduleId);
+    }
+  };
   const handlerMapping =
     __webpack_require__.federation?.consumesLoadingModuleToHandlerMapping;
   if (isObject(handlerMapping)) {
@@ -319,9 +287,7 @@ const resolveSharedConsumeModuleId = (
       ) {
         continue;
       }
-      if (candidateShareKeys.has(handlerValue.shareKey)) {
-        return String(moduleId);
-      }
+      assignShareKey(String(moduleId), handlerValue.shareKey);
     }
   }
 
@@ -332,9 +298,28 @@ const resolveSharedConsumeModuleId = (
       if (!isObject(consumeData) || typeof consumeData.shareKey !== 'string') {
         continue;
       }
-      if (candidateShareKeys.has(consumeData.shareKey)) {
-        return String(moduleId);
-      }
+      assignShareKey(String(moduleId), consumeData.shareKey);
+    }
+  }
+
+  return shareKeyToModuleId;
+};
+
+const resolveSharedConsumeModuleId = (
+  rawClientManifestKey: string,
+  shareKeyToModuleId: Record<string, string>,
+  explicitShareKey?: string,
+): string | undefined => {
+  const candidateShareKeys = new Set<string>([
+    explicitShareKey || getClientManifestKeyWithoutHash(rawClientManifestKey),
+  ]);
+
+  for (const shareKey of candidateShareKeys) {
+    if (!shareKey) {
+      continue;
+    }
+    if (Object.prototype.hasOwnProperty.call(shareKeyToModuleId, shareKey)) {
+      return shareKeyToModuleId[shareKey];
     }
   }
 
@@ -445,6 +430,41 @@ const resolveClientEntryExpose = (
     return normalizeExpose(entryName);
   }
 
+  return undefined;
+};
+
+const resolveExplicitClientModuleId = (
+  remoteManifest: ManifestLike,
+  rawClientManifestKey: string,
+) => {
+  const clientReference = resolveClientReferenceEntry(
+    remoteManifest,
+    rawClientManifestKey,
+  );
+  if (!clientReference || !isObject(clientReference.resolution)) {
+    return undefined;
+  }
+  const resolution = clientReference.resolution;
+  if (
+    resolution.kind === 'shared' &&
+    typeof resolution.shareKey === 'string' &&
+    resolution.shareKey
+  ) {
+    return {
+      kind: 'shared' as const,
+      shareKey: String(resolution.shareKey),
+    };
+  }
+  if (
+    resolution.kind === 'remote' &&
+    typeof resolution.request === 'string' &&
+    resolution.request
+  ) {
+    return {
+      kind: 'remote' as const,
+      expose: normalizeExpose(resolution.request),
+    };
+  }
   return undefined;
 };
 
@@ -1365,6 +1385,7 @@ const rscBridgeRuntimePlugin = () => {
       string,
       ClientModuleResolutionKind
     > = Object.create(null);
+    const shareKeyToModuleId = createSharedConsumeModuleIdIndex();
     const clientManifestEntriesByRawId: Record<
       string,
       Array<ManifestExport>
@@ -1387,16 +1408,35 @@ const rscBridgeRuntimePlugin = () => {
           isObject(nextValue) && typeof nextValue.name === 'string'
             ? nextValue.name
             : undefined;
-        const entryExpose = resolveClientEntryExpose(
+        const explicitClientModule = resolveExplicitClientModuleId(
+          remoteManifest,
           rawClientManifestKey,
-          entryName,
-          clientExposes,
         );
+        const entryExpose =
+          explicitClientModule?.kind === 'remote'
+            ? explicitClientModule.expose
+            : resolveClientEntryExpose(
+                rawClientManifestKey,
+                entryName,
+                clientExposes,
+              );
         const resolvedLocalSharedClientModuleId =
-          resolveSharedConsumeModuleId(rawClientManifestKey);
-        const resolvedShareKey = resolvedLocalSharedClientModuleId
-          ? undefined
-          : resolveShareKeyFromClientManifestKey(rawClientManifestKey);
+          explicitClientModule?.kind === 'shared'
+            ? resolveSharedConsumeModuleId(
+                rawClientManifestKey,
+                shareKeyToModuleId,
+                explicitClientModule.shareKey,
+              )
+            : resolveSharedConsumeModuleId(
+                rawClientManifestKey,
+                shareKeyToModuleId,
+              );
+        const resolvedShareKey =
+          explicitClientModule?.kind === 'shared'
+            ? explicitClientModule.shareKey
+            : resolvedLocalSharedClientModuleId
+              ? undefined
+              : resolveShareKeyFromClientManifestKey(rawClientManifestKey);
         const resolvedRemoteExposeClientModuleId =
           entryExpose && !resolvedLocalSharedClientModuleId
             ? getRemoteClientReferenceModuleId(alias, entryExpose)

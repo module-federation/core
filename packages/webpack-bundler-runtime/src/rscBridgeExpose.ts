@@ -1,21 +1,11 @@
-type ManifestExport = {
-  id: string;
-  name: string;
-  chunks?: Array<string | number>;
-  async?: boolean;
-};
-
-type ManifestNode = Record<string, ManifestExport>;
-
-type ManifestLike = {
-  serverManifest?: Record<string, ManifestExport>;
-  clientManifest?: Record<string, ManifestExport>;
-  serverConsumerModuleMap?: Record<string, ManifestNode>;
-  moduleLoading?: Record<string, unknown>;
-  entryCssFiles?: Record<string, string[]>;
-  entryJsFiles?: Record<string, string[]>;
-  clientExposes?: Record<string, string>;
-};
+import {
+  type ManifestExport,
+  type ManifestLike,
+  type ManifestNode,
+  getClientManifestKeyWithoutHash,
+  resolveActionReference,
+  resolveServerModuleReference,
+} from './rscManifest';
 
 type WebpackRequireRuntime = {
   (moduleId: string): unknown;
@@ -713,8 +703,16 @@ export async function getManifest(): Promise<ManifestLike> {
 }
 
 export async function executeAction(actionId: string, args: unknown[]) {
+  const manifest = isObject(__webpack_require__.rscM)
+    ? (__webpack_require__.rscM as ManifestLike)
+    : undefined;
+  const manifestAction = resolveActionReference(manifest, actionId);
+  const localActionId =
+    manifestAction && typeof manifestAction.localActionId === 'string'
+      ? manifestAction.localActionId
+      : actionId;
   await scanExposedModules();
-  const action = actionReferenceCache[actionId];
+  const action = actionReferenceCache[localActionId];
   if (typeof action !== 'function') {
     throw new Error(
       `[rsc-bridge-expose] Missing remote action for "${actionId}". Ensure the action is reachable from a federated expose.`,
@@ -774,6 +772,7 @@ export async function preloadSSRModule(moduleId: string, exposeHint?: string) {
   );
   let hiddenSsrExpose =
     hiddenExposeFromHint ||
+    resolveServerModuleReference(manifest, normalizedModuleId)?.ssrExpose ||
     ssrExposeByServerModuleId[normalizedModuleId] ||
     resolveHiddenSsrExposeFromClientExposeMap(normalizedModuleId, moduleMap);
   if (!hiddenSsrExpose) {
@@ -782,6 +781,7 @@ export async function preloadSSRModule(moduleId: string, exposeHint?: string) {
     await buildSsrExposeMap(true);
     hiddenSsrExpose =
       hiddenExposeFromHint ||
+      resolveServerModuleReference(manifest, normalizedModuleId)?.ssrExpose ||
       ssrExposeByServerModuleId[normalizedModuleId] ||
       resolveHiddenSsrExposeFromClientExposeMap(normalizedModuleId, moduleMap);
   }
