@@ -29,6 +29,11 @@ interface NodeFederationContext {
   ModuleFederationPlugin?: typeof container.ModuleFederationPlugin;
 }
 
+const resolveRuntimePluginPath = (): string =>
+  process.env.IS_ESM_BUILD === 'true'
+    ? require.resolve('../runtimePlugin.mjs')
+    : require.resolve('../runtimePlugin.js');
+
 /**
  * Class representing a UniversalFederationPlugin
  */
@@ -47,11 +52,10 @@ class UniversalFederationPlugin {
     this.context = context || ({} as NodeFederationContext);
     this.name = 'ModuleFederationPlugin';
     if (this._options.useRuntimePlugin && this._options.isServer) {
+      const runtimePluginPath = resolveRuntimePluginPath();
       this._options.runtimePlugins = this._options.runtimePlugins
-        ? this._options.runtimePlugins.concat([
-            require.resolve('../runtimePlugin.js'),
-          ])
-        : [require.resolve('../runtimePlugin.js')];
+        ? this._options.runtimePlugins.concat([runtimePluginPath])
+        : [runtimePluginPath];
     }
   }
 
