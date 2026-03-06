@@ -26,8 +26,21 @@ export function assignRemoteInfo(
 
   let entryUrl = getResourceUrl(remoteSnapshot, remoteEntryInfo.url);
 
-  if (!isBrowserEnv() && !entryUrl.startsWith('http')) {
-    entryUrl = `https:${entryUrl}`;
+  if (!isBrowserEnv()) {
+    if (entryUrl.startsWith('//')) {
+      entryUrl = `https:${entryUrl}`;
+    } else if (
+      !entryUrl.startsWith('http://') &&
+      !entryUrl.startsWith('https://')
+    ) {
+      try {
+        entryUrl = new URL(entryUrl, remoteInfo.entry).href;
+      } catch {
+        error(
+          `Unable to resolve remote entry URL for ${remoteInfo.name}. entry="${entryUrl}", manifest="${remoteInfo.entry}"`,
+        );
+      }
+    }
   }
 
   remoteInfo.type = remoteEntryInfo.type;

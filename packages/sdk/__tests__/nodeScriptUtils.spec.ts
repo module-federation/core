@@ -39,7 +39,7 @@ describe('nodeScriptUtils', () => {
   it('resolves promise-like exports and falls back to global container', async () => {
     const key = '__FEDERATION_remote:key__';
     const globalContainer = { init: () => undefined, get: () => undefined };
-    (globalThis as Record<string, unknown>)[key] = globalContainer;
+    (global as Record<string, unknown>)[key] = globalContainer;
 
     const resolvedFromPromise = await resolveNodeScriptExports(
       {
@@ -68,6 +68,6 @@ describe('nodeScriptUtils', () => {
 
     expect(resolvedFromGlobal).toBe(globalContainer);
 
-    delete (globalThis as Record<string, unknown>)[key];
+    delete (global as Record<string, unknown>)[key];
   });
 });

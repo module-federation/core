@@ -13,10 +13,10 @@ import {
 
 import { StatsPlugin } from '@module-federation/manifest';
 import { ContainerManager, utils } from '@module-federation/managers';
-import { DtsPlugin } from '@module-federation/dts-plugin';
 import ReactBridgePlugin from '@module-federation/bridge-react-webpack-plugin';
 import path from 'node:path';
 import fs from 'node:fs';
+import { createRequire } from 'node:module';
 import { RemoteEntryPlugin } from './RemoteEntryPlugin';
 import logger from './logger';
 
@@ -29,7 +29,116 @@ type CacheGroup = CacheGroups[string];
 
 declare const __VERSION__: string;
 
-const RuntimeToolsPath = require.resolve('@module-federation/runtime-tools');
+const RUNTIME_TOOLS_REQUEST = '@module-federation/runtime-tools';
+const NODE_RUNTIME_PLUGIN = '@module-federation/node/runtimePlugin';
+const runtimeRequire: NodeJS.Require = createRequire(
+  path.join(process.cwd(), '__mf_rspack_runtime__.cjs'),
+);
+
+type DtsPluginRuntimeInstance = {
+  apply(compiler: Compiler): void;
+  addRuntimePlugins(): void;
+};
+
+type DtsPluginConstructor = new (
+  options: moduleFederationPlugin.ModuleFederationPluginOptions,
+) => DtsPluginRuntimeInstance;
+
+function getTargetValues(target: unknown): string[] {
+  if (Array.isArray(target)) {
+    return target.filter((item): item is string => typeof item === 'string');
+  }
+  return typeof target === 'string' ? [target] : [];
+}
+
+function isNodeLikeTarget(target: unknown): boolean {
+  if (target === false) {
+    return false;
+  }
+  const targets = getTargetValues(target);
+  return targets.some((value) => value.includes('node'));
+}
+
+function hasAsyncNodeTarget(target: unknown): boolean {
+  if (target === false) {
+    return false;
+  }
+  const targets = getTargetValues(target);
+  return targets.some((value) => value.includes('async-node'));
+}
+
+function hasNodeRuntimePlugin(
+  runtimePlugins: moduleFederationPlugin.ModuleFederationPluginOptions['runtimePlugins'],
+): boolean {
+  if (!Array.isArray(runtimePlugins)) {
+    return false;
+  }
+
+  return runtimePlugins.some((plugin) => {
+    const entry = Array.isArray(plugin) ? plugin[0] : plugin;
+    if (typeof entry !== 'string') {
+      return false;
+    }
+    return (
+      entry === NODE_RUNTIME_PLUGIN ||
+      entry.includes('@module-federation/node/runtimePlugin') ||
+      entry.includes('@module-federation/node/dist/src/runtimePlugin')
+    );
+  });
+}
+
+function validateRscNodeRuntimePlugin(
+  options: moduleFederationPlugin.ModuleFederationPluginOptions,
+  target: unknown,
+): void {
+  const isRscEnabled =
+    (options.experiments as { rsc?: boolean } | undefined)?.rsc === true;
+
+  if (!isRscEnabled || !isNodeLikeTarget(target)) {
+    return;
+  }
+
+  if (!hasAsyncNodeTarget(target)) {
+    throw new Error(
+      '[ModuleFederationPlugin.rsc] Invalid configuration:\n`target` must include `"async-node"`.',
+    );
+  }
+
+  if (
+    (options.experiments as { asyncStartup?: boolean } | undefined)
+      ?.asyncStartup !== true
+  ) {
+    throw new Error(
+      '[ModuleFederationPlugin.rsc] Invalid configuration:\n`experiments.asyncStartup` must be `true`.',
+    );
+  }
+
+  if (!hasNodeRuntimePlugin(options.runtimePlugins)) {
+    options.runtimePlugins = [
+      ...(options.runtimePlugins || []),
+      NODE_RUNTIME_PLUGIN,
+    ];
+  }
+}
+
+function resolveFromCompilerContext(
+  request: string,
+  compilerContext: string,
+): string {
+  try {
+    return runtimeRequire.resolve(request, {
+      paths: [compilerContext],
+    });
+  } catch {}
+
+  return runtimeRequire.resolve(request);
+}
+
+function loadDtsPlugin(): DtsPluginConstructor {
+  const request = ['@module-federation', 'dts-plugin'].join('/');
+  const load = (id: string) => runtimeRequire(id);
+  return (load(request) as { DtsPlugin: DtsPluginConstructor }).DtsPlugin;
+}
 
 export const PLUGIN_NAME = 'RspackModuleFederationPlugin';
 export class ModuleFederationPlugin implements RspackPluginInstance {
@@ -98,6 +207,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
   apply(compiler: Compiler): void {
     bindLoggerToCompiler(logger, compiler, PLUGIN_NAME);
     const { _options: options } = this;
+    validateRscNodeRuntimePlugin(options, compiler.options.target);
 
     if (!options.name) {
       throw new Error('[ ModuleFederationPlugin ]: name is required');
@@ -123,7 +233,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
 
       const runtimePlugins = options.runtimePlugins || [];
       options.runtimePlugins = runtimePlugins.concat(
-        require.resolve(
+        runtimeRequire.resolve(
           '@module-federation/inject-external-runtime-core-plugin',
         ),
       );
@@ -136,12 +246,15 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       }).apply(compiler);
     }
 
-    const implementationPath = options.implementation || RuntimeToolsPath;
+    const implementationPath = options.implementation
+      ? resolveFromCompilerContext(options.implementation, compiler.context)
+      : resolveFromCompilerContext(RUNTIME_TOOLS_REQUEST, compiler.context);
     options.implementation = implementationPath;
     let disableManifest = options.manifest === false;
     let disableDts = options.dts === false;
 
     if (!disableDts) {
+      const DtsPlugin = loadDtsPlugin();
       const dtsPlugin = new DtsPlugin(options);
       // @ts-ignore
       dtsPlugin.apply(compiler);
@@ -164,12 +277,15 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     ).apply(compiler);
 
     const resolveRuntimePath = (candidates: string[]) => {
+      const resolvePaths = [compiler.context, path.dirname(implementationPath)];
       for (const candidate of candidates) {
-        try {
-          return require.resolve(candidate, {
-            paths: [implementationPath],
-          });
-        } catch {}
+        for (const resolvePath of resolvePaths) {
+          try {
+            return runtimeRequire.resolve(candidate, {
+              paths: [resolvePath],
+            });
+          } catch {}
+        }
       }
       throw new Error(
         `[ ModuleFederationPlugin ]: Unable to resolve runtime entry from ${candidates.join(
