@@ -28,9 +28,8 @@ function main() {
   }
 
   const changedFiles = getChangedFiles(baseRef, headRef);
-  const changedPackagesWithTestImpact =
-    getChangedPackagesWithTestImpact(changedFiles);
-  if (changedPackagesWithTestImpact.length === 0) {
+  const testImpactRoots = getChangedPackagesWithTestImpact(changedFiles);
+  if (testImpactRoots.length === 0) {
     console.log(
       `[affected-tests] No package test-impact changes detected (${baseRef}..${headRef}). Skipping affected package tests.`,
     );
@@ -41,11 +40,7 @@ function main() {
     baseRef,
     headRef,
   );
-  const runnablePackageTargets = intersectSortedUnique(
-    affectedPackageTargets,
-    changedPackagesWithTestImpact,
-  );
-  if (runnablePackageTargets.length === 0) {
+  if (affectedPackageTargets.length === 0) {
     console.log(
       `[affected-tests] No affected package turbo:test tasks detected (${baseRef}..${headRef}) after test-impact filtering.`,
     );
@@ -53,11 +48,11 @@ function main() {
   }
 
   console.log(
-    `[affected-tests] Running turbo:test for ${runnablePackageTargets.length} affected package(s): ${runnablePackageTargets.join(', ')}`,
+    `[affected-tests] Running turbo:test for ${affectedPackageTargets.length} affected package(s) from ${testImpactRoots.length} impact root(s): ${affectedPackageTargets.join(', ')}`,
   );
 
   const args = ['exec', 'turbo', 'run', 'turbo:test'];
-  for (const packageName of runnablePackageTargets) {
+  for (const packageName of affectedPackageTargets) {
     args.push(`--filter=${packageName}`);
   }
   args.push('--concurrency=50%');
@@ -279,12 +274,23 @@ function shouldTriggerPackageTests(relativeFilePath) {
     relativeFilePath.startsWith('src/') ||
     relativeFilePath.startsWith('test/') ||
     relativeFilePath.startsWith('tests/') ||
-    relativeFilePath.startsWith('__tests__/')
+    relativeFilePath.startsWith('__tests__/') ||
+    relativeFilePath.startsWith('scripts/') ||
+    relativeFilePath.startsWith('script/') ||
+    relativeFilePath.startsWith('bin/')
   ) {
     return true;
   }
 
   if (/\.(spec|test)\.[cm]?[jt]sx?$/.test(relativeFilePath)) {
+    return true;
+  }
+
+  if (
+    /\.(?:[cm]?[jt]sx?|json|ya?ml|toml|graphql|gql|sql|sh)$/i.test(
+      relativeFilePath,
+    )
+  ) {
     return true;
   }
 
@@ -367,19 +373,6 @@ function getAffectedPackageTestTargets(baseRef, headRef) {
   }
 
   return Array.from(packageNames).sort();
-}
-
-function intersectSortedUnique(left, right) {
-  const rightSet = new Set(Array.isArray(right) ? right : []);
-  const intersection = [];
-
-  for (const value of Array.isArray(left) ? left : []) {
-    if (rightSet.has(value)) {
-      intersection.push(value);
-    }
-  }
-
-  return intersection;
 }
 
 function parseJsonFromTurboOutput(outputText) {
