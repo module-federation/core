@@ -8,12 +8,6 @@ export type PreparedSkipList = {
 };
 
 export const DEFAULT_SKIP_LIST: SkipListEntry[] = [
-  '@module-federation/native-federation-runtime',
-  '@module-federation/native-federation',
-  '@module-federation/native-federation-core',
-  '@module-federation/native-federation-esbuild',
-  '@angular-architects/native-federation',
-  '@angular-architects/native-federation-runtime',
   'es-module-shims',
   'zone.js',
   'tslib/',

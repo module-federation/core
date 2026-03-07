@@ -192,7 +192,7 @@ export function readConfiguredSecondaries(
     }
     const entry = getDefaultEntry(exports, key);
     if (typeof entry !== 'string') {
-      console.log(`No entry point found for ${secondaryName}`);
+      logger.warn(`No entry point found for ${secondaryName}`);
       continue;
     }
     if (['.css', '.scss', '.less'].some((ext) => entry.endsWith(ext))) {
