@@ -8,7 +8,6 @@ import {
   type WebpackPluginInstance,
 } from 'webpack';
 import { normalizeStories } from '@storybook/core/common';
-import withModuleFederation from '../utils/with-module-federation.js';
 import { correctImportPath } from '../utils/correctImportPath.js';
 
 // TODO: Only reserve `storybook/internal/node-logger` in next major release.
@@ -40,7 +39,11 @@ type Options = {
   };
   configDir: string;
 };
-export { withModuleFederation };
+
+export const withModuleFederation = async (options: ModuleFederationConfig) => {
+  const mod = await import('../utils/with-module-federation.js');
+  return mod.default(options);
+};
 
 export const webpack = async (
   webpackConfig: Configuration,
