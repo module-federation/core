@@ -200,7 +200,7 @@ function listChangedFiles(baseRef, headRef) {
   const result = spawnSync(
     'git',
     // Compare PR-introduced changes only: merge-base(baseRef, headRef)..headRef.
-    ['diff', '--name-only', '--diff-filter=ACMR', `${baseRef}...${headRef}`],
+    ['diff', '--name-only', '--diff-filter=ACMRD', `${baseRef}...${headRef}`],
     {
       cwd: ROOT,
       stdio: 'pipe',

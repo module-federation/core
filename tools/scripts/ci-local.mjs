@@ -668,6 +668,15 @@ async function runBasePackagesBuild(ctx) {
     return;
   }
 
+  if (existsSync(join(ctx.state.basePath, 'nx.json'))) {
+    await runCommand(
+      'pnpm',
+      ['exec', 'nx', 'run-many', '--target=build', '--all'],
+      baseCtx,
+    );
+    return;
+  }
+
   if (existsSync(join(ctx.state.basePath, 'turbo.json'))) {
     await runCommand(
       'pnpm',
