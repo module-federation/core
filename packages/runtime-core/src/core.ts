@@ -353,6 +353,10 @@ export class ModuleFederation {
     return this.remoteHandler.registerRemotes(remotes, options);
   }
 
+  unloadRemote(nameOrAlias: string): boolean {
+    return this.remoteHandler.unloadRemote(nameOrAlias);
+  }
+
   registerShared(shared: UserOptions['shared']) {
     this.sharedHandler.registerShared(this.options, {
       ...this.options,

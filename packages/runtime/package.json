@@ -63,6 +63,16 @@
         "default": "./dist/core.cjs"
       }
     },
+    "./unload": {
+      "import": {
+        "types": "./dist/unload.d.ts",
+        "default": "./dist/unload.esm.js"
+      },
+      "require": {
+        "types": "./dist/unload.d.ts",
+        "default": "./dist/unload.cjs.cjs"
+      }
+    },
     "./*": "./*"
   },
   "typesVersions": {
@@ -78,6 +88,9 @@
       ],
       "core": [
         "./dist/core.d.ts"
+      ],
+      "unload": [
+        "./dist/unload.d.ts"
       ]
     }
   },

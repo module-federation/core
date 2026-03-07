@@ -8,8 +8,10 @@ import { attachShareScopeMap } from './attachShareScopeMap';
 import { initContainerEntry } from './initContainerEntry';
 import { init } from './init';
 import { getSharedFallbackGetter } from './getSharedFallbackGetter';
+import { unloadRemotePlugin } from './unload-remote-plugin';
 
 export * from './types';
+export { unloadRemotePlugin };
 
 const federation: Federation = {
   runtime,

@@ -6,17 +6,26 @@
   "tags": ["type:pkg"],
   "targets": {
     "build": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/rollup:rollup",
       "outputs": ["{workspaceRoot}/packages/runtime/dist"],
       "options": {
         "parallel": false,
-        "cwd": "packages/runtime",
-        "commands": [
-          {
-            "command": "tsdown --config tsdown.config.ts",
-            "forwardAllArgs": false
-          }
-        ]
+        "outputPath": "packages/runtime/dist",
+        "main": "packages/runtime/src/index.ts",
+        "additionalEntryPoints": [
+          "packages/runtime/src/types.ts",
+          "packages/runtime/src/helpers.ts",
+          "packages/runtime/src/unload.ts"
+        ],
+        "tsConfig": "packages/runtime/tsconfig.lib.json",
+        "assets": [],
+        "external": ["@module-federation/*"],
+        "project": "packages/runtime/package.json",
+        "compiler": "tsc",
+        "rollupConfig": "packages/runtime/rollup.config.cjs",
+        "format": ["cjs", "esm"],
+        "generatePackageJson": false,
+        "useLegacyTypescriptPlugin": false
       },
       "dependsOn": [
         {
@@ -39,10 +48,9 @@
       "executor": "nx:run-commands",
       "options": {
         "parallel": false,
-        "cwd": "packages/runtime",
         "commands": [
           {
-            "command": "RUNTIME_TSDOWN_MODE=debug tsdown --config tsdown.config.ts",
+            "command": "FEDERATION_DEBUG=true nx run runtime:build",
             "forwardAllArgs": false
           }
         ]
