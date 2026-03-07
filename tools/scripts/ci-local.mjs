@@ -659,7 +659,11 @@ async function runBasePackagesBuild(ctx) {
   }
 
   const buildPackagesScript = basePackageJson?.scripts?.['build:packages'];
-  if (typeof buildPackagesScript === 'string' && buildPackagesScript.trim()) {
+  if (
+    typeof buildPackagesScript === 'string' &&
+    buildPackagesScript.trim() &&
+    !isNxAffectedScript(buildPackagesScript)
+  ) {
     await runCommand('pnpm', ['run', 'build:packages'], baseCtx);
     return;
   }
@@ -683,6 +687,10 @@ async function runBasePackagesBuild(ctx) {
   throw new Error(
     '[ci:local] Base worktree has no build:packages script and no turbo.json; cannot build base packages.',
   );
+}
+
+function isNxAffectedScript(script) {
+  return /\bnx\b/.test(script) && /\baffected\b/.test(script);
 }
 
 function preflight() {
