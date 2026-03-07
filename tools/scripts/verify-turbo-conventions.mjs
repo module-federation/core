@@ -116,7 +116,9 @@ function listPackageJsonPathsFromGit() {
       .split('\n')
       .map((entry) => entry.trim())
       .filter(Boolean)
-      .filter((entry) => entry === 'package.json' || entry.endsWith('/package.json'))
+      .filter(
+        (entry) => entry === 'package.json' || entry.endsWith('/package.json'),
+      )
       .filter((entry) => !isExcludedPackageJsonPath(entry))
       .join('\n'),
   );
