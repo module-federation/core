@@ -81,6 +81,11 @@ function runPrettier(changedFiles) {
 }
 
 function getChangedPackages(changedFiles) {
+  const workspacePackageNames = getWorkspacePackageNames();
+  if (workspacePackageNames.size === 0) {
+    return [];
+  }
+
   const packages = new Set();
 
   for (const changedFile of changedFiles) {
@@ -98,7 +103,8 @@ function getChangedPackages(changedFiles) {
       if (
         typeof packageJson?.name === 'string' &&
         packageJson.name &&
-        packageJson.name !== 'module-federation'
+        packageJson.name !== 'module-federation' &&
+        workspacePackageNames.has(packageJson.name)
       ) {
         packages.add(packageJson.name);
       }
@@ -108,6 +114,71 @@ function getChangedPackages(changedFiles) {
   }
 
   return Array.from(packages).sort();
+}
+
+function getWorkspacePackageNames() {
+  const result = spawnSync('pnpm', ['exec', 'turbo', 'ls', '--output=json'], {
+    cwd: ROOT,
+    stdio: 'pipe',
+    encoding: 'utf-8',
+    maxBuffer: 1024 * 1024 * 64,
+    env: process.env,
+  });
+
+  if (result.status !== 0) {
+    throw new Error(
+      `[lint-fix] Failed to list workspace packages from Turbo: ${result.stderr || result.stdout}`,
+    );
+  }
+
+  let payload;
+  try {
+    payload = JSON.parse(result.stdout || '{}');
+  } catch (error) {
+    throw new Error(
+      `[lint-fix] Failed to parse Turbo workspace package output: ${error.message}`,
+    );
+  }
+
+  const items = getWorkspaceItemsFromTurboPayload(payload);
+  const names = new Set();
+  for (const item of items) {
+    const name = extractWorkspaceName(item);
+    if (typeof name === 'string' && name) {
+      names.add(name);
+    }
+  }
+
+  return names;
+}
+
+function getWorkspaceItemsFromTurboPayload(payload) {
+  if (Array.isArray(payload?.packages?.items)) {
+    return payload.packages.items;
+  }
+  if (Array.isArray(payload?.packages)) {
+    return payload.packages;
+  }
+  if (Array.isArray(payload?.items)) {
+    return payload.items;
+  }
+  if (Array.isArray(payload)) {
+    return payload;
+  }
+  return [];
+}
+
+function extractWorkspaceName(item) {
+  if (!item) {
+    return null;
+  }
+  if (typeof item === 'string') {
+    return item;
+  }
+  if (typeof item.name === 'string') {
+    return item.name;
+  }
+  return null;
 }
 
 function shouldTriggerPackageLint(relativeFilePath) {

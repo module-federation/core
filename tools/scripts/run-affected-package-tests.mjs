@@ -158,11 +158,16 @@ function resolveGitCommit(ref) {
 }
 
 function getChangedFiles(baseRef, headRef) {
-  const result = spawnSync('git', ['diff', '--name-only', baseRef, headRef], {
-    cwd: ROOT,
-    stdio: 'pipe',
-    encoding: 'utf-8',
-  });
+  const result = spawnSync(
+    'git',
+    // Compare PR-introduced changes only: merge-base(baseRef, headRef)..headRef.
+    ['diff', '--name-only', `${baseRef}...${headRef}`],
+    {
+      cwd: ROOT,
+      stdio: 'pipe',
+      encoding: 'utf-8',
+    },
+  );
   if (result.status !== 0) {
     throw new Error(
       `[affected-tests] Failed to evaluate changed files for ${baseRef}..${headRef}: ${result.stderr || result.stdout}`,
