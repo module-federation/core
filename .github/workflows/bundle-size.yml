@@ -82,13 +82,20 @@ jobs:
 
       - name: Build packages (base)
         run: |
-          if pnpm run build:packages; then
-            echo "Built base packages with root build:packages script."
-          elif [ -f turbo.json ]; then
+          BUILD_PACKAGES_SCRIPT="$(node -e "const pkg=require('./package.json'); process.stdout.write(pkg.scripts?.['build:packages'] ?? '')")"
+          if [ -f turbo.json ]; then
             echo "Falling back to Turbo package build on base worktree."
             pnpm exec turbo run build --filter=./packages/** --concurrency=10
+          elif [ -f nx.json ]; then
+            echo "Falling back to detached-safe Nx package build on base worktree."
+            npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4 --skip-nx-cache
+          elif printf '%s' "$BUILD_PACKAGES_SCRIPT" | grep -Eq '(^|[[:space:]])nx[[:space:]].*affected'; then
+            echo "Detected legacy Nx affected build:packages script on detached base; using deterministic nx run-many instead."
+            npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4 --skip-nx-cache
+          elif pnpm run build:packages; then
+            echo "Built base packages with root build:packages script."
           else
-            echo "Unable to build base packages: missing build:packages script and turbo.json" >&2
+            echo "Unable to build base packages: missing compatible Turbo, Nx, or build:packages entrypoint" >&2
             exit 1
           fi
         working-directory: ${{ env.BASE_PATH }}
