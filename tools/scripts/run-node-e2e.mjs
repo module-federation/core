@@ -47,7 +47,7 @@ const E2E_CMD = [
   'exec',
   'turbo',
   'run',
-  'test:e2e',
+  'e2e',
   '--filter=node-host-e2e',
   '--only',
 ];
