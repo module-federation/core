@@ -53,7 +53,7 @@ jobs:
         run: npx cypress install
 
       - name: Check code format
-        run: git ls-files -z | xargs -0 pnpm exec prettier --check --ignore-unknown
+        run: node tools/scripts/check-format-changed.mjs
 
       - name: Verify Rslib Template Publint Wiring
         run: node packages/create-module-federation/scripts/verify-rslib-templates.mjs

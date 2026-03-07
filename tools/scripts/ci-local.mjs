@@ -46,10 +46,7 @@ const jobs = [
         runCommand('npx', ['cypress', 'install'], ctx),
       ),
       step('Check code format', (ctx) =>
-        runShell(
-          'git ls-files -z | xargs -0 pnpm exec prettier --check --ignore-unknown',
-          ctx,
-        ),
+        runCommand('node', ['tools/scripts/check-format-changed.mjs'], ctx),
       ),
       step('Verify Rslib Template Publint Wiring', (ctx) =>
         runCommand(
