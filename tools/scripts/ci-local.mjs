@@ -671,7 +671,15 @@ async function runBasePackagesBuild(ctx) {
   if (existsSync(join(ctx.state.basePath, 'nx.json'))) {
     await runCommand(
       'pnpm',
-      ['exec', 'nx', 'run-many', '--target=build', '--all'],
+      [
+        'exec',
+        'nx',
+        'run-many',
+        '--targets=build',
+        '--projects=tag:type:pkg',
+        '--parallel=4',
+        '--skip-nx-cache',
+      ],
       baseCtx,
     );
     return;
