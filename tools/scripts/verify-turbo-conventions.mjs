@@ -85,13 +85,45 @@ function listPackageJsonPaths() {
     },
   );
 
-  if (result.status !== 0) {
+  if (!result.error && result.status === 0) {
+    return normalizePackageJsonPaths(result.stdout);
+  }
+
+  if (isCommandNotFound(result)) {
+    return listPackageJsonPathsFromGit();
+  }
+
+  throw new Error(
+    `[verify-turbo-conventions] Failed to list package.json files with rg: ${formatSpawnFailure(result)}`,
+  );
+}
+
+function listPackageJsonPathsFromGit() {
+  const result = spawnSync('git', ['ls-files'], {
+    cwd: ROOT,
+    encoding: 'utf-8',
+    stdio: 'pipe',
+  });
+
+  if (result.error || result.status !== 0) {
     throw new Error(
-      `[verify-turbo-conventions] Failed to list package.json files: ${result.stderr || result.stdout}`,
+      `[verify-turbo-conventions] Failed to list package.json files with git ls-files fallback: ${formatSpawnFailure(result)}`,
     );
   }
 
-  return result.stdout
+  return normalizePackageJsonPaths(
+    result.stdout
+      .split('\n')
+      .map((entry) => entry.trim())
+      .filter(Boolean)
+      .filter((entry) => entry === 'package.json' || entry.endsWith('/package.json'))
+      .filter((entry) => !isExcludedPackageJsonPath(entry))
+      .join('\n'),
+  );
+}
+
+function normalizePackageJsonPaths(stdout) {
+  return stdout
     .split('\n')
     .map((entry) => entry.trim())
     .filter(Boolean)
@@ -276,6 +308,38 @@ function normalizeFilterTarget(filterTarget) {
     return filterTarget.slice(1);
   }
   return filterTarget;
+}
+
+function isExcludedPackageJsonPath(path) {
+  return (
+    path.includes('/node_modules/') ||
+    path.includes('/dist/') ||
+    path.includes('/build/') ||
+    path.includes('/.next/')
+  );
+}
+
+function isCommandNotFound(result) {
+  return result.error?.code === 'ENOENT';
+}
+
+function formatSpawnFailure(result) {
+  if (result.error?.message) {
+    return result.error.message;
+  }
+  if (typeof result.stderr === 'string' && result.stderr.trim()) {
+    return result.stderr.trim();
+  }
+  if (typeof result.stdout === 'string' && result.stdout.trim()) {
+    return result.stdout.trim();
+  }
+  if (typeof result.status === 'number') {
+    return `exit code ${result.status}`;
+  }
+  if (result.signal) {
+    return `terminated by signal ${result.signal}`;
+  }
+  return 'unknown error';
 }
 
 function hasWildcard(filterTarget) {
