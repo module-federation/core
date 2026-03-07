@@ -62,6 +62,12 @@ export function snapshotPlugin(): ModuleFederationRuntimePlugin {
           },
         };
 
+        await origin.remoteHandler.hooks.lifecycle.beforePreloadRemote.emit({
+          preloadOps: [preloadOptions.preloadConfig],
+          options: origin.options,
+          origin,
+        });
+
         const assets =
           await origin.remoteHandler.hooks.lifecycle.generatePreloadAssets.emit(
             {
