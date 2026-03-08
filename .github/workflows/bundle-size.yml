@@ -85,7 +85,7 @@ jobs:
           BUILD_PACKAGES_SCRIPT="$(node -e "const pkg=require('./package.json'); process.stdout.write(pkg.scripts?.['build:packages'] ?? '')")"
           if [ -f turbo.json ]; then
             echo "Falling back to Turbo package build on base worktree."
-            pnpm exec turbo run build --filter=./packages/** --concurrency=10
+            pnpm exec turbo run build --filter=./packages/** --concurrency=20
           elif [ -f nx.json ]; then
             echo "Falling back to detached-safe Nx package build on base worktree."
             npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4 --skip-nx-cache

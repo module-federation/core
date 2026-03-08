@@ -29,7 +29,7 @@ const REMOTE_SERVE_CMD = [
   '--filter=node-local-remote',
   '--filter=node-dynamic-remote',
   '--filter=node-dynamic-remote-new-version',
-  '--concurrency=4',
+  '--concurrency=20',
 ];
 
 const HOST_SERVE_CMD = [
@@ -39,7 +39,7 @@ const HOST_SERVE_CMD = [
   'run',
   'serve:development',
   '--filter=node-host',
-  '--concurrency=1',
+  '--concurrency=20',
 ];
 
 const E2E_CMD = [

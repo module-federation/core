@@ -694,7 +694,7 @@ async function runBasePackagesBuild(ctx) {
         'run',
         'build',
         '--filter=./packages/**',
-        '--concurrency=10',
+        '--concurrency=20',
       ],
       baseCtx,
     );

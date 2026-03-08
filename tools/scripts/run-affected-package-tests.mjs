@@ -53,7 +53,7 @@ function main() {
   for (const packageName of combinedTargets) {
     args.push(`--filter=${packageName}`);
   }
-  args.push('--concurrency=50%');
+  args.push('--concurrency=20');
 
   const testRun = spawnSync('pnpm', args, {
     cwd: ROOT,
