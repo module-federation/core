@@ -1,4 +1,5 @@
-import { ensureDirSync, writeFileSync, existsSync } from 'fs-extra';
+import fse from 'fs-extra';
+const { ensureDirSync, writeFileSync, existsSync } = fse;
 import crypto from 'crypto';
 import { stat, readdir, writeFile, rm, readFile } from 'fs/promises';
 import {
