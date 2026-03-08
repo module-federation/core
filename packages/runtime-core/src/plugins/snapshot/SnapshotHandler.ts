@@ -7,13 +7,12 @@ import {
   isBrowserEnv,
 } from '@module-federation/sdk';
 import {
-  getShortErrorMsg,
   RUNTIME_003,
   RUNTIME_007,
   runtimeDescMap,
 } from '@module-federation/error-codes';
 import { Options, Remote } from '../../type';
-import { isRemoteInfoWithEntry, error } from '../../utils';
+import { isRemoteInfoWithEntry, error, optionsToMFContext } from '../../utils';
 import {
   getGlobalSnapshot,
   setGlobalSnapshotInfoByModuleInfo,
@@ -245,11 +244,15 @@ export class SnapshotHandler {
         gSnapshot = globalSnapshotRes;
       } else {
         error(
-          getShortErrorMsg(RUNTIME_007, runtimeDescMap, {
+          RUNTIME_007,
+          runtimeDescMap,
+          {
             hostName: moduleInfo.name,
             hostVersion: moduleInfo.version,
             globalSnapshot: JSON.stringify(globalSnapshotRes),
-          }),
+          },
+          undefined,
+          optionsToMFContext(this.HostInstance.options),
         );
       }
     }
@@ -308,16 +311,15 @@ export class SnapshotHandler {
         if (!manifestJson) {
           delete this.manifestLoading[manifestUrl];
           error(
-            getShortErrorMsg(
-              RUNTIME_003,
-              runtimeDescMap,
-              {
-                manifestUrl,
-                moduleName: moduleInfo.name,
-                hostName: this.HostInstance.options.name,
-              },
-              `${err}`,
-            ),
+            RUNTIME_003,
+            runtimeDescMap,
+            {
+              manifestUrl,
+              moduleName: moduleInfo.name,
+              hostName: this.HostInstance.options.name,
+            },
+            `${err}`,
+            optionsToMFContext(this.HostInstance.options),
           );
         }
       }

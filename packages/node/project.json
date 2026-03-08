@@ -33,11 +33,11 @@
       }
     },
     "test": {
-      "executor": "@nx/jest:jest",
+      "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/coverage/packages/node"],
       "options": {
-        "jestConfig": "packages/node/jest.config.js",
-        "passWithNoTests": true
+        "command": "pnpm exec jest --config packages/node/jest.config.js --passWithNoTests",
+        "forwardAllArgs": false
       }
     },
     "pre-release": {

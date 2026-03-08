@@ -5,11 +5,7 @@ import {
   ModuleInfo,
   GlobalModuleInfo,
 } from '@module-federation/sdk';
-import {
-  getShortErrorMsg,
-  RUNTIME_004,
-  runtimeDescMap,
-} from '@module-federation/error-codes';
+import { RUNTIME_004, runtimeDescMap } from '@module-federation/error-codes';
 import {
   Global,
   getInfoWithoutType,
@@ -37,9 +33,11 @@ import {
 } from '../utils/hooks';
 import {
   assert,
+  error,
   getRemoteInfo,
   getRemoteEntryUniqueKey,
   matchRemoteWithNameAndExpose,
+  optionsToMFContext,
   logger,
 } from '../utils';
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
@@ -357,13 +355,18 @@ export class RemoteHandler {
       host.options.remotes,
       idRes,
     );
-    assert(
-      remoteSplitInfo,
-      getShortErrorMsg(RUNTIME_004, runtimeDescMap, {
-        hostName: host.options.name,
-        requestId: idRes,
-      }),
-    );
+    if (!remoteSplitInfo) {
+      error(
+        RUNTIME_004,
+        runtimeDescMap,
+        {
+          hostName: host.options.name,
+          requestId: idRes,
+        },
+        undefined,
+        optionsToMFContext(host.options),
+      );
+    }
 
     const { remote: rawRemote } = remoteSplitInfo;
     const remoteInfo = getRemoteInfo(rawRemote);

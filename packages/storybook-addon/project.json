@@ -7,13 +7,15 @@
   "implicitDependencies": ["utils"],
   "targets": {
     "build": {
-      "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/packages/storybook-addon/dist"],
       "options": {
-        "outputPath": "packages/storybook-addon/dist",
-        "main": "packages/storybook-addon/src/index.ts",
-        "tsConfig": "packages/storybook-addon/tsconfig.lib.json",
-        "assets": ["packages/storybook-addon/*.md"]
+        "parallel": false,
+        "commands": [
+          "node -e \"require('fs').rmSync('packages/storybook-addon/dist',{recursive:true,force:true})\"",
+          "pnpm -C packages/storybook-addon exec tsdown --config tsdown.config.ts",
+          "node -e \"const fs=require('fs');const path=require('path');const src='packages/storybook-addon';const dst='packages/storybook-addon/dist';for(const f of fs.readdirSync(src)){if(f.endsWith('.md'))fs.cpSync(path.join(src,f),path.join(dst,f));}\""
+        ]
       },
       "dependsOn": [
         {
@@ -30,16 +32,15 @@
       }
     },
     "test": {
-      "executor": "@nx/jest:jest",
+      "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "packages/storybook-addon/jest.config.ts",
-        "passWithNoTests": true
+        "command": "pnpm exec jest --config packages/storybook-addon/jest.config.ts --passWithNoTests",
+        "forwardAllArgs": false
       },
       "configurations": {
         "ci": {
-          "ci": true,
-          "codeCoverage": true
+          "command": "pnpm exec jest --config packages/storybook-addon/jest.config.ts --passWithNoTests --ci --coverage"
         }
       }
     },
