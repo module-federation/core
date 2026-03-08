@@ -75,6 +75,35 @@ export function parseJsonFromTurboOutput(outputText) {
   throw new Error('Unable to locate JSON payload in Turbo output.');
 }
 
+export function listChangedFiles(root, baseRef, headRef, options = {}) {
+  const diffFilter = options.diffFilter?.trim();
+  const errorPrefix = options.errorPrefix ?? 'Failed to compute changed files';
+  const args = ['diff', '--name-only'];
+
+  if (diffFilter) {
+    args.push(`--diff-filter=${diffFilter}`);
+  }
+
+  args.push(`${baseRef}...${headRef}`);
+
+  const result = spawnSync('git', args, {
+    cwd: root,
+    stdio: 'pipe',
+    encoding: 'utf-8',
+  });
+
+  if (result.status !== 0) {
+    throw new Error(
+      `${errorPrefix} for ${baseRef}...${headRef}: ${result.stderr || result.stdout}`,
+    );
+  }
+
+  return result.stdout
+    .split('\n')
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+}
+
 function tryParseJson(value) {
   try {
     return { ok: true, value: JSON.parse(value) };

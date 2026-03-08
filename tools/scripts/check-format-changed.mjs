@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { listChangedFiles } from './turbo-script-utils.mjs';
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(SCRIPT_DIR, '../..');
@@ -21,7 +22,10 @@ function main() {
     process.exit(0);
   }
 
-  const changedFiles = getChangedFiles(baseRef, 'HEAD');
+  const changedFiles = listChangedFiles(ROOT, baseRef, 'HEAD', {
+    diffFilter: 'ACMR',
+    errorPrefix: '[format-check] Failed to compute changed files',
+  });
   if (changedFiles.length === 0) {
     console.log(
       `[format-check] No changed files detected between ${baseRef}...HEAD. Skipping format check.`,
@@ -128,29 +132,6 @@ function getEventBaseCandidates() {
   }
 
   return Array.from(refs);
-}
-
-function getChangedFiles(baseRef, headRef) {
-  const result = spawnSync(
-    'git',
-    ['diff', '--name-only', '--diff-filter=ACMR', `${baseRef}...${headRef}`],
-    {
-      cwd: ROOT,
-      stdio: 'pipe',
-      encoding: 'utf-8',
-    },
-  );
-
-  if (result.status !== 0) {
-    throw new Error(
-      `[format-check] Failed to compute changed files for ${baseRef}...${headRef}: ${result.stderr || result.stdout}`,
-    );
-  }
-
-  return result.stdout
-    .split('\n')
-    .map((entry) => entry.trim())
-    .filter(Boolean);
 }
 
 function hasGitRef(ref) {

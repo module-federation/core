@@ -5,6 +5,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   hasGitRef as hasGitRefInRepo,
+  listChangedFiles,
   parseJsonFromTurboOutput,
   resolveGitCommit as resolveGitCommitInRepo,
 } from './turbo-script-utils.mjs';
@@ -37,7 +38,9 @@ function main() {
     process.exit(0);
   }
 
-  const changedFiles = getChangedFiles(baseRef, headRef);
+  const changedFiles = listChangedFiles(ROOT, baseRef, headRef, {
+    errorPrefix: '[affected-tests] Failed to evaluate changed files',
+  });
   const testImpactRoots = getChangedPackagesWithTestImpact(changedFiles);
   const affectedPackageTargets = getAffectedPackageTestTargets(
     baseRef,
@@ -147,28 +150,6 @@ function hasGitRef(ref) {
 
 function resolveGitCommit(ref) {
   return resolveGitCommitInRepo(ROOT, ref);
-}
-
-function getChangedFiles(baseRef, headRef) {
-  const result = spawnSync(
-    'git',
-    // Compare PR-introduced changes only: merge-base(baseRef, headRef)..headRef.
-    ['diff', '--name-only', `${baseRef}...${headRef}`],
-    {
-      cwd: ROOT,
-      stdio: 'pipe',
-      encoding: 'utf-8',
-    },
-  );
-  if (result.status !== 0) {
-    throw new Error(
-      `[affected-tests] Failed to evaluate changed files for ${baseRef}..${headRef}: ${result.stderr || result.stdout}`,
-    );
-  }
-  return result.stdout
-    .split('\n')
-    .map((entry) => entry.trim())
-    .filter(Boolean);
 }
 
 function getChangedPackagesWithTestImpact(changedFiles) {
