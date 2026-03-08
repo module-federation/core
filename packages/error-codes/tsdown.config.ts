@@ -12,6 +12,8 @@ export default defineConfig([
     packageDir,
     entry: {
       index: 'src/index.ts',
+      browser: 'src/browser.ts',
+      node: 'src/node.ts',
     },
     external: ['@module-federation/*'],
     dts: {
