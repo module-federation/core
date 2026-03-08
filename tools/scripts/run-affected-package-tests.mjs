@@ -6,6 +6,10 @@ import { fileURLToPath } from 'node:url';
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(SCRIPT_DIR, '../..');
+const EXCLUDED_AFFECTED_TEST_PACKAGES = new Set([
+  '@module-federation/treeshake-frontend',
+  '@module-federation/treeshake-server',
+]);
 
 main();
 
@@ -38,19 +42,31 @@ function main() {
     testImpactRoots,
     affectedPackageTargets,
   );
-  if (combinedTargets.length === 0) {
+  const filteredTargets = combinedTargets.filter(
+    (packageName) => !EXCLUDED_AFFECTED_TEST_PACKAGES.has(packageName),
+  );
+  const excludedTargets = combinedTargets.filter((packageName) =>
+    EXCLUDED_AFFECTED_TEST_PACKAGES.has(packageName),
+  );
+  if (filteredTargets.length === 0) {
     console.log(
       `[affected-tests] No affected package test tasks detected (${baseRef}..${headRef}). Skipping affected package tests.`,
     );
     process.exit(0);
   }
 
+  if (excludedTargets.length > 0) {
+    console.log(
+      `[affected-tests] Skipping packages covered by dedicated CI workflows: ${excludedTargets.join(', ')}`,
+    );
+  }
+
   console.log(
-    `[affected-tests] Running turbo test for ${combinedTargets.length} affected package(s) from ${testImpactRoots.length} impact root(s): ${combinedTargets.join(', ')}`,
+    `[affected-tests] Running turbo test for ${filteredTargets.length} affected package(s) from ${testImpactRoots.length} impact root(s): ${filteredTargets.join(', ')}`,
   );
 
   const args = ['exec', 'turbo', 'run', 'test'];
-  for (const packageName of combinedTargets) {
+  for (const packageName of filteredTargets) {
     args.push(`--filter=${packageName}`);
   }
   args.push('--concurrency=20');
