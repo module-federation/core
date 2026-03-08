@@ -3,7 +3,11 @@ import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { listChangedFiles } from './turbo-script-utils.mjs';
+import {
+  hasGitRef as hasGitRefInRepo,
+  listChangedFiles,
+  resolveGitCommit as resolveGitCommitInRepo,
+} from './turbo-script-utils.mjs';
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(SCRIPT_DIR, '../..');
@@ -135,40 +139,9 @@ function getEventBaseCandidates() {
 }
 
 function hasGitRef(ref) {
-  if (!ref) {
-    return false;
-  }
-
-  const result = spawnSync(
-    'git',
-    ['rev-parse', '--verify', '--quiet', `${ref}^{commit}`],
-    {
-      cwd: ROOT,
-      stdio: 'ignore',
-    },
-  );
-
-  return result.status === 0;
+  return hasGitRefInRepo(ROOT, ref);
 }
 
 function resolveGitCommit(ref) {
-  if (!ref) {
-    return null;
-  }
-
-  const result = spawnSync(
-    'git',
-    ['rev-parse', '--verify', '--quiet', `${ref}^{commit}`],
-    {
-      cwd: ROOT,
-      stdio: 'pipe',
-      encoding: 'utf-8',
-    },
-  );
-
-  if (result.status !== 0) {
-    return null;
-  }
-
-  return result.stdout.trim() || null;
+  return resolveGitCommitInRepo(ROOT, ref);
 }
