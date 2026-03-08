@@ -1,7 +1,7 @@
 {
   "name": "react-storybook",
   "version": "1.0.0",
-  "private": true,
+  "private": true, "description": "Federation example for reactStorybook",
   "devDependencies": {
     "@module-federation/utilities": "workspace:*",
     "@module-federation/storybook-addon": "workspace:*",

@@ -1,7 +1,7 @@
 {
   "name": "@module-federation/3000-home",
   "version": "1.0.0",
-  "private": true,
+  "private": true, "description": "Federation example for 3000-home",
   "dependencies": {
     "@ant-design/cssinjs": "^1.21.0",
     "antd": "5.19.1",

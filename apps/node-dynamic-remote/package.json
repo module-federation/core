@@ -1,6 +1,6 @@
 {
   "name": "node-dynamic-remote",
-  "private": true,
+  "private": true, "description": "Federation example for node-dynamic-remote",
   "dependencies": {
     "@module-federation/node": "workspace:*",
     "lodash": "4.17.23"
