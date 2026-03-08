@@ -1,5 +1,23 @@
-import { execSync } from 'child_process';
+import { spawnSync } from 'node:child_process';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import yargs from 'yargs';
+
+const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
+const ROOT = resolve(SCRIPT_DIR, '../..');
+const GLOBAL_E2E_INPUT_PATTERNS = [
+  'package.json',
+  'tools/scripts/ci-is-affected.mjs',
+  'tools/scripts/e2e-process-utils.mjs',
+  'tools/scripts/run-manifest-e2e.mjs',
+  'tools/scripts/run-modern-e2e.mjs',
+  'tools/scripts/run-metro-e2e.mjs',
+  'tools/scripts/run-next-e2e.mjs',
+  'tools/scripts/run-node-e2e.mjs',
+  'tools/scripts/run-router-e2e.mjs',
+  'tools/scripts/run-runtime-e2e.mjs',
+  'scripts/ensure-playwright.js',
+];
 
 const argv = yargs(process.argv.slice(2))
   .option('appName', {
@@ -15,58 +33,7 @@ const argv = yargs(process.argv.slice(2))
   .strict(false)
   .parseSync();
 
-let { appName, base, head } = argv;
-
-const hasGitRef = (ref) => {
-  if (!ref) {
-    return false;
-  }
-  try {
-    execSync(`git rev-parse --verify --quiet "${ref}^{commit}"`, {
-      stdio: 'ignore',
-    });
-    return true;
-  } catch {
-    return false;
-  }
-};
-
-const resolveBase = (requestedBase) => {
-  if (hasGitRef(requestedBase)) {
-    return requestedBase;
-  }
-  if (hasGitRef(process.env.NX_BASE)) {
-    return process.env.NX_BASE;
-  }
-  if (hasGitRef('origin/main')) {
-    return 'origin/main';
-  }
-  if (hasGitRef('main')) {
-    return 'main';
-  }
-  if (hasGitRef('HEAD~1')) {
-    return 'HEAD~1';
-  }
-  return null;
-};
-
-const resolveHead = (requestedHead) => {
-  if (hasGitRef(requestedHead)) {
-    return requestedHead;
-  }
-  if (hasGitRef(process.env.NX_HEAD)) {
-    return process.env.NX_HEAD;
-  }
-  if (hasGitRef('HEAD')) {
-    return 'HEAD';
-  }
-  return null;
-};
-
-base = resolveBase(base);
-head = resolveHead(head);
-
-const appNames = appName
+const appNames = argv.appName
   .split(',')
   .map((name) => name.trim())
   .filter(Boolean);
@@ -76,8 +43,10 @@ if (appNames.length === 0) {
   process.exit(1);
 }
 
+const base = resolveBase(argv.base);
+const head = resolveHead(argv.head);
+
 if (!base || !head) {
-  // Fail open for uncertain git state so CI does not skip required e2e checks.
   console.warn(
     `Unable to resolve a valid base/head commit (base=${base}, head=${head}). Running e2e by default.`,
   );
@@ -85,42 +54,421 @@ if (!base || !head) {
 }
 
 if (base === head) {
-  // Same commit cannot produce an affected diff; run e2e to avoid false skips.
   console.warn(
     `Resolved base and head are identical (${base}). Running e2e by default.`,
   );
   process.exit(0);
 }
 
-let affectedProjectsOutput = [];
-try {
-  affectedProjectsOutput = execSync(
-    `npx nx show projects --affected --base=${base} --head=${head}`,
-  )
-    .toString()
-    .split('\n')
-    .map((p) => p.trim())
-    .filter(Boolean);
-} catch (error) {
+const changedFiles = listChangedFiles(base, head);
+
+if (!changedFiles) {
   console.warn(
-    `Failed to evaluate affected projects for base=${base} head=${head}. Running e2e by default.`,
+    `Unable to resolve changed files for base=${base} head=${head}. Running e2e by default.`,
   );
-  if (error instanceof Error) {
-    console.warn(error.message);
+  process.exit(0);
+}
+
+const changedGlobalE2EInputs = changedFiles.filter(isGlobalE2EInput);
+
+if (changedGlobalE2EInputs.length > 0) {
+  console.log(
+    `Detected shared e2e harness changes (${changedGlobalE2EInputs.join(', ')}). Running e2e CI.`,
+  );
+  process.exit(0);
+}
+
+const turboResult = spawnSync(
+  'pnpm',
+  ['exec', 'turbo', 'ls', '--affected', '--output=json'],
+  {
+    cwd: ROOT,
+    stdio: 'pipe',
+    encoding: 'utf-8',
+    maxBuffer: 1024 * 1024 * 64,
+    env: {
+      ...process.env,
+      TURBO_SCM_BASE: base,
+      TURBO_SCM_HEAD: head,
+    },
+  },
+);
+
+if (turboResult.status !== 0) {
+  console.warn(
+    `Failed to evaluate Turbo affected packages for base=${base} head=${head}. Running e2e by default.`,
+  );
+  if (turboResult.stderr?.trim()) {
+    console.warn(turboResult.stderr.trim());
+  } else if (turboResult.stdout?.trim()) {
+    console.warn(turboResult.stdout.trim());
   }
   process.exit(0);
 }
 
-const isAffected = affectedProjectsOutput.some((p) => appNames.includes(p));
+let affectedPackageNames;
+try {
+  affectedPackageNames = parseAffectedPackages(turboResult.stdout ?? '');
+} catch {
+  try {
+    affectedPackageNames = parseAffectedPackages(
+      `${turboResult.stdout ?? ''}\n${turboResult.stderr ?? ''}`,
+    );
+  } catch {
+    console.warn(
+      `Unable to parse Turbo affected output for base=${base} head=${head}. Running e2e by default.`,
+    );
+    process.exit(0);
+  }
+}
+
+const matchableAffectedNames = new Set();
+for (const packageName of affectedPackageNames) {
+  matchableAffectedNames.add(packageName);
+  const unscoped = toUnscopedName(packageName);
+  if (unscoped) {
+    matchableAffectedNames.add(unscoped);
+  }
+}
+
+const isAffected = appNames.some((name) => matchableAffectedNames.has(name));
 
 if (isAffected) {
   console.log(
-    `appNames: ${appNames} , base=${base} head=${head}, conditions met, executing e2e CI.`,
+    `appNames: ${appNames.join(',')} , base=${base} head=${head}, conditions met, executing e2e CI.`,
   );
   process.exit(0);
-} else {
-  console.log(
-    `appNames: ${appNames} , base=${base} head=${head}, conditions not met, skipping e2e CI.`,
+}
+
+console.log(
+  `appNames: ${appNames.join(',')} , base=${base} head=${head}, conditions not met, skipping e2e CI.`,
+);
+process.exit(1);
+
+function hasGitRef(ref) {
+  if (!ref || !ref.trim()) {
+    return false;
+  }
+  const result = spawnSync(
+    'git',
+    ['rev-parse', '--verify', '--quiet', `${ref}^{commit}`],
+    {
+      cwd: ROOT,
+      stdio: 'ignore',
+    },
   );
-  process.exit(1);
+  return result.status === 0;
+}
+
+function resolveBase(requestedBase) {
+  const candidates = [
+    ...expandRefCandidates(requestedBase),
+    ...expandRefCandidates(process.env.CI_LOCAL_BASE_REF),
+    ...expandRefCandidates(process.env.CI_BASE_REF),
+    ...expandRefCandidates(process.env.GITHUB_BASE_REF),
+    'origin/main',
+    'main',
+    'HEAD~1',
+  ];
+
+  for (const candidate of candidates) {
+    if (hasGitRef(candidate)) {
+      return candidate;
+    }
+  }
+  return null;
+}
+
+function resolveHead(requestedHead) {
+  const candidates = [
+    ...expandRefCandidates(requestedHead),
+    ...expandRefCandidates(process.env.CI_LOCAL_HEAD_REF),
+    ...expandRefCandidates(process.env.CI_HEAD_REF),
+    ...expandRefCandidates(process.env.GITHUB_SHA),
+    'HEAD',
+  ];
+
+  for (const candidate of candidates) {
+    if (hasGitRef(candidate)) {
+      return candidate;
+    }
+  }
+  return null;
+}
+
+function listChangedFiles(baseRef, headRef) {
+  const result = spawnSync(
+    'git',
+    // Compare PR-introduced changes only: merge-base(baseRef, headRef)..headRef.
+    ['diff', '--name-only', '--diff-filter=ACMRD', `${baseRef}...${headRef}`],
+    {
+      cwd: ROOT,
+      stdio: 'pipe',
+      encoding: 'utf-8',
+      maxBuffer: 1024 * 1024 * 8,
+    },
+  );
+
+  if (result.status !== 0) {
+    return null;
+  }
+
+  return result.stdout
+    .split('\n')
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+}
+
+function isGlobalE2EInput(relativePath) {
+  return GLOBAL_E2E_INPUT_PATTERNS.some(
+    (pattern) =>
+      relativePath === pattern ||
+      (pattern.endsWith('/') && relativePath.startsWith(pattern)),
+  );
+}
+
+function expandRefCandidates(ref) {
+  if (!ref || !ref.trim()) {
+    return [];
+  }
+
+  const normalized = ref.trim();
+  const candidates = new Set([normalized]);
+
+  if (normalized.startsWith('refs/heads/')) {
+    const branchName = normalized.slice('refs/heads/'.length);
+    if (branchName) {
+      candidates.add(branchName);
+      candidates.add(`origin/${branchName}`);
+    }
+  } else if (normalized.startsWith('origin/')) {
+    const localBranch = normalized.slice('origin/'.length);
+    if (localBranch) {
+      candidates.add(localBranch);
+    }
+  } else {
+    candidates.add(`origin/${normalized}`);
+  }
+
+  return Array.from(candidates);
+}
+
+function parseAffectedPackages(outputText) {
+  const payload = parseJsonFromTurboOutput(outputText);
+  const packageNames = new Set();
+
+  if (Array.isArray(payload)) {
+    collectPackageNamesFromList(payload, packageNames);
+    return packageNames;
+  }
+
+  if (!payload || typeof payload !== 'object') {
+    return packageNames;
+  }
+
+  if (Array.isArray(payload.items)) {
+    collectPackageNamesFromList(payload.items, packageNames);
+  }
+
+  if ('packages' in payload) {
+    collectPackageNamesFromContainer(payload.packages, packageNames);
+  }
+
+  if (packageNames.size === 0 && typeof payload.name === 'string') {
+    addPackageName(payload.name, packageNames);
+  }
+
+  return packageNames;
+}
+
+function collectPackageNamesFromContainer(container, packageNames) {
+  if (!container) {
+    return;
+  }
+
+  if (Array.isArray(container)) {
+    collectPackageNamesFromList(container, packageNames);
+    return;
+  }
+
+  if (typeof container !== 'object') {
+    return;
+  }
+
+  if (typeof container.name === 'string') {
+    addPackageName(container.name, packageNames);
+  }
+
+  if (Array.isArray(container.items)) {
+    collectPackageNamesFromList(container.items, packageNames);
+  }
+
+  if (Array.isArray(container.packages)) {
+    collectPackageNamesFromList(container.packages, packageNames);
+  }
+
+  for (const [key, value] of Object.entries(container)) {
+    const valueLooksLikePackageEntry =
+      value &&
+      typeof value === 'object' &&
+      !Array.isArray(value) &&
+      ('path' in value || 'name' in value || 'package' in value);
+
+    if (valueLooksLikePackageEntry && isPackageNameCandidate(key)) {
+      packageNames.add(key);
+    }
+    if (value && typeof value === 'object' && typeof value.name === 'string') {
+      addPackageName(value.name, packageNames);
+    }
+  }
+}
+
+function collectPackageNamesFromList(list, packageNames) {
+  for (const entry of list) {
+    if (typeof entry === 'string') {
+      addPackageName(entry, packageNames);
+      continue;
+    }
+    if (!entry || typeof entry !== 'object') {
+      continue;
+    }
+
+    if (typeof entry.name === 'string') {
+      addPackageName(entry.name, packageNames);
+      continue;
+    }
+
+    if (typeof entry.package === 'string') {
+      addPackageName(entry.package, packageNames);
+      continue;
+    }
+
+    if (Array.isArray(entry.items)) {
+      collectPackageNamesFromList(entry.items, packageNames);
+    }
+  }
+}
+
+function addPackageName(name, packageNames) {
+  if (isPackageNameCandidate(name)) {
+    packageNames.add(name);
+  }
+}
+
+function isPackageNameCandidate(value) {
+  if (typeof value !== 'string') {
+    return false;
+  }
+  if (!value || value === '//') {
+    return false;
+  }
+  if (value.includes('#') || value.includes('\\') || value.includes(' ')) {
+    return false;
+  }
+  if (value.startsWith('@')) {
+    return /^@[^/]+\/[^/]+$/.test(value);
+  }
+  return !value.includes('/');
+}
+
+function toUnscopedName(value) {
+  if (typeof value !== 'string' || !value.startsWith('@')) {
+    return null;
+  }
+  const [, unscoped] = value.split('/');
+  return unscoped || null;
+}
+
+function parseJsonFromTurboOutput(outputText) {
+  const raw = outputText?.trim();
+  if (!raw) {
+    throw new Error('Turbo output is empty.');
+  }
+
+  const directParse = tryParseJson(raw);
+  if (directParse.ok) {
+    return directParse.value;
+  }
+
+  for (let index = 0; index < raw.length; index += 1) {
+    const char = raw[index];
+    if (char !== '{' && char !== '[') {
+      continue;
+    }
+
+    const toEndParse = tryParseJson(raw.slice(index));
+    if (toEndParse.ok) {
+      return toEndParse.value;
+    }
+
+    const balancedCandidate = extractBalancedJson(raw, index);
+    if (!balancedCandidate) {
+      continue;
+    }
+
+    const balancedParse = tryParseJson(balancedCandidate);
+    if (balancedParse.ok) {
+      return balancedParse.value;
+    }
+  }
+
+  throw new Error('Unable to locate JSON payload in Turbo output.');
+}
+
+function tryParseJson(value) {
+  try {
+    return { ok: true, value: JSON.parse(value) };
+  } catch {
+    return { ok: false, value: null };
+  }
+}
+
+function extractBalancedJson(text, startIndex) {
+  const stack = [];
+  let inString = false;
+  let escaping = false;
+
+  for (let index = startIndex; index < text.length; index += 1) {
+    const char = text[index];
+
+    if (inString) {
+      if (escaping) {
+        escaping = false;
+        continue;
+      }
+      if (char === '\\') {
+        escaping = true;
+        continue;
+      }
+      if (char === '"') {
+        inString = false;
+      }
+      continue;
+    }
+
+    if (char === '"') {
+      inString = true;
+      continue;
+    }
+
+    if (char === '{') {
+      stack.push('}');
+      continue;
+    }
+    if (char === '[') {
+      stack.push(']');
+      continue;
+    }
+    if (char === '}' || char === ']') {
+      const expected = stack.pop();
+      if (expected !== char) {
+        return null;
+      }
+      if (stack.length === 0) {
+        return text.slice(startIndex, index + 1);
+      }
+    }
+  }
+
+  return null;
 }

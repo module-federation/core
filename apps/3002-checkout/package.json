@@ -20,6 +20,15 @@
   },
   "scripts": {
     "start": "next start",
-    "build": "NEXT_PRIVATE_LOCAL_WEBPACK=true next build"
+    "build": "NEXT_PRIVATE_LOCAL_WEBPACK=true next build",
+    "build:development": "npx next build",
+    "build:production": "npx next build",
+    "serve": "npx next dev -p 3002",
+    "serve:development": "npx next dev -p 3002",
+    "serve:production": "npx next start -p 3002",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules **/*.{ts,tsx,js,jsx}",
+    "e2e": "pnpm exec cypress run --project . --e2e --config baseUrl=http://localhost:3002",
+    "test:e2e": "pnpm -w exec node tools/scripts/run-next-e2e.mjs --mode=dev",
+    "test:e2e:production": "pnpm -w exec node tools/scripts/run-next-e2e.mjs --mode=prod"
   }
 }

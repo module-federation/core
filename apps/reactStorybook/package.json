@@ -12,5 +12,21 @@
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "^6.30.2"
+  },
+  "scripts": {
+    "build": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config webpack.config.prod.js --mode production",
+    "build:development": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config webpack.config.js --mode development",
+    "build:production": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config webpack.config.prod.js --mode production",
+    "serve": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config webpack.config.js --mode development --port 4200",
+    "serve:development": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config webpack.config.js --mode development --port 4200",
+    "serve:production": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config webpack.config.prod.js --mode production --port 4200 --no-hot",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules **/*.{ts,tsx,js,jsx}",
+    "test": "pnpm exec jest --config jest.config.ts --passWithNoTests",
+    "test:ci": "pnpm exec jest --config jest.config.ts --passWithNoTests --ci --coverage",
+    "serve-static": "pnpm exec serve dist -l 4200 --cors",
+    "storybook": "pnpm exec storybook dev -p 4400 -c .storybook",
+    "storybook:ci": "pnpm exec storybook dev -p 4400 -c .storybook --quiet",
+    "build-storybook": "pnpm exec storybook build -c .storybook -o storybook/reactStorybook/dist",
+    "build-storybook:ci": "pnpm exec storybook build -c .storybook -o storybook/reactStorybook/dist --quiet"
   }
 }

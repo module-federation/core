@@ -4,7 +4,6 @@ import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-process.env.NX_TUI = 'false';
 process.env.CI = process.env.CI ?? 'true';
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
@@ -28,19 +27,18 @@ const onlyJobNames = args.only
   : [];
 const onlyJobs = args.only === null ? null : new Set(onlyJobNames);
 
+function setupE2E() {
+  return step('Setup E2E dependencies and package build', async (ctx) => {
+    await runCommand('pnpm', ['install', '--frozen-lockfile'], ctx);
+    await runCommand('npx', ['cypress', 'install'], ctx);
+    await runCommand('pnpm', ['run', 'build:packages'], ctx);
+  });
+}
+
 const jobs = [
   {
     name: 'build-and-test',
     steps: [
-      step('Optional clean node_modules/.nx', async (ctx) => {
-        if (process.env.CI_LOCAL_CLEAN === 'true') {
-          await runShell('rm -rf node_modules .nx', ctx);
-          return;
-        }
-        console.log(
-          '[ci:local] Skipping cache clean (set CI_LOCAL_CLEAN=true to enable).',
-        );
-      }),
       step('Install dependencies', (ctx) =>
         runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
       ),
@@ -48,7 +46,7 @@ const jobs = [
         runCommand('npx', ['cypress', 'install'], ctx),
       ),
       step('Check code format', (ctx) =>
-        runCommand('npx', ['nx', 'format:check'], ctx),
+        runCommand('node', ['tools/scripts/check-format-changed.mjs'], ctx),
       ),
       step('Verify Rslib Template Publint Wiring', (ctx) =>
         runCommand(
@@ -73,38 +71,11 @@ const jobs = [
           ctx,
         ),
       ),
-      step('Print number of CPU cores', (ctx) =>
-        runShell(
-          'if command -v nproc >/dev/null 2>&1; then nproc; elif command -v sysctl >/dev/null 2>&1; then sysctl -n hw.ncpu; else node -e "const os = require(\'node:os\'); console.log(os.availableParallelism ? os.availableParallelism() : os.cpus().length);" ; fi',
-          ctx,
-        ),
+      step('Verify Turbo Conventions', (ctx) =>
+        runCommand('pnpm', ['run', 'verify:turbo'], ctx),
       ),
-      step('Build packages (cold cache)', (ctx) =>
-        runCommand(
-          'npx',
-          [
-            'nx',
-            'run-many',
-            '--targets=build',
-            '--projects=tag:type:pkg',
-            '--parallel=4',
-            '--skip-nx-cache',
-          ],
-          ctx,
-        ),
-      ),
-      step('Build packages (warm cache)', (ctx) =>
-        runCommand(
-          'npx',
-          [
-            'nx',
-            'run-many',
-            '--targets=build',
-            '--projects=tag:type:pkg',
-            '--parallel=4',
-          ],
-          ctx,
-        ),
+      step('Build packages', (ctx) =>
+        runCommand('pnpm', ['run', 'build:packages'], ctx),
       ),
       step('Check package publishing compatibility (publint)', (ctx) =>
         runShell(
@@ -124,33 +95,7 @@ const jobs = [
           ctx,
         ),
       ),
-      step('Warm Nx cache', (ctx) =>
-        runCommand(
-          'npx',
-          [
-            'nx',
-            'run-many',
-            '--targets=build',
-            '--projects=tag:type:pkg',
-            '--parallel=4',
-          ],
-          ctx,
-        ),
-      ),
-      step('Run affected tests', (ctx) =>
-        runCommand(
-          'npx',
-          [
-            'nx',
-            'affected',
-            '-t',
-            'test',
-            '--parallel=3',
-            '--exclude=*,!tag:type:pkg',
-          ],
-          ctx,
-        ),
-      ),
+      step('Run affected package tests', (ctx) => runChangedPackageTests(ctx)),
     ],
   },
   {
@@ -182,53 +127,13 @@ const jobs = [
           ctx,
         ),
       ),
-      step('Build all required packages', (ctx) =>
-        runCommand(
-          'npx',
-          [
-            'nx',
-            'run-many',
-            '--targets=build',
-            '--projects=tag:type:pkg',
-            '--parallel=4',
-            '--skip-nx-cache',
-          ],
-          ctx,
-        ),
+      step('Verify Turbo Conventions', (ctx) =>
+        runCommand('pnpm', ['run', 'verify:turbo'], ctx),
       ),
-      step('Test metro packages', (ctx) =>
-        runWithRetry({
-          label: 'metro affected tests',
-          attempts: 2,
-          run: () =>
-            runCommand(
-              'npx',
-              [
-                'nx',
-                'affected',
-                '-t',
-                'test',
-                '--parallel=2',
-                '--exclude=*,!tag:npm:metro',
-              ],
-              ctx,
-            ),
-        }),
+      step('Build shared packages', (ctx) =>
+        runCommand('pnpm', ['run', 'build:packages'], ctx),
       ),
-      step('Lint metro packages', (ctx) =>
-        runCommand(
-          'npx',
-          [
-            'nx',
-            'run-many',
-            '--targets=lint',
-            '--projects=tag:npm:metro',
-            '--parallel=2',
-          ],
-          ctx,
-        ),
-      ),
-      step('Check package publishing compatibility (publint)', (ctx) =>
+      step('Check metro package publishing compatibility (publint)', (ctx) =>
         runShell(
           `
             for pkg in packages/metro-*; do
@@ -241,37 +146,51 @@ const jobs = [
           ctx,
         ),
       ),
+      step('Test metro packages', (ctx) =>
+        runCommand(
+          'pnpm',
+          [
+            'exec',
+            'turbo',
+            'run',
+            'test',
+            '--filter=@module-federation/metro*',
+          ],
+          ctx,
+        ),
+      ),
+      step('Lint metro packages', (ctx) =>
+        runCommand(
+          'pnpm',
+          [
+            'exec',
+            'turbo',
+            'run',
+            'lint',
+            '--filter=@module-federation/metro*',
+          ],
+          ctx,
+        ),
+      ),
     ],
   },
   {
     name: 'e2e-modern',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      step('Install dependencies', (ctx) =>
-        runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
-      ),
-      step('Install Cypress', (ctx) =>
-        runCommand('npx', ['cypress', 'install'], ctx),
-      ),
-      step('Build packages', (ctx) =>
-        runCommand(
-          'npx',
-          ['nx', 'run-many', '--targets=build', '--projects=tag:type:pkg'],
-          ctx,
-        ),
-      ),
+      setupE2E(),
       step('Check CI conditions', async (ctx) => {
-        ctx.state.shouldRun = await ciIsAffected('modernjs', ctx);
+        ctx.state.shouldRun = await ciIsAffected(
+          '@module-federation/modern-js,@module-federation/modern-js-v3',
+          ctx,
+        );
       }),
       step('E2E Test for ModernJS', async (ctx) => {
         if (!ctx.state.shouldRun) {
           logStepSkip(ctx, 'Not affected by current changes.');
           return;
         }
-        await runShell(
-          'npx kill-port --port 4001 && npx nx run-many --target=test:e2e --projects=modernjs --parallel=1 && npx kill-port --port 4001',
-          ctx,
-        );
+        await runCommand('pnpm', ['run', 'e2e:modern'], ctx);
       }),
     ],
   },
@@ -279,95 +198,36 @@ const jobs = [
     name: 'e2e-runtime',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      step('Install dependencies', (ctx) =>
-        runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
-      ),
-      step('Install Cypress', (ctx) =>
-        runCommand('npx', ['cypress', 'install'], ctx),
-      ),
-      step('Build packages', (ctx) =>
-        runCommand(
-          'npx',
-          ['nx', 'run-many', '--targets=build', '--projects=tag:type:pkg'],
-          ctx,
+      setupE2E(),
+      step('E2E Test for Runtime Demo', (ctx) =>
+        runIfAffected(ctx, 'runtime-host', () =>
+          runCommand('pnpm', ['run', 'e2e:runtime'], ctx),
         ),
       ),
-      step('Check CI conditions', async (ctx) => {
-        ctx.state.shouldRun = await ciIsAffected('3005-runtime-host', ctx);
-      }),
-      step('E2E Test for Runtime Demo', async (ctx) => {
-        if (!ctx.state.shouldRun) {
-          logStepSkip(ctx, 'Not affected by current changes.');
-          return;
-        }
-        await runShell(
-          'npx kill-port --port 3005,3006,3007 && pnpm run app:runtime:dev & echo "done" && sleep 20 && npx nx run-many --target=test:e2e --projects=3005-runtime-host --parallel=1 && lsof -ti tcp:3005,3006,3007 | xargs kill',
-          ctx,
-        );
-      }),
     ],
   },
   {
     name: 'e2e-manifest',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      step('Install dependencies', (ctx) =>
-        runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
-      ),
-      step('Install Cypress', (ctx) =>
-        runCommand('npx', ['cypress', 'install'], ctx),
-      ),
-      step('Build packages', (ctx) =>
-        runCommand(
-          'npx',
-          ['nx', 'run-many', '--targets=build', '--projects=tag:type:pkg'],
-          ctx,
+      setupE2E(),
+      step('E2E Test for Manifest Demo (dev)', (ctx) =>
+        runIfAffected(ctx, '3008-webpack-host', () =>
+          runCommand('pnpm', ['run', 'e2e:manifest:dev'], ctx),
         ),
       ),
-      step('Check CI conditions', async (ctx) => {
-        ctx.state.shouldRun = await ciIsAffected('manifest-webpack-host', ctx);
-      }),
-      step('E2E Test for Manifest Demo (dev)', async (ctx) => {
-        if (!ctx.state.shouldRun) {
-          logStepSkip(ctx, 'Not affected by current changes.');
-          return;
-        }
-        await runCommand(
-          'node',
-          ['tools/scripts/run-manifest-e2e.mjs', '--mode=dev'],
-          ctx,
-        );
-      }),
-      step('E2E Test for Manifest Demo (prod)', async (ctx) => {
-        if (!ctx.state.shouldRun) {
-          logStepSkip(ctx, 'Not affected by current changes.');
-          return;
-        }
-        await runCommand(
-          'node',
-          ['tools/scripts/run-manifest-e2e.mjs', '--mode=prod'],
-          ctx,
-        );
-      }),
+      step('E2E Test for Manifest Demo (prod)', (ctx) =>
+        runIfAffected(ctx, '3008-webpack-host', () =>
+          runCommand('pnpm', ['run', 'e2e:manifest:prod'], ctx),
+        ),
+      ),
     ],
   },
   {
     name: 'e2e-node',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      step('Install dependencies', (ctx) =>
-        runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
-      ),
-      step('Install Cypress', (ctx) =>
-        runCommand('npx', ['cypress', 'install'], ctx),
-      ),
-      step('Build packages', (ctx) =>
-        runCommand(
-          'npx',
-          ['nx', 'run-many', '--targets=build', '--projects=tag:type:pkg'],
-          ctx,
-        ),
-      ),
+      setupE2E(),
       step('Check CI conditions', async (ctx) => {
         ctx.state.shouldRun = await ciIsAffected(
           'node-local-remote,node-remote,node-dynamic-remote-new-version,node-dynamic-remote',
@@ -379,10 +239,7 @@ const jobs = [
           logStepSkip(ctx, 'Not affected by current changes.');
           return;
         }
-        await runShell(
-          'npx nx run-many --target=serve --projects=node-local-remote,node-remote,node-dynamic-remote-new-version,node-dynamic-remote --parallel=10 & echo "done" && sleep 25 && npx nx run-many --target=serve --projects=node-host & sleep 5 && npx wait-on tcp:3333 && npx nx run node-host-e2e:test:e2e',
-          ctx,
-        );
+        await runCommand('pnpm', ['run', 'e2e:node'], ctx);
       }),
     ],
   },
@@ -393,66 +250,24 @@ const jobs = [
       NEXT_PRIVATE_LOCAL_WEBPACK: 'true',
     },
     steps: [
-      step('Install dependencies', (ctx) =>
-        runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
-      ),
-      step('Install Cypress', (ctx) =>
-        runCommand('npx', ['cypress', 'install'], ctx),
-      ),
-      step('Build packages', (ctx) =>
-        runCommand(
-          'npx',
-          ['nx', 'run-many', '--targets=build', '--projects=tag:type:pkg'],
-          ctx,
+      setupE2E(),
+      step('E2E Test for Next.js Dev', (ctx) =>
+        runIfAffected(ctx, '@module-federation/3000-home', () =>
+          runCommand('pnpm', ['run', 'e2e:next:dev'], ctx),
         ),
       ),
-      step('Check CI conditions', async (ctx) => {
-        ctx.state.shouldRun = await ciIsAffected('3000-home', ctx);
-      }),
-      step('E2E Test for Next.js Dev', async (ctx) => {
-        if (!ctx.state.shouldRun) {
-          logStepSkip(ctx, 'Not affected by current changes.');
-          return;
-        }
-        await runCommand(
-          'node',
-          ['tools/scripts/run-next-e2e.mjs', '--mode=dev'],
-          ctx,
-        );
-      }),
     ],
   },
   {
     name: 'e2e-next-prod',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      step('Install dependencies', (ctx) =>
-        runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
-      ),
-      step('Install Cypress', (ctx) =>
-        runCommand('npx', ['cypress', 'install'], ctx),
-      ),
-      step('Build packages', (ctx) =>
-        runCommand(
-          'npx',
-          ['nx', 'run-many', '--targets=build', '--projects=tag:type:pkg'],
-          ctx,
+      setupE2E(),
+      step('E2E Test for Next.js Prod', (ctx) =>
+        runIfAffected(ctx, '@module-federation/3000-home', () =>
+          runCommand('pnpm', ['run', 'e2e:next:prod'], ctx),
         ),
       ),
-      step('Check CI conditions', async (ctx) => {
-        ctx.state.shouldRun = await ciIsAffected('3000-home', ctx);
-      }),
-      step('E2E Test for Next.js Prod', async (ctx) => {
-        if (!ctx.state.shouldRun) {
-          logStepSkip(ctx, 'Not affected by current changes.');
-          return;
-        }
-        await runCommand(
-          'node',
-          ['tools/scripts/run-next-e2e.mjs', '--mode=prod'],
-          ctx,
-        );
-      }),
     ],
   },
   {
@@ -463,15 +278,11 @@ const jobs = [
         runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
       ),
       step('Build packages', (ctx) =>
-        runCommand(
-          'npx',
-          ['nx', 'run-many', '--targets=build', '--projects=tag:type:pkg'],
-          ctx,
-        ),
+        runCommand('pnpm', ['run', 'build:packages'], ctx),
       ),
       step('Check CI conditions', async (ctx) => {
         ctx.state.shouldRun = await ciIsAffected(
-          'treeshake-server,treeshake-frontend',
+          '@module-federation/treeshake-server,@module-federation/treeshake-frontend',
           ctx,
         );
       }),
@@ -480,47 +291,34 @@ const jobs = [
           logStepSkip(ctx, 'Not affected by current changes.');
           return;
         }
-        await runCommand('npx', ['nx', 'run', 'treeshake-server:test'], ctx);
+        await runCommand('pnpm', ['run', 'e2e:treeshake:server'], ctx);
       }),
       step('E2E Treeshake Frontend', async (ctx) => {
         if (!ctx.state.shouldRun) {
           logStepSkip(ctx, 'Not affected by current changes.');
           return;
         }
-        await runCommand('npx', ['nx', 'run', 'treeshake-frontend:e2e'], ctx);
+        await runCommand('pnpm', ['run', 'e2e:treeshake:frontend'], ctx);
       }),
     ],
   },
-
   {
     name: 'e2e-modern-ssr',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      step('Install dependencies', (ctx) =>
-        runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
-      ),
-      step('Install Cypress', (ctx) =>
-        runCommand('npx', ['cypress', 'install'], ctx),
-      ),
-      step('Build packages', (ctx) =>
-        runCommand(
-          'npx',
-          ['nx', 'run-many', '--targets=build', '--projects=tag:type:pkg'],
-          ctx,
-        ),
-      ),
+      setupE2E(),
       step('Check CI conditions', async (ctx) => {
-        ctx.state.shouldRun = await ciIsAffected('modernjs', ctx);
+        ctx.state.shouldRun = await ciIsAffected(
+          '@module-federation/modern-js,@module-federation/modern-js-v3,modernjs-ssr-host,modernjs-ssr-remote,modernjs-ssr-remote-new-version,modernjs-ssr-nested-remote,modernjs-ssr-dynamic-remote,modernjs-ssr-dynamic-remote-new-version,modernjs-ssr-dynamic-nested-remote,modernjs-ssr-data-fetch-host,modernjs-ssr-data-fetch-provider,modernjs-ssr-data-fetch-provider-csr',
+          ctx,
+        );
       }),
       step('E2E Test for ModernJS SSR', async (ctx) => {
         if (!ctx.state.shouldRun) {
           logStepSkip(ctx, 'Not affected by current changes.');
           return;
         }
-        await runShell(
-          'lsof -ti tcp:3050,3051,3052,3053,3054,3055,3056 | xargs -r kill && pnpm run app:modern:dev & sleep 30 && for port in 3050 3051 3052 3053 3054 3055 3056; do while true; do response=$(curl -s http://127.0.0.1:$port/mf-manifest.json); if echo "$response" | jq empty >/dev/null 2>&1; then break; fi; sleep 1; done; done',
-          ctx,
-        );
+        await runCommand('pnpm', ['run', 'e2e:modern:ssr'], ctx);
       }),
     ],
   },
@@ -528,22 +326,10 @@ const jobs = [
     name: 'e2e-router',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      step('Install dependencies', (ctx) =>
-        runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
-      ),
-      step('Install Cypress', (ctx) =>
-        runCommand('npx', ['cypress', 'install'], ctx),
-      ),
-      step('Build packages', (ctx) =>
-        runCommand(
-          'npx',
-          ['nx', 'run-many', '--targets=build', '--projects=tag:type:pkg'],
-          ctx,
-        ),
-      ),
+      setupE2E(),
       step('Check CI conditions', async (ctx) => {
         ctx.state.shouldRun = await ciIsAffected(
-          'router-host-2000,router-host-v5-2200,router-host-vue3-2100,router-remote1-2001,router-remote2-2002,router-remote3-2003,router-remote4-2004',
+          'host,host-v5,host-vue3,remote1,remote2,remote3,remote4',
           ctx,
         );
       }),
@@ -552,11 +338,7 @@ const jobs = [
           logStepSkip(ctx, 'Not affected by current changes.');
           return;
         }
-        await runCommand(
-          'node',
-          ['tools/scripts/run-router-e2e.mjs', '--mode=dev'],
-          ctx,
-        );
+        await runCommand('pnpm', ['run', 'e2e:router'], ctx);
       }),
     ],
   },
@@ -598,11 +380,7 @@ const jobs = [
         runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
       ),
       step('Build shared packages', (ctx) =>
-        runCommand(
-          'npx',
-          ['nx', 'run-many', '--targets=build', '--projects=tag:type:pkg'],
-          ctx,
-        ),
+        runCommand('pnpm', ['run', 'build:packages'], ctx),
       ),
       step('Check CI conditions', async (ctx) => {
         ctx.state.shouldRun = await ciIsAffected(ctx.env.METRO_APP_NAME, ctx);
@@ -642,11 +420,7 @@ const jobs = [
         runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
       ),
       step('Build shared packages', (ctx) =>
-        runCommand(
-          'npx',
-          ['nx', 'run-many', '--targets=build', '--projects=tag:type:pkg'],
-          ctx,
-        ),
+        runCommand('pnpm', ['run', 'build:packages'], ctx),
       ),
       step('Check CI conditions', async (ctx) => {
         ctx.state.shouldRun = await ciIsAffected(ctx.env.METRO_APP_NAME, ctx);
@@ -689,19 +463,7 @@ const jobs = [
     name: 'e2e-shared-tree-shaking',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      step('Install dependencies', (ctx) =>
-        runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
-      ),
-      step('Install Cypress', (ctx) =>
-        runCommand('npx', ['cypress', 'install'], ctx),
-      ),
-      step('Build packages', (ctx) =>
-        runCommand(
-          'npx',
-          ['nx', 'run-many', '--targets=build', '--projects=tag:type:pkg'],
-          ctx,
-        ),
-      ),
+      setupE2E(),
       step('Check CI conditions', async (ctx) => {
         ctx.state.shouldRun = await ciIsAffected(
           'shared-tree-shaking-with-server-host',
@@ -713,8 +475,9 @@ const jobs = [
           logStepSkip(ctx, 'Not affected by current changes.');
           return;
         }
-        await runShell(
-          'npx kill-port --port 3001,3002 && npx nx run shared-tree-shaking-no-server-host:test:e2e && lsof -ti tcp:3001,3002 | xargs kill',
+        await runCommand(
+          'pnpm',
+          ['run', 'e2e:shared-tree-shaking:runtime-infer'],
           ctx,
         );
       }),
@@ -723,8 +486,9 @@ const jobs = [
           logStepSkip(ctx, 'Not affected by current changes.');
           return;
         }
-        await runShell(
-          'npx kill-port --port 3001,3002,3003 && npx nx run shared-tree-shaking-with-server-host:test:e2e && lsof -ti tcp:3001,3002,3003 | xargs kill',
+        await runCommand(
+          'pnpm',
+          ['run', 'e2e:shared-tree-shaking:server-calc'],
           ctx,
         );
       }),
@@ -744,26 +508,16 @@ const jobs = [
         runCommand('npx', ['cypress', 'install'], ctx),
       ),
       step('Build packages', (ctx) =>
-        runCommand(
-          'npx',
-          ['nx', 'run-many', '--targets=build', '--projects=tag:type:pkg'],
-          ctx,
-        ),
+        runCommand('pnpm', ['run', 'build:packages'], ctx),
       ),
       step('Install xvfb', (ctx) =>
         runShell('sudo apt-get update && sudo apt-get install xvfb', ctx),
       ),
       step('E2E Chrome Devtools Dev', (ctx) =>
-        runShell(
-          'npx kill-port 3009 3010 3011 3012 3013 4001 && pnpm run app:manifest:dev & echo "done" && npx wait-on tcp:3009 tcp:3010 tcp:3011 tcp:3012 tcp:3013 && sleep 10 && npx nx e2e:devtools chrome-devtools',
-          ctx,
-        ),
+        runCommand('pnpm', ['run', 'e2e:devtools:dev'], ctx),
       ),
       step('E2E Chrome Devtools Prod', (ctx) =>
-        runShell(
-          'npx kill-port 3009 3010 3011 3012 3013 4001 && npx kill-port 3009 3010 3011 3012 3013 4001 && pnpm run app:manifest:prod & echo "done" && npx wait-on tcp:3009 tcp:3010 tcp:3011 tcp:3012 tcp:3013 && sleep 30 && npx nx e2e:devtools chrome-devtools',
-          ctx,
-        ),
+        runCommand('pnpm', ['run', 'e2e:devtools:prod'], ctx),
       ),
       step('Kill devtools ports', (ctx) =>
         runShell('npx kill-port 3013 3009 3010 3011 3012 4001 || true', ctx),
@@ -782,18 +536,7 @@ const jobs = [
         runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
       ),
       step('Build packages (current)', (ctx) =>
-        runCommand(
-          'npx',
-          [
-            'nx',
-            'run-many',
-            '--targets=build',
-            '--projects=tag:type:pkg',
-            '--parallel=4',
-            '--skip-nx-cache',
-          ],
-          ctx,
-        ),
+        runCommand('pnpm', ['run', 'build:packages'], ctx),
       ),
       step('Measure bundle sizes (current)', (ctx) =>
         runCommand(
@@ -804,14 +547,23 @@ const jobs = [
       ),
       step('Prepare base worktree', async (ctx) => {
         const baseRef = process.env.CI_LOCAL_BASE_REF ?? 'origin/main';
+        const localBaseRef = baseRef.startsWith('origin/')
+          ? baseRef.slice('origin/'.length)
+          : baseRef;
         const basePath = join(ROOT, `.ci-local-base-${Date.now()}`);
         if (existsSync(basePath)) {
           throw new Error(`Base worktree path already exists: ${basePath}`);
         }
         ctx.state.baseRef = baseRef;
+        ctx.state.localBaseRef = localBaseRef;
         ctx.state.basePath = basePath;
         console.log(`[ci:local] Using base ref ${baseRef}`);
         await runCommand('git', ['worktree', 'add', basePath, baseRef], ctx);
+        await runCommand(
+          'git',
+          ['-C', basePath, 'branch', '-f', localBaseRef, baseRef],
+          ctx,
+        );
       }),
       step('Install dependencies (base)', (ctx) =>
         runCommand('pnpm', ['install', '--frozen-lockfile'], {
@@ -819,23 +571,7 @@ const jobs = [
           cwd: ctx.state.basePath,
         }),
       ),
-      step('Build packages (base)', (ctx) =>
-        runCommand(
-          'npx',
-          [
-            'nx',
-            'run-many',
-            '--targets=build',
-            '--projects=tag:type:pkg',
-            '--parallel=4',
-            '--skip-nx-cache',
-          ],
-          {
-            ...ctx,
-            cwd: ctx.state.basePath,
-          },
-        ),
-      ),
+      step('Build packages (base)', (ctx) => runBasePackagesBuild(ctx)),
       step('Measure bundle sizes (base)', (ctx) =>
         runCommand(
           'node',
@@ -910,6 +646,68 @@ async function main() {
   for (const job of jobs) {
     await runJob(job);
   }
+}
+
+async function runBasePackagesBuild(ctx) {
+  const baseCtx = { ...ctx, cwd: ctx.state.basePath };
+  const rootPackageJsonPath = join(ctx.state.basePath, 'package.json');
+  let basePackageJson = null;
+  try {
+    basePackageJson = JSON.parse(readFileSync(rootPackageJsonPath, 'utf-8'));
+  } catch {
+    basePackageJson = null;
+  }
+
+  const buildPackagesScript = basePackageJson?.scripts?.['build:packages'];
+  if (
+    typeof buildPackagesScript === 'string' &&
+    buildPackagesScript.trim() &&
+    !isNxAffectedScript(buildPackagesScript)
+  ) {
+    await runCommand('pnpm', ['run', 'build:packages'], baseCtx);
+    return;
+  }
+
+  if (existsSync(join(ctx.state.basePath, 'nx.json'))) {
+    await runCommand(
+      'pnpm',
+      [
+        'exec',
+        'nx',
+        'run-many',
+        '--targets=build',
+        '--projects=tag:type:pkg',
+        '--parallel=4',
+        '--skip-nx-cache',
+      ],
+      baseCtx,
+    );
+    return;
+  }
+
+  if (existsSync(join(ctx.state.basePath, 'turbo.json'))) {
+    await runCommand(
+      'pnpm',
+      [
+        'exec',
+        'turbo',
+        'run',
+        'build',
+        '--filter=./packages/**',
+        '--concurrency=20',
+      ],
+      baseCtx,
+    );
+    return;
+  }
+
+  throw new Error(
+    '[ci:local] Base worktree has no build:packages script and no turbo.json; cannot build base packages.',
+  );
+}
+
+function isNxAffectedScript(script) {
+  return /\bnx\b/.test(script) && /\baffected\b/.test(script);
 }
 
 function preflight() {
@@ -1238,6 +1036,25 @@ function getSelectableJobNames(jobList) {
   return names;
 }
 
+async function runIfAffected(ctx, affectedAppName, run) {
+  const shouldRun = await ciIsAffected(affectedAppName, ctx);
+  if (!shouldRun) {
+    logStepSkip(ctx, 'Not affected by current changes.');
+    return;
+  }
+  await run();
+}
+
+async function runChangedPackageTests(ctx) {
+  await runCommand('node', ['tools/scripts/run-affected-package-tests.mjs'], {
+    ...ctx,
+    env: {
+      ...ctx.env,
+      CI_BASE_REF: process.env.CI_LOCAL_BASE_REF ?? '',
+    },
+  });
+}
+
 function runCommand(command, args = [], options = {}) {
   const { env = {}, cwd, allowFailure = false } = options;
 
@@ -1373,30 +1190,6 @@ function resolveExpectedPnpmVersion(packageJson) {
   }
 
   return null;
-}
-
-async function runWithRetry({ label, attempts, run }) {
-  let lastError;
-  for (let attempt = 1; attempt <= attempts; attempt += 1) {
-    try {
-      await run();
-      return;
-    } catch (error) {
-      lastError = error;
-      if (attempt === attempts) {
-        throw error;
-      }
-      console.warn(
-        `[ci:local] ${label} failed on attempt ${attempt}/${attempts}: ${error.message}`,
-      );
-      await sleep(2000);
-    }
-  }
-  throw lastError;
-}
-
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function ciIsAffected(appName, ctx) {

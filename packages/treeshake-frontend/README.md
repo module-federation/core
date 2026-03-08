@@ -22,17 +22,19 @@
 本应用通过一个后端服务来获取打包产物。你需要配置该服务的地址，有以下三种方式（优先级从高到低）：
 
 1.  **在页面中配置**：
-    -   在主界面的表单区域，找到并展开 “**高级构建配置**” 面板。
-    -   在 “**Server API Base URL**” 输入框中，填入你的后端服务地址（例如：`http://localhost:3000/tree-shaking-shared`）。
-    -   该配置会自动保存到浏览器的 localStorage（`treeshake_server_url`）中。
+
+    - 在主界面的表单区域，找到并展开 “**高级构建配置**” 面板。
+    - 在 “**Server API Base URL**” 输入框中，填入你的后端服务地址（例如：`http://localhost:3000/tree-shaking-shared`）。
+    - 该配置会自动保存到浏览器的 localStorage（`treeshake_server_url`）中。
 
 2.  **通过环境变量配置**：
-    -   在项目根目录下创建一个 `.env` 文件。
-    -   在文件中添加一行：`VITE_API_BASE_URL=http://localhost:3000/tree-shaking-shared`
-    -   重新启动或构建前端应用即可生效。
+
+    - 在项目根目录下创建一个 `.env` 文件。
+    - 在文件中添加一行：`VITE_API_BASE_URL=http://localhost:3000/tree-shaking-shared`
+    - 重新启动或构建前端应用即可生效。
 
 3.  **默认地址**：
-    -   如果以上两种方式都未配置，应用将默认尝试连接 `http://localhost:3000/tree-shaking-shared`。
+    - 如果以上两种方式都未配置，应用将默认尝试连接 `http://localhost:3000/tree-shaking-shared`。
 
 ### 2. 使用 Mock Mode（无需后端）
 
@@ -44,19 +46,19 @@
 
 在 “**高级构建配置**” 面板中，你可以自定义传递给后端打包服务的构建参数，例如：
 
--   `target`、`format`、`platform`：用于 esbuild 或其他打包工具的配置。
--   `minify`：是否开启代码压缩。
--   `External 依赖`：需要从打包产物中排除的第三方库（例如 `react`, `react-dom`）。
--   `请求头 (JSON)`：允许你添加自定义的 HTTP 请求头，例如用于身份验证的 `Authorization`。
--   `额外构建配置 (JSON)`：一个灵活的 JSON 输入框，用于传递任何与后端服务约定的其他参数。
+- `target`、`format`、`platform`：用于 esbuild 或其他打包工具的配置。
+- `minify`：是否开启代码压缩。
+- `External 依赖`：需要从打包产物中排除的第三方库（例如 `react`, `react-dom`）。
+- `请求头 (JSON)`：允许你添加自定义的 HTTP 请求头，例如用于身份验证的 `Authorization`。
+- `额外构建配置 (JSON)`：一个灵活的 JSON 输入框，用于传递任何与后端服务约定的其他参数。
 
 ## 技术栈
 
--   **框架**: Rsbuild + React
--   **UI**: Tailwind CSS + shadcn/ui
--   **图表**: Recharts
--   **状态管理**: React Hooks
--   **图标**: Lucide React
+- **框架**: Rsbuild + React
+- **UI**: Tailwind CSS + shadcn/ui
+- **图表**: Recharts
+- **状态管理**: React Hooks
+- **图标**: Lucide React
 
 ## 开发与构建
 
@@ -82,16 +84,16 @@ pnpm run test:e2e
 该包提供一个可注册到 `@module-federation/treeshake-server` 的前端适配器：
 
 ```ts
-import { createTreeshakeFrontendAdapter } from "@module-federation/treeshake-frontend/adapter";
-import { createApp } from "@module-federation/treeshake-server";
+import { createTreeshakeFrontendAdapter } from '@module-federation/treeshake-frontend/adapter';
+import { createApp } from '@module-federation/treeshake-server';
 
 const app = createApp(
   { objectStore },
   {
     frontendAdapters: [
       createTreeshakeFrontendAdapter({
-        basePath: "/tree-shaking",
-        distDir: "/path/to/treeshake-frontend/dist",
+        basePath: '/tree-shaking',
+        distDir: '/path/to/treeshake-frontend/dist',
       }),
     ],
   },

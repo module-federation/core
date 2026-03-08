@@ -1,5 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
+const { execSync } = require('node:child_process');
 
 const repoRoot = path.resolve(__dirname, '../../..');
 const serverRoot = path.resolve(__dirname, '..');
@@ -11,6 +12,16 @@ const frontendDist = path.join(
 );
 const frontendIndex = path.join(frontendDist, 'index.html');
 const targetDir = path.join(serverRoot, 'dist', 'frontend');
+
+if (!fs.existsSync(frontendIndex)) {
+  execSync(
+    'pnpm exec turbo run build --filter=@module-federation/treeshake-frontend',
+    {
+      cwd: repoRoot,
+      stdio: 'inherit',
+    },
+  );
+}
 
 if (!fs.existsSync(frontendIndex)) {
   throw new Error(

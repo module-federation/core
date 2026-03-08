@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "rspress dev",
     "build": "rspress build",
-    "preview": "rspress preview"
+    "preview": "rspress preview",
+    "serve": "npm run dev"
   },
   "dependencies": {
     "@module-federation/error-codes": "workspace:*",

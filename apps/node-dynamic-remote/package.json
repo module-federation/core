@@ -5,5 +5,16 @@
     "@module-federation/node": "workspace:*",
     "lodash": "4.17.23"
   },
-  "version": null
+  "version": "1.0.0",
+  "scripts": {
+    "build": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config webpack.config.js --output-path dist --mode production",
+    "build:development": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config webpack.config.js --output-path dist --mode development",
+    "build:production": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config webpack.config.js --output-path dist --mode production",
+    "serve": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config webpack.config.js --output-path dist --mode development --port 3026",
+    "serve:development": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config webpack.config.js --output-path dist --mode development --port 3026",
+    "serve:production": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config webpack.config.js --output-path dist --mode production --port 3026 --no-hot",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules **/*.{ts,tsx,js,jsx}",
+    "test": "pnpm exec jest --config jest.config.ts --passWithNoTests",
+    "test:ci": "pnpm exec jest --config jest.config.ts --passWithNoTests --ci --coverage"
+  }
 }
