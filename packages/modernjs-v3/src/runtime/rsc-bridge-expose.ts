@@ -57,19 +57,9 @@ const getWebpackRequire = (): WebpackRequireRuntime => {
   ) {
     return __webpack_require__;
   }
-
-  const runtime = (
-    globalThis as typeof globalThis & {
-      __webpack_require__?: WebpackRequireRuntime;
-    }
-  ).__webpack_require__;
-  if (!isWebpackRequireRuntime(runtime)) {
-    throw new Error(
-      '[modern-js-v3:rsc-bridge] __webpack_require__ is unavailable while evaluating the internal bridge expose',
-    );
-  }
-
-  return runtime as WebpackRequireRuntime;
+  throw new Error(
+    '[modern-js-v3:rsc-bridge] __webpack_require__ is unavailable while evaluating the internal bridge expose',
+  );
 };
 
 const cacheActionReferencesFromExports = (

@@ -44,6 +44,7 @@ const t = {
             ],
           },
           name: { type: 'string' },
+          layer: { type: 'string', minLength: 1 },
         },
         required: ['import'],
       },
@@ -604,7 +605,7 @@ function i(
       {
         const r = l;
         for (const t in e)
-          if ('import' !== t && 'name' !== t)
+          if ('import' !== t && 'name' !== t && 'layer' !== t)
             return (i.errors = [{ params: { additionalProperty: t } }]), !1;
         if (r === l) {
           if (void 0 !== e.import) {
@@ -646,13 +647,25 @@ function i(
             (l = u), null !== a && (u ? (a.length = u) : (a = null));
             var f = n === l;
           } else f = !0;
-          if (f)
+          if (f) {
             if (void 0 !== e.name) {
               const t = l;
               if ('string' != typeof e.name)
                 return (i.errors = [{ params: { type: 'string' } }]), !1;
               f = t === l;
             } else f = !0;
+            if (f)
+              if (void 0 !== e.layer) {
+                let t = e.layer;
+                const r = l;
+                if (l === r) {
+                  if ('string' != typeof t)
+                    return (i.errors = [{ params: { type: 'string' } }]), !1;
+                  if (t.length < 1) return (i.errors = [{ params: {} }]), !1;
+                }
+                f = r === l;
+              } else f = !0;
+          }
         }
       }
     }

@@ -16,11 +16,7 @@ type WebpackRequireRuntime = {
 };
 
 const setWebpackRequireRuntime = (runtime: WebpackRequireRuntime) => {
-  (
-    globalThis as typeof globalThis & {
-      __webpack_require__?: WebpackRequireRuntime;
-    }
-  ).__webpack_require__ = runtime;
+  vi.stubGlobal('__webpack_require__', runtime);
 };
 
 const loadBridgeExposeModule = async () => {
@@ -29,11 +25,7 @@ const loadBridgeExposeModule = async () => {
 };
 
 afterEach(() => {
-  delete (
-    globalThis as typeof globalThis & {
-      __webpack_require__?: WebpackRequireRuntime;
-    }
-  ).__webpack_require__;
+  vi.unstubAllGlobals();
 });
 
 describe('rsc-bridge-expose', () => {

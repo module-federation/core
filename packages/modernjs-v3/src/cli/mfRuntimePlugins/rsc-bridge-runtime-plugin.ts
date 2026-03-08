@@ -4,7 +4,6 @@ const RSC_BRIDGE_EXPOSE = '__rspack_rsc_bridge__';
 const ACTION_PREFIX = 'remote:';
 const MODULE_PREFIX = 'remote-module:';
 const ACTION_REMAP_GLOBAL_KEY = '__MODERN_RSC_MF_ACTION_ID_MAP__';
-const ACTION_REMAP_WAITERS_KEY = '__MODERN_RSC_MF_ACTION_ID_MAP_WAITERS__';
 const PROXY_MODULE_PREFIX = '__modernjs_mf_rsc_action_proxy__:';
 
 type ManifestLike = {
@@ -19,9 +18,10 @@ type BridgeModule = {
 };
 
 type ActionMapRecord = Record<string, { alias: string; rawActionId: string }>;
-type ActionRemapWaiter = (prefixedActionId: string) => void;
-type ActionRemapWaiterMap = Map<string, ActionRemapWaiter[]>;
 type ActionRemapMap = Record<string, string | false>;
+type FederationState = {
+  [ACTION_REMAP_GLOBAL_KEY]?: ActionRemapMap;
+};
 type WebpackRequireRuntime = {
   m?: Record<string, (module: { exports: any }) => void>;
   c?: Record<string, { exports?: unknown }>;
@@ -34,6 +34,7 @@ type WebpackRequireRuntime = {
 };
 
 declare const __webpack_require__: WebpackRequireRuntime;
+declare const __FEDERATION__: FederationState | undefined;
 
 const isObject = (value: unknown): value is Record<string, any> =>
   typeof value === 'object' && value !== null;
@@ -78,40 +79,34 @@ const assertNoConflict = (
 const getNamespacedModuleId = (alias: string, rawId: string | number) =>
   `${MODULE_PREFIX}${alias}:${String(rawId)}`;
 
-const getActionRemapMap = () => {
-  const globalState = globalThis as typeof globalThis & {
-    [ACTION_REMAP_GLOBAL_KEY]?: ActionRemapMap;
-    [ACTION_REMAP_WAITERS_KEY]?: ActionRemapWaiterMap;
-  };
-  if (!isObject(globalState[ACTION_REMAP_GLOBAL_KEY])) {
-    globalState[ACTION_REMAP_GLOBAL_KEY] = {};
+const getNamespacedClientManifestKey = (alias: string, key: string | number) =>
+  `${MODULE_PREFIX}${alias}:${String(key)}`;
+
+const actionRemapMapFallback: ActionRemapMap = {};
+
+const getFederationState = (): FederationState | undefined => {
+  if (typeof __FEDERATION__ !== 'undefined' && isObject(__FEDERATION__)) {
+    return __FEDERATION__;
   }
-  return globalState[ACTION_REMAP_GLOBAL_KEY] as ActionRemapMap;
+  return undefined;
 };
 
-const getActionRemapWaiters = () => {
-  const globalState = globalThis as typeof globalThis & {
-    [ACTION_REMAP_WAITERS_KEY]?: ActionRemapWaiterMap;
-  };
-  const existingWaiters = globalState[ACTION_REMAP_WAITERS_KEY];
-  if (!(existingWaiters instanceof Map)) {
-    globalState[ACTION_REMAP_WAITERS_KEY] = new Map();
-    return globalState[ACTION_REMAP_WAITERS_KEY] as ActionRemapWaiterMap;
+const getActionRemapMap = () => {
+  const federationState = getFederationState();
+  if (!federationState) {
+    return actionRemapMapFallback;
   }
-  return existingWaiters;
+  if (!isObject(federationState[ACTION_REMAP_GLOBAL_KEY])) {
+    federationState[ACTION_REMAP_GLOBAL_KEY] = {};
+  }
+  return federationState[ACTION_REMAP_GLOBAL_KEY] as ActionRemapMap;
 };
 
 const registerActionRemap = (rawActionId: string, prefixedActionId: string) => {
   const remapMap = getActionRemapMap();
-  const remapWaiters = getActionRemapWaiters();
   const existingValue = remapMap[rawActionId];
   if (typeof existingValue === 'undefined') {
     remapMap[rawActionId] = prefixedActionId;
-    const waiters = remapWaiters.get(rawActionId);
-    if (waiters?.length) {
-      waiters.forEach((waiter) => waiter(prefixedActionId));
-      remapWaiters.delete(rawActionId);
-    }
     return;
   }
   if (existingValue === prefixedActionId) {
@@ -119,24 +114,13 @@ const registerActionRemap = (rawActionId: string, prefixedActionId: string) => {
   }
   // Ambiguous mapping across remotes; skip unsafe remap.
   remapMap[rawActionId] = false;
-  const waiters = remapWaiters.get(rawActionId);
-  if (waiters?.length) {
-    waiters.forEach((waiter) => waiter(rawActionId));
-    remapWaiters.delete(rawActionId);
-  }
 };
 
 const getWebpackRequireIfAvailable = (): WebpackRequireRuntime | undefined => {
   if (typeof __webpack_require__ !== 'undefined') {
     return __webpack_require__;
   }
-
-  const runtime = (
-    globalThis as typeof globalThis & {
-      __webpack_require__?: WebpackRequireRuntime;
-    }
-  ).__webpack_require__;
-  return isObject(runtime) ? (runtime as WebpackRequireRuntime) : undefined;
+  return undefined;
 };
 
 const getWebpackRequire = (): WebpackRequireRuntime => {
@@ -361,6 +345,10 @@ const rscBridgeRuntimePlugin = (): ModuleFederationRuntimePlugin => {
       for (const [key, value] of Object.entries(
         remoteManifest.clientManifest,
       )) {
+        const scopedClientManifestKey = getNamespacedClientManifestKey(
+          alias,
+          key,
+        );
         const nextValue = isObject(value) ? { ...value } : value;
         if (isObject(nextValue) && nextValue.id != null) {
           const namespacedClientId = getNamespacedModuleId(alias, nextValue.id);
@@ -369,12 +357,14 @@ const rscBridgeRuntimePlugin = (): ModuleFederationRuntimePlugin => {
         }
         assertNoConflict(
           hostManifest.clientManifest as Record<string, any>,
-          key,
+          scopedClientManifestKey,
           nextValue,
           alias,
           'clientManifest',
         );
-        (hostManifest.clientManifest as Record<string, any>)[key] = nextValue;
+        (hostManifest.clientManifest as Record<string, any>)[
+          scopedClientManifestKey
+        ] = nextValue;
       }
     }
 
