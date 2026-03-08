@@ -1,7 +1,8 @@
 {
   "name": "react-ts-host",
   "version": "1.0.0",
-  "private": true, "description": "Federation example for react-ts-host", "description": "Federation example for react-ts-host",
+  "private": true,
+  "description": "Federation example for react-ts-host",
   "dependencies": {
     "react": "18.3.1",
     "react-dom": "18.3.1",

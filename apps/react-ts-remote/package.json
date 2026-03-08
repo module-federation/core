@@ -1,6 +1,7 @@
 {
   "name": "react-ts-remote",
-  "private": true, "description": "Federation example for react-ts-remote", "description": "Federation example for react-ts-remote",
+  "private": true,
+  "description": "Federation example for react-ts-remote",
   "version": "1.0.0",
   "dependencies": {
     "react": "18.3.1",
