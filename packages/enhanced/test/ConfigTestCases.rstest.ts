@@ -1090,6 +1090,24 @@ export const describeCases = (config: any) => {
                             }
                             if (esmMode === 'unlinked') return esm;
                             return (async () => {
+                              if (esm.status === 'evaluated') {
+                                const ns = (esm as any).namespace;
+                                return ns.default &&
+                                  ns.default instanceof Promise
+                                  ? ns.default
+                                  : ns;
+                              }
+                              if (
+                                esm.status !== 'unlinked' &&
+                                esm.status !== 'linking'
+                              ) {
+                                await esm.evaluate();
+                                const ns = (esm as any).namespace;
+                                return ns.default &&
+                                  ns.default instanceof Promise
+                                  ? ns.default
+                                  : ns;
+                              }
                               await esm.link(
                                 async (
                                   specifier: string,
@@ -1116,8 +1134,9 @@ export const describeCases = (config: any) => {
                                   );
                                 },
                               );
-                              if ((esm as any).instantiate)
-                                (esm as any).instantiate();
+                              // Do not call instantiate(): Node's link() already performs
+                              // instantiation. Calling instantiate() on a linked module throws
+                              // "Module status must be unlinked" in Node 20+.
                               await esm.evaluate();
                               if (esmMode === 'evaluated') return esm as any;
                               const ns = (esm as any).namespace;
