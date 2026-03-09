@@ -1,0 +1,9 @@
+```ts title="rslib.config.ts"
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+import { defineConfig } from '@rslib/core';
+import mfConfig from './module-federation.config.ts';
+
+export default defineConfig({
+  plugins: [pluginModuleFederation(mfConfig, { target: 'node' })],
+});
+```

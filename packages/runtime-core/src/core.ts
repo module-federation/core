@@ -1,6 +1,7 @@
 import { isBrowserEnv } from '@module-federation/sdk';
 import type {
   CreateScriptHookReturn,
+  GlobalModuleInfo,
   ModuleInfo,
 } from '@module-federation/sdk';
 import {
@@ -17,7 +18,12 @@ import {
   RemoteEntryInitOptions,
   CallFrom,
 } from './type';
-import { getBuilderId, registerPlugins, getRemoteEntry } from './utils';
+import { getBuilderId, registerPlugins, getRemoteEntry, error } from './utils';
+import {
+  getShortErrorMsg,
+  RUNTIME_010,
+  runtimeDescMap,
+} from '@module-federation/error-codes';
 import { Module } from './module';
 import {
   AsyncHook,
@@ -51,6 +57,9 @@ export class ModuleFederation {
       userOptions: UserOptions;
       options: Options;
       origin: ModuleFederation;
+      /**
+       * @deprecated shareInfo will be removed soon, please use userOptions directly!
+       */
       shareInfo: ShareInfos;
     }>('beforeInit'),
     init: new SyncHook<
@@ -78,7 +87,7 @@ export class ModuleFederation {
       remoteInfo: RemoteInfo;
       remoteEntryExports: RemoteEntryExports;
       origin: ModuleFederation;
-      id: string;
+      id?: string;
       remoteSnapshot?: ModuleInfo;
     }>('initContainer'),
   });
@@ -167,6 +176,7 @@ export class ModuleFederation {
       void | Record<string, any>
     >(),
   });
+  moduleInfo?: GlobalModuleInfo[string];
 
   constructor(userOptions: UserOptions) {
     const plugins = USE_SNAPSHOT
@@ -197,6 +207,9 @@ export class ModuleFederation {
   }
 
   initOptions(userOptions: UserOptions): Options {
+    if (userOptions.name && userOptions.name !== this.options.name) {
+      error(getShortErrorMsg(RUNTIME_010, runtimeDescMap));
+    }
     this.registerPlugins(userOptions.plugins);
     const options = this.formatOptions(this.options, userOptions);
 
@@ -278,7 +291,10 @@ export class ModuleFederation {
   }
 
   formatOptions(globalOptions: Options, userOptions: UserOptions): Options {
-    const { shared } = formatShareConfigs(globalOptions, userOptions);
+    const { allShareInfos: shared } = formatShareConfigs(
+      globalOptions,
+      userOptions,
+    );
     const { userOptions: userOptionsRes, options: globalOptionsRes } =
       this.hooks.lifecycle.beforeInit.emit({
         origin: this,
@@ -292,7 +308,7 @@ export class ModuleFederation {
       userOptionsRes,
     );
 
-    const { shared: handledShared } = this.sharedHandler.registerShared(
+    const { allShareInfos } = this.sharedHandler.registerShared(
       globalOptionsRes,
       userOptionsRes,
     );
@@ -312,7 +328,7 @@ export class ModuleFederation {
       ...userOptions,
       plugins,
       remotes,
-      shared: handledShared,
+      shared: allShareInfos,
     };
 
     this.hooks.lifecycle.init.emit({

@@ -11,12 +11,12 @@
   },
   {
     "type": "file",
-    "name": "load-app", 
-    "label": "Load Remote Application"
+    "name": "load-app",
+    "label": "Load Application"
   },
   {
     "type": "file",
     "name": "load-component",
-    "label": "Load Remote Component"
+    "label": "Load Component"
   }
 ]

@@ -1,5 +1,26 @@
 # @module-federation/error-codes
 
+## 2.1.0
+
+### Patch Changes
+
+- 918294f: Migrate `@module-federation/error-codes` and `@module-federation/runtime` package builds from Nx Rollup executor to `tsdown`, and modernize their emitted `dist` filenames and export map targets.
+- 24bf84d: feat(runtime-core): add RUNTIME-010 error code and handling for name option inconsistency
+
+## 2.0.1
+
+## 2.0.0
+
+## 0.24.1
+
+## 0.24.0
+
+## 0.23.0
+
+## 0.22.1
+
+## 0.22.0
+
 ## 0.21.6
 
 ## 0.21.5

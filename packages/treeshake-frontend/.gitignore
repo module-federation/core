@@ -1,0 +1,7 @@
+node_modules/
+dist/
+test-results/
+playwright-report/
+.cache/ms-playwright/
+e2e/__screenshots__/
+log/

@@ -1,5 +1,5 @@
 /*
- * @jest-environment node
+ * @rstest-environment node
  */
 
 import type { WebpackOptionsNormalized } from 'webpack';
@@ -7,45 +7,58 @@ import type { ResolverWithOptions } from 'webpack/lib/ResolverFactory';
 import type { InputFileSystem } from 'webpack/lib/util/fs';
 import { createMockCompilation, createWebpackMock } from './utils';
 
+// Use rs.hoisted() to create mock functions that are hoisted along with rs.mock()
+const mocks = rs.hoisted(() => {
+  const mockGetCompilationHooks = rs.fn(() => ({
+    addContainerEntryDependency: { tap: rs.fn(), call: rs.fn() },
+    addFederationRuntimeDependency: { tap: rs.fn(), call: rs.fn() },
+    addRemoteDependency: { tap: rs.fn(), call: rs.fn() },
+  }));
+
+  return {
+    mockNormalizeWebpackPath: rs.fn((path: string) => path),
+    mockHookTap: rs.fn(),
+    mockHookCall: rs.fn(),
+    mockAddContainerEntryDependencyHook: { tap: rs.fn(), call: rs.fn() },
+    mockAddFederationRuntimeDependencyHook: { tap: rs.fn(), call: rs.fn() },
+    mockAddRemoteDependencyHook: { tap: rs.fn(), call: rs.fn() },
+    mockGetCompilationHooks,
+    mockFederationModulesPlugin: {
+      getCompilationHooks: mockGetCompilationHooks,
+    },
+  };
+});
+
 // Mock webpack
-jest.mock(
-  'webpack',
-  () => {
-    return createWebpackMock();
-  },
-  { virtual: true },
-);
+rs.mock('webpack', () => createWebpackMock());
 
 // Get the webpack mock
 const webpack = require('webpack');
 
-// Add mock to make Module.serialize work
-webpack.Module.prototype.serialize = jest.fn();
+// Add mock to make Module.serialize work - must properly handle blocks iteration
+webpack.Module.prototype.serialize = rs.fn(function (this: any, context: any) {
+  // The real Module.serialize iterates over blocks, so ensure blocks is iterable
+  if (!this.blocks) {
+    this.blocks = [];
+  }
+});
+
+// Add mock for Module.deserialize
+webpack.Module.prototype.deserialize = rs.fn();
 
 // Mock dependencies
-jest.mock('@module-federation/sdk/normalize-webpack-path', () => ({
-  normalizeWebpackPath: jest.fn((path) => path),
+rs.mock('@module-federation/sdk/normalize-webpack-path', () => ({
+  normalizeWebpackPath: mocks.mockNormalizeWebpackPath,
 }));
 
 // Import after mocks
 import RemoteModule from '../../../src/lib/container/RemoteModule';
 
 // Mock the entire FederationModulesPlugin before any imports use it
-jest.mock('../../../src/lib/container/runtime/FederationModulesPlugin', () => {
-  const mockHook = () => ({
-    tap: jest.fn(),
-    call: jest.fn(),
-  });
-
-  const mockFederationModulesPlugin = {
-    getCompilationHooks: jest.fn(() => ({
-      addContainerEntryDependency: mockHook(),
-      addFederationRuntimeDependency: mockHook(),
-      addRemoteDependency: mockHook(),
-    })),
+rs.mock('../../../src/lib/container/runtime/FederationModulesPlugin', () => {
+  return {
+    default: mocks.mockFederationModulesPlugin,
   };
-
-  return mockFederationModulesPlugin;
 });
 
 describe('RemoteModule', () => {
@@ -55,16 +68,21 @@ describe('RemoteModule', () => {
   let mockSerializeContext: any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.resetModules();
+    rs.clearAllMocks();
+    rs.resetModules();
 
     const { mockCompilation: compilation } = createMockCompilation();
     mockCompilation = compilation;
 
     mockSerializeContext = {
-      write: jest.fn(),
-      read: jest.fn(),
+      write: rs.fn(),
+      read: rs.fn(),
     };
+
+    // Ensure the mock compilation has processAssets hook for FederationModulesPlugin duck-type check
+    if (!mockCompilation.hooks.processAssets) {
+      mockCompilation.hooks.processAssets = { tap: rs.fn() };
+    }
   });
 
   describe('constructor', () => {
@@ -167,7 +185,7 @@ describe('RemoteModule', () => {
         'default',
       );
 
-      const callback = jest.fn();
+      const callback = rs.fn();
       // Create a more complete mock for WebpackOptionsNormalized
       const mockOptions: Partial<WebpackOptionsNormalized> = {
         cache: true,
@@ -219,7 +237,7 @@ describe('RemoteModule', () => {
 
       const serializedData: any[] = [];
       const serializeContext: any = {
-        write: jest.fn((value: any): number => {
+        write: rs.fn((value: any): number => {
           serializedData.push(value);
           return serializedData.length - 1;
         }),
@@ -244,8 +262,8 @@ describe('RemoteModule', () => {
 
       let index = 0;
       const deserializeContext: any = {
-        read: jest.fn(() => deserializedData[index++]),
-        setCircularReference: jest.fn(),
+        read: rs.fn(() => deserializedData[index++]),
+        setCircularReference: rs.fn(),
       };
 
       const staticDeserialize = RemoteModule.deserialize as unknown as (
@@ -254,9 +272,10 @@ describe('RemoteModule', () => {
 
       const deserializedModule = staticDeserialize(deserializeContext);
 
-      jest
-        .spyOn(webpack.Module.prototype, 'deserialize')
-        .mockImplementation(() => undefined);
+      rs.spyOn(
+        webpack.Module.prototype as any,
+        'deserialize',
+      ).mockImplementation(() => undefined);
 
       expect(deserializedModule.request).toBe(request);
       expect(deserializedModule.externalRequests).toEqual(externalRequests);
@@ -276,18 +295,18 @@ describe('RemoteModule', () => {
 
       const codeGenContext = {
         moduleGraph: {
-          getExportsInfo: jest.fn().mockReturnValue({
+          getExportsInfo: rs.fn().mockReturnValue({
             isModuleUsed: () => true,
           }),
-          getModule: jest.fn().mockReturnValue({}),
+          getModule: rs.fn().mockReturnValue({}),
         },
         runtimeTemplate: {
-          returningFunction: jest.fn(
+          returningFunction: rs.fn(
             (args, body) => `function(${args}) { ${body} }`,
           ),
         },
         chunkGraph: {
-          getModuleId: jest.fn().mockReturnValue('123'),
+          getModuleId: rs.fn().mockReturnValue('123'),
         },
       };
 

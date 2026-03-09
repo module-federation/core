@@ -3,6 +3,7 @@ import 'mf:async-require';
 import { loadSharedToRegistry } from 'mf:remote-module-registry';
 import { init as runtimeInit } from '@module-federation/runtime';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 __PLUGINS__;
 
 const usedRemotes = __REMOTES__;

@@ -1,5 +1,5 @@
 /*
- * @jest-environment node
+ * @rstest-environment node
  */
 
 import {
@@ -344,9 +344,14 @@ describe('ConsumeSharedPlugin', () => {
           ['react', { shareScope: 'default' }],
         ]);
 
-        const { createLookupKeyForSharing } = jest.requireActual(
+        const { createLookupKeyForSharing } = rs.requireActual(
           '../../../../src/lib/sharing/utils',
-        );
+        ) as {
+          createLookupKeyForSharing: (
+            request: string,
+            layer?: string | null,
+          ) => string;
+        };
 
         // Test fallback pattern for layered context
         const layeredLookup = createLookupKeyForSharing('react', 'client');
@@ -371,7 +376,12 @@ describe('ConsumeSharedPlugin', () => {
     describe('createLookupKeyForSharing fallback behavior', () => {
       it('should verify fallback logic uses correct lookup keys', () => {
         // Import the real function (not mocked) directly to test the logic
-        const utils = jest.requireActual('../../../../src/lib/sharing/utils');
+        const utils = rs.requireActual('../../../../src/lib/sharing/utils') as {
+          createLookupKeyForSharing: (
+            request: string,
+            layer?: string | null,
+          ) => string;
+        };
         const { createLookupKeyForSharing } = utils;
 
         // Test the utility function directly

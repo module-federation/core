@@ -1,8 +1,7 @@
-import path from 'path';
 import fs from 'fs';
+import path from 'path';
 import { getIPV4, isWebTarget, skipByTarget } from './utils';
 import { moduleFederationPlugin, encodeName } from '@module-federation/sdk';
-import { bundle } from '@modern-js/node-bundle-require';
 import { PluginOptions } from '../types';
 import { LOCALHOST, PLUGIN_IDENTIFIER } from '../constant';
 import {
@@ -23,6 +22,14 @@ import type {
 } from '@modern-js/app-tools';
 import type { BundlerChainConfig } from '../interfaces/bundler';
 
+declare global {
+  namespace NodeJS {
+    interface ProcessEnv {
+      IS_ESM_BUILD?: string;
+    }
+  }
+}
+
 const defaultPath = path.resolve(process.cwd(), 'module-federation.config.ts');
 
 export type ConfigType<T> = T extends 'webpack'
@@ -34,6 +41,59 @@ export type ConfigType<T> = T extends 'webpack'
 type RuntimePluginEntry = NonNullable<
   moduleFederationPlugin.ModuleFederationPluginOptions['runtimePlugins']
 >[number];
+
+const resolvePackageFile = (
+  packageName: string,
+  esmRelativePath: string,
+  cjsRelativePath: string,
+): string => {
+  const packageEntry = require.resolve(packageName);
+  let packageRoot = path.dirname(packageEntry);
+  while (!fs.existsSync(path.join(packageRoot, 'package.json'))) {
+    const parentDir = path.dirname(packageRoot);
+    if (parentDir === packageRoot) {
+      throw new Error(
+        `Unable to resolve package root for ${packageName} from ${packageEntry}`,
+      );
+    }
+    packageRoot = parentDir;
+  }
+
+  return require.resolve(
+    path.join(
+      packageRoot,
+      process.env.IS_ESM_BUILD === 'true' ? esmRelativePath : cjsRelativePath,
+    ),
+  );
+};
+
+const resolveSharedStrategyPlugin = (): string =>
+  resolvePackageFile(
+    '@module-federation/modern-js',
+    'dist/esm/cli/mfRuntimePlugins/shared-strategy.mjs',
+    'dist/cjs/cli/mfRuntimePlugins/shared-strategy.js',
+  );
+
+const resolveInjectNodeFetchPlugin = (): string =>
+  resolvePackageFile(
+    '@module-federation/modern-js',
+    'dist/esm/cli/mfRuntimePlugins/inject-node-fetch.mjs',
+    'dist/cjs/cli/mfRuntimePlugins/inject-node-fetch.js',
+  );
+
+const resolveNodeRuntimePlugin = (): string =>
+  resolvePackageFile(
+    '@module-federation/node',
+    'dist/src/runtimePlugin.mjs',
+    'dist/src/runtimePlugin.js',
+  );
+
+const resolveNodeRecordRemoteHashPlugin = (): string =>
+  resolvePackageFile(
+    '@module-federation/node',
+    'dist/src/recordDynamicRemoteEntryHashPlugin.mjs',
+    'dist/src/recordDynamicRemoteEntryHashPlugin.js',
+  );
 
 export function setEnv(enableSSR: boolean) {
   if (enableSSR) {
@@ -49,12 +109,22 @@ export const getMFConfig = async (
     return config;
   }
   const mfConfigPath = configPath ? configPath : defaultPath;
+  const { createJiti } = require('jiti');
+  const jit = createJiti(__filename, {
+    interopDefault: true,
+    esmResolve: true,
+  });
+  const configModule = await jit(mfConfigPath);
 
-  const preBundlePath = await bundle(mfConfigPath);
-  const mfConfig = (await import(preBundlePath))
-    .default as unknown as moduleFederationPlugin.ModuleFederationPluginOptions;
+  const resolvedConfig = (
+    configModule &&
+    typeof configModule === 'object' &&
+    'default' in configModule
+      ? (configModule as { default: unknown }).default
+      : configModule
+  ) as moduleFederationPlugin.ModuleFederationPluginOptions;
 
-  return mfConfig;
+  return resolvedConfig;
 };
 
 const injectRuntimePlugins = (
@@ -74,50 +144,6 @@ const injectRuntimePlugins = (
 
   if (!hasPlugin) {
     runtimePlugins.push(runtimePlugin);
-  }
-};
-
-const replaceRemoteUrl = (
-  mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
-  remoteIpStrategy?: 'ipv4' | 'inherit',
-) => {
-  if (remoteIpStrategy && remoteIpStrategy === 'inherit') {
-    return;
-  }
-  if (!mfConfig.remotes) {
-    return;
-  }
-  const ipv4 = getIPV4();
-  const handleRemoteObject = (
-    remoteObject: moduleFederationPlugin.RemotesObject,
-  ) => {
-    Object.keys(remoteObject).forEach((remoteKey) => {
-      const remote = remoteObject[remoteKey];
-      // no support array items yet
-      if (Array.isArray(remote)) {
-        return;
-      }
-      if (typeof remote === 'string' && remote.includes(LOCALHOST)) {
-        remoteObject[remoteKey] = remote.replace(LOCALHOST, ipv4);
-      }
-      if (
-        typeof remote === 'object' &&
-        !Array.isArray(remote.external) &&
-        remote.external.includes(LOCALHOST)
-      ) {
-        remote.external = remote.external.replace(LOCALHOST, ipv4);
-      }
-    });
-  };
-  if (Array.isArray(mfConfig.remotes)) {
-    mfConfig.remotes.forEach((remoteObject) => {
-      if (typeof remoteObject === 'string') {
-        return;
-      }
-      handleRemoteObject(remoteObject);
-    });
-  } else if (typeof mfConfig.remotes !== 'string') {
-    handleRemoteObject(mfConfig.remotes);
   }
 };
 
@@ -161,10 +187,7 @@ const patchDTSConfig = (
 export const patchMFConfig = (
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
   isServer: boolean,
-  remoteIpStrategy?: 'ipv4' | 'inherit',
-  enableSSR?: boolean,
 ) => {
-  replaceRemoteUrl(mfConfig, remoteIpStrategy);
   addDataFetchExposes(mfConfig.exposes, isServer);
 
   if (mfConfig.remoteType === undefined) {
@@ -181,36 +204,15 @@ export const patchMFConfig = (
 
   patchDTSConfig(mfConfig, isServer);
 
-  injectRuntimePlugins(
-    require.resolve('@module-federation/modern-js/shared-strategy'),
-    runtimePlugins,
-  );
-
-  if (enableSSR && isDev()) {
-    injectRuntimePlugins(
-      require.resolve('@module-federation/modern-js/resolve-entry-ipv4'),
-      runtimePlugins,
-    );
-  }
+  injectRuntimePlugins(resolveSharedStrategyPlugin(), runtimePlugins);
 
   if (isServer) {
-    injectRuntimePlugins(
-      require.resolve('@module-federation/node/runtimePlugin'),
-      runtimePlugins,
-    );
+    injectRuntimePlugins(resolveNodeRuntimePlugin(), runtimePlugins);
     if (isDev()) {
-      injectRuntimePlugins(
-        require.resolve(
-          '@module-federation/node/record-dynamic-remote-entry-hash-plugin',
-        ),
-        runtimePlugins,
-      );
+      injectRuntimePlugins(resolveNodeRecordRemoteHashPlugin(), runtimePlugins);
     }
 
-    injectRuntimePlugins(
-      require.resolve('@module-federation/modern-js/inject-node-fetch'),
-      runtimePlugins,
-    );
+    injectRuntimePlugins(resolveInjectNodeFetchPlugin(), runtimePlugins);
 
     if (!mfConfig.library) {
       mfConfig.library = {
@@ -413,12 +415,7 @@ export const moduleFederationConfigPlugin = (
       addMyTypes2Ignored(chain, !isWeb ? ssrConfig : csrConfig);
 
       const targetMFConfig = !isWeb ? ssrConfig : csrConfig;
-      patchMFConfig(
-        targetMFConfig,
-        !isWeb,
-        userConfig.remoteIpStrategy || 'ipv4',
-        enableSSR,
-      );
+      patchMFConfig(targetMFConfig, !isWeb);
 
       patchBundlerConfig({
         chain,
@@ -428,21 +425,23 @@ export const moduleFederationConfigPlugin = (
         enableSSR,
       });
 
-      userConfig.distOutputDir =
-        chain.output.get('path') || path.resolve(process.cwd(), 'dist');
+      if (isWeb) {
+        userConfig.distOutputDir =
+          chain.output.get('path') || path.resolve(process.cwd(), 'dist');
+      } else if (enableSSR) {
+        userConfig.userConfig ||= {};
+        userConfig.userConfig.ssr ||= {};
+        if (userConfig.userConfig.ssr === true) {
+          userConfig.userConfig.ssr = {};
+        }
+        userConfig.userConfig.ssr.distOutputDir =
+          chain.output.get('path') ||
+          path.resolve(process.cwd(), 'dist/bundles');
+      }
     });
     api.config(() => {
       const bundlerType =
         api.getAppContext().bundlerType === 'rspack' ? 'rspack' : 'webpack';
-      const ipv4 = getIPV4();
-
-      if (userConfig.remoteIpStrategy === undefined) {
-        if (!enableSSR) {
-          userConfig.remoteIpStrategy = 'inherit';
-        } else {
-          userConfig.remoteIpStrategy = 'ipv4';
-        }
-      }
 
       const devServerConfig = modernjsConfig.tools?.devServer;
       const corsWarnMsgs = [
@@ -475,12 +474,7 @@ export const moduleFederationConfigPlugin = (
             'Access-Control-Allow-Headers': '*',
           }
         : undefined;
-      const defineConfig = {
-        REMOTE_IP_STRATEGY: JSON.stringify(userConfig.remoteIpStrategy),
-      };
-      if (enableSSR && isDev()) {
-        defineConfig['FEDERATION_IPV4'] = JSON.stringify(ipv4);
-      }
+
       return {
         tools: {
           devServer: {
@@ -496,7 +490,6 @@ export const moduleFederationConfigPlugin = (
           },
         },
         source: {
-          define: defineConfig,
           enableAsyncEntry:
             bundlerType === 'rspack'
               ? (modernjsConfig.source?.enableAsyncEntry ?? true)

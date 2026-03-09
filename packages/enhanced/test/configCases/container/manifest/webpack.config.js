@@ -17,6 +17,7 @@ module.exports = {
       exposes: {
         './expose-a': './module.js',
       },
+      manifest: true,
       remoteType: 'script',
       remotes: {
         '@remote/alias': 'remote@http://localhost:8000/remoteEntry.js',

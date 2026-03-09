@@ -1,11 +1,15 @@
 export = EvalSourceMapDevToolPlugin;
 declare class EvalSourceMapDevToolPlugin {
   /**
-   * @param {SourceMapDevToolPluginOptions|string} inputOptions Options object
+   * @param {SourceMapDevToolPluginOptions | string=} inputOptions Options object
    */
-  constructor(inputOptions: SourceMapDevToolPluginOptions | string);
+  constructor(
+    inputOptions?: (SourceMapDevToolPluginOptions | string) | undefined,
+  );
   sourceMapComment: string;
-  moduleFilenameTemplate: string | Function;
+  moduleFilenameTemplate:
+    | string
+    | ModuleFilenameHelpers.ModuleFilenameTemplateFunction;
   namespace: string;
   options: import('../declarations/plugins/SourceMapDevToolPlugin').SourceMapDevToolPluginOptions;
   /**
@@ -17,16 +21,19 @@ declare class EvalSourceMapDevToolPlugin {
 }
 declare namespace EvalSourceMapDevToolPlugin {
   export {
+    RawSourceMap,
     Source,
-    DevToolOptions,
     SourceMapDevToolPluginOptions,
+    Rules,
+    ModuleId,
     Compiler,
-    SourceMap,
   };
 }
-type Compiler = import('./Compiler');
+import ModuleFilenameHelpers = require('./ModuleFilenameHelpers');
+type RawSourceMap = import('webpack-sources').RawSourceMap;
+type Source = import('webpack-sources').Source;
 type SourceMapDevToolPluginOptions =
   import('../declarations/plugins/SourceMapDevToolPlugin').SourceMapDevToolPluginOptions;
-type Source = any;
-type DevToolOptions = import('../declarations/WebpackOptions').DevTool;
-type SourceMap = import('./NormalModule').SourceMap;
+type Rules = import('../declarations/plugins/SourceMapDevToolPlugin').Rules;
+type ModuleId = import('./ChunkGraph').ModuleId;
+type Compiler = import('./Compiler');

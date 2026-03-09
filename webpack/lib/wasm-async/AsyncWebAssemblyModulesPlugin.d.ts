@@ -26,12 +26,11 @@ declare class AsyncWebAssemblyModulesPlugin {
     module: Module,
     renderContext: WebAssemblyRenderContext,
     hooks: CompilationHooks,
-  ): any;
+  ): Source;
 }
 declare namespace AsyncWebAssemblyModulesPlugin {
   export {
     Source,
-    OutputOptions,
     Chunk,
     ChunkGraph,
     CodeGenerationResults,
@@ -40,22 +39,23 @@ declare namespace AsyncWebAssemblyModulesPlugin {
     Module,
     ModuleGraph,
     RuntimeTemplate,
-    RenderManifestEntry,
-    RenderManifestOptions,
     WebpackError,
     WebAssemblyRenderContext,
     CompilationHooks,
     AsyncWebAssemblyModulesPluginOptions,
   };
 }
-type AsyncWebAssemblyModulesPluginOptions = {
-  /**
-   * mangle imports
-   */
-  mangleImports?: boolean;
-};
+import Compilation = require('../Compilation');
+type Source = import('webpack-sources').Source;
+type Chunk = import('../Chunk');
+type ChunkGraph = import('../ChunkGraph');
+type CodeGenerationResults = import('../CodeGenerationResults');
 type Compiler = import('../Compiler');
+type DependencyTemplates = import('../DependencyTemplates');
 type Module = import('../Module');
+type ModuleGraph = import('../ModuleGraph');
+type RuntimeTemplate = import('../RuntimeTemplate');
+type WebpackError = import('../WebpackError');
 type WebAssemblyRenderContext = {
   /**
    * the chunk
@@ -87,17 +87,10 @@ type CompilationHooks = {
     [Source, Module, WebAssemblyRenderContext]
   >;
 };
-import Compilation = require('../Compilation');
-type Source = any;
-type OutputOptions =
-  import('../../declarations/WebpackOptions').OutputNormalized;
-type Chunk = import('../Chunk');
-type ChunkGraph = import('../ChunkGraph');
-type CodeGenerationResults = import('../CodeGenerationResults');
-type DependencyTemplates = import('../DependencyTemplates');
-type ModuleGraph = import('../ModuleGraph');
-type RuntimeTemplate = import('../RuntimeTemplate');
-type RenderManifestEntry = import('../Template').RenderManifestEntry;
-type RenderManifestOptions = import('../Template').RenderManifestOptions;
-type WebpackError = import('../WebpackError');
+type AsyncWebAssemblyModulesPluginOptions = {
+  /**
+   * mangle imports
+   */
+  mangleImports?: boolean | undefined;
+};
 import { SyncWaterfallHook } from 'tapable';

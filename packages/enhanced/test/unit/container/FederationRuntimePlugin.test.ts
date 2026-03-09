@@ -1,9 +1,15 @@
 import FederationRuntimePlugin from '../../../src/lib/container/runtime/FederationRuntimePlugin';
 import type { Compiler } from 'webpack';
+import { rs, Mock } from '@rstest/core';
 
-jest.mock('@module-federation/sdk/normalize-webpack-path', () => ({
+// Use rs.hoisted() to create mock functions that are hoisted along with rs.mock()
+const mocks = rs.hoisted(() => ({
+  mockGetWebpackPath: rs.fn(() => 'webpack'),
+}));
+
+rs.mock('@module-federation/sdk/normalize-webpack-path', () => ({
   normalizeWebpackPath: (path: string) => path,
-  getWebpackPath: jest.fn(() => 'webpack'),
+  getWebpackPath: mocks.mockGetWebpackPath,
 }));
 
 describe('FederationRuntimePlugin runtimePluginCalls', () => {
@@ -17,10 +23,10 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
       },
       hooks: {
         thisCompilation: {
-          tap: jest.fn(),
+          tap: rs.fn(),
         },
         make: {
-          tapAsync: jest.fn(),
+          tapAsync: rs.fn(),
         },
       },
     };
@@ -37,7 +43,7 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    rs.clearAllMocks();
   });
 
   describe('runtimePluginCalls array', () => {
@@ -180,6 +186,111 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
 
       // 验证生成的模板中包含正确的插件调用语法
       expect(template).toContain('plugin_0 ? (plugin_0.default || plugin_0)');
+    });
+  });
+
+  describe('runtime bootstrap guards', () => {
+    it('rehydrates bundler runtime when runtime exists but bundlerRuntime is missing', () => {
+      const template = FederationRuntimePlugin.getTemplate(
+        compiler as Compiler,
+        mockOptions,
+        'bundler-runtime.js',
+        {},
+      );
+
+      expect(template).toContain(
+        'if(!__webpack_require__.federation.runtime || !__webpack_require__.federation.bundlerRuntime)',
+      );
+    });
+  });
+
+  describe('runtime module resolution compatibility', () => {
+    const normalizePath = (filePath: string) => filePath.replace(/\\/g, '/');
+    const originalIsEsmBuild = process.env.IS_ESM_BUILD;
+
+    afterEach(() => {
+      if (originalIsEsmBuild === undefined) {
+        delete process.env.IS_ESM_BUILD;
+      } else {
+        process.env.IS_ESM_BUILD = originalIsEsmBuild;
+      }
+    });
+
+    it('prefers cjs runtime entry when IS_ESM_BUILD is false', () => {
+      process.env.IS_ESM_BUILD = 'false';
+      const plugin = new FederationRuntimePlugin({
+        implementation: '/legacy/runtime-tools',
+      } as any);
+      const runtimePath = plugin.getRuntimeAlias({
+        options: { resolve: { alias: {} }, output: {} },
+      } as unknown as Compiler);
+
+      expect(normalizePath(runtimePath)).toMatch(
+        /\/runtime\/dist\/index\.cjs(?:\.cjs)?$/,
+      );
+    });
+
+    it('prefers esm runtime entry when IS_ESM_BUILD is true', () => {
+      process.env.IS_ESM_BUILD = 'true';
+      const plugin = new FederationRuntimePlugin({
+        implementation: '/legacy/runtime-tools',
+      } as any);
+      const runtimePath = plugin.getRuntimeAlias({
+        options: {
+          resolve: { alias: {} },
+          output: {},
+        },
+      } as unknown as Compiler);
+
+      expect(normalizePath(runtimePath)).toMatch(
+        /\/runtime\/dist\/index\.(?:js|esm\.js)$/,
+      );
+    });
+
+    it('resolves runtime-tools alias for CJS mode when runtime alias is preset', () => {
+      process.env.IS_ESM_BUILD = 'false';
+      const plugin = new FederationRuntimePlugin({} as any);
+      const compiler = {
+        options: {
+          resolve: {
+            alias: { '@module-federation/runtime$': '/custom/runtime' },
+          },
+          output: {},
+        },
+      } as unknown as Compiler;
+
+      plugin.setRuntimeAlias(compiler);
+
+      expect(
+        normalizePath(
+          (compiler.options.resolve as any).alias[
+            '@module-federation/runtime-tools$'
+          ],
+        ),
+      ).toMatch(/\/runtime-tools\/dist\/index\.cjs(?:\.cjs)?$/);
+    });
+
+    it('resolves runtime-tools alias for ESM mode when runtime alias is preset', () => {
+      process.env.IS_ESM_BUILD = 'true';
+      const plugin = new FederationRuntimePlugin({} as any);
+      const compiler = {
+        options: {
+          resolve: {
+            alias: { '@module-federation/runtime$': '/custom/runtime' },
+          },
+          output: {},
+        },
+      } as unknown as Compiler;
+
+      plugin.setRuntimeAlias(compiler);
+
+      expect(
+        normalizePath(
+          (compiler.options.resolve as any).alias[
+            '@module-federation/runtime-tools$'
+          ],
+        ),
+      ).toMatch(/\/runtime-tools\/dist\/index\.(?:js|esm\.js)$/);
     });
   });
 });

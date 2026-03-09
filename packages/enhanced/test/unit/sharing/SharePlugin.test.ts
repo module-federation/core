@@ -1,7 +1,8 @@
 /*
- * @jest-environment node
+ * @rstest-environment node
  */
 
+import { rs } from '@rstest/core';
 import type { Compiler, Compilation } from 'webpack';
 import { SyncHook, AsyncSeriesHook, HookMap } from 'tapable';
 
@@ -29,30 +30,33 @@ const findShareConfig = (
 };
 
 const loadMockedSharePlugin = () => {
-  jest.doMock('@module-federation/sdk/normalize-webpack-path', () => ({
-    normalizeWebpackPath: jest.fn((path: string) => path),
-    getWebpackPath: jest.fn(() => 'mocked-webpack-path'),
+  const normalizeWebpackPathMock = rs.fn((path: string) => path);
+  const getWebpackPathMock = rs.fn(() => 'mocked-webpack-path');
+
+  rs.doMock('@module-federation/sdk/normalize-webpack-path', () => ({
+    normalizeWebpackPath: normalizeWebpackPathMock,
+    getWebpackPath: getWebpackPathMock,
   }));
 
-  jest.doMock('@module-federation/sdk', () => ({
-    isRequiredVersion: jest.fn(
+  rs.doMock('@module-federation/sdk', () => ({
+    isRequiredVersion: rs.fn(
       (version: unknown) =>
         typeof version === 'string' && version.startsWith('^'),
     ),
   }));
 
-  const ConsumeSharedPluginMock = jest
+  const ConsumeSharedPluginMock = rs
     .fn()
-    .mockImplementation((options) => ({ options, apply: jest.fn() }));
-  jest.doMock('../../../src/lib/sharing/ConsumeSharedPlugin', () => ({
+    .mockImplementation((options) => ({ options, apply: rs.fn() }));
+  rs.doMock('../../../src/lib/sharing/ConsumeSharedPlugin', () => ({
     __esModule: true,
     default: ConsumeSharedPluginMock,
   }));
 
-  const ProvideSharedPluginMock = jest
+  const ProvideSharedPluginMock = rs
     .fn()
-    .mockImplementation((options) => ({ options, apply: jest.fn() }));
-  jest.doMock('../../../src/lib/sharing/ProvideSharedPlugin', () => ({
+    .mockImplementation((options) => ({ options, apply: rs.fn() }));
+  rs.doMock('../../../src/lib/sharing/ProvideSharedPlugin', () => ({
     __esModule: true,
     default: ProvideSharedPluginMock,
   }));
@@ -60,14 +64,9 @@ const loadMockedSharePlugin = () => {
   let SharePlugin: any;
   let shareUtils: any;
 
-  jest.isolateModules(() => {
-    SharePlugin = require('../../../src/lib/sharing/SharePlugin').default;
-    shareUtils = require('./utils');
-  });
-
-  const {
-    getWebpackPath,
-  } = require('@module-federation/sdk/normalize-webpack-path');
+  rs.resetModules();
+  SharePlugin = require('../../../src/lib/sharing/SharePlugin').default;
+  shareUtils = require('./utils');
 
   return {
     SharePlugin,
@@ -75,42 +74,46 @@ const loadMockedSharePlugin = () => {
     createMockCompiler: shareUtils.createMockCompiler,
     ConsumeSharedPluginMock,
     ProvideSharedPluginMock,
-    getWebpackPath,
+    getWebpackPath: getWebpackPathMock,
   };
 };
 
-const loadRealSharePlugin = () => {
-  jest.dontMock('../../../src/lib/sharing/ConsumeSharedPlugin');
-  jest.dontMock('../../../src/lib/sharing/ProvideSharedPlugin');
-  jest.dontMock('../../../src/lib/sharing/ConsumeSharedPlugin.ts');
-  jest.dontMock('../../../src/lib/sharing/ProvideSharedPlugin.ts');
-  jest.doMock(
+// Load the real SharePlugin immediately, before any mocks are set up
+// This avoids the issue where mocked tests interfere with integration tests
+// and also avoids duplicate serializer registration errors
+const loadRealSharePluginOnce = () => {
+  // Mock FederationRuntimePlugin to avoid loading the full federation runtime
+  rs.doMock(
     '../../../src/lib/container/runtime/FederationRuntimePlugin',
     () => ({
       __esModule: true,
-      default: jest.fn().mockImplementation(() => ({ apply: jest.fn() })),
+      default: rs.fn().mockImplementation(() => ({ apply: rs.fn() })),
     }),
   );
 
-  let SharePlugin: any;
-  jest.isolateModules(() => {
-    SharePlugin = require('../../../src/lib/sharing/SharePlugin').default;
-  });
+  // Load the real SharePlugin (which will use real ConsumeSharedPlugin
+  // and ProvideSharedPlugin, but mocked FederationRuntimePlugin)
+  return require('../../../src/lib/sharing/SharePlugin').default;
+};
 
-  return { SharePlugin };
+// Load the real SharePlugin once at module load time
+const RealSharePlugin = loadRealSharePluginOnce();
+
+const loadRealSharePlugin = () => {
+  return { SharePlugin: RealSharePlugin };
 };
 
 describe('SharePlugin (mocked dependencies)', () => {
   let SharePlugin: any;
   let shareScopesLocal: any;
   let createMockCompiler: () => any;
-  let ConsumeSharedPluginMock: jest.Mock;
-  let ProvideSharedPluginMock: jest.Mock;
-  let getWebpackPath: jest.Mock;
+  let ConsumeSharedPluginMock: any;
+  let ProvideSharedPluginMock: any;
+  let getWebpackPath: any;
 
   beforeEach(() => {
-    jest.resetModules();
-    jest.clearAllMocks();
+    rs.resetModules();
+    rs.clearAllMocks();
     delete process.env['FEDERATION_WEBPACK_PATH'];
     ({
       SharePlugin,
@@ -123,7 +126,7 @@ describe('SharePlugin (mocked dependencies)', () => {
   });
 
   afterEach(() => {
-    jest.resetModules();
+    rs.resetModules();
   });
 
   describe('constructor', () => {
@@ -367,14 +370,16 @@ describe('SharePlugin (integration)', () => {
   let SharePlugin: any;
 
   beforeEach(() => {
-    jest.resetModules();
-    jest.clearAllMocks();
+    // Don't call rs.resetModules() here as it causes duplicate serializer registration errors
+    // The real plugins use webpack's makeSerializable which registers globally
+    rs.clearAllMocks();
     delete process.env['FEDERATION_WEBPACK_PATH'];
     ({ SharePlugin } = loadRealSharePlugin());
   });
 
   afterEach(() => {
-    jest.resetModules();
+    // Clean up environment but don't reset modules
+    delete process.env['FEDERATION_WEBPACK_PATH'];
   });
 
   const createRealWebpackCompiler = (): Compiler => {
@@ -382,28 +387,49 @@ describe('SharePlugin (integration)', () => {
       hook: THook,
     ): THook => {
       const tapCalls: Array<{ name: string; fn: unknown }> = [];
+      // Initialize __tapCalls immediately so it's always defined
+      (hook as any).__tapCalls = tapCalls;
+
       const originalTap = hook.tap.bind(hook);
-      (hook as any).tap = (name: string, fn: any) => {
+      (hook as any).tap = (
+        nameOrOptions: string | { name: string },
+        fn: any,
+      ) => {
+        const name =
+          typeof nameOrOptions === 'string'
+            ? nameOrOptions
+            : nameOrOptions.name;
         tapCalls.push({ name, fn });
-        (hook as any).__tapCalls = tapCalls;
-        return originalTap(name, fn);
+        return originalTap(nameOrOptions as string, fn);
       };
 
       if ('tapAsync' in hook && typeof hook.tapAsync === 'function') {
         const originalTapAsync = (hook.tapAsync as any).bind(hook);
-        (hook as any).tapAsync = (name: string, fn: any) => {
+        (hook as any).tapAsync = (
+          nameOrOptions: string | { name: string },
+          fn: any,
+        ) => {
+          const name =
+            typeof nameOrOptions === 'string'
+              ? nameOrOptions
+              : nameOrOptions.name;
           tapCalls.push({ name, fn });
-          (hook as any).__tapCalls = tapCalls;
-          return originalTapAsync(name, fn);
+          return originalTapAsync(nameOrOptions, fn);
         };
       }
 
       if ('tapPromise' in hook && typeof hook.tapPromise === 'function') {
         const originalTapPromise = (hook.tapPromise as any).bind(hook);
-        (hook as any).tapPromise = (name: string, fn: any) => {
+        (hook as any).tapPromise = (
+          nameOrOptions: string | { name: string },
+          fn: any,
+        ) => {
+          const name =
+            typeof nameOrOptions === 'string'
+              ? nameOrOptions
+              : nameOrOptions.name;
           tapCalls.push({ name, fn });
-          (hook as any).__tapCalls = tapCalls;
-          return originalTapPromise(name, fn);
+          return originalTapPromise(nameOrOptions, fn);
         };
       }
 
@@ -440,7 +466,7 @@ describe('SharePlugin (integration)', () => {
       webpack: {
         javascript: {
           JavascriptModulesPlugin: {
-            getCompilationHooks: jest.fn(() => ({
+            getCompilationHooks: rs.fn(() => ({
               renderChunk: new SyncHook<[unknown, unknown]>([
                 'source',
                 'renderContext',
@@ -483,21 +509,21 @@ describe('SharePlugin (integration)', () => {
       },
       dependencyFactories: new Map(),
       hooks: {
-        additionalTreeRuntimeRequirements: { tap: jest.fn() },
+        additionalTreeRuntimeRequirements: { tap: rs.fn() },
         runtimeRequirementInTree: runtimeRequirementInTreeHookMap,
-        finishModules: { tap: jest.fn(), tapAsync: jest.fn() },
-        seal: { tap: jest.fn() },
+        finishModules: { tap: rs.fn(), tapAsync: rs.fn() },
+        seal: { tap: rs.fn() },
       },
-      addRuntimeModule: jest.fn(),
-      contextDependencies: { addAll: jest.fn() },
-      fileDependencies: { addAll: jest.fn() },
-      missingDependencies: { addAll: jest.fn() },
+      addRuntimeModule: rs.fn(),
+      contextDependencies: { addAll: rs.fn() },
+      fileDependencies: { addAll: rs.fn() },
+      missingDependencies: { addAll: rs.fn() },
       warnings: [],
       errors: [],
-      addInclude: jest.fn(),
+      addInclude: rs.fn(),
       resolverFactory: {
-        get: jest.fn(() => ({
-          resolve: jest.fn(
+        get: rs.fn(() => ({
+          resolve: rs.fn(
             (
               _context: unknown,
               path: string,
@@ -515,17 +541,17 @@ describe('SharePlugin (integration)', () => {
 
   type NormalModuleFactoryLike = {
     hooks: {
-      module: { tap: jest.Mock };
-      factorize: { tapPromise: jest.Mock };
-      createModule: { tapPromise: jest.Mock };
+      module: { tap: any };
+      factorize: { tapPromise: any };
+      createModule: { tapPromise: any };
     };
   };
 
   const createMockNormalModuleFactory = (): NormalModuleFactoryLike => ({
     hooks: {
-      module: { tap: jest.fn() },
-      factorize: { tapPromise: jest.fn() },
-      createModule: { tapPromise: jest.fn() },
+      module: { tap: rs.fn() },
+      factorize: { tapPromise: rs.fn() },
+      createModule: { tapPromise: rs.fn() },
     },
   });
 

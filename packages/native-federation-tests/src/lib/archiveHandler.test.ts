@@ -63,7 +63,7 @@ describe('archiveHandler', () => {
 
     it('correctly extract downloaded archive', async () => {
       const zip = new AdmZip();
-      await zip.addLocalFolderPromise(tmpDir, {});
+      zip.addLocalFolder(tmpDir);
 
       axios.get = vi.fn().mockResolvedValueOnce({ data: zip.toBuffer() });
 
@@ -76,7 +76,7 @@ describe('archiveHandler', () => {
 
     it('correctly extracts downloaded archive - skips same zip file', async () => {
       const zip = new AdmZip();
-      await zip.addLocalFolderPromise(tmpDir, {});
+      zip.addLocalFolder(tmpDir);
 
       axios.get = vi.fn().mockResolvedValue({ data: zip.toBuffer() });
 

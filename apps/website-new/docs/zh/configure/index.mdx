@@ -1,11 +1,13 @@
 # Config 总览
 
-当前页面列出了 `Module federation` 所有的配置项，请查看 「[Rspack Plugin](../guide/basic/rspack)」、「[Webpack Plugin](../guide/basic/webpack)」 了解使用方式。
+当前页面列出了 `Module federation` 所有的配置项，请查看 「[Build Plugins](../guide/build-plugins/plugins)」、「[Webpack Plugin](../guide/build-plugins/plugins-webpack)」 了解使用方式。
 
 ```ts
 type ModuleFederationOptions {
     // module federation name
     name: string;
+    // 当前应用（host/remote）参与的共享池（默认 default）
+    shareScope?: string | string[];
     // remoteEntry 名称
     filename?: string,
     // module federation remotes 远程模块别名和 entry 信息
@@ -26,5 +28,9 @@ type ModuleFederationOptions {
     dev?: boolean | PluginDevOptions;
     // 控制类型生成
     dts?: boolean | PluginDtsOptions;
+    injectTreeShakingUsedExports?: boolean;
+    treeShakingDir?: string;
+    treeShakingSharedPlugins?: Array<string>;
+    treeShakingSharedExcludePlugins?: Array<string>;
 };
 ```

@@ -1,6 +1,6 @@
 /*
-	MIT License http://www.opensource.org/licenses/mit-license.php
-	Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
+  MIT License http://www.opensource.org/licenses/mit-license.php
+  Author Tobias Koppers @sokra, Zackary Jackson @ScriptedAlchemy
 */
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 
@@ -30,6 +30,9 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
     const compilation: Compilation = this.compilation!;
     const chunkGraph: ChunkGraph = this.chunkGraph!;
     const { runtimeTemplate, codeGenerationResults } = compilation;
+    if (!codeGenerationResults) {
+      return null;
+    }
     const chunkToModuleMapping: Record<string, any> = {};
     const moduleIdToSourceMapping: Map<string | number, string> = new Map();
     const initialConsumes: (string | number)[] = [];
@@ -48,6 +51,9 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
         const module: ConsumeSharedModule = m as unknown as ConsumeSharedModule;
         // @ts-ignore
         const id = chunkGraph.getModuleId(module);
+        if (id === null || id === undefined) {
+          continue;
+        }
         list.push(id);
         const moduleGetter = codeGenerationResults.getSource(
           // @ts-ignore
@@ -55,12 +61,18 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
           chunk.runtime,
           'consume-shared',
         );
+        if (!moduleGetter) {
+          continue;
+        }
         const shareOption = codeGenerationResults.getData(
           // @ts-ignore
           module,
           chunk.runtime,
           'consume-shared',
         );
+        if (!shareOption) {
+          continue;
+        }
         moduleIdToSourceMapping.set(
           id,
           Template.asString([
@@ -78,6 +90,7 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
               `eager: ${JSON.stringify(shareOption.shareConfig.eager)},`,
               `layer: ${JSON.stringify(shareOption.shareConfig.layer)},`,
               `shareKey: "${shareOption.shareKey}",`,
+              `${shareOption.treeShakingMode ? `treeShakingMode: ${JSON.stringify(shareOption.treeShakingMode)},` : ''}`,
             ]),
             '}',
           ]),
@@ -137,11 +150,12 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
                   `initialConsumes: ${RuntimeGlobals.require}.consumesLoadingData.initialConsumes,`,
                   'installedModules:installedModules,',
                   `moduleToHandlerMapping,`,
-                  `webpackRequire: ${RuntimeGlobals.require}`,
+                  `webpackRequire: ${RuntimeGlobals.require},`,
+                  `asyncLoad: typeof options==='object' ? options.asyncLoad : undefined,`,
                 ]),
                 `})`,
               ]),
-              '',
+              'options',
             )}`,
           ])
         : '// no consumes in initial chunks',

@@ -20,7 +20,11 @@ import {
   StatsMetaDataWithPublicPath,
   StatsShared,
 } from '@module-federation/sdk';
-import { Compilation, Compiler, StatsCompilation, StatsModule } from 'webpack';
+import { Compilation, Compiler } from 'webpack';
+import type {
+  StatsCompilation,
+  StatsModule,
+} from 'webpack/lib/stats/DefaultStatsFactoryPlugin';
 import {
   isDev,
   getAssetsByChunk,
@@ -59,14 +63,29 @@ class StatsManager {
   private _sharedManager: SharedManager = new SharedManager();
   private _pkgJsonManager: PKGJsonManager = new PKGJsonManager();
 
-  private getBuildInfo(context?: string): StatsBuildInfo {
+  private getBuildInfo(
+    context?: string,
+    target?: string | string[],
+  ): StatsBuildInfo {
     const rootPath = context || process.cwd();
     const pkg = this._pkgJsonManager.readPKGJson(rootPath);
 
-    return {
+    const statsBuildInfo: StatsBuildInfo = {
       buildVersion: utils.getBuildVersion(rootPath),
       buildName: utils.getBuildName() || pkg['name'],
     };
+    if (this._sharedManager.enableTreeShaking) {
+      statsBuildInfo.target = target
+        ? Array.isArray(target)
+          ? target
+          : [target]
+        : [];
+      statsBuildInfo.plugins = this._options.treeShakingSharedPlugins || [];
+      statsBuildInfo.excludePlugins =
+        this._options.treeShakingSharedExcludePlugins || [];
+    }
+
+    return statsBuildInfo;
   }
 
   get fileName(): string {
@@ -102,7 +121,10 @@ class StatsManager {
     const {
       _options: { name },
     } = this;
-    const buildInfo = this.getBuildInfo(context);
+    const buildInfo = this.getBuildInfo(
+      context,
+      compilation.options.target || '',
+    );
     const type = this._pkgJsonManager.getExposeGarfishModuleType(
       context || process.cwd(),
     );
@@ -207,16 +229,57 @@ class StatsManager {
     const assets: Record<string, StatsAssets> = {};
 
     chunks.forEach((chunk) => {
-      if (
-        typeof chunk.name === 'string' &&
-        exposeFileNameImportMap[chunk.name]
-      ) {
-        // TODO: support multiple import
-        const exposeKey = exposeFileNameImportMap[chunk.name][0];
-        assets[getFileNameWithOutExt(exposeKey)] = getAssetsByChunk(
-          chunk,
-          entryPointNames,
-        );
+      if (typeof chunk.name !== 'string') return;
+
+      // Support split chunks caused by splitChunks.maxSize:
+      // A chunk named "__federation_expose_Foo" may be split into
+      // "__federation_expose_Foo-<hash>" chunks, so we match both exact
+      // and prefix+dash patterns.
+      const matchedKey =
+        exposeFileNameImportMap[chunk.name] !== undefined
+          ? chunk.name
+          : Object.keys(exposeFileNameImportMap).find((key) =>
+              chunk.name!.startsWith(key + '-'),
+            );
+
+      if (!matchedKey) return;
+
+      // TODO: support multiple import
+      const exposeKey = exposeFileNameImportMap[matchedKey][0];
+      const assetKey = getFileNameWithOutExt(exposeKey);
+      const chunkAssets = getAssetsByChunk(chunk, entryPointNames);
+
+      if (!assets[assetKey]) {
+        assets[assetKey] = chunkAssets;
+      } else {
+        // Merge split chunk assets, deduplicating with Set
+        assets[assetKey] = {
+          js: {
+            sync: [
+              ...new Set([...assets[assetKey].js.sync, ...chunkAssets.js.sync]),
+            ],
+            async: [
+              ...new Set([
+                ...assets[assetKey].js.async,
+                ...chunkAssets.js.async,
+              ]),
+            ],
+          },
+          css: {
+            sync: [
+              ...new Set([
+                ...assets[assetKey].css.sync,
+                ...chunkAssets.css.sync,
+              ]),
+            ],
+            async: [
+              ...new Set([
+                ...assets[assetKey].css.async,
+                ...chunkAssets.css.async,
+              ]),
+            ],
+          },
+        };
       }
     });
 
@@ -344,7 +407,7 @@ class StatsManager {
             getShareItem({
               pkgName,
               normalizedShareOptions,
-              pkgVersion: UNKNOWN_MODULE_NAME,
+              pkgVersion: normalizedShareOptions.version || UNKNOWN_MODULE_NAME,
               hostName: name,
             }),
           );

@@ -1,10 +1,19 @@
 export = RuntimeChunkPlugin;
-/** @typedef {import("../Compilation").EntryData} EntryData */
-/** @typedef {import("../Compiler")} Compiler */
-/** @typedef {import("../Entrypoint")} Entrypoint */
+/** @typedef {(entrypoint: { name: string }) => string} RuntimeChunkFunction */
 declare class RuntimeChunkPlugin {
-  constructor(options: any);
-  options: any;
+  /**
+   * @param {{ name?: RuntimeChunkFunction }=} options options
+   */
+  constructor(
+    options?:
+      | {
+          name?: RuntimeChunkFunction;
+        }
+      | undefined,
+  );
+  options: {
+    name: RuntimeChunkFunction;
+  };
   /**
    * Apply the plugin
    * @param {Compiler} compiler the compiler instance
@@ -13,8 +22,8 @@ declare class RuntimeChunkPlugin {
   apply(compiler: Compiler): void;
 }
 declare namespace RuntimeChunkPlugin {
-  export { EntryData, Compiler, Entrypoint };
+  export { EntryData, Compiler, RuntimeChunkFunction };
 }
-type Compiler = import('../Compiler');
 type EntryData = import('../Compilation').EntryData;
-type Entrypoint = import('../Entrypoint');
+type Compiler = import('../Compiler');
+type RuntimeChunkFunction = (entrypoint: { name: string }) => string;

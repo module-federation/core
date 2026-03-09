@@ -1,0 +1,33 @@
+# treeShakingSharedPlugins
+
+允许用户显式指定哪些插件应该参与 shared 模块的第二次 treeshaking 过程。
+
+- 类型：`string[]`
+- 是否必填：否
+- 默认值：`undefined`
+
+如果设置了 `shared.treeShaking.mode` 为 'server-calc'，那么在部署服务中，会重新构建需要 tree shaking 的共享依赖，此时仅构建共享依赖，不会加载原项目的构建配置。
+如果你的项目有特殊的构建配置，例如设置了 externals ，那么你可以把这些构建配置集成到一个 NPM Package ，然后在 `treeShakingSharedPlugins` 中填写此插件的名称和版本，这样就可以在第二次 treeshaking 过程中参与 shared 模块的 treeshaking 过程。
+
+例如提供了一个插件 `my-build-plugin`，它会设置 `externals`：
+
+```ts title='my-build-plugin'
+class MyBuildPlugin {
+  apply(compiler){
+    compiler.options.externals = {
+      'react': 'React',
+    }
+  }
+}
+export default MyBuildPlugin;
+```
+
+将此插件发布的版本为 `0.0.2` ，那么此时只需要在 `treeShakingSharedPlugins` 中填写插件的名称和版本即可：
+
+```ts title='module-federation.config.ts'
+
+export default {
+  // ...
+  treeShakingSharedPlugins: ['my-build-plugin@0.0.2'],
+}
+```

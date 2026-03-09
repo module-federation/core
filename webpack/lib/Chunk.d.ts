@@ -5,31 +5,30 @@ export = Chunk;
  */
 declare class Chunk {
   /**
-   * @param {string=} name of chunk being created, is optional (for subclasses)
+   * @param {ChunkName=} name of chunk being created, is optional (for subclasses)
    * @param {boolean} backCompat enable backward-compatibility
    */
-  constructor(name?: string | undefined, backCompat?: boolean);
+  constructor(name?: ChunkName | undefined, backCompat?: boolean);
   /** @type {ChunkId | null} */
   id: ChunkId | null;
   /** @type {ChunkId[] | null} */
   ids: ChunkId[] | null;
   /** @type {number} */
   debugId: number;
-  /** @type {string | undefined} */
-  name: string | undefined;
-  /** @type {SortableSet<string>} */
-  idNameHints: SortableSet<string>;
+  /** @type {ChunkName | undefined} */
+  name: ChunkName | undefined;
+  /** @type {IdNameHints} */
+  idNameHints: IdNameHints;
   /** @type {boolean} */
   preventIntegration: boolean;
-  /** @type {(string | function(PathData, AssetInfo=): string) | undefined} */
-  filenameTemplate:
-    | string
-    | ((arg0: PathData, arg1?: AssetInfo | undefined) => string);
-  /** @type {(string | function(PathData, AssetInfo=): string) | undefined} */
-  cssFilenameTemplate:
-    | string
-    | ((arg0: PathData, arg1?: AssetInfo | undefined) => string);
-  /** @private @type {SortableSet<ChunkGroup>} */
+  /** @type {TemplatePath | undefined} */
+  filenameTemplate: TemplatePath | undefined;
+  /** @type {TemplatePath | undefined} */
+  cssFilenameTemplate: TemplatePath | undefined;
+  /**
+   * @private
+   * @type {SortableChunkGroups}
+   */
   private _groups;
   /** @type {RuntimeSpec} */
   runtime: RuntimeSpec;
@@ -71,7 +70,7 @@ declare class Chunk {
   get modulesIterable(): Iterable<import('./Module')>;
   /**
    * @param {Chunk} otherChunk the chunk to compare with
-   * @returns {-1|0|1} the comparison result
+   * @returns {-1 | 0 | 1} the comparison result
    */
   compareTo(otherChunk: Chunk): -1 | 0 | 1;
   /**
@@ -178,9 +177,9 @@ declare class Chunk {
    */
   getNumberOfGroups(): number;
   /**
-   * @returns {SortableSet<ChunkGroup>} the chunkGroups that the said chunk is referenced in
+   * @returns {SortableChunkGroups} the chunkGroups that the said chunk is referenced in
    */
-  get groupsIterable(): SortableSet<import('./ChunkGroup')>;
+  get groupsIterable(): SortableChunkGroups;
   /**
    * @returns {void}
    */
@@ -197,21 +196,21 @@ declare class Chunk {
    */
   updateHash(hash: Hash, chunkGraph: ChunkGraph): void;
   /**
-   * @returns {Set<Chunk>} a set of all the async chunks
+   * @returns {Chunks} a set of all the async chunks
    */
-  getAllAsyncChunks(): Set<Chunk>;
+  getAllAsyncChunks(): Chunks;
   /**
-   * @returns {Set<Chunk>} a set of all the initial chunks (including itself)
+   * @returns {Chunks} a set of all the initial chunks (including itself)
    */
-  getAllInitialChunks(): Set<Chunk>;
+  getAllInitialChunks(): Chunks;
   /**
-   * @returns {Set<Chunk>} a set of all the referenced chunks (including itself)
+   * @returns {Chunks} a set of all the referenced chunks (including itself)
    */
-  getAllReferencedChunks(): Set<Chunk>;
+  getAllReferencedChunks(): Chunks;
   /**
-   * @returns {Set<Entrypoint>} a set of all the referenced entrypoints
+   * @returns {Entrypoints} a set of all the referenced entrypoints
    */
-  getAllReferencedAsyncEntrypoints(): Set<Entrypoint>;
+  getAllReferencedAsyncEntrypoints(): Entrypoints;
   /**
    * @returns {boolean} true, if the chunk references async chunks
    */
@@ -219,16 +218,16 @@ declare class Chunk {
   /**
    * @param {ChunkGraph} chunkGraph the chunk graph
    * @param {ChunkFilterPredicate=} filterFn function used to filter chunks
-   * @returns {Record<string, (string | number)[]>} a record object of names to lists of child ids(?)
+   * @returns {Record<string, ChunkId[]>} a record object of names to lists of child ids(?)
    */
   getChildIdsByOrders(
     chunkGraph: ChunkGraph,
     filterFn?: ChunkFilterPredicate | undefined,
-  ): Record<string, (string | number)[]>;
+  ): Record<string, ChunkId[]>;
   /**
    * @param {ChunkGraph} chunkGraph the chunk graph
    * @param {string} type option name
-   * @returns {{ onChunks: Chunk[], chunks: Set<Chunk> }[] | undefined} referenced chunks for a specific type
+   * @returns {{ onChunks: Chunk[], chunks: Chunks }[] | undefined} referenced chunks for a specific type
    */
   getChildrenOfTypeInOrder(
     chunkGraph: ChunkGraph,
@@ -236,76 +235,93 @@ declare class Chunk {
   ):
     | {
         onChunks: Chunk[];
-        chunks: Set<Chunk>;
+        chunks: Chunks;
       }[]
     | undefined;
   /**
    * @param {ChunkGraph} chunkGraph the chunk graph
    * @param {boolean=} includeDirectChildren include direct children (by default only children of async children are included)
    * @param {ChunkFilterPredicate=} filterFn function used to filter chunks
-   * @returns {Record<string|number, Record<string, (string | number)[]>>} a record object of names to lists of child ids(?) by chunk id
+   * @returns {ChunkChildIdsByOrdersMapByData} a record object of names to lists of child ids(?) by chunk id
    */
   getChildIdsByOrdersMap(
     chunkGraph: ChunkGraph,
     includeDirectChildren?: boolean | undefined,
     filterFn?: ChunkFilterPredicate | undefined,
-  ): Record<string | number, Record<string, (string | number)[]>>;
+  ): ChunkChildIdsByOrdersMapByData;
+  /**
+   * @param {ChunkGraph} chunkGraph the chunk graph
+   * @param {string} type option name
+   * @param {boolean=} includeDirectChildren include direct children (by default only children of async children are included)
+   * @param {ChunkFilterPredicate=} filterFn function used to filter chunks
+   * @returns {boolean} true when the child is of type order, otherwise false
+   */
+  hasChildByOrder(
+    chunkGraph: ChunkGraph,
+    type: string,
+    includeDirectChildren?: boolean | undefined,
+    filterFn?: ChunkFilterPredicate | undefined,
+  ): boolean;
 }
 declare namespace Chunk {
   export {
-    Source,
     ChunkFilterPredicate,
     ChunkSizeOptions,
     ModuleFilterPredicate,
+    ModuleId,
     ChunkGroup,
     ChunkGroupOptions,
-    Compilation,
-    AssetInfo,
-    PathData,
     EntryOptions,
     Module,
-    ModuleGraph,
+    TemplatePath,
     Hash,
     RuntimeSpec,
+    ChunkName,
     ChunkId,
-    WithId,
+    IdNameHints,
     ChunkMaps,
+    ChunkModuleIdMap,
+    chunkModuleHashMap,
     ChunkModuleMaps,
+    Chunks,
+    Entrypoints,
+    Queue,
+    SortableChunkGroups,
+    ChunkChildIdsByOrdersMap,
+    ChunkChildIdsByOrdersMapByData,
   };
 }
-type ChunkId = number | string;
-import SortableSet = require('./util/SortableSet');
-type PathData = import('./Compilation').PathData;
-type AssetInfo = import('./Compilation').AssetInfo;
-type RuntimeSpec = import('./util/runtime').RuntimeSpec;
-type Module = import('./Module');
+import ChunkGraph = require('./ChunkGraph');
+type ChunkFilterPredicate = import('./ChunkGraph').ChunkFilterPredicate;
 type ChunkSizeOptions = import('./ChunkGraph').ChunkSizeOptions;
 type ModuleFilterPredicate = import('./ChunkGraph').ModuleFilterPredicate;
-type ChunkModuleMaps = {
-  id: Record<string | number, (string | number)[]>;
-  hash: Record<string | number, string>;
-};
-type ChunkFilterPredicate = import('./ChunkGraph').ChunkFilterPredicate;
-type ChunkMaps = {
-  hash: Record<string | number, string>;
-  contentHash: Record<string | number, Record<string, string>>;
-  name: Record<string | number, string>;
-};
-type EntryOptions = import('./Entrypoint').EntryOptions;
+type ModuleId = import('./ChunkGraph').ModuleId;
 type ChunkGroup = import('./ChunkGroup');
-type Hash = import('./util/Hash');
-import ChunkGraph = require('./ChunkGraph');
-import Entrypoint = require('./Entrypoint');
-type Source = any;
 type ChunkGroupOptions = import('./ChunkGroup').ChunkGroupOptions;
-type Compilation = import('./Compilation');
-type ModuleGraph = import('./ModuleGraph');
-/**
- * an object who has an id property *
- */
-type WithId = {
-  /**
-   * the id of the object
-   */
-  id: string | number;
+type EntryOptions = import('./Entrypoint').EntryOptions;
+type Module = import('./Module');
+type TemplatePath = import('./TemplatedPathPlugin').TemplatePath;
+type Hash = import('./util/Hash');
+type RuntimeSpec = import('./util/runtime').RuntimeSpec;
+type ChunkName = string | null;
+type ChunkId = string | number;
+type IdNameHints = SortableSet<string>;
+type ChunkMaps = {
+  hash: Record<ChunkId, string>;
+  contentHash: Record<ChunkId, Record<string, string>>;
+  name: Record<ChunkId, string>;
 };
+type ChunkModuleIdMap = Record<ChunkId, ChunkId[]>;
+type chunkModuleHashMap = Record<ModuleId, string>;
+type ChunkModuleMaps = {
+  id: ChunkModuleIdMap;
+  hash: chunkModuleHashMap;
+};
+type Chunks = Set<Chunk>;
+type Entrypoints = Set<Entrypoint>;
+type Queue = Set<ChunkGroup>;
+type SortableChunkGroups = SortableSet<ChunkGroup>;
+type ChunkChildIdsByOrdersMap = Record<string, ChunkId[]>;
+type ChunkChildIdsByOrdersMapByData = Record<string, ChunkChildIdsByOrdersMap>;
+import SortableSet = require('./util/SortableSet');
+import Entrypoint = require('./Entrypoint');

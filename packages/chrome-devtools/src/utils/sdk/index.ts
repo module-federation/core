@@ -4,6 +4,15 @@ export const setLocalStorage = (key: string, value: any) => {
   localStorage.setItem(key, value);
 };
 
+export const getLocalStorage = (key: string) => {
+  try {
+    return localStorage.getItem(key);
+  } catch (error) {
+    console.warn('[MF Devtools] getLocalStorage failed', error);
+    return null;
+  }
+};
+
 export const removeLocalStorage = (key: string) => {
   const data = localStorage.getItem(key);
   if (data) {

@@ -1,16 +1,15 @@
 export = UmdLibraryPlugin;
-/** @typedef {string | string[] | LibraryCustomUmdObject} UmdLibraryPluginName */
 /**
- * @typedef {Object} UmdLibraryPluginOptions
+ * @typedef {object} UmdLibraryPluginOptions
  * @property {LibraryType} type
  * @property {boolean=} optionalAmdExternalAsGlobal
  */
 /**
- * @typedef {Object} UmdLibraryPluginParsed
- * @property {string | string[]} name
+ * @typedef {object} UmdLibraryPluginParsed
+ * @property {string | string[] | undefined} name
  * @property {LibraryCustomUmdObject} names
- * @property {string | LibraryCustomUmdCommentObject} auxiliaryComment
- * @property {boolean} namedDefine
+ * @property {string | LibraryCustomUmdCommentObject | undefined} auxiliaryComment
+ * @property {boolean | undefined} namedDefine
  */
 /**
  * @typedef {UmdLibraryPluginParsed} T
@@ -31,28 +30,17 @@ declare namespace UmdLibraryPlugin {
     LibraryName,
     LibraryOptions,
     LibraryType,
-    Compiler,
     RenderContext,
-    Hash,
+    RequestRecord,
     LibraryContext,
-    UmdLibraryPluginName,
+    Accessor,
     UmdLibraryPluginOptions,
     UmdLibraryPluginParsed,
     T,
   };
 }
-type UmdLibraryPluginParsed = {
-  name: string | string[];
-  names: LibraryCustomUmdObject;
-  auxiliaryComment: string | LibraryCustomUmdCommentObject;
-  namedDefine: boolean;
-};
 import AbstractLibraryPlugin = require('./AbstractLibraryPlugin');
-type UmdLibraryPluginOptions = {
-  type: LibraryType;
-  optionalAmdExternalAsGlobal?: boolean | undefined;
-};
-type Source = any;
+type Source = import('webpack-sources').Source;
 type LibraryCustomUmdCommentObject =
   import('../../declarations/WebpackOptions').LibraryCustomUmdCommentObject;
 type LibraryCustomUmdObject =
@@ -61,13 +49,22 @@ type LibraryName = import('../../declarations/WebpackOptions').LibraryName;
 type LibraryOptions =
   import('../../declarations/WebpackOptions').LibraryOptions;
 type LibraryType = import('../../declarations/WebpackOptions').LibraryType;
-type Compiler = import('../Compiler');
 type RenderContext =
   import('../javascript/JavascriptModulesPlugin').RenderContext;
-type Hash = import('../util/Hash');
+type RequestRecord = import('../ExternalModule').RequestRecord;
 /**
  * <T>
  */
-type LibraryContext<T_1> = import('./AbstractLibraryPlugin').LibraryContext<T>;
-type UmdLibraryPluginName = string | string[] | LibraryCustomUmdObject;
+type LibraryContext<T> = import('./AbstractLibraryPlugin').LibraryContext<T>;
+type Accessor = string | string[];
+type UmdLibraryPluginOptions = {
+  type: LibraryType;
+  optionalAmdExternalAsGlobal?: boolean | undefined;
+};
+type UmdLibraryPluginParsed = {
+  name: string | string[] | undefined;
+  names: LibraryCustomUmdObject;
+  auxiliaryComment: string | LibraryCustomUmdCommentObject | undefined;
+  namedDefine: boolean | undefined;
+};
 type T = UmdLibraryPluginParsed;

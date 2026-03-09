@@ -1,0 +1,22 @@
+```js title="rspack.config.js"
+const {
+  ModuleFederationPlugin,
+} = require('@module-federation/enhanced/rspack');
+
+module.exports = {
+  // ...
+  target: 'async-node',
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'node_host',
+      runtimePlugins: [
+        require.resolve('@module-federation/node/runtimePlugin'),
+      ],
+      remoteType: 'script',
+      remotes: {
+        node_remote: 'node_remote@http://localhost:3022/mf-manifest.json',
+      },
+    }),
+  ],
+};
+```

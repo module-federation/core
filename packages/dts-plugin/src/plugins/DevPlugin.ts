@@ -62,7 +62,7 @@ export class DevPlugin implements WebpackPluginInstance {
   ): void {
     ensureTempDir(filePath);
     const liveReloadEntry = fs
-      .readFileSync(path.join(__dirname, './iife/launch-web-client.js'))
+      .readFileSync(path.join(__dirname, './iife/launch-web-client.iife.js'))
       .toString('utf-8');
     const liveReloadEntryWithOptions = liveReloadEntry.replace(
       WEB_CLIENT_OPTIONS_IDENTIFIER,
@@ -271,6 +271,7 @@ export class DevPlugin implements WebpackPluginInstance {
         name,
         remote: remote,
         host: {
+          moduleFederationConfig: {},
           ...host,
           remoteTypeUrls,
         },

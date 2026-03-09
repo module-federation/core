@@ -1,54 +1,63 @@
-# Chrome DevTools
+# Chrome Devtool
 
-The `Microfrontend` architecture differs from the traditional monolithic application development model. Its characteristics of separate development, deployment, and debugging necessitate a new set of debugging tools to meet new usage scenarios, such as: how to verify the effect of modules in actual projects when developing `Module Federation`, whether the dependencies of `Module Federation` are reused with the host environment, which `Module Federation` modules are loaded on the current page, the dependency relationships of `Module Federation`, and how the data flow between `Module Federation` works.
+The `Micro-frontend` architecture differs from the traditional monolithic application development model. Its characteristics of separate development, deployment, and debugging require a new set of debugging tools to meet new usage scenarios, such as: how to verify the effect of modules in actual projects during `Module Federation` development, whether the dependencies of `Module Federation` are reused with the host environment, which `Module Federation` modules are loaded on the current page, the dependency relationships of `Module Federation`, and how data flows between `Module Federation` modules.
 
-`Chrome DevTools` provides the following capabilities:
+`Chrome Devtool` provides the following capabilities:
 
-- Support for `Module Federation` proxy functionality, which proxies the `Module Federation` on the online page to the user's local `Module Federation`.
-- Switch the version of `Module Federation` on the online page for rapid feature verification.
-- Support for viewing module dependency information.
-- Support for filtering specific module dependency information.
+- Supports `Module Federation` proxy function, proxying online page `Module Federation` to user local `Module Federation`.
+- Switch online page `Module Federation` versions for quick functional verification.
+- Support viewing module dependency information.
+- Support filtering specified module dependency information.
 
-::: tip About the limitations of Chrome DevTools:
-You must use `mf-manifest.json` to utilize the visualization and proxy capabilities provided by `Chrome DevTools`.
+::: tip Limitations of Chrome Devtool:
+
+You must use `mf-manifest.json` to use the visualization and proxy capabilities provided by `Chrome devtool`.
 
 :::
 
-## Use Cases
+## Usage Scenarios
 
-Development and production environments:
+DevTools provides multiple functional panels suitable for different debugging needs in development and production environments:
 
-- Existing modules need to be proxied, currently supporting the following scenarios:
+- **Proxy**: Used to proxy modules from online or test environments to the local development environment.
+  - Supports local service port numbers, e.g., key: appA -> value: `http://localhost:3000/mf-manifest.json`, the page will directly load `Module Federation` content from port 3000.
+  - Supports using `mf-manifest.json` file address format, e.g., key: appA -> value: `https://xxx/static/mf-manifest.json`, the page will directly load `Module Federation` content from the specified address.
 
-1. Support for local server port numbers, for example, key: appA -> value: `http://localhost:3000/mf-manifest.json`, the page will directly load the `Module Federation` content from port 3000.
-2. Support for using the `mf-manifest.json` file address format, for example, key: appA -> value: `https://xxx/static/mf-manifest.json`, the page will directly load the `Module Federation` content from the specified address.
+- **Module Info**: Used to view detailed information of all Federation modules loaded on the current page, including version, entry address, etc.
 
-- Want to see the remote dependency relationship graph.
+- **Dependency Graph**: Visually displays the dependency reference relationships between modules, helping to clarify complex micro-frontend architectures.
 
-![](@public/guide/chrome-devtools/features.png)
+- **Shared**: In-depth analysis of Shared Dependencies usage.
+  - View loaded and unloaded shared dependencies.
+  - Analyze version reuse of shared dependencies (Loaded / Reused).
+  - Check the effective status of configurations such as Singleton and Strict Version.
+
+![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/shared-overview.png)
 
 ## How to Install
 
-1. Open the [Module Federation plugin detail page](https://chromewebstore.google.com/detail/module-federation/aeoilchhomapofiopejjlecddfldpeom), and click the `Add to Chrome` button.
+1. Open the [Module Federation Plugin Details Page](https://chromewebstore.google.com/detail/module-federation/aeoilchhomapofiopejjlecddfldpeom?hl=zh-CN&utm_source=ext_sidebar), click the `Add to Chrome` button.
 
 ![](@public/guide/chrome-devtools/chrome-store-add-devtool.png)
 
 ## How to Use
 
-The plugin provides a DevTools panel:
+The plugin provides a Devtools panel.
 
-- Press F12 to open the developer tools, select and click the `Module Federation` tab to enter the proxy page, where you can proxy and debug the dependent modules.
-  ![](@public/guide/chrome-devtools/open-devtools.png)
+- F12 open developer tools, select click `Module Federation` tab, enter the proxy page, and you can debug the dependent modules.
+![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/launch-devtool.jpg)
 
 ## Overall Interaction
 
-As shown in the figure below, the proxy page provides options for operations such as `add new proxy module`, `producer selector`, `version or local port or custom entry`.
+As shown below, the proxy page provides options such as `add new proxy module`, `producer selector`, `version or local port or custom entry`, etc.
 
-- Select a module that needs to be proxied on the target page by choosing the `producer selector`.
-- Select or enter a specific address (including port number and address ending with `mf-manifest.json`) through `version or local port` to perform the proxy operation.
-- If you need to proxy multiple modules at the same time, click the `add new proxy module` area to add the corresponding proxy modules.
+- Select a module that the target page needs to proxy by selecting `producer selector`;
+- Select or enter the specified address (including port number and address ending with `mf-manifest.json`) through `version or local port` for proxy operation;
+- If you need to proxy multiple modules at the same time, click the `add new proxy module` area to add the corresponding proxy module.
+- **Support Multi-Tab Isolation**: When opening pages using Module Federation in multiple tabs simultaneously, the proxy rules and module information of each tab are independent. Proxy rules set in Tab A will not affect Tab B, and vice versa. This allows you to debug multiple environments or application states simultaneously.
 
-![](@public/guide/chrome-devtools/opereation-guide.png)
+![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/proxy.png)
+
 
 ## How to Proxy Locally Developed Modules to Online
 
@@ -56,26 +65,27 @@ As shown in the figure below, the proxy page provides options for operations suc
 
 ![](@public/guide/chrome-devtools/dev-to-proxy.png)
 
-- Then enter the successfully launched manifest address into the version selection input box on the proxy page.
-- After adjusting the local producer code, the consumer page will automatically Reload.
+- Then enter the successful manifest address into the version selection input box on the proxy page.
+- Afterward, adjust the local producer code, and the consumer page will automatically Reload.
 
 ![](@public/guide/chrome-devtools/proxy-to-local.png)
 
-## Common Issues
+## FAQ
 
-### DevTools Content is Too Crowded
+### Does it support multi-tab isolation debugging?
 
-You can open DevTools in a separate window.
+Yes, when you debug with multiple tabs open simultaneously, the Chrome DevTool plugin automatically identifies the current active tab and stores the proxy rules for each tab in isolation.
 
-![](@public/guide/chrome-devtools/split-window.png)
+- **Independent Storage**: Proxy configuration for Tab A only affects Tab A. After switching to Tab B, the panel automatically loads Tab B's configuration.
+- **State Persistence**: Even if multiple tabs load the same URL, their proxy states are physically isolated and do not interfere with each other.
+- **Automatic Switching**: Clicking the "Focus Tab" tag in DevTools confirms the target page currently being debugged.
 
-### When Does the Configuration Take Effect
+### When does the configuration take effect?
 
-- ✅ Complies with validation rules.
-- ✅ Configuration rules are checked.
-- ✅ Configuration is filled in correctly, the page shows: Proxy configuration is effective, remote module retrieval is successful, the corresponding page has been automatically refreshed.
+- ✅ Matches verification rules
+- ✅ Configuration rule is checked
+- ✅ Configuration filled in correctly, page displays: Proxy configuration has taken effect, remote module obtained successfully, corresponding page has been automatically refreshed.
 
+### Partial configuration matches rules
 
-### Partial Configuration Complies with Rules
-
-The plugin will filter out **modules that comply with the configuration rules** for proxying.
+The plugin will filter out **modules that match the configuration rules** for proxying.

@@ -1,4 +1,4 @@
-import { ModuleFederationRuntimePlugin } from '@module-federation/runtime/types';
+import { ModuleFederationRuntimePlugin } from '@module-federation/runtime';
 import type { CommonRetryOptions } from './types';
 import { fetchRetry } from './fetch-retry';
 import { scriptRetry } from './script-retry';
@@ -8,6 +8,10 @@ import {
   defaultRetryDelay,
 } from './constant';
 import logger from './logger';
+
+type LoadEntryErrorArgs = Parameters<
+  NonNullable<ModuleFederationRuntimePlugin['loadEntryError']>
+>[0];
 
 const RetryPlugin = (
   params?: CommonRetryOptions,
@@ -58,7 +62,7 @@ const RetryPlugin = (
       remoteEntryExports,
       globalLoading,
       uniqueKey,
-    }) {
+    }: LoadEntryErrorArgs) {
       const beforeExecuteRetry = () => {
         delete globalLoading[uniqueKey];
       };

@@ -57,7 +57,6 @@ export function isObject(val: any): boolean {
 
 export const objectToString = Object.prototype.toString;
 
-// eslint-disable-next-line @typescript-eslint/ban-types
 export function isPlainObject(val: any): val is object {
   return objectToString.call(val) === '[object Object]';
 }
@@ -89,7 +88,7 @@ export function getRemoteEntryInfoFromSnapshot(snapshot: ModuleInfo): {
     type: 'global',
     globalName: '',
   };
-  if (isBrowserEnv() || isReactNativeEnv()) {
+  if (isBrowserEnv() || isReactNativeEnv() || !('ssrRemoteEntry' in snapshot)) {
     return 'remoteEntry' in snapshot
       ? {
           url: snapshot.remoteEntry,

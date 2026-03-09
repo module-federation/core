@@ -1,0 +1,26 @@
+```ts
+import { createInstance } from '@module-federation/enhanced/runtime';
+
+const mf = createInstance({
+  name: 'node_host',
+  remotes: [
+    {
+      name: 'node_remote',
+      entry: 'http://localhost:3022/mf-manifest.json',
+    },
+  ],
+});
+
+async function handleHttpRequest(req: { query: any }, userId: string) {
+  const remote = await mf.loadRemote('node_remote/api-handler');
+
+  const result = await remote({
+    method: req.method,
+    path: req.path,
+    query: req.query,
+    body: req.body,
+    user: { id: 'u_123' },
+  });
+  res.status(result.status).json(result.body);
+}
+```

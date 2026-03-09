@@ -26,7 +26,7 @@ async function getLogger() {
 }
 
 import type { moduleFederationPlugin } from '@module-federation/sdk';
-import type { ModuleFederationConfig } from '@nx/webpack';
+import type { ModuleFederationConfig } from '@nx/module-federation';
 
 const { ModuleFederationPlugin } = container;
 

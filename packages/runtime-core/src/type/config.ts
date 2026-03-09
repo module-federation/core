@@ -3,6 +3,7 @@ import type {
   RemoteWithVersion,
   Module,
   RemoteEntryType,
+  TreeShakingStatus,
 } from '@module-federation/sdk';
 import { ModuleFederationRuntimePlugin } from './plugin';
 
@@ -54,6 +55,17 @@ export interface SharedConfig {
   layer?: string | null;
 }
 
+export type TreeShakingArgs = {
+  usedExports?: string[];
+  get?: SharedGetter;
+  lib?: () => Module;
+  status?: TreeShakingStatus;
+  mode?: 'server-calc' | 'runtime-infer';
+  loading?: null | Promise<any>;
+  loaded?: boolean;
+  useIn?: Array<string>;
+};
+
 type SharedBaseArgs = {
   version?: string;
   shareConfig?: SharedConfig;
@@ -61,6 +73,7 @@ type SharedBaseArgs = {
   deps?: Array<string>;
   strategy?: 'version-first' | 'loaded-first';
   loaded?: boolean;
+  treeShaking?: TreeShakingArgs;
 };
 
 export type SharedGetter = (() => () => Module) | (() => Promise<() => Module>);
@@ -70,6 +83,8 @@ export type ShareArgs =
   | (SharedBaseArgs & { lib: () => Module })
   | SharedBaseArgs;
 export type ShareStrategy = 'version-first' | 'loaded-first';
+
+export type NoMatchedUsedExportsItem = [from: string, usedExports?: string[]];
 export type Shared = {
   version: string;
   get: SharedGetter;
@@ -87,6 +102,8 @@ export type Shared = {
    * @deprecated set in initOptions.shareStrategy instead
    */
   strategy: ShareStrategy;
+  treeShaking?: TreeShakingArgs;
+  // _noMatchedUsedExports?: NoMatchedUsedExportsItem[];
 };
 
 export type ShareScopeMap = {

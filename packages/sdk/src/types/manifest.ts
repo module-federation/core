@@ -3,6 +3,7 @@ import {
   StatsAssets,
   StatsExpose,
   BasicStatsMetaData,
+  RemoteEntryType,
 } from './stats';
 import { RemoteWithEntry, RemoteWithVersion } from './common';
 
@@ -14,6 +15,9 @@ export interface ManifestShared {
   requiredVersion: string;
   hash: string;
   assets: StatsAssets;
+  fallback?: string;
+  fallbackName?: string;
+  fallbackType?: RemoteEntryType;
 }
 
 export interface ManifestRemoteCommonInfo {

@@ -259,12 +259,13 @@ export function generatePreloadAssets(
       shareInfo: Shared,
       snapshotShared: ModuleInfo['shared'][0],
     ) => {
-      const registeredShared = getRegisteredShare(
-        origin.shareScopeMap,
-        snapshotShared.sharedName,
-        shareInfo,
-        origin.sharedHandler.hooks.lifecycle.resolveShare,
-      );
+      const { shared: registeredShared } =
+        getRegisteredShare(
+          origin.shareScopeMap,
+          snapshotShared.sharedName,
+          shareInfo,
+          origin.sharedHandler.hooks.lifecycle.resolveShare,
+        ) || {};
       // If the global share does not exist, or the lib function does not exist, it means that the shared has not been loaded yet and can be preloaded.
 
       if (registeredShared && typeof registeredShared.lib === 'function') {

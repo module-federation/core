@@ -1,17 +1,25 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
-import { pathToFileURL } from 'node:url';
 import util from 'node:util';
 import { mergeConfig } from 'metro';
-import Server from 'metro/src/Server';
-import type { OutputOptions, RequestOptions } from 'metro/src/shared/types';
 import type { ModuleFederationConfigNormalized } from '../../types';
 import { CLIError } from '../../utils/errors';
+import {
+  applyTypesMetaToManifest,
+  maybeGenerateFederatedRemoteTypes,
+} from '../../utils/federated-remote-types';
+import type { OutputOptions, RequestOptions } from '../../utils/metro-compat';
+import { Server } from '../../utils/metro-compat';
 import type { Config } from '../types';
 import { createModulePathRemapper } from '../utils/create-module-path-remapper';
 import { createResolver } from '../utils/create-resolver';
 import loadMetroConfig from '../utils/load-metro-config';
+import {
+  normalizeOutputRelativePath,
+  toFileSourceUrl,
+} from '../utils/path-utils';
 import { saveBundleAndMap } from '../utils/save-bundle-and-map';
+import { toPosixPath } from '../../plugin/helpers';
 
 import type { BundleFederatedRemoteArgs } from './types';
 
@@ -218,9 +226,12 @@ async function bundleFederatedRemote(
   };
 
   // hack: resolve the container entry to register it as a virtual module
+  const relativeContainerEntryPath = toPosixPath(
+    path.relative(config.projectRoot, containerEntryFilepath),
+  );
   resolver.resolve({
     from: config.projectRoot,
-    to: `./${path.relative(config.projectRoot, containerEntryFilepath)}`,
+    to: `./${relativeContainerEntryPath}`,
   });
 
   const exposedModules = Object.entries(federationConfig.exposes)
@@ -273,26 +284,26 @@ async function bundleFederatedRemote(
         moduleOutputDir,
         moduleBundleName,
       );
+      const relativeModuleBundlePath = normalizeOutputRelativePath(
+        path.relative(outputDir, moduleBundleFilepath),
+      );
       // Metro requires `sourceURL` to be defined when doing bundle splitting
       // we use relative path and supply it in fileURL format to avoid issues
-      const moduleBundleUrl = pathToFileURL(
-        '/' + path.relative(outputDir, moduleBundleFilepath),
-      ).href;
+      const moduleBundleUrl = toFileSourceUrl(relativeModuleBundlePath);
       const moduleSourceMapName = `${moduleBundleName}.map`;
       const moduleSourceMapFilepath = path.resolve(
         moduleOutputDir,
         moduleSourceMapName,
       );
       // use relative path just like when bundling `index.bundle`
-      const moduleSourceMapUrl = path.relative(
-        outputDir,
-        moduleSourceMapFilepath,
+      const moduleSourceMapUrl = normalizeOutputRelativePath(
+        path.relative(outputDir, moduleSourceMapFilepath),
       );
 
       if (!isContainerModule) {
         modulePathRemapper.addMapping(
           moduleInputFilepath,
-          path.relative(outputDir, moduleBundleFilepath),
+          relativeModuleBundlePath,
         );
       }
 
@@ -338,9 +349,27 @@ async function bundleFederatedRemote(
       // );
     }
 
-    logger.info(`${util.styleText('blue', 'Processing manifest')}`);
     const manifestOutputFilepath = path.resolve(outputDir, 'mf-manifest.json');
-    await fs.copyFile(manifestFilepath, manifestOutputFilepath);
+
+    // Intentional: type assets are generated during remote bundling because
+    // they describe the remote container artifacts emitted by this command.
+    const typesMeta = await maybeGenerateFederatedRemoteTypes({
+      federationConfig,
+      projectRoot: config.projectRoot,
+      outputDir,
+      logger,
+    });
+
+    logger.info(`${util.styleText('blue', 'Processing manifest')}`);
+    const rawManifest = JSON.parse(
+      await fs.readFile(manifestFilepath, 'utf-8'),
+    );
+    applyTypesMetaToManifest(rawManifest, typesMeta);
+    await fs.writeFile(
+      manifestOutputFilepath,
+      JSON.stringify(rawManifest, undefined, 2),
+      'utf-8',
+    );
     logger.info(
       `Done writing MF Manifest to:\n${util.styleText('dim', manifestOutputFilepath)}`,
     );

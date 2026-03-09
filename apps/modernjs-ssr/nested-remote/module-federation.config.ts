@@ -1,4 +1,4 @@
-import { createModuleFederationConfig } from '@module-federation/modern-js';
+import { createModuleFederationConfig } from '@module-federation/modern-js-v3';
 export default createModuleFederationConfig({
   name: 'nested_remote',
   filename: 'remoteEntry.js',

@@ -16,7 +16,7 @@ The following items are exported:
 
 ## Documentation
 
-See [https://module-federation.io/guide/basic/webpack.html](https://module-federation.io/guide/basic/webpack.html) for details.
+See [https://module-federation.io/guide/build-plugins/plugins.html](https://module-federation.io/guide/build-plugins/plugins.html) for details.
 
 ## ModuleFederationPlugin
 

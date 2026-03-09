@@ -1,0 +1,36 @@
+## 自建 Deploy Server
+
+如果你打算自建部署服务（Deploy Server），可以参考下面这套流程来落地 `server-calc`。
+
+1.  **部署阶段：汇总 `usedExports`**
+    在 CI/CD 部署流程中，你的部署服务需要：
+
+    - 收集所有即将上线应用的构建元信息（通常是 `mf-stats.json` 或同类文件）。
+    - 针对同一份共享依赖（例如 `antd@6.1.0`），汇总各应用声明的 `usedExports` 列表。
+
+2.  **计算全局最小并集**
+    合并并去重所有应用的 `usedExports`，得到该共享依赖在全局范围内必需模块的最小集合（并集）。
+
+3.  **触发二次构建（生成优化共享包）**
+    调用构建工具（如 Rspack CLI），以独立构建的方式传入关键信息：
+
+    - 目标共享依赖的名称与版本（如 `antd@6.1.0`）。
+    - 上一步得到的全局 `usedExports` 最小并集。
+      构建完成后，产出一个仅包含这些模块、体积更小的独立共享包。
+
+4.  **更新并下发 Snapshot**
+    将新生成的优化包上传到静态资源服务器（CDN）。然后，更新模块联邦的 `Snapshot` 文件（通常是远程的 `mf-manifest.json`），写入或更新以下关键字段：
+
+    - `secondarySharedTreeShakingEntry`: 指向新生成的优化包的 URL。
+    - `secondarySharedTreeShakingName`: 优化包的唯一名称。
+    - `treeShakingStatus`: 标记为可用状态。
+      最后，将更新后的 `Snapshot` 文件下发给所有消费者应用。
+
+5.  **运行时按需加载**
+    当用户访问应用时，MF Runtime 会读取 `Snapshot`。如果检测到 `treeShakingStatus` 可用且满足加载条件，它会自动加载 `secondarySharedTreeShakingEntry` 指向的优化包，而不是全量包。
+
+**版本、缓存与兼容性建议**：
+
+- **严格版本管理**是策略的基石。确保二次构建与运行时加载都基于精确版本号（如 `antd@6.1.0`），避免不匹配。
+- 为二次构建产物设置**合理缓存策略**。由于内容会随全局 `usedExports` 变化，建议使用基于内容哈希的命名，实现长期缓存。
+- 该流程天然**向前兼容**：未启用或不满足条件时仍加载全量包，不影响现有功能。

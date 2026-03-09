@@ -6,7 +6,7 @@ import {
   composeKeyWithSeparator,
   moduleFederationPlugin,
 } from '@module-federation/sdk';
-import type { StatsModule } from 'webpack';
+import type { StatsModule } from 'webpack/lib/stats/DefaultStatsFactoryPlugin';
 import path from 'path';
 import {
   ContainerManager,
@@ -199,6 +199,8 @@ export const getShareItem = ({
     },
     // @ts-ignore to deduplicate
     usedIn: new Set(),
+    usedExports: [],
+    fallback: '',
   };
 };
 
@@ -560,10 +562,7 @@ class ModuleHandler {
 
       if (isRemoteModule(identifier)) {
         this._handleRemoteModule(mod, remotes, remotesConsumerMap);
-      } else if (
-        !this._containerManager.enable &&
-        isContainerModule(identifier)
-      ) {
+      } else if (isContainerModule(identifier)) {
         this._handleContainerModule(mod, exposesMap);
       }
     });

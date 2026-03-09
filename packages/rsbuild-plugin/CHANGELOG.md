@@ -1,5 +1,83 @@
 # @module-federation/rsbuild-plugin
 
+## 2.1.0
+
+### Patch Changes
+
+- dfbf05f: Fix app-mode `target: 'node'` handling to respect custom `environment` names, improve missing-environment errors, auto-detect default environment names by caller/tooling when `environment` is omitted, and ensure selected node-target environments still receive federation plugin injection for commonjs-like SSR outputs.
+- Updated dependencies [987716a]
+- Updated dependencies [0172491]
+- Updated dependencies [a0faa70]
+- Updated dependencies [918294f]
+  - @module-federation/enhanced@2.1.0
+  - @module-federation/node@2.7.33
+  - @module-federation/sdk@2.1.0
+
+## 2.0.1
+
+### Patch Changes
+
+- @module-federation/enhanced@2.0.1
+- @module-federation/node@2.7.32
+- @module-federation/sdk@2.0.1
+
+## 2.0.0
+
+### Major Changes
+
+- 2bd445d: feat: upgrade to modern js 3.0
+
+### Patch Changes
+
+- @module-federation/enhanced@2.0.0
+- @module-federation/node@2.7.31
+- @module-federation/sdk@2.0.0
+
+## 0.24.1
+
+### Patch Changes
+
+- @module-federation/node@2.7.30
+- @module-federation/enhanced@0.24.1
+- @module-federation/sdk@0.24.1
+
+## 0.24.0
+
+### Patch Changes
+
+- Updated dependencies [c3c068e]
+  - @module-federation/enhanced@0.24.0
+  - @module-federation/node@2.7.29
+  - @module-federation/sdk@0.24.0
+
+## 0.23.0
+
+### Minor Changes
+
+- 3aa3cf9: feat(rsbuild-plugin): support build node mf assets
+
+### Patch Changes
+
+- @module-federation/enhanced@0.23.0
+- @module-federation/node@2.7.28
+- @module-federation/sdk@0.23.0
+
+## 0.22.1
+
+### Patch Changes
+
+- @module-federation/enhanced@0.22.1
+- @module-federation/sdk@0.22.1
+- @module-federation/node@2.7.27
+
+## 0.22.0
+
+### Patch Changes
+
+- @module-federation/enhanced@0.22.0
+- @module-federation/sdk@0.22.0
+- @module-federation/node@2.7.26
+
 ## 0.21.6
 
 ### Patch Changes

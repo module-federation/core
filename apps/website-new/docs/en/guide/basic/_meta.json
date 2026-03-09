@@ -1,13 +1,8 @@
 [
-  {
-  "type": "dir",
-  "name": "runtime",
-  "label": "Runtime"
-  },
-  "rsbuild", "rspack", "webpack", "rspress","vite","metro","type-prompt","cli", "css-isolate",
-  {
-  "type": "dir",
-  "name": "data-fetch",
-  "label": "Data Solution"
-  }
+  "cli",
+  "css-isolate",
+  "type-prompt",
+  "data-fetch",
+  "data-fetch-cache",
+  "data-fetch-prefetch"
 ]

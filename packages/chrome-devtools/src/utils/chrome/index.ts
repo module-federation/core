@@ -22,6 +22,33 @@ export const TabInfo = {
   currentTabId: 0,
 };
 
+export const setTargetTab = (tab?: chrome.tabs.Tab | null) => {
+  if (!tab || typeof tab.id !== 'number') {
+    return;
+  }
+  window.targetTab = tab;
+  TabInfo.currentTabId = tab.id;
+};
+
+export const syncActiveTab = async (tabId?: number) => {
+  try {
+    if (typeof tabId === 'number') {
+      const tab = await chrome.tabs.get(tabId);
+      setTargetTab(tab);
+      return tab;
+    }
+    const [activeTab] = await getTabs({
+      active: true,
+      lastFocusedWindow: true,
+    });
+    setTargetTab(activeTab);
+    return activeTab;
+  } catch (error) {
+    console.warn('[Module Federation Devtools] syncActiveTab failed', error);
+    return undefined;
+  }
+};
+
 export function getCurrentTabId() {
   return TabInfo.currentTabId;
 }
@@ -41,7 +68,7 @@ export function getInspectWindowTabId() {
             const target = tabs.find(
               (tab: chrome.tabs.Tab) => tab.id === tabId,
             );
-            window.targetTab = target as chrome.tabs.Tab;
+            setTargetTab(target as chrome.tabs.Tab);
           });
           console.log(
             'chrome.devtools.inspectedWindow.tabId',
@@ -56,7 +83,7 @@ export function getInspectWindowTabId() {
       );
     } else {
       // chrome devtool e2e test，The test window opens independently
-      if (window.targetTab && window.targetTab.id) {
+      if (window.targetTab?.id) {
         const tabId = window.targetTab.id;
         TabInfo.currentTabId = tabId;
         resolve(tabId);
@@ -67,57 +94,76 @@ export function getInspectWindowTabId() {
   });
 }
 
-export const getGlobalModuleInfo = async (
-  callback: React.Dispatch<React.SetStateAction<GlobalModuleInfo>>,
-) => {
-  await sleep(300);
-
-  chrome.runtime.onMessage.addListener(
-    (message: { origin: string; data: any }) => {
-      const { origin, data } = message;
-
-      if (!data || data?.appInfos) {
-        return;
-      }
-      if (!window?.__FEDERATION__) {
-        definePropertyGlobalVal(window, '__FEDERATION__', {});
-        definePropertyGlobalVal(window, '__VMOK__', window.__FEDERATION__);
-      }
-      window.__FEDERATION__.originModuleInfo = JSON.parse(
-        JSON.stringify(data?.moduleInfo),
-      );
-      if (data?.updateModule) {
-        const moduleIds = Object.keys(window.__FEDERATION__.originModuleInfo);
-        const shouldUpdate = !moduleIds.some((id) =>
-          id.includes(data.updateModule.name),
-        );
-        if (shouldUpdate) {
-          const destination =
-            data.updateModule.entry || data.updateModule.version;
-          window.__FEDERATION__.originModuleInfo[
-            `${data.updateModule.name}:${destination}`
-          ] = {
-            remoteEntry: destination,
-            version: destination,
-          };
-        }
-      }
-      window.__FEDERATION__.moduleInfo = JSON.parse(
-        JSON.stringify(window.__FEDERATION__.originModuleInfo),
-      );
-      callback(window.__FEDERATION__.moduleInfo);
-    },
-  );
+export const refreshModuleInfo = async () => {
+  if (typeof window !== 'undefined' && window.__FEDERATION__?.moduleInfo) {
+    // noop - consumers can synchronise from existing cache
+  }
+  await sleep(50);
   const postMessageStartUrl = getUrl('post-message-start.js');
   await injectScript(injectPostMessage, false, postMessageStartUrl);
+};
+
+export const getGlobalModuleInfo = async (
+  callback: (moduleInfo: GlobalModuleInfo) => void,
+) => {
+  if (typeof window !== 'undefined' && window.__FEDERATION__?.moduleInfo) {
+    callback(
+      JSON.parse(
+        JSON.stringify(window.__FEDERATION__?.moduleInfo),
+      ) as GlobalModuleInfo,
+    );
+  }
+  await sleep(300);
+
+  const listener = (message: { origin: string; data: any }) => {
+    const { data } = message;
+
+    if (!data || data?.appInfos) {
+      return;
+    }
+    if (!window?.__FEDERATION__) {
+      definePropertyGlobalVal(window, '__FEDERATION__', {});
+      definePropertyGlobalVal(window, '__VMOK__', window.__FEDERATION__);
+    }
+    window.__FEDERATION__.originModuleInfo = JSON.parse(
+      JSON.stringify(data?.moduleInfo),
+    );
+    if (data?.updateModule) {
+      const moduleIds = Object.keys(window.__FEDERATION__.originModuleInfo);
+      const shouldUpdate = !moduleIds.some((id) =>
+        id.includes(data.updateModule.name),
+      );
+      if (shouldUpdate) {
+        const destination =
+          data.updateModule.entry || data.updateModule.version;
+        window.__FEDERATION__.originModuleInfo[
+          `${data.updateModule.name}:${destination}`
+        ] = {
+          remoteEntry: destination,
+          version: destination,
+        };
+      }
+    }
+    if (data?.share) {
+      window.__FEDERATION__.__SHARE__ = data.share;
+    }
+    window.__FEDERATION__.moduleInfo = JSON.parse(
+      JSON.stringify(window.__FEDERATION__.originModuleInfo),
+    );
+    console.log('getGlobalModuleInfo window', window.__FEDERATION__);
+    callback(window.__FEDERATION__.moduleInfo);
+  };
+  chrome.runtime.onMessage.addListener(listener);
+  await refreshModuleInfo();
+  return () => chrome.runtime.onMessage.removeListener(listener);
 };
 
 export const getTabs = (queryOptions = {}) => chrome.tabs.query(queryOptions);
 
 export const getScope = async () => {
   const activeTab = window.targetTab;
-  const favIconUrl = activeTab?.favIconUrl;
-  return favIconUrl || 'noScope';
+  const tabId = activeTab?.id;
+  return tabId ? String(tabId) : 'noScope';
 };
 
 export const injectScript = async (
@@ -135,11 +181,16 @@ export const injectScript = async (
       world: world ? 'MAIN' : 'ISOLATED',
       args,
     })
-    .then(() => {
+    .then((results) => {
       console.log('InjectScript success, excuteScript:', args);
+      if (Array.isArray(results) && results.length) {
+        return results[0]?.result;
+      }
+      return undefined;
     })
     .catch((e) => {
       console.log(e, 'InjectScript fail, excuteScript:', args);
+      return undefined;
     });
 };
 

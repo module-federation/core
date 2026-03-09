@@ -1,11 +1,13 @@
 # Configuration Overview
 
-The current page lists all the configuration options for `Module Federation`. Please refer to the documentation for [`Rspack Plugin`](../guide/basic/rspack) and [`Webpack Plugin`](../guide/basic/webpack) and [`Vite Plugin`](../guide/basic/vite) to understand how to use them.
+The current page lists all the configuration options for `Module Federation`. Please refer to the documentation for [`Build Plugins`](../guide/build-plugins/plugins) to understand how to use them.
 
 ```ts
 type ModuleFederationOptions = {
   // Name for module federation
   name: string;
+  // Share scope(s) for the current app (default: 'default')
+  shareScope?: string | string[];
   // Name for the remoteEntry file
   filename?: string;
   // Configuration for remote modules and entry information in module federation
@@ -28,5 +30,9 @@ type ModuleFederationOptions = {
   dts?: boolean | PluginDtsOptions;
   // Use a virtual runtime entrypoint instead of writing a temporary file to disk
   virtualRuntimeEntry?: boolean;
+  injectTreeShakingUsedExports?: boolean;
+  treeShakingDir?: string;
+  treeShakingSharedPlugins?: Array<string>;
+  treeShakingSharedExcludePlugins?: Array<string>;
 };
 ```

@@ -1,4 +1,6 @@
 export = Compilation;
+/** @typedef {{ id: ModuleId, modules?: Map<Module, ModuleId>, blocks?: (ChunkId | null)[] }} References */
+/** @typedef {Map<Module, WeakTupleMap<EXPECTED_ANY[], EXPECTED_ANY>>} ModuleMemCaches */
 declare class Compilation {
   /**
    * Creates an instance of Compilation.
@@ -24,9 +26,9 @@ declare class Compilation {
     failedEntry: SyncHook<[Dependency, EntryOptions, Error]>;
     /** @type {SyncHook<[Dependency, EntryOptions, Module]>} */
     succeedEntry: SyncHook<[Dependency, EntryOptions, Module]>;
-    /** @type {SyncWaterfallHook<[(string[] | ReferencedExport)[], Dependency, RuntimeSpec]>} */
+    /** @type {SyncWaterfallHook<[ReferencedExports, Dependency, RuntimeSpec]>} */
     dependencyReferencedExports: SyncWaterfallHook<
-      [(string[] | ReferencedExport)[], Dependency, RuntimeSpec]
+      [ReferencedExports, Dependency, RuntimeSpec]
     >;
     /** @type {SyncHook<[ExecuteModuleArgument, ExecuteModuleContext]>} */
     executeModule: SyncHook<[ExecuteModuleArgument, ExecuteModuleContext]>;
@@ -79,36 +81,45 @@ declare class Compilation {
     >;
     /** @type {SyncHook<[Iterable<Chunk>, Iterable<Module>]>} */
     afterOptimizeChunkModules: SyncHook<[Iterable<Chunk>, Iterable<Module>]>;
-    /** @type {SyncBailHook<[], boolean | undefined>} */
-    shouldRecord: SyncBailHook<[], boolean | undefined>;
-    /** @type {SyncHook<[Chunk, Set<string>, RuntimeRequirementsContext]>} */
+    /** @type {SyncBailHook<[], boolean | void>} */
+    shouldRecord: SyncBailHook<[], boolean | void>;
+    /** @type {SyncHook<[Chunk, RuntimeRequirements, RuntimeRequirementsContext]>} */
     additionalChunkRuntimeRequirements: SyncHook<
-      [Chunk, Set<string>, RuntimeRequirementsContext]
+      [Chunk, RuntimeRequirements, RuntimeRequirementsContext]
     >;
-    /** @type {HookMap<SyncBailHook<[Chunk, Set<string>, RuntimeRequirementsContext], void>>} */
+    /** @type {HookMap<SyncBailHook<[Chunk, RuntimeRequirements, RuntimeRequirementsContext], void>>} */
     runtimeRequirementInChunk: HookMap<
-      SyncBailHook<[Chunk, Set<string>, RuntimeRequirementsContext], void>
+      SyncBailHook<
+        [Chunk, RuntimeRequirements, RuntimeRequirementsContext],
+        void
+      >
     >;
-    /** @type {SyncHook<[Module, Set<string>, RuntimeRequirementsContext]>} */
+    /** @type {SyncHook<[Module, RuntimeRequirements, RuntimeRequirementsContext]>} */
     additionalModuleRuntimeRequirements: SyncHook<
-      [Module, Set<string>, RuntimeRequirementsContext]
+      [Module, RuntimeRequirements, RuntimeRequirementsContext]
     >;
-    /** @type {HookMap<SyncBailHook<[Module, Set<string>, RuntimeRequirementsContext], void>>} */
+    /** @type {HookMap<SyncBailHook<[Module, RuntimeRequirements, RuntimeRequirementsContext], void>>} */
     runtimeRequirementInModule: HookMap<
-      SyncBailHook<[Module, Set<string>, RuntimeRequirementsContext], void>
+      SyncBailHook<
+        [Module, RuntimeRequirements, RuntimeRequirementsContext],
+        void
+      >
     >;
-    /** @type {SyncHook<[Chunk, Set<string>, RuntimeRequirementsContext]>} */
+    /** @type {SyncHook<[Chunk, RuntimeRequirements, RuntimeRequirementsContext]>} */
     additionalTreeRuntimeRequirements: SyncHook<
-      [Chunk, Set<string>, RuntimeRequirementsContext]
+      [Chunk, RuntimeRequirements, RuntimeRequirementsContext]
     >;
-    /** @type {HookMap<SyncBailHook<[Chunk, Set<string>, RuntimeRequirementsContext], void>>} */
+    /** @type {HookMap<SyncBailHook<[Chunk, RuntimeRequirements, RuntimeRequirementsContext], void>>} */
     runtimeRequirementInTree: HookMap<
-      SyncBailHook<[Chunk, Set<string>, RuntimeRequirementsContext], void>
+      SyncBailHook<
+        [Chunk, RuntimeRequirements, RuntimeRequirementsContext],
+        void
+      >
     >;
     /** @type {SyncHook<[RuntimeModule, Chunk]>} */
     runtimeModule: SyncHook<[RuntimeModule, Chunk]>;
-    /** @type {SyncHook<[Iterable<Module>, any]>} */
-    reviveModules: SyncHook<[Iterable<Module>, any]>;
+    /** @type {SyncHook<[Iterable<Module>, Records]>} */
+    reviveModules: SyncHook<[Iterable<Module>, Records]>;
     /** @type {SyncHook<[Iterable<Module>]>} */
     beforeModuleIds: SyncHook<[Iterable<Module>]>;
     /** @type {SyncHook<[Iterable<Module>]>} */
@@ -117,8 +128,8 @@ declare class Compilation {
     optimizeModuleIds: SyncHook<[Iterable<Module>]>;
     /** @type {SyncHook<[Iterable<Module>]>} */
     afterOptimizeModuleIds: SyncHook<[Iterable<Module>]>;
-    /** @type {SyncHook<[Iterable<Chunk>, any]>} */
-    reviveChunks: SyncHook<[Iterable<Chunk>, any]>;
+    /** @type {SyncHook<[Iterable<Chunk>, Records]>} */
+    reviveChunks: SyncHook<[Iterable<Chunk>, Records]>;
     /** @type {SyncHook<[Iterable<Chunk>]>} */
     beforeChunkIds: SyncHook<[Iterable<Chunk>]>;
     /** @type {SyncHook<[Iterable<Chunk>]>} */
@@ -127,10 +138,10 @@ declare class Compilation {
     optimizeChunkIds: SyncHook<[Iterable<Chunk>]>;
     /** @type {SyncHook<[Iterable<Chunk>]>} */
     afterOptimizeChunkIds: SyncHook<[Iterable<Chunk>]>;
-    /** @type {SyncHook<[Iterable<Module>, any]>} */
-    recordModules: SyncHook<[Iterable<Module>, any]>;
-    /** @type {SyncHook<[Iterable<Chunk>, any]>} */
-    recordChunks: SyncHook<[Iterable<Chunk>, any]>;
+    /** @type {SyncHook<[Iterable<Module>, Records]>} */
+    recordModules: SyncHook<[Iterable<Module>, Records]>;
+    /** @type {SyncHook<[Iterable<Chunk>, Records]>} */
+    recordChunks: SyncHook<[Iterable<Chunk>, Records]>;
     /** @type {SyncHook<[Iterable<Module>]>} */
     optimizeCodeGeneration: SyncHook<[Iterable<Module>]>;
     /** @type {SyncHook<[]>} */
@@ -151,49 +162,46 @@ declare class Compilation {
     contentHash: SyncHook<[Chunk]>;
     /** @type {SyncHook<[]>} */
     afterHash: SyncHook<[]>;
-    /** @type {SyncHook<[any]>} */
-    recordHash: SyncHook<[any]>;
-    /** @type {SyncHook<[Compilation, any]>} */
-    record: SyncHook<[Compilation, any]>;
+    /** @type {SyncHook<[Records]>} */
+    recordHash: SyncHook<[Records]>;
+    /** @type {SyncHook<[Compilation, Records]>} */
+    record: SyncHook<[Compilation, Records]>;
     /** @type {SyncHook<[]>} */
     beforeModuleAssets: SyncHook<[]>;
-    /** @type {SyncBailHook<[], boolean>} */
-    shouldGenerateChunkAssets: SyncBailHook<[], boolean>;
+    /** @type {SyncBailHook<[], boolean | void>} */
+    shouldGenerateChunkAssets: SyncBailHook<[], boolean | void>;
     /** @type {SyncHook<[]>} */
     beforeChunkAssets: SyncHook<[]>;
     /** @deprecated */
     additionalChunkAssets: FakeHook<
       Pick<
-        AsyncSeriesHook<[Set<Chunk>], import('tapable').UnsetAdditionalOptions>,
-        'name' | 'tap' | 'tapAsync' | 'tapPromise'
+        AsyncSeriesHook<[Chunks]>,
+        'tap' | 'tapAsync' | 'tapPromise' | 'name'
       >
     >;
     /** @deprecated */
     additionalAssets: FakeHook<
-      Pick<
-        AsyncSeriesHook<[], import('tapable').UnsetAdditionalOptions>,
-        'name' | 'tap' | 'tapAsync' | 'tapPromise'
-      >
+      Pick<AsyncSeriesHook<[]>, 'tap' | 'tapAsync' | 'tapPromise' | 'name'>
     >;
     /** @deprecated */
     optimizeChunkAssets: FakeHook<
       Pick<
-        AsyncSeriesHook<[Set<Chunk>], import('tapable').UnsetAdditionalOptions>,
-        'name' | 'tap' | 'tapAsync' | 'tapPromise'
+        AsyncSeriesHook<[Chunks]>,
+        'tap' | 'tapAsync' | 'tapPromise' | 'name'
       >
     >;
     /** @deprecated */
     afterOptimizeChunkAssets: FakeHook<
       Pick<
-        AsyncSeriesHook<[Set<Chunk>], import('tapable').UnsetAdditionalOptions>,
-        'name' | 'tap' | 'tapAsync' | 'tapPromise'
+        AsyncSeriesHook<[Chunks]>,
+        'tap' | 'tapAsync' | 'tapPromise' | 'name'
       >
     >;
     /** @deprecated */
     optimizeAssets: AsyncSeriesHook<
       [CompilationAssets],
       {
-        additionalAssets?: true | Function;
+        additionalAssets?: boolean | ((assets: CompilationAssets) => void);
       }
     >;
     /** @deprecated */
@@ -205,7 +213,7 @@ declare class Compilation {
     processAssets: AsyncSeriesHook<
       [CompilationAssets],
       {
-        additionalAssets?: true | Function;
+        additionalAssets?: boolean | ((assets: CompilationAssets) => void);
       }
     >;
     afterProcessAssets: SyncHook<
@@ -215,8 +223,8 @@ declare class Compilation {
     >;
     /** @type {AsyncSeriesHook<[CompilationAssets]>} */
     processAdditionalAssets: AsyncSeriesHook<[CompilationAssets]>;
-    /** @type {SyncBailHook<[], boolean | undefined>} */
-    needAdditionalSeal: SyncBailHook<[], boolean | undefined>;
+    /** @type {SyncBailHook<[], boolean | void>} */
+    needAdditionalSeal: SyncBailHook<[], boolean | void>;
     /** @type {AsyncSeriesHook<[]>} */
     afterSeal: AsyncSeriesHook<[]>;
     /** @type {SyncWaterfallHook<[RenderManifestEntry[], RenderManifestOptions]>} */
@@ -231,18 +239,18 @@ declare class Compilation {
     moduleAsset: SyncHook<[Module, string]>;
     /** @type {SyncHook<[Chunk, string]>} */
     chunkAsset: SyncHook<[Chunk, string]>;
-    /** @type {SyncWaterfallHook<[string, object, AssetInfo | undefined]>} */
-    assetPath: SyncWaterfallHook<[string, object, AssetInfo | undefined]>;
-    /** @type {SyncBailHook<[], boolean>} */
-    needAdditionalPass: SyncBailHook<[], boolean>;
+    /** @type {SyncWaterfallHook<[string, PathData, AssetInfo | undefined]>} */
+    assetPath: SyncWaterfallHook<[string, PathData, AssetInfo | undefined]>;
+    /** @type {SyncBailHook<[], boolean | void>} */
+    needAdditionalPass: SyncBailHook<[], boolean | void>;
     /** @type {SyncHook<[Compiler, string, number]>} */
     childCompiler: SyncHook<[Compiler, string, number]>;
-    /** @type {SyncBailHook<[string, LogEntry], true>} */
-    log: SyncBailHook<[string, LogEntry], true>;
-    /** @type {SyncWaterfallHook<[WebpackError[]]>} */
-    processWarnings: SyncWaterfallHook<[WebpackError[]]>;
-    /** @type {SyncWaterfallHook<[WebpackError[]]>} */
-    processErrors: SyncWaterfallHook<[WebpackError[]]>;
+    /** @type {SyncBailHook<[string, LogEntry], boolean | void>} */
+    log: SyncBailHook<[string, LogEntry], boolean | void>;
+    /** @type {SyncWaterfallHook<[Error[]]>} */
+    processWarnings: SyncWaterfallHook<[Error[]]>;
+    /** @type {SyncWaterfallHook<[Error[]]>} */
+    processErrors: SyncWaterfallHook<[Error[]]>;
     /** @type {HookMap<SyncHook<[Partial<NormalizedStatsOptions>, CreateStatsOptionsContext]>>} */
     statsPreset: HookMap<
       SyncHook<[Partial<NormalizedStatsOptions>, CreateStatsOptionsContext]>
@@ -256,7 +264,7 @@ declare class Compilation {
     /** @type {SyncHook<[StatsPrinter, NormalizedStatsOptions]>} */
     statsPrinter: SyncHook<[StatsPrinter, NormalizedStatsOptions]>;
     readonly normalModuleLoader: SyncHook<
-      [import('./NormalModule').LoaderContext<any>, import('./NormalModule')],
+      [import('./NormalModule').AnyLoaderContext, import('./NormalModule')],
       void,
       import('tapable').UnsetAdditionalOptions
     >;
@@ -273,13 +281,13 @@ declare class Compilation {
   /** @type {InputFileSystem} */
   inputFileSystem: InputFileSystem;
   fileSystemInfo: FileSystemInfo;
-  /** @type {Map<string, ValueCacheVersion>} */
-  valueCacheVersions: Map<string, ValueCacheVersion>;
+  /** @type {ValueCacheVersions} */
+  valueCacheVersions: ValueCacheVersions;
   requestShortener: import('./RequestShortener');
   compilerPath: string;
   logger: Logger;
-  options: import('../declarations/WebpackOptions').WebpackOptionsNormalized;
-  outputOptions: import('../declarations/WebpackOptions').OutputNormalized;
+  options: import('./config/defaults').WebpackOptionsNormalizedWithDefaults;
+  outputOptions: import('./config/defaults').OutputNormalizedWithDefaults;
   /** @type {boolean} */
   bail: boolean;
   /** @type {boolean} */
@@ -290,15 +298,16 @@ declare class Compilation {
   runtimeTemplate: RuntimeTemplate;
   /** @type {ModuleTemplates} */
   moduleTemplates: ModuleTemplates;
-  /** @type {Map<Module, WeakTupleMap<any, any>> | undefined} */
-  moduleMemCaches: Map<Module, WeakTupleMap<any, any>> | undefined;
-  /** @type {Map<Module, WeakTupleMap<any, any>> | undefined} */
-  moduleMemCaches2: Map<Module, WeakTupleMap<any, any>> | undefined;
+  /** @type {ModuleMemCaches | undefined} */
+  moduleMemCaches: ModuleMemCaches | undefined;
+  /** @type {ModuleMemCaches | undefined} */
+  moduleMemCaches2: ModuleMemCaches | undefined;
+  /** @type {ModuleGraph} */
   moduleGraph: ModuleGraph;
   /** @type {ChunkGraph} */
   chunkGraph: ChunkGraph;
-  /** @type {CodeGenerationResults} */
-  codeGenerationResults: CodeGenerationResults;
+  /** @type {CodeGenerationResults | undefined} */
+  codeGenerationResults: CodeGenerationResults | undefined;
   /** @type {AsyncQueue<Module, Module, Module>} */
   processDependenciesQueue: AsyncQueue<Module, Module, Module>;
   /** @type {AsyncQueue<Module, string, Module>} */
@@ -320,16 +329,16 @@ declare class Compilation {
    * @type {WeakMap<Module, Set<Module>>}
    */
   creatingModuleDuringBuild: WeakMap<Module, Set<Module>>;
-  /** @type {Map<string, EntryData>} */
-  entries: Map<string, EntryData>;
+  /** @type {Map<Exclude<ChunkName, null>, EntryData>} */
+  entries: Map<Exclude<ChunkName, null>, EntryData>;
   /** @type {EntryData} */
   globalEntry: EntryData;
   /** @type {Map<string, Entrypoint>} */
   entrypoints: Map<string, Entrypoint>;
   /** @type {Entrypoint[]} */
   asyncEntrypoints: Entrypoint[];
-  /** @type {Set<Chunk>} */
-  chunks: Set<Chunk>;
+  /** @type {Chunks} */
+  chunks: Chunks;
   /** @type {ChunkGroup[]} */
   chunkGroups: ChunkGroup[];
   /** @type {Map<string, ChunkGroup>} */
@@ -343,7 +352,8 @@ declare class Compilation {
    * @type {Map<string, Module>}
    */
   private _modules;
-  records: any;
+  /** @type {Records | null} */
+  records: Records | null;
   /** @type {string[]} */
   additionalChunkAssets: string[];
   /** @type {CompilationAssets} */
@@ -352,70 +362,56 @@ declare class Compilation {
   assetsInfo: Map<string, AssetInfo>;
   /** @type {Map<string, Map<string, Set<string>>>} */
   _assetsRelatedIn: Map<string, Map<string, Set<string>>>;
-  /** @type {WebpackError[]} */
-  errors: WebpackError[];
-  /** @type {WebpackError[]} */
-  warnings: WebpackError[];
+  /** @type {Error[]} */
+  errors: Error[];
+  /** @type {Error[]} */
+  warnings: Error[];
   /** @type {Compilation[]} */
   children: Compilation[];
   /** @type {Map<string, LogEntry[]>} */
   logging: Map<string, LogEntry[]>;
-  /** @type {Map<DepConstructor, ModuleFactory>} */
-  dependencyFactories: Map<DepConstructor, ModuleFactory>;
+  /** @type {Map<DependencyConstructor, ModuleFactory>} */
+  dependencyFactories: Map<DependencyConstructor, ModuleFactory>;
   /** @type {DependencyTemplates} */
   dependencyTemplates: DependencyTemplates;
   /** @type {Record<string, number>} */
   childrenCounters: Record<string, number>;
-  /** @type {Set<number|string>} */
-  usedChunkIds: Set<number | string>;
-  /** @type {Set<number>} */
-  usedModuleIds: Set<number>;
+  /** @type {Set<number> | null} */
+  usedChunkIds: Set<number> | null;
+  /** @type {Set<number> | null} */
+  usedModuleIds: Set<number> | null;
   /** @type {boolean} */
   needAdditionalPass: boolean;
-  /** @type {Set<Module & { restoreFromUnsafeCache: Function }>} */
-  _restoredUnsafeCacheModuleEntries: Set<
-    Module & {
-      restoreFromUnsafeCache: Function;
-    }
-  >;
-  /** @type {Map<string, Module & { restoreFromUnsafeCache: Function }>} */
-  _restoredUnsafeCacheEntries: Map<
-    string,
-    Module & {
-      restoreFromUnsafeCache: Function;
-    }
-  >;
+  /** @type {Set<ModuleWithRestoreFromUnsafeCache>} */
+  _restoredUnsafeCacheModuleEntries: Set<ModuleWithRestoreFromUnsafeCache>;
+  /** @type {Map<string, ModuleWithRestoreFromUnsafeCache>} */
+  _restoredUnsafeCacheEntries: Map<string, ModuleWithRestoreFromUnsafeCache>;
   /** @type {WeakSet<Module>} */
   builtModules: WeakSet<Module>;
   /** @type {WeakSet<Module>} */
   codeGeneratedModules: WeakSet<Module>;
   /** @type {WeakSet<Module>} */
   buildTimeExecutedModules: WeakSet<Module>;
-  /**
-   * @private
-   * @type {Map<Module, Callback[]>}
-   */
-  private _rebuildingModules;
   /** @type {Set<string>} */
   emittedAssets: Set<string>;
   /** @type {Set<string>} */
   comparedForEmitAssets: Set<string>;
-  /** @type {LazySet<string>} */
-  fileDependencies: LazySet<string>;
-  /** @type {LazySet<string>} */
-  contextDependencies: LazySet<string>;
-  /** @type {LazySet<string>} */
-  missingDependencies: LazySet<string>;
-  /** @type {LazySet<string>} */
-  buildDependencies: LazySet<string>;
+  /** @type {FileSystemDependencies} */
+  fileDependencies: FileSystemDependencies;
+  /** @type {FileSystemDependencies} */
+  contextDependencies: FileSystemDependencies;
+  /** @type {FileSystemDependencies} */
+  missingDependencies: FileSystemDependencies;
+  /** @type {FileSystemDependencies} */
+  buildDependencies: FileSystemDependencies;
   compilationDependencies: {
-    add: (item: string) => LazySet<string>;
+    add: (item: string) => FileSystemDependencies;
   };
   _modulesCache: import('./CacheFacade');
   _assetsCache: import('./CacheFacade');
   _codeGenerationCache: import('./CacheFacade');
   _unsafeCache: boolean;
-  _unsafeCachePredicate: Function;
+  _unsafeCachePredicate: (module: import('./Module')) => boolean;
   getStats(): Stats;
   /**
    * @param {string | boolean | StatsOptions | undefined} optionsOrPreset stats option value
@@ -442,7 +438,7 @@ declare class Compilation {
    */
   getCache(name: string): CacheFacade;
   /**
-   * @param {string | (function(): string)} name name of the logger, or function called once to get the logger name
+   * @param {string | (() => string)} name name of the logger, or function called once to get the logger name
    * @returns {Logger} a logger with that name
    */
   getLogger(name: string | (() => string)): Logger;
@@ -519,6 +515,47 @@ declare class Compilation {
    */
   private _handleExistingModuleFromUnsafeCache;
   /**
+   * @param {FactorizeModuleOptions} options options
+   * @param {ModuleOrModuleFactoryResultCallback} callback callback
+   * @returns {void}
+   */
+  _factorizeModule(
+    {
+      currentProfile,
+      factory,
+      dependencies,
+      originModule,
+      factoryResult,
+      contextInfo,
+      context,
+    }: FactorizeModuleOptions,
+    callback: ModuleOrModuleFactoryResultCallback,
+  ): void;
+  /**
+   * @overload
+   * @param {FactorizeModuleOptions & { factoryResult?: false }} options options
+   * @param {ModuleCallback} callback callback
+   * @returns {void}
+   */
+  factorizeModule(
+    options: FactorizeModuleOptions & {
+      factoryResult?: false;
+    },
+    callback: ModuleCallback,
+  ): void;
+  /**
+   * @overload
+   * @param {FactorizeModuleOptions & { factoryResult: true }} options options
+   * @param {ModuleFactoryResultCallback} callback callback
+   * @returns {void}
+   */
+  factorizeModule(
+    options: FactorizeModuleOptions & {
+      factoryResult: true;
+    },
+    callback: ModuleFactoryResultCallback,
+  ): void;
+  /**
    * @typedef {object} HandleModuleCreationOptions
    * @property {ModuleFactory} factory
    * @property {Dependency[]} dependencies
@@ -567,7 +604,7 @@ declare class Compilation {
   ): void;
   /**
    * @private
-   * @param {Module} originModule original module
+   * @param {Module | null} originModule original module
    * @param {Module} module module
    * @param {boolean} recursive true if make it recursive, otherwise false
    * @param {boolean} checkCycle true if need to check cycle, otherwise false
@@ -575,23 +612,6 @@ declare class Compilation {
    * @returns {void}
    */
   private _handleModuleBuildAndDependencies;
-  /**
-   * @param {FactorizeModuleOptions} options options object
-   * @param {ModuleOrFactoryResultCallback} callback callback
-   * @returns {void}
-   */
-  _factorizeModule(
-    {
-      currentProfile,
-      factory,
-      dependencies,
-      originModule,
-      factoryResult,
-      contextInfo,
-      context,
-    }: FactorizeModuleOptions,
-    callback: ModuleOrFactoryResultCallback,
-  ): void;
   /**
    * @param {string} context context string path
    * @param {Dependency} dependency dependency used to create Module chain
@@ -723,7 +743,7 @@ declare class Compilation {
    * @param {RuntimeTemplate} runtimeTemplate runtimeTemplate
    * @param {WebpackError[]} errors errors
    * @param {CodeGenerationResults} results results
-   * @param {function((WebpackError | null)=, boolean=): void} callback callback
+   * @param {(err?: WebpackError | null, result?: boolean) => void} callback callback
    */
   _codeGenerationModule(
     module: Module,
@@ -736,10 +756,7 @@ declare class Compilation {
     runtimeTemplate: RuntimeTemplate,
     errors: WebpackError[],
     results: CodeGenerationResults,
-    callback: (
-      arg0: (WebpackError | null) | undefined,
-      arg1: boolean | undefined,
-    ) => void,
+    callback: (err?: WebpackError | null, result?: boolean) => void,
   ): void;
   _getChunkGraphEntries(): Set<Chunk>;
   /**
@@ -805,10 +822,10 @@ declare class Compilation {
   /**
    * This method first looks to see if a name is provided for a new chunk,
    * and first looks to see if any named chunks already exist and reuse that chunk instead.
-   * @param {string=} name optional chunk name to be provided
+   * @param {ChunkName=} name optional chunk name to be provided
    * @returns {Chunk} create a chunk (invoked during seal event)
    */
-  addChunk(name?: string | undefined): Chunk;
+  addChunk(name?: ChunkName | undefined): Chunk;
   /**
    * @deprecated
    * @param {Module} module module to assign depth
@@ -823,15 +840,15 @@ declare class Compilation {
   /**
    * @param {Dependency} dependency the dependency
    * @param {RuntimeSpec} runtime the runtime
-   * @returns {(string[] | ReferencedExport)[]} referenced exports
+   * @returns {ReferencedExports} referenced exports
    */
   getDependencyReferencedExports(
     dependency: Dependency,
     runtime: RuntimeSpec,
-  ): (string[] | ReferencedExport)[];
+  ): ReferencedExports;
   /**
    * @param {Module} module module relationship for removal
-   * @param {DependenciesBlockLike} block //TODO: good description
+   * @param {DependenciesBlockLike} block dependencies block
    * @returns {void}
    */
   removeReasonsOfDependencyBlock(
@@ -859,20 +876,15 @@ declare class Compilation {
    * @param {Module} module module
    * @param {ChunkGraph} chunkGraph the chunk graph
    * @param {RuntimeSpec} runtime runtime
-   * @param {OutputOptions["hashFunction"]} hashFunction hash function
+   * @param {HashFunction} hashFunction hash function
    * @param {RuntimeTemplate} runtimeTemplate runtime template
-   * @param {OutputOptions["hashDigest"]} hashDigest hash digest
-   * @param {OutputOptions["hashDigestLength"]} hashDigestLength hash digest length
+   * @param {HashDigest} hashDigest hash digest
+   * @param {HashDigestLength} hashDigestLength hash digest length
    * @param {WebpackError[]} errors errors
    * @returns {string} module hash digest
    */
   private _createModuleHash;
-  createHash(): {
-    module: Module;
-    hash: string;
-    runtime: RuntimeSpec;
-    runtimes: RuntimeSpec[];
-  }[];
+  createHash(): CodeGenerationJobs;
   fullHash: string;
   hash: string;
   /**
@@ -882,17 +894,23 @@ declare class Compilation {
    * @returns {void}
    */
   emitAsset(file: string, source: Source, assetInfo?: AssetInfo): void;
-  _setAssetInfo(file: any, newInfo: any, oldInfo?: AssetInfo): void;
+  /**
+   * @private
+   * @param {string} file file name
+   * @param {AssetInfo=} newInfo new asset information
+   * @param {AssetInfo=} oldInfo old asset information
+   */
+  private _setAssetInfo;
   /**
    * @param {string} file file name
-   * @param {Source | function(Source): Source} newSourceOrFunction new asset source or function converting old to new
-   * @param {(AssetInfo | function(AssetInfo | undefined): AssetInfo) | undefined} assetInfoUpdateOrFunction new asset info or function converting old to new
+   * @param {Source | ((source: Source) => Source)} newSourceOrFunction new asset source or function converting old to new
+   * @param {(AssetInfo | ((assetInfo?: AssetInfo) => AssetInfo | undefined)) | undefined} assetInfoUpdateOrFunction new asset info or function converting old to new
    */
   updateAsset(
     file: string,
-    newSourceOrFunction: Source | ((arg0: Source) => Source),
+    newSourceOrFunction: Source | ((source: Source) => Source),
     assetInfoUpdateOrFunction?:
-      | (AssetInfo | ((arg0: AssetInfo | undefined) => AssetInfo))
+      | (AssetInfo | ((assetInfo?: AssetInfo) => AssetInfo | undefined))
       | undefined,
   ): void;
   /**
@@ -952,21 +970,21 @@ declare class Compilation {
     filename: TemplatePath,
     data: PathData,
   ): InterpolatedPathAndAssetInfo;
-  getWarnings(): WebpackError[];
-  getErrors(): WebpackError[];
+  getWarnings(): Error[];
+  getErrors(): Error[];
   /**
    * This function allows you to run another instance of webpack inside of webpack however as
    * a child with different settings and configurations (if desired) applied. It copies all hooks, plugins
    * from parent (or top level compiler) and creates a child Compilation
    * @param {string} name name of the child compiler
-   * @param {OutputOptions=} outputOptions // Need to convert config schema to types for this
-   * @param {Array<WebpackPluginInstance | WebpackPluginFunction>=} plugins webpack plugins that will be applied
+   * @param {Partial<OutputOptions>=} outputOptions // Need to convert config schema to types for this
+   * @param {Plugins=} plugins webpack plugins that will be applied
    * @returns {Compiler} creates a child Compiler instance
    */
   createChildCompiler(
     name: string,
-    outputOptions?: OutputOptions | undefined,
-    plugins?: Array<WebpackPluginInstance | WebpackPluginFunction> | undefined,
+    outputOptions?: Partial<OutputOptions> | undefined,
+    plugins?: Plugins | undefined,
   ): Compiler;
   /**
    * @param {Module} module the module
@@ -979,35 +997,6 @@ declare class Compilation {
     callback: ExecuteModuleCallback,
   ): void;
   checkConstraints(): void;
-  /**
-   * @typedef {object} FactorizeModuleOptions
-   * @property {ModuleProfile} currentProfile
-   * @property {ModuleFactory} factory
-   * @property {Dependency[]} dependencies
-   * @property {boolean=} factoryResult return full ModuleFactoryResult instead of only module
-   * @property {Module | null} originModule
-   * @property {Partial<ModuleFactoryCreateDataContextInfo>=} contextInfo
-   * @property {string=} context
-   */
-  /**
-   * @param {FactorizeModuleOptions} options options object
-   * @param {ModuleCallback | ModuleFactoryResultCallback} callback callback
-   * @returns {void}
-   */
-  factorizeModule: {
-    (
-      options: FactorizeModuleOptions & {
-        factoryResult?: false;
-      },
-      callback: ModuleCallback,
-    ): void;
-    (
-      options: FactorizeModuleOptions & {
-        factoryResult: true;
-      },
-      callback: ModuleFactoryResultCallback,
-    ): void;
-  };
 }
 declare namespace Compilation {
   export {
@@ -1026,33 +1015,46 @@ declare namespace Compilation {
     PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER,
     PROCESS_ASSETS_STAGE_ANALYSE,
     PROCESS_ASSETS_STAGE_REPORT,
-    AsArray,
     Source,
-    EntryDescription,
     OutputOptions,
+    HashFunction,
+    HashDigest,
+    HashDigestLength,
     StatsOptions,
+    Plugins,
     WebpackOptions,
-    WebpackPluginFunction,
-    WebpackPluginInstance,
+    OutputOptionsWithDefaults,
     AsyncDependenciesBlock,
     Cache,
     CacheFacade,
+    ChunkName,
     ChunkId,
     ChunkGroupOptions,
     Compiler,
     CompilationParams,
+    MemCache,
+    WeakReferences,
+    ModuleMemCachesItem,
+    Records,
     DependenciesBlock,
     DependencyLocation,
-    ReferencedExport,
-    DependencyTemplate,
+    ReferencedExports,
     EntryOptions,
+    NameForCondition,
     BuildInfo,
+    ValueCacheVersions,
+    RuntimeRequirements,
     NormalModuleCompilationHooks,
+    FactoryMeta,
     CodeGenerationResult,
     ModuleFactory,
+    ResolveOptions,
+    ModuleId,
     ModuleGraphConnection,
     ModuleFactoryCreateDataContextInfo,
     ModuleFactoryResult,
+    ParserOptions,
+    GeneratorOptions,
     RequestShortener,
     RuntimeModule,
     RenderManifestEntry,
@@ -1062,26 +1064,32 @@ declare namespace Compilation {
     StatsModule,
     TemplatePath,
     Hash,
+    AsArray,
     FakeHook,
     RuntimeSpec,
-    References,
     InputFileSystem,
     Callback,
     ModuleCallback,
     ModuleFactoryResultCallback,
-    ModuleOrFactoryResultCallback,
+    ModuleOrModuleFactoryResultCallback,
     ExecuteModuleCallback,
-    DepBlockVarDependenciesCallback,
-    DepConstructor,
+    DependencyConstructor,
     CompilationAssets,
     AvailableModulesChunkGroupMapping,
     DependenciesBlockLike,
+    Chunks,
     ChunkPathData,
     ChunkHashContext,
     RuntimeRequirementsContext,
     ExecuteModuleOptions,
+    FileSystemDependencies,
+    ExecuteModuleExports,
     ExecuteModuleResult,
+    ExecuteModuleObject,
     ExecuteModuleArgument,
+    WebpackRequire,
+    ExecuteOptions,
+    ExecuteModuleAssets,
     ExecuteModuleContext,
     EntryData,
     LogEntry,
@@ -1089,16 +1097,24 @@ declare namespace Compilation {
     AssetInfo,
     InterpolatedPathAndAssetInfo,
     Asset,
+    HashWithLengthFunction,
     ModulePathData,
+    PrepareIdFunction,
     PathData,
+    ExcludeModulesType,
     KnownNormalizedStatsOptions,
     NormalizedStatsOptions,
     KnownCreateStatsOptionsContext,
     CreateStatsOptionsContext,
+    CodeGenerationJob,
     CodeGenerationJobs,
     ModuleTemplates,
     NotCodeGeneratedModules,
-    ValueCacheVersion,
+    KnownUnsafeCacheData,
+    UnsafeCacheData,
+    ModuleWithRestoreFromUnsafeCache,
+    References,
+    ModuleMemCaches,
     FactorizeModuleOptions,
   };
 }
@@ -1121,14 +1137,12 @@ import { Logger } from './logging/Logger';
 import MainTemplate = require('./MainTemplate');
 import ChunkTemplate = require('./ChunkTemplate');
 import RuntimeTemplate = require('./RuntimeTemplate');
-import WeakTupleMap = require('./util/WeakTupleMap');
 import ModuleGraph = require('./ModuleGraph');
 import ChunkGraph = require('./ChunkGraph');
 import CodeGenerationResults = require('./CodeGenerationResults');
 import AsyncQueue = require('./util/AsyncQueue');
 import Entrypoint = require('./Entrypoint');
 import DependencyTemplates = require('./DependencyTemplates');
-import LazySet = require('./util/LazySet');
 import Stats = require('./Stats');
 declare var PROCESS_ASSETS_STAGE_ADDITIONAL: number;
 declare var PROCESS_ASSETS_STAGE_PRE_PROCESS: number;
@@ -1145,42 +1159,51 @@ declare var PROCESS_ASSETS_STAGE_OPTIMIZE_HASH: number;
 declare var PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER: number;
 declare var PROCESS_ASSETS_STAGE_ANALYSE: number;
 declare var PROCESS_ASSETS_STAGE_REPORT: number;
-/**
- * <T>
- */
-type AsArray<T> = import('tapable').AsArray<T>;
 type Source = import('webpack-sources').Source;
-type EntryDescription =
-  import('../declarations/WebpackOptions').EntryDescriptionNormalized;
 type OutputOptions = import('../declarations/WebpackOptions').OutputNormalized;
+type HashFunction = import('../declarations/WebpackOptions').HashFunction;
+type HashDigest = import('../declarations/WebpackOptions').HashDigest;
+type HashDigestLength =
+  import('../declarations/WebpackOptions').HashDigestLength;
 type StatsOptions = import('../declarations/WebpackOptions').StatsOptions;
+type Plugins = import('../declarations/WebpackOptions').Plugins;
 type WebpackOptions =
-  import('../declarations/WebpackOptions').WebpackOptionsNormalized;
-type WebpackPluginFunction =
-  import('../declarations/WebpackOptions').WebpackPluginFunction;
-type WebpackPluginInstance =
-  import('../declarations/WebpackOptions').WebpackPluginInstance;
+  import('./config/defaults').WebpackOptionsNormalizedWithDefaults;
+type OutputOptionsWithDefaults =
+  import('./config/defaults').OutputNormalizedWithDefaults;
 type AsyncDependenciesBlock = import('./AsyncDependenciesBlock');
 type Cache = import('./Cache');
 type CacheFacade = import('./CacheFacade');
+type ChunkName = import('./Chunk').ChunkName;
 type ChunkId = import('./Chunk').ChunkId;
 type ChunkGroupOptions = import('./ChunkGroup').ChunkGroupOptions;
 type Compiler = import('./Compiler');
 type CompilationParams = import('./Compiler').CompilationParams;
+type MemCache = import('./Compiler').MemCache;
+type WeakReferences = import('./Compiler').WeakReferences;
+type ModuleMemCachesItem = import('./Compiler').ModuleMemCachesItem;
+type Records = import('./Compiler').Records;
 type DependenciesBlock = import('./DependenciesBlock');
 type DependencyLocation = import('./Dependency').DependencyLocation;
-type ReferencedExport = import('./Dependency').ReferencedExport;
-type DependencyTemplate = import('./DependencyTemplate');
+type ReferencedExports = import('./Dependency').ReferencedExports;
 type EntryOptions = import('./Entrypoint').EntryOptions;
+type NameForCondition = import('./Module').NameForCondition;
 type BuildInfo = import('./Module').BuildInfo;
+type ValueCacheVersions = import('./Module').ValueCacheVersions;
+type RuntimeRequirements = import('./Module').RuntimeRequirements;
 type NormalModuleCompilationHooks =
   import('./NormalModule').NormalModuleCompilationHooks;
+type FactoryMeta = import('./Module').FactoryMeta;
 type CodeGenerationResult = import('./Module').CodeGenerationResult;
 type ModuleFactory = import('./ModuleFactory');
+type ResolveOptions = import('../declarations/WebpackOptions').ResolveOptions;
+type ModuleId = import('./ChunkGraph').ModuleId;
 type ModuleGraphConnection = import('./ModuleGraphConnection');
 type ModuleFactoryCreateDataContextInfo =
   import('./ModuleFactory').ModuleFactoryCreateDataContextInfo;
 type ModuleFactoryResult = import('./ModuleFactory').ModuleFactoryResult;
+type ParserOptions = import('./NormalModule').ParserOptions;
+type GeneratorOptions = import('./NormalModule').GeneratorOptions;
 type RequestShortener = import('./RequestShortener');
 type RuntimeModule = import('./RuntimeModule');
 type RenderManifestEntry = import('./Template').RenderManifestEntry;
@@ -1193,9 +1216,12 @@ type Hash = import('./util/Hash');
 /**
  * <T>
  */
+type AsArray<T> = import('tapable').AsArray<T>;
+/**
+ * <T>
+ */
 type FakeHook<T> = import('./util/deprecation').FakeHook<T>;
 type RuntimeSpec = import('./util/runtime').RuntimeSpec;
-type References = WeakMap<Dependency, Module>;
 type InputFileSystem = import('./util/fs').InputFileSystem;
 type Callback = (err?: (WebpackError | null) | undefined) => void;
 type ModuleCallback = (
@@ -1204,18 +1230,17 @@ type ModuleCallback = (
 ) => void;
 type ModuleFactoryResultCallback = (
   err?: (WebpackError | null) | undefined,
-  result?: ModuleFactoryResult | undefined,
+  result?: (ModuleFactoryResult | null) | undefined,
 ) => void;
-type ModuleOrFactoryResultCallback = (
+type ModuleOrModuleFactoryResultCallback = (
   err?: (WebpackError | null) | undefined,
-  result?: (Module | ModuleFactoryResult) | undefined,
+  result?: (Module | ModuleFactoryResult | null) | undefined,
 ) => void;
 type ExecuteModuleCallback = (
-  err: WebpackError | null,
-  result?: ExecuteModuleResult | undefined,
+  err?: (WebpackError | null) | undefined,
+  result?: (ExecuteModuleResult | null) | undefined,
 ) => void;
-type DepBlockVarDependenciesCallback = (dependency: Dependency) => any;
-type DepConstructor = new (...args: any[]) => Dependency;
+type DependencyConstructor = new (...args: EXPECTED_ANY[]) => Dependency;
 type CompilationAssets = Record<string, Source>;
 type AvailableModulesChunkGroupMapping = {
   chunkGroup: ChunkGroup;
@@ -1226,15 +1251,14 @@ type DependenciesBlockLike = {
   dependencies: Dependency[];
   blocks: AsyncDependenciesBlock[];
 };
+type Chunks = Set<Chunk>;
 type ChunkPathData = {
   id: string | number;
   name?: string | undefined;
   hash: string;
-  hashWithLength?: ((arg0: number) => string) | undefined;
+  hashWithLength?: HashWithLengthFunction | undefined;
   contentHash?: Record<string, string> | undefined;
-  contentHashWithLength?:
-    | Record<string, (length: number) => string>
-    | undefined;
+  contentHashWithLength?: Record<string, HashWithLengthFunction> | undefined;
 };
 type ChunkHashContext = {
   /**
@@ -1267,44 +1291,70 @@ type RuntimeRequirementsContext = {
 type ExecuteModuleOptions = {
   entryOptions?: EntryOptions | undefined;
 };
+type FileSystemDependencies = LazySet<string>;
+type ExecuteModuleExports = EXPECTED_ANY;
 type ExecuteModuleResult = {
-  exports: any;
+  exports: ExecuteModuleExports;
   cacheable: boolean;
-  assets: Map<
-    string,
-    {
-      source: Source;
-      info: AssetInfo;
-    }
-  >;
-  fileDependencies: LazySet<string>;
-  contextDependencies: LazySet<string>;
-  missingDependencies: LazySet<string>;
-  buildDependencies: LazySet<string>;
+  assets: ExecuteModuleAssets;
+  fileDependencies: FileSystemDependencies;
+  contextDependencies: FileSystemDependencies;
+  missingDependencies: FileSystemDependencies;
+  buildDependencies: FileSystemDependencies;
+};
+type ExecuteModuleObject = {
+  /**
+   * module id
+   */
+  id?: string | undefined;
+  /**
+   * exports
+   */
+  exports: ExecuteModuleExports;
+  /**
+   * is loaded
+   */
+  loaded: boolean;
+  /**
+   * error
+   */
+  error?: Error | undefined;
 };
 type ExecuteModuleArgument = {
   module: Module;
-  moduleObject?:
-    | {
-        id: string;
-        exports: any;
-        loaded: boolean;
-      }
-    | undefined;
-  preparedInfo: any;
+  moduleObject?: ExecuteModuleObject | undefined;
   codeGenerationResult: CodeGenerationResult;
 };
+type WebpackRequire = ((id: string) => ExecuteModuleExports) & {
+  i?: ((options: ExecuteOptions) => void)[];
+  c?: Record<string, ExecuteModuleObject>;
+};
+type ExecuteOptions = {
+  /**
+   * module id
+   */
+  id?: string | undefined;
+  /**
+   * module
+   */
+  module: ExecuteModuleObject;
+  /**
+   * require function
+   */
+  require: WebpackRequire;
+};
+type ExecuteModuleAssets = Map<
+  string,
+  {
+    source: Source;
+    info: AssetInfo | undefined;
+  }
+>;
 type ExecuteModuleContext = {
-  assets: Map<
-    string,
-    {
-      source: Source;
-      info: AssetInfo;
-    }
-  >;
+  assets: ExecuteModuleAssets;
   chunk: Chunk;
   chunkGraph: ChunkGraph;
-  __webpack_require__?: ((arg0: string) => any) | undefined;
+  __webpack_require__?: WebpackRequire | undefined;
 };
 type EntryData = {
   /**
@@ -1322,7 +1372,7 @@ type EntryData = {
 };
 type LogEntry = {
   type: string;
-  args?: any[] | undefined;
+  args?: EXPECTED_ANY[] | undefined;
   time: number;
   trace?: string[] | undefined;
 };
@@ -1372,11 +1422,15 @@ type KnownAssetInfo = {
    */
   javascriptModule?: boolean | undefined;
   /**
+   * true, when file is a manifest
+   */
+  manifest?: boolean | undefined;
+  /**
    * object of pointers to other assets, keyed by type of relation (only points from parent to child)
    */
-  related?: Record<string, string | string[]> | undefined;
+  related?: Record<string, null | string | string[]> | undefined;
 };
-type AssetInfo = KnownAssetInfo & Record<string, any>;
+type AssetInfo = KnownAssetInfo & Record<string, EXPECTED_ANY>;
 type InterpolatedPathAndAssetInfo = {
   path: string;
   info: AssetInfo;
@@ -1395,15 +1449,17 @@ type Asset = {
    */
   info: AssetInfo;
 };
+type HashWithLengthFunction = (length: number) => string;
 type ModulePathData = {
   id: string | number;
   hash: string;
-  hashWithLength?: ((arg0: number) => string) | undefined;
+  hashWithLength?: HashWithLengthFunction | undefined;
 };
+type PrepareIdFunction = (id: string | number) => string | number;
 type PathData = {
   chunkGraph?: ChunkGraph | undefined;
   hash?: string | undefined;
-  hashWithLength?: ((arg0: number) => string) | undefined;
+  hashWithLength?: HashWithLengthFunction | undefined;
   chunk?: (Chunk | ChunkPathData) | undefined;
   module?: (Module | ModulePathData) | undefined;
   runtime?: RuntimeSpec | undefined;
@@ -1412,18 +1468,20 @@ type PathData = {
   query?: string | undefined;
   contentHashType?: string | undefined;
   contentHash?: string | undefined;
-  contentHashWithLength?: ((arg0: number) => string) | undefined;
+  contentHashWithLength?: HashWithLengthFunction | undefined;
   noChunkHash?: boolean | undefined;
   url?: string | undefined;
+  prepareId?: PrepareIdFunction | undefined;
 };
+type ExcludeModulesType = 'module' | 'chunk' | 'root-of-chunk' | 'nested';
 type KnownNormalizedStatsOptions = {
   context: string;
   requestShortener: RequestShortener;
-  chunksSort: string;
-  modulesSort: string;
-  chunkModulesSort: string;
-  nestedModulesSort: string;
-  assetsSort: string;
+  chunksSort: string | false;
+  modulesSort: string | false;
+  chunkModulesSort: string | false;
+  nestedModulesSort: string | false;
+  assetsSort: string | false;
   ids: boolean;
   cachedAssets: boolean;
   groupAssetsByEmitStatus: boolean;
@@ -1434,7 +1492,7 @@ type KnownNormalizedStatsOptions = {
   excludeModules: ((
     name: string,
     module: StatsModule,
-    type: 'module' | 'chunk' | 'root-of-chunk' | 'nested',
+    type: ExcludeModulesType,
   ) => boolean)[];
   warningsFilter: ((warning: StatsError, textValue: string) => boolean)[];
   cachedModules: boolean;
@@ -1458,29 +1516,55 @@ type KnownNormalizedStatsOptions = {
   logging: false | 'none' | 'error' | 'warn' | 'info' | 'log' | 'verbose';
   loggingDebug: ((value: string) => boolean)[];
   loggingTrace: boolean;
-  _env: any;
+  _env: EXPECTED_ANY;
 };
 type NormalizedStatsOptions = KnownNormalizedStatsOptions &
   Omit<StatsOptions, keyof KnownNormalizedStatsOptions> &
-  Record<string, any>;
+  Record<string, EXPECTED_ANY>;
 type KnownCreateStatsOptionsContext = {
   forToString?: boolean | undefined;
 };
-type CreateStatsOptionsContext = Record<string, any> &
-  KnownCreateStatsOptionsContext;
-type CodeGenerationJobs = {
+type CreateStatsOptionsContext = KnownCreateStatsOptionsContext &
+  Record<string, EXPECTED_ANY>;
+type CodeGenerationJob = {
   module: Module;
   hash: string;
   runtime: RuntimeSpec;
   runtimes: RuntimeSpec[];
-}[];
+};
+type CodeGenerationJobs = CodeGenerationJob[];
 type ModuleTemplates = {
   javascript: ModuleTemplate;
 };
 type NotCodeGeneratedModules = Set<Module>;
-type ValueCacheVersion = string | Set<string> | undefined;
+type KnownUnsafeCacheData = {
+  /**
+   * factory meta
+   */
+  factoryMeta?: FactoryMeta | undefined;
+  /**
+   * resolve options
+   */
+  resolveOptions?: ResolveOptions | undefined;
+  parserOptions?: ParserOptions | undefined;
+  generatorOptions?: GeneratorOptions | undefined;
+};
+type UnsafeCacheData = KnownUnsafeCacheData & Record<string, EXPECTED_ANY>;
+type ModuleWithRestoreFromUnsafeCache = Module & {
+  restoreFromUnsafeCache?: (
+    unsafeCacheData: UnsafeCacheData,
+    moduleFactory: ModuleFactory,
+    compilationParams: CompilationParams,
+  ) => void;
+};
+type References = {
+  id: ModuleId;
+  modules?: Map<Module, ModuleId>;
+  blocks?: (ChunkId | null)[];
+};
+type ModuleMemCaches = Map<Module, WeakTupleMap<EXPECTED_ANY[], EXPECTED_ANY>>;
 type FactorizeModuleOptions = {
-  currentProfile: ModuleProfile;
+  currentProfile?: ModuleProfile | undefined;
   factory: ModuleFactory;
   dependencies: Dependency[];
   /**
@@ -1491,5 +1575,7 @@ type FactorizeModuleOptions = {
   contextInfo?: Partial<ModuleFactoryCreateDataContextInfo> | undefined;
   context?: string | undefined;
 };
+import LazySet = require('./util/LazySet');
 import ModuleTemplate = require('./ModuleTemplate');
+import WeakTupleMap = require('./util/WeakTupleMap');
 import ModuleProfile = require('./ModuleProfile');

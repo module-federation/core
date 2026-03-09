@@ -1,5 +1,71 @@
 # @module-federation/bridge-vue3
 
+## 2.1.0
+
+### Patch Changes
+
+- Updated dependencies [918294f]
+- Updated dependencies [918294f]
+  - @module-federation/runtime@2.1.0
+  - @module-federation/sdk@2.1.0
+  - @module-federation/bridge-shared@2.1.0
+
+## 2.0.1
+
+### Patch Changes
+
+- @module-federation/runtime@2.0.1
+- @module-federation/sdk@2.0.1
+- @module-federation/bridge-shared@2.0.1
+
+## 2.0.0
+
+### Patch Changes
+
+- @module-federation/runtime@2.0.0
+- @module-federation/sdk@2.0.0
+- @module-federation/bridge-shared@2.0.0
+
+## 0.24.1
+
+### Patch Changes
+
+- @module-federation/runtime@0.24.1
+- @module-federation/sdk@0.24.1
+- @module-federation/bridge-shared@0.24.1
+
+## 0.24.0
+
+### Patch Changes
+
+- @module-federation/runtime@0.24.0
+- @module-federation/sdk@0.24.0
+- @module-federation/bridge-shared@0.24.0
+
+## 0.23.0
+
+### Patch Changes
+
+- @module-federation/runtime@0.23.0
+- @module-federation/sdk@0.23.0
+- @module-federation/bridge-shared@0.23.0
+
+## 0.22.1
+
+### Patch Changes
+
+- @module-federation/runtime@0.22.1
+- @module-federation/sdk@0.22.1
+- @module-federation/bridge-shared@0.22.1
+
+## 0.22.0
+
+### Patch Changes
+
+- @module-federation/runtime@0.22.0
+- @module-federation/sdk@0.22.0
+- @module-federation/bridge-shared@0.22.0
+
 ## 0.21.6
 
 ### Patch Changes

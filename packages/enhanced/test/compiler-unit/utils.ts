@@ -1,5 +1,6 @@
 import webpack from 'webpack';
 import path from 'path';
+import { rs } from '@rstest/core';
 
 export function createMockCompiler(): webpack.Compiler {
   const compiler = {
@@ -9,19 +10,19 @@ export function createMockCompiler(): webpack.Compiler {
     },
     hooks: {
       thisCompilation: {
-        tap: jest.fn(),
+        tap: rs.fn(),
       },
       compilation: {
-        tap: jest.fn(),
+        tap: rs.fn(),
       },
       afterCompile: {
-        tap: jest.fn(),
+        tap: rs.fn(),
       },
       finishMake: {
-        tapPromise: jest.fn(),
+        tapPromise: rs.fn(),
       },
       make: {
-        tapAsync: jest.fn(),
+        tapAsync: rs.fn(),
       },
     },
     context: path.resolve(__dirname, '../../'),
@@ -36,22 +37,22 @@ export function createMockCompilation(
   const compilation = {
     hooks: {
       afterOptimizeChunks: {
-        tap: jest.fn(),
+        tap: rs.fn(),
       },
       processAssets: {
-        tap: jest.fn(),
+        tap: rs.fn(),
       },
       optimize: {
-        tap: jest.fn(),
+        tap: rs.fn(),
       },
       finishModules: {
-        tap: jest.fn(),
+        tap: rs.fn(),
       },
       additionalTreeRuntimeRequirements: {
-        tap: jest.fn(),
+        tap: rs.fn(),
       },
       runtimeRequirementInTree: {
-        for: jest.fn().mockReturnValue({ tap: jest.fn() }),
+        for: rs.fn().mockReturnValue({ tap: rs.fn() }),
       },
     },
     compiler,
@@ -63,10 +64,10 @@ export function createMockCompilation(
     errors: [],
     dependencyFactories: new Map(),
     dependencyTemplates: new Map(),
-    addRuntimeModule: jest.fn(),
+    addRuntimeModule: rs.fn(),
     resolverFactory: {
-      get: jest.fn().mockReturnValue({
-        resolve: jest.fn(),
+      get: rs.fn().mockReturnValue({
+        resolve: rs.fn(),
       }),
     },
   } as any;

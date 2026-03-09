@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import type { GlobalModuleInfo } from '@module-federation/sdk';
 import { getModuleInfo } from '../index';
 
 export interface FormItemStatus {
@@ -16,4 +17,7 @@ export interface RootComponentProps {
   handleProxyAddress?: (address: string) => string;
   customValueValidate?: (schema: string) => boolean;
   headerSlot?: ReactNode;
+  onModuleInfoChange?: (moduleInfo: GlobalModuleInfo) => void;
+  onModuleInfoReset?: () => void;
+  tabId?: number;
 }

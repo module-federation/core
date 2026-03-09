@@ -45,5 +45,8 @@ export default defineConfig({
   server: {
     port: 3053,
   },
-  plugins: [pluginReact(), pluginModuleFederation(mfConfig, { ssr: true })],
+  plugins: [
+    pluginReact(),
+    pluginModuleFederation(mfConfig, { target: 'dual' }),
+  ],
 });

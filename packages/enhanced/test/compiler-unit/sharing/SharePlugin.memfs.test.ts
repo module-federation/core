@@ -1,8 +1,9 @@
 // @ts-nocheck
 /*
- * @jest-environment node
+ * @rstest-environment node
  */
 
+import { rs } from '@rstest/core';
 import { vol } from 'memfs';
 import SharePlugin from '../../../src/lib/sharing/SharePlugin';
 import {
@@ -12,28 +13,33 @@ import {
 } from '../../helpers/webpackMocks';
 
 // Use memfs for fs inside this suite
-jest.mock('fs', () => require('memfs').fs);
-jest.mock('fs/promises', () => require('memfs').fs.promises);
+rs.mock('fs', () => require('memfs').fs);
+rs.mock('fs/promises', () => require('memfs').fs.promises);
+
+// Use rs.hoisted() to create mock functions that are hoisted along with rs.mock()
+const mocks = rs.hoisted(() => ({
+  mockConsumeSharedPlugin: rs.fn().mockImplementation((opts) => ({
+    options: opts,
+    apply: rs.fn(),
+  })),
+  mockProvideSharedPlugin: rs.fn().mockImplementation((opts) => ({
+    options: opts,
+    apply: rs.fn(),
+  })),
+}));
 
 // Mock child plugins to avoid deep integration
-jest.mock('../../../src/lib/sharing/ConsumeSharedPlugin', () => {
-  return jest
-    .fn()
-    .mockImplementation((opts) => ({ options: opts, apply: jest.fn() }));
-});
-jest.mock('../../../src/lib/sharing/ProvideSharedPlugin', () => {
-  return jest
-    .fn()
-    .mockImplementation((opts) => ({ options: opts, apply: jest.fn() }));
-});
-
-import ConsumeSharedPlugin from '../../../src/lib/sharing/ConsumeSharedPlugin';
-import ProvideSharedPlugin from '../../../src/lib/sharing/ProvideSharedPlugin';
+rs.mock('../../../src/lib/sharing/ConsumeSharedPlugin', () => ({
+  default: mocks.mockConsumeSharedPlugin,
+}));
+rs.mock('../../../src/lib/sharing/ProvideSharedPlugin', () => ({
+  default: mocks.mockProvideSharedPlugin,
+}));
 
 describe('SharePlugin smoke (memfs)', () => {
   beforeEach(() => {
     vol.reset();
-    jest.clearAllMocks();
+    rs.clearAllMocks();
   });
 
   it('applies child plugins with derived options', () => {
@@ -58,12 +64,12 @@ describe('SharePlugin smoke (memfs)', () => {
     expect(() => plugin.apply(compiler as any)).not.toThrow();
 
     // Child plugins constructed
-    expect(ConsumeSharedPlugin).toHaveBeenCalledTimes(1);
-    expect(ProvideSharedPlugin).toHaveBeenCalledTimes(1);
+    expect(mocks.mockConsumeSharedPlugin).toHaveBeenCalledTimes(1);
+    expect(mocks.mockProvideSharedPlugin).toHaveBeenCalledTimes(1);
 
     // Each child plugin receives shareScope and normalized arrays
-    const consumeOpts = (ConsumeSharedPlugin as jest.Mock).mock.calls[0][0];
-    const provideOpts = (ProvideSharedPlugin as jest.Mock).mock.calls[0][0];
+    const consumeOpts = mocks.mockConsumeSharedPlugin.mock.calls[0][0];
+    const provideOpts = mocks.mockProvideSharedPlugin.mock.calls[0][0];
     expect(consumeOpts.shareScope).toBe('default');
     expect(Array.isArray(consumeOpts.consumes)).toBe(true);
     expect(provideOpts.shareScope).toBe('default');
@@ -84,10 +90,8 @@ describe('SharePlugin smoke (memfs)', () => {
     ).not.toThrow();
 
     // Child plugin instances should be applied to the compiler
-    const consumeInst = (ConsumeSharedPlugin as jest.Mock).mock.results[0]
-      .value;
-    const provideInst = (ProvideSharedPlugin as jest.Mock).mock.results[0]
-      .value;
+    const consumeInst = mocks.mockConsumeSharedPlugin.mock.results[0].value;
+    const provideInst = mocks.mockProvideSharedPlugin.mock.results[0].value;
     expect(consumeInst.apply).toHaveBeenCalledWith(compiler);
     expect(provideInst.apply).toHaveBeenCalledWith(compiler);
   });

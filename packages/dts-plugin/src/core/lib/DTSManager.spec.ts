@@ -325,7 +325,7 @@ describe('DTSManager', () => {
     it('correct consumeTypes', async () => {
       const distFolder = join(projectRoot, TEST_DIT_DIR, typesFolder);
       const zip = new AdmZip();
-      await zip.addLocalFolderPromise(distFolder, {});
+      zip.addLocalFolder(distFolder);
       axios.get = vi.fn().mockResolvedValueOnce({ data: zip.toBuffer() });
       await dtsManager.consumeTypes();
 
@@ -491,7 +491,7 @@ describe('DTSManager', () => {
 
     const distFolder = join(projectRoot, TEST_DIT_DIR, typesFolder);
     const zip = new AdmZip();
-    await zip.addLocalFolderPromise(distFolder, {});
+    zip.addLocalFolder(distFolder);
     axios.get = vi.fn().mockResolvedValueOnce({ data: zip.toBuffer() });
 
     await dtsManager.updateTypes({

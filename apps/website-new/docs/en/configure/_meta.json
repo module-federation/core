@@ -21,6 +21,11 @@
   },
   {
     "type": "file",
+    "name": "shareScope",
+    "label": "shareScope"
+  },
+  {
+    "type": "file",
     "name": "exposes",
     "label": "Exposes"
   },
@@ -68,5 +73,25 @@
     "type": "file",
     "name": "experiments",
     "label": "experiments"
+  },
+   {
+    "type": "file",
+    "name": "injectTreeShakingUsedExports",
+    "label": "injectTreeShakingUsedExports"
+  },
+  {
+    "type": "file",
+    "name": "treeShakingDir",
+    "label": "treeShakingDir"
+  },
+  {
+    "type": "file",
+    "name": "treeShakingSharedExcludePlugins",
+    "label": "treeShakingSharedExcludePlugins"
+  },
+  {
+    "type": "file",
+    "name": "treeShakingSharedPlugins",
+    "label": "treeShakingSharedPlugins"
   }
 ]

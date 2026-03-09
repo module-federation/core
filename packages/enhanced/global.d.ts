@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/triple-slash-reference */
 
-/// <reference path="../../node_modules/webpack/module.d.ts" />
-/// <reference path="../../node_modules/webpack/types.d.ts" />
+/// <reference path="../../webpack/module.d.ts" />
+/// <reference path="../../webpack/types.d.ts" />
 
 // declare module 'webpack/lib/RuntimeGlobals';
 // declare module 'webpack/lib/Compilation';

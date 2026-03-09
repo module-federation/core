@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
     "module": "commonjs",
-    "types": ["jest", "node"],
+    "types": ["@rstest/core/globals", "node"],
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
@@ -12,9 +12,9 @@
     }
   },
   "include": [
-    "jest.config.ts",
     "test/**/*.test.ts",
     "test/**/*.spec.ts",
+    "test/**/*.rstest.ts",
     "test/**/*.d.ts",
     "src/**/*.d.ts"
   ]

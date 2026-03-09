@@ -17,13 +17,17 @@
         "static/js/post-message.js",
         "static/js/post-message-start.js",
         "static/js/fast-refresh.js",
+        "static/js/override-remote.js",
         "static/js/snapshot-plugin.js"
       ],
       "matches": ["<all_urls>"]
     }
   ],
-  "permissions": ["storage", "scripting"],
+  "permissions": ["storage", "scripting", "sidePanel"],
   "host_permissions": ["<all_urls>"],
+  "side_panel": {
+    "default_path": "html/main/index.html"
+  },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
@@ -35,7 +39,11 @@
     },
     {
       "matches": ["<all_urls>"],
-      "js": ["static/js/fast-refresh.js", "static/js/snapshot-plugin.js"],
+      "js": [
+        "static/js/fast-refresh.js",
+        "static/js/override-remote.js",
+        "static/js/snapshot-plugin.js"
+      ],
       "world": "MAIN",
       "run_at": "document_start"
     }

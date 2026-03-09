@@ -2,4 +2,4 @@ import { HomeLayout } from './pages';
 import './index.css';
 
 export { HomeLayout };
-export * from 'rspress/theme';
+export * from '@rspress/core/theme-original';

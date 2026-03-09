@@ -1,6 +1,7 @@
 export const FormID = 'FormID';
 
 export const ENABLEHMR = 'enableHMR';
+export const ENABLE_CLIP = 'enableClip';
 
 export const proxyFormField = 'proxyFormField';
 
@@ -11,11 +12,7 @@ export const defaultDataItem = {
 };
 
 export const defaultModuleData = {
-  proxyFormField: [
-    {
-      ...defaultDataItem,
-    },
-  ],
+  proxyFormField: [],
 };
 
 export const statusInfo: Record<

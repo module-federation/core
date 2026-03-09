@@ -1,5 +1,4 @@
 export = WarnDeprecatedOptionPlugin;
-/** @typedef {import("./Compiler")} Compiler */
 declare class WarnDeprecatedOptionPlugin {
   /**
    * Create an instance of the plugin

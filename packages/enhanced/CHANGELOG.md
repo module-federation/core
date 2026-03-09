@@ -1,5 +1,149 @@
 # @module-federation/enhanced
 
+## 2.1.0
+
+### Patch Changes
+
+- 987716a: fix(enhanced): correct the condition for provideExternalRuntime field
+- 0172491: Fix federation runtime bootstrap to rehydrate bundler runtime in workers.
+- a0faa70: Security fix: bump Ajv usage to 8.18.0 to prevent CVE-2025-69873 from affecting `schema-utils` validation paths.
+- 918294f: Add runtime-safe access helpers for webpack require, webpack share-scope globals, and ignored dynamic imports, and migrate core/node runtime loaders to use these helpers. The helpers are exposed via a standalone `@module-federation/sdk/bundler` entrypoint so they can be built and consumed independently from the SDK main index bundle.
+- Updated dependencies [6235711]
+- Updated dependencies [5a4f503]
+- Updated dependencies [918294f]
+- Updated dependencies [24bf84d]
+- Updated dependencies [918294f]
+- Updated dependencies [5954fe7]
+- Updated dependencies [918294f]
+  - @module-federation/dts-plugin@2.1.0
+  - @module-federation/manifest@2.1.0
+  - @module-federation/error-codes@2.1.0
+  - @module-federation/cli@2.1.0
+  - @module-federation/managers@2.1.0
+  - @module-federation/sdk@2.1.0
+  - @module-federation/runtime-tools@2.1.0
+  - @module-federation/data-prefetch@2.1.0
+  - @module-federation/rspack@2.1.0
+  - @module-federation/inject-external-runtime-core-plugin@2.1.0
+  - @module-federation/bridge-react-webpack-plugin@2.1.0
+
+## 2.0.1
+
+### Patch Changes
+
+- Updated dependencies [28a2db4]
+  - @module-federation/dts-plugin@2.0.1
+  - @module-federation/cli@2.0.1
+  - @module-federation/manifest@2.0.1
+  - @module-federation/rspack@2.0.1
+  - @module-federation/data-prefetch@2.0.1
+  - @module-federation/runtime-tools@2.0.1
+  - @module-federation/inject-external-runtime-core-plugin@2.0.1
+  - @module-federation/sdk@2.0.1
+  - @module-federation/managers@2.0.1
+  - @module-federation/bridge-react-webpack-plugin@2.0.1
+  - @module-federation/error-codes@2.0.1
+
+## 2.0.0
+
+### Patch Changes
+
+- Updated dependencies [2bd445d]
+  - @module-federation/rspack@2.0.0
+  - @module-federation/sdk@2.0.0
+  - @module-federation/runtime-tools@2.0.0
+  - @module-federation/managers@2.0.0
+  - @module-federation/manifest@2.0.0
+  - @module-federation/dts-plugin@2.0.0
+  - @module-federation/bridge-react-webpack-plugin@2.0.0
+  - @module-federation/data-prefetch@2.0.0
+  - @module-federation/error-codes@2.0.0
+  - @module-federation/inject-external-runtime-core-plugin@2.0.0
+  - @module-federation/cli@2.0.0
+
+## 0.24.1
+
+### Patch Changes
+
+- @module-federation/data-prefetch@0.24.1
+- @module-federation/dts-plugin@0.24.1
+- @module-federation/runtime-tools@0.24.1
+- @module-federation/rspack@0.24.1
+- @module-federation/inject-external-runtime-core-plugin@0.24.1
+- @module-federation/sdk@0.24.1
+- @module-federation/managers@0.24.1
+- @module-federation/manifest@0.24.1
+- @module-federation/bridge-react-webpack-plugin@0.24.1
+- @module-federation/error-codes@0.24.1
+- @module-federation/cli@0.24.1
+
+## 0.24.0
+
+### Patch Changes
+
+- c3c068e: chore(enhanced): upgrade node@20
+- Updated dependencies [6c45347]
+  - @module-federation/manifest@0.24.0
+  - @module-federation/rspack@0.24.0
+  - @module-federation/sdk@0.24.0
+  - @module-federation/runtime-tools@0.24.0
+  - @module-federation/managers@0.24.0
+  - @module-federation/dts-plugin@0.24.0
+  - @module-federation/bridge-react-webpack-plugin@0.24.0
+  - @module-federation/data-prefetch@0.24.0
+  - @module-federation/error-codes@0.24.0
+  - @module-federation/inject-external-runtime-core-plugin@0.24.0
+  - @module-federation/cli@0.24.0
+
+## 0.23.0
+
+### Patch Changes
+
+- Updated dependencies [9373882]
+  - @module-federation/dts-plugin@0.23.0
+  - @module-federation/cli@0.23.0
+  - @module-federation/manifest@0.23.0
+  - @module-federation/rspack@0.23.0
+  - @module-federation/data-prefetch@0.23.0
+  - @module-federation/runtime-tools@0.23.0
+  - @module-federation/inject-external-runtime-core-plugin@0.23.0
+  - @module-federation/sdk@0.23.0
+  - @module-federation/managers@0.23.0
+  - @module-federation/bridge-react-webpack-plugin@0.23.0
+  - @module-federation/error-codes@0.23.0
+
+## 0.22.1
+
+### Patch Changes
+
+- @module-federation/rspack@0.22.1
+- @module-federation/sdk@0.22.1
+- @module-federation/runtime-tools@0.22.1
+- @module-federation/managers@0.22.1
+- @module-federation/manifest@0.22.1
+- @module-federation/dts-plugin@0.22.1
+- @module-federation/bridge-react-webpack-plugin@0.22.1
+- @module-federation/data-prefetch@0.22.1
+- @module-federation/error-codes@0.22.1
+- @module-federation/inject-external-runtime-core-plugin@0.22.1
+- @module-federation/cli@0.22.1
+
+## 0.22.0
+
+### Patch Changes
+
+- @module-federation/rspack@0.22.0
+- @module-federation/sdk@0.22.0
+- @module-federation/runtime-tools@0.22.0
+- @module-federation/managers@0.22.0
+- @module-federation/manifest@0.22.0
+- @module-federation/dts-plugin@0.22.0
+- @module-federation/bridge-react-webpack-plugin@0.22.0
+- @module-federation/data-prefetch@0.22.0
+- @module-federation/error-codes@0.22.0
+- @module-federation/inject-external-runtime-core-plugin@0.22.0
+- @module-federation/cli@0.22.0
+
 ## 0.21.6
 
 ### Patch Changes

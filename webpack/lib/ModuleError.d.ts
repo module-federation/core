@@ -4,7 +4,7 @@ export = ModuleError;
 declare class ModuleError extends WebpackError {
   /**
    * @param {Error} err error thrown
-   * @param {{from?: string|null}} info additional info
+   * @param {{from?: string | null}} info additional info
    */
   constructor(
     err: Error,

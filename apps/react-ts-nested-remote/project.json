@@ -6,46 +6,19 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/webpack:webpack",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/apps/react-ts-nested-remote/dist"],
       "defaultConfiguration": "production",
       "options": {
-        "compiler": "babel",
-        "outputPath": "apps/react-ts-nested-remote/dist",
-        "index": "apps/react-ts-nested-remote/src/index.html",
-        "baseHref": "/",
-        "main": "apps/react-ts-nested-remote/src/main.ts",
-        "polyfills": "apps/react-ts-nested-remote/src/polyfills.ts",
-        "tsConfig": "apps/react-ts-nested-remote/tsconfig.app.json",
-        "assets": [
-          "apps/react-ts-nested-remote/src/favicon.ico",
-          "apps/react-ts-nested-remote/src/assets"
-        ],
-        "styles": ["apps/react-ts-nested-remote/src/styles.css"],
-        "scripts": [],
-        "webpackConfig": "apps/react-ts-nested-remote/webpack.config.js",
-        "babelUpwardRootMode": true
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/react-ts-nested-remote/webpack.config.js --mode production",
+        "forwardAllArgs": false
       },
       "configurations": {
         "development": {
-          "extractLicenses": false,
-          "optimization": false,
-          "sourceMap": true,
-          "vendorChunk": true
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/react-ts-nested-remote/webpack.config.js --mode development"
         },
         "production": {
-          "fileReplacements": [
-            {
-              "replace": "apps/react-ts-nested-remote/src/environments/environment.ts",
-              "with": "apps/react-ts-nested-remote/src/environments/environment.prod.ts"
-            }
-          ],
-          "optimization": true,
-          "outputHashing": "all",
-          "sourceMap": false,
-          "namedChunks": false,
-          "extractLicenses": false,
-          "vendorChunk": false
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/react-ts-nested-remote/webpack.config.js --mode production"
         }
       },
       "dependsOn": [
@@ -56,44 +29,34 @@
       ]
     },
     "serve": {
-      "executor": "@nx/webpack:dev-server",
+      "executor": "nx:run-commands",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "react_ts_nested_remote:build",
-        "hmr": true,
-        "port": 3005
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/react-ts-nested-remote/webpack.config.js --mode development --port 3005",
+        "forwardAllArgs": false
       },
       "configurations": {
         "development": {
-          "buildTarget": "react_ts_nested_remote:build:development"
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/react-ts-nested-remote/webpack.config.js --mode development --port 3005"
         },
         "production": {
-          "buildTarget": "react_ts_nested_remote:build:production",
-          "hmr": false
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/react-ts-nested-remote/webpack.config.js --mode production --port 3005 --no-hot"
         }
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
+      "executor": "nx:run-commands",
       "options": {
-        "lintFilePatterns": ["apps/react-ts-nested-remote/**/*.{ts,tsx,js,jsx}"]
+        "command": "pnpm exec eslint apps/react-ts-nested-remote/**/*.{ts,tsx,js,jsx}",
+        "forwardAllArgs": false
       }
     },
     "serve-static": {
-      "executor": "@nx/web:file-server",
-      "defaultConfiguration": "development",
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
       "options": {
-        "buildTarget": "react_ts_nested_remote:build",
-        "port": 3005
-      },
-      "configurations": {
-        "development": {
-          "buildTarget": "react_ts_nested_remote:build:development"
-        },
-        "production": {
-          "buildTarget": "react_ts_nested_remote:build:production"
-        }
+        "command": "pnpm exec serve apps/react-ts-nested-remote/dist -l 3005 --cors",
+        "forwardAllArgs": false
       }
     }
   }

@@ -1,5 +1,5 @@
 /*
- * @jest-environment node
+ * @rstest-environment node
  */
 
 /*
@@ -7,6 +7,7 @@
  * Testing all resolution paths: relative, absolute, prefix, and regular module requests
  */
 
+import { rs, Mock } from '@rstest/core';
 import type { Compilation } from 'webpack';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import ModuleNotFoundError from 'webpack/lib/ModuleNotFoundError';
@@ -22,8 +23,8 @@ try {
   vol = require('memfs').vol;
 } catch {
   vol = {
-    reset: jest.fn(),
-    fromJSON: jest.fn(),
+    reset: rs.fn(),
+    fromJSON: rs.fn(),
   };
 }
 
@@ -48,42 +49,50 @@ interface CompilationError {
 }
 
 interface MockResolver {
-  resolve: jest.MockedFunction<ResolverFunction>;
+  resolve: Mock<ResolverFunction>;
 }
 
 interface MockCompilation {
   resolverFactory: {
-    get: jest.Mock<MockResolver, [string, ResolveOptionsWithDependencyType?]>;
+    get: Mock<
+      (type: string, options?: ResolveOptionsWithDependencyType) => MockResolver
+    >;
   };
   compiler: { context: string };
   errors: CompilationError[];
   contextDependencies: {
-    addAll: jest.Mock<(iterable: Iterable<string>) => void>;
+    addAll: Mock<(iterable: Iterable<string>) => void>;
   };
-  fileDependencies: { addAll: jest.Mock<(iterable: Iterable<string>) => void> };
+  fileDependencies: { addAll: Mock<(iterable: Iterable<string>) => void> };
   missingDependencies: {
-    addAll: jest.Mock<(iterable: Iterable<string>) => void>;
+    addAll: Mock<(iterable: Iterable<string>) => void>;
   };
 }
 
-jest.mock('@module-federation/sdk/normalize-webpack-path', () => ({
-  normalizeWebpackPath: jest.fn((path) => path),
-  getWebpackPath: jest.fn(() => 'webpack'),
+// Use rs.hoisted() to create mock functions that are hoisted along with rs.mock()
+const mocks = rs.hoisted(() => ({
+  mockNormalizeWebpackPath: rs.fn((path: string) => path),
+  mockGetWebpackPath: rs.fn(() => 'webpack'),
 }));
 
-jest.mock('fs', () => require('memfs').fs);
-jest.mock('fs/promises', () => require('memfs').fs.promises);
+rs.mock('@module-federation/sdk/normalize-webpack-path', () => ({
+  normalizeWebpackPath: mocks.mockNormalizeWebpackPath,
+  getWebpackPath: mocks.mockGetWebpackPath,
+}));
 
-jest.mock('webpack/lib/util/fs', () => ({
-  join: (fs: any, ...paths: string[]) => require('path').join(...paths),
-  dirname: (fs: any, filePath: string) => require('path').dirname(filePath),
+rs.mock('fs', () => require('memfs').fs);
+rs.mock('fs/promises', () => require('memfs').fs.promises);
+
+rs.mock('webpack/lib/util/fs', () => ({
+  join: (fs: unknown, ...paths: string[]) => require('path').join(...paths),
+  dirname: (fs: unknown, filePath: string) => require('path').dirname(filePath),
   readJson: (
     fs: unknown,
     filePath: string,
     callback: (error: Error | null, data?: unknown) => void,
   ) => {
     const memfs = require('memfs').fs;
-    memfs.readFile(filePath, 'utf8', (err: any, content: any) => {
+    memfs.readFile(filePath, 'utf8', (err: Error | null, content: string) => {
       if (err) return callback(err);
       try {
         const data = JSON.parse(content);
@@ -102,26 +111,23 @@ describe('resolveMatchedConfigs', () => {
   let compilation: Compilation;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    rs.clearAllMocks();
 
     mockResolver = {
-      resolve: jest.fn<
-        ReturnType<ResolverFunction>,
-        Parameters<ResolverFunction>
-      >() as jest.MockedFunction<ResolverFunction>,
+      resolve: rs.fn<ResolverFunction>(),
     };
 
     mockCompilation = {
       resolverFactory: {
-        get: jest.fn().mockReturnValue(mockResolver),
+        get: rs.fn().mockReturnValue(mockResolver),
       },
       compiler: {
         context: '/test/context',
       },
       errors: [],
-      contextDependencies: { addAll: jest.fn() },
-      fileDependencies: { addAll: jest.fn() },
-      missingDependencies: { addAll: jest.fn() },
+      contextDependencies: { addAll: rs.fn() },
+      fileDependencies: { addAll: rs.fn() },
+      missingDependencies: { addAll: rs.fn() },
     };
 
     compilation = mockCompilation as unknown as Compilation;
@@ -668,9 +674,9 @@ describe('resolveMatchedConfigs', () => {
       expect(fileDeps).toBeInstanceOf(LazySet);
       expect(missingDeps).toBeInstanceOf(LazySet);
 
-      expect(contextDeps.has('/some/context')).toBe(true);
-      expect(fileDeps.has('/some/file.js')).toBe(true);
-      expect(missingDeps.has('/missing/file')).toBe(true);
+      expect((contextDeps as Set<string>).has('/some/context')).toBe(true);
+      expect((fileDeps as Set<string>).has('/some/file.js')).toBe(true);
+      expect((missingDeps as Set<string>).has('/missing/file')).toBe(true);
     });
   });
 
@@ -747,9 +753,14 @@ describe('resolveMatchedConfigs', () => {
   });
 
   describe('integration scenarios with memfs', () => {
+    // Capture memfs at module level to use directly in resolver callbacks
+    // rs.mock only works at module load time, not for dynamic require() calls
+    const memfs = require('memfs');
+    const path = require('path');
+
     beforeEach(() => {
       vol.reset();
-      jest.clearAllMocks();
+      rs.clearAllMocks();
     });
 
     describe('real module resolution scenarios', () => {
@@ -778,25 +789,29 @@ describe('resolveMatchedConfigs', () => {
                 resolveContext: unknown,
                 callback: ResolveCallback,
               ) => {
-                const fs = require('fs');
-                const path = require('path');
-
                 const fullPath = path.resolve(basePath, request);
 
-                fs.access(fullPath + '.js', fs.constants.F_OK, (err: any) => {
-                  if (err) {
-                    callback(new Error(`Module not found: ${request}`), false);
-                  } else {
-                    callback(null, fullPath + '.js');
-                  }
-                });
+                memfs.fs.access(
+                  fullPath + '.js',
+                  memfs.fs.constants.F_OK,
+                  (err: any) => {
+                    if (err) {
+                      callback(
+                        new Error(`Module not found: ${request}`),
+                        false,
+                      );
+                    } else {
+                      callback(null, fullPath + '.js');
+                    }
+                  },
+                );
               },
             }),
           },
           compiler: { context: '/test-project' },
-          contextDependencies: { addAll: jest.fn() },
-          fileDependencies: { addAll: jest.fn() },
-          missingDependencies: { addAll: jest.fn() },
+          contextDependencies: { addAll: rs.fn() },
+          fileDependencies: { addAll: rs.fn() },
+          missingDependencies: { addAll: rs.fn() },
           errors: [] as CompilationError[],
         };
 
@@ -850,24 +865,29 @@ describe('resolveMatchedConfigs', () => {
                 resolveContext: unknown,
                 callback: ResolveCallback,
               ) => {
-                const fs = require('fs');
-                const path = require('path');
                 const fullPath = path.resolve(basePath, request);
 
-                fs.access(fullPath + '.js', fs.constants.F_OK, (err: any) => {
-                  if (err) {
-                    callback(new Error(`Module not found: ${request}`), false);
-                  } else {
-                    callback(null, fullPath + '.js');
-                  }
-                });
+                memfs.fs.access(
+                  fullPath + '.js',
+                  memfs.fs.constants.F_OK,
+                  (err: any) => {
+                    if (err) {
+                      callback(
+                        new Error(`Module not found: ${request}`),
+                        false,
+                      );
+                    } else {
+                      callback(null, fullPath + '.js');
+                    }
+                  },
+                );
               },
             }),
           },
           compiler: { context: '/test-project' },
-          contextDependencies: { addAll: jest.fn() },
-          fileDependencies: { addAll: jest.fn() },
-          missingDependencies: { addAll: jest.fn() },
+          contextDependencies: { addAll: rs.fn() },
+          fileDependencies: { addAll: rs.fn() },
+          missingDependencies: { addAll: rs.fn() },
           errors: [] as CompilationError[],
         };
 
@@ -897,9 +917,9 @@ describe('resolveMatchedConfigs', () => {
         const mockCompilation = {
           resolverFactory: { get: () => ({}) },
           compiler: { context: '/test-project' },
-          contextDependencies: { addAll: jest.fn() },
-          fileDependencies: { addAll: jest.fn() },
-          missingDependencies: { addAll: jest.fn() },
+          contextDependencies: { addAll: rs.fn() },
+          fileDependencies: { addAll: rs.fn() },
+          missingDependencies: { addAll: rs.fn() },
           errors: [] as CompilationError[],
         };
 
@@ -931,9 +951,9 @@ describe('resolveMatchedConfigs', () => {
         const mockCompilation = {
           resolverFactory: { get: () => ({}) },
           compiler: { context: '/test-project' },
-          contextDependencies: { addAll: jest.fn() },
-          fileDependencies: { addAll: jest.fn() },
-          missingDependencies: { addAll: jest.fn() },
+          contextDependencies: { addAll: rs.fn() },
+          fileDependencies: { addAll: rs.fn() },
+          missingDependencies: { addAll: rs.fn() },
           errors: [] as CompilationError[],
         };
 
@@ -967,9 +987,9 @@ describe('resolveMatchedConfigs', () => {
         const mockCompilation = {
           resolverFactory: { get: () => ({}) },
           compiler: { context: '/test-project' },
-          contextDependencies: { addAll: jest.fn() },
-          fileDependencies: { addAll: jest.fn() },
-          missingDependencies: { addAll: jest.fn() },
+          contextDependencies: { addAll: rs.fn() },
+          fileDependencies: { addAll: rs.fn() },
+          missingDependencies: { addAll: rs.fn() },
           errors: [],
         };
 
@@ -1018,24 +1038,29 @@ describe('resolveMatchedConfigs', () => {
                 resolveContext: unknown,
                 callback: ResolveCallback,
               ) => {
-                const fs = require('fs');
-                const path = require('path');
                 const fullPath = path.resolve(basePath, request);
 
-                fs.access(fullPath + '.js', fs.constants.F_OK, (err: any) => {
-                  if (err) {
-                    callback(new Error(`Module not found: ${request}`), false);
-                  } else {
-                    callback(null, fullPath + '.js');
-                  }
-                });
+                memfs.fs.access(
+                  fullPath + '.js',
+                  memfs.fs.constants.F_OK,
+                  (err: any) => {
+                    if (err) {
+                      callback(
+                        new Error(`Module not found: ${request}`),
+                        false,
+                      );
+                    } else {
+                      callback(null, fullPath + '.js');
+                    }
+                  },
+                );
               },
             }),
           },
           compiler: { context: '/test-project' },
-          contextDependencies: { addAll: jest.fn() },
-          fileDependencies: { addAll: jest.fn() },
-          missingDependencies: { addAll: jest.fn() },
+          contextDependencies: { addAll: rs.fn() },
+          fileDependencies: { addAll: rs.fn() },
+          missingDependencies: { addAll: rs.fn() },
           errors: [] as CompilationError[],
         };
 
@@ -1093,24 +1118,29 @@ describe('resolveMatchedConfigs', () => {
                 resolveContext: unknown,
                 callback: ResolveCallback,
               ) => {
-                const fs = require('fs');
-                const path = require('path');
                 const fullPath = path.resolve(basePath, request);
 
-                fs.access(fullPath + '.js', fs.constants.F_OK, (err: any) => {
-                  if (err) {
-                    callback(new Error(`Module not found: ${request}`), false);
-                  } else {
-                    callback(null, fullPath + '.js');
-                  }
-                });
+                memfs.fs.access(
+                  fullPath + '.js',
+                  memfs.fs.constants.F_OK,
+                  (err: any) => {
+                    if (err) {
+                      callback(
+                        new Error(`Module not found: ${request}`),
+                        false,
+                      );
+                    } else {
+                      callback(null, fullPath + '.js');
+                    }
+                  },
+                );
               },
             }),
           },
           compiler: { context: '/test-project' },
-          contextDependencies: { addAll: jest.fn() },
-          fileDependencies: { addAll: jest.fn() },
-          missingDependencies: { addAll: jest.fn() },
+          contextDependencies: { addAll: rs.fn() },
+          fileDependencies: { addAll: rs.fn() },
+          missingDependencies: { addAll: rs.fn() },
           errors: [] as CompilationError[],
         };
 
@@ -1148,9 +1178,9 @@ describe('resolveMatchedConfigs', () => {
         const mockCompilation = {
           resolverFactory: { get: () => ({}) },
           compiler: { context: '/test-project' },
-          contextDependencies: { addAll: jest.fn() },
-          fileDependencies: { addAll: jest.fn() },
-          missingDependencies: { addAll: jest.fn() },
+          contextDependencies: { addAll: rs.fn() },
+          fileDependencies: { addAll: rs.fn() },
+          missingDependencies: { addAll: rs.fn() },
           errors: [],
         };
 
@@ -1191,9 +1221,9 @@ describe('resolveMatchedConfigs', () => {
         ];
 
         const mockDependencies = {
-          contextDependencies: { addAll: jest.fn() },
-          fileDependencies: { addAll: jest.fn() },
-          missingDependencies: { addAll: jest.fn() },
+          contextDependencies: { addAll: rs.fn() },
+          fileDependencies: { addAll: rs.fn() },
+          missingDependencies: { addAll: rs.fn() },
         };
 
         const mockCompilation = {
@@ -1215,17 +1245,22 @@ describe('resolveMatchedConfigs', () => {
                 );
                 typedContext.contextDependencies.add('/test-project/src');
 
-                const fs = require('fs');
-                const path = require('path');
                 const fullPath = path.resolve(basePath, request);
 
-                fs.access(fullPath + '.js', fs.constants.F_OK, (err: any) => {
-                  if (err) {
-                    callback(new Error(`Module not found: ${request}`), false);
-                  } else {
-                    callback(null, fullPath + '.js');
-                  }
-                });
+                memfs.fs.access(
+                  fullPath + '.js',
+                  memfs.fs.constants.F_OK,
+                  (err: any) => {
+                    if (err) {
+                      callback(
+                        new Error(`Module not found: ${request}`),
+                        false,
+                      );
+                    } else {
+                      callback(null, fullPath + '.js');
+                    }
+                  },
+                );
               },
             }),
           },
@@ -1252,9 +1287,9 @@ describe('resolveMatchedConfigs', () => {
         const mockCompilation = {
           resolverFactory: { get: () => ({}) },
           compiler: { context: '/test-project' },
-          contextDependencies: { addAll: jest.fn() },
-          fileDependencies: { addAll: jest.fn() },
-          missingDependencies: { addAll: jest.fn() },
+          contextDependencies: { addAll: rs.fn() },
+          fileDependencies: { addAll: rs.fn() },
+          missingDependencies: { addAll: rs.fn() },
           errors: [],
         };
 
@@ -1281,9 +1316,9 @@ describe('resolveMatchedConfigs', () => {
             },
           },
           compiler: { context: '/test-project' },
-          contextDependencies: { addAll: jest.fn() },
-          fileDependencies: { addAll: jest.fn() },
-          missingDependencies: { addAll: jest.fn() },
+          contextDependencies: { addAll: rs.fn() },
+          fileDependencies: { addAll: rs.fn() },
+          missingDependencies: { addAll: rs.fn() },
           errors: [] as CompilationError[],
         };
 
@@ -1322,29 +1357,31 @@ describe('resolveMatchedConfigs', () => {
                 resolveContext: unknown,
                 callback: ResolveCallback,
               ) => {
-                const fs = require('fs');
-                const path = require('path');
                 const fullPath = path.resolve(basePath, request);
 
                 setTimeout(() => {
-                  fs.access(fullPath + '.js', fs.constants.F_OK, (err: any) => {
-                    if (err) {
-                      callback(
-                        new Error(`Module not found: ${request}`),
-                        false,
-                      );
-                    } else {
-                      callback(null, fullPath + '.js');
-                    }
-                  });
+                  memfs.fs.access(
+                    fullPath + '.js',
+                    memfs.fs.constants.F_OK,
+                    (err: any) => {
+                      if (err) {
+                        callback(
+                          new Error(`Module not found: ${request}`),
+                          false,
+                        );
+                      } else {
+                        callback(null, fullPath + '.js');
+                      }
+                    },
+                  );
                 }, Math.random() * 10);
               },
             }),
           },
           compiler: { context: '/test-project' },
-          contextDependencies: { addAll: jest.fn() },
-          fileDependencies: { addAll: jest.fn() },
-          missingDependencies: { addAll: jest.fn() },
+          contextDependencies: { addAll: rs.fn() },
+          fileDependencies: { addAll: rs.fn() },
+          missingDependencies: { addAll: rs.fn() },
           errors: [] as CompilationError[],
         };
 

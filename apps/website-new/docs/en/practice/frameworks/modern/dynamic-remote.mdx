@@ -18,7 +18,7 @@ Create a new provider for dynamic load.
 Create a `module-federation.config.ts` file in the project root directory and write the following content:
 
 ```ts title='module-federation.config.ts'
-import { createModuleFederationConfig } from '@module-federation/modern-js';
+import { createModuleFederationConfig } from '@module-federation/modern-js-v3';
 
 export default createModuleFederationConfig({
   name: 'dynamic_provider',
@@ -35,17 +35,15 @@ export default createModuleFederationConfig({
 
 ### 2. Apply plugin
 
-Apply `@module-federation/modern-js` in `modern.config.ts`:
+Apply `@module-federation/modern-js-v3` in `modern.config.ts`:
 
 ```ts title='modern.config.ts'
 import { appTools, defineConfig } from '@modern-js/app-tools';
-import { moduleFederationPlugin } from '@module-federation/modern-js';
+import { moduleFederationPlugin } from '@module-federation/modern-js-v3';
 
 // https://modernjs.dev/en/configure/app/usage
 export default defineConfig({
-  runtime: {
-    router: true,
-  },
+
   server: {
     ssr: {
       mode: 'stream',
@@ -147,8 +145,8 @@ export const loader = async ({ request }: LoaderFunctionArgs): Promise<DataLoade
 Consume loader data and dynamically load the corresponding producer:
 
 ```tsx
-import { loadRemote, registerRemotes, getInstance } from '@module-federation/modern-js/runtime';
-import { createLazyComponent } from '@module-federation/modern-js/react';
+import { loadRemote, registerRemotes, getInstance } from '@module-federation/modern-js-v3/runtime';
+import { createLazyComponent } from '@module-federation/modern-js-v3/react';
 // Use import type to get data loader types
 import type { DataLoaderRes } from './page.data';
 import { useLoaderData } from '@modern-js/runtime/router';

@@ -17,7 +17,7 @@ Modern.js 提供了 [Data Loader](https://modernjs.dev/guides/basic-features/dat
 在项目根目录创建 `module-federation.config.ts` 文件，并写入下列内容：
 
 ```ts title='module-federation.config.ts'
-import { createModuleFederationConfig } from '@module-federation/modern-js';
+import { createModuleFederationConfig } from '@module-federation/modern-js-v3';
 
 export default createModuleFederationConfig({
   name: 'dynamic_provider',
@@ -34,17 +34,14 @@ export default createModuleFederationConfig({
 
 ### 2. 应用插件
 
-在 `modern.config.ts` 应用 `@module-federation/modern-js`：
+在 `modern.config.ts` 应用 `@module-federation/modern-js-v3`：
 
 ```ts title='modern.config.ts'
 import { appTools, defineConfig } from '@modern-js/app-tools';
-import { moduleFederationPlugin } from '@module-federation/modern-js';
+import { moduleFederationPlugin } from '@module-federation/modern-js-v3';
 
 // https://modernjs.dev/en/configure/app/usage
 export default defineConfig({
-  runtime: {
-    router: true,
-  },
   server: {
     ssr: {
       mode: 'stream',
@@ -144,8 +141,8 @@ export const loader = async ({ request }: LoaderFunctionArgs): Promise<DataLoade
 消费 loader 数据，并动态加载对应的生产者：
 
 ```tsx
-import { loadRemote, registerRemotes, getInstance } from '@module-federation/modern-js/runtime';
-import { createLazyComponent } from '@module-federation/modern-js/react';
+import { loadRemote, registerRemotes, getInstance } from '@module-federation/modern-js-v3/runtime';
+import { createLazyComponent } from '@module-federation/modern-js-v3/react';
 // 使用 import type ，仅获取类型
 import type { DataLoaderRes } from './page.data';
 import { useLoaderData } from '@modern-js/runtime/router';

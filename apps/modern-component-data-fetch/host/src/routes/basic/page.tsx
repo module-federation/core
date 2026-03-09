@@ -1,5 +1,5 @@
-import { getInstance } from '@module-federation/modern-js/runtime';
-import { ERROR_TYPE } from '@module-federation/modern-js/react';
+import { getInstance } from '@module-federation/modern-js-v3/runtime';
+import { ERROR_TYPE } from '@module-federation/modern-js-v3/react';
 
 const Basic = getInstance()!.createLazyComponent({
   loader: () => {

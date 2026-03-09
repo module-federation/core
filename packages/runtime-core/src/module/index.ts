@@ -1,21 +1,77 @@
-import { getFMId, assert, error, processModuleAlias } from '../utils';
+import {
+  getFMId,
+  assert,
+  error,
+  processModuleAlias,
+  optionsToMFContext,
+} from '../utils';
 import { safeToString, ModuleInfo } from '@module-federation/sdk';
 import {
-  getShortErrorMsg,
   RUNTIME_002,
   RUNTIME_008,
   runtimeDescMap,
 } from '@module-federation/error-codes';
-import { getRemoteEntry, getRemoteEntryUniqueKey } from '../utils/load';
+import { getRemoteEntry } from '../utils/load';
 import { ModuleFederation } from '../core';
-import { RemoteEntryExports, RemoteInfo, InitScope } from '../type';
-import { globalLoading } from '../global';
+import {
+  RemoteEntryExports,
+  RemoteInfo,
+  InitScope,
+  ShareScopeMap,
+} from '../type';
 
 export type ModuleOptions = ConstructorParameters<typeof Module>[0];
+
+export function createRemoteEntryInitOptions(
+  remoteInfo: RemoteInfo,
+  hostShareScopeMap: ShareScopeMap,
+  rawInitScope?: InitScope,
+): Record<string, any> {
+  const localShareScopeMap = hostShareScopeMap;
+
+  const shareScopeKeys = Array.isArray(remoteInfo.shareScope)
+    ? remoteInfo.shareScope
+    : [remoteInfo.shareScope];
+
+  if (!shareScopeKeys.length) {
+    shareScopeKeys.push('default');
+  }
+  shareScopeKeys.forEach((shareScopeKey) => {
+    if (!localShareScopeMap[shareScopeKey]) {
+      localShareScopeMap[shareScopeKey] = {};
+    }
+  });
+
+  const remoteEntryInitOptions = {
+    version: remoteInfo.version || '',
+    shareScopeKeys: Array.isArray(remoteInfo.shareScope)
+      ? shareScopeKeys
+      : remoteInfo.shareScope || 'default',
+  };
+
+  // Help to find host instance
+  Object.defineProperty(remoteEntryInitOptions, 'shareScopeMap', {
+    value: localShareScopeMap,
+    // remoteEntryInitOptions will be traversed and assigned during container init, ,so this attribute is not allowed to be traversed
+    enumerable: false,
+  });
+
+  // TODO: compate legacy init params, should use shareScopeMap if exist
+  const shareScope = localShareScopeMap[shareScopeKeys[0]];
+  const initScope: InitScope = rawInitScope ?? [];
+
+  return {
+    remoteEntryInitOptions,
+    shareScope,
+    initScope,
+  };
+}
 
 class Module {
   remoteInfo: RemoteInfo;
   inited = false;
+  initing = false;
+  initPromise?: Promise<void>;
   remoteEntryExports?: RemoteEntryExports;
   lib: RemoteEntryExports | undefined = undefined;
   host: ModuleFederation;
@@ -36,9 +92,7 @@ class Module {
       return this.remoteEntryExports;
     }
 
-    let remoteEntryExports;
-
-    remoteEntryExports = await getRemoteEntry({
+    const remoteEntryExports = await getRemoteEntry({
       origin: this.host,
       remoteInfo: this.remoteInfo,
       remoteEntryExports: this.remoteEntryExports,
@@ -49,54 +103,37 @@ class Module {
       `remoteEntryExports is undefined \n ${safeToString(this.remoteInfo)}`,
     );
 
-    this.remoteEntryExports = remoteEntryExports as RemoteEntryExports;
+    this.remoteEntryExports = remoteEntryExports;
     return this.remoteEntryExports;
   }
 
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  async get(
-    id: string,
-    expose: string,
-    options?: { loadFactory?: boolean },
-    remoteSnapshot?: ModuleInfo,
-  ) {
-    const { loadFactory = true } = options || { loadFactory: true };
 
+  async init(
+    id?: string,
+    remoteSnapshot?: ModuleInfo,
+    rawInitScope?: InitScope,
+  ) {
     // Get remoteEntry.js
     const remoteEntryExports = await this.getEntry();
 
-    if (!this.inited) {
-      const localShareScopeMap = this.host.shareScopeMap;
-      const shareScopeKeys = Array.isArray(this.remoteInfo.shareScope)
-        ? this.remoteInfo.shareScope
-        : [this.remoteInfo.shareScope];
-      if (!shareScopeKeys.length) {
-        shareScopeKeys.push('default');
-      }
+    if (this.inited) {
+      return remoteEntryExports;
+    }
 
-      shareScopeKeys.forEach((shareScopeKey) => {
-        if (!localShareScopeMap[shareScopeKey]) {
-          localShareScopeMap[shareScopeKey] = {};
-        }
-      });
+    if (this.initPromise) {
+      await this.initPromise;
+      return remoteEntryExports;
+    }
 
-      // TODO: compate legacy init params, should use shareScopeMap if exist
-      const shareScope = localShareScopeMap[shareScopeKeys[0]];
-      const initScope: InitScope = [];
-
-      const remoteEntryInitOptions = {
-        version: this.remoteInfo.version || '',
-        shareScopeKeys: Array.isArray(this.remoteInfo.shareScope)
-          ? shareScopeKeys
-          : this.remoteInfo.shareScope || 'default',
-      };
-
-      // Help to find host instance
-      Object.defineProperty(remoteEntryInitOptions, 'shareScopeMap', {
-        value: localShareScopeMap,
-        // remoteEntryInitOptions will be traversed and assigned during container init, ,so this attribute is not allowed to be traversed
-        enumerable: false,
-      });
+    this.initing = true;
+    this.initPromise = (async () => {
+      const { remoteEntryInitOptions, shareScope, initScope } =
+        createRemoteEntryInitOptions(
+          this.remoteInfo,
+          this.host.shareScopeMap,
+          rawInitScope,
+        );
 
       const initContainerOptions =
         await this.host.hooks.lifecycle.beforeInitContainer.emit({
@@ -110,12 +147,16 @@ class Module {
 
       if (typeof remoteEntryExports?.init === 'undefined') {
         error(
-          getShortErrorMsg(RUNTIME_002, runtimeDescMap, {
+          RUNTIME_002,
+          runtimeDescMap,
+          {
             hostName: this.host.name,
             remoteName: this.remoteInfo.name,
             remoteEntryUrl: this.remoteInfo.entry,
             remoteEntryKey: this.remoteInfo.entryGlobalName,
-          }),
+          },
+          undefined,
+          optionsToMFContext(this.host.options),
         );
       }
 
@@ -131,10 +172,30 @@ class Module {
         remoteSnapshot,
         remoteEntryExports,
       });
+      this.inited = true;
+    })();
+
+    try {
+      await this.initPromise;
+    } finally {
+      this.initing = false;
+      this.initPromise = undefined;
     }
 
+    return remoteEntryExports;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  async get(
+    id: string,
+    expose: string,
+    options?: { loadFactory?: boolean },
+    remoteSnapshot?: ModuleInfo,
+  ) {
+    const { loadFactory = true } = options || { loadFactory: true };
+
+    const remoteEntryExports = await this.init(id, remoteSnapshot);
     this.lib = remoteEntryExports;
-    this.inited = true;
 
     let moduleFactory;
     moduleFactory = await this.host.loaderHook.lifecycle.getModuleFactory.emit({

@@ -1,0 +1,36 @@
+## Deploy Server (reference implementation)
+
+If you plan to build your own Deploy Server, the following high-level flow can be used to implement `server-calc`.
+
+1.  **Deployment phase: aggregate `usedExports`**
+    In your CI/CD deployment pipeline, your service should:
+
+    - collect build metadata for all applications about to be released (typically `mf-stats.json` or similar files);
+    - for the same shared dependency (e.g. `antd@6.1.0`), aggregate the `usedExports` declared by each application.
+
+2.  **Compute the global minimum union**
+    Merge and deduplicate all collected `usedExports` lists to get the minimal global set (the union) required by the system.
+
+3.  **Trigger a secondary build (produce an optimized shared bundle)**
+    Invoke your build tool (e.g. Rspack CLI) as an isolated build and pass:
+
+    - the target shared dependency name and version (e.g. `antd@6.1.0`);
+    - the global `usedExports` union from the previous step.
+      The output is a standalone shared bundle containing only the required modules.
+
+4.  **Update and publish the Snapshot**
+    Upload the optimized bundle to your static asset host (CDN). Then update the Module Federation Snapshot file (typically the remote version of `mf-manifest.json`) with fields such as:
+
+    - `secondarySharedTreeShakingEntry`: URL of the optimized bundle,
+    - `secondarySharedTreeShakingName`: unique bundle name,
+    - `treeShakingStatus`: mark as available.
+      Finally, distribute the updated Snapshot to all consumers.
+
+5.  **Runtime on-demand loading**
+    When a user visits the application, the MF Runtime reads the Snapshot. If `treeShakingStatus` is available and the environment meets the loading conditions, it loads the optimized bundle via `secondarySharedTreeShakingEntry` instead of the full bundle.
+
+**Versioning, caching, and compatibility**
+
+- **Strict versioning** is the foundation. Ensure secondary builds and runtime loading are based on the exact same version (e.g. `antd@6.1.0`) to avoid mismatches.
+- Use a **reasonable caching strategy** for secondary build artifacts. Since content changes with the global `usedExports`, prefer content-hash-based filenames for long-term caching.
+- This flow is **forward compatible**: when not enabled or conditions aren’t met, consumers fall back to the full bundle without impacting existing functionality.

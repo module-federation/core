@@ -1,6 +1,6 @@
 /*
-	MIT License http://www.opensource.org/licenses/mit-license.php
-	Author Tobias Koppers @sokra
+  MIT License http://www.opensource.org/licenses/mit-license.php
+  Author Tobias Koppers @sokra
 */
 
 import { isRequiredVersion } from '@module-federation/sdk';
@@ -390,7 +390,7 @@ function getDescriptionFile(
       );
     }
     const filePath = join(fs, directory, descriptionFiles[i]);
-    readJson(fs, filePath, (err, data: object) => {
+    readJson(fs, filePath, (err, data?: Record<string, any>) => {
       if (err) {
         if ('code' in err && err.code === 'ENOENT') {
           i++;
@@ -466,6 +466,7 @@ export function normalizeConsumeShareOptions(consumeOptions: ConsumeOptions) {
     shareKey,
     shareScope,
     layer,
+    treeShakingMode,
   } = consumeOptions;
   return {
     shareConfig: {
@@ -478,6 +479,7 @@ export function normalizeConsumeShareOptions(consumeOptions: ConsumeOptions) {
     },
     shareScope,
     shareKey,
+    treeShakingMode,
   };
 }
 

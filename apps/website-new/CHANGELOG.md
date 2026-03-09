@@ -1,5 +1,67 @@
 # website-new
 
+## 1.3.14
+
+### Patch Changes
+
+- Updated dependencies [918294f]
+- Updated dependencies [24bf84d]
+- Updated dependencies [da4c722]
+- Updated dependencies [e787fd3]
+  - @module-federation/error-codes@2.1.0
+  - @module-federation/rspress-plugin@2.1.0
+
+## 1.3.13
+
+### Patch Changes
+
+- Updated dependencies [a331eba]
+  - @module-federation/rspress-plugin@2.0.1
+  - @module-federation/error-codes@2.0.1
+
+## 1.3.12
+
+### Patch Changes
+
+- @module-federation/rspress-plugin@2.0.0
+- @module-federation/error-codes@2.0.0
+
+## 1.3.11
+
+### Patch Changes
+
+- @module-federation/rspress-plugin@0.24.1
+- @module-federation/error-codes@0.24.1
+
+## 1.3.10
+
+### Patch Changes
+
+- Updated dependencies [0133409]
+  - @module-federation/rspress-plugin@0.24.0
+  - @module-federation/error-codes@0.24.0
+
+## 1.3.9
+
+### Patch Changes
+
+- @module-federation/rspress-plugin@0.23.0
+- @module-federation/error-codes@0.23.0
+
+## 1.3.8
+
+### Patch Changes
+
+- @module-federation/error-codes@0.22.1
+- @module-federation/rspress-plugin@0.22.1
+
+## 1.3.7
+
+### Patch Changes
+
+- @module-federation/error-codes@0.22.0
+- @module-federation/rspress-plugin@0.22.0
+
 ## 1.3.6
 
 ### Patch Changes

@@ -11,7 +11,8 @@
     "resolveJsonModule": true,
     "declaration": true,
     "allowJs": true,
-    "lib": ["ES2021", "DOM"]
+    "lib": ["ES2021", "DOM"],
+    "types": ["node", "fs-extra"]
   },
   "include": ["src", "__tests__"]
 }

@@ -5,13 +5,13 @@ import * as ReactRouterDom from 'react-router';
 import { RouterContext } from '../provider/context';
 import { LoggerInstance } from '../utils';
 
-function WraperRouter(
-  props:
-    | Parameters<typeof ReactRouterDom.BrowserRouter>[0]
-    | Parameters<typeof ReactRouterDom.MemoryRouter>[0],
-) {
+function WraperRouter(props: Record<string, unknown>) {
   const { basename, ...propsRes } = props;
   const routerContextProps = useContext(RouterContext) || {};
+  const MemoryRouter =
+    ReactRouterDom.MemoryRouter as unknown as React.ComponentType<any>;
+  const BrowserRouter =
+    ReactRouterDom.BrowserRouter as unknown as React.ComponentType<any>;
 
   LoggerInstance.debug(`WraperRouter info >>>`, {
     ...routerContextProps,
@@ -21,24 +21,22 @@ function WraperRouter(
 
   if (routerContextProps?.memoryRoute) {
     return (
-      <ReactRouterDom.MemoryRouter
+      <MemoryRouter
         {...props}
         initialEntries={[routerContextProps?.memoryRoute.entryPath]}
       />
     );
   }
   return (
-    <ReactRouterDom.BrowserRouter
+    <BrowserRouter
       {...propsRes}
       basename={routerContextProps?.basename || basename}
     />
   );
 }
 
-function WraperRouterProvider(
-  props: Parameters<typeof ReactRouterDom.RouterProvider>[0],
-) {
-  const { router, ...propsRes } = props;
+function WraperRouterProvider(props: Record<string, unknown>) {
+  const { router, ...propsRes } = props as { router: any };
   const routerContextProps = useContext(RouterContext) || {};
   const routers = router.routes;
   LoggerInstance.debug(`WraperRouterProvider info >>>`, {
@@ -47,7 +45,9 @@ function WraperRouterProvider(
     WraperRouterProviderProps: props,
     router,
   });
-  const RouterProvider = (ReactRouterDom as any)['Router' + 'Provider'];
+  const RouterProvider = (ReactRouterDom as any)[
+    'Router' + 'Provider'
+  ] as React.ComponentType<any>;
   const createMemoryRouter = (ReactRouterDom as any)['create' + 'MemoryRouter'];
   const createBrowserRouter = (ReactRouterDom as any)[
     'create' + 'BrowserRouter'

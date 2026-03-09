@@ -1,4 +1,5 @@
 import { SyncHook, AsyncSeriesHook, HookMap } from 'tapable';
+import { rs } from '@rstest/core';
 
 export type BasicCompiler = {
   hooks: {
@@ -72,9 +73,9 @@ export function createMemfsCompilation(compiler: BasicCompiler) {
   return {
     dependencyFactories: new Map(),
     hooks: {
-      additionalTreeRuntimeRequirements: { tap: jest.fn() },
-      finishModules: { tap: jest.fn(), tapAsync: jest.fn() },
-      seal: { tap: jest.fn() },
+      additionalTreeRuntimeRequirements: { tap: rs.fn() },
+      finishModules: { tap: rs.fn(), tapAsync: rs.fn() },
+      seal: { tap: rs.fn() },
       runtimeRequirementInTree: new HookMap<
         SyncHook<[unknown, unknown, unknown]>
       >(
@@ -85,17 +86,17 @@ export function createMemfsCompilation(compiler: BasicCompiler) {
             'context',
           ]),
       ),
-      processAssets: { tap: jest.fn() },
+      processAssets: { tap: rs.fn() },
     },
-    addRuntimeModule: jest.fn(),
-    contextDependencies: { addAll: jest.fn() },
-    fileDependencies: { addAll: jest.fn() },
-    missingDependencies: { addAll: jest.fn() },
+    addRuntimeModule: rs.fn(),
+    contextDependencies: { addAll: rs.fn() },
+    fileDependencies: { addAll: rs.fn() },
+    missingDependencies: { addAll: rs.fn() },
     warnings: [],
     errors: [],
     resolverFactory: {
-      get: jest.fn(() => ({
-        resolve: jest.fn(
+      get: rs.fn(() => ({
+        resolve: rs.fn(
           (
             _context: unknown,
             lookupStartPath: string,
@@ -114,9 +115,9 @@ export function createMemfsCompilation(compiler: BasicCompiler) {
 export function createNormalModuleFactory() {
   return {
     hooks: {
-      module: { tap: jest.fn() },
-      factorize: { tapPromise: jest.fn(), tapAsync: jest.fn(), tap: jest.fn() },
-      createModule: { tapPromise: jest.fn() },
+      module: { tap: rs.fn() },
+      factorize: { tapPromise: rs.fn(), tapAsync: rs.fn(), tap: rs.fn() },
+      createModule: { tapPromise: rs.fn() },
     },
   };
 }

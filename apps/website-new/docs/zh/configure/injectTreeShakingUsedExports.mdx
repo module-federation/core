@@ -1,0 +1,11 @@
+# injectTreeShakingUsedExports
+
+是否将 shared 使用的 exports 注入到 bundler runtime 中。
+
+- 类型：`boolean`
+- 是否必填：否
+- 默认值：`undefined`
+
+此选项用于控制是否将共享模块中实际使用的导出信息注入到打包器的运行时中，以便进行更精确的依赖管理和优化。
+
+如果你使用的是 mode 为 'server-calc'，那么推荐将此选项设置为 `false`。

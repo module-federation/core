@@ -1,5 +1,78 @@
 # @module-federation/runtime
 
+## 2.1.0
+
+### Patch Changes
+
+- 918294f: Migrate `@module-federation/error-codes` and `@module-federation/runtime` package builds from Nx Rollup executor to `tsdown`, and modernize their emitted `dist` filenames and export map targets.
+- Updated dependencies [918294f]
+- Updated dependencies [24bf84d]
+- Updated dependencies [203c950]
+- Updated dependencies [918294f]
+  - @module-federation/error-codes@2.1.0
+  - @module-federation/runtime-core@2.1.0
+  - @module-federation/sdk@2.1.0
+
+## 2.0.1
+
+### Patch Changes
+
+- Updated dependencies [28a2db4]
+- Updated dependencies [3808d17]
+  - @module-federation/runtime-core@2.0.1
+  - @module-federation/sdk@2.0.1
+  - @module-federation/error-codes@2.0.1
+
+## 2.0.0
+
+### Patch Changes
+
+- @module-federation/sdk@2.0.0
+- @module-federation/error-codes@2.0.0
+- @module-federation/runtime-core@2.0.0
+
+## 0.24.1
+
+### Patch Changes
+
+- Updated dependencies [6590738]
+  - @module-federation/runtime-core@0.24.1
+  - @module-federation/sdk@0.24.1
+  - @module-federation/error-codes@0.24.1
+
+## 0.24.0
+
+### Patch Changes
+
+- @module-federation/sdk@0.24.0
+- @module-federation/error-codes@0.24.0
+- @module-federation/runtime-core@0.24.0
+
+## 0.23.0
+
+### Patch Changes
+
+- Updated dependencies [3aa3cf9]
+  - @module-federation/runtime-core@0.23.0
+  - @module-federation/sdk@0.23.0
+  - @module-federation/error-codes@0.23.0
+
+## 0.22.1
+
+### Patch Changes
+
+- @module-federation/sdk@0.22.1
+- @module-federation/error-codes@0.22.1
+- @module-federation/runtime-core@0.22.1
+
+## 0.22.0
+
+### Patch Changes
+
+- @module-federation/sdk@0.22.0
+- @module-federation/error-codes@0.22.0
+- @module-federation/runtime-core@0.22.0
+
 ## 0.21.6
 
 ### Patch Changes

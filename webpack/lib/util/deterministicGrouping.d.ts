@@ -1,3 +1,6 @@
+declare namespace _exports {
+  export { Sizes, Types, Similarities, GroupedItems, Options };
+}
 declare function _exports<T>({
   maxSize,
   minSize,
@@ -6,23 +9,26 @@ declare function _exports<T>({
   getKey,
 }: Options<T>): GroupedItems<T>[];
 export = _exports;
+type Sizes = Record<string, number>;
+type Types = Set<string>;
+type Similarities = number[];
 /**
  * <T>
  */
-export type GroupedItems<T> = {
+type GroupedItems<T> = {
   key: string;
   items: T[];
-  size: Record<string, number>;
+  size: Sizes;
 };
-export type Options<T> = {
+type Options<T> = {
   /**
    * maximum size of a group
    */
-  maxSize: Record<string, number>;
+  maxSize: Sizes;
   /**
    * minimum size of a group (preferred over maximum size)
    */
-  minSize: Record<string, number>;
+  minSize: Sizes;
   /**
    * a list of items
    */
@@ -30,9 +36,9 @@ export type Options<T> = {
   /**
    * function to get size of an item
    */
-  getSize: (arg0: T) => Record<string, number>;
+  getSize: (item: T) => Sizes;
   /**
    * function to get the key of an item
    */
-  getKey: (arg0: T) => string;
+  getKey: (item: T) => string;
 };

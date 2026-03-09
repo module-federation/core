@@ -1,3 +1,4 @@
+import { pluginPublint } from 'rsbuild-plugin-publint';
 import { defineConfig } from '@rslib/core';
 
 const externalizeMetroImports = (request: string) => {
@@ -5,6 +6,7 @@ const externalizeMetroImports = (request: string) => {
 };
 
 export default defineConfig({
+  plugins: [pluginPublint()],
   lib: [
     {
       format: 'esm',

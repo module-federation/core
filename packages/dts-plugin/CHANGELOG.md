@@ -1,5 +1,86 @@
 # @module-federation/dts-plugin
 
+## 2.1.0
+
+### Patch Changes
+
+- 6235711: Replace the Koa-based dev types server with a native Node HTTP server to reduce dependencies and keep type generation behavior unchanged.
+- 5954fe7: Fix fork-dev-worker crashes in dts-plugin when consumeTypes is disabled
+- Updated dependencies [918294f]
+- Updated dependencies [24bf84d]
+- Updated dependencies [918294f]
+- Updated dependencies [918294f]
+  - @module-federation/error-codes@2.1.0
+  - @module-federation/managers@2.1.0
+  - @module-federation/sdk@2.1.0
+  - @module-federation/third-party-dts-extractor@2.1.0
+
+## 2.0.1
+
+### Patch Changes
+
+- 28a2db4: Fix Windows TypeScript type generation by invoking the compiler with
+  `execFile` and properly quoted project paths.
+  - @module-federation/sdk@2.0.1
+  - @module-federation/managers@2.0.1
+  - @module-federation/third-party-dts-extractor@2.0.1
+  - @module-federation/error-codes@2.0.1
+
+## 2.0.0
+
+### Patch Changes
+
+- @module-federation/sdk@2.0.0
+- @module-federation/managers@2.0.0
+- @module-federation/third-party-dts-extractor@2.0.0
+- @module-federation/error-codes@2.0.0
+
+## 0.24.1
+
+### Patch Changes
+
+- @module-federation/sdk@0.24.1
+- @module-federation/managers@0.24.1
+- @module-federation/third-party-dts-extractor@0.24.1
+- @module-federation/error-codes@0.24.1
+
+## 0.24.0
+
+### Patch Changes
+
+- @module-federation/sdk@0.24.0
+- @module-federation/managers@0.24.0
+- @module-federation/third-party-dts-extractor@0.24.0
+- @module-federation/error-codes@0.24.0
+
+## 0.23.0
+
+### Patch Changes
+
+- 9373882: fix(dts-plugin): add default mf config value
+  - @module-federation/sdk@0.23.0
+  - @module-federation/managers@0.23.0
+  - @module-federation/third-party-dts-extractor@0.23.0
+  - @module-federation/error-codes@0.23.0
+
+## 0.22.1
+
+### Patch Changes
+
+- @module-federation/sdk@0.22.1
+- @module-federation/managers@0.22.1
+- @module-federation/third-party-dts-extractor@0.22.1
+- @module-federation/error-codes@0.22.1
+
+## 0.22.0
+
+### Patch Changes
+
+- @module-federation/sdk@0.22.0
+- @module-federation/managers@0.22.0
+- @module-federation/third-party-dts-extractor@0.22.0
+- @module-federation/error-codes@0.22.0
+
 ## 0.21.6
 
 ### Patch Changes

@@ -4,8 +4,8 @@ import {
   getInstance,
   registerRemotes,
   loadRemote,
-} from '@module-federation/modern-js/runtime';
-import { lazyLoadComponentPlugin } from '@module-federation/modern-js/react';
+} from '@module-federation/modern-js-v3/runtime';
+import { lazyLoadComponentPlugin } from '@module-federation/modern-js-v3/react';
 import stuff from './stuff.module.css';
 
 getInstance()!.registerPlugins([lazyLoadComponentPlugin()]);

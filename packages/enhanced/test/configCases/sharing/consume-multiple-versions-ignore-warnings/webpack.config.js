@@ -12,11 +12,9 @@ module.exports = {
         shared: {
           import: false,
           strictVersion: true,
-          eager: true,
         },
         shared2: {
           import: false,
-          eager: true,
         },
       },
     }),
