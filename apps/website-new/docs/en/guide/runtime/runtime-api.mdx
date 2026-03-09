@@ -20,6 +20,8 @@ This singleton pattern works for most scenarios, but in the following cases, you
 - Multiple ModuleFederation instances need to be created with different configurations for each instance
 - You want to use ModuleFederation's partitioning feature to encapsulate corresponding APIs for use in other projects
 
+* `createInstance` will not overwrite an existing instance. Each call will create a new instance.
+
 ```ts
 import { createInstance } from '@module-federation/enhanced/runtime';
 
