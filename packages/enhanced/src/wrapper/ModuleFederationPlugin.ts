@@ -3,7 +3,6 @@ import {
   infrastructureLogger,
   type moduleFederationPlugin,
 } from '@module-federation/sdk';
-
 import type IModuleFederationPlugin from '../lib/container/ModuleFederationPlugin';
 
 import path from 'node:path';

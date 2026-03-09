@@ -34,7 +34,7 @@ export default abstract class BaseWrapperPlugin
     process.env['FEDERATION_WEBPACK_PATH'] =
       process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
 
-    // Dynamically import core plugin
+    // Lazily load core plugin after webpack path is set.
     const CorePlugin = require(this.coreModulePath).default as any;
 
     // Create core plugin instance and apply it
