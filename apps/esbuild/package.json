@@ -1,8 +1,8 @@
 {
   "name": "federation-demo1",
   "private": true,
-  "version": "1.0.0",
   "description": "",
+  "version": "1.0.0",
   "main": "index.js",
   "scripts": {
     "build:remote": "node build/build-mfe1.js",
