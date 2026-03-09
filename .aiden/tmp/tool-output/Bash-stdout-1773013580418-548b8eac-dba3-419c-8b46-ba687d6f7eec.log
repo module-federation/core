@@ -1,0 +1,411 @@
+Generated 204 shuffled commits for 17 apps over the past year.
+Your branch is up to date with 'origin/main'.
+[chore/optimize-apps db1c32b57] chore: [Aiden] Update package.json description for node-dynamic-remote
+ 2 files changed, 1 insertion(+), 49 deletions(-)
+[chore/optimize-apps 85b6f1a7f] docs: [Aiden] Add prerequisites and features for node-remote
+ 1 file changed, 1 insertion(+), 42 deletions(-)
+[chore/optimize-apps 46f209205] docs: [Aiden] Initialize README with title for bundle-size
+ 1 file changed, 46 deletions(-)
+[chore/optimize-apps 9791ce0ca] docs: [Aiden] Initialize README with title for esbuild
+ 1 file changed, 46 deletions(-)
+[chore/optimize-apps 6407b4b03] docs: [Aiden] Add prerequisites and features for node-host-e2e
+ 1 file changed, 1 insertion(+), 42 deletions(-)
+[chore/optimize-apps fbe6fb79c] docs: [Aiden] Add build instructions for node-host-e2e
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 257c5089c] docs: [Aiden] Add available scripts for react-ts-nested-remote
+ 1 file changed, 1 insertion(+), 43 deletions(-)
+[chore/optimize-apps 76f7c6c90] docs: [Aiden] Final README polish for react-ts-nested-remote
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps e13f975ae] docs: [Aiden] Add troubleshooting notes for 3001-shop
+ 1 file changed, 1 insertion(+), 44 deletions(-)
+[chore/optimize-apps 2efb168be] docs: [Aiden] Add available scripts for 3000-home
+ 1 file changed, 1 insertion(+), 43 deletions(-)
+[chore/optimize-apps 53a6c804b] docs: [Aiden] Add installation guide for esbuild
+ 1 file changed, 7 insertions(+)
+[chore/optimize-apps 1f49d36f4] docs: [Aiden] Add installation guide for reactRemoteUI
+ 1 file changed, 1 insertion(+), 42 deletions(-)
+[chore/optimize-apps 1e7c7af65] docs: [Aiden] Final README polish for node-host
+ 1 file changed, 43 deletions(-)
+[chore/optimize-apps 57b929bd8] docs: [Aiden] Add troubleshooting notes for react-ts-host
+ 1 file changed, 1 insertion(+), 44 deletions(-)
+[chore/optimize-apps 427f912ae] docs: [Aiden] Add links and badges for website-new
+ 1 file changed, 1 insertion(+), 44 deletions(-)
+[chore/optimize-apps 1fcadc6ad] docs: [Aiden] Final README polish for react-ts-host
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps b2e0eb291] docs: [Aiden] Add running instructions for 3002-checkout
+ 1 file changed, 1 insertion(+), 44 deletions(-)
+[chore/optimize-apps f5cc82e26] docs: [Aiden] Initialize README with title for node-host
+ 1 file changed, 1 insertion(+), 4 deletions(-)
+[chore/optimize-apps b63d9eaf5] docs: [Aiden] Add links and badges for 3000-home
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 04f012f5f] docs: [Aiden] Add available scripts for node-local-remote
+ 1 file changed, 1 insertion(+), 43 deletions(-)
+[chore/optimize-apps 3ad22ac4b] docs: [Aiden] Initialize README with title for website-new
+ 1 file changed, 1 insertion(+), 4 deletions(-)
+[chore/optimize-apps 6ba17bf2f] docs: [Aiden] Final README polish for reactStorybook
+ 1 file changed, 43 deletions(-)
+[chore/optimize-apps f71a52424] docs: [Aiden] Add available scripts for reactStorybook
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+[chore/optimize-apps 123c36e44] docs: [Aiden] Add prerequisites and features for react-ts-host
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+[chore/optimize-apps a67de5b4a] docs: [Aiden] Add links and badges for node-local-remote
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps d5a7b7a7f] docs: [Aiden] Add running instructions for react-ts-nested-remote
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 90bb33426] docs: [Aiden] Add running instructions for node-host
+ 1 file changed, 5 insertions(+)
+[chore/optimize-apps 508ef3362] docs: [Aiden] Initialize README with title for node-remote
+ 1 file changed, 1 insertion(+), 6 deletions(-)
+[chore/optimize-apps 3dc010473] docs: [Aiden] Add prerequisites and features for esbuild
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+[chore/optimize-apps 64b316e28] docs: [Aiden] Add running instructions for react-ts-host
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps a44bb1e6e] docs: [Aiden] Add available scripts for react-ts-host
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+[chore/optimize-apps 2f7c56fb1] docs: [Aiden] Add running instructions for node-remote
+ 1 file changed, 5 insertions(+)
+[chore/optimize-apps c77180139] docs: [Aiden] Add running instructions for 3000-home
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps ce28843a0] docs: [Aiden] Add prerequisites and features for reactRemoteUI
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+[chore/optimize-apps 63cfe351a] docs: [Aiden] Final README polish for node-host-e2e
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 6ee06a08f] docs: [Aiden] Add build instructions for react-ts-nested-remote
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 66f22b9af] docs: [Aiden] Add installation guide for react-ts-nested-remote
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+[chore/optimize-apps eb3bc836a] docs: [Aiden] Add available scripts for 3002-checkout
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+[chore/optimize-apps ebaa7659d] docs: [Aiden] Initialize README with title for 3001-shop
+ 1 file changed, 1 insertion(+), 4 deletions(-)
+[chore/optimize-apps e74c2cbd9] docs: [Aiden] Add running instructions for website-new
+ 1 file changed, 5 insertions(+)
+[chore/optimize-apps 6ece8f37d] docs: [Aiden] Add build instructions for 3001-shop
+ 1 file changed, 5 insertions(+)
+[chore/optimize-apps 2e1095acf] chore: [Aiden] Update package.json description for react-ts-nested-remote
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+[chore/optimize-apps 87c3020a5] docs: [Aiden] Add installation guide for node-dynamic-remote-new-version
+ 1 file changed, 1 insertion(+), 42 deletions(-)
+[chore/optimize-apps 9cd4f91c4] docs: [Aiden] Add prerequisites and features for 3000-home
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+[chore/optimize-apps 38054e6a7] docs: [Aiden] Add prerequisites and features for node-dynamic-remote
+ 1 file changed, 7 insertions(+)
+[chore/optimize-apps ae2561b43] docs: [Aiden] Add configuration section for node-dynamic-remote-new-version
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 20393fa02] docs: [Aiden] Add links and badges for react-ts-remote
+ 1 file changed, 1 insertion(+), 44 deletions(-)
+[chore/optimize-apps 45dce91cf] docs: [Aiden] Add running instructions for bundle-size
+ 1 file changed, 5 insertions(+)
+[chore/optimize-apps 04a5a87bb] docs: [Aiden] Add troubleshooting notes for node-remote
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 2ef27fd56] docs: [Aiden] Add running instructions for node-dynamic-remote-new-version
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps eab303b2e] docs: [Aiden] Add running instructions for reactRemoteUI
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 1782a5cc7] docs: [Aiden] Initialize README with title for react-ts-host
+ 1 file changed, 1 insertion(+), 23 deletions(-)
+[chore/optimize-apps 3921b4a7b] docs: [Aiden] Initialize README with title for node-host-e2e
+ 1 file changed, 1 insertion(+), 14 deletions(-)
+[chore/optimize-apps a33dddf2e] docs: [Aiden] Initialize README with title for node-dynamic-remote-new-version
+ 1 file changed, 1 insertion(+), 14 deletions(-)
+[chore/optimize-apps 816e4b0fc] docs: [Aiden] Final README polish for node-dynamic-remote
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 5865f5155] docs: [Aiden] Initialize README with title for react-ts-nested-remote
+ 1 file changed, 1 insertion(+), 23 deletions(-)
+[chore/optimize-apps 892ff9777] docs: [Aiden] Final README polish for node-local-remote
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 3f2c09df8] docs: [Aiden] Add build instructions for reactRemoteUI
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 3d3ffc782] docs: [Aiden] Add installation guide for react-ts-host
+ 1 file changed, 7 insertions(+)
+[chore/optimize-apps a802a57ba] docs: [Aiden] Add available scripts for bundle-size
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+[chore/optimize-apps 7b349ebe9] docs: [Aiden] Initialize README with title for reactRemoteUI
+ 1 file changed, 1 insertion(+), 20 deletions(-)
+[chore/optimize-apps f7626dada] docs: [Aiden] Add troubleshooting notes for 3000-home
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 738b4700f] docs: [Aiden] Add prerequisites and features for react-ts-nested-remote
+ 1 file changed, 7 insertions(+)
+[chore/optimize-apps 383e49cce] docs: [Aiden] Add links and badges for node-dynamic-remote-new-version
+ 1 file changed, 5 insertions(+)
+[chore/optimize-apps 6fb4977a7] docs: [Aiden] Final README polish for reactRemoteUI
+ 1 file changed, 5 insertions(+)
+[chore/optimize-apps bace768d7] docs: [Aiden] Add build instructions for 3002-checkout
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 5c4f2d112] docs: [Aiden] Add configuration section for esbuild
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 680496ab9] docs: [Aiden] Add troubleshooting notes for website-new
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps c375e7de7] docs: [Aiden] Add troubleshooting notes for reactRemoteUI
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps f1e7c50ef] docs: [Aiden] Add build instructions for website-new
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 00fa0883c] docs: [Aiden] Add running instructions for esbuild
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 642e32d24] docs: [Aiden] Add installation guide for 3001-shop
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+[chore/optimize-apps a6803cdfc] docs: [Aiden] Add description section for node-host
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 778f06930] docs: [Aiden] Add configuration section for reactRemoteUI
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps e874a31ff] docs: [Aiden] Add running instructions for node-local-remote
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps dbf5560ed] chore: [Aiden] Update package.json description for website-new
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+[chore/optimize-apps 8f84ab215] docs: [Aiden] Add available scripts for node-dynamic-remote-new-version
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+[chore/optimize-apps 56b01fe26] docs: [Aiden] Add configuration section for bundle-size
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps cb5f0a69a] docs: [Aiden] Add build instructions for node-local-remote
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 35b043765] docs: [Aiden] Add configuration section for react-ts-host
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps d13df0a7d] docs: [Aiden] Add description section for node-dynamic-remote
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 3569eead5] docs: [Aiden] Add troubleshooting notes for node-local-remote
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps de257b039] docs: [Aiden] Final README polish for bundle-size
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps b327abfe5] docs: [Aiden] Add installation guide for node-host
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+[chore/optimize-apps 3d4b3693d] chore: [Aiden] Update package.json description for node-host-e2e
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+[chore/optimize-apps 4a406ca92] docs: [Aiden] Add prerequisites and features for 3002-checkout
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+[chore/optimize-apps fd938cc38] docs: [Aiden] Add description section for react-ts-remote
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 3354f7385] docs: [Aiden] Add configuration section for react-ts-nested-remote
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 7b41fa96e] docs: [Aiden] Add available scripts for 3001-shop
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+[chore/optimize-apps bb681cd44] docs: [Aiden] Add links and badges for reactStorybook
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 40bb55c8b] docs: [Aiden] Add build instructions for 3000-home
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps d4d2f152f] docs: [Aiden] Add prerequisites and features for react-ts-remote
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+[chore/optimize-apps 1a710ef21] docs: [Aiden] Add troubleshooting notes for node-host
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps d2f7dde1c] docs: [Aiden] Add troubleshooting notes for node-host-e2e
+ 1 file changed, 5 insertions(+)
+[chore/optimize-apps 65b593a91] docs: [Aiden] Add links and badges for node-remote
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps db163a3c9] docs: [Aiden] Add configuration section for node-local-remote
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps c4443bf1e] docs: [Aiden] Add installation guide for node-host-e2e
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+[chore/optimize-apps 13d36b437] chore: [Aiden] Update package.json description for reactRemoteUI
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+[chore/optimize-apps 49dc61cca] docs: [Aiden] Add available scripts for website-new
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+[chore/optimize-apps 6ea63b30a] chore: [Aiden] Update package.json description for node-remote
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+[chore/optimize-apps b7e6efd13] docs: [Aiden] Add prerequisites and features for reactStorybook
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+[chore/optimize-apps 43518b538] docs: [Aiden] Add prerequisites and features for bundle-size
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+[chore/optimize-apps a26479f48] docs: [Aiden] Add available scripts for react-ts-remote
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+[chore/optimize-apps 7de096c75] docs: [Aiden] Add build instructions for node-host
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 3e865aa60] docs: [Aiden] Add configuration section for reactStorybook
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 07e076103] docs: [Aiden] Add configuration section for website-new
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 68dd346c6] docs: [Aiden] Add prerequisites and features for node-local-remote
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+[chore/optimize-apps aa4621370] docs: [Aiden] Add running instructions for reactStorybook
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 063ab84c2] docs: [Aiden] Add running instructions for node-host-e2e
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 570e0a60f] docs: [Aiden] Add configuration section for 3000-home
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps a97048c53] docs: [Aiden] Add configuration section for 3002-checkout
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 58ea8c5f2] docs: [Aiden] Add description section for node-local-remote
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 0ef5678a8] docs: [Aiden] Add description section for node-dynamic-remote-new-version
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps fa3b42715] docs: [Aiden] Add description section for react-ts-nested-remote
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 19df1c4f3] docs: [Aiden] Add build instructions for node-dynamic-remote
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 1faef7deb] docs: [Aiden] Add description section for 3000-home
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps ed0653494] docs: [Aiden] Add description section for website-new
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 3446cc945] docs: [Aiden] Add links and badges for bundle-size
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 368fbe239] docs: [Aiden] Add links and badges for 3001-shop
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 75377ea7b] docs: [Aiden] Add available scripts for node-dynamic-remote
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+[chore/optimize-apps b4f561ca8] docs: [Aiden] Add troubleshooting notes for node-dynamic-remote
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps f0ab93501] docs: [Aiden] Add troubleshooting notes for reactStorybook
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 6fddfcabe] docs: [Aiden] Add prerequisites and features for website-new
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+[chore/optimize-apps eff1683fe] docs: [Aiden] Add troubleshooting notes for react-ts-nested-remote
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 722721787] docs: [Aiden] Add configuration section for react-ts-remote
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 4adaffb6a] docs: [Aiden] Final README polish for website-new
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 38cdb09ef] docs: [Aiden] Add troubleshooting notes for 3002-checkout
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps c501eeae2] docs: [Aiden] Add troubleshooting notes for bundle-size
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 642c7fd08] docs: [Aiden] Final README polish for 3000-home
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps cdcdf3250] docs: [Aiden] Add troubleshooting notes for esbuild
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps de72f2a06] docs: [Aiden] Add build instructions for reactStorybook
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 085085b11] docs: [Aiden] Final README polish for node-dynamic-remote-new-version
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps d0a131574] docs: [Aiden] Final README polish for 3002-checkout
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 107134930] docs: [Aiden] Add configuration section for node-dynamic-remote
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 2d2a5a095] chore: [Aiden] Update package.json description for reactStorybook
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+[chore/optimize-apps 88a495648] docs: [Aiden] Final README polish for esbuild
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps ac3b12de5] docs: [Aiden] Add installation guide for node-remote
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+[chore/optimize-apps cdd361868] docs: [Aiden] Add running instructions for react-ts-remote
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps fd8efed8d] docs: [Aiden] Add available scripts for node-remote
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+[chore/optimize-apps 2ed9bc3f4] docs: [Aiden] Add description section for 3002-checkout
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 622ad4015] chore: [Aiden] Update package.json description for bundle-size
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+[chore/optimize-apps 43f9c8a3c] docs: [Aiden] Add links and badges for node-dynamic-remote
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps e2db132e5] docs: [Aiden] Add installation guide for 3000-home
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+[chore/optimize-apps 312d041f7] docs: [Aiden] Add troubleshooting notes for react-ts-remote
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 178caddf1] docs: [Aiden] Add installation guide for node-dynamic-remote
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+[chore/optimize-apps a1ad8c5e8] docs: [Aiden] Add build instructions for node-remote
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps c843c97ae] docs: [Aiden] Add build instructions for bundle-size
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps bd48e3001] docs: [Aiden] Add links and badges for react-ts-nested-remote
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps bd5852093] docs: [Aiden] Add configuration section for node-host
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 75727ceaf] docs: [Aiden] Add description section for node-host-e2e
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 31b3f1c89] docs: [Aiden] Add prerequisites and features for node-dynamic-remote-new-version
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+[chore/optimize-apps 2732ac594] docs: [Aiden] Add available scripts for esbuild
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+[chore/optimize-apps 1f8114eeb] docs: [Aiden] Add description section for reactRemoteUI
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 7a30ba36f] docs: [Aiden] Add prerequisites and features for 3001-shop
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+[chore/optimize-apps fe9fa599d] docs: [Aiden] Add links and badges for node-host
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps a349e2e03] docs: [Aiden] Add configuration section for node-remote
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 8d7bfcea5] docs: [Aiden] Initialize README with title for node-local-remote
+ 1 file changed, 1 insertion(+), 39 deletions(-)
+[chore/optimize-apps 138e80ed9] docs: [Aiden] Add description section for react-ts-host
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps c6c5ef825] docs: [Aiden] Initialize README with title for 3002-checkout
+ 1 file changed, 1 insertion(+), 35 deletions(-)
+[chore/optimize-apps 39d51e252] docs: [Aiden] Add build instructions for esbuild
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps b46453331] docs: [Aiden] Add available scripts for node-host-e2e
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+[chore/optimize-apps 53273cc9c] docs: [Aiden] Add description section for node-remote
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps bd2887861] docs: [Aiden] Add installation guide for website-new
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+[chore/optimize-apps ec1e4af80] docs: [Aiden] Add links and badges for 3002-checkout
+ 1 file changed, 5 insertions(+)
+[chore/optimize-apps 63436534c] docs: [Aiden] Add configuration section for 3001-shop
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps a506a4272] chore: [Aiden] Update package.json description for 3002-checkout
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+[chore/optimize-apps a8cb6989e] docs: [Aiden] Add description section for 3001-shop
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps c591ab7cb] docs: [Aiden] Initialize README with title for reactStorybook
+ 1 file changed, 1 insertion(+), 35 deletions(-)
+[chore/optimize-apps f815a5ba5] docs: [Aiden] Final README polish for node-remote
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps f0a4dbf60] docs: [Aiden] Add available scripts for reactRemoteUI
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+[chore/optimize-apps 0513c61b2] docs: [Aiden] Add description section for esbuild
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 8db79417a] chore: [Aiden] Update package.json description for esbuild
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+[chore/optimize-apps 1934f6b0a] docs: [Aiden] Add installation guide for react-ts-remote
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+[chore/optimize-apps 258c346d3] chore: [Aiden] Update package.json description for node-local-remote
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+[chore/optimize-apps d648a95f3] chore: [Aiden] Update package.json description for 3001-shop
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+[chore/optimize-apps edfd49216] docs: [Aiden] Add configuration section for node-host-e2e
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 8e6d030a4] docs: [Aiden] Add description section for bundle-size
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 6f871b078] docs: [Aiden] Add build instructions for react-ts-remote
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps eba6c6b9c] docs: [Aiden] Add links and badges for node-host-e2e
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps c2047c7f6] docs: [Aiden] Add installation guide for bundle-size
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+[chore/optimize-apps c22b71a01] docs: [Aiden] Add links and badges for reactRemoteUI
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps eff32fd78] docs: [Aiden] Add links and badges for esbuild
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 7f42c3ec2] docs: [Aiden] Final README polish for react-ts-remote
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 27bfd02eb] docs: [Aiden] Add installation guide for node-local-remote
+ 1 file changed, 7 insertions(+)
+[chore/optimize-apps 796937b00] chore: [Aiden] Update package.json description for react-ts-remote
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+[chore/optimize-apps fc387698f] chore: [Aiden] Update package.json description for node-dynamic-remote-new-version
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+[chore/optimize-apps dd8ed6435] docs: [Aiden] Add running instructions for 3001-shop
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps ed1787e09] docs: [Aiden] Add build instructions for react-ts-host
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps cb499c18c] docs: [Aiden] Final README polish for 3001-shop
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 54dfc2b05] chore: [Aiden] Update package.json description for node-host
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+[chore/optimize-apps 0cea3290a] docs: [Aiden] Add running instructions for node-dynamic-remote
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 900381a4e] docs: [Aiden] Add links and badges for react-ts-host
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 30a97e57b] docs: [Aiden] Initialize README with title for node-dynamic-remote
+ 1 file changed, 1 insertion(+), 45 deletions(-)
+[chore/optimize-apps 7c7a00497] docs: [Aiden] Add installation guide for 3002-checkout
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+[chore/optimize-apps 37c89b7fc] docs: [Aiden] Initialize README with title for react-ts-remote
+ 1 file changed, 1 insertion(+), 45 deletions(-)
+[chore/optimize-apps 159e898e2] chore: [Aiden] Update package.json description for 3000-home
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+[chore/optimize-apps c0220926b] chore: [Aiden] Update package.json description for react-ts-host
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+[chore/optimize-apps c30df23e9] docs: [Aiden] Add available scripts for node-host
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+[chore/optimize-apps 604a3a7ed] docs: [Aiden] Add prerequisites and features for node-host
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+[chore/optimize-apps b02043541] docs: [Aiden] Add description section for reactStorybook
+ 1 file changed, 5 insertions(+)
+[chore/optimize-apps 8e33a7e93] docs: [Aiden] Add troubleshooting notes for node-dynamic-remote-new-version
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 991580d00] docs: [Aiden] Add build instructions for node-dynamic-remote-new-version
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+[chore/optimize-apps 833835633] docs: [Aiden] Add installation guide for reactStorybook
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+[chore/optimize-apps 174a076d0] docs: [Aiden] Initialize README with title for 3000-home
+ 1 file changed, 1 insertion(+), 45 deletions(-)
+Backdated commits completed.

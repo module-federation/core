@@ -1,0 +1,564 @@
+[
+  {
+    "name": "module-federation",
+    "version": "0.0.0",
+    "path": "/Users/bytedance/github/core",
+    "private": true
+  },
+  {
+    "name": "@module-federation/3000-home",
+    "version": "1.0.0",
+    "path": "/Users/bytedance/github/core/apps/3000-home",
+    "private": true
+  },
+  {
+    "name": "@module-federation/3001-shop",
+    "version": "1.0.0",
+    "path": "/Users/bytedance/github/core/apps/3001-shop",
+    "private": true
+  },
+  {
+    "name": "@module-federation/3002-checkout",
+    "version": "1.0.0",
+    "path": "/Users/bytedance/github/core/apps/3002-checkout",
+    "private": true
+  },
+  {
+    "name": "bundle-size",
+    "version": "0.1.1",
+    "path": "/Users/bytedance/github/core/apps/bundle-size",
+    "private": true
+  },
+  {
+    "name": "federation-demo1",
+    "version": "1.0.0",
+    "path": "/Users/bytedance/github/core/apps/esbuild",
+    "private": true
+  },
+  {
+    "name": "3009-webpack-provider",
+    "version": "0.0.0",
+    "path": "/Users/bytedance/github/core/apps/manifest-demo/3009-webpack-provider",
+    "private": true
+  },
+  {
+    "name": "3010-rspack-provider",
+    "version": "0.0.0",
+    "path": "/Users/bytedance/github/core/apps/manifest-demo/3010-rspack-provider",
+    "private": true
+  },
+  {
+    "name": "3011-rspack-manifest-provider",
+    "version": "0.0.0",
+    "path": "/Users/bytedance/github/core/apps/manifest-demo/3011-rspack-manifest-provider",
+    "private": true
+  },
+  {
+    "name": "3012-rspack-js-entry-provider",
+    "version": "0.0.0",
+    "path": "/Users/bytedance/github/core/apps/manifest-demo/3012-rspack-js-entry-provider",
+    "private": true
+  },
+  {
+    "name": "3008-webpack-host",
+    "version": "0.0.0",
+    "path": "/Users/bytedance/github/core/apps/manifest-demo/webpack-host",
+    "private": true
+  },
+  {
+    "name": "example-host",
+    "version": "0.0.1",
+    "path": "/Users/bytedance/github/core/apps/metro-example-host",
+    "private": true
+  },
+  {
+    "name": "example-mini",
+    "version": "0.0.1",
+    "path": "/Users/bytedance/github/core/apps/metro-example-mini",
+    "private": true
+  },
+  {
+    "name": "example-nested-mini",
+    "version": "0.0.1",
+    "path": "/Users/bytedance/github/core/apps/metro-example-nested-mini",
+    "private": true
+  },
+  {
+    "name": "modernjs-ssr-dynamic-nested-remote",
+    "version": "0.1.34",
+    "path": "/Users/bytedance/github/core/apps/modernjs-ssr/dynamic-nested-remote",
+    "private": true
+  },
+  {
+    "name": "modernjs-ssr-dynamic-remote",
+    "path": "/Users/bytedance/github/core/apps/modernjs-ssr/dynamic-remote",
+    "private": true
+  },
+  {
+    "name": "modernjs-ssr-dynamic-remote-new-version",
+    "version": "0.1.34",
+    "path": "/Users/bytedance/github/core/apps/modernjs-ssr/dynamic-remote-new-version",
+    "private": true
+  },
+  {
+    "name": "modernjs-ssr-host",
+    "version": "0.1.34",
+    "path": "/Users/bytedance/github/core/apps/modernjs-ssr/host",
+    "private": true
+  },
+  {
+    "name": "modernjs-ssr-nested-remote",
+    "version": "0.1.34",
+    "path": "/Users/bytedance/github/core/apps/modernjs-ssr/nested-remote",
+    "private": true
+  },
+  {
+    "name": "modernjs-ssr-remote",
+    "version": "0.1.36",
+    "path": "/Users/bytedance/github/core/apps/modernjs-ssr/remote",
+    "private": true
+  },
+  {
+    "name": "modernjs-ssr-remote-new-version",
+    "version": "0.1.36",
+    "path": "/Users/bytedance/github/core/apps/modernjs-ssr/remote-new-version",
+    "private": true
+  },
+  {
+    "name": "app-router-4000",
+    "path": "/Users/bytedance/github/core/apps/next-app-router/next-app-router-4000",
+    "private": true
+  },
+  {
+    "name": "app-router-4001",
+    "path": "/Users/bytedance/github/core/apps/next-app-router/next-app-router-4001",
+    "private": true
+  },
+  {
+    "name": "node-dynamic-remote",
+    "version": null,
+    "path": "/Users/bytedance/github/core/apps/node-dynamic-remote",
+    "private": true
+  },
+  {
+    "name": "node-dynamic-remote-new-version",
+    "version": null,
+    "path": "/Users/bytedance/github/core/apps/node-dynamic-remote-new-version",
+    "private": true
+  },
+  {
+    "name": "node-host",
+    "path": "/Users/bytedance/github/core/apps/node-host",
+    "private": true
+  },
+  {
+    "name": "node-host-e2e",
+    "path": "/Users/bytedance/github/core/apps/node-host-e2e",
+    "private": true
+  },
+  {
+    "name": "node-local-remote",
+    "path": "/Users/bytedance/github/core/apps/node-local-remote",
+    "private": true
+  },
+  {
+    "name": "node-remote",
+    "path": "/Users/bytedance/github/core/apps/node-remote",
+    "private": true
+  },
+  {
+    "name": "react-ts-host",
+    "version": "1.0.0",
+    "path": "/Users/bytedance/github/core/apps/react-ts-host",
+    "private": true
+  },
+  {
+    "name": "react-ts-nested-remote",
+    "version": "1.0.0",
+    "path": "/Users/bytedance/github/core/apps/react-ts-nested-remote",
+    "private": true
+  },
+  {
+    "name": "react-ts-remote",
+    "version": "1.0.0",
+    "path": "/Users/bytedance/github/core/apps/react-ts-remote",
+    "private": true
+  },
+  {
+    "name": "react-remote-ui",
+    "version": "1.0.0",
+    "path": "/Users/bytedance/github/core/apps/reactRemoteUI",
+    "private": true
+  },
+  {
+    "name": "react-storybook",
+    "version": "1.0.0",
+    "path": "/Users/bytedance/github/core/apps/reactStorybook",
+    "private": true
+  },
+  {
+    "name": "host",
+    "version": "1.0.34",
+    "path": "/Users/bytedance/github/core/apps/router-demo/router-host-2000",
+    "private": true
+  },
+  {
+    "name": "host-v5",
+    "version": "1.0.34",
+    "path": "/Users/bytedance/github/core/apps/router-demo/router-host-v5-2200",
+    "private": true
+  },
+  {
+    "name": "host-vue3",
+    "version": "1.0.34",
+    "path": "/Users/bytedance/github/core/apps/router-demo/router-host-vue3-2100",
+    "private": true
+  },
+  {
+    "name": "remote1",
+    "version": "1.0.34",
+    "path": "/Users/bytedance/github/core/apps/router-demo/router-remote1-2001",
+    "private": true
+  },
+  {
+    "name": "remote2",
+    "version": "1.0.34",
+    "path": "/Users/bytedance/github/core/apps/router-demo/router-remote2-2002",
+    "private": true
+  },
+  {
+    "name": "remote3",
+    "version": "1.0.34",
+    "path": "/Users/bytedance/github/core/apps/router-demo/router-remote3-2003",
+    "private": true
+  },
+  {
+    "name": "remote4",
+    "version": "1.0.33",
+    "path": "/Users/bytedance/github/core/apps/router-demo/router-remote4-2004",
+    "private": true
+  },
+  {
+    "name": "remote5",
+    "version": "2.0.2",
+    "path": "/Users/bytedance/github/core/apps/router-demo/router-remote5-2005",
+    "private": true
+  },
+  {
+    "name": "remote6",
+    "version": "2.0.2",
+    "path": "/Users/bytedance/github/core/apps/router-demo/router-remote6-2006",
+    "private": true
+  },
+  {
+    "name": "@examples/mf-react-component",
+    "path": "/Users/bytedance/github/core/apps/rslib-module",
+    "private": true
+  },
+  {
+    "name": "runtime-host",
+    "version": "0.0.0",
+    "path": "/Users/bytedance/github/core/apps/runtime-demo/3005-runtime-host",
+    "private": true
+  },
+  {
+    "name": "runtime-remote1",
+    "version": "0.0.1",
+    "path": "/Users/bytedance/github/core/apps/runtime-demo/3006-runtime-remote",
+    "private": true
+  },
+  {
+    "name": "runtime-remote2",
+    "version": "0.0.0",
+    "path": "/Users/bytedance/github/core/apps/runtime-demo/3007-runtime-remote",
+    "private": true
+  },
+  {
+    "name": "3008-runtime-remote",
+    "version": "1.0.44",
+    "path": "/Users/bytedance/github/core/apps/runtime-demo/3008-runtime-remote",
+    "private": true
+  },
+  {
+    "name": "shared-tree-shaking-no-server-host",
+    "version": "1.0.2",
+    "path": "/Users/bytedance/github/core/apps/shared-tree-shaking/no-server/host",
+    "private": true
+  },
+  {
+    "name": "shared-tree-shaking-no-server-provider",
+    "version": "1.0.2",
+    "path": "/Users/bytedance/github/core/apps/shared-tree-shaking/no-server/provider",
+    "private": true
+  },
+  {
+    "name": "shared-tree-shaking-with-server-host",
+    "version": "1.0.2",
+    "path": "/Users/bytedance/github/core/apps/shared-tree-shaking/with-server/host",
+    "private": true
+  },
+  {
+    "name": "shared-tree-shaking-with-server-provider",
+    "version": "1.0.2",
+    "path": "/Users/bytedance/github/core/apps/shared-tree-shaking/with-server/provider",
+    "private": true
+  },
+  {
+    "name": "website-new",
+    "version": "1.3.14",
+    "path": "/Users/bytedance/github/core/apps/website-new",
+    "private": true
+  },
+  {
+    "name": "@changesets/assemble-release-plan",
+    "version": "6.0.4",
+    "path": "/Users/bytedance/github/core/packages/assemble-release-plan",
+    "private": true
+  },
+  {
+    "name": "@module-federation/bridge-react",
+    "version": "2.1.0",
+    "path": "/Users/bytedance/github/core/packages/bridge/bridge-react",
+    "private": false
+  },
+  {
+    "name": "@module-federation/bridge-react-webpack-plugin",
+    "version": "2.1.0",
+    "path": "/Users/bytedance/github/core/packages/bridge/bridge-react-webpack-plugin",
+    "private": false
+  },
+  {
+    "name": "@module-federation/bridge-shared",
+    "version": "2.1.0",
+    "path": "/Users/bytedance/github/core/packages/bridge/bridge-shared",
+    "private": false
+  },
+  {
+    "name": "@module-federation/bridge-vue3",
+    "version": "2.1.0",
+    "path": "/Users/bytedance/github/core/packages/bridge/vue3-bridge",
+    "private": false
+  },
+  {
+    "name": "@module-federation/devtools",
+    "version": "2.1.0",
+    "path": "/Users/bytedance/github/core/packages/chrome-devtools",
+    "private": false
+  },
+  {
+    "name": "@module-federation/cli",
+    "version": "2.1.0",
+    "path": "/Users/bytedance/github/core/packages/cli",
+    "private": false
+  },
+  {
+    "name": "@module-federation/core",
+    "version": "0.0.1",
+    "path": "/Users/bytedance/github/core/packages/core",
+    "private": true
+  },
+  {
+    "name": "create-module-federation",
+    "version": "2.1.0",
+    "path": "/Users/bytedance/github/core/packages/create-module-federation",
+    "private": false
+  },
+  {
+    "name": "@module-federation/data-prefetch",
+    "version": "2.1.0",
+    "path": "/Users/bytedance/github/core/packages/data-prefetch",
+    "private": false
+  },
+  {
+    "name": "@module-federation/dts-plugin",
+    "version": "2.1.0",
+    "path": "/Users/bytedance/github/core/packages/dts-plugin",
+    "private": false
+  },
+  {
+    "name": "@module-federation/enhanced",
+    "version": "2.1.0",
+    "path": "/Users/bytedance/github/core/packages/enhanced",
+    "private": false
+  },
+  {
+    "name": "@module-federation/error-codes",
+    "version": "2.1.0",
+    "path": "/Users/bytedance/github/core/packages/error-codes",
+    "private": false
+  },
+  {
+    "name": "@module-federation/esbuild",
+    "version": "0.0.97",
+    "path": "/Users/bytedance/github/core/packages/esbuild",
+    "private": false
+  },
+  {
+    "name": "@module-federation/managers",
+    "version": "2.1.0",
+    "path": "/Users/bytedance/github/core/packages/managers",
+    "private": false
+  },
+  {
+    "name": "@module-federation/manifest",
+    "version": "2.1.0",
+    "path": "/Users/bytedance/github/core/packages/manifest",
+    "private": false
+  },
+  {
+    "name": "@module-federation/metro",
+    "version": "2.1.0",
+    "path": "/Users/bytedance/github/core/packages/metro-core",
+    "private": false
+  },
+  {
+    "name": "@module-federation/metro-plugin-rnc-cli",
+    "version": "2.1.0",
+    "path": "/Users/bytedance/github/core/packages/metro-plugin-rnc-cli",
+    "private": false
+  },
+  {
+    "name": "@module-federation/metro-plugin-rnef",
+    "version": "2.1.0",
+    "path": "/Users/bytedance/github/core/packages/metro-plugin-rnef",
+    "private": false
+  },
+  {
+    "name": "@module-federation/modern-js",
+    "version": "2.1.0",
+    "path": "/Users/bytedance/github/core/packages/modernjs",
+    "private": false
+  },
+  {
+    "name": "@module-federation/modern-js-v3",
+    "version": "2.1.0",
+    "path": "/Users/bytedance/github/core/packages/modernjs-v3",
+    "private": false
+  },
+  {
+    "name": "@module-federation/native-federation-tests",
+    "version": "0.6.3",
+    "path": "/Users/bytedance/github/core/packages/native-federation-tests",
+    "private": false
+  },
+  {
+    "name": "@module-federation/native-federation-typescript",
+    "version": "0.6.3",
+    "path": "/Users/bytedance/github/core/packages/native-federation-typescript",
+    "private": false
+  },
+  {
+    "name": "@module-federation/nextjs-mf",
+    "version": "8.8.57",
+    "path": "/Users/bytedance/github/core/packages/nextjs-mf",
+    "private": false
+  },
+  {
+    "name": "@module-federation/node",
+    "version": "2.7.33",
+    "path": "/Users/bytedance/github/core/packages/node",
+    "private": false
+  },
+  {
+    "name": "@module-federation/retry-plugin",
+    "version": "2.1.0",
+    "path": "/Users/bytedance/github/core/packages/retry-plugin",
+    "private": false
+  },
+  {
+    "name": "@module-federation/rsbuild-plugin",
+    "version": "2.1.0",
+    "path": "/Users/bytedance/github/core/packages/rsbuild-plugin",
+    "private": false
+  },
+  {
+    "name": "@module-federation/rspack",
+    "version": "2.1.0",
+    "path": "/Users/bytedance/github/core/packages/rspack",
+    "private": false
+  },
+  {
+    "name": "@module-federation/rspress-plugin",
+    "version": "2.1.0",
+    "path": "/Users/bytedance/github/core/packages/rspress-plugin",
+    "private": false
+  },
+  {
+    "name": "@module-federation/runtime",
+    "version": "2.1.0",
+    "path": "/Users/bytedance/github/core/packages/runtime",
+    "private": false
+  },
+  {
+    "name": "@module-federation/runtime-core",
+    "version": "2.1.0",
+    "path": "/Users/bytedance/github/core/packages/runtime-core",
+    "private": false
+  },
+  {
+    "name": "@module-federation/inject-external-runtime-core-plugin",
+    "version": "2.1.0",
+    "path": "/Users/bytedance/github/core/packages/runtime-plugins/inject-external-runtime-core-plugin",
+    "private": false
+  },
+  {
+    "name": "@module-federation/runtime-tools",
+    "version": "2.1.0",
+    "path": "/Users/bytedance/github/core/packages/runtime-tools",
+    "private": false
+  },
+  {
+    "name": "@module-federation/sdk",
+    "version": "2.1.0",
+    "path": "/Users/bytedance/github/core/packages/sdk",
+    "private": false
+  },
+  {
+    "name": "@module-federation/storybook-addon",
+    "version": "6.0.2",
+    "path": "/Users/bytedance/github/core/packages/storybook-addon",
+    "private": false
+  },
+  {
+    "name": "@module-federation/third-party-dts-extractor",
+    "version": "2.1.0",
+    "path": "/Users/bytedance/github/core/packages/third-party-dts-extractor",
+    "private": false
+  },
+  {
+    "name": "@module-federation/treeshake-frontend",
+    "version": "2.1.0",
+    "path": "/Users/bytedance/github/core/packages/treeshake-frontend",
+    "private": false
+  },
+  {
+    "name": "@module-federation/treeshake-server",
+    "version": "2.1.0",
+    "path": "/Users/bytedance/github/core/packages/treeshake-server",
+    "private": false
+  },
+  {
+    "name": "@module-federation/typescript",
+    "version": "3.1.6",
+    "path": "/Users/bytedance/github/core/packages/typescript",
+    "private": false
+  },
+  {
+    "name": "@module-federation/utilities",
+    "version": "3.1.85",
+    "path": "/Users/bytedance/github/core/packages/utilities",
+    "private": false
+  },
+  {
+    "name": "@module-federation/webpack-bundler-runtime",
+    "version": "2.1.0",
+    "path": "/Users/bytedance/github/core/packages/webpack-bundler-runtime",
+    "private": false
+  },
+  {
+    "name": "@module-federation/webpack-type",
+    "version": "0.0.1",
+    "path": "/Users/bytedance/github/core/webpack",
+    "private": false
+  }
+]
