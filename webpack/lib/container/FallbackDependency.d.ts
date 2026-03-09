@@ -1,4 +1,5 @@
 export = FallbackDependency;
+/** @typedef {import("./RemoteModule").ExternalRequests} ExternalRequests */
 /** @typedef {import("../serialization/ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
 /** @typedef {import("../serialization/ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
 declare class FallbackDependency extends Dependency {
@@ -8,15 +9,20 @@ declare class FallbackDependency extends Dependency {
    */
   static deserialize(context: ObjectDeserializerContext): FallbackDependency;
   /**
-   * @param {string[]} requests requests
+   * @param {ExternalRequests} requests requests
    */
-  constructor(requests: string[]);
-  requests: string[];
+  constructor(requests: ExternalRequests);
+  requests: import('./RemoteModule').ExternalRequests;
 }
 declare namespace FallbackDependency {
-  export { ObjectDeserializerContext, ObjectSerializerContext };
+  export {
+    ExternalRequests,
+    ObjectDeserializerContext,
+    ObjectSerializerContext,
+  };
 }
 import Dependency = require('../Dependency');
+type ExternalRequests = import('./RemoteModule').ExternalRequests;
 type ObjectDeserializerContext =
   import('../serialization/ObjectMiddleware').ObjectDeserializerContext;
 type ObjectSerializerContext =

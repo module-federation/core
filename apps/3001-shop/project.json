@@ -42,10 +42,10 @@
       "dependsOn": ["build"]
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
+      "executor": "nx:run-commands",
       "options": {
-        "lintFilePatterns": ["apps/3001-shop/**/*.{ts,tsx,js,jsx}"]
+        "command": "pnpm exec eslint apps/3001-shop/**/*.{ts,tsx,js,jsx}",
+        "forwardAllArgs": false
       }
     },
     "test:e2e": {
@@ -60,11 +60,10 @@
       }
     },
     "e2e": {
-      "executor": "@nx/cypress:cypress",
+      "executor": "nx:run-commands",
       "options": {
-        "cypressConfig": "apps/3001-shop/cypress.config.ts",
-        "testingType": "e2e",
-        "baseUrl": "http://localhost:3001"
+        "command": "pnpm exec cypress run --project apps/3001-shop --e2e --config baseUrl=http://localhost:3001",
+        "forwardAllArgs": false
       }
     }
   }

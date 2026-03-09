@@ -13,12 +13,12 @@ declare class SetObjectSerializer {
    * @param {ObjectDeserializerContext} context context
    * @returns {Set<T>} date
    */
-  deserialize<T_1>(context: ObjectDeserializerContext): Set<T_1>;
+  deserialize<T>(context: ObjectDeserializerContext): Set<T>;
 }
 declare namespace SetObjectSerializer {
   export { ObjectDeserializerContext, ObjectSerializerContext };
 }
-type ObjectSerializerContext =
-  import('./ObjectMiddleware').ObjectSerializerContext;
 type ObjectDeserializerContext =
   import('./ObjectMiddleware').ObjectDeserializerContext;
+type ObjectSerializerContext =
+  import('./ObjectMiddleware').ObjectSerializerContext;

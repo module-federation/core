@@ -17,12 +17,11 @@
       }
     },
     "test": {
-      "executor": "@nx/jest:jest",
+      "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "packages/metro-plugin-rnc-cli/jest.config.ts",
-        "passWithNoTests": true,
-        "watchman": false
+        "command": "pnpm exec jest --config packages/metro-plugin-rnc-cli/jest.config.ts --passWithNoTests --watchman=false",
+        "forwardAllArgs": false
       }
     },
     "lint": {

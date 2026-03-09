@@ -6,42 +6,19 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/webpack:webpack",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/apps/reactRemoteUI/dist"],
       "defaultConfiguration": "production",
       "options": {
-        "compiler": "babel",
-        "outputPath": "apps/reactRemoteUI/dist",
-        "index": "apps/reactRemoteUI/src/index.html",
-        "baseHref": "/",
-        "main": "apps/reactRemoteUI/src/main.ts",
-        "tsConfig": "apps/reactRemoteUI/tsconfig.app.json",
-        "assets": ["apps/reactRemoteUI/src/favicon.ico"],
-        "styles": ["apps/reactRemoteUI/src/styles.scss"],
-        "scripts": [],
-        "webpackConfig": "apps/reactRemoteUI/webpack.config.js"
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/reactRemoteUI/webpack.config.prod.js --mode production",
+        "forwardAllArgs": false
       },
       "configurations": {
         "development": {
-          "extractLicenses": false,
-          "optimization": false,
-          "sourceMap": true,
-          "vendorChunk": true
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/reactRemoteUI/webpack.config.js --mode development"
         },
         "production": {
-          "fileReplacements": [
-            {
-              "replace": "apps/reactRemoteUI/src/environments/environment.ts",
-              "with": "apps/reactRemoteUI/src/environments/environment.prod.ts"
-            }
-          ],
-          "optimization": true,
-          "outputHashing": "all",
-          "sourceMap": false,
-          "namedChunks": false,
-          "extractLicenses": false,
-          "vendorChunk": false,
-          "webpackConfig": "apps/reactRemoteUI/webpack.config.prod.js"
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config apps/reactRemoteUI/webpack.config.prod.js --mode production"
         }
       },
       "dependsOn": [
@@ -52,58 +29,46 @@
       ]
     },
     "serve": {
-      "executor": "@nx/react:module-federation-dev-server",
+      "executor": "nx:run-commands",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "reactRemoteUI:build",
-        "hmr": true,
-        "port": 4201
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/reactRemoteUI/webpack.config.js --mode development --port 4201",
+        "forwardAllArgs": false
       },
       "configurations": {
         "development": {
-          "buildTarget": "reactRemoteUI:build:development"
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/reactRemoteUI/webpack.config.js --mode development --port 4201"
         },
         "production": {
-          "buildTarget": "reactRemoteUI:build:production",
-          "hmr": false
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config apps/reactRemoteUI/webpack.config.prod.js --mode production --port 4201 --no-hot"
         }
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
+      "executor": "nx:run-commands",
       "options": {
-        "lintFilePatterns": ["apps/reactRemoteUI/**/*.{ts,tsx,js,jsx}"]
+        "command": "pnpm exec eslint apps/reactRemoteUI/**/*.{ts,tsx,js,jsx}",
+        "forwardAllArgs": false
       }
     },
     "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "executor": "nx:run-commands",
       "options": {
-        "jestConfig": "apps/reactRemoteUI/jest.config.ts",
-        "passWithNoTests": true
+        "command": "pnpm exec jest --config apps/reactRemoteUI/jest.config.ts --passWithNoTests",
+        "forwardAllArgs": false
       },
       "configurations": {
         "ci": {
-          "ci": true,
-          "codeCoverage": true
+          "command": "pnpm exec jest --config apps/reactRemoteUI/jest.config.ts --passWithNoTests --ci --coverage"
         }
       }
     },
     "serve-static": {
-      "executor": "@nx/web:file-server",
-      "defaultConfiguration": "development",
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
       "options": {
-        "buildTarget": "reactRemoteUI:build",
-        "port": 4201
-      },
-      "configurations": {
-        "development": {
-          "buildTarget": "reactRemoteUI:build:development"
-        },
-        "production": {
-          "buildTarget": "reactRemoteUI:build:production"
-        }
+        "command": "pnpm exec serve apps/reactRemoteUI/dist -l 4201 --cors",
+        "forwardAllArgs": false
       }
     }
   }

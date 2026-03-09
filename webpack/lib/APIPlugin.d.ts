@@ -1,14 +1,5 @@
 export = APIPlugin;
-/**
- * @typedef {Object} APIPluginOptions
- * @property {boolean} [module] the output filename
- */
 declare class APIPlugin {
-  /**
-   * @param {APIPluginOptions} [options] options
-   */
-  constructor(options?: APIPluginOptions);
-  options: APIPluginOptions;
   /**
    * Apply the plugin
    * @param {Compiler} compiler the compiler instance
@@ -17,13 +8,10 @@ declare class APIPlugin {
   apply(compiler: Compiler): void;
 }
 declare namespace APIPlugin {
-  export { Compiler, JavascriptParser, APIPluginOptions };
+  export { Compiler, DependencyLocation, BuildInfo, JavascriptParser, Range };
 }
-type APIPluginOptions = {
-  /**
-   * the output filename
-   */
-  module?: boolean;
-};
 type Compiler = import('./Compiler');
+type DependencyLocation = import('./Dependency').DependencyLocation;
+type BuildInfo = import('./Module').BuildInfo;
 type JavascriptParser = import('./javascript/JavascriptParser');
+type Range = import('./javascript/JavascriptParser').Range;

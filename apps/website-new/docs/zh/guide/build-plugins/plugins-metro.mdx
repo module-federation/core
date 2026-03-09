@@ -153,6 +153,10 @@ module.exports = withModuleFederation(
   mergeConfig(getDefaultConfig(__dirname), config),
   {
     name: 'MiniApp',
+    // 可选：为 TS 项目启用联邦类型生成
+    // 执行 `bundle-mf-remote` 时生成 `@mf-types.zip`（以及启用时的 `@mf-types.d.ts`）
+    // 并将文件名写入 `mf-manifest.json` 的 `metaData.types`。
+    dts: true,
     exposes: {
       './Screen': './src/Screen.tsx',
       './Component': './src/Component.tsx',
@@ -246,6 +250,7 @@ export interface ModuleFederationConfig {
    * 计划在下一个 major 版本移除。
    */
   plugins?: string[];
+  dts?: boolean | PluginDtsOptions;
 }
 ```
 

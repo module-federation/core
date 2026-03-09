@@ -6,6 +6,7 @@ import type {
   ShareObject,
 } from '../types';
 import { DEFAULT_ENTRY_FILENAME } from './constants';
+import { toPosixPath } from './helpers';
 
 interface ProjectConfig {
   projectRoot: string;
@@ -20,7 +21,7 @@ export function normalizeOptions(
   const remotes = getNormalizedRemotes(options);
   const exposes = getNormalizedExposes(options);
   const shareStrategy = getNormalizedShareStrategy(options);
-  const plugins = getNormalizedPlugins(options, tmpDirPath);
+  const plugins = getNormalizedPlugins(options, tmpDirPath, projectRoot);
 
   return {
     // validated in validateOptions before normalization
@@ -31,6 +32,7 @@ export function normalizeOptions(
     shared,
     shareStrategy,
     plugins,
+    dts: options.dts ?? false,
   };
 }
 
@@ -103,6 +105,7 @@ function getNormalizedShareStrategy(options: ModuleFederationConfig) {
 function getNormalizedPlugins(
   options: ModuleFederationConfig,
   tmpDirPath: string,
+  projectRoot: string,
 ) {
   const runtimePlugins = getNormalizedRuntimePlugins(options);
   const plugins = options.plugins ?? [];
@@ -116,10 +119,26 @@ function getNormalizedPlugins(
 
   const deduplicatedPlugins = Array.from(new Set(allPlugins));
 
-  // make paths relative to the tmp dir
-  return deduplicatedPlugins.map((pluginPath) =>
-    path.relative(tmpDirPath, pluginPath),
-  );
+  // make local file paths relative to the tmp dir; keep package specifiers unchanged
+  return deduplicatedPlugins.map((pluginPath) => {
+    if (!isLocalPluginPath(pluginPath, projectRoot)) {
+      return pluginPath;
+    }
+    const resolvedPluginPath = path.isAbsolute(pluginPath)
+      ? pluginPath
+      : path.resolve(projectRoot, pluginPath);
+    return toPosixPath(path.relative(tmpDirPath, resolvedPluginPath));
+  });
+}
+
+function isLocalPluginPath(pluginPath: string, projectRoot: string) {
+  if (path.isAbsolute(pluginPath)) {
+    return true;
+  }
+  if (pluginPath.startsWith('./') || pluginPath.startsWith('../')) {
+    return true;
+  }
+  return fs.existsSync(path.resolve(projectRoot, pluginPath));
 }
 
 function getNormalizedRuntimePlugins(

@@ -14,5 +14,5 @@ declare namespace AsyncDependencyToInitialChunkError {
   export { DependencyLocation, Module };
 }
 import WebpackError = require('./WebpackError');
-type Module = import('./Module');
 type DependencyLocation = import('./Dependency').DependencyLocation;
+type Module = import('./Module');

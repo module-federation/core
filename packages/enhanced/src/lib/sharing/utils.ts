@@ -390,7 +390,7 @@ function getDescriptionFile(
       );
     }
     const filePath = join(fs, directory, descriptionFiles[i]);
-    readJson(fs, filePath, (err, data: object) => {
+    readJson(fs, filePath, (err, data?: Record<string, any>) => {
       if (err) {
         if ('code' in err && err.code === 'ENOENT') {
           i++;

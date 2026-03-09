@@ -151,6 +151,10 @@ module.exports = withModuleFederation(
   mergeConfig(getDefaultConfig(__dirname), config),
   {
     name: 'MiniApp',
+    // Optional: enable federated type generation for TS projects
+    // Generates `@mf-types.zip` (and `@mf-types.d.ts` when enabled) during `bundle-mf-remote`
+    // and writes filenames into `mf-manifest.json` under `metaData.types`.
+    dts: true,
     exposes: {
       './Screen': './src/Screen.tsx',
       './Component': './src/Component.tsx',
@@ -244,6 +248,7 @@ export interface ModuleFederationConfig {
    * Scheduled for removal in the next major version.
    */
   plugins?: string[];
+  dts?: boolean | PluginDtsOptions;
 }
 ```
 

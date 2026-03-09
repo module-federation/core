@@ -9,29 +9,33 @@ declare class InnerGraphPlugin {
 }
 declare namespace InnerGraphPlugin {
   export {
-    ClassDeclarationNode,
-    ClassExpressionNode,
+    ClassDeclaration,
+    ClassExpression,
+    Expression,
+    MaybeNamedClassDeclaration,
+    MaybeNamedFunctionDeclaration,
     Node,
-    VariableDeclaratorNode,
+    VariableDeclarator,
     JavascriptParserOptions,
     Compiler,
-    Dependency,
-    HarmonyImportSpecifierDependency,
+    DependencyLocation,
     JavascriptParser,
-    InnerGraph,
+    Range,
     TopLevelSymbol,
   };
 }
-type Compiler = import('../Compiler');
-type ClassDeclarationNode = import('estree').ClassDeclaration;
-type ClassExpressionNode = import('estree').ClassExpression;
+type ClassDeclaration = import('estree').ClassDeclaration;
+type ClassExpression = import('estree').ClassExpression;
+type Expression = import('estree').Expression;
+type MaybeNamedClassDeclaration = import('estree').MaybeNamedClassDeclaration;
+type MaybeNamedFunctionDeclaration =
+  import('estree').MaybeNamedFunctionDeclaration;
 type Node = import('estree').Node;
-type VariableDeclaratorNode = import('estree').VariableDeclarator;
+type VariableDeclarator = import('estree').VariableDeclarator;
 type JavascriptParserOptions =
   import('../../declarations/WebpackOptions').JavascriptParserOptions;
-type Dependency = import('../Dependency');
-type HarmonyImportSpecifierDependency =
-  import('../dependencies/HarmonyImportSpecifierDependency');
+type Compiler = import('../Compiler');
+type DependencyLocation = import('../Dependency').DependencyLocation;
 type JavascriptParser = import('../javascript/JavascriptParser');
-type InnerGraph = import('./InnerGraph').InnerGraph;
+type Range = import('../javascript/JavascriptParser').Range;
 type TopLevelSymbol = import('./InnerGraph').TopLevelSymbol;

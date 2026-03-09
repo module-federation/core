@@ -17,6 +17,7 @@ This page collects runtime-related error codes and common troubleshooting guidan
 - [RUNTIME-007](#runtime-007)
 - [RUNTIME-008](#runtime-008)
 - [RUNTIME-009](#runtime-009)
+- [RUNTIME-010](#runtime-010)
 
 ## RUNTIME-001
 
@@ -160,6 +161,19 @@ Not use build plugin, but directly call runtime api.
 ### Solution
 
 <Runtime />
+
+## RUNTIME-010
+
+<ErrorCodeTitle code='RUNTIME-010'/>
+
+### Reason
+
+`initOptions` was called with a `name` different from the one used during initialization. The `name` is the unique identifier of the instance and cannot be changed after initialization.
+
+### Solution
+
+- If you need an instance with a different `name`, use the `createInstance` API to create a new instance instead of modifying the existing one.
+- If changing the `name` is not required, omit the `name` field in the `initOptions` call or keep it consistent with the value used during initialization.
 
 ## Common Issues (No Error Code)
 

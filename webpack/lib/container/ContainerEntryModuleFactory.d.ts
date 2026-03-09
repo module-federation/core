@@ -2,13 +2,13 @@ export = ContainerEntryModuleFactory;
 declare class ContainerEntryModuleFactory extends ModuleFactory {}
 declare namespace ContainerEntryModuleFactory {
   export {
+    ModuleFactoryCallback,
     ModuleFactoryCreateData,
-    ModuleFactoryResult,
     ContainerEntryDependency,
   };
 }
 import ModuleFactory = require('../ModuleFactory');
+type ModuleFactoryCallback = import('../ModuleFactory').ModuleFactoryCallback;
 type ModuleFactoryCreateData =
   import('../ModuleFactory').ModuleFactoryCreateData;
-type ModuleFactoryResult = import('../ModuleFactory').ModuleFactoryResult;
 type ContainerEntryDependency = import('./ContainerEntryDependency');

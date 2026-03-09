@@ -1,16 +1,16 @@
 export = ChunkPreloadTriggerRuntimeModule;
 /** @typedef {import("../Compilation")} Compilation */
-/** @typedef {import("../RuntimeTemplate")} RuntimeTemplate */
+/** @typedef {import("../Chunk").ChunkChildIdsByOrdersMap} ChunkChildIdsByOrdersMap */
 declare class ChunkPreloadTriggerRuntimeModule extends RuntimeModule {
   /**
-   * @param {Record<string|number, (string|number)[]>} chunkMap map from chunk to chunks
+   * @param {ChunkChildIdsByOrdersMap} chunkMap map from chunk to chunks
    */
-  constructor(chunkMap: Record<string | number, (string | number)[]>);
-  chunkMap: Record<string | number, (string | number)[]>;
+  constructor(chunkMap: ChunkChildIdsByOrdersMap);
+  chunkMap: import('../Chunk').ChunkChildIdsByOrdersMap;
 }
 declare namespace ChunkPreloadTriggerRuntimeModule {
-  export { Compilation, RuntimeTemplate };
+  export { Compilation, ChunkChildIdsByOrdersMap };
 }
 import RuntimeModule = require('../RuntimeModule');
 type Compilation = import('../Compilation');
-type RuntimeTemplate = import('../RuntimeTemplate');
+type ChunkChildIdsByOrdersMap = import('../Chunk').ChunkChildIdsByOrdersMap;

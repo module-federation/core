@@ -1,8 +1,5 @@
-import type {
-  WebpackOptionsNormalized,
-  Compiler,
-  ExternalItemFunctionData,
-} from 'webpack';
+import type { WebpackOptionsNormalized, Compiler } from 'webpack';
+import type ExternalModuleFactoryPlugin from 'webpack/lib/ExternalModuleFactoryPlugin';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import path from 'path';
 import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
@@ -17,6 +14,77 @@ interface ModifyEntryOptions {
   prependEntry?: (entry: EntryStaticNormalized) => void;
   staticEntry?: EntryStaticNormalized;
 }
+
+type ExternalItemFunction =
+  ExternalModuleFactoryPlugin.ExternalItemFunctionCallback;
+type ExternalItemFunctionData =
+  ExternalModuleFactoryPlugin.ExternalItemFunctionData;
+type ExternalItemValue = ExternalModuleFactoryPlugin.ExternalItemValue;
+
+const isExternalItemValue = (value: unknown): value is ExternalItemValue => {
+  return (
+    typeof value === 'string' ||
+    typeof value === 'boolean' ||
+    Array.isArray(value) ||
+    (!!value && typeof value === 'object')
+  );
+};
+
+const runExternalFunction = async (
+  external: ExternalItemFunction,
+  data: ExternalItemFunctionData,
+): Promise<ExternalItemValue | undefined> => {
+  return new Promise((resolve, reject) => {
+    let settled = false;
+    const settle = (err?: Error | null, result?: unknown) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      if (err) {
+        reject(err);
+        return;
+      }
+      if (isExternalItemValue(result)) {
+        resolve(result);
+        return;
+      }
+      resolve(undefined);
+    };
+
+    const maybePromise: unknown = external(data, (err, result) => {
+      settle(err, result);
+    });
+
+    if (maybePromise !== undefined) {
+      Promise.resolve(maybePromise)
+        .then((result) => {
+          settle(undefined, result);
+        })
+        .catch((error: unknown) => {
+          const normalizedError =
+            error instanceof Error ? error : new Error(String(error));
+          settle(normalizedError);
+        });
+    }
+  });
+};
+
+const isExternalItemFunction = (
+  external: unknown,
+): external is ExternalItemFunction => {
+  return typeof external === 'function';
+};
+
+const isSharedImportEnabled = (sharedConfigValue: unknown): boolean => {
+  if (!sharedConfigValue || typeof sharedConfigValue !== 'object') {
+    return true;
+  }
+  if (!Object.prototype.hasOwnProperty.call(sharedConfigValue, 'import')) {
+    return true;
+  }
+  return Reflect.get(sharedConfigValue, 'import') !== false;
+};
 
 // Modifies the Webpack entry configuration
 export function modifyEntry(options: ModifyEntryOptions): void {
@@ -94,7 +162,9 @@ export function configureServerLibraryAndFilename(
   };
 
   // Set the filename option to the basename of the current filename
-  options.filename = path.basename(options.filename as string);
+  if (typeof options.filename === 'string') {
+    options.filename = path.basename(options.filename);
+  }
 }
 
 /**
@@ -108,38 +178,48 @@ export function handleServerExternals(
   options: moduleFederationPlugin.ModuleFederationPluginOptions,
 ): void {
   if (Array.isArray(compiler.options.externals)) {
-    const functionIndex = compiler.options.externals.findIndex(
-      (external) => typeof external === 'function',
+    const functionIndex = compiler.options.externals.findIndex((external) =>
+      isExternalItemFunction(external),
     );
 
     if (functionIndex !== -1) {
-      const originalExternals = compiler.options.externals[functionIndex] as (
-        data: ExternalItemFunctionData,
-        callback: any,
-      ) => undefined | string;
+      const originalExternals = compiler.options.externals[functionIndex];
+      if (!isExternalItemFunction(originalExternals)) {
+        return;
+      }
 
-      compiler.options.externals[functionIndex] = async function (
+      compiler.options.externals[functionIndex] = async (
         ctx: ExternalItemFunctionData,
-        callback: any,
-      ) {
-        const fromNext = await originalExternals(ctx, callback);
-        if (!fromNext) {
+      ): Promise<ExternalItemValue | undefined> => {
+        const fromNext = await runExternalFunction(originalExternals, ctx);
+        if (typeof fromNext !== 'string') {
+          return fromNext;
+        }
+
+        const req = fromNext.split(' ')[1];
+        if (!req) {
           return;
         }
-        const req = fromNext.split(' ')[1];
+
+        const sharedEntries =
+          options.shared &&
+          !Array.isArray(options.shared) &&
+          typeof options.shared === 'object'
+            ? Object.entries(options.shared)
+            : [];
+        const isSharedRequest = sharedEntries.some(
+          ([key, sharedConfigValue]) => {
+            if (!isSharedImportEnabled(sharedConfigValue)) {
+              return false;
+            }
+            return key.endsWith('/') ? req.includes(key) : req === key;
+          },
+        );
+
         if (
           ctx.request &&
           (ctx.request.includes('@module-federation/utilities') ||
-            Object.keys(options.shared || {}).some((key) => {
-              const sharedOptions = options.shared as Record<
-                string,
-                { import: boolean }
-              >;
-              return (
-                sharedOptions[key]?.import !== false &&
-                (key.endsWith('/') ? req.includes(key) : req === key)
-              );
-            }) ||
+            isSharedRequest ||
             ctx.request.includes('@module-federation/'))
         ) {
           return;

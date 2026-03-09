@@ -34,51 +34,31 @@ const { mkdirpSync } = require(
   normalizeWebpackPath('webpack/lib/util/fs'),
 ) as typeof import('webpack/lib/util/fs');
 
-function resolveModule(
-  candidates: string[],
-  options?: NodeJS.RequireResolveOptions,
-): string {
-  let lastError: unknown;
-  for (const candidate of candidates) {
-    try {
-      return require.resolve(candidate, options);
-    } catch (error) {
-      lastError = error;
-    }
-  }
+function resolveRuntimePaths(implementation?: string) {
+  const ext = process.env.IS_ESM_BUILD === 'true' ? '.js' : '.cjs';
+  const runtimeToolsSpec = `@module-federation/runtime-tools/dist/index${ext}`;
+  const bundlerRuntimeSpec = `@module-federation/webpack-bundler-runtime/dist/index${ext}`;
+  const runtimeSpec = `@module-federation/runtime/dist/index${ext}`;
 
-  throw (
-    lastError ??
-    new Error(`Unable to resolve any module from: ${candidates.join(', ')}`)
-  );
+  const runtimeToolsPath = require.resolve(runtimeToolsSpec);
+  const modulePaths = implementation ? [implementation] : [runtimeToolsPath];
+
+  return {
+    runtimeToolsPath,
+    bundlerRuntimePath: require.resolve(bundlerRuntimeSpec, {
+      paths: modulePaths,
+    }),
+    runtimePath: require.resolve(runtimeSpec, {
+      paths: modulePaths,
+    }),
+  };
 }
 
-const RuntimeToolsPath = resolveModule([
-  '@module-federation/runtime-tools',
-  '@module-federation/runtime-tools/dist/index.esm.js',
-  '@module-federation/runtime-tools/dist/index.cjs.cjs',
-]);
-const BundlerRuntimePath = resolveModule(
-  [
-    '@module-federation/webpack-bundler-runtime',
-    '@module-federation/webpack-bundler-runtime/dist/index.js',
-    '@module-federation/webpack-bundler-runtime/dist/index.esm.js',
-    '@module-federation/webpack-bundler-runtime/dist/index.cjs.cjs',
-  ],
-  {
-    paths: [RuntimeToolsPath],
-  },
-);
-const RuntimePath = resolveModule(
-  [
-    '@module-federation/runtime',
-    '@module-federation/runtime/dist/index.esm.js',
-    '@module-federation/runtime/dist/index.cjs.cjs',
-  ],
-  {
-    paths: [RuntimeToolsPath],
-  },
-);
+const {
+  runtimeToolsPath: RuntimeToolsPath,
+  bundlerRuntimePath: BundlerRuntimePath,
+  runtimePath: RuntimePath,
+} = resolveRuntimePaths();
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
 const onceForCompiler = new WeakSet<Compiler>();
@@ -88,12 +68,16 @@ class FederationRuntimePlugin {
   options?: moduleFederationPlugin.ModuleFederationPluginOptions;
   entryFilePath: string;
   bundlerRuntimePath: string;
+  runtimePath: string;
+  runtimeToolsPath: string;
   federationRuntimeDependency?: FederationRuntimeDependency; // Add this line
 
   constructor(options?: moduleFederationPlugin.ModuleFederationPluginOptions) {
     this.options = options ? { ...options } : undefined;
     this.entryFilePath = '';
     this.bundlerRuntimePath = BundlerRuntimePath;
+    this.runtimePath = RuntimePath;
+    this.runtimeToolsPath = RuntimeToolsPath;
     this.federationRuntimeDependency = undefined; // Initialize as undefined
   }
 
@@ -136,7 +120,7 @@ class FederationRuntimePlugin {
       });
     }
     const embedRuntimeLines = Template.asString([
-      `if(!${federationGlobal}.runtime){`,
+      `if(!${federationGlobal}.runtime || !${federationGlobal}.bundlerRuntime){`,
       Template.indent([
         `var prevFederation = ${federationGlobal};`,
         `${federationGlobal} = {}`,
@@ -373,27 +357,21 @@ class FederationRuntimePlugin {
 
   getRuntimeAlias(compiler: Compiler) {
     const { implementation } = this.options || {};
-    let runtimePath = RuntimePath;
     const alias: any = compiler.options.resolve.alias || {};
 
+    const resolvedPaths = resolveRuntimePaths(implementation);
+
+    this.runtimeToolsPath = resolvedPaths.runtimeToolsPath;
+    this.bundlerRuntimePath = resolvedPaths.bundlerRuntimePath;
+
     if (alias['@module-federation/runtime$']) {
-      runtimePath = alias['@module-federation/runtime$'];
-    } else {
-      if (implementation) {
-        runtimePath = resolveModule(
-          [
-            '@module-federation/runtime',
-            '@module-federation/runtime/dist/index.esm.js',
-            '@module-federation/runtime/dist/index.cjs.cjs',
-          ],
-          {
-            paths: [implementation],
-          },
-        );
-      }
+      this.runtimePath = alias['@module-federation/runtime$'];
+      return this.runtimePath;
     }
 
-    return runtimePath;
+    this.runtimePath = resolvedPaths.runtimePath;
+
+    return this.runtimePath;
   }
 
   setRuntimeAlias(compiler: Compiler) {
@@ -405,7 +383,7 @@ class FederationRuntimePlugin {
     alias['@module-federation/runtime-tools$'] =
       alias['@module-federation/runtime-tools$'] ||
       implementation ||
-      RuntimeToolsPath;
+      this.runtimeToolsPath;
 
     // Set up aliases for the federation runtime and tools
     // This ensures that the correct versions are used throughout the project
@@ -464,19 +442,10 @@ class FederationRuntimePlugin {
         compiler.options.output.uniqueName || `container_${Date.now()}`;
     }
 
-    if (this.options?.implementation) {
-      this.bundlerRuntimePath = resolveModule(
-        [
-          '@module-federation/webpack-bundler-runtime',
-          '@module-federation/webpack-bundler-runtime/dist/index.js',
-          '@module-federation/webpack-bundler-runtime/dist/index.esm.js',
-          '@module-federation/webpack-bundler-runtime/dist/index.cjs.cjs',
-        ],
-        {
-          paths: [this.options.implementation],
-        },
-      );
-    }
+    const resolvedPaths = resolveRuntimePaths(this.options?.implementation);
+    this.bundlerRuntimePath = resolvedPaths.bundlerRuntimePath;
+    this.runtimePath = resolvedPaths.runtimePath;
+    this.runtimeToolsPath = resolvedPaths.runtimeToolsPath;
 
     this.entryFilePath = this.getFilePath(compiler);
 

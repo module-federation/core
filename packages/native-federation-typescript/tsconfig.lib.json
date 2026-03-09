@@ -11,6 +11,6 @@
     "jest.config.ts",
     "**/*.spec.ts",
     "**/*.test.ts",
-    "tsup.config.ts"
+    "tsdown.config.ts"
   ]
 }

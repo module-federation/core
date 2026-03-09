@@ -1,29 +1,94 @@
-// const { registerPluginTSTranspiler } = require('nx/src/utils/nx-plugin.js');
-// registerPluginTSTranspiler();
-
-const { composePlugins, withNx } = require('@nx/webpack');
-const { withReact } = require('@nx/react');
-
 const path = require('path');
-// Force a single React instance across host/remotes in pnpm/Nx workspace setups.
 const reactPath = path.dirname(require.resolve('react/package.json'));
 const reactDomPath = path.dirname(require.resolve('react-dom/package.json'));
-// const { withModuleFederation } = require('@nx/react/module-federation');
+const swcLoader = require.resolve('swc-loader');
+const styleLoader = require.resolve('style-loader');
+const cssLoader = require.resolve('css-loader');
 const {
   ModuleFederationPlugin,
 } = require('@module-federation/enhanced/webpack');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-module.exports = composePlugins(
-  withNx(),
-  withReact(),
-  async (config, context) => {
-    config.watchOptions = {
-      ignored: ['**/node_modules/**', '**/@mf-types/**', '**/dist/**'],
-    };
-    config.plugins.push(
+module.exports = (_env, argv = {}) => {
+  const isProduction = argv.mode === 'production';
+  const sourcePath = path.resolve(__dirname, 'src');
+
+  return {
+    mode: isProduction ? 'production' : 'development',
+    target: 'web',
+    context: __dirname,
+    entry: {
+      main: path.resolve(__dirname, 'src/index.tsx'),
+    },
+    output: {
+      path: path.resolve(__dirname, 'dist'),
+      filename: '[name].js',
+      chunkFilename: '[name].js',
+      publicPath: 'http://127.0.0.1:3007/',
+      scriptType: 'text/javascript',
+      clean: true,
+    },
+    devtool: false,
+    resolve: {
+      extensions: ['.tsx', '.ts', '.jsx', '.js', '.mjs', '.json'],
+      alias: {
+        react: reactPath,
+        'react-dom': reactDomPath,
+      },
+    },
+    module: {
+      rules: [
+        {
+          test: /\.[jt]sx?$/,
+          include: sourcePath,
+          use: {
+            loader: swcLoader,
+            options: {
+              sourceMaps: true,
+              jsc: {
+                parser: {
+                  syntax: 'typescript',
+                  tsx: true,
+                  decorators: true,
+                },
+                transform: {
+                  react: {
+                    runtime: 'automatic',
+                    development: !isProduction,
+                  },
+                },
+              },
+            },
+          },
+        },
+        {
+          test: /\.module\.css$/,
+          use: [
+            styleLoader,
+            {
+              loader: cssLoader,
+              options: {
+                modules: {
+                  localIdentName: '[name]__[local]__[hash:base64:5]',
+                },
+              },
+            },
+          ],
+        },
+        {
+          test: /\.css$/,
+          exclude: /\.module\.css$/,
+          use: [styleLoader, cssLoader],
+        },
+        {
+          test: /\.(png|svg|jpe?g|gif|webp)$/i,
+          type: 'asset/resource',
+        },
+      ],
+    },
+    plugins: [
       new ModuleFederationPlugin({
         name: 'runtime_remote2',
-        // library: { type: 'var', name: 'runtime_remote' },
         filename: 'remoteEntry.js',
         exposes: {
           './ButtonOldAnt': './src/components/ButtonOldAnt',
@@ -59,53 +124,33 @@ module.exports = composePlugins(
           disableLiveReload: true,
         },
       }),
-    );
-    config.plugins.push({
-      name: 'nx-dev-webpack-plugin',
-      apply(compiler) {
-        compiler.options.devtool = false;
-        compiler.options.resolve.alias = {
-          ...compiler.options.resolve.alias,
-          react: reactPath,
-          'react-dom': reactDomPath,
-        };
+      new HtmlWebpackPlugin({
+        template: path.resolve(__dirname, 'src/index.html'),
+      }),
+    ],
+    watchOptions: {
+      ignored: ['**/node_modules/**', '**/@mf-types/**', '**/dist/**'],
+    },
+    devServer: {
+      host: '127.0.0.1',
+      allowedHosts: 'all',
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods':
+          'GET, POST, PUT, DELETE, PATCH, OPTIONS',
+        'Access-Control-Allow-Headers':
+          'X-Requested-With, content-type, Authorization',
       },
-    });
-    if (!config.devServer) {
-      config.devServer = {};
-    }
-    config.devServer.host = '127.0.0.1';
-    config.devServer.headers = {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
-      'Access-Control-Allow-Headers':
-        'X-Requested-With, content-type, Authorization',
-    };
-    config.devServer.allowedHosts = 'all';
-    config.optimization.runtimeChunk = false;
-    config.plugins.forEach((p) => {
-      if (p.constructor.name === 'ModuleFederationPlugin') {
-        //Temporary workaround - https://github.com/nrwl/nx/issues/16983
-        p._options.library = undefined;
-      }
-    });
-
-    //Temporary workaround - https://github.com/nrwl/nx/issues/16983
-    config.experiments = { outputModule: false };
-
-    // Update the webpack config as needed here.
-    // e.g. `config.plugins.push(new MyPlugin())`
-    config.output = {
-      ...config.output,
-      publicPath: 'http://127.0.0.1:3007/',
-      scriptType: 'text/javascript',
-    };
-    config.optimization = {
-      ...config.optimization,
+      client: {
+        overlay: false,
+      },
+      devMiddleware: {
+        writeToDisk: true,
+      },
+    },
+    optimization: {
       runtimeChunk: false,
       minimize: false,
-    };
-    // const mf = await withModuleFederation(defaultConfig);
-    return config;
-  },
-);
+    },
+  };
+};

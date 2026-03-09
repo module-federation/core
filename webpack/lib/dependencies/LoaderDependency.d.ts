@@ -1,14 +1,15 @@
 export = LoaderDependency;
+/** @typedef {import("../Dependency").GetConditionFn} GetConditionFn */
 /** @typedef {import("../ModuleGraph")} ModuleGraph */
-/** @typedef {import("../ModuleGraphConnection")} ModuleGraphConnection */
-/** @typedef {import("../ModuleGraphConnection").ConnectionState} ConnectionState */
-/** @typedef {import("../util/runtime").RuntimeSpec} RuntimeSpec */
-declare class LoaderDependency extends ModuleDependency {}
+declare class LoaderDependency extends ModuleDependency {
+  /**
+   * @param {string} request request string
+   */
+  constructor(request: string);
+}
 declare namespace LoaderDependency {
-  export { ModuleGraph, ModuleGraphConnection, ConnectionState, RuntimeSpec };
+  export { GetConditionFn, ModuleGraph };
 }
 import ModuleDependency = require('./ModuleDependency');
+type GetConditionFn = import('../Dependency').GetConditionFn;
 type ModuleGraph = import('../ModuleGraph');
-type ModuleGraphConnection = import('../ModuleGraphConnection');
-type ConnectionState = import('../ModuleGraphConnection').ConnectionState;
-type RuntimeSpec = import('../util/runtime').RuntimeSpec;

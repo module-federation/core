@@ -1,3 +1,4 @@
+import path from 'node:path';
 import type { ModuleFederationConfig, ShareObject } from '../types';
 import logger from '../logger';
 import { ConfigError } from '../utils';
@@ -11,7 +12,6 @@ const unsupportedTopLevelOptions: (keyof ModuleFederationConfig)[] = [
   'implementation',
   'manifest',
   'dev',
-  'dts',
   'dataPrefetch',
   'virtualRuntimeEntry',
   'experiments',
@@ -99,14 +99,14 @@ function validateShared(shared: ModuleFederationConfig['shared']) {
     const sharedConfig = sharedObject[sharedName] as unknown;
 
     // disallow relative paths
-    if (sharedName.startsWith('./') || sharedName.startsWith('../')) {
+    if (isRelativePathLike(sharedName)) {
       throw new ConfigError(
         'Relative paths are not supported as shared module names.',
       );
     }
 
     // disallow absolute paths
-    if (sharedName.startsWith('/')) {
+    if (isAbsolutePathLike(sharedName)) {
       throw new ConfigError(
         'Absolute paths are not supported as shared module names.',
       );
@@ -225,6 +225,16 @@ function validateRuntimePlugins(
   });
 }
 
+function validateDts(dts: ModuleFederationConfig['dts']) {
+  if (typeof dts === 'undefined' || typeof dts === 'boolean') {
+    return;
+  }
+
+  if (!isPlainObject(dts)) {
+    throw new ConfigError("Option 'dts' must be a boolean or a plain object.");
+  }
+}
+
 function validateUnsupportedTopLevelOptions(options: ModuleFederationConfig) {
   unsupportedTopLevelOptions.forEach((unsupportedOption) => {
     if (typeof options[unsupportedOption] !== 'undefined') {
@@ -259,6 +269,14 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
+function isRelativePathLike(value: string): boolean {
+  return /^\.{1,2}[\\/]/.test(value);
+}
+
+function isAbsolutePathLike(value: string): boolean {
+  return path.posix.isAbsolute(value) || path.win32.isAbsolute(value);
+}
+
 export function validateOptions(options: ModuleFederationConfig) {
   // warn for known but unsupported options
   validateUnsupportedTopLevelOptions(options);
@@ -276,6 +294,9 @@ export function validateOptions(options: ModuleFederationConfig) {
 
   // validate runtime plugins subset support
   validateRuntimePlugins(options.runtimePlugins);
+
+  // validate dts
+  validateDts(options.dts);
 
   // validate shared
   validateShared(options.shared);

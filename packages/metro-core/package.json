@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/metro",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "Module Federation for Metro bundler",
   "keywords": [
     "module-federation",
@@ -63,6 +63,7 @@
   },
   "dependencies": {
     "@expo/metro-runtime": "^5.0.4",
+    "@module-federation/dts-plugin": "workspace:*",
     "@module-federation/runtime": "workspace:*",
     "@module-federation/sdk": "workspace:*"
   },

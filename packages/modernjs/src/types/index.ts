@@ -9,7 +9,6 @@ export interface PluginOptions {
         distOutputDir?: string;
       }
     | boolean;
-  remoteIpStrategy?: 'ipv4' | 'inherit';
   fetchServerQuery?: Record<string, unknown>;
   secondarySharedTreeShaking?: boolean;
 }
@@ -33,7 +32,6 @@ export interface InternalModernPluginOptions {
     browser?: StatsAssetResource;
     node?: StatsAssetResource;
   };
-  remoteIpStrategy?: 'ipv4' | 'inherit';
   userConfig?: PluginOptions;
   fetchServerQuery?: Record<string, unknown>;
   secondarySharedTreeShaking?: boolean;

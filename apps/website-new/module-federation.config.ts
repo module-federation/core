@@ -42,6 +42,7 @@ const exposes = {
   [`./configure-tree-shaking-shared-exclude-plugins-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/treeShakingSharedExcludePlugins.mdx`,
   [`./configure-tree-shaking-shared-plugins-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/treeShakingSharedPlugins.mdx`,
   [`./configure-inject-tree-shaking-used-exports-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/injectTreeShakingUsedExports.mdx`,
+  [`./configure-experiments-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/experiments.mdx`,
 
   // [`./configure-shareStrategy-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/shareStrategy.mdx`,
   // [`./configure-experiments-${LANGUAGE}`]: `./docs/${LANGUAGE}/configure/experiments.mdx`,
@@ -61,9 +62,12 @@ const exposes = {
   // blog
   [`./error-load-remote-${LANGUAGE}`]: `./docs/${LANGUAGE}/blog/error-load-remote.mdx`,
 
-  // performance
-  // [`./shared-tree-shaking-overview-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/performance/shared-treeshaking.mdx`,
   [`./node-${LANGUAGE}`]: `./docs/${LANGUAGE}/blog/node.mdx`,
+  // ai-skills
+  // [`./ai-skills-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/ai-skills/index.mdx`,
+
+  // advanced
+  [`./advanced-multiple-shared-scope-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/advanced/multiple-shared-scope.mdx`,
 };
 
 export default createModuleFederationConfig({

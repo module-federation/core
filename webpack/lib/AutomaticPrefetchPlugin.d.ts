@@ -1,5 +1,4 @@
 export = AutomaticPrefetchPlugin;
-/** @typedef {import("./Compiler")} Compiler */
 declare class AutomaticPrefetchPlugin {
   /**
    * Apply the plugin

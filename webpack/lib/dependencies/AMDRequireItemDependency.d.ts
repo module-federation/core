@@ -3,13 +3,9 @@ export = AMDRequireItemDependency;
 declare class AMDRequireItemDependency extends ModuleDependency {
   /**
    * @param {string} request the request string
-   * @param {Range} range location in source code
+   * @param {Range=} range location in source code
    */
-  constructor(
-    request: string,
-    range: import('../javascript/JavascriptParser').Range,
-  );
-  range: import('../javascript/JavascriptParser').Range;
+  constructor(request: string, range?: Range | undefined);
 }
 declare namespace AMDRequireItemDependency {
   export { ModuleDependencyTemplateAsRequireId as Template, Range };

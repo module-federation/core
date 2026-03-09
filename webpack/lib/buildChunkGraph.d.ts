@@ -2,12 +2,12 @@ export = buildChunkGraph;
 /**
  * This method creates the Chunk graph from the Module graph
  * @param {Compilation} compilation the compilation
- * @param {Map<Entrypoint, Module[]>} inputEntrypointsAndModules chunk groups which are processed with the modules
+ * @param {InputEntrypointsAndModules} inputEntrypointsAndModules chunk groups which are processed with the modules
  * @returns {void}
  */
 declare function buildChunkGraph(
   compilation: Compilation,
-  inputEntrypointsAndModules: Map<Entrypoint, Module[]>,
+  inputEntrypointsAndModules: InputEntrypointsAndModules,
 ): void;
 declare namespace buildChunkGraph {
   export {
@@ -16,7 +16,6 @@ declare namespace buildChunkGraph {
     ChunkGroup,
     Compilation,
     DependenciesBlock,
-    Dependency,
     DependencyLocation,
     Entrypoint,
     Module,
@@ -25,20 +24,27 @@ declare namespace buildChunkGraph {
     Logger,
     RuntimeSpec,
     QueueItem,
-    ModuleSetPlus,
     ChunkGroupInfo,
     BlockChunkGroupConnection,
+    BlockModulesInTuples,
+    BlockModulesInFlattenTuples,
+    BlockModulesMap,
+    MaskByChunk,
+    BlocksWithNestedBlocks,
+    BlockConnections,
+    ChunkGroupInfoMap,
+    AllCreatedChunkGroups,
+    InputEntrypointsAndModules,
   };
 }
-type Compilation = import('./Compilation');
-type Entrypoint = import('./Entrypoint');
-type Module = import('./Module');
 type AsyncDependenciesBlock = import('./AsyncDependenciesBlock');
 type Chunk = import('./Chunk');
 type ChunkGroup = import('./ChunkGroup');
+type Compilation = import('./Compilation');
 type DependenciesBlock = import('./DependenciesBlock');
-type Dependency = import('./Dependency');
 type DependencyLocation = import('./Dependency').DependencyLocation;
+type Entrypoint = import('./Entrypoint');
+type Module = import('./Module');
 type ModuleGraph = import('./ModuleGraph');
 type ConnectionState = import('./ModuleGraphConnection').ConnectionState;
 type Logger = import('./logging/Logger').Logger;
@@ -51,9 +57,6 @@ type QueueItem = {
   chunkGroup: ChunkGroup;
   chunkGroupInfo: ChunkGroupInfo;
 };
-type ModuleSetPlus = Set<Module> & {
-  plus: Set<Module>;
-};
 type ChunkGroupInfo = {
   /**
    * the chunk group
@@ -64,17 +67,17 @@ type ChunkGroupInfo = {
    */
   runtime: RuntimeSpec;
   /**
+   * is this chunk group initialized
+   */
+  initialized: boolean;
+  /**
    * current minimal set of modules available at this point
    */
-  minAvailableModules: ModuleSetPlus | undefined;
-  /**
-   * true, if minAvailableModules is owned and can be modified
-   */
-  minAvailableModulesOwned: boolean | undefined;
+  minAvailableModules: bigint | undefined;
   /**
    * enqueued updates to the minimal set of available modules
    */
-  availableModulesToBeMerged: ModuleSetPlus[];
+  availableModulesToBeMerged: bigint[];
   /**
    * modules that were skipped because module is already available in parent chunks (need to reconsider when minAvailableModules is shrinking)
    */
@@ -82,11 +85,11 @@ type ChunkGroupInfo = {
   /**
    * referenced modules that where skipped because they were not active in this runtime
    */
-  skippedModuleConnections?: Set<[Module, ConnectionState]> | undefined;
+  skippedModuleConnections?: Set<[Module, ModuleGraphConnection[]]> | undefined;
   /**
    * set of modules available including modules from this chunk group
    */
-  resultingAvailableModules: ModuleSetPlus | undefined;
+  resultingAvailableModules: bigint | undefined;
   /**
    * set of children chunk groups, that will be revisited when availableModules shrink
    */
@@ -126,3 +129,24 @@ type BlockChunkGroupConnection = {
    */
   chunkGroup: ChunkGroup;
 };
+type BlockModulesInTuples = (
+  | Module
+  | ConnectionState
+  | ModuleGraphConnection
+)[];
+type BlockModulesInFlattenTuples = (
+  | Module
+  | ConnectionState
+  | ModuleGraphConnection[]
+)[];
+type BlockModulesMap = Map<DependenciesBlock, BlockModulesInFlattenTuples>;
+type MaskByChunk = Map<Chunk, bigint>;
+type BlocksWithNestedBlocks = Set<DependenciesBlock>;
+type BlockConnections = Map<
+  AsyncDependenciesBlock,
+  BlockChunkGroupConnection[]
+>;
+type ChunkGroupInfoMap = Map<ChunkGroup, ChunkGroupInfo>;
+type AllCreatedChunkGroups = Set<ChunkGroup>;
+type InputEntrypointsAndModules = Map<Entrypoint, Module[]>;
+import ModuleGraphConnection = require('./ModuleGraphConnection');

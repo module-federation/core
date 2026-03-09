@@ -30,8 +30,12 @@
       }
     },
     "test": {
-      "executor": "@nx/vite:test",
-      "outputs": ["{workspaceRoot}/coverage/packages/rsbuild-plugin"]
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/coverage/packages/rsbuild-plugin"],
+      "options": {
+        "command": "pnpm exec vitest run --passWithNoTests --config packages/rsbuild-plugin/vite.config.mts",
+        "forwardAllArgs": false
+      }
     },
     "pre-release": {
       "executor": "nx:run-commands",

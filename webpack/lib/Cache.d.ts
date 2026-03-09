@@ -1,10 +1,13 @@
 export = Cache;
 declare class Cache {
   hooks: {
-    /** @type {AsyncSeriesBailHook<[string, Etag | null, GotHandler[]], any>} */
-    get: AsyncSeriesBailHook<[string, Etag | null, GotHandler[]], any>;
-    /** @type {AsyncParallelHook<[string, Etag | null, any]>} */
-    store: AsyncParallelHook<[string, Etag | null, any]>;
+    /** @type {AsyncSeriesBailHook<[string, Etag | null, GotHandler<EXPECTED_ANY>[]], Data>} */
+    get: AsyncSeriesBailHook<
+      [string, Etag | null, GotHandler<EXPECTED_ANY>[]],
+      Data
+    >;
+    /** @type {AsyncParallelHook<[string, Etag | null, Data]>} */
+    store: AsyncParallelHook<[string, Etag | null, Data]>;
     /** @type {AsyncParallelHook<[Iterable<string>]>} */
     storeBuildDependencies: AsyncParallelHook<[Iterable<string>]>;
     /** @type {SyncHook<[]>} */
@@ -34,10 +37,10 @@ declare class Cache {
    * @param {CallbackCache<void>} callback signals when the value is stored
    * @returns {void}
    */
-  store<T_1>(
+  store<T>(
     identifier: string,
     etag: Etag | null,
-    data: T_1,
+    data: T,
     callback: CallbackCache<void>,
   ): void;
   /**
@@ -74,25 +77,24 @@ declare namespace Cache {
     WebpackError,
     Etag,
     CallbackCache,
+    Data,
     GotHandler,
   };
 }
 import { AsyncSeriesBailHook } from 'tapable';
-type Etag = {
-  toString: () => string;
-};
-type GotHandler = (
-  result: any,
-  callback: (arg0: Error | undefined) => void,
-) => void;
 import { AsyncParallelHook } from 'tapable';
 import { SyncHook } from 'tapable';
-type CallbackCache<T> = (
-  err?: (WebpackError | null) | undefined,
-  result?: T | undefined,
-) => void;
 declare var STAGE_MEMORY: number;
 declare var STAGE_DEFAULT: number;
 declare var STAGE_DISK: number;
 declare var STAGE_NETWORK: number;
 type WebpackError = import('./WebpackError');
+type Etag = {
+  toString: () => string;
+};
+type CallbackCache<T> = (
+  err: WebpackError | null,
+  result?: T | undefined,
+) => void;
+type Data = EXPECTED_ANY;
+type GotHandler<T> = (result: T, callback: () => void) => void;
