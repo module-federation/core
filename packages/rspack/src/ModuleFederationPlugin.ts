@@ -225,7 +225,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     new RemoteEntryPlugin(options).apply(compiler);
 
     if (options.experiments?.provideExternalRuntime) {
-      if (options.exposes) {
+      if (containerManager.enable) {
         throw new Error(
           'You can only set provideExternalRuntime: true in pure consumer which not expose modules.',
         );
@@ -294,7 +294,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       );
     };
 
-    const runtimeESMPath = resolveRuntimePath([
+    const runtimePath = resolveRuntimePath([
       '@module-federation/runtime/dist/index.js',
       '@module-federation/runtime/dist/index.esm.js',
       '@module-federation/runtime/dist/index.cjs',
@@ -305,7 +305,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     compiler.hooks.afterPlugins.tap('PatchAliasWebpackPlugin', () => {
       compiler.options.resolve.alias = {
         ...compiler.options.resolve.alias,
-        '@module-federation/runtime$': runtimeESMPath,
+        '@module-federation/runtime$': runtimePath,
       };
     });
 

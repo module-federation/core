@@ -23,11 +23,72 @@ import type {
 import type { BundlerChainConfig } from '../interfaces/bundler';
 import type { InternalModernPluginOptions } from '../types';
 
+declare global {
+  namespace NodeJS {
+    interface ProcessEnv {
+      IS_ESM_BUILD?: string;
+    }
+  }
+}
+
 const defaultPath = path.resolve(process.cwd(), 'module-federation.config.ts');
 
 type RuntimePluginEntry = NonNullable<
   moduleFederationPlugin.ModuleFederationPluginOptions['runtimePlugins']
 >[number];
+
+const resolvePackageFile = (
+  packageName: string,
+  esmRelativePath: string,
+  cjsRelativePath: string,
+): string => {
+  const packageEntry = require.resolve(packageName);
+  let packageRoot = path.dirname(packageEntry);
+  while (!fs.existsSync(path.join(packageRoot, 'package.json'))) {
+    const parentDir = path.dirname(packageRoot);
+    if (parentDir === packageRoot) {
+      throw new Error(
+        `Unable to resolve package root for ${packageName} from ${packageEntry}`,
+      );
+    }
+    packageRoot = parentDir;
+  }
+
+  return require.resolve(
+    path.join(
+      packageRoot,
+      process.env.IS_ESM_BUILD === 'true' ? esmRelativePath : cjsRelativePath,
+    ),
+  );
+};
+
+const resolveSharedStrategyPlugin = (): string =>
+  resolvePackageFile(
+    '@module-federation/modern-js-v3',
+    'dist/esm/cli/mfRuntimePlugins/shared-strategy.mjs',
+    'dist/cjs/cli/mfRuntimePlugins/shared-strategy.js',
+  );
+
+const resolveInjectNodeFetchPlugin = (): string =>
+  resolvePackageFile(
+    '@module-federation/modern-js-v3',
+    'dist/esm/cli/mfRuntimePlugins/inject-node-fetch.mjs',
+    'dist/cjs/cli/mfRuntimePlugins/inject-node-fetch.js',
+  );
+
+const resolveNodeRuntimePlugin = (): string =>
+  resolvePackageFile(
+    '@module-federation/node',
+    'dist/src/runtimePlugin.mjs',
+    'dist/src/runtimePlugin.js',
+  );
+
+const resolveNodeRecordRemoteHashPlugin = (): string =>
+  resolvePackageFile(
+    '@module-federation/node',
+    'dist/src/recordDynamicRemoteEntryHashPlugin.mjs',
+    'dist/src/recordDynamicRemoteEntryHashPlugin.js',
+  );
 
 const RSC_LAYER = 'react-server-components';
 const RSC_BRIDGE_EXPOSE = './__rspack_rsc_bridge__';
@@ -394,32 +455,18 @@ export const patchMFConfig = (
 
   patchDTSConfig(mfConfig, isServer);
 
-  injectRuntimePlugins(
-    require.resolve('@module-federation/modern-js-v3/shared-strategy'),
-    runtimePlugins,
-  );
+  injectRuntimePlugins(resolveSharedStrategyPlugin(), runtimePlugins);
 
   if (rscEnabled && hasRemotes(mfConfig.remotes)) {
     injectRuntimePlugins(RSC_BRIDGE_RUNTIME_PLUGIN, runtimePlugins);
   }
   if (isServer) {
-    injectRuntimePlugins(
-      require.resolve('@module-federation/node/runtimePlugin'),
-      runtimePlugins,
-    );
+    injectRuntimePlugins(resolveNodeRuntimePlugin(), runtimePlugins);
     if (isDev()) {
-      injectRuntimePlugins(
-        require.resolve(
-          '@module-federation/node/record-dynamic-remote-entry-hash-plugin',
-        ),
-        runtimePlugins,
-      );
+      injectRuntimePlugins(resolveNodeRecordRemoteHashPlugin(), runtimePlugins);
     }
 
-    injectRuntimePlugins(
-      require.resolve('@module-federation/modern-js-v3/inject-node-fetch'),
-      runtimePlugins,
-    );
+    injectRuntimePlugins(resolveInjectNodeFetchPlugin(), runtimePlugins);
 
     if (!mfConfig.library) {
       mfConfig.library = {

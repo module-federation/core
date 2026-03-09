@@ -1,7 +1,12 @@
-import type { ExecutorContext } from '@nx/devkit';
-export interface EchoExecutorOptions {
-    message?: string;
+import { ExecutorContext } from "@nx/devkit";
+
+//#region src/executors/echo/executor.d.ts
+interface EchoExecutorOptions {
+  message?: string;
 }
-export default function echoExecutor(options: EchoExecutorOptions, context: ExecutorContext): Promise<{
-    success: boolean;
+declare function echoExecutor(options: EchoExecutorOptions, context: ExecutorContext): Promise<{
+  success: boolean;
 }>;
+//#endregion
+export { EchoExecutorOptions, echoExecutor as default };
+//# sourceMappingURL=executor.d.ts.map

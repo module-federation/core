@@ -128,7 +128,7 @@ export const createScriptNode =
             );
 
             let requireFn: NodeRequire;
-            if (process.env['IS_ESM_BUILD'] === 'true') {
+            if (process.env.IS_ESM_BUILD === 'true') {
               const nodeModule =
                 await importNodeModule<typeof import('node:module')>(
                   'node:module',
