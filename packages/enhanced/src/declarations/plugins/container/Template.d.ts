@@ -6,8 +6,7 @@ declare class Template {
    * @param {Function} fn a runtime function (.runtime.js) "template"
    * @returns {string} the updated and normalized function string
    */
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  static getFunctionContent(fn: Function): string;
+  static getFunctionContent(fn: (...args: Array<any>) => any): string;
   /**
    * @param {string} str the string converted to identifier
    * @returns {string} created identifier

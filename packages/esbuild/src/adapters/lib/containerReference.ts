@@ -59,28 +59,38 @@ export const buildFederationHost = (config: NormalizedFederationConfig) => {
     const runtimePlugin = () => ({
       name: 'import-maps-plugin',
       async init(args) {
-        const remotePrefetch = args.options.remotes.map(async (remote) => {
-          console.log('remote', remote);
-          if (remote.type === 'esm') {
-            await import(remote.entry);
-          }
-        });
-
-        await Promise.all(remotePrefetch);
-        if (typeof moduleMap !== 'undefined') {
-          const map = Object.keys(moduleMap).reduce((acc, expose) => {
-            const importMap = importShim.getImportMap().imports;
-            const key = args.origin.name + expose.replace('.', '');
-            if (!importMap[key]) {
-              const encodedModule = encodeInlineESM(
-                createVirtualRemoteModule(args.origin.name, key, moduleMap[expose].exports)
-              );
-              acc[key] = encodedModule;
+        // Load all remotes and collect their moduleMaps
+        const remotesWithModuleMaps = await Promise.all(
+          args.options.remotes.map(async (remote) => {
+            console.log('remote', remote);
+            if (remote.type === 'esm') {
+              const remoteModule = await import(remote.entry);
+              return { remote, moduleMap: remoteModule.moduleMap };
             }
-            return acc;
-          }, {});
+            return { remote, moduleMap: null };
+          })
+        );
 
-          await importShim.addImportMap({ imports: map });
+        // Build import map entries for all remote modules
+        const allImports = {};
+        for (const { remote, moduleMap } of remotesWithModuleMaps) {
+          if (moduleMap && typeof moduleMap === 'object') {
+            for (const expose of Object.keys(moduleMap)) {
+              const currentImportMap = importShim.getImportMap().imports;
+              // Use remote name + expose path (e.g., "mfe1/component")
+              const key = remote.name + expose.replace('.', '');
+              if (!currentImportMap[key] && !allImports[key]) {
+                const encodedModule = encodeInlineESM(
+                  createVirtualRemoteModule(remote.name, key, moduleMap[expose].exports)
+                );
+                allImports[key] = encodedModule;
+              }
+            }
+          }
+        }
+
+        if (Object.keys(allImports).length > 0) {
+          await importShim.addImportMap({ imports: allImports });
         }
 
         return args;
@@ -96,6 +106,33 @@ export const buildFederationHost = (config: NormalizedFederationConfig) => {
 
     await Promise.all(mfHoZJ92.initializeSharing('default', 'version-first'));
 
+    // Ensure import maps are registered before any code that uses remotes runs
+    const remotesList = ${remoteConfigs};
+    const allImports = {};
+    for (const remote of remotesList) {
+      if (remote.type === 'esm') {
+        try {
+          const remoteModule = await import(remote.entry);
+          const moduleMap = remoteModule.moduleMap;
+          if (moduleMap && typeof moduleMap === 'object') {
+            for (const expose of Object.keys(moduleMap)) {
+              const key = remote.name + expose.replace('.', '');
+              if (!allImports[key]) {
+                const encodedModule = encodeInlineESM(
+                  createVirtualRemoteModule(remote.name, key, moduleMap[expose].exports)
+                );
+                allImports[key] = encodedModule;
+              }
+            }
+          }
+        } catch (e) {
+          console.error('Failed to load remote:', remote.name, e);
+        }
+      }
+    }
+    if (Object.keys(allImports).length > 0) {
+      await importShim.addImportMap({ imports: allImports });
+    }
 
   `;
 };
