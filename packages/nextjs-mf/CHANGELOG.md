@@ -1,5 +1,63 @@
 # @module-federation/nextjs-mf
 
+## 8.8.57
+
+### Patch Changes
+
+- 918294f: Add missing release coverage for packages moved to the new build implementation and standardized ESM/CJS artifact outputs. This ensures package versioning and publish automation include the remaining affected packages on this branch.
+- Updated dependencies [987716a]
+- Updated dependencies [918294f]
+- Updated dependencies [203c950]
+- Updated dependencies [0172491]
+- Updated dependencies [a0faa70]
+- Updated dependencies [918294f]
+  - @module-federation/enhanced@2.1.0
+  - @module-federation/runtime@2.1.0
+  - @module-federation/webpack-bundler-runtime@2.1.0
+  - @module-federation/node@2.7.33
+  - @module-federation/sdk@2.1.0
+
+## 8.8.56
+
+### Patch Changes
+
+- @module-federation/enhanced@2.0.1
+- @module-federation/runtime@2.0.1
+- @module-federation/node@2.7.32
+- @module-federation/webpack-bundler-runtime@2.0.1
+- @module-federation/sdk@2.0.1
+
+## 8.8.55
+
+### Patch Changes
+
+- @module-federation/enhanced@2.0.0
+- @module-federation/node@2.7.31
+- @module-federation/runtime@2.0.0
+- @module-federation/webpack-bundler-runtime@2.0.0
+- @module-federation/sdk@2.0.0
+
+## 8.8.54
+
+### Patch Changes
+
+- @module-federation/runtime@0.24.1
+- @module-federation/node@2.7.30
+- @module-federation/webpack-bundler-runtime@0.24.1
+- @module-federation/enhanced@0.24.1
+- @module-federation/sdk@0.24.1
+
+## 8.8.53
+
+### Patch Changes
+
+- Updated dependencies [c3c068e]
+  - @module-federation/enhanced@0.24.0
+  - @module-federation/node@2.7.29
+  - @module-federation/runtime@0.24.0
+  - @module-federation/webpack-bundler-runtime@0.24.0
+  - @module-federation/sdk@0.24.0
+
 ## 8.8.52
 
 ### Patch Changes

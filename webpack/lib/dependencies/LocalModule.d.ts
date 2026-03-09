@@ -27,7 +27,7 @@ declare class LocalModule {
 declare namespace LocalModule {
   export { ObjectDeserializerContext, ObjectSerializerContext };
 }
-type ObjectSerializerContext =
-  import('../serialization/ObjectMiddleware').ObjectSerializerContext;
 type ObjectDeserializerContext =
   import('../serialization/ObjectMiddleware').ObjectDeserializerContext;
+type ObjectSerializerContext =
+  import('../serialization/ObjectMiddleware').ObjectSerializerContext;

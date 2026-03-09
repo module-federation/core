@@ -3,9 +3,10 @@ import path from 'node:path';
 import type {
   ModuleFederationConfig,
   ModuleFederationConfigNormalized,
-  Shared,
+  ShareObject,
 } from '../types';
 import { DEFAULT_ENTRY_FILENAME } from './constants';
+import { toPosixPath } from './helpers';
 
 interface ProjectConfig {
   projectRoot: string;
@@ -17,26 +18,56 @@ export function normalizeOptions(
   { projectRoot, tmpDirPath }: ProjectConfig,
 ): ModuleFederationConfigNormalized {
   const shared = getNormalizedShared(options, projectRoot);
+  const remotes = getNormalizedRemotes(options);
+  const exposes = getNormalizedExposes(options);
   const shareStrategy = getNormalizedShareStrategy(options);
-  const plugins = getNormalizedPlugins(options, tmpDirPath);
+  const plugins = getNormalizedPlugins(options, tmpDirPath, projectRoot);
 
   return {
-    name: options.name,
+    // validated in validateOptions before normalization
+    name: options.name as string,
     filename: options.filename ?? DEFAULT_ENTRY_FILENAME,
-    remotes: options.remotes ?? {},
-    exposes: options.exposes ?? {},
+    remotes,
+    exposes,
     shared,
     shareStrategy,
     plugins,
+    dts: options.dts ?? false,
   };
+}
+
+function getNormalizedRemotes(
+  options: ModuleFederationConfig,
+): Record<string, string> {
+  return { ...((options.remotes ?? {}) as Record<string, string>) };
+}
+
+function getNormalizedExposes(
+  options: ModuleFederationConfig,
+): Record<string, string> {
+  return { ...((options.exposes ?? {}) as Record<string, string>) };
 }
 
 function getNormalizedShared(
   options: ModuleFederationConfig,
   projectRoot: string,
-): Shared {
+): ShareObject {
   const pkg = getProjectPackageJson(projectRoot);
-  const shared = options.shared ?? {};
+  const sharedInput = options.shared ?? {};
+  const shared = Object.entries(sharedInput).reduce(
+    (acc, [sharedName, config]) => {
+      if (typeof config === 'string') {
+        return acc;
+      }
+
+      const metroSharedConfig = {
+        ...(config as ShareObject[string]),
+      };
+      acc[sharedName] = metroSharedConfig;
+      return acc;
+    },
+    {} as ShareObject,
+  );
 
   // force all shared modules in host to be eager
   if (!options.exposes) {
@@ -74,12 +105,63 @@ function getNormalizedShareStrategy(options: ModuleFederationConfig) {
 function getNormalizedPlugins(
   options: ModuleFederationConfig,
   tmpDirPath: string,
+  projectRoot: string,
 ) {
+  const runtimePlugins = getNormalizedRuntimePlugins(options);
   const plugins = options.plugins ?? [];
+
   // auto-inject 'metro-core-plugin' runtime plugin
-  plugins.unshift(require.resolve('../modules/metroCorePlugin.ts'));
-  // make paths relative to the tmp dir
-  return plugins.map((pluginPath) => path.relative(tmpDirPath, pluginPath));
+  const allPlugins = [
+    require.resolve('../modules/metroCorePlugin.ts'),
+    ...runtimePlugins,
+    ...plugins,
+  ];
+
+  const deduplicatedPlugins = Array.from(new Set(allPlugins));
+
+  // make local file paths relative to the tmp dir; keep package specifiers unchanged
+  return deduplicatedPlugins.map((pluginPath) => {
+    if (!isLocalPluginPath(pluginPath, projectRoot)) {
+      return pluginPath;
+    }
+    const resolvedPluginPath = path.isAbsolute(pluginPath)
+      ? pluginPath
+      : path.resolve(projectRoot, pluginPath);
+    return toPosixPath(path.relative(tmpDirPath, resolvedPluginPath));
+  });
+}
+
+function isLocalPluginPath(pluginPath: string, projectRoot: string) {
+  if (path.isAbsolute(pluginPath)) {
+    return true;
+  }
+  if (pluginPath.startsWith('./') || pluginPath.startsWith('../')) {
+    return true;
+  }
+  return fs.existsSync(path.resolve(projectRoot, pluginPath));
+}
+
+function getNormalizedRuntimePlugins(
+  options: ModuleFederationConfig,
+): string[] {
+  const runtimePlugins = options.runtimePlugins ?? [];
+  const normalizedRuntimePlugins: string[] = [];
+
+  runtimePlugins.forEach((runtimePlugin) => {
+    if (typeof runtimePlugin === 'string') {
+      normalizedRuntimePlugins.push(runtimePlugin);
+      return;
+    }
+
+    if (Array.isArray(runtimePlugin)) {
+      const [pluginPath] = runtimePlugin;
+      if (typeof pluginPath === 'string') {
+        normalizedRuntimePlugins.push(pluginPath);
+      }
+    }
+  });
+
+  return normalizedRuntimePlugins;
 }
 
 function getProjectPackageJson(projectRoot: string): {

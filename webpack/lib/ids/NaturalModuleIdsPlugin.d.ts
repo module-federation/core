@@ -1,6 +1,4 @@
 export = NaturalModuleIdsPlugin;
-/** @typedef {import("../Compiler")} Compiler */
-/** @typedef {import("../Module")} Module */
 declare class NaturalModuleIdsPlugin {
   /**
    * Apply the plugin
@@ -10,7 +8,6 @@ declare class NaturalModuleIdsPlugin {
   apply(compiler: Compiler): void;
 }
 declare namespace NaturalModuleIdsPlugin {
-  export { Compiler, Module };
+  export { Compiler };
 }
 type Compiler = import('../Compiler');
-type Module = import('../Module');

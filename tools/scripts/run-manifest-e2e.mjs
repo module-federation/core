@@ -3,8 +3,15 @@ import { spawn } from 'node:child_process';
 
 const MANIFEST_WAIT_TARGETS = [
   'tcp:3009',
+  'tcp:3010',
+  'tcp:3011',
   'tcp:3012',
-  'http://127.0.0.1:4001/',
+  'tcp:3013',
+  'http-get://localhost:3009/mf-manifest.json',
+  'http-get://localhost:3010/mf-manifest.json',
+  'http-get://localhost:3011/mf-manifest.json',
+  'http-get://localhost:3012/remoteEntry.js',
+  'http-get://localhost:3013/',
 ];
 
 const KILL_PORT_ARGS = [
@@ -15,7 +22,6 @@ const KILL_PORT_ARGS = [
   '3010',
   '3011',
   '3012',
-  '4001',
 ];
 
 const SCENARIOS = {

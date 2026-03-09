@@ -97,3 +97,6 @@ packages/enhanced/.unpack-cache/**
 packages/enhanced/.codex/**
 packages/enhanced/generated/**
 **/.codex/
+.pnpm-store/
+apps/rsc-demo/**/build/
+apps/rsc-demo/e2e/test-results/

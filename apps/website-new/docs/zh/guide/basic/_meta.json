@@ -1,18 +1,8 @@
 [
-  {
-  "type": "dir",
-  "name": "runtime",
-  "label": "运行时"
-  },
-  {
-  "type": "dir",
-  "name": "plugins",
-  "label": "构建插件"
-  },
-  "type-prompt","cli","css-isolate",
-   {
-    "type": "dir",
-    "name": "data-fetch",
-    "label": "数据管理"
-  }
+  "cli",
+  "css-isolate",
+  "type-prompt",
+  "data-fetch",
+  "data-fetch-cache",
+  "data-fetch-prefetch"
 ]

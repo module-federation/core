@@ -2,19 +2,18 @@ export = AMDRequireContextDependency;
 /** @typedef {import("../javascript/JavascriptParser").Range} Range */
 /** @typedef {import("../serialization/ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
 /** @typedef {import("../serialization/ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
+/** @typedef {import("./ContextDependency").ContextDependencyOptions} ContextDependencyOptions */
 declare class AMDRequireContextDependency extends ContextDependency {
   /**
-   * @param {TODO} options options
+   * @param {ContextDependencyOptions} options options
    * @param {Range} range range
    * @param {Range} valueRange value range
    */
   constructor(
-    options: TODO,
-    range: import('../javascript/JavascriptParser').Range,
-    valueRange: import('../javascript/JavascriptParser').Range,
+    options: ContextDependencyOptions,
+    range: Range,
+    valueRange: Range,
   );
-  range: import('../javascript/JavascriptParser').Range;
-  valueRange: import('../javascript/JavascriptParser').Range;
 }
 declare namespace AMDRequireContextDependency {
   export {
@@ -22,6 +21,7 @@ declare namespace AMDRequireContextDependency {
     Range,
     ObjectDeserializerContext,
     ObjectSerializerContext,
+    ContextDependencyOptions,
   };
 }
 import ContextDependency = require('./ContextDependency');
@@ -31,3 +31,5 @@ type ObjectDeserializerContext =
   import('../serialization/ObjectMiddleware').ObjectDeserializerContext;
 type ObjectSerializerContext =
   import('../serialization/ObjectMiddleware').ObjectSerializerContext;
+type ContextDependencyOptions =
+  import('./ContextDependency').ContextDependencyOptions;

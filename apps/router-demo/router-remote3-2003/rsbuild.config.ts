@@ -4,7 +4,7 @@ import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import path from 'path';
 
 export default defineConfig({
-  source: {
+  resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
     },

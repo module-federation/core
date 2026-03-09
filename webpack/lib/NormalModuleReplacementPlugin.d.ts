@@ -1,11 +1,9 @@
 export = NormalModuleReplacementPlugin;
-/** @typedef {import("./Compiler")} Compiler */
-/** @typedef {function(import("./NormalModuleFactory").ResolveData): void} ModuleReplacer */
 declare class NormalModuleReplacementPlugin {
   /**
    * Create an instance of the plugin
    * @param {RegExp} resourceRegExp the resource matcher
-   * @param {string|ModuleReplacer} newResource the resource replacement
+   * @param {string | ModuleReplacer} newResource the resource replacement
    */
   constructor(resourceRegExp: RegExp, newResource: string | ModuleReplacer);
   resourceRegExp: RegExp;
@@ -18,9 +16,9 @@ declare class NormalModuleReplacementPlugin {
   apply(compiler: Compiler): void;
 }
 declare namespace NormalModuleReplacementPlugin {
-  export { Compiler, ModuleReplacer };
+  export { Compiler, ResolveData, InputFileSystem, ModuleReplacer };
 }
-type ModuleReplacer = (
-  arg0: import('./NormalModuleFactory').ResolveData,
-) => void;
 type Compiler = import('./Compiler');
+type ResolveData = import('./NormalModuleFactory').ResolveData;
+type InputFileSystem = import('./util/fs').InputFileSystem;
+type ModuleReplacer = (resolveData: ResolveData) => void;

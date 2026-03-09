@@ -1,6 +1,7 @@
 import { defineConfig } from '@rslib/core';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { pluginPublint } from 'rsbuild-plugin-publint';
 
 // Read package.json to get version
 const pkg = JSON.parse(
@@ -10,13 +11,16 @@ const pkg = JSON.parse(
 const FEDERATION_DEBUG = process.env.FEDERATION_DEBUG || '';
 
 export default defineConfig({
+  plugins: [pluginPublint()],
   lib: [
     // ESM format
     {
       format: 'esm',
       syntax: 'es2021',
-      bundle: true,
+      bundle: false,
+      outBase: 'src',
       dts: {
+        bundle: false,
         distPath: './dist',
       },
     },
@@ -24,16 +28,19 @@ export default defineConfig({
     {
       format: 'cjs',
       syntax: 'es2021',
-      bundle: true,
+      bundle: false,
+      outBase: 'src',
       dts: false, // Only generate types once for ESM
     },
   ],
   // Shared configurations
   source: {
     entry: {
-      index: './src/index.ts',
-      plugin: './src/adapters/lib/plugin.ts',
-      build: './src/build.ts',
+      index: [
+        './src/**/*.{ts,tsx,js,jsx}',
+        '!./src/**/*.spec.*',
+        '!./src/**/*.test.*',
+      ],
     },
     define: {
       __VERSION__: JSON.stringify(pkg.version),
@@ -43,6 +50,7 @@ export default defineConfig({
   },
   output: {
     target: 'node',
+    minify: false,
     distPath: {
       root: './dist',
     },

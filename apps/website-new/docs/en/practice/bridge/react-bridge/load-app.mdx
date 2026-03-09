@@ -1,19 +1,18 @@
 # Loading Applications
 
-This chapter will introduce how to use `createRemoteAppComponent` to load and integrate remote React applications in host applications.
+This chapter introduces how to use `createRemoteAppComponent` to load and integrate remote React applications in a host application.
 
 ## What is createRemoteAppComponent?
 
-`createRemoteAppComponent` is the core API of React Bridge for loading remote React applications in host applications. It has the following features:
+`createRemoteAppComponent` is the core React Bridge API for loading remote React applications. It provides:
 
-- **🚀 Automatic Lazy Loading** - Remote applications are loaded only when needed
-- **🔧 Lifecycle Management** - Automatically handles component mounting and unmounting
-- **🛣️ Router Integration** - Seamlessly integrates with React Router, supports basename injection
-- **⚡ Error Handling** - Built-in loading failure and runtime error handling mechanisms
-- **🎨 Style Isolation** - Supports component-level styling and class name configuration 
+- **Automatic Lazy Loading**: Loads remotes only when needed
+- **Lifecycle Management**: Handles mount/unmount automatically
+- **Router Integration**: Integrates with React Router and supports basename injection
+- **Error Handling**: Built-in loading/runtime error fallback support
+- **Styling**: Supports `className` / `style` on the wrapper component
 
-
-## 安装
+## Installation
 
 import { PackageManagerTabs } from '@theme';
 
@@ -24,11 +23,12 @@ import { PackageManagerTabs } from '@theme';
     pnpm: 'pnpm add @module-federation/bridge-react@latest',
   }}
 />
+
 ## Basic Usage
 
 ### Step 1: Configure Remote Modules
 
-Add remote application configuration to the host application's configuration file:
+Add remote configuration to the host application's Module Federation config.
 
 :::tip Build Tool Support
 The following example uses Rsbuild configuration. Please adjust according to your build tool:
@@ -36,9 +36,7 @@ The following example uses Rsbuild configuration. Please adjust according to you
 - **Rspack**: `@module-federation/enhanced/rspack`
 - **Webpack**: `@module-federation/enhanced/webpack`
 - **Vite**: `@module-federation/vite`
-
 :::
-
 
 ```ts
 // rsbuild.config.ts
@@ -50,7 +48,7 @@ export default defineConfig({
     pluginModuleFederation({
       name: 'host-app',
       remotes: {
-        'remote1': 'remote1@http://localhost:3001/remoteEntry.js',
+        remote1: 'remote1@http://localhost:3001/remoteEntry.js',
       },
     }),
   ],
@@ -61,34 +59,26 @@ export default defineConfig({
 
 #### 2.1 Define Loading and Error Components
 
-First, create loading state and error handling components:
-
 ```tsx
 // ./src/components/RemoteComponents.tsx
 import React from 'react';
 
-// Loading state component
 export const LoadingComponent = () => (
   <div style={{ padding: '20px', textAlign: 'center' }}>
     <div>Loading remote application...</div>
   </div>
 );
 
-// Error fallback component
 export const ErrorFallback = ({ error }: { error: Error }) => (
   <div style={{ padding: '20px', border: '1px solid #ff6b6b', borderRadius: '8px' }}>
     <h3>Remote Application Load Failed</h3>
     <p>Error details: {error.message}</p>
-    <button onClick={() => window.location.reload()}>
-      Reload Page
-    </button>
+    <button onClick={() => window.location.reload()}>Reload Page</button>
   </div>
 );
 ```
 
 #### 2.2 Create Remote Application Component
-
-Use `createRemoteAppComponent` to create remote components:
 
 ```tsx
 // ./src/remotes/Remote1App.tsx
@@ -105,15 +95,12 @@ export const Remote1App = createRemoteAppComponent({
 
 #### 2.3 Main Application Router Configuration
 
-Configure routing in the main application:
-
 ```tsx
 // ./src/App.tsx
-import React from 'react';
+import React, { useRef } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Remote1App } from './remotes/Remote1App';
 
-// Host application home component
 const HomePage = () => (
   <div style={{ padding: '20px' }}>
     <h1>Host Application Home</h1>
@@ -122,22 +109,20 @@ const HomePage = () => (
 );
 
 const App = () => {
+  const ref = useRef<HTMLDivElement | null>(null);
+
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route
           path="/remote1/*"
-          // Use Remote1App component, will be lazy loaded
           Component={() => (
             <Remote1App
-              // Can set className and style, will be automatically injected to the component
-              className={styles.remote1}
+              className="remote1"
               style={{ color: 'red' }}
-              // name and age are remote component props, will be automatically passed to remote component
-              name={'Ming'}
+              name="Ming"
               age={12}
-              // Can set ref, will be automatically forwarded to remote component for DOM manipulation
               ref={ref}
             />
           )}
@@ -152,28 +137,27 @@ export default App;
 
 ## Remote Component Props
 
-### Router-related Properties
+### Router Props
 
-- **`basename`**: Set the base path for the remote application
-- **`memoryRoute`**: Memory route configuration, used to control sub-application routing as memoryRouter
+- `basename`: Set the base path for the remote application
+- `memoryRoute`: Memory router configuration
 
-### Style Properties
+### Style Props
 
-- **`style`**: React.CSSProperties - Set component styles
-- **`className`**: string - Set component class name
+- `style`: `React.CSSProperties`
+- `className`: `string`
 
-### Reference Support
+### Ref Support
 
-- **`ref`**: React.Ref\<HTMLDivElement\> - Forward reference to internal container element for DOM manipulation
+- `ref`: `React.Ref<HTMLDivElement>` (forwarded to the internal container)
 
 ### Data Passing
 
-- **`props`**: Property object passed to remote component
-- Or pass properties directly, such as `userId={'123'}`
+- Pass props directly (e.g. `userId="123"`) or via the `props` object.
 
-## createRemoteAppComponent API 参考
+## createRemoteAppComponent API Reference
 
-### 函数签名
+### Function Signature
 
 ```tsx
 function createRemoteAppComponent<T = Record<string, unknown>, E extends keyof T = keyof T>(
@@ -185,68 +169,42 @@ function createRemoteAppComponent<T = Record<string, unknown>, E extends keyof T
 
 ### RemoteComponentParams\<T, E\>
 
-配置参数接口：
-
 ```tsx
 interface RemoteComponentParams<T = Record<string, unknown>, E extends keyof T = keyof T> {
-  // 远程模块加载器
   loader: () => Promise<T>;
-  
-  // 加载状态显示内容
   loading: React.ReactNode;
-  
-  // 错误回退组件
   fallback: React.ComponentType<{ error: Error }>;
-  
-  // 导出名称（可选）
   export?: E;
-  
-  // 传递给远程组件的属性（可选）
   props?: T;
 }
 ```
 
 ### RemoteComponentProps\<T\>
 
-返回组件的属性接口：
-
 ```tsx
 interface RemoteComponentProps<T = Record<string, unknown>> {
-  // 传递给远程组件的属性
   props?: T;
-  
-  // 错误回退组件
   fallback?: React.ComponentType<{ error: Error }>;
-  
-  // 加载状态显示内容
   loading?: React.ReactNode;
-  
-  // 路由基础路径
   basename?: string;
-  
-  // 内存路由配置
   memoryRoute?: {
     entryPath: string;
     initialState?: Record<string, unknown>;
   };
-  
-  // 样式属性
   style?: React.CSSProperties;
   className?: string;
-  
-  // 其他自定义属性
   [key: string]: unknown;
 }
 ```
 
-### 参数详解
+### Parameter Details
 
 ### loader
 
-- **类型**: `() => Promise<T>`
-- **必需**: 是
-- **作用**: 用于加载远程模块的函数，返回一个 Promise，该 Promise 解析为远程模块对象
-- **示例**:
+- Type: `() => Promise<T>`
+- Required: Yes
+- Description: Loads the remote module object
+- Examples:
   ```tsx
   loader: () => loadRemote('remote1/export-app')
   loader: () => import('remote1/export-app')
@@ -254,10 +212,10 @@ interface RemoteComponentProps<T = Record<string, unknown>> {
 
 ### loading
 
-- **类型**: `React.ReactNode`
-- **必需**: 是
-- **作用**: 在远程应用加载期间显示的加载内容，可以是组件、元素或字符串
-- **示例**:
+- Type: `React.ReactNode`
+- Required: Yes
+- Description: UI shown while the remote is loading
+- Examples:
   ```tsx
   loading: <div>Loading...</div>
   loading: 'Loading remote app...'
@@ -266,10 +224,10 @@ interface RemoteComponentProps<T = Record<string, unknown>> {
 
 ### fallback
 
-- **类型**: `React.ComponentType<{ error: Error }>`
-- **必需**: 是
-- **作用**: 当远程应用加载失败时显示的错误回退组件，会接收错误对象作为 `error` 属性
-- **示例**:
+- Type: `React.ComponentType<{ error: Error }>`
+- Required: Yes
+- Description: UI shown when loading/rendering fails; receives `error`
+- Examples:
   ```tsx
   fallback: ({ error }) => <div>Error: {error.message}</div>
   fallback: ErrorBoundaryComponent
@@ -277,64 +235,44 @@ interface RemoteComponentProps<T = Record<string, unknown>> {
 
 ### export
 
-- **类型**: `E extends keyof T` (泛型约束，通常是 `string`)
-- **必需**: 否
-- **默认值**: `'default'`
-- **作用**: 指定要使用的远程模块导出名称
-- **示例**:
-  
-  假设远程模块有以下导出：
-  ```tsx
-  // 远程模块的导出
-  export default App;           // 默认导出
-  export const provider = App;  // 命名导出 provider
-  export const dashboard = Dashboard; // 命名导出 dashboard
-  ```
-  
-  在宿主应用中可以这样使用：
-  ```tsx
-  // 使用默认导出（可以省略 export 参数）
-  createRemoteAppComponent({
-    loader: () => loadRemote('remote1/export-app'),
-    // export: 'default' // 可以省略，默认就是 'default'
-  })
-  
-  // 使用命名导出 provider
-  createRemoteAppComponent({
-    loader: () => loadRemote('remote1/export-app'),
-    export: 'provider'
-  })
-  
-  // 使用命名导出 dashboard
-  createRemoteAppComponent({
-    loader: () => loadRemote('remote1/export-app'),
-    export: 'dashboard'
-  })
-  ```
+- Type: `E extends keyof T`
+- Required: No
+- Default: `'default'`
+- Description: Selects which export to render from the loaded remote module
+
+Example: if your remote module exports:
+
+```tsx
+export default App;
+export const dashboard = Dashboard;
+```
+
+Host usage:
+
+```tsx
+createRemoteAppComponent({
+  loader: () => loadRemote('remote1/export-app'),
+})
+
+createRemoteAppComponent({
+  loader: () => loadRemote('remote1/export-app'),
+  export: 'dashboard',
+})
+```
 
 ## Bundle Size Optimization
 
 ### React Router Dependency Explanation
 
-By default, `@module-federation/bridge-react` includes `react-router-dom` in your bundle to provide the following out-of-the-box capabilities:
+By default, `@module-federation/bridge-react` includes `react-router-dom` in your bundle to provide:
 
-- ✅ Automatic basename injection - No manual route base path configuration needed
-- ✅ Router context passing - Automatic React Router context handling
-- ✅ Nested routing support - Complete router integration capabilities
+- Automatic basename injection
+- Router context passing
+- Nested routing support
 
-**However**, if your project meets any of these conditions:
-- Doesn't need routing functionality (pure component loading)
-- Uses a non-react-router routing framework (e.g., TanStack Router)
-- Wants to minimize bundle size
-
-**We recommend** disabling the `enableBridgeRouter` configuration to turn off this capability, which will:
-- ✅ Reduce bundle size by ~3KB (gzipped)
-- ✅ Avoid unnecessary dependency injection
-- ✅ Eliminate potential version conflict risks
+If you don't need React Router integration (or you use a different router), disable `enableBridgeRouter` to reduce bundle size (about ~3KB gzipped) and avoid unnecessary router integration.
 
 ### How to Disable Router Dependency
-
-You can control whether to include router support through the `bridge.enableBridgeRouter` configuration:
 
 ```ts title="rsbuild.config.ts"
 import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
@@ -347,7 +285,6 @@ export default {
         remote1: 'remote1@http://localhost:3001/mf-manifest.json',
       },
       bridge: {
-        // Disable router support to reduce bundle size
         enableBridgeRouter: false,
       },
     }),
@@ -356,66 +293,13 @@ export default {
 ```
 
 :::tip Configuration Behavior
-- **`enableBridgeRouter: false`**: Automatically aliases to `/base` entry point (no react-router-dom code)
-- **`enableBridgeRouter: true`** or **`undefined`**: Includes router support (default behavior)
+- `enableBridgeRouter: false`: Automatically aliases to the router-free `/base` entry.
+- `enableBridgeRouter: true` / `undefined`: Includes router support (default).
 :::
 
-### When to Disable Router?
-
-**Disable router** (`enableBridgeRouter: false`) when:
-- ✅ Your application doesn't use react-router
-- ✅ You want to minimize bundle size
-- ✅ You can manually manage basename if needed
-
-**Keep router enabled** (default) when:
-- ✅ Your application uses react-router
-- ✅ You need automatic basename injection
-- ✅ You need routing context integration
-
-### Migration Example
-
-#### Before: With Router (Default)
-```tsx
-import { createRemoteAppComponent } from '@module-federation/bridge-react';
-
-const RemoteApp = createRemoteAppComponent({
-  loader: () => loadRemote('remote1/app'),
-  loading: <div>Loading...</div>,
-  fallback: ErrorBoundary,
-});
-
-// basename automatically retrieved from router context
-<RemoteApp />
-```
-
-#### After: Without Router (Optimized)
-```ts title="rsbuild.config.ts"
-// Configuration
-pluginModuleFederation({
-  bridge: {
-    enableBridgeRouter: false, // Disable router
-  },
-})
-```
-
-```tsx
-import { createRemoteAppComponent } from '@module-federation/bridge-react';
-
-const RemoteApp = createRemoteAppComponent({
-  loader: () => loadRemote('remote1/app'),
-  loading: <div>Loading...</div>,
-  fallback: ErrorBoundary,
-});
-
-// No changes needed! The plugin automatically aliases to /base entry
-<RemoteApp basename="/" />  // Manually pass basename if needed
-```
-
 :::info How It Works
-When `enableBridgeRouter: false`, the Module Federation plugin automatically sets up a webpack alias:
+When `enableBridgeRouter: false`, the plugin sets up an alias:
 ```
 '@module-federation/bridge-react' → '@module-federation/bridge-react/base'
 ```
-
-This means your imports automatically resolve to the router-free version without changing any code!
 :::

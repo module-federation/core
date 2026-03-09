@@ -1,14 +1,15 @@
 import path from 'node:path';
 import util from 'node:util';
-import Server from 'metro/src/Server';
-import type { RequestOptions } from 'metro/src/shared/types';
 import type { ModuleFederationConfigNormalized } from '../../types';
 import { CLIError } from '../../utils/errors';
+import type { RequestOptions } from '../../utils/metro-compat';
+import { Server } from '../../utils/metro-compat';
 import type { Config } from '../types';
 import { createResolver } from '../utils/create-resolver';
 import { getCommunityCliPlugin } from '../utils/get-community-plugin';
 import loadMetroConfig from '../utils/load-metro-config';
 import { saveBundleAndMap } from '../utils/save-bundle-and-map';
+import { toPosixPath } from '../../plugin/helpers';
 import type { BundleFederatedHostArgs } from './types';
 
 declare global {
@@ -64,9 +65,12 @@ async function bundleFederatedHost(
       config.server.enhanceMiddleware(server.processRequest, server);
       const resolver = await createResolver(server, args.platform);
       // hack: resolve the host entry to register it as a virtual module
+      const relativeHostEntryPath = toPosixPath(
+        path.relative(config.projectRoot, hostEntryFilepath),
+      );
       resolver.resolve({
         from: config.projectRoot,
-        to: `./${path.relative(config.projectRoot, hostEntryFilepath)}`,
+        to: `./${relativeHostEntryPath}`,
       });
 
       return server.build({

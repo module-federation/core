@@ -1,5 +1,38 @@
 # @module-federation/utilities
 
+## 3.1.85
+
+### Patch Changes
+
+- 2a2042d: fix(utilities): align published entrypoints with rslib output and add publint CI coverage.
+- 918294f: Add runtime-safe access helpers for webpack require, webpack share-scope globals, and ignored dynamic imports, and migrate core/node runtime loaders to use these helpers. The helpers are exposed via a standalone `@module-federation/sdk/bundler` entrypoint so they can be built and consumed independently from the SDK main index bundle.
+- Updated dependencies [918294f]
+  - @module-federation/sdk@2.1.0
+
+## 3.1.84
+
+### Patch Changes
+
+- @module-federation/sdk@2.0.1
+
+## 3.1.83
+
+### Patch Changes
+
+- @module-federation/sdk@2.0.0
+
+## 3.1.82
+
+### Patch Changes
+
+- @module-federation/sdk@0.24.1
+
+## 3.1.81
+
+### Patch Changes
+
+- @module-federation/sdk@0.24.0
+
 ## 3.1.80
 
 ### Patch Changes

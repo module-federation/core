@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/metro",
-  "version": "0.23.0",
+  "version": "2.1.0",
   "description": "Module Federation for Metro bundler",
   "keywords": [
     "module-federation",
@@ -57,10 +57,13 @@
   },
   "scripts": {
     "build": "rslib build",
+    "test": "vitest run --config vitest.config.mts",
+    "test:watch": "vitest --config vitest.config.mts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@expo/metro-runtime": "^5.0.4",
+    "@module-federation/dts-plugin": "workspace:*",
     "@module-federation/runtime": "workspace:*",
     "@module-federation/sdk": "workspace:*"
   },
@@ -84,8 +87,11 @@
   },
   "devDependencies": {
     "@rslib/core": "^0.10.0",
-    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "8.54.0",
+    "@typescript-eslint/parser": "8.54.0",
+    "@types/node": "^20.19.5",
     "@types/react": "^19.1.0",
+    "memfs": "4.46.0",
     "metro": "^0.82.1",
     "metro-config": "^0.82.1",
     "metro-file-map": "^0.82.1",

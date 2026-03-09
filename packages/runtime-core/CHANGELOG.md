@@ -1,5 +1,54 @@
 # @module-federation/runtime
 
+## 2.1.0
+
+### Patch Changes
+
+- 24bf84d: feat(runtime-core): add RUNTIME-010 error code and handling for name option inconsistency
+- 203c950: fix(runtime-core): preserve init scope across module init and avoid self-load init loops
+- 918294f: Add runtime-safe access helpers for webpack require, webpack share-scope globals, and ignored dynamic imports, and migrate core/node runtime loaders to use these helpers. The helpers are exposed via a standalone `@module-federation/sdk/bundler` entrypoint so they can be built and consumed independently from the SDK main index bundle.
+- Updated dependencies [918294f]
+- Updated dependencies [24bf84d]
+- Updated dependencies [918294f]
+  - @module-federation/error-codes@2.1.0
+  - @module-federation/sdk@2.1.0
+
+## 2.0.1
+
+### Patch Changes
+
+- 28a2db4: Fix a race where concurrent `Module.init()` calls could run remote container initialization more than once.
+
+  `Module.init()` now deduplicates in-flight initialization with a shared promise so `beforeInitContainer`/`initContainer` logic executes once per module while preserving stable initialized state after completion.
+
+  Also adds regression coverage for concurrent initialization behavior.
+
+- 3808d17: fix(runtime-core): correct treeShaking condition and format error message
+  - @module-federation/sdk@2.0.1
+  - @module-federation/error-codes@2.0.1
+
+## 2.0.0
+
+### Patch Changes
+
+- @module-federation/sdk@2.0.0
+- @module-federation/error-codes@2.0.0
+
+## 0.24.1
+
+### Patch Changes
+
+- 6590738: fix(runtime-core): prevent duplicate remote entry initialization
+  - @module-federation/sdk@0.24.1
+  - @module-federation/error-codes@0.24.1
+
+## 0.24.0
+
+### Patch Changes
+
+- @module-federation/sdk@0.24.0
+- @module-federation/error-codes@0.24.0
+
 ## 0.23.0
 
 ### Minor Changes

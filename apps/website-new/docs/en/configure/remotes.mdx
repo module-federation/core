@@ -14,8 +14,15 @@ The `PluginRemoteOptions` type is as follows:
 
 ```tsx
 type ModuleFederationInfo = string;
+type ShareScope = string | string[];
+
+type RemoteConfig = {
+  external: ModuleFederationInfo | ModuleFederationInfo[];
+  shareScope?: ShareScope;
+};
+
 interface PluginRemoteOptions {
-  [remoteAlias: string]: ModuleFederationInfo;
+  [remoteAlias: string]: ModuleFederationInfo | RemoteConfig;
 }
 ```
 
@@ -44,3 +51,28 @@ module.exports = {
   ],
 };
 ```
+
+## shareScope
+
+- Type: `string | string[]`
+- Required: No
+- Default: `'default'`
+
+Defines which share scopes (shared dependency pools) the host aligns with a given remote. This is useful for isolating certain shared dependencies away from the default pool (for example, putting an internal design system into `scope1` while keeping React in `default`).
+
+```ts
+new ModuleFederationPlugin({
+  name: 'host',
+  remotes: {
+    remote: {
+      external: 'app_remote@http://localhost:2001/remoteEntry.js',
+      shareScope: ['default', 'scope1'],
+    },
+  },
+});
+```
+
+Related configuration:
+
+- The producer (remote) should declare which scopes it initializes via [shareScope](./shareScope).
+- Each shared dependency chooses its scope via [shared.shareScope](./shared#sharescope).

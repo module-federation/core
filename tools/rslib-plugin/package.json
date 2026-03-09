@@ -17,7 +17,7 @@
     "@rslib/core": "^0.10.4"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0"
+    "@types/node": "^20.19.5"
   },
   "peerDependencies": {
     "@rslib/core": ">=0.10.0"

@@ -112,6 +112,11 @@ const Layout = (
   const ensureFederationContext = () => {
     if (!window.__FEDERATION__) {
       window.__FEDERATION__ = {
+        __GLOBAL_PLUGIN__: [],
+        __INSTANCES__: [],
+        __SHARE__: {},
+        __MANIFEST_LOADING__: {},
+        __PRELOADED_MAP__: new Map<string, boolean>(),
         originModuleInfo: moduleInfo || ({} as GlobalModuleInfo),
         moduleInfo: moduleInfo || ({} as GlobalModuleInfo),
       } as Federation & {

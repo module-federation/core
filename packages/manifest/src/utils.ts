@@ -1,4 +1,8 @@
-import { Chunk, Compilation, StatsCompilation, StatsModule } from 'webpack';
+import { Chunk, Compilation } from 'webpack';
+import type {
+  StatsCompilation,
+  StatsModule,
+} from 'webpack/lib/stats/DefaultStatsFactoryPlugin';
 import path from 'path';
 import fs from 'fs';
 import {

@@ -16,7 +16,7 @@ declare class RegExpObjectSerializer {
 declare namespace RegExpObjectSerializer {
   export { ObjectDeserializerContext, ObjectSerializerContext };
 }
-type ObjectSerializerContext =
-  import('./ObjectMiddleware').ObjectSerializerContext;
 type ObjectDeserializerContext =
   import('./ObjectMiddleware').ObjectDeserializerContext;
+type ObjectSerializerContext =
+  import('./ObjectMiddleware').ObjectSerializerContext;

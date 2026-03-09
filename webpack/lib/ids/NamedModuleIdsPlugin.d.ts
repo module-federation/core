@@ -1,16 +1,9 @@
 export = NamedModuleIdsPlugin;
-/** @typedef {import("../../declarations/WebpackOptions").OutputNormalized} Output */
-/** @typedef {import("../Compiler")} Compiler */
-/** @typedef {import("../Module")} Module */
-/**
- * @typedef {Object} NamedModuleIdsPluginOptions
- * @property {string} [context] context
- */
 declare class NamedModuleIdsPlugin {
   /**
-   * @param {NamedModuleIdsPluginOptions} [options] options
+   * @param {NamedModuleIdsPluginOptions=} options options
    */
-  constructor(options?: NamedModuleIdsPluginOptions);
+  constructor(options?: NamedModuleIdsPluginOptions | undefined);
   options: NamedModuleIdsPluginOptions;
   /**
    * Apply the plugin
@@ -20,14 +13,12 @@ declare class NamedModuleIdsPlugin {
   apply(compiler: Compiler): void;
 }
 declare namespace NamedModuleIdsPlugin {
-  export { Output, Compiler, Module, NamedModuleIdsPluginOptions };
+  export { Compiler, NamedModuleIdsPluginOptions };
 }
+type Compiler = import('../Compiler');
 type NamedModuleIdsPluginOptions = {
   /**
    * context
    */
-  context?: string;
+  context?: string | undefined;
 };
-type Compiler = import('../Compiler');
-type Output = import('../../declarations/WebpackOptions').OutputNormalized;
-type Module = import('../Module');

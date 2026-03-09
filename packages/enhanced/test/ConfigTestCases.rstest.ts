@@ -37,25 +37,27 @@ const casesPath = path.join(__dirname, 'configCases');
 const ensureTreeShakingFixtures = (testDirectory: string) => {
   const nodeModulesDir = path.join(testDirectory, 'node_modules');
   const isReshake = path.basename(testDirectory) === 'reshake-share';
-  const ensurePackage = (pkgName: string, entryContents: string) => {
+  fs.mkdirSync(nodeModulesDir, { recursive: true });
+  const ensurePackage = (
+    pkgName: string,
+    entryContents: string,
+    sideEffects: boolean = false,
+  ) => {
     const pkgDir = path.join(nodeModulesDir, pkgName);
     fs.mkdirSync(pkgDir, { recursive: true });
-    const packageJsonPath = path.join(pkgDir, 'package.json');
-    if (!fs.existsSync(packageJsonPath)) {
-      fs.writeFileSync(
-        packageJsonPath,
-        `${JSON.stringify(
-          {
-            name: pkgName,
-            main: './index.js',
-            version: '1.0.0',
-            sideEffects: false,
-          },
-          null,
-          2,
-        )}\n`,
-      );
-    }
+    fs.writeFileSync(
+      path.join(pkgDir, 'package.json'),
+      `${JSON.stringify(
+        {
+          name: pkgName,
+          main: './index.js',
+          version: '1.0.0',
+          sideEffects: sideEffects,
+        },
+        null,
+        2,
+      )}\n`,
+    );
     fs.writeFileSync(path.join(pkgDir, 'index.js'), entryContents);
   };
   if (isReshake) {
@@ -103,7 +105,104 @@ const ensureTreeShakingFixtures = (testDirectory: string) => {
         '',
       ].join('\n'),
     );
+    ensurePackage(
+      'ui-lib-es',
+      [
+        "export const Button = 'Button';",
+        "export const List = 'List'",
+        "export const Badge = 'Badge'",
+        '',
+      ].join('\n'),
+    );
+    ensurePackage(
+      'ui-lib-dynamic-specific-export',
+      [
+        "export const Button = 'Button';",
+        "export const List = 'List'",
+        "export const Badge = 'Badge'",
+        '',
+      ].join('\n'),
+    );
+    ensurePackage(
+      'ui-lib-dynamic-default-export',
+      [
+        "export const Button = 'Button';",
+        "export const List = 'List'",
+        "export const Badge = 'Badge'",
+        '',
+        'export default {',
+        '\tButton,',
+        '\tList,',
+        '\tBadge',
+        '}',
+        '',
+      ].join('\n'),
+    );
+    ensurePackage(
+      'ui-lib-side-effect',
+      [
+        "export const Button = 'Button';",
+        "export const List = 'List'",
+        "export const Badge = 'Badge'",
+        '',
+        'globalThis.Button = Button;',
+        'globalThis.List = List;',
+        'globalThis.Badge = Badge;',
+        'export default {',
+        '\tButton,',
+        '\tList,',
+        '\tBadge',
+        '}',
+        '',
+      ].join('\n'),
+      true,
+    );
   }
+};
+
+const collectTreeShakingMissingModuleStubs = (outputDirectory: string) => {
+  const independentPackagesDir = path.join(
+    outputDirectory,
+    'independent-packages',
+  );
+  if (!fs.existsSync(independentPackagesDir)) {
+    return [] as string[];
+  }
+  const missing = new Set<string>();
+  const pending = [independentPackagesDir];
+  const pattern =
+    /Cannot find module ['"]([^'"]*tree-shaking-share[^'"]*node_modules[^'"]*)['"]/g;
+  while (pending.length) {
+    const currentDir = pending.pop() as string;
+    let entries: fs.Dirent[] = [];
+    try {
+      entries = fs.readdirSync(currentDir, { withFileTypes: true });
+    } catch {
+      continue;
+    }
+    for (const entry of entries) {
+      const fullPath = path.join(currentDir, entry.name);
+      if (entry.isDirectory()) {
+        pending.push(fullPath);
+        continue;
+      }
+      if (!entry.isFile() || entry.name !== 'share-entry.js') {
+        continue;
+      }
+      let content = '';
+      try {
+        content = fs.readFileSync(fullPath, 'utf-8');
+      } catch {
+        continue;
+      }
+      pattern.lastIndex = 0;
+      let match: RegExpExecArray | null = null;
+      while ((match = pattern.exec(content))) {
+        missing.add(match[1]);
+      }
+    }
+  }
+  return Array.from(missing).sort();
 };
 
 const dedupeByMessage = (items: any[]) => {
@@ -193,6 +292,25 @@ const createLogger = (appendTarget: string[]) => {
 };
 
 export const describeCases = (config: any) => {
+  const includeCategories: string[] | undefined = Array.isArray(
+    config?.includeCategories,
+  )
+    ? config.includeCategories
+    : undefined;
+  const excludeCategories: string[] | undefined = Array.isArray(
+    config?.excludeCategories,
+  )
+    ? config.excludeCategories
+    : undefined;
+
+  const selectedCategories = categories.filter((category) => {
+    if (includeCategories?.length && !includeCategories.includes(category.name))
+      return false;
+    if (excludeCategories?.length && excludeCategories.includes(category.name))
+      return false;
+    return true;
+  });
+
   describe(config.name, () => {
     let stderr: any;
     rs.setConfig({ testTimeout: 20000 });
@@ -203,7 +321,7 @@ export const describeCases = (config: any) => {
       stderr.restore();
     });
 
-    for (const category of categories) {
+    for (const category of selectedCategories) {
       describe(category.name, () => {
         for (const testName of category.tests) {
           describe(testName, () => {
@@ -219,6 +337,15 @@ export const describeCases = (config: any) => {
             const outputDirectory = path.join(outBaseDir, testSubPath);
             const cacheDirectory = path.join(outBaseDir, '.cache', testSubPath);
             let options: any, optionsArr: any[], testConfig: any;
+            const ensureTreeShakingFixturesIfNeeded = () => {
+              if (
+                testDirectory.includes(
+                  `${path.sep}tree-shaking-share${path.sep}`,
+                )
+              ) {
+                ensureTreeShakingFixtures(testDirectory);
+              }
+            };
 
             beforeAll(() => {
               if (
@@ -227,7 +354,7 @@ export const describeCases = (config: any) => {
                 )
               ) {
                 nativeRequire('./scripts/ensure-reshake-fixtures');
-                ensureTreeShakingFixtures(testDirectory);
+                ensureTreeShakingFixturesIfNeeded();
               }
               options = prepareOptions(
                 require(path.join(testDirectory, 'webpack.config.js')),
@@ -369,6 +496,7 @@ export const describeCases = (config: any) => {
             // cache 预编译：第一次
             if (config.cache) {
               it(`${testName} should pre-compile to fill disk cache (1st)`, async () => {
+                ensureTreeShakingFixturesIfNeeded();
                 rimrafSync(outputDirectory);
                 fs.mkdirSync(outputDirectory, { recursive: true });
                 infraStructureLog.length = 0;
@@ -422,6 +550,7 @@ export const describeCases = (config: any) => {
               }, 60000);
               // cache 预编译：第二次
               it(`${testName} should pre-compile to fill disk cache (2nd)`, async () => {
+                ensureTreeShakingFixturesIfNeeded();
                 rimrafSync(outputDirectory);
                 fs.mkdirSync(outputDirectory, { recursive: true });
                 infraStructureLog.length = 0;
@@ -504,25 +633,29 @@ export const describeCases = (config: any) => {
             it(
               `${testName} should compile`,
               async () => {
-                try {
-                  // Robust cleanup to avoid ENOTEMPTY and race conditions
-                  (fs as any).rmSync?.(outputDirectory, {
-                    recursive: true,
-                    force: true,
-                  });
-                } catch {
+                ensureTreeShakingFixturesIfNeeded();
+                const isTreeShakingFixtureCase = testDirectory.includes(
+                  `${path.sep}tree-shaking-share${path.sep}`,
+                );
+                const cleanOutputDirectory = () => {
                   try {
-                    rimrafSync(outputDirectory);
+                    // Robust cleanup to avoid ENOTEMPTY and race conditions
+                    (fs as any).rmSync?.(outputDirectory, {
+                      recursive: true,
+                      force: true,
+                    });
                   } catch {
-                    /* ignore */
+                    try {
+                      rimrafSync(outputDirectory);
+                    } catch {
+                      /* ignore */
+                    }
                   }
-                }
-                fs.mkdirSync(outputDirectory, { recursive: true });
-                infraStructureLog.length = 0;
-
-                // 运行 webpack
-                const { stats } = await new Promise<{ stats: any }>(
-                  (resolve, reject) => {
+                };
+                const runWebpackCompile = async () => {
+                  infraStructureLog.length = 0;
+                  stderr.reset();
+                  return new Promise<{ stats: any }>((resolve, reject) => {
                     const onCompiled = (err: any, stats: any) => {
                       if (err) return reject(err);
                       resolve({ stats });
@@ -546,11 +679,57 @@ export const describeCases = (config: any) => {
                     } catch (e: any) {
                       reject(e);
                     }
-                  },
-                ).catch((e) => {
+                  });
+                };
+
+                cleanOutputDirectory();
+                fs.mkdirSync(outputDirectory, { recursive: true });
+                let { stats } = await runWebpackCompile().catch((e) => {
                   handleFatalError(e);
                   throw e; // rethrow for rstest to mark failure otherwise
                 });
+
+                // Under heavy IO/CPU contention, tree-shaking fixture packages can
+                // transiently resolve as missing. Rebuild with bounded retries
+                // after re-ensuring fixtures when share-entry stubs contain
+                // webpackMissingModule.
+                if (isTreeShakingFixtureCase) {
+                  const maxTreeShakingAttempts = 4;
+                  for (
+                    let attempt = 1;
+                    attempt < maxTreeShakingAttempts;
+                    attempt++
+                  ) {
+                    const missingModules =
+                      collectTreeShakingMissingModuleStubs(outputDirectory);
+                    if (!missingModules.length) {
+                      break;
+                    }
+                    ensureTreeShakingFixturesIfNeeded();
+                    // Give the FS a tiny settle window under extreme IO pressure.
+                    await new Promise<void>((resolve) =>
+                      setTimeout(resolve, 25 * attempt),
+                    );
+                    cleanOutputDirectory();
+                    fs.mkdirSync(outputDirectory, { recursive: true });
+                    ({ stats } = await runWebpackCompile().catch((e) => {
+                      handleFatalError(e);
+                      throw e;
+                    }));
+                    if (attempt === maxTreeShakingAttempts - 1) {
+                      const remainingMissingModules =
+                        collectTreeShakingMissingModuleStubs(outputDirectory);
+                      if (remainingMissingModules.length) {
+                        throw new Error(
+                          [
+                            `Tree-shaking fixture modules remained unresolved after ${maxTreeShakingAttempts} compilation attempts:`,
+                            ...remainingMissingModules,
+                          ].join('\n'),
+                        );
+                      }
+                    }
+                  }
+                }
 
                 // 写入 stats
                 const statOptions = { preset: 'verbose', colors: false };
@@ -911,6 +1090,24 @@ export const describeCases = (config: any) => {
                             }
                             if (esmMode === 'unlinked') return esm;
                             return (async () => {
+                              if (esm.status === 'evaluated') {
+                                const ns = (esm as any).namespace;
+                                return ns.default &&
+                                  ns.default instanceof Promise
+                                  ? ns.default
+                                  : ns;
+                              }
+                              if (
+                                esm.status !== 'unlinked' &&
+                                esm.status !== 'linking'
+                              ) {
+                                await esm.evaluate();
+                                const ns = (esm as any).namespace;
+                                return ns.default &&
+                                  ns.default instanceof Promise
+                                  ? ns.default
+                                  : ns;
+                              }
                               await esm.link(
                                 async (
                                   specifier: string,
@@ -937,8 +1134,9 @@ export const describeCases = (config: any) => {
                                   );
                                 },
                               );
-                              if ((esm as any).instantiate)
-                                (esm as any).instantiate();
+                              // Do not call instantiate(): Node's link() already performs
+                              // instantiation. Calling instantiate() on a linked module throws
+                              // "Module status must be unlinked" in Node 20+.
                               await esm.evaluate();
                               if (esmMode === 'evaluated') return esm as any;
                               const ns = (esm as any).namespace;

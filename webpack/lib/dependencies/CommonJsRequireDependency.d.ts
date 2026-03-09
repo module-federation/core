@@ -8,10 +8,9 @@ declare class CommonJsRequireDependency extends ModuleDependency {
    */
   constructor(
     request: string,
-    range?: import('../javascript/JavascriptParser').Range | undefined,
+    range?: Range | undefined,
     context?: string | undefined,
   );
-  range: import('../javascript/JavascriptParser').Range;
   _context: string;
 }
 declare namespace CommonJsRequireDependency {

@@ -1,10 +1,12 @@
 export = EnvironmentPlugin;
-/** @typedef {import("./Compiler")} Compiler */
-/** @typedef {import("./DefinePlugin").CodeValue} CodeValue */
 declare class EnvironmentPlugin {
-  constructor(...keys: any[]);
-  keys: any[];
-  defaultValues: any;
+  /**
+   * @param {(string | string[] | Record<string, EXPECTED_ANY>)[]} keys keys
+   */
+  constructor(...keys: (string | string[] | Record<string, EXPECTED_ANY>)[]);
+  /** @type {string[]} */
+  keys: string[];
+  defaultValues: Record<string, EXPECTED_ANY>;
   /**
    * Apply the plugin
    * @param {Compiler} compiler the compiler instance

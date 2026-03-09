@@ -1,5 +1,53 @@
 # @module-federation/manifest
 
+## 2.1.0
+
+### Patch Changes
+
+- 5a4f503: fix(manifest): record split expose chunk assets
+- 918294f: Add missing release coverage for packages moved to the new build implementation and standardized ESM/CJS artifact outputs. This ensures package versioning and publish automation include the remaining affected packages on this branch.
+- Updated dependencies [6235711]
+- Updated dependencies [918294f]
+- Updated dependencies [5954fe7]
+- Updated dependencies [918294f]
+  - @module-federation/dts-plugin@2.1.0
+  - @module-federation/managers@2.1.0
+  - @module-federation/sdk@2.1.0
+
+## 2.0.1
+
+### Patch Changes
+
+- Updated dependencies [28a2db4]
+  - @module-federation/dts-plugin@2.0.1
+  - @module-federation/sdk@2.0.1
+  - @module-federation/managers@2.0.1
+
+## 2.0.0
+
+### Patch Changes
+
+- @module-federation/sdk@2.0.0
+- @module-federation/managers@2.0.0
+- @module-federation/dts-plugin@2.0.0
+
+## 0.24.1
+
+### Patch Changes
+
+- @module-federation/dts-plugin@0.24.1
+- @module-federation/sdk@0.24.1
+- @module-federation/managers@0.24.1
+
+## 0.24.0
+
+### Patch Changes
+
+- 6c45347: fix(manifest): use parsed version first
+  - @module-federation/sdk@0.24.0
+  - @module-federation/managers@0.24.0
+  - @module-federation/dts-plugin@0.24.0
+
 ## 0.23.0
 
 ### Patch Changes

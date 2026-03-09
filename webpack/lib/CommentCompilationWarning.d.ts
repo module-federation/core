@@ -2,7 +2,6 @@ export = CommentCompilationWarning;
 /** @typedef {import("./Dependency").DependencyLocation} DependencyLocation */
 declare class CommentCompilationWarning extends WebpackError {
   /**
-   *
    * @param {string} message warning message
    * @param {DependencyLocation} loc affected lines of code
    */

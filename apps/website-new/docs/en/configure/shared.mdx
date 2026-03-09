@@ -22,6 +22,12 @@ interface SharedConfig {
   shareScope?: string;
   import?: string | false;
   allowNodeModulesSuffixMatch?: boolean;
+  treeShaking?: TreeShakingConfig;
+}
+
+interface TreeShakingConfig {
+  mode: 'server-calc' | 'runtime-infer';
+  usedExports?: string[];
 }
 
 ```
@@ -108,7 +114,7 @@ Enables a fallback lookup that matches shared modules by the portion of their re
 
 > Previously this option was called `nodeModulesReconstructedLookup`.
 
-{/*
+
 ## treeShaking
 
 - Type: `TreeShakingConfig`
@@ -117,8 +123,8 @@ Enables a fallback lookup that matches shared modules by the portion of their re
 
 Configures tree-shaking behavior for shared dependencies. Enabling tree shaking for shared dependencies can reduce the size of the shared bundle.
 
-> Only takes effect when using Rspack as the bundler.
- */}
+> Rspack is the recommended bundler for this capability, and the docs/examples prioritize Rspack usage.
+
 
 ### usedExports
 

@@ -1,5 +1,4 @@
 export = LoaderTargetPlugin;
-/** @typedef {import("./Compiler")} Compiler */
 declare class LoaderTargetPlugin {
   /**
    * @param {string} target the target

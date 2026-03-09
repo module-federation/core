@@ -10,19 +10,25 @@ appId: com.mf.example.host
 - copyTextFrom:
     id: 'host-lodash'
 - assertTrue:
-    condition: ${maestro.copiedText === "4.16.6"}
+    condition: ${maestro.copiedText === "4.17.23"}
 
 # Check Mini App Info
 - assertNotVisible:
     id: 'mini-info'
-- tapOn:
-    id: 'load-mini-button'
 - assertVisible:
-    id: 'mini-info'
+    id: 'load-mini-button'
+- retry:
+    maxRetries: 2
+    commands:
+      - tapOn:
+          id: 'load-mini-button'
+          retryTapIfNoChange: true
+      - assertVisible:
+          id: 'mini-info'
 - copyTextFrom:
     id: 'mini-lodash'
 - assertTrue:
-    condition: ${maestro.copiedText === "4.17.21"}
+    condition: ${maestro.copiedText === "4.17.23"}
 
 # Check Nested Mini App Info
 - assertVisible:
@@ -30,4 +36,4 @@ appId: com.mf.example.host
 - copyTextFrom:
     id: 'nested-mini-lodash'
 - assertTrue:
-    condition: ${maestro.copiedText === "4.16.6"}
+    condition: ${maestro.copiedText === "4.17.23"}

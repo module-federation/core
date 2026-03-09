@@ -54,7 +54,11 @@ type InferredGlobalShareScope = {
 };
 
 // shareScope, name, externalModuleId
-type IdToExternalAndNameMappingItem = [string, string, string | number];
+type IdToExternalAndNameMappingItem = [
+  string | string[],
+  string,
+  string | number,
+];
 interface IdToExternalAndNameMappingItemWithPromise
   extends IdToExternalAndNameMappingItem {
   p?: Promise<any> | number;
@@ -67,7 +71,7 @@ export type IdToExternalAndNameMapping = Record<
 export type ModuleId = string | number;
 
 export type RemoteDataItem = {
-  shareScope: string;
+  shareScope: string | string[];
   name: string;
   externalModuleId: ModuleId;
   remoteName: string;

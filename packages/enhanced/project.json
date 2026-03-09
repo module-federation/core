@@ -13,20 +13,15 @@
       }
     },
     "build": {
-      "executor": "@nx/js:tsc",
+      "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/packages/enhanced/dist"],
       "options": {
-        "outputPath": "packages/enhanced/dist",
-        "main": "packages/enhanced/src/index.ts",
-        "tsConfig": "packages/enhanced/tsconfig.lib.json",
-        "assets": [
-          "packages/enhanced/*.md",
-          {
-            "glob": "src/**/*.d.ts",
-            "input": "packages/enhanced",
-            "ignore": [],
-            "output": ""
-          }
+        "parallel": false,
+        "commands": [
+          "node -e \"require('fs').rmSync('packages/enhanced/dist',{recursive:true,force:true})\"",
+          "pnpm -C packages/enhanced exec tsdown --config tsdown.config.ts",
+          "node -e \"const fs=require('fs');const path=require('path');const src='packages/enhanced';const dst='packages/enhanced/dist';for(const f of fs.readdirSync(src)){if(f.endsWith('.md'))fs.cpSync(path.join(src,f),path.join(dst,f));}\"",
+          "node -e \"const fs=require('fs');const path=require('path');const src='packages/enhanced/src';const dst='packages/enhanced/dist/src';(function w(d){for(const e of fs.readdirSync(d,{withFileTypes:true})){const p=path.join(d,e.name);if(e.isDirectory())w(p);else if(e.name.endsWith('.d.ts')){const rel=path.relative(src,p);const out=path.join(dst,rel);fs.mkdirSync(path.dirname(out),{recursive:true});fs.copyFileSync(p,out);}}})(src);\""
         ]
       },
       "dependsOn": [
@@ -55,6 +50,10 @@
           },
           {
             "command": "NODE_OPTIONS=\"--experimental-vm-modules --max-old-space-size=24576\" npx rstest -c packages/enhanced/rstest.config.ts",
+            "forwardAllArgs": true
+          },
+          {
+            "command": "NODE_OPTIONS=\"--experimental-vm-modules --max-old-space-size=24576\" npx rstest -c packages/enhanced/rstest.treeshake.serial.config.ts",
             "forwardAllArgs": true
           }
         ]

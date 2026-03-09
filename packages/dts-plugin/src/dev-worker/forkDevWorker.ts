@@ -14,7 +14,7 @@ import {
   UpdateCallbackOptions,
   UpdateKind,
   ModuleFederationDevServer,
-  createKoaServer,
+  createHttpServer,
   fileLog,
   getIPV4,
   DEFAULT_TAR_NAME,
@@ -23,6 +23,7 @@ import {
 
 import { DevWorkerOptions } from './DevWorker';
 import { getIpFromEntry } from './utils';
+import { handleDevWorkerMessage } from './handleWorkerMessage';
 
 interface Options extends DevWorkerOptions {
   name: string;
@@ -40,7 +41,18 @@ function getLocalRemoteNames(
   if (!options) {
     return [];
   }
-  const { mapRemotesToDownload } = retrieveHostConfig(options);
+  let hostConfig;
+  try {
+    hostConfig = retrieveHostConfig(options);
+  } catch (e) {
+    fileLog(
+      `getLocalRemoteNames: retrieveHostConfig failed: ${(e as Error).message}`,
+      'forkDevWorker',
+      'warn',
+    );
+    return [];
+  }
+  const { mapRemotesToDownload } = hostConfig;
 
   return Object.keys(mapRemotesToDownload).reduce<Remote[]>(
     (sum, remoteModuleName) => {
@@ -114,7 +126,7 @@ export async function forkDevWorker(
       const mfTypesZipPath = retrieveTypesZipPath(mfTypesPath, remoteOptions);
 
       await Promise.all([
-        createKoaServer({
+        createHttpServer({
           typeTarPath: mfTypesZipPath,
         }).then((res) => {
           serverAddress = res.serverAddress;
@@ -178,20 +190,7 @@ export async function forkDevWorker(
 }
 
 process.on('message', (message: rpc.RpcMessage) => {
-  fileLog(
-    `ChildProcess(${process.pid}), message: ${JSON.stringify(message)} `,
-    'forkDevWorker',
-    'info',
-  );
-  if (message.type === rpc.RpcGMCallTypes.EXIT) {
-    fileLog(
-      `ChildProcess(${process.pid}) SIGTERM, Federation DevServer will exit...`,
-      'forkDevWorker',
-      'error',
-    );
-    moduleServer.exit();
-    process.exit(0);
-  }
+  handleDevWorkerMessage(message, { moduleServer, log: fileLog });
 });
 
 rpc.exposeRpc(forkDevWorker);

@@ -1,0 +1,9 @@
+[
+  "plugins",
+  "plugins-rsbuild",
+  "plugins-rspack",
+  "plugins-webpack",
+  "plugins-rspress",
+  "plugins-vite",
+  "plugins-metro"
+]

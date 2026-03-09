@@ -1,32 +1,57 @@
 [
   {
-    "type": "dir",
+    "type": "dir-section-header",
     "name": "start",
     "label": "开始"
   },
   {
-    "type": "dir",
+    "type": "dir-section-header",
     "name": "basic",
     "label": "基础"
   },
+    {
+    "type": "dir-section-header",
+    "name": "runtime",
+    "label": "运行时"
+  },
   {
-    "type": "dir",
+    "type": "dir-section-header",
+    "name": "build-plugins",
+    "label": "构建插件"
+  },
+  {
+    "type": "dir-section-header",
     "name": "framework",
     "label": "框架"
   },
   {
-    "type": "dir",
+    "type": "dir-section-header",
+    "name": "performance",
+    "label": "性能优化"
+  },
+  {
+    "type": "dir-section-header",
+    "name": "advanced",
+    "label": "高级能力"
+  },
+  {
+    "type": "dir-section-header",
     "name": "deployment",
     "label": "部署"
   },
   {
-    "type":"dir",
+    "type":"dir-section-header",
     "name":"debug",
     "label":"调试"
   },
   {
-    "type":"dir",
+    "type":"dir-section-header",
     "name":"troubleshooting",
     "label":"Troubleshooting"
+  },
+  {
+    "type": "dir-section-header",
+    "name": "ai",
+    "label": "AI"
   }
 ]

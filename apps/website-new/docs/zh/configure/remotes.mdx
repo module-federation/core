@@ -14,13 +14,20 @@
 
 ```tsx
 type ModuleFederationInfo = string;
+type ShareScope = string | string[];
+
+type RemoteConfig = {
+  external: ModuleFederationInfo | ModuleFederationInfo[];
+  shareScope?: ShareScope;
+};
+
 interface PluginRemoteOptions {
-  [remoteAlias: string]: ModuleFederationInfo;
+  [remoteAlias: string]: ModuleFederationInfo | RemoteConfig;
 }
 ```
 
 - `remoteAlias` 为实际用户引用的名称，可自行配置，例如设置了 `remoteAlias` 为 `demo` ，那么消费方式为 `import xx from 'demo'` 。
-- `ModuleFederationInfo` 由 `ModuleFederation name` + `@` + `ModuleFederation entry` 组成
+- `ModuleFederationInfo` 由 `ModuleFederation name` + `@` + `ModuleFederation entry` 组成：
   - `ModuleFederation name` 是生产者设置的名称
   - `entry` 可以为 `mf-manifest.json` 和 `remoteEntry.js`
   - `entry` 为 `mf-manifest.json` 拥有以下额外能力
@@ -44,3 +51,28 @@ module.exports = {
   ],
 };
 ```
+
+## shareScope
+
+- 类型：`string | string[]`
+- 是否必填：否
+- 默认值：`'default'`
+
+host 与某个 remote 对齐哪些共享池（share scope）。可以用于把某些 shared 依赖从默认共享池里隔离出去（例如 `scope1` 用于公司内设计系统，`default` 仍用于 React 生态）。
+
+```ts
+new ModuleFederationPlugin({
+  name: 'host',
+  remotes: {
+    remote: {
+      external: 'app_remote@http://localhost:2001/remoteEntry.js',
+      shareScope: ['default', 'scope1'],
+    },
+  },
+});
+```
+
+与之配套的配置：
+
+- 生产者（remote）需要声明自己要初始化的共享池，见 [shareScope](./shareScope)。
+- 具体某个 shared 依赖要注册在哪个共享池，见 [shared.shareScope](./shared#sharescope)。

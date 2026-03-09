@@ -7,58 +7,56 @@ declare class ExportsInfoDependency extends NullDependency {
   static deserialize(context: ObjectDeserializerContext): ExportsInfoDependency;
   /**
    * @param {Range} range range
-   * @param {TODO} exportName export name
+   * @param {ExportInfoName[] | null} exportName export name
    * @param {string | null} property property
    */
   constructor(
-    range: import('../javascript/JavascriptParser').Range,
-    exportName: TODO,
+    range: Range,
+    exportName: ExportInfoName[] | null,
     property: string | null,
   );
   range: import('../javascript/JavascriptParser').Range;
-  exportName: TODO;
+  exportName: string[];
   property: string;
 }
 declare namespace ExportsInfoDependency {
   export {
     ExportsInfoDependencyTemplate as Template,
     ReplaceSource,
-    ChunkGraph,
     Dependency,
-    UpdateHashContext,
     DependencyTemplateContext,
     Module,
     ModuleGraph,
+    ExportInfoName,
     Range,
     ObjectDeserializerContext,
     ObjectSerializerContext,
-    Hash,
     RuntimeSpec,
+    SortableSet,
   };
 }
 import NullDependency = require('./NullDependency');
-type ObjectDeserializerContext =
-  import('../serialization/ObjectMiddleware').ObjectDeserializerContext;
 declare const ExportsInfoDependencyTemplate_base: {
   new (): {
     apply(
       dependency: import('../Dependency'),
-      source: any,
-      templateContext: import('../DependencyTemplate').DependencyTemplateContext,
+      source: NullDependency.ReplaceSource,
+      templateContext: NullDependency.DependencyTemplateContext,
     ): void;
   };
 };
 declare class ExportsInfoDependencyTemplate extends ExportsInfoDependencyTemplate_base {}
-type ReplaceSource = any;
-type ChunkGraph = import('../ChunkGraph');
+type ReplaceSource = import('webpack-sources').ReplaceSource;
 type Dependency = import('../Dependency');
-type UpdateHashContext = import('../Dependency').UpdateHashContext;
 type DependencyTemplateContext =
   import('../DependencyTemplate').DependencyTemplateContext;
 type Module = import('../Module');
 type ModuleGraph = import('../ModuleGraph');
+type ExportInfoName = import('../ExportsInfo').ExportInfoName;
 type Range = import('../javascript/JavascriptParser').Range;
+type ObjectDeserializerContext =
+  import('../serialization/ObjectMiddleware').ObjectDeserializerContext;
 type ObjectSerializerContext =
   import('../serialization/ObjectMiddleware').ObjectSerializerContext;
-type Hash = import('../util/Hash');
 type RuntimeSpec = import('../util/runtime').RuntimeSpec;
+type SortableSet<T> = import('../util/SortableSet')<T>;

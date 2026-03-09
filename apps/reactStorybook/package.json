@@ -2,6 +2,7 @@
   "name": "react-storybook",
   "version": "1.0.0",
   "private": true,
+  "description": "Federation example for reactStorybook",
   "devDependencies": {
     "@module-federation/utilities": "workspace:*",
     "@module-federation/storybook-addon": "workspace:*",
@@ -11,6 +12,6 @@
   "dependencies": {
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-router-dom": "^6.23.1"
+    "react-router-dom": "^6.30.2"
   }
 }

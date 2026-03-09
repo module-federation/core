@@ -1,7 +1,7 @@
 export = WebAssemblyGenerator;
 /**
- * @typedef {Object} WebAssemblyGeneratorOptions
- * @property {boolean} [mangleImports] mangle imports
+ * @typedef {object} WebAssemblyGeneratorOptions
+ * @property {boolean=} mangleImports mangle imports
  */
 declare class WebAssemblyGenerator extends Generator {
   /**
@@ -9,36 +9,63 @@ declare class WebAssemblyGenerator extends Generator {
    */
   constructor(options: WebAssemblyGeneratorOptions);
   options: WebAssemblyGeneratorOptions;
+  /**
+   * @param {Error} error the error
+   * @param {NormalModule} module module for which the code should be generated
+   * @param {GenerateContext} generateContext context for generate
+   * @returns {Source | null} generated code
+   */
+  generateError(
+    error: Error,
+    module: NormalModule,
+    generateContext: GenerateContext,
+  ): Source | null;
 }
 declare namespace WebAssemblyGenerator {
   export {
     Source,
-    DependencyTemplates,
     GenerateContext,
     Module,
+    SourceType,
+    SourceTypes,
     ModuleGraph,
     NormalModule,
-    RuntimeTemplate,
     RuntimeSpec,
     UsedWasmDependency,
+    Instruction,
+    ModuleImport,
+    ModuleExport,
+    Global,
+    AST,
+    GlobalType,
+    NodePath,
     ArrayBufferTransform,
+    Mapping,
     WebAssemblyGeneratorOptions,
   };
 }
 import Generator = require('../Generator');
+type Source = import('webpack-sources').Source;
+type GenerateContext = import('../Generator').GenerateContext;
+type Module = import('../Module');
+type SourceType = import('../Module').SourceType;
+type SourceTypes = import('../Module').SourceTypes;
+type ModuleGraph = import('../ModuleGraph');
+type NormalModule = import('../NormalModule');
+type RuntimeSpec = import('../util/runtime').RuntimeSpec;
+type UsedWasmDependency = import('./WebAssemblyUtils').UsedWasmDependency;
+type Instruction = any;
+type ModuleImport = any;
+type ModuleExport = any;
+type Global = any;
+type AST = any;
+type GlobalType = any;
+type NodePath<T> = any;
+type ArrayBufferTransform = (buf: ArrayBuffer) => ArrayBuffer;
+type Mapping = Map<string, UsedWasmDependency>;
 type WebAssemblyGeneratorOptions = {
   /**
    * mangle imports
    */
-  mangleImports?: boolean;
+  mangleImports?: boolean | undefined;
 };
-type Source = any;
-type DependencyTemplates = import('../DependencyTemplates');
-type GenerateContext = import('../Generator').GenerateContext;
-type Module = import('../Module');
-type ModuleGraph = import('../ModuleGraph');
-type NormalModule = import('../NormalModule');
-type RuntimeTemplate = import('../RuntimeTemplate');
-type RuntimeSpec = import('../util/runtime').RuntimeSpec;
-type UsedWasmDependency = import('./WebAssemblyUtils').UsedWasmDependency;
-type ArrayBufferTransform = (buf: ArrayBuffer) => ArrayBuffer;

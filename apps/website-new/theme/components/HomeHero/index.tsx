@@ -1,7 +1,6 @@
-import { Button } from 'rspress/theme';
-import { normalizeHrefInRuntime } from 'rspress/runtime';
+import { Button } from '@rspress/core/theme-original';
+import { normalizeHrefInRuntime } from '@rspress/core/runtime';
 import styles from './index.module.scss';
-import logoImg from '../../../docs/public/module-federation-logo.svg';
 
 export interface Hero {
   name: string;

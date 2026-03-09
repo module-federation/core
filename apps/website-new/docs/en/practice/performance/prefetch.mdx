@@ -4,7 +4,7 @@
 
 This feature is no longer maintained and will be deprecated soon.
 
-We recommend using [bridge-react - prefetch](../../guide/basic/data-fetch/prefetch), which supports Rspack/Webpack and works in both SSR and CSR scenarios.
+We recommend using [bridge-react - prefetch](../../guide/basic/data-fetch-prefetch), which supports Rspack/Webpack and works in both SSR and CSR scenarios.
 
 :::
 
@@ -30,8 +30,8 @@ If the producer application also needs to render this component with data, call 
 ### Consumer
 
 1. Remove `dataPrefetch` from your config file.
-2. Use `createLazyComponent` to load the producer. See [bridge-react - prefetch](../../guide/basic/data-fetch/index#consumer).
-3. Use [prefetch](../../guide/basic/data-fetch/prefetch) to prefetch data.
+2. Use `createLazyComponent` to load the producer. See [bridge-react - prefetch](../../guide/basic/data-fetch#consumer).
+3. Use [prefetch](../../guide/basic/data-fetch-prefetch) to prefetch data.
 
 ## What is Data Prefetch
 Data Prefetch can advance the remote module interface request to be sent immediately after `remoteEntry` is loaded, without waiting for component rendering, thus improving the first screen speed.
@@ -239,7 +239,7 @@ return (
 
 ### loadRemote
 #### Function
-If the user manually calls [loadRemote](/zh/guide/basic/runtime/runtime-api.html#loadremote) in the hosts project API, then it will be considered that the hosts not only wants to load the producer's static resources, but also wants to send the interface request in advance, which can make the project render faster. This is especially effective in the scenario where **the first screen has a pre-request** or **you want the second screen to be directly displayed**. It is suitable for the scenario where the second screen module is loaded in advance on the current page.
+If the user manually calls [loadRemote](/guide/runtime/runtime-api.html#loadremote) in the hosts project API, then it will be considered that the hosts not only wants to load the producer's static resources, but also wants to send the interface request in advance, which can make the project render faster. This is especially effective in the scenario where **the first screen has a pre-request** or **you want the second screen to be directly displayed**. It is suitable for the scenario where the second screen module is loaded in advance on the current page.
 #### How to use
 ``` ts
 import { loadRemote } from '@module-federation/enhanced/runtime';

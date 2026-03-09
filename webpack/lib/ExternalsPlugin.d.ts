@@ -1,13 +1,11 @@
 export = ExternalsPlugin;
-/** @typedef {import("../declarations/WebpackOptions").Externals} Externals */
-/** @typedef {import("./Compiler")} Compiler */
 declare class ExternalsPlugin {
   /**
-   * @param {string | undefined} type default external type
+   * @param {ExternalsType} type default external type
    * @param {Externals} externals externals config
    */
-  constructor(type: string | undefined, externals: Externals);
-  type: string;
+  constructor(type: ExternalsType, externals: Externals);
+  type: import('../declarations/WebpackOptions').ExternalsType;
   externals: import('../declarations/WebpackOptions').Externals;
   /**
    * Apply the plugin
@@ -17,7 +15,9 @@ declare class ExternalsPlugin {
   apply(compiler: Compiler): void;
 }
 declare namespace ExternalsPlugin {
-  export { Externals, Compiler };
+  export { ExternalsType, Externals, Compiler, Imported };
 }
-type Compiler = import('./Compiler');
+type ExternalsType = import('../declarations/WebpackOptions').ExternalsType;
 type Externals = import('../declarations/WebpackOptions').Externals;
+type Compiler = import('./Compiler');
+type Imported = import('./ExternalModule').Imported;

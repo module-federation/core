@@ -1,4 +1,4 @@
-import { createModuleFederationConfig } from '@module-federation/modern-js';
+import { createModuleFederationConfig } from '@module-federation/modern-js-v3';
 import path from 'path';
 
 const isSecondarySharedTreeShaking = Boolean(

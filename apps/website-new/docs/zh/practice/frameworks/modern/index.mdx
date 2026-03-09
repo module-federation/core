@@ -76,10 +76,10 @@ npx @modern-js/create@latest modern-provider
 
 ### 安装插件
 
-Module Federation 为 Modern.js 提供了 配套的插件 `@module-federation/modern-js`。
+Module Federation 为 Modern.js 提供了 配套的插件 `@module-federation/modern-js-v3`。
 
 ```bash
-pnpm add @module-federation/modern-js
+pnpm add @module-federation/modern-js-v3
 ```
 
 ## 设置模块联邦配置
@@ -91,7 +91,7 @@ pnpm add @module-federation/modern-js
 在项目根目录创建 `module-federation.config.ts` 文件，并写入下列内容：
 
 ```ts title='module-federation.config.ts'
-import { createModuleFederationConfig } from '@module-federation/modern-js';
+import { createModuleFederationConfig } from '@module-federation/modern-js-v3';
 
 export default createModuleFederationConfig({
   name: 'provider',
@@ -108,17 +108,14 @@ export default createModuleFederationConfig({
 
 #### 2. 应用插件
 
-在 `modern.config.ts` 应用 `@module-federation/modern-js`：
+在 `modern.config.ts` 应用 `@module-federation/modern-js-v3`：
 
 ```ts title='modern.config.ts'
 import { appTools, defineConfig } from '@modern-js/app-tools';
-import { moduleFederationPlugin } from '@module-federation/modern-js';
+import { moduleFederationPlugin } from '@module-federation/modern-js-v3';
 
 // https://modernjs.dev/en/configure/app/usage
 export default defineConfig({
-  runtime: {
-    router: true,
-  },
   server: {
     ssr: {
       mode: 'stream',
@@ -180,7 +177,7 @@ export default (): JSX.Element => (
 在项目根目录创建 `module-federation.config.ts` 文件，并写入下列内容：
 
 ```ts title='module-federation.config.ts'
-import { createModuleFederationConfig } from '@module-federation/modern-js';
+import { createModuleFederationConfig } from '@module-federation/modern-js-v3';
 
 export default createModuleFederationConfig({
   name: 'consumer',
@@ -196,17 +193,15 @@ export default createModuleFederationConfig({
 
 #### 2. 应用插件
 
-在 `modern.config.ts` 应用 `@module-federation/modern-js`：
+在 `modern.config.ts` 应用 `@module-federation/modern-js-v3`：
 
 ```ts title='modern.config.ts'
 import { appTools, defineConfig } from '@modern-js/app-tools';
-import { moduleFederationPlugin } from '@module-federation/modern-js';
+import { moduleFederationPlugin } from '@module-federation/modern-js-v3';
 
 // https://modernjs.dev/en/configure/app/usage
 export default defineConfig({
-  runtime: {
-    router: true,
-  },
+
   server: {
     ssr: {
       mode: 'stream',
@@ -252,13 +247,13 @@ export default Index;
 
 这是因为生产者的样式文件无法注入到对应的 html 中。
 
-此问题可以通过使用 `@module-federation/modern-js` 提供的 [createremotessrcomponent](../../../guide/framework/modernjs#createremotessrcomponent) 解决。
+此问题可以通过使用 `@module-federation/modern-js-v3` 提供的 [createremotessrcomponent](../../../guide/framework/modernjs#createremotessrcomponent) 解决。
 
 修改消费者引用生产者处的代码（`src/routes/page.tsx`）：
 
 ```tsx title='page.tsx'
-import { getInstance } from '@module-federation/modern-js/runtime';
-import { createLazyComponent } from '@module-federation/modern-js/react'
+import { getInstance } from '@module-federation/modern-js-v3/runtime';
+import { createLazyComponent } from '@module-federation/modern-js-v3/react'
 import './index.css';
 
 const RemoteSSRComponent = createLazyComponent({
