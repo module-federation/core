@@ -12,11 +12,11 @@
       }
     },
     "test": {
-      "executor": "@nx/jest:jest",
+      "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "packages/bridge/bridge-react/jest.config.ts",
-        "passWithNoTests": true
+        "command": "pnpm exec jest --config packages/bridge/bridge-react/jest.config.ts --passWithNoTests",
+        "forwardAllArgs": false
       }
     }
   }
