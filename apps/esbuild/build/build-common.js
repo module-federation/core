@@ -33,6 +33,7 @@ async function buildProject(projectName, watch) {
   if (watch) {
     const context = await esbuild.context(buildOptions);
     await context.watch();
+    console.log(`Watching ${projectName} for changes...`);
   } else {
     await esbuild.build(buildOptions);
   }

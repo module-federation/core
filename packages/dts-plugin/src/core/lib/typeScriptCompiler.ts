@@ -1,4 +1,5 @@
-import { ensureDirSync, writeFileSync, existsSync } from 'fs-extra';
+import fse from 'fs-extra';
+const { ensureDirSync, writeFileSync, existsSync } = fse;
 import crypto from 'crypto';
 import { stat, readdir, writeFile, rm, readFile } from 'fs/promises';
 import {
@@ -11,11 +12,8 @@ import {
   extname,
   isAbsolute,
 } from 'path';
-import {
-  getShortErrorMsg,
-  TYPE_001,
-  typeDescMap,
-} from '@module-federation/error-codes';
+import { TYPE_001, typeDescMap } from '@module-federation/error-codes';
+import { logAndReport } from '@module-federation/error-codes/node';
 import { ThirdPartyExtractor } from '@module-federation/third-party-dts-extractor';
 import { execFile } from 'child_process';
 import util from 'util';
@@ -297,10 +295,14 @@ export const compileTs = async (
           // noop
         }
       }
-      throw new Error(
-        getShortErrorMsg(TYPE_001, typeDescMap, {
-          cmd,
-        }),
+      logAndReport(
+        TYPE_001,
+        typeDescMap,
+        { cmd },
+        (msg) => {
+          throw new Error(msg);
+        },
+        undefined,
       );
     }
 
