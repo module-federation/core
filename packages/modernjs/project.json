@@ -31,8 +31,12 @@
       }
     },
     "test": {
-      "executor": "@nx/vite:test",
-      "outputs": ["{workspaceRoot}/coverage/packages/modernjs"]
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/coverage/packages/modernjs"],
+      "options": {
+        "command": "pnpm exec vitest run --passWithNoTests --config packages/modernjs/vite.config.mts",
+        "forwardAllArgs": false
+      }
     },
     "pre-release": {
       "executor": "nx:run-commands",
@@ -49,9 +53,6 @@
           }
         ]
       }
-    },
-    "semantic-release": {
-      "executor": "@goestav/nx-semantic-release:semantic-release"
     }
   }
 }
