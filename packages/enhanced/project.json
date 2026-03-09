@@ -8,7 +8,11 @@
     "generate:schema": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "node src/scripts/compile-schema.js",
+        "parallel": false,
+        "commands": [
+          "node src/scripts/compile-schema.js",
+          "node src/scripts/generate-sdk-types.js"
+        ],
         "cwd": "packages/enhanced"
       }
     },

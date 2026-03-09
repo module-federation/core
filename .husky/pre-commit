@@ -1,6 +1,17 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
+# Regenerate schema validation & SDK types when JSON schemas change
+if git diff --cached --name-only | grep -qE '^packages/enhanced/src/schemas/.+\.json$'; then
+  echo "[husky] Detected schema changes, running pnpm generate:schema..."
+  pnpm generate:schema || {
+    echo "[husky] pnpm generate:schema failed";
+    exit 1;
+  }
+  # Re-stage generated files if any
+  git add packages/enhanced/src/schemas/container/*.check.ts packages/enhanced/src/schemas/container/*.ts packages/enhanced/src/schemas/sharing/*.check.ts packages/enhanced/src/schemas/sharing/*.ts packages/sdk/src/types/plugins/*.ts 2>/dev/null || true
+fi
+
 npm run lint-fix
 
 git add .

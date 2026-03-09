@@ -24,7 +24,7 @@ When using this mode, all entrypoints will initialize asynchronously. If you're 
 - **Required:** No
 - **Default:** `false`
 
-After setting `true`, the external {props.name || 'Module Federation'}  runtime will be used and the runtime provided by the consumer will be used. (Please make sure your consumer has `provideExternalRuntime: true` set, otherwise it will not run properly!)
+When set to `true`, `@module-federation/runtime-core` will be treated as an external and read from the global `_FEDERATION_RUNTIME_CORE` at runtime. Ensure the consumer provides this global (typically used together with `provideExternalRuntime`), otherwise it will not work.
 
 ## provideExternalRuntime
 
@@ -32,11 +32,12 @@ After setting `true`, the external {props.name || 'Module Federation'}  runtime 
 - **Required:** No
 - **Default:** `false`
 
-::: warning note
-Make sure to only configure it on the topmost consumer! If multiple consumers inject runtime at the same time, the ones executed later will not overwrite the existing runtime.
-:::
+Only for “pure consumer” scenarios (no `exposes`). When enabled, automatically injects `@module-federation/inject-external-runtime-core-plugin` to provide the external runtime at execution time.
 
-Setting `true` will inject the {props.name || 'Module Federation'}  runtime at the consumer.
+:::warning Notes
+- Using this together with `exposes` will throw an error — only pure consumers can enable it.
+- Prefer configuring it at the topmost consumer to avoid multiple injections.
+:::
 
 ## optimization
 
