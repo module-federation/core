@@ -14,6 +14,6 @@ declare class RequireIncludeDependencyParserPlugin {
 declare namespace RequireIncludeDependencyParserPlugin {
   export { DependencyLocation, JavascriptParser, Range };
 }
-type JavascriptParser = import('../javascript/JavascriptParser');
 type DependencyLocation = import('../Dependency').DependencyLocation;
+type JavascriptParser = import('../javascript/JavascriptParser');
 type Range = import('../javascript/JavascriptParser').Range;

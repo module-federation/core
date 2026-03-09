@@ -27,10 +27,10 @@ class InvertedContainerRuntimeModule extends RuntimeModule {
     }
 
     const runtimeChunk = compilation.options.optimization?.runtimeChunk;
-    if (runtimeChunk === 'single' || typeof runtimeChunk === 'object') {
+    if (typeof runtimeChunk === 'object' && runtimeChunk !== null) {
       const logger = compilation.getLogger('InvertedContainerRuntimeModule');
       logger.info(
-        'Runtime chunk is set to single. Consider adding runtime: false to your ModuleFederationPlugin configuration to prevent runtime conflicts.',
+        'Runtime chunk is configured. Consider adding runtime: false to your ModuleFederationPlugin configuration to prevent runtime conflicts.',
       );
     }
 

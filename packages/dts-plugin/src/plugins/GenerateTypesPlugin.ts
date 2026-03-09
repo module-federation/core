@@ -172,8 +172,7 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
             compilation.emitAsset(
               zipName,
               new compiler.webpack.sources.RawSource(
-                fs.readFileSync(zipTypesPath),
-                false,
+                fs.readFileSync(zipTypesPath) as unknown as string,
               ),
             );
           }
@@ -186,8 +185,7 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
             compilation.emitAsset(
               apiFileName,
               new compiler.webpack.sources.RawSource(
-                fs.readFileSync(apiTypesPath),
-                false,
+                fs.readFileSync(apiTypesPath) as unknown as string,
               ),
             );
           }

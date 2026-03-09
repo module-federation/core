@@ -3,7 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/metro-plugin-rnef/src",
   "projectType": "library",
-  "tags": ["type:metro"],
+  "tags": ["type:pkg"],
   "targets": {
     "build": {
       "executor": "nx:run-commands",

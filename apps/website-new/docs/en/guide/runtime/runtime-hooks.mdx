@@ -126,6 +126,26 @@ interface RemoteInfo {
 }
 ```
 
+## beforeInitContainer
+
+`AsyncWaterfallHook`
+
+Triggered before the host calls `remoteEntry.init(...)`. Useful for dynamically rewriting the share-scope alignment for this initialization (shareScopeKeys/shareScopeMap) and the `remoteEntryInitOptions` passed to the remote.
+
+* type
+
+```ts
+async function beforeInitContainer(args: BeforeInitContainerOptions): Promise<BeforeInitContainerOptions>
+
+type BeforeInitContainerOptions ={
+  shareScope: ShareScopeMap[string];
+  initScope: InitScope;
+  remoteEntryInitOptions: RemoteEntryInitOptions;
+  remoteInfo: RemoteInfo;
+  origin: ModuleFederation;
+}
+```
+
 ## handlePreloadModule
 
 `SyncHook`
@@ -259,6 +279,26 @@ type BeforeLoadShareOptions ={
   shareInfo?: Shared;
   shared: Options['shared'];
   origin: ModuleFederation;
+}
+```
+
+## initContainerShareScopeMap
+
+`SyncWaterfallHook`
+
+Triggered when the host aligns a remote’s share-scope mapping. Useful for redirecting one scope to another (for example, aliasing `scope1` to `default` so they share the same pool).
+
+* type
+
+```ts
+function initContainerShareScopeMap(args: InitContainerShareScopeMapOptions): InitContainerShareScopeMapOptions
+
+type InitContainerShareScopeMapOptions ={
+  shareScope: ShareScopeMap[string];
+  options: Options;
+  origin: ModuleFederation;
+  scopeName: string;
+  hostShareScopeMap?: ShareScopeMap;
 }
 ```
 

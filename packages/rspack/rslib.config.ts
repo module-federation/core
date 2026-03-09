@@ -1,18 +1,23 @@
 import { defineConfig } from '@rslib/core';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { pluginPublint } from 'rsbuild-plugin-publint';
 
 const pkg = JSON.parse(
   readFileSync(join(process.cwd(), 'package.json'), 'utf-8'),
 );
 
 export default defineConfig({
+  plugins: [pluginPublint()],
   lib: [
     {
       format: 'esm',
       syntax: 'es2021',
       bundle: false,
       outBase: 'src',
+      define: {
+        'process.env.IS_ESM_BUILD': JSON.stringify('true'),
+      },
       dts: {
         bundle: false,
         distPath: './dist',
@@ -23,6 +28,9 @@ export default defineConfig({
       syntax: 'es2021',
       bundle: false,
       outBase: 'src',
+      define: {
+        'process.env.IS_ESM_BUILD': JSON.stringify('false'),
+      },
       dts: false,
     },
   ],

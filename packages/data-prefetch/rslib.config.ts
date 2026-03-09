@@ -1,15 +1,21 @@
+import { pluginPublint } from 'rsbuild-plugin-publint';
 import { defineConfig } from '@rslib/core';
 
 export default defineConfig({
+  plugins: [pluginPublint()],
   lib: [
     {
       format: 'esm',
       syntax: 'es2021',
       bundle: false,
       outBase: 'src',
+      define: {
+        'process.env.IS_ESM_BUILD': JSON.stringify('true'),
+      },
       dts: {
         bundle: false,
         distPath: './dist',
+        autoExtension: true,
       },
     },
     {
@@ -17,7 +23,14 @@ export default defineConfig({
       syntax: 'es2021',
       bundle: false,
       outBase: 'src',
-      dts: false,
+      define: {
+        'process.env.IS_ESM_BUILD': JSON.stringify('false'),
+      },
+      dts: {
+        bundle: false,
+        distPath: './dist',
+        autoExtension: true,
+      },
     },
   ],
   source: {

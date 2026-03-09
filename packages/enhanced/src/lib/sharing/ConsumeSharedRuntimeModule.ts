@@ -30,6 +30,9 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
     const compilation: Compilation = this.compilation!;
     const chunkGraph: ChunkGraph = this.chunkGraph!;
     const { runtimeTemplate, codeGenerationResults } = compilation;
+    if (!codeGenerationResults) {
+      return null;
+    }
     const chunkToModuleMapping: Record<string, any> = {};
     const moduleIdToSourceMapping: Map<string | number, string> = new Map();
     const initialConsumes: (string | number)[] = [];
@@ -48,6 +51,9 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
         const module: ConsumeSharedModule = m as unknown as ConsumeSharedModule;
         // @ts-ignore
         const id = chunkGraph.getModuleId(module);
+        if (id === null || id === undefined) {
+          continue;
+        }
         list.push(id);
         const moduleGetter = codeGenerationResults.getSource(
           // @ts-ignore
@@ -55,12 +61,18 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
           chunk.runtime,
           'consume-shared',
         );
+        if (!moduleGetter) {
+          continue;
+        }
         const shareOption = codeGenerationResults.getData(
           // @ts-ignore
           module,
           chunk.runtime,
           'consume-shared',
         );
+        if (!shareOption) {
+          continue;
+        }
         moduleIdToSourceMapping.set(
           id,
           Template.asString([

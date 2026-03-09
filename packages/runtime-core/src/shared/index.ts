@@ -1,5 +1,4 @@
 import {
-  getShortErrorMsg,
   RUNTIME_005,
   RUNTIME_006,
   runtimeDescMap,
@@ -34,7 +33,7 @@ import {
   shouldUseTreeShaking,
   addUseIn,
 } from '../utils/share';
-import { assert, addUniqueItem } from '../utils';
+import { assert, error, addUniqueItem, optionsToMFContext } from '../utils';
 import { DEFAULT_SCOPE } from '../constant';
 import { LoadRemoteMatch } from '../remote';
 import { createRemoteEntryInitOptions } from '../module';
@@ -331,9 +330,10 @@ export class SharedHandler {
             origin: host,
           })) as RemoteEntryExports;
       } finally {
-        if (remoteEntryExports?.init) {
+        // prevent self load loop: when host load self , the initTokens is not the same
+        if (remoteEntryExports?.init && !module.initing) {
           module.remoteEntryExports = remoteEntryExports;
-          await module.init();
+          await module.init(undefined, undefined, initScope);
         }
       }
     };
@@ -432,11 +432,15 @@ export class SharedHandler {
       if (module instanceof Promise) {
         const errorCode =
           extraOptions?.from === 'build' ? RUNTIME_005 : RUNTIME_006;
-        throw new Error(
-          getShortErrorMsg(errorCode, runtimeDescMap, {
+        error(
+          errorCode,
+          runtimeDescMap,
+          {
             hostName: host.options.name,
             sharedPkgName: pkgName,
-          }),
+          },
+          undefined,
+          optionsToMFContext(host.options),
         );
       }
 
@@ -452,11 +456,15 @@ export class SharedHandler {
       return shareOptions.lib as () => T;
     }
 
-    throw new Error(
-      getShortErrorMsg(RUNTIME_006, runtimeDescMap, {
+    error(
+      RUNTIME_006,
+      runtimeDescMap,
+      {
         hostName: host.options.name,
         sharedPkgName: pkgName,
-      }),
+      },
+      undefined,
+      optionsToMFContext(host.options),
     );
   }
 

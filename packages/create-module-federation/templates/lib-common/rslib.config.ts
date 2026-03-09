@@ -1,6 +1,7 @@
 import { pluginReact } from '@rsbuild/plugin-react';
 import { defineConfig } from '@rslib/core';
 import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+import { pluginPublint } from 'rsbuild-plugin-publint';
 import moduleFederationConfig from './module-federation.config';
 import pkg from './package.json';
 
@@ -48,5 +49,9 @@ export default defineConfig({
   server: {
     port: 3001,
   },
-  plugins: [pluginReact(), pluginModuleFederation(moduleFederationConfig)],
+  plugins: [
+    pluginReact(),
+    pluginModuleFederation(moduleFederationConfig),
+    pluginPublint(),
+  ],
 });

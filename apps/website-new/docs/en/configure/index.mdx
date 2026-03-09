@@ -6,6 +6,8 @@ The current page lists all the configuration options for `Module Federation`. Pl
 type ModuleFederationOptions = {
   // Name for module federation
   name: string;
+  // Share scope(s) for the current app (default: 'default')
+  shareScope?: string | string[];
   // Name for the remoteEntry file
   filename?: string;
   // Configuration for remote modules and entry information in module federation

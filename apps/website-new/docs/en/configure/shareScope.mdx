@@ -1,0 +1,51 @@
+# shareScope
+
+`shareScope` specifies which shared dependency pools (share scopes) a producer (remote) participates in. You can think of a share scope as a named shared-dependency pool: dependencies are only reused within the same scope.
+
+- Type: `string | string[]`
+- Required: No
+- Default: `'default'`
+
+## What It Does
+
+- Controls which share scopes a remote initializes at runtime.
+- Works with `shared[*].shareScope`: a shared dependency only participates in the scope it is assigned to.
+- Works with `remotes[remote].shareScope`: the host must align the scopes it wants to reuse with the remote, otherwise missing scopes are treated as empty and cannot be reused.
+
+## Examples
+
+### Single Scope (Default)
+
+```ts
+new ModuleFederationPlugin({
+  name: 'app_remote',
+  shareScope: 'default',
+});
+```
+
+### Multiple Scopes (Isolated Shared Pools)
+
+```ts
+new ModuleFederationPlugin({
+  name: 'app_remote',
+  shareScope: ['default', 'scope1'],
+  shared: {
+    react: {
+      singleton: true,
+      requiredVersion: false,
+      shareScope: 'default',
+    },
+    '@company/design-system': {
+      singleton: true,
+      requiredVersion: false,
+      shareScope: 'scope1',
+    },
+  },
+});
+```
+
+## Notes
+
+- `shareScope` declares which share scopes this remote initializes. It does not automatically put dependencies into those scopes; that is controlled by each `shared` entry's `shareScope`.
+- To actually reuse dependencies across apps, the host and remote typically need to agree on the same share scopes for that remote. See [remotes.shareScope](./remotes#sharescope).
+

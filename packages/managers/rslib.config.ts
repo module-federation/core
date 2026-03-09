@@ -1,6 +1,8 @@
+import { pluginPublint } from 'rsbuild-plugin-publint';
 import { defineConfig } from '@rslib/core';
 
 export default defineConfig({
+  plugins: [pluginPublint()],
   lib: [
     {
       format: 'esm',
@@ -10,6 +12,7 @@ export default defineConfig({
       dts: {
         bundle: false,
         distPath: './dist',
+        autoExtension: true,
       },
     },
     {
@@ -17,7 +20,11 @@ export default defineConfig({
       syntax: 'es2021',
       bundle: false,
       outBase: 'src',
-      dts: false,
+      dts: {
+        bundle: false,
+        distPath: './dist',
+        autoExtension: true,
+      },
     },
   ],
   source: {

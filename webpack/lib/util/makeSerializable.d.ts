@@ -1,8 +1,29 @@
-declare function _exports(
-  Constructor: Constructor,
+declare namespace _exports {
+  export {
+    Constructor,
+    ObjectDeserializerContext,
+    ObjectSerializerContext,
+    SerializableClass,
+    SerializableClassConstructor,
+  };
+}
+declare function _exports<T extends Constructor>(
+  Constructor: T,
   request: string,
-  name?: string | null,
+  name?: (string | null) | undefined,
 ): void;
 export = _exports;
-export type Constructor =
-  import('../serialization/ObjectMiddleware').Constructor;
+type Constructor = import('../serialization/ObjectMiddleware').Constructor;
+type ObjectDeserializerContext =
+  import('../serialization/ObjectMiddleware').ObjectDeserializerContext;
+type ObjectSerializerContext =
+  import('../serialization/ObjectMiddleware').ObjectSerializerContext;
+type SerializableClass = {
+  serialize: (context: ObjectSerializerContext) => void;
+  deserialize: (context: ObjectDeserializerContext) => void;
+};
+type SerializableClassConstructor<T extends SerializableClass> = (new (
+  ...params: EXPECTED_ANY[]
+) => T) & {
+  deserialize?: (context: ObjectDeserializerContext) => T;
+};

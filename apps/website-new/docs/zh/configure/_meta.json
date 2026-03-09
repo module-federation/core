@@ -21,6 +21,11 @@
   },
   {
     "type": "file",
+    "name": "shareScope",
+    "label": "shareScope"
+  },
+  {
+    "type": "file",
     "name": "exposes",
     "label": "exposes"
   },

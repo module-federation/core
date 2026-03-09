@@ -1,43 +1,60 @@
 export = ContextElementDependency;
-/** @typedef {import("../Dependency").ReferencedExport} ReferencedExport */
+/** @typedef {import("../ContextModule")} ContextModule */
+/** @typedef {import("../Dependency").RawReferencedExports} RawReferencedExports */
+/** @typedef {import("../Dependency").ReferencedExports} ReferencedExports */
+/** @typedef {import("../Module")} Module */
 /** @typedef {import("../ModuleGraph")} ModuleGraph */
+/** @typedef {import("../javascript/JavascriptParser").ImportAttributes} ImportAttributes */
 /** @typedef {import("../serialization/ObjectMiddleware").ObjectDeserializerContext} ObjectDeserializerContext */
 /** @typedef {import("../serialization/ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
 /** @typedef {import("../util/runtime").RuntimeSpec} RuntimeSpec */
 declare class ContextElementDependency extends ModuleDependency {
   /**
    * @param {string} request request
-   * @param {string|undefined} userRequest user request
-   * @param {string} typePrefix type prefix
+   * @param {string | undefined} userRequest user request
+   * @param {string | undefined} typePrefix type prefix
    * @param {string} category category
-   * @param {string[][]=} referencedExports referenced exports
+   * @param {RawReferencedExports | null=} referencedExports referenced exports
    * @param {string=} context context
+   * @param {ImportAttributes=} attributes import assertions
    */
   constructor(
     request: string,
     userRequest: string | undefined,
-    typePrefix: string,
+    typePrefix: string | undefined,
     category: string,
-    referencedExports?: string[][] | undefined,
+    referencedExports?: (RawReferencedExports | null) | undefined,
     context?: string | undefined,
+    attributes?: ImportAttributes | undefined,
   );
-  referencedExports: string[][];
   _typePrefix: string;
   _category: string;
+  referencedExports: Dependency.RawReferencedExports;
   _context: string;
+  attributes: import('../javascript/JavascriptParser').ImportAttributes;
 }
 declare namespace ContextElementDependency {
   export {
-    ReferencedExport,
+    ContextModule,
+    RawReferencedExports,
+    ReferencedExports,
+    Module,
     ModuleGraph,
+    ImportAttributes,
     ObjectDeserializerContext,
     ObjectSerializerContext,
     RuntimeSpec,
   };
 }
 import ModuleDependency = require('./ModuleDependency');
-type ReferencedExport = import('../Dependency').ReferencedExport;
+import Dependency = require('../Dependency');
+type ContextModule = import('../ContextModule');
+type RawReferencedExports = import('../Dependency').RawReferencedExports;
+type ReferencedExports = import('../Dependency').ReferencedExports;
+type Module = import('../Module');
 type ModuleGraph = import('../ModuleGraph');
+type ImportAttributes =
+  import('../javascript/JavascriptParser').ImportAttributes;
 type ObjectDeserializerContext =
   import('../serialization/ObjectMiddleware').ObjectDeserializerContext;
 type ObjectSerializerContext =

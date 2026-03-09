@@ -3,10 +3,19 @@ import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime';
 
 import { definePropertyGlobalVal } from '../sdk';
 
+type LoadRemoteSnapshotArgs = Parameters<
+  NonNullable<ModuleFederationRuntimePlugin['loadRemoteSnapshot']>
+>[0];
+
 const getModuleInfo = (): ModuleFederationRuntimePlugin => {
   return {
     name: 'mf-devtool-getModuleInfo-plugin',
-    loadRemoteSnapshot({ options, moduleInfo, remoteSnapshot, ...res }) {
+    loadRemoteSnapshot({
+      options,
+      moduleInfo,
+      remoteSnapshot,
+      ...res
+    }: LoadRemoteSnapshotArgs) {
       const globalSnapshot = helpers.global.getGlobalSnapshot();
 
       if (!options || options.inBrowser) {

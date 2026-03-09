@@ -1,11 +1,10 @@
 export = PrefetchPlugin;
-/** @typedef {import("./Compiler")} Compiler */
 declare class PrefetchPlugin {
   /**
    * @param {string} context context or request if context is not set
-   * @param {string} [request] request
+   * @param {string=} request request
    */
-  constructor(context: string, request?: string);
+  constructor(context: string, request?: string | undefined);
   context: string;
   request: string;
   /**

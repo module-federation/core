@@ -68,7 +68,6 @@ jobs:
         run: |
           git fetch origin main
           npx nx run-many --targets=build --projects=tag:type:pkg --skip-nx-cache
-          npx nx run-many --targets=build --projects=tag:type:metro
           ls -l packages/*/dist packages/*/package.json
 
       - name: Publish latest version

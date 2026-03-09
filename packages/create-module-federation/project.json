@@ -41,7 +41,9 @@
       ],
       "options": {
         "parallel": false,
-        "commands": ["echo 'no test'"]
+        "commands": [
+          "node packages/create-module-federation/scripts/verify-rslib-templates.mjs"
+        ]
       }
     },
     "pre-release": {

@@ -17,7 +17,6 @@ describe('patchMFConfig', async () => {
   it('patchMFConfig: server', async () => {
     const patchedConfig = JSON.parse(JSON.stringify(mfConfig));
     patchMFConfig(patchedConfig, true);
-    const ipv4 = getIPV4();
 
     expect(patchedConfig).toStrictEqual({
       dev: false,
@@ -29,7 +28,7 @@ describe('patchMFConfig', async () => {
       },
       name: 'host',
       remotes: {
-        remote: `http://${ipv4}:3000/remoteEntry.js`,
+        remote: `http://localhost:3000/remoteEntry.js`,
       },
       remoteType: 'script',
       runtimePlugins: [
@@ -53,13 +52,12 @@ describe('patchMFConfig', async () => {
   it('patchMFConfig: client', async () => {
     const patchedConfig = JSON.parse(JSON.stringify(mfConfig));
     patchMFConfig(patchedConfig, false);
-    const ipv4 = getIPV4();
 
     expect(patchedConfig).toStrictEqual({
       filename: 'remoteEntry.js',
       name: 'host',
       remotes: {
-        remote: `http://${ipv4}:3000/remoteEntry.js`,
+        remote: `http://localhost:3000/remoteEntry.js`,
       },
       remoteType: 'script',
       runtimePlugins: [

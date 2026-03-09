@@ -1,7 +1,12 @@
-import { getFMId, assert, error, processModuleAlias } from '../utils';
+import {
+  getFMId,
+  assert,
+  error,
+  processModuleAlias,
+  optionsToMFContext,
+} from '../utils';
 import { safeToString, ModuleInfo } from '@module-federation/sdk';
 import {
-  getShortErrorMsg,
   RUNTIME_002,
   RUNTIME_008,
   runtimeDescMap,
@@ -20,6 +25,7 @@ export type ModuleOptions = ConstructorParameters<typeof Module>[0];
 export function createRemoteEntryInitOptions(
   remoteInfo: RemoteInfo,
   hostShareScopeMap: ShareScopeMap,
+  rawInitScope?: InitScope,
 ): Record<string, any> {
   const localShareScopeMap = hostShareScopeMap;
 
@@ -52,7 +58,7 @@ export function createRemoteEntryInitOptions(
 
   // TODO: compate legacy init params, should use shareScopeMap if exist
   const shareScope = localShareScopeMap[shareScopeKeys[0]];
-  const initScope: InitScope = [];
+  const initScope: InitScope = rawInitScope ?? [];
 
   return {
     remoteEntryInitOptions,
@@ -103,7 +109,11 @@ class Module {
 
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 
-  async init(id?: string, remoteSnapshot?: ModuleInfo) {
+  async init(
+    id?: string,
+    remoteSnapshot?: ModuleInfo,
+    rawInitScope?: InitScope,
+  ) {
     // Get remoteEntry.js
     const remoteEntryExports = await this.getEntry();
 
@@ -119,7 +129,11 @@ class Module {
     this.initing = true;
     this.initPromise = (async () => {
       const { remoteEntryInitOptions, shareScope, initScope } =
-        createRemoteEntryInitOptions(this.remoteInfo, this.host.shareScopeMap);
+        createRemoteEntryInitOptions(
+          this.remoteInfo,
+          this.host.shareScopeMap,
+          rawInitScope,
+        );
 
       const initContainerOptions =
         await this.host.hooks.lifecycle.beforeInitContainer.emit({
@@ -133,12 +147,16 @@ class Module {
 
       if (typeof remoteEntryExports?.init === 'undefined') {
         error(
-          getShortErrorMsg(RUNTIME_002, runtimeDescMap, {
+          RUNTIME_002,
+          runtimeDescMap,
+          {
             hostName: this.host.name,
             remoteName: this.remoteInfo.name,
             remoteEntryUrl: this.remoteInfo.entry,
             remoteEntryKey: this.remoteInfo.entryGlobalName,
-          }),
+          },
+          undefined,
+          optionsToMFContext(this.host.options),
         );
       }
 

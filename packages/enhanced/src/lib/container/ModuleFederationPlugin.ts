@@ -21,7 +21,6 @@ import ContainerPlugin from './ContainerPlugin';
 import ContainerReferencePlugin from './ContainerReferencePlugin';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
 import { RemoteEntryPlugin } from '@module-federation/rspack/remote-entry-plugin';
-import { ExternalsType } from 'webpack/declarations/WebpackOptions';
 import StartupChunkDependenciesPlugin from '../startup/MfStartupChunkDependenciesPlugin';
 import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 import { createSchemaValidation } from '../../utils';
@@ -119,8 +118,14 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     (new RemoteEntryPlugin(options) as unknown as WebpackPluginInstance).apply(
       compiler,
     );
+    const useContainerPlugin =
+      options.exposes &&
+      (Array.isArray(options.exposes)
+        ? options.exposes.length > 0
+        : Object.keys(options.exposes).length > 0);
+
     if (experiments?.provideExternalRuntime) {
-      if (options.exposes) {
+      if (useContainerPlugin) {
         throw new Error(
           'You can only set provideExternalRuntime: true in pure consumer which not expose modules.',
         );
@@ -165,14 +170,10 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     const remoteType =
       options.remoteType ||
       (options.library && isValidExternalsType(options.library.type)
-        ? (options.library.type as ExternalsType)
-        : ('script' as ExternalsType));
-
-    const useContainerPlugin =
-      options.exposes &&
-      (Array.isArray(options.exposes)
-        ? options.exposes.length > 0
-        : Object.keys(options.exposes).length > 0);
+        ? (options.library.type as moduleFederationPlugin.ExternalsType)
+        : ('script' as moduleFederationPlugin.ExternalsType));
+    const containerRemoteType =
+      remoteType as moduleFederationPlugin.ExternalsType;
 
     let disableManifest = options.manifest === false;
     if (useContainerPlugin) {
@@ -219,7 +220,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
           : Object.keys(remotes).length > 0)
       ) {
         new ContainerReferencePlugin({
-          remoteType,
+          remoteType: containerRemoteType,
           shareScope,
           remotes,
         }).apply(compiler);

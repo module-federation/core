@@ -1,8 +1,11 @@
 export = BasicEvaluatedExpression;
+/** @typedef {() => Members} GetMembers */
+/** @typedef {() => MembersOptionals} GetMembersOptionals */
+/** @typedef {() => MemberRanges} GetMemberRanges */
 declare class BasicEvaluatedExpression {
   type: number;
-  /** @type {[number, number] | undefined} */
-  range: [number, number] | undefined;
+  /** @type {Range | undefined} */
+  range: Range | undefined;
   /** @type {boolean} */
   falsy: boolean;
   /** @type {boolean} */
@@ -25,8 +28,8 @@ declare class BasicEvaluatedExpression {
   quasis: BasicEvaluatedExpression[] | undefined;
   /** @type {BasicEvaluatedExpression[] | undefined} */
   parts: BasicEvaluatedExpression[] | undefined;
-  /** @type {any[] | undefined} */
-  array: any[] | undefined;
+  /** @type {EXPECTED_ANY[] | undefined} */
+  array: EXPECTED_ANY[] | undefined;
   /** @type {BasicEvaluatedExpression[] | undefined} */
   items: BasicEvaluatedExpression[] | undefined;
   /** @type {BasicEvaluatedExpression[] | undefined} */
@@ -37,16 +40,16 @@ declare class BasicEvaluatedExpression {
   postfix: BasicEvaluatedExpression | undefined | null;
   /** @type {BasicEvaluatedExpression[] | undefined} */
   wrappedInnerExpressions: BasicEvaluatedExpression[] | undefined;
-  /** @type {string | VariableInfoInterface | undefined} */
-  identifier: string | VariableInfoInterface | undefined;
-  /** @type {string | VariableInfoInterface | undefined} */
-  rootInfo: string | VariableInfoInterface | undefined;
-  /** @type {(() => string[]) | undefined} */
-  getMembers: () => string[];
-  /** @type {(() => boolean[]) | undefined} */
-  getMembersOptionals: () => boolean[];
-  /** @type {(() => Range[]) | undefined} */
-  getMemberRanges: () => import('./JavascriptParser').Range[];
+  /** @type {string | VariableInfo | undefined} */
+  identifier: string | VariableInfo | undefined;
+  /** @type {string | VariableInfo | undefined} */
+  rootInfo: string | VariableInfo | undefined;
+  /** @type {GetMembers | undefined} */
+  getMembers: GetMembers | undefined;
+  /** @type {GetMembersOptionals | undefined} */
+  getMembersOptionals: GetMembersOptionals | undefined;
+  /** @type {GetMemberRanges | undefined} */
+  getMemberRanges: GetMemberRanges | undefined;
   /** @type {Node | undefined} */
   expression: Node | undefined;
   isUnknown(): boolean;
@@ -75,9 +78,17 @@ declare class BasicEvaluatedExpression {
   isCompileTimeValue(): boolean;
   /**
    * Gets the compile-time value of the expression
-   * @returns {any} the javascript value
+   * @returns {undefined | null | string | number | boolean | RegExp | EXPECTED_ANY[] | bigint} the javascript value
    */
-  asCompileTimeValue(): any;
+  asCompileTimeValue():
+    | undefined
+    | null
+    | string
+    | number
+    | boolean
+    | RegExp
+    | EXPECTED_ANY[]
+    | bigint;
   isTruthy(): boolean;
   isFalsy(): boolean;
   isNullish(): boolean;
@@ -134,58 +145,52 @@ declare class BasicEvaluatedExpression {
   setRegExp(regExp: RegExp): this;
   /**
    * Set's the value of this expression to a particular identifier and its members.
-   *
-   * @param {string | VariableInfoInterface} identifier identifier to set
-   * @param {string | VariableInfoInterface} rootInfo root info
-   * @param {() => string[]} getMembers members
-   * @param {() => boolean[]=} getMembersOptionals optional members
-   * @param {() => Range[]=} getMemberRanges ranges of progressively increasing sub-expressions
+   * @param {string | VariableInfo} identifier identifier to set
+   * @param {string | VariableInfo} rootInfo root info
+   * @param {GetMembers} getMembers members
+   * @param {GetMembersOptionals=} getMembersOptionals optional members
+   * @param {GetMemberRanges=} getMemberRanges ranges of progressively increasing sub-expressions
    * @returns {this} this
    */
   setIdentifier(
-    identifier: string | VariableInfoInterface,
-    rootInfo: string | VariableInfoInterface,
-    getMembers: () => string[],
-    getMembersOptionals?: () => boolean[],
-    getMemberRanges?: () => import('./JavascriptParser').Range[],
+    identifier: string | VariableInfo,
+    rootInfo: string | VariableInfo,
+    getMembers: GetMembers,
+    getMembersOptionals?: GetMembersOptionals | undefined,
+    getMemberRanges?: GetMemberRanges | undefined,
   ): this;
   /**
    * Wraps an array of expressions with a prefix and postfix expression.
-   *
    * @param {BasicEvaluatedExpression | null | undefined} prefix Expression to be added before the innerExpressions
    * @param {BasicEvaluatedExpression | null | undefined} postfix Expression to be added after the innerExpressions
-   * @param {BasicEvaluatedExpression[]} innerExpressions Expressions to be wrapped
+   * @param {BasicEvaluatedExpression[] | undefined} innerExpressions Expressions to be wrapped
    * @returns {this} this
    */
   setWrapped(
     prefix: BasicEvaluatedExpression | null | undefined,
     postfix: BasicEvaluatedExpression | null | undefined,
-    innerExpressions: BasicEvaluatedExpression[],
+    innerExpressions: BasicEvaluatedExpression[] | undefined,
   ): this;
   /**
    * Stores the options of a conditional expression.
-   *
    * @param {BasicEvaluatedExpression[]} options optional (consequent/alternate) expressions to be set
    * @returns {this} this
    */
   setOptions(options: BasicEvaluatedExpression[]): this;
   /**
    * Adds options to a conditional expression.
-   *
    * @param {BasicEvaluatedExpression[]} options optional (consequent/alternate) expressions to be added
    * @returns {this} this
    */
   addOptions(options: BasicEvaluatedExpression[]): this;
   /**
    * Set's the value of this expression to an array of expressions.
-   *
    * @param {BasicEvaluatedExpression[]} items expressions to set
    * @returns {this} this
    */
   setItems(items: BasicEvaluatedExpression[]): this;
   /**
    * Set's the value of this expression to an array of strings.
-   *
    * @param {string[]} array array to set
    * @returns {this} this
    */
@@ -193,7 +198,6 @@ declare class BasicEvaluatedExpression {
   /**
    * Set's the value of this expression to a processed/unprocessed template string. Used
    * for evaluating TemplateLiteral expressions in the JavaScript Parser.
-   *
    * @param {BasicEvaluatedExpression[]} quasis template string quasis
    * @param {BasicEvaluatedExpression[]} parts template string parts
    * @param {"cooked" | "raw"} kind template string kind
@@ -204,46 +208,59 @@ declare class BasicEvaluatedExpression {
     parts: BasicEvaluatedExpression[],
     kind: 'cooked' | 'raw',
   ): this;
-  templateStringKind: 'raw' | 'cooked';
+  templateStringKind: 'cooked' | 'raw';
   setTruthy(): this;
   setFalsy(): this;
   /**
    * Set's the value of the expression to nullish.
-   *
    * @param {boolean} value true, if the expression is nullish
    * @returns {this} this
    */
   setNullish(value: boolean): this;
   /**
    * Set's the range for the expression.
-   *
-   * @param {[number, number]} range range to set
+   * @param {Range} range range to set
    * @returns {this} this
    */
-  setRange(range: [number, number]): this;
+  setRange(range: Range): this;
   /**
    * Set whether or not the expression has side effects.
-   *
    * @param {boolean} sideEffects true, if the expression has side effects
    * @returns {this} this
    */
   setSideEffects(sideEffects?: boolean): this;
   /**
    * Set the expression node for the expression.
-   *
    * @param {Node | undefined} expression expression
    * @returns {this} this
    */
   setExpression(expression: Node | undefined): this;
 }
 declare namespace BasicEvaluatedExpression {
-  export { isValidRegExpFlags, Node, Range, VariableInfoInterface };
+  export {
+    isValidRegExpFlags,
+    Node,
+    Range,
+    VariableInfo,
+    Members,
+    MembersOptionals,
+    MemberRanges,
+    GetMembers,
+    GetMembersOptionals,
+    GetMemberRanges,
+  };
 }
-type VariableInfoInterface = import('./JavascriptParser').VariableInfoInterface;
-type Node = import('estree').Node;
 /**
  * @param {string} flags regexp flags
  * @returns {boolean} is valid flags
  */
 declare function isValidRegExpFlags(flags: string): boolean;
+type Node = import('estree').Node;
 type Range = import('./JavascriptParser').Range;
+type VariableInfo = import('./JavascriptParser').VariableInfo;
+type Members = import('./JavascriptParser').Members;
+type MembersOptionals = import('./JavascriptParser').MembersOptionals;
+type MemberRanges = import('./JavascriptParser').MemberRanges;
+type GetMembers = () => Members;
+type GetMembersOptionals = () => MembersOptionals;
+type GetMemberRanges = () => MemberRanges;

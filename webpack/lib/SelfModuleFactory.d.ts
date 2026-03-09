@@ -1,6 +1,6 @@
 export = SelfModuleFactory;
+/** @typedef {import("./ModuleFactory").ModuleFactoryCallback} ModuleFactoryCallback */
 /** @typedef {import("./ModuleFactory").ModuleFactoryCreateData} ModuleFactoryCreateData */
-/** @typedef {import("./ModuleFactory").ModuleFactoryResult} ModuleFactoryResult */
 /** @typedef {import("./ModuleGraph")} ModuleGraph */
 declare class SelfModuleFactory {
   /**
@@ -10,21 +10,15 @@ declare class SelfModuleFactory {
   moduleGraph: import('./ModuleGraph');
   /**
    * @param {ModuleFactoryCreateData} data data object
-   * @param {function((Error | null)=, ModuleFactoryResult=): void} callback callback
+   * @param {ModuleFactoryCallback} callback callback
    * @returns {void}
    */
-  create(
-    data: ModuleFactoryCreateData,
-    callback: (
-      arg0: (Error | null) | undefined,
-      arg1: ModuleFactoryResult | undefined,
-    ) => void,
-  ): void;
+  create(data: ModuleFactoryCreateData, callback: ModuleFactoryCallback): void;
 }
 declare namespace SelfModuleFactory {
-  export { ModuleFactoryCreateData, ModuleFactoryResult, ModuleGraph };
+  export { ModuleFactoryCallback, ModuleFactoryCreateData, ModuleGraph };
 }
+type ModuleFactoryCallback = import('./ModuleFactory').ModuleFactoryCallback;
 type ModuleFactoryCreateData =
   import('./ModuleFactory').ModuleFactoryCreateData;
-type ModuleFactoryResult = import('./ModuleFactory').ModuleFactoryResult;
 type ModuleGraph = import('./ModuleGraph');

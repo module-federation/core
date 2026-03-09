@@ -6,16 +6,22 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/rspack:rspack",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
+      "outputs": [
+        "{workspaceRoot}/apps/manifest-demo/3010-rspack-provider/dist"
+      ],
       "defaultConfiguration": "production",
       "options": {
-        "target": "web",
-        "outputPath": "apps/manifest-demo/3010-rspack-provider/dist",
-        "indexHtml": "apps/manifest-demo/3010-rspack-provider/src/index.html",
-        "main": "apps/manifest-demo/3010-rspack-provider/src/index.ts",
-        "tsConfig": "apps/manifest-demo/3010-rspack-provider/tsconfig.app.json",
-        "rspackConfig": "apps/manifest-demo/3010-rspack-provider/rspack.config.js"
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec rspack build --config apps/manifest-demo/3010-rspack-provider/rspack.config.js --mode production",
+        "forwardAllArgs": false
+      },
+      "configurations": {
+        "development": {
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec rspack build --config apps/manifest-demo/3010-rspack-provider/rspack.config.js --mode development"
+        },
+        "production": {
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec rspack build --config apps/manifest-demo/3010-rspack-provider/rspack.config.js --mode production"
+        }
       },
       "dependsOn": [
         {
@@ -25,12 +31,11 @@
       ]
     },
     "serve": {
-      "executor": "@nx/rspack:dev-server",
+      "executor": "nx:run-commands",
       "defaultConfiguration": "production",
       "options": {
-        "rspackConfig": "apps/manifest-demo/3010-rspack-provider/rspack.config.js",
-        "buildTarget": "3010-rspack-provider:build",
-        "port": 3010
+        "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec rspack serve --config apps/manifest-demo/3010-rspack-provider/rspack.config.js --mode production --port 3010 --no-hot",
+        "forwardAllArgs": false
       },
       "dependsOn": [
         {
@@ -40,34 +45,18 @@
       ],
       "configurations": {
         "development": {
-          "buildTarget": "3010-rspack-provider:build:development",
-          "port": 3010
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec rspack serve --config apps/manifest-demo/3010-rspack-provider/rspack.config.js --mode development --port 3010"
         },
         "production": {
-          "buildTarget": "3010-rspack-provider:build:production",
-          "port": 3010
+          "command": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec rspack serve --config apps/manifest-demo/3010-rspack-provider/rspack.config.js --mode production --port 3010 --no-hot"
         }
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
+      "executor": "nx:run-commands",
       "options": {
-        "lintFilePatterns": ["apps/node-remote/**/*.{ts,tsx,js,jsx}"]
-      }
-    },
-    "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-      "options": {
-        "jestConfig": "apps/node-remote/jest.config.ts",
-        "passWithNoTests": true
-      },
-      "configurations": {
-        "ci": {
-          "ci": true,
-          "codeCoverage": true
-        }
+        "command": "pnpm exec eslint apps/manifest-demo/3010-rspack-provider/**/*.{ts,tsx,js,jsx}",
+        "forwardAllArgs": false
       }
     }
   }

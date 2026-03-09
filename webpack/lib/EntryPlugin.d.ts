@@ -1,6 +1,4 @@
 export = EntryPlugin;
-/** @typedef {import("./Compiler")} Compiler */
-/** @typedef {import("./Entrypoint").EntryOptions} EntryOptions */
 declare class EntryPlugin {
   /**
    * @param {string} entry entry request
@@ -12,9 +10,7 @@ declare class EntryPlugin {
     options: EntryOptions | string,
   ): EntryDependency;
   /**
-   * An entry plugin which will handle
-   * creation of the EntryDependency
-   *
+   * An entry plugin which will handle creation of the EntryDependency
    * @param {string} context context path
    * @param {string} entry entry path
    * @param {EntryOptions | string=} options entry options (passing a string is deprecated)
@@ -37,6 +33,6 @@ declare class EntryPlugin {
 declare namespace EntryPlugin {
   export { Compiler, EntryOptions };
 }
+import EntryDependency = require('./dependencies/EntryDependency');
 type Compiler = import('./Compiler');
 type EntryOptions = import('./Entrypoint').EntryOptions;
-import EntryDependency = require('./dependencies/EntryDependency');
