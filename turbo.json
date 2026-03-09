@@ -17,6 +17,10 @@
       "dependsOn": [],
       "outputs": ["dist/**"]
     },
+    "website-new#build": {
+      "dependsOn": ["^build"],
+      "outputs": ["doc_build/**"]
+    },
     "@module-federation/metro-plugin-rnc-cli#build": {
       "dependsOn": ["^build"],
       "outputs": []

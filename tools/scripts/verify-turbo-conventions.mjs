@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { parseJsonFromTurboOutput } from './turbo-script-utils.mjs';
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(SCRIPT_DIR, '../..');
@@ -444,7 +445,7 @@ function getWorkspacePackageNames(errors) {
 
   let payload;
   try {
-    payload = JSON.parse(result.stdout || '{}');
+    payload = parseJsonFromTurboOutput(result.stdout || '');
   } catch (error) {
     errors.push(
       `[verify-turbo-conventions] Failed to parse Turbo workspace package output: ${error.message}`,

@@ -50,6 +50,8 @@ export function parseJsonFromTurboOutput(outputText) {
     return directParse.value;
   }
 
+  let bestMatch = null;
+
   for (let index = 0; index < raw.length; index += 1) {
     const char = raw[index];
     if (char !== '{' && char !== '[') {
@@ -58,7 +60,10 @@ export function parseJsonFromTurboOutput(outputText) {
 
     const toEndParse = tryParseJson(raw.slice(index));
     if (toEndParse.ok) {
-      return toEndParse.value;
+      bestMatch = choosePreferredJsonMatch(
+        bestMatch,
+        buildJsonMatch(raw.slice(index), toEndParse.value),
+      );
     }
 
     const balancedCandidate = extractBalancedJson(raw, index);
@@ -68,8 +73,15 @@ export function parseJsonFromTurboOutput(outputText) {
 
     const balancedParse = tryParseJson(balancedCandidate);
     if (balancedParse.ok) {
-      return balancedParse.value;
+      bestMatch = choosePreferredJsonMatch(
+        bestMatch,
+        buildJsonMatch(balancedCandidate, balancedParse.value),
+      );
     }
+  }
+
+  if (bestMatch) {
+    return bestMatch.value;
   }
 
   throw new Error('Unable to locate JSON payload in Turbo output.');
@@ -160,4 +172,58 @@ function extractBalancedJson(text, startIndex) {
   }
 
   return null;
+}
+
+function buildJsonMatch(rawText, value) {
+  return {
+    rawText,
+    value,
+    score: scoreTurboJsonCandidate(value, rawText),
+  };
+}
+
+function choosePreferredJsonMatch(current, candidate) {
+  if (!current) {
+    return candidate;
+  }
+  if (candidate.score !== current.score) {
+    return candidate.score > current.score ? candidate : current;
+  }
+  if (candidate.rawText.length !== current.rawText.length) {
+    return candidate.rawText.length > current.rawText.length
+      ? candidate
+      : current;
+  }
+  return candidate;
+}
+
+function scoreTurboJsonCandidate(value, rawText) {
+  let score = 0;
+
+  if (Array.isArray(value)) {
+    score += 5;
+    if (value.some((item) => item && typeof item === 'object')) {
+      score += 10;
+    }
+  } else if (value && typeof value === 'object') {
+    score += 10;
+    if (value.turboVersion || value.packageManager) {
+      score += 40;
+    }
+    if (value.packages) {
+      score += 40;
+    }
+    if (Array.isArray(value.tasks)) {
+      score += 40;
+    }
+    if (value.globalCacheInputs) {
+      score += 20;
+    }
+  }
+
+  if (typeof rawText === 'string') {
+    score += Math.min(rawText.length, 100000) / 1000;
+  }
+
+  return score;
 }
