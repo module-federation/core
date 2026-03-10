@@ -434,7 +434,7 @@ function generateContainerPlugin() {
       ? `import type { ${importsNeeded.join(', ')} } from './ModuleFederationPlugin';\n\n`
       : '';
 
-  return header + importLine + `export ${rootTs}`;
+  return header + importLine + rootTs;
 }
 
 // ---------------------------------------------------------------------------
@@ -470,7 +470,7 @@ function generateContainerReferencePlugin() {
       ? `import type { ${importsNeeded.join(', ')} } from './ModuleFederationPlugin';\n\n`
       : '';
 
-  return header + importLine + `export ${rootTs}`;
+  return header + importLine + rootTs;
 }
 
 // ---------------------------------------------------------------------------
@@ -506,7 +506,7 @@ function generateSharePlugin() {
       ? `import type { ${importsNeeded.join(', ')} } from './ModuleFederationPlugin';\n\n`
       : '';
 
-  return header + importLine + `export ${rootTs}`;
+  return header + importLine + rootTs;
 }
 
 // ---------------------------------------------------------------------------
@@ -548,7 +548,7 @@ function generateConsumeSharedPlugin() {
 
 `;
 
-  return header + definitionTs + '\n' + `export ${rootTs}`;
+  return header + definitionTs + '\n' + rootTs;
 }
 
 // ---------------------------------------------------------------------------
@@ -594,7 +594,7 @@ function generateProvideSharedPlugin() {
     ? `import type { IncludeExcludeOptions } from './ConsumeSharedPlugin';\n\n`
     : '';
 
-  return header + importLine + definitionTs + '\n' + `export ${rootTs}`;
+  return header + importLine + definitionTs + '\n' + rootTs;
 }
 
 // ---------------------------------------------------------------------------

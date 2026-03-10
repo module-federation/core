@@ -48,17 +48,17 @@ function t(
     p = 0;
   if (0 === p) {
     if (!s || 'object' != typeof s || Array.isArray(s))
-      return (t.errors = [{ params: { type: 'object' } }]), !1;
+      return ((t.errors = [{ params: { type: 'object' } }]), !1);
     {
       const n = p;
       for (const n in s)
         if (!e.call(r.properties, n))
-          return (t.errors = [{ params: { additionalProperty: n } }]), !1;
+          return ((t.errors = [{ params: { additionalProperty: n } }]), !1);
       if (n === p) {
         if (void 0 !== s.eager) {
           const r = p;
           if ('boolean' != typeof s.eager)
-            return (t.errors = [{ params: { type: 'boolean' } }]), !1;
+            return ((t.errors = [{ params: { type: 'boolean' } }]), !1);
           var f = r === p;
         } else f = !0;
         if (f) {
@@ -67,8 +67,8 @@ function t(
             const e = p;
             if (p === e) {
               if ('string' != typeof r)
-                return (t.errors = [{ params: { type: 'string' } }]), !1;
-              if (r.length < 1) return (t.errors = [{ params: {} }]), !1;
+                return ((t.errors = [{ params: { type: 'string' } }]), !1);
+              if (r.length < 1) return ((t.errors = [{ params: {} }]), !1);
             }
             f = e === p;
           } else f = !0;
@@ -78,8 +78,8 @@ function t(
               const e = p;
               if (p === e) {
                 if ('string' != typeof r)
-                  return (t.errors = [{ params: { type: 'string' } }]), !1;
-                if (r.length < 1) return (t.errors = [{ params: {} }]), !1;
+                  return ((t.errors = [{ params: { type: 'string' } }]), !1);
+                if (r.length < 1) return ((t.errors = [{ params: {} }]), !1);
               }
               f = e === p;
             } else f = !0;
@@ -94,11 +94,11 @@ function t(
                   if ('string' == typeof r) {
                     if (r.length < 1) {
                       const r = { params: {} };
-                      null === l ? (l = [r]) : l.push(r), p++;
+                      (null === l ? (l = [r]) : l.push(r), p++);
                     }
                   } else {
                     const r = { params: { type: 'string' } };
-                    null === l ? (l = [r]) : l.push(r), p++;
+                    (null === l ? (l = [r]) : l.push(r), p++);
                   }
                 var u = i === p;
                 if (((o = o || u), !o)) {
@@ -113,29 +113,32 @@ function t(
                           if ('string' == typeof e) {
                             if (e.length < 1) {
                               const r = { params: {} };
-                              null === l ? (l = [r]) : l.push(r), p++;
+                              (null === l ? (l = [r]) : l.push(r), p++);
                             }
                           } else {
                             const r = { params: { type: 'string' } };
-                            null === l ? (l = [r]) : l.push(r), p++;
+                            (null === l ? (l = [r]) : l.push(r), p++);
                           }
                         if (s !== p) break;
                       }
                     } else {
                       const r = { params: { type: 'array' } };
-                      null === l ? (l = [r]) : l.push(r), p++;
+                      (null === l ? (l = [r]) : l.push(r), p++);
                     }
-                  (u = e === p), (o = o || u);
+                  ((u = e === p), (o = o || u));
                 }
                 if (!o) {
                   const r = { params: {} };
                   return (
-                    null === l ? (l = [r]) : l.push(r), p++, (t.errors = l), !1
+                    null === l ? (l = [r]) : l.push(r),
+                    p++,
+                    (t.errors = l),
+                    !1
                   );
                 }
-                (p = n),
+                ((p = n),
                   null !== l && (n ? (l.length = n) : (l = null)),
-                  (f = e === p);
+                  (f = e === p));
               } else f = !0;
               if (f) {
                 if (void 0 !== s.requiredVersion) {
@@ -151,16 +154,16 @@ function t(
                           r.properties.requiredVersion.anyOf[0].enum,
                       },
                     };
-                    null === l ? (l = [e]) : l.push(e), p++;
+                    (null === l ? (l = [e]) : l.push(e), p++);
                   }
                   var c = a === p;
                   if (((i = i || c), !i)) {
                     const r = p;
                     if ('string' != typeof e) {
                       const r = { params: { type: 'string' } };
-                      null === l ? (l = [r]) : l.push(r), p++;
+                      (null === l ? (l = [r]) : l.push(r), p++);
                     }
-                    (c = r === p), (i = i || c);
+                    ((c = r === p), (i = i || c));
                   }
                   if (!i) {
                     const r = { params: {} };
@@ -171,15 +174,18 @@ function t(
                       !1
                     );
                   }
-                  (p = o),
+                  ((p = o),
                     null !== l && (o ? (l.length = o) : (l = null)),
-                    (f = n === p);
+                    (f = n === p));
                 } else f = !0;
                 if (f) {
                   if (void 0 !== s.strictVersion) {
                     const r = p;
                     if ('boolean' != typeof s.strictVersion)
-                      return (t.errors = [{ params: { type: 'boolean' } }]), !1;
+                      return (
+                        (t.errors = [{ params: { type: 'boolean' } }]),
+                        !1
+                      );
                     f = r === p;
                   } else f = !0;
                   if (f) {
@@ -187,7 +193,8 @@ function t(
                       const r = p;
                       if ('boolean' != typeof s.singleton)
                         return (
-                          (t.errors = [{ params: { type: 'boolean' } }]), !1
+                          (t.errors = [{ params: { type: 'boolean' } }]),
+                          !1
                         );
                       f = r === p;
                     } else f = !0;
@@ -198,10 +205,11 @@ function t(
                         if (p === e) {
                           if ('string' != typeof r)
                             return (
-                              (t.errors = [{ params: { type: 'string' } }]), !1
+                              (t.errors = [{ params: { type: 'string' } }]),
+                              !1
                             );
                           if (r.length < 1)
-                            return (t.errors = [{ params: {} }]), !1;
+                            return ((t.errors = [{ params: {} }]), !1);
                         }
                         f = e === p;
                       } else f = !0;
@@ -216,7 +224,7 @@ function t(
                                 !1
                               );
                             if (r.length < 1)
-                              return (t.errors = [{ params: {} }]), !1;
+                              return ((t.errors = [{ params: {} }]), !1);
                           }
                           f = e === p;
                         } else f = !0;
@@ -234,16 +242,16 @@ function t(
                                     r.properties.version.anyOf[0].enum,
                                 },
                               };
-                              null === l ? (l = [e]) : l.push(e), p++;
+                              (null === l ? (l = [e]) : l.push(e), p++);
                             }
                             var y = a === p;
                             if (((i = i || y), !i)) {
                               const r = p;
                               if ('string' != typeof e) {
                                 const r = { params: { type: 'string' } };
-                                null === l ? (l = [r]) : l.push(r), p++;
+                                (null === l ? (l = [r]) : l.push(r), p++);
                               }
-                              (y = r === p), (i = i || y);
+                              ((y = r === p), (i = i || y));
                             }
                             if (!i) {
                               const r = { params: {} };
@@ -254,9 +262,9 @@ function t(
                                 !1
                               );
                             }
-                            (p = o),
+                            ((p = o),
                               null !== l && (o ? (l.length = o) : (l = null)),
-                              (f = n === p);
+                              (f = n === p));
                           } else f = !0;
                           if (f) {
                             if (void 0 !== s.exclude) {
@@ -274,7 +282,7 @@ function t(
                                 let e;
                                 if (void 0 === r.request && (e = 'request')) {
                                   const r = { params: { missingProperty: e } };
-                                  null === l ? (l = [r]) : l.push(r), p++;
+                                  (null === l ? (l = [r]) : l.push(r), p++);
                                 }
                               }
                               var g = a === p;
@@ -290,10 +298,10 @@ function t(
                                     const r = {
                                       params: { missingProperty: e },
                                     };
-                                    null === l ? (l = [r]) : l.push(r), p++;
+                                    (null === l ? (l = [r]) : l.push(r), p++);
                                   }
                                 }
-                                (g = e === p), (i = i || g);
+                                ((g = e === p), (i = i || g));
                               }
                               if (!i) {
                                 const r = { params: {} };
@@ -345,17 +353,18 @@ function t(
                                         const r = {
                                           params: { type: 'string' },
                                         };
-                                        null === l ? (l = [r]) : l.push(r), p++;
+                                        (null === l ? (l = [r]) : l.push(r),
+                                          p++);
                                       }
                                       var h = i === p;
                                       if (((o = o || h), !o)) {
                                         const r = p;
                                         if (!(e instanceof RegExp)) {
                                           const r = { params: {} };
-                                          null === l ? (l = [r]) : l.push(r),
-                                            p++;
+                                          (null === l ? (l = [r]) : l.push(r),
+                                            p++);
                                         }
-                                        (h = r === p), (o = o || h);
+                                        ((h = r === p), (o = o || h));
                                       }
                                       if (!o) {
                                         const r = { params: {} };
@@ -366,9 +375,9 @@ function t(
                                           !1
                                         );
                                       }
-                                      (p = n),
+                                      ((p = n),
                                         null !== l &&
-                                          (n ? (l.length = n) : (l = null));
+                                          (n ? (l.length = n) : (l = null)));
                                       var m = s === p;
                                     } else m = !0;
                                     if (m) {
@@ -421,7 +430,7 @@ function t(
                                     const r = {
                                       params: { missingProperty: e },
                                     };
-                                    null === l ? (l = [r]) : l.push(r), p++;
+                                    (null === l ? (l = [r]) : l.push(r), p++);
                                   }
                                 }
                                 var d = a === p;
@@ -440,10 +449,10 @@ function t(
                                       const r = {
                                         params: { missingProperty: e },
                                       };
-                                      null === l ? (l = [r]) : l.push(r), p++;
+                                      (null === l ? (l = [r]) : l.push(r), p++);
                                     }
                                   }
-                                  (d = e === p), (i = i || d);
+                                  ((d = e === p), (i = i || d));
                                 }
                                 if (!i) {
                                   const r = { params: {} };
@@ -498,18 +507,18 @@ function t(
                                           const r = {
                                             params: { type: 'string' },
                                           };
-                                          null === l ? (l = [r]) : l.push(r),
-                                            p++;
+                                          (null === l ? (l = [r]) : l.push(r),
+                                            p++);
                                         }
                                         var v = i === p;
                                         if (((o = o || v), !o)) {
                                           const r = p;
                                           if (!(e instanceof RegExp)) {
                                             const r = { params: {} };
-                                            null === l ? (l = [r]) : l.push(r),
-                                              p++;
+                                            (null === l ? (l = [r]) : l.push(r),
+                                              p++);
                                           }
-                                          (v = r === p), (o = o || v);
+                                          ((v = r === p), (o = o || v));
                                         }
                                         if (!o) {
                                           const r = { params: {} };
@@ -520,9 +529,9 @@ function t(
                                             !1
                                           );
                                         }
-                                        (p = n),
+                                        ((p = n),
                                           null !== l &&
-                                            (n ? (l.length = n) : (l = null));
+                                            (n ? (l.length = n) : (l = null)));
                                         var b = s === p;
                                       } else b = !0;
                                       if (b) {
@@ -619,7 +628,7 @@ function t(
       }
     }
   }
-  return (t.errors = l), 0 === p;
+  return ((t.errors = l), 0 === p);
 }
 function s(
   r,
@@ -634,7 +643,7 @@ function s(
     l = 0;
   if (0 === l) {
     if (!r || 'object' != typeof r || Array.isArray(r))
-      return (s.errors = [{ params: { type: 'object' } }]), !1;
+      return ((s.errors = [{ params: { type: 'object' } }]), !1);
     for (const n in r) {
       let o = r[n];
       const f = l,
@@ -654,23 +663,23 @@ function s(
           if ('string' == typeof o) {
             if (o.length < 1) {
               const r = { params: {} };
-              null === a ? (a = [r]) : a.push(r), l++;
+              (null === a ? (a = [r]) : a.push(r), l++);
             }
           } else {
             const r = { params: { type: 'string' } };
-            null === a ? (a = [r]) : a.push(r), l++;
+            (null === a ? (a = [r]) : a.push(r), l++);
           }
-        (p = r === l), (c = c || p);
+        ((p = r === l), (c = c || p));
       }
       if (!c) {
         const r = { params: {} };
-        return null === a ? (a = [r]) : a.push(r), l++, (s.errors = a), !1;
+        return (null === a ? (a = [r]) : a.push(r), l++, (s.errors = a), !1);
       }
       if (((l = u), null !== a && (u ? (a.length = u) : (a = null)), f !== l))
         break;
     }
   }
-  return (s.errors = a), 0 === l;
+  return ((s.errors = a), 0 === l);
 }
 function n(
   r,
@@ -699,16 +708,16 @@ function n(
           if ('string' == typeof t) {
             if (t.length < 1) {
               const r = { params: {} };
-              null === a ? (a = [r]) : a.push(r), l++;
+              (null === a ? (a = [r]) : a.push(r), l++);
             }
           } else {
             const r = { params: { type: 'string' } };
-            null === a ? (a = [r]) : a.push(r), l++;
+            (null === a ? (a = [r]) : a.push(r), l++);
           }
         var c = u === l;
         if (((f = f || c), !f)) {
           const o = l;
-          s(t, {
+          (s(t, {
             instancePath: e + '/' + n,
             parentData: r,
             parentDataProperty: n,
@@ -716,34 +725,34 @@ function n(
           }) ||
             ((a = null === a ? s.errors : a.concat(s.errors)), (l = a.length)),
             (c = o === l),
-            (f = f || c);
+            (f = f || c));
         }
-        if (f) (l = p), null !== a && (p ? (a.length = p) : (a = null));
+        if (f) ((l = p), null !== a && (p ? (a.length = p) : (a = null)));
         else {
           const r = { params: {} };
-          null === a ? (a = [r]) : a.push(r), l++;
+          (null === a ? (a = [r]) : a.push(r), l++);
         }
         if (o !== l) break;
       }
     } else {
       const r = { params: { type: 'array' } };
-      null === a ? (a = [r]) : a.push(r), l++;
+      (null === a ? (a = [r]) : a.push(r), l++);
     }
   var y = u === l;
   if (((f = f || y), !f)) {
     const n = l;
-    s(r, {
+    (s(r, {
       instancePath: e,
       parentData: t,
       parentDataProperty: o,
       rootData: i,
     }) || ((a = null === a ? s.errors : a.concat(s.errors)), (l = a.length)),
       (y = n === l),
-      (f = f || y);
+      (f = f || y));
   }
   if (!f) {
     const r = { params: {} };
-    return null === a ? (a = [r]) : a.push(r), l++, (n.errors = a), !1;
+    return (null === a ? (a = [r]) : a.push(r), l++, (n.errors = a), !1);
   }
   return (
     (l = p),
@@ -765,16 +774,16 @@ function o(
     l = 0;
   if (0 === l) {
     if (!r || 'object' != typeof r || Array.isArray(r))
-      return (o.errors = [{ params: { type: 'object' } }]), !1;
+      return ((o.errors = [{ params: { type: 'object' } }]), !1);
     {
       let t;
       if (void 0 === r.provides && (t = 'provides'))
-        return (o.errors = [{ params: { missingProperty: t } }]), !1;
+        return ((o.errors = [{ params: { missingProperty: t } }]), !1);
       {
         const t = l;
         for (const e in r)
           if ('provides' !== e && 'shareScope' !== e && 'experiments' !== e)
-            return (o.errors = [{ params: { additionalProperty: e } }]), !1;
+            return ((o.errors = [{ params: { additionalProperty: e } }]), !1);
         if (t === l) {
           if (void 0 !== r.provides) {
             const t = l;
@@ -799,11 +808,11 @@ function o(
                 if ('string' == typeof e) {
                   if (e.length < 1) {
                     const r = { params: {} };
-                    null === a ? (a = [r]) : a.push(r), l++;
+                    (null === a ? (a = [r]) : a.push(r), l++);
                   }
                 } else {
                   const r = { params: { type: 'string' } };
-                  null === a ? (a = [r]) : a.push(r), l++;
+                  (null === a ? (a = [r]) : a.push(r), l++);
                 }
               var f = i === l;
               if (((n = n || f), !n)) {
@@ -818,29 +827,32 @@ function o(
                         if ('string' == typeof r) {
                           if (r.length < 1) {
                             const r = { params: {} };
-                            null === a ? (a = [r]) : a.push(r), l++;
+                            (null === a ? (a = [r]) : a.push(r), l++);
                           }
                         } else {
                           const r = { params: { type: 'string' } };
-                          null === a ? (a = [r]) : a.push(r), l++;
+                          (null === a ? (a = [r]) : a.push(r), l++);
                         }
                       if (s !== l) break;
                     }
                   } else {
                     const r = { params: { type: 'array' } };
-                    null === a ? (a = [r]) : a.push(r), l++;
+                    (null === a ? (a = [r]) : a.push(r), l++);
                   }
-                (f = r === l), (n = n || f);
+                ((f = r === l), (n = n || f));
               }
               if (!n) {
                 const r = { params: {} };
                 return (
-                  null === a ? (a = [r]) : a.push(r), l++, (o.errors = a), !1
+                  null === a ? (a = [r]) : a.push(r),
+                  l++,
+                  (o.errors = a),
+                  !1
                 );
               }
-              (l = s),
+              ((l = s),
                 null !== a && (s ? (a.length = s) : (a = null)),
-                (p = t === l);
+                (p = t === l));
             } else p = !0;
             if (p)
               if (void 0 !== r.experiments) {
@@ -848,7 +860,7 @@ function o(
                 const t = l;
                 if (l === t) {
                   if (!e || 'object' != typeof e || Array.isArray(e))
-                    return (o.errors = [{ params: { type: 'object' } }]), !1;
+                    return ((o.errors = [{ params: { type: 'object' } }]), !1);
                   {
                     const r = l;
                     for (const r in e)
@@ -862,7 +874,10 @@ function o(
                       void 0 !== e.allowNodeModulesSuffixMatch &&
                       'boolean' != typeof e.allowNodeModulesSuffixMatch
                     )
-                      return (o.errors = [{ params: { type: 'boolean' } }]), !1;
+                      return (
+                        (o.errors = [{ params: { type: 'boolean' } }]),
+                        !1
+                      );
                   }
                 }
                 p = t === l;
@@ -872,5 +887,5 @@ function o(
       }
     }
   }
-  return (o.errors = a), 0 === l;
+  return ((o.errors = a), 0 === l);
 }
