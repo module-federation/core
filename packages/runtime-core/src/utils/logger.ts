@@ -80,8 +80,4 @@ export function warn(msg: Parameters<typeof console.warn>[0]): void {
   }
 }
 
-export function log(...args: unknown[]) {
-  logger.log(...args);
-}
-
 export { logger };
