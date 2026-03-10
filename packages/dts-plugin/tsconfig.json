@@ -12,7 +12,7 @@
     "declaration": true,
     "allowJs": true,
     "lib": ["ES2021", "DOM"],
-    "types": ["node", "fs-extra"]
+    "types": ["node"]
   },
   "include": ["src", "__tests__"]
 }

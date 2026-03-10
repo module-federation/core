@@ -1,4 +1,4 @@
-import fs from 'fs-extra';
+import { mkdirSync, readFileSync, writeFileSync } from 'fs';
 import path from 'path';
 import { createDevWorker } from '../dev-worker';
 import {
@@ -26,7 +26,7 @@ enum PROCESS_EXIT_CODE {
 function ensureTempDir(filePath: string): void {
   try {
     const dir = path.dirname(filePath);
-    fs.ensureDirSync(dir);
+    mkdirSync(dir, { recursive: true });
   } catch (_err) {
     // noop
   }
@@ -61,14 +61,14 @@ export class DevPlugin implements WebpackPluginInstance {
     filePath: string,
   ): void {
     ensureTempDir(filePath);
-    const liveReloadEntry = fs
-      .readFileSync(path.join(__dirname, './iife/launch-web-client.iife.js'))
-      .toString('utf-8');
+    const liveReloadEntry = readFileSync(
+      path.join(__dirname, './iife/launch-web-client.iife.js'),
+    ).toString('utf-8');
     const liveReloadEntryWithOptions = liveReloadEntry.replace(
       WEB_CLIENT_OPTIONS_IDENTIFIER,
       JSON.stringify(options),
     );
-    fs.writeFileSync(filePath, liveReloadEntryWithOptions);
+    writeFileSync(filePath, liveReloadEntryWithOptions);
   }
 
   private _stopWhenSIGTERMOrSIGINT(): void {

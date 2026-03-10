@@ -1,5 +1,5 @@
 import http from 'http';
-import fs from 'fs-extra';
+import { createReadStream } from 'fs';
 import { getFreePort, getIPV4 } from './utils';
 import { DEFAULT_TAR_NAME } from './constant';
 
@@ -24,7 +24,7 @@ export async function createHttpServer(
         res.end();
         return;
       }
-      const stream = fs.createReadStream(typeTarPath);
+      const stream = createReadStream(typeTarPath);
       stream.on('error', () => {
         if (!res.headersSent) {
           res.statusCode = 500;

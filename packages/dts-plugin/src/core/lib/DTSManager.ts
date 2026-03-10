@@ -1,7 +1,7 @@
 import path from 'path';
-import { rm } from 'fs/promises';
-import fs from 'fs';
-import fse from 'fs-extra';
+import { rm, mkdir, cp } from 'fs/promises';
+import { existsSync, rmSync, readFileSync, writeFileSync } from 'fs';
+
 import {
   MANIFEST_EXT,
   Manifest,
@@ -112,10 +112,14 @@ class DTSManager {
         );
 
         const targetDir = path.join(mfTypesPath, 'node_modules');
-        if (fs.existsSync(remoteTypesFolder)) {
+        if (existsSync(remoteTypesFolder)) {
           const targetFolder = path.resolve(remoteOptions.context, targetDir);
-          await fse.ensureDir(targetFolder);
-          await fse.copy(remoteTypesFolder, targetFolder, { overwrite: true });
+
+          await mkdir(targetFolder, { recursive: true });
+          await cp(remoteTypesFolder, targetFolder, {
+            recursive: true,
+            force: true,
+          });
         }
       } catch (err) {
         if (this.options.host?.abortOnError === false) {
@@ -160,8 +164,8 @@ class DTSManager {
             tsConfig.compilerOptions.tsBuildInfoFile,
           );
           const mfTypesPath = retrieveMfTypesPath(tsConfig, remoteOptions);
-          if (!fs.existsSync(mfTypesPath)) {
-            fs.rmSync(tsBuildInfoFile, { force: true });
+          if (!existsSync(mfTypesPath)) {
+            rmSync(tsBuildInfoFile, { force: true });
           }
         } catch (e) {
           //noop
@@ -182,7 +186,7 @@ class DTSManager {
       if (remoteOptions.generateAPITypes) {
         const apiTypes = this.generateAPITypes(mapComponentsToExpose);
         apiTypesPath = retrieveMfAPITypesPath(tsConfig, remoteOptions);
-        fs.writeFileSync(apiTypesPath, apiTypes);
+        writeFileSync(apiTypesPath, apiTypes);
       }
       try {
         if (remoteOptions.deleteTypesFolder) {
@@ -307,7 +311,7 @@ class DTSManager {
         remoteInfo.alias,
       );
       const filePath = path.join(destinationPath, REMOTE_API_TYPES_FILE_NAME);
-      fs.writeFileSync(filePath, apiTypeFile);
+      writeFileSync(filePath, apiTypeFile);
       const existed = this.loadedRemoteAPIAlias.has(remoteInfo.alias);
       this.loadedRemoteAPIAlias.add(remoteInfo.alias);
       fileLog(`success`, 'downloadAPITypes', 'info');
@@ -328,7 +332,7 @@ class DTSManager {
       HOST_API_TYPES_FILE_NAME,
     );
     try {
-      const existedFile = fs.readFileSync(apiTypeFileName, 'utf-8');
+      const existedFile = readFileSync(apiTypeFileName, 'utf-8');
       const existedImports = new ThirdPartyExtractor({
         destDir: '',
       }).collectTypeImports(existedFile);
@@ -385,7 +389,7 @@ class DTSManager {
     ${pkgsDeclareStr}
     `;
 
-    fs.writeFileSync(
+    writeFileSync(
       path.join(
         hostOptions.context,
         hostOptions.typesFolder,
