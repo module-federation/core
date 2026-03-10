@@ -244,7 +244,9 @@ export class SnapshotHandler {
         gSnapshot = globalSnapshotRes;
       } else {
         error(
-          getShortErrorMsg(RUNTIME_007, runtimeDescMap, {
+          RUNTIME_007,
+          runtimeDescMap,
+          {
             remoteName: moduleInfo.name,
             remoteVersion: moduleInfo.version,
             hostName: this.HostInstance.options.name,
