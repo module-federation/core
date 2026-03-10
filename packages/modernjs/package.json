@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/modern-js",
-  "version": "2.70.6",
+  "version": "2.1.0",
   "files": [
     "dist/",
     "types.d.ts",
@@ -10,7 +10,10 @@
     "access": "public"
   },
   "scripts": {
-    "build": "rslib build"
+    "build": "rslib build",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\"",
+    "test": "pnpm exec vitest run --passWithNoTests --config vite.config.mts",
+    "pre-release": "pnpm run test && pnpm run build"
   },
   "repository": {
     "type": "git",

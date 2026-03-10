@@ -1,6 +1,6 @@
 {
   "extends": ["../../.eslintrc.json"],
-  "ignorePatterns": ["!**/*"],
+  "ignorePatterns": ["!**/*", "dist/**/*", "**/*.d.ts"],
   "env": {
     "jest": true
   },
@@ -11,6 +11,7 @@
         "@typescript-eslint/no-unused-vars": "warn",
         "@typescript-eslint/ban-ts-comment": "warn",
         "@typescript-eslint/no-var-requires": 0,
+        "@typescript-eslint/no-require-imports": "off",
         "@typescript-eslint/no-restricted-imports": [
           "error",
           {

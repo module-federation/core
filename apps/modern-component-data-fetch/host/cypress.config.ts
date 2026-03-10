@@ -1,9 +1,12 @@
-import { nxE2EPreset } from '@nx/cypress/plugins/cypress-preset';
 import { defineConfig } from 'cypress';
 
 export default defineConfig({
   projectId: 'sa6wfn',
-  e2e: nxE2EPreset(__filename, { cypressDir: 'cypress' }),
+  e2e: {
+    specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
+    supportFile: 'cypress/support/e2e.ts',
+    fixturesFolder: 'cypress/fixtures',
+  },
   defaultCommandTimeout: 20000,
   retries: {
     runMode: 2,

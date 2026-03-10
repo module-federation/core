@@ -164,6 +164,20 @@ export default createModuleFederationConfig({
 
 If you want to integrate `Module Federation` into an existing project, you can refer to [docs](../../practice/frameworks/overview).
 
+:::tip Integrate with AI in one step
+Using [Claude Code](https://claude.ai/code) or another AI editor that supports Skills? The `mf-integrate` skill auto-detects your bundler (Rsbuild / Rspack / Webpack / Modern.js / Next.js / Vite), generates complete MF configuration, and can optionally insert a remote component into your entry file so you can verify everything is working immediately:
+
+```bash
+npx skills add module-federation/core --skill mf-integrate -y
+```
+
+Then run inside your project directory:
+
+```
+/mf-integrate
+```
+:::
+
 ## Summary
 
 Through the above process, you have completed the export of a component from a 'provider' for use by a 'consumer' based on Module Federation. Along the way, you have preliminarily used and understood the configurations of remotes, exposes, and shared in the Module Federation plugin.

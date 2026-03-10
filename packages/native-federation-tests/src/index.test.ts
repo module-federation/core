@@ -12,7 +12,7 @@ import {
 } from './index';
 
 describe('index', () => {
-  const projectRoot = join(__dirname, '..', '..', '..');
+  const projectRoot = join(__dirname, '..');
   const exposedIndex = join(__dirname, 'index.ts');
 
   describe('NativeFederationTestsRemote', () => {

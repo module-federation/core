@@ -16,12 +16,10 @@ function _toPrimitive(t, r) {
   }
   return ('string' === r ? String : Number)(t);
 }
-
 function _toPropertyKey(t) {
   var i = _toPrimitive(t, 'string');
   return 'symbol' == typeof i ? i : i + '';
 }
-
 function _defineProperty(e, r, t) {
   return (
     (r = _toPropertyKey(r)) in e
@@ -35,16 +33,15 @@ function _defineProperty(e, r, t) {
     e
   );
 }
-
 function ownKeys(e, r) {
   var t = Object.keys(e);
   if (Object.getOwnPropertySymbols) {
     var o = Object.getOwnPropertySymbols(e);
-    r &&
+    (r &&
       (o = o.filter(function (r) {
         return Object.getOwnPropertyDescriptor(e, r).enumerable;
       })),
-      t.push.apply(t, o);
+      t.push.apply(t, o));
   }
   return t;
 }
@@ -63,7 +60,6 @@ function _objectSpread2(e) {
   }
   return e;
 }
-
 function getHighestReleaseType(releases) {
   if (releases.length === 0) {
     throw new Error(
@@ -153,7 +149,6 @@ function applyLinks(releases, packagesByName, linked) {
   }
   return updated;
 }
-
 function incrementVersion(release, preInfo) {
   if (release.type === 'none') {
     return release.oldVersion;
@@ -426,7 +421,6 @@ function flattenReleases(changesets, packagesByName, config) {
   });
   return releases;
 }
-
 function matchFixedConstraint(releases, packagesByName, config) {
   let updated = false;
   for (let fixedPackages of config.fixed) {
@@ -474,7 +468,6 @@ function matchFixedConstraint(releases, packagesByName, config) {
   }
   return updated;
 }
-
 function getPreVersion(version) {
   let parsed = semverParse(version);
   let preVersion =

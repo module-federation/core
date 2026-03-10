@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/inject-external-runtime-core-plugin",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "type": "module",
   "license": "MIT",
   "description": "A sdk for support module federation",
@@ -49,5 +49,10 @@
   },
   "devDependencies": {
     "@module-federation/runtime-tools": "workspace:*"
+  },
+  "scripts": {
+    "build": "tsdown --config tsdown.config.ts --filter inject-external-runtime-core-plugin-build",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",
+    "pre-release": "pnpm run build"
   }
 }
