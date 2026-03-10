@@ -43,9 +43,6 @@ jobs:
       - name: Install pnpm dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Set Nx base and head SHAs
-        uses: nrwl/nx-set-shas@v4
-
       - name: Evaluate Metro affected scope
         id: affected
         run: |
@@ -106,7 +103,7 @@ jobs:
         shell: bash
 
       - name: Build shared packages
-        run: npx nx run-many --targets=build --projects=tag:type:pkg
+        run: pnpm run build:packages
         shell: bash
 
       - name: Install Maestro CLI
@@ -195,7 +192,7 @@ jobs:
           ruby-version: ${{ env.RUBY_VERSION }}
 
       - name: Build shared packages
-        run: npx nx run-many --targets=build --projects=tag:type:pkg
+        run: pnpm run build:packages
         shell: bash
 
       - name: Install Maestro CLI and iOS Utilities
