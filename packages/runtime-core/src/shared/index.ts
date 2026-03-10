@@ -297,9 +297,8 @@ export class SharedHandler {
         versions[version] && (directShare(versions[version]) as Shared);
       const activeVersionEager = Boolean(
         activeVersion &&
-          (('eager' in activeVersion && activeVersion.eager) ||
-            ('shareConfig' in activeVersion &&
-              activeVersion.shareConfig?.eager)),
+        (('eager' in activeVersion && activeVersion.eager) ||
+          ('shareConfig' in activeVersion && activeVersion.shareConfig?.eager)),
       );
       if (
         !activeVersion ||
