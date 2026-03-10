@@ -460,19 +460,7 @@ class ConsumeSharedPlugin {
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
       (compilation: Compilation, { normalModuleFactory }) => {
-        const dependencyFactories =
-          (
-            compilation as Compilation & {
-              dependencyFactories?: Map<unknown, unknown>;
-            }
-          ).dependencyFactories || new Map<unknown, unknown>();
-        (
-          compilation as Compilation & {
-            dependencyFactories?: Map<unknown, unknown>;
-          }
-        ).dependencyFactories = dependencyFactories;
-
-        dependencyFactories.set(
+        compilation.dependencyFactories.set(
           ConsumeSharedFallbackDependency,
           normalModuleFactory,
         );
