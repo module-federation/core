@@ -16,6 +16,8 @@ import {
 import { PrefetchPlugin } from '@module-federation/data-prefetch/cli';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { Compiler, WebpackPluginInstance } from 'webpack';
+import fs from 'node:fs';
+import path from 'node:path';
 import SharePlugin from '../sharing/SharePlugin';
 import ContainerPlugin from './ContainerPlugin';
 import ContainerReferencePlugin from './ContainerReferencePlugin';
@@ -44,6 +46,33 @@ const validate = createSchemaValidation(
     baseDataPath: 'options',
   },
 );
+
+function getEnhancedPackageVersion(): string {
+  let currentDir = __dirname;
+
+  while (true) {
+    const packageJsonPath = path.join(currentDir, 'package.json');
+
+    if (fs.existsSync(packageJsonPath)) {
+      const pkg = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8')) as {
+        name?: string;
+        version?: string;
+      };
+
+      if (pkg.name === '@module-federation/enhanced' && pkg.version) {
+        return pkg.version;
+      }
+    }
+
+    const parentDir = path.dirname(currentDir);
+    if (parentDir === currentDir) {
+      break;
+    }
+    currentDir = parentDir;
+  }
+
+  throw new Error('Unable to resolve @module-federation/enhanced package.json');
+}
 
 class ModuleFederationPlugin implements WebpackPluginInstance {
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -134,9 +163,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
       }
       const runtimePlugins = options.runtimePlugins || [];
       options.runtimePlugins = runtimePlugins.concat(
-        require.resolve(
-          '@module-federation/inject-external-runtime-core-plugin',
-        ),
+        require.resolve('@module-federation/inject-external-runtime-core-plugin'),
       );
     }
 
@@ -281,9 +308,8 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     });
 
     if (!disableManifest) {
-      const pkg = require('../../../../package.json');
       this._statsPlugin = new StatsPlugin(options, {
-        pluginVersion: pkg.version,
+        pluginVersion: getEnhancedPackageVersion(),
         bundler: 'webpack',
       });
       this._statsPlugin.apply(compiler);

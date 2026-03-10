@@ -1,6 +1,6 @@
 {
   "extends": ["../../.eslintrc.json"],
-  "ignorePatterns": ["!**/*", "**/*.d.ts"],
+  "ignorePatterns": ["!**/*", "dist/**/*", "**/*.d.ts"],
   "overrides": [
     {
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
@@ -8,6 +8,7 @@
         "@typescript-eslint/no-explicit-any": "off",
         "@typescript-eslint/ban-ts-comment": "warn",
         "@typescript-eslint/no-var-requires": 0,
+        "@typescript-eslint/no-require-imports": "off",
         "@typescript-eslint/no-restricted-imports": [
           "error",
           {
