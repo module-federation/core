@@ -1,6 +1,4 @@
-import type runtimeCore from '@module-federation/runtime/core';
-
-type RemoteEntryExports = runtimeCore.types.RemoteEntryExports;
+import type { RemoteEntryExports } from '@module-federation/runtime-core/types';
 
 declare module '@module-federation/runtime' {
   interface Federation {
