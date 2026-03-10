@@ -2,7 +2,7 @@
 import { defineConfig } from 'vite';
 import pkg from './package.json';
 
-import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
+import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig({
   cacheDir: '../../node_modules/.vite/rsbuild-plugin',
@@ -10,11 +10,11 @@ export default defineConfig({
     __RSBUILD_PLUGIN_NAME__: JSON.stringify(pkg.name),
   },
 
-  plugins: [nxViteTsPaths()],
+  plugins: [tsconfigPaths()],
 
   // Uncomment this if you are using workers.
   // worker: {
-  //  plugins: [ nxViteTsPaths() ],
+  //  plugins: [ tsconfigPaths() ],
   // },
 
   test: {

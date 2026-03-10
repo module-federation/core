@@ -24,7 +24,7 @@ try {
         'treeshake-server: missing build output at dist/server.js.',
         '',
         'Run:',
-        '  pnpm --filter @module-federation/treeshake-server build',
+        '  pnpm exec turbo run build --filter=@module-federation/treeshake-server',
         '',
       ].join('\n'),
     );
