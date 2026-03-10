@@ -20,7 +20,9 @@ const EXCLUDED_AFFECTED_TEST_PACKAGES = new Set([
 main();
 
 function main() {
-  const requestedBase = parseBaseArg(process.argv.slice(2));
+  const cliArgs = process.argv.slice(2);
+  const requestedBase = parseBaseArg(cliArgs);
+  const skipCache = cliArgs.includes('--skip-cache');
   const baseRef = resolveBaseRef(requestedBase);
   const headRef = 'HEAD';
 
@@ -78,6 +80,9 @@ function main() {
     args.push(`--filter=${packageName}`);
   }
   args.push('--concurrency=20');
+  if (skipCache) {
+    args.push('--force');
+  }
 
   const testRun = spawnSync('pnpm', args, {
     cwd: ROOT,

@@ -31,7 +31,7 @@ function setupE2E() {
   return step('Setup E2E dependencies and package build', async (ctx) => {
     await runCommand('pnpm', ['install', '--frozen-lockfile'], ctx);
     await runCommand('npx', ['cypress', 'install'], ctx);
-    await runCommand('pnpm', ['run', 'build:packages'], ctx);
+    await runPackagesBuild(ctx);
   });
 }
 
@@ -74,9 +74,7 @@ const jobs = [
       step('Verify Turbo Conventions', (ctx) =>
         runCommand('pnpm', ['run', 'verify:turbo'], ctx),
       ),
-      step('Build packages', (ctx) =>
-        runCommand('pnpm', ['run', 'build:packages'], ctx),
-      ),
+      step('Build packages', (ctx) => runPackagesBuild(ctx)),
       step('Check package publishing compatibility (publint)', (ctx) =>
         runShell(
           `
@@ -130,9 +128,7 @@ const jobs = [
       step('Verify Turbo Conventions', (ctx) =>
         runCommand('pnpm', ['run', 'verify:turbo'], ctx),
       ),
-      step('Build shared packages', (ctx) =>
-        runCommand('pnpm', ['run', 'build:packages'], ctx),
-      ),
+      step('Build shared packages', (ctx) => runPackagesBuild(ctx)),
       step('Check metro package publishing compatibility (publint)', (ctx) =>
         runShell(
           `
@@ -277,9 +273,7 @@ const jobs = [
       step('Install dependencies', (ctx) =>
         runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
       ),
-      step('Build packages', (ctx) =>
-        runCommand('pnpm', ['run', 'build:packages'], ctx),
-      ),
+      step('Build packages', (ctx) => runPackagesBuild(ctx)),
       step('Check CI conditions', async (ctx) => {
         ctx.state.shouldRun = await ciIsAffected(
           '@module-federation/treeshake-server,@module-federation/treeshake-frontend',
@@ -379,9 +373,7 @@ const jobs = [
       step('Install dependencies', (ctx) =>
         runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
       ),
-      step('Build shared packages', (ctx) =>
-        runCommand('pnpm', ['run', 'build:packages'], ctx),
-      ),
+      step('Build shared packages', (ctx) => runPackagesBuild(ctx)),
       step('Check CI conditions', async (ctx) => {
         ctx.state.shouldRun = await ciIsAffected(ctx.env.METRO_APP_NAME, ctx);
       }),
@@ -419,9 +411,7 @@ const jobs = [
       step('Install dependencies', (ctx) =>
         runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
       ),
-      step('Build shared packages', (ctx) =>
-        runCommand('pnpm', ['run', 'build:packages'], ctx),
-      ),
+      step('Build shared packages', (ctx) => runPackagesBuild(ctx)),
       step('Check CI conditions', async (ctx) => {
         ctx.state.shouldRun = await ciIsAffected(ctx.env.METRO_APP_NAME, ctx);
       }),
@@ -507,9 +497,7 @@ const jobs = [
       step('Install Cypress', (ctx) =>
         runCommand('npx', ['cypress', 'install'], ctx),
       ),
-      step('Build packages', (ctx) =>
-        runCommand('pnpm', ['run', 'build:packages'], ctx),
-      ),
+      step('Build packages', (ctx) => runPackagesBuild(ctx)),
       step('Install xvfb', (ctx) =>
         runShell('sudo apt-get update && sudo apt-get install xvfb', ctx),
       ),
@@ -535,9 +523,7 @@ const jobs = [
       step('Install dependencies', (ctx) =>
         runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
       ),
-      step('Build packages (current)', (ctx) =>
-        runCommand('pnpm', ['run', 'build:packages'], ctx),
-      ),
+      step('Build packages (current)', (ctx) => runPackagesBuild(ctx)),
       step('Measure bundle sizes (current)', (ctx) =>
         runCommand(
           'node',
@@ -639,6 +625,9 @@ async function main() {
     return;
   }
   preflight();
+  if (args.skipCache) {
+    console.log('[ci:local] Task cache bypass enabled (--skip-cache).');
+  }
   if (args.printParity) {
     printParity();
     return;
@@ -649,8 +638,19 @@ async function main() {
 }
 
 async function runBasePackagesBuild(ctx) {
-  const baseCtx = { ...ctx, cwd: ctx.state.basePath };
-  const rootPackageJsonPath = join(ctx.state.basePath, 'package.json');
+  await runPackagesBuildAtPath(ctx.state.basePath, {
+    ...ctx,
+    cwd: ctx.state.basePath,
+  });
+}
+
+async function runPackagesBuild(ctx) {
+  await runPackagesBuildAtPath(ctx.cwd ?? ROOT, ctx);
+}
+
+async function runPackagesBuildAtPath(targetPath, ctx) {
+  const targetCtx = { ...ctx, cwd: targetPath };
+  const rootPackageJsonPath = join(targetPath, 'package.json');
   let basePackageJson = null;
   try {
     basePackageJson = JSON.parse(readFileSync(rootPackageJsonPath, 'utf-8'));
@@ -662,52 +662,31 @@ async function runBasePackagesBuild(ctx) {
   if (
     typeof buildPackagesScript === 'string' &&
     buildPackagesScript.trim() &&
-    !isNxAffectedScript(buildPackagesScript)
+    !args.skipCache
   ) {
-    await runCommand('pnpm', ['run', 'build:packages'], baseCtx);
+    await runCommand('pnpm', ['run', 'build:packages'], targetCtx);
     return;
   }
 
-  if (existsSync(join(ctx.state.basePath, 'nx.json'))) {
-    await runCommand(
-      'pnpm',
-      [
-        'exec',
-        'nx',
-        'run-many',
-        '--targets=build',
-        '--projects=tag:type:pkg',
-        '--parallel=4',
-        '--skip-nx-cache',
-      ],
-      baseCtx,
-    );
-    return;
-  }
-
-  if (existsSync(join(ctx.state.basePath, 'turbo.json'))) {
-    await runCommand(
-      'pnpm',
-      [
-        'exec',
-        'turbo',
-        'run',
-        'build',
-        '--filter=./packages/**',
-        '--concurrency=20',
-      ],
-      baseCtx,
-    );
+  if (existsSync(join(targetPath, 'turbo.json'))) {
+    const turboArgs = [
+      'exec',
+      'turbo',
+      'run',
+      'build',
+      '--filter=./packages/**',
+      '--concurrency=20',
+    ];
+    if (args.skipCache) {
+      turboArgs.push('--force');
+    }
+    await runCommand('pnpm', turboArgs, targetCtx);
     return;
   }
 
   throw new Error(
-    '[ci:local] Base worktree has no build:packages script and no turbo.json; cannot build base packages.',
+    '[ci:local] No turbo.json found for package builds. ci-local expects Turbo-managed package builds.',
   );
-}
-
-function isNxAffectedScript(script) {
-  return /\bnx\b/.test(script) && /\baffected\b/.test(script);
 }
 
 function preflight() {
@@ -910,6 +889,9 @@ function printHelp() {
   console.log(
     '  --strict-parity         Fail when node/pnpm parity is mismatched',
   );
+  console.log(
+    '  --skip-cache           Bypass Turbo task caches for supported ci-local steps',
+  );
   console.log('  --help                  Show this help message');
   console.log('');
   console.log('Examples:');
@@ -922,6 +904,9 @@ function printHelp() {
   console.log(
     '  node tools/scripts/ci-local.mjs --strict-parity --only=build-and-test',
   );
+  console.log(
+    '  node tools/scripts/ci-local.mjs --skip-cache --only=build-and-test',
+  );
 }
 
 function parseArgs(argv) {
@@ -931,6 +916,7 @@ function parseArgs(argv) {
     only: null,
     onlyTokens: [],
     printParity: false,
+    skipCache: false,
     strictParity: false,
     errors: [],
     unknownArgs: [],
@@ -961,6 +947,10 @@ function parseArgs(argv) {
     }
     if (arg === '--print-parity') {
       result.printParity = true;
+      continue;
+    }
+    if (arg === '--skip-cache') {
+      result.skipCache = true;
       continue;
     }
     if (arg === '--strict-parity') {
@@ -1046,7 +1036,11 @@ async function runIfAffected(ctx, affectedAppName, run) {
 }
 
 async function runChangedPackageTests(ctx) {
-  await runCommand('node', ['tools/scripts/run-affected-package-tests.mjs'], {
+  const commandArgs = ['tools/scripts/run-affected-package-tests.mjs'];
+  if (args.skipCache) {
+    commandArgs.push('--skip-cache');
+  }
+  await runCommand('node', commandArgs, {
     ...ctx,
     env: {
       ...ctx.env,
@@ -1057,8 +1051,9 @@ async function runChangedPackageTests(ctx) {
 
 function runCommand(command, args = [], options = {}) {
   const { env = {}, cwd, allowFailure = false } = options;
+  const resolvedArgs = applyCacheBypassArgs(command, args);
 
-  const child = spawn(command, args, {
+  const child = spawn(command, resolvedArgs, {
     stdio: 'inherit',
     env,
     cwd,
@@ -1076,7 +1071,7 @@ function runCommand(command, args = [], options = {}) {
       }
       reject(
         new Error(
-          `${command} ${args.join(' ')} exited with ${formatExit({
+          `${command} ${resolvedArgs.join(' ')} exited with ${formatExit({
             code,
             signal,
           })}`,
@@ -1085,6 +1080,21 @@ function runCommand(command, args = [], options = {}) {
     });
     child.on('error', reject);
   });
+}
+
+function applyCacheBypassArgs(command, commandArgs) {
+  if (!args.skipCache) {
+    return commandArgs;
+  }
+  if (
+    command === 'pnpm' &&
+    commandArgs[0] === 'exec' &&
+    commandArgs[1] === 'turbo' &&
+    !commandArgs.includes('--force')
+  ) {
+    return [...commandArgs, '--force'];
+  }
+  return commandArgs;
 }
 
 function runShell(command, options = {}) {
