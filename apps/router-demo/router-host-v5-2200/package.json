@@ -5,7 +5,12 @@
   "scripts": {
     "dev": "FEDERATION_DEBUG=true rsbuild dev",
     "build": "rsbuild build",
-    "preview": "rsbuild preview"
+    "preview": "rsbuild preview",
+    "test": "pnpm exec vitest --passWithNoTests",
+    "serve": "pnpm run dev",
+    "e2e": "pnpm -w run e2e:router",
+    "e2e:development": "pnpm -w run e2e:router",
+    "test:e2e": "pnpm -w run e2e:router"
   },
   "dependencies": {
     "@ant-design/icons": "^5.3.6",
