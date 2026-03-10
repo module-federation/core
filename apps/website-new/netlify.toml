@@ -1,4 +1,5 @@
 [build]
+command = "pnpm run build:website"
 publish = "apps/website-new/doc_build"
 
 [[redirects]]
@@ -15,5 +16,4 @@ status = 200
   for = "/*"
   [headers.values]
     Access-Control-Allow-Origin = "*"
-
 

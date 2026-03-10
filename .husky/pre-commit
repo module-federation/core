@@ -12,6 +12,6 @@ if git diff --cached --name-only | grep -qE '^packages/enhanced/src/schemas/.+\.
   git add packages/enhanced/src/schemas/container/*.check.ts packages/enhanced/src/schemas/container/*.ts packages/enhanced/src/schemas/sharing/*.check.ts packages/enhanced/src/schemas/sharing/*.ts packages/sdk/src/types/plugins/*.ts 2>/dev/null || true
 fi
 
-npm run lint-fix
+pnpm run lint-fix
 
 git add .

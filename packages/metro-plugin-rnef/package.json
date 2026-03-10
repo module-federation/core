@@ -35,7 +35,8 @@
   },
   "scripts": {
     "build": "rslib build",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.{js,ts}\""
   },
   "peerDependencies": {
     "@module-federation/metro": "workspace:*",
