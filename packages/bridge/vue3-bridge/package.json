@@ -21,7 +21,6 @@
     "CHANGELOG.md",
     "LICENSE",
     "package.json",
-    "project.json",
     "README.md",
     "tsconfig.json",
     "tsconfig.node.json",

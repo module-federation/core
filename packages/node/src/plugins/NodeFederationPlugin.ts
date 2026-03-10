@@ -32,6 +32,14 @@ const createBundlerLogger: typeof createLogger =
     ? (createInfrastructureLogger as unknown as typeof createLogger)
     : createLogger;
 
+function getRuntimePluginPath(): string {
+  return require.resolve(
+    process.env.IS_ESM_BUILD === 'true'
+      ? '../runtimePlugin.mjs'
+      : '../runtimePlugin.js',
+  );
+}
+
 /**
  * Class representing a NodeFederationPlugin.
  * @class
@@ -77,7 +85,7 @@ class NodeFederationPlugin {
 
   private preparePluginOptions(): ModuleFederationPluginOptions {
     this._options.runtimePlugins = [
-      ...(this.useRuntimePlugin ? [require.resolve('../runtimePlugin')] : []),
+      ...(this.useRuntimePlugin ? [getRuntimePluginPath()] : []),
       ...(this._options.runtimePlugins || []),
     ];
 

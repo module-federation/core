@@ -12,13 +12,16 @@ import Runtime from '@components/zh/runtime/index';
 
 * 什么时候使用 `createInstance` ？
 
-为了保证 `ModuleFederation` 实例的唯一性，我们在构建插件创建实例后，会将其存储到内存中，导出的 API 都是先从内存中获取 `ModuleFederation` 实例，然后再调用 `ModuleFederation` 实例的 API。这也是为什么 `loadRemote` 等 API 可以直接使用的原因。
+  为了保证 `ModuleFederation` 实例的唯一性，我们在构建插件创建实例后，会将其存储到内存中，导出的 API 都是先从内存中获取 `ModuleFederation` 实例，然后再调用 `ModuleFederation` 实例的 API。这也是为什么 `loadRemote` 等 API 可以直接使用的原因。
 
-这种单例模式适用于大多数场景，但如果在以下场景，你需要使用 `createInstance`：
+  这种单例模式适用于大多数场景，但如果在以下场景，你需要使用 `createInstance`：
 
-- 没有使用构建插件（纯运行时场景）
-- 需要创建多个 ModuleFederation 实例，每个实例的配置不同
-- 希望使用 ModuleFederation 分治特性，封装相应的 API 提供给其他项目使用
+  - 没有使用构建插件（纯运行时场景）
+  - 需要创建多个 ModuleFederation 实例，每个实例的配置不同
+  - 希望使用 ModuleFederation 分治特性，封装相应的 API 提供给其他项目使用
+
+
+* `createInstance` 不会对已存在的实例进行覆盖，每次调用都会创建一个新的实例。
 
 ```ts
 import { createInstance } from '@module-federation/enhanced/runtime';
