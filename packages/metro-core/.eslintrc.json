@@ -2,17 +2,19 @@
   "extends": ["../../.eslintrc.json"],
   "ignorePatterns": [
     "!**/*",
+    "**/dist/**",
     "**/*.d.ts",
     "**/vite.config.*.timestamp*",
     "**/vitest.config.*.timestamp*"
   ],
   "overrides": [
     {
-      "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
+      "files": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"],
       "rules": {
         "@typescript-eslint/no-explicit-any": "off",
         "@typescript-eslint/ban-ts-comment": "warn",
         "@typescript-eslint/no-var-requires": 0,
+        "@typescript-eslint/no-require-imports": "off",
         "@typescript-eslint/no-restricted-imports": [
           "error",
           {
@@ -55,7 +57,12 @@
       }
     },
     {
-      "files": ["*.js", "*.jsx"]
+      "files": ["**/*.js", "**/*.jsx"],
+      "env": { "node": true, "es2021": true },
+      "parserOptions": { "ecmaVersion": 2021, "sourceType": "module" },
+      "rules": {
+        "no-undef": "off"
+      }
     }
   ]
 }
