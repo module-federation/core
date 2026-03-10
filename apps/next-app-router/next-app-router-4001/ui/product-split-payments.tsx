@@ -11,7 +11,8 @@ export const ProductSplitPayments = ({ price }: { price: Dinero<number> }) => {
   return (
     <div className="text-sm text-gray-400">
       Or <ProductCurrencySymbol dinero={price} />
-      {toDecimal(perMonth, ({ value }) => Math.ceil(Number(value)))}/month for 3 months
+      {toDecimal(perMonth, ({ value }) => Math.ceil(Number(value)))}/month for 3
+      months
     </div>
   );
 };
