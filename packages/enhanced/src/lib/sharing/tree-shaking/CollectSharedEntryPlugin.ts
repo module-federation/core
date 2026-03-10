@@ -84,34 +84,51 @@ class CollectSharedEntryPlugin {
   apply(compiler: Compiler): void {
     const { sharedOptions } = this;
     const { _collectedEntries: collectedEntries } = this;
+    const tappedFactories = new WeakSet<object>();
+    const tapNormalModuleFactory = (normalModuleFactory: any) => {
+      if (
+        !normalModuleFactory ||
+        typeof normalModuleFactory !== 'object' ||
+        tappedFactories.has(normalModuleFactory)
+      ) {
+        return;
+      }
+      if (!normalModuleFactory.hooks?.module?.tap) {
+        return;
+      }
+      tappedFactories.add(normalModuleFactory);
+      normalModuleFactory.hooks.module.tap(
+        'CollectSharedEntryPlugin',
+        (module, { resource }) => {
+          if (!resource || !('rawRequest' in module)) {
+            return module;
+          }
+          const matchedSharedOption = sharedOptions.find(
+            (item) => item[0] === (module.rawRequest as string),
+          );
+          if (!matchedSharedOption) {
+            return module;
+          }
+          const [sharedName] = matchedSharedOption;
+          const sharedVersion = inferPkgVersionFromResource(resource);
+          if (!sharedVersion) {
+            return module;
+          }
+          collectedEntries[sharedName] ||= { requests: [] };
+          collectedEntries[sharedName].requests.push([resource, sharedVersion]);
+          return module;
+        },
+      );
+    };
+
+    (compiler.hooks as any).normalModuleFactory?.tap?.(
+      'CollectSharedEntryPlugin',
+      tapNormalModuleFactory,
+    );
     compiler.hooks.compilation.tap(
       'CollectSharedEntryPlugin',
-      (_compilation, { normalModuleFactory }) => {
-        normalModuleFactory.hooks.module.tap(
-          'CollectSharedEntryPlugin',
-          (module, { resource }, resolveData) => {
-            if (!resource || !('rawRequest' in module)) {
-              return module;
-            }
-            const matchedSharedOption = sharedOptions.find(
-              (item) => item[0] === (module.rawRequest as string),
-            );
-            if (!matchedSharedOption) {
-              return module;
-            }
-            const [sharedName, _] = matchedSharedOption;
-            const sharedVersion = inferPkgVersionFromResource(resource);
-            if (!sharedVersion) {
-              return module;
-            }
-            collectedEntries[sharedName] ||= { requests: [] };
-            collectedEntries[sharedName].requests.push([
-              resource,
-              sharedVersion,
-            ]);
-            return module;
-          },
-        );
+      (_compilation, params) => {
+        tapNormalModuleFactory(params?.normalModuleFactory);
       },
     );
 

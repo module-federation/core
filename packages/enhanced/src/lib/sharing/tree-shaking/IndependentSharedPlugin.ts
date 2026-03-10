@@ -58,6 +58,39 @@ const resolveOutputDir = (outputDir: string, shareName?: string) => {
   return shareName ? path.join(outputDir, encodeName(shareName)) : outputDir;
 };
 
+const resolveShareRequest = (shareName: string, shareConfig?: SharedConfig) => {
+  const request =
+    shareConfig?.request ||
+    shareConfig?.import ||
+    shareConfig?.packageName ||
+    shareConfig?.shareKey ||
+    shareName;
+  return typeof request === 'string' && request ? request : null;
+};
+
+const resolveShareVersion = (
+  context: string,
+  shareName: string,
+  shareConfig?: SharedConfig,
+) => {
+  if (typeof shareConfig?.version === 'string' && shareConfig.version) {
+    return shareConfig.version;
+  }
+  const request = resolveShareRequest(shareName, shareConfig);
+  if (!request) {
+    return null;
+  }
+  try {
+    const pkgJsonPath = require.resolve(`${request}/package.json`, {
+      paths: [context],
+    });
+    const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf-8'));
+    return typeof pkg?.version === 'string' && pkg.version ? pkg.version : null;
+  } catch {
+    return null;
+  }
+};
+
 export interface IndependentSharePluginOptions {
   name: string;
   shared: moduleFederationPlugin.Shared;
@@ -246,7 +279,20 @@ export default class IndependentSharedPlugin {
         if (!shareConfig.treeShaking) {
           return;
         }
-        const shareRequests = shareRequestsMap[shareName].requests;
+        const fallbackRequest = resolveShareRequest(shareName, shareConfig);
+        const fallbackVersion = resolveShareVersion(
+          parentCompiler.context,
+          shareName,
+          shareConfig,
+        );
+        const shareRequests =
+          shareRequestsMap[shareName]?.requests ||
+          (fallbackRequest && fallbackVersion
+            ? [[fallbackRequest, fallbackVersion] as [string, string]]
+            : []);
+        if (!shareRequests.length) {
+          return;
+        }
         await Promise.all(
           shareRequests.map(async ([request, version]) => {
             const sharedConfig = sharedOptions.find(

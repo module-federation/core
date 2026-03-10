@@ -26,6 +26,7 @@ export default defineConfig({
   },
   output: {
     assetPrefix: publicPath,
+    disableTsChecker: true,
     distPath: {
       root: isSecondarySharedTreeShaking ? 'dist-test' : 'dist',
     },
