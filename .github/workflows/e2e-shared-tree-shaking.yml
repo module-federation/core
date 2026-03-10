@@ -51,7 +51,7 @@ jobs:
         id: check-ci
         run: |
           ci_status=0
-          node tools/scripts/ci-is-affected.mjs --appName=shared-tree-shaking-with-server-host || ci_status=$?
+          node tools/scripts/ci-is-affected.mjs --appName=shared-tree-shaking-no-server-host,shared-tree-shaking-no-server-provider,shared-tree-shaking-with-server-host,shared-tree-shaking-with-server-provider || ci_status=$?
           if [ "$ci_status" -eq 0 ]; then
             echo "run-e2e=true" >> "$GITHUB_OUTPUT"
           elif [ "$ci_status" -eq 1 ]; then
