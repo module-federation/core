@@ -87,6 +87,7 @@ export class PrefetchPlugin implements WebpackPluginInstance {
     if (fs.existsSync(asyncEntryPath)) {
       fs.unlinkSync(asyncEntryPath);
     }
+    // @ts-ignore
     if (!this.options.dataPrefetch) {
       return;
     }
