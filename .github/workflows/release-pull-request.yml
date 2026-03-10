@@ -43,14 +43,24 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
 
-      - name: Set Nx SHA
-        uses: nrwl/nx-set-shas@v4
-
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
         # assemble-release-plan is forked, so need to build it before execute pnpm changeset version
+
+      - name: Restore Turborepo cache
+        uses: actions/cache@v5
+        with:
+          path: |
+            .turbo
+            **/.turbo
+          key: ${{ runner.os }}-turbo-${{ github.workflow }}-${{ github.job }}-${{ github.ref_name }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-${{ github.workflow }}-${{ github.job }}-${{ github.ref_name }}-
+            ${{ runner.os }}-turbo-${{ github.workflow }}-${{ github.job }}-
+            ${{ runner.os }}-turbo-
+
       - name: Build Internal Changesets Dependencies
-        run: npx nx build assemble-release-plan
+        run: pnpm exec turbo run build --filter=@changesets/assemble-release-plan --concurrency=20
 
       - name: Create Release Pull Request
         uses: module-federation/actions@v2

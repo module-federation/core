@@ -7,11 +7,11 @@ Assemble a release plan for changesets from data about a repository.
 Usage
 
 ```ts
-import assembleReleasePlan from "@changesets/assemble-release-plan";
-import readChangesets from "@changesets/read";
-import { read } from "@changesets/config";
-import { getPackages } from "@manypkg/get-packages";
-import { readPreState } from "@changesets/pre";
+import assembleReleasePlan from '@changesets/assemble-release-plan';
+import readChangesets from '@changesets/read';
+import { read } from '@changesets/config';
+import { getPackages } from '@manypkg/get-packages';
+import { readPreState } from '@changesets/pre';
 
 const packages = await getPackages(cwd);
 const preState = await readPreState(cwd);
@@ -24,14 +24,10 @@ const releasePlan = assembleReleasePlan(changesets, packages, config, preState);
 Signature
 
 ```ts
-import { NewChangeset, Config, ReleasePlan } from "@changesets/types";
-import { Packages } from "@manypkg/get-packages";
+import { NewChangeset, Config, ReleasePlan } from '@changesets/types';
+import { Packages } from '@manypkg/get-packages';
 
-assembleReleasePlan = (
-  changesets: NewChangeset[],
-  packages: Packages,
-  config: Config
-) => ReleasePlan;
+assembleReleasePlan = (changesets: NewChangeset[], packages: Packages, config: Config) => ReleasePlan;
 ```
 
 This package exists so assembling a release plan can be done without reading from disc.

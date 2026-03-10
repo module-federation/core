@@ -346,6 +346,28 @@ export const describeCases = (config: any) => {
                 ensureTreeShakingFixtures(testDirectory);
               }
             };
+            const withLegacyTreeShakingBuildVersion = async <T>(
+              run: () => Promise<T>,
+            ): Promise<T> => {
+              if (
+                !testDirectory.includes(
+                  `${path.sep}tree-shaking-share${path.sep}`,
+                )
+              ) {
+                return run();
+              }
+              const previousBuildVersion = process.env.MF_BUILD_VERSION;
+              process.env.MF_BUILD_VERSION = '0.0.0';
+              try {
+                return await run();
+              } finally {
+                if (previousBuildVersion === undefined) {
+                  delete process.env.MF_BUILD_VERSION;
+                } else {
+                  process.env.MF_BUILD_VERSION = previousBuildVersion;
+                }
+              }
+            };
 
             beforeAll(() => {
               if (
@@ -503,46 +525,55 @@ export const describeCases = (config: any) => {
                 await new Promise<void>((resolve, reject) => {
                   try {
                     // 单次 run
-                    require('webpack')(options, (err: any) => {
-                      const stderrOutput = stderr.toString();
-                      const { unhandled, results: infrastructureLogErrors } =
-                        collectInfrastructureOutputs(
-                          infraStructureLog,
-                          stderrOutput,
-                          { run: 1, options },
-                        );
-                      stderr.reset();
-                      if (unhandled.length) {
-                        reject(
-                          new Error(
-                            'Errors/Warnings during build:\n' +
-                              unhandled.join('\n'),
-                          ),
-                        );
-                        return;
-                      }
-                      if (
-                        infrastructureLogErrors.length &&
-                        checkArrayExpectation(
-                          testDirectory,
-                          { infrastructureLogs: infrastructureLogErrors },
-                          'infrastructureLog',
-                          'infrastructure-log',
-                          'InfrastructureLog',
-                          (e: any) => {
-                            throw e;
-                          },
-                        )
-                      ) {
-                        resolve();
-                        return;
-                      }
-                      if (err) {
-                        reject(err);
-                        return;
-                      }
-                      resolve();
-                    });
+                    withLegacyTreeShakingBuildVersion(
+                      () =>
+                        new Promise<void>((innerResolve, innerReject) => {
+                          require('webpack')(options, (err: any) => {
+                            const stderrOutput = stderr.toString();
+                            const {
+                              unhandled,
+                              results: infrastructureLogErrors,
+                            } = collectInfrastructureOutputs(
+                              infraStructureLog,
+                              stderrOutput,
+                              { run: 1, options },
+                            );
+                            stderr.reset();
+                            if (unhandled.length) {
+                              innerReject(
+                                new Error(
+                                  'Errors/Warnings during build:\n' +
+                                    unhandled.join('\n'),
+                                ),
+                              );
+                              return;
+                            }
+                            if (
+                              infrastructureLogErrors.length &&
+                              checkArrayExpectation(
+                                testDirectory,
+                                { infrastructureLogs: infrastructureLogErrors },
+                                'infrastructureLog',
+                                'infrastructure-log',
+                                'InfrastructureLog',
+                                (e: any) => {
+                                  throw e;
+                                },
+                              )
+                            ) {
+                              innerResolve();
+                              return;
+                            }
+                            if (err) {
+                              innerReject(err);
+                              return;
+                            }
+                            innerResolve();
+                          });
+                        }),
+                    )
+                      .then(resolve)
+                      .catch(reject);
                   } catch (e: any) {
                     reject(e);
                   }
@@ -556,73 +587,88 @@ export const describeCases = (config: any) => {
                 infraStructureLog.length = 0;
                 await new Promise<void>((resolve, reject) => {
                   try {
-                    require('webpack')(options, (err: any, stats: any) => {
-                      if (err) {
-                        reject(err);
-                        return;
-                      }
-                      const { modules, children, errorsCount } = stats.toJson({
-                        all: false,
-                        modules: true,
-                        errorsCount: true,
-                      });
-                      const stderrOutput = stderr.toString();
-                      const { unhandled, results: infrastructureLogErrors } =
-                        collectInfrastructureOutputs(
-                          infraStructureLog,
-                          stderrOutput,
-                          { run: 2, options },
-                        );
-                      stderr.reset();
-                      if (errorsCount === 0) {
-                        if (unhandled.length) {
-                          reject(
-                            new Error(
-                              'Errors/Warnings during build:\n' +
-                                unhandled.join('\n'),
-                            ),
+                    withLegacyTreeShakingBuildVersion(
+                      () =>
+                        new Promise<void>((innerResolve, innerReject) => {
+                          require('webpack')(
+                            options,
+                            (err: any, stats: any) => {
+                              if (err) {
+                                innerReject(err);
+                                return;
+                              }
+                              const { modules, children, errorsCount } =
+                                stats.toJson({
+                                  all: false,
+                                  modules: true,
+                                  errorsCount: true,
+                                });
+                              const stderrOutput = stderr.toString();
+                              const {
+                                unhandled,
+                                results: infrastructureLogErrors,
+                              } = collectInfrastructureOutputs(
+                                infraStructureLog,
+                                stderrOutput,
+                                { run: 2, options },
+                              );
+                              stderr.reset();
+                              if (errorsCount === 0) {
+                                if (unhandled.length) {
+                                  innerReject(
+                                    new Error(
+                                      'Errors/Warnings during build:\n' +
+                                        unhandled.join('\n'),
+                                    ),
+                                  );
+                                  return;
+                                }
+                                const allModules = children
+                                  ? children.reduce(
+                                      (all: any[], { modules }: any) =>
+                                        all.concat(modules),
+                                      modules || [],
+                                    )
+                                  : modules;
+                                if (
+                                  allModules.some(
+                                    (m: any) =>
+                                      m.type !== 'cached modules' && !m.cached,
+                                  )
+                                ) {
+                                  innerReject(
+                                    new Error(
+                                      `Some modules were not cached:\n${stats.toString({ all: false, modules: true, modulesSpace: 100 })}`,
+                                    ),
+                                  );
+                                  return;
+                                }
+                              }
+                              if (
+                                infrastructureLogErrors.length &&
+                                checkArrayExpectation(
+                                  testDirectory,
+                                  {
+                                    infrastructureLogs: infrastructureLogErrors,
+                                  },
+                                  'infrastructureLog',
+                                  'infrastructure-log',
+                                  'InfrastructureLog',
+                                  (e: any) => {
+                                    throw e;
+                                  },
+                                )
+                              ) {
+                                innerResolve();
+                                return;
+                              }
+                              innerResolve();
+                            },
                           );
-                          return;
-                        }
-                        const allModules = children
-                          ? children.reduce(
-                              (all: any[], { modules }: any) =>
-                                all.concat(modules),
-                              modules || [],
-                            )
-                          : modules;
-                        if (
-                          allModules.some(
-                            (m: any) =>
-                              m.type !== 'cached modules' && !m.cached,
-                          )
-                        ) {
-                          reject(
-                            new Error(
-                              `Some modules were not cached:\n${stats.toString({ all: false, modules: true, modulesSpace: 100 })}`,
-                            ),
-                          );
-                          return;
-                        }
-                      }
-                      if (
-                        infrastructureLogErrors.length &&
-                        checkArrayExpectation(
-                          testDirectory,
-                          { infrastructureLogs: infrastructureLogErrors },
-                          'infrastructureLog',
-                          'infrastructure-log',
-                          'InfrastructureLog',
-                          (e: any) => {
-                            throw e;
-                          },
-                        )
-                      ) {
-                        resolve();
-                        return;
-                      }
-                      resolve();
-                    });
+                        }),
+                    )
+                      .then(resolve)
+                      .catch(reject);
                   } catch (e: any) {
                     reject(e);
                   }
@@ -655,31 +701,34 @@ export const describeCases = (config: any) => {
                 const runWebpackCompile = async () => {
                   infraStructureLog.length = 0;
                   stderr.reset();
-                  return new Promise<{ stats: any }>((resolve, reject) => {
-                    const onCompiled = (err: any, stats: any) => {
-                      if (err) return reject(err);
-                      resolve({ stats });
-                    };
-                    try {
-                      if (config.cache) {
-                        const compiler = require('webpack')(options);
-                        compiler.run((err: any) => {
+                  return withLegacyTreeShakingBuildVersion(
+                    () =>
+                      new Promise<{ stats: any }>((resolve, reject) => {
+                        const onCompiled = (err: any, stats: any) => {
                           if (err) return reject(err);
-                          compiler.run((error: any, stats: any) => {
-                            compiler.close((cerr: any) => {
-                              if (cerr) return reject(cerr);
-                              if (error) return reject(error);
-                              resolve({ stats });
+                          resolve({ stats });
+                        };
+                        try {
+                          if (config.cache) {
+                            const compiler = require('webpack')(options);
+                            compiler.run((err: any) => {
+                              if (err) return reject(err);
+                              compiler.run((error: any, stats: any) => {
+                                compiler.close((cerr: any) => {
+                                  if (cerr) return reject(cerr);
+                                  if (error) return reject(error);
+                                  resolve({ stats });
+                                });
+                              });
                             });
-                          });
-                        });
-                      } else {
-                        require('webpack')(options, onCompiled);
-                      }
-                    } catch (e: any) {
-                      reject(e);
-                    }
-                  });
+                          } else {
+                            require('webpack')(options, onCompiled);
+                          }
+                        } catch (e: any) {
+                          reject(e);
+                        }
+                      }),
+                  );
                 };
 
                 cleanOutputDirectory();
