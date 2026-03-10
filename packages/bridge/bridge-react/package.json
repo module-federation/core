@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/bridge-react",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "sideEffects": false,
   "publishConfig": {
     "access": "public"
@@ -129,7 +129,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "pnpm exec jest --config jest.config.ts --passWithNoTests"
   },
   "dependencies": {
     "@module-federation/bridge-shared": "workspace:*",

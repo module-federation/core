@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/storybook-addon",
-  "version": "6.0.1",
+  "version": "6.0.2",
   "description": "Storybook addon to consume remote module federated apps/components",
   "type": "module",
   "license": "MIT",
@@ -53,6 +53,7 @@
     "@module-federation/sdk": "workspace:*"
   },
   "devDependencies": {
+    "@nx/module-federation": ">= 16.0.0",
     "jest-fixed-jsdom": "^0.0.9",
     "@module-federation/utilities": "workspace:*",
     "@rsbuild/core": "2.0.0-beta.2",
@@ -63,7 +64,7 @@
   },
   "peerDependencies": {
     "@rsbuild/core": "^1.0.1 || ^2.0.0-0",
-    "@module-federation/sdk": "^2.0.1",
+    "@module-federation/sdk": "^2.1.0",
     "@nx/react": ">= 16.0.0",
     "@nx/webpack": ">= 16.0.0",
     "@nx/module-federation": ">= 16.0.0",
@@ -82,6 +83,9 @@
     "@nx/react": {
       "optional": true
     },
+    "@nx/module-federation": {
+      "optional": true
+    },
     "@nx/webpack": {
       "optional": true
     },
@@ -97,5 +101,12 @@
     "webpack-virtual-modules": {
       "optional": true
     }
+  },
+  "scripts": {
+    "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && pnpm -C . exec tsdown --config tsdown.config.ts && cp *.md dist",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\"",
+    "test": "pnpm exec jest --config jest.config.ts --passWithNoTests",
+    "test:ci": "pnpm exec jest --config jest.config.ts --passWithNoTests --ci --coverage",
+    "pre-release": "pnpm run test && pnpm run build"
   }
 }

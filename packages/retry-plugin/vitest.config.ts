@@ -1,5 +1,5 @@
 import { defineConfig } from 'vitest/config';
-import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
+import tsconfigPaths from 'vite-tsconfig-paths';
 import path from 'path';
 export default defineConfig({
   define: {
@@ -8,7 +8,7 @@ export default defineConfig({
     __BROWSER__: false,
     __VERSION__: '"unknown"',
   },
-  plugins: [nxViteTsPaths()],
+  plugins: [tsconfigPaths()],
   test: {
     environment: 'jsdom',
     include: [path.resolve(__dirname, '__tests__/*.spec.ts')],

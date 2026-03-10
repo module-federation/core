@@ -1,8 +1,8 @@
-import webpack from 'webpack';
 import path from 'path';
 import { rs } from '@rstest/core';
+import type { Compiler, Compilation } from 'webpack';
 
-export function createMockCompiler(): webpack.Compiler {
+export function createMockCompiler(): Compiler {
   const compiler = {
     options: {
       context: path.resolve(__dirname, '../../'),
@@ -31,9 +31,7 @@ export function createMockCompiler(): webpack.Compiler {
   return compiler;
 }
 
-export function createMockCompilation(
-  compiler: webpack.Compiler,
-): webpack.Compilation {
+export function createMockCompilation(compiler: Compiler): Compilation {
   const compilation = {
     hooks: {
       afterOptimizeChunks: {

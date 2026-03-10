@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/retry-plugin",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "author": "danpeen <dapeen.feng@gmail.com>",
   "main": "./dist/index.js",
   "module": "./dist/esm/index.js",
@@ -37,5 +37,12 @@
   },
   "dependencies": {
     "@module-federation/sdk": "workspace:*"
+  },
+  "scripts": {
+    "build": "tsdown --config tsdown.config.ts && cp package.json dist && cp *.md dist",
+    "test": "vitest run -u -c vitest.config.ts",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",
+    "build-debug": "FEDERATION_DEBUG=true pnpm run build",
+    "pre-release": "pnpm run test && pnpm run build"
   }
 }

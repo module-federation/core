@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/modern-js-v3",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "files": [
     "dist/",
     "types.d.ts",
@@ -10,7 +10,10 @@
     "access": "public"
   },
   "scripts": {
-    "build": "rslib build"
+    "build": "rslib build",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\"",
+    "test": "pnpm exec vitest run --passWithNoTests --config vite.config.mts",
+    "pre-release": "pnpm run test && pnpm run build"
   },
   "repository": {
     "type": "git",
@@ -153,7 +156,9 @@
     "@modern-js/runtime": "3.0.1",
     "@modern-js/tsconfig": "3.0.1",
     "@types/react": "^18.3.11",
-    "@types/react-dom": "^18.3.0"
+    "@types/react-dom": "^18.3.0",
+    "react": "~18.3.1",
+    "react-dom": "~18.3.1"
   },
   "peerDependencies": {
     "react": ">=17",

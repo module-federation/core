@@ -1,7 +1,7 @@
 {
   "public": true,
   "name": "@module-federation/node",
-  "version": "2.7.32",
+  "version": "2.7.33",
   "type": "commonjs",
   "main": "./dist/src/index.js",
   "module": "./dist/src/index.mjs",
@@ -122,5 +122,11 @@
     "webpack": {
       "optional": true
     }
+  },
+  "scripts": {
+    "build": "tsdown --config tsdown.config.mts",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.js\" \"**/*.ts\"",
+    "test": "pnpm exec jest --config jest.config.js --passWithNoTests",
+    "pre-release": "pnpm run test && pnpm run build && rm -f ./dist/package.json"
   }
 }
