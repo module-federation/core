@@ -386,6 +386,12 @@ function compare(baseData, currentData) {
   ]);
   const changed = [];
   let unchangedCount = 0;
+  const emptyPackageMetrics = {
+    totalDist: 0,
+    esmGzip: 0,
+    webBundleGzip: 0,
+    nodeBundleGzip: 0,
+  };
 
   const distMetrics = [
     { key: 'totalDist', label: 'Total dist (raw)' },
@@ -400,8 +406,8 @@ function compare(baseData, currentData) {
   const allMetrics = [...distMetrics, ...bundleMetrics];
 
   for (const name of [...allPackages].sort()) {
-    const base = baseData[name] || {};
-    const current = currentData[name] || {};
+    const base = baseData[name] || emptyPackageMetrics;
+    const current = currentData[name] || emptyPackageMetrics;
 
     const hasChange = allMetrics.some(({ key }) => {
       const baseValue = base[key];
