@@ -52,7 +52,7 @@ jobs:
         id: check-ci
         run: |
           ci_status=0
-          node tools/scripts/ci-is-affected.mjs --appName=runtime-host || ci_status=$?
+          node tools/scripts/ci-is-affected.mjs --appName=runtime-host,runtime-remote1,runtime-remote2 || ci_status=$?
           if [ "$ci_status" -eq 0 ]; then
             echo "run-e2e=true" >> "$GITHUB_OUTPUT"
           elif [ "$ci_status" -eq 1 ]; then

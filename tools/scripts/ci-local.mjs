@@ -196,7 +196,7 @@ const jobs = [
     steps: [
       setupE2E(),
       step('E2E Test for Runtime Demo', (ctx) =>
-        runIfAffected(ctx, 'runtime-host', () =>
+        runIfAffected(ctx, 'runtime-host,runtime-remote1,runtime-remote2', () =>
           runCommand('pnpm', ['run', 'e2e:runtime'], ctx),
         ),
       ),
@@ -208,13 +208,17 @@ const jobs = [
     steps: [
       setupE2E(),
       step('E2E Test for Manifest Demo (dev)', (ctx) =>
-        runIfAffected(ctx, '3008-webpack-host', () =>
-          runCommand('pnpm', ['run', 'e2e:manifest:dev'], ctx),
+        runIfAffected(
+          ctx,
+          '3008-webpack-host,3009-webpack-provider,3010-rspack-provider,3011-rspack-manifest-provider,3012-rspack-js-entry-provider',
+          () => runCommand('pnpm', ['run', 'e2e:manifest:dev'], ctx),
         ),
       ),
       step('E2E Test for Manifest Demo (prod)', (ctx) =>
-        runIfAffected(ctx, '3008-webpack-host', () =>
-          runCommand('pnpm', ['run', 'e2e:manifest:prod'], ctx),
+        runIfAffected(
+          ctx,
+          '3008-webpack-host,3009-webpack-provider,3010-rspack-provider,3011-rspack-manifest-provider,3012-rspack-js-entry-provider',
+          () => runCommand('pnpm', ['run', 'e2e:manifest:prod'], ctx),
         ),
       ),
     ],
@@ -226,7 +230,7 @@ const jobs = [
       setupE2E(),
       step('Check CI conditions', async (ctx) => {
         ctx.state.shouldRun = await ciIsAffected(
-          'node-local-remote,node-remote,node-dynamic-remote-new-version,node-dynamic-remote',
+          'node-host,node-local-remote,node-remote,node-dynamic-remote-new-version,node-dynamic-remote,node-host-e2e',
           ctx,
         );
       }),
@@ -248,8 +252,10 @@ const jobs = [
     steps: [
       setupE2E(),
       step('E2E Test for Next.js Dev', (ctx) =>
-        runIfAffected(ctx, '@module-federation/3000-home', () =>
-          runCommand('pnpm', ['run', 'e2e:next:dev'], ctx),
+        runIfAffected(
+          ctx,
+          '@module-federation/3000-home,@module-federation/3001-shop,@module-federation/3002-checkout',
+          () => runCommand('pnpm', ['run', 'e2e:next:dev'], ctx),
         ),
       ),
     ],
@@ -260,8 +266,10 @@ const jobs = [
     steps: [
       setupE2E(),
       step('E2E Test for Next.js Prod', (ctx) =>
-        runIfAffected(ctx, '@module-federation/3000-home', () =>
-          runCommand('pnpm', ['run', 'e2e:next:prod'], ctx),
+        runIfAffected(
+          ctx,
+          '@module-federation/3000-home,@module-federation/3001-shop,@module-federation/3002-checkout',
+          () => runCommand('pnpm', ['run', 'e2e:next:prod'], ctx),
         ),
       ),
     ],
@@ -323,7 +331,7 @@ const jobs = [
       setupE2E(),
       step('Check CI conditions', async (ctx) => {
         ctx.state.shouldRun = await ciIsAffected(
-          'host,host-v5,host-vue3,remote1,remote2,remote3,remote4',
+          'host,host-v5,host-vue3,remote1,remote2,remote3,remote4,remote5,remote6',
           ctx,
         );
       }),

@@ -53,7 +53,7 @@ jobs:
         id: check-ci
         run: |
           ci_status=0
-          node tools/scripts/ci-is-affected.mjs --appName=@module-federation/3000-home || ci_status=$?
+          node tools/scripts/ci-is-affected.mjs --appName=@module-federation/3000-home,@module-federation/3001-shop,@module-federation/3002-checkout || ci_status=$?
           if [ "$ci_status" -eq 0 ]; then
             echo "run-e2e=true" >> "$GITHUB_OUTPUT"
           elif [ "$ci_status" -eq 1 ]; then

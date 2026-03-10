@@ -52,7 +52,7 @@ jobs:
         id: check-ci
         run: |
           ci_status=0
-          node tools/scripts/ci-is-affected.mjs --appName=3008-webpack-host || ci_status=$?
+          node tools/scripts/ci-is-affected.mjs --appName=3008-webpack-host,3009-webpack-provider,3010-rspack-provider,3011-rspack-manifest-provider,3012-rspack-js-entry-provider || ci_status=$?
           if [ "$ci_status" -eq 0 ]; then
             echo "run-e2e=true" >> "$GITHUB_OUTPUT"
           elif [ "$ci_status" -eq 1 ]; then

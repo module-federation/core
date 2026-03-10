@@ -52,7 +52,7 @@ jobs:
         id: check-ci
         run: |
           ci_status=0
-          node tools/scripts/ci-is-affected.mjs --appName=node-local-remote,node-remote,node-dynamic-remote-new-version,node-dynamic-remote || ci_status=$?
+          node tools/scripts/ci-is-affected.mjs --appName=node-host,node-local-remote,node-remote,node-dynamic-remote-new-version,node-dynamic-remote,node-host-e2e || ci_status=$?
           if [ "$ci_status" -eq 0 ]; then
             echo "run-e2e=true" >> "$GITHUB_OUTPUT"
           elif [ "$ci_status" -eq 1 ]; then
