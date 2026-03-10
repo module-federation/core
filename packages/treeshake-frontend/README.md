@@ -22,13 +22,11 @@
 本应用通过一个后端服务来获取打包产物。你需要配置该服务的地址，有以下三种方式（优先级从高到低）：
 
 1.  **在页面中配置**：
-
     - 在主界面的表单区域，找到并展开 “**高级构建配置**” 面板。
     - 在 “**Server API Base URL**” 输入框中，填入你的后端服务地址（例如：`http://localhost:3000/tree-shaking-shared`）。
     - 该配置会自动保存到浏览器的 localStorage（`treeshake_server_url`）中。
 
 2.  **通过环境变量配置**：
-
     - 在项目根目录下创建一个 `.env` 文件。
     - 在文件中添加一行：`VITE_API_BASE_URL=http://localhost:3000/tree-shaking-shared`
     - 重新启动或构建前端应用即可生效。

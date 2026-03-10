@@ -161,9 +161,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
       }
       const runtimePlugins = options.runtimePlugins || [];
       options.runtimePlugins = runtimePlugins.concat(
-        require.resolve(
-          '@module-federation/inject-external-runtime-core-plugin',
-        ),
+        require.resolve('@module-federation/inject-external-runtime-core-plugin'),
       );
     }
 
