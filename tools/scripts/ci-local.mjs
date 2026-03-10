@@ -464,7 +464,7 @@ const jobs = [
       setupE2E(),
       step('Check CI conditions', async (ctx) => {
         ctx.state.shouldRun = await ciIsAffected(
-          'shared-tree-shaking-with-server-host',
+          'shared-tree-shaking-no-server-host,shared-tree-shaking-no-server-provider,shared-tree-shaking-with-server-host,shared-tree-shaking-with-server-provider',
           ctx,
         );
       }),
