@@ -44,10 +44,9 @@ jobs:
           path: |
             .turbo
             **/.turbo
-          key: ${{ runner.os }}-turbo-${{ github.workflow }}-${{ github.job }}-${{ github.ref_name }}-${{ hashFiles('pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-turbo-${{ github.ref_name }}-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-turbo-${{ github.workflow }}-${{ github.job }}-${{ github.ref_name }}-
-            ${{ runner.os }}-turbo-${{ github.workflow }}-${{ github.job }}-
+            ${{ runner.os }}-turbo-${{ github.ref_name }}-
             ${{ runner.os }}-turbo-
 
       - name: Install Cypress
@@ -146,4 +145,15 @@ jobs:
     needs:
       - checkout-install
     uses: ./.github/workflows/e2e-metro.yml
+    secrets: inherit
+
+  devtools:
+    needs: checkout-install
+    uses: ./.github/workflows/devtools.yml
+    secrets: inherit
+
+  bundle-size:
+    if: github.event_name == 'pull_request'
+    needs: checkout-install
+    uses: ./.github/workflows/bundle-size.yml
     secrets: inherit

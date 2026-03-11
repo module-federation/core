@@ -2,7 +2,7 @@ name: Bundle Size Comment
 
 on:
   workflow_run:
-    workflows: ['Bundle Size']
+    workflows: ['Build Affected Packages']
     types: [completed]
 
 permissions:

@@ -1,8 +1,7 @@
 name: Bundle Size
 
 on:
-  pull_request:
-    branches: [main]
+  workflow_call:
 
 permissions:
   contents: read
@@ -39,10 +38,9 @@ jobs:
           path: |
             .turbo
             **/.turbo
-          key: ${{ runner.os }}-turbo-${{ github.workflow }}-${{ github.job }}-${{ github.ref_name }}-${{ hashFiles('pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-turbo-${{ github.ref_name }}-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-turbo-${{ github.workflow }}-${{ github.job }}-${{ github.ref_name }}-
-            ${{ runner.os }}-turbo-${{ github.workflow }}-${{ github.job }}-
+            ${{ runner.os }}-turbo-${{ github.ref_name }}-
             ${{ runner.os }}-turbo-
 
       - name: Build packages (current)
@@ -70,10 +68,8 @@ jobs:
         uses: actions/cache/restore@v5
         with:
           path: ${{ env.BASE_PATH }}/.turbo
-          key: ${{ runner.os }}-turbo-base-${{ github.workflow }}-${{ github.job }}-${{ hashFiles('pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-turbo-base-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-turbo-base-${{ github.workflow }}-${{ github.job }}-
-            ${{ runner.os }}-turbo-base-${{ github.workflow }}-
             ${{ runner.os }}-turbo-base-
 
       - name: Install dependencies (base)
