@@ -3,14 +3,18 @@ if [ "$SKIP_DEVTOOLS_POSTINSTALL" = "true" ]; then
     exit 0
 fi
 
+if [ "$GITHUB_ACTIONS" = "true" ] && [ "$RUN_DEVTOOLS_POSTINSTALL" != "true" ]; then
+    echo "Skipping devtools postinstall outside the devtools workflow."
+    exit 0
+fi
+
 if [ "$GITHUB_ACTIONS" = "true" ]; then
     echo "Running in GitHub Actions environment."
     # Only install if cache miss was reported by the cache action
     if [ "$PLAYWRIGHT_CACHE_HIT" != "true" ]; then
-        echo "Playwright cache miss, installing dependencies and browsers..."
-        npx playwright install-deps && npx playwright install
+        echo "Playwright cache miss, installing Chromium dependencies and browser..."
+        npx playwright install-deps && npx playwright install chromium
     else
-        npx playwright install
         echo "Using cached Playwright browsers."
     fi
 else
