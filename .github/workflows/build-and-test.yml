@@ -38,7 +38,8 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Restore Turborepo cache
-        uses: actions/cache/restore@v4
+        id: turbo-cache
+        uses: actions/cache/restore@v5
         with:
           path: |
             .turbo
@@ -86,6 +87,15 @@ jobs:
 
       - name: Run affected package tests
         run: node tools/scripts/run-affected-package-tests.mjs
+
+      - name: Save Turborepo cache
+        if: ${{ success() && steps.turbo-cache.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@v5
+        with:
+          path: |
+            .turbo
+            **/.turbo
+          key: ${{ steps.turbo-cache.outputs.cache-primary-key }}
 
   e2e-modern:
     needs: checkout-install
