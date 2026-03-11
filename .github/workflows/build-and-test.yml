@@ -41,9 +41,7 @@ jobs:
         id: turbo-cache
         uses: actions/cache/restore@v5
         with:
-          path: |
-            .turbo
-            **/.turbo
+          path: .turbo/cache
           key: ${{ runner.os }}-turbo-${{ github.ref_name }}-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-turbo-${{ github.ref_name }}-
@@ -88,12 +86,10 @@ jobs:
         run: node tools/scripts/run-affected-package-tests.mjs
 
       - name: Save Turborepo cache
-        if: ${{ success() && steps.turbo-cache.outputs.cache-hit != 'true' }}
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && success() && steps.turbo-cache.outputs.cache-hit != 'true' }}
         uses: actions/cache/save@v5
         with:
-          path: |
-            .turbo
-            **/.turbo
+          path: .turbo/cache
           key: ${{ steps.turbo-cache.outputs.cache-primary-key }}
 
   e2e-modern:

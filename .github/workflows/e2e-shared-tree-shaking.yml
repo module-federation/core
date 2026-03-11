@@ -32,9 +32,7 @@ jobs:
       - name: Restore Turborepo cache
         uses: actions/cache/restore@v5
         with:
-          path: |
-            .turbo
-            **/.turbo
+          path: .turbo/cache
           key: ${{ runner.os }}-turbo-${{ github.ref_name }}-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-turbo-${{ github.ref_name }}-
