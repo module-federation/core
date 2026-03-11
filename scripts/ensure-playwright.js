@@ -114,8 +114,8 @@ const ensurePlaywright = () => {
 
   const installArgs =
     process.platform === 'linux'
-      ? 'playwright install --with-deps'
-      : 'playwright install';
+      ? 'playwright install --with-deps chromium'
+      : 'playwright install chromium';
 
   console.log(
     `[ensure-playwright] Missing browser. Running "pnpm exec ${installArgs}"...`,
