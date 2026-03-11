@@ -26,7 +26,7 @@ jobs:
           fetch-depth: 10
 
       - name: Cache Tool Downloads
-        uses: actions/cache@v5
+        uses: actions/cache/restore@v4
         with:
           path: ~/.cache
           key: ${{ runner.os }}-toolcache-${{ hashFiles('pnpm-lock.yaml') }}
@@ -48,7 +48,7 @@ jobs:
         # assemble-release-plan is forked, so need to build it before execute pnpm changeset version
 
       - name: Restore Turborepo cache
-        uses: actions/cache@v5
+        uses: actions/cache/restore@v4
         with:
           path: |
             .turbo
