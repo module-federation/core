@@ -39,7 +39,6 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Restore Turborepo cache
-        id: turbo-cache
         uses: actions/cache/restore@v5
         with:
           path: .turbo/cache
@@ -50,13 +49,6 @@ jobs:
 
       - name: Build package workspace targets
         run: pnpm run build:packages
-
-      - name: Save Turborepo cache
-        if: steps.turbo-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v5
-        with:
-          path: .turbo/cache
-          key: ${{ runner.os }}-turbo-${{ github.ref_name }}-${{ hashFiles('pnpm-lock.yaml') }}
 
       - name: Publish pkg.pr.new previews
         run: node tools/scripts/publish-pkg-pr-new-previews.mjs

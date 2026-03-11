@@ -48,7 +48,6 @@ jobs:
         # assemble-release-plan is forked, so need to build it before execute pnpm changeset version
 
       - name: Restore Turborepo cache
-        id: turbo-cache
         uses: actions/cache/restore@v5
         with:
           path: .turbo/cache
@@ -59,13 +58,6 @@ jobs:
 
       - name: Build Internal Changesets Dependencies
         run: pnpm exec turbo run build --filter=@changesets/assemble-release-plan --concurrency=20
-
-      - name: Save Turborepo cache
-        if: steps.turbo-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v5
-        with:
-          path: .turbo/cache
-          key: ${{ runner.os }}-turbo-${{ github.ref_name }}-${{ hashFiles('pnpm-lock.yaml') }}
 
       - name: Create Release Pull Request
         uses: module-federation/actions@v2
