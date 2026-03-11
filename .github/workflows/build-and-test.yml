@@ -147,9 +147,3 @@ jobs:
     needs: checkout-install
     uses: ./.github/workflows/devtools.yml
     secrets: inherit
-
-  bundle-size:
-    if: github.event_name == 'pull_request'
-    needs: checkout-install
-    uses: ./.github/workflows/bundle-size.yml
-    secrets: inherit

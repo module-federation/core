@@ -27,8 +27,20 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
 
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-devtools-${{ hashFiles('pnpm-lock.yaml', 'packages/chrome-devtools/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-devtools-
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile && find . -maxdepth 6 -type d \( -name ".cache" -o -name ".modern-js" \) -exec rm -rf {} +
+        env:
+          PLAYWRIGHT_CACHE_HIT: ${{ steps.playwright-cache.outputs.cache-hit }}
+          RUN_DEVTOOLS_POSTINSTALL: 'true'
 
       - name: Restore Turborepo cache
         uses: actions/cache/restore@v5
@@ -41,9 +53,6 @@ jobs:
 
       - name: Install Cypress
         run: npx cypress install
-
-      - name: Install Playwright browsers
-        run: pnpm --filter @module-federation/devtools exec playwright install chromium
 
       - name: Build shared packages
         run: pnpm run build:packages
