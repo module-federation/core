@@ -1,4 +1,4 @@
-import { toFormat, type Dinero } from 'dinero.js';
+import { toSnapshot, type Dinero } from 'dinero.js';
 
 export const ProductCurrencySymbol = ({
   dinero,
@@ -6,7 +6,7 @@ export const ProductCurrencySymbol = ({
   dinero: Dinero<number>;
 }) => {
   let symbol = '';
-  switch (toFormat(dinero, ({ currency }) => currency.code)) {
+  switch (toSnapshot(dinero).currency.code) {
     case 'GBP': {
       symbol = '£';
       break;
