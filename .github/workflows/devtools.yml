@@ -1,14 +1,10 @@
 name: Devtools
 
 on:
-  pull_request:
-    branches: [main]
-
-  push:
-    branches: [main]
+  workflow_call:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: devtools-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -31,26 +27,32 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile && find . -maxdepth 6 -type d \( -name ".cache" -o -name ".modern-js" \) -exec rm -rf {} +
-
-      - name: Restore Turborepo cache
+      - name: Cache Playwright browsers
+        id: playwright-cache
         uses: actions/cache@v5
         with:
-          path: |
-            .turbo
-            **/.turbo
-          key: ${{ runner.os }}-turbo-${{ github.workflow }}-${{ github.job }}-${{ github.ref_name }}-${{ hashFiles('pnpm-lock.yaml') }}
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-devtools-${{ hashFiles('pnpm-lock.yaml', 'packages/chrome-devtools/package.json') }}
           restore-keys: |
-            ${{ runner.os }}-turbo-${{ github.workflow }}-${{ github.job }}-${{ github.ref_name }}-
-            ${{ runner.os }}-turbo-${{ github.workflow }}-${{ github.job }}-
+            ${{ runner.os }}-playwright-devtools-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile && find . -maxdepth 6 -type d \( -name ".cache" -o -name ".modern-js" \) -exec rm -rf {} +
+        env:
+          PLAYWRIGHT_CACHE_HIT: ${{ steps.playwright-cache.outputs.cache-hit }}
+          RUN_DEVTOOLS_POSTINSTALL: 'true'
+
+      - name: Restore Turborepo cache
+        uses: actions/cache/restore@v5
+        with:
+          path: .turbo/cache
+          key: ${{ runner.os }}-turbo-${{ github.ref_name }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-${{ github.ref_name }}-
             ${{ runner.os }}-turbo-
 
       - name: Install Cypress
         run: npx cypress install
-
-      - name: Install Playwright browsers
-        run: pnpm --filter @module-federation/devtools exec playwright install chromium
 
       - name: Build shared packages
         run: pnpm run build:packages
