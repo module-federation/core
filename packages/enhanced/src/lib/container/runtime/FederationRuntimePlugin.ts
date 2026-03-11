@@ -34,23 +34,73 @@ const { mkdirpSync } = require(
   normalizeWebpackPath('webpack/lib/util/fs'),
 ) as typeof import('webpack/lib/util/fs');
 
-function resolveRuntimePaths(implementation?: string) {
-  const ext = process.env.IS_ESM_BUILD === 'true' ? '.js' : '.cjs';
-  const runtimeToolsSpec = `@module-federation/runtime-tools/dist/index${ext}`;
-  const bundlerRuntimeSpec = `@module-federation/webpack-bundler-runtime/dist/index${ext}`;
-  const runtimeSpec = `@module-federation/runtime/dist/index${ext}`;
+type ResolveFn = typeof require.resolve;
+type RuntimeEntrySpec = {
+  bundler: string;
+  esm: string;
+  cjs: string;
+};
 
-  const runtimeToolsPath = require.resolve(runtimeToolsSpec);
-  const modulePaths = implementation ? [implementation] : [runtimeToolsPath];
+function resolveRuntimeEntry(
+  spec: RuntimeEntrySpec,
+  implementation: string | undefined,
+  resolve: ResolveFn = require.resolve,
+) {
+  const candidates = [spec.bundler, spec.esm, spec.cjs];
+  const modulePaths = implementation ? [implementation] : undefined;
+  let lastError: unknown;
+
+  for (const candidate of candidates) {
+    try {
+      return modulePaths
+        ? resolve(candidate, { paths: modulePaths })
+        : resolve(candidate);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw lastError;
+}
+
+export function resolveRuntimePaths(
+  implementation?: string,
+  resolve: ResolveFn = require.resolve,
+) {
+  // Prefer the dedicated bundler subpath so webpack can tree-shake across the
+  // runtime package boundary. Fall back to the legacy dist contract for older
+  // custom implementations that have not published /bundler yet.
+  const runtimeToolsPath = resolveRuntimeEntry(
+    {
+      bundler: '@module-federation/runtime-tools/bundler',
+      esm: '@module-federation/runtime-tools/dist/index.js',
+      cjs: '@module-federation/runtime-tools/dist/index.cjs',
+    },
+    undefined,
+    resolve,
+  );
+  const moduleBase = implementation || runtimeToolsPath;
 
   return {
     runtimeToolsPath,
-    bundlerRuntimePath: require.resolve(bundlerRuntimeSpec, {
-      paths: modulePaths,
-    }),
-    runtimePath: require.resolve(runtimeSpec, {
-      paths: modulePaths,
-    }),
+    bundlerRuntimePath: resolveRuntimeEntry(
+      {
+        bundler: '@module-federation/webpack-bundler-runtime/bundler',
+        esm: '@module-federation/webpack-bundler-runtime/dist/index.js',
+        cjs: '@module-federation/webpack-bundler-runtime/dist/index.cjs',
+      },
+      moduleBase,
+      resolve,
+    ),
+    runtimePath: resolveRuntimeEntry(
+      {
+        bundler: '@module-federation/runtime/bundler',
+        esm: '@module-federation/runtime/dist/index.js',
+        cjs: '@module-federation/runtime/dist/index.cjs',
+      },
+      moduleBase,
+      resolve,
+    ),
   };
 }
 
@@ -225,7 +275,7 @@ class FederationRuntimePlugin {
         : fs;
     try {
       fsLike.readFileSync(filePath);
-    } catch (err) {
+    } catch {
       mkdirpSync(fsLike as any, TEMP_DIR);
       fsLike.writeFileSync(
         filePath,
@@ -277,7 +327,7 @@ class FederationRuntimePlugin {
           compiler.context,
           federationRuntimeDependency,
           { name: undefined },
-          (err, module) => {
+          (err) => {
             if (err) {
               return callback(err);
             }
