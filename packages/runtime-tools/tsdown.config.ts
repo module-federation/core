@@ -15,6 +15,7 @@ export default defineConfig([
       runtime: 'src/runtime.ts',
       'runtime-core': 'src/runtime-core.ts',
       'webpack-bundler-runtime': 'src/webpack-bundler-runtime.ts',
+      bundler: 'src/bundler.ts',
     },
     external: ['@module-federation/*'],
     dts: {
