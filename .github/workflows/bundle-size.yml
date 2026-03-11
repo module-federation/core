@@ -3,12 +3,13 @@ name: Bundle Size
 on:
   pull_request:
     branches: [main]
+  workflow_call:
 
 permissions:
   contents: read
 
 concurrency:
-  group: bundle-size-${{ github.event.pull_request.number }}
+  group: bundle-size-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -34,15 +35,12 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Restore Turborepo cache
-        uses: actions/cache@v5
+        uses: actions/cache/restore@v5
         with:
-          path: |
-            .turbo
-            **/.turbo
-          key: ${{ runner.os }}-turbo-${{ github.workflow }}-${{ github.job }}-${{ github.ref_name }}-${{ hashFiles('pnpm-lock.yaml') }}
+          path: .turbo/cache
+          key: ${{ runner.os }}-turbo-${{ github.ref_name }}-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-turbo-${{ github.workflow }}-${{ github.job }}-${{ github.ref_name }}-
-            ${{ runner.os }}-turbo-${{ github.workflow }}-${{ github.job }}-
+            ${{ runner.os }}-turbo-${{ github.ref_name }}-
             ${{ runner.os }}-turbo-
 
       - name: Build packages (current)
@@ -67,13 +65,11 @@ jobs:
           esac
 
       - name: Restore Turborepo cache (base worktree)
-        uses: actions/cache@v5
+        uses: actions/cache/restore@v5
         with:
-          path: ${{ env.BASE_PATH }}/.turbo
-          key: ${{ runner.os }}-turbo-base-${{ github.workflow }}-${{ github.job }}-${{ hashFiles('pnpm-lock.yaml') }}
+          path: ${{ env.BASE_PATH }}/.turbo/cache
+          key: ${{ runner.os }}-turbo-base-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-turbo-base-${{ github.workflow }}-${{ github.job }}-
-            ${{ runner.os }}-turbo-base-${{ github.workflow }}-
             ${{ runner.os }}-turbo-base-
 
       - name: Install dependencies (base)
