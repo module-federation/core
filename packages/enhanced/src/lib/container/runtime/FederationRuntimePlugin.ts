@@ -79,7 +79,6 @@ function resolveRuntimeEntryWithFallback(
 
   return resolveRuntimeEntry(spec, undefined, resolve);
 }
-
 export function resolveRuntimePaths(
   implementation?: string,
   resolve: ResolveFn = require.resolve,
@@ -201,10 +200,6 @@ class FederationRuntimePlugin {
       '}',
     ]);
 
-    const installInitialConsumesCall = options.experiments?.asyncStartup
-      ? `${federationGlobal}.installInitialConsumes({ asyncLoad: true })`
-      : `${federationGlobal}.installInitialConsumes()`;
-
     return Template.asString([
       `import federation from '${normalizedBundlerRuntimePath}';`,
       runtimePluginTemplates,
@@ -230,7 +225,7 @@ class FederationRuntimePlugin {
         ]),
         '}',
         `if(${federationGlobal}.installInitialConsumes){`,
-        Template.indent([installInitialConsumesCall]),
+        Template.indent([`${federationGlobal}.installInitialConsumes()`]),
         '}',
       ]),
       PrefetchPlugin.addRuntime(compiler, {
@@ -296,7 +291,7 @@ class FederationRuntimePlugin {
         : fs;
     try {
       fsLike.readFileSync(filePath);
-    } catch (err) {
+    } catch {
       mkdirpSync(fsLike as any, TEMP_DIR);
       fsLike.writeFileSync(
         filePath,
@@ -348,7 +343,7 @@ class FederationRuntimePlugin {
           compiler.context,
           federationRuntimeDependency,
           { name: undefined },
-          (err, module) => {
+          (err) => {
             if (err) {
               return callback(err);
             }

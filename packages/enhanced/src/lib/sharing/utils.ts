@@ -4,7 +4,7 @@
 */
 
 import { isRequiredVersion } from '@module-federation/sdk';
-import type { ConsumeOptions } from '../../declarations/plugins/sharing/ConsumeSharedModule';
+import type { ConsumeOptions } from '@module-federation/sdk';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { InputFileSystem } from 'webpack/lib/util/fs';
 import type { Compilation } from 'webpack';

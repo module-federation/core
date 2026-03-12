@@ -78,13 +78,9 @@ export class StatsPlugin implements WebpackPluginInstance {
                   })) || updatedStats;
               }
 
-              const webpackSources =
-                compiler.webpack?.sources ||
-                // eslint-disable-next-line @typescript-eslint/no-var-requires
-                require('webpack').sources;
               compilation.updateAsset(
                 this._statsManager.fileName,
-                new webpackSources.RawSource(
+                new compiler.webpack.sources.RawSource(
                   JSON.stringify(updatedStats, null, 2),
                 ),
               );
@@ -95,7 +91,7 @@ export class StatsPlugin implements WebpackPluginInstance {
                 compiler,
                 bundler: this._bundler,
               });
-              const source = new webpackSources.RawSource(
+              const source = new compiler.webpack.sources.RawSource(
                 JSON.stringify(updatedManifest, null, 2),
               );
               compilation.updateAsset(this._manifestManager.fileName, source);
@@ -130,17 +126,17 @@ export class StatsPlugin implements WebpackPluginInstance {
               bundler: this._bundler,
             });
 
-            const webpackSources =
-              compiler.webpack?.sources ||
-              // eslint-disable-next-line @typescript-eslint/no-var-requires
-              require('webpack').sources;
             compilation.emitAsset(
               this._statsManager.fileName,
-              new webpackSources.RawSource(JSON.stringify(stats, null, 2)),
+              new compiler.webpack.sources.RawSource(
+                JSON.stringify(stats, null, 2),
+              ),
             );
             compilation.emitAsset(
               this._manifestManager.fileName,
-              new webpackSources.RawSource(JSON.stringify(manifest, null, 2)),
+              new compiler.webpack.sources.RawSource(
+                JSON.stringify(manifest, null, 2),
+              ),
             );
           }
         },
