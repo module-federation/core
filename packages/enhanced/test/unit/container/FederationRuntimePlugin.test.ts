@@ -2,7 +2,7 @@ import FederationRuntimePlugin, {
   resolveRuntimePaths,
 } from '../../../src/lib/container/runtime/FederationRuntimePlugin';
 import type { Compiler } from 'webpack';
-import { rs, Mock } from '@rstest/core';
+import { rs } from '@rstest/core';
 
 // Use rs.hoisted() to create mock functions that are hoisted along with rs.mock()
 const mocks = rs.hoisted(() => ({
@@ -369,7 +369,7 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
       );
     });
 
-    it('resolves runtime-tools alias for CJS mode when runtime alias is preset', () => {
+    it('resolves runtime-tools alias to esm when IS_ESM_BUILD is false', () => {
       process.env.IS_ESM_BUILD = 'false';
       const plugin = new FederationRuntimePlugin({} as any);
       const compiler = {
