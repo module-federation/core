@@ -246,6 +246,18 @@ Guidance:
 - This AGENTS update does not change hook behavior.
 - Keep commit messages compatible with conventional commits (`@commitlint/config-conventional`).
 
+## Pull Request Conventions
+
+- PR titles should use the same conventional-commit style as commits when practical, for example `fix(runtime): handle missing remote entry` or `chore(enhanced): remove unused plugin`.
+- Prefer PR titles without extra prefixes such as `[codex]`; the title should describe the change directly.
+- PR bodies should be prose-first and explain:
+  - what changed
+  - why the change was needed
+  - user or runtime impact
+  - validation that was run
+  - any failed or skipped checks, with cause
+- If a PR is docs-only, say that explicitly and keep the body brief.
+
 ## Operating Rules
 
 - Keep changes minimal and directly scoped to the user request.
