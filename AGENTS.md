@@ -258,6 +258,29 @@ Guidance:
   - any failed or skipped checks, with cause
 - If a PR is docs-only, say that explicitly and keep the body brief.
 
+## Webpack Internal Access
+
+- When accessing webpack internals from repo code, prefer the repo's normalized webpack-path convention over direct bare-package imports.
+- Prefer:
+
+```ts
+import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
+
+const InternalThing = require(
+  normalizeWebpackPath('webpack/lib/some/internal/path'),
+) as typeof import('webpack/lib/some/internal/path');
+```
+
+- For top-level webpack access, prefer:
+
+```ts
+const webpack = require(normalizeWebpackPath('webpack')) as typeof import('webpack');
+```
+
+- Avoid introducing new direct bare-path requires such as `require('webpack/lib/...')` when the normalized path pattern is available.
+- Avoid introducing new direct webpack package imports for internals when the existing module uses normalized `require(...)` conventions.
+- When editing an existing file, preserve the local webpack-loading style already used there unless there is a deliberate reason to migrate the file consistently.
+
 ## Operating Rules
 
 - Keep changes minimal and directly scoped to the user request.
