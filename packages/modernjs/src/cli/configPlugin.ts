@@ -112,7 +112,6 @@ export const getMFConfig = async (
   const { createJiti } = require('jiti');
   const jit = createJiti(__filename, {
     interopDefault: true,
-    esmResolve: true,
   });
   const configModule = await jit(mfConfigPath);
 
@@ -484,9 +483,8 @@ export const moduleFederationConfigPlugin = (
         resolve: {
           alias: {
             // TODO: deprecated
-            '@modern-js/runtime/mf': require.resolve(
-              '@module-federation/modern-js/runtime',
-            ),
+            '@modern-js/runtime/mf':
+              require.resolve('@module-federation/modern-js/runtime'),
           },
         },
         source: {
