@@ -84,7 +84,7 @@
     "commitgen:staged": "./commit-gen.js --path ./packages --staged",
     "commitgen:main": "./commit-gen.js --path ./packages",
     "changeset:status": "changeset status",
-    "generate:schema": "pnpm --filter @module-federation/enhanced run generate:schema && pnpm exec prettier --write ."
+    "generate:schema": "pnpm --filter @module-federation/enhanced run generate:schema && git diff --name-only | xargs pnpm exec prettier --write --ignore-unknown"
   },
   "pnpm": {
     "packageExtensions": {
