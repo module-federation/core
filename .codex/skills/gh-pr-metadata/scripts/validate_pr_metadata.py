@@ -13,24 +13,30 @@ TITLE_RE = (
     r"(\([^)]+\))?!?: .+"
 )
 
-REQUIRED_SECTIONS = [
-    "## Description",
-    "## Related Issue",
-    "## Types of changes",
-    "## Checklist",
-]
+DEFAULT_TEMPLATE = """## Description
 
-REQUIRED_TYPE_LINES = [
-    "- [ ] Docs change / refactoring / dependency upgrade",
-    "- [ ] Bug fix (non-breaking change which fixes an issue)",
-    "- [ ] New feature (non-breaking change which adds functionality)",
-]
+<!--- Provide a general summary of your changes in the Title above -->
+<!--- Describe your changes in detail -->
 
-REQUIRED_CHECKLIST_LINES = [
-    "- [ ] I have added tests to cover my changes.",
-    "- [ ] All new and existing tests passed.",
-    "- [ ] I have updated the documentation.",
-]
+## Related Issue
+
+<!--- This project only accepts pull requests related to open issues -->
+<!--- If suggesting a new feature or change, please discuss it in an issue first -->
+<!--- If fixing a bug, there should be an issue describing it with steps to reproduce -->
+<!--- Please link to the issue here: -->
+
+## Types of changes
+
+- [ ] Docs change / refactoring / dependency upgrade
+- [ ] Bug fix (non-breaking change which fixes an issue)
+- [ ] New feature (non-breaking change which adds functionality)
+
+## Checklist
+
+- [ ] I have added tests to cover my changes.
+- [ ] All new and existing tests passed.
+- [ ] I have updated the documentation.
+"""
 
 
 def run(cmd: list[str], cwd: Path) -> str:
@@ -67,6 +73,35 @@ def load_body(args: argparse.Namespace, cwd: Path) -> tuple[str, str]:
     return read_current_pr(cwd)
 
 
+def load_repo_template(cwd: Path) -> str:
+    template_path = cwd / ".github" / "pull_request_template.md"
+    if template_path.exists():
+        return template_path.read_text()
+    return DEFAULT_TEMPLATE
+
+
+def parse_template_requirements(template: str) -> tuple[list[str], list[str], list[str]]:
+    sections: list[str] = []
+    type_lines: list[str] = []
+    checklist_lines: list[str] = []
+    current_section = ""
+
+    for raw_line in template.splitlines():
+        line = raw_line.strip()
+        if line.startswith("## "):
+            sections.append(line)
+            current_section = line
+            continue
+        if not line.startswith("- [ ] "):
+            continue
+        if current_section == "## Types of changes":
+            type_lines.append(line)
+        elif current_section == "## Checklist":
+            checklist_lines.append(line)
+
+    return sections, type_lines, checklist_lines
+
+
 def validate_title(title: str) -> list[str]:
     import re
 
@@ -84,11 +119,16 @@ def validate_title(title: str) -> list[str]:
     return errors
 
 
-def validate_body(body: str) -> list[str]:
+def validate_body(
+    body: str,
+    required_sections: list[str],
+    required_type_lines: list[str],
+    required_checklist_lines: list[str],
+) -> list[str]:
     errors: list[str] = []
     positions: list[int] = []
 
-    for section in REQUIRED_SECTIONS:
+    for section in required_sections:
         idx = body.find(section)
         if idx == -1:
             errors.append(f"missing section: {section}")
@@ -98,43 +138,19 @@ def validate_body(body: str) -> list[str]:
     if valid_positions and valid_positions != sorted(valid_positions):
         errors.append("required sections are out of order")
 
-    for line in REQUIRED_TYPE_LINES:
+    for line in required_type_lines:
         if line not in body:
             errors.append(f"missing type checkbox: {line}")
 
-    for line in REQUIRED_CHECKLIST_LINES:
+    for line in required_checklist_lines:
         if line not in body:
             errors.append(f"missing checklist item: {line}")
 
     return errors
 
 
-def print_template() -> None:
-    body = """## Description
-
-<!--- Provide a general summary of your changes in the Title above -->
-<!--- Describe your changes in detail -->
-
-## Related Issue
-
-<!--- This project only accepts pull requests related to open issues -->
-<!--- If suggesting a new feature or change, please discuss it in an issue first -->
-<!--- If fixing a bug, there should be an issue describing it with steps to reproduce -->
-<!--- Please link to the issue here: -->
-
-## Types of changes
-
-- [ ] Docs change / refactoring / dependency upgrade
-- [ ] Bug fix (non-breaking change which fixes an issue)
-- [ ] New feature (non-breaking change which adds functionality)
-
-## Checklist
-
-- [ ] I have added tests to cover my changes.
-- [ ] All new and existing tests passed.
-- [ ] I have updated the documentation.
-"""
-    sys.stdout.write(body)
+def print_template(cwd: Path) -> None:
+    sys.stdout.write(load_repo_template(cwd))
 
 
 def main() -> int:
@@ -162,14 +178,22 @@ def main() -> int:
     )
     args = parser.parse_args()
 
+    cwd = Path(args.repo_root).resolve()
     if args.print_template:
-        print_template()
+        print_template(cwd)
         return 0
 
-    cwd = Path(args.repo_root).resolve()
+    required_sections, required_type_lines, required_checklist_lines = (
+        parse_template_requirements(load_repo_template(cwd))
+    )
     title, body = load_body(args, cwd)
 
-    errors = validate_title(title) + validate_body(body)
+    errors = validate_title(title) + validate_body(
+        body,
+        required_sections,
+        required_type_lines,
+        required_checklist_lines,
+    )
     payload = {
         "ok": not errors,
         "title": title,
