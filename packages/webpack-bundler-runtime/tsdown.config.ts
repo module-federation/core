@@ -14,6 +14,7 @@ export default defineConfig([
       entry: {
         index: 'src/index.ts',
         constant: 'src/constant.ts',
+        bundler: 'src/bundler.ts',
       },
       external: ['@module-federation/*', 'webpack'],
       dts: {
