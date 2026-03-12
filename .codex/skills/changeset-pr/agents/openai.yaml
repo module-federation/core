@@ -1,4 +1,4 @@
 interface:
-  display_name: "Changeset PR"
-  short_description: "Create and verify PR changesets"
-  default_prompt: "Use $changeset-pr to create or update the correct changeset for this branch and verify its scope."
+  display_name: 'Changeset PR'
+  short_description: 'Create and verify PR changesets'
+  default_prompt: 'Use $changeset-pr to create or update the correct changeset for this branch and verify its scope.'
