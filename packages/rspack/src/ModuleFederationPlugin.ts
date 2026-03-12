@@ -28,6 +28,14 @@ type CacheGroups = NonUndefined<NonFalseSplitChunks['cacheGroups']>;
 type CacheGroup = CacheGroups[string];
 
 declare const __VERSION__: string;
+export const PLUGIN_NAME = 'RspackModuleFederationPlugin';
+
+type ResolveFn = typeof require.resolve;
+type RuntimeEntrySpec = {
+  bundler: string;
+  esm: string;
+  cjs: string;
+};
 
 const RUNTIME_TOOLS_REQUEST = '@module-federation/runtime-tools';
 const NODE_RUNTIME_PLUGIN = '@module-federation/node/runtimePlugin';
@@ -43,6 +51,58 @@ type DtsPluginRuntimeInstance = {
 type DtsPluginConstructor = new (
   options: moduleFederationPlugin.ModuleFederationPluginOptions,
 ) => DtsPluginRuntimeInstance;
+
+function resolveRuntimeEntry(
+  spec: RuntimeEntrySpec,
+  implementation: string | undefined,
+  resolve: ResolveFn = require.resolve,
+) {
+  const candidates = [spec.bundler, spec.esm, spec.cjs];
+  const modulePaths = implementation ? [implementation] : undefined;
+  let lastError: unknown;
+
+  for (const candidate of candidates) {
+    try {
+      return modulePaths
+        ? resolve(candidate, { paths: modulePaths })
+        : resolve(candidate);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw lastError;
+}
+
+export function resolveRspackRuntimeImplementation(
+  implementation?: string,
+  resolve: ResolveFn = require.resolve,
+) {
+  return resolveRuntimeEntry(
+    {
+      bundler: '@module-federation/runtime-tools/bundler',
+      esm: '@module-federation/runtime-tools/dist/index.js',
+      cjs: '@module-federation/runtime-tools/dist/index.cjs',
+    },
+    implementation,
+    resolve,
+  );
+}
+
+export function resolveRspackRuntimeAlias(
+  implementation: string,
+  resolve: ResolveFn = require.resolve,
+) {
+  return resolveRuntimeEntry(
+    {
+      bundler: '@module-federation/runtime/bundler',
+      esm: '@module-federation/runtime/dist/index.js',
+      cjs: '@module-federation/runtime/dist/index.cjs',
+    },
+    implementation,
+    resolve,
+  );
+}
 
 function getTargetValues(target: unknown): string[] {
   if (Array.isArray(target)) {
@@ -140,7 +200,6 @@ function loadDtsPlugin(): DtsPluginConstructor {
   return (load(request) as { DtsPlugin: DtsPluginConstructor }).DtsPlugin;
 }
 
-export const PLUGIN_NAME = 'RspackModuleFederationPlugin';
 export class ModuleFederationPlugin implements RspackPluginInstance {
   readonly name = PLUGIN_NAME;
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -249,7 +308,18 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     const implementationPath = options.implementation
       ? resolveFromCompilerContext(options.implementation, compiler.context)
       : resolveFromCompilerContext(RUNTIME_TOOLS_REQUEST, compiler.context);
-    options.implementation = implementationPath;
+    const implementationResolveBase = path.dirname(implementationPath);
+    const resolvedImplementationPath = (() => {
+      try {
+        return resolveRspackRuntimeImplementation(
+          implementationResolveBase,
+          runtimeRequire.resolve.bind(runtimeRequire) as ResolveFn,
+        );
+      } catch {
+        return implementationPath;
+      }
+    })();
+    options.implementation = resolvedImplementationPath;
     let disableManifest = options.manifest === false;
     let disableDts = options.dts === false;
 
@@ -277,7 +347,10 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     ).apply(compiler);
 
     const resolveRuntimePath = (candidates: string[]) => {
-      const resolvePaths = [compiler.context, path.dirname(implementationPath)];
+      const resolvePaths = [
+        compiler.context,
+        path.dirname(resolvedImplementationPath),
+      ];
       for (const candidate of candidates) {
         for (const resolvePath of resolvePaths) {
           try {
@@ -293,14 +366,22 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
         )}`,
       );
     };
-
-    const runtimePath = resolveRuntimePath([
-      '@module-federation/runtime/dist/index.js',
-      '@module-federation/runtime/dist/index.esm.js',
-      '@module-federation/runtime/dist/index.cjs',
-      '@module-federation/runtime/dist/index.cjs.cjs',
-      '@module-federation/runtime',
-    ]);
+    let runtimePath: string;
+    try {
+      runtimePath = resolveRspackRuntimeAlias(
+        path.dirname(resolvedImplementationPath),
+        runtimeRequire.resolve.bind(runtimeRequire) as ResolveFn,
+      );
+    } catch {
+      runtimePath = resolveRuntimePath([
+        '@module-federation/runtime/bundler',
+        '@module-federation/runtime/dist/index.js',
+        '@module-federation/runtime/dist/index.esm.js',
+        '@module-federation/runtime/dist/index.cjs',
+        '@module-federation/runtime/dist/index.cjs.cjs',
+        '@module-federation/runtime',
+      ]);
+    }
 
     compiler.hooks.afterPlugins.tap('PatchAliasWebpackPlugin', () => {
       compiler.options.resolve.alias = {

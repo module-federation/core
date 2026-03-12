@@ -70,6 +70,7 @@
       },
       "default": "./dist/rsc-bridge-expose.js"
     },
+    "./bundler": "./dist/bundler.js",
     "./*": "./*"
   },
   "typesVersions": {
@@ -85,6 +86,9 @@
       ],
       "rsc-bridge-expose": [
         "./dist/rsc-bridge-expose.d.ts"
+      ],
+      "bundler": [
+        "./dist/bundler.d.ts"
       ]
     }
   },

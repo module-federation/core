@@ -16,6 +16,7 @@ export default defineConfig([
         constant: 'src/constant.ts',
         'rsc-bridge-runtime-plugin': 'src/rscBridgeRuntimePlugin.ts',
         'rsc-bridge-expose': 'src/rscBridgeExpose.ts',
+        bundler: 'src/bundler.ts',
       },
       external: ['@module-federation/*', 'webpack'],
       dts: {

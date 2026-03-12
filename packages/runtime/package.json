@@ -63,6 +63,7 @@
       },
       "default": "./dist/core.js"
     },
+    "./bundler": "./dist/bundler.js",
     "./*": "./*"
   },
   "typesVersions": {
@@ -78,6 +79,9 @@
       ],
       "core": [
         "./dist/core.d.ts"
+      ],
+      "bundler": [
+        "./dist/bundler.d.ts"
       ]
     }
   },
