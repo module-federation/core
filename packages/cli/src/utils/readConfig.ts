@@ -1,7 +1,6 @@
 import path from 'path';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
-
-const { createJiti } = require('jiti');
+import { createJiti } from 'jiti';
 const DEFAULT_CONFIG_PATH = 'module-federation.config.ts';
 
 export const getConfigPath = (userConfigPath?: string) => {
@@ -16,7 +15,6 @@ export async function readConfig(userConfigPath?: string) {
   const configPath = getConfigPath(userConfigPath);
   const jit = createJiti(__filename, {
     interopDefault: true,
-    esmResolve: true,
   });
   const configModule = await jit(configPath);
   const resolvedConfig = (

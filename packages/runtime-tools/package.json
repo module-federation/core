@@ -60,6 +60,7 @@
         "default": "./dist/webpack-bundler-runtime.cjs"
       }
     },
+    "./bundler": "./dist/bundler.js",
     "./*": "./*"
   },
   "typesVersions": {
@@ -75,6 +76,9 @@
       ],
       "runtime-core": [
         "./dist/runtime-core.d.ts"
+      ],
+      "bundler": [
+        "./dist/bundler.d.ts"
       ]
     }
   },
