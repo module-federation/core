@@ -100,7 +100,15 @@ const processChunk = async (chunk, shareMap, hostStats) => {
   const normalizedChunk = chunk.includes('->')
     ? chunk.replace('->', '/')
     : chunk;
-  const [remote, req] = normalizedChunk.split('/');
+  const remoteSeparatorIndex = normalizedChunk.indexOf('/');
+  const remote =
+    remoteSeparatorIndex === -1
+      ? normalizedChunk
+      : normalizedChunk.slice(0, remoteSeparatorIndex);
+  const req =
+    remoteSeparatorIndex === -1
+      ? ''
+      : normalizedChunk.slice(remoteSeparatorIndex + 1);
   const request = req?.startsWith('./') ? req : './' + req;
   const knownRemotes = getAllKnownRemotes();
   //@ts-ignore
