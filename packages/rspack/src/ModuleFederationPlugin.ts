@@ -28,14 +28,6 @@ type CacheGroups = NonUndefined<NonFalseSplitChunks['cacheGroups']>;
 type CacheGroup = CacheGroups[string];
 
 declare const __VERSION__: string;
-declare global {
-  namespace NodeJS {
-    interface ProcessEnv {
-      IS_ESM_BUILD?: string;
-    }
-  }
-}
-
 export const PLUGIN_NAME = 'RspackModuleFederationPlugin';
 
 type ResolveFn = typeof require.resolve;
