@@ -1,5 +1,5 @@
 {
-  "extends": ["../../.eslintrc.package-opt-in.json"],
+  "extends": ["../.eslintrc.json"],
   "overrides": [
     {
       "files": ["src/initContainerEntry.ts", "src/initializeSharing.ts"],
