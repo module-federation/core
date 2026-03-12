@@ -86,6 +86,7 @@ const ASSET_RULES = [
 
 const JS_EXTENSIONS = new Set(['.js', '.mjs', '.cjs']);
 const TRACKED_EXPORT_SUBPATHS = ['./bundler'];
+const EXCLUDED_PACKAGE_NAMES = new Set(['@changesets/assemble-release-plan']);
 
 async function loadRslib() {
   if (!rslibPromise) {
@@ -613,6 +614,7 @@ function discoverPackages(packagesDir) {
       try {
         const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
         if (!packageJson?.name) continue;
+        if (EXCLUDED_PACKAGE_NAMES.has(packageJson.name)) continue;
         packages.push({
           name: packageJson.name,
           dir: pkgDir,
