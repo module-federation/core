@@ -1,7 +1,6 @@
 {
   "extends": [
     "plugin:cypress/recommended",
-    "plugin:@nx/react-typescript",
     "next",
     "next/core-web-vitals",
     "../../.eslintrc.json"

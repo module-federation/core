@@ -16,12 +16,13 @@ import {
 import { PrefetchPlugin } from '@module-federation/data-prefetch/cli';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { Compiler, WebpackPluginInstance } from 'webpack';
+import fs from 'node:fs';
+import path from 'node:path';
 import SharePlugin from '../sharing/SharePlugin';
 import ContainerPlugin from './ContainerPlugin';
 import ContainerReferencePlugin from './ContainerReferencePlugin';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
 import { RemoteEntryPlugin } from '@module-federation/rspack/remote-entry-plugin';
-import { ExternalsType } from 'webpack/declarations/WebpackOptions';
 import StartupChunkDependenciesPlugin from '../startup/MfStartupChunkDependenciesPlugin';
 import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 import { createSchemaValidation } from '../../utils';
@@ -46,6 +47,33 @@ const validate = createSchemaValidation(
     baseDataPath: 'options',
   },
 );
+
+function getEnhancedPackageVersion(): string {
+  let currentDir = __dirname;
+
+  while (true) {
+    const packageJsonPath = path.join(currentDir, 'package.json');
+
+    if (fs.existsSync(packageJsonPath)) {
+      const pkg = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8')) as {
+        name?: string;
+        version?: string;
+      };
+
+      if (pkg.name === '@module-federation/enhanced' && pkg.version) {
+        return pkg.version;
+      }
+    }
+
+    const parentDir = path.dirname(currentDir);
+    if (parentDir === currentDir) {
+      break;
+    }
+    currentDir = parentDir;
+  }
+
+  throw new Error('Unable to resolve @module-federation/enhanced package.json');
+}
 
 class ModuleFederationPlugin implements WebpackPluginInstance {
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -119,17 +147,21 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     (new RemoteEntryPlugin(options) as unknown as WebpackPluginInstance).apply(
       compiler,
     );
+    const useContainerPlugin =
+      options.exposes &&
+      (Array.isArray(options.exposes)
+        ? options.exposes.length > 0
+        : Object.keys(options.exposes).length > 0);
+
     if (experiments?.provideExternalRuntime) {
-      if (options.exposes) {
+      if (useContainerPlugin) {
         throw new Error(
           'You can only set provideExternalRuntime: true in pure consumer which not expose modules.',
         );
       }
       const runtimePlugins = options.runtimePlugins || [];
       options.runtimePlugins = runtimePlugins.concat(
-        require.resolve(
-          '@module-federation/inject-external-runtime-core-plugin',
-        ),
+        require.resolve('@module-federation/inject-external-runtime-core-plugin'),
       );
     }
 
@@ -165,14 +197,10 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     const remoteType =
       options.remoteType ||
       (options.library && isValidExternalsType(options.library.type)
-        ? (options.library.type as ExternalsType)
-        : ('script' as ExternalsType));
-
-    const useContainerPlugin =
-      options.exposes &&
-      (Array.isArray(options.exposes)
-        ? options.exposes.length > 0
-        : Object.keys(options.exposes).length > 0);
+        ? (options.library.type as moduleFederationPlugin.ExternalsType)
+        : ('script' as moduleFederationPlugin.ExternalsType));
+    const containerRemoteType =
+      remoteType as moduleFederationPlugin.ExternalsType;
 
     let disableManifest = options.manifest === false;
     if (useContainerPlugin) {
@@ -219,7 +247,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
           : Object.keys(remotes).length > 0)
       ) {
         new ContainerReferencePlugin({
-          remoteType,
+          remoteType: containerRemoteType,
           shareScope,
           remotes,
         }).apply(compiler);
@@ -236,9 +264,8 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     });
 
     if (!disableManifest) {
-      const pkg = require('../../../../package.json');
       this._statsPlugin = new StatsPlugin(options, {
-        pluginVersion: pkg.version,
+        pluginVersion: getEnhancedPackageVersion(),
         bundler: 'webpack',
       });
       this._statsPlugin.apply(compiler);

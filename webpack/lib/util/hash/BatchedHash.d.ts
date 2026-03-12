@@ -1,15 +1,16 @@
 export = BatchedHash;
+/** @typedef {import("../../../declarations/WebpackOptions").HashDigest} Encoding */
 declare class BatchedHash extends Hash {
-  constructor(hash: any);
+  /**
+   * @param {Hash} hash hash
+   */
+  constructor(hash: Hash);
   string: string;
   encoding: string;
-  hash: any;
-  /**
-   * Update hash {@link https://nodejs.org/api/crypto.html#crypto_hash_update_data_inputencoding}
-   * @param {string|Buffer} data data
-   * @param {string=} inputEncoding data encoding
-   * @returns {this} updated hash
-   */
-  update(data: string | Buffer, inputEncoding?: string | undefined): this;
+  hash: Hash;
+}
+declare namespace BatchedHash {
+  export { Encoding };
 }
 import Hash = require('../Hash');
+type Encoding = import('../../../declarations/WebpackOptions').HashDigest;

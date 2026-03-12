@@ -1,36 +1,47 @@
 export = AsyncWebAssemblyJavascriptGenerator;
+/** @typedef {import("webpack-sources").Source} Source */
+/** @typedef {import("../Generator").GenerateContext} GenerateContext */
+/** @typedef {import("../Module")} Module */
+/** @typedef {import("../Module").SourceType} SourceType */
+/** @typedef {import("../Module").SourceTypes} SourceTypes */
+/** @typedef {import("../NormalModule")} NormalModule */
 /**
- * @typedef {{ request: string, importVar: string }} ImportObjRequestItem
+ * @typedef {{ request: string, importVar: string, dependency: WebAssemblyImportDependency }} ImportObjRequestItem
  */
 declare class AsyncWebAssemblyJavascriptGenerator extends Generator {
   /**
-   * @param {OutputOptions["webassemblyModuleFilename"]} filenameTemplate template for the WebAssembly module filename
+   * @param {Error} error the error
+   * @param {NormalModule} module module for which the code should be generated
+   * @param {GenerateContext} generateContext context for generate
+   * @returns {Source | null} generated code
    */
-  constructor(filenameTemplate: OutputOptions['webassemblyModuleFilename']);
-  filenameTemplate: string;
+  generateError(
+    error: Error,
+    module: NormalModule,
+    generateContext: GenerateContext,
+  ): Source | null;
 }
 declare namespace AsyncWebAssemblyJavascriptGenerator {
   export {
     Source,
-    OutputOptions,
-    DependencyTemplates,
     GenerateContext,
     Module,
+    SourceType,
+    SourceTypes,
     NormalModule,
-    RuntimeTemplate,
     ImportObjRequestItem,
   };
 }
 import Generator = require('../Generator');
-type OutputOptions =
-  import('../../declarations/WebpackOptions').OutputNormalized;
-type Source = any;
-type DependencyTemplates = import('../DependencyTemplates');
+type Source = import('webpack-sources').Source;
 type GenerateContext = import('../Generator').GenerateContext;
 type Module = import('../Module');
+type SourceType = import('../Module').SourceType;
+type SourceTypes = import('../Module').SourceTypes;
 type NormalModule = import('../NormalModule');
-type RuntimeTemplate = import('../RuntimeTemplate');
 type ImportObjRequestItem = {
   request: string;
   importVar: string;
+  dependency: WebAssemblyImportDependency;
 };
+import WebAssemblyImportDependency = require('../dependencies/WebAssemblyImportDependency');

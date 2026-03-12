@@ -1,8 +1,8 @@
 import React from 'react';
 import { Outlet, useNavigate, useLocation } from '@modern-js/runtime/router';
 import { Layout, Menu } from 'antd';
-import { getInstance } from '@module-federation/modern-js/runtime';
-import { lazyLoadComponentPlugin } from '@module-federation/modern-js/react';
+import { getInstance } from '@module-federation/modern-js-v3/runtime';
+import { lazyLoadComponentPlugin } from '@module-federation/modern-js-v3/react';
 
 getInstance()!.registerPlugins([lazyLoadComponentPlugin()]);
 console.log('layout');

@@ -7,7 +7,10 @@ update-commit-messages.sh
 /out-tsc
 /build
 /docs
+/.turbo
+**/.turbo/
 /.nx
+**/.nx/
 # dependencies
 node_modules
 ./webpack-lib
@@ -81,8 +84,6 @@ packages/enhanced/test/js
 
 vite.config.*.timestamp*
 vitest.config.*.timestamp*
-.cursor/rules/nx-rules.mdc
-.github/instructions/nx.instructions.md
 .temp-commit-msg
 
 # website-new
@@ -97,3 +98,10 @@ packages/enhanced/.unpack-cache/**
 packages/enhanced/.codex/**
 packages/enhanced/generated/**
 **/.codex/
+!/.codex/
+!/.codex/skills/
+!/.codex/skills/turborepo/
+!/.codex/skills/turborepo/**
+.pnpm-store/
+apps/rsc-demo/**/build/
+apps/rsc-demo/e2e/test-results/

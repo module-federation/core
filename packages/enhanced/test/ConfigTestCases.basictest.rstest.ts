@@ -18,4 +18,5 @@ rs.resetModules();
 describeCases({
   // Unique name to keep test/js output isolated from other config-case suites.
   name: 'ConfigTestCases-basictest',
+  excludeCategories: ['tree-shaking-share'],
 });

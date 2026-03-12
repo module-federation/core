@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/metro-plugin-rnef",
-  "version": "0.23.0",
+  "version": "2.1.0",
   "description": "Metro Module Federation plugin for React Native Enterprise Framework (RNEF)",
   "keywords": [
     "rnef",
@@ -35,7 +35,8 @@
   },
   "scripts": {
     "build": "rslib build",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.{js,ts}\""
   },
   "peerDependencies": {
     "@module-federation/metro": "workspace:*",
@@ -46,6 +47,8 @@
     "@rnef/config": "^0.7.18",
     "@rnef/tools": "^0.7.18",
     "@rslib/core": "^0.10.0",
+    "@typescript-eslint/eslint-plugin": "8.54.0",
+    "@typescript-eslint/parser": "8.54.0",
     "@types/node": "^20.0.0",
     "typescript": "^5.8.3"
   }

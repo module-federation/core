@@ -2,10 +2,11 @@
   "name": "react-ts-host",
   "version": "1.0.0",
   "private": true,
+  "description": "Federation example for react-ts-host",
   "dependencies": {
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-router-dom": "^6.23.1"
+    "react-router-dom": "^6.30.2"
   },
   "devDependencies": {
     "@module-federation/enhanced": "workspace:*",
@@ -15,5 +16,15 @@
     "@types/react": "18.3.11",
     "@types/react-dom": "18.3.0",
     "react-refresh": "0.14.2"
+  },
+  "scripts": {
+    "build": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config webpack.config.js --mode production",
+    "build:development": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config webpack.config.js --mode development",
+    "build:production": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config webpack.config.js --mode production",
+    "serve": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config webpack.config.js --mode production --port 3003 --no-hot",
+    "serve:development": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config webpack.config.js --mode development --port 3003",
+    "serve:production": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config webpack.config.js --mode production --port 3003 --no-hot",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules **/*.{ts,tsx,js,jsx}",
+    "serve-static": "pnpm exec serve dist -l 3003 --cors"
   }
 }

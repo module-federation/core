@@ -1,4 +1,4 @@
-import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime/types';
+import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime';
 import { ModuleInfo, getResourceUrl } from '@module-federation/sdk';
 
 import { getSignalFromManifest } from './common/runtime-utils';

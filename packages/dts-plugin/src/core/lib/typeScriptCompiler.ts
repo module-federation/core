@@ -1,4 +1,5 @@
-import { ensureDirSync, writeFileSync, existsSync } from 'fs-extra';
+import fse from 'fs-extra';
+const { ensureDirSync, writeFileSync, existsSync } = fse;
 import crypto from 'crypto';
 import { stat, readdir, writeFile, rm, readFile } from 'fs/promises';
 import {
@@ -11,13 +12,10 @@ import {
   extname,
   isAbsolute,
 } from 'path';
-import {
-  getShortErrorMsg,
-  TYPE_001,
-  typeDescMap,
-} from '@module-federation/error-codes';
+import { TYPE_001, typeDescMap } from '@module-federation/error-codes';
+import { logAndReport } from '@module-federation/error-codes/node';
 import { ThirdPartyExtractor } from '@module-federation/third-party-dts-extractor';
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import util from 'util';
 import { TEMP_DIR } from '@module-federation/sdk';
 
@@ -182,6 +180,66 @@ const resolvePackageManagerExecutable = () => {
   }
 };
 
+const splitCommandArgs = (value: string): string[] => {
+  const args: string[] = [];
+  let current = '';
+  let quote: '"' | "'" | null = null;
+  let escaped = false;
+
+  for (const char of value) {
+    if (escaped) {
+      current += char;
+      escaped = false;
+      continue;
+    }
+
+    if (char === '\\') {
+      escaped = true;
+      continue;
+    }
+
+    if (quote) {
+      if (char === quote) {
+        quote = null;
+      } else {
+        current += char;
+      }
+      continue;
+    }
+
+    if (char === '"' || char === "'") {
+      quote = char;
+      continue;
+    }
+
+    if (char.trim() === '') {
+      if (current) {
+        args.push(current);
+        current = '';
+      }
+      continue;
+    }
+
+    current += char;
+  }
+
+  if (current) {
+    args.push(current);
+  }
+
+  return args;
+};
+
+const formatCommandForDisplay = (executable: string, args: string[]) => {
+  const formatArg = (arg: string) => {
+    if (/[\s'"]/.test(arg)) {
+      return JSON.stringify(arg);
+    }
+    return arg;
+  };
+  return [executable, ...args].map(formatArg).join(' ');
+};
+
 export const compileTs = async (
   mapComponentsToExpose: Record<string, string>,
   tsConfig: TsConfigJson,
@@ -210,15 +268,24 @@ export const compileTs = async (
           ? remoteOptions.extractThirdParty.exclude
           : undefined,
     });
-    const execPromise = util.promisify(exec);
+    const execPromise = util.promisify(execFile);
     const pmExecutable = resolvePackageManagerExecutable();
-    const cmd = `${pmExecutable} ${remoteOptions.compilerInstance} --project '${tempTsConfigJsonPath}'`;
+    const compilerArgs = splitCommandArgs(remoteOptions.compilerInstance);
+    const resolvedCompilerArgs =
+      compilerArgs.length > 0 ? compilerArgs : [remoteOptions.compilerInstance];
+    const cmdArgs = [
+      ...resolvedCompilerArgs,
+      '--project',
+      tempTsConfigJsonPath,
+    ];
+    const cmd = formatCommandForDisplay(pmExecutable, cmdArgs);
     try {
-      await execPromise(cmd, {
+      await execPromise(pmExecutable, cmdArgs, {
         cwd:
           typeof remoteOptions.moduleFederationConfig.dts !== 'boolean'
             ? (remoteOptions.moduleFederationConfig.dts?.cwd ?? undefined)
             : undefined,
+        shell: process.platform === 'win32',
       });
     } catch (err) {
       if (compilerOptions.tsBuildInfoFile) {
@@ -228,10 +295,14 @@ export const compileTs = async (
           // noop
         }
       }
-      throw new Error(
-        getShortErrorMsg(TYPE_001, typeDescMap, {
-          cmd,
-        }),
+      logAndReport(
+        TYPE_001,
+        typeDescMap,
+        { cmd },
+        (msg) => {
+          throw new Error(msg);
+        },
+        undefined,
       );
     }
 

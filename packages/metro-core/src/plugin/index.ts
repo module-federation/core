@@ -1,4 +1,5 @@
 import path from 'node:path';
+import { promises as fs } from 'node:fs';
 import util from 'node:util';
 import type { ConfigT } from 'metro-config';
 import type {
@@ -7,6 +8,11 @@ import type {
   ModuleFederationExtraOptions,
 } from '../types';
 import { VirtualModuleManager } from '../utils';
+import type { FederatedTypesMeta } from '../utils/federated-remote-types';
+import {
+  applyTypesMetaToManifest,
+  maybeGenerateFederatedRemoteTypes,
+} from '../utils/federated-remote-types';
 import { createBabelTransformer } from './babel-transformer';
 import {
   isUsingMFBundleCommand,
@@ -33,6 +39,8 @@ declare global {
   var __METRO_FEDERATION_REMOTE_ENTRY_PATH: string | undefined;
   // eslint-disable-next-line no-var
   var __METRO_FEDERATION_MANIFEST_PATH: string | undefined;
+  // eslint-disable-next-line no-var
+  var __METRO_FEDERATION_DTS_ASSETS: FederatedTypesMeta | undefined;
 }
 
 export function withModuleFederation(
@@ -128,6 +136,15 @@ function augmentConfig(
   global.__METRO_FEDERATION_HOST_ENTRY_PATH = hostEntryPath;
   global.__METRO_FEDERATION_REMOTE_ENTRY_PATH = remoteEntryPath;
   global.__METRO_FEDERATION_MANIFEST_PATH = manifestPath;
+  global.__METRO_FEDERATION_DTS_ASSETS = undefined;
+
+  maybeGenerateRemoteTypesForStart({
+    isRemote,
+    options,
+    projectRoot: config.projectRoot,
+    tmpDirPath,
+    manifestPath,
+  });
 
   return {
     ...config,
@@ -198,9 +215,55 @@ function augmentConfig(
         remoteEntryFilename,
         manifestPath,
         tmpDirPath,
+        getDtsAssetNames: () => global.__METRO_FEDERATION_DTS_ASSETS,
       }),
     },
   };
+}
+
+function maybeGenerateRemoteTypesForStart(opts: {
+  isRemote: boolean;
+  options: ModuleFederationConfigNormalized;
+  projectRoot: string;
+  tmpDirPath: string;
+  manifestPath: string;
+}) {
+  if (process.argv[2] !== 'start') {
+    return;
+  }
+  if (!opts.isRemote || opts.options.dts === false) {
+    return;
+  }
+
+  void (async () => {
+    try {
+      const typesMeta = await maybeGenerateFederatedRemoteTypes({
+        federationConfig: opts.options,
+        projectRoot: opts.projectRoot,
+        outputDir: opts.tmpDirPath,
+        logger: console,
+      });
+
+      if (!typesMeta) {
+        return;
+      }
+
+      global.__METRO_FEDERATION_DTS_ASSETS = typesMeta;
+      const manifest = JSON.parse(
+        await fs.readFile(opts.manifestPath, 'utf-8'),
+      ) as Record<string, any>;
+      applyTypesMetaToManifest(manifest, typesMeta);
+      await fs.writeFile(
+        opts.manifestPath,
+        JSON.stringify(manifest, undefined, 2),
+        'utf-8',
+      );
+    } catch (error) {
+      console.warn(
+        `${util.styleText('yellow', 'Failed to generate federated types for dev server:')}\n${String(error)}`,
+      );
+    }
+  })();
 }
 
 function getOriginalEntry(

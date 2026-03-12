@@ -7,14 +7,11 @@ export = HarmonyExportHeaderDependency;
 /** @typedef {import("../serialization/ObjectMiddleware").ObjectSerializerContext} ObjectSerializerContext */
 declare class HarmonyExportHeaderDependency extends NullDependency {
   /**
-   * @param {Range} range range
+   * @param {Range | false} range range
    * @param {Range} rangeStatement range statement
    */
-  constructor(
-    range: import('../javascript/JavascriptParser').Range,
-    rangeStatement: import('../javascript/JavascriptParser').Range,
-  );
-  range: import('../javascript/JavascriptParser').Range;
+  constructor(range: Range | false, rangeStatement: Range);
+  range: false | import('../javascript/JavascriptParser').Range;
   rangeStatement: import('../javascript/JavascriptParser').Range;
 }
 declare namespace HarmonyExportHeaderDependency {
@@ -33,13 +30,13 @@ declare const HarmonyExportDependencyTemplate_base: {
   new (): {
     apply(
       dependency: import('../Dependency'),
-      source: any,
-      templateContext: import('../DependencyTemplate').DependencyTemplateContext,
+      source: NullDependency.ReplaceSource,
+      templateContext: NullDependency.DependencyTemplateContext,
     ): void;
   };
 };
 declare class HarmonyExportDependencyTemplate extends HarmonyExportDependencyTemplate_base {}
-type ReplaceSource = any;
+type ReplaceSource = import('webpack-sources').ReplaceSource;
 type Dependency = import('../Dependency');
 type DependencyTemplateContext =
   import('../DependencyTemplate').DependencyTemplateContext;

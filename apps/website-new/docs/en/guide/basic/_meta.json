@@ -1,18 +1,8 @@
 [
-  {
-  "type": "dir",
-  "name": "runtime",
-  "label": "Runtime"
-  },
-  {
-  "type": "dir",
-  "name": "plugins",
-  "label": "Build Plugins"
-  },
-  "type-prompt","cli", "css-isolate",
-  {
-  "type": "dir",
-  "name": "data-fetch",
-  "label": "Data Solution"
-  }
+  "cli",
+  "css-isolate",
+  "type-prompt",
+  "data-fetch",
+  "data-fetch-cache",
+  "data-fetch-prefetch"
 ]

@@ -1,24 +1,26 @@
 export = ImportWeakDependency;
 /** @typedef {import("webpack-sources").ReplaceSource} ReplaceSource */
 /** @typedef {import("../Dependency")} Dependency */
-/** @typedef {import("../Dependency").ReferencedExport} ReferencedExport */
 /** @typedef {import("../DependencyTemplate").DependencyTemplateContext} DependencyTemplateContext */
 /** @typedef {import("../Module")} Module */
 /** @typedef {import("../Module").BuildMeta} BuildMeta */
-/** @typedef {import("../ModuleGraph")} ModuleGraph */
+/** @typedef {import("../javascript/JavascriptParser").ImportAttributes} ImportAttributes */
 /** @typedef {import("../javascript/JavascriptParser").Range} Range */
+/** @typedef {ImportDependency.RawReferencedExports} RawReferencedExports */
+/** @typedef {import("./ImportPhase").ImportPhaseType} ImportPhaseType */
 declare class ImportWeakDependency extends ImportDependency {}
 declare namespace ImportWeakDependency {
   export {
     ImportDependencyTemplate as Template,
     ReplaceSource,
     Dependency,
-    ReferencedExport,
     DependencyTemplateContext,
     Module,
     BuildMeta,
-    ModuleGraph,
+    ImportAttributes,
     Range,
+    RawReferencedExports,
+    ImportPhaseType,
   };
 }
 import ImportDependency = require('./ImportDependency');
@@ -26,24 +28,26 @@ declare const ImportDependencyTemplate_base: {
   new (): {
     apply(
       dependency: import('../Dependency'),
-      source: any,
+      source: ImportDependency.ReplaceSource,
       {
         runtimeTemplate,
         module,
         moduleGraph,
         chunkGraph,
         runtimeRequirements,
-      }: import('../DependencyTemplate').DependencyTemplateContext,
+      }: ImportDependency.DependencyTemplateContext,
     ): void;
   };
 };
 declare class ImportDependencyTemplate extends ImportDependencyTemplate_base {}
-type ReplaceSource = any;
+type ReplaceSource = import('webpack-sources').ReplaceSource;
 type Dependency = import('../Dependency');
-type ReferencedExport = import('../Dependency').ReferencedExport;
 type DependencyTemplateContext =
   import('../DependencyTemplate').DependencyTemplateContext;
 type Module = import('../Module');
 type BuildMeta = import('../Module').BuildMeta;
-type ModuleGraph = import('../ModuleGraph');
+type ImportAttributes =
+  import('../javascript/JavascriptParser').ImportAttributes;
 type Range = import('../javascript/JavascriptParser').Range;
+type RawReferencedExports = ImportDependency.RawReferencedExports;
+type ImportPhaseType = import('./ImportPhase').ImportPhaseType;

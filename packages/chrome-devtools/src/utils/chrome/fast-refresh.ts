@@ -1,7 +1,5 @@
-import type {
-  ModuleFederationRuntimePlugin,
-  Shared,
-} from '@module-federation/runtime/types';
+import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime';
+import type { Shared } from '@module-federation/runtime/types';
 import { loadScript, createScript } from '@module-federation/sdk';
 
 import { isObject, getUnpkgUrl } from '../index';
@@ -13,6 +11,9 @@ import {
 } from '../../template/constant';
 
 const SUPPORT_PKGS = ['react', 'react-dom'];
+type BeforeInitArgs = Parameters<
+  NonNullable<ModuleFederationRuntimePlugin['beforeInit']>
+>[0];
 
 /**
  * Fetch and execute a UMD module synchronously
@@ -70,7 +71,7 @@ if (
 const fastRefreshPlugin = (): ModuleFederationRuntimePlugin => {
   return {
     name: 'mf-fast-refresh-plugin',
-    beforeInit({ userOptions, ...args }) {
+    beforeInit({ userOptions, ...args }: BeforeInitArgs) {
       const shareInfo = userOptions.shared;
       const twinsShareInfo = args.shareInfo;
       let enableFastRefresh = false;

@@ -1,0 +1,67 @@
+name: E2E Treeshake
+
+on:
+  workflow_call:
+
+jobs:
+  e2e-treeshake:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    timeout-minutes: 30
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
+
+      - name: Export SKIP_DEVTOOLS_POSTINSTALL
+        run: echo "SKIP_DEVTOOLS_POSTINSTALL=true" >> "$GITHUB_ENV"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Restore Turborepo cache
+        uses: actions/cache/restore@v5
+        with:
+          path: .turbo/cache
+          key: ${{ runner.os }}-turbo-${{ github.ref_name }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-${{ github.ref_name }}-
+            ${{ runner.os }}-turbo-
+
+      - name: Build shared packages
+        run: pnpm run build:packages
+
+      - name: Check CI conditions
+        id: check-ci
+        run: |
+          ci_status=0
+          node tools/scripts/ci-is-affected.mjs --appName=@module-federation/treeshake-server,@module-federation/treeshake-frontend || ci_status=$?
+          if [ "$ci_status" -eq 0 ]; then
+            echo "run-e2e=true" >> "$GITHUB_OUTPUT"
+          elif [ "$ci_status" -eq 1 ]; then
+            echo "run-e2e=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ci-is-affected failed with unexpected exit code: $ci_status" >&2
+            exit "$ci_status"
+          fi
+
+      - name: E2E Treeshake Server
+        if: steps.check-ci.outputs.run-e2e == 'true'
+        run: pnpm exec turbo run test --filter=@module-federation/treeshake-server --only
+
+      - name: E2E Treeshake Frontend
+        if: steps.check-ci.outputs.run-e2e == 'true'
+        run: pnpm exec turbo run e2e --filter=@module-federation/treeshake-frontend --only

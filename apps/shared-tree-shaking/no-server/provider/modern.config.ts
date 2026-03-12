@@ -11,9 +11,6 @@ const publicPath = 'http://localhost:3002/';
 
 // https://modernjs.dev/en/configure/app/usage
 export default defineConfig({
-  runtime: {
-    router: true,
-  },
   dev: {
     assetPrefix: publicPath,
   },

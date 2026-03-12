@@ -1,13 +1,9 @@
-export type AsyncDependenciesBlock = import('./AsyncDependenciesBlock');
 export type Chunk = import('./Chunk');
 export type ChunkGroup = import('./ChunkGroup');
-export type DependenciesBlock = import('./DependenciesBlock');
-export type Module = import('./Module');
-/** @typedef {import("./AsyncDependenciesBlock")} AsyncDependenciesBlock */
+export type Entrypoint = import('.').Entrypoint;
 /** @typedef {import("./Chunk")} Chunk */
 /** @typedef {import("./ChunkGroup")} ChunkGroup */
-/** @typedef {import("./DependenciesBlock")} DependenciesBlock */
-/** @typedef {import("./Module")} Module */
+/** @typedef {import(".").Entrypoint} Entrypoint */
 /**
  * @param {ChunkGroup} chunkGroup the ChunkGroup to connect
  * @param {Chunk} chunk chunk to tie to ChunkGroup
@@ -25,4 +21,13 @@ export function connectChunkGroupAndChunk(
 export function connectChunkGroupParentAndChild(
   parent: ChunkGroup,
   child: ChunkGroup,
+): void;
+/**
+ * @param {Entrypoint} entrypoint the entrypoint
+ * @param {Entrypoint} dependOnEntrypoint the dependOnEntrypoint
+ * @returns {void}
+ */
+export function connectEntrypointAndDependOn(
+  entrypoint: Entrypoint,
+  dependOnEntrypoint: Entrypoint,
 ): void;

@@ -9,6 +9,7 @@ pnpm-lock.yaml
 **/dist/**
 **/dist-rslib/**
 apps/website-new/docs
+packages/treeshake-server/template/**
 
 /.nx/workspace-data
 /.nx/cache
@@ -18,3 +19,6 @@ apps/website-new/docs
 # Task DSL files contain mustache-like placeholders (e.g. `{{assets...}}`)
 # that Prettier currently fails to parse in TSX.
 packages/enhanced/task/**
+
+# Temporarily ignore assemble-release-plan package until build formatting churn is addressed.
+packages/assemble-release-plan/**

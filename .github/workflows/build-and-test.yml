@@ -2,12 +2,17 @@ name: Build Affected Packages
 
 permissions:
   contents: read
+  actions: read
 
 on:
   pull_request:
     branches: [main, '**']
   push:
     branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   checkout-install:
@@ -26,38 +31,42 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
 
-      - name: Remove cached node_modules
-        run: rm -rf node_modules .nx
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-      - name: Set Playwright cache status
-        run: |
-          if [ -d "$HOME/.cache/ms-playwright" ] || [ -d "$HOME/.cache/Cypress" ]; then
-            echo "PLAYWRIGHT_CACHE_HIT=true" >> "$GITHUB_ENV"
-          else
-            echo "PLAYWRIGHT_CACHE_HIT=false" >> "$GITHUB_ENV"
-          fi
-
-      - name: Set Nx SHA
-        uses: nrwl/nx-set-shas@v3
-
-      - name: Install Dependencies
-        run: pnpm install
+      - name: Restore Turborepo cache
+        id: turbo-cache
+        uses: actions/cache/restore@v5
+        with:
+          path: .turbo/cache
+          key: ${{ runner.os }}-turbo-${{ github.ref_name }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-${{ github.ref_name }}-
+            ${{ runner.os }}-turbo-
 
       - name: Install Cypress
-        # if: steps.browsers-cache.outputs.cache-hit != 'true'
         run: npx cypress install
 
-      - name: Check Code Format
-        run: npx nx format:check
+      - name: Check code format
+        run: node tools/scripts/check-format-changed.mjs
 
-      - name: Print Number of CPU Cores
-        run: nproc
+      - name: Verify Rslib Template Publint Wiring
+        run: node packages/create-module-federation/scripts/verify-rslib-templates.mjs
 
-      - name: Run Build for All
-        run: |
-          npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4 --skip-nx-cache
-          npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4
+      - name: Verify Package Rslib Publint Wiring
+        run: node tools/scripts/verify-rslib-publint-coverage.mjs
+
+      - name: Verify Publint Workflow Coverage
+        run: node tools/scripts/verify-publint-workflow-coverage.mjs
+
+      - name: Verify Turbo Conventions
+        run: pnpm run verify:turbo
+
+      - name: Build packages
+        run: pnpm run build:packages
 
       - name: Check Package Publishing Compatibility
         run: |
@@ -67,21 +76,21 @@ jobs:
                [ "$pkg" != "packages/chrome-devtools" ] && \
                [ "$pkg" != "packages/core" ] && \
                [ "$pkg" != "packages/modernjs" ] && \
-               [ "$pkg" != "packages/utilities" ] && \
-               [ "$pkg" != "packages/metro-core" ] && \
-               [ "$pkg" != "packages/metro-plugin-rnef" ] && \
-               [ "$pkg" != "packages/metro-plugin-rnc-cli" ]; then
+               [ "$pkg" != "packages/utilities" ]; then
               echo "Checking $pkg..."
               npx publint "$pkg"
             fi
           done
 
-      - name: Warm Nx Cache
-        run: npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4
+      - name: Run affected package tests
+        run: node tools/scripts/run-affected-package-tests.mjs
 
-      - name: Run Affected Test
-        timeout-minutes: 10
-        run: npx nx affected -t test --parallel=3 --exclude='*,!tag:type:pkg'
+      - name: Save Turborepo cache
+        if: ${{ success() && steps.turbo-cache.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@v5
+        with:
+          path: .turbo/cache
+          key: ${{ steps.turbo-cache.outputs.cache-primary-key }}
 
   e2e-modern:
     needs: checkout-install
@@ -113,6 +122,11 @@ jobs:
     uses: ./.github/workflows/e2e-next-prod.yml
     secrets: inherit
 
+  e2e-treeshake:
+    needs: checkout-install
+    uses: ./.github/workflows/e2e-treeshake.yml
+    secrets: inherit
+
   e2e-modern-ssr:
     needs: checkout-install
     uses: ./.github/workflows/e2e-modern-ssr.yml
@@ -124,17 +138,12 @@ jobs:
     secrets: inherit
 
   e2e-metro:
-    permissions:
-      contents: read
-      actions: read
-      checks: write
-      pull-requests: write
     needs:
       - checkout-install
-      - build-metro
     uses: ./.github/workflows/e2e-metro.yml
     secrets: inherit
 
-  build-metro:
-    uses: ./.github/workflows/build-metro.yml
+  devtools:
+    needs: checkout-install
+    uses: ./.github/workflows/devtools.yml
     secrets: inherit

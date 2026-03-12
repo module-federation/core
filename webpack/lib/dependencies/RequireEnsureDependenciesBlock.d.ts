@@ -1,21 +1,19 @@
 export = RequireEnsureDependenciesBlock;
-/** @typedef {import("../ChunkGroup").ChunkGroupOptions} ChunkGroupOptions */
+/** @typedef {import("../AsyncDependenciesBlock").GroupOptions} GroupOptions */
 /** @typedef {import("../Dependency").DependencyLocation} DependencyLocation */
 declare class RequireEnsureDependenciesBlock extends AsyncDependenciesBlock {
   /**
-   * @param {ChunkGroupOptions & { entryOptions?: TODO }} chunkName chunk name
-   * @param {DependencyLocation} loc location info
+   * @param {GroupOptions | null} chunkName chunk name
+   * @param {(DependencyLocation | null)=} loc location info
    */
   constructor(
-    chunkName: ChunkGroupOptions & {
-      entryOptions?: TODO;
-    },
-    loc: DependencyLocation,
+    chunkName: GroupOptions | null,
+    loc?: (DependencyLocation | null) | undefined,
   );
 }
 declare namespace RequireEnsureDependenciesBlock {
-  export { ChunkGroupOptions, DependencyLocation };
+  export { GroupOptions, DependencyLocation };
 }
 import AsyncDependenciesBlock = require('../AsyncDependenciesBlock');
-type ChunkGroupOptions = import('../ChunkGroup').ChunkGroupOptions;
+type GroupOptions = import('../AsyncDependenciesBlock').GroupOptions;
 type DependencyLocation = import('../Dependency').DependencyLocation;

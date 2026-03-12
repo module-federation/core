@@ -1,5 +1,63 @@
 # @module-federation/rspress-plugin
 
+## 2.1.0
+
+### Patch Changes
+
+- da4c722: fix(rspress-plugin): auto infer environment
+- e787fd3: fix(rspress-plugin): set config.ssg.experimentalWorker true if enable ssg-md
+- Updated dependencies [987716a]
+- Updated dependencies [918294f]
+- Updated dependencies [24bf84d]
+- Updated dependencies [dfbf05f]
+- Updated dependencies [0172491]
+- Updated dependencies [a0faa70]
+- Updated dependencies [918294f]
+  - @module-federation/enhanced@2.1.0
+  - @module-federation/error-codes@2.1.0
+  - @module-federation/rsbuild-plugin@2.1.0
+  - @module-federation/sdk@2.1.0
+
+## 2.0.1
+
+### Patch Changes
+
+- a331eba: feat(rspress-plugin): support ssg-md
+  - @module-federation/enhanced@2.0.1
+  - @module-federation/rsbuild-plugin@2.0.1
+  - @module-federation/sdk@2.0.1
+  - @module-federation/error-codes@2.0.1
+
+## 2.0.0
+
+### Patch Changes
+
+- Updated dependencies [2bd445d]
+  - @module-federation/rsbuild-plugin@2.0.0
+  - @module-federation/enhanced@2.0.0
+  - @module-federation/sdk@2.0.0
+  - @module-federation/error-codes@2.0.0
+
+## 0.24.1
+
+### Patch Changes
+
+- @module-federation/enhanced@0.24.1
+- @module-federation/rsbuild-plugin@0.24.1
+- @module-federation/sdk@0.24.1
+- @module-federation/error-codes@0.24.1
+
+## 0.24.0
+
+### Patch Changes
+
+- 0133409: feat: support respress v2
+- Updated dependencies [c3c068e]
+  - @module-federation/enhanced@0.24.0
+  - @module-federation/rsbuild-plugin@0.24.0
+  - @module-federation/sdk@0.24.0
+  - @module-federation/error-codes@0.24.0
+
 ## 0.23.0
 
 ### Patch Changes

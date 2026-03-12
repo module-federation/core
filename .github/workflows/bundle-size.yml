@@ -1,0 +1,116 @@
+name: Bundle Size
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bundle-size-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: '**/pnpm-lock.yaml'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Restore Turborepo cache
+        uses: actions/cache/restore@v5
+        with:
+          path: .turbo/cache
+          key: ${{ runner.os }}-turbo-${{ github.ref_name }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-${{ github.ref_name }}-
+            ${{ runner.os }}-turbo-
+
+      - name: Build packages (current)
+        run: pnpm run build:packages
+
+      - name: Measure bundle sizes (current)
+        run: node scripts/bundle-size-report.mjs --output current.json
+
+      - name: Prepare base worktree
+        run: |
+          BASE_REF=${CI_LOCAL_BASE_REF:-${{ github.event.pull_request.base.sha }}}
+          BASE_PATH=".ci-local-base-${RANDOM}-${RANDOM}"
+          echo "BASE_REF=$BASE_REF" >> "$GITHUB_ENV"
+          echo "BASE_PATH=$BASE_PATH" >> "$GITHUB_ENV"
+          git worktree add "$BASE_PATH" "$BASE_REF"
+          case "$BASE_REF" in
+            origin/*)
+              LOCAL_BASE_REF="${BASE_REF#origin/}"
+              echo "LOCAL_BASE_REF=$LOCAL_BASE_REF" >> "$GITHUB_ENV"
+              git -C "$BASE_PATH" branch -f "$LOCAL_BASE_REF" "$BASE_REF" || true
+              ;;
+          esac
+
+      - name: Restore Turborepo cache (base worktree)
+        uses: actions/cache/restore@v5
+        with:
+          path: ${{ env.BASE_PATH }}/.turbo/cache
+          key: ${{ runner.os }}-turbo-base-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-base-
+
+      - name: Install dependencies (base)
+        run: pnpm install --frozen-lockfile
+        working-directory: ${{ env.BASE_PATH }}
+
+      - name: Build packages (base)
+        run: |
+          BUILD_PACKAGES_SCRIPT="$(node -e "const pkg=require('./package.json'); process.stdout.write(pkg.scripts?.['build:packages'] ?? '')")"
+          if [ -f turbo.json ]; then
+            echo "Falling back to Turbo package build on base worktree."
+            pnpm exec turbo run build --filter=./packages/** --concurrency=20
+          elif [ -f nx.json ]; then
+            echo "Falling back to detached-safe Nx package build on base worktree."
+            npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4 --skip-nx-cache
+          elif printf '%s' "$BUILD_PACKAGES_SCRIPT" | grep -Eq '(^|[[:space:]])nx[[:space:]].*affected'; then
+            echo "Detected legacy Nx affected build:packages script on detached base; using deterministic nx run-many instead."
+            npx nx run-many --targets=build --projects=tag:type:pkg --parallel=4 --skip-nx-cache
+          elif pnpm run build:packages; then
+            echo "Built base packages with root build:packages script."
+          else
+            echo "Unable to build base packages: missing compatible Turbo, Nx, or build:packages entrypoint" >&2
+            exit 1
+          fi
+        working-directory: ${{ env.BASE_PATH }}
+
+      - name: Measure bundle sizes (base)
+        run: node scripts/bundle-size-report.mjs --output base.json --packages-dir "${{ env.BASE_PATH }}/packages"
+
+      - name: Compare bundle sizes
+        run: node scripts/bundle-size-report.mjs --compare base.json --current current.json --output stats.txt
+
+      - name: Upload bundle size stats artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-size-stats
+          path: stats.txt
+
+      - name: Cleanup base worktree
+        if: always()
+        run: |
+          if [ -n "${BASE_PATH:-}" ] && [ -d "${BASE_PATH}" ]; then
+            git worktree remove --force "${BASE_PATH}"
+          fi

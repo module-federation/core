@@ -1,9 +1,9 @@
 {
   "name": "@module-federation/dts-plugin",
-  "version": "0.23.0",
+  "version": "2.1.0",
   "author": "hanric <hanric.zhang@gmail.com>",
   "main": "./dist/index.js",
-  "module": "./dist/index.js",
+  "module": "./dist/esm/index.mjs",
   "types": "./dist/index.d.ts",
   "license": "MIT",
   "repository": {
@@ -20,17 +20,34 @@
   ],
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "require": "./dist/index.js"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/esm/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
     },
     "./core": {
-      "import": "./dist/core.js",
-      "require": "./dist/core.js"
+      "import": {
+        "types": "./dist/core.d.ts",
+        "default": "./dist/esm/core.mjs"
+      },
+      "require": {
+        "types": "./dist/core.d.ts",
+        "default": "./dist/core.js"
+      }
     },
     "./dynamic-remote-type-hints-plugin": {
-      "types": "./dist/dynamic-remote-type-hints-plugin.d.ts",
-      "import": "./dist/esm/dynamic-remote-type-hints-plugin.js",
-      "require": "./dist/dynamic-remote-type-hints-plugin.js"
+      "import": {
+        "types": "./dist/dynamic-remote-type-hints-plugin.d.ts",
+        "default": "./dist/esm/dynamic-remote-type-hints-plugin.mjs"
+      },
+      "require": {
+        "types": "./dist/dynamic-remote-type-hints-plugin.d.ts",
+        "default": "./dist/dynamic-remote-type-hints-plugin.js"
+      }
     },
     "./*": "./*"
   },
@@ -54,11 +71,10 @@
     "@module-federation/third-party-dts-extractor": "workspace:*",
     "adm-zip": "^0.5.10",
     "ansi-colors": "^4.1.3",
-    "axios": "^1.12.0",
+    "axios": "^1.13.5",
     "chalk": "3.0.0",
     "fs-extra": "9.1.0",
     "isomorphic-ws": "5.0.0",
-    "koa": "3.0.3",
     "lodash.clonedeepwith": "4.5.0",
     "log4js": "6.9.1",
     "node-schedule": "2.1.1",
@@ -67,14 +83,13 @@
   },
   "devDependencies": {
     "@module-federation/runtime": "workspace:*",
-    "@types/koa": "2.15.0",
     "@types/node-schedule": "2.1.7",
     "@types/ws": "8.5.12",
     "@vue/tsconfig": "^0.7.0",
     "rimraf": "~6.0.1",
     "vue": "^3.5.13",
     "vue-tsc": "^2.2.10",
-    "webpack": "^5.98.0"
+    "webpack": "^5.104.1"
   },
   "peerDependencies": {
     "typescript": "^4.9.0 || ^5.0.0",
@@ -84,5 +99,13 @@
     "vue-tsc": {
       "optional": true
     }
+  },
+  "scripts": {
+    "build": "tsdown --config ./tsdown.config.ts && sleep 1 && cp package.json ./dist && cp *.md ./dist",
+    "test": "node -e \"require('fs').rmSync('dist-test',{recursive:true,force:true,maxRetries:20,retryDelay:50})\" && pnpm run test-impl",
+    "test-impl": "pnpm exec vitest run --passWithNoTests --config vite.config.mts",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",
+    "build-debug": "FEDERATION_DEBUG=true pnpm run build",
+    "pre-release": "pnpm run test && pnpm run build"
   }
 }

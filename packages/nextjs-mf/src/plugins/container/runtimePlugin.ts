@@ -1,4 +1,4 @@
-import { ModuleFederationRuntimePlugin } from '@module-federation/runtime/types';
+import { ModuleFederationRuntimePlugin } from '@module-federation/runtime';
 
 export default function (): ModuleFederationRuntimePlugin {
   return {

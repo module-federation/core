@@ -4,7 +4,7 @@
 
 该功能已不再维护，即将废弃。
 
-推荐使用 [bridge-react - prefetch](../../guide/basic/data-fetch/prefetch)，该方案支持 Rspack/Webpack，并且支持 SSR/CSR 。
+推荐使用 [bridge-react - prefetch](../../guide/basic/data-fetch-prefetch)，该方案支持 Rspack/Webpack，并且支持 SSR/CSR 。
 
 :::
 
@@ -30,8 +30,8 @@
 ### 消费者
 
 1. 移除配置文件中的 `dataPrefetch` 配置项。
-2. 使用 `createLazyComponent` 加载生产者，具体参考 [bridge-react - prefetch](../../guide/basic/data-fetch/index#消费者)。
-3. 使用 [prefetch](../../guide/basic/data-fetch/prefetch) 函数预取数据。
+2. 使用 `createLazyComponent` 加载生产者，具体参考 [bridge-react - prefetch](../../guide/basic/data-fetch#消费者)。
+3. 使用 [prefetch](../../guide/basic/data-fetch-prefetch) 函数预取数据。
 
 ## 什么是 Data Prefetch
 Data Prefetch 可以将远程模块接口请求提前到 `remoteEntry` 加载完成后立即发出，无需等到组件渲染，提升首屏速度。
@@ -238,7 +238,7 @@ export const Button = () => {
 
 ### loadRemote
 #### 功能
-用户如果在消费者项目中手动调用 [loadRemote](/zh/guide/basic/runtime/runtime-api.html#loadremote) API，那么会认为消费者不仅希望加载生产者的静态资源，同时希望将接口请求也提前发出，这可以让项目获得更快的渲染速度,
+用户如果在消费者项目中手动调用 [loadRemote](/zh/guide/runtime/runtime-api.html#loadremote) API，那么会认为消费者不仅希望加载生产者的静态资源，同时希望将接口请求也提前发出，这可以让项目获得更快的渲染速度,
 这在**首屏有前置请求**场景或者**希望次屏直出**这些场景中尤其有效，适用于在当前页面提前加载次屏模块的场景
 #### 使用方法
 ``` ts

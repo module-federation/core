@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/bridge-react-webpack-plugin",
-  "version": "0.23.0",
+  "version": "2.1.0",
   "publishConfig": {
     "access": "public"
   },
@@ -25,7 +25,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run -c vitest.config.ts"
   },
   "dependencies": {
     "@module-federation/sdk": "workspace:*",

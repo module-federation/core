@@ -5,25 +5,25 @@
     "label": "Framework Overview"
   },
   {
-    "type": "dir",
+    "type": "dir-section-header",
     "name": "react",
     "label": "React",
     "collapsed": true
   },
   {
-    "type": "dir",
+    "type": "dir-section-header",
     "name": "modern",
     "label": "Modern.js",
     "collapsed": true
   },
   {
-    "type": "dir",
+    "type": "dir-section-header",
     "name": "next",
     "label": "Next.js",
     "collapsed": true
   },
   {
-    "type": "dir",
+    "type": "dir-section-header",
     "name": "angular",
     "label": "Angular",
     "collapsed": true

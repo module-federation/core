@@ -1,8 +1,0 @@
-[
-  {
-  "type": "file",
-  "name": "overview",
-  "label": "Overview"
-  },
-  "rsbuild", "rspack", "webpack", "rspress", "vite","metro"
-]

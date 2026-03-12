@@ -35,6 +35,8 @@ export default defineConfig({
           // This file is a shared harness that runner entrypoints import.
           // Running it directly would add an extra warmup-only test file.
           path.resolve(__dirname, 'test/ConfigTestCases.rstest.ts'),
+          // Treeshake cases are run in a dedicated single-worker run to avoid flakes.
+          path.resolve(__dirname, 'test/ConfigTestCases.treeshake.rstest.ts'),
         ],
       },
       setupFiles: [path.resolve(__dirname, 'test/setupTestFramework.js')],

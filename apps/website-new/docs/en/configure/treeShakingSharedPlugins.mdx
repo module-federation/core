@@ -1,15 +1,16 @@
 # treeShakingSharedPlugins
 
-允许用户显式指定哪些插件应该参与 shared 模块的第二次 treeshaking 过程。
+Allows users to explicitly specify which plugins should participate in the second tree-shaking pass for shared modules.
 
-- 类型：`string[]`
-- 是否必填：否
-- 默认值：`undefined`
+- Type: `string[]`
+- Required: No
+- Default: `undefined`
 
-如果设置了 `shared.treeShaking.mode` 为 'server-calc'，那么在部署服务中，会重新构建需要 tree shaking 的共享依赖，此时仅构建共享依赖，不会加载原项目的构建配置。
-如果你的项目有特殊的构建配置，例如设置了 externals ，那么你可以把这些构建配置集成到一个 NPM Package ，然后在 `treeShakingSharedPlugins` 中填写此插件的名称和版本，这样就可以在第二次 treeshaking 过程中参与 shared 模块的 treeshaking 过程。
+If `shared.treeShaking.mode` is set to `'server-calc'`, the deployment service will rebuild the shared dependencies that need tree shaking. In this process, only the shared dependencies are built, and the original project's build configuration is not loaded.
 
-例如提供了一个插件 `my-build-plugin`，它会设置 `externals`：
+If your project relies on special build configuration—for example, setting `externals`—you can package that configuration into an NPM package, then provide the plugin name and version in `treeShakingSharedPlugins`. This allows the plugin to participate in the second tree-shaking pass for shared modules.
+
+For example, suppose you provide a plugin `my-build-plugin` that sets `externals`:
 
 ```ts title='my-build-plugin'
 class MyBuildPlugin {
@@ -22,7 +23,7 @@ class MyBuildPlugin {
 export default MyBuildPlugin;
 ```
 
-将此插件发布的版本为 `0.0.2` ，那么此时只需要在 `treeShakingSharedPlugins` 中填写插件的名称和版本即可：
+If you publish this plugin as version `0.0.2`, you only need to specify its name and version in `treeShakingSharedPlugins`:
 
 ```ts title='module-federation.config.ts'
 

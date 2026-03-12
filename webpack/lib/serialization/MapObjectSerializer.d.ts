@@ -13,12 +13,12 @@ declare class MapObjectSerializer {
    * @param {ObjectDeserializerContext} context context
    * @returns {Map<K, V>} map
    */
-  deserialize<K_1, V_1>(context: ObjectDeserializerContext): Map<K_1, V_1>;
+  deserialize<K, V>(context: ObjectDeserializerContext): Map<K, V>;
 }
 declare namespace MapObjectSerializer {
   export { ObjectDeserializerContext, ObjectSerializerContext };
 }
-type ObjectSerializerContext =
-  import('./ObjectMiddleware').ObjectSerializerContext;
 type ObjectDeserializerContext =
   import('./ObjectMiddleware').ObjectDeserializerContext;
+type ObjectSerializerContext =
+  import('./ObjectMiddleware').ObjectSerializerContext;

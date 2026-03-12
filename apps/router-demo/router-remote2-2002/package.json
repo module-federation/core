@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "rsbuild dev",
     "build": "rsbuild build",
-    "preview": "rsbuild preview"
+    "preview": "rsbuild preview",
+    "test": "pnpm exec vitest --passWithNoTests",
+    "serve": "pnpm run dev"
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",
@@ -14,11 +16,11 @@
     "@module-federation/rsbuild-plugin": "workspace:*",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-router-dom": "6.24.1"
+    "react-router-dom": "6.30.2"
   },
   "devDependencies": {
-    "@rsbuild/core": "^1.3.21",
-    "@rsbuild/plugin-react": "^1.0.6",
+    "@rsbuild/core": "1.7.3",
+    "@rsbuild/plugin-react": "^1.4.5",
     "@types/react": "^18.2.79",
     "@types/react-dom": "^18.3.0",
     "typescript": "^5.4.5"

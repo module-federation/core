@@ -3,7 +3,7 @@
   "description": "Create a new Module Federation project",
   "public": true,
   "sideEffects": false,
-  "version": "0.23.0",
+  "version": "2.1.0",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -15,7 +15,10 @@
   },
   "type": "module",
   "scripts": {
-    "build": "rslib build"
+    "build": "rslib build",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",
+    "test": "node scripts/verify-rslib-templates.mjs",
+    "pre-release": "pnpm run test && pnpm run build"
   },
   "exports": {
     ".": "./dist/index.js"
@@ -42,7 +45,7 @@
   "devDependencies": {
     "@types/glob": "7.2.0",
     "@types/minimist": "^1.2.5",
-    "@types/fs-extra": "9.0.6",
+    "@types/fs-extra": "9.0.13",
     "@rslib/core": "^0.9.0",
     "rsbuild-plugin-publint": "^0.2.1"
   }

@@ -10,7 +10,10 @@
     "serve": "modern serve",
     "new": "modern new",
     "lint": "modern lint",
-    "upgrade": "modern upgrade"
+    "upgrade": "modern upgrade",
+    "e2e": "pnpm exec cypress run --project . --e2e --config baseUrl=http://localhost:4001 --browser chrome",
+    "e2e:development": "pnpm exec cypress open --project . --e2e --config baseUrl=http://localhost:4001 --browser electron",
+    "test:e2e": "pnpm exec concurrently \"lsof -i :8080 || pnpm --filter modernjs-ssr-dynamic-remote-new-version run serve & echo 'done'\" \"sleep 20 && pnpm --filter modernjs-ssr-dynamic-remote-new-version run e2e\""
   },
   "engines": {
     "node": ">=16.18.1"
@@ -26,19 +29,19 @@
   ],
   "dependencies": {
     "@babel/runtime": "7.28.2",
-    "@modern-js/runtime": "2.68.2",
-    "@module-federation/modern-js": "workspace:*",
+    "@modern-js/runtime": "3.0.1",
+    "@module-federation/modern-js-v3": "workspace:*",
     "antd": "4.24.15",
     "react": "~18.3.1",
     "react-dom": "~18.3.1"
   },
   "devDependencies": {
     "@modern-js-app/eslint-config": "2.59.0",
-    "@modern-js/app-tools": "2.68.2",
+    "@modern-js/app-tools": "3.0.1",
     "@modern-js/eslint-config": "2.59.0",
-    "@modern-js/tsconfig": "2.68.2",
+    "@modern-js/tsconfig": "3.0.1",
     "@types/jest": "~29.5.0",
-    "@types/node": "~16.11.7",
+    "@types/node": "^20.19.5",
     "@types/react": "~18.2.0",
     "@types/react-dom": "~18.3.0",
     "lint-staged": "~13.1.0",

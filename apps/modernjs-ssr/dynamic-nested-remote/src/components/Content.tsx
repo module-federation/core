@@ -4,8 +4,8 @@ import {
   getInstance,
   registerRemotes,
   loadRemote,
-} from '@module-federation/modern-js/runtime';
-import { lazyLoadComponentPlugin } from '@module-federation/modern-js/react';
+} from '@module-federation/modern-js-v3/runtime';
+import { lazyLoadComponentPlugin } from '@module-federation/modern-js-v3/react';
 import stuff from './stuff.module.css';
 
 getInstance()!.registerPlugins([lazyLoadComponentPlugin()]);
@@ -68,7 +68,7 @@ export default (): JSX.Element => (
       Click me to test <strong>dynamic nested remote</strong> interactive!
     </Button>
 
-    <RemoteSSRComponent text={'xxxx'} />
+    <RemoteSSRComponent />
 
     <React.Suspense fallback="loading btn 1000ms">
       <LazyButton1 />

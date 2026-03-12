@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/metro-plugin-rnc-cli",
-  "version": "0.23.0",
+  "version": "2.1.0",
   "description": "Metro Module Federation plugin for React Native Enterprise Framework (RNEF)",
   "keywords": [
     "rnc",
@@ -33,6 +33,13 @@
     "@module-federation/metro": "workspace:*"
   },
   "devDependencies": {
-    "@module-federation/metro": "workspace:*"
+    "@module-federation/metro": "workspace:*",
+    "@typescript-eslint/eslint-plugin": "8.54.0",
+    "@typescript-eslint/parser": "8.54.0"
+  },
+  "scripts": {
+    "build": "echo 'No build needed for metro-plugin-rnc-cli - pure JavaScript package'",
+    "test": "pnpm exec jest --config jest.config.ts --passWithNoTests --watchman=false",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.{js,ts}\""
   }
 }

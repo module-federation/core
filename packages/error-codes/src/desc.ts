@@ -8,6 +8,8 @@ import {
   RUNTIME_007,
   RUNTIME_008,
   RUNTIME_009,
+  RUNTIME_010,
+  RUNTIME_011,
   TYPE_001,
   BUILD_001,
   BUILD_002,
@@ -23,6 +25,9 @@ export const runtimeDescMap = {
   [RUNTIME_007]: 'Failed to get remote snapshot.',
   [RUNTIME_008]: 'Failed to load script resources.',
   [RUNTIME_009]: 'Please call createInstance first.',
+  [RUNTIME_010]:
+    'The name option cannot be changed after initialization. If you want to create a new instance with a different name, please use "createInstance" api.',
+  [RUNTIME_011]: 'The remoteEntry URL is missing from the remote snapshot.',
 };
 
 export const typeDescMap = {

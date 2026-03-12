@@ -1,5 +1,5 @@
-import { getInstance } from '@module-federation/modern-js/runtime';
-import { lazyLoadComponentPlugin } from '@module-federation/modern-js/react';
+import { getInstance } from '@module-federation/modern-js-v3/runtime';
+import { lazyLoadComponentPlugin } from '@module-federation/modern-js-v3/react';
 
 import Content from '../components/Content';
 import './index.css';

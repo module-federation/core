@@ -5,7 +5,7 @@
   "scripts": {
     "android": "rnef run:android",
     "ios": "rnef run:ios",
-    "lint": "eslint .",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint .",
     "dev": "nodemon --config ../../nodemon.json --exec NODE_OPTIONS='--conditions=dev' pnpm start",
     "start": "rnef start --port 8083",
     "test": "jest",
@@ -19,7 +19,7 @@
     "adbreverse": "adb reverse tcp:8083 tcp:8083"
   },
   "dependencies": {
-    "lodash": "4.17.21",
+    "lodash": "4.17.23",
     "react": "19.1.0",
     "react-native": "0.80.0"
   },
@@ -42,7 +42,7 @@
     "@types/lodash": "^4",
     "@types/react": "^19.1.0",
     "@types/react-test-renderer": "^19.1.0",
-    "eslint": "^8.19.0",
+    "eslint": "^9.26.0",
     "jest": "^29.6.3",
     "nodemon": "^3.1.9",
     "prettier": "2.8.8",

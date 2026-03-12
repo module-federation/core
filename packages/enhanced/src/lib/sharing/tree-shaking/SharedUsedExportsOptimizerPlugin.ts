@@ -51,7 +51,10 @@ export default class SharedUsedExportsOptimizerPlugin
     this.injectTreeShakingUsedExports = injectTreeShakingUsedExports ?? true;
     this.manifestOptions = manifestOptions ?? {};
     this.sharedReferencedExports = new Map();
-    this.sharedOptions.forEach(([key, _config]) => {
+    this.sharedOptions.forEach(([key, config]) => {
+      if (!config.treeShaking) {
+        return;
+      }
       this.sharedReferencedExports.set(key, new Set());
     });
     this.ignoredRuntime = ignoredRuntime || [];

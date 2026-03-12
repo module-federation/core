@@ -5,15 +5,23 @@
   "devDependencies": {
     "@module-federation/enhanced": "workspace:*",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.15",
-    "react-refresh": "0.14.2",
     "@rspack/plugin-react-refresh": "^0.7.5",
     "@types/react": "18.3.11",
-    "@types/react-dom": "18.3.0"
+    "@types/react-dom": "18.3.0",
+    "react-refresh": "0.14.2"
   },
   "dependencies": {
-    "lodash": "4.17.21",
     "antd": "4.24.15",
+    "lodash": "4.17.23",
     "react": "18.3.1",
     "react-dom": "18.3.1"
+  },
+  "scripts": {
+    "build": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec rspack build --config rspack.config.js --mode production",
+    "build:development": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec rspack build --config rspack.config.js --mode development",
+    "build:production": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec rspack build --config rspack.config.js --mode production",
+    "serve": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec rspack serve --config rspack.config.js --mode production --port 3012 --no-hot",
+    "serve:development": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec rspack serve --config rspack.config.js --mode development --port 3012",
+    "serve:production": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec rspack serve --config rspack.config.js --mode production --port 3012 --no-hot"
   }
 }

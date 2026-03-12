@@ -8,7 +8,7 @@ hero:
   actions:
     - theme: brand
       text: 🎉 2.0 Announcement
-      link: /blog/announcement.html
+      link: /blog/v2-stable-version.html
     - theme: alt
       text: Quick Start
       link: /guide/start/quick-start.html

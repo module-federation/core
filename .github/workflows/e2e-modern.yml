@@ -14,22 +14,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Cache Tool Downloads
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache
-          key: ${{ runner.os }}-toolcache-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-toolcache-
-
-      - name: Set Playwright cache status
-        run: |
-          if [ -d "$HOME/.cache/ms-playwright" ] || [ -d "$HOME/.cache/Cypress" ]; then
-            echo "PLAYWRIGHT_CACHE_HIT=true" >> "$GITHUB_ENV"
-          else
-            echo "PLAYWRIGHT_CACHE_HIT=false" >> "$GITHUB_ENV"
-          fi
-
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 
@@ -40,28 +24,41 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
 
-      - name: Set Nx SHA
-        uses: nrwl/nx-set-shas@v3
-
-      - name: Set SKIP_DEVTOOLS_POSTINSTALL environment variable
+      - name: Export SKIP_DEVTOOLS_POSTINSTALL
         run: echo "SKIP_DEVTOOLS_POSTINSTALL=true" >> "$GITHUB_ENV"
 
-      - name: Install Dependencies
-        run: pnpm install
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Restore Turborepo cache
+        uses: actions/cache/restore@v5
+        with:
+          path: .turbo/cache
+          key: ${{ runner.os }}-turbo-${{ github.ref_name }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-${{ github.ref_name }}-
+            ${{ runner.os }}-turbo-
 
       - name: Install Cypress
         run: npx cypress install
 
-      - name: Run Build for All
-        run: npx nx run-many --targets=build --projects=tag:type:pkg
+      - name: Build shared packages
+        run: pnpm run build:packages
 
-      - name: Run condition check script
+      - name: Check CI conditions
         id: check-ci
-        run: node tools/scripts/ci-is-affected.mjs --appName=modernjs
+        run: |
+          ci_status=0
+          node tools/scripts/ci-is-affected.mjs --appName=@module-federation/modern-js,@module-federation/modern-js-v3 || ci_status=$?
+          if [ "$ci_status" -eq 0 ]; then
+            echo "run-e2e=true" >> "$GITHUB_OUTPUT"
+          elif [ "$ci_status" -eq 1 ]; then
+            echo "run-e2e=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ci-is-affected failed with unexpected exit code: $ci_status" >&2
+            exit "$ci_status"
+          fi
 
-      - name: E2E Test for ModernJS
-        if: steps.check-ci.outcome == 'success'
-        run: npx kill-port --port 4001 && npx nx run-many --target=test:e2e --projects=modernjs --parallel=1 && npx kill-port --port 4001
-
-      - name: Kill ports
-        run: npx kill-port --port 4001
+      - name: Run Modern package test suite
+        if: steps.check-ci.outputs.run-e2e == 'true'
+        run: pnpm exec turbo run test --filter=@module-federation/modern-js --filter=@module-federation/modern-js-v3 --concurrency=20

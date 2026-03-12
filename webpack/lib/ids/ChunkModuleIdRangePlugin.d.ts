@@ -1,12 +1,4 @@
 export = ChunkModuleIdRangePlugin;
-/** @typedef {import("../Compiler")} Compiler */
-/**
- * @typedef {Object} ChunkModuleIdRangePluginOptions
- * @property {string} name the chunk name
- * @property {("index" | "index2" | "preOrderIndex" | "postOrderIndex")=} order order
- * @property {number=} start start id
- * @property {number=} end end id
- */
 declare class ChunkModuleIdRangePlugin {
   /**
    * @param {ChunkModuleIdRangePluginOptions} options options object
@@ -21,8 +13,10 @@ declare class ChunkModuleIdRangePlugin {
   apply(compiler: Compiler): void;
 }
 declare namespace ChunkModuleIdRangePlugin {
-  export { Compiler, ChunkModuleIdRangePluginOptions };
+  export { Compiler, Module, ChunkModuleIdRangePluginOptions };
 }
+type Compiler = import('../Compiler');
+type Module = import('../Module');
 type ChunkModuleIdRangePluginOptions = {
   /**
    * the chunk name
@@ -41,4 +35,3 @@ type ChunkModuleIdRangePluginOptions = {
    */
   end?: number | undefined;
 };
-type Compiler = import('../Compiler');

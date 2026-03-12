@@ -51,9 +51,11 @@ function App(): React.JSX.Element {
         <Card title="Federated Remote" description="Dynamically loaded module">
           {!shouldLoadMini ? (
             <Pressable
+              testID="load-mini-button"
+              accessibilityRole="button"
               style={styles.defaultButton}
               onPress={() => setShouldLoadMini(true)}>
-              <Text testID="load-mini-button" style={styles.defaultButtonText}>
+              <Text style={styles.defaultButtonText}>
                 Load Remote Component
               </Text>
             </Pressable>
