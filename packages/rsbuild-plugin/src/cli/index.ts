@@ -274,8 +274,14 @@ export const pluginModuleFederation = (
             `'${SSR_ENV_NAME}' environment is already defined.Please use another name.`,
           );
         }
+        const currentEnvironment = config.environments?.[environment];
+        if (!currentEnvironment) {
+          throw new Error(
+            `Can not find environment '${environment}' when enabling SSR.`,
+          );
+        }
         config.environments![SSR_ENV_NAME] = createSSRREnvConfig(
-          config.environments?.[environment]!,
+          currentEnvironment,
           moduleFederationOptions,
           ssrDir,
           config,
