@@ -298,7 +298,20 @@ export interface SharedConfig {
  */
 export type Shared = (SharedItem | SharedObject)[] | SharedObject;
 
-export type IncludeExcludeOptions = unknown | unknown | unknown;
+export interface IncludeExcludeOptions {
+  /**
+   * A string (which can be a regex pattern) or a RegExp object to match the request path.
+   */
+  request?: string | RegExp;
+  /**
+   * Semantic versioning range to match against the module's version.
+   */
+  version?: string;
+  /**
+   * Semantic versioning range to match against the fallback module's version for exclusion/inclusion context where applicable.
+   */
+  fallbackVersion?: string;
+}
 
 /**
  * Tree-shake configuration for shared module.

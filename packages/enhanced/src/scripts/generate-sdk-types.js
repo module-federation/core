@@ -281,9 +281,18 @@ function generateTypeDeclaration(name, schema, definitions, referencedTypes) {
   // Decide whether to emit an interface or a type alias.
   // Use interface when the schema is a plain object with named properties
   // and no anyOf/oneOf/enum at the top level.
+  // Exception: anyOf entries that only contain `required` are validation-only
+  // constraints (e.g. "at least one of these fields must be present"), not type
+  // unions — treat the schema as a plain object in that case.
+  const anyOfIsRequiredConstraintOnly =
+    Array.isArray(schema.anyOf) &&
+    schema.anyOf.every(
+      (s) => Object.keys(s).length === 1 && Array.isArray(s.required),
+    );
+
   const isPlainObject =
     (schema.type === 'object' || schema.properties) &&
-    !schema.anyOf &&
+    (!schema.anyOf || anyOfIsRequiredConstraintOnly) &&
     !schema.oneOf &&
     !schema.enum &&
     !schema.$ref;
