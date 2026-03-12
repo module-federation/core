@@ -447,6 +447,87 @@ function normalizeExposes(
   return exposes as Record<string, unknown>;
 }
 
+export function applyResolvedNextFederationConfig(
+  userConfig: Configuration,
+  context: NextWebpackContext,
+  resolved: ResolvedNextFederationOptions,
+  hasValidatedAppExposes: boolean,
+): { config: Configuration; hasValidatedAppExposes: boolean } {
+  normalizeOutputPath(userConfig);
+
+  const compilerName = inferCompilerName(userConfig, context);
+
+  if (compilerName === 'edge-server' || context.nextRuntime === 'edge') {
+    // v9 intentionally skips federation in edge compiler.
+    return { config: userConfig, hasValidatedAppExposes };
+  }
+
+  ensureFederationWebpackPath(context);
+  userConfig.plugins = userConfig.plugins || [];
+  userConfig.plugins.unshift(new EnsureCompilerWebpackPlugin());
+  applyFederatedAssetLoaderFixes(userConfig);
+
+  const cwd = context.dir || userConfig.context || process.cwd();
+
+  const routerPresence = detectRouterPresence(cwd);
+  assertModeRouterCompatibility(resolved.mode, routerPresence.hasApp);
+
+  if (
+    !hasValidatedAppExposes &&
+    (resolved.mode === 'app' || resolved.mode === 'hybrid')
+  ) {
+    assertUnsupportedAppRouterTargets(cwd, resolved.federation.exposes);
+    hasValidatedAppExposes = true;
+  }
+
+  const federationContext = toCompilerContext(compilerName, context);
+  const isServer = federationContext.isServer;
+
+  const remotes = resolveFederationRemotes(resolved, federationContext);
+  const pagesExposes = resolved.pages.exposePages
+    ? buildPagesExposes(cwd, resolved.pages.pageMapFormat)
+    : {};
+  const shared = buildSharedConfig(
+    resolved,
+    isServer,
+    resolved.federation.shared,
+  );
+  const mergedExposes = {
+    ...normalizeExposes(resolved.federation.exposes),
+    ...pagesExposes,
+  } as moduleFederationPlugin.ModuleFederationPluginOptions['exposes'];
+
+  const nextFederationConfig: moduleFederationPlugin.ModuleFederationPluginOptions =
+    {
+      ...resolved.federation,
+      runtime: false,
+      filename: resolved.filename,
+      remotes,
+      exposes: mergedExposes,
+      shared,
+      remoteType: 'script' as const,
+      runtimePlugins: buildRuntimePlugins(resolved, isServer),
+      dts: resolved.federation.dts ?? false,
+      shareStrategy: resolved.sharing.strategy,
+      experiments: {
+        asyncStartup: true,
+        ...(resolved.federation.experiments || {}),
+      },
+      manifest: isServer ? { filePath: '' } : { filePath: '/static/chunks' },
+    };
+
+  if (isServer) {
+    configureServerCompiler(userConfig, nextFederationConfig);
+  } else {
+    configureClientCompiler(userConfig, nextFederationConfig);
+  }
+
+  const ModuleFederationPlugin = getModuleFederationPluginCtor();
+  applyPlugin(userConfig, new ModuleFederationPlugin(nextFederationConfig));
+
+  return { config: userConfig, hasValidatedAppExposes };
+}
+
 export function withNextFederation(
   nextConfig: NextConfig,
   federationOptions: NextFederationOptionsV9,
@@ -471,82 +552,14 @@ export function withNextFederation(
         typeof userWebpack === 'function'
           ? (userWebpack(config, context as never) as Configuration) || config
           : config;
-
-      normalizeOutputPath(userConfig);
-
-      const compilerName = inferCompilerName(userConfig, context);
-
-      if (compilerName === 'edge-server' || context.nextRuntime === 'edge') {
-        // v9 intentionally skips federation in edge compiler.
-        return userConfig;
-      }
-
-      ensureFederationWebpackPath(context);
-      userConfig.plugins = userConfig.plugins || [];
-      userConfig.plugins.unshift(new EnsureCompilerWebpackPlugin());
-      applyFederatedAssetLoaderFixes(userConfig);
-
-      const cwd = context.dir || userConfig.context || process.cwd();
-
-      const routerPresence = detectRouterPresence(cwd);
-      assertModeRouterCompatibility(resolved.mode, routerPresence.hasApp);
-
-      if (
-        !hasValidatedAppExposes &&
-        (resolved.mode === 'app' || resolved.mode === 'hybrid')
-      ) {
-        assertUnsupportedAppRouterTargets(cwd, resolved.federation.exposes);
-        hasValidatedAppExposes = true;
-      }
-
-      const federationContext = toCompilerContext(compilerName, context);
-      const isServer = federationContext.isServer;
-
-      const remotes = resolveFederationRemotes(resolved, federationContext);
-      const pagesExposes = resolved.pages.exposePages
-        ? buildPagesExposes(cwd, resolved.pages.pageMapFormat)
-        : {};
-      const shared = buildSharedConfig(
+      const applied = applyResolvedNextFederationConfig(
+        userConfig,
+        context,
         resolved,
-        isServer,
-        resolved.federation.shared,
+        hasValidatedAppExposes,
       );
-      const mergedExposes = {
-        ...normalizeExposes(resolved.federation.exposes),
-        ...pagesExposes,
-      } as moduleFederationPlugin.ModuleFederationPluginOptions['exposes'];
-
-      const nextFederationConfig: moduleFederationPlugin.ModuleFederationPluginOptions =
-        {
-          ...resolved.federation,
-          runtime: false,
-          filename: resolved.filename,
-          remotes,
-          exposes: mergedExposes,
-          shared,
-          remoteType: 'script' as const,
-          runtimePlugins: buildRuntimePlugins(resolved, isServer),
-          dts: resolved.federation.dts ?? false,
-          shareStrategy: resolved.sharing.strategy,
-          experiments: {
-            asyncStartup: true,
-            ...(resolved.federation.experiments || {}),
-          },
-          manifest: isServer
-            ? { filePath: '' }
-            : { filePath: '/static/chunks' },
-        };
-
-      if (isServer) {
-        configureServerCompiler(userConfig, nextFederationConfig);
-      } else {
-        configureClientCompiler(userConfig, nextFederationConfig);
-      }
-
-      const ModuleFederationPlugin = getModuleFederationPluginCtor();
-      applyPlugin(userConfig, new ModuleFederationPlugin(nextFederationConfig));
-
-      return userConfig;
+      hasValidatedAppExposes = applied.hasValidatedAppExposes;
+      return applied.config;
     },
   };
 }
