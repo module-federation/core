@@ -5,6 +5,10 @@ import type { Compiler, Chunk, Compilation } from 'webpack';
 import { getFederationGlobalScope } from './utils';
 import ContainerEntryDependency from '../ContainerEntryDependency';
 import FederationRuntimeDependency from './FederationRuntimeDependency';
+import {
+  getJavascriptModulesPlugin,
+  getWebpackSources,
+} from '../../webpackCompat';
 
 const { RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
@@ -69,9 +73,7 @@ class EmbedFederationRuntimePlugin {
       (compilation: Compilation) => {
         // --- Part 1: Modify renderStartup to append a startup call when none is added automatically ---
         const { renderStartup } =
-          compiler.webpack.javascript.JavascriptModulesPlugin.getCompilationHooks(
-            compilation,
-          );
+          getJavascriptModulesPlugin(compiler).getCompilationHooks(compilation);
 
         renderStartup.tap(
           PLUGIN_NAME,
@@ -97,7 +99,8 @@ class EmbedFederationRuntimePlugin {
             }
 
             // Otherwise, append a startup call.
-            return new compiler.webpack.sources.ConcatSource(
+            const webpackSources = getWebpackSources(compiler);
+            return new webpackSources.ConcatSource(
               startupSource,
               '\n// Custom hook: appended startup call because none was added automatically\n',
               `${RuntimeGlobals.startup}();\n`,

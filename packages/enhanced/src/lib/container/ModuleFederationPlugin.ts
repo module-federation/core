@@ -4,7 +4,7 @@
 */
 
 'use strict';
-import { DtsPlugin } from '@module-federation/dts-plugin';
+import type { DtsPlugin as DtsPluginType } from '@module-federation/dts-plugin';
 import { ContainerManager, utils } from '@module-federation/managers';
 import { StatsPlugin } from '@module-federation/manifest';
 import {
@@ -137,6 +137,22 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
       compiler,
       'EnhancedModuleFederationPlugin',
     );
+    if (!compiler.webpack || !compiler.webpack.sources) {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const webpack = require(
+          process.env['FEDERATION_WEBPACK_PATH'] || 'webpack',
+        );
+        if (!compiler.webpack) {
+          compiler.webpack = webpack;
+        } else if (!compiler.webpack.sources && webpack?.sources) {
+          // Webpack typings mark `sources` readonly, but runtime fallback needs it populated.
+          (compiler.webpack as any).sources = webpack.sources;
+        }
+      } catch {
+        // ignore fallback failures
+      }
+    }
     const { _options: options } = this;
     const { name, experiments, dts, remotes, shared, shareScope } = options;
     if (!name) {
@@ -182,6 +198,10 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     }
 
     if (dts !== false) {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { DtsPlugin } = require('@module-federation/dts-plugin') as {
+        DtsPlugin: typeof DtsPluginType;
+      };
       const dtsPlugin = new DtsPlugin(options);
       dtsPlugin.apply(compiler);
       dtsPlugin.addRuntimePlugins();

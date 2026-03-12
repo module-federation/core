@@ -97,8 +97,11 @@ const createShareMap = () => {
 // @ts-ignore
 const processChunk = async (chunk, shareMap, hostStats) => {
   const chunks = new Set();
-  const [remote, req] = chunk.split('/');
-  const request = './' + req;
+  const normalizedChunk = chunk.includes('->')
+    ? chunk.replace('->', '/')
+    : chunk;
+  const [remote, req] = normalizedChunk.split('/');
+  const request = req?.startsWith('./') ? req : './' + req;
   const knownRemotes = getAllKnownRemotes();
   //@ts-ignore
   if (!knownRemotes[remote]) {
