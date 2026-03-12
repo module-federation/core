@@ -1,4 +1,6 @@
-import type { ProvideSharedPluginOptions } from '../declarations/plugins/sharing/ProvideSharedPlugin';
+import type { provideSharedPlugin } from '@module-federation/sdk';
+type ProvideSharedPluginOptions =
+  provideSharedPlugin.ProvideSharedPluginOptions;
 import BaseWrapperPlugin from './BaseWrapperPlugin';
 
 const PLUGIN_NAME = 'ProvideSharedPlugin';

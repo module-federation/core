@@ -30,9 +30,7 @@ function isImportDependency(dependency: Dependency) {
   return dependency.type === 'import()';
 }
 
-export default class SharedUsedExportsOptimizerPlugin
-  implements WebpackPluginInstance
-{
+export default class SharedUsedExportsOptimizerPlugin implements WebpackPluginInstance {
   name = 'SharedUsedExportsOptimizerPlugin';
 
   sharedReferencedExports: ReferencedExports;
