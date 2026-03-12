@@ -50,6 +50,7 @@
         "default": "./dist/constant.cjs"
       }
     },
+    "./bundler": "./dist/bundler.js",
     "./*": "./*"
   },
   "typesVersions": {
@@ -59,6 +60,9 @@
       ],
       "constant": [
         "./dist/constant.d.ts"
+      ],
+      "bundler": [
+        "./dist/bundler.d.ts"
       ]
     }
   },
