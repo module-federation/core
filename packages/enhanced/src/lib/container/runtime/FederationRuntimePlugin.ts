@@ -63,6 +63,23 @@ function resolveRuntimeEntry(
   throw lastError;
 }
 
+function resolveRuntimeEntryWithFallback(
+  spec: RuntimeEntrySpec,
+  implementation: string | undefined,
+  resolve: ResolveFn = require.resolve,
+) {
+  if (implementation) {
+    try {
+      return resolveRuntimeEntry(spec, implementation, resolve);
+    } catch {
+      // Fall back to the workspace runtime packages when a custom
+      // implementation hasn't published the newer subpath yet.
+    }
+  }
+
+  return resolveRuntimeEntry(spec, undefined, resolve);
+}
+
 export function resolveRuntimePaths(
   implementation?: string,
   resolve: ResolveFn = require.resolve,
@@ -70,13 +87,13 @@ export function resolveRuntimePaths(
   // Prefer the dedicated bundler subpath so webpack can tree-shake across the
   // runtime package boundary. Fall back to the legacy dist contract for older
   // custom implementations that have not published /bundler yet.
-  const runtimeToolsPath = resolveRuntimeEntry(
+  const runtimeToolsPath = resolveRuntimeEntryWithFallback(
     {
       bundler: '@module-federation/runtime-tools/bundler',
       esm: '@module-federation/runtime-tools/dist/index.js',
       cjs: '@module-federation/runtime-tools/dist/index.cjs',
     },
-    undefined,
+    implementation,
     resolve,
   );
   const moduleBase = implementation || runtimeToolsPath;

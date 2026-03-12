@@ -271,6 +271,48 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
       );
     });
 
+    it('prefers the provided runtime-tools implementation when available', () => {
+      const resolve = rs.fn(
+        (request: string, options?: { paths?: string[] }) => {
+          const basedFromLegacy =
+            options?.paths?.[0] === '/legacy/runtime-tools';
+
+          if (
+            basedFromLegacy &&
+            request === '@module-federation/runtime-tools/bundler'
+          ) {
+            return '/legacy/runtime-tools/dist/bundler.js';
+          }
+          if (
+            basedFromLegacy &&
+            request === '@module-federation/runtime/bundler'
+          ) {
+            return '/legacy/runtime/dist/bundler.js';
+          }
+          if (
+            basedFromLegacy &&
+            request === '@module-federation/webpack-bundler-runtime/bundler'
+          ) {
+            return '/legacy/webpack-bundler-runtime/dist/bundler.js';
+          }
+
+          throw new Error(`Unexpected request: ${request}`);
+        },
+      );
+
+      const resolved = resolveRuntimePaths('/legacy/runtime-tools', resolve);
+
+      expect(normalizePath(resolved.runtimeToolsPath)).toBe(
+        '/legacy/runtime-tools/dist/bundler.js',
+      );
+      expect(normalizePath(resolved.runtimePath)).toBe(
+        '/legacy/runtime/dist/bundler.js',
+      );
+      expect(normalizePath(resolved.bundlerRuntimePath)).toBe(
+        '/legacy/webpack-bundler-runtime/dist/bundler.js',
+      );
+    });
+
     it('falls back to legacy cjs runtime entries when esm legacy builds are unavailable', () => {
       const resolve = rs.fn(
         (request: string, options?: { paths?: string[] }) => {
