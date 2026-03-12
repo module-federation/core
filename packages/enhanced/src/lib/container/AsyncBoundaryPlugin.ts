@@ -4,10 +4,6 @@
 */
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import { moduleFederationPlugin } from '@module-federation/sdk';
-import {
-  getJavascriptModulesPlugin,
-  getWebpackSources,
-} from '../webpackCompat';
 import type {
   Compiler,
   Compilation,
@@ -87,122 +83,119 @@ class AsyncEntryStartupPlugin {
   }
 
   private _handleRenderStartup(compiler: Compiler, compilation: Compilation) {
-    getJavascriptModulesPlugin(compiler)
-      .getCompilationHooks(compilation)
-      .renderStartup.tap(
-        'AsyncEntryStartupPlugin',
-        (
-          source: sources.Source,
-          _renderContext: Module,
-          upperContext: StartupRenderContext,
-        ) => {
-          const isSingleRuntime = compiler.options?.optimization?.runtimeChunk;
-          if (upperContext?.chunk.id && isSingleRuntime) {
-            if (upperContext?.chunk.hasRuntime()) {
-              this._runtimeChunks.set(
-                upperContext.chunk.id,
-                upperContext.chunk,
+    compiler.webpack.javascript.JavascriptModulesPlugin.getCompilationHooks(
+      compilation,
+    ).renderStartup.tap(
+      'AsyncEntryStartupPlugin',
+      (
+        source: sources.Source,
+        _renderContext: Module,
+        upperContext: StartupRenderContext,
+      ) => {
+        const isSingleRuntime = compiler.options?.optimization?.runtimeChunk;
+        if (upperContext?.chunk.id && isSingleRuntime) {
+          if (upperContext?.chunk.hasRuntime()) {
+            this._runtimeChunks.set(upperContext.chunk.id, upperContext.chunk);
+            return source;
+          }
+        }
+
+        if (
+          this._options.excludeChunk &&
+          this._options.excludeChunk(upperContext.chunk)
+        ) {
+          return source;
+        }
+
+        const runtime = this._getChunkRuntime(upperContext);
+
+        let remotes = '';
+        let shared = '';
+
+        for (const runtimeItem of runtime) {
+          if (!runtimeItem) {
+            continue;
+          }
+
+          const requirements =
+            compilation.chunkGraph.getTreeRuntimeRequirements(runtimeItem);
+
+          const entryOptions = upperContext.chunk.getEntryOptions();
+          const chunkInitialsSet = new Set(
+            compilation.chunkGraph.getChunkEntryDependentChunksIterable(
+              upperContext.chunk,
+            ),
+          );
+
+          chunkInitialsSet.add(upperContext.chunk);
+          const dependOn = entryOptions?.dependOn || [];
+          this.getChunkByName(compilation, dependOn, chunkInitialsSet);
+
+          const initialChunks = [];
+
+          let hasRemoteModules = false;
+          let consumeShares = false;
+
+          for (const chunk of chunkInitialsSet) {
+            initialChunks.push(chunk.id);
+            if (!hasRemoteModules) {
+              hasRemoteModules = Boolean(
+                compilation.chunkGraph.getChunkModulesIterableBySourceType(
+                  chunk,
+                  'remote',
+                ),
               );
-              return source;
+            }
+            if (!consumeShares) {
+              consumeShares = Boolean(
+                compilation.chunkGraph.getChunkModulesIterableBySourceType(
+                  chunk,
+                  'consume-shared',
+                ),
+              );
+            }
+            if (hasRemoteModules && consumeShares) {
+              break;
             }
           }
 
-          if (
-            this._options.excludeChunk &&
-            this._options.excludeChunk(upperContext.chunk)
-          ) {
-            return source;
-          }
-
-          const runtime = this._getChunkRuntime(upperContext);
-
-          let remotes = '';
-          let shared = '';
-
-          for (const runtimeItem of runtime) {
-            if (!runtimeItem) {
-              continue;
-            }
-
-            const requirements =
-              compilation.chunkGraph.getTreeRuntimeRequirements(runtimeItem);
-
-            const entryOptions = upperContext.chunk.getEntryOptions();
-            const chunkInitialsSet = new Set(
-              compilation.chunkGraph.getChunkEntryDependentChunksIterable(
-                upperContext.chunk,
-              ),
-            );
-
-            chunkInitialsSet.add(upperContext.chunk);
-            const dependOn = entryOptions?.dependOn || [];
-            this.getChunkByName(compilation, dependOn, chunkInitialsSet);
-
-            const initialChunks = [];
-
-            let hasRemoteModules = false;
-            let consumeShares = false;
-
-            for (const chunk of chunkInitialsSet) {
-              initialChunks.push(chunk.id);
-              if (!hasRemoteModules) {
-                hasRemoteModules = Boolean(
-                  compilation.chunkGraph.getChunkModulesIterableBySourceType(
-                    chunk,
-                    'remote',
-                  ),
-                );
-              }
-              if (!consumeShares) {
-                consumeShares = Boolean(
-                  compilation.chunkGraph.getChunkModulesIterableBySourceType(
-                    chunk,
-                    'consume-shared',
-                  ),
-                );
-              }
-              if (hasRemoteModules && consumeShares) {
-                break;
-              }
-            }
-
-            remotes = this._getRemotes(
-              compiler.webpack.RuntimeGlobals,
-              requirements,
-              hasRemoteModules,
-              initialChunks,
-              remotes,
-            );
-
-            shared = this._getShared(
-              compiler.webpack.RuntimeGlobals,
-              requirements,
-              consumeShares,
-              initialChunks,
-              shared,
-            );
-          }
-
-          if (!remotes && !shared) {
-            return source;
-          }
-
-          const initialEntryModules = this._getInitialEntryModules(
-            compilation,
-            upperContext,
-          );
-          const templateString = this._getTemplateString(
-            compiler,
-            initialEntryModules,
-            shared,
+          remotes = this._getRemotes(
+            compiler.webpack.RuntimeGlobals,
+            requirements,
+            hasRemoteModules,
+            initialChunks,
             remotes,
-            source,
           );
 
-          const webpackSources = getWebpackSources(compiler);
-          return new webpackSources.ConcatSource(templateString);
-        },
-      );
+          shared = this._getShared(
+            compiler.webpack.RuntimeGlobals,
+            requirements,
+            consumeShares,
+            initialChunks,
+            shared,
+          );
+        }
+
+        if (!remotes && !shared) {
+          return source;
+        }
+
+        const initialEntryModules = this._getInitialEntryModules(
+          compilation,
+          upperContext,
+        );
+        const templateString = this._getTemplateString(
+          compiler,
+          initialEntryModules,
+          shared,
+          remotes,
+          source,
+        );
+
+        const { ConcatSource } = compiler.webpack.sources;
+        return new ConcatSource(templateString);
+      },
+    );
   }
 
   private _getChunkRuntime(upperContext: StartupRenderContext) {

@@ -102,20 +102,6 @@ export const normalizeWebpackPath = (fullPath: string): string => {
     return fullPath;
   }
 
-  // Next.js webpack bridge points to its compiled bundle entry. For deep webpack
-  // internals we should keep native requests so Node/Next hook resolution can
-  // pick the best available target (Next-compiled alias or local webpack).
-  if (
-    federationWebpackPath &&
-    federationWebpackPath.includes('/next/dist/compiled/webpack/')
-  ) {
-    if (fullPath === 'webpack') {
-      return federationWebpackPath;
-    }
-
-    return fullPath;
-  }
-
   if (fullPath === 'webpack') {
     return federationWebpackPath || fullPath;
   }

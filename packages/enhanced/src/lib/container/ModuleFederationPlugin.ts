@@ -137,22 +137,6 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
       compiler,
       'EnhancedModuleFederationPlugin',
     );
-    if (!compiler.webpack || !compiler.webpack.sources) {
-      try {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const webpack = require(
-          process.env['FEDERATION_WEBPACK_PATH'] || 'webpack',
-        );
-        if (!compiler.webpack) {
-          compiler.webpack = webpack;
-        } else if (!compiler.webpack.sources && webpack?.sources) {
-          // Webpack typings mark `sources` readonly, but runtime fallback needs it populated.
-          (compiler.webpack as any).sources = webpack.sources;
-        }
-      } catch {
-        // ignore fallback failures
-      }
-    }
     const { _options: options } = this;
     const { name, experiments, dts, remotes, shared, shareScope } = options;
     if (!name) {

@@ -24,7 +24,6 @@ import type { SharedConfig } from '../../../declarations/plugins/sharing/SharePl
 import ConsumeSharedPlugin from '../ConsumeSharedPlugin';
 import { NormalizedSharedOptions } from '../SharePlugin';
 import IndependentSharedRuntimeModule from './IndependentSharedRuntimeModule';
-import { getWebpackSources } from '../../webpackCompat';
 
 const IGNORED_ENTRY = 'ignored-entry';
 
@@ -206,7 +205,7 @@ export default class IndependentSharedPlugin {
 
             compilation.updateAsset(
               StatsFileName,
-              new (getWebpackSources(compiler).RawSource)(
+              new compiler.webpack.sources.RawSource(
                 JSON.stringify(statsContent),
               ),
             );
