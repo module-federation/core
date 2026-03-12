@@ -1,13 +1,24 @@
-import {
-  createInfrastructureLogger,
-  createLogger,
-} from '@module-federation/sdk';
+const PREFIX = '[nextjs-mf]';
 
-const createBundlerLogger: typeof createLogger =
-  typeof createInfrastructureLogger === 'function'
-    ? (createInfrastructureLogger as unknown as typeof createLogger)
-    : createLogger;
+function prefix(args: unknown[]): unknown[] {
+  return [PREFIX, ...args];
+}
 
-const logger = createBundlerLogger('[ nextjs-mf ]');
+const logger = {
+  error(...args: unknown[]): void {
+    console.error(...prefix(args));
+  },
+  warn(...args: unknown[]): void {
+    console.warn(...prefix(args));
+  },
+  info(...args: unknown[]): void {
+    console.info(...prefix(args));
+  },
+  debug(...args: unknown[]): void {
+    if (process.env['NEXTJS_MF_DEBUG'] === '1') {
+      console.debug(...prefix(args));
+    }
+  },
+};
 
 export default logger;
