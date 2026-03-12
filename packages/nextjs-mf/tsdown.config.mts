@@ -14,6 +14,8 @@ export default defineConfig([
       entry: {
         'src/index': 'src/index.ts',
         node: 'node.ts',
+        'src/core/features/pages-map-loader':
+          'src/core/features/pages-map-loader.ts',
         'src/core/loaders/fixNextImageLoader':
           'src/core/loaders/fixNextImageLoader.ts',
         'src/core/loaders/fixUrlLoader': 'src/core/loaders/fixUrlLoader.ts',
