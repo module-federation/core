@@ -15,7 +15,6 @@ export async function readConfig(userConfigPath?: string) {
   const configPath = getConfigPath(userConfigPath);
   const jit = createJiti(__filename, {
     interopDefault: true,
-    esmResolve: true,
   });
   const configModule = await jit(configPath);
   const resolvedConfig = (
