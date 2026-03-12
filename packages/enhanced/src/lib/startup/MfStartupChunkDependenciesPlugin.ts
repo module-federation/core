@@ -122,8 +122,7 @@ class StartupChunkDependenciesPlugin {
               ? generateESMEntryStartup
               : generateEntryStartup;
 
-            const { ConcatSource } = compiler.webpack.sources;
-            return new ConcatSource(
+            return new compiler.webpack.sources.ConcatSource(
               entryGeneration(
                 compilation,
                 chunkGraph,

@@ -192,8 +192,7 @@ class AsyncEntryStartupPlugin {
           source,
         );
 
-        const { ConcatSource } = compiler.webpack.sources;
-        return new ConcatSource(templateString);
+        return new compiler.webpack.sources.ConcatSource(templateString);
       },
     );
   }

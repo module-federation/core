@@ -11,6 +11,7 @@ import type { Compiler, Compilation, Chunk, Module, ChunkGraph } from 'webpack';
 import { getFederationGlobalScope } from './utils';
 import fs from 'fs';
 import path from 'path';
+import { ConcatSource } from 'webpack-sources';
 import { transformSync } from '@swc/core';
 import { infrastructureLogger as logger } from '@module-federation/sdk';
 
@@ -56,7 +57,6 @@ class RuntimeModuleChunkPlugin {
           ) => {
             const { chunk, chunkGraph } = renderContext;
 
-            const { ConcatSource } = compiler.webpack.sources;
             const source = new ConcatSource();
             source.add('var federation = ');
             source.add(modules);

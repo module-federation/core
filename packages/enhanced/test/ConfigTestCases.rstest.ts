@@ -375,6 +375,7 @@ export const describeCases = (config: any) => {
                   `${path.sep}tree-shaking-share${path.sep}`,
                 )
               ) {
+                nativeRequire('./scripts/ensure-reshake-fixtures');
                 ensureTreeShakingFixturesIfNeeded();
               }
               options = prepareOptions(

@@ -97,8 +97,7 @@ class EmbedFederationRuntimePlugin {
             }
 
             // Otherwise, append a startup call.
-            const { ConcatSource } = compiler.webpack.sources;
-            return new ConcatSource(
+            return new compiler.webpack.sources.ConcatSource(
               startupSource,
               '\n// Custom hook: appended startup call because none was added automatically\n',
               `${RuntimeGlobals.startup}();\n`,

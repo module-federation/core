@@ -200,10 +200,6 @@ class FederationRuntimePlugin {
       '}',
     ]);
 
-    const installInitialConsumesCall = options.experiments?.asyncStartup
-      ? `${federationGlobal}.installInitialConsumes({ asyncLoad: true })`
-      : `${federationGlobal}.installInitialConsumes()`;
-
     return Template.asString([
       `import federation from '${normalizedBundlerRuntimePath}';`,
       runtimePluginTemplates,
@@ -229,7 +225,7 @@ class FederationRuntimePlugin {
         ]),
         '}',
         `if(${federationGlobal}.installInitialConsumes){`,
-        Template.indent([installInitialConsumesCall]),
+        Template.indent([`${federationGlobal}.installInitialConsumes()`]),
         '}',
       ]),
       PrefetchPlugin.addRuntime(compiler, {
