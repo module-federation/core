@@ -79,7 +79,6 @@ function resolveRuntimeEntryWithFallback(
 
   return resolveRuntimeEntry(spec, undefined, resolve);
 }
-
 export function resolveRuntimePaths(
   implementation?: string,
   resolve: ResolveFn = require.resolve,
@@ -296,7 +295,7 @@ class FederationRuntimePlugin {
         : fs;
     try {
       fsLike.readFileSync(filePath);
-    } catch (err) {
+    } catch {
       mkdirpSync(fsLike as any, TEMP_DIR);
       fsLike.writeFileSync(
         filePath,
@@ -348,7 +347,7 @@ class FederationRuntimePlugin {
           compiler.context,
           federationRuntimeDependency,
           { name: undefined },
-          (err, module) => {
+          (err) => {
             if (err) {
               return callback(err);
             }
