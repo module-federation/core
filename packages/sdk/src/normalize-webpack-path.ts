@@ -50,7 +50,10 @@ export const normalizeWebpackPath = (fullPath: string): string => {
       return federationWebpackPath;
     }
 
-    return fullPath;
+    return path.resolve(
+      path.dirname(federationWebpackPath),
+      fullPath.replace(/^webpack\//, ''),
+    );
   }
 
   if (fullPath === 'webpack') {
