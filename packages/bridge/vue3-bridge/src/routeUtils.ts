@@ -24,9 +24,10 @@ function addBasenameToNestedRoutes(
   basename: string,
 ): VueRouter.RouteRecordNormalized[] {
   return routes.map((route) => {
+    const joinedPath = `${basename}/${route.path}`;
     const updatedRoute: VueRouter.RouteRecordNormalized = {
       ...route,
-      path: basename + route.path,
+      path: joinedPath.replace(/\/+/g, '/').replace(/\/$/, '') || '/',
     };
 
     // Recursively process child routes
