@@ -16,8 +16,18 @@
   },
   {
     "type": "file",
+    "name": "library",
+    "label": "library"
+  },
+  {
+    "type": "file",
     "name": "remotes",
     "label": "remotes"
+  },
+  {
+    "type": "file",
+    "name": "remotetype",
+    "label": "remoteType"
   },
   {
     "type": "file",
@@ -93,5 +103,5 @@
     "type": "file",
     "name": "treeShakingSharedPlugins",
     "label": "treeShakingSharedPlugins"
-  }
+  },
 ]
