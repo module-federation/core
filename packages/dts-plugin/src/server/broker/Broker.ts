@@ -391,7 +391,6 @@ export class Broker {
             client,
           );
           fileLog(
-            // eslint-disable-next-line @ies/eden/max-calls-in-template
             `[${
               ActionKind.ADD_SUBSCRIBER
             }]: ${identifier} has been started, Adding Subscriber ${subscriberName} Succeed, this.__publisherMap are: ${JSON.stringify(
@@ -414,7 +413,6 @@ export class Broker {
             },
           );
           fileLog(
-            // eslint-disable-next-line @ies/eden/max-calls-in-template
             `[${ActionKind.ADD_SUBSCRIBER}]: notifySubscriber Subscriber ${subscriberName}, updateMode: "PASSIVE",  updateSourcePaths: ${registeredPublisher.name}`,
             'Broker',
             'info',
