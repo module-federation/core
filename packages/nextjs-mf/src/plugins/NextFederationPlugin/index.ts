@@ -270,4 +270,3 @@ export class NextFederationPlugin {
 }
 
 export default NextFederationPlugin;
-

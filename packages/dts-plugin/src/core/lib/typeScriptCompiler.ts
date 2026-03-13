@@ -1,5 +1,4 @@
-import fse from 'fs-extra';
-const { ensureDirSync, writeFileSync, existsSync } = fse;
+import fsExtra from 'fs-extra';
 import crypto from 'crypto';
 import { stat, readdir, writeFile, rm, readFile } from 'fs/promises';
 import {
@@ -24,6 +23,7 @@ import { TsConfigJson } from '../interfaces/TsConfigJson';
 import { logger } from '../../server';
 
 const STARTS_WITH_SLASH = /^\//;
+const { ensureDirSync, writeFileSync, existsSync } = fsExtra;
 
 const DEFINITION_FILE_EXTENSION = '.d.ts';
 

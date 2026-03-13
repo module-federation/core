@@ -8,8 +8,10 @@ import { attachShareScopeMap } from './attachShareScopeMap';
 import { initContainerEntry } from './initContainerEntry';
 import { init } from './init';
 import { getSharedFallbackGetter } from './getSharedFallbackGetter';
+import { resolveRemoteModuleId } from './resolveRemoteModuleId';
 
 export * from './types';
+export * from './rscManifest';
 
 const federation: Federation = {
   runtime,
@@ -23,6 +25,7 @@ const federation: Federation = {
     installInitialConsumes,
     initContainerEntry,
     init,
+    resolveRemoteModuleId,
     getSharedFallbackGetter,
   },
   attachShareScopeMap,

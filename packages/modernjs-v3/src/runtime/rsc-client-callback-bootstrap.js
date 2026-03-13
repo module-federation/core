@@ -1,0 +1,506 @@
+import { setResolveActionId } from '@modern-js/runtime/rsc/client';
+import {
+  createFromFetch,
+  createTemporaryReferenceSet,
+  encodeReply,
+  setServerCallback,
+} from 'react-server-dom-rspack/client.browser';
+
+const ACTION_PREFIX = 'remote:';
+const ACTION_REMAP_GLOBAL_KEY = '__MODERN_RSC_MF_ACTION_ID_MAP__';
+const CALLBACK_INSTALL_RETRY_DELAY_MS = 50;
+const MAX_CALLBACK_INSTALL_ATTEMPTS = 120;
+const CALLBACK_CHUNK_LOADER_HOOK_FLAG =
+  '__MODERN_RSC_MF_CALLBACK_CHUNK_LOADER_HOOKED__';
+const CALLBACK_CHUNK_LOADER_WRAPPED_FLAG =
+  '__MODERN_RSC_MF_CALLBACK_CHUNK_LOADER_WRAPPED__';
+const CALLBACK_CHUNK_HANDLER_KEY = '__MODERN_RSC_MF_CALLBACK_CHUNK_HANDLER__';
+const CALLBACK_CHUNK_HANDLER_WRAPPED_FLAG =
+  '__MODERN_RSC_MF_CALLBACK_CHUNK_HANDLER_WRAPPED__';
+let hasResolvedFallbackAlias = false;
+let fallbackRemoteAlias;
+let callbackInstallAttempts = 0;
+const actionRemapMapFallback = Object.create(null);
+const installedClientBrowserRuntimes = new WeakSet();
+const wrappedChunkLoaders = new WeakMap();
+const wrappedChunkHandlers = new WeakMap();
+const hookedChunkHandlers = new WeakSet();
+
+function isObject(value) {
+  return typeof value === 'object' && value !== null;
+}
+
+function isFunction(value) {
+  return typeof value === 'function';
+}
+
+const runtimeRequireFromWrapper = (() => {
+  try {
+    // Access the module-wrapper require function when available.
+    // biome-ignore lint/security/noGlobalEval: The bundler module wrapper exposes `require` via arguments only.
+    const wrapperRequire = eval('arguments[2]');
+    if (isFunction(wrapperRequire) || isObject(wrapperRequire)) {
+      return wrapperRequire;
+    }
+  } catch {}
+  return undefined;
+})();
+
+function isClientBrowserRuntime(value) {
+  return (
+    isObject(value) &&
+    isFunction(value.setServerCallback) &&
+    isFunction(value.createTemporaryReferenceSet) &&
+    isFunction(value.encodeReply) &&
+    isFunction(value.createFromFetch)
+  );
+}
+
+function getWebpackRequire() {
+  if (runtimeRequireFromWrapper) {
+    return runtimeRequireFromWrapper;
+  }
+  if (typeof __webpack_require__ !== 'undefined') {
+    return __webpack_require__;
+  }
+  return undefined;
+}
+
+function getActionRemapMap() {
+  const federationState =
+    typeof __FEDERATION__ !== 'undefined' && isObject(__FEDERATION__)
+      ? __FEDERATION__
+      : undefined;
+  if (!federationState) {
+    return actionRemapMapFallback;
+  }
+  const map = federationState[ACTION_REMAP_GLOBAL_KEY];
+  if (!isObject(map)) {
+    federationState[ACTION_REMAP_GLOBAL_KEY] = Object.create(null);
+    return federationState[ACTION_REMAP_GLOBAL_KEY];
+  }
+  return map;
+}
+
+function getHostServerManifest() {
+  const webpackRequire = getWebpackRequire();
+  if (
+    webpackRequire &&
+    isObject(webpackRequire.rscM) &&
+    isObject(webpackRequire.rscM.serverManifest)
+  ) {
+    return webpackRequire.rscM.serverManifest;
+  }
+  return undefined;
+}
+
+function hasHostServerAction(rawId) {
+  const serverManifest = getHostServerManifest();
+  if (!isObject(serverManifest)) {
+    return false;
+  }
+  return Object.prototype.hasOwnProperty.call(serverManifest, rawId);
+}
+
+function resolveFallbackRemoteAlias() {
+  if (hasResolvedFallbackAlias) {
+    return fallbackRemoteAlias;
+  }
+
+  const webpackRequire = getWebpackRequire();
+  const runtimeInstance =
+    webpackRequire &&
+    isObject(webpackRequire.federation) &&
+    isObject(webpackRequire.federation.instance)
+      ? webpackRequire.federation.instance
+      : undefined;
+  if (!runtimeInstance) {
+    return undefined;
+  }
+
+  const aliasSet = new Set();
+  const remotes = Array.isArray(runtimeInstance.options?.remotes)
+    ? runtimeInstance.options.remotes
+    : [];
+  for (const remote of remotes) {
+    if (isObject(remote)) {
+      const alias =
+        typeof remote.alias === 'string' && remote.alias
+          ? remote.alias
+          : typeof remote.name === 'string' && remote.name
+            ? remote.name
+            : undefined;
+      if (alias) {
+        aliasSet.add(alias);
+      }
+    }
+  }
+
+  const idToRemoteMap = runtimeInstance.remoteHandler?.idToRemoteMap;
+  if (isObject(idToRemoteMap)) {
+    for (const remoteInfo of Object.values(idToRemoteMap)) {
+      if (!isObject(remoteInfo)) {
+        continue;
+      }
+      const name =
+        typeof remoteInfo.name === 'string' && remoteInfo.name
+          ? remoteInfo.name
+          : undefined;
+      if (name) {
+        aliasSet.add(name);
+      }
+    }
+  }
+
+  if (aliasSet.size === 1) {
+    fallbackRemoteAlias = Array.from(aliasSet)[0];
+    hasResolvedFallbackAlias = true;
+    return fallbackRemoteAlias;
+  }
+
+  if (aliasSet.size === 0 && typeof window === 'undefined') {
+    return undefined;
+  }
+
+  if (typeof window !== 'undefined') {
+    const containerAliases = Object.keys(window).filter((alias) => {
+      const candidate = window[alias];
+      return (
+        isObject(candidate) &&
+        isFunction(candidate.get) &&
+        isFunction(candidate.init)
+      );
+    });
+    if (aliasSet.size === 0 && containerAliases.length === 1) {
+      fallbackRemoteAlias = containerAliases[0];
+      hasResolvedFallbackAlias = true;
+      return fallbackRemoteAlias;
+    }
+    if (aliasSet.size === 0 && containerAliases.length === 0) {
+      return undefined;
+    }
+  }
+
+  fallbackRemoteAlias = undefined;
+  hasResolvedFallbackAlias = true;
+  return undefined;
+}
+
+function resolveActionEndpoint() {
+  if (typeof window === 'undefined') {
+    return '/';
+  }
+
+  const entryName = window.__MODERN_JS_ENTRY_NAME;
+  if (!entryName || entryName === 'main' || entryName === 'index') {
+    return '/';
+  }
+  return `/${entryName}`;
+}
+
+async function resolveActionId(id) {
+  const rawId = String(id);
+  if (rawId.startsWith(ACTION_PREFIX)) {
+    return rawId;
+  }
+
+  const remapMap = getActionRemapMap();
+  const remappedId = remapMap[rawId];
+  if (typeof remappedId === 'string') {
+    return remappedId;
+  }
+  if (hasHostServerAction(rawId)) {
+    return rawId;
+  }
+  if (remappedId === false) {
+    throw new Error(
+      `[modern-js-v3:rsc-bridge] Ambiguous remote action id "${rawId}" cannot be resolved safely.`,
+    );
+  }
+
+  const fallbackAlias = resolveFallbackRemoteAlias();
+  if (typeof fallbackAlias === 'string' && fallbackAlias) {
+    const prefixedId = `${ACTION_PREFIX}${fallbackAlias}:${rawId}`;
+    remapMap[rawId] = prefixedId;
+    return prefixedId;
+  }
+
+  throw new Error(
+    `[modern-js-v3:rsc-bridge] Unable to resolve raw action id "${rawId}". Use a prefixed action id or ensure the remote alias manifest is merged before invoking the action.`,
+  );
+}
+
+function createServerCallback(runtime) {
+  return async (id, args) => {
+    const actionId = await resolveActionId(id);
+    const temporaryReferences = runtime.createTemporaryReferenceSet();
+    const body = await runtime.encodeReply(Array.isArray(args) ? args : [], {
+      temporaryReferences,
+    });
+    const endpoint = resolveActionEndpoint();
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        Accept: 'text/x-component',
+        'x-rsc-action': actionId,
+      },
+      body,
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        `[modern-js-v3:rsc-bridge] callback request failed (${response.status}) for "${actionId}"`,
+      );
+    }
+
+    return runtime.createFromFetch(Promise.resolve(response), {
+      temporaryReferences,
+    });
+  };
+}
+
+function collectClientBrowserRuntimes() {
+  const runtimes = [];
+  const maybePushRuntime = (candidate) => {
+    if (isClientBrowserRuntime(candidate)) {
+      runtimes.push(candidate);
+    } else if (
+      isObject(candidate) &&
+      isClientBrowserRuntime(candidate.default)
+    ) {
+      runtimes.push(candidate.default);
+    }
+  };
+
+  maybePushRuntime({
+    createFromFetch,
+    createTemporaryReferenceSet,
+    encodeReply,
+    setServerCallback,
+  });
+
+  const webpackRequire = getWebpackRequire();
+  const moduleCache = webpackRequire?.c;
+  if (isObject(moduleCache)) {
+    for (const moduleRecord of Object.values(moduleCache)) {
+      if (isObject(moduleRecord) && 'exports' in moduleRecord) {
+        maybePushRuntime(moduleRecord.exports);
+      }
+    }
+  }
+
+  return runtimes;
+}
+
+function installServerCallbacks() {
+  let installedCount = 0;
+  for (const runtime of collectClientBrowserRuntimes()) {
+    if (installedClientBrowserRuntimes.has(runtime)) {
+      continue;
+    }
+    installedClientBrowserRuntimes.add(runtime);
+    runtime.setServerCallback(createServerCallback(runtime));
+    installedCount += 1;
+  }
+  return installedCount;
+}
+
+function getWrappedChunkLoader(chunkLoader) {
+  if (!isFunction(chunkLoader)) {
+    return chunkLoader;
+  }
+  if (chunkLoader[CALLBACK_CHUNK_LOADER_WRAPPED_FLAG]) {
+    return chunkLoader;
+  }
+
+  const cachedWrappedLoader = wrappedChunkLoaders.get(chunkLoader);
+  if (cachedWrappedLoader) {
+    return cachedWrappedLoader;
+  }
+
+  const wrappedChunkLoader = function (...args) {
+    const chunkLoadResult = chunkLoader.apply(this, args);
+    Promise.resolve(chunkLoadResult)
+      .catch(() => undefined)
+      .then(() => {
+        installServerCallbacks();
+      });
+    return chunkLoadResult;
+  };
+
+  wrappedChunkLoader[CALLBACK_CHUNK_LOADER_WRAPPED_FLAG] = true;
+  wrappedChunkLoaders.set(chunkLoader, wrappedChunkLoader);
+  return wrappedChunkLoader;
+}
+
+function queueCallbackInstallAfterChunkLoad(promises) {
+  if (!Array.isArray(promises)) {
+    installServerCallbacks();
+    return;
+  }
+
+  Promise.resolve().then(() => {
+    Promise.allSettled(promises.slice())
+      .catch(() => undefined)
+      .then(() => {
+        installServerCallbacks();
+      });
+  });
+}
+
+function getWrappedChunkHandler(chunkHandler) {
+  if (!isFunction(chunkHandler)) {
+    return chunkHandler;
+  }
+  if (chunkHandler[CALLBACK_CHUNK_HANDLER_WRAPPED_FLAG]) {
+    return chunkHandler;
+  }
+
+  const cachedWrappedChunkHandler = wrappedChunkHandlers.get(chunkHandler);
+  if (cachedWrappedChunkHandler) {
+    return cachedWrappedChunkHandler;
+  }
+
+  const wrappedChunkHandler = function (...args) {
+    chunkHandler.apply(this, args);
+    queueCallbackInstallAfterChunkLoad(args[1]);
+  };
+  wrappedChunkHandler[CALLBACK_CHUNK_HANDLER_WRAPPED_FLAG] = true;
+  wrappedChunkHandlers.set(chunkHandler, wrappedChunkHandler);
+  return wrappedChunkHandler;
+}
+
+function hookEnsureChunkHandlersInstall() {
+  const webpackRequire = getWebpackRequire();
+  if (!webpackRequire || !isObject(webpackRequire.f)) {
+    return false;
+  }
+
+  const chunkHandlers = webpackRequire.f;
+  if (hookedChunkHandlers.has(chunkHandlers)) {
+    return true;
+  }
+
+  const existingChunkHandler = chunkHandlers[CALLBACK_CHUNK_HANDLER_KEY];
+  if (isFunction(existingChunkHandler)) {
+    chunkHandlers[CALLBACK_CHUNK_HANDLER_KEY] =
+      getWrappedChunkHandler(existingChunkHandler);
+  } else {
+    const callbackInstallChunkHandler = function (_chunkId, promises) {
+      queueCallbackInstallAfterChunkLoad(promises);
+    };
+    callbackInstallChunkHandler[CALLBACK_CHUNK_HANDLER_WRAPPED_FLAG] = true;
+    chunkHandlers[CALLBACK_CHUNK_HANDLER_KEY] = callbackInstallChunkHandler;
+  }
+
+  hookedChunkHandlers.add(chunkHandlers);
+  return true;
+}
+
+function hookChunkLoaderInstall() {
+  const webpackRequire = getWebpackRequire();
+  if (!webpackRequire) {
+    return;
+  }
+
+  const chunkLoaderDescriptor = Object.getOwnPropertyDescriptor(
+    webpackRequire,
+    'e',
+  );
+  if (
+    webpackRequire[CALLBACK_CHUNK_LOADER_HOOK_FLAG] &&
+    (!isFunction(chunkLoaderDescriptor?.get) ||
+      chunkLoaderDescriptor.get[CALLBACK_CHUNK_LOADER_HOOK_FLAG])
+  ) {
+    return;
+  }
+
+  const hookState = {
+    chunkLoader: isFunction(chunkLoaderDescriptor?.get)
+      ? chunkLoaderDescriptor.get.call(webpackRequire)
+      : webpackRequire.e,
+  };
+
+  if (!isFunction(hookState.chunkLoader)) {
+    return;
+  }
+
+  if (chunkLoaderDescriptor?.configurable === false) {
+    const wrappedChunkLoader = getWrappedChunkLoader(hookState.chunkLoader);
+    if (isFunction(chunkLoaderDescriptor?.set)) {
+      chunkLoaderDescriptor.set.call(webpackRequire, wrappedChunkLoader);
+      webpackRequire[CALLBACK_CHUNK_LOADER_HOOK_FLAG] = true;
+      return;
+    }
+    if (chunkLoaderDescriptor?.writable !== false) {
+      const didSetChunkLoader = Reflect.set(
+        webpackRequire,
+        'e',
+        wrappedChunkLoader,
+      );
+      if (didSetChunkLoader && webpackRequire.e === wrappedChunkLoader) {
+        webpackRequire[CALLBACK_CHUNK_LOADER_HOOK_FLAG] = true;
+      }
+    }
+    return;
+  }
+
+  const readChunkLoader = () => {
+    if (isFunction(chunkLoaderDescriptor?.get)) {
+      const nextChunkLoader = chunkLoaderDescriptor.get.call(webpackRequire);
+      if (isFunction(nextChunkLoader)) {
+        hookState.chunkLoader = nextChunkLoader;
+      }
+    }
+    return hookState.chunkLoader;
+  };
+
+  const wrappedChunkLoaderGetter = function () {
+    const chunkLoader = readChunkLoader();
+    return isFunction(chunkLoader)
+      ? getWrappedChunkLoader(chunkLoader)
+      : chunkLoader;
+  };
+  wrappedChunkLoaderGetter[CALLBACK_CHUNK_LOADER_HOOK_FLAG] = true;
+
+  Object.defineProperty(webpackRequire, 'e', {
+    configurable: true,
+    enumerable: chunkLoaderDescriptor?.enumerable ?? true,
+    get: wrappedChunkLoaderGetter,
+    set(nextChunkLoader) {
+      if (isFunction(chunkLoaderDescriptor?.set)) {
+        chunkLoaderDescriptor.set.call(webpackRequire, nextChunkLoader);
+      }
+      hookState.chunkLoader = nextChunkLoader;
+    },
+  });
+
+  webpackRequire[CALLBACK_CHUNK_LOADER_HOOK_FLAG] = true;
+}
+
+function runInstallAttempt() {
+  const hasEnsureChunkHandlersHook = hookEnsureChunkHandlersInstall();
+  if (!hasEnsureChunkHandlersHook) {
+    hookChunkLoaderInstall();
+  }
+  installServerCallbacks();
+  callbackInstallAttempts += 1;
+
+  if (
+    callbackInstallAttempts >= MAX_CALLBACK_INSTALL_ATTEMPTS ||
+    typeof setTimeout !== 'function'
+  ) {
+    return;
+  }
+
+  setTimeout(runInstallAttempt, CALLBACK_INSTALL_RETRY_DELAY_MS);
+}
+
+setResolveActionId(resolveActionId);
+
+runInstallAttempt();
+if (typeof queueMicrotask === 'function') {
+  queueMicrotask(() => {
+    installServerCallbacks();
+  });
+}
