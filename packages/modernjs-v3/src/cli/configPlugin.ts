@@ -891,6 +891,14 @@ export const moduleFederationConfigPlugin = (
       const targetMFConfig = !isWeb ? ssrConfig : csrConfig;
       patchMFConfig(targetMFConfig, !isWeb);
 
+      if (
+        modernjsConfig.source?.enableAsyncEntry !== true &&
+        targetMFConfig.experiments?.asyncStartup !== false
+      ) {
+        targetMFConfig.experiments ||= {};
+        targetMFConfig.experiments.asyncStartup = true;
+      }
+
       patchBundlerConfig({
         chain,
         isServer: !isWeb,

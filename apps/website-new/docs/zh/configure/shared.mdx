@@ -20,7 +20,9 @@ interface SharedConfig {
   requiredVersion?: string;
   eager?: boolean;
   shareScope?: string;
+  shareKey?: string;
   import?: string | false;
+  request?: string;
   allowNodeModulesSuffixMatch?: boolean;
   treeShaking?: TreeShakingConfig;
 }
@@ -94,6 +96,29 @@ new ModuleFederationPlugin({
 
 共享依赖作用域，默认值为 `'default'` 。
 
+## shareKey
+
+- 类型：`string`
+- 是否必填：否
+- 默认值：`shared` 配置的属性名（`key`）
+
+共享模块在 shared scope 中的协商 key。Provider 发布模块和 Consumer 匹配模块时都通过该 key 进行查找，**两端必须一致才能协商成功**，否则双方各自打包一份依赖。
+
+默认值为 `shared` 配置的属性名，大多数场景无需手动设置。典型的自定义场景是通过 `import` 将属性名映射到不同的实际包：
+
+```ts
+shared: {
+  'my-alias': {
+    import: 'react',     // 实际 resolve 的包
+    shareKey: 'react',   // shared scope 里用 "react" 协商，与其他应用对齐
+  },
+}
+```
+
+:::warning 注意
+不设置 `shareKey` 时，协商 key 就是属性名本身（此例为 `"my-alias"`）。若对端用 `"react"` 注册，则无法匹配。
+:::
+
 ## import
 
 - 类型：`string | false`
@@ -103,6 +128,32 @@ new ModuleFederationPlugin({
 共享依赖的导入路径，默认值为 `undefined` 。
 
 若设置为 `false` ，则不会将此 shared 打包到产物中，仅使用消费者提供的 `shared`。 因此设置前请确认消费者已提供对应 `shared`。
+
+## request
+
+- 类型：`string`
+- 是否必填：否
+- 默认值：`shared` 配置的属性名（`key`）
+
+构建时需要拦截的模块请求路径。当代码中出现匹配该值的 `import` 时，构建器会将其替换为消费 shared scope 的模块，而不是打包进产物。
+
+默认值与属性名相同，大多数场景无需设置。`request` 与 `shareKey` 的区别：
+
+| 字段 | 作用层面 | 回答的问题 |
+|---|---|---|
+| `request` | 构建时 · 模块图 | 拦截哪个 `import` |
+| `shareKey` | 运行时 · 协商 | 去 shared scope 的哪个槽取模块 |
+
+前缀匹配场景下两者会配合使用：
+
+```ts
+shared: {
+  'lodash/': {
+    request: 'lodash/',    // 拦截所有 import 'lodash/*'
+    shareKey: 'lodash/',   // 最终协商 key = "lodash/" + 子路径后缀
+  },
+}
+```
 
 ## allowNodeModulesSuffixMatch
 

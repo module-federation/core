@@ -719,7 +719,8 @@ export default {
       minLength: 1,
     },
     treeShakingSharedExcludePlugins: {
-      description: 'List of plugins to exclude from tree-shake analysis.',
+      description:
+        'Plugin names to exclude from independent shared compilation (will be filtered out by name).',
       type: 'array',
       items: {
         type: 'string',
@@ -727,7 +728,8 @@ export default {
       },
     },
     treeShakingSharedPlugins: {
-      description: 'List of plugins to exclude from tree-shake analysis.',
+      description:
+        'List of plugin module paths to apply when building independent shared fallbacks.',
       type: 'array',
       items: {
         type: 'string',
@@ -783,7 +785,8 @@ export default {
       ],
     },
     shareStrategy: {
-      description: 'Strategy for resolving shared modules',
+      description:
+        "Strategy for resolving shared modules (defaults to 'version-first').",
       enum: ['version-first', 'loaded-first'],
       type: 'string',
     },
@@ -969,9 +972,13 @@ export default {
           type: 'boolean',
         },
         externalRuntime: {
+          description:
+            "Externalize '@module-federation/runtime-core' and expect global '_FEDERATION_RUNTIME_CORE' at runtime.",
           type: 'boolean',
         },
         provideExternalRuntime: {
+          description:
+            "Provide external runtime injection for pure consumer builds (no `exposes`). When enabled, automatically adds '@module-federation/inject-external-runtime-core-plugin'. Throws error if used together with exposes.",
           type: 'boolean',
         },
         optimization: {
@@ -1100,7 +1107,8 @@ export default {
       },
     },
     getPublicPath: {
-      description: 'Custom public path function for remote entry',
+      description:
+        "Stringified function or return expression to compute dynamic publicPath. Effective only when 'exposes' is set. Example: `function(){ return window.cdn_prefix }` or `return 'https://cdn.example.com/app/'`.",
       type: 'string',
     },
     dataPrefetch: {

@@ -1,62 +1,148 @@
+import type { Stats } from '../stats';
 import type webpack from 'webpack';
-import { Stats } from '../stats';
-/**
- * Modules that should be exposed by this container. When provided, property name is used as public name, otherwise public name is automatically inferred from request.
- */
-export type Exposes = (ExposesItem | ExposesObject)[] | ExposesObject;
+
+// <-- BEGIN SCHEMA-GENERATED TYPES -->
 /**
  * Module that should be exposed by this container.
  */
 export type ExposesItem = string;
+
 /**
  * Modules that should be exposed by this container.
  */
 export type ExposesItems = ExposesItem[];
+
+/**
+ * Modules that should be exposed by this container. Property names are used as public paths.
+ */
+export interface ExposesObject {
+  [k: string]: ExposesConfig | ExposesItem | ExposesItems;
+}
+
+/**
+ * Advanced configuration for modules that should be exposed by this container.
+ */
+export interface ExposesConfig {
+  /**
+   * Request to a module that should be exposed by this container.
+   */
+  import: ExposesItem | ExposesItems;
+  /**
+   * Custom chunk name for the exposed module.
+   */
+  name?: string;
+  /**
+   * Layer in which the exposed module should be placed.
+   */
+  layer?: string;
+}
+
+/**
+ * Modules that should be exposed by this container. When provided, property name is used as public name, otherwise public name is automatically inferred from request.
+ */
+export type Exposes = (ExposesItem | ExposesObject)[] | ExposesObject;
+
 /**
  * Add a container for define/require functions in the AMD module.
  */
 export type AmdContainer = string;
+
 /**
  * Add a comment in the UMD wrapper.
  */
 export type AuxiliaryComment = string | LibraryCustomUmdCommentObject;
+
+/**
+ * Set explicit comments for `commonjs`, `commonjs2`, `amd`, and `root`.
+ */
+export interface LibraryCustomUmdCommentObject {
+  /**
+   * Set comment for `amd` section in UMD.
+   */
+  amd?: string;
+  /**
+   * Set comment for `commonjs` (exports) section in UMD.
+   */
+  commonjs?: string;
+  /**
+   * Set comment for `commonjs2` (module.exports) section in UMD.
+   */
+  commonjs2?: string;
+  /**
+   * Set comment for `root` (global variable) section in UMD.
+   */
+  root?: string;
+}
+
+/**
+ * Description object for all UMD variants of the library name.
+ */
+export interface LibraryCustomUmdObject {
+  /**
+   * Name of the exposed AMD library in the UMD.
+   */
+  amd?: string;
+  /**
+   * Name of the exposed commonjs export in the UMD.
+   */
+  commonjs?: string;
+  /**
+   * Name of the property exposed globally by a UMD library.
+   */
+  root?: string[] | string;
+}
+
 /**
  * Specify which export should be exposed as library.
  */
 export type LibraryExport = string[] | string;
+
 /**
  * The name of the library (some types allow unnamed libraries too).
  */
 export type LibraryName = string[] | string | LibraryCustomUmdObject;
+
 /**
  * Type of library (types included by default are 'var', 'module', 'assign', 'assign-properties', 'this', 'window', 'self', 'global', 'commonjs', 'commonjs2', 'commonjs-module', 'commonjs-static', 'amd', 'amd-require', 'umd', 'umd2', 'jsonp', 'system', but others might be added by plugins).
  */
 export type LibraryType =
-  | (
-      | 'var'
-      | 'module'
-      | 'assign'
-      | 'assign-properties'
-      | 'this'
-      | 'window'
-      | 'self'
-      | 'global'
-      | 'commonjs'
-      | 'commonjs2'
-      | 'commonjs-module'
-      | 'commonjs-static'
-      | 'amd'
-      | 'amd-require'
-      | 'umd'
-      | 'umd2'
-      | 'jsonp'
-      | 'system'
-    )
+  | 'var'
+  | 'module'
+  | 'assign'
+  | 'assign-properties'
+  | 'this'
+  | 'window'
+  | 'self'
+  | 'global'
+  | 'commonjs'
+  | 'commonjs2'
+  | 'commonjs-module'
+  | 'commonjs-static'
+  | 'amd'
+  | 'amd-require'
+  | 'umd'
+  | 'umd2'
+  | 'jsonp'
+  | 'system'
   | string;
+
+/**
+ * Options for library.
+ */
+export interface LibraryOptions {
+  amdContainer?: AmdContainer;
+  auxiliaryComment?: AuxiliaryComment;
+  export?: LibraryExport;
+  name?: LibraryName;
+  type: LibraryType;
+  umdNamedDefine?: UmdNamedDefine;
+}
+
 /**
  * If `output.libraryTarget` is set to umd and `output.library` is set, setting this to true will name the AMD module.
  */
 export type UmdNamedDefine = boolean;
+
 /**
  * Specifies the default type of externals ('amd*', 'umd*', 'system' and 'jsonp' depend on output.libraryTarget set to the same value).
  */
@@ -80,37 +166,176 @@ export type ExternalsType =
   | 'system'
   | 'promise'
   | 'import'
-  | 'script'
   | 'module-import'
+  | 'script'
   | 'node-commonjs';
-/**
- * Container locations and request scopes from which modules should be resolved and loaded at runtime. When provided, property name is used as request scope, otherwise request scope is automatically inferred from container location.
- */
-export type Remotes = (RemotesItem | RemotesObject)[] | RemotesObject;
+
 /**
  * Container location from which modules should be resolved and loaded at runtime.
  */
 export type RemotesItem = string;
+
 /**
  * Container locations from which modules should be resolved and loaded at runtime.
  */
 export type RemotesItems = RemotesItem[];
+
+/**
+ * Container locations from which modules should be resolved and loaded at runtime. Property names are used as request scopes.
+ */
+export interface RemotesObject {
+  [k: string]: RemotesConfig | RemotesItem | RemotesItems;
+}
+
+/**
+ * Advanced configuration for container locations from which modules should be resolved and loaded at runtime.
+ */
+export interface RemotesConfig {
+  /**
+   * Container locations from which modules should be resolved and loaded at runtime.
+   */
+  external: RemotesItem | RemotesItems;
+  /**
+   * The name of the share scope shared with this remote.
+   */
+  shareScope?: string | string[];
+}
+
+/**
+ * Container locations and request scopes from which modules should be resolved and loaded at runtime. When provided, property name is used as request scope, otherwise request scope is automatically inferred from container location.
+ */
+export type Remotes = (RemotesItem | RemotesObject)[] | RemotesObject;
+
 /**
  * The name of the runtime chunk. If set a runtime chunk with this name is created or an existing entrypoint is used as runtime.
  */
 export type EntryRuntime = false | string;
-/**
- * Modules that should be shared in the share scope. When provided, property names are used to match requested modules in this compilation.
- */
-export type Shared = (SharedItem | SharedObject)[] | SharedObject;
+
 /**
  * A module that should be shared in the share scope.
  */
 export type SharedItem = string;
+
 /**
- * Enable Data Prefetch
+ * Modules that should be shared in the share scope. Property names are used to match requested modules in this compilation. Relative requests are resolved, module requests are matched unresolved, absolute paths will match resolved requests. A trailing slash will match all requests with this prefix. In this case shareKey must also have a trailing slash.
  */
-export type DataPrefetch = boolean;
+export interface SharedObject {
+  [k: string]: SharedConfig | SharedItem;
+}
+
+/**
+ * Advanced configuration for modules that should be shared in the share scope.
+ */
+export interface SharedConfig {
+  /**
+   * Include the provided and fallback module directly instead behind an async request. This allows to use this shared module in initial load too. All possible shared modules need to be eager too.
+   */
+  eager?: boolean;
+  /**
+   * Options for excluding specific versions or request paths of the shared module. When specified, matching modules will not be shared. Cannot be used with 'include'.
+   */
+  exclude?: IncludeExcludeOptions;
+  /**
+   * Options for including only specific versions or request paths of the shared module. When specified, only matching modules will be shared. Cannot be used with 'exclude'.
+   */
+  include?: IncludeExcludeOptions;
+  /**
+   * Provided module that should be provided to share scope. Also acts as fallback module if no shared module is found in share scope or version isn't valid. Defaults to the property name.
+   */
+  import?: false | SharedItem;
+  /**
+   * Import request to match on
+   */
+  request?: string;
+  /**
+   * Layer in which the shared module should be placed.
+   */
+  layer?: string;
+  /**
+   * Layer of the issuer.
+   */
+  issuerLayer?: string;
+  /**
+   * Package name to determine required version from description file. This is only needed when package name can't be automatically determined from request.
+   */
+  packageName?: string;
+  /**
+   * Version requirement from module in share scope.
+   */
+  requiredVersion?: false | string;
+  /**
+   * Module is looked up under this key from the share scope.
+   */
+  shareKey?: string;
+  /**
+   * Share scope name.
+   */
+  shareScope?: string | string[];
+  /**
+   * [Deprecated]: load shared strategy(defaults to 'version-first').
+   */
+  shareStrategy?: 'version-first' | 'loaded-first';
+  /**
+   * Allow only a single version of the shared module in share scope (disabled by default).
+   */
+  singleton?: boolean;
+  /**
+   * Do not accept shared module if version is not valid (defaults to yes, if local fallback module is available and shared module is not a singleton, otherwise no, has no effect if there is no required version specified).
+   */
+  strictVersion?: boolean;
+  /**
+   * Version of the provided module. Will replace lower matching versions, but not higher.
+   */
+  version?: false | string;
+  /**
+   * Enable reconstructed lookup for node_modules paths for this share item
+   */
+  allowNodeModulesSuffixMatch?: boolean;
+  /**
+   * Enable tree-shaking for the shared module or configure it.
+   */
+  treeShaking?: boolean | TreeShakingConfig;
+}
+
+/**
+ * Modules that should be shared in the share scope. When provided, property names are used to match requested modules in this compilation.
+ */
+export type Shared = (SharedItem | SharedObject)[] | SharedObject;
+
+export interface IncludeExcludeOptions {
+  /**
+   * A string (which can be a regex pattern) or a RegExp object to match the request path.
+   */
+  request?: string | RegExp;
+  /**
+   * Semantic versioning range to match against the module's version.
+   */
+  version?: string;
+  /**
+   * Semantic versioning range to match against the fallback module's version for exclusion/inclusion context where applicable.
+   */
+  fallbackVersion?: string;
+}
+
+/**
+ * Tree-shake configuration for shared module.
+ */
+export interface TreeShakingConfig {
+  /**
+   * List of export names used from the shared module.
+   */
+  usedExports?: string[];
+  /**
+   * Tree-shake analysis mode.
+   */
+  mode?: 'server-calc' | 'runtime-infer';
+  /**
+   * Filename for generated treeShaking metadata.
+   */
+  filename?: string;
+}
+
+// <-- END SCHEMA-GENERATED TYPES -->
 
 export interface AdditionalDataOptions {
   stats: Stats;
@@ -162,6 +387,8 @@ export interface DtsRemoteOptions {
   tsConfigPath?: string;
   typesFolder?: string;
   compiledTypesFolder?: string;
+  /** Custom base output directory for generated types. When set, types will be emitted to this directory instead of the default compiler output directory. */
+  outputDir?: string;
   deleteTypesFolder?: boolean;
   additionalFilesToCompile?: string[];
   compileInChildProcess?: boolean;
@@ -249,7 +476,6 @@ export interface ModuleFederationPluginOptions {
   manifest?: boolean | PluginManifestOptions;
   dev?: boolean | PluginDevOptions;
   dts?: boolean | PluginDtsOptions;
-  dataPrefetch?: DataPrefetch;
   virtualRuntimeEntry?: boolean;
   experiments?: {
     externalRuntime?: boolean;
@@ -309,182 +535,5 @@ export interface ModuleFederationPluginOptions {
   treeShakingSharedExcludePlugins?: string[];
   treeShakingSharedPlugins?: string[];
 }
-/**
- * Modules that should be exposed by this container. Property names are used as public paths.
- */
-export interface ExposesObject {
-  /**
-   * Modules that should be exposed by this container.
-   */
-  [k: string]: ExposesConfig | ExposesItem | ExposesItems;
-}
-/**
- * Advanced configuration for modules that should be exposed by this container.
- */
-export interface ExposesConfig {
-  /**
-   * Request to a module that should be exposed by this container.
-   */
-  import: ExposesItem | ExposesItems;
-  /**
-   * Custom chunk name for the exposed module.
-   */
-  name?: string;
-  /**
-   * Layer in which the exposed module should be placed.
-   */
-  layer?: string;
-}
-/**
- * Options for library.
- */
-export interface LibraryOptions {
-  /**
-   * Add a container for define/require functions in the AMD module.
-   */
-  amdContainer?: AmdContainer;
-  /**
-   * Add a comment in the UMD wrapper.
-   */
-  auxiliaryComment?: AuxiliaryComment;
-  /**
-   * Specify which export should be exposed as library.
-   */
-  export?: LibraryExport;
-  /**
-   * The name of the library (some types allow unnamed libraries too).
-   */
-  name?: LibraryName;
-  /**
-   * Type of library (types included by default are 'var', 'module', 'assign', 'assign-properties', 'this', 'window', 'self', 'global', 'commonjs', 'commonjs2', 'commonjs-module', 'commonjs-static', 'amd', 'amd-require', 'umd', 'umd2', 'jsonp', 'system', but others might be added by plugins).
-   */
-  type: LibraryType;
-  /**
-   * If `output.libraryTarget` is set to umd and `output.library` is set, setting this to true will name the AMD module.
-   */
-  umdNamedDefine?: UmdNamedDefine;
-}
-/**
- * Set explicit comments for `commonjs`, `commonjs2`, `amd`, and `root`.
- */
-export interface LibraryCustomUmdCommentObject {
-  /**
-   * Set comment for `amd` section in UMD.
-   */
-  amd?: string;
-  /**
-   * Set comment for `commonjs` (exports) section in UMD.
-   */
-  commonjs?: string;
-  /**
-   * Set comment for `commonjs2` (module.exports) section in UMD.
-   */
-  commonjs2?: string;
-  /**
-   * Set comment for `root` (global variable) section in UMD.
-   */
-  root?: string;
-}
-/**
- * Description object for all UMD variants of the library name.
- */
-export interface LibraryCustomUmdObject {
-  /**
-   * Name of the exposed AMD library in the UMD.
-   */
-  amd?: string;
-  /**
-   * Name of the exposed commonjs export in the UMD.
-   */
-  commonjs?: string;
-  /**
-   * Name of the property exposed globally by a UMD library.
-   */
-  root?: string[] | string;
-}
-/**
- * Container locations from which modules should be resolved and loaded at runtime. Property names are used as request scopes.
- */
-export interface RemotesObject {
-  /**
-   * Container locations from which modules should be resolved and loaded at runtime.
-   */
-  [k: string]: RemotesConfig | RemotesItem | RemotesItems;
-}
-/**
- * Advanced configuration for container locations from which modules should be resolved and loaded at runtime.
- */
-export interface RemotesConfig {
-  /**
-   * Container locations from which modules should be resolved and loaded at runtime.
-   */
-  external: RemotesItem | RemotesItems;
-  /**
-   * The name of the share scope shared with this remote.
-   */
-  shareScope?: string | string[];
-}
-/**
- * Modules that should be shared in the share scope. Property names are used to match requested modules in this compilation. Relative requests are resolved, module requests are matched unresolved, absolute paths will match resolved requests. A trailing slash will match all requests with this prefix. In this case shareKey must also have a trailing slash.
- */
-export interface SharedObject {
-  /**
-   * Modules that should be shared in the share scope.
-   */
-  [k: string]: SharedConfig | SharedItem;
-}
 
 export type SharedStrategy = 'version-first' | 'loaded-first';
-
-export type TreeShakingConfig = {
-  usedExports?: string[];
-  mode?: 'server-calc' | 'runtime-infer';
-  filename?: string;
-};
-
-/**
- * Advanced configuration for modules that should be shared in the share scope.
- */
-export interface SharedConfig {
-  /**
-   * Include the provided and fallback module directly instead behind an async request. This allows to use this shared module in initial load too. All possible shared modules need to be eager too.
-   */
-  eager?: boolean;
-  /**
-   * Provided module that should be provided to share scope. Also acts as fallback module if no shared module is found in share scope or version isn't valid. Defaults to the property name.
-   */
-  import?: false | SharedItem;
-  /**
-   * Package name to determine required version from description file. This is only needed when package name can't be automatically determined from request.
-   */
-  packageName?: string;
-  /**
-   * Version requirement from module in share scope.
-   */
-  requiredVersion?: false | string;
-  /**
-   * Module is looked up under this key from the share scope.
-   */
-  shareKey?: string;
-  /**
-   * Share scope name.
-   */
-  shareScope?: string | string[];
-  /**
-   * load shared strategy(defaults to 'version-first').
-   */
-  shareStrategy?: SharedStrategy;
-  /**
-   * Allow only a single version of the shared module in share scope (disabled by default).
-   */
-  singleton?: boolean;
-  /**
-   * Do not accept shared module if version is not valid (defaults to yes, if local fallback module is available and shared module is not a singleton, otherwise no, has no effect if there is no required version specified).
-   */
-  strictVersion?: boolean;
-  /**
-   * Version of the provided module. Will replace lower matching versions, but not higher.
-   */
-  version?: false | string;
-  treeShaking?: TreeShakingConfig;
-}
