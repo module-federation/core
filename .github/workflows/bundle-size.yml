@@ -3,6 +3,8 @@ name: Bundle Size
 on:
   pull_request:
     branches: [main]
+    paths-ignore:
+      - 'apps/website-new/docs/**'
   workflow_call:
 
 permissions:

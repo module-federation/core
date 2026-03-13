@@ -1,6 +1,6 @@
 # treeShakingSharedPlugins
 
-Allows users to explicitly specify which plugins should participate in the second tree-shaking pass for shared modules.
+A list of plugin module paths used when building independent shared fallbacks. During the secondary tree-shaking build, each item will be `require(p)`-loaded and instantiated to participate in compilation.
 
 - Type: `string[]`
 - Required: No

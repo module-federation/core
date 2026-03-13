@@ -430,6 +430,14 @@ function registerPlugins(plugins: ModuleFederationRuntimePlugin[]) {}
 
 ## registerShared
 
+### 详情
+
+- shared: `{ [pkgName]: ShareArgs | ShareArgs[] }`
+- ShareArgs 参数：
+  - lib: `() => Module` 同步工厂函数；不应返回 Promise。
+  - get: `() => () => Module` 或 `() => Promise<() => Module>`，用于懒加载/异步加载。
+- 其他：scope、shareConfig、deps 可选；version 建议填写以便版本区分。
+
 <Collapse>
 
 ```typescript
@@ -488,6 +496,11 @@ type SharedGetter = (() => () => Module) | (() => Promise<() => Module>);
                 singleton: true,
                 requiredVersion: "^18.0.0"
             }
+        },
+        'antd': {
+          version: '1.0.0',
+          scope: 'default',
+          get: () => import('antd').then((m) => () => m),
         }
     });
   ```
@@ -526,6 +539,11 @@ type SharedGetter = (() => () => Module) | (() => Promise<() => Module>);
                 singleton: true,
                 requiredVersion: "^18.0.0"
             }
+        },
+        'antd': {
+          version: '1.0.0',
+          scope: 'default',
+          get: () => import('antd').then((m) => () => m),
         }
     });
   ```
