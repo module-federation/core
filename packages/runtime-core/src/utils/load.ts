@@ -141,16 +141,31 @@ async function loadEntryScript({
 
       return;
     },
-  })
-    .then(() => {
+  }).then(
+    () => {
+      // loadScript resolved: script was fetched, executed without throwing, and
+      // did not trigger a ScriptExecutionError listener. Now verify the global was registered.
       return handleRemoteEntryLoaded(name, globalName, entry);
-    })
-    .catch(() => {
-      error(RUNTIME_008, runtimeDescMap, {
-        remoteName: name,
-        resourceUrl: entry,
-      });
-    });
+    },
+    (loadError: unknown) => {
+      // loadScript rejected — one of three causes, all with descriptive messages:
+      //   ScriptNetworkError  — URL unreachable, 404, CORS, etc.
+      //   ScriptExecutionError — script fetched OK but IIFE threw during execution
+      //   timeout             — script took too long to load
+      // Errors thrown inside handleRemoteEntryLoaded above are NOT caught here.
+      const originalMsg =
+        loadError instanceof Error ? loadError.message : String(loadError);
+      error(
+        RUNTIME_008,
+        runtimeDescMap,
+        {
+          remoteName: name,
+          resourceUrl: url,
+        },
+        originalMsg,
+      );
+    },
+  );
 }
 async function loadEntryDom({
   remoteInfo,
@@ -280,8 +295,14 @@ export async function getRemoteEntry(params: {
       })
       .catch(async (err) => {
         const uniqueKey = getRemoteEntryUniqueKey(remoteInfo);
+        // ScriptExecutionError means the script downloaded fine but its IIFE
+        // threw at runtime — retrying would reproduce the same error, so exclude it.
+        const isScriptExecutionError =
+          err instanceof Error && err.message.includes('ScriptExecutionError');
         const isScriptLoadError =
-          err instanceof Error && err.message.includes(RUNTIME_008);
+          err instanceof Error &&
+          err.message.includes(RUNTIME_008) &&
+          !isScriptExecutionError;
 
         if (isScriptLoadError && !_inErrorHandling) {
           const wrappedGetRemoteEntry = (
