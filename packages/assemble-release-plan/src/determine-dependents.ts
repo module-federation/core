@@ -230,7 +230,8 @@ function shouldBumpMajor({
   preInfo: PreInfo | undefined;
   onlyUpdatePeerDependentsWhenOutOfRange: boolean;
 }) {
-  //disable major bump due to peer dep
+  // This fork intentionally never escalates peer dependency changes into
+  // major dependent releases. Preserve that lock even when refactoring.
   if (depType === 'peerDependencies') {
     return false;
   }

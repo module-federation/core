@@ -1,4 +1,5 @@
-import type { SharePluginOptions } from '../declarations/plugins/sharing/SharePlugin';
+import type { sharePlugin } from '@module-federation/sdk';
+type SharePluginOptions = sharePlugin.SharePluginOptions;
 import BaseWrapperPlugin from './BaseWrapperPlugin';
 
 const PLUGIN_NAME = 'SharePlugin';

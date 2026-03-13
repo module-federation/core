@@ -11,10 +11,6 @@ import { NormalizedSharedOptions } from './types';
 import { BasicPluginOptionsManager } from './BasicPluginOptionsManager';
 import { parseOptions } from './utils';
 
-type SharePluginOptions = ConstructorParameters<
-  typeof sharePlugin.SharePlugin
->[0];
-
 class SharedManager extends BasicPluginOptionsManager<moduleFederationPlugin.ModuleFederationPluginOptions> {
   normalizedOptions: NormalizedSharedOptions = {};
 
@@ -22,7 +18,7 @@ class SharedManager extends BasicPluginOptionsManager<moduleFederationPlugin.Mod
     return Boolean(Object.keys(this.sharedPluginOptions.shared).length);
   }
 
-  get sharedPluginOptions(): SharePluginOptions {
+  get sharedPluginOptions(): sharePlugin.SharePluginOptions {
     const normalizedShared = this.normalizedOptions;
     const shared = Object.keys(normalizedShared).reduce((sum, cur) => {
       const {

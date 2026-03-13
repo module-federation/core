@@ -7,8 +7,7 @@ const StartupChunkDependenciesPlugin = require(
 import ChunkLoadingRuntimeModule from './DynamicFilesystemChunkLoadingRuntimeModule';
 import AutoPublicPathRuntimeModule from './RemotePublicPathRuntimeModule';
 
-interface DynamicFilesystemChunkLoadingOptions
-  extends ModuleFederationPluginOptions {
+interface DynamicFilesystemChunkLoadingOptions extends ModuleFederationPluginOptions {
   baseURI: Compiler['options']['output']['publicPath'];
   promiseBaseURI?: string;
   remotes: Record<string, string>;

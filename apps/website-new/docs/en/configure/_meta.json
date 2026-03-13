@@ -7,17 +7,27 @@
   {
     "type": "file",
     "name": "name",
-    "label": "Name"
+    "label": "name"
   },
   {
     "type": "file",
     "name": "filename",
-    "label": "Filename"
+    "label": "filename"
+  },
+  {
+    "type": "file",
+    "name": "library",
+    "label": "library"
   },
   {
     "type": "file",
     "name": "remotes",
-    "label": "Remotes"
+    "label": "remotes"
+  },
+  {
+    "type": "file",
+    "name": "remotetype",
+    "label": "remoteType"
   },
   {
     "type": "file",
@@ -27,12 +37,12 @@
   {
     "type": "file",
     "name": "exposes",
-    "label": "Exposes"
+    "label": "exposes"
   },
   {
     "type": "file",
     "name": "shared",
-    "label": "Shared"
+    "label": "shared"
   },
   {
     "type": "file",
@@ -42,27 +52,27 @@
   {
     "type": "file",
     "name": "getpublicpath",
-    "label": "Get Public Path"
+    "label": "getPublicPath"
   },
   {
     "type": "file",
     "name": "implementation",
-    "label": "Implementation"
+    "label": "implementation"
   },
   {
     "type": "file",
     "name": "dts",
-    "label": "DTS"
+    "label": "dts"
   },
   {
     "type": "file",
     "name": "dev",
-    "label": "Dev"
+    "label": "dev"
   },
   {
     "type": "file",
     "name": "manifest",
-    "label": "Manifest"
+    "label": "manifest"
   },
   {
     "type": "file",
@@ -74,7 +84,7 @@
     "name": "experiments",
     "label": "experiments"
   },
-   {
+  {
     "type": "file",
     "name": "injectTreeShakingUsedExports",
     "label": "injectTreeShakingUsedExports"
