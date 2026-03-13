@@ -28,15 +28,67 @@ type CacheGroups = NonUndefined<NonFalseSplitChunks['cacheGroups']>;
 type CacheGroup = CacheGroups[string];
 
 declare const __VERSION__: string;
-declare global {
-  namespace NodeJS {
-    interface ProcessEnv {
-      IS_ESM_BUILD?: string;
+export const PLUGIN_NAME = 'RspackModuleFederationPlugin';
+
+type ResolveFn = typeof require.resolve;
+type RuntimeEntrySpec = {
+  bundler: string;
+  esm: string;
+  cjs: string;
+};
+
+function resolveRuntimeEntry(
+  spec: RuntimeEntrySpec,
+  implementation: string | undefined,
+  resolve: ResolveFn = require.resolve,
+) {
+  const candidates = [spec.bundler, spec.esm, spec.cjs];
+  const modulePaths = implementation ? [implementation] : undefined;
+  let lastError: unknown;
+
+  for (const candidate of candidates) {
+    try {
+      return modulePaths
+        ? resolve(candidate, { paths: modulePaths })
+        : resolve(candidate);
+    } catch (error) {
+      lastError = error;
     }
   }
+
+  throw lastError;
 }
 
-export const PLUGIN_NAME = 'RspackModuleFederationPlugin';
+export function resolveRspackRuntimeImplementation(
+  implementation?: string,
+  resolve: ResolveFn = require.resolve,
+) {
+  return resolveRuntimeEntry(
+    {
+      bundler: '@module-federation/runtime-tools/bundler',
+      esm: '@module-federation/runtime-tools/dist/index.js',
+      cjs: '@module-federation/runtime-tools/dist/index.cjs',
+    },
+    implementation,
+    resolve,
+  );
+}
+
+export function resolveRspackRuntimeAlias(
+  implementation: string,
+  resolve: ResolveFn = require.resolve,
+) {
+  return resolveRuntimeEntry(
+    {
+      bundler: '@module-federation/runtime/bundler',
+      esm: '@module-federation/runtime/dist/index.js',
+      cjs: '@module-federation/runtime/dist/index.cjs',
+    },
+    implementation,
+    resolve,
+  );
+}
+
 export class ModuleFederationPlugin implements RspackPluginInstance {
   readonly name = PLUGIN_NAME;
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -132,9 +184,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
 
       const runtimePlugins = options.runtimePlugins || [];
       options.runtimePlugins = runtimePlugins.concat(
-        require.resolve(
-          '@module-federation/inject-external-runtime-core-plugin',
-        ),
+        require.resolve('@module-federation/inject-external-runtime-core-plugin'),
       );
     }
 
@@ -145,12 +195,9 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       }).apply(compiler);
     }
 
-    const runtimeToolsSpecifier =
-      process.env.IS_ESM_BUILD === 'true'
-        ? '@module-federation/runtime-tools/dist/index.js'
-        : '@module-federation/runtime-tools/dist/index.cjs';
-    const implementationPath =
-      options.implementation || require.resolve(runtimeToolsSpecifier);
+    const implementationPath = options.implementation
+      ? options.implementation
+      : resolveRspackRuntimeImplementation();
     options.implementation = implementationPath;
     let disableManifest = options.manifest === false;
     let disableDts = options.dts === false;
@@ -177,19 +224,13 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       options as unknown as ModuleFederationPluginOptions,
     ).apply(compiler);
 
-    const runtimeEntrySpecifier =
-      process.env.IS_ESM_BUILD === 'true'
-        ? '@module-federation/runtime/dist/index.js'
-        : '@module-federation/runtime/dist/index.cjs';
     let runtimePath: string;
     try {
-      runtimePath = require.resolve(runtimeEntrySpecifier, {
-        paths: [implementationPath],
-      });
+      runtimePath = resolveRspackRuntimeAlias(implementationPath);
     } catch (err) {
       const detail = err instanceof Error ? err.message : String(err);
       throw new Error(
-        `[ ModuleFederationPlugin ]: Unable to resolve runtime entry at ${runtimeEntrySpecifier} (paths: [${implementationPath}]): ${detail}`,
+        `[ ModuleFederationPlugin ]: Unable to resolve runtime entry (paths: [${implementationPath}]): ${detail}`,
       );
     }
 

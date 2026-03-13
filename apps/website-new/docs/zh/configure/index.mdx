@@ -4,10 +4,12 @@
 
 ```ts
 type ModuleFederationOptions {
-    // module federation name
+    // module federation name（必填）
     name: string;
     // 当前应用（host/remote）参与的共享池（默认 default）
     shareScope?: string | string[];
+    // 共享依赖加载策略（默认 'version-first'）
+    shareStrategy?: 'version-first' | 'loaded-first';
     // remoteEntry 名称
     filename?: string,
     // module federation remotes 远程模块别名和 entry 信息
@@ -16,10 +18,10 @@ type ModuleFederationOptions {
     exposes?: PluginExposesOptions;
     // 共享依赖配置
     shared?: ShareInfos;
-    // 动态 publicPath
+    // 动态 publicPath（仅当设置了 exposes 时生效）
     getPublicPath?: string;
-    // 运行时插件
-    runtimePlugins?: Array<string>;
+    // 运行时插件（支持元组 [path, params]）
+    runtimePlugins?: (string | [string, Record<string, unknown>])[];
     // runtime pkg 依赖
     implementation?: string;
     // manifest 配置
@@ -28,9 +30,22 @@ type ModuleFederationOptions {
     dev?: boolean | PluginDevOptions;
     // 控制类型生成
     dts?: boolean | PluginDtsOptions;
+    // 运行时入口使用虚拟模块（data:URI）
+    virtualRuntimeEntry?: boolean;
+    // 实验特性
+    experiments?: {
+      asyncStartup?: boolean;
+      externalRuntime?: boolean;
+      provideExternalRuntime?: boolean;
+      optimization?: {
+        disableSnapshot?: boolean;
+        target?: 'web' | 'node';
+      };
+    };
+    // Tree-shaking 相关
     injectTreeShakingUsedExports?: boolean;
     treeShakingDir?: string;
-    treeShakingSharedPlugins?: Array<string>;
-    treeShakingSharedExcludePlugins?: Array<string>;
+    treeShakingSharedPlugins?: string[];
+    treeShakingSharedExcludePlugins?: string[];
 };
 ```

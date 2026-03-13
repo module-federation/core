@@ -1,0 +1,4 @@
+interface:
+  display_name: 'GH PR Metadata'
+  short_description: 'Normalize PR title and body'
+  default_prompt: "Use $gh-pr-metadata to update this repo's PR title and body to match the template and conventional-commit style."

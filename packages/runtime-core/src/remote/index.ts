@@ -1,5 +1,5 @@
 import {
-  isBrowserEnv,
+  isBrowserEnvValue,
   warn,
   composeKeyWithSeparator,
   ModuleInfo,
@@ -450,7 +450,8 @@ export class RemoteHandler {
           );
         }
         if (
-          isBrowserEnv() &&
+          isBrowserEnvValue &&
+          typeof window !== 'undefined' &&
           !preserveImportMapEntry &&
           !remote.entry.startsWith('http')
         ) {
@@ -623,7 +624,9 @@ export class RemoteHandler {
         host.moduleCache.delete(remote.name);
       }
     } catch (err) {
-      logger.log('removeRemote fail: ', err);
+      logger.error(
+        `removeRemote failed: ${err instanceof Error ? err.message : String(err)}`,
+      );
     }
   }
 }

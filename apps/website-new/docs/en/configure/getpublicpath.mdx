@@ -1,20 +1,23 @@
-# GetPublicPath
+# getPublicPath
 
 - Type: `string`
 - Required: No
 - Default value: `undefined`
-- Purpose: Used to set a dynamic `publicPath`. Once set, the corresponding remote module resources will also use this `publicPath`. For instance, if the deployed project dynamically serves a `cdn_prefix`, `getPublicPath` can be set to `return "https:" + window.navigator.cdn_host + "/resource/app/"`.
+- Effective condition: only effective when `exposes` is set
+- Purpose: Used to set a dynamic `publicPath`. The value must be a stringified function or a stringified return expression. When other consumers load this provider, the string in `getPublicPath` will be executed via `new Function` to obtain the return value, which will be used as the `publicPath` prefix for the module’s static assets.
+  - Function form: ``function(){ return window.cdn_prefix }``
+  - Return form: ``return "https:" + window.navigator.cdn_host + "/resource/app/"``
 
 - Example:
 
-In the example below, `getPublicPath` is set. When other consumers load this provider, the code for `getPublicPath` will be executed using `new Function` to obtain the return value. The content of the return value will be used as the `publicPath` prefix for the static resources of the module.
+In the example below, `getPublicPath` is set. When other consumers load this provider, the string in `getPublicPath` will be executed using `new Function` to obtain the value, which will be used as the `publicPath` prefix for the module’s static assets.
 
 :::tip NOTE
-```getPublicPath``` Must be a function as a string.
+`getPublicPath` must be a stringified function or a stringified return expression.
 :::
 
 :::tip NOTE
-If you're using module federation webpack plugin and want to set a dynamic publicPath, you should set `__webpack_public_path__ = window.cdn_prefix` statement in `getPublicPath` function body.
+If you're using the module federation webpack plugin and want to set a dynamic publicPath, you should set `__webpack_public_path__ = window.cdn_prefix` in the `getPublicPath` function body.
 :::
 
 ```ts title="rspack.config.ts"

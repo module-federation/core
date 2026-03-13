@@ -64,13 +64,15 @@ function formatShare(
   } else {
     get = () =>
       Promise.resolve(() => {
-        throw new Error(`Can not get shared '${name}'!`);
+        error(
+          `Cannot get shared "${name}" from "${from}": neither "get" nor "lib" is provided in the share config.`,
+        );
       });
   }
 
   if (shareArgs.shareConfig?.eager && shareArgs.treeShaking?.mode) {
-    throw new Error(
-      'Can not set "eager:true" and "treeShaking" at the same time!',
+    error(
+      `Invalid shared config for "${name}" from "${from}": cannot use both "eager: true" and "treeShaking.mode" simultaneously. Choose one strategy.`,
     );
   }
 

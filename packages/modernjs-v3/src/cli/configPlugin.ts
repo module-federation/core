@@ -106,7 +106,6 @@ export const getMFConfig = async (
   const { createJiti } = require('jiti');
   const jit = createJiti(__filename, {
     interopDefault: true,
-    esmResolve: true,
   });
   const configModule = await jit(mfConfigPath);
 
@@ -410,6 +409,14 @@ export const moduleFederationConfigPlugin = (
       const targetMFConfig = !isWeb ? ssrConfig : csrConfig;
       patchMFConfig(targetMFConfig, !isWeb);
 
+      if (
+        modernjsConfig.source?.enableAsyncEntry !== true &&
+        targetMFConfig.experiments?.asyncStartup !== false
+      ) {
+        targetMFConfig.experiments ||= {};
+        targetMFConfig.experiments.asyncStartup = true;
+      }
+
       patchBundlerConfig({
         chain,
         isServer: !isWeb,
@@ -474,9 +481,8 @@ export const moduleFederationConfigPlugin = (
         resolve: {
           alias: {
             // TODO: deprecated
-            '@modern-js/runtime/mf': require.resolve(
-              '@module-federation/modern-js-v3/runtime',
-            ),
+            '@modern-js/runtime/mf':
+              require.resolve('@module-federation/modern-js-v3/runtime'),
           },
         },
         source: {

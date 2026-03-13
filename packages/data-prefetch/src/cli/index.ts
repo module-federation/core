@@ -17,6 +17,7 @@ import { fileExistsWithCaseSync, fixPrefetchPath } from '../common/node-utils';
 import { getPrefetchId } from '../common/runtime-utils';
 import { SHARED_STRATEGY } from '../constant';
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
@@ -87,6 +88,7 @@ export class PrefetchPlugin implements WebpackPluginInstance {
     if (fs.existsSync(asyncEntryPath)) {
       fs.unlinkSync(asyncEntryPath);
     }
+    // @ts-ignore
     if (!this.options.dataPrefetch) {
       return;
     }
