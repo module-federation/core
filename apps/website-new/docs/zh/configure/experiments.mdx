@@ -24,7 +24,7 @@
 - Required: No
 - Default: `false`
 
-设置 `true` 后 会 external {props.name || 'Module Federation'}  runtime，并使用消费者提供的 runtime 。（请确保你的消费者有设置 `provideExternalRuntime: true`，否则无法正常运行！）
+设置为 `true` 时，将把 `@module-federation/runtime-core` 作为外部依赖处理，并在运行时从全局变量 `_FEDERATION_RUNTIME_CORE` 读取。请确保消费者侧已正确提供该全局变量（通常与 `provideExternalRuntime` 配合使用），否则无法正常运行。
 
 ## provideExternalRuntime
 
@@ -32,11 +32,12 @@
 - Required: No
 - Default: `false`
 
-::: warning 注意
-请确保仅在最顶层消费者配置！若同时有多个消费者注入 runtime，后执行的不会覆盖已有的 runtime。
-:::
+仅用于“纯消费者”（没有设置 `exposes`）的场景。开启后会自动注入 `@module-federation/inject-external-runtime-core-plugin` 以在运行时提供必要的外部 runtime。
 
-设置 `true` 后会在消费者处注入 {props.name || 'Module Federation'}  runtime。
+:::warning 注意
+- 与 `exposes` 同时使用会报错：仅纯消费者可开启。
+- 建议仅在应用最顶层消费者配置，避免多个消费者重复注入。
+:::
 
 
 ## optimization
