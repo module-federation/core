@@ -58,7 +58,7 @@
     "types": "./dist/types/src/App.d.ts"
   },
   "dependencies": {
-    "@modern-js/runtime": "2.70.2",
+    "@modern-js/runtime": "2.70.8",
     "@arco-design/web-react": "2.66.7",
     "@module-federation/sdk": "workspace:*",
     "ahooks": "^3.7.10",
@@ -86,11 +86,11 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "@modern-js-app/eslint-config": "2.59.0",
-    "@modern-js/app-tools": "2.70.2",
+    "@modern-js/app-tools": "2.70.8",
     "@modern-js/eslint-config": "2.59.0",
-    "@modern-js/module-tools": "2.70.2",
-    "@modern-js/storybook": "2.70.2",
-    "@modern-js/tsconfig": "2.70.2",
+    "@modern-js/module-tools": "2.70.8",
+    "@modern-js/storybook": "2.70.8",
+    "@modern-js/tsconfig": "2.70.8",
     "@module-federation/runtime": "workspace:*",
     "@playwright/test": "1.57.0",
     "@types/chrome": "^0.0.272",
@@ -101,6 +101,7 @@
     "@types/react-dom": "^19.2.2",
     "lint-staged": "~13.1.0",
     "prettier": "~3.3.3",
+    "typescript": "5.9.3",
     "rimraf": "~6.0.1",
     "vitest": "1.2.2"
   }
