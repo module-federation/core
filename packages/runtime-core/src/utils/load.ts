@@ -8,7 +8,7 @@ import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { ModuleFederation } from '../core';
 import { globalLoading, getRemoteEntryExports } from '../global';
 import { Remote, RemoteEntryExports, RemoteInfo } from '../type';
-import { error } from './logger';
+import { assert, error } from './logger';
 import {
   RUNTIME_001,
   RUNTIME_008,
@@ -43,7 +43,8 @@ async function loadEsmEntry({
         resolve(remoteEntryExports);
       }
     } catch (e) {
-      reject(e);
+      const msg = e instanceof Error ? e.message : String(e);
+      error(`Failed to load ESM entry from "${entry}". ${msg}`);
     }
   });
 }
@@ -72,7 +73,8 @@ async function loadSystemJsEntry({
         resolve(remoteEntryExports);
       }
     } catch (e) {
-      reject(e);
+      const msg = e instanceof Error ? e.message : String(e);
+      error(`Failed to load SystemJS entry from "${entry}". ${msg}`);
     }
   });
 }
@@ -216,7 +218,10 @@ async function loadEntryNode({
       return handleRemoteEntryLoaded(name, globalName, entry);
     })
     .catch((e) => {
-      throw e;
+      const msg = e instanceof Error ? e.message : String(e);
+      error(
+        `Failed to load Node.js entry for remote "${name}" from "${entry}". ${msg}`,
+      );
     });
 }
 

@@ -3,6 +3,7 @@ import { execSync, spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { basename, dirname, extname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { parseJsonFromTurboOutput } from './turbo-script-utils.mjs';
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(SCRIPT_DIR, '../..');
@@ -133,7 +134,7 @@ function getWorkspacePackageNames() {
 
   let payload;
   try {
-    payload = JSON.parse(extractJsonPayload(result.stdout || ''));
+    payload = parseJsonFromTurboOutput(result.stdout || '');
   } catch (error) {
     throw new Error(
       `[lint-fix] Failed to parse Turbo workspace package output: ${error.message}`,
@@ -150,36 +151,6 @@ function getWorkspacePackageNames() {
   }
 
   return names;
-}
-
-function extractJsonPayload(stdout) {
-  const output = stdout.trim();
-  if (!output) {
-    return '{}';
-  }
-
-  if (output.startsWith('{') || output.startsWith('[')) {
-    return output;
-  }
-
-  const objectStart = output.indexOf('{');
-  const arrayStart = output.indexOf('[');
-  const startCandidates = [objectStart, arrayStart].filter(
-    (index) => index >= 0,
-  );
-  if (startCandidates.length === 0) {
-    return '{}';
-  }
-
-  const start = Math.min(...startCandidates);
-  const objectEnd = output.lastIndexOf('}');
-  const arrayEnd = output.lastIndexOf(']');
-  const end = Math.max(objectEnd, arrayEnd);
-  if (end < start) {
-    return '{}';
-  }
-
-  return output.slice(start, end + 1);
 }
 
 function getWorkspaceItemsFromTurboPayload(payload) {

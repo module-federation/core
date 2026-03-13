@@ -239,8 +239,7 @@ export function generatePreloadAssets(
             cssAssets.push(...handleAssets(assetsInfo.assets.css.sync));
             jsAssets.push(...handleAssets(assetsInfo.assets.js.async));
             jsAssets.push(...handleAssets(assetsInfo.assets.js.sync));
-            // eslint-disable-next-line no-constant-condition
-          } else if ((preloadConfig.resourceCategory = 'sync')) {
+          } else if (preloadConfig.resourceCategory === 'sync') {
             cssAssets.push(...handleAssets(assetsInfo.assets.css.sync));
             jsAssets.push(...handleAssets(assetsInfo.assets.js.sync));
           }
