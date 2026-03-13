@@ -2,7 +2,6 @@
 
 This is the example application for Module Federation core.
 
-
 ## Installation
 
 ```bash
@@ -29,7 +28,7 @@ Clear `.nx` cache if you encounter unexpected build issues.
 
 ---
 
-*Optimized by Aiden*
+_Optimized by Aiden_
 
 ## Scripts
 
