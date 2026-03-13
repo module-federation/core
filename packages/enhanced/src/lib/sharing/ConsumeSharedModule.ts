@@ -24,7 +24,7 @@ import type {
 import ConsumeSharedFallbackDependency from './ConsumeSharedFallbackDependency';
 import { normalizeConsumeShareOptions } from './utils';
 import { WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE } from '../Constants';
-import type { ConsumeOptions } from '../../declarations/plugins/sharing/ConsumeSharedModule';
+import type { ConsumeOptions } from '@module-federation/sdk';
 
 const { rangeToString, stringifyHoley } = require(
   normalizeWebpackPath('webpack/lib/util/semver'),

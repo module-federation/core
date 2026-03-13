@@ -31,6 +31,7 @@ The `DtsRemoteOptions` types are as follows:
 interface DtsRemoteOptions {
   tsConfigPath?: string;
   typesFolder?: string;
+  outputDir?: string;
   deleteTypesFolder?: boolean;
   additionalFilesToCompile?: string[];
   compilerInstance?: 'tsc' | 'vue-tsc';
@@ -108,6 +109,39 @@ Whether to throw an error when a problem is encountered during type generation
 - Default value: `path.join(process.cwd(),'./tsconfig.json')`
 > priority: dts.generateTypes.tsConfigPath > dts.tsConfigPath
 tsconfig configuration file path
+
+#### outputDir
+
+- Type: `string`
+- Required: No
+- Default value: `undefined`
+
+Custom base output directory for generated type assets.
+
+When this option is not set, Module Federation emits `@mf-types.zip` and
+`@mf-types.d.ts` relative to the bundler output directory. If your remote entry
+is emitted to a nested subdirectory such as `production/remoteEntry.js`, set
+`dts.generateTypes.outputDir` to the same nested output directory so the type
+artifacts are emitted alongside the entry file.
+
+This keeps the default inferred type URLs aligned with the remote entry path, so
+consumers usually do not need `remoteTypeUrls` just because the remote entry is
+served from a subdirectory.
+
+```ts title="module-federation.config.ts"
+new ModuleFederationPlugin({
+  filename: 'production/remoteEntry.js',
+  dts: {
+    generateTypes: {
+      outputDir: `dist/react/${process.env.DEPLOY_ENVIRONMENT || 'production'}`,
+    },
+  },
+});
+```
+
+With the config above, the generated files are emitted to
+`dist/react/production/@mf-types.zip` and
+`dist/react/production/@mf-types.d.ts`.
 
 #### typesFolder
 

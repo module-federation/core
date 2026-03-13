@@ -1,4 +1,6 @@
-import type { ConsumeSharedPluginOptions } from '../declarations/plugins/sharing/ConsumeSharedPlugin';
+import type { consumeSharedPlugin } from '@module-federation/sdk';
+type ConsumeSharedPluginOptions =
+  consumeSharedPlugin.ConsumeSharedPluginOptions;
 import BaseWrapperPlugin from './BaseWrapperPlugin';
 
 const PLUGIN_NAME = 'ConsumeSharedPlugin';
