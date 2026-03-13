@@ -1,6 +1,6 @@
 {
   "extends": ["../../.eslintrc.json"],
-  "ignorePatterns": ["!**/*"],
+  "ignorePatterns": ["!**/*", "dist/**/*", "**/*.d.ts"],
   "env": {
     "jest": true
   },
@@ -11,6 +11,7 @@
     {
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
       "rules": {
+        "@typescript-eslint/no-require-imports": "off",
         "@typescript-eslint/no-restricted-imports": [
           "error",
           {
@@ -41,7 +42,23 @@
     },
     {
       "files": ["*.js", "*.jsx"],
-      "rules": {}
+      "env": {
+        "node": true,
+        "es2021": true
+      },
+      "rules": {
+        "no-undef": "off",
+        "no-unused-vars": "off"
+      }
+    },
+    {
+      "files": [
+        "src/plugins/AutomaticPublicPathPlugin.ts",
+        "src/plugins/StreamingTargetPlugin.ts"
+      ],
+      "rules": {
+        "@typescript-eslint/no-empty-object-type": "off"
+      }
     }
   ]
 }
