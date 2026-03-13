@@ -18,7 +18,9 @@ import {
 import { isRequiredVersion } from '@module-federation/sdk';
 import type { Compiler, Compilation, Module } from 'webpack';
 import { parseOptions } from '../container/options';
-import type { ConsumeSharedPluginOptions } from '../../declarations/plugins/sharing/ConsumeSharedPlugin';
+import type { consumeSharedPlugin } from '@module-federation/sdk';
+type ConsumeSharedPluginOptions =
+  consumeSharedPlugin.ConsumeSharedPluginOptions;
 import { resolveMatchedConfigs } from './resolveMatchedConfigs';
 import {
   getDescriptionFile,
@@ -37,7 +39,7 @@ import ShareRuntimeModule from './ShareRuntimeModule';
 import type { SemVerRange } from 'webpack/lib/util/semver';
 import type { ResolveData } from 'webpack/lib/NormalModuleFactory';
 import type { ModuleFactoryCreateDataContextInfo } from 'webpack/lib/ModuleFactory';
-import type { ConsumeOptions } from '../../declarations/plugins/sharing/ConsumeSharedModule';
+import type { ConsumeOptions } from '@module-federation/sdk';
 import { createSchemaValidation } from '../../utils';
 import path from 'path';
 const { satisfy, parseRange } = require(

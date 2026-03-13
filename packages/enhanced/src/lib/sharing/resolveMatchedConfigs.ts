@@ -5,7 +5,7 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { Compilation } from 'webpack';
 import type { ResolveOptionsWithDependencyType } from 'webpack/lib/ResolverFactory';
-import type { ConsumeOptions } from '../../declarations/plugins/sharing/ConsumeSharedModule';
+import type { ConsumeOptions } from '@module-federation/sdk';
 
 const ModuleNotFoundError = require(
   normalizeWebpackPath('webpack/lib/ModuleNotFoundError'),

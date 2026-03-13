@@ -14,9 +14,7 @@ import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
  * which can cause module federation to malfunction. By setting FEDERATION_WEBPACK_PATH, we ensure all internal
  * dependencies use the same webpack instance as the current compiler.
  */
-export default abstract class BaseWrapperPlugin
-  implements WebpackPluginInstance
-{
+export default abstract class BaseWrapperPlugin implements WebpackPluginInstance {
   protected _options: any;
   name: string;
   protected pluginName: string;

@@ -155,6 +155,118 @@ describe('createScript', () => {
   });
 });
 
+describe('createScript - error handling', () => {
+  afterEach(() => {
+    document.getElementsByTagName('html')[0].innerHTML = '';
+    jest.restoreAllMocks();
+  });
+
+  it('onerror calls onErrorCallback with a ScriptNetworkError', () => {
+    const url = 'https://example.com/network-error.js';
+    const cb = jest.fn();
+    const onErrorCallback = jest.fn();
+    const { script, needAttach } = createScript({ url, cb, onErrorCallback });
+
+    if (needAttach) document.body.appendChild(script);
+    script?.onerror?.(new Event('error'));
+
+    expect(onErrorCallback).toHaveBeenCalledTimes(1);
+    const err = onErrorCallback.mock.calls[0][0] as Error;
+    expect(err).toBeInstanceOf(Error);
+    expect(err.name).toBe('ScriptNetworkError');
+    expect(err.message).toContain(url);
+    expect(err.message).toContain('network');
+    expect(cb).not.toHaveBeenCalled();
+  });
+
+  it('window ErrorEvent with matching filename calls onErrorCallback with ScriptExecutionError and does not call cb', () => {
+    const url = 'https://example.com/exec-error.js';
+    const cb = jest.fn();
+    const onErrorCallback = jest.fn();
+    const { script, needAttach } = createScript({ url, cb, onErrorCallback });
+
+    if (needAttach) document.body.appendChild(script);
+
+    // Simulate IIFE throwing during execution before onload fires
+    window.dispatchEvent(
+      new ErrorEvent('error', {
+        message: 'TypeError: x is not a function',
+        filename: url,
+        lineno: 10,
+        colno: 5,
+        bubbles: true,
+      }),
+    );
+
+    // Browser still fires onload even when the IIFE threw
+    script?.onload?.(new Event('load'));
+
+    expect(onErrorCallback).toHaveBeenCalledTimes(1);
+    const err = onErrorCallback.mock.calls[0][0] as Error;
+    expect(err).toBeInstanceOf(Error);
+    expect(err.name).toBe('ScriptExecutionError');
+    expect(err.message).toContain(url);
+    expect(err.message).toContain('TypeError: x is not a function');
+    expect(cb).not.toHaveBeenCalled();
+  });
+
+  it('window ErrorEvent from a different url does not trigger onErrorCallback', () => {
+    const url = 'https://example.com/my-script.js';
+    const otherUrl = 'https://example.com/other-script.js';
+    const cb = jest.fn();
+    const onErrorCallback = jest.fn();
+    const { script, needAttach } = createScript({ url, cb, onErrorCallback });
+
+    if (needAttach) document.body.appendChild(script);
+
+    window.dispatchEvent(
+      new ErrorEvent('error', {
+        message: 'ReferenceError: foo is not defined',
+        filename: otherUrl,
+        lineno: 1,
+        colno: 1,
+        bubbles: true,
+      }),
+    );
+
+    script?.onload?.(new Event('load'));
+
+    expect(onErrorCallback).not.toHaveBeenCalled();
+    expect(cb).toHaveBeenCalledTimes(1);
+  });
+
+  it('window error listener is removed after onload fires', () => {
+    const url = 'https://example.com/remove-on-load.js';
+    const cb = jest.fn();
+    const removeEventListenerSpy = jest.spyOn(window, 'removeEventListener');
+    const { script, needAttach } = createScript({ url, cb });
+
+    if (needAttach) document.body.appendChild(script);
+    script?.onload?.(new Event('load'));
+
+    expect(removeEventListenerSpy).toHaveBeenCalledWith(
+      'error',
+      expect.any(Function),
+    );
+  });
+
+  it('window error listener is removed after onerror fires', () => {
+    const url = 'https://example.com/remove-on-error.js';
+    const cb = jest.fn();
+    const onErrorCallback = jest.fn();
+    const removeEventListenerSpy = jest.spyOn(window, 'removeEventListener');
+    const { script, needAttach } = createScript({ url, cb, onErrorCallback });
+
+    if (needAttach) document.body.appendChild(script);
+    script?.onerror?.(new Event('error'));
+
+    expect(removeEventListenerSpy).toHaveBeenCalledWith(
+      'error',
+      expect.any(Function),
+    );
+  });
+});
+
 describe('createLink', () => {
   afterEach(() => {
     document.getElementsByTagName('html')[0].innerHTML = '';
