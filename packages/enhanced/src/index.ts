@@ -14,9 +14,11 @@ export { default as AsyncBoundaryPlugin } from './wrapper/AsyncBoundaryPlugin';
 export { default as HoistContainerReferencesPlugin } from './wrapper/HoistContainerReferencesPlugin';
 export { default as TreeShakingSharedPlugin } from './wrapper/TreeShakingSharedPlugin';
 
+const lazyRequire = (id: string): any => module.require(id);
+
 export const dependencies = {
   get ContainerEntryDependency() {
-    return require('./lib/container/ContainerEntryDependency').default;
+    return lazyRequire('./lib/container/ContainerEntryDependency').default;
   },
 };
 
@@ -24,7 +26,7 @@ export { parseOptions } from './lib/container/options';
 
 export const container = {
   get ContainerEntryModule() {
-    return require('./lib/container/ContainerEntryModule').default;
+    return lazyRequire('./lib/container/ContainerEntryModule').default;
   },
 };
 

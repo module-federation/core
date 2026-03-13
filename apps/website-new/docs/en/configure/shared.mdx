@@ -1,4 +1,4 @@
-# Shared
+# shared
 
 The `shared` configuration is used to share common dependencies between consumers and producers, reducing the runtime download volume and thus improving performance. `shared` allows you to configure rules for reusing dependency versions. You can learn more about the scenarios where `shared` is applicable and how to use `shared` through the [FAQ](#faq).
 
@@ -49,7 +49,7 @@ new ModuleFederationPlugin({
 });
 ```
 
-## Singleton
+## singleton
 
 - Type: `boolean`
 - Required: No
@@ -61,7 +61,7 @@ Whether to allow only one version of the shared module within the shared scope (
 - If singleton mode is enabled, the shared dependencies between the remote application components and the host application will only be loaded once, and a higher version will be loaded if the versions are inconsistent. A warning will be given for the party with the lower version.
 - If singleton mode is not enabled, and the shared dependencies between the remote application and the host application have different versions, each will load their own dependencies.
 
-## RequiredVersion
+## requiredVersion
 
 - Type: `string`
 - Required: No
@@ -72,7 +72,7 @@ The required version, which can be a version range. The default value is the cur
 - When using shared dependencies, it will check whether the dependency version is greater than or equal to `requiredVersion`. If it is, it will be used normally. If it is less than `requiredVersion`, a warning will be given in the console, and the smallest version available in the shared dependencies will be used.
 - When one party sets `requiredVersion` and the other sets `singleton`, the dependency with `requiredVersion` will be loaded, and the `singleton` party will directly use the dependency with `requiredVersion`, regardless of the version.
 
-## Eager
+## eager
 
 :::warning
 Setting `eager` to true will package the shared dependencies into the entry file, which may result in a large entry file size. Use with caution.

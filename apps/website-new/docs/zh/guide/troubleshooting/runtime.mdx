@@ -143,11 +143,43 @@ import Runtime from '@components/zh/runtime/index';
 
 ### 原因
 
-Runtime 运行时资源加载失败报错，可能原因为网络不稳定导致资源加载超时失败，或者为资源地址错误导致资源加载失败。
+生产者入口脚本（remote entry）加载失败。错误信息中会包含具体失败原因，分为以下两种情况：
+
+**1. ScriptNetworkError — 网络层加载失败**
+
+脚本文件本身无法下载，常见原因：
+
+- 资源地址（URL）错误，服务器返回 404
+- 网络不稳定或请求超时
+- 跨域（CORS）配置问题
+- CDN 节点异常
+
+**2. ScriptExecutionError — 脚本执行时抛错**
+
+脚本文件下载成功，但其中的 IIFE 在执行时抛出了运行时异常。此时错误信息中会包含 `ScriptExecutionError` 及原始异常信息（如 `TypeError: ...`）。常见原因：
+
+- 生产者代码存在兼容性问题（如使用了当前浏览器不支持的语法）
+- 生产者入口文件依赖了未正确初始化的全局变量
+- 构建产物损坏或不完整
 
 ### 解决方法
 
-检查资源地址是否正确，若资源地址正确，检查网络是否稳定。网络不稳定时可增加重试机制，参考 [Runtime 重试机制](/plugin/plugins/retry-plugin.html)。
+**针对 ScriptNetworkError：**
+
+1. 直接在浏览器地址栏访问错误信息中的资源 URL，确认是否可以正常返回
+2. 检查生产者的 `publicPath` 和 `remoteEntry` 地址配置是否正确
+3. 检查是否存在跨域问题，必要时配置 CORS 或使用 [`createScript`](../../plugin/dev/index#createscript) hook 添加 `crossOrigin` 属性
+4. 网络不稳定时，可接入重试机制，参考 [Runtime 重试机制](/plugin/plugins/retry-plugin.html)
+
+**针对 ScriptExecutionError：**
+
+1. 查看错误信息中的原始异常（`TypeError` / `SyntaxError` 等），定位生产者入口文件中的具体报错
+2. 检查生产者构建目标（`target`）是否与消费者的浏览器兼容范围匹配
+3. 在浏览器 DevTools Network 面板中下载对应的 remote entry 文件，手动执行以复现错误
+
+:::tip
+ScriptExecutionError 表示脚本已成功下载，重试不会解决此类问题。需优先排查生产者代码本身的兼容性或运行时错误。
+:::
 
 ## RUNTIME-009
 

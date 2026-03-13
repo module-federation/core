@@ -11,7 +11,7 @@ import {
   ModuleInfo,
   isDebugMode,
 } from '@module-federation/sdk';
-import { warn } from './utils/logger';
+import { warn, error } from './utils/logger';
 import { ModuleFederationRuntimePlugin } from './type/plugin';
 
 export interface Federation {
@@ -170,7 +170,9 @@ export function getInfoWithoutType<T extends object>(
       };
     }
   } else {
-    throw new Error('key must be string');
+    error(
+      `getInfoWithoutType: "key" must be a string, got ${typeof key} (${JSON.stringify(key)}).`,
+    );
   }
 }
 
