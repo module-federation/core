@@ -27,7 +27,7 @@ export function RenderingInfo({
       <div className="text-sm text-gray-300">{msg}</div>
 
       <div className="flex">
-        <RenderedTimeAgo timestamp={Date.now()} />
+        <RenderedTimeAgo />
       </div>
     </div>
   );

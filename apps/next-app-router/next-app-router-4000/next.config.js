@@ -5,10 +5,6 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  port: 4000,
   webpack(config, options) {
     const { isServer } = options;
     config.watchOptions = {

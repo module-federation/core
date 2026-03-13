@@ -9,7 +9,7 @@ export default function Page() {
 
       <ul>
         <li>
-          Typically, when you have shared UI, you'd put it inside a layout.
+          Typically, when you have shared UI, you&apos;d put it inside a layout.
           However, layouts do not receive <code>searchParams</code> and{' '}
           <code>params</code> lower than their segment. This is a challenge for
           shared UI like breadcrumbs that depends on the URL information.

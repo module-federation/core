@@ -2,31 +2,24 @@
 
 import { Tab } from '#/ui/tab';
 import clsx from 'clsx';
-import React, { useEffect } from 'react';
+import React from 'react';
 
 const randomNumber = (min: number, max: number) =>
   Math.floor(Math.random() * (max - min + 1) + min);
 
 export function RandomPostTab({ path }: { path: string }) {
-  const [post, setPost] = React.useState<null | { text: string; slug: string }>(
-    null,
-  );
-
-  useEffect(() => {
+  const [post] = React.useState(() => {
     const randomId = String(randomNumber(3, 100));
-    setPost({ text: `Post ${randomId} (On Demand)`, slug: randomId });
-  }, []);
+    return { text: `Post ${randomId} (On Demand)`, slug: randomId };
+  });
 
   return (
     <div
       className={clsx('inline-flex transition', {
-        'opacity-0': !post,
-        'opacity-100': post,
+        'opacity-100': Boolean(post),
       })}
     >
-      {post ? (
-        <Tab path={path} item={{ text: post.text, slug: post.slug }} />
-      ) : null}
+      <Tab path={path} item={post} />
     </div>
   );
 }

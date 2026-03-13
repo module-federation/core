@@ -21,23 +21,24 @@ const useInterval = (callback: Function, delay?: number | null) => {
   }, [delay]);
 };
 
-export function RenderedTimeAgo({ timestamp }: { timestamp: number }) {
+export function RenderedTimeAgo({ timestamp }: { timestamp?: number }) {
+  const [createdAt] = useState(() => timestamp ?? Date.now());
   const [msAgo, setMsAgo] = useState<number>(0);
 
   // update on page change
   useEffect(() => {
-    setMsAgo(Date.now() - timestamp);
-  }, [timestamp]);
+    setMsAgo(Date.now() - createdAt);
+  }, [createdAt]);
 
   // update every second
   useInterval(() => {
-    setMsAgo(Date.now() - timestamp);
+    setMsAgo(Date.now() - createdAt);
   }, 1000);
 
   return (
     <div
       className="h-6 w-20 items-center rounded-full bg-gray-100 px-2 text-center text-sm leading-6"
-      title={new Date(timestamp).toISOString()}
+      title={new Date(createdAt).toISOString()}
     >
       {msAgo ? (
         <>

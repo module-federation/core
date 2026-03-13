@@ -1,10 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 const ExportedTitle = () => {
-  const [hookData, setHookData] = useState('');
-  useEffect(() => {
-    setHookData('HOOKS WORKS');
-  }, []);
+  const [hookData] = useState('HOOKS WORKS');
 
   return (
     <div className="hero">

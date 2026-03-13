@@ -5,7 +5,6 @@ require('next/script');
 require('next/image');
 require('next/dynamic');
 require('next/error');
-require('next/amp');
 require('styled-jsx');
 require('styled-jsx/style');
 require('next/image');
