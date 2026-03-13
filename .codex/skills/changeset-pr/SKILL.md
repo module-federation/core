@@ -9,10 +9,12 @@ description: Create or update a `.changeset/*.md` file for the current branch or
 
 Create a repo-correct changeset for the current branch, or update an existing one without widening scope unnecessarily. Verify both syntax and package scope before handoff.
 
+Ground the changeset in the live branch diff, not stale branch intent. Always inspect the current branch state against its base before choosing package scope or release type.
+
 ## Workflow
 
 1. Confirm whether a changeset is needed.
-2. Identify the publishable package scope from the branch diff.
+2. Identify the publishable package scope from the live branch diff.
 3. Create or edit one `.changeset/*.md` file.
 4. Validate the file against repo config and branch scope.
 5. Report the exact commands run and any ambiguity that remains.
@@ -26,6 +28,16 @@ Create a repo-correct changeset for the current branch, or update an existing on
 Read [references/repo-conventions.md](./references/repo-conventions.md) when you need the repo-specific fixed-group, ignore-list, or release-flow details.
 
 ## Determine Scope
+
+First inspect the live branch state:
+
+```bash
+git diff --name-status origin/main...HEAD
+git diff --stat origin/main...HEAD
+git log --oneline --decorate --no-merges origin/main..HEAD
+```
+
+Use that to separate real publishable-package behavior changes from repo-local docs, skills, tooling, or cleanup.
 
 Start with the helper script:
 
@@ -82,13 +94,13 @@ python3 .codex/skills/changeset-pr/scripts/inspect_changeset_scope.py --base ori
 2. Validate that Changesets can parse and plan the release:
 
 ```bash
-pnpm exec changeset status --verbose
+python3 .codex/skills/changeset-pr/scripts/run_changeset_status.py --verbose
 ```
 
 3. When machine-readable output is useful:
 
 ```bash
-pnpm exec changeset status --output /tmp/changeset-status.json
+python3 .codex/skills/changeset-pr/scripts/run_changeset_status.py --output /tmp/changeset-status.json
 ```
 
 Interpretation:
@@ -96,6 +108,7 @@ Interpretation:
 - `status` verifies parseability and computed release planning.
 - `status` does not prove the changeset is branch-local or minimal in this repo because other pending changesets may already exist.
 - Fixed-group packages can cause broader or higher bumps than the frontmatter alone suggests.
+- Prefer the helper script over direct `pnpm exec changeset status` in Codex runs because shell wrappers in non-TTY sessions can add `/dev/tty` noise or otherwise make the raw CLI output unreliable.
 
 ## Update Existing Changesets
 
