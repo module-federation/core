@@ -5,8 +5,9 @@
 //   Compare: node scripts/bundle-size-report.mjs --compare base.json --current current.json --output stats.txt
 // Output includes:
 //   - package dist total (raw)
-//   - ESM entry gzip
-//   - web/node bundles (gzip, ENV_TARGET=web/node)
+//   - root ESM entry gzip
+//   - web/node bundles for the root entry (gzip, ENV_TARGET=web/node)
+//   - tracked tree-shakable subpath entries like ./bundler
 
 import {
   readFileSync,
@@ -17,10 +18,12 @@ import {
   mkdirSync,
 } from 'fs';
 import { join, resolve, relative, extname } from 'path';
+import { createRequire } from 'module';
 import { tmpdir } from 'os';
 import { gzipSync } from 'zlib';
 
 const ROOT = resolve(import.meta.dirname, '..');
+const require = createRequire(import.meta.url);
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -71,6 +74,7 @@ function formatDeltaMaybe(current, base) {
 }
 
 let rslibPromise;
+let webpackPromise;
 
 const ASSET_RULES = [
   { test: /\.(css|scss|sass|less|styl)$/i, type: 'asset/resource' },
@@ -81,12 +85,21 @@ const ASSET_RULES = [
 ];
 
 const JS_EXTENSIONS = new Set(['.js', '.mjs', '.cjs']);
+const TRACKED_EXPORT_SUBPATHS = ['./bundler'];
+const EXCLUDED_PACKAGE_NAMES = new Set(['@changesets/assemble-release-plan']);
 
 async function loadRslib() {
   if (!rslibPromise) {
     rslibPromise = import('@rslib/core');
   }
   return rslibPromise;
+}
+
+async function loadWebpack() {
+  if (!webpackPromise) {
+    webpackPromise = Promise.resolve(require('webpack'));
+  }
+  return webpackPromise;
 }
 
 /** Recursively sum all file sizes in a directory, excluding .map files */
@@ -152,6 +165,73 @@ function findEsmEntry(pkgDir, pkg) {
   }
 
   return null;
+}
+
+function resolveExportTarget(pkgDir, target) {
+  if (!target) return null;
+
+  if (typeof target === 'string') {
+    const resolved = join(pkgDir, target);
+    return existsSync(resolved) ? resolved : null;
+  }
+
+  if (typeof target !== 'object') {
+    return null;
+  }
+
+  const preferredKeys = [
+    'import',
+    'default',
+    'module',
+    'browser',
+    'node',
+    'require',
+  ];
+  for (const key of preferredKeys) {
+    if (!(key in target)) continue;
+    const resolved = resolveExportTarget(pkgDir, target[key]);
+    if (resolved) return resolved;
+  }
+
+  for (const value of Object.values(target)) {
+    const resolved = resolveExportTarget(pkgDir, value);
+    if (resolved) return resolved;
+  }
+
+  return null;
+}
+
+function findTrackedEntries(pkgDir, pkg) {
+  const entries = [];
+  const rootEntry = findEsmEntry(pkgDir, pkg);
+
+  if (rootEntry) {
+    entries.push({
+      id: '.',
+      label: 'Package root',
+      path: rootEntry,
+    });
+  }
+
+  if (!pkg?.exports || typeof pkg.exports !== 'object') {
+    return entries;
+  }
+
+  for (const subpath of TRACKED_EXPORT_SUBPATHS) {
+    if (!(subpath in pkg.exports)) continue;
+
+    const resolved = resolveExportTarget(pkgDir, pkg.exports[subpath]);
+    if (!resolved) continue;
+    if (entries.some((entry) => entry.path === resolved)) continue;
+
+    entries.push({
+      id: subpath,
+      label: `${subpath} export`,
+      path: resolved,
+    });
+  }
+
+  return entries;
 }
 
 function createTempDir(pkgName, target) {
@@ -278,6 +358,231 @@ async function bundleEntry(entryPath, options) {
   }
 }
 
+async function measureEntry(entry, pkgName, pkgDir) {
+  const entryGzip = gzipSize(entry.path);
+  const [webResult, nodeResult] = await Promise.all([
+    bundleEntry(entry.path, {
+      target: 'web',
+      packageName: pkgName,
+      entryName: entry.id === '.' ? 'bundle' : sanitizeEntryId(entry.id),
+      define: { ENV_TARGET: JSON.stringify('web') },
+    }),
+    bundleEntry(entry.path, {
+      target: 'node',
+      packageName: pkgName,
+      entryName: entry.id === '.' ? 'bundle' : sanitizeEntryId(entry.id),
+      define: { ENV_TARGET: JSON.stringify('node') },
+    }),
+  ]);
+
+  const bundleErrors = {};
+  if (webResult.error) bundleErrors.web = webResult.error;
+  if (nodeResult.error) bundleErrors.node = nodeResult.error;
+
+  return {
+    label: entry.label,
+    entry: relative(pkgDir, entry.path),
+    gzip: entryGzip,
+    webBundleBytes: webResult.bytes,
+    webBundleGzip: webResult.gzip,
+    nodeBundleBytes: nodeResult.bytes,
+    nodeBundleGzip: nodeResult.gzip,
+    bundleErrors: Object.keys(bundleErrors).length ? bundleErrors : null,
+  };
+}
+
+function sanitizeEntryId(entryId) {
+  return (
+    entryId.replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '') || 'entry'
+  );
+}
+
+function findPackage(packages, name) {
+  return packages.find((pkg) => pkg.name === name) || null;
+}
+
+function createScenarioResult(label, data) {
+  return {
+    label,
+    webBytes: data.webBytes ?? null,
+    webGzip: data.webGzip ?? null,
+    nodeBytes: data.nodeBytes ?? null,
+    nodeGzip: data.nodeGzip ?? null,
+    details: data.details ?? null,
+    errors: data.errors ?? null,
+  };
+}
+
+async function runWebpackBuild(config) {
+  const webpack = await loadWebpack();
+  const compiler = webpack(config);
+
+  return new Promise((resolveBuild, rejectBuild) => {
+    compiler.run((error, stats) => {
+      const done = (closeError) => {
+        if (error) {
+          rejectBuild(error);
+          return;
+        }
+        if (closeError) {
+          rejectBuild(closeError);
+          return;
+        }
+        if (!stats) {
+          rejectBuild(new Error('webpack returned no stats'));
+          return;
+        }
+        if (stats.hasErrors()) {
+          rejectBuild(
+            new Error(
+              stats.toString({
+                all: false,
+                errors: true,
+                errorDetails: true,
+              }),
+            ),
+          );
+          return;
+        }
+        resolveBuild(stats);
+      };
+
+      if (typeof compiler.close === 'function') {
+        compiler.close(done);
+      } else {
+        done();
+      }
+    });
+  });
+}
+
+async function measureEnhancedRemoteScenario(packagesDir, packages) {
+  const enhancedPkg = findPackage(packages, '@module-federation/enhanced');
+  if (!enhancedPkg) {
+    return createScenarioResult('Enhanced remoteEntry', {
+      errors: { scenario: 'package not found' },
+    });
+  }
+
+  const enhancedEntry = join(enhancedPkg.dir, 'dist/src/index.js');
+  if (!existsSync(enhancedEntry)) {
+    return createScenarioResult('Enhanced remoteEntry', {
+      errors: { scenario: 'built enhanced entry not found' },
+    });
+  }
+
+  const { ModuleFederationPlugin } = require(enhancedEntry);
+  const scenarioRoot = createTempDir('scenario-enhanced-remote', 'matrix');
+  const entryPath = join(scenarioRoot, 'index.js');
+  const exposePath = join(scenarioRoot, 'noop.js');
+  writeFileSync(entryPath, 'module.exports = 1;\n', 'utf8');
+  writeFileSync(exposePath, 'module.exports = () => "noop";\n', 'utf8');
+
+  const buildTarget = async ({
+    optimizationTarget,
+    disableSnapshot,
+    suffix,
+  }) => {
+    const outputPath = join(scenarioRoot, `dist-${suffix}`);
+    mkdirSync(outputPath, { recursive: true });
+    const filename = `remoteEntry-${suffix}.js`;
+
+    await runWebpackBuild({
+      mode: 'production',
+      context: scenarioRoot,
+      entry: './index.js',
+      target: 'async-node',
+      infrastructureLogging: { level: 'error' },
+      stats: 'errors-only',
+      output: {
+        path: outputPath,
+        filename: '[name].js',
+        chunkFilename: '[name].js',
+        publicPath: '/',
+        uniqueName: `bundle-size-enhanced-${suffix}`,
+        clean: true,
+      },
+      optimization: {
+        minimize: true,
+        chunkIds: 'named',
+        moduleIds: 'named',
+      },
+      plugins: [
+        new ModuleFederationPlugin({
+          name: `bundle_size_${suffix}`,
+          filename,
+          library: {
+            type: 'commonjs-module',
+            name: `bundle_size_${suffix}`,
+          },
+          exposes: {
+            './noop': './noop.js',
+          },
+          remotes: {
+            remote: 'remote@http://localhost:3001/remoteEntry.js',
+          },
+          manifest: false,
+          experiments: {
+            optimization: {
+              target: optimizationTarget,
+              disableSnapshot,
+            },
+          },
+        }),
+      ],
+    });
+
+    const outputFile = join(outputPath, filename);
+    return {
+      bytes: statSync(outputFile).size,
+      gzip: gzipSize(outputFile),
+      file: outputFile,
+    };
+  };
+
+  try {
+    const [webResult, nodeResult] = await Promise.all([
+      buildTarget({
+        optimizationTarget: 'web',
+        disableSnapshot: true,
+        suffix: 'web',
+      }),
+      buildTarget({
+        optimizationTarget: 'node',
+        disableSnapshot: false,
+        suffix: 'node',
+      }),
+    ]);
+
+    return createScenarioResult('Enhanced remoteEntry', {
+      webBytes: webResult.bytes,
+      webGzip: webResult.gzip,
+      nodeBytes: nodeResult.bytes,
+      nodeGzip: nodeResult.gzip,
+      details: {
+        webFile: relative(ROOT, webResult.file),
+        nodeFile: relative(ROOT, nodeResult.file),
+        packagesDir: relative(ROOT, packagesDir),
+      },
+    });
+  } catch (error) {
+    return createScenarioResult('Enhanced remoteEntry', {
+      errors: {
+        scenario: error?.message ? error.message : String(error),
+      },
+    });
+  }
+}
+
+async function measureScenarios(packagesDir, packages) {
+  const scenarios = {};
+  scenarios.enhancedRemoteEntry = await measureEnhancedRemoteScenario(
+    packagesDir,
+    packages,
+  );
+  return scenarios;
+}
+
 // ── Discovery ────────────────────────────────────────────────────────────────
 
 /** Find package directories from workspace package manifests */
@@ -309,6 +614,7 @@ function discoverPackages(packagesDir) {
       try {
         const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
         if (!packageJson?.name) continue;
+        if (EXCLUDED_PACKAGE_NAMES.has(packageJson.name)) continue;
         packages.push({
           name: packageJson.name,
           dir: pkgDir,
@@ -332,59 +638,75 @@ async function measure(packagesDir) {
     const pkgJson = readPackageJson(pkg.dir);
     const distDir = join(pkg.dir, 'dist');
     const totalSize = dirSize(distDir);
-    const esmEntry = findEsmEntry(pkg.dir, pkgJson);
-    const esmGzip = gzipSize(esmEntry);
-    let webBundle = { bytes: null, gzip: null };
-    let nodeBundle = { bytes: null, gzip: null };
-    const bundleErrors = {};
+    const measuredEntries = findTrackedEntries(pkg.dir, pkgJson);
+    const entrypoints = {};
 
-    if (esmEntry) {
-      const [webResult, nodeResult] = await Promise.all([
-        bundleEntry(esmEntry, {
-          target: 'web',
-          packageName: pkg.name,
-          entryName: 'bundle',
-          define: { ENV_TARGET: JSON.stringify('web') },
-        }),
-        bundleEntry(esmEntry, {
-          target: 'node',
-          packageName: pkg.name,
-          entryName: 'bundle',
-          define: { ENV_TARGET: JSON.stringify('node') },
-        }),
-      ]);
-
-      webBundle = webResult;
-      nodeBundle = nodeResult;
-
-      if (webResult.error) bundleErrors.web = webResult.error;
-      if (nodeResult.error) bundleErrors.node = nodeResult.error;
+    for (const entry of measuredEntries) {
+      entrypoints[entry.id] = await measureEntry(entry, pkg.name, pkg.dir);
     }
+
+    const rootMetrics = entrypoints['.'] || {
+      entry: null,
+      gzip: 0,
+      webBundleBytes: null,
+      webBundleGzip: null,
+      nodeBundleBytes: null,
+      nodeBundleGzip: null,
+      bundleErrors: null,
+    };
 
     results[pkg.name] = {
       totalDist: totalSize,
-      esmGzip,
-      esmEntry: esmEntry ? relative(pkg.dir, esmEntry) : null,
-      webBundleBytes: webBundle.bytes,
-      webBundleGzip: webBundle.gzip,
-      nodeBundleBytes: nodeBundle.bytes,
-      nodeBundleGzip: nodeBundle.gzip,
-      bundleEntry: esmEntry ? relative(pkg.dir, esmEntry) : null,
-      bundleErrors: Object.keys(bundleErrors).length ? bundleErrors : null,
+      esmGzip: rootMetrics.gzip,
+      esmEntry: rootMetrics.entry,
+      webBundleBytes: rootMetrics.webBundleBytes,
+      webBundleGzip: rootMetrics.webBundleGzip,
+      nodeBundleBytes: rootMetrics.nodeBundleBytes,
+      nodeBundleGzip: rootMetrics.nodeBundleGzip,
+      bundleEntry: rootMetrics.entry,
+      bundleErrors: rootMetrics.bundleErrors,
+      entrypoints,
     };
   }
 
-  return results;
+  return {
+    packages: results,
+    scenarios: await measureScenarios(packagesDir, packages),
+  };
 }
 
 // ── Compare ──────────────────────────────────────────────────────────────────
 
+function normalizeMeasuredData(data) {
+  if (
+    data &&
+    typeof data === 'object' &&
+    'packages' in data &&
+    'scenarios' in data
+  ) {
+    return {
+      packages: data.packages || {},
+      scenarios: data.scenarios || {},
+    };
+  }
+
+  return {
+    packages: data || {},
+    scenarios: {},
+  };
+}
+
 function compare(baseData, currentData) {
+  const normalizedBase = normalizeMeasuredData(baseData);
+  const normalizedCurrent = normalizeMeasuredData(currentData);
+  const basePackages = normalizedBase.packages;
+  const currentPackages = normalizedCurrent.packages;
+  const baseScenarios = normalizedBase.scenarios;
+  const currentScenarios = normalizedCurrent.scenarios;
   const allPackages = new Set([
-    ...Object.keys(baseData),
-    ...Object.keys(currentData),
+    ...Object.keys(basePackages),
+    ...Object.keys(currentPackages),
   ]);
-  const changed = [];
   let unchangedCount = 0;
   const emptyPackageMetrics = {
     totalDist: 0,
@@ -404,26 +726,79 @@ function compare(baseData, currentData) {
   ];
 
   const allMetrics = [...distMetrics, ...bundleMetrics];
+  const changedRootRows = [];
+  const changedEntrypointRows = [];
+  const changedPackages = new Set();
 
-  for (const name of [...allPackages].sort()) {
-    const base = baseData[name] || emptyPackageMetrics;
-    const current = currentData[name] || emptyPackageMetrics;
-
-    const hasChange = allMetrics.some(({ key }) => {
-      const baseValue = base[key];
-      const currentValue = current[key];
+  const hasMetricChange = (base, current, metrics) =>
+    metrics.some(({ key }) => {
+      const baseValue = base?.[key];
+      const currentValue = current?.[key];
       if (typeof baseValue === 'number' && typeof currentValue === 'number') {
         return baseValue !== currentValue;
       }
       return typeof baseValue === 'number' || typeof currentValue === 'number';
     });
 
-    if (hasChange) {
-      changed.push({ name, base, current });
-    } else {
-      unchangedCount++;
+  const getEntrypoints = (pkg) => {
+    const entrypoints = { ...(pkg?.entrypoints || {}) };
+    if (!entrypoints['.']) {
+      entrypoints['.'] = {
+        label: 'Package root',
+        entry: pkg?.bundleEntry ?? pkg?.esmEntry ?? null,
+        gzip: pkg?.esmGzip ?? 0,
+        webBundleBytes: pkg?.webBundleBytes ?? null,
+        webBundleGzip: pkg?.webBundleGzip ?? null,
+        nodeBundleBytes: pkg?.nodeBundleBytes ?? null,
+        nodeBundleGzip: pkg?.nodeBundleGzip ?? null,
+        bundleErrors: pkg?.bundleErrors ?? null,
+      };
+    }
+    return entrypoints;
+  };
+
+  for (const name of [...allPackages].sort()) {
+    const base = basePackages[name] || emptyPackageMetrics;
+    const current = currentPackages[name] || emptyPackageMetrics;
+    const baseEntrypoints = getEntrypoints(base);
+    const currentEntrypoints = getEntrypoints(current);
+
+    if (hasMetricChange(base, current, allMetrics)) {
+      changedRootRows.push({ name, base, current });
+      changedPackages.add(name);
+    }
+
+    const trackedEntrypoints = new Set([
+      ...Object.keys(baseEntrypoints),
+      ...Object.keys(currentEntrypoints),
+    ]);
+    trackedEntrypoints.delete('.');
+
+    for (const entryId of [...trackedEntrypoints].sort()) {
+      const baseEntry = baseEntrypoints[entryId] || {};
+      const currentEntry = currentEntrypoints[entryId] || {};
+      const entryMetrics = [
+        { key: 'gzip' },
+        { key: 'webBundleGzip' },
+        { key: 'nodeBundleGzip' },
+      ];
+
+      if (!hasMetricChange(baseEntry, currentEntry, entryMetrics)) {
+        continue;
+      }
+
+      changedEntrypointRows.push({
+        name,
+        entryId,
+        base: baseEntry,
+        current: currentEntry,
+      });
+      changedPackages.add(name);
     }
   }
+
+  const changed = [...changedPackages].sort();
+  unchangedCount = allPackages.size - changed.length;
 
   const sumMetric = (data, key) =>
     Object.values(data).reduce((sum, item) => {
@@ -431,17 +806,53 @@ function compare(baseData, currentData) {
       return typeof value === 'number' ? sum + value : sum;
     }, 0);
 
-  const totalDistBase = sumMetric(baseData, 'totalDist');
-  const totalDistCurrent = sumMetric(currentData, 'totalDist');
-  const totalEsmBase = sumMetric(baseData, 'esmGzip');
-  const totalEsmCurrent = sumMetric(currentData, 'esmGzip');
-  const totalWebBase = sumMetric(baseData, 'webBundleGzip');
-  const totalWebCurrent = sumMetric(currentData, 'webBundleGzip');
-  const totalNodeBase = sumMetric(baseData, 'nodeBundleGzip');
-  const totalNodeCurrent = sumMetric(currentData, 'nodeBundleGzip');
+  const sumEntrypointMetric = (data, entryId, key) =>
+    Object.values(data).reduce((sum, item) => {
+      const value = item?.entrypoints?.[entryId]?.[key];
+      return typeof value === 'number' ? sum + value : sum;
+    }, 0);
 
-  const buildTable = (title, metrics) => {
-    if (changed.length === 0) return [];
+  const totalDistBase = sumMetric(basePackages, 'totalDist');
+  const totalDistCurrent = sumMetric(currentPackages, 'totalDist');
+  const totalEsmBase = sumMetric(basePackages, 'esmGzip');
+  const totalEsmCurrent = sumMetric(currentPackages, 'esmGzip');
+  const totalWebBase = sumMetric(basePackages, 'webBundleGzip');
+  const totalWebCurrent = sumMetric(currentPackages, 'webBundleGzip');
+  const totalNodeBase = sumMetric(basePackages, 'nodeBundleGzip');
+  const totalNodeCurrent = sumMetric(currentPackages, 'nodeBundleGzip');
+  const totalBundlerEntryBase = sumEntrypointMetric(
+    basePackages,
+    './bundler',
+    'gzip',
+  );
+  const totalBundlerEntryCurrent = sumEntrypointMetric(
+    currentPackages,
+    './bundler',
+    'gzip',
+  );
+  const totalBundlerWebBase = sumEntrypointMetric(
+    basePackages,
+    './bundler',
+    'webBundleGzip',
+  );
+  const totalBundlerWebCurrent = sumEntrypointMetric(
+    currentPackages,
+    './bundler',
+    'webBundleGzip',
+  );
+  const totalBundlerNodeBase = sumEntrypointMetric(
+    basePackages,
+    './bundler',
+    'nodeBundleGzip',
+  );
+  const totalBundlerNodeCurrent = sumEntrypointMetric(
+    currentPackages,
+    './bundler',
+    'nodeBundleGzip',
+  );
+
+  const buildTable = (title, metrics, rowsData) => {
+    if (rowsData.length === 0) return [];
     const rows = [];
     rows.push(`### ${title}`);
     rows.push('');
@@ -453,7 +864,7 @@ function compare(baseData, currentData) {
     rows.push(`| ${headers.join(' | ')} |`);
     rows.push(`| ${headers.map(() => '---').join(' | ')} |`);
 
-    for (const { name, base, current } of changed) {
+    for (const { name, base, current } of rowsData) {
       const cells = [`\`${name}\``];
       for (const metric of metrics) {
         const currentValue = current[metric.key];
@@ -464,6 +875,94 @@ function compare(baseData, currentData) {
         );
       }
       rows.push(`| ${cells.join(' | ')} |`);
+    }
+
+    rows.push('');
+    return rows;
+  };
+
+  const formatSignedBytes = (bytes) => {
+    if (typeof bytes !== 'number' || bytes === 0) return '0 B';
+    return `${bytes > 0 ? '+' : '-'}${formatBytes(Math.abs(bytes))}`;
+  };
+
+  const buildEntrypointTable = () => {
+    if (changedEntrypointRows.length === 0) return [];
+
+    const rows = [];
+    rows.push('### Tree-shakable entrypoints');
+    rows.push('');
+    rows.push(
+      '| Package | Export | Entry gzip | Delta | Web bundle (gzip) | Delta | Node bundle (gzip) | Delta | Gap (node-web) | Delta |',
+    );
+    rows.push('| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |');
+
+    for (const { name, entryId, base, current } of changedEntrypointRows) {
+      const currentGap =
+        typeof current.nodeBundleGzip === 'number' &&
+        typeof current.webBundleGzip === 'number'
+          ? current.nodeBundleGzip - current.webBundleGzip
+          : null;
+      const baseGap =
+        typeof base.nodeBundleGzip === 'number' &&
+        typeof base.webBundleGzip === 'number'
+          ? base.nodeBundleGzip - base.webBundleGzip
+          : null;
+
+      rows.push(
+        [
+          `\`${name}\``,
+          `\`${entryId}\``,
+          formatMaybe(current.gzip),
+          formatDeltaMaybe(current.gzip, base.gzip),
+          formatMaybe(current.webBundleGzip),
+          formatDeltaMaybe(current.webBundleGzip, base.webBundleGzip),
+          formatMaybe(current.nodeBundleGzip),
+          formatDeltaMaybe(current.nodeBundleGzip, base.nodeBundleGzip),
+          currentGap === null ? 'n/a' : formatSignedBytes(currentGap),
+          currentGap === null || baseGap === null
+            ? 'n/a'
+            : formatSignedBytes(currentGap - baseGap),
+        ].join(' | '),
+      );
+      rows[rows.length - 1] = `| ${rows[rows.length - 1]} |`;
+    }
+
+    rows.push('');
+    return rows;
+  };
+
+  const buildScenarioTable = () => {
+    const scenarioNames = new Set([
+      ...Object.keys(baseScenarios),
+      ...Object.keys(currentScenarios),
+    ]);
+    if (scenarioNames.size === 0) return [];
+
+    const rows = [];
+    rows.push('### Consumer scenarios');
+    rows.push('');
+    rows.push(
+      '| Scenario | Web output (gzip) | Delta | Node output (gzip) | Delta | Gap (node-web) | Delta |',
+    );
+    rows.push('| --- | --- | --- | --- | --- | --- | --- |');
+
+    for (const name of [...scenarioNames].sort()) {
+      const base = baseScenarios[name] || {};
+      const current = currentScenarios[name] || {};
+      const currentGap =
+        typeof current.nodeGzip === 'number' &&
+        typeof current.webGzip === 'number'
+          ? current.nodeGzip - current.webGzip
+          : null;
+      const baseGap =
+        typeof base.nodeGzip === 'number' && typeof base.webGzip === 'number'
+          ? base.nodeGzip - base.webGzip
+          : null;
+
+      rows.push(
+        `| ${current.label || base.label || `\`${name}\``} | ${formatMaybe(current.webGzip)} | ${formatDeltaMaybe(current.webGzip, base.webGzip)} | ${formatMaybe(current.nodeGzip)} | ${formatDeltaMaybe(current.nodeGzip, base.nodeGzip)} | ${currentGap === null ? 'n/a' : formatSignedBytes(currentGap)} | ${currentGap === null || baseGap === null ? 'n/a' : formatSignedBytes(currentGap - baseGap)} |`,
+      );
     }
 
     rows.push('');
@@ -485,8 +984,12 @@ function compare(baseData, currentData) {
     lines.push('');
   }
 
-  lines.push(...buildTable('Package dist + ESM entry', distMetrics));
-  lines.push(...buildTable('Bundle targets', bundleMetrics));
+  lines.push(
+    ...buildTable('Package dist + ESM entry', distMetrics, changedRootRows),
+  );
+  lines.push(...buildTable('Bundle targets', bundleMetrics, changedRootRows));
+  lines.push(...buildEntrypointTable());
+  lines.push(...buildScenarioTable());
 
   lines.push(
     `**Total dist (raw):** ${formatBytes(totalDistCurrent)} (${formatDelta(totalDistCurrent, totalDistBase)})`,
@@ -500,22 +1003,65 @@ function compare(baseData, currentData) {
   lines.push(
     `**Total node bundle (gzip):** ${formatBytes(totalNodeCurrent)} (${formatDelta(totalNodeCurrent, totalNodeBase)})`,
   );
+  if (
+    totalBundlerEntryBase > 0 ||
+    totalBundlerEntryCurrent > 0 ||
+    totalBundlerWebBase > 0 ||
+    totalBundlerWebCurrent > 0 ||
+    totalBundlerNodeBase > 0 ||
+    totalBundlerNodeCurrent > 0
+  ) {
+    lines.push(
+      `**Tracked ./bundler entry gzip:** ${formatBytes(totalBundlerEntryCurrent)} (${formatDelta(totalBundlerEntryCurrent, totalBundlerEntryBase)})`,
+    );
+    lines.push(
+      `**Tracked ./bundler web bundle (gzip):** ${formatBytes(totalBundlerWebCurrent)} (${formatDelta(totalBundlerWebCurrent, totalBundlerWebBase)})`,
+    );
+    lines.push(
+      `**Tracked ./bundler node bundle (gzip):** ${formatBytes(totalBundlerNodeCurrent)} (${formatDelta(totalBundlerNodeCurrent, totalBundlerNodeBase)})`,
+    );
+  }
   lines.push('');
   lines.push(
-    '_Bundle sizes are generated with rslib (Rspack). Web/node bundles set ENV_TARGET and enable tree-shaking. Bare imports are externalized to keep sizes consistent with prior reporting, and assets are emitted as resources._',
+    '_Bundle sizes are generated with rslib (Rspack). Package-root metrics preserve the historical report. Tracked subpath exports such as `./bundler` are measured separately so ENV_TARGET-driven tree-shaking is visible. Bare imports are externalized to keep package-level sizes consistent, and assets are emitted as resources._',
   );
   lines.push('');
 
-  const errored = Object.entries(currentData).filter(
-    ([, data]) => data?.bundleErrors,
-  );
+  const errored = [];
+  for (const [name, data] of Object.entries(currentPackages)) {
+    const entrypoints = getEntrypoints(data);
+    for (const [entryId, entry] of Object.entries(entrypoints)) {
+      if (!entry?.bundleErrors) continue;
+      errored.push({
+        name,
+        entryId,
+        bundleErrors: entry.bundleErrors,
+      });
+    }
+  }
+
   if (errored.length) {
     lines.push('### Bundle errors');
-    for (const [name, data] of errored) {
-      const parts = Object.entries(data.bundleErrors).map(
+    for (const item of errored) {
+      const parts = Object.entries(item.bundleErrors).map(
         ([target, error]) => `${target}: ${error}`,
       );
-      lines.push(`- \`${name}\`: ${parts.join('; ')}`);
+      const entryLabel = item.entryId === '.' ? '' : ` ${item.entryId}`;
+      lines.push(`- \`${item.name}${entryLabel}\`: ${parts.join('; ')}`);
+    }
+    lines.push('');
+  }
+
+  const erroredScenarios = Object.values(currentScenarios).filter(
+    (scenario) => scenario?.errors,
+  );
+  if (erroredScenarios.length) {
+    lines.push('### Scenario errors');
+    for (const scenario of erroredScenarios) {
+      const parts = Object.entries(scenario.errors).map(
+        ([target, error]) => `${target}: ${error}`,
+      );
+      lines.push(`- ${scenario.label || 'Scenario'}: ${parts.join('; ')}`);
     }
     lines.push('');
   }
@@ -557,7 +1103,7 @@ async function main() {
 
     console.log(`Scanning packages in ${packagesDir}...`);
     const results = await measure(packagesDir);
-    const packageCount = Object.keys(results).length;
+    const packageCount = Object.keys(results.packages).length;
 
     writeFileSync(outputPath, JSON.stringify(results, null, 2), 'utf8');
     console.log(`Measured ${packageCount} packages → ${outputPath}`);
@@ -567,7 +1113,7 @@ async function main() {
     let totalEsm = 0;
     let totalWeb = 0;
     let totalNode = 0;
-    for (const [name, data] of Object.entries(results)) {
+    for (const [name, data] of Object.entries(results.packages)) {
       totalDist += data.totalDist;
       totalEsm += data.esmGzip;
       if (typeof data.webBundleGzip === 'number')
@@ -579,6 +1125,23 @@ async function main() {
         : '';
       console.log(
         `  ${name}: dist=${formatBytes(data.totalDist)}, esm-gzip=${formatBytes(data.esmGzip)}, web-gzip=${formatMaybe(data.webBundleGzip)}, node-gzip=${formatMaybe(data.nodeBundleGzip)}${bundleErrorNote}`,
+      );
+      for (const [entryId, entry] of Object.entries(data.entrypoints || {})) {
+        if (entryId === '.') continue;
+        const entryBundleErrorNote = entry.bundleErrors
+          ? ` (bundle errors: ${Object.keys(entry.bundleErrors).join(', ')})`
+          : '';
+        console.log(
+          `    ${entryId}: entry-gzip=${formatMaybe(entry.gzip)}, web-gzip=${formatMaybe(entry.webBundleGzip)}, node-gzip=${formatMaybe(entry.nodeBundleGzip)}${entryBundleErrorNote}`,
+        );
+      }
+    }
+    for (const scenario of Object.values(results.scenarios || {})) {
+      const scenarioErrorNote = scenario.errors
+        ? ` (errors: ${Object.keys(scenario.errors).join(', ')})`
+        : '';
+      console.log(
+        `  scenario ${scenario.label}: web-gzip=${formatMaybe(scenario.webGzip)}, node-gzip=${formatMaybe(scenario.nodeGzip)}${scenarioErrorNote}`,
       );
     }
     console.log(

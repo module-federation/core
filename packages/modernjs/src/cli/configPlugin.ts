@@ -112,7 +112,6 @@ export const getMFConfig = async (
   const { createJiti } = require('jiti');
   const jit = createJiti(__filename, {
     interopDefault: true,
-    esmResolve: true,
   });
   const configModule = await jit(mfConfigPath);
 
@@ -244,7 +243,7 @@ export const patchMFConfig = (
   return mfConfig;
 };
 
-function patchIgnoreWarning<T extends Bundler>(chain: BundlerChainConfig) {
+function patchIgnoreWarning(chain: BundlerChainConfig) {
   const ignoreWarnings = chain.get('ignoreWarnings') || [];
   const ignoredMsgs = [
     'external script',
@@ -407,6 +406,8 @@ export const moduleFederationConfigPlugin = (
     );
 
     api.modifyBundlerChain((chain) => {
+      const bundlerType =
+        api.getAppContext().bundlerType === 'rspack' ? 'rspack' : 'webpack';
       const target = chain.get('target');
       if (skipByTarget(target)) {
         return;
@@ -416,6 +417,15 @@ export const moduleFederationConfigPlugin = (
 
       const targetMFConfig = !isWeb ? ssrConfig : csrConfig;
       patchMFConfig(targetMFConfig, !isWeb);
+
+      if (
+        bundlerType === 'rspack' &&
+        modernjsConfig.source?.enableAsyncEntry !== true &&
+        targetMFConfig.experiments?.asyncStartup !== false
+      ) {
+        targetMFConfig.experiments ||= {};
+        targetMFConfig.experiments.asyncStartup = true;
+      }
 
       patchBundlerConfig({
         chain,
@@ -484,9 +494,8 @@ export const moduleFederationConfigPlugin = (
         resolve: {
           alias: {
             // TODO: deprecated
-            '@modern-js/runtime/mf': require.resolve(
-              '@module-federation/modern-js/runtime',
-            ),
+            '@modern-js/runtime/mf':
+              require.resolve('@module-federation/modern-js/runtime'),
           },
         },
         source: {

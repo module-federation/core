@@ -30,6 +30,7 @@ interface PluginDtsOptions {
 interface DtsRemoteOptions {
   tsConfigPath?: string;
   typesFolder?: string;
+  outputDir?: string;
   deleteTypesFolder?: boolean;
   additionalFilesToCompile?: string[];
   compilerInstance?: 'tsc' | 'vue-tsc';
@@ -108,6 +109,39 @@ interface DtsRemoteOptions {
 > 优先级：dts.generateTypes.tsConfigPath > dts.tsConfigPath
 
 tsconfig 配置文件路径
+
+#### outputDir
+
+- 类型：`string`
+- 是否必填：否
+- 默认值：`undefined`
+
+用于指定生成类型产物的基础输出目录。
+
+未设置时，Module Federation 会相对于构建器的输出目录生成
+`@mf-types.zip` 和 `@mf-types.d.ts`。如果你的 remote entry 输出到了
+`production/remoteEntry.js` 这类嵌套子目录，建议将
+`dts.generateTypes.outputDir` 设置为相同的嵌套输出目录，这样类型产物会和
+entry 文件一起输出到同一个目录。
+
+这样可以让默认推导出的类型文件地址与 remote entry 路径保持一致，因此仅仅
+因为 remote entry 部署在子目录中时，通常不再需要额外配置
+`remoteTypeUrls`。
+
+```ts title="module-federation.config.ts"
+new ModuleFederationPlugin({
+  filename: 'production/remoteEntry.js',
+  dts: {
+    generateTypes: {
+      outputDir: `dist/react/${process.env.DEPLOY_ENVIRONMENT || 'production'}`,
+    },
+  },
+});
+```
+
+以上配置会将类型文件输出到
+`dist/react/production/@mf-types.zip` 和
+`dist/react/production/@mf-types.d.ts`。
 
 #### typesFolder
 
