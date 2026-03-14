@@ -367,6 +367,18 @@ export default class IndependentSharedPlugin {
       parentCompiler.outputPath,
       outputDirWithShareName,
     );
+    const parentResolve = parentConfig.resolve || {};
+    const resolveModules = new Set(
+      Array.isArray(parentResolve.modules)
+        ? parentResolve.modules
+        : parentResolve.modules
+          ? [parentResolve.modules]
+          : ['node_modules'],
+    );
+    if (parentCompiler.context) {
+      resolveModules.add(path.join(parentCompiler.context, 'node_modules'));
+    }
+
     // @ts-ignore webpack version is not the same as the one used in the plugin
     const compilerConfig: Configuration = {
       ...parentConfig,
@@ -374,6 +386,10 @@ export default class IndependentSharedPlugin {
       ignoreWarnings: [],
       entry: {
         [IGNORED_ENTRY]: this.createEntry(parentCompiler.context),
+      },
+      resolve: {
+        ...parentResolve,
+        modules: Array.from(resolveModules),
       },
 
       // 输出配置
