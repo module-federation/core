@@ -1,5 +1,14 @@
 //@ts-nocheck
 
-(async () => {
-  import('./bootstrap');
-})();
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { App } from './app';
+
+import { of } from 'rxjs';
+
+console.log(of);
+
+ReactDOM.render(
+  React.createElement(React.StrictMode, null, React.createElement(App, null)),
+  document.getElementById('root'),
+);

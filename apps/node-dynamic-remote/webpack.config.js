@@ -70,6 +70,9 @@ module.exports = (_env, argv = {}) => {
           axios: { singleton: true },
           lodash: { singleton: true },
         },
+        experiments: {
+          asyncStartup: true,
+        },
       }),
     ],
     watchOptions: {

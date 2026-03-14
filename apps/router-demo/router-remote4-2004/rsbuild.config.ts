@@ -46,6 +46,9 @@ export default defineConfig({
     pluginReact(),
     pluginModuleFederation({
       name: 'remote4',
+      experiments: {
+        asyncStartup: true,
+      },
       exposes: {
         './export-app': './src/export-App.tsx',
       },

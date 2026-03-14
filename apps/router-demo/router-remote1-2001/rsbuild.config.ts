@@ -36,6 +36,9 @@ export default defineConfig({
     pluginReact(),
     pluginModuleFederation({
       name: 'remote1',
+      experiments: {
+        asyncStartup: true,
+      },
       runtimePlugins: [
         require.resolve('@module-federation/bridge-react/plugin'),
       ],

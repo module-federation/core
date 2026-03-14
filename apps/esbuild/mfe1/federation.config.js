@@ -5,6 +5,9 @@ const {
 
 module.exports = withFederation({
   name: 'mfe1',
+  experiments: {
+    asyncStartup: true,
+  },
   filename: './mfe1/remoteEntry.js',
   exposes: {
     './component': './mfe1/app',

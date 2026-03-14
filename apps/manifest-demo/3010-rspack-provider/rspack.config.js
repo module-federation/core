@@ -94,6 +94,7 @@ module.exports = (_env, argv = {}) => {
         },
         dataPrefetch: true,
         experiments: {
+          asyncStartup: true,
           externalRuntime: true,
         },
       }),

@@ -120,6 +120,9 @@ module.exports = (_env, argv = {}) => {
           },
         },
         shareStrategy: 'loaded-first',
+        experiments: {
+          asyncStartup: true,
+        },
         dev: {
           disableLiveReload: true,
         },
