@@ -2,66 +2,112 @@
 /**
  * check-ghost-deps.mjs
  *
- * 扫描 packages/* 下每个子包 src/ 目录里的 import/require，
- * 找出未在该包 package.json 中声明的第三方依赖（幽灵依赖）。
+ * Scans import/require statements in src/ directories under packages/*,
+ * identifying third-party dependencies not declared in package.json (ghost dependencies).
  *
- * 用法：
- *   node scripts/check-ghost-deps.mjs          # 检测并报错
- *   node scripts/check-ghost-deps.mjs --fix    # 打印修复建议（pnpm add 命令）
+ * Usage:
+ *   node scripts/check-ghost-deps.mjs          # Detect and report errors
+ *   node scripts/check-ghost-deps.mjs --fix    # Print fix suggestions (pnpm add commands)
  */
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { createRequire } from 'node:module';
 
 const FIX_MODE = process.argv.includes('--fix');
 const ROOT = path.resolve(import.meta.dirname, '..');
 const PACKAGES_DIR = path.join(ROOT, 'packages');
 
-// Node.js 内置模块前缀
+// Node.js built-in module prefixes
 const NODE_BUILTINS = new Set([
-  'assert', 'async_hooks', 'buffer', 'child_process', 'cluster', 'console',
-  'constants', 'crypto', 'dgram', 'diagnostics_channel', 'dns', 'domain',
-  'events', 'fs', 'http', 'http2', 'https', 'inspector', 'module', 'net',
-  'os', 'path', 'perf_hooks', 'process', 'punycode', 'querystring', 'readline',
-  'repl', 'stream', 'string_decoder', 'sys', 'timers', 'tls', 'trace_events',
-  'tty', 'url', 'util', 'v8', 'vm', 'wasi', 'worker_threads', 'zlib',
+  'assert',
+  'async_hooks',
+  'buffer',
+  'child_process',
+  'cluster',
+  'console',
+  'constants',
+  'crypto',
+  'dgram',
+  'diagnostics_channel',
+  'dns',
+  'domain',
+  'events',
+  'fs',
+  'http',
+  'http2',
+  'https',
+  'inspector',
+  'module',
+  'net',
+  'os',
+  'path',
+  'perf_hooks',
+  'process',
+  'punycode',
+  'querystring',
+  'readline',
+  'repl',
+  'stream',
+  'string_decoder',
+  'sys',
+  'timers',
+  'tls',
+  'trace_events',
+  'tty',
+  'url',
+  'util',
+  'v8',
+  'vm',
+  'wasi',
+  'worker_threads',
+  'zlib',
 ]);
 
-// workspace 内部包前缀（不算幽灵依赖）
+// Workspace internal package prefixes (not ghost dependencies)
 const WORKSPACE_PREFIXES = ['@module-federation/'];
 
-// 虚拟模块 / alias 前缀（跳过）
-const VIRTUAL_PREFIXES = ['virtual:', '\0', '@/', '~/', 'mf:', 'REMOTE_ALIAS_IDENTIFIER'];
+// Virtual module / alias prefixes (skip)
+const VIRTUAL_PREFIXES = [
+  'virtual:',
+  '\0',
+  '@/',
+  '~/',
+  'mf:',
+  'REMOTE_ALIAS_IDENTIFIER',
+];
 
-// 已知虚拟 specifier（完整匹配，跳过）
+// Known virtual specifiers (exact match, skip)
 const VIRTUAL_EXACT = new Set([
-  'federation-host', 'federationShare', 'ignored-modules',
-  // 测试 mock / 内部 alias（非真实 npm 包）
-  'foo', 'ui-lib', 'REMOTE_ALIAS_IDENTIFIER',
+  'federation-host',
+  'federationShare',
+  'ignored-modules',
+  // Test mocks / internal aliases (not real npm packages)
+  'foo',
+  'ui-lib',
+  'REMOTE_ALIAS_IDENTIFIER',
 ]);
 
 /**
- * 判断一个 specifier 是否需要跳过
+ * Determine if a specifier should be skipped
  */
 function shouldSkip(spec) {
   if (!spec) return true;
-  if (spec.startsWith('.') || spec.startsWith('/')) return true; // 相对/绝对路径
+  if (spec.startsWith('.') || spec.startsWith('/')) return true; // relative/absolute paths
   if (spec.startsWith('node:')) return true; // node: protocol
-  // 模板字符串插值残留（如 `${foo}/bar`）
+  // Template string interpolation leftovers (e.g. `${foo}/bar`)
   if (spec.includes('${')) return true;
-  // 全大写 identifier（宏/常量，非包名）
+  // All-uppercase identifiers (macros/constants, not package names)
   if (/^[A-Z_]+$/.test(spec)) return true;
   const bare = spec.split('/')[0];
   if (NODE_BUILTINS.has(bare)) return true;
-  if (WORKSPACE_PREFIXES.some(p => spec.startsWith(p))) return true;
-  if (VIRTUAL_PREFIXES.some(p => spec.startsWith(p))) return true;
+  if (WORKSPACE_PREFIXES.some((p) => spec.startsWith(p))) return true;
+  if (VIRTUAL_PREFIXES.some((p) => spec.startsWith(p))) return true;
   if (VIRTUAL_EXACT.has(spec)) return true;
   return false;
 }
 
 /**
- * 从 specifier 提取包名（处理 @scope/pkg 和普通 pkg）
+ * Extract package name from specifier (handles @scope/pkg and regular pkg)
  */
 function extractPkgName(spec) {
   if (spec.startsWith('@')) {
@@ -72,7 +118,7 @@ function extractPkgName(spec) {
 }
 
 /**
- * 递归遍历目录，返回所有匹配后缀的文件
+ * Recursively traverse directory, returning all files matching given extensions
  */
 function walkDir(dir, exts) {
   const results = [];
@@ -81,7 +127,7 @@ function walkDir(dir, exts) {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) {
       results.push(...walkDir(full, exts));
-    } else if (exts.some(e => entry.name.endsWith(e))) {
+    } else if (exts.some((e) => entry.name.endsWith(e))) {
       results.push(full);
     }
   }
@@ -89,12 +135,14 @@ function walkDir(dir, exts) {
 }
 
 /**
- * 从文件内容里提取所有 import/require specifiers（正则，不做完整 AST）
+ * Extract all import/require specifiers from file content (using regex, not full AST)
  */
 function extractSpecifiers(content) {
   const specs = new Set();
   // static import/export: import ... from 'xxx' / export ... from 'xxx'
-  for (const m of content.matchAll(/(?:import|export)\s+(?:.*?\s+from\s+)?['"]([^'"]+)['"]/g)) {
+  for (const m of content.matchAll(
+    /(?:import|export)\s+(?:.*?\s+from\s+)?['"]([^'"]+)['"]/g,
+  )) {
     specs.add(m[1]);
   }
   // dynamic import: import('xxx')
@@ -108,14 +156,15 @@ function extractSpecifiers(content) {
   return specs;
 }
 
-// ---- 主逻辑 ----
+// ---- Main logic ----
 
 let hasError = false;
 const errorSummary = []; // { pkgName, pkgDir, missing: Set<string> }
 
-const pkgDirs = fs.readdirSync(PACKAGES_DIR, { withFileTypes: true })
-  .filter(e => e.isDirectory())
-  .map(e => path.join(PACKAGES_DIR, e.name));
+const pkgDirs = fs
+  .readdirSync(PACKAGES_DIR, { withFileTypes: true })
+  .filter((e) => e.isDirectory())
+  .map((e) => path.join(PACKAGES_DIR, e.name));
 
 for (const pkgDir of pkgDirs) {
   const pkgJsonPath = path.join(pkgDir, 'package.json');
@@ -131,7 +180,7 @@ for (const pkgDir of pkgDirs) {
     ...Object.keys(pkgJson.optionalDependencies ?? {}),
   ]);
 
-  // 扫描 src/ 目录（有些包可能是 lib/ 或根目录，兜底也扫一层）
+  // Scan src/ directory (some packages may have lib/ or root directory, also scan one level as fallback)
   const srcDir = path.join(pkgDir, 'src');
   const files = walkDir(srcDir, ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs']);
 
@@ -156,24 +205,32 @@ for (const pkgDir of pkgDirs) {
   if (missing.size > 0) {
     hasError = true;
     errorSummary.push({ pkgName, pkgDir, missing });
-    console.error(`\n❌ [${pkgName}] 发现幽灵依赖（共 ${missing.size} 个）：`);
+    console.error(
+      `\n❌ [${pkgName}] Found ghost dependencies (${missing.size} total):`,
+    );
     for (const dep of [...missing].sort()) {
       console.error(`   - ${dep}`);
     }
     if (FIX_MODE) {
       const deps = [...missing].sort().join(' ');
-      console.log(`\n   💡 修复建议：`);
+      console.log(`\n   💡 Fix suggestion:`);
       console.log(`   pnpm --filter ${pkgName} add ${deps}`);
     }
   }
 }
 
 if (hasError) {
-  console.error(`\n\n💥 检测到幽灵依赖！请在对应 package.json 中补充声明。`);
+  console.error(
+    `\n\n💥 Ghost dependencies detected! Please add declarations to the corresponding package.json files.`,
+  );
   if (!FIX_MODE) {
-    console.error(`   提示：运行 node scripts/check-ghost-deps.mjs --fix 查看修复建议`);
+    console.error(
+      `   Tip: Run node scripts/check-ghost-deps.mjs --fix to see fix suggestions`,
+    );
   }
   process.exit(1);
 } else {
-  console.log('✅ 未发现幽灵依赖，所有包依赖声明完整。');
+  console.log(
+    '✅ No ghost dependencies found. All package dependencies are properly declared.',
+  );
 }
