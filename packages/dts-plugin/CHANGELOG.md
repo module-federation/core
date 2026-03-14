@@ -1,5 +1,24 @@
 # @module-federation/dts-plugin
 
+## 2.2.0
+
+### Minor Changes
+
+- 12240bb: feat(dts-plugin): support custom outputDir for DTS type emission
+
+  Expose the `outputDir` option in `DtsRemoteOptions` so users can configure where `@mf-types.zip` and `@mf-types.d.ts` are emitted. Fix `GenerateTypesPlugin` to use `path.relative()` for correct asset placement in subdirectories.
+
+### Patch Changes
+
+- 079aecd: fix(dts-plugin): use default import for fs-extra to fix ESM compatibility
+- Updated dependencies [c856ec1]
+- Updated dependencies [12240bb]
+- Updated dependencies [e5dd6ef]
+  - @module-federation/sdk@2.2.0
+  - @module-federation/managers@2.2.0
+  - @module-federation/third-party-dts-extractor@2.2.0
+  - @module-federation/error-codes@2.2.0
+
 ## 2.1.0
 
 ### Patch Changes
@@ -248,7 +267,6 @@
 ### Patch Changes
 
 - a7cf276: chore: upgrade NX to 21.2.3, Storybook to 9.0.9, and TypeScript to 5.8.3
-
   - Upgraded NX from 21.0.3 to 21.2.3 with workspace configuration updates
   - Migrated Storybook from 8.3.5 to 9.0.9 with updated configurations and automigrations
   - Upgraded TypeScript from 5.7.3 to 5.8.3 with compatibility fixes

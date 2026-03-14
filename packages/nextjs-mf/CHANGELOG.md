@@ -1,5 +1,20 @@
 # @module-federation/nextjs-mf
 
+## 8.8.58
+
+### Patch Changes
+
+- Updated dependencies [c856ec1]
+- Updated dependencies [12240bb]
+- Updated dependencies [e5dd6ef]
+- Updated dependencies [90758e9]
+- Updated dependencies [ec7ab53]
+  - @module-federation/sdk@2.2.0
+  - @module-federation/enhanced@2.2.0
+  - @module-federation/node@2.7.34
+  - @module-federation/runtime@2.2.0
+  - @module-federation/webpack-bundler-runtime@2.2.0
+
 ## 8.8.57
 
 ### Patch Changes
@@ -270,7 +285,6 @@
 ### Patch Changes
 
 - 4ffefbe: refactor: rename container hooks for clarity and consistency
-
   - Renamed `addContainerEntryModule` to `addContainerEntryDependency`
   - Renamed `addFederationRuntimeModule` to `addFederationRuntimeDependency`
   - Added new `addRemoteDependency` hook for remote module tracking
@@ -278,7 +292,6 @@
   - This is an internal refactoring with no breaking changes to external APIs
 
 - d31a326: refactor: sink React packages from root to individual packages
-
   - Removed React dependencies from root package.json and moved them to packages that actually need them
   - Fixed rsbuild-plugin configuration to match workspace patterns
   - Updated tests to handle platform-specific files
@@ -803,7 +816,6 @@
 ### Patch Changes
 
 - d3e904b: Support Next 15 externals configuration
-
   - Refactored external handling to dynamically find and replace the first function in the 'externals' array.
   - This change improves robustness by ensuring the system correctly overrides external functions regardless of their position in the list.
   - Maintained the existing logic to preserve intended behavior with conditions checking specific package prefixes and names.
@@ -820,7 +832,6 @@
 ### Minor Changes
 
 - 1478f50: Added the UniverseEntryChunkTrackerPlugin to track entry chunks in the server plugin.
-
   - Applied UniverseEntryChunkTrackerPlugin in the applyServerPlugins function.
   - This change aims to enhance tracking of entry chunks in the server environment for hot reloading prod instances
 
@@ -895,7 +906,6 @@
 ### Minor Changes
 
 - 9e32644: Simplified InvertedContainerPlugin by removing configuration dependencies and improving runtime module integration.
-
   - Refactored `InvertedContainerPlugin` to remove redundant configurations.
   - Deleted `EmbeddedContainerPlugin` and moved its logic into `InvertedContainerPlugin`.
   - Modified `InvertedContainerRuntimeModule` to dynamically locate and integrate container entry modules.
