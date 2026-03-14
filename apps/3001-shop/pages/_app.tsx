@@ -1,14 +1,13 @@
 import React, { Suspense, useState, lazy } from 'react';
 import App from 'next/app';
 import { Layout, version, ConfigProvider } from 'antd';
-import Router, { useRouter } from 'next/router';
+import Router from 'next/router';
 import { StyleProvider } from '@ant-design/cssinjs';
 import HostAppMenu from '../components/menu';
 
 const SharedNav = lazy(() => import('home/SharedNav'));
 
 function MyApp({ Component, pageProps }) {
-  const { asPath } = useRouter();
   const [MenuComponent, setMenuComponent] = useState(() => HostAppMenu);
   const handleRouteChange = async (url) => {
     if (url.startsWith('/home') || url === '/') {
@@ -25,8 +24,16 @@ function MyApp({ Component, pageProps }) {
   };
   // handle first route hit.
   React.useEffect(() => {
-    handleRouteChange(asPath);
-  }, [asPath]);
+    const initialPath =
+      (
+        Router as typeof Router & {
+          router?: {
+            asPath?: string;
+          };
+        }
+      ).router?.asPath || '/shop';
+    handleRouteChange(initialPath);
+  }, []);
 
   //handle route change
   React.useEffect(() => {

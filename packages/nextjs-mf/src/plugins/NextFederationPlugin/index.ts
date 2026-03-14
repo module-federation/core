@@ -72,16 +72,33 @@ const loadApplyClientPlugins = () =>
   ) as typeof import('./apply-client-plugins');
 const loadLogger = () =>
   loadModule<typeof import('../../logger').default>('../../logger');
-const loadNextRequireHook = () =>
-  runtimeRequire(
-    'next/dist/server/require-hook',
-  ) as typeof import('next/dist/server/require-hook');
+const loadNextRequireHook = () => {
+  const cachedModule = Object.values(require.cache).find((entry) => {
+    const fileName = entry?.filename;
+    return (
+      typeof fileName === 'string' &&
+      fileName.includes(
+        `${path.sep}next${path.sep}dist${path.sep}server${path.sep}require-hook`,
+      )
+    );
+  });
+
+  if (cachedModule?.exports) {
+    return cachedModule.exports as typeof import('next/dist/server/require-hook');
+  }
+
+  return undefined;
+};
 
 let patchedWebpackSourcesAlias: string | undefined;
 
 const patchNextWebpackSourcesAlias = (compiler: Compiler) => {
   try {
-    const { addHookAliases } = loadNextRequireHook();
+    const nextRequireHook = loadNextRequireHook();
+    const addHookAliases = nextRequireHook?.addHookAliases;
+    if (typeof addHookAliases !== 'function') {
+      return;
+    }
     const compilerWebpack = compiler.webpack as unknown as {
       webpack?: { sources?: typeof import('webpack').sources };
       sources?: typeof import('webpack').sources;

@@ -19,11 +19,31 @@ const runtimeRequire = (id: string) =>
 const loadEnhanced = (): EnhancedModuleExports => {
   const enhancedModule = runtimeRequire('@module-federation/enhanced') as
     | EnhancedModuleExports
-    | { default: EnhancedModuleExports };
+    | {
+        default?: EnhancedModuleExports;
+        FederationModulesPlugin?: EnhancedModuleExports['FederationModulesPlugin'];
+      };
 
-  return (enhancedModule as { default?: EnhancedModuleExports }).default
-    ? (enhancedModule as { default: EnhancedModuleExports }).default
-    : (enhancedModule as EnhancedModuleExports);
+  if (
+    enhancedModule &&
+    typeof enhancedModule === 'object' &&
+    'FederationModulesPlugin' in enhancedModule
+  ) {
+    return enhancedModule as EnhancedModuleExports;
+  }
+
+  const defaultExport = (enhancedModule as { default?: EnhancedModuleExports })
+    .default;
+
+  if (
+    defaultExport &&
+    typeof defaultExport === 'object' &&
+    'FederationModulesPlugin' in defaultExport
+  ) {
+    return defaultExport;
+  }
+
+  return enhancedModule as EnhancedModuleExports;
 };
 
 const loadInvertedContainerRuntimeModule =
