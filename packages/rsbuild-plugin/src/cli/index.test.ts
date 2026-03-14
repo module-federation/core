@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { pluginModuleFederation } from './index';
+import pkg from '../../package.json';
+import { CALL_NAME_MAP } from '../constant';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 
 describe('pluginModuleFederation', () => {
@@ -26,5 +28,17 @@ describe('pluginModuleFederation', () => {
     const plugin = pluginModuleFederation(mockMFConfig, {});
     expect(plugin).toBeDefined();
     expect(plugin.name).toBe('rsbuild:module-federation-enhanced');
+  });
+
+  it('should use defined plugin name in dual-target guidance error', () => {
+    const plugin = pluginModuleFederation(mockMFConfig, { target: 'dual' });
+    const mockApi = {
+      context: { callerName: CALL_NAME_MAP.RSLIB },
+      getRsbuildConfig: () => ({}),
+    };
+
+    expect(() => plugin.setup(mockApi as any)).toThrow(
+      `Please set ${pkg.name} as global plugin in rslib.config.ts if you set 'target: "dual"'.`,
+    );
   });
 });
