@@ -82,12 +82,11 @@ let patchedWebpackSourcesAlias: string | undefined;
 const patchNextWebpackSourcesAlias = (compiler: Compiler) => {
   try {
     const { addHookAliases } = loadNextRequireHook();
-    const localWebpack =
-      (
-        compiler.webpack as typeof import('webpack') & {
-          webpack?: typeof import('webpack');
-        }
-      ).webpack ?? compiler.webpack;
+    const compilerWebpack = compiler.webpack as unknown as {
+      webpack?: { sources?: typeof import('webpack').sources };
+      sources?: typeof import('webpack').sources;
+    };
+    const localWebpack = compilerWebpack.webpack ?? compilerWebpack;
     const localWebpackSources = localWebpack.sources;
 
     if (!localWebpackSources) {
@@ -130,6 +129,76 @@ const resolveRuntimePluginPath = (): string =>
   process.env['IS_ESM_BUILD'] === 'true'
     ? require.resolve('@module-federation/nextjs-mf/dist/src/plugins/container/runtimePlugin.mjs')
     : require.resolve('@module-federation/nextjs-mf/dist/src/plugins/container/runtimePlugin.js');
+
+const patchContainerEntryDependencyFactory = (compiler: Compiler) => {
+  compiler.hooks.afterPlugins.tap('NextFederationPlugin', () => {
+    compiler.hooks.thisCompilation.tap(
+      'NextFederationPlugin',
+      (compilation) => {
+        const dependencyFactoryEntry = Array.from(
+          compilation.dependencyFactories.entries(),
+        ).find(([dependencyType]) => {
+          return (
+            (dependencyType as { name?: string } | undefined)?.name ===
+            'ContainerEntryDependency'
+          );
+        });
+
+        if (!dependencyFactoryEntry) {
+          return;
+        }
+
+        const [dependencyType, dependencyFactory] = dependencyFactoryEntry;
+        const typedDependencyFactory = dependencyFactory as {
+          create?: (data: unknown, callback: unknown) => unknown;
+          __nextMfPatched?: boolean;
+        };
+
+        if (
+          typedDependencyFactory.__nextMfPatched ||
+          typeof typedDependencyFactory.create !== 'function'
+        ) {
+          return;
+        }
+
+        const originalCreate =
+          typedDependencyFactory.create.bind(dependencyFactory);
+        const patchedFactory = Object.create(dependencyFactory) as
+          | typeof dependencyFactory
+          | {
+              create: (data: unknown, callback: unknown) => unknown;
+              __nextMfPatched?: boolean;
+            };
+
+        (patchedFactory as { __nextMfPatched?: boolean }).__nextMfPatched =
+          true;
+        (patchedFactory as { create: typeof originalCreate }).create = (
+          data: unknown,
+          callback: unknown,
+        ) => {
+          const containerDependency = (
+            data as { dependencies?: unknown[] } | undefined
+          )?.dependencies?.[0] as { injectRuntimeEntry?: string } | undefined;
+
+          if (
+            containerDependency &&
+            (typeof containerDependency.injectRuntimeEntry !== 'string' ||
+              containerDependency.injectRuntimeEntry.trim().length === 0)
+          ) {
+            containerDependency.injectRuntimeEntry = resolveRuntimePluginPath();
+          }
+
+          return originalCreate(data, callback);
+        };
+
+        compilation.dependencyFactories.set(
+          dependencyType,
+          patchedFactory as typeof dependencyFactory,
+        );
+      },
+    );
+  });
+};
 
 const resolveNoopPath = (): string =>
   process.env['IS_ESM_BUILD'] === 'true'
@@ -181,6 +250,36 @@ export class NextFederationPlugin {
     const CopyFederationPlugin = loadCopyFederationPlugin();
 
     bindLoggerToCompiler(logger, compiler, 'NextFederationPlugin');
+    compiler.hooks.normalModuleFactory.tap(
+      'NextFederationPlugin',
+      (normalModuleFactory) => {
+        normalModuleFactory.hooks.beforeResolve.tap(
+          'NextFederationPlugin',
+          (resolveData) => {
+            if (
+              !resolveData ||
+              typeof resolveData.request !== 'string' ||
+              resolveData.request.trim().length > 0
+            ) {
+              return;
+            }
+
+            const hasFederationRuntimeDependency = (
+              resolveData.dependencies || []
+            ).some((dependency) => {
+              return (
+                (dependency as { type?: string } | undefined)?.type ===
+                'federation runtime dependency'
+              );
+            });
+
+            if (hasFederationRuntimeDependency) {
+              resolveData.request = resolveRuntimePluginPath();
+            }
+          },
+        );
+      },
+    );
     process.env['FEDERATION_WEBPACK_PATH'] =
       process.env['FEDERATION_WEBPACK_PATH'] ||
       getWebpackPath(compiler, { framework: 'nextjs' });
@@ -198,9 +297,8 @@ export class NextFederationPlugin {
     const { ModuleFederationPlugin } =
       require('@module-federation/enhanced/webpack') as EnhancedWebpackModule;
 
-    // Temporary experiment to isolate whether the remaining Next 16 dev crash
-    // happens inside the enhanced ModuleFederationPlugin apply path.
-    // new ModuleFederationPlugin(normalFederationPluginOptions).apply(compiler);
+    new ModuleFederationPlugin(normalFederationPluginOptions).apply(compiler);
+    patchContainerEntryDependencyFactory(compiler);
 
     const noop = this.getNoopPath();
 

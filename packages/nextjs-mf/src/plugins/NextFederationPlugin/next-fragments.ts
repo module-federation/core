@@ -15,22 +15,14 @@ import {
 import path from 'path';
 
 const resolveFixImageLoaderPath = (): string =>
-  process.env.IS_ESM_BUILD === 'true'
-    ? require.resolve(
-        '@module-federation/nextjs-mf/dist/src/loaders/fixImageLoader.mjs',
-      )
-    : require.resolve(
-        '@module-federation/nextjs-mf/dist/src/loaders/fixImageLoader.js',
-      );
+  process.env['IS_ESM_BUILD'] === 'true'
+    ? require.resolve('@module-federation/nextjs-mf/dist/src/loaders/fixImageLoader.mjs')
+    : require.resolve('@module-federation/nextjs-mf/dist/src/loaders/fixImageLoader.js');
 
 const resolveFixUrlLoaderPath = (): string =>
-  process.env.IS_ESM_BUILD === 'true'
-    ? require.resolve(
-        '@module-federation/nextjs-mf/dist/src/loaders/fixUrlLoader.mjs',
-      )
-    : require.resolve(
-        '@module-federation/nextjs-mf/dist/src/loaders/fixUrlLoader.js',
-      );
+  process.env['IS_ESM_BUILD'] === 'true'
+    ? require.resolve('@module-federation/nextjs-mf/dist/src/loaders/fixUrlLoader.mjs')
+    : require.resolve('@module-federation/nextjs-mf/dist/src/loaders/fixUrlLoader.js');
 /**
  * Set up default shared values based on the environment.
  * @param {boolean} isServer - Boolean indicating if the code is running on the server.
@@ -87,19 +79,20 @@ export const applyPathFixes = (
     if (match.use) {
       matchCopy = { ...match };
       if (Array.isArray(match.use)) {
-        matchCopy.use = match.use.filter((loader: any) => {
+        const filteredUse = match.use.filter((loader: any) => {
           return (
             typeof loader === 'object' &&
             loader.loader &&
             !loader.loader.includes('react')
           );
         });
+        matchCopy.use = filteredUse.length > 0 ? filteredUse : undefined;
       } else if (typeof match.use === 'string') {
-        matchCopy.use = match.use.includes('react') ? '' : match.use;
+        matchCopy.use = match.use.includes('react') ? undefined : match.use;
       } else if (typeof match.use === 'object' && match.use !== null) {
         matchCopy.use =
           match.use.loader && match.use.loader.includes('react')
-            ? {}
+            ? undefined
             : match.use;
       }
     } else {
