@@ -1,6 +1,6 @@
 # @module-federation/modern-js
 
-## 2.1.1
+## 2.2.0
 
 ### Patch Changes
 
