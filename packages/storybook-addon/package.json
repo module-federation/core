@@ -70,6 +70,7 @@
     "@nx/module-federation": ">= 16.0.0",
     "@storybook/core": ">= 8.2.0",
     "@storybook/node-logger": "^6.5.16 || ^7.0.0 || ^8.0.0",
+    "storybook": ">= 8.2.0",
     "webpack": "^5.75.0",
     "webpack-virtual-modules": "0.6.2"
   },
@@ -93,6 +94,9 @@
       "optional": true
     },
     "@storybook/node-logger": {
+      "optional": true
+    },
+    "storybook": {
       "optional": true
     },
     "webpack": {

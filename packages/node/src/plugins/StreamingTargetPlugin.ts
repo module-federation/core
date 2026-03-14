@@ -60,13 +60,17 @@ class StreamingTargetPlugin implements WebpackPluginInstance {
       dynamicImport: true,
     };
 
-    new (webpack?.node?.NodeEnvironmentPlugin ||
-      require('webpack/lib/node/NodeEnvironmentPlugin'))({
+    new (
+      webpack?.node?.NodeEnvironmentPlugin ||
+      require('webpack/lib/node/NodeEnvironmentPlugin')
+    )({
       infrastructureLogging: compiler.options.infrastructureLogging,
     }).apply(compiler);
 
-    new (webpack?.node?.NodeTargetPlugin ||
-      require('webpack/lib/node/NodeTargetPlugin'))().apply(compiler);
+    new (
+      webpack?.node?.NodeTargetPlugin ||
+      require('webpack/lib/node/NodeTargetPlugin')
+    )().apply(compiler);
     new CommonJsChunkLoadingPlugin({
       asyncChunkLoading: true,
       name: this.options.name,

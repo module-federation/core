@@ -94,6 +94,10 @@
     "tsdown": "0.20.3",
     "unplugin": "^1.10.1"
   },
+  "devDependencies": {
+    "directory-tree": "3.5.2",
+    "vitest": "1.6.0"
+  },
   "scripts": {
     "build": "tsdown --config tsdown.config.ts && cp package.json dist && cp *.md dist",
     "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\"",

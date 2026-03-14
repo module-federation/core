@@ -5,7 +5,8 @@
   border: 1px solid var(--color-border-1, rgba(96, 165, 250, 0.3));
   overflow: hidden;
   box-shadow: 0 18px 32px rgba(8, 11, 25, 0.35);
-  background: linear-gradient(
+  background:
+    linear-gradient(
       140deg,
       var(--mf-accent, rgba(243, 244, 246, 0.9)) 0%,
       rgba(229, 231, 235, 0.7) 45%,

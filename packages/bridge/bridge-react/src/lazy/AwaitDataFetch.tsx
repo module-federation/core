@@ -75,8 +75,10 @@ export interface AwaitProps<T> {
   params?: DataFetchParams;
 }
 
-export interface AwaitErrorHandlerProps<T = any>
-  extends Omit<AwaitProps<T>, 'resolve'> {
+export interface AwaitErrorHandlerProps<T = any> extends Omit<
+  AwaitProps<T>,
+  'resolve'
+> {
   resolve: () => T | string;
 }
 

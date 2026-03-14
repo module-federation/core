@@ -2,7 +2,6 @@
 
 This is the example application for Module Federation core.
 
-
 ## Features
 
 - Remote loading
