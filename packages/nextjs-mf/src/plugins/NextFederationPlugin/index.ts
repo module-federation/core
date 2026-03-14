@@ -72,22 +72,38 @@ const loadApplyClientPlugins = () =>
   ) as typeof import('./apply-client-plugins');
 const loadLogger = () =>
   loadModule<typeof import('../../logger').default>('../../logger');
-const loadNextRequireHook = () =>
-  runtimeRequire(
-    'next/dist/server/require-hook',
-  ) as typeof import('next/dist/server/require-hook');
+const loadNextRequireHook = () => {
+  const cachedModule = Object.values(require.cache).find((entry) => {
+    const fileName = entry?.filename;
+    return (
+      typeof fileName === 'string' &&
+      fileName.includes(
+        `${path.sep}next${path.sep}dist${path.sep}server${path.sep}require-hook`,
+      )
+    );
+  });
+
+  if (cachedModule?.exports) {
+    return cachedModule.exports as typeof import('next/dist/server/require-hook');
+  }
+
+  return undefined;
+};
 
 let patchedWebpackSourcesAlias: string | undefined;
 
 const patchNextWebpackSourcesAlias = (compiler: Compiler) => {
   try {
-    const { addHookAliases } = loadNextRequireHook();
-    const localWebpack =
-      (
-        compiler.webpack as typeof import('webpack') & {
-          webpack?: typeof import('webpack');
-        }
-      ).webpack ?? compiler.webpack;
+    const nextRequireHook = loadNextRequireHook();
+    const addHookAliases = nextRequireHook?.addHookAliases;
+    if (typeof addHookAliases !== 'function') {
+      return;
+    }
+    const compilerWebpack = compiler.webpack as unknown as {
+      webpack?: { sources?: typeof import('webpack').sources };
+      sources?: typeof import('webpack').sources;
+    };
+    const localWebpack = compilerWebpack.webpack ?? compilerWebpack;
     const localWebpackSources = localWebpack.sources;
 
     if (!localWebpackSources) {
@@ -130,6 +146,76 @@ const resolveRuntimePluginPath = (): string =>
   process.env['IS_ESM_BUILD'] === 'true'
     ? require.resolve('@module-federation/nextjs-mf/dist/src/plugins/container/runtimePlugin.mjs')
     : require.resolve('@module-federation/nextjs-mf/dist/src/plugins/container/runtimePlugin.js');
+
+const patchContainerEntryDependencyFactory = (compiler: Compiler) => {
+  compiler.hooks.afterPlugins.tap('NextFederationPlugin', () => {
+    compiler.hooks.thisCompilation.tap(
+      'NextFederationPlugin',
+      (compilation) => {
+        const dependencyFactoryEntry = Array.from(
+          compilation.dependencyFactories.entries(),
+        ).find(([dependencyType]) => {
+          return (
+            (dependencyType as { name?: string } | undefined)?.name ===
+            'ContainerEntryDependency'
+          );
+        });
+
+        if (!dependencyFactoryEntry) {
+          return;
+        }
+
+        const [dependencyType, dependencyFactory] = dependencyFactoryEntry;
+        const typedDependencyFactory = dependencyFactory as {
+          create?: (data: unknown, callback: unknown) => unknown;
+          __nextMfPatched?: boolean;
+        };
+
+        if (
+          typedDependencyFactory.__nextMfPatched ||
+          typeof typedDependencyFactory.create !== 'function'
+        ) {
+          return;
+        }
+
+        const originalCreate =
+          typedDependencyFactory.create.bind(dependencyFactory);
+        const patchedFactory = Object.create(dependencyFactory) as
+          | typeof dependencyFactory
+          | {
+              create: (data: unknown, callback: unknown) => unknown;
+              __nextMfPatched?: boolean;
+            };
+
+        (patchedFactory as { __nextMfPatched?: boolean }).__nextMfPatched =
+          true;
+        (patchedFactory as { create: typeof originalCreate }).create = (
+          data: unknown,
+          callback: unknown,
+        ) => {
+          const containerDependency = (
+            data as { dependencies?: unknown[] } | undefined
+          )?.dependencies?.[0] as { injectRuntimeEntry?: string } | undefined;
+
+          if (
+            containerDependency &&
+            (typeof containerDependency.injectRuntimeEntry !== 'string' ||
+              containerDependency.injectRuntimeEntry.trim().length === 0)
+          ) {
+            containerDependency.injectRuntimeEntry = resolveRuntimePluginPath();
+          }
+
+          return originalCreate(data, callback);
+        };
+
+        compilation.dependencyFactories.set(
+          dependencyType,
+          patchedFactory as typeof dependencyFactory,
+        );
+      },
+    );
+  });
+};
 
 const resolveNoopPath = (): string =>
   process.env['IS_ESM_BUILD'] === 'true'
@@ -181,30 +267,61 @@ export class NextFederationPlugin {
     const CopyFederationPlugin = loadCopyFederationPlugin();
 
     bindLoggerToCompiler(logger, compiler, 'NextFederationPlugin');
+    compiler.hooks.normalModuleFactory.tap(
+      'NextFederationPlugin',
+      (normalModuleFactory) => {
+        normalModuleFactory.hooks.beforeResolve.tap(
+          'NextFederationPlugin',
+          (resolveData) => {
+            if (
+              !resolveData ||
+              typeof resolveData.request !== 'string' ||
+              resolveData.request.trim().length > 0
+            ) {
+              return;
+            }
+
+            const hasFederationRuntimeDependency = (
+              resolveData.dependencies || []
+            ).some((dependency) => {
+              return (
+                (dependency as { type?: string } | undefined)?.type ===
+                'federation runtime dependency'
+              );
+            });
+
+            if (hasFederationRuntimeDependency) {
+              resolveData.request = resolveRuntimePluginPath();
+            }
+          },
+        );
+      },
+    );
     process.env['FEDERATION_WEBPACK_PATH'] =
       process.env['FEDERATION_WEBPACK_PATH'] ||
       getWebpackPath(compiler, { framework: 'nextjs' });
     patchNextWebpackSourcesAlias(compiler);
     if (!this.validateOptions(compiler)) return;
     const isServer = this.isServerCompiler(compiler);
+    const isAppDirectory = this.isAppDirectory(compiler);
     new CopyFederationPlugin(isServer).apply(compiler);
     const normalFederationPluginOptions = this.getNormalFederationPluginOptions(
       compiler,
       isServer,
+      isAppDirectory,
     );
     this._options = normalFederationPluginOptions;
-    this.applyConditionalPlugins(compiler, isServer);
+    this.applyConditionalPlugins(compiler, isServer, isAppDirectory);
 
     const { ModuleFederationPlugin } =
       require('@module-federation/enhanced/webpack') as EnhancedWebpackModule;
 
-    // Temporary experiment to isolate whether the remaining Next 16 dev crash
-    // happens inside the enhanced ModuleFederationPlugin apply path.
-    // new ModuleFederationPlugin(normalFederationPluginOptions).apply(compiler);
+    new ModuleFederationPlugin(normalFederationPluginOptions).apply(compiler);
+    patchContainerEntryDependencyFactory(compiler);
 
     const noop = this.getNoopPath();
 
-    if (!this._extraOptions.skipSharingNextInternals) {
+    if (!this._extraOptions.skipSharingNextInternals && !isAppDirectory) {
       compiler.hooks.make.tapAsync(
         'NextFederationPlugin',
         (compilation, callback) => {
@@ -239,19 +356,6 @@ export class NextFederationPlugin {
     const { validateCompilerOptions, validatePluginOptions } =
       loadValidateOptions();
     const logger = loadLogger();
-    const manifestPlugin = compiler.options.plugins.find(
-      (p): p is WebpackPluginInstance =>
-        p?.constructor?.name === 'BuildManifestPlugin',
-    );
-
-    if (manifestPlugin) {
-      //@ts-ignore
-      if (manifestPlugin?.appDirEnabled) {
-        throw new Error(
-          'App Directory is not supported by nextjs-mf. Use only pages directory, do not open git issues about this',
-        );
-      }
-    }
 
     const compilerValid = validateCompilerOptions(compiler);
     const pluginValid = validatePluginOptions(this._options);
@@ -275,7 +379,38 @@ export class NextFederationPlugin {
     return compiler.options.name === 'server';
   }
 
-  private applyConditionalPlugins(compiler: Compiler, isServer: boolean) {
+  private isAppDirectory(compiler: Compiler): boolean {
+    const pluginNames = (compiler.options.plugins || []).map((plugin) => {
+      const candidate = plugin as
+        | { constructor?: { name?: string }; name?: string }
+        | undefined;
+      return candidate?.constructor?.name || candidate?.name || '';
+    });
+
+    if (
+      pluginNames.includes('FlightClientEntryPlugin') ||
+      pluginNames.includes('ClientReferenceManifestPlugin')
+    ) {
+      return true;
+    }
+
+    const manifestPlugin = compiler.options.plugins.find(
+      (plugin): plugin is WebpackPluginInstance =>
+        plugin?.constructor?.name === 'BuildManifestPlugin',
+    ) as
+      | (WebpackPluginInstance & {
+          appDirEnabled?: boolean;
+        })
+      | undefined;
+
+    return Boolean(manifestPlugin?.appDirEnabled);
+  }
+
+  private applyConditionalPlugins(
+    compiler: Compiler,
+    isServer: boolean,
+    isAppDirectory: boolean,
+  ) {
     const { applyPathFixes, retrieveDefaultShared } = loadNextFragments();
     compiler.options.output.uniqueName = this._options.name;
     compiler.options.output.environment = {
@@ -321,7 +456,10 @@ export class NextFederationPlugin {
       applyServerPlugins(compiler, this._options);
       handleServerExternals(compiler, {
         ...this._options,
-        shared: { ...retrieveDefaultShared(isServer), ...this._options.shared },
+        shared: {
+          ...retrieveDefaultShared(isServer, isAppDirectory),
+          ...this._options.shared,
+        },
       });
     } else {
       const { applyClientPlugins } = loadApplyClientPlugins();
@@ -332,12 +470,13 @@ export class NextFederationPlugin {
   private getNormalFederationPluginOptions(
     compiler: Compiler,
     isServer: boolean,
+    isAppDirectory: boolean,
   ): moduleFederationPlugin.ModuleFederationPluginOptions {
     const { retrieveDefaultShared } = loadNextFragments();
     const { exposeNextjsPages } = loadNextPageMapLoader();
     const defaultShared = this._extraOptions.skipSharingNextInternals
       ? {}
-      : retrieveDefaultShared(isServer);
+      : retrieveDefaultShared(isServer, isAppDirectory);
 
     return {
       ...this._options,

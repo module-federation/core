@@ -1,10 +1,21 @@
 import React from 'react';
 import { Menu, Layout } from 'antd';
-import { useRouter } from 'next/router';
+import Router from 'next/router';
 import './menu';
 
 const SharedNav = () => {
-  const { asPath, push } = useRouter();
+  const router = (
+    Router as typeof Router & {
+      router?: {
+        asPath?: string;
+        push: (url: string) => Promise<boolean>;
+      };
+    }
+  ).router;
+  const asPath =
+    typeof window !== 'undefined'
+      ? window.location.pathname || router?.asPath || '/'
+      : router?.asPath || '/';
   let activeMenu;
 
   if (asPath === '/' || asPath.startsWith('/home')) {
@@ -53,7 +64,13 @@ const SharedNav = () => {
         mode="horizontal"
         selectedKeys={activeMenu ? [activeMenu] : undefined}
         onClick={({ key }) => {
-          push(key);
+          if (router) {
+            void router.push(String(key));
+            return;
+          }
+          if (typeof window !== 'undefined') {
+            window.location.assign(String(key));
+          }
         }}
         items={menuItems}
       />

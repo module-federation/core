@@ -90,17 +90,6 @@ export default function (): ModuleFederationRuntimePlugin {
       return args;
     },
     beforeRequest: function (args: any) {
-      const options = args.options;
-      const id = args.id;
-      const remoteName = id.split('/').shift();
-      const remote = options.remotes.find(function (remote: any) {
-        return remote.name === remoteName;
-      });
-      if (!remote) return args;
-      if (remote && remote.entry && remote.entry.includes('?t=')) {
-        return args;
-      }
-      remote.entry = remote.entry + '?t=' + Date.now();
       return args;
     },
     afterResolve: function (args: any) {
@@ -237,9 +226,12 @@ export default function (): ModuleFederationRuntimePlugin {
       if (!host.options.shared[pkgName]) {
         return args;
       }
+      const hostShared = host.options.shared[pkgName];
+      if (!Array.isArray(hostShared) || !hostShared[0]) {
+        return args;
+      }
       args.resolver = function () {
-        shareScopeMap[scope][pkgName][version] =
-          host.options.shared[pkgName][0];
+        shareScopeMap[scope][pkgName][version] = hostShared[0];
         return {
           shared: shareScopeMap[scope][pkgName][version],
           useTreesShaking: false,
