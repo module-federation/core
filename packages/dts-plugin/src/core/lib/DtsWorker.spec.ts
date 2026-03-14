@@ -161,6 +161,9 @@ describe('generateTypesInChildProcess', () => {
                                 {
                                   name: 'utils.d.ts',
                                 },
+                                {
+                                  name: 'virtualRemotePackage.d.ts',
+                                },
                               ],
                               name: 'lib',
                             },
