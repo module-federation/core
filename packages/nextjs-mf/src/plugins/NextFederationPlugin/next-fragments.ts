@@ -30,7 +30,13 @@ const resolveFixUrlLoaderPath = (): string =>
  */
 export const retrieveDefaultShared = (
   isServer: boolean,
+  isAppDirectory = false,
 ): moduleFederationPlugin.SharedObject => {
+  // In app router builds, force Next internals to be bundled to avoid
+  // unresolved shared lookups during app route data collection/runtime init.
+  if (isAppDirectory) {
+    return DEFAULT_SHARE_SCOPE_BROWSER;
+  }
   // If the code is running on the server, treat some Next.js internals as import false to make them external
   // This is because they will be provided by the server environment and not by the remote container
   if (isServer) {

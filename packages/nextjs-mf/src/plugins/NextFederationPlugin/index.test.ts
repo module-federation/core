@@ -149,4 +149,36 @@ describe('NextFederationPlugin apply', () => {
     );
     expect(moduleFederationPluginApplyMock).toHaveBeenCalledWith(compiler);
   });
+
+  it('allows app directory build manifest plugin configurations', () => {
+    const options: NextFederationPluginOptions = {
+      name: 'host',
+      filename: 'static/chunks/remoteEntry.js',
+      exposes: {},
+      remotes: {},
+      shared: {},
+      extraOptions: {
+        skipSharingNextInternals: true,
+      },
+    };
+    const plugin = new NextFederationPlugin(options);
+    const compiler = createCompiler();
+
+    compiler.options.plugins = [
+      {
+        constructor: {
+          name: 'BuildManifestPlugin',
+        },
+        appDirEnabled: true,
+      } as unknown as Compiler['options']['plugins'][number],
+    ];
+
+    const result = (
+      plugin as unknown as {
+        validateOptions: (compiler: Compiler) => boolean;
+      }
+    ).validateOptions(compiler);
+
+    expect(result).toBe(true);
+  });
 });

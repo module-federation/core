@@ -1,5 +1,5 @@
 import type { Compiler, RuleSetRule } from 'webpack';
-import { applyPathFixes } from './next-fragments';
+import { applyPathFixes, retrieveDefaultShared } from './next-fragments';
 
 describe('applyPathFixes', () => {
   it('does not create empty loader dependencies for runtimePlugin rules', () => {
@@ -29,5 +29,19 @@ describe('applyPathFixes', () => {
     expect(firstRule.oneOf).toBeDefined();
     expect(firstRule.oneOf?.[0].use).toBeUndefined();
     expect(firstRule.oneOf?.[1].use).toBeUndefined();
+  });
+});
+
+describe('retrieveDefaultShared', () => {
+  it('uses browser-style shared config for app directory builds', () => {
+    const shared = retrieveDefaultShared(true, true);
+    const reactShared = shared['react'] as
+      | undefined
+      | {
+          import?: boolean;
+        };
+
+    expect(reactShared).toBeDefined();
+    expect(reactShared?.import).toBeUndefined();
   });
 });

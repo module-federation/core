@@ -286,13 +286,15 @@ export class NextFederationPlugin {
     patchNextWebpackSourcesAlias(compiler);
     if (!this.validateOptions(compiler)) return;
     const isServer = this.isServerCompiler(compiler);
+    const isAppDirectory = this.isAppDirectory(compiler);
     new CopyFederationPlugin(isServer).apply(compiler);
     const normalFederationPluginOptions = this.getNormalFederationPluginOptions(
       compiler,
       isServer,
+      isAppDirectory,
     );
     this._options = normalFederationPluginOptions;
-    this.applyConditionalPlugins(compiler, isServer);
+    this.applyConditionalPlugins(compiler, isServer, isAppDirectory);
 
     const { ModuleFederationPlugin } =
       require('@module-federation/enhanced/webpack') as EnhancedWebpackModule;
@@ -302,7 +304,7 @@ export class NextFederationPlugin {
 
     const noop = this.getNoopPath();
 
-    if (!this._extraOptions.skipSharingNextInternals) {
+    if (!this._extraOptions.skipSharingNextInternals && !isAppDirectory) {
       compiler.hooks.make.tapAsync(
         'NextFederationPlugin',
         (compilation, callback) => {
@@ -337,19 +339,6 @@ export class NextFederationPlugin {
     const { validateCompilerOptions, validatePluginOptions } =
       loadValidateOptions();
     const logger = loadLogger();
-    const manifestPlugin = compiler.options.plugins.find(
-      (p): p is WebpackPluginInstance =>
-        p?.constructor?.name === 'BuildManifestPlugin',
-    );
-
-    if (manifestPlugin) {
-      //@ts-ignore
-      if (manifestPlugin?.appDirEnabled) {
-        throw new Error(
-          'App Directory is not supported by nextjs-mf. Use only pages directory, do not open git issues about this',
-        );
-      }
-    }
 
     const compilerValid = validateCompilerOptions(compiler);
     const pluginValid = validatePluginOptions(this._options);
@@ -373,7 +362,38 @@ export class NextFederationPlugin {
     return compiler.options.name === 'server';
   }
 
-  private applyConditionalPlugins(compiler: Compiler, isServer: boolean) {
+  private isAppDirectory(compiler: Compiler): boolean {
+    const pluginNames = (compiler.options.plugins || []).map((plugin) => {
+      const candidate = plugin as
+        | { constructor?: { name?: string }; name?: string }
+        | undefined;
+      return candidate?.constructor?.name || candidate?.name || '';
+    });
+
+    if (
+      pluginNames.includes('FlightClientEntryPlugin') ||
+      pluginNames.includes('ClientReferenceManifestPlugin')
+    ) {
+      return true;
+    }
+
+    const manifestPlugin = compiler.options.plugins.find(
+      (plugin): plugin is WebpackPluginInstance =>
+        plugin?.constructor?.name === 'BuildManifestPlugin',
+    ) as
+      | (WebpackPluginInstance & {
+          appDirEnabled?: boolean;
+        })
+      | undefined;
+
+    return Boolean(manifestPlugin?.appDirEnabled);
+  }
+
+  private applyConditionalPlugins(
+    compiler: Compiler,
+    isServer: boolean,
+    isAppDirectory: boolean,
+  ) {
     const { applyPathFixes, retrieveDefaultShared } = loadNextFragments();
     compiler.options.output.uniqueName = this._options.name;
     compiler.options.output.environment = {
@@ -419,7 +439,10 @@ export class NextFederationPlugin {
       applyServerPlugins(compiler, this._options);
       handleServerExternals(compiler, {
         ...this._options,
-        shared: { ...retrieveDefaultShared(isServer), ...this._options.shared },
+        shared: {
+          ...retrieveDefaultShared(isServer, isAppDirectory),
+          ...this._options.shared,
+        },
       });
     } else {
       const { applyClientPlugins } = loadApplyClientPlugins();
@@ -430,12 +453,13 @@ export class NextFederationPlugin {
   private getNormalFederationPluginOptions(
     compiler: Compiler,
     isServer: boolean,
+    isAppDirectory: boolean,
   ): moduleFederationPlugin.ModuleFederationPluginOptions {
     const { retrieveDefaultShared } = loadNextFragments();
     const { exposeNextjsPages } = loadNextPageMapLoader();
     const defaultShared = this._extraOptions.skipSharingNextInternals
       ? {}
-      : retrieveDefaultShared(isServer);
+      : retrieveDefaultShared(isServer, isAppDirectory);
 
     return {
       ...this._options,

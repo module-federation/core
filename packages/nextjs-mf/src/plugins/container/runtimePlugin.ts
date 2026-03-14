@@ -237,9 +237,15 @@ export default function (): ModuleFederationRuntimePlugin {
       if (!host.options.shared[pkgName]) {
         return args;
       }
+      const hostShared = host.options.shared[pkgName];
+      const hostSharedConfig = Array.isArray(hostShared)
+        ? hostShared[0]
+        : hostShared;
+      if (!hostSharedConfig) {
+        return args;
+      }
       args.resolver = function () {
-        shareScopeMap[scope][pkgName][version] =
-          host.options.shared[pkgName][0];
+        shareScopeMap[scope][pkgName][version] = hostSharedConfig;
         return {
           shared: shareScopeMap[scope][pkgName][version],
           useTreesShaking: false,
