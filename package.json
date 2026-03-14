@@ -84,7 +84,8 @@
     "commitgen:staged": "./commit-gen.js --path ./packages --staged",
     "commitgen:main": "./commit-gen.js --path ./packages",
     "changeset:status": "changeset status",
-    "generate:schema": "pnpm --filter @module-federation/enhanced run generate:schema && git diff --name-only | xargs pnpm exec prettier --write --ignore-unknown"
+    "generate:schema": "pnpm --filter @module-federation/enhanced run generate:schema && git diff --name-only | xargs pnpm exec prettier --write --ignore-unknown",
+    "lint:deps": "node scripts/check-ghost-deps.mjs"
   },
   "pnpm": {
     "packageExtensions": {
