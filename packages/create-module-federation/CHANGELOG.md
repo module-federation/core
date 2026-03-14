@@ -1,5 +1,11 @@
 # create-module-federation
 
+## 2.2.0
+
+### Patch Changes
+
+- 5fe1ceb: Update React and React DOM to v19.2.3
+
 ## 2.1.0
 
 ## 2.0.1
@@ -55,7 +61,6 @@
 ### Patch Changes
 
 - a7cf276: chore: upgrade NX to 21.2.3, Storybook to 9.0.9, and TypeScript to 5.8.3
-
   - Upgraded NX from 21.0.3 to 21.2.3 with workspace configuration updates
   - Migrated Storybook from 8.3.5 to 9.0.9 with updated configurations and automigrations
   - Upgraded TypeScript from 5.7.3 to 5.8.3 with compatibility fixes

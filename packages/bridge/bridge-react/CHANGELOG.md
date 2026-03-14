@@ -1,5 +1,19 @@
 # @module-federation/bridge-react
 
+## 2.2.0
+
+### Patch Changes
+
+- c856ec1: Add `isBrowserEnvValue` as a tree-shakable ENV_TARGET-aware constant while
+  preserving the `isBrowserEnv()` function. Internal runtime and bridge callers
+  use the constant to enable bundler dead-code elimination without breaking the
+  public API.
+- Updated dependencies [c856ec1]
+- Updated dependencies [12240bb]
+- Updated dependencies [e5dd6ef]
+  - @module-federation/sdk@2.2.0
+  - @module-federation/bridge-shared@2.2.0
+
 ## 2.1.0
 
 ### Patch Changes
@@ -96,7 +110,6 @@
 - dc103ee: fix: support React Router v6 in peer dependencies
 
   Update react-router peer dependency from "^7" to "^6 || ^7" to fix npm install failures for projects using React Router v6.
-
   - @module-federation/sdk@0.21.2
   - @module-federation/bridge-shared@0.21.2
 
@@ -190,7 +203,6 @@
 
 - 65aa038: chore(bridge-react): set sideEffects false
 - a7cf276: chore: upgrade NX to 21.2.3, Storybook to 9.0.9, and TypeScript to 5.8.3
-
   - Upgraded NX from 21.0.3 to 21.2.3 with workspace configuration updates
   - Migrated Storybook from 8.3.5 to 9.0.9 with updated configurations and automigrations
   - Upgraded TypeScript from 5.7.3 to 5.8.3 with compatibility fixes
@@ -199,7 +211,6 @@
   - Updated build configurations and dependencies to support latest versions
 
 - d31a326: refactor: sink React packages from root to individual packages
-
   - Removed React dependencies from root package.json and moved them to packages that actually need them
   - Fixed rsbuild-plugin configuration to match workspace patterns
   - Updated tests to handle platform-specific files

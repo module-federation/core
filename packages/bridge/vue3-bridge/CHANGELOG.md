@@ -1,5 +1,16 @@
 # @module-federation/bridge-vue3
 
+## 2.2.0
+
+### Patch Changes
+
+- Updated dependencies [c856ec1]
+- Updated dependencies [12240bb]
+- Updated dependencies [e5dd6ef]
+  - @module-federation/sdk@2.2.0
+  - @module-federation/runtime@2.2.0
+  - @module-federation/bridge-shared@2.2.0
+
 ## 2.1.0
 
 ### Patch Changes
@@ -203,7 +214,6 @@
 ### Patch Changes
 
 - a7cf276: chore: upgrade NX to 21.2.3, Storybook to 9.0.9, and TypeScript to 5.8.3
-
   - Upgraded NX from 21.0.3 to 21.2.3 with workspace configuration updates
   - Migrated Storybook from 8.3.5 to 9.0.9 with updated configurations and automigrations
   - Upgraded TypeScript from 5.7.3 to 5.8.3 with compatibility fixes
@@ -365,7 +375,6 @@
 ### Patch Changes
 
 - 6bc13cf: Fixed several issues:
-
   1. Resolved inconsistencies in naming between `name` and `moduleName` to align with the type defined in `packages/bridge/bridge-shared/src/type.ts`. This also fixed an issue where `name` was being passed to the remote component, and if it was `<router-view>`, it caused rendering issues.
   2. Issue: When passing props from a Vue 3 host application to a Vue 3 remote application created with `createRemoteComponent`, the props were being applied as attributes on the root container instead of being passed to the remote component.
      Fix: Set `inheritAttrs: false` in `remoteApp.tsx` and explicitly pass all attributes to the remote component using `useAttrs()`.

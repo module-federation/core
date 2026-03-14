@@ -1,5 +1,18 @@
 # @module-federation/esbuild
 
+## 0.0.98
+
+### Patch Changes
+
+- a944c2d: fix: fix import map registration for ESM remote modules
+
+  The import map registration was failing because the runtimePlugin was looking for moduleMap in the host scope instead of fetching it from the remote module exports. This fix adds explicit synchronous import map registration in the host initialization code that runs after initializeSharing but before any code that imports from remotes.
+
+- Updated dependencies [c856ec1]
+- Updated dependencies [12240bb]
+- Updated dependencies [e5dd6ef]
+  - @module-federation/sdk@2.2.0
+
 ## 0.0.97
 
 ### Patch Changes

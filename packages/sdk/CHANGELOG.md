@@ -1,5 +1,21 @@
 # @module-federation/sdk
 
+## 2.2.0
+
+### Minor Changes
+
+- c856ec1: Add `isBrowserEnvValue` as a tree-shakable ENV_TARGET-aware constant while
+  preserving the `isBrowserEnv()` function. Internal runtime and bridge callers
+  use the constant to enable bundler dead-code elimination without breaking the
+  public API.
+- 12240bb: feat(dts-plugin): support custom outputDir for DTS type emission
+
+  Expose the `outputDir` option in `DtsRemoteOptions` so users can configure where `@mf-types.zip` and `@mf-types.d.ts` are emitted. Fix `GenerateTypesPlugin` to use `path.relative()` for correct asset placement in subdirectories.
+
+### Patch Changes
+
+- e5dd6ef: feat(runtime-core): enhance error handling for script loading and execution
+
 ## 2.1.0
 
 ### Patch Changes
@@ -76,7 +92,6 @@
 ### Patch Changes
 
 - 0bf3a3a: fix(node): prevent infinite recursion in module imports
-
   - Add import cache to prevent infinite recursion when modules have circular dependencies
   - Cache import promises to ensure each module is only imported once
   - Clear cache on import errors to allow retry attempts
@@ -93,7 +108,6 @@
 ### Patch Changes
 
 - a7cf276: chore: upgrade NX to 21.2.3, Storybook to 9.0.9, and TypeScript to 5.8.3
-
   - Upgraded NX from 21.0.3 to 21.2.3 with workspace configuration updates
   - Migrated Storybook from 8.3.5 to 9.0.9 with updated configurations and automigrations
   - Upgraded TypeScript from 5.7.3 to 5.8.3 with compatibility fixes
@@ -122,7 +136,6 @@
 ### Minor Changes
 
 - 82b8cac: Introduced environment-specific handling for `createScriptNode` and `loadScriptNode` functions and added build optimization options.
-
   - Declared `ENV_TARGET` constant to differentiate between 'web' and 'node' environments.
   - Modified `createScriptNode` and `loadScriptNode` to execute only in Node.js environment.
     - Throws an error if attempted in a non-Node.js environment.
@@ -304,7 +317,6 @@
 ### Patch Changes
 
 - 9e32644: Added experimental option for federation runtime in ContainerPluginOptions.
-
   - Extended `ContainerPluginOptions` to include an `experiments` property.
     - Within `experiments`, added a `federationRuntime` option.
       - `federationRuntime` can be either `false` or `'hoisted'`.
