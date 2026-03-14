@@ -2,8 +2,48 @@ import type { WebpackOptionsNormalized, Compiler } from 'webpack';
 import type ExternalModuleFactoryPlugin from 'webpack/lib/ExternalModuleFactoryPlugin';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import path from 'path';
-import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
-import UniverseEntryChunkTrackerPlugin from '@module-federation/node/universe-entry-chunk-tracker-plugin';
+
+type UniverseEntryChunkTrackerPluginCtor =
+  typeof import('@module-federation/node/universe-entry-chunk-tracker-plugin').default;
+type InvertedContainerPluginCtor =
+  typeof import('../container/InvertedContainerPlugin').default;
+
+const runtimeRequireFromModule = new Function(
+  'moduleRef',
+  'id',
+  'return moduleRef && moduleRef.require ? moduleRef.require(id) : undefined',
+) as (moduleRef: { require(id: string): any } | undefined, id: string) => any;
+
+const runtimeRequire = (id: string) =>
+  runtimeRequireFromModule(
+    typeof module !== 'undefined' ? module : undefined,
+    id,
+  );
+
+const loadUniverseEntryChunkTrackerPlugin =
+  (): UniverseEntryChunkTrackerPluginCtor => {
+    const pluginModule = runtimeRequire(
+      '@module-federation/node/universe-entry-chunk-tracker-plugin',
+    ) as
+      | UniverseEntryChunkTrackerPluginCtor
+      | { default: UniverseEntryChunkTrackerPluginCtor };
+
+    return (pluginModule as { default?: UniverseEntryChunkTrackerPluginCtor })
+      .default
+      ? (pluginModule as { default: UniverseEntryChunkTrackerPluginCtor })
+          .default
+      : (pluginModule as UniverseEntryChunkTrackerPluginCtor);
+  };
+
+const loadInvertedContainerPlugin = (): InvertedContainerPluginCtor => {
+  const pluginModule = runtimeRequire(
+    '../container/InvertedContainerPlugin',
+  ) as InvertedContainerPluginCtor | { default: InvertedContainerPluginCtor };
+
+  return (pluginModule as { default?: InvertedContainerPluginCtor }).default
+    ? (pluginModule as { default: InvertedContainerPluginCtor }).default
+    : (pluginModule as InvertedContainerPluginCtor);
+};
 
 type EntryStaticNormalized = Awaited<
   ReturnType<Extract<WebpackOptionsNormalized['entry'], () => any>>
@@ -128,6 +168,8 @@ export function applyServerPlugins(
   compiler: Compiler,
   options: moduleFederationPlugin.ModuleFederationPluginOptions,
 ): void {
+  const UniverseEntryChunkTrackerPlugin = loadUniverseEntryChunkTrackerPlugin();
+  const InvertedContainerPlugin = loadInvertedContainerPlugin();
   const chunkFileName = compiler.options?.output?.chunkFilename;
   const uniqueName = compiler?.options?.output?.uniqueName || options.name;
   const suffix = `-[contenthash].js`;

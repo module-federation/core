@@ -93,11 +93,6 @@
           "@changesets/assemble-release-plan": "workspace:*"
         }
       },
-      "next": {
-        "dependencies": {
-          "webpack": "*"
-        }
-      },
       "react-server-dom-webpack@19.2.4": {
         "peerDependencies": {
           "react": ">=18",

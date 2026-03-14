@@ -1,9 +1,44 @@
 import type { Compiler } from 'webpack';
-import { ChunkCorrelationPlugin } from '@module-federation/node';
-import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import type { NextFederationPluginExtraOptions } from './next-fragments';
 import logger from '../../logger';
+
+type ChunkCorrelationPluginCtor =
+  typeof import('@module-federation/node/src/plugins/ChunkCorrelationPlugin').default;
+type InvertedContainerPluginCtor =
+  typeof import('../container/InvertedContainerPlugin').default;
+
+const runtimeRequireFromModule = new Function(
+  'moduleRef',
+  'id',
+  'return moduleRef && moduleRef.require ? moduleRef.require(id) : undefined',
+) as (moduleRef: { require(id: string): any } | undefined, id: string) => any;
+
+const runtimeRequire = (id: string) =>
+  runtimeRequireFromModule(
+    typeof module !== 'undefined' ? module : undefined,
+    id,
+  );
+
+const loadChunkCorrelationPlugin = (): ChunkCorrelationPluginCtor => {
+  const pluginModule = runtimeRequire(
+    '@module-federation/node/src/plugins/ChunkCorrelationPlugin',
+  ) as ChunkCorrelationPluginCtor | { default: ChunkCorrelationPluginCtor };
+
+  return (pluginModule as { default?: ChunkCorrelationPluginCtor }).default
+    ? (pluginModule as { default: ChunkCorrelationPluginCtor }).default
+    : (pluginModule as ChunkCorrelationPluginCtor);
+};
+
+const loadInvertedContainerPlugin = (): InvertedContainerPluginCtor => {
+  const pluginModule = runtimeRequire(
+    '../container/InvertedContainerPlugin',
+  ) as InvertedContainerPluginCtor | { default: InvertedContainerPluginCtor };
+
+  return (pluginModule as { default?: InvertedContainerPluginCtor }).default
+    ? (pluginModule as { default: InvertedContainerPluginCtor }).default
+    : (pluginModule as InvertedContainerPluginCtor);
+};
 
 /**
  * Applies client-specific plugins.
@@ -29,6 +64,8 @@ export function applyClientPlugins(
   options: moduleFederationPlugin.ModuleFederationPluginOptions,
   extraOptions: NextFederationPluginExtraOptions,
 ): void {
+  const ChunkCorrelationPlugin = loadChunkCorrelationPlugin();
+  const InvertedContainerPlugin = loadInvertedContainerPlugin();
   const { name } = options;
 
   // Adjust the public path if it is set to the default Next.js path

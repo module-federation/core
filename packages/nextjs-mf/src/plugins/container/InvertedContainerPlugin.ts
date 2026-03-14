@@ -1,10 +1,23 @@
 import type { Compilation, Compiler, Chunk } from 'webpack';
-import InvertedContainerRuntimeModule from './InvertedContainerRuntimeModule';
 
 type EnhancedModuleExports = typeof import('@module-federation/enhanced');
+type InvertedContainerRuntimeModuleFactory =
+  typeof import('./InvertedContainerRuntimeModule').default;
+
+const runtimeRequireFromModule = new Function(
+  'moduleRef',
+  'id',
+  'return moduleRef && moduleRef.require ? moduleRef.require(id) : undefined',
+) as (moduleRef: { require(id: string): any } | undefined, id: string) => any;
+
+const runtimeRequire = (id: string) =>
+  runtimeRequireFromModule(
+    typeof module !== 'undefined' ? module : undefined,
+    id,
+  );
 
 const loadEnhanced = (): EnhancedModuleExports => {
-  const enhancedModule = require('@module-federation/enhanced') as
+  const enhancedModule = runtimeRequire('@module-federation/enhanced') as
     | EnhancedModuleExports
     | { default: EnhancedModuleExports };
 
@@ -13,9 +26,28 @@ const loadEnhanced = (): EnhancedModuleExports => {
     : (enhancedModule as EnhancedModuleExports);
 };
 
+const loadInvertedContainerRuntimeModule =
+  (): InvertedContainerRuntimeModuleFactory => {
+    const runtimeModule = runtimeRequire('./InvertedContainerRuntimeModule') as
+      | InvertedContainerRuntimeModuleFactory
+      | { default: InvertedContainerRuntimeModuleFactory };
+
+    return (
+      runtimeModule as { default?: InvertedContainerRuntimeModuleFactory }
+    ).default
+      ? (runtimeModule as { default: InvertedContainerRuntimeModuleFactory })
+          .default
+      : (runtimeModule as InvertedContainerRuntimeModuleFactory);
+  };
+
 class InvertedContainerPlugin {
   public apply(compiler: Compiler): void {
     const { FederationModulesPlugin, dependencies } = loadEnhanced();
+    const createInvertedContainerRuntimeModule =
+      loadInvertedContainerRuntimeModule();
+    const InvertedContainerRuntimeModule = createInvertedContainerRuntimeModule(
+      compiler.webpack,
+    );
 
     compiler.hooks.thisCompilation.tap(
       'EmbeddedContainerPlugin',
