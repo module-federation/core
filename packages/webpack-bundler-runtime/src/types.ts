@@ -59,8 +59,7 @@ type IdToExternalAndNameMappingItem = [
   string,
   string | number,
 ];
-interface IdToExternalAndNameMappingItemWithPromise
-  extends IdToExternalAndNameMappingItem {
+interface IdToExternalAndNameMappingItemWithPromise extends IdToExternalAndNameMappingItem {
   p?: Promise<any> | number;
 }
 export type IdToExternalAndNameMapping = Record<

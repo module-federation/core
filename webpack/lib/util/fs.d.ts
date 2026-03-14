@@ -757,8 +757,8 @@ export type ReadAsyncOptions<TBuffer extends NodeJS.ArrayBufferView> = {
   buffer?: TBuffer | undefined;
 };
 export type Read<
-  TBuffer extends
-    NodeJS.ArrayBufferView = NodeJS.ArrayBufferView<ArrayBufferLike>,
+  TBuffer extends NodeJS.ArrayBufferView =
+    NodeJS.ArrayBufferView<ArrayBufferLike>,
 > = {
   (
     fd: number,

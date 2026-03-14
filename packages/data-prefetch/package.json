@@ -126,7 +126,7 @@
     "react-router": "^6.30.2",
     "react-test-renderer": "^18.2.0",
     "ts-jest": "29.0.1",
-    "webpack": "5.104.1"
+    "@module-federation/webpack-type": "workspace:*"
   },
   "dependencies": {
     "@module-federation/runtime": "workspace:*",

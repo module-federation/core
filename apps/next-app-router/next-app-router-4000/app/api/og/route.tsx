@@ -18,38 +18,36 @@ export async function GET(req: NextRequest): Promise<Response | ImageResponse> {
       : 'App Router Playground';
 
     return new ImageResponse(
-      (
+      <div
+        style={{
+          position: 'relative',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        {isLight ? <LightSvg /> : <DarkSvg />}
         <div
           style={{
-            position: 'relative',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
+            position: 'absolute',
+            fontFamily: 'Inter',
+            fontSize: '48px',
+            fontWeight: '600',
+            letterSpacing: '-0.04em',
+            color: isLight ? 'black' : 'white',
+            top: '250px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            whiteSpace: 'pre-wrap',
+            maxWidth: '750px',
+            textAlign: 'center',
+            wordWrap: 'break-word',
+            overflowWrap: 'break-word',
           }}
         >
-          {isLight ? <LightSvg /> : <DarkSvg />}
-          <div
-            style={{
-              position: 'absolute',
-              fontFamily: 'Inter',
-              fontSize: '48px',
-              fontWeight: '600',
-              letterSpacing: '-0.04em',
-              color: isLight ? 'black' : 'white',
-              top: '250px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              whiteSpace: 'pre-wrap',
-              maxWidth: '750px',
-              textAlign: 'center',
-              wordWrap: 'break-word',
-              overflowWrap: 'break-word',
-            }}
-          >
-            {title}
-          </div>
+          {title}
         </div>
-      ),
+      </div>,
       {
         width: 843,
         height: 441,

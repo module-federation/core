@@ -83,14 +83,15 @@
     }
   },
   "devDependencies": {
-    "@module-federation/webpack-bundler-runtime": "workspace:*",
     "@types/btoa": "^1.2.5",
     "ajv": "^8.18.0",
     "enhanced-resolve": "^5.0.0",
     "terser": "^5.37.0",
+    "fast-glob": "3.3.3",
     "memfs": "4.46.0"
   },
   "dependencies": {
+    "@module-federation/webpack-bundler-runtime": "workspace:*",
     "@module-federation/bridge-react-webpack-plugin": "workspace:*",
     "@module-federation/data-prefetch": "workspace:*",
     "@module-federation/dts-plugin": "workspace:*",
@@ -104,7 +105,8 @@
     "@module-federation/cli": "workspace:*",
     "btoa": "^1.2.1",
     "upath": "2.0.1",
-    "schema-utils": "^4.3.0"
+    "schema-utils": "^4.3.0",
+    "tapable": "2.3.0"
   },
   "scripts": {
     "generate:schema": "node src/scripts/compile-schema.js && node src/scripts/generate-sdk-types.js",

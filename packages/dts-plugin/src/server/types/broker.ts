@@ -4,8 +4,10 @@ import { Subscriber } from './message';
 type SubscriberIdentifier = string;
 type PublisherIdentifier = string;
 
-export interface TmpSubscriberShelterSubscriber
-  extends Omit<Subscriber, 'type' | 'ip'> {
+export interface TmpSubscriberShelterSubscriber extends Omit<
+  Subscriber,
+  'type' | 'ip'
+> {
   client: WebSocket;
 }
 

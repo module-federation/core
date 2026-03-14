@@ -61,6 +61,18 @@
       ]
     }
   },
+  "devDependencies": {
+    "@jest/globals": "29.7.0",
+    "webpack": "^5.0.0"
+  },
+  "peerDependencies": {
+    "node-fetch": "^3.3.2"
+  },
+  "peerDependenciesMeta": {
+    "node-fetch": {
+      "optional": true
+    }
+  },
   "scripts": {
     "build": "tsdown --config tsdown.config.ts",
     "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",

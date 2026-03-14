@@ -46,7 +46,8 @@
   gap: clamp(18px, 3vw, 36px);
   padding: 28px clamp(16px, 4vw, 48px);
   box-sizing: border-box;
-  background: radial-gradient(
+  background:
+    radial-gradient(
       circle at 10% 20%,
       rgba(229, 231, 235, 0.8) 0%,
       rgba(243, 244, 246, 0.9) 55%
@@ -357,7 +358,8 @@
 }
 
 .shell:global(.arco-theme-dark) {
-  background: radial-gradient(
+  background:
+    radial-gradient(
       circle at 10% 20%,
       rgba(15, 23, 42, 0.9) 0%,
       rgba(15, 23, 42, 0.98) 55%

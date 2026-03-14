@@ -539,7 +539,7 @@ class ModuleHandler {
     const isSharedModule = (moduleType?: string) => {
       return Boolean(
         moduleType &&
-          ['provide-module', 'consume-shared-module'].includes(moduleType),
+        ['provide-module', 'consume-shared-module'].includes(moduleType),
       );
     };
     const isContainerModule = (identifier: string) => {
