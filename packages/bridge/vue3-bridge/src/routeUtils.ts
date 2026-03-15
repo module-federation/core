@@ -30,6 +30,24 @@ function addBasenameToNestedRoutes(
       path: joinedPath.replace(/\/+/g, '/').replace(/\/$/, '') || '/',
     };
 
+    // Prefix string redirects with basename
+    if (typeof route.redirect === 'string') {
+      const joinedRedirect = `${basename}/${route.redirect}`;
+      updatedRoute.redirect =
+        joinedRedirect.replace(/\/+/g, '/').replace(/\/$/, '') || '/';
+    } else if (
+      route.redirect &&
+      typeof route.redirect === 'object' &&
+      'path' in route.redirect &&
+      typeof route.redirect.path === 'string'
+    ) {
+      const joinedRedirect = `${basename}/${route.redirect.path}`;
+      updatedRoute.redirect = {
+        ...route.redirect,
+        path: joinedRedirect.replace(/\/+/g, '/').replace(/\/$/, '') || '/',
+      };
+    }
+
     // Recursively process child routes
     if (route.children && route.children.length > 0) {
       updatedRoute.children = addBasenameToNestedRoutes(

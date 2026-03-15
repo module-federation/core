@@ -2,4 +2,4 @@
 '@module-federation/bridge-vue3': patch
 ---
 
-feat(bridge-vue3): add hashRoute support in route processing, fix deprecation message, and update devDependencies
+fix(bridge-vue3): pass hashRoute and memoryRoute to RemoteApp, fix path and redirect prefixing in addBasenameToNestedRoutes

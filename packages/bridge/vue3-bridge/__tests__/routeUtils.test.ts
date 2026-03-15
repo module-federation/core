@@ -711,4 +711,107 @@ describe('routeUtils', () => {
       expect(dashboardRoute?.path).toBe('/dashboard');
     });
   });
+
+  describe('processRoutes hashRoute with redirects', () => {
+    it('should prefix string redirects with basename', () => {
+      const redirectRoutes = [
+        {
+          path: '/',
+          redirect: '/dashboard',
+        },
+        {
+          path: '/dashboard',
+          name: 'Dashboard',
+          component: { template: '<div>Dashboard</div>' },
+        },
+        {
+          path: '/about',
+          name: 'About',
+          component: { template: '<div>About</div>' },
+        },
+      ];
+
+      const router = createRouter({
+        history: createWebHistory(),
+        routes: redirectRoutes,
+      });
+
+      const result = processRoutes({
+        router,
+        basename: '/barber',
+        hashRoute: true,
+      });
+
+      // The redirect route should have its redirect target prefixed
+      const rootRoute = result.routes.find((r) => r.path === '/barber');
+      expect(rootRoute).toBeDefined();
+      expect(rootRoute?.redirect).toBe('/barber/dashboard');
+
+      // Other routes should be prefixed normally
+      const dashboardRoute = result.routes.find((r) => r.name === 'Dashboard');
+      expect(dashboardRoute?.path).toBe('/barber/dashboard');
+
+      const aboutRoute = result.routes.find((r) => r.name === 'About');
+      expect(aboutRoute?.path).toBe('/barber/about');
+    });
+
+    it('should prefix object redirects with path property', () => {
+      const redirectRoutes = [
+        {
+          path: '/',
+          redirect: { path: '/dashboard' },
+        },
+        {
+          path: '/dashboard',
+          name: 'Dashboard',
+          component: { template: '<div>Dashboard</div>' },
+        },
+      ];
+
+      const router = createRouter({
+        history: createWebHistory(),
+        routes: redirectRoutes,
+      });
+
+      const result = processRoutes({
+        router,
+        basename: '/app',
+        hashRoute: true,
+      });
+
+      const rootRoute = result.routes.find((r) => r.path === '/app');
+      expect(rootRoute).toBeDefined();
+      expect(rootRoute?.redirect).toEqual({ path: '/app/dashboard' });
+    });
+
+    it('should not modify named redirects (no path property)', () => {
+      const redirectRoutes = [
+        {
+          path: '/',
+          redirect: { name: 'Dashboard' },
+        },
+        {
+          path: '/dashboard',
+          name: 'Dashboard',
+          component: { template: '<div>Dashboard</div>' },
+        },
+      ];
+
+      const router = createRouter({
+        history: createWebHistory(),
+        routes: redirectRoutes,
+      });
+
+      const result = processRoutes({
+        router,
+        basename: '/app',
+        hashRoute: true,
+      });
+
+      const rootRoute = result.routes.find((r) => r.path === '/app');
+      expect(rootRoute).toBeDefined();
+      // Named redirects should be untouched — Vue Router resolves by name, not path
+      expect(rootRoute?.redirect).toEqual({ name: 'Dashboard' });
+    });
+  });
 });
