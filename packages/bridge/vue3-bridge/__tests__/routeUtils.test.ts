@@ -617,6 +617,68 @@ describe('routeUtils', () => {
       // Memory history uses basename as the base
       expect(result.history.base).toBe('/app');
     });
+
+    it('should preserve trailing slashes in paths when prefixing with basename', () => {
+      const trailingSlashRoutes = [
+        {
+          path: '/dashboard/',
+          name: 'Dashboard',
+          component: { template: '<div>Dashboard</div>' },
+        },
+        {
+          path: '/settings',
+          name: 'Settings',
+          component: { template: '<div>Settings</div>' },
+        },
+      ];
+
+      const router = createRouter({
+        history: createWebHistory(),
+        routes: trailingSlashRoutes,
+      });
+
+      const result = processRoutes({
+        router,
+        basename: '/app',
+        hashRoute: true,
+      });
+
+      // Trailing slash should be preserved for /dashboard/
+      const dashboardRoute = result.routes.find((r) => r.name === 'Dashboard');
+      expect(dashboardRoute?.path).toBe('/app/dashboard/');
+
+      // No trailing slash should remain absent for /settings
+      const settingsRoute = result.routes.find((r) => r.name === 'Settings');
+      expect(settingsRoute?.path).toBe('/app/settings');
+    });
+
+    it('should preserve trailing slashes in string redirects', () => {
+      const redirectRoutes = [
+        {
+          path: '/',
+          redirect: '/dashboard/',
+        },
+        {
+          path: '/dashboard/',
+          name: 'Dashboard',
+          component: { template: '<div>Dashboard</div>' },
+        },
+      ];
+
+      const router = createRouter({
+        history: createWebHistory(),
+        routes: redirectRoutes,
+      });
+
+      const result = processRoutes({
+        router,
+        basename: '/app',
+        hashRoute: true,
+      });
+
+      const rootRoute = result.routes.find((r) => r.path === '/app');
+      expect(rootRoute?.redirect).toBe('/app/dashboard/');
+    });
   });
 
   describe('processRoutes with memoryRoute', () => {
