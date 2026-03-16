@@ -1,0 +1,32 @@
+{
+  "name": "@module-federation/metro-cache",
+  "version": "0.0.1",
+  "description": "Native caching module for Module Federation Metro bundles",
+  "license": "MIT",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/module-federation/core.git",
+    "directory": "packages/metro-cache"
+  },
+  "scripts": {
+    "test": "jest"
+  },
+  "peerDependencies": {
+    "react": ">=19.0.0",
+    "react-native": ">=0.79.0",
+    "react-native-mmkv": ">=3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react-native-mmkv": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.0",
+    "react": "19.1.0",
+    "react-native": "0.80.0",
+    "typescript": "^5.8.3"
+  }
+}

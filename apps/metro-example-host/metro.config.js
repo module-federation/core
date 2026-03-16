@@ -14,6 +14,10 @@ const config = {
   resolver: {
     extraNodeModules: {
       '@babel/runtime': path.resolve(__dirname, 'node_modules/@babel/runtime'),
+      '@module-federation/metro-cache': path.resolve(
+        __dirname,
+        'node_modules/@module-federation/metro-cache',
+      ),
     },
     useWatchman: false,
   },

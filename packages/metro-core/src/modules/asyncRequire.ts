@@ -70,24 +70,115 @@ function buildLoadBundleAsyncWrapper() {
   const loadBundleAsync =
     __loadBundleAsync as typeof globalThis.__loadBundleAsync;
 
+  // DEBUG: set to true to test cache layer in dev mode
+  const FORCE_CACHE_IN_DEV = true;
+
+  // Try to load metro-cache for caching.
+  // Host loads via require, remotes reuse via globalThis (they can't require metro-cache).
+  let cacheModule: {
+    CacheManager: any;
+    NativeMFECache: any;
+  } | null = null;
+
+  const cacheEnabled =
+    process.env.NODE_ENV === 'production' || FORCE_CACHE_IN_DEV;
+
+  if (cacheEnabled) {
+    if ((globalThis as any).__MFE_CACHE_MODULE__) {
+      cacheModule = (globalThis as any).__MFE_CACHE_MODULE__;
+    } else {
+      try {
+        const mod = require('@module-federation/metro-cache');
+        if (mod?.NativeMFECache && mod?.CacheManager) {
+          cacheModule = mod;
+          (globalThis as any).__MFE_CACHE_MODULE__ = mod;
+        }
+      } catch {
+        // metro-cache not installed — cache layer disabled
+      }
+    }
+  }
+
+  // CacheManager singleton shared via globalThis
+  let cacheManager: any = (globalThis as any).__MFE_CACHE_MANAGER__ ?? null;
+
   return async (originalBundlePath: string) => {
     const scope = globalThis.__FEDERATION__.__NATIVE__[__METRO_GLOBAL_PREFIX__];
 
-    // entry is always in the root directory of assets associated with remote
-    // based on that, we extract the public path from the origin URL
-    // e.g. http://example.com/a/b/c/mf-manfiest.json -> http://example.com/a/b/c
     const publicPath = getPublicPath(scope.origin);
     const bundlePath = getBundlePath(originalBundlePath, publicPath);
 
-    // ../../node_modules/ -> ..%2F..%2Fnode_modules/ so that it's not automatically sanitized
-    const encodedBundlePath = bundlePath.replaceAll('../', '..%2F');
+    console.log(
+      '[MFE-Cache] loadBundleAsync:',
+      __METRO_GLOBAL_PREFIX__,
+      isUrl(bundlePath) ? bundlePath.split('?')[0] : bundlePath,
+    );
 
-    const result = await loadBundleAsync(encodedBundlePath);
+    // --- Cache layer: only intercept remote bundles (full URLs) ---
+    if (cacheEnabled && cacheModule && isUrl(bundlePath)) {
+      const { CacheManager, NativeMFECache } = cacheModule;
+
+      // Lazy-init CacheManager singleton
+      if (!cacheManager) {
+        cacheManager = new CacheManager();
+        await cacheManager.initialize();
+        (globalThis as any).__MFE_CACHE_MANAGER__ = cacheManager;
+      }
+
+      try {
+        const cached = await cacheManager.getCachedBundle(bundlePath);
+
+        if (cached) {
+          // Path A: cache HIT — read from disk + JS eval
+          console.log('[MFE-Cache] HIT:', cached.filePath);
+          const source = await NativeMFECache.readFile(cached.filePath, 'utf8');
+          eval(source);
+        } else {
+          // Path B: cache MISS — download + save + read + JS eval
+          const urlParts = bundlePath.split('/');
+          const bundleFileName =
+            urlParts[urlParts.length - 1]?.split('.')[0] ?? 'unknown';
+          const remoteName = bundleFileName;
+
+          const destPath = await cacheManager.getBundleDestPath(
+            remoteName,
+            bundlePath,
+          );
+          console.log('[MFE-Cache] MISS:', remoteName, '→', destPath);
+
+          const { sha256 } = await NativeMFECache.downloadFile(
+            bundlePath,
+            destPath,
+          );
+
+          await cacheManager.saveBundleToCache(remoteName, destPath, {
+            bundleUrl: bundlePath,
+            bundleHash: sha256,
+          });
+
+          const source = await NativeMFECache.readFile(destPath, 'utf8');
+          eval(source);
+        }
+      } catch (cacheError) {
+        console.warn(
+          '[MFE-Cache] cache error, falling back to network:',
+          cacheError,
+        );
+        const encodedBundlePath = bundlePath.replaceAll('../', '..%2F');
+        await loadBundleAsync(encodedBundlePath);
+      }
+    } else {
+      // No cache: split bundles, dev without FORCE_CACHE, or metro-cache not installed
+      const encodedBundlePath = bundlePath.replaceAll('../', '..%2F');
+      await loadBundleAsync(encodedBundlePath);
+    }
+
+    // --- Below: shared/remotes preloading (unchanged) ---
 
     // when the origin is not the same, it means we are loading a remote container
     // we can return early since dependencies are processed differently for entry bundles
     if (!isSameOrigin(bundlePath, publicPath)) {
-      return result;
+      return;
     }
 
     // at this point the code in the bundle has been evaluated
@@ -108,8 +199,6 @@ function buildLoadBundleAsyncWrapper() {
     }
 
     await Promise.all(promises);
-
-    return result;
   };
 }
 

@@ -2,6 +2,7 @@ import type {
   Federation,
   ModuleFederationRuntimePlugin,
 } from '@module-federation/runtime';
+import { tryLoadCacheModule } from './cache-interface';
 
 declare global {
   // @ts-expect-error -- Intentional redeclaration for Metro/React Native runtime global.
@@ -43,46 +44,74 @@ const buildUrlForEntryBundle = (entry: string) => {
   return entry;
 };
 
-const MetroCorePlugin: () => ModuleFederationRuntimePlugin = () => ({
-  name: 'metro-core-plugin',
-  loadEntry: async ({ remoteInfo }) => {
-    const { entry, entryGlobalName } = remoteInfo;
+const MetroCorePlugin: () => ModuleFederationRuntimePlugin = () => {
+  // Try to load cache module for onLoad tracking
+  const cacheModule = !__DEV__ ? tryLoadCacheModule() : null;
+  let cacheManagerInstance: InstanceType<any> | null = null;
 
-    const __loadBundleAsync =
-      globalThis[`${__METRO_GLOBAL_PREFIX__ ?? ''}__loadBundleAsync`];
-
-    const loadBundleAsync =
-      __loadBundleAsync as typeof globalThis.__loadBundleAsync;
-
-    if (!loadBundleAsync) {
-      throw new Error('loadBundleAsync is not defined');
+  const getCacheManager = async () => {
+    if (!cacheModule) return null;
+    if (!cacheManagerInstance) {
+      cacheManagerInstance = new cacheModule.CacheManager();
+      await cacheManagerInstance.initialize();
     }
+    return cacheManagerInstance;
+  };
 
-    try {
-      const entryUrl = buildUrlForEntryBundle(entry);
-      await loadBundleAsync(entryUrl);
+  return {
+    name: 'metro-core-plugin',
+    loadEntry: async ({ remoteInfo }) => {
+      const { entry, entryGlobalName } = remoteInfo;
 
-      if (!globalThis.__FEDERATION__.__NATIVE__[entryGlobalName]) {
-        throw new Error(`Remote entry ${entryGlobalName} failed to register.`);
+      const __loadBundleAsync =
+        globalThis[`${__METRO_GLOBAL_PREFIX__ ?? ''}__loadBundleAsync`];
+
+      const loadBundleAsync =
+        __loadBundleAsync as typeof globalThis.__loadBundleAsync;
+
+      if (!loadBundleAsync) {
+        throw new Error('loadBundleAsync is not defined');
       }
 
-      globalThis.__FEDERATION__.__NATIVE__[entryGlobalName].origin = entryUrl;
+      try {
+        const entryUrl = buildUrlForEntryBundle(entry);
+        await loadBundleAsync(entryUrl);
 
-      return globalThis.__FEDERATION__.__NATIVE__[entryGlobalName].exports;
-    } catch (error) {
-      throw new Error(
-        `Failed to load remote entry: ${entryGlobalName}. Reason: ${error}`,
-      );
-    }
-  },
-  generatePreloadAssets: async () => {
-    // noop for compatibility
-    return Promise.resolve({
-      cssAssets: [],
-      jsAssetsWithoutEntry: [],
-      entryAssets: [],
-    });
-  },
-});
+        if (!globalThis.__FEDERATION__.__NATIVE__[entryGlobalName]) {
+          throw new Error(
+            `Remote entry ${entryGlobalName} failed to register.`,
+          );
+        }
+
+        globalThis.__FEDERATION__.__NATIVE__[entryGlobalName].origin = entryUrl;
+
+        return globalThis.__FEDERATION__.__NATIVE__[entryGlobalName].exports;
+      } catch (error) {
+        throw new Error(
+          `Failed to load remote entry: ${entryGlobalName}. Reason: ${error}`,
+        );
+      }
+    },
+    generatePreloadAssets: async () => {
+      // noop for compatibility
+      return Promise.resolve({
+        cssAssets: [],
+        jsAssetsWithoutEntry: [],
+        entryAssets: [],
+      });
+    },
+    onLoad: async ({ remote }) => {
+      // Update lastUsedAt for cache tracking
+      try {
+        const cm = await getCacheManager();
+        if (cm && remote?.name) {
+          await cm.updateLastUsedAt(remote.name);
+        }
+      } catch {
+        // non-critical, don't break loading
+      }
+    },
+  };
+};
 
 export default MetroCorePlugin;
