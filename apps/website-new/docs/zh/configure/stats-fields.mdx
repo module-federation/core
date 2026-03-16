@@ -1,0 +1,72 @@
+import CommonMfManifestStatsFields from '@components/common/configure/mf-manifest-stats-common.mdx'
+
+# mf-stats.json 字段定义
+
+`mf-stats.json` 是启用 [manifest](./manifest) 后生成的构建统计文件，包含本次构建的 exposes/shared/remotes 资源信息、`metaData`（构建信息、remoteEntry 等）以及资产分析结果。
+
+本文按字段解释 `mf-stats.json` 的结构，便于排查“线上到底加载了哪些资源”“某个 shared 在哪些地方被用到”“remoteEntry 的类型/地址是什么”等问题。
+
+## 顶层结构
+
+| 字段 | 类型 | 必有 | 说明 |
+| --- | --- | --- | --- |
+| `id` | `string` | 是 | 本次构建的唯一标识 |
+| `name` | `string` | 是 | federation name |
+| `metaData` | `StatsMetaData` | 是 | 构建与远程入口信息 |
+| `shared` | `StatsShared[]` | 是 | shared 依赖列表（包含版本、资源与使用信息） |
+| `remotes` | `StatsRemote[]` | 是 | remotes 列表（包含 entry/version 以及消费关系） |
+| `exposes` | `StatsExpose[]` | 是 | exposes 列表（包含资源与依赖信息） |
+
+<CommonMfManifestStatsFields />
+
+## shared
+
+### StatsShared
+
+| 字段 | 类型 | 必有 | 说明 |
+| --- | --- | --- | --- |
+| `id` | `string` | 是 | shared 唯一 id |
+| `name` | `string` | 是 | 包名 |
+| `version` | `string` | 是 | 本次构建使用的版本 |
+| `singleton` | `boolean` | 是 | 是否 singleton |
+| `requiredVersion` | `string` | 是 | requiredVersion |
+| `hash` | `string` | 是 | 内容 hash |
+| `assets` | `StatsAssets` | 是 | 资源列表 |
+| `deps` | `string[]` | 是 | 依赖列表 |
+| `usedIn` | `string[]` | 是 | 被哪些模块/容器使用 |
+| `usedExports` | `string[]` | 是 | 实际使用到的导出 |
+| `fallback` | `string` | 是 | fallback 路径/标识 |
+| `fallbackName` | `string` | 是 | fallback 名称 |
+| `fallbackType` | `RemoteEntryType` | 是 | fallback 产物类型 |
+
+## remotes
+
+`StatsRemote` 是 “remote 的消费关系” 记录：包含它的 `entry` 或 `version`（二选一），以及它在当前构建里是如何被消费的。
+
+### StatsRemoteVal（共同字段）
+
+| 字段 | 类型 | 必有 | 说明 |
+| --- | --- | --- | --- |
+| `moduleName` | `string` | 是 | remote 模块名 |
+| `federationContainerName` | `string` | 是 | remote 容器名 |
+| `consumingFederationContainerName` | `string` | 是 | 消费端容器名 |
+| `alias` | `string` | 是 | alias |
+| `usedIn` | `string[]` | 是 | 被哪些模块/容器使用 |
+
+### StatsRemote（互斥字段）
+
+- `entry: string`（存在时不会有 `version`）
+- `version: string`（存在时不会有 `entry`）
+
+## exposes
+
+### StatsExpose
+
+| 字段 | 类型 | 必有 | 说明 |
+| --- | --- | --- | --- |
+| `id` | `string` | 是 | expose 唯一 id |
+| `name` | `string` | 是 | expose 名称（如 `./Button`） |
+| `path` | `string` | 否 | 源码路径（若有） |
+| `file` | `string` | 是 | 产物文件 |
+| `requires` | `string[]` | 是 | 依赖列表 |
+| `assets` | `StatsAssets` | 是 | 资源列表 |

@@ -5,8 +5,8 @@
 
 Controls whether the plugin generates manifest artifacts and how they are produced. When enabled, the plugin emits  <code>{props.manifest || 'mf-manifest.json' }</code> and <code>{props.stats || 'mf-stats.json' }</code> (names can be customized via `fileName`) on every build so that other tools can consume them directly through `processAssets` or from the final build output.
 
-- <code>{props.stats || 'mf-stats.json'}</code>: captures the full build statistics, including the assets for exposes/shared/remotes, `metaData` (plugin version, build info, `remoteEntry`, etc.), and any additional asset analysis. Ideal for debugging or merging stats across environments.
-- <code>{props.manifest || 'mf-manifest.json'}</code>: a runtime-oriented manifest distilled from the stats. It keeps the stable structure that {props.brandName  || 'Module Federation'} consumers read when loading remote modules. The exposes/shared/remotes entries describe what is actually available to consumers.
+- <code>{props.stats || 'mf-stats.json'}</code>: captures the full build statistics, including the assets for exposes/shared/remotes, `metaData` (plugin version, build info, `remoteEntry`, etc.), and any additional asset analysis. Ideal for debugging or merging stats across environments, see field references: [{props.stats || 'mf-stats.json'}](./stats-fields).
+- <code>{props.manifest || 'mf-manifest.json'}</code>: a runtime-oriented manifest distilled from the stats. It keeps the stable structure that {props.brandName  || 'Module Federation'} consumers read when loading remote modules. The exposes/shared/remotes entries describe what is actually available to consumers, see field references: [{props.manifest || 'mf-manifest.json'}](./manifest-fields).
 
 The `PluginManifestOptions` types are as follows:
 

@@ -1,0 +1,73 @@
+import CommonMfManifestStatsFields from '@components/common/configure/mf-manifest-stats-common-en.mdx'
+
+# mf-stats.json Field Reference
+
+`mf-stats.json` is generated when [manifest](./manifest) is enabled. It contains full build statistics, including exposes/shared/remotes assets, `metaData` (build info, remoteEntry, etc.), and asset analysis results.
+
+Use this document to understand every field in `mf-stats.json`, which is helpful for debugging and analysis.
+
+## Top-level
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `id` | `string` | Yes | Unique build identifier |
+| `name` | `string` | Yes | Federation name |
+| `metaData` | `StatsMetaData` | Yes | Build and remote entry info |
+| `shared` | `StatsShared[]` | Yes | Shared dependencies (full details) |
+| `remotes` | `StatsRemote[]` | Yes | Remotes (entry/version plus usage) |
+| `exposes` | `StatsExpose[]` | Yes | Exposes (assets and dependencies) |
+
+<CommonMfManifestStatsFields />
+
+## shared
+
+### StatsShared
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `id` | `string` | Yes | Shared id |
+| `name` | `string` | Yes | Package name |
+| `version` | `string` | Yes | Version used in this build |
+| `singleton` | `boolean` | Yes | Singleton |
+| `requiredVersion` | `string` | Yes | requiredVersion |
+| `hash` | `string` | Yes | Content hash |
+| `assets` | `StatsAssets` | Yes | Assets |
+| `deps` | `string[]` | Yes | Dependencies |
+| `usedIn` | `string[]` | Yes | Used by containers/modules |
+| `usedExports` | `string[]` | Yes | Used exports |
+| `fallback` | `string` | Yes | Fallback path/id |
+| `fallbackName` | `string` | Yes | Fallback name |
+| `fallbackType` | `RemoteEntryType` | Yes | Fallback type |
+
+## remotes
+
+`StatsRemote` records remote consumption info. It always includes either `entry` or `version`.
+
+### StatsRemoteVal (shared fields)
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `moduleName` | `string` | Yes | Remote module name |
+| `federationContainerName` | `string` | Yes | Remote container name |
+| `consumingFederationContainerName` | `string` | Yes | Consumer container name |
+| `alias` | `string` | Yes | Alias |
+| `usedIn` | `string[]` | Yes | Used by containers/modules |
+
+### StatsRemote (mutually exclusive)
+
+- `entry: string` (exists, then no `version`)
+- `version: string` (exists, then no `entry`)
+
+## exposes
+
+### StatsExpose
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `id` | `string` | Yes | Expose id |
+| `name` | `string` | Yes | Expose name (e.g. `./Button`) |
+| `path` | `string` | No | Source path |
+| `file` | `string` | Yes | Output file |
+| `requires` | `string[]` | Yes | Dependencies |
+| `assets` | `StatsAssets` | Yes | Assets |
+

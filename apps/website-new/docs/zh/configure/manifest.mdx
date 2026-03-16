@@ -5,8 +5,8 @@
 
 用于控制是否生成 manifest ，以及对应的生成配置。启用后插件会在每次构建中同时产出 <code>{props.manifest || 'mf-manifest.json' }</code> 与 <code>{props.stats || 'mf-stats.json' }</code>（名称可通过 `fileName` 自定义），并写入到构建产物中，供其他工具在 `processAssets` 钩子或构建结果中直接读取。
 
--  <code>{props.stats || 'mf-stats.json'}</code>：包含完整的构建统计信息，如 exposes/shared/remotes 的资源列表、`metaData`（插件版本、构建信息、`remoteEntry` 等）以及额外的资产分析结果，适合用于后续合并或诊断。
-- <code>{props.manifest || 'mf-manifest.json'}</code>：在 stats 基础上提炼出的运行时清单，结构稳定，供 {props.brandName || props.name || 'Module Federation'} 消费端在加载远程模块时读取。文件中的 exposes/shared/remotes 对应线上对外暴露的能力。
+- <code>{props.stats || 'mf-stats.json'}</code>：包含完整的构建统计信息，如 exposes/shared/remotes 的资源列表、`metaData`（插件版本、构建信息、`remoteEntry` 等）以及额外的资产分析结果，适合用于后续合并或诊断，更多字段级定义见：[{props.stats || 'mf-stats.json'}](./stats-fields)。
+- <code>{props.manifest || 'mf-manifest.json'}</code>：在 stats 基础上提炼出的运行时清单，结构稳定，供 {props.brandName || props.name || 'Module Federation'} 消费端在加载远程模块时读取。文件中的 exposes/shared/remotes 对应线上对外暴露的能力，更多字段级定义见：[{props.manifest || 'mf-manifest.json'}](./manifest-fields)。
 
 `PluginManifestOptions` 类型如下：
 

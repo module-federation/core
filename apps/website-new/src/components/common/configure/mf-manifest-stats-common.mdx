@@ -1,0 +1,70 @@
+## metaData（两者都有）
+
+`metaData` 描述“这个构建产物怎么被消费端加载”以及“本次构建的上下文信息”。`mf-stats.json` 与 `mf-manifest.json` 都包含该字段。
+
+### StatsMetaData
+
+`StatsMetaData` 有两种互斥形态（只会出现一种）：
+
+- **函数形式**：`getPublicPath: string`
+- **字符串形式**：`publicPath: string`（可选 `ssrPublicPath: string`）
+
+共同字段如下：
+
+| 字段                | 类型             | 必有 | 说明                          |
+| ------------------- | ---------------- | ---- | ----------------------------- |
+| `name`              | `string`         | 是   | 当前 remote/host 名称         |
+| `globalName`        | `string`         | 是   | remoteEntry 对应的 globalName |
+| `buildInfo`         | `StatsBuildInfo` | 是   | 构建信息（版本/构建名等）     |
+| `remoteEntry`       | `ResourceInfo`   | 是   | remoteEntry 资源信息          |
+| `ssrRemoteEntry`    | `ResourceInfo`   | 否   | SSR remoteEntry（若有）       |
+| `prefetchInterface` | `boolean`        | 否   | 是否启用 prefetch 接口        |
+| `prefetchEntry`     | `ResourceInfo`   | 否   | prefetch 资源（若有）         |
+| `types`             | `MetaDataTypes`  | 否   | 类型产物信息（若有）          |
+| `type`              | `string`         | 是   | remote 类型标识               |
+| `pluginVersion`     | `string`         | 否   | 构建插件版本                  |
+
+### ResourceInfo
+
+| 字段   | 类型              | 必有 | 说明                                                |
+| ------ | ----------------- | ---- | --------------------------------------------------- |
+| `path` | `string`          | 是   | 构建产物内路径（相对路径）                          |
+| `name` | `string`          | 是   | 文件名                                              |
+| `type` | `RemoteEntryType` | 是   | remoteEntry 的输出格式（例如 `var/umd/system/...`） |
+
+### StatsBuildInfo
+
+| 字段             | 类型       | 必有 | 说明                     |
+| ---------------- | ---------- | ---- | ------------------------ |
+| `buildVersion`   | `string`   | 是   | 构建版本                 |
+| `buildName`      | `string`   | 是   | 构建名                   |
+| `target`         | `string[]` | 否   | target 列表              |
+| `plugins`        | `string[]` | 否   | treeShaking 插件列表     |
+| `excludePlugins` | `string[]` | 否   | treeShaking 排除插件列表 |
+
+### MetaDataTypes
+
+| 字段   | 类型     | 必有 | 说明            |
+| ------ | -------- | ---- | --------------- |
+| `path` | `string` | 是   | 产物路径        |
+| `name` | `string` | 是   | 文件名          |
+| `api`  | `string` | 是   | API 类型入口    |
+| `zip`  | `string` | 是   | zip 包地址/路径 |
+
+## assets（两者都有）
+
+`StatsAssets` 描述某个条目（shared/expose）的同步/异步资源列表。`mf-stats.json` 与 `mf-manifest.json` 都会用到该结构。
+
+### StatsAssets
+
+| 字段  | 类型              | 必有 | 说明     |
+| ----- | ----------------- | ---- | -------- |
+| `js`  | `StatsAssetsInfo` | 是   | JS 资源  |
+| `css` | `StatsAssetsInfo` | 是   | CSS 资源 |
+
+### StatsAssetsInfo
+
+| 字段    | 类型       | 必有 | 说明         |
+| ------- | ---------- | ---- | ------------ |
+| `sync`  | `string[]` | 是   | 同步加载资源 |
+| `async` | `string[]` | 是   | 异步加载资源 |

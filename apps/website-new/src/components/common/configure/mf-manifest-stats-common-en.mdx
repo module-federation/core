@@ -1,0 +1,70 @@
+## metaData (Both Files)
+
+`metaData` describes how this build is consumed at runtime and the build context. Both `mf-stats.json` and `mf-manifest.json` include it.
+
+### StatsMetaData
+
+`StatsMetaData` has two mutually exclusive shapes:
+
+- **Function form**: `getPublicPath: string`
+- **String form**: `publicPath: string` (optional `ssrPublicPath: string`)
+
+Shared fields:
+
+| Field               | Type             | Required | Description                           |
+| ------------------- | ---------------- | -------- | ------------------------------------- |
+| `name`              | `string`         | Yes      | Current remote/host name              |
+| `globalName`        | `string`         | Yes      | Global name for the remoteEntry       |
+| `buildInfo`         | `StatsBuildInfo` | Yes      | Build information                     |
+| `remoteEntry`       | `ResourceInfo`   | Yes      | Remote entry resource                 |
+| `ssrRemoteEntry`    | `ResourceInfo`   | No       | SSR remote entry (if any)             |
+| `prefetchInterface` | `boolean`        | No       | Whether prefetch interface is enabled |
+| `prefetchEntry`     | `ResourceInfo`   | No       | Prefetch resource (if any)            |
+| `types`             | `MetaDataTypes`  | No       | Types bundle info (if any)            |
+| `type`              | `string`         | Yes      | Remote type                           |
+| `pluginVersion`     | `string`         | No       | Plugin version                        |
+
+### ResourceInfo
+
+| Field  | Type              | Required | Description                                |
+| ------ | ----------------- | -------- | ------------------------------------------ |
+| `path` | `string`          | Yes      | Relative path in build output              |
+| `name` | `string`          | Yes      | File name                                  |
+| `type` | `RemoteEntryType` | Yes      | Remote entry format (`var/umd/system/...`) |
+
+### StatsBuildInfo
+
+| Field            | Type       | Required | Description                  |
+| ---------------- | ---------- | -------- | ---------------------------- |
+| `buildVersion`   | `string`   | Yes      | Build version                |
+| `buildName`      | `string`   | Yes      | Build name                   |
+| `target`         | `string[]` | No       | Build targets                |
+| `plugins`        | `string[]` | No       | Tree-shaking plugins         |
+| `excludePlugins` | `string[]` | No       | Tree-shaking exclude plugins |
+
+### MetaDataTypes
+
+| Field  | Type     | Required | Description |
+| ------ | -------- | -------- | ----------- |
+| `path` | `string` | Yes      | Output path |
+| `name` | `string` | Yes      | File name   |
+| `api`  | `string` | Yes      | API entry   |
+| `zip`  | `string` | Yes      | Zip path    |
+
+## assets (Both Files)
+
+`StatsAssets` describes sync/async assets for a shared or exposed module. Both files use it.
+
+### StatsAssets
+
+| Field | Type              | Required | Description       |
+| ----- | ----------------- | -------- | ----------------- |
+| `js`  | `StatsAssetsInfo` | Yes      | JavaScript assets |
+| `css` | `StatsAssetsInfo` | Yes      | CSS assets        |
+
+### StatsAssetsInfo
+
+| Field   | Type       | Required | Description  |
+| ------- | ---------- | -------- | ------------ |
+| `sync`  | `string[]` | Yes      | Sync assets  |
+| `async` | `string[]` | Yes      | Async assets |
