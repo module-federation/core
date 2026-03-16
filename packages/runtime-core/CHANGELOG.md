@@ -1,5 +1,32 @@
 # @module-federation/runtime
 
+## 2.2.1
+
+### Patch Changes
+
+- @module-federation/sdk@2.2.1
+- @module-federation/error-codes@2.2.1
+
+## 2.2.0
+
+### Minor Changes
+
+- c856ec1: Add `isBrowserEnvValue` as a tree-shakable ENV_TARGET-aware constant while
+  preserving the `isBrowserEnv()` function. Internal runtime and bridge callers
+  use the constant to enable bundler dead-code elimination without breaking the
+  public API.
+
+### Patch Changes
+
+- e5dd6ef: feat(runtime-core): enhance error handling for script loading and execution
+- 5c746e3: fix(runtime-core): change log to error for remote removal failure and remove redundant log function
+- 0ff97d6: fix(runtime-core): improve error messages clarity and fix preload resourceCategory bug
+- Updated dependencies [c856ec1]
+- Updated dependencies [12240bb]
+- Updated dependencies [e5dd6ef]
+  - @module-federation/sdk@2.2.0
+  - @module-federation/error-codes@2.2.0
+
 ## 2.1.0
 
 ### Patch Changes
@@ -203,7 +230,6 @@
   Add `useLegacyTypescriptPlugin: false` to all rollup-based packages to use the official `@rollup/plugin-typescript` instead of the deprecated `rollup-plugin-typescript2`. This resolves TypeScript compilation errors during build and modernizes the build toolchain.
 
 - a7cf276: chore: upgrade NX to 21.2.3, Storybook to 9.0.9, and TypeScript to 5.8.3
-
   - Upgraded NX from 21.0.3 to 21.2.3 with workspace configuration updates
   - Migrated Storybook from 8.3.5 to 9.0.9 with updated configurations and automigrations
   - Upgraded TypeScript from 5.7.3 to 5.8.3 with compatibility fixes
@@ -214,7 +240,6 @@
 - cc44d97: fix: prevent duplicate error prefix in Module Federation Runtime errors
 
   This change fixes an issue where the `[ Federation Runtime ]` prefix was being added multiple times to error messages when errors were re-thrown or already contained the prefix. The fix includes:
-
   - Check if error message already starts with the log category prefix before adding it
   - Properly handle Error objects to avoid mutating original errors in warn function
   - Add comprehensive tests to ensure prefix duplication is prevented
@@ -274,7 +299,6 @@
 ### Minor Changes
 
 - 82b8cac: Add conditional functionality for snapshots and optimize entry loading.
-
   - Introduced FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN constant to control snapshot functionality.
     - Default to include snapshot functionality if constant is not defined.
   - Simplified plugin loading logic to check USE_SNAPSHOT flag.
@@ -460,7 +484,6 @@
 ### Patch Changes
 
 - ea6d417: Replaced dynamic module import using `new Function` with a safer direct `import` call.
-
   - Removed usage of `new Function` to execute dynamic import
   - Implemented a direct async import with `/* webpackIgnore: true */` for proper bundler handling
 
@@ -496,7 +519,6 @@
 ### Patch Changes
 
 - 9e32644: Added comprehensive integration tests for the API synchronization and enhanced the embedded module proxy implementation.
-
   - Added detailed integration tests for API consistency between embedded and index modules.
     - Tests include export comparison and method consistency for `ModuleFederation` and `Module` classes.
   - Introduced and updated the `embedded.ts` file to dynamically access the runtime modules at runtime.

@@ -1,0 +1,59 @@
+# remoteType
+
+`remoteType` 用于指定远程容器的外部模块加载类型，决定运行时如何加载远程入口。
+
+- 类型：`ExternalsType`
+- 是否必填：否
+- 默认值：`'script'`
+
+```ts
+type ExternalsType =
+  | 'var' | 'module' | 'assign'
+  | 'this' | 'window' | 'self' | 'global'
+  | 'commonjs' | 'commonjs2' | 'commonjs-module' | 'commonjs-static'
+  | 'amd' | 'amd-require'
+  | 'umd' | 'umd2'
+  | 'jsonp' | 'system'
+  | 'promise' | 'import' | 'module-import'
+  | 'script' | 'node-commonjs';
+```
+
+## 使用说明
+
+`remoteType` 决定了 webpack/rspack 在运行时以何种方式引入远程容器脚本。常用值：
+
+| 值 | 说明 |
+|---|---|
+| `'script'` | 通过 `<script>` 标签加载（浏览器环境默认） |
+| `'var'` | 远程容器已通过全局变量暴露 |
+| `'commonjs2'` | 使用 `require()` 加载（Node.js 环境） |
+| `'node-commonjs'` | Node.js CommonJS 规范 |
+| `'import'` | 使用动态 `import()` 加载 |
+| `'promise'` | 使用 Promise 包装加载 |
+| `'module'` | ESM 模块加载 |
+
+:::tip
+绝大多数场景下无需手动设置 `remoteType`，使用默认值 `'script'` 即可。Node.js 服务端场景通常需要设置为 `'commonjs2'` 或 `'node-commonjs'`。
+:::
+
+- Example
+
+```ts
+// 浏览器端（默认）
+new ModuleFederationPlugin({
+  name: '@demo/host',
+  remoteType: 'script',
+  remotes: {
+    provider: 'provider@http://localhost:3001/remoteEntry.js',
+  },
+});
+
+// Node.js 服务端
+new ModuleFederationPlugin({
+  name: '@demo/node-host',
+  remoteType: 'commonjs2',
+  remotes: {
+    provider: 'provider@http://localhost:3001/remoteEntry.js',
+  },
+});
+```

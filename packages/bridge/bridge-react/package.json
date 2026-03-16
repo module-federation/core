@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/bridge-react",
-  "version": "2.1.0",
+  "version": "2.2.1",
   "sideEffects": false,
   "publishConfig": {
     "access": "public"
@@ -142,13 +142,17 @@
     "react": ">=16.9.0",
     "react-dom": ">=16.9.0",
     "react-router-dom": "^4 || ^5 || ^6 || ^7",
-    "react-router": "^6 || ^7"
+    "react-router": "^6 || ^7",
+    "hono": "^4.12.7"
   },
   "peerDependenciesMeta": {
     "react-router-dom": {
       "optional": true
     },
     "react-router": {
+      "optional": true
+    },
+    "hono": {
       "optional": true
     }
   },
@@ -169,6 +173,7 @@
     "vite-plugin-dts": "^4.3.0",
     "@module-federation/runtime": "workspace:*",
     "@module-federation/runtime-core": "workspace:*",
-    "hono": "4.12.7"
+    "hono": "4.12.7",
+    "vitest": "1.6.0"
   }
 }

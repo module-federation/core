@@ -1,5 +1,27 @@
 # @module-federation/node
 
+## 2.7.35
+
+### Patch Changes
+
+- Updated dependencies
+  - @module-federation/enhanced@2.2.1
+  - @module-federation/runtime@2.2.1
+  - @module-federation/sdk@2.2.1
+
+## 2.7.34
+
+### Patch Changes
+
+- ec7ab53: Fix node chunk parsing and align node webpack-path lint handling.
+- Updated dependencies [c856ec1]
+- Updated dependencies [12240bb]
+- Updated dependencies [e5dd6ef]
+- Updated dependencies [90758e9]
+  - @module-federation/sdk@2.2.0
+  - @module-federation/enhanced@2.2.0
+  - @module-federation/runtime@2.2.0
+
 ## 2.7.33
 
 ### Patch Changes
@@ -198,7 +220,6 @@
 ### Patch Changes
 
 - 0bf3a3a: fix(node): prevent infinite recursion in module imports
-
   - Add import cache to prevent infinite recursion when modules have circular dependencies
   - Cache import promises to ensure each module is only imported once
   - Clear cache on import errors to allow retry attempts
@@ -687,7 +708,6 @@
 ### Patch Changes
 
 - f1b8848: Improved error handling and cache clearing process in hot-reload utility.
-
   - Added error handling with try-catch block to manage potential exceptions when clearing the path cache.
   - Replaced direct use of module with a reference to currentChunk for cache path operations.
   - Ensured compatibility with TypeScript by adding @ts-ignore annotations where necessary.
@@ -704,7 +724,6 @@
 ### Minor Changes
 
 - 1478f50: Enhanced hot-reload functionality with module decaching and improved type safety.
-
   - Added `callsite` package for resolving module paths.
   - Implemented `decache` and `searchCache` functions to remove modules from cache safely.
     - Ensure proper handling of relative module paths.
@@ -717,7 +736,6 @@
 ### Patch Changes
 
 - 1478f50: Add global flag `moduleGraphDirty` to control forced revalidation in hot-reload.
-
   - Introduced new global variable `moduleGraphDirty`.
     - Initialized `moduleGraphDirty` to `false` in the global scope.
   - Modified `revalidate` function to check `moduleGraphDirty` flag.

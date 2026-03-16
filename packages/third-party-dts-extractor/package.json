@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/third-party-dts-extractor",
-  "version": "2.1.0",
+  "version": "2.2.1",
   "files": [
     "dist/",
     "README.md"
@@ -39,7 +39,10 @@
   "devDependencies": {
     "@types/fs-extra": "9.0.13",
     "@types/node": "^20.19.5",
-    "@types/react": "^18.3.11"
+    "@types/react": "^18.3.11",
+    "vitest": "1.6.0",
+    "react": "^18",
+    "tsup": "7.3.0"
   },
   "scripts": {
     "build": "tsup --config tsup.config.ts --outDir dist && cp package.json dist && cp *.md dist",

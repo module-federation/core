@@ -2,7 +2,6 @@
 
 This is the example application for Module Federation core.
 
-
 ## Build
 
 Output will be located in the `dist` or `.next` folder.
@@ -42,4 +41,4 @@ Run the development server and navigate to the provided localhost URL.
 
 ---
 
-*Optimized by Aiden*
+_Optimized by Aiden_

@@ -603,7 +603,9 @@ export class RemoteHandler {
         host.moduleCache.delete(remote.name);
       }
     } catch (err) {
-      logger.log('removeRemote fail: ', err);
+      logger.error(
+        `removeRemote failed: ${err instanceof Error ? err.message : String(err)}`,
+      );
     }
   }
 }

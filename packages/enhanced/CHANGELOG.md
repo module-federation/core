@@ -1,5 +1,46 @@
 # @module-federation/enhanced
 
+## 2.2.1
+
+### Patch Changes
+
+- fix(enhanced): fix missed deps
+  - @module-federation/rspack@2.2.1
+  - @module-federation/webpack-bundler-runtime@2.2.1
+  - @module-federation/sdk@2.2.1
+  - @module-federation/runtime-tools@2.2.1
+  - @module-federation/managers@2.2.1
+  - @module-federation/manifest@2.2.1
+  - @module-federation/dts-plugin@2.2.1
+  - @module-federation/bridge-react-webpack-plugin@2.2.1
+  - @module-federation/data-prefetch@2.2.1
+  - @module-federation/error-codes@2.2.1
+  - @module-federation/inject-external-runtime-core-plugin@2.2.1
+  - @module-federation/cli@2.2.1
+
+## 2.2.0
+
+### Patch Changes
+
+- 90758e9: Remove the unused `ChildCompilationRuntimePlugin` implementation from the
+  enhanced runtime container internals.
+- Updated dependencies [c856ec1]
+- Updated dependencies [12240bb]
+- Updated dependencies [e5dd6ef]
+- Updated dependencies [079aecd]
+- Updated dependencies [83662e3]
+  - @module-federation/sdk@2.2.0
+  - @module-federation/dts-plugin@2.2.0
+  - @module-federation/rspack@2.2.0
+  - @module-federation/bridge-react-webpack-plugin@2.2.0
+  - @module-federation/cli@2.2.0
+  - @module-federation/data-prefetch@2.2.0
+  - @module-federation/managers@2.2.0
+  - @module-federation/manifest@2.2.0
+  - @module-federation/runtime-tools@2.2.0
+  - @module-federation/inject-external-runtime-core-plugin@2.2.0
+  - @module-federation/error-codes@2.2.0
+
 ## 2.1.0
 
 ### Patch Changes
@@ -367,7 +408,6 @@
 ### Patch Changes
 
 - 756750e: test: add test coverage for ConsumeSharedPlugin
-
   - Add 70+ tests for createConsumeSharedModule method covering all critical business logic
   - Implement tests for import resolution logic including error handling and direct fallback regex matching
   - Add requiredVersion resolution tests for package name extraction and version resolution
@@ -378,7 +418,6 @@
   - Achieve test coverage parity with ProvideSharedPlugin (70+ tests each)
 
 - 756750e: test: add test coverage for ProvideSharedPlugin
-
   - Add 73 tests covering all critical business logic and edge cases
   - Implement complete shouldProvideSharedModule method coverage (15 tests) for version filtering with semver validation
   - Add provideSharedModule method tests (16 tests) covering version resolution, request pattern filtering, and warning generation
@@ -389,7 +428,6 @@
   - Add performance and memory usage tests for large-scale scenarios
 
 - 756750e: test: add test coverage for ConsumeSharedPlugin and ProvideSharedPlugin
-
   - Add 70+ tests for ConsumeSharedPlugin covering all critical business logic including multi-stage module resolution, import resolution logic, version filtering, and error handling
   - Add 73 tests for ProvideSharedPlugin covering shouldProvideSharedModule method, provideSharedModule method, module matching, and resolution stages
   - Fix minor bug in ProvideSharedPlugin where originalRequestString was used instead of modulePathAfterNodeModules for prefix matching
@@ -414,7 +452,6 @@
 ### Patch Changes
 
 - 0bf3a3a: test: add comprehensive test coverage for request pattern filtering
-
   - Add integration tests for request pattern filtering in provide-filters test case
   - Add test cases verifying modules match/don't match request include filters
   - Add unit tests for `extractPathAfterNodeModules` utility function
@@ -442,11 +479,9 @@
 ### Minor Changes
 
 - 0ab51b8: fix(enhanced): add module factory for EntryDependency when entry is empty
-
   - bind normalModuleFactory for EntryDependency when no moduleFactory is bound for EntryDependency
 
 - 98a29c3: feat(enhanced): add include/exclude filtering for shared modules
-
   - Add include/exclude filtering for both ConsumeSharedPlugin and ProvideSharedPlugin
   - Support version-based filtering using semantic version ranges (e.g., `include: { version: '^18.0.0' }`)
   - Support request pattern filtering with string and RegExp (e.g., `include: { request: /^Button/ }`)
@@ -474,7 +509,6 @@
 ### Patch Changes
 
 - bc3bc10: enhance HoistContainerReferencesPlugin for better module hoisting
-
   - Separate handling for container, federation, and remote dependencies
   - Improved support for `runtimeChunk: 'single'` configuration
   - Proper remote module hoisting using the new `addRemoteDependency` hook
@@ -483,14 +517,12 @@
   - Added comprehensive unit tests for the plugin functionality
 
 - 7000c1f: fix: BuildVersion now correctly reads from project's package.json
-
   - Fixed getBuildVersion() to accept optional root parameter for correct directory resolution
   - Updated StatsManager to use compiler.context when determining build version
   - Ensures buildVersion in mf-manifest.json matches the project's package.json version
   - Resolves issue #3835 where buildVersion was reading from wrong package.json location
 
 - 4ffefbe: refactor: rename container hooks for clarity and consistency
-
   - Renamed `addContainerEntryModule` to `addContainerEntryDependency`
   - Renamed `addFederationRuntimeModule` to `addFederationRuntimeDependency`
   - Added new `addRemoteDependency` hook for remote module tracking
@@ -498,7 +530,6 @@
   - This is an internal refactoring with no breaking changes to external APIs
 
 - a7cf276: chore: upgrade NX to 21.2.3, Storybook to 9.0.9, and TypeScript to 5.8.3
-
   - Upgraded NX from 21.0.3 to 21.2.3 with workspace configuration updates
   - Migrated Storybook from 8.3.5 to 9.0.9 with updated configurations and automigrations
   - Upgraded TypeScript from 5.7.3 to 5.8.3 with compatibility fixes
@@ -507,7 +538,6 @@
   - Updated build configurations and dependencies to support latest versions
 
 - 1825b9d: fix(enhanced): add runtime safety checks to prevent errors
-
   - Add typeof check for prevStartup function in EmbedFederationRuntimeModule to prevent calling undefined function
   - Add typeof check for **webpack_require**.x in StartupHelpers to prevent calling undefined function
   - Add warning logs when these functions are missing to help developers debug issues
@@ -639,7 +669,6 @@
 ### Minor Changes
 
 - 82b8cac: Updated ModuleFederationPlugin to enhance configuration capabilities and target environment identification.
-
   - Introduced `definePluginOptions` to manage DefinePlugin settings.
   - Added `FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN` to handle disabling of snapshot optimizations via experiments.
   - Implemented environment target detection (`web` or `node`) based on compiler options and experiments.
@@ -708,7 +737,6 @@
 ### Minor Changes
 
 - f4fb242: Enhancements to layer handling in module federation tests and configuration.
-
   - Introduced new layer configurations to support more nuanced federation scenarios that consider multiple layers of dependency.
 
 - f4fb242: support request option on ConsumeSharePlugin. Allows matching requests like the object key of shared does
@@ -719,7 +747,6 @@
 ### Patch Changes
 
 - f4fb242: Refactored module sharing configuration handling.
-
   - Simplified plugin schema for better maintainability
   - Improved layer-based module sharing test coverage
   - Removed redundant plugin exports
@@ -817,7 +844,6 @@
 ### Minor Changes
 
 - fce107e: Enhanced module federation plugin to remove the `federationRuntime` experiment and replace it with `asyncStartup`.
-
   - Dropped support for `federationRuntime` experiment and introduced `asyncStartup` to enable asynchronous container startup.
   - Refactored EmbedFederationRuntimePlugin for improved runtime embedding and startup management.
     - Added options to enable runtime embedding for all chunks.
@@ -1311,7 +1337,6 @@
 ### Patch Changes
 
 - 6b02145: Added a check to skip processing when virtualRuntimeEntry is present.
-
   - Added an early return in `FederationRuntimePlugin` to skip processing if `options.virtualRuntimeEntry` is defined.
 
 - 22a3b83: fix(data-prefetch): apply DataPrefetchPlugin on demand
@@ -1331,7 +1356,6 @@
 ### Patch Changes
 
 - 70a1708: Added a check to skip processing when virtualRuntimeEntry is present.
-
   - Added an early return in `FederationRuntimePlugin` to skip processing if `options.virtualRuntimeEntry` is defined.
   - @module-federation/rspack@0.6.9
   - @module-federation/sdk@0.6.9
@@ -1362,7 +1386,6 @@
 
 - 1b6bf0e: ContainerPlugin to use makeHook to addInclude of federation runtime dependency
 - 9e32644: Added support for hoisting federation runtime modules and enhancing dependency management.
-
   - Introduced `FederationModulesPlugin` to handle federation-related hooks and dependencies.
   - Added new `FederationRuntimeDependency` and logic to include it conditionally.
   - Enhanced `ContainerPlugin` and related plugins to support experimental `federationRuntime` options.
@@ -1370,7 +1393,6 @@
   - Implemented changes across multiple files to support the new plugin and dependency management features.
 
 - 9e32644: Refactor `HoistContainerReferencesPlugin` to optimize module disconnection and cleanup logic.
-
   - Removed `moduleToDelete` set as it was redundant.
   - Ensured all referenced modules are disconnected from unused chunks directly.
   - Added call to `cleanUpChunks` within the main loop to clean up chunks using `allReferencedModules`.

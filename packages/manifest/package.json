@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/manifest",
-  "version": "2.1.0",
+  "version": "2.2.1",
   "license": "MIT",
   "description": "Provide manifest/stats for webpack/rspack MF project .",
   "keywords": [
@@ -51,6 +51,9 @@
         "./dist/index.d.ts"
       ]
     }
+  },
+  "devDependencies": {
+    "webpack": "^5.0.0"
   },
   "scripts": {
     "build": "rslib build",

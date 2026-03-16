@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/sdk",
-  "version": "2.1.0",
+  "version": "2.2.1",
   "type": "module",
   "license": "MIT",
   "description": "A sdk for support module federation",
@@ -59,6 +59,18 @@
       "normalize-webpack-path": [
         "./dist/normalize-webpack-path.d.ts"
       ]
+    }
+  },
+  "devDependencies": {
+    "@jest/globals": "29.7.0",
+    "webpack": "^5.0.0"
+  },
+  "peerDependencies": {
+    "node-fetch": "^3.3.2"
+  },
+  "peerDependenciesMeta": {
+    "node-fetch": {
+      "optional": true
     }
   },
   "scripts": {
