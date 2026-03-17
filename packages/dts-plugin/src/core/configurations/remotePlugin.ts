@@ -1,5 +1,5 @@
 import { existsSync } from 'fs';
-import { dirname, join, resolve, extname } from 'path';
+import { dirname, join, resolve, extname, isAbsolute } from 'path';
 import { utils } from '@module-federation/managers';
 import typescript from 'typescript';
 
@@ -46,6 +46,26 @@ function getEffectiveRootDir(
         }
         return commonPath;
       }, files[0]);
+    return commonRoot;
+  }
+
+  // if there are project references, infer the commonRoot from references
+  if (parsedCommandLine.projectReferences.length) {
+    const relativeReferences = parsedCommandLine.projectReferences.filter(
+      (reference) => !isAbsolute(reference.originalPath ?? reference.path),
+    );
+    const referencesForRoot = relativeReferences.length
+      ? relativeReferences
+      : parsedCommandLine.projectReferences;
+
+    const commonRoot = referencesForRoot
+      .map((reference) => dirname(reference.path))
+      .reduce((commonPath, filePath) => {
+        while (!filePath.startsWith(commonPath)) {
+          commonPath = dirname(commonPath);
+        }
+        return commonPath;
+      }, dirname(referencesForRoot[0].path));
     return commonRoot;
   }
 

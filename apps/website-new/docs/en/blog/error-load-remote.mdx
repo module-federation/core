@@ -5,10 +5,6 @@ title: Error handling for remote module rendering in Module Federation.
 # Error handling for remote module rendering in Module Federation.
 import BlogGifGrid from '@components/BlogGifGrid.tsx';
 
-:::tip Version Requirements
-This solution requires upgrading the `@module-federation/runtime` version to 0.8.10 or higher.
-:::
-
 
 ## Background
 Remote module loading process may fail due to network resource loading failure or business logic rendering failure.
@@ -50,7 +46,7 @@ These three solutions are for different scenarios, can be used separately, or co
 
 For weak network environment or producer has not started the service, we can add retry mechanism to request resources multiple times, which will increase the probability of resource loading success.
 
-Module Federation official provides retry plugin [@module-federation/retry-plugin](https://module-federation.io/zh/plugin/plugins/retry-plugin.html) to support retry mechanism for resources, support fetch and script resources retry.    
+Module Federation official provides retry plugin [@module-federation/retry-plugin](https://module-federation.io/zh/plugin/plugins/retry-plugin.html) to support retry mechanism for resources, support fetch and script resources retry.
 
 #### Pure runtime registration
 
@@ -313,7 +309,7 @@ export default defineConfig({
 ```
 
 :::info Tips
-The following example shows how to handle errors in different lifecycle stages. 
+The following example shows how to handle errors in different lifecycle stages.
 
 If your application scenario is simple, you can refer to the **simplified version** below, which provides a unified error handling solution.
 
