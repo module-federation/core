@@ -1,6 +1,11 @@
 import type { WebpackPluginInstance, Compiler } from 'webpack';
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 
+// Use module.require instead of require to prevent bundlers (rolldown/tsdown) from
+// hoisting the call to the top of the file. This ensures the require only executes
+// at call time, preserving strict initialization ordering. CJS-only.
+const lazyRequire = (id: string): any => module.require(id);
+
 /**
  * Base Wrapper Plugin Class
  *
@@ -33,7 +38,7 @@ export default abstract class BaseWrapperPlugin implements WebpackPluginInstance
       process.env['FEDERATION_WEBPACK_PATH'] || getWebpackPath(compiler);
 
     // Lazily load core plugin after webpack path is set.
-    const CorePlugin = require(this.coreModulePath).default as any;
+    const CorePlugin = lazyRequire(this.coreModulePath).default as any;
 
     // Create core plugin instance and apply it
     this.createCorePluginInstance(CorePlugin, compiler);
