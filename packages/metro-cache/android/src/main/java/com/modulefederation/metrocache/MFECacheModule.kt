@@ -11,7 +11,27 @@ import java.util.concurrent.TimeUnit
 class MFECacheModule(reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule(reactContext) {
 
+  companion object {
+    init {
+      System.loadLibrary("mfecache")
+    }
+  }
+
+  private external fun nativeInstallJSI(runtimePtr: Long)
+
   override fun getName(): String = "MFECache"
+
+  override fun initialize() {
+    super.initialize()
+    try {
+      val jsContext = reactApplicationContext.javaScriptContextHolder?.get() ?: 0L
+      if (jsContext != 0L) {
+        nativeInstallJSI(jsContext)
+      }
+    } catch (e: Exception) {
+      // JSI installation failed — JS side will use readFile + eval fallback
+    }
+  }
 
   private val httpClient = OkHttpClient.Builder()
     .connectTimeout(60, TimeUnit.SECONDS)
@@ -166,39 +186,4 @@ class MFECacheModule(reactContext: ReactApplicationContext) :
     }.start()
   }
 
-  // --- JavaScript Evaluation ---
-
-  @ReactMethod
-  fun evaluateJavaScript(filePath: String, sourceURL: String, promise: Promise) {
-    Thread {
-      try {
-        val file = File(filePath)
-        if (!file.exists()) {
-          promise.reject("EVAL_ERROR", "File not found: $filePath")
-          return@Thread
-        }
-
-        val script = file.readText(Charsets.UTF_8)
-        val catalystInstance = reactApplicationContext.catalystInstance
-          ?: run {
-            promise.reject("EVAL_ERROR", "CatalystInstance is not available")
-            return@Thread
-          }
-
-        // Use original bundle URL as sourceURL so Metro's module resolution works correctly
-        val evalSourceURL = if (sourceURL.isNotEmpty()) sourceURL else filePath
-
-        UiThreadUtil.runOnUiThread {
-          try {
-            catalystInstance.loadScriptFromFile(filePath, evalSourceURL, false)
-            promise.resolve(null)
-          } catch (e: Exception) {
-            promise.reject("EVAL_ERROR", e.message, e)
-          }
-        }
-      } catch (e: Exception) {
-        promise.reject("EVAL_ERROR", e.message, e)
-      }
-    }.start()
-  }
 }

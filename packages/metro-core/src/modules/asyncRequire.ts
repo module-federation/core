@@ -129,12 +129,23 @@ function buildLoadBundleAsyncWrapper() {
         const cached = await cacheManager.getCachedBundle(bundlePath);
 
         if (cached) {
-          // Path A: cache HIT — read from disk + JS eval
+          // Path A: cache HIT — native sync read + JS eval
           console.log('[MFE-Cache] HIT:', cached.filePath);
-          const source = await NativeMFECache.readFile(cached.filePath, 'utf8');
-          eval(source);
+          if (typeof (globalThis as any).__MFE_readFileSync === 'function') {
+            const source = (globalThis as any).__MFE_readFileSync(
+              cached.filePath,
+            );
+            eval(source);
+          } else {
+            // Fallback: async readFile + JS eval
+            const source = await NativeMFECache.readFile(
+              cached.filePath,
+              'utf8',
+            );
+            eval(source);
+          }
         } else {
-          // Path B: cache MISS — download + save + read + JS eval
+          // Path B: cache MISS — download + save + eval
           const urlParts = bundlePath.split('/');
           const bundleFileName =
             urlParts[urlParts.length - 1]?.split('.')[0] ?? 'unknown';
@@ -156,8 +167,13 @@ function buildLoadBundleAsyncWrapper() {
             bundleHash: sha256,
           });
 
-          const source = await NativeMFECache.readFile(destPath, 'utf8');
-          eval(source);
+          if (typeof (globalThis as any).__MFE_readFileSync === 'function') {
+            const source = (globalThis as any).__MFE_readFileSync(destPath);
+            eval(source);
+          } else {
+            const source = await NativeMFECache.readFile(destPath, 'utf8');
+            eval(source);
+          }
         }
       } catch (cacheError) {
         console.warn(

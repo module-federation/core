@@ -21,10 +21,6 @@ export interface NativeMFECacheSpec {
     url: string,
     destPath: string,
   ): Promise<{ sha256: string; bytesWritten: number }>;
-
-  // JS evaluation (native: read disk file + JSI evaluateJavaScript)
-  // sourceURL: original bundle URL for correct Metro module resolution
-  evaluateJavaScript(filePath: string, sourceURL: string): Promise<void>;
 }
 
 const MFECache = NativeModules.MFECache as NativeMFECacheSpec | undefined;
