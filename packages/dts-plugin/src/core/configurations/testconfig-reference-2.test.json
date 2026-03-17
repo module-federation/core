@@ -1,0 +1,7 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./testconfig.app.test.json" },
+    { "path": "./testconfig.node.test.json" }
+  ]
+}

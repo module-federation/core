@@ -85,9 +85,8 @@ describe('normalizeOptions', () => {
       { projectRoot, tmpDirPath },
     );
 
-    const metroCorePluginPath = require.resolve(
-      '../../src/modules/metroCorePlugin.ts',
-    );
+    const metroCorePluginPath =
+      require.resolve('../../src/modules/metroCorePlugin.ts');
     expect(normalized.plugins).toEqual([
       toPosixPath(path.relative(tmpDirPath, metroCorePluginPath)),
       toPosixPath(path.relative(tmpDirPath, runtimePluginPath)),
@@ -111,9 +110,8 @@ describe('normalizeOptions', () => {
       { projectRoot, tmpDirPath },
     );
 
-    const metroCorePluginPath = require.resolve(
-      '../../src/modules/metroCorePlugin.ts',
-    );
+    const metroCorePluginPath =
+      require.resolve('../../src/modules/metroCorePlugin.ts');
     expect(normalized.plugins).toEqual([
       path.relative(tmpDirPath, metroCorePluginPath),
       path.relative(tmpDirPath, runtimePluginPath),
@@ -138,9 +136,8 @@ describe('normalizeOptions', () => {
       { projectRoot, tmpDirPath },
     );
 
-    const metroCorePluginPath = require.resolve(
-      '../../src/modules/metroCorePlugin.ts',
-    );
+    const metroCorePluginPath =
+      require.resolve('../../src/modules/metroCorePlugin.ts');
     expect(normalized.plugins).toEqual([
       path.relative(tmpDirPath, metroCorePluginPath),
       path.relative(tmpDirPath, runtimePluginPath),
@@ -161,9 +158,8 @@ describe('normalizeOptions', () => {
       { projectRoot, tmpDirPath },
     );
 
-    const metroCorePluginPath = require.resolve(
-      '../../src/modules/metroCorePlugin.ts',
-    );
+    const metroCorePluginPath =
+      require.resolve('../../src/modules/metroCorePlugin.ts');
     expect(normalized.plugins).toEqual([
       path.relative(tmpDirPath, metroCorePluginPath),
       '@scope/pkg/plugin',
@@ -197,9 +193,8 @@ describe('normalizeOptions', () => {
       { projectRoot, tmpDirPath },
     );
 
-    const metroCorePluginPath = require.resolve(
-      '../../src/modules/metroCorePlugin.ts',
-    );
+    const metroCorePluginPath =
+      require.resolve('../../src/modules/metroCorePlugin.ts');
     expect(normalized.plugins).toEqual([
       toPosixPath(path.relative(tmpDirPath, metroCorePluginPath)),
       toPosixPath(path.relative(tmpDirPath, runtimePluginPath)),
