@@ -1,5 +1,13 @@
 # @module-federation/esbuild
 
+## 0.0.99
+
+### Patch Changes
+
+- @module-federation/runtime@2.2.1
+- @module-federation/webpack-bundler-runtime@2.2.1
+- @module-federation/sdk@2.2.1
+
 ## 0.0.98
 
 ### Patch Changes

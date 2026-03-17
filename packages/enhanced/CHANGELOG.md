@@ -1,5 +1,23 @@
 # @module-federation/enhanced
 
+## 2.2.1
+
+### Patch Changes
+
+- fix(enhanced): fix missed deps
+  - @module-federation/rspack@2.2.1
+  - @module-federation/webpack-bundler-runtime@2.2.1
+  - @module-federation/sdk@2.2.1
+  - @module-federation/runtime-tools@2.2.1
+  - @module-federation/managers@2.2.1
+  - @module-federation/manifest@2.2.1
+  - @module-federation/dts-plugin@2.2.1
+  - @module-federation/bridge-react-webpack-plugin@2.2.1
+  - @module-federation/data-prefetch@2.2.1
+  - @module-federation/error-codes@2.2.1
+  - @module-federation/inject-external-runtime-core-plugin@2.2.1
+  - @module-federation/cli@2.2.1
+
 ## 2.2.0
 
 ### Patch Changes
