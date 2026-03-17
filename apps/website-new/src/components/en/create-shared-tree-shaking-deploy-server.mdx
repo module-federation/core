@@ -4,7 +4,6 @@ If you plan to build your own Deploy Server, the following high-level flow can b
 
 1.  **Deployment phase: aggregate `usedExports`**
     In your CI/CD deployment pipeline, your service should:
-
     - collect build metadata for all applications about to be released (typically `mf-stats.json` or similar files);
     - for the same shared dependency (e.g. `antd@6.1.0`), aggregate the `usedExports` declared by each application.
 
@@ -13,14 +12,12 @@ If you plan to build your own Deploy Server, the following high-level flow can b
 
 3.  **Trigger a secondary build (produce an optimized shared bundle)**
     Invoke your build tool (e.g. Rspack CLI) as an isolated build and pass:
-
     - the target shared dependency name and version (e.g. `antd@6.1.0`);
     - the global `usedExports` union from the previous step.
       The output is a standalone shared bundle containing only the required modules.
 
 4.  **Update and publish the Snapshot**
     Upload the optimized bundle to your static asset host (CDN). Then update the Module Federation Snapshot file (typically the remote version of `mf-manifest.json`) with fields such as:
-
     - `secondarySharedTreeShakingEntry`: URL of the optimized bundle,
     - `secondarySharedTreeShakingName`: unique bundle name,
     - `treeShakingStatus`: mark as available.

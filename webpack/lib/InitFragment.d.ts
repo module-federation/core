@@ -3,9 +3,9 @@ export = InitFragment;
  * @template GenerateContext
  * @implements {MaybeMergeableInitFragment<GenerateContext>}
  */
-declare class InitFragment<GenerateContext>
-  implements MaybeMergeableInitFragment<GenerateContext>
-{
+declare class InitFragment<
+  GenerateContext,
+> implements MaybeMergeableInitFragment<GenerateContext> {
   /**
    * @template Context
    * @param {Source} source sources
