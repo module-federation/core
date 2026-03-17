@@ -1,11 +1,11 @@
 import path from 'path';
 
-const globalState = globalThis as typeof globalThis & {
-  __NEXT_MF_LOCAL_WEBPACK_PATH__?: string;
-};
+const localWebpackPathEnvKey = 'NEXT_MF_LOCAL_WEBPACK_PATH';
+const resolveLocalWebpackPath = (): string | undefined =>
+  process.env[localWebpackPathEnvKey];
 
 const resolveWebpackLibPath = (requestPath: string): string => {
-  const localWebpackPath = globalState.__NEXT_MF_LOCAL_WEBPACK_PATH__;
+  const localWebpackPath = resolveLocalWebpackPath();
 
   if (localWebpackPath) {
     const webpackLibDir = path.dirname(localWebpackPath);
@@ -16,7 +16,7 @@ const resolveWebpackLibPath = (requestPath: string): string => {
 };
 
 const requireLocalWebpack = () => {
-  const localWebpackPath = globalState.__NEXT_MF_LOCAL_WEBPACK_PATH__;
+  const localWebpackPath = resolveLocalWebpackPath();
 
   if (localWebpackPath) {
     return require(localWebpackPath) as typeof import('webpack');

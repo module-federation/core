@@ -95,12 +95,6 @@ const patchNextWebpackSourcesAlias = (compiler: Compiler) => {
       return;
     }
 
-    (
-      globalThis as typeof globalThis & {
-        __NEXT_MF_WEBPACK_SOURCES__?: typeof import('webpack').sources;
-      }
-    ).__NEXT_MF_WEBPACK_SOURCES__ = localWebpackSources;
-
     const { createRequire } = runtimeRequire(
       'module',
     ) as typeof import('module');

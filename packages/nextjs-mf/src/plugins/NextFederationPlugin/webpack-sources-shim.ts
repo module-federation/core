@@ -1,16 +1,6 @@
 import type webpack from 'webpack';
 
 const loadWebpackSources = () => {
-  const globalWebpackSources = (
-    globalThis as typeof globalThis & {
-      __NEXT_MF_WEBPACK_SOURCES__?: typeof import('webpack').sources;
-    }
-  ).__NEXT_MF_WEBPACK_SOURCES__;
-
-  if (globalWebpackSources) {
-    return globalWebpackSources;
-  }
-
   try {
     const resolvedWebpackSources = require.resolve('webpack-sources');
     if (

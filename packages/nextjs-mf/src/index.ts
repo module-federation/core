@@ -74,6 +74,8 @@ const reactAliasKeys = [
   'react/jsx-runtime',
   'react/jsx-dev-runtime',
 ] as const;
+const localWebpackPathEnvKey = 'NEXT_MF_LOCAL_WEBPACK_PATH';
+let requireHookAliasPatched = false;
 
 const collectRequireCandidates = (): ModuleLike['require'][] => {
   const candidates: ModuleLike['require'][] = [];
@@ -263,12 +265,7 @@ const resolveRequestPath = (request: string): string | undefined => {
 };
 
 const patchRequireHookWebpackSourcesAlias = () => {
-  const globalState = globalThis as typeof globalThis & {
-    __NEXT_MF_WEBPACK_SOURCES_ALIAS_PATCHED__?: boolean;
-    __NEXT_MF_LOCAL_WEBPACK_PATH__?: string;
-  };
-
-  if (globalState.__NEXT_MF_WEBPACK_SOURCES_ALIAS_PATCHED__) {
+  if (requireHookAliasPatched) {
     return;
   }
 
@@ -288,7 +285,7 @@ const patchRequireHookWebpackSourcesAlias = () => {
   let nextCompiledWebpackShimPath: string | undefined;
 
   if (webpackAliasPath) {
-    globalState.__NEXT_MF_LOCAL_WEBPACK_PATH__ = webpackAliasPath;
+    process.env[localWebpackPathEnvKey] = webpackAliasPath;
     try {
       nextCompiledWebpackShimPath =
         require.resolve('./plugins/NextFederationPlugin/next-compiled-webpack-shim.js');
@@ -344,8 +341,7 @@ const patchRequireHookWebpackSourcesAlias = () => {
       .map((aliasKey) => [aliasKey, nextCompiledWebpackShimPath!]),
     ...reactAliasEntries,
   ]);
-
-  globalState.__NEXT_MF_WEBPACK_SOURCES_ALIAS_PATCHED__ = true;
+  requireHookAliasPatched = true;
 };
 
 export class NextFederationPlugin implements WebpackPluginInstance {
