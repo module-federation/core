@@ -64,6 +64,14 @@ export function consumes(options: ConsumesOptions) {
           moduleToHandlerMapping[id];
         const usedExports = getUsedExports(webpackRequire, shareKey);
         const customShareInfo: Partial<Shared> = { ...shareInfo };
+        // compatibility for rspack, which will wrap scope with array, but webpack will not
+        // https://github.com/web-infra-dev/rspack/blob/main/packages/rspack/src/runtime/moduleFederationDefaultRuntime.js#L95
+        if (
+          Array.isArray(customShareInfo.scope) &&
+          Array.isArray(customShareInfo.scope[0])
+        ) {
+          customShareInfo.scope = customShareInfo.scope[0];
+        }
         if (usedExports) {
           customShareInfo.treeShaking = {
             usedExports,
