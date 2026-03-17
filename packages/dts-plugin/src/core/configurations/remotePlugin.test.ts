@@ -204,4 +204,32 @@ describe('hostPlugin', () => {
       });
     });
   });
+
+  describe('successfully parse tsconfig with project references', () => {
+    it.each([
+      {
+        tsConfigFile: './testconfig-reference.test.json',
+        expectedRootDir: resolve(__dirname),
+      },
+      {
+        tsConfigFile: './testconfig-reference-2.test.json',
+        expectedRootDir: resolve(__dirname),
+      },
+      {
+        tsConfigFile: './testconfig-reference-relative.test.json',
+        expectedRootDir: resolve(__dirname, '..'),
+      },
+    ])(
+      'infers rootDir from project references',
+      ({ tsConfigFile, expectedRootDir }) => {
+        const tsConfigPath = join(__dirname, tsConfigFile);
+        const { tsConfig } = retrieveRemoteConfig({
+          moduleFederationConfig,
+          tsConfigPath,
+        });
+
+        expect(tsConfig.compilerOptions.rootDir).toBe(expectedRootDir);
+      },
+    );
+  });
 });
