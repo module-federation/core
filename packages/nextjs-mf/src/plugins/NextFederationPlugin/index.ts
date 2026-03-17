@@ -72,23 +72,8 @@ const loadApplyClientPlugins = () =>
   ) as typeof import('./apply-client-plugins');
 const loadLogger = () =>
   loadModule<typeof import('../../logger').default>('../../logger');
-const loadNextRequireHook = () => {
-  const cachedModule = Object.values(require.cache).find((entry) => {
-    const fileName = entry?.filename;
-    return (
-      typeof fileName === 'string' &&
-      fileName.includes(
-        `${path.sep}next${path.sep}dist${path.sep}server${path.sep}require-hook`,
-      )
-    );
-  });
-
-  if (cachedModule?.exports) {
-    return cachedModule.exports as typeof import('next/dist/server/require-hook');
-  }
-
-  return undefined;
-};
+const loadNextRequireHook = () =>
+  require('next/dist/server/require-hook') as typeof import('next/dist/server/require-hook');
 
 let patchedWebpackSourcesAlias: string | undefined;
 
