@@ -2,7 +2,7 @@ export function orderedUniq<T>(array: T[]): T[] {
   // prettier-ignore
   const ret: T[] = [], visited = new Set<T>();
   for (const val of array)
-    if (!visited.has(val)) visited.add(val), ret.push(val);
+    if (!visited.has(val)) (visited.add(val), ret.push(val));
   return ret;
 }
 

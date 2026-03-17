@@ -3,7 +3,7 @@
     "outDir": "dist",
     "sourceMap": false,
     "target": "es6",
-    "module": "commonjs",
+    "module": "esnext",
     "moduleResolution": "node",
     "esModuleInterop": true,
     "experimentalDecorators": true,
