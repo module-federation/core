@@ -1,6 +1,6 @@
 # Rspack
 
-* 使用 `Rspack` 构建工具的应用构建出满足 {props.name || 'Module Federation'} 加载规范的微模块
+* 使用 `Rspack` 构建工具的应用构建出满足 {props.brandName || props.name || 'Module Federation'} 加载规范的微模块
 * 能够在构建插件里面使用别名消费微模块
 * 能够设置微模块的共享依赖配置，当加载微模块的宿主环境已经存在对应依赖时将不会重复加载
 * 当微模块具备远程类型时将会自动把远程模块的类型下载下来消费
@@ -19,7 +19,7 @@ import { Tab, Tabs } from '@theme';
 import InstallKit from '@components/common/install-kit';
 
 <InstallKit
-  pkgName={props.pkgName}
+  pkgName={props.rspackPackage || props.pkgName}
 />
 
 ### 创建 {props.configName || 'module-federation.config.ts'}

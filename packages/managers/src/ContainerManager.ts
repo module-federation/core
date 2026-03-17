@@ -27,10 +27,10 @@ class ContainerManager extends BasicPluginOptionsManager<moduleFederationPlugin.
   override get enable(): boolean {
     return Boolean(
       this.options.name &&
-        this.options.exposes &&
-        (Array.isArray(this.options.exposes)
-          ? this.options.exposes.length > 0
-          : Object.keys(this.options.exposes).length > 0),
+      this.options.exposes &&
+      (Array.isArray(this.options.exposes)
+        ? this.options.exposes.length > 0
+        : Object.keys(this.options.exposes).length > 0),
     );
   }
 

@@ -34,21 +34,13 @@ import logger from '../../logger';
 
 const resolveRuntimePluginPath = (): string =>
   process.env.IS_ESM_BUILD === 'true'
-    ? require.resolve(
-        '@module-federation/nextjs-mf/dist/src/plugins/container/runtimePlugin.mjs',
-      )
-    : require.resolve(
-        '@module-federation/nextjs-mf/dist/src/plugins/container/runtimePlugin.js',
-      );
+    ? require.resolve('@module-federation/nextjs-mf/dist/src/plugins/container/runtimePlugin.mjs')
+    : require.resolve('@module-federation/nextjs-mf/dist/src/plugins/container/runtimePlugin.js');
 
 const resolveNoopPath = (): string =>
   process.env.IS_ESM_BUILD === 'true'
-    ? require.resolve(
-        '@module-federation/nextjs-mf/dist/src/federation-noop.mjs',
-      )
-    : require.resolve(
-        '@module-federation/nextjs-mf/dist/src/federation-noop.js',
-      );
+    ? require.resolve('@module-federation/nextjs-mf/dist/src/federation-noop.mjs')
+    : require.resolve('@module-federation/nextjs-mf/dist/src/federation-noop.js');
 
 const resolveNodeRuntimePluginPath = (): string => {
   const nodePackageRoot = path.dirname(

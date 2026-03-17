@@ -21,11 +21,7 @@ import { isWebTarget, skipByTarget } from './utils';
 
 import type { RsbuildPlugin, ModifyRspackConfigFn } from '@rsbuild/core';
 import type { CliPlugin, AppTools } from '@modern-js/app-tools';
-import type {
-  AssetFileNames,
-  InternalModernPluginOptions,
-  PluginOptions,
-} from '../types';
+import type { AssetFileNames, InternalModernPluginOptions } from '../types';
 
 export function setEnv() {
   process.env['MF_SSR_PRJ'] = 'true';
