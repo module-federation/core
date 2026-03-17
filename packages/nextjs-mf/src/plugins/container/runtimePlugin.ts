@@ -90,6 +90,19 @@ export default function (): ModuleFederationRuntimePlugin {
       return args;
     },
     beforeRequest: function (args: any) {
+      const options = args.options;
+      const id = args.id;
+      const remoteName = id.split('/').shift();
+      const remote = options.remotes.find(function (remote: any) {
+        return remote.name === remoteName;
+      });
+      if (!remote || typeof remote.entry !== 'string') return args;
+      if (remote.entry.includes('?t=')) {
+        return args;
+      }
+      remote.entry = remote.entry.includes('?')
+        ? `${remote.entry}&t=${Date.now()}`
+        : `${remote.entry}?t=${Date.now()}`;
       return args;
     },
     afterResolve: function (args: any) {
