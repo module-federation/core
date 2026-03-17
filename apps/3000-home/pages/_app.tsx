@@ -27,14 +27,7 @@ function MyApp(props) {
   };
   // handle first route hit.
   React.useEffect(() => {
-    const initialPath =
-      (
-        Router as typeof Router & {
-          router?: {
-            asPath?: string;
-          };
-        }
-      ).router?.asPath || '/';
+    const initialPath = Router.router?.asPath || '/';
     handleRouteChange(initialPath);
   }, []);
 

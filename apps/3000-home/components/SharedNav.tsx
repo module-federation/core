@@ -4,14 +4,7 @@ import Router from 'next/router';
 import './menu';
 
 const SharedNav = () => {
-  const router = (
-    Router as typeof Router & {
-      router?: {
-        asPath?: string;
-        push: (url: string) => Promise<boolean>;
-      };
-    }
-  ).router;
+  const router = Router.router;
   const asPath =
     typeof window !== 'undefined'
       ? window.location.pathname || router?.asPath || '/'

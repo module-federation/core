@@ -16,14 +16,7 @@ const menuItems: ItemType[] = [
 ];
 
 export default function AppMenu() {
-  const router = (
-    Router as typeof Router & {
-      router?: {
-        asPath?: string;
-        push: (url: string) => Promise<boolean>;
-      };
-    }
-  ).router;
+  const router = Router.router;
   const selectedKey =
     typeof window !== 'undefined'
       ? window.location.pathname || router?.asPath || '/'
