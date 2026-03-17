@@ -1,7 +1,7 @@
 # Webpack
 
-- 能够构建出满足 {props.name || 'Module Federation'} 加载规范的模块
-- 能够使用别名消费 {props.name || 'Module Federation'} 规范的模块
+- 能够构建出满足 {props.brandName || props.name || 'Module Federation'} 加载规范的模块
+- 能够使用别名消费 {props.brandName || props.name || 'Module Federation'} 规范的模块
 - 能够设置模块的共享依赖配置，当加载模块的宿主环境已经存在对应依赖时将不会重复加载
 - 当模块具备远程类型时将会自动把远程模块的类型下载下来消费
 - 消费远程模块时将具备热更新能力
@@ -19,7 +19,7 @@
 import InstallKit from '@components/common/install-kit';
 
 <InstallKit
-  pkgName={props.pkgName}
+  pkgName={props.enhancedPackage || props.pkgName}
 />
 
 ### 创建 {props.configName || 'module-federation.config.js'}
