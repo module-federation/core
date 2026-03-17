@@ -10,7 +10,16 @@ import { parseOptions } from '../options';
 import type webpack from 'webpack';
 import type RuntimeGlobals from 'webpack/lib/RuntimeGlobals';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
-import { NormalizedRuntimeInitOptionsWithOutShared } from '../../../types/runtime';
+import type { init } from '@module-federation/runtime-tools';
+
+type Remotes = Parameters<typeof init>[0]['remotes'];
+
+export interface NormalizedRuntimeInitOptionsWithOutShared {
+  name: string;
+  remotes: Array<
+    Remotes[0] & { externalType: moduleFederationPlugin.ExternalsType }
+  >;
+}
 
 const extractUrlAndGlobal = require(
   normalizeWebpackPath('webpack/lib/util/extractUrlAndGlobal'),

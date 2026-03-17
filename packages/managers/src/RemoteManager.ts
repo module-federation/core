@@ -36,9 +36,9 @@ class RemoteManager extends BasicPluginOptionsManager<moduleFederationPlugin.Mod
   override get enable(): boolean {
     return Boolean(
       this.remotes &&
-        (Array.isArray(this.remotes)
-          ? this.remotes.length > 0
-          : Object.keys(this.remotes).length > 0),
+      (Array.isArray(this.remotes)
+        ? this.remotes.length > 0
+        : Object.keys(this.remotes).length > 0),
     );
   }
 

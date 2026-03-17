@@ -144,11 +144,43 @@ Check whether globalSnapshot contains an object with key `${moduleName}:${module
 
 ### Reasons
 
-Runtime resource loading failed. The possible reasons are network instability causing timeout, or an incorrect resource URL.
+The remote entry script failed to load. The error message includes a specific failure reason, which falls into one of two categories:
+
+**1. ScriptNetworkError — network-level failure**
+
+The script file could not be downloaded. Common causes:
+
+- Incorrect resource URL (server returns 404)
+- Network instability or request timeout
+- Cross-origin (CORS) misconfiguration
+- CDN node unavailability
+
+**2. ScriptExecutionError — runtime error during script execution**
+
+The script file downloaded successfully, but its IIFE threw a runtime exception during execution. The error message will contain `ScriptExecutionError` along with the original exception (e.g. `TypeError: ...`). Common causes:
+
+- Incompatible syntax in the producer's code (e.g. unsupported browser APIs)
+- Producer entry relies on a global variable that was not correctly initialized
+- Corrupted or incomplete build output
 
 ### Solutions
 
-Check whether the resource URL is correct. If correct, check whether the network is stable. You can add a retry mechanism when the network is unstable, refer to [Runtime retry](/plugin/plugins/retry-plugin.html).
+**For ScriptNetworkError:**
+
+1. Open the resource URL from the error message directly in the browser to confirm it is accessible
+2. Verify the producer's `publicPath` and `remoteEntry` address configuration
+3. Check for CORS issues; if needed, configure CORS on the server or use the [`createScript`](../../plugin/dev/index#createscript) hook to add a `crossOrigin` attribute
+4. For flaky networks, add a retry mechanism — refer to [Runtime retry](/plugin/plugins/retry-plugin.html)
+
+**For ScriptExecutionError:**
+
+1. Inspect the original exception in the error message (`TypeError` / `SyntaxError`, etc.) to locate the specific error in the producer's entry file
+2. Verify that the producer's build target is compatible with the consumer's browser support range
+3. Download the remote entry file from the browser DevTools Network panel and execute it manually to reproduce the error
+
+:::tip
+A `ScriptExecutionError` means the script was downloaded successfully — retrying will not fix this type of error. Focus on investigating compatibility or runtime errors in the producer's code first.
+:::
 
 ## RUNTIME-009
 

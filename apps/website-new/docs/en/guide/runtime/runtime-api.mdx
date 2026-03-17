@@ -427,6 +427,13 @@ function registerPlugins(plugins: ModuleFederationRuntimePlugin[]) {}
 
 ## registerShared
 
+### details
+- shared: `{ [pkgName]: ShareArgs | ShareArgs[] }`
+- ShareArgs parameters:
+  - lib: `() => Module` synchronous factory; should not return Promise.
+  - get: `() => () => Module` or `() => Promise<() => Module>`, for lazy/async loading.
+- Others: scope, shareConfig, deps are optional; version is recommended for distinguishing.
+
 <Collapse>
 
 ```typescript
@@ -485,6 +492,11 @@ type SharedGetter = (() => () => Module) | (() => Promise<() => Module>);
                 singleton: true,
                 requiredVersion: "^18.0.0"
             }
+        },
+        'antd': {
+          version: '1.0.0',
+          scope: 'default',
+          get: () => import('antd').then((m) => () => m),
         }
     });
   ```
@@ -523,6 +535,11 @@ type SharedGetter = (() => () => Module) | (() => Promise<() => Module>);
                 singleton: true,
                 requiredVersion: "^18.0.0"
             }
+        },
+        'antd': {
+          version: '1.0.0',
+          scope: 'default',
+          get: () => import('antd').then((m) => () => m),
         }
     });
   ```

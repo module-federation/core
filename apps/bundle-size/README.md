@@ -2,7 +2,6 @@
 
 This is the example application for Module Federation core.
 
-
 ## Usage
 
 Run the development server and navigate to the provided localhost URL.
@@ -18,7 +17,7 @@ Check `webpack.config.js` or `next.config.js` for federation settings.
 
 ---
 
-*Optimized by Aiden*
+_Optimized by Aiden_
 
 ## Features
 

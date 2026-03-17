@@ -1,0 +1,4 @@
+interface:
+  display_name: 'Local CI'
+  short_description: 'Run repo CI parity jobs locally'
+  default_prompt: 'Use $local-ci to choose and run the smallest local CI parity command for this repo change.'

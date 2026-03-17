@@ -76,17 +76,17 @@ function n(
     u = 0;
   if (0 === u) {
     if (!o || 'object' != typeof o || Array.isArray(o))
-      return (n.errors = [{ params: { type: 'object' } }]), !1;
+      return ((n.errors = [{ params: { type: 'object' } }]), !1);
     {
       const i = u;
       for (const r in o)
         if (!s.call(e.properties, r))
-          return (n.errors = [{ params: { additionalProperty: r } }]), !1;
+          return ((n.errors = [{ params: { additionalProperty: r } }]), !1);
       if (i === u) {
         if (void 0 !== o.eager) {
           const e = u;
           if ('boolean' != typeof o.eager)
-            return (n.errors = [{ params: { type: 'boolean' } }]), !1;
+            return ((n.errors = [{ params: { type: 'boolean' } }]), !1);
           var c = e === u;
         } else c = !0;
         if (c) {
@@ -101,7 +101,7 @@ function n(
               let r;
               if (void 0 === e.request && (r = 'request')) {
                 const e = { params: { missingProperty: r } };
-                null === f ? (f = [e]) : f.push(e), u++;
+                (null === f ? (f = [e]) : f.push(e), u++);
               }
             }
             var y = l === u;
@@ -111,7 +111,7 @@ function n(
                 let r;
                 if (void 0 === e.version && (r = 'version')) {
                   const e = { params: { missingProperty: r } };
-                  null === f ? (f = [e]) : f.push(e), u++;
+                  (null === f ? (f = [e]) : f.push(e), u++);
                 }
               }
               if (((y = r === u), (a = a || y), !a)) {
@@ -120,16 +120,19 @@ function n(
                   let r;
                   if (void 0 === e.fallbackVersion && (r = 'fallbackVersion')) {
                     const e = { params: { missingProperty: r } };
-                    null === f ? (f = [e]) : f.push(e), u++;
+                    (null === f ? (f = [e]) : f.push(e), u++);
                   }
                 }
-                (y = r === u), (a = a || y);
+                ((y = r === u), (a = a || y));
               }
             }
             if (!a) {
               const e = { params: {} };
               return (
-                null === f ? (f = [e]) : f.push(e), u++, (n.errors = f), !1
+                null === f ? (f = [e]) : f.push(e),
+                u++,
+                (n.errors = f),
+                !1
               );
             }
             if (
@@ -138,7 +141,7 @@ function n(
               u === s)
             ) {
               if (!e || 'object' != typeof e || Array.isArray(e))
-                return (n.errors = [{ params: { type: 'object' } }]), !1;
+                return ((n.errors = [{ params: { type: 'object' } }]), !1);
               {
                 const t = u;
                 for (const r in e)
@@ -148,7 +151,8 @@ function n(
                     'fallbackVersion' !== r
                   )
                     return (
-                      (n.errors = [{ params: { additionalProperty: r } }]), !1
+                      (n.errors = [{ params: { additionalProperty: r } }]),
+                      !1
                     );
                 if (t === u) {
                   if (void 0 !== e.request) {
@@ -171,7 +175,8 @@ function n(
                       const r = u;
                       if ('string' != typeof e.version)
                         return (
-                          (n.errors = [{ params: { type: 'string' } }]), !1
+                          (n.errors = [{ params: { type: 'string' } }]),
+                          !1
                         );
                       m = r === u;
                     } else m = !0;
@@ -180,7 +185,8 @@ function n(
                         const r = u;
                         if ('string' != typeof e.fallbackVersion)
                           return (
-                            (n.errors = [{ params: { type: 'string' } }]), !1
+                            (n.errors = [{ params: { type: 'string' } }]),
+                            !1
                           );
                         m = r === u;
                       } else m = !0;
@@ -202,7 +208,7 @@ function n(
                 let r;
                 if (void 0 === e.request && (r = 'request')) {
                   const e = { params: { missingProperty: r } };
-                  null === f ? (f = [e]) : f.push(e), u++;
+                  (null === f ? (f = [e]) : f.push(e), u++);
                 }
               }
               var h = l === u;
@@ -212,7 +218,7 @@ function n(
                   let r;
                   if (void 0 === e.version && (r = 'version')) {
                     const e = { params: { missingProperty: r } };
-                    null === f ? (f = [e]) : f.push(e), u++;
+                    (null === f ? (f = [e]) : f.push(e), u++);
                   }
                 }
                 if (((h = r === u), (a = a || h), !a)) {
@@ -224,16 +230,19 @@ function n(
                       (r = 'fallbackVersion')
                     ) {
                       const e = { params: { missingProperty: r } };
-                      null === f ? (f = [e]) : f.push(e), u++;
+                      (null === f ? (f = [e]) : f.push(e), u++);
                     }
                   }
-                  (h = r === u), (a = a || h);
+                  ((h = r === u), (a = a || h));
                 }
               }
               if (!a) {
                 const e = { params: {} };
                 return (
-                  null === f ? (f = [e]) : f.push(e), u++, (n.errors = f), !1
+                  null === f ? (f = [e]) : f.push(e),
+                  u++,
+                  (n.errors = f),
+                  !1
                 );
               }
               if (
@@ -242,7 +251,7 @@ function n(
                 u === s)
               ) {
                 if (!e || 'object' != typeof e || Array.isArray(e))
-                  return (n.errors = [{ params: { type: 'object' } }]), !1;
+                  return ((n.errors = [{ params: { type: 'object' } }]), !1);
                 {
                   const t = u;
                   for (const r in e)
@@ -252,7 +261,8 @@ function n(
                       'fallbackVersion' !== r
                     )
                       return (
-                        (n.errors = [{ params: { additionalProperty: r } }]), !1
+                        (n.errors = [{ params: { additionalProperty: r } }]),
+                        !1
                       );
                   if (t === u) {
                     if (void 0 !== e.request) {
@@ -275,7 +285,8 @@ function n(
                         const r = u;
                         if ('string' != typeof e.version)
                           return (
-                            (n.errors = [{ params: { type: 'string' } }]), !1
+                            (n.errors = [{ params: { type: 'string' } }]),
+                            !1
                           );
                         g = r === u;
                       } else g = !0;
@@ -284,7 +295,8 @@ function n(
                           const r = u;
                           if ('string' != typeof e.fallbackVersion)
                             return (
-                              (n.errors = [{ params: { type: 'string' } }]), !1
+                              (n.errors = [{ params: { type: 'string' } }]),
+                              !1
                             );
                           g = r === u;
                         } else g = !0;
@@ -307,7 +319,7 @@ function n(
                       allowedValues: e.properties.import.anyOf[0].enum,
                     },
                   };
-                  null === f ? (f = [r]) : f.push(r), u++;
+                  (null === f ? (f = [r]) : f.push(r), u++);
                 }
                 var d = a === u;
                 if (((i = i || d), !i)) {
@@ -316,23 +328,26 @@ function n(
                     if ('string' == typeof r) {
                       if (r.length < 1) {
                         const e = { params: {} };
-                        null === f ? (f = [e]) : f.push(e), u++;
+                        (null === f ? (f = [e]) : f.push(e), u++);
                       }
                     } else {
                       const e = { params: { type: 'string' } };
-                      null === f ? (f = [e]) : f.push(e), u++;
+                      (null === f ? (f = [e]) : f.push(e), u++);
                     }
-                  (d = e === u), (i = i || d);
+                  ((d = e === u), (i = i || d));
                 }
                 if (!i) {
                   const e = { params: {} };
                   return (
-                    null === f ? (f = [e]) : f.push(e), u++, (n.errors = f), !1
+                    null === f ? (f = [e]) : f.push(e),
+                    u++,
+                    (n.errors = f),
+                    !1
                   );
                 }
-                (u = s),
+                ((u = s),
                   null !== f && (s ? (f.length = s) : (f = null)),
-                  (c = t === u);
+                  (c = t === u));
               } else c = !0;
               if (c) {
                 if (void 0 !== o.packageName) {
@@ -340,8 +355,12 @@ function n(
                   const r = u;
                   if (u === r) {
                     if ('string' != typeof e)
-                      return (n.errors = [{ params: { type: 'string' } }]), !1;
-                    if (e.length < 1) return (n.errors = [{ params: {} }]), !1;
+                      return (
+                        (n.errors = [{ params: { type: 'string' } }]),
+                        !1
+                      );
+                    if (e.length < 1)
+                      return ((n.errors = [{ params: {} }]), !1);
                   }
                   c = r === u;
                 } else c = !0;
@@ -359,16 +378,16 @@ function n(
                             e.properties.requiredVersion.anyOf[0].enum,
                         },
                       };
-                      null === f ? (f = [r]) : f.push(r), u++;
+                      (null === f ? (f = [r]) : f.push(r), u++);
                     }
                     var v = a === u;
                     if (((i = i || v), !i)) {
                       const e = u;
                       if ('string' != typeof r) {
                         const e = { params: { type: 'string' } };
-                        null === f ? (f = [e]) : f.push(e), u++;
+                        (null === f ? (f = [e]) : f.push(e), u++);
                       }
-                      (v = e === u), (i = i || v);
+                      ((v = e === u), (i = i || v));
                     }
                     if (!i) {
                       const e = { params: {} };
@@ -379,9 +398,9 @@ function n(
                         !1
                       );
                     }
-                    (u = s),
+                    ((u = s),
                       null !== f && (s ? (f.length = s) : (f = null)),
-                      (c = t === u);
+                      (c = t === u));
                   } else c = !0;
                   if (c) {
                     if (void 0 !== o.shareKey) {
@@ -390,10 +409,11 @@ function n(
                       if (u === r) {
                         if ('string' != typeof e)
                           return (
-                            (n.errors = [{ params: { type: 'string' } }]), !1
+                            (n.errors = [{ params: { type: 'string' } }]),
+                            !1
                           );
                         if (e.length < 1)
-                          return (n.errors = [{ params: {} }]), !1;
+                          return ((n.errors = [{ params: {} }]), !1);
                       }
                       c = r === u;
                     } else c = !0;
@@ -408,11 +428,11 @@ function n(
                           if ('string' == typeof e) {
                             if (e.length < 1) {
                               const e = { params: {} };
-                              null === f ? (f = [e]) : f.push(e), u++;
+                              (null === f ? (f = [e]) : f.push(e), u++);
                             }
                           } else {
                             const e = { params: { type: 'string' } };
-                            null === f ? (f = [e]) : f.push(e), u++;
+                            (null === f ? (f = [e]) : f.push(e), u++);
                           }
                         var b = i === u;
                         if (((s = s || b), !s)) {
@@ -427,19 +447,19 @@ function n(
                                   if ('string' == typeof r) {
                                     if (r.length < 1) {
                                       const e = { params: {} };
-                                      null === f ? (f = [e]) : f.push(e), u++;
+                                      (null === f ? (f = [e]) : f.push(e), u++);
                                     }
                                   } else {
                                     const e = { params: { type: 'string' } };
-                                    null === f ? (f = [e]) : f.push(e), u++;
+                                    (null === f ? (f = [e]) : f.push(e), u++);
                                   }
                                 if (s !== u) break;
                               }
                             } else {
                               const e = { params: { type: 'array' } };
-                              null === f ? (f = [e]) : f.push(e), u++;
+                              (null === f ? (f = [e]) : f.push(e), u++);
                             }
-                          (b = r === u), (s = s || b);
+                          ((b = r === u), (s = s || b));
                         }
                         if (!s) {
                           const e = { params: {} };
@@ -450,16 +470,17 @@ function n(
                             !1
                           );
                         }
-                        (u = t),
+                        ((u = t),
                           null !== f && (t ? (f.length = t) : (f = null)),
-                          (c = r === u);
+                          (c = r === u));
                       } else c = !0;
                       if (c) {
                         if (void 0 !== o.singleton) {
                           const e = u;
                           if ('boolean' != typeof o.singleton)
                             return (
-                              (n.errors = [{ params: { type: 'boolean' } }]), !1
+                              (n.errors = [{ params: { type: 'boolean' } }]),
+                              !1
                             );
                           c = e === u;
                         } else c = !0;
@@ -482,7 +503,7 @@ function n(
                               const a = u;
                               if ('boolean' != typeof e) {
                                 const e = { params: { type: 'boolean' } };
-                                null === f ? (f = [e]) : f.push(e), u++;
+                                (null === f ? (f = [e]) : f.push(e), u++);
                               }
                               var A = a === u;
                               if (((i = i || A), !i)) {
@@ -503,7 +524,8 @@ function n(
                                         const e = {
                                           params: { additionalProperty: r },
                                         };
-                                        null === f ? (f = [e]) : f.push(e), u++;
+                                        (null === f ? (f = [e]) : f.push(e),
+                                          u++);
                                         break;
                                       }
                                     if (r === u) {
@@ -520,19 +542,19 @@ function n(
                                                 if ('string' == typeof e) {
                                                   if (e.length < 1) {
                                                     const e = { params: {} };
-                                                    null === f
+                                                    (null === f
                                                       ? (f = [e])
                                                       : f.push(e),
-                                                      u++;
+                                                      u++);
                                                   }
                                                 } else {
                                                   const e = {
                                                     params: { type: 'string' },
                                                   };
-                                                  null === f
+                                                  (null === f
                                                     ? (f = [e])
                                                     : f.push(e),
-                                                    u++;
+                                                    u++);
                                                 }
                                               if (s !== u) break;
                                             }
@@ -540,8 +562,8 @@ function n(
                                             const e = {
                                               params: { type: 'array' },
                                             };
-                                            null === f ? (f = [e]) : f.push(e),
-                                              u++;
+                                            (null === f ? (f = [e]) : f.push(e),
+                                              u++);
                                           }
                                         var P = t === u;
                                       } else P = !0;
@@ -553,8 +575,8 @@ function n(
                                             const e = {
                                               params: { type: 'string' },
                                             };
-                                            null === f ? (f = [e]) : f.push(e),
-                                              u++;
+                                            (null === f ? (f = [e]) : f.push(e),
+                                              u++);
                                           }
                                           if (
                                             'server-calc' !== r &&
@@ -566,8 +588,8 @@ function n(
                                                   t.properties.mode.enum,
                                               },
                                             };
-                                            null === f ? (f = [e]) : f.push(e),
-                                              u++;
+                                            (null === f ? (f = [e]) : f.push(e),
+                                              u++);
                                           }
                                           P = s === u;
                                         } else P = !0;
@@ -578,10 +600,10 @@ function n(
                                               const e = {
                                                 params: { type: 'string' },
                                               };
-                                              null === f
+                                              (null === f
                                                 ? (f = [e])
                                                 : f.push(e),
-                                                u++;
+                                                u++);
                                             }
                                             P = r === u;
                                           } else P = !0;
@@ -589,9 +611,9 @@ function n(
                                     }
                                   } else {
                                     const e = { params: { type: 'object' } };
-                                    null === f ? (f = [e]) : f.push(e), u++;
+                                    (null === f ? (f = [e]) : f.push(e), u++);
                                   }
-                                (A = r === u), (i = i || A);
+                                ((A = r === u), (i = i || A));
                               }
                               if (!i) {
                                 const e = { params: {} };
@@ -602,9 +624,9 @@ function n(
                                   !1
                                 );
                               }
-                              (u = s),
+                              ((u = s),
                                 null !== f && (s ? (f.length = s) : (f = null)),
-                                (c = r === u);
+                                (c = r === u));
                             } else c = !0;
                             if (c) {
                               if (void 0 !== o.independentShareFileName) {
@@ -619,7 +641,7 @@ function n(
                                       !1
                                     );
                                   if (e.length < 1)
-                                    return (n.errors = [{ params: {} }]), !1;
+                                    return ((n.errors = [{ params: {} }]), !1);
                                 }
                                 c = r === u;
                               } else c = !0;
@@ -637,16 +659,16 @@ function n(
                                           e.properties.version.anyOf[0].enum,
                                       },
                                     };
-                                    null === f ? (f = [r]) : f.push(r), u++;
+                                    (null === f ? (f = [r]) : f.push(r), u++);
                                   }
                                   var j = a === u;
                                   if (((i = i || j), !i)) {
                                     const e = u;
                                     if ('string' != typeof r) {
                                       const e = { params: { type: 'string' } };
-                                      null === f ? (f = [e]) : f.push(e), u++;
+                                      (null === f ? (f = [e]) : f.push(e), u++);
                                     }
-                                    (j = e === u), (i = i || j);
+                                    ((j = e === u), (i = i || j));
                                   }
                                   if (!i) {
                                     const e = { params: {} };
@@ -657,10 +679,10 @@ function n(
                                       !1
                                     );
                                   }
-                                  (u = s),
+                                  ((u = s),
                                     null !== f &&
                                       (s ? (f.length = s) : (f = null)),
-                                    (c = t === u);
+                                    (c = t === u));
                                 } else c = !0;
                                 if (c) {
                                   if (void 0 !== o.request) {
@@ -676,7 +698,8 @@ function n(
                                         );
                                       if (e.length < 1)
                                         return (
-                                          (n.errors = [{ params: {} }]), !1
+                                          (n.errors = [{ params: {} }]),
+                                          !1
                                         );
                                     }
                                     c = r === u;
@@ -695,7 +718,8 @@ function n(
                                           );
                                         if (e.length < 1)
                                           return (
-                                            (n.errors = [{ params: {} }]), !1
+                                            (n.errors = [{ params: {} }]),
+                                            !1
                                           );
                                       }
                                       c = r === u;
@@ -714,7 +738,8 @@ function n(
                                             );
                                           if (e.length < 1)
                                             return (
-                                              (n.errors = [{ params: {} }]), !1
+                                              (n.errors = [{ params: {} }]),
+                                              !1
                                             );
                                         }
                                         c = r === u;
@@ -755,7 +780,7 @@ function n(
       }
     }
   }
-  return (n.errors = f), 0 === u;
+  return ((n.errors = f), 0 === u);
 }
 function o(
   e,
@@ -770,7 +795,7 @@ function o(
     l = 0;
   if (0 === l) {
     if (!e || 'object' != typeof e || Array.isArray(e))
-      return (o.errors = [{ params: { type: 'object' } }]), !1;
+      return ((o.errors = [{ params: { type: 'object' } }]), !1);
     for (const t in e) {
       let s = e[t];
       const f = l,
@@ -790,23 +815,23 @@ function o(
           if ('string' == typeof s) {
             if (s.length < 1) {
               const e = { params: {} };
-              null === a ? (a = [e]) : a.push(e), l++;
+              (null === a ? (a = [e]) : a.push(e), l++);
             }
           } else {
             const e = { params: { type: 'string' } };
-            null === a ? (a = [e]) : a.push(e), l++;
+            (null === a ? (a = [e]) : a.push(e), l++);
           }
-        (p = e === l), (c = c || p);
+        ((p = e === l), (c = c || p));
       }
       if (!c) {
         const e = { params: {} };
-        return null === a ? (a = [e]) : a.push(e), l++, (o.errors = a), !1;
+        return (null === a ? (a = [e]) : a.push(e), l++, (o.errors = a), !1);
       }
       if (((l = u), null !== a && (u ? (a.length = u) : (a = null)), f !== l))
         break;
     }
   }
-  return (o.errors = a), 0 === l;
+  return ((o.errors = a), 0 === l);
 }
 function i(
   e,
@@ -835,16 +860,16 @@ function i(
           if ('string' == typeof t) {
             if (t.length < 1) {
               const e = { params: {} };
-              null === a ? (a = [e]) : a.push(e), l++;
+              (null === a ? (a = [e]) : a.push(e), l++);
             }
           } else {
             const e = { params: { type: 'string' } };
-            null === a ? (a = [e]) : a.push(e), l++;
+            (null === a ? (a = [e]) : a.push(e), l++);
           }
         var c = u === l;
         if (((f = f || c), !f)) {
           const i = l;
-          o(t, {
+          (o(t, {
             instancePath: r + '/' + s,
             parentData: e,
             parentDataProperty: s,
@@ -852,34 +877,34 @@ function i(
           }) ||
             ((a = null === a ? o.errors : a.concat(o.errors)), (l = a.length)),
             (c = i === l),
-            (f = f || c);
+            (f = f || c));
         }
-        if (f) (l = p), null !== a && (p ? (a.length = p) : (a = null));
+        if (f) ((l = p), null !== a && (p ? (a.length = p) : (a = null)));
         else {
           const e = { params: {} };
-          null === a ? (a = [e]) : a.push(e), l++;
+          (null === a ? (a = [e]) : a.push(e), l++);
         }
         if (i !== l) break;
       }
     } else {
       const e = { params: { type: 'array' } };
-      null === a ? (a = [e]) : a.push(e), l++;
+      (null === a ? (a = [e]) : a.push(e), l++);
     }
   var y = u === l;
   if (((f = f || y), !f)) {
     const i = l;
-    o(e, {
+    (o(e, {
       instancePath: r,
       parentData: t,
       parentDataProperty: s,
       rootData: n,
     }) || ((a = null === a ? o.errors : a.concat(o.errors)), (l = a.length)),
       (y = i === l),
-      (f = f || y);
+      (f = f || y));
   }
   if (!f) {
     const e = { params: {} };
-    return null === a ? (a = [e]) : a.push(e), l++, (i.errors = a), !1;
+    return (null === a ? (a = [e]) : a.push(e), l++, (i.errors = a), !1);
   }
   return (
     (l = p),
@@ -901,11 +926,11 @@ function a(
     l = 0;
   if (0 === l) {
     if (!e || 'object' != typeof e || Array.isArray(e))
-      return (a.errors = [{ params: { type: 'object' } }]), !1;
+      return ((a.errors = [{ params: { type: 'object' } }]), !1);
     {
       let t;
       if (void 0 === e.shared && (t = 'shared'))
-        return (a.errors = [{ params: { missingProperty: t } }]), !1;
+        return ((a.errors = [{ params: { missingProperty: t } }]), !1);
       {
         const t = l;
         for (const r in e)
@@ -915,12 +940,12 @@ function a(
             'shared' !== r &&
             'experiments' !== r
           )
-            return (a.errors = [{ params: { additionalProperty: r } }]), !1;
+            return ((a.errors = [{ params: { additionalProperty: r } }]), !1);
         if (t === l) {
           if (void 0 !== e.async) {
             const r = l;
             if ('boolean' != typeof e.async)
-              return (a.errors = [{ params: { type: 'boolean' } }]), !1;
+              return ((a.errors = [{ params: { type: 'boolean' } }]), !1);
             var p = r === l;
           } else p = !0;
           if (p) {
@@ -934,11 +959,11 @@ function a(
                 if ('string' == typeof r) {
                   if (r.length < 1) {
                     const e = { params: {} };
-                    null === o ? (o = [e]) : o.push(e), l++;
+                    (null === o ? (o = [e]) : o.push(e), l++);
                   }
                 } else {
                   const e = { params: { type: 'string' } };
-                  null === o ? (o = [e]) : o.push(e), l++;
+                  (null === o ? (o = [e]) : o.push(e), l++);
                 }
               var f = i === l;
               if (((n = n || f), !n)) {
@@ -953,34 +978,37 @@ function a(
                         if ('string' == typeof e) {
                           if (e.length < 1) {
                             const e = { params: {} };
-                            null === o ? (o = [e]) : o.push(e), l++;
+                            (null === o ? (o = [e]) : o.push(e), l++);
                           }
                         } else {
                           const e = { params: { type: 'string' } };
-                          null === o ? (o = [e]) : o.push(e), l++;
+                          (null === o ? (o = [e]) : o.push(e), l++);
                         }
                       if (s !== l) break;
                     }
                   } else {
                     const e = { params: { type: 'array' } };
-                    null === o ? (o = [e]) : o.push(e), l++;
+                    (null === o ? (o = [e]) : o.push(e), l++);
                   }
-                (f = e === l), (n = n || f);
+                ((f = e === l), (n = n || f));
               }
               if (!n) {
                 const e = { params: {} };
                 return (
-                  null === o ? (o = [e]) : o.push(e), l++, (a.errors = o), !1
+                  null === o ? (o = [e]) : o.push(e),
+                  l++,
+                  (a.errors = o),
+                  !1
                 );
               }
-              (l = s),
+              ((l = s),
                 null !== o && (s ? (o.length = s) : (o = null)),
-                (p = t === l);
+                (p = t === l));
             } else p = !0;
             if (p) {
               if (void 0 !== e.shared) {
                 const t = l;
-                i(e.shared, {
+                (i(e.shared, {
                   instancePath: r + '/shared',
                   parentData: e,
                   parentDataProperty: 'shared',
@@ -988,7 +1016,7 @@ function a(
                 }) ||
                   ((o = null === o ? i.errors : o.concat(i.errors)),
                   (l = o.length)),
-                  (p = t === l);
+                  (p = t === l));
               } else p = !0;
               if (p)
                 if (void 0 !== e.experiments) {
@@ -996,7 +1024,10 @@ function a(
                   const t = l;
                   if (l === t) {
                     if (!r || 'object' != typeof r || Array.isArray(r))
-                      return (a.errors = [{ params: { type: 'object' } }]), !1;
+                      return (
+                        (a.errors = [{ params: { type: 'object' } }]),
+                        !1
+                      );
                     {
                       const e = l;
                       for (const e in r)
@@ -1013,7 +1044,8 @@ function a(
                         'boolean' != typeof r.allowNodeModulesSuffixMatch
                       )
                         return (
-                          (a.errors = [{ params: { type: 'boolean' } }]), !1
+                          (a.errors = [{ params: { type: 'boolean' } }]),
+                          !1
                         );
                     }
                   }
@@ -1025,5 +1057,5 @@ function a(
       }
     }
   }
-  return (a.errors = o), 0 === l;
+  return ((a.errors = o), 0 === l);
 }

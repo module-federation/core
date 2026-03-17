@@ -9,13 +9,15 @@ import { isRequiredVersion } from '@module-federation/sdk';
 import type {
   sharePlugin,
   moduleFederationPlugin,
+  consumeSharedPlugin,
+  provideSharedPlugin,
 } from '@module-federation/sdk';
+type SharedConfig = moduleFederationPlugin.SharedConfig;
+type ConsumesConfig = consumeSharedPlugin.ConsumesConfig;
+type ProvidesConfig = provideSharedPlugin.ProvidesConfig;
 import { parseOptions } from '../container/options';
 import ConsumeSharedPlugin from './ConsumeSharedPlugin';
 import ProvideSharedPlugin from './ProvideSharedPlugin';
-import type { SharedConfig } from '../../declarations/plugins/sharing/SharePlugin';
-import type { ConsumesConfig } from '../../declarations/plugins/sharing/ConsumeSharedPlugin';
-import type { ProvidesConfig } from '../../declarations/plugins/sharing/ProvideSharedPlugin';
 import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import { createSchemaValidation } from '../../utils';
 

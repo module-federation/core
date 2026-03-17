@@ -102,6 +102,8 @@ packages/enhanced/generated/**
 !/.codex/skills/
 !/.codex/skills/turborepo/
 !/.codex/skills/turborepo/**
+.codex/skills/**/__pycache__/
+.codex/skills/**/*.pyc
 .pnpm-store/
 apps/rsc-demo/**/build/
 apps/rsc-demo/e2e/test-results/

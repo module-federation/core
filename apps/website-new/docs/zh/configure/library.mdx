@@ -1,0 +1,100 @@
+# library
+
+`library` 用于配置 Module Federation 容器的输出库格式，决定容器以何种模块规范暴露给外部使用。
+
+- 类型：`LibraryOptions`
+- 是否必填：否
+- 默认值：`undefined`
+
+```ts
+interface LibraryOptions {
+  type: LibraryType;
+  name?: string | string[] | { amd?: string; commonjs?: string; root?: string | string[] };
+  export?: string | string[];
+  umdNamedDefine?: boolean;
+  amdContainer?: string;
+  auxiliaryComment?: string | {
+    amd?: string;
+    commonjs?: string;
+    commonjs2?: string;
+    root?: string;
+  };
+}
+
+type LibraryType =
+  | 'var' | 'module' | 'assign' | 'assign-properties'
+  | 'this' | 'window' | 'self' | 'global'
+  | 'commonjs' | 'commonjs2' | 'commonjs-module' | 'commonjs-static'
+  | 'amd' | 'amd-require' | 'umd' | 'umd2'
+  | 'jsonp' | 'system' | string;
+```
+
+## type（必填）
+
+- 类型：`LibraryType`
+- 是否必填：**是**
+
+指定容器的输出库类型。常用值：
+
+| 值 | 说明 |
+|---|---|
+| `'var'` | 赋值给一个全局变量（默认） |
+| `'module'` | ESM 输出（需要 `experiments.outputModule: true`） |
+| `'commonjs2'` | CommonJS 规范，通过 `module.exports` 导出 |
+| `'umd'` | 兼容 AMD、CommonJS 和全局变量 |
+| `'global'` | 挂载到 `global` 对象 |
+| `'window'` | 挂载到 `window` 对象 |
+| `'self'` | 挂载到 `self` 对象 |
+| `'system'` | SystemJS 模块格式 |
+
+## name
+
+- 类型：`string | string[] | LibraryCustomUmdObject`
+- 是否必填：否
+- 默认值：`undefined`
+
+库的名称。对于 `umd` 类型，可以分别指定 amd、commonjs 和全局变量的名称。
+
+## export
+
+- 类型：`string | string[]`
+- 是否必填：否
+- 默认值：`undefined`
+
+指定哪个导出应作为库对外暴露。
+
+## umdNamedDefine
+
+- 类型：`boolean`
+- 是否必填：否
+- 默认值：`false`
+
+当 `type` 为 `'umd'` 时，是否对 AMD 模块命名（即在 `define()` 中传入模块名）。
+
+## amdContainer
+
+- 类型：`string`
+- 是否必填：否
+- 默认值：`undefined`
+
+在 AMD 模块中为 `define`/`require` 函数添加容器前缀。
+
+## auxiliaryComment
+
+- 类型：`string | object`
+- 是否必填：否
+- 默认值：`undefined`
+
+在 UMD 包装器中为各模块格式添加注释。
+
+- Example
+
+```ts
+new ModuleFederationPlugin({
+  name: '@demo/provider',
+  library: { type: 'var', name: 'provider' },
+  exposes: {
+    './Button': './src/Button',
+  },
+});
+```

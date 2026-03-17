@@ -1,7 +1,7 @@
 # Webpack
 
-- Capable of building modules that meet the {props.name || 'Module Federation'} loading specification.
-- Capable of consuming modules of the {props.name || 'Module Federation'} specification using aliases.
+- Capable of building modules that meet the {props.brandName || props.name || 'Module Federation'} loading specification.
+- Capable of consuming modules of the {props.brandName || props.name || 'Module Federation'} specification using aliases.
 - Capable of setting the shared dependency configuration for modules. When the host environment where the module is loaded already has the corresponding dependency, it will not be loaded repeatedly.
 - When a module has a remote type, the type of the remote module will be automatically downloaded for consumption.
 - Hot-reloading capability when consuming remote modules.
@@ -19,7 +19,7 @@ You can install the plugin with the following command:
 import InstallKit from '@components/common/install-kit';
 
 <InstallKit
-  pkgName={props.pkgName}
+  pkgName={props.enhancedPackage || props.pkgName}
 />
 
 ### Create {props.configName || 'module-federation.config.js'}

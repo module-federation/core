@@ -1,9 +1,9 @@
 import fs from 'fs';
 import path from 'path';
-import { getIPV4, isWebTarget, skipByTarget } from './utils';
+import { isWebTarget, skipByTarget } from './utils';
 import { moduleFederationPlugin, encodeName } from '@module-federation/sdk';
 import { PluginOptions } from '../types';
-import { LOCALHOST, PLUGIN_IDENTIFIER } from '../constant';
+import { PLUGIN_IDENTIFIER } from '../constant';
 import {
   autoDeleteSplitChunkCacheGroups,
   addDataFetchExposes,
@@ -408,6 +408,14 @@ export const moduleFederationConfigPlugin = (
 
       const targetMFConfig = !isWeb ? ssrConfig : csrConfig;
       patchMFConfig(targetMFConfig, !isWeb);
+
+      if (
+        modernjsConfig.source?.enableAsyncEntry !== true &&
+        targetMFConfig.experiments?.asyncStartup !== false
+      ) {
+        targetMFConfig.experiments ||= {};
+        targetMFConfig.experiments.asyncStartup = true;
+      }
 
       patchBundlerConfig({
         chain,

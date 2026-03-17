@@ -2,7 +2,6 @@
 
 This is the example application for Module Federation core.
 
-
 ## Links
 
 - [Module Federation Docs](https://module-federation.io/)
@@ -18,7 +17,7 @@ This package demonstrates a specific use case of Module Federation within the ec
 
 ---
 
-*Optimized by Aiden*
+_Optimized by Aiden_
 
 ## Features
 

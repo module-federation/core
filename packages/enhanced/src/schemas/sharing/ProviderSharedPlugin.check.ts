@@ -57,7 +57,7 @@ function r(
                   additionalProperty: r,
                 },
               };
-              null === a ? (a = [e]) : a.push(e), l++;
+              (null === a ? (a = [e]) : a.push(e), l++);
               break;
             }
           if (r === l) {
@@ -70,7 +70,7 @@ function r(
                     const r = {
                       params: {},
                     };
-                    null === a ? (a = [r]) : a.push(r), l++;
+                    (null === a ? (a = [r]) : a.push(r), l++);
                   }
                 } else {
                   const r = {
@@ -78,7 +78,7 @@ function r(
                       type: 'string',
                     },
                   };
-                  null === a ? (a = [r]) : a.push(r), l++;
+                  (null === a ? (a = [r]) : a.push(r), l++);
                 }
               i = e === l;
             } else i = !0;
@@ -91,7 +91,7 @@ function r(
                       type: 'boolean',
                     },
                   };
-                  null === a ? (a = [r]) : a.push(r), l++;
+                  (null === a ? (a = [r]) : a.push(r), l++);
                 }
                 var i = r === l;
               } else i = !0;
@@ -106,7 +106,7 @@ function r(
                     const r = {
                       params: {},
                     };
-                    null === a ? (a = [r]) : a.push(r), l++;
+                    (null === a ? (a = [r]) : a.push(r), l++);
                   }
                   var p = o === l;
                   if (((n = n || p), !n)) {
@@ -117,17 +117,17 @@ function r(
                           type: 'string',
                         },
                       };
-                      null === a ? (a = [r]) : a.push(r), l++;
+                      (null === a ? (a = [r]) : a.push(r), l++);
                     }
-                    (p = e === l), (n = n || p);
+                    ((p = e === l), (n = n || p));
                   }
                   if (n)
-                    (l = t), null !== a && (t ? (a.length = t) : (a = null));
+                    ((l = t), null !== a && (t ? (a.length = t) : (a = null)));
                   else {
                     const r = {
                       params: {},
                     };
-                    null === a ? (a = [r]) : a.push(r), l++;
+                    (null === a ? (a = [r]) : a.push(r), l++);
                   }
                   i = e === l;
                 } else i = !0;
@@ -141,7 +141,7 @@ function r(
                           const r = {
                             params: {},
                           };
-                          null === a ? (a = [r]) : a.push(r), l++;
+                          (null === a ? (a = [r]) : a.push(r), l++);
                         }
                       } else {
                         const r = {
@@ -149,7 +149,7 @@ function r(
                             type: 'string',
                           },
                         };
-                        null === a ? (a = [r]) : a.push(r), l++;
+                        (null === a ? (a = [r]) : a.push(r), l++);
                       }
                     i = e === l;
                   } else i = !0;
@@ -163,7 +163,7 @@ function r(
                             const r = {
                               params: {},
                             };
-                            null === a ? (a = [r]) : a.push(r), l++;
+                            (null === a ? (a = [r]) : a.push(r), l++);
                           }
                         } else {
                           const r = {
@@ -171,7 +171,7 @@ function r(
                               type: 'string',
                             },
                           };
-                          null === a ? (a = [r]) : a.push(r), l++;
+                          (null === a ? (a = [r]) : a.push(r), l++);
                         }
                       i = e === l;
                     } else i = !0;
@@ -184,7 +184,7 @@ function r(
                               type: 'boolean',
                             },
                           };
-                          null === a ? (a = [r]) : a.push(r), l++;
+                          (null === a ? (a = [r]) : a.push(r), l++);
                         }
                         i = r === l;
                       } else i = !0;
@@ -197,7 +197,7 @@ function r(
                                 type: 'boolean',
                               },
                             };
-                            null === a ? (a = [r]) : a.push(r), l++;
+                            (null === a ? (a = [r]) : a.push(r), l++);
                           }
                           i = r === l;
                         } else i = !0;
@@ -212,7 +212,7 @@ function r(
                               const r = {
                                 params: {},
                               };
-                              null === a ? (a = [r]) : a.push(r), l++;
+                              (null === a ? (a = [r]) : a.push(r), l++);
                             }
                             var f = o === l;
                             if (((n = n || f), !n)) {
@@ -223,18 +223,19 @@ function r(
                                     type: 'string',
                                   },
                                 };
-                                null === a ? (a = [r]) : a.push(r), l++;
+                                (null === a ? (a = [r]) : a.push(r), l++);
                               }
-                              (f = e === l), (n = n || f);
+                              ((f = e === l), (n = n || f));
                             }
                             if (n)
-                              (l = t),
-                                null !== a && (t ? (a.length = t) : (a = null));
+                              ((l = t),
+                                null !== a &&
+                                  (t ? (a.length = t) : (a = null)));
                             else {
                               const r = {
                                 params: {},
                               };
-                              null === a ? (a = [r]) : a.push(r), l++;
+                              (null === a ? (a = [r]) : a.push(r), l++);
                             }
                             i = e === l;
                           } else i = !0;
@@ -248,7 +249,7 @@ function r(
                                   const r = {
                                     params: {},
                                   };
-                                  null === a ? (a = [r]) : a.push(r), l++;
+                                  (null === a ? (a = [r]) : a.push(r), l++);
                                 }
                               } else {
                                 const r = {
@@ -256,7 +257,7 @@ function r(
                                     type: 'string',
                                   },
                                 };
-                                null === a ? (a = [r]) : a.push(r), l++;
+                                (null === a ? (a = [r]) : a.push(r), l++);
                               }
                             i = e === l;
                           } else i = !0;
@@ -274,7 +275,7 @@ function r(
               type: 'object',
             },
           };
-          null === a ? (a = [r]) : a.push(r), l++;
+          (null === a ? (a = [r]) : a.push(r), l++);
         }
       var u = h === l;
       if (((c = c || u), !c)) {
@@ -285,7 +286,7 @@ function r(
               const r = {
                 params: {},
               };
-              null === a ? (a = [r]) : a.push(r), l++;
+              (null === a ? (a = [r]) : a.push(r), l++);
             }
           } else {
             const r = {
@@ -293,21 +294,21 @@ function r(
                 type: 'string',
               },
             };
-            null === a ? (a = [r]) : a.push(r), l++;
+            (null === a ? (a = [r]) : a.push(r), l++);
           }
-        (u = r === l), (c = c || u);
+        ((u = r === l), (c = c || u));
       }
       if (!c) {
         const e = {
           params: {},
         };
-        return null === a ? (a = [e]) : a.push(e), l++, (r.errors = a), !1;
+        return (null === a ? (a = [e]) : a.push(e), l++, (r.errors = a), !1);
       }
       if (((l = o), null !== a && (o ? (a.length = o) : (a = null)), n !== l))
         break;
     }
   }
-  return (r.errors = a), 0 === l;
+  return ((r.errors = a), 0 === l);
 }
 
 function e(
@@ -339,7 +340,7 @@ function e(
               const r = {
                 params: {},
               };
-              null === l ? (l = [r]) : l.push(r), i++;
+              (null === l ? (l = [r]) : l.push(r), i++);
             }
           } else {
             const r = {
@@ -347,12 +348,12 @@ function e(
                 type: 'string',
               },
             };
-            null === l ? (l = [r]) : l.push(r), i++;
+            (null === l ? (l = [r]) : l.push(r), i++);
           }
         var c = u === i;
         if (((f = f || c), !f)) {
           const o = i;
-          r(e, {
+          (r(e, {
             instancePath: s + '/' + n,
             parentData: t,
             parentDataProperty: n,
@@ -360,14 +361,14 @@ function e(
           }) ||
             ((l = null === l ? r.errors : l.concat(r.errors)), (i = l.length)),
             (c = o === i),
-            (f = f || c);
+            (f = f || c));
         }
-        if (f) (i = p), null !== l && (p ? (l.length = p) : (l = null));
+        if (f) ((i = p), null !== l && (p ? (l.length = p) : (l = null)));
         else {
           const r = {
             params: {},
           };
-          null === l ? (l = [r]) : l.push(r), i++;
+          (null === l ? (l = [r]) : l.push(r), i++);
         }
         if (o !== i) break;
       }
@@ -377,25 +378,25 @@ function e(
           type: 'array',
         },
       };
-      null === l ? (l = [r]) : l.push(r), i++;
+      (null === l ? (l = [r]) : l.push(r), i++);
     }
   var h = u === i;
   if (((f = f || h), !f)) {
     const e = i;
-    r(t, {
+    (r(t, {
       instancePath: s,
       parentData: n,
       parentDataProperty: o,
       rootData: a,
     }) || ((l = null === l ? r.errors : l.concat(r.errors)), (i = l.length)),
       (h = e === i),
-      (f = f || h);
+      (f = f || h));
   }
   if (!f) {
     const r = {
       params: {},
     };
-    return null === l ? (l = [r]) : l.push(r), i++, (e.errors = l), !1;
+    return (null === l ? (l = [r]) : l.push(r), i++, (e.errors = l), !1);
   }
   return (
     (i = p),
@@ -500,7 +501,7 @@ function t(
       }
     }
   }
-  return (t.errors = l), 0 === i;
+  return ((t.errors = l), 0 === i);
 }
 
 export default t;

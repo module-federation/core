@@ -7,15 +7,10 @@ title: 远程模块渲染错误处理方案
 import BlogGifGrid from '@components/BlogGifGrid.tsx';
 
 
-:::tip 版本要求
-此方案需要升级 `@module-federation/runtime` 版本至 0.8.10 或以上版本
-:::
-
-
 ## 背景
 远程模块加载过程可能会因网络资源加载失败或自身业务逻辑渲染失败等因素造成远程模块加载失败。
 
-虽然 Module Federation Runtime 在此过程中提供了尽可能详细的错误日志信息及 runtime hook 来帮助用户定位加载失败的原因，但是更多的我们需要针对此类不可控因素增加错误兜底机制以保证整个站点的稳定性，防止因某个远程模块渲染失败导致整个站点崩溃。
+虽然 {props.name || 'Module federation'} Runtime 在此过程中提供了尽可能详细的错误日志信息及 runtime hook 来帮助用户定位加载失败的原因，但是更多的我们需要针对此类不可控因素增加错误兜底机制以保证整个站点的稳定性，防止因某个远程模块渲染失败导致整个站点崩溃。
 
 ## 解决方案
 
