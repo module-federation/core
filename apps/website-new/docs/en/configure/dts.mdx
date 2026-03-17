@@ -3,7 +3,7 @@
 - Type: `boolean | PluginDtsOptions`
 - Required: No
 - Default value: `true`
-- Usage scenario: used to control `Module Federation` generation/consumption type behavior
+- Usage scenario: used to control <code>{props.brandName || props.name || 'Module Federation'}</code> generation/consumption type behavior
 
 After configuration, the producer will automatically generate a compressed type file `@mf-types.zip` (default name) during build, and the consumer will automatically pull the type file of `remotes` and decompress it to `@mf-types` (default name).
 

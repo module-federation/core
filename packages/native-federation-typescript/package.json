@@ -103,7 +103,10 @@
     }
   },
   "devDependencies": {
-    "upath": "2.0.1"
+    "directory-tree": "3.5.2",
+    "upath": "2.0.1",
+    "vitest": "1.6.0",
+    "webpack": "5.104.1"
   },
   "scripts": {
     "build": "tsdown --config tsdown.config.ts && cp package.json dist && cp *.md dist",

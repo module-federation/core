@@ -1,0 +1,7 @@
+{
+  "files": [],
+  "references": [
+    { "path": "../shared/testconfig.shared.test.json" },
+    { "path": "testconfig.local.test.json" }
+  ]
+}
