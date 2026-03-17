@@ -168,11 +168,11 @@ At this point, you can add the corresponding dependencies to the `shared` config
 
 ### How to use shared dependencies
 
-Depending on the use case, {props.name || 'Module Federation'} supports two forms of shared dependency configuration: array and object. The former is suitable for most scenarios, while the latter is suitable for complex customization needs.
+Depending on the use case, {props.brandName || props.name || 'Module Federation'} supports two forms of shared dependency configuration: array and object. The former is suitable for most scenarios, while the latter is suitable for complex customization needs.
 
 **Array Format (General Scenario)**
 
-Simply add the corresponding dependencies to the `shared` configuration in the {props.name || 'Module Federation'} build configuration, for example:
+Simply add the corresponding dependencies to the `shared` configuration in the {props.brandName || props.name || 'Module Federation'} build configuration, for example:
 
 import ArrayShared from '@components/common/configure/array-shared';
 import React from 'react';
@@ -181,7 +181,7 @@ import React from 'react';
 
 **Object Format (Customized Configuration)**
 
-Add the shared dependencies in the `shared` configuration of the {props.name || 'Module Federation'}, with the `key` being the dependency name and the `value` being the provided configuration.
+Add the shared dependencies in the `shared` configuration of the {props.brandName || props.name || 'Module Federation'}, with the `key` being the dependency name and the `value` being the provided configuration.
 
 import ObjectShared from '@components/common/configure/object-shared'
 
