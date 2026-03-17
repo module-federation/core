@@ -11,18 +11,16 @@
 
 共同字段如下：
 
-| 字段                | 类型             | 必有 | 说明                          |
-| ------------------- | ---------------- | ---- | ----------------------------- |
-| `name`              | `string`         | 是   | 当前 remote/host 名称         |
-| `globalName`        | `string`         | 是   | remoteEntry 对应的 globalName |
-| `buildInfo`         | `StatsBuildInfo` | 是   | 构建信息（版本/构建名等）     |
-| `remoteEntry`       | `ResourceInfo`   | 是   | remoteEntry 资源信息          |
-| `ssrRemoteEntry`    | `ResourceInfo`   | 否   | SSR remoteEntry（若有）       |
-| `prefetchInterface` | `boolean`        | 否   | 是否启用 prefetch 接口        |
-| `prefetchEntry`     | `ResourceInfo`   | 否   | prefetch 资源（若有）         |
-| `types`             | `MetaDataTypes`  | 否   | 类型产物信息（若有）          |
-| `type`              | `string`         | 是   | remote 类型标识               |
-| `pluginVersion`     | `string`         | 否   | 构建插件版本                  |
+| 字段             | 类型             | 必有 | 说明                          |
+| ---------------- | ---------------- | ---- | ----------------------------- | --- |
+| `name`           | `string`         | 是   | 当前 remote/host 名称         |
+| `globalName`     | `string`         | 是   | remoteEntry 对应的 globalName |
+| `buildInfo`      | `StatsBuildInfo` | 是   | 构建信息（版本/构建名等）     |
+| `remoteEntry`    | `ResourceInfo`   | 是   | remoteEntry 资源信息          |
+| `ssrRemoteEntry` | `ResourceInfo`   | 否   | SSR remoteEntry（若有）       |
+| `types`          | `MetaDataTypes`  | 否   | 类型产物信息（若有）          |
+| `type`           | `string`         | 是   | APP                           | NPM |
+| `pluginVersion`  | `string`         | 否   | MF 构建插件版本               |
 
 ### ResourceInfo
 
@@ -44,12 +42,12 @@
 
 ### MetaDataTypes
 
-| 字段   | 类型     | 必有 | 说明            |
-| ------ | -------- | ---- | --------------- |
-| `path` | `string` | 是   | 产物路径        |
-| `name` | `string` | 是   | 文件名          |
-| `api`  | `string` | 是   | API 类型入口    |
-| `zip`  | `string` | 是   | zip 包地址/路径 |
+| 字段   | 类型     | 必有 | 说明                             |
+| ------ | -------- | ---- | -------------------------------- |
+| `path` | `string` | 是   | 产物路径                         |
+| `name` | `string` | 是   | 文件名（旧版类型需要，即将废弃） |
+| `api`  | `string` | 是   | API 类型入口                     |
+| `zip`  | `string` | 是   | zip 包地址/路径                  |
 
 ## assets（两者都有）
 
@@ -66,5 +64,5 @@
 
 | 字段    | 类型       | 必有 | 说明         |
 | ------- | ---------- | ---- | ------------ |
-| `sync`  | `string[]` | 是   | 同步加载资源 |
+| `sync`  | `string[]` | 是   | 初始加载资源 |
 | `async` | `string[]` | 是   | 异步加载资源 |

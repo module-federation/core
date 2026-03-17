@@ -12,7 +12,7 @@
 Shared fields:
 
 | Field               | Type             | Required | Description                           |
-| ------------------- | ---------------- | -------- | ------------------------------------- |
+| ------------------- | ---------------- | -------- | ------------------------------------- | --- |
 | `name`              | `string`         | Yes      | Current remote/host name              |
 | `globalName`        | `string`         | Yes      | Global name for the remoteEntry       |
 | `buildInfo`         | `StatsBuildInfo` | Yes      | Build information                     |
@@ -21,8 +21,8 @@ Shared fields:
 | `prefetchInterface` | `boolean`        | No       | Whether prefetch interface is enabled |
 | `prefetchEntry`     | `ResourceInfo`   | No       | Prefetch resource (if any)            |
 | `types`             | `MetaDataTypes`  | No       | Types bundle info (if any)            |
-| `type`              | `string`         | Yes      | Remote type                           |
-| `pluginVersion`     | `string`         | No       | Plugin version                        |
+| `type`              | `string`         | Yes      | APP                                   | NPM |
+| `pluginVersion`     | `string`         | No       | MF Plugin version                     |
 
 ### ResourceInfo
 
@@ -44,12 +44,12 @@ Shared fields:
 
 ### MetaDataTypes
 
-| Field  | Type     | Required | Description |
-| ------ | -------- | -------- | ----------- |
-| `path` | `string` | Yes      | Output path |
-| `name` | `string` | Yes      | File name   |
-| `api`  | `string` | Yes      | API entry   |
-| `zip`  | `string` | Yes      | Zip path    |
+| Field  | Type     | Required | Description                                               |
+| ------ | -------- | -------- | --------------------------------------------------------- |
+| `path` | `string` | Yes      | Output path                                               |
+| `name` | `string` | Yes      | File name (required for legacy types, will be deprecated) |
+| `api`  | `string` | Yes      | API entry                                                 |
+| `zip`  | `string` | Yes      | Zip path                                                  |
 
 ## assets (Both Files)
 
@@ -64,7 +64,7 @@ Shared fields:
 
 ### StatsAssetsInfo
 
-| Field   | Type       | Required | Description  |
-| ------- | ---------- | -------- | ------------ |
-| `sync`  | `string[]` | Yes      | Sync assets  |
-| `async` | `string[]` | Yes      | Async assets |
+| Field   | Type       | Required | Description    |
+| ------- | ---------- | -------- | -------------- |
+| `sync`  | `string[]` | Yes      | Initial assets |
+| `async` | `string[]` | Yes      | Async assets   |
