@@ -21,15 +21,20 @@ class MFECacheModule(reactContext: ReactApplicationContext) :
 
   override fun getName(): String = "MFECache"
 
-  override fun initialize() {
-    super.initialize()
-    try {
+  // Called from JS: NativeMFECache.installJSI() — synchronous.
+  // At this point runtime is guaranteed ready (JS is already running).
+  @ReactMethod(isBlockingSynchronousMethod = true)
+  fun installJSI(): Boolean {
+    return try {
       val jsContext = reactApplicationContext.javaScriptContextHolder?.get() ?: 0L
       if (jsContext != 0L) {
         nativeInstallJSI(jsContext)
+        true
+      } else {
+        false
       }
     } catch (e: Exception) {
-      // JSI installation failed — JS side will use readFile + eval fallback
+      false
     }
   }
 

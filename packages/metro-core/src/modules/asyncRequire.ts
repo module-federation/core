@@ -92,6 +92,10 @@ function buildLoadBundleAsyncWrapper() {
         if (mod?.NativeMFECache && mod?.CacheManager) {
           cacheModule = mod;
           (globalThis as any).__MFE_CACHE_MODULE__ = mod;
+          // Install JSI bindings (sync) — runtime is guaranteed ready since JS is running
+          if (typeof mod.NativeMFECache.installJSI === 'function') {
+            mod.NativeMFECache.installJSI();
+          }
         }
       } catch {
         // metro-cache not installed — cache layer disabled

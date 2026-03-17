@@ -6,11 +6,7 @@
 
 using namespace facebook;
 
-@implementation MFECacheModule {
-  BOOL _jsiInstalled;
-}
-
-@synthesize bridge = _bridge;
+@implementation MFECacheModule
 
 RCT_EXPORT_MODULE(MFECache)
 
@@ -18,31 +14,21 @@ RCT_EXPORT_MODULE(MFECache)
   return NO;
 }
 
-#pragma mark - JSI Installation
+#pragma mark - JSI Installation (JS-triggered, like react-native-fast-tflite)
 
-/// Called by RN when the bridge is set. We use this to install JSI host functions.
-- (void)setBridge:(RCTBridge *)bridge {
-  _bridge = bridge;
-  _jsiInstalled = NO;
-  [self installJSIBindingsIfNeeded];
-}
-
-- (void)installJSIBindingsIfNeeded {
-  if (_jsiInstalled) return;
-
-  RCTCxxBridge *cxxBridge = (RCTCxxBridge *)self.bridge;
+/// Called from JS: NativeMFECache.installJSI() — synchronous.
+/// At this point bridge + runtime are guaranteed to be ready (JS is already running).
+RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(installJSI)
+{
+  RCTBridge *bridge = [RCTBridge currentBridge];
+  RCTCxxBridge *cxxBridge = (RCTCxxBridge *)bridge;
   if (!cxxBridge || !cxxBridge.runtime) {
-    // Runtime not ready yet, retry on next runloop tick
-    __weak auto weakSelf = self;
-    dispatch_async(dispatch_get_main_queue(), ^{
-      [weakSelf installJSIBindingsIfNeeded];
-    });
-    return;
+    return @(NO);
   }
 
   auto &runtime = *reinterpret_cast<jsi::Runtime *>(cxxBridge.runtime);
   [self installReadFileSync:runtime];
-  _jsiInstalled = YES;
+  return @(YES);
 }
 
 /// Install global.__MFE_readFileSync(filePath) — synchronous JSI function.
@@ -79,9 +65,6 @@ RCT_EXPORT_MODULE(MFECache)
   runtime.global().setProperty(runtime, "__MFE_readFileSync", std::move(readFileSync));
 }
 
-- (void)invalidate {
-  _jsiInstalled = NO;
-}
 
 #pragma mark - File System Operations (async bridge methods — unchanged)
 
