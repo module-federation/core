@@ -1,5 +1,15 @@
 # @module-federation/dts-plugin
 
+## 2.2.2
+
+### Patch Changes
+
+- 95282ac: Infer root dir from "references" property for solution-style tsconfig
+  - @module-federation/sdk@2.2.2
+  - @module-federation/managers@2.2.2
+  - @module-federation/third-party-dts-extractor@2.2.2
+  - @module-federation/error-codes@2.2.2
+
 ## 2.2.1
 
 ### Patch Changes

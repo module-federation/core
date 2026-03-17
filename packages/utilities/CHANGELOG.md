@@ -1,5 +1,11 @@
 # @module-federation/utilities
 
+## 3.1.88
+
+### Patch Changes
+
+- @module-federation/sdk@2.2.2
+
 ## 3.1.87
 
 ### Patch Changes

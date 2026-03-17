@@ -1,5 +1,14 @@
 # @module-federation/manifest
 
+## 2.2.2
+
+### Patch Changes
+
+- Updated dependencies [95282ac]
+  - @module-federation/dts-plugin@2.2.2
+  - @module-federation/sdk@2.2.2
+  - @module-federation/managers@2.2.2
+
 ## 2.2.1
 
 ### Patch Changes

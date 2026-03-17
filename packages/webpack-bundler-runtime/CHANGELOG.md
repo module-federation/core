@@ -1,5 +1,13 @@
 # @module-federation/webpack-bundler-runtime
 
+## 2.2.2
+
+### Patch Changes
+
+- f81bbea: fix(webpack-bundler-runtime): ensure compatibility for rspack by flattening scope array in customShareInfo
+  - @module-federation/runtime@2.2.2
+  - @module-federation/sdk@2.2.2
+
 ## 2.2.1
 
 ### Patch Changes

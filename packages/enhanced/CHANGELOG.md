@@ -1,5 +1,25 @@
 # @module-federation/enhanced
 
+## 2.2.2
+
+### Patch Changes
+
+- 8b8da62: fix(enhanced): replace require with lazyRequire to ensure proper initialization ordering in plugins
+- Updated dependencies [95282ac]
+- Updated dependencies [f81bbea]
+  - @module-federation/dts-plugin@2.2.2
+  - @module-federation/webpack-bundler-runtime@2.2.2
+  - @module-federation/cli@2.2.2
+  - @module-federation/manifest@2.2.2
+  - @module-federation/rspack@2.2.2
+  - @module-federation/runtime-tools@2.2.2
+  - @module-federation/inject-external-runtime-core-plugin@2.2.2
+  - @module-federation/sdk@2.2.2
+  - @module-federation/managers@2.2.2
+  - @module-federation/bridge-react-webpack-plugin@2.2.2
+  - @module-federation/data-prefetch@2.2.2
+  - @module-federation/error-codes@2.2.2
+
 ## 2.2.1
 
 ### Patch Changes
