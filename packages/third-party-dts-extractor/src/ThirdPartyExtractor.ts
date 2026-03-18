@@ -106,6 +106,7 @@ class ThirdPartyExtractor {
         this.addPkgs(typedPkgName, typedDir);
         return typedDir;
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (_err) {
       return;
     }
