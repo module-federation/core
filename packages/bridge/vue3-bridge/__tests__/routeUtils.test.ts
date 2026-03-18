@@ -498,4 +498,382 @@ describe('routeUtils', () => {
       expect(() => processRoutes({ router: doubleSlashRouter })).not.toThrow();
     });
   });
+
+  describe('processRoutes with hashRoute', () => {
+    it('should create a hash history when hashRoute is true', () => {
+      const routes = createNestedRoutes();
+      const router = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      const result = processRoutes({
+        router,
+        hashRoute: true,
+      });
+
+      expect(result.history).toBeDefined();
+      // Hash history base includes the '#' prefix
+      expect(result.history.base).toBe('/#');
+    });
+
+    it('should prefix routes with basename when hashRoute is true and basename is provided', () => {
+      const routes = createNestedRoutes();
+      const router = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      const result = processRoutes({
+        router,
+        basename: '/app',
+        hashRoute: true,
+      });
+
+      expect(result.history).toBeDefined();
+      expect(result.routes.length).toBeGreaterThan(0);
+
+      // Top-level routes should be prefixed with basename
+      // Home route path '/' + basename '/app' normalizes to '/app'
+      const homeRoute = result.routes.find((r) => r.name === 'Home');
+      expect(homeRoute?.path).toBe('/app');
+
+      const dashboardRoute = result.routes.find((r) => r.name === 'Dashboard');
+      // Paths are joined with '/' and normalized (no double slashes)
+      expect(dashboardRoute?.path).toBe('/app/dashboard');
+    });
+
+    it('should prefix nested children with basename when hashRoute is true', () => {
+      const routes = createNestedRoutes();
+      const router = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      const result = processRoutes({
+        router,
+        basename: '/app',
+        hashRoute: true,
+      });
+
+      const dashboardRoute = result.routes.find((r) => r.name === 'Dashboard');
+      expect(dashboardRoute).toBeDefined();
+
+      if (dashboardRoute?.children) {
+        const profileRoute = dashboardRoute.children.find(
+          (child) => child.name === 'Profile',
+        );
+        // Paths are now properly joined with '/' separator
+        expect(profileRoute?.path).toBe('/app/profile');
+
+        const settingsRoute = dashboardRoute.children.find(
+          (child) => child.name === 'Settings',
+        );
+        expect(settingsRoute?.path).toBe('/app/settings');
+
+        if (settingsRoute?.children) {
+          const accountRoute = settingsRoute.children.find(
+            (child) => child.name === 'Account',
+          );
+          expect(accountRoute?.path).toBe('/app/account');
+        }
+      }
+    });
+
+    it('should not prefix routes when hashRoute is true but no basename', () => {
+      const routes = createNestedRoutes();
+      const router = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      const result = processRoutes({
+        router,
+        hashRoute: true,
+      });
+
+      const homeRoute = result.routes.find((r) => r.name === 'Home');
+      expect(homeRoute?.path).toBe('/');
+
+      const dashboardRoute = result.routes.find((r) => r.name === 'Dashboard');
+      expect(dashboardRoute?.path).toBe('/dashboard');
+    });
+
+    it('should prefer memoryRoute over hashRoute when both are set', () => {
+      const routes = createNestedRoutes();
+      const router = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      const result = processRoutes({
+        router,
+        basename: '/app',
+        memoryRoute: true,
+        hashRoute: true,
+      });
+
+      // memoryRoute takes priority (checked first in processRoutes)
+      // Memory history uses basename as the base
+      expect(result.history.base).toBe('/app');
+    });
+
+    it('should preserve trailing slashes in paths when prefixing with basename', () => {
+      const trailingSlashRoutes = [
+        {
+          path: '/dashboard/',
+          name: 'Dashboard',
+          component: { template: '<div>Dashboard</div>' },
+        },
+        {
+          path: '/settings',
+          name: 'Settings',
+          component: { template: '<div>Settings</div>' },
+        },
+      ];
+
+      const router = createRouter({
+        history: createWebHistory(),
+        routes: trailingSlashRoutes,
+      });
+
+      const result = processRoutes({
+        router,
+        basename: '/app',
+        hashRoute: true,
+      });
+
+      // Trailing slash should be preserved for /dashboard/
+      const dashboardRoute = result.routes.find((r) => r.name === 'Dashboard');
+      expect(dashboardRoute?.path).toBe('/app/dashboard/');
+
+      // No trailing slash should remain absent for /settings
+      const settingsRoute = result.routes.find((r) => r.name === 'Settings');
+      expect(settingsRoute?.path).toBe('/app/settings');
+    });
+
+    it('should preserve trailing slashes in string redirects', () => {
+      const redirectRoutes = [
+        {
+          path: '/',
+          redirect: '/dashboard/',
+        },
+        {
+          path: '/dashboard/',
+          name: 'Dashboard',
+          component: { template: '<div>Dashboard</div>' },
+        },
+      ];
+
+      const router = createRouter({
+        history: createWebHistory(),
+        routes: redirectRoutes,
+      });
+
+      const result = processRoutes({
+        router,
+        basename: '/app',
+        hashRoute: true,
+      });
+
+      const rootRoute = result.routes.find((r) => r.path === '/app');
+      expect(rootRoute?.redirect).toBe('/app/dashboard/');
+    });
+  });
+
+  describe('processRoutes with memoryRoute', () => {
+    it('should create a memory history when memoryRoute is true', () => {
+      const routes = createNestedRoutes();
+      const router = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      const result = processRoutes({
+        router,
+        memoryRoute: true,
+      });
+
+      expect(result.history).toBeDefined();
+      expect(result.routes.length).toBeGreaterThan(0);
+    });
+
+    it('should pass basename to memory history', () => {
+      const routes = createNestedRoutes();
+      const router = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      const result = processRoutes({
+        router,
+        basename: '/app',
+        memoryRoute: true,
+      });
+
+      expect(result.history).toBeDefined();
+      expect(result.history.base).toBe('/app');
+    });
+
+    it('should not prefix route paths when using memoryRoute', () => {
+      const routes = createNestedRoutes();
+      const router = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      const result = processRoutes({
+        router,
+        basename: '/app',
+        memoryRoute: true,
+      });
+
+      // Unlike hashRoute, memoryRoute does NOT prefix routes — it passes basename to createMemoryHistory
+      const homeRoute = result.routes.find((r) => r.name === 'Home');
+      expect(homeRoute?.path).toBe('/');
+
+      const dashboardRoute = result.routes.find((r) => r.name === 'Dashboard');
+      expect(dashboardRoute?.path).toBe('/dashboard');
+    });
+  });
+
+  describe('processRoutes default (web history)', () => {
+    it('should create web history with basename by default', () => {
+      const routes = createNestedRoutes();
+      const router = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      const result = processRoutes({
+        router,
+        basename: '/app',
+      });
+
+      expect(result.history).toBeDefined();
+      expect(result.history.base).toBe('/app');
+    });
+
+    it('should not prefix route paths in default mode', () => {
+      const routes = createNestedRoutes();
+      const router = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      const result = processRoutes({
+        router,
+        basename: '/app',
+      });
+
+      const homeRoute = result.routes.find((r) => r.name === 'Home');
+      expect(homeRoute?.path).toBe('/');
+
+      const dashboardRoute = result.routes.find((r) => r.name === 'Dashboard');
+      expect(dashboardRoute?.path).toBe('/dashboard');
+    });
+  });
+
+  describe('processRoutes hashRoute with redirects', () => {
+    it('should prefix string redirects with basename', () => {
+      const redirectRoutes = [
+        {
+          path: '/',
+          redirect: '/dashboard',
+        },
+        {
+          path: '/dashboard',
+          name: 'Dashboard',
+          component: { template: '<div>Dashboard</div>' },
+        },
+        {
+          path: '/about',
+          name: 'About',
+          component: { template: '<div>About</div>' },
+        },
+      ];
+
+      const router = createRouter({
+        history: createWebHistory(),
+        routes: redirectRoutes,
+      });
+
+      const result = processRoutes({
+        router,
+        basename: '/barber',
+        hashRoute: true,
+      });
+
+      // The redirect route should have its redirect target prefixed
+      const rootRoute = result.routes.find((r) => r.path === '/barber');
+      expect(rootRoute).toBeDefined();
+      expect(rootRoute?.redirect).toBe('/barber/dashboard');
+
+      // Other routes should be prefixed normally
+      const dashboardRoute = result.routes.find((r) => r.name === 'Dashboard');
+      expect(dashboardRoute?.path).toBe('/barber/dashboard');
+
+      const aboutRoute = result.routes.find((r) => r.name === 'About');
+      expect(aboutRoute?.path).toBe('/barber/about');
+    });
+
+    it('should prefix object redirects with path property', () => {
+      const redirectRoutes = [
+        {
+          path: '/',
+          redirect: { path: '/dashboard' },
+        },
+        {
+          path: '/dashboard',
+          name: 'Dashboard',
+          component: { template: '<div>Dashboard</div>' },
+        },
+      ];
+
+      const router = createRouter({
+        history: createWebHistory(),
+        routes: redirectRoutes,
+      });
+
+      const result = processRoutes({
+        router,
+        basename: '/app',
+        hashRoute: true,
+      });
+
+      const rootRoute = result.routes.find((r) => r.path === '/app');
+      expect(rootRoute).toBeDefined();
+      expect(rootRoute?.redirect).toEqual({ path: '/app/dashboard' });
+    });
+
+    it('should not modify named redirects (no path property)', () => {
+      const redirectRoutes = [
+        {
+          path: '/',
+          redirect: { name: 'Dashboard' },
+        },
+        {
+          path: '/dashboard',
+          name: 'Dashboard',
+          component: { template: '<div>Dashboard</div>' },
+        },
+      ];
+
+      const router = createRouter({
+        history: createWebHistory(),
+        routes: redirectRoutes,
+      });
+
+      const result = processRoutes({
+        router,
+        basename: '/app',
+        hashRoute: true,
+      });
+
+      const rootRoute = result.routes.find((r) => r.path === '/app');
+      expect(rootRoute).toBeDefined();
+      // Named redirects should be untouched — Vue Router resolves by name, not path
+      expect(rootRoute?.redirect).toEqual({ name: 'Dashboard' });
+    });
+  });
 });
