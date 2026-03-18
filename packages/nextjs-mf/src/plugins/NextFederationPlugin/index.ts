@@ -75,6 +75,7 @@ const loadLogger = () =>
 const loadNextRequireHook = () =>
   require('next/dist/server/require-hook') as typeof import('next/dist/server/require-hook');
 
+const localWebpackPathEnvKey = 'NEXT_MF_LOCAL_WEBPACK_PATH';
 let patchedWebpackSourcesAlias: string | undefined;
 
 const patchNextWebpackSourcesAlias = (compiler: Compiler) => {
@@ -84,26 +85,38 @@ const patchNextWebpackSourcesAlias = (compiler: Compiler) => {
     if (typeof addHookAliases !== 'function') {
       return;
     }
-    const compilerWebpack = compiler.webpack as unknown as {
-      webpack?: { sources?: typeof import('webpack').sources };
-      sources?: typeof import('webpack').sources;
-    };
-    const localWebpack = compilerWebpack.webpack ?? compilerWebpack;
+    const localWebpack = compiler.webpack;
     const localWebpackSources = localWebpack.sources;
 
     if (!localWebpackSources) {
       return;
     }
 
-    const { createRequire } = runtimeRequire(
-      'module',
-    ) as typeof import('module');
-    const localWebpackEntry = Object.keys(require.cache).find(
-      (cacheKey) => require.cache[cacheKey]?.exports === localWebpack,
-    );
-    const webpackSourcesShimPath = localWebpackEntry
-      ? createRequire(localWebpackEntry).resolve('webpack-sources')
-      : require.resolve('@module-federation/nextjs-mf/dist/src/plugins/NextFederationPlugin/webpack-sources-shim.js');
+    const localWebpackEntry = Object.keys(require.cache).find((cacheKey) => {
+      const cacheExports = require.cache[cacheKey]?.exports as
+        | undefined
+        | {
+            sources?: unknown;
+            webpack?: { sources?: unknown };
+          };
+
+      return (
+        cacheExports === localWebpack ||
+        cacheExports?.sources === localWebpackSources ||
+        cacheExports?.webpack?.sources === localWebpackSources
+      );
+    });
+    if (localWebpackEntry) {
+      process.env[localWebpackPathEnvKey] = localWebpackEntry;
+    } else if (
+      process.env['FEDERATION_WEBPACK_PATH'] &&
+      !process.env[localWebpackPathEnvKey]
+    ) {
+      process.env[localWebpackPathEnvKey] =
+        process.env['FEDERATION_WEBPACK_PATH'];
+    }
+    const webpackSourcesShimPath =
+      require.resolve('@module-federation/nextjs-mf/dist/src/plugins/NextFederationPlugin/webpack-sources-shim.js');
 
     if (patchedWebpackSourcesAlias === webpackSourcesShimPath) {
       return;
