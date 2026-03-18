@@ -9,7 +9,7 @@ import type {
   NextFederationPluginExtraOptions,
   NextFederationPluginOptions,
 } from './next-fragments';
-import type { Compiler, WebpackPluginInstance } from 'webpack';
+import type { Compilation, Compiler, WebpackPluginInstance } from 'webpack';
 import path from 'path';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 
@@ -17,6 +17,29 @@ type EnhancedWebpackModule =
   typeof import('@module-federation/enhanced/webpack');
 type CopyFederationPluginCtor =
   typeof import('../CopyFederationPlugin').default;
+type EnhancedFederationRuntimePluginCtor = new (
+  options?: moduleFederationPlugin.ModuleFederationPluginOptions,
+) => {
+  entryFilePath: string;
+  getFilePath(compiler: Compiler): string;
+  ensureFile(compiler: Compiler): void;
+};
+type ContainerEntryDependencyLike = {
+  injectRuntimeEntry?: string;
+};
+type EnhancedRuntimeSupport = {
+  FederationModulesPlugin: {
+    getCompilationHooks: (compilation: Compilation) => {
+      addContainerEntryDependency: {
+        tap: (
+          pluginName: string,
+          handler: (dependency: ContainerEntryDependencyLike) => void,
+        ) => void;
+      };
+    };
+  };
+  FederationRuntimePlugin: EnhancedFederationRuntimePluginCtor;
+};
 
 const runtimeRequireFromModule = new Function(
   'moduleRef',
@@ -74,6 +97,91 @@ const loadLogger = () =>
   loadModule<typeof import('../../logger').default>('../../logger');
 const loadNextRequireHook = () =>
   require('next/dist/server/require-hook') as typeof import('next/dist/server/require-hook');
+const resolveEnhancedRuntimeCoreModulePath = (moduleName: string) => {
+  const enhancedEntryDir = path.dirname(
+    require.resolve('@module-federation/enhanced'),
+  );
+
+  return path.join(
+    enhancedEntryDir,
+    process.env['IS_ESM_BUILD'] === 'true'
+      ? `lib/container/runtime/${moduleName}.mjs`
+      : `lib/container/runtime/${moduleName}.js`,
+  );
+};
+const loadEnhancedRuntimeSupport = (): EnhancedRuntimeSupport => {
+  const enhancedModule = runtimeRequire('@module-federation/enhanced') as
+    | EnhancedRuntimeSupport
+    | { default?: EnhancedRuntimeSupport };
+
+  if (
+    enhancedModule &&
+    typeof enhancedModule === 'object' &&
+    'FederationModulesPlugin' in enhancedModule &&
+    'FederationRuntimePlugin' in enhancedModule
+  ) {
+    return enhancedModule as EnhancedRuntimeSupport;
+  }
+
+  const defaultExport = (enhancedModule as { default?: EnhancedRuntimeSupport })
+    .default;
+  if (
+    defaultExport &&
+    typeof defaultExport === 'object' &&
+    'FederationModulesPlugin' in defaultExport &&
+    'FederationRuntimePlugin' in defaultExport
+  ) {
+    return defaultExport;
+  }
+
+  return enhancedModule as EnhancedRuntimeSupport;
+};
+const loadFederationRuntimePluginCtor =
+  (): EnhancedFederationRuntimePluginCtor => {
+    try {
+      const runtimePluginModule = runtimeRequire(
+        resolveEnhancedRuntimeCoreModulePath('FederationRuntimePlugin'),
+      ) as
+        | EnhancedFederationRuntimePluginCtor
+        | { default?: EnhancedFederationRuntimePluginCtor };
+
+      if (
+        runtimePluginModule &&
+        typeof runtimePluginModule === 'object' &&
+        'default' in runtimePluginModule &&
+        runtimePluginModule.default
+      ) {
+        return runtimePluginModule.default;
+      }
+
+      return runtimePluginModule as EnhancedFederationRuntimePluginCtor;
+    } catch {
+      return loadEnhancedRuntimeSupport().FederationRuntimePlugin;
+    }
+  };
+const loadFederationModulesPlugin =
+  (): EnhancedRuntimeSupport['FederationModulesPlugin'] => {
+    try {
+      const modulesPluginModule = runtimeRequire(
+        resolveEnhancedRuntimeCoreModulePath('FederationModulesPlugin'),
+      ) as
+        | EnhancedRuntimeSupport['FederationModulesPlugin']
+        | { default?: EnhancedRuntimeSupport['FederationModulesPlugin'] };
+
+      if (
+        modulesPluginModule &&
+        typeof modulesPluginModule === 'object' &&
+        'default' in modulesPluginModule &&
+        modulesPluginModule.default
+      ) {
+        return modulesPluginModule.default;
+      }
+
+      return modulesPluginModule as EnhancedRuntimeSupport['FederationModulesPlugin'];
+    } catch {
+      return loadEnhancedRuntimeSupport().FederationModulesPlugin;
+    }
+  };
 
 const localWebpackPathEnvKey = 'NEXT_MF_LOCAL_WEBPACK_PATH';
 let patchedWebpackSourcesAlias: string | undefined;
@@ -138,75 +246,41 @@ const resolveRuntimePluginPath = (): string =>
   process.env['IS_ESM_BUILD'] === 'true'
     ? require.resolve('@module-federation/nextjs-mf/dist/src/plugins/container/runtimePlugin.mjs')
     : require.resolve('@module-federation/nextjs-mf/dist/src/plugins/container/runtimePlugin.js');
+const ensureContainerRuntimeEntry = (
+  compiler: Compiler,
+  options: moduleFederationPlugin.ModuleFederationPluginOptions,
+) => {
+  try {
+    const FederationModulesPlugin = loadFederationModulesPlugin();
+    const FederationRuntimePlugin = loadFederationRuntimePluginCtor();
+    const federationRuntimePlugin = new FederationRuntimePlugin(options);
+    const runtimeEntryPath = federationRuntimePlugin.getFilePath(compiler);
+    federationRuntimePlugin.entryFilePath = runtimeEntryPath;
+    federationRuntimePlugin.ensureFile(compiler);
 
-const patchContainerEntryDependencyFactory = (compiler: Compiler) => {
-  compiler.hooks.afterPlugins.tap('NextFederationPlugin', () => {
     compiler.hooks.thisCompilation.tap(
       'NextFederationPlugin',
-      (compilation) => {
-        const dependencyFactoryEntry = Array.from(
-          compilation.dependencyFactories.entries(),
-        ).find(([dependencyType]) => {
-          return (
-            (dependencyType as { name?: string } | undefined)?.name ===
-            'ContainerEntryDependency'
-          );
-        });
-
-        if (!dependencyFactoryEntry) {
-          return;
-        }
-
-        const [dependencyType, dependencyFactory] = dependencyFactoryEntry;
-        const typedDependencyFactory = dependencyFactory as {
-          create?: (data: unknown, callback: unknown) => unknown;
-          __nextMfPatched?: boolean;
-        };
-
-        if (
-          typedDependencyFactory.__nextMfPatched ||
-          typeof typedDependencyFactory.create !== 'function'
-        ) {
-          return;
-        }
-
-        const originalCreate =
-          typedDependencyFactory.create.bind(dependencyFactory);
-        const patchedFactory = Object.create(dependencyFactory) as
-          | typeof dependencyFactory
-          | {
-              create: (data: unknown, callback: unknown) => unknown;
-              __nextMfPatched?: boolean;
-            };
-
-        (patchedFactory as { __nextMfPatched?: boolean }).__nextMfPatched =
-          true;
-        (patchedFactory as { create: typeof originalCreate }).create = (
-          data: unknown,
-          callback: unknown,
-        ) => {
-          const containerDependency = (
-            data as { dependencies?: unknown[] } | undefined
-          )?.dependencies?.[0] as { injectRuntimeEntry?: string } | undefined;
-
-          if (
-            containerDependency &&
-            (typeof containerDependency.injectRuntimeEntry !== 'string' ||
-              containerDependency.injectRuntimeEntry.trim().length === 0)
-          ) {
-            containerDependency.injectRuntimeEntry = resolveRuntimePluginPath();
-          }
-
-          return originalCreate(data, callback);
-        };
-
-        compilation.dependencyFactories.set(
-          dependencyType,
-          patchedFactory as typeof dependencyFactory,
+      (compilation: Compilation) => {
+        const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
+        hooks.addContainerEntryDependency.tap(
+          'NextFederationPlugin',
+          (dependency: ContainerEntryDependencyLike) => {
+            if (
+              typeof dependency.injectRuntimeEntry !== 'string' ||
+              dependency.injectRuntimeEntry.trim().length === 0
+            ) {
+              dependency.injectRuntimeEntry =
+                runtimeEntryPath || resolveRuntimePluginPath();
+            }
+          },
         );
       },
     );
-  });
+    return runtimeEntryPath;
+  } catch {
+    // Keep Next bootstrap resilient if enhanced runtime internals are unavailable.
+    return undefined;
+  }
 };
 
 const resolveNoopPath = (): string =>
@@ -257,6 +331,7 @@ export class NextFederationPlugin {
     const logger = loadLogger();
     const { getWebpackPath } = loadNormalizeWebpackPath();
     const CopyFederationPlugin = loadCopyFederationPlugin();
+    let preparedRuntimeEntryPath: string | undefined;
 
     bindLoggerToCompiler(logger, compiler, 'NextFederationPlugin');
     compiler.hooks.normalModuleFactory.tap(
@@ -281,9 +356,21 @@ export class NextFederationPlugin {
                 'federation runtime dependency'
               );
             });
+            const hasEntryDependency = (resolveData.dependencies || []).some(
+              (dependency) => {
+                const typedDependency = dependency as
+                  | { type?: string; constructor?: { name?: string } }
+                  | undefined;
+                return (
+                  typedDependency?.type === 'entry' ||
+                  typedDependency?.constructor?.name === 'EntryDependency'
+                );
+              },
+            );
 
-            if (hasFederationRuntimeDependency) {
-              resolveData.request = resolveRuntimePluginPath();
+            if (hasFederationRuntimeDependency || hasEntryDependency) {
+              resolveData.request =
+                preparedRuntimeEntryPath || resolveRuntimePluginPath();
             }
           },
         );
@@ -308,8 +395,11 @@ export class NextFederationPlugin {
     const { ModuleFederationPlugin } =
       require('@module-federation/enhanced/webpack') as EnhancedWebpackModule;
 
+    preparedRuntimeEntryPath = ensureContainerRuntimeEntry(
+      compiler,
+      normalFederationPluginOptions,
+    );
     new ModuleFederationPlugin(normalFederationPluginOptions).apply(compiler);
-    patchContainerEntryDependencyFactory(compiler);
 
     const noop = this.getNoopPath();
 

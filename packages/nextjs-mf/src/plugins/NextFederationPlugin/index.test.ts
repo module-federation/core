@@ -7,6 +7,15 @@ const moduleFederationPluginApplyMock = jest.fn();
 const moduleFederationPluginCtorMock = jest
   .fn()
   .mockImplementation(() => ({ apply: moduleFederationPluginApplyMock }));
+const federationRuntimePluginGetFilePathMock = jest.fn(
+  () => '/mock/runtime-entry.js',
+);
+const federationRuntimePluginEnsureFileMock = jest.fn();
+const federationRuntimePluginCtorMock = jest.fn().mockImplementation(() => ({
+  entryFilePath: '/mock/runtime-entry.js',
+  getFilePath: federationRuntimePluginGetFilePathMock,
+  ensureFile: federationRuntimePluginEnsureFileMock,
+}));
 
 jest.mock('@module-federation/sdk', () => ({
   bindLoggerToCompiler: bindLoggerToCompilerMock,
@@ -28,6 +37,7 @@ jest.mock('@module-federation/enhanced/webpack', () => ({
 }));
 
 jest.mock('@module-federation/enhanced', () => ({
+  FederationRuntimePlugin: federationRuntimePluginCtorMock,
   FederationModulesPlugin: {
     getCompilationHooks: jest.fn(() => ({
       addContainerEntryDependency: {
