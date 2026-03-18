@@ -3,6 +3,7 @@ import path from 'node:path';
 
 export type FrontendAdapter = {
   id: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   register: (app: { get: (path: string, handler: any) => void }) => void;
 };
 
@@ -59,6 +60,7 @@ export function createTreeshakeFrontendAdapter(
   const indexFile = opts.indexFile ?? 'index.html';
   const spaFallback = opts.spaFallback ?? true;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handler = async (c: any) => {
     let requestPath = c.req.path;
     try {

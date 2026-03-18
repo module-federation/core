@@ -90,6 +90,15 @@ describe('ConsumeSharedModule (integration)', () => {
     expect(module.layer).toBeNull();
   });
 
+  it('returns javascript from getSourceBasicTypes (webpack 5.105.4+)', () => {
+    const module = new ConsumeSharedModule('/context', {
+      ...testModuleOptions.basic,
+      shareScope: shareScopes.string,
+    } as unknown as ConsumeOptions);
+
+    expect(module.getSourceBasicTypes().has('javascript')).toBe(true);
+  });
+
   it('produces identifiers that encode scope and key information', () => {
     const module = new ConsumeSharedModule('/context', {
       ...testModuleOptions.basic,
