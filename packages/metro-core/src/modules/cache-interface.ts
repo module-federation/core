@@ -13,10 +13,8 @@ export interface ICacheManager {
       buildVersion?: string;
     },
   ): Promise<any>;
-  updateLastUsedAt(remoteName: string): Promise<void>;
+  updateLastUsedAt(bundleUrl: string): Promise<void>;
   markBroken(remoteName: string, bundleUrl: string): Promise<void>;
-  getCurrentBundleUrl(remoteName: string): string | null;
-  getPreviousValidVersion(remoteName: string): Promise<any | null>;
   invalidateAllCaches(): Promise<void>;
 }
 

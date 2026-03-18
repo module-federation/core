@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import util from 'node:util';
@@ -365,6 +366,54 @@ async function bundleFederatedRemote(
       await fs.readFile(manifestFilepath, 'utf-8'),
     );
     applyTypesMetaToManifest(rawManifest, typesMeta);
+
+    // Compute SHA-256 hashes for all built bundles and inject into manifest
+    logger.info(`${util.styleText('blue', 'Computing bundle hashes')}`);
+    const bundleHashMap = new Map<string, string>();
+
+    for (const { saveBundleOpts } of requests) {
+      const bundleContent = await fs.readFile(
+        saveBundleOpts.bundleOutput,
+        'utf-8',
+      );
+      const hash = crypto
+        .createHash('sha256')
+        .update(bundleContent)
+        .digest('hex');
+      // Store by relative path from outputDir (e.g. "mini.bundle", "exposed/info.bundle", "shared/lodash.bundle")
+      const relPath = normalizeOutputRelativePath(
+        path.relative(outputDir, saveBundleOpts.bundleOutput),
+      );
+      bundleHashMap.set(relPath, hash);
+    }
+
+    // Inject container bundle hash into metaData.buildInfo.hash
+    const containerFilename = federationConfig.filename;
+    if (bundleHashMap.has(containerFilename)) {
+      rawManifest.metaData.buildInfo.hash =
+        bundleHashMap.get(containerFilename);
+    }
+
+    // Inject exposed bundle hashes
+    if (Array.isArray(rawManifest.exposes)) {
+      for (const expose of rawManifest.exposes) {
+        const exposePath = `exposed/${expose.name}.bundle`;
+        if (bundleHashMap.has(exposePath)) {
+          expose.hash = bundleHashMap.get(exposePath);
+        }
+      }
+    }
+
+    // Inject shared bundle hashes (non-eager shared with bundle files)
+    if (Array.isArray(rawManifest.shared)) {
+      for (const shared of rawManifest.shared) {
+        const sharedPath = `shared/${shared.name}.bundle`;
+        if (bundleHashMap.has(sharedPath)) {
+          shared.hash = bundleHashMap.get(sharedPath);
+        }
+      }
+    }
+
     await fs.writeFile(
       manifestOutputFilepath,
       JSON.stringify(rawManifest, undefined, 2),

@@ -18,6 +18,12 @@ declare global {
   var __FEDERATION__: Federation;
 }
 
+// Global map: bundleUrl → expected bundleHash from manifest
+// Populated by afterResolve hook, consumed by asyncRequire.ts cache layer
+const bundleHashMap: Record<string, string> =
+  (globalThis as any).__MFE_BUNDLE_HASHES__ ??
+  ((globalThis as any).__MFE_BUNDLE_HASHES__ = {});
+
 const getQueryParams = () => {
   const isFuseboxEnabled = !!globalThis.__FUSEBOX_HAS_FULL_CONSOLE_SUPPORT__;
   const queryParams: Record<string, string> = {
@@ -45,21 +51,82 @@ const buildUrlForEntryBundle = (entry: string) => {
 };
 
 const MetroCorePlugin: () => ModuleFederationRuntimePlugin = () => {
-  // Try to load cache module for onLoad tracking
-  const cacheModule = !__DEV__ ? tryLoadCacheModule() : null;
-  let cacheManagerInstance: InstanceType<any> | null = null;
-
-  const getCacheManager = async () => {
-    if (!cacheModule) return null;
-    if (!cacheManagerInstance) {
-      cacheManagerInstance = new cacheModule.CacheManager();
-      await cacheManagerInstance.initialize();
-    }
-    return cacheManagerInstance;
-  };
-
   return {
     name: 'metro-core-plugin',
+    afterResolve: (args) => {
+      // Extract bundleHash from manifest and store in global map for asyncRequire.ts
+      try {
+        const { origin, remoteInfo, remote } = args;
+        const manifestUrl =
+          'entry' in remote ? (remote as any).entry : undefined;
+        if (manifestUrl && origin.snapshotHandler?.manifestCache) {
+          const manifest =
+            origin.snapshotHandler.manifestCache.get(manifestUrl);
+          if (manifest) {
+            // Container bundle hash
+            const containerHash = (manifest.metaData?.buildInfo as any)?.hash;
+            if (containerHash && remoteInfo.entry) {
+              bundleHashMap[remoteInfo.entry] = containerHash;
+              console.log(
+                '[MFE-Hash] container:',
+                remoteInfo.entry,
+                '→',
+                containerHash.slice(0, 8),
+              );
+            }
+            // Exposed bundle hashes — keyed by publicPath + exposed asset path
+            const publicPath =
+              'publicPath' in manifest.metaData
+                ? manifest.metaData.publicPath
+                : '';
+            if (Array.isArray(manifest.exposes)) {
+              for (const expose of manifest.exposes) {
+                const hash = (expose as any).hash;
+                const syncJs = expose.assets?.js?.sync;
+                if (hash && syncJs) {
+                  for (const assetPath of syncJs) {
+                    const fullUrl = publicPath
+                      ? `${publicPath.replace(/\/+$/, '')}/${assetPath.replace(/^\.?\//, '')}`
+                      : assetPath;
+                    bundleHashMap[fullUrl] = hash;
+                    console.log(
+                      '[MFE-Hash] expose:',
+                      fullUrl,
+                      '→',
+                      hash.slice(0, 8),
+                    );
+                  }
+                }
+              }
+            }
+            // Shared bundle hashes
+            if (Array.isArray(manifest.shared)) {
+              for (const shared of manifest.shared) {
+                const hash = (shared as any).hash;
+                const syncJs = shared.assets?.js?.sync;
+                if (hash && syncJs) {
+                  for (const assetPath of syncJs) {
+                    const fullUrl = publicPath
+                      ? `${publicPath.replace(/\/+$/, '')}/${assetPath.replace(/^\.?\//, '')}`
+                      : assetPath;
+                    bundleHashMap[fullUrl] = hash;
+                    console.log(
+                      '[MFE-Hash] shared:',
+                      fullUrl,
+                      '→',
+                      hash.slice(0, 8),
+                    );
+                  }
+                }
+              }
+            }
+          }
+        }
+      } catch {
+        // non-critical — hash validation is best-effort
+      }
+      return args;
+    },
     loadEntry: async ({ remoteInfo }) => {
       const { entry, entryGlobalName } = remoteInfo;
 
@@ -99,17 +166,6 @@ const MetroCorePlugin: () => ModuleFederationRuntimePlugin = () => {
         jsAssetsWithoutEntry: [],
         entryAssets: [],
       });
-    },
-    onLoad: async ({ remote }) => {
-      // Update lastUsedAt for cache tracking
-      try {
-        const cm = await getCacheManager();
-        if (cm && remote?.name) {
-          await cm.updateLastUsedAt(remote.name);
-        }
-      } catch {
-        // non-critical, don't break loading
-      }
     },
   };
 };

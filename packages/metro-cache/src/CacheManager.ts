@@ -1,68 +1,23 @@
 import NativeMFECache from './NativeMFECache';
 import type {
   BundleMetadata,
-  BundleStatus,
   CachedBundleResult,
   CacheManagerConfig,
 } from './types';
 
 const LOG_PREFIX = '[MFE-Cache]';
 
-// Simple KV interface — will use MMKV when available, falls back to in-memory
-interface KVStore {
-  getString(key: string): string | undefined;
-  set(key: string, value: string): void;
-  delete(key: string): void;
-  getAllKeys(): string[];
-}
-
-function createMemoryKV(): KVStore {
-  const store = new Map<string, string>();
-  return {
-    getString: (key) => store.get(key),
-    set: (key, value) => store.set(key, value),
-    delete: (key) => store.delete(key),
-    getAllKeys: () => Array.from(store.keys()),
-  };
-}
-
-function createMMKVStore(instanceId: string): KVStore {
-  try {
-    const { MMKV } = require('react-native-mmkv');
-    return new MMKV({ id: instanceId });
-  } catch {
-    console.warn(
-      `${LOG_PREFIX} react-native-mmkv not available, using in-memory store`,
-    );
-    return createMemoryKV();
-  }
-}
-
-function shortHash(url: string): string {
-  // Simple hash for MMKV key — not crypto, just for key uniqueness
-  let hash = 0;
-  for (let i = 0; i < url.length; i++) {
-    const char = url.charCodeAt(i);
-    hash = ((hash << 5) - hash + char) | 0;
-  }
-  return Math.abs(hash).toString(36);
-}
-
 export class CacheManager {
-  private kv: KVStore;
   private bundleDir: string = '';
   private config: CacheManagerConfig;
 
-  // In-memory indexes
+  // In-memory index: bundleUrl → BundleMetadata
   private urlIndex = new Map<string, BundleMetadata>();
-  private activeVersions = new Map<string, BundleMetadata>();
-  private previousVersions = new Map<string, BundleMetadata | null>();
 
   private initialized = false;
 
   constructor(config: CacheManagerConfig = {}) {
     this.config = config;
-    this.kv = createMMKVStore(config.mmkvInstanceId ?? 'mfe-cache');
   }
 
   async initialize(): Promise<void> {
@@ -79,55 +34,12 @@ export class CacheManager {
     const docDir = await NativeMFECache.getDocumentDirectory();
     this.bundleDir = this.config.bundleDir ?? `${docDir}/mfe-bundles`;
 
-    // Rebuild in-memory indexes from MMKV
-    const allKeys = this.kv.getAllKeys();
-    for (const key of allKeys) {
-      if (!key.startsWith('mfe:bundle:')) continue;
-      try {
-        const raw = this.kv.getString(key);
-        if (!raw) continue;
-        const meta: BundleMetadata = JSON.parse(raw);
-        this.urlIndex.set(meta.bundleUrl, meta);
-      } catch {
-        // corrupted entry, skip
-      }
-    }
-
-    // If MMKV is not available (in-memory store), try to recover from disk manifest
-    if (this.urlIndex.size === 0) {
-      await this.recoverFromDiskManifest();
-    }
-
-    // Rebuild active/previous pointers
-    const remoteNames = new Set<string>();
-    for (const meta of this.urlIndex.values()) {
-      remoteNames.add(meta.remoteName);
-    }
-    for (const name of remoteNames) {
-      const activeUrl = this.kv.getString(`mfe:active:${name}`);
-      if (activeUrl) {
-        const meta = this.urlIndex.get(activeUrl);
-        if (meta) this.activeVersions.set(name, meta);
-      }
-      const prevUrl = this.kv.getString(`mfe:previous:${name}`);
-      if (prevUrl) {
-        const meta = this.urlIndex.get(prevUrl);
-        this.previousVersions.set(name, meta ?? null);
-      }
-    }
-
-    // If we recovered from disk but active pointers are empty, rebuild them
-    if (this.urlIndex.size > 0 && this.activeVersions.size === 0) {
-      for (const meta of this.urlIndex.values()) {
-        if (meta.status === 'active') {
-          this.activeVersions.set(meta.remoteName, meta);
-          this.kv.set(`mfe:active:${meta.remoteName}`, meta.bundleUrl);
-        }
-      }
-    }
+    // Recover indexes from disk manifest
+    await this.recoverFromDiskManifest();
 
     // Check host build hash
-    const storedHostHash = this.kv.getString('mfe:hostBuildHash');
+    const storedHostHash =
+      this.urlIndex.size > 0 ? (this as any)._hostBuildHash : undefined;
     const currentHostHash = (globalThis as any).__MF_HOST_BUILD_HASH__;
     if (
       storedHostHash &&
@@ -140,7 +52,7 @@ export class CacheManager {
       await this.invalidateAllCaches();
     }
     if (currentHostHash) {
-      this.kv.set('mfe:hostBuildHash', currentHostHash);
+      (this as any)._hostBuildHash = currentHostHash;
     }
 
     // Activate pending updates (cold start)
@@ -175,9 +87,23 @@ export class CacheManager {
 
   async getBundleDestPath(
     remoteName: string,
-    _bundleUrl: string,
+    bundleUrl: string,
   ): Promise<string> {
-    return `${this.bundleDir}/${remoteName}/${remoteName}.bundle`;
+    // Use host_port/pathname as storage path to avoid name conflicts across hosts
+    // e.g. http://localhost:8082/mini.bundle → localhost_8082/mini.bundle
+    // e.g. https://cdn.example.com/miniApp/mini.bundle → cdn.example.com/miniApp/mini.bundle
+    // e.g. https://cdn.example.com/miniApp/shared/lodash.bundle → cdn.example.com/miniApp/shared/lodash.bundle
+    try {
+      const url = new URL(bundleUrl);
+      // Replace ':' with '_' in host (filesystem-safe)
+      const hostDir = url.host.replace(/:/g, '_');
+      // Remove leading slash from pathname
+      const pathname = url.pathname.replace(/^\/+/, '');
+      return `${this.bundleDir}/${hostDir}/${pathname}`;
+    } catch {
+      // Fallback for non-URL paths
+      return `${this.bundleDir}/${remoteName}/${remoteName}.bundle`;
+    }
   }
 
   async saveBundleToCache(
@@ -203,25 +129,9 @@ export class CacheManager {
       lastRetryAt: null,
     };
 
-    // Version rotation: current → previous, delete older
-    const currentActive = this.activeVersions.get(remoteName);
-    if (currentActive && currentActive.bundleUrl !== meta.bundleUrl) {
-      const oldPrevious = this.previousVersions.get(remoteName);
-      if (oldPrevious) {
-        await this.deleteBundleFiles(oldPrevious);
-        this.removeBundleMetadata(oldPrevious);
-      }
-      this.previousVersions.set(remoteName, currentActive);
-      this.kv.set(`mfe:previous:${remoteName}`, currentActive.bundleUrl);
-    }
-
-    // Save new as active
     this.urlIndex.set(meta.bundleUrl, meta);
-    this.activeVersions.set(remoteName, meta);
-    this.persistBundleMetadata(meta);
-    this.kv.set(`mfe:active:${remoteName}`, meta.bundleUrl);
 
-    // Persist manifest to disk for recovery without MMKV
+    // Persist manifest to disk
     await this.saveDiskManifest();
 
     return meta;
@@ -251,7 +161,6 @@ export class CacheManager {
     };
 
     this.urlIndex.set(meta.bundleUrl, meta);
-    this.persistBundleMetadata(meta);
     return meta;
   }
 
@@ -269,7 +178,6 @@ export class CacheManager {
     if (!pending) return null;
 
     pending.status = 'active';
-    // Rotate versions
     return this.saveBundleToCache(remoteName, pending.filePath, {
       bundleUrl: pending.bundleUrl,
       bundleHash: pending.bundleHash,
@@ -283,31 +191,26 @@ export class CacheManager {
     meta.status = 'broken';
     meta.retryCount = 0;
     meta.lastRetryAt = null;
-    this.persistBundleMetadata(meta);
+    await this.saveDiskManifest();
     console.warn(`${LOG_PREFIX} marked broken: ${remoteName} @ ${bundleUrl}`);
   }
 
-  async getPreviousValidVersion(
-    remoteName: string,
-  ): Promise<BundleMetadata | null> {
-    const prev = this.previousVersions.get(remoteName);
-    if (!prev || prev.status === 'broken') return null;
-    if (NativeMFECache) {
-      const exists = await NativeMFECache.fileExists(prev.filePath);
-      if (!exists) return null;
+  async updateLastUsedAt(bundleUrl: string): Promise<void> {
+    const meta = this.urlIndex.get(bundleUrl);
+    if (!meta) {
+      console.log(
+        '[MFE-Cache] updateLastUsedAt: no entry for',
+        bundleUrl.split('?')[0],
+      );
+      return;
     }
-    return prev;
-  }
-
-  getCurrentBundleUrl(remoteName: string): string | null {
-    return this.activeVersions.get(remoteName)?.bundleUrl ?? null;
-  }
-
-  async updateLastUsedAt(remoteName: string): Promise<void> {
-    const meta = this.activeVersions.get(remoteName);
-    if (!meta) return;
     meta.lastUsedAt = Date.now();
-    this.persistBundleMetadata(meta);
+    console.log(
+      '[MFE-Cache] updateLastUsedAt:',
+      meta.remoteName,
+      meta.lastUsedAt,
+    );
+    await this.saveDiskManifest();
   }
 
   getAllMetadata(): BundleMetadata[] {
@@ -321,10 +224,6 @@ export class CacheManager {
         this.removeBundleMetadata(meta);
       }
     }
-    this.activeVersions.delete(remoteName);
-    this.previousVersions.delete(remoteName);
-    this.kv.delete(`mfe:active:${remoteName}`);
-    this.kv.delete(`mfe:previous:${remoteName}`);
   }
 
   async invalidateAllCaches(): Promise<void> {
@@ -352,23 +251,19 @@ export class CacheManager {
     return `${this.bundleDir}/cache-manifest.json`;
   }
 
-  /** Persist all metadata to a JSON file on disk so it survives JS reloads without MMKV */
+  /** Persist all metadata to a JSON file on disk */
   private async saveDiskManifest(): Promise<void> {
     if (!NativeMFECache) return;
     try {
+      // Store filePath as relative to bundleDir so it survives app UUID changes
+      const bundles = Array.from(this.urlIndex.values()).map((meta) => ({
+        ...meta,
+        filePath: meta.filePath.startsWith(this.bundleDir)
+          ? meta.filePath.slice(this.bundleDir.length + 1)
+          : meta.filePath,
+      }));
       const manifest: Record<string, any> = {
-        bundles: Array.from(this.urlIndex.values()),
-        active: Object.fromEntries(
-          Array.from(this.activeVersions.entries()).map(([k, v]) => [
-            k,
-            v.bundleUrl,
-          ]),
-        ),
-        previous: Object.fromEntries(
-          Array.from(this.previousVersions.entries())
-            .filter(([, v]) => v != null)
-            .map(([k, v]) => [k, v!.bundleUrl]),
-        ),
+        bundles,
       };
       await NativeMFECache.writeFile(
         this.manifestPath,
@@ -380,7 +275,7 @@ export class CacheManager {
     }
   }
 
-  /** Recover cache index from disk manifest (fallback when MMKV is unavailable) */
+  /** Recover cache index from disk manifest */
   private async recoverFromDiskManifest(): Promise<void> {
     if (!NativeMFECache) return;
     try {
@@ -391,24 +286,14 @@ export class CacheManager {
       if (!Array.isArray(manifest.bundles)) return;
 
       for (const meta of manifest.bundles as BundleMetadata[]) {
+        // Resolve relative filePath back to absolute using current bundleDir
+        if (!meta.filePath.startsWith('/')) {
+          meta.filePath = `${this.bundleDir}/${meta.filePath}`;
+        }
         // Verify the bundle file still exists
         const fileOk = await NativeMFECache.fileExists(meta.filePath);
         if (!fileOk) continue;
         this.urlIndex.set(meta.bundleUrl, meta);
-        // Also populate the in-memory KV so the rest of initialize() works
-        this.persistBundleMetadata(meta);
-      }
-
-      // Restore active/previous pointers into KV
-      if (manifest.active) {
-        for (const [name, url] of Object.entries(manifest.active)) {
-          this.kv.set(`mfe:active:${name}`, url as string);
-        }
-      }
-      if (manifest.previous) {
-        for (const [name, url] of Object.entries(manifest.previous)) {
-          this.kv.set(`mfe:previous:${name}`, url as string);
-        }
       }
 
       console.info(
@@ -419,14 +304,7 @@ export class CacheManager {
     }
   }
 
-  private persistBundleMetadata(meta: BundleMetadata): void {
-    const key = `mfe:bundle:${meta.remoteName}:${shortHash(meta.bundleUrl)}`;
-    this.kv.set(key, JSON.stringify(meta));
-  }
-
   private removeBundleMetadata(meta: BundleMetadata): void {
-    const key = `mfe:bundle:${meta.remoteName}:${shortHash(meta.bundleUrl)}`;
-    this.kv.delete(key);
     this.urlIndex.delete(meta.bundleUrl);
   }
 

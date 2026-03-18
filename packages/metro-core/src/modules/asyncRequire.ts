@@ -14,6 +14,28 @@ function isUrl(url: string) {
   return url.match(/^https?:\/\//);
 }
 
+// Extract a bundle name from a URL for cache grouping
+// e.g. https://cdn.example.com/miniApp/mini.bundle → "miniApp/mini"
+// e.g. https://cdn.example.com/miniApp/exposed/info.bundle → "miniApp/exposed/info"
+// e.g. http://localhost:8082/mini.bundle?platform=ios → "mini"
+function extractBundleName(url: string): string {
+  try {
+    const parsed = new URL(url);
+    const pathParts = parsed.pathname.replace(/^\/+/, '').split('/');
+    // Remove .bundle extension and query params from last segment
+    if (pathParts.length > 0) {
+      pathParts[pathParts.length - 1] = pathParts[pathParts.length - 1]
+        .split('.')[0]
+        .split('?')[0];
+    }
+    return pathParts.join('/') || 'unknown';
+  } catch {
+    // Fallback for non-URL paths
+    const last = url.split('/').pop() ?? 'unknown';
+    return last.split('.')[0].split('?')[0];
+  }
+}
+
 // get bundle id from the bundle path
 // e.g. /a/b.bundle?platform=ios -> a/b
 // e.g. http://host:8081/a/b.bundle -> a/b
@@ -105,6 +127,7 @@ function buildLoadBundleAsyncWrapper() {
 
   // CacheManager singleton shared via globalThis
   let cacheManager: any = (globalThis as any).__MFE_CACHE_MANAGER__ ?? null;
+  let cacheInitPromise: Promise<void> | null = null;
 
   return async (originalBundlePath: string) => {
     const scope = globalThis.__FEDERATION__.__NATIVE__[__METRO_GLOBAL_PREFIX__];
@@ -122,11 +145,17 @@ function buildLoadBundleAsyncWrapper() {
     if (cacheEnabled && cacheModule && isUrl(bundlePath)) {
       const { CacheManager, NativeMFECache } = cacheModule;
 
-      // Lazy-init CacheManager singleton
+      // Lazy-init CacheManager singleton (with lock to prevent race condition)
       if (!cacheManager) {
-        cacheManager = new CacheManager();
-        await cacheManager.initialize();
-        (globalThis as any).__MFE_CACHE_MANAGER__ = cacheManager;
+        if (!cacheInitPromise) {
+          cacheInitPromise = (async () => {
+            const cm = new CacheManager();
+            await cm.initialize();
+            cacheManager = cm;
+            (globalThis as any).__MFE_CACHE_MANAGER__ = cm;
+          })();
+        }
+        await cacheInitPromise;
       }
 
       try {
@@ -135,6 +164,53 @@ function buildLoadBundleAsyncWrapper() {
         if (cached) {
           // Path A: cache HIT — native sync read + JS eval
           console.log('[MFE-Cache] HIT:', cached.filePath);
+
+          // Update lastUsedAt so LRU eviction knows this bundle is still in use
+          cacheManager.updateLastUsedAt(bundlePath).catch(() => {});
+
+          // Check if manifest has a newer hash (stale cache detection)
+          // Strip query params for lookup — afterResolve stores keys without them
+          const bundlePathNoQuery = bundlePath.split('?')[0];
+          const expectedHash = ((globalThis as any).__MFE_BUNDLE_HASHES__ ??
+            {})[bundlePathNoQuery];
+          console.log(
+            '[MFE-Hash] check:',
+            bundlePath.split('/').pop(),
+            'expected:',
+            expectedHash?.slice(0, 8) ?? 'none',
+            'cached:',
+            cached.metadata.bundleHash?.slice(0, 8) ?? 'none',
+          );
+          if (
+            expectedHash &&
+            cached.metadata.bundleHash &&
+            expectedHash !== cached.metadata.bundleHash
+          ) {
+            // Stale cache — re-download in background, use cached version for now
+            console.log('[MFE-Cache] STALE:', bundlePath.split('/').pop());
+            const remoteName = extractBundleName(bundlePath);
+            const destPath = await cacheManager.getBundleDestPath(
+              remoteName,
+              bundlePath,
+            );
+            NativeMFECache.downloadFile(bundlePath, destPath)
+              .then(({ sha256 }: { sha256: string }) => {
+                if (expectedHash && sha256 !== expectedHash) {
+                  console.warn(
+                    '[MFE-Cache] checksum mismatch after re-download, discarding',
+                  );
+                  return;
+                }
+                cacheManager.saveBundleToCache(remoteName, destPath, {
+                  bundleUrl: bundlePath,
+                  bundleHash: sha256,
+                });
+              })
+              .catch(() => {
+                /* non-critical */
+              });
+          }
+
           if (typeof (globalThis as any).__MFE_readFileSync === 'function') {
             const source = (globalThis as any).__MFE_readFileSync(
               cached.filePath,
@@ -150,10 +226,10 @@ function buildLoadBundleAsyncWrapper() {
           }
         } else {
           // Path B: cache MISS — download + save + eval
-          const urlParts = bundlePath.split('/');
-          const bundleFileName =
-            urlParts[urlParts.length - 1]?.split('.')[0] ?? 'unknown';
-          const remoteName = bundleFileName;
+          // Extract remoteName from URL path for cache grouping
+          // e.g. https://cdn.example.com/miniApp/mini.bundle → "miniApp/mini"
+          // e.g. https://cdn.example.com/miniApp/exposed/info.bundle → "miniApp/exposed/info"
+          const remoteName = extractBundleName(bundlePath);
 
           const destPath = await cacheManager.getBundleDestPath(
             remoteName,
@@ -165,6 +241,31 @@ function buildLoadBundleAsyncWrapper() {
             bundlePath,
             destPath,
           );
+
+          // Checksum verification: compare download hash with manifest hash
+          const bundlePathNoQueryMiss = bundlePath.split('?')[0];
+          const expectedHash = ((globalThis as any).__MFE_BUNDLE_HASHES__ ??
+            {})[bundlePathNoQueryMiss];
+          if (expectedHash && sha256 !== expectedHash) {
+            // Integrity check failed — delete file, don't cache
+            console.warn(
+              '[MFE-Cache] checksum FAILED:',
+              remoteName,
+              'expected:',
+              expectedHash.slice(0, 8),
+              'got:',
+              sha256.slice(0, 8),
+            );
+            try {
+              await NativeMFECache.deleteFile(destPath);
+            } catch {
+              /* ok */
+            }
+            // Fall back to network load
+            const encodedBundlePath = bundlePath.replaceAll('../', '..%2F');
+            await loadBundleAsync(encodedBundlePath);
+            return;
+          }
 
           await cacheManager.saveBundleToCache(remoteName, destPath, {
             bundleUrl: bundlePath,

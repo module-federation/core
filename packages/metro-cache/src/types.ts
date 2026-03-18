@@ -24,6 +24,5 @@ export interface CachedBundleResult {
 }
 
 export interface CacheManagerConfig {
-  mmkvInstanceId?: string;
   bundleDir?: string;
 }
