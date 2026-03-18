@@ -20,14 +20,6 @@ import type {
 } from '@modern-js/app-tools';
 import type { BundlerChainConfig } from '../interfaces/bundler';
 
-declare global {
-  namespace NodeJS {
-    interface ProcessEnv {
-      IS_ESM_BUILD?: string;
-    }
-  }
-}
-
 const defaultPath = path.resolve(process.cwd(), 'module-federation.config.ts');
 
 export type ConfigType = Rspack.Configuration;
@@ -56,7 +48,9 @@ const resolvePackageFile = (
   return require.resolve(
     path.join(
       packageRoot,
-      process.env.IS_ESM_BUILD === 'true' ? esmRelativePath : cjsRelativePath,
+      process.env['IS_ESM_BUILD'] === 'true'
+        ? esmRelativePath
+        : cjsRelativePath,
     ),
   );
 };
@@ -103,6 +97,7 @@ export const getMFConfig = async (
     return config;
   }
   const mfConfigPath = configPath ? configPath : defaultPath;
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { createJiti } = require('jiti');
   const jit = createJiti(__filename, {
     interopDefault: true,
@@ -327,7 +322,6 @@ export function patchBundlerConfig(options: {
 
   const splitChunkConfig = chain.optimization.splitChunks.entries();
   if (!isServer) {
-    // @ts-ignore type not the same
     autoDeleteSplitChunkCacheGroups(mfConfig, splitChunkConfig);
   }
 
