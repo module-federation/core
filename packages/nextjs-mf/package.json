@@ -3,7 +3,6 @@
   "version": "8.8.60",
   "license": "MIT",
   "main": "dist/src/index.js",
-  "module": "dist/src/index.mjs",
   "types": "dist/src/index.d.ts",
   "type": "commonjs",
   "description": "Module Federation helper for NextJS",
@@ -29,24 +28,12 @@
   },
   "exports": {
     ".": {
-      "import": {
-        "types": "./dist/src/index.d.mts",
-        "default": "./dist/src/index.mjs"
-      },
-      "require": {
-        "types": "./dist/src/index.d.ts",
-        "default": "./dist/src/index.js"
-      }
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
     },
     "./utils": {
-      "import": {
-        "types": "./dist/utils/index.d.mts",
-        "default": "./dist/utils/index.mjs"
-      },
-      "require": {
-        "types": "./dist/utils/index.d.ts",
-        "default": "./dist/utils/index.js"
-      }
+      "types": "./dist/utils/index.d.ts",
+      "default": "./dist/utils/index.js"
     },
     "./*": "./*"
   },

@@ -62,19 +62,7 @@ export default defineConfig([
       copyLicense: true,
       unbundle: true,
       define: {},
-      preferNonModuleCjs: false,
+      format: ['cjs'],
     }),
-    format: {
-      esm: {
-        define: {
-          'process.env.IS_ESM_BUILD': JSON.stringify('true'),
-        },
-      },
-      cjs: {
-        define: {
-          'process.env.IS_ESM_BUILD': JSON.stringify('false'),
-        },
-      },
-    },
   },
 ]);
