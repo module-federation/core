@@ -69,14 +69,10 @@ const loadLogger = () =>
   loadModule<typeof import('../../logger').default>('../../logger');
 
 const resolveRuntimePluginPath = (): string =>
-  process.env['IS_ESM_BUILD'] === 'true'
-    ? require.resolve('@module-federation/nextjs-mf/dist/src/plugins/container/runtimePlugin.mjs')
-    : require.resolve('@module-federation/nextjs-mf/dist/src/plugins/container/runtimePlugin.js');
+  require.resolve('@module-federation/nextjs-mf/dist/src/plugins/container/runtimePlugin.cjs');
 
 const resolveNoopPath = (): string =>
-  process.env['IS_ESM_BUILD'] === 'true'
-    ? require.resolve('@module-federation/nextjs-mf/dist/src/federation-noop.mjs')
-    : require.resolve('@module-federation/nextjs-mf/dist/src/federation-noop.js');
+  require.resolve('@module-federation/nextjs-mf/dist/src/federation-noop.cjs');
 
 const resolveNodeRuntimePluginPath = (): string => {
   const nodePackageRoot = path.dirname(
@@ -84,12 +80,7 @@ const resolveNodeRuntimePluginPath = (): string => {
   );
 
   return require.resolve(
-    path.join(
-      nodePackageRoot,
-      process.env['IS_ESM_BUILD'] === 'true'
-        ? 'dist/src/runtimePlugin.mjs'
-        : 'dist/src/runtimePlugin.js',
-    ),
+    path.join(nodePackageRoot, 'dist/src/runtimePlugin.js'),
   );
 };
 /**
@@ -115,7 +106,7 @@ export class NextFederationPlugin {
   /**
    * The apply method is called by the webpack compiler and allows the plugin to hook into the webpack process.
    * @param compiler The webpack compiler object.
-  */
+   */
   apply(compiler: Compiler) {
     const logger = loadLogger();
     const CopyFederationPlugin = loadCopyFederationPlugin();

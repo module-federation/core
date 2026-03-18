@@ -36,10 +36,6 @@ export default defineConfig([
           'src/plugins/NextFederationPlugin/next-fragments.ts',
         'src/plugins/NextFederationPlugin/regex-equal':
           'src/plugins/NextFederationPlugin/regex-equal.ts',
-        'src/plugins/NextFederationPlugin/webpack-sources-shim':
-          'src/plugins/NextFederationPlugin/webpack-sources-shim.ts',
-        'src/plugins/NextFederationPlugin/next-compiled-webpack-shim':
-          'src/plugins/NextFederationPlugin/next-compiled-webpack-shim.ts',
         'src/plugins/container/InvertedContainerPlugin':
           'src/plugins/container/InvertedContainerPlugin.ts',
         'src/plugins/container/InvertedContainerRuntimeModule':
@@ -61,7 +57,6 @@ export default defineConfig([
       },
       copyLicense: true,
       unbundle: true,
-      define: {},
       format: ['cjs'],
     }),
   },

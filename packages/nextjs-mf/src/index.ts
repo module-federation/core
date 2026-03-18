@@ -1,5 +1,6 @@
 import type { Compiler, WebpackPluginInstance } from 'webpack';
 import type { NextFederationPluginOptions } from './plugins/NextFederationPlugin/next-fragments';
+import { createRequire } from 'module';
 import path from 'path';
 
 type NextFederationPluginCtor =
@@ -11,22 +12,9 @@ type NextFederationPluginModule =
       NextFederationPlugin?: NextFederationPluginCtor;
     };
 
-const runtimeRequireFromModule = new Function(
-  'moduleRef',
-  'id',
-  'return moduleRef && moduleRef.require ? moduleRef.require(id) : undefined',
-) as (moduleRef: { require(id: string): any } | undefined, id: string) => any;
-
-const runtimeRequire = (id: string) =>
-  runtimeRequireFromModule(
-    typeof module !== 'undefined' ? module : undefined,
-    id,
-  );
-
 const loadNextFederationPlugin = (): NextFederationPluginCtor => {
-  const pluginModule = runtimeRequire(
-    './plugins/NextFederationPlugin',
-  ) as NextFederationPluginModule;
+  const pluginModule =
+    require('./plugins/NextFederationPlugin') as NextFederationPluginModule;
 
   if ((pluginModule as { default?: NextFederationPluginCtor }).default) {
     return (pluginModule as { default: NextFederationPluginCtor }).default;
@@ -63,19 +51,11 @@ const webpackSourcesAliasKeys = [
   'webpack-sources/lib/index.js',
 ] as const;
 
-const webpackAliasKeys = ['webpack'] as const;
-const nextCompiledWebpackAliasKeys = [
-  'next/dist/compiled/webpack/webpack',
-  'next/dist/compiled/webpack/webpack.js',
-] as const;
-const reactAliasKeys = [
-  'react',
-  'react-dom',
-  'react/jsx-runtime',
-  'react/jsx-dev-runtime',
-] as const;
-const localWebpackPathEnvKey = 'NEXT_MF_LOCAL_WEBPACK_PATH';
 let requireHookAliasPatched = false;
+
+const getCwdRequire = () => {
+  return createRequire(path.join(process.cwd(), 'package.json'));
+};
 
 const collectRequireCandidates = (): ModuleLike['require'][] => {
   const candidates: ModuleLike['require'][] = [];
@@ -99,9 +79,6 @@ const collectRequireCandidates = (): ModuleLike['require'][] => {
   }
 
   try {
-    const { createRequire } = runtimeRequire(
-      'module',
-    ) as typeof import('module');
     pushCandidate(createRequire(path.join(process.cwd(), 'package.json')));
   } catch {
     // cwd package.json may not exist in some script contexts
@@ -111,6 +88,30 @@ const collectRequireCandidates = (): ModuleLike['require'][] => {
 };
 
 const resolveNextRequireHook = (): NextRequireHookModule | undefined => {
+  try {
+    const cwdRequire = getCwdRequire();
+    const hookModule = cwdRequire(
+      'next/dist/server/require-hook',
+    ) as NextRequireHookModule;
+
+    if (typeof hookModule?.addHookAliases === 'function') {
+      return hookModule;
+    }
+  } catch {
+    // continue to module-local and cache lookup
+  }
+
+  try {
+    const hookModule =
+      require('next/dist/server/require-hook') as NextRequireHookModule;
+
+    if (typeof hookModule?.addHookAliases === 'function') {
+      return hookModule;
+    }
+  } catch {
+    // continue to cache and candidate lookup
+  }
+
   const cachedModule = Object.values(require.cache).find((entry) => {
     const fileName = entry?.filename;
 
@@ -156,9 +157,26 @@ const resolveWebpackSourcesPath = (
   }
 
   try {
-    const { createRequire } = runtimeRequire(
-      'module',
-    ) as typeof import('module');
+    const cwdRequire = getCwdRequire();
+
+    try {
+      return cwdRequire.resolve('webpack-sources');
+    } catch {
+      // continue to webpack-internal resolution
+    }
+
+    try {
+      const { createRequire } = runtimeRequire(
+        'module',
+      ) as typeof import('module');
+      const webpackConcatenatedModulePath = cwdRequire.resolve(
+        'webpack/lib/optimize/ConcatenatedModule.js',
+      );
+      const webpackRequire = createRequire(webpackConcatenatedModulePath);
+      return webpackRequire.resolve('webpack-sources');
+    } catch {
+      // continue to candidate search
+    }
 
     for (const requireCandidate of collectRequireCandidates()) {
       if (typeof requireCandidate.resolve !== 'function') {
@@ -174,20 +192,6 @@ const resolveWebpackSourcesPath = (
       } catch {
         // continue to webpack-internal resolution
       }
-
-      try {
-        const webpackConcatenatedModulePath = requireCandidate.resolve(
-          'webpack/lib/optimize/ConcatenatedModule.js',
-        );
-        const webpackRequire = createRequire(webpackConcatenatedModulePath);
-        const resolvedWebpackSources =
-          webpackRequire.resolve('webpack-sources');
-        if (resolvedWebpackSources) {
-          return resolvedWebpackSources;
-        }
-      } catch {
-        // continue to next candidate
-      }
     }
   } finally {
     for (const aliasKey of webpackSourcesAliasKeys) {
@@ -197,67 +201,6 @@ const resolveWebpackSourcesPath = (
       } else {
         hookPropertyMap.delete(aliasKey);
       }
-    }
-  }
-
-  try {
-    return require.resolve('./plugins/NextFederationPlugin/webpack-sources-shim.js');
-  } catch {
-    return undefined;
-  }
-};
-
-const resolveWebpackPath = (
-  hookPropertyMap: Map<string, string>,
-): string | undefined => {
-  const previousAliases = new Map<string, string | undefined>();
-  for (const aliasKey of webpackAliasKeys) {
-    previousAliases.set(aliasKey, hookPropertyMap.get(aliasKey));
-    hookPropertyMap.delete(aliasKey);
-  }
-
-  try {
-    for (const requireCandidate of collectRequireCandidates()) {
-      if (typeof requireCandidate.resolve !== 'function') {
-        continue;
-      }
-
-      try {
-        const resolvedWebpackPath = requireCandidate.resolve('webpack');
-        if (resolvedWebpackPath) {
-          return resolvedWebpackPath;
-        }
-      } catch {
-        // continue to next candidate
-      }
-    }
-  } finally {
-    for (const aliasKey of webpackAliasKeys) {
-      const previousAlias = previousAliases.get(aliasKey);
-      if (previousAlias) {
-        hookPropertyMap.set(aliasKey, previousAlias);
-      } else {
-        hookPropertyMap.delete(aliasKey);
-      }
-    }
-  }
-
-  return undefined;
-};
-
-const resolveRequestPath = (request: string): string | undefined => {
-  for (const requireCandidate of collectRequireCandidates()) {
-    if (typeof requireCandidate.resolve !== 'function') {
-      continue;
-    }
-
-    try {
-      const resolvedPath = requireCandidate.resolve(request);
-      if (resolvedPath) {
-        return resolvedPath;
-      }
-    } catch {
-      // continue to next candidate
     }
   }
 
@@ -277,36 +220,19 @@ const patchRequireHookWebpackSourcesAlias = () => {
   }
 
   const webpackSourcesAliasPath = resolveWebpackSourcesPath(hookPropertyMap);
-  const webpackAliasPath = resolveWebpackPath(hookPropertyMap);
-  const reactAliasEntries = reactAliasKeys
-    .map((aliasKey) => [aliasKey, resolveRequestPath(aliasKey)] as const)
-    .filter((entry): entry is [string, string] => Boolean(entry[1]));
-  const reactAliasMap = new Map(reactAliasEntries);
-  let nextCompiledWebpackShimPath: string | undefined;
 
-  if (webpackAliasPath) {
-    process.env[localWebpackPathEnvKey] = webpackAliasPath;
-    try {
-      nextCompiledWebpackShimPath =
-        require.resolve('./plugins/NextFederationPlugin/next-compiled-webpack-shim.js');
-    } catch {
-      nextCompiledWebpackShimPath = undefined;
-    }
-  }
-
-  if (!webpackSourcesAliasPath && !nextCompiledWebpackShimPath) {
+  if (!webpackSourcesAliasPath) {
     return;
   }
 
   const patchedHookMap = hookPropertyMap as Map<string, string> & {
-    __nextMfSetPatched?: boolean;
+    __nextMfWebpackSourcesPatched?: boolean;
   };
 
-  if (!patchedHookMap.__nextMfSetPatched) {
+  if (!patchedHookMap.__nextMfWebpackSourcesPatched) {
     const originalSet = hookPropertyMap.set.bind(hookPropertyMap);
     hookPropertyMap.set = ((request: string, replacement: string) => {
       if (
-        webpackSourcesAliasPath &&
         webpackSourcesAliasKeys.includes(
           request as (typeof webpackSourcesAliasKeys)[number],
         )
@@ -314,33 +240,17 @@ const patchRequireHookWebpackSourcesAlias = () => {
         return originalSet(request, webpackSourcesAliasPath);
       }
 
-      if (
-        nextCompiledWebpackShimPath &&
-        nextCompiledWebpackAliasKeys.includes(
-          request as (typeof nextCompiledWebpackAliasKeys)[number],
-        )
-      ) {
-        return originalSet(request, nextCompiledWebpackShimPath);
-      }
-
-      if (reactAliasMap.has(request)) {
-        return originalSet(request, reactAliasMap.get(request)!);
-      }
-
       return originalSet(request, replacement);
     }) as typeof hookPropertyMap.set;
-    patchedHookMap.__nextMfSetPatched = true;
+    patchedHookMap.__nextMfWebpackSourcesPatched = true;
   }
 
-  hookModule?.addHookAliases?.([
-    ...webpackSourcesAliasKeys
-      .filter(() => Boolean(webpackSourcesAliasPath))
-      .map((aliasKey) => [aliasKey, webpackSourcesAliasPath!]),
-    ...nextCompiledWebpackAliasKeys
-      .filter(() => Boolean(nextCompiledWebpackShimPath))
-      .map((aliasKey) => [aliasKey, nextCompiledWebpackShimPath!]),
-    ...reactAliasEntries,
-  ]);
+  hookModule.addHookAliases?.(
+    webpackSourcesAliasKeys.map((aliasKey) => [
+      aliasKey,
+      webpackSourcesAliasPath,
+    ]),
+  );
   requireHookAliasPatched = true;
 };
 
@@ -351,6 +261,7 @@ export class NextFederationPlugin implements WebpackPluginInstance {
 
   constructor(options: NextFederationPluginOptions) {
     this.options = options;
+    patchRequireHookWebpackSourcesAlias();
   }
 
   private getInstance(): WebpackPluginInstance & { name?: string } {
@@ -372,12 +283,9 @@ export class NextFederationPlugin implements WebpackPluginInstance {
 
 export default NextFederationPlugin;
 
-if (
-  process.env['IS_ESM_BUILD'] !== 'true' &&
-  typeof module !== 'undefined' &&
-  typeof module.exports !== 'undefined'
-) {
-  patchRequireHookWebpackSourcesAlias();
+patchRequireHookWebpackSourcesAlias();
+
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
   module.exports = NextFederationPlugin;
   module.exports.NextFederationPlugin = NextFederationPlugin;
 }

@@ -29,13 +29,9 @@ import { getFederationGlobalScope } from './runtime/utils';
 const makeSerializable = require(
   normalizeWebpackPath('webpack/lib/util/makeSerializable'),
 ) as typeof import('webpack/lib/util/makeSerializable');
-const {
-  sources: webpackSources,
-  AsyncDependenciesBlock,
-  Template,
-  Module,
-  RuntimeGlobals,
-} = require(normalizeWebpackPath('webpack')) as typeof import('webpack');
+const { AsyncDependenciesBlock, Template, Module, RuntimeGlobals } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
 const StaticExportsDependency = require(
   normalizeWebpackPath('webpack/lib/dependencies/StaticExportsDependency'),
 ) as typeof import('webpack/lib/dependencies/StaticExportsDependency');
@@ -209,6 +205,12 @@ class ContainerEntryModule extends Module {
    * @returns {CodeGenerationResult} result
    */
   override codeGeneration({ moduleGraph, chunkGraph, runtimeTemplate }: any) {
+    const compilation = this.compilation;
+    if (!compilation) {
+      throw new Error('Compilation is undefined');
+    }
+
+    const webpackSources = compilation.compiler.webpack.sources;
     const sources = new Map();
     const runtimeRequirements = new Set([
       RuntimeGlobals.definePropertyGetters,

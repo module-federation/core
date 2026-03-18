@@ -2,7 +2,7 @@
   "name": "@module-federation/nextjs-mf",
   "version": "8.8.60",
   "license": "MIT",
-  "main": "dist/src/index.js",
+  "main": "dist/src/index.cjs",
   "types": "dist/src/index.d.ts",
   "type": "commonjs",
   "description": "Module Federation helper for NextJS",
@@ -29,11 +29,11 @@
   "exports": {
     ".": {
       "types": "./dist/src/index.d.ts",
-      "default": "./dist/src/index.js"
+      "default": "./dist/src/index.cjs"
     },
     "./utils": {
       "types": "./dist/utils/index.d.ts",
-      "default": "./dist/utils/index.js"
+      "default": "./dist/utils/index.cjs"
     },
     "./*": "./*"
   },
@@ -66,7 +66,6 @@
   },
   "peerDependencies": {
     "webpack": "^5.40.0",
-    "webpack-sources": "^3.3.3",
     "next": "^12 || ^13 || ^14 || ^15 || ^16",
     "react": "^17 || ^18 || ^19",
     "react-dom": "^17 || ^18 || ^19",
@@ -74,9 +73,6 @@
   },
   "peerDependenciesMeta": {
     "webpack": {
-      "optional": true
-    },
-    "webpack-sources": {
       "optional": true
     },
     "next": {

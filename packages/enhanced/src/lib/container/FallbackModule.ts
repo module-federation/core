@@ -24,9 +24,6 @@ import type {
 import { WEBPACK_MODULE_TYPE_FALLBACK } from '../Constants';
 import FallbackItemDependency from './FallbackItemDependency';
 
-const { sources: webpackSources } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
 const { Template, Module, RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
@@ -150,6 +147,12 @@ class FallbackModule extends Module {
     moduleGraph,
     chunkGraph,
   }: CodeGenerationContext): CodeGenerationResult {
+    const compilation = this.compilation;
+    if (!compilation) {
+      throw new Error('Compilation is undefined');
+    }
+
+    const webpackSources = compilation.compiler.webpack.sources;
     const ids = this.dependencies.map((dep) =>
       // @ts-expect-error incompatible dependency type
       chunkGraph.getModuleId(moduleGraph.getModule(dep)),

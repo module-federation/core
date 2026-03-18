@@ -32,9 +32,6 @@ const { rangeToString, stringifyHoley } = require(
 const { AsyncDependenciesBlock, Module, RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
-const { sources: webpackSources } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
 const makeSerializable = require(
   normalizeWebpackPath('webpack/lib/util/makeSerializable'),
 ) as typeof import('webpack/lib/util/makeSerializable');
@@ -229,6 +226,12 @@ class ConsumeSharedModule extends Module {
     moduleGraph,
     runtimeTemplate,
   }: CodeGenerationContext): CodeGenerationResult {
+    const compilation = this.compilation;
+    if (!compilation) {
+      throw new Error('Compilation is undefined');
+    }
+
+    const webpackSources = compilation.compiler.webpack.sources;
     const runtimeRequirements = new Set([RuntimeGlobals.shareScopeMap]);
     const {
       shareScope,

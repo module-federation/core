@@ -18,12 +18,9 @@ import { getFederationGlobalScope } from '../../../container/runtime/utils';
 const makeSerializable = require(
   normalizeWebpackPath('webpack/lib/util/makeSerializable'),
 ) as typeof import('webpack/lib/util/makeSerializable');
-const {
-  sources: webpackSources,
-  Template,
-  Module,
-  RuntimeGlobals,
-} = require(normalizeWebpackPath('webpack')) as typeof import('webpack');
+const { Template, Module, RuntimeGlobals } = require(
+  normalizeWebpackPath('webpack'),
+) as typeof import('webpack');
 const StaticExportsDependency = require(
   normalizeWebpackPath('webpack/lib/dependencies/StaticExportsDependency'),
 ) as typeof import('webpack/lib/dependencies/StaticExportsDependency');
@@ -152,6 +149,12 @@ class SharedEntryModule extends Module {
     // @ts-ignore
     runtimeTemplate,
   }: CodeGenerationResult) {
+    const compilation = this.compilation;
+    if (!compilation) {
+      throw new Error('Compilation is undefined');
+    }
+
+    const webpackSources = compilation.compiler.webpack.sources;
     const sources = new Map();
     const runtimeRequirements = new Set([
       RuntimeGlobals.definePropertyGetters,

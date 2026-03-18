@@ -1,3 +1,4 @@
+const withRspack = require('next-rspack');
 const NextFederationPlugin = require('@module-federation/nextjs-mf');
 const path = require('path');
 const reactPath = path.dirname(require.resolve('react/package.json'));
@@ -63,4 +64,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+module.exports = withRspack(nextConfig);

@@ -15,14 +15,10 @@ import {
 import path from 'path';
 
 const resolveFixImageLoaderPath = (): string =>
-  process.env['IS_ESM_BUILD'] === 'true'
-    ? require.resolve('@module-federation/nextjs-mf/dist/src/loaders/fixImageLoader.mjs')
-    : require.resolve('@module-federation/nextjs-mf/dist/src/loaders/fixImageLoader.js');
+  require.resolve('@module-federation/nextjs-mf/dist/src/loaders/fixImageLoader.cjs');
 
 const resolveFixUrlLoaderPath = (): string =>
-  process.env['IS_ESM_BUILD'] === 'true'
-    ? require.resolve('@module-federation/nextjs-mf/dist/src/loaders/fixUrlLoader.mjs')
-    : require.resolve('@module-federation/nextjs-mf/dist/src/loaders/fixUrlLoader.js');
+  require.resolve('@module-federation/nextjs-mf/dist/src/loaders/fixUrlLoader.cjs');
 /**
  * Set up default shared values based on the environment.
  * @param {boolean} isServer - Boolean indicating if the code is running on the server.

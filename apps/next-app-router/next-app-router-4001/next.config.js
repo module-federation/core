@@ -1,3 +1,4 @@
+const withRspack = require('next-rspack');
 const NextFederationPlugin = require('@module-federation/nextjs-mf');
 
 /** @type {import('next').NextConfig} */
@@ -67,4 +68,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+module.exports = withRspack(nextConfig);
