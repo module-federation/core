@@ -221,7 +221,6 @@ export const moduleFederationSSRPlugin = (
         });
       }
     });
-    // @ts-ignore
     api.config(() => {
       return {
         builderPlugins: [mfSSRRsbuildPlugin(pluginOptions)],
