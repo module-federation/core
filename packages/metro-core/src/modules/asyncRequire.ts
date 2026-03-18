@@ -129,7 +129,11 @@ function buildLoadBundleAsyncWrapper() {
   let cacheManager: any = (globalThis as any).__MFE_CACHE_MANAGER__ ?? null;
   let cacheInitPromise: Promise<void> | null = null;
 
-  return async (originalBundlePath: string) => {
+  // Inflight dedup: same bundlePath won't trigger concurrent downloads.
+  // On error the entry is removed so the next call can retry.
+  const inflight = new Map<string, Promise<void>>();
+
+  async function doLoadBundle(originalBundlePath: string) {
     const scope = globalThis.__FEDERATION__.__NATIVE__[__METRO_GLOBAL_PREFIX__];
 
     const publicPath = getPublicPath(scope.origin);
@@ -320,6 +324,21 @@ function buildLoadBundleAsyncWrapper() {
     }
 
     await Promise.all(promises);
+  }
+
+  return (originalBundlePath: string): Promise<void> => {
+    const existing = inflight.get(originalBundlePath);
+    if (existing) {
+      return existing;
+    }
+
+    const promise = doLoadBundle(originalBundlePath).catch((err) => {
+      inflight.delete(originalBundlePath);
+      throw err;
+    });
+
+    inflight.set(originalBundlePath, promise);
+    return promise;
   };
 }
 
