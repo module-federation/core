@@ -473,7 +473,7 @@ export const pluginModuleFederation = (
                 const match = shared.some((dep) => {
                   if (
                     (ext as RegExp).test(dep) ||
-                    (ext as RegExp).test(pkgJson.name)
+                    (ext as RegExp).test(__RSBUILD_PLUGIN_PACKAGE_NAME__)
                   ) {
                     sharedModule = dep;
                     return true;
@@ -486,7 +486,7 @@ export const pluginModuleFederation = (
               }
 
               if (typeof ext === 'string') {
-                if (ext === pkgJson.name) {
+                if (ext === __RSBUILD_PLUGIN_PACKAGE_NAME__) {
                   return false;
                 }
 
