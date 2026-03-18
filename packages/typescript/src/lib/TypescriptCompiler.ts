@@ -17,6 +17,7 @@ import { Logger } from '../Logger';
 
 let vueTs: typeof VueTs;
 try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   vueTs = require('vue-tsc');
 } catch {
   // vue-tsc is an optional dependency.
