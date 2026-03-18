@@ -2,8 +2,8 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "command": "pnpm run nx",
-      "name": "Run nx",
+      "command": "pnpm run turbo",
+      "name": "Run turbo",
       "request": "launch",
       "type": "node-terminal"
     },
@@ -119,9 +119,11 @@
       "request": "launch",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": [
-        "nx",
+        "--filter",
+        "${input:package}",
+        "run",
         "test",
-        "${relativeFileDirname}",
+        "--",
         "--testFile=${fileBasename}",
         "--runInBand",
         "--no-cache"
@@ -139,9 +141,11 @@
       "request": "launch",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": [
-        "nx",
-        "test",
+        "--filter",
         "${input:package}",
+        "run",
+        "test",
+        "--",
         "--runInBand",
         "--no-cache"
       ],
@@ -158,9 +162,11 @@
       "request": "launch",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": [
-        "nx",
-        "run-many",
-        "--target=test",
+        "exec",
+        "turbo",
+        "run",
+        "test",
+        "--",
         "--runInBand",
         "--no-cache"
       ],

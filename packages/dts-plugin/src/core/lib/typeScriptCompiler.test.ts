@@ -1,6 +1,7 @@
 import dirTree from 'directory-tree';
 import { rmSync } from 'fs';
-import { readJSONSync, ensureDirSync } from 'fs-extra';
+import fse from 'fs-extra';
+const { readJSONSync, ensureDirSync } = fse;
 import os from 'os';
 import { join, resolve, sep } from 'path';
 import util from 'util';

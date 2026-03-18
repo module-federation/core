@@ -1,6 +1,6 @@
 # treeShakingSharedPlugins
 
-允许用户显式指定哪些插件应该参与 shared 模块的第二次 treeshaking 过程。
+用于构建独立共享 fallback 的插件模块路径列表。构建二次 treeshaking 时会通过 `require(p)` 加载并实例化插件参与构建。
 
 - 类型：`string[]`
 - 是否必填：否
@@ -28,6 +28,6 @@ export default MyBuildPlugin;
 
 export default {
   // ...
-  treeShakingSharedPlugins: ['my-build-plugin@0.0.2'],
+  treeShakingSharedPlugins: ['my-build-plugin'],
 }
 ```

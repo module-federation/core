@@ -1,0 +1,71 @@
+import CommonMfManifestStatsFields from '@components/common/configure/mf-manifest-stats-common-en.mdx'
+
+# mf-manifest.json Field Reference
+
+`mf-manifest.json` is generated when [manifest](./manifest) is enabled. It is a runtime-oriented manifest distilled from `mf-stats.json`, keeping a stable, consumer-friendly shape.
+
+## Top-level
+
+| Field | Type | Required | mf-stats.json | Description |
+| --- | --- | --- | --- | --- |
+| `id` | `string` | Yes | Yes | Unique build identifier |
+| `name` | `string` | Yes | Yes | Federation name |
+| `metaData` | `StatsMetaData` | Yes | Yes | Build and remote entry info |
+| `shared` | `ManifestShared[]` | Yes | Yes (fuller) | Shared list (trimmed fields) |
+| `remotes` | `ManifestRemote[]` | Yes | Yes (fuller) | Remotes list (trimmed fields) |
+| `exposes` | `ManifestExpose[]` | Yes | Yes (fuller) | Exposes list (trimmed fields) |
+
+:::tip disableAssetsAnalyze impact
+When `disableAssetsAnalyze: true` is set in [manifest](./manifest), `mf-manifest.json` will omit `shared` and `exposes`, and `remotes` will omit `assets`.
+:::
+
+## Field Differences vs mf-stats.json
+
+<CommonMfManifestStatsFields />
+
+### shared (ManifestShared vs StatsShared)
+
+`mf-manifest.json` keeps only the essential shared fields needed at runtime.
+
+| Field | mf-manifest.json | mf-stats.json |
+| --- | --- | --- |
+| `id` | Yes | Yes |
+| `name` | Yes | Yes |
+| `version` | Yes | Yes |
+| `singleton` | Yes | Yes |
+| `requiredVersion` | Yes | Yes |
+| `hash` | Yes | Yes |
+| `assets` | Yes | Yes |
+| `deps` | No | Yes |
+| `usedIn` | No | Yes |
+| `usedExports` | No | Yes |
+| `fallback` | Optional | Yes |
+| `fallbackName` | Optional | Yes |
+| `fallbackType` | Optional | Yes |
+
+### remotes (ManifestRemote vs StatsRemote)
+
+`mf-manifest.json` keeps the minimal set needed to locate and load a remote.
+
+| Field | mf-manifest.json | mf-stats.json |
+| --- | --- | --- |
+| `moduleName` | Yes | Yes |
+| `federationContainerName` | Yes | Yes |
+| `alias` | Yes | Yes |
+| `consumingFederationContainerName` | No | Yes |
+| `usedIn` | No | Yes |
+| `entry` / `version` (one of) | Yes | Yes |
+
+### exposes (ManifestExpose vs StatsExpose)
+
+`mf-manifest.json` exposes only runtime consumer fields.
+
+| Field | mf-manifest.json | mf-stats.json |
+| --- | --- | --- |
+| `id` | Yes | Yes |
+| `name` | Yes | Yes |
+| `path` | Yes | Yes |
+| `assets` | Yes | Yes |
+| `file` | No | Yes |
+| `requires` | No | Yes |
+

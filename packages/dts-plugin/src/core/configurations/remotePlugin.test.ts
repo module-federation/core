@@ -160,6 +160,76 @@ describe('hostPlugin', () => {
           extractThirdParty: false,
         });
       });
+
+      it('custom outputDir changes outDir base path', () => {
+        const tsConfigPath = join(__dirname, 'tsconfig.test.json');
+        const customOutputDir = 'dist/react/production';
+        const { tsConfig, remoteOptions } = retrieveRemoteConfig({
+          moduleFederationConfig,
+          tsConfigPath,
+          outputDir: customOutputDir,
+        });
+
+        expect(remoteOptions.outputDir).toBe(customOutputDir);
+        expect(tsConfig.compilerOptions.outDir).toBe(
+          resolve(
+            remoteOptions.context,
+            customOutputDir,
+            '@mf-types',
+            'compiled-types',
+          ),
+        );
+      });
+
+      it('custom outputDir combined with custom typesFolder', () => {
+        const tsConfigPath = join(__dirname, 'tsconfig.test.json');
+        const { tsConfig, remoteOptions } = retrieveRemoteConfig({
+          moduleFederationConfig,
+          tsConfigPath,
+          outputDir: 'dist/react/staging',
+          typesFolder: 'my-types',
+          compiledTypesFolder: 'compiled',
+        });
+
+        expect(remoteOptions.outputDir).toBe('dist/react/staging');
+        expect(remoteOptions.typesFolder).toBe('my-types');
+        expect(tsConfig.compilerOptions.outDir).toBe(
+          resolve(
+            remoteOptions.context,
+            'dist/react/staging',
+            'my-types',
+            'compiled',
+          ),
+        );
+      });
     });
+  });
+
+  describe('successfully parse tsconfig with project references', () => {
+    it.each([
+      {
+        tsConfigFile: './testconfig-reference.test.json',
+        expectedRootDir: resolve(__dirname),
+      },
+      {
+        tsConfigFile: './testconfig-reference-2.test.json',
+        expectedRootDir: resolve(__dirname),
+      },
+      {
+        tsConfigFile: './testconfig-reference-relative.test.json',
+        expectedRootDir: resolve(__dirname, '..'),
+      },
+    ])(
+      'infers rootDir from project references',
+      ({ tsConfigFile, expectedRootDir }) => {
+        const tsConfigPath = join(__dirname, tsConfigFile);
+        const { tsConfig } = retrieveRemoteConfig({
+          moduleFederationConfig,
+          tsConfigPath,
+        });
+
+        expect(tsConfig.compilerOptions.rootDir).toBe(expectedRootDir);
+      },
+    );
   });
 });

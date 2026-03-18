@@ -95,7 +95,6 @@ jest.mock(
 );
 
 import type { moduleFederationPlugin } from '@module-federation/sdk';
-// eslint-disable-next-line import/first
 import { ModuleHandler } from '../src/ModuleHandler';
 
 describe('ModuleHandler', () => {

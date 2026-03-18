@@ -5,6 +5,7 @@ packages:
   - 'packages/enhanced'
   - 'apps/runtime-demo/*'
   - 'apps/next-app-router/*'
+  - 'apps/modern-component-data-fetch/*'
   - 'apps/modernjs-ssr/*'
   - 'apps/shared-tree-shaking/*/*'
   - 'apps/router-demo/*'

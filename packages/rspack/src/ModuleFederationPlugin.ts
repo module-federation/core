@@ -28,10 +28,67 @@ type CacheGroups = NonUndefined<NonFalseSplitChunks['cacheGroups']>;
 type CacheGroup = CacheGroups[string];
 
 declare const __VERSION__: string;
-
-const RuntimeToolsPath = require.resolve('@module-federation/runtime-tools');
-
 export const PLUGIN_NAME = 'RspackModuleFederationPlugin';
+
+type ResolveFn = typeof require.resolve;
+type RuntimeEntrySpec = {
+  bundler: string;
+  esm: string;
+  cjs: string;
+};
+
+function resolveRuntimeEntry(
+  spec: RuntimeEntrySpec,
+  implementation: string | undefined,
+  resolve: ResolveFn = require.resolve,
+) {
+  const candidates = [spec.bundler, spec.esm, spec.cjs];
+  const modulePaths = implementation ? [implementation] : undefined;
+  let lastError: unknown;
+
+  for (const candidate of candidates) {
+    try {
+      return modulePaths
+        ? resolve(candidate, { paths: modulePaths })
+        : resolve(candidate);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw lastError;
+}
+
+export function resolveRspackRuntimeImplementation(
+  implementation?: string,
+  resolve: ResolveFn = require.resolve,
+) {
+  return resolveRuntimeEntry(
+    {
+      bundler: '@module-federation/runtime-tools/bundler',
+      esm: '@module-federation/runtime-tools/dist/index.js',
+      cjs: '@module-federation/runtime-tools/dist/index.cjs',
+    },
+    implementation,
+    resolve,
+  );
+}
+
+export function resolveRspackRuntimeAlias(
+  implementation: string,
+  resolve: ResolveFn = require.resolve,
+) {
+  return resolveRuntimeEntry(
+    {
+      bundler: '@module-federation/runtime/bundler',
+      esm: '@module-federation/runtime/dist/index.js',
+      cjs: '@module-federation/runtime/dist/index.cjs',
+    },
+    implementation,
+    resolve,
+  );
+}
+
 export class ModuleFederationPlugin implements RspackPluginInstance {
   readonly name = PLUGIN_NAME;
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -115,7 +172,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     new RemoteEntryPlugin(options).apply(compiler);
 
     if (options.experiments?.provideExternalRuntime) {
-      if (options.exposes) {
+      if (containerManager.enable) {
         throw new Error(
           'You can only set provideExternalRuntime: true in pure consumer which not expose modules.',
         );
@@ -123,9 +180,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
 
       const runtimePlugins = options.runtimePlugins || [];
       options.runtimePlugins = runtimePlugins.concat(
-        require.resolve(
-          '@module-federation/inject-external-runtime-core-plugin',
-        ),
+        require.resolve('@module-federation/inject-external-runtime-core-plugin'),
       );
     }
 
@@ -136,7 +191,9 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       }).apply(compiler);
     }
 
-    const implementationPath = options.implementation || RuntimeToolsPath;
+    const implementationPath = options.implementation
+      ? options.implementation
+      : resolveRspackRuntimeImplementation();
     options.implementation = implementationPath;
     let disableManifest = options.manifest === false;
     let disableDts = options.dts === false;
@@ -163,33 +220,20 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       options as unknown as ModuleFederationPluginOptions,
     ).apply(compiler);
 
-    const resolveRuntimePath = (candidates: string[]) => {
-      for (const candidate of candidates) {
-        try {
-          return require.resolve(candidate, {
-            paths: [implementationPath],
-          });
-        } catch {}
-      }
+    let runtimePath: string;
+    try {
+      runtimePath = resolveRspackRuntimeAlias(implementationPath);
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : String(err);
       throw new Error(
-        `[ ModuleFederationPlugin ]: Unable to resolve runtime entry from ${candidates.join(
-          ', ',
-        )}`,
+        `[ ModuleFederationPlugin ]: Unable to resolve runtime entry (paths: [${implementationPath}]): ${detail}`,
       );
-    };
-
-    const runtimeESMPath = resolveRuntimePath([
-      '@module-federation/runtime/dist/index.js',
-      '@module-federation/runtime/dist/index.esm.js',
-      '@module-federation/runtime/dist/index.cjs',
-      '@module-federation/runtime/dist/index.cjs.cjs',
-      '@module-federation/runtime',
-    ]);
+    }
 
     compiler.hooks.afterPlugins.tap('PatchAliasWebpackPlugin', () => {
       compiler.options.resolve.alias = {
         ...compiler.options.resolve.alias,
-        '@module-federation/runtime$': runtimeESMPath,
+        '@module-federation/runtime$': runtimePath,
       };
     });
 

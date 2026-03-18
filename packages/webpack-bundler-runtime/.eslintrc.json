@@ -1,0 +1,17 @@
+{
+  "extends": ["../.eslintrc.json"],
+  "overrides": [
+    {
+      "files": ["src/initContainerEntry.ts", "src/initializeSharing.ts"],
+      "rules": {
+        "no-var": "off"
+      }
+    },
+    {
+      "files": ["__tests__/**/*.ts"],
+      "rules": {
+        "@typescript-eslint/no-require-imports": "off"
+      }
+    }
+  ]
+}

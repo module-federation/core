@@ -24,7 +24,7 @@ import type {
 import ConsumeSharedFallbackDependency from './ConsumeSharedFallbackDependency';
 import { normalizeConsumeShareOptions } from './utils';
 import { WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE } from '../Constants';
-import type { ConsumeOptions } from '../../declarations/plugins/sharing/ConsumeSharedModule';
+import type { ConsumeOptions } from '@module-federation/sdk';
 
 const { rangeToString, stringifyHoley } = require(
   normalizeWebpackPath('webpack/lib/util/semver'),
@@ -57,6 +57,7 @@ const makeSerializable = require(
  */
 
 const TYPES = new Set(['consume-shared']);
+const JAVASCRIPT_TYPES = new Set(['javascript']);
 
 class ConsumeSharedModule extends Module {
   options: ConsumeOptions;
@@ -195,6 +196,10 @@ class ConsumeSharedModule extends Module {
    */
   override getSourceTypes(): Set<string> {
     return TYPES;
+  }
+
+  override getSourceBasicTypes(): Set<string> {
+    return JAVASCRIPT_TYPES;
   }
 
   /**

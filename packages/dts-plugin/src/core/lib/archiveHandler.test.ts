@@ -5,7 +5,8 @@ import type { TsConfigJson } from '../interfaces/TsConfigJson';
 import AdmZip from 'adm-zip';
 import axios, { AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'fs';
-import { readJSONSync } from 'fs-extra';
+import fse from 'fs-extra';
+const { readJSONSync } = fse;
 import os from 'os';
 import { join } from 'path';
 import {

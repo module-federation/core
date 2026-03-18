@@ -4,7 +4,8 @@
     "!**/*",
     "**/vite.config.*.timestamp*",
     "**/vitest.config.*.timestamp*",
-    "rslib.config.ts"
+    "rslib.config.ts",
+    "dist/**"
   ],
   "overrides": [
     {

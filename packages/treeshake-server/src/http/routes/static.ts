@@ -28,7 +28,7 @@ async function serveLocalFile(c: any, rootDir: string) {
   }
   try {
     const buf = await fs.promises.readFile(filePath);
-    return new Response(buf, {
+    return new Response(new Uint8Array(buf), {
       status: 200,
       headers: { 'Content-Type': contentTypeByExt(filePath) },
     });

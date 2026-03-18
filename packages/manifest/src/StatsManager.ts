@@ -115,7 +115,7 @@ class StatsManager {
   private _getMetaData(
     compiler: Compiler,
     compilation: Compilation,
-    extraOptions?: {},
+    extraOptions?: object,
   ): StatsMetaData {
     const { context } = compiler.options;
     const {
@@ -363,7 +363,7 @@ class StatsManager {
   private async _generateStats(
     compiler: Compiler,
     compilation: Compilation,
-    extraOptions?: {},
+    extraOptions?: object,
   ): Promise<Stats> {
     try {
       const {

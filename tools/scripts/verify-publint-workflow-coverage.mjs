@@ -19,6 +19,10 @@ const MIN_EXPECTED_PACKAGE_COUNT = Number.parseInt(
   10,
 );
 const VERIFY_STEP_NAME = 'Verify Publint Workflow Coverage';
+const CI_LOCAL_PARITY_STEP_NAME = 'Run local CI parity job';
+const BUILD_AND_TEST_CI_LOCAL_PATTERN =
+  /pnpm run ci:local --only=build-and-test/;
+const BUILD_METRO_CI_LOCAL_PATTERN = /pnpm run ci:local --only=build-metro/;
 const METRO_EXCLUSION_PATTERN =
   /\[\[\s*"\$pkg"\s*!=\s*packages\/metro-\*\s*\]\]|\[\s*"\$pkg"\s*!=\s*"packages\/metro-\*"\s*\]/;
 const CI_LOCAL_BUILD_METRO_JOB_PATTERN = /name:\s*'build-metro'/;
@@ -114,78 +118,94 @@ function main() {
     CI_LOCAL_BUILD_METRO_JOB_PATTERN.test(ciLocalText);
   const ciLocalWorkflowStepMinCount = hasCiLocalBuildMetroJob ? 2 : 1;
 
-  const buildAndTestLoop = readRunCommand({
+  const buildAndTestDelegatesToCiLocal = workflowRunsCiLocalParityJob({
     workflow: buildAndTestWorkflow,
     workflowName: 'build-and-test',
     jobName: 'checkout-install',
-    stepName: 'Check Package Publishing Compatibility',
+    requiredPattern: BUILD_AND_TEST_CI_LOCAL_PATTERN,
     issues,
   });
-  const buildMetroLoop = hasBuildMetroWorkflow
-    ? readRunCommand({
+
+  if (!buildAndTestDelegatesToCiLocal) {
+    const buildAndTestLoop = readRunCommand({
+      workflow: buildAndTestWorkflow,
+      workflowName: 'build-and-test',
+      jobName: 'checkout-install',
+      stepName: 'Check Package Publishing Compatibility',
+      issues,
+    });
+    const buildAndTestVerifyStep = readRunCommand({
+      workflow: buildAndTestWorkflow,
+      workflowName: 'build-and-test',
+      jobName: 'checkout-install',
+      stepName: VERIFY_STEP_NAME,
+      issues,
+    });
+
+    assertPatterns({
+      text: buildAndTestLoop,
+      workflowName: 'build-and-test',
+      label: 'publint loop',
+      patterns: REQUIRED_PATTERNS.buildAndTestLoop,
+      issues,
+    });
+    assertPatterns({
+      text: buildAndTestVerifyStep,
+      workflowName: 'build-and-test',
+      label: VERIFY_STEP_NAME,
+      patterns: REQUIRED_PATTERNS.verifyStepRun,
+      issues,
+    });
+    if (
+      !hasBuildMetroWorkflow &&
+      METRO_EXCLUSION_PATTERN.test(buildAndTestLoop)
+    ) {
+      issues.push(
+        'build-and-test publint loop excludes metro packages, but build-metro.yml is absent',
+      );
+    }
+  }
+
+  if (hasBuildMetroWorkflow) {
+    const buildMetroDelegatesToCiLocal = workflowRunsCiLocalParityJob({
+      workflow: buildMetroWorkflow,
+      workflowName: 'build-metro',
+      jobName: 'build-metro',
+      requiredPattern: BUILD_METRO_CI_LOCAL_PATTERN,
+      issues,
+    });
+
+    if (!buildMetroDelegatesToCiLocal) {
+      const buildMetroLoop = readRunCommand({
         workflow: buildMetroWorkflow,
         workflowName: 'build-metro',
         jobName: 'build-metro',
         stepName: 'Check Package Publishing Compatibility',
         issues,
-      })
-    : '';
-  const buildAndTestVerifyStep = readRunCommand({
-    workflow: buildAndTestWorkflow,
-    workflowName: 'build-and-test',
-    jobName: 'checkout-install',
-    stepName: VERIFY_STEP_NAME,
-    issues,
-  });
-  const buildMetroVerifyStep = hasBuildMetroWorkflow
-    ? readRunCommand({
+      });
+      const buildMetroVerifyStep = readRunCommand({
         workflow: buildMetroWorkflow,
         workflowName: 'build-metro',
         jobName: 'build-metro',
         stepName: VERIFY_STEP_NAME,
         issues,
-      })
-    : '';
+      });
 
-  assertPatterns({
-    text: buildAndTestLoop,
-    workflowName: 'build-and-test',
-    label: 'publint loop',
-    patterns: REQUIRED_PATTERNS.buildAndTestLoop,
-    issues,
-  });
-  if (hasBuildMetroWorkflow) {
-    assertPatterns({
-      text: buildMetroLoop,
-      workflowName: 'build-metro',
-      label: 'publint loop',
-      patterns: REQUIRED_PATTERNS.buildMetroLoop,
-      issues,
-    });
-  }
-  assertPatterns({
-    text: buildAndTestVerifyStep,
-    workflowName: 'build-and-test',
-    label: VERIFY_STEP_NAME,
-    patterns: REQUIRED_PATTERNS.verifyStepRun,
-    issues,
-  });
-  if (hasBuildMetroWorkflow) {
-    assertPatterns({
-      text: buildMetroVerifyStep,
-      workflowName: 'build-metro',
-      label: VERIFY_STEP_NAME,
-      patterns: REQUIRED_PATTERNS.verifyStepRun,
-      issues,
-    });
-  }
-  if (
-    !hasBuildMetroWorkflow &&
-    METRO_EXCLUSION_PATTERN.test(buildAndTestLoop)
-  ) {
-    issues.push(
-      'build-and-test publint loop excludes metro packages, but build-metro.yml is absent',
-    );
+      assertPatterns({
+        text: buildMetroLoop,
+        workflowName: 'build-metro',
+        label: 'publint loop',
+        patterns: REQUIRED_PATTERNS.buildMetroLoop,
+        issues,
+      });
+      assertPatterns({
+        text: buildMetroVerifyStep,
+        workflowName: 'build-metro',
+        label: VERIFY_STEP_NAME,
+        patterns: REQUIRED_PATTERNS.verifyStepRun,
+        issues,
+      });
+    }
   }
   assertPatternCount({
     text: ciLocalText,
@@ -287,6 +307,34 @@ function readRunCommand({ workflow, workflowName, jobName, stepName, issues }) {
     return '';
   }
   return step.run;
+}
+
+function workflowRunsCiLocalParityJob({
+  workflow,
+  workflowName,
+  jobName,
+  requiredPattern,
+  issues,
+}) {
+  const step = workflow?.jobs?.[jobName]?.steps?.find(
+    (candidate) => candidate?.name === CI_LOCAL_PARITY_STEP_NAME,
+  );
+  if (!step) {
+    return false;
+  }
+  if (typeof step.run !== 'string' || step.run.trim().length === 0) {
+    issues.push(
+      `${workflowName} workflow step "${CI_LOCAL_PARITY_STEP_NAME}" in job "${jobName}" is missing a run command`,
+    );
+    return false;
+  }
+  if (!requiredPattern.test(step.run)) {
+    issues.push(
+      `${workflowName} workflow step "${CI_LOCAL_PARITY_STEP_NAME}" in job "${jobName}" is missing required pattern: ${requiredPattern}`,
+    );
+    return false;
+  }
+  return true;
 }
 
 function assertPatterns({ text, workflowName, label, patterns, issues }) {

@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/runtime-tools",
-  "version": "2.1.0",
+  "version": "2.2.2",
   "type": "module",
   "author": "zhanghang <hanric.zhang@gmail.com>",
   "main": "./dist/index.cjs",
@@ -60,6 +60,7 @@
         "default": "./dist/webpack-bundler-runtime.cjs"
       }
     },
+    "./bundler": "./dist/bundler.js",
     "./*": "./*"
   },
   "typesVersions": {
@@ -75,11 +76,19 @@
       ],
       "runtime-core": [
         "./dist/runtime-core.d.ts"
+      ],
+      "bundler": [
+        "./dist/bundler.d.ts"
       ]
     }
   },
   "dependencies": {
     "@module-federation/runtime": "workspace:*",
     "@module-federation/webpack-bundler-runtime": "workspace:*"
+  },
+  "scripts": {
+    "build": "tsdown --config tsdown.config.ts",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",
+    "test": "pnpm exec jest --config jest.config.cjs --passWithNoTests"
   }
 }

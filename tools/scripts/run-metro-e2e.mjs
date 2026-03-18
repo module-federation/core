@@ -3,11 +3,15 @@ import { spawn } from 'node:child_process';
 import { constants } from 'node:fs';
 import { access, mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import {
+  DETACHED_PROCESS_GROUP,
+  formatExit,
+  isExpectedServeExit,
+  shutdownServe,
+} from './e2e-process-utils.mjs';
 
-process.env.NX_TUI = 'false';
 process.env.CI = process.env.CI ?? 'true';
 
-const DETACHED_PROCESS_GROUP = Symbol('detachedProcessGroup');
 const VALID_PLATFORMS = new Set(['android', 'ios']);
 
 main().catch((error) => {
@@ -283,98 +287,6 @@ async function runGuardedCommand(
   });
 
   await Promise.race([commandPromise, serveWatchPromise]);
-}
-
-async function shutdownServe(proc, exitPromise) {
-  if (proc.exitCode !== null || proc.signalCode !== null) {
-    return exitPromise;
-  }
-
-  const sequence = [
-    { signal: 'SIGINT', timeoutMs: 8000 },
-    { signal: 'SIGTERM', timeoutMs: 5000 },
-    { signal: 'SIGKILL', timeoutMs: 3000 },
-  ];
-
-  for (const { signal, timeoutMs } of sequence) {
-    if (proc.exitCode !== null || proc.signalCode !== null) {
-      break;
-    }
-
-    sendSignal(proc, signal);
-
-    try {
-      await waitWithTimeout(exitPromise, timeoutMs);
-      break;
-    } catch (error) {
-      if (error?.name !== 'TimeoutError') {
-        throw error;
-      }
-    }
-  }
-
-  return exitPromise;
-}
-
-function sendSignal(proc, signal) {
-  if (proc.exitCode !== null || proc.signalCode !== null) {
-    return;
-  }
-
-  if (proc[DETACHED_PROCESS_GROUP]) {
-    try {
-      process.kill(-proc.pid, signal);
-      return;
-    } catch (error) {
-      if (error.code !== 'ESRCH' && error.code !== 'EPERM') {
-        throw error;
-      }
-    }
-  }
-
-  try {
-    proc.kill(signal);
-  } catch (error) {
-    if (error.code !== 'ESRCH') {
-      throw error;
-    }
-  }
-}
-
-function waitWithTimeout(promise, timeoutMs) {
-  let timeoutId;
-  const timeoutPromise = new Promise((_, reject) => {
-    timeoutId = setTimeout(() => {
-      const error = new Error(`Timed out after ${timeoutMs}ms`);
-      error.name = 'TimeoutError';
-      reject(error);
-    }, timeoutMs);
-  });
-
-  return Promise.race([promise, timeoutPromise]).finally(() => {
-    clearTimeout(timeoutId);
-  });
-}
-
-function isExpectedServeExit(exitInfo) {
-  if (!exitInfo) {
-    return false;
-  }
-  if (exitInfo.code === 0) {
-    return true;
-  }
-  return ['SIGINT', 'SIGTERM', 'SIGKILL'].includes(exitInfo.signal);
-}
-
-function formatExit({ code, signal } = {}) {
-  const parts = [];
-  if (code !== null && code !== undefined) {
-    parts.push(`code ${code}`);
-  }
-  if (signal) {
-    parts.push(`signal ${signal}`);
-  }
-  return parts.length > 0 ? parts.join(', ') : 'unknown status';
 }
 
 function runCommand(command, args = [], options = {}) {

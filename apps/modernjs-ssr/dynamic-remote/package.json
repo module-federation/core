@@ -5,11 +5,18 @@
     "build": "rslib build",
     "serve": "rslib mf-dev",
     "dev": "rslib mf-dev",
-    "storybook": "storybook dev -p 6006"
+    "storybook": "storybook dev -p 6006",
+    "e2e": "pnpm exec cypress run --project . --e2e --config baseUrl=http://localhost:4001 --browser chrome",
+    "e2e:development": "pnpm exec cypress open --project . --e2e --config baseUrl=http://localhost:4001 --browser electron",
+    "test:e2e": "pnpm exec concurrently \"lsof -i :8080 || pnpm --filter modernjs-ssr-dynamic-remote run serve & echo 'done'\" \"sleep 20 && pnpm --filter modernjs-ssr-dynamic-remote run e2e\""
   },
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.mjs",
   "types": "./dist/cjs/index.d.ts",
+  "dependencies": {
+    "react": "~18.3.1",
+    "react-dom": "~18.3.1"
+  },
   "devDependencies": {
     "@module-federation/enhanced": "workspace:*",
     "@module-federation/modern-js-v3": "workspace:*",
@@ -17,8 +24,6 @@
     "@rsbuild/plugin-react": "^1.4.5",
     "@rslib/core": "^0.9.0",
     "@types/react": "^18.3.11",
-    "http-server": "^14.1.1",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "http-server": "^14.1.1"
   }
 }

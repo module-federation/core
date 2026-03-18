@@ -10,16 +10,20 @@ import {
   MFPrefetchCommon,
 } from '@module-federation/sdk';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import type { Compiler, WebpackPluginInstance } from 'webpack';
+import type {
+  Compiler,
+  WebpackPluginInstance,
+} from '@module-federation/webpack-type';
 
 import { TEMP_DIR } from '../common/constant';
 import { fileExistsWithCaseSync, fixPrefetchPath } from '../common/node-utils';
 import { getPrefetchId } from '../common/runtime-utils';
 import { SHARED_STRATEGY } from '../constant';
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
+) as typeof import('@module-federation/webpack-type');
 
 const createBundlerLogger: typeof createLogger =
   typeof createInfrastructureLogger === 'function'
@@ -61,21 +65,12 @@ export class PrefetchPlugin implements WebpackPluginInstance {
       this.options.runtimePlugins = [];
     }
 
-    const runtimePluginCandidates =
-      process.env.IS_ESM_BUILD === 'true'
-        ? ['../plugin.js', '../plugin.cjs']
-        : ['../plugin.cjs', '../plugin.js'];
-    const runtimePath = runtimePluginCandidates
-      .map((candidate) => path.resolve(__dirname, candidate))
-      .find((candidatePath) => fs.existsSync(candidatePath));
-    if (!runtimePath) {
+    const runtimePluginFile =
+      process.env.IS_ESM_BUILD === 'true' ? '../plugin.js' : '../plugin.cjs';
+    const runtimePath = path.resolve(__dirname, runtimePluginFile);
+    if (!fs.existsSync(runtimePath)) {
       throw new Error(
-        [
-          '[Module Federation Data Prefetch]: Unable to resolve runtime plugin file.',
-          `Checked paths: ${runtimePluginCandidates
-            .map((candidate) => path.resolve(__dirname, candidate))
-            .join(', ')}`,
-        ].join('\n'),
+        `[Module Federation Data Prefetch]: Unable to resolve runtime plugin file at ${runtimePath}.`,
       );
     }
     if (!this.options.runtimePlugins?.includes(runtimePath)) {
@@ -96,6 +91,7 @@ export class PrefetchPlugin implements WebpackPluginInstance {
     if (fs.existsSync(asyncEntryPath)) {
       fs.unlinkSync(asyncEntryPath);
     }
+    // @ts-ignore
     if (!this.options.dataPrefetch) {
       return;
     }

@@ -4,16 +4,15 @@ import {
   ModuleInfo,
   generateSnapshotFromManifest,
   isManifestProvider,
-  isBrowserEnv,
+  isBrowserEnvValue,
 } from '@module-federation/sdk';
 import {
-  getShortErrorMsg,
   RUNTIME_003,
   RUNTIME_007,
   runtimeDescMap,
 } from '@module-federation/error-codes';
 import { Options, Remote } from '../../type';
-import { isRemoteInfoWithEntry, error } from '../../utils';
+import { isRemoteInfoWithEntry, error, optionsToMFContext } from '../../utils';
 import {
   getGlobalSnapshot,
   setGlobalSnapshotInfoByModuleInfo,
@@ -187,7 +186,7 @@ export class SnapshotHandler {
     // global snapshot includes manifest or module info includes manifest
     if (globalRemoteSnapshot) {
       if (isManifestProvider(globalRemoteSnapshot)) {
-        const remoteEntry = isBrowserEnv()
+        const remoteEntry = isBrowserEnvValue
           ? globalRemoteSnapshot.remoteEntry
           : globalRemoteSnapshot.ssrRemoteEntry ||
             globalRemoteSnapshot.remoteEntry ||
@@ -245,11 +244,16 @@ export class SnapshotHandler {
         gSnapshot = globalSnapshotRes;
       } else {
         error(
-          getShortErrorMsg(RUNTIME_007, runtimeDescMap, {
-            hostName: moduleInfo.name,
-            hostVersion: moduleInfo.version,
+          RUNTIME_007,
+          runtimeDescMap,
+          {
+            remoteName: moduleInfo.name,
+            remoteVersion: moduleInfo.version,
+            hostName: this.HostInstance.options.name,
             globalSnapshot: JSON.stringify(globalSnapshotRes),
-          }),
+          },
+          undefined,
+          optionsToMFContext(this.HostInstance.options),
         );
       }
     }
@@ -308,23 +312,22 @@ export class SnapshotHandler {
         if (!manifestJson) {
           delete this.manifestLoading[manifestUrl];
           error(
-            getShortErrorMsg(
-              RUNTIME_003,
-              runtimeDescMap,
-              {
-                manifestUrl,
-                moduleName: moduleInfo.name,
-                hostName: this.HostInstance.options.name,
-              },
-              `${err}`,
-            ),
+            RUNTIME_003,
+            runtimeDescMap,
+            {
+              manifestUrl,
+              moduleName: moduleInfo.name,
+              hostName: this.HostInstance.options.name,
+            },
+            `${err}`,
+            optionsToMFContext(this.HostInstance.options),
           );
         }
       }
 
       assert(
         manifestJson.metaData && manifestJson.exposes && manifestJson.shared,
-        `${manifestUrl} is not a federation manifest`,
+        `"${manifestUrl}" is not a valid federation manifest for remote "${moduleInfo.name}". Missing required fields: ${[!manifestJson.metaData && 'metaData', !manifestJson.exposes && 'exposes', !manifestJson.shared && 'shared'].filter(Boolean).join(', ')}.`,
       );
       this.manifestCache.set(manifestUrl, manifestJson);
       return manifestJson;

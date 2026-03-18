@@ -69,7 +69,7 @@ export function createEmbeddedFrontendAdapter(
         const stat = await fs.promises.stat(filePath);
         if (stat.isFile()) {
           const buf = await fs.promises.readFile(filePath);
-          return new Response(buf, {
+          return new Response(new Uint8Array(buf), {
             status: 200,
             headers: { 'Content-Type': contentTypeByExt(filePath) },
           });
@@ -89,7 +89,7 @@ export function createEmbeddedFrontendAdapter(
     }
     try {
       const buf = await fs.promises.readFile(fallbackPath);
-      return new Response(buf, {
+      return new Response(new Uint8Array(buf), {
         status: 200,
         headers: { 'Content-Type': contentTypeByExt(fallbackPath) },
       });

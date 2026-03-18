@@ -35,7 +35,7 @@ const mf = createInstance({
     {
       name: 'remote1',
       entry: 'http://localhost:2001/mf-manifest.json',
-    }
+    },
   ],
   plugins: [
     RetryPlugin({
@@ -48,7 +48,7 @@ const mf = createInstance({
       onSuccess: ({ url }) => console.log('Success!', url),
       onError: ({ url }) => console.log('Failed!', url),
     }),
-  ]
+  ],
 });
 ```
 
@@ -66,9 +66,7 @@ export default {
       remotes: {
         remote1: 'remote1@http://localhost:2001/mf-manifest.json',
       },
-      runtimePlugins: [
-        path.join(__dirname, './src/runtime-plugin/retry.ts'),
-      ],
+      runtimePlugins: [path.join(__dirname, './src/runtime-plugin/retry.ts')],
     }),
   ],
 };
@@ -78,34 +76,35 @@ export default {
 // src/runtime-plugin/retry.ts
 import { RetryPlugin } from '@module-federation/retry-plugin';
 
-export default () => RetryPlugin({
-  retryTimes: 3,
-  retryDelay: 1000,
-  domains: ['https://cdn1.example.com', 'https://cdn2.example.com'],
-  manifestDomains: ['https://domain1.example.com', 'https://domain2.example.com'],
-  addQuery: ({ times, originalQuery }) => `${originalQuery}&retry=${times}`,
-  onRetry: ({ times, url }) => console.log('Retrying...', times, url),
-  onSuccess: ({ url }) => console.log('Success!', url),
-  onError: ({ url }) => console.log('Failed!', url),
-});
+export default () =>
+  RetryPlugin({
+    retryTimes: 3,
+    retryDelay: 1000,
+    domains: ['https://cdn1.example.com', 'https://cdn2.example.com'],
+    manifestDomains: ['https://domain1.example.com', 'https://domain2.example.com'],
+    addQuery: ({ times, originalQuery }) => `${originalQuery}&retry=${times}`,
+    onRetry: ({ times, url }) => console.log('Retrying...', times, url),
+    onSuccess: ({ url }) => console.log('Success!', url),
+    onError: ({ url }) => console.log('Failed!', url),
+  });
 ```
 
 ## Configuration Options
 
 ### CommonRetryOptions
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `retryTimes` | `number` | `3` | Number of retry attempts |
-| `retryDelay` | `number` | `1000` | Delay between retries in milliseconds |
-| `successTimes` | `number` | `0` | Number of successful requests required |
-| `domains` | `string[]` | `[]` | Alternative domains for script resources |
-| `manifestDomains` | `string[]` | `[]` | Alternative domains for manifest files |
-| `addQuery` | `boolean \| function` | `false` | Add query parameters for cache busting |
-| `fetchOptions` | `RequestInit` | `{}` | Additional fetch options |
-| `onRetry` | `function` | `undefined` | Callback when retry occurs |
-| `onSuccess` | `function` | `undefined` | Callback when request succeeds |
-| `onError` | `function` | `undefined` | Callback when all retries fail |
+| Option            | Type                  | Default     | Description                              |
+| ----------------- | --------------------- | ----------- | ---------------------------------------- |
+| `retryTimes`      | `number`              | `3`         | Number of retry attempts                 |
+| `retryDelay`      | `number`              | `1000`      | Delay between retries in milliseconds    |
+| `successTimes`    | `number`              | `0`         | Number of successful requests required   |
+| `domains`         | `string[]`            | `[]`        | Alternative domains for script resources |
+| `manifestDomains` | `string[]`            | `[]`        | Alternative domains for manifest files   |
+| `addQuery`        | `boolean \| function` | `false`     | Add query parameters for cache busting   |
+| `fetchOptions`    | `RequestInit`         | `{}`        | Additional fetch options                 |
+| `onRetry`         | `function`            | `undefined` | Callback when retry occurs               |
+| `onSuccess`       | `function`            | `undefined` | Callback when request succeeds           |
+| `onError`         | `function`            | `undefined` | Callback when all retries fail           |
 
 ### addQuery Function
 
@@ -114,7 +113,7 @@ addQuery: ({ times, originalQuery }) => {
   // Add retry count and timestamp for cache busting
   const separator = originalQuery ? '&' : '?';
   return `${originalQuery}${separator}retry=${times}&t=${Date.now()}`;
-}
+};
 ```
 
 ### Callback Functions
@@ -144,15 +143,8 @@ onError: ({ domains, url, tagName }) => {
 RetryPlugin({
   retryTimes: 5,
   retryDelay: (attempt) => Math.pow(2, attempt) * 1000, // Exponential backoff
-  domains: [
-    'https://cdn1.example.com',
-    'https://cdn2.example.com',
-    'https://cdn3.example.com',
-  ],
-  manifestDomains: [
-    'https://api1.example.com',
-    'https://api2.example.com',
-  ],
+  domains: ['https://cdn1.example.com', 'https://cdn2.example.com', 'https://cdn3.example.com'],
+  manifestDomains: ['https://api1.example.com', 'https://api2.example.com'],
   addQuery: ({ times, originalQuery }) => {
     const params = new URLSearchParams(originalQuery);
     params.set('retry', times.toString());
@@ -171,7 +163,7 @@ RetryPlugin({
     console.error(`❌ Failed to load ${url} after all retries`);
     console.error(`❌ Tried all domains: ${domains?.join(', ')}`);
   },
-})
+});
 ```
 
 ### Error Handling with Fallback
@@ -184,7 +176,7 @@ RetryPlugin({
   onError: ({ url, domains }) => {
     // Log error for monitoring
     console.error('Module loading failed:', { url, domains });
-    
+
     // Send error to monitoring service
     if (window.gtag) {
       window.gtag('event', 'module_load_error', {
@@ -193,7 +185,7 @@ RetryPlugin({
         value: domains?.length || 0,
       });
     }
-    
+
     // Show user-friendly error message
     const errorElement = document.createElement('div');
     errorElement.className = 'module-load-error';
@@ -206,7 +198,7 @@ RetryPlugin({
     `;
     document.body.appendChild(errorElement);
   },
-})
+});
 ```
 
 ### Production Configuration
@@ -215,15 +207,8 @@ RetryPlugin({
 RetryPlugin({
   retryTimes: 3,
   retryDelay: 1000,
-  domains: [
-    'https://cdn1.prod.example.com',
-    'https://cdn2.prod.example.com',
-    'https://cdn3.prod.example.com',
-  ],
-  manifestDomains: [
-    'https://api1.prod.example.com',
-    'https://api2.prod.example.com',
-  ],
+  domains: ['https://cdn1.prod.example.com', 'https://cdn2.prod.example.com', 'https://cdn3.prod.example.com'],
+  manifestDomains: ['https://api1.prod.example.com', 'https://api2.prod.example.com'],
   addQuery: ({ times, originalQuery }) => {
     const params = new URLSearchParams(originalQuery);
     params.set('retry', times.toString());
@@ -251,13 +236,10 @@ RetryPlugin({
   onError: ({ url, domains }) => {
     // Send error to monitoring service
     if (window.errorReporting) {
-      window.errorReporting.captureException(
-        new Error(`Module loading failed: ${url}`),
-        { extra: { domains, url } }
-      );
+      window.errorReporting.captureException(new Error(`Module loading failed: ${url}`), { extra: { domains, url } });
     }
   },
-})
+});
 ```
 
 ## How It Works
@@ -318,9 +300,11 @@ RetryPlugin({
   },
   script: {
     url: 'http://localhost:2001/static/js/async/src_App_tsx.js',
-    customCreateScript: (url, attrs) => { /* ... */ },
-  }
-})
+    customCreateScript: (url, attrs) => {
+      /* ... */
+    },
+  },
+});
 
 // ✅ New way
 RetryPlugin({
@@ -329,7 +313,7 @@ RetryPlugin({
   domains: ['http://localhost:2001'],
   manifestDomains: ['http://localhost:2001'],
   addQuery: ({ times, originalQuery }) => `${originalQuery}&retry=${times}`,
-})
+});
 ```
 
 ## Contributing

@@ -1,5 +1,4 @@
 import {
-  getShortErrorMsg,
   RUNTIME_005,
   RUNTIME_006,
   runtimeDescMap,
@@ -34,7 +33,7 @@ import {
   shouldUseTreeShaking,
   addUseIn,
 } from '../utils/share';
-import { assert, addUniqueItem } from '../utils';
+import { assert, error, addUniqueItem, optionsToMFContext } from '../utils';
 import { DEFAULT_SCOPE } from '../constant';
 import { LoadRemoteMatch } from '../remote';
 import { createRemoteEntryInitOptions } from '../module';
@@ -164,7 +163,7 @@ export class SharedHandler {
     // Assert that shareInfoRes exists, if not, throw an error
     assert(
       shareOptionsRes,
-      `Cannot find ${pkgName} Share in the ${host.options.name}. Please ensure that the ${pkgName} Share parameters have been injected`,
+      `Cannot find shared "${pkgName}" in host "${host.options.name}". Ensure the shared config for "${pkgName}" is declared in the federation plugin options and the host has been initialized before loading shares.`,
     );
 
     const { shared: registeredShared, useTreesShaking } =
@@ -298,9 +297,8 @@ export class SharedHandler {
         versions[version] && (directShare(versions[version]) as Shared);
       const activeVersionEager = Boolean(
         activeVersion &&
-          (('eager' in activeVersion && activeVersion.eager) ||
-            ('shareConfig' in activeVersion &&
-              activeVersion.shareConfig?.eager)),
+        (('eager' in activeVersion && activeVersion.eager) ||
+          ('shareConfig' in activeVersion && activeVersion.shareConfig?.eager)),
       );
       if (
         !activeVersion ||
@@ -330,6 +328,9 @@ export class SharedHandler {
             lifecycle: 'beforeLoadShare',
             origin: host,
           })) as RemoteEntryExports;
+        if (!remoteEntryExports) {
+          return;
+        }
       } finally {
         // prevent self load loop: when host load self , the initTokens is not the same
         if (remoteEntryExports?.init && !module.initing) {
@@ -433,11 +434,15 @@ export class SharedHandler {
       if (module instanceof Promise) {
         const errorCode =
           extraOptions?.from === 'build' ? RUNTIME_005 : RUNTIME_006;
-        throw new Error(
-          getShortErrorMsg(errorCode, runtimeDescMap, {
+        error(
+          errorCode,
+          runtimeDescMap,
+          {
             hostName: host.options.name,
             sharedPkgName: pkgName,
-          }),
+          },
+          undefined,
+          optionsToMFContext(host.options),
         );
       }
 
@@ -453,11 +458,15 @@ export class SharedHandler {
       return shareOptions.lib as () => T;
     }
 
-    throw new Error(
-      getShortErrorMsg(RUNTIME_006, runtimeDescMap, {
+    error(
+      RUNTIME_006,
+      runtimeDescMap,
+      {
         hostName: host.options.name,
         sharedPkgName: pkgName,
-      }),
+      },
+      undefined,
+      optionsToMFContext(host.options),
     );
   }
 

@@ -1,13 +1,22 @@
 import type { Compilation, Compiler, Chunk } from 'webpack';
 import InvertedContainerRuntimeModule from './InvertedContainerRuntimeModule';
-import * as enhancedModule from '@module-federation/enhanced';
 
-const enhancedExports =
-  (enhancedModule as any).default ?? (enhancedModule as any);
-const { FederationModulesPlugin, dependencies } = enhancedExports;
+type EnhancedModuleExports = typeof import('@module-federation/enhanced');
+
+const loadEnhanced = (): EnhancedModuleExports => {
+  const enhancedModule = require('@module-federation/enhanced') as
+    | EnhancedModuleExports
+    | { default: EnhancedModuleExports };
+
+  return (enhancedModule as { default?: EnhancedModuleExports }).default
+    ? (enhancedModule as { default: EnhancedModuleExports }).default
+    : (enhancedModule as EnhancedModuleExports);
+};
 
 class InvertedContainerPlugin {
   public apply(compiler: Compiler): void {
+    const { FederationModulesPlugin, dependencies } = loadEnhanced();
+
     compiler.hooks.thisCompilation.tap(
       'EmbeddedContainerPlugin',
       (compilation: Compilation) => {

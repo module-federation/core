@@ -3,7 +3,6 @@ import {
   infrastructureLogger,
   type moduleFederationPlugin,
 } from '@module-federation/sdk';
-
 import type IModuleFederationPlugin from '../lib/container/ModuleFederationPlugin';
 
 import path from 'node:path';
@@ -104,8 +103,6 @@ export default class ModuleFederationPlugin extends BaseWrapperPlugin {
     if (!enableBridgePlugin && hasBridgeReact) {
       compiler.hooks.afterPlugins.tap('BridgeReactBaseAliasPlugin', () => {
         try {
-          const path = require('path');
-          const fs = require('fs');
           const bridgeReactBasePath = path.resolve(
             compiler.context,
             'node_modules/@module-federation/bridge-react/dist/base.es.js',

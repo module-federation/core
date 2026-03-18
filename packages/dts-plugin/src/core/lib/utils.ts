@@ -21,6 +21,7 @@ export function getDTSManagerConstructor(
   implementation?: string,
 ): typeof DTSManager {
   if (implementation) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const NewConstructor = require(implementation);
     return NewConstructor.default ? NewConstructor.default : NewConstructor;
   }
