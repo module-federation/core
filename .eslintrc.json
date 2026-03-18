@@ -25,6 +25,28 @@
       }
     },
     {
+      "files": [
+        "**/src/**/*.ts",
+        "**/src/**/*.tsx",
+        "**/src/**/*.js",
+        "**/src/**/*.jsx"
+      ],
+      "excludedFiles": ["**/*.config.*", "**/*.spec.*", "**/*.test.*"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["**/*.json"],
+                "message": "Direct JSON imports may fail in Node.js >= 22. Inject values via builder define (source.define in rslib/rsbuild) instead."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
       "files": ["*.spec.ts", "*.spec.tsx", "*.spec.js", "*.spec.jsx"],
       "env": { "jest": true },
       "rules": {}

@@ -371,6 +371,216 @@ describe('consumes', () => {
     expect(moduleObj.exports).toBe('factory result');
   });
 
+  test('should unwrap nested array scope for rspack compatibility', async () => {
+    // Setup
+    const mockModuleId = 'moduleId1';
+    const mockPromises: Promise<any>[] = [];
+    const mockShareKey = 'testShareKey';
+    // Rspack wraps scope in nested array: [['default']]
+    const mockShareInfo = {
+      scope: [['default']],
+      shareConfig: {
+        singleton: true,
+        requiredVersion: '1.0.0',
+      },
+    };
+
+    const mockFactory = jest.fn().mockReturnValue('factory result');
+    const mockLoadSharePromise = Promise.resolve(mockFactory);
+
+    const mockFederationInstance = {
+      loadShare: jest.fn().mockReturnValue(mockLoadSharePromise),
+    };
+
+    const mockWebpackRequire = {
+      o: jest
+        .fn()
+        .mockImplementation((obj, key) =>
+          Object.prototype.hasOwnProperty.call(obj, key),
+        ),
+      m: {},
+      c: {},
+      federation: {
+        instance: mockFederationInstance,
+      },
+    };
+
+    const mockOptions: ConsumesOptions = {
+      chunkId: 'testChunkId',
+      promises: mockPromises,
+      chunkMapping: {
+        testChunkId: [mockModuleId],
+      },
+      installedModules: {},
+      moduleToHandlerMapping: {
+        [mockModuleId]: {
+          shareKey: mockShareKey,
+          getter: jest.fn(),
+          shareInfo: mockShareInfo,
+        },
+      },
+      webpackRequire: mockWebpackRequire as any,
+    };
+
+    // Execute
+    consumes(mockOptions);
+
+    // Verify promise is added
+    expect(mockPromises.length).toBe(1);
+
+    // Wait for promise to resolve
+    await mockPromises[0];
+
+    // Verify loadShare was called with unwrapped scope
+    expect(mockFederationInstance.loadShare).toHaveBeenCalledWith(
+      mockShareKey,
+      expect.objectContaining({
+        customShareInfo: expect.objectContaining({
+          scope: ['default'], // Should be unwrapped from [['default']]
+        }),
+      }),
+    );
+
+    // Verify the original shareInfo was not mutated (customShareInfo is a copy)
+    expect(mockShareInfo.scope).toEqual([['default']]);
+  });
+
+  test('should not unwrap non-nested array scope', async () => {
+    // Setup
+    const mockModuleId = 'moduleId1';
+    const mockPromises: Promise<any>[] = [];
+    const mockShareKey = 'testShareKey';
+    // Webpack style: scope is a flat array
+    const mockShareInfo = {
+      scope: ['default'],
+      shareConfig: {
+        singleton: true,
+        requiredVersion: '1.0.0',
+      },
+    };
+
+    const mockFactory = jest.fn().mockReturnValue('factory result');
+    const mockLoadSharePromise = Promise.resolve(mockFactory);
+
+    const mockFederationInstance = {
+      loadShare: jest.fn().mockReturnValue(mockLoadSharePromise),
+    };
+
+    const mockWebpackRequire = {
+      o: jest
+        .fn()
+        .mockImplementation((obj, key) =>
+          Object.prototype.hasOwnProperty.call(obj, key),
+        ),
+      m: {},
+      c: {},
+      federation: {
+        instance: mockFederationInstance,
+      },
+    };
+
+    const mockOptions: ConsumesOptions = {
+      chunkId: 'testChunkId',
+      promises: mockPromises,
+      chunkMapping: {
+        testChunkId: [mockModuleId],
+      },
+      installedModules: {},
+      moduleToHandlerMapping: {
+        [mockModuleId]: {
+          shareKey: mockShareKey,
+          getter: jest.fn(),
+          shareInfo: mockShareInfo,
+        },
+      },
+      webpackRequire: mockWebpackRequire as any,
+    };
+
+    // Execute
+    consumes(mockOptions);
+
+    // Wait for promise to resolve
+    await mockPromises[0];
+
+    // Verify loadShare was called with unchanged scope
+    expect(mockFederationInstance.loadShare).toHaveBeenCalledWith(
+      mockShareKey,
+      expect.objectContaining({
+        customShareInfo: expect.objectContaining({
+          scope: ['default'], // Should remain unchanged
+        }),
+      }),
+    );
+  });
+
+  test('should not unwrap scope when first element is not an array', async () => {
+    // Setup
+    const mockModuleId = 'moduleId1';
+    const mockPromises: Promise<any>[] = [];
+    const mockShareKey = 'testShareKey';
+    // Edge case: scope is an array but first element is not an array
+    const mockShareInfo = {
+      scope: ['default', 'other'],
+      shareConfig: {
+        singleton: true,
+        requiredVersion: '1.0.0',
+      },
+    };
+
+    const mockFactory = jest.fn().mockReturnValue('factory result');
+    const mockLoadSharePromise = Promise.resolve(mockFactory);
+
+    const mockFederationInstance = {
+      loadShare: jest.fn().mockReturnValue(mockLoadSharePromise),
+    };
+
+    const mockWebpackRequire = {
+      o: jest
+        .fn()
+        .mockImplementation((obj, key) =>
+          Object.prototype.hasOwnProperty.call(obj, key),
+        ),
+      m: {},
+      c: {},
+      federation: {
+        instance: mockFederationInstance,
+      },
+    };
+
+    const mockOptions: ConsumesOptions = {
+      chunkId: 'testChunkId',
+      promises: mockPromises,
+      chunkMapping: {
+        testChunkId: [mockModuleId],
+      },
+      installedModules: {},
+      moduleToHandlerMapping: {
+        [mockModuleId]: {
+          shareKey: mockShareKey,
+          getter: jest.fn(),
+          shareInfo: mockShareInfo,
+        },
+      },
+      webpackRequire: mockWebpackRequire as any,
+    };
+
+    // Execute
+    consumes(mockOptions);
+
+    // Wait for promise to resolve
+    await mockPromises[0];
+
+    // Verify loadShare was called with unchanged scope
+    expect(mockFederationInstance.loadShare).toHaveBeenCalledWith(
+      mockShareKey,
+      expect.objectContaining({
+        customShareInfo: expect.objectContaining({
+          scope: ['default', 'other'], // Should remain unchanged
+        }),
+      }),
+    );
+  });
+
   test('should handle promise rejection', async () => {
     // Setup
     const mockModuleId = 'moduleId1';

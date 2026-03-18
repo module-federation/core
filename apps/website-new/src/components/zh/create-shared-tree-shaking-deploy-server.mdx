@@ -4,7 +4,6 @@
 
 1.  **部署阶段：汇总 `usedExports`**
     在 CI/CD 部署流程中，你的部署服务需要：
-
     - 收集所有即将上线应用的构建元信息（通常是 `mf-stats.json` 或同类文件）。
     - 针对同一份共享依赖（例如 `antd@6.1.0`），汇总各应用声明的 `usedExports` 列表。
 
@@ -13,14 +12,12 @@
 
 3.  **触发二次构建（生成优化共享包）**
     调用构建工具（如 Rspack CLI），以独立构建的方式传入关键信息：
-
     - 目标共享依赖的名称与版本（如 `antd@6.1.0`）。
     - 上一步得到的全局 `usedExports` 最小并集。
       构建完成后，产出一个仅包含这些模块、体积更小的独立共享包。
 
 4.  **更新并下发 Snapshot**
     将新生成的优化包上传到静态资源服务器（CDN）。然后，更新模块联邦的 `Snapshot` 文件（通常是远程的 `mf-manifest.json`），写入或更新以下关键字段：
-
     - `secondarySharedTreeShakingEntry`: 指向新生成的优化包的 URL。
     - `secondarySharedTreeShakingName`: 优化包的唯一名称。
     - `treeShakingStatus`: 标记为可用状态。

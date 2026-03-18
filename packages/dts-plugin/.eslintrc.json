@@ -1,3 +1,12 @@
 {
-  "extends": ["../.eslintrc.json"]
+  "extends": ["../../.eslintrc.json"],
+  "ignorePatterns": ["!**/*", "dist/**/*", "**/*.d.ts"],
+  "overrides": [
+    {
+      "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
+      "rules": {
+        "@typescript-eslint/no-require-imports": "off"
+      }
+    }
+  ]
 }
