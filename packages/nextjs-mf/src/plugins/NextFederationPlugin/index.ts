@@ -9,37 +9,18 @@ import type {
   NextFederationPluginExtraOptions,
   NextFederationPluginOptions,
 } from './next-fragments';
-import type { Compilation, Compiler, WebpackPluginInstance } from 'webpack';
+import type { Compiler, WebpackPluginInstance } from 'webpack';
 import path from 'path';
-import type { moduleFederationPlugin } from '@module-federation/sdk';
+import {
+  bindLoggerToCompiler,
+  type moduleFederationPlugin,
+} from '@module-federation/sdk';
+import { getWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 
 type EnhancedWebpackModule =
   typeof import('@module-federation/enhanced/webpack');
 type CopyFederationPluginCtor =
   typeof import('../CopyFederationPlugin').default;
-type EnhancedFederationRuntimePluginCtor = new (
-  options?: moduleFederationPlugin.ModuleFederationPluginOptions,
-) => {
-  entryFilePath: string;
-  getFilePath(compiler: Compiler): string;
-  ensureFile(compiler: Compiler): void;
-};
-type ContainerEntryDependencyLike = {
-  injectRuntimeEntry?: string;
-};
-type EnhancedRuntimeSupport = {
-  FederationModulesPlugin: {
-    getCompilationHooks: (compilation: Compilation) => {
-      addContainerEntryDependency: {
-        tap: (
-          pluginName: string,
-          handler: (dependency: ContainerEntryDependencyLike) => void,
-        ) => void;
-      };
-    };
-  };
-  FederationRuntimePlugin: EnhancedFederationRuntimePluginCtor;
-};
 
 const runtimeRequireFromModule = new Function(
   'moduleRef',
@@ -64,15 +45,6 @@ const loadModule = <T>(id: string): T => {
     ? (loadedModule as { default: T }).default
     : (loadedModule as T);
 };
-
-const loadSdk = () =>
-  runtimeRequire(
-    '@module-federation/sdk',
-  ) as typeof import('@module-federation/sdk');
-const loadNormalizeWebpackPath = () =>
-  runtimeRequire(
-    '@module-federation/sdk/normalize-webpack-path',
-  ) as typeof import('@module-federation/sdk/normalize-webpack-path');
 const loadCopyFederationPlugin = (): CopyFederationPluginCtor =>
   loadModule<CopyFederationPluginCtor>('../CopyFederationPlugin');
 const loadNextPageMapLoader = () =>
@@ -95,193 +67,11 @@ const loadApplyClientPlugins = () =>
   ) as typeof import('./apply-client-plugins');
 const loadLogger = () =>
   loadModule<typeof import('../../logger').default>('../../logger');
-const loadNextRequireHook = () =>
-  require('next/dist/server/require-hook') as typeof import('next/dist/server/require-hook');
-const resolveEnhancedRuntimeCoreModulePath = (moduleName: string) => {
-  const enhancedEntryDir = path.dirname(
-    require.resolve('@module-federation/enhanced'),
-  );
-
-  return path.join(
-    enhancedEntryDir,
-    process.env['IS_ESM_BUILD'] === 'true'
-      ? `lib/container/runtime/${moduleName}.mjs`
-      : `lib/container/runtime/${moduleName}.js`,
-  );
-};
-const loadEnhancedRuntimeSupport = (): EnhancedRuntimeSupport => {
-  const enhancedModule = runtimeRequire('@module-federation/enhanced') as
-    | EnhancedRuntimeSupport
-    | { default?: EnhancedRuntimeSupport };
-
-  if (
-    enhancedModule &&
-    typeof enhancedModule === 'object' &&
-    'FederationModulesPlugin' in enhancedModule &&
-    'FederationRuntimePlugin' in enhancedModule
-  ) {
-    return enhancedModule as EnhancedRuntimeSupport;
-  }
-
-  const defaultExport = (enhancedModule as { default?: EnhancedRuntimeSupport })
-    .default;
-  if (
-    defaultExport &&
-    typeof defaultExport === 'object' &&
-    'FederationModulesPlugin' in defaultExport &&
-    'FederationRuntimePlugin' in defaultExport
-  ) {
-    return defaultExport;
-  }
-
-  return enhancedModule as EnhancedRuntimeSupport;
-};
-const loadFederationRuntimePluginCtor =
-  (): EnhancedFederationRuntimePluginCtor => {
-    try {
-      const runtimePluginModule = runtimeRequire(
-        resolveEnhancedRuntimeCoreModulePath('FederationRuntimePlugin'),
-      ) as
-        | EnhancedFederationRuntimePluginCtor
-        | { default?: EnhancedFederationRuntimePluginCtor };
-
-      if (
-        runtimePluginModule &&
-        typeof runtimePluginModule === 'object' &&
-        'default' in runtimePluginModule &&
-        runtimePluginModule.default
-      ) {
-        return runtimePluginModule.default;
-      }
-
-      return runtimePluginModule as EnhancedFederationRuntimePluginCtor;
-    } catch {
-      return loadEnhancedRuntimeSupport().FederationRuntimePlugin;
-    }
-  };
-const loadFederationModulesPlugin =
-  (): EnhancedRuntimeSupport['FederationModulesPlugin'] => {
-    try {
-      const modulesPluginModule = runtimeRequire(
-        resolveEnhancedRuntimeCoreModulePath('FederationModulesPlugin'),
-      ) as
-        | EnhancedRuntimeSupport['FederationModulesPlugin']
-        | { default?: EnhancedRuntimeSupport['FederationModulesPlugin'] };
-
-      if (
-        modulesPluginModule &&
-        typeof modulesPluginModule === 'object' &&
-        'default' in modulesPluginModule &&
-        modulesPluginModule.default
-      ) {
-        return modulesPluginModule.default;
-      }
-
-      return modulesPluginModule as EnhancedRuntimeSupport['FederationModulesPlugin'];
-    } catch {
-      return loadEnhancedRuntimeSupport().FederationModulesPlugin;
-    }
-  };
-
-const localWebpackPathEnvKey = 'NEXT_MF_LOCAL_WEBPACK_PATH';
-let patchedWebpackSourcesAlias: string | undefined;
-
-const patchNextWebpackSourcesAlias = (compiler: Compiler) => {
-  try {
-    const nextRequireHook = loadNextRequireHook();
-    const addHookAliases = nextRequireHook?.addHookAliases;
-    if (typeof addHookAliases !== 'function') {
-      return;
-    }
-    const localWebpack = compiler.webpack;
-    const localWebpackSources = localWebpack.sources;
-
-    if (!localWebpackSources) {
-      return;
-    }
-
-    const localWebpackEntry = Object.keys(require.cache).find((cacheKey) => {
-      const cacheExports = require.cache[cacheKey]?.exports as
-        | undefined
-        | {
-            sources?: unknown;
-            webpack?: { sources?: unknown };
-          };
-
-      return (
-        cacheExports === localWebpack ||
-        cacheExports?.sources === localWebpackSources ||
-        cacheExports?.webpack?.sources === localWebpackSources
-      );
-    });
-    if (localWebpackEntry) {
-      process.env[localWebpackPathEnvKey] = localWebpackEntry;
-    } else if (
-      process.env['FEDERATION_WEBPACK_PATH'] &&
-      !process.env[localWebpackPathEnvKey]
-    ) {
-      process.env[localWebpackPathEnvKey] =
-        process.env['FEDERATION_WEBPACK_PATH'];
-    }
-    const webpackSourcesShimPath =
-      require.resolve('@module-federation/nextjs-mf/dist/src/plugins/NextFederationPlugin/webpack-sources-shim.js');
-
-    if (patchedWebpackSourcesAlias === webpackSourcesShimPath) {
-      return;
-    }
-
-    patchedWebpackSourcesAlias = webpackSourcesShimPath;
-    addHookAliases([
-      ['webpack-sources', webpackSourcesShimPath],
-      ['webpack-sources/lib', webpackSourcesShimPath],
-      ['webpack-sources/lib/index', webpackSourcesShimPath],
-      ['webpack-sources/lib/index.js', webpackSourcesShimPath],
-    ]);
-  } catch {
-    // The hook only exists inside Next's config/bootstrap flow.
-  }
-};
 
 const resolveRuntimePluginPath = (): string =>
   process.env['IS_ESM_BUILD'] === 'true'
     ? require.resolve('@module-federation/nextjs-mf/dist/src/plugins/container/runtimePlugin.mjs')
     : require.resolve('@module-federation/nextjs-mf/dist/src/plugins/container/runtimePlugin.js');
-const ensureContainerRuntimeEntry = (
-  compiler: Compiler,
-  options: moduleFederationPlugin.ModuleFederationPluginOptions,
-) => {
-  try {
-    const FederationModulesPlugin = loadFederationModulesPlugin();
-    const FederationRuntimePlugin = loadFederationRuntimePluginCtor();
-    const federationRuntimePlugin = new FederationRuntimePlugin(options);
-    const runtimeEntryPath = federationRuntimePlugin.getFilePath(compiler);
-    federationRuntimePlugin.entryFilePath = runtimeEntryPath;
-    federationRuntimePlugin.ensureFile(compiler);
-
-    compiler.hooks.thisCompilation.tap(
-      'NextFederationPlugin',
-      (compilation: Compilation) => {
-        const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
-        hooks.addContainerEntryDependency.tap(
-          'NextFederationPlugin',
-          (dependency: ContainerEntryDependencyLike) => {
-            if (
-              typeof dependency.injectRuntimeEntry !== 'string' ||
-              dependency.injectRuntimeEntry.trim().length === 0
-            ) {
-              dependency.injectRuntimeEntry =
-                runtimeEntryPath || resolveRuntimePluginPath();
-            }
-          },
-        );
-      },
-    );
-    return runtimeEntryPath;
-  } catch {
-    // Keep Next bootstrap resilient if enhanced runtime internals are unavailable.
-    return undefined;
-  }
-};
 
 const resolveNoopPath = (): string =>
   process.env['IS_ESM_BUILD'] === 'true'
@@ -325,13 +115,10 @@ export class NextFederationPlugin {
   /**
    * The apply method is called by the webpack compiler and allows the plugin to hook into the webpack process.
    * @param compiler The webpack compiler object.
-   */
+  */
   apply(compiler: Compiler) {
-    const { bindLoggerToCompiler } = loadSdk();
     const logger = loadLogger();
-    const { getWebpackPath } = loadNormalizeWebpackPath();
     const CopyFederationPlugin = loadCopyFederationPlugin();
-    let preparedRuntimeEntryPath: string | undefined;
 
     bindLoggerToCompiler(logger, compiler, 'NextFederationPlugin');
     compiler.hooks.normalModuleFactory.tap(
@@ -369,8 +156,7 @@ export class NextFederationPlugin {
             );
 
             if (hasFederationRuntimeDependency || hasEntryDependency) {
-              resolveData.request =
-                preparedRuntimeEntryPath || resolveRuntimePluginPath();
+              resolveData.request = resolveRuntimePluginPath();
             }
           },
         );
@@ -379,7 +165,6 @@ export class NextFederationPlugin {
     process.env['FEDERATION_WEBPACK_PATH'] =
       process.env['FEDERATION_WEBPACK_PATH'] ||
       getWebpackPath(compiler, { framework: 'nextjs' });
-    patchNextWebpackSourcesAlias(compiler);
     if (!this.validateOptions(compiler)) return;
     const isServer = this.isServerCompiler(compiler);
     const isAppDirectory = this.isAppDirectory(compiler);
@@ -395,10 +180,6 @@ export class NextFederationPlugin {
     const { ModuleFederationPlugin } =
       require('@module-federation/enhanced/webpack') as EnhancedWebpackModule;
 
-    preparedRuntimeEntryPath = ensureContainerRuntimeEntry(
-      compiler,
-      normalFederationPluginOptions,
-    );
     new ModuleFederationPlugin(normalFederationPluginOptions).apply(compiler);
 
     const noop = this.getNoopPath();
