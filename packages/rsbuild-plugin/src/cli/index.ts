@@ -5,7 +5,6 @@ import {
   PLUGIN_NAME,
 } from '@module-federation/enhanced/rspack';
 import { isRequiredVersion, getManifestFileName } from '@module-federation/sdk';
-import pkgJson from '../../package.json';
 import logger from '../logger';
 import {
   isRegExp,
