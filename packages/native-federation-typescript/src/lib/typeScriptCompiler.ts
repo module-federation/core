@@ -104,6 +104,7 @@ const createHost = (
 const createVueTscProgram = (
   programOptions: typescript.CreateProgramOptions,
 ) => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const vueTypescript = require('vue-tsc');
   return vueTypescript.createProgram(programOptions);
 };

@@ -1,6 +1,11 @@
 import { pluginPublint } from 'rsbuild-plugin-publint';
 import { defineConfig } from '@rslib/core';
-import pkg from './package.json';
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
+
+const pkg = JSON.parse(
+  readFileSync(resolve(__dirname, './package.json'), 'utf-8'),
+);
 
 export default defineConfig({
   plugins: [pluginPublint()],
@@ -31,10 +36,10 @@ export default defineConfig({
         '!./src/**/*.test.*',
       ],
     },
-    define: {
-      __RSBUILD_PLUGIN_NAME__: JSON.stringify(pkg.name),
-    },
     tsconfigPath: './tsconfig.lib.json',
+    define: {
+      __RSBUILD_PLUGIN_PACKAGE_NAME__: JSON.stringify(pkg.name),
+    },
   },
   output: {
     target: 'node',

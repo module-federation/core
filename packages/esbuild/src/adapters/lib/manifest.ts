@@ -1,18 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { resolve } from './collect-exports.js';
-import {
-  BuildOptions,
-  PluginBuild,
-  Plugin,
-  OnResolveArgs,
-  OnLoadArgs,
-  BuildResult,
-  BuildContext,
-} from 'esbuild';
-//@ts-expect-error
-import { version as pluginVersion } from '@module-federation/esbuild/package.json';
-
+import { BuildResult } from 'esbuild';
 interface OutputFile {
   entryPoint?: string;
   imports?: { path: string }[];
@@ -91,6 +80,7 @@ export const writeRemoteManifest = async (config: any, result: BuildResult) => {
   try {
     const packageJsonPath =
       (await resolve(process.cwd(), '/package.json')) || '';
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     packageJson = require(packageJsonPath);
   } catch (e) {
     packageJson = { name: config.name };
@@ -261,7 +251,7 @@ export const writeRemoteManifest = async (config: any, result: BuildResult) => {
       },
       types,
       globalName: config.name,
-      pluginVersion,
+      pluginVersion: __VERSION__,
       publicPath,
     },
     shared,

@@ -60,10 +60,9 @@ type ExposedAPIType = {
 };
 export type { ModuleFederationOptions, ExposedAPIType };
 
-declare const __RSBUILD_PLUGIN_NAME__: string;
 const RSBUILD_PLUGIN_MODULE_FEDERATION_NAME =
   'rsbuild:module-federation-enhanced';
-const RSBUILD_PLUGIN_NAME = __RSBUILD_PLUGIN_NAME__;
+const RSBUILD_PLUGIN_NAME = '@module-federation/rsbuild-plugin';
 
 export { RSBUILD_PLUGIN_MODULE_FEDERATION_NAME, PLUGIN_NAME, SSR_DIR };
 
@@ -474,7 +473,7 @@ export const pluginModuleFederation = (
                 const match = shared.some((dep) => {
                   if (
                     (ext as RegExp).test(dep) ||
-                    (ext as RegExp).test(RSBUILD_PLUGIN_NAME)
+                    (ext as RegExp).test(__RSBUILD_PLUGIN_PACKAGE_NAME__)
                   ) {
                     sharedModule = dep;
                     return true;
@@ -487,7 +486,7 @@ export const pluginModuleFederation = (
               }
 
               if (typeof ext === 'string') {
-                if (ext === RSBUILD_PLUGIN_NAME) {
+                if (ext === __RSBUILD_PLUGIN_PACKAGE_NAME__) {
                   return false;
                 }
 
