@@ -11,14 +11,14 @@ Federated remote used by rstest demo apps.
 ```bash
 # from repo root
 pnpm i
-nx run rstest-remote-demo:serve
+pnpm --filter rstest-remote-demo run serve
 ```
 
 ## Build targets
 
 ```bash
-nx run rstest-remote-demo:build
-nx run rstest-remote-demo:build:node
+pnpm --filter rstest-remote-demo run build
+pnpm --filter rstest-remote-demo run build:node
 ```
 
 - `build` emits browser remote output

@@ -55,15 +55,14 @@ const RetryPlugin = (
       });
     },
 
-    async loadEntryError(args: LoadEntryErrorArgs) {
-      const {
-        getRemoteEntry,
-        origin,
-        remoteInfo,
-        remoteEntryExports,
-        globalLoading,
-        uniqueKey,
-      } = args;
+    async loadEntryError({
+      getRemoteEntry,
+      origin,
+      remoteInfo,
+      remoteEntryExports,
+      globalLoading,
+      uniqueKey,
+    }: LoadEntryErrorArgs) {
       const beforeExecuteRetry = () => {
         delete globalLoading[uniqueKey];
       };

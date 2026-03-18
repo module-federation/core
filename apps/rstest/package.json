@@ -15,7 +15,7 @@
     "react-dom": "^19.2.3"
   },
   "devDependencies": {
-    "@module-federation/rstest-plugin": "workspace:*",
+    "@module-federation/rstest": "workspace:*",
     "@rsbuild/plugin-react": "^1.4.2",
     "@rspack/cli": "^1.6.8",
     "@rspack/core": "^1.6.8",

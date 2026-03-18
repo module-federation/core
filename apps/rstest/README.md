@@ -12,17 +12,17 @@
 pnpm i
 
 # terminal 1
-nx run rstest-remote-demo:serve
+pnpm --filter rstest-remote-demo run serve
 
 # terminal 2
-nx run rstest-demo:serve
+pnpm --filter rstest-demo run serve
 ```
 
 ## Test commands
 
 ```bash
-nx run rstest-demo:test-node
-nx run rstest-demo:test-browser
+pnpm --filter rstest-demo run test:node
+pnpm --filter rstest-demo run test:browser
 ```
 
 ## What this covers

@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "@module-federation/rsbuild-plugin": "workspace:*",
-    "@module-federation/rstest-plugin": "workspace:*",
+    "@module-federation/rstest": "workspace:*",
     "@rsbuild/plugin-react": "^1.4.2",
     "@rslib/core": "^0.19.0",
     "@rstest/adapter-rslib": "^0.2.0",

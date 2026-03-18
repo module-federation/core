@@ -1,6 +1,5 @@
 ---
-"@module-federation/rstest-plugin": patch
+"@module-federation/rstest": patch
 ---
 
-Add new `@module-federation/rstest-plugin` package (extracted from `@rstest/core`) to provide the `federation()` Rsbuild plugin.
-
+Add new `@module-federation/rstest` package (extracted from `@rstest/core`) to provide the `federation()` Rsbuild plugin.

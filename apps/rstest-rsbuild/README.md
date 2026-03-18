@@ -14,17 +14,17 @@ Demonstrates `@rstest/adapter-rsbuild` with module federation test flows.
 pnpm i
 
 # terminal 1
-nx run rstest-remote-demo:serve
+pnpm --filter rstest-remote-demo run serve
 
 # terminal 2
-nx run rstest-rsbuild-demo:serve
+pnpm --filter rstest-rsbuild-demo run serve
 ```
 
 ## Test commands
 
 ```bash
-nx run rstest-rsbuild-demo:test-node
-nx run rstest-rsbuild-demo:test-browser
+pnpm --filter rstest-rsbuild-demo run test:node
+pnpm --filter rstest-rsbuild-demo run test:browser
 ```
 
 ## What this covers

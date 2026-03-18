@@ -2425,9 +2425,9 @@ importers:
         specifier: ^19.2.3
         version: 19.2.4(react@19.2.4)
     devDependencies:
-      '@module-federation/rstest-plugin':
+      '@module-federation/rstest':
         specifier: workspace:*
-        version: link:../../packages/rstest-plugin
+        version: link:../../packages/rstest
       '@rsbuild/plugin-react':
         specifier: ^1.4.2
         version: 1.4.5(@rsbuild/core@2.0.0-beta.3(@module-federation/runtime-tools@2.2.2(node-fetch@3.3.2))(core-js@3.49.0))(webpack-hot-middleware@2.26.1)
@@ -2508,9 +2508,9 @@ importers:
       '@module-federation/rsbuild-plugin':
         specifier: workspace:*
         version: link:../../packages/rsbuild-plugin
-      '@module-federation/rstest-plugin':
+      '@module-federation/rstest':
         specifier: workspace:*
-        version: link:../../packages/rstest-plugin
+        version: link:../../packages/rstest
       '@rsbuild/core':
         specifier: ^1.7.3
         version: 1.7.3
@@ -2563,9 +2563,9 @@ importers:
       '@module-federation/rsbuild-plugin':
         specifier: workspace:*
         version: link:../../packages/rsbuild-plugin
-      '@module-federation/rstest-plugin':
+      '@module-federation/rstest':
         specifier: workspace:*
-        version: link:../../packages/rstest-plugin
+        version: link:../../packages/rstest
       '@rsbuild/plugin-react':
         specifier: ^1.4.2
         version: 1.4.5(@rsbuild/core@2.0.0-beta.3(@module-federation/runtime-tools@2.2.2(node-fetch@3.3.2))(core-js@3.49.0))(webpack-hot-middleware@2.26.1)
@@ -4254,7 +4254,7 @@ importers:
         specifier: ^18.3.11
         version: 18.3.28
 
-  packages/rstest-plugin:
+  packages/rstest:
     dependencies:
       '@module-federation/enhanced':
         specifier: workspace:*

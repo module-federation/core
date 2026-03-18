@@ -1,4 +1,4 @@
-# @module-federation/rstest-plugin
+# @module-federation/rstest
 
 This package contains the `federation()` Rsbuild plugin used by Rstest to enable
 Module Federation compatibility mode for Node test environments
@@ -12,7 +12,7 @@ alongside other Module Federation tooling.
 ### Node/JSDOM test environments (default)
 
 ```ts
-import { federation } from '@module-federation/rstest-plugin';
+import { federation } from '@module-federation/rstest';
 import { defineConfig } from '@rstest/core';
 
 export default defineConfig({
@@ -43,7 +43,7 @@ By default, `federation()` applies Node-safe Module Federation settings:
 ### Browser mode
 
 ```ts
-import { federation } from '@module-federation/rstest-plugin';
+import { federation } from '@module-federation/rstest';
 import { defineConfig } from '@rstest/core';
 
 export default defineConfig({
@@ -63,4 +63,3 @@ export default defineConfig({
 ```
 
 In browser target mode, node-only defaults are not applied.
-

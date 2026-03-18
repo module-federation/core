@@ -1,5 +1,5 @@
 {
-  "name": "@module-federation/rstest-plugin",
+  "name": "@module-federation/rstest",
   "version": "0.23.0",
   "description": "Rstest federation compatibility plugin (extracted from @rstest/core).",
   "homepage": "https://module-federation.io",
@@ -9,7 +9,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/module-federation/core.git",
-    "directory": "packages/rstest-plugin"
+    "directory": "packages/rstest"
   },
   "license": "MIT",
   "type": "module",
@@ -33,6 +33,12 @@
     "README.md",
     "LICENSE"
   ],
+  "scripts": {
+    "build": "rslib build",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",
+    "test": "pnpm exec rstest run -c rstest.config.ts",
+    "pre-release": "pnpm run test && pnpm run build"
+  },
   "devDependencies": {
     "@rslib/core": "^0.12.4",
     "@rsbuild/core": "^1.3.21"

@@ -14,17 +14,17 @@ Demonstrates `@rstest/adapter-rslib` with node and browser rstest projects.
 pnpm i
 
 # terminal 1
-nx run rstest-remote-demo:serve
+pnpm --filter rstest-remote-demo run serve
 
 # terminal 2
-nx run rstest-rslib-demo:dev
+pnpm --filter rstest-rslib-demo run dev
 ```
 
 ## Test commands
 
 ```bash
-nx run rstest-rslib-demo:test-node
-nx run rstest-rslib-demo:test-browser
+pnpm --filter rstest-rslib-demo run test:node
+pnpm --filter rstest-rslib-demo run test:browser
 ```
 
 ## What this covers

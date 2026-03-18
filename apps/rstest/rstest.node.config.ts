@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { federation } from '@module-federation/rstest-plugin';
+import { federation } from '@module-federation/rstest';
 import { pluginReact } from '@rsbuild/plugin-react';
 import { defineConfig } from '@rstest/core';
 

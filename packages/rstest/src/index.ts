@@ -246,7 +246,7 @@ const createFederationExternalBypass = (
  * Add this to your `rstest.config.*`:
  *
  * ```ts
- * import { federation } from '@module-federation/rstest-plugin';
+ * import { federation } from '@module-federation/rstest';
  * import { defineConfig } from '@rstest/core';
  * export default defineConfig({
  *   federation: true,
