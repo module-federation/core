@@ -31,6 +31,7 @@ const makeSerializable = require(
 ) as typeof import('webpack/lib/util/makeSerializable');
 
 const TYPES: Set<string> = new Set(['remote', 'share-init']);
+const JAVASCRIPT_TYPES = new Set(['javascript']);
 const RUNTIME_REQUIREMENTS: Set<string> = new Set([RuntimeGlobals.module]);
 
 class RemoteModule extends Module {
@@ -152,6 +153,13 @@ class RemoteModule extends Module {
    */
   override getSourceTypes(): Set<string> {
     return TYPES;
+  }
+
+  /**
+   * @returns {Set<string>} types available (do not mutate)
+   */
+  override getSourceBasicTypes(): Set<string> {
+    return JAVASCRIPT_TYPES;
   }
 
   /**
