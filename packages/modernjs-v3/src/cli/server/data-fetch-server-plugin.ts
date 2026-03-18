@@ -9,7 +9,6 @@ const dataFetchServePlugin = (): ServerPlugin => ({
       const { middlewares } = api.getServerContext();
       middlewares.push({
         name: 'module-federation-serve-manifest',
-        // @ts-ignore type error
         handler: dataFetchMiddleWare,
       });
     });

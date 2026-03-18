@@ -1,14 +1,14 @@
 # 类型提示
 
-就像 NPM Package 一样，{props.name || 'Module Federation'} 产物同样会生成类型，并且享有类型热加载，尽管产物托管在远程 CDN 上。
+就像 NPM Package 一样，{props.brandName || props.name || 'Module Federation'} 产物同样会生成类型，并且享有类型热加载，尽管产物托管在远程 CDN 上。
 
-<code>{props.pkgName || '@module-federation/enhanced'}</code> 默认开启类型提示功能，本文将介绍几种常见的使用场景以及具体配置。
+<code>{props.enhancedPackage || props.pkgName || '@module-federation/enhanced'}</code> 默认开启类型提示功能，本文将介绍几种常见的使用场景以及具体配置。
 
 ## 使用场景
 
 ### 生成类型
 
-使用<code>{props.pkgName || '@module-federation/enhanced'}</code> 提供的构建插件进行构建，会自动生成类型文件。
+使用<code>{props.enhancedPackage || props.pkgName || '@module-federation/enhanced'}</code> 提供的构建插件进行构建，会自动生成类型文件。
 
 ### 加载类型
 
@@ -56,19 +56,19 @@
 
 ### 第三方包类型抽取
 
-{props.name || 'Module Federation'} 会自动抽取第三方包类型，确保 `exposes` 文件类型能正常访问。
+{props.brandName || props.name || 'Module Federation'} 会自动抽取第三方包类型，确保 `exposes` 文件类型能正常访问。
 
 ![third-party](@public/guide/type-prompt/third-party.jpg)
 
 ### 嵌套类型重导出
 
-{props.name || 'Module Federation'} 支持嵌套 remotes ，并会自动抽取嵌套的 remotes 类型。
+{props.brandName || props.name || 'Module Federation'} 支持嵌套 remotes ，并会自动抽取嵌套的 remotes 类型。
 
 ![nested-remote](@public/guide/type-prompt/nested-remote.jpg)
 
 ### 动态类型提示
 
-{props.name || 'Module Federation'} 支持加载动态类型，并且通用支持热更新。
+{props.brandName || props.name || 'Module Federation'} 支持加载动态类型，并且通用支持热更新。
 
 ![dynamic-remote-hot-types-reload](@public/guide/type-prompt/dynamic-remote-hot-types-reload-static.gif)
 

@@ -92,6 +92,7 @@ class StartupChunkDependenciesPlugin {
           'MfStartupChunkDependenciesPlugin',
           (startupSource, lastInlinedModule, renderContext) => {
             const { chunk, chunkGraph, runtimeTemplate } = renderContext;
+            const sources = compiler.webpack.sources;
 
             if (!this.isEnabledForChunk(chunk, compilation)) {
               return startupSource;
@@ -122,7 +123,7 @@ class StartupChunkDependenciesPlugin {
               ? generateESMEntryStartup
               : generateEntryStartup;
 
-            return new compiler.webpack.sources.ConcatSource(
+            return new sources.ConcatSource(
               entryGeneration(
                 compilation,
                 chunkGraph,

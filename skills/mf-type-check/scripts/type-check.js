@@ -47,7 +47,7 @@ function main(ctx) {
   const hasTsconfig = tsconfigPath && fs.existsSync(tsconfigPath);
   const hasTypescript = Boolean(
     (ctx.dependencies && ctx.dependencies.typescript) ||
-      (ctx.devDependencies && ctx.devDependencies.typescript),
+    (ctx.devDependencies && ctx.devDependencies.typescript),
   );
 
   if (!hasTsconfig || !hasTypescript) {
