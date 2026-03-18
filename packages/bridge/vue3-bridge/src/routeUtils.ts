@@ -23,11 +23,38 @@ function addBasenameToNestedRoutes(
   routes: VueRouter.RouteRecordNormalized[],
   basename: string,
 ): VueRouter.RouteRecordNormalized[] {
+  /**
+   * Join two path segments, collapse multiple slashes, and optionally
+   * preserve a trailing slash that was present in the original value.
+   * A bare '/' root is never considered an intentional trailing slash.
+   */
+  const prefixPath = (original: string): string => {
+    const hasTrailingSlash = original.length > 1 && original.endsWith('/');
+    const normalized =
+      `${basename}/${original}`.replace(/\/+/g, '/').replace(/\/$/, '') || '/';
+    return hasTrailingSlash ? `${normalized}/` : normalized;
+  };
+
   return routes.map((route) => {
     const updatedRoute: VueRouter.RouteRecordNormalized = {
       ...route,
-      path: basename + route.path,
+      path: prefixPath(route.path),
     };
+
+    // Prefix string redirects with basename
+    if (typeof route.redirect === 'string') {
+      updatedRoute.redirect = prefixPath(route.redirect);
+    } else if (
+      route.redirect &&
+      typeof route.redirect === 'object' &&
+      'path' in route.redirect &&
+      typeof route.redirect.path === 'string'
+    ) {
+      updatedRoute.redirect = {
+        ...route.redirect,
+        path: prefixPath(route.redirect.path),
+      };
+    }
 
     // Recursively process child routes
     if (route.children && route.children.length > 0) {
