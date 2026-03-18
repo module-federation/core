@@ -140,6 +140,7 @@ export function commonjs({
     setup({ onLoad, esbuild, initialOptions }) {
       let esbuild_shim: typeof import('esbuild') | undefined;
       const require_esbuild = () =>
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         esbuild || (esbuild_shim ||= require('esbuild'));
       const read = promises.readFile;
       const lexer = new Lexer();

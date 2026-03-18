@@ -10,6 +10,8 @@ export function createRemoteAppComponent(info: {
   export?: string;
   asyncComponentOptions?: Omit<AsyncComponentOptions, 'loader'>;
   rootAttrs?: Record<string, unknown>;
+  memoryRoute?: { entryPath: string };
+  hashRoute?: boolean;
 }) {
   return defineAsyncComponent({
     __APP_VERSION__,
@@ -54,6 +56,8 @@ export function createRemoteAppComponent(info: {
               providerInfo: exportFn,
               basename,
               rootAttrs: info.rootAttrs,
+              memoryRoute: info.memoryRoute,
+              hashRoute: info.hashRoute,
             });
           },
         };
@@ -64,7 +68,7 @@ export function createRemoteAppComponent(info: {
 }
 
 /**
- * @deprecated createRemoteAppComponent is deprecated, please use createRemoteAppComponent instead!
+ * @deprecated createRemoteComponent is deprecated, please use createRemoteAppComponent instead!
  */
 export function createRemoteComponent(info: {
   loader: () => Promise<any>;
@@ -73,7 +77,7 @@ export function createRemoteComponent(info: {
   rootAttrs?: Record<string, unknown>;
 }) {
   LoggerInstance.warn(
-    'createRemoteAppComponent is deprecated, please use createRemoteAppComponent instead!',
+    'createRemoteComponent is deprecated, please use createRemoteAppComponent instead!',
   );
   return createRemoteAppComponent(info);
 }
