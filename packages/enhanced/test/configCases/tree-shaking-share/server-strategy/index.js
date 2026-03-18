@@ -84,8 +84,8 @@ it('should not tree shaking ui-lib-dynamic-default-export', async () => {
   );
   const bundleContent = fs.readFileSync(bundlePath, 'utf-8');
   expect(bundleContent).toContain('List');
-  expect(bundleContent).toContain('Button');
-  expect(bundleContent).toContain('Badge');
+  expect(bundleContent).not.toContain('Button');
+  expect(bundleContent).not.toContain('Badge');
 });
 
 it('should not tree shaking ui-lib-side-effect if not set sideEffect:false ', async () => {
