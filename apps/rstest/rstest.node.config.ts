@@ -13,7 +13,6 @@ export default defineConfig({
     pluginReact(),
     federation({
       name: 'rstest_host',
-      remoteType: 'commonjs',
       remotes: {
         rstest_remote: `commonjs ${path.resolve(
           __dirname,

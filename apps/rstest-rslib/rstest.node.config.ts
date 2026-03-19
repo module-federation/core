@@ -13,7 +13,6 @@ export default defineConfig({
   plugins: [
     federation({
       name: 'rstest_rslib_host',
-      remoteType: 'commonjs',
       remotes: {
         rstest_remote: `commonjs ${path.resolve(
           __dirname,

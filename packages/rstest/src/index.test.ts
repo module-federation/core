@@ -209,8 +209,9 @@ describe('federation()', () => {
     expect(options.name).toBe('main_app_web');
     expect(options.library?.type).toBe('commonjs-module');
     expect(options.library?.name).toBe('main_app_web');
-    expect(options.remoteType).toBe('script');
+    expect(options.remoteType).toBe(undefined);
     expect(options.runtimePlugins).toEqual([NODE_RUNTIME_PLUGIN]);
+    expect(options.experiments?.asyncStartup).toBe(true);
     expect(options.experiments?.optimization?.target).toBe('node');
   });
 
@@ -260,10 +261,46 @@ describe('federation()', () => {
     expect(options.remoteType).toBe('commonjs');
     expect(options.library?.type).toBe('var');
     expect(options.library?.name).toBe('component_app');
+    expect(options.experiments?.asyncStartup).toBe(true);
     expect(options.runtimePlugins).toEqual([
       NODE_RUNTIME_PLUGIN,
       'custom/runtimePlugin',
     ]);
+  });
+
+  it('forces async startup even when disabled manually', () => {
+    const plugin = federation({
+      name: 'legacy_component_app',
+      experiments: {
+        asyncStartup: false,
+      },
+    });
+
+    let envCb:
+      | ((
+          config: any,
+          utils: { mergeEnvironmentConfig: (...configs: any[]) => any },
+        ) => any)
+      | undefined;
+
+    plugin.setup({
+      modifyEnvironmentConfig: (cb: any) => {
+        envCb = cb;
+      },
+    } as any);
+
+    const mergeEnvironmentConfig = (...configs: any[]) =>
+      Object.assign({}, ...configs);
+
+    const merged = envCb!({} as any, { mergeEnvironmentConfig });
+    const rspackConfig: any = {
+      output: {},
+      plugins: [],
+    };
+    merged.tools.rspack(rspackConfig);
+
+    const options = getFederationPluginOptions(rspackConfig.plugins);
+    expect(options.experiments?.asyncStartup).toBe(true);
   });
 
   it('warns when the node runtime plugin is configured manually', () => {
@@ -368,6 +405,42 @@ describe('federation()', () => {
     expect(options.remoteType).toBe(undefined);
     expect(options.library).toBe(undefined);
     expect(options.runtimePlugins).toBe(undefined);
+    expect(options.experiments?.asyncStartup).toBe(true);
+  });
+
+  it('does not force remoteType when remotes are configured', () => {
+    const plugin = federation({
+      name: 'prefixed_commonjs_remote',
+      remotes: {
+        host: 'commonjs /tmp/remoteEntry.js',
+      },
+    });
+
+    let envCb:
+      | ((
+          config: any,
+          utils: { mergeEnvironmentConfig: (...configs: any[]) => any },
+        ) => any)
+      | undefined;
+
+    plugin.setup({
+      modifyEnvironmentConfig: (cb: any) => {
+        envCb = cb;
+      },
+    } as any);
+
+    const mergeEnvironmentConfig = (...configs: any[]) =>
+      Object.assign({}, ...configs);
+
+    const merged = envCb!({} as any, { mergeEnvironmentConfig });
+    const rspackConfig: any = {
+      output: {},
+      plugins: [],
+    };
+    merged.tools.rspack(rspackConfig);
+
+    const options = getFederationPluginOptions(rspackConfig.plugins);
+    expect(options.remoteType).toBe(undefined);
   });
 
   it('does not force remoteType when no remotes are configured', () => {

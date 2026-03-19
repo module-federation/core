@@ -35,10 +35,12 @@ export default defineConfig({
 By default, `federation()` applies Node-safe Module Federation settings:
 
 - `target: async-node`
+- `experiments.asyncStartup = true`
 - CommonJS library output (`library.type = 'commonjs-module'`)
-- `remoteType = 'script'` when remotes are present
 - Node runtime plugin (`@module-federation/node/runtimePlugin`)
 - `experiments.optimization.target = 'node'`
+- Remote transport is inferred from each remote declaration, so standard URL
+  remotes and `commonjs ...` path remotes work without setting `remoteType`
 
 ### Browser mode
 
@@ -63,3 +65,4 @@ export default defineConfig({
 ```
 
 In browser target mode, node-only defaults are not applied.
+`experiments.asyncStartup` remains enabled.

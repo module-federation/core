@@ -207,22 +207,30 @@ const normalizeRuntimePlugin = (
   return [NODE_RUNTIME_PLUGIN, runtimePlugin[1]];
 };
 
+const withRstestDefaults = (
+  options: ModuleFederationOptions,
+): ModuleFederationOptions => {
+  return {
+    ...options,
+    experiments: {
+      ...options.experiments,
+      // Rstest runs federation bootstraps inside test workers. Force async
+      // container startup so consumers do not need to repeat this everywhere.
+      asyncStartup: true,
+    },
+  };
+};
+
 const withNodeDefaults = (
   options: ModuleFederationOptions,
 ): ModuleFederationOptions => {
-  const merged: ModuleFederationOptions = {
-    ...options,
-  };
+  const merged = withRstestDefaults(options);
 
   merged.library = {
     ...merged.library,
     name: merged.name,
     type: merged.library?.type ?? 'commonjs-module',
   };
-
-  if (merged.remotes && options.remoteType == null) {
-    merged.remoteType = 'script';
-  }
 
   const existingRuntimePlugins = toArray(merged.runtimePlugins).map(
     normalizeRuntimePlugin,
@@ -335,9 +343,7 @@ export const federation = (
         if (moduleFederationOptions) {
           const effectiveOptions = isNodeTarget
             ? withNodeDefaults(moduleFederationOptions)
-            : {
-                ...moduleFederationOptions,
-              };
+            : withRstestDefaults(moduleFederationOptions);
           rspackConfig.plugins.push(
             new ModuleFederationPlugin(
               effectiveOptions as moduleFederationPlugin.ModuleFederationPluginOptions,
