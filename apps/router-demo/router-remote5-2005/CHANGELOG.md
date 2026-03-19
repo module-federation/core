@@ -1,5 +1,13 @@
 # remote5
 
+## 2.0.6
+
+### Patch Changes
+
+- Updated dependencies [762b9ef]
+  - @module-federation/rsbuild-plugin@2.2.3
+  - @module-federation/bridge-react@2.2.3
+
 ## 2.0.5
 
 ### Patch Changes
