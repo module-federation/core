@@ -1,6 +1,7 @@
 import ErrorCodeTitle from '@components/ErrorCodeTitle';
 import EnableAsyncEntry from '@components/zh/EnableAsyncEntry';
 import Runtime from '@components/zh/runtime/index';
+import { Tab, Tabs } from '@theme';
 
 # 运行时
 
@@ -41,6 +42,96 @@ import Runtime from '@components/zh/runtime/index';
   如果使用的是 manifest ，那么检查 manifest 中的 publicPath 和 remoteEntry.name 字段
 2. 若项目构建器为 rspack ，查看最终构建配置是否设置了 [runtimeChunk](https://rspack.dev/config/optimization#optimizationruntimechunk) ，若是则删除此配置
 3. 检查该资源是否是外部可访问
+
+### 获取更详细的错误信息
+
+如果已确认 `window[remoteEntryKey]` 不存在（即脚本未能正常挂载容器），但控制台没有明确的报错信息，可能是因为生产者脚本为跨域资源，浏览器出于安全限制会隐藏跨域脚本的错误详情（`filename`、`lineno`、`message` 均为空）。
+
+此时可通过 [`createScript`](../../plugin/dev/index#createscript) hook 为脚本添加 `crossorigin` 属性，前提是生产者服务端已配置 `Access-Control-Allow-Origin` 响应头。
+
+首先创建运行时插件文件：
+
+```ts title="script-crossorigin-plugin.ts"
+import { ModuleFederationRuntimePlugin } from '@module-federation/runtime/types';
+
+export default function MFScriptPlugin(): ModuleFederationRuntimePlugin {
+  return {
+    name: 'script-crossorigin-plugin',
+    createScript({ url }) {
+      const script = document.createElement('script');
+      script.src = url;
+      script.crossOrigin = 'anonymous';
+      return script;
+    },
+    // 若项目中使用了 preloadRemote，需同步设置 createLink 的 crossorigin，
+    // 否则预加载（no-cors）与实际加载（cors）缓存键不匹配，导致预加载失效。
+    createLink({ url, attrs }) {
+      const link = document.createElement('link');
+      link.setAttribute('href', url);
+      link.setAttribute('crossorigin', 'anonymous');
+      if (attrs) {
+        Object.entries(attrs).forEach(([key, value]) => {
+          if (key !== 'crossorigin') {
+            link.setAttribute(key, String(value));
+          }
+        });
+      }
+      return link;
+    },
+  };
+}
+```
+
+然后注册该插件：
+
+<Tabs>
+  <Tab label="构建插件注册">
+
+通过构建配置中的 `runtimePlugins` 字段注册：
+
+```ts title="rspack.config.ts"
+const path = require('path');
+module.exports = {
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'host',
+      remotes: { /* ... */ },
+      runtimePlugins: [
+        path.resolve(__dirname, './script-crossorigin-plugin.ts'),
+      ],
+    }),
+  ],
+};
+```
+
+  </Tab>
+  <Tab label="Runtime API 注册">
+
+通过 `init` API 的 `plugins` 字段注册：
+
+```ts title="index.ts"
+import { init } from '@module-federation/runtime';
+import MFScriptPlugin from './script-crossorigin-plugin';
+
+init({
+  name: 'host',
+  remotes: [/* ... */],
+  plugins: [MFScriptPlugin()],
+});
+```
+
+  </Tab>
+</Tabs>
+
+添加后，跨域脚本执行时抛出的异常将携带完整的 `filename`、`lineno`、`message` 信息，便于定位具体报错位置。
+
+:::tip
+
+* 若服务端未配置 CORS 响应头，添加 `crossorigin` 属性反而会导致脚本加载失败（网络错误）。请先确认服务端已正确配置后再使用此方法。
+
+* MF 未自动设置该属性，原因是：在预加载阶段若自动调用 `createScript` hook 来探测 `crossOrigin` 值，而 hook 内部可能存在注册监听器、修改全局状态等副作用，被调用两次会引发不可预期的问题。
+
+:::
 
 ## RUNTIME-002
 
@@ -180,6 +271,10 @@ import Runtime from '@components/zh/runtime/index';
 :::tip
 ScriptExecutionError 表示脚本已成功下载，重试不会解决此类问题。需优先排查生产者代码本身的兼容性或运行时错误。
 :::
+
+### 获取更详细的错误信息
+
+在 **v2.2.0 之前**，RUNTIME-008 的错误信息可能不包含具体的异常详情。若遇到错误信息不够明确的情况，可参考 「[RUNTIME-001 获取更详细的错误信息](#获取更详细的错误信息)」 中的方法，通过添加 `crossorigin` 属性来获取完整的错误堆栈。
 
 ## RUNTIME-009
 
