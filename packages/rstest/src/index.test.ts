@@ -1,8 +1,11 @@
+import { createRequire } from 'node:module';
 import { describe, expect, it } from '@rstest/core';
 
 import { federation, shouldKeepBundledForFederation } from './index';
 
-const NODE_RUNTIME_PLUGIN = '@module-federation/node/runtimePlugin';
+const require = createRequire(import.meta.url);
+const NODE_RUNTIME_PLUGIN_REQUEST = '@module-federation/node/runtimePlugin';
+const NODE_RUNTIME_PLUGIN = require.resolve(NODE_RUNTIME_PLUGIN_REQUEST);
 
 const getFederationPluginOptions = (plugins: unknown[]) => {
   const plugin = (plugins as any[]).find(
@@ -277,7 +280,7 @@ describe('federation()', () => {
     try {
       const plugin = federation({
         name: 'legacy_component_app',
-        runtimePlugins: [NODE_RUNTIME_PLUGIN],
+        runtimePlugins: [NODE_RUNTIME_PLUGIN_REQUEST],
         experiments: {
           optimization: {
             target: 'node',

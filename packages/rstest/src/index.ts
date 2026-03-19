@@ -1,3 +1,4 @@
+import { createRequire } from 'node:module';
 import type { EnvironmentConfig, RsbuildPlugin, Rspack } from '@rsbuild/core';
 import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
 import { createLogger } from '@module-federation/sdk';
@@ -37,7 +38,9 @@ type RstestFederationOptions = {
 export type { ModuleFederationOptions, RstestFederationOptions };
 
 const logger = createLogger('[ Module Federation Rstest Plugin ]');
-const NODE_RUNTIME_PLUGIN = '@module-federation/node/runtimePlugin';
+const require = createRequire(import.meta.url);
+const NODE_RUNTIME_PLUGIN_REQUEST = '@module-federation/node/runtimePlugin';
+const NODE_RUNTIME_PLUGIN = require.resolve(NODE_RUNTIME_PLUGIN_REQUEST);
 
 // Note: ModuleFederationPlugin configuration should include
 // experiments.optimization.target: 'node' when used with Rstest
@@ -184,6 +187,26 @@ const toArray = <T>(value: T | T[] | undefined): T[] => {
   return Array.isArray(value) ? [...value] : [value];
 };
 
+const getRuntimePluginName = (
+  runtimePlugin: string | [string, Record<string, unknown>],
+): string => {
+  return typeof runtimePlugin === 'string' ? runtimePlugin : runtimePlugin[0];
+};
+
+const normalizeRuntimePlugin = (
+  runtimePlugin: string | [string, Record<string, unknown>],
+): string | [string, Record<string, unknown>] => {
+  if (getRuntimePluginName(runtimePlugin) !== NODE_RUNTIME_PLUGIN_REQUEST) {
+    return runtimePlugin;
+  }
+
+  if (typeof runtimePlugin === 'string') {
+    return NODE_RUNTIME_PLUGIN;
+  }
+
+  return [NODE_RUNTIME_PLUGIN, runtimePlugin[1]];
+};
+
 const withNodeDefaults = (
   options: ModuleFederationOptions,
 ): ModuleFederationOptions => {
@@ -201,14 +224,15 @@ const withNodeDefaults = (
     merged.remoteType = 'script';
   }
 
-  const existingRuntimePlugins = toArray(merged.runtimePlugins);
-  const hasNodeRuntimePlugin = existingRuntimePlugins.some((runtimePlugin) => {
-    return (
-      (typeof runtimePlugin === 'string' ? runtimePlugin : runtimePlugin[0]) ===
-      NODE_RUNTIME_PLUGIN
-    );
-  });
-  if (!hasNodeRuntimePlugin) {
+  const existingRuntimePlugins = toArray(merged.runtimePlugins).map(
+    normalizeRuntimePlugin,
+  );
+  if (
+    !existingRuntimePlugins.some(
+      (runtimePlugin) =>
+        getRuntimePluginName(runtimePlugin) === NODE_RUNTIME_PLUGIN,
+    )
+  ) {
     merged.runtimePlugins = [NODE_RUNTIME_PLUGIN, ...existingRuntimePlugins];
   } else {
     logger.warn(
