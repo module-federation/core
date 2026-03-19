@@ -4,7 +4,7 @@ import {
   getManifestFileName,
   type moduleFederationPlugin,
 } from '@module-federation/sdk';
-import type { Compiler, WebpackPluginInstance } from 'webpack';
+import type { Compiler, WebpackPluginInstance } from '@rspack/core';
 
 const PUBLISHED_SERVER_ASSET_DIRECTORY = path.join('static', 'ssr');
 

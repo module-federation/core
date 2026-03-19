@@ -6,17 +6,14 @@ import {
 import type {
   Compilation,
   Compiler,
-  WebpackOptionsNormalized,
   WebpackPluginInstance,
-} from 'webpack';
+} from '@rspack/core';
 import {
   PersistManifestAssetsPlugin,
   PublishServerAssetsPlugin,
 } from './server-asset-publisher';
 
-type EntryStaticNormalized = Awaited<
-  ReturnType<Extract<WebpackOptionsNormalized['entry'], () => any>>
->;
+type EntryStaticNormalized = Record<string, unknown>;
 
 type ModifyEntryOptions = {
   compiler: Compiler;
@@ -29,7 +26,7 @@ type InvertedContainerRuntimeModuleOptions = {
 };
 
 const createInvertedContainerRuntimeModule = (
-  webpackRef: typeof import('webpack'),
+  webpackRef: typeof import('@rspack/core'),
 ) => {
   const { RuntimeGlobals, RuntimeModule, Template } = webpackRef;
 
@@ -55,7 +52,14 @@ const createInvertedContainerRuntimeModule = (
         const module = compilation.moduleGraph.getModule(
           containerDependency as never,
         );
-        if (module && chunkGraph.isModuleInChunk(module, chunk)) {
+        if (
+          module &&
+          (
+            chunkGraph as unknown as {
+              isModuleInChunk: (m: unknown, c: unknown) => boolean;
+            }
+          ).isModuleInChunk(module, chunk)
+        ) {
           containerEntryModule =
             module as unknown as typeof containerEntryModule;
         }
@@ -66,15 +70,20 @@ const createInvertedContainerRuntimeModule = (
       }
 
       if (
-        compilation.chunkGraph.isEntryModuleInChunk(
-          containerEntryModule as never,
-          chunk,
-        )
+        (
+          compilation.chunkGraph as unknown as {
+            isEntryModuleInChunk: (m: unknown, c: unknown) => boolean;
+          }
+        ).isEntryModuleInChunk(containerEntryModule as never, chunk)
       ) {
         return '';
       }
 
-      const initRuntimeModuleGetter = compilation.runtimeTemplate.moduleRaw({
+      const initRuntimeModuleGetter = (
+        compilation as unknown as {
+          runtimeTemplate: { moduleRaw: (opts: unknown) => string };
+        }
+      ).runtimeTemplate.moduleRaw({
         module: containerEntryModule as never,
         chunkGraph,
         weak: false,
@@ -87,7 +96,13 @@ const createInvertedContainerRuntimeModule = (
       return Template.asString([
         `var prevStartup = ${RuntimeGlobals.startup};`,
         'var hasRun = false;',
-        `${RuntimeGlobals.startup} = ${compilation.runtimeTemplate.basicFunction(
+        `${RuntimeGlobals.startup} = ${(
+          compilation as unknown as {
+            runtimeTemplate: {
+              basicFunction: (a: string, b: string) => string;
+            };
+          }
+        ).runtimeTemplate.basicFunction(
           '',
           Template.asString([
             'if (!hasRun) {',
@@ -121,7 +136,9 @@ class InvertedContainerPlugin implements WebpackPluginInstance {
     compiler.hooks.thisCompilation.tap(
       'NextjsMfInvertedContainerPlugin',
       (compilation: Compilation) => {
-        const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
+        const hooks = FederationModulesPlugin.getCompilationHooks(
+          compilation as never,
+        );
         const containers = new Set<unknown>();
 
         hooks.addContainerEntryDependency.tap(
@@ -185,14 +202,17 @@ export const modifyEntry = ({
 
   if (typeof compiler.options.entry === 'function') {
     const previousEntry = compiler.options.entry;
-    compiler.options.entry = async () => {
+    compiler.options.entry = (async () => {
       let resolvedEntry = await previousEntry();
       if (staticEntry) {
-        resolvedEntry = mergeEntries(resolvedEntry, staticEntry);
+        resolvedEntry = mergeEntries(
+          resolvedEntry,
+          staticEntry,
+        ) as typeof resolvedEntry;
       }
       prependEntry?.(resolvedEntry);
       return resolvedEntry;
-    };
+    }) as typeof compiler.options.entry;
     return;
   }
 
@@ -200,7 +220,7 @@ export const modifyEntry = ({
     compiler.options.entry = mergeEntries(
       compiler.options.entry as EntryStaticNormalized,
       staticEntry,
-    );
+    ) as typeof compiler.options.entry;
   }
 
   if (compiler.options.entry) {

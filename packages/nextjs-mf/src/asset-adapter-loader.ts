@@ -1,4 +1,4 @@
-import type { LoaderContext } from 'webpack';
+import type { LoaderContext } from '@rspack/core';
 
 type AssetModuleExport =
   | string

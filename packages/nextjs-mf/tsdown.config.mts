@@ -17,13 +17,7 @@ export default defineConfig([
         'asset-adapter-loader': 'src/asset-adapter-loader.ts',
         'runtime-plugin': 'src/runtime-plugin.ts',
       },
-      external: [
-        '@module-federation/*',
-        'next',
-        'react',
-        'react-dom',
-        'webpack',
-      ],
+      external: ['@module-federation/*', 'next', 'react', 'react-dom'],
       dts: {
         resolver: 'tsc',
         eager: true,

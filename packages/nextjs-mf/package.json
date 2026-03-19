@@ -16,26 +16,15 @@
     "Pavel Chertorogov, nodkz <pavel.chertorogov@gmail.com> (www.ps.kz)"
   ],
   "files": [
-    "dist/asset-adapter-loader.cjs",
-    "dist/asset-adapter-loader.cjs.map",
-    "dist/asset-adapter-loader.d.ts",
-    "dist/index.cjs",
-    "dist/index.cjs.map",
-    "dist/index.d.ts",
-    "dist/server.cjs",
-    "dist/server.cjs.map",
-    "dist/server.d.ts",
-    "server.js",
-    "server.mjs",
-    "server.d.ts",
+    "dist/",
+    "README.md",
+    "LICENSE",
+    "runtime-plugin.d.ts",
     "runtime-plugin.js",
     "runtime-plugin.mjs",
-    "runtime-plugin.d.ts",
-    "dist/runtime-plugin.cjs",
-    "dist/runtime-plugin.cjs.map",
-    "dist/runtime-plugin.d.ts",
-    "README.md",
-    "LICENSE"
+    "server.d.ts",
+    "server.js",
+    "server.mjs"
   ],
   "scripts": {
     "postinstall": "echo \"Deprecation Notice: We intend to deprecate 'nextjs-mf'. Please see https://github.com/module-federation/core/issues/3153 for more details.\"",

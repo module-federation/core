@@ -1,7 +1,11 @@
-import type { Compiler, Compilation, WebpackPluginInstance } from 'webpack';
+import type {
+  Compiler,
+  Compilation,
+  WebpackPluginInstance,
+} from '@rspack/core';
 
 const createEntryStartupRuntimeModule = (
-  webpackRef: typeof import('webpack'),
+  webpackRef: typeof import('@rspack/core'),
 ) => {
   const { RuntimeGlobals, RuntimeModule, Template } = webpackRef;
 
