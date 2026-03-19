@@ -187,67 +187,91 @@ RCT_EXPORT_METHOD(downloadFile:(NSString *)urlString
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
 {
-  dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-    @try {
-      NSURL *url = [NSURL URLWithString:urlString];
-      NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
-      [request setHTTPMethod:@"GET"];
-      [request setTimeoutInterval:60];
+  NSURL *url = [NSURL URLWithString:urlString];
+  if (!url) {
+    reject(@"DOWNLOAD_ERROR", @"Invalid URL", nil);
+    return;
+  }
 
-      __block NSError *sessionError = nil;
-      dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+  NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+  [request setHTTPMethod:@"GET"];
+  [request setTimeoutInterval:60];
 
-      NSURLSessionDataTask *task = [[NSURLSession sharedSession]
-        dataTaskWithRequest:request
-        completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-          if (error) {
-            sessionError = error;
-            dispatch_semaphore_signal(semaphore);
-            return;
-          }
-
-          NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
-          if (httpResponse.statusCode != 200) {
-            sessionError = [NSError errorWithDomain:@"MFECache"
-                                               code:httpResponse.statusCode
-                                           userInfo:@{NSLocalizedDescriptionKey:
-                                             [NSString stringWithFormat:@"HTTP %ld", (long)httpResponse.statusCode]}];
-            dispatch_semaphore_signal(semaphore);
-            return;
-          }
-
-          NSString *dir = [destPath stringByDeletingLastPathComponent];
-          NSFileManager *fm = [NSFileManager defaultManager];
-          if (![fm fileExistsAtPath:dir]) {
-            [fm createDirectoryAtPath:dir withIntermediateDirectories:YES attributes:nil error:nil];
-          }
-
-          [data writeToFile:destPath atomically:YES];
-
-          unsigned char hash[CC_SHA256_DIGEST_LENGTH];
-          CC_SHA256(data.bytes, (CC_LONG)data.length, hash);
-          NSMutableString *hex = [NSMutableString stringWithCapacity:CC_SHA256_DIGEST_LENGTH * 2];
-          for (int i = 0; i < CC_SHA256_DIGEST_LENGTH; i++) {
-            [hex appendFormat:@"%02x", hash[i]];
-          }
-
-          resolve(@{
-            @"sha256": hex,
-            @"bytesWritten": @(data.length)
-          });
-          dispatch_semaphore_signal(semaphore);
-        }];
-
-      [task resume];
-      dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
-
-      if (sessionError) {
-        reject(@"DOWNLOAD_ERROR", sessionError.localizedDescription, sessionError);
+  NSURLSessionDownloadTask *task = [[NSURLSession sharedSession]
+    downloadTaskWithRequest:request
+    completionHandler:^(NSURL *tempFileURL, NSURLResponse *response, NSError *error) {
+      if (error) {
+        reject(@"DOWNLOAD_ERROR", error.localizedDescription, error);
+        return;
       }
-    } @catch (NSException *exception) {
-      reject(@"DOWNLOAD_ERROR", exception.reason, nil);
-    }
-  });
+
+      NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
+      if (httpResponse.statusCode != 200) {
+        reject(@"DOWNLOAD_ERROR",
+               [NSString stringWithFormat:@"HTTP %ld", (long)httpResponse.statusCode],
+               nil);
+        return;
+      }
+
+      if (!tempFileURL) {
+        reject(@"DOWNLOAD_ERROR", @"No temporary file from download", nil);
+        return;
+      }
+
+      // Streaming SHA-256: read temp file in chunks, never load entire body into memory
+      CC_SHA256_CTX ctx;
+      CC_SHA256_Init(&ctx);
+
+      NSInputStream *stream = [NSInputStream inputStreamWithURL:tempFileURL];
+      [stream open];
+      uint8_t buffer[8192];
+      NSInteger bytesRead;
+      NSUInteger totalBytes = 0;
+      while ((bytesRead = [stream read:buffer maxLength:sizeof(buffer)]) > 0) {
+        CC_SHA256_Update(&ctx, buffer, (CC_LONG)bytesRead);
+        totalBytes += (NSUInteger)bytesRead;
+      }
+      [stream close];
+
+      unsigned char hash[CC_SHA256_DIGEST_LENGTH];
+      CC_SHA256_Final(hash, &ctx);
+
+      NSMutableString *hex = [NSMutableString stringWithCapacity:CC_SHA256_DIGEST_LENGTH * 2];
+      for (int i = 0; i < CC_SHA256_DIGEST_LENGTH; i++) {
+        [hex appendFormat:@"%02x", hash[i]];
+      }
+
+      // Ensure destination directory exists
+      NSString *dir = [destPath stringByDeletingLastPathComponent];
+      NSFileManager *fm = [NSFileManager defaultManager];
+      if (![fm fileExistsAtPath:dir]) {
+        [fm createDirectoryAtPath:dir withIntermediateDirectories:YES attributes:nil error:nil];
+      }
+
+      // Remove existing file at destPath if any (moveItem fails if dest exists)
+      if ([fm fileExistsAtPath:destPath]) {
+        [fm removeItemAtPath:destPath error:nil];
+      }
+
+      // Move temp file to destination
+      NSError *moveError = nil;
+      BOOL moved = [fm moveItemAtURL:tempFileURL
+                               toURL:[NSURL fileURLWithPath:destPath]
+                               error:&moveError];
+      if (!moved) {
+        reject(@"DOWNLOAD_ERROR",
+               [NSString stringWithFormat:@"Failed to move file: %@", moveError.localizedDescription],
+               moveError);
+        return;
+      }
+
+      resolve(@{
+        @"sha256": hex,
+        @"bytesWritten": @(totalBytes)
+      });
+    }];
+
+  [task resume];
 }
 
 @end

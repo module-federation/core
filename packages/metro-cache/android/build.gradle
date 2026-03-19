@@ -23,6 +23,17 @@ android {
     }
   }
 
+  buildFeatures {
+    prefab true
+  }
+
+  // Prefab packages from React Native
+  packagingOptions {
+    jniLibs {
+      useLegacyPackaging = true
+    }
+  }
+
   externalNativeBuild {
     cmake {
       path "src/main/jni/CMakeLists.txt"
@@ -39,4 +50,5 @@ android {
 dependencies {
   implementation "com.facebook.react:react-android:+"
   implementation "com.squareup.okhttp3:okhttp:4.12.0"
+  implementation "com.facebook.fbjni:fbjni:0.5.1"
 }

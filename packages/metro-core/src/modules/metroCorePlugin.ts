@@ -65,13 +65,23 @@ const MetroCorePlugin: () => ModuleFederationRuntimePlugin = () => {
           if (manifest) {
             // Container bundle hash
             const containerHash = (manifest.metaData?.buildInfo as any)?.hash;
+            console.log(
+              '[MFE-Hash] afterResolve raw manifest.metaData.buildInfo:',
+              JSON.stringify(manifest.metaData?.buildInfo),
+            );
+            console.log(
+              '[MFE-Hash] afterResolve manifestUrl:',
+              manifestUrl,
+              'remoteInfo.entry:',
+              remoteInfo.entry,
+            );
             if (containerHash && remoteInfo.entry) {
               bundleHashMap[remoteInfo.entry] = containerHash;
               console.log(
                 '[MFE-Hash] container:',
                 remoteInfo.entry,
                 '→',
-                containerHash.slice(0, 8),
+                containerHash,
               );
             }
             // Exposed bundle hashes — keyed by publicPath + exposed asset path
@@ -89,12 +99,7 @@ const MetroCorePlugin: () => ModuleFederationRuntimePlugin = () => {
                       ? `${publicPath.replace(/\/+$/, '')}/${assetPath.replace(/^\.?\//, '')}`
                       : assetPath;
                     bundleHashMap[fullUrl] = hash;
-                    console.log(
-                      '[MFE-Hash] expose:',
-                      fullUrl,
-                      '→',
-                      hash.slice(0, 8),
-                    );
+                    console.log('[MFE-Hash] expose:', fullUrl, '→', hash);
                   }
                 }
               }
@@ -110,12 +115,7 @@ const MetroCorePlugin: () => ModuleFederationRuntimePlugin = () => {
                       ? `${publicPath.replace(/\/+$/, '')}/${assetPath.replace(/^\.?\//, '')}`
                       : assetPath;
                     bundleHashMap[fullUrl] = hash;
-                    console.log(
-                      '[MFE-Hash] shared:',
-                      fullUrl,
-                      '→',
-                      hash.slice(0, 8),
-                    );
+                    console.log('[MFE-Hash] shared:', fullUrl, '→', hash);
                   }
                 }
               }

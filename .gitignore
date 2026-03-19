@@ -8,6 +8,8 @@ update-commit-messages.sh
 /build
 /docs
 /.nx
+.cxx
+**/android/build/
 # dependencies
 node_modules
 ./webpack-lib
@@ -100,3 +102,4 @@ packages/enhanced/generated/**
 .pnpm-store/
 apps/rsc-demo/**/build/
 apps/rsc-demo/e2e/test-results/
+.kiro
