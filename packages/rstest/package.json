@@ -41,6 +41,7 @@
   },
   "devDependencies": {
     "@rslib/core": "^0.12.4",
+    "@rstest/core": "^0.8.1",
     "@rsbuild/core": "^1.3.21"
   },
   "peerDependencies": {

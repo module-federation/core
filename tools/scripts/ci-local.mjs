@@ -35,6 +35,16 @@ function setupE2E() {
   });
 }
 
+const RSTEST_E2E_APPS =
+  'rstest-demo,rstest-remote-demo,rstest-rsbuild-demo,rstest-rslib-demo';
+const RSTEST_E2E_BUILD_FILTERS = [
+  '--filter=rstest-demo',
+  '--filter=rstest-remote-demo',
+  '--filter=rstest-rsbuild-demo',
+  '--filter=rstest-rslib-demo',
+];
+const RSTEST_E2E_PORTS = '3015,3016,3025,3035,3115,3125,3135';
+
 const jobs = [
   {
     name: 'build-and-test',
@@ -242,6 +252,53 @@ const jobs = [
         await runCommand('pnpm', ['run', 'e2e:node'], ctx);
       }),
     ],
+  },
+  {
+    name: 'e2e-rstest',
+    env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
+    steps: [
+      setupE2E(),
+      step('Build Rstest demos', (ctx) =>
+        runCommand(
+          'pnpm',
+          [
+            'exec',
+            'turbo',
+            'run',
+            'build',
+            ...RSTEST_E2E_BUILD_FILTERS,
+            '--concurrency=20',
+          ],
+          ctx,
+        ),
+      ),
+      step('Check CI conditions', async (ctx) => {
+        ctx.state.shouldRun = await ciIsAffected(RSTEST_E2E_APPS, ctx);
+      }),
+      step('Clear Rstest demo ports', (ctx) =>
+        runShell(`npx kill-port --port ${RSTEST_E2E_PORTS} || true`, ctx),
+      ),
+      step('E2E Test for Rstest demos', async (ctx) => {
+        if (!ctx.state.shouldRun) {
+          logStepSkip(ctx, 'Not affected by current changes.');
+          return;
+        }
+        const demoTests = [
+          ['rstest-demo', 'test:node'],
+          ['rstest-demo', 'test:browser'],
+          ['rstest-rsbuild-demo', 'test:node'],
+          ['rstest-rsbuild-demo', 'test:browser'],
+          ['rstest-rslib-demo', 'test:node'],
+          ['rstest-rslib-demo', 'test:browser'],
+        ];
+
+        for (const [filter, script] of demoTests) {
+          await runCommand('pnpm', ['--filter', filter, 'run', script], ctx);
+        }
+      }),
+    ],
+    cleanup: (ctx) =>
+      runShell(`lsof -ti tcp:${RSTEST_E2E_PORTS} | xargs kill || true`, ctx),
   },
   {
     name: 'e2e-next-dev',

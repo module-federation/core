@@ -1,0 +1,87 @@
+# Rstest
+
+`@module-federation/rstest` provides the `federation()` Rsbuild plugin used by
+Rstest to enable Module Federation compatibility mode for Node/JSDOM test
+environments and browser mode.
+
+## Quick Start
+
+### Installation
+
+You can install the plugin using the following command:
+
+import { PackageManagerTabs } from '@theme';
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm add @module-federation/rstest --save-dev',
+    yarn: 'yarn add @module-federation/rstest --save-dev',
+    pnpm: 'pnpm add @module-federation/rstest --save-dev',
+    bun: 'bun add @module-federation/rstest --save-dev',
+  }}
+/>
+
+### Register plugin
+
+#### Node / JSDOM test environments
+
+```ts title='rstest.config.ts'
+import { federation } from '@module-federation/rstest';
+import { defineConfig } from '@rstest/core';
+
+export default defineConfig({
+  federation: true,
+  plugins: [
+    federation({
+      name: 'main_app_web',
+      remotes: {
+        'component-app': 'component_app@http://localhost:3001/remoteEntry.js',
+      },
+      shared: {
+        react: { singleton: true },
+        'react-dom': { singleton: true },
+      },
+    }),
+  ],
+});
+```
+
+By default, `federation()` applies Node-safe Module Federation settings:
+
+- `target: async-node`
+- CommonJS library output (`library.type = 'commonjs-module'`)
+- `remoteType = 'script'` when remotes are present
+- Node runtime plugin resolved from the `@module-federation/rstest` package
+- `experiments.optimization.target = 'node'`
+
+### Browser mode
+
+```ts title='rstest.config.ts'
+import { federation } from '@module-federation/rstest';
+import { defineConfig } from '@rstest/core';
+
+export default defineConfig({
+  federation: true,
+  plugins: [
+    federation(
+      {
+        name: 'browser_host',
+        remotes: {
+          app2: 'app2@http://localhost:3001/remoteEntry.js',
+        },
+      },
+      { target: 'browser' },
+    ),
+  ],
+});
+```
+
+In browser target mode, node-only defaults are not applied.
+
+### Notes
+
+- Node-target configs automatically inject the Node runtime plugin from the
+  package context, so consuming test apps do not need to install
+  `@module-federation/node` directly.
+- Use `federation: true` in your Rstest config when you want Rstest to enable
+  this compatibility mode.

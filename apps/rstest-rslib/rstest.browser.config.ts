@@ -11,7 +11,6 @@ export default defineConfig({
     }),
   }),
   name: 'rslib-browser',
-  globalSetup: ['./scripts/rstestGlobalSetup.ts'],
   setupFiles: ['./scripts/rstest.browser.setup.ts'],
   browser: {
     enabled: true,
