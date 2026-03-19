@@ -1,6 +1,7 @@
 [
   "plugins",
   "plugins-rsbuild",
+  "plugins-rstest",
   "plugins-rspack",
   "plugins-webpack",
   "plugins-rspress",
