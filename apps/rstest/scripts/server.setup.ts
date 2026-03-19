@@ -31,6 +31,16 @@ declare global {
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+const waitForExit = (child: ChildProc) =>
+  new Promise<void>((resolve) => {
+    if (child.exitCode !== null || child.signalCode !== null) {
+      resolve();
+      return;
+    }
+
+    child.once('exit', () => resolve());
+  });
+
 const canConnect = (target: ServerTarget) =>
   new Promise<boolean>((resolve) => {
     const socket = net.createConnection({
@@ -117,7 +127,9 @@ export const cleanupDemoServers = async () => {
 
   if (hostChild) {
     try {
+      const exitPromise = waitForExit(hostChild);
       hostChild.kill('SIGTERM');
+      await exitPromise;
     } catch {
       // no-op
     }
@@ -126,7 +138,9 @@ export const cleanupDemoServers = async () => {
 
   if (child) {
     try {
+      const exitPromise = waitForExit(child);
       child.kill('SIGTERM');
+      await exitPromise;
     } catch {
       // no-op
     }
