@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@module-federation/enhanced": "workspace:*",
+    "@module-federation/node": "workspace:*",
     "@module-federation/runtime": "workspace:*",
     "react": "^19.2.3",
     "react-dom": "^19.2.3"
