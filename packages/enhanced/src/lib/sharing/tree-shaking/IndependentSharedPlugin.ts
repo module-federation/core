@@ -188,7 +188,6 @@ export default class IndependentSharedPlugin {
             const statsContent = JSON.parse(
               stats.source.source().toString(),
             ) as Stats;
-            const sources = compiler.webpack.sources;
 
             const { shared } = statsContent;
             Object.entries(this.buildAssets).forEach(([key, item]) => {
@@ -206,7 +205,9 @@ export default class IndependentSharedPlugin {
 
             compilation.updateAsset(
               StatsFileName,
-              new sources.RawSource(JSON.stringify(statsContent)),
+              new compiler.webpack.sources.RawSource(
+                JSON.stringify(statsContent),
+              ),
             );
           },
         );

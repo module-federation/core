@@ -77,7 +77,6 @@ class EmbedFederationRuntimePlugin {
           PLUGIN_NAME,
           (startupSource, _lastInlinedModule, renderContext) => {
             const { chunk, chunkGraph } = renderContext;
-            const sources = compiler.webpack.sources;
 
             if (!this.isEnabledForChunk(chunk)) {
               return startupSource;
@@ -98,7 +97,7 @@ class EmbedFederationRuntimePlugin {
             }
 
             // Otherwise, append a startup call.
-            return new sources.ConcatSource(
+            return new compiler.webpack.sources.ConcatSource(
               startupSource,
               '\n// Custom hook: appended startup call because none was added automatically\n',
               `${RuntimeGlobals.startup}();\n`,

@@ -92,7 +92,6 @@ class AsyncEntryStartupPlugin {
         _renderContext: Module,
         upperContext: StartupRenderContext,
       ) => {
-        const sources = compiler.webpack.sources;
         const isSingleRuntime = compiler.options?.optimization?.runtimeChunk;
         if (upperContext?.chunk.id && isSingleRuntime) {
           if (upperContext?.chunk.hasRuntime()) {
@@ -193,7 +192,7 @@ class AsyncEntryStartupPlugin {
           source,
         );
 
-        return new sources.ConcatSource(templateString);
+        return new compiler.webpack.sources.ConcatSource(templateString);
       },
     );
   }

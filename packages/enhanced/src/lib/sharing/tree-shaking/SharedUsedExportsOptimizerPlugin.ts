@@ -295,7 +295,6 @@ export default class SharedUsedExportsOptimizerPlugin implements WebpackPluginIn
               const statsContent = JSON.parse(
                 stats.source.source().toString(),
               ) as Stats;
-              const sources = compiler.webpack.sources;
 
               for (const key of sharedReferencedExports.keys()) {
                 const sharedModule = statsContent.shared.find(
@@ -314,7 +313,9 @@ export default class SharedUsedExportsOptimizerPlugin implements WebpackPluginIn
 
               compilation.updateAsset(
                 statsFileName,
-                new sources.RawSource(JSON.stringify(statsContent, null, 2)),
+                new compiler.webpack.sources.RawSource(
+                  JSON.stringify(statsContent, null, 2),
+                ),
               );
             },
           );
