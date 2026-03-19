@@ -22,12 +22,8 @@ const remoteServer: ServerTarget = {
 const hostAppDir = path.resolve(__dirname, '..');
 const remoteAppDir = path.resolve(__dirname, '../../rstest-remote');
 
-declare global {
-  // eslint-disable-next-line no-var
-  var __RSTEST_DEMO_HOST__: ChildProc | undefined;
-  // eslint-disable-next-line no-var
-  var __RSTEST_DEMO_REMOTE__: ChildProc | undefined;
-}
+let hostProcess: ChildProc | undefined;
+let remoteProcess: ChildProc | undefined;
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -112,18 +108,18 @@ const startHost = () => {
 };
 
 export const ensureDemoServers = async () => {
-  if (globalThis.__RSTEST_DEMO_HOST__ && globalThis.__RSTEST_DEMO_REMOTE__) {
+  if (hostProcess && remoteProcess) {
     return;
   }
 
-  globalThis.__RSTEST_DEMO_HOST__ = startHost();
-  globalThis.__RSTEST_DEMO_REMOTE__ = startRemote();
+  hostProcess = startHost();
+  remoteProcess = startRemote();
   await Promise.all([waitForServer(hostServer), waitForServer(remoteServer)]);
 };
 
 export const cleanupDemoServers = async () => {
-  const hostChild = globalThis.__RSTEST_DEMO_HOST__;
-  const child = globalThis.__RSTEST_DEMO_REMOTE__;
+  const hostChild = hostProcess;
+  const child = remoteProcess;
 
   if (hostChild) {
     try {
@@ -133,7 +129,7 @@ export const cleanupDemoServers = async () => {
     } catch {
       // no-op
     }
-    globalThis.__RSTEST_DEMO_HOST__ = undefined;
+    hostProcess = undefined;
   }
 
   if (child) {
@@ -144,6 +140,6 @@ export const cleanupDemoServers = async () => {
     } catch {
       // no-op
     }
-    globalThis.__RSTEST_DEMO_REMOTE__ = undefined;
+    remoteProcess = undefined;
   }
 };

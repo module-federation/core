@@ -22,12 +22,8 @@ const remoteServer: ServerTarget = {
 const hostAppDir = path.resolve(__dirname, '..');
 const remoteAppDir = path.resolve(__dirname, '../../rstest-remote');
 
-declare global {
-  // eslint-disable-next-line no-var
-  var __RSTEST_RSLIB_HOST__: ChildProc | undefined;
-  // eslint-disable-next-line no-var
-  var __RSTEST_RSLIB_REMOTE__: ChildProc | undefined;
-}
+let hostProcess: ChildProc | undefined;
+let remoteProcess: ChildProc | undefined;
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -94,17 +90,17 @@ const startRemote = () =>
   });
 
 export const ensureDemoServers = async () => {
-  if (globalThis.__RSTEST_RSLIB_HOST__ && globalThis.__RSTEST_RSLIB_REMOTE__) {
+  if (hostProcess && remoteProcess) {
     return;
   }
-  globalThis.__RSTEST_RSLIB_HOST__ = startHost();
-  globalThis.__RSTEST_RSLIB_REMOTE__ = startRemote();
+  hostProcess = startHost();
+  remoteProcess = startRemote();
   await Promise.all([waitForServer(hostServer), waitForServer(remoteServer)]);
 };
 
 export const cleanupDemoServers = async () => {
-  const host = globalThis.__RSTEST_RSLIB_HOST__;
-  const remote = globalThis.__RSTEST_RSLIB_REMOTE__;
+  const host = hostProcess;
+  const remote = remoteProcess;
 
   if (host) {
     try {
@@ -114,7 +110,7 @@ export const cleanupDemoServers = async () => {
     } catch {
       // no-op
     }
-    globalThis.__RSTEST_RSLIB_HOST__ = undefined;
+    hostProcess = undefined;
   }
 
   if (remote) {
@@ -125,6 +121,6 @@ export const cleanupDemoServers = async () => {
     } catch {
       // no-op
     }
-    globalThis.__RSTEST_RSLIB_REMOTE__ = undefined;
+    remoteProcess = undefined;
   }
 };
