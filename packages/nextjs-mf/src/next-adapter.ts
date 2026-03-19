@@ -102,7 +102,13 @@ const mergeIgnoredWatchEntries = (
 const NEXTJS_MF_RUNTIME_PLUGIN_REQUEST =
   '@module-federation/nextjs-mf/runtime-plugin';
 
-const resolveRuntimePluginPath = (): string => NEXTJS_MF_RUNTIME_PLUGIN_REQUEST;
+const resolveRuntimePluginPath = (): string => {
+  try {
+    return require.resolve(NEXTJS_MF_RUNTIME_PLUGIN_REQUEST);
+  } catch {
+    return path.resolve(__dirname, '..', 'runtime-plugin.js');
+  }
+};
 
 const resolveNodeRuntimePluginPath = (): string =>
   require.resolve('@module-federation/node/runtimePlugin');

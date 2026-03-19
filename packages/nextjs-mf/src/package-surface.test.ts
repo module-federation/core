@@ -153,6 +153,9 @@ describe('package surface', () => {
       'server.js',
       'server.mjs',
       'server.d.ts',
+      'runtime-plugin.js',
+      'runtime-plugin.mjs',
+      'runtime-plugin.d.ts',
       'dist/runtime-plugin.cjs',
       'dist/runtime-plugin.cjs.map',
       'dist/runtime-plugin.d.ts',
@@ -165,8 +168,10 @@ describe('package surface', () => {
         default: './dist/index.cjs',
       },
       './runtime-plugin': {
-        types: './dist/runtime-plugin.d.ts',
-        default: './dist/runtime-plugin.cjs',
+        types: './runtime-plugin.d.ts',
+        require: './runtime-plugin.js',
+        import: './runtime-plugin.mjs',
+        default: './runtime-plugin.mjs',
       },
       './server': {
         types: './server.d.ts',
