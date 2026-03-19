@@ -7,7 +7,6 @@ const menuItems: ItemType[] = [
   { label: 'Main shop', key: '/shop' },
   { label: 'Product A', key: '/shop/products/A' },
   { label: 'Product B', key: '/shop/products/B' },
-  { label: 'Exposed pages', key: '/shop/exposed-pages' },
   {
     label: 'Exposed components',
     type: 'group',
@@ -21,9 +20,9 @@ const menuItems: ItemType[] = [
 export default function AppMenu() {
   const router = Router.router;
   const selectedKey =
-    typeof window !== 'undefined'
-      ? window.location.pathname || router?.asPath || '/shop'
-      : router?.asPath || '/shop';
+    typeof window === 'undefined'
+      ? router?.asPath || '/shop'
+      : window.location.pathname || router?.asPath || '/shop';
 
   return (
     <>

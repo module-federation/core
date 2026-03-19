@@ -5,6 +5,8 @@ How AI coding agents should operate in this repository.
 > **Important migration note (Turborepo):**
 > Nx orchestration has been removed from this repository. Prefer Turbo + package scripts for all build/test/lint workflows.
 
+NOTE: never use 'eager:true' unless explicitly told to. assume by default it is forbidden unless already exists in a test case. 
+
 ## Scope and Precedence
 
 - Scope: this file applies to the full repository root.

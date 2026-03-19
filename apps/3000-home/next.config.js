@@ -9,6 +9,18 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  async headers() {
+    return [
+      {
+        source: '/_next/static/:path*',
+        headers: [
+          { key: 'Access-Control-Allow-Origin', value: '*' },
+          { key: 'Access-Control-Allow-Methods', value: 'GET, OPTIONS' },
+          { key: 'Access-Control-Allow-Headers', value: '*' },
+        ],
+      },
+    ];
+  },
   webpack(config, options) {
     const { isServer } = options;
     config.watchOptions = {
@@ -36,24 +48,12 @@ const nextConfig = {
           checkout: remotes.checkout,
         },
         exposes: {
+          './pages/index': './pages/index',
           './SharedNav': './components/SharedNav',
           './menu': './components/menu',
         },
         shared: {
           'lodash/': {},
-          antd: {
-            requiredVersion: '5.19.1',
-            version: '5.19.1',
-          },
-          '@ant-design/': {
-            singleton: true,
-          },
-        },
-        extraOptions: {
-          debug: false,
-          exposePages: true,
-          enableImageLoaderFix: true,
-          enableUrlLoaderFix: true,
         },
       }),
     );

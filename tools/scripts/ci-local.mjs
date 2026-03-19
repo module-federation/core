@@ -247,7 +247,6 @@ const jobs = [
     name: 'e2e-next-dev',
     env: {
       SKIP_DEVTOOLS_POSTINSTALL: 'true',
-      NEXT_PRIVATE_LOCAL_WEBPACK: 'true',
     },
     steps: [
       setupE2E(),

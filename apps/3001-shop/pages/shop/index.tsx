@@ -17,8 +17,8 @@ const Shop = (props) => {
           This is a federated page owned by localhost:3001
         </h3>
         <p className="description">
-          This application manually exposes <code>page-map</code> and its
-          modules (see next.config.js file).
+          This application is consumed through explicit route stitching and
+          component exposes declared in <code>next.config.js</code>.
           <br />
           <br />
           <WebpackPng />

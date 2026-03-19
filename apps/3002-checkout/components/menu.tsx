@@ -5,7 +5,6 @@ import { Menu } from 'antd';
 
 const menuItems: ItemType[] = [
   { label: 'Main checkout', key: '/checkout' },
-  { label: 'Exposed pages', key: '/checkout/exposed-pages' },
   {
     label: 'Exposed components',
     type: 'group',
@@ -19,9 +18,9 @@ const menuItems: ItemType[] = [
 export default function AppMenu() {
   const router = Router.router;
   const selectedKey =
-    typeof window !== 'undefined'
-      ? window.location.pathname || router?.asPath || '/checkout'
-      : router?.asPath || '/checkout';
+    typeof window === 'undefined'
+      ? router?.asPath || '/checkout'
+      : window.location.pathname || router?.asPath || '/checkout';
 
   return (
     <>

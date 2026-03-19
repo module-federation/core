@@ -28,6 +28,7 @@ const nextConfig = {
     };
 
     config.plugins.push(
+      // Experimental quarantine only: wave 1 does not claim App Router support.
       new NextFederationPlugin({
         name: 'home_app',
         filename: 'static/chunks/remoteEntry.js',
@@ -45,12 +46,6 @@ const nextConfig = {
           //   singleton: true,
           //   requiredVersion: false
           // }
-        },
-        extraOptions: {
-          // debug: false,
-          // exposePages: true,
-          // enableImageLoaderFix: true,
-          // enableUrlLoaderFix: true,
         },
       }),
     );

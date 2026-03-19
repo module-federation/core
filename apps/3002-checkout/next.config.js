@@ -9,6 +9,18 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  async headers() {
+    return [
+      {
+        source: '/_next/static/:path*',
+        headers: [
+          { key: 'Access-Control-Allow-Origin', value: '*' },
+          { key: 'Access-Control-Allow-Methods', value: 'GET, OPTIONS' },
+          { key: 'Access-Control-Allow-Headers', value: '*' },
+        ],
+      },
+    ];
+  },
   webpack(config, options) {
     const { isServer } = options;
     config.watchOptions = {
@@ -27,25 +39,18 @@ const nextConfig = {
           }/remoteEntry.js`,
         },
         exposes: {
+          './pages/checkout/index': './pages/checkout/index',
+          './pages/checkout/[pid]': './pages/checkout/[pid]',
+          './pages/checkout/[...slug]': './pages/checkout/[...slug]',
+          './pages/checkout/test-check-button':
+            './pages/checkout/test-check-button',
+          './pages/checkout/test-title': './pages/checkout/test-title',
           './CheckoutTitle': './components/CheckoutTitle',
           './ButtonOldAnt': './components/ButtonOldAnt',
           './menu': './components/menu',
         },
         shared: {
           'lodash/': {},
-          antd: {
-            requiredVersion: '5.19.1',
-            version: '5.19.1',
-          },
-          '@ant-design/': {
-            singleton: true,
-          },
-        },
-        extraOptions: {
-          exposePages: true,
-          enableImageLoaderFix: true,
-          enableUrlLoaderFix: true,
-          automaticPageStitching: false,
         },
       }),
     );

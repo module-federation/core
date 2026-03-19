@@ -5,17 +5,19 @@ import './menu';
 
 const SharedNav = () => {
   const router = Router.router;
-  const asPath =
-    typeof window !== 'undefined'
-      ? window.location.pathname || router?.asPath || '/'
-      : router?.asPath || '/';
+  const [asPath, setAsPath] = React.useState<string>();
+
+  React.useEffect(() => {
+    setAsPath(window.location.pathname || router?.asPath || '/');
+  }, [router?.asPath]);
+
   let activeMenu;
 
-  if (asPath === '/' || asPath.startsWith('/home')) {
+  if (asPath === '/' || asPath?.startsWith('/home')) {
     activeMenu = '/';
-  } else if (asPath.startsWith('/shop')) {
+  } else if (asPath?.startsWith('/shop')) {
     activeMenu = '/shop';
-  } else if (asPath.startsWith('/checkout')) {
+  } else if (asPath?.startsWith('/checkout')) {
     activeMenu = '/checkout';
   }
 

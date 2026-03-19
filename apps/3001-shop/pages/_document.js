@@ -1,25 +1,22 @@
 import React from 'react';
 import Document, { Html, Head, Main, NextScript } from 'next/document';
 import {
-  revalidate,
   FlushedChunks,
   flushChunks,
-} from '@module-federation/nextjs-mf/utils';
+  withFederatedRequest,
+} from '@module-federation/nextjs-mf/server';
 
 class MyDocument extends Document {
   static async getInitialProps(ctx) {
-    if (ctx.pathname) {
-      if (!ctx.pathname.endsWith('_error')) {
-        await revalidate().then((shouldUpdate) => {
-          if (shouldUpdate) {
-            console.log('should HMR', shouldUpdate);
-          }
-        });
-      }
-    }
+    const { initialProps, chunks } = await withFederatedRequest(async () => {
+      const initialProps = await Document.getInitialProps(ctx);
+      const chunks = await flushChunks();
 
-    const initialProps = await Document.getInitialProps(ctx);
-    const chunks = await flushChunks();
+      return {
+        initialProps,
+        chunks,
+      };
+    });
 
     return {
       ...initialProps,

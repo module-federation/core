@@ -2,10 +2,10 @@
   "name": "@module-federation/nextjs-mf",
   "version": "8.8.60",
   "license": "MIT",
-  "main": "dist/src/index.cjs",
-  "types": "dist/src/index.d.ts",
+  "main": "dist/index.cjs",
+  "types": "dist/index.d.ts",
   "type": "commonjs",
-  "description": "Module Federation helper for NextJS",
+  "description": "Rspack-first Module Federation adapter for Next.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/module-federation/core.git",
@@ -16,8 +16,23 @@
     "Pavel Chertorogov, nodkz <pavel.chertorogov@gmail.com> (www.ps.kz)"
   ],
   "files": [
-    "dist/",
-    "README.md"
+    "dist/asset-adapter-loader.cjs",
+    "dist/asset-adapter-loader.cjs.map",
+    "dist/asset-adapter-loader.d.ts",
+    "dist/index.cjs",
+    "dist/index.cjs.map",
+    "dist/index.d.ts",
+    "dist/server.cjs",
+    "dist/server.cjs.map",
+    "dist/server.d.ts",
+    "server.js",
+    "server.mjs",
+    "server.d.ts",
+    "dist/runtime-plugin.cjs",
+    "dist/runtime-plugin.cjs.map",
+    "dist/runtime-plugin.d.ts",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "postinstall": "echo \"Deprecation Notice: We intend to deprecate 'nextjs-mf'. Please see https://github.com/module-federation/core/issues/3153 for more details.\"",
@@ -28,51 +43,44 @@
   },
   "exports": {
     ".": {
-      "types": "./dist/src/index.d.ts",
-      "default": "./dist/src/index.cjs"
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.cjs"
     },
-    "./utils": {
-      "types": "./dist/utils/index.d.ts",
-      "default": "./dist/utils/index.cjs"
+    "./runtime-plugin": {
+      "types": "./dist/runtime-plugin.d.ts",
+      "default": "./dist/runtime-plugin.cjs"
     },
-    "./*": "./*"
-  },
-  "typesVersions": {
-    "*": {
-      ".": [
-        "./dist/src/index.d.ts"
-      ],
-      "utils": [
-        "./dist/utils/index.d.ts"
-      ]
+    "./server": {
+      "types": "./server.d.ts",
+      "import": "./server.mjs",
+      "require": "./server.js",
+      "default": "./server.mjs"
     }
   },
   "publishConfig": {
     "access": "public"
   },
   "dependencies": {
-    "fast-glob": "^3.2.11",
     "@module-federation/runtime": "workspace:*",
     "@module-federation/sdk": "workspace:*",
-    "@module-federation/enhanced": "workspace:*",
-    "@module-federation/node": "workspace:*",
-    "@module-federation/webpack-bundler-runtime": "workspace:*"
+    "@module-federation/enhanced": "workspace:*"
   },
   "devDependencies": {
+    "@rspack/core": "1.7.4",
     "@types/btoa": "^1.2.5",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.1",
     "tsdown": "0.20.3"
   },
   "peerDependencies": {
-    "webpack": "^5.40.0",
+    "@rspack/core": "^1.7.4 || ^2.0.0-0",
     "next": "^12 || ^13 || ^14 || ^15 || ^16",
     "react": "^17 || ^18 || ^19",
     "react-dom": "^17 || ^18 || ^19",
     "styled-jsx": "*"
   },
   "peerDependenciesMeta": {
-    "webpack": {
+    "@rspack/core": {
       "optional": true
     },
     "next": {

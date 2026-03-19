@@ -1,2 +1,15 @@
-import TestSvg from 'shop/pages/shop/test-webpack-svg';
-export default TestSvg;
+import React, { Suspense, lazy } from 'react';
+
+const WebpackSvg = lazy(() => import('shop/WebpackSvg'));
+
+function TestWebpackSvgPage() {
+  return (
+    <Suspense fallback="loading WebpackSvg">
+      <WebpackSvg />
+    </Suspense>
+  );
+}
+
+TestWebpackSvgPage.getInitialProps = async () => ({});
+
+export default TestWebpackSvgPage;

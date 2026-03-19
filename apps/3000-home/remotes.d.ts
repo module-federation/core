@@ -1,5 +1,12 @@
 declare module 'shop/useCustomRemoteHook';
 declare module 'shop/WebpackSvg';
 declare module 'shop/WebpackPng';
+declare module 'shop/pages/shop/index';
+declare module 'shop/pages/shop/products/[...slug]';
 declare module 'checkout/CheckoutTitle';
 declare module 'checkout/ButtonOldAnt';
+declare module 'checkout/pages/checkout/index';
+declare module 'checkout/pages/checkout/[pid]';
+declare module 'checkout/pages/checkout/[...slug]';
+declare module 'checkout/pages/checkout/test-check-button';
+declare module 'checkout/pages/checkout/test-title';

@@ -5,9 +5,10 @@
   "devDependencies": {
     "@module-federation/enhanced": "workspace:*",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.15",
+    "@rspack/cli": "1.7.4",
     "react-refresh": "0.14.2",
     "@rspack/plugin-react-refresh": "^0.7.5",
-    "@rspack/core": "^1.0.2",
+    "@rspack/core": "1.7.4",
     "@types/react": "18.3.11",
     "@types/react-dom": "18.3.0"
   },
