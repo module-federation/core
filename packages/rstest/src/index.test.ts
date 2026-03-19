@@ -1,5 +1,4 @@
 import { describe, expect, it } from '@rstest/core';
-import { vi } from 'vitest';
 
 import { federation, shouldKeepBundledForFederation } from './index';
 
@@ -265,46 +264,58 @@ describe('federation()', () => {
   });
 
   it('warns when the node runtime plugin is configured manually', () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    const plugin = federation({
-      name: 'legacy_component_app',
-      runtimePlugins: [NODE_RUNTIME_PLUGIN],
-      experiments: {
-        optimization: {
-          target: 'node',
-        },
-      },
-    });
-
-    let envCb:
-      | ((
-          config: any,
-          utils: { mergeEnvironmentConfig: (...configs: any[]) => any },
-        ) => any)
-      | undefined;
-
-    plugin.setup({
-      modifyEnvironmentConfig: (cb: any) => {
-        envCb = cb;
-      },
-    } as any);
-
-    const mergeEnvironmentConfig = (...configs: any[]) =>
-      Object.assign({}, ...configs);
-
-    const merged = envCb!({} as any, { mergeEnvironmentConfig });
-    const rspackConfig: any = {
-      output: {},
-      plugins: [],
+    const consoleWithWarn = console as typeof console & {
+      warn: (...args: unknown[]) => void;
     };
-    merged.tools.rspack(rspackConfig);
+    const originalWarn = consoleWithWarn.warn;
+    const warnMessages: string[] = [];
 
-    const options = getFederationPluginOptions(rspackConfig.plugins);
-    expect(options.runtimePlugins).toEqual([NODE_RUNTIME_PLUGIN]);
-    expect(
-      warnSpy.mock.calls.map((call) => call.join(' ')).join('\n'),
-    ).toContain('manual configuration is unnecessary');
-    warnSpy.mockRestore();
+    consoleWithWarn.warn = (...args: unknown[]) => {
+      warnMessages.push(args.map((arg) => String(arg)).join(' '));
+    };
+
+    try {
+      const plugin = federation({
+        name: 'legacy_component_app',
+        runtimePlugins: [NODE_RUNTIME_PLUGIN],
+        experiments: {
+          optimization: {
+            target: 'node',
+          },
+        },
+      });
+
+      let envCb:
+        | ((
+            config: any,
+            utils: { mergeEnvironmentConfig: (...configs: any[]) => any },
+          ) => any)
+        | undefined;
+
+      plugin.setup({
+        modifyEnvironmentConfig: (cb: any) => {
+          envCb = cb;
+        },
+      } as any);
+
+      const mergeEnvironmentConfig = (...configs: any[]) =>
+        Object.assign({}, ...configs);
+
+      const merged = envCb!({} as any, { mergeEnvironmentConfig });
+      const rspackConfig: any = {
+        output: {},
+        plugins: [],
+      };
+      merged.tools.rspack(rspackConfig);
+
+      const options = getFederationPluginOptions(rspackConfig.plugins);
+      expect(options.runtimePlugins).toEqual([NODE_RUNTIME_PLUGIN]);
+      expect(warnMessages.join('\n')).toContain(
+        'manual configuration is unnecessary',
+      );
+    } finally {
+      consoleWithWarn.warn = originalWarn;
+    }
   });
 
   it('supports browser target without node-specific rspack patches', () => {
