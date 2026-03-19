@@ -161,6 +161,13 @@ export const shouldKeepBundledForFederation = (
     return true;
   }
 
+  // Keep the resolved node runtime plugin bundled too. The package resolves
+  // this to an absolute path before handing it to ModuleFederationPlugin, and
+  // externalizing that path breaks runtime bootstrap in test workers.
+  if (request === NODE_RUNTIME_PLUGIN) {
+    return true;
+  }
+
   // Keep MF runtime packages bundled when federation is enabled. They participate
   // in runtime bootstrapping and may be referenced through loader-style specifiers.
   if (request.startsWith('@module-federation/')) {

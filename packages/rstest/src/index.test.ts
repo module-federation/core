@@ -30,6 +30,14 @@ describe('shouldKeepBundledForFederation', () => {
     );
   });
 
+  it('keeps the resolved node runtime plugin path bundled', () => {
+    expect(
+      shouldKeepBundledForFederation(
+        require.resolve('@module-federation/node/runtimePlugin'),
+      ),
+    ).toBe(true);
+  });
+
   it('keeps webpack container reference requests bundled', () => {
     expect(
       shouldKeepBundledForFederation(
