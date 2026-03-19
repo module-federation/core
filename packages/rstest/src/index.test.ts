@@ -1,11 +1,9 @@
-import { createRequire } from 'node:module';
 import { describe, expect, it } from '@rstest/core';
+import { vi } from 'vitest';
 
 import { federation, shouldKeepBundledForFederation } from './index';
 
-const require = createRequire(import.meta.url);
-const NODE_RUNTIME_PLUGIN_REQUEST = '@module-federation/node/runtimePlugin';
-const NODE_RUNTIME_PLUGIN = require.resolve(NODE_RUNTIME_PLUGIN_REQUEST);
+const NODE_RUNTIME_PLUGIN = '@module-federation/node/runtimePlugin';
 
 const getFederationPluginOptions = (plugins: unknown[]) => {
   const plugin = (plugins as any[]).find(
@@ -210,7 +208,7 @@ describe('federation()', () => {
     expect(options.library?.type).toBe('commonjs-module');
     expect(options.library?.name).toBe('main_app_web');
     expect(options.remoteType).toBe('script');
-    expect(options.runtimePlugins).toContain(NODE_RUNTIME_PLUGIN);
+    expect(options.runtimePlugins).toEqual([NODE_RUNTIME_PLUGIN]);
     expect(options.experiments?.optimization?.target).toBe('node');
   });
 
@@ -260,14 +258,17 @@ describe('federation()', () => {
     expect(options.remoteType).toBe('commonjs');
     expect(options.library?.type).toBe('var');
     expect(options.library?.name).toBe('component_app');
-    expect(options.runtimePlugins[0]).toBe(NODE_RUNTIME_PLUGIN);
-    expect(options.runtimePlugins).toContain('custom/runtimePlugin');
+    expect(options.runtimePlugins).toEqual([
+      NODE_RUNTIME_PLUGIN,
+      'custom/runtimePlugin',
+    ]);
   });
 
-  it('normalizes the legacy node runtime plugin request to the resolved path', () => {
+  it('warns when the node runtime plugin is configured manually', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const plugin = federation({
       name: 'legacy_component_app',
-      runtimePlugins: [NODE_RUNTIME_PLUGIN_REQUEST],
+      runtimePlugins: [NODE_RUNTIME_PLUGIN],
       experiments: {
         optimization: {
           target: 'node',
@@ -300,6 +301,10 @@ describe('federation()', () => {
 
     const options = getFederationPluginOptions(rspackConfig.plugins);
     expect(options.runtimePlugins).toEqual([NODE_RUNTIME_PLUGIN]);
+    expect(
+      warnSpy.mock.calls.map((call) => call.join(' ')).join('\n'),
+    ).toContain('manual configuration is unnecessary');
+    warnSpy.mockRestore();
   });
 
   it('supports browser target without node-specific rspack patches', () => {
