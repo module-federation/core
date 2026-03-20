@@ -84,20 +84,33 @@ const MetroCorePlugin: () => ModuleFederationRuntimePlugin = () => {
                 containerHash,
               );
             }
-            // Exposed bundle hashes — keyed by publicPath + exposed asset path
-            const publicPath =
+            // Resolve actual publicPath for hash key construction.
+            // In dev mode, manifest.publicPath is "auto" — resolve to actual server URL.
+            const rawPublicPath =
               'publicPath' in manifest.metaData
                 ? manifest.metaData.publicPath
                 : '';
+            const resolvedPublicPath =
+              rawPublicPath &&
+              rawPublicPath !== 'auto' &&
+              /^https?:\/\//.test(rawPublicPath)
+                ? rawPublicPath
+                : manifestUrl
+                  ? manifestUrl.replace(/\/[^/]*$/, '')
+                  : '';
+
+            // Exposed bundle hashes — keyed by resolvedPublicPath + bundle path
             if (Array.isArray(manifest.exposes)) {
               for (const expose of manifest.exposes) {
                 const hash = (expose as any).hash;
                 const syncJs = expose.assets?.js?.sync;
                 if (hash && syncJs) {
                   for (const assetPath of syncJs) {
-                    const fullUrl = publicPath
-                      ? `${publicPath.replace(/\/+$/, '')}/${assetPath.replace(/^\.?\//, '')}`
-                      : assetPath;
+                    // In dev, asset paths use source extensions (.tsx/.ts) — normalize to .bundle
+                    const bundlePath = assetPath.replace(/\.\w+$/, '.bundle');
+                    const fullUrl = resolvedPublicPath
+                      ? `${resolvedPublicPath.replace(/\/+$/, '')}/${bundlePath.replace(/^\.?\//, '')}`
+                      : bundlePath;
                     bundleHashMap[fullUrl] = hash;
                     console.log('[MFE-Hash] expose:', fullUrl, '→', hash);
                   }
@@ -111,9 +124,10 @@ const MetroCorePlugin: () => ModuleFederationRuntimePlugin = () => {
                 const syncJs = shared.assets?.js?.sync;
                 if (hash && syncJs) {
                   for (const assetPath of syncJs) {
-                    const fullUrl = publicPath
-                      ? `${publicPath.replace(/\/+$/, '')}/${assetPath.replace(/^\.?\//, '')}`
-                      : assetPath;
+                    const bundlePath = assetPath.replace(/\.\w+$/, '.bundle');
+                    const fullUrl = resolvedPublicPath
+                      ? `${resolvedPublicPath.replace(/\/+$/, '')}/${bundlePath.replace(/^\.?\//, '')}`
+                      : bundlePath;
                     bundleHashMap[fullUrl] = hash;
                     console.log('[MFE-Hash] shared:', fullUrl, '→', hash);
                   }
