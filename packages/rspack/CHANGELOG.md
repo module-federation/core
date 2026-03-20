@@ -1,5 +1,17 @@
 # @module-federation/rspack
 
+## 2.2.3
+
+### Patch Changes
+
+- @module-federation/sdk@2.2.3
+- @module-federation/runtime-tools@2.2.3
+- @module-federation/managers@2.2.3
+- @module-federation/manifest@2.2.3
+- @module-federation/dts-plugin@2.2.3
+- @module-federation/bridge-react-webpack-plugin@2.2.3
+- @module-federation/inject-external-runtime-core-plugin@2.2.3
+
 ## 2.2.2
 
 ### Patch Changes

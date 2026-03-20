@@ -1,5 +1,12 @@
 # @module-federation/storybook-addon
 
+## 6.0.6
+
+### Patch Changes
+
+- @module-federation/enhanced@2.2.3
+- @module-federation/sdk@2.2.3
+
 ## 6.0.5
 
 ### Patch Changes
