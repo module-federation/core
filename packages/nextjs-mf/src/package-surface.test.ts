@@ -141,26 +141,15 @@ describe('package surface', () => {
     expect(packageJson.main).toBe('dist/index.cjs');
     expect(packageJson.types).toBe('dist/index.d.ts');
     expect(packageJson.files).toEqual([
-      'dist/asset-adapter-loader.cjs',
-      'dist/asset-adapter-loader.cjs.map',
-      'dist/asset-adapter-loader.d.ts',
-      'dist/index.cjs',
-      'dist/index.cjs.map',
-      'dist/index.d.ts',
-      'dist/server.cjs',
-      'dist/server.cjs.map',
-      'dist/server.d.ts',
-      'server.js',
-      'server.mjs',
-      'server.d.ts',
-      'runtime-plugin.js',
-      'runtime-plugin.mjs',
-      'runtime-plugin.d.ts',
-      'dist/runtime-plugin.cjs',
-      'dist/runtime-plugin.cjs.map',
-      'dist/runtime-plugin.d.ts',
+      'dist/',
       'README.md',
       'LICENSE',
+      'runtime-plugin.d.ts',
+      'runtime-plugin.js',
+      'runtime-plugin.mjs',
+      'server.d.ts',
+      'server.js',
+      'server.mjs',
     ]);
     expect(packageJson.exports).toEqual({
       '.': {
