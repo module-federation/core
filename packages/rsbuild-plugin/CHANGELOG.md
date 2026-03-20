@@ -1,5 +1,14 @@
 # @module-federation/rsbuild-plugin
 
+## 2.2.3
+
+### Patch Changes
+
+- 762b9ef: fix(rsbuild-plugin): replace direct package.json import with builder define injection to avoid Node.js >= 22 compatibility error
+  - @module-federation/enhanced@2.2.3
+  - @module-federation/sdk@2.2.3
+  - @module-federation/node@2.7.37
+
 ## 2.2.2
 
 ### Patch Changes
