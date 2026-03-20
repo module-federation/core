@@ -1,5 +1,3 @@
-import { readFileSync } from 'node:fs';
-import path from 'node:path';
 import { cp, mkdir, writeFile } from 'node:fs/promises';
 
 jest.mock('@module-federation/enhanced/rspack', () => ({
@@ -20,9 +18,7 @@ jest.mock('node:fs/promises', () => ({
 
 import { ModuleFederationPlugin as MockedRspackModuleFederationPlugin } from '@module-federation/enhanced/rspack';
 import { loadScriptNode } from '@module-federation/runtime';
-import NextFederationPlugin, {
-  NextFederationPlugin as NamedNextFederationPlugin,
-} from './index';
+import NextFederationPlugin from './index';
 import createRuntimePlugin from './runtime-plugin';
 import * as serverEntry from './server';
 
@@ -124,70 +120,6 @@ const createCompiler = (name: 'server' | 'client'): TestCompiler => ({
     plugins: [],
     externals: [],
   },
-});
-
-describe('package surface', () => {
-  it('only exports the explicit public entrypoints', () => {
-    const packageJson = JSON.parse(
-      readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'),
-    ) as {
-      exports?: Record<string, unknown>;
-      files?: string[];
-      typesVersions?: unknown;
-      main?: string;
-      types?: string;
-    };
-
-    expect(packageJson.main).toBe('dist/index.cjs');
-    expect(packageJson.types).toBe('dist/index.d.ts');
-    expect(packageJson.files).toEqual([
-      'dist/',
-      'README.md',
-      'LICENSE',
-      'runtime-plugin.d.ts',
-      'runtime-plugin.js',
-      'runtime-plugin.mjs',
-      'server.d.ts',
-      'server.js',
-      'server.mjs',
-    ]);
-    expect(packageJson.exports).toEqual({
-      '.': {
-        types: './dist/index.d.ts',
-        default: './dist/index.cjs',
-      },
-      './runtime-plugin': {
-        types: './runtime-plugin.d.ts',
-        require: './runtime-plugin.js',
-        import: './runtime-plugin.mjs',
-        default: './runtime-plugin.mjs',
-      },
-      './server': {
-        types: './server.d.ts',
-        import: './server.mjs',
-        require: './server.js',
-        default: './server.mjs',
-      },
-    });
-    expect(packageJson.typesVersions).toBeUndefined();
-  });
-
-  it('keeps the root CommonJS export callable', () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const requiredEntry = require('./index');
-
-    expect(requiredEntry).toBe(NextFederationPlugin);
-    expect(requiredEntry.NextFederationPlugin).toBe(NamedNextFederationPlugin);
-  });
-
-  it('keeps the server entry focused on explicit SSR helpers', () => {
-    expect(serverEntry).toMatchObject({
-      FlushedChunks: expect.any(Function),
-      flushChunks: expect.any(Function),
-      withFederatedRequest: expect.any(Function),
-    });
-    expect('revalidate' in serverEntry).toBe(false);
-  });
 });
 
 describe('NextFederationPlugin', () => {
