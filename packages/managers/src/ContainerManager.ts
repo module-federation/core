@@ -21,7 +21,7 @@ function normalizeExposeModuleName(exposeKey: string): string {
 class ContainerManager extends BasicPluginOptionsManager<moduleFederationPlugin.ModuleFederationPluginOptions> {
   private _manifestModuleInfos?: ManifestModuleInfos;
   private _parsedOptions?: Array<
-    [exposeKey: string, { import: string[]; name?: string }]
+    [exposeKey: string, { import: string[]; name?: string; layer?: string }]
   >;
 
   override get enable(): boolean {
@@ -54,10 +54,12 @@ class ContainerManager extends BasicPluginOptionsManager<moduleFederationPlugin.
       (item, key) => ({
         import: Array.isArray(item) ? item : [item],
         name: generateExposeFilename(key, false),
+        layer: undefined,
       }),
       (item, key) => ({
         import: Array.isArray(item.import) ? item.import : [item.import],
         name: item.name || generateExposeFilename(key, false),
+        layer: item.layer,
       }),
     );
 
@@ -97,10 +99,12 @@ class ContainerManager extends BasicPluginOptionsManager<moduleFederationPlugin.
       (item, key) => ({
         import: Array.isArray(item) ? item : [item],
         name: generateExposeFilename(key, false),
+        layer: undefined,
       }),
       (item, key) => ({
         import: Array.isArray(item.import) ? item.import : [item.import],
         name: item.name || generateExposeFilename(key, false),
+        layer: item.layer,
       }),
     );
     return parsedOptions.reduce(
@@ -185,10 +189,12 @@ class ContainerManager extends BasicPluginOptionsManager<moduleFederationPlugin.
       (item) => ({
         import: Array.isArray(item) ? item : [item],
         name: undefined,
+        layer: undefined,
       }),
       (item) => ({
         import: Array.isArray(item.import) ? item.import : [item.import],
         name: undefined,
+        layer: item.layer,
       }),
     );
 

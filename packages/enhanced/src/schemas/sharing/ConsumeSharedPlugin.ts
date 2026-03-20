@@ -6,249 +6,241 @@
  */
 
 export default {
-  definitions: {
-    Consumes: {
-      description:
-        'Modules that should be consumed from share scope. When provided, property names are used to match requested modules in this compilation.',
-      anyOf: [
+  "definitions": {
+    "Consumes": {
+      "description": "Modules that should be consumed from share scope. When provided, property names are used to match requested modules in this compilation.",
+      "anyOf": [
         {
-          type: 'array',
-          items: {
-            description: 'Modules that should be consumed from share scope.',
-            anyOf: [
+          "type": "array",
+          "items": {
+            "description": "Modules that should be consumed from share scope.",
+            "anyOf": [
               {
-                $ref: '#/definitions/ConsumesItem',
+                "$ref": "#/definitions/ConsumesItem"
               },
               {
-                $ref: '#/definitions/ConsumesObject',
-              },
-            ],
-          },
+                "$ref": "#/definitions/ConsumesObject"
+              }
+            ]
+          }
         },
         {
-          $ref: '#/definitions/ConsumesObject',
-        },
-      ],
+          "$ref": "#/definitions/ConsumesObject"
+        }
+      ]
     },
-    ConsumesConfig: {
-      description:
-        'Advanced configuration for modules that should be consumed from share scope.',
-      type: 'object',
-      additionalProperties: false,
-      properties: {
-        eager: {
-          description:
-            'Include the fallback module directly instead behind an async request. This allows to use fallback module in initial load too. All possible shared modules need to be eager too.',
-          type: 'boolean',
+    "ConsumesConfig": {
+      "description": "Advanced configuration for modules that should be consumed from share scope.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "eager": {
+          "description": "Include the fallback module directly instead behind an async request. This allows to use fallback module in initial load too. All possible shared modules need to be eager too.",
+          "type": "boolean"
         },
-        import: {
-          description:
-            'Fallback module if no shared module is found in share scope. Defaults to the property name.',
-          anyOf: [
+        "import": {
+          "description": "Fallback module if no shared module is found in share scope. Defaults to the property name.",
+          "anyOf": [
             {
-              description: 'No fallback module.',
-              enum: [false],
+              "description": "No fallback module.",
+              "enum": [
+                false
+              ]
             },
             {
-              $ref: '#/definitions/ConsumesItem',
-            },
-          ],
+              "$ref": "#/definitions/ConsumesItem"
+            }
+          ]
         },
-        packageName: {
-          description:
-            "Package name to determine required version from description file. This is only needed when package name can't be automatically determined from request.",
-          type: 'string',
-          minLength: 1,
+        "packageName": {
+          "description": "Package name to determine required version from description file. This is only needed when package name can't be automatically determined from request.",
+          "type": "string",
+          "minLength": 1
         },
-        requiredVersion: {
-          description: 'Version requirement from module in share scope.',
-          anyOf: [
+        "requiredVersion": {
+          "description": "Version requirement from module in share scope.",
+          "anyOf": [
             {
-              description: 'No version requirement check.',
-              enum: [false],
-            },
-            {
-              description:
-                "Version as string. Can be prefixed with '^' or '~' for minimum matches. Each part of the version should be separated by a dot '.'.",
-              type: 'string',
-            },
-          ],
-        },
-        shareKey: {
-          description:
-            'Module is looked up under this key from the share scope.',
-          type: 'string',
-          minLength: 1,
-        },
-        shareScope: {
-          description: 'Share scope name.',
-          anyOf: [
-            {
-              type: 'string',
-              minLength: 1,
+              "description": "No version requirement check.",
+              "enum": [
+                false
+              ]
             },
             {
-              type: 'array',
-              items: {
-                type: 'string',
-                minLength: 1,
-              },
+              "description": "Version as string. Can be prefixed with '^' or '~' for minimum matches. Each part of the version should be separated by a dot '.'.",
+              "type": "string"
+            }
+          ]
+        },
+        "shareKey": {
+          "description": "Module is looked up under this key from the share scope.",
+          "type": "string",
+          "minLength": 1
+        },
+        "shareScope": {
+          "description": "Share scope name.",
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
             },
-          ],
+            {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          ]
         },
-        layer: {
-          description: 'Layer in which the shared module should be placed.',
-          type: 'string',
-          minLength: 1,
+        "layer": {
+          "description": "Layer in which the shared module should be placed.",
+          "type": "string",
+          "minLength": 1
         },
-        issuerLayer: {
-          description: 'Layer of the issuer.',
-          type: 'string',
-          minLength: 1,
+        "issuerLayer": {
+          "description": "Layer of the issuer.",
+          "type": "string",
+          "minLength": 1
         },
-        request: {
-          description: 'Import request to match on',
-          type: 'string',
-          minLength: 1,
+        "request": {
+          "description": "Import request to match on",
+          "type": "string",
+          "minLength": 1
         },
-        singleton: {
-          description:
-            'Allow only a single version of the shared module in share scope (disabled by default).',
-          type: 'boolean',
+        "singleton": {
+          "description": "Allow only a single version of the shared module in share scope (disabled by default).",
+          "type": "boolean"
         },
-        strictVersion: {
-          description:
-            'Do not accept shared module if version is not valid (defaults to yes, if local fallback module is available and shared module is not a singleton, otherwise no, has no effect if there is no required version specified).',
-          type: 'boolean',
+        "strictVersion": {
+          "description": "Do not accept shared module if version is not valid (defaults to yes, if local fallback module is available and shared module is not a singleton, otherwise no, has no effect if there is no required version specified).",
+          "type": "boolean"
         },
-        exclude: {
-          description: 'Filter consumed modules based on the request path.',
-          $ref: '#/definitions/IncludeExcludeOptions',
+        "exclude": {
+          "description": "Filter consumed modules based on the request path.",
+          "$ref": "#/definitions/IncludeExcludeOptions"
         },
-        include: {
-          description:
-            'Filter consumed modules based on the request path (only include matches).',
-          $ref: '#/definitions/IncludeExcludeOptions',
+        "include": {
+          "description": "Filter consumed modules based on the request path (only include matches).",
+          "$ref": "#/definitions/IncludeExcludeOptions"
         },
-        allowNodeModulesSuffixMatch: {
-          description:
-            'Enable reconstructed lookup for node_modules paths for this share item',
-          type: 'boolean',
+        "allowNodeModulesSuffixMatch": {
+          "description": "Enable reconstructed lookup for node_modules paths for this share item",
+          "type": "boolean"
         },
-        treeShakingMode: {
-          description: 'Tree shaking mode for the shared module.',
-          type: 'string',
-          enum: ['server-calc', 'runtime-infer'],
-        },
-      },
+        "treeShakingMode": {
+          "description": "Tree shaking mode for the shared module.",
+          "type": "string",
+          "enum": [
+            "server-calc",
+            "runtime-infer"
+          ]
+        }
+      }
     },
-    ConsumesItem: {
-      description: 'A module that should be consumed from share scope.',
-      type: 'string',
-      minLength: 1,
+    "ConsumesItem": {
+      "description": "A module that should be consumed from share scope.",
+      "type": "string",
+      "minLength": 1
     },
-    ConsumesObject: {
-      description:
-        'Modules that should be consumed from share scope. Property names are used to match requested modules in this compilation. Relative requests are resolved, module requests are matched unresolved, absolute paths will match resolved requests. A trailing slash will match all requests with this prefix. In this case shareKey must also have a trailing slash.',
-      type: 'object',
-      additionalProperties: {
-        description: 'Modules that should be consumed from share scope.',
-        anyOf: [
+    "ConsumesObject": {
+      "description": "Modules that should be consumed from share scope. Property names are used to match requested modules in this compilation. Relative requests are resolved, module requests are matched unresolved, absolute paths will match resolved requests. A trailing slash will match all requests with this prefix. In this case shareKey must also have a trailing slash.",
+      "type": "object",
+      "additionalProperties": {
+        "description": "Modules that should be consumed from share scope.",
+        "anyOf": [
           {
-            $ref: '#/definitions/ConsumesConfig',
+            "$ref": "#/definitions/ConsumesConfig"
           },
           {
-            $ref: '#/definitions/ConsumesItem',
-          },
-        ],
-      },
+            "$ref": "#/definitions/ConsumesItem"
+          }
+        ]
+      }
     },
-    Exclude: {
-      description: 'Advanced filtering options.',
-      type: 'object',
-      additionalProperties: false,
-      properties: {
-        request: {
-          description: 'Regular expression pattern to filter module requests',
-          instanceof: 'RegExp',
+    "Exclude": {
+      "description": "Advanced filtering options.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "request": {
+          "description": "Regular expression pattern to filter module requests",
+          "instanceof": "RegExp"
         },
-        version: {
-          description:
-            'Specific version string or range to filter by (exclude matches).',
-          type: 'string',
+        "version": {
+          "description": "Specific version string or range to filter by (exclude matches).",
+          "type": "string"
         },
-        fallbackVersion: {
-          description:
-            'Optional specific version string to check against the filter.version range instead of reading package.json.',
-          type: 'string',
-        },
-      },
+        "fallbackVersion": {
+          "description": "Optional specific version string to check against the filter.version range instead of reading package.json.",
+          "type": "string"
+        }
+      }
     },
-    IncludeExcludeOptions: {
-      type: 'object',
-      properties: {
-        request: {
-          anyOf: [
+    "IncludeExcludeOptions": {
+      "type": "object",
+      "properties": {
+        "request": {
+          "anyOf": [
             {
-              type: 'string',
-              description: 'Request string to match exactly.',
+              "type": "string",
+              "description": "Request string to match exactly."
             },
             {
-              instanceof: 'RegExp',
-              description: 'Regular expression to match the request path.',
-            },
-          ],
+              "instanceof": "RegExp",
+              "description": "Regular expression to match the request path."
+            }
+          ]
         },
-        version: {
-          type: 'string',
-          description:
-            "Semantic versioning range to match against the module's version.",
+        "version": {
+          "type": "string",
+          "description": "Semantic versioning range to match against the module's version."
         },
-        fallbackVersion: {
-          type: 'string',
-          description:
-            'Optional specific version string to check against the version range instead of reading package.json.',
-        },
+        "fallbackVersion": {
+          "type": "string",
+          "description": "Optional specific version string to check against the version range instead of reading package.json."
+        }
       },
-      additionalProperties: false,
-    },
+      "additionalProperties": false
+    }
   },
-  title: 'ConsumeSharedPluginOptions',
-  description: 'Options for consuming shared modules.',
-  type: 'object',
-  additionalProperties: false,
-  properties: {
-    consumes: {
-      $ref: '#/definitions/Consumes',
+  "title": "ConsumeSharedPluginOptions",
+  "description": "Options for consuming shared modules.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "consumes": {
+      "$ref": "#/definitions/Consumes"
     },
-    shareScope: {
-      description:
-        "Share scope name used for all consumed modules (defaults to 'default').",
-      anyOf: [
+    "shareScope": {
+      "description": "Share scope name used for all consumed modules (defaults to 'default').",
+      "anyOf": [
         {
-          type: 'string',
-          minLength: 1,
+          "type": "string",
+          "minLength": 1
         },
         {
-          type: 'array',
-          items: {
-            type: 'string',
-            minLength: 1,
-          },
-        },
-      ],
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      ]
     },
-    experiments: {
-      description: 'Experimental features configuration',
-      type: 'object',
-      additionalProperties: false,
-      properties: {
-        allowNodeModulesSuffixMatch: {
-          description: 'Enable reconstructed lookup for node_modules paths',
-          type: 'boolean',
-        },
-      },
-    },
+    "experiments": {
+      "description": "Experimental features configuration",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "allowNodeModulesSuffixMatch": {
+          "description": "Enable reconstructed lookup for node_modules paths",
+          "type": "boolean"
+        }
+      }
+    }
   },
-  required: ['consumes'],
+  "required": [
+    "consumes"
+  ]
 } as const;

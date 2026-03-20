@@ -118,10 +118,11 @@ export function remotes(options: RemotesOptions) {
           if (instance.options.shareStrategy === 'version-first') {
             const shareScopes = Array.isArray(data[0]) ? data[0] : [data[0]];
 
-            return Promise.all(
-              shareScopes.map((shareScope) =>
-                instance.sharedHandler.initializeSharing(shareScope),
-              ),
+            const shareScopeInput =
+              shareScopes.length === 1 ? shareScopes[0] : shareScopes;
+
+            return Promise.resolve(
+              instance.sharedHandler.initializeSharing(shareScopeInput),
             ).then(() => {
               return loadRemote();
             });

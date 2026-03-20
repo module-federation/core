@@ -4,11 +4,7 @@
  * Run `pnpm generate:schema -w` to update.
  */
 
-import type {
-  Exposes,
-  EntryRuntime,
-  LibraryOptions,
-} from './ModuleFederationPlugin';
+import type { Exposes, EntryRuntime, LibraryOptions } from './ModuleFederationPlugin';
 
 export interface ContainerPluginOptions {
   exposes: Exposes;

@@ -1,0 +1,490 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import rscBridgeRuntimePlugin from './rsc-bridge-runtime-plugin';
+
+type ManifestLike = {
+  serverManifest?: Record<string, any>;
+  clientManifest?: Record<string, any>;
+  serverConsumerModuleMap?: Record<string, any>;
+};
+
+type WebpackRequireRuntime = {
+  m?: Record<string, (module: { exports: any }) => void>;
+  c?: Record<string, { exports?: unknown }>;
+  rscM?: ManifestLike;
+};
+
+const ACTION_REMAP_GLOBAL_KEY = '__MODERN_RSC_MF_ACTION_ID_MAP__';
+const PROXY_MODULE_PREFIX = '__modernjs_mf_rsc_action_proxy__:';
+type FederationState = {
+  [ACTION_REMAP_GLOBAL_KEY]?: Record<string, string | false>;
+};
+
+const createWebpackRequireRuntime = (): WebpackRequireRuntime => ({
+  m: {},
+  c: {},
+  rscM: {
+    serverManifest: {},
+    clientManifest: {},
+    serverConsumerModuleMap: {},
+  },
+});
+let runtimeRequire: WebpackRequireRuntime;
+
+const getFederationState = () =>
+  global as typeof global & {
+    __FEDERATION__?: FederationState;
+    fetch?: unknown;
+  };
+
+const getActionRemapMap = () =>
+  getFederationState().__FEDERATION__?.[ACTION_REMAP_GLOBAL_KEY] || {};
+
+describe('rsc-bridge-runtime-plugin', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    runtimeRequire = createWebpackRequireRuntime();
+    vi.stubGlobal('__webpack_require__', runtimeRequire);
+    vi.stubGlobal('__FEDERATION__', {});
+    vi.stubGlobal('window', {
+      __MODERN_JS_ENTRY_NAME: 'server-component-root',
+    });
+    delete getFederationState().__FEDERATION__?.[ACTION_REMAP_GLOBAL_KEY];
+  });
+
+  afterEach(() => {
+    vi.clearAllTimers();
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+    delete getFederationState().fetch;
+    delete getFederationState().__FEDERATION__?.[ACTION_REMAP_GLOBAL_KEY];
+  });
+
+  it('merges remote manifest, registers action remap, and installs proxy dispatcher', async () => {
+    const executeAction = vi.fn(async (id: string, args: unknown[]) => ({
+      id,
+      args,
+    }));
+
+    const plugin = rscBridgeRuntimePlugin();
+    const loadRemote = vi.fn(async () => ({
+      getManifest: () => ({
+        clientManifest: {
+          clientRef: {
+            id: '123',
+            name: 'default',
+            chunks: [],
+          },
+        },
+        serverConsumerModuleMap: {
+          '123': {
+            '*': {
+              id: '123',
+              name: 'default',
+              chunks: [],
+            },
+          },
+        },
+        serverManifest: {
+          rawActionId: {
+            async: true,
+          },
+        },
+      }),
+      executeAction,
+    }));
+
+    await plugin.onLoad?.({
+      remote: { alias: 'rscRemote' },
+      options: { name: 'rscHost' },
+      origin: {
+        loadRemote,
+      },
+    });
+
+    expect(loadRemote).toHaveBeenCalledTimes(1);
+    expect(loadRemote).toHaveBeenCalledWith('rscRemote/__rspack_rsc_bridge__');
+
+    const webpackRequire = runtimeRequire;
+    const hostManifest = webpackRequire.rscM!;
+
+    expect(
+      hostManifest.clientManifest?.['remote-module:rscRemote:clientRef']?.id,
+    ).toBe('remote-module:rscRemote:123');
+    expect(hostManifest.serverConsumerModuleMap).toHaveProperty(
+      'remote-module:rscRemote:123',
+    );
+    expect(
+      hostManifest.serverConsumerModuleMap?.['remote-module:rscRemote:123']?.[
+        '*'
+      ]?.id,
+    ).toBe('remote-module:rscRemote:123');
+
+    const prefixedActionId = 'remote:rscRemote:rawActionId';
+    const proxyModuleId = `${PROXY_MODULE_PREFIX}rscRemote`;
+    expect(hostManifest.serverManifest?.[prefixedActionId]).toMatchObject({
+      id: proxyModuleId,
+      name: prefixedActionId,
+    });
+    expect(getActionRemapMap().rawActionId).toBe(prefixedActionId);
+
+    const proxyFactory = webpackRequire.m?.[proxyModuleId];
+    expect(typeof proxyFactory).toBe('function');
+
+    const proxyModule = { exports: {} as Record<string, any> };
+    proxyFactory?.(proxyModule);
+    const result = await proxyModule.exports[prefixedActionId]('payload');
+
+    expect(executeAction).toHaveBeenCalledWith('rawActionId', ['payload']);
+    expect(result).toEqual({
+      id: 'rawActionId',
+      args: ['payload'],
+    });
+  });
+
+  it('awaits async bridge manifest responses before merge', async () => {
+    const plugin = rscBridgeRuntimePlugin();
+
+    await plugin.onLoad?.({
+      remote: { alias: 'rscRemote' },
+      options: { name: 'rscHost' },
+      origin: {
+        loadRemote: vi.fn(async () => ({
+          getManifest: async () => ({
+            serverManifest: {
+              asyncRawAction: {
+                async: true,
+              },
+            },
+          }),
+          executeAction: vi.fn(async () => undefined),
+        })),
+      },
+    } as any);
+
+    const webpackRequire = runtimeRequire;
+    expect(webpackRequire.rscM?.serverManifest).toHaveProperty(
+      'remote:rscRemote:asyncRawAction',
+    );
+    expect(getActionRemapMap().asyncRawAction).toBe(
+      'remote:rscRemote:asyncRawAction',
+    );
+  });
+
+  it('namespaces clientManifest keys per alias for same remote export key', async () => {
+    const plugin = rscBridgeRuntimePlugin();
+
+    const loadRemote = vi.fn(async (request: string) => {
+      if (request.startsWith('rscRemoteA/')) {
+        return {
+          getManifest: () => ({
+            clientManifest: {
+              sharedClientRef: {
+                id: '123',
+                name: 'default',
+                chunks: [],
+              },
+            },
+          }),
+          executeAction: vi.fn(async () => undefined),
+        };
+      }
+
+      return {
+        getManifest: () => ({
+          clientManifest: {
+            sharedClientRef: {
+              id: '123',
+              name: 'default',
+              chunks: [],
+            },
+          },
+        }),
+        executeAction: vi.fn(async () => undefined),
+      };
+    });
+
+    await plugin.onLoad?.({
+      remote: { alias: 'rscRemoteA' },
+      options: { name: 'rscHost' },
+      origin: { loadRemote },
+    } as any);
+
+    await plugin.onLoad?.({
+      remote: { alias: 'rscRemoteB' },
+      options: { name: 'rscHost' },
+      origin: { loadRemote },
+    } as any);
+
+    const webpackRequire = runtimeRequire;
+
+    expect(webpackRequire.rscM?.clientManifest).toHaveProperty(
+      'remote-module:rscRemoteA:sharedClientRef',
+    );
+    expect(webpackRequire.rscM?.clientManifest).toHaveProperty(
+      'remote-module:rscRemoteB:sharedClientRef',
+    );
+  });
+
+  it('loads and merges each remote alias once', async () => {
+    const plugin = rscBridgeRuntimePlugin();
+    const loadRemote = vi.fn(async () => ({
+      getManifest: () => ({
+        serverManifest: {
+          one: {
+            async: true,
+          },
+        },
+      }),
+      executeAction: vi.fn(async () => undefined),
+    }));
+
+    const args = {
+      remote: { alias: 'rscRemote' },
+      options: { name: 'rscHost' },
+      origin: {
+        loadRemote,
+      },
+    };
+
+    await plugin.onLoad?.(args as any);
+    await plugin.onLoad?.(args as any);
+
+    expect(loadRemote).toHaveBeenCalledTimes(1);
+  });
+
+  it('falls back to federation.instance when origin is unavailable', async () => {
+    const loadRemote = vi.fn(async () => ({
+      getManifest: () => ({
+        serverManifest: {
+          rawActionId: {
+            async: true,
+          },
+        },
+      }),
+      executeAction: vi.fn(async () => undefined),
+    }));
+
+    const webpackRequire = runtimeRequire;
+    (
+      webpackRequire as WebpackRequireRuntime & {
+        federation?: {
+          instance?: { loadRemote?: (request: string) => Promise<unknown> };
+        };
+      }
+    ).federation = {
+      instance: {
+        loadRemote,
+      },
+    };
+
+    const plugin = rscBridgeRuntimePlugin();
+
+    await plugin.onLoad?.({
+      remote: { alias: 'rscRemote' },
+      options: { name: 'rscHost' },
+    } as any);
+
+    expect(loadRemote).toHaveBeenCalledWith('rscRemote/__rspack_rsc_bridge__');
+    expect(getActionRemapMap().rawActionId).toBe(
+      'remote:rscRemote:rawActionId',
+    );
+  });
+
+  it('throws deterministic conflict errors when manifests disagree', async () => {
+    const webpackRequire = runtimeRequire;
+    webpackRequire.rscM = {
+      serverManifest: {},
+      clientManifest: {
+        'remote-module:rscRemote:sharedKey': {
+          id: 'remote-module:existingRemote:123',
+          name: 'default',
+          chunks: [],
+        },
+      },
+      serverConsumerModuleMap: {},
+    };
+
+    const plugin = rscBridgeRuntimePlugin();
+
+    await expect(
+      plugin.onLoad?.({
+        remote: { alias: 'rscRemote' },
+        options: { name: 'rscHost' },
+        origin: {
+          loadRemote: vi.fn(async () => ({
+            getManifest: () => ({
+              clientManifest: {
+                sharedKey: {
+                  id: '123',
+                  name: 'default',
+                  chunks: [],
+                },
+              },
+            }),
+            executeAction: vi.fn(async () => undefined),
+          })),
+        },
+      } as any),
+    ).rejects.toThrow(/clientManifest conflict/);
+  });
+
+  it('marks raw action remaps as false when aliases collide', async () => {
+    const plugin = rscBridgeRuntimePlugin();
+
+    const loadRemote = vi.fn(async (request: string) => {
+      if (request.startsWith('rscRemoteA/')) {
+        return {
+          getManifest: () => ({
+            serverManifest: {
+              sameRawId: {
+                async: true,
+              },
+            },
+          }),
+          executeAction: vi.fn(async () => undefined),
+        };
+      }
+
+      return {
+        getManifest: () => ({
+          serverManifest: {
+            sameRawId: {
+              async: true,
+            },
+          },
+        }),
+        executeAction: vi.fn(async () => undefined),
+      };
+    });
+
+    await plugin.onLoad?.({
+      remote: { alias: 'rscRemoteA' },
+      options: { name: 'rscHost' },
+      origin: { loadRemote },
+    } as any);
+
+    await plugin.onLoad?.({
+      remote: { alias: 'rscRemoteB' },
+      options: { name: 'rscHost' },
+      origin: { loadRemote },
+    } as any);
+
+    expect(getActionRemapMap().sameRawId).toBe(false);
+  });
+
+  it('normalizes missing ssrPublicPath on resolved remote snapshots', async () => {
+    const plugin = rscBridgeRuntimePlugin();
+    const loadRemote = vi.fn(async () => ({
+      getManifest: () => ({}),
+      executeAction: vi.fn(async () => undefined),
+    }));
+    const args: any = {
+      remote: { alias: 'rscRemote' },
+      remoteInfo: {
+        publicPath: 'http://127.0.0.1:3008/bundles/',
+        remoteEntry: {
+          name: 'static/remoteEntry.js',
+        },
+      },
+      origin: {
+        loadRemote,
+      },
+    };
+
+    await plugin.afterResolve?.(args);
+
+    expect(args.remoteInfo.ssrPublicPath).toBe(
+      'http://127.0.0.1:3008/bundles/',
+    );
+    expect(args.remoteInfo.remoteEntry.path).toBe('');
+  });
+
+  it('rewrites node bridge loads to bundles/<remote>.js when ssr entry is missing', async () => {
+    const plugin = rscBridgeRuntimePlugin();
+    const loadRemote = vi.fn(async () => ({
+      getManifest: () => ({}),
+      executeAction: vi.fn(async () => undefined),
+    }));
+    const args: any = {
+      remote: { alias: 'rscRemote' },
+      remoteInfo: {
+        entry: undefined,
+      },
+      remoteSnapshot: {
+        name: 'rscRemote',
+        publicPath: 'http://127.0.0.1:3008/',
+        remoteEntry: {
+          name: 'static/remoteEntry.js',
+        },
+      },
+      origin: {
+        loadRemote,
+      },
+    };
+
+    await plugin.afterResolve?.(args);
+
+    expect(args.remoteInfo.entry).toBe(
+      'http://127.0.0.1:3008/bundles/static/remoteEntry.js',
+    );
+  });
+
+  it('rewrites existing client remoteEntry URLs to node bundles entry', async () => {
+    const plugin = rscBridgeRuntimePlugin();
+    const loadRemote = vi.fn(async () => ({
+      getManifest: () => ({}),
+      executeAction: vi.fn(async () => undefined),
+    }));
+    const args: any = {
+      remote: { alias: 'rscRemote' },
+      remoteInfo: {
+        entry: 'http://127.0.0.1:3008/static/remoteEntry.js',
+      },
+      remoteSnapshot: {
+        name: 'rscRemote',
+        publicPath: 'http://127.0.0.1:3008/',
+        remoteEntry: {
+          name: 'static/remoteEntry.js',
+        },
+      },
+      origin: {
+        loadRemote,
+      },
+    };
+
+    await plugin.afterResolve?.(args);
+
+    expect(args.remoteInfo.entry).toBe(
+      'http://127.0.0.1:3008/bundles/static/remoteEntry.js',
+    );
+  });
+
+  it('avoids duplicate bundles segment when ssr publicPath already includes bundles', async () => {
+    const plugin = rscBridgeRuntimePlugin();
+    const loadRemote = vi.fn(async () => ({
+      getManifest: () => ({}),
+      executeAction: vi.fn(async () => undefined),
+    }));
+    const args: any = {
+      remote: { alias: 'rscRemote' },
+      remoteInfo: {
+        entry: undefined,
+      },
+      remoteSnapshot: {
+        publicPath: 'http://127.0.0.1:3008/bundles/',
+        remoteEntry: {
+          name: 'static/remoteEntry.js',
+        },
+      },
+      origin: {
+        loadRemote,
+      },
+    };
+
+    await plugin.afterResolve?.(args);
+
+    expect(args.remoteInfo.entry).toBe(
+      'http://127.0.0.1:3008/bundles/static/remoteEntry.js',
+    );
+  });
+});

@@ -215,6 +215,12 @@ export interface GetSharedFallbackGetterOptions {
   libraryType?: string;
 }
 
+export interface ResolveRemoteModuleIdOptions {
+  alias: string;
+  expose: string;
+  webpackRequire: WebpackRequire;
+}
+
 export interface Federation {
   runtime?: typeof runtime;
   instance?: runtime.ModuleFederation;
@@ -234,6 +240,9 @@ export interface Federation {
       webpackRequire: WebpackRequire;
       libraryType: string;
     }) => void;
+    resolveRemoteModuleId: (
+      options: ResolveRemoteModuleIdOptions,
+    ) => string | undefined;
     getSharedFallbackGetter: (
       options: GetSharedFallbackGetterOptions,
     ) => SharedGetter;

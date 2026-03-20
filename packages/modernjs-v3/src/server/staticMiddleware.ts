@@ -26,24 +26,37 @@ const createStaticMiddleware = (options: {
   pwd: string;
 }): MiddlewareHandler => {
   const { assetPrefix, pwd } = options;
+  const bundlesRootDir = path.resolve(pwd, `.${bundlesAssetPrefix}`);
 
   return async (c, next) => {
     const pathname = c.req.path;
+    const extension = path.extname(pathname);
 
-    // We only handle js file for performance
-    if (path.extname(pathname) !== '.js') {
+    // Only serve assets required by server-side federation runtime.
+    if (extension !== '.js' && extension !== '.json') {
       return next();
     }
 
     const prefixWithoutHost = removeHost(assetPrefix);
-    const prefixWithBundle = path.join(prefixWithoutHost, bundlesAssetPrefix);
+    const prefixWithBundle = path.posix.join(
+      prefixWithoutHost || '/',
+      bundlesAssetPrefix,
+    );
+    const isBundleRequest =
+      pathname === prefixWithBundle ||
+      pathname.startsWith(`${prefixWithBundle}/`);
     // Skip if the request is not for asset prefix + `/bundles`
-    if (!pathname.startsWith(prefixWithBundle)) {
+    if (!isBundleRequest) {
       return next();
     }
 
-    const pathnameWithoutPrefix = pathname.replace(prefixWithBundle, '');
-    const filepath = path.join(pwd, bundlesAssetPrefix, pathnameWithoutPrefix);
+    const pathnameWithoutPrefix = pathname.slice(prefixWithBundle.length);
+    const relativeBundlePath = pathnameWithoutPrefix.replace(/^\/+/, '');
+    const filepath = path.resolve(bundlesRootDir, relativeBundlePath);
+    const allowedPrefix = `${bundlesRootDir}${path.sep}`;
+    if (filepath !== bundlesRootDir && !filepath.startsWith(allowedPrefix)) {
+      return next();
+    }
     if (!(await fs.pathExists(filepath))) {
       return next();
     }
@@ -53,8 +66,11 @@ const createStaticMiddleware = (options: {
       return next();
     }
 
-    c.header('Content-Type', 'application/javascript');
-    c.header('Content-Length', String(fileResult.content.length));
+    c.header(
+      'Content-Type',
+      extension === '.json' ? 'application/json' : 'application/javascript',
+    );
+    c.header('Content-Length', String(Buffer.byteLength(fileResult.content)));
     return c.body(fileResult.content, 200);
   };
 };
