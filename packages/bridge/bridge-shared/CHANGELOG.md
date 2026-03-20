@@ -1,5 +1,7 @@
 # @module-federation/bridge-shared
 
+## 2.2.3
+
 ## 2.2.2
 
 ## 2.2.1
