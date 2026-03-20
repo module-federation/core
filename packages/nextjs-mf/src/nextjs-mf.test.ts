@@ -665,26 +665,33 @@ describe('server runtime contract', () => {
     });
   });
 
+  it('does not fetch manifests for an empty federated request', async () => {
+    await serverEntry.withFederatedRequest(async () => 'ok');
+
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
   it('collects request-scoped assets from mf-manifest metadata', async () => {
     const chunks = await serverEntry.withFederatedRequest(async () => {
       const beforeRequest = await runtimePlugin.beforeRequest?.({
         id: 'shop/menu',
       } as never);
-      const runtimeRemoteName = beforeRequest?.id?.split('/')[0];
+      expect(beforeRequest?.id).toBe('shop/menu');
 
       const afterResolve = await runtimePlugin.afterResolve?.({
         remote: {
-          name: runtimeRemoteName,
+          name: 'shop',
         },
         remoteInfo: {
-          name: runtimeRemoteName,
+          name: 'shop',
           entry: 'http://localhost:3001/_next/static/chunks/remoteEntry.js',
           entryGlobalName: 'shop',
           buildVersion: activeBuildVersion,
         },
       } as never);
 
-      expect(afterResolve?.remote.name).toBe(runtimeRemoteName);
+      const runtimeRemoteName = afterResolve?.remote.name || '';
+      expect(runtimeRemoteName).toMatch(/^__nextjs_mf_generation__/);
       expect(afterResolve?.remoteInfo.name).toBe('shop');
       expect(afterResolve?.remoteInfo.entryGlobalName).not.toBe('shop');
       expect(afterResolve?.remoteInfo.entry).toContain(
@@ -753,6 +760,87 @@ describe('server runtime contract', () => {
       ],
       { force: false },
     );
+  });
+
+  it('does not fetch unrelated remote manifests when resolving shop', async () => {
+    hostRemotes = [
+      {
+        name: 'shop',
+        entry: 'http://localhost:3001/_next/static/ssr/mf-manifest.json',
+      },
+      {
+        name: 'checkout',
+        entry: 'http://localhost:3002/_next/static/ssr/mf-manifest.json',
+      },
+    ];
+    global.fetch = jest.fn().mockImplementation((url: string) => {
+      if (url.startsWith('http://localhost:3001/')) {
+        return Promise.resolve({
+          ok: true,
+          json: async () =>
+            createManifest(
+              activeBuildVersion,
+              'http://localhost:3001/_next/static/chunks/',
+            ),
+        });
+      }
+
+      if (url.startsWith('http://localhost:3002/')) {
+        throw new Error(`Unexpected checkout fetch: ${url}`);
+      }
+
+      throw new Error(`Unexpected fetch: ${url}`);
+    }) as never;
+
+    const chunks = await serverEntry.withFederatedRequest(async () => {
+      const afterResolve = await runtimePlugin.afterResolve?.({
+        remote: {
+          name: 'shop',
+        },
+        remoteInfo: {
+          name: 'shop',
+          entry: 'http://localhost:3001/_next/static/chunks/remoteEntry.js',
+          entryGlobalName: 'shop',
+          buildVersion: activeBuildVersion,
+        },
+      } as never);
+
+      runtimePlugin.onLoad?.({
+        remote: {
+          name: afterResolve?.remote.name,
+        },
+        expose: './menu',
+      } as never);
+
+      return serverEntry.flushChunks();
+    });
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      'http://localhost:3001/_next/static/ssr/mf-manifest.json',
+      expect.objectContaining({
+        cache: 'no-store',
+      }),
+    );
+    expect(global.fetch).toHaveBeenCalledWith(
+      'http://localhost:3001/_next/static/chunks/mf-manifest.json',
+      expect.objectContaining({
+        cache: 'no-store',
+      }),
+    );
+    expect(global.fetch).not.toHaveBeenCalledWith(
+      'http://localhost:3002/_next/static/ssr/mf-manifest.json',
+      expect.anything(),
+    );
+    expect(global.fetch).not.toHaveBeenCalledWith(
+      'http://localhost:3002/_next/static/chunks/mf-manifest.json',
+      expect.anything(),
+    );
+    expect(chunks).toEqual([
+      'http://localhost:3001/_next/static/chunks/remoteEntry.js?mf-build-version=local',
+      'http://localhost:3001/_next/static/chunks/menu.css?mf-build-version=local',
+      'http://localhost:3001/_next/static/chunks/menu.js?mf-build-version=local',
+      'http://localhost:3001/_next/static/chunks/menu.async.js?mf-build-version=local',
+    ]);
   });
 
   it('reuses an attached host container for the pinned generation runtime', async () => {
@@ -1086,24 +1174,22 @@ describe('server runtime contract', () => {
   });
 
   it('retires old remote generations after in-flight requests drain', async () => {
-    let firstGenerationName = '';
-
     await serverEntry.withFederatedRequest(async () => {
-      const beforeRequest = await runtimePlugin.beforeRequest?.({
+      await runtimePlugin.beforeRequest?.({
         id: 'shop/menu',
       } as never);
-      firstGenerationName = beforeRequest?.id?.split('/')[0] || '';
-      await runtimePlugin.afterResolve?.({
+      const afterResolve = await runtimePlugin.afterResolve?.({
         remote: {
-          name: firstGenerationName,
+          name: 'shop',
         },
         remoteInfo: {
-          name: firstGenerationName,
+          name: 'shop',
           entry: 'http://localhost:3001/_next/static/chunks/remoteEntry.js',
           entryGlobalName: 'shop',
           buildVersion: activeBuildVersion,
         },
       } as never);
+      const firstGenerationName = afterResolve?.remote.name || '';
       runtimePlugin.onLoad?.({
         remote: {
           name: firstGenerationName,
@@ -1114,24 +1200,23 @@ describe('server runtime contract', () => {
     });
 
     activeBuildVersion = 'next-build';
-    let secondGenerationName = '';
 
     await serverEntry.withFederatedRequest(async () => {
-      const beforeRequest = await runtimePlugin.beforeRequest?.({
+      await runtimePlugin.beforeRequest?.({
         id: 'shop/menu',
       } as never);
-      secondGenerationName = beforeRequest?.id?.split('/')[0] || '';
-      await runtimePlugin.afterResolve?.({
+      const afterResolve = await runtimePlugin.afterResolve?.({
         remote: {
-          name: secondGenerationName,
+          name: 'shop',
         },
         remoteInfo: {
-          name: secondGenerationName,
+          name: 'shop',
           entry: 'http://localhost:3001/_next/static/chunks/remoteEntry.js',
           entryGlobalName: 'shop',
           buildVersion: activeBuildVersion,
         },
       } as never);
+      const secondGenerationName = afterResolve?.remote.name || '';
       runtimePlugin.onLoad?.({
         remote: {
           name: secondGenerationName,
@@ -1141,6 +1226,10 @@ describe('server runtime contract', () => {
       await serverEntry.flushChunks();
     });
 
+    const firstGenerationName =
+      registerRemotes.mock.calls[0]?.[0]?.[0]?.name || '';
+    const secondGenerationName =
+      registerRemotes.mock.calls[1]?.[0]?.[0]?.name || '';
     expect(secondGenerationName).not.toBe(firstGenerationName);
     expect(removeRemote).toHaveBeenCalledWith(
       expect.objectContaining({

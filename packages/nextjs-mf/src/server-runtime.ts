@@ -98,6 +98,15 @@ type FederatedSsrGlobal = {
   activeBuildVersions: Map<string, string>;
   record: (runtimeName: string, expose: string) => void;
   rewriteId: (id: string) => string;
+  ensureRemoteGeneration: (args: {
+    remote: { name: string; alias?: string };
+    remoteInfo: {
+      name: string;
+      entry: string;
+      entryGlobalName: string;
+      buildVersion?: string;
+    };
+  }) => Promise<RemoteGeneration | undefined>;
   pinRemote: (args: {
     remote: { name: string; alias?: string };
     remoteInfo: {
@@ -209,6 +218,43 @@ const getConfiguredRemotes = (): Array<
   }
 
   return Array.from(remotes.values());
+};
+
+const findConfiguredRemoteForRequest = (
+  remote: { name: string; alias?: string },
+  remoteInfo: {
+    name: string;
+    entry: string;
+    entryGlobalName: string;
+  },
+):
+  | (FederatedRemoteReference & { baseKey: string; entry: string })
+  | undefined => {
+  const requestedNames = new Set(
+    [
+      remote.name,
+      remote.alias,
+      remoteInfo.name,
+      remoteInfo.entryGlobalName,
+    ].filter((value): value is string => Boolean(value)),
+  );
+  const requestedEntry = normalizeNextManifestUrl(remoteInfo.entry);
+
+  return getConfiguredRemotes().find((candidate) => {
+    const candidateEntries = new Set([
+      normalizeNextManifestUrl(candidate.entry),
+      normalizeNextManifestUrl(getBrowserManifestUrl(candidate.entry)),
+    ]);
+
+    if (!candidateEntries.has(requestedEntry)) {
+      return false;
+    }
+
+    return (
+      requestedNames.has(candidate.name) ||
+      (candidate.alias ? requestedNames.has(candidate.alias) : false)
+    );
+  });
 };
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -513,25 +559,53 @@ const registerGenerationForRequest = (
   return generation;
 };
 
-const captureRequestGenerations = async (
+const ensureRemoteGeneration = async (
   state: FederatedRequestState,
-): Promise<void> => {
-  const remotes = getConfiguredRemotes();
+  remote: { name: string; alias?: string },
+  remoteInfo: {
+    name: string;
+    entry: string;
+    entryGlobalName: string;
+    buildVersion?: string;
+  },
+): Promise<RemoteGeneration | undefined> => {
+  const existingGeneration =
+    state.generationByRuntimeName.get(remote.name) ||
+    state.generationBySpecifier.get(remote.name) ||
+    (remote.alias
+      ? state.generationBySpecifier.get(remote.alias)
+      : undefined) ||
+    state.generationBySpecifier.get(remoteInfo.name) ||
+    state.generationByEntryGlobalName.get(remoteInfo.entryGlobalName);
 
-  await Promise.all(
-    remotes.map(async (remote) => {
-      const manifest = await fetchManifestWithDevFallback(remote.entry);
-      const buildVersion = getManifestBuildVersion(remote.entry, manifest);
-      const generationBucket = getGlobalSsrStore().generations.get(
-        remote.baseKey,
-      );
-      const existingGeneration = generationBucket?.get(buildVersion);
-      const assetManifest =
-        existingGeneration?.assetManifest ||
-        (await fetchManifestWithRetries(getBrowserManifestUrl(remote.entry)));
+  if (existingGeneration) {
+    return existingGeneration;
+  }
 
-      registerGenerationForRequest(state, remote, manifest, assetManifest);
-    }),
+  const configuredRemote = findConfiguredRemoteForRequest(remote, remoteInfo);
+  if (!configuredRemote) {
+    return undefined;
+  }
+
+  const manifest = await fetchManifestWithDevFallback(configuredRemote.entry);
+  const buildVersion = getManifestBuildVersion(
+    configuredRemote.entry,
+    manifest,
+  );
+  const registeredGeneration = getGlobalSsrStore()
+    .generations.get(configuredRemote.baseKey)
+    ?.get(buildVersion);
+  const assetManifest =
+    registeredGeneration?.assetManifest ||
+    (await fetchManifestWithRetries(
+      getBrowserManifestUrl(configuredRemote.entry),
+    ));
+
+  return registerGenerationForRequest(
+    state,
+    configuredRemote,
+    manifest,
+    assetManifest,
   );
 };
 
@@ -662,6 +736,25 @@ const getGlobalSsrStore = (): FederatedSsrGlobal => {
       }
 
       return id;
+    },
+    async ensureRemoteGeneration({
+      remote,
+      remoteInfo,
+    }: {
+      remote: { name: string; alias?: string };
+      remoteInfo: {
+        name: string;
+        entry: string;
+        entryGlobalName: string;
+        buildVersion?: string;
+      };
+    }) {
+      const state = this.storage.getStore();
+      if (!state) {
+        return undefined;
+      }
+
+      return ensureRemoteGeneration(state, remote, remoteInfo);
     },
     pinRemote({
       remote,
@@ -808,8 +901,6 @@ export const withFederatedRequest = async <T>(
     if (!state) {
       return Promise.resolve(callback());
     }
-
-    await captureRequestGenerations(state);
 
     try {
       return await callback();

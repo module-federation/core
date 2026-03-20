@@ -57,6 +57,7 @@
   "dependencies": {
     "@module-federation/runtime": "workspace:*",
     "@module-federation/sdk": "workspace:*",
+    "@module-federation/node": "workspace:*",
     "@module-federation/enhanced": "workspace:*"
   },
   "devDependencies": {

@@ -10,6 +10,18 @@ type RemoteContainer = {
 type FederatedSsrRuntime = {
   record?: (remote: string, expose: string) => void;
   rewriteId?: (id: string) => string;
+  ensureRemoteGeneration?: (args: {
+    remote: {
+      name: string;
+      alias?: string;
+    };
+    remoteInfo: {
+      name: string;
+      entry: string;
+      entryGlobalName: string;
+      buildVersion?: string;
+    };
+  }) => Promise<{ runtimeName: string } | undefined>;
   loadEntry?: (args: {
     loaderHook: unknown;
     remoteInfo: {
@@ -347,12 +359,13 @@ export default function (): ModuleFederationRuntimePlugin {
         id: getSsrRuntime()?.rewriteId?.(args.id) ?? args.id,
       };
     },
-    afterResolve(args) {
+    async afterResolve(args) {
       if (typeof window !== 'undefined') {
         return args;
       }
 
-      const generation = getSsrRuntime()?.pinRemote?.({
+      const runtime = getSsrRuntime();
+      const generation = await runtime?.ensureRemoteGeneration?.({
         remote: args.remote,
         remoteInfo: args.remoteInfo,
       });
@@ -361,11 +374,20 @@ export default function (): ModuleFederationRuntimePlugin {
         return args;
       }
 
+      const pinnedGeneration = runtime?.pinRemote?.({
+        remote: args.remote,
+        remoteInfo: args.remoteInfo,
+      });
+
+      if (!pinnedGeneration) {
+        return args;
+      }
+
       return {
         ...args,
         remote: {
           ...args.remote,
-          name: generation.runtimeName,
+          name: pinnedGeneration.runtimeName,
         },
       };
     },
