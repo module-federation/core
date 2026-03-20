@@ -1,5 +1,14 @@
 # @module-federation/bridge-vue3
 
+## 2.2.3
+
+### Patch Changes
+
+- 7489d7c: fix(bridge-vue3): pass hashRoute and memoryRoute to RemoteApp, fix path and redirect prefixing in addBasenameToNestedRoutes
+  - @module-federation/runtime@2.2.3
+  - @module-federation/sdk@2.2.3
+  - @module-federation/bridge-shared@2.2.3
+
 ## 2.2.2
 
 ### Patch Changes
