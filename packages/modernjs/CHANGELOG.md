@@ -1,5 +1,18 @@
 # @module-federation/modern-js
 
+## 2.2.3
+
+### Patch Changes
+
+- Updated dependencies [762b9ef]
+  - @module-federation/rsbuild-plugin@2.2.3
+  - @module-federation/runtime@2.2.3
+  - @module-federation/enhanced@2.2.3
+  - @module-federation/sdk@2.2.3
+  - @module-federation/bridge-react@2.2.3
+  - @module-federation/cli@2.2.3
+  - @module-federation/node@2.7.37
+
 ## 2.2.2
 
 ### Patch Changes
