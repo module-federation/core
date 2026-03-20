@@ -1,22 +1,16 @@
 import type { ItemType } from 'antd/es/menu/interface';
 
-import { useRouter } from 'next/router';
+import Router from 'next/router';
 import { Menu } from 'antd';
 
-const menuItems: ItemType[] = [
-  { label: 'Main home', key: '/' },
-  { label: 'Test hook from remote', key: '/home/test-remote-hook' },
-  { label: 'Test broken remotes', key: '/home/test-broken-remotes' },
-  { label: 'Exposed pages', key: '/home/exposed-pages' },
-  {
-    label: 'Exposed components',
-    type: 'group',
-    children: [{ label: 'home/SharedNav', key: '/home/test-shared-nav' }],
-  },
-];
+const menuItems: ItemType[] = [{ label: 'Main home', key: '/' }];
 
 export default function AppMenu() {
-  const router = useRouter();
+  const router = Router.router;
+  const selectedKey =
+    typeof window === 'undefined'
+      ? router?.asPath || '/'
+      : window.location.pathname || router?.asPath || '/';
 
   return (
     <>
@@ -27,9 +21,18 @@ export default function AppMenu() {
       </div>
       <Menu
         mode="inline"
-        selectedKeys={[router.asPath]}
+        selectedKeys={[selectedKey]}
         style={{ height: '100%' }}
-        onClick={({ key }) => router.push(key)}
+        onClick={({ key }) => {
+          if (typeof window === 'undefined') {
+            return;
+          }
+          if (router) {
+            void router.push(String(key));
+            return;
+          }
+          window.location.assign(String(key));
+        }}
         items={menuItems}
       />
     </>

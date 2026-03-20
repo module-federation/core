@@ -1,3 +1,4 @@
+const withRspack = require('next-rspack');
 const NextFederationPlugin = require('@module-federation/nextjs-mf');
 const path = require('path');
 const reactPath = path.dirname(require.resolve('react/package.json'));
@@ -7,6 +8,18 @@ const reactDomPath = path.dirname(require.resolve('react-dom/package.json'));
 const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
+  },
+  async headers() {
+    return [
+      {
+        source: '/_next/static/:path*',
+        headers: [
+          { key: 'Access-Control-Allow-Origin', value: '*' },
+          { key: 'Access-Control-Allow-Methods', value: 'GET, OPTIONS' },
+          { key: 'Access-Control-Allow-Headers', value: '*' },
+        ],
+      },
+    ];
   },
   webpack(config, options) {
     const { isServer } = options;
@@ -26,6 +39,8 @@ const nextConfig = {
           }/remoteEntry.js`,
         },
         exposes: {
+          './pages/shop/index': './pages/shop/index',
+          './pages/shop/products/[...slug]': './pages/shop/products/[...slug]',
           './useCustomRemoteHook': './components/useCustomRemoteHook',
           './WebpackSvg': './components/WebpackSvg',
           './WebpackPng': './components/WebpackPng',
@@ -40,12 +55,6 @@ const nextConfig = {
           '@ant-design/': {
             singleton: true,
           },
-        },
-        extraOptions: {
-          exposePages: true,
-          enableImageLoaderFix: true,
-          enableUrlLoaderFix: true,
-          automaticPageStitching: false,
         },
       }),
     );
@@ -64,4 +73,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+module.exports = withRspack(nextConfig);

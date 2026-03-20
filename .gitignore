@@ -56,6 +56,7 @@ apps/**/dist
 
 **/@mf-types/**
 **/cypress/downloads
+**/cypress/screenshots
 packages/chrome-devtools/test-results/
 
 # test cases
@@ -71,6 +72,7 @@ packages/enhanced/test/js
 **/cache/**
 **/dist-test/**
 **/cypress/downloads
+**/cypress/screenshots
 /packages/data-prefetch/jest/cache/
 
 # storybook cases

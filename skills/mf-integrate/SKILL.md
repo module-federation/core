@@ -265,13 +265,14 @@ pnpm add @module-federation/enhanced
 
 **Detected by**: `next.config.ts` / `next.config.mjs` / `next.config.js` in project root.
 
-> **Deprecation warning**: `@module-federation/nextjs-mf` only supports Pages Router (not App Router) and is no longer actively maintained. For new projects, consider using Rsbuild or Modern.js instead.
+> **Pages-only warning**: the rspack-first `@module-federation/nextjs-mf` adapter only claims Pages Router support in wave 1. Do not treat it as an App Router integration.
 
-#### 4a. Modify `next.config.mjs`
+#### 4a. Modify `next.config.js`
 
 ```diff
-+import { NextFederationPlugin } from '@module-federation/nextjs-mf';
-
++const withRspack = require('next-rspack');
++const NextFederationPlugin = require('@module-federation/nextjs-mf');
++
  const nextConfig = {
    webpack(config, options) {
 +    config.plugins.push(
@@ -280,33 +281,24 @@ pnpm add @module-federation/enhanced
 +        filename: 'static/chunks/remoteEntry.js',
 +        // exposes: { ... },   // provider / both only
 +        // remotes: {          // consumer / both only
-+        //   remote: `remote@http://localhost:3001/static/${options.isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
++        //   remote: `remote@http://localhost:3001/_next/static/${options.isServer ? 'ssr' : 'chunks'}/remoteEntry.js`,
 +        // },
 +        shared: {},
-+        extraOptions: {
-+          exposePages: true,
-+          enableImageLoaderFix: true,
-+          enableUrlLoaderFix: true,
-+        },
-+      })
++      }),
 +    );
      return config;
    },
  };
++module.exports = withRspack(nextConfig);
 ```
 
-#### 4b. Enable local Webpack
-
-Add to `.env.local`:
-```
-NEXT_PRIVATE_LOCAL_WEBPACK=true
-```
-
-#### 4c. Install
+#### 4b. Install
 
 ```bash
-pnpm add @module-federation/nextjs-mf webpack -D
+pnpm add @module-federation/nextjs-mf next-rspack
 ```
+
+`extraOptions`, `pages-map`, `./utils`, and `NEXT_PRIVATE_LOCAL_WEBPACK` are no longer part of the supported setup.
 
 ---
 

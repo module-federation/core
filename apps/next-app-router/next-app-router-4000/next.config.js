@@ -1,3 +1,4 @@
+const withRspack = require('next-rspack');
 const NextFederationPlugin = require('@module-federation/nextjs-mf');
 
 /** @type {import('next').NextConfig} */
@@ -27,6 +28,7 @@ const nextConfig = {
     };
 
     config.plugins.push(
+      // Experimental quarantine only: wave 1 does not claim App Router support.
       new NextFederationPlugin({
         name: 'home_app',
         filename: 'static/chunks/remoteEntry.js',
@@ -45,12 +47,6 @@ const nextConfig = {
           //   requiredVersion: false
           // }
         },
-        extraOptions: {
-          // debug: false,
-          // exposePages: true,
-          // enableImageLoaderFix: true,
-          // enableUrlLoaderFix: true,
-        },
       }),
     );
     config.plugins.push({
@@ -63,4 +59,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+module.exports = withRspack(nextConfig);

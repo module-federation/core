@@ -2,12 +2,9 @@ import React, { Suspense, lazy } from 'react';
 import Head from 'next/head';
 import CheckoutTitle from 'checkout/CheckoutTitle';
 import ButtonOldAnt from 'checkout/ButtonOldAnt';
-// const CheckoutTitle = lazy(() => import('checkout/CheckoutTitle'));
-// const ButtonOldAnt = lazy(() => import('checkout/ButtonOldAnt'));
+
 const WebpackSvgRemote = lazy(() =>
-  import('shop/WebpackSvg').then((m) => {
-    return m;
-  }),
+  import('shop/WebpackSvg').then((module) => module),
 );
 const WebpackPngRemote = lazy(() => import('shop/WebpackPng'));
 
@@ -105,7 +102,7 @@ const Home = () => {
             <td>
               Loading remote component with PNG image from localhost:3001
               <br />
-              <blockquote>(check publicPath fix in image-loader)</blockquote>
+              <blockquote>(check remote asset base resolution)</blockquote>
             </td>
             <td>
               <img className="home-webpack-png" src="./webpack.png" />
@@ -121,7 +118,7 @@ const Home = () => {
             <td>
               Loading remote component with SVG from localhost:3001
               <br />
-              <blockquote>(check publicPath fix in url-loader)</blockquote>
+              <blockquote>(check remote asset base resolution)</blockquote>
             </td>
             <td>
               <img src="./webpack.svg" />

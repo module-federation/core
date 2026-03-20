@@ -2,11 +2,11 @@
 
 ## 共享依赖
 
-默认情况下，某些 Next.js 内部结构会自动共享以优化你的应用程序。
-请务必注意，手动共享这些内部结构可能会导致错误，因为它们已经为你处理了。
+适配器仍然会自动共享常见的 Next 内部依赖，通常不需要重复声明：
 
 - `next/dynamic`
 - `next/head`
+- `next/image`
 - `next/link`
 - `next/router`
 - `next/script`
@@ -17,123 +17,25 @@
 - `styled-jsx`
 - `styled-jsx/style`
 
-<details>
-<summary> 点击展开 `DEFAULT_SHARE_SCOPE`:</summary>
+## Pages 暴露
 
-```ts
-export const DEFAULT_SHARE_SCOPE: SharedObject = {
-  'next/dynamic': {
-    requiredVersion: undefined,
-    singleton: true,
-    import: undefined,
-  },
-  'next/head': {
-    requiredVersion: undefined,
-    singleton: true,
-    import: undefined,
-  },
-  'next/link': {
-    requiredVersion: undefined,
-    singleton: true,
-    import: undefined,
-  },
-  'next/router': {
-    requiredVersion: false,
-    singleton: true,
-    import: undefined,
-  },
-  'next/image': {
-    requiredVersion: undefined,
-    singleton: true,
-    import: undefined,
-  },
-  'next/script': {
-    requiredVersion: undefined,
-    singleton: true,
-    import: undefined,
-  },
-  react: {
-    singleton: true,
-    requiredVersion: false,
-    import: false,
-  },
-  'react/': {
-    singleton: true,
-    requiredVersion: false,
-    import: false,
-  },
-  'react-dom/': {
-    singleton: true,
-    requiredVersion: false,
-    import: false,
-  },
-  'react-dom': {
-    singleton: true,
-    requiredVersion: false,
-    import: false,
-  },
-  'react/jsx-dev-runtime': {
-    singleton: true,
-    requiredVersion: false,
-  },
-  'react/jsx-runtime': {
-    singleton: true,
-    requiredVersion: false,
-  },
-  'styled-jsx': {
-    singleton: true,
-    import: undefined,
-    version: require('styled-jsx/package.json').version,
-    requiredVersion: '^' + require('styled-jsx/package.json').version,
-  },
-  'styled-jsx/style': {
-    singleton: true,
-    import: false,
-    version: require('styled-jsx/package.json').version,
-    requiredVersion: '^' + require('styled-jsx/package.json').version,
-  },
-  'styled-jsx/css': {
-    singleton: true,
-    import: undefined,
-    version: require('styled-jsx/package.json').version,
-    requiredVersion: '^' + require('styled-jsx/package.json').version,
-  },
-};
-```
-</details>
+新的适配器 **不再支持** `extraOptions.exposePages`。
 
-## 导出页面
+如果另一个应用需要导入某个拼接后的 Pages 路由，请显式声明它：
 
-你可以通过插件自动公开所有页面
-
-```javascript
+```js
 new NextFederationPlugin({
   name: 'remoteApp',
-  filename: '',
-  remotes: {},
-  exposes: {},
-  shared: {},
-  extraOptions: {
-    exposePages: true
+  filename: 'static/chunks/remoteEntry.js',
+  exposes: {
+    './pages/index': './pages/index',
+    './pages/shop/products/[...slug]': './pages/shop/products/[...slug]',
   },
 });
 ```
 
-这将使页面可以导入，例如：
+## 构建默认值
 
-- `import Page from 'remoteApp/pages/index'`
-- `import Page from 'remoteApp/pages/shop/product'`
-
-## 构建配置 Options
-
-### Public Path
-
-publicPath 设置为 "auto"
-
-`config.output.publicPath: "auto"`
-
-### Target
-
-Webpack output target is set to `async-node` from `node`
-
-`config.target = "async-node"`
+- client `publicPath` 会规范化为 `auto`
+- server target 会规范化为 `async-node`
+- remote 元数据来自 `mf-manifest.json`

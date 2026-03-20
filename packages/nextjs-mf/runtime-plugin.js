@@ -1,0 +1,3 @@
+/* eslint-env node */
+
+module.exports = require('./dist/runtime-plugin.cjs');
