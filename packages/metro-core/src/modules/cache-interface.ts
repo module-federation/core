@@ -14,7 +14,6 @@ export interface ICacheManager {
     },
   ): Promise<any>;
   updateLastUsedAt(bundleUrl: string): Promise<void>;
-  markBroken(remoteName: string, bundleUrl: string): Promise<void>;
   invalidateAllCaches(): Promise<void>;
 }
 

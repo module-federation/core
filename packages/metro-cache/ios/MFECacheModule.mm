@@ -146,6 +146,23 @@ RCT_EXPORT_METHOD(getDocumentDirectory:(RCTPromiseResolveBlock)resolve
   resolve(paths.firstObject);
 }
 
+RCT_EXPORT_METHOD(getFileSize:(NSString *)path
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  reject:(RCTPromiseRejectBlock)reject)
+{
+  dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    NSFileManager *fm = [NSFileManager defaultManager];
+    NSError *error;
+    NSDictionary *attrs = [fm attributesOfItemAtPath:path error:&error];
+    if (error) {
+      reject(@"FILE_SIZE_ERROR", error.localizedDescription, error);
+    } else {
+      NSNumber *size = attrs[NSFileSize];
+      resolve(size ?: @(0));
+    }
+  });
+}
+
 #pragma mark - SHA-256
 
 - (NSString *)sha256FromData:(NSData *)data {

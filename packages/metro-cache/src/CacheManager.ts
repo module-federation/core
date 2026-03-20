@@ -7,6 +7,11 @@ import type {
 
 const LOG_PREFIX = '[MFE-Cache]';
 
+// Default configuration values
+const DEFAULT_MAX_CACHE_SIZE_BYTES = 20 * 1024 * 1024; // 20MB
+const DEFAULT_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+const DEFAULT_MIN_CACHE_SIZE_BYTES = 0;
+
 export class CacheManager {
   private bundleDir: string = '';
   private config: CacheManagerConfig;
@@ -55,12 +60,8 @@ export class CacheManager {
       (this as any)._hostBuildHash = currentHostHash;
     }
 
-    // Activate pending updates (cold start)
-    for (const meta of this.urlIndex.values()) {
-      if (meta.status === 'pendingUpdate') {
-        await this.activatePendingUpdate(meta.remoteName);
-      }
-    }
+    // Perform LRU eviction on cold start
+    await this.evictLRU();
 
     this.initialized = true;
     console.info(
@@ -137,79 +138,12 @@ export class CacheManager {
     return meta;
   }
 
-  async savePendingUpdate(
-    remoteName: string,
-    filePath: string,
-    metadata: {
-      bundleUrl: string;
-      bundleHash?: string;
-      buildVersion?: string;
-    },
-  ): Promise<BundleMetadata> {
-    const now = Date.now();
-    const meta: BundleMetadata = {
-      remoteName,
-      bundleHash: metadata.bundleHash ?? '',
-      buildVersion: metadata.buildVersion ?? '',
-      filePath,
-      bundleUrl: metadata.bundleUrl,
-      downloadedAt: now,
-      lastUsedAt: now,
-      status: 'pendingUpdate',
-      retryCount: 0,
-      lastRetryAt: null,
-    };
-
-    this.urlIndex.set(meta.bundleUrl, meta);
-    return meta;
-  }
-
-  async activatePendingUpdate(
-    remoteName: string,
-  ): Promise<BundleMetadata | null> {
-    // Find pending update for this remote
-    let pending: BundleMetadata | null = null;
-    for (const meta of this.urlIndex.values()) {
-      if (meta.remoteName === remoteName && meta.status === 'pendingUpdate') {
-        pending = meta;
-        break;
-      }
-    }
-    if (!pending) return null;
-
-    pending.status = 'active';
-    return this.saveBundleToCache(remoteName, pending.filePath, {
-      bundleUrl: pending.bundleUrl,
-      bundleHash: pending.bundleHash,
-      buildVersion: pending.buildVersion,
-    });
-  }
-
-  async markBroken(remoteName: string, bundleUrl: string): Promise<void> {
-    const meta = this.urlIndex.get(bundleUrl);
-    if (!meta) return;
-    meta.status = 'broken';
-    meta.retryCount = 0;
-    meta.lastRetryAt = null;
-    await this.saveDiskManifest();
-    console.warn(`${LOG_PREFIX} marked broken: ${remoteName} @ ${bundleUrl}`);
-  }
-
   async updateLastUsedAt(bundleUrl: string): Promise<void> {
     const meta = this.urlIndex.get(bundleUrl);
     if (!meta) {
-      console.log(
-        '[MFE-Cache] updateLastUsedAt: no entry for',
-        bundleUrl.split('?')[0],
-      );
       return;
     }
     meta.lastUsedAt = Date.now();
-    console.log(
-      '[MFE-Cache] updateLastUsedAt:',
-      meta.remoteName,
-      meta.lastUsedAt,
-    );
     await this.saveDiskManifest();
   }
 
@@ -317,6 +251,73 @@ export class CacheManager {
       }
     } catch (e) {
       console.warn(`${LOG_PREFIX} failed to delete ${meta.filePath}:`, e);
+    }
+  }
+
+  /**
+   * Evict bundles based on LRU policy.
+   * Rules:
+   * 1. Only evict bundles older than maxAgeMs (stale)
+   * 2. Stop if total size drops below maxCacheSizeBytes
+   * 3. Never go below minCacheSizeBytes
+   *
+   * Fresh bundles (within maxAgeMs) are never evicted, even if over size limit.
+   */
+  async evictLRU(): Promise<void> {
+    if (!NativeMFECache) return;
+
+    const maxSize =
+      this.config.maxCacheSizeBytes ?? DEFAULT_MAX_CACHE_SIZE_BYTES;
+    const maxAge = this.config.maxAgeMs ?? DEFAULT_MAX_AGE_MS;
+    const minSize =
+      this.config.minCacheSizeBytes ?? DEFAULT_MIN_CACHE_SIZE_BYTES;
+
+    const now = Date.now();
+
+    // Single pass: compute total size and collect stale candidates
+    let currentSize = 0;
+    const candidates: Array<{ meta: BundleMetadata; size: number }> = [];
+    for (const meta of this.urlIndex.values()) {
+      let size = 0;
+      try {
+        size = await NativeMFECache.getFileSize(meta.filePath);
+      } catch {
+        continue; // Skip files we can't stat
+      }
+      currentSize += size;
+      if (now - meta.lastUsedAt > maxAge) {
+        candidates.push({ meta, size });
+      }
+    }
+    // No stale bundles to evict
+    if (candidates.length === 0) {
+      return;
+    }
+    candidates.sort((a, b) => a.meta.lastUsedAt - b.meta.lastUsedAt);
+
+    let evictedCount = 0;
+    let evictedSize = 0;
+
+    for (const { meta, size } of candidates) {
+      // Stop if we're under the max size limit
+      if (currentSize < maxSize) {
+        break;
+      }
+      // Never go below min cache size
+      if (currentSize - size < minSize) {
+        break;
+      }
+
+      // Evict this stale bundle
+      await this.deleteBundleFiles(meta);
+      this.removeBundleMetadata(meta);
+      currentSize -= size;
+      evictedCount++;
+      evictedSize += size;
+    }
+
+    if (evictedCount > 0) {
+      await this.saveDiskManifest();
     }
   }
 }

@@ -93,7 +93,7 @@ function buildLoadBundleAsyncWrapper() {
     __loadBundleAsync as typeof globalThis.__loadBundleAsync;
 
   // DEBUG: set to true to test cache layer in dev mode
-  const FORCE_CACHE_IN_DEV = true;
+  const FORCE_CACHE_IN_DEV = false;
 
   // Try to load metro-cache for caching.
   // Host loads via require, remotes reuse via globalThis (they can't require metro-cache).

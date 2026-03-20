@@ -110,6 +110,22 @@ class MFECacheModule(reactContext: ReactApplicationContext) :
     promise.resolve(reactApplicationContext.filesDir.absolutePath)
   }
 
+  @ReactMethod
+  fun getFileSize(path: String, promise: Promise) {
+    Thread {
+      try {
+        val file = File(path)
+        if (!file.exists()) {
+          promise.reject("FILE_SIZE_ERROR", "File not found: $path")
+          return@Thread
+        }
+        promise.resolve(file.length().toDouble())
+      } catch (e: Exception) {
+        promise.reject("FILE_SIZE_ERROR", e.message, e)
+      }
+    }.start()
+  }
+
   // --- SHA-256 ---
 
   private fun sha256Hex(bytes: ByteArray): String {

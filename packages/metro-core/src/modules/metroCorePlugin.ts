@@ -65,24 +65,8 @@ const MetroCorePlugin: () => ModuleFederationRuntimePlugin = () => {
           if (manifest) {
             // Container bundle hash
             const containerHash = (manifest.metaData?.buildInfo as any)?.hash;
-            console.log(
-              '[MFE-Hash] afterResolve raw manifest.metaData.buildInfo:',
-              JSON.stringify(manifest.metaData?.buildInfo),
-            );
-            console.log(
-              '[MFE-Hash] afterResolve manifestUrl:',
-              manifestUrl,
-              'remoteInfo.entry:',
-              remoteInfo.entry,
-            );
             if (containerHash && remoteInfo.entry) {
               bundleHashMap[remoteInfo.entry] = containerHash;
-              console.log(
-                '[MFE-Hash] container:',
-                remoteInfo.entry,
-                '→',
-                containerHash,
-              );
             }
             // Resolve actual publicPath for hash key construction.
             // In dev mode, manifest.publicPath is "auto" — resolve to actual server URL.
@@ -112,7 +96,6 @@ const MetroCorePlugin: () => ModuleFederationRuntimePlugin = () => {
                       ? `${resolvedPublicPath.replace(/\/+$/, '')}/${bundlePath.replace(/^\.?\//, '')}`
                       : bundlePath;
                     bundleHashMap[fullUrl] = hash;
-                    console.log('[MFE-Hash] expose:', fullUrl, '→', hash);
                   }
                 }
               }
@@ -129,7 +112,6 @@ const MetroCorePlugin: () => ModuleFederationRuntimePlugin = () => {
                       ? `${resolvedPublicPath.replace(/\/+$/, '')}/${bundlePath.replace(/^\.?\//, '')}`
                       : bundlePath;
                     bundleHashMap[fullUrl] = hash;
-                    console.log('[MFE-Hash] shared:', fullUrl, '→', hash);
                   }
                 }
               }

@@ -14,6 +14,8 @@ export interface NativeMFECacheSpec {
   deleteFile(path: string): Promise<void>;
   fileExists(path: string): Promise<boolean>;
   getDocumentDirectory(): Promise<string>;
+  /** Get file size in bytes */
+  getFileSize(path: string): Promise<number>;
 
   // SHA-256 hash
   sha256File(filePath: string): Promise<string>;
