@@ -1,6 +1,7 @@
 import ErrorCodeTitle from '@components/ErrorCodeTitle';
 import EnableAsyncEntry from '@components/en/EnableAsyncEntry';
 import Runtime from '@components/en/runtime/index';
+import { Tab, Tabs } from '@theme';
 
 # Runtime
 
@@ -44,6 +45,97 @@ There are corresponding solutions for the reasons:
 3. Check if the resource is externally accessible.
 4. Loading a ESM remote from a non-esm host
   - setting `type: 'module'` on the remote config
+
+### Getting More Detailed Error Information
+
+If you have confirmed that `window[remoteEntryKey]` does not exist (i.e. the script failed to register the container), but there is no clear error message in the console, it may be because the producer script is a cross-origin resource. Browsers hide error details for cross-origin scripts by default (`filename`, `lineno`, and `message` are all empty).
+
+You can add a `crossorigin` attribute to the script via the [`createScript`](../../plugin/dev/index#createscript) hook, provided that the producer server has `Access-Control-Allow-Origin` configured.
+
+First, create the runtime plugin file:
+
+```ts title="script-crossorigin-plugin.ts"
+import { ModuleFederationRuntimePlugin } from '@module-federation/runtime/types';
+
+export default function MFScriptPlugin(): ModuleFederationRuntimePlugin {
+  return {
+    name: 'script-crossorigin-plugin',
+    createScript({ url }) {
+      const script = document.createElement('script');
+      script.src = url;
+      script.crossOrigin = 'anonymous';
+      return script;
+    },
+    // If preloadRemote is used in your project, also implement createLink to keep
+    // crossorigin consistent. Without this, the preload (no-cors) and actual load
+    // (cors) will have different cache keys, causing the preload to be wasted.
+    createLink({ url, attrs }) {
+      const link = document.createElement('link');
+      link.setAttribute('href', url);
+      link.setAttribute('crossorigin', 'anonymous');
+      if (attrs) {
+        Object.entries(attrs).forEach(([key, value]) => {
+          if (key !== 'crossorigin') {
+            link.setAttribute(key, String(value));
+          }
+        });
+      }
+      return link;
+    },
+  };
+}
+```
+
+Then register the plugin:
+
+<Tabs>
+  <Tab label="Build Plugin">
+
+Register via the `runtimePlugins` field in your build config:
+
+```ts title="rspack.config.ts"
+const path = require('path');
+module.exports = {
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'host',
+      remotes: { /* ... */ },
+      runtimePlugins: [
+        path.resolve(__dirname, './script-crossorigin-plugin.ts'),
+      ],
+    }),
+  ],
+};
+```
+
+  </Tab>
+  <Tab label="Runtime API">
+
+Register via the `plugins` field in the `init` API:
+
+```ts title="index.ts"
+import { init } from '@module-federation/runtime';
+import MFScriptPlugin from './script-crossorigin-plugin';
+
+init({
+  name: 'host',
+  remotes: [/* ... */],
+  plugins: [MFScriptPlugin()],
+});
+```
+
+  </Tab>
+</Tabs>
+
+Once added, runtime exceptions thrown by cross-origin scripts will include the full `filename`, `lineno`, and `message`, making it easier to locate the specific error.
+
+:::tip
+
+* If the server does not have CORS headers configured, adding the `crossorigin` attribute will instead cause the script to fail to load (network error). Confirm the server is correctly configured before using this approach.
+
+* MF does not sync this automatically because doing so would require calling the `createScript` hook speculatively during preload to read the `crossOrigin` value — hook implementations may have side effects (e.g. registering listeners, mutating global state), so invoking the hook twice could cause unpredictable behavior.
+
+:::
 
 ## RUNTIME-002
 
@@ -181,6 +273,10 @@ The script file downloaded successfully, but its IIFE threw a runtime exception 
 :::tip
 A `ScriptExecutionError` means the script was downloaded successfully — retrying will not fix this type of error. Focus on investigating compatibility or runtime errors in the producer's code first.
 :::
+
+### Getting More Detailed Error Information
+
+Prior to **v2.2.0**, RUNTIME-008 error messages may not include specific exception details. If the error message is not descriptive enough, refer to 「[RUNTIME-001 Getting More Detailed Error Information](#getting-more-detailed-error-information)」 for how to add the `crossorigin` attribute to retrieve the full error stack.
 
 ## RUNTIME-009
 
