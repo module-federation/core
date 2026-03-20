@@ -1,5 +1,11 @@
 # @module-federation/metro-plugin-rnef
 
+## 2.2.3
+
+### Patch Changes
+
+- @module-federation/metro@2.2.3
+
 ## 2.2.2
 
 ### Patch Changes
