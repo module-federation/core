@@ -5,7 +5,6 @@ import {
   applyAutomaticAssetAdaptation,
   isAppDirectoryCompiler,
 } from './asset-adapter';
-import EntryStartupPlugin from './entry-startup-plugin';
 import { DEFAULT_SHARE_SCOPE, DEFAULT_SHARE_SCOPE_BROWSER } from './internal';
 import { normalizeNextRemotes } from './remotes';
 import { applyServerCompilerEnhancements } from './server-compiler';
@@ -462,10 +461,6 @@ export class NextFederationPlugin {
     new RspackModuleFederationPlugin(normalizedOptions).apply(
       compiler as never,
     );
-
-    if (compilerName === 'server') {
-      new EntryStartupPlugin().apply(compiler as never);
-    }
   }
 }
 

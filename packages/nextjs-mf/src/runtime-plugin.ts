@@ -10,6 +10,7 @@ type RemoteContainer = {
 type FederatedSsrRuntime = {
   record?: (remote: string, expose: string) => void;
   rewriteId?: (id: string) => string;
+  hasActiveRequest?: () => boolean;
   ensureRemoteGeneration?: (args: {
     remote: {
       name: string;
@@ -69,6 +70,11 @@ const createOfflinePageFallback = () => {
     getServerSideProps: OFFLINE_SERVER_SIDE_PROPS,
   };
 };
+
+const createSyntheticRemoteContainer = (): RemoteContainer => ({
+  init: async () => undefined,
+  get: async () => () => createOfflinePageFallback(),
+});
 
 const copyOwnProperties = (
   source: AnyFunction,
@@ -172,6 +178,50 @@ const normalizeRemotePublicPath = ({
 
   return publicPath;
 };
+
+const createSyntheticManifest = (manifestUrl: string): ParsedManifest => {
+  const manifestDirectory =
+    normalizeRemotePublicPath({
+      manifestUrl,
+      inBrowser: false,
+    }) || '';
+
+  return {
+    id: '__nextjs_mf_offline__',
+    name: '__nextjs_mf_offline__',
+    metaData: {
+      name: '__nextjs_mf_offline__',
+      globalName: '__nextjs_mf_offline__',
+      buildInfo: {
+        buildVersion: 'offline',
+        buildName: '__nextjs_mf_offline__',
+      },
+      remoteEntry: {
+        path: '',
+        name: 'remoteEntry.js',
+        type: 'commonjs-module',
+      },
+      ssrRemoteEntry: {
+        path: '',
+        name: 'remoteEntry.js',
+        type: 'commonjs-module',
+      },
+      publicPath: manifestDirectory,
+      ssrPublicPath: manifestDirectory,
+      type: 'nextjs-mf',
+    },
+    shared: [],
+    remotes: [],
+    exposes: [],
+  };
+};
+
+const createSyntheticManifestResponse = (manifestUrl: string): Response =>
+  new Response(JSON.stringify(createSyntheticManifest(manifestUrl)), {
+    headers: new Headers({
+      'content-type': 'application/json',
+    }),
+  });
 
 const isRemoteContainer = (value: unknown): value is RemoteContainer =>
   !!value &&
@@ -311,6 +361,14 @@ export default function (): ModuleFederationRuntimePlugin {
         return undefined;
       }
 
+      if (args.lifecycle !== 'onLoad') {
+        return undefined;
+      }
+
+      if (args.from !== 'build' && args.from !== 'runtime') {
+        return undefined;
+      }
+
       const fallbackModule = createOfflinePageFallback();
       return args.from === 'build' ? () => fallbackModule : fallbackModule;
     },
@@ -324,11 +382,17 @@ export default function (): ModuleFederationRuntimePlugin {
         return undefined;
       }
 
-      return fetch(url, {
+      const manifestFetch = fetch(url, {
         cache: 'no-store',
       }).then((manifestResponse) =>
         sanitizeManifestResponse(manifestResponse, url),
       );
+
+      if (getSsrRuntime()?.hasActiveRequest?.()) {
+        return manifestFetch;
+      }
+
+      return manifestFetch.catch(() => createSyntheticManifestResponse(url));
     },
     createScript(args: { url: string; attrs?: Record<string, unknown> }) {
       if (typeof window === 'undefined') {
@@ -403,7 +467,12 @@ export default function (): ModuleFederationRuntimePlugin {
         return undefined as never;
       }
 
-      return (await getSsrRuntime()?.loadEntry?.({
+      const runtime = getSsrRuntime();
+      if (!runtime?.hasActiveRequest?.()) {
+        return createSyntheticRemoteContainer() as never;
+      }
+
+      return (await runtime.loadEntry?.({
         loaderHook: args.loaderHook,
         remoteInfo: args.remoteInfo,
       })) as never;

@@ -263,10 +263,6 @@ describe('NextFederationPlugin', () => {
 
     plugin.apply(compiler);
 
-    expect(compiler.hooks.thisCompilation.tap).toHaveBeenCalledWith(
-      'NextjsMfEntryStartupPlugin',
-      expect.any(Function),
-    );
     expect(compiler.options.node).toEqual({
       global: false,
     });
@@ -620,6 +616,74 @@ describe('server runtime contract', () => {
     });
   });
 
+  it('does not return a page fallback for manifest-loading failures', async () => {
+    expect(
+      runtimePlugin.errorLoadRemote?.({
+        id: 'http://localhost:3002/_next/static/ssr/mf-manifest.json',
+        from: 'runtime',
+        lifecycle: 'afterResolve',
+        error: new Error('fetch failed'),
+      } as never),
+    ).toBeUndefined();
+  });
+
+  it('returns a synthesized manifest response when a server manifest fetch fails without a request', async () => {
+    global.fetch = jest
+      .fn()
+      .mockRejectedValue(new Error('fetch failed')) as never;
+
+    const response = (await runtimePlugin.fetch?.(
+      'http://localhost:3002/_next/static/ssr/mf-manifest.json',
+      {} as never,
+    )) as Response;
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      'http://localhost:3002/_next/static/ssr/mf-manifest.json',
+      expect.objectContaining({
+        cache: 'no-store',
+      }),
+    );
+
+    await expect(response.json()).resolves.toEqual(
+      expect.objectContaining({
+        name: '__nextjs_mf_offline__',
+        metaData: expect.objectContaining({
+          globalName: '__nextjs_mf_offline__',
+          publicPath: 'http://localhost:3002/_next/static/ssr/',
+          ssrPublicPath: 'http://localhost:3002/_next/static/ssr/',
+          remoteEntry: expect.objectContaining({
+            name: 'remoteEntry.js',
+            path: '',
+            type: 'commonjs-module',
+          }),
+          ssrRemoteEntry: expect.objectContaining({
+            name: 'remoteEntry.js',
+            path: '',
+            type: 'commonjs-module',
+          }),
+        }),
+        shared: [],
+        remotes: [],
+        exposes: [],
+      }),
+    );
+  });
+
+  it('does not synthesize a manifest response when a request is active', async () => {
+    global.fetch = jest
+      .fn()
+      .mockRejectedValue(new Error('fetch failed')) as never;
+
+    await expect(
+      serverEntry.withFederatedRequest(async () =>
+        runtimePlugin.fetch?.(
+          'http://localhost:3002/_next/static/ssr/mf-manifest.json',
+          {} as never,
+        ),
+      ),
+    ).rejects.toThrow('fetch failed');
+  });
+
   it('preserves static page methods through the server onLoad shim', async () => {
     const record = jest.fn();
     (globalThis as any).__NEXTJS_MF_SSR__ = {
@@ -732,9 +796,7 @@ describe('server runtime contract', () => {
 
       expect(entryExports).toBe(remoteEntryExports);
       expect(mockLoadScriptNode).toHaveBeenCalledWith(
-        expect.stringContaining(
-          '/apps/3001-shop/.next/static/chunks/remoteEntry.js',
-        ),
+        'http://localhost:3001/_next/static/chunks/remoteEntry.js?mf-build-version=local',
         expect.objectContaining({
           attrs: expect.objectContaining({
             globalName: 'shop',
@@ -1219,6 +1281,68 @@ describe('server runtime contract', () => {
 
     expect(result).toBe(remoteEntryExports);
     expect(mockLoadScriptNode).not.toHaveBeenCalled();
+  });
+
+  it('returns a synthetic server container when no request is active', async () => {
+    const syntheticContainer = (await runtimePlugin.loadEntry?.({
+      loaderHook: {
+        lifecycle: {
+          createScript: {
+            emit: () => undefined,
+          },
+          fetch: {
+            emit: async () => undefined,
+          },
+        },
+      },
+      remoteInfo: {
+        name: 'shop',
+        entry: 'http://localhost:3001/_next/static/chunks/remoteEntry.js',
+        entryGlobalName: 'shop',
+      },
+    } as never)) as unknown as {
+      init: (...args: unknown[]) => Promise<void> | void;
+      get: (...args: unknown[]) => Promise<
+        () => {
+          __esModule: boolean;
+          default: {
+            getInitialProps?: (
+              ...args: unknown[]
+            ) => Promise<Record<string, unknown>>;
+          };
+          getServerSideProps: () => Promise<{ props: Record<string, unknown> }>;
+        }
+      >;
+    };
+
+    expect(mockLoadScriptNode).not.toHaveBeenCalled();
+    expect(syntheticContainer).toEqual(
+      expect.objectContaining({
+        init: expect.any(Function),
+        get: expect.any(Function),
+      }),
+    );
+
+    await expect(syntheticContainer.init()).resolves.toBeUndefined();
+
+    const factory = await syntheticContainer.get('./pages/shop/index');
+    expect(factory).toEqual(expect.any(Function));
+
+    const fallbackModule = factory();
+
+    expect(fallbackModule).toEqual(
+      expect.objectContaining({
+        __esModule: true,
+        default: expect.any(Function),
+        getServerSideProps: expect.any(Function),
+      }),
+    );
+    await expect(fallbackModule.default.getInitialProps?.({})).resolves.toEqual(
+      {},
+    );
+    await expect(fallbackModule.getServerSideProps()).resolves.toEqual({
+      props: {},
+    });
   });
 
   it('retires old remote generations after in-flight requests drain', async () => {

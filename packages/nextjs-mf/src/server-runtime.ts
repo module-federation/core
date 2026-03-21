@@ -2,7 +2,7 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 import * as React from 'react';
 import { loadScriptNode } from '@module-federation/runtime';
 import {
@@ -99,6 +99,7 @@ type FederatedSsrGlobal = {
   storage: AsyncLocalStorage<FederatedRequestState>;
   generations: Map<string, Map<string, RemoteGeneration>>;
   activeBuildVersions: Map<string, string>;
+  hasActiveRequest: () => boolean;
   record: (runtimeName: string, expose: string) => void;
   rewriteId: (id: string) => string;
   ensureRemoteGeneration: (args: {
@@ -399,34 +400,36 @@ const fetchManifestWithDevFallback = async (
   }
 };
 
-const resolveLocalRemoteEntryUrl = (
+const resolveServerRemoteEntryUrl = (
   generation: RemoteGeneration,
   entryUrl: string,
-): string | undefined => {
-  const buildName = generation.manifest.metaData?.buildInfo?.buildName;
-  if (typeof buildName !== 'string' || !buildName) {
-    return undefined;
-  }
+): string => {
+  const remoteEntryName =
+    generation.manifest.metaData?.remoteEntry?.name || 'remoteEntry.js';
+  const remoteEntryPath = generation.manifest.metaData?.remoteEntry?.path || '';
 
   try {
-    const packageJsonPath = require.resolve(`${buildName}/package.json`);
-    const packageRoot = path.dirname(packageJsonPath);
     const entry = new URL(entryUrl);
-    const nextSegmentIndex = entry.pathname.indexOf('/_next/');
-
-    if (nextSegmentIndex === -1) {
-      return undefined;
+    if (!entry.pathname.endsWith('/mf-manifest.json')) {
+      return entry.toString();
     }
 
-    const relativeAssetPath = entry.pathname.slice(
-      nextSegmentIndex + '/_next/'.length,
-    );
+    const relativeRemoteEntryPath = path.posix
+      .join(remoteEntryPath, remoteEntryName)
+      .replace(/^\/+/, '');
 
-    return pathToFileURL(
-      path.join(packageRoot, '.next', relativeAssetPath),
-    ).toString();
+    if (relativeRemoteEntryPath.startsWith('static/')) {
+      entry.pathname = `/_next/${relativeRemoteEntryPath}`;
+      return entry.toString();
+    }
+
+    entry.pathname = `${entry.pathname.slice(
+      0,
+      entry.pathname.lastIndexOf('/') + 1,
+    )}${relativeRemoteEntryPath}`;
+    return entry.toString();
   } catch {
-    return undefined;
+    return entryUrl;
   }
 };
 
@@ -735,6 +738,7 @@ const getGlobalSsrStore = (): FederatedSsrGlobal => {
     storage: new AsyncLocalStorage<FederatedRequestState>(),
     generations: new Map(),
     activeBuildVersions: new Map(),
+    hasActiveRequest: () => Boolean(getCurrentRequestState()),
     record(runtimeName: string, expose: string) {
       const state = this.storage.getStore();
       if (!state) {
@@ -884,11 +888,10 @@ const getGlobalSsrStore = (): FederatedSsrGlobal => {
         return attachedBaseContainer;
       }
 
-      const localRemoteEntryUrl = resolveLocalRemoteEntryUrl(
+      const remoteEntryTarget = resolveServerRemoteEntryUrl(
         generation,
         remoteInfo.entry,
       );
-      const remoteEntryTarget = localRemoteEntryUrl || remoteInfo.entry;
 
       const remoteEntryExports = await loadScriptNode(remoteEntryTarget, {
         attrs: {

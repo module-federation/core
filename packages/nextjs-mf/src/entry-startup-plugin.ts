@@ -7,39 +7,34 @@ import type {
 type ChunkLike = {
   hasRuntime(): boolean;
   id?: string | number | null;
-};
-
-type ChunkGraphLike = {
-  getChunkEntryDependentChunksIterable(chunk: ChunkLike): Iterable<ChunkLike>;
+  getAllReferencedChunks(): Iterable<ChunkLike>;
 };
 
 type RuntimeModuleContextLike = {
   chunk?: ChunkLike;
-  chunkGraph?: ChunkGraphLike | null;
-  compilation?: {
-    chunkGraph?: ChunkGraphLike | null;
-  } | null;
 };
 
 const PLUGIN_NAME = 'NextjsMfEntryStartupPlugin';
 
-const getEntryDependentChunkIds = (
-  chunk: ChunkLike,
-  chunkGraph: ChunkGraphLike,
-): Array<string | number> => {
-  const dependentChunkIds: Array<string | number> = [];
+const getReferencedChunkIds = (chunk: ChunkLike): Array<string | number> => {
+  const referencedChunkIds: Array<string | number> = [];
 
-  for (const dependentChunk of chunkGraph.getChunkEntryDependentChunksIterable(
-    chunk,
-  )) {
-    const dependentChunkId = dependentChunk.id;
-    if (dependentChunkId === null || dependentChunkId === undefined) {
+  for (const referencedChunk of chunk.getAllReferencedChunks()) {
+    if (referencedChunk === chunk) {
       continue;
     }
-    dependentChunkIds.push(dependentChunkId);
+    const referencedChunkId = referencedChunk.id;
+    if (
+      referencedChunkId === null ||
+      referencedChunkId === undefined ||
+      referencedChunkId === chunk.id
+    ) {
+      continue;
+    }
+    referencedChunkIds.push(referencedChunkId);
   }
 
-  return dependentChunkIds;
+  return referencedChunkIds;
 };
 
 const createEntryStartupRuntimeModule = (
@@ -53,27 +48,18 @@ const createEntryStartupRuntimeModule = (
     }
 
     override generate(): string {
-      const { chunk, chunkGraph, compilation } =
-        this as unknown as RuntimeModuleContextLike;
+      const { chunk } = this as unknown as RuntimeModuleContextLike;
       if (!chunk) {
         return '';
       }
 
-      const runtimeChunkGraph = chunkGraph || compilation?.chunkGraph;
-      if (!runtimeChunkGraph) {
-        return '';
-      }
-
-      const dependentChunkIds = getEntryDependentChunkIds(
-        chunk,
-        runtimeChunkGraph,
-      );
+      const referencedChunkIds = getReferencedChunkIds(chunk);
 
       return Template.asString([
         `var nextjsMfPrevStartup = ${RuntimeGlobals.startup};`,
         'var nextjsMfWrappedStartupEntrypoint = false;',
         'var nextjsMfPrefetchedEntrypointRemotes = false;',
-        `var nextjsMfEntryDependentChunkIds = ${JSON.stringify(dependentChunkIds)};`,
+        `var nextjsMfEntryDependentChunkIds = ${JSON.stringify(referencedChunkIds)};`,
         'var nextjsMfWarmDependentChunks = function(handler, promises) {',
         '  if (typeof handler !== "function" || !nextjsMfEntryDependentChunkIds.length) {',
         '    return;',
@@ -82,17 +68,17 @@ const createEntryStartupRuntimeModule = (
         '    handler(nextjsMfEntryDependentChunkIds[i], promises);',
         '  }',
         '};',
-        'var nextjsMfInvokePrevStartupEntrypoint = function(result, chunkIds, fn) {',
-        '  if (typeof nextjsMfPrevStartupEntrypoint === "function") {',
-        '    return nextjsMfPrevStartupEntrypoint(result, chunkIds, fn);',
-        '  }',
-        '  return undefined;',
-        '};',
         `${RuntimeGlobals.startup} = function() {`,
         '  var startupResult = typeof nextjsMfPrevStartup === "function" ? nextjsMfPrevStartup() : undefined;',
         '  if (!nextjsMfWrappedStartupEntrypoint && typeof __webpack_require__.X === "function") {',
         '    nextjsMfWrappedStartupEntrypoint = true;',
         '    var nextjsMfPrevStartupEntrypoint = __webpack_require__.X;',
+        '    var nextjsMfInvokePrevStartupEntrypoint = function(result, chunkIds, fn) {',
+        '      if (typeof nextjsMfPrevStartupEntrypoint === "function") {',
+        '        return nextjsMfPrevStartupEntrypoint(result, chunkIds, fn);',
+        '      }',
+        '      return undefined;',
+        '    };',
         '    __webpack_require__.X = function(result, chunkIds, fn) {',
         '      if (nextjsMfPrefetchedEntrypointRemotes || typeof nextjsMfPrevStartupEntrypoint !== "function") {',
         '        return nextjsMfInvokePrevStartupEntrypoint(result, chunkIds, fn);',
