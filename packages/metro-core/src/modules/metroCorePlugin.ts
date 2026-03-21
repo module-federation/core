@@ -2,8 +2,6 @@ import type {
   Federation,
   ModuleFederationRuntimePlugin,
 } from '@module-federation/runtime';
-import { tryLoadCacheModule } from './cache-interface';
-
 declare global {
   // @ts-expect-error -- Intentional redeclaration for Metro/React Native runtime global.
   // eslint-disable-next-line no-var

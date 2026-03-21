@@ -25,25 +25,3 @@ export interface ICacheNative {
   evaluateJavaScript(filePath: string, sourceURL: string): Promise<void>;
   deleteFile(path: string): Promise<void>;
 }
-
-/**
- * Try to load metro-cache at runtime.
- * Returns null if not installed (graceful degradation).
- */
-export function tryLoadCacheModule(): {
-  CacheManager: new (config?: any) => ICacheManager;
-  NativeMFECache: ICacheNative;
-} | null {
-  try {
-    const mod = require('@module-federation/metro-cache');
-    if (mod?.NativeMFECache && mod?.CacheManager) {
-      return {
-        CacheManager: mod.CacheManager,
-        NativeMFECache: mod.NativeMFECache,
-      };
-    }
-    return null;
-  } catch {
-    return null;
-  }
-}
