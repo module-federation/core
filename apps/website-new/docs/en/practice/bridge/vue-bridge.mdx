@@ -27,6 +27,10 @@ function createRemoteAppComponent<T, E extends keyof T>(
     asyncComponentOptions?: Omit<AsyncComponentOptions, 'loader'>;
     // Attributes that will be bound to the root container where the remote Vue application will be mounted
     rootAttrs?: Record<string, unknown>;
+    // Use memory history for isolated routing (e.g., rendering inside a modal or sandbox)
+    memoryRoute?: { entryPath: string };
+    // Use hash-based history instead of the default web history
+    hashRoute?: boolean;
   }
 ): (props: {
     basename?: string;
@@ -40,6 +44,7 @@ function createBridgeComponent(bridgeInfo: {
     app: Vue.App<VueComponent>;
     basename?: string;
     memoryRoute?: { entryPath: string };
+    hashRoute?: boolean;
     [key: string]: any;
   }) => { router?: Router } | void;
 }): () => {
@@ -49,6 +54,7 @@ function createBridgeComponent(bridgeInfo: {
     memoryRoute?: {
       entryPath: string;
     };
+    hashRoute?: boolean;
     dom?: HTMLElement;
   }): void;
   destroy(info: {
@@ -131,6 +137,58 @@ const router = createRouter({
 export default router;
 ```
 
+### Routing Modes
+
+The bridge supports three routing modes that determine how the remote application manages its internal navigation:
+
+| Mode | Option | History Type | Use Case |
+|------|--------|-------------|----------|
+| **Web History** (default) | — | `createWebHistory(basename)` | Standard URL-based routing. The `basename` is automatically derived from the host route match. |
+| **Memory History** | `memoryRoute: { entryPath: '/path' }` | `createMemoryHistory(basename)` | Isolated routing that does not affect the browser URL. Useful when the remote app is rendered inside a modal, sidebar, or sandbox. |
+| **Hash History** | `hashRoute: true` | `createWebHashHistory()` | Hash-based routing (`#/path`). Route paths are automatically prefixed with the `basename`. |
+
+> Hash route example
+
+```tsx
+// ./src/router.ts
+import * as bridge from '@module-federation/bridge-vue3';
+
+const Remote1 = bridge.createRemoteAppComponent({
+  loader: () => loadRemote('remote1/export-app'),
+  hashRoute: true,
+});
+
+const router = createRouter({
+  history: createWebHashHistory(),
+  routes: [
+    { path: '/', component: Home },
+    { path: '/remote1/:pathMatch(.*)*', component: Remote1 },
+  ],
+});
+export default router;
+```
+
+> Memory route example
+
+```tsx
+// ./src/router.ts
+import * as bridge from '@module-federation/bridge-vue3';
+
+const Remote1 = bridge.createRemoteAppComponent({
+  loader: () => loadRemote('remote1/export-app'),
+  memoryRoute: { entryPath: '/initial-page' },
+});
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes: [
+    { path: '/', component: Home },
+    { path: '/remote1/:pathMatch(.*)*', component: Remote1 },
+  ],
+});
+export default router;
+```
+
 ### Parameters
 
 #### createRemoteAppComponent
@@ -146,6 +204,10 @@ function createRemoteAppComponent<T, E extends keyof T>(
     asyncComponentOptions?: Omit<AsyncComponentOptions, 'loader'>;
     // Attributes that will be bound to the root container where the remote Vue application will be mounted
     rootAttrs?: Record<string, unknown>;
+    // Use memory history for isolated routing (e.g., rendering inside a modal or sandbox)
+    memoryRoute?: { entryPath: string };
+    // Use hash-based history instead of the default web history
+    hashRoute?: boolean;
   }
 ): (props: {
     basename?: string;
@@ -171,6 +233,12 @@ const Remote1App = createRemoteAppComponent({ loader: () => loadRemote('remote1/
   * `rootAttrs`
     * type: `Record<string, unknown>`
     * Purpose: Attributes that will be bound to the root container where the remote Vue application will be mounted
+  * `memoryRoute`
+    * type: `{ entryPath: string }`
+    * Purpose: When provided, the remote application will use memory history (`createMemoryHistory`) instead of the default web history. The `entryPath` sets the initial route the remote app navigates to on mount. Useful when the remote app is rendered in an isolated context (e.g., a modal or sandbox) where it should not modify the browser URL.
+  * `hashRoute`
+    * type: `boolean`
+    * Purpose: When set to `true`, the remote application will use hash-based history (`createWebHashHistory`) instead of the default web history. Route paths are automatically prefixed with the `basename`. Use this when the host application also uses hash-based routing.
 ```tsx
 // remote
 export const provider = createBridgeComponent({
@@ -214,6 +282,7 @@ function createBridgeComponent(bridgeInfo: {
     app: Vue.App<VueComponent>;
     basename?: string;
     memoryRoute?: { entryPath: string };
+    hashRoute?: boolean;
     [key: string]: any;
   }) => { router?: Router } | void;
 }): () => {
@@ -223,6 +292,7 @@ function createBridgeComponent(bridgeInfo: {
     memoryRoute?: {
       entryPath: string;
     };
+    hashRoute?: boolean;
     dom?: HTMLElement;
   }): void;
   destroy(info: { dom: HTMLElement }): void;
@@ -232,6 +302,11 @@ function createBridgeComponent(bridgeInfo: {
 * `bridgeInfo`
   * type: `{ rootComponent: VueComponent; appOptions?: (params: AddOptionsFnParams) => ({ router?: Router }) }`
   * Purpose: Used to pass the root component
+  * `appOptions` receives the following params:
+    * `app`: The Vue application instance
+    * `basename`: The base path derived from the host route
+    * `memoryRoute`: Memory route configuration (if provided by the host)
+    * `hashRoute`: Whether hash-based routing is enabled (if provided by the host)
 * ReturnType
   * type: `() => { render: (info: RenderFnParams) => void; destroy: (info: { dom: HTMLElement}) => void; }`
 
