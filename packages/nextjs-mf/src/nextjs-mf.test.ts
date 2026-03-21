@@ -1,6 +1,6 @@
 import { cp, mkdir, writeFile } from 'node:fs/promises';
 
-jest.mock('@module-federation/enhanced/rspack', () => ({
+jest.mock('@module-federation/rspack', () => ({
   ModuleFederationPlugin: jest.fn().mockImplementation(() => ({
     apply: jest.fn(),
   })),
@@ -16,7 +16,7 @@ jest.mock('node:fs/promises', () => ({
   writeFile: jest.fn(),
 }));
 
-import { ModuleFederationPlugin as MockedRspackModuleFederationPlugin } from '@module-federation/enhanced/rspack';
+import { ModuleFederationPlugin as MockedRspackModuleFederationPlugin } from '@module-federation/rspack';
 import { loadScriptNode } from '@module-federation/runtime';
 import NextFederationPlugin from './index';
 import createRuntimePlugin from './runtime-plugin';
@@ -263,6 +263,10 @@ describe('NextFederationPlugin', () => {
 
     plugin.apply(compiler);
 
+    expect(compiler.hooks.thisCompilation.tap).toHaveBeenCalledWith(
+      'NextjsMfEntryStartupPlugin',
+      expect.any(Function),
+    );
     expect(compiler.options.node).toEqual({
       global: false,
     });

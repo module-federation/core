@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { ModuleFederationPlugin as RspackModuleFederationPlugin } from '@module-federation/enhanced/rspack';
+import { ModuleFederationPlugin as RspackModuleFederationPlugin } from '@module-federation/rspack';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import {
   applyAutomaticAssetAdaptation,
@@ -446,9 +446,6 @@ export class NextFederationPlugin {
     if (!isAppDirectoryCompiler(compiler)) {
       applyAutomaticAssetAdaptation(compiler);
     }
-    if (compilerName === 'server') {
-      new EntryStartupPlugin().apply(compiler as never);
-    }
     const normalizedOptions = normalizeOptionsForCompiler(
       this.options,
       compilerName,
@@ -465,6 +462,10 @@ export class NextFederationPlugin {
     new RspackModuleFederationPlugin(normalizedOptions).apply(
       compiler as never,
     );
+
+    if (compilerName === 'server') {
+      new EntryStartupPlugin().apply(compiler as never);
+    }
   }
 }
 

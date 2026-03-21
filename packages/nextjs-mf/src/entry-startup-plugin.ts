@@ -1,8 +1,46 @@
 import type {
-  Compiler,
   Compilation,
+  Compiler,
   WebpackPluginInstance,
 } from '@rspack/core';
+
+type ChunkLike = {
+  hasRuntime(): boolean;
+  id?: string | number | null;
+};
+
+type ChunkGraphLike = {
+  getChunkEntryDependentChunksIterable(chunk: ChunkLike): Iterable<ChunkLike>;
+};
+
+type RuntimeModuleContextLike = {
+  chunk?: ChunkLike;
+  chunkGraph?: ChunkGraphLike | null;
+  compilation?: {
+    chunkGraph?: ChunkGraphLike | null;
+  } | null;
+};
+
+const PLUGIN_NAME = 'NextjsMfEntryStartupPlugin';
+
+const getEntryDependentChunkIds = (
+  chunk: ChunkLike,
+  chunkGraph: ChunkGraphLike,
+): Array<string | number> => {
+  const dependentChunkIds: Array<string | number> = [];
+
+  for (const dependentChunk of chunkGraph.getChunkEntryDependentChunksIterable(
+    chunk,
+  )) {
+    const dependentChunkId = dependentChunk.id;
+    if (dependentChunkId === null || dependentChunkId === undefined) {
+      continue;
+    }
+    dependentChunkIds.push(dependentChunkId);
+  }
+
+  return dependentChunkIds;
+};
 
 const createEntryStartupRuntimeModule = (
   webpackRef: typeof import('@rspack/core'),
@@ -15,22 +53,40 @@ const createEntryStartupRuntimeModule = (
     }
 
     override generate(): string {
-      const { chunk } = this;
-      if (!chunk?.hasRuntime()) {
+      const { chunk, chunkGraph, compilation } =
+        this as unknown as RuntimeModuleContextLike;
+      if (!chunk) {
         return '';
       }
+
+      const runtimeChunkGraph = chunkGraph || compilation?.chunkGraph;
+      if (!runtimeChunkGraph) {
+        return '';
+      }
+
+      const dependentChunkIds = getEntryDependentChunkIds(
+        chunk,
+        runtimeChunkGraph,
+      );
 
       return Template.asString([
         `var nextjsMfPrevStartup = ${RuntimeGlobals.startup};`,
         'var nextjsMfWrappedStartupEntrypoint = false;',
         'var nextjsMfPrefetchedEntrypointRemotes = false;',
-        'var nextjsMfWarmChunkMapping = function(mapping, handler, promises) {',
-        '  if (!mapping || typeof handler !== "function") {',
+        `var nextjsMfEntryDependentChunkIds = ${JSON.stringify(dependentChunkIds)};`,
+        'var nextjsMfWarmDependentChunks = function(handler, promises) {',
+        '  if (typeof handler !== "function" || !nextjsMfEntryDependentChunkIds.length) {',
         '    return;',
         '  }',
-        '  Object.keys(mapping).forEach(function(chunkId) {',
-        '    handler(chunkId, promises);',
-        '  });',
+        '  for (var i = 0; i < nextjsMfEntryDependentChunkIds.length; i++) {',
+        '    handler(nextjsMfEntryDependentChunkIds[i], promises);',
+        '  }',
+        '};',
+        'var nextjsMfInvokePrevStartupEntrypoint = function(result, chunkIds, fn) {',
+        '  if (typeof nextjsMfPrevStartupEntrypoint === "function") {',
+        '    return nextjsMfPrevStartupEntrypoint(result, chunkIds, fn);',
+        '  }',
+        '  return undefined;',
         '};',
         `${RuntimeGlobals.startup} = function() {`,
         '  var startupResult = typeof nextjsMfPrevStartup === "function" ? nextjsMfPrevStartup() : undefined;',
@@ -39,25 +95,17 @@ const createEntryStartupRuntimeModule = (
         '    var nextjsMfPrevStartupEntrypoint = __webpack_require__.X;',
         '    __webpack_require__.X = function(result, chunkIds, fn) {',
         '      if (nextjsMfPrefetchedEntrypointRemotes || typeof nextjsMfPrevStartupEntrypoint !== "function") {',
-        '        return nextjsMfPrevStartupEntrypoint(result, chunkIds, fn);',
+        '        return nextjsMfInvokePrevStartupEntrypoint(result, chunkIds, fn);',
         '      }',
         '      nextjsMfPrefetchedEntrypointRemotes = true;',
         '      var promises = [];',
-        '      nextjsMfWarmChunkMapping(',
-        '        __webpack_require__.remotesLoadingData && __webpack_require__.remotesLoadingData.chunkMapping,',
-        '        __webpack_require__.f && __webpack_require__.f.remotes,',
-        '        promises',
-        '      );',
-        '      nextjsMfWarmChunkMapping(',
-        '        __webpack_require__.consumesLoadingData && __webpack_require__.consumesLoadingData.chunkMapping,',
-        '        __webpack_require__.f && __webpack_require__.f.consumes,',
-        '        promises',
-        '      );',
+        '      nextjsMfWarmDependentChunks(__webpack_require__.f && __webpack_require__.f.remotes, promises);',
+        '      nextjsMfWarmDependentChunks(__webpack_require__.f && __webpack_require__.f.consumes, promises);',
         '      if (!promises.length) {',
-        '        return nextjsMfPrevStartupEntrypoint(result, chunkIds, fn);',
+        '        return nextjsMfInvokePrevStartupEntrypoint(result, chunkIds, fn);',
         '      }',
         '      return Promise.all(promises).then(function() {',
-        '        return nextjsMfPrevStartupEntrypoint(result, chunkIds, fn);',
+        '        return nextjsMfInvokePrevStartupEntrypoint(result, chunkIds, fn);',
         '      });',
         '    };',
         '  }',
@@ -75,11 +123,11 @@ class EntryStartupPlugin implements WebpackPluginInstance {
     );
 
     compiler.hooks.thisCompilation.tap(
-      'NextjsMfEntryStartupPlugin',
+      PLUGIN_NAME,
       (compilation: Compilation) => {
         compilation.hooks.additionalTreeRuntimeRequirements.tap(
-          'NextjsMfEntryStartupPlugin',
-          (chunk, set) => {
+          PLUGIN_NAME,
+          (chunk: any, set: Set<string>) => {
             if (!chunk.hasRuntime()) {
               return;
             }
@@ -89,7 +137,7 @@ class EntryStartupPlugin implements WebpackPluginInstance {
             set.add(compiler.webpack.RuntimeGlobals.ensureChunkHandlers);
 
             compilation.addRuntimeModule(
-              chunk,
+              chunk as never,
               new EntryStartupRuntimeModule(),
             );
           },

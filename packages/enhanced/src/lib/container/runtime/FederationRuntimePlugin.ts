@@ -154,10 +154,6 @@ class FederationRuntimePlugin {
   ) {
     // internal runtime plugin
     const runtimePlugins = options.runtimePlugins;
-    const asyncStartup = Boolean(
-      (options as { experiments?: { asyncStartup?: boolean } }).experiments
-        ?.asyncStartup,
-    );
     const normalizedBundlerRuntimePath = normalizeToPosixPath(
       bundlerRuntimePath || BundlerRuntimePath,
     );
@@ -229,11 +225,7 @@ class FederationRuntimePlugin {
         ]),
         '}',
         `if(${federationGlobal}.installInitialConsumes){`,
-        Template.indent([
-          asyncStartup
-            ? `${federationGlobal}.installInitialConsumes({ asyncLoad: true })`
-            : `${federationGlobal}.installInitialConsumes()`,
-        ]),
+        Template.indent([`${federationGlobal}.installInitialConsumes()`]),
         '}',
       ]),
       PrefetchPlugin.addRuntime(compiler, {

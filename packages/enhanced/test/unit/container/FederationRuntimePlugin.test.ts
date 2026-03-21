@@ -204,35 +204,6 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
         'if(!__webpack_require__.federation.runtime || !__webpack_require__.federation.bundlerRuntime)',
       );
     });
-
-    it('uses async initial consumes when asyncStartup is enabled', () => {
-      const template = FederationRuntimePlugin.getTemplate(
-        compiler as Compiler,
-        {
-          ...mockOptions,
-          experiments: {
-            asyncStartup: true,
-          },
-        },
-        'bundler-runtime.js',
-        {},
-      );
-
-      expect(template).toContain('installInitialConsumes({ asyncLoad: true })');
-      expect(template).not.toContain('installInitialConsumes()');
-    });
-
-    it('keeps sync initial consumes by default', () => {
-      const template = FederationRuntimePlugin.getTemplate(
-        compiler as Compiler,
-        mockOptions,
-        'bundler-runtime.js',
-        {},
-      );
-
-      expect(template).toContain('installInitialConsumes()');
-      expect(template).not.toContain('asyncLoad: true');
-    });
   });
 
   describe('runtime module resolution compatibility', () => {
