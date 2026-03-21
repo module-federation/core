@@ -28,7 +28,7 @@
     "build:production": "npx next build",
     "serve": "npx next dev -p 3001",
     "serve:development": "npx next dev -p 3001",
-    "serve:production": "npx next start -p 3001",
+    "serve:production": "TURBOPACK=auto npx next start -p 3001",
     "lint": "eslint .",
     "test:e2e": "pnpm -w exec node tools/scripts/run-next-e2e.mjs --mode=dev",
     "test:e2e:production": "pnpm -w exec node tools/scripts/run-next-e2e.mjs --mode=prod",

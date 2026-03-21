@@ -207,14 +207,18 @@ describe('NextFederationPlugin', () => {
     });
     expect(normalizedOptions.runtimePlugins).toBeDefined();
     expect(normalizedOptions.runtimePlugins?.[0]).toContain('runtime-plugin');
-    expect(normalizedOptions.shared).toEqual(
-      expect.objectContaining({
-        lodash: {},
-        react: expect.objectContaining({
-          singleton: true,
-        }),
-      }),
-    );
+    expect(normalizedOptions.shared).toMatchObject({
+      lodash: {},
+      react: {
+        singleton: true,
+      },
+    });
+    expect(
+      (normalizedOptions.shared as Record<string, unknown>)['react'] as Record<
+        string,
+        unknown
+      >,
+    ).not.toHaveProperty('eager');
     expect(normalizedOptions.experiments).toEqual(
       expect.objectContaining({
         asyncStartup: true,
@@ -374,26 +378,35 @@ describe('NextFederationPlugin', () => {
         {
           name: 'static/chunks/mf-manifest.json',
           source: {
-            source: () => '{"name":"home"}',
+            source: () => '{"name":"home","build":1}{"stale":true}',
+          },
+        },
+        {
+          name: 'static/chunks/mf-manifest.json',
+          source: {
+            source: () => '{"name":"home","build":2}{"stale":true}',
           },
         },
         {
           name: 'static/chunks/mf-stats.json',
           source: {
-            source: () => '{"stats":true}',
+            source: () => '{"stats":true}{"stale":true}',
           },
         },
       ],
     });
 
-    expect(mockWriteFile).toHaveBeenCalledWith(
-      '/tmp/nextjs-mf/.next/dev/static/chunks/mf-manifest.json',
-      '{"name":"home"}',
-    );
-    expect(mockWriteFile).toHaveBeenCalledWith(
-      '/tmp/nextjs-mf/.next/dev/static/chunks/mf-stats.json',
-      '{"stats":true}',
-    );
+    expect(mockWriteFile).toHaveBeenCalledTimes(2);
+    expect(mockWriteFile.mock.calls).toEqual([
+      [
+        '/tmp/nextjs-mf/.next/dev/static/chunks/mf-manifest.json',
+        '{"name":"home","build":2}',
+      ],
+      [
+        '/tmp/nextjs-mf/.next/dev/static/chunks/mf-stats.json',
+        '{"stats":true}',
+      ],
+    ]);
   });
 
   it('keeps shared server dependencies bundled through Next externals', async () => {
@@ -461,6 +474,7 @@ describe('server runtime contract', () => {
     metaData: {
       buildInfo: {
         buildVersion,
+        buildName: '@module-federation/3001-shop',
       },
       globalName: 'shop',
       publicPath,
@@ -714,7 +728,9 @@ describe('server runtime contract', () => {
 
       expect(entryExports).toBe(remoteEntryExports);
       expect(mockLoadScriptNode).toHaveBeenCalledWith(
-        expect.stringContaining('mf-build-version=local'),
+        expect.stringContaining(
+          '/apps/3001-shop/.next/static/chunks/remoteEntry.js',
+        ),
         expect.objectContaining({
           attrs: expect.objectContaining({
             globalName: 'shop',
@@ -1130,6 +1146,34 @@ describe('server runtime contract', () => {
     expect(normalizedSnapshot?.publicPath).toBe('http://localhost:3001/_next/');
     expect(normalizedManifest?.metaData.publicPath).toBe(
       'http://localhost:3001/_next/',
+    );
+  });
+
+  it('normalizes manifest publicPath for server snapshots to the manifest directory', async () => {
+    const result = await runtimePlugin.loadRemoteSnapshot?.({
+      from: 'manifest',
+      manifestUrl: 'http://localhost:3001/_next/static/ssr/mf-manifest.json',
+      manifestJson: createManifest(activeBuildVersion, '/_next/'),
+      remoteSnapshot: {
+        publicPath: '/_next/',
+      },
+      options: {
+        inBrowser: false,
+      },
+    } as never);
+
+    const normalizedSnapshot = result?.remoteSnapshot as
+      | { publicPath?: string }
+      | undefined;
+    const normalizedManifest = result?.manifestJson as
+      | { metaData: { publicPath?: string } }
+      | undefined;
+
+    expect(normalizedSnapshot?.publicPath).toBe(
+      'http://localhost:3001/_next/static/ssr/',
+    );
+    expect(normalizedManifest?.metaData.publicPath).toBe(
+      'http://localhost:3001/_next/static/ssr/',
     );
   });
 

@@ -1,5 +1,8 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { createHash } from 'node:crypto';
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import * as React from 'react';
 import { loadScriptNode } from '@module-federation/runtime';
 import {
@@ -393,6 +396,37 @@ const fetchManifestWithDevFallback = async (
     }
 
     return fetchManifestWithRetries(browserManifestUrl);
+  }
+};
+
+const resolveLocalRemoteEntryUrl = (
+  generation: RemoteGeneration,
+  entryUrl: string,
+): string | undefined => {
+  const buildName = generation.manifest.metaData?.buildInfo?.buildName;
+  if (typeof buildName !== 'string' || !buildName) {
+    return undefined;
+  }
+
+  try {
+    const packageJsonPath = require.resolve(`${buildName}/package.json`);
+    const packageRoot = path.dirname(packageJsonPath);
+    const entry = new URL(entryUrl);
+    const nextSegmentIndex = entry.pathname.indexOf('/_next/');
+
+    if (nextSegmentIndex === -1) {
+      return undefined;
+    }
+
+    const relativeAssetPath = entry.pathname.slice(
+      nextSegmentIndex + '/_next/'.length,
+    );
+
+    return pathToFileURL(
+      path.join(packageRoot, '.next', relativeAssetPath),
+    ).toString();
+  } catch {
+    return undefined;
   }
 };
 
@@ -850,7 +884,13 @@ const getGlobalSsrStore = (): FederatedSsrGlobal => {
         return attachedBaseContainer;
       }
 
-      const remoteEntryExports = await loadScriptNode(remoteInfo.entry, {
+      const localRemoteEntryUrl = resolveLocalRemoteEntryUrl(
+        generation,
+        remoteInfo.entry,
+      );
+      const remoteEntryTarget = localRemoteEntryUrl || remoteInfo.entry;
+
+      const remoteEntryExports = await loadScriptNode(remoteEntryTarget, {
         attrs: {
           name: remoteInfo.name,
           globalName: generation.baseEntryGlobalName,
@@ -874,8 +914,25 @@ const getGlobalSsrStore = (): FederatedSsrGlobal => {
 
             return undefined;
           },
-          fetch: (input: RequestInfo | URL, init?: RequestInit) =>
-            loaderHook.lifecycle.fetch.emit(input, init || {}),
+          fetch: async (input: RequestInfo | URL, init?: RequestInit) => {
+            const target =
+              typeof input === 'string'
+                ? input
+                : input instanceof URL
+                  ? input.toString()
+                  : input.url;
+
+            if (target.startsWith('file://')) {
+              const source = await readFile(fileURLToPath(target), 'utf8');
+              return new Response(source, {
+                headers: {
+                  'content-type': 'application/javascript',
+                },
+              });
+            }
+
+            return loaderHook.lifecycle.fetch.emit(input, init || {});
+          },
         } as never,
       });
 

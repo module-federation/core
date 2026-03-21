@@ -8,6 +8,84 @@ import type { Compiler, WebpackPluginInstance } from '@rspack/core';
 
 const PUBLISHED_SERVER_ASSET_DIRECTORY = path.join('static', 'ssr');
 
+const findJsonDocumentEnd = (source: string): number | undefined => {
+  let depth = 0;
+  let started = false;
+  let inString = false;
+  let escaped = false;
+
+  for (let index = 0; index < source.length; index++) {
+    const character = source[index];
+
+    if (!started) {
+      if (character.trim() === '') {
+        continue;
+      }
+
+      if (character !== '{' && character !== '[') {
+        return undefined;
+      }
+
+      started = true;
+      depth = 1;
+      continue;
+    }
+
+    if (inString) {
+      if (escaped) {
+        escaped = false;
+        continue;
+      }
+
+      if (character === '\\') {
+        escaped = true;
+        continue;
+      }
+
+      if (character === '"') {
+        inString = false;
+      }
+
+      continue;
+    }
+
+    if (character === '"') {
+      inString = true;
+      continue;
+    }
+
+    if (character === '{' || character === '[') {
+      depth += 1;
+      continue;
+    }
+
+    if (character === '}' || character === ']') {
+      depth -= 1;
+
+      if (depth === 0) {
+        return index + 1;
+      }
+    }
+  }
+
+  return undefined;
+};
+
+const sanitizePersistedAssetSource = (source: string): string => {
+  const documentEnd = findJsonDocumentEnd(source);
+
+  if (documentEnd === undefined) {
+    return source;
+  }
+
+  const trailingContent = source.slice(documentEnd).trim();
+  if (!trailingContent) {
+    return source;
+  }
+
+  return source.slice(0, documentEnd);
+};
+
 const getPublishedServerAssetDirectory = (
   outputPath: string,
 ): string | undefined => {
@@ -64,19 +142,27 @@ export class PersistManifestAssetsPlugin implements WebpackPluginInstance {
     compiler.hooks.afterEmit.tapPromise(
       'NextjsMfPersistManifestAssetsPlugin',
       async (compilation) => {
+        const manifestAssetsByPath = new Map<string, string>();
         const manifestAssets = compilation
           .getAssets()
           .filter((asset) =>
             this.assetBaseNames.has(path.posix.basename(asset.name)),
           );
 
-        await Promise.all(
-          manifestAssets.map(async (asset) => {
-            const assetPath = path.join(compiler.outputPath, asset.name);
-            await fs.mkdir(path.dirname(assetPath), { recursive: true });
-            await fs.writeFile(assetPath, asset.source.source().toString());
-          }),
-        );
+        for (const asset of manifestAssets) {
+          const assetPath = path.join(compiler.outputPath, asset.name);
+          const assetSource = sanitizePersistedAssetSource(
+            asset.source.source().toString(),
+          );
+          manifestAssetsByPath.set(assetPath, assetSource);
+        }
+
+        for (const [assetPath, assetSource] of Array.from(
+          manifestAssetsByPath.entries(),
+        ).sort(([left], [right]) => left.localeCompare(right))) {
+          await fs.mkdir(path.dirname(assetPath), { recursive: true });
+          await fs.writeFile(assetPath, assetSource);
+        }
       },
     );
   }

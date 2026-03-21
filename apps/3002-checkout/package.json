@@ -28,7 +28,7 @@
     "build:production": "npx next build",
     "serve": "npx next dev -p 3002",
     "serve:development": "npx next dev -p 3002",
-    "serve:production": "npx next start -p 3002",
+    "serve:production": "TURBOPACK=auto npx next start -p 3002",
     "lint": "eslint .",
     "e2e": "pnpm exec cypress run --project . --e2e --config baseUrl=http://localhost:3002",
     "test:e2e": "pnpm -w exec node tools/scripts/run-next-e2e.mjs --mode=dev",

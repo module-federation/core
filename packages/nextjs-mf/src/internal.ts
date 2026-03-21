@@ -6,7 +6,6 @@ const createSingletonShare = (
   config: Partial<moduleFederationPlugin.SharedConfig> = {},
 ): moduleFederationPlugin.SharedConfig => ({
   singleton: true,
-  eager: true,
   ...config,
 });
 

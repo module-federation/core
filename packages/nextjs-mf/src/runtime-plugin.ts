@@ -153,24 +153,24 @@ const normalizeRemotePublicPath = ({
   manifestUrl: string;
   publicPath?: string;
 }): string | undefined => {
+  if (manifestUrl.includes('mf-manifest.json')) {
+    const manifestDirectory = manifestUrl.substring(
+      0,
+      manifestUrl.indexOf('mf-manifest.json'),
+    );
+
+    if (!inBrowser) {
+      return manifestDirectory;
+    }
+
+    return manifestDirectory.replace('/static/chunks/', '/');
+  }
+
   if (publicPath?.includes('/_next/')) {
     return publicPath.substring(0, publicPath.lastIndexOf('/_next/') + 7);
   }
 
-  if (!manifestUrl.includes('mf-manifest.json')) {
-    return publicPath;
-  }
-
-  const manifestDirectory = manifestUrl.substring(
-    0,
-    manifestUrl.indexOf('mf-manifest.json'),
-  );
-
-  if (!inBrowser) {
-    return manifestDirectory;
-  }
-
-  return manifestDirectory.replace('/static/chunks/', '/');
+  return publicPath;
 };
 
 const isRemoteContainer = (value: unknown): value is RemoteContainer =>
