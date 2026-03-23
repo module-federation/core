@@ -1161,5 +1161,141 @@ describe('routeUtils', () => {
 
       expect(pushSpy).toHaveBeenCalledWith('/barber/services');
     });
+
+    it('should not rewrite relative path strings (resolved by Vue Router against current route)', () => {
+      const routes = createNestedRoutes();
+      const sourceRouter = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      const result = processRoutes({
+        router: sourceRouter,
+        basename: '/barber',
+        hashRoute: true,
+      });
+
+      const targetRouter = createRouter({
+        history: result.history,
+        routes: result.routes,
+      });
+
+      const pushSpy = vi.fn();
+      targetRouter.push = pushSpy;
+      result.patchRouter!(targetRouter);
+
+      targetRouter.push('settings');
+
+      // Relative path must pass through untouched — Vue Router resolves it
+      expect(pushSpy).toHaveBeenCalledWith('settings');
+    });
+
+    it('should not rewrite relative object paths', () => {
+      const routes = createNestedRoutes();
+      const sourceRouter = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      const result = processRoutes({
+        router: sourceRouter,
+        basename: '/barber',
+        hashRoute: true,
+      });
+
+      const targetRouter = createRouter({
+        history: result.history,
+        routes: result.routes,
+      });
+
+      const pushSpy = vi.fn();
+      targetRouter.push = pushSpy;
+      result.patchRouter!(targetRouter);
+
+      targetRouter.push({ path: 'settings' });
+
+      expect(pushSpy).toHaveBeenCalledWith({ path: 'settings' });
+    });
+
+    it('should not rewrite query-only string navigations', () => {
+      const routes = createNestedRoutes();
+      const sourceRouter = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      const result = processRoutes({
+        router: sourceRouter,
+        basename: '/barber',
+        hashRoute: true,
+      });
+
+      const targetRouter = createRouter({
+        history: result.history,
+        routes: result.routes,
+      });
+
+      const pushSpy = vi.fn();
+      targetRouter.push = pushSpy;
+      result.patchRouter!(targetRouter);
+
+      targetRouter.push('?tab=details');
+
+      expect(pushSpy).toHaveBeenCalledWith('?tab=details');
+    });
+
+    it('should not rewrite hash-only string navigations', () => {
+      const routes = createNestedRoutes();
+      const sourceRouter = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      const result = processRoutes({
+        router: sourceRouter,
+        basename: '/barber',
+        hashRoute: true,
+      });
+
+      const targetRouter = createRouter({
+        history: result.history,
+        routes: result.routes,
+      });
+
+      const replaceSpy = vi.fn();
+      targetRouter.replace = replaceSpy;
+      result.patchRouter!(targetRouter);
+
+      targetRouter.replace('#anchor');
+
+      expect(replaceSpy).toHaveBeenCalledWith('#anchor');
+    });
+
+    it('should not rewrite empty string navigations', () => {
+      const routes = createNestedRoutes();
+      const sourceRouter = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      const result = processRoutes({
+        router: sourceRouter,
+        basename: '/barber',
+        hashRoute: true,
+      });
+
+      const targetRouter = createRouter({
+        history: result.history,
+        routes: result.routes,
+      });
+
+      const pushSpy = vi.fn();
+      targetRouter.push = pushSpy;
+      result.patchRouter!(targetRouter);
+
+      targetRouter.push('');
+
+      expect(pushSpy).toHaveBeenCalledWith('');
+    });
   });
 });

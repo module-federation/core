@@ -83,8 +83,16 @@ function createHashBasenamePatch(
 ): (router: VueRouter.Router) => void {
   const normalized = basename.replace(/\/+$/, '');
 
+  /**
+   * Only absolute paths (starting with '/') that don't already carry the
+   * basename prefix need rewriting.  Relative segments ('settings'),
+   * query-only ('?tab=1'), and hash-only ('#anchor') strings are resolved
+   * by Vue Router against the current route and must pass through untouched.
+   */
   const needsPrefix = (path: string): boolean =>
-    path !== normalized && !path.startsWith(normalized + '/');
+    path.startsWith('/') &&
+    path !== normalized &&
+    !path.startsWith(normalized + '/');
 
   const prefix = (path: string): string =>
     `${normalized}${path}`.replace(/\/+/g, '/');
