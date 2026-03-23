@@ -59,7 +59,7 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
           ...extraProps,
         });
         if (bridgeOptions?.router) {
-          const { history, routes } = processRoutes({
+          const { history, routes, patchRouter } = processRoutes({
             router: bridgeOptions.router,
             basename: info.basename,
             memoryRoute: info.memoryRoute,
@@ -71,6 +71,10 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
             history,
             routes,
           });
+
+          if (patchRouter) {
+            patchRouter(router);
+          }
 
           LoggerInstance.debug(`createBridgeComponent render router info>>>`, {
             moduleName,
