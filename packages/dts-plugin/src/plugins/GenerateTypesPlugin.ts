@@ -207,6 +207,7 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
         logger.debug('start generating types...');
         await generateTypesAPI({ dtsManagerOptions });
         logger.debug('generate types success!');
+        await dtsOptions.afterGenerateTypes?.();
 
         if (isProd) {
           if (

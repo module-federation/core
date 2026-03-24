@@ -955,6 +955,11 @@ export default {
             displayErrorInTerminal: {
               type: 'boolean',
             },
+            afterGenerateTypes: {
+              description:
+                'Callback invoked after each type generation completes',
+              instanceof: 'Function',
+            },
           },
         },
       ],
