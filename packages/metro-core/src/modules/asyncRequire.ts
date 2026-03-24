@@ -14,28 +14,6 @@ function isUrl(url: string) {
   return url.match(/^https?:\/\//);
 }
 
-// Extract a bundle name from a URL for cache grouping
-// e.g. https://cdn.example.com/miniApp/mini.bundle → "miniApp/mini"
-// e.g. https://cdn.example.com/miniApp/exposed/info.bundle → "miniApp/exposed/info"
-// e.g. http://localhost:8082/mini.bundle?platform=ios → "mini"
-function extractBundleName(url: string): string {
-  try {
-    const parsed = new URL(url);
-    const pathParts = parsed.pathname.replace(/^\/+/, '').split('/');
-    // Remove .bundle extension and query params from last segment
-    if (pathParts.length > 0) {
-      pathParts[pathParts.length - 1] = pathParts[pathParts.length - 1]
-        .split('.')[0]
-        .split('?')[0];
-    }
-    return pathParts.join('/') || 'unknown';
-  } catch {
-    // Fallback for non-URL paths
-    const last = url.split('/').pop() ?? 'unknown';
-    return last.split('.')[0].split('?')[0];
-  }
-}
-
 // get bundle id from the bundle path
 // e.g. /a/b.bundle?platform=ios -> a/b
 // e.g. http://host:8081/a/b.bundle -> a/b
@@ -95,29 +73,21 @@ function buildLoadBundleAsyncWrapper() {
   // DEBUG: set to true to test cache layer in dev mode
   const FORCE_CACHE_IN_DEV = false;
 
-  // Try to load metro-cache for caching.
-  // Host loads via require, remotes reuse via globalThis (they can't require metro-cache).
-  let cacheModule: {
-    CacheManager: any;
-    NativeMFECache: any;
-  } | null = null;
-
+  // --- Cache layer setup ---
   const cacheEnabled =
     process.env.NODE_ENV === 'production' || FORCE_CACHE_IN_DEV;
 
+  let cacheLayer: any = null;
+
   if (cacheEnabled) {
-    if ((globalThis as any).__MFE_CACHE_MODULE__) {
-      cacheModule = (globalThis as any).__MFE_CACHE_MODULE__;
+    if ((globalThis as any).__MFE_CACHE_LAYER__) {
+      cacheLayer = (globalThis as any).__MFE_CACHE_LAYER__;
     } else {
       try {
         const mod = require('@module-federation/metro-cache');
-        if (mod?.NativeMFECache && mod?.CacheManager) {
-          cacheModule = mod;
-          (globalThis as any).__MFE_CACHE_MODULE__ = mod;
-          // Install JSI bindings (sync) — runtime is guaranteed ready since JS is running
-          if (typeof mod.NativeMFECache.installJSI === 'function') {
-            mod.NativeMFECache.installJSI();
-          }
+        if (mod?.BundleCacheLayer) {
+          cacheLayer = new mod.BundleCacheLayer();
+          (globalThis as any).__MFE_CACHE_LAYER__ = cacheLayer;
         }
       } catch {
         // metro-cache not installed — cache layer disabled
@@ -125,44 +95,22 @@ function buildLoadBundleAsyncWrapper() {
     }
   }
 
-  // CacheManager singleton shared via globalThis
-  let cacheManager: any = (globalThis as any).__MFE_CACHE_MANAGER__ ?? null;
-  let cacheInitPromise: Promise<void> | null = null;
+  // Expose manual APIs on globalThis
+  if (cacheLayer) {
+    (globalThis as any).__MFE_CHECK_UPDATES__ = () =>
+      cacheLayer.checkForUpdates();
+    (globalThis as any).__MFE_START_UPDATE_POLLING__ = (intervalMs?: number) =>
+      cacheLayer.startPolling(intervalMs);
+    (globalThis as any).__MFE_STOP_UPDATE_POLLING__ = () =>
+      cacheLayer.stopPolling();
+
+    // Auto-start polling (first tick fires after default interval)
+    cacheLayer.startPolling();
+  }
 
   // Inflight dedup: same bundlePath won't trigger concurrent downloads.
   // On error the entry is removed so the next call can retry.
   const inflight = new Map<string, Promise<void>>();
-
-  // Helper: read bundle from file and eval
-  function evalFromFile(filePath: string, NativeMFECache: any) {
-    if (typeof (globalThis as any).__MFE_readFileSync === 'function') {
-      const source = (globalThis as any).__MFE_readFileSync(filePath);
-      eval(source);
-    } else {
-      // Fallback: async read (less ideal — introduces a microtask gap)
-      return NativeMFECache.readFile(filePath, 'utf8').then(
-        (source: string) => {
-          eval(source);
-        },
-      );
-    }
-  }
-
-  // Helper: lazy-init CacheManager singleton
-  async function ensureCacheManager() {
-    if (!cacheManager) {
-      if (!cacheInitPromise) {
-        cacheInitPromise = (async () => {
-          const cm = new cacheModule!.CacheManager();
-          await cm.initialize();
-          cacheManager = cm;
-          (globalThis as any).__MFE_CACHE_MANAGER__ = cm;
-        })();
-      }
-      await cacheInitPromise;
-    }
-    return cacheManager;
-  }
 
   async function doLoadBundle(originalBundlePath: string) {
     const scope = globalThis.__FEDERATION__.__NATIVE__[__METRO_GLOBAL_PREFIX__];
@@ -176,87 +124,19 @@ function buildLoadBundleAsyncWrapper() {
     // full URLs so they enter the same cache path as container bundles.
     // In dev mode, getBundlePath returns relative paths unchanged, but we need
     // full URLs for the cache layer (download + eval).
-    if (
-      isSplitBundle &&
-      cacheEnabled &&
-      cacheModule &&
-      publicPath &&
-      !isUrl(bundlePath)
-    ) {
+    if (isSplitBundle && cacheLayer && publicPath && !isUrl(bundlePath)) {
       bundlePath = joinComponents(publicPath, bundlePath);
     }
 
     // --- Cache layer: intercept bundles with full URLs (containers + remote split bundles) ---
-    if (cacheEnabled && cacheModule && isUrl(bundlePath)) {
-      const { NativeMFECache } = cacheModule;
-
-      await ensureCacheManager();
-
-      try {
-        // Resolve expected hash from manifest (strip query params for lookup)
-        const bundlePathNoQuery = bundlePath.split('?')[0];
-        const expectedHash = ((globalThis as any).__MFE_BUNDLE_HASHES__ ?? {})[
-          bundlePathNoQuery
-        ] as string | undefined;
-
-        // If manifest has no hash for this bundle, we can't verify integrity
-        // — skip cache entirely and fall back to network load
-        if (!expectedHash) {
-          const encodedBundlePath = bundlePath.replaceAll('../', '..%2F');
-          await loadBundleAsync(encodedBundlePath);
-        } else {
-          const cached = await cacheManager.getCachedBundle(bundlePath);
-
-          // Determine if cache is valid: hash must match manifest
-          const cacheValid =
-            cached &&
-            cached.metadata.bundleHash &&
-            cached.metadata.bundleHash === expectedHash;
-
-          if (cacheValid) {
-            // Path A: cache HIT with matching hash — use cached bundle
-            cacheManager.updateLastUsedAt(bundlePath).catch(() => {});
-            await evalFromFile(cached.filePath, NativeMFECache);
-          } else {
-            // Path B: cache MISS or EXPIRED — download fresh bundle
-            const remoteName = extractBundleName(bundlePath);
-            const destPath = await cacheManager.getBundleDestPath(
-              remoteName,
-              bundlePath,
-            );
-
-            const { sha256 } = await NativeMFECache.downloadFile(
-              bundlePath,
-              destPath,
-            );
-
-            // Checksum verification against manifest hash
-            if (sha256 !== expectedHash) {
-              try {
-                await NativeMFECache.deleteFile(destPath);
-              } catch {
-                /* ok */
-              }
-              // Fall back to network load
-              const encodedBundlePath = bundlePath.replaceAll('../', '..%2F');
-              await loadBundleAsync(encodedBundlePath);
-            } else {
-              await cacheManager.saveBundleToCache(remoteName, destPath, {
-                bundleUrl: bundlePath,
-                bundleHash: sha256,
-              });
-              await evalFromFile(destPath, NativeMFECache);
-            }
-          }
-        }
-      } catch (cacheError) {
-        console.warn(
-          '[MFE-Cache] cache error, falling back to network:',
-          cacheError,
-        );
+    if (cacheLayer && isUrl(bundlePath)) {
+      const { status } = await cacheLayer.loadBundle(bundlePath);
+      if (status === 'skipped') {
+        // Cache layer skipped — fall back to network load
         const encodedBundlePath = bundlePath.replaceAll('../', '..%2F');
         await loadBundleAsync(encodedBundlePath);
       }
+      // else: 'cache-hit' or 'downloaded' — bundle already eval'd by cache layer
     } else {
       // No cache: host split bundles (no publicPath), cache disabled, or metro-cache not installed
       const encodedBundlePath = bundlePath.replaceAll('../', '..%2F');

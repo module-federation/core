@@ -16,11 +16,48 @@ declare global {
   var __FEDERATION__: Federation;
 }
 
-// Global map: bundleUrl → expected bundleHash from manifest
-// Populated by afterResolve hook, consumed by asyncRequire.ts cache layer
-const bundleHashMap: Record<string, string> =
-  (globalThis as any).__MFE_BUNDLE_HASHES__ ??
-  ((globalThis as any).__MFE_BUNDLE_HASHES__ = {});
+/**
+ * Extract bundleUrl → hash map from a manifest.
+ * Used by afterResolve to register hashes, and passed as callback
+ * to the cache layer for manifest polling.
+ */
+function extractBundleHashes(
+  manifest: any,
+  manifestUrl: string,
+): Map<string, string> {
+  const hashes = new Map<string, string>();
+
+  const rawPublicPath = manifest?.metaData?.publicPath ?? '';
+  const resolvedPublicPath =
+    rawPublicPath &&
+    rawPublicPath !== 'auto' &&
+    /^https?:\/\//.test(rawPublicPath)
+      ? rawPublicPath
+      : manifestUrl.replace(/\/[^/]*$/, '');
+
+  function addHashes(items: any[] | undefined) {
+    if (!Array.isArray(items)) return;
+    for (const item of items) {
+      const hash = (item as any)?.hash;
+      const syncJs = item?.assets?.js?.sync;
+      if (hash && syncJs) {
+        for (const assetPath of syncJs) {
+          // In dev, asset paths use source extensions (.tsx/.ts) — normalize to .bundle
+          const bundlePath = assetPath.replace(/\.\w+$/, '.bundle');
+          const fullUrl = resolvedPublicPath
+            ? `${resolvedPublicPath.replace(/\/+$/, '')}/${bundlePath.replace(/^\.?\//, '')}`
+            : bundlePath;
+          hashes.set(fullUrl, hash);
+        }
+      }
+    }
+  }
+
+  addHashes(manifest?.exposes);
+  addHashes(manifest?.shared);
+
+  return hashes;
+}
 
 const getQueryParams = () => {
   const isFuseboxEnabled = !!globalThis.__FUSEBOX_HAS_FULL_CONSOLE_SUPPORT__;
@@ -52,8 +89,11 @@ const MetroCorePlugin: () => ModuleFederationRuntimePlugin = () => {
   return {
     name: 'metro-core-plugin',
     afterResolve: (args) => {
-      // Extract bundleHash from manifest and store in global map for asyncRequire.ts
+      // Register bundle hashes with cache layer for integrity verification
       try {
+        const cacheLayer = (globalThis as any).__MFE_CACHE_LAYER__;
+        if (!cacheLayer) return args;
+
         const { origin, remoteInfo, remote } = args;
         const manifestUrl =
           'entry' in remote ? (remote as any).entry : undefined;
@@ -64,56 +104,21 @@ const MetroCorePlugin: () => ModuleFederationRuntimePlugin = () => {
             // Container bundle hash
             const containerHash = (manifest.metaData?.buildInfo as any)?.hash;
             if (containerHash && remoteInfo.entry) {
-              bundleHashMap[remoteInfo.entry] = containerHash;
+              cacheLayer.registerBundleHash(remoteInfo.entry, containerHash);
             }
-            // Resolve actual publicPath for hash key construction.
-            // In dev mode, manifest.publicPath is "auto" — resolve to actual server URL.
-            const rawPublicPath =
-              'publicPath' in manifest.metaData
-                ? manifest.metaData.publicPath
-                : '';
-            const resolvedPublicPath =
-              rawPublicPath &&
-              rawPublicPath !== 'auto' &&
-              /^https?:\/\//.test(rawPublicPath)
-                ? rawPublicPath
-                : manifestUrl
-                  ? manifestUrl.replace(/\/[^/]*$/, '')
-                  : '';
 
-            // Exposed bundle hashes — keyed by resolvedPublicPath + bundle path
-            if (Array.isArray(manifest.exposes)) {
-              for (const expose of manifest.exposes) {
-                const hash = (expose as any).hash;
-                const syncJs = expose.assets?.js?.sync;
-                if (hash && syncJs) {
-                  for (const assetPath of syncJs) {
-                    // In dev, asset paths use source extensions (.tsx/.ts) — normalize to .bundle
-                    const bundlePath = assetPath.replace(/\.\w+$/, '.bundle');
-                    const fullUrl = resolvedPublicPath
-                      ? `${resolvedPublicPath.replace(/\/+$/, '')}/${bundlePath.replace(/^\.?\//, '')}`
-                      : bundlePath;
-                    bundleHashMap[fullUrl] = hash;
-                  }
-                }
-              }
+            // Exposed + shared bundle hashes
+            const hashes = extractBundleHashes(manifest, manifestUrl);
+            for (const [url, hash] of hashes) {
+              cacheLayer.registerBundleHash(url, hash);
             }
-            // Shared bundle hashes
-            if (Array.isArray(manifest.shared)) {
-              for (const shared of manifest.shared) {
-                const hash = (shared as any).hash;
-                const syncJs = shared.assets?.js?.sync;
-                if (hash && syncJs) {
-                  for (const assetPath of syncJs) {
-                    const bundlePath = assetPath.replace(/\.\w+$/, '.bundle');
-                    const fullUrl = resolvedPublicPath
-                      ? `${resolvedPublicPath.replace(/\/+$/, '')}/${bundlePath.replace(/^\.?\//, '')}`
-                      : bundlePath;
-                    bundleHashMap[fullUrl] = hash;
-                  }
-                }
-              }
-            }
+
+            // Register manifest source for polling
+            cacheLayer.registerManifestSource(
+              manifestUrl,
+              remoteInfo.entry ?? '',
+              extractBundleHashes,
+            );
           }
         }
       } catch {

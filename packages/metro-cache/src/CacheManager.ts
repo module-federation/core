@@ -160,6 +160,48 @@ export class CacheManager {
     }
   }
 
+  /**
+   * Pre-download a bundle if its hash has changed.
+   * Returns true if a new version was downloaded, false if skipped or failed.
+   */
+  async preDownloadBundle(
+    bundleUrl: string,
+    newHash: string,
+  ): Promise<boolean> {
+    if (!NativeMFECache) return false;
+
+    const existing = this.urlIndex.get(bundleUrl);
+    // Already cached with same hash — skip
+    if (existing?.bundleHash === newHash) return false;
+
+    const remoteName = existing?.remoteName ?? this.inferRemoteName(bundleUrl);
+    const destPath = await this.getBundleDestPath(remoteName, bundleUrl);
+
+    try {
+      const { sha256 } = await NativeMFECache.downloadFile(bundleUrl, destPath);
+
+      // Verify downloaded content matches expected hash
+      if (sha256 !== newHash) {
+        try {
+          await NativeMFECache.deleteFile(destPath);
+        } catch {
+          /* ok */
+        }
+        return false;
+      }
+
+      await this.saveBundleToCache(remoteName, destPath, {
+        bundleUrl,
+        bundleHash: sha256,
+      });
+
+      console.info(`${LOG_PREFIX} pre-downloaded updated bundle: ${bundleUrl}`);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   async invalidateAllCaches(): Promise<void> {
     const remoteNames = new Set<string>();
     for (const meta of this.urlIndex.values()) {
@@ -240,6 +282,22 @@ export class CacheManager {
 
   private removeBundleMetadata(meta: BundleMetadata): void {
     this.urlIndex.delete(meta.bundleUrl);
+  }
+
+  /** Infer a remote name from a bundle URL for storage path generation */
+  private inferRemoteName(url: string): string {
+    try {
+      const parsed = new URL(url);
+      const pathParts = parsed.pathname.replace(/^\/+/, '').split('/');
+      if (pathParts.length > 0) {
+        pathParts[pathParts.length - 1] =
+          pathParts[pathParts.length - 1].split('.')[0];
+      }
+      return pathParts.join('/') || 'unknown';
+    } catch {
+      const last = url.split('/').pop() ?? 'unknown';
+      return last.split('.')[0];
+    }
   }
 
   private async deleteBundleFiles(meta: BundleMetadata): Promise<void> {
