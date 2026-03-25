@@ -26,6 +26,10 @@ export class BundleCacheLayer {
   private isCheckingUpdates = false;
   private static DEFAULT_POLL_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 
+  // Maps bundleUrl (no query) → full download URL (with query params)
+  // Recorded during loadBundle so preDownloadBundle can use the correct URL
+  private downloadUrlMap: Record<string, string> = {};
+
   constructor(config: MFECacheConfig = {}) {
     this.config = config;
 
@@ -125,6 +129,10 @@ export class BundleCacheLayer {
           bundleUrl,
           bundleHash: sha256,
         });
+
+        // Record full URL for pre-download during polling
+        this.downloadUrlMap[bundleUrlNoQuery] = bundleUrl;
+
         await this.evalFromFile(destPath);
         return { status: 'downloaded' };
       }
@@ -167,8 +175,11 @@ export class BundleCacheLayer {
           const containerHash = manifest?.metaData?.buildInfo?.hash;
           if (containerHash && source.containerEntry) {
             checked++;
+            const downloadUrl =
+              this.downloadUrlMap[source.containerEntry] ??
+              source.containerEntry;
             const didUpdate = await this.cacheManager!.preDownloadBundle(
-              source.containerEntry,
+              downloadUrl,
               containerHash,
             );
             if (didUpdate) {
@@ -182,8 +193,9 @@ export class BundleCacheLayer {
 
           for (const [bundleUrl, newHash] of newHashes) {
             checked++;
+            const downloadUrl = this.downloadUrlMap[bundleUrl] ?? bundleUrl;
             const didUpdate = await this.cacheManager!.preDownloadBundle(
-              bundleUrl,
+              downloadUrl,
               newHash,
             );
             if (didUpdate) {
