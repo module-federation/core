@@ -118,6 +118,7 @@ const MetroCorePlugin: () => ModuleFederationRuntimePlugin = () => {
               manifestUrl,
               remoteInfo.entry ?? '',
               extractBundleHashes,
+              buildUrlForEntryBundle,
             );
           }
         }

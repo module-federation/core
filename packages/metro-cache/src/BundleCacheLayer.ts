@@ -7,6 +7,8 @@ const LOG_PREFIX = '[MFE-Cache]';
 interface ManifestSource {
   containerEntry: string;
   extractHashes: (manifest: any, manifestUrl: string) => Map<string, string>;
+  /** Build full download URL from a raw bundle URL (e.g. append dev query params) */
+  buildDownloadUrl?: (url: string) => string;
 }
 
 export class BundleCacheLayer {
@@ -24,11 +26,7 @@ export class BundleCacheLayer {
   // Polling state
   private pollTimer: ReturnType<typeof setInterval> | null = null;
   private isCheckingUpdates = false;
-  private static DEFAULT_POLL_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
-
-  // Maps bundleUrl (no query) → full download URL (with query params)
-  // Recorded during loadBundle so preDownloadBundle can use the correct URL
-  private downloadUrlMap: Record<string, string> = {};
+  private static DEFAULT_POLL_INTERVAL_MS = 5 * 1000; // 5 minutes
 
   constructor(config: MFECacheConfig = {}) {
     this.config = config;
@@ -57,8 +55,13 @@ export class BundleCacheLayer {
     manifestUrl: string,
     containerEntry: string,
     extractHashes: (manifest: any, manifestUrl: string) => Map<string, string>,
+    buildDownloadUrl?: (url: string) => string,
   ): void {
-    this.manifestSources.set(manifestUrl, { containerEntry, extractHashes });
+    this.manifestSources.set(manifestUrl, {
+      containerEntry,
+      extractHashes,
+      buildDownloadUrl,
+    });
   }
 
   // --- Core loading ---
@@ -129,10 +132,6 @@ export class BundleCacheLayer {
           bundleUrl,
           bundleHash: sha256,
         });
-
-        // Record full URL for pre-download during polling
-        this.downloadUrlMap[bundleUrlNoQuery] = bundleUrl;
-
         await this.evalFromFile(destPath);
         return { status: 'downloaded' };
       }
@@ -171,13 +170,16 @@ export class BundleCacheLayer {
           if (!resp.ok) continue;
           const manifest = await resp.json();
 
+          // Container uses buildDownloadUrl (appends dev query params)
+          // Split bundles use raw URL — must match loadBundle's URL exactly
+          const toContainerUrl =
+            source.buildDownloadUrl ?? ((url: string) => url);
+
           // --- Container bundle hash ---
           const containerHash = manifest?.metaData?.buildInfo?.hash;
           if (containerHash && source.containerEntry) {
             checked++;
-            const downloadUrl =
-              this.downloadUrlMap[source.containerEntry] ??
-              source.containerEntry;
+            const downloadUrl = toContainerUrl(source.containerEntry);
             const didUpdate = await this.cacheManager!.preDownloadBundle(
               downloadUrl,
               containerHash,
@@ -188,14 +190,13 @@ export class BundleCacheLayer {
             }
           }
 
-          // --- Exposed & shared bundle hashes ---
+          // --- Exposed & shared bundle hashes (split bundles — no query params) ---
           const newHashes = source.extractHashes(manifest, manifestUrl);
 
           for (const [bundleUrl, newHash] of newHashes) {
             checked++;
-            const downloadUrl = this.downloadUrlMap[bundleUrl] ?? bundleUrl;
             const didUpdate = await this.cacheManager!.preDownloadBundle(
-              downloadUrl,
+              bundleUrl,
               newHash,
             );
             if (didUpdate) {
