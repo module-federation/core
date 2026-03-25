@@ -1,6 +1,6 @@
 import NativeMFECache from './NativeMFECache';
 import { CacheManager } from './CacheManager';
-import type { CacheManagerConfig } from './types';
+import type { MFECacheConfig } from './types';
 
 const LOG_PREFIX = '[MFE-Cache]';
 
@@ -12,7 +12,7 @@ interface ManifestSource {
 export class BundleCacheLayer {
   private cacheManager: CacheManager | null = null;
   private initPromise: Promise<void> | null = null;
-  private config: CacheManagerConfig;
+  private config: MFECacheConfig;
 
   // Bundle hash map: bundleUrl (without query params) → expected hash
   // Shared via globalThis.__MFE_BUNDLE_HASHES__ for cross-instance access
@@ -26,7 +26,7 @@ export class BundleCacheLayer {
   private isCheckingUpdates = false;
   private static DEFAULT_POLL_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 
-  constructor(config: CacheManagerConfig = {}) {
+  constructor(config: MFECacheConfig = {}) {
     this.config = config;
 
     // Share bundleHashMap via globalThis for cross-instance access
@@ -229,7 +229,8 @@ export class BundleCacheLayer {
     if (this.cacheManager) return;
     if (!this.initPromise) {
       this.initPromise = (async () => {
-        const cm = new CacheManager(this.config);
+        const { enablePolling, pollIntervalMs, ...cacheConfig } = this.config;
+        const cm = new CacheManager(cacheConfig);
         await cm.initialize();
         this.cacheManager = cm;
       })();

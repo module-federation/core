@@ -2,7 +2,7 @@ import NativeMFECache from './NativeMFECache';
 import type {
   BundleMetadata,
   CachedBundleResult,
-  CacheManagerConfig,
+  MFECacheConfig,
 } from './types';
 
 const LOG_PREFIX = '[MFE-Cache]';
@@ -14,14 +14,14 @@ const DEFAULT_MIN_CACHE_SIZE_BYTES = 0;
 
 export class CacheManager {
   private bundleDir: string = '';
-  private config: CacheManagerConfig;
+  private config: MFECacheConfig;
 
   // In-memory index: bundleUrl → BundleMetadata
   private urlIndex = new Map<string, BundleMetadata>();
 
   private initialized = false;
 
-  constructor(config: CacheManagerConfig = {}) {
+  constructor(config: MFECacheConfig = {}) {
     this.config = config;
   }
 

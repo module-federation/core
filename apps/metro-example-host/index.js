@@ -1,6 +1,9 @@
+import {register} from '@module-federation/metro-cache';
 import {withAsyncStartup} from '@module-federation/metro/bootstrap';
 import {AppRegistry} from 'react-native';
 import {name as appName} from './app.json';
+
+register();
 
 // create async boundry through withAsyncStartup helper
 // and pass the getter function for the app component

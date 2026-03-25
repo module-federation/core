@@ -73,40 +73,13 @@ function buildLoadBundleAsyncWrapper() {
   // DEBUG: set to true to test cache layer in dev mode
   const FORCE_CACHE_IN_DEV = false;
 
-  // --- Cache layer setup ---
+  // --- Cache layer (registered externally via metro-cache register()) ---
   const cacheEnabled =
     process.env.NODE_ENV === 'production' || FORCE_CACHE_IN_DEV;
 
-  let cacheLayer: any = null;
-
-  if (cacheEnabled) {
-    if ((globalThis as any).__MFE_CACHE_LAYER__) {
-      cacheLayer = (globalThis as any).__MFE_CACHE_LAYER__;
-    } else {
-      try {
-        const mod = require('@module-federation/metro-cache');
-        if (mod?.BundleCacheLayer) {
-          cacheLayer = new mod.BundleCacheLayer();
-          (globalThis as any).__MFE_CACHE_LAYER__ = cacheLayer;
-        }
-      } catch {
-        // metro-cache not installed — cache layer disabled
-      }
-    }
-  }
-
-  // Expose manual APIs on globalThis
-  if (cacheLayer) {
-    (globalThis as any).__MFE_CHECK_UPDATES__ = () =>
-      cacheLayer.checkForUpdates();
-    (globalThis as any).__MFE_START_UPDATE_POLLING__ = (intervalMs?: number) =>
-      cacheLayer.startPolling(intervalMs);
-    (globalThis as any).__MFE_STOP_UPDATE_POLLING__ = () =>
-      cacheLayer.stopPolling();
-
-    // Auto-start polling (first tick fires after default interval)
-    cacheLayer.startPolling();
-  }
+  const cacheLayer: any = cacheEnabled
+    ? ((globalThis as any).__MFE_CACHE_LAYER__ ?? null)
+    : null;
 
   // Inflight dedup: same bundlePath won't trigger concurrent downloads.
   // On error the entry is removed so the next call can retry.
