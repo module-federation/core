@@ -19,6 +19,7 @@ This page collects runtime-related error codes and common troubleshooting guidan
 - [RUNTIME-008](#runtime-008)
 - [RUNTIME-009](#runtime-009)
 - [RUNTIME-010](#runtime-010)
+- [RUNTIME-012](#runtime-012)
 
 ## RUNTIME-001
 
@@ -312,6 +313,44 @@ Not use build plugin, but directly call runtime api.
 
 - If you need an instance with a different `name`, use the `createInstance` API to create a new instance instead of modifying the existing one.
 - If changing the `name` is not required, omit the `name` field in the `initOptions` call or keep it consistent with the value used during initialization.
+
+## RUNTIME-012
+
+<ErrorCodeTitle code='RUNTIME-012'/>
+
+### Reason
+
+When loading a shared module, the local `getter` is not a function (it is `undefined` or another non-function type).
+
+When `loadShare` returns `false` — meaning the remote did not provide the shared module — the runtime falls back to the local `getter` to resolve the module. If the `getter` is not a function at that point, neither the remote nor the local fallback can supply the module, and this error is thrown.
+
+**Most common cause**: `import: false` is set for the shared module in one of the applications, which tells the bundler not to include that module locally. In this case the host app **must** provide the module via a `lib` function — if no host provides it, the fallback has nothing to call.
+
+### Solution
+
+1. **Check the `shared.import` configuration**
+
+   If you set `import: false` for this shared module in any application, you must ensure the host provides a corresponding `lib` function, for example:
+
+   ```ts title="host/webpack.config.ts"
+   new ModuleFederationPlugin({
+     name: 'host',
+     shared: {
+       react: {
+         singleton: true,
+         lib: () => require('react'), // host must provide lib
+       },
+     },
+   });
+   ```
+
+2. **Remove `import: false`**
+
+   If the optimization is not required, remove `import: false` and let the bundler handle the dependency automatically.
+
+3. **Verify shared module name and version range**
+
+   Make sure the shared module name and version range are consistent between the host and all remotes, so a match can be found and the fallback is never reached with an empty `getter`.
 
 ## Common Issues (No Error Code)
 
