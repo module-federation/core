@@ -905,9 +905,6 @@ importers:
       '@module-federation/metro-plugin-rnef':
         specifier: workspace:*
         version: link:../../packages/metro-plugin-rnef
-      '@module-federation/native-cache':
-        specifier: workspace:*
-        version: link:../../packages/native-cache
       '@module-federation/runtime':
         specifier: workspace:*
         version: link:../../packages/runtime
@@ -3683,21 +3680,6 @@ importers:
       '@types/react-dom':
         specifier: ^18.3.0
         version: 18.3.7(@types/react@18.3.11)
-
-  packages/native-cache:
-    devDependencies:
-      '@types/react':
-        specifier: ^19.1.0
-        version: 19.2.10
-      react:
-        specifier: 19.1.0
-        version: 19.1.0
-      react-native:
-        specifier: 0.80.0
-        version: 0.80.0(@babel/core@7.29.0)(@react-native-community/cli@19.1.2(typescript@5.9.3))(@types/react@19.2.10)(react@19.1.0)
-      typescript:
-        specifier: ^5.8.3
-        version: 5.9.3
 
   packages/native-federation-tests:
     dependencies:
