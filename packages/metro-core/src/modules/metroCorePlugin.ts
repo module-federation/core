@@ -2,6 +2,7 @@ import type {
   Federation,
   ModuleFederationRuntimePlugin,
 } from '@module-federation/runtime';
+import type { ICacheLayer } from './cache-interface';
 declare global {
   // @ts-expect-error -- Intentional redeclaration for Metro/React Native runtime global.
   // eslint-disable-next-line no-var
@@ -91,7 +92,9 @@ const MetroCorePlugin: () => ModuleFederationRuntimePlugin = () => {
     afterResolve: (args) => {
       // Register bundle hashes with cache layer for integrity verification
       try {
-        const cacheLayer = (globalThis as any).__MFE_CACHE_LAYER__;
+        const cacheLayer = (globalThis as any).__MFE_CACHE_LAYER__ as
+          | ICacheLayer
+          | undefined;
         if (!cacheLayer) return args;
 
         const { origin, remoteInfo, remote } = args;

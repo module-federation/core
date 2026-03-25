@@ -1,3 +1,5 @@
+import type { ICacheLayer } from './cache-interface';
+
 // join two paths
 // e.g. /a/b/ + /c/d -> /a/b/c/d
 function joinComponents(prefix: string, suffix: string) {
@@ -81,10 +83,11 @@ function buildLoadBundleAsyncWrapper() {
   // On error the entry is removed so the next call can retry.
   const inflight = new Map<string, Promise<void>>();
 
-  function getCacheLayer() {
+  function getCacheLayer(): ICacheLayer | undefined {
     return cacheEnabled
-      ? ((globalThis as any).__MFE_CACHE_LAYER__ ?? null)
-      : null;
+      ? (((globalThis as any).__MFE_CACHE_LAYER__ as ICacheLayer | undefined) ??
+          undefined)
+      : undefined;
   }
 
   async function doLoadBundle(originalBundlePath: string) {

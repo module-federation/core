@@ -1,27 +1,28 @@
-export interface ICacheManager {
-  initialize(): Promise<void>;
-  getCachedBundle(
+/**
+ * Interface for the global cache layer (`globalThis.__MFE_CACHE_LAYER__`).
+ *
+ * Metro-core never imports native-cache directly — it only
+ * reads this global, keeping the two packages decoupled.
+ */
+export interface ICacheLayer {
+  /**
+   * Load a bundle through the cache layer.
+   * - 'cache-hit': bundle loaded from disk cache (hash matched)
+   * - 'downloaded': bundle freshly downloaded, verified, cached, and eval'd
+   * - 'skipped': no expected hash, verification failed, or error — caller should fallback
+   */
+  loadBundle(
     bundleUrl: string,
-  ): Promise<{ source: string; filePath: string; metadata: any } | null>;
-  getBundleDestPath(remoteName: string, bundleUrl: string): Promise<string>;
-  saveBundleToCache(
-    remoteName: string,
-    filePath: string,
-    metadata: {
-      bundleUrl: string;
-      bundleHash?: string;
-      buildVersion?: string;
-    },
-  ): Promise<any>;
-  updateLastUsedAt(bundleUrl: string): Promise<void>;
-  invalidateAllCaches(): Promise<void>;
-}
+  ): Promise<{ status: 'cache-hit' | 'downloaded' | 'skipped' }>;
 
-export interface ICacheNative {
-  downloadFile(
-    url: string,
-    destPath: string,
-  ): Promise<{ sha256: string; bytesWritten: number }>;
-  evaluateJavaScript(filePath: string, sourceURL: string): Promise<void>;
-  deleteFile(path: string): Promise<void>;
+  /** Register an expected hash for a bundle URL (used for integrity verification). */
+  registerBundleHash(bundleUrl: string, hash: string): void;
+
+  /** Register a manifest source for background polling and pre-downloading. */
+  registerManifestSource(
+    manifestUrl: string,
+    containerEntry: string,
+    extractHashes: (manifest: any, manifestUrl: string) => Map<string, string>,
+    buildDownloadUrl?: (url: string) => string,
+  ): void;
 }
