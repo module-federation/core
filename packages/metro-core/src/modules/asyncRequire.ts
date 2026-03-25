@@ -77,15 +77,18 @@ function buildLoadBundleAsyncWrapper() {
   const cacheEnabled =
     process.env.NODE_ENV === 'production' || FORCE_CACHE_IN_DEV;
 
-  const cacheLayer: any = cacheEnabled
-    ? ((globalThis as any).__MFE_CACHE_LAYER__ ?? null)
-    : null;
-
   // Inflight dedup: same bundlePath won't trigger concurrent downloads.
   // On error the entry is removed so the next call can retry.
   const inflight = new Map<string, Promise<void>>();
 
+  function getCacheLayer() {
+    return cacheEnabled
+      ? ((globalThis as any).__MFE_CACHE_LAYER__ ?? null)
+      : null;
+  }
+
   async function doLoadBundle(originalBundlePath: string) {
+    const cacheLayer = getCacheLayer();
     const scope = globalThis.__FEDERATION__.__NATIVE__[__METRO_GLOBAL_PREFIX__];
 
     const publicPath = getPublicPath(scope.origin);
