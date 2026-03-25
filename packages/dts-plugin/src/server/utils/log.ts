@@ -1,5 +1,6 @@
 import { createLogger } from '@module-federation/sdk';
-import * as log4js from 'log4js';
+import * as fs from 'fs';
+import * as path from 'path';
 import { MF_SERVER_IDENTIFIER } from '../constant';
 import { ActionKind } from '../message/Action';
 
@@ -13,21 +14,17 @@ function fileLog(msg: string, module: string, level: string) {
   if (!process?.env?.['FEDERATION_DEBUG']) {
     return;
   }
-  log4js.configure({
-    appenders: {
-      [module]: { type: 'file', filename: '.mf/typesGenerate.log' },
-      default: { type: 'file', filename: '.mf/typesGenerate.log' },
-    },
-    categories: {
-      [module]: { appenders: [module], level: 'error' },
-      default: { appenders: ['default'], level: 'trace' },
-    },
-  });
+  const logDir = '.mf';
+  const logFile = path.join(logDir, 'typesGenerate.log');
 
-  const logger4 = log4js.getLogger(module);
-  logger4.level = 'debug';
-  // @ts-ignore
-  logger4[level]?.(msg);
+  if (!fs.existsSync(logDir)) {
+    fs.mkdirSync(logDir, { recursive: true });
+  }
+
+  const stream = fs.createWriteStream(logFile, { flags: 'a' });
+  const timestamp = new Date().toISOString();
+  stream.write(`[${timestamp}] [${level.toUpperCase()}] ${module} - ${msg}\n`);
+  stream.end();
 }
 
 function error(error: unknown, action: ActionKind, from: string): string {
