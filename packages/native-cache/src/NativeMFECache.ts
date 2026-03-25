@@ -33,7 +33,7 @@ const MFECache = NativeModules.MFECache as NativeMFECacheSpec | undefined;
 if (!MFECache) {
   console.warn(
     '[MFE-Cache] NativeModules.MFECache is not available. ' +
-      'Make sure @module-federation/metro-cache is properly linked.',
+      'Make sure @module-federation/native-cache is properly linked.',
   );
 }
 

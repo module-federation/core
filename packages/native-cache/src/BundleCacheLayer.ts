@@ -170,8 +170,6 @@ export class BundleCacheLayer {
           if (!resp.ok) continue;
           const manifest = await resp.json();
 
-          // Container uses buildDownloadUrl (appends dev query params)
-          // Split bundles use raw URL — must match loadBundle's URL exactly
           const toContainerUrl =
             source.buildDownloadUrl ?? ((url: string) => url);
 
@@ -179,24 +177,32 @@ export class BundleCacheLayer {
           const containerHash = manifest?.metaData?.buildInfo?.hash;
           if (containerHash && source.containerEntry) {
             checked++;
-            const downloadUrl = toContainerUrl(source.containerEntry);
-            const didUpdate = await this.cacheManager!.preDownloadBundle(
-              downloadUrl,
-              containerHash,
-            );
-            if (didUpdate) {
-              this.bundleHashMap[source.containerEntry] = containerHash;
-              updated++;
+            const currentHash = this.bundleHashMap[source.containerEntry];
+            if (currentHash !== containerHash) {
+              const downloadUrl = toContainerUrl(source.containerEntry);
+              const didUpdate = await this.cacheManager!.preDownloadBundle(
+                downloadUrl,
+                containerHash,
+              );
+              if (didUpdate) {
+                this.bundleHashMap[source.containerEntry] = containerHash;
+                updated++;
+              }
             }
           }
 
-          // --- Exposed & shared bundle hashes (split bundles — no query params) ---
+          // --- Exposed & shared bundle hashes (split bundles) ---
           const newHashes = source.extractHashes(manifest, manifestUrl);
 
           for (const [bundleUrl, newHash] of newHashes) {
             checked++;
+            const currentHash = this.bundleHashMap[bundleUrl];
+            if (currentHash === newHash) continue;
+            const downloadUrl = source.buildDownloadUrl
+              ? source.buildDownloadUrl(bundleUrl)
+              : bundleUrl;
             const didUpdate = await this.cacheManager!.preDownloadBundle(
-              bundleUrl,
+              downloadUrl,
               newHash,
             );
             if (didUpdate) {

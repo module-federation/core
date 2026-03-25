@@ -1,5 +1,5 @@
 {
-  "name": "@module-federation/metro-cache",
+  "name": "@module-federation/native-cache",
   "version": "0.0.1",
   "description": "Native caching module for Module Federation Metro bundles",
   "license": "MIT",
@@ -8,7 +8,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/module-federation/core.git",
-    "directory": "packages/metro-cache"
+    "directory": "packages/native-cache"
   },
   "scripts": {
     "test": "jest"

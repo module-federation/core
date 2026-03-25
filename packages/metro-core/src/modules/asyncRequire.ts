@@ -71,9 +71,9 @@ function buildLoadBundleAsyncWrapper() {
     __loadBundleAsync as typeof globalThis.__loadBundleAsync;
 
   // DEBUG: set to true to test cache layer in dev mode
-  const FORCE_CACHE_IN_DEV = false;
+  const FORCE_CACHE_IN_DEV = true;
 
-  // --- Cache layer (registered externally via metro-cache register()) ---
+  // --- Cache layer (registered externally via native-cache register()) ---
   const cacheEnabled =
     process.env.NODE_ENV === 'production' || FORCE_CACHE_IN_DEV;
 
@@ -111,7 +111,7 @@ function buildLoadBundleAsyncWrapper() {
       }
       // else: 'cache-hit' or 'downloaded' — bundle already eval'd by cache layer
     } else {
-      // No cache: host split bundles (no publicPath), cache disabled, or metro-cache not installed
+      // No cache: host split bundles (no publicPath), cache disabled, or native-cache not installed
       const encodedBundlePath = bundlePath.replaceAll('../', '..%2F');
       await loadBundleAsync(encodedBundlePath);
     }

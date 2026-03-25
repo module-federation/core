@@ -1,7 +1,7 @@
 {
-  "name": "metro-cache",
+  "name": "native-cache",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/metro-cache/src",
+  "sourceRoot": "packages/native-cache/src",
   "projectType": "library",
   "tags": ["type:pkg"],
   "targets": {
@@ -10,7 +10,7 @@
       "options": {
         "commands": [
           {
-            "command": "echo 'No build needed for metro-cache - React Native native module'",
+            "command": "echo 'No build needed for native-cache - React Native native module'",
             "forwardAllArgs": false
           }
         ]
@@ -21,7 +21,7 @@
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
         "command": "pnpm exec jest --passWithNoTests --watchman=false",
-        "cwd": "packages/metro-cache",
+        "cwd": "packages/native-cache",
         "forwardAllArgs": false
       }
     },

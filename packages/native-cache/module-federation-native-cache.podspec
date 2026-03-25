@@ -3,7 +3,7 @@ require "json"
 package = JSON.parse(File.read(File.join(__dir__, "package.json")))
 
 Pod::Spec.new do |s|
-  s.name         = "module-federation-metro-cache"
+  s.name         = "module-federation-native-cache"
   s.version      = package["version"]
   s.summary      = package["description"]
   s.homepage     = "https://github.com/module-federation/core"

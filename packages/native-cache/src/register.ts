@@ -6,11 +6,11 @@ import type { MFECacheConfig } from './types';
  *
  * Call this once at app startup (before any remote bundle loading).
  * metro-core reads `globalThis.__MFE_CACHE_LAYER__` — it never
- * imports metro-cache directly, keeping the two packages decoupled.
+ * imports native-cache directly, keeping the two packages decoupled.
  *
  * @example
  * ```ts
- * import { register } from '@module-federation/metro-cache';
+ * import { register } from '@module-federation/native-cache';
  *
  * register({
  *   maxCacheSizeBytes: 50 * 1024 * 1024,
