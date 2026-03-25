@@ -71,7 +71,7 @@ function buildLoadBundleAsyncWrapper() {
     __loadBundleAsync as typeof globalThis.__loadBundleAsync;
 
   // DEBUG: set to true to test cache layer in dev mode
-  const FORCE_CACHE_IN_DEV = true;
+  const FORCE_CACHE_IN_DEV = false;
 
   // --- Cache layer (registered externally via native-cache register()) ---
   const cacheEnabled =
