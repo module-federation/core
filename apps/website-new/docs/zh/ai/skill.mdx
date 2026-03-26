@@ -1,0 +1,107 @@
+---
+pageType: doc-wide
+sidebar: false
+---
+
+# Skills
+
+Module Federation 现在对外提供一个统一的 **`mf` skill**。
+
+你不需要在很多 skill 之间自己挑，也不需要先把文档看完再转述给 Agent。更直接的方式是安装这一个 skill，然后让 Agent 自己判断现在该走“读文档”、“看配置”还是“排查问题”。
+
+如果你还没看过，建议先从 [AI 快速开始](./index) 开始。
+
+## 安装
+
+```bash
+npx skills add module-federation/core --skill mf -y
+```
+
+安装后，主入口就是：
+
+```text
+/mf <子命令或问题>
+```
+
+如果无法使用命令行安装，也可以直接从 GitHub 手动复制目录：
+
+```text
+https://github.com/module-federation/core/tree/main/skills/mf
+```
+
+## 这个 skill 是怎么用的
+
+`mf` 只有一个入口，但里面包含多个能力。你可以显式写子命令，也可以直接用自然语言提问。
+
+显式写子命令：
+
+```text
+/mf docs 如何在 Modern.js 里使用 Module Federation？
+/mf integrate
+/mf type-check
+/mf runtime-error RUNTIME-008
+```
+
+直接写自然语言：
+
+```text
+/mf shared 里的 singleton 和 requiredVersion 有什么区别？
+/mf 帮我看看这个项目为什么 remote types 没拉下来
+/mf 帮我把 Module Federation 接到当前项目里
+```
+
+## `mf` 目前支持什么
+
+| 子命令 | 适合做什么 |
+|---|---|
+| `docs` | 先读最新文档，再回答配置、API、概念问题 |
+| `context` | 快速查看当前项目的 MF 配置情况 |
+| `module-info` | 查看远端模块的地址、暴露内容和相关信息 |
+| `integrate` | 把 Module Federation 接入已有项目 |
+| `type-check` | 排查类型相关问题 |
+| `shared-deps` | 排查共享依赖冲突和重复打包 |
+| `perf` | 排查本地开发慢、HMR 慢的问题 |
+| `config-check` | 排查配置错误、暴露路径错误、插件不匹配 |
+| `bridge-check` | 排查 Bridge 接入问题 |
+| `runtime-error` | 排查明确的运行时报错码，尤其是 `RUNTIME-001` / `RUNTIME-008` |
+
+## 最常用的几类场景
+
+### 1. 先读文档再回答
+
+这是最常见的用法，也是最推荐的起点：
+
+```text
+/mf docs shared 里的 singleton 和 requiredVersion 有什么区别？
+```
+
+这样 Agent 会先去读最新文档，再回来回答你，而不是靠过时记忆硬猜。
+
+### 2. 让 Agent 直接接入
+
+如果你想把 Module Federation 接进现有项目：
+
+```text
+/mf integrate
+```
+
+它会自动看你当前项目的构建器和配置，再决定下一步怎么做。
+
+### 3. 让 Agent 直接排查
+
+如果你已经遇到具体问题：
+
+```text
+/mf type-check
+/mf shared-deps
+/mf config-check
+/mf runtime-error RUNTIME-008
+```
+
+这时候重点不是你自己查，而是让 Agent 直接开始定位。
+
+## 你真正需要记住的只有一件事
+
+不是你自己先读文档、再告诉 Agent 该怎么办。
+
+而是直接把 `mf` 装上，然后让 Agent 先读、先看、先判断、先动手。

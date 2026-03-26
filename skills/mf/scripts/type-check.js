@@ -33,7 +33,7 @@ function semverGt(a, b) {
 }
 
 function stripVersionPrefix(version) {
-  return (version || '').replace(/^[\^~]/, '');
+  return (version || '').replace(/^[\\^~]/, '');
 }
 
 function main(ctx) {

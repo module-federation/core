@@ -1,13 +1,14 @@
----
-name: mf-perf
-description: "Check Module Federation local development performance configuration: detect whether recommended performance optimization options are enabled to alleviate slow HMR and slow build speed."
-argument-hint: [project-root]
-allowed-tools: Bash(node *)
----
+# Sub-skill: perf
 
-**Step 1**: Call the `mf-context` Skill (pass `$ARGUMENTS`) to collect MFContext.
+Check Module Federation local development performance configuration: detect whether recommended performance optimization options are enabled to alleviate slow HMR and slow build speed.
 
-**Step 2**: Serialize MFContext to JSON and pass it to the check script via the `--context` argument:
+## Step 1: Collect MFContext
+
+Read and follow the instructions in `./context.md`, passing ARGS as the project root.
+
+## Step 2: Run performance check script
+
+Serialize MFContext to JSON and pass it to the check script:
 
 ```bash
 node scripts/performance-check.js --context '<MFContext-JSON>'
@@ -34,7 +35,9 @@ Provide recommendations for each item in the output `results` and `context.bundl
   1. Temporarily disable DTS: set `dts: false` in the `@module-federation/enhanced` config
   2. Switch to `ts-go` for significantly faster type generation
 
-**Step 3**: After presenting the DTS recommendation, ask the user:
+## Step 3: ts-go migration (interactive)
+
+After presenting the DTS recommendation, ask the user:
 
 > "Would you like me to automatically try switching to `ts-go` and verify compatibility?"
 
@@ -44,11 +47,10 @@ If the user confirms, execute the following steps in order:
 
 2. **Configure** — set `dts.generateTypes.compilerInstance = "tsgo"` in the Module Federation config
 
-3. **Install** — install the required package:
+3. **Install** — install the required package using the project's package manager from MFContext:
    ```bash
-   npm install @typescript/native-preview --save-dev
+   pnpm add @typescript/native-preview --save-dev
    ```
-   (use the project's actual package manager from MFContext)
 
 4. **Regenerate** — run:
    ```bash

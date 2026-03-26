@@ -1,15 +1,10 @@
----
-name: mf-integrate
-description: "Integrate Module Federation into an existing project — add provider (exposes modules) or consumer (loads remote modules) configuration. Use when the user wants to add Module Federation to an existing Rsbuild / Rspack / Webpack / Modern.js / Next.js / Vite project, set up a remote, create a host app, or quickly consume the demo provider to see MF working. Default role is consumer."
-argument-hint: [project-root]
-allowed-tools: Read Glob Write Edit Bash AskUserQuestion
----
+# Sub-skill: integrate
 
-# MF Scaffold — Add Module Federation to an Existing Project
+Integrate Module Federation into an existing project — add provider (exposes modules) or consumer (loads remote modules) configuration.
 
 ## Step 1: Detect project
 
-Call the `mf-context` Skill (pass `$ARGUMENTS`) to collect MFContext.
+Collect MFContext by reading and following the instructions in `./context.md`, passing ARGS as the project root.
 
 If no bundler can be detected (no `rsbuild.config`, `rspack.config`, `webpack.config`, `modern.config`, `next.config`, `vite.config` found), this is likely a new project. Tell the user:
 
@@ -112,8 +107,6 @@ export default createModuleFederationConfig({
 
 #### 4b. Modify `rsbuild.config.ts`
 
-Add `pluginModuleFederation` to the plugins array:
-
 ```diff
 +import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 +import moduleFederationConfig from './module-federation.config';
@@ -193,8 +186,6 @@ pnpm add @module-federation/modern-js-v3
 **Detected by**: `rspack.config.ts` / `rspack.config.js` in project root.
 
 #### 4a. Modify `rspack.config.ts` / `rspack.config.js`
-
-Add `ModuleFederationPlugin` and `experiments.asyncStartup`:
 
 ```diff
 +const { ModuleFederationPlugin } = require('@module-federation/enhanced/rspack');

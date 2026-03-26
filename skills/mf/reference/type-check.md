@@ -1,13 +1,17 @@
----
-name: mf-type-check
-description: "Diagnose Module Federation type issues across three categories: (1) producer type file generation failures (TYPE-001), (2) consumer failing to pull remote types, (3) tsconfig not configured to consume remote types. Use when the user encounters TS type errors, missing @mf-types folder, or cannot consume remote module types."
-argument-hint: [project-root]
-allowed-tools: Bash(node *), Bash(npx tsc*), Bash(npx mf dts*)
----
+# Sub-skill: type-check
 
-**Step 1**: Call the `mf-context` Skill (pass `$ARGUMENTS`) to collect MFContext.
+Diagnose Module Federation type issues across three categories:
+1. Producer type file generation failures (TYPE-001)
+2. Consumer failing to pull remote types
+3. tsconfig not configured to consume remote types
 
-**Step 2**: Serialize MFContext to JSON and pass it to the check script via the `--context` argument:
+## Step 1: Collect MFContext
+
+Read and follow the instructions in `./context.md`, passing ARGS as the project root.
+
+## Step 2: Run type check script
+
+Serialize MFContext to JSON and pass it to the check script:
 
 ```bash
 node scripts/type-check.js --context '<MFContext-JSON>'
@@ -39,7 +43,7 @@ The producer failed to generate type files (TYPE-001 error).
 
 The `@mf-types` folder is missing. Remote types have not been downloaded.
 
-1. Call `mf-module-info` skill with the remote module name to retrieve the type file URL (`@mf-types.zip`)
+1. Read and follow `./module-info.md` with the remote module name to retrieve the type file URL (`@mf-types.zip`)
    - If **no URL returned**: the producer has not configured the type file URL or has not generated types. Guide them to enable `dts` in the `@module-federation/enhanced` plugin config, then revisit **Problem 1**
    - If **URL found**: attempt to fetch it (or ask the user to verify in browser)
      - **URL inaccessible**: try fetching the `remoteEntry` URL
@@ -80,4 +84,4 @@ The `@mf-types` folder exists but TypeScript cannot find the types because `tsco
 
 ---
 
-> This Skill performs configuration and dependency-level checks. It runs `npx tsc` only when guided by a valid temp TS config path. It never runs `tsc` blindly against the entire project.
+> This sub-skill performs configuration and dependency-level checks. It runs `npx tsc` only when guided by a valid temp TS config path. It never runs `tsc` blindly against the entire project.

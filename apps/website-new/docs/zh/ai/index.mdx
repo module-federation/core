@@ -1,0 +1,90 @@
+---
+pageType: doc-wide
+sidebar: false
+---
+
+# AI 快速开始
+
+:::tip 想自己阅读完整指南？
+如果你希望按文档顺序自己了解 Module Federation 的概念、配置和接入方式，可以直接前往 [开始使用指南](../guide/start/index)。
+:::
+
+## 更适合的开始方式
+
+如果你已经在用 AI 编程工具，那么这里更推荐的方式不是你自己先把文档读完。
+
+更高效的做法是：**先把最新的 Module Federation 文档交给 Agent，让它先读，再让它回答、排查、改配置、写代码。**
+
+很多模型对 Module Federation 2.0 的理解并不完整，直接问，答案很容易过时或不准。所以这页的重点不是教你自己先补课，而是教你怎么让 Agent 先拿到对的资料。
+
+## 最推荐的用法
+
+如果你在用 Claude Code、Cursor、Windsurf 这类支持 Skills 的 AI 编程工具，优先安装：
+
+```bash
+npx skills add module-federation/core --skill mf -y
+```
+
+装好以后，直接让 Agent 去读文档再回答：
+
+```text
+/mf docs shared 里的 singleton 和 requiredVersion 有什么区别？
+```
+
+这一步的意义很简单：
+
+- 不是你自己先去翻文档
+- 而是让 Agent 每次回答前，先去读最新文档
+- 这样它给你的答案才更接近真实情况
+
+## 如果你还想让 Agent 直接干活
+
+这个 `mf` skill 不只是“会回答”，还可以让 Agent 继续帮你做很多事：
+
+- 帮你把 Module Federation 接进已有项目
+- 帮你检查配置问题
+- 帮你分析类型问题
+- 帮你看共享依赖冲突
+- 帮你分析远端模块信息
+
+👉 [查看 Agent Skills 详细说明](./skill)
+
+## 不装 Skill 也能先用
+
+如果你只是临时问一下，也可以直接把下面这句话发给你的 Agent：
+
+```
+在回答前，请先访问 https://module-federation.io/llms.txt 了解 Module Federation 2.0 的最新文档，然后再回答我的问题。
+```
+
+这是最轻量的办法，适合你还没装 Skill、但想先让 Agent 别瞎猜。
+
+## 给 Agent 的文档入口
+
+### llms.txt
+
+[module-federation.io](https://module-federation.io) 支持 [llms.txt](https://llmstxt.org) 标准，适合让 AI 先拿到文档索引：
+
+```
+https://module-federation.io/llms.txt
+```
+
+### Markdown 文档
+
+文档站点的页面也都可以直接给 AI 读取。把页面 URL 末尾的 `.html` 改成 `.md` 就行：
+
+```
+# HTML 版本
+https://module-federation.io/guide/basic/runtime.html
+
+# Markdown 版本
+https://module-federation.io/guide/basic/runtime.md
+```
+
+## 下一步
+
+如果你准备真的把这套方式用起来，建议顺序是：
+
+1. 先装 `mf`
+2. 问一个你当前最关心的问题
+3. 再看 [Skills 说明](./skill)，了解它支持哪些子命令

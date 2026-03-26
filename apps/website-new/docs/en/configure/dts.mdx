@@ -41,6 +41,16 @@ interface DtsRemoteOptions {
   extractRemoteTypes?: boolean;
   abortOnError?: boolean;
   deleteTsConfig?: boolean;
+  afterGenerate?: (
+    options: DtsGenerateTypesHookOptions,
+  ) => Promise<void> | void;
+}
+
+interface DtsGenerateTypesHookOptions {
+  zipTypesPath: string;
+  apiTypesPath: string;
+  zipName: string;
+  apiFileName: string;
 }
 ```
 
@@ -101,6 +111,27 @@ Whether generate types in child process
 - Default value: `false`
 
 Whether to throw an error when a problem is encountered during type generation
+
+#### afterGenerate
+
+- Type: `(options: DtsGenerateTypesHookOptions) => Promise<void> | void`
+- Required: No
+- Default value: `undefined`
+
+Runs after federated types are generated and before the generated files are emitted.
+
+```ts title="module-federation.config.ts"
+new ModuleFederationPlugin({
+  dts: {
+    generateTypes: {
+      afterGenerate({ zipTypesPath, apiTypesPath }) {
+        console.log('zip types:', zipTypesPath);
+        console.log('api types:', apiTypesPath);
+      },
+    },
+  },
+});
+```
 
 #### tsConfigPath
 

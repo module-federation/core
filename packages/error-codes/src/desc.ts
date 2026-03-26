@@ -10,6 +10,7 @@ import {
   RUNTIME_009,
   RUNTIME_010,
   RUNTIME_011,
+  RUNTIME_012,
   TYPE_001,
   BUILD_001,
   BUILD_002,
@@ -28,6 +29,8 @@ export const runtimeDescMap = {
   [RUNTIME_010]:
     'The name option cannot be changed after initialization. If you want to create a new instance with a different name, please use "createInstance" api.',
   [RUNTIME_011]: 'The remoteEntry URL is missing from the remote snapshot.',
+  [RUNTIME_012]:
+    'The getter for the shared module is not a function. This may be caused by setting "shared.import: false" without the host providing the corresponding lib.',
 };
 
 export const typeDescMap = {

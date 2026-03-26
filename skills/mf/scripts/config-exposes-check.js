@@ -110,7 +110,6 @@ function checkAsyncEntry(ctx, results) {
   const deps = ctx.dependencies || {};
   const configFile = (ctx.bundler && ctx.bundler.configFile) || '';
 
-  // Modern.js plugins handle async entry internally — skip check
   if (
     deps['@module-federation/modern-js-v3'] ||
     deps['@module-federation/modern-js']
@@ -125,7 +124,6 @@ function checkAsyncEntry(ctx, results) {
     const bundler = (ctx.bundler && ctx.bundler.name) || '';
     let note = 'Set `experiments.asyncStartup = true` in your bundler config.';
     if (bundler === 'rspack') {
-      const rspackVersion = deps['@rspack/core'] || deps['rspack'] || '';
       note += ' Note: Rspack requires version > 1.7.4 for this option.';
     }
     results.push({
