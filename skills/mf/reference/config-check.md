@@ -1,13 +1,14 @@
----
-name: mf-config-check
-description: "Check Module Federation build configuration: verify correct MF plugin for the bundler, async entry configuration, exposes key format, and exposes path existence. Use when modules cannot be correctly exposed, expected modules are missing from the build output, or runtime initialization errors occur."
-argument-hint: [project-root]
-allowed-tools: Bash(node *) Read Glob
----
+# Sub-skill: config-check
 
-**Step 1**: Call the `mf-context` Skill (pass `$ARGUMENTS`) to collect MFContext.
+Check Module Federation build configuration: verify correct MF plugin for the bundler, async entry configuration, exposes key format, and exposes path existence.
 
-**Step 2**: Serialize MFContext to JSON and pass it to the check script via the `--context` argument:
+## Step 1: Collect MFContext
+
+Read and follow the instructions in `./context.md`, passing ARGS as the project root.
+
+## Step 2: Run config check script
+
+Serialize MFContext to JSON and pass it to the check script:
 
 ```bash
 node scripts/config-exposes-check.js --context '<MFContext-JSON>'

@@ -1,13 +1,14 @@
----
-name: mf-bridge-check
-description: "Check Module Federation Bridge usage: verify that producers correctly export export-app, and that consumers use the recommended Bridge API. Use when micro-frontend sub-app integration is unstable or errors occur."
-argument-hint: [project-root]
-allowed-tools: Bash(node *)
----
+# Sub-skill: bridge-check
 
-**Step 1**: Call the `mf-context` Skill (pass `$ARGUMENTS`) to collect MFContext.
+Check Module Federation Bridge usage: verify that producers correctly export `export-app`, and that consumers use the recommended Bridge API.
 
-**Step 2**: Serialize MFContext to JSON and pass it to the check script via the `--context` argument:
+## Step 1: Collect MFContext
+
+Read and follow the instructions in `./context.md`, passing ARGS as the project root.
+
+## Step 2: Run bridge check script
+
+Serialize MFContext to JSON and pass it to the check script:
 
 ```bash
 node scripts/bridge-check.js --context '<MFContext-JSON>'

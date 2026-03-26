@@ -1,13 +1,14 @@
----
-name: mf-shared-deps
-description: "Check Module Federation shared dependency configuration: detect shared/externals conflicts, antd/arco transformImport blocking shared deps, and multiple versions of the same shared package in build artifacts. Use when shared dependencies fail to be shared, or host and remote load duplicate instances of a library."
-argument-hint: [project-root]
-allowed-tools: Bash(node *) Read Glob
----
+# Sub-skill: shared-deps
 
-**Step 1**: Call the `mf-context` Skill (pass `$ARGUMENTS`) to collect MFContext.
+Check Module Federation shared dependency configuration: detect shared/externals conflicts, antd/arco transformImport blocking shared deps, and multiple versions of the same shared package in build artifacts.
 
-**Step 2**: Serialize MFContext to JSON and pass it to the check script via the `--context` argument:
+## Step 1: Collect MFContext
+
+Read and follow the instructions in `./context.md`, passing ARGS as the project root.
+
+## Step 2: Run shared config check script
+
+Serialize MFContext to JSON and pass it to the check script:
 
 ```bash
 node scripts/shared-config-check.js --context '<MFContext-JSON>'

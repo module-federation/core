@@ -1,5 +1,11 @@
 # 快速上手
 
+:::tip 先走更快的入口
+如果你已经在用 Claude Code、Cursor、Windsurf 这类 AI 编程工具，建议先看 [AI 快速开始](../../ai)。
+
+很多情况下，你不需要自己先把文档读完，再开始接入。更高效的方式是先让 Agent 读，再让它帮你接入和排查。
+:::
+
 在阅读本指南前，请先阅读 [设置环境](./setting-up-env)。本指南将引导你逐步学习使用 Module Federation。我们将构建两个独立的单页面应用程序 (SPA)，它们会使用 Module Federation 共享组件，下文中遇到不熟的名词请查看[名词解释](./glossary)。
 
 ## 新项目创建
@@ -166,16 +172,16 @@ export default createModuleFederationConfig({
 如果你想将 `Module Federation` 集成到现有项目中，可以参考[此文档](../../practice/frameworks/overview)。
 
 :::tip 使用 AI 一键接入
-已安装 [Claude Code](https://claude.ai/code) 或其他支持 Skills 的 AI 编程助手？可以使用 `mf-integrate` Skill，它会自动检测你的构建器（Rsbuild / Rspack / Webpack / Modern.js / Next.js / Vite），生成完整的 MF 配置，并可选择自动在入口文件中引入远程组件以快速验证效果：
+已安装 [Claude Code](https://claude.ai/code) 或其他支持 Skills 的 AI 编程助手？可以直接使用统一的 `mf` skill。它会自动检测你的构建器（Rsbuild / Rspack / Webpack / Modern.js / Next.js / Vite），生成完整的 MF 配置，并可选择自动在入口文件中引入远程组件以快速验证效果：
 
 ```bash
-npx skills add module-federation/core --skill mf-integrate -y
+npx skills add module-federation/core --skill mf -y
 ```
 
 安装后，在项目目录下运行：
 
-```
-/mf-integrate
+```text
+/mf integrate
 ```
 :::
 

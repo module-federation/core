@@ -1,11 +1,6 @@
----
-name: mf-context
-description: "Collects the current project's Module Federation context (MFContext) and outputs a structured summary. Serves as the data foundation for all MF diagnostic Skills; can also be called standalone to quickly understand the project's MF configuration."
-argument-hint: [project-root]
-allowed-tools: Read Glob
----
+# Sub-skill: context
 
-Collect the following information step by step from `$ARGUMENTS` (defaults to the current working directory if empty), then output the aggregated MFContext.
+Collect the current project's Module Federation context (MFContext) from `ARGS` (defaults to the current working directory if empty), then output the aggregated summary.
 
 ## 1. Basic Info
 
@@ -70,5 +65,3 @@ dependencies:
 latestErrorEvent: (if present)
 buildArtifacts:   (if present)
 ```
-
-For further diagnostics, call the corresponding diagnostic Skill based on this context.

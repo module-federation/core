@@ -1,23 +1,10 @@
----
-name: mf-docs
-description: "Answer questions about Module Federation (MF) — configuration, runtime API, build plugins (Webpack/Rspack/Rsbuild/Vite), framework integration (React/Vue/Next.js/Modern.js/Angular), shared dependencies, exposes, remotes, debugging, troubleshooting, and micro-frontend architecture. Use this skill when the user asks anything about module federation, remote modules, shared deps, mf-manifest, federation runtime, or micro-frontends with MF."
-compatibility: Requires internet access to fetch documentation from module-federation.io
-allowed-tools: WebFetch
-metadata:
-  author: module-federation
-  version: "1.0"
-  docs: https://module-federation.io
----
-
-# Module Federation Docs Assistant
+# Sub-skill: docs
 
 Answer Module Federation questions by fetching only the relevant documentation pages — not the entire docs.
 
-## Steps
+Requires internet access to fetch documentation from module-federation.io.
 
-### 1. Fetch the documentation index
-
-Fetch the index to discover available pages and their descriptions:
+## Step 1: Fetch the documentation index
 
 ```
 https://module-federation.io/llms.txt
@@ -30,7 +17,7 @@ The index is in this format:
 - [Page Title](/path/to/page.md): brief description of the page content
 ```
 
-### 2. Identify the relevant page(s)
+## Step 2: Identify the relevant page(s)
 
 Read the page descriptions in the index and select the 1–3 pages most relevant to the user's question. Use the quick topic map below to narrow down candidates before reading descriptions.
 
@@ -52,7 +39,7 @@ Read the page descriptions in the index and select the 1–3 pages most relevant
 | Monorepo, Nx | `Practice` → `monorepos/` |
 | Deployment, Zephyr | `Guide` → `deployment/` |
 
-### 3. Fetch the specific page(s)
+## Step 3: Fetch the specific page(s)
 
 Construct the URL by removing the `.md` extension from the path in the index, then prepend the base URL:
 
@@ -67,7 +54,7 @@ https://module-federation.io{path_without_md_extension}
 
 Fetch the page(s) and read the content.
 
-### 4. Answer the question
+## Step 4: Answer the question
 
 Answer based on the fetched content. If the answer spans multiple pages (e.g., config + runtime), fetch both. Do not load more than 3 pages per question.
 
