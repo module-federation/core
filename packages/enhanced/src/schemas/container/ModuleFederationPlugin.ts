@@ -864,6 +864,11 @@ export default {
                     abortOnError: {
                       type: 'boolean',
                     },
+                    afterGenerate: {
+                      description:
+                        'Hook called after federated types are generated and before assets are emitted',
+                      instanceof: 'Function',
+                    },
                   },
                 },
               ],
@@ -954,11 +959,6 @@ export default {
             },
             displayErrorInTerminal: {
               type: 'boolean',
-            },
-            afterGenerateTypes: {
-              description:
-                'Callback invoked after each type generation completes',
-              instanceof: 'Function',
             },
           },
         },

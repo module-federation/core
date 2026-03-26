@@ -364,6 +364,13 @@ export interface RemoteTypeUrls {
   [remoteName: string]: RemoteTypeUrl;
 }
 
+export interface DtsGenerateTypesHookOptions {
+  zipTypesPath: string;
+  apiTypesPath: string;
+  zipName: string;
+  apiFileName: string;
+}
+
 export interface DtsHostOptions {
   typesFolder?: string;
   abortOnError?: boolean;
@@ -398,6 +405,9 @@ export interface DtsRemoteOptions {
   extractRemoteTypes?: boolean;
   abortOnError?: boolean;
   deleteTsConfig?: boolean;
+  afterGenerate?: (
+    options: DtsGenerateTypesHookOptions,
+  ) => Promise<void> | void;
 }
 
 export interface PluginDtsOptions {
@@ -408,7 +418,6 @@ export interface PluginDtsOptions {
   implementation?: string;
   cwd?: string;
   displayErrorInTerminal?: boolean;
-  afterGenerateTypes?: () => void | Promise<void>;
 }
 
 export type AsyncBoundaryOptions = {

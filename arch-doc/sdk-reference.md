@@ -486,6 +486,10 @@ interface DtsRemoteOptions {
       };
   extractRemoteTypes?: boolean;
   abortOnError?: boolean;
+  deleteTsConfig?: boolean;
+  afterGenerate?: (
+    options: DtsGenerateTypesHookOptions,
+  ) => Promise<void> | void;
 }
 
 interface DtsHostOptions {
@@ -507,6 +511,13 @@ interface RemoteTypeUrls {
     api: string;
     zip: string;
   };
+}
+
+interface DtsGenerateTypesHookOptions {
+  zipTypesPath: string;
+  apiTypesPath: string;
+  zipName: string;
+  apiFileName: string;
 }
 ```
 
