@@ -21,8 +21,6 @@ export interface ICacheLayer {
   /** Register a manifest source for background polling and pre-downloading. */
   registerManifestSource(
     manifestUrl: string,
-    containerEntry: string,
     extractHashes: (manifest: any, manifestUrl: string) => Map<string, string>,
-    buildDownloadUrl?: (url: string) => string,
   ): void;
 }

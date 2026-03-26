@@ -19,8 +19,8 @@ declare global {
 
 /**
  * Extract bundleUrl → hash map from a manifest.
- * Used by afterResolve to register hashes, and passed as callback
- * to the cache layer for manifest polling.
+ * Returns fully-resolved URLs (with query params in dev mode) so the
+ * cache layer can use them directly without bundler-specific knowledge.
  */
 function extractBundleHashes(
   manifest: any,
@@ -36,7 +36,7 @@ function extractBundleHashes(
       ? rawPublicPath
       : manifestUrl.replace(/\/[^/]*$/, '');
 
-  function addHashes(items: any[] | undefined) {
+  function addHashes(items: any[] | undefined, isContainer: boolean) {
     if (!Array.isArray(items)) return;
     for (const item of items) {
       const hash = (item as any)?.hash;
@@ -45,17 +45,31 @@ function extractBundleHashes(
         for (const assetPath of syncJs) {
           // In dev, asset paths use source extensions (.tsx/.ts) — normalize to .bundle
           const bundlePath = assetPath.replace(/\.\w+$/, '.bundle');
-          const fullUrl = resolvedPublicPath
+          const bareUrl = resolvedPublicPath
             ? `${resolvedPublicPath.replace(/\/+$/, '')}/${bundlePath.replace(/^\.?\//, '')}`
             : bundlePath;
+          const fullUrl = isContainer
+            ? buildUrlForEntryBundle(bareUrl)
+            : buildUrlForSplitBundle(bareUrl);
           hashes.set(fullUrl, hash);
         }
       }
     }
   }
 
-  addHashes(manifest?.exposes);
-  addHashes(manifest?.shared);
+  addHashes(manifest?.exposes, false);
+  addHashes(manifest?.shared, false);
+
+  // Container bundle: resolve URL from metaData.remoteEntry + publicPath
+  const remoteEntry = manifest?.metaData?.remoteEntry;
+  const containerHash = (manifest?.metaData?.buildInfo as any)?.hash;
+  if (remoteEntry?.name && containerHash && resolvedPublicPath) {
+    const entryPath = remoteEntry.path
+      ? `${remoteEntry.path}/${remoteEntry.name}`
+      : remoteEntry.name;
+    const bareUrl = `${resolvedPublicPath.replace(/\/+$/, '')}/${entryPath.replace(/^\.?\//, '')}`;
+    hashes.set(buildUrlForEntryBundle(bareUrl), containerHash);
+  }
 
   return hashes;
 }
@@ -86,6 +100,21 @@ const buildUrlForEntryBundle = (entry: string) => {
   return entry;
 };
 
+const buildUrlForSplitBundle = (entry: string) => {
+  if (__DEV__) {
+    const params = getQueryParams();
+    params.set('runModule', 'false');
+    params.set('modulesOnly', 'true');
+    return `${entry}?${params.toString()}`;
+  }
+  // Prod: Metro serializer appends modulesOnly & runModule to split bundle paths.
+  // Only add them if not already present.
+  if (entry.includes('modulesOnly=') || entry.includes('runModule=')) {
+    return entry;
+  }
+  return `${entry}?modulesOnly=true&runModule=false`;
+};
+
 const MetroCorePlugin: () => ModuleFederationRuntimePlugin = () => {
   return {
     name: 'metro-core-plugin',
@@ -113,16 +142,12 @@ const MetroCorePlugin: () => ModuleFederationRuntimePlugin = () => {
             // Exposed + shared bundle hashes
             const hashes = extractBundleHashes(manifest, manifestUrl);
             for (const [url, hash] of hashes) {
-              cacheLayer.registerBundleHash(url, hash);
+              // Strip query params — loadBundle looks up hashes by bare URL
+              cacheLayer.registerBundleHash(url.split('?')[0], hash);
             }
 
             // Register manifest source for polling
-            cacheLayer.registerManifestSource(
-              manifestUrl,
-              remoteInfo.entry ?? '',
-              extractBundleHashes,
-              buildUrlForEntryBundle,
-            );
+            cacheLayer.registerManifestSource(manifestUrl, extractBundleHashes);
           }
         }
       } catch {
