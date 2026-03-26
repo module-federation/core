@@ -122,8 +122,6 @@ function buildLoadBundleAsyncWrapper() {
       await loadBundleAsync(encodedBundlePath);
     }
 
-    // --- Below: shared/remotes preloading ---
-
     // when the origin is not the same, it means we are loading a remote container
     // we can return early since dependencies are processed differently for entry bundles
     if (!isSameOrigin(bundlePath, publicPath)) {
