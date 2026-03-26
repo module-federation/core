@@ -1,4 +1,4 @@
-# chrome-browser-debug — Setup
+# Browser Capture Setup
 
 One-time setup: create a debug Chrome profile that shares your real cookies/auth.
 
@@ -117,7 +117,7 @@ Should return something like:
 ## Usage
 
 ```bash
-node scripts/capture.mjs "<url>" [timeout_ms] [--vars var1,var2,...]
+node ../scripts/browser-capture.mjs "<url>" [timeout_ms] [--vars var1,var2,...]
 ```
 
 - Default timeout: 15 000ms
@@ -142,7 +142,7 @@ create `~/Library/Application Support/Google/ChromeDebug`.
 → Upgrade Node.js: `nvm install 21 && nvm use 21` (or install from nodejs.org).
 
 **`PUT /json/new` fails (older Chrome)**
-→ Try downgrading to Node's `fetch` with `GET /json/new` — edit the `fetch(..., { method: 'PUT' })` line in `capture.mjs` to remove the method option (defaults to GET).
+→ Try downgrading to Node's `fetch` with `GET /json/new` — edit the `fetch(..., { method: 'PUT' })` line in `browser-capture.mjs` to remove the method option (defaults to GET).
 
 **Page loads but no logs captured**
 → The page may have errored before CDP attached. Try increasing timeout, or check if the error only triggers on user interaction.

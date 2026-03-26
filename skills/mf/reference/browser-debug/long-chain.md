@@ -6,14 +6,14 @@ Keep a tab alive across multiple steps — navigate, click through interactions,
 
 ```bash
 # Step 1 — open tab, keep it alive
-TAB=$(node scripts/capture.mjs "https://example.com" --keep-tab | jq -r .tabId)
+TAB=$(node ../scripts/browser-capture.mjs "https://example.com" --keep-tab | jq -r .tabId)
 
 # Step 2 — click through the interaction chain (faster: domcontentloaded/none)
-node scripts/capture.mjs --tab-id "$TAB" --click "Profile" --action-wait domcontentloaded
-node scripts/capture.mjs --tab-id "$TAB" --click "Favorites" --action-wait none
+node ../scripts/browser-capture.mjs --tab-id "$TAB" --click "Profile" --action-wait domcontentloaded
+node ../scripts/browser-capture.mjs --tab-id "$TAB" --click "Favorites" --action-wait none
 
 # Step 3 — final action, capture variables, close tab
-node scripts/capture.mjs --tab-id "$TAB" --click "Add" --vars __FEDERATION__ --action-wait networkidle --close
+node ../scripts/browser-capture.mjs --tab-id "$TAB" --click "Add" --vars __FEDERATION__ --action-wait networkidle --close
 ```
 
 ## Flags
@@ -43,7 +43,7 @@ Applied in order:
 Locates the field by `placeholder` attribute, injects text using native value setter — compatible with React and Vue controlled inputs.
 
 ```bash
-node scripts/capture.mjs --tab-id "$TAB" --fill "Enter keyword::Module Federation"
+node ../scripts/browser-capture.mjs --tab-id "$TAB" --fill "Enter keyword::Module Federation"
 ```
 
 ## Select (dropdown)
@@ -53,7 +53,7 @@ Locates by `placeholder` attribute or default option text, then:
 - **Custom dropdown** — clicks the trigger to open, then clicks the matching option
 
 ```bash
-node scripts/capture.mjs --tab-id "$TAB" --select "Select environment::Production"
+node ../scripts/browser-capture.mjs --tab-id "$TAB" --select "Select environment::Production"
 ```
 
 ## When element is not found
@@ -61,9 +61,9 @@ node scripts/capture.mjs --tab-id "$TAB" --select "Select environment::Productio
 Use `--dump-dom` to let Claude inspect the page and identify the correct selector:
 
 ```bash
-node scripts/capture.mjs --tab-id "$TAB" --dump-dom
+node ../scripts/browser-capture.mjs --tab-id "$TAB" --dump-dom
 # Claude analyzes the DOM, then:
-node scripts/capture.mjs --tab-id "$TAB" --click "#profile-nav-btn"
+node ../scripts/browser-capture.mjs --tab-id "$TAB" --click "#profile-nav-btn"
 ```
 
 ## Tab lifecycle

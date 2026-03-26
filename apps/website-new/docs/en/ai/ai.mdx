@@ -1,0 +1,90 @@
+---
+pageType: doc-wide
+sidebar: false
+---
+
+# AI Quick Start
+
+:::tip Prefer to read the docs yourself?
+If you want to go through Module Federation concepts, configuration, and integration in order, head to the [Getting Started guide](../guide/start/index).
+:::
+
+## A Better Way To Start
+
+If you are already using an AI coding tool, the better starting point is not to read all of the docs yourself first.
+
+The faster approach is: **give the latest Module Federation docs to your agent first, then let it answer questions, debug problems, update config, and write code.**
+
+Many models still have incomplete or outdated knowledge of Module Federation 2.0. So the point of this page is not to make you study first. It is to help your agent get the right source material first.
+
+## Recommended Setup
+
+If you use Claude Code, Cursor, Windsurf, or another editor with Skills support, install:
+
+```bash
+npx skills add module-federation/core --skill mf -y
+```
+
+Then ask the agent to read the docs before answering:
+
+```text
+/mf docs What's the difference between singleton and requiredVersion in shared?
+```
+
+The idea is simple:
+
+- you do not need to hunt through the docs first
+- your agent reads the latest docs before it answers
+- the result is much more likely to be accurate
+
+## If You Want Your Agent To Do More
+
+The `mf` skill does more than answer questions. It can also help your agent:
+
+- add Module Federation to an existing project
+- inspect config problems
+- analyze type issues
+- check shared dependency conflicts
+- inspect remote module information
+
+👉 [View Agent Skills documentation](./skill)
+
+## You Can Still Use This Without Installing Anything
+
+If you just want a lightweight version first, send this directly to your agent:
+
+```text
+Before answering, please read https://module-federation.io/llms.txt to learn about the latest Module Federation 2.0 documentation, then answer my question.
+```
+
+This is the easiest way to stop the model from guessing when you have not installed the skill yet.
+
+## Docs You Can Hand To Your Agent
+
+### llms.txt
+
+[module-federation.io](https://module-federation.io) supports the [llms.txt](https://llmstxt.org) standard, which is a good entry point for AI systems:
+
+```text
+https://module-federation.io/llms.txt
+```
+
+### Markdown Docs
+
+Every page on the docs site is also available in Markdown. Replace `.html` at the end of a docs URL with `.md`:
+
+```text
+# HTML version
+https://module-federation.io/guide/basic/runtime.html
+
+# Markdown version
+https://module-federation.io/guide/basic/runtime.md
+```
+
+## Next
+
+If you want to start using this workflow right away:
+
+1. Install `mf`
+2. Ask the question you care about most
+3. Open [Skills documentation](./skill) to see which sub-commands it supports

@@ -5,7 +5,7 @@ Navigate to a URL, collect logs + variables, tab auto-closes.
 ## Usage
 
 ```bash
-node scripts/capture.mjs "<url>" [timeout_ms] [--vars var1,var2,...] [--wait-until auto|domcontentloaded|networkidle|timeout] [--action-wait auto|networkidle|domcontentloaded|timeout|none] [--no-entries]
+node ../scripts/browser-capture.mjs "<url>" [timeout_ms] [--vars var1,var2,...] [--wait-until auto|domcontentloaded|networkidle|timeout] [--action-wait auto|networkidle|domcontentloaded|timeout|none] [--no-entries]
 ```
 
 Default `auto`:
@@ -14,22 +14,22 @@ Default `auto`:
 
 Increase timeout for slow pages or heavy SPAs:
 ```bash
-node scripts/capture.mjs "https://example.com/dashboard" 30000
+node ../scripts/browser-capture.mjs "https://example.com/dashboard" 30000
 ```
 
 Capture JavaScript variables:
 ```bash
-node scripts/capture.mjs "https://example.com" 20000 --vars __FEDERATION__,__NEXT_DATA__,featureFlags
+node ../scripts/browser-capture.mjs "https://example.com" 20000 --vars __FEDERATION__,__NEXT_DATA__,featureFlags
 ```
 
 Capture deep path variables:
 ```bash
-node scripts/capture.mjs "https://example.com" 20000 --vars __VMOK__.__INSTANCES__,window.__APP_STATE__.user
+node ../scripts/browser-capture.mjs "https://example.com" 20000 --vars __VMOK__.__INSTANCES__,window.__APP_STATE__.user
 ```
 
 Performance-first capture (skip heavy entries and avoid long waits):
 ```bash
-node scripts/capture.mjs "https://example.com" 12000 --vars __VMOK__.__INSTANCES__ --action-wait none --no-entries
+node ../scripts/browser-capture.mjs "https://example.com" 12000 --vars __VMOK__.__INSTANCES__ --action-wait none --no-entries
 ```
 
 ## Output format

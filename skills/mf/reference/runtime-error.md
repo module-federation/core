@@ -27,7 +27,7 @@ The goal is to confirm whether the real problem is:
 
 ## Step 3: Prefer automatic browser capture
 
-Prefer using the sibling Skill `../chrome-browser-debug/SKILL.md` to capture browser evidence automatically before asking the user to paste logs manually.
+Prefer using the built-in browser capture helper inside `mf` to capture browser evidence automatically before asking the user to paste logs manually.
 
 ### 3a. Check whether Chrome remote debugging is available
 
@@ -38,25 +38,25 @@ curl -s http://localhost:9222/json/version
 ```
 
 - If reachable: continue with automatic capture
-- If not reachable: follow `../chrome-browser-debug/references/setup.md`
+- If not reachable: follow `./browser-debug/setup.md`
 
 ### 3b. Capture the failing page
 
-Use `../chrome-browser-debug/scripts/capture.mjs` against the failing page URL.
+Use `../scripts/browser-capture.mjs` against the failing page URL.
 
 Prefer this baseline command first:
 
 ```bash
-node ../chrome-browser-debug/scripts/capture.mjs "<failing-page-url>" 20000 --vars __FEDERATION__,__webpack_require__,window.__FEDERATION__
+node ../scripts/browser-capture.mjs "<failing-page-url>" 20000 --vars __FEDERATION__,__webpack_require__,window.__FEDERATION__
 ```
 
 If the page is noisy or polling heavily, prefer:
 
 ```bash
-node ../chrome-browser-debug/scripts/capture.mjs "<failing-page-url>" 15000 --vars __FEDERATION__,window.__FEDERATION__ --no-entries
+node ../scripts/browser-capture.mjs "<failing-page-url>" 15000 --vars __FEDERATION__,window.__FEDERATION__ --no-entries
 ```
 
-If the error only happens after user interaction, follow `../chrome-browser-debug/references/long-chain.md`.
+If the error only happens after user interaction, follow `./browser-debug/long-chain.md`.
 
 ## Step 4: Fallback when auto capture is unavailable
 

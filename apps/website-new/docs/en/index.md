@@ -11,7 +11,7 @@ hero:
       link: /blog/v2-stable-version.html
     - theme: alt
       text: Quick Start
-      link: /guide/start/quick-start.html
+      link: /ai/index.html
   image:
     src: /svg.svg
     alt: module federation Logo
