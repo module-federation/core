@@ -1,6 +1,7 @@
 import path from 'path';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import {
+  callAfterGenerateHook,
   isSafeRelativePath,
   normalizeGenerateTypesOptions,
   resolveEmitAssetName,
@@ -67,7 +68,7 @@ function createMockCompiler() {
   };
 }
 
-describe('afterGenerateTypes callback', () => {
+describe('afterGenerate callback', () => {
   const basePluginOptions = {
     name: 'testRemote',
     filename: 'remoteEntry.js',
@@ -79,41 +80,41 @@ describe('afterGenerateTypes callback', () => {
     vi.clearAllMocks();
   });
 
-  it('should call afterGenerateTypes after type generation in prod', async () => {
+  it('should call afterGenerate after type generation in prod', async () => {
     mockIsDev.mockReturnValue(false);
-    const afterGenerateTypes = vi.fn().mockResolvedValue(undefined);
+    const afterGenerate = vi.fn().mockResolvedValue(undefined);
     const { compiler, triggerProcessAssets } = createMockCompiler();
 
     const plugin = new GenerateTypesPlugin(
       basePluginOptions,
-      { generateTypes: true, afterGenerateTypes },
+      { generateTypes: { afterGenerate } },
       Promise.resolve(undefined),
       vi.fn(),
     );
     plugin.apply(compiler as any);
     await triggerProcessAssets();
 
-    expect(afterGenerateTypes).toHaveBeenCalledOnce();
+    expect(afterGenerate).toHaveBeenCalledOnce();
   });
 
-  it('should call afterGenerateTypes after type generation in dev', async () => {
+  it('should call afterGenerate after type generation in dev', async () => {
     mockIsDev.mockReturnValue(true);
-    const afterGenerateTypes = vi.fn().mockResolvedValue(undefined);
+    const afterGenerate = vi.fn().mockResolvedValue(undefined);
     const { compiler, triggerProcessAssets } = createMockCompiler();
 
     const plugin = new GenerateTypesPlugin(
       basePluginOptions,
-      { generateTypes: true, afterGenerateTypes },
+      { generateTypes: { afterGenerate } },
       Promise.resolve(undefined),
       vi.fn(),
     );
     plugin.apply(compiler as any);
     await triggerProcessAssets();
     // In dev mode emitTypesFilesPromise is not awaited, flush microtasks
-    await vi.waitFor(() => expect(afterGenerateTypes).toHaveBeenCalledOnce());
+    await vi.waitFor(() => expect(afterGenerate).toHaveBeenCalledOnce());
   });
 
-  it('should not throw when afterGenerateTypes is not provided', async () => {
+  it('should not throw when afterGenerate is not provided', async () => {
     mockIsDev.mockReturnValue(false);
     const { compiler, triggerProcessAssets } = createMockCompiler();
 
@@ -128,36 +129,36 @@ describe('afterGenerateTypes callback', () => {
     await expect(triggerProcessAssets()).resolves.not.toThrow();
   });
 
-  it('should not call afterGenerateTypes when asset already exists (early return)', async () => {
+  it('should not call afterGenerate when asset already exists (early return)', async () => {
     mockIsDev.mockReturnValue(false);
-    const afterGenerateTypes = vi.fn();
+    const afterGenerate = vi.fn();
     const { compiler, compilation, triggerProcessAssets } =
       createMockCompiler();
     compilation.getAsset.mockReturnValue({});
 
     const plugin = new GenerateTypesPlugin(
       basePluginOptions,
-      { generateTypes: true, afterGenerateTypes },
+      { generateTypes: { afterGenerate } },
       Promise.resolve(undefined),
       vi.fn(),
     );
     plugin.apply(compiler as any);
     await triggerProcessAssets();
 
-    expect(afterGenerateTypes).not.toHaveBeenCalled();
+    expect(afterGenerate).not.toHaveBeenCalled();
   });
 
-  it('should await async afterGenerateTypes before continuing', async () => {
+  it('should await async afterGenerate before continuing', async () => {
     mockIsDev.mockReturnValue(false);
     const order: string[] = [];
-    const afterGenerateTypes = vi.fn(async () => {
+    const afterGenerate = vi.fn(async () => {
       order.push('callback');
     });
     const { compiler, triggerProcessAssets } = createMockCompiler();
 
     const plugin = new GenerateTypesPlugin(
       basePluginOptions,
-      { generateTypes: true, afterGenerateTypes },
+      { generateTypes: { afterGenerate } },
       Promise.resolve(undefined),
       vi.fn(),
     );
@@ -338,6 +339,57 @@ describe('GenerateTypesPlugin', () => {
         fallbackName: '@mf-types.zip',
       });
       expect(emitZipName).toBe(path.join('production', '@mf-types.zip'));
+    });
+  });
+
+  describe('afterGenerate', () => {
+    it('should call afterGenerate with generated asset info', async () => {
+      const afterGenerate = vi.fn();
+
+      await callAfterGenerateHook({
+        dtsManagerOptions: {
+          remote: {
+            moduleFederationConfig: basePluginOptions,
+            afterGenerate,
+          },
+        },
+        generatedTypes: {
+          zipTypesPath: '/project/dist/@mf-types.zip',
+          apiTypesPath: '/project/dist/@mf-types.d.ts',
+          zipName: '@mf-types.zip',
+          apiFileName: '@mf-types.d.ts',
+        },
+      });
+
+      expect(afterGenerate).toHaveBeenCalledWith({
+        zipTypesPath: '/project/dist/@mf-types.zip',
+        apiTypesPath: '/project/dist/@mf-types.d.ts',
+        zipName: '@mf-types.zip',
+        apiFileName: '@mf-types.d.ts',
+      });
+    });
+
+    it('should not throw when afterGenerate fails and abortOnError is false', async () => {
+      await expect(
+        callAfterGenerateHook({
+          dtsManagerOptions: {
+            remote: {
+              moduleFederationConfig: basePluginOptions,
+              abortOnError: false,
+              afterGenerate: vi
+                .fn()
+                .mockRejectedValue(new Error('hook failed')),
+            },
+            displayErrorInTerminal: false,
+          },
+          generatedTypes: {
+            zipTypesPath: '',
+            apiTypesPath: '',
+            zipName: '',
+            apiFileName: '',
+          },
+        }),
+      ).resolves.toBeUndefined();
     });
   });
 });

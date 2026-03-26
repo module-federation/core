@@ -232,10 +232,10 @@ const resolveExposes = (remoteOptions: Required<RemoteOptions>) => {
 export const retrieveRemoteConfig = (options: RemoteOptions) => {
   validateOptions(options);
 
-  const remoteOptions: Required<RemoteOptions> = {
+  const remoteOptions = {
     ...defaultOptions,
     ...options,
-  };
+  } as Required<RemoteOptions>;
   const mapComponentsToExpose = resolveExposes(remoteOptions);
   const tsConfig = readTsConfig(remoteOptions, mapComponentsToExpose);
 

@@ -102,7 +102,39 @@ export const generateTypesAPI = ({
   dtsManagerOptions: DTSManagerOptions;
 }) => {
   const fn = getGenerateTypesFn(dtsManagerOptions);
-  return fn(dtsManagerOptions);
+  return fn(dtsManagerOptions).then(async () => {
+    await callAfterGenerateHook({
+      dtsManagerOptions,
+      generatedTypes: retrieveTypesAssetsInfo(dtsManagerOptions.remote),
+    });
+  });
+};
+
+export const callAfterGenerateHook = async ({
+  dtsManagerOptions,
+  generatedTypes,
+}: {
+  dtsManagerOptions: DTSManagerOptions;
+  generatedTypes: moduleFederationPlugin.DtsGenerateTypesHookOptions;
+}) => {
+  const afterGenerate = dtsManagerOptions.remote.afterGenerate;
+
+  if (!afterGenerate) {
+    return;
+  }
+
+  try {
+    await afterGenerate(generatedTypes);
+  } catch (error) {
+    if (dtsManagerOptions.remote.abortOnError === false) {
+      if (dtsManagerOptions.displayErrorInTerminal) {
+        logger.error(error);
+      }
+      return;
+    }
+
+    throw error;
+  }
 };
 
 const WINDOWS_ABSOLUTE_PATH_REGEXP = /^[a-zA-Z]:[\\/]/;
@@ -207,7 +239,6 @@ export class GenerateTypesPlugin implements WebpackPluginInstance {
         logger.debug('start generating types...');
         await generateTypesAPI({ dtsManagerOptions });
         logger.debug('generate types success!');
-        await dtsOptions.afterGenerateTypes?.();
 
         if (isProd) {
           if (
