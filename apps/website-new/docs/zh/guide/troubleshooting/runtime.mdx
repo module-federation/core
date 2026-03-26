@@ -125,11 +125,20 @@ init({
 
 添加后，跨域脚本执行时抛出的异常将携带完整的 `filename`、`lineno`、`message` 信息，便于定位具体报错位置。
 
-:::tip
+:::warning
+
+* 添加此插件后，需要同步将**所有生产者**的构建配置中 `output.crossOriginLoading` 设置为 `'anonymous'`，否则预加载（preload）将会失效。
+
+```js
+// webpack.config.js / rspack.config.js（生产者侧）
+module.exports = {
+  output: {
+    crossOriginLoading: 'anonymous',
+  },
+};
+```
 
 * 若服务端未配置 CORS 响应头，添加 `crossorigin` 属性反而会导致脚本加载失败（网络错误）。请先确认服务端已正确配置后再使用此方法。
-
-* MF 未自动设置该属性，原因是：在预加载阶段若自动调用 `createScript` hook 来探测 `crossOrigin` 值，而 hook 内部可能存在注册监听器、修改全局状态等副作用，被调用两次会引发不可预期的问题。
 
 :::
 
