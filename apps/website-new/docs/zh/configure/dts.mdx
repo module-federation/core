@@ -40,6 +40,16 @@ interface DtsRemoteOptions {
   extractRemoteTypes?: boolean;
   abortOnError?: boolean;
   deleteTsConfig?: boolean;
+  afterGenerate?: (
+    options: DtsGenerateTypesHookOptions,
+  ) => Promise<void> | void;
+}
+
+interface DtsGenerateTypesHookOptions {
+  zipTypesPath: string;
+  apiTypesPath: string;
+  zipName: string;
+  apiFileName: string;
 }
 ```
 
@@ -100,6 +110,27 @@ interface DtsRemoteOptions {
 - 默认值：`false`
 
 是否抛出错误当类型生成过程中碰到问题
+
+#### afterGenerate
+
+- 类型：`(options: DtsGenerateTypesHookOptions) => Promise<void> | void`
+- 是否必填：否
+- 默认值：`undefined`
+
+在 federated types 生成完成后、输出文件被提交到文件系统前执行。
+
+```ts title="module-federation.config.ts"
+new ModuleFederationPlugin({
+  dts: {
+    generateTypes: {
+      afterGenerate({ zipTypesPath, apiTypesPath }) {
+        console.log('zip types:', zipTypesPath);
+        console.log('api types:', apiTypesPath);
+      },
+    },
+  },
+});
+```
 
 #### tsConfigPath
 

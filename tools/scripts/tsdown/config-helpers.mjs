@@ -39,6 +39,7 @@ export function createDualFormatConfig({
   packageDir,
   entry,
   external,
+  noExternal,
   define,
   copyLicense = false,
   unbundle = false,
@@ -67,6 +68,7 @@ export function createDualFormatConfig({
     outExtensions:
       outExtensions || createModernOutExtensions(pkg.type, preferNonModuleCjs),
     external,
+    noExternal,
     define,
     copy: copyLicense ? ['LICENSE'] : undefined,
   };

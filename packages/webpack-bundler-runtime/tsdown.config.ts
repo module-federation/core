@@ -17,6 +17,7 @@ export default defineConfig([
         bundler: 'src/bundler.ts',
       },
       external: ['@module-federation/*', 'webpack'],
+      noExternal: ['@module-federation/error-codes'],
       dts: {
         resolver: 'tsc',
       },

@@ -9,6 +9,7 @@ export const RUNTIME_008 = 'RUNTIME-008';
 export const RUNTIME_009 = 'RUNTIME-009';
 export const RUNTIME_010 = 'RUNTIME-010';
 export const RUNTIME_011 = 'RUNTIME-011';
+export const RUNTIME_012 = 'RUNTIME-012';
 
 export const TYPE_001 = 'TYPE-001';
 export const BUILD_001 = 'BUILD-001';
