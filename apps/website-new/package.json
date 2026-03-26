@@ -1,6 +1,6 @@
 {
   "name": "website-new",
-  "version": "1.3.18",
+  "version": "1.3.19",
   "private": true,
   "description": "Federation example for website-new",
   "scripts": {

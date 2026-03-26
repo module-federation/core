@@ -1,5 +1,13 @@
 # website-new
 
+## 1.3.19
+
+### Patch Changes
+
+- Updated dependencies [f1d79b2]
+  - @module-federation/error-codes@2.3.0
+  - @module-federation/rspress-plugin@2.3.0
+
 ## 1.3.18
 
 ### Patch Changes

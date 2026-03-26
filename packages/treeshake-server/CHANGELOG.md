@@ -1,5 +1,7 @@
 # @module-federation/treeshake-server
 
+## 2.3.0
+
 ## 2.2.3
 
 ## 2.2.2

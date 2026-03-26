@@ -1,5 +1,15 @@
 # @module-federation/bridge-vue3
 
+## 2.3.0
+
+### Patch Changes
+
+- Updated dependencies [eb26065]
+- Updated dependencies [8f2ec9b]
+  - @module-federation/sdk@2.3.0
+  - @module-federation/runtime@2.3.0
+  - @module-federation/bridge-shared@2.3.0
+
 ## 2.2.3
 
 ### Patch Changes

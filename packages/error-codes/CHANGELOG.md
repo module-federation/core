@@ -1,5 +1,13 @@
 # @module-federation/error-codes
 
+## 2.3.0
+
+### Patch Changes
+
+- f1d79b2: feat(webpack-bundler-runtime): add RUNTIME-012 error for invalid shared module getter
+
+  When `loadShare` returns `false` and the local `getter` is not a function (e.g. `undefined`), throw a `RUNTIME-012` error with the affected `shareKey`. This typically happens when `shared.import: false` is set but no host provides the corresponding `lib`.
+
 ## 2.2.3
 
 ## 2.2.2
