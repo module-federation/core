@@ -116,7 +116,9 @@ export function createScript(info: {
     const onScriptCompleteCallback = () => {
       if (event?.type === 'error') {
         const networkError = new Error(
-          `ScriptNetworkError: Failed to load script "${info.url}" - the script URL is unreachable or the server returned an error (network failure, 404, CORS, etc.)`,
+          event?.isTimeout
+            ? `ScriptNetworkError: Script "${info.url}" timed out.`
+            : `ScriptNetworkError: Failed to load script "${info.url}" - the script URL is unreachable or the server returned an error (network failure, 404, CORS, etc.)`,
         );
         networkError.name = 'ScriptNetworkError';
         info?.onErrorCallback && info?.onErrorCallback(networkError);
@@ -156,10 +158,7 @@ export function createScript(info: {
   script.onload = onScriptComplete.bind(null, script.onload);
 
   timeoutId = setTimeout(() => {
-    onScriptComplete(
-      null,
-      new Error(`Remote script "${info.url}" time-outed.`),
-    );
+    onScriptComplete(null, { type: 'error', isTimeout: true });
   }, timeout);
 
   return { script, needAttach };
