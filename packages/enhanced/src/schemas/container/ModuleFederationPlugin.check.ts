@@ -407,6 +407,7 @@ const t = {
                       },
                       extractRemoteTypes: { type: 'boolean' },
                       abortOnError: { type: 'boolean' },
+                      afterGenerate: { instanceof: 'Function' },
                     },
                   },
                 ],
@@ -3622,7 +3623,7 @@ function D(
                                                                         } else
                                                                           O =
                                                                             !0;
-                                                                        if (O)
+                                                                        if (O) {
                                                                           if (
                                                                             void 0 !==
                                                                             t.abortOnError
@@ -3657,6 +3658,42 @@ function D(
                                                                           } else
                                                                             O =
                                                                               !0;
+                                                                          if (O)
+                                                                            if (
+                                                                              void 0 !==
+                                                                              t.afterGenerate
+                                                                            ) {
+                                                                              const e =
+                                                                                c;
+                                                                              if (
+                                                                                !(
+                                                                                  t.afterGenerate instanceof
+                                                                                  Function
+                                                                                )
+                                                                              ) {
+                                                                                const e =
+                                                                                  {
+                                                                                    params:
+                                                                                      {},
+                                                                                  };
+                                                                                (null ===
+                                                                                u
+                                                                                  ? (u =
+                                                                                      [
+                                                                                        e,
+                                                                                      ])
+                                                                                  : u.push(
+                                                                                      e,
+                                                                                    ),
+                                                                                  c++);
+                                                                              }
+                                                                              O =
+                                                                                e ===
+                                                                                c;
+                                                                            } else
+                                                                              O =
+                                                                                !0;
+                                                                        }
                                                                       }
                                                                     }
                                                                   }
