@@ -454,6 +454,7 @@ const t = {
               implementation: { type: 'string' },
               cwd: { type: 'string' },
               displayErrorInTerminal: { type: 'boolean' },
+              afterGenerateTypes: { instanceof: 'Function' },
             },
           },
         ],
@@ -4522,7 +4523,7 @@ function D(
                                                           }
                                                           T = t === c;
                                                         } else T = !0;
-                                                        if (T)
+                                                        if (T) {
                                                           if (
                                                             void 0 !==
                                                             e.displayErrorInTerminal
@@ -4544,6 +4545,29 @@ function D(
                                                             }
                                                             T = t === c;
                                                           } else T = !0;
+                                                          if (T)
+                                                            if (
+                                                              void 0 !==
+                                                              e.afterGenerateTypes
+                                                            ) {
+                                                              const t = c;
+                                                              if (
+                                                                !(
+                                                                  e.afterGenerateTypes instanceof
+                                                                  Function
+                                                                )
+                                                              ) {
+                                                                const e = {
+                                                                  params: {},
+                                                                };
+                                                                (null === u
+                                                                  ? (u = [e])
+                                                                  : u.push(e),
+                                                                  c++);
+                                                              }
+                                                              T = t === c;
+                                                            } else T = !0;
+                                                        }
                                                       }
                                                     }
                                                   }

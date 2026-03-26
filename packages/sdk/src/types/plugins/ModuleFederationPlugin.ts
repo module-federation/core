@@ -408,6 +408,7 @@ export interface PluginDtsOptions {
   implementation?: string;
   cwd?: string;
   displayErrorInTerminal?: boolean;
+  afterGenerateTypes?: () => void | Promise<void>;
 }
 
 export type AsyncBoundaryOptions = {
