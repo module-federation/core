@@ -14,17 +14,20 @@ function fileLog(msg: string, module: string, level: string) {
   if (!process?.env?.['FEDERATION_DEBUG']) {
     return;
   }
-  const logDir = '.mf';
-  const logFile = path.join(logDir, 'typesGenerate.log');
+  try {
+    const logDir = '.mf';
+    const logFile = path.join(logDir, 'typesGenerate.log');
+    const timestamp = new Date().toISOString();
 
-  if (!fs.existsSync(logDir)) {
-    fs.mkdirSync(logDir, { recursive: true });
-  }
+    if (!fs.existsSync(logDir)) {
+      fs.mkdirSync(logDir, { recursive: true });
+    }
 
-  const stream = fs.createWriteStream(logFile, { flags: 'a' });
-  const timestamp = new Date().toISOString();
-  stream.write(`[${timestamp}] [${level.toUpperCase()}] ${module} - ${msg}\n`);
-  stream.end();
+    fs.appendFileSync(
+      logFile,
+      `[${timestamp}] [${level.toUpperCase()}] ${module} - ${msg}\n`,
+    );
+  } catch {}
 }
 
 function error(error: unknown, action: ActionKind, from: string): string {
