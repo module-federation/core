@@ -2,6 +2,7 @@ import helpers from '@module-federation/runtime/helpers';
 import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime';
 
 import { definePropertyGlobalVal } from '../sdk';
+import { sanitizePostMessagePayload } from './safe-post-message';
 
 type LoadRemoteSnapshotArgs = Parameters<
   NonNullable<ModuleFederationRuntimePlugin['loadRemoteSnapshot']>
@@ -20,10 +21,10 @@ const getModuleInfo = (): ModuleFederationRuntimePlugin => {
 
       if (!options || options.inBrowser) {
         window.postMessage(
-          {
+          sanitizePostMessagePayload({
             moduleInfo: globalSnapshot,
             updateModule: moduleInfo,
-          },
+          }),
           '*',
         );
       }
