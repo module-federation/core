@@ -306,7 +306,9 @@ type InitContainerShareScopeMapOptions ={
 
 `SyncWaterfallHook`
 
-Allows manual setting of the actual shared module to be used.
+Allows overriding the final shared module selection result.
+
+`resolveShare` runs after the runtime has already picked the candidate scope and version. At this point, changing fields like `scope` or `version` on `args` does not change the final result by itself. To switch to a different shared module, replace `args.resolver` and return the shared record you want to use.
 
 * type
 
@@ -318,11 +320,12 @@ type ResolveShareOptions ={
   scope: string;
   pkgName: string;
   version: string;
+  shareInfo: Shared;
   GlobalFederation: Federation;
   resolver: () => {
     shared: Shared;
     useTreesShaking: boolean;
-  };
+  } | undefined;
 }
 ```
 
@@ -338,19 +341,21 @@ const customSharedPlugin: () => ModuleFederationRuntimePlugin =
     return {
       name: 'custom-shared-plugin',
       resolveShare(args) {
-        const { shareScopeMap, scope, pkgName, version, GlobalFederation } = args;
+        const { pkgName, shareScopeMap } = args;
 
-        if (
-          pkgName !== 'react'
-        ) {
+        if (pkgName !== 'react') {
+          return args;
+        }
+
+        const fallbackShared = shareScopeMap.default?.react?.['17.0.0'];
+        if (!fallbackShared) {
           return args;
         }
 
         args.resolver = function () {
-          shareScopeMap[scope][pkgName][version] = window.React; // replace local share scope manually with desired module
           return {
-            shared:shareScopeMap[scope][pkgName][version],
-            useTreesShaking:false
+            shared: fallbackShared,
+            useTreesShaking: false,
           };
         };
         return args;
@@ -375,10 +380,8 @@ const mf = createInstance({
     plugins: [customSharedPlugin()]
 });
 
-window.React = ()=> 'Desired Shared';
-
-mf.loadShare("react").then((reactFactory)=>{
-  expect(reactFactory()).toEqual(window.React());
+mf.loadShare('react').then((reactFactory) => {
+  expect(reactFactory()).toEqual(React);
 });
 ```
 
