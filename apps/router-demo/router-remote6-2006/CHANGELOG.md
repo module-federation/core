@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.7
+
+### Patch Changes
+
+- @module-federation/bridge-react@2.3.0
+- @module-federation/rsbuild-plugin@2.3.0
+
 ## 2.0.6
 
 ### Patch Changes

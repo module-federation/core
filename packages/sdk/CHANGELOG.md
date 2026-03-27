@@ -1,5 +1,35 @@
 # @module-federation/sdk
 
+## 2.3.0
+
+### Minor Changes
+
+- eb26065: feat(dts-plugin): add `dts.generateTypes.afterGenerate` callback
+
+  Allows users to hook into the type generation lifecycle from
+  `dts.generateTypes`. The callback runs after each successful type generation in
+  both dev and prod modes, making it possible to do follow-up work with the
+  generated files.
+
+  ```ts
+  new ModuleFederationPlugin({
+    dts: {
+      generateTypes: {
+        afterGenerate: async ({ zipTypesPath, apiTypesPath }) => {
+          await analyzeTypesAndGenerateJson({
+            zipTypesPath,
+            apiTypesPath,
+          });
+        },
+      },
+    },
+  });
+  ```
+
+### Patch Changes
+
+- 8f2ec9b: fix(sdk): capture timeout network error
+
 ## 2.2.3
 
 ## 2.2.2
