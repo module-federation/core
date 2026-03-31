@@ -1,5 +1,12 @@
 # @module-federation/devtools
 
+## 2.3.1
+
+### Patch Changes
+
+- e7d83ea: fix(chrome-devtool): Avoid message crashes in devtools by converting functions and other unsafe values into safe placeholders before forwarding module data.
+  - @module-federation/sdk@2.3.1
+
 ## 2.3.0
 
 ### Patch Changes

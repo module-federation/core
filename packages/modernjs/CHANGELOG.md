@@ -1,5 +1,17 @@
 # @module-federation/modern-js
 
+## 2.3.1
+
+### Patch Changes
+
+- @module-federation/runtime@2.3.1
+- @module-federation/enhanced@2.3.1
+- @module-federation/sdk@2.3.1
+- @module-federation/bridge-react@2.3.1
+- @module-federation/rsbuild-plugin@2.3.1
+- @module-federation/cli@2.3.1
+- @module-federation/node@2.7.39
+
 ## 2.3.0
 
 ### Patch Changes

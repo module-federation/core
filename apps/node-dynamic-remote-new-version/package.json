@@ -6,7 +6,7 @@
     "@module-federation/node": "workspace:*",
     "lodash": "4.17.23"
   },
-  "version": "1.0.5",
+  "version": "1.0.6",
   "scripts": {
     "build": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config webpack.config.js --output-path dist --mode production",
     "build:development": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config webpack.config.js --output-path dist --mode development",

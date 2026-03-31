@@ -1,5 +1,11 @@
 # @module-federation/bridge-react-webpack-plugin
 
+## 2.3.1
+
+### Patch Changes
+
+- @module-federation/sdk@2.3.1
+
 ## 2.3.0
 
 ### Patch Changes

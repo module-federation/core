@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/rsbuild-plugin",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "Module Federation plugin for Rsbuild",
   "homepage": "https://module-federation.io",
   "bugs": {

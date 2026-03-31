@@ -1,5 +1,13 @@
 # @module-federation/metro
 
+## 2.3.1
+
+### Patch Changes
+
+- @module-federation/runtime@2.3.1
+- @module-federation/sdk@2.3.1
+- @module-federation/dts-plugin@2.3.1
+
 ## 2.3.0
 
 ### Patch Changes
