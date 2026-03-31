@@ -34,7 +34,7 @@ export function scriptRetry<T extends Record<string, any>>({
     while (attempts < maxAttempts) {
       try {
         beforeExecuteRetry();
-        if (retryDelay > 0 && attempts > 0) {
+        if (retryDelay > 0) {
           await new Promise((resolve) => setTimeout(resolve, retryDelay));
         }
         const retryIndex = attempts + 1;
