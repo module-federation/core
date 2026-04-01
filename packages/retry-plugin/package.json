@@ -39,7 +39,7 @@
     "@module-federation/sdk": "workspace:*"
   },
   "scripts": {
-    "build": "tsdown --config tsdown.config.ts && node ../../tools/scripts/write-dist-package-json.mjs --source package.json --out dist/package.json && cp *.md dist",
+    "build": "tsdown --config tsdown.config.ts && cp *.md dist",
     "test": "vitest run -u -c vitest.config.ts",
     "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",
     "build-debug": "FEDERATION_DEBUG=true pnpm run build",
