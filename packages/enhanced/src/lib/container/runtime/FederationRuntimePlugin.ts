@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import pBtoa from 'btoa';
 import type {
   Compiler,
   WebpackPluginInstance,
@@ -258,13 +257,14 @@ class FederationRuntimePlugin {
       );
       entryFilePath = path.join(TEMP_DIR, `entry.${hash}.js`);
     } else {
-      entryFilePath = `data:text/javascript;charset=utf-8;base64,${pBtoa(
+      entryFilePath = `data:text/javascript;charset=utf-8;base64,${Buffer.from(
         FederationRuntimePlugin.getTemplate(
           compiler,
           this.options,
           this.bundlerRuntimePath,
         ),
-      )}`;
+        'utf8',
+      ).toString('base64')}`;
     }
 
     onceForCompilerEntryMap.set(compiler, entryFilePath);

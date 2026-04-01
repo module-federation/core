@@ -11,7 +11,6 @@ declare module 'webpack/lib/RuntimeModule';
 declare module 'webpack/lib/Template';
 declare module 'webpack/lib/util/compileBooleanMatcher';
 declare module 'webpack/lib/util/identifier';
-declare module 'btoa';
 declare global {
   namespace NodeJS {
     interface Global {

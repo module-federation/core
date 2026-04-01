@@ -204,7 +204,7 @@ export function multiScopePolicyPlugin(): ModuleFederationRuntimePlugin {
 ### 2) Fallback / alias when a scope is missing (initContainerShareScopeMap / resolveShare)
 
 * `initContainerShareScopeMap`: adjust the share pool mapping during remote initialization.
-* `resolveShare`: intervene when selecting a specific shared version, useful for “fallback to default if not found in current scope”.
+* `resolveShare`: override the final selection result by replacing `args.resolver`. Returning `{ ...args, scope: 'default' }` alone is not enough in the current runtime implementation.
 
 Example: if a package is not found in `scope1`, fall back to `default`:
 
@@ -215,9 +215,31 @@ export function scopeFallbackPlugin(): ModuleFederationRuntimePlugin {
   return {
     name: 'scope-fallback',
     resolveShare(args) {
-      const hasPkg = Boolean(args.shareScopeMap[args.scope]?.[args.pkgName]);
-      if (hasPkg) return args;
-      return { ...args, scope: 'default' };
+      const current =
+        args.shareScopeMap[args.scope]?.[args.pkgName]?.[args.version];
+      if (current) return args;
+
+      args.resolver = () => {
+        const fallbackVersionMap = args.shareScopeMap.default?.[args.pkgName];
+        if (!fallbackVersionMap) {
+          return undefined;
+        }
+
+        const fallbackShared =
+          fallbackVersionMap[args.version] ??
+          Object.values(fallbackVersionMap)[0];
+
+        if (!fallbackShared) {
+          return undefined;
+        }
+
+        return {
+          shared: fallbackShared,
+          useTreesShaking: false,
+        };
+      };
+
+      return args;
     },
   };
 }

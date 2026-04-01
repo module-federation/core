@@ -1,4 +1,3 @@
-import pBtoa from 'btoa';
 import { ContainerManager } from '@module-federation/managers';
 import logger from './logger';
 
@@ -48,7 +47,7 @@ export class RemoteEntryPlugin implements RspackPluginInstance {
     } else {
       code = `(${sanitizedPublicPath}())`;
     }
-    const base64Code = pBtoa(code);
+    const base64Code = Buffer.from(code, 'utf8').toString('base64');
     const dataUrl = `data:text/javascript;base64,${base64Code}`;
 
     compiler.hooks.afterPlugins.tap('VmokRemoteEntryPlugin', () => {
