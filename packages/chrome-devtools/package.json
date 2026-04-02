@@ -61,14 +61,14 @@
     "@modern-js/runtime": "2.70.8",
     "@arco-design/web-react": "2.66.7",
     "@module-federation/sdk": "workspace:*",
-    "ahooks": "^3.7.10",
-    "dagre": "^0.8.5",
+    "ahooks": "3.7.10",
+    "dagre": "0.8.5",
     "reactflow": "11.11.4",
-    "echarts": "^6.0.0",
-    "lucide-react": "^0.364.0",
-    "echarts-for-react": "^3.0.5",
-    "i18next": "^23.0.0",
-    "react-i18next": "^15.0.0"
+    "echarts": "6.0.0",
+    "lucide-react": "0.364.0",
+    "echarts-for-react": "3.0.5",
+    "i18next": "23.0.0",
+    "react-i18next": "15.0.0"
   },
   "peerDependencies": {
     "react": "^18 || ^19",

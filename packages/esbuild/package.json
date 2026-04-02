@@ -50,17 +50,17 @@
     }
   },
   "dependencies": {
-    "@chialab/esbuild-plugin-commonjs": "^0.18.0",
-    "@hyrious/esbuild-plugin-commonjs": "^0.2.4",
+    "@chialab/esbuild-plugin-commonjs": "0.18.0",
+    "@hyrious/esbuild-plugin-commonjs": "0.2.4",
     "@module-federation/sdk": "workspace:*",
     "@module-federation/runtime": "workspace:*",
     "@module-federation/webpack-bundler-runtime": "workspace:*",
-    "cjs-module-lexer": "^1.3.1",
-    "enhanced-resolve": "^5.16.1",
-    "es-module-lexer": "^1.5.3",
-    "esbuild": "^0.25.0",
-    "json5": "^2.2.3",
-    "npmlog": "^7.0.1"
+    "cjs-module-lexer": "1.3.1",
+    "enhanced-resolve": "5.16.1",
+    "es-module-lexer": "1.5.3",
+    "esbuild": "0.25.0",
+    "json5": "2.2.3",
+    "npmlog": "7.0.1"
   },
   "devDependencies": {
     "@rslib/core": "^0.12.4"

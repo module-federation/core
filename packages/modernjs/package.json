@@ -141,8 +141,8 @@
     "@module-federation/node": "workspace:*",
     "@module-federation/sdk": "workspace:*",
     "@module-federation/cli": "workspace:*",
-    "@swc/helpers": "^0.5.17",
-    "node-fetch": "~3.3.0",
+    "@swc/helpers": "0.5.17",
+    "node-fetch": "3.3.0",
     "jiti": "2.4.2",
     "react-error-boundary": "4.1.2"
   },
