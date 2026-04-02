@@ -10,6 +10,7 @@ export interface RouteProcessingOptions {
 export interface RouteProcessingResult {
   history: VueRouter.RouterHistory;
   routes: VueRouter.RouteRecordNormalized[];
+  patchRouter?: (router: VueRouter.Router) => void;
 }
 
 /**
@@ -66,6 +67,59 @@ function addBasenameToNestedRoutes(
 
     return updatedRoute;
   });
+}
+
+/**
+ * Create a patch function that rewrites path-based navigations to include
+ * the basename prefix.  This is needed because createWebHashHistory() does
+ * not accept a basename argument, so router.push('/foo') would bypass the
+ * prefixed route definitions.
+ *
+ * By patching push/replace/resolve *before* Vue Router resolves the
+ * location we also avoid the "No match found" console warning.
+ */
+function createHashBasenamePatch(
+  basename: string,
+): (router: VueRouter.Router) => void {
+  const normalized = basename.replace(/\/+$/, '');
+
+  /**
+   * Only absolute paths (starting with '/') that don't already carry the
+   * basename prefix need rewriting.  Relative segments ('settings'),
+   * query-only ('?tab=1'), and hash-only ('#anchor') strings are resolved
+   * by Vue Router against the current route and must pass through untouched.
+   */
+  const needsPrefix = (path: string): boolean =>
+    path.startsWith('/') &&
+    path !== normalized &&
+    !path.startsWith(normalized + '/');
+
+  const prefix = (path: string): string =>
+    `${normalized}${path}`.replace(/\/+/g, '/');
+
+  const rewrite = (
+    to: VueRouter.RouteLocationRaw,
+  ): VueRouter.RouteLocationRaw => {
+    if (typeof to === 'string') {
+      return needsPrefix(to) ? prefix(to) : to;
+    }
+    if ('path' in to && typeof to.path === 'string' && needsPrefix(to.path)) {
+      return { ...to, path: prefix(to.path) };
+    }
+    return to;
+  };
+
+  return (router) => {
+    const originalPush = router.push.bind(router);
+    const originalReplace = router.replace.bind(router);
+    const originalResolve = router.resolve.bind(router);
+
+    router.push = (to: VueRouter.RouteLocationRaw) => originalPush(rewrite(to));
+    router.replace = (to: VueRouter.RouteLocationRaw) =>
+      originalReplace(rewrite(to));
+    router.resolve = ((to: VueRouter.RouteLocationRaw, ...rest: any[]) =>
+      originalResolve(rewrite(to), ...rest)) as typeof router.resolve;
+  };
 }
 
 /**
@@ -146,21 +200,19 @@ export function processRoutes(
   }
 
   let history: VueRouter.RouterHistory;
+  let patchRouter: ((router: VueRouter.Router) => void) | undefined;
+
   if (memoryRoute) {
-    // Memory route mode
     history = VueRouter.createMemoryHistory(basename);
   } else if (hashRoute) {
-    // Hash route mode
     history = VueRouter.createWebHashHistory();
-    // Recursively process nested routes and add basename prefix to all paths
-    if (basename) routes = addBasenameToNestedRoutes(routes, basename);
+    if (basename) {
+      routes = addBasenameToNestedRoutes(routes, basename);
+      patchRouter = createHashBasenamePatch(basename);
+    }
   } else {
-    // Default Web History mode
     history = VueRouter.createWebHistory(basename);
   }
 
-  return {
-    history,
-    routes,
-  };
+  return { history, routes, patchRouter };
 }
