@@ -26,7 +26,6 @@
     "@module-federation/sdk": "workspace:*",
     "@module-federation/dts-plugin": "workspace:*",
     "commander": "11.1.0",
-    "chalk": "3.0.0",
     "jiti": "2.4.2"
   },
   "devDependencies": {

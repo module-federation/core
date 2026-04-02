@@ -1,4 +1,4 @@
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 import {
   createInfrastructureLogger,
   createLogger,
@@ -10,6 +10,8 @@ const createBundlerLogger: typeof createLogger =
     ? (createInfrastructureLogger as unknown as typeof createLogger)
     : createLogger;
 
-const logger = createBundlerLogger(chalk.cyan(`[ ${PLUGIN_IDENTIFIER} ]`));
+const logger = createBundlerLogger(
+  styleText('cyan', `[ ${PLUGIN_IDENTIFIER} ]`),
+);
 
 export default logger;
