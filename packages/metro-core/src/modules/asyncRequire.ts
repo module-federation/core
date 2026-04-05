@@ -96,16 +96,17 @@ function buildLoadBundleAsyncWrapper() {
 
     const encodedBundlePath = bundlePath.replaceAll('../', '..%2F');
 
+    let result;
     if (cacheHandler) {
       await cacheHandler(loadBundleAsync, encodedBundlePath);
     } else {
-      await loadBundleAsync(encodedBundlePath);
+      result = await loadBundleAsync(encodedBundlePath);
     }
 
     // when the origin is not the same, it means we are loading a remote container
     // we can return early since dependencies are processed differently for entry bundles
     if (!isSameOrigin(bundlePath, publicPath)) {
-      return;
+      return result;
     }
 
     // at this point the code in the bundle has been evaluated
@@ -126,6 +127,8 @@ function buildLoadBundleAsyncWrapper() {
     }
 
     await Promise.all(promises);
+
+    return result;
   };
 }
 
