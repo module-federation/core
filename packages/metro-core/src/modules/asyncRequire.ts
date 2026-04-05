@@ -70,11 +70,7 @@ function buildLoadBundleAsyncWrapper() {
   const loadBundleAsync =
     __loadBundleAsync as typeof globalThis.__loadBundleAsync;
 
-  // Inflight dedup: same bundlePath won't trigger concurrent downloads.
-  // On error the entry is removed so the next call can retry.
-  const inflight = new Map<string, Promise<void>>();
-
-  async function doLoadBundle(originalBundlePath: string) {
+  return async (originalBundlePath: string): Promise<void> => {
     const scope = globalThis.__FEDERATION__.__NATIVE__[__METRO_GLOBAL_PREFIX__];
 
     const publicPath = getPublicPath(scope.origin);
@@ -130,21 +126,6 @@ function buildLoadBundleAsyncWrapper() {
     }
 
     await Promise.all(promises);
-  }
-
-  return (originalBundlePath: string): Promise<void> => {
-    const existing = inflight.get(originalBundlePath);
-    if (existing) {
-      return existing;
-    }
-
-    const promise = doLoadBundle(originalBundlePath).catch((err) => {
-      inflight.delete(originalBundlePath);
-      throw err;
-    });
-
-    inflight.set(originalBundlePath, promise);
-    return promise;
   };
 }
 
