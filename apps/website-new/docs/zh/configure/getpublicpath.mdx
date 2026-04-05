@@ -3,11 +3,14 @@
 - 类型：`string`
 - 是否必填：否
 - 默认值：`undefined`
-- 作用：用于设置动态 publicPath，设置后，对应的远程模块资源也将使用此 publicPath。例如，部署的项目是动态下发 `cdn_prefix` ，那么可以设置 `getPublicPath` 为 `return "https:" + window.navigator.cdn_host + "/resource/app/"`
+- 生效条件：仅当设置了 `exposes` 时生效
+- 作用：用于设置动态 publicPath。值为“字符串化的函数”或“字符串化的 return 表达式”。当消费者加载该生产者时，会通过 `new Function` 执行此字符串以获取返回值，并将其作为该模块静态资源的 `publicPath` 前缀。例如，部署的项目动态下发 `cdn_prefix`，可以设置：
+  - 函数形式：``function(){ return window.cdn_prefix }``
+  - return 形式：``return "https:" + window.navigator.cdn_host + "/resource/app/"``
 
 - 示例：
 
-下面的示例中，设置了 `getPublicPath`，在其他消费者加载该生产者时，将会通过 `new Function` 的方式执行 `getPublicPath` 的代码获取到返回值，将会把返回值的内容作为该模块的 `publicPath` 静态资源前缀
+下面的示例中，设置了 `getPublicPath`。在其他消费者加载该生产者时，将会通过 `new Function` 的方式执行 `getPublicPath` 字符串以获取值，并把返回值作为该模块的 `publicPath` 静态资源前缀
 
 ```ts title="rspack.config.ts"
 module.exports = {

@@ -7,10 +7,11 @@ export default defineConfig({
     ssr: {
       mode: 'stream',
     },
+    port: 3056,
   },
 
   tools: {
-    webpack: (config) => {
+    rspack: (config) => {
       config.output!.uniqueName = 'modernjs-ssr-dynamic-remote-new-version';
       config.output!.chunkLoadingGlobal =
         'modernjs-ssr-dynamic-remote-new-version';

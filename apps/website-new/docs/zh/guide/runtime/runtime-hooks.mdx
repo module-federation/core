@@ -264,7 +264,9 @@ type InitContainerShareScopeMapOptions ={
 
 `SyncWaterfallHook`
 
-允许手动设置实际使用的共享模块。
+允许改写最终选中的共享模块结果。
+
+`resolveShare` 触发时，运行时已经先选好了候选的 scope 和 version。这个阶段单独修改 `args.scope`、`args.version` 之类的字段，并不会自动影响最终结果。要真正改掉最终使用的 shared，需要改写 `args.resolver`，让它返回你希望使用的那条记录。
 
 * type
 
@@ -276,11 +278,12 @@ type ResolveShareOptions ={
   scope: string;
   pkgName: string;
   version: string;
+  shareInfo: Shared;
   GlobalFederation: Federation;
   resolver: () => {
     shared: Shared;
     useTreesShaking: boolean;
-  };
+  } | undefined;
 }
 ```
 
@@ -296,19 +299,21 @@ const customSharedPlugin: () => ModuleFederationRuntimePlugin =
     return {
       name: 'custom-shared-plugin',
       resolveShare(args) {
-        const { shareScopeMap, scope, pkgName, version, GlobalFederation } = args;
+        const { pkgName, shareScopeMap } = args;
 
-        if (
-          pkgName !== 'react'
-        ) {
+        if (pkgName !== 'react') {
+          return args;
+        }
+
+        const fallbackShared = shareScopeMap.default?.react?.['17.0.0'];
+        if (!fallbackShared) {
           return args;
         }
 
         args.resolver = function () {
-          shareScopeMap[scope][pkgName][version] = window.React; // replace local share scope manually with desired module
           return {
-            shared:shareScopeMap[scope][pkgName][version],
-            useTreesShaking:false
+            shared: fallbackShared,
+            useTreesShaking: false,
           };
         };
         return args;
@@ -333,10 +338,8 @@ const mf = createInstance({
     plugins: [customSharedPlugin()]
 });
 
-window.React = ()=> 'Desired Shared';
-
-mf.loadShare("react").then((reactFactory)=>{
-  expect(reactFactory()).toEqual(window.React());
+mf.loadShare('react').then((reactFactory) => {
+  expect(reactFactory()).toEqual(React);
 });
 ```
 

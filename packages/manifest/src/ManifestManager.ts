@@ -1,4 +1,4 @@
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 import {
   Stats,
   Manifest,
@@ -111,9 +111,7 @@ class ManifestManager {
         : true)
     ) {
       logger.info(
-        `Manifest Link: ${chalk.cyan(
-          `${publicPath === 'auto' ? '{auto}/' : publicPath}${this.fileName}`,
-        )} `,
+        `Manifest Link: ${styleText('cyan', `${publicPath === 'auto' ? '{auto}/' : publicPath}${this.fileName}`)} `,
       );
     }
 

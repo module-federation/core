@@ -1,4 +1,3 @@
-import pBtoa from 'btoa';
 import type { WebpackPluginInstance, Compiler } from 'webpack';
 
 class UniverseEntryChunkTrackerPlugin implements WebpackPluginInstance {
@@ -14,7 +13,7 @@ class UniverseEntryChunkTrackerPlugin implements WebpackPluginInstance {
 }
   }
     `;
-    const base64Code = pBtoa(code);
+    const base64Code = Buffer.from(code, 'utf8').toString('base64');
     const dataUrl = `data:text/javascript;base64,${base64Code}`;
 
     compiler.hooks.afterPlugins.tap('UniverseEntryChunkTrackerPlugin', () => {

@@ -1,5 +1,46 @@
 # @module-federation/bridge-react-webpack-plugin
 
+## 2.3.1
+
+### Patch Changes
+
+- @module-federation/sdk@2.3.1
+
+## 2.3.0
+
+### Patch Changes
+
+- Updated dependencies [eb26065]
+- Updated dependencies [8f2ec9b]
+  - @module-federation/sdk@2.3.0
+
+## 2.2.3
+
+### Patch Changes
+
+- @module-federation/sdk@2.2.3
+
+## 2.2.2
+
+### Patch Changes
+
+- @module-federation/sdk@2.2.2
+
+## 2.2.1
+
+### Patch Changes
+
+- @module-federation/sdk@2.2.1
+
+## 2.2.0
+
+### Patch Changes
+
+- Updated dependencies [c856ec1]
+- Updated dependencies [12240bb]
+- Updated dependencies [e5dd6ef]
+  - @module-federation/sdk@2.2.0
+
 ## 2.1.0
 
 ### Patch Changes
@@ -157,7 +198,6 @@
 ### Patch Changes
 
 - a7cf276: chore: upgrade NX to 21.2.3, Storybook to 9.0.9, and TypeScript to 5.8.3
-
   - Upgraded NX from 21.0.3 to 21.2.3 with workspace configuration updates
   - Migrated Storybook from 8.3.5 to 9.0.9 with updated configurations and automigrations
   - Upgraded TypeScript from 5.7.3 to 5.8.3 with compatibility fixes

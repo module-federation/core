@@ -1,3 +1,4 @@
+import fs from 'fs';
 import path from 'path';
 import { getIPV4, isWebTarget, skipByTarget } from './utils';
 import { moduleFederationPlugin, encodeName } from '@module-federation/sdk';
@@ -33,6 +34,61 @@ type RuntimePluginEntry = NonNullable<
   moduleFederationPlugin.ModuleFederationPluginOptions['runtimePlugins']
 >[number];
 
+const resolvePackageFile = (
+  packageName: string,
+  esmRelativePath: string,
+  cjsRelativePath: string,
+): string => {
+  const packageEntry = require.resolve(packageName);
+  let packageRoot = path.dirname(packageEntry);
+  while (!fs.existsSync(path.join(packageRoot, 'package.json'))) {
+    const parentDir = path.dirname(packageRoot);
+    if (parentDir === packageRoot) {
+      throw new Error(
+        `Unable to resolve package root for ${packageName} from ${packageEntry}`,
+      );
+    }
+    packageRoot = parentDir;
+  }
+
+  return require.resolve(
+    path.join(
+      packageRoot,
+      process.env['IS_ESM_BUILD'] === 'true'
+        ? esmRelativePath
+        : cjsRelativePath,
+    ),
+  );
+};
+
+const resolveSharedStrategyPlugin = (): string =>
+  resolvePackageFile(
+    '@module-federation/modern-js',
+    'dist/esm/cli/mfRuntimePlugins/shared-strategy.mjs',
+    'dist/cjs/cli/mfRuntimePlugins/shared-strategy.js',
+  );
+
+const resolveInjectNodeFetchPlugin = (): string =>
+  resolvePackageFile(
+    '@module-federation/modern-js',
+    'dist/esm/cli/mfRuntimePlugins/inject-node-fetch.mjs',
+    'dist/cjs/cli/mfRuntimePlugins/inject-node-fetch.js',
+  );
+
+const resolveNodeRuntimePlugin = (): string =>
+  resolvePackageFile(
+    '@module-federation/node',
+    'dist/src/runtimePlugin.mjs',
+    'dist/src/runtimePlugin.js',
+  );
+
+const resolveNodeRecordRemoteHashPlugin = (): string =>
+  resolvePackageFile(
+    '@module-federation/node',
+    'dist/src/recordDynamicRemoteEntryHashPlugin.mjs',
+    'dist/src/recordDynamicRemoteEntryHashPlugin.js',
+  );
+
 export function setEnv(enableSSR: boolean) {
   if (enableSSR) {
     process.env['MF_SSR_PRJ'] = 'true';
@@ -47,10 +103,10 @@ export const getMFConfig = async (
     return config;
   }
   const mfConfigPath = configPath ? configPath : defaultPath;
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { createJiti } = require('jiti');
   const jit = createJiti(__filename, {
     interopDefault: true,
-    esmResolve: true,
   });
   const configModule = await jit(mfConfigPath);
 
@@ -142,29 +198,15 @@ export const patchMFConfig = (
 
   patchDTSConfig(mfConfig, isServer);
 
-  injectRuntimePlugins(
-    require.resolve('@module-federation/modern-js/shared-strategy'),
-    runtimePlugins,
-  );
+  injectRuntimePlugins(resolveSharedStrategyPlugin(), runtimePlugins);
 
   if (isServer) {
-    injectRuntimePlugins(
-      require.resolve('@module-federation/node/runtimePlugin'),
-      runtimePlugins,
-    );
+    injectRuntimePlugins(resolveNodeRuntimePlugin(), runtimePlugins);
     if (isDev()) {
-      injectRuntimePlugins(
-        require.resolve(
-          '@module-federation/node/record-dynamic-remote-entry-hash-plugin',
-        ),
-        runtimePlugins,
-      );
+      injectRuntimePlugins(resolveNodeRecordRemoteHashPlugin(), runtimePlugins);
     }
 
-    injectRuntimePlugins(
-      require.resolve('@module-federation/modern-js/inject-node-fetch'),
-      runtimePlugins,
-    );
+    injectRuntimePlugins(resolveInjectNodeFetchPlugin(), runtimePlugins);
 
     if (!mfConfig.library) {
       mfConfig.library = {
@@ -196,7 +238,7 @@ export const patchMFConfig = (
   return mfConfig;
 };
 
-function patchIgnoreWarning<T extends Bundler>(chain: BundlerChainConfig) {
+function patchIgnoreWarning(chain: BundlerChainConfig) {
   const ignoreWarnings = chain.get('ignoreWarnings') || [];
   const ignoredMsgs = [
     'external script',
@@ -286,7 +328,7 @@ export function patchBundlerConfig(options: {
 
   const splitChunkConfig = chain.optimization.splitChunks.entries();
   if (!isServer) {
-    // @ts-ignore type not the same
+    // @ts-expect-error type not the same
     autoDeleteSplitChunkCacheGroups(mfConfig, splitChunkConfig);
   }
 
@@ -359,6 +401,8 @@ export const moduleFederationConfigPlugin = (
     );
 
     api.modifyBundlerChain((chain) => {
+      const bundlerType =
+        api.getAppContext().bundlerType === 'rspack' ? 'rspack' : 'webpack';
       const target = chain.get('target');
       if (skipByTarget(target)) {
         return;
@@ -368,6 +412,15 @@ export const moduleFederationConfigPlugin = (
 
       const targetMFConfig = !isWeb ? ssrConfig : csrConfig;
       patchMFConfig(targetMFConfig, !isWeb);
+
+      if (
+        bundlerType === 'rspack' &&
+        modernjsConfig.source?.enableAsyncEntry !== true &&
+        targetMFConfig.experiments?.asyncStartup !== false
+      ) {
+        targetMFConfig.experiments ||= {};
+        targetMFConfig.experiments.asyncStartup = true;
+      }
 
       patchBundlerConfig({
         chain,
@@ -436,9 +489,8 @@ export const moduleFederationConfigPlugin = (
         resolve: {
           alias: {
             // TODO: deprecated
-            '@modern-js/runtime/mf': require.resolve(
-              '@module-federation/modern-js/runtime',
-            ),
+            '@modern-js/runtime/mf':
+              require.resolve('@module-federation/modern-js/runtime'),
           },
         },
         source: {

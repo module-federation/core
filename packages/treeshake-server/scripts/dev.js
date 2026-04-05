@@ -23,25 +23,18 @@ const envPath = fs.existsSync(devEnv) ? devEnv : path.join(serverRoot, '.env');
 require('dotenv').config({ path: envPath });
 
 const entry = path.join(serverRoot, 'dist', 'server.js');
-if (!fs.existsSync(entry)) {
-  execSync('pnpm -r --filter ./packages/treeshake-server... run build', {
-    cwd: repoRoot,
-    stdio: 'inherit',
-  });
-}
-
-if (!fs.existsSync(frontendDistIndex)) {
-  execSync('pnpm -C packages/treeshake-frontend build', {
-    cwd: repoRoot,
-    stdio: 'inherit',
-  });
-}
-
-if (!fs.existsSync(embeddedIndex)) {
-  execSync('node scripts/copy-frontend.js', {
-    cwd: serverRoot,
-    stdio: 'inherit',
-  });
+if (
+  !fs.existsSync(entry) ||
+  !fs.existsSync(frontendDistIndex) ||
+  !fs.existsSync(embeddedIndex)
+) {
+  execSync(
+    'pnpm exec turbo run build --filter=@module-federation/treeshake-server',
+    {
+      cwd: serverRoot,
+      stdio: 'inherit',
+    },
+  );
 }
 
 require(entry);

@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import pBtoa from 'btoa';
 import type {
   Compiler,
   WebpackPluginInstance,
@@ -34,90 +33,89 @@ const { mkdirpSync } = require(
   normalizeWebpackPath('webpack/lib/util/fs'),
 ) as typeof import('webpack/lib/util/fs');
 
-function resolveModule(
-  candidates: string[],
-  options?: NodeJS.RequireResolveOptions,
-): string {
+type ResolveFn = typeof require.resolve;
+type RuntimeEntrySpec = {
+  bundler: string;
+  esm: string;
+  cjs: string;
+};
+
+function resolveRuntimeEntry(
+  spec: RuntimeEntrySpec,
+  implementation: string | undefined,
+  resolve: ResolveFn = require.resolve,
+) {
+  const candidates = [spec.bundler, spec.esm, spec.cjs];
+  const modulePaths = implementation ? [implementation] : undefined;
   let lastError: unknown;
+
   for (const candidate of candidates) {
     try {
-      return require.resolve(candidate, options);
+      return modulePaths
+        ? resolve(candidate, { paths: modulePaths })
+        : resolve(candidate);
     } catch (error) {
       lastError = error;
     }
   }
 
-  throw (
-    lastError ??
-    new Error(`Unable to resolve any module from: ${candidates.join(', ')}`)
-  );
+  throw lastError;
 }
 
-function isEsmOutputBuild(compiler: Compiler): boolean {
-  if (compiler.options.experiments?.outputModule) {
-    return true;
+function resolveRuntimeEntryWithFallback(
+  spec: RuntimeEntrySpec,
+  implementation: string | undefined,
+  resolve: ResolveFn = require.resolve,
+) {
+  if (implementation) {
+    try {
+      return resolveRuntimeEntry(spec, implementation, resolve);
+    } catch {
+      // Fall back to the workspace runtime packages when a custom
+      // implementation hasn't published the newer subpath yet.
+    }
   }
 
-  if (compiler.options.output?.module) {
-    return true;
-  }
-
-  const library = compiler.options.output?.library;
-  if (
-    library &&
-    typeof library === 'object' &&
-    !Array.isArray(library) &&
-    'type' in library
-  ) {
-    return library.type === 'module';
-  }
-
-  return false;
+  return resolveRuntimeEntry(spec, undefined, resolve);
 }
-
-function getModuleCandidates(
-  packageName: string,
-  preferEsm: boolean,
-): string[] {
-  const preferred = preferEsm
-    ? [`${packageName}/dist/index.js`, `${packageName}/dist/index.cjs`]
-    : [`${packageName}/dist/index.cjs`, `${packageName}/dist/index.js`];
-
-  const legacyFallback = preferEsm
-    ? [`${packageName}/dist/index.esm.js`, `${packageName}/dist/index.cjs.cjs`]
-    : [`${packageName}/dist/index.cjs.cjs`, `${packageName}/dist/index.esm.js`];
-
-  // Keep legacy dist entry names as fallbacks for mixed plugin/runtime versions.
-  // Resolve package root last to avoid accidentally selecting a CJS export when
-  // an explicit ESM fallback file exists in legacy runtime layouts.
-  return [...preferred, ...legacyFallback, packageName];
-}
-
-function resolveRuntimePaths(preferEsm: boolean, implementation?: string) {
-  const runtimeToolsCandidates = getModuleCandidates(
-    '@module-federation/runtime-tools',
-    preferEsm,
+export function resolveRuntimePaths(
+  implementation?: string,
+  resolve: ResolveFn = require.resolve,
+) {
+  // Prefer the dedicated bundler subpath so webpack can tree-shake across the
+  // runtime package boundary. Fall back to the legacy dist contract for older
+  // custom implementations that have not published /bundler yet.
+  const runtimeToolsPath = resolveRuntimeEntryWithFallback(
+    {
+      bundler: '@module-federation/runtime-tools/bundler',
+      esm: '@module-federation/runtime-tools/dist/index.js',
+      cjs: '@module-federation/runtime-tools/dist/index.cjs',
+    },
+    implementation,
+    resolve,
   );
-  const bundlerRuntimeCandidates = getModuleCandidates(
-    '@module-federation/webpack-bundler-runtime',
-    preferEsm,
-  );
-  const runtimeCandidates = getModuleCandidates(
-    '@module-federation/runtime',
-    preferEsm,
-  );
-
-  const runtimeToolsPath = resolveModule(runtimeToolsCandidates);
-  const modulePaths = implementation ? [implementation] : [runtimeToolsPath];
+  const moduleBase = implementation || runtimeToolsPath;
 
   return {
     runtimeToolsPath,
-    bundlerRuntimePath: resolveModule(bundlerRuntimeCandidates, {
-      paths: modulePaths,
-    }),
-    runtimePath: resolveModule(runtimeCandidates, {
-      paths: modulePaths,
-    }),
+    bundlerRuntimePath: resolveRuntimeEntry(
+      {
+        bundler: '@module-federation/webpack-bundler-runtime/bundler',
+        esm: '@module-federation/webpack-bundler-runtime/dist/index.js',
+        cjs: '@module-federation/webpack-bundler-runtime/dist/index.cjs',
+      },
+      moduleBase,
+      resolve,
+    ),
+    runtimePath: resolveRuntimeEntry(
+      {
+        bundler: '@module-federation/runtime/bundler',
+        esm: '@module-federation/runtime/dist/index.js',
+        cjs: '@module-federation/runtime/dist/index.cjs',
+      },
+      moduleBase,
+      resolve,
+    ),
   };
 }
 
@@ -125,7 +123,7 @@ const {
   runtimeToolsPath: RuntimeToolsPath,
   bundlerRuntimePath: BundlerRuntimePath,
   runtimePath: RuntimePath,
-} = resolveRuntimePaths(true);
+} = resolveRuntimePaths();
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
 const onceForCompiler = new WeakSet<Compiler>();
@@ -259,13 +257,14 @@ class FederationRuntimePlugin {
       );
       entryFilePath = path.join(TEMP_DIR, `entry.${hash}.js`);
     } else {
-      entryFilePath = `data:text/javascript;charset=utf-8;base64,${pBtoa(
+      entryFilePath = `data:text/javascript;charset=utf-8;base64,${Buffer.from(
         FederationRuntimePlugin.getTemplate(
           compiler,
           this.options,
           this.bundlerRuntimePath,
         ),
-      )}`;
+        'utf8',
+      ).toString('base64')}`;
     }
 
     onceForCompilerEntryMap.set(compiler, entryFilePath);
@@ -292,7 +291,7 @@ class FederationRuntimePlugin {
         : fs;
     try {
       fsLike.readFileSync(filePath);
-    } catch (err) {
+    } catch {
       mkdirpSync(fsLike as any, TEMP_DIR);
       fsLike.writeFileSync(
         filePath,
@@ -344,7 +343,7 @@ class FederationRuntimePlugin {
           compiler.context,
           federationRuntimeDependency,
           { name: undefined },
-          (err, module) => {
+          (err) => {
             if (err) {
               return callback(err);
             }
@@ -426,10 +425,7 @@ class FederationRuntimePlugin {
     const { implementation } = this.options || {};
     const alias: any = compiler.options.resolve.alias || {};
 
-    const resolvedPaths = resolveRuntimePaths(
-      isEsmOutputBuild(compiler),
-      implementation,
-    );
+    const resolvedPaths = resolveRuntimePaths(implementation);
 
     this.runtimeToolsPath = resolvedPaths.runtimeToolsPath;
     this.bundlerRuntimePath = resolvedPaths.bundlerRuntimePath;
@@ -512,10 +508,7 @@ class FederationRuntimePlugin {
         compiler.options.output.uniqueName || `container_${Date.now()}`;
     }
 
-    const resolvedPaths = resolveRuntimePaths(
-      isEsmOutputBuild(compiler),
-      this.options?.implementation,
-    );
+    const resolvedPaths = resolveRuntimePaths(this.options?.implementation);
     this.bundlerRuntimePath = resolvedPaths.bundlerRuntimePath;
     this.runtimePath = resolvedPaths.runtimePath;
     this.runtimeToolsPath = resolvedPaths.runtimeToolsPath;

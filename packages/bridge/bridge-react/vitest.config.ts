@@ -1,5 +1,5 @@
 import { defineConfig } from 'vitest/config';
-import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
+import tsconfigPaths from 'vite-tsconfig-paths';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 export default defineConfig({
@@ -13,7 +13,7 @@ export default defineConfig({
   resolve: {
     extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json'],
   },
-  plugins: [react(), nxViteTsPaths()],
+  plugins: [react(), tsconfigPaths()],
   test: {
     environment: 'jsdom',
     include: [

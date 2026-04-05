@@ -43,9 +43,6 @@ jobs:
       - name: Install pnpm dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Set Nx base and head SHAs
-        uses: nrwl/nx-set-shas@v4
-
       - name: Evaluate Metro affected scope
         id: affected
         run: |
@@ -98,6 +95,15 @@ jobs:
       - name: Install pnpm dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Restore Turborepo cache
+        uses: actions/cache/restore@v5
+        with:
+          path: .turbo/cache
+          key: ${{ runner.os }}-turbo-${{ github.ref_name }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-${{ github.ref_name }}-
+            ${{ runner.os }}-turbo-
+
       - name: Configure KVM for Android emulator
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -106,7 +112,7 @@ jobs:
         shell: bash
 
       - name: Build shared packages
-        run: npx nx run-many --targets=build --projects=tag:type:pkg
+        run: pnpm run build:packages
         shell: bash
 
       - name: Install Maestro CLI
@@ -189,13 +195,22 @@ jobs:
       - name: Install pnpm dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Restore Turborepo cache
+        uses: actions/cache/restore@v5
+        with:
+          path: .turbo/cache
+          key: ${{ runner.os }}-turbo-${{ github.ref_name }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-${{ github.ref_name }}-
+            ${{ runner.os }}-turbo-
+
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ env.RUBY_VERSION }}
 
       - name: Build shared packages
-        run: npx nx run-many --targets=build --projects=tag:type:pkg
+        run: pnpm run build:packages
         shell: bash
 
       - name: Install Maestro CLI and iOS Utilities

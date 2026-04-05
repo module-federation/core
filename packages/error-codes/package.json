@@ -4,7 +4,7 @@
   "author": "zhanghang <hanric.zhang@gmail.com>",
   "public": true,
   "sideEffects": false,
-  "version": "2.1.0",
+  "version": "2.3.1",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -72,5 +72,12 @@
         "./dist/node.d.ts"
       ]
     }
+  },
+  "scripts": {
+    "build": "tsdown --config tsdown.config.ts --filter error-codes-build",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",
+    "test": "pnpm exec jest --config jest.config.js --passWithNoTests",
+    "test:ci": "pnpm exec jest --config jest.config.js --passWithNoTests --ci --coverage",
+    "pre-release": "pnpm run test && pnpm run build"
   }
 }

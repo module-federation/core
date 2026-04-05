@@ -53,6 +53,7 @@ const cjsToEsmPlugin: Plugin = {
       async (args: OnLoadArgs) => {
         let esbuild_shim: typeof import('esbuild') | undefined;
         const require_esbuild = () =>
+          // eslint-disable-next-line @typescript-eslint/no-require-imports
           build.esbuild || (esbuild_shim ||= require('esbuild'));
 
         const packageBuilder = await require_esbuild().build({

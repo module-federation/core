@@ -5,7 +5,6 @@ import {
   PLUGIN_NAME,
 } from '@module-federation/enhanced/rspack';
 import { isRequiredVersion, getManifestFileName } from '@module-federation/sdk';
-import pkgJson from '../../package.json';
 import logger from '../logger';
 import {
   isRegExp,
@@ -274,8 +273,14 @@ export const pluginModuleFederation = (
             `'${SSR_ENV_NAME}' environment is already defined.Please use another name.`,
           );
         }
+        const currentEnvironment = config.environments?.[environment];
+        if (!currentEnvironment) {
+          throw new Error(
+            `Can not find environment '${environment}' when enabling SSR.`,
+          );
+        }
         config.environments![SSR_ENV_NAME] = createSSRREnvConfig(
-          config.environments?.[environment]!,
+          currentEnvironment,
           moduleFederationOptions,
           ssrDir,
           config,
@@ -468,7 +473,7 @@ export const pluginModuleFederation = (
                 const match = shared.some((dep) => {
                   if (
                     (ext as RegExp).test(dep) ||
-                    (ext as RegExp).test(pkgJson.name)
+                    (ext as RegExp).test(__RSBUILD_PLUGIN_PACKAGE_NAME__)
                   ) {
                     sharedModule = dep;
                     return true;
@@ -481,7 +486,7 @@ export const pluginModuleFederation = (
               }
 
               if (typeof ext === 'string') {
-                if (ext === pkgJson.name) {
+                if (ext === __RSBUILD_PLUGIN_PACKAGE_NAME__) {
                   return false;
                 }
 

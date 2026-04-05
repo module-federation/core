@@ -614,11 +614,12 @@ hooks = new PluginSystem({
   
   resolveShare: new SyncWaterfallHook<{
     shareScopeMap: ShareScopeMap;
-    scope: ShareScopeMap[string];
+    scope: string;
     pkgName: string;
     version: string;
-    GlobalFederation: ModuleFederation;
-    resolver?: (sharedOptions: ShareInfos[string]) => Shared;
+    shareInfo: Shared;
+    GlobalFederation: Federation;
+    resolver: () => { shared: Shared; useTreesShaking: boolean } | undefined;
   }>('resolveShare'),
   
   initContainerShareScopeMap: new SyncWaterfallHook<{

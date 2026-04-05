@@ -12,7 +12,6 @@ const unsupportedTopLevelOptions: (keyof ModuleFederationConfig)[] = [
   'implementation',
   'manifest',
   'dev',
-  'dataPrefetch',
   'virtualRuntimeEntry',
   'experiments',
   'bridge',

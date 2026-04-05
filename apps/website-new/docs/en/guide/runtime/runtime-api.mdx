@@ -12,13 +12,15 @@ Used to create ModuleFederation instance.
 
 * When to use `createInstance`?
 
-To ensure the uniqueness of the ModuleFederation instance, after the build plugin creates an instance, it will be stored in memory. The exported APIs all first obtain the ModuleFederation instance from memory and then call the APIs of the ModuleFederation instance. This is also why APIs like loadRemote can be used directly from the `@module-federation/enhanced/runtime` package and inherently understand what application container they are attached to.
+  To ensure the uniqueness of the ModuleFederation instance, after the build plugin creates an instance, it will be stored in memory. The exported APIs all first obtain the ModuleFederation instance from memory and then call the APIs of the ModuleFederation instance. This is also why APIs like loadRemote can be used directly from the `@module-federation/enhanced/runtime` package and inherently understand what application container they are attached to.
 
-This singleton pattern works for most scenarios, but in the following cases, you need to use `createInstance`:
+  This singleton pattern works for most scenarios, but in the following cases, you need to use `createInstance`:
 
-- No build plugin is used  (Only use runtime)
-- Multiple ModuleFederation instances need to be created with different configurations for each instance
-- You want to use ModuleFederation's partitioning feature to encapsulate corresponding APIs for use in other projects
+  - No build plugin is used  (Only use runtime)
+  - Multiple ModuleFederation instances need to be created with different configurations for each instance
+  - You want to use ModuleFederation's partitioning feature to encapsulate corresponding APIs for use in other projects
+
+* `createInstance` will not overwrite an existing instance. Each call will create a new instance.
 
 ```ts
 import { createInstance } from '@module-federation/enhanced/runtime';
@@ -425,6 +427,13 @@ function registerPlugins(plugins: ModuleFederationRuntimePlugin[]) {}
 
 ## registerShared
 
+### details
+- shared: `{ [pkgName]: ShareArgs | ShareArgs[] }`
+- ShareArgs parameters:
+  - lib: `() => Module` synchronous factory; should not return Promise.
+  - get: `() => () => Module` or `() => Promise<() => Module>`, for lazy/async loading.
+- Others: scope, shareConfig, deps are optional; version is recommended for distinguishing.
+
 <Collapse>
 
 ```typescript
@@ -483,6 +492,11 @@ type SharedGetter = (() => () => Module) | (() => Promise<() => Module>);
                 singleton: true,
                 requiredVersion: "^18.0.0"
             }
+        },
+        'antd': {
+          version: '1.0.0',
+          scope: 'default',
+          get: () => import('antd').then((m) => () => m),
         }
     });
   ```
@@ -521,6 +535,11 @@ type SharedGetter = (() => () => Module) | (() => Promise<() => Module>);
                 singleton: true,
                 requiredVersion: "^18.0.0"
             }
+        },
+        'antd': {
+          version: '1.0.0',
+          scope: 'default',
+          get: () => import('antd').then((m) => () => m),
         }
     });
   ```

@@ -1,20 +1,45 @@
 {
   "root": true,
-  "ignorePatterns": ["**/*"],
-  "plugins": ["@nx"],
   "overrides": [
     {
-      "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
+      "files": ["*.ts", "*.tsx"],
+      "extends": ["plugin:@typescript-eslint/recommended"],
+      "parser": "@typescript-eslint/parser",
+      "parserOptions": { "ecmaVersion": 2020, "sourceType": "module" },
       "rules": {
-        "@nx/enforce-module-boundaries": [
-          "warn",
+        "@typescript-eslint/ban-ts-comment": "off",
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/no-unused-expressions": "off",
+        "@typescript-eslint/no-unused-vars": "off",
+        "prefer-const": "off",
+        "no-extra-semi": "error"
+      }
+    },
+    {
+      "files": ["*.js", "*.jsx"],
+      "extends": ["eslint:recommended"],
+      "parserOptions": { "ecmaVersion": 2020, "sourceType": "module" },
+      "rules": {
+        "@typescript-eslint/no-useless-constructor": "off",
+        "no-extra-semi": "error"
+      }
+    },
+    {
+      "files": [
+        "**/src/**/*.ts",
+        "**/src/**/*.tsx",
+        "**/src/**/*.js",
+        "**/src/**/*.jsx"
+      ],
+      "excludedFiles": ["**/*.config.*", "**/*.spec.*", "**/*.test.*"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
           {
-            "enforceBuildableLibDependency": true,
-            "allow": [],
-            "depConstraints": [
+            "patterns": [
               {
-                "sourceTag": "*",
-                "onlyDependOnLibsWithTags": ["*"]
+                "group": ["**/*.json"],
+                "message": "Direct JSON imports may fail in Node.js >= 22. Inject values via builder define (source.define in rslib/rsbuild) instead."
               }
             ]
           }
@@ -22,36 +47,14 @@
       }
     },
     {
-      "files": ["*.ts", "*.tsx"],
-      "extends": ["plugin:@nx/typescript"],
-      "rules": {
-        "@typescript-eslint/ban-ts-comment": "off",
-        "@typescript-eslint/no-explicit-any": "off",
-        "@typescript-eslint/no-unused-vars": "off",
-        "no-extra-semi": "error"
-      }
-    },
-    {
-      "files": ["*.js", "*.jsx"],
-      "extends": ["plugin:@nx/javascript"],
-      "rules": {
-        "@typescript-eslint/no-useless-constructor": "off",
-        "no-extra-semi": "error"
-      }
-    },
-    {
       "files": ["*.spec.ts", "*.spec.tsx", "*.spec.js", "*.spec.jsx"],
-      "env": {
-        "jest": true
-      },
+      "env": { "jest": true },
       "rules": {}
     },
     {
       "files": ["*.json"],
       "parser": "jsonc-eslint-parser",
-      "rules": {
-        "@nx/dependency-checks": "off"
-      }
+      "rules": {}
     }
   ]
 }

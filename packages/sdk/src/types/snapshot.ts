@@ -44,14 +44,12 @@ export interface BasicProviderModuleInfo extends BasicModuleInfo {
   prefetchEntryType?: RemoteEntryType;
 }
 
-interface BasicProviderModuleInfoWithPublicPath
-  extends BasicProviderModuleInfo {
+interface BasicProviderModuleInfoWithPublicPath extends BasicProviderModuleInfo {
   publicPath: string;
   ssrPublicPath?: string;
 }
 
-interface BasicProviderModuleInfoWithGetPublicPath
-  extends BasicProviderModuleInfo {
+interface BasicProviderModuleInfoWithGetPublicPath extends BasicProviderModuleInfo {
   getPublicPath: string;
 }
 
@@ -70,15 +68,13 @@ interface BasicConsumerModuleInfo extends BasicModuleInfo {
 }
 
 export interface ConsumerModuleInfoWithPublicPath
-  extends BasicConsumerModuleInfo,
-    BasicProviderModuleInfo {
+  extends BasicConsumerModuleInfo, BasicProviderModuleInfo {
   publicPath: string;
   ssrPublicPath?: string;
 }
 
 interface ConsumerModuleInfoWithGetPublicPath
-  extends BasicConsumerModuleInfo,
-    BasicProviderModuleInfo {
+  extends BasicConsumerModuleInfo, BasicProviderModuleInfo {
   getPublicPath: string;
 }
 

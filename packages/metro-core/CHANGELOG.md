@@ -1,5 +1,60 @@
 # @module-federation/metro
 
+## 2.3.1
+
+### Patch Changes
+
+- @module-federation/runtime@2.3.1
+- @module-federation/sdk@2.3.1
+- @module-federation/dts-plugin@2.3.1
+
+## 2.3.0
+
+### Patch Changes
+
+- Updated dependencies [eb26065]
+- Updated dependencies [8f2ec9b]
+  - @module-federation/dts-plugin@2.3.0
+  - @module-federation/sdk@2.3.0
+  - @module-federation/runtime@2.3.0
+
+## 2.2.3
+
+### Patch Changes
+
+- @module-federation/runtime@2.2.3
+- @module-federation/sdk@2.2.3
+- @module-federation/dts-plugin@2.2.3
+
+## 2.2.2
+
+### Patch Changes
+
+- Updated dependencies [95282ac]
+  - @module-federation/dts-plugin@2.2.2
+  - @module-federation/runtime@2.2.2
+  - @module-federation/sdk@2.2.2
+
+## 2.2.1
+
+### Patch Changes
+
+- @module-federation/runtime@2.2.1
+- @module-federation/sdk@2.2.1
+- @module-federation/dts-plugin@2.2.1
+
+## 2.2.0
+
+### Patch Changes
+
+- Updated dependencies [c856ec1]
+- Updated dependencies [12240bb]
+- Updated dependencies [e5dd6ef]
+- Updated dependencies [079aecd]
+  - @module-federation/sdk@2.2.0
+  - @module-federation/dts-plugin@2.2.0
+  - @module-federation/runtime@2.2.0
+
 ## 2.1.0
 
 ### Patch Changes

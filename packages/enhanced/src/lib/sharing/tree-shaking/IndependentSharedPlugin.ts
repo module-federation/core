@@ -20,7 +20,7 @@ import SharedContainerPlugin, {
   SharedContainerPluginOptions,
 } from './SharedContainerPlugin/SharedContainerPlugin';
 import { parseOptions } from '../../container/options';
-import type { SharedConfig } from '../../../declarations/plugins/sharing/SharePlugin';
+type SharedConfig = moduleFederationPlugin.SharedConfig;
 import ConsumeSharedPlugin from '../ConsumeSharedPlugin';
 import { NormalizedSharedOptions } from '../SharePlugin';
 import IndependentSharedRuntimeModule from './IndependentSharedRuntimeModule';

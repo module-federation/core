@@ -9,7 +9,7 @@ const ROOT = resolve(SCRIPT_DIR, '../..');
 const PACKAGES_ROOT = join(ROOT, 'packages');
 const SCOPE_PREFIX = '@module-federation/';
 const ADDITIONAL_PACKAGE_NAMES = new Set(['create-module-federation']);
-const SKIP_DIR_NAMES = new Set(['dist', 'node_modules', '.git', '.nx']);
+const SKIP_DIR_NAMES = new Set(['dist', 'node_modules', '.git', '.turbo']);
 const DEPENDENCY_FIELDS = [
   'dependencies',
   'devDependencies',

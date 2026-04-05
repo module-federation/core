@@ -7,7 +7,7 @@ const { getUndoPath } = require(
 ) as typeof import('webpack/lib/util/identifier');
 // inspired by react-refresh-webpack-plugin
 import getFederationGlobal from './getFederationGlobal';
-import { NormalizedRuntimeInitOptionsWithOutShared } from '../../../types/runtime';
+import type { NormalizedRuntimeInitOptionsWithOutShared } from './utils';
 
 const { RuntimeModule, RuntimeGlobals, Template } = require(
   normalizeWebpackPath('webpack'),

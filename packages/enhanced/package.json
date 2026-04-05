@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/enhanced",
-  "version": "2.1.0",
+  "version": "2.3.1",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
   "repository": {
@@ -83,14 +83,14 @@
     }
   },
   "devDependencies": {
-    "@module-federation/webpack-bundler-runtime": "workspace:*",
-    "@types/btoa": "^1.2.5",
     "ajv": "^8.18.0",
     "enhanced-resolve": "^5.0.0",
     "terser": "^5.37.0",
+    "fast-glob": "3.3.3",
     "memfs": "4.46.0"
   },
   "dependencies": {
+    "@module-federation/webpack-bundler-runtime": "workspace:*",
     "@module-federation/bridge-react-webpack-plugin": "workspace:*",
     "@module-federation/data-prefetch": "workspace:*",
     "@module-federation/dts-plugin": "workspace:*",
@@ -102,8 +102,15 @@
     "@module-federation/runtime-tools": "workspace:*",
     "@module-federation/sdk": "workspace:*",
     "@module-federation/cli": "workspace:*",
-    "btoa": "^1.2.1",
     "upath": "2.0.1",
-    "schema-utils": "^4.3.0"
+    "schema-utils": "^4.3.0",
+    "tapable": "2.3.0"
+  },
+  "scripts": {
+    "generate:schema": "node src/scripts/compile-schema.js && node src/scripts/generate-sdk-types.js",
+    "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && pnpm -C . exec tsdown --config tsdown.config.mts && cp *.md dist && node -e \"const fs=require('fs');const path=require('path');const src='src';const dst='dist/src';(function w(d){for(const e of fs.readdirSync(d,{withFileTypes:true})){const p=path.join(d,e.name);if(e.isDirectory())w(p);else if(e.name.endsWith('.d.ts')){const rel=path.relative(src,p);const out=path.join(dst,rel);fs.mkdirSync(path.dirname(out),{recursive:true});fs.copyFileSync(p,out);}}})(src);\"",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\"",
+    "test": "node test/scripts/ensure-reshake-fixtures.js && NODE_OPTIONS=\"--experimental-vm-modules --max-old-space-size=24576\" npx rstest -c rstest.config.ts && NODE_OPTIONS=\"--experimental-vm-modules --max-old-space-size=24576\" npx rstest -c rstest.treeshake.serial.config.ts",
+    "pre-release": "pnpm run test && pnpm run build"
   }
 }

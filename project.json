@@ -1,5 +1,0 @@
-{
-  "name": "module-federation",
-  "$schema": "node_modules/nx/schemas/project-schema.json",
-  "targets": {}
-}

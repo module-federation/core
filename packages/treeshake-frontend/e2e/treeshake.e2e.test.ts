@@ -94,9 +94,7 @@ describe('treeshake frontend e2e', () => {
       name: /analyze treeshake savings|立即分析/i,
     });
     await analyzeBtn.waitFor({ state: 'visible' });
-    await analyzeBtn.click();
-
-    const buildResp = await page.waitForResponse(
+    const buildRespPromise = page.waitForResponse(
       (resp) => {
         if (resp.request().method() !== 'POST') return false;
         try {
@@ -109,6 +107,8 @@ describe('treeshake frontend e2e', () => {
       },
       { timeout: 180000 },
     );
+    await analyzeBtn.click();
+    const buildResp = await buildRespPromise;
     assert.equal(buildResp.ok(), true);
 
     await page

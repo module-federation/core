@@ -13,6 +13,11 @@ export default defineConfig({
   output: {
     cleanDistPath: true,
   },
+  source: {
+    entry: {
+      index: './src/Index.tsx',
+    },
+  },
   lib: [
     {
       ...shared,

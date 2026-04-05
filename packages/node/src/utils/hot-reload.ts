@@ -125,6 +125,8 @@ const searchCache = function (
   }
 };
 
+globalThis.moduleGraphDirty = false;
+
 const hashmap = globalThis.mfHashMap || ({} as Record<string, string>);
 globalThis.moduleGraphDirty = false;
 

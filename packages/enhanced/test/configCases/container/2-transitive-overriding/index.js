@@ -11,9 +11,8 @@ it('should not override non-overridables (container-no-shared/b)', () => {
 });
 
 it('should have good module ids', async () => {
-  const { default: m0 } = await import(
-    'container-no-shared/modules-from-remote'
-  );
+  const { default: m0 } =
+    await import('container-no-shared/modules-from-remote');
   const { default: m1 } = await import('container-no-shared/modules');
   const m2 = Object.keys(__webpack_modules__).sort();
   [

@@ -1,6 +1,7 @@
 import ErrorCodeTitle from '@components/ErrorCodeTitle';
 import EnableAsyncEntry from '@components/en/EnableAsyncEntry';
 import Runtime from '@components/en/runtime/index';
+import { Tab, Tabs } from '@theme';
 
 # Runtime
 
@@ -18,6 +19,7 @@ This page collects runtime-related error codes and common troubleshooting guidan
 - [RUNTIME-008](#runtime-008)
 - [RUNTIME-009](#runtime-009)
 - [RUNTIME-010](#runtime-010)
+- [RUNTIME-012](#runtime-012)
 
 ## RUNTIME-001
 
@@ -44,6 +46,107 @@ There are corresponding solutions for the reasons:
 3. Check if the resource is externally accessible.
 4. Loading a ESM remote from a non-esm host
   - setting `type: 'module'` on the remote config
+
+### Getting More Detailed Error Information
+
+If you have confirmed that `window[remoteEntryKey]` does not exist (i.e. the script failed to register the container), but there is no clear error message in the console, it may be because the producer script is a cross-origin resource. Browsers hide error details for cross-origin scripts by default (`filename`, `lineno`, and `message` are all empty).
+
+You can add a `crossorigin` attribute to the script via the [`createScript`](../../plugin/dev/index#createscript) hook, provided that the producer server has `Access-Control-Allow-Origin` configured.
+
+First, create the runtime plugin file:
+
+```ts title="script-crossorigin-plugin.ts"
+import { ModuleFederationRuntimePlugin } from '@module-federation/runtime/types';
+
+export default function MFScriptPlugin(): ModuleFederationRuntimePlugin {
+  return {
+    name: 'script-crossorigin-plugin',
+    createScript({ url }) {
+      const script = document.createElement('script');
+      script.src = url;
+      script.crossOrigin = 'anonymous';
+      return script;
+    },
+    // If preloadRemote is used in your project, also implement createLink to keep
+    // crossorigin consistent. Without this, the preload (no-cors) and actual load
+    // (cors) will have different cache keys, causing the preload to be wasted.
+    createLink({ url, attrs }) {
+      const link = document.createElement('link');
+      link.setAttribute('href', url);
+      link.setAttribute('crossorigin', 'anonymous');
+      if (attrs) {
+        Object.entries(attrs).forEach(([key, value]) => {
+          if (key !== 'crossorigin') {
+            link.setAttribute(key, String(value));
+          }
+        });
+      }
+      return link;
+    },
+  };
+}
+```
+
+Then register the plugin:
+
+<Tabs>
+  <Tab label="Build Plugin">
+
+Register via the `runtimePlugins` field in your build config:
+
+```ts title="rspack.config.ts"
+const path = require('path');
+module.exports = {
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'host',
+      remotes: { /* ... */ },
+      runtimePlugins: [
+        path.resolve(__dirname, './script-crossorigin-plugin.ts'),
+      ],
+    }),
+  ],
+};
+```
+
+  </Tab>
+  <Tab label="Runtime API">
+
+Register via the `plugins` field in the `init` API:
+
+```ts title="index.ts"
+import { init } from '@module-federation/runtime';
+import MFScriptPlugin from './script-crossorigin-plugin';
+
+init({
+  name: 'host',
+  remotes: [/* ... */],
+  plugins: [MFScriptPlugin()],
+});
+```
+
+  </Tab>
+</Tabs>
+
+Once added, runtime exceptions thrown by cross-origin scripts will include the full `filename`, `lineno`, and `message`, making it easier to locate the specific error.
+
+
+:::warning
+
+* After adding this plugin, you must also set `output.crossOriginLoading` to `'anonymous'` in the build config of **all producers**, otherwise preloading will stop working.
+
+```js
+// webpack.config.js / rspack.config.js (producer side)
+module.exports = {
+  output: {
+    crossOriginLoading: 'anonymous',
+  },
+};
+```
+
+* If the server does not have CORS headers configured, adding the `crossorigin` attribute will instead cause the script to fail to load (network error). Confirm the server is correctly configured before using this approach.
+
+:::
 
 ## RUNTIME-002
 
@@ -144,11 +247,47 @@ Check whether globalSnapshot contains an object with key `${moduleName}:${module
 
 ### Reasons
 
-Runtime resource loading failed. The possible reasons are network instability causing timeout, or an incorrect resource URL.
+The remote entry script failed to load. The error message includes a specific failure reason, which falls into one of two categories:
+
+**1. ScriptNetworkError — network-level failure**
+
+The script file could not be downloaded. Common causes:
+
+- Incorrect resource URL (server returns 404)
+- Network instability or request timeout
+- Cross-origin (CORS) misconfiguration
+- CDN node unavailability
+
+**2. ScriptExecutionError — runtime error during script execution**
+
+The script file downloaded successfully, but its IIFE threw a runtime exception during execution. The error message will contain `ScriptExecutionError` along with the original exception (e.g. `TypeError: ...`). Common causes:
+
+- Incompatible syntax in the producer's code (e.g. unsupported browser APIs)
+- Producer entry relies on a global variable that was not correctly initialized
+- Corrupted or incomplete build output
 
 ### Solutions
 
-Check whether the resource URL is correct. If correct, check whether the network is stable. You can add a retry mechanism when the network is unstable, refer to [Runtime retry](/plugin/plugins/retry-plugin.html).
+**For ScriptNetworkError:**
+
+1. Open the resource URL from the error message directly in the browser to confirm it is accessible
+2. Verify the producer's `publicPath` and `remoteEntry` address configuration
+3. Check for CORS issues; if needed, configure CORS on the server or use the [`createScript`](../../plugin/dev/index#createscript) hook to add a `crossOrigin` attribute
+4. For flaky networks, add a retry mechanism — refer to [Runtime retry](/plugin/plugins/retry-plugin.html)
+
+**For ScriptExecutionError:**
+
+1. Inspect the original exception in the error message (`TypeError` / `SyntaxError`, etc.) to locate the specific error in the producer's entry file
+2. Verify that the producer's build target is compatible with the consumer's browser support range
+3. Download the remote entry file from the browser DevTools Network panel and execute it manually to reproduce the error
+
+:::tip
+A `ScriptExecutionError` means the script was downloaded successfully — retrying will not fix this type of error. Focus on investigating compatibility or runtime errors in the producer's code first.
+:::
+
+### Getting More Detailed Error Information
+
+Prior to **v2.3.0**, RUNTIME-008 error messages may not include specific exception details. If the error message is not descriptive enough, refer to 「[RUNTIME-001 Getting More Detailed Error Information](#getting-more-detailed-error-information)」 for how to add the `crossorigin` attribute to retrieve the full error stack.
 
 ## RUNTIME-009
 
@@ -174,6 +313,44 @@ Not use build plugin, but directly call runtime api.
 
 - If you need an instance with a different `name`, use the `createInstance` API to create a new instance instead of modifying the existing one.
 - If changing the `name` is not required, omit the `name` field in the `initOptions` call or keep it consistent with the value used during initialization.
+
+## RUNTIME-012
+
+<ErrorCodeTitle code='RUNTIME-012'/>
+
+### Reason
+
+When loading a shared module, the local `getter` is not a function (it is `undefined` or another non-function type).
+
+When `loadShare` returns `false` — meaning the remote did not provide the shared module — the runtime falls back to the local `getter` to resolve the module. If the `getter` is not a function at that point, neither the remote nor the local fallback can supply the module, and this error is thrown.
+
+**Most common cause**: `import: false` is set for the shared module in one of the applications, which tells the bundler not to include that module locally. In this case the host app **must** provide the module via a `lib` function — if no host provides it, the fallback has nothing to call.
+
+### Solution
+
+1. **Check the `shared.import` configuration**
+
+   If you set `import: false` for this shared module in any application, you must ensure the host provides a corresponding `lib` function, for example:
+
+   ```ts title="host/webpack.config.ts"
+   new ModuleFederationPlugin({
+     name: 'host',
+     shared: {
+       react: {
+         singleton: true,
+         lib: () => require('react'), // host must provide lib
+       },
+     },
+   });
+   ```
+
+2. **Remove `import: false`**
+
+   If the optimization is not required, remove `import: false` and let the bundler handle the dependency automatically.
+
+3. **Verify shared module name and version range**
+
+   Make sure the shared module name and version range are consistent between the host and all remotes, so a match can be found and the fallback is never reached with an empty `getter`.
 
 ## Common Issues (No Error Code)
 

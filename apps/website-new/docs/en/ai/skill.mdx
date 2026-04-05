@@ -1,0 +1,107 @@
+---
+pageType: doc-wide
+sidebar: false
+---
+
+# Skills
+
+Module Federation now exposes one unified **`mf` skill**.
+
+You do not need to pick from a long list of separate skills, and you do not need to read the docs first and then translate them back to your agent. The simpler approach is to install this one skill and let the agent decide whether it should read docs, inspect config, or troubleshoot a problem.
+
+If you have not read it yet, start with [AI Quick Start](./index).
+
+## Installation
+
+```bash
+npx skills add module-federation/core --skill mf -y
+```
+
+After that, the main entry is:
+
+```text
+/mf <sub-command or question>
+```
+
+If you cannot use the CLI, you can also copy the directory manually from GitHub:
+
+```text
+https://github.com/module-federation/core/tree/main/skills/mf
+```
+
+## How to use it
+
+`mf` has one entry point, but it contains multiple capabilities. You can either provide an explicit sub-command or just ask in plain language.
+
+With explicit sub-commands:
+
+```text
+/mf docs How do I use Module Federation in Modern.js?
+/mf integrate
+/mf type-check
+/mf runtime-error RUNTIME-008
+```
+
+With natural language:
+
+```text
+/mf What's the difference between singleton and requiredVersion in shared?
+/mf Help me figure out why this project is not pulling remote types
+/mf Add Module Federation to the current project
+```
+
+## What `mf` supports
+
+| Sub-command | Use it for |
+|---|---|
+| `docs` | Read the latest docs first, then answer configuration, API, and concept questions |
+| `context` | Inspect the current project's MF configuration |
+| `module-info` | Inspect remote module URLs, exposed modules, and related metadata |
+| `integrate` | Add Module Federation to an existing project |
+| `type-check` | Troubleshoot type-related issues |
+| `shared-deps` | Troubleshoot shared dependency conflicts and duplicate bundling |
+| `perf` | Troubleshoot slow local development and slow HMR |
+| `config-check` | Troubleshoot config mistakes, missing files, and plugin mismatches |
+| `bridge-check` | Troubleshoot Bridge integration issues |
+| `runtime-error` | Troubleshoot explicit runtime error codes, especially `RUNTIME-001` and `RUNTIME-008` |
+
+## The most common workflows
+
+### 1. Read the docs before answering
+
+This is the most common use case, and the best place to start:
+
+```text
+/mf docs What's the difference between singleton and requiredVersion in shared?
+```
+
+That makes the agent read the latest docs first instead of guessing from outdated memory.
+
+### 2. Let the agent integrate it for you
+
+If you want to add Module Federation to an existing project:
+
+```text
+/mf integrate
+```
+
+The agent will inspect your current project and decide what to do next.
+
+### 3. Let the agent troubleshoot directly
+
+If you already have a concrete problem:
+
+```text
+/mf type-check
+/mf shared-deps
+/mf config-check
+/mf runtime-error RUNTIME-008
+```
+
+At that point, the goal is not for you to manually investigate first. The goal is to let the agent start diagnosing immediately.
+
+## The one thing you really need to remember
+
+You do not need to read the docs first and then tell the agent what to do.
+
+Install `mf`, then let the agent read, inspect, decide, and act.

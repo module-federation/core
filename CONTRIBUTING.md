@@ -10,7 +10,7 @@ Thank you for your interest in contributing to Module Federation! Before startin
 4. Set up the development environment. Refer to the "Setup Development Environment" section below for guidance.
 5. If you've fixed a bug or added code that should be tested, add some tests.
 6. Ensure all tests pass. See the "Testing" section below for more information.
-7. Run `nx format:write` and `nx affected -t lint --parallel=7 --exclude='*,!tag:type:pkg'` to check and fix the code style.
+7. Run `pnpm exec prettier --write .` and `pnpm exec turbo run lint` to check and fix code style.
 8. If you've changed Node.js packages, run `npm run commit` for semantic versioning and commit.
 9. Submit the Pull Request, ensuring all CI runs pass.
 10. Your Pull Request will be reviewed by the maintainers soon.
@@ -23,15 +23,15 @@ Thank you for your interest in contributing to Module Federation! Before startin
 
 ### Install Node.js
 
-We recommend using Node.js 18 LTS. Check your Node.js version with `node -v`.
+We recommend using Node.js 20 LTS. Check your Node.js version with `node -v`.
 
 To install Node.js, use [nvm](https://github.com/nvm-sh/nvm) or [fnm](https://github.com/Schniz/fnm):
 
 ```bash
-# Install Node.js 18 LTS
-nvm install 18 --lts
-nvm alias default 18
-nvm use 18
+# Install Node.js 20 LTS
+nvm install 20 --lts
+nvm alias default 20
+nvm use 20
 ```
 
 ### Install Dependencies
@@ -40,14 +40,6 @@ nvm use 18
 # Enable pnpm with corepack, only available on Node.js >= `v14.19.0`
 corepack enable
 ```
-
-Add nx to global
-
-```bash
-pnpm add nx@latest -g
-```
-
-First, install NX globally:
 
 ```sh
 pnpm install
@@ -68,7 +60,7 @@ Testing is a crucial part of the development process in Module Federation. Here'
 To execute all test suites in the project, use:
 
 ```sh
-npx nx run-many -t test --parallel=3
+pnpm exec turbo run test
 ```
 
 This command runs every test across all projects in the repository.
@@ -78,17 +70,17 @@ This command runs every test across all projects in the repository.
 If you need to run tests for a specific project, use:
 
 ```sh
-npx nx run-many -t test --parallel=3 --projects=PROJECT-NAME
+pnpm --filter PROJECT-NAME run test
 ```
 
-Replace `PROJECT-NAME` with the actual name of the project you want to test. The `--parallel=3` flag allows simultaneous execution of up to 3 test suites, improving the overall testing speed.
+Replace `PROJECT-NAME` with the actual package name (for example `@module-federation/runtime-core`).
 
 ### Running Impacted Tests
 
 To run tests only for the projects affected by recent changes, use:
 
 ```sh
-npx nx affected -t test --parallel=3 --exclude='*,!tag:type:pkg'
+pnpm run ci:local --only=build-and-test
 ```
 
 This command ensures that only relevant tests are executed, saving time and resources.
@@ -100,7 +92,7 @@ The enhanced package uses Vitest with a custom runner that compiles webpack conf
 - Run all enhanced tests
 
 ```sh
-nx test enhanced
+pnpm --filter @module-federation/enhanced run test
 ```
 
 - Run a single enhanced case (by directory name)

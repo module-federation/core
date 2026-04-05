@@ -8,7 +8,7 @@
 - Required: No
 - Default: `false`
 
-启用 `asyncStartup` 后，所有 {props.name || 'Module Federation'}  入口将默认以异步方式初始化。这意味着：
+启用 `asyncStartup` 后，所有 {props.brandName || props.name || 'Module Federation'}  入口将默认以异步方式初始化。这意味着：
 
 - 无需在应用顶部手动添加 `import()` 语句（例如 `import('./bootstrap')`）
 - 所有入口都会自动处理异步初始化
@@ -24,7 +24,7 @@
 - Required: No
 - Default: `false`
 
-设置 `true` 后 会 external {props.name || 'Module Federation'}  runtime，并使用消费者提供的 runtime 。（请确保你的消费者有设置 `provideExternalRuntime: true`，否则无法正常运行！）
+设置为 `true` 时，将把 `@module-federation/runtime-core` 作为外部依赖处理，并在运行时从全局变量 `_FEDERATION_RUNTIME_CORE` 读取。请确保消费者侧已正确提供该全局变量（通常与 `provideExternalRuntime` 配合使用），否则无法正常运行。
 
 ## provideExternalRuntime
 
@@ -32,11 +32,12 @@
 - Required: No
 - Default: `false`
 
-::: warning 注意
-请确保仅在最顶层消费者配置！若同时有多个消费者注入 runtime，后执行的不会覆盖已有的 runtime。
-:::
+仅用于“纯消费者”（没有设置 `exposes`）的场景。开启后会自动注入 `@module-federation/inject-external-runtime-core-plugin` 以在运行时提供必要的外部 runtime。
 
-设置 `true` 后会在消费者处注入 {props.name || 'Module Federation'}  runtime。
+:::warning 注意
+- 与 `exposes` 同时使用会报错：仅纯消费者可开启。
+- 建议仅在应用最顶层消费者配置，避免多个消费者重复注入。
+:::
 
 
 ## optimization
@@ -52,7 +53,7 @@
 当设置为 `true` 时，该选项会在构建期间将全局常量 `FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN` 定义为 `true`。在 `@module-federation/runtime-core` 中，这会阻止 `snapshotPlugin()` 与 `generatePreloadAssetsPlugin()` 被打包并在 Module Federation 实例中初始化。
 
 **影响：**
-*   **收益：** 排除这两个插件的代码后，可减小 {props.name || 'Module Federation'} 运行时的整体包体积。
+*   **收益：** 排除这两个插件的代码后，可减小 {props.brandName || props.name || 'Module Federation'} 运行时的整体包体积。
 *   **代价：** 会禁用这两个插件提供的能力。`snapshotPlugin` 对 “mf-manifest 协议” 非常关键，它负责生成或在运行时提供构建清单（例如 `mf-manifest.json`）的访问能力，清单中包含暴露模块、共享依赖、版本与远程模块等元数据。禁用后意味着：
     *   运行时将无法访问这份构建清单数据。
     *   依赖清单的能力（如动态远程发现、基于清单的版本兼容检查、高级资源预加载（也由被移除的 `generatePreloadAssetsPlugin` 处理）以及可能的运行时调试/自省工具）将无法正常工作或不可用。

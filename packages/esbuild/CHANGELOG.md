@@ -1,5 +1,62 @@
 # @module-federation/esbuild
 
+## 0.0.103
+
+### Patch Changes
+
+- @module-federation/runtime@2.3.1
+- @module-federation/webpack-bundler-runtime@2.3.1
+- @module-federation/sdk@2.3.1
+
+## 0.0.102
+
+### Patch Changes
+
+- Updated dependencies [eb26065]
+- Updated dependencies [f1d79b2]
+- Updated dependencies [8f2ec9b]
+  - @module-federation/sdk@2.3.0
+  - @module-federation/webpack-bundler-runtime@2.3.0
+  - @module-federation/runtime@2.3.0
+
+## 0.0.101
+
+### Patch Changes
+
+- @module-federation/runtime@2.2.3
+- @module-federation/webpack-bundler-runtime@2.2.3
+- @module-federation/sdk@2.2.3
+
+## 0.0.100
+
+### Patch Changes
+
+- Updated dependencies [f81bbea]
+  - @module-federation/webpack-bundler-runtime@2.2.2
+  - @module-federation/runtime@2.2.2
+  - @module-federation/sdk@2.2.2
+
+## 0.0.99
+
+### Patch Changes
+
+- @module-federation/runtime@2.2.1
+- @module-federation/webpack-bundler-runtime@2.2.1
+- @module-federation/sdk@2.2.1
+
+## 0.0.98
+
+### Patch Changes
+
+- a944c2d: fix: fix import map registration for ESM remote modules
+
+  The import map registration was failing because the runtimePlugin was looking for moduleMap in the host scope instead of fetching it from the remote module exports. This fix adds explicit synchronous import map registration in the host initialization code that runs after initializeSharing but before any code that imports from remotes.
+
+- Updated dependencies [c856ec1]
+- Updated dependencies [12240bb]
+- Updated dependencies [e5dd6ef]
+  - @module-federation/sdk@2.2.0
+
 ## 0.0.97
 
 ### Patch Changes

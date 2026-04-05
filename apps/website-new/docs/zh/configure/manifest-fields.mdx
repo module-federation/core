@@ -1,0 +1,75 @@
+import CommonMfManifestStatsFields from '@components/common/configure/mf-manifest-stats-common.mdx'
+
+# mf-manifest.json 字段定义
+
+`mf-manifest.json` 是启用 [manifest](./manifest) 后生成的运行时清单文件。它从 `mf-stats.json` 中提炼出“消费端运行时加载所需”的稳定字段，便于消费端在加载远程模块前快速解析。
+
+对比关系：
+
+- `mf-stats.json`：字段更全，适合用于诊断/分析
+- `mf-manifest.json`：字段更稳定、更精简，适合运行时消费
+
+## 顶层结构
+
+| 字段 | 类型 | 必有 | mf-stats.json | 说明 |
+| --- | --- | --- | --- | --- |
+| `id` | `string` | 是 | 有 | 本次构建的唯一标识 |
+| `name` | `string` | 是 | 有 | federation name |
+| `metaData` | `StatsMetaData` | 是 | 有 | 构建与远程入口信息 |
+| `shared` | `ManifestShared[]` | 是 | 有（但字段更全） | shared 列表（精简字段） |
+| `remotes` | `ManifestRemote[]` | 是 | 有（但字段更全） | remotes 列表（精简字段） |
+| `exposes` | `ManifestExpose[]` | 是 | 有（但字段更全） | exposes 列表（精简字段） |
+
+:::tip disableAssetsAnalyze 的影响
+当你在 [manifest](./manifest) 中配置 `disableAssetsAnalyze: true` 时，`mf-manifest.json` 中将不会有 `shared`、`exposes` 字段，且 `remotes` 中也不会有 `assets`。
+:::
+
+## 与 mf-stats.json 的字段差异
+
+<CommonMfManifestStatsFields />
+
+### shared
+
+`mf-manifest.json` 的 `shared` 是 `mf-stats.json` 的精简版，主要保留版本与资源信息。
+
+| 字段 | mf-manifest.json | mf-stats.json |
+| --- | --- | --- |
+| `id` | 有 | 有 |
+| `name` | 有 | 有 |
+| `version` | 有 | 有 |
+| `singleton` | 有 | 有 |
+| `requiredVersion` | 有 | 有 |
+| `hash` | 有 | 有 |
+| `assets` | 有 | 有 |
+| `deps` | 无 | 有 |
+| `usedIn` | 无 | 有 |
+| `usedExports` | 无 | 有 |
+| `fallback` | 可选 | 有 |
+| `fallbackName` | 可选 | 有 |
+| `fallbackType` | 可选 | 有 |
+
+### remotes
+
+`mf-manifest.json` 的 remotes 只保留定位与加载所需字段；`mf-stats.json` 会额外记录消费关系（usedIn 等）。
+
+| 字段 | mf-manifest.json | mf-stats.json |
+| --- | --- | --- |
+| `moduleName` | 有 | 有 |
+| `federationContainerName` | 有 | 有 |
+| `alias` | 有 | 有 |
+| `consumingFederationContainerName` | 无 | 有 |
+| `usedIn` | 无 | 有 |
+| `entry` / `version`（二选一） | 有 | 有 |
+
+### exposes
+
+`mf-manifest.json` 的 exposes 只保留运行时消费端需要的字段。
+
+| 字段 | mf-manifest.json | mf-stats.json |
+| --- | --- | --- |
+| `id` | 有 | 有 |
+| `name` | 有 | 有 |
+| `path` | 有 | 有 |
+| `assets` | 有 | 有 |
+| `file` | 无 | 有 |
+| `requires` | 无 | 有 |

@@ -16,9 +16,13 @@ type AddOptionsFnParams = {
 
 export type ProviderFnParams = {
   rootComponent: Vue.Component;
-  appOptions: (
-    params: AddOptionsFnParams,
-  ) => { router?: VueRouter.Router } | void;
+  appOptions: (params: AddOptionsFnParams) => {
+    router?: VueRouter.Router;
+    /** Called with the bridge's internal router after creation but before navigation.
+     *  Use this to register global guards (beforeEach, afterEach, etc.) that would
+     *  otherwise be lost when the bridge recreates the router. */
+    afterRouterCreate?: (router: VueRouter.Router) => void;
+  } | void;
 };
 
 export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
@@ -59,7 +63,7 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
           ...extraProps,
         });
         if (bridgeOptions?.router) {
-          const { history, routes } = processRoutes({
+          const { history, routes, patchRouter } = processRoutes({
             router: bridgeOptions.router,
             basename: info.basename,
             memoryRoute: info.memoryRoute,
@@ -71,6 +75,14 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
             history,
             routes,
           });
+
+          if (patchRouter) {
+            patchRouter(router);
+          }
+
+          if (bridgeOptions.afterRouterCreate) {
+            bridgeOptions.afterRouterCreate(router);
+          }
 
           LoggerInstance.debug(`createBridgeComponent render router info>>>`, {
             moduleName,

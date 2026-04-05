@@ -17,10 +17,10 @@ import { parseOptions } from '../container/options';
 import ProvideForSharedDependency from './ProvideForSharedDependency';
 import ProvideSharedDependency from './ProvideSharedDependency';
 import ProvideSharedModuleFactory from './ProvideSharedModuleFactory';
-import type {
-  ProvideSharedPluginOptions,
-  ProvidesConfig,
-} from '../../declarations/plugins/sharing/ProvideSharedPlugin';
+import type { provideSharedPlugin } from '@module-federation/sdk';
+type ProvideSharedPluginOptions =
+  provideSharedPlugin.ProvideSharedPluginOptions;
+type ProvidesConfig = provideSharedPlugin.ProvidesConfig;
 import FederationRuntimePlugin from '../container/runtime/FederationRuntimePlugin';
 import { createSchemaValidation } from '../../utils';
 import path from 'path';

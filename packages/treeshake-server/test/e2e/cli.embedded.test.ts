@@ -49,10 +49,13 @@ let baseUrl = '';
 
 beforeAll(async () => {
   if (!fs.existsSync(distEntry) || !fs.existsSync(embeddedIndex)) {
-    execSync('pnpm -C packages/treeshake-server build', {
-      cwd: repoRoot,
-      stdio: 'inherit',
-    });
+    execSync(
+      'pnpm exec turbo run build --filter=@module-federation/treeshake-server',
+      {
+        cwd: repoRoot,
+        stdio: 'inherit',
+      },
+    );
   }
 
   const port = await getAvailablePort();

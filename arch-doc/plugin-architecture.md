@@ -19,31 +19,31 @@ graph TB
     subgraph "Enhanced Package"
         MFP[ModuleFederationPlugin<br/>Main Orchestrator]
     end
-    
+
     subgraph "Core Plugins - Applied Immediately (in order)"
-        REP[RemoteEntryPlugin<br/>@module-federation/rspack]
+        REP[RemoteEntryPlugin<br/>&#64;module-federation/rspack]
         FMP[FederationModulesPlugin<br/>Hook Provider]
         FRP[FederationRuntimePlugin]
     end
-    
+
     subgraph "Feature Plugins - Applied via afterPlugins Hook"
         CP[ContainerPlugin<br/>if options.exposes]
         CRP[ContainerReferencePlugin<br/>if options.remotes]
         SP[SharePlugin<br/>always applied]
     end
-    
+
     subgraph "Share System"
         CSP[ConsumeSharedPlugin]
         PSP[ProvideSharedPlugin]
     end
-    
+
     subgraph "Additional Plugins (exists but not in main flow)"
         HCP[HoistContainerReferencesPlugin]
         EFRP[EmbedFederationRuntimePlugin]
     end
-    
+
     MFP -->|"First"| REP
-    MFP -->|"Second"| FMP  
+    MFP -->|"Second"| FMP
     MFP -->|"Third"| FRP
     MFP -->|"afterPlugins hook"| CP
     MFP -->|"afterPlugins hook"| CRP

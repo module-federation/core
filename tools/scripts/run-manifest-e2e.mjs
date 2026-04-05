@@ -1,5 +1,13 @@
 #!/usr/bin/env node
 import { spawn } from 'node:child_process';
+import {
+  DETACHED_PROCESS_GROUP,
+  formatExit,
+  isExpectedServeExit,
+  runGuardedCommand,
+  shutdownServe,
+  spawnWithPromise,
+} from './e2e-process-utils.mjs';
 
 const MANIFEST_WAIT_TARGETS = [
   'tcp:3009',
@@ -28,27 +36,13 @@ const SCENARIOS = {
   dev: {
     label: 'manifest development',
     serveCmd: ['pnpm', 'run', 'app:manifest:dev'],
-    e2eCmd: [
-      'npx',
-      'nx',
-      'run-many',
-      '--target=e2e',
-      '--projects=manifest-webpack-host',
-      '--parallel=2',
-    ],
+    e2eCmd: ['pnpm', '--filter', '3008-webpack-host', 'run', 'e2e'],
     waitTargets: MANIFEST_WAIT_TARGETS,
   },
   prod: {
     label: 'manifest production',
     serveCmd: ['pnpm', 'run', 'app:manifest:prod'],
-    e2eCmd: [
-      'npx',
-      'nx',
-      'run-many',
-      '--target=e2e',
-      '--projects=manifest-webpack-host',
-      '--parallel=1',
-    ],
+    e2eCmd: ['pnpm', '--filter', '3008-webpack-host', 'run', 'e2e'],
     waitTargets: MANIFEST_WAIT_TARGETS,
   },
 };
@@ -86,6 +80,7 @@ async function runScenario(name) {
     stdio: 'inherit',
     detached: true,
   });
+  serve[DETACHED_PROCESS_GROUP] = true;
 
   let serveExitInfo;
   let shutdownRequested = false;
@@ -98,61 +93,19 @@ async function runScenario(name) {
     serve.on('error', reject);
   });
 
-  const guard = (commandDescription, factory) => {
-    const controller = new AbortController();
-    const { signal } = controller;
-    const { child, promise } = factory(signal);
-
-    const watchingPromise = serveExitPromise.then((info) => {
-      if (!shutdownRequested) {
-        if (child.exitCode === null && child.signalCode === null) {
-          controller.abort();
-        }
-        throw new Error(
-          `Serve process exited while ${commandDescription}: ${formatExit(info)}`,
-        );
-      }
-      return info;
-    });
-
-    return Promise.race([promise, watchingPromise]).finally(() => {
-      if (child.exitCode === null && child.signalCode === null) {
-        controller.abort();
-      }
-    });
-  };
-
-  const runCommand = (cmd, args, signal) => {
-    const child = spawn(cmd, args, {
-      stdio: 'inherit',
-      signal,
-    });
-
-    const promise = new Promise((resolve, reject) => {
-      child.on('exit', (code, childSignal) => {
-        if (code === 0) {
-          resolve({ code, signal: childSignal });
-        } else {
-          reject(
-            new Error(
-              `${cmd} ${args.join(' ')} exited with ${formatExit({ code, signal: childSignal })}`,
-            ),
-          );
-        }
-      });
-      child.on('error', reject);
-    });
-
-    return { child, promise };
-  };
-
   try {
-    await guard('waiting for manifest services', (signal) =>
-      runCommand('npx', ['wait-on', ...scenario.waitTargets], signal),
+    await runGuardedCommand(
+      'waiting for manifest services',
+      serveExitPromise,
+      () => spawnWithPromise('npx', ['wait-on', ...scenario.waitTargets]),
+      () => shutdownRequested,
     );
 
-    await guard('running manifest e2e tests', (signal) =>
-      runCommand(scenario.e2eCmd[0], scenario.e2eCmd.slice(1), signal),
+    await runGuardedCommand(
+      'running manifest e2e tests',
+      serveExitPromise,
+      () => spawnWithPromise(scenario.e2eCmd[0], scenario.e2eCmd.slice(1)),
+      () => shutdownRequested,
     );
   } finally {
     shutdownRequested = true;
@@ -191,151 +144,6 @@ async function runKillPort() {
   } catch (error) {
     console.warn('[manifest-e2e] kill-port command failed:', error.message);
   }
-}
-
-function spawnWithPromise(cmd, args, options = {}) {
-  const child = spawn(cmd, args, {
-    stdio: 'inherit',
-    ...options,
-  });
-
-  const promise = new Promise((resolve, reject) => {
-    child.on('exit', (code, signal) => {
-      if (code === 0) {
-        resolve({ code, signal });
-      } else {
-        reject(
-          new Error(
-            `${cmd} ${args.join(' ')} exited with ${formatExit({ code, signal })}`,
-          ),
-        );
-      }
-    });
-    child.on('error', reject);
-  });
-
-  return { child, promise };
-}
-
-async function shutdownServe(proc, exitPromise) {
-  if (proc.exitCode !== null || proc.signalCode !== null) {
-    return exitPromise;
-  }
-
-  const sequence = [
-    { signal: 'SIGINT', timeoutMs: 8000 },
-    { signal: 'SIGTERM', timeoutMs: 5000 },
-    { signal: 'SIGKILL', timeoutMs: 3000 },
-  ];
-
-  for (const { signal, timeoutMs } of sequence) {
-    if (proc.exitCode !== null || proc.signalCode !== null) {
-      break;
-    }
-
-    sendSignal(proc, signal);
-
-    try {
-      await waitWithTimeout(exitPromise, timeoutMs);
-      break;
-    } catch (error) {
-      if (error?.name !== 'TimeoutError') {
-        throw error;
-      }
-      // escalate to next signal on timeout
-    }
-  }
-
-  return exitPromise;
-}
-
-function sendSignal(proc, signal) {
-  if (proc.exitCode !== null || proc.signalCode !== null) {
-    return;
-  }
-
-  try {
-    process.kill(-proc.pid, signal);
-  } catch (error) {
-    if (error.code !== 'ESRCH' && error.code !== 'EPERM') {
-      throw error;
-    }
-    try {
-      proc.kill(signal);
-    } catch (innerError) {
-      if (innerError.code !== 'ESRCH') {
-        throw innerError;
-      }
-    }
-  }
-}
-
-function waitWithTimeout(promise, timeoutMs) {
-  return new Promise((resolve, reject) => {
-    let settled = false;
-
-    const timer = setTimeout(() => {
-      if (settled) {
-        return;
-      }
-      settled = true;
-      const timeoutError = new Error(`Timed out after ${timeoutMs}ms`);
-      timeoutError.name = 'TimeoutError';
-      reject(timeoutError);
-    }, timeoutMs);
-
-    promise.then(
-      (value) => {
-        if (settled) {
-          return;
-        }
-        settled = true;
-        clearTimeout(timer);
-        resolve(value);
-      },
-      (error) => {
-        if (settled) {
-          return;
-        }
-        settled = true;
-        clearTimeout(timer);
-        reject(error);
-      },
-    );
-  });
-}
-
-function isExpectedServeExit(info) {
-  if (!info) {
-    return false;
-  }
-
-  const { code, signal } = info;
-
-  if (code === 0) {
-    return true;
-  }
-
-  if (code === 130 || code === 137 || code === 143) {
-    return true;
-  }
-
-  if (code == null && ['SIGINT', 'SIGTERM', 'SIGKILL'].includes(signal)) {
-    return true;
-  }
-
-  return false;
-}
-
-function formatExit({ code, signal }) {
-  const parts = [];
-  if (code !== null && code !== undefined) {
-    parts.push(`code ${code}`);
-  }
-  if (signal) {
-    parts.push(`signal ${signal}`);
-  }
-  return parts.length > 0 ? parts.join(', ') : 'unknown status';
 }
 
 main().catch((error) => {

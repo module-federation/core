@@ -49,6 +49,7 @@ describe('generateTypesInChildProcess', () => {
   it('generateTypesInChildProcess', async () => {
     // createRpcWorker will use dist assets , so it need to test dist
     const { DtsWorker } =
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       require('../../../dist/core') as typeof import('../index');
     const dtsWorker = new DtsWorker({
       host: hostOptions,
@@ -273,6 +274,7 @@ describe('DtsWorker Unit Tests', () => {
     vi.spyOn(console, 'error').mockImplementation(() => {});
     originalKill = process.kill;
     originalDebugMode = isDebugMode;
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     DtsWorkerClass = require('../../../dist/core').DtsWorker;
     // Reset isDebugMode for each test
     vi.mock('./utils', () => ({

@@ -84,15 +84,47 @@ export function createScript(info: {
     }
   }
 
+  // Capture JS runtime errors thrown by this script's IIFE during execution.
+  // The browser still fires onload even when the script throws, so without this
+  // listener the execution error would silently become an uncaught global exception.
+  let executionError: Error | null = null;
+  const executionErrorHandler =
+    typeof window !== 'undefined'
+      ? (evt: ErrorEvent) => {
+          if (evt.filename && isStaticResourcesEqual(evt.filename, info.url)) {
+            const err = new Error(
+              `ScriptExecutionError: Script "${info.url}" loaded but threw a runtime error during execution: ${evt.message} (${evt.filename}:${evt.lineno}:${evt.colno})`,
+            );
+            err.name = 'ScriptExecutionError';
+            executionError = err;
+          }
+        }
+      : null;
+  if (executionErrorHandler) {
+    window.addEventListener('error', executionErrorHandler);
+  }
+
   const onScriptComplete = async (
     prev: OnErrorEventHandler | GlobalEventHandlers['onload'] | null,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     event: any,
   ): Promise<void> => {
     clearTimeout(timeoutId);
+    if (executionErrorHandler) {
+      window.removeEventListener('error', executionErrorHandler);
+    }
     const onScriptCompleteCallback = () => {
       if (event?.type === 'error') {
-        info?.onErrorCallback && info?.onErrorCallback(event);
+        const networkError = new Error(
+          event?.isTimeout
+            ? `ScriptNetworkError: Script "${info.url}" timed out.`
+            : `ScriptNetworkError: Failed to load script "${info.url}" - the script URL is unreachable or the server returned an error (network failure, 404, CORS, etc.)`,
+        );
+        networkError.name = 'ScriptNetworkError';
+        info?.onErrorCallback && info?.onErrorCallback(networkError);
+      } else if (executionError) {
+        // Script fetched OK (onload fired) but IIFE threw during execution.
+        info?.onErrorCallback && info?.onErrorCallback(executionError);
       } else {
         info?.cb && info?.cb();
       }
@@ -126,10 +158,7 @@ export function createScript(info: {
   script.onload = onScriptComplete.bind(null, script.onload);
 
   timeoutId = setTimeout(() => {
-    onScriptComplete(
-      null,
-      new Error(`Remote script "${info.url}" time-outed.`),
-    );
+    onScriptComplete(null, { type: 'error', isTimeout: true });
   }, timeout);
 
   return { script, needAttach };

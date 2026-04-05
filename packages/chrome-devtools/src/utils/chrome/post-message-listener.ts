@@ -1,3 +1,5 @@
+import { sanitizePostMessagePayload } from './safe-post-message';
+
 if (window.moduleHandler) {
   window.removeEventListener('message', window.moduleHandler);
 } else {
@@ -10,11 +12,11 @@ if (window.moduleHandler) {
     chrome.runtime
       .sendMessage({
         origin,
-        data: {
+        data: sanitizePostMessagePayload({
           moduleInfo: data.moduleInfo,
           updateModule: data.updateModule,
           share: data.share,
-        },
+        }),
       })
       .catch(() => {
         return false;

@@ -44,8 +44,7 @@ export interface NextFederationPluginExtraOptions {
   debug?: boolean;
 }
 
-export interface NextFederationPluginOptions
-  extends ModuleFederationPluginOptions {
+export interface NextFederationPluginOptions extends ModuleFederationPluginOptions {
   extraOptions: NextFederationPluginExtraOptions;
 }
 

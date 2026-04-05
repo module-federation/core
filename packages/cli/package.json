@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/cli",
-  "version": "2.1.0",
+  "version": "2.3.1",
   "type": "commonjs",
   "description": "Module Federation CLI",
   "homepage": "https://module-federation.io",
@@ -26,7 +26,6 @@
     "@module-federation/sdk": "workspace:*",
     "@module-federation/dts-plugin": "workspace:*",
     "commander": "11.1.0",
-    "chalk": "3.0.0",
     "jiti": "2.4.2"
   },
   "devDependencies": {
@@ -38,5 +37,11 @@
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {
+    "build": "rslib build",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",
+    "test": "rstest run -c rstest.config.ts",
+    "pre-release": "pnpm run test && pnpm run build"
   }
 }

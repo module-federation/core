@@ -1,5 +1,63 @@
 # @module-federation/rsbuild-plugin
 
+## 2.3.1
+
+### Patch Changes
+
+- @module-federation/enhanced@2.3.1
+- @module-federation/sdk@2.3.1
+- @module-federation/node@2.7.39
+
+## 2.3.0
+
+### Patch Changes
+
+- Updated dependencies [eb26065]
+- Updated dependencies [8f2ec9b]
+  - @module-federation/sdk@2.3.0
+  - @module-federation/enhanced@2.3.0
+  - @module-federation/node@2.7.38
+
+## 2.2.3
+
+### Patch Changes
+
+- 762b9ef: fix(rsbuild-plugin): replace direct package.json import with builder define injection to avoid Node.js >= 22 compatibility error
+  - @module-federation/enhanced@2.2.3
+  - @module-federation/sdk@2.2.3
+  - @module-federation/node@2.7.37
+
+## 2.2.2
+
+### Patch Changes
+
+- Updated dependencies [8b8da62]
+  - @module-federation/enhanced@2.2.2
+  - @module-federation/node@2.7.36
+  - @module-federation/sdk@2.2.2
+
+## 2.2.1
+
+### Patch Changes
+
+- Updated dependencies
+  - @module-federation/enhanced@2.2.1
+  - @module-federation/node@2.7.35
+  - @module-federation/sdk@2.2.1
+
+## 2.2.0
+
+### Patch Changes
+
+- Updated dependencies [c856ec1]
+- Updated dependencies [12240bb]
+- Updated dependencies [e5dd6ef]
+- Updated dependencies [90758e9]
+- Updated dependencies [ec7ab53]
+  - @module-federation/sdk@2.2.0
+  - @module-federation/enhanced@2.2.0
+  - @module-federation/node@2.7.34
+
 ## 2.1.0
 
 ### Patch Changes
@@ -211,7 +269,6 @@
 ### Patch Changes
 
 - 0bf3a3a: fix(rsbuild-plugin): add build dependencies configuration to project.json
-
   - Add dependsOn configuration to ensure dependencies are built before the plugin
   - Improves build reliability and fixes potential issues when dependencies haven't been built
 
@@ -243,7 +300,6 @@
   Fixes CI test failure by adding missing `describe`, `expect`, and `it` imports from vitest to the test file. This resolves the "ReferenceError: describe is not defined" error that was causing the rsbuild-plugin tests to fail.
 
 - a7cf276: chore: upgrade NX to 21.2.3, Storybook to 9.0.9, and TypeScript to 5.8.3
-
   - Upgraded NX from 21.0.3 to 21.2.3 with workspace configuration updates
   - Migrated Storybook from 8.3.5 to 9.0.9 with updated configurations and automigrations
   - Upgraded TypeScript from 5.7.3 to 5.8.3 with compatibility fixes
@@ -252,7 +308,6 @@
   - Updated build configurations and dependencies to support latest versions
 
 - d31a326: refactor: sink React packages from root to individual packages
-
   - Removed React dependencies from root package.json and moved them to packages that actually need them
   - Fixed rsbuild-plugin configuration to match workspace patterns
   - Updated tests to handle platform-specific files
