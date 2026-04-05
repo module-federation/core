@@ -329,11 +329,23 @@ async function bundleFederatedRemote(
       `${util.styleText('blue', 'Processing remote container and exposed modules')}`,
     );
 
+    const bundleHashMap = new Map<string, string>();
+
     for (const { requestOpts, saveBundleOpts, targetDir } of requests) {
       // ensure output directory exists
       await fs.mkdir(targetDir, { recursive: true, mode: 0o755 });
       const bundle = await buildBundle(server, requestOpts);
       await saveBundleAndMap(bundle, saveBundleOpts, logger.info);
+
+      // Compute SHA-256 hash directly from in-memory bundle content
+      const hash = crypto
+        .createHash('sha256')
+        .update(bundle.code)
+        .digest('hex');
+      const relPath = normalizeOutputRelativePath(
+        path.relative(outputDir, saveBundleOpts.bundleOutput),
+      );
+      bundleHashMap.set(relPath, hash);
 
       // Save the assets of the bundle
       // const outputAssets = await server.getAssets({
@@ -366,26 +378,6 @@ async function bundleFederatedRemote(
       await fs.readFile(manifestFilepath, 'utf-8'),
     );
     applyTypesMetaToManifest(rawManifest, typesMeta);
-
-    // Compute SHA-256 hashes for all built bundles and inject into manifest
-    logger.info(`${util.styleText('blue', 'Computing bundle hashes')}`);
-    const bundleHashMap = new Map<string, string>();
-
-    for (const { saveBundleOpts } of requests) {
-      const bundleContent = await fs.readFile(
-        saveBundleOpts.bundleOutput,
-        'utf-8',
-      );
-      const hash = crypto
-        .createHash('sha256')
-        .update(bundleContent)
-        .digest('hex');
-      // Store by relative path from outputDir (e.g. "mini.bundle", "exposed/info.bundle", "shared/lodash.bundle")
-      const relPath = normalizeOutputRelativePath(
-        path.relative(outputDir, saveBundleOpts.bundleOutput),
-      );
-      bundleHashMap.set(relPath, hash);
-    }
 
     // Inject container bundle hash into metaData.buildInfo.hash
     const containerFilename = federationConfig.filename;

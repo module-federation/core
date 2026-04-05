@@ -1,5 +1,3 @@
-import type { ICacheLayer } from './cache-interface';
-
 // join two paths
 // e.g. /a/b/ + /c/d -> /a/b/c/d
 function joinComponents(prefix: string, suffix: string) {
@@ -72,26 +70,11 @@ function buildLoadBundleAsyncWrapper() {
   const loadBundleAsync =
     __loadBundleAsync as typeof globalThis.__loadBundleAsync;
 
-  // DEBUG: set to true to test cache layer in dev mode
-  const FORCE_CACHE_IN_DEV = false;
-
-  // --- Cache layer (registered externally via native-cache register()) ---
-  const cacheEnabled =
-    process.env.NODE_ENV === 'production' || FORCE_CACHE_IN_DEV;
-
   // Inflight dedup: same bundlePath won't trigger concurrent downloads.
   // On error the entry is removed so the next call can retry.
   const inflight = new Map<string, Promise<void>>();
 
-  function getCacheLayer(): ICacheLayer | undefined {
-    return cacheEnabled
-      ? (((globalThis as any).__MFE_CACHE_LAYER__ as ICacheLayer | undefined) ??
-          undefined)
-      : undefined;
-  }
-
   async function doLoadBundle(originalBundlePath: string) {
-    const cacheLayer = getCacheLayer();
     const scope = globalThis.__FEDERATION__.__NATIVE__[__METRO_GLOBAL_PREFIX__];
 
     const publicPath = getPublicPath(scope.origin);
@@ -99,26 +82,27 @@ function buildLoadBundleAsyncWrapper() {
 
     const isSplitBundle = !isUrl(originalBundlePath);
 
+    // Cache handler registered externally (e.g. by zephyr-native-cache register()).
+    const cacheHandler = (globalThis as any).__MFE_CACHE__ as
+      | ((
+          fallback: (path: string) => Promise<void>,
+          bundlePath: string,
+        ) => Promise<void>)
+      | undefined;
+
     // For remote split bundles with cache enabled, convert relative paths to
     // full URLs so they enter the same cache path as container bundles.
     // In dev mode, getBundlePath returns relative paths unchanged, but we need
     // full URLs for the cache layer (download + eval).
-    if (isSplitBundle && cacheLayer && publicPath && !isUrl(bundlePath)) {
+    if (isSplitBundle && cacheHandler && publicPath && !isUrl(bundlePath)) {
       bundlePath = joinComponents(publicPath, bundlePath);
     }
 
-    // --- Cache layer: intercept bundles with full URLs (containers + remote split bundles) ---
-    if (cacheLayer && isUrl(bundlePath)) {
-      const { status } = await cacheLayer.loadBundle(bundlePath);
-      if (status === 'skipped') {
-        // Cache layer skipped — fall back to network load
-        const encodedBundlePath = bundlePath.replaceAll('../', '..%2F');
-        await loadBundleAsync(encodedBundlePath);
-      }
-      // else: 'cache-hit' or 'downloaded' — bundle already eval'd by cache layer
+    const encodedBundlePath = bundlePath.replaceAll('../', '..%2F');
+
+    if (cacheHandler) {
+      await cacheHandler(loadBundleAsync, encodedBundlePath);
     } else {
-      // No cache: host split bundles (no publicPath), cache disabled, or native-cache not installed
-      const encodedBundlePath = bundlePath.replaceAll('../', '..%2F');
       await loadBundleAsync(encodedBundlePath);
     }
 

@@ -30,6 +30,7 @@ export interface ResourceInfo {
 export interface StatsBuildInfo {
   buildVersion: string;
   buildName: string;
+  hash?: string;
 
   // only appear when enable treeshaking
   target?: string[];
@@ -129,6 +130,7 @@ export interface StatsExpose {
   file: string;
   requires: string[];
   assets: StatsAssets;
+  hash?: string;
 }
 
 export interface Stats<T = BasicStatsMetaData, K = StatsRemoteVal> {
