@@ -97,7 +97,7 @@ describe('DTSManager advance usage', () => {
       remoteOptions.typesFolder,
     );
     const apiFile = `${apiDistFolder}.d.ts`;
-    vi.spyOn(utils, 'axiosGet').mockImplementation((url) => {
+    vi.spyOn(utils, 'fetchGet').mockImplementation((url) => {
       if (url.includes('.d.ts')) {
         return Promise.resolve({
           data: readFileSync(apiFile, 'utf8'),

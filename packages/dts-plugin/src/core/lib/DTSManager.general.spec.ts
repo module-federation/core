@@ -142,7 +142,7 @@ describe('DTSManager General Tests', () => {
         },
       };
 
-      vi.spyOn(utils, 'axiosGet').mockResolvedValueOnce({
+      vi.spyOn(utils, 'fetchGet').mockResolvedValueOnce({
         data: manifestResponse.data,
         status: 200,
         headers: {},
@@ -172,7 +172,7 @@ describe('DTSManager General Tests', () => {
         },
       };
 
-      vi.spyOn(utils, 'axiosGet').mockResolvedValueOnce({
+      vi.spyOn(utils, 'fetchGet').mockResolvedValueOnce({
         data: manifestResponse.data,
         status: 200,
         headers: {},
@@ -191,7 +191,7 @@ describe('DTSManager General Tests', () => {
     });
 
     it('should handle manifest fetch errors', async () => {
-      vi.spyOn(utils, 'axiosGet').mockRejectedValueOnce(
+      vi.spyOn(utils, 'fetchGet').mockRejectedValueOnce(
         new Error('Network error'),
       );
 
@@ -219,7 +219,7 @@ describe('DTSManager General Tests', () => {
         },
       };
 
-      vi.spyOn(utils, 'axiosGet').mockResolvedValueOnce({
+      vi.spyOn(utils, 'fetchGet').mockResolvedValueOnce({
         data: manifestResponse.data,
         status: 200,
         headers: {},
@@ -359,7 +359,7 @@ describe('DTSManager General Tests', () => {
         type PackageType<T> = T extends 'REMOTE_ALIAS_IDENTIFIER/Component' ? typeof import('REMOTE_ALIAS_IDENTIFIER/Component') : any;
       `;
 
-      vi.spyOn(utils, 'axiosGet').mockResolvedValueOnce({
+      vi.spyOn(utils, 'fetchGet').mockResolvedValueOnce({
         data: apiTypeContent,
         status: 200,
         headers: {},
@@ -407,7 +407,7 @@ describe('DTSManager General Tests', () => {
         apiTypeUrl: 'http://example.com/api.d.ts',
       };
 
-      vi.spyOn(utils, 'axiosGet').mockRejectedValueOnce(
+      vi.spyOn(utils, 'fetchGet').mockRejectedValueOnce(
         new Error('Network error'),
       );
       vi.spyOn(fs, 'writeFileSync');

@@ -1,8 +1,8 @@
 import { it, describe, expect, vi } from 'vitest';
-import { axiosGet, cloneDeepOptions } from './utils';
+import { fetchGet, cloneDeepOptions } from './utils';
 import type { DTSManagerOptions } from '../interfaces/DTSManagerOptions';
 
-it('axiosGet should merge MF_ENV_HEADERS into request headers', async () => {
+it('fetchGet should merge MF_ENV_HEADERS into request headers', async () => {
   const prevEnv = process.env['MF_ENV_HEADERS'];
   process.env['MF_ENV_HEADERS'] = JSON.stringify({ 'x-test': '1' });
 
@@ -14,7 +14,7 @@ it('axiosGet should merge MF_ENV_HEADERS into request headers', async () => {
   });
   vi.stubGlobal('fetch', fetchMock);
 
-  const res = await axiosGet('http://localhost');
+  const res = await fetchGet('http://localhost');
 
   expect(fetchMock).toHaveBeenCalledWith(
     'http://localhost',
@@ -28,7 +28,7 @@ it('axiosGet should merge MF_ENV_HEADERS into request headers', async () => {
   process.env['MF_ENV_HEADERS'] = prevEnv;
 });
 
-it('axiosGet should return arraybuffer when responseType is arraybuffer', async () => {
+it('fetchGet should return arraybuffer when responseType is arraybuffer', async () => {
   const buf = Buffer.from('hello');
   const ab = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
 
@@ -40,7 +40,7 @@ it('axiosGet should return arraybuffer when responseType is arraybuffer', async 
   });
   vi.stubGlobal('fetch', fetchMock);
 
-  const res = await axiosGet('http://localhost/file.zip', {
+  const res = await fetchGet('http://localhost/file.zip', {
     responseType: 'arraybuffer',
   });
 

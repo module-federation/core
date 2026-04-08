@@ -13,6 +13,10 @@ import {
 } from './typeScriptCompiler';
 import { DTSManagerOptions } from '../interfaces/DTSManagerOptions';
 
+type DispatcherLike = unknown;
+
+const dispatcherCache = new Map<4 | 6, DispatcherLike>();
+
 export function getDTSManagerConstructor(
   implementation?: string,
 ): typeof DTSManager {
@@ -159,14 +163,45 @@ const getEnvHeaders = (): Record<string, string> => {
   }
 };
 
-export type AxiosRequestConfig = {
+export type FetchRequestConfig = {
   timeout?: number;
   family?: 4 | 6;
   headers?: Record<string, string>;
   responseType?: 'arraybuffer';
+  /**
+   * Optional custom dispatcher for Node.js/undici fetch.
+   * Kept as `unknown` to avoid taking a hard type dependency.
+   */
+  dispatcher?: DispatcherLike;
+  /**
+   * Optional custom agent for node-fetch compatible fetch.
+   * (Native Node.js fetch ignores this field.)
+   */
+  agent?: unknown;
 };
 
-export type AxiosResponseLike<T = unknown> = {
+const createDispatcherFromFamily = (family?: 4 | 6): DispatcherLike => {
+  if (!family) return undefined;
+  if (dispatcherCache.has(family)) return dispatcherCache.get(family);
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const undici = require('undici') as any;
+    if (undici?.Agent) {
+      const dispatcher = new undici.Agent({
+        connect: {
+          family,
+        },
+      });
+      dispatcherCache.set(family, dispatcher);
+      return dispatcher;
+    }
+  } catch {
+    // ignore
+  }
+  return undefined;
+};
+
+export type FetchResponseLike<T = unknown> = {
   data: T;
   headers: Record<string, string>;
   status: number;
@@ -180,18 +215,18 @@ const toHeaderRecord = (headers: Headers): Record<string, string> => {
   return out;
 };
 
-export function axiosGet(
+export function fetchGet(
   url: string,
-  config: AxiosRequestConfig & { responseType: 'arraybuffer' },
-): Promise<AxiosResponseLike<ArrayBuffer>>;
-export function axiosGet(
+  config: FetchRequestConfig & { responseType: 'arraybuffer' },
+): Promise<FetchResponseLike<ArrayBuffer>>;
+export function fetchGet(
   url: string,
-  config?: AxiosRequestConfig,
-): Promise<AxiosResponseLike<unknown>>;
-export async function axiosGet(
+  config?: FetchRequestConfig,
+): Promise<FetchResponseLike<unknown>>;
+export async function fetchGet(
   url: string,
-  config?: AxiosRequestConfig,
-): Promise<AxiosResponseLike<unknown>> {
+  config?: FetchRequestConfig,
+): Promise<FetchResponseLike<unknown>> {
   const controller = new AbortController();
   const timeoutMs = config?.timeout ?? 60000;
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
@@ -201,11 +236,16 @@ export async function axiosGet(
     ...(config?.headers ?? {}),
   };
 
+  const dispatcher =
+    config?.dispatcher ?? createDispatcherFromFamily(config?.family);
+
   try {
     const resp = await fetch(url, {
       headers,
       signal: controller.signal,
-    });
+      ...(dispatcher ? { dispatcher } : {}),
+      ...(config?.agent ? { agent: config.agent } : {}),
+    } as any);
 
     const headerRecord = toHeaderRecord(resp.headers);
 
