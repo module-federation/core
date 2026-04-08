@@ -1,4 +1,4 @@
-import fs from 'fs-extra';
+import fs from 'fs';
 import path from 'path';
 import { createDevWorker } from '../dev-worker';
 import {
@@ -26,7 +26,7 @@ enum PROCESS_EXIT_CODE {
 function ensureTempDir(filePath: string): void {
   try {
     const dir = path.dirname(filePath);
-    fs.ensureDirSync(dir);
+    fs.mkdirSync(dir, { recursive: true });
   } catch (_err) {
     // noop
   }

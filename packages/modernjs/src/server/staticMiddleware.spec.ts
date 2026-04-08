@@ -2,10 +2,8 @@ import { it, expect, describe, vi, beforeEach } from 'vitest';
 import { createStaticMiddleware } from './staticMiddleware';
 
 // Mock dependencies
-vi.mock('fs-extra', () => ({
-  default: {
-    pathExists: vi.fn(),
-  },
+vi.mock('fs/promises', () => ({
+  access: vi.fn(),
 }));
 
 vi.mock('./fileCache', () => ({
@@ -14,7 +12,7 @@ vi.mock('./fileCache', () => ({
   },
 }));
 
-import fs from 'fs-extra';
+import { access } from 'fs/promises';
 import { fileCache } from './fileCache';
 
 describe('staticMiddleware', () => {
@@ -66,12 +64,12 @@ describe('staticMiddleware', () => {
 
     it('should process .js files', async () => {
       mockContext.req.path = '/bundles/test.js';
-      (fs.pathExists as any).mockResolvedValue(false);
+      (access as any).mockRejectedValue(new Error('ENOENT'));
 
       await middleware(mockContext, nextSpy);
 
       // Should not return early due to extension check
-      expect(fs.pathExists).toHaveBeenCalled();
+      expect(access).toHaveBeenCalled();
     });
   });
 
@@ -82,7 +80,7 @@ describe('staticMiddleware', () => {
       await middleware(mockContext, nextSpy);
 
       expect(nextSpy).toHaveBeenCalledOnce();
-      expect(fs.pathExists).not.toHaveBeenCalled();
+      expect(access).not.toHaveBeenCalled();
       expect(mockContext.header).not.toHaveBeenCalled();
       expect(mockContext.body).not.toHaveBeenCalled();
     });
@@ -93,30 +91,28 @@ describe('staticMiddleware', () => {
       await middleware(mockContext, nextSpy);
 
       expect(nextSpy).toHaveBeenCalledOnce();
-      expect(fs.pathExists).not.toHaveBeenCalled();
+      expect(access).not.toHaveBeenCalled();
     });
 
     it('should process paths starting with /bundles', async () => {
       mockContext.req.path = '/bundles/test.js';
-      (fs.pathExists as any).mockResolvedValue(false);
+      (access as any).mockRejectedValue(new Error('ENOENT'));
 
       await middleware(mockContext, nextSpy);
 
       // Should proceed to file existence check
-      expect(fs.pathExists).toHaveBeenCalledWith('/test/path/bundles/test.js');
+      expect(access).toHaveBeenCalledWith('/test/path/bundles/test.js');
     });
   });
 
   describe('file existence check', () => {
     it('should call next() when file does not exist', async () => {
       mockContext.req.path = '/bundles/nonexistent.js';
-      (fs.pathExists as any).mockResolvedValue(false);
+      (access as any).mockRejectedValue(new Error('ENOENT'));
 
       await middleware(mockContext, nextSpy);
 
-      expect(fs.pathExists).toHaveBeenCalledWith(
-        '/test/path/bundles/nonexistent.js',
-      );
+      expect(access).toHaveBeenCalledWith('/test/path/bundles/nonexistent.js');
       expect(nextSpy).toHaveBeenCalledOnce();
       expect(fileCache.getFile).not.toHaveBeenCalled();
       expect(mockContext.header).not.toHaveBeenCalled();
@@ -125,14 +121,12 @@ describe('staticMiddleware', () => {
 
     it('should proceed to file cache when file exists', async () => {
       mockContext.req.path = '/bundles/existing.js';
-      (fs.pathExists as any).mockResolvedValue(true);
+      (access as any).mockResolvedValue(undefined);
       (fileCache.getFile as any).mockResolvedValue(null);
 
       await middleware(mockContext, nextSpy);
 
-      expect(fs.pathExists).toHaveBeenCalledWith(
-        '/test/path/bundles/existing.js',
-      );
+      expect(access).toHaveBeenCalledWith('/test/path/bundles/existing.js');
       expect(fileCache.getFile).toHaveBeenCalledWith(
         '/test/path/bundles/existing.js',
       );
@@ -148,13 +142,13 @@ describe('staticMiddleware', () => {
       };
 
       mockContext.req.path = '/bundles/app.js';
-      (fs.pathExists as any).mockResolvedValue(true);
+      (access as any).mockResolvedValue(undefined);
       (fileCache.getFile as any).mockResolvedValue(mockFileResult);
       mockContext.body.mockReturnValue('response');
 
       const result = await middleware(mockContext, nextSpy);
 
-      expect(fs.pathExists).toHaveBeenCalledWith('/test/path/bundles/app.js');
+      expect(access).toHaveBeenCalledWith('/test/path/bundles/app.js');
       expect(fileCache.getFile).toHaveBeenCalledWith(
         '/test/path/bundles/app.js',
       );
@@ -185,7 +179,7 @@ describe('staticMiddleware', () => {
       };
 
       mockContext.req.path = '/bundles/empty.js';
-      (fs.pathExists as any).mockResolvedValue(true);
+      (access as any).mockResolvedValue(undefined);
       (fileCache.getFile as any).mockResolvedValue(mockFileResult);
       mockContext.body.mockReturnValue('empty-response');
 
@@ -228,13 +222,13 @@ describe('staticMiddleware', () => {
       };
 
       mockContext.req.path = '/prefix/bundles/test.js';
-      (fs.pathExists as any).mockResolvedValue(true);
+      (access as any).mockResolvedValue(undefined);
       (fileCache.getFile as any).mockResolvedValue(mockFileResult);
 
       await customMiddleware(mockContext, nextSpy);
 
       // Should remove prefix from path
-      expect(fs.pathExists).toHaveBeenCalledWith('/test/path/bundles/test.js');
+      expect(access).toHaveBeenCalledWith('/test/path/bundles/test.js');
     });
   });
 });

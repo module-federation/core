@@ -4,9 +4,14 @@ import type { TsConfigJson } from '../interfaces/TsConfigJson';
 
 import AdmZip from 'adm-zip';
 import axios, { AxiosResponse, InternalAxiosRequestConfig } from 'axios';
-import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'fs';
-import fse from 'fs-extra';
-const { readJSONSync } = fse;
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'fs';
 import os from 'os';
 import { join } from 'path';
 import {
@@ -29,8 +34,8 @@ import { fileLog } from '../../server';
 
 describe('archiveHandler', () => {
   const tmpDir = mkdtempSync(join(os.tmpdir(), 'archive-handler'));
-  const basicConfig = readJSONSync(
-    join(__dirname, '../../..', './tsconfig.spec.json'),
+  const basicConfig = JSON.parse(
+    readFileSync(join(__dirname, '../../..', './tsconfig.spec.json'), 'utf-8'),
   ) as TsConfigJson;
   const tsConfig: TsConfigJson = {
     ...basicConfig,

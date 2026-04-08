@@ -1,7 +1,6 @@
 import path from 'path';
-import { rm } from 'fs/promises';
+import { cp, mkdir, rm } from 'fs/promises';
 import fs from 'fs';
-import fse from 'fs-extra';
 import {
   MANIFEST_EXT,
   Manifest,
@@ -114,8 +113,11 @@ class DTSManager {
         const targetDir = path.join(mfTypesPath, 'node_modules');
         if (fs.existsSync(remoteTypesFolder)) {
           const targetFolder = path.resolve(remoteOptions.context, targetDir);
-          await fse.ensureDir(targetFolder);
-          await fse.copy(remoteTypesFolder, targetFolder, { overwrite: true });
+          await mkdir(targetFolder, { recursive: true });
+          await cp(remoteTypesFolder, targetFolder, {
+            recursive: true,
+            force: true,
+          });
         }
       } catch (err) {
         if (this.options.host?.abortOnError === false) {

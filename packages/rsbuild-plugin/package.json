@@ -49,7 +49,6 @@
     "dist"
   ],
   "dependencies": {
-    "fs-extra": "11.3.0",
     "@module-federation/sdk": "workspace:*",
     "@module-federation/enhanced": "workspace:*",
     "@module-federation/node": "workspace:*"
