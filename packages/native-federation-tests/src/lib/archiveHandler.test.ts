@@ -1,8 +1,9 @@
 import AdmZip from 'adm-zip';
+import axios from 'axios';
 import { existsSync, mkdirSync, mkdtempSync, rmSync } from 'fs';
 import os from 'os';
 import { join } from 'path';
-import { afterAll, afterEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, describe, expect, it, vi } from 'vitest';
 
 import { RemoteOptions } from '../interfaces/RemoteOptions';
 import { createTestsArchive, downloadTypesArchive } from './archiveHandler';
@@ -15,10 +16,6 @@ describe('archiveHandler', () => {
 
   afterAll(() => {
     rmSync(tmpDir, { recursive: true });
-  });
-
-  afterEach(() => {
-    vi.unstubAllGlobals();
   });
 
   describe('createTypesArchive', () => {
@@ -56,10 +53,6 @@ describe('archiveHandler', () => {
     };
 
     it('throws for unexisting url', async () => {
-      const fetchMock = vi
-        .fn()
-        .mockRejectedValue(new Error('getaddrinfo ENOTFOUND foo.it'));
-      vi.stubGlobal('fetch', fetchMock);
       expect(
         downloadTypesArchive(hostOptions)([tmpDir, 'https://foo.it']),
       ).rejects.toThrowError(
@@ -72,17 +65,7 @@ describe('archiveHandler', () => {
       const zip = new AdmZip();
       zip.addLocalFolder(tmpDir);
 
-      const buf = zip.toBuffer();
-      const ab = buf.buffer.slice(
-        buf.byteOffset,
-        buf.byteOffset + buf.byteLength,
-      );
-      const fetchMock = vi.fn().mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        arrayBuffer: async () => ab,
-      });
-      vi.stubGlobal('fetch', fetchMock);
+      axios.get = vi.fn().mockResolvedValueOnce({ data: zip.toBuffer() });
 
       await downloadTypesArchive(hostOptions)([
         destinationFolder,
@@ -95,17 +78,7 @@ describe('archiveHandler', () => {
       const zip = new AdmZip();
       zip.addLocalFolder(tmpDir);
 
-      const buf = zip.toBuffer();
-      const ab = buf.buffer.slice(
-        buf.byteOffset,
-        buf.byteOffset + buf.byteLength,
-      );
-      const fetchMock = vi.fn().mockResolvedValue({
-        ok: true,
-        status: 200,
-        arrayBuffer: async () => ab,
-      });
-      vi.stubGlobal('fetch', fetchMock);
+      axios.get = vi.fn().mockResolvedValue({ data: zip.toBuffer() });
 
       const downloader = downloadTypesArchive(hostOptions);
 
@@ -113,9 +86,19 @@ describe('archiveHandler', () => {
       await downloader([destinationFolder, fileToDownload]);
 
       expect(existsSync(archivePath)).toBeTruthy();
-      expect(fetchMock).toHaveBeenCalledTimes(2);
-      expect(fetchMock.mock.calls[0]).toStrictEqual([fileToDownload]);
-      expect(fetchMock.mock.calls[1]).toStrictEqual([fileToDownload]);
+      expect(axios.get).toHaveBeenCalledTimes(2);
+      expect(axios.get.mock.calls[0]).toStrictEqual([
+        fileToDownload,
+        {
+          responseType: 'arraybuffer',
+        },
+      ]);
+      expect(axios.get.mock.calls[1]).toStrictEqual([
+        fileToDownload,
+        {
+          responseType: 'arraybuffer',
+        },
+      ]);
     });
   });
 });

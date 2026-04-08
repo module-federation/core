@@ -1,5 +1,6 @@
 import AdmZip from 'adm-zip';
 import ansiColors from 'ansi-colors';
+import axios from 'axios';
 import { createHash } from 'node:crypto';
 import { rm } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -51,21 +52,11 @@ export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => {
 
     while (retriesPerFile[fileToDownload]++ < hostOptions.maxRetries) {
       try {
-        let responseBuffer: Buffer;
-        try {
-          const response = await fetch(fileToDownload);
-          if (!response.ok) {
-            throw new Error(`Request failed with status ${response.status}`);
-          }
-          const arrayBuffer = await response.arrayBuffer();
-          responseBuffer = Buffer.from(arrayBuffer);
-        } catch (error) {
-          downloadErrorLogger(
-            destinationFolder,
-            fileToDownload,
-          )(error as Error);
-          throw error;
-        }
+        const response = await axios
+          .get(fileToDownload, { responseType: 'arraybuffer' })
+          .catch(downloadErrorLogger(destinationFolder, fileToDownload));
+
+        const responseBuffer = Buffer.from(response.data);
 
         const hash = createHash('sha256').update(responseBuffer).digest('hex');
 

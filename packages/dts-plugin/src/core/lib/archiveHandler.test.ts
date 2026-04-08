@@ -276,11 +276,13 @@ describe('archiveHandler', () => {
         Buffer.from('export declare const bar: number;'),
       );
 
-      const fetchGetMock = vi.spyOn(utils, 'fetchGet').mockResolvedValueOnce({
-        data: zip.toBuffer(),
-        status: 200,
-        headers: {},
-      } as any);
+      const nativeFetchMock = vi
+        .spyOn(utils, 'nativeFetch')
+        .mockResolvedValueOnce({
+          data: zip.toBuffer(),
+          status: 200,
+          headers: {},
+        } as any);
 
       const result = await downloadTypesArchive(hostOptions)([
         destinationFolder,
@@ -289,21 +291,23 @@ describe('archiveHandler', () => {
 
       expect(result).toEqual([destinationFolder, archivePath]);
       expect(existsSync(join(archivePath, 'sample.d.ts'))).toBeTruthy();
-      expect(fetchGetMock).toHaveBeenCalledTimes(1);
-      const [[url, options]] = fetchGetMock.mock.calls;
+      expect(nativeFetchMock).toHaveBeenCalledTimes(1);
+      const [[url, options]] = nativeFetchMock.mock.calls;
       expect(url).toBe(new URL(fileToDownload).href);
       expect(options.responseType).toBe('arraybuffer');
     });
 
     it('should retry on network failure up to maxRetries', async () => {
       const error = new Error('Network error');
-      const fetchGetMock = vi.spyOn(utils, 'fetchGet').mockRejectedValue(error);
+      const nativeFetchMock = vi
+        .spyOn(utils, 'nativeFetch')
+        .mockRejectedValue(error);
 
       await expect(() =>
         downloadTypesArchive(hostOptions)([destinationFolder, fileToDownload]),
       ).rejects.toThrowError(/Network error/);
 
-      expect(fetchGetMock).toHaveBeenCalledTimes(hostOptions.maxRetries);
+      expect(nativeFetchMock).toHaveBeenCalledTimes(hostOptions.maxRetries);
     });
 
     it('should handle empty archives gracefully', async () => {
@@ -311,7 +315,7 @@ describe('archiveHandler', () => {
       const zip = new AdmZip();
       // Add an empty directory to the archive
       zip.addFile('.keep', Buffer.from(''));
-      vi.spyOn(utils, 'fetchGet').mockResolvedValueOnce({
+      vi.spyOn(utils, 'nativeFetch').mockResolvedValueOnce({
         data: zip.toBuffer(),
         status: 200,
         headers: {},
@@ -333,7 +337,7 @@ describe('archiveHandler', () => {
 
       const zip = new AdmZip();
       zip.addFile('new.d.ts', Buffer.from('new content'));
-      vi.spyOn(utils, 'fetchGet').mockResolvedValueOnce({
+      vi.spyOn(utils, 'nativeFetch').mockResolvedValueOnce({
         data: zip.toBuffer(),
         status: 200,
         headers: {},
@@ -358,7 +362,7 @@ describe('archiveHandler', () => {
 
       const zip = new AdmZip();
       zip.addFile('new.d.ts', Buffer.from('new content'));
-      vi.spyOn(utils, 'fetchGet').mockResolvedValueOnce({
+      vi.spyOn(utils, 'nativeFetch').mockResolvedValueOnce({
         data: zip.toBuffer(),
         status: 200,
         headers: {},
@@ -375,8 +379,8 @@ describe('archiveHandler', () => {
         ...hostOptions,
         abortOnError: false,
       };
-      const fetchGetMock = vi
-        .spyOn(utils, 'fetchGet')
+      const nativeFetchMock = vi
+        .spyOn(utils, 'nativeFetch')
         .mockRejectedValue(new Error('Network error'));
 
       const result = await downloadTypesArchive(options)([
@@ -385,11 +389,11 @@ describe('archiveHandler', () => {
       ]);
 
       expect(result).toBeUndefined();
-      expect(fetchGetMock).toHaveBeenCalledTimes(options.maxRetries);
+      expect(nativeFetchMock).toHaveBeenCalledTimes(options.maxRetries);
     });
 
     it('should handle malformed zip data', async () => {
-      vi.spyOn(utils, 'fetchGet').mockResolvedValueOnce({
+      vi.spyOn(utils, 'nativeFetch').mockResolvedValueOnce({
         data: Buffer.from('not a valid zip file'),
         status: 200,
         headers: {},

@@ -212,15 +212,15 @@ const toHeaderRecord = (headers: Headers): Record<string, string> => {
   return out;
 };
 
-export function fetchGet(
+export function nativeFetch(
   url: string,
   config: FetchRequestConfig & { responseType: 'arraybuffer' },
 ): Promise<FetchResponseLike<ArrayBuffer>>;
-export function fetchGet(
+export function nativeFetch(
   url: string,
   config?: FetchRequestConfig,
 ): Promise<FetchResponseLike<unknown>>;
-export async function fetchGet(
+export async function nativeFetch(
   url: string,
   config?: FetchRequestConfig,
 ): Promise<FetchResponseLike<unknown>> {

@@ -1,4 +1,5 @@
 import AdmZip from 'adm-zip';
+import axios from 'axios';
 import dirTree from 'directory-tree';
 import { rm } from 'fs/promises';
 import { join, resolve } from 'path';
@@ -196,17 +197,7 @@ describe('index', () => {
       const zip = new AdmZip();
       zip.addLocalFolder(distFolder);
 
-      const buf = zip.toBuffer();
-      const ab = buf.buffer.slice(
-        buf.byteOffset,
-        buf.byteOffset + buf.byteLength,
-      );
-      const fetchMock = vi.fn().mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        arrayBuffer: async () => ab,
-      });
-      vi.stubGlobal('fetch', fetchMock);
+      axios.get = vi.fn().mockResolvedValueOnce({ data: zip.toBuffer() });
 
       const unplugin = NativeFederationTypeScriptHost.rollup(
         options,
@@ -257,8 +248,6 @@ describe('index', () => {
       });
 
       await rm(options.typesFolder, { recursive: true, force: true });
-
-      vi.unstubAllGlobals();
     });
   });
 });
