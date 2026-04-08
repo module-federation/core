@@ -3,15 +3,7 @@ import type { RemoteOptions } from '../interfaces/RemoteOptions';
 import type { TsConfigJson } from '../interfaces/TsConfigJson';
 
 import AdmZip from 'adm-zip';
-import axios, { AxiosResponse, InternalAxiosRequestConfig } from 'axios';
-import {
-  existsSync,
-  mkdirSync,
-  mkdtempSync,
-  readFileSync,
-  rmSync,
-  writeFileSync,
-} from 'fs';
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'fs';
 import os from 'os';
 import { join } from 'path';
 import {
@@ -31,6 +23,7 @@ import {
   retrieveTypesZipPath,
 } from './archiveHandler';
 import { fileLog } from '../../server';
+import * as utils from './utils';
 
 describe('archiveHandler', () => {
   const tmpDir = mkdtempSync(join(os.tmpdir(), 'archive-handler'));
@@ -283,15 +276,11 @@ describe('archiveHandler', () => {
         Buffer.from('export declare const bar: number;'),
       );
 
-      const mockResponse: AxiosResponse<Buffer> = {
+      const axiosGetMock = vi.spyOn(utils, 'axiosGet').mockResolvedValueOnce({
         data: zip.toBuffer(),
         status: 200,
-        statusText: 'OK',
         headers: {},
-        config: {} as InternalAxiosRequestConfig,
-        request: {} as XMLHttpRequest,
-      };
-      vi.spyOn(axios, 'get').mockResolvedValueOnce(mockResponse);
+      } as any);
 
       const result = await downloadTypesArchive(hostOptions)([
         destinationFolder,
@@ -300,9 +289,7 @@ describe('archiveHandler', () => {
 
       expect(result).toEqual([destinationFolder, archivePath]);
       expect(existsSync(join(archivePath, 'sample.d.ts'))).toBeTruthy();
-      expect(axios.get).toHaveBeenCalledTimes(1);
-      // Only verify the URL and responseType
-      const axiosGetMock = vi.mocked(axios.get);
+      expect(axiosGetMock).toHaveBeenCalledTimes(1);
       const [[url, options]] = axiosGetMock.mock.calls;
       expect(url).toBe(new URL(fileToDownload).href);
       expect(options.responseType).toBe('arraybuffer');
@@ -310,13 +297,13 @@ describe('archiveHandler', () => {
 
     it('should retry on network failure up to maxRetries', async () => {
       const error = new Error('Network error');
-      vi.spyOn(axios, 'get').mockRejectedValue(error);
+      const axiosGetMock = vi.spyOn(utils, 'axiosGet').mockRejectedValue(error);
 
       await expect(() =>
         downloadTypesArchive(hostOptions)([destinationFolder, fileToDownload]),
       ).rejects.toThrowError(/Network error/);
 
-      expect(axios.get).toHaveBeenCalledTimes(hostOptions.maxRetries);
+      expect(axiosGetMock).toHaveBeenCalledTimes(hostOptions.maxRetries);
     });
 
     it('should handle empty archives gracefully', async () => {
@@ -324,14 +311,11 @@ describe('archiveHandler', () => {
       const zip = new AdmZip();
       // Add an empty directory to the archive
       zip.addFile('.keep', Buffer.from(''));
-      vi.spyOn(axios, 'get').mockResolvedValueOnce({
+      vi.spyOn(utils, 'axiosGet').mockResolvedValueOnce({
         data: zip.toBuffer(),
         status: 200,
-        statusText: 'OK',
         headers: {},
-        config: {} as InternalAxiosRequestConfig,
-        request: {} as XMLHttpRequest,
-      } as AxiosResponse<Buffer>);
+      } as any);
 
       const result = await downloadTypesArchive(hostOptions)([
         destinationFolder,
@@ -349,14 +333,11 @@ describe('archiveHandler', () => {
 
       const zip = new AdmZip();
       zip.addFile('new.d.ts', Buffer.from('new content'));
-      vi.spyOn(axios, 'get').mockResolvedValueOnce({
+      vi.spyOn(utils, 'axiosGet').mockResolvedValueOnce({
         data: zip.toBuffer(),
         status: 200,
-        statusText: 'OK',
         headers: {},
-        config: {} as InternalAxiosRequestConfig,
-        request: {} as XMLHttpRequest,
-      } as AxiosResponse<Buffer>);
+      } as any);
 
       await downloadTypesArchive(hostOptions)([
         destinationFolder,
@@ -377,14 +358,11 @@ describe('archiveHandler', () => {
 
       const zip = new AdmZip();
       zip.addFile('new.d.ts', Buffer.from('new content'));
-      vi.spyOn(axios, 'get').mockResolvedValueOnce({
+      vi.spyOn(utils, 'axiosGet').mockResolvedValueOnce({
         data: zip.toBuffer(),
         status: 200,
-        statusText: 'OK',
         headers: {},
-        config: {} as InternalAxiosRequestConfig,
-        request: {} as XMLHttpRequest,
-      } as AxiosResponse<Buffer>);
+      } as any);
 
       await downloadTypesArchive(options)([destinationFolder, fileToDownload]);
 
@@ -397,7 +375,9 @@ describe('archiveHandler', () => {
         ...hostOptions,
         abortOnError: false,
       };
-      vi.spyOn(axios, 'get').mockRejectedValue(new Error('Network error'));
+      const axiosGetMock = vi
+        .spyOn(utils, 'axiosGet')
+        .mockRejectedValue(new Error('Network error'));
 
       const result = await downloadTypesArchive(options)([
         destinationFolder,
@@ -405,18 +385,15 @@ describe('archiveHandler', () => {
       ]);
 
       expect(result).toBeUndefined();
-      expect(axios.get).toHaveBeenCalledTimes(options.maxRetries);
+      expect(axiosGetMock).toHaveBeenCalledTimes(options.maxRetries);
     });
 
     it('should handle malformed zip data', async () => {
-      vi.spyOn(axios, 'get').mockResolvedValueOnce({
+      vi.spyOn(utils, 'axiosGet').mockResolvedValueOnce({
         data: Buffer.from('not a valid zip file'),
         status: 200,
-        statusText: 'OK',
         headers: {},
-        config: {} as InternalAxiosRequestConfig,
-        request: {} as XMLHttpRequest,
-      } as AxiosResponse<Buffer>);
+      } as any);
 
       await expect(() =>
         downloadTypesArchive(hostOptions)([destinationFolder, fileToDownload]),

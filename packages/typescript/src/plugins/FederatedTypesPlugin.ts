@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import axios from 'axios';
 import { Compiler, WebpackPluginInstance } from 'webpack';
 import { startServer, stopServer } from '../lib/server';
 import { TypescriptCompiler } from '../lib/TypescriptCompiler';
@@ -295,11 +294,25 @@ export class FederatedTypesPlugin {
         indexTypesUrl.pathname,
         this.normalizeOptions.typesIndexJsonFileName,
       );
-      const resp = await axios.get<TypesStatsJson>(indexTypesUrl.toString(), {
-        timeout: downloadRemoteTypesTimeout,
-      });
+      const controller = new AbortController();
+      const timeoutId = setTimeout(
+        () => controller.abort(),
+        downloadRemoteTypesTimeout,
+      );
+      let statsJson: TypesStatsJson;
+      try {
+        const resp = await fetch(indexTypesUrl.toString(), {
+          signal: controller.signal,
+        });
 
-      const statsJson = resp.data;
+        if (!resp.ok) {
+          throw new Error(`Request failed with status ${resp.status}`);
+        }
+
+        statsJson = (await resp.json()) as TypesStatsJson;
+      } finally {
+        clearTimeout(timeoutId);
+      }
 
       if (statsJson?.files) {
         this.logger.log(`Checking with Cache entries`);
