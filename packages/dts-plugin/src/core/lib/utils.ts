@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { moduleFederationPlugin, getProcessEnv } from '@module-federation/sdk';
 import ansiColors from 'ansi-colors';
+import { Agent } from 'undici';
 import { retrieveRemoteConfig } from '../configurations/remotePlugin';
 import { HostOptions } from '../interfaces/HostOptions';
 import { RemoteOptions } from '../interfaces/RemoteOptions';
@@ -184,17 +185,13 @@ const createDispatcherFromFamily = (family?: 4 | 6): DispatcherLike => {
   if (!family) return undefined;
   if (dispatcherCache.has(family)) return dispatcherCache.get(family);
   try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const undici = require('undici') as any;
-    if (undici?.Agent) {
-      const dispatcher = new undici.Agent({
-        connect: {
-          family,
-        },
-      });
-      dispatcherCache.set(family, dispatcher);
-      return dispatcher;
-    }
+    const dispatcher = new Agent({
+      connect: {
+        family,
+      },
+    });
+    dispatcherCache.set(family, dispatcher);
+    return dispatcher;
   } catch {
     // ignore
   }
