@@ -1,5 +1,5 @@
 import path from 'path';
-import fs from 'fs-extra';
+import fs from 'fs';
 
 export const fileExistsWithCaseSync = (filepath: string): boolean => {
   const dir = path.dirname(filepath);

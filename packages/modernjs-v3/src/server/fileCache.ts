@@ -1,5 +1,14 @@
-import fs from 'fs-extra';
+import { access, lstat, readFile } from 'fs/promises';
 import { LRUCache } from 'lru-cache';
+
+const pathExists = async (filepath: string): Promise<boolean> => {
+  try {
+    await access(filepath);
+    return true;
+  } catch {
+    return false;
+  }
+};
 
 export interface FileResult {
   content: string;
@@ -18,12 +27,12 @@ export class FileCache {
    */
   async getFile(filepath: string): Promise<FileResult | null> {
     // Check if file exists
-    if (!(await fs.pathExists(filepath))) {
+    if (!(await pathExists(filepath))) {
       return null;
     }
 
     try {
-      const stat = await fs.lstat(filepath);
+      const stat = await lstat(filepath);
       const currentModified = stat.mtimeMs;
 
       // Check if file is in cache and if the cached version is still valid
@@ -36,7 +45,7 @@ export class FileCache {
       }
 
       // Read file and update cache
-      const content = await fs.readFile(filepath, 'utf-8');
+      const content = await readFile(filepath, 'utf-8');
       const newEntry: FileResult = {
         content,
         lastModified: currentModified,

@@ -114,7 +114,6 @@
   },
   "devDependencies": {
     "@testing-library/react-hooks": "^8.0.1",
-    "@types/fs-extra": "9.0.13",
     "@types/jest": "^29.5.11",
     "@types/node": "^20.19.5",
     "@types/react": "~18.0.38",
@@ -130,7 +129,6 @@
   },
   "dependencies": {
     "@module-federation/runtime": "workspace:*",
-    "@module-federation/sdk": "workspace:*",
-    "fs-extra": "9.1.0"
+    "@module-federation/sdk": "workspace:*"
   }
 }

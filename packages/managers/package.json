@@ -26,8 +26,7 @@
   "types": "./dist/index.d.ts",
   "dependencies": {
     "@module-federation/sdk": "workspace:*",
-    "find-pkg": "2.0.0",
-    "fs-extra": "9.1.0"
+    "find-pkg": "2.0.0"
   },
   "devDependencies": {
     "webpack": "5.104.1"
