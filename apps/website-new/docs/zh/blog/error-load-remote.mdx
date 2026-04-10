@@ -426,7 +426,7 @@ export default fallbackPlugin;
     ```
 
   - **处理入口文件错误** (`args.lifecycle === 'afterResolve'`)
-     - 这类错误发生在入口资源 `mf-manifest.json` 加载过程中
+     - 这类错误发生在入口资源 `mf-manifest.json` 加载过程中，包括网络失败和 manifest 校验错误（例如缺少 `metaData`、`exposes` 或 `shared` 等必填字段）
      - 可以通过以下两种方式处理：
 
      a. 尝试加载备用服务：
