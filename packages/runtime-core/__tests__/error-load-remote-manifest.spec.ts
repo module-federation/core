@@ -137,6 +137,59 @@ describe('errorLoadRemote — manifest validation errors', () => {
     expect(module()).toBe('hello app2');
   });
 
+  it('rejects when errorLoadRemote returns an invalid failover manifest', async () => {
+    const errorLoadRemoteSpy = vi.fn();
+    const invalidFallback = {
+      id: '@test/bad-remote',
+      name: '@test/bad-remote',
+    };
+
+    const fetchPlugin: () => ModuleFederationRuntimePlugin = () => ({
+      name: 'test-fetch-plugin',
+      fetch(url) {
+        if (url.includes('bad-manifest')) {
+          return Promise.resolve(
+            new Response(JSON.stringify({ id: 'x', name: 'x' }), {
+              status: 200,
+              headers: { 'Content-Type': 'application/json' },
+            }),
+          );
+        }
+      },
+    });
+
+    const errorHandlerPlugin: () => ModuleFederationRuntimePlugin = () => ({
+      name: 'test-error-handler',
+      errorLoadRemote(args) {
+        errorLoadRemoteSpy(args);
+        if (args.lifecycle === 'afterResolve') {
+          return invalidFallback;
+        }
+        return undefined;
+      },
+    });
+
+    const FM = new ModuleFederation({
+      name: '@test/host-bad-fallback',
+      remotes: [
+        {
+          name: '@test/bad-remote',
+          entry: 'http://localhost:9999/bad-manifest/mf-manifest.json',
+        },
+      ],
+      plugins: [fetchPlugin(), errorHandlerPlugin()],
+    });
+
+    await expect(FM.loadRemote('@test/bad-remote/someExpose')).rejects.toThrow(
+      /Missing required fields/,
+    );
+
+    const lifecycles = errorLoadRemoteSpy.mock.calls.map(
+      (c: any[]) => c[0].lifecycle,
+    );
+    expect(lifecycles).toContain('afterResolve');
+  });
+
   it('calls errorLoadRemote when manifest fetch fails (network error)', async () => {
     const errorLoadRemoteSpy = vi.fn();
 

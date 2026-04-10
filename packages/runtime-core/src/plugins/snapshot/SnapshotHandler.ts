@@ -330,6 +330,10 @@ export class SnapshotHandler {
         }
       }
 
+      assert(
+        manifestJson.metaData && manifestJson.exposes && manifestJson.shared,
+        `"${manifestUrl}" is not a valid federation manifest for remote "${moduleInfo.name}". Missing required fields: ${[!manifestJson.metaData && 'metaData', !manifestJson.exposes && 'exposes', !manifestJson.shared && 'shared'].filter(Boolean).join(', ')}.`,
+      );
       this.manifestCache.set(manifestUrl, manifestJson);
       return manifestJson;
     };

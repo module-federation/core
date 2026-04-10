@@ -65,7 +65,7 @@ export function snapshotPlugin(): ModuleFederationRuntimePlugin {
             throw assignError;
           }
 
-          return args;
+          assignRemoteInfo(remoteInfo, failOver as ModuleInfo);
         }
 
         const preloadOptions: PreloadOptions[0] = {
