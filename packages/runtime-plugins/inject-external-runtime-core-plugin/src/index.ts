@@ -1,9 +1,6 @@
-import runtimeCoreDefault, * as runtimeCoreNamespace from '@module-federation/runtime-tools/runtime-core';
+import * as runtimeCore from '@module-federation/runtime-tools/runtime-core';
 
 import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime-tools/runtime-core';
-const runtimeCore =
-  (runtimeCoreDefault as typeof runtimeCoreNamespace | undefined) ??
-  runtimeCoreNamespace;
 declare global {
   var __VERSION__: string;
   var _FEDERATION_RUNTIME_CORE: typeof runtimeCore;

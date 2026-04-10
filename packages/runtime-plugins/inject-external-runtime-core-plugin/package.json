@@ -52,6 +52,7 @@
   },
   "scripts": {
     "build": "tsdown --config tsdown.config.ts --filter inject-external-runtime-core-plugin-build",
+    "test": "NODE_OPTIONS=--experimental-vm-modules pnpm exec jest --config jest.config.cjs",
     "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",
     "pre-release": "pnpm run build"
   }
