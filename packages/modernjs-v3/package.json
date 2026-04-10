@@ -133,7 +133,6 @@
   "dependencies": {
     "@module-federation/rsbuild-plugin": "workspace:*",
     "@module-federation/bridge-react": "workspace:*",
-    "fs-extra": "11.3.0",
     "lru-cache": "10.4.3",
     "@module-federation/enhanced": "workspace:*",
     "@module-federation/runtime": "workspace:*",

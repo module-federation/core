@@ -1,24 +1,16 @@
-import { it, expect, describe, vi, beforeAll } from 'vitest';
-import { FileCache } from './fileCache';
+import { it, expect, describe, vi } from 'vitest';
 
-beforeAll(() => {
-  vi.mock('fs-extra', () => ({
-    default: {
-      pathExists: () => {
-        return true;
-      },
-      lstat: () => {
-        return {
-          mtimeMs: Date.now(),
-          size: 4,
-        };
-      },
-      readFile: () => {
-        return 'test';
-      },
-    },
-  }));
-});
+vi.mock('fs/promises', () => ({
+  access: () => Promise.resolve(),
+  lstat: () =>
+    Promise.resolve({
+      mtimeMs: Date.now(),
+      size: 4,
+    }),
+  readFile: () => Promise.resolve('test'),
+}));
+
+import { FileCache } from './fileCache';
 
 describe('modern serve static file cache', async () => {
   it('should cache file', async () => {

@@ -1,7 +1,7 @@
 // @ts-ignore this pkg miss types
 import findPkg from 'find-pkg';
 import path from 'path';
-import fs from 'fs-extra';
+import fs from 'fs';
 import {
   moduleFederationPlugin,
   sharePlugin,

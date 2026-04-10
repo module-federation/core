@@ -45,7 +45,6 @@
   "dependencies": {
     "cheerio": "1.0.0-rc.12",
     "@module-federation/sdk": "workspace:*",
-    "fs-extra": "11.3.0",
     "html-to-text": "9.0.5",
     "lodash-es": "4.17.21",
     "@module-federation/enhanced": "workspace:*",

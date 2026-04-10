@@ -1,7 +1,5 @@
 import dirTree from 'directory-tree';
-import { rmSync } from 'fs';
-import fse from 'fs-extra';
-const { readJSONSync, ensureDirSync } = fse;
+import { mkdirSync, readFileSync, rmSync } from 'fs';
 import os from 'os';
 import { join, resolve, sep } from 'path';
 import util from 'util';
@@ -17,6 +15,9 @@ import {
 
 describe('typeScriptCompiler', () => {
   const tmpDir = join(os.tmpdir(), 'typeScriptCompiler');
+
+  const readJSONSync = (filePath: string) =>
+    JSON.parse(readFileSync(filePath, 'utf-8'));
 
   const basicConfig = readJSONSync(
     join(__dirname, '../../..', './tsconfig.spec.json'),
@@ -36,7 +37,7 @@ describe('typeScriptCompiler', () => {
     },
   };
 
-  ensureDirSync(join(tmpDir, 'typesRemoteFolder'));
+  mkdirSync(join(tmpDir, 'typesRemoteFolder'), { recursive: true });
 
   const remoteOptions: Required<RemoteOptions> = {
     additionalFilesToCompile: [],
@@ -96,7 +97,7 @@ describe('typeScriptCompiler', () => {
     afterEach(() => {
       vi.restoreAllMocks();
       rmSync(tmpDir, { recursive: true, force: true });
-      ensureDirSync(join(tmpDir, 'typesRemoteFolder'));
+      mkdirSync(join(tmpDir, 'typesRemoteFolder'), { recursive: true });
     });
 
     it('empty mapToExpose', () => {
