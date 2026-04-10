@@ -73,13 +73,18 @@ function buildLoadBundleAsyncWrapper() {
   return async (originalBundlePath: string): Promise<void> => {
     const scope = globalThis.__FEDERATION__.__NATIVE__[__METRO_GLOBAL_PREFIX__];
 
+    // entry is always in the root directory of assets associated with remote
+    // based on that, we extract the public path from the origin URL
+    // e.g. http://example.com/a/b/c/mf-manfiest.json -> http://example.com/a/b/c
     const publicPath = getPublicPath(scope.origin);
     let bundlePath = getBundlePath(originalBundlePath, publicPath);
 
     const isSplitBundle = !isUrl(originalBundlePath);
 
     // Cache handler registered externally (e.g. by zephyr-native-cache register()).
-    const cacheHandler = (globalThis as any).__MFE_CACHE__ as
+    // Stored under __FEDERATION__.__NATIVE__.__CACHE__ as a singleton (no prefix scope).
+    const cacheHandler = (globalThis as any).__FEDERATION__?.__NATIVE__
+      ?.__CACHE__ as
       | ((
           fallback: (path: string) => Promise<void>,
           bundlePath: string,
@@ -94,6 +99,7 @@ function buildLoadBundleAsyncWrapper() {
       bundlePath = joinComponents(publicPath, bundlePath);
     }
 
+    // ../../node_modules/ -> ..%2F..%2Fnode_modules/ so that it's not automatically sanitized
     const encodedBundlePath = bundlePath.replaceAll('../', '..%2F');
 
     let result;

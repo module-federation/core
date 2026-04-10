@@ -1,5 +1,5 @@
 /**
- * Interface for the global cache layer (`globalThis.__MFE_CACHE_LAYER__`).
+ * Interface for the global cache layer (`globalThis.__FEDERATION__.__NATIVE__.__CACHE_LAYER__`).
  *
  * Metro-core never imports native-cache directly — it only
  * reads this global, keeping the two packages decoupled.
