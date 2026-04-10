@@ -19,26 +19,10 @@ import type {
 } from '@module-federation/sdk';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
 import FederationModulesPlugin from './runtime/FederationModulesPlugin';
-import schema from '../../schemas/container/ContainerReferencePlugin';
-import checkOptions from '../../schemas/container/ContainerReferencePlugin.check';
 
 const { ExternalsPlugin } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
-
-const createSchemaValidation = require(
-  normalizeWebpackPath('webpack/lib/util/create-schema-validation'),
-) as typeof import('webpack/lib/util/create-schema-validation');
-
-// const validate = createSchemaValidation(
-//   //eslint-disable-next-line
-//   checkOptions,
-//   () => schema,
-//   {
-//     name: 'Container Reference Plugin',
-//     baseDataPath: 'options',
-//   },
-// );
 
 const slashCode = '/'.charCodeAt(0);
 

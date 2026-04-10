@@ -17,8 +17,6 @@ import type {
 import type { containerPlugin } from '@module-federation/sdk';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
 import FederationModulesPlugin from './runtime/FederationModulesPlugin';
-import checkOptions from '../../schemas/container/ContainerPlugin.check';
-import schema from '../../schemas/container/ContainerPlugin';
 import FederationRuntimeDependency from './runtime/FederationRuntimeDependency';
 import type { OptimizationSplitChunksCacheGroup } from 'webpack/lib/optimize/SplitChunksPlugin';
 import type { Falsy } from 'webpack/declarations/WebpackOptions';
@@ -30,15 +28,6 @@ const ModuleDependency = require(
 const EntryDependency = require(
   normalizeWebpackPath('webpack/lib/dependencies/EntryDependency'),
 ) as typeof import('webpack/lib/dependencies/EntryDependency');
-
-const createSchemaValidation = require(
-  normalizeWebpackPath('webpack/lib/util/create-schema-validation'),
-) as typeof import('webpack/lib/util/create-schema-validation');
-
-// const validate = createSchemaValidation(checkOptions, () => schema, {
-//   name: 'Container Plugin',
-//   baseDataPath: 'options',
-// });
 
 const PLUGIN_NAME = 'ContainerPlugin';
 
