@@ -1,0 +1,274 @@
+# Runtime 插件
+
+Runtime 插件用于改写 **运行时行为**，而不是改写 runtime 本身。
+
+适合这类场景：
+
+- 运行时改写 remote URL
+- 自定义 manifest 请求
+- 改写 script 注入逻辑
+- 覆盖 shared 最终命中结果
+- 增加容错、回退、恢复逻辑
+- 扩展新的 remote 加载方式
+
+如果你只是想在构建配置里注册插件路径，见 [`runtimePlugins`](../../configure/runtimeplugins)。如果你需要完整 hook 列表，见 [Runtime Hooks](./runtime-hooks)。
+
+## 心智模型
+
+一个 runtime 插件本质上是一个返回 `ModuleFederationRuntimePlugin` 的函数：
+
+```ts title="my-runtime-plugin.ts"
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+export default function myRuntimePlugin(): ModuleFederationRuntimePlugin {
+  return {
+    name: 'my-runtime-plugin',
+  };
+}
+```
+
+用函数返回插件实例，而不是直接导出对象，主要有几个好处：
+
+- 可以接收 options
+- 可以通过闭包保存状态
+- 同一份插件逻辑可以复用到不同环境
+
+## 注册方式
+
+Runtime 插件可以在两个阶段注册：
+
+1. 构建期，通过 `runtimePlugins`
+2. 运行时，通过 `registerPlugins(...)` 或 `instance.registerPlugins(...)`
+
+### 构建期注册
+
+如果某个 host 在所有环境都需要这个插件，优先用构建期注册。
+
+```ts title="module-federation.config.ts"
+const path = require('path');
+
+export default {
+  name: 'host',
+  remotes: {
+    catalog: 'catalog@https://registry.example.com/mf-manifest.json',
+  },
+  runtimePlugins: [
+    [
+      path.resolve(__dirname, './plugins/rewrite-remote-entry.ts'),
+      {
+        fromHost: 'registry.example.com',
+        toHost: 'cdn.example.com',
+      },
+    ],
+  ],
+};
+```
+
+### 运行时注册
+
+如果插件依赖用户态、环境变量、特性开关、启动后拿到的数据，适合运行时注册。
+
+```ts title="bootstrap.ts"
+import { createInstance } from '@module-federation/enhanced/runtime';
+import rewriteRemoteEntryPlugin from './plugins/rewrite-remote-entry';
+
+const mf = createInstance({
+  name: 'host',
+  remotes: [
+    {
+      name: 'catalog',
+      entry: 'https://registry.example.com/mf-manifest.json',
+    },
+  ],
+});
+
+mf.registerPlugins([
+  rewriteRemoteEntryPlugin({
+    fromHost: 'registry.example.com',
+    toHost: 'cdn.example.com',
+  }),
+]);
+```
+
+## 怎么选 hook
+
+| 目标 | Hook | 适用场景 |
+| --- | --- | --- |
+| 改写 remote 查找输入 | `beforeRequest` | 需要在 remote 解析开始前改写请求内容 |
+| 改写解析后的 entry URL | `afterResolve` | 需要在 runtime 解析出 `remoteInfo.entry` 之后改写最终加载地址 |
+| 自定义 manifest 请求 | `fetch` | 需要加 credentials、headers、重试或自定义 fetch 行为 |
+| 自定义 script 注入 | `createScript` | 需要加 `crossorigin`、timeout、特殊 script 属性 |
+| 在 remote init 前对齐 / 改写共享池 | `beforeInitContainer`、`initContainerShareScopeMap` | 需要控制 remote 初始化时使用哪个 share scope |
+| 改写 shared 最终命中结果 | `resolveShare` | 需要强制命中某个 shared，而不是用 runtime 默认选择 |
+| 加载失败时兜底 | `errorLoadRemote` | 需要离线兜底、fallback module、分层恢复策略 |
+| 扩展新的 remote 加载方式 | `loadEntry` | 需要完整接管 remote entry 加载过程，或实现新的 remote 类型 |
+
+## 配方：改写解析后的 remote entry
+
+`afterResolve` 适合“remote 已经解析完成，但真正加载前还要改一下最终 URL”这种场景。
+
+典型用途：
+
+- CDN 切流
+- 环境切换
+- 基于注册中心改写地址
+- 域名归一化
+
+```ts title="plugins/rewrite-remote-entry.ts"
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+interface RewriteRemoteEntryOptions {
+  fromHost: string;
+  toHost: string;
+}
+
+export default function rewriteRemoteEntryPlugin(
+  options: RewriteRemoteEntryOptions,
+): ModuleFederationRuntimePlugin {
+  return {
+    name: 'rewrite-remote-entry',
+    async afterResolve(args) {
+      const entry = args.remoteInfo?.entry;
+      if (!entry) {
+        return args;
+      }
+
+      try {
+        const currentUrl = new URL(entry);
+        if (currentUrl.hostname !== options.fromHost) {
+          return args;
+        }
+
+        const nextUrl = new URL(entry);
+        nextUrl.hostname = options.toHost;
+        args.remoteInfo.entry = nextUrl.toString();
+      } catch {
+        // 非 URL 场景直接忽略，保留原始解析结果。
+      }
+
+      return args;
+    },
+  };
+}
+```
+
+为什么选这个 hook：
+
+- `beforeRequest` 太早，此时还拿不到解析后的 entry
+- `afterResolve` 已经给出了 `remoteInfo.entry`
+- 在这里改 `args.remoteInfo.entry`，可以保留原始 path / query / hash
+
+:::tip 只影响运行时
+
+`afterResolve` 改写的是运行时加载地址。它不会自动改写类型生成或其他构建期工具使用的 remote URL。  
+如果你依赖远程类型生成，这条链路需要单独保持一致。
+
+:::
+
+## 配方：自定义 manifest fetch
+
+当你需要改 manifest 请求本身时，使用 `fetch`。
+
+```ts title="plugins/fetch-manifest-with-credentials.ts"
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+export default function fetchManifestWithCredentials(): ModuleFederationRuntimePlugin {
+  return {
+    name: 'fetch-manifest-with-credentials',
+    fetch(manifestUrl, requestInit) {
+      const headers = new Headers(requestInit?.headers);
+      headers.set('x-mf-host', 'host');
+
+      return fetch(manifestUrl, {
+        ...requestInit,
+        credentials: 'include',
+        headers,
+      });
+    },
+  };
+}
+```
+
+`fetch` 常见用途：
+
+- 带凭证请求
+- 增加鉴权头
+- manifest 重试
+- 自定义代理逻辑
+
+如果你想直接复用现成的传输层恢复策略，可以看内置的 retry 插件。
+
+## 配方：优先使用 host 自己的 shared
+
+`resolveShare` 用来改写 shared 最终选择结果。
+
+关键点：只改 `args.scope`、`args.version` 这类字段，并不会自动改变最终命中项。要真正改掉结果，必须替换 `args.resolver`。
+
+```ts title="plugins/prefer-host-react.ts"
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+export default function preferHostReact(): ModuleFederationRuntimePlugin {
+  return {
+    name: 'prefer-host-react',
+    resolveShare(args) {
+      if (args.pkgName !== 'react') {
+        return args;
+      }
+
+      const hostVersionMap = args.shareScopeMap.default?.react;
+      if (!hostVersionMap) {
+        return args;
+      }
+
+      const preferredShared =
+        hostVersionMap[args.version] ?? Object.values(hostVersionMap)[0];
+      if (!preferredShared) {
+        return args;
+      }
+
+      args.resolver = () => ({
+        shared: preferredShared,
+        useTreesShaking: false,
+      });
+
+      return args;
+    },
+  };
+}
+```
+
+## 容错与 `shareStrategy`
+
+做运行时容错时，`errorLoadRemote` 很关键。
+
+但有个经常踩坑的点：它和 `shareStrategy` 强相关。
+
+- `version-first` 会在启动阶段提前加载 remote entry，用来初始化 shared
+- `loaded-first` 则会把 remote 加载延迟到真正访问 remote 时
+
+这意味着：
+
+- 用 `version-first` 时，remote 离线可能会在启动期就以 `lifecycle: 'beforeLoadShare'` 失败
+- 用 `loaded-first` 时，通常会等到真正访问 remote 时才暴露失败
+
+如果你的 remote 存在离线、波动、跨网络访问等情况，建议把 `errorLoadRemote` 和明确的 `shareStrategy` 一起设计。
+
+## 对版本敏感的 hook
+
+高级 hook 的参数和行为会随 runtime 演进。  
+像 `afterResolve`、`fetch`、`createScript`、`loadEntry` 这类 hook，如果你依赖比较新的参数，最好以你本地安装版本的类型定义为准。
+
+尤其要注意这些场景：
+
+- `createScript` 里依赖新增 script attrs
+- `fetch` / `loadEntry` 里依赖更多 loader hook 上下文
+- 使用内置插件里那些文档没完全展开的生命周期 hook
+
+## 相关文档
+
+- [`runtimePlugins` 配置](../../configure/runtimeplugins)
+- [Runtime API](./runtime-api)
+- [Runtime Hooks](./runtime-hooks)
+- [插件系统](../../plugin/dev/index)
+- [Retry 插件](../../plugin/plugins/retry-plugin)
+- [Error Load Remote 的解决方案](../../blog/error-load-remote)
