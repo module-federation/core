@@ -428,6 +428,175 @@ function registerPlugins(plugins: ModuleFederationRuntimePlugin[]) {}
   </Tab>
 </Tabs>
 
+## registerGlobalPlugins
+
+- type
+
+```typescript
+function registerGlobalPlugins(plugins: ModuleFederationRuntimePlugin[]): void {}
+```
+
+用于把插件注册到全局 federation 状态，而不是只注册到某一个当前实例。
+
+适合这类场景：
+
+- 通用埋点
+- 环境级统一策略
+- host 级默认插件
+
+全局插件会按 `plugin.name` 去重。
+
+```ts
+import {
+  registerGlobalPlugins,
+  createInstance,
+} from '@module-federation/enhanced/runtime';
+import runtimePlugin from './runtime-plugin';
+
+registerGlobalPlugins([runtimePlugin()]);
+
+const mf = createInstance({
+  name: 'mf_host',
+  remotes: [
+    {
+      name: 'sub1',
+      entry: 'http://localhost:2001/mf-manifest.json',
+    },
+  ],
+});
+```
+
+为了保证行为可预期，建议在创建或使用 runtime 实例之前注册全局插件。
+
+## getRemoteInfo
+
+- type
+
+```typescript
+function getRemoteInfo(remote: Remote): RemoteInfo {}
+```
+
+把 remote 配置归一化为 runtime 内部使用的 `RemoteInfo` 结构。
+
+这个 helper 会补齐一些默认值，比如：
+
+- `type`
+- `entryGlobalName`
+- `shareScope`
+
+```ts
+import { getRemoteInfo } from '@module-federation/enhanced/runtime';
+
+const remoteInfo = getRemoteInfo({
+  name: 'sub1',
+  entry: 'http://localhost:2001/mf-manifest.json',
+});
+
+console.log(remoteInfo.entryGlobalName);
+console.log(remoteInfo.shareScope);
+```
+
+这是一个偏底层的 helper。大多数应用仍然应该优先使用 `createInstance`、`registerRemotes` 或构建插件去管理 remotes。
+
+## getRemoteEntry
+
+- type
+
+```typescript
+function getRemoteEntry(params: {
+  origin: ModuleFederation;
+  remoteInfo: RemoteInfo;
+  remoteEntryExports?: RemoteEntryExports;
+  getEntryUrl?: (url: string) => string;
+}): Promise<RemoteEntryExports | false | void> {}
+```
+
+用于加载 remote entry，并返回对应的 entry exports。
+
+这个 API 更适合底层工具、调试、自定义 loader 或高级 runtime 集成。大多数应用应该优先使用 `loadRemote`。
+
+```ts
+import {
+  createInstance,
+  getRemoteInfo,
+  getRemoteEntry,
+} from '@module-federation/enhanced/runtime';
+
+const mf = createInstance({
+  name: 'mf_host',
+  remotes: [],
+});
+
+const remoteInfo = getRemoteInfo({
+  name: 'sub1',
+  entry: 'http://localhost:2001/mf-manifest.json',
+});
+
+const remoteEntryExports = await getRemoteEntry({
+  origin: mf,
+  remoteInfo,
+});
+```
+
+## loadScript
+
+- type
+
+```typescript
+function loadScript(
+  url: string,
+  info: {
+    attrs?: Record<string, any>;
+    createScriptHook?: CreateScriptHookDom;
+  },
+): Promise<void> {}
+```
+
+浏览器侧的底层 helper，用于插入并加载 remote entry script。
+
+只有在你需要绕过 `loadRemote` / `getRemoteEntry`、自己控制 script 加载流程时才需要直接使用它。
+
+```ts
+import { loadScript } from '@module-federation/enhanced/runtime';
+
+await loadScript('http://localhost:2001/remoteEntry.js', {
+  attrs: {
+    crossorigin: 'anonymous',
+  },
+});
+```
+
+## loadScriptNode
+
+- type
+
+```typescript
+function loadScriptNode(
+  url: string,
+  info: {
+    attrs?: Record<string, any>;
+    loaderHook?: {
+      createScriptHook?: CreateScriptHookNode;
+    };
+  },
+): Promise<void> {}
+```
+
+Node.js 侧的底层 helper，用于把 remote entry 加载到当前进程。
+
+适合 Node 端集成或自定义 loader。浏览器环境请使用 `loadScript`。
+
+```ts
+import { loadScriptNode } from '@module-federation/enhanced/runtime';
+
+await loadScriptNode('http://localhost:2001/remoteEntry.js', {
+  attrs: {
+    name: 'sub1',
+    globalName: 'sub1',
+  },
+});
+```
+
 ## registerShared
 
 ### 详情

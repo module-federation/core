@@ -35,10 +35,11 @@ The function form matters because it lets you:
 
 ## Register a plugin
 
-You can register runtime plugins in two places:
+You can register runtime plugins in three places:
 
 1. Build time, through `runtimePlugins`
-2. Runtime, through `registerPlugins(...)` or `instance.registerPlugins(...)`
+2. Runtime, on a specific instance, through `registerPlugins(...)` or `instance.registerPlugins(...)`
+3. Runtime, globally, through `registerGlobalPlugins(...)`
 
 ### Build-time registration
 
@@ -89,6 +90,34 @@ mf.registerPlugins([
   }),
 ]);
 ```
+
+### Global runtime registration
+
+Use `registerGlobalPlugins(...)` when you want the plugin to be available to all future runtime instances, instead of only one current instance.
+
+This is best suited for shared instrumentation, cross-app policy, or host-wide defaults.
+
+```ts title="bootstrap.ts"
+import {
+  registerGlobalPlugins,
+  createInstance,
+} from '@module-federation/enhanced/runtime';
+import runtimePlugin from './plugins/runtime-plugin';
+
+registerGlobalPlugins([runtimePlugin()]);
+
+const mf = createInstance({
+  name: 'host',
+  remotes: [
+    {
+      name: 'catalog',
+      entry: 'https://registry.example.com/mf-manifest.json',
+    },
+  ],
+});
+```
+
+`registerGlobalPlugins(...)` deduplicates plugins by `name`. In practice, call it before creating or using runtime instances so the global plugins are incorporated consistently.
 
 ## Choose the right hook
 

@@ -425,6 +425,175 @@ function registerPlugins(plugins: ModuleFederationRuntimePlugin[]) {}
   </Tab>
 </Tabs>
 
+## registerGlobalPlugins
+
+- type
+
+```typescript
+function registerGlobalPlugins(plugins: ModuleFederationRuntimePlugin[]): void {}
+```
+
+Registers plugins on the global federation state instead of on a single current instance.
+
+Use this when you want a plugin to be picked up by all future runtime instances, such as:
+
+- shared instrumentation
+- environment-wide policy
+- host-wide defaults
+
+Global plugins are deduplicated by `plugin.name`.
+
+```ts
+import {
+  registerGlobalPlugins,
+  createInstance,
+} from '@module-federation/enhanced/runtime';
+import runtimePlugin from './runtime-plugin';
+
+registerGlobalPlugins([runtimePlugin()]);
+
+const mf = createInstance({
+  name: 'mf_host',
+  remotes: [
+    {
+      name: 'sub1',
+      entry: 'http://localhost:2001/mf-manifest.json',
+    },
+  ],
+});
+```
+
+For predictable behavior, register global plugins before creating or using runtime instances.
+
+## getRemoteInfo
+
+- type
+
+```typescript
+function getRemoteInfo(remote: Remote): RemoteInfo {}
+```
+
+Normalizes a remote definition into the runtime shape used internally by the loader.
+
+This helper fills in defaults such as:
+
+- `type`
+- `entryGlobalName`
+- `shareScope`
+
+```ts
+import { getRemoteInfo } from '@module-federation/enhanced/runtime';
+
+const remoteInfo = getRemoteInfo({
+  name: 'sub1',
+  entry: 'http://localhost:2001/mf-manifest.json',
+});
+
+console.log(remoteInfo.entryGlobalName);
+console.log(remoteInfo.shareScope);
+```
+
+This is a low-level helper. Most applications should configure remotes through `createInstance`, `registerRemotes`, or the build plugin.
+
+## getRemoteEntry
+
+- type
+
+```typescript
+function getRemoteEntry(params: {
+  origin: ModuleFederation;
+  remoteInfo: RemoteInfo;
+  remoteEntryExports?: RemoteEntryExports;
+  getEntryUrl?: (url: string) => string;
+}): Promise<RemoteEntryExports | false | void> {}
+```
+
+Loads a remote entry and returns its entry exports.
+
+This is mainly useful for low-level tooling, debugging, custom loaders, or advanced runtime integrations. Most applications should prefer `loadRemote`.
+
+```ts
+import {
+  createInstance,
+  getRemoteInfo,
+  getRemoteEntry,
+} from '@module-federation/enhanced/runtime';
+
+const mf = createInstance({
+  name: 'mf_host',
+  remotes: [],
+});
+
+const remoteInfo = getRemoteInfo({
+  name: 'sub1',
+  entry: 'http://localhost:2001/mf-manifest.json',
+});
+
+const remoteEntryExports = await getRemoteEntry({
+  origin: mf,
+  remoteInfo,
+});
+```
+
+## loadScript
+
+- type
+
+```typescript
+function loadScript(
+  url: string,
+  info: {
+    attrs?: Record<string, any>;
+    createScriptHook?: CreateScriptHookDom;
+  },
+): Promise<void> {}
+```
+
+Low-level browser helper that injects and loads a remote entry script.
+
+Use it only when you need to work below `loadRemote` / `getRemoteEntry`, for example in custom script loading flows.
+
+```ts
+import { loadScript } from '@module-federation/enhanced/runtime';
+
+await loadScript('http://localhost:2001/remoteEntry.js', {
+  attrs: {
+    crossorigin: 'anonymous',
+  },
+});
+```
+
+## loadScriptNode
+
+- type
+
+```typescript
+function loadScriptNode(
+  url: string,
+  info: {
+    attrs?: Record<string, any>;
+    loaderHook?: {
+      createScriptHook?: CreateScriptHookNode;
+    };
+  },
+): Promise<void> {}
+```
+
+Low-level Node.js helper that loads a remote entry into the current process.
+
+Use it only in Node-side integrations or custom loaders. In browser code, use `loadScript` instead.
+
+```ts
+import { loadScriptNode } from '@module-federation/enhanced/runtime';
+
+await loadScriptNode('http://localhost:2001/remoteEntry.js', {
+  attrs: {
+    name: 'sub1',
+    globalName: 'sub1',
+  },
+});
+```
+
 ## registerShared
 
 ### details

@@ -35,10 +35,11 @@ export default function myRuntimePlugin(): ModuleFederationRuntimePlugin {
 
 ## 注册方式
 
-Runtime 插件可以在两个阶段注册：
+Runtime 插件可以在三个位置注册：
 
 1. 构建期，通过 `runtimePlugins`
-2. 运行时，通过 `registerPlugins(...)` 或 `instance.registerPlugins(...)`
+2. 运行时，在某个实例上，通过 `registerPlugins(...)` 或 `instance.registerPlugins(...)`
+3. 运行时，在全局作用域，通过 `registerGlobalPlugins(...)`
 
 ### 构建期注册
 
@@ -89,6 +90,38 @@ mf.registerPlugins([
   }),
 ]);
 ```
+
+### 全局运行时注册
+
+如果你希望插件对之后创建的所有 runtime 实例都生效，而不是只绑定到某一个当前实例，可以使用 `registerGlobalPlugins(...)`。
+
+适合这类场景：
+
+- 通用埋点
+- 跨应用统一策略
+- host 级默认插件
+
+```ts title="bootstrap.ts"
+import {
+  registerGlobalPlugins,
+  createInstance,
+} from '@module-federation/enhanced/runtime';
+import runtimePlugin from './plugins/runtime-plugin';
+
+registerGlobalPlugins([runtimePlugin()]);
+
+const mf = createInstance({
+  name: 'host',
+  remotes: [
+    {
+      name: 'catalog',
+      entry: 'https://registry.example.com/mf-manifest.json',
+    },
+  ],
+});
+```
+
+`registerGlobalPlugins(...)` 会按 `name` 去重。实践里建议在创建或使用 runtime 实例之前调用，这样全局插件会更稳定地并入实例插件链。
 
 ## 怎么选 hook
 
