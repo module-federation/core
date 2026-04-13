@@ -3,7 +3,7 @@
   "description": "Create a new Module Federation project",
   "public": true,
   "sideEffects": false,
-  "version": "2.3.1",
+  "version": "2.3.2",
   "license": "MIT",
   "repository": {
     "type": "git",

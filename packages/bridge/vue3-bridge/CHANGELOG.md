@@ -1,5 +1,32 @@
 # @module-federation/bridge-vue3
 
+## 2.3.2
+
+### Patch Changes
+
+- 1f1ca88: feat(bridge-vue3): add afterRouterCreate callback to preserve navigation guards
+
+  The bridge internally recreates the Vue Router instance, which discards any
+  global navigation guards (beforeEach, afterEach, beforeResolve) registered on
+  the original router. The new optional `afterRouterCreate` callback in the
+  `appOptions` return value is invoked with the bridge's internal router right
+  after creation but before any navigation, allowing consumers to re-register
+  their guards on the actual router that will be used.
+
+- 1f1ca88: fix(bridge-vue3): skip rewriting relative paths, query strings, and hash fragments in hash+basename mode
+
+  The `patchRouter` function created by `createHashBasenamePatch()` now only rewrites
+  **absolute** paths (starting with `/`). Previously it blindly prefixed any string
+  navigation, which caused:
+  - Relative paths like `router.push('settings')` to become `/barbersettings` instead of
+    being resolved by Vue Router against the current route.
+  - Query-only navigations like `router.push('?tab=details')` to jump to `/barber?tab=details`,
+    dropping the current path.
+  - Hash-only navigations like `router.push('#anchor')` to jump to `/barber#anchor`.
+  - @module-federation/runtime@2.3.2
+  - @module-federation/sdk@2.3.2
+  - @module-federation/bridge-shared@2.3.2
+
 ## 2.3.1
 
 ### Patch Changes

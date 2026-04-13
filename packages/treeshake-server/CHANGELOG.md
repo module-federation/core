@@ -1,5 +1,11 @@
 # @module-federation/treeshake-server
 
+## 2.3.2
+
+### Patch Changes
+
+- 1c02710: chore: lock deps
+
 ## 2.3.1
 
 ## 2.3.0

@@ -1,5 +1,12 @@
 # @module-federation/retry-plugin
 
+## 2.3.2
+
+### Patch Changes
+
+- 0e7b1a1: Fix retryDelay not being applied on the first retry attempt in scriptRetry.
+  - @module-federation/sdk@2.3.2
+
 ## 2.3.1
 
 ### Patch Changes

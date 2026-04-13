@@ -1,5 +1,15 @@
 # @module-federation/node
 
+## 2.7.40
+
+### Patch Changes
+
+- 1c02710: chore: lock deps
+- Updated dependencies [1c02710]
+  - @module-federation/enhanced@2.3.2
+  - @module-federation/runtime@2.3.2
+  - @module-federation/sdk@2.3.2
+
 ## 2.7.39
 
 ### Patch Changes
