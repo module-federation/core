@@ -69,8 +69,8 @@ importers:
         specifier: 0.28.17
         version: 0.28.17(typescript@5.9.3)
       undici:
-        specifier: 7.18.2
-        version: 7.18.2
+        specifier: 7.24.7
+        version: 7.24.7
       unplugin:
         specifier: 3.0.0
         version: 3.0.0
@@ -3278,6 +3278,9 @@ importers:
       typescript:
         specifier: ^4.9.0 || ^5.0.0
         version: 5.9.3
+      undici:
+        specifier: 7.24.7
+        version: 7.24.7
       ws:
         specifier: 8.18.0
         version: 8.18.0
@@ -25505,8 +25508,8 @@ packages:
     resolution: {integrity: sha512-VfQPToRA5FZs/qJxLIinmU59u0r7LXqoJkCzinq3ckNJp3vKEh7jTWN589YQ5+aoAC/TGRLyJLCPKcLQbM8r9g==}
     engines: {node: '>=18.17'}
 
-  undici@7.18.2:
-    resolution: {integrity: sha512-y+8YjDFzWdQlSE9N5nzKMT3g4a5UBX1HKowfdXh0uvAnTaqqwqB92Jt4UXBAeKekDs5IaDKyJFR4X1gYVCgXcw==}
+  undici@7.24.7:
+    resolution: {integrity: sha512-H/nlJ/h0ggGC+uRL3ovD+G0i4bqhvsDOpbDv7At5eFLlj2b41L8QliGbnl2H7SnDiYhENphh1tQFJZf+MyfLsQ==}
     engines: {node: '>=20.18.1'}
 
   unhead@2.1.12:
@@ -57128,7 +57131,7 @@ snapshots:
 
   undici@6.23.0: {}
 
-  undici@7.18.2: {}
+  undici@7.24.7: {}
 
   unhead@2.1.12:
     dependencies:
