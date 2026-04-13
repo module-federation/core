@@ -49,8 +49,25 @@ export function snapshotPlugin(): ModuleFederationRuntimePlugin {
             id,
           });
 
-        assignRemoteInfo(remoteInfo, remoteSnapshot);
-        // preloading assets
+        try {
+          assignRemoteInfo(remoteInfo, remoteSnapshot);
+        } catch (assignError) {
+          const failOver =
+            await origin.remoteHandler.hooks.lifecycle.errorLoadRemote.emit({
+              id: id || remoteInfo.name,
+              error: assignError,
+              from: 'runtime',
+              lifecycle: 'afterResolve',
+              origin,
+            });
+
+          if (!failOver) {
+            throw assignError;
+          }
+
+          assignRemoteInfo(remoteInfo, failOver as ModuleInfo);
+        }
+
         const preloadOptions: PreloadOptions[0] = {
           remote,
           preloadConfig: {

@@ -181,15 +181,24 @@ async function errorLoadRemote(args: ErrorLoadRemoteOptions): Promise<void | unk
 type ErrorLoadRemoteOptions ={
   id: string;
   error: unknown;
+  options?: any;
   from: 'build' | 'runtime';
+  lifecycle: 'beforeRequest' | 'beforeLoadShare' | 'afterResolve' | 'onLoad';
   origin: ModuleFederation;
 }
 ```
+
+`lifecycle` 参数标识错误发生的阶段：
+
+- `beforeRequest`：初始请求处理阶段出错
+- `afterResolve`：manifest 加载或校验阶段出错（网络失败、manifest 缺少必填字段等）
+- `onLoad`：模块加载和执行阶段出错
+- `beforeLoadShare`：共享依赖加载阶段出错
+
 * example
 
 ```ts
-import { createInstance } from '@module-federation/enhanced/runtime'
-
+import { createInstance, loadRemote } from '@module-federation/enhanced/runtime'
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
 const fallbackPlugin: () => ModuleFederationRuntimePlugin =
@@ -197,12 +206,47 @@ const fallbackPlugin: () => ModuleFederationRuntimePlugin =
     return {
       name: 'fallback-plugin',
       errorLoadRemote(args) {
-        const fallback = 'fallback'
-        return fallback;
+        const { lifecycle, id, error } = args;
+
+        if (error) {
+          console.warn(`Failed to load remote ${id} at ${lifecycle}:`, error?.message || error);
+        }
+
+        switch (lifecycle) {
+          case 'afterResolve':
+            return {
+              id: id || 'fallback',
+              name: id || 'fallback',
+              metaData: { /* fallback manifest */ },
+              shared: [],
+              remotes: [],
+              exposes: []
+            };
+
+          case 'beforeRequest':
+            console.warn(`Request processing failed for ${id}`);
+            return void 0;
+
+          case 'onLoad':
+            return () => ({
+              __esModule: true,
+              default: () => 'Fallback Component'
+            });
+
+          case 'beforeLoadShare':
+            console.warn(`Shared dependency loading failed for ${id}`);
+            return () => ({
+              __esModule: true,
+              default: {}
+            });
+
+          default:
+            console.warn(`Unknown lifecycle ${lifecycle} for ${id}`);
+            return void 0;
+        }
       },
     };
   };
-
 
 const mf = createInstance({
     name: 'mf_host',
@@ -218,7 +262,7 @@ const mf = createInstance({
 
 mf.loadRemote('app1/un-existed-module').then(mod=>{
   expect(mod).toEqual('fallback');
-})
+});
 ```
 
 ## beforeLoadShare

@@ -427,7 +427,7 @@ export default fallbackPlugin;
     ```
 
   - **Handle entry file loading errors** (`args.lifecycle === 'afterResolve'`)
-     - This type of error occurs in the entry resource `mf-manifest.json` loading process
+     - This type of error occurs in the entry resource `mf-manifest.json` loading process, including network failures and manifest validation errors (e.g. missing required fields like `metaData`, `exposes`, or `shared`)
      - We can handle it in the following two ways:
 
      a. Try to load backup service:

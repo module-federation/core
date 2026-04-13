@@ -297,6 +297,11 @@ export class SnapshotHandler {
           res = await fetch(manifestUrl, {});
         }
         manifestJson = (await res.json()) as Manifest;
+
+        assert(
+          manifestJson.metaData && manifestJson.exposes && manifestJson.shared,
+          `"${manifestUrl}" is not a valid federation manifest for remote "${moduleInfo.name}". Missing required fields: ${[!manifestJson.metaData && 'metaData', !manifestJson.exposes && 'exposes', !manifestJson.shared && 'shared'].filter(Boolean).join(', ')}.`,
+        );
       } catch (err) {
         manifestJson =
           (await this.HostInstance.remoteHandler.hooks.lifecycle.errorLoadRemote.emit(

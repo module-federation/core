@@ -189,7 +189,7 @@ type ErrorLoadRemoteOptions ={
 The `lifecycle` parameter indicates the stage where the error occurred:
 
 - `beforeRequest`: Error during initial request processing
-- `afterResolve`: Error during manifest loading (most common for network failures)
+- `afterResolve`: Error during manifest loading or validation (network failures, invalid/malformed manifest)
 - `onLoad`: Error during module loading and execution
 - `beforeLoadShare`: Error during shared dependency loading
 
