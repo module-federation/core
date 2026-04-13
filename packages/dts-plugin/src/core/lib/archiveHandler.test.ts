@@ -3,7 +3,14 @@ import type { RemoteOptions } from '../interfaces/RemoteOptions';
 import type { TsConfigJson } from '../interfaces/TsConfigJson';
 
 import AdmZip from 'adm-zip';
-import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  writeFileSync,
+  readFileSync,
+} from 'fs';
 import os from 'os';
 import { join } from 'path';
 import {
