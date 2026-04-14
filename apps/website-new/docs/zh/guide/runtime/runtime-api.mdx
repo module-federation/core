@@ -21,7 +21,7 @@ import Runtime from '@components/zh/runtime/index';
   - 希望使用 ModuleFederation 分治特性，封装相应的 API 提供给其他项目使用
 
 
-* `createInstance` 不会对已存在的实例进行覆盖，每次调用都会创建一个新的实例。
+* `createInstance` 每次都会创建一个全新的 `ModuleFederation` 实例，并将其注册到全局实例列表中。它不会根据 `name` / `version` 查找已有实例，也不会把新配置合并到已有实例上。
 
 ```ts
 import { createInstance } from '@module-federation/enhanced/runtime';
@@ -39,17 +39,19 @@ const mf = createInstance({
 mf.loadRemote('sub1/util').then((m) => m.add(1, 2, 3));
 ```
 
-## init <Badge type='danger'>废弃</Badge>
+## init <Badge type='warning'>谨慎使用</Badge>
 
 :::warning Warning
 
-此 API 将被废弃。如果需要获取已创建的实例，可以使用 [getInstance](#getinstance) 获取已创建的实例。
+`init` 仍然受支持，但需要根据你希望如何管理实例来选择是否使用它。
 
-如果需要创建新的实例，请使用 [createInstance](#createinstance)。
+它与 [createInstance](#createinstance) 的核心区别在于：`init` 不会每次都创建新实例，而是会先根据 `name` 和 `version` 查找已有实例。如果找到了匹配实例，就复用该实例，并通过 `instance.initOptions(options)` 合并新的配置；只有在找不到匹配实例时，才会退回到创建新实例。
+
+当你希望同一个 host 的多次调用复用并扩展同一个运行时实例时，适合使用 `init`。当你需要严格隔离、确保每次都拿到全新实例时，请使用 [createInstance](#createinstance)。如果你只是想获取构建插件创建的实例，请使用 [getInstance](#getinstance)。
 
 :::
 
-- Type: `init(options: InitOptions): void`
+- Type: `init(options: InitOptions): ModuleFederation`
 - 用于运行时动态注册 `Vmok` 模块
 - InitOptions:
 
@@ -138,7 +140,7 @@ init({
 ```
 </Collapse>
 
-### 如何迁移
+### 推荐替代方式
 
 #### Build Plugin（使用构建插件）
 
@@ -229,7 +231,7 @@ plugins: [mfRuntimePlugin()]
 ```
 
 
-如果没有使用构建插件，你可以使用 [createInstance](#createinstance)替换 `init` ，其参数完全一致。
+如果没有使用构建插件，你可以从 `init` 切换到 [createInstance](#createinstance)，因为两者接收的配置形状是一致的。但要注意实例语义不同：`createInstance` 总是创建新实例，而 `init` 可能会复用同一个 `name` / `version` 对应的已有实例，并把新配置合并进去。
 
 ## getInstance
 

@@ -132,7 +132,7 @@ interface RemoteInfo {
 
 `AsyncWaterfallHook`
 
-在 host（消费者）调用 `remoteEntry.init(...)` 之前触发，可用于动态改写本次初始化要对齐的共享池（shareScopeKeys/shareScopeMap）、以及传给 remote 的 `remoteEntryInitOptions`。
+在 host（消费者）调用 `remoteEntry.init(...)` 之前触发，可用于动态改写本次初始化使用的 `shareScope` / `initScope`，以及传给 remote 的 `remoteEntryInitOptions`。
 
 * type
 
@@ -145,6 +145,29 @@ type BeforeInitContainerOptions ={
   remoteEntryInitOptions: RemoteEntryInitOptions;
   remoteInfo: RemoteInfo;
   origin: ModuleFederation;
+}
+```
+
+## initContainer
+
+`AsyncWaterfallHook`
+
+在 `remoteEntry.init(...)` 调用成功后触发。可用于在容器初始化完成后执行观测、埋点或补充处理。
+
+* type
+
+```ts
+async function initContainer(args: InitContainerOptions): Promise<InitContainerOptions>
+
+type InitContainerOptions ={
+  shareScope: ShareScopeMap[string];
+  initScope: InitScope;
+  remoteEntryInitOptions: RemoteEntryInitOptions;
+  remoteInfo: RemoteInfo;
+  remoteEntryExports: RemoteEntryExports;
+  origin: ModuleFederation;
+  id?: string;
+  remoteSnapshot?: ModuleInfo;
 }
 ```
 
@@ -162,8 +185,10 @@ function handlePreloadModule(args: HandlePreloadModuleOptions): void
 type HandlePreloadModuleOptions ={
   id: string;
   name: string;
+  remote: Remote;
   remoteSnapshot: ModuleInfo;
   preloadConfig: PreloadRemoteArgs;
+  origin: ModuleFederation;
 }
 ```
 
@@ -181,10 +206,20 @@ async function errorLoadRemote(args: ErrorLoadRemoteOptions): Promise<void | unk
 type ErrorLoadRemoteOptions ={
   id: string;
   error: unknown;
+  options?: any;
   from: 'build' | 'runtime';
+  lifecycle: 'beforeRequest' | 'beforeLoadShare' | 'afterResolve' | 'onLoad';
   origin: ModuleFederation;
 }
 ```
+
+`lifecycle` 表示错误发生阶段：
+
+- `beforeRequest`: 处理 remote 请求参数阶段出错
+- `afterResolve`: 解析/拉取 manifest 阶段出错（常见于网络异常）
+- `onLoad`: 加载 exposes 模块阶段出错
+- `beforeLoadShare`: 加载 shared 依赖阶段出错
+
 * example
 
 ```ts
@@ -352,7 +387,7 @@ mf.loadShare('react').then((reactFactory) => {
 * type
 
 ```ts
-async function beforePreloadRemote(args: BeforePreloadRemoteOptions): BeforePreloadRemoteOptions
+async function beforePreloadRemote(args: BeforePreloadRemoteOptions): Promise<void>
 
 type BeforePreloadRemoteOptions ={
   preloadOps: Array<PreloadRemoteArgs>;
@@ -390,6 +425,8 @@ interface PreloadAssets {
 
 ## loaderHook
 
+`loaderHook` 用于拦截资源加载与工厂获取流程。
+
 ## createScript
 
 `SyncHook`
@@ -399,10 +436,11 @@ interface PreloadAssets {
 * type
 
 ```ts
-function createScript(args: CreateScriptOptions): HTMLScriptElement | void
+function createScript(args: CreateScriptOptions): CreateScriptHookReturn
 
 type CreateScriptOptions ={
   url: string;
+  attrs?: Record<string, any>;
 }
 ```
 
@@ -456,6 +494,62 @@ export default function (): FederationRuntimePlugin {
     },
   }
 };
+```
+
+## createLink
+
+`SyncHook`
+
+用于修改预加载/样式加载时创建的 link 元素。
+
+* type
+
+```ts
+function createLink(args: CreateLinkOptions): HTMLLinkElement | void
+
+type CreateLinkOptions ={
+  url: string;
+  attrs?: Record<string, any>;
+}
+```
+
+## loadEntryError
+
+`AsyncHook`
+
+在 remoteEntry 加载失败（通常是脚本加载异常）时触发，可用于重试或自定义兜底。
+
+* type
+
+```ts
+async function loadEntryError(args: LoadEntryErrorOptions): Promise<Promise<RemoteEntryExports | undefined> | undefined>
+
+type LoadEntryErrorOptions ={
+  getRemoteEntry: typeof getRemoteEntry;
+  origin: ModuleFederation;
+  remoteInfo: RemoteInfo;
+  remoteEntryExports?: RemoteEntryExports;
+  globalLoading: Record<string, Promise<void | RemoteEntryExports> | undefined>;
+  uniqueKey: string;
+}
+```
+
+## getModuleFactory
+
+`AsyncHook`
+
+在调用 `remoteEntry.get(expose)` 前触发，可自定义模块工厂获取逻辑。
+
+* type
+
+```ts
+async function getModuleFactory(args: GetModuleFactoryOptions): Promise<(() => Promise<Module>) | undefined>
+
+type GetModuleFactoryOptions ={
+  remoteEntryExports: RemoteEntryExports;
+  expose: string;
+  moduleInfo: RemoteInfo;
+}
 ```
 
 ## loadEntry
@@ -590,4 +684,56 @@ import test1 from "delegateModulesA/test1"
 import test2 from "delegateModulesA/test2"
 test1 // "test1 value"
 test2 // "test2 value"
+```
+
+## bridgeHook
+
+`bridgeHook` 定义在 `runtime-core/src/core.ts`，用于桥接渲染/销毁阶段（如 React/Vue bridge）扩展上下文。
+
+## beforeBridgeRender
+
+`SyncHook`
+
+在桥接渲染前触发，可返回对象扩展渲染参数（例如追加 `extraProps`）。
+
+* type
+
+```ts
+function beforeBridgeRender(args: Record<string, any>): void | Record<string, any>
+```
+
+## afterBridgeRender
+
+`SyncHook`
+
+在桥接渲染后触发。
+
+* type
+
+```ts
+function afterBridgeRender(args: Record<string, any>): void | Record<string, any>
+```
+
+## beforeBridgeDestroy
+
+`SyncHook`
+
+在桥接销毁前触发。
+
+* type
+
+```ts
+function beforeBridgeDestroy(args: Record<string, any>): void | Record<string, any>
+```
+
+## afterBridgeDestroy
+
+`SyncHook`
+
+在桥接销毁后触发。
+
+* type
+
+```ts
+function afterBridgeDestroy(args: Record<string, any>): void | Record<string, any>
 ```
