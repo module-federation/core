@@ -1,4 +1,5 @@
 import { ModuleFederationRuntimePlugin } from '@module-federation/runtime';
+import { matchRemoteWithNameAndExpose } from '@module-federation/runtime-core';
 
 export default function (): ModuleFederationRuntimePlugin {
   return {
@@ -92,12 +93,10 @@ export default function (): ModuleFederationRuntimePlugin {
     beforeRequest: function (args: any) {
       const options = args.options;
       const id = args.id;
-      const remoteName = id.split('/').shift();
-      const remote = options.remotes.find(function (remote: any) {
-        return remote.name === remoteName;
-      });
-      if (!remote) return args;
-      if (remote && remote.entry && remote.entry.includes('?t=')) {
+      const match = matchRemoteWithNameAndExpose(options.remotes, id);
+      if (!match) return args;
+      const remote = match.remote;
+      if (remote.entry && remote.entry.includes('?t=')) {
         return args;
       }
       remote.entry = remote.entry + '?t=' + Date.now();
