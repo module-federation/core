@@ -354,10 +354,19 @@ describe('runtimePlugin', () => {
         text: jest.fn().mockResolvedValue('// mock script content'),
       });
 
-      const url = new URL('http://example.com/chunk.js');
+      const url = Object.assign(new URL('http://example.com/chunk.js'), {
+        mfMetadata: {
+          resolvedFrom: 'public-path',
+          remoteName: 'chunk.js',
+          publicPath: 'http://localhost:3000/',
+        },
+      });
       const callback = jest.fn();
       const args = {
         origin: {
+          options: {
+            name: 'test-host',
+          },
           loaderHook: {
             lifecycle: {
               fetch: {
@@ -386,10 +395,19 @@ describe('runtimePlugin', () => {
       const fetchError = new Error('Fetch failed');
       (global.fetch as jest.Mock).mockRejectedValue(fetchError);
 
-      const url = new URL('http://example.com/chunk.js');
+      const url = Object.assign(new URL('http://example.com/chunk.js'), {
+        mfMetadata: {
+          resolvedFrom: 'public-path',
+          remoteName: 'chunk.js',
+          publicPath: 'http://localhost:3000/',
+        },
+      });
       const callback = jest.fn();
       const args = {
         origin: {
+          options: {
+            name: 'test-host',
+          },
           loaderHook: {
             lifecycle: {
               fetch: {
@@ -406,6 +424,76 @@ describe('runtimePlugin', () => {
       await new Promise((resolve) => setTimeout(resolve, 10));
 
       expect(callback).toHaveBeenCalledWith(expect.any(Error), null);
+    });
+
+    it('should attach remote chunk context when execution fails', async () => {
+      const syntaxError = new SyntaxError('Unexpected token :');
+      (global.fetch as jest.Mock).mockResolvedValue({
+        text: jest.fn().mockResolvedValue('const broken = { foo: };'),
+      });
+      require('vm').Script.mockImplementationOnce(() => {
+        throw syntaxError;
+      });
+
+      const url = Object.assign(new URL('http://example.com/chunk.js'), {
+        mfMetadata: {
+          resolvedFrom: 'public-path',
+          remoteName: 'chunk.js',
+          publicPath: 'http://localhost:3000/',
+        },
+      });
+      const callback = jest.fn();
+      const args = {
+        origin: {
+          options: {
+            name: 'test-host',
+          },
+          loaderHook: {
+            lifecycle: {
+              fetch: {
+                emit: jest.fn().mockResolvedValue({
+                  text: jest.fn().mockResolvedValue('const broken = { foo: };'),
+                }),
+              },
+            },
+          },
+        },
+      };
+
+      fetchAndRun(url, 'chunk.js', callback, args);
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      const error = callback.mock.calls[0][0] as Error & {
+        chunkName?: string;
+        chunkLocation?: string;
+        chunkSource?: string;
+        chunkHostName?: string;
+        chunkResolution?: {
+          resolvedFrom?: string;
+          remoteName?: string;
+          publicPath?: string;
+        };
+      };
+
+      expect(error).toBeInstanceOf(SyntaxError);
+      expect(error.message).toContain('Federated chunk execution failed.');
+      expect(error.message).toContain('chunk: chunk.js');
+      expect(error.message).toContain(`location: ${url.href}`);
+      expect(error.message).toContain('host: test-host');
+      expect(error.message).toContain('resolved-from: public-path');
+      expect(error.message).toContain('remote: chunk.js');
+      expect(error.message).toContain('public-path: http://localhost:3000/');
+      expect(error.message).toContain('preview: const broken = { foo: };');
+      expect(error.chunkName).toBe('chunk.js');
+      expect(error.chunkLocation).toBe(url.href);
+      expect(error.chunkSource).toBe('remote-url');
+      expect(error.chunkHostName).toBe('test-host');
+      expect(error.chunkResolution).toMatchObject({
+        resolvedFrom: 'public-path',
+        remoteName: 'chunk.js',
+        publicPath: 'http://localhost:3000/',
+      });
     });
   });
 
@@ -498,6 +586,36 @@ describe('runtimePlugin', () => {
       spyReturnFromCache.mockRestore();
       spyReturnFromGlobalInstances.mockRestore();
     });
+
+    it('should attach fallback resolution metadata to resolved urls', () => {
+      const originalURL = global.URL;
+      let firstCall = true;
+      global.URL = jest
+        .fn()
+        .mockImplementation((...args: [string, string?]) => {
+          if (firstCall) {
+            firstCall = false;
+            throw new Error('Invalid URL');
+          }
+          return new originalURL(args[0], args[1]);
+        }) as any;
+
+      const result = resolveUrl('test-remote', 'chunk.js') as URL & {
+        mfMetadata?: {
+          resolvedFrom?: string;
+          remoteName?: string;
+          remoteEntryUrl?: string;
+        };
+      };
+
+      expect(result.mfMetadata).toMatchObject({
+        resolvedFrom: 'remote-entry-fallback',
+        remoteName: 'test-remote',
+        remoteEntryUrl: 'http://localhost:3001/remoteEntry.js',
+      });
+
+      global.URL = originalURL;
+    });
   });
 
   describe('loadChunk', () => {
@@ -553,7 +671,12 @@ describe('runtimePlugin', () => {
 
       // Fix the parameter order to match the implementation: (remoteName, chunkName)
       expect(resolveUrlSpy).toHaveBeenCalledWith('/dist', 'test-chunk');
-      expect(mockFetchAndRun).toHaveBeenCalled();
+      expect(mockFetchAndRun).toHaveBeenCalledWith(
+        testUrl,
+        'test-chunk',
+        mockCallback,
+        {},
+      );
       expect(mockCallback).toHaveBeenCalledWith(null, mockChunk);
 
       // Restore mocks
