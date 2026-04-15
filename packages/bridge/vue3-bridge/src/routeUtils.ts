@@ -28,8 +28,13 @@ function addBasenameToNestedRoutes(
    * Join two path segments, collapse multiple slashes, and optionally
    * preserve a trailing slash that was present in the original value.
    * A bare '/' root is never considered an intentional trailing slash.
+   *
+   * Relative paths (not starting with '/') are left untouched — Vue Router
+   * resolves them against the parent route, which already carries the basename.
    */
   const prefixPath = (original: string): string => {
+    if (!original.startsWith('/')) return original;
+
     const hasTrailingSlash = original.length > 1 && original.endsWith('/');
     const normalized =
       `${basename}/${original}`.replace(/\/+/g, '/').replace(/\/$/, '') || '/';
@@ -143,11 +148,15 @@ export function processRoutes(
     );
 
   // Use Map/Set for O(1) lookup performance
-  const flatRoutesMap = new Map<string, VueRouter.RouteRecordNormalized>();
+  // Store arrays because multiple routes can resolve to the same path
+  // (e.g. a parent and a default child with path: '')
+  const flatRoutesMap = new Map<string, VueRouter.RouteRecordNormalized[]>();
   const processedRoutes = new Set<VueRouter.RouteRecordNormalized>();
 
   flatRoutes.forEach((route) => {
-    flatRoutesMap.set(route.path, route);
+    const existing = flatRoutesMap.get(route.path) || [];
+    existing.push(route);
+    flatRoutesMap.set(route.path, existing);
   });
 
   /**
@@ -169,9 +178,20 @@ export function processRoutes(
     for (let j = 0; j < route.children.length; j++) {
       const child = route.children[j];
       const fullPath = normalizePath(prefix, child.path);
-      const childRoute = flatRoutesMap.get(fullPath);
+      const candidates = flatRoutesMap.get(fullPath) || [];
+      // Find a matching route that:
+      // 1. Hasn't been processed yet
+      // 2. Isn't the current parent route (avoids circular references when
+      //    a child with path: '' resolves to the same absolute path)
+      // 3. Matches by name when the child definition specifies one
+      const childRoute = candidates.find(
+        (r) =>
+          !processedRoutes.has(r) &&
+          r !== route &&
+          (child.name == null || r.name === child.name),
+      );
 
-      if (childRoute && !processedRoutes.has(childRoute)) {
+      if (childRoute) {
         // Create a new optimized route object with relative path for nested routes
         const relativeChildRoute: VueRouter.RouteRecordNormalized = {
           ...childRoute,
