@@ -166,7 +166,19 @@ describe('hooks', () => {
       plugins: [
         {
           name: 'change-script-attribute',
-          createScript({ url }) {
+          createScript({ url, remoteInfo }) {
+            if (url === testRemoteEntry) {
+              expect(remoteInfo).toMatchObject({
+                name: '@loader-hooks/app2',
+                entry: testRemoteEntry,
+              });
+            }
+            if (url === preloadRemoteEntry) {
+              expect(remoteInfo).toMatchObject({
+                name: '@loader-hooks/app3',
+                entry: preloadRemoteEntry,
+              });
+            }
             const script = document.createElement('script');
             script.src = url;
             if (url === testRemoteEntry) {
@@ -236,9 +248,11 @@ describe('hooks', () => {
       statusText: 'OK',
       headers: { 'Content-Type': 'application/json' },
     });
+    let lastFetchRemoteInfo: any;
     const fetchPlugin: () => ModuleFederationRuntimePlugin = () => ({
       name: 'fetch-plugin',
-      fetch(url, options) {
+      fetch(url, options, remoteInfo) {
+        lastFetchRemoteInfo = remoteInfo;
         if (url === 'http://mockxxx.com/loader-fetch-hooks-mf-manifest.json') {
           return Promise.resolve(responseBody);
         }
@@ -260,6 +274,10 @@ describe('hooks', () => {
     );
     assert(res);
     expect(res()).toBe('hello app2');
+    expect(lastFetchRemoteInfo).toMatchObject({
+      name: '@loader-hooks/app2',
+      entry: 'http://mockxxx.com/loader-fetch-hooks-mf-manifest.json',
+    });
   });
 
   it('loaderEntry hooks', async () => {
