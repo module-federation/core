@@ -1,5 +1,14 @@
 # @module-federation/node
 
+## 2.7.41
+
+### Patch Changes
+
+- bc49c23: feat(node): enhance error handling and metadata for chunk execution in runtimePlugin
+  - @module-federation/enhanced@2.3.3
+  - @module-federation/runtime@2.3.3
+  - @module-federation/sdk@2.3.3
+
 ## 2.7.40
 
 ### Patch Changes
