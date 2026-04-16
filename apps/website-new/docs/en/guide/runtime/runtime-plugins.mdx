@@ -126,7 +126,7 @@ const mf = createInstance({
 | Change remote lookup input | `beforeRequest` | You need to rewrite the request before remote resolution starts |
 | Rewrite a resolved entry URL | `afterResolve` | You want to change `remoteInfo.entry` after the runtime has resolved the remote |
 | Customize manifest network requests | `fetch` | You need credentials, headers, retries, or alternate fetch behavior for manifest loading |
-| Customize injected scripts | `createScript` | You need to add attributes like `crossorigin`, timeouts, or custom script elements |
+| Customize injected scripts and links | `createScript`, `createLink` | You need to add attributes like `crossorigin`, timeouts, or custom script/link elements. When available, `remoteInfo` is provided so you can apply per-remote policy. |
 | Align or rewrite share scopes before remote init | `beforeInitContainer`, `initContainerShareScopeMap` | You need to change which share scope a remote initializes against |
 | Override the shared winner | `resolveShare` | You want to force a different shared implementation than the runtime would normally pick |
 | Recover from load failures | `errorLoadRemote` | You need fallback modules, offline behavior, or layered recovery |
@@ -203,9 +203,12 @@ import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/
 export default function fetchManifestWithCredentials(): ModuleFederationRuntimePlugin {
   return {
     name: 'fetch-manifest-with-credentials',
-    fetch(manifestUrl, requestInit) {
+    fetch(manifestUrl, requestInit, remoteInfo) {
       const headers = new Headers(requestInit?.headers);
       headers.set('x-mf-host', 'host');
+      if (remoteInfo?.name) {
+        headers.set('x-mf-remote', remoteInfo.name);
+      }
 
       return fetch(manifestUrl, {
         ...requestInit,
