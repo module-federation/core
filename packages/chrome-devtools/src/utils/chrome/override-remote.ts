@@ -1,9 +1,8 @@
 import runtimeHelpers from '@module-federation/runtime/helpers';
-
+import { MODULE_DEVTOOL_IDENTIFIER } from '@module-federation/sdk';
 import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime';
 
 import { definePropertyGlobalVal } from '../sdk';
-import { __FEDERATION_DEVTOOLS__ } from '@/template';
 
 type BeforeRegisterRemoteArgs = Parameters<
   NonNullable<ModuleFederationRuntimePlugin['beforeRegisterRemote']>
@@ -18,7 +17,7 @@ const chromeOverrideRemotesPlugin: () => ModuleFederationRuntimePlugin =
           const { remote } = args;
           const overrideRemote =
             runtimeHelpers.global.nativeGlobal.localStorage.getItem(
-              __FEDERATION_DEVTOOLS__,
+              MODULE_DEVTOOL_IDENTIFIER,
             );
           if (!overrideRemote) {
             return args;
