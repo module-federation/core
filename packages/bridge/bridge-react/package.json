@@ -12,6 +12,12 @@
     "url": "git+https://github.com/module-federation/core.git",
     "directory": "packages/bridge/bridge-react"
   },
+  "files": [
+    "dist/",
+    "src/",
+    "CHANGELOG.md",
+    "README.md"
+  ],
   "main": "./dist/index.cjs.js",
   "module": "./dist/index.es.js",
   "types": "./dist/index.d.ts",

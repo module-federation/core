@@ -11,6 +11,12 @@
     "url": "git+https://github.com/module-federation/core.git",
     "directory": "packages/bridge/bridge-shared"
   },
+  "files": [
+    "dist/",
+    "src/",
+    "CHANGELOG.md",
+    "README.md"
+  ],
   "type": "module",
   "main": "./dist/index.umd.js",
   "module": "./dist/index.es.js",
