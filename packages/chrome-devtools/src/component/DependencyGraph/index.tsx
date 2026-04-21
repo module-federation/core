@@ -10,7 +10,7 @@ import ReactFlow, {
   Connection,
 } from 'reactflow';
 import dagre from 'dagre';
-import { GlobalModuleInfo } from '@module-federation/sdk';
+import { GlobalModuleInfo } from '@module-federation/sdk/proxy';
 import { Select } from '@arco-design/web-react';
 import { useTranslation } from 'react-i18next';
 

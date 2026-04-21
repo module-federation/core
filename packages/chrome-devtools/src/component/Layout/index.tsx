@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import {
   GlobalModuleInfo,
   MODULE_DEVTOOL_IDENTIFIER,
-} from '@module-federation/sdk';
+} from '@module-federation/sdk/proxy';
 import type { Federation } from '@module-federation/runtime';
 
 import FormComponent from '../Form';

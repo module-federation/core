@@ -4,7 +4,7 @@ import {
   FEDERATION_PROXY_STORAGE_KEY,
   FederationProxyDataManager,
   type GlobalModuleInfo,
-} from '../src';
+} from '../src/proxy';
 
 describe('FederationProxyDataManager', () => {
   beforeEach(() => {

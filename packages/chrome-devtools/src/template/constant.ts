@@ -3,7 +3,7 @@ import {
   FEDERATION_PROXY_EAGER_SHARE_FIELD,
   FEDERATION_PROXY_ENABLE_FAST_REFRESH_FIELD,
   FEDERATION_PROXY_STORAGE_KEY,
-} from '@module-federation/sdk';
+} from '@module-federation/sdk/proxy';
 
 export const FormID = 'FormID';
 

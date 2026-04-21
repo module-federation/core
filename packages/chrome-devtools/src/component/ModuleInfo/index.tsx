@@ -4,7 +4,7 @@ import { Empty, Select, Tag, Table } from '@arco-design/web-react';
 import type {
   BasicProviderModuleInfo,
   GlobalModuleInfo,
-} from '@module-federation/sdk';
+} from '@module-federation/sdk/proxy';
 import { useTranslation } from 'react-i18next';
 
 import styles from './index.module.scss';

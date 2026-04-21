@@ -6,7 +6,7 @@ export {
   removeLocalStorage,
   removeLocalStorageKey,
   setLocalStorage,
-} from '@module-federation/sdk';
+} from '@module-federation/sdk/proxy';
 
 export const isObject = (target: any) =>
   Object.prototype.toString.call(target) === '[object Object]';

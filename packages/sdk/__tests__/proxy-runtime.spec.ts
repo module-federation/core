@@ -8,7 +8,7 @@ import {
   createFederationProxySnapshotPlugin,
   registerFederationProxyRuntimePlugins,
   type GlobalModuleInfo,
-} from '../src';
+} from '../src/proxy';
 
 const resetFederationGlobals = () => {
   const target = globalThis as typeof globalThis & {

@@ -42,6 +42,16 @@
       }
     },
     "./iife": "./dist/index.iife.js",
+    "./proxy": {
+      "import": {
+        "types": "./dist/proxy/index.d.ts",
+        "default": "./dist/proxy/index.js"
+      },
+      "require": {
+        "types": "./dist/proxy/index.d.ts",
+        "default": "./dist/proxy/index.cjs"
+      }
+    },
     "./normalize-webpack-path": {
       "import": {
         "types": "./dist/normalize-webpack-path.d.ts",
@@ -60,6 +70,9 @@
       ],
       "normalize-webpack-path": [
         "./dist/normalize-webpack-path.d.ts"
+      ],
+      "proxy": [
+        "./dist/proxy/index.d.ts"
       ]
     }
   },

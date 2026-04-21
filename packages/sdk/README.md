@@ -16,7 +16,7 @@
 ### 代理数据层
 
 ```ts
-import { FederationProxyDataManager, FEDERATION_PROXY_MODULE_INFO_KEY, FEDERATION_PROXY_STORAGE_KEY } from '@module-federation/sdk';
+import { FederationProxyDataManager, FEDERATION_PROXY_MODULE_INFO_KEY, FEDERATION_PROXY_STORAGE_KEY } from '@module-federation/sdk/proxy';
 ```
 
 `FederationProxyDataManager` 负责管理这三类信息：
@@ -35,7 +35,7 @@ import { FederationProxyDataManager, FEDERATION_PROXY_MODULE_INFO_KEY, FEDERATIO
 ### 运行时注入层
 
 ```ts
-import { bootstrapFederationProxy, createFederationProxyOverridePlugin, createFederationProxySnapshotPlugin, registerFederationProxyRuntimePlugins } from '@module-federation/sdk';
+import { bootstrapFederationProxy, createFederationProxyOverridePlugin, createFederationProxySnapshotPlugin, registerFederationProxyRuntimePlugins } from '@module-federation/sdk/proxy';
 ```
 
 - `createFederationProxyOverridePlugin()`：在 `beforeRegisterRemote` 阶段重写 remote 的 `entry` 或 `version`
@@ -67,7 +67,7 @@ import { bootstrapFederationProxy, createFederationProxyOverridePlugin, createFe
 ### 方案二：AI / 脚本一步接入（默认推荐）
 
 ```ts
-import { bootstrapFederationProxy } from '@module-federation/sdk';
+import { bootstrapFederationProxy } from '@module-federation/sdk/proxy';
 
 bootstrapFederationProxy({
   data: {
@@ -84,7 +84,7 @@ bootstrapFederationProxy({
 ### 方案三：数据与注入分开控制
 
 ```ts
-import { FederationProxyDataManager, registerFederationProxyRuntimePlugins } from '@module-federation/sdk';
+import { FederationProxyDataManager, registerFederationProxyRuntimePlugins } from '@module-federation/sdk/proxy';
 
 const proxyManager = new FederationProxyDataManager();
 
@@ -120,7 +120,7 @@ registerFederationProxyRuntimePlugins();
 下面是一个精简后的 `moduleInfo` 示例参数，结构可对照 Garfish 中 `App.jsx` / `utils/data/index.js` 的传参方式理解：
 
 ```ts
-import { bootstrapFederationProxy } from '@module-federation/sdk';
+import { bootstrapFederationProxy } from '@module-federation/sdk/proxy';
 
 bootstrapFederationProxy({
   data: {

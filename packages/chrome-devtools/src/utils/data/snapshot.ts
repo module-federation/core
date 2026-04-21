@@ -1,4 +1,4 @@
-import { GlobalModuleInfo, ModuleInfo } from '@module-federation/sdk';
+import { GlobalModuleInfo, ModuleInfo } from '@module-federation/sdk/proxy';
 
 export const calculateSnapshot = (
   originSnapshot: GlobalModuleInfo,
