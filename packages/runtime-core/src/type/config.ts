@@ -122,6 +122,16 @@ export type ShareInfos = {
   [pkgName: string]: Shared[];
 };
 
+export interface SecurityOptions {
+  /**
+   * A whitelist for proxy debug target origins.
+   *
+   * - When set to `['*']`, it allows proxying to any origin.
+   * - Items can be either a hostname (e.g. `example.com`) or an origin (e.g. `https://example.com`).
+   */
+  allowedProxyOrigins?: string[];
+}
+
 export interface Options {
   id?: string;
   name: string;
@@ -131,6 +141,7 @@ export interface Options {
   plugins: Array<ModuleFederationRuntimePlugin>;
   inBrowser: boolean;
   shareStrategy?: ShareStrategy;
+  security?: SecurityOptions;
 }
 
 export type UserOptions = Omit<
@@ -139,6 +150,9 @@ export type UserOptions = Omit<
 > & {
   shared?: {
     [pkgName: string]: ShareArgs | ShareArgs[];
+  };
+  security?: {
+    allowedProxyOrigins?: string[];
   };
 };
 

@@ -50,6 +50,36 @@ const USE_SNAPSHOT =
     ? !FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN
     : true; // Default to true (use snapshot) when not explicitly defined
 
+const lockSecurityOptions = (options: Options): void => {
+  const security = options.security;
+  if (!security || typeof security !== 'object') {
+    return;
+  }
+
+  const allowedProxyOrigins = (security as any).allowedProxyOrigins;
+  if (
+    Array.isArray(allowedProxyOrigins) &&
+    !Object.isFrozen(allowedProxyOrigins)
+  ) {
+    Object.freeze(allowedProxyOrigins);
+  }
+
+  if (!Object.isFrozen(security)) {
+    Object.freeze(security);
+  }
+
+  try {
+    Object.defineProperty(options, 'security', {
+      value: security,
+      enumerable: true,
+      configurable: false,
+      writable: false,
+    });
+  } catch {
+    // ignore errors for readonly / non-configurable options objects
+  }
+};
+
 export class ModuleFederation {
   options: Options;
   hooks = new PluginSystem({
@@ -204,6 +234,7 @@ export class ModuleFederation {
       ...(userOptions.plugins || []),
     ]);
     this.options = this.formatOptions(defaultOptions, userOptions);
+    lockSecurityOptions(this.options);
   }
 
   initOptions(userOptions: UserOptions): Options {
@@ -214,6 +245,7 @@ export class ModuleFederation {
     const options = this.formatOptions(this.options, userOptions);
 
     this.options = options;
+    lockSecurityOptions(this.options);
 
     return options;
   }
