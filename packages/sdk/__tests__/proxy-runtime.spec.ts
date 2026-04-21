@@ -7,6 +7,7 @@ import {
   createFederationProxyOverridePlugin,
   createFederationProxySnapshotPlugin,
   registerFederationProxyRuntimePlugins,
+  type GlobalModuleInfo,
 } from '../src';
 
 const resetFederationGlobals = () => {
@@ -77,24 +78,23 @@ describe('federation proxy runtime helpers', () => {
 
   it('hydrates snapshot data into the federation global once', () => {
     const manager = new FederationProxyDataManager();
-    manager.setModuleInfo({
+    const moduleInfo: GlobalModuleInfo = {
+      extendInfos: {
+        region: 'cn',
+      },
       provider: {
         version: '1.0.0',
         remoteEntry: 'http://127.0.0.1:3009/mf-manifest.json',
       },
-    } as any);
+    };
+    manager.setModuleInfo(moduleInfo);
 
     const plugin = createFederationProxySnapshotPlugin();
 
     plugin.beforeLoadRemoteSnapshot?.({ options: { inBrowser: true } });
     plugin.beforeLoadRemoteSnapshot?.({ options: { inBrowser: true } });
 
-    expect((globalThis as any).__FEDERATION__.moduleInfo).toEqual({
-      provider: {
-        version: '1.0.0',
-        remoteEntry: 'http://127.0.0.1:3009/mf-manifest.json',
-      },
-    });
+    expect((globalThis as any).__FEDERATION__.moduleInfo).toEqual(moduleInfo);
     expect((globalThis as any)[FEDERATION_PROXY_SNAPSHOT_GUARD]).toBe(true);
   });
 
@@ -113,11 +113,14 @@ describe('federation proxy runtime helpers', () => {
   });
 
   it('bootstraps data and runtime plugins together', () => {
-    const moduleInfo = {
+    const moduleInfo: GlobalModuleInfo = {
+      extendInfos: {
+        region: 'cn',
+      },
       provider: {
         version: '1.0.0',
       },
-    } as any;
+    };
 
     const result = bootstrapFederationProxy({
       data: {

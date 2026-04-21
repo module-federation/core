@@ -26,6 +26,7 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "unpkg": "./dist/index.iife.js",
   "browser": {
     "url": false
   },
@@ -40,6 +41,7 @@
         "default": "./dist/index.cjs"
       }
     },
+    "./iife": "./dist/index.iife.js",
     "./normalize-webpack-path": {
       "import": {
         "types": "./dist/normalize-webpack-path.d.ts",
