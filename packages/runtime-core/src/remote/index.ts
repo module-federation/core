@@ -24,6 +24,7 @@ import {
   CallFrom,
 } from '../type';
 import { ModuleFederation } from '../core';
+import { getRawRemotes } from '../internal/remotes';
 import {
   PluginSystem,
   AsyncHook,

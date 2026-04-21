@@ -18,7 +18,7 @@ import {
   RemoteEntryInitOptions,
   CallFrom,
 } from './type';
-import { getBuilderId, registerPlugins, getRemoteEntry, error } from './utils';
+import { getBuilderId, registerPlugins, getRemoteEntry, error, warn } from './utils';
 import {
   getShortErrorMsg,
   RUNTIME_010,
@@ -36,6 +36,11 @@ import { generatePreloadAssetsPlugin } from './plugins/generate-preload-assets';
 import { snapshotPlugin } from './plugins/snapshot';
 import { getRemoteInfo } from './utils/load';
 import { DEFAULT_SCOPE } from './constant';
+import {
+  createRemotesProxy,
+  setRawRemotes,
+  unwrapRemotes,
+} from './internal/remotes';
 import { SnapshotHandler } from './plugins/snapshot/SnapshotHandler';
 import { SharedHandler } from './shared';
 import { RemoteHandler } from './remote';
@@ -262,6 +267,57 @@ export class ModuleFederation {
     return options;
   }
 
+  private guardOptionsRemotes(options: Options, userOptions: UserOptions): void {
+    const strictMode = userOptions.security?.strictMode === true;
+
+    const isProd =
+      (globalThis as any)?.process?.env?.NODE_ENV === 'production';
+
+    const warnMessage =
+      '[Module Federation] Warning: Direct mutation of options.remotes is deprecated and will be disabled in the future. Please use instance.registerRemotes() instead.';
+    const errorMessage =
+      '[Module Federation] Error: Direct mutation of options.remotes is not allowed when security.strictMode is enabled. Please use instance.registerRemotes() instead.';
+
+    const onIllegalMutation = (_action: string) => {
+      if (strictMode) {
+        throw new Error(errorMessage);
+      }
+      if (!isProd) {
+        warn(warnMessage);
+      }
+    };
+
+    const host = this;
+
+    let rawRemotes = unwrapRemotes(options.remotes);
+    if (!Array.isArray(rawRemotes)) {
+      rawRemotes = [];
+    }
+
+    setRawRemotes(host, rawRemotes);
+    let remotesProxy = createRemotesProxy(rawRemotes, onIllegalMutation);
+
+    try {
+      Object.defineProperty(options, 'remotes', {
+        enumerable: true,
+        configurable: true,
+        get() {
+          return remotesProxy;
+        },
+        set(next) {
+          onIllegalMutation('assign options.remotes');
+
+          const nextRaw = unwrapRemotes(next);
+          rawRemotes = Array.isArray(nextRaw) ? nextRaw : [];
+          setRawRemotes(host, rawRemotes);
+          remotesProxy = createRemotesProxy(rawRemotes, onIllegalMutation);
+        },
+      });
+    } catch {
+      // ignore errors for readonly / non-configurable options objects
+    }
+  }
+
   async loadShare<T>(
     pkgName: string,
     extraOptions?: {
@@ -335,29 +391,40 @@ export class ModuleFederation {
   }
 
   formatOptions(globalOptions: Options, userOptions: UserOptions): Options {
+    const sanitizedGlobalOptions: Options = {
+      ...globalOptions,
+      remotes: unwrapRemotes(globalOptions.remotes),
+    };
+
     const { allShareInfos: shared } = formatShareConfigs(
-      globalOptions,
+      sanitizedGlobalOptions,
       userOptions,
     );
+
     const { userOptions: userOptionsRes, options: globalOptionsRes } =
       this.hooks.lifecycle.beforeInit.emit({
         origin: this,
         userOptions,
-        options: globalOptions,
+        options: sanitizedGlobalOptions,
         shareInfo: shared,
       });
 
+    const sanitizedGlobalOptionsRes: Options = {
+      ...globalOptionsRes,
+      remotes: unwrapRemotes(globalOptionsRes.remotes),
+    };
+
     const remotes = this.remoteHandler.formatAndRegisterRemote(
-      globalOptionsRes,
+      sanitizedGlobalOptionsRes,
       userOptionsRes,
     );
 
     const { allShareInfos } = this.sharedHandler.registerShared(
-      globalOptionsRes,
+      sanitizedGlobalOptionsRes,
       userOptionsRes,
     );
 
-    const plugins = [...globalOptionsRes.plugins];
+    const plugins = [...sanitizedGlobalOptionsRes.plugins];
 
     if (userOptionsRes.plugins) {
       userOptionsRes.plugins.forEach((plugin) => {
@@ -368,12 +435,15 @@ export class ModuleFederation {
     }
 
     const optionsRes: Options = {
-      ...globalOptions,
+      ...sanitizedGlobalOptions,
       ...userOptions,
+      security: userOptionsRes.security ?? userOptions.security,
       plugins,
       remotes,
       shared: allShareInfos,
     };
+
+    this.guardOptionsRemotes(optionsRes, userOptionsRes);
 
     this.hooks.lifecycle.init.emit({
       origin: this,

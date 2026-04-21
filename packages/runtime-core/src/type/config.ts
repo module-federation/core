@@ -130,6 +130,14 @@ export interface SecurityOptions {
    * - Items can be either a hostname (e.g. `example.com`) or an origin (e.g. `https://example.com`).
    */
   allowedProxyOrigins?: string[];
+
+  /**
+   * Enable strict security mode.
+   *
+   * When enabled, direct mutation of `instance.options.remotes` will be blocked.
+   * Please use `instance.registerRemotes()` instead.
+   */
+  strictMode?: boolean;
 }
 
 export interface Options {
@@ -153,6 +161,7 @@ export type UserOptions = Omit<
   };
   security?: {
     allowedProxyOrigins?: string[];
+    strictMode?: boolean;
   };
 };
 

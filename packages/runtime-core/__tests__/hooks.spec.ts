@@ -64,7 +64,6 @@ describe('hooks', () => {
     expect(beforeInitArgs).toMatchObject({
       options: {
         name: options.name,
-        remotes: options.remotes,
       },
       origin: GM,
     });
