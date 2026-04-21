@@ -543,7 +543,7 @@ describe('routeUtils', () => {
       expect(dashboardRoute?.path).toBe('/app/dashboard');
     });
 
-    it('should prefix nested children with basename when hashRoute is true', () => {
+    it('should keep relative children paths unchanged when hashRoute is true with basename', () => {
       const routes = createNestedRoutes();
       const router = createRouter({
         history: createWebHistory(),
@@ -558,24 +558,26 @@ describe('routeUtils', () => {
 
       const dashboardRoute = result.routes.find((r) => r.name === 'Dashboard');
       expect(dashboardRoute).toBeDefined();
+      // Top-level route should be prefixed
+      expect(dashboardRoute?.path).toBe('/app/dashboard');
 
       if (dashboardRoute?.children) {
         const profileRoute = dashboardRoute.children.find(
           (child) => child.name === 'Profile',
         );
-        // Paths are now properly joined with '/' separator
-        expect(profileRoute?.path).toBe('/app/profile');
+        // Relative children must stay relative — Vue Router resolves them against the parent
+        expect(profileRoute?.path).toBe('profile');
 
         const settingsRoute = dashboardRoute.children.find(
           (child) => child.name === 'Settings',
         );
-        expect(settingsRoute?.path).toBe('/app/settings');
+        expect(settingsRoute?.path).toBe('settings');
 
         if (settingsRoute?.children) {
           const accountRoute = settingsRoute.children.find(
             (child) => child.name === 'Account',
           );
-          expect(accountRoute?.path).toBe('/app/account');
+          expect(accountRoute?.path).toBe('account');
         }
       }
     });
@@ -1296,6 +1298,266 @@ describe('routeUtils', () => {
       targetRouter.push('');
 
       expect(pushSpy).toHaveBeenCalledWith('');
+    });
+  });
+
+  describe('processRoutes with default child routes (path: "")', () => {
+    it('should not crash with children using path: "" (no infinite recursion)', () => {
+      const routes = [
+        {
+          path: '/parent',
+          name: 'parent',
+          component: DashboardComponent,
+          children: [
+            {
+              path: '',
+              name: 'parent-default',
+              component: HomeComponent,
+            },
+            {
+              path: 'child',
+              name: 'child',
+              component: ProfileComponent,
+            },
+          ],
+        },
+      ];
+
+      const router = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      // Must not throw "Maximum call stack size exceeded"
+      expect(() => processRoutes({ router })).not.toThrow();
+    });
+
+    it('should preserve default child route structure with path: ""', () => {
+      const routes = [
+        {
+          path: '/parent',
+          name: 'parent',
+          component: DashboardComponent,
+          children: [
+            {
+              path: '',
+              name: 'parent-default',
+              component: HomeComponent,
+            },
+            {
+              path: 'other',
+              name: 'other-child',
+              component: ProfileComponent,
+            },
+          ],
+        },
+      ];
+
+      const router = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      const result = processRoutes({ router });
+
+      const parentRoute = result.routes.find((r) => r.name === 'parent');
+      expect(parentRoute).toBeDefined();
+      expect(parentRoute?.path).toBe('/parent');
+      expect(parentRoute?.children?.length).toBe(2);
+
+      const defaultChild = parentRoute?.children?.find(
+        (c) => c.name === 'parent-default',
+      );
+      expect(defaultChild).toBeDefined();
+      expect(defaultChild?.path).toBe('');
+
+      const otherChild = parentRoute?.children?.find(
+        (c) => c.name === 'other-child',
+      );
+      expect(otherChild).toBeDefined();
+      expect(otherChild?.path).toBe('other');
+    });
+
+    it('should not crash with path: "" children when using hashRoute + basename', () => {
+      const routes = [
+        {
+          path: '/operations',
+          name: 'operations',
+          component: DashboardComponent,
+          children: [
+            {
+              path: '',
+              name: 'operations-default',
+              component: HomeComponent,
+            },
+            {
+              path: 'integrations',
+              name: 'integrations',
+              component: ProfileComponent,
+            },
+          ],
+        },
+      ];
+
+      const router = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      // Must not throw with hashRoute + basename
+      expect(() =>
+        processRoutes({ router, basename: '/do', hashRoute: true }),
+      ).not.toThrow();
+
+      const result = processRoutes({
+        router,
+        basename: '/do',
+        hashRoute: true,
+      });
+
+      // Top-level route should be prefixed
+      const opsRoute = result.routes.find((r) => r.name === 'operations');
+      expect(opsRoute?.path).toBe('/do/operations');
+
+      // Children should remain relative
+      const defaultChild = opsRoute?.children?.find(
+        (c) => c.name === 'operations-default',
+      );
+      expect(defaultChild?.path).toBe('');
+
+      const integrationsChild = opsRoute?.children?.find(
+        (c) => c.name === 'integrations',
+      );
+      expect(integrationsChild?.path).toBe('integrations');
+    });
+  });
+
+  describe('processRoutes with deeply nested relative children + hashRoute', () => {
+    it('should keep relative children paths when using hashRoute + basename', () => {
+      const routes = [
+        {
+          path: '/climate/measurements/results/:measurementId',
+          name: 'measurement-results',
+          component: DashboardComponent,
+          children: [
+            {
+              path: 'summary',
+              name: 'results-summary',
+              component: HomeComponent,
+            },
+            {
+              path: 'questions',
+              name: 'results-by-question',
+              component: ProfileComponent,
+            },
+          ],
+        },
+      ];
+
+      const router = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      const result = processRoutes({
+        router,
+        basename: '/do',
+        hashRoute: true,
+      });
+
+      const parentRoute = result.routes.find(
+        (r) => r.name === 'measurement-results',
+      );
+      expect(parentRoute?.path).toBe(
+        '/do/climate/measurements/results/:measurementId',
+      );
+
+      // Children must stay relative — Vue Router resolves them against the parent.
+      // Before the fix they'd incorrectly become '/do/summary', '/do/questions'.
+      const summaryChild = parentRoute?.children?.find(
+        (c) => c.name === 'results-summary',
+      );
+      expect(summaryChild?.path).toBe('summary');
+
+      const questionsChild = parentRoute?.children?.find(
+        (c) => c.name === 'results-by-question',
+      );
+      expect(questionsChild?.path).toBe('questions');
+    });
+
+    it('should keep optional param children relative with hashRoute + basename', () => {
+      const routes = [
+        {
+          path: '/climate/measurements/config',
+          component: DashboardComponent,
+          children: [
+            {
+              path: ':measurementId?/:type?',
+              name: 'config-surveys',
+              component: HomeComponent,
+            },
+          ],
+        },
+      ];
+
+      const router = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      const result = processRoutes({
+        router,
+        basename: '/do',
+        hashRoute: true,
+      });
+
+      const parentRoute = result.routes.find(
+        (r) => r.path === '/do/climate/measurements/config',
+      );
+      expect(parentRoute).toBeDefined();
+
+      const paramChild = parentRoute?.children?.find(
+        (c) => c.name === 'config-surveys',
+      );
+      // Must stay relative, not become '/do/:measurementId?/:type?' which would match everything
+      expect(paramChild?.path).toBe(':measurementId?/:type?');
+    });
+
+    it('should still prefix absolute children paths with basename in hashRoute', () => {
+      const routes = [
+        {
+          path: '/parent',
+          name: 'parent',
+          component: DashboardComponent,
+          children: [
+            {
+              path: '/absolute-child',
+              name: 'abs-child',
+              component: HomeComponent,
+            },
+          ],
+        },
+      ];
+
+      const router = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      const result = processRoutes({
+        router,
+        basename: '/app',
+        hashRoute: true,
+      });
+
+      const parentRoute = result.routes.find((r) => r.name === 'parent');
+      expect(parentRoute?.path).toBe('/app/parent');
+
+      // Absolute child paths SHOULD be prefixed
+      const absChild = parentRoute?.children?.find(
+        (c) => c.name === 'abs-child',
+      );
+      expect(absChild?.path).toBe('/app/absolute-child');
     });
   });
 });

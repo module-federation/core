@@ -1,5 +1,15 @@
 # @module-federation/dts-plugin
 
+## 2.3.3
+
+### Patch Changes
+
+- 6d33275: fix: override inherited declarationDir in tsconfig and add test for declarationDir handling
+  - @module-federation/sdk@2.3.3
+  - @module-federation/managers@2.3.3
+  - @module-federation/third-party-dts-extractor@2.3.3
+  - @module-federation/error-codes@2.3.3
+
 ## 2.3.2
 
 ### Patch Changes

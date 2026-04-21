@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/metro-plugin-rnc-cli",
-  "version": "2.3.2",
+  "version": "2.3.3",
   "description": "Metro Module Federation plugin for React Native Enterprise Framework (RNEF)",
   "keywords": [
     "rnc",
