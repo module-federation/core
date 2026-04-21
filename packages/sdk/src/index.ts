@@ -20,4 +20,5 @@ export * from './env';
 export * from './dom';
 export * from './node';
 export * from './normalizeOptions';
+export * from './proxy';
 export { createModuleFederationConfig } from './createModuleFederationConfig';

@@ -3,8 +3,7 @@ import {
   FEDERATION_PROXY_MODULE_INFO_KEY,
   FEDERATION_PROXY_STORAGE_KEY,
   FederationProxyDataManager,
-  type GlobalModuleInfo,
-} from '../src/proxy';
+} from '../src';
 
 describe('FederationProxyDataManager', () => {
   beforeEach(() => {
@@ -13,21 +12,12 @@ describe('FederationProxyDataManager', () => {
 
   it('stores proxy state in the shared chrome-devtools format', () => {
     const manager = new FederationProxyDataManager();
-    const moduleInfo: GlobalModuleInfo = {
-      extendInfos: {
-        region: 'cn',
-        overrides: {
-          provider: 'http://127.0.0.1:3001/mf-manifest.json',
-        },
-      },
-      res: {
-        success: true,
-      },
+    const moduleInfo = {
       'provider:1.0.0': {
         version: '1.0.0',
         remoteEntry: 'http://127.0.0.1:3001/mf-manifest.json',
       },
-    };
+    } as any;
 
     manager.applyState({
       moduleInfo,
