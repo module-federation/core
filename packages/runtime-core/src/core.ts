@@ -56,12 +56,12 @@ const lockSecurityOptions = (options: Options): void => {
     return;
   }
 
-  const allowedProxyOrigins = (security as any).allowedProxyOrigins;
+  const allowedRemoteOrigins = (security as any).allowedRemoteOrigins;
   if (
-    Array.isArray(allowedProxyOrigins) &&
-    !Object.isFrozen(allowedProxyOrigins)
+    Array.isArray(allowedRemoteOrigins) &&
+    !Object.isFrozen(allowedRemoteOrigins)
   ) {
-    Object.freeze(allowedProxyOrigins);
+    Object.freeze(allowedRemoteOrigins);
   }
 
   if (!Object.isFrozen(security)) {

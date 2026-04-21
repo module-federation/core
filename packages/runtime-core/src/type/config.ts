@@ -129,7 +129,7 @@ export interface SecurityOptions {
    * - When set to `['*']`, it allows proxying to any origin.
    * - Items can be either a hostname (e.g. `example.com`) or an origin (e.g. `https://example.com`).
    */
-  allowedProxyOrigins?: string[];
+  allowedRemoteOrigins?: string[];
 }
 
 export interface Options {
@@ -152,7 +152,7 @@ export type UserOptions = Omit<
     [pkgName: string]: ShareArgs | ShareArgs[];
   };
   security?: {
-    allowedProxyOrigins?: string[];
+    allowedRemoteOrigins?: string[];
   };
 };
 
