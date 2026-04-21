@@ -1,3 +1,10 @@
+import {
+  FEDERATION_PROXY_BROWSER_ENV_KEY,
+  FEDERATION_PROXY_EAGER_SHARE_FIELD,
+  FEDERATION_PROXY_ENABLE_FAST_REFRESH_FIELD,
+  FEDERATION_PROXY_STORAGE_KEY,
+} from '@module-federation/sdk';
+
 export const FormID = 'FormID';
 
 export const ENABLEHMR = 'enableHMR';
@@ -47,9 +54,10 @@ export const statusInfo: Record<
   },
 };
 
-export const __ENABLE_FAST_REFRESH__ = 'enableFastRefresh';
-export const __EAGER_SHARE__ = 'eagerShare';
+export const __ENABLE_FAST_REFRESH__ =
+  FEDERATION_PROXY_ENABLE_FAST_REFRESH_FIELD;
+export const __EAGER_SHARE__ = FEDERATION_PROXY_EAGER_SHARE_FIELD;
 
-export const BROWSER_ENV_KEY = 'MF_ENV';
+export const BROWSER_ENV_KEY = FEDERATION_PROXY_BROWSER_ENV_KEY;
 
-export const __FEDERATION_DEVTOOLS__ = '__MF_DEVTOOLS__';
+export const __FEDERATION_DEVTOOLS__ = FEDERATION_PROXY_STORAGE_KEY;
