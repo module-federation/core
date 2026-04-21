@@ -1,6 +1,7 @@
 import { defineConfig } from 'tsdown';
 import {
   createDualFormatConfig,
+  createIifeDebugConfig,
   packageDirFromMetaUrl,
 } from '../../tools/scripts/tsdown/config-helpers.mjs';
 
@@ -33,5 +34,18 @@ export default defineConfig([
         define: { 'process.env.IS_ESM_BUILD': JSON.stringify('false') },
       },
     },
+  },
+  {
+    ...createIifeDebugConfig({
+      name: 'sdk-build-iife',
+      packageDir,
+      entry: 'src/proxy/iife.ts',
+      outDir: 'dist',
+      globalName: 'FederationSdk',
+    }),
+    clean: false,
+    outExtensions: () => ({
+      js: '.js',
+    }),
   },
 ]);
