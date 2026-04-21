@@ -1,4 +1,4 @@
-import { GlobalModuleInfo } from '@module-federation/sdk';
+import { GlobalModuleInfo } from '@module-federation/sdk/proxy';
 import { FormID } from '../../template/constant';
 import { definePropertyGlobalVal } from '../sdk';
 import { sanitizePostMessagePayload } from './safe-post-message';

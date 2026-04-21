@@ -1,4 +1,7 @@
-import { GlobalModuleInfo, ConsumerModuleInfo } from '@module-federation/sdk';
+import {
+  GlobalModuleInfo,
+  ConsumerModuleInfo,
+} from '@module-federation/sdk/proxy';
 
 import { calculateSnapshot, calculateMicroAppSnapshot } from './snapshot';
 

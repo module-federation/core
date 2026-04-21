@@ -1,4 +1,7 @@
-import { ConsumerModuleInfo, GlobalModuleInfo } from '@module-federation/sdk';
+import {
+  ConsumerModuleInfo,
+  GlobalModuleInfo,
+} from '@module-federation/sdk/proxy';
 import { MarkerType } from 'reactflow';
 
 export interface NodeCustomData {

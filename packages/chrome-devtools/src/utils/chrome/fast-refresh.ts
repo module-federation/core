@@ -1,6 +1,6 @@
 import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime';
 import type { Shared } from '@module-federation/runtime/types';
-import { loadScript, createScript } from '@module-federation/sdk';
+import { loadScript, createScript } from '@module-federation/sdk/proxy';
 
 import { isObject, getUnpkgUrl } from '../index';
 import { definePropertyGlobalVal } from '../sdk';

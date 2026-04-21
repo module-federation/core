@@ -1,4 +1,4 @@
-import { GlobalModuleInfo } from '@module-federation/sdk';
+import { GlobalModuleInfo } from '@module-federation/sdk/proxy';
 
 declare global {
   interface Window {

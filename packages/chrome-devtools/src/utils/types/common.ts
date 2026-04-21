@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import type { GlobalModuleInfo } from '@module-federation/sdk';
+import type { GlobalModuleInfo } from '@module-federation/sdk/proxy';
 import { getModuleInfo } from '../index';
 
 export interface FormItemStatus {

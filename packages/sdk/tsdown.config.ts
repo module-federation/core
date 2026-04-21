@@ -13,6 +13,7 @@ export default defineConfig([
       packageDir,
       entry: {
         index: 'src/index.ts',
+        'proxy/index': './src/proxy/index.ts',
         'normalize-webpack-path': 'src/normalize-webpack-path.ts',
       },
       external: ['@module-federation/*', 'isomorphic-rslog', 'webpack'],
