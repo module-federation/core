@@ -177,9 +177,10 @@ const readTsConfig = (
   'references' in rawTsConfigJson && delete rawTsConfigJson.references;
 
   rawTsConfigJson.extends = resolvedTsConfigPath;
-  if (rawTsConfigJson.compilerOptions.declarationDir) {
-    delete rawTsConfigJson.compilerOptions.declarationDir;
-  }
+
+  // Force override inherited declarationDir
+  rawTsConfigJson.compilerOptions.declarationDir = outDir;
+
   return rawTsConfigJson;
 };
 

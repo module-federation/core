@@ -1,5 +1,7 @@
 # create-module-federation
 
+## 2.3.3
+
 ## 2.3.2
 
 ### Patch Changes
