@@ -340,7 +340,7 @@ export function patchBundlerConfig(options: {
 
   if (isDev() && chain.output.get('publicPath') === 'auto') {
     // TODO: only in dev temp
-    const port = modernjsConfig.server?.port || 8080;
+    const port = modernjsConfig.dev?.port || modernjsConfig.server?.port || 8080;
     const publicPath = `http://localhost:${port}/`;
     chain.output.publicPath(publicPath);
   }
