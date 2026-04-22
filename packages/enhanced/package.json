@@ -54,7 +54,7 @@
     },
     "./runtime": {
       "types": "./dist/src/runtime.d.ts",
-      "import": "./dist/src/runtime.js",
+      "import": "./dist/src/runtime.mjs",
       "require": "./dist/src/runtime.js"
     },
     "./prefetch": {
