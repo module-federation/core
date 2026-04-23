@@ -1,8 +1,7 @@
 import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime';
-import type { Shared } from '@module-federation/runtime/types';
-import { loadScript, createScript } from '@module-federation/sdk';
+import { loadScript } from '@module-federation/sdk';
 
-import { isObject, getUnpkgUrl } from '../index';
+import { getUnpkgUrl } from '../index';
 import { definePropertyGlobalVal } from '../sdk';
 import {
   __FEDERATION_DEVTOOLS__,
@@ -11,8 +10,8 @@ import {
 } from '../../template/constant';
 
 const SUPPORT_PKGS = ['react', 'react-dom'];
-type BeforeInitArgs = Parameters<
-  NonNullable<ModuleFederationRuntimePlugin['beforeInit']>
+type BeforeRegisterShareArgs = Parameters<
+  NonNullable<ModuleFederationRuntimePlugin['beforeRegisterShare']>
 >[0];
 
 /**
@@ -63,17 +62,25 @@ if (
   devtoolsMessage?.[__EAGER_SHARE__]
 ) {
   // eagerShare is [react, 19.0.0]
-  const [_name, version] = devtoolsMessage[__EAGER_SHARE__] as [string, string];
+  const [, version] = devtoolsMessage[__EAGER_SHARE__] as [string, string];
   fetchAndExecuteUmdSync(getUnpkgUrl('react', version) as string);
   fetchAndExecuteUmdSync(getUnpkgUrl('react-dom', version) as string);
 }
 
 const fastRefreshPlugin = (): ModuleFederationRuntimePlugin => {
+  let orderResolve: (value?: unknown) => void;
+  const orderPromise = new Promise((resolve) => {
+    orderResolve = resolve;
+  });
+
   return {
     name: 'mf-fast-refresh-plugin',
-    beforeInit({ userOptions, ...args }: BeforeInitArgs) {
-      const shareInfo = userOptions.shared;
-      const twinsShareInfo = args.shareInfo;
+    beforeRegisterShare(args: BeforeRegisterShareArgs) {
+      const { pkgName, shared } = args;
+      if (!SUPPORT_PKGS.includes(pkgName)) {
+        return args;
+      }
+
       let enableFastRefresh = false;
       let devtoolsMessage: Record<string, unknown> = {};
 
@@ -90,115 +97,77 @@ const fastRefreshPlugin = (): ModuleFederationRuntimePlugin => {
       }
 
       if (!enableFastRefresh) {
-        return {
-          userOptions,
-          ...args,
-        };
+        return args;
       }
 
-      if (shareInfo && isObject(shareInfo)) {
-        let orderResolve: (value?: unknown) => void;
-        const orderPromise = new Promise((resolve) => {
-          orderResolve = resolve;
-        });
-        Object.keys(shareInfo).forEach(async (share) => {
-          // @ts-ignore legacy runtime shareInfo[share] is shared , and latest i shard[]
-          const sharedArr: Shared[] = Array.isArray(shareInfo[share])
-            ? shareInfo[share]
-            : [shareInfo[share]];
+      if (shared.shareConfig?.eager) {
+        if (!devtoolsMessage?.[__EAGER_SHARE__]) {
+          const eagerShare: string[] = [];
+          eagerShare.push(pkgName, shared.version);
+          devtoolsMessage[__EAGER_SHARE__] = eagerShare;
+          localStorage.setItem(
+            __FEDERATION_DEVTOOLS__,
+            JSON.stringify(devtoolsMessage),
+          );
+          window.location.reload();
+        }
+        if (pkgName === 'react-dom') {
+          shared.lib = () => window.ReactDOM;
+        }
+        if (pkgName === 'react') {
+          shared.lib = () => window.React;
+        }
+        return args;
+      }
 
-          let twinsSharedArr: Shared[];
-          if (twinsShareInfo) {
-            // @ts-ignore
-            twinsSharedArr = Array.isArray(twinsShareInfo[share])
-              ? twinsShareInfo[share]
-              : [twinsShareInfo[share]];
-          }
-
-          sharedArr.forEach((shared, idx) => {
-            if (!SUPPORT_PKGS.includes(share)) {
-              return;
-            }
-            if (shared.shareConfig?.eager) {
-              if (!devtoolsMessage?.[__EAGER_SHARE__]) {
-                const eagerShare: string[] = [];
-                eagerShare.push(share, shared.version);
-                devtoolsMessage[__EAGER_SHARE__] = eagerShare;
-                localStorage.setItem(
-                  __FEDERATION_DEVTOOLS__,
-                  JSON.stringify(devtoolsMessage),
-                );
-                window.location.reload();
-              }
-              if (share === 'react-dom') {
-                shared.lib = () => window.ReactDOM;
-              }
-              if (share === 'react') {
-                shared.lib = () => window.React;
-              }
-              return;
-            }
-            let get: () => any;
-            if (share === 'react') {
-              get = () =>
-                loadScript(getUnpkgUrl(share, shared.version) as string, {
-                  attrs: {
-                    defer: false,
-                    async: false,
-                    'data-mf-injected': 'true',
-                  },
-                }).then(() => {
-                  orderResolve();
-                });
-            }
-            if (share === 'react-dom') {
-              get = () =>
-                orderPromise.then(() =>
-                  loadScript(getUnpkgUrl(share, shared.version) as string, {
-                    attrs: { defer: true, async: false },
-                  }),
-                );
-            }
-            // @ts-expect-error
-            if (typeof get === 'function') {
-              if (share === 'react') {
-                shared.get = async () => {
-                  if (!window.React) {
-                    await get();
-                    console.warn(
-                      '[Module Federation HMR]: You are using Module Federation Devtools to debug online host, it will cause your project load Dev mode React and ReactDOM. If not in this mode, please disable it in Module Federation Devtools',
-                    );
-                  }
-                  shared.lib = () => window.React;
-                  return () => window.React;
-                };
-              }
-              if (share === 'react-dom') {
-                shared.get = async () => {
-                  if (!window.ReactDOM) {
-                    await get();
-                  }
-                  shared.lib = () => window.ReactDOM;
-                  return () => window.ReactDOM;
-                };
-              }
-              if (twinsShareInfo) {
-                twinsSharedArr[idx].get = shared.get;
-              }
-            }
+      let get: (() => any) | undefined;
+      if (pkgName === 'react') {
+        get = () =>
+          loadScript(getUnpkgUrl(pkgName, shared.version) as string, {
+            attrs: {
+              defer: false,
+              async: false,
+              'data-mf-injected': 'true',
+            },
+          }).then(() => {
+            orderResolve();
           });
-        });
-
-        return {
-          userOptions,
-          ...args,
-        };
-      } else {
-        return {
-          userOptions,
-          ...args,
-        };
       }
+      if (pkgName === 'react-dom') {
+        get = () =>
+          orderPromise.then(() =>
+            loadScript(getUnpkgUrl(pkgName, shared.version) as string, {
+              attrs: { defer: true, async: false },
+            }),
+          );
+      }
+
+      if (typeof get === 'function') {
+        const finalGet = get;
+        if (pkgName === 'react') {
+          shared.get = async () => {
+            if (!window.React) {
+              await finalGet();
+              console.warn(
+                '[Module Federation HMR]: You are using Module Federation Devtools to debug online host, it will cause your project load Dev mode React and ReactDOM. If not in this mode, please disable it in Module Federation Devtools',
+              );
+            }
+            shared.lib = () => window.React;
+            return () => window.React;
+          };
+        }
+        if (pkgName === 'react-dom') {
+          shared.get = async () => {
+            if (!window.ReactDOM) {
+              await finalGet();
+            }
+            shared.lib = () => window.ReactDOM;
+            return () => window.ReactDOM;
+          };
+        }
+      }
+
+      return args;
     },
   };
 };
