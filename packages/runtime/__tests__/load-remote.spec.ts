@@ -1,7 +1,6 @@
 import 'whatwg-fetch';
 import { assert, describe, it } from 'vitest';
 import { ModuleFederation, init } from '../src/index';
-import { mockRemoteSnapshot } from './mock/utils';
 import { matchRemoteWithNameAndExpose } from '@module-federation/runtime-core';
 import {
   addGlobalSnapshot,
@@ -603,4 +602,54 @@ describe('loadRemote', () => {
     expect(loadedSrcs.includes(`${remotePublicPath}${jsSyncAssetPath}`));
     reset();
   });
+});
+
+
+describe('security.allowedRemoteOrigins', () => {
+  it('allows remote when origin hostname is in allowedRemoteOrigins', async () => {
+    const federationInstance = new ModuleFederation({
+      name: '@federation-test/security-host',
+      remotes: [
+        {
+          name: '__FEDERATION_@federation-test/app2:custom__',
+          alias: 'app2',
+          entry:
+            'http://localhost:1111/resources/app2/federation-remote-entry.js',
+        },
+      ],
+      security: {
+        allowedRemoteOrigins: ['localhost'],
+      },
+    });
+
+    const module = await federationInstance.loadRemote<() => string>(
+      'app2/say',
+    );
+    assert(module, 'module should be a function');
+    expect(module()).toBe('hello app2');
+  });
+
+  it('allows remote when origin matches regex in allowedRemoteOrigins', async () => {
+    const federationInstance = new ModuleFederation({
+      name: '@federation-test/security-regex',
+      remotes: [
+        {
+          name: '__FEDERATION_@federation-test/app2:custom__',
+          alias: 'app2',
+          entry:
+            'http://localhost:1111/resources/app2/federation-remote-entry.js',
+        },
+      ],
+      security: {
+        allowedRemoteOrigins: ['/localhost/'],
+      },
+    });
+
+    const module = await federationInstance.loadRemote<() => string>(
+      'app2/say',
+    );
+    assert(module, 'module should be a function');
+    expect(module()).toBe('hello app2');
+  });
+
 });
