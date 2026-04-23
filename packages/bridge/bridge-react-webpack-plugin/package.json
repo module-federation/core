@@ -13,8 +13,6 @@
   },
   "files": [
     "dist/",
-    "src/",
-    "CHANGELOG.md",
     "README.md"
   ],
   "main": "./dist/index.cjs.js",

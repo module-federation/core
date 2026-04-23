@@ -17,14 +17,8 @@
   "types": "./dist/index.d.ts",
   "files": [
     "dist/",
-    "src/",
-    "CHANGELOG.md",
-    "LICENSE",
     "package.json",
-    "README.md",
-    "tsconfig.json",
-    "tsconfig.node.json",
-    "vite.config.ts"
+    "README.md"
   ],
   "scripts": {
     "dev": "vite",
