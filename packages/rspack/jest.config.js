@@ -3,7 +3,7 @@
 
 module.exports = {
   clearMocks: true,
-  testEnvironment: 'jsdom',
+  testEnvironment: 'node',
   coveragePathIgnorePatterns: ['__tests__', '/node_modules/'],
   coverageProvider: 'v8',
   coverageReporters: ['cobertura', 'clover', 'json', 'lcov', 'text'],

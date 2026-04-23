@@ -1,32 +1,52 @@
 import { it, describe, expect, vi } from 'vitest';
-import http from 'http';
-import { axiosGet, cloneDeepOptions } from './utils';
+import { nativeFetch, cloneDeepOptions } from './utils';
 import type { DTSManagerOptions } from '../interfaces/DTSManagerOptions';
 
-vi.mock('axios', () => ({
-  default: {
-    get: vi.fn(() => Promise.resolve({ data: 'mocked response' })),
-  },
-}));
+it('nativeFetch should merge MF_ENV_HEADERS into request headers', async () => {
+  const prevEnv = process.env['MF_ENV_HEADERS'];
+  process.env['MF_ENV_HEADERS'] = JSON.stringify({ 'x-test': '1' });
 
-it('axiosGet should use agents with family set to 4', async () => {
-  const httpSpy = vi.spyOn(http, 'Agent');
+  const fetchMock = vi.fn().mockResolvedValue({
+    ok: true,
+    status: 200,
+    headers: new Headers({ 'content-type': 'text/plain' }),
+    text: vi.fn().mockResolvedValue('ok'),
+  });
+  vi.stubGlobal('fetch', fetchMock);
 
-  await axiosGet('http://localhost');
+  const res = await nativeFetch('http://localhost');
 
-  expect(httpSpy).toHaveBeenCalledWith({ family: 4 });
+  expect(fetchMock).toHaveBeenCalledWith(
+    'http://localhost',
+    expect.objectContaining({
+      headers: expect.objectContaining({ 'x-test': '1' }),
+    }),
+  );
+  expect(res.data).toBe('ok');
 
-  httpSpy.mockRestore();
+  vi.unstubAllGlobals();
+  process.env['MF_ENV_HEADERS'] = prevEnv;
 });
 
-it('axiosGet should allow to use agents with family set to 6', async () => {
-  const httpSpy = vi.spyOn(http, 'Agent');
+it('nativeFetch should return arraybuffer when responseType is arraybuffer', async () => {
+  const buf = Buffer.from('hello');
+  const ab = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
 
-  await axiosGet('http://localhost', { family: 6 });
+  const fetchMock = vi.fn().mockResolvedValue({
+    ok: true,
+    status: 200,
+    headers: new Headers({ 'content-type': 'application/zip' }),
+    arrayBuffer: vi.fn().mockResolvedValue(ab),
+  });
+  vi.stubGlobal('fetch', fetchMock);
 
-  expect(httpSpy).toHaveBeenCalledWith({ family: 6 });
+  const res = await nativeFetch('http://localhost/file.zip', {
+    responseType: 'arraybuffer',
+  });
 
-  httpSpy.mockRestore();
+  expect(res.data).toBeInstanceOf(ArrayBuffer);
+
+  vi.unstubAllGlobals();
 });
 
 describe('cloneDeepOptions', () => {

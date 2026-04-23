@@ -1,5 +1,11 @@
 # @module-federation/typescript
 
+## 3.1.7
+
+### Patch Changes
+
+- 1c02710: chore: lock deps
+
 ## 3.1.6
 
 ### Patch Changes

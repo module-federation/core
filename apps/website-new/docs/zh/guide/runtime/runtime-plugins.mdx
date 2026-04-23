@@ -130,7 +130,7 @@ const mf = createInstance({
 | 改写 remote 查找输入 | `beforeRequest` | 需要在 remote 解析开始前改写请求内容 |
 | 改写解析后的 entry URL | `afterResolve` | 需要在 runtime 解析出 `remoteInfo.entry` 之后改写最终加载地址 |
 | 自定义 manifest 请求 | `fetch` | 需要加 credentials、headers、重试或自定义 fetch 行为 |
-| 自定义 script 注入 | `createScript` | 需要加 `crossorigin`、timeout、特殊 script 属性 |
+| 自定义 script / link 注入 | `createScript`、`createLink` | 需要加 `crossorigin`、timeout、特殊 script/link 属性；在具备 remote 上下文时会额外提供 `remoteInfo`，便于按 remote 做策略 |
 | 在 remote init 前对齐 / 改写共享池 | `beforeInitContainer`、`initContainerShareScopeMap` | 需要控制 remote 初始化时使用哪个 share scope |
 | 改写 shared 最终命中结果 | `resolveShare` | 需要强制命中某个 shared，而不是用 runtime 默认选择 |
 | 加载失败时兜底 | `errorLoadRemote` | 需要离线兜底、fallback module、分层恢复策略 |
@@ -208,9 +208,12 @@ import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/
 export default function fetchManifestWithCredentials(): ModuleFederationRuntimePlugin {
   return {
     name: 'fetch-manifest-with-credentials',
-    fetch(manifestUrl, requestInit) {
+    fetch(manifestUrl, requestInit, remoteInfo) {
       const headers = new Headers(requestInit?.headers);
       headers.set('x-mf-host', 'host');
+      if (remoteInfo?.name) {
+        headers.set('x-mf-remote', remoteInfo.name);
+      }
 
       return fetch(manifestUrl, {
         ...requestInit,

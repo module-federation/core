@@ -40,6 +40,83 @@ declare const __webpack_require__: WebpackRequire;
 declare const __non_webpack_require__: (id: string) => any;
 
 export const nodeRuntimeImportCache = new Map<string, Promise<any>>();
+const CHUNK_PREVIEW_LENGTH = 240;
+type ChunkResolutionSource = 'public-path' | 'remote-entry-fallback';
+type ChunkLocationSource = 'filesystem' | 'remote-url';
+type ChunkUrlMetadata = {
+  chunkName: string;
+  publicPath?: string;
+  remoteName?: string;
+  rootOutputDir?: string;
+  resolvedFrom: ChunkResolutionSource;
+  remoteEntryUrl?: string;
+};
+
+const getChunkPreview = (content: string): string =>
+  content.slice(0, CHUNK_PREVIEW_LENGTH).replace(/\s+/g, ' ').trim();
+
+const enrichChunkExecutionError = (
+  error: unknown,
+  options: {
+    chunkName: string;
+    location: string;
+    source: ChunkLocationSource;
+    content: string;
+    hostName?: string;
+    resolution?: ChunkUrlMetadata;
+  },
+): Error => {
+  const normalizedError =
+    error instanceof Error ? error : new Error(String(error));
+  const preview = getChunkPreview(options.content);
+  const details = [
+    `Federated chunk execution failed.`,
+    `chunk: ${options.chunkName}`,
+    `source: ${options.source}`,
+    `location: ${options.location}`,
+  ];
+
+  if (options.hostName) {
+    details.push(`host: ${options.hostName}`);
+  }
+
+  if (options.resolution) {
+    details.push(`resolved-from: ${options.resolution.resolvedFrom}`);
+
+    if (options.resolution.remoteName) {
+      details.push(`remote: ${options.resolution.remoteName}`);
+    }
+
+    if (options.resolution.publicPath) {
+      details.push(`public-path: ${options.resolution.publicPath}`);
+    }
+
+    if (options.resolution.rootOutputDir) {
+      details.push(`root-output-dir: ${options.resolution.rootOutputDir}`);
+    }
+
+    if (options.resolution.remoteEntryUrl) {
+      details.push(`remote-entry: ${options.resolution.remoteEntryUrl}`);
+    }
+  }
+
+  if (preview) {
+    details.push(`preview: ${preview}`);
+  }
+
+  normalizedError.message = `${normalizedError.message}\n${details.join('\n')}`;
+
+  Object.assign(normalizedError, {
+    chunkName: options.chunkName,
+    chunkLocation: options.location,
+    chunkSource: options.source,
+    chunkPreview: preview,
+    chunkHostName: options.hostName,
+    chunkResolution: options.resolution,
+  });
+
+  return normalizedError;
+};
 
 export function importNodeModule<T>(name: string): Promise<T> {
   if (!name) {
@@ -131,8 +208,15 @@ export const loadFromFs = (
         );
         callback(null, chunk);
       } catch (e) {
-        console.log("'runInThisContext threw'", e);
-        callback(e as Error, null);
+        callback(
+          enrichChunkExecutionError(e, {
+            chunkName: path.basename(filename),
+            location: filename,
+            source: 'filesystem',
+            content,
+          }),
+          null,
+        );
       }
     });
   } else {
@@ -165,6 +249,9 @@ export const fetchAndRun = (
     })
     .then((data) => {
       const chunk = {};
+      const hostName = args?.origin?.options?.name || args?.origin?.name;
+      const resolution = (url as URL & { mfMetadata?: ChunkUrlMetadata })
+        .mfMetadata;
       try {
         eval(`(function(exports, require, __dirname, __filename) {${data}\n})`)(
           chunk,
@@ -174,7 +261,17 @@ export const fetchAndRun = (
         );
         callback(null, chunk);
       } catch (e) {
-        callback(e as Error, null);
+        callback(
+          enrichChunkExecutionError(e, {
+            chunkName,
+            location: url.href,
+            source: 'remote-url',
+            content: data,
+            hostName,
+            resolution,
+          }),
+          null,
+        );
       }
     })
     .catch((err: Error) => callback(err, null));
@@ -186,7 +283,15 @@ export const resolveUrl = (
   chunkName: string,
 ): URL | null => {
   try {
-    return new URL(chunkName, __webpack_require__.p);
+    return Object.assign(new URL(chunkName, __webpack_require__.p), {
+      mfMetadata: {
+        chunkName,
+        publicPath: __webpack_require__.p,
+        remoteName,
+        rootOutputDir: __webpack_require__.federation.rootOutputDir || '',
+        resolvedFrom: 'public-path' as const,
+      },
+    });
   } catch {
     const entryUrl =
       returnFromCache(remoteName) || returnFromGlobalInstances(remoteName);
@@ -212,7 +317,16 @@ export const resolveUrl = (
       .join(directoryPath, rootDir, chunkName)
       .replace(/\\/g, '/');
     // Create the final URL
-    return new URL(combinedPath, url.origin);
+    return Object.assign(new URL(combinedPath, url.origin), {
+      mfMetadata: {
+        chunkName,
+        publicPath: __webpack_require__.p,
+        remoteName,
+        rootOutputDir: rootDir,
+        resolvedFrom: 'remote-entry-fallback' as const,
+        remoteEntryUrl: entryUrl,
+      },
+    });
   }
 };
 

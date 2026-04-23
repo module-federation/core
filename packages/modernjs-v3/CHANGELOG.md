@@ -1,5 +1,32 @@
 # @module-federation/modern-js-v3
 
+## 2.3.3
+
+### Patch Changes
+
+- Updated dependencies [bc49c23]
+  - @module-federation/node@2.7.41
+  - @module-federation/cli@2.3.3
+  - @module-federation/enhanced@2.3.3
+  - @module-federation/rsbuild-plugin@2.3.3
+  - @module-federation/runtime@2.3.3
+  - @module-federation/sdk@2.3.3
+  - @module-federation/bridge-react@2.3.3
+
+## 2.3.2
+
+### Patch Changes
+
+- 1c02710: chore: lock deps
+- Updated dependencies [1c02710]
+  - @module-federation/bridge-react@2.3.2
+  - @module-federation/enhanced@2.3.2
+  - @module-federation/node@2.7.40
+  - @module-federation/cli@2.3.2
+  - @module-federation/rsbuild-plugin@2.3.2
+  - @module-federation/runtime@2.3.2
+  - @module-federation/sdk@2.3.2
+
 ## 2.3.1
 
 ### Patch Changes

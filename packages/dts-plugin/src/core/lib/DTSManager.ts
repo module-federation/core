@@ -27,7 +27,7 @@ import {
   HOST_API_TYPES_FILE_NAME,
 } from '../constant';
 import { fileLog, logger } from '../../server';
-import { axiosGet, cloneDeepOptions, isDebugMode } from './utils';
+import { nativeFetch, cloneDeepOptions, isDebugMode } from './utils';
 import { UpdateMode } from '../../server/constant';
 
 export const MODULE_DTS_MANAGER_IDENTIFIER = 'MF DTS Manager';
@@ -222,7 +222,7 @@ class DTSManager {
         return remoteInfo as Required<RemoteInfo>;
       }
       const url = remoteInfo.url;
-      const res = await axiosGet(url, {
+      const res = await nativeFetch(url, {
         timeout: hostOptions.timeout,
         family: hostOptions.family,
       });
@@ -299,7 +299,7 @@ class DTSManager {
     }
     try {
       const url = apiTypeUrl;
-      const res = await axiosGet(url, {
+      const res = await nativeFetch(url, {
         timeout: hostOptions.timeout,
         family: hostOptions.family,
       });

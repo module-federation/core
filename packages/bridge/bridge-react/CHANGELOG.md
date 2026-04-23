@@ -1,5 +1,18 @@
 # @module-federation/bridge-react
 
+## 2.3.3
+
+### Patch Changes
+
+- @module-federation/sdk@2.3.3
+
+## 2.3.2
+
+### Patch Changes
+
+- 1c02710: chore: lock deps
+  - @module-federation/sdk@2.3.2
+
 ## 2.3.1
 
 ### Patch Changes

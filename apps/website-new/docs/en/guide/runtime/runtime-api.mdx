@@ -20,7 +20,7 @@ Used to create ModuleFederation instance.
   - Multiple ModuleFederation instances need to be created with different configurations for each instance
   - You want to use ModuleFederation's partitioning feature to encapsulate corresponding APIs for use in other projects
 
-* `createInstance` will not overwrite an existing instance. Each call will create a new instance.
+* `createInstance` always creates a fresh `ModuleFederation` instance and registers it in the global instance registry. It does not look up an existing instance by `name` / `version`, and it does not merge options into an existing instance.
 
 ```ts
 import { createInstance } from '@module-federation/enhanced/runtime';
@@ -38,17 +38,19 @@ const mf = createInstance({
 mf.loadRemote('sub1/util').then((m) => m.add(1, 2, 3));
 ```
 
-## init <Badge type='danger'>Deprecated</Badge>
+## init <Badge type='warning'>Use with caution</Badge>
 
 :::warning Warning
 
-This API will be deprecated. If you need to get an existing instance, you can use [getInstance](#getinstance) to retrieve the created instance.
+`init` is still supported, but choose it based on how you want instances to be managed.
 
-If you need to create a new instance, please use the [createInstance](#createinstance).
+Unlike [createInstance](#createinstance), `init` does not always create a fresh instance. It first looks up an existing instance by `name` and `version`. If a matching instance is found, it reuses that instance and merges the new options by calling `instance.initOptions(options)`. If no matching instance exists, it falls back to creating one.
+
+Use `init` when you want repeated calls for the same host to reuse and extend a single runtime instance. Use [createInstance](#createinstance) when you need guaranteed isolation and a brand-new instance every time. If you only need the instance created by the build plugin, use [getInstance](#getinstance).
 
 :::
 
-- Type: `init(options: InitOptions): void`
+- Type: `init(options: InitOptions): ModuleFederation`
 - Used for dynamically registering `Vmok` modules at runtime.
 - InitOptions:
 
@@ -137,7 +139,7 @@ init({
 ```
 </Collapse>
 
-### How to Migrate
+### Recommended alternatives
 
 #### Build Plugin(Use build plugin)
 
@@ -226,7 +228,7 @@ plugins: [mfRuntimePlugin()]
 });
 ```
 
-If you are not using the build plugin, you can replace `init` with [createInstance](#createinstance), which has exactly the same parameters.
+If you are not using the build plugin, you can switch from `init` to [createInstance](#createinstance) because the option shape is the same. However, the instance semantics are different: `createInstance` always creates a fresh instance, while `init` may reuse an existing one with the same `name` / `version` and merge the new options into it.
 
 ## getInstance
 

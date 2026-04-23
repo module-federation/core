@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/bridge-shared",
-  "version": "2.3.1",
+  "version": "2.3.3",
   "publishConfig": {
     "access": "public"
   },
@@ -11,6 +11,10 @@
     "url": "git+https://github.com/module-federation/core.git",
     "directory": "packages/bridge/bridge-shared"
   },
+  "files": [
+    "dist/",
+    "README.md"
+  ],
   "type": "module",
   "main": "./dist/index.umd.js",
   "module": "./dist/index.es.js",

@@ -130,7 +130,7 @@ interface RemoteInfo {
 
 `AsyncWaterfallHook`
 
-Triggered before the host calls `remoteEntry.init(...)`. Useful for dynamically rewriting the share-scope alignment for this initialization (shareScopeKeys/shareScopeMap) and the `remoteEntryInitOptions` passed to the remote.
+Triggered before the host calls `remoteEntry.init(...)`. Useful for dynamically rewriting the `shareScope` / `initScope` used in this initialization and the `remoteEntryInitOptions` passed to the remote.
 
 * type
 
@@ -143,6 +143,29 @@ type BeforeInitContainerOptions ={
   remoteEntryInitOptions: RemoteEntryInitOptions;
   remoteInfo: RemoteInfo;
   origin: ModuleFederation;
+}
+```
+
+## initContainer
+
+`AsyncWaterfallHook`
+
+Triggered after `remoteEntry.init(...)` completes successfully. Useful for metrics, observability, or post-initialization customization.
+
+* type
+
+```ts
+async function initContainer(args: InitContainerOptions): Promise<InitContainerOptions>
+
+type InitContainerOptions ={
+  shareScope: ShareScopeMap[string];
+  initScope: InitScope;
+  remoteEntryInitOptions: RemoteEntryInitOptions;
+  remoteInfo: RemoteInfo;
+  remoteEntryExports: RemoteEntryExports;
+  origin: ModuleFederation;
+  id?: string;
+  remoteSnapshot?: ModuleInfo;
 }
 ```
 
@@ -160,8 +183,10 @@ function handlePreloadModule(args: HandlePreloadModuleOptions): void
 type HandlePreloadModuleOptions ={
   id: string;
   name: string;
+  remote: Remote;
   remoteSnapshot: ModuleInfo;
   preloadConfig: PreloadRemoteArgs;
+  origin: ModuleFederation;
 }
 ```
 
@@ -394,7 +419,7 @@ Called before the preload handler executes any preload logic.
 * type
 
 ```ts
-async function beforePreloadRemote(args: BeforePreloadRemoteOptions): BeforePreloadRemoteOptions
+async function beforePreloadRemote(args: BeforePreloadRemoteOptions): Promise<void>
 
 type BeforePreloadRemoteOptions ={
   preloadOps: Array<PreloadRemoteArgs>;
@@ -430,6 +455,10 @@ interface PreloadAssets {
 }
 ```
 
+## loaderHook
+
+`loaderHook` is used to intercept resource loading and module-factory resolution.
+
 ## createScript
 
 `SyncHook`
@@ -439,10 +468,11 @@ Used to modify the script when loading resources.
 * type
 
 ```ts
-function createScript(args: CreateScriptOptions): HTMLScriptElement | void
+function createScript(args: CreateScriptOptions): CreateScriptHookReturn
 
 type CreateScriptOptions ={
   url: string;
+  attrs?: Record<string, any>;
 }
 ```
 
@@ -496,6 +526,62 @@ export default function (): FederationRuntimePlugin {
     },
   }
 };
+```
+
+## createLink
+
+`SyncHook`
+
+Used to customize the link element created for preload/style loading.
+
+* type
+
+```ts
+function createLink(args: CreateLinkOptions): HTMLLinkElement | void
+
+type CreateLinkOptions ={
+  url: string;
+  attrs?: Record<string, any>;
+}
+```
+
+## loadEntryError
+
+`AsyncHook`
+
+Triggered when loading remoteEntry fails (typically script loading errors). Useful for retries or custom fallback strategies.
+
+* type
+
+```ts
+async function loadEntryError(args: LoadEntryErrorOptions): Promise<Promise<RemoteEntryExports | undefined> | undefined>
+
+type LoadEntryErrorOptions ={
+  getRemoteEntry: typeof getRemoteEntry;
+  origin: ModuleFederation;
+  remoteInfo: RemoteInfo;
+  remoteEntryExports?: RemoteEntryExports;
+  globalLoading: Record<string, Promise<void | RemoteEntryExports> | undefined>;
+  uniqueKey: string;
+}
+```
+
+## getModuleFactory
+
+`AsyncHook`
+
+Triggered before calling `remoteEntry.get(expose)`, allowing custom module-factory resolution.
+
+* type
+
+```ts
+async function getModuleFactory(args: GetModuleFactoryOptions): Promise<(() => Promise<Module>) | undefined>
+
+type GetModuleFactoryOptions ={
+  remoteEntryExports: RemoteEntryExports;
+  expose: string;
+  moduleInfo: RemoteInfo;
+}
 ```
 
 ## loadEntry
@@ -630,4 +716,56 @@ import test1 from "delegateModulesA/test1"
 import test2 from "delegateModulesA/test2"
 test1 // "test1 value"
 test2 // "test2 value"
+```
+
+## bridgeHook
+
+`bridgeHook` is defined in `runtime-core/src/core.ts` and is used to extend context across bridge render/destroy stages (for example, React/Vue bridge).
+
+## beforeBridgeRender
+
+`SyncHook`
+
+Triggered before bridge rendering. You can return an object to augment render arguments (for example, `extraProps`).
+
+* type
+
+```ts
+function beforeBridgeRender(args: Record<string, any>): void | Record<string, any>
+```
+
+## afterBridgeRender
+
+`SyncHook`
+
+Triggered after bridge rendering.
+
+* type
+
+```ts
+function afterBridgeRender(args: Record<string, any>): void | Record<string, any>
+```
+
+## beforeBridgeDestroy
+
+`SyncHook`
+
+Triggered before bridge teardown.
+
+* type
+
+```ts
+function beforeBridgeDestroy(args: Record<string, any>): void | Record<string, any>
+```
+
+## afterBridgeDestroy
+
+`SyncHook`
+
+Triggered after bridge teardown.
+
+* type
+
+```ts
+function afterBridgeDestroy(args: Record<string, any>): void | Record<string, any>
 ```
