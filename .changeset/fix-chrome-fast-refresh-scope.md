@@ -1,5 +1,5 @@
 ---
-"@module-federation/devtools": patch
+"@module-federation/devtools": minor
 ---
 
-Fix devtools fast refresh so scoped React and ReactDOM load without polluting root window globals.
+feat: support proxying runtime-registered React and ReactDOM in devtools fast refresh across multiple share scopes.
