@@ -122,6 +122,19 @@ export type ShareInfos = {
   [pkgName: string]: Shared[];
 };
 
+export interface SecurityOptions {
+  /**
+   * A whitelist for remote entry origins.
+   *
+   * - When unset or empty, remote entry loading behavior is unchanged.
+   * - When set to `['*']`, it allows loading from any origin.
+   * - Items can be a hostname (e.g. `example.com`), a host with port
+   *   (e.g. `localhost:3001`), an origin (e.g. `https://example.com`),
+   *   or a regex literal (e.g. `/^https:\\/\\/example\\.com$/`).
+   */
+  allowedRemoteOrigins?: string[];
+}
+
 export interface Options {
   id?: string;
   name: string;
@@ -131,6 +144,7 @@ export interface Options {
   plugins: Array<ModuleFederationRuntimePlugin>;
   inBrowser: boolean;
   shareStrategy?: ShareStrategy;
+  security?: SecurityOptions;
 }
 
 export type UserOptions = Omit<
@@ -140,6 +154,7 @@ export type UserOptions = Omit<
   shared?: {
     [pkgName: string]: ShareArgs | ShareArgs[];
   };
+  security?: SecurityOptions;
 };
 
 export type LoadModuleOptions = {

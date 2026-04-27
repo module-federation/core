@@ -51,6 +51,11 @@
   },
   {
     "type": "file",
+    "name": "security",
+    "label": "security"
+  },
+  {
+    "type": "file",
     "name": "getpublicpath",
     "label": "getPublicPath"
   },

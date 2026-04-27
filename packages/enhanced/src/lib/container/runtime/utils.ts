@@ -13,12 +13,15 @@ import type { moduleFederationPlugin } from '@module-federation/sdk';
 import type { init } from '@module-federation/runtime-tools';
 
 type Remotes = Parameters<typeof init>[0]['remotes'];
+type SecurityOptions = Parameters<typeof init>[0]['security'];
 
 export interface NormalizedRuntimeInitOptionsWithOutShared {
   name: string;
   remotes: Array<
     Remotes[0] & { externalType: moduleFederationPlugin.ExternalsType }
   >;
+  shareStrategy: 'version-first' | 'loaded-first';
+  security?: SecurityOptions;
 }
 
 const extractUrlAndGlobal = require(
@@ -98,10 +101,15 @@ export function normalizeRuntimeInitOptionsWithOutShared(
     });
   });
 
+  const security = options.security
+    ? (JSON.parse(JSON.stringify(options.security)) as SecurityOptions)
+    : undefined;
+
   const initOptionsWithoutShared = {
     name: options.name!,
     remotes: remoteOptions,
     shareStrategy: options.shareStrategy || 'version-first',
+    security,
   };
 
   return initOptionsWithoutShared;

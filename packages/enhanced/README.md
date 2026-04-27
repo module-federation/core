@@ -164,6 +164,44 @@ Used to add additional plug-ins required at runtime. The value is the path of th
 
 Once set, the runtime plugin is automatically injected and used at build time.
 
+### security
+
+- Type: `{ allowedRemoteOrigins?: string[] }`
+- Required: False
+- Default: `undefined`
+
+Used to restrict which remote entry origins can be loaded by the runtime.
+
+If this option is not set, the existing loading behavior remains unchanged.
+Once `allowedRemoteOrigins` is configured, only matching network remote entry URLs
+can be loaded.
+
+`allowedRemoteOrigins` supports:
+
+- `'*'` to allow all origins
+- hostnames such as `localhost` or `cdn.example.com`
+- host + port values such as `cdn.example.com:8080`
+- exact origins such as `https://cdn.example.com`
+- regex literals such as `/^https:\\/\\/.*\\.example\\.com$/`
+
+Example:
+
+```js
+module.exports = {
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'host',
+      remotes: {
+        remote: 'remote@https://cdn.example.com/remoteEntry.js',
+      },
+      security: {
+        allowedRemoteOrigins: ['cdn.example.com'],
+      },
+    }),
+  ],
+};
+```
+
 ### implementation
 
 - Type: `string`

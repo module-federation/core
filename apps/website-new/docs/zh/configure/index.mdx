@@ -22,6 +22,11 @@ type ModuleFederationOptions {
     getPublicPath?: string;
     // 运行时插件（支持元组 [path, params]）
     runtimePlugins?: (string | [string, Record<string, unknown>])[];
+    // 运行时安全配置
+    security?: {
+      allowedRemoteOrigins?: string[];
+      [key: string]: unknown;
+    };
     // runtime pkg 依赖
     implementation?: string;
     // manifest 配置

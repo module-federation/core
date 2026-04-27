@@ -1,7 +1,6 @@
 import 'whatwg-fetch';
 import { assert, describe, it } from 'vitest';
 import { ModuleFederation, init } from '../src/index';
-import { mockRemoteSnapshot } from './mock/utils';
 import { matchRemoteWithNameAndExpose } from '@module-federation/runtime-core';
 import {
   addGlobalSnapshot,
@@ -602,5 +601,161 @@ describe('loadRemote', () => {
     );
     expect(loadedSrcs.includes(`${remotePublicPath}${jsSyncAssetPath}`));
     reset();
+  });
+});
+
+describe('security.allowedRemoteOrigins', () => {
+  it('does not affect remote loading when allowedRemoteOrigins is not configured', async () => {
+    const federationInstance = new ModuleFederation({
+      name: '@federation-test/security-default',
+      remotes: [
+        {
+          name: '__FEDERATION_@federation-test/app2:custom__',
+          alias: 'app2',
+          entry:
+            'http://localhost:1111/resources/app2/federation-remote-entry.js',
+        },
+      ],
+    });
+
+    const module =
+      await federationInstance.loadRemote<() => string>('app2/say');
+    assert(module, 'module should be a function');
+    expect(module()).toBe('hello app2');
+  });
+
+  it('allows remote when origin hostname is in allowedRemoteOrigins', async () => {
+    const federationInstance = new ModuleFederation({
+      name: '@federation-test/security-host',
+      remotes: [
+        {
+          name: '__FEDERATION_@federation-test/app2:custom__',
+          alias: 'app2',
+          entry:
+            'http://localhost:1111/resources/app2/federation-remote-entry.js',
+        },
+      ],
+      security: {
+        allowedRemoteOrigins: ['localhost'],
+      },
+    });
+
+    const module =
+      await federationInstance.loadRemote<() => string>('app2/say');
+    assert(module, 'module should be a function');
+    expect(module()).toBe('hello app2');
+  });
+
+  it('allows remote when origin matches regex in allowedRemoteOrigins', async () => {
+    const federationInstance = new ModuleFederation({
+      name: '@federation-test/security-regex',
+      remotes: [
+        {
+          name: '__FEDERATION_@federation-test/app2:custom__',
+          alias: 'app2',
+          entry:
+            'http://localhost:1111/resources/app2/federation-remote-entry.js',
+        },
+      ],
+      security: {
+        allowedRemoteOrigins: ['/localhost/'],
+      },
+    });
+
+    const module =
+      await federationInstance.loadRemote<() => string>('app2/say');
+    assert(module, 'module should be a function');
+    expect(module()).toBe('hello app2');
+  });
+
+  it('allows any remote when allowedRemoteOrigins includes *', async () => {
+    const federationInstance = new ModuleFederation({
+      name: '@federation-test/security-wildcard',
+      remotes: [
+        {
+          name: '__FEDERATION_@federation-test/app2:custom__',
+          alias: 'app2',
+          entry:
+            'http://untrusted.example.test:1111/resources/app2/federation-remote-entry.js',
+        },
+      ],
+      security: {
+        allowedRemoteOrigins: ['*'],
+      },
+    });
+
+    const module =
+      await federationInstance.loadRemote<() => string>('app2/say');
+    assert(module, 'module should be a function');
+    expect(module()).toBe('hello app2');
+  });
+
+  it('blocks remote when origin hostname is not in allowedRemoteOrigins', async () => {
+    const federationInstance = new ModuleFederation({
+      name: '@federation-test/security-block-host',
+      remotes: [
+        {
+          name: '__FEDERATION_@federation-test/app2:custom__',
+          alias: 'app2',
+          entry:
+            'http://untrusted.example.test:1111/resources/app2/federation-remote-entry.js',
+        },
+      ],
+      security: {
+        allowedRemoteOrigins: ['localhost'],
+      },
+    });
+
+    await expect(
+      federationInstance.loadRemote<() => string>('app2/say'),
+    ).rejects.toThrow(
+      'Remote origin "http://untrusted.example.test:1111" is not allowed by security.allowedRemoteOrigins.',
+    );
+  });
+
+  it('does not treat origin entries as string prefixes', async () => {
+    const federationInstance = new ModuleFederation({
+      name: '@federation-test/security-origin-prefix',
+      remotes: [
+        {
+          name: '__FEDERATION_@federation-test/app2:custom__',
+          alias: 'app2',
+          entry:
+            'http://localhost.attacker.test:1111/resources/app2/federation-remote-entry.js',
+        },
+      ],
+      security: {
+        allowedRemoteOrigins: ['http://localhost'],
+      },
+    });
+
+    await expect(
+      federationInstance.loadRemote<() => string>('app2/say'),
+    ).rejects.toThrow(
+      'Remote origin "http://localhost.attacker.test:1111" is not allowed by security.allowedRemoteOrigins.',
+    );
+  });
+
+  it('checks protocol-relative network URLs when allowedRemoteOrigins is configured', async () => {
+    const federationInstance = new ModuleFederation({
+      name: '@federation-test/security-protocol-relative',
+      remotes: [
+        {
+          name: '__FEDERATION_@federation-test/app2:custom__',
+          alias: 'app2',
+          entry:
+            '//protocol-relative.example.test:1111/federation-remote-entry.js',
+        },
+      ],
+      security: {
+        allowedRemoteOrigins: ['localhost'],
+      },
+    });
+
+    await expect(
+      federationInstance.loadRemote<() => string>('app2/say'),
+    ).rejects.toThrow(
+      /Remote origin "https?:\/\/protocol-relative\.example\.test:1111" is not allowed by security.allowedRemoteOrigins\./,
+    );
   });
 });

@@ -463,6 +463,16 @@ export interface ModuleFederationPluginOptions {
    */
   shareStrategy?: SharedStrategy;
   /**
+   * Runtime security options for remote loading.
+   */
+  security?: {
+    [key: string]: unknown;
+    /**
+     * Allowed remote entry origins. Leave unset to keep the default behavior.
+     */
+    allowedRemoteOrigins?: string[];
+  };
+  /**
    * Modules that should be shared in the share scope. When provided, property names are used to match requested modules in this compilation.
    */
   shared?: Shared;
