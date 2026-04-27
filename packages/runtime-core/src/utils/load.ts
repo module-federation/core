@@ -8,7 +8,7 @@ import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { ModuleFederation } from '../core';
 import { globalLoading, getRemoteEntryExports } from '../global';
 import { Remote, RemoteEntryExports, RemoteInfo } from '../type';
-import { assert, error } from './logger';
+import { error } from './logger';
 import {
   RUNTIME_001,
   RUNTIME_008,
@@ -19,16 +19,142 @@ import {
 declare const ENV_TARGET: 'web' | 'node';
 const importCallback = '.then(callbacks[0]).catch(callbacks[1])';
 
+function getDefaultRemoteProtocol(): 'http:' | 'https:' {
+  if (
+    typeof globalThis !== 'undefined' &&
+    typeof globalThis.location?.protocol === 'string' &&
+    (globalThis.location.protocol === 'http:' ||
+      globalThis.location.protocol === 'https:')
+  ) {
+    return globalThis.location.protocol;
+  }
+
+  return 'https:';
+}
+
+function parseNetworkRemoteUrl(entryUrl: string): URL | undefined {
+  const isNetworkRemote =
+    entryUrl.startsWith('//') ||
+    entryUrl.startsWith('http://') ||
+    entryUrl.startsWith('https://');
+
+  if (!isNetworkRemote) {
+    return;
+  }
+
+  const normalizedEntryUrl = entryUrl.startsWith('//')
+    ? `${getDefaultRemoteProtocol()}${entryUrl}`
+    : entryUrl;
+
+  const parsed = new URL(normalizedEntryUrl);
+
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+    return;
+  }
+
+  return parsed;
+}
+
+function assertRemoteOriginAllowed(
+  entryUrl: string,
+  allowedRemoteOrigins?: string[],
+): void {
+  if (!allowedRemoteOrigins || allowedRemoteOrigins.length === 0) {
+    return;
+  }
+
+  let parsed: URL | undefined;
+  try {
+    parsed = parseNetworkRemoteUrl(entryUrl);
+  } catch {
+    throw new Error(
+      `Remote origin "${entryUrl}" is not allowed by security.allowedRemoteOrigins.`,
+    );
+  }
+
+  if (!parsed) {
+    // Only enforce origin checks for network-loaded http(s) URLs.
+    return;
+  }
+
+  if (allowedRemoteOrigins.includes('*')) {
+    return;
+  }
+
+  const origin = parsed.origin;
+  const host = parsed.host;
+  const hostname = parsed.hostname;
+
+  const isAllowed = allowedRemoteOrigins.some((rawPattern) => {
+    const pattern = rawPattern.trim();
+
+    if (!pattern) {
+      return false;
+    }
+
+    if (pattern === '*') {
+      return true;
+    }
+
+    // Regex literal pattern, e.g. `/^https:\\/\\/example\\.com$/` or `/foo/i`
+    if (
+      pattern.length > 2 &&
+      pattern.startsWith('/') &&
+      pattern.lastIndexOf('/') > 0
+    ) {
+      const lastSlashIndex = pattern.lastIndexOf('/');
+      const source = pattern.slice(1, lastSlashIndex);
+      const flags = pattern.slice(lastSlashIndex + 1);
+
+      try {
+        const regex = new RegExp(source, flags as any);
+        return regex.test(origin) || regex.test(entryUrl);
+      } catch {
+        // Ignore invalid regex patterns
+        return false;
+      }
+    }
+
+    if (pattern.includes('://')) {
+      try {
+        return new URL(pattern).origin === origin;
+      } catch {
+        return false;
+      }
+    }
+
+    if (pattern.includes(':')) {
+      return host === pattern;
+    }
+
+    // Hostname match: exact or subdomain of the pattern
+    if (hostname === pattern || hostname.endsWith(`.${pattern}`)) {
+      return true;
+    }
+
+    return false;
+  });
+
+  if (!isAllowed) {
+    throw new Error(
+      `Remote origin "${origin}" is not allowed by security.allowedRemoteOrigins.`,
+    );
+  }
+}
+
 async function loadEsmEntry({
   entry,
   remoteEntryExports,
+  allowedRemoteOrigins,
 }: {
   entry: string;
   remoteEntryExports: RemoteEntryExports | undefined;
+  allowedRemoteOrigins?: string[];
 }): Promise<RemoteEntryExports> {
   return new Promise<RemoteEntryExports>((resolve, reject) => {
     try {
       if (!remoteEntryExports) {
+        assertRemoteOriginAllowed(entry, allowedRemoteOrigins);
         if (typeof FEDERATION_ALLOW_NEW_FUNCTION !== 'undefined') {
           new Function('callbacks', `import("${entry}")${importCallback}`)([
             resolve,
@@ -52,13 +178,16 @@ async function loadEsmEntry({
 async function loadSystemJsEntry({
   entry,
   remoteEntryExports,
+  allowedRemoteOrigins,
 }: {
   entry: string;
   remoteEntryExports: RemoteEntryExports | undefined;
+  allowedRemoteOrigins?: string[];
 }): Promise<RemoteEntryExports> {
   return new Promise<RemoteEntryExports>((resolve, reject) => {
     try {
       if (!remoteEntryExports) {
+        assertRemoteOriginAllowed(entry, allowedRemoteOrigins);
         //@ts-ignore
         if (typeof __system_context__ === 'undefined') {
           //@ts-ignore
@@ -106,12 +235,14 @@ async function loadEntryScript({
   entry,
   loaderHook,
   getEntryUrl,
+  allowedRemoteOrigins,
 }: {
   name: string;
   globalName: string;
   entry: string;
   loaderHook: ModuleFederation['loaderHook'];
   getEntryUrl?: (url: string) => string;
+  allowedRemoteOrigins?: string[];
 }): Promise<RemoteEntryExports> {
   const { entryExports: remoteEntryExports } = getRemoteEntryExports(
     name,
@@ -124,6 +255,7 @@ async function loadEntryScript({
 
   // if getEntryUrl is passed, use the getEntryUrl to get the entry url
   const url = getEntryUrl ? getEntryUrl(entry) : entry;
+  assertRemoteOriginAllowed(url, allowedRemoteOrigins);
   return loadScript(url, {
     attrs: {},
     createScriptHook: (url, attrs) => {
@@ -172,19 +304,29 @@ async function loadEntryDom({
   remoteEntryExports,
   loaderHook,
   getEntryUrl,
+  allowedRemoteOrigins,
 }: {
   remoteInfo: RemoteInfo;
   remoteEntryExports?: RemoteEntryExports;
   loaderHook: ModuleFederation['loaderHook'];
   getEntryUrl?: (url: string) => string;
+  allowedRemoteOrigins?: string[];
 }) {
   const { entry, entryGlobalName: globalName, name, type } = remoteInfo;
   switch (type) {
     case 'esm':
     case 'module':
-      return loadEsmEntry({ entry, remoteEntryExports });
+      return loadEsmEntry({
+        entry,
+        remoteEntryExports,
+        allowedRemoteOrigins,
+      });
     case 'system':
-      return loadSystemJsEntry({ entry, remoteEntryExports });
+      return loadSystemJsEntry({
+        entry,
+        remoteEntryExports,
+        allowedRemoteOrigins,
+      });
     default:
       return loadEntryScript({
         entry,
@@ -192,6 +334,7 @@ async function loadEntryDom({
         name,
         loaderHook,
         getEntryUrl,
+        allowedRemoteOrigins,
       });
   }
 }
@@ -199,9 +342,11 @@ async function loadEntryDom({
 async function loadEntryNode({
   remoteInfo,
   loaderHook,
+  allowedRemoteOrigins,
 }: {
   remoteInfo: RemoteInfo;
   loaderHook: ModuleFederation['loaderHook'];
+  allowedRemoteOrigins?: string[];
 }) {
   const { entry, entryGlobalName: globalName, name, type } = remoteInfo;
   const { entryExports: remoteEntryExports } = getRemoteEntryExports(
@@ -212,6 +357,8 @@ async function loadEntryNode({
   if (remoteEntryExports) {
     return remoteEntryExports;
   }
+
+  assertRemoteOriginAllowed(entry, allowedRemoteOrigins);
 
   return loadScriptNode(entry, {
     attrs: { name, globalName, type },
@@ -259,6 +406,12 @@ export async function getRemoteEntry(params: {
     getEntryUrl,
     _inErrorHandling = false,
   } = params;
+  const allowedRemoteOrigins = origin.options.security?.allowedRemoteOrigins;
+
+  if (allowedRemoteOrigins && allowedRemoteOrigins.length) {
+    assertRemoteOriginAllowed(remoteInfo.entry, allowedRemoteOrigins);
+  }
+
   const uniqueKey = getRemoteEntryUniqueKey(remoteInfo);
   if (remoteEntryExports) {
     return remoteEntryExports;
@@ -290,8 +443,13 @@ export async function getRemoteEntry(params: {
               remoteEntryExports,
               loaderHook,
               getEntryUrl,
+              allowedRemoteOrigins,
             })
-          : loadEntryNode({ remoteInfo, loaderHook });
+          : loadEntryNode({
+              remoteInfo,
+              loaderHook,
+              allowedRemoteOrigins,
+            });
       })
       .catch(async (err) => {
         const uniqueKey = getRemoteEntryUniqueKey(remoteInfo);
