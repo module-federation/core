@@ -7,7 +7,6 @@ import type {
   Chunk,
 } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import { PrefetchPlugin } from '@module-federation/data-prefetch/cli';
 import { moduleFederationPlugin } from '@module-federation/sdk';
 import FederationRuntimeModule from './FederationRuntimeModule';
 import {
@@ -227,9 +226,6 @@ class FederationRuntimePlugin {
         Template.indent([`${federationGlobal}.installInitialConsumes()`]),
         '}',
       ]),
-      PrefetchPlugin.addRuntime(compiler, {
-        name: options.name!,
-      }),
       '}',
     ]);
   }

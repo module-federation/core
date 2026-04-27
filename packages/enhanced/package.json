@@ -56,11 +56,6 @@
       "types": "./dist/src/runtime.d.ts",
       "import": "./dist/src/runtime.mjs",
       "require": "./dist/src/runtime.js"
-    },
-    "./prefetch": {
-      "types": "./dist/src/prefetch.d.ts",
-      "import": "./dist/src/prefetch.js",
-      "require": "./dist/src/prefetch.js"
     }
   },
   "typesVersions": {
@@ -76,9 +71,6 @@
       ],
       "runtime": [
         "./dist/src/runtime.d.ts"
-      ],
-      "prefetch": [
-        "./dist/src/prefetch.d.ts"
       ]
     }
   },
@@ -92,7 +84,6 @@
   "dependencies": {
     "@module-federation/webpack-bundler-runtime": "workspace:*",
     "@module-federation/bridge-react-webpack-plugin": "workspace:*",
-    "@module-federation/data-prefetch": "workspace:*",
     "@module-federation/dts-plugin": "workspace:*",
     "@module-federation/error-codes": "workspace:*",
     "@module-federation/inject-external-runtime-core-plugin": "workspace:*",

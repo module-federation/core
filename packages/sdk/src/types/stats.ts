@@ -50,8 +50,6 @@ export interface BasicStatsMetaData {
   buildInfo: StatsBuildInfo;
   remoteEntry: ResourceInfo;
   ssrRemoteEntry?: ResourceInfo;
-  prefetchInterface?: boolean;
-  prefetchEntry?: ResourceInfo;
   types?: MetaDataTypes;
   type: string;
   pluginVersion?: string;

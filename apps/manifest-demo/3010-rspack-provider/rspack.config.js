@@ -92,7 +92,6 @@ module.exports = (_env, argv = {}) => {
             requiredVersion: '^18.3.1',
           },
         },
-        dataPrefetch: true,
         experiments: {
           externalRuntime: true,
         },

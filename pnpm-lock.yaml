@@ -3200,55 +3200,6 @@ importers:
         specifier: ^0.2.1
         version: 0.2.1(@rsbuild/core@1.7.3)
 
-  packages/data-prefetch:
-    dependencies:
-      '@module-federation/runtime':
-        specifier: workspace:*
-        version: link:../runtime
-      '@module-federation/sdk':
-        specifier: workspace:*
-        version: link:../sdk
-    devDependencies:
-      '@module-federation/webpack-type':
-        specifier: workspace:*
-        version: link:../../webpack
-      '@testing-library/react-hooks':
-        specifier: ^8.0.1
-        version: 8.0.1(@types/react@18.0.38)(react-dom@18.3.1(react@18.3.1))(react-test-renderer@18.3.1(react@18.3.1))(react@18.3.1)
-      '@types/jest':
-        specifier: ^29.5.11
-        version: 29.5.13
-      '@types/node':
-        specifier: ^20.19.5
-        version: 20.19.5
-      '@types/react':
-        specifier: ~18.0.38
-        version: 18.0.38
-      jest:
-        specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.5)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.10(@swc/helpers@0.5.19))(@types/node@20.19.5)(typescript@5.9.3))
-      jest-environment-jsdom:
-        specifier: ^29.7.0
-        version: 29.7.0
-      minimist:
-        specifier: ^1.2.8
-        version: 1.2.8
-      react:
-        specifier: ^18.3.1
-        version: 18.3.1
-      react-dom:
-        specifier: ^18.3.1
-        version: 18.3.1(react@18.3.1)
-      react-router:
-        specifier: ^6.30.2
-        version: 6.30.3(react@18.3.1)
-      react-test-renderer:
-        specifier: ^18.2.0
-        version: 18.3.1(react@18.3.1)
-      ts-jest:
-        specifier: 29.0.1
-        version: 29.0.1(@babel/core@7.29.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.29.0))(esbuild@0.27.3)(jest@29.7.0(@types/node@20.19.5)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.10(@swc/helpers@0.5.19))(@types/node@20.19.5)(typescript@5.9.3)))(typescript@5.9.3)
-
   packages/dts-plugin:
     dependencies:
       '@module-federation/error-codes':
@@ -3324,9 +3275,6 @@ importers:
       '@module-federation/cli':
         specifier: workspace:*
         version: link:../cli
-      '@module-federation/data-prefetch':
-        specifier: workspace:*
-        version: link:../data-prefetch
       '@module-federation/dts-plugin':
         specifier: workspace:*
         version: link:../dts-plugin
