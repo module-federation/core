@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/enhanced",
-  "version": "2.3.2",
+  "version": "2.3.3",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
   "repository": {
@@ -54,7 +54,7 @@
     },
     "./runtime": {
       "types": "./dist/src/runtime.d.ts",
-      "import": "./dist/src/runtime.js",
+      "import": "./dist/src/runtime.mjs",
       "require": "./dist/src/runtime.js"
     },
     "./prefetch": {

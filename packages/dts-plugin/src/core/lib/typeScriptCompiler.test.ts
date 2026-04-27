@@ -1,5 +1,5 @@
 import dirTree from 'directory-tree';
-import { mkdirSync, readFileSync, rmSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import os from 'os';
 import { join, resolve, sep } from 'path';
 import util from 'util';
@@ -204,6 +204,75 @@ describe('typeScriptCompiler', () => {
       expect(args.slice(0, 3)).toEqual(['tsc', '--pretty', 'false']);
       expect(args[3]).toBe('--project');
       expect(args[4]).toEqual(expect.any(String));
+    });
+
+    it('ignores inherited declarationDir', async () => {
+      const projectDir = join(tmpDir, 'declarationDirProject');
+      const srcDir = join(projectDir, 'src');
+      mkdirSync(srcDir, { recursive: true });
+
+      const entryFile = join(srcDir, 'hello.ts');
+      writeFileSync(entryFile, 'export const hello = 1;\n');
+
+      const baseTsConfigPath = join(projectDir, 'tsconfig.json');
+      writeFileSync(
+        baseTsConfigPath,
+        JSON.stringify(
+          {
+            compilerOptions: {
+              target: 'es2017',
+              module: 'esnext',
+              moduleResolution: 'node',
+              declaration: true,
+              emitDeclarationOnly: true,
+              declarationDir: 'decl-dist',
+            },
+            include: ['src'],
+          },
+          null,
+          2,
+        ),
+      );
+
+      const outDir = join(
+        projectDir,
+        'typesRemoteFolder',
+        'compiledTypesFolder',
+      );
+
+      await compileTs(
+        { './hello': entryFile },
+        {
+          extends: baseTsConfigPath,
+          compilerOptions: {
+            target: 'es2017',
+            module: 'esnext',
+            moduleResolution: 'node',
+            strict: true,
+            esModuleInterop: true,
+            emitDeclarationOnly: true,
+            noEmit: false,
+            declaration: true,
+            outDir,
+            declarationDir: outDir,
+            rootDir: projectDir,
+          },
+          files: [entryFile],
+          include: [],
+          exclude: [],
+        },
+        {
+          ...remoteOptions,
+          context: projectDir,
+          tsConfigPath: baseTsConfigPath,
+        },
+      );
+
+      expect(existsSync(join(projectDir, 'decl-dist'))).toBe(false);
+      expect(existsSync(join(outDir, 'src', 'hello.d.ts'))).toBe(true);
+      expect(
+        existsSync(join(projectDir, 'typesRemoteFolder', 'hello.d.ts')),
+      ).toBe(true);
     });
 
     it('filled mapToExpose', async () => {

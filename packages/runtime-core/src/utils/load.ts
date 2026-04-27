@@ -233,6 +233,7 @@ async function loadEntryScript({
   name,
   globalName,
   entry,
+  remoteInfo,
   loaderHook,
   getEntryUrl,
   allowedRemoteOrigins,
@@ -240,6 +241,7 @@ async function loadEntryScript({
   name: string;
   globalName: string;
   entry: string;
+  remoteInfo: RemoteInfo;
   loaderHook: ModuleFederation['loaderHook'];
   getEntryUrl?: (url: string) => string;
   allowedRemoteOrigins?: string[];
@@ -259,7 +261,11 @@ async function loadEntryScript({
   return loadScript(url, {
     attrs: {},
     createScriptHook: (url, attrs) => {
-      const res = loaderHook.lifecycle.createScript.emit({ url, attrs });
+      const res = loaderHook.lifecycle.createScript.emit({
+        url,
+        attrs,
+        remoteInfo,
+      });
 
       if (!res) return;
 
@@ -332,6 +338,7 @@ async function loadEntryDom({
         entry,
         globalName,
         name,
+        remoteInfo,
         loaderHook,
         getEntryUrl,
         allowedRemoteOrigins,
@@ -364,7 +371,11 @@ async function loadEntryNode({
     attrs: { name, globalName, type },
     loaderHook: {
       createScriptHook: (url: string, attrs: Record<string, any> = {}) => {
-        const res = loaderHook.lifecycle.createScript.emit({ url, attrs });
+        const res = loaderHook.lifecycle.createScript.emit({
+          url,
+          attrs,
+          remoteInfo,
+        });
 
         if (!res) return;
 

@@ -164,7 +164,20 @@ describe('hooks', () => {
       plugins: [
         {
           name: 'change-script-attribute',
-          createScript({ url }) {
+          createScript({ url, remoteInfo }) {
+            // Assert remote context is exposed for remoteEntry loads
+            if (url === testRemoteEntry) {
+              expect(remoteInfo).toMatchObject({
+                name: '@loader-hooks/app2',
+                entry: testRemoteEntry,
+              });
+            }
+            if (url === preloadRemoteEntry) {
+              expect(remoteInfo).toMatchObject({
+                name: '@loader-hooks/app3',
+                entry: preloadRemoteEntry,
+              });
+            }
             const script = document.createElement('script');
             script.src = url;
             if (url === testRemoteEntry) {
@@ -203,6 +216,86 @@ describe('hooks', () => {
     reset();
   });
 
+  it('loader createLink hooks expose remoteInfo in preloadRemote', async () => {
+    const remotePublicPath = 'http://localhost:1111/';
+    const reset = addGlobalSnapshot({
+      '@loader-hooks/globalinfo': {
+        globalName: '',
+        buildVersion: '',
+        publicPath: '',
+        remoteTypes: '',
+        shared: [],
+        remoteEntry: '',
+        remoteEntryType: 'global',
+        modules: [],
+        version: '0.0.1',
+        remotesInfo: {
+          '@loader-hooks/app3': {
+            matchedVersion: '0.0.1',
+          },
+        },
+      },
+      '@loader-hooks/app3:0.0.1': {
+        globalName: '@loader-hooks/app3',
+        publicPath: remotePublicPath,
+        remoteTypes: '',
+        shared: [],
+        buildVersion: 'custom',
+        remotesInfo: {},
+        remoteEntryType: 'global',
+        modules: [],
+        version: '0.0.1',
+        remoteEntry: 'resources/hooks/app3/federation-remote-entry.js',
+      },
+    });
+
+    let lastLinkRemoteInfo: any;
+    const INSTANCE = new ModuleFederation({
+      name: '@loader-hooks/globalinfo',
+      remotes: [
+        {
+          name: '@loader-hooks/app3',
+          version: '*',
+        },
+      ],
+      plugins: [
+        {
+          name: 'force-preload-assets',
+          async generatePreloadAssets() {
+            return {
+              cssAssets: ['http://localhost:1111/__virtual__/style.css'],
+              jsAssetsWithoutEntry: [
+                'http://localhost:1111/__virtual__/chunk.js',
+              ],
+              entryAssets: [],
+            } as any;
+          },
+        },
+        {
+          name: 'capture-link-remote-info',
+          createLink({ url, attrs, remoteInfo }) {
+            lastLinkRemoteInfo = remoteInfo;
+            const link = document.createElement('link');
+            link.href = url;
+            if (attrs) {
+              Object.entries(attrs).forEach(([k, v]) => {
+                link.setAttribute(k, String(v));
+              });
+            }
+            return link;
+          },
+        },
+      ],
+    });
+
+    await INSTANCE.preloadRemote([{ nameOrAlias: '@loader-hooks/app3' }]);
+    expect(lastLinkRemoteInfo).toMatchObject({
+      name: '@loader-hooks/app3',
+    });
+
+    reset();
+  });
+
   it('loader fetch hooks', async () => {
     const data = {
       id: '@loader-hooks/app2',
@@ -234,9 +327,11 @@ describe('hooks', () => {
       statusText: 'OK',
       headers: { 'Content-Type': 'application/json' },
     });
+    let lastFetchRemoteInfo: any;
     const fetchPlugin: () => ModuleFederationRuntimePlugin = () => ({
       name: 'fetch-plugin',
-      fetch(url, options) {
+      fetch(url, options, remoteInfo) {
+        lastFetchRemoteInfo = remoteInfo;
         if (url === 'http://mockxxx.com/loader-fetch-hooks-mf-manifest.json') {
           return Promise.resolve(responseBody);
         }
@@ -258,6 +353,10 @@ describe('hooks', () => {
     );
     assert(res);
     expect(res()).toBe('hello app2');
+    expect(lastFetchRemoteInfo).toMatchObject({
+      name: '@loader-hooks/app2',
+      entry: 'http://mockxxx.com/loader-fetch-hooks-mf-manifest.json',
+    });
   });
 
   it('loaderEntry hooks', async () => {

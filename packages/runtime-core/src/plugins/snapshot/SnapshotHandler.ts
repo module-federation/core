@@ -12,7 +12,12 @@ import {
   runtimeDescMap,
 } from '@module-federation/error-codes';
 import { Options, Remote } from '../../type';
-import { isRemoteInfoWithEntry, error, optionsToMFContext } from '../../utils';
+import {
+  isRemoteInfoWithEntry,
+  error,
+  optionsToMFContext,
+  getRemoteInfo,
+} from '../../utils';
 import {
   getGlobalSnapshot,
   setGlobalSnapshotInfoByModuleInfo,
@@ -292,7 +297,11 @@ export class SnapshotHandler {
         return manifestJson;
       }
       try {
-        let res = await this.loaderHook.lifecycle.fetch.emit(manifestUrl, {});
+        let res = await this.loaderHook.lifecycle.fetch.emit(
+          manifestUrl,
+          {},
+          getRemoteInfo(moduleInfo),
+        );
         if (!res || !(res instanceof Response)) {
           res = await fetch(manifestUrl, {});
         }

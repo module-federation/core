@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/bridge-react-webpack-plugin",
-  "version": "2.3.2",
+  "version": "2.3.3",
   "publishConfig": {
     "access": "public"
   },
@@ -11,6 +11,10 @@
     "url": "git+https://github.com/module-federation/core.git",
     "directory": "packages/bridge/bridge-react-webpack-plugin"
   },
+  "files": [
+    "dist/",
+    "README.md"
+  ],
   "main": "./dist/index.cjs.js",
   "module": "./dist/index.es.js",
   "types": "./dist/index.cjs.d.ts",

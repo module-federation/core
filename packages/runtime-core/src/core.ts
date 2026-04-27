@@ -144,6 +144,12 @@ export class ModuleFederation {
         {
           url: string;
           attrs?: Record<string, any>;
+          /**
+           * The producer(remote) info bound to this resource.
+           * Only present when the loader is invoked in a remote-related context
+           * (e.g. preloadRemote / loading remoteEntry).
+           */
+          remoteInfo?: RemoteInfo;
         },
       ],
       CreateScriptHookReturn
@@ -153,12 +159,18 @@ export class ModuleFederation {
         {
           url: string;
           attrs?: Record<string, any>;
+          /**
+           * The producer(remote) info bound to this resource.
+           * Only present when the loader is invoked in a remote-related context
+           * (e.g. preloadRemote / loading remoteEntry).
+           */
+          remoteInfo?: RemoteInfo;
         },
       ],
       HTMLLinkElement | void
     >(),
     fetch: new AsyncHook<
-      [string, RequestInit],
+      [string, RequestInit, RemoteInfo?],
       Promise<Response> | void | false
     >(),
     loadEntryError: new AsyncHook<

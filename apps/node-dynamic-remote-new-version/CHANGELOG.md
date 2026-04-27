@@ -1,5 +1,12 @@
 # node-dynamic-remote-new-version
 
+## 1.0.8
+
+### Patch Changes
+
+- Updated dependencies [bc49c23]
+  - @module-federation/node@2.7.41
+
 ## 1.0.7
 
 ### Patch Changes
