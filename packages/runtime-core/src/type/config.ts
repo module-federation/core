@@ -154,9 +154,7 @@ export type UserOptions = Omit<
   shared?: {
     [pkgName: string]: ShareArgs | ShareArgs[];
   };
-  security?: {
-    allowedRemoteOrigins?: string[];
-  };
+  security?: SecurityOptions;
 };
 
 export type LoadModuleOptions = {

@@ -785,6 +785,22 @@ export default {
       enum: ['version-first', 'loaded-first'],
       type: 'string',
     },
+    security: {
+      description: 'Runtime security options for remote loading.',
+      type: 'object',
+      properties: {
+        allowedRemoteOrigins: {
+          description:
+            'Allowed remote entry origins. Leave unset to keep the default behavior.',
+          type: 'array',
+          items: {
+            type: 'string',
+            minLength: 1,
+          },
+        },
+      },
+      additionalProperties: true,
+    },
     shared: {
       $ref: '#/definitions/Shared',
     },

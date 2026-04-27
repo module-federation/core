@@ -1,0 +1,38 @@
+# security
+
+- 类型：`{ allowedRemoteOrigins?: string[]; [key: string]: unknown }`
+- 是否必填：否
+- 默认值：`undefined`
+- 使用场景：用于传递运行时安全配置
+
+当前内置的运行时行为主要使用 `allowedRemoteOrigins` 来限制允许加载哪些远程入口来源。如果你在 `security` 下放了额外字段，它们会被原样保留，可供你自己的运行时扩展或插件使用。
+
+## allowedRemoteOrigins
+
+- 类型：`string[]`
+- 是否必填：否
+- 默认值：`undefined`
+
+如果不配置 `allowedRemoteOrigins`，远程加载行为保持不变。
+
+配置了 `allowedRemoteOrigins` 之后，只允许匹配到的网络远程入口地址继续加载。这个检查适用于 `http://`、`https://`，以及 `//cdn.example.com/remoteEntry.js` 这种协议相对地址。
+
+支持的写法：
+
+- `'*'`：允许所有来源
+- 主机名，例如 `localhost`、`cdn.example.com`
+- 主机名加端口，例如 `localhost:3001`
+- 精确来源，例如 `https://cdn.example.com`
+- 正则字面量，例如 `/^https:\\/\\/.*\\.example\\.com$/`
+
+```ts title="rspack.config.ts"
+new ModuleFederationPlugin({
+  name: 'host',
+  remotes: {
+    remote: 'remote@https://cdn.example.com/remoteEntry.js',
+  },
+  security: {
+    allowedRemoteOrigins: ['cdn.example.com', 'localhost:3001'],
+  },
+});
+```

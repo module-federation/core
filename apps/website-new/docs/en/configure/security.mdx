@@ -1,0 +1,38 @@
+# security
+
+- Type: `{ allowedRemoteOrigins?: string[]; [key: string]: unknown }`
+- Required: No
+- Default value: `undefined`
+- Usage scenario: used to pass runtime security options
+
+At the moment, the built-in runtime behavior uses `allowedRemoteOrigins` to restrict which remote entry origins can be loaded. If you add extra fields under `security`, they are preserved and can be used by your own runtime extensions or plugins.
+
+## allowedRemoteOrigins
+
+- Type: `string[]`
+- Required: No
+- Default value: `undefined`
+
+When `allowedRemoteOrigins` is not set, remote loading behavior stays unchanged.
+
+Once `allowedRemoteOrigins` is configured, only matching network remote entry URLs can be loaded. This check applies to network remotes such as `http://`, `https://`, or protocol-relative URLs like `//cdn.example.com/remoteEntry.js`.
+
+Supported values:
+
+- `'*'`: allow all origins
+- Hostname such as `localhost` or `cdn.example.com`
+- Host with port such as `localhost:3001`
+- Exact origin such as `https://cdn.example.com`
+- Regex literal such as `/^https:\\/\\/.*\\.example\\.com$/`
+
+```ts title="rspack.config.ts"
+new ModuleFederationPlugin({
+  name: 'host',
+  remotes: {
+    remote: 'remote@https://cdn.example.com/remoteEntry.js',
+  },
+  security: {
+    allowedRemoteOrigins: ['cdn.example.com', 'localhost:3001'],
+  },
+});
+```

@@ -20,6 +20,11 @@ type ModuleFederationOptions = {
   getPublicPath?: string;
   // Runtime plugins
   runtimePlugins?: Array<string | [string, Record<string, unknown>]>;
+  // Runtime security options
+  security?: {
+    allowedRemoteOrigins?: string[];
+    [key: string]: unknown;
+  };
   // The runtime implementation to use
   implementation?: string;
   // manifest configuration
