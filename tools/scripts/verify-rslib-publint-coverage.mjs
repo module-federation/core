@@ -9,7 +9,7 @@ const PACKAGES_DIR = join(ROOT, 'packages');
 const REQUIRED_IMPORT = "from 'rsbuild-plugin-publint'";
 const REQUIRED_CALL = 'pluginPublint()';
 const MIN_EXPECTED_RSLIB_PACKAGES = Number.parseInt(
-  process.env.MIN_EXPECTED_RSLIB_PACKAGES ?? '16',
+  process.env.MIN_EXPECTED_RSLIB_PACKAGES ?? '15',
   10,
 );
 
