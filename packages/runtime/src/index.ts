@@ -26,7 +26,10 @@ export function createInstance(options: UserOptions) {
   // Retrieve debug constructor
   const ModuleFederationConstructor =
     getGlobalFederationConstructor() || ModuleFederation;
-  const instance = new ModuleFederationConstructor(options);
+  const instance = new ModuleFederationConstructor({
+    id: `${options.name}@${options.version || Date.now()}`,
+    ...options,
+  });
   setGlobalFederationInstance(instance);
   return instance;
 }
