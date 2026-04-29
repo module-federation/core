@@ -4,7 +4,7 @@
   "description": "Federation example for node-dynamic-remote-new-version",
   "dependencies": {
     "@module-federation/node": "workspace:*",
-    "lodash": "4.17.23"
+    "lodash": "4.18.1"
   },
   "version": "1.0.9",
   "scripts": {
