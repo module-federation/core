@@ -119,7 +119,7 @@ describe('initContainerEntry with array-based share scopes', () => {
     });
 
     // Execute
-    const result = initContainerEntry(mockOptions);
+    initContainerEntry(mockOptions);
 
     // Verify
     expect(
@@ -432,7 +432,7 @@ describe('initContainerEntry with array-based share scopes', () => {
 
   test('should behave differently for proxyInitializeSharing=false vs true with array shareScopeKey', () => {
     // Mock setup for shared=false (proxyInitializeSharing=false)
-    const mockIFunctionFalse = jest.fn().mockImplementation((key) => {
+    const mockIFunctionFalse = jest.fn().mockImplementation((_key) => {
       return Promise.resolve(true);
     });
 
@@ -492,7 +492,7 @@ describe('initContainerEntry with array-based share scopes', () => {
 
   test('should handle proxyInitializeSharing=false with array shareScopeKey', async () => {
     // Setup with shared: false (making proxyInitializeSharing false)
-    const mockIFunction = jest.fn().mockImplementation((key) => {
+    const mockIFunction = jest.fn().mockImplementation((_key) => {
       return Promise.resolve(true);
     });
 
@@ -1113,5 +1113,95 @@ describe('initContainerEntry with array-based share scopes', () => {
     expect(mockIFunction).toHaveBeenCalledWith('key2', ['test-scope']);
     expect(mockIFunction).toHaveBeenCalledWith('key3', ['test-scope']);
     expect(mockIFunction).toHaveBeenCalledTimes(3);
+  });
+
+  test('should preserve non-default share scopes across repeated init with incomplete host shareScopeMap', () => {
+    const defaultScope = {
+      react: {
+        '18.2.0': {
+          scope: ['default'],
+        },
+      },
+    };
+    const customScope = {
+      '@tanstack/react-query': {
+        '5.0.0': {
+          scope: ['custom'],
+        },
+      },
+    };
+    const shareScopeMap: Record<string, Record<string, any>> = {};
+    const federationInstance = createMockFederationInstance({
+      shareScopeMap,
+      initShareScopeMap: jest.fn(
+        (scopeName: string, scope: Record<string, any>) => {
+          shareScopeMap[scopeName] = scope;
+        },
+      ),
+    });
+    const webpackRequire = createMockWebpackRequire({
+      I: jest.fn().mockReturnValue(Promise.resolve(true)),
+      federation: createMockFederation({
+        instance: federationInstance,
+        initOptions: {
+          name: 'test-app',
+          shared: false,
+        },
+      }),
+    });
+
+    initContainerEntry(
+      createMockOptions({
+        webpackRequire,
+        shareScopeKey: ['default', 'custom'],
+        shareScope: defaultScope,
+        remoteEntryInitOptions: createMockRemoteEntryInitOptions({
+          shareScopeKeys: ['default', 'custom'],
+          shareScopeMap: {
+            default: defaultScope,
+            custom: customScope,
+          },
+        }),
+      }),
+    );
+
+    expect(federationInstance.shareScopeMap.custom).toBe(customScope);
+
+    const emptyCustomScopeInitOptions = createMockRemoteEntryInitOptions({
+      shareScopeKeys: ['default', 'custom'],
+      shareScopeMap: {
+        default: defaultScope,
+        custom: {},
+      },
+    });
+
+    initContainerEntry(
+      createMockOptions({
+        webpackRequire,
+        shareScopeKey: ['default', 'custom'],
+        shareScope: defaultScope,
+        remoteEntryInitOptions: emptyCustomScopeInitOptions,
+      }),
+    );
+
+    expect(federationInstance.shareScopeMap.custom).toBe(customScope);
+
+    const missingCustomScopeInitOptions = createMockRemoteEntryInitOptions({
+      shareScopeKeys: ['default', 'custom'],
+      shareScopeMap: {
+        default: defaultScope,
+      },
+    });
+
+    initContainerEntry(
+      createMockOptions({
+        webpackRequire,
+        shareScopeKey: ['default', 'custom'],
+        shareScope: defaultScope,
+        remoteEntryInitOptions: missingCustomScopeInitOptions,
+      }),
+    );
+
+    expect(federationInstance.shareScopeMap.custom).toBe(customScope);
   });
 });
