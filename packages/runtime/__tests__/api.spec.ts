@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { init } from '../src';
+import { createInstance, init } from '../src';
 
 // eslint-disable-next-line max-lines-per-function
 describe('api', () => {
@@ -82,6 +82,26 @@ describe('api', () => {
       remotes: [],
     });
     expect(FM3).not.toBe(FM4);
+  });
+
+  it('generates an id for runtime-created instances', () => {
+    const FM = createInstance({
+      name: '@federation/create-instance-id',
+      version: '1.0.0',
+      remotes: [],
+    });
+
+    expect(FM.options.id).toBe('@federation/create-instance-id@1.0.0');
+  });
+
+  it('does not generate an id for init-created instances', () => {
+    const FM = init({
+      name: '@federation/init-without-id',
+      version: '1.0.0',
+      remotes: [],
+    });
+
+    expect(FM.options.id).toBe('');
   });
 
   it('alias check', () => {

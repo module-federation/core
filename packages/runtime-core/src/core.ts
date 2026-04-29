@@ -341,6 +341,7 @@ export class ModuleFederation {
       plugins,
       remotes,
       shared: allShareInfos,
+      id: userOptionsRes.id || globalOptions.id,
     };
 
     this.hooks.lifecycle.init.emit({

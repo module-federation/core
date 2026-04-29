@@ -41,12 +41,13 @@ let FederationInstance: ModuleFederation | null = null;
 export function init(options: UserOptions): ModuleFederation {
   // Retrieve the same instance with the same name
   const instance = getGlobalFederationInstance(options.name, options.version);
+  const normalizedOptions = { ...options, id: options.id || '' };
   if (!instance) {
-    FederationInstance = createInstance(options);
+    FederationInstance = createInstance(normalizedOptions);
     return FederationInstance;
   } else {
     // Merge options
-    instance.initOptions(options);
+    instance.initOptions(normalizedOptions);
     if (!FederationInstance) {
       FederationInstance = instance;
     }
