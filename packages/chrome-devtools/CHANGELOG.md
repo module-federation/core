@@ -1,5 +1,18 @@
 # @module-federation/devtools
 
+## 2.4.0
+
+### Minor Changes
+
+- 2dc50ff: feat: support proxying runtime-registered React and ReactDOM in devtools fast refresh across multiple share scopes.
+
+### Patch Changes
+
+- 7356321: fix(chrome-devtools): update remote identifier to use MODULE_DEVTOOL_IDENTIFIER
+- Updated dependencies [5eba770]
+- Updated dependencies [13b1e84]
+  - @module-federation/sdk@2.4.0
+
 ## 2.3.3
 
 ### Patch Changes
