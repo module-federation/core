@@ -1,6 +1,5 @@
 import path from 'path';
-// @ts-ignore this pkg miss types
-import finder from 'find-pkg';
+import { up as findPkgUp } from 'empathic/package';
 import fs from 'fs';
 import { MFModuleType, logger } from '@module-federation/sdk';
 
@@ -24,7 +23,7 @@ export class PKGJsonManager {
       return pkg;
     } catch (_err) {
       try {
-        const pkg = finder.sync(root);
+        const pkg = findPkgUp({ cwd: root }) as unknown as Record<string, any>;
         this._pkg = pkg;
         return pkg;
       } catch (err) {

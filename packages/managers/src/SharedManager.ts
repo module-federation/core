@@ -1,5 +1,4 @@
-// @ts-ignore this pkg miss types
-import findPkg from 'find-pkg';
+import { up as findPkgUp } from 'empathic/package';
 import path from 'path';
 import fs from 'fs';
 import {
@@ -70,7 +69,9 @@ class SharedManager extends BasicPluginOptionsManager<moduleFederationPlugin.Mod
         }
       }
       pkgPath = pkgPath || require.resolve(depName, { paths: [this.root] });
-      const pkgJsonPath = findPkg.sync(pkgPath);
+      const pkgJsonPath = findPkgUp({
+        cwd: path.dirname(pkgPath),
+      }) as string;
       return {
         pkg: JSON.parse(fs.readFileSync(pkgJsonPath, 'utf-8')),
         path: '',
