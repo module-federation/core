@@ -36,9 +36,6 @@ export function createInstance(options: UserOptions) {
 }
 
 let FederationInstance: ModuleFederation | null = null;
-/**
- * @deprecated Use createInstance or getInstance instead
- */
 export function init(options: UserOptions): ModuleFederation {
   // Retrieve the same instance with the same name
   const instance = getGlobalFederationInstance(options.name, options.version);
