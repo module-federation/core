@@ -232,8 +232,9 @@ If you are not using the build plugin, you can switch from `init` to [createInst
 
 ## getInstance
 
-- Type: `getInstance(): ModuleFederation`
-- Retrieves the `ModuleFederation` instance created by the build plugin
+- Type: `getInstance(): ModuleFederation | null`
+- Type: `getInstance(finder: (instance: ModuleFederation) => boolean): ModuleFederation | null`
+- Retrieves the `ModuleFederation` instance created by the build plugin, or the first registered instance that matches a finder callback
 
 When the build plugin is used, you can call `getInstance` to retrieve the `ModuleFederation` instance created by the build plugin.
 
@@ -242,6 +243,14 @@ import { getInstance } from '@module-federation/enhanced/runtime';
 
 const mfInstance = getInstance();
 mfInstance.loadRemote('remote/util');
+```
+
+If you need a specific registered instance, pass a finder callback. The runtime will iterate over the registered instances and return the first match.
+
+```ts
+const targetInstance = getInstance(
+  (instance) => instance.name === 'remote-host',
+);
 ```
 
 If the build plugin is not used, calling `getInstance` will throw an exception. In this case, you need to use the [createInstance](#createinstance) to create a new instance.

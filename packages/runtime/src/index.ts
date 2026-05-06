@@ -1,6 +1,7 @@
 import {
   ModuleFederation,
   type UserOptions,
+  CurrentGlobal,
   getGlobalFederationConstructor,
   setGlobalFederationInstance,
   assert,
@@ -109,8 +110,16 @@ export function registerPlugins(
   return FederationInstance.registerPlugins.apply(FederationInstance, args);
 }
 
-export function getInstance() {
-  return FederationInstance;
+export function getInstance(): ModuleFederation | null;
+export function getInstance(
+  finder: (instance: ModuleFederation) => boolean,
+): ModuleFederation | null;
+export function getInstance(finder?: (instance: ModuleFederation) => boolean) {
+  if (!finder) {
+    return FederationInstance;
+  }
+
+  return CurrentGlobal.__FEDERATION__.__INSTANCES__.find(finder) || null;
 }
 
 export function registerShared(
