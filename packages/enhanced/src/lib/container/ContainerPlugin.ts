@@ -61,7 +61,6 @@ class ContainerPlugin {
         }),
       ),
       runtimePlugins: options.runtimePlugins,
-      dataPrefetch: options.dataPrefetch,
     };
   }
 
@@ -195,7 +194,6 @@ class ContainerPlugin {
           exposes,
           shareScope,
           federationRuntimePluginInstance.entryFilePath,
-          this._options.dataPrefetch,
         );
         dep.loc = { name };
 
@@ -273,7 +271,6 @@ class ContainerPlugin {
           exposes,
           shareScope,
           federationRuntimePluginInstance.entryFilePath,
-          this._options.dataPrefetch,
         );
 
         dep.loc = { name };

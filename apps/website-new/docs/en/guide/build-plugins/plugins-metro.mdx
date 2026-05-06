@@ -19,7 +19,8 @@ The React Native Module Federation ecosystem consists of several packages:
 
 - `@module-federation/metro` - Core integration with Metro to enable Module Federation
 - `@module-federation/metro-plugin-rnc-cli` - React Native CLI integration  
-- `@module-federation/metro-plugin-rnef` - React Native Enterprise Framework integration
+- `@module-federation/metro-plugin-rock` - [Rock](https://www.rockjs.dev/) integration
+- `@module-federation/metro-plugin-rnef` - RNEF integration (deprecated, use `metro-plugin-rock` instead)
 
 ## Installation
 
@@ -32,8 +33,8 @@ pnpm add @module-federation/metro
 # If your project is using React Native CLI
 pnpm add @module-federation/metro-plugin-rnc-cli
 
-# If your project is using React Native Enterprise Framework (RNEF)
-pnpm add @module-federation/metro-plugin-rnef
+# If your project is using Rock (formerly RNEF)
+pnpm add @module-federation/metro-plugin-rock
 ```
 
 ## Configuration
@@ -199,17 +200,17 @@ Both commands support all the same options as the standard `react-native bundle`
 
 > **Note**: These commands are provided by the `@module-federation/metro-plugin-rnc-cli` package.
 
-## React Native Enterprise Framework (RNEF) Integration
+## Rock Integration
 
-For projects using [React Native Enterprise Framework (RNEF)](https://github.com/callstack/react-native-enterprise-framework), add the Module Federation plugin to your `rnef.config.mjs`:
+For projects using [Rock](https://www.rockjs.dev/) (formerly RNEF), add the Module Federation plugin to your `rock.config.mjs`:
 
 ```javascript
-import { pluginMetroModuleFederation } from '@module-federation/metro-plugin-rnef';
-import { platformAndroid } from '@rnef/platform-android';
-import { platformIOS } from '@rnef/platform-ios';
-import { pluginMetro } from '@rnef/plugin-metro';
+import { pluginMetroModuleFederation } from '@module-federation/metro-plugin-rock';
+import { platformAndroid } from '@rock-js/platform-android';
+import { platformIOS } from '@rock-js/platform-ios';
+import { pluginMetro } from '@rock-js/plugin-metro';
 
-/** @type {import('@rnef/config').Config} */
+/** @type {import('rock').Config} */
 export default {
   bundler: pluginMetro(),
   platforms: {
@@ -219,6 +220,8 @@ export default {
   plugins: [pluginMetroModuleFederation()],
 };
 ```
+
+> **Note**: If you are migrating from RNEF, replace `@module-federation/metro-plugin-rnef` with `@module-federation/metro-plugin-rock` and rename `rnef.config.mjs` to `rock.config.mjs`. See the [metro-plugin-rock README](https://www.npmjs.com/package/@module-federation/metro-plugin-rock) for full migration details.
 
 ## API Reference
 

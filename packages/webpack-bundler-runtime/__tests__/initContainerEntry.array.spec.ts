@@ -32,7 +32,6 @@ function createMockFederation(overrides: FederationOverrides = {}) {
       ...(overrides.initOptions || {}),
     },
     attachShareScopeMap: jest.fn(),
-    prefetch: jest.fn(),
     ...overrides,
   };
 }
@@ -678,7 +677,6 @@ describe('initContainerEntry with array-based share scopes', () => {
             shared: true,
           },
           // Deliberately omit attachShareScopeMap
-          prefetch: jest.fn(),
         },
       } as any),
       shareScopeKey: ['key1', 'key2'],
@@ -802,7 +800,6 @@ describe('initContainerEntry with array-based share scopes', () => {
             shared: false,
           },
           // Deliberately omit attachShareScopeMap
-          prefetch: jest.fn(),
         },
         I: mockIFunction,
       } as any,
@@ -815,9 +812,6 @@ describe('initContainerEntry with array-based share scopes', () => {
 
     // Verify the function didn't crash without attachShareScopeMap
     expect(result).toBeInstanceOf(Promise);
-
-    // Verify prefetch was called
-    expect(mockOptions.webpackRequire.federation.prefetch).toHaveBeenCalled();
 
     // Verify I was called for each key
     expect(mockIFunction).toHaveBeenCalledWith('key1', undefined);
@@ -908,7 +902,6 @@ describe('initContainerEntry with array-based share scopes', () => {
           shared: false,
         },
         attachShareScopeMap: jest.fn(),
-        prefetch: jest.fn(),
       },
       I: mockIFunction,
     } as any;
@@ -958,7 +951,6 @@ describe('initContainerEntry with array-based share scopes', () => {
           name: 'test-app',
         },
         // Specifically don't include attachShareScopeMap
-        prefetch: jest.fn(),
       },
       I: jest.fn(),
     } as any;
@@ -969,9 +961,6 @@ describe('initContainerEntry with array-based share scopes', () => {
       shareScope: {},
       shareScopeKey: 'default',
     } as any);
-
-    // Verify prefetch was still called
-    expect(mockWebpackRequire.federation.prefetch).toHaveBeenCalled();
   });
 
   // Specific test to cover lines 91-102
@@ -994,7 +983,6 @@ describe('initContainerEntry with array-based share scopes', () => {
             shared: true, // This will make proxyInitializeSharing true
           },
           attachShareScopeMap: jest.fn(),
-          prefetch: jest.fn(),
         },
         I: mockIFunction1,
       } as any,
@@ -1031,7 +1019,6 @@ describe('initContainerEntry with array-based share scopes', () => {
             shared: false, // This will make proxyInitializeSharing false
           },
           attachShareScopeMap: jest.fn(),
-          prefetch: jest.fn(),
         },
         I: mockIFunction2,
       } as any,
@@ -1086,7 +1073,6 @@ describe('initContainerEntry with array-based share scopes', () => {
             shared: false, // Ensure Promise.all path is taken
           },
           attachShareScopeMap: jest.fn(),
-          prefetch: jest.fn(),
         },
         I: mockIFunction,
       } as any,

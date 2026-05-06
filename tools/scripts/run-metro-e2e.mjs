@@ -48,7 +48,7 @@ async function main() {
     `[metro-e2e] Starting ${options.platform} e2e for "${options.appName}"`,
   );
 
-  await configureRnefCacheAuth(options);
+  await configureRockCacheAuth(options);
 
   await runCommand('pnpm', [
     '--filter',
@@ -142,14 +142,14 @@ function parseArgs(argv) {
   const result = {
     platform: null,
     appName: null,
-    skipRnefCacheAuth: false,
+    skipRockCacheAuth: false,
     skipOnMissingPrereqs: false,
   };
 
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
-    if (arg === '--skip-rnef-cache-auth') {
-      result.skipRnefCacheAuth = true;
+    if (arg === '--skip-rock-cache-auth') {
+      result.skipRockCacheAuth = true;
       continue;
     }
     if (arg === '--skip-on-missing-prereqs') {
@@ -247,24 +247,24 @@ async function hasWritableMaestroHome() {
   }
 }
 
-async function configureRnefCacheAuth(options) {
-  if (options.skipRnefCacheAuth) {
-    console.log('[metro-e2e] Skipping RNEF cache auth configuration.');
+async function configureRockCacheAuth(options) {
+  if (options.skipRockCacheAuth) {
+    console.log('[metro-e2e] Skipping Rock cache auth configuration.');
     return;
   }
 
   const githubToken = process.env.GITHUB_TOKEN?.trim();
   if (!githubToken) {
     console.log(
-      '[metro-e2e] GITHUB_TOKEN not set; skipping RNEF cache auth configuration.',
+      '[metro-e2e] GITHUB_TOKEN not set; skipping Rock cache auth configuration.',
     );
     return;
   }
 
-  const rnefPath = join('apps', `metro-${options.appName}`, '.rnef', 'cache');
-  await mkdir(rnefPath, { recursive: true });
+  const rockPath = join('apps', `metro-${options.appName}`, '.rock', 'cache');
+  await mkdir(rockPath, { recursive: true });
   await writeFile(
-    join(rnefPath, 'project.json'),
+    join(rockPath, 'project.json'),
     JSON.stringify({ githubToken }),
     'utf8',
   );

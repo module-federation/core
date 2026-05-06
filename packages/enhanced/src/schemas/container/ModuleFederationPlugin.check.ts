@@ -528,7 +528,6 @@ const t = {
         },
       },
       getPublicPath: { type: 'string' },
-      dataPrefetch: { type: 'boolean' },
       implementation: { type: 'string' },
     },
   },
@@ -5427,21 +5426,21 @@ function D(
                                                         );
                                                       b = e === c;
                                                     } else b = !0;
-                                                    if (b) {
+                                                    if (b)
                                                       if (
                                                         void 0 !==
-                                                        o.dataPrefetch
+                                                        o.implementation
                                                       ) {
                                                         const e = c;
                                                         if (
-                                                          'boolean' !=
-                                                          typeof o.dataPrefetch
+                                                          'string' !=
+                                                          typeof o.implementation
                                                         )
                                                           return (
                                                             (D.errors = [
                                                               {
                                                                 params: {
-                                                                  type: 'boolean',
+                                                                  type: 'string',
                                                                 },
                                                               },
                                                             ]),
@@ -5449,29 +5448,6 @@ function D(
                                                           );
                                                         b = e === c;
                                                       } else b = !0;
-                                                      if (b)
-                                                        if (
-                                                          void 0 !==
-                                                          o.implementation
-                                                        ) {
-                                                          const e = c;
-                                                          if (
-                                                            'string' !=
-                                                            typeof o.implementation
-                                                          )
-                                                            return (
-                                                              (D.errors = [
-                                                                {
-                                                                  params: {
-                                                                    type: 'string',
-                                                                  },
-                                                                },
-                                                              ]),
-                                                              !1
-                                                            );
-                                                          b = e === c;
-                                                        } else b = !0;
-                                                    }
                                                   }
                                                 }
                                               }

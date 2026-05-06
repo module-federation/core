@@ -19,7 +19,8 @@ React Native 模块联邦生态系统由以下几个包组成：
 
 - `@module-federation/metro` - 与 Metro 的核心集成，用于启用模块联邦  
 - `@module-federation/metro-plugin-rnc-cli` - React Native CLI 集成  
-- `@module-federation/metro-plugin-rnef` - React Native Enterprise Framework 集成  
+- `@module-federation/metro-plugin-rock` - [Rock](https://www.rockjs.dev/) 集成
+- `@module-federation/metro-plugin-rnef` - RNEF 集成（已弃用，请使用 `metro-plugin-rock`）
 
 ## 安装
 
@@ -32,8 +33,8 @@ pnpm add @module-federation/metro
 # 如果项目使用 React Native CLI
 pnpm add @module-federation/metro-plugin-rnc-cli
 
-# 如果项目使用 React Native Enterprise Framework (RNEF)
-pnpm add @module-federation/metro-plugin-rnef
+# 如果项目使用 Rock（原 RNEF）
+pnpm add @module-federation/metro-plugin-rock
 ```
 
 ## 配置
@@ -201,17 +202,17 @@ react-native bundle-mf-remote --platform android
 
 > **注意**：这些命令由 `@module-federation/metro-plugin-rnc-cli` 包提供。
 
-## React Native Enterprise Framework (RNEF) 集成
+## Rock 集成
 
-如果项目使用 [React Native Enterprise Framework (RNEF)](https://github.com/callstack/react-native-enterprise-framework)，请在 `rnef.config.mjs` 中添加模块联邦插件：
+如果项目使用 [Rock](https://www.rockjs.dev/)（原 RNEF），请在 `rock.config.mjs` 中添加模块联邦插件：
 
 ```javascript
-import { pluginMetroModuleFederation } from '@module-federation/metro-plugin-rnef';
-import { platformAndroid } from '@rnef/platform-android';
-import { platformIOS } from '@rnef/platform-ios';
-import { pluginMetro } from '@rnef/plugin-metro';
+import { pluginMetroModuleFederation } from '@module-federation/metro-plugin-rock';
+import { platformAndroid } from '@rock-js/platform-android';
+import { platformIOS } from '@rock-js/platform-ios';
+import { pluginMetro } from '@rock-js/plugin-metro';
 
-/** @type {import('@rnef/config').Config} */
+/** @type {import('rock').Config} */
 export default {
   bundler: pluginMetro(),
   platforms: {
@@ -221,6 +222,8 @@ export default {
   plugins: [pluginMetroModuleFederation()],
 };
 ```
+
+> **注意**：如果你正在从 RNEF 迁移，请将 `@module-federation/metro-plugin-rnef` 替换为 `@module-federation/metro-plugin-rock`，并将 `rnef.config.mjs` 重命名为 `rock.config.mjs`。详细迁移指南请参阅 [metro-plugin-rock README](https://www.npmjs.com/package/@module-federation/metro-plugin-rock)。
 
 ## API 参考
 

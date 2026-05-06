@@ -1,5 +1,20 @@
 # @module-federation/webpack-bundler-runtime
 
+## 2.4.0
+
+### Minor Changes
+
+- 13b1e84: chore: remove the legacy Data Prefetch package and its related configuration, manifest fields, and runtime hooks.
+
+### Patch Changes
+
+- Updated dependencies [5eba770]
+- Updated dependencies [3a3414c]
+- Updated dependencies [13b1e84]
+  - @module-federation/sdk@2.4.0
+  - @module-federation/runtime@2.4.0
+  - @module-federation/error-codes@2.4.0
+
 ## 2.3.3
 
 ### Patch Changes

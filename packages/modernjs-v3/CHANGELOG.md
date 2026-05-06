@@ -1,5 +1,20 @@
 # @module-federation/modern-js-v3
 
+## 2.4.0
+
+### Patch Changes
+
+- Updated dependencies [5eba770]
+- Updated dependencies [3a3414c]
+- Updated dependencies [13b1e84]
+  - @module-federation/sdk@2.4.0
+  - @module-federation/runtime@2.4.0
+  - @module-federation/enhanced@2.4.0
+  - @module-federation/bridge-react@2.4.0
+  - @module-federation/cli@2.4.0
+  - @module-federation/node@2.7.42
+  - @module-federation/rsbuild-plugin@2.4.0
+
 ## 2.3.3
 
 ### Patch Changes

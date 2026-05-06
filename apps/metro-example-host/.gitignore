@@ -77,5 +77,6 @@ yarn-error.log
 # build artifacts
 dist/
 
-# RNEF
+# Rock
+.rock
 .rnef

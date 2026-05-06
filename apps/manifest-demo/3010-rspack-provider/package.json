@@ -23,7 +23,6 @@
     "build:production": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec rspack build --config rspack.config.js --mode production",
     "serve": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec rspack serve --config rspack.config.js --mode production --port 3010 --no-hot",
     "serve:development": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec rspack serve --config rspack.config.js --mode development --port 3010",
-    "serve:production": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec rspack serve --config rspack.config.js --mode production --port 3010 --no-hot",
-    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --no-error-on-unmatched-pattern --ignore-pattern node_modules **/*.{ts,tsx,js,jsx}"
+    "serve:production": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec rspack serve --config rspack.config.js --mode production --port 3010 --no-hot"
   }
 }

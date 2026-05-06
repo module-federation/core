@@ -1,5 +1,17 @@
 # @module-federation/runtime
 
+## 2.4.0
+
+### Patch Changes
+
+- 3a3414c: fix(runtime): ensure instance creation includes id and options
+- Updated dependencies [5eba770]
+- Updated dependencies [3a3414c]
+- Updated dependencies [13b1e84]
+  - @module-federation/sdk@2.4.0
+  - @module-federation/runtime-core@2.4.0
+  - @module-federation/error-codes@2.4.0
+
 ## 2.3.3
 
 ### Patch Changes

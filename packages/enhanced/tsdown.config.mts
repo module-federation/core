@@ -29,4 +29,21 @@ export default defineConfig([
       dts: '.d.ts',
     }),
   },
+  {
+    name: 'enhanced-runtime-esm',
+    cwd: import.meta.dirname,
+    entry: ['src/runtime.ts'],
+    tsconfig: 'tsconfig.lib.json',
+    outDir: 'dist/src',
+    format: ['esm'],
+    external: [/^[^./]/, /package\.json$/],
+    sourcemap: true,
+    clean: false,
+    dts: false,
+    skipNodeModulesBundle: true,
+    unbundle: false,
+    outExtensions: () => ({
+      js: '.mjs',
+    }),
+  },
 ]);

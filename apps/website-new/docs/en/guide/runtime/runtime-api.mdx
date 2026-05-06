@@ -872,8 +872,6 @@ type depsPreloadArg = Omit<PreloadRemoteArgs, 'depsRemote'>;
 type PreloadRemoteArgs = {
   // Name or alias of the remote to be preloaded
   nameOrAlias: string;
-  // Whether to preload the module's interface, the default value is false. For details, please refer to the <Interface Prefetch> chapter in <Performance Optimization>. The @vmok/kit version needs to be greater than 1.7.6.
-  prefetchInterface?: boolean;
   // The exposes to be preloaded
   // By default, all exposes are preloaded
   // When exposes are provided, only the required exposes will be loaded

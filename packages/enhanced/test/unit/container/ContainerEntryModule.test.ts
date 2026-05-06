@@ -63,14 +63,12 @@ describe('ContainerEntryModule', () => {
         ['component', { import: './Component' }],
       ];
       const injectRuntimeEntry = '';
-      const dataPrefetch = undefined;
 
       const module = new ContainerEntryModule(
         name,
         exposesFormatted,
         shareScope,
         injectRuntimeEntry,
-        dataPrefetch,
       );
 
       // Use getters or internal properties with prefix
@@ -89,14 +87,12 @@ describe('ContainerEntryModule', () => {
         ['component', { import: './Component' }],
       ];
       const injectRuntimeEntry = '';
-      const dataPrefetch = undefined;
 
       const module = new ContainerEntryModule(
         name,
         exposesFormatted,
         shareScope,
         injectRuntimeEntry,
-        dataPrefetch,
       );
 
       // Use getters or internal properties with prefix
@@ -117,14 +113,12 @@ describe('ContainerEntryModule', () => {
         ['component', { import: './Component' }],
       ];
       const injectRuntimeEntry = '';
-      const dataPrefetch = undefined;
 
       const module = new ContainerEntryModule(
         name,
         exposesFormatted,
         shareScope,
         injectRuntimeEntry,
-        dataPrefetch,
       );
 
       const identifier = module.identifier();
@@ -144,14 +138,12 @@ describe('ContainerEntryModule', () => {
         ['component', { import: './Component' }],
       ];
       const injectRuntimeEntry = '';
-      const dataPrefetch = undefined;
 
       const module = new ContainerEntryModule(
         name,
         exposesFormatted,
         shareScope,
         injectRuntimeEntry,
-        dataPrefetch,
       );
 
       const readableId = module.readableIdentifier({
@@ -173,14 +165,12 @@ describe('ContainerEntryModule', () => {
         ['component', { import: './Component' }],
       ];
       const injectRuntimeEntry = '';
-      const dataPrefetch = undefined;
 
       const module = new ContainerEntryModule(
         name,
         exposesFormatted,
         shareScope,
         injectRuntimeEntry,
-        dataPrefetch,
       );
 
       const callback = rs.fn();
@@ -206,14 +196,12 @@ describe('ContainerEntryModule', () => {
         ['component', { import: './Component' }],
       ];
       const injectRuntimeEntry = '';
-      const dataPrefetch = undefined;
 
       const module = new ContainerEntryModule(
         name,
         exposesFormatted,
         shareScope,
         injectRuntimeEntry,
-        dataPrefetch,
       );
 
       // Create a proper mock for the serialization context
@@ -234,11 +222,10 @@ describe('ContainerEntryModule', () => {
       expect(serializeContext.write).toHaveBeenCalledWith(exposesFormatted);
       expect(serializeContext.write).toHaveBeenCalledWith(shareScope);
       expect(serializeContext.write).toHaveBeenCalledWith(injectRuntimeEntry);
-      expect(serializeContext.write).toHaveBeenCalledWith(dataPrefetch);
 
       // Reset the serialized data for deserialization
       // The deserialize order is:
-      // 1. ContainerEntryModule.deserialize (static) reads: _name, _exposes, _shareScope, _injectRuntimeEntry, _dataPrefetch
+      // 1. ContainerEntryModule.deserialize (static) reads: _name, _exposes, _shareScope, _injectRuntimeEntry
       // 2. Then calls obj.deserialize(context) which is Module.deserialize reading:
       //    type, layer, context, resolveOptions, factoryMeta, useSourceMap, useSimpleSourceMap, hot,
       //    _warnings, _errors, buildMeta, buildInfo, presentationalDependencies, codeGenerationDependencies
@@ -248,7 +235,6 @@ describe('ContainerEntryModule', () => {
         exposesFormatted, // _exposes (ContainerEntryModule)
         shareScope, // _shareScope (ContainerEntryModule)
         injectRuntimeEntry, // _injectRuntimeEntry (ContainerEntryModule)
-        dataPrefetch, // _dataPrefetch (ContainerEntryModule)
         // Module.deserialize reads:
         'javascript/dynamic', // type
         null, // layer
@@ -298,14 +284,12 @@ describe('ContainerEntryModule', () => {
         ['component', { import: './Component' }],
       ];
       const injectRuntimeEntry = '';
-      const dataPrefetch = undefined;
 
       const module = new ContainerEntryModule(
         name,
         exposesFormatted,
         shareScope,
         injectRuntimeEntry,
-        dataPrefetch,
       );
 
       // Create a proper mock for the serialization context
@@ -326,7 +310,6 @@ describe('ContainerEntryModule', () => {
       expect(serializeContext.write).toHaveBeenCalledWith(exposesFormatted);
       expect(serializeContext.write).toHaveBeenCalledWith(shareScope);
       expect(serializeContext.write).toHaveBeenCalledWith(injectRuntimeEntry);
-      expect(serializeContext.write).toHaveBeenCalledWith(dataPrefetch);
 
       // Reset the serialized data for deserialization
       // Same order as string shareScope test
@@ -335,7 +318,6 @@ describe('ContainerEntryModule', () => {
         exposesFormatted, // _exposes (ContainerEntryModule)
         shareScope, // _shareScope (ContainerEntryModule)
         injectRuntimeEntry, // _injectRuntimeEntry (ContainerEntryModule)
-        dataPrefetch, // _dataPrefetch (ContainerEntryModule)
         // Module.deserialize reads:
         'javascript/dynamic', // type
         null, // layer
@@ -382,7 +364,6 @@ describe('ContainerEntryModule', () => {
       ];
       const shareScope = 'default';
       const injectRuntimeEntry = '';
-      const dataPrefetch = undefined;
 
       // Include all required fields for proper deserialization
       const deserializedData = [
@@ -390,7 +371,6 @@ describe('ContainerEntryModule', () => {
         exposesFormatted, // _exposes (ContainerEntryModule)
         shareScope, // _shareScope (ContainerEntryModule)
         injectRuntimeEntry, // _injectRuntimeEntry (ContainerEntryModule)
-        dataPrefetch, // _dataPrefetch (ContainerEntryModule)
         // Module.deserialize reads:
         'javascript/dynamic', // type
         null, // layer
@@ -438,14 +418,12 @@ describe('ContainerEntryModule', () => {
         ['component', { import: './Component' }],
       ];
       const injectRuntimeEntry = '';
-      const dataPrefetch = undefined;
 
       const module = new ContainerEntryModule(
         name,
         exposesFormatted,
         shareScope,
         injectRuntimeEntry,
-        dataPrefetch,
       );
 
       // Add basicFunction to runtimeTemplate to avoid errors

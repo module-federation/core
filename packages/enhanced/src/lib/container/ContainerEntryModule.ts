@@ -8,7 +8,6 @@ import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-p
 import { infrastructureLogger as logger } from '@module-federation/sdk';
 import { buildDescMap, BUILD_001 } from '@module-federation/error-codes';
 import { logAndReport } from '@module-federation/error-codes/node';
-import type { containerPlugin } from '@module-federation/sdk';
 import type { Compilation, Dependency } from 'webpack';
 import type {
   InputFileSystem,
@@ -20,7 +19,6 @@ import type {
   ResolverWithOptions,
   WebpackOptions,
 } from 'webpack/lib/Module';
-import { PrefetchPlugin } from '@module-federation/data-prefetch/cli';
 import type WebpackError from 'webpack/lib/WebpackError';
 import { JAVASCRIPT_MODULE_TYPE_DYNAMIC } from '../Constants';
 import ContainerExposedDependency from './ContainerExposedDependency';
@@ -61,28 +59,24 @@ class ContainerEntryModule extends Module {
   private _exposes: [string, ExposeOptions][];
   private _shareScope: string | string[];
   private _injectRuntimeEntry: string;
-  private _dataPrefetch: containerPlugin.ContainerPluginOptions['dataPrefetch'];
 
   /**
    * @param {string} name container entry name
    * @param {[string, ExposeOptions][]} exposes list of exposed modules
    * @param {string|string[]} shareScope name of the share scope
    * @param {string} injectRuntimeEntry the path of injectRuntime file.
-   * @param {containerPlugin.ContainerPluginOptions['dataPrefetch']} dataPrefetch whether enable dataPrefetch
    */
   constructor(
     name: string,
     exposes: [string, ExposeOptions][],
     shareScope: string | string[],
     injectRuntimeEntry: string,
-    dataPrefetch: containerPlugin.ContainerPluginOptions['dataPrefetch'],
   ) {
     super(JAVASCRIPT_MODULE_TYPE_DYNAMIC, null);
     this._name = name;
     this._exposes = exposes;
     this._shareScope = shareScope;
     this._injectRuntimeEntry = injectRuntimeEntry;
-    this._dataPrefetch = dataPrefetch;
   }
 
   /**
@@ -91,13 +85,7 @@ class ContainerEntryModule extends Module {
    */
   static deserialize(context: ObjectDeserializerContext): ContainerEntryModule {
     const { read } = context;
-    const obj = new ContainerEntryModule(
-      read(),
-      read(),
-      read(),
-      read(),
-      read(),
-    );
+    const obj = new ContainerEntryModule(read(), read(), read(), read());
     obj.deserialize(context);
     return obj;
   }
@@ -118,7 +106,7 @@ class ContainerEntryModule extends Module {
 
     return `container entry (${scopeStr}) ${JSON.stringify(
       this._exposes,
-    )} ${this._injectRuntimeEntry} ${JSON.stringify(this._dataPrefetch)}`;
+    )} ${this._injectRuntimeEntry}`;
   }
   /**
    * @param {RequestShortener} requestShortener the request shortener
@@ -324,8 +312,6 @@ class ContainerEntryModule extends Module {
           '})',
         ],
       )};`,
-      this._dataPrefetch ? PrefetchPlugin.setRemoteIdentifier() : '',
-      this._dataPrefetch ? PrefetchPlugin.removeRemoteIdentifier() : '',
       '// This exports getters to disallow modifications',
       `${RuntimeGlobals.definePropertyGetters}(exports, {`,
       Template.indent([
@@ -364,7 +350,6 @@ class ContainerEntryModule extends Module {
     write(this._exposes);
     write(this._shareScope);
     write(this._injectRuntimeEntry);
-    write(this._dataPrefetch);
     super.serialize(context);
   }
 }

@@ -1,5 +1,15 @@
 # @module-federation/sdk
 
+## 2.4.0
+
+### Minor Changes
+
+- 13b1e84: chore: remove the legacy Data Prefetch package and its related configuration, manifest fields, and runtime hooks.
+
+### Patch Changes
+
+- 5eba770: Widen node-fetch peerOptional range from `^3.3.2` to `^2.7.0 || ^3.3.2` to resolve version conflict with `@module-federation/node`.
+
 ## 2.3.3
 
 ## 2.3.2

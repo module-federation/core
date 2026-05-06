@@ -875,8 +875,6 @@ type depsPreloadArg = Omit<PreloadRemoteArgs, 'depsRemote'>;
 type PreloadRemoteArgs = {
   // 预加载 remote 的名称和别名
   nameOrAlias: string;
-  // 是否需要预加载模块的接口，默认值为 false，具体参考<性能优化>中<Interface Prefetch 接口预请求>章节，@vmok/kit 版本需要大于 1.7.6
-  prefetchInterface?: boolean;
   // 需要预加载的 expose
   // 默认预加载所有的 expose
   // 提供了 expose 时只会加载所需要的 expose
