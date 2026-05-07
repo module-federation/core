@@ -91,6 +91,23 @@ export class RemoteHandler {
       ],
       void
     >('onLoad'),
+    afterLoadRemote: new AsyncHook<
+      [
+        {
+          id: string;
+          expose?: string;
+          remote?: RemoteInfo;
+          options?: {
+            loadFactory?: boolean;
+            from?: CallFrom;
+          };
+          error?: unknown;
+          recovered?: boolean;
+          origin: ModuleFederation;
+        },
+      ],
+      void
+    >('afterLoadRemote'),
     handlePreloadModule: new SyncHook<
       [
         {
@@ -116,6 +133,8 @@ export class RemoteHandler {
             | 'beforeLoadShare'
             | 'afterResolve'
             | 'onLoad';
+          remote?: RemoteInfo;
+          expose?: string;
           origin: ModuleFederation;
         },
       ],
@@ -153,12 +172,13 @@ export class RemoteHandler {
     loadEntry: new AsyncHook<
       [
         {
+          origin: ModuleFederation;
           loaderHook: ModuleFederation['loaderHook'];
           remoteInfo: RemoteInfo;
           remoteEntryExports?: RemoteEntryExports;
         },
       ],
-      Promise<RemoteEntryExports>
+      Promise<RemoteEntryExports | void> | RemoteEntryExports | void
     >(),
   });
 
@@ -199,6 +219,21 @@ export class RemoteHandler {
     options?: { loadFactory?: boolean; from: CallFrom },
   ): Promise<T | null> {
     const { host } = this;
+    const startMatchInfo = matchRemoteWithNameAndExpose(
+      host.options.remotes,
+      id,
+    );
+    let completeRequestId = id;
+    let completeExpose = startMatchInfo?.expose;
+    let completeRemote = startMatchInfo
+      ? getRemoteInfo(startMatchInfo.remote)
+      : undefined;
+    let afterLoadRemoteArgs:
+      | Parameters<
+          RemoteHandler['hooks']['lifecycle']['afterLoadRemote']['emit']
+        >[0]
+      | undefined;
+
     try {
       const { loadFactory = true } = options || {
         loadFactory: true,
@@ -221,6 +256,9 @@ export class RemoteHandler {
         id: idRes,
         remoteSnapshot,
       } = remoteMatchInfo;
+      completeRequestId = idRes;
+      completeExpose = expose;
+      completeRemote = getRemoteInfo(remote);
 
       const moduleOrFactory = (await module.get(
         idRes,
@@ -242,6 +280,14 @@ export class RemoteHandler {
       });
 
       this.setIdToRemoteMap(id, remoteMatchInfo);
+      afterLoadRemoteArgs = {
+        id: completeRequestId,
+        expose: completeExpose,
+        remote: completeRemote,
+        options,
+        origin: host,
+      };
+
       if (typeof moduleWrapper === 'function') {
         return moduleWrapper as T;
       }
@@ -250,19 +296,56 @@ export class RemoteHandler {
     } catch (error) {
       const { from = 'runtime' } = options || { from: 'runtime' };
 
-      const failOver = await this.hooks.lifecycle.errorLoadRemote.emit({
-        id,
-        error,
-        from,
-        lifecycle: 'onLoad',
-        origin: host,
-      });
+      let failOver;
+      try {
+        failOver = await this.hooks.lifecycle.errorLoadRemote.emit({
+          id,
+          error,
+          from,
+          lifecycle: 'onLoad',
+          expose: completeExpose,
+          remote: completeRemote,
+          origin: host,
+        });
+      } catch (hookError) {
+        afterLoadRemoteArgs = {
+          id: completeRequestId,
+          expose: completeExpose,
+          remote: completeRemote,
+          options,
+          error: hookError,
+          origin: host,
+        };
+        throw hookError;
+      }
 
       if (!failOver) {
+        afterLoadRemoteArgs = {
+          id: completeRequestId,
+          expose: completeExpose,
+          remote: completeRemote,
+          options,
+          error,
+          origin: host,
+        };
         throw error;
       }
 
+      afterLoadRemoteArgs = {
+        id: completeRequestId,
+        expose: completeExpose,
+        remote: completeRemote,
+        options,
+        error,
+        origin: host,
+        recovered: true,
+      };
+
       return failOver as T;
+    } finally {
+      if (afterLoadRemoteArgs) {
+        await this.hooks.lifecycle.afterLoadRemote.emit(afterLoadRemoteArgs);
+      }
     }
   }
 

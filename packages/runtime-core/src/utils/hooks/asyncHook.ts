@@ -13,17 +13,24 @@ export class AsyncHook<
     const ls = Array.from(this.listeners);
     if (ls.length > 0) {
       let i = 0;
-      const call = (prev?: any): any => {
+      const call = (prev?: unknown): unknown => {
         if (prev === false) {
           return false; // Abort process
         } else if (i < ls.length) {
-          return Promise.resolve(ls[i++].apply(null, data)).then(call);
+          return Promise.resolve(ls[i++].apply(null, data)).then((result) => {
+            if (result === undefined) {
+              return call(prev);
+            }
+            return call(result);
+          });
         } else {
           return prev;
         }
       };
       result = call();
     }
-    return Promise.resolve(result);
+    return Promise.resolve(result) as Promise<
+      void | false | ExternalEmitReturnType
+    >;
   }
 }

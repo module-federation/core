@@ -1,0 +1,304 @@
+import {
+  DiagnosticsPlugin as createBaseDiagnosticsPlugin,
+  type DiagnosticsController,
+  type DiagnosticsEvent,
+  type DiagnosticsEventContext,
+  type DiagnosticsPluginOptions,
+  type DiagnosticsReport,
+  type DiagnosticsRuntimeOrigin,
+} from './index';
+
+export interface DiagnosticsNodeOptions extends Omit<
+  DiagnosticsPluginOptions,
+  'browser'
+> {
+  directory?: string;
+  latestFile?: string;
+  eventsFile?: string;
+}
+
+interface NodeOutputModules {
+  fs: {
+    mkdirSync(path: string, options?: { recursive?: boolean }): void;
+    writeFileSync(path: string, data: string, encoding?: string): void;
+    appendFileSync(path: string, data: string, encoding?: string): void;
+  };
+  path: {
+    isAbsolute(path: string): boolean;
+    join(...paths: string[]): string;
+    resolve(...paths: string[]): string;
+  };
+}
+
+const DEFAULT_NODE_DIRECTORY = '.mf/diagnostics';
+const DEFAULT_LATEST_FILE = 'latest.json';
+const DEFAULT_EVENTS_FILE = 'events.jsonl';
+
+let nodeOutputModulesPromise:
+  | Promise<NodeOutputModules | undefined>
+  | undefined;
+
+declare const __non_webpack_require__: ((id: string) => unknown) | undefined;
+
+function getNodeProcess():
+  | { versions?: { node?: string }; cwd?: () => string }
+  | undefined {
+  return (
+    globalThis as {
+      process?: { versions?: { node?: string }; cwd?: () => string };
+    }
+  ).process;
+}
+
+function isNodeEnvironment() {
+  return Boolean(getNodeProcess()?.versions?.node);
+}
+
+export function getNativeNodeRequire(): ((id: string) => unknown) | undefined {
+  if (typeof __non_webpack_require__ === 'function') {
+    return __non_webpack_require__;
+  }
+
+  const globalRequire = (
+    globalThis as {
+      __non_webpack_require__?: (id: string) => unknown;
+    }
+  ).__non_webpack_require__;
+  if (typeof globalRequire === 'function') {
+    return globalRequire;
+  }
+
+  try {
+    return Function(
+      'return typeof require === "function" ? require : undefined',
+    )() as ((id: string) => unknown) | undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function getRuntimeImport():
+  | ((specifier: string) => Promise<Record<string, unknown>>)
+  | undefined {
+  try {
+    return Function('specifier', 'return import(specifier)') as (
+      specifier: string,
+    ) => Promise<Record<string, unknown>>;
+  } catch {
+    return undefined;
+  }
+}
+
+function unwrapDefaultExport<T>(moduleValue: T & { default?: T }) {
+  return moduleValue.default || moduleValue;
+}
+
+async function getNodeOutputModules(): Promise<NodeOutputModules | undefined> {
+  if (!isNodeEnvironment()) {
+    return undefined;
+  }
+
+  if (nodeOutputModulesPromise) {
+    return nodeOutputModulesPromise;
+  }
+
+  nodeOutputModulesPromise = (async () => {
+    const nativeRequire = getNativeNodeRequire();
+    if (nativeRequire) {
+      try {
+        const fs = nativeRequire('node:fs');
+        const path = nativeRequire('node:path');
+        return {
+          fs,
+          path,
+        } as NodeOutputModules;
+      } catch {
+        // Fall through to dynamic import for ESM-only Node environments.
+      }
+    }
+
+    const runtimeImport = getRuntimeImport();
+    if (!runtimeImport) {
+      return undefined;
+    }
+
+    try {
+      const [fsModule, pathModule] = await Promise.all([
+        runtimeImport('node:fs'),
+        runtimeImport('node:path'),
+      ]);
+
+      return {
+        fs: unwrapDefaultExport(fsModule),
+        path: unwrapDefaultExport(pathModule),
+      } as NodeOutputModules;
+    } catch {
+      return undefined;
+    }
+  })();
+
+  return nodeOutputModulesPromise;
+}
+
+function getNodeOutputConfig(options: DiagnosticsNodeOptions) {
+  return {
+    directory: options.directory || DEFAULT_NODE_DIRECTORY,
+    latestFile: options.latestFile || DEFAULT_LATEST_FILE,
+    eventsFile: options.eventsFile || DEFAULT_EVENTS_FILE,
+  };
+}
+
+function shouldUseNodeOutput(
+  options: DiagnosticsNodeOptions,
+  origin?: DiagnosticsRuntimeOrigin,
+) {
+  return (
+    options.enabled !== false &&
+    origin?.options?.security?.diagnostics?.fileOutput === true &&
+    isNodeEnvironment()
+  );
+}
+
+function shouldUseConsole(
+  options: DiagnosticsNodeOptions,
+  origin?: DiagnosticsRuntimeOrigin,
+) {
+  return (
+    options.console !== false &&
+    origin?.options?.security?.diagnostics?.console !== false
+  );
+}
+
+function getNodeLatestPathForConsole(options: DiagnosticsNodeOptions) {
+  const config = getNodeOutputConfig(options);
+  return `${config.directory}/${config.latestFile}`;
+}
+
+function getNodeEventsPathForConsole(options: DiagnosticsNodeOptions) {
+  const config = getNodeOutputConfig(options);
+  return `${config.directory}/${config.eventsFile}`;
+}
+
+function isErrorEvent(event: DiagnosticsEvent) {
+  return (
+    event.status === 'error' ||
+    (event.status === 'complete' &&
+      Boolean(event.errorName || event.errorMessage))
+  );
+}
+
+async function writeNodeOutput(
+  options: DiagnosticsNodeOptions,
+  event: DiagnosticsEvent,
+  report: DiagnosticsReport,
+) {
+  const modules = await getNodeOutputModules();
+  if (!modules) {
+    return;
+  }
+
+  const config = getNodeOutputConfig(options);
+  const cwd = getNodeProcess()?.cwd?.() || '.';
+  const directory = modules.path.isAbsolute(config.directory)
+    ? config.directory
+    : modules.path.resolve(cwd, config.directory);
+  const latestFile = modules.path.join(directory, config.latestFile);
+  const eventsFile = modules.path.join(directory, config.eventsFile);
+
+  modules.fs.mkdirSync(directory, { recursive: true });
+  modules.fs.writeFileSync(
+    latestFile,
+    `${JSON.stringify(report, null, 2)}\n`,
+    'utf8',
+  );
+  modules.fs.appendFileSync(eventsFile, `${JSON.stringify(event)}\n`, 'utf8');
+}
+
+function emitNodeConsoleHint(
+  options: DiagnosticsNodeOptions,
+  event: DiagnosticsEvent,
+  report: DiagnosticsReport,
+  context: DiagnosticsEventContext | undefined,
+  reportedTraceIds: Set<string>,
+) {
+  if (
+    !isErrorEvent(event) ||
+    !shouldUseConsole(options, context?.origin) ||
+    reportedTraceIds.has(report.traceId)
+  ) {
+    return;
+  }
+
+  reportedTraceIds.add(report.traceId);
+
+  const lines = [
+    '[Module Federation] Diagnostic report generated',
+    `traceId: ${report.traceId}`,
+    `phase: ${report.failedPhase || event.phase}`,
+  ];
+
+  if (report.requestId) {
+    lines.push(`requestId: ${report.requestId}`);
+  }
+  if (report.shared?.name) {
+    lines.push(`shared: ${report.shared.name}`);
+  }
+
+  if (shouldUseNodeOutput(options, context?.origin)) {
+    lines.push(`latest: ${getNodeLatestPathForConsole(options)}`);
+    lines.push(`events: ${getNodeEventsPathForConsole(options)}`);
+  } else {
+    lines.push(
+      `read: diagnostics.getReport(${JSON.stringify(report.traceId)})`,
+    );
+  }
+
+  try {
+    console.warn(lines.join('\n'));
+  } catch {
+    // Console output is best-effort diagnostics only.
+  }
+}
+
+export function DiagnosticsPlugin(
+  options: DiagnosticsNodeOptions = {},
+): DiagnosticsController {
+  let nodeWriteQueue: Promise<void> = Promise.resolve();
+  const consoleReportedTraceIds = new Set<string>();
+  const diagnostics = createBaseDiagnosticsPlugin({
+    ...options,
+    console: false,
+    browser: undefined,
+    onEvent(event, report, context) {
+      if (shouldUseNodeOutput(options, context?.origin)) {
+        nodeWriteQueue = nodeWriteQueue
+          .catch(() => undefined)
+          .then(() => writeNodeOutput(options, event, report))
+          .catch(() => undefined);
+      }
+
+      emitNodeConsoleHint(
+        options,
+        event,
+        report,
+        context,
+        consoleReportedTraceIds,
+      );
+      options.onEvent?.(event, report, context);
+    },
+    onReport(report, context) {
+      options.onReport?.(report, context);
+    },
+  });
+
+  diagnostics.plugin.name = 'diagnostics-node-plugin';
+
+  const clear = diagnostics.clear;
+  diagnostics.clear = () => {
+    clear();
+    nodeWriteQueue = Promise.resolve();
+    consoleReportedTraceIds.clear();
+  };
+
+  return diagnostics;
+}

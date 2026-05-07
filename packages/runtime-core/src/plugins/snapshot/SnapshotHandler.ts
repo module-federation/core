@@ -81,6 +81,7 @@ export class SnapshotHandler {
         {
           options: Options;
           moduleInfo: Remote;
+          origin: ModuleFederation;
         },
       ],
       void
@@ -137,6 +138,7 @@ export class SnapshotHandler {
     await this.hooks.lifecycle.beforeLoadRemoteSnapshot.emit({
       options,
       moduleInfo,
+      origin: this.HostInstance,
     });
 
     let hostSnapshot = getGlobalSnapshotInfoByModuleInfo({
@@ -291,6 +293,7 @@ export class SnapshotHandler {
     extraOptions: Record<string, any>,
   ): Promise<ModuleInfo> {
     const getManifest = async (): Promise<Manifest> => {
+      const remoteInfo = getRemoteInfo(moduleInfo);
       let manifestJson: Manifest | undefined =
         this.manifestCache.get(manifestUrl);
       if (manifestJson) {
@@ -300,7 +303,7 @@ export class SnapshotHandler {
         let res = await this.loaderHook.lifecycle.fetch.emit(
           manifestUrl,
           {},
-          getRemoteInfo(moduleInfo),
+          remoteInfo,
         );
         if (!res || !(res instanceof Response)) {
           res = await fetch(manifestUrl, {});
@@ -314,6 +317,7 @@ export class SnapshotHandler {
               error: err,
               from: 'runtime',
               lifecycle: 'afterResolve',
+              remote: remoteInfo,
               origin: this.HostInstance,
             },
           )) as Manifest | undefined;
@@ -334,9 +338,29 @@ export class SnapshotHandler {
         }
       }
 
+      const missingRequiredFields = [
+        !manifestJson.metaData && 'metaData',
+        !manifestJson.exposes && 'exposes',
+        !manifestJson.shared && 'shared',
+      ].filter(Boolean);
+      if (missingRequiredFields.length > 0) {
+        await this.HostInstance.remoteHandler.hooks.lifecycle.errorLoadRemote.emit(
+          {
+            id: manifestUrl,
+            error: new Error(
+              `"${manifestUrl}" is not a valid federation manifest for remote "${moduleInfo.name}". Missing required fields: ${missingRequiredFields.join(', ')}.`,
+            ),
+            from: 'runtime',
+            lifecycle: 'afterResolve',
+            remote: remoteInfo,
+            origin: this.HostInstance,
+          },
+        );
+      }
+
       assert(
         manifestJson.metaData && manifestJson.exposes && manifestJson.shared,
-        `"${manifestUrl}" is not a valid federation manifest for remote "${moduleInfo.name}". Missing required fields: ${[!manifestJson.metaData && 'metaData', !manifestJson.exposes && 'exposes', !manifestJson.shared && 'shared'].filter(Boolean).join(', ')}.`,
+        `"${manifestUrl}" is not a valid federation manifest for remote "${moduleInfo.name}". Missing required fields: ${missingRequiredFields.join(', ')}.`,
       );
       this.manifestCache.set(manifestUrl, manifestJson);
       return manifestJson;

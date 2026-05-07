@@ -15,7 +15,11 @@ export {
   getGlobalSnapshot,
   getInfoWithoutType,
 } from './global';
-export type { UserOptions, ModuleFederationRuntimePlugin } from './type';
+export type {
+  UserOptions,
+  ModuleFederationRuntimePlugin,
+  SecurityOptions,
+} from './type';
 export { assert, error } from './utils/logger';
 export { registerGlobalPlugins } from './global';
 export {

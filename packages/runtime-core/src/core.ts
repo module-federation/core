@@ -159,6 +159,18 @@ export class ModuleFederation {
       ],
       Promise<Promise<RemoteEntryExports | undefined> | undefined>
     >(),
+    afterLoadEntry: new AsyncHook<
+      [
+        {
+          origin: ModuleFederation;
+          remoteInfo: RemoteInfo;
+          remoteEntryExports?: RemoteEntryExports | false | void;
+          error?: unknown;
+          recovered?: boolean;
+        },
+      ],
+      void
+    >('afterLoadEntry'),
     getModuleFactory: new AsyncHook<
       [
         {
