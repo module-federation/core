@@ -133,6 +133,8 @@ const mf = createInstance({
 | 自定义 script / link 注入 | `createScript`、`createLink` | 需要加 `crossorigin`、timeout、特殊 script/link 属性；在具备 remote 上下文时会额外提供 `remoteInfo`，便于按 remote 做策略 |
 | 在 remote init 前对齐 / 改写共享池 | `beforeInitContainer`、`initContainerShareScopeMap` | 需要控制 remote 初始化时使用哪个 share scope |
 | 改写 shared 最终命中结果 | `resolveShare` | 需要强制命中某个 shared，而不是用 runtime 默认选择 |
+| 观测 remote 加载状态 | `afterMatchRemote`、`afterLoadRemote` | 需要记录 `loadRemote` 的请求链路或最终成功/失败状态 |
+| 观测 shared 依赖状态 | `afterLoadShare`、`errorLoadShare` | 需要诊断 shared 缺失、版本不匹配、eager 配置错误等问题 |
 | 加载失败时兜底 | `errorLoadRemote` | 需要离线兜底、fallback module、分层恢复策略 |
 | 扩展新的 remote 加载方式 | `loadEntry` | 需要完整接管 remote entry 加载过程，或实现新的 remote 类型 |
 

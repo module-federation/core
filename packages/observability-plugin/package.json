@@ -1,5 +1,5 @@
 {
-  "name": "@module-federation/diagnostics-plugin",
+  "name": "@module-federation/observability-plugin",
   "version": "2.4.0",
   "author": "module-federation",
   "main": "./dist/index.js",
@@ -9,14 +9,15 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/module-federation/core.git",
-    "directory": "packages/diagnostics-plugin"
+    "directory": "packages/observability-plugin"
   },
   "publishConfig": {
     "access": "public"
   },
   "files": [
     "dist/",
-    "README.md"
+    "README.md",
+    "AI_TROUBLESHOOTING.md"
   ],
   "exports": {
     ".": {
@@ -28,6 +29,11 @@
       "types": "./dist/node.d.ts",
       "import": "./dist/esm/node.js",
       "require": "./dist/node.js"
+    },
+    "./build": {
+      "types": "./dist/build.d.ts",
+      "import": "./dist/esm/build.js",
+      "require": "./dist/build.js"
     }
   },
   "typesVersions": {
@@ -37,6 +43,9 @@
       ],
       "node": [
         "./dist/node.d.ts"
+      ],
+      "build": [
+        "./dist/build.d.ts"
       ]
     }
   },

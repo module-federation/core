@@ -1,0 +1,263 @@
+---
+title: Observability Plugin
+description: Observe Module Federation loading, collect runtime and build reports, and give humans or AI agents enough facts to debug failures.
+---
+
+# Observability Plugin
+
+The Observability Plugin makes Module Federation loading observable. It records
+runtime loading events, summarizes the final result, prints a stable
+`traceId` when loading fails, and can correlate runtime failures with build
+information.
+
+The plugin is designed for Module Federation `2.5.0` and later. If a project is
+on an older MF version, runtime error codes still help with basic
+troubleshooting, but the richer report and loading observability workflow
+requires upgrading to `2.5.0+` and enabling this plugin.
+
+Use it when you want to answer questions such as:
+
+- Did this remote load successfully?
+- Which phase failed: manifest, remoteEntry, init, expose, factory, or shared?
+- Did the load recover through retry or fallback?
+- Which shared dependency provider and version were selected?
+- What report should I give to a human or AI coding agent?
+
+## Install
+
+```bash
+npm install @module-federation/observability-plugin
+```
+
+## Browser Runtime
+
+Use the default entry in browser runtime code.
+
+```ts title="mf-runtime.ts"
+import { createInstance } from '@module-federation/runtime';
+import { ObservabilityPlugin } from '@module-federation/observability-plugin';
+
+export const observability = ObservabilityPlugin({
+  level: 'verbose',
+  browser: {
+    enabled: true,
+    scope: 'runtime_host',
+  },
+});
+
+export const mf = createInstance({
+  name: 'runtime_host',
+  remotes: [
+    {
+      name: 'remote1',
+      entry: 'https://example.com/mf-manifest.json',
+    },
+  ],
+  plugins: [observability.plugin],
+});
+```
+
+When a Module Federation load fails, the plugin prints a compact
+`console.error` hint:
+
+```text
+[Module Federation] Observability report generated
+traceId: mf-...
+phase: manifest
+errorCode: RUNTIME-003
+read: window.__FEDERATION__.__OBSERVABILITY__["runtime_host"].getReport("mf-...")
+```
+
+Run the `read:` command in the browser console to get the full report.
+
+You can also read reports directly:
+
+```ts
+window.__FEDERATION__.__OBSERVABILITY__.runtime_host.getLatestReport();
+window.__FEDERATION__.__OBSERVABILITY__.runtime_host.getReport('mf-...');
+window.__FEDERATION__.__OBSERVABILITY__.runtime_host.getReports({ limit: 5 });
+window.__FEDERATION__.__OBSERVABILITY__.runtime_host.findReports({
+  remote: 'remote1',
+});
+window.__FEDERATION__.__OBSERVABILITY__.runtime_host.exportReport('mf-...');
+```
+
+## Production Runtime
+
+In production, avoid exposing a public browser reader by default. Keep console
+output small and upload reports through your own system.
+
+```ts title="mf-runtime.ts"
+import { ObservabilityPlugin } from '@module-federation/observability-plugin';
+
+export const observability = ObservabilityPlugin({
+  level: 'summary',
+  browser: {
+    mode: 'production',
+  },
+  onReport(report) {
+    if (report.status === 'error' || report.summary.outcome === 'recovered') {
+      navigator.sendBeacon(
+        '/api/mf-observability',
+        JSON.stringify({
+          traceId: report.traceId,
+          status: report.status,
+          diagnosis: report.diagnosis,
+          summary: report.summary,
+          remote: report.remote,
+          shared: report.shared,
+          moduleInfo: report.moduleInfo,
+        }),
+      );
+    }
+  },
+});
+```
+
+In production browser mode, the console hint only contains `traceId` and known
+`errorCode`. The full report should come from `onReport`, `exportReport()`, or
+your own telemetry backend.
+
+## Node or SSR Runtime
+
+Use the Node entry when you want local report files.
+
+```ts title="mf-node-runtime.ts"
+import { createInstance } from '@module-federation/runtime';
+import { ObservabilityPlugin } from '@module-federation/observability-plugin/node';
+
+const observability = ObservabilityPlugin({
+  level: 'verbose',
+  fileOutput: true,
+  directory: '.mf/observability',
+});
+
+createInstance({
+  name: 'node_host',
+  remotes: [],
+  plugins: [observability.plugin],
+});
+```
+
+The Node entry writes:
+
+- `.mf/observability/latest.json`: latest complete report
+- `.mf/observability/events.jsonl`: event stream for multiple traces
+
+Read `latest.json` first. Use `events.jsonl` only when you need ordering or
+multiple traces.
+
+## Build Observability
+
+Add the build plugin next to your Module Federation build plugin when you want
+separate build-side evidence.
+
+```js title="webpack.config.js"
+const {
+  ModuleFederationPlugin,
+} = require('@module-federation/enhanced/webpack');
+const {
+  ObservabilityBuildPlugin,
+} = require('@module-federation/observability-plugin/build');
+
+const moduleFederationOptions = {
+  name: 'runtime_host',
+  remotes: {
+    remote1: 'remote1@https://example.com/mf-manifest.json',
+  },
+  exposes: {
+    './Button': './src/Button',
+  },
+  shared: {
+    react: { singleton: true, requiredVersion: '^18.0.0' },
+  },
+};
+
+module.exports = {
+  plugins: [
+    new ModuleFederationPlugin(moduleFederationOptions),
+    new ObservabilityBuildPlugin({
+      moduleFederation: moduleFederationOptions,
+    }),
+  ],
+};
+```
+
+Build observability can write:
+
+- `.mf/observability/build-info.json`
+- `.mf/observability/build-report.json`
+
+Runtime reports do not embed these files. When debugging needs build evidence,
+read the build file separately and compare it with the runtime report.
+
+## Mark Business Success
+
+Module Federation can know that a remote module loaded. It cannot always know
+that your business component finished its own rendering or data loading. Call
+`markComponentLoaded` when your application considers the component ready.
+
+```ts
+observability.markComponentLoaded({
+  requestId: 'remote1/Button',
+  componentName: 'Button',
+  metadata: {
+    route: '/dashboard',
+  },
+});
+```
+
+The report will include `component:business-loaded` and
+`summary.outcome: "component-loaded"`.
+
+## Use With the `mf` Skill
+
+Install the skill:
+
+```bash
+npx skills add module-federation/core --skill mf -y
+```
+
+When the console prints an observability hint, ask your agent:
+
+```text
+/mf observability
+I saw this Module Federation console error:
+
+[Module Federation] Observability report generated
+traceId: mf-...
+read: window.__FEDERATION__.__OBSERVABILITY__["runtime_host"].getReport("mf-...")
+
+Please read the report and fix the issue.
+```
+
+If you are in Node or SSR, give the agent the file path instead:
+
+```text
+/mf observability
+Read .mf/observability/latest.json and explain the likely owner and fix.
+```
+
+If your production app uploads reports, give the uploaded report or `traceId`
+to the agent:
+
+```text
+/mf observability
+Here is the uploaded report for traceId mf-...
+Tell me whether this is a host, remote, shared, network, or build issue.
+```
+
+## What the AI Reads First
+
+The skill reads fields in this order:
+
+1. `diagnosis`
+2. `summary`
+3. `moduleInfo`
+4. `events`
+
+If build-side evidence is needed, read `.mf/observability/build-info.json` or
+`.mf/observability/build-report.json` as a separate file.
+
+Reports omit `undefined` fields. If a field is absent, treat it as not observed
+or not relevant for this trace.

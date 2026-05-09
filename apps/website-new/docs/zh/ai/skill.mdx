@@ -40,6 +40,7 @@ https://github.com/module-federation/core/tree/main/skills/mf
 /mf integrate
 /mf type-check
 /mf runtime-error RUNTIME-008
+/mf observability 帮我接入观测插件，记录 MF 加载过程
 ```
 
 直接写自然语言：
@@ -48,6 +49,8 @@ https://github.com/module-federation/core/tree/main/skills/mf
 /mf shared 里的 singleton 和 requiredVersion 有什么区别？
 /mf 帮我看看这个项目为什么 remote types 没拉下来
 /mf 帮我把 Module Federation 接到当前项目里
+/mf 我想让 AI 能看见 MF remote 和 shared 的加载状态，应该怎么接
+/mf 我看到 Module Federation console error，traceId 是 mf-...
 ```
 
 ## `mf` 目前支持什么
@@ -64,6 +67,7 @@ https://github.com/module-federation/core/tree/main/skills/mf
 | `config-check` | 排查配置错误、暴露路径错误、插件不匹配 |
 | `bridge-check` | 排查 Bridge 接入问题 |
 | `runtime-error` | 排查明确的运行时报错码，尤其是 `RUNTIME-001` / `RUNTIME-008` |
+| `observability` | 配合观测插件记录 MF 加载过程，读取观测报告，排查运行时和构建加载问题 |
 
 ## 最常用的几类场景
 
@@ -96,9 +100,43 @@ https://github.com/module-federation/core/tree/main/skills/mf
 /mf shared-deps
 /mf config-check
 /mf runtime-error RUNTIME-008
+/mf observability
 ```
 
 这时候重点不是你自己查，而是让 Agent 直接开始定位。
+
+### 4. 让 Agent 分析 MF 加载过程
+
+如果你希望 AI 不只是“看到报错”，而是能知道 MF 的 remote、shared、组件加载状态在哪里成功、在哪里失败，可以用 `observability` 子命令。
+
+要读取真实的 MF 加载报告，需要先接入 [观测插件](../plugin/plugins/observability-plugin)。观测插件会把 MF 加载过程整理成报告，包括加载成功、加载失败、错误原因、`traceId` 和读取方式；skill 负责帮你接入、读取和分析这些信息，再判断问题更可能在宿主、远端、共享依赖、构建配置还是部署地址。
+
+如果你还没有接入观测插件，可以先这样问：
+
+```text
+/mf observability
+帮我看当前项目怎么接入观测插件，记录 MF 加载过程。
+```
+
+接入后，如果你看到浏览器控制台打印了 `traceId` 和 `read:` 命令，再把它交给 skill：
+
+```text
+/mf observability
+我看到了这条 Module Federation console error：
+
+[Module Federation] Observability report generated
+traceId: mf-...
+read: window.__FEDERATION__.__OBSERVABILITY__["runtime_host"].getReport("mf-...")
+
+请读取报告并帮我修复问题。
+```
+
+这里的“报告”不是让你手动整理出来的长日志，而是观测插件生成的结构化结果。浏览器里通常通过控制台里的 `read:` 命令读取；Node、SSR 或生产环境上报场景，可以让 Agent 读取文件或你们自己上报系统里的报告：
+
+```text
+/mf observability
+请读取 .mf/observability/latest.json，告诉我可能是谁的问题，以及应该怎么修。
+```
 
 ## 你真正需要记住的只有一件事
 

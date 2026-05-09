@@ -24,7 +24,7 @@ import {
   RUNTIME_010,
   runtimeDescMap,
 } from '@module-federation/error-codes';
-import { Module } from './module';
+import { Module, type RemoteModuleFactory } from './module';
 import {
   AsyncHook,
   AsyncWaterfallHook,
@@ -171,6 +171,83 @@ export class ModuleFederation {
       ],
       void
     >('afterLoadEntry'),
+    beforeInitRemote: new AsyncHook<
+      [
+        {
+          id?: string;
+          remoteInfo: RemoteInfo;
+          remoteSnapshot?: ModuleInfo;
+          origin: ModuleFederation;
+        },
+      ],
+      void
+    >('beforeInitRemote'),
+    afterInitRemote: new AsyncHook<
+      [
+        {
+          id?: string;
+          remoteInfo: RemoteInfo;
+          remoteSnapshot?: ModuleInfo;
+          remoteEntryExports?: RemoteEntryExports;
+          error?: unknown;
+          cached?: boolean;
+          origin: ModuleFederation;
+        },
+      ],
+      void
+    >('afterInitRemote'),
+    beforeGetExpose: new AsyncHook<
+      [
+        {
+          id: string;
+          expose: string;
+          moduleInfo: RemoteInfo;
+          remoteEntryExports: RemoteEntryExports;
+          origin: ModuleFederation;
+        },
+      ],
+      void
+    >('beforeGetExpose'),
+    afterGetExpose: new AsyncHook<
+      [
+        {
+          id: string;
+          expose: string;
+          moduleInfo: RemoteInfo;
+          remoteEntryExports: RemoteEntryExports;
+          moduleFactory?: RemoteModuleFactory;
+          error?: unknown;
+          origin: ModuleFederation;
+        },
+      ],
+      void
+    >('afterGetExpose'),
+    beforeExecuteFactory: new AsyncHook<
+      [
+        {
+          id: string;
+          expose: string;
+          moduleInfo: RemoteInfo;
+          loadFactory: boolean;
+          origin: ModuleFederation;
+        },
+      ],
+      void
+    >('beforeExecuteFactory'),
+    afterExecuteFactory: new AsyncHook<
+      [
+        {
+          id: string;
+          expose: string;
+          moduleInfo: RemoteInfo;
+          loadFactory: boolean;
+          exposeModule?: unknown;
+          error?: unknown;
+          origin: ModuleFederation;
+        },
+      ],
+      void
+    >('afterExecuteFactory'),
     getModuleFactory: new AsyncHook<
       [
         {
@@ -179,7 +256,7 @@ export class ModuleFederation {
           moduleInfo: RemoteInfo;
         },
       ],
-      Promise<(() => Promise<Module>) | undefined>
+      RemoteModuleFactory | Promise<RemoteModuleFactory | undefined> | undefined
     >(),
   });
   bridgeHook = new PluginSystem({

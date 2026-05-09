@@ -2,19 +2,11 @@ import React, { StrictMode } from 'react';
 import { init } from '@module-federation/enhanced/runtime';
 import * as ReactDOM from 'react-dom/client';
 import App from './App';
-import { diagnostics } from './diagnostics';
+import { observability } from './observability';
 
 init({
   name: 'runtime_host',
-  security: {
-    diagnostics: {
-      enabled: true,
-      maxEvents: 100,
-      console: true,
-      browserGlobal: true,
-    },
-  },
-  plugins: [diagnostics.plugin],
+  plugins: [observability.plugin],
   remotes: [
     {
       name: 'runtime_remote2',

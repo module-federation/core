@@ -122,16 +122,6 @@ export type ShareInfos = {
   [pkgName: string]: Shared[];
 };
 
-export interface SecurityOptions {
-  diagnostics?: {
-    enabled?: boolean;
-    maxEvents?: number;
-    console?: boolean;
-    browserGlobal?: boolean;
-    fileOutput?: boolean;
-  };
-}
-
 export interface Options {
   id?: string;
   name: string;
@@ -141,7 +131,6 @@ export interface Options {
   plugins: Array<ModuleFederationRuntimePlugin>;
   inBrowser: boolean;
   shareStrategy?: ShareStrategy;
-  security?: SecurityOptions;
 }
 
 export type UserOptions = Omit<

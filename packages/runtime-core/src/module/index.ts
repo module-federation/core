@@ -1,5 +1,4 @@
 import {
-  getFMId,
   assert,
   error,
   processModuleAlias,
@@ -8,7 +7,8 @@ import {
 import { safeToString, ModuleInfo } from '@module-federation/sdk';
 import {
   RUNTIME_002,
-  RUNTIME_008,
+  RUNTIME_014,
+  RUNTIME_015,
   runtimeDescMap,
 } from '@module-federation/error-codes';
 import { getRemoteEntry } from '../utils/load';
@@ -21,6 +21,25 @@ import {
 } from '../type';
 
 export type ModuleOptions = ConstructorParameters<typeof Module>[0];
+export type RemoteModuleFactory = () => unknown | Promise<unknown>;
+
+function getAvailableExposeNames(
+  remoteSnapshot?: ModuleInfo,
+): string | undefined {
+  if (
+    !remoteSnapshot ||
+    !('modules' in remoteSnapshot) ||
+    !Array.isArray(remoteSnapshot.modules)
+  ) {
+    return undefined;
+  }
+
+  const exposes = remoteSnapshot.modules
+    .map((module) => module.moduleName)
+    .filter(Boolean);
+
+  return exposes.length ? exposes.join(',') : undefined;
+}
 
 export function createRemoteEntryInitOptions(
   remoteInfo: RemoteInfo,
@@ -118,16 +137,52 @@ class Module {
     const remoteEntryExports = await this.getEntry();
 
     if (this.inited) {
+      await this.host.loaderHook.lifecycle.afterInitRemote.emit({
+        id,
+        remoteInfo: this.remoteInfo,
+        remoteSnapshot,
+        remoteEntryExports,
+        cached: true,
+        origin: this.host,
+      });
       return remoteEntryExports;
     }
 
     if (this.initPromise) {
-      await this.initPromise;
+      try {
+        await this.initPromise;
+        await this.host.loaderHook.lifecycle.afterInitRemote.emit({
+          id,
+          remoteInfo: this.remoteInfo,
+          remoteSnapshot,
+          remoteEntryExports,
+          cached: true,
+          origin: this.host,
+        });
+      } catch (initError) {
+        await this.host.loaderHook.lifecycle.afterInitRemote.emit({
+          id,
+          remoteInfo: this.remoteInfo,
+          remoteSnapshot,
+          remoteEntryExports,
+          error: initError,
+          cached: true,
+          origin: this.host,
+        });
+        throw initError;
+      }
       return remoteEntryExports;
     }
 
     this.initing = true;
     this.initPromise = (async () => {
+      await this.host.loaderHook.lifecycle.beforeInitRemote.emit({
+        id,
+        remoteInfo: this.remoteInfo,
+        remoteSnapshot,
+        origin: this.host,
+      });
+
       const { remoteEntryInitOptions, shareScope, initScope } =
         createRemoteEntryInitOptions(
           this.remoteInfo,
@@ -160,11 +215,27 @@ class Module {
         );
       }
 
-      await remoteEntryExports.init(
-        initContainerOptions.shareScope,
-        initContainerOptions.initScope,
-        initContainerOptions.remoteEntryInitOptions,
-      );
+      try {
+        await remoteEntryExports.init(
+          initContainerOptions.shareScope,
+          initContainerOptions.initScope,
+          initContainerOptions.remoteEntryInitOptions,
+        );
+      } catch (initError) {
+        error(
+          RUNTIME_015,
+          runtimeDescMap,
+          {
+            hostName: this.host.name,
+            remoteName: this.remoteInfo.name,
+            remoteEntryUrl: this.remoteInfo.entry,
+            remoteEntryKey: this.remoteInfo.entryGlobalName,
+            shareScope: this.remoteInfo.shareScope,
+          },
+          `${initError}`,
+          optionsToMFContext(this.host.options),
+        );
+      }
 
       await this.host.hooks.lifecycle.initContainer.emit({
         ...initContainerOptions,
@@ -177,6 +248,23 @@ class Module {
 
     try {
       await this.initPromise;
+      await this.host.loaderHook.lifecycle.afterInitRemote.emit({
+        id,
+        remoteInfo: this.remoteInfo,
+        remoteSnapshot,
+        remoteEntryExports,
+        origin: this.host,
+      });
+    } catch (initError) {
+      await this.host.loaderHook.lifecycle.afterInitRemote.emit({
+        id,
+        remoteInfo: this.remoteInfo,
+        remoteSnapshot,
+        remoteEntryExports,
+        error: initError,
+        origin: this.host,
+      });
+      throw initError;
     } finally {
       this.initing = false;
       this.initPromise = undefined;
@@ -197,22 +285,66 @@ class Module {
     const remoteEntryExports = await this.init(id, remoteSnapshot);
     this.lib = remoteEntryExports;
 
-    let moduleFactory;
-    moduleFactory = await this.host.loaderHook.lifecycle.getModuleFactory.emit({
-      remoteEntryExports,
+    await this.host.loaderHook.lifecycle.beforeGetExpose.emit({
+      id,
       expose,
       moduleInfo: this.remoteInfo,
+      remoteEntryExports,
+      origin: this.host,
     });
 
-    // get exposeGetter
-    if (!moduleFactory) {
-      moduleFactory = await remoteEntryExports.get(expose);
-    }
+    let moduleFactory: RemoteModuleFactory | undefined;
+    try {
+      const hookModuleFactory =
+        await this.host.loaderHook.lifecycle.getModuleFactory.emit({
+          remoteEntryExports,
+          expose,
+          moduleInfo: this.remoteInfo,
+        });
+      moduleFactory =
+        typeof hookModuleFactory === 'function' ? hookModuleFactory : undefined;
 
-    assert(
-      moduleFactory,
-      `${getFMId(this.remoteInfo)} remote don't export ${expose}.`,
-    );
+      // get exposeGetter
+      if (!moduleFactory) {
+        moduleFactory = await remoteEntryExports.get(expose);
+      }
+
+      if (!moduleFactory) {
+        error(
+          RUNTIME_014,
+          runtimeDescMap,
+          {
+            hostName: this.host.name,
+            remoteName: this.remoteInfo.name,
+            remoteEntryUrl: this.remoteInfo.entry,
+            expose,
+            requestId: id,
+            availableExposes: getAvailableExposeNames(remoteSnapshot),
+          },
+          undefined,
+          optionsToMFContext(this.host.options),
+        );
+      }
+
+      await this.host.loaderHook.lifecycle.afterGetExpose.emit({
+        id,
+        expose,
+        moduleInfo: this.remoteInfo,
+        remoteEntryExports,
+        moduleFactory,
+        origin: this.host,
+      });
+    } catch (getExposeError) {
+      await this.host.loaderHook.lifecycle.afterGetExpose.emit({
+        id,
+        expose,
+        moduleInfo: this.remoteInfo,
+        remoteEntryExports,
+        error: getExposeError,
+        origin: this.host,
+      });
+      throw getExposeError;
+    }
 
     // keep symbol for module name always one format
     const symbolName = processModuleAlias(this.remoteInfo.name, expose);
@@ -221,16 +353,43 @@ class Module {
     if (!loadFactory) {
       return wrapModuleFactory;
     }
-    const exposeContent = await wrapModuleFactory();
 
-    return exposeContent;
+    await this.host.loaderHook.lifecycle.beforeExecuteFactory.emit({
+      id,
+      expose,
+      moduleInfo: this.remoteInfo,
+      loadFactory,
+      origin: this.host,
+    });
+
+    try {
+      const exposeContent = await wrapModuleFactory();
+
+      await this.host.loaderHook.lifecycle.afterExecuteFactory.emit({
+        id,
+        expose,
+        moduleInfo: this.remoteInfo,
+        loadFactory,
+        exposeModule: exposeContent,
+        origin: this.host,
+      });
+
+      return exposeContent;
+    } catch (executeFactoryError) {
+      await this.host.loaderHook.lifecycle.afterExecuteFactory.emit({
+        id,
+        expose,
+        moduleInfo: this.remoteInfo,
+        loadFactory,
+        error: executeFactoryError,
+        origin: this.host,
+      });
+      throw executeFactoryError;
+    }
   }
 
-  private wraperFactory(
-    moduleFactory: () => any | (() => Promise<any>),
-    id: string,
-  ) {
-    function defineModuleId(res: any, id: string) {
+  private wraperFactory(moduleFactory: RemoteModuleFactory, id: string) {
+    function defineModuleId(res: unknown, id: string) {
       if (
         res &&
         typeof res === 'object' &&
@@ -244,21 +403,21 @@ class Module {
       }
     }
 
-    if (moduleFactory instanceof Promise) {
-      return async () => {
-        const res = await moduleFactory();
-        // This parameter is used for bridge debugging
-        defineModuleId(res, id);
-        return res;
-      };
-    } else {
-      return () => {
-        const res = moduleFactory();
-        // This parameter is used for bridge debugging
-        defineModuleId(res, id);
-        return res;
-      };
-    }
+    return () => {
+      const res = moduleFactory();
+
+      if (res instanceof Promise) {
+        return res.then((asyncRes) => {
+          // This parameter is used for bridge debugging
+          defineModuleId(asyncRes, id);
+          return asyncRes;
+        });
+      }
+
+      // This parameter is used for bridge debugging
+      defineModuleId(res, id);
+      return res;
+    };
   }
 }
 

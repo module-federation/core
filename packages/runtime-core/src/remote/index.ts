@@ -75,6 +75,20 @@ export class RemoteHandler {
       options: Options;
       origin: ModuleFederation;
     }>('beforeRequest'),
+    afterMatchRemote: new AsyncHook<
+      [
+        {
+          id: string;
+          options: Options;
+          remote?: Remote;
+          expose?: string;
+          remoteInfo?: RemoteInfo;
+          error?: unknown;
+          origin: ModuleFederation;
+        },
+      ],
+      void
+    >('afterMatchRemote'),
     onLoad: new AsyncHook<
       [
         {
@@ -439,20 +453,37 @@ export class RemoteHandler {
       idRes,
     );
     if (!remoteSplitInfo) {
-      error(
-        RUNTIME_004,
-        runtimeDescMap,
-        {
-          hostName: host.options.name,
-          requestId: idRes,
-        },
-        undefined,
-        optionsToMFContext(host.options),
-      );
+      try {
+        error(
+          RUNTIME_004,
+          runtimeDescMap,
+          {
+            hostName: host.options.name,
+            requestId: idRes,
+          },
+          undefined,
+          optionsToMFContext(host.options),
+        );
+      } catch (matchError) {
+        await this.hooks.lifecycle.afterMatchRemote.emit({
+          id: idRes,
+          options: host.options,
+          error: matchError,
+          origin: host,
+        });
+        throw matchError;
+      }
     }
 
     const { remote: rawRemote } = remoteSplitInfo;
     const remoteInfo = getRemoteInfo(rawRemote);
+    await this.hooks.lifecycle.afterMatchRemote.emit({
+      id: idRes,
+      ...remoteSplitInfo,
+      options: host.options,
+      remoteInfo,
+      origin: host,
+    });
     const matchInfo =
       await host.sharedHandler.hooks.lifecycle.afterResolve.emit({
         id: idRes,

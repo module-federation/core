@@ -18,7 +18,6 @@ export {
   registerGlobalPlugins,
   type ModuleFederationRuntimePlugin,
   type Federation,
-  type SecurityOptions,
 } from '@module-federation/runtime-core';
 
 export { ModuleFederation };

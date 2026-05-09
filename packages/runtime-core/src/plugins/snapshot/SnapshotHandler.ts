@@ -9,6 +9,7 @@ import {
 import {
   RUNTIME_003,
   RUNTIME_007,
+  RUNTIME_013,
   runtimeDescMap,
 } from '@module-federation/error-codes';
 import { Options, Remote } from '../../type';
@@ -28,7 +29,6 @@ import {
 } from '../../global';
 import { PluginSystem, AsyncHook, AsyncWaterfallHook } from '../../utils/hooks';
 import { ModuleFederation } from '../../core';
-import { assert } from '../../utils/logger';
 
 export function getGlobalRemoteInfo(
   moduleInfo: Remote,
@@ -358,10 +358,20 @@ export class SnapshotHandler {
         );
       }
 
-      assert(
-        manifestJson.metaData && manifestJson.exposes && manifestJson.shared,
-        `"${manifestUrl}" is not a valid federation manifest for remote "${moduleInfo.name}". Missing required fields: ${missingRequiredFields.join(', ')}.`,
-      );
+      if (missingRequiredFields.length > 0) {
+        error(
+          RUNTIME_013,
+          runtimeDescMap,
+          {
+            manifestUrl,
+            moduleName: moduleInfo.name,
+            hostName: this.HostInstance.options.name,
+            missingFields: missingRequiredFields.join(','),
+          },
+          undefined,
+          optionsToMFContext(this.HostInstance.options),
+        );
+      }
       this.manifestCache.set(manifestUrl, manifestJson);
       return manifestJson;
     };

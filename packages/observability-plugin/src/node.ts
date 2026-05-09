@@ -1,17 +1,17 @@
 import {
-  DiagnosticsPlugin as createBaseDiagnosticsPlugin,
-  type DiagnosticsController,
-  type DiagnosticsEvent,
-  type DiagnosticsEventContext,
-  type DiagnosticsPluginOptions,
-  type DiagnosticsReport,
-  type DiagnosticsRuntimeOrigin,
+  ObservabilityPlugin as createBaseObservabilityPlugin,
+  type ObservabilityController,
+  type ObservabilityEvent,
+  type ObservabilityEventContext,
+  type ObservabilityPluginOptions,
+  type ObservabilityReport,
 } from './index';
 
-export interface DiagnosticsNodeOptions extends Omit<
-  DiagnosticsPluginOptions,
+export interface ObservabilityNodeOptions extends Omit<
+  ObservabilityPluginOptions,
   'browser'
 > {
+  fileOutput?: boolean;
   directory?: string;
   latestFile?: string;
   eventsFile?: string;
@@ -30,7 +30,7 @@ interface NodeOutputModules {
   };
 }
 
-const DEFAULT_NODE_DIRECTORY = '.mf/diagnostics';
+const DEFAULT_NODE_DIRECTORY = '.mf/observability';
 const DEFAULT_LATEST_FILE = 'latest.json';
 const DEFAULT_EVENTS_FILE = 'events.jsonl';
 
@@ -140,7 +140,7 @@ async function getNodeOutputModules(): Promise<NodeOutputModules | undefined> {
   return nodeOutputModulesPromise;
 }
 
-function getNodeOutputConfig(options: DiagnosticsNodeOptions) {
+function getNodeOutputConfig(options: ObservabilityNodeOptions) {
   return {
     directory: options.directory || DEFAULT_NODE_DIRECTORY,
     latestFile: options.latestFile || DEFAULT_LATEST_FILE,
@@ -148,38 +148,29 @@ function getNodeOutputConfig(options: DiagnosticsNodeOptions) {
   };
 }
 
-function shouldUseNodeOutput(
-  options: DiagnosticsNodeOptions,
-  origin?: DiagnosticsRuntimeOrigin,
-) {
+function shouldUseNodeOutput(options: ObservabilityNodeOptions) {
   return (
     options.enabled !== false &&
-    origin?.options?.security?.diagnostics?.fileOutput === true &&
+    options.fileOutput === true &&
     isNodeEnvironment()
   );
 }
 
-function shouldUseConsole(
-  options: DiagnosticsNodeOptions,
-  origin?: DiagnosticsRuntimeOrigin,
-) {
-  return (
-    options.console !== false &&
-    origin?.options?.security?.diagnostics?.console !== false
-  );
+function shouldUseConsole(options: ObservabilityNodeOptions) {
+  return options.console !== false;
 }
 
-function getNodeLatestPathForConsole(options: DiagnosticsNodeOptions) {
+function getNodeLatestPathForConsole(options: ObservabilityNodeOptions) {
   const config = getNodeOutputConfig(options);
   return `${config.directory}/${config.latestFile}`;
 }
 
-function getNodeEventsPathForConsole(options: DiagnosticsNodeOptions) {
+function getNodeEventsPathForConsole(options: ObservabilityNodeOptions) {
   const config = getNodeOutputConfig(options);
   return `${config.directory}/${config.eventsFile}`;
 }
 
-function isErrorEvent(event: DiagnosticsEvent) {
+function isErrorEvent(event: ObservabilityEvent) {
   return (
     event.status === 'error' ||
     (event.status === 'complete' &&
@@ -187,10 +178,18 @@ function isErrorEvent(event: DiagnosticsEvent) {
   );
 }
 
+function getRawStack(error: unknown): string | undefined {
+  if (error instanceof Error) {
+    return error.stack || error.message;
+  }
+
+  return undefined;
+}
+
 async function writeNodeOutput(
-  options: DiagnosticsNodeOptions,
-  event: DiagnosticsEvent,
-  report: DiagnosticsReport,
+  options: ObservabilityNodeOptions,
+  event: ObservabilityEvent,
+  report: ObservabilityReport,
 ) {
   const modules = await getNodeOutputModules();
   if (!modules) {
@@ -215,15 +214,16 @@ async function writeNodeOutput(
 }
 
 function emitNodeConsoleHint(
-  options: DiagnosticsNodeOptions,
-  event: DiagnosticsEvent,
-  report: DiagnosticsReport,
-  context: DiagnosticsEventContext | undefined,
+  options: ObservabilityNodeOptions,
+  event: ObservabilityEvent,
+  report: ObservabilityReport,
+  context: ObservabilityEventContext | undefined,
   reportedTraceIds: Set<string>,
+  rawStack?: string,
 ) {
   if (
     !isErrorEvent(event) ||
-    !shouldUseConsole(options, context?.origin) ||
+    !shouldUseConsole(options) ||
     reportedTraceIds.has(report.traceId)
   ) {
     return;
@@ -232,7 +232,7 @@ function emitNodeConsoleHint(
   reportedTraceIds.add(report.traceId);
 
   const lines = [
-    '[Module Federation] Diagnostic report generated',
+    '[Module Federation] Observability report generated',
     `traceId: ${report.traceId}`,
     `phase: ${report.failedPhase || event.phase}`,
   ];
@@ -240,37 +240,53 @@ function emitNodeConsoleHint(
   if (report.requestId) {
     lines.push(`requestId: ${report.requestId}`);
   }
+  if (report.errorCode) {
+    lines.push(`errorCode: ${report.errorCode}`);
+  }
   if (report.shared?.name) {
     lines.push(`shared: ${report.shared.name}`);
   }
 
-  if (shouldUseNodeOutput(options, context?.origin)) {
+  if (shouldUseNodeOutput(options)) {
     lines.push(`latest: ${getNodeLatestPathForConsole(options)}`);
     lines.push(`events: ${getNodeEventsPathForConsole(options)}`);
   } else {
     lines.push(
-      `read: diagnostics.getReport(${JSON.stringify(report.traceId)})`,
+      `read: observability.getReport(${JSON.stringify(report.traceId)})`,
     );
   }
 
+  if (options.printRawStack === true && rawStack) {
+    lines.push('rawStack:', rawStack);
+  }
+
   try {
-    console.warn(lines.join('\n'));
+    console.error(lines.join('\n'));
   } catch {
-    // Console output is best-effort diagnostics only.
+    // Console output is best-effort observability only.
   }
 }
 
-export function DiagnosticsPlugin(
-  options: DiagnosticsNodeOptions = {},
-): DiagnosticsController {
+export function ObservabilityPlugin(
+  options: ObservabilityNodeOptions = {},
+): ObservabilityController {
   let nodeWriteQueue: Promise<void> = Promise.resolve();
   const consoleReportedTraceIds = new Set<string>();
-  const diagnostics = createBaseDiagnosticsPlugin({
+  const rawStackByTraceId = new Map<string, string>();
+  const observability = createBaseObservabilityPlugin({
     ...options,
     console: false,
     browser: undefined,
+    onRawError(error, context) {
+      const rawStack = getRawStack(error);
+      if (rawStack) {
+        rawStackByTraceId.set(context.report.traceId, rawStack);
+      }
+
+      options.onRawError?.(error, context);
+    },
     onEvent(event, report, context) {
-      if (shouldUseNodeOutput(options, context?.origin)) {
+      if (shouldUseNodeOutput(options)) {
         nodeWriteQueue = nodeWriteQueue
           .catch(() => undefined)
           .then(() => writeNodeOutput(options, event, report))
@@ -283,22 +299,30 @@ export function DiagnosticsPlugin(
         report,
         context,
         consoleReportedTraceIds,
+        rawStackByTraceId.get(report.traceId),
       );
-      options.onEvent?.(event, report, context);
+      try {
+        options.onEvent?.(event, report, context);
+      } finally {
+        if (isErrorEvent(event)) {
+          rawStackByTraceId.delete(report.traceId);
+        }
+      }
     },
     onReport(report, context) {
       options.onReport?.(report, context);
     },
   });
 
-  diagnostics.plugin.name = 'diagnostics-node-plugin';
+  observability.plugin.name = 'observability-node-plugin';
 
-  const clear = diagnostics.clear;
-  diagnostics.clear = () => {
+  const clear = observability.clear;
+  observability.clear = () => {
     clear();
     nodeWriteQueue = Promise.resolve();
     consoleReportedTraceIds.clear();
+    rawStackByTraceId.clear();
   };
 
-  return diagnostics;
+  return observability;
 }
