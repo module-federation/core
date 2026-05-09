@@ -1,4 +1,3 @@
-import crypto from 'node:crypto';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import util from 'node:util';
@@ -329,23 +328,11 @@ async function bundleFederatedRemote(
       `${util.styleText('blue', 'Processing remote container and exposed modules')}`,
     );
 
-    const bundleHashMap = new Map<string, string>();
-
     for (const { requestOpts, saveBundleOpts, targetDir } of requests) {
       // ensure output directory exists
       await fs.mkdir(targetDir, { recursive: true, mode: 0o755 });
       const bundle = await buildBundle(server, requestOpts);
       await saveBundleAndMap(bundle, saveBundleOpts, logger.info);
-
-      // Compute SHA-256 hash directly from in-memory bundle content
-      const hash = crypto
-        .createHash('sha256')
-        .update(bundle.code)
-        .digest('hex');
-      const relPath = normalizeOutputRelativePath(
-        path.relative(outputDir, saveBundleOpts.bundleOutput),
-      );
-      bundleHashMap.set(relPath, hash);
 
       // Save the assets of the bundle
       // const outputAssets = await server.getAssets({
@@ -378,33 +365,6 @@ async function bundleFederatedRemote(
       await fs.readFile(manifestFilepath, 'utf-8'),
     );
     applyTypesMetaToManifest(rawManifest, typesMeta);
-
-    // Inject container bundle hash into metaData.buildInfo.hash
-    const containerFilename = federationConfig.filename;
-    if (bundleHashMap.has(containerFilename)) {
-      rawManifest.metaData.buildInfo.hash =
-        bundleHashMap.get(containerFilename);
-    }
-
-    // Inject exposed bundle hashes
-    if (Array.isArray(rawManifest.exposes)) {
-      for (const expose of rawManifest.exposes) {
-        const exposePath = `exposed/${expose.name}.bundle`;
-        if (bundleHashMap.has(exposePath)) {
-          expose.hash = bundleHashMap.get(exposePath);
-        }
-      }
-    }
-
-    // Inject shared bundle hashes (non-eager shared with bundle files)
-    if (Array.isArray(rawManifest.shared)) {
-      for (const shared of rawManifest.shared) {
-        const sharedPath = `shared/${shared.name}.bundle`;
-        if (bundleHashMap.has(sharedPath)) {
-          shared.hash = bundleHashMap.get(sharedPath);
-        }
-      }
-    }
 
     await fs.writeFile(
       manifestOutputFilepath,

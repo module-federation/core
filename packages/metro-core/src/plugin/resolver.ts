@@ -42,7 +42,7 @@ interface CreateResolveRequestOptions {
     tmpDir: string;
   };
   options: ModuleFederationConfigNormalized;
-  vmManager: VirtualModuleManager;
+  vmManager: Pick<VirtualModuleManager, 'registerVirtualModule'>;
   customResolver?: CustomResolver;
 }
 
@@ -155,8 +155,13 @@ export function createResolveRequest({
       const importName = options.shared[sharedName].import || sharedName;
       // module import
       if (moduleName === importName) {
-        const sharedPath = getSharedPath(moduleName, paths.tmpDir);
-        const sharedGenerator = () => getRemoteModule(moduleName);
+        // Resolve by the package that Metro is importing, but keep the virtual
+        // file keyed by the shared config name. Manifest assets and bundle
+        // hashes are indexed by sharedName, so using importName for the path
+        // makes aliases like { sharedName: { import: importName } } miss their
+        // manifest entry even though the generated module imports correctly.
+        const sharedPath = getSharedPath(sharedName, paths.tmpDir);
+        const sharedGenerator = () => getRemoteModule(importName);
         vmManager.registerVirtualModule(sharedPath, sharedGenerator);
         return { type: 'sourceFile', filePath: sharedPath };
       }

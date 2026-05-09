@@ -1,10 +1,13 @@
 # Runtime API
 
 import { Steps, Tab, Tabs, Badge, Aside } from '@theme';
-import Collapse from '@components/Collapse'
-import Runtime from '@components/zh/runtime/index';
+import Collapse from '@components/Collapse';
 
-<Runtime />
+MF 的运行时 API 围绕 `ModuleFederation` 实例展开。除 [createInstance](#createinstance) 会创建并返回新的实例外，其他 API 都会基于运行时中的已有实例执行对应操作。
+
+默认实例通常由构建插件自动创建，也可以通过 [init](#init) 手动初始化。调用运行时 API 时，无需显式传入 `ModuleFederation` 实例，它们会自动使用运行时中的默认实例。
+
+需要注意的是，[createInstance](#createinstance) 创建的新实例不会替换默认实例，但会被加入全局实例列表。后续可以通过 [getInstance](#getinstance) 配合 finder 回调重新获取该实例。
 
 ## createInstance
 
@@ -12,14 +15,11 @@ import Runtime from '@components/zh/runtime/index';
 
 * 什么时候使用 `createInstance` ？
 
-  为了保证 `ModuleFederation` 实例的唯一性，我们在构建插件创建实例后，会将其存储到内存中，导出的 API 都是先从内存中获取 `ModuleFederation` 实例，然后再调用 `ModuleFederation` 实例的 API。这也是为什么 `loadRemote` 等 API 可以直接使用的原因。
-
-  这种单例模式适用于大多数场景，但如果在以下场景，你需要使用 `createInstance`：
+  默认实例模式适用于大多数场景，但如果在以下场景，你需要使用 `createInstance`：
 
   - 没有使用构建插件（纯运行时场景）
   - 需要创建多个 ModuleFederation 实例，每个实例的配置不同
   - 希望使用 ModuleFederation 分治特性，封装相应的 API 提供给其他项目使用
-
 
 * `createInstance` 每次都会创建一个全新的 `ModuleFederation` 实例，并将其注册到全局实例列表中。它不会根据 `name` / `version` 查找已有实例，也不会把新配置合并到已有实例上。
 
@@ -43,18 +43,21 @@ mf.loadRemote('sub1/util').then((m) => m.add(1, 2, 3));
 
 :::warning Warning
 
-`init` 仍然受支持，但需要根据你希望如何管理实例来选择是否使用它。
+`init` 用于初始化运行时实例，但它并不总是创建新的 `ModuleFederation` 实例。
 
-它与 [createInstance](#createinstance) 的核心区别在于：`init` 不会每次都创建新实例，而是会先根据 `name` 和 `version` 查找已有实例。如果找到了匹配实例，就复用该实例，并通过 `instance.initOptions(options)` 合并新的配置；只有在找不到匹配实例时，才会退回到创建新实例。
+调用 `init` 时，运行时会先根据 `name` 和 `version` 查找已有实例。若找到匹配实例，则复用该实例，并通过 `instance.initOptions(options)` 合并本次传入的配置；若未找到匹配实例，才会创建新的实例。
 
-当你希望同一个 host 的多次调用复用并扩展同一个运行时实例时，适合使用 `init`。当你需要严格隔离、确保每次都拿到全新实例时，请使用 [createInstance](#createinstance)。如果你只是想获取构建插件创建的实例，请使用 [getInstance](#getinstance)。
+因此，`init` 更适合用于同一个 host 多次初始化，并希望复用、扩展同一个运行时实例的场景。
+
+- 如果你需要创建一个完全独立的新实例，请使用 [createInstance](#createinstance)。
+
+- 如果你只是想获取由构建插件创建的实例，请使用 [getInstance](#getinstance)。
 
 :::
 
 - Type: `init(options: InitOptions): ModuleFederation`
-- 用于运行时动态注册 `Vmok` 模块
+- 用于初始化或复用 `ModuleFederation` 运行时实例
 - InitOptions:
-
 
 <Collapse>
 ```ts
@@ -235,19 +238,36 @@ plugins: [mfRuntimePlugin()]
 
 ## getInstance
 
-- Type: `getInstance(): ModuleFederation`
-- 获取构建插件创建的 `ModuleFederation` 实例
+- Type: `getInstance(): ModuleFederation | null`
+- Type: `getInstance(finder: (instance: ModuleFederation) => boolean): ModuleFederation | null`
+- 获取默认的 `ModuleFederation` 实例，或者返回首个匹配 finder 回调的已注册实例
 
-当使用了构建插件后，可以调用 `getInstance` 获取构建插件创建的 `ModuleFederation` 实例。
+当使用构建插件或 [init](#init) 创建默认实例后，可以调用 `getInstance()` 获取这个默认实例。
 
 ```ts
 import { getInstance } from '@module-federation/enhanced/runtime';
 
 const mfInstance = getInstance();
+if (!mfInstance) {
+  throw new Error('Module Federation instance is not initialized');
+}
+
 mfInstance.loadRemote('remote/util');
 ```
 
-如果没有使用构建插件，调用 `getInstance` 会抛出异常，此时你需要使用 [createInstance](#createinstance) 来创建一个新的实例。
+通过 [createInstance](#createinstance) 创建的实例不会替换默认实例，但仍然会注册到全局实例列表中。所以即使你没有保存它的返回值，也可以通过给 `getInstance` 传入 finder 回调把它找回来。
+
+finder 回调的行为和 `Array.prototype.find` 类似：运行时会遍历当前已注册的实例，并返回第一个匹配项。如果没有找到匹配实例，`getInstance` 会返回 `null`。
+
+```ts
+const targetInstance = getInstance(
+  (instance) => instance.name === 'remote-host',
+);
+
+if (targetInstance) {
+  targetInstance.loadRemote('remote/util');
+}
+```
 
 ## registerRemotes
 

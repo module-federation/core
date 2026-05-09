@@ -1,10 +1,13 @@
 # Runtime API
 
 import { Steps, Tab, Tabs, Badge, Aside } from '@theme';
-import Collapse from '@components/Collapse'
-import Runtime from '@components/en/runtime/index';
+import Collapse from '@components/Collapse';
 
-<Runtime />
+MF runtime APIs are built around the `ModuleFederation` instance. Except for [createInstance](#createinstance), which creates and returns a new instance, the other APIs run against an existing runtime instance.
+
+The default instance is usually created automatically by the build plugin, or initialized manually through [init](#init). When calling runtime APIs, you do not need to pass a `ModuleFederation` instance explicitly. They automatically use the default instance from the runtime.
+
+It is important to note that the new instance created by [createInstance](#createinstance) does not replace the default instance, but it is added to the global instance registry. You can later retrieve it through [getInstance](#getinstance) with a finder callback.
 
 ## createInstance
 
@@ -12,9 +15,7 @@ Used to create ModuleFederation instance.
 
 * When to use `createInstance`?
 
-  To ensure the uniqueness of the ModuleFederation instance, after the build plugin creates an instance, it will be stored in memory. The exported APIs all first obtain the ModuleFederation instance from memory and then call the APIs of the ModuleFederation instance. This is also why APIs like loadRemote can be used directly from the `@module-federation/enhanced/runtime` package and inherently understand what application container they are attached to.
-
-  This singleton pattern works for most scenarios, but in the following cases, you need to use `createInstance`:
+  The default instance pattern works for most scenarios, but in the following cases, you need to use `createInstance`:
 
   - No build plugin is used  (Only use runtime)
   - Multiple ModuleFederation instances need to be created with different configurations for each instance
@@ -42,16 +43,20 @@ mf.loadRemote('sub1/util').then((m) => m.add(1, 2, 3));
 
 :::warning Warning
 
-`init` is still supported, but choose it based on how you want instances to be managed.
+`init` is used to initialize a runtime instance, but it does not always create a new `ModuleFederation` instance.
 
-Unlike [createInstance](#createinstance), `init` does not always create a fresh instance. It first looks up an existing instance by `name` and `version`. If a matching instance is found, it reuses that instance and merges the new options by calling `instance.initOptions(options)`. If no matching instance exists, it falls back to creating one.
+When `init` is called, the runtime first looks for an existing instance by `name` and `version`. If a matching instance is found, it will be reused, and the new options will be merged through `instance.initOptions(options)`. If no matching instance is found, a new instance will be created.
 
-Use `init` when you want repeated calls for the same host to reuse and extend a single runtime instance. Use [createInstance](#createinstance) when you need guaranteed isolation and a brand-new instance every time. If you only need the instance created by the build plugin, use [getInstance](#getinstance).
+Therefore, `init` is more suitable when the same host may be initialized multiple times and you want to reuse and extend the same runtime instance.
+
+- If you need to create a completely independent new instance, use [createInstance](#createinstance).
+
+- If you only want to access the instance created by the build plugin, use [getInstance](#getinstance).
 
 :::
 
 - Type: `init(options: InitOptions): ModuleFederation`
-- Used for dynamically registering `Vmok` modules at runtime.
+- Used to initialize or reuse a `ModuleFederation` runtime instance
 - InitOptions:
 
 <Collapse>
@@ -232,19 +237,36 @@ If you are not using the build plugin, you can switch from `init` to [createInst
 
 ## getInstance
 
-- Type: `getInstance(): ModuleFederation`
-- Retrieves the `ModuleFederation` instance created by the build plugin
+- Type: `getInstance(): ModuleFederation | null`
+- Type: `getInstance(finder: (instance: ModuleFederation) => boolean): ModuleFederation | null`
+- Retrieves the default `ModuleFederation` instance, or the first registered instance that matches a finder callback
 
-When the build plugin is used, you can call `getInstance` to retrieve the `ModuleFederation` instance created by the build plugin.
+When the build plugin or [init](#init) creates the default instance, you can call `getInstance()` to retrieve it.
 
 ```ts
 import { getInstance } from '@module-federation/enhanced/runtime';
 
 const mfInstance = getInstance();
+if (!mfInstance) {
+  throw new Error('Module Federation instance is not initialized');
+}
+
 mfInstance.loadRemote('remote/util');
 ```
 
-If the build plugin is not used, calling `getInstance` will throw an exception. In this case, you need to use the [createInstance](#createinstance) to create a new instance.
+Instances created by [createInstance](#createinstance) do not replace the default instance, but they are still registered globally. You can pass a finder callback to `getInstance` to retrieve one later even if you did not keep the returned reference.
+
+The finder callback works like `Array.prototype.find`: the runtime iterates over the registered instances and returns the first match. If no matching instance exists, `getInstance` returns `null`.
+
+```ts
+const targetInstance = getInstance(
+  (instance) => instance.name === 'remote-host',
+);
+
+if (targetInstance) {
+  targetInstance.loadRemote('remote/util');
+}
+```
 
 ## registerRemotes
 

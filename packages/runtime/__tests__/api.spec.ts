@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createInstance, init } from '../src';
+import { createInstance, getInstance, init } from '../src';
 
 // eslint-disable-next-line max-lines-per-function
 describe('api', () => {
@@ -54,6 +54,7 @@ describe('api', () => {
         },
       ],
     });
+    expect(FM2).toBe(FM1);
     // merge remotes
     expect(FM1.options.remotes).toEqual(
       expect.arrayContaining([
@@ -82,6 +83,41 @@ describe('api', () => {
       remotes: [],
     });
     expect(FM3).not.toBe(FM4);
+  });
+
+  it('returns the default instance when no finder is provided', () => {
+    const defaultInstance = init({
+      name: '@federation/default-instance',
+      remotes: [],
+    });
+
+    createInstance({
+      name: '@federation/secondary-instance',
+      remotes: [],
+    });
+
+    expect(getInstance()).toBe(defaultInstance);
+  });
+
+  it('finds the first matching registered instance', () => {
+    const firstInstance = createInstance({
+      name: '@federation/find-first',
+      remotes: [],
+    });
+    const matchingInstance = createInstance({
+      name: '@federation/find-target',
+      remotes: [],
+    });
+
+    expect(getInstance((instance) => instance === firstInstance)).toBe(
+      firstInstance,
+    );
+    expect(
+      getInstance((instance) => instance.name === '@federation/find-target'),
+    ).toBe(matchingInstance);
+    expect(
+      getInstance((instance) => instance.name === '@federation/missing'),
+    ).toBe(null);
   });
 
   it('generates an id for runtime-created instances', () => {
