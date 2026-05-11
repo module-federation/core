@@ -1,8 +1,9 @@
 import {
-  ObservabilityPlugin as createBaseObservabilityPlugin,
+  createObservability as createBaseObservability,
   type ObservabilityController,
   type ObservabilityEvent,
   type ObservabilityEventContext,
+  type ObservabilityRuntimePlugin,
   type ObservabilityPluginOptions,
   type ObservabilityReport,
 } from './index';
@@ -251,9 +252,7 @@ function emitNodeConsoleHint(
     lines.push(`latest: ${getNodeLatestPathForConsole(options)}`);
     lines.push(`events: ${getNodeEventsPathForConsole(options)}`);
   } else {
-    lines.push(
-      `read: observability.getReport(${JSON.stringify(report.traceId)})`,
-    );
+    lines.push('read: enable fileOutput or use onReport(report)');
   }
 
   if (options.printRawStack === true && rawStack) {
@@ -267,13 +266,13 @@ function emitNodeConsoleHint(
   }
 }
 
-export function ObservabilityPlugin(
+export function createNodeObservability(
   options: ObservabilityNodeOptions = {},
 ): ObservabilityController {
   let nodeWriteQueue: Promise<void> = Promise.resolve();
   const consoleReportedTraceIds = new Set<string>();
   const rawStackByTraceId = new Map<string, string>();
-  const observability = createBaseObservabilityPlugin({
+  const observability = createBaseObservability({
     ...options,
     console: false,
     browser: undefined,
@@ -326,3 +325,11 @@ export function ObservabilityPlugin(
 
   return observability;
 }
+
+export function ObservabilityPlugin(
+  options: ObservabilityNodeOptions = {},
+): ObservabilityRuntimePlugin {
+  return createNodeObservability(options).plugin;
+}
+
+export default ObservabilityPlugin;

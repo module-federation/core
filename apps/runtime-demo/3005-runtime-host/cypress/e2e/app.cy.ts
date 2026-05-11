@@ -9,6 +9,8 @@ type ObservabilityTestReport = {
   errorCode?: string;
   requestId?: string;
   summary: {
+    componentLoaded?: boolean;
+    outcome?: string;
     flags: {
       cached?: boolean;
     };
@@ -26,7 +28,7 @@ type ObservabilityTestReport = {
   };
   events: Array<{
     eventName?: string;
-    metadata?: Record<string, string>;
+    metadata?: Record<string, unknown>;
   }>;
 };
 
@@ -651,6 +653,24 @@ describe('3005-runtime-host/', () => {
         'contain',
         'ProfileCard',
       );
+      cy.window().should((win) => {
+        const reports = getObservabilityReader(win).getReports();
+        const profileReport = reports.find(
+          (report: ObservabilityTestReport) =>
+            report.requestId === 'dynamic-remote/ProfileCard' &&
+            report.summary.componentLoaded === true,
+        );
+
+        expect(profileReport?.summary.componentLoaded).to.equal(true);
+        expect(profileReport?.summary.outcome).to.equal('component-loaded');
+        expect(
+          profileReport?.events.some(
+            (event) =>
+              event.eventName === 'component:business-loaded' &&
+              event.metadata?.producer === 'runtime_remote2',
+          ),
+        ).to.equal(true);
+      });
       cy.get('[data-testid="observability-showcase-load"]').click();
       cy.location('pathname').should(
         'equal',

@@ -15,21 +15,19 @@ Node file output, and no raw error stack in console output.
 import { createInstance } from '@module-federation/runtime';
 import { ObservabilityPlugin } from '@module-federation/observability-plugin';
 
-const observability = ObservabilityPlugin({
-  level: 'verbose',
-  browser: {
-    enabled: true,
-    scope: 'host',
-  },
-});
-
 createInstance({
   name: 'host',
-  plugins: [observability.plugin],
+  plugins: [
+    ObservabilityPlugin({
+      level: 'verbose',
+      browser: {
+        enabled: true,
+        scope: 'host',
+      },
+    }),
+  ],
   remotes: [],
 });
-
-const report = observability.getLatestReport();
 ```
 
 The plugin does not upload data or expose a browser global by default. Reports
@@ -68,7 +66,13 @@ Failure hints are printed with `console.error` so browser DevTools, CDP-based
 agents, Node logs, and log collection systems can detect that a Module
 Federation load failed and then use the printed `traceId` to fetch the full
 report. Successful or recovered reports are still available through the reader
-APIs and callbacks, but they are not promoted to console errors.
+APIs and callbacks, but they are not promoted to console errors. When the
+browser reader is enabled in development mode, the plugin prints a small
+`console.info` line by default when a `loadRemote` or `loadShare` trace starts.
+The line includes the `traceId` and read command so an agent can inspect pending
+loading state before a timeout or error happens. In production browser mode,
+start logs are disabled by default; set `trace.printStart: true` only when you
+explicitly want them.
 
 The runtime only exposes the loading lifecycle hooks needed to know whether the
 main flow started, succeeded, or failed. This plugin listens to those hooks,
@@ -76,7 +80,8 @@ derives detailed reasons like shared version mismatch or eager boundary issues,
 and exposes the final loading state through a small `summary` object:
 
 - `runtime-loaded`: Module Federation finished loading the remote module.
-- `component-loaded`: business code called `markComponentLoaded`.
+- `component-loaded`: business code called `markComponentLoaded`, or the
+  opt-in React lifecycle observer confirmed that the remote component mounted.
 - `failed`: the load failed and `failedPhase` points to the first specific
   failing phase.
 - `recovered`: loading hit an error but a fallback/recovery path returned a
@@ -120,10 +125,36 @@ mismatch, and eager boundary errors are not retried by the retry plugin by
 default because they are usually configuration or availability problems instead
 of transient network failures.
 
-Business code can mark its own success condition with a fixed event:
+Business code can mark its own success condition with a fixed event. When React
+component lifecycle observation is enabled, the wrapper injects an
+`onMFRemoteLoaded` prop into the remote component. The producer can call it when
+the component's own ready condition is met:
+
+```tsx
+import { useEffect } from 'react';
+import type { OnMFRemoteLoaded } from '@module-federation/observability-plugin';
+
+export default function RemotePanel({ onMFRemoteLoaded }: { onMFRemoteLoaded?: OnMFRemoteLoaded }) {
+  useEffect(() => {
+    onMFRemoteLoaded?.({
+      metadata: {
+        dataReady: true,
+      },
+    });
+  }, [onMFRemoteLoaded]);
+
+  return <section>Remote panel</section>;
+}
+```
+
+If the app wants to mark readiness from the consumer side, it can still call the
+instance method directly:
 
 ```ts
-observability.markComponentLoaded({
+import { getInstance } from '@module-federation/runtime';
+import '@module-federation/observability-plugin';
+
+getInstance()?.markComponentLoaded({
   requestId: 'remote/Button',
   componentName: 'Button',
   metadata: {
@@ -132,9 +163,40 @@ observability.markComponentLoaded({
 });
 ```
 
-This records `component:business-loaded` on the same trace when possible.
+Both paths record `component:business-loaded` on the same trace when possible.
 Business metadata is optional. String values keep their original details and are
-only length-limited, so user-provided metadata remains trustworthy.
+only length-limited, so user-provided metadata remains trustworthy. The instance
+method is attached when the observability plugin is registered. If an
+application uses multiple runtime instances, call it on the instance that
+registered this plugin.
+
+React component lifecycle observation is available only when explicitly enabled:
+
+```ts
+ObservabilityPlugin({
+  level: 'verbose',
+  react: {
+    enabled: true,
+    timeout: 5000,
+    consumerNames: ['runtime_host'],
+    remoteIds: ['remote/Button'],
+  },
+});
+```
+
+When this option is enabled, the plugin tries to wrap remote function components
+returned by `loadRemote`. The wrapper does not add DOM nodes. It injects the
+`onMFRemoteLoaded` prop and records
+`component:react-render-started`, `component:react-mounted`, or
+`component:react-render-timeout`. This is useful for dev and AI debugging, but
+it only means React mounted the component. Keep using `markComponentLoaded` when
+the business definition of success depends on data, charts, SDKs, or other async
+work inside the remote component.
+
+Use `react.consumerNames` or `react.remoteIds` to limit this behavior to the
+consumers or remote requests you are actively debugging. If both are empty, the
+plugin observes detected React function components for every runtime instance
+that registered it.
 
 Browser output is available only when the plugin option explicitly enables it.
 When browser output is enabled, the report can be read from:
@@ -147,11 +209,29 @@ window.__FEDERATION__.__OBSERVABILITY__.host.findReports({ remote: 'remote1' });
 window.__FEDERATION__.__OBSERVABILITY__.host.exportReport('mf-trace-id');
 ```
 
-The same methods are available on the observability controller returned by
-`ObservabilityPlugin()`. `getReports({ limit })` returns recent reports newest
-first. `findReports()` can filter by `traceId`, `remote`, `expose`, `shared`,
-`status`, or `outcome`. `exportReport()` returns a copied report object, using
-the latest report when no `traceId` is provided.
+`getReports({ limit })` returns recent reports newest first. `findReports()` can
+filter by `traceId`, `remote`, `expose`, `shared`, `status`, or `outcome`.
+`exportReport()` returns a copied report object, using the latest report when no
+`traceId` is provided.
+
+For agent-led development debugging where a page may stay in a loading state,
+enable the browser reader. Development browser mode prints start traces by
+default:
+
+```ts
+ObservabilityPlugin({
+  level: 'verbose',
+  browser: {
+    enabled: true,
+    scope: 'host',
+  },
+});
+```
+
+This prints only `loadRemote` and `loadShare` start lines. It does not print a
+line for every internal phase. Set `trace.printStart: false` to disable it in
+development browser mode. In production browser mode, set
+`trace.printStart: true` to opt in.
 
 For browser production use, set `browser.mode: "production"` when the runtime
 console must stay minimal:
@@ -169,10 +249,10 @@ ObservabilityPlugin({
 In production browser mode, the `console.error` hint only includes the `traceId`
 and known `errorCode`. It does not print the report body, raw stack, request
 URL, or `read:` command. Full reports are still available only through explicit
-user choices such as the observability controller, `exportReport()`, or an
-application-owned `onReport` upload. Production applications that want richer
-observability should prefer `onReport` / `onEvent` to forward reports to their
-own telemetry system instead of exposing a public browser global.
+user choices such as `exportReport()` or an application-owned `onReport` upload.
+Production applications that want richer observability should prefer
+`onReport` / `onEvent` to forward reports to their own telemetry system instead
+of exposing a public browser global.
 
 Node file output is provided by the Node-specific entry:
 
@@ -180,15 +260,15 @@ Node file output is provided by the Node-specific entry:
 import { createInstance } from '@module-federation/runtime';
 import { ObservabilityPlugin } from '@module-federation/observability-plugin/node';
 
-const observability = ObservabilityPlugin({
-  level: 'verbose',
-  fileOutput: true,
-  directory: '.mf/observability',
-});
-
 createInstance({
   name: 'host',
-  plugins: [observability.plugin],
+  plugins: [
+    ObservabilityPlugin({
+      level: 'verbose',
+      fileOutput: true,
+      directory: '.mf/observability',
+    }),
+  ],
   remotes: [],
 });
 ```
@@ -293,3 +373,13 @@ Shared dependency reports include only evidence fields such as package name,
 share scope, requested version, available versions, selected provider, and a
 reason like `missing-provider`, `version-mismatch`, or `sync-async-boundary`.
 They do not include shared factories, module values, source, or business data.
+
+Shared observability is intentionally scoped to the Module Federation instance
+that resolved the shared dependency. It can answer which MF instance loaded a
+shared package, which registered provider/version was selected, and the related
+scope/version/eager configuration. It does not guarantee a causal link from that
+shared dependency back to a specific remote or expose, because shared resolution
+can be triggered later by the bundler runtime while chunks and module factories
+execute. When multiple shared dependencies are involved, read all
+`phase: "shared"` events. `summary.shared` is only a compact last-observed
+summary.

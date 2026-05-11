@@ -46,11 +46,23 @@ read: window.__FEDERATION__.__OBSERVABILITY__["runtime_host"].getReport("mf-..."
 ```
 
 Run the `read:` command exactly as printed. If the browser global reader is not
-enabled, use the observability controller created by application code:
+enabled, ask for the application-owned `onReport` output or the uploaded
+observability record.
+
+If the user wants to inspect loading chains or says the page is stuck loading
+without an error, do not wait for a failure hint. Read recent reports directly:
 
 ```ts
-observability.getReport('mf-...');
+window.__FEDERATION__.__OBSERVABILITY__['runtime_host'].getReports({ limit: 10 });
 ```
+
+Then look for `status: "pending"` or `summary.outcome: "pending"`. Use
+`startedAt`, `updatedAt`, `duration`, `summary.phases`, and
+`diagnosis.pendingPhases` to explain where the trace is currently stuck. When
+the browser reader is enabled in development mode, the console prints
+`Observability trace started` for `loadRemote` and `loadShare` by default; use
+that `traceId` to read the exact report. In production browser mode, this start
+log is disabled unless the app explicitly sets `trace.printStart: true`.
 
 For the latest report:
 
@@ -90,8 +102,7 @@ errorCode: RUNTIME-...
 
 Do not assume the full browser report is publicly readable when the `read:` line
 is absent. Ask the application owner to export it with `exportReport(traceId)`,
-read it through the application-owned observability controller, or check the
-application's own uploaded observability record.
+or check the application's own uploaded observability record.
 
 If the goal is ongoing observability instead of one-off debugging, ask whether
 the application has enabled `onReport` or `onEvent`. In production, those
@@ -170,11 +181,26 @@ not by an AI model.
 
 - `summary.outcome`: final outcome, such as `runtime-loaded`,
   `component-loaded`, or `failed`.
+- `summary.runtimeLoaded`: the remote module loaded successfully in the runtime.
+- `summary.loadCompleted`: the `loadRemote` flow ended; this is not by itself a
+  success signal.
+- `summary.componentLoaded`: a component-level success signal was observed. It
+  can come from business `markComponentLoaded` or from the opt-in React lifecycle
+  observer reporting `component:react-mounted`.
 - `summary.phases`: per-phase status, duration, cache, retry, and recovery
   markers.
 - `summary.flags`: cross-phase cache, retry, fallback, and recovery markers.
-- `summary.shared`: last observed shared provider/version result.
+- `summary.shared`: last observed shared provider/version result. If multiple
+  shared dependencies are involved, inspect every `phase: "shared"` event.
 - `summary.error`: compact error summary.
+
+If React lifecycle observation is enabled, reports may include
+`component:react-render-started`, `component:react-mounted`, or
+`component:react-render-timeout`. Treat `component:react-mounted` as React mount
+success only. It does not prove that business data, charts, or SDK
+initialization completed. The wrapper also injects an `onMFRemoteLoaded` prop
+into the remote React component; if the producer calls it, the report includes
+`component:business-loaded`, which is the producer's explicit ready signal.
 
 ### Build files
 
@@ -354,6 +380,7 @@ Shared dependency or async boundary configuration failed.
 Start with:
 
 - `summary.shared`
+- all `events` entries where `phase === "shared"`
 - shared config in `.mf/observability/build-info.json` when available
 - `summary.error.lifecycle`
 - `diagnosis.actions`
@@ -364,6 +391,13 @@ Likely fixes:
 - Ensure the dependency is provided by the host or expected provider.
 - Fix `eager` for sync shared usage.
 - Add an async startup or async boundary when needed.
+
+Shared evidence is scoped to the MF instance that resolved the shared
+dependency. It can identify the instance, shared package, selected
+provider/version, and related config. Do not claim that a shared dependency was
+caused by a specific remote/expose unless the report contains explicit evidence.
+Bundler runtime chunk and module execution can trigger shared resolution after
+remote loading, so remote/expose causality is not guaranteed.
 
 ### `RUNTIME-008`
 

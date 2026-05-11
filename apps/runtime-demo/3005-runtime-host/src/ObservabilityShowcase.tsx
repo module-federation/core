@@ -89,20 +89,6 @@ async function loadProfileWidget() {
   const Component = resolveRemoteComponent(remoteModule);
   const report = observability.getLatestReport();
 
-  if (report?.traceId) {
-    observability.markComponentLoaded({
-      traceId: report.traceId,
-      requestId: profileRequest,
-      componentName: 'ProfileCard',
-      metadata: {
-        route: 'profile',
-        consumer: 'observability_showcase_profile_consumer',
-        producer: producerName,
-        expose: './ProfileCard',
-      },
-    });
-  }
-
   return {
     Component,
     traceId: report?.traceId || '',
@@ -170,23 +156,6 @@ async function loadAnalyticsWorkspace() {
   const sdk = sdkFactory();
   const Component = resolveRemoteComponent(remoteModule);
   const report = observability.getLatestReport();
-
-  if (report?.traceId) {
-    observability.markComponentLoaded({
-      traceId: report.traceId,
-      requestId: analyticsRequest,
-      componentName: 'AnalyticsPanel',
-      metadata: {
-        route: 'analytics',
-        consumer: analyticsConsumerName,
-        producer: producerName,
-        expose: './AnalyticsPanel',
-        shared: ['react', 'observability-customer-sdk'],
-        customerSdkProvider: sdk.provider,
-        customerSdkVersion: sdk.version,
-      },
-    });
-  }
 
   return {
     Component,

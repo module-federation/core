@@ -19,7 +19,7 @@ Use this sub-skill when the user provides or mentions:
 - a report field such as `diagnosis`, `summary.phases`, `ownerHint`, or
   `moduleInfo`
 
-## Runtime codes and plugin reports
+## Error codes vs observability reports
 
 Runtime error codes are still the stable first signal. The observability plugin
 does not replace `RUNTIME-xxx`; it enriches the code with phase, moduleInfo,
@@ -68,6 +68,24 @@ If the user only has the latest browser report, use:
 window.__FEDERATION__.__OBSERVABILITY__['runtime_host'].getLatestReport();
 ```
 
+If the user wants to inspect loading chains, observe MF loading, or debug a page
+that stays in loading state without an error or `traceId`, do not wait for a
+console error. Read recent reports directly:
+
+```ts
+window.__FEDERATION__.__OBSERVABILITY__['runtime_host'].getReports({ limit: 10 });
+```
+
+Then look for reports with `status: "pending"` or
+`summary.outcome: "pending"`. Use `startedAt`, `updatedAt`, `duration`,
+`summary.phases`, and `diagnosis.pendingPhases` to explain which phase has
+started, which phase has not completed, and how long the trace has been idle.
+When the browser reader is enabled in development mode, the console prints
+`Observability trace started` lines for `loadRemote` and `loadShare` by default;
+use the printed `traceId` to read that exact report. In production browser mode,
+these start logs are disabled unless the app explicitly sets
+`trace.printStart: true`.
+
 For recent or filtered browser reports, use:
 
 ```ts
@@ -84,13 +102,13 @@ window.__FEDERATION__.__OBSERVABILITY__['runtime_host'].findReports({
 window.__FEDERATION__.__OBSERVABILITY__['runtime_host'].exportReport('mf-...');
 ```
 
-If the browser global is disabled, ask for the app's observability controller or
-for the full report output pasted by the user.
+If the browser global is disabled, ask for the app's `onReport` output, uploaded
+observability record, or the full report output pasted by the user.
 
 If the browser console only contains `traceId` and `errorCode`, treat it as
 production-safe output. Do not assume the full report is globally readable. Ask
-for an explicit `exportReport(traceId)` output, the app observability controller
-output, or the user's uploaded observability record.
+for an explicit `exportReport(traceId)` output, the app's `onReport` output, or
+the user's uploaded observability record.
 
 ### Node or SSR
 
@@ -130,6 +148,37 @@ Read:
 12. `build`
 13. `moduleInfo`
 14. `events`
+
+## Step 2.1: Decide loading success
+
+Use `summary.outcome` before reading raw `events`:
+
+- `runtime-loaded`: the remote module was loaded by Module Federation runtime.
+- `component-loaded`: a component-level success signal was observed. This may be
+  a business `markComponentLoaded` signal or the opt-in React lifecycle observer
+  reporting `component:react-mounted`.
+- `failed`: loading failed. Use `summary.error`, `diagnosis.actions`, and
+  `failedPhase`.
+- `recovered`: loading failed first, then retry or fallback returned a result.
+
+Use `summary.loadCompleted` only as "the loadRemote flow ended"; it does not by
+itself prove success. Use `summary.runtimeLoaded` for remote module success and
+`summary.componentLoaded` for component-level success.
+
+If `events` are needed, remote module success is usually:
+
+- `phase: "loadRemote"`
+- `status: "success"`
+- `lifecycle: "onLoad"`
+- `message: "remote:loaded"`
+
+React mount observation is opt-in. It records component events such as
+`component:react-render-started`, `component:react-mounted`, and
+`component:react-render-timeout`. Treat `component:react-mounted` as React mount
+success, not as proof that business data, charts, or SDKs finished loading.
+When this option is enabled, the wrapper also injects an `onMFRemoteLoaded` prop
+into the remote React component. If the producer calls that prop, treat the
+resulting `component:business-loaded` event as the producer's own ready signal.
 
 ## Step 3: Decide the likely owner
 
@@ -185,185 +234,24 @@ Do not describe `moduleInfo.availableNames` as a component list, expose list, or
 prefetch list. It is the clipped list of deployment-provided moduleInfo remote
 candidate keys that were available when no entry matched the failed remote.
 
-## Step 6: Common paths
+## Step 6: Use runtime error codes as references
 
-### Manifest failure / `RUNTIME-003`
+Runtime error codes are stable entry points, but this observability skill should
+not act as a full `RUNTIME-xxx` troubleshooting manual.
 
-Check:
+When a report contains `diagnosis.errorCode`, `summary.error.errorCode`, or a
+console `RUNTIME-xxx` code:
 
-- `diagnosis.facts.url`
-- `summary.phases.manifest`
-- `build.host.remotes`
+1. use the code to choose the relevant runtime troubleshooting document
+2. use this report to confirm the actual phase, owner, request, remote, shared,
+   `moduleInfo`, and timing evidence
+3. avoid giving a fix based only on the code if report fields contradict it
+4. if there is no observability report, ask for the report, trace id, browser
+   reader output, Node report file, or enough console/network evidence
 
-Fix wrong manifest URL, HTML shell responses, CORS, gateway routing, or stale
-query/hash assumptions.
-
-### Invalid manifest / `RUNTIME-013`
-
-Definition:
-
-`RUNTIME-013` means the manifest URL returned JSON, but the JSON is not a valid
-Module Federation manifest. It is different from `RUNTIME-003`, which means the
-manifest could not be fetched or parsed.
-
-Check:
-
-- `diagnosis.facts.url`
-- `diagnosis.facts.errorCode`
-- `summary.phases.manifest`
-- `diagnosis.facts.hostName`
-- manifest fields such as `metaData`, `exposes`, and `shared`
-
-When explaining this failure, say that the manifest response is reachable but
-structurally invalid or incomplete. Do not describe it as a remoteEntry network
-failure unless the report also contains network evidence.
-
-Fix wrong JSON responses, gateway/deployment rewrites, missing producer manifest
-output, or stale/incomplete manifest files.
-
-### Remote not matched / `RUNTIME-004`
-
-Check:
-
-- `diagnosis.facts.requestId`
-- host remotes in `.mf/observability/build-info.json` when available
-
-Fix remote name, alias, or host remote declaration.
-
-### Snapshot / moduleInfo failure / `RUNTIME-007`
-
-Definition:
-
-`RUNTIME-007` means the runtime failed while resolving a snapshot/moduleInfo
-remote. It is not a remoteEntry network failure, not an expose lookup failure,
-and not a React/component render failure unless another report field explicitly
-shows those later phases.
-
-Check:
-
-- `requestId`
-- `remote.name`
-- `remote.alias`
-- `remote.version`
-- `diagnosis.errorCode`
-- `diagnosis.facts.moduleInfoMatchedCount`
-- `diagnosis.facts.moduleInfoNames`
-- `moduleInfo.entries`
-- `moduleInfo.availableNames`
-- `build.host.remotes`
-
-When explaining this failure, say that the runtime could not match the requested
-remote name/alias/version against deployment-provided `__FEDERATION__.moduleInfo`.
-Do not say "available component list" unless the report explicitly refers to
-remote exposes. This failure usually happens before the remote URL, remoteEntry,
-or exposed component can be loaded.
-
-The first cause sentence must include the literal term `moduleInfo`. Do not
-replace it with "loadable source list", "available source list", "component
-list", or any other paraphrase.
-
-Use this wording:
-
-- "The requested remote did not match any deployment-provided moduleInfo entry."
-- "Check whether the deployment/platform moduleInfo injection contains the
-  requested remote name, alias, or version key."
-- "The component has not been reached yet; the failure is in remote snapshot
-  resolution."
-
-Avoid this wording:
-
-- "The component is missing from the available component list."
-- "The prefetch list does not contain the component."
-- "The expose is missing."
-- "The React component failed to render."
-- "The remoteEntry request failed."
-
-Only mention source files or demo setup code after report evidence. In real
-projects, first inspect the deployment/platform plugin or runtime registration
-that injects `__FEDERATION__.moduleInfo`; do not jump directly to editing the
-business component.
-
-Exclude likely causes when the report only shows a snapshot/moduleInfo failure:
-
-- remoteEntry URL/network/CORS failure
-- remoteEntry execution failure
-- exposed module key missing
-- shared dependency version/provider/eager failure
-- business component render failure
-
-Fix missing deployment-provided `__FEDERATION__.moduleInfo`, mismatched remote
-name/alias keys, or missing `publicPath` / `getPublicPath` in the injected
-moduleInfo.
-
-### Expose not found / `RUNTIME-014`
-
-Definition:
-
-`RUNTIME-014` means the remote entry loaded and initialized, but the requested
-expose was not exported by that remote.
-
-Check:
-
-- `diagnosis.facts.requestId`
-- `diagnosis.facts.remoteName`
-- `diagnosis.facts.expose`
-- producer `exposes` config or manifest `exposes`
-
-When explaining this failure, say that remote loading reached the expose lookup
-phase. Do not call it a manifest fetch failure, moduleInfo match failure,
-remoteEntry network failure, or shared dependency failure unless another report
-field explicitly shows that evidence.
-
-Fix the consumer request id, producer expose name, `./` prefix, case mismatch,
-alias mismatch, or stale producer deployment.
-
-### Remote init failure / `RUNTIME-015`
-
-Definition:
-
-`RUNTIME-015` means the remote entry loaded, but the remote container failed
-during `init`.
-
-Check:
-
-- `diagnosis.facts.remoteName`
-- `diagnosis.facts.remoteEntry`
-- `diagnosis.facts.entryGlobalName`
-- `summary.phases.remoteEntry`
-- original error text in `diagnosis.errorMessage` or `summary.error.errorMessage`
-- shared facts and build-side shared config when available
-
-When explaining this failure, say that the remote entry was reached and failed
-while initializing. If the original error points to shared config, classify the
-likely owner as shared/host+remote config; otherwise inspect producer init
-logic.
-
-Fix shared provider/version/scope/eager config, remoteEntry type/global mismatch,
-or producer code that throws during container initialization.
-
-### Shared or eager failure / `RUNTIME-005` / `RUNTIME-006`
-
-Check:
-
-- `summary.shared`
-- shared config in `.mf/observability/build-info.json` when available
-- `summary.error.lifecycle`
-
-Fix provider availability, version range, shareScope, singleton/strictVersion,
-eager, or async boundary.
-
-### RemoteEntry failure / `RUNTIME-008`
-
-Check:
-
-- `diagnosis.facts.resourceErrorType`
-- `diagnosis.facts.url`
-- `summary.phases.remoteEntry`
-- `.mf/observability/build-info.json` remoteEntry facts when available
-
-If the type is network/timeout, fix URL, CORS, routing, server, or timeout. If
-the type is script execution, inspect the producer exception and fix the remote
-build. Retry does not fix script execution failures.
+Keep the explanation centered on the report evidence. For code-specific
+definitions and fixes, refer to the runtime troubleshooting docs instead of
+duplicating that content here.
 
 ## Step 7: Final response shape
 

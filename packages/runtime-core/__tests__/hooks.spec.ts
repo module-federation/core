@@ -506,6 +506,20 @@ describe('hooks', () => {
     await expect(hook.emit('payload')).resolves.toBe('second-result');
   });
 
+  it('async hooks treat returning the original payload as no explicit result', async () => {
+    const hook = new AsyncHook<
+      [{ id: string }],
+      { id: string; wrapped?: boolean } | void | false
+    >('async-passthrough');
+    const payload = { id: 'remote/Button' };
+    const wrapped = { id: 'remote/Button', wrapped: true };
+
+    hook.on(() => wrapped);
+    hook.on((args) => args);
+
+    await expect(hook.emit(payload)).resolves.toBe(wrapped);
+  });
+
   it('async hooks still abort when a listener returns false', async () => {
     const hook = new AsyncHook<[string], string | void | false>('async-abort');
     const calls: Array<string> = [];

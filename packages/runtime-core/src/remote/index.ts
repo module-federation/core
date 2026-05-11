@@ -103,7 +103,7 @@ export class RemoteHandler {
           moduleInstance: Module;
         },
       ],
-      void
+      unknown
     >('onLoad'),
     afterLoadRemote: new AsyncHook<
       [

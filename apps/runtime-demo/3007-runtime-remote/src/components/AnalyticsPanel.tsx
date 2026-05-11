@@ -1,4 +1,24 @@
-export default function AnalyticsPanel() {
+import { useEffect } from 'react';
+
+type OnMFRemoteLoaded = (options?: {
+  metadata?: Record<string, unknown>;
+}) => void;
+
+export default function AnalyticsPanel({
+  onMFRemoteLoaded,
+}: {
+  onMFRemoteLoaded?: OnMFRemoteLoaded;
+}) {
+  useEffect(() => {
+    onMFRemoteLoaded?.({
+      metadata: {
+        producer: 'runtime_remote2',
+        expose: './AnalyticsPanel',
+        readySource: 'producer',
+      },
+    });
+  }, [onMFRemoteLoaded]);
+
   return (
     <section
       className="customer-portal__remote-widget"

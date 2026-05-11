@@ -18,7 +18,10 @@ export class AsyncHook<
           return false; // Abort process
         } else if (i < ls.length) {
           return Promise.resolve(ls[i++].apply(null, data)).then((result) => {
-            if (result === undefined) {
+            if (
+              result === undefined ||
+              (data.length === 1 && result === data[0])
+            ) {
               return call(prev);
             }
             return call(result);

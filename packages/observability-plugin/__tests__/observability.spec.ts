@@ -2,12 +2,12 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
-import { ObservabilityPlugin } from '../src';
+import { createObservability, ObservabilityPlugin } from '../src';
 import {
   ObservabilityBuildPlugin,
   createObservabilityBuildInfo,
 } from '../src/build';
-import { ObservabilityPlugin as ObservabilityNode } from '../src/node';
+import { createNodeObservability as ObservabilityNode } from '../src/node';
 
 const enabledOrigin = {
   options: {
@@ -415,7 +415,7 @@ describe('ObservabilityBuildPlugin', () => {
 });
 
 const emitRemoteLoaded = (
-  observability: ReturnType<typeof ObservabilityPlugin>,
+  observability: ReturnType<typeof createObservability>,
   overrides: Record<string, unknown> = {},
 ) =>
   observability.plugin.onLoad?.({
@@ -435,7 +435,7 @@ const emitRemoteLoaded = (
   } as any);
 
 const emitRemoteStart = (
-  observability: ReturnType<typeof ObservabilityPlugin>,
+  observability: ReturnType<typeof createObservability>,
   overrides: Record<string, unknown> = {},
 ) =>
   observability.plugin.beforeRequest?.({
@@ -446,7 +446,7 @@ const emitRemoteStart = (
   } as any);
 
 const emitRemoteComplete = (
-  observability: ReturnType<typeof ObservabilityPlugin>,
+  observability: ReturnType<typeof createObservability>,
   overrides: Record<string, unknown> = {},
 ) =>
   observability.plugin.afterLoadRemote?.({
@@ -461,7 +461,7 @@ const emitRemoteComplete = (
   } as any);
 
 const emitRemoteMatch = (
-  observability: ReturnType<typeof ObservabilityPlugin>,
+  observability: ReturnType<typeof createObservability>,
   overrides: Record<string, unknown> = {},
 ) =>
   observability.plugin.afterMatchRemote?.({
@@ -476,7 +476,7 @@ const emitRemoteMatch = (
   } as any);
 
 const emitRemoteInit = (
-  observability: ReturnType<typeof ObservabilityPlugin>,
+  observability: ReturnType<typeof createObservability>,
   overrides: Record<string, unknown> = {},
 ) =>
   observability.plugin.afterInitRemote?.({
@@ -490,7 +490,7 @@ const emitRemoteInit = (
   } as any);
 
 const emitExposePhase = (
-  observability: ReturnType<typeof ObservabilityPlugin>,
+  observability: ReturnType<typeof createObservability>,
   hookName: 'beforeGetExpose' | 'afterGetExpose',
   overrides: Record<string, unknown> = {},
 ) =>
@@ -506,7 +506,7 @@ const emitExposePhase = (
   } as any);
 
 const emitFactoryPhase = (
-  observability: ReturnType<typeof ObservabilityPlugin>,
+  observability: ReturnType<typeof createObservability>,
   hookName: 'beforeExecuteFactory' | 'afterExecuteFactory',
   overrides: Record<string, unknown> = {},
 ) =>
@@ -523,7 +523,7 @@ const emitFactoryPhase = (
   } as any);
 
 const emitRemoteError = (
-  observability: ReturnType<typeof ObservabilityPlugin>,
+  observability: ReturnType<typeof createObservability>,
   overrides: Record<string, unknown> = {},
 ) =>
   observability.plugin.errorLoadRemote?.({
@@ -541,7 +541,7 @@ const emitRemoteError = (
   } as any);
 
 const emitManifestError = (
-  observability: ReturnType<typeof ObservabilityPlugin>,
+  observability: ReturnType<typeof createObservability>,
   overrides: Record<string, unknown> = {},
 ) =>
   observability.plugin.errorLoadRemote?.({
@@ -703,23 +703,325 @@ const createBuildCompilerFixture = (
 };
 
 describe('ObservabilityPlugin', () => {
-  it('does not record events when the plugin is disabled', () => {
-    const observability = ObservabilityPlugin({
+  it('returns a runtime plugin and attaches markComponentLoaded to the runtime instance', () => {
+    const plugin = ObservabilityPlugin({ level: 'verbose' });
+    const instance = {} as {
+      markComponentLoaded?: ReturnType<
+        typeof createObservability
+      >['markComponentLoaded'];
+    };
+
+    expect(plugin.name).toBe('observability-plugin');
+    plugin.apply?.(
+      instance as unknown as Parameters<NonNullable<typeof plugin.apply>>[0],
+    );
+
+    expect(typeof instance.markComponentLoaded).toBe('function');
+  });
+
+  it('wraps a remote React function component only when react lifecycle observability is enabled', async () => {
+    const effects: Array<() => void | (() => void)> = [];
+    const react = {
+      createElement: vi.fn((type: unknown, props?: unknown) => ({
+        type,
+        props,
+      })),
+      useEffect: vi.fn((effect: () => void | (() => void)) => {
+        effects.push(effect);
+      }),
+    };
+    const observability = createObservability({
+      level: 'verbose',
+      react: {
+        enabled: true,
+        timeout: 0,
+      },
+    });
+
+    function RemoteButton() {
+      return null;
+    }
+
+    const wrapped = await observability.plugin.onLoad?.({
+      id: 'remote/Button',
+      pkgNameOrAlias: 'remote',
+      expose: './Button',
+      remote: {
+        name: 'remote',
+        entry: 'http://localhost:3001/mf-manifest.json',
+      },
+      options: {},
+      origin: {
+        ...enabledOrigin,
+        loadShareSync: () => () => react,
+      },
+      exposeModule: RemoteButton,
+      exposeModuleFactory: undefined,
+      moduleInstance: {},
+    } as any);
+
+    expect(typeof wrapped).toBe('function');
+
+    (wrapped as (props: Record<string, unknown>) => unknown)({
+      label: 'Save',
+    });
+    effects[0]?.();
+
+    const renderedProps = react.createElement.mock.calls[0]?.[1] as {
+      label: string;
+      onMFRemoteLoaded: (options?: {
+        componentName?: string;
+        metadata?: Record<string, unknown>;
+      }) => void;
+    };
+
+    expect(react.createElement).toHaveBeenCalledWith(
+      RemoteButton,
+      expect.objectContaining({
+        label: 'Save',
+        onMFRemoteLoaded: expect.any(Function),
+      }),
+    );
+    expect(observability.getEvents()).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          phase: 'component',
+          status: 'start',
+          eventName: 'component:react-render-started',
+          source: 'react',
+          componentName: 'RemoteButton',
+        }),
+        expect.objectContaining({
+          phase: 'component',
+          status: 'success',
+          eventName: 'component:react-mounted',
+          source: 'react',
+          componentName: 'RemoteButton',
+        }),
+      ]),
+    );
+    expect(observability.getLatestReport()?.summary.outcome).toBe(
+      'component-loaded',
+    );
+    expect(observability.getLatestReport()?.diagnosis?.title).toBe(
+      'React component mounted',
+    );
+
+    renderedProps.onMFRemoteLoaded({
+      metadata: {
+        readySource: 'producer',
+      },
+    });
+
+    expect(observability.getEvents()).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          phase: 'component',
+          status: 'success',
+          eventName: 'component:business-loaded',
+          source: 'business',
+          componentName: 'RemoteButton',
+          metadata: {
+            readySource: 'producer',
+          },
+        }),
+      ]),
+    );
+
+    react.createElement.mockClear();
+    effects.length = 0;
+
+    function RemoteCard() {
+      return null;
+    }
+
+    const remoteModule = {
+      default: RemoteCard,
+      named: 'value',
+    };
+    const wrappedModule = await observability.plugin.onLoad?.({
+      id: 'remote/Card',
+      pkgNameOrAlias: 'remote',
+      expose: './Card',
+      remote: {
+        name: 'remote',
+        entry: 'http://localhost:3001/mf-manifest.json',
+      },
+      options: {},
+      origin: {
+        ...enabledOrigin,
+        loadShareSync: () => () => react,
+      },
+      exposeModule: remoteModule,
+      exposeModuleFactory: undefined,
+      moduleInstance: {},
+    } as any);
+
+    expect(wrappedModule).toBeUndefined();
+    expect(remoteModule.named).toBe('value');
+    expect(remoteModule.default).toEqual(expect.any(Function));
+
+    const WrappedDefault = remoteModule.default as (
+      props: Record<string, unknown>,
+    ) => unknown;
+    WrappedDefault({});
+    effects[0]?.();
+
+    expect(react.createElement).toHaveBeenCalledWith(
+      RemoteCard,
+      expect.objectContaining({
+        onMFRemoteLoaded: expect.any(Function),
+      }),
+    );
+  });
+
+  it('wraps explicitly matched React remotes even when the compiled component name is not capitalized', async () => {
+    const react = {
+      createElement: vi.fn((type: unknown, props?: unknown) => ({
+        type,
+        props,
+      })),
+      useEffect: vi.fn(),
+    };
+    const observability = createObservability({
+      level: 'verbose',
+      react: {
+        enabled: true,
+        remoteIds: ['remote/profile'],
+      },
+    });
+
+    const compiledRemote = function profile_widget() {
+      return null;
+    };
+
+    const unmatched = await observability.plugin.onLoad?.({
+      id: 'remote/settings',
+      pkgNameOrAlias: 'remote',
+      expose: './settings',
+      remote: {
+        name: 'remote',
+        entry: 'http://localhost:3001/mf-manifest.json',
+      },
+      options: {},
+      origin: {
+        ...enabledOrigin,
+        loadShareSync: () => () => react,
+      },
+      exposeModule: compiledRemote,
+      exposeModuleFactory: undefined,
+      moduleInstance: {},
+    } as any);
+
+    expect(unmatched).toBeUndefined();
+
+    const matched = await observability.plugin.onLoad?.({
+      id: 'remote/profile',
+      pkgNameOrAlias: 'remote',
+      expose: './profile',
+      remote: {
+        name: 'remote',
+        entry: 'http://localhost:3001/mf-manifest.json',
+      },
+      options: {},
+      origin: {
+        ...enabledOrigin,
+        loadShareSync: () => () => react,
+      },
+      exposeModule: compiledRemote,
+      exposeModuleFactory: undefined,
+      moduleInstance: {},
+    } as any);
+
+    expect(typeof matched).toBe('function');
+
+    (matched as (props: Record<string, unknown>) => unknown)({});
+
+    expect(react.createElement).toHaveBeenCalledWith(
+      compiledRemote,
+      expect.objectContaining({
+        onMFRemoteLoaded: expect.any(Function),
+      }),
+    );
+  });
+
+  it('injects the producer loaded callback even when React cannot be resolved from shared scope', async () => {
+    const observability = createObservability({
+      level: 'verbose',
+      react: {
+        enabled: true,
+      },
+    });
+
+    function RemotePanel(props: {
+      onMFRemoteLoaded?: (options?: {
+        metadata?: Record<string, unknown>;
+      }) => void;
+    }) {
+      props.onMFRemoteLoaded?.({
+        metadata: {
+          readySource: 'producer',
+        },
+      });
+      return 'rendered';
+    }
+
+    const wrapped = await observability.plugin.onLoad?.({
+      id: 'remote/Panel',
+      pkgNameOrAlias: 'remote',
+      expose: './Panel',
+      remote: {
+        name: 'remote',
+        entry: 'http://localhost:3001/mf-manifest.json',
+      },
+      options: {},
+      origin: {
+        ...enabledOrigin,
+        loadShareSync: () => false,
+        loadShare: async () => false,
+      },
+      exposeModule: RemotePanel,
+      exposeModuleFactory: undefined,
+      moduleInstance: {},
+    } as any);
+
+    expect(typeof wrapped).toBe('function');
+    expect((wrapped as (props: Record<string, unknown>) => unknown)({})).toBe(
+      'rendered',
+    );
+    expect(observability.getEvents()).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          phase: 'component',
+          status: 'success',
+          eventName: 'component:business-loaded',
+          source: 'business',
+          componentName: 'RemotePanel',
+          metadata: {
+            readySource: 'producer',
+          },
+        }),
+      ]),
+    );
+  });
+
+  it('does not record events when the plugin is disabled', async () => {
+    const observability = createObservability({
       enabled: false,
       level: 'verbose',
     });
 
-    emitRemoteLoaded(observability);
+    await emitRemoteLoaded(observability);
 
     expect(observability.getEvents()).toHaveLength(0);
     expect(observability.getLatestReport()).toBeUndefined();
   });
 
-  it('records a successful loadRemote report when enabled', () => {
-    const observability = ObservabilityPlugin({ level: 'verbose' });
+  it('records a successful loadRemote report when enabled', async () => {
+    const observability = createObservability({ level: 'verbose' });
 
     emitRemoteStart(observability);
-    emitRemoteLoaded(observability);
+    await emitRemoteLoaded(observability);
 
     const report = observability.getLatestReport();
     expect(report?.status).toBe('success');
@@ -753,13 +1055,13 @@ describe('ObservabilityPlugin', () => {
     expect(report?.events).toHaveLength(2);
   });
 
-  it('omits undefined fields from public snapshots', () => {
-    const observability = ObservabilityPlugin({
+  it('omits undefined fields from public snapshots', async () => {
+    const observability = createObservability({
       level: 'verbose',
     });
 
     emitRemoteStart(observability);
-    emitRemoteLoaded(observability);
+    await emitRemoteLoaded(observability);
 
     const report = observability.getLatestReport();
     const events = observability.getEvents();
@@ -769,11 +1071,11 @@ describe('ObservabilityPlugin', () => {
     expect(hasUndefinedField(events)).toBe(false);
   });
 
-  it('records a complete loadRemote event as the final runtime outcome', () => {
-    const observability = ObservabilityPlugin({ level: 'verbose' });
+  it('records a complete loadRemote event as the final runtime outcome', async () => {
+    const observability = createObservability({ level: 'verbose' });
 
     emitRemoteStart(observability);
-    emitRemoteLoaded(observability);
+    await emitRemoteLoaded(observability);
     emitRemoteComplete(observability);
 
     const report = observability.getLatestReport();
@@ -788,7 +1090,7 @@ describe('ObservabilityPlugin', () => {
   });
 
   it('records manifest and remoteEntry lifecycle hooks without observability events', () => {
-    const observability = ObservabilityPlugin({
+    const observability = createObservability({
       level: 'verbose',
       console: false,
     });
@@ -864,7 +1166,7 @@ describe('ObservabilityPlugin', () => {
         },
       };
 
-      const observability = ObservabilityPlugin({
+      const observability = createObservability({
         level: 'verbose',
         console: false,
       });
@@ -910,7 +1212,7 @@ describe('ObservabilityPlugin', () => {
         },
       };
 
-      const observability = ObservabilityPlugin({
+      const observability = createObservability({
         level: 'verbose',
         console: false,
       });
@@ -974,7 +1276,7 @@ describe('ObservabilityPlugin', () => {
   });
 
   it('treats a recovered complete event as a recovered runtime outcome', () => {
-    const observability = ObservabilityPlugin({
+    const observability = createObservability({
       level: 'verbose',
       console: false,
     });
@@ -1005,7 +1307,7 @@ describe('ObservabilityPlugin', () => {
   });
 
   it('keeps summary level compact while preserving phase durations', () => {
-    const observability = ObservabilityPlugin({
+    const observability = createObservability({
       level: 'summary',
       console: false,
     });
@@ -1029,7 +1331,7 @@ describe('ObservabilityPlugin', () => {
   });
 
   it('preserves urls and error message fields for observability', () => {
-    const observability = ObservabilityPlugin({
+    const observability = createObservability({
       level: 'verbose',
       console: false,
     });
@@ -1050,7 +1352,7 @@ describe('ObservabilityPlugin', () => {
   });
 
   it('keeps the first specific failed phase when loadRemote closes the trace', () => {
-    const observability = ObservabilityPlugin({
+    const observability = createObservability({
       level: 'verbose',
       console: false,
     });
@@ -1087,7 +1389,7 @@ describe('ObservabilityPlugin', () => {
   });
 
   it('records runtime error code and manifest context for RUNTIME-003', () => {
-    const observability = ObservabilityPlugin({
+    const observability = createObservability({
       level: 'verbose',
       console: false,
     });
@@ -1168,7 +1470,7 @@ describe('ObservabilityPlugin', () => {
   });
 
   it('records host remote summary for RUNTIME-004 match failures', () => {
-    const observability = ObservabilityPlugin({
+    const observability = createObservability({
       level: 'verbose',
       console: false,
     });
@@ -1226,7 +1528,7 @@ describe('ObservabilityPlugin', () => {
   });
 
   it('records remoteEntry global context for RUNTIME-001', () => {
-    const observability = ObservabilityPlugin({
+    const observability = createObservability({
       level: 'verbose',
       console: false,
     });
@@ -1300,7 +1602,7 @@ describe('ObservabilityPlugin', () => {
 
   it('classifies RUNTIME-008 remoteEntry resource failures', () => {
     const createReportForError = (error: Error) => {
-      const observability = ObservabilityPlugin({
+      const observability = createObservability({
         level: 'verbose',
         console: false,
       });
@@ -1396,7 +1698,7 @@ describe('ObservabilityPlugin', () => {
   });
 
   it('records detailed remote phases and keeps expose as the failed phase', () => {
-    const observability = ObservabilityPlugin({
+    const observability = createObservability({
       level: 'verbose',
       console: false,
     });
@@ -1450,7 +1752,7 @@ describe('ObservabilityPlugin', () => {
   });
 
   it('records factory execution success with a phase duration', () => {
-    const observability = ObservabilityPlugin({
+    const observability = createObservability({
       level: 'verbose',
       console: false,
     });
@@ -1476,8 +1778,8 @@ describe('ObservabilityPlugin', () => {
     });
   });
 
-  it('reads recent reports, filters by observability fields, and exports copies', () => {
-    const observability = ObservabilityPlugin({
+  it('reads recent reports, filters by observability fields, and exports copies', async () => {
+    const observability = createObservability({
       level: 'verbose',
       console: false,
     });
@@ -1485,11 +1787,11 @@ describe('ObservabilityPlugin', () => {
     vi.useFakeTimers();
     try {
       vi.setSystemTime(1000);
-      emitRemoteLoaded(observability);
+      await emitRemoteLoaded(observability);
       const buttonTraceId = observability.getLatestReport()?.traceId || '';
 
       vi.setSystemTime(2000);
-      emitRemoteLoaded(observability, {
+      await emitRemoteLoaded(observability, {
         id: 'catalog/Card',
         expose: './Card',
         remote: {
@@ -1560,7 +1862,7 @@ describe('ObservabilityPlugin', () => {
   });
 
   it('summarizes successful manifest, remoteEntry, cache, and retry recovery facts', () => {
-    const observability = ObservabilityPlugin({
+    const observability = createObservability({
       level: 'verbose',
       console: false,
     });
@@ -1652,7 +1954,7 @@ describe('ObservabilityPlugin', () => {
   });
 
   it('records shared dependency observability', () => {
-    const observability = ObservabilityPlugin({
+    const observability = createObservability({
       level: 'verbose',
       console: false,
     });
@@ -1704,7 +2006,7 @@ describe('ObservabilityPlugin', () => {
   });
 
   it('derives shared success details from loadShare hooks', () => {
-    const observability = ObservabilityPlugin({
+    const observability = createObservability({
       level: 'verbose',
       console: false,
     });
@@ -1750,7 +2052,7 @@ describe('ObservabilityPlugin', () => {
   });
 
   it('derives shared version mismatch details from errorLoadShare', () => {
-    const observability = ObservabilityPlugin({
+    const observability = createObservability({
       level: 'verbose',
       console: false,
     });
@@ -1801,7 +2103,7 @@ describe('ObservabilityPlugin', () => {
   });
 
   it('derives eager boundary details from loadShareSync failures', () => {
-    const observability = ObservabilityPlugin({
+    const observability = createObservability({
       level: 'verbose',
       console: false,
     });
@@ -1864,7 +2166,7 @@ describe('ObservabilityPlugin', () => {
   });
 
   it('reports pure runtime shared failures with available shared versions', () => {
-    const observability = ObservabilityPlugin({
+    const observability = createObservability({
       level: 'verbose',
       console: false,
     });
@@ -1928,7 +2230,7 @@ describe('ObservabilityPlugin', () => {
   });
 
   it('prints a minimal console hint with traceId on error', () => {
-    const observability = ObservabilityPlugin({ level: 'verbose' });
+    const observability = createObservability({ level: 'verbose' });
     const error = vi
       .spyOn(console, 'error')
       .mockImplementation(() => undefined);
@@ -1952,7 +2254,7 @@ describe('ObservabilityPlugin', () => {
       expect(output).toContain('traceId: mf-');
       expect(output).toContain('phase: manifest');
       expect(output).toContain('errorCode:');
-      expect(output).toContain('read: observability.getReport');
+      expect(output).toContain('read: enable browser output or use onReport');
       expect(output).toContain('demo-secret');
       expect(output).toContain('token=');
       expect(output).toContain('#hash');
@@ -1964,7 +2266,7 @@ describe('ObservabilityPlugin', () => {
   });
 
   it('prints only traceId and errorCode for browser production console hints', () => {
-    const observability = ObservabilityPlugin({
+    const observability = createObservability({
       level: 'verbose',
       browser: {
         enabled: true,
@@ -2001,8 +2303,137 @@ describe('ObservabilityPlugin', () => {
     }
   });
 
+  it('prints start console hints by default in development mode', () => {
+    const originalFederation = (
+      globalThis as {
+        __FEDERATION__?: Record<string, unknown>;
+      }
+    ).__FEDERATION__;
+    const info = vi.spyOn(console, 'info').mockImplementation(() => undefined);
+
+    try {
+      (
+        globalThis as {
+          __FEDERATION__?: Record<string, unknown>;
+        }
+      ).__FEDERATION__ = {};
+      const observability = createObservability({
+        browser: {
+          enabled: true,
+          scope: 'runtime_host',
+        },
+      });
+
+      emitRemoteStart(observability);
+      observability.plugin.beforeLoadShare?.({
+        pkgName: 'react',
+        shareInfo: createShared(),
+        shared: {},
+        origin: enabledOrigin,
+      });
+
+      expect(info).toHaveBeenCalledTimes(2);
+      const remoteOutput = String(info.mock.calls[0]?.[0]);
+      const sharedOutput = String(info.mock.calls[1]?.[0]);
+
+      expect(remoteOutput).toContain(
+        '[Module Federation] Observability trace started',
+      );
+      expect(remoteOutput).toContain('traceId: mf-');
+      expect(remoteOutput).toContain('phase: loadRemote');
+      expect(remoteOutput).toContain('requestId: remote/Button');
+      expect(remoteOutput).toContain(
+        'read: window.__FEDERATION__.__OBSERVABILITY__["runtime_host"].getReport',
+      );
+
+      expect(sharedOutput).toContain('phase: shared');
+      expect(sharedOutput).toContain('requestId: shared:react');
+      expect(sharedOutput).toContain('shared: react');
+      expect(sharedOutput).toContain('lifecycle: loadShare');
+
+      const reports = observability.getReports({ limit: 10 });
+      expect(reports).toHaveLength(2);
+      expect(reports.map((report) => report.status)).toEqual([
+        'pending',
+        'pending',
+      ]);
+    } finally {
+      (
+        globalThis as {
+          __FEDERATION__?: Record<string, unknown>;
+        }
+      ).__FEDERATION__ = originalFederation;
+      info.mockRestore();
+    }
+  });
+
+  it('requires explicit start console hints in production mode', () => {
+    const originalFederation = (
+      globalThis as {
+        __FEDERATION__?: Record<string, unknown>;
+      }
+    ).__FEDERATION__;
+    const info = vi.spyOn(console, 'info').mockImplementation(() => undefined);
+
+    try {
+      (
+        globalThis as {
+          __FEDERATION__?: Record<string, unknown>;
+        }
+      ).__FEDERATION__ = {};
+
+      const productionDefault = createObservability({
+        browser: {
+          enabled: true,
+          scope: 'runtime_host',
+          mode: 'production',
+        },
+      });
+
+      emitRemoteStart(productionDefault);
+      productionDefault.plugin.beforeLoadShare?.({
+        pkgName: 'react',
+        shareInfo: createShared(),
+        shared: {},
+        origin: enabledOrigin,
+      });
+
+      expect(info).not.toHaveBeenCalled();
+      expect(productionDefault.getReports({ limit: 10 })).toHaveLength(0);
+
+      const productionExplicit = createObservability({
+        browser: {
+          enabled: true,
+          scope: 'runtime_host',
+          mode: 'production',
+        },
+        trace: {
+          printStart: true,
+        },
+      });
+
+      emitRemoteStart(productionExplicit);
+      productionExplicit.plugin.beforeLoadShare?.({
+        pkgName: 'react',
+        shareInfo: createShared(),
+        shared: {},
+        origin: enabledOrigin,
+      });
+
+      expect(info).toHaveBeenCalledTimes(2);
+      expect(productionExplicit.getReports({ limit: 10 })).toHaveLength(2);
+    } finally {
+      (
+        globalThis as {
+          __FEDERATION__?: Record<string, unknown>;
+        }
+      ).__FEDERATION__ = originalFederation;
+      info.mockRestore();
+    }
+  });
+
   it('stores the original error stack by default', () => {
-    const observability = ObservabilityPlugin({
+    const observability = createObservability({
       level: 'verbose',
       console: false,
     });
@@ -2033,7 +2464,7 @@ describe('ObservabilityPlugin', () => {
   });
 
   it('prints the raw stack only when explicitly allowed', () => {
-    const observability = ObservabilityPlugin({
+    const observability = createObservability({
       level: 'verbose',
       printRawStack: true,
     });
@@ -2062,7 +2493,7 @@ describe('ObservabilityPlugin', () => {
     const onRawError = vi.fn(() => {
       throw new Error('ignored callback failure');
     });
-    const observability = ObservabilityPlugin({
+    const observability = createObservability({
       level: 'verbose',
       console: false,
       onRawError,
@@ -2090,7 +2521,7 @@ describe('ObservabilityPlugin', () => {
     expect(observability.getLatestReport()?.status).toBe('error');
   });
 
-  it('exposes a browser reader only when plugin options allow it', () => {
+  it('exposes a browser reader only when plugin options allow it', async () => {
     const originalFederation = (
       globalThis as {
         __FEDERATION__?: {
@@ -2108,7 +2539,7 @@ describe('ObservabilityPlugin', () => {
         }
       ).__FEDERATION__ = {};
 
-      const observability = ObservabilityPlugin({
+      const observability = createObservability({
         level: 'verbose',
         browser: {
           enabled: true,
@@ -2116,7 +2547,7 @@ describe('ObservabilityPlugin', () => {
         },
       });
 
-      emitRemoteLoaded(observability, {
+      await emitRemoteLoaded(observability, {
         origin: {
           options: {
             name: 'host',
@@ -2187,7 +2618,7 @@ describe('ObservabilityPlugin', () => {
     }
   });
 
-  it('does not expose the browser reader by default', () => {
+  it('does not expose the browser reader by default', async () => {
     const originalFederation = (
       globalThis as {
         __FEDERATION__?: {
@@ -2205,9 +2636,9 @@ describe('ObservabilityPlugin', () => {
         }
       ).__FEDERATION__ = {};
 
-      const observability = ObservabilityPlugin({ level: 'verbose' });
+      const observability = createObservability({ level: 'verbose' });
 
-      emitRemoteLoaded(observability);
+      await emitRemoteLoaded(observability);
 
       expect(
         (
@@ -2361,10 +2792,10 @@ describe('ObservabilityPlugin', () => {
     }
   });
 
-  it('lets business code mark component loaded after runtime observability starts', () => {
-    const observability = ObservabilityPlugin({ level: 'verbose' });
+  it('lets business code mark component loaded after runtime observability starts', async () => {
+    const observability = createObservability({ level: 'verbose' });
 
-    emitRemoteLoaded(observability);
+    await emitRemoteLoaded(observability);
 
     const componentEvent = observability.markComponentLoaded({
       requestId: 'remote/Button',
@@ -2404,8 +2835,8 @@ describe('ObservabilityPlugin', () => {
     expect(JSON.stringify(report)).toContain('token=');
   });
 
-  it('does not let observability callbacks affect loading', () => {
-    const observability = ObservabilityPlugin({
+  it('does not let observability callbacks affect loading', async () => {
+    const observability = createObservability({
       level: 'verbose',
       onEvent: vi.fn(() => {
         throw new Error('onEvent failed');
@@ -2415,13 +2846,13 @@ describe('ObservabilityPlugin', () => {
       }),
     });
 
-    expect(() => emitRemoteLoaded(observability)).not.toThrow();
+    await expect(emitRemoteLoaded(observability)).resolves.toBeUndefined();
 
     expect(observability.getLatestReport()?.status).toBe('success');
   });
 
   it('does not let observability callbacks affect error collection', () => {
-    const observability = ObservabilityPlugin({
+    const observability = createObservability({
       level: 'verbose',
       console: false,
       onEvent: vi.fn(() => {

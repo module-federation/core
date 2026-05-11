@@ -1,4 +1,7 @@
-import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime';
+import type {
+  ModuleFederation,
+  ModuleFederationRuntimePlugin,
+} from '@module-federation/runtime';
 
 export type ObservabilityLevel = 'error' | 'summary' | 'verbose';
 export type ObservabilityEventStatus =
@@ -7,7 +10,7 @@ export type ObservabilityEventStatus =
   | 'error'
   | 'complete';
 export type ObservabilityReportStatus = 'pending' | 'success' | 'error';
-export type ObservabilityEventSource = 'runtime' | 'business';
+export type ObservabilityEventSource = 'runtime' | 'business' | 'react';
 export type ObservabilityBrowserMode = 'development' | 'production';
 export type ObservabilityReportOutcome =
   | 'pending'
@@ -226,6 +229,16 @@ export interface ObservabilityPluginOptions {
     scope?: string;
     mode?: ObservabilityBrowserMode;
   };
+  trace?: {
+    printStart?: boolean;
+  };
+  react?: {
+    enabled?: boolean;
+    timeout?: number;
+    consumerNames?: string[];
+    remoteIds?: string[];
+    defaultExportMode?: 'preserve' | 'component';
+  };
   onEvent?: (
     event: ObservabilityEvent,
     report: ObservabilityReport,
@@ -258,6 +271,13 @@ export interface MarkComponentLoadedOptions {
   metadata?: Record<string, unknown>;
 }
 
+export interface MFRemoteLoadedOptions {
+  componentName?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export type OnMFRemoteLoaded = (options?: MFRemoteLoadedOptions) => void;
+
 export interface ObservabilityController {
   plugin: ObservabilityRuntimePlugin;
   getEvents(): ObservabilityEvent[];
@@ -271,6 +291,20 @@ export interface ObservabilityController {
   markComponentLoaded(
     options?: MarkComponentLoadedOptions,
   ): ObservabilityEvent | undefined;
+}
+
+export interface ObservabilityInstanceAPI {
+  markComponentLoaded(
+    options?: MarkComponentLoadedOptions,
+  ): ObservabilityEvent | undefined;
+}
+
+declare module '@module-federation/runtime-core' {
+  interface ModuleFederation {
+    markComponentLoaded(
+      options?: MarkComponentLoadedOptions,
+    ): ObservabilityEvent | undefined;
+  }
 }
 
 export interface ObservabilityRuntimeEventInput {
@@ -298,9 +332,13 @@ export interface ObservabilityRuntimeEventInput {
 }
 
 export interface ObservabilityRuntimeOrigin {
+  name?: string;
   options?: {
+    id?: string;
     name?: string;
   };
+  loadShare?: (pkgName: string) => Promise<false | (() => unknown)>;
+  loadShareSync?: (pkgName: string) => false | (() => unknown);
 }
 
 export interface ObservabilityEventContext {
@@ -348,6 +386,7 @@ interface ObservabilityRemoteLoadArgs {
   expose?: string;
   remote?: ObservabilityRuntimeRemoteSource;
   origin: ObservabilityRuntimeOrigin;
+  exposeModule?: unknown;
 }
 
 interface ObservabilityRemoteBeforeRequestArgs {
@@ -476,9 +515,22 @@ interface FederationObservabilityGlobal {
   moduleInfo?: Record<string, unknown>;
 }
 
+interface ObservabilityReactLike {
+  createElement: (
+    type: unknown,
+    props?: Record<string, unknown> | null,
+    ...children: unknown[]
+  ) => unknown;
+  useEffect: (effect: () => void | (() => void), deps?: unknown[]) => void;
+}
+
 const DEFAULT_MAX_EVENTS = 100;
 const HARD_MAX_EVENTS = 1000;
 const COMPONENT_BUSINESS_LOADED_EVENT = 'component:business-loaded';
+const COMPONENT_REACT_RENDER_STARTED_EVENT = 'component:react-render-started';
+const COMPONENT_REACT_MOUNTED_EVENT = 'component:react-mounted';
+const COMPONENT_REACT_RENDER_TIMEOUT_EVENT = 'component:react-render-timeout';
+const ON_MF_REMOTE_LOADED_PROP = 'onMFRemoteLoaded';
 const SENSITIVE_PAIR_PATTERN =
   /\b(token|authorization|cookie|secret|password|session|access_token|refresh_token|api_key|apikey|key)\s*[:=]\s*([^&\s'",;<>]+)/gi;
 const ERROR_CODE_PATTERN = /\b(?:RUNTIME|TYPE|BUILD)-\d{3}\b/;
@@ -850,10 +902,172 @@ function sanitizeShared(
   };
 }
 
+function getObjectValue(value: Record<string, unknown>, key: string) {
+  return value[key];
+}
+
+function isReactLike(value: unknown): value is ObservabilityReactLike {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  return (
+    typeof getObjectValue(value, 'createElement') === 'function' &&
+    typeof getObjectValue(value, 'useEffect') === 'function'
+  );
+}
+
+function resolveReactLike(value: unknown): ObservabilityReactLike | undefined {
+  if (isReactLike(value)) {
+    return value;
+  }
+
+  if (isRecord(value)) {
+    const defaultExport = getObjectValue(value, 'default');
+    if (isReactLike(defaultExport)) {
+      return defaultExport;
+    }
+  }
+
+  return undefined;
+}
+
+function getReactComponentName(component: unknown, fallback: string) {
+  if (typeof component === 'function') {
+    const displayName = (component as { displayName?: string }).displayName;
+    return displayName || component.name || fallback;
+  }
+
+  if (!isRecord(component)) {
+    return fallback;
+  }
+
+  const displayName = getObjectValue(component, 'displayName');
+  if (typeof displayName === 'string' && displayName) {
+    return displayName;
+  }
+
+  const render = getObjectValue(component, 'render');
+  if (typeof render === 'function') {
+    return render.displayName || render.name || fallback;
+  }
+
+  return fallback;
+}
+
+function isLikelyReactFunctionComponent(
+  component: unknown,
+  allowAnonymousComponent = false,
+) {
+  if (typeof component !== 'function') {
+    return false;
+  }
+
+  const name =
+    (component as { displayName?: string }).displayName || component.name || '';
+  if (/^use[A-Z0-9]/.test(name)) {
+    return false;
+  }
+
+  if (allowAnonymousComponent) {
+    return true;
+  }
+
+  if (!name) {
+    return false;
+  }
+
+  return /^[A-Z]/.test(name);
+}
+
+function copyComponentStatics(
+  target: Record<string, unknown>,
+  source: Record<string, unknown>,
+) {
+  const reserved = new Set([
+    'arguments',
+    'caller',
+    'length',
+    'name',
+    'prototype',
+    'displayName',
+  ]);
+
+  Object.getOwnPropertyNames(source).forEach((key) => {
+    if (reserved.has(key)) {
+      return;
+    }
+
+    const descriptor = Object.getOwnPropertyDescriptor(source, key);
+    if (!descriptor || !descriptor.configurable) {
+      return;
+    }
+
+    try {
+      Object.defineProperty(target, key, descriptor);
+    } catch {
+      // Static metadata is best effort and must not affect remote rendering.
+    }
+  });
+}
+
+function resolveReactComponentTarget(
+  component: unknown,
+  defaultExportMode: 'preserve' | 'component' = 'preserve',
+  allowAnonymousComponent = false,
+):
+  | {
+      component: unknown;
+      createResult: (wrappedComponent: unknown) => unknown;
+    }
+  | undefined {
+  if (isLikelyReactFunctionComponent(component, allowAnonymousComponent)) {
+    return {
+      component,
+      createResult: (wrappedComponent) => wrappedComponent,
+    };
+  }
+
+  if (!isRecord(component)) {
+    return undefined;
+  }
+
+  const defaultExport = getObjectValue(component, 'default');
+  if (!isLikelyReactFunctionComponent(defaultExport, allowAnonymousComponent)) {
+    return undefined;
+  }
+
+  return {
+    component: defaultExport,
+    createResult: (wrappedComponent) => {
+      const descriptor = Object.getOwnPropertyDescriptor(component, 'default');
+
+      try {
+        if (!descriptor || descriptor.writable || descriptor.set) {
+          component.default = wrappedComponent;
+        } else if (descriptor.configurable) {
+          Object.defineProperty(component, 'default', {
+            configurable: true,
+            enumerable: descriptor.enumerable,
+            writable: true,
+            value: wrappedComponent,
+          });
+        }
+      } catch {
+        // If the module namespace is read-only, leave the remote module untouched.
+      }
+
+      return defaultExportMode === 'component' ? wrappedComponent : undefined;
+    },
+  };
+}
+
 function normalizeEventSource(
   value: ObservabilityEventSource | undefined,
 ): ObservabilityEventSource | undefined {
-  return value === 'runtime' || value === 'business' ? value : undefined;
+  return value === 'runtime' || value === 'business' || value === 'react'
+    ? value
+    : undefined;
 }
 
 function extractErrorCode(value: unknown): string | undefined {
@@ -1443,7 +1657,7 @@ function createErrorContext(
   return clipObservabilityMetadata(context);
 }
 
-export function ObservabilityPlugin(
+export function createObservability(
   options: ObservabilityPluginOptions = {},
 ): ObservabilityController {
   const level = options.level || 'summary';
@@ -1459,8 +1673,10 @@ export function ObservabilityPlugin(
   const seenManifestUrls = new Set<string>();
   const seenRemoteEntryKeys = new Set<string>();
   const consoleReportedTraceIds = new Set<string>();
+  const consoleReportedStartKeys = new Set<string>();
   let latestTraceId: string | undefined;
   let runtimeObservabilityEnabled = false;
+  let suppressRuntimeEvents = false;
   let effectiveMaxEvents = configuredMaxEvents;
   let browserGlobalScope: string | undefined;
   let lastRuntimeOrigin: ObservabilityRuntimeOrigin | undefined;
@@ -1637,8 +1853,10 @@ export function ObservabilityPlugin(
   const isComponentLoadedEvent = (event: ObservabilityEvent) =>
     event.status === 'success' &&
     (event.eventName === COMPONENT_BUSINESS_LOADED_EVENT ||
+      event.eventName === COMPONENT_REACT_MOUNTED_EVENT ||
       (event.phase === 'component' &&
-        event.message === COMPONENT_BUSINESS_LOADED_EVENT));
+        (event.message === COMPONENT_BUSINESS_LOADED_EVENT ||
+          event.message === COMPONENT_REACT_MOUNTED_EVENT)));
 
   const shouldReplaceFailedPhase = (
     report: ObservabilityReport,
@@ -1764,10 +1982,10 @@ export function ObservabilityPlugin(
     const lastEvent = report.events[report.events.length - 1];
     let outcome: ObservabilityReportOutcome = 'pending';
 
-    if (componentLoaded) {
-      outcome = 'component-loaded';
-    } else if (recovered && runtimeLoaded) {
+    if (recovered && runtimeLoaded) {
       outcome = 'recovered';
+    } else if (componentLoaded) {
+      outcome = 'component-loaded';
     } else if (report.status === 'error') {
       outcome = 'failed';
     } else if (runtimeLoaded) {
@@ -1858,7 +2076,11 @@ export function ObservabilityPlugin(
   const getDiagnosisTitle = (report: ObservabilityReport) => {
     if (report.status !== 'error') {
       if (report.summary.componentLoaded) {
-        return 'Business component loaded';
+        return report.events.some(
+          (event) => event.eventName === COMPONENT_BUSINESS_LOADED_EVENT,
+        )
+          ? 'Business component loaded'
+          : 'React component mounted';
       }
       if (report.summary.runtimeLoaded) {
         return 'Remote loaded successfully';
@@ -2588,6 +2810,21 @@ export function ObservabilityPlugin(
   const shouldUseMinimalBrowserConsole = () =>
     options.browser?.mode === 'production';
 
+  const shouldUseStartTrace = () =>
+    options.trace?.printStart ??
+    (options.browser?.enabled === true && !shouldUseMinimalBrowserConsole());
+
+  const shouldPrintStartConsole = (event: ObservabilityEvent) =>
+    shouldUseStartTrace() &&
+    event.status === 'start' &&
+    (event.phase === 'loadRemote' || event.phase === 'shared') &&
+    shouldUseConsole();
+
+  const shouldRecordStartTrace = (input: ObservabilityRuntimeEventInput) =>
+    shouldUseStartTrace() &&
+    input.status === 'start' &&
+    (input.phase === 'loadRemote' || input.phase === 'shared');
+
   const getBrowserReadCommand = (traceId: string) => {
     if (!browserGlobalScope) {
       return undefined;
@@ -2651,9 +2888,7 @@ export function ObservabilityPlugin(
     if (browserReadCommand) {
       lines.push(`read: ${browserReadCommand}`);
     } else {
-      lines.push(
-        `read: observability.getReport(${JSON.stringify(report.traceId)})`,
-      );
+      lines.push('read: enable browser output or use onReport(report)');
     }
 
     const rawStack = getRawStack(rawError);
@@ -2663,6 +2898,60 @@ export function ObservabilityPlugin(
 
     try {
       console.error(lines.join('\n'));
+    } catch {
+      // Console output is best-effort observability only.
+    }
+  };
+
+  const emitStartConsoleHint = (
+    event: ObservabilityEvent,
+    report: ObservabilityReport,
+  ) => {
+    if (!shouldPrintStartConsole(event)) {
+      return;
+    }
+
+    const startKey = [
+      event.traceId,
+      event.phase,
+      event.requestId || event.shared?.name || event.remote?.name || '',
+      event.lifecycle || '',
+    ].join('|');
+    if (consoleReportedStartKeys.has(startKey)) {
+      return;
+    }
+    consoleReportedStartKeys.add(startKey);
+
+    const lines = [
+      '[Module Federation] Observability trace started',
+      `traceId: ${report.traceId}`,
+      `phase: ${event.phase}`,
+    ];
+
+    if (event.requestId) {
+      lines.push(`requestId: ${event.requestId}`);
+    }
+    if (event.remote?.name) {
+      lines.push(`remote: ${event.remote.name}`);
+    }
+    if (event.shared?.name) {
+      lines.push(`shared: ${event.shared.name}`);
+    }
+    if (event.lifecycle) {
+      lines.push(`lifecycle: ${event.lifecycle}`);
+    }
+
+    const browserReadCommand = getBrowserReadCommand(report.traceId);
+    if (browserReadCommand) {
+      lines.push(`read: ${browserReadCommand}`);
+    } else {
+      lines.push(
+        'read: enable browser output or use getReports({ limit: 10 })',
+      );
+    }
+
+    try {
+      console.info(lines.join('\n'));
     } catch {
       // Console output is best-effort observability only.
     }
@@ -2687,17 +2976,22 @@ export function ObservabilityPlugin(
     input: ObservabilityRuntimeEventInput,
     origin?: ObservabilityRuntimeOrigin,
   ) => {
+    if (suppressRuntimeEvents) {
+      return undefined;
+    }
+
     const traceId = resolveTraceId(input);
     const event = normalizeEvent(input, traceId, origin);
     applyPhaseDuration(event);
     updateTraceMaps(event);
 
-    if (!shouldRecordEvent(level, input)) {
+    if (!shouldRecordEvent(level, input) && !shouldRecordStartTrace(input)) {
       return undefined;
     }
 
     events.push(event);
     const report = updateReport(event);
+    emitStartConsoleHint(event, report);
     emitConsoleHint(event, report, input.error);
     notifyRawError(input.error, event, report, origin);
     notifyEvent(event, report, origin);
@@ -2705,8 +2999,265 @@ export function ObservabilityPlugin(
     return event;
   };
 
+  const markComponentLoaded = (
+    markOptions: MarkComponentLoadedOptions = {},
+  ) => {
+    if (options.enabled === false || !runtimeObservabilityEnabled) {
+      return undefined;
+    }
+
+    const traceId =
+      markOptions.traceId ||
+      (markOptions.requestId
+        ? traceByRequest.get(sanitizeRequestId(markOptions.requestId) || '')
+        : undefined) ||
+      latestTraceId ||
+      createTraceId({
+        phase: 'component',
+        status: 'success',
+        requestId: markOptions.requestId,
+      });
+
+    return recordEvent(
+      {
+        traceId,
+        phase: 'component',
+        status: 'success',
+        requestId: markOptions.requestId,
+        componentName: markOptions.componentName,
+        metadata: markOptions.metadata,
+        eventName: COMPONENT_BUSINESS_LOADED_EVENT,
+        message: COMPONENT_BUSINESS_LOADED_EVENT,
+        source: 'business',
+      },
+      lastRuntimeOrigin,
+    );
+  };
+
+  const getReactForOrigin = async (
+    origin: ObservabilityRuntimeOrigin,
+  ): Promise<ObservabilityReactLike | undefined> => {
+    const previousSuppressRuntimeEvents = suppressRuntimeEvents;
+    suppressRuntimeEvents = true;
+    try {
+      let reactFactory: false | (() => unknown) | undefined;
+      try {
+        reactFactory = origin.loadShareSync?.('react');
+      } catch {
+        reactFactory = undefined;
+      }
+
+      if (typeof reactFactory !== 'function') {
+        reactFactory = await origin.loadShare?.('react');
+      }
+
+      if (typeof reactFactory !== 'function') {
+        return undefined;
+      }
+
+      return resolveReactLike(reactFactory());
+    } catch {
+      return undefined;
+    } finally {
+      suppressRuntimeEvents = previousSuppressRuntimeEvents;
+    }
+  };
+
+  const getReactWrapPolicy = (loadArgs: ObservabilityRemoteLoadArgs) => {
+    if (options.react?.enabled !== true) {
+      return undefined;
+    }
+
+    const consumerNames = options.react.consumerNames || [];
+    const remoteIds = options.react.remoteIds || [];
+    if (!consumerNames.length && !remoteIds.length) {
+      return {
+        allowAnonymousComponent: false,
+      };
+    }
+
+    const consumerName = loadArgs.origin.options?.name || loadArgs.origin.name;
+    const consumerId = loadArgs.origin.options?.id;
+    const matched =
+      (consumerName ? consumerNames.includes(consumerName) : false) ||
+      (consumerId ? consumerNames.includes(consumerId) : false) ||
+      remoteIds.includes(loadArgs.id) ||
+      (loadArgs.expose ? remoteIds.includes(loadArgs.expose) : false);
+
+    return matched
+      ? {
+          allowAnonymousComponent: true,
+        }
+      : undefined;
+  };
+
+  const recordReactComponentEvent = (
+    loadArgs: ObservabilityRemoteLoadArgs,
+    status: ObservabilityEventStatus,
+    lifecycle: string,
+    eventName: string,
+    componentName: string,
+    message: string,
+    errorValue?: unknown,
+  ) =>
+    recordEvent(
+      {
+        phase: 'component',
+        status,
+        requestId: loadArgs.id,
+        expose: loadArgs.expose,
+        remote: createRemoteInfo(loadArgs.remote),
+        lifecycle,
+        eventName,
+        componentName,
+        message,
+        source: 'react',
+        error: errorValue,
+      },
+      loadArgs.origin,
+    );
+
+  const wrapReactComponent = async (
+    component: unknown,
+    loadArgs: ObservabilityRemoteLoadArgs,
+  ) => {
+    const wrapPolicy = getReactWrapPolicy(loadArgs);
+    if (!wrapPolicy) {
+      return undefined;
+    }
+
+    const target = resolveReactComponentTarget(
+      component,
+      options.react?.defaultExportMode ||
+        (wrapPolicy.allowAnonymousComponent ? 'component' : 'preserve'),
+      wrapPolicy.allowAnonymousComponent,
+    );
+    if (!target) {
+      return undefined;
+    }
+
+    const componentName = getReactComponentName(
+      target.component,
+      loadArgs.expose || loadArgs.id,
+    );
+    const timeout =
+      typeof options.react.timeout === 'number' &&
+      Number.isFinite(options.react.timeout)
+        ? Math.max(0, options.react.timeout)
+        : 5000;
+    let started = false;
+    let mounted = false;
+    let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+    const originalComponent = target.component;
+
+    const clearRenderTimeout = () => {
+      if (timeoutHandle) {
+        clearTimeout(timeoutHandle);
+        timeoutHandle = undefined;
+      }
+    };
+
+    const recordStarted = () => {
+      if (started) {
+        return;
+      }
+      started = true;
+      recordReactComponentEvent(
+        loadArgs,
+        'start',
+        'reactRender',
+        COMPONENT_REACT_RENDER_STARTED_EVENT,
+        componentName,
+        COMPONENT_REACT_RENDER_STARTED_EVENT,
+      );
+
+      if (timeout > 0) {
+        timeoutHandle = setTimeout(() => {
+          if (mounted) {
+            return;
+          }
+          recordReactComponentEvent(
+            loadArgs,
+            'error',
+            'reactMountTimeout',
+            COMPONENT_REACT_RENDER_TIMEOUT_EVENT,
+            componentName,
+            COMPONENT_REACT_RENDER_TIMEOUT_EVENT,
+            new Error(
+              `React component "${componentName}" did not mount within ${timeout}ms`,
+            ),
+          );
+        }, timeout);
+      }
+    };
+
+    const react = await getReactForOrigin(loadArgs.origin);
+    const ObservedRemoteComponent = (props: Record<string, unknown>) => {
+      recordStarted();
+      if (react) {
+        react.useEffect(() => {
+          if (!mounted) {
+            mounted = true;
+            clearRenderTimeout();
+            recordReactComponentEvent(
+              loadArgs,
+              'success',
+              'reactMount',
+              COMPONENT_REACT_MOUNTED_EVENT,
+              componentName,
+              COMPONENT_REACT_MOUNTED_EVENT,
+            );
+          }
+
+          return clearRenderTimeout;
+        }, []);
+      }
+
+      const incomingProps = isRecord(props) ? props : {};
+      const originalLoadedCallback = getObjectValue(
+        incomingProps,
+        ON_MF_REMOTE_LOADED_PROP,
+      );
+      const onMFRemoteLoaded: OnMFRemoteLoaded = (loadedOptions = {}) => {
+        markComponentLoaded({
+          requestId: loadArgs.id,
+          componentName: loadedOptions.componentName || componentName,
+          metadata: loadedOptions.metadata,
+        });
+
+        if (typeof originalLoadedCallback === 'function') {
+          (originalLoadedCallback as OnMFRemoteLoaded)(loadedOptions);
+        }
+      };
+
+      const nextProps = {
+        ...incomingProps,
+        [ON_MF_REMOTE_LOADED_PROP]: onMFRemoteLoaded,
+      };
+
+      if (react) {
+        return react.createElement(originalComponent, nextProps);
+      }
+
+      return (
+        originalComponent as (nextProps: Record<string, unknown>) => unknown
+      )(nextProps);
+    };
+
+    ObservedRemoteComponent.displayName = `ObservedRemote(${componentName})`;
+    copyComponentStatics(
+      ObservedRemoteComponent as unknown as Record<string, unknown>,
+      originalComponent as unknown as Record<string, unknown>,
+    );
+
+    return target.createResult(ObservedRemoteComponent);
+  };
+
   const plugin: ObservabilityRuntimePlugin = {
     name: 'observability-plugin',
+    apply(instance: ModuleFederation) {
+      instance.markComponentLoaded = markComponentLoaded;
+    },
     beforeRequest(args) {
       const requestArgs = args as ObservabilityRemoteBeforeRequestArgs;
       if (!prepareRuntimeOrigin(requestArgs.origin)) {
@@ -2816,12 +3367,16 @@ export function ObservabilityPlugin(
         seenManifestUrls.add(manifestUrl);
       }
     },
-    onLoad(args) {
+    async onLoad(args) {
       const loadArgs = args as ObservabilityRemoteLoadArgs;
       if (!prepareRuntimeOrigin(loadArgs.origin)) {
         return;
       }
 
+      const wrappedComponent = await wrapReactComponent(
+        loadArgs.exposeModule,
+        loadArgs,
+      );
       recordEvent(
         {
           phase: 'loadRemote',
@@ -2834,6 +3389,9 @@ export function ObservabilityPlugin(
         },
         loadArgs.origin,
       );
+      if (wrappedComponent) {
+        return wrappedComponent;
+      }
     },
     errorLoadRemote(args) {
       const errorArgs = args as ObservabilityRemoteErrorArgs;
@@ -3165,43 +3723,21 @@ export function ObservabilityPlugin(
       seenManifestUrls.clear();
       seenRemoteEntryKeys.clear();
       consoleReportedTraceIds.clear();
+      consoleReportedStartKeys.clear();
       latestTraceId = undefined;
       runtimeObservabilityEnabled = false;
       effectiveMaxEvents = configuredMaxEvents;
       browserGlobalScope = undefined;
       lastRuntimeOrigin = undefined;
     },
-    markComponentLoaded(markOptions: MarkComponentLoadedOptions = {}) {
-      if (options.enabled === false || !runtimeObservabilityEnabled) {
-        return undefined;
-      }
-
-      const traceId =
-        markOptions.traceId ||
-        (markOptions.requestId
-          ? traceByRequest.get(sanitizeRequestId(markOptions.requestId) || '')
-          : undefined) ||
-        latestTraceId ||
-        createTraceId({
-          phase: 'component',
-          status: 'success',
-          requestId: markOptions.requestId,
-        });
-
-      return recordEvent(
-        {
-          traceId,
-          phase: 'component',
-          status: 'success',
-          requestId: markOptions.requestId,
-          componentName: markOptions.componentName,
-          metadata: markOptions.metadata,
-          eventName: COMPONENT_BUSINESS_LOADED_EVENT,
-          message: COMPONENT_BUSINESS_LOADED_EVENT,
-          source: 'business',
-        },
-        lastRuntimeOrigin,
-      );
-    },
+    markComponentLoaded,
   };
 }
+
+export function ObservabilityPlugin(
+  options: ObservabilityPluginOptions = {},
+): ObservabilityRuntimePlugin {
+  return createObservability(options).plugin;
+}
+
+export default ObservabilityPlugin;
