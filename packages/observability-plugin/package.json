@@ -52,6 +52,9 @@
   "devDependencies": {
     "@module-federation/runtime": "workspace:*"
   },
+  "dependencies": {
+    "@module-federation/sdk": "workspace:*"
+  },
   "scripts": {
     "build": "tsdown --config tsdown.config.ts && cp *.md dist",
     "test": "vitest run -u -c vitest.config.ts",

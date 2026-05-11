@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { simpleJoinRemoteEntry } from '@module-federation/sdk';
 
 export type ObservabilityBuildInfoSource = 'config' | 'stats' | 'manifest';
 export type ObservabilityBuildPublicPathMode =
@@ -398,8 +399,8 @@ function getManifestFileName(manifestOption: unknown) {
     : DEFAULT_STATS_FILE;
 
   return {
-    manifestFileName: joinAssetPath(filePath, manifestFile),
-    statsFileName: joinAssetPath(filePath, statsFile),
+    manifestFileName: simpleJoinRemoteEntry(filePath, manifestFile),
+    statsFileName: simpleJoinRemoteEntry(filePath, statsFile),
   };
 }
 
@@ -409,14 +410,6 @@ function addJsonExtension(fileName: string) {
 
 function insertSuffix(fileName: string, suffix: string) {
   return fileName.replace(/\.json$/i, `${suffix}.json`);
-}
-
-function joinAssetPath(filePath: string, fileName: string) {
-  if (!filePath) {
-    return fileName;
-  }
-
-  return `${filePath.replace(/\\/g, '/').replace(/\/+$/g, '')}/${fileName}`;
 }
 
 function getSourceText(source: unknown): string | undefined {

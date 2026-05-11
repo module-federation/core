@@ -3883,6 +3883,10 @@ importers:
         version: 5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.27.3)(webpack-cli@5.1.4)
 
   packages/observability-plugin:
+    dependencies:
+      '@module-federation/sdk':
+        specifier: workspace:*
+        version: link:../sdk
     devDependencies:
       '@module-federation/runtime':
         specifier: workspace:*
