@@ -207,10 +207,10 @@ export const observabilityPlugin = ObservabilityPlugin({
 | `browser.scope` | `string` | host 名称 | 浏览器读取入口的命名空间，例如 `runtime_host`。 |
 | `browser.mode` | `'development' \| 'production'` | `'development'` | 浏览器输出模式。生产模式下 console 只输出最小提示。 |
 | `trace.printStart` | `boolean` | 浏览器开发模式为 `true`，浏览器生产模式为 `false` | 是否在 `loadRemote` 和 `loadShare` 开始时打印 `console.info`，便于开发环境和 Agent 获取 `traceId`。生产模式需要显式设置为 `true` 才会开启。 |
-| `react.enabled` | `boolean` | `false` | 是否尝试自动观测远程 React 函数组件的渲染生命周期。默认关闭。 |
-| `react.timeout` | `number` | `5000` | 开启 React 生命周期观测后，组件迟迟没有 mount 时多久记录超时事件。 |
-| `react.consumerNames` | `string[]` | `[]` | 只对指定消费者实例开启 React 生命周期观测。为空时不按消费者过滤。 |
-| `react.remoteIds` | `string[]` | `[]` | 只对指定远程请求开启 React 生命周期观测，例如 `remote/Button` 或 `./Button`。为空时不按远程请求过滤。 |
+| `react.enabled` | `boolean` | `true` | React 调试能力总开关。设置为 `false` 时关闭所有 React 包装行为。 |
+| `react.injectLoadedCallback` | `boolean` | `false` | 显式包装匹配到的远程 React 组件，并注入 `onMFRemoteLoaded`。这个能力会改变组件引用，只建议作为临时调试开关，问题修复后需要及时关闭。 |
+| `react.consumerNames` | `string[]` | `[]` | 只对指定消费者实例注入回调。为空时不按消费者过滤。 |
+| `react.remoteIds` | `string[]` | `[]` | 只对指定远程请求注入回调，例如 `remote/Button` 或 `./Button`。为空时不按远程请求过滤。 |
 | `react.defaultExportMode` | `'preserve' \| 'component'` | 自动选择 | 远程模块是 `{ default: Component }` 时，是否直接把包装后的组件作为返回值。通常保持默认即可。 |
 | `onEvent` | `(event, report, context) => void` | `undefined` | 每次记录观测事件时触发，适合接入自定义日志系统。 |
 | `onReport` | `(report, context) => void` | `undefined` | 报告更新时触发，生产环境常用它上传失败或恢复报告。 |
@@ -327,7 +327,7 @@ module.exports = {
 
 Module Federation 能知道 remote module 是否加载完成，但不一定能知道业务组件自己的请求、图表或 SDK 初始化是否完成。
 
-开启 React 生命周期观测后，插件会自动给远程 React 组件注入 `onMFRemoteLoaded` prop。生产者组件在自己认为业务可用时调用它即可：
+显式开启 `react.injectLoadedCallback` 后，插件会给匹配到的远程 React 组件注入 `onMFRemoteLoaded` prop。生产者组件在自己认为业务可用时调用它即可：
 
 ```tsx
 import { useEffect } from 'react';
@@ -367,27 +367,26 @@ getInstance()?.markComponentLoaded({
 
 报告里会出现 `component:business-loaded`，并且 `summary.outcome` 会变成 `"component-loaded"`。
 
-## 自动观测 React 组件 Mount
+## 注入 React Loaded 回调
 
-如果是开发环境或 AI 调试场景，也可以手动开启远程 React 组件生命周期观测：
+如果是开发环境、AI 调试，或者线上临时定位“生产者组件没有真正加载”的问题，可以显式开启远程 React 组件回调注入：
 
 ```ts
 ObservabilityPlugin({
   level: 'verbose',
   react: {
-    enabled: true,
-    timeout: 5000,
+    injectLoadedCallback: true,
+    consumerNames: ['runtime_host'],
+    remoteIds: ['remote/Button'],
   },
 });
 ```
 
-开启后，插件会在 `loadRemote` 成功后尝试识别远程 React 函数组件，并包一层不产生 DOM 的组件。报告里会出现：
+开启后，插件会在 `loadRemote` 成功后尝试识别远程 React 函数组件，并包一层不产生 DOM 的组件。这个包装只注入 `onMFRemoteLoaded` prop，不监听 React mount、render 生命周期或超时。
 
-- `component:react-render-started`
-- `component:react-mounted`
-- `component:react-render-timeout`
+生产者调用 `props.onMFRemoteLoaded?.()` 后，报告里会出现 `component:business-loaded`。
 
-这个包装还会给远程组件注入 `onMFRemoteLoaded` prop。这个能力只能说明 React 组件已经 mount，不能说明业务数据、图表或 SDK 已经完成。需要表达业务可用时，在生产者组件里调用 `props.onMFRemoteLoaded?.()`。
+这个能力会改变组件引用。请尽量用 `consumerNames` 和 `remoteIds` 缩小范围，并且只作为临时调试开关使用，线上问题修复后需要及时关闭。
 
 ## 配合 `mf` Skill 使用
 

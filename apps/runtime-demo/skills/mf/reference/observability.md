@@ -155,8 +155,8 @@ Use `summary.outcome` before reading raw `events`:
 
 - `runtime-loaded`: the remote module was loaded by Module Federation runtime.
 - `component-loaded`: a component-level success signal was observed. This may be
-  a business `markComponentLoaded` signal or the opt-in React lifecycle observer
-  reporting `component:react-mounted`.
+  a business `markComponentLoaded` signal or the producer calling the injected
+  `onMFRemoteLoaded` callback.
 - `failed`: loading failed. Use `summary.error`, `diagnosis.actions`, and
   `failedPhase`.
 - `recovered`: loading failed first, then retry or fallback returned a result.
@@ -172,13 +172,13 @@ If `events` are needed, remote module success is usually:
 - `lifecycle: "onLoad"`
 - `message: "remote:loaded"`
 
-React mount observation is opt-in. It records component events such as
-`component:react-render-started`, `component:react-mounted`, and
-`component:react-render-timeout`. Treat `component:react-mounted` as React mount
-success, not as proof that business data, charts, or SDKs finished loading.
-When this option is enabled, the wrapper also injects an `onMFRemoteLoaded` prop
-into the remote React component. If the producer calls that prop, treat the
-resulting `component:business-loaded` event as the producer's own ready signal.
+React callback injection is opt-in. It can inject an `onMFRemoteLoaded` prop
+into the remote React component by returning a wrapper component. If the
+producer calls that prop, treat the resulting `component:business-loaded` event
+as the producer's own ready signal. Do not infer React mount success from this
+plugin; it no longer observes React render lifecycle events. Because callback
+injection changes the component reference, treat it as a temporary production
+debugging switch and ask the user to remove it after the issue is fixed.
 
 ## Step 3: Decide the likely owner
 

@@ -185,8 +185,8 @@ not by an AI model.
 - `summary.loadCompleted`: the `loadRemote` flow ended; this is not by itself a
   success signal.
 - `summary.componentLoaded`: a component-level success signal was observed. It
-  can come from business `markComponentLoaded` or from the opt-in React lifecycle
-  observer reporting `component:react-mounted`.
+  can come from business `markComponentLoaded` or from the producer calling the
+  injected `onMFRemoteLoaded` callback.
 - `summary.phases`: per-phase status, duration, cache, retry, and recovery
   markers.
 - `summary.flags`: cross-phase cache, retry, fallback, and recovery markers.
@@ -194,13 +194,13 @@ not by an AI model.
   shared dependencies are involved, inspect every `phase: "shared"` event.
 - `summary.error`: compact error summary.
 
-If React lifecycle observation is enabled, reports may include
-`component:react-render-started`, `component:react-mounted`, or
-`component:react-render-timeout`. Treat `component:react-mounted` as React mount
-success only. It does not prove that business data, charts, or SDK
-initialization completed. The wrapper also injects an `onMFRemoteLoaded` prop
-into the remote React component; if the producer calls it, the report includes
-`component:business-loaded`, which is the producer's explicit ready signal.
+If React callback injection is enabled, the wrapper injects an
+`onMFRemoteLoaded` prop into the remote React component. If the producer calls
+it, the report includes `component:business-loaded`, which is the producer's
+explicit ready signal. Do not infer React mount success from this plugin; it
+does not observe React render lifecycle events. Because callback injection
+changes the component reference, treat it as a temporary production debugging
+switch and tell the user to remove it after the issue is fixed.
 
 ### Build files
 

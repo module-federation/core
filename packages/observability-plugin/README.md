@@ -80,8 +80,8 @@ derives detailed reasons like shared version mismatch or eager boundary issues,
 and exposes the final loading state through a small `summary` object:
 
 - `runtime-loaded`: Module Federation finished loading the remote module.
-- `component-loaded`: business code called `markComponentLoaded`, or the
-  opt-in React lifecycle observer confirmed that the remote component mounted.
+- `component-loaded`: business code called `markComponentLoaded`, or a producer
+  called the injected `onMFRemoteLoaded` callback.
 - `failed`: the load failed and `failedPhase` points to the first specific
   failing phase.
 - `recovered`: loading hit an error but a fallback/recovery path returned a
@@ -126,7 +126,7 @@ default because they are usually configuration or availability problems instead
 of transient network failures.
 
 Business code can mark its own success condition with a fixed event. When React
-component lifecycle observation is enabled, the wrapper injects an
+callback injection is explicitly enabled, the wrapper injects an
 `onMFRemoteLoaded` prop into the remote component. The producer can call it when
 the component's own ready condition is met:
 
@@ -170,14 +170,13 @@ method is attached when the observability plugin is registered. If an
 application uses multiple runtime instances, call it on the instance that
 registered this plugin.
 
-React component lifecycle observation is available only when explicitly enabled:
+React callback injection is available only when explicitly enabled:
 
 ```ts
 ObservabilityPlugin({
   level: 'verbose',
   react: {
-    enabled: true,
-    timeout: 5000,
+    injectLoadedCallback: true,
     consumerNames: ['runtime_host'],
     remoteIds: ['remote/Button'],
   },
@@ -186,16 +185,15 @@ ObservabilityPlugin({
 
 When this option is enabled, the plugin tries to wrap remote function components
 returned by `loadRemote`. The wrapper does not add DOM nodes. It injects the
-`onMFRemoteLoaded` prop and records
-`component:react-render-started`, `component:react-mounted`, or
-`component:react-render-timeout`. This is useful for dev and AI debugging, but
-it only means React mounted the component. Keep using `markComponentLoaded` when
-the business definition of success depends on data, charts, SDKs, or other async
-work inside the remote component.
+`onMFRemoteLoaded` prop only. It does not observe React mount, render lifecycle,
+or timeout. When the producer calls the callback, the report records
+`component:business-loaded`. This option changes the component reference because
+it returns a wrapper component, so use it as a temporary debugging switch and
+remove it after the production issue is fixed.
 
 Use `react.consumerNames` or `react.remoteIds` to limit this behavior to the
 consumers or remote requests you are actively debugging. If both are empty, the
-plugin observes detected React function components for every runtime instance
+plugin wraps detected React function components for every runtime instance
 that registered it.
 
 Browser output is available only when the plugin option explicitly enables it.

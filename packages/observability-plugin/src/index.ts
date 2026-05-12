@@ -234,7 +234,7 @@ export interface ObservabilityPluginOptions {
   };
   react?: {
     enabled?: boolean;
-    timeout?: number;
+    injectLoadedCallback?: boolean;
     consumerNames?: string[];
     remoteIds?: string[];
     defaultExportMode?: 'preserve' | 'component';
@@ -521,15 +521,11 @@ interface ObservabilityReactLike {
     props?: Record<string, unknown> | null,
     ...children: unknown[]
   ) => unknown;
-  useEffect: (effect: () => void | (() => void), deps?: unknown[]) => void;
 }
 
 const DEFAULT_MAX_EVENTS = 100;
 const HARD_MAX_EVENTS = 1000;
 const COMPONENT_BUSINESS_LOADED_EVENT = 'component:business-loaded';
-const COMPONENT_REACT_RENDER_STARTED_EVENT = 'component:react-render-started';
-const COMPONENT_REACT_MOUNTED_EVENT = 'component:react-mounted';
-const COMPONENT_REACT_RENDER_TIMEOUT_EVENT = 'component:react-render-timeout';
 const ON_MF_REMOTE_LOADED_PROP = 'onMFRemoteLoaded';
 const SENSITIVE_PAIR_PATTERN =
   /\b(token|authorization|cookie|secret|password|session|access_token|refresh_token|api_key|apikey|key)\s*[:=]\s*([^&\s'",;<>]+)/gi;
@@ -911,10 +907,7 @@ function isReactLike(value: unknown): value is ObservabilityReactLike {
     return false;
   }
 
-  return (
-    typeof getObjectValue(value, 'createElement') === 'function' &&
-    typeof getObjectValue(value, 'useEffect') === 'function'
-  );
+  return typeof getObjectValue(value, 'createElement') === 'function';
 }
 
 function resolveReactLike(value: unknown): ObservabilityReactLike | undefined {
@@ -1853,10 +1846,8 @@ export function createObservability(
   const isComponentLoadedEvent = (event: ObservabilityEvent) =>
     event.status === 'success' &&
     (event.eventName === COMPONENT_BUSINESS_LOADED_EVENT ||
-      event.eventName === COMPONENT_REACT_MOUNTED_EVENT ||
       (event.phase === 'component' &&
-        (event.message === COMPONENT_BUSINESS_LOADED_EVENT ||
-          event.message === COMPONENT_REACT_MOUNTED_EVENT)));
+        event.message === COMPONENT_BUSINESS_LOADED_EVENT));
 
   const shouldReplaceFailedPhase = (
     report: ObservabilityReport,
@@ -2076,11 +2067,7 @@ export function createObservability(
   const getDiagnosisTitle = (report: ObservabilityReport) => {
     if (report.status !== 'error') {
       if (report.summary.componentLoaded) {
-        return report.events.some(
-          (event) => event.eventName === COMPONENT_BUSINESS_LOADED_EVENT,
-        )
-          ? 'Business component loaded'
-          : 'React component mounted';
+        return 'Business component loaded';
       }
       if (report.summary.runtimeLoaded) {
         return 'Remote loaded successfully';
@@ -3064,7 +3051,10 @@ export function createObservability(
   };
 
   const getReactWrapPolicy = (loadArgs: ObservabilityRemoteLoadArgs) => {
-    if (options.react?.enabled !== true) {
+    if (
+      options.react?.enabled === false ||
+      options.react?.injectLoadedCallback !== true
+    ) {
       return undefined;
     }
 
@@ -3091,32 +3081,6 @@ export function createObservability(
       : undefined;
   };
 
-  const recordReactComponentEvent = (
-    loadArgs: ObservabilityRemoteLoadArgs,
-    status: ObservabilityEventStatus,
-    lifecycle: string,
-    eventName: string,
-    componentName: string,
-    message: string,
-    errorValue?: unknown,
-  ) =>
-    recordEvent(
-      {
-        phase: 'component',
-        status,
-        requestId: loadArgs.id,
-        expose: loadArgs.expose,
-        remote: createRemoteInfo(loadArgs.remote),
-        lifecycle,
-        eventName,
-        componentName,
-        message,
-        source: 'react',
-        error: errorValue,
-      },
-      loadArgs.origin,
-    );
-
   const wrapReactComponent = async (
     component: unknown,
     loadArgs: ObservabilityRemoteLoadArgs,
@@ -3140,79 +3104,10 @@ export function createObservability(
       target.component,
       loadArgs.expose || loadArgs.id,
     );
-    const timeout =
-      typeof options.react.timeout === 'number' &&
-      Number.isFinite(options.react.timeout)
-        ? Math.max(0, options.react.timeout)
-        : 5000;
-    let started = false;
-    let mounted = false;
-    let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
     const originalComponent = target.component;
-
-    const clearRenderTimeout = () => {
-      if (timeoutHandle) {
-        clearTimeout(timeoutHandle);
-        timeoutHandle = undefined;
-      }
-    };
-
-    const recordStarted = () => {
-      if (started) {
-        return;
-      }
-      started = true;
-      recordReactComponentEvent(
-        loadArgs,
-        'start',
-        'reactRender',
-        COMPONENT_REACT_RENDER_STARTED_EVENT,
-        componentName,
-        COMPONENT_REACT_RENDER_STARTED_EVENT,
-      );
-
-      if (timeout > 0) {
-        timeoutHandle = setTimeout(() => {
-          if (mounted) {
-            return;
-          }
-          recordReactComponentEvent(
-            loadArgs,
-            'error',
-            'reactMountTimeout',
-            COMPONENT_REACT_RENDER_TIMEOUT_EVENT,
-            componentName,
-            COMPONENT_REACT_RENDER_TIMEOUT_EVENT,
-            new Error(
-              `React component "${componentName}" did not mount within ${timeout}ms`,
-            ),
-          );
-        }, timeout);
-      }
-    };
 
     const react = await getReactForOrigin(loadArgs.origin);
     const ObservedRemoteComponent = (props: Record<string, unknown>) => {
-      recordStarted();
-      if (react) {
-        react.useEffect(() => {
-          if (!mounted) {
-            mounted = true;
-            clearRenderTimeout();
-            recordReactComponentEvent(
-              loadArgs,
-              'success',
-              'reactMount',
-              COMPONENT_REACT_MOUNTED_EVENT,
-              componentName,
-              COMPONENT_REACT_MOUNTED_EVENT,
-            );
-          }
-
-          return clearRenderTimeout;
-        }, []);
-      }
-
       const incomingProps = isRecord(props) ? props : {};
       const originalLoadedCallback = getObjectValue(
         incomingProps,

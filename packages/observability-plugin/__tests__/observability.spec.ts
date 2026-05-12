@@ -719,22 +719,64 @@ describe('ObservabilityPlugin', () => {
     expect(typeof instance.markComponentLoaded).toBe('function');
   });
 
-  it('wraps a remote React function component only when react lifecycle observability is enabled', async () => {
-    const effects: Array<() => void | (() => void)> = [];
+  it('does not wrap a remote React function component unless callback injection is explicitly enabled', async () => {
     const react = {
       createElement: vi.fn((type: unknown, props?: unknown) => ({
         type,
         props,
       })),
-      useEffect: vi.fn((effect: () => void | (() => void)) => {
-        effects.push(effect);
-      }),
     };
     const observability = createObservability({
       level: 'verbose',
       react: {
         enabled: true,
-        timeout: 0,
+      },
+    });
+
+    function RemoteButton() {
+      return null;
+    }
+
+    const wrapped = await observability.plugin.onLoad?.({
+      id: 'remote/Button',
+      pkgNameOrAlias: 'remote',
+      expose: './Button',
+      remote: {
+        name: 'remote',
+        entry: 'http://localhost:3001/mf-manifest.json',
+      },
+      options: {},
+      origin: {
+        ...enabledOrigin,
+        loadShareSync: () => () => react,
+      },
+      exposeModule: RemoteButton,
+      exposeModuleFactory: undefined,
+      moduleInstance: {},
+    } as any);
+
+    expect(wrapped).toBeUndefined();
+    expect(react.createElement).not.toHaveBeenCalled();
+    expect(observability.getEvents()).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          phase: 'component',
+        }),
+      ]),
+    );
+  });
+
+  it('injects the producer loaded callback when explicitly enabled', async () => {
+    const react = {
+      createElement: vi.fn((type: unknown, props?: unknown) => ({
+        type,
+        props,
+      })),
+    };
+    const observability = createObservability({
+      level: 'verbose',
+      react: {
+        injectLoadedCallback: true,
       },
     });
 
@@ -765,7 +807,6 @@ describe('ObservabilityPlugin', () => {
     (wrapped as (props: Record<string, unknown>) => unknown)({
       label: 'Save',
     });
-    effects[0]?.();
 
     const renderedProps = react.createElement.mock.calls[0]?.[1] as {
       label: string;
@@ -782,29 +823,12 @@ describe('ObservabilityPlugin', () => {
         onMFRemoteLoaded: expect.any(Function),
       }),
     );
-    expect(observability.getEvents()).toEqual(
+    expect(observability.getEvents()).not.toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          phase: 'component',
-          status: 'start',
-          eventName: 'component:react-render-started',
-          source: 'react',
-          componentName: 'RemoteButton',
-        }),
-        expect.objectContaining({
-          phase: 'component',
-          status: 'success',
-          eventName: 'component:react-mounted',
-          source: 'react',
-          componentName: 'RemoteButton',
+          eventName: expect.stringContaining('component:react-'),
         }),
       ]),
-    );
-    expect(observability.getLatestReport()?.summary.outcome).toBe(
-      'component-loaded',
-    );
-    expect(observability.getLatestReport()?.diagnosis?.title).toBe(
-      'React component mounted',
     );
 
     renderedProps.onMFRemoteLoaded({
@@ -829,7 +853,6 @@ describe('ObservabilityPlugin', () => {
     );
 
     react.createElement.mockClear();
-    effects.length = 0;
 
     function RemoteCard() {
       return null;
@@ -865,7 +888,6 @@ describe('ObservabilityPlugin', () => {
       props: Record<string, unknown>,
     ) => unknown;
     WrappedDefault({});
-    effects[0]?.();
 
     expect(react.createElement).toHaveBeenCalledWith(
       RemoteCard,
@@ -881,12 +903,11 @@ describe('ObservabilityPlugin', () => {
         type,
         props,
       })),
-      useEffect: vi.fn(),
     };
     const observability = createObservability({
       level: 'verbose',
       react: {
-        enabled: true,
+        injectLoadedCallback: true,
         remoteIds: ['remote/profile'],
       },
     });
@@ -949,7 +970,7 @@ describe('ObservabilityPlugin', () => {
     const observability = createObservability({
       level: 'verbose',
       react: {
-        enabled: true,
+        injectLoadedCallback: true,
       },
     });
 

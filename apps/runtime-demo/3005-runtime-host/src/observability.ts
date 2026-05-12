@@ -8,8 +8,7 @@ export const observability = createObservability({
     scope: 'runtime_host',
   },
   react: {
-    enabled: true,
-    timeout: 5000,
+    injectLoadedCallback: true,
     consumerNames: [
       'observability_showcase_profile_consumer',
       'observability_showcase_analytics_consumer',

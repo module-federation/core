@@ -165,10 +165,10 @@ your own telemetry backend.
 | `browser.scope` | `string` | host name | Browser reader namespace, for example `runtime_host`. |
 | `browser.mode` | `'development' \| 'production'` | `'development'` | Browser output mode. Production mode keeps console hints minimal. |
 | `trace.printStart` | `boolean` | `true` in development browser mode, `false` in production browser mode | Print `console.info` when `loadRemote` or `loadShare` starts so development agents can get the `traceId`. Production mode requires an explicit `true`. |
-| `react.enabled` | `boolean` | `false` | Try to observe remote React function component lifecycle. |
-| `react.timeout` | `number` | `5000` | Record a timeout event if the component does not mount in time. |
-| `react.consumerNames` | `string[]` | `[]` | Observe only specific consumer instances. Empty means no consumer filter. |
-| `react.remoteIds` | `string[]` | `[]` | Observe only specific remote requests, such as `remote/Button` or `./Button`. Empty means no remote filter. |
+| `react.enabled` | `boolean` | `true` | Master switch for React-specific debugging options. Set to `false` to disable all React wrapping. |
+| `react.injectLoadedCallback` | `boolean` | `false` | Explicitly wrap matched remote React components and inject `onMFRemoteLoaded`. This changes the component reference; use it as a temporary debugging option and remove it after the issue is fixed. |
+| `react.consumerNames` | `string[]` | `[]` | Limit callback injection to specific consumer instances. Empty means no consumer filter. |
+| `react.remoteIds` | `string[]` | `[]` | Limit callback injection to specific remote requests, such as `remote/Button` or `./Button`. Empty means no remote filter. |
 | `react.defaultExportMode` | `'preserve' \| 'component'` | auto | Controls whether `{ default: Component }` remotes return the wrapped component directly. Usually keep the default. |
 | `onEvent` | `(event, report, context) => void` | `undefined` | Called whenever an observability event is recorded. |
 | `onReport` | `(report, context) => void` | `undefined` | Called whenever a report is updated. Production apps commonly upload reports here. |
@@ -253,9 +253,9 @@ Module Federation can know that a remote module loaded. It cannot always know
 that your business component finished its own data loading, chart rendering, or
 SDK initialization.
 
-When React lifecycle observation is enabled, the plugin injects an
-`onMFRemoteLoaded` prop into the remote React component. The producer can call
-it when its own ready condition is met:
+When `react.injectLoadedCallback` is explicitly enabled, the plugin injects an
+`onMFRemoteLoaded` prop into matched remote React components. The producer can
+call it when its own ready condition is met:
 
 ```tsx
 import { useEffect } from 'react';
@@ -296,32 +296,31 @@ getInstance()?.markComponentLoaded({
 The report will include `component:business-loaded` and
 `summary.outcome: "component-loaded"`.
 
-## Observe React Component Mount
+## Inject React Loaded Callback
 
-For development or AI debugging, you can explicitly enable remote React
-component lifecycle observation:
+For development, AI debugging, or temporary production debugging, you can
+explicitly inject a loaded callback into matched remote React components:
 
 ```ts
 ObservabilityPlugin({
   level: 'verbose',
   react: {
-    enabled: true,
-    timeout: 5000,
+    injectLoadedCallback: true,
+    consumerNames: ['runtime_host'],
+    remoteIds: ['remote/Button'],
   },
 });
 ```
 
 When enabled, the plugin tries to detect remote React function components after
 `loadRemote` succeeds and wraps them with a component that does not add DOM
-nodes. The wrapper also injects the `onMFRemoteLoaded` prop. Reports may include:
+nodes. The wrapper injects only the `onMFRemoteLoaded` prop. It does not observe
+React mount, render lifecycle, or timeout. When the producer calls
+`props.onMFRemoteLoaded?.()`, the report records `component:business-loaded`.
 
-- `component:react-render-started`
-- `component:react-mounted`
-- `component:react-render-timeout`
-
-This only means React mounted the component. It does not mean business data,
-charts, or SDK initialization completed. Call `props.onMFRemoteLoaded?.()` from
-the producer when the application has its own success condition.
+This option changes the component reference because `loadRemote` returns a
+wrapper component. Keep the matched scope narrow, and remove this option after
+the production issue is fixed.
 
 ## Use With the `mf` Skill
 
