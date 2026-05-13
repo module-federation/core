@@ -53,6 +53,63 @@ for the separate `.mf/observability/build-info.json` or
 
 Prefer the most direct source available.
 
+### Browser capability check
+
+For a browser page, first try the least intrusive path:
+
+1. open or inspect the target page
+2. check whether the current agent/browser tool can evaluate JavaScript in the
+   page context
+3. if evaluation works, read
+   `window.__FEDERATION__.__OBSERVABILITY__` directly and do not start the local
+   collector
+
+Use the local collector only when page-context evaluation is unavailable,
+blocked, or unreliable. The collector is a fallback for agent environments that
+can open a page but cannot execute `window.__FEDERATION__...` in that page.
+
+### Local collector
+
+If evaluation is unavailable and the project enables
+`ObservabilityPlugin({ collector: true })` or
+`collector: { enabled: true, port }`, start the lightweight collector before
+opening the page.
+
+Before starting the collector, check whether the configured port is available.
+Use `17891` by default. If it is occupied, pick the next free local port
+(`17892`, `17893`, ...), then tell the user to make the runtime plugin config
+match that port:
+
+```ts
+ObservabilityPlugin({
+  collector: {
+    enabled: true,
+    port: 17892,
+  },
+});
+```
+
+Start the collector with the selected port:
+
+```bash
+node skills/mf/scripts/observability-collector.js --port 17891
+```
+
+The collector listens only on `127.0.0.1`, receives browser reports from the
+runtime plugin, and writes:
+
+```text
+.mf/observability/collector/latest-session.json
+.mf/observability/collector/<sessionId>/events.jsonl
+.mf/observability/collector/<sessionId>/latest.json
+.mf/observability/collector/<sessionId>/latest-report.json
+```
+
+After opening the target page and reproducing the issue, read
+`latest-report.json` first. If the page is still loading, read `latest.json` or
+`events.jsonl` to inspect pending traces. Stop the collector process after the
+analysis unless the user asks to keep collecting.
+
 ### Browser
 
 If the console hint includes a `read:` line, execute that command exactly in the
@@ -159,11 +216,45 @@ Use `summary.outcome` before reading raw `events`:
   `onMFRemoteLoaded` callback.
 - `failed`: loading failed. Use `summary.error`, `diagnosis.actions`, and
   `failedPhase`.
-- `recovered`: loading failed first, then retry or fallback returned a result.
+- `recovered`: loading failed first, then a runtime fallback or recovery path
+  returned a result.
+
+For shared loading, `summary.outcome: "recovered"` can also mean the runtime
+handled a custom shared-info miss. If `summary.phases.shared.status` is
+`"complete"` and `shared.reason` is `"custom-share-info-unmatched"`, do not say
+Module Federation loading failed. Say the build plugin supplied
+`customShareInfo`, but no registered shared provider matched it, so the runtime
+continued through its handled path. Ask the user to inspect shared config only
+if they expected a specific provider/version to be selected.
+
+The observability plugin cannot determine whether `@module-federation/retry-plugin`
+itself succeeded. It records the Module Federation loading chain and final
+resource result, not retry-plugin internal state. Do not infer retry success
+only from URL changes, retry-plugin console lines, or the page eventually
+rendering. If the user needs a retry success/failure judgment, ask them to add
+their own evidence in retry-plugin hooks such as `onRetry`, `onSuccess`, and
+`onError`, then read that output. Without those hook records or user-provided
+retry events, say only that the remote eventually loaded.
 
 Use `summary.loadCompleted` only as "the loadRemote flow ended"; it does not by
 itself prove success. Use `summary.runtimeLoaded` for remote module success and
 `summary.componentLoaded` for component-level success.
+
+`summary.componentLoaded: false` is not by itself proof that the React component
+failed to render. It only means no component-level ready signal was observed. If
+`react.injectLoadedCallback: true` is enabled but `componentLoaded` is false:
+
+1. first inspect the producer source, if available, and check whether the
+   component receives and calls `props.onMFRemoteLoaded?.(...)`
+2. if the producer source is available and the callback is not called, explain
+   that the remote resource loaded but component readiness is unknown until the
+   producer adds the callback
+3. if the producer source is not available, ask the user whether the producer
+   calls `onMFRemoteLoaded`; do not claim the component failed only because the
+   flag is false
+4. only conclude that the component failed when there is additional evidence,
+   such as a React error, an error boundary state, a missing expected UI, or a
+   producer/runtime error event
 
 If `events` are needed, remote module success is usually:
 

@@ -16,8 +16,7 @@
   },
   "files": [
     "dist/",
-    "README.md",
-    "AI_TROUBLESHOOTING.md"
+    "README.md"
   ],
   "exports": {
     ".": {

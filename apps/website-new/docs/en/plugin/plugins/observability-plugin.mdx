@@ -19,7 +19,7 @@ Use it when you want to answer questions such as:
 
 - Did this remote load successfully?
 - Which phase failed: manifest, remoteEntry, init, expose, factory, or shared?
-- Did the load recover through retry or fallback?
+- Did the load recover through a runtime fallback or recovery path?
 - Which shared dependency provider and version were selected?
 - What report should I give to a human or AI coding agent?
 
@@ -161,13 +161,13 @@ your own telemetry backend.
 | `stackTrace.enabled` | `boolean` | `true` | Store a clipped stack in the report. |
 | `stackTrace.maxLines` | `number` | built-in limit | Maximum stack lines kept in the report. |
 | `stackTrace.maxLength` | `number` | built-in limit | Maximum stack characters kept in the report. |
+| `collector` | `boolean \| { enabled?: boolean; port?: number }` | `false` | POST browser runtime events to a local collector. `true` uses `127.0.0.1:17891`; custom config only needs a `port`. This is for local AI debugging, and the runtime plugin does not start the server. |
 | `browser.enabled` | `boolean` | `false` | Expose the browser reader on `window.__FEDERATION__.__OBSERVABILITY__`. |
 | `browser.scope` | `string` | host name | Browser reader namespace, for example `runtime_host`. |
 | `browser.mode` | `'development' \| 'production'` | `'development'` | Browser output mode. Production mode keeps console hints minimal. |
 | `trace.printStart` | `boolean` | `true` in development browser mode, `false` in production browser mode | Print `console.info` when `loadRemote` or `loadShare` starts so development agents can get the `traceId`. Production mode requires an explicit `true`. |
 | `react.enabled` | `boolean` | `true` | Master switch for React-specific debugging options. Set to `false` to disable all React wrapping. |
 | `react.injectLoadedCallback` | `boolean` | `false` | Explicitly wrap matched remote React components and inject `onMFRemoteLoaded`. This changes the component reference; use it as a temporary debugging option and remove it after the issue is fixed. |
-| `react.consumerNames` | `string[]` | `[]` | Limit callback injection to specific consumer instances. Empty means no consumer filter. |
 | `react.remoteIds` | `string[]` | `[]` | Limit callback injection to specific remote requests, such as `remote/Button` or `./Button`. Empty means no remote filter. |
 | `react.defaultExportMode` | `'preserve' \| 'component'` | auto | Controls whether `{ default: Component }` remotes return the wrapped component directly. Usually keep the default. |
 | `onEvent` | `(event, report, context) => void` | `undefined` | Called whenever an observability event is recorded. |
@@ -306,7 +306,6 @@ ObservabilityPlugin({
   level: 'verbose',
   react: {
     injectLoadedCallback: true,
-    consumerNames: ['runtime_host'],
     remoteIds: ['remote/Button'],
   },
 });
@@ -318,9 +317,16 @@ nodes. The wrapper injects only the `onMFRemoteLoaded` prop. It does not observe
 React mount, render lifecycle, or timeout. When the producer calls
 `props.onMFRemoteLoaded?.()`, the report records `component:business-loaded`.
 
+If `summary.componentLoaded` is `false` after enabling
+`react.injectLoadedCallback`, first check whether the producer source actually
+calls `props.onMFRemoteLoaded?.(...)`. If it does not, the report can only prove
+that the remote resource loaded; it cannot prove whether the component reached
+the producer's business-ready point. If the producer source is unavailable, ask
+the producer owner to confirm whether the callback was added.
+
 This option changes the component reference because `loadRemote` returns a
-wrapper component. Keep the matched scope narrow, and remove this option after
-the production issue is fixed.
+wrapper component. Use `remoteIds` to keep the matched scope narrow, and remove
+this option after the production issue is fixed.
 
 ## Use With the `mf` Skill
 

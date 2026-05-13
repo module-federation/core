@@ -42,6 +42,8 @@ Enable only the output channels that match the environment:
 
 - Browser dev: use `browser.enabled: true` with a scoped reader such as
   `window.__FEDERATION__.__OBSERVABILITY__.host`.
+- Agent-led browser dev: use `collector: true` to POST reports to the local
+  skill collector on `127.0.0.1:17891`.
 - Browser prod: set `browser.mode: "production"` so console output stays limited
   to `traceId` and known `errorCode`; export full reports only through explicit
   app-owned flows such as `exportReport()` or `onReport`.
@@ -85,7 +87,16 @@ and exposes the final loading state through a small `summary` object:
 - `failed`: the load failed and `failedPhase` points to the first specific
   failing phase.
 - `recovered`: loading hit an error but a fallback/recovery path returned a
-  result.
+  result. For shared loading, the `custom-share-info-unmatched` reason means
+  build-time `customShareInfo` did not match a registered provider, but the
+  runtime handled it as a non-fatal result instead of a loading failure.
+
+`summary.componentLoaded: false` only means no component-level ready signal was
+observed. If `react.injectLoadedCallback: true` is enabled but this field is
+still false, check whether the producer actually calls
+`props.onMFRemoteLoaded?.(...)`. Without that producer call, the report can only
+confirm that the remote resource loaded; it cannot prove whether the React
+component reached the producer's business-ready point.
 
 For remote loading, the plugin listens to runtime lifecycle hooks such as
 `beforeRequest`, `afterMatchRemote`, `onLoad`, `afterLoadRemote`,
@@ -115,15 +126,16 @@ a known runtime error code is present, and a short list of next checks. This is
 the field a person or AI coding agent should read first before falling back to
 the raw `events` timeline.
 
-For a stable report-reading and fixing workflow, see
-[`AI_TROUBLESHOOTING.md`](./AI_TROUBLESHOOTING.md). Codex-style agents can also
-use the repository's single `mf` skill entry with the `observability`
-sub-command.
+For agent-led debugging, use the repository's single `mf` skill entry with the
+`observability` sub-command. The skill is the maintained guide for reading
+reports and deciding the next debugging step.
 
 `errorLoadShare` is used only for observation. Shared dependency miss, version
 mismatch, and eager boundary errors are not retried by the retry plugin by
 default because they are usually configuration or availability problems instead
-of transient network failures.
+of transient network failures. When a build plugin supplies `customShareInfo`
+and the runtime reports a handled miss, the observability report uses a
+recovered outcome instead of marking the trace as failed.
 
 Business code can mark its own success condition with a fixed event. When React
 callback injection is explicitly enabled, the wrapper injects an
@@ -177,7 +189,6 @@ ObservabilityPlugin({
   level: 'verbose',
   react: {
     injectLoadedCallback: true,
-    consumerNames: ['runtime_host'],
     remoteIds: ['remote/Button'],
   },
 });
@@ -191,10 +202,15 @@ or timeout. When the producer calls the callback, the report records
 it returns a wrapper component, so use it as a temporary debugging switch and
 remove it after the production issue is fixed.
 
-Use `react.consumerNames` or `react.remoteIds` to limit this behavior to the
-consumers or remote requests you are actively debugging. If both are empty, the
-plugin wraps detected React function components for every runtime instance
-that registered it.
+If `summary.componentLoaded` is still `false` after enabling this option, inspect
+the producer first. If the producer has not called `onMFRemoteLoaded`, the report
+only proves remote runtime loading, not component business readiness. If the
+producer source is unavailable, ask the producer owner to confirm whether the
+callback was added.
+
+Use `react.remoteIds` to limit this behavior to the remote requests you are
+actively debugging. If `remoteIds` is empty, the plugin wraps detected React
+function components loaded by the runtime instance that registered it.
 
 Browser output is available only when the plugin option explicitly enables it.
 When browser output is enabled, the report can be read from:
@@ -230,6 +246,38 @@ This prints only `loadRemote` and `loadShare` start lines. It does not print a
 line for every internal phase. Set `trace.printStart: false` to disable it in
 development browser mode. In production browser mode, set
 `trace.printStart: true` to opt in.
+
+If the agent cannot execute JavaScript in the browser page, enable the local
+collector and start the collector from the MF skill:
+
+```ts
+ObservabilityPlugin({
+  level: 'verbose',
+  collector: true,
+});
+```
+
+`collector: true` posts event/report snapshots to:
+
+```text
+http://127.0.0.1:17891/__mf_observability
+```
+
+Use a custom local port only when the default port is occupied:
+
+```ts
+ObservabilityPlugin({
+  collector: {
+    enabled: true,
+    port: 17892,
+  },
+});
+```
+
+The runtime plugin does not create a server. The MF skill starts a temporary
+local Node collector, writes reports under `.mf/observability/collector`, and
+the agent reads those files. The collector path is local-only and does not
+execute code or control the page.
 
 For browser production use, set `browser.mode: "production"` when the runtime
 console must stay minimal:

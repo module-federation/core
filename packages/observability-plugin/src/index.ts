@@ -62,7 +62,6 @@ export interface ObservabilitySharedSummary {
 
 export interface ObservabilityReportFlags {
   cached: boolean;
-  retried: boolean;
   fallback: boolean;
   recovered: boolean;
 }
@@ -218,6 +217,12 @@ export interface ObservabilityPluginOptions {
   level?: ObservabilityLevel;
   maxEvents?: number;
   console?: boolean;
+  collector?:
+    | boolean
+    | {
+        enabled?: boolean;
+        port?: number;
+      };
   printRawStack?: boolean;
   stackTrace?: {
     enabled?: boolean;
@@ -235,7 +240,6 @@ export interface ObservabilityPluginOptions {
   react?: {
     enabled?: boolean;
     injectLoadedCallback?: boolean;
-    consumerNames?: string[];
     remoteIds?: string[];
     defaultExportMode?: 'preserve' | 'component';
   };
@@ -387,6 +391,7 @@ interface ObservabilityRemoteLoadArgs {
   remote?: ObservabilityRuntimeRemoteSource;
   origin: ObservabilityRuntimeOrigin;
   exposeModule?: unknown;
+  exposeModuleFactory?: unknown;
 }
 
 interface ObservabilityRemoteBeforeRequestArgs {
@@ -523,8 +528,27 @@ interface ObservabilityReactLike {
   ) => unknown;
 }
 
+interface ObservabilityCollectorOptions {
+  enabled: true;
+  port: number;
+}
+
+type ObservabilityFetch = (
+  input: string,
+  init?: {
+    method?: string;
+    headers?: Record<string, string>;
+    body?: string;
+    keepalive?: boolean;
+    credentials?: 'omit';
+    mode?: 'cors';
+  },
+) => Promise<unknown>;
+
 const DEFAULT_MAX_EVENTS = 100;
 const HARD_MAX_EVENTS = 1000;
+const DEFAULT_COLLECTOR_PORT = 17891;
+const COLLECTOR_PATH = '/__mf_observability';
 const COMPONENT_BUSINESS_LOADED_EVENT = 'component:business-loaded';
 const ON_MF_REMOTE_LOADED_PROP = 'onMFRemoteLoaded';
 const SENSITIVE_PAIR_PATTERN =
@@ -563,6 +587,39 @@ function normalizeQueryLimit(value: number | undefined): number | undefined {
   }
 
   return Math.max(1, Math.min(HARD_MAX_REPORT_QUERY_LIMIT, Math.floor(value)));
+}
+
+function normalizeCollectorPort(value: number | undefined) {
+  if (!Number.isFinite(value) || !value) {
+    return DEFAULT_COLLECTOR_PORT;
+  }
+
+  const port = Math.floor(value);
+  return port > 0 && port <= 65535 ? port : DEFAULT_COLLECTOR_PORT;
+}
+
+function normalizeCollectorOptions(
+  value: ObservabilityPluginOptions['collector'],
+): ObservabilityCollectorOptions | undefined {
+  if (value === true) {
+    return {
+      enabled: true,
+      port: DEFAULT_COLLECTOR_PORT,
+    };
+  }
+
+  if (!value || value === false || value.enabled === false) {
+    return undefined;
+  }
+
+  return {
+    enabled: true,
+    port: normalizeCollectorPort(value.port),
+  };
+}
+
+function getCollectorUrl(port: number) {
+  return `http://127.0.0.1:${port}${COLLECTOR_PATH}`;
 }
 
 function sanitizeText(value: unknown, maxLength = 800): string | undefined {
@@ -1004,6 +1061,26 @@ function copyComponentStatics(
   });
 }
 
+function cloneModuleWithDefaultExport(
+  moduleExports: Record<string, unknown>,
+  defaultExport: unknown,
+) {
+  const descriptors = Object.getOwnPropertyDescriptors(moduleExports);
+  const defaultDescriptor = descriptors.default;
+
+  descriptors.default = {
+    configurable: true,
+    enumerable: defaultDescriptor?.enumerable ?? true,
+    writable: true,
+    value: defaultExport,
+  };
+
+  return Object.defineProperties(
+    Object.create(Object.getPrototypeOf(moduleExports)),
+    descriptors,
+  );
+}
+
 function resolveReactComponentTarget(
   component: unknown,
   defaultExportMode: 'preserve' | 'component' = 'preserve',
@@ -1034,10 +1111,12 @@ function resolveReactComponentTarget(
     component: defaultExport,
     createResult: (wrappedComponent) => {
       const descriptor = Object.getOwnPropertyDescriptor(component, 'default');
+      let defaultExportReplaced = false;
 
       try {
         if (!descriptor || descriptor.writable || descriptor.set) {
           component.default = wrappedComponent;
+          defaultExportReplaced = true;
         } else if (descriptor.configurable) {
           Object.defineProperty(component, 'default', {
             configurable: true,
@@ -1045,12 +1124,19 @@ function resolveReactComponentTarget(
             writable: true,
             value: wrappedComponent,
           });
+          defaultExportReplaced = true;
         }
       } catch {
         // If the module namespace is read-only, leave the remote module untouched.
       }
 
-      return defaultExportMode === 'component' ? wrappedComponent : undefined;
+      if (defaultExportMode === 'component') {
+        return wrappedComponent;
+      }
+
+      return defaultExportReplaced
+        ? undefined
+        : cloneModuleWithDefaultExport(component, wrappedComponent);
     },
   };
 }
@@ -1663,6 +1749,7 @@ export function createObservability(
   const traceByRequest = new Map<string, string>();
   const traceByRemote = new Map<string, string>();
   const phaseStartTimes = new Map<string, number>();
+  const collectorOptions = normalizeCollectorOptions(options.collector);
   const seenManifestUrls = new Set<string>();
   const seenRemoteEntryKeys = new Set<string>();
   const consoleReportedTraceIds = new Set<string>();
@@ -1868,7 +1955,6 @@ export function createObservability(
     phases: {},
     flags: {
       cached: false,
-      retried: false,
       fallback: false,
       recovered: false,
     },
@@ -1907,9 +1993,6 @@ export function createObservability(
 
       collection.phases[phase] = phaseSummary;
 
-      if (event.phase === 'remoteEntry' && event.recovered) {
-        collection.flags.retried = true;
-      }
       if (
         event.phase === 'loadRemote' &&
         event.status === 'complete' &&
@@ -1973,7 +2056,7 @@ export function createObservability(
     const lastEvent = report.events[report.events.length - 1];
     let outcome: ObservabilityReportOutcome = 'pending';
 
-    if (recovered && runtimeLoaded) {
+    if (recovered) {
       outcome = 'recovered';
     } else if (componentLoaded) {
       outcome = 'component-loaded';
@@ -2205,7 +2288,6 @@ export function createObservability(
         : report.moduleInfo?.availableNames,
     );
     addFact('cached', report.summary.flags.cached);
-    addFact('retried', report.summary.flags.retried);
     addFact('fallback', report.summary.flags.fallback);
     addFact('recovered', report.summary.recovered);
     addFact('loadCompleted', report.summary.loadCompleted);
@@ -2220,9 +2302,6 @@ export function createObservability(
 
     if (report.status === 'error' && !report.errorCode) {
       warnings.push('No known Module Federation error code was captured');
-    }
-    if (report.summary.flags.retried) {
-      warnings.push('Remote entry loading recovered after retry');
     }
     if (report.summary.flags.fallback) {
       warnings.push('Remote loading completed through fallback recovery');
@@ -2640,6 +2719,46 @@ export function createObservability(
     }
   };
 
+  const notifyCollector = (
+    event: ObservabilityEvent,
+    report: ObservabilityReport,
+  ) => {
+    if (!collectorOptions) {
+      return;
+    }
+
+    const fetcher = (globalThis as { fetch?: ObservabilityFetch }).fetch;
+    if (typeof fetcher !== 'function') {
+      return;
+    }
+
+    try {
+      const body = JSON.stringify({
+        schemaVersion: 1,
+        source: 'browser',
+        kind: 'event',
+        createdAt: Date.now(),
+        event: copyEvent(event),
+        report: copyReport(report),
+      });
+
+      void fetcher(getCollectorUrl(collectorOptions.port), {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+        },
+        body,
+        keepalive: body.length <= 64 * 1024,
+        credentials: 'omit',
+        mode: 'cors',
+      }).catch(() => {
+        // The local collector is optional and must not affect MF loading.
+      });
+    } catch {
+      // The local collector is optional and must not affect MF loading.
+    }
+  };
+
   const getEventsSnapshot = () => events.map(copyEvent);
 
   const getTraceIdsSnapshot = () => Array.from(reports.keys());
@@ -2980,6 +3099,7 @@ export function createObservability(
     const report = updateReport(event);
     emitStartConsoleHint(event, report);
     emitConsoleHint(event, report, input.error);
+    notifyCollector(event, report);
     notifyRawError(input.error, event, report, origin);
     notifyEvent(event, report, origin);
     notifyReport(report, origin);
@@ -3058,19 +3178,14 @@ export function createObservability(
       return undefined;
     }
 
-    const consumerNames = options.react.consumerNames || [];
     const remoteIds = options.react.remoteIds || [];
-    if (!consumerNames.length && !remoteIds.length) {
+    if (!remoteIds.length) {
       return {
         allowAnonymousComponent: false,
       };
     }
 
-    const consumerName = loadArgs.origin.options?.name || loadArgs.origin.name;
-    const consumerId = loadArgs.origin.options?.id;
     const matched =
-      (consumerName ? consumerNames.includes(consumerName) : false) ||
-      (consumerId ? consumerNames.includes(consumerId) : false) ||
       remoteIds.includes(loadArgs.id) ||
       (loadArgs.expose ? remoteIds.includes(loadArgs.expose) : false);
 
@@ -3081,15 +3196,12 @@ export function createObservability(
       : undefined;
   };
 
-  const wrapReactComponent = async (
+  const createReactComponentWrapper = (
     component: unknown,
     loadArgs: ObservabilityRemoteLoadArgs,
+    wrapPolicy: { allowAnonymousComponent: boolean },
+    react: ObservabilityReactLike | undefined,
   ) => {
-    const wrapPolicy = getReactWrapPolicy(loadArgs);
-    if (!wrapPolicy) {
-      return undefined;
-    }
-
     const target = resolveReactComponentTarget(
       component,
       options.react?.defaultExportMode ||
@@ -3106,7 +3218,6 @@ export function createObservability(
     );
     const originalComponent = target.component;
 
-    const react = await getReactForOrigin(loadArgs.origin);
     const ObservedRemoteComponent = (props: Record<string, unknown>) => {
       const incomingProps = isRecord(props) ? props : {};
       const originalLoadedCallback = getObjectValue(
@@ -3146,6 +3257,60 @@ export function createObservability(
     );
 
     return target.createResult(ObservedRemoteComponent);
+  };
+
+  const wrapReactComponent = async (
+    component: unknown,
+    loadArgs: ObservabilityRemoteLoadArgs,
+  ) => {
+    const wrapPolicy = getReactWrapPolicy(loadArgs);
+    if (!wrapPolicy) {
+      return undefined;
+    }
+
+    return createReactComponentWrapper(
+      component,
+      loadArgs,
+      wrapPolicy,
+      await getReactForOrigin(loadArgs.origin),
+    );
+  };
+
+  const wrapReactComponentFactory = async (
+    factory: unknown,
+    loadArgs: ObservabilityRemoteLoadArgs,
+  ) => {
+    const wrapPolicy = getReactWrapPolicy(loadArgs);
+    if (!wrapPolicy || typeof factory !== 'function') {
+      return undefined;
+    }
+
+    const react = await getReactForOrigin(loadArgs.origin);
+    const originalFactory = factory as (...args: unknown[]) => unknown;
+
+    return (...factoryArgs: unknown[]) => {
+      const moduleOrPromise = originalFactory(...factoryArgs);
+      if (
+        moduleOrPromise &&
+        typeof (moduleOrPromise as Promise<unknown>).then === 'function'
+      ) {
+        return (moduleOrPromise as Promise<unknown>).then((module) => {
+          return (
+            createReactComponentWrapper(module, loadArgs, wrapPolicy, react) ||
+            module
+          );
+        });
+      }
+
+      return (
+        createReactComponentWrapper(
+          moduleOrPromise,
+          loadArgs,
+          wrapPolicy,
+          react,
+        ) || moduleOrPromise
+      );
+    };
   };
 
   const plugin: ObservabilityRuntimePlugin = {
@@ -3268,10 +3433,13 @@ export function createObservability(
         return;
       }
 
-      const wrappedComponent = await wrapReactComponent(
-        loadArgs.exposeModule,
-        loadArgs,
-      );
+      const wrappedComponent =
+        typeof loadArgs.exposeModuleFactory === 'function'
+          ? await wrapReactComponentFactory(
+              loadArgs.exposeModuleFactory,
+              loadArgs,
+            )
+          : await wrapReactComponent(loadArgs.exposeModule, loadArgs);
       recordEvent(
         {
           phase: 'loadRemote',
@@ -3568,17 +3736,20 @@ export function createObservability(
         return;
       }
 
-      const reason = getSharedErrorReason(args);
+      const handledCustomShareMiss = args.recovered === true && !args.error;
+      const reason = handledCustomShareMiss
+        ? 'custom-share-info-unmatched'
+        : getSharedErrorReason(args);
 
       recordEvent(
         {
           phase: 'shared',
-          status: 'error',
+          status: handledCustomShareMiss ? 'complete' : 'error',
           requestId: `shared:${args.pkgName}`,
           lifecycle: args.lifecycle,
           shared: createSharedInfo(args, reason),
           message: reason ? `shared:${reason}` : undefined,
-          error: args.error,
+          error: handledCustomShareMiss ? undefined : args.error,
           recovered: args.recovered,
         },
         args.origin,

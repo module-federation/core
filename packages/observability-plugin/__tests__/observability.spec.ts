@@ -897,6 +897,136 @@ describe('ObservabilityPlugin', () => {
     );
   });
 
+  it('injects the producer loaded callback for build-time remote factories', async () => {
+    const react = {
+      createElement: vi.fn((type: unknown, props?: unknown) => ({
+        type,
+        props,
+      })),
+    };
+    const observability = createObservability({
+      level: 'verbose',
+      react: {
+        injectLoadedCallback: true,
+      },
+    });
+
+    function RemoteProvider() {
+      return null;
+    }
+
+    const wrappedFactory = await observability.plugin.onLoad?.({
+      id: 'provider',
+      pkgNameOrAlias: 'provider',
+      expose: '.',
+      remote: {
+        name: 'provider',
+        entry: 'http://localhost:3001/mf-manifest.json',
+      },
+      options: {},
+      origin: {
+        ...enabledOrigin,
+        loadShareSync: () => () => react,
+      },
+      exposeModule: undefined,
+      exposeModuleFactory: () => RemoteProvider,
+      moduleInstance: {},
+    } as any);
+
+    expect(typeof wrappedFactory).toBe('function');
+
+    const WrappedProvider = (wrappedFactory as () => unknown)();
+    expect(typeof WrappedProvider).toBe('function');
+
+    (WrappedProvider as (props: Record<string, unknown>) => unknown)({});
+
+    const renderedProps = react.createElement.mock.calls[0]?.[1] as {
+      onMFRemoteLoaded: (options?: {
+        componentName?: string;
+        metadata?: Record<string, unknown>;
+      }) => void;
+    };
+
+    expect(react.createElement).toHaveBeenCalledWith(
+      RemoteProvider,
+      expect.objectContaining({
+        onMFRemoteLoaded: expect.any(Function),
+      }),
+    );
+
+    renderedProps.onMFRemoteLoaded({
+      metadata: {
+        readySource: 'producer',
+      },
+    });
+
+    expect(observability.getEvents()).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          phase: 'component',
+          status: 'success',
+          eventName: 'component:business-loaded',
+          source: 'business',
+          componentName: 'RemoteProvider',
+          metadata: {
+            readySource: 'producer',
+          },
+        }),
+      ]),
+    );
+
+    react.createElement.mockClear();
+
+    function ReadonlyRemoteProvider() {
+      return null;
+    }
+
+    const readonlyModule = {};
+    Object.defineProperty(readonlyModule, 'default', {
+      configurable: false,
+      enumerable: true,
+      get: () => ReadonlyRemoteProvider,
+    });
+
+    const wrappedReadonlyFactory = await observability.plugin.onLoad?.({
+      id: 'provider',
+      pkgNameOrAlias: 'provider',
+      expose: '.',
+      remote: {
+        name: 'provider',
+        entry: 'http://localhost:3001/mf-manifest.json',
+      },
+      options: {},
+      origin: {
+        ...enabledOrigin,
+        loadShareSync: () => () => react,
+      },
+      exposeModule: undefined,
+      exposeModuleFactory: () => readonlyModule,
+      moduleInstance: {},
+    } as any);
+
+    const wrappedReadonlyModule = (
+      wrappedReadonlyFactory as () => Record<string, unknown>
+    )();
+
+    expect(wrappedReadonlyModule).not.toBe(readonlyModule);
+    expect(wrappedReadonlyModule.default).toEqual(expect.any(Function));
+
+    (
+      wrappedReadonlyModule.default as (
+        props: Record<string, unknown>,
+      ) => unknown
+    )({});
+
+    expect(react.createElement).toHaveBeenCalledWith(
+      ReadonlyRemoteProvider,
+      expect.objectContaining({
+        onMFRemoteLoaded: expect.any(Function),
+      }),
+    );
+  });
+
   it('wraps explicitly matched React remotes even when the compiled component name is not capitalized', async () => {
     const react = {
       createElement: vi.fn((type: unknown, props?: unknown) => ({
@@ -1074,6 +1204,66 @@ describe('ObservabilityPlugin', () => {
       actions: [],
     });
     expect(report?.events).toHaveLength(2);
+  });
+
+  it('posts events to the local collector when enabled', () => {
+    const originalFetch = globalThis.fetch;
+    const fetchMock = vi.fn(() => Promise.resolve({ ok: true }));
+    Object.defineProperty(globalThis, 'fetch', {
+      value: fetchMock,
+      configurable: true,
+      writable: true,
+    });
+
+    try {
+      const observability = createObservability({
+        level: 'verbose',
+        collector: true,
+      });
+
+      emitRemoteStart(observability);
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(fetchMock.mock.calls[0]?.[0]).toBe(
+        'http://127.0.0.1:17891/__mf_observability',
+      );
+
+      const requestInit = fetchMock.mock.calls[0]?.[1] as {
+        body: string;
+        credentials: string;
+        mode: string;
+      };
+      const payload = JSON.parse(requestInit.body);
+
+      expect(requestInit).toMatchObject({
+        credentials: 'omit',
+        mode: 'cors',
+      });
+      expect(payload).toMatchObject({
+        schemaVersion: 1,
+        source: 'browser',
+        kind: 'event',
+        event: {
+          phase: 'loadRemote',
+          status: 'start',
+          requestId: 'remote/Button',
+        },
+        report: {
+          requestId: 'remote/Button',
+          status: 'pending',
+        },
+      });
+    } finally {
+      if (originalFetch) {
+        Object.defineProperty(globalThis, 'fetch', {
+          value: originalFetch,
+          configurable: true,
+          writable: true,
+        });
+      } else {
+        Reflect.deleteProperty(globalThis, 'fetch');
+      }
+    }
   });
 
   it('omits undefined fields from public snapshots', async () => {
@@ -1882,7 +2072,7 @@ describe('ObservabilityPlugin', () => {
     }
   });
 
-  it('summarizes successful manifest, remoteEntry, cache, and retry recovery facts', () => {
+  it('summarizes successful manifest, remoteEntry, cache, and runtime recovery facts', () => {
     const observability = createObservability({
       level: 'verbose',
       console: false,
@@ -1932,7 +2122,6 @@ describe('ObservabilityPlugin', () => {
       recovered: true,
     });
     expect(report?.summary.flags).toMatchObject({
-      retried: true,
       recovered: true,
     });
 
@@ -2072,7 +2261,7 @@ describe('ObservabilityPlugin', () => {
     });
   });
 
-  it('derives shared version mismatch details from errorLoadShare', () => {
+  it('records custom shared info misses as handled recovery', () => {
     const observability = createObservability({
       level: 'verbose',
       console: false,
@@ -2113,14 +2302,27 @@ describe('ObservabilityPlugin', () => {
 
     const report = observability.getLatestReport();
 
-    expect(report?.status).toBe('error');
-    expect(report?.failedPhase).toBe('shared');
+    expect(report?.status).toBe('success');
+    expect(report?.failedPhase).toBeUndefined();
+    expect(report?.summary.outcome).toBe('recovered');
+    expect(report?.summary.flags.recovered).toBe(true);
+    expect(report?.summary.phases.shared).toMatchObject({
+      status: 'complete',
+      recovered: true,
+    });
     expect(report?.shared).toMatchObject({
       name: 'react',
       requiredVersion: '^99.0.0',
       availableVersions: ['18.3.1'],
-      reason: 'version-mismatch',
+      reason: 'custom-share-info-unmatched',
     });
+    expect(report?.events.at(-1)).toMatchObject({
+      phase: 'shared',
+      status: 'complete',
+      message: 'shared:custom-share-info-unmatched',
+      recovered: true,
+    });
+    expect(report?.summary.error).toBeUndefined();
   });
 
   it('derives eager boundary details from loadShareSync failures', () => {

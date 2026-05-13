@@ -7,12 +7,9 @@ export const observability = createObservability({
     enabled: true,
     scope: 'runtime_host',
   },
+  collector: true,
   react: {
     injectLoadedCallback: true,
-    consumerNames: [
-      'observability_showcase_profile_consumer',
-      'observability_showcase_analytics_consumer',
-    ],
     remoteIds: [
       'dynamic-remote/ProfileCard',
       'dynamic-remote/AnalyticsPanel',

@@ -15,11 +15,13 @@ description: 观测 Module Federation 加载过程，收集运行时和构建侧
 
 - 这个 remote 是否真的加载成功？
 - 失败发生在 manifest、remoteEntry、init、expose、factory 还是 shared？
-- 这次加载是否通过 retry 或 fallback 恢复了？
+- 这次加载是否通过运行时 fallback 或恢复路径完成了？
 - 这次命中了哪个 shared provider 和版本？
 - 应该把哪份报告交给人或 AI coding agent 排查？
 
 shared 观测的边界是实例级别：它用于说明哪个 MF 实例加载了哪个共享依赖、最终使用了哪个已注册的 provider/version，以及对应的 scope、版本、eager 等基础信息。它不保证还原该 shared 是由哪个 remote/expose 间接触发的。一次链路涉及多个 shared 时，请查看 `events` 中所有 `phase: "shared"` 的事件；`summary.shared` 只是最后一次观测到的 shared 摘要。
+
+如果构建插件传入了 `customShareInfo`，但运行时没有匹配到已注册的 shared provider，这不是普通的 fatal error。报告会把它描述为 `summary.outcome: "recovered"`、`summary.phases.shared.status: "complete"`，并在 `shared.reason` 中标记 `"custom-share-info-unmatched"`。它表示运行时走了可继续执行的处理路径；只有当你预期它必须命中某个 provider/version 时，才需要继续检查 shared 配置。
 
 ## 安装
 
@@ -203,13 +205,13 @@ export const observabilityPlugin = ObservabilityPlugin({
 | `stackTrace.enabled` | `boolean` | `true` | 是否在报告中保存裁剪后的错误栈。 |
 | `stackTrace.maxLines` | `number` | 内置上限 | 错误栈最多保留多少行。 |
 | `stackTrace.maxLength` | `number` | 内置上限 | 错误栈最多保留多少字符。 |
+| `collector` | `boolean \| { enabled?: boolean; port?: number }` | `false` | 是否把浏览器运行时事件 POST 到本地 collector。`true` 使用 `127.0.0.1:17891`，自定义时只需要改 `port`。这个能力用于本地 AI 调试，插件本身不会启动服务。 |
 | `browser.enabled` | `boolean` | `false` | 是否把读取入口挂到 `window.__FEDERATION__.__OBSERVABILITY__`。 |
 | `browser.scope` | `string` | host 名称 | 浏览器读取入口的命名空间，例如 `runtime_host`。 |
 | `browser.mode` | `'development' \| 'production'` | `'development'` | 浏览器输出模式。生产模式下 console 只输出最小提示。 |
 | `trace.printStart` | `boolean` | 浏览器开发模式为 `true`，浏览器生产模式为 `false` | 是否在 `loadRemote` 和 `loadShare` 开始时打印 `console.info`，便于开发环境和 Agent 获取 `traceId`。生产模式需要显式设置为 `true` 才会开启。 |
 | `react.enabled` | `boolean` | `true` | React 调试能力总开关。设置为 `false` 时关闭所有 React 包装行为。 |
 | `react.injectLoadedCallback` | `boolean` | `false` | 显式包装匹配到的远程 React 组件，并注入 `onMFRemoteLoaded`。这个能力会改变组件引用，只建议作为临时调试开关，问题修复后需要及时关闭。 |
-| `react.consumerNames` | `string[]` | `[]` | 只对指定消费者实例注入回调。为空时不按消费者过滤。 |
 | `react.remoteIds` | `string[]` | `[]` | 只对指定远程请求注入回调，例如 `remote/Button` 或 `./Button`。为空时不按远程请求过滤。 |
 | `react.defaultExportMode` | `'preserve' \| 'component'` | 自动选择 | 远程模块是 `{ default: Component }` 时，是否直接把包装后的组件作为返回值。通常保持默认即可。 |
 | `onEvent` | `(event, report, context) => void` | `undefined` | 每次记录观测事件时触发，适合接入自定义日志系统。 |
@@ -376,7 +378,6 @@ ObservabilityPlugin({
   level: 'verbose',
   react: {
     injectLoadedCallback: true,
-    consumerNames: ['runtime_host'],
     remoteIds: ['remote/Button'],
   },
 });
@@ -386,7 +387,9 @@ ObservabilityPlugin({
 
 生产者调用 `props.onMFRemoteLoaded?.()` 后，报告里会出现 `component:business-loaded`。
 
-这个能力会改变组件引用。请尽量用 `consumerNames` 和 `remoteIds` 缩小范围，并且只作为临时调试开关使用，线上问题修复后需要及时关闭。
+如果开启了 `react.injectLoadedCallback`，但 `summary.componentLoaded` 仍然是 `false`，不能只根据这个字段判断组件渲染失败。它只表示没有收到组件级成功信号。需要先看生产者源码里有没有调用 `props.onMFRemoteLoaded?.(...)`；如果没有调用，只能说明远程资源已经加载，组件是否达到业务可用状态还需要生产者补充这个回调。如果拿不到生产者源码，需要询问生产者是否已经接入这个回调。
+
+这个能力会改变组件引用。请尽量用 `remoteIds` 缩小范围，并且只作为临时调试开关使用，线上问题修复后需要及时关闭。
 
 ## 配合 `mf` Skill 使用
 
