@@ -142,7 +142,7 @@ export const loader = async ({ request }: LoaderFunctionArgs): Promise<DataLoade
 
 ```tsx
 import { loadRemote, registerRemotes, getInstance } from '@module-federation/modern-js-v3/runtime';
-import { lazyLoadComponentPlugin } from '@module-federation/modern-js-v3/react/data-fetch';
+import { lazyLoadComponentPlugin } from '@module-federation/modern-js-v3/data-fetch';
 // 使用 import type ，仅获取类型
 import type { DataLoaderRes } from './page.data';
 import { useLoaderData } from '@modern-js/runtime/router';

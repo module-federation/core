@@ -30,13 +30,13 @@
       "types": "./dist/types/runtime/index.d.ts",
       "default": "./dist/esm/runtime/index.mjs"
     },
+    "./data-fetch": {
+      "types": "./dist/types/data-fetch.d.ts",
+      "default": "./dist/esm/data-fetch.mjs"
+    },
     "./react": {
       "types": "./dist/types/react/index.d.ts",
       "default": "./dist/esm/react/index.mjs"
-    },
-    "./react/data-fetch": {
-      "types": "./dist/types/react/data-fetch.d.ts",
-      "default": "./dist/esm/react/data-fetch.mjs"
     },
     "./react-v18": {
       "types": "./dist/types/react/v18.d.ts",
@@ -95,11 +95,11 @@
       "runtime": [
         "./dist/types/runtime/index.d.ts"
       ],
+      "data-fetch": [
+        "./dist/types/data-fetch.d.ts"
+      ],
       "react": [
         "./dist/types/react/index.d.ts"
-      ],
-      "react/data-fetch": [
-        "./dist/types/react/data-fetch.d.ts"
       ],
       "react-v18": [
         "./dist/types/react/v18.d.ts"
