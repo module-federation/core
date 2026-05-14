@@ -137,6 +137,7 @@ export interface NextFederationPluginExtraOptions {
   skipSharingNextInternals?: boolean;
   automaticPageStitching?: boolean;
   debug?: boolean;
+  skipFederatedStats?: boolean;
 }
 
 export interface NextFederationPluginOptions

@@ -154,6 +154,7 @@ new NextFederationPlugin({
     enableImageLoaderFix: boolean, // `false` by default
     enableUrlLoaderFix: boolean, // `false` by default
     skipSharingNextInternals: boolean, // `false` by default
+    skipFederatedStats: boolean // `false` by default
   },
 });
 ```
@@ -163,6 +164,7 @@ new NextFederationPlugin({
 - `enableImageLoaderFix` – 给所有由 `nextjs-image-loader` 打包的资产添加公共主机名。例如，如果你从 `http://example.com` 提供 remoteEntry，则所有打包资产将在运行时获取此主机名。这类似于 HTML 中的 Base URL，但用于联合模块。
 - `enableUrlLoaderFix` – 给所有由 `url-loader` 打包的资产添加公共主机名。
 - `skipSharingNextInternals` – 禁用共享 Next 内部。如果你想自己共享 Next 内部或在非 next 应用中使用此插件，则可以使用它。
+- `skipFederatedStats` – 跳过 `federated-stats.json` 的生成。仅在 SSR 中被 `flushChunks()` 使用。不使用 `flushChunks()` 的纯 CSR 应用可以启用此选项来显著减少构建时间。
 
 ## 演示
 
