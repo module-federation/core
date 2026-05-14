@@ -31,8 +31,8 @@
       "default": "./dist/esm/runtime/index.mjs"
     },
     "./data-fetch": {
-      "types": "./dist/types/data-fetch.d.ts",
-      "default": "./dist/esm/data-fetch.mjs"
+      "types": "./dist/types/react/data-fetch.d.ts",
+      "default": "./dist/esm/react/data-fetch.mjs"
     },
     "./react": {
       "types": "./dist/types/react/index.d.ts",
@@ -96,7 +96,7 @@
         "./dist/types/runtime/index.d.ts"
       ],
       "data-fetch": [
-        "./dist/types/data-fetch.d.ts"
+        "./dist/types/react/data-fetch.d.ts"
       ],
       "react": [
         "./dist/types/react/index.d.ts"
