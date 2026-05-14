@@ -146,15 +146,17 @@ Consume loader data and dynamically load the corresponding producer:
 
 ```tsx
 import { loadRemote, registerRemotes, getInstance } from '@module-federation/modern-js-v3/runtime';
-import { createLazyComponent } from '@module-federation/modern-js-v3/react';
+import { lazyLoadComponentPlugin } from '@module-federation/modern-js-v3/react/data-fetch';
 // Use import type to get data loader types
 import type { DataLoaderRes } from './page.data';
 import { useLoaderData } from '@modern-js/runtime/router';
 
 import './index.css';
 
-const RemoteSSRComponent = createLazyComponent({
-  instance: getInstance(),
+const instance = getInstance();
+instance.registerPlugins([lazyLoadComponentPlugin()]);
+
+const RemoteSSRComponent = instance.createLazyComponent({
   loader: () => import('remote/Image'),
   loading: 'loading...',
   export: 'default',
@@ -174,8 +176,7 @@ const Index = () => {
 
   const DynamicRemoteSSRComponents = dataLoader.providerList.map(item => {
     const { id } = item;
-    const Com = createLazyComponent({
-      instance: getInstance(),
+    const Com = instance.createLazyComponent({
       loader: () => loadRemote(id),
       loading: 'loading...',
       fallback: ({ error }) => {

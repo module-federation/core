@@ -75,7 +75,7 @@ There is no difference in using Module Federation in SSR scenarios compared to C
 
 See [Data Fetching](../basic/data-fetch).
 
-The Modern.js plugin re-exports `@module-federation/bridge-react` from `@module-federation/modern-js-v3/react`, so you don't need to install it separately.
+The Modern.js plugin provides `lazyLoadComponentPlugin` from the `@module-federation/modern-js-v3/react/data-fetch` subpath, so you don't need to install `@module-federation/bridge-react` separately.
 
 ## API
 
@@ -95,7 +95,7 @@ The parameters for `createRemoteComponent` and `createLazyComponent` are identic
 ```diff
 - import { createRemoteComponent } from '@module-federation/modern-js-v3/runtime';
 + import { getInstance } from '@module-federation/modern-js-v3/runtime';
-+ import { lazyLoadComponentPlugin } from '@module-federation/modern-js-v3/react';
++ import { lazyLoadComponentPlugin } from '@module-federation/modern-js-v3/react/data-fetch';
 
 const instance = getInstance();
 // After registering the lazyLoadComponentPlugin, the instance will automatically add the createLazyComponent API

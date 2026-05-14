@@ -253,11 +253,13 @@ export default Index;
 
 ```tsx title='page.tsx'
 import { getInstance } from '@module-federation/modern-js-v3/runtime';
-import { createLazyComponent } from '@module-federation/modern-js-v3/react'
+import { lazyLoadComponentPlugin } from '@module-federation/modern-js-v3/react/data-fetch';
 import './index.css';
 
-const RemoteSSRComponent = createLazyComponent({
-  instance: getInstance(),
+const instance = getInstance();
+instance.registerPlugins([lazyLoadComponentPlugin()]);
+
+const RemoteSSRComponent = instance.createLazyComponent({
   loader: () => import('remote/Image'),
   loading: 'loading...',
   export: 'default',

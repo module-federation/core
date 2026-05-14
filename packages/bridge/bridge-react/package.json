@@ -75,6 +75,11 @@
       "import": "./dist/data-fetch-utils.es.js",
       "require": "./dist/data-fetch-utils.cjs.js"
     },
+    "./data-fetch": {
+      "types": "./dist/data-fetch.d.ts",
+      "import": "./dist/data-fetch.es.js",
+      "require": "./dist/data-fetch.cjs.js"
+    },
     "./data-fetch-server-middleware": {
       "types": "./dist/data-fetch-server-middleware.d.ts",
       "import": "./dist/data-fetch-server-middleware.es.js",
@@ -125,6 +130,9 @@
       "data-fetch-utils": [
         "./dist/data-fetch-utils.d.ts"
       ],
+      "data-fetch": [
+        "./dist/data-fetch.d.ts"
+      ],
       "data-fetch-server-middleware": [
         "./dist/data-fetch-server-middleware.d.ts"
       ]
@@ -144,17 +152,13 @@
     "react": ">=16.9.0",
     "react-dom": ">=16.9.0",
     "react-router-dom": "^4 || ^5 || ^6 || ^7",
-    "react-router": "^6 || ^7",
-    "hono": "^4.12.7"
+    "react-router": "^6 || ^7"
   },
   "peerDependenciesMeta": {
     "react-router-dom": {
       "optional": true
     },
     "react-router": {
-      "optional": true
-    },
-    "hono": {
       "optional": true
     }
   },
