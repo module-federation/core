@@ -58,6 +58,7 @@ export function applyClientPlugins(
       'static/chunks/federated-stats.json',
       'server/federated-stats.json',
     ],
+    skip: extraOptions?.skipFederatedStats,
   }).apply(compiler);
 
   // Apply the InvertedContainerPlugin to add custom runtime modules to the container runtime

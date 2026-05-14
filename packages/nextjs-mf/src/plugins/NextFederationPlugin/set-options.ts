@@ -7,6 +7,7 @@ export interface NextFederationPluginExtraOptions {
   skipSharingNextInternals?: boolean;
   automaticPageStitching?: boolean;
   debug?: boolean;
+  skipFederatedStats?: boolean;
 }
 
 export interface NextFederationPluginOptions
@@ -30,6 +31,7 @@ export function setOptions(options: NextFederationPluginOptions): {
     enableUrlLoaderFix: false,
     skipSharingNextInternals: false,
     debug: false,
+    skipFederatedStats: false,
   };
 
   return {
