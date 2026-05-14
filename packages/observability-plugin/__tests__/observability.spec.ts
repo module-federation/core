@@ -1266,6 +1266,59 @@ describe('ObservabilityPlugin', () => {
     }
   });
 
+  it('posts events to the browser devtools channel when enabled', () => {
+    const originalPostMessage = (globalThis as { postMessage?: unknown })
+      .postMessage;
+    const postMessageMock = vi.fn();
+    Object.defineProperty(globalThis, 'postMessage', {
+      value: postMessageMock,
+      configurable: true,
+      writable: true,
+    });
+
+    try {
+      const observability = createObservability({
+        level: 'verbose',
+        console: false,
+        browser: {
+          enabled: true,
+          scope: 'runtime_host',
+        },
+        devtools: true,
+      });
+
+      emitRemoteStart(observability);
+
+      expect(postMessageMock).toHaveBeenCalledTimes(1);
+      expect(postMessageMock.mock.calls[0]?.[1]).toBe('*');
+      expect(postMessageMock.mock.calls[0]?.[0]).toMatchObject({
+        schemaVersion: 1,
+        source: 'module-federation/observability',
+        kind: 'event',
+        scope: 'host',
+        event: {
+          phase: 'loadRemote',
+          status: 'start',
+          requestId: 'remote/Button',
+        },
+        report: {
+          requestId: 'remote/Button',
+          status: 'pending',
+        },
+      });
+    } finally {
+      if (originalPostMessage) {
+        Object.defineProperty(globalThis, 'postMessage', {
+          value: originalPostMessage,
+          configurable: true,
+          writable: true,
+        });
+      } else {
+        Reflect.deleteProperty(globalThis, 'postMessage');
+      }
+    }
+  });
+
   it('omits undefined fields from public snapshots', async () => {
     const observability = createObservability({
       level: 'verbose',

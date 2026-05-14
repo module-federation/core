@@ -3061,6 +3061,9 @@ importers:
       '@modern-js/runtime':
         specifier: 2.70.8
         version: 2.70.8(react-dom@19.2.4(react@19.2.4))(react-server-dom-webpack@19.2.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.19))(esbuild@0.18.20)(webpack-cli@5.1.4)))(react@19.2.4)
+      '@module-federation/observability-plugin':
+        specifier: workspace:*
+        version: link:../observability-plugin
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../sdk

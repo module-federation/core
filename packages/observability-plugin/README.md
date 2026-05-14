@@ -42,6 +42,9 @@ Enable only the output channels that match the environment:
 
 - Browser dev: use `browser.enabled: true` with a scoped reader such as
   `window.__FEDERATION__.__OBSERVABILITY__.host`.
+- Chrome DevTools integration: use `devtools: true` together with browser
+  output so a browser extension can receive loading events through
+  `window.postMessage`.
 - Agent-led browser dev: use `collector: true` to POST reports to the local
   skill collector on `127.0.0.1:17891`.
 - Browser prod: set `browser.mode: "production"` so console output stays limited
@@ -222,6 +225,27 @@ window.__FEDERATION__.__OBSERVABILITY__.host.getReports({ limit: 5 });
 window.__FEDERATION__.__OBSERVABILITY__.host.findReports({ remote: 'remote1' });
 window.__FEDERATION__.__OBSERVABILITY__.host.exportReport('mf-trace-id');
 ```
+
+Chrome DevTools panels can opt in to event delivery without polling the page:
+
+```ts
+ObservabilityPlugin({
+  level: 'verbose',
+  browser: {
+    enabled: true,
+    scope: 'host',
+    mode: 'development',
+  },
+  trace: {
+    printStart: true,
+  },
+  devtools: true,
+});
+```
+
+This posts structured event/report snapshots to the page with
+`window.postMessage`. Browser extensions can forward those messages from their
+content script to the panel. The channel is disabled by default.
 
 `getReports({ limit })` returns recent reports newest first. `findReports()` can
 filter by `traceId`, `remote`, `expose`, `shared`, `status`, or `outcome`.

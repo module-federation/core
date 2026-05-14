@@ -237,6 +237,12 @@ export interface ObservabilityPluginOptions {
   trace?: {
     printStart?: boolean;
   };
+  devtools?:
+    | boolean
+    | {
+        enabled?: boolean;
+        source?: string;
+      };
   react?: {
     enabled?: boolean;
     injectLoadedCallback?: boolean;
@@ -533,6 +539,11 @@ interface ObservabilityCollectorOptions {
   port: number;
 }
 
+interface ObservabilityDevtoolsOptions {
+  enabled: true;
+  source: string;
+}
+
 type ObservabilityFetch = (
   input: string,
   init?: {
@@ -549,6 +560,7 @@ const DEFAULT_MAX_EVENTS = 100;
 const HARD_MAX_EVENTS = 1000;
 const DEFAULT_COLLECTOR_PORT = 17891;
 const COLLECTOR_PATH = '/__mf_observability';
+const DEFAULT_DEVTOOLS_SOURCE = 'module-federation/observability';
 const COMPONENT_BUSINESS_LOADED_EVENT = 'component:business-loaded';
 const ON_MF_REMOTE_LOADED_PROP = 'onMFRemoteLoaded';
 const SENSITIVE_PAIR_PATTERN =
@@ -615,6 +627,26 @@ function normalizeCollectorOptions(
   return {
     enabled: true,
     port: normalizeCollectorPort(value.port),
+  };
+}
+
+function normalizeDevtoolsOptions(
+  value: ObservabilityPluginOptions['devtools'],
+): ObservabilityDevtoolsOptions | undefined {
+  if (value === true) {
+    return {
+      enabled: true,
+      source: DEFAULT_DEVTOOLS_SOURCE,
+    };
+  }
+
+  if (!value || value === false || value.enabled === false) {
+    return undefined;
+  }
+
+  return {
+    enabled: true,
+    source: sanitizeText(value.source, 160) || DEFAULT_DEVTOOLS_SOURCE,
   };
 }
 
@@ -1750,6 +1782,7 @@ export function createObservability(
   const traceByRemote = new Map<string, string>();
   const phaseStartTimes = new Map<string, number>();
   const collectorOptions = normalizeCollectorOptions(options.collector);
+  const devtoolsOptions = normalizeDevtoolsOptions(options.devtools);
   const seenManifestUrls = new Set<string>();
   const seenRemoteEntryKeys = new Set<string>();
   const consoleReportedTraceIds = new Set<string>();
@@ -2759,6 +2792,38 @@ export function createObservability(
     }
   };
 
+  const notifyDevtools = (
+    event: ObservabilityEvent,
+    report: ObservabilityReport,
+  ) => {
+    if (!devtoolsOptions) {
+      return;
+    }
+
+    const poster = (globalThis as { postMessage?: unknown }).postMessage;
+    if (typeof poster !== 'function') {
+      return;
+    }
+
+    try {
+      poster.call(
+        globalThis,
+        {
+          schemaVersion: 1,
+          source: devtoolsOptions.source,
+          kind: 'event',
+          createdAt: Date.now(),
+          scope: browserGlobalScope || report.hostName,
+          event: copyEvent(event),
+          report: copyReport(report),
+        },
+        '*',
+      );
+    } catch {
+      // Browser extension delivery is optional and must not affect MF loading.
+    }
+  };
+
   const getEventsSnapshot = () => events.map(copyEvent);
 
   const getTraceIdsSnapshot = () => Array.from(reports.keys());
@@ -3100,6 +3165,7 @@ export function createObservability(
     emitStartConsoleHint(event, report);
     emitConsoleHint(event, report, input.error);
     notifyCollector(event, report);
+    notifyDevtools(event, report);
     notifyRawError(input.error, event, report, origin);
     notifyEvent(event, report, origin);
     notifyReport(report, origin);
