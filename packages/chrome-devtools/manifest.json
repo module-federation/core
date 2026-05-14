@@ -18,7 +18,8 @@
         "static/js/post-message-start.js",
         "static/js/fast-refresh.js",
         "static/js/override-remote.js",
-        "static/js/snapshot-plugin.js"
+        "static/js/snapshot-plugin.js",
+        "static/js/observability-plugin.js"
       ],
       "matches": ["<all_urls>"]
     }
@@ -42,7 +43,8 @@
       "js": [
         "static/js/fast-refresh.js",
         "static/js/override-remote.js",
-        "static/js/snapshot-plugin.js"
+        "static/js/snapshot-plugin.js",
+        "static/js/observability-plugin.js"
       ],
       "world": "MAIN",
       "run_at": "document_start"

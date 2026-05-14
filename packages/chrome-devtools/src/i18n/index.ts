@@ -13,6 +13,7 @@ const resources = {
           proxy: 'Proxy',
           dependency: 'Dependency graph',
           share: 'Shared',
+          loadingTrace: 'Loading trace',
           performance: 'Performance',
         },
         header: {
@@ -241,6 +242,64 @@ const resources = {
         entry: 'Entry',
         version: 'Version',
       },
+      loadingTrace: {
+        title: 'Loading Trace',
+        empty: 'No loading report yet',
+        status: {
+          enabled: 'Observability is enabled for the current page.',
+          disabled: 'Observability is not enabled for the current page.',
+          unavailable: 'Current page is unavailable.',
+          reloading: 'Configuration saved. Reloading current page.',
+          synced: 'Reports synced.',
+          noReports: 'No report found on the current page.',
+        },
+        confirm: {
+          observeTitle: 'Start observability?',
+          updateTitle: 'Update configuration?',
+          content:
+            'The current tab will reload after the configuration is saved.',
+        },
+        actions: {
+          observeNow: 'Observe now',
+          updateConfig: 'Update config',
+          config: 'Configuration',
+          disable: 'Disable',
+          refresh: 'Sync',
+          export: 'Export',
+          confirm: 'Confirm',
+          cancel: 'Cancel',
+        },
+        config: {
+          level: 'Level',
+          levelTip:
+            'Controls how much event detail is kept. Verbose keeps the full timeline, summary keeps key results, and error focuses on failures.',
+          verbose: 'Verbose',
+          summary: 'Summary',
+          error: 'Error',
+          console: 'Console hints',
+          consoleTip:
+            'Prints lightweight hints in the inspected page console. Turn it off when the page console should stay clean.',
+          reactCallback: 'React callback',
+          reactCallbackTip:
+            'Injects an onMFRemoteLoaded callback prop into matched React remote function components so producers can mark business readiness.',
+          remoteIds: 'Module filter',
+          remoteIdsTip:
+            'Only used when React callback is enabled. Empty means no filter; filled values only inject callbacks for matching loadRemote request ids or exposes.',
+        },
+        stats: {
+          state: 'State',
+          reports: 'Reports',
+          events: 'Events',
+          latest: 'Latest outcome',
+        },
+        reports: {
+          search: 'Filter reports',
+          noMatch: 'No matching report',
+          success: 'Success',
+          failed: 'Failed',
+          pending: 'Pending',
+        },
+      },
     },
   },
   'zh-CN': {
@@ -251,6 +310,7 @@ const resources = {
           proxy: '代理配置',
           dependency: '依赖关系图',
           share: '共享依赖',
+          loadingTrace: '加载链路',
           performance: '性能',
         },
         header: {
@@ -472,6 +532,63 @@ const resources = {
         shared: '共享依赖',
         entry: '入口',
         version: '版本',
+      },
+      loadingTrace: {
+        title: '加载链路',
+        empty: '暂无加载报告',
+        status: {
+          enabled: '当前页面已开启可观测。',
+          disabled: '当前页面未开启可观测。',
+          unavailable: '当前页面暂不可用。',
+          reloading: '配置已保存，正在刷新当前页面。',
+          synced: '报告已同步。',
+          noReports: '当前页面还没有报告。',
+        },
+        confirm: {
+          observeTitle: '开启观测？',
+          updateTitle: '更新配置？',
+          content: '保存配置后会刷新当前标签页。',
+        },
+        actions: {
+          observeNow: '立即观测',
+          updateConfig: '更新配置',
+          config: '配置',
+          disable: '关闭',
+          refresh: '同步',
+          export: '导出',
+          confirm: '确认',
+          cancel: '取消',
+        },
+        config: {
+          level: '记录级别',
+          levelTip:
+            '控制保留多少事件细节。完整会保留完整链路，摘要只保留关键结果，错误只关注失败。',
+          verbose: '完整',
+          summary: '摘要',
+          error: '错误',
+          console: '控制台提示',
+          consoleTip:
+            '在被调试页面的控制台打印轻量提示。如果想保持页面控制台干净，可以关闭。',
+          reactCallback: 'React 回调',
+          reactCallbackTip:
+            '给匹配的 React 远程函数组件注入 onMFRemoteLoaded 回调，让生产者主动标记业务就绪。',
+          remoteIds: '模块过滤',
+          remoteIdsTip:
+            '仅在开启 React 回调时生效。留空表示不过滤；填写后只对匹配的 loadRemote 请求 id 或 expose 注入回调。',
+        },
+        stats: {
+          state: '状态',
+          reports: '报告',
+          events: '事件',
+          latest: '最新结果',
+        },
+        reports: {
+          search: '过滤报告',
+          noMatch: '没有匹配的报告',
+          success: '成功',
+          failed: '失败',
+          pending: '进行中',
+        },
       },
     },
   },

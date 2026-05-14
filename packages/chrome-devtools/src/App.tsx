@@ -11,6 +11,7 @@ import ProxyLayout from './component/Layout';
 import Dependency from './component/DependencyGraph';
 import ModuleInfo from './component/ModuleInfo';
 import SharedDepsExplorer from './component/SharedDepsExplorer';
+import LoadingTrace from './component/LoadingTrace';
 import LanguageSwitch from './component/LanguageSwitch';
 import ThemeToggle from './component/ThemeToggle';
 import {
@@ -99,6 +100,7 @@ const NAV_ITEMS = [
   { key: 'proxy', i18nKey: 'app.nav.proxy' },
   { key: 'dependency', i18nKey: 'app.nav.dependency' },
   { key: 'share', i18nKey: 'app.nav.share' },
+  { key: 'loadingTrace', i18nKey: 'app.nav.loadingTrace' },
   { key: 'performance', i18nKey: 'app.nav.performance' },
 ] as const;
 
@@ -409,6 +411,8 @@ const InnerApp = (props: RootComponentProps) => {
             )}
           />
         );
+      case 'loadingTrace':
+        return <LoadingTrace tabId={inspectedTab?.id} />;
       case 'performance':
         return (
           <div className={styles.placeholder}>
