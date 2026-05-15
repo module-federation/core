@@ -144,14 +144,20 @@ Bridge 解决了现代前端开发中的几个关键挑战：
 组件级加载和应用级加载可以完美配合使用：
 
 ```tsx
+import { getInstance } from '@module-federation/runtime';
+import { lazyLoadComponentPlugin } from '@module-federation/bridge-react/data-fetch';
+
 // 应用级加载 - 加载完整的远程应用
 const RemoteApp = createRemoteAppComponent({
   loader: () => import('remote/app'),
   fallback: <AppSkeleton />
 });
 
+const instance = getInstance();
+instance.registerPlugins([lazyLoadComponentPlugin()]);
+
 // 组件级加载 - 在远程应用内部按需加载组件
-const LazyComponent = createLazyComponent({
+const LazyComponent = instance.createLazyComponent({
   loader: () => import('remote/heavy-component'),
   loading: <ComponentSkeleton />,
   fallback: ({ error }) => <ErrorBoundary error={error} />
@@ -276,4 +282,3 @@ function App() {
 ```
 
 通过这种模式，Bridge 实现了框架无关的应用级模块加载，为微前端架构提供了坚实的技术基础。
-
