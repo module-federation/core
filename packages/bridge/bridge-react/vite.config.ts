@@ -41,6 +41,7 @@ export default defineConfig({
           __dirname,
           'src/lazy/data-fetch/index.ts',
         ),
+        'data-fetch': path.resolve(__dirname, 'src/data-fetch.ts'),
       },
       formats: ['cjs', 'es'],
       fileName: (format, entryName) => `${entryName}.${format}.js`,

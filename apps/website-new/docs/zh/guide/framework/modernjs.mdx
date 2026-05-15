@@ -76,7 +76,7 @@ export default createModuleFederationConfig({
 
 参考[数据获取](../basic/data-fetch)。
 
-其中 Modern.js 插件在 `@module-federation/modern-js-v3/react` 重导出了 `@module-federation/bridge-react` ，因此你不需要额外安装。
+其中 Modern.js 插件在 `@module-federation/modern-js-v3/data-fetch` 子路径提供了 `lazyLoadComponentPlugin`，因此你不需要额外安装 `@module-federation/bridge-react`。
 
 ## API
 
@@ -95,7 +95,7 @@ createRemoteComponent 参数和 createLazyComponent 完全一致，区别在于 
 ```diff
 - import { createRemoteComponent } from '@module-federation/modern-js-v3/runtime';
 + import { getInstance } from '@module-federation/modern-js-v3/runtime';
-+ import { lazyLoadComponentPlugin } from '@module-federation/modern-js-v3/react';
++ import { lazyLoadComponentPlugin } from '@module-federation/modern-js-v3/data-fetch';
 
 const instance = getInstance();
 // 注册 lazyLoadComponentPlugin 插件后，instance 会自动添加 createLazyComponent API

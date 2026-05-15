@@ -36,7 +36,7 @@ import { PackageManagerTabs } from '@theme';
 
 ```tsx
 import { getInstance } from '@module-federation/runtime';
-import { lazyLoadComponentPlugin } from '@module-federation/bridge-react';
+import { lazyLoadComponentPlugin } from '@module-federation/bridge-react/data-fetch';
 
 const instance = getInstance();
 // 注册 lazyLoadComponentPlugin 插件
@@ -50,7 +50,7 @@ instance.registerPlugins([lazyLoadComponentPlugin()]);
 
 ```tsx
 import { getInstance } from '@module-federation/runtime';
-import { lazyLoadComponentPlugin } from '@module-federation/bridge-react';
+import { lazyLoadComponentPlugin } from '@module-federation/bridge-react/data-fetch';
 
 const instance = getInstance();
 // 注册 lazyLoadComponentPlugin 插件后, 注册后即可使用 `createLazyComponent` 或 `prefetch` API
@@ -134,7 +134,7 @@ type ErrorInfo = {
 ```tsx
 import React, { FC, memo, useEffect } from 'react';
 import { getInstance } from '@module-federation/enhanced/runtime';
-import { ERROR_TYPE } from '@module-federation/bridge-react';
+import { ERROR_TYPE } from '@module-federation/bridge-react/data-fetch';
 
 const instance = getInstance();
 const LazyComponent = instance.createLazyComponent({

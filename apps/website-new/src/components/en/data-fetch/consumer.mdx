@@ -6,10 +6,8 @@ In the consumer, we need to use the [createLazyComponent](/practice/bridge/react
 
 ```tsx
 import { getInstance } from '@module-federation/enhanced/runtime';
-import {
-  ERROR_TYPE,
-  lazyLoadComponentPlugin,
-} from '@module-federation/bridge-react';
+import { ERROR_TYPE } from '@module-federation/bridge-react/data-fetch';
+import { lazyLoadComponentPlugin } from '@module-federation/bridge-react/data-fetch';
 
 const instance = getInstance();
 instance.registerPlugins([lazyLoadComponentPlugin()]);

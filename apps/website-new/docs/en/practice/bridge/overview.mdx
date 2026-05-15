@@ -140,14 +140,20 @@ In addition to application-level modularity, Bridge also supports component-leve
 Component-level loading and application-level loading work perfectly together:
 
 ```tsx
+import { getInstance } from '@module-federation/runtime';
+import { lazyLoadComponentPlugin } from '@module-federation/bridge-react/data-fetch';
+
 // Application-level loading - Load complete remote application
 const RemoteApp = createRemoteAppComponent({
   loader: () => import('remote/app'),
   fallback: <AppSkeleton />
 });
 
+const instance = getInstance();
+instance.registerPlugins([lazyLoadComponentPlugin()]);
+
 // Component-level loading - Load components on demand within remote applications
-const LazyComponent = createLazyComponent({
+const LazyComponent = instance.createLazyComponent({
   loader: () => import('remote/heavy-component'),
   loading: <ComponentSkeleton />,
   fallback: ({ error }) => <ErrorBoundary error={error} />
@@ -272,4 +278,3 @@ function App() {
 ```
 
 Through this pattern, Bridge achieves framework-agnostic application-level module loading, providing a solid technical foundation for micro-frontend architectures.
-

@@ -44,7 +44,7 @@ Each exposed module can have a corresponding `.data` file with the same name. Th
 Here, `List.data.ts` needs to export a function named `fetchData`, which will be executed before the `List` component renders and injects its data. Here is an example:
 
 ```ts title="List.data.ts"
-import type { DataFetchParams } from '@module-federation/bridge-react';
+import type { DataFetchParams } from '@module-federation/bridge-react/data-fetch';
 export type Data = {
   data: string;
 };
