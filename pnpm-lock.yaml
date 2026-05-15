@@ -3817,6 +3817,9 @@ importers:
       '@module-federation/runtime':
         specifier: workspace:*
         version: link:../runtime
+      '@module-federation/runtime-core':
+        specifier: workspace:*
+        version: link:../runtime-core
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../sdk
@@ -4063,7 +4066,7 @@ importers:
         version: 22.5.4(@babel/traverse@7.29.0)(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.25)(typescript@5.9.3))(@swc/core@1.15.10(@swc/helpers@0.5.19))(@swc/helpers@0.5.19)(esbuild@0.25.0)(nx@22.5.4(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.25)(typescript@5.9.3))(@swc/core@1.15.10(@swc/helpers@0.5.19)))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3)(vue-tsc@2.2.12(typescript@5.9.3))(webpack-cli@5.1.4)
       '@rsbuild/core':
         specifier: 2.0.0-beta.2
-        version: 2.0.0-beta.2(@module-federation/runtime-tools@0.21.6)(core-js@3.49.0)
+        version: 2.0.0-beta.2(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(core-js@3.49.0)
       '@storybook/core':
         specifier: ^8.4.6
         version: 8.6.14(prettier@3.8.1)(storybook@8.6.17(prettier@3.8.1))
@@ -23131,6 +23134,7 @@ packages:
   react-server-dom-webpack@19.2.4:
     resolution: {integrity: sha512-zEhkWv6RhXDctC2N7yEUHg3751nvFg81ydHj8LTTZuukF/IF1gcOKqqAL6Ds+kS5HtDVACYPik0IvzkgYXPhlQ==}
     engines: {node: '>=0.10.0'}
+    deprecated: High Security Vulnerability in React Server Components
     peerDependencies:
       react: ^19.2.4
       react-dom: ^19.2.4
@@ -36174,9 +36178,9 @@ snapshots:
       core-js: 3.47.0
       jiti: 2.6.1
 
-  '@rsbuild/core@2.0.0-beta.2(@module-federation/runtime-tools@0.21.6)(core-js@3.49.0)':
+  '@rsbuild/core@2.0.0-beta.2(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(core-js@3.49.0)':
     dependencies:
-      '@rspack/core': 2.0.0-beta.0(@module-federation/runtime-tools@0.21.6)(@swc/helpers@0.5.19)
+      '@rspack/core': 2.0.0-beta.0(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(@swc/helpers@0.5.19)
       '@swc/helpers': 0.5.19
       jiti: 2.6.1
     optionalDependencies:
@@ -37436,12 +37440,12 @@ snapshots:
     optionalDependencies:
       '@swc/helpers': 0.5.19
 
-  '@rspack/core@2.0.0-beta.0(@module-federation/runtime-tools@0.21.6)(@swc/helpers@0.5.19)':
+  '@rspack/core@2.0.0-beta.0(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(@swc/helpers@0.5.19)':
     dependencies:
       '@rspack/binding': 2.0.0-beta.0
       '@rspack/lite-tapable': 1.1.0
     optionalDependencies:
-      '@module-federation/runtime-tools': 0.21.6
+      '@module-federation/runtime-tools': 2.2.2(node-fetch@2.7.0(encoding@0.1.13))
       '@swc/helpers': 0.5.19
 
   '@rspack/core@2.0.0-beta.0(@module-federation/runtime-tools@2.3.2(node-fetch@3.3.0))(@swc/helpers@0.5.17)':

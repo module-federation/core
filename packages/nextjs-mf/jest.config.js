@@ -9,6 +9,9 @@ module.exports = {
       'ts-jest',
       {
         tsconfig: '<rootDir>/tsconfig.spec.json',
+        // Disabled because runtimePlugin.ts uses webpack globals and
+        // untyped hook args that fail strict type-checking.
+        diagnostics: false,
       },
     ],
   },
