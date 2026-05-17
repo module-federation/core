@@ -28,6 +28,10 @@ function createRemoteAppComponent<T, E extends keyof T>(
     asyncComponentOptions?: Omit<AsyncComponentOptions, 'loader'>;
     // Attributes that will be bound to the root container where the remote Vue application will be mounted
     rootAttrs?: Record<string, unknown>;
+    // 使用 memory history 进行隔离路由（例如在弹窗或沙箱中渲染）
+    memoryRoute?: { entryPath: string };
+    // 使用 hash 路由模式代替默认的 web history
+    hashRoute?: boolean;
   }
 ): (props: {
     basename?: string;
@@ -41,6 +45,7 @@ function createBridgeComponent(bridgeInfo: {
     app: Vue.App<VueComponent>;
     basename?: string;
     memoryRoute?: { entryPath: string };
+    hashRoute?: boolean;
     [key: string]: any;
   }) => { router?: Router } | void;
 }): () => {
@@ -50,6 +55,7 @@ function createBridgeComponent(bridgeInfo: {
     memoryRoute?: {
       entryPath: string;
     };
+    hashRoute?: boolean;
     dom?: HTMLElement;
   }): void;
   destroy(info: {
@@ -135,6 +141,58 @@ const router = createRouter({
 export default router;
 ```
 
+### 路由模式
+
+Bridge 支持三种路由模式，决定远程应用如何管理其内部导航：
+
+| 模式 | 配置项 | History 类型 | 使用场景 |
+|------|--------|-------------|----------|
+| **Web History**（默认） | — | `createWebHistory(basename)` | 标准的基于 URL 的路由。`basename` 会自动从宿主路由匹配中获取。 |
+| **Memory History** | `memoryRoute: { entryPath: '/path' }` | `createMemoryHistory(basename)` | 隔离路由，不会影响浏览器 URL。适用于远程应用在弹窗、侧边栏或沙箱中渲染的场景。 |
+| **Hash History** | `hashRoute: true` | `createWebHashHistory()` | 基于 hash 的路由（`#/path`）。路由路径会自动添加 `basename` 前缀。 |
+
+> Hash 路由示例
+
+```tsx
+// ./src/router.ts
+import * as bridge from '@module-federation/bridge-vue3';
+
+const Remote1 = bridge.createRemoteAppComponent({
+  loader: () => loadRemote('remote1/export-app'),
+  hashRoute: true,
+});
+
+const router = createRouter({
+  history: createWebHashHistory(),
+  routes: [
+    { path: '/', component: Home },
+    { path: '/remote1/:pathMatch(.*)*', component: Remote1 },
+  ],
+});
+export default router;
+```
+
+> Memory 路由示例
+
+```tsx
+// ./src/router.ts
+import * as bridge from '@module-federation/bridge-vue3';
+
+const Remote1 = bridge.createRemoteAppComponent({
+  loader: () => loadRemote('remote1/export-app'),
+  memoryRoute: { entryPath: '/initial-page' },
+});
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes: [
+    { path: '/', component: Home },
+    { path: '/remote1/:pathMatch(.*)*', component: Remote1 },
+  ],
+});
+export default router;
+```
+
 ### 方法
 
 #### createRemoteAppComponent
@@ -150,6 +208,10 @@ function createRemoteAppComponent<T, E extends keyof T>(
     asyncComponentOptions?: Omit<AsyncComponentOptions, 'loader'>;
     // Attributes that will be bound to the root container where the remote Vue application will be mounted
     rootAttrs?: Record<string, unknown>;
+    // 使用 memory history 进行隔离路由（例如在弹窗或沙箱中渲染）
+    memoryRoute?: { entryPath: string };
+    // 使用 hash 路由模式代替默认的 web history
+    hashRoute?: boolean;
   }
 ): (props: {
     basename?: string;
@@ -175,6 +237,12 @@ const Remote1App = createRemoteAppComponent({ loader: () => loadRemote('remote1/
   * `rootAttrs`
     * type: `Record<string, unknown>`
     * Purpose: Attributes that will be bound to the root container where the remote Vue application will be mounted
+  * `memoryRoute`
+    * type: `{ entryPath: string }`
+    * 用途：提供后，远程应用将使用 memory history（`createMemoryHistory`）代替默认的 web history。`entryPath` 设置远程应用挂载时导航到的初始路由。适用于远程应用在隔离上下文（例如弹窗或沙箱）中渲染且不应修改浏览器 URL 的场景。
+  * `hashRoute`
+    * type: `boolean`
+    * 用途：设为 `true` 时，远程应用将使用基于 hash 的 history（`createWebHashHistory`）代替默认的 web history。路由路径会自动添加 `basename` 前缀。当宿主应用也使用 hash 路由时使用此选项。
 ```tsx
 // remote
 export const provider = createBridgeComponent({
@@ -218,6 +286,7 @@ function createBridgeComponent(bridgeInfo: {
     app: Vue.App<VueComponent>;
     basename?: string;
     memoryRoute?: { entryPath: string };
+    hashRoute?: boolean;
     [key: string]: any;
   }) => { router?: Router } | void;
 }): () => {
@@ -227,6 +296,7 @@ function createBridgeComponent(bridgeInfo: {
     memoryRoute?: {
       entryPath: string;
     };
+    hashRoute?: boolean;
     dom?: HTMLElement;
   }): void;
   destroy(info: { dom: HTMLElement }): void;
@@ -235,7 +305,12 @@ function createBridgeComponent(bridgeInfo: {
 
 * `bridgeInfo`
   * type: `{ rootComponent: VueComponent; appOptions?: (params: AddOptionsFnParams) => ({ router?: Router }) }`
-  * Purpose: Used to pass the root component
+  * 用途：用于传递根组件
+  * `appOptions` 接收以下参数：
+    * `app`：Vue 应用实例
+    * `basename`：从宿主路由获取的基础路径
+    * `memoryRoute`：memory 路由配置（如果宿主提供）
+    * `hashRoute`：是否启用 hash 路由（如果宿主提供）
 * ReturnType
   * type: `() => { render: (info: RenderFnParams) => void; destroy: (info: { dom: HTMLElement}) => void; }`
 
