@@ -20,12 +20,10 @@ import type { RequestShortener } from 'webpack/lib/RuntimeModule';
 import type { ObjectDeserializerContext } from 'webpack/lib/serialization/ObjectMiddleware';
 import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 
-const { sources: webpackSources } = require(
+const webpack = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
-const { Module, RuntimeGlobals } = require(
-  normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
+const { Module, RuntimeGlobals } = webpack;
 const makeSerializable = require(
   normalizeWebpackPath('webpack/lib/util/makeSerializable'),
 ) as typeof import('webpack/lib/util/makeSerializable');
@@ -177,6 +175,8 @@ class RemoteModule extends Module {
   override codeGeneration(
     context: CodeGenerationContext,
   ): CodeGenerationResult {
+    const webpackSources =
+      this.compilation?.compiler.webpack.sources ?? webpack.sources;
     const { moduleGraph, chunkGraph } = context;
     const module = moduleGraph.getModule(this.dependencies[0]);
     const id = module && chunkGraph.getModuleId(module);
