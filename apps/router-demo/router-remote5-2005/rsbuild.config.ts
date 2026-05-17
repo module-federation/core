@@ -30,6 +30,9 @@ export default defineConfig({
     pluginReact(),
     pluginModuleFederation({
       name: 'remote5',
+      experiments: {
+        asyncStartup: true,
+      },
       exposes: {
         './export-app': './src/export-App.tsx',
       },

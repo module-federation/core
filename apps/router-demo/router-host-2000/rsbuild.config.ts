@@ -18,6 +18,9 @@ export default defineConfig({
     pluginReact(),
     pluginModuleFederation({
       name: 'federation_consumer',
+      experiments: {
+        asyncStartup: true,
+      },
       shareStrategy: 'loaded-first',
       remotes: {
         remote1: 'remote1@http://localhost:2001/mf-manifest.json',

@@ -7,6 +7,9 @@ const {
 
 module.exports = withFederation({
   name: 'host',
+  experiments: {
+    asyncStartup: true,
+  },
   filename: './shell/remoteEntry.js',
   remotes: {
     mfe1: 'http://localhost:3001/remoteEntry.js',

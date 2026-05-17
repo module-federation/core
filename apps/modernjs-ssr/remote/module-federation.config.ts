@@ -1,6 +1,9 @@
 import { createModuleFederationConfig } from '@module-federation/modern-js-v3';
 export default createModuleFederationConfig({
   name: 'remote',
+  experiments: {
+    asyncStartup: true,
+  },
   manifest: {
     filePath: 'static',
   },

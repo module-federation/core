@@ -25,6 +25,9 @@ export default defineConfig({
     pluginReact(),
     pluginModuleFederation({
       name: 'remote6',
+      experiments: {
+        asyncStartup: true,
+      },
       exposes: {
         './button': './src/button.tsx',
         './export-app': './src/export-App.tsx',

@@ -86,6 +86,9 @@ module.exports = (_env, argv = {}) => {
       new ModuleFederationPlugin({
         name: 'react_ts_host',
         filename: 'remoteEntry.js',
+        experiments: {
+          asyncStartup: true,
+        },
         remotes: {
           react_ts_nested_remote:
             'react_ts_nested_remote@http://localhost:3005/mf-manifest.json',

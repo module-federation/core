@@ -86,6 +86,9 @@ module.exports = (_env, argv = {}) => {
       new ModuleFederationPlugin({
         name: 'react_ts_nested_remote',
         filename: 'remoteEntry.js',
+        experiments: {
+          asyncStartup: true,
+        },
         exposes: {
           './Module': './src/app/nx-welcome.tsx',
           './utils': './src/app/utils.ts',

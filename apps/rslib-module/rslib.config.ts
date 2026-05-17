@@ -45,6 +45,9 @@ export default defineConfig({
     pluginReact(),
     pluginModuleFederation({
       name: 'rslib_provider',
+      experiments: {
+        asyncStartup: true,
+      },
       exposes: {
         '.': './src/index.tsx',
       },

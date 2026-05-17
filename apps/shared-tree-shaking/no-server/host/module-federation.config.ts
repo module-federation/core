@@ -2,6 +2,9 @@ import { createModuleFederationConfig } from '@module-federation/enhanced';
 
 export default createModuleFederationConfig({
   name: 'mf_host',
+  experiments: {
+    asyncStartup: true,
+  },
   remotes: {
     mf_remote: 'provider@http://localhost:3002/mf-manifest.json',
   },

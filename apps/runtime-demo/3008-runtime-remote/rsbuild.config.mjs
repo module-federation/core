@@ -16,6 +16,9 @@ export default defineConfig({
       appendPlugins([
         new ModuleFederationPlugin({
           name: 'runtime_remote3',
+          experiments: {
+            asyncStartup: true,
+          },
           exposes: {
             './button': './src/Button.tsx',
           },

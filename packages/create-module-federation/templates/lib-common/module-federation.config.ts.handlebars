@@ -6,6 +6,9 @@ export default createModuleFederationConfig({
   exposes: {
     '.': './src/index.tsx',
   },
+  experiments: {
+    asyncStartup: true,
+  },
   shared: {
     react: {
       singleton: true,

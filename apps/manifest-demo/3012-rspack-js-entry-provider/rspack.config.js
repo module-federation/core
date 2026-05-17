@@ -95,6 +95,7 @@ module.exports = (_env, argv = {}) => {
         },
         manifest: false,
         experiments: {
+          asyncStartup: true,
           externalRuntime: true,
         },
       }),
