@@ -241,6 +241,17 @@ export default class IndependentSharedPlugin {
     const shareRequestsMap: ShareRequestsMap =
       await this.createIndependentCompiler(parentCompiler);
 
+    const normalizeRequest = (resource: string) => {
+      // The collector records resolved absolute resources. For independent fallback bundles we want
+      // webpack to resolve the module from the same context as the parent compilation, otherwise
+      // some setups end up with a runtime "Cannot find module ..." stub instead of bundling.
+      if (typeof resource !== 'string' || !resource) return resource;
+      if (!path.isAbsolute(resource)) return resource;
+      const rel = path.relative(parentCompiler.context, resource);
+      if (!rel || rel.startsWith('..') || path.isAbsolute(rel)) return resource;
+      return `./${rel.split(path.sep).join('/')}`;
+    };
+
     await Promise.all(
       sharedOptions.map(async ([shareName, shareConfig]) => {
         if (!shareConfig.treeShaking) {
@@ -258,7 +269,7 @@ export default class IndependentSharedPlugin {
                 currentShare: {
                   shareName,
                   version,
-                  request,
+                  request: normalizeRequest(request),
                   independentShareFileName: sharedConfig?.treeShaking?.filename,
                 },
               });
