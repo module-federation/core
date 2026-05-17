@@ -148,6 +148,9 @@ describe('DTSManager', () => {
                                 {
                                   name: 'utils.d.ts',
                                 },
+                                {
+                                  name: 'virtualRemotePackage.d.ts',
+                                },
                               ],
                               name: 'lib',
                             },
@@ -271,6 +274,9 @@ describe('DTSManager', () => {
                                     },
                                     {
                                       name: 'utils.d.ts',
+                                    },
+                                    {
+                                      name: 'virtualRemotePackage.d.ts',
                                     },
                                   ],
                                   name: 'lib',
@@ -507,6 +513,9 @@ describe('DTSManager', () => {
                                 {
                                   name: 'utils.d.ts',
                                 },
+                                {
+                                  name: 'virtualRemotePackage.d.ts',
+                                },
                               ],
                               name: 'lib',
                             },
@@ -653,6 +662,9 @@ describe('DTSManager', () => {
                                     },
                                     {
                                       name: 'utils.d.ts',
+                                    },
+                                    {
+                                      name: 'virtualRemotePackage.d.ts',
                                     },
                                   ],
                                   name: 'lib',
