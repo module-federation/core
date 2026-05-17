@@ -26,7 +26,7 @@
   "types": "./dist/index.d.ts",
   "dependencies": {
     "@module-federation/sdk": "workspace:*",
-    "find-pkg": "2.0.0"
+    "empathic": "2.0.0"
   },
   "devDependencies": {
     "webpack": "5.104.1"
