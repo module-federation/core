@@ -145,6 +145,15 @@ class EmbedFederationRuntimePlugin {
             return;
           }
 
+          const { moduleGraph, chunkGraph } = compilation;
+          for (const dep of containerEntrySet) {
+            const runtimeModule = moduleGraph.getModule(dep);
+            if (!runtimeModule) continue;
+            if (!chunkGraph.isModuleInChunk(runtimeModule, chunk)) {
+              chunkGraph.connectChunkAndModule(chunk, runtimeModule);
+            }
+          }
+
           // Mark as embedded and add the runtime module.
           runtimeRequirements.add('embeddedFederationRuntime');
           const runtimeModule = new EmbedFederationRuntimeModule(
