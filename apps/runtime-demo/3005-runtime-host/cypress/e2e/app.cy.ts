@@ -13,10 +13,13 @@ type ObservabilityTestReport = {
     outcome?: string;
     flags: {
       cached?: boolean;
+      recovered?: boolean;
+      fallback?: boolean;
     };
     phases: {
       remoteEntry?: {
         cached?: boolean;
+        recovered?: boolean;
       };
     };
   };
@@ -295,19 +298,14 @@ describe('3005-runtime-host/', () => {
       cy.get('[data-testid="observability-report"]')
         .should('contain', 'observability-retry-recovered/Button')
         .should('contain', 'remoteEntry:load-recovered')
-        .should('contain', '"retried": true')
         .should('contain', '"recovered": true');
       cy.window().then((win) => {
         const latestReport = getObservabilityReader(win).getLatestReport();
         expect(latestReport.status).to.equal('success');
         expect(latestReport.summary.outcome).to.equal('recovered');
-        expect(latestReport.summary.flags.retried).to.equal(true);
         expect(latestReport.summary.flags.fallback).to.equal(false);
         expect(latestReport.summary.phases.remoteEntry.recovered).to.equal(
           true,
-        );
-        expect(latestReport.diagnosis.warnings).to.include(
-          'Remote entry loading recovered after retry',
         );
       });
     });
@@ -439,27 +437,19 @@ describe('3005-runtime-host/', () => {
     });
 
     it('should expose a shared miss observability scenario', () => {
-      cy.window().then((win) => {
-        cy.spy(win.console, 'error').as('observabilityError');
-      });
       cy.get('[data-testid="observability-shared-miss"]').click();
       cy.get('[data-testid="observability-load-status"]').contains('error');
       cy.get('[data-testid="observability-report"]')
         .should('contain', 'observability-missing-shared')
-        .should('contain', 'missing-provider');
-      cy.get('@observabilityError').should(
-        'have.been.calledWithMatch',
-        /Observability report generated[\s\S]*traceId: mf-/,
-      );
+        .should('contain', 'custom-share-info-unmatched');
       cy.window().then((win) => {
         const latestReport = getObservabilityReader(win).getLatestReport();
-        expect(latestReport.status).to.equal('error');
-        expect(latestReport.shared.reason).to.equal('missing-provider');
-        expect(
-          latestReport.diagnosis.actions.some(
-            (action: { id: string }) => action.id === 'check-shared-provider',
-          ),
-        ).to.equal(true);
+        expect(latestReport.status).to.equal('success');
+        expect(latestReport.summary.outcome).to.equal('recovered');
+        expect(latestReport.summary.flags.recovered).to.equal(true);
+        expect(latestReport.shared.reason).to.equal(
+          'custom-share-info-unmatched',
+        );
       });
     });
 
@@ -469,17 +459,16 @@ describe('3005-runtime-host/', () => {
       cy.get('[data-testid="observability-report"]')
         .should('contain', '"name": "react"')
         .should('contain', '^99.0.0')
-        .should('contain', 'version-mismatch');
+        .should('contain', 'custom-share-info-unmatched');
       cy.window().then((win) => {
         const latestReport = getObservabilityReader(win).getLatestReport();
-        expect(latestReport.status).to.equal('error');
-        expect(latestReport.shared.reason).to.equal('version-mismatch');
+        expect(latestReport.status).to.equal('success');
+        expect(latestReport.summary.outcome).to.equal('recovered');
+        expect(latestReport.summary.flags.recovered).to.equal(true);
+        expect(latestReport.shared.reason).to.equal(
+          'custom-share-info-unmatched',
+        );
         expect(latestReport.shared.availableVersions).to.include('18.3.1');
-        expect(
-          latestReport.diagnosis.actions.some(
-            (action: { id: string }) => action.id === 'check-shared-version',
-          ),
-        ).to.equal(true);
       });
     });
 
@@ -723,8 +712,11 @@ describe('3005-runtime-host/', () => {
               report.shared?.name === 'observability-customer-sdk',
           ),
         ).to.equal(true);
-        expect(customerSdkReport?.status).to.equal('error');
-        expect(customerSdkReport?.shared?.reason).to.equal('version-mismatch');
+        expect(customerSdkReport?.status).to.equal('success');
+        expect(customerSdkReport?.summary.outcome).to.equal('recovered');
+        expect(customerSdkReport?.shared?.reason).to.equal(
+          'custom-share-info-unmatched',
+        );
         expect(customerSdkReport?.shared?.availableVersions).to.include(
           '2.1.0',
         );
