@@ -22,7 +22,7 @@ export interface ObservabilityDevtoolsConfig {
   };
 }
 
-const DEFAULT_SCOPE = 'mf-devtools';
+export const CHROME_OBSERVABILITY_SCOPE = 'chrome_extension';
 const MIN_EVENTS = 10;
 const MAX_EVENTS = 1000;
 
@@ -34,7 +34,7 @@ export const DEFAULT_OBSERVABILITY_DEVTOOLS_CONFIG: ObservabilityDevtoolsConfig 
     console: true,
     browser: {
       enabled: true,
-      scope: DEFAULT_SCOPE,
+      scope: CHROME_OBSERVABILITY_SCOPE,
       mode: 'development',
     },
     trace: {
@@ -72,27 +72,10 @@ const normalizeMaxEvents = (value: unknown) => {
 
 const normalizeScope = (value: unknown) => {
   if (typeof value !== 'string') {
-    return DEFAULT_SCOPE;
+    return CHROME_OBSERVABILITY_SCOPE;
   }
   const trimmed = value.trim().replace(/[^\w:@.-]+/g, '-');
-  return trimmed || DEFAULT_SCOPE;
-};
-
-const normalizeRemoteIds = (value: unknown) => {
-  if (Array.isArray(value)) {
-    return value
-      .map((item) => String(item || '').trim())
-      .filter(Boolean)
-      .slice(0, 50);
-  }
-  if (typeof value === 'string') {
-    return value
-      .split(',')
-      .map((item) => item.trim())
-      .filter(Boolean)
-      .slice(0, 50);
-  }
-  return [];
+  return trimmed || CHROME_OBSERVABILITY_SCOPE;
 };
 
 export const normalizeObservabilityDevtoolsConfig = (
@@ -101,7 +84,6 @@ export const normalizeObservabilityDevtoolsConfig = (
   const source = isObject(value) ? value : {};
   const browser = isObject(source.browser) ? source.browser : {};
   const trace = isObject(source.trace) ? source.trace : {};
-  const react = isObject(source.react) ? source.react : {};
 
   return {
     enabled: normalizeBoolean(
@@ -129,11 +111,8 @@ export const normalizeObservabilityDevtoolsConfig = (
       ),
     },
     react: {
-      injectLoadedCallback: normalizeBoolean(
-        react.injectLoadedCallback,
-        DEFAULT_OBSERVABILITY_DEVTOOLS_CONFIG.react.injectLoadedCallback,
-      ),
-      remoteIds: normalizeRemoteIds(react.remoteIds),
+      injectLoadedCallback: false,
+      remoteIds: [],
     },
   };
 };
@@ -157,10 +136,4 @@ export const createObservabilityPluginOptions = (
     enabled: true,
     source: OBSERVABILITY_DEVTOOLS_SOURCE,
   },
-  react: config.react.injectLoadedCallback
-    ? {
-        injectLoadedCallback: true,
-        remoteIds: config.react.remoteIds,
-      }
-    : undefined,
 });

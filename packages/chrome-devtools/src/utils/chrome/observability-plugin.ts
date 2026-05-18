@@ -1,7 +1,7 @@
 import {
-  createObservability,
+  ChromeObservabilityPlugin,
   type ObservabilityPluginOptions,
-} from '@module-federation/observability-plugin';
+} from '@module-federation/observability-plugin/chrome-devtool';
 
 import {
   OBSERVABILITY_DEVTOOLS_SOURCE,
@@ -12,7 +12,8 @@ import {
   normalizeObservabilityDevtoolsConfig,
 } from './observability-shared';
 
-const DEVTOOLS_PLUGIN_NAME = 'observability-plugin-devtools';
+const DEVTOOLS_PLUGIN_NAME = 'observability-plugin:chrome-extension';
+const LEGACY_DEVTOOLS_PLUGIN_NAME = 'observability-plugin-devtools';
 
 type FederationGlobal = {
   __GLOBAL_PLUGIN__?: Array<{ name?: string }>;
@@ -104,16 +105,21 @@ const install = () => {
 
   const federation = ensureFederationGlobal();
   const globalPlugins = federation?.__GLOBAL_PLUGIN__ || [];
-  if (globalPlugins.some((plugin) => plugin?.name === DEVTOOLS_PLUGIN_NAME)) {
+  if (
+    globalPlugins.some(
+      (plugin) =>
+        plugin?.name === DEVTOOLS_PLUGIN_NAME ||
+        plugin?.name === LEGACY_DEVTOOLS_PLUGIN_NAME,
+    )
+  ) {
     notifyInstalled('skipped', 'already-installed', config);
     return;
   }
 
-  const controller = createObservability(
+  const plugin = ChromeObservabilityPlugin(
     createObservabilityPluginOptions(config) as ObservabilityPluginOptions,
   );
-  controller.plugin.name = DEVTOOLS_PLUGIN_NAME;
-  globalPlugins.push(controller.plugin);
+  globalPlugins.push(plugin);
   federation.__GLOBAL_PLUGIN__ = globalPlugins;
   notifyInstalled('installed', undefined, config);
 };

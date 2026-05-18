@@ -2,6 +2,8 @@ import { defineConfig } from 'tsdown';
 
 const entry = {
   index: 'src/index.ts',
+  browser: 'src/browser.ts',
+  'chrome-devtool': 'src/chrome-devtool.ts',
   node: 'src/node.ts',
   build: 'src/build.ts',
 };

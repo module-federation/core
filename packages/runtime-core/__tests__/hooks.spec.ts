@@ -365,6 +365,78 @@ describe('hooks', () => {
     });
   });
 
+  it('emits manifest snapshot lifecycle once when loading a manifest remote', async () => {
+    const data = {
+      id: '@loader-hooks/app2',
+      name: '@loader-hooks/app2',
+      metaData: {
+        name: '@loader-hooks/app2',
+        publicPath: 'http://localhost:1111/',
+        type: 'app',
+        buildInfo: {
+          buildVersion: 'custom',
+        },
+        remoteEntry: {
+          name: 'federation-remote-entry.js',
+          path: 'resources/hooks/app2/',
+        },
+        types: {
+          name: 'index.d.ts',
+          path: './',
+        },
+        globalName: '@loader-hooks/app2',
+      },
+      remotes: [],
+      shared: [],
+      exposes: [],
+    };
+
+    const fetchPlugin: () => ModuleFederationRuntimePlugin = () => ({
+      name: 'fetch-plugin',
+      fetch(url) {
+        if (url === 'http://mockxxx.com/snapshot-hooks-mf-manifest.json') {
+          return Promise.resolve(
+            new Response(JSON.stringify(data), {
+              status: 200,
+              statusText: 'OK',
+              headers: { 'Content-Type': 'application/json' },
+            }),
+          );
+        }
+      },
+    });
+    const snapshotEvents: string[] = [];
+    const snapshotPlugin: () => ModuleFederationRuntimePlugin = () => ({
+      name: 'snapshot-observer-plugin',
+      loadSnapshot(args) {
+        snapshotEvents.push('loadSnapshot');
+        return args;
+      },
+      loadRemoteSnapshot(args) {
+        snapshotEvents.push(args.from);
+        return args;
+      },
+    });
+
+    const INSTANCE = new ModuleFederation({
+      name: '@loader-hooks/snapshot',
+      remotes: [
+        {
+          name: '@loader-hooks/app2',
+          entry: 'http://mockxxx.com/snapshot-hooks-mf-manifest.json',
+        },
+      ],
+      plugins: [fetchPlugin(), snapshotPlugin()],
+    });
+
+    const res = await INSTANCE.loadRemote<() => string>(
+      '@loader-hooks/app2/say',
+    );
+    assert(res);
+    expect(res()).toBe('hello app2');
+    expect(snapshotEvents).toEqual(['loadSnapshot', 'manifest']);
+  });
+
   it('loaderEntry hooks', async () => {
     const data = {
       id: '@loader-hooks/app2',

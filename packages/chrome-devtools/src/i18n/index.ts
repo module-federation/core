@@ -245,6 +245,8 @@ const resources = {
       loadingTrace: {
         title: 'Loading Trace',
         empty: 'No loading report yet',
+        emptyEnableChrome:
+          'No observability plugin was detected on the page. Enable Chrome observability to start collecting loading reports.',
         status: {
           enabled: 'Observability is enabled for the current page.',
           disabled: 'Observability is not enabled for the current page.',
@@ -252,6 +254,8 @@ const resources = {
           reloading: 'Configuration saved. Reloading current page.',
           synced: 'Reports synced.',
           noReports: 'No report found on the current page.',
+          userPlugin:
+            'Application observability plugin detected. Syncing existing reports.',
         },
         confirm: {
           observeTitle: 'Start observability?',
@@ -279,18 +283,14 @@ const resources = {
           console: 'Console hints',
           consoleTip:
             'Prints lightweight hints in the inspected page console. Turn it off when the page console should stay clean.',
-          reactCallback: 'React callback',
-          reactCallbackTip:
-            'Injects an onMFRemoteLoaded callback prop into matched React remote function components so producers can mark business readiness.',
-          remoteIds: 'Module filter',
-          remoteIdsTip:
-            'Only used when React callback is enabled. Empty means no filter; filled values only inject callbacks for matching loadRemote request ids or exposes.',
         },
         stats: {
           state: 'State',
           reports: 'Reports',
           events: 'Events',
           latest: 'Latest outcome',
+          customTip:
+            'Custom means the inspected page already registered its own observability plugin, so reports are read from the page instead of only from the Chrome collection plugin.',
         },
         reports: {
           search: 'Filter reports',
@@ -298,6 +298,44 @@ const resources = {
           success: 'Success',
           failed: 'Failed',
           pending: 'Pending',
+          recovered: 'Recovered',
+          eventRecovered: 'Recovered',
+          limited: 'Basic observability',
+          lowVersionTip:
+            'The current MF runtime version is too low, so only basic loading events can be collected. Fine-grained remoteEntry, init, expose, factory, and shared phases may be missing. Upgrade to 2.5.0+ for the full loading trace.',
+          unknownVersionTip:
+            'The current MF runtime version cannot be detected, so Chrome observability may only collect basic loading events. Fine-grained remoteEntry, init, expose, factory, and shared phases may be missing.',
+        },
+        currentLoad: {
+          title: 'Current loading',
+          remoteReport: 'Remote',
+          sharedReport: 'Shared dependency',
+          consumer: 'Current consumer',
+          request: 'Request',
+          producer: 'Producer',
+          remoteName: 'Remote name',
+          expose: 'Expose',
+          shared: 'Shared dependency',
+          provider: 'Provider',
+          requiredVersion: 'Required version',
+          selectedVersion: 'Selected version',
+          availableVersions: 'Available versions',
+        },
+        loadedBefore: {
+          title: 'Other consumer loading records',
+          consumerCount: '{{count}} consumer(s)',
+          producerLoaded: 'Same producer was loaded before',
+          exposeLoaded: 'Current expose was loaded before',
+          exposeNotLoaded: 'Current expose was not loaded before',
+          consumer: 'Consumer',
+          status: 'Status',
+          exposes: 'Loaded exposes',
+          unknownConsumer: 'Unknown consumer',
+          entryReady: 'remoteEntry is available',
+          entryMissing: 'remoteEntry is not available',
+          initReady: 'container was initialized',
+          initMissing: 'container was not initialized',
+          noExposes: 'No expose record',
         },
       },
     },
@@ -310,7 +348,7 @@ const resources = {
           proxy: '代理配置',
           dependency: '依赖关系图',
           share: '共享依赖',
-          loadingTrace: '加载链路',
+          loadingTrace: '加载追踪',
           performance: '性能',
         },
         header: {
@@ -534,23 +572,26 @@ const resources = {
         version: '版本',
       },
       loadingTrace: {
-        title: '加载链路',
+        title: '加载追踪',
         empty: '暂无加载报告',
+        emptyEnableChrome:
+          '当前页面未检测到观测插件。可以开启 Chrome 采集来收集加载报告。',
         status: {
-          enabled: '当前页面已开启可观测。',
-          disabled: '当前页面未开启可观测。',
+          enabled: '当前页面已开启加载追踪。',
+          disabled: '当前页面未开启加载追踪。',
           unavailable: '当前页面暂不可用。',
           reloading: '配置已保存，正在刷新当前页面。',
           synced: '报告已同步。',
           noReports: '当前页面还没有报告。',
+          userPlugin: '已检测到页面自带观测插件，正在同步已有报告。',
         },
         confirm: {
-          observeTitle: '开启观测？',
+          observeTitle: '开启加载追踪？',
           updateTitle: '更新配置？',
           content: '保存配置后会刷新当前标签页。',
         },
         actions: {
-          observeNow: '立即观测',
+          observeNow: '开启采集',
           updateConfig: '更新配置',
           config: '配置',
           disable: '关闭',
@@ -569,18 +610,14 @@ const resources = {
           console: '控制台提示',
           consoleTip:
             '在被调试页面的控制台打印轻量提示。如果想保持页面控制台干净，可以关闭。',
-          reactCallback: 'React 回调',
-          reactCallbackTip:
-            '给匹配的 React 远程函数组件注入 onMFRemoteLoaded 回调，让生产者主动标记业务就绪。',
-          remoteIds: '模块过滤',
-          remoteIdsTip:
-            '仅在开启 React 回调时生效。留空表示不过滤；填写后只对匹配的 loadRemote 请求 id 或 expose 注入回调。',
         },
         stats: {
           state: '状态',
           reports: '报告',
           events: '事件',
           latest: '最新结果',
+          customTip:
+            'Custom 表示当前页面已经自己注册了观测插件，报告会从页面已有插件中读取，不只依赖 Chrome 插件注入采集。',
         },
         reports: {
           search: '过滤报告',
@@ -588,6 +625,44 @@ const resources = {
           success: '成功',
           failed: '失败',
           pending: '进行中',
+          recovered: '兜底成功',
+          eventRecovered: '兜底',
+          limited: '基础观测',
+          lowVersionTip:
+            '当前 MF 运行时版本较低，只能采集基础加载事件。remoteEntry、init、expose、factory、shared 等细阶段可能缺失。升级到 2.5.0+ 后可获得完整链路。',
+          unknownVersionTip:
+            '当前 MF 运行时版本无法识别，Chrome 观测可能只能采集基础加载事件。remoteEntry、init、expose、factory、shared 等细阶段可能缺失。',
+        },
+        currentLoad: {
+          title: '当前加载',
+          remoteReport: '远程模块',
+          sharedReport: '共享依赖',
+          consumer: '当前消费方',
+          request: '请求',
+          producer: '生产者',
+          remoteName: '生产者名称',
+          expose: 'Expose',
+          shared: '共享依赖',
+          provider: '提供方',
+          requiredVersion: '要求版本',
+          selectedVersion: '实际版本',
+          availableVersions: '可用版本',
+        },
+        loadedBefore: {
+          title: '其他消费方加载记录',
+          consumerCount: '{{count}} 个消费方',
+          producerLoaded: '同一生产者之前已被加载',
+          exposeLoaded: '当前 expose 之前已被加载',
+          exposeNotLoaded: '当前 expose 之前未被加载',
+          consumer: '消费方',
+          status: '状态',
+          exposes: '已加载 expose',
+          unknownConsumer: '未知消费方',
+          entryReady: 'remoteEntry 已拿到',
+          entryMissing: 'remoteEntry 未拿到',
+          initReady: '容器已初始化',
+          initMissing: '容器未初始化',
+          noExposes: '暂无导出记录',
         },
       },
     },

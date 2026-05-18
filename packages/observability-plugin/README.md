@@ -139,6 +139,9 @@ default because they are usually configuration or availability problems instead
 of transient network failures. When a build plugin supplies `customShareInfo`
 and the runtime reports a handled miss, the observability report uses a
 recovered outcome instead of marking the trace as failed.
+The Chrome extension entry skips shared events for older or preview runtime
+versions because those runtimes do not expose the same shared lifecycle
+contract.
 
 Business code can mark its own success condition with a fixed event. When React
 callback injection is explicitly enabled, the wrapper injects an

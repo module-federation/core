@@ -7,9 +7,11 @@ import {
   ObservabilityBuildPlugin,
   createObservabilityBuildInfo,
 } from '../src/build';
+import { ChromeObservabilityPlugin } from '../src/chrome-devtool';
 import { createNodeObservability as ObservabilityNode } from '../src/node';
 
 const enabledOrigin = {
+  version: '2.5.0',
   options: {
     name: 'host',
   },
@@ -557,6 +559,67 @@ const emitManifestError = (
     ...overrides,
   } as any);
 
+const createLoadedBeforeFederationFixture = () => {
+  const currentOrigin = {
+    version: '2.5.0',
+    options: {
+      name: 'consumer_b',
+    },
+    moduleCache: new Map([
+      [
+        'provider',
+        {
+          remoteInfo: {
+            name: 'provider',
+            entryGlobalName: 'provider_global',
+          },
+          remoteEntryExports: { get: vi.fn() },
+          inited: true,
+        },
+      ],
+    ]),
+  };
+  const previousConsumer = {
+    version: '2.5.0',
+    options: {
+      name: 'consumer_a',
+    },
+    moduleCache: new Map([
+      [
+        'provider',
+        {
+          remoteInfo: {
+            name: 'provider',
+            entryGlobalName: 'provider_global',
+          },
+          remoteEntryExports: { get: vi.fn() },
+          inited: true,
+        },
+      ],
+    ]),
+    remoteHandler: {
+      idToRemoteMap: {
+        'provider/Button': {
+          name: 'provider',
+          expose: './Button',
+        },
+        'provider/Card': {
+          name: 'provider',
+          expose: './Card',
+        },
+      },
+    },
+  };
+
+  return {
+    currentOrigin,
+    previousConsumer,
+    federation: {
+      __INSTANCES__: [currentOrigin, previousConsumer],
+    },
+  };
+};
+
 const waitForFile = async (filePath: string) => {
   const startedAt = Date.now();
 
@@ -717,6 +780,54 @@ describe('ObservabilityPlugin', () => {
     );
 
     expect(typeof instance.markComponentLoaded).toBe('function');
+  });
+
+  it('returns a chrome runtime plugin without attaching instance APIs', () => {
+    const plugin = ChromeObservabilityPlugin({ level: 'verbose' });
+    const instance = {} as {
+      markComponentLoaded?: ReturnType<
+        typeof createObservability
+      >['markComponentLoaded'];
+    };
+
+    expect(plugin.name).toBe('observability-plugin:chrome-extension');
+    plugin.apply?.(
+      instance as unknown as Parameters<NonNullable<typeof plugin.apply>>[0],
+    );
+
+    expect(instance.markComponentLoaded).toBeUndefined();
+  });
+
+  it('exposes chrome reports under the fixed browser scope', () => {
+    const previousFederation = (globalThis as any).__FEDERATION__;
+
+    try {
+      (globalThis as any).__FEDERATION__ = {};
+      const plugin = ChromeObservabilityPlugin({
+        level: 'verbose',
+        console: false,
+        browser: {
+          enabled: true,
+          scope: 'ignored_custom_scope',
+        },
+      });
+
+      plugin.beforeRequest?.({
+        id: 'remote/Button',
+        options: {},
+        origin: enabledOrigin,
+      } as any);
+
+      expect(
+        (globalThis as any).__FEDERATION__.__OBSERVABILITY__.chrome_extension,
+      ).toBeDefined();
+      expect(
+        (globalThis as any).__FEDERATION__.__OBSERVABILITY__
+          .ignored_custom_scope,
+      ).toBeUndefined();
+    } finally {
+      (globalThis as any).__FEDERATION__ = previousFederation;
+    }
   });
 
   it('does not wrap a remote React function component unless callback injection is explicitly enabled', async () => {
@@ -1360,20 +1471,25 @@ describe('ObservabilityPlugin', () => {
     });
 
     observability.plugin.beforeLoadRemoteSnapshot?.({
+      origin: enabledOrigin,
+    } as any);
+    observability.plugin.loadSnapshot?.({
       moduleInfo: {
         name: 'remote',
         entry: 'http://localhost:3001/mf-manifest.json',
       },
-      origin: enabledOrigin,
     } as any);
-    observability.plugin.afterResolve?.({
-      id: 'remote/Button',
-      expose: './Button',
-      remoteInfo: {
+    observability.plugin.loadRemoteSnapshot?.({
+      moduleInfo: {
         name: 'remote',
         entry: 'http://localhost:3001/mf-manifest.json',
       },
-      origin: enabledOrigin,
+      manifestUrl: 'http://localhost:3001/mf-manifest.json',
+      remoteSnapshot: {
+        version: 'http://localhost:3001/mf-manifest.json',
+        remoteEntry: 'http://localhost:3001/remoteEntry.js',
+      },
+      from: 'manifest',
     } as any);
     observability.plugin.loadEntry?.({
       remoteInfo: {
@@ -1395,12 +1511,12 @@ describe('ObservabilityPlugin', () => {
         expect.objectContaining({
           phase: 'manifest',
           status: 'start',
-          lifecycle: 'beforeLoadRemoteSnapshot',
+          lifecycle: 'loadSnapshot',
         }),
         expect.objectContaining({
           phase: 'manifest',
           status: 'success',
-          lifecycle: 'afterResolve',
+          lifecycle: 'loadRemoteSnapshot',
         }),
         expect.objectContaining({
           phase: 'remoteEntry',
@@ -1413,6 +1529,238 @@ describe('ObservabilityPlugin', () => {
           lifecycle: 'afterLoadEntry',
         }),
       ]),
+    );
+  });
+
+  it('records repeated manifest snapshot loads as cached success', () => {
+    const observability = createObservability({
+      level: 'verbose',
+      console: false,
+    });
+    const moduleInfo = {
+      name: 'remote',
+      entry: 'http://localhost:3001/mf-manifest.json',
+    };
+
+    observability.plugin.beforeLoadRemoteSnapshot?.({
+      origin: enabledOrigin,
+    } as any);
+    observability.plugin.loadSnapshot?.({
+      moduleInfo,
+    } as any);
+    observability.plugin.loadRemoteSnapshot?.({
+      moduleInfo,
+      manifestUrl: moduleInfo.entry,
+      remoteSnapshot: {
+        version: moduleInfo.entry,
+        remoteEntry: 'http://localhost:3001/remoteEntry.js',
+      },
+      from: 'manifest',
+    } as any);
+
+    observability.plugin.loadSnapshot?.({
+      moduleInfo,
+    } as any);
+
+    const manifestEvents = observability
+      .getEvents()
+      .filter((event) => event.phase === 'manifest');
+
+    expect(manifestEvents).toEqual([
+      expect.objectContaining({
+        status: 'start',
+        message: 'manifest:load-start',
+      }),
+      expect.objectContaining({
+        status: 'success',
+        message: 'manifest:resolved',
+      }),
+      expect.objectContaining({
+        status: 'success',
+        message: 'manifest:cached',
+        cached: true,
+      }),
+    ]);
+    expect(
+      observability.getLatestReport()?.summary.phases.manifest,
+    ).toMatchObject({
+      status: 'success',
+      cached: true,
+    });
+  });
+
+  it('keeps manifest, remoteEntry, and runtime load events in the same remote trace', async () => {
+    const observability = createObservability({
+      level: 'verbose',
+      console: false,
+    });
+
+    emitRemoteStart(observability, {
+      id: '@cloud-public/ai-assistant/AiAssistant',
+      options: {
+        remotes: [
+          {
+            name: '@cloud-public/ai-assistant',
+            entry: 'https://example.com/vmok-manifest.json',
+            type: 'global',
+          },
+        ],
+      },
+    });
+    observability.plugin.beforeLoadRemoteSnapshot?.({
+      origin: enabledOrigin,
+    } as any);
+    observability.plugin.loadSnapshot?.({
+      moduleInfo: {
+        name: '@cloud-public/ai-assistant',
+        entry: 'https://example.com/vmok-manifest.json',
+      },
+    } as any);
+    observability.plugin.loadRemoteSnapshot?.({
+      moduleInfo: {
+        name: '@cloud-public/ai-assistant',
+        entry: 'https://example.com/vmok-manifest.json',
+      },
+      manifestUrl: 'https://example.com/vmok-manifest.json',
+      remoteSnapshot: {
+        version: 'https://example.com/vmok-manifest.json',
+        remoteEntry: 'https://example.com/remoteEntry.js',
+      },
+      from: 'manifest',
+    } as any);
+    observability.plugin.loadEntry?.({
+      remoteInfo: {
+        name: '@cloud-public/ai-assistant',
+        entry: 'https://example.com/remoteEntry.js',
+      },
+      origin: enabledOrigin,
+    } as any);
+    await emitRemoteLoaded(observability, {
+      id: '@cloud-public/ai-assistant/AiAssistant',
+      remote: {
+        name: '@cloud-public/ai-assistant',
+        entry: 'https://example.com/vmok-manifest.json',
+      },
+    });
+
+    const reports = observability.getReports();
+    expect(reports).toHaveLength(1);
+    expect(reports[0].status).toBe('success');
+    expect(reports[0].runtimeVersion).toBe('2.5.0');
+    expect(reports[0].summary.outcome).toBe('runtime-loaded');
+    expect(reports[0].diagnosis.title).toBe('Remote loaded successfully');
+    expect(reports[0].events.map((event) => event.phase)).toEqual([
+      'loadRemote',
+      'manifest',
+      'manifest',
+      'remoteEntry',
+      'loadRemote',
+    ]);
+  });
+
+  it('uses the applied instance version when hook origin version is missing', () => {
+    const observability = createObservability({
+      level: 'verbose',
+      console: false,
+    });
+    observability.plugin.apply?.({
+      version: '2.5.0',
+    } as any);
+
+    observability.plugin.beforeRequest?.({
+      id: 'remote/Button',
+      origin: {
+        options: {
+          name: 'host',
+        },
+      },
+    } as any);
+
+    const report = observability.getLatestReport();
+
+    expect(report?.runtimeVersion).toBe('2.5.0');
+    expect(report?.events[0].runtimeVersion).toBe('2.5.0');
+  });
+
+  it('does not return hook args from the default browser entry', () => {
+    const observability = createObservability({
+      level: 'verbose',
+      console: false,
+    });
+    const beforeRequestArgs = {
+      id: 'remote/Button',
+      options: {},
+      origin: enabledOrigin,
+    };
+    const afterResolveArgs = {
+      id: 'remote/Button',
+      expose: './Button',
+      remoteInfo: {
+        name: 'remote',
+        entry: 'http://localhost:3001/mf-manifest.json',
+      },
+      origin: enabledOrigin,
+    };
+    const loadRemoteSnapshotArgs = {
+      options: {},
+      moduleInfo: {
+        name: 'remote',
+      },
+      remoteSnapshot: {
+        remoteEntry: 'http://localhost:3001/remoteEntry.js',
+      },
+      from: 'global',
+    };
+
+    expect(observability.plugin.beforeRequest?.(beforeRequestArgs as any)).toBe(
+      undefined,
+    );
+    expect(observability.plugin.afterResolve?.(afterResolveArgs as any)).toBe(
+      undefined,
+    );
+    expect(
+      observability.plugin.loadRemoteSnapshot?.(loadRemoteSnapshotArgs as any),
+    ).toBe(undefined);
+  });
+
+  it('returns original args from chrome remote waterfall hooks for old runtimes', () => {
+    const plugin = ChromeObservabilityPlugin({
+      level: 'verbose',
+      console: false,
+    });
+    const beforeRequestArgs = {
+      id: 'remote/Button',
+      options: {},
+      origin: enabledOrigin,
+    };
+    const afterResolveArgs = {
+      id: 'remote/Button',
+      expose: './Button',
+      remoteInfo: {
+        name: 'remote',
+        entry: 'http://localhost:3001/mf-manifest.json',
+      },
+      origin: enabledOrigin,
+    };
+    const loadRemoteSnapshotArgs = {
+      options: {},
+      moduleInfo: {
+        name: 'remote',
+      },
+      remoteSnapshot: {
+        remoteEntry: 'http://localhost:3001/remoteEntry.js',
+      },
+      from: 'global',
+    };
+
+    expect(plugin.beforeRequest?.(beforeRequestArgs as any)).toBe(
+      beforeRequestArgs,
+    );
+    expect(plugin.afterResolve?.(afterResolveArgs as any)).toBe(
+      afterResolveArgs,
+    );
+    expect(plugin.loadRemoteSnapshot?.(loadRemoteSnapshotArgs as any)).toBe(
+      loadRemoteSnapshotArgs,
     );
   });
 
@@ -1650,6 +1998,194 @@ describe('ObservabilityPlugin', () => {
       componentLoaded: false,
       outcome: 'failed',
     });
+  });
+
+  it('attaches loaded-before evidence from other consumers on remote failures', () => {
+    const originalFederation = (globalThis as any).__FEDERATION__;
+    const { currentOrigin, federation } = createLoadedBeforeFederationFixture();
+
+    try {
+      (globalThis as any).__FEDERATION__ = federation;
+
+      const observability = createObservability({
+        level: 'verbose',
+        console: false,
+      });
+
+      emitRemoteError(observability, {
+        origin: currentOrigin,
+        remote: {
+          name: 'provider',
+          entryGlobalName: 'provider_global',
+          entry: 'http://localhost:3001/mf-manifest.json',
+        },
+        expose: './Button',
+      });
+
+      const report = observability.getLatestReport();
+      expect(report?.loadedBefore).toEqual({
+        producer: true,
+        expose: true,
+        consumers: [
+          {
+            name: 'consumer_a',
+            remoteEntryExports: true,
+            containerInitialized: true,
+            exposes: ['./Button', './Card'],
+          },
+        ],
+      });
+      expect(report?.events[0].loadedBefore).toEqual(report?.loadedBefore);
+      expect(
+        report?.loadedBefore?.consumers.some(
+          (consumer) => consumer.name === 'consumer_b',
+        ),
+      ).toBe(false);
+      expect(hasUndefinedField(report)).toBe(false);
+    } finally {
+      if (originalFederation) {
+        (globalThis as any).__FEDERATION__ = originalFederation;
+      } else {
+        delete (globalThis as any).__FEDERATION__;
+      }
+    }
+  });
+
+  it('attaches loaded-before evidence on successful verbose development remote loads', async () => {
+    const originalFederation = (globalThis as any).__FEDERATION__;
+    const { currentOrigin, federation } = createLoadedBeforeFederationFixture();
+
+    try {
+      (globalThis as any).__FEDERATION__ = federation;
+
+      const observability = createObservability({
+        level: 'verbose',
+        console: false,
+        browser: {
+          enabled: true,
+          mode: 'development',
+        },
+      });
+
+      await emitRemoteLoaded(observability, {
+        origin: currentOrigin,
+        remote: {
+          name: 'provider',
+          entryGlobalName: 'provider_global',
+          entry: 'http://localhost:3001/mf-manifest.json',
+        },
+        expose: './Button',
+      });
+
+      const report = observability.getLatestReport();
+      expect(report?.status).toBe('success');
+      expect(report?.loadedBefore).toEqual({
+        producer: true,
+        expose: true,
+        consumers: [
+          {
+            name: 'consumer_a',
+            remoteEntryExports: true,
+            containerInitialized: true,
+            exposes: ['./Button', './Card'],
+          },
+        ],
+      });
+    } finally {
+      if (originalFederation) {
+        (globalThis as any).__FEDERATION__ = originalFederation;
+      } else {
+        delete (globalThis as any).__FEDERATION__;
+      }
+    }
+  });
+
+  it('does not attach loaded-before evidence on successful production remote loads', async () => {
+    const originalFederation = (globalThis as any).__FEDERATION__;
+    const { currentOrigin, federation } = createLoadedBeforeFederationFixture();
+
+    try {
+      (globalThis as any).__FEDERATION__ = federation;
+
+      const observability = createObservability({
+        level: 'verbose',
+        console: false,
+        browser: {
+          enabled: true,
+          mode: 'production',
+        },
+      });
+
+      await emitRemoteLoaded(observability, {
+        origin: currentOrigin,
+        remote: {
+          name: 'provider',
+          entryGlobalName: 'provider_global',
+          entry: 'http://localhost:3001/mf-manifest.json',
+        },
+        expose: './Button',
+      });
+
+      expect(observability.getLatestReport()?.status).toBe('success');
+      expect(observability.getLatestReport()?.loadedBefore).toBeUndefined();
+    } finally {
+      if (originalFederation) {
+        (globalThis as any).__FEDERATION__ = originalFederation;
+      } else {
+        delete (globalThis as any).__FEDERATION__;
+      }
+    }
+  });
+
+  it('omits loaded-before evidence when no existing producer cache matches', () => {
+    const originalFederation = (globalThis as any).__FEDERATION__;
+
+    try {
+      (globalThis as any).__FEDERATION__ = {
+        __INSTANCES__: [
+          {
+            options: {
+              name: 'consumer_a',
+            },
+            moduleCache: new Map([
+              [
+                'other',
+                {
+                  remoteInfo: {
+                    name: 'other',
+                    entryGlobalName: 'other_global',
+                  },
+                },
+              ],
+            ]),
+          },
+        ],
+      };
+
+      const observability = createObservability({
+        level: 'verbose',
+        console: false,
+      });
+
+      emitRemoteError(observability, {
+        remote: {
+          name: 'provider',
+          entryGlobalName: 'provider_global',
+        },
+        expose: './Button',
+      });
+
+      expect(observability.getLatestReport()?.loadedBefore).toBeUndefined();
+      expect(
+        observability.getLatestReport()?.events[0].loadedBefore,
+      ).toBeUndefined();
+    } finally {
+      if (originalFederation) {
+        (globalThis as any).__FEDERATION__ = originalFederation;
+      } else {
+        delete (globalThis as any).__FEDERATION__;
+      }
+    }
   });
 
   it('records runtime error code and manifest context for RUNTIME-003', () => {
@@ -2132,20 +2668,25 @@ describe('ObservabilityPlugin', () => {
     });
 
     observability.plugin.beforeLoadRemoteSnapshot?.({
+      origin: enabledOrigin,
+    } as any);
+    observability.plugin.loadSnapshot?.({
       moduleInfo: {
         name: 'remote',
         entry: 'http://localhost:3001/mf-manifest.json',
       },
-      origin: enabledOrigin,
     } as any);
-    observability.plugin.afterResolve?.({
-      id: 'remote/Button',
-      expose: './Button',
-      remoteInfo: {
+    observability.plugin.loadRemoteSnapshot?.({
+      moduleInfo: {
         name: 'remote',
         entry: 'http://localhost:3001/mf-manifest.json',
       },
-      origin: enabledOrigin,
+      manifestUrl: 'http://localhost:3001/mf-manifest.json',
+      remoteSnapshot: {
+        version: 'http://localhost:3001/mf-manifest.json',
+        remoteEntry: 'http://localhost:3001/remoteEntry.js',
+      },
+      from: 'manifest',
     } as any);
     observability.plugin.loadEntry?.({
       remoteInfo: {
@@ -2179,20 +2720,25 @@ describe('ObservabilityPlugin', () => {
     });
 
     observability.plugin.beforeLoadRemoteSnapshot?.({
+      origin: enabledOrigin,
+    } as any);
+    observability.plugin.loadSnapshot?.({
       moduleInfo: {
         name: 'remote',
         entry: 'http://localhost:3001/mf-manifest.json',
       },
-      origin: enabledOrigin,
     } as any);
-    observability.plugin.afterResolve?.({
-      id: 'remote/Button',
-      expose: './Button',
-      remoteInfo: {
+    observability.plugin.loadRemoteSnapshot?.({
+      moduleInfo: {
         name: 'remote',
         entry: 'http://localhost:3001/mf-manifest.json',
       },
-      origin: enabledOrigin,
+      manifestUrl: 'http://localhost:3001/mf-manifest.json',
+      remoteSnapshot: {
+        version: 'http://localhost:3001/mf-manifest.json',
+        remoteEntry: 'http://localhost:3001/remoteEntry.js',
+      },
+      from: 'manifest',
     } as any);
     observability.plugin.loadEntry?.({
       remoteInfo: {
@@ -2268,6 +2814,141 @@ describe('ObservabilityPlugin', () => {
     expect(output).toContain('token=');
   });
 
+  it('skips shared observability in compatibility mode for unsupported runtime versions and returns hook args', () => {
+    const observability = createObservability(
+      {
+        level: 'verbose',
+        console: false,
+      },
+      {
+        guardSharedHooksByRuntimeVersion: true,
+        returnHookArgs: true,
+      },
+    );
+    const sharedArgs = {
+      pkgName: 'react',
+      shareInfo: createShared(),
+      shared: {},
+      origin: {
+        version: '2.4.9',
+        options: {
+          name: 'host',
+        },
+      },
+    };
+    const previewArgs = {
+      ...sharedArgs,
+      origin: {
+        version: '0.0.0-feat-federationdiagnosticerror-20260512025420',
+        options: {
+          name: 'host',
+        },
+      },
+    };
+    const afterArgs = {
+      ...sharedArgs,
+      selectedShared: createShared(),
+    };
+    const errorArgs = {
+      ...sharedArgs,
+      error: new Error('shared failed'),
+    };
+
+    expect(observability.plugin.beforeLoadShare?.(sharedArgs as any)).toBe(
+      sharedArgs,
+    );
+    expect(observability.plugin.afterLoadShare?.(afterArgs as any)).toBe(
+      afterArgs,
+    );
+    expect(observability.plugin.errorLoadShare?.(errorArgs as any)).toBe(
+      errorArgs,
+    );
+    expect(observability.plugin.beforeLoadShare?.(previewArgs as any)).toBe(
+      previewArgs,
+    );
+    expect(observability.getReports()).toHaveLength(0);
+  });
+
+  it('uses the applied instance version for shared compatibility checks', () => {
+    const observability = createObservability(
+      {
+        level: 'verbose',
+        console: false,
+      },
+      {
+        guardSharedHooksByRuntimeVersion: true,
+        returnHookArgs: true,
+      },
+    );
+    observability.plugin.apply?.({
+      version: '2.5.0',
+    } as any);
+    const sharedArgs = {
+      pkgName: 'react',
+      shareInfo: createShared(),
+      shared: {},
+      origin: {
+        options: {
+          name: 'host',
+        },
+      },
+    };
+
+    expect(observability.plugin.beforeLoadShare?.(sharedArgs as any)).toBe(
+      sharedArgs,
+    );
+
+    const report = observability.getLatestReport();
+
+    expect(report).toMatchObject({
+      runtimeVersion: '2.5.0',
+      summary: {
+        phases: {
+          shared: {
+            status: 'start',
+          },
+        },
+      },
+    });
+    expect(report?.events[0]).toMatchObject({
+      phase: 'shared',
+      runtimeVersion: '2.5.0',
+    });
+  });
+
+  it('records shared observability by default without runtime version gating', () => {
+    const observability = createObservability({
+      level: 'verbose',
+      console: false,
+    });
+    const sharedArgs = {
+      pkgName: 'react',
+      shareInfo: createShared(),
+      shared: {},
+      origin: {
+        version: '2.4.9',
+        options: {
+          name: 'host',
+        },
+      },
+    };
+
+    observability.plugin.beforeLoadShare?.(sharedArgs as any);
+    observability.plugin.afterLoadShare?.({
+      ...sharedArgs,
+      selectedShared: createShared(),
+    } as any);
+
+    expect(observability.getLatestReport()).toMatchObject({
+      status: 'success',
+      summary: {
+        shared: {
+          name: 'react',
+        },
+      },
+    });
+  });
+
   it('derives shared success details from loadShare hooks', () => {
     const observability = createObservability({
       level: 'verbose',
@@ -2300,6 +2981,11 @@ describe('ObservabilityPlugin', () => {
     const report = observability.getLatestReport();
 
     expect(report?.status).toBe('success');
+    expect(report?.summary.outcome).toBe('shared-resolved');
+    expect(report?.summary.sharedResolved).toBe(true);
+    expect(report?.diagnosis?.title).toBe(
+      'Shared dependency resolved successfully',
+    );
     expect(report?.shared).toMatchObject({
       name: 'react',
       selectedVersion: '18.3.1',

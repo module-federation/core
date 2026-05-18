@@ -135,6 +135,7 @@ const InnerApp = (props: RootComponentProps) => {
   const [inspectedTab, setInspectedTab] = useState<chrome.tabs.Tab | undefined>(
     window.targetTab,
   );
+  const [inspectedTabRefreshKey, setInspectedTabRefreshKey] = useState(0);
   const [activePanel, setActivePanel] = useState<TabKey>('proxy');
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -255,9 +256,16 @@ const InnerApp = (props: RootComponentProps) => {
   }, [applyModuleUpdate]);
 
   useEffect(() => {
-    const updateActiveTab = async (tabId?: number) => {
+    const updateActiveTab = async (
+      tabId?: number,
+      options?: { status?: chrome.tabs.TabChangeInfo['status'] },
+    ) => {
       const tab = await syncActiveTab(tabId);
       setInspectedTab(tab || undefined);
+      if (options?.status === 'loading') {
+        setInspectedTabRefreshKey((key) => key + 1);
+        return;
+      }
       if (window.__FEDERATION__?.moduleInfo) {
         applyModuleUpdate(cloneModuleInfo(window.__FEDERATION__?.moduleInfo));
       }
@@ -265,12 +273,16 @@ const InnerApp = (props: RootComponentProps) => {
     };
 
     const onMessage = (
-      message: { type?: string; tabId?: number },
+      message: {
+        type?: string;
+        tabId?: number;
+        status?: chrome.tabs.TabChangeInfo['status'];
+      },
       _sender: chrome.runtime.MessageSender,
       _sendResponse: (response?: any) => void,
     ) => {
       if (message?.type === MESSAGE_ACTIVE_TAB_CHANGED) {
-        updateActiveTab(message.tabId);
+        updateActiveTab(message.tabId, { status: message.status });
       }
     };
 
@@ -412,7 +424,12 @@ const InnerApp = (props: RootComponentProps) => {
           />
         );
       case 'loadingTrace':
-        return <LoadingTrace tabId={inspectedTab?.id} />;
+        return (
+          <LoadingTrace
+            tabId={inspectedTab?.id}
+            resetKey={inspectedTabRefreshKey}
+          />
+        );
       case 'performance':
         return (
           <div className={styles.placeholder}>

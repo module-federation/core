@@ -6,7 +6,7 @@ import {
   type ObservabilityRuntimePlugin,
   type ObservabilityPluginOptions,
   type ObservabilityReport,
-} from './index';
+} from './core';
 
 export interface ObservabilityNodeOptions extends Omit<
   ObservabilityPluginOptions,

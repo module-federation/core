@@ -1,6 +1,7 @@
 import { injectScript } from './index';
 import { OBSERVABILITY_DEVTOOLS_STORAGE_KEY } from './messages';
 import {
+  CHROME_OBSERVABILITY_SCOPE,
   DEFAULT_OBSERVABILITY_DEVTOOLS_CONFIG,
   normalizeObservabilityDevtoolsConfig,
   type ObservabilityDevtoolsConfig,
@@ -14,6 +15,7 @@ export interface ObservabilityDevtoolsEvent {
   requestId?: string;
   lifecycle?: string;
   message?: string;
+  runtimeVersion?: string;
   remote?: {
     name?: string;
     entry?: string;
@@ -21,7 +23,10 @@ export interface ObservabilityDevtoolsEvent {
   };
   shared?: {
     name?: string;
+    shareScope?: string[];
+    requiredVersion?: string | false;
     selectedVersion?: string;
+    availableVersions?: string[];
     provider?: string;
     reason?: string;
   };
@@ -33,6 +38,18 @@ export interface ObservabilityDevtoolsEvent {
   ownerHint?: string;
   recovered?: boolean;
   cached?: boolean;
+  loadedBefore?: ObservabilityDevtoolsLoadedBefore;
+}
+
+export interface ObservabilityDevtoolsLoadedBefore {
+  producer: boolean;
+  expose: boolean;
+  consumers: Array<{
+    name?: string;
+    remoteEntryExports?: boolean;
+    containerInitialized?: boolean;
+    exposes?: string[];
+  }>;
 }
 
 export interface ObservabilityDevtoolsReport {
@@ -40,6 +57,7 @@ export interface ObservabilityDevtoolsReport {
   status: string;
   requestId?: string;
   hostName?: string;
+  runtimeVersion?: string;
   remote?: {
     name?: string;
     entry?: string;
@@ -47,7 +65,10 @@ export interface ObservabilityDevtoolsReport {
   };
   shared?: {
     name?: string;
+    shareScope?: string[];
+    requiredVersion?: string | false;
     selectedVersion?: string;
+    availableVersions?: string[];
     provider?: string;
     reason?: string;
   };
@@ -60,10 +81,12 @@ export interface ObservabilityDevtoolsReport {
   errorName?: string;
   errorMessage?: string;
   ownerHint?: string;
+  loadedBefore?: ObservabilityDevtoolsLoadedBefore;
   events: ObservabilityDevtoolsEvent[];
   summary?: {
     outcome?: string;
     runtimeLoaded?: boolean;
+    sharedResolved?: boolean;
     componentLoaded?: boolean;
     loadCompleted?: boolean;
     recovered?: boolean;
@@ -84,7 +107,21 @@ export interface ObservabilityDevtoolsSnapshot {
   stored: boolean;
   scopes: string[];
   reports: ObservabilityDevtoolsReport[];
+  hasUserObservabilityPlugin: boolean;
 }
+
+const USER_OBSERVABILITY_PLUGIN_NAME = 'observability-plugin';
+const CHROME_OBSERVABILITY_PLUGIN_NAME =
+  'observability-plugin:chrome-extension';
+const LEGACY_CHROME_OBSERVABILITY_PLUGIN_NAME = 'observability-plugin-devtools';
+const OBSERVABILITY_SNAPSHOT_CONTEXT = {
+  chromeScope: CHROME_OBSERVABILITY_SCOPE,
+  userPluginName: USER_OBSERVABILITY_PLUGIN_NAME,
+  chromePluginNames: [
+    CHROME_OBSERVABILITY_PLUGIN_NAME,
+    LEGACY_CHROME_OBSERVABILITY_PLUGIN_NAME,
+  ],
+};
 
 const readConfigFromPage = (storageKey: string) => {
   try {
@@ -109,7 +146,28 @@ const reloadPage = () => {
   globalThis.location?.reload();
 };
 
-const readSnapshotFromPage = (storageKey: string) => {
+const readSnapshotFromPage = (
+  storageKey: string,
+  context?: {
+    chromeScope?: string;
+    userPluginName?: string;
+    chromePluginNames?: string[];
+  },
+) => {
+  const chromeScope =
+    typeof context?.chromeScope === 'string'
+      ? context.chromeScope
+      : 'chrome_extension';
+  const userPluginName =
+    typeof context?.userPluginName === 'string'
+      ? context.userPluginName
+      : 'observability-plugin';
+  const chromePluginNames = Array.isArray(context?.chromePluginNames)
+    ? context.chromePluginNames
+    : [
+        'observability-plugin:chrome-extension',
+        'observability-plugin-devtools',
+      ];
   const safeCopy = (value: unknown) => {
     try {
       return JSON.parse(JSON.stringify(value));
@@ -130,6 +188,27 @@ const readSnapshotFromPage = (storageKey: string) => {
   const readers = federation?.__OBSERVABILITY__ || {};
   const reports: Array<ObservabilityDevtoolsReport> = [];
   const scopes = Object.keys(readers);
+  const isChromeObservabilityPluginName = (name: unknown) =>
+    chromePluginNames.includes(String(name));
+  const hasUserObservabilityPluginFromInstances = Array.isArray(
+    federation?.__INSTANCES__,
+  )
+    ? federation.__INSTANCES__.some((instance: any) => {
+        const plugins = instance?.options?.plugins;
+        if (!Array.isArray(plugins)) {
+          return false;
+        }
+
+        return plugins.some(
+          (plugin) =>
+            plugin?.name === userPluginName &&
+            !isChromeObservabilityPluginName(plugin?.name),
+        );
+      })
+    : false;
+  const hasUserObservabilityPluginFromReaders = scopes.some(
+    (scope) => scope !== chromeScope,
+  );
 
   scopes.forEach((scope) => {
     const reader = readers[scope];
@@ -159,6 +238,9 @@ const readSnapshotFromPage = (storageKey: string) => {
     stored: Boolean(rawConfig),
     scopes,
     reports,
+    hasUserObservabilityPlugin:
+      hasUserObservabilityPluginFromInstances ||
+      hasUserObservabilityPluginFromReaders,
   };
 };
 
@@ -195,6 +277,7 @@ export const readObservabilitySnapshot =
       readSnapshotFromPage,
       true,
       OBSERVABILITY_DEVTOOLS_STORAGE_KEY,
+      OBSERVABILITY_SNAPSHOT_CONTEXT,
     );
 
     return {
@@ -204,6 +287,7 @@ export const readObservabilitySnapshot =
       stored: Boolean(snapshot?.stored),
       scopes: Array.isArray(snapshot?.scopes) ? snapshot.scopes : [],
       reports: Array.isArray(snapshot?.reports) ? snapshot.reports : [],
+      hasUserObservabilityPlugin: Boolean(snapshot?.hasUserObservabilityPlugin),
     };
   };
 
@@ -230,4 +314,15 @@ export const mergeObservabilityReports = (
     }
     return (right.startedAt || 0) - (left.startedAt || 0);
   });
+};
+
+export const getObservabilityReportScopeLabel = (
+  report: Pick<ObservabilityDevtoolsReport, '__scope'>,
+) => {
+  const scope = report.__scope;
+  if (!scope || scope === CHROME_OBSERVABILITY_SCOPE) {
+    return undefined;
+  }
+
+  return `custom: ${scope}`;
 };

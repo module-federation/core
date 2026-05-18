@@ -198,7 +198,7 @@ export class SnapshotHandler {
           : globalRemoteSnapshot.ssrRemoteEntry ||
             globalRemoteSnapshot.remoteEntry ||
             '';
-        const moduleSnapshot = await this.getManifestJson(
+        const moduleSnapshot = await this.loadManifestSnapshot(
           remoteEntry,
           moduleInfo,
           {},
@@ -229,7 +229,7 @@ export class SnapshotHandler {
     } else {
       if (isRemoteInfoWithEntry(moduleInfo)) {
         // get from manifest.json and merge remote info from remote server
-        const moduleSnapshot = await this.getManifestJson(
+        const moduleSnapshot = await this.loadManifestSnapshot(
           moduleInfo.entry,
           moduleInfo,
           {},
@@ -239,15 +239,7 @@ export class SnapshotHandler {
           moduleInfo,
           moduleSnapshot,
         );
-        const { remoteSnapshot: remoteSnapshotRes } =
-          await this.hooks.lifecycle.loadRemoteSnapshot.emit({
-            options: this.HostInstance.options,
-            moduleInfo,
-            remoteSnapshot: moduleSnapshot,
-            from: 'global',
-          });
-
-        mSnapshot = remoteSnapshotRes;
+        mSnapshot = moduleSnapshot;
         gSnapshot = globalSnapshotRes;
       } else {
         error(
@@ -291,7 +283,7 @@ export class SnapshotHandler {
     manifestUrl: string,
     moduleInfo: Remote,
     extraOptions: Record<string, any>,
-  ): Promise<ModuleInfo> {
+  ): Promise<Manifest> {
     const getManifest = async (): Promise<Manifest> => {
       const remoteInfo = getRemoteInfo(moduleInfo);
       let manifestJson: Manifest | undefined =
@@ -376,8 +368,20 @@ export class SnapshotHandler {
       return manifestJson;
     };
 
+    return getManifest();
+  }
+
+  private async loadManifestSnapshot(
+    manifestUrl: string,
+    moduleInfo: Remote,
+    extraOptions: Record<string, any>,
+  ): Promise<ModuleInfo> {
     const asyncLoadProcess = async () => {
-      const manifestJson = await getManifest();
+      const manifestJson = await this.getManifestJson(
+        manifestUrl,
+        moduleInfo,
+        extraOptions,
+      );
       const remoteSnapshot = generateSnapshotFromManifest(manifestJson, {
         version: manifestUrl,
       });
