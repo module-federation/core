@@ -146,7 +146,8 @@
       "@eslint/eslintrc>ajv": "6.14.0",
       "schema-utils@3.3.0>ajv": "6.14.0",
       "flatted": "3.4.2",
-      "@remix-run/router": "1.23.2"
+      "@remix-run/router": "1.23.2",
+      "typescript": "$typescript"
     },
     "onlyBuiltDependencies": [
       "@parcel/watcher",
@@ -295,7 +296,7 @@
     "tslib": "2.8.1",
     "tsup": "7.3.0",
     "turbo": "^2.5.8",
-    "typescript": "5.9.3",
+    "typescript": "6.0.3",
     "url-loader": "4.1.1",
     "vite": "7.3.5",
     "vite-tsconfig-paths": "4.2.3",

@@ -6,7 +6,7 @@
     "module": "commonjs",
     "target": "ES2015",
     "skipLibCheck": true,
-    "moduleResolution": "node",
+    "moduleResolution": "node10",
     "allowJs": false,
     "strict": true,
     "types": ["jest", "node"],
@@ -19,7 +19,8 @@
     "paths": {
       "@/*": ["./*"],
       "@src/*": ["./src/*"]
-    }
+    },
+    "ignoreDeprecations": "6.0"
   },
   "include": ["src", "../../global.d.ts", "__tests__/**/*", "__tests__"],
   "exclude": ["node_modules/**/*", "../node_modules"]
