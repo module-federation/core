@@ -798,6 +798,12 @@ describe('ObservabilityPlugin', () => {
     expect(instance.markComponentLoaded).toBeUndefined();
   });
 
+  it('does not register preload hooks for the chrome injected runtime plugin', () => {
+    const plugin = ChromeObservabilityPlugin({ level: 'verbose' });
+
+    expect(plugin.generatePreloadAssets).toBeUndefined();
+  });
+
   it('exposes chrome reports under the fixed browser scope', () => {
     const previousFederation = (globalThis as any).__FEDERATION__;
 
@@ -828,6 +834,185 @@ describe('ObservabilityPlugin', () => {
     } finally {
       (globalThis as any).__FEDERATION__ = previousFederation;
     }
+  });
+
+  it('skips paired runtime lifecycle hooks for unsupported runtime versions', () => {
+    const observability = createObservability(
+      {
+        level: 'verbose',
+        console: false,
+      },
+      {
+        guardRuntimeHooksByRuntimeVersion: true,
+        returnHookArgs: true,
+      },
+    );
+    const legacyEntryArgs = {
+      remoteInfo: {
+        name: 'legacy-remote',
+        entry: 'http://localhost:3001/remoteEntry.js',
+      },
+      origin: {
+        version: '2.3.1',
+        options: {
+          name: 'legacy-host',
+        },
+      },
+    };
+
+    expect((observability.plugin.loadEntry as any)(legacyEntryArgs)).toBe(
+      undefined,
+    );
+    expect(
+      observability.getEvents().some((event) => event.phase === 'remoteEntry'),
+    ).toBe(false);
+
+    expect(
+      (observability.plugin.loadEntry as any)({
+        ...legacyEntryArgs,
+        origin: {
+          ...legacyEntryArgs.origin,
+          version: '2.5.0',
+        },
+      }),
+    ).toBeUndefined();
+
+    expect(
+      observability.getEvents().some((event) => event.phase === 'remoteEntry'),
+    ).toBe(true);
+  });
+
+  it('keeps waterfall hook return values for the chrome injected runtime plugin', () => {
+    const plugin = ChromeObservabilityPlugin({
+      level: 'verbose',
+      console: false,
+    });
+    const requestArgs = {
+      id: 'legacy-remote/Button',
+      options: {
+        name: 'legacy-host',
+        remotes: [
+          {
+            name: 'legacy-remote',
+            entry: 'http://localhost:3001/remoteEntry.js',
+          },
+        ],
+      },
+      origin: {
+        version: '2.3.1',
+        options: {
+          name: 'legacy-host',
+        },
+      },
+    };
+    const snapshotArgs = {
+      options: requestArgs.options,
+      moduleInfo: {
+        name: 'legacy-remote',
+        entry: 'http://localhost:3001/mf-manifest.json',
+      },
+      hostGlobalSnapshot: undefined,
+      remoteSnapshot: undefined,
+      globalSnapshot: {},
+    };
+    const resolveArgs = {
+      ...requestArgs,
+      remote: requestArgs.options.remotes[0],
+      remoteInfo: requestArgs.options.remotes[0],
+      expose: 'Button',
+      pkgNameOrAlias: 'legacy-remote',
+    };
+
+    expect((plugin.beforeRequest as any)(requestArgs)).toBe(requestArgs);
+    expect((plugin.loadSnapshot as any)(snapshotArgs)).toBe(snapshotArgs);
+    expect((plugin.afterResolve as any)(resolveArgs)).toBe(resolveArgs);
+  });
+
+  it('does not return lifecycle args from chrome entry hooks', () => {
+    const plugin = ChromeObservabilityPlugin({
+      level: 'verbose',
+      console: false,
+    });
+    const entryArgs = {
+      remoteInfo: {
+        name: 'legacy-remote',
+        entry: 'http://localhost:3001/remoteEntry.js',
+      },
+      origin: {
+        version: '2.3.1',
+        options: {
+          name: 'legacy-host',
+        },
+      },
+    };
+
+    expect((plugin.loadEntry as any)(entryArgs)).toBeUndefined();
+    expect((plugin.afterLoadEntry as any)(entryArgs)).toBeUndefined();
+  });
+
+  it('records paired runtime lifecycle hooks for supported runtime versions', () => {
+    const observability = createObservability(
+      {
+        level: 'verbose',
+        console: false,
+      },
+      {
+        guardRuntimeHooksByRuntimeVersion: true,
+        returnHookArgs: true,
+      },
+    );
+
+    (observability.plugin.loadEntry as any)({
+      remoteInfo: {
+        name: 'modern-remote',
+        entry: 'http://localhost:3001/remoteEntry.js',
+      },
+      origin: {
+        version: '2.5.0',
+        options: {
+          name: 'modern-host',
+        },
+      },
+    });
+
+    expect(observability.getEvents()).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          phase: 'remoteEntry',
+          status: 'start',
+          remote: expect.objectContaining({
+            name: 'modern-remote',
+          }),
+        }),
+      ]),
+    );
+  });
+
+  it('treats missing runtime version as unsupported for guarded runtime hooks', () => {
+    const observability = createObservability(
+      {
+        level: 'verbose',
+        console: false,
+      },
+      {
+        guardRuntimeHooksByRuntimeVersion: true,
+        returnHookArgs: true,
+      },
+    );
+    const entryArgs = {
+      remoteInfo: {
+        name: 'unknown-version-remote',
+        entry: 'http://localhost:3001/remoteEntry.js',
+      },
+      origin: {
+        options: {
+          name: 'unknown-version-host',
+        },
+      },
+    };
+
+    expect((observability.plugin.loadEntry as any)(entryArgs)).toBeUndefined();
+    expect(observability.getEvents()).toEqual([]);
   });
 
   it('does not wrap a remote React function component unless callback injection is explicitly enabled', async () => {
@@ -1587,6 +1772,69 @@ describe('ObservabilityPlugin', () => {
       status: 'success',
       cached: true,
     });
+  });
+
+  it('records preloadRemote asset preparation as a successful preload outcome', async () => {
+    const observability = createObservability({
+      level: 'verbose',
+      console: false,
+    });
+
+    await observability.plugin.generatePreloadAssets?.({
+      origin: enabledOrigin,
+      preloadOptions: {
+        remote: {
+          name: 'runtime_remote2',
+          alias: 'dynamic-remote',
+          entry: 'http://localhost:3007/mf-manifest.json',
+        },
+        preloadConfig: {
+          nameOrAlias: 'dynamic-remote',
+          exposes: ['ButtonOldAnt'],
+          resourceCategory: 'all',
+          share: true,
+          depsRemote: true,
+        },
+      },
+      remote: {
+        name: 'runtime_remote2',
+        alias: 'dynamic-remote',
+        entry: 'http://localhost:3007/mf-manifest.json',
+      },
+      remoteInfo: {
+        name: 'runtime_remote2',
+        alias: 'dynamic-remote',
+        entry: 'http://localhost:3007/mf-manifest.json',
+      },
+    } as any);
+
+    const report = observability.getLatestReport();
+
+    expect(report).toMatchObject({
+      status: 'success',
+      remote: {
+        name: 'runtime_remote2',
+        alias: 'dynamic-remote',
+      },
+      summary: {
+        preloaded: true,
+        outcome: 'preloaded',
+      },
+      diagnosis: {
+        title: 'Remote preload prepared',
+        outcome: 'preloaded',
+      },
+    });
+    expect(report?.events).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          phase: 'preload',
+          status: 'success',
+          lifecycle: 'generatePreloadAssets',
+          message: 'preload:assets-ready',
+        }),
+      ]),
+    );
   });
 
   it('keeps manifest, remoteEntry, and runtime load events in the same remote trace', async () => {

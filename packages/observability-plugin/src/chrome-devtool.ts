@@ -11,6 +11,8 @@ export function ChromeObservabilityPlugin(
     fixedBrowserScope: 'chrome_extension',
     attachInstanceApi: false,
     guardSharedHooksByRuntimeVersion: true,
+    guardRuntimeHooksByRuntimeVersion: true,
+    disablePreloadHooks: true,
     returnHookArgs: true,
   }).plugin;
 }

@@ -6,6 +6,7 @@ import {
   loadRemote,
   loadShare,
   loadShareSync,
+  preloadRemote,
   registerPlugins,
   registerRemotes,
 } from '@module-federation/runtime';
@@ -16,6 +17,7 @@ type LoadStatus = 'idle' | 'loading' | 'success' | 'error';
 type RemoteComponent = React.ComponentType<Record<string, never>>;
 
 const successRequest = 'dynamic-remote/ButtonOldAnt';
+const preloadRemoteName = 'dynamic-remote';
 const missingExposeRequest = 'dynamic-remote/__missing_expose__';
 const brokenManifestEntry =
   'http://127.0.0.1:3005/observability-missing/mf-manifest.json?token=demo-secret#hash';
@@ -281,6 +283,32 @@ export default function ObservabilityDemo() {
       }
 
       setRemoteComponent(() => component);
+      setStatus('success');
+    } catch (error) {
+      const message = sanitizeErrorMessage(error);
+      setStatus('error');
+      setErrorMessage(message);
+    } finally {
+      refreshReport();
+    }
+  }, [refreshReport]);
+
+  const preloadSuccessRemote = useCallback(async () => {
+    setStatus('loading');
+    setErrorMessage('');
+    setRemoteComponent(null);
+
+    try {
+      await preloadRemote([
+        {
+          nameOrAlias: preloadRemoteName,
+          exposes: ['ButtonOldAnt'],
+          resourceCategory: 'all',
+          share: true,
+          depsRemote: true,
+        },
+      ]);
+      await new Promise((resolve) => setTimeout(resolve, 80));
       setStatus('success');
     } catch (error) {
       const message = sanitizeErrorMessage(error);
@@ -907,6 +935,13 @@ export default function ObservabilityDemo() {
           onClick={loadSuccessRemote}
         >
           Load success remote
+        </button>
+        <button
+          data-testid="observability-preload-success"
+          type="button"
+          onClick={preloadSuccessRemote}
+        >
+          Preload remote
         </button>
         <button
           data-testid="observability-load-missing-expose"
