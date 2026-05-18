@@ -1,4 +1,8 @@
 {
   "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["chrome"],
+    "strict": false
+  },
   "include": ["src", "stories"]
 }

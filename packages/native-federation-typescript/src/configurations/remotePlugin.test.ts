@@ -48,6 +48,7 @@ describe('hostPlugin', () => {
           noEmit: false,
           declaration: true,
           outDir: 'dist/@mf-types/compiled-types',
+          ignoreDeprecations: '6.0',
         });
 
         expect(mapComponentsToExpose).toStrictEqual({
@@ -92,6 +93,7 @@ describe('hostPlugin', () => {
           noEmit: false,
           declaration: true,
           outDir: 'dist/typesFolder/compiledTypesFolder',
+          ignoreDeprecations: '6.0',
         });
 
         expect(mapComponentsToExpose).toStrictEqual({
