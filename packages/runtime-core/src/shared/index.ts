@@ -23,6 +23,7 @@ import {
   AsyncHook,
   AsyncWaterfallHook,
   SyncWaterfallHook,
+  SyncHook,
 } from '../utils/hooks';
 import {
   formatShareConfigs,
@@ -33,7 +34,13 @@ import {
   shouldUseTreeShaking,
   addUseIn,
 } from '../utils/share';
-import { assert, error, addUniqueItem, optionsToMFContext } from '../utils';
+import {
+  assert,
+  error,
+  addUniqueItem,
+  optionsToMFContext,
+  warn,
+} from '../utils';
 import { DEFAULT_SCOPE } from '../constant';
 import { LoadRemoteMatch } from '../remote';
 import { createRemoteEntryInitOptions } from '../module';
@@ -56,6 +63,35 @@ export class SharedHandler {
     }>('beforeLoadShare'),
     // not used yet
     loadShare: new AsyncHook<[ModuleFederation, string, ShareInfos]>(),
+    afterLoadShare: new SyncHook<
+      [
+        {
+          pkgName: string;
+          shareInfo?: Partial<Shared>;
+          selectedShared?: Partial<Shared>;
+          shared: Options['shared'];
+          shareScopeMap: ShareScopeMap;
+          lifecycle: 'loadShare' | 'loadShareSync';
+          origin: ModuleFederation;
+        },
+      ],
+      void
+    >('afterLoadShare'),
+    errorLoadShare: new SyncHook<
+      [
+        {
+          pkgName: string;
+          shareInfo?: Partial<Shared>;
+          shared: Options['shared'];
+          shareScopeMap: ShareScopeMap;
+          lifecycle: 'loadShare' | 'loadShareSync';
+          origin: ModuleFederation;
+          error?: unknown;
+          recovered?: boolean;
+        },
+      ],
+      void
+    >('errorLoadShare'),
     resolveShare: new SyncWaterfallHook<{
       shareScopeMap: ShareScopeMap;
       scope: string;
@@ -80,6 +116,61 @@ export class SharedHandler {
     this.shareScopeMap = {};
     this.initTokens = {};
     this._setGlobalShareScopeMap(host.options);
+  }
+
+  private emitAfterLoadShare({
+    lifecycle,
+    pkgName,
+    shareInfo,
+    selectedShared,
+  }: {
+    lifecycle: 'loadShare' | 'loadShareSync';
+    pkgName: string;
+    shareInfo?: Partial<Shared>;
+    selectedShared?: Partial<Shared>;
+  }): void {
+    try {
+      this.hooks.lifecycle.afterLoadShare.emit({
+        pkgName,
+        shareInfo,
+        selectedShared,
+        shared: this.host.options.shared,
+        shareScopeMap: this.shareScopeMap,
+        lifecycle,
+        origin: this.host,
+      });
+    } catch (error) {
+      warn(error);
+    }
+  }
+
+  private emitErrorLoadShare({
+    lifecycle,
+    pkgName,
+    shareInfo,
+    error,
+    recovered,
+  }: {
+    lifecycle: 'loadShare' | 'loadShareSync';
+    pkgName: string;
+    shareInfo?: Partial<Shared>;
+    error?: unknown;
+    recovered?: boolean;
+  }): void {
+    try {
+      this.hooks.lifecycle.errorLoadShare.emit({
+        pkgName,
+        shareInfo,
+        shared: this.host.options.shared,
+        shareScopeMap: this.shareScopeMap,
+        lifecycle,
+        origin: this.host,
+        error,
+        recovered,
+      });
+    } catch (hookError) {
+      warn(hookError);
+    }
   }
 
   // register shared in shareScopeMap
@@ -138,117 +229,163 @@ export class SharedHandler {
       extraOptions,
       shareInfos: host.options.shared,
     });
+    let shareOptionsRes: Shared | undefined = shareOptions;
 
-    if (shareOptions?.scope) {
-      await Promise.all(
-        shareOptions.scope.map(async (shareScope) => {
-          await Promise.all(
-            this.initializeSharing(shareScope, {
-              strategy: shareOptions.strategy,
-            }),
-          );
-          return;
-        }),
-      );
-    }
-    const loadShareRes = await this.hooks.lifecycle.beforeLoadShare.emit({
-      pkgName,
-      shareInfo: shareOptions,
-      shared: host.options.shared,
-      origin: host,
-    });
-
-    const { shareInfo: shareOptionsRes } = loadShareRes;
-
-    // Assert that shareInfoRes exists, if not, throw an error
-    assert(
-      shareOptionsRes,
-      `Cannot find shared "${pkgName}" in host "${host.options.name}". Ensure the shared config for "${pkgName}" is declared in the federation plugin options and the host has been initialized before loading shares.`,
-    );
-
-    const { shared: registeredShared, useTreesShaking } =
-      getRegisteredShare(
-        this.shareScopeMap,
+    try {
+      if (shareOptions?.scope) {
+        await Promise.all(
+          shareOptions.scope.map(async (shareScope) => {
+            await Promise.all(
+              this.initializeSharing(shareScope, {
+                strategy: shareOptions.strategy,
+              }),
+            );
+            return;
+          }),
+        );
+      }
+      const loadShareRes = await this.hooks.lifecycle.beforeLoadShare.emit({
         pkgName,
-        shareOptionsRes,
-        this.hooks.lifecycle.resolveShare,
-      ) || {};
+        shareInfo: shareOptions,
+        shared: host.options.shared,
+        origin: host,
+      });
 
-    if (registeredShared) {
-      const targetShared = directShare(registeredShared, useTreesShaking);
-      if (targetShared.lib) {
-        addUseIn(targetShared, host.options.name);
-        return targetShared.lib as () => T;
-      } else if (targetShared.loading && !targetShared.loaded) {
-        const factory = await targetShared.loading;
-        targetShared.loaded = true;
-        if (!targetShared.lib) {
-          targetShared.lib = factory;
+      shareOptionsRes = loadShareRes.shareInfo;
+
+      // Assert that shareInfoRes exists, if not, throw an error
+      assert(
+        shareOptionsRes,
+        `Cannot find shared "${pkgName}" in host "${host.options.name}". Ensure the shared config for "${pkgName}" is declared in the federation plugin options and the host has been initialized before loading shares.`,
+      );
+      const resolvedShareOptions = shareOptionsRes;
+
+      const { shared: registeredShared, useTreesShaking } =
+        getRegisteredShare(
+          this.shareScopeMap,
+          pkgName,
+          shareOptionsRes,
+          this.hooks.lifecycle.resolveShare,
+        ) || {};
+
+      if (registeredShared) {
+        const targetShared = directShare(registeredShared, useTreesShaking);
+        if (targetShared.lib) {
+          addUseIn(targetShared, host.options.name);
+          this.emitAfterLoadShare({
+            lifecycle: 'loadShare',
+            pkgName,
+            shareInfo: resolvedShareOptions,
+            selectedShared: registeredShared,
+          });
+          return targetShared.lib as () => T;
+        } else if (targetShared.loading && !targetShared.loaded) {
+          const factory = await targetShared.loading;
+          targetShared.loaded = true;
+          if (!targetShared.lib) {
+            targetShared.lib = factory;
+          }
+          addUseIn(targetShared, host.options.name);
+          this.emitAfterLoadShare({
+            lifecycle: 'loadShare',
+            pkgName,
+            shareInfo: resolvedShareOptions,
+            selectedShared: registeredShared,
+          });
+          return factory;
+        } else {
+          const asyncLoadProcess = async () => {
+            const factory = await targetShared.get!();
+            addUseIn(targetShared, host.options.name);
+            targetShared.loaded = true;
+            targetShared.lib = factory;
+            return factory as () => T;
+          };
+          const loading = asyncLoadProcess();
+          this.setShared({
+            pkgName,
+            loaded: false,
+            shared: registeredShared,
+            from: host.options.name,
+            lib: null,
+            loading,
+            treeShaking: useTreesShaking
+              ? (targetShared as TreeShakingArgs)
+              : undefined,
+          });
+          const factory = await loading;
+          this.emitAfterLoadShare({
+            lifecycle: 'loadShare',
+            pkgName,
+            shareInfo: resolvedShareOptions,
+            selectedShared: registeredShared,
+          });
+          return factory;
         }
-        addUseIn(targetShared, host.options.name);
-        return factory;
       } else {
+        if (extraOptions?.customShareInfo) {
+          this.emitErrorLoadShare({
+            lifecycle: 'loadShare',
+            pkgName,
+            shareInfo: resolvedShareOptions,
+            recovered: true,
+          });
+          return false;
+        }
+        const _useTreeShaking = shouldUseTreeShaking(
+          resolvedShareOptions.treeShaking,
+        );
+        const targetShared = directShare(resolvedShareOptions, _useTreeShaking);
+
         const asyncLoadProcess = async () => {
           const factory = await targetShared.get!();
-          addUseIn(targetShared, host.options.name);
-          targetShared.loaded = true;
           targetShared.lib = factory;
+          targetShared.loaded = true;
+          addUseIn(targetShared, host.options.name);
+          const { shared: gShared, useTreesShaking: gUseTreeShaking } =
+            getRegisteredShare(
+              this.shareScopeMap,
+              pkgName,
+              resolvedShareOptions,
+              this.hooks.lifecycle.resolveShare,
+            ) || {};
+          if (gShared) {
+            const targetGShared = directShare(gShared, gUseTreeShaking);
+            targetGShared.lib = factory;
+            targetGShared.loaded = true;
+            gShared.from = resolvedShareOptions.from;
+          }
           return factory as () => T;
         };
         const loading = asyncLoadProcess();
         this.setShared({
           pkgName,
           loaded: false,
-          shared: registeredShared,
+          shared: resolvedShareOptions,
           from: host.options.name,
           lib: null,
           loading,
-          treeShaking: useTreesShaking
+          treeShaking: _useTreeShaking
             ? (targetShared as TreeShakingArgs)
             : undefined,
         });
-        return loading;
+        const factory = await loading;
+        this.emitAfterLoadShare({
+          lifecycle: 'loadShare',
+          pkgName,
+          shareInfo: resolvedShareOptions,
+          selectedShared: resolvedShareOptions,
+        });
+        return factory;
       }
-    } else {
-      if (extraOptions?.customShareInfo) {
-        return false;
-      }
-      const _useTreeShaking = shouldUseTreeShaking(shareOptionsRes.treeShaking);
-      const targetShared = directShare(shareOptionsRes, _useTreeShaking);
-
-      const asyncLoadProcess = async () => {
-        const factory = await targetShared.get!();
-        targetShared.lib = factory;
-        targetShared.loaded = true;
-        addUseIn(targetShared, host.options.name);
-        const { shared: gShared, useTreesShaking: gUseTreeShaking } =
-          getRegisteredShare(
-            this.shareScopeMap,
-            pkgName,
-            shareOptionsRes,
-            this.hooks.lifecycle.resolveShare,
-          ) || {};
-        if (gShared) {
-          const targetGShared = directShare(gShared, gUseTreeShaking);
-          targetGShared.lib = factory;
-          targetGShared.loaded = true;
-          gShared.from = shareOptionsRes.from;
-        }
-        return factory as () => T;
-      };
-      const loading = asyncLoadProcess();
-      this.setShared({
+    } catch (shareError) {
+      this.emitErrorLoadShare({
+        lifecycle: 'loadShare',
         pkgName,
-        loaded: false,
-        shared: shareOptionsRes,
-        from: host.options.name,
-        lib: null,
-        loading,
-        treeShaking: _useTreeShaking
-          ? (targetShared as TreeShakingArgs)
-          : undefined,
+        shareInfo: shareOptionsRes,
+        error: shareError,
       });
-      return loading;
+      throw shareError;
     }
   }
 
@@ -326,6 +463,7 @@ export class SharedHandler {
             error,
             from: 'runtime',
             lifecycle: 'beforeLoadShare',
+            remote: module.remoteInfo,
             origin: host,
           })) as RemoteEntryExports;
         if (!remoteEntryExports) {
@@ -381,93 +519,129 @@ export class SharedHandler {
       shareInfos: host.options.shared,
     });
 
-    if (shareOptions?.scope) {
-      shareOptions.scope.forEach((shareScope) => {
-        this.initializeSharing(shareScope, { strategy: shareOptions.strategy });
-      });
-    }
-    const { shared: registeredShared, useTreesShaking } =
-      getRegisteredShare(
-        this.shareScopeMap,
-        pkgName,
-        shareOptions,
-        this.hooks.lifecycle.resolveShare,
-      ) || {};
+    try {
+      if (shareOptions?.scope) {
+        shareOptions.scope.forEach((shareScope) => {
+          this.initializeSharing(shareScope, {
+            strategy: shareOptions.strategy,
+          });
+        });
+      }
+      const { shared: registeredShared } =
+        getRegisteredShare(
+          this.shareScopeMap,
+          pkgName,
+          shareOptions,
+          this.hooks.lifecycle.resolveShare,
+        ) || {};
 
-    if (registeredShared) {
-      if (typeof registeredShared.lib === 'function') {
-        addUseIn(registeredShared, host.options.name);
-        if (!registeredShared.loaded) {
-          registeredShared.loaded = true;
-          if (registeredShared.from === host.options.name) {
-            shareOptions.loaded = true;
+      if (registeredShared) {
+        if (typeof registeredShared.lib === 'function') {
+          addUseIn(registeredShared, host.options.name);
+          if (!registeredShared.loaded) {
+            registeredShared.loaded = true;
+            if (registeredShared.from === host.options.name) {
+              shareOptions.loaded = true;
+            }
+          }
+          this.emitAfterLoadShare({
+            lifecycle: 'loadShareSync',
+            pkgName,
+            shareInfo: shareOptions,
+            selectedShared: registeredShared,
+          });
+          return registeredShared.lib as () => T;
+        }
+        if (typeof registeredShared.get === 'function') {
+          const module = registeredShared.get();
+          if (!(module instanceof Promise)) {
+            addUseIn(registeredShared, host.options.name);
+            this.setShared({
+              pkgName,
+              loaded: true,
+              from: host.options.name,
+              lib: module,
+              shared: registeredShared,
+            });
+            this.emitAfterLoadShare({
+              lifecycle: 'loadShareSync',
+              pkgName,
+              shareInfo: shareOptions,
+              selectedShared: registeredShared,
+            });
+            return module;
           }
         }
-        return registeredShared.lib as () => T;
       }
-      if (typeof registeredShared.get === 'function') {
-        const module = registeredShared.get();
-        if (!(module instanceof Promise)) {
-          addUseIn(registeredShared, host.options.name);
-          this.setShared({
-            pkgName,
-            loaded: true,
-            from: host.options.name,
-            lib: module,
-            shared: registeredShared,
-          });
-          return module;
+
+      if (shareOptions.lib) {
+        if (!shareOptions.loaded) {
+          shareOptions.loaded = true;
         }
-      }
-    }
-
-    if (shareOptions.lib) {
-      if (!shareOptions.loaded) {
-        shareOptions.loaded = true;
-      }
-      return shareOptions.lib as () => T;
-    }
-
-    if (shareOptions.get) {
-      const module = shareOptions.get();
-
-      if (module instanceof Promise) {
-        const errorCode =
-          extraOptions?.from === 'build' ? RUNTIME_005 : RUNTIME_006;
-        error(
-          errorCode,
-          runtimeDescMap,
-          {
-            hostName: host.options.name,
-            sharedPkgName: pkgName,
-          },
-          undefined,
-          optionsToMFContext(host.options),
-        );
+        this.emitAfterLoadShare({
+          lifecycle: 'loadShareSync',
+          pkgName,
+          shareInfo: shareOptions,
+          selectedShared: shareOptions,
+        });
+        return shareOptions.lib as () => T;
       }
 
-      shareOptions.lib = module;
+      if (shareOptions.get) {
+        const module = shareOptions.get();
 
-      this.setShared({
+        if (module instanceof Promise) {
+          const errorCode =
+            extraOptions?.from === 'build' ? RUNTIME_005 : RUNTIME_006;
+          error(
+            errorCode,
+            runtimeDescMap,
+            {
+              hostName: host.options.name,
+              sharedPkgName: pkgName,
+            },
+            undefined,
+            optionsToMFContext(host.options),
+          );
+        }
+
+        shareOptions.lib = module;
+
+        this.setShared({
+          pkgName,
+          loaded: true,
+          from: host.options.name,
+          lib: shareOptions.lib,
+          shared: shareOptions,
+        });
+        this.emitAfterLoadShare({
+          lifecycle: 'loadShareSync',
+          pkgName,
+          shareInfo: shareOptions,
+          selectedShared: shareOptions,
+        });
+        return shareOptions.lib as () => T;
+      }
+
+      error(
+        RUNTIME_006,
+        runtimeDescMap,
+        {
+          hostName: host.options.name,
+          sharedPkgName: pkgName,
+        },
+        undefined,
+        optionsToMFContext(host.options),
+      );
+    } catch (shareError) {
+      this.emitErrorLoadShare({
+        lifecycle: 'loadShareSync',
         pkgName,
-        loaded: true,
-        from: host.options.name,
-        lib: shareOptions.lib,
-        shared: shareOptions,
+        shareInfo: shareOptions,
+        error: shareError,
       });
-      return shareOptions.lib as () => T;
+      throw shareError;
     }
-
-    error(
-      RUNTIME_006,
-      runtimeDescMap,
-      {
-        hostName: host.options.name,
-        sharedPkgName: pkgName,
-      },
-      undefined,
-      optionsToMFContext(host.options),
-    );
   }
 
   initShareScopeMap(

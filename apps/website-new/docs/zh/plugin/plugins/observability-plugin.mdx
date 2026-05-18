@@ -1,0 +1,509 @@
+---
+title: 观测插件
+description: 观测 Module Federation 加载过程，收集运行时和构建侧信息，并给人或 AI 足够的信息定位问题。
+---
+
+# 观测插件
+
+观测插件用于让 Module Federation 加载过程可观测。它会记录运行时加载事件，整理最终加载结果，并在加载失败时打印稳定的 `traceId`。构建侧信息由构建观测插件单独写出。
+
+该插件面向 Module Federation `2.5.0` 及以上版本。如果项目还在更早的 MF
+版本，仍然可以先用运行时错误码做基础排查；但更完整的报告和加载观测链路需要升级到
+`2.5.0+` 并启用这个插件。
+
+它适合回答这些问题：
+
+- 这个 remote 是否真的加载成功？
+- 失败发生在 manifest、remoteEntry、init、expose、factory 还是 shared？
+- 这次加载是否通过运行时 fallback 或恢复路径完成了？
+- 这次命中了哪个 shared provider 和版本？
+- 应该把哪份报告交给人或 AI coding agent 排查？
+
+shared 观测的边界是实例级别：它用于说明哪个 MF 实例加载了哪个共享依赖、最终使用了哪个已注册的 provider/version，以及对应的 scope、版本、eager 等基础信息。它不保证还原该 shared 是由哪个 remote/expose 间接触发的。一次链路涉及多个 shared 时，请查看 `events` 中所有 `phase: "shared"` 的事件；`summary.shared` 只是最后一次观测到的 shared 摘要。
+
+如果构建插件传入了 `customShareInfo`，但运行时没有匹配到已注册的 shared provider，这不是普通的 fatal error。报告会把它描述为 `summary.outcome: "recovered"`、`summary.phases.shared.status: "complete"`，并在 `shared.reason` 中标记 `"custom-share-info-unmatched"`。它表示运行时走了可继续执行的处理路径；只有当你预期它必须命中某个 provider/version 时，才需要继续检查 shared 配置。
+
+如果你想先体验报告效果，或者希望在页面里直接查看和导出报告，可以安装最新的 [Module Federation Chrome 插件](https://chromewebstore.google.com/detail/module-federation/aeoilchhomapofiopejjlecddfldpeom?hl=zh-CN&utm_source=ext_sidebar)。插件的「加载追踪」Tab 会读取页面已有的观测插件报告；如果页面还没有接入观测插件，也可以在当前 Tab 临时开启采集。更多使用方式见 [Chrome Devtool 加载追踪](../../guide/debug/chrome-devtool#加载追踪)。
+
+## 安装
+
+```bash
+npm install @module-federation/observability-plugin
+```
+
+## Browser
+
+浏览器运行时使用默认入口。开发环境和生产环境的接入方式一样，区别只在于传给 `ObservabilityPlugin` 的参数。
+
+import { Tab, Tabs } from '@theme';
+
+<Tabs>
+  <Tab label="Build Plugin（使用构建插件）">
+  如果应用已经通过构建插件注册 Module Federation，推荐用 `runtimePlugins` 注入观测插件。
+
+  在 Module Federation 构建配置中注入插件入口和可序列化参数：
+
+  ```ts title="module-federation.config.ts"
+  export default {
+    name: 'runtime_host',
+    remotes: {
+      remote1: 'remote1@https://example.com/mf-manifest.json',
+    },
+    runtimePlugins: [
+      [
+        require.resolve('@module-federation/observability-plugin'),
+        {
+          level: 'verbose',
+          browser: {
+            enabled: true,
+            scope: 'runtime_host',
+          },
+        },
+      ],
+    ],
+  };
+  ```
+
+  如果业务代码需要主动标记组件加载成功，可以在注册插件后的默认实例上调用 `markComponentLoaded`。
+
+  ```ts
+  import { getInstance } from '@module-federation/runtime';
+  import '@module-federation/observability-plugin';
+
+  getInstance()?.markComponentLoaded({
+    requestId: 'remote1/Button',
+    componentName: 'Button',
+  });
+  ```
+  </Tab>
+
+  <Tab label="Pure Runtime（未使用构建插件）">
+  如果没有使用构建插件，可以在创建 runtime 实例时直接注册观测插件。
+
+  ```ts title="mf-runtime.ts"
+  import { createInstance } from '@module-federation/runtime';
+  import { ObservabilityPlugin } from '@module-federation/observability-plugin';
+
+  export const mf = createInstance({
+    name: 'runtime_host',
+    remotes: [
+      {
+        name: 'remote1',
+        entry: 'https://example.com/mf-manifest.json',
+      },
+    ],
+    plugins: [
+      ObservabilityPlugin({
+        level: 'verbose',
+        browser: {
+          enabled: true,
+          scope: 'runtime_host',
+        },
+      }),
+    ],
+  });
+  ```
+  </Tab>
+</Tabs>
+
+## 开发和生产参数
+
+当 Module Federation 加载失败时，插件会打印一条简短的 `console.error`：
+
+```text
+[Module Federation] Observability report generated
+traceId: mf-...
+phase: manifest
+errorCode: RUNTIME-003
+read: window.__FEDERATION__.__OBSERVABILITY__["runtime_host"].getReport("mf-...")
+```
+
+在浏览器控制台执行 `read:` 后面的命令，就能拿到完整报告。
+
+也可以直接读取：
+
+```ts
+window.__FEDERATION__.__OBSERVABILITY__.runtime_host.getLatestReport();
+window.__FEDERATION__.__OBSERVABILITY__.runtime_host.getReport('mf-...');
+window.__FEDERATION__.__OBSERVABILITY__.runtime_host.getReports({ limit: 5 });
+window.__FEDERATION__.__OBSERVABILITY__.runtime_host.findReports({
+  remote: 'remote1',
+});
+window.__FEDERATION__.__OBSERVABILITY__.runtime_host.exportReport('mf-...');
+```
+
+如果只是想在开发环境观察加载链路，或者页面一直停在 loading 状态但还没有报错，开启浏览器读取入口后，开发模式默认会打印开始日志：
+
+```ts
+ObservabilityPlugin({
+  level: 'verbose',
+  browser: {
+    enabled: true,
+    scope: 'runtime_host',
+  },
+});
+```
+
+插件只会在 `loadRemote` 和 `loadShare` 开始时打印 `console.info`，其中包含 `traceId` 和读取命令。Agent 可以用这个 `traceId` 读取当前报告，查看 `status: "pending"`、`summary.phases`、`updatedAt` 和 `duration`，判断当前卡在哪一步。浏览器开发模式可通过 `trace.printStart: false` 关闭；浏览器生产模式默认关闭，只有显式设置 `trace.printStart: true` 才会开启。
+
+开发环境通常打开浏览器读取入口，方便人或 AI coding agent 直接读取报告：
+
+```ts title="mf-runtime.ts"
+import { ObservabilityPlugin } from '@module-federation/observability-plugin';
+
+export const observabilityPlugin = ObservabilityPlugin({
+  level: 'verbose',
+  browser: {
+    enabled: true,
+    scope: 'runtime_host',
+  },
+});
+```
+
+生产环境仍然使用同一个插件，只是参数更保守：console 只保留 `traceId` 和已知 `errorCode`，完整报告通过业务自己的系统上报。
+
+```ts title="mf-runtime.ts"
+import { ObservabilityPlugin } from '@module-federation/observability-plugin';
+
+export const observabilityPlugin = ObservabilityPlugin({
+  level: 'summary',
+  browser: {
+    enabled: true,
+    scope: 'runtime_host',
+    mode: 'production',
+  },
+  onReport(report) {
+    if (report.status === 'error' || report.summary.outcome === 'recovered') {
+      navigator.sendBeacon(
+        '/api/mf-observability',
+        JSON.stringify({
+          traceId: report.traceId,
+          status: report.status,
+          diagnosis: report.diagnosis,
+          summary: report.summary,
+          remote: report.remote,
+          shared: report.shared,
+          moduleInfo: report.moduleInfo,
+        }),
+      );
+    }
+  },
+});
+```
+
+生产环境浏览器模式下，console 只包含 `traceId` 和已知 `errorCode`。完整报告应通过 `onReport`、`exportReport()` 或业务自己的上报系统获取。
+
+## 使用 `onReport` 分析报告
+
+`onReport` 会在报告更新时触发。生产环境通常不需要保存所有成功报告，但可以在这里把失败、恢复路径，或者你关心的成功链路上报到自己的系统。
+
+常见策略：
+
+- 只排查故障：上报 `report.status === "error"` 和 `report.summary.outcome === "recovered"`。
+- 观测 shared 选择结果：额外上报 `report.summary.outcome === "shared-resolved"`，用于查看 shared 使用了哪个 provider 和版本。
+- 观测完整加载链路：按比例采样 `runtime-loaded`、`component-loaded`、`shared-resolved` 等成功报告。
+
+拿到报告后，优先按这个顺序分析：
+
+1. `diagnosis`：直接给出问题归属、关键证据和下一步建议。
+2. `summary`：判断最终结果。`runtime-loaded` 表示 remote 已加载，`component-loaded` 表示业务组件主动确认成功，`shared-resolved` 表示 shared 已选出 provider 和版本，`failed` 表示失败，`recovered` 表示走了可继续执行的恢复路径。
+3. `remote` / `shared`：确认当前加载对象。shared 报告重点看 `provider`、`requiredVersion`、`selectedVersion`、`availableVersions`。
+4. `moduleInfo`：排查依赖部署平台下发的模块信息是否匹配。
+5. `events`：按时间线查看卡在哪个阶段。
+
+示例：
+
+```ts
+ObservabilityPlugin({
+  level: 'summary',
+  browser: {
+    mode: 'production',
+  },
+  onReport(report) {
+    const outcome = report.summary.outcome;
+    const shouldUpload =
+      report.status === 'error' ||
+      outcome === 'recovered' ||
+      outcome === 'shared-resolved';
+
+    if (!shouldUpload) {
+      return;
+    }
+
+    navigator.sendBeacon(
+      '/api/mf-observability',
+      JSON.stringify({
+        traceId: report.traceId,
+        status: report.status,
+        outcome,
+        diagnosis: report.diagnosis,
+        summary: report.summary,
+        remote: report.remote,
+        shared: report.shared,
+        moduleInfo: report.moduleInfo,
+        events: report.events,
+      }),
+    );
+  },
+});
+```
+
+把上传后的报告交给 AI coding agent 时，可以这样问：
+
+```text
+/mf observability
+
+这是生产环境上传的 MF observability 报告。
+请帮我判断加载是否成功，失败点在哪里，最可能是谁的问题，以及下一步怎么修。
+
+<粘贴报告 JSON>
+```
+
+## Browser 参数
+
+`ObservabilityPlugin(options)` 支持以下参数：
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `enabled` | `boolean` | `true` | 是否启用观测插件。关闭后不记录事件、不生成报告。 |
+| `level` | `'summary' \| 'verbose'` | `'summary'` | 报告详细程度。`summary` 保留摘要和关键事件，`verbose` 保留完整事件时间线。 |
+| `maxEvents` | `number` | 内置上限 | 单个插件实例最多保留的事件数量，避免长时间运行时无限增长。 |
+| `console` | `boolean` | `true` | 加载失败时是否打印 `console.error` 提示。 |
+| `printRawStack` | `boolean` | `false` | 是否把原始错误栈打印到 console。默认关闭，避免生产环境输出过多细节。 |
+| `stackTrace.enabled` | `boolean` | `true` | 是否在报告中保存裁剪后的错误栈。 |
+| `stackTrace.maxLines` | `number` | 内置上限 | 错误栈最多保留多少行。 |
+| `stackTrace.maxLength` | `number` | 内置上限 | 错误栈最多保留多少字符。 |
+| `collector` | `boolean \| { enabled?: boolean; port?: number }` | `false` | 是否把浏览器运行时事件 POST 到本地 collector。`true` 使用 `127.0.0.1:17891`，自定义时只需要改 `port`。这个能力用于本地 AI 调试，插件本身不会启动服务。 |
+| `browser.enabled` | `boolean` | `false` | 是否把读取入口挂到 `window.__FEDERATION__.__OBSERVABILITY__`。 |
+| `browser.scope` | `string` | host 名称 | 浏览器读取入口的命名空间，例如 `runtime_host`。 |
+| `browser.mode` | `'development' \| 'production'` | `'development'` | 浏览器输出模式。生产模式下 console 只输出最小提示。 |
+| `trace.printStart` | `boolean` | 浏览器开发模式为 `true`，浏览器生产模式为 `false` | 是否在 `loadRemote` 和 `loadShare` 开始时打印 `console.info`，便于开发环境和 Agent 获取 `traceId`。生产模式需要显式设置为 `true` 才会开启。 |
+| `react.enabled` | `boolean` | `true` | React 调试能力总开关。设置为 `false` 时关闭所有 React 包装行为。 |
+| `react.injectLoadedCallback` | `boolean` | `false` | 显式包装匹配到的远程 React 组件，并注入 `onMFRemoteLoaded`。这个能力会改变组件引用，只建议作为临时调试开关，问题修复后需要及时关闭。 |
+| `react.remoteIds` | `string[]` | `[]` | 只对指定远程请求注入回调，例如 `remote/Button` 或 `./Button`。为空时不按远程请求过滤。 |
+| `react.defaultExportMode` | `'preserve' \| 'component'` | 自动选择 | 远程模块是 `{ default: Component }` 时，是否直接把包装后的组件作为返回值。通常保持默认即可。 |
+| `onEvent` | `(event, report, context) => void` | `undefined` | 每次记录观测事件时触发，适合接入自定义日志系统。 |
+| `onReport` | `(report, context) => void` | `undefined` | 报告更新时触发，生产环境常用它上传失败或恢复报告。 |
+| `onRawError` | `(error, context) => void` | `undefined` | 捕获原始错误对象时触发，适合接入业务自己的错误系统。 |
+
+生产环境推荐至少设置：
+
+```ts
+ObservabilityPlugin({
+  level: 'summary',
+  browser: {
+    mode: 'production',
+  },
+  onReport(report) {
+    // 上传到业务自己的系统
+  },
+});
+```
+
+## Node 或 SSR 运行时
+
+需要本地观测文件时，使用 Node 专用入口。
+
+```ts title="mf-node-runtime.ts"
+import { createInstance } from '@module-federation/runtime';
+import { ObservabilityPlugin } from '@module-federation/observability-plugin/node';
+
+createInstance({
+  name: 'node_host',
+  remotes: [],
+  plugins: [
+    ObservabilityPlugin({
+      level: 'verbose',
+      fileOutput: true,
+      directory: '.mf/observability',
+    }),
+  ],
+});
+```
+
+Node 入口会写：
+
+- `.mf/observability/latest.json`：最近一次完整报告
+- `.mf/observability/events.jsonl`：多次 trace 的事件流水
+
+优先读 `latest.json`。只有需要查看事件顺序或多条 trace 时，再读 `events.jsonl`。
+
+Node 入口继承运行时参数，并额外支持：
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `fileOutput` | `boolean` | `false` | 是否写出本地观测文件。 |
+| `directory` | `string` | `'.mf/observability'` | 观测文件输出目录。 |
+| `latestFile` | `string` | `'latest.json'` | 最近一次完整报告的文件名。 |
+| `eventsFile` | `string` | `'events.jsonl'` | 事件流水文件名。 |
+
+## 构建观测
+
+如果希望保留构建侧证据，把构建观测插件放到 Module Federation 构建插件旁边。
+
+```js title="webpack.config.js"
+const {
+  ModuleFederationPlugin,
+} = require('@module-federation/enhanced/webpack');
+const {
+  ObservabilityBuildPlugin,
+} = require('@module-federation/observability-plugin/build');
+
+const moduleFederationOptions = {
+  name: 'runtime_host',
+  remotes: {
+    remote1: 'remote1@https://example.com/mf-manifest.json',
+  },
+  exposes: {
+    './Button': './src/Button',
+  },
+  shared: {
+    react: { singleton: true, requiredVersion: '^18.0.0' },
+  },
+};
+
+module.exports = {
+  plugins: [
+    new ModuleFederationPlugin(moduleFederationOptions),
+    new ObservabilityBuildPlugin({
+      moduleFederation: moduleFederationOptions,
+    }),
+  ],
+};
+```
+
+构建观测可以写出：
+
+- `.mf/observability/build-info.json`
+- `.mf/observability/build-report.json`
+
+运行时报告不会内嵌这两个文件。排查时如果需要构建侧证据，单独读取构建文件，再和运行时报告对照。
+
+`ObservabilityBuildPlugin(options)` 支持以下参数：
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `enabled` | `boolean` | `true` | 是否启用构建观测插件。 |
+| `outputFile` | `string` | `'.mf/observability/build-info.json'` | 成功构建时写出的构建信息文件。 |
+| `errorReport` | `false \| object` | `{}` | 构建失败时是否写出构建错误观测报告。设为 `false` 可关闭。 |
+| `errorReport.outputFile` | `string` | `'.mf/observability/build-report.json'` | 构建错误观测报告文件路径。 |
+| `cwd` | `string` | 编译上下文 | 输出文件的相对目录基准。 |
+| `bundler` | `string` | 自动识别 | 手动指定 bundler 名称。 |
+| `bundlerVersion` | `string` | 自动识别 | 手动指定 bundler 版本。 |
+| `pluginVersion` | `string` | 自动识别 | 手动指定 Module Federation 构建插件版本。 |
+| `moduleFederation` | `unknown` | 自动读取 | 显式传入 Module Federation 配置，便于构建观测采集 remotes、exposes、shared 等信息。 |
+
+## 标记业务组件成功
+
+Module Federation 能知道 remote module 是否加载完成，但不一定能知道业务组件自己的请求、图表或 SDK 初始化是否完成。
+
+显式开启 `react.injectLoadedCallback` 后，插件会给匹配到的远程 React 组件注入 `onMFRemoteLoaded` prop。生产者组件在自己认为业务可用时调用它即可：
+
+```tsx
+import { useEffect } from 'react';
+import type { OnMFRemoteLoaded } from '@module-federation/observability-plugin';
+
+export default function RemotePanel({
+  onMFRemoteLoaded,
+}: {
+  onMFRemoteLoaded?: OnMFRemoteLoaded;
+}) {
+  useEffect(() => {
+    onMFRemoteLoaded?.({
+      metadata: {
+        dataReady: true,
+      },
+    });
+  }, [onMFRemoteLoaded]);
+
+  return <section>Remote panel</section>;
+}
+```
+
+如果业务需要在消费者侧主动标记，也可以直接调用实例方法：
+
+```ts
+import { getInstance } from '@module-federation/runtime';
+import '@module-federation/observability-plugin';
+
+getInstance()?.markComponentLoaded({
+  requestId: 'remote1/Button',
+  componentName: 'Button',
+  metadata: {
+    route: '/dashboard',
+  },
+});
+```
+
+报告里会出现 `component:business-loaded`，并且 `summary.outcome` 会变成 `"component-loaded"`。
+
+## 注入 React Loaded 回调
+
+如果是开发环境、AI 调试，或者线上临时定位“生产者组件没有真正加载”的问题，可以显式开启远程 React 组件回调注入：
+
+```ts
+ObservabilityPlugin({
+  level: 'verbose',
+  react: {
+    injectLoadedCallback: true,
+    remoteIds: ['remote/Button'],
+  },
+});
+```
+
+开启后，插件会在 `loadRemote` 成功后尝试识别远程 React 函数组件，并包一层不产生 DOM 的组件。这个包装只注入 `onMFRemoteLoaded` prop，不监听 React mount、render 生命周期或超时。
+
+生产者调用 `props.onMFRemoteLoaded?.()` 后，报告里会出现 `component:business-loaded`。
+
+如果开启了 `react.injectLoadedCallback`，但 `summary.componentLoaded` 仍然是 `false`，不能只根据这个字段判断组件渲染失败。它只表示没有收到组件级成功信号。需要先看生产者源码里有没有调用 `props.onMFRemoteLoaded?.(...)`；如果没有调用，只能说明远程资源已经加载，组件是否达到业务可用状态还需要生产者补充这个回调。如果拿不到生产者源码，需要询问生产者是否已经接入这个回调。
+
+这个能力会改变组件引用。请尽量用 `remoteIds` 缩小范围，并且只作为临时调试开关使用，线上问题修复后需要及时关闭。
+
+## 配合 `mf` Skill 使用
+
+安装 skill：
+
+```bash
+npx skills add module-federation/core --skill mf -y
+```
+
+当控制台打印观测提示时，把这段交给 Agent：
+
+```text
+/mf observability
+我看到了这条 Module Federation console error：
+
+[Module Federation] Observability report generated
+traceId: mf-...
+read: window.__FEDERATION__.__OBSERVABILITY__["runtime_host"].getReport("mf-...")
+
+请读取报告并帮我修复问题。
+```
+
+如果是 Node 或 SSR，把文件路径交给 Agent：
+
+```text
+/mf observability
+请读取 .mf/observability/latest.json，告诉我可能是谁的问题，以及应该怎么修。
+```
+
+如果生产环境已经把报告上传到自己的系统，把上传后的报告或 `traceId` 交给 Agent：
+
+```text
+/mf observability
+这是 traceId mf-... 对应的上传报告。
+帮我判断这是 host、remote、shared、network 还是 build 的问题。
+```
+
+## AI 优先读什么
+
+skill 会按这个顺序读报告：
+
+1. `diagnosis`
+2. `summary`
+3. `moduleInfo`
+4. `events`
+
+如果需要构建侧证据，再单独读取 `.mf/observability/build-info.json` 或 `.mf/observability/build-report.json`。
+
+报告会省略 `undefined` 字段。字段不存在时，表示这次没有观察到，或者这次加载不相关。

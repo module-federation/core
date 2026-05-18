@@ -3,6 +3,12 @@ import { ModuleFederation } from '../src/core';
 import { ModuleFederationRuntimePlugin } from '../src/type/plugin';
 import { mockStaticServer, removeScriptTags } from './mock/utils';
 import { addGlobalSnapshot } from '../src/global';
+import {
+  AsyncHook,
+  AsyncWaterfallHook,
+  SyncHook,
+  SyncWaterfallHook,
+} from '../src/utils/hooks';
 
 // eslint-disable-next-line max-lines-per-function
 describe('hooks', () => {
@@ -359,6 +365,78 @@ describe('hooks', () => {
     });
   });
 
+  it('emits manifest snapshot lifecycle once when loading a manifest remote', async () => {
+    const data = {
+      id: '@loader-hooks/app2',
+      name: '@loader-hooks/app2',
+      metaData: {
+        name: '@loader-hooks/app2',
+        publicPath: 'http://localhost:1111/',
+        type: 'app',
+        buildInfo: {
+          buildVersion: 'custom',
+        },
+        remoteEntry: {
+          name: 'federation-remote-entry.js',
+          path: 'resources/hooks/app2/',
+        },
+        types: {
+          name: 'index.d.ts',
+          path: './',
+        },
+        globalName: '@loader-hooks/app2',
+      },
+      remotes: [],
+      shared: [],
+      exposes: [],
+    };
+
+    const fetchPlugin: () => ModuleFederationRuntimePlugin = () => ({
+      name: 'fetch-plugin',
+      fetch(url) {
+        if (url === 'http://mockxxx.com/snapshot-hooks-mf-manifest.json') {
+          return Promise.resolve(
+            new Response(JSON.stringify(data), {
+              status: 200,
+              statusText: 'OK',
+              headers: { 'Content-Type': 'application/json' },
+            }),
+          );
+        }
+      },
+    });
+    const snapshotEvents: string[] = [];
+    const snapshotPlugin: () => ModuleFederationRuntimePlugin = () => ({
+      name: 'snapshot-observer-plugin',
+      loadSnapshot(args) {
+        snapshotEvents.push('loadSnapshot');
+        return args;
+      },
+      loadRemoteSnapshot(args) {
+        snapshotEvents.push(args.from);
+        return args;
+      },
+    });
+
+    const INSTANCE = new ModuleFederation({
+      name: '@loader-hooks/snapshot',
+      remotes: [
+        {
+          name: '@loader-hooks/app2',
+          entry: 'http://mockxxx.com/snapshot-hooks-mf-manifest.json',
+        },
+      ],
+      plugins: [fetchPlugin(), snapshotPlugin()],
+    });
+
+    const res = await INSTANCE.loadRemote<() => string>(
+      '@loader-hooks/app2/say',
+    );
+    assert(res);
+    expect(res()).toBe('hello app2');
+    expect(snapshotEvents).toEqual(['loadSnapshot', 'manifest']);
+  });
+
   it('loaderEntry hooks', async () => {
     const data = {
       id: '@loader-hooks/app2',
@@ -446,5 +524,162 @@ describe('hooks', () => {
     );
     assert(loadEntryTestRes);
     expect(loadEntryTestRes).toBe('./testtest');
+  });
+
+  it('sync hooks preserve previous returned value when later listeners return nothing', () => {
+    const hook = new SyncHook<[string], string | void>('sync-noop');
+    const calls: Array<string> = [];
+
+    hook.on((value) => {
+      calls.push(`first:${value}`);
+      return 'first-result';
+    });
+    hook.on((value) => {
+      calls.push(`second:${value}`);
+    });
+
+    expect(hook.emit('payload')).toBe('first-result');
+    expect(calls).toEqual(['first:payload', 'second:payload']);
+  });
+
+  it('sync hooks use the latest explicit returned value', () => {
+    const hook = new SyncHook<[string], string | void>('sync-override');
+
+    hook.on(() => 'first-result');
+    hook.on(() => 'second-result');
+
+    expect(hook.emit('payload')).toBe('second-result');
+  });
+
+  it('async hooks preserve previous returned value when later listeners return nothing', async () => {
+    const hook = new AsyncHook<[string], string | void | false>('async-noop');
+    const calls: Array<string> = [];
+
+    hook.on(async (value) => {
+      calls.push(`first:${value}`);
+      return 'first-result';
+    });
+    hook.on((value) => {
+      calls.push(`second:${value}`);
+    });
+
+    await expect(hook.emit('payload')).resolves.toBe('first-result');
+    expect(calls).toEqual(['first:payload', 'second:payload']);
+  });
+
+  it('async hooks use the latest explicit returned value', async () => {
+    const hook = new AsyncHook<[string], string | void | false>(
+      'async-override',
+    );
+
+    hook.on(async () => 'first-result');
+    hook.on(() => 'second-result');
+
+    await expect(hook.emit('payload')).resolves.toBe('second-result');
+  });
+
+  it('async hooks treat returning the original payload as no explicit result', async () => {
+    const hook = new AsyncHook<
+      [{ id: string }],
+      { id: string; wrapped?: boolean } | void | false
+    >('async-passthrough');
+    const payload = { id: 'remote/Button' };
+    const wrapped = { id: 'remote/Button', wrapped: true };
+
+    hook.on(() => wrapped);
+    hook.on((args) => args);
+
+    await expect(hook.emit(payload)).resolves.toBe(wrapped);
+  });
+
+  it('async hooks still abort when a listener returns false', async () => {
+    const hook = new AsyncHook<[string], string | void | false>('async-abort');
+    const calls: Array<string> = [];
+
+    hook.on(() => {
+      calls.push('first');
+      return 'first-result';
+    });
+    hook.on(() => {
+      calls.push('second');
+      return false;
+    });
+    hook.on(() => {
+      calls.push('third');
+      return 'third-result';
+    });
+
+    await expect(hook.emit('payload')).resolves.toBe(false);
+    expect(calls).toEqual(['first', 'second']);
+  });
+
+  it('sync waterfall hooks keep the current payload when observers return nothing', () => {
+    const hook = new SyncWaterfallHook<{ id: string; changed?: boolean }>(
+      'sync-waterfall-noop',
+    );
+
+    hook.on((args) => ({
+      ...args,
+      changed: true,
+    }));
+    hook.on(() => undefined);
+
+    expect(hook.emit({ id: 'remote/Button' })).toEqual({
+      id: 'remote/Button',
+      changed: true,
+    });
+  });
+
+  it('async waterfall hooks keep the current payload when observers return nothing', async () => {
+    const hook = new AsyncWaterfallHook<{ id: string; changed?: boolean }>(
+      'async-waterfall-noop',
+    );
+
+    hook.on(async (args) => ({
+      ...args,
+      changed: true,
+    }));
+    hook.on(() => undefined);
+
+    await expect(hook.emit({ id: 'remote/Button' })).resolves.toEqual({
+      id: 'remote/Button',
+      changed: true,
+    });
+  });
+
+  it('observer plugins do not clear errorLoadRemote fallback results', async () => {
+    let observedLifecycle: string | undefined;
+    const fallbackPlugin: ModuleFederationRuntimePlugin = {
+      name: 'fallback-plugin',
+      errorLoadRemote() {
+        return {
+          default: () => 'fallback component',
+        };
+      },
+    };
+    const observerPlugin: ModuleFederationRuntimePlugin = {
+      name: 'observer-plugin',
+      errorLoadRemote(args) {
+        observedLifecycle = args.lifecycle;
+      },
+    };
+    const GM = new ModuleFederation({
+      name: '@hooks/error-load-remote-fallback',
+      remotes: [],
+      plugins: [fallbackPlugin, observerPlugin],
+    });
+
+    const result = (await GM.remoteHandler.hooks.lifecycle.errorLoadRemote.emit(
+      {
+        id: '@demo/fallback/component',
+        error: new Error('load failed'),
+        from: 'runtime',
+        lifecycle: 'onLoad',
+        origin: GM,
+      },
+    )) as { default: () => string };
+
+    expect(result.default()).toBe('fallback component');
+    expect(observedLifecycle).toBe('onLoad');
   });
 });
