@@ -16,6 +16,7 @@ export type ObservabilityReportOutcome =
   | 'pending'
   | 'runtime-loaded'
   | 'shared-resolved'
+  | 'preloaded'
   | 'component-loaded'
   | 'failed'
   | 'recovered';
@@ -220,6 +221,7 @@ export interface ObservabilityReport {
     loadCompleted: boolean;
     runtimeLoaded: boolean;
     sharedResolved: boolean;
+    preloaded: boolean;
     componentLoaded: boolean;
     outcome: ObservabilityReportOutcome;
     lastPhase?: string;
@@ -334,6 +336,8 @@ export interface ObservabilityRuntimeAdapterOptions {
   disableReact?: boolean;
   attachInstanceApi?: boolean;
   guardSharedHooksByRuntimeVersion?: boolean;
+  guardRuntimeHooksByRuntimeVersion?: boolean;
+  disablePreloadHooks?: boolean;
   returnHookArgs?: boolean;
 }
 
@@ -457,6 +461,26 @@ interface ObservabilityRemoteMatchArgs {
 
 interface ObservabilityRemoteSnapshotArgs {
   origin: ObservabilityRuntimeOrigin;
+}
+
+interface ObservabilityPreloadConfig {
+  nameOrAlias?: string;
+  exposes?: string[];
+  resourceCategory?: 'all' | 'sync';
+  share?: boolean;
+  depsRemote?: boolean | unknown[];
+}
+
+interface ObservabilityPreloadOption {
+  remote?: ObservabilityRuntimeRemoteSource;
+  preloadConfig?: ObservabilityPreloadConfig;
+}
+
+interface ObservabilityPreloadAssetsArgs {
+  origin: ObservabilityRuntimeOrigin;
+  preloadOptions?: ObservabilityPreloadOption;
+  remote?: ObservabilityRuntimeRemoteSource;
+  remoteInfo?: ObservabilityRuntimeRemoteSource;
 }
 
 type ObservabilitySnapshotRemoteSource = ObservabilityRuntimeRemoteSource & {
@@ -1022,7 +1046,7 @@ function isVersionAtLeast(
   return version.patch >= target.patch;
 }
 
-function supportsSharedObservability(origin?: ObservabilityRuntimeOrigin) {
+function supportsRuntimeObservability(origin?: ObservabilityRuntimeOrigin) {
   const version = parseStableVersion(origin?.version);
 
   if (!version) {
@@ -2063,6 +2087,9 @@ export function createObservability(
   const shouldAttachInstanceApi = adapterOptions.attachInstanceApi !== false;
   const shouldGuardSharedHooksByRuntimeVersion =
     adapterOptions.guardSharedHooksByRuntimeVersion === true;
+  const shouldGuardRuntimeHooksByRuntimeVersion =
+    adapterOptions.guardRuntimeHooksByRuntimeVersion === true;
+  const shouldDisablePreloadHooks = adapterOptions.disablePreloadHooks === true;
   const shouldReturnHookArgs = adapterOptions.returnHookArgs === true;
   const returnHookArgs = <T>(args: T): T | undefined =>
     shouldReturnHookArgs ? args : undefined;
@@ -2193,16 +2220,20 @@ export function createObservability(
     return normalizedEvent;
   };
 
-  const supportsRuntimeSharedObservability = (
+  const supportsRuntimeHookObservability = (
     origin?: ObservabilityRuntimeOrigin,
   ) =>
-    supportsSharedObservability({
+    supportsRuntimeObservability({
       ...origin,
       version:
         sanitizeText(origin?.version, 80) ||
         appliedRuntimeVersion ||
         origin?.version,
     } as ObservabilityRuntimeOrigin);
+
+  const shouldSkipRuntimeHook = (origin?: ObservabilityRuntimeOrigin) =>
+    shouldGuardRuntimeHooksByRuntimeVersion &&
+    !supportsRuntimeHookObservability(origin);
 
   const applyPhaseDuration = (event: ObservabilityEvent) => {
     const key = getPhaseDurationKey(event);
@@ -2279,6 +2310,9 @@ export function createObservability(
     event.phase === 'shared' &&
     (event.status === 'success' ||
       (event.status === 'complete' && event.recovered));
+
+  const isPreloadedEvent = (event: ObservabilityEvent) =>
+    event.phase === 'preload' && event.status === 'success';
 
   const isComponentLoadedEvent = (event: ObservabilityEvent) =>
     event.status === 'success' &&
@@ -2402,6 +2436,7 @@ export function createObservability(
     const loadCompleted = report.events.some(isLoadRemoteCompleteEvent);
     const runtimeLoaded = report.events.some(isRuntimeLoadedEvent);
     const sharedResolved = report.events.some(isSharedResolvedEvent);
+    const preloaded = report.events.some(isPreloadedEvent);
     const recovered = report.events.some((item) => item.recovered);
     const componentLoaded = report.events.some(isComponentLoadedEvent);
     const lastEvent = report.events[report.events.length - 1];
@@ -2417,6 +2452,8 @@ export function createObservability(
       outcome = 'runtime-loaded';
     } else if (sharedResolved) {
       outcome = 'shared-resolved';
+    } else if (preloaded) {
+      outcome = 'preloaded';
     }
 
     const phaseCollection = createPhaseCollection(report.events);
@@ -2427,6 +2464,7 @@ export function createObservability(
       loadCompleted,
       runtimeLoaded,
       sharedResolved,
+      preloaded,
       componentLoaded,
       outcome,
       lastPhase: lastEvent?.phase,
@@ -2514,6 +2552,9 @@ export function createObservability(
       }
       if (report.summary.runtimeLoaded) {
         return 'Remote loaded successfully';
+      }
+      if (report.summary.preloaded) {
+        return 'Remote preload prepared';
       }
       return 'Remote loading is pending';
     }
@@ -2958,6 +2999,7 @@ export function createObservability(
           loadCompleted: false,
           runtimeLoaded: false,
           sharedResolved: false,
+          preloaded: false,
           componentLoaded: false,
           outcome: 'pending',
           lastPhase: undefined,
@@ -4016,7 +4058,10 @@ export function createObservability(
     },
     loadEntry(args) {
       const entryArgs = args as ObservabilityRemoteEntryLoadArgs;
-      if (!prepareRuntimeOrigin(entryArgs.origin)) {
+      if (
+        shouldSkipRuntimeHook(entryArgs.origin) ||
+        !prepareRuntimeOrigin(entryArgs.origin)
+      ) {
         return;
       }
 
@@ -4036,7 +4081,10 @@ export function createObservability(
     },
     afterLoadEntry(args) {
       const entryArgs = args as ObservabilityRemoteEntryAfterLoadArgs;
-      if (!prepareRuntimeOrigin(entryArgs.origin)) {
+      if (
+        shouldSkipRuntimeHook(entryArgs.origin) ||
+        !prepareRuntimeOrigin(entryArgs.origin)
+      ) {
         return;
       }
 
@@ -4070,7 +4118,10 @@ export function createObservability(
     },
     beforeInitRemote(args) {
       const initArgs = args as ObservabilityRemoteInitArgs;
-      if (!prepareRuntimeOrigin(initArgs.origin)) {
+      if (
+        shouldSkipRuntimeHook(initArgs.origin) ||
+        !prepareRuntimeOrigin(initArgs.origin)
+      ) {
         return;
       }
 
@@ -4089,7 +4140,10 @@ export function createObservability(
     },
     afterInitRemote(args) {
       const initArgs = args as ObservabilityRemoteInitArgs;
-      if (!prepareRuntimeOrigin(initArgs.origin)) {
+      if (
+        shouldSkipRuntimeHook(initArgs.origin) ||
+        !prepareRuntimeOrigin(initArgs.origin)
+      ) {
         return;
       }
 
@@ -4114,7 +4168,10 @@ export function createObservability(
     },
     beforeGetExpose(args) {
       const exposeArgs = args as ObservabilityRemoteExposeArgs;
-      if (!prepareRuntimeOrigin(exposeArgs.origin)) {
+      if (
+        shouldSkipRuntimeHook(exposeArgs.origin) ||
+        !prepareRuntimeOrigin(exposeArgs.origin)
+      ) {
         return;
       }
 
@@ -4133,7 +4190,10 @@ export function createObservability(
     },
     afterGetExpose(args) {
       const exposeArgs = args as ObservabilityRemoteExposeArgs;
-      if (!prepareRuntimeOrigin(exposeArgs.origin)) {
+      if (
+        shouldSkipRuntimeHook(exposeArgs.origin) ||
+        !prepareRuntimeOrigin(exposeArgs.origin)
+      ) {
         return;
       }
 
@@ -4161,7 +4221,10 @@ export function createObservability(
     },
     beforeExecuteFactory(args) {
       const factoryArgs = args as ObservabilityRemoteFactoryArgs;
-      if (!prepareRuntimeOrigin(factoryArgs.origin)) {
+      if (
+        shouldSkipRuntimeHook(factoryArgs.origin) ||
+        !prepareRuntimeOrigin(factoryArgs.origin)
+      ) {
         return;
       }
 
@@ -4180,7 +4243,10 @@ export function createObservability(
     },
     afterExecuteFactory(args) {
       const factoryArgs = args as ObservabilityRemoteFactoryArgs;
-      if (!prepareRuntimeOrigin(factoryArgs.origin)) {
+      if (
+        shouldSkipRuntimeHook(factoryArgs.origin) ||
+        !prepareRuntimeOrigin(factoryArgs.origin)
+      ) {
         return;
       }
 
@@ -4211,7 +4277,7 @@ export function createObservability(
     beforeLoadShare(args) {
       if (
         shouldGuardSharedHooksByRuntimeVersion &&
-        !supportsRuntimeSharedObservability(args.origin)
+        !supportsRuntimeHookObservability(args.origin)
       ) {
         return returnHookArgs(args);
       }
@@ -4237,7 +4303,7 @@ export function createObservability(
     afterLoadShare(args) {
       if (
         shouldGuardSharedHooksByRuntimeVersion &&
-        !supportsRuntimeSharedObservability(args.origin)
+        !supportsRuntimeHookObservability(args.origin)
       ) {
         return returnHookArgs(args);
       }
@@ -4266,7 +4332,7 @@ export function createObservability(
     errorLoadShare(args) {
       if (
         shouldGuardSharedHooksByRuntimeVersion &&
-        !supportsRuntimeSharedObservability(args.origin)
+        !supportsRuntimeHookObservability(args.origin)
       ) {
         return returnHookArgs(args);
       }
@@ -4297,6 +4363,41 @@ export function createObservability(
       return returnHookArgs(args);
     },
   } as ObservabilityRuntimePlugin;
+
+  if (!shouldDisablePreloadHooks) {
+    plugin.generatePreloadAssets = (args) => {
+      const preloadArgs = args as ObservabilityPreloadAssetsArgs;
+      if (!prepareRuntimeOrigin(preloadArgs.origin)) {
+        return;
+      }
+
+      const remote = createRemoteInfo(
+        preloadArgs.remoteInfo || preloadArgs.remote,
+      );
+      const preloadConfig = preloadArgs.preloadOptions?.preloadConfig;
+      recordEvent(
+        {
+          phase: 'preload',
+          status: 'success',
+          requestId:
+            remote?.name || sanitizeText(preloadConfig?.nameOrAlias, 160),
+          remote,
+          lifecycle: 'generatePreloadAssets',
+          message: 'preload:assets-ready',
+          metadata: clipObservabilityMetadata({
+            nameOrAlias: preloadConfig?.nameOrAlias,
+            exposes: preloadConfig?.exposes?.join(','),
+            resourceCategory: preloadConfig?.resourceCategory,
+            share: preloadConfig?.share,
+            depsRemote: Array.isArray(preloadConfig?.depsRemote)
+              ? 'custom'
+              : preloadConfig?.depsRemote,
+          }),
+        },
+        preloadArgs.origin,
+      );
+    };
+  }
 
   return {
     plugin,

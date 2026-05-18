@@ -210,6 +210,27 @@ describe('3005-runtime-host/', () => {
       });
     });
 
+    it('should expose a preloadRemote observability scenario', () => {
+      cy.get('[data-testid="observability-preload-success"]').click();
+      cy.get('[data-testid="observability-load-status"]').contains('success');
+      cy.get('[data-testid="observability-report"]')
+        .should('contain', '"phase": "preload"')
+        .should('contain', '"outcome": "preloaded"')
+        .should('contain', 'preload:assets-ready');
+      cy.window().then((win) => {
+        const reader = getObservabilityReader(win);
+        expect(reader).to.exist;
+
+        const latestReport = reader.getLatestReport();
+        expect(latestReport.status).to.equal('success');
+        expect(latestReport.summary.preloaded).to.equal(true);
+        expect(latestReport.summary.outcome).to.equal('preloaded');
+        expect(latestReport.diagnosis.title).to.equal(
+          'Remote preload prepared',
+        );
+      });
+    });
+
     it('should expose a failed remote loading scenario', () => {
       cy.window().then((win) => {
         cy.spy(win.console, 'error').as('observabilityError');

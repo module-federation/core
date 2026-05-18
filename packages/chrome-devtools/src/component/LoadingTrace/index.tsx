@@ -158,6 +158,7 @@ const getLimitedObservabilityLabel = (report: ObservabilityDevtoolsReport) => {
 
 const getReportState = (report: ObservabilityDevtoolsReport) => {
   const outcome = getReportOutcome(report);
+  const limitedObservability = getLimitedObservabilityLabel(report);
   if (outcome === 'recovered' || report.summary?.recovered) {
     return 'recovered';
   }
@@ -168,6 +169,13 @@ const getReportState = (report: ObservabilityDevtoolsReport) => {
     report.errorMessage
   ) {
     return 'failed';
+  }
+  if (
+    outcome === 'pending' &&
+    report.status === 'success' &&
+    limitedObservability
+  ) {
+    return 'success';
   }
   if (outcome === 'pending') {
     return 'pending';

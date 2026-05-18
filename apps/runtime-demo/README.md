@@ -66,6 +66,10 @@ Then open the observability fixture page and use these controls:
   `diagnosis.outcome: "runtime-loaded"`.
   The same report is available at
   `window.__FEDERATION__.__OBSERVABILITY__.runtime_host.getLatestReport()`.
+- `Preload remote`: calls `preloadRemote` for the real `dynamic-remote`
+  producer. The status should become `success`, and the latest report should
+  include `summary.outcome: "preloaded"` plus a `preload` phase. This verifies
+  that preloading is not treated as a failed or stuck component load.
 - `Load missing expose`: loads a missing expose from remote2. The status should
   become `error`, and the report should include
   `dynamic-remote/__missing_expose__` with `failedPhase: "expose"`. The
