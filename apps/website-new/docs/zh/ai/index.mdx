@@ -46,8 +46,30 @@ npx skills add module-federation/core --skill mf -y
 - 帮你分析类型问题
 - 帮你看共享依赖冲突
 - 帮你分析远端模块信息
+- 帮你读取观测报告并排查 MF 加载失败
 
 👉 [查看 Agent Skills 详细说明](./skill)
+
+## 观测和调试 MF 加载
+
+如果你希望 AI coding agent 基于真实运行时信息排查 Module Federation
+加载问题，需要先接入 [观测插件](../plugin/plugins/observability-plugin)。
+`/mf observability` 这个 skill 负责帮你接入、读取和分析报告；真正的运行时证据由观测插件采集。
+
+加载失败后，浏览器控制台会打印 `traceId`，开发环境还会打印 `read:` 命令。把这段提示交给 Agent：
+
+```text
+/mf observability
+我看到了这条 Module Federation console error：
+
+[Module Federation] Observability report generated
+traceId: mf-...
+read: window.__FEDERATION__.__OBSERVABILITY__["runtime_host"].getReport("mf-...")
+
+请读取报告并帮我修复问题。
+```
+
+如果是 Node 或 SSR，让 Agent 读取 `.mf/observability/latest.json`。如果是生产环境，建议通过插件的 `onReport` 回调把报告上传到自己的系统，然后把上传报告或 traceId 交给 Agent。
 
 ## 不装 Skill 也能先用
 
@@ -87,4 +109,5 @@ https://module-federation.io/guide/basic/runtime.md
 
 1. 先装 `mf`
 2. 问一个你当前最关心的问题
-3. 再看 [Skills 说明](./skill)，了解它支持哪些子命令
+3. 需要 MF 加载可观测时，先接入 [观测插件](../plugin/plugins/observability-plugin)
+4. 再看 [Skills 说明](./skill)，了解它支持哪些子命令

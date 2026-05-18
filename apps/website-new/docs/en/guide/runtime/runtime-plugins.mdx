@@ -129,6 +129,8 @@ const mf = createInstance({
 | Customize injected scripts and links | `createScript`, `createLink` | You need to add attributes like `crossorigin`, timeouts, or custom script/link elements. When available, `remoteInfo` is provided so you can apply per-remote policy. |
 | Align or rewrite share scopes before remote init | `beforeInitContainer`, `initContainerShareScopeMap` | You need to change which share scope a remote initializes against |
 | Override the shared winner | `resolveShare` | You want to force a different shared implementation than the runtime would normally pick |
+| Observe remote load status | `afterMatchRemote`, `afterLoadRemote` | You need request tracing or final success/failure status for `loadRemote` |
+| Observe shared dependency status | `afterLoadShare`, `errorLoadShare` | You need to diagnose missing shared dependencies, version mismatch, or eager configuration errors |
 | Recover from load failures | `errorLoadRemote` | You need fallback modules, offline behavior, or layered recovery |
 | Implement a new remote loading strategy | `loadEntry` | You want to fully customize how a remote entry is loaded or support a new remote type |
 

@@ -1,13 +1,12 @@
 import React, { StrictMode } from 'react';
-import {
-  init,
-  registerGlobalPlugins,
-} from '@module-federation/enhanced/runtime';
+import { init } from '@module-federation/enhanced/runtime';
 import * as ReactDOM from 'react-dom/client';
 import App from './App';
+import { observability } from './observability';
 
 init({
   name: 'runtime_host',
+  plugins: [observability.plugin],
   remotes: [
     {
       name: 'runtime_remote2',

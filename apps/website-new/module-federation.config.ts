@@ -58,6 +58,7 @@ const exposes = {
   // plugin
   [`./plugin-introduce-${LANGUAGE}`]: `./docs/${LANGUAGE}/plugin/dev/index.mdx`,
   [`./plugin-retry-${LANGUAGE}`]: `./docs/${LANGUAGE}/plugin/plugins/retry-plugin.mdx`,
+  [`./plugin-observability-${LANGUAGE}`]: `./docs/${LANGUAGE}/plugin/plugins/observability-plugin.mdx`,
 
   // blog
   [`./error-load-remote-${LANGUAGE}`]: `./docs/${LANGUAGE}/blog/error-load-remote.mdx`,

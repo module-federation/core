@@ -1,5 +1,11 @@
 # Runtime Hooks
 
+## Hook return values
+
+For `SyncHook` and `AsyncHook`, returning `undefined` means the plugin only observes the event. It does not clear a value returned by an earlier plugin. A later plugin can still replace that value by returning another non-`undefined` value.
+
+For `SyncWaterfallHook` and `AsyncWaterfallHook`, return the full updated args object when you need to change the payload. Returning `undefined` keeps the current args and passes them to the next plugin.
+
 ## beforeInit
 
 `SyncWaterfallHook`
@@ -64,6 +70,28 @@ type BeforeRequestOptions ={
 }
 ```
 
+## afterMatchRemote
+
+`AsyncHook`
+
+Called after the runtime matches a `loadRemote` request to a configured remote. If matching fails, the hook is still called with `error`. It is useful for diagnostics, request tracing, and checking whether a failure happened before manifest or remoteEntry loading.
+
+* type
+
+```ts
+async function afterMatchRemote(args: AfterMatchRemoteOptions): Promise<void>
+
+type AfterMatchRemoteOptions ={
+  id: string;
+  options: ModuleFederationRuntimeOptions;
+  remote?: Remote;
+  expose?: string;
+  remoteInfo?: RemoteInfo;
+  error?: unknown;
+  origin: ModuleFederation;
+}
+```
+
 ## afterResolve
 
 `AsyncWaterfallHook`
@@ -123,6 +151,33 @@ interface RemoteInfo {
   type: RemoteEntryType;
   entryGlobalName: string;
   shareScope: string;
+}
+```
+
+## afterLoadRemote
+
+`AsyncHook`
+
+Called after a `loadRemote` request finishes. It runs for successful loads, failed loads, and loads recovered by `errorLoadRemote`. Use it to record the final remote loading status.
+
+`onLoad` runs before `afterLoadRemote` on a successful load. If a load fails and `errorLoadRemote` returns a fallback, `afterLoadRemote` receives the original `error` and `recovered: true`.
+
+* type
+
+```ts
+async function afterLoadRemote(args: AfterLoadRemoteOptions): Promise<void>
+
+type AfterLoadRemoteOptions ={
+  id: string;
+  expose?: string;
+  remote?: RemoteInfo;
+  options?: {
+    loadFactory?: boolean;
+    from?: 'build' | 'runtime';
+  };
+  error?: unknown;
+  recovered?: boolean;
+  origin: ModuleFederation;
 }
 ```
 
@@ -207,6 +262,8 @@ type ErrorLoadRemoteOptions ={
   options?: any;
   from: 'build' | 'runtime';
   lifecycle: 'beforeRequest' | 'beforeLoadShare' | 'afterResolve' | 'onLoad';
+  remote?: RemoteInfo;
+  expose?: string;
   origin: ModuleFederation;
 }
 ```
@@ -216,7 +273,9 @@ The `lifecycle` parameter indicates the stage where the error occurred:
 - `beforeRequest`: Error during initial request processing
 - `afterResolve`: Error during manifest loading (most common for network failures)
 - `onLoad`: Error during module loading and execution
-- `beforeLoadShare`: Error during shared dependency loading
+- `beforeLoadShare`: Error while loading a remoteEntry during shared dependency initialization
+
+If this hook returns a fallback module, the runtime uses that value to continue. If a diagnostics or logging plugin returns `undefined`, it does not clear a fallback returned by another plugin.
 
 * example
 
@@ -304,6 +363,51 @@ type BeforeLoadShareOptions ={
   shareInfo?: Shared;
   shared: Options['shared'];
   origin: ModuleFederation;
+}
+```
+
+## afterLoadShare
+
+`SyncHook`
+
+Called after a shared dependency is successfully resolved by `loadShare` or `loadShareSync`. Use it to observe which provider and version were selected.
+
+* type
+
+```ts
+function afterLoadShare(args: AfterLoadShareOptions): void
+
+type AfterLoadShareOptions ={
+  pkgName: string;
+  shareInfo?: Partial<Shared>;
+  selectedShared?: Partial<Shared>;
+  shared: Options['shared'];
+  shareScopeMap: ShareScopeMap;
+  lifecycle: 'loadShare' | 'loadShareSync';
+  origin: ModuleFederation;
+}
+```
+
+## errorLoadShare
+
+`SyncHook`
+
+Called when shared dependency resolution fails or cannot select a valid shared dependency. It is useful for diagnostics around missing shared dependencies, version mismatch, and eager configuration errors.
+
+* type
+
+```ts
+function errorLoadShare(args: ErrorLoadShareOptions): void
+
+type ErrorLoadShareOptions ={
+  pkgName: string;
+  shareInfo?: Partial<Shared>;
+  shared: Options['shared'];
+  shareScopeMap: ShareScopeMap;
+  lifecycle: 'loadShare' | 'loadShareSync';
+  origin: ModuleFederation;
+  error?: unknown;
+  recovered?: boolean;
 }
 ```
 
@@ -459,6 +563,131 @@ interface PreloadAssets {
 
 `loaderHook` is used to intercept resource loading and module-factory resolution.
 
+## beforeInitRemote
+
+`AsyncHook`
+
+Called before initializing the remote container with `remoteEntry.init(...)`.
+
+* type
+
+```ts
+async function beforeInitRemote(args: BeforeInitRemoteOptions): Promise<void>
+
+type BeforeInitRemoteOptions ={
+  id?: string;
+  remoteInfo: RemoteInfo;
+  remoteSnapshot?: ModuleInfo;
+  origin: ModuleFederation;
+}
+```
+
+## afterInitRemote
+
+`AsyncHook`
+
+Called after remote container initialization succeeds or fails. When the remote was already initialized, `cached` is set to `true`.
+
+* type
+
+```ts
+async function afterInitRemote(args: AfterInitRemoteOptions): Promise<void>
+
+type AfterInitRemoteOptions ={
+  id?: string;
+  remoteInfo: RemoteInfo;
+  remoteSnapshot?: ModuleInfo;
+  remoteEntryExports?: RemoteEntryExports;
+  error?: unknown;
+  cached?: boolean;
+  origin: ModuleFederation;
+}
+```
+
+## beforeGetExpose
+
+`AsyncHook`
+
+Called before `remoteEntry.get(expose)`.
+
+* type
+
+```ts
+async function beforeGetExpose(args: BeforeGetExposeOptions): Promise<void>
+
+type BeforeGetExposeOptions ={
+  id: string;
+  expose: string;
+  moduleInfo: RemoteInfo;
+  remoteEntryExports: RemoteEntryExports;
+  origin: ModuleFederation;
+}
+```
+
+## afterGetExpose
+
+`AsyncHook`
+
+Called after `remoteEntry.get(expose)` succeeds or fails.
+
+* type
+
+```ts
+async function afterGetExpose(args: AfterGetExposeOptions): Promise<void>
+
+type AfterGetExposeOptions ={
+  id: string;
+  expose: string;
+  moduleInfo: RemoteInfo;
+  remoteEntryExports: RemoteEntryExports;
+  moduleFactory?: () => unknown | Promise<unknown>;
+  error?: unknown;
+  origin: ModuleFederation;
+}
+```
+
+## beforeExecuteFactory
+
+`AsyncHook`
+
+Called before executing the exposed module factory. It is skipped when `loadRemote` is called with `loadFactory: false`.
+
+* type
+
+```ts
+async function beforeExecuteFactory(args: BeforeExecuteFactoryOptions): Promise<void>
+
+type BeforeExecuteFactoryOptions ={
+  id: string;
+  expose: string;
+  moduleInfo: RemoteInfo;
+  loadFactory: boolean;
+  origin: ModuleFederation;
+}
+```
+
+## afterExecuteFactory
+
+`AsyncHook`
+
+Called after the exposed module factory succeeds or fails. It is skipped when `loadRemote` is called with `loadFactory: false`.
+
+* type
+
+```ts
+async function afterExecuteFactory(args: AfterExecuteFactoryOptions): Promise<void>
+
+type AfterExecuteFactoryOptions ={
+  id: string;
+  expose: string;
+  moduleInfo: RemoteInfo;
+  loadFactory: boolean;
+  exposeModule?: unknown;
+  error?: unknown;
+  origin: ModuleFederation;
+}
+```
+
 ## createScript
 
 `SyncHook`
@@ -473,6 +702,7 @@ function createScript(args: CreateScriptOptions): CreateScriptHookReturn
 type CreateScriptOptions ={
   url: string;
   attrs?: Record<string, any>;
+  remoteInfo?: RemoteInfo;
 }
 ```
 
@@ -506,7 +736,7 @@ The `fetch` function allows customizing the request that fetches the manifest JS
 - **Type**
 
 ```typescript
-function fetch(manifestUrl: string, requestInit: RequestInit): Promise<Response> | void | false;
+function fetch(manifestUrl: string, requestInit: RequestInit, remoteInfo?: RemoteInfo): Promise<Response> | void | false;
 ```
 
 - Example for including the credentials when fetching the manifest JSON:
@@ -542,6 +772,7 @@ function createLink(args: CreateLinkOptions): HTMLLinkElement | void
 type CreateLinkOptions ={
   url: string;
   attrs?: Record<string, any>;
+  remoteInfo?: RemoteInfo;
 }
 ```
 
@@ -563,6 +794,26 @@ type LoadEntryErrorOptions ={
   remoteEntryExports?: RemoteEntryExports;
   globalLoading: Record<string, Promise<void | RemoteEntryExports> | undefined>;
   uniqueKey: string;
+}
+```
+
+## afterLoadEntry
+
+`AsyncHook`
+
+Called after loading a remoteEntry succeeds, fails, or is recovered by `loadEntryError`.
+
+* type
+
+```ts
+async function afterLoadEntry(args: AfterLoadEntryOptions): Promise<void>
+
+type AfterLoadEntryOptions ={
+  origin: ModuleFederation;
+  remoteInfo: RemoteInfo;
+  remoteEntryExports?: RemoteEntryExports | false | void;
+  error?: unknown;
+  recovered?: boolean;
 }
 ```
 

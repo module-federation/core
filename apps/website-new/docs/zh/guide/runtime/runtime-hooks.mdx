@@ -1,5 +1,11 @@
 # Runtime Hooks
 
+## Hook 返回值
+
+对于 `SyncHook` 和 `AsyncHook`，返回 `undefined` 表示插件只观察事件，不会清空前一个插件已经返回的结果。后续插件如果返回新的非 `undefined` 值，仍然可以替换这个结果。
+
+对于 `SyncWaterfallHook` 和 `AsyncWaterfallHook`，需要改写参数时返回完整的新 args 对象；返回 `undefined` 会保留当前 args，并继续传给下一个插件。
+
 ## beforeInit
 
 `SyncWaterfallHook`
@@ -60,6 +66,28 @@ async function beforeRequest(args: BeforeRequestOptions): Promise<BeforeRequestO
 type BeforeRequestOptions ={
   id: string;
   options: ModuleFederationRuntimeOptions;
+  origin: ModuleFederation;
+}
+```
+
+## afterMatchRemote
+
+`AsyncHook`
+
+在 runtime 把一次 `loadRemote` 请求匹配到具体 remote 之后触发。如果匹配失败，也会带着 `error` 触发。适合用于诊断、链路追踪，以及判断问题是否发生在 manifest 或 remoteEntry 加载之前。
+
+* type
+
+```ts
+async function afterMatchRemote(args: AfterMatchRemoteOptions): Promise<void>
+
+type AfterMatchRemoteOptions ={
+  id: string;
+  options: ModuleFederationRuntimeOptions;
+  remote?: Remote;
+  expose?: string;
+  remoteInfo?: RemoteInfo;
+  error?: unknown;
   origin: ModuleFederation;
 }
 ```
@@ -125,6 +153,33 @@ interface RemoteInfo {
   type: RemoteEntryType;
   entryGlobalName: string;
   shareScope: string;
+}
+```
+
+## afterLoadRemote
+
+`AsyncHook`
+
+在一次 `loadRemote` 请求结束后触发。加载成功、加载失败、以及通过 `errorLoadRemote` 兜底恢复的场景都会触发。适合记录 remote 加载的最终状态。
+
+成功加载时，`onLoad` 会先于 `afterLoadRemote` 触发。如果加载失败后由 `errorLoadRemote` 返回兜底结果，`afterLoadRemote` 会带上原始 `error` 和 `recovered: true`。
+
+* type
+
+```ts
+async function afterLoadRemote(args: AfterLoadRemoteOptions): Promise<void>
+
+type AfterLoadRemoteOptions ={
+  id: string;
+  expose?: string;
+  remote?: RemoteInfo;
+  options?: {
+    loadFactory?: boolean;
+    from?: 'build' | 'runtime';
+  };
+  error?: unknown;
+  recovered?: boolean;
+  origin: ModuleFederation;
 }
 ```
 
@@ -209,6 +264,8 @@ type ErrorLoadRemoteOptions ={
   options?: any;
   from: 'build' | 'runtime';
   lifecycle: 'beforeRequest' | 'beforeLoadShare' | 'afterResolve' | 'onLoad';
+  remote?: RemoteInfo;
+  expose?: string;
   origin: ModuleFederation;
 }
 ```
@@ -218,7 +275,9 @@ type ErrorLoadRemoteOptions ={
 - `beforeRequest`: 处理 remote 请求参数阶段出错
 - `afterResolve`: 解析/拉取 manifest 阶段出错（常见于网络异常）
 - `onLoad`: 加载 exposes 模块阶段出错
-- `beforeLoadShare`: 加载 shared 依赖阶段出错
+- `beforeLoadShare`: shared 初始化过程中加载 remoteEntry 出错
+
+如果这个 hook 返回兜底模块，runtime 会使用这个值继续执行。如果诊断或日志插件返回 `undefined`，不会清空其他插件已经返回的兜底结果。
 
 * example
 
@@ -272,6 +331,51 @@ type BeforeLoadShareOptions ={
   shareInfo?: Shared;
   shared: Options['shared'];
   origin: ModuleFederation;
+}
+```
+
+## afterLoadShare
+
+`SyncHook`
+
+在 `loadShare` 或 `loadShareSync` 成功解析 shared 依赖后触发。适合观察最终选中了哪个提供方和版本。
+
+* type
+
+```ts
+function afterLoadShare(args: AfterLoadShareOptions): void
+
+type AfterLoadShareOptions ={
+  pkgName: string;
+  shareInfo?: Partial<Shared>;
+  selectedShared?: Partial<Shared>;
+  shared: Options['shared'];
+  shareScopeMap: ShareScopeMap;
+  lifecycle: 'loadShare' | 'loadShareSync';
+  origin: ModuleFederation;
+}
+```
+
+## errorLoadShare
+
+`SyncHook`
+
+在 shared 依赖解析失败，或者无法选中可用 shared 依赖时触发。适合诊断 shared 缺失、版本不匹配、eager 配置错误等问题。
+
+* type
+
+```ts
+function errorLoadShare(args: ErrorLoadShareOptions): void
+
+type ErrorLoadShareOptions ={
+  pkgName: string;
+  shareInfo?: Partial<Shared>;
+  shared: Options['shared'];
+  shareScopeMap: ShareScopeMap;
+  lifecycle: 'loadShare' | 'loadShareSync';
+  origin: ModuleFederation;
+  error?: unknown;
+  recovered?: boolean;
 }
 ```
 
@@ -427,6 +531,131 @@ interface PreloadAssets {
 
 `loaderHook` 用于拦截资源加载与工厂获取流程。
 
+## beforeInitRemote
+
+`AsyncHook`
+
+在调用 `remoteEntry.init(...)` 初始化 remote 容器之前触发。
+
+* type
+
+```ts
+async function beforeInitRemote(args: BeforeInitRemoteOptions): Promise<void>
+
+type BeforeInitRemoteOptions ={
+  id?: string;
+  remoteInfo: RemoteInfo;
+  remoteSnapshot?: ModuleInfo;
+  origin: ModuleFederation;
+}
+```
+
+## afterInitRemote
+
+`AsyncHook`
+
+在 remote 容器初始化成功或失败后触发。如果 remote 已经初始化过，会带上 `cached: true`。
+
+* type
+
+```ts
+async function afterInitRemote(args: AfterInitRemoteOptions): Promise<void>
+
+type AfterInitRemoteOptions ={
+  id?: string;
+  remoteInfo: RemoteInfo;
+  remoteSnapshot?: ModuleInfo;
+  remoteEntryExports?: RemoteEntryExports;
+  error?: unknown;
+  cached?: boolean;
+  origin: ModuleFederation;
+}
+```
+
+## beforeGetExpose
+
+`AsyncHook`
+
+在调用 `remoteEntry.get(expose)` 之前触发。
+
+* type
+
+```ts
+async function beforeGetExpose(args: BeforeGetExposeOptions): Promise<void>
+
+type BeforeGetExposeOptions ={
+  id: string;
+  expose: string;
+  moduleInfo: RemoteInfo;
+  remoteEntryExports: RemoteEntryExports;
+  origin: ModuleFederation;
+}
+```
+
+## afterGetExpose
+
+`AsyncHook`
+
+在 `remoteEntry.get(expose)` 成功或失败后触发。
+
+* type
+
+```ts
+async function afterGetExpose(args: AfterGetExposeOptions): Promise<void>
+
+type AfterGetExposeOptions ={
+  id: string;
+  expose: string;
+  moduleInfo: RemoteInfo;
+  remoteEntryExports: RemoteEntryExports;
+  moduleFactory?: () => unknown | Promise<unknown>;
+  error?: unknown;
+  origin: ModuleFederation;
+}
+```
+
+## beforeExecuteFactory
+
+`AsyncHook`
+
+在执行 exposed module factory 之前触发。`loadRemote` 使用 `loadFactory: false` 时不会触发。
+
+* type
+
+```ts
+async function beforeExecuteFactory(args: BeforeExecuteFactoryOptions): Promise<void>
+
+type BeforeExecuteFactoryOptions ={
+  id: string;
+  expose: string;
+  moduleInfo: RemoteInfo;
+  loadFactory: boolean;
+  origin: ModuleFederation;
+}
+```
+
+## afterExecuteFactory
+
+`AsyncHook`
+
+在 exposed module factory 执行成功或失败后触发。`loadRemote` 使用 `loadFactory: false` 时不会触发。
+
+* type
+
+```ts
+async function afterExecuteFactory(args: AfterExecuteFactoryOptions): Promise<void>
+
+type AfterExecuteFactoryOptions ={
+  id: string;
+  expose: string;
+  moduleInfo: RemoteInfo;
+  loadFactory: boolean;
+  exposeModule?: unknown;
+  error?: unknown;
+  origin: ModuleFederation;
+}
+```
+
 ## createScript
 
 `SyncHook`
@@ -441,6 +670,7 @@ function createScript(args: CreateScriptOptions): CreateScriptHookReturn
 type CreateScriptOptions ={
   url: string;
   attrs?: Record<string, any>;
+  remoteInfo?: RemoteInfo;
 }
 ```
 
@@ -474,7 +704,7 @@ const changeScriptAttributePlugin: () => ModuleFederationRuntimePlugin =
 - **Type**
 
 ```typescript
-function fetch(manifestUrl: string, requestInit: RequestInit): Promise<Response> | void | false;
+function fetch(manifestUrl: string, requestInit: RequestInit, remoteInfo?: RemoteInfo): Promise<Response> | void | false;
 ```
 
 - 示例：在获取清单（manifest）JSON 时包含凭证：
@@ -510,6 +740,7 @@ function createLink(args: CreateLinkOptions): HTMLLinkElement | void
 type CreateLinkOptions ={
   url: string;
   attrs?: Record<string, any>;
+  remoteInfo?: RemoteInfo;
 }
 ```
 
@@ -531,6 +762,26 @@ type LoadEntryErrorOptions ={
   remoteEntryExports?: RemoteEntryExports;
   globalLoading: Record<string, Promise<void | RemoteEntryExports> | undefined>;
   uniqueKey: string;
+}
+```
+
+## afterLoadEntry
+
+`AsyncHook`
+
+在 remoteEntry 加载成功、失败，或被 `loadEntryError` 恢复之后触发。
+
+* type
+
+```ts
+async function afterLoadEntry(args: AfterLoadEntryOptions): Promise<void>
+
+type AfterLoadEntryOptions ={
+  origin: ModuleFederation;
+  remoteInfo: RemoteInfo;
+  remoteEntryExports?: RemoteEntryExports | false | void;
+  error?: unknown;
+  recovered?: boolean;
 }
 ```
 

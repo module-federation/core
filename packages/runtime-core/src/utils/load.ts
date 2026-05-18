@@ -281,6 +281,7 @@ export async function getRemoteEntry(params: {
 
     globalLoading[uniqueKey] = loadEntryHook
       .emit({
+        origin,
         loaderHook,
         remoteInfo,
         remoteEntryExports,
@@ -303,6 +304,14 @@ export async function getRemoteEntry(params: {
               getEntryUrl,
             })
           : loadEntryNode({ remoteInfo, loaderHook });
+      })
+      .then(async (res) => {
+        await origin.loaderHook.lifecycle.afterLoadEntry.emit({
+          origin,
+          remoteInfo,
+          remoteEntryExports: res,
+        });
+        return res;
       })
       .catch(async (err) => {
         const uniqueKey = getRemoteEntryUniqueKey(remoteInfo);
@@ -333,9 +342,20 @@ export async function getRemoteEntry(params: {
             });
 
           if (RemoteEntryExports) {
+            await origin.loaderHook.lifecycle.afterLoadEntry.emit({
+              origin,
+              remoteInfo,
+              remoteEntryExports: RemoteEntryExports,
+              recovered: true,
+            });
             return RemoteEntryExports;
           }
         }
+        await origin.loaderHook.lifecycle.afterLoadEntry.emit({
+          origin,
+          remoteInfo,
+          error: err,
+        });
         throw err;
       });
   }

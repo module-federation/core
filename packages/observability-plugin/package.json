@@ -1,0 +1,79 @@
+{
+  "name": "@module-federation/observability-plugin",
+  "version": "2.4.0",
+  "author": "module-federation",
+  "main": "./dist/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/index.d.ts",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/module-federation/core.git",
+    "directory": "packages/observability-plugin"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist/",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/index.js"
+    },
+    "./browser": {
+      "types": "./dist/browser.d.ts",
+      "import": "./dist/esm/browser.js",
+      "require": "./dist/browser.js"
+    },
+    "./chrome-devtool": {
+      "types": "./dist/chrome-devtool.d.ts",
+      "import": "./dist/esm/chrome-devtool.js",
+      "require": "./dist/chrome-devtool.js"
+    },
+    "./node": {
+      "types": "./dist/node.d.ts",
+      "import": "./dist/esm/node.js",
+      "require": "./dist/node.js"
+    },
+    "./build": {
+      "types": "./dist/build.d.ts",
+      "import": "./dist/esm/build.js",
+      "require": "./dist/build.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/index.d.ts"
+      ],
+      "browser": [
+        "./dist/browser.d.ts"
+      ],
+      "chrome-devtool": [
+        "./dist/chrome-devtool.d.ts"
+      ],
+      "node": [
+        "./dist/node.d.ts"
+      ],
+      "build": [
+        "./dist/build.d.ts"
+      ]
+    }
+  },
+  "devDependencies": {
+    "@module-federation/runtime": "workspace:*"
+  },
+  "dependencies": {
+    "@module-federation/sdk": "workspace:*"
+  },
+  "scripts": {
+    "build": "tsdown --config tsdown.config.ts && cp *.md dist",
+    "test": "vitest run -u -c vitest.config.ts",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",
+    "pre-release": "pnpm run test && pnpm run build"
+  }
+}
