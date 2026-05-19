@@ -5,7 +5,6 @@ on:
     types: [labeled]
 
 permissions:
-  contents: read
   issues: write
 
 jobs:
@@ -15,20 +14,22 @@ jobs:
     steps:
       - name: contribution welcome
         if: github.event.label.name == 'contribution welcome' || github.event.label.name == 'help wanted'
-        uses: actions-cool/issues-helper@v3
-        with:
-          actions: 'remove-labels'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.issue.number }}
-          labels: 'pending triage, need reproduction'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh issue edit "${ISSUE_NUMBER}" --repo "${REPO}" --remove-label "pending triage" || true
+          gh issue edit "${ISSUE_NUMBER}" --repo "${REPO}" --remove-label "need reproduction" || true
 
       - name: need reproduction
         if: github.event.label.name == 'need reproduction'
-        uses: actions-cool/issues-helper@v3
-        with:
-          actions: 'create-comment, remove-labels'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.issue.number }}
-          body: |
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
+          BODY: |
             Hello @${{ github.event.issue.user.login }}. Please provide a [minimal reproduction](https://stackoverflow.com/help/minimal-reproducible-example) using a GitHub repository or [StackBlitz](https://stackblitz.com/). Issues marked with `need reproduction` will be closed if they have no activity within 5 days.
-          labels: 'pending triage'
+        run: |
+          gh issue comment "${ISSUE_NUMBER}" --repo "${REPO}" --body "$BODY"
+          gh issue edit "${ISSUE_NUMBER}" --repo "${REPO}" --remove-label "pending triage" || true
