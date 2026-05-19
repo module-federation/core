@@ -42,7 +42,7 @@ when the same input also contains a `RUNTIME-xxx` code.
 | "plugin", "asyncStartup", "exposes key", "config" | `reference/config-check.md` |
 | "bridge", "sub-app", "export-app", "createRemoteAppComponent" | `reference/bridge-check.md` |
 | "RUNTIME-001", "RUNTIME-008", "runtime error code", "remote entry load failed", "ScriptNetworkError", "ScriptExecutionError", "container missing", "window[remoteEntryKey]" | `reference/runtime-error.md` |
-| "Observability report generated", "console.error", "traceId", "read:", "diagnosis", "ownerHint", "summary.phases", ".mf/observability", "build-report.json", "latest.json", "RUNTIME-007", "moduleInfo", "remote snapshot", "global snapshot", "snapshot match", "observability", "observe MF", "debug MF loading", "trace loading", "loading report", "telemetry", "onReport", "onEvent", "production report", "upload observability" | `reference/observability.md` |
+| "Observability report generated", "console.error", "traceId", "read:", "diagnosis", "ownerHint", "summary.phases", ".mf/observability", "build-report.json", "latest.json", "RUNTIME-007", "moduleInfo", "remote snapshot", "global snapshot", "snapshot match", "observability", "observe MF", "debug MF loading", "trace loading", "loading report", "open page and inspect MF", "visit URL and observe MF", "看下 MF 加载情况", "telemetry", "onReport", "onEvent", "production report", "upload observability" | `reference/observability.md` |
 | "manifest", "remoteEntry URL", "module info", "publicPath" | `reference/module-info.md` |
 | "context", "what is configured", "MF role", "bundler" | `reference/context.md` |
 

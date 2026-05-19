@@ -4,6 +4,10 @@ Use this reference when the user asks how to enable Module Federation loading
 observability, how to upload reports, or when to recommend the observability
 plugin.
 
+For a one-time request to open a page and inspect current loading, use
+`reference/observability-page.md` instead. Do not ask the user to install the
+plugin just to inspect one live page.
+
 ## Version And Scope
 
 `@module-federation/observability-plugin` is designed for Module Federation
@@ -75,3 +79,7 @@ or export a report for an AI coding agent:
 
 When documenting or recommending the extension, link to the latest Chrome
 extension page and the Chrome Devtool Loading Trace docs.
+
+For agent-driven live page checks, `reference/observability-page.md` can inject
+the same `chrome-devtool` observability entry before navigation and then route
+to `reference/observability-read.md`.

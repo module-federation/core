@@ -8,18 +8,17 @@ the smallest needed reference below.
 
 ## Route
 
-### Setup
+### Project Setup
 
 Use [observability-use.md](observability-use.md) when the user asks how to
-install, enable, configure, upload, or recommend the observability plugin, or
-when they have a loading problem but no report yet.
+install, enable, configure, upload, keep a long-term dev loop, or recommend the
+observability plugin for a project.
 
 Typical triggers:
 
 - enable observability
 - install observability
 - observability setup
-- no report
 - onReport
 - onEvent
 - production telemetry
@@ -27,8 +26,26 @@ Typical triggers:
 - 怎么接入观测插件
 - 启用观测
 - 使用观测插件
-- 没有报告
 - 生产环境上报
+
+### Page Observation
+
+Use [observability-page.md](observability-page.md) when the user asks to
+open/visit a live page, gives a URL, asks to inspect current Module Federation
+loading, or has a loading problem but no report yet.
+
+Typical triggers:
+
+- open page
+- visit URL
+- observe page
+- browser observability
+- debug current page
+- no report
+- 看下 MF 加载情况
+- 看下 Module Federation 加载情况
+- 观测页面
+- 没有报告
 
 ### Read
 
@@ -85,7 +102,7 @@ Typical triggers:
 
 If the report is missing or incomplete, route back to
 [observability-read.md](observability-read.md) or
-[observability-use.md](observability-use.md).
+[observability-page.md](observability-page.md).
 
 ## Order With Related MF Tools
 
