@@ -605,7 +605,7 @@ async function main() {
   const version = await httpRequest('GET', port, '/json/version').catch(
     (error) => {
       throw new Error(
-        `Chrome debug port ${port} is not available: ${error.message}. Follow reference/browser-debug/setup.md first.`,
+        `Chrome debug port ${port} is not available: ${error.message}. Run scripts/open-chrome-debug.mjs first.`,
       );
     },
   );

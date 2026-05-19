@@ -19,6 +19,26 @@ URL", "看下 MF 加载情况", or live diagnosis with no report yet.
 Do not read `observability-use.md` for one-time page checks unless the user asks
 to install or keep the plugin in the project.
 
+## Browser Control Rule
+
+For one-time public page checks, start an independent Chrome debug window first.
+Do not try the Codex Chrome plugin, do not attach to the user's current Chrome
+tabs, and do not depend on an already-open Chrome window. If the user says
+"open my Chrome" without explicitly asking for login state, current cookies, or
+an existing tab, still use the independent debug window.
+
+Run this from the repository root before opening the page:
+
+```bash
+node skills/mf/scripts/open-chrome-debug.mjs --url about:blank --json
+```
+
+Use the returned `port` when running the page-observation script. If starting
+Chrome or opening a local app requires permission, request that permission
+immediately. Only use the user's existing Chrome window, current tab, cookies,
+or logged-in state when the user explicitly asks for current login/session
+state.
+
 ## Fast Integration Check
 
 Run this only when a project path or local dev context is available.
@@ -49,13 +69,16 @@ Use `scripts/open-observability-page.mjs` from the `mf` skill directory. The
 script reads a ready-to-run `chrome-devtool` IIFE, wraps it with the preset
 options below, registers the init script through Chrome CDP before navigation,
 opens the target URL, and prints the reader expression for the fixed
-`chrome_extension` scope.
+`chrome_extension` scope. Run it after the independent Chrome debug window is
+ready.
 
 Example:
 
 ```bash
+node skills/mf/scripts/open-chrome-debug.mjs --url about:blank --json
 node skills/mf/scripts/open-observability-page.mjs \
   --url "https://example.com/" \
+  --port "<returned-port>" \
   --output "/tmp/mf-observability-open.json" \
   --json
 ```
