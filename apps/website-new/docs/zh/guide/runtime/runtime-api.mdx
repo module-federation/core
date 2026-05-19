@@ -125,6 +125,7 @@ type Share = {
 
 <Collapse title="示例">
 
+
 ```ts
 import { init, loadRemote } from '@module-federation/enhanced/runtime';
 
@@ -141,6 +142,7 @@ init({
     ],
 });
 ```
+
 </Collapse>
 
 ### 推荐替代方式
@@ -244,6 +246,7 @@ plugins: [mfRuntimePlugin()]
 
 当使用构建插件或 [init](#init) 创建默认实例后，可以调用 `getInstance()` 获取这个默认实例。
 
+
 ```ts
 import { getInstance } from '@module-federation/enhanced/runtime';
 
@@ -254,6 +257,7 @@ if (!mfInstance) {
 
 mfInstance.loadRemote('remote/util');
 ```
+
 
 通过 [createInstance](#createinstance) 创建的实例不会替换默认实例，但仍然会注册到全局实例列表中。所以即使你没有保存它的返回值，也可以通过给 `getInstance` 传入 finder 回调把它找回来。
 
@@ -468,11 +472,10 @@ function registerGlobalPlugins(plugins: ModuleFederationRuntimePlugin[]): void {
 
 全局插件会按 `plugin.name` 去重。
 
+
 ```ts
-import {
-  registerGlobalPlugins,
-  createInstance,
-} from '@module-federation/enhanced/runtime';
+import { registerGlobalPlugins, createInstance } from '@module-federation/enhanced/runtime';
+
 import runtimePlugin from './runtime-plugin';
 
 registerGlobalPlugins([runtimePlugin()]);
@@ -487,6 +490,7 @@ const mf = createInstance({
   ],
 });
 ```
+
 
 为了保证行为可预期，建议在创建或使用 runtime 实例之前注册全局插件。
 
@@ -506,6 +510,7 @@ function getRemoteInfo(remote: Remote): RemoteInfo {}
 - `entryGlobalName`
 - `shareScope`
 
+
 ```ts
 import { getRemoteInfo } from '@module-federation/enhanced/runtime';
 
@@ -517,6 +522,7 @@ const remoteInfo = getRemoteInfo({
 console.log(remoteInfo.entryGlobalName);
 console.log(remoteInfo.shareScope);
 ```
+
 
 这是一个偏底层的 helper。大多数应用仍然应该优先使用 `createInstance`、`registerRemotes` 或构建插件去管理 remotes。
 
@@ -537,12 +543,9 @@ function getRemoteEntry(params: {
 
 这个 API 更适合底层工具、调试、自定义 loader 或高级 runtime 集成。大多数应用应该优先使用 `loadRemote`。
 
+
 ```ts
-import {
-  createInstance,
-  getRemoteInfo,
-  getRemoteEntry,
-} from '@module-federation/enhanced/runtime';
+import { createInstance, getRemoteInfo, getRemoteEntry } from '@module-federation/enhanced/runtime';
 
 const mf = createInstance({
   name: 'mf_host',
@@ -559,6 +562,7 @@ const remoteEntryExports = await getRemoteEntry({
   remoteInfo,
 });
 ```
+
 
 ## loadScript
 
@@ -578,6 +582,7 @@ function loadScript(
 
 只有在你需要绕过 `loadRemote` / `getRemoteEntry`、自己控制 script 加载流程时才需要直接使用它。
 
+
 ```ts
 import { loadScript } from '@module-federation/enhanced/runtime';
 
@@ -587,6 +592,7 @@ await loadScript('http://localhost:2001/remoteEntry.js', {
   },
 });
 ```
+
 
 ## loadScriptNode
 
@@ -608,6 +614,7 @@ Node.js 侧的底层 helper，用于把 remote entry 加载到当前进程。
 
 适合 Node 端集成或自定义 loader。浏览器环境请使用 `loadScript`。
 
+
 ```ts
 import { loadScriptNode } from '@module-federation/enhanced/runtime';
 
@@ -618,6 +625,7 @@ await loadScriptNode('http://localhost:2001/remoteEntry.js', {
   },
 });
 ```
+
 
 ## registerShared
 

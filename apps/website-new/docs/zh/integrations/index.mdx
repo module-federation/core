@@ -1,0 +1,25 @@
+# 接入方案
+
+Module Federation 的核心能力来自 MF Runtime。大多数项目推荐使用构建插件接入，它可以让你像使用 npm 包一样 `import` 远程模块，并获得类型提示等工程能力。如果你的项目需要暴露模块给其他应用消费，必须使用构建插件接入。如果你不想改造构建流程，只需要在运行时加载远程模块，也可以直接使用 Runtime。
+
+如果你不知道应该安装哪个包，先按当前项目类型选择：
+
+| 你的项目 | 安装的包 | 继续阅读 |
+| --- | --- | --- |
+| Rsbuild 应用 | `@module-federation/rsbuild-plugin` | [Rsbuild](/integrations/build-tool/rsbuild) |
+| Rslib 模块 | `@module-federation/rsbuild-plugin` | [Rslib](/integrations/build-tool/rslib) |
+| Vite 应用 | `@module-federation/vite` | [Vite](/integrations/build-tool/vite) |
+| Rspack 应用 | `@module-federation/enhanced` | [Rspack](/integrations/bundler/rspack) |
+| Webpack 应用 | `@module-federation/enhanced` | [Webpack](/integrations/bundler/webpack) |
+| React Native / Metro | `@module-federation/metro` 以及对应 Metro 插件 | [Metro](/integrations/bundler/metro) |
+| 只在运行时加载远程模块 | 通常从 `@module-federation/enhanced` 开始 | [Runtime](/integrations/runtime) |
+| Rspress 站点 | `@module-federation/rspress-plugin` | [Rspress](/integrations/documentation/rspress) |
+| Modern.js 应用 | `@module-federation/modern-js-v3`（推荐，Modern.js v3）或 `@module-federation/modern-js`（Modern.js v2） | [Modern.js](/integrations/framework/modernjs) |
+| Next.js 应用 | `@module-federation/nextjs-mf` 和 `webpack` | [Next.js](/integrations/framework/nextjs) |
+| Angular 应用 | 根据 Angular 构建方式选择对应插件 | [Angular](/integrations/framework/angular) |
+
+## 下一步
+
+- 先在本页选择与你项目匹配的接入方案，完成包安装和插件配置。
+- 如果你使用 React、Vue 或其他具体框架场景，可以继续查看[实践](/integrations/practice/)。
+- Module Federation 的通用能力仍然在[指南](/guide/start/index)中介绍，具体项目如何启用插件，请以对应接入方案为准。

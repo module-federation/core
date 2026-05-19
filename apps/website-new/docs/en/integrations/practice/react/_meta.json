@@ -1,0 +1,14 @@
+[
+  {
+    "type": "file",
+    "name": "index",
+    "label": "Overview"
+  },
+  {
+    "type": "file",
+    "name": "rsbuild-cra",
+    "label": "Rsbuild CRA"
+  },
+  "i18n-react",
+  "using-nx-for-react"
+]
