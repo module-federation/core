@@ -81,11 +81,12 @@
     "@types/node-schedule": "2.1.7",
     "@types/ws": "8.5.12",
     "@vue/tsconfig": "^0.7.0",
+    "directory-tree": "3.5.2",
     "rimraf": "~6.0.1",
+    "typescript": "6.0.3",
+    "vitest": "1.6.0",
     "vue": "^3.5.13",
     "vue-tsc": "^2.2.10",
-    "directory-tree": "3.5.2",
-    "vitest": "1.6.0",
     "webpack": "^5.104.1"
   },
   "peerDependencies": {

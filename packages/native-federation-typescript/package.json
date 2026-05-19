@@ -104,6 +104,7 @@
   },
   "devDependencies": {
     "directory-tree": "3.5.2",
+    "typescript": "6.0.3",
     "upath": "2.0.1",
     "vitest": "1.6.0",
     "webpack": "5.104.1"
