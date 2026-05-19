@@ -126,6 +126,7 @@ type Share = {
 
 <Collapse title="Example">
 
+
 ```ts
 import { init, loadRemote } from '@module-federation/enhanced/runtime';
 
@@ -142,6 +143,7 @@ init({
     ],
 });
 ```
+
 </Collapse>
 
 ### Recommended alternatives
@@ -243,6 +245,7 @@ If you are not using the build plugin, you can switch from `init` to [createInst
 
 When the build plugin or [init](#init) creates the default instance, you can call `getInstance()` to retrieve it.
 
+
 ```ts
 import { getInstance } from '@module-federation/enhanced/runtime';
 
@@ -253,6 +256,7 @@ if (!mfInstance) {
 
 mfInstance.loadRemote('remote/util');
 ```
+
 
 Instances created by [createInstance](#createinstance) do not replace the default instance, but they are still registered globally. You can pass a finder callback to `getInstance` to retrieve one later even if you did not keep the returned reference.
 
@@ -467,11 +471,10 @@ Use this when you want a plugin to be picked up by all future runtime instances,
 
 Global plugins are deduplicated by `plugin.name`.
 
+
 ```ts
-import {
-  registerGlobalPlugins,
-  createInstance,
-} from '@module-federation/enhanced/runtime';
+import { registerGlobalPlugins, createInstance } from '@module-federation/enhanced/runtime';
+
 import runtimePlugin from './runtime-plugin';
 
 registerGlobalPlugins([runtimePlugin()]);
@@ -486,6 +489,7 @@ const mf = createInstance({
   ],
 });
 ```
+
 
 For predictable behavior, register global plugins before creating or using runtime instances.
 
@@ -505,6 +509,7 @@ This helper fills in defaults such as:
 - `entryGlobalName`
 - `shareScope`
 
+
 ```ts
 import { getRemoteInfo } from '@module-federation/enhanced/runtime';
 
@@ -516,6 +521,7 @@ const remoteInfo = getRemoteInfo({
 console.log(remoteInfo.entryGlobalName);
 console.log(remoteInfo.shareScope);
 ```
+
 
 This is a low-level helper. Most applications should configure remotes through `createInstance`, `registerRemotes`, or the build plugin.
 
@@ -536,12 +542,9 @@ Loads a remote entry and returns its entry exports.
 
 This is mainly useful for low-level tooling, debugging, custom loaders, or advanced runtime integrations. Most applications should prefer `loadRemote`.
 
+
 ```ts
-import {
-  createInstance,
-  getRemoteInfo,
-  getRemoteEntry,
-} from '@module-federation/enhanced/runtime';
+import { createInstance, getRemoteInfo, getRemoteEntry } from '@module-federation/enhanced/runtime';
 
 const mf = createInstance({
   name: 'mf_host',
@@ -558,6 +561,7 @@ const remoteEntryExports = await getRemoteEntry({
   remoteInfo,
 });
 ```
+
 
 ## loadScript
 
@@ -577,6 +581,7 @@ Low-level browser helper that injects and loads a remote entry script.
 
 Use it only when you need to work below `loadRemote` / `getRemoteEntry`, for example in custom script loading flows.
 
+
 ```ts
 import { loadScript } from '@module-federation/enhanced/runtime';
 
@@ -586,6 +591,7 @@ await loadScript('http://localhost:2001/remoteEntry.js', {
   },
 });
 ```
+
 
 ## loadScriptNode
 
@@ -607,6 +613,7 @@ Low-level Node.js helper that loads a remote entry into the current process.
 
 Use it only in Node-side integrations or custom loaders. In browser code, use `loadScript` instead.
 
+
 ```ts
 import { loadScriptNode } from '@module-federation/enhanced/runtime';
 
@@ -617,6 +624,7 @@ await loadScriptNode('http://localhost:2001/remoteEntry.js', {
   },
 });
 ```
+
 
 ## registerShared
 
@@ -920,6 +928,7 @@ Through `preloadRemote`, you can start preloading module resources at an earlier
 * `remote`'s `expose`
 * `remote`'s synchronous or asynchronous resources
 * `remote`'s dependent `remote` resources
+
 <Tabs>
   <Tab label="Build Plugin(Use build plugin)">
   ```tsx

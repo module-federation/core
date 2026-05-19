@@ -279,8 +279,10 @@ If this hook returns a fallback module, the runtime uses that value to continue.
 
 * example
 
+
 ```ts
-import { createInstance, loadRemote } from '@module-federation/enhanced/runtime'
+import { createInstance, loadRemote } from '@module-federation/enhanced/runtime';
+
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
 const fallbackPlugin: () => ModuleFederationRuntimePlugin =
@@ -291,7 +293,7 @@ const fallbackPlugin: () => ModuleFederationRuntimePlugin =
         const { lifecycle, id, error } = args;
 
         if (error) {
-          console.warn(`Failed to load remote ${id} at ${lifecycle}:`, error?.message || error);
+          console.warn(\`Failed to load remote \${id} at \${lifecycle}:\`, error?.message || error);
         }
 
         switch (lifecycle) {
@@ -306,7 +308,7 @@ const fallbackPlugin: () => ModuleFederationRuntimePlugin =
             };
 
           case 'beforeRequest':
-            console.warn(`Request processing failed for ${id}`);
+            console.warn(\`Request processing failed for \${id}\`);
             return void 0;
 
           case 'onLoad':
@@ -316,14 +318,14 @@ const fallbackPlugin: () => ModuleFederationRuntimePlugin =
             });
 
           case 'beforeLoadShare':
-            console.warn(`Shared dependency loading failed for ${id}`);
+            console.warn(\`Shared dependency loading failed for \${id}\`);
             return () => ({
               __esModule: true,
               default: {}
             });
 
           default:
-            console.warn(`Unknown lifecycle ${lifecycle} for ${id}`);
+            console.warn(\`Unknown lifecycle \${lifecycle} for \${id}\`);
             return void 0;
         }
       },
@@ -346,6 +348,7 @@ mf.loadRemote('app1/un-existed-module').then(mod=>{
   expect(mod).toEqual('fallback');
 });
 ```
+
 
 ## beforeLoadShare
 
@@ -460,8 +463,9 @@ type ResolveShareOptions ={
 
 * example
 
+
 ```ts
-import { createInstance, loadRemote } from '@module-federation/enhanced/runtime'
+import { createInstance, loadRemote } from '@module-federation/enhanced/runtime';
 
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
@@ -513,6 +517,7 @@ mf.loadShare('react').then((reactFactory) => {
   expect(reactFactory()).toEqual(React);
 });
 ```
+
 
 ## beforePreloadRemote
 
@@ -708,6 +713,7 @@ type CreateScriptOptions ={
 
 * example
 
+
 ```ts
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
@@ -728,6 +734,7 @@ const changeScriptAttributePlugin: () => ModuleFederationRuntimePlugin =
   };
 ```
 
+
 ## fetch
 The `fetch` function allows customizing the request that fetches the manifest JSON. A successful `Response` must yield a valid JSON.
 
@@ -741,10 +748,11 @@ function fetch(manifestUrl: string, requestInit: RequestInit, remoteInfo?: Remot
 
 - Example for including the credentials when fetching the manifest JSON:
 
-```typescript
-// fetch-manifest-with-credentials-plugin.ts
+
+```ts
 import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
+// fetch-manifest-with-credentials-plugin.ts
 export default function (): FederationRuntimePlugin {
   return {
     name: 'fetch-manifest-with-credentials-plugin',
@@ -757,6 +765,7 @@ export default function (): FederationRuntimePlugin {
   }
 };
 ```
+
 
 ## createLink
 
@@ -871,11 +880,13 @@ export type RemoteEntryExports = {
 
 - Example Loading JSON Data
 
-```typescript
-// load-json-data-plugin.ts
+
+```ts
 import { init } from '@module-federation/enhanced/runtime';
+
 import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
+// load-json-data-plugin.ts
 const changeScriptAttributePlugin: () => FederationRuntimePlugin = function () {
   return {
     name: 'load-json-data-plugin',
@@ -896,6 +907,7 @@ const changeScriptAttributePlugin: () => FederationRuntimePlugin = function () {
   };
 };
 ```
+
 ```ts
 // module-federation-config
 {
@@ -912,11 +924,13 @@ jsonA // {...json data}
 
 - Example Delegate Modules
 
-```typescript
-// delegate-modules-plugin.ts
+
+```ts
 import { init } from '@module-federation/enhanced/runtime';
+
 import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
+// delegate-modules-plugin.ts
 const changeScriptAttributePlugin: () => FederationRuntimePlugin = function () {
   return {
     name: 'delegate-modules-plugin',
@@ -936,6 +950,7 @@ const changeScriptAttributePlugin: () => FederationRuntimePlugin = function () {
   };
 };
 ```
+
 ```ts
 // ./src/delegateModulesA.js
 export async function test1() {

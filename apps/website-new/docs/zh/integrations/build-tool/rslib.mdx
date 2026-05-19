@@ -1,0 +1,75 @@
+# Rslib
+
+Rslib 可以用 `@module-federation/rsbuild-plugin` 产出 Module Federation 生产者。它更适合把组件库、业务模块或 SSR 生产者作为独立产物发布给其他应用消费。
+
+## 快速开始
+
+### 安装
+
+import { PackageManagerTabs } from '@theme';
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm add @module-federation/rsbuild-plugin --save-dev',
+    yarn: 'yarn add @module-federation/rsbuild-plugin --save-dev',
+    pnpm: 'pnpm add @module-federation/rsbuild-plugin --save-dev',
+    bun: 'bun add @module-federation/rsbuild-plugin --save-dev',
+  }}
+/>
+
+### 注册插件
+
+```ts title='rslib.config.ts'
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+import { defineConfig } from '@rslib/core';
+
+export default defineConfig({
+  lib: [
+    {
+      format: 'mf',
+      output: {
+        distPath: {
+          root: './dist/mf',
+        },
+        assetPrefix: 'https://example.com/mf/',
+      },
+      plugins: [
+        pluginModuleFederation({
+          name: 'rslib_provider',
+          exposes: {
+            '.': './src/index.tsx',
+          },
+          shared: {
+            react: {
+              singleton: true,
+            },
+            'react-dom': {
+              singleton: true,
+            },
+          },
+        }),
+      ],
+    },
+  ],
+});
+```
+
+## SSR
+
+如果需要同时生成浏览器和 Node.js 产物，可以在插件选项中使用 `target: 'dual'`。
+
+```ts title='rslib.config.ts'
+pluginModuleFederation(
+  {
+    name: 'rslib_provider',
+    exposes: {
+      '.': './src/index.tsx',
+    },
+  },
+  {
+    target: 'dual',
+  },
+);
+```
+
+完整插件选项可以继续阅读 [Rsbuild 插件配置](/integrations/build-tool/rsbuild#rsbuildoptions)。
