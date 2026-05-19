@@ -19,19 +19,6 @@ Module Federation 的核心能力来自 MF Runtime。大多数项目推荐使用
 | React 应用 | 根据构建工具选择对应插件 | [React](/integrations/framework/react) |
 | Angular 应用 | 根据 Angular 构建方式选择对应插件 | [Angular](/integrations/framework/angular) |
 
-## 如何引用 Runtime API
-
-如果你需要手动调用 `loadRemote`、`registerRemotes`、`getInstance` 等 Runtime API，请根据接入方式选择引用入口：
-
-| 接入方式 | Runtime API 引用方式 |
-| --- | --- |
-| Rspack / Webpack | 从 `@module-federation/enhanced/runtime` 引用 |
-| Modern.js v3 | 从 `@module-federation/modern-js-v3/runtime` 引用 |
-| Modern.js v2 | 从 `@module-federation/modern-js/runtime` 引用 |
-| Rsbuild / Rslib / Vite / Rspress | 额外安装 `@module-federation/enhanced`，并从 `@module-federation/enhanced/runtime` 引用 |
-
-Rsbuild、Rslib、Vite 和 Rspress 的插件包不提供 `runtime` 子路径。如果你只安装了这些插件包，不要从插件包里引用 Runtime API。
-
 ## 如何使用这部分文档
 
 - 新项目可以先看 [快速上手](/guide/start/quick-start)，用脚手架创建示例项目。

@@ -3,7 +3,7 @@
 When a user hovers over a link that will navigate to the shop page, we can prefetch the data needed for that page.
 
 ```ts
-import { getInstance } from '@module-federation/enhanced/runtime';
+import { getInstance } from '@module-federation/runtime';
 
 const instance = getInstance();
 
@@ -20,7 +20,7 @@ const handleMouseEnter = () => {
 For further optimization, we can download the component's JS and CSS files at the same time as prefetching the data.
 
 ```ts
-import { getInstance } from '@module-federation/enhanced/runtime';
+import { getInstance } from '@module-federation/runtime';
 
 const instance = getInstance();
 

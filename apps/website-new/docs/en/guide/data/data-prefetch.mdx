@@ -39,11 +39,7 @@ interface ModuleFederation {
 
 Suppose we have a remote application `shop` that exposes a `Button` component, and this component is associated with a data fetch function.
 
-:::tip Runtime API imports
-The following examples import Runtime APIs from `@module-federation/enhanced/runtime` by default. Modern.js projects can import from `@module-federation/modern-js-v3/runtime` or `@module-federation/modern-js/runtime` instead. For other integrations, see [How to import Runtime APIs](/integrations#how-to-import-runtime-apis).
-:::
-
-import PrefetchDemo from '@components/en/data-fetch/prefetch-demo';
+import PrefetchDemo from '@components/en/data-fetch/prefetch-demo'
 
 {props.prefetchDemo || React.createElement(PrefetchDemo)}
 

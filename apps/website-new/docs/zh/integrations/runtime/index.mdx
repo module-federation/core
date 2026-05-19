@@ -4,17 +4,4 @@
 
 通常使用 `@module-federation/enhanced/runtime` 作为入口。运行时 API、模块注册、模块加载、运行时插件等能力，请继续阅读 [Runtime 接入](/guide/runtime/index)。
 
-## 如何引用 Runtime API
-
-如果你需要手动调用 `loadRemote`、`registerRemotes`、`getInstance` 等 Runtime API，请根据接入方式选择引用入口：
-
-| 接入方式 | Runtime API 引用方式 |
-| --- | --- |
-| Rspack / Webpack | 从 `@module-federation/enhanced/runtime` 引用 |
-| Modern.js v3 | 从 `@module-federation/modern-js-v3/runtime` 引用 |
-| Modern.js v2 | 从 `@module-federation/modern-js/runtime` 引用 |
-| Rsbuild / Rslib / Vite / Rspress | 额外安装 `@module-federation/enhanced`，并从 `@module-federation/enhanced/runtime` 引用 |
-
-Rsbuild、Rslib、Vite 和 Rspress 的插件包不提供 `runtime` 子路径。如果你只安装了这些插件包，不要从插件包里引用 Runtime API。
-
 这种方式适合特殊接入场景。大多数 Web 应用仍然建议优先选择当前项目对应的接入方案，例如 [Rsbuild](/integrations/build-tool/rsbuild)、[Rspack](/integrations/bundler/rspack)、[Webpack](/integrations/bundler/webpack) 或 [Modern.js](/integrations/framework/modernjs)。

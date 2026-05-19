@@ -20,19 +20,6 @@ If you are not sure which package to install, start with your project type:
 | Angular app | Choose the integration package for your Angular build setup | [Angular](/integrations/framework/angular) |
 | Monorepos | Use the package for your app framework and monorepo tooling | [Monorepos](/integrations/framework/monorepos) |
 
-## How to import Runtime APIs
-
-If you need to call Runtime APIs such as `loadRemote`, `registerRemotes`, or `getInstance` manually, choose the import entry based on your integration:
-
-| Integration | Runtime API import |
-| --- | --- |
-| Rspack / Webpack | Import from `@module-federation/enhanced/runtime` |
-| Modern.js v3 | Import from `@module-federation/modern-js-v3/runtime` |
-| Modern.js v2 | Import from `@module-federation/modern-js/runtime` |
-| Rsbuild / Rslib / Vite / Rspress | Install `@module-federation/enhanced` separately and import from `@module-federation/enhanced/runtime` |
-
-The Rsbuild, Rslib, Vite, and Rspress plugin packages do not provide a `runtime` subpath. If you only installed one of these plugin packages, do not import Runtime APIs from the plugin package.
-
 ## How to use this section
 
 - For a new project, start with [Quick Start](/guide/start/quick-start) and create an example project with the scaffolding tool.
