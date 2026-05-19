@@ -164,7 +164,8 @@
     "@modern-js/runtime": "2.70.5",
     "@modern-js/tsconfig": "2.70.5",
     "@types/react": "^18.3.11",
-    "@types/react-dom": "^18.3.0"
+    "@types/react-dom": "^18.3.0",
+    "typescript": "6.0.3"
   },
   "peerDependencies": {
     "react": ">=17",
