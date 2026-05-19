@@ -181,5 +181,6 @@ When reporting back, keep it concrete:
 4. what was changed or what should be changed
 5. how it was verified
 
-If the report is missing, ask for the console `traceId`, optional `read:` line,
-or `.mf/observability/latest.json`.
+If the report is missing, route back to `reference/observability-page.md` or
+`reference/observability-read.md` instead of guessing from incomplete console
+text.

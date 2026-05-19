@@ -3,6 +3,10 @@
 Use this reference to get Module Federation observability reports from the most
 direct available source.
 
+If the user asks to open or visit a real page and observe Module Federation
+loading with no existing report, use `reference/observability-page.md` first so
+it can choose existing project integration or temporary browser injection.
+
 ## Browser Capability Check
 
 For a browser page, first try the least intrusive path:
@@ -25,6 +29,23 @@ browser console context:
 
 ```ts
 window.__FEDERATION__.__OBSERVABILITY__['runtime_host'].getReport('mf-...');
+```
+
+For temporary browser injection through `reference/observability-page.md`,
+always try `chrome_extension` first:
+
+```ts
+window.__FEDERATION__.__OBSERVABILITY__['chrome_extension'].getLatestReport();
+window.__FEDERATION__.__OBSERVABILITY__['chrome_extension'].getReports({
+  limit: 10,
+});
+```
+
+Do not pass or invent a custom scope for this injected path. If the app itself
+configured a different browser scope, inspect:
+
+```ts
+Object.keys(window.__FEDERATION__.__OBSERVABILITY__);
 ```
 
 If the user only has the latest browser report, use:
