@@ -39,6 +39,10 @@ interface ModuleFederation {
 
 假设我们有一个远程应用 `shop`，它暴露了一个组件 `Button`，并且该组件关联了一个数据获取函数。
 
+:::tip Runtime API 引用
+以下示例默认从 `@module-federation/enhanced/runtime` 引用 Runtime API。Modern.js 项目可以改为从 `@module-federation/modern-js-v3/runtime` 或 `@module-federation/modern-js/runtime` 引用。更多接入方式请参考 [如何引用 Runtime API](/integrations#如何引用-runtime-api)。
+:::
+
 import PrefetchDemo from '@components/zh/data-fetch/prefetch-demo';
 
 {props.prefetchDemo || React.createElement(PrefetchDemo)}
