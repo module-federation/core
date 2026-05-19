@@ -67,6 +67,7 @@ export default defineConfig({
     dev: {
       assetPrefix: true,
       writeToDisk: true,
+      lazyCompilation: false,
     },
     performance: {
       buildCache: false,

@@ -1,8 +1,8 @@
 [
   {
     "type": "file",
-    "name": "overview",
-    "label": "概览"
+    "name": "index",
+    "label": "Overview"
   },
   {
     "type": "dir",
@@ -10,5 +10,10 @@
     "label": "React",
     "collapsible": true,
     "collapsed": true
+  },
+  {
+    "type": "file",
+    "name": "vue",
+    "label": "Vue"
   }
 ]

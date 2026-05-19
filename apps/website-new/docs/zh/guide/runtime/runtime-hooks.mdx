@@ -222,8 +222,9 @@ type ErrorLoadRemoteOptions ={
 
 * example
 
+
 ```ts
-import { createInstance } from '@module-federation/enhanced/runtime'
+import { createInstance } from '@module-federation/enhanced/runtime';
 
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
@@ -255,6 +256,7 @@ mf.loadRemote('app1/un-existed-module').then(mod=>{
   expect(mod).toEqual('fallback');
 })
 ```
+
 
 ## beforeLoadShare
 
@@ -324,8 +326,9 @@ type ResolveShareOptions ={
 
 * example
 
+
 ```ts
-import { createInstance, loadRemote } from '@module-federation/enhanced/runtime'
+import { createInstance, loadRemote } from '@module-federation/enhanced/runtime';
 
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
@@ -377,6 +380,7 @@ mf.loadShare('react').then((reactFactory) => {
   expect(reactFactory()).toEqual(React);
 });
 ```
+
 
 ## beforePreloadRemote
 
@@ -446,6 +450,7 @@ type CreateScriptOptions ={
 
 * example
 
+
 ```ts
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
@@ -466,6 +471,7 @@ const changeScriptAttributePlugin: () => ModuleFederationRuntimePlugin =
   };
 ```
 
+
 ## fetch
 `fetch` 函数允许自定义获取清单（manifest）JSON 的请求。成功的 `Response` 必须返回一个有效的 JSON。
 
@@ -479,10 +485,11 @@ function fetch(manifestUrl: string, requestInit: RequestInit): Promise<Response>
 
 - 示例：在获取清单（manifest）JSON 时包含凭证：
 
-```typescript
-// fetch-manifest-with-credentials-plugin.ts
+
+```ts
 import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
+// fetch-manifest-with-credentials-plugin.ts
 export default function (): FederationRuntimePlugin {
   return {
     name: 'fetch-manifest-with-credentials-plugin',
@@ -495,6 +502,7 @@ export default function (): FederationRuntimePlugin {
   }
 };
 ```
+
 
 ## createLink
 
@@ -588,11 +596,13 @@ export type RemoteEntryExports = {
 
 - 示例：加载 JSON 数据
 
-```typescript
-// load-json-data-plugin.ts
+
+```ts
 import { init } from '@module-federation/enhanced/runtime';
+
 import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
+// load-json-data-plugin.ts
 const changeScriptAttributePlugin: () => FederationRuntimePlugin = function () {
   return {
     name: 'load-json-data-plugin',
@@ -613,6 +623,7 @@ const changeScriptAttributePlugin: () => FederationRuntimePlugin = function () {
   };
 };
 ```
+
 ```ts
 // module-federation-config
 {
@@ -629,11 +640,13 @@ jsonA // {...json data}
 
 - 示例：模块代理（Delegate Modules)
 
-```typescript
-// delegate-modules-plugin.ts
+
+```ts
 import { init } from '@module-federation/enhanced/runtime';
+
 import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
+// delegate-modules-plugin.ts
 const changeScriptAttributePlugin: () => FederationRuntimePlugin = function () {
   return {
     name: 'delegate-modules-plugin',
@@ -653,6 +666,7 @@ const changeScriptAttributePlugin: () => FederationRuntimePlugin = function () {
   };
 };
 ```
+
 ```ts
 // ./src/delegateModulesA.js
 export async function test1() {

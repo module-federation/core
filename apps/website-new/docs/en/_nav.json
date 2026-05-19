@@ -59,16 +59,16 @@
         "link": "/integrations/framework/nextjs"
       },
       {
-        "text": "React",
-        "link": "/integrations/framework/react"
-      },
-      {
         "text": "Angular",
         "link": "/integrations/framework/angular"
       },
       {
         "text": "Monorepos",
         "link": "/integrations/framework/monorepos"
+      },
+      {
+        "text": "Practice",
+        "link": "/integrations/practice"
       }
     ]
   },

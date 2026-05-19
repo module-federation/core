@@ -59,12 +59,12 @@
         "link": "/integrations/framework/nextjs"
       },
       {
-        "text": "React",
-        "link": "/integrations/framework/react"
-      },
-      {
         "text": "Angular",
         "link": "/integrations/framework/angular"
+      },
+      {
+        "text": "实践",
+        "link": "/integrations/practice"
       }
     ]
   },

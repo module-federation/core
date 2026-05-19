@@ -13,9 +13,7 @@ const instance = getInstance();
 instance.registerPlugins([lazyLoadComponentPlugin()]);
 
 const List = instance.createLazyComponent({
-  loader: () => {
-    return import('remote/List');
-  },
+  loader: () => import('remote/List'),
   loading: 'loading...',
   export: 'default',
   fallback: ({ error, errorType, dataFetchMapKey }) => {
@@ -24,24 +22,13 @@ const List = instance.createLazyComponent({
       return <div>load remote failed</div>;
     }
     if (errorType === ERROR_TYPE.DATA_FETCH) {
-      return (
-        <div>
-          data fetch failed, the dataFetchMapKey key is: {dataFetchMapKey}
-        </div>
-      );
+      return <div>data fetch failed: {dataFetchMapKey}</div>;
     }
     return <div>error type is unknown</div>;
   },
 });
 
-const Index = (): JSX.Element => {
-  return (
-    <div>
-      <h1>Basic usage with data fetch</h1>
-      <List />
-    </div>
-  );
-};
-
-export default Index;
+export default function Index() {
+  return <List />;
+}
 ```

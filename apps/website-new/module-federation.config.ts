@@ -50,7 +50,7 @@ const exposes = {
   [`./bridge-export-app-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/bridge/react/export-app.mdx`,
   [`./bridge-load-app-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/bridge/react/load-app.mdx`,
   [`./bridge-load-component-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/bridge/react/load-component.mdx`,
-  [`./bridge-vue-${LANGUAGE}`]: `./docs/${LANGUAGE}/guide/bridge/vue.mdx`,
+  [`./bridge-vue-${LANGUAGE}`]: `./docs/${LANGUAGE}/integrations/practice/vue.mdx`,
 
   // plugin
   [`./plugin-introduce-${LANGUAGE}`]: `./docs/${LANGUAGE}/plugin/dev/index.mdx`,
