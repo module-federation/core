@@ -77,9 +77,10 @@
   "devDependencies": {
     "ajv": "^8.18.0",
     "enhanced-resolve": "^5.0.0",
-    "terser": "^5.37.0",
     "fast-glob": "3.3.3",
-    "memfs": "4.46.0"
+    "memfs": "4.46.0",
+    "terser": "^5.37.0",
+    "typescript": "6.0.3"
   },
   "dependencies": {
     "@module-federation/webpack-bundler-runtime": "workspace:*",

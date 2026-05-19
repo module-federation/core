@@ -33,7 +33,8 @@
     "@module-federation/sdk": "workspace:*"
   },
   "devDependencies": {
-    "@rspack/core": "^1.0.2"
+    "@rspack/core": "^1.0.2",
+    "typescript": "6.0.3"
   },
   "exports": {
     ".": {
