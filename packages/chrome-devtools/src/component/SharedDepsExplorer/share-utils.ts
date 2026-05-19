@@ -103,7 +103,7 @@ function normalizeEntry({
     version: sharedEntry.version || versionKey,
     from: sharedEntry.from,
     useIn,
-    shareConfig: sharedEntry.shareConfig ?? {},
+    shareConfig: (sharedEntry.shareConfig ?? {}) as SharedConfig,
     treeShakingMode: (
       sharedEntry as Shared & { treeShaking?: { mode?: string } }
     ).treeShaking?.mode,

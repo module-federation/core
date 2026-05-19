@@ -293,7 +293,7 @@
     "tslib": "2.8.1",
     "tsup": "7.3.0",
     "turbo": "^2.5.8",
-    "typescript": "5.9.3",
+    "typescript": "6.0.3",
     "url-loader": "4.1.1",
     "vite": "7.3.1",
     "vite-tsconfig-paths": "4.2.3",
