@@ -16,18 +16,13 @@
   },
   {
     "type": "dir-section-header",
-    "name": "build-plugins",
-    "label": "Build Plugins"
+    "name": "bridge",
+    "label": "Bridge"
   },
   {
     "type": "dir-section-header",
-    "name": "framework",
-    "label": "Frameworks"
-  },
-  {
-    "type": "dir-section-header",
-    "name": "performance",
-    "label": "Performance"
+    "name": "data",
+    "label": "Data Management"
   },
   {
     "type": "dir-section-header",
@@ -36,17 +31,17 @@
   },
   {
     "type": "dir-section-header",
+    "name": "debug",
+    "label": "Debug"
+  },
+  {
+    "type": "dir-section-header",
     "name": "deployment",
     "label": "Deployment"
   },
   {
     "type": "dir-section-header",
-    "name": "debug",
-    "label": "Debug"
-  },
-  {
-    "type":"dir-section-header",
-    "name":"troubleshooting",
-    "label":"Troubleshooting"
+    "name": "troubleshooting",
+    "label": "Troubleshooting"
   }
 ]

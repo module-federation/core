@@ -1,0 +1,19 @@
+# React 接入概览
+
+React 应用本身不需要一个固定的 React 专用插件。接入 Module Federation 时，先根据项目使用的构建工具选择对应方案。
+
+| 项目类型 | 推荐阅读 |
+| --- | --- |
+| Rsbuild | [Rsbuild](/integrations/build-tool/rsbuild) |
+| Rslib | [Rslib](/integrations/build-tool/rslib) |
+| Rspack | [Rspack](/integrations/bundler/rspack) |
+| Webpack | [Webpack](/integrations/bundler/webpack) |
+| Vite | [Vite](/integrations/build-tool/vite) |
+| 只使用运行时加载远程模块 | [Runtime](/integrations/runtime) |
+
+如果你要在 React 中加载远程组件，可以继续阅读 [Bridge](/guide/bridge/overview)；如果远程组件需要数据获取、数据缓存或预取，可以继续阅读 [数据管理](/guide/data/data-fetch)。
+
+## 示例
+
+- [Rsbuild CRA](./rsbuild-cra)
+- [React i18n](./i18n-react)

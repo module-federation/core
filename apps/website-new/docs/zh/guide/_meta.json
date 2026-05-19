@@ -9,25 +9,20 @@
     "name": "basic",
     "label": "基础"
   },
-    {
+  {
     "type": "dir-section-header",
     "name": "runtime",
     "label": "运行时"
   },
   {
     "type": "dir-section-header",
-    "name": "build-plugins",
-    "label": "构建插件"
+    "name": "bridge",
+    "label": "Bridge"
   },
   {
     "type": "dir-section-header",
-    "name": "framework",
-    "label": "框架"
-  },
-  {
-    "type": "dir-section-header",
-    "name": "performance",
-    "label": "性能优化"
+    "name": "data",
+    "label": "数据管理"
   },
   {
     "type": "dir-section-header",
@@ -36,17 +31,17 @@
   },
   {
     "type": "dir-section-header",
+    "name": "debug",
+    "label": "调试"
+  },
+  {
+    "type": "dir-section-header",
     "name": "deployment",
     "label": "部署"
   },
   {
-    "type":"dir-section-header",
-    "name":"debug",
-    "label":"调试"
-  },
-  {
-    "type":"dir-section-header",
-    "name":"troubleshooting",
-    "label":"Troubleshooting"
+    "type": "dir-section-header",
+    "name": "troubleshooting",
+    "label": "Troubleshooting"
   }
 ]
