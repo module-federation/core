@@ -166,6 +166,7 @@ export interface ObservabilityEvent {
   phase: string;
   status: ObservabilityEventStatus;
   requestId?: string;
+  requestAlias?: string;
   hostName?: string;
   runtimeVersion?: string;
   remote?: ObservabilityRemoteInfo;
@@ -195,6 +196,7 @@ export interface ObservabilityReport {
   traceId: string;
   status: ObservabilityReportStatus;
   requestId?: string;
+  requestAlias?: string;
   hostName?: string;
   runtimeVersion?: string;
   remote?: ObservabilityRemoteInfo;
@@ -353,6 +355,7 @@ export interface ObservabilityRuntimeEventInput {
   phase: string;
   status: ObservabilityEventStatus;
   requestId?: string;
+  requestAlias?: string;
   hostName?: string;
   remote?: ObservabilityRemoteInfo;
   shared?: ObservabilitySharedInfo;
@@ -427,6 +430,7 @@ interface ObservabilityRuntimeOptions {
 
 interface ObservabilityRemoteLoadArgs {
   id: string;
+  pkgNameOrAlias?: string;
   expose?: string;
   remote?: ObservabilityRuntimeRemoteSource;
   origin: ObservabilityRuntimeOrigin;
@@ -1717,6 +1721,25 @@ function resolveRemoteFromRequestId(
   return createRemoteInfo(matchedRemote);
 }
 
+function resolveAliasRequestId(
+  requestId: string | undefined,
+  remote: ObservabilityRemoteInfo | undefined,
+): string | undefined {
+  if (!requestId || !remote?.alias || remote.alias === remote.name) {
+    return undefined;
+  }
+
+  if (requestId === remote.name) {
+    return remote.alias;
+  }
+
+  if (requestId.startsWith(`${remote.name}/`)) {
+    return `${remote.alias}/${requestId.slice(remote.name.length + 1)}`;
+  }
+
+  return undefined;
+}
+
 function sanitizeModuleInfoPath(value: unknown): string | undefined {
   if (typeof value !== 'string') {
     return undefined;
@@ -2024,6 +2047,9 @@ function createErrorContext(
   if (event.requestId) {
     context.requestId = event.requestId;
   }
+  if (event.requestAlias) {
+    context.requestAlias = event.requestAlias;
+  }
   if (event.remote?.name) {
     context.remoteName = event.remote.name;
   }
@@ -2170,6 +2196,9 @@ export function createObservability(
     const errorInfo = getErrorInfo(event.error, options.stackTrace);
     const sanitizedRemote = sanitizeRemote(event.remote);
     const sanitizedShared = sanitizeShared(event.shared);
+    const requestAlias =
+      sanitizeRequestId(event.requestAlias) ||
+      resolveAliasRequestId(event.requestId, sanitizedRemote);
     const hostName =
       sanitizeText(event.hostName, 120) ||
       sanitizeText(origin?.options?.name, 120);
@@ -2183,6 +2212,7 @@ export function createObservability(
       phase: sanitizeText(event.phase, 120) || 'runtime',
       status: event.status,
       requestId: sanitizeRequestId(event.requestId),
+      requestAlias,
       hostName,
       runtimeVersion,
       remote: sanitizedRemote,
@@ -2654,6 +2684,10 @@ export function createObservability(
     addFact('ownerHint', ownerHint);
     addFact('retryable', report.retryable ?? report.summary.error?.retryable);
     addFact('requestId', report.requestId);
+    addFact(
+      'requestAlias',
+      report.requestAlias || report.summary.error?.context?.['requestAlias'],
+    );
     addFact('hostName', report.hostName);
     addFact('remoteName', report.remote?.name);
     addFact('remoteAlias', report.remote?.alias);
@@ -2972,6 +3006,7 @@ export function createObservability(
         traceId: event.traceId,
         status: event.status === 'error' ? 'error' : 'pending',
         requestId: event.requestId,
+        requestAlias: event.requestAlias,
         hostName: event.hostName,
         runtimeVersion: event.runtimeVersion,
         remote: event.remote ? { ...event.remote } : undefined,
@@ -3014,6 +3049,9 @@ export function createObservability(
 
     if (event.requestId) {
       report.requestId = event.requestId;
+    }
+    if (event.requestAlias) {
+      report.requestAlias = event.requestAlias;
     }
     if (event.hostName) {
       report.hostName = event.hostName;
@@ -3252,6 +3290,7 @@ export function createObservability(
         report.remote?.alias,
         report.remote?.entry,
         report.requestId,
+        report.requestAlias,
         report.sanitizedUrl,
       ].some((value) => matchesReportValue(value, query.remote))
     ) {
@@ -3430,6 +3469,9 @@ export function createObservability(
     if (report.requestId) {
       lines.push(`requestId: ${report.requestId}`);
     }
+    if (report.requestAlias) {
+      lines.push(`requestAlias: ${report.requestAlias}`);
+    }
     if (report.errorCode) {
       lines.push(`errorCode: ${report.errorCode}`);
     }
@@ -3483,6 +3525,9 @@ export function createObservability(
 
     if (event.requestId) {
       lines.push(`requestId: ${event.requestId}`);
+    }
+    if (event.requestAlias) {
+      lines.push(`requestAlias: ${event.requestAlias}`);
     }
     if (event.remote?.name) {
       lines.push(`remote: ${event.remote.name}`);
@@ -3633,9 +3678,38 @@ export function createObservability(
       };
     }
 
-    const matched =
-      remoteIds.includes(loadArgs.id) ||
-      (loadArgs.expose ? remoteIds.includes(loadArgs.expose) : false);
+    const normalizeRemoteId = (value: string) =>
+      value.replace(/\/\.\//g, '/').replace(/^\.\//, '');
+    const expectedRemoteIds = new Set(remoteIds.map(normalizeRemoteId));
+    const candidates = new Set<string>();
+    const addCandidate = (value: string | undefined) => {
+      if (!value) {
+        return;
+      }
+      candidates.add(value);
+      candidates.add(normalizeRemoteId(value));
+    };
+    const exposeValues = [loadArgs.expose];
+    if (loadArgs.expose?.startsWith('./')) {
+      exposeValues.push(loadArgs.expose.slice(2));
+    }
+    const remoteNames = [
+      loadArgs.pkgNameOrAlias,
+      loadArgs.remote?.alias,
+      loadArgs.remote?.name,
+    ];
+
+    addCandidate(loadArgs.id);
+    addCandidate(loadArgs.expose);
+    remoteNames.forEach((remoteName) => {
+      exposeValues.forEach((expose) => {
+        addCandidate(remoteName && expose ? `${remoteName}/${expose}` : '');
+      });
+    });
+
+    const matched = Array.from(candidates).some((candidate) =>
+      expectedRemoteIds.has(candidate),
+    );
 
     return matched
       ? {
