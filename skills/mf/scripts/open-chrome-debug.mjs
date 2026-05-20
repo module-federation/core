@@ -3,8 +3,6 @@
 import { spawn } from 'node:child_process';
 import { access, mkdir } from 'node:fs/promises';
 import http from 'node:http';
-import { tmpdir } from 'node:os';
-import path from 'node:path';
 
 const DEFAULT_CHROME =
   '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
@@ -79,25 +77,13 @@ async function waitForDebugPort(port, timeoutMs) {
   return lastResult || { ok: false, error: 'timeout' };
 }
 
-function createDefaultPort() {
-  return String(30000 + Math.floor(Math.random() * 20000));
-}
-
-const port = Number(
-  readArg('port', process.env.CHROME_DEBUG_PORT || createDefaultPort()),
-);
+const port = Number(readArg('port', process.env.CHROME_DEBUG_PORT || '9222'));
 const url = readArg('url', 'about:blank');
 const chrome = readArg('chrome', process.env.CHROME_BIN || DEFAULT_CHROME);
 const timeoutMs = Number(readArg('timeout-ms', '15000'));
 const explicitUserDataDir = readArg('user-data-dir');
-const profilePrefix = readArg(
-  'profile-prefix',
-  process.env.MF_CHROME_DEBUG_PROFILE_PREFIX ||
-    path.join(tmpdir(), 'mf-chrome-debug'),
-);
 const json = hasFlag('json');
 const dryRun = hasFlag('dry-run');
-const reuseExisting = hasFlag('reuse-existing');
 
 if (!Number.isInteger(port) || port <= 0 || port > 65535) {
   print(
@@ -110,8 +96,8 @@ if (!Number.isInteger(port) || port <= 0 || port > 65535) {
   process.exit(1);
 }
 
-const existing = reuseExisting ? await checkDebugPort(port) : { ok: false };
-if (reuseExisting && existing.ok) {
+const existing = await checkDebugPort(port);
+if (existing.ok) {
   print(
     {
       ok: true,
@@ -124,8 +110,6 @@ if (reuseExisting && existing.ok) {
   );
   process.exit(0);
 }
-
-const userDataDir = explicitUserDataDir || `${profilePrefix}-${port}`;
 
 try {
   await access(chrome);
@@ -144,12 +128,15 @@ try {
 
 const args = [
   `--remote-debugging-port=${port}`,
-  `--user-data-dir=${userDataDir}`,
   '--new-window',
   '--no-first-run',
   '--no-default-browser-check',
   url,
 ];
+
+if (explicitUserDataDir) {
+  args.splice(1, 0, `--user-data-dir=${explicitUserDataDir}`);
+}
 
 if (dryRun) {
   print(
@@ -159,14 +146,16 @@ if (dryRun) {
       chrome,
       args,
       message:
-        'Dry run only. This would launch an independent Chrome debug window with an isolated profile.',
+        'Dry run only. This would launch Chrome with the user profile and remote debugging enabled.',
     },
     json,
   );
   process.exit(0);
 }
 
-await mkdir(userDataDir, { recursive: true });
+if (explicitUserDataDir) {
+  await mkdir(explicitUserDataDir, { recursive: true });
+}
 
 try {
   const child = spawn(chrome, args, {
@@ -213,7 +202,7 @@ print(
     args,
     lastError: ready.error,
     message:
-      'Chrome debug port did not become available after launching an independent Chrome debug window.',
+      'Chrome debug port did not become available after launching Chrome with the user profile. Chrome may already be running without remote debugging; do not switch to a temporary profile unless the user explicitly allows a stateless run.',
   },
   json,
 );

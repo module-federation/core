@@ -53,6 +53,8 @@ Options:
   --collector-port <port>  Enable collector on a fixed port.
   --output <file>          Write a JSON capture file.
   --wait-ms <ms>           Wait after navigation before reading page state. Default: 8000.
+  --read-limit <n>         Read recent observability reports after opening. Default: 10.
+  --no-read                Do not read observability reports after opening.
   --dry-run                Read the init script, but do not connect to Chrome.
   --json                   Print JSON output.
 `);
@@ -528,6 +530,44 @@ function evaluateExpression(cdp, expression) {
   });
 }
 
+function buildReportReadExpression(scope, limit) {
+  return `(() => {
+    const observability =
+      window.__FEDERATION__ && window.__FEDERATION__.__OBSERVABILITY__;
+    const scopes = observability ? Object.keys(observability) : [];
+    const reader = observability && observability[${JSON.stringify(scope)}];
+    const result = {
+      href: location.href,
+      title: document.title,
+      scope: ${JSON.stringify(scope)},
+      scopes,
+      latestReport: null,
+      reports: [],
+      readError: null,
+    };
+
+    if (!reader) {
+      result.readError = 'Observability reader scope is missing';
+      return result;
+    }
+
+    try {
+      result.latestReport =
+        typeof reader.getLatestReport === 'function'
+          ? reader.getLatestReport()
+          : null;
+      result.reports =
+        typeof reader.getReports === 'function'
+          ? reader.getReports({ limit: ${Number(limit)} })
+          : [];
+    } catch (error) {
+      result.readError = error?.message || String(error);
+    }
+
+    return result;
+  })()`;
+}
+
 async function main() {
   if (hasFlag('help')) {
     usage();
@@ -539,6 +579,8 @@ async function main() {
   const targetUrl = readArg('url');
   const port = Number(readArg('port', String(DEFAULT_PORT)));
   const waitMs = Number(readArg('wait-ms', String(DEFAULT_WAIT_MS)));
+  const readLimit = Number(readArg('read-limit', '10'));
+  const readAfterOpen = !hasFlag('no-read');
   const iifePath = readArg(
     'iife',
     process.env.MF_OBSERVABILITY_IIFE || DEFAULT_IIFE_PATH,
@@ -567,6 +609,9 @@ async function main() {
   }
   if (!Number.isInteger(waitMs) || waitMs < 0) {
     throw new Error(`Invalid --wait-ms: ${String(waitMs)}`);
+  }
+  if (!Number.isInteger(readLimit) || readLimit <= 0) {
+    throw new Error(`Invalid --read-limit: ${String(readLimit)}`);
   }
 
   const init = initSourcePath
@@ -655,9 +700,21 @@ async function main() {
     },
   }));
 
+  const reportReadResult = readAfterOpen
+    ? await evaluateExpression(
+        cdp,
+        buildReportReadExpression('chrome_extension', readLimit),
+      ).catch((error) => ({
+        exceptionDetails: {
+          text: error.message,
+        },
+      }))
+    : undefined;
+
   cdp.close();
 
   const pageState = pageStateResult?.result?.value;
+  const initialRead = reportReadResult?.result?.value;
   const result = {
     ...baseResult,
     status: 'opened',
@@ -673,6 +730,8 @@ async function main() {
     hasFederation: pageState?.hasFederation,
     hasVmok: pageState?.hasVmok,
     scopes: pageState?.scopes,
+    initialRead,
+    initialReadExceptionDetails: reportReadResult?.exceptionDetails,
     readExpression:
       "window.__FEDERATION__.__OBSERVABILITY__['chrome_extension'].getLatestReport()",
     readCommand: `node skills/mf/scripts/read-observability-report.mjs --port ${port} --page-id ${page.id} --scope chrome_extension --output /tmp/mf-observability-report.json --json`,

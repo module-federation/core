@@ -12,6 +12,10 @@ If the report source is a temporary browser injection from
 `skills/mf/scripts/read-observability-report.mjs` first. Do not create a
 one-off CDP or WebSocket reader script.
 
+If `skills/mf/scripts/open-observability-page.mjs` already returned
+`initialRead`, analyze that result before running another read. Rerun the reader
+only after user interaction, reload, or a specific follow-up target.
+
 ## Browser Capability Check
 
 For a browser page, first try the least intrusive path:

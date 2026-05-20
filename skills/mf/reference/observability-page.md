@@ -21,11 +21,9 @@ to install or keep the plugin in the project.
 
 ## Browser Control Rule
 
-For one-time public page checks, start an independent Chrome debug window first.
-Do not try the Codex Chrome plugin, do not attach to the user's current Chrome
-tabs, and do not depend on an already-open Chrome window. If the user says
-"open my Chrome" without explicitly asking for login state, current cookies, or
-an existing tab, still use the independent debug window.
+For one-time page checks, use the user's Chrome login state by default. Do not
+try the Codex Chrome plugin and do not operate the user's current tab directly;
+use CDP to open a new tab/window in a stateful Chrome debug session.
 
 Run this from the repository root before opening the page:
 
@@ -33,15 +31,22 @@ Run this from the repository root before opening the page:
 node skills/mf/scripts/open-chrome-debug.mjs --url about:blank --json
 ```
 
-Use the returned `port` when running the page-observation script. If starting
-Chrome or opening a local app requires permission, request that permission
-immediately. Only use the user's existing Chrome window, current tab, cookies,
-or logged-in state when the user explicitly asks for current login/session
-state.
+Use the returned `port` when running the page-observation script. The helper
+first reuses an existing Chrome debug port when available; otherwise it tries to
+launch Chrome with the user's normal profile and remote debugging enabled. Do
+not switch to a temporary, stateless, or empty profile unless the user explicitly
+allows a run without login state. If Chrome is already running without remote
+debugging and the helper cannot make the port available, stop and explain that
+Chrome must be restarted in debug mode or explicitly approved for restart.
 
 If connecting to the local Chrome debug port is blocked by sandbox permissions,
 rerun the same skill script with permission. Do not create ad hoc WebSocket or
 CDP scripts in `/tmp`.
+
+Do not use a quick-completion heuristic for normal page observation. A single
+remote or shared event does not prove the page is finished, because Module
+Federation may be only one part of the page. Also do not take screenshots unless
+the user asks to inspect visual page state.
 
 ## Fast Integration Check
 
@@ -117,12 +122,14 @@ ChromeObservabilityPlugin({
 ```
 
 Do not pass `browser.scope`. The browser reader scope is fixed to
-`chrome_extension` by the `chrome-devtool` export. After the script opens the
-page and the user flow is reproduced, route to `observability-read.md` and read
+`chrome_extension` by the `chrome-devtool` export. The script reads the latest
+report once before it exits and stores that in `initialRead`. Use `initialRead`
+first. After additional user interaction or a later reload, route to
+`observability-read.md` and reread
 `window.__FEDERATION__.__OBSERVABILITY__.chrome_extension`.
 
-Use the `readCommand` printed by this script, or run the built-in reader
-directly:
+Use the `readCommand` printed by this script only when a later read is needed,
+or run the built-in reader directly:
 
 ```bash
 node skills/mf/scripts/read-observability-report.mjs \
