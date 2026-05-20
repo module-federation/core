@@ -709,10 +709,16 @@ type CreateScriptOptions ={
   attrs?: Record<string, any>;
   remoteInfo?: RemoteInfo;
 }
+
+type CreateScriptHookReturn =
+  | HTMLScriptElement
+  | { script?: HTMLScriptElement; timeout?: number }
+  | void;
 ```
 
-* example
+`timeout` is measured in milliseconds and controls the script loading timeout. The default value is `20000`.
 
+* example
 
 ```ts
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
@@ -727,7 +733,10 @@ const changeScriptAttributePlugin: () => ModuleFederationRuntimePlugin =
           script.src = url;
           script.setAttribute('loader-hooks', 'isTrue');
           script.setAttribute('crossorigin', 'anonymous');
-          return script;
+          return {
+            script,
+            timeout: 30000,
+          };
         }
       }
     };
