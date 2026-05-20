@@ -834,6 +834,75 @@ type PreloadRemoteArgs = {
 * `remote` 的同步资源还是异步资源
 * `remote` 依赖的 `remote` 资源
 
+`preloadRemote` 会等待本次预加载涉及的资源完成。如果资源全部成功加载或命中缓存，Promise 会 resolve；如果有资源加载失败或超时，Promise 会 reject，并在错误对象上携带本次预加载的资源结果。
+
+如果只关心最终结果，可以直接用 `await` 或 `.then/.catch` 判断：
+
+```ts
+import { preloadRemote } from '@module-federation/enhanced/runtime';
+
+try {
+  await preloadRemote([
+    {
+      nameOrAlias: 'sub1',
+      exposes: ['add'],
+      resourceCategory: 'all',
+    },
+  ]);
+
+  console.log('sub1/add preload success');
+} catch (error) {
+  console.error('sub1/add preload failed', error);
+}
+```
+
+如果需要统计具体哪些资源成功、失败、超时或命中缓存，可以读取错误对象上的 `results`：
+
+```ts
+type PreloadRemoteError = Error & {
+  results?: Array<{
+    id: string;
+    results: Array<{
+      url: string;
+      status: 'success' | 'error' | 'timeout' | 'cached';
+      resourceType: 'manifest' | 'remoteEntry' | 'js' | 'css';
+      error?: unknown;
+    }>;
+  }>;
+};
+
+preloadRemote([
+  {
+    nameOrAlias: 'sub1',
+    exposes: ['add'],
+    resourceCategory: 'all',
+  },
+]).catch((error: PreloadRemoteError) => {
+  const failedResources =
+    error.results
+      ?.flatMap((remoteResult) =>
+        remoteResult.results.map((resource) => ({
+          id: remoteResult.id,
+          ...resource,
+        })),
+      )
+      .filter(
+        (resource) =>
+          resource.status === 'error' || resource.status === 'timeout',
+      ) ?? [];
+
+  failedResources.forEach((resource) => {
+    console.error(
+      `[preloadRemote] ${resource.id} ${resource.resourceType} failed`,
+      resource.url,
+      resource.error,
+    );
+  });
+});
+```
+
+如果没有指定 `exposes`，本次预加载的资源 id 是 `remoteName/*`。如果指定了 `exposes`，运行时会按 expose 单独生成资源，资源 id 是 `remoteName/expose`。
+
 <Tabs>
   <Tab label="Build Plugin（使用构建插件）">
   ```tsx
