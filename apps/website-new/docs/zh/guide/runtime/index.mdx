@@ -35,14 +35,13 @@ import Runtime from '@components/zh/runtime/index';
 
 <Runtime />
 
-## 安装与 Runtime 引用
+## 安装
 
-默认项目安装 `@module-federation/enhanced`，并从 `@module-federation/enhanced/runtime` 引用 Runtime API。Modern.js 项目如果已经使用 `@module-federation/modern-js-v3`，应该从 `@module-federation/modern-js-v3/runtime` 引用 Runtime API，保证框架插件和手动调用的 Runtime 使用同一个实例。
+不同项目需要安装和引用不同的 Runtime 入口。大多数项目默认安装 `@module-federation/enhanced`，并从 `@module-federation/enhanced/runtime` 引用 Runtime API。Modern.js 项目如果已经使用 Module Federation 插件，应该从对应插件的 `/runtime` 入口引用 Runtime API，保证框架插件和手动调用的 Runtime 使用同一个实例。
 
 import { PackageManagerTabs, Tab, Tabs } from '@theme';
 
-<Tabs>
-  <Tab label="Default">
+### @module-federation/enhanced
 
 <PackageManagerTabs
   command={{
@@ -57,8 +56,7 @@ import { PackageManagerTabs, Tab, Tabs } from '@theme';
 import { createInstance, loadRemote } from '@module-federation/enhanced/runtime';
 ```
 
-  </Tab>
-  <Tab label="Modern.js">
+### Modern.js
 
 <PackageManagerTabs
   command={{
@@ -73,8 +71,7 @@ import { createInstance, loadRemote } from '@module-federation/enhanced/runtime'
 import { createInstance, loadRemote } from '@module-federation/modern-js-v3/runtime';
 ```
 
-  </Tab>
-</Tabs>
+如果是 Modern.js v2 项目，请安装 `@module-federation/modern-js`，并从 `@module-federation/modern-js/runtime` 引用 Runtime API。
 
 ## 模块注册
 

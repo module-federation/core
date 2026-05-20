@@ -36,14 +36,13 @@ import Runtime from '@components/en/runtime/index';
 
 <Runtime />
 
-## Installation and Runtime Import
+## Installation
 
-Default projects should install `@module-federation/enhanced` and import Runtime APIs from `@module-federation/enhanced/runtime`. If your Modern.js project already uses `@module-federation/modern-js-v3`, import Runtime APIs from `@module-federation/modern-js-v3/runtime` so the framework plugin and manual Runtime calls use the same Runtime instance.
+Different project types should install and import Runtime from different entries. Most projects should install `@module-federation/enhanced` and import Runtime APIs from `@module-federation/enhanced/runtime`. If your Modern.js project already uses a Module Federation plugin, import Runtime APIs from the plugin's `/runtime` entry so the framework plugin and manual Runtime calls use the same Runtime instance.
 
 import { PackageManagerTabs, Tab, Tabs } from '@theme';
 
-<Tabs>
-  <Tab label="Default">
+### @module-federation/enhanced
 
 <PackageManagerTabs
   command={{
@@ -58,8 +57,7 @@ import { PackageManagerTabs, Tab, Tabs } from '@theme';
 import { createInstance, loadRemote } from '@module-federation/enhanced/runtime';
 ```
 
-  </Tab>
-  <Tab label="Modern.js">
+### Modern.js
 
 <PackageManagerTabs
   command={{
@@ -74,8 +72,7 @@ import { createInstance, loadRemote } from '@module-federation/enhanced/runtime'
 import { createInstance, loadRemote } from '@module-federation/modern-js-v3/runtime';
 ```
 
-  </Tab>
-</Tabs>
+For Modern.js v2 projects, install `@module-federation/modern-js` and import Runtime APIs from `@module-federation/modern-js/runtime`.
 
 ## Module Registration
 
