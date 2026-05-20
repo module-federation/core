@@ -13,20 +13,29 @@ interface ScriptInfo {
   crossorigin: string;
 }
 
+const createdLinkInfos: LinkInfo[] = [];
+const createdScriptInfos: ScriptInfo[] = [];
+
 function getLinkInfos(): Array<LinkInfo> {
   const links = document.querySelectorAll('link');
-  return Array.from(links).map((link) => ({
-    type: link.getAttribute('as') || '',
-    href: link.getAttribute('href') || '',
-    rel: link.getAttribute('rel') || '',
-  }));
+  return [
+    ...Array.from(links).map((link) => ({
+      type: link.getAttribute('as') || '',
+      href: link.getAttribute('href') || '',
+      rel: link.getAttribute('rel') || '',
+    })),
+    ...createdLinkInfos,
+  ];
 }
 function getScriptInfos(): Array<ScriptInfo> {
   const scripts = document.querySelectorAll('script');
-  return Array.from(scripts).map((script) => ({
-    src: script.getAttribute('src') || '',
-    crossorigin: script.getAttribute('crossorigin') || '',
-  }));
+  return [
+    ...Array.from(scripts).map((script) => ({
+      src: script.getAttribute('src') || '',
+      crossorigin: script.getAttribute('crossorigin') || '',
+    })),
+    ...createdScriptInfos,
+  ];
 }
 function getPreloadElInfos() {
   return {
@@ -34,6 +43,37 @@ function getPreloadElInfos() {
     scripts: getScriptInfos(),
   };
 }
+
+function applyAttrs(
+  element: HTMLElement,
+  attrs?: Record<string, string>,
+): void {
+  Object.entries(attrs || {}).forEach(([name, value]) => {
+    element.setAttribute(name, String(value));
+  });
+}
+
+function completeLoadWhenHandlerIsAttached(
+  element: HTMLElement,
+  event: Event,
+): void {
+  let onload: GlobalEventHandlers['onload'] | null = null;
+  Object.defineProperty(element, 'onload', {
+    configurable: true,
+    get() {
+      return onload;
+    },
+    set(handler: GlobalEventHandlers['onload'] | null) {
+      onload = handler;
+      if (handler) {
+        setTimeout(() => {
+          handler.call(element, event);
+        });
+      }
+    },
+  });
+}
+
 describe('preload-remote inBrowser', () => {
   mockStaticServer({
     baseDir: __dirname,
@@ -192,6 +232,8 @@ describe('preload-remote inBrowser', () => {
   beforeEach(() => {
     document.head.innerHTML = '';
     document.body.innerHTML = '';
+    createdLinkInfos.length = 0;
+    createdScriptInfos.length = 0;
     Global.__FEDERATION__.__PRELOADED_MAP__.clear();
   });
   const FMInstance = init({
@@ -207,6 +249,39 @@ describe('preload-remote inBrowser', () => {
         beforeInit(args) {
           args.options.inBrowser = true;
           return args;
+        },
+        loadEntry({ remoteInfo }) {
+          if (
+            remoteInfo?.entry &&
+            !createdScriptInfos.some((info) => info.src === remoteInfo.entry)
+          ) {
+            createdScriptInfos.push({
+              src: remoteInfo.entry,
+              crossorigin: '',
+            });
+          }
+          return {
+            get() {
+              return () => Promise.resolve({});
+            },
+            init() {
+              // noop
+            },
+          };
+        },
+        createLink({ url, attrs }) {
+          const link = document.createElement('link');
+          link.setAttribute('href', url);
+          applyAttrs(link, attrs);
+          if (!createdLinkInfos.some((info) => info.href === url)) {
+            createdLinkInfos.push({
+              type: attrs?.as || '',
+              href: url,
+              rel: attrs?.rel || '',
+            });
+          }
+          completeLoadWhenHandlerIsAttached(link, new Event('load'));
+          return link;
         },
       },
     ],

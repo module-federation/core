@@ -21,6 +21,7 @@ Use it when you want to answer questions such as:
 - Which phase failed: manifest, remoteEntry, init, expose, factory, or shared?
 - Did the load recover through a runtime fallback or recovery path?
 - Which shared dependency provider and version were selected?
+- Did `preloadRemote` actually finish loading its resources?
 - What report should I give to a human or AI coding agent?
 
 Shared observability is scoped to the MF instance. It tells you which MF
@@ -38,6 +39,14 @@ handled path as `summary.outcome: "recovered"`,
 `shared.reason: "custom-share-info-unmatched"`. It means the runtime continued
 through a recoverable path. Inspect shared configuration only if you expected a
 specific provider/version to be selected.
+
+Preload observability answers whether `preloadRemote` actually finished loading
+its resources. After `preloadRemote` completes, reports include
+`phase: "preload"` resource results with the resource URL, resource type,
+status, and preload `id`. Status can be `success`, `error`, `timeout`, or
+`cached`. When the call does not specify `exposes`, the `id` is `remoteName/*`.
+When `exposes` are provided, each expose is recorded separately as
+`remoteName/expose`.
 
 If you want to try the report workflow first, or inspect and export reports
 directly from the page, install the latest
@@ -178,6 +187,9 @@ Common strategies:
 - Shared dependency auditing: also upload
   `report.summary.outcome === "shared-resolved"` so you can see which provider
   and version were selected.
+- Preload result auditing: also upload
+  `report.summary.outcome === "preloaded"` or failed `phase: "preload"` events
+  to count successful, failed, timed out, and cached preload resources.
 - Full loading observability: sample successful `runtime-loaded`,
   `component-loaded`, and `shared-resolved` reports.
 
@@ -186,8 +198,9 @@ After you have a report, read it in this order:
 1. `diagnosis`: owner hint, key facts, and suggested next actions.
 2. `summary`: final result. `runtime-loaded` means the remote loaded,
    `component-loaded` means business code reported readiness, `shared-resolved`
-   means a shared provider/version was selected, `failed` means loading failed,
-   and `recovered` means the runtime continued through a recoverable path.
+   means a shared provider/version was selected, `preloaded` means preload
+   resources completed, `failed` means loading failed, and `recovered` means the
+   runtime continued through a recoverable path.
 3. `remote` / `shared`: the current load target. For shared reports, inspect
    `provider`, `requiredVersion`, `selectedVersion`, and `availableVersions`.
 4. `moduleInfo`: deployment-provided module information, useful for snapshot
@@ -207,7 +220,8 @@ ObservabilityPlugin({
     const shouldUpload =
       report.status === 'error' ||
       outcome === 'recovered' ||
-      outcome === 'shared-resolved';
+      outcome === 'shared-resolved' ||
+      outcome === 'preloaded';
 
     if (!shouldUpload) {
       return;

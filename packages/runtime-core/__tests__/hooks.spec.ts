@@ -170,18 +170,28 @@ describe('hooks', () => {
       plugins: [
         {
           name: 'change-script-attribute',
-          createScript({ url, remoteInfo }) {
+          createScript({ url, remoteInfo, resourceContext }) {
             // Assert remote context is exposed for remoteEntry loads
             if (url === testRemoteEntry) {
               expect(remoteInfo).toMatchObject({
                 name: '@loader-hooks/app2',
                 entry: testRemoteEntry,
               });
+              expect(resourceContext).toMatchObject({
+                initiator: 'loadRemote',
+                resourceType: 'remoteEntry',
+              });
+              expect(resourceContext?.id).toBe('@loader-hooks/app2/say');
             }
             if (url === preloadRemoteEntry) {
               expect(remoteInfo).toMatchObject({
                 name: '@loader-hooks/app3',
                 entry: preloadRemoteEntry,
+              });
+              expect(resourceContext).toMatchObject({
+                initiator: 'preloadRemote',
+                id: '@loader-hooks/app3/*',
+                resourceType: 'remoteEntry',
               });
             }
             const script = document.createElement('script');
@@ -261,6 +271,7 @@ describe('hooks', () => {
       remotes: [
         {
           name: '@loader-hooks/app3',
+          alias: 'app3-alias',
           version: '*',
         },
       ],
@@ -279,8 +290,12 @@ describe('hooks', () => {
         },
         {
           name: 'capture-link-remote-info',
-          createLink({ url, attrs, remoteInfo }) {
+          createLink({ url, attrs, remoteInfo, resourceContext }) {
             lastLinkRemoteInfo = remoteInfo;
+            expect(resourceContext).toMatchObject({
+              initiator: 'preloadRemote',
+              id: '@loader-hooks/app3/*',
+            });
             const link = document.createElement('link');
             link.href = url;
             if (attrs) {
@@ -288,16 +303,275 @@ describe('hooks', () => {
                 link.setAttribute(k, String(v));
               });
             }
+            setTimeout(() => {
+              link.onload?.(new Event('load'));
+            });
             return link;
           },
         },
       ],
     });
 
-    await INSTANCE.preloadRemote([{ nameOrAlias: '@loader-hooks/app3' }]);
+    await INSTANCE.preloadRemote([{ nameOrAlias: 'app3-alias' }]);
     expect(lastLinkRemoteInfo).toMatchObject({
       name: '@loader-hooks/app3',
     });
+
+    reset();
+  });
+
+  it('preloadRemote rejects when a preload resource fails', async () => {
+    const remotePublicPath = 'http://localhost:1111/';
+    const reset = addGlobalSnapshot({
+      '@loader-hooks/globalinfo': {
+        globalName: '',
+        buildVersion: '',
+        publicPath: '',
+        remoteTypes: '',
+        shared: [],
+        remoteEntry: '',
+        remoteEntryType: 'global',
+        modules: [],
+        version: '0.0.1',
+        remotesInfo: {
+          '@loader-hooks/app3': {
+            matchedVersion: '0.0.1',
+          },
+        },
+      },
+      '@loader-hooks/app3:0.0.1': {
+        globalName: '@loader-hooks/app3',
+        publicPath: remotePublicPath,
+        remoteTypes: '',
+        shared: [],
+        buildVersion: 'custom',
+        remotesInfo: {},
+        remoteEntryType: 'global',
+        modules: [],
+        version: '0.0.1',
+        remoteEntry: 'resources/hooks/app3/federation-remote-entry.js',
+      },
+    });
+
+    let afterPreloadArgs: any;
+    const INSTANCE = new ModuleFederation({
+      name: '@loader-hooks/globalinfo',
+      remotes: [
+        {
+          name: '@loader-hooks/app3',
+          version: '*',
+        },
+      ],
+      plugins: [
+        {
+          name: 'force-preload-assets',
+          async generatePreloadAssets() {
+            return {
+              cssAssets: [],
+              jsAssetsWithoutEntry: [
+                'http://localhost:1111/__virtual__/missing-chunk.js',
+              ],
+              entryAssets: [],
+            } as any;
+          },
+          createLink({ url }) {
+            const link = document.createElement('link');
+            link.href = url;
+            setTimeout(() => {
+              link.onerror?.(new Event('error'));
+            });
+            return link;
+          },
+          afterPreloadRemote(args) {
+            afterPreloadArgs = args;
+          },
+        },
+      ],
+    });
+
+    await expect(
+      INSTANCE.preloadRemote([{ nameOrAlias: '@loader-hooks/app3' }]),
+    ).rejects.toThrow('preloadRemote failed to load 1 resource');
+
+    expect(afterPreloadArgs.results[0].results[0]).toMatchObject({
+      url: 'http://localhost:1111/__virtual__/missing-chunk.js',
+      status: 'error',
+      resourceType: 'js',
+      initiator: 'preloadRemote',
+      id: '@loader-hooks/app3/*',
+    });
+
+    reset();
+  });
+
+  it('preloadRemote reports timeout from createLink hook timeout', async () => {
+    const remotePublicPath = 'http://localhost:1111/';
+    const reset = addGlobalSnapshot({
+      '@loader-hooks/globalinfo': {
+        globalName: '',
+        buildVersion: '',
+        publicPath: '',
+        remoteTypes: '',
+        shared: [],
+        remoteEntry: '',
+        remoteEntryType: 'global',
+        modules: [],
+        version: '0.0.1',
+        remotesInfo: {
+          '@loader-hooks/app3': {
+            matchedVersion: '0.0.1',
+          },
+        },
+      },
+      '@loader-hooks/app3:0.0.1': {
+        globalName: '@loader-hooks/app3',
+        publicPath: remotePublicPath,
+        remoteTypes: '',
+        shared: [],
+        buildVersion: 'custom',
+        remotesInfo: {},
+        remoteEntryType: 'global',
+        modules: [],
+        version: '0.0.1',
+        remoteEntry: 'resources/hooks/app3/federation-remote-entry.js',
+      },
+    });
+
+    let afterPreloadArgs: any;
+    const INSTANCE = new ModuleFederation({
+      name: '@loader-hooks/globalinfo',
+      remotes: [
+        {
+          name: '@loader-hooks/app3',
+          version: '*',
+        },
+      ],
+      plugins: [
+        {
+          name: 'timeout-preload-assets',
+          async generatePreloadAssets() {
+            return {
+              cssAssets: [],
+              jsAssetsWithoutEntry: [
+                'http://localhost:1111/__virtual__/timeout-chunk.js',
+              ],
+              entryAssets: [],
+            } as any;
+          },
+          createLink({ url, resourceContext }) {
+            expect(resourceContext).toMatchObject({
+              initiator: 'preloadRemote',
+              resourceType: 'js',
+              id: '@loader-hooks/app3/*',
+            });
+            const link = document.createElement('link');
+            link.href = url;
+            return {
+              link,
+              timeout: 1,
+            };
+          },
+          afterPreloadRemote(args) {
+            afterPreloadArgs = args;
+          },
+        },
+      ],
+    });
+
+    await expect(
+      INSTANCE.preloadRemote([{ nameOrAlias: '@loader-hooks/app3' }]),
+    ).rejects.toThrow('preloadRemote failed to load 1 resource');
+
+    expect(afterPreloadArgs.results[0].results[0]).toMatchObject({
+      url: 'http://localhost:1111/__virtual__/timeout-chunk.js',
+      status: 'timeout',
+      resourceType: 'js',
+      initiator: 'preloadRemote',
+      id: '@loader-hooks/app3/*',
+    });
+
+    reset();
+  });
+
+  it('uses exact expose ids when preloadRemote is configured with exposes', async () => {
+    const remotePublicPath = 'http://localhost:1111/';
+    const reset = addGlobalSnapshot({
+      '@loader-hooks/globalinfo': {
+        globalName: '',
+        buildVersion: '',
+        publicPath: '',
+        remoteTypes: '',
+        shared: [],
+        remoteEntry: '',
+        remoteEntryType: 'global',
+        modules: [],
+        version: '0.0.1',
+        remotesInfo: {
+          '@loader-hooks/app3': {
+            matchedVersion: '0.0.1',
+          },
+        },
+      },
+      '@loader-hooks/app3:0.0.1': {
+        globalName: '@loader-hooks/app3',
+        publicPath: remotePublicPath,
+        remoteTypes: '',
+        shared: [],
+        buildVersion: 'custom',
+        remotesInfo: {},
+        remoteEntryType: 'global',
+        modules: [],
+        version: '0.0.1',
+        remoteEntry: 'resources/hooks/app3/federation-remote-entry.js',
+      },
+    });
+
+    const generatedExposes: Array<string[] | undefined> = [];
+    const resourceIds: string[] = [];
+    const INSTANCE = new ModuleFederation({
+      name: '@loader-hooks/globalinfo',
+      remotes: [
+        {
+          name: '@loader-hooks/app3',
+          version: '*',
+        },
+      ],
+      plugins: [
+        {
+          name: 'force-expose-preload-assets',
+          async generatePreloadAssets(args) {
+            generatedExposes.push(args.preloadOptions.preloadConfig.exposes);
+            const expose = args.preloadOptions.preloadConfig.exposes?.[0];
+            return {
+              cssAssets: [],
+              jsAssetsWithoutEntry: [
+                `http://localhost:1111/__virtual__/${expose}.js`,
+              ],
+              entryAssets: [],
+            } as any;
+          },
+          createLink({ url, resourceContext }) {
+            resourceIds.push(resourceContext?.id || '');
+            const link = document.createElement('link');
+            link.href = url;
+            setTimeout(() => {
+              link.onload?.(new Event('load'));
+            });
+            return link;
+          },
+        },
+      ],
+    });
+
+    await INSTANCE.preloadRemote([
+      { nameOrAlias: '@loader-hooks/app3', exposes: ['Button', 'Card'] },
+    ]);
+
+    expect(generatedExposes).toEqual([['Button'], ['Card']]);
+    expect(resourceIds).toEqual([
+      '@loader-hooks/app3/Button',
+      '@loader-hooks/app3/Card',
+    ]);
 
     reset();
   });
@@ -336,8 +610,13 @@ describe('hooks', () => {
     let lastFetchRemoteInfo: any;
     const fetchPlugin: () => ModuleFederationRuntimePlugin = () => ({
       name: 'fetch-plugin',
-      fetch(url, options, remoteInfo) {
+      fetch(url, options, remoteInfo, resourceContext) {
         lastFetchRemoteInfo = remoteInfo;
+        expect(resourceContext).toMatchObject({
+          initiator: 'loadRemote',
+          id: '@loader-hooks/app2/say',
+          resourceType: 'manifest',
+        });
         if (url === 'http://mockxxx.com/loader-fetch-hooks-mf-manifest.json') {
           return Promise.resolve(responseBody);
         }

@@ -708,15 +708,27 @@ type CreateScriptOptions ={
   url: string;
   attrs?: Record<string, any>;
   remoteInfo?: RemoteInfo;
+  resourceContext?: ResourceLoadContext;
 }
 
 type CreateScriptHookReturn =
   | HTMLScriptElement
   | { script?: HTMLScriptElement; timeout?: number }
   | void;
+
+type ResourceLoadContext = {
+  initiator: 'loadRemote' | 'preloadRemote';
+  id: string;
+  resourceType: 'manifest' | 'remoteEntry' | 'js' | 'css';
+  url?: string;
+}
 ```
 
 `timeout` is measured in milliseconds and controls the script loading timeout. The default value is `20000`.
+`resourceContext` tells whether this resource load came from `loadRemote` or
+`preloadRemote`, plus the resource type and id.
+You can combine `timeout` and `resourceContext` to set different timeouts for
+remoteEntry loads and preload loads.
 
 * example
 
@@ -752,8 +764,16 @@ The `fetch` function allows customizing the request that fetches the manifest JS
 - **Type**
 
 ```typescript
-function fetch(manifestUrl: string, requestInit: RequestInit, remoteInfo?: RemoteInfo): Promise<Response> | void | false;
+function fetch(
+  manifestUrl: string,
+  requestInit: RequestInit,
+  remoteInfo?: RemoteInfo,
+  resourceContext?: ResourceLoadContext,
+): Promise<Response> | void | false;
 ```
+
+`resourceContext` can tell whether this manifest request came from `loadRemote`
+or `preloadRemote`.
 
 - Example for including the credentials when fetching the manifest JSON:
 
@@ -791,7 +811,46 @@ type CreateLinkOptions ={
   url: string;
   attrs?: Record<string, any>;
   remoteInfo?: RemoteInfo;
+  resourceContext?: ResourceLoadContext;
 }
+
+type CreateLinkHookReturn =
+  | HTMLLinkElement
+  | { link?: HTMLLinkElement; timeout?: number }
+  | void;
+```
+
+`resourceContext` has the same shape as in `createScript`. It can distinguish
+preloaded JS/CSS, actual remoteEntry loading, and the related resource id.
+`timeout` is measured in milliseconds and controls the link loading timeout. The
+default value is `20000`.
+
+Example: use a shorter timeout for low-priority preload resources, while keeping
+normal remote loading more tolerant.
+
+```ts
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+const resourceTimeoutPlugin = (): ModuleFederationRuntimePlugin => ({
+  name: 'resource-timeout-plugin',
+  createScript({ resourceContext }) {
+    if (
+      resourceContext?.initiator === 'loadRemote' &&
+      resourceContext.resourceType === 'remoteEntry'
+    ) {
+      return {
+        timeout: 30000,
+      };
+    }
+  },
+  createLink({ resourceContext }) {
+    if (resourceContext?.initiator === 'preloadRemote') {
+      return {
+        timeout: 5000,
+      };
+    }
+  },
+});
 ```
 
 ## loadEntryError

@@ -226,7 +226,7 @@ describe('3005-runtime-host/', () => {
         expect(latestReport.summary.preloaded).to.equal(true);
         expect(latestReport.summary.outcome).to.equal('preloaded');
         expect(latestReport.diagnosis.title).to.equal(
-          'Remote preload prepared',
+          'Remote preloaded successfully',
         );
       });
     });

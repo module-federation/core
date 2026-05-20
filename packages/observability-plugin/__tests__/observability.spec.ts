@@ -2010,13 +2010,13 @@ describe('ObservabilityPlugin', () => {
     });
   });
 
-  it('records preloadRemote asset preparation as a successful preload outcome', async () => {
+  it('records preloadRemote resource results as a successful preload outcome', async () => {
     const observability = createObservability({
       level: 'verbose',
       console: false,
     });
 
-    await observability.plugin.generatePreloadAssets?.({
+    const preloadArgs = {
       origin: enabledOrigin,
       preloadOptions: {
         remote: {
@@ -2042,6 +2042,29 @@ describe('ObservabilityPlugin', () => {
         alias: 'dynamic-remote',
         entry: 'http://localhost:3007/mf-manifest.json',
       },
+    } as any;
+
+    await observability.plugin.generatePreloadAssets?.(preloadArgs);
+    await observability.plugin.afterPreloadRemote?.({
+      origin: enabledOrigin,
+      preloadOps: [preloadArgs.preloadOptions.preloadConfig],
+      results: [
+        {
+          remote: preloadArgs.remote,
+          remoteInfo: preloadArgs.remoteInfo,
+          preloadConfig: preloadArgs.preloadOptions.preloadConfig,
+          id: 'runtime_remote2/ButtonOldAnt',
+          results: [
+            {
+              url: 'http://localhost:3007/static/ButtonOldAnt.js',
+              status: 'success',
+              resourceType: 'js',
+              initiator: 'preloadRemote',
+              id: 'runtime_remote2/ButtonOldAnt',
+            },
+          ],
+        },
+      ],
     } as any);
 
     const report = observability.getLatestReport();
@@ -2057,7 +2080,7 @@ describe('ObservabilityPlugin', () => {
         outcome: 'preloaded',
       },
       diagnosis: {
-        title: 'Remote preload prepared',
+        title: 'Remote preloaded successfully',
         outcome: 'preloaded',
       },
     });
@@ -2066,11 +2089,74 @@ describe('ObservabilityPlugin', () => {
         expect.objectContaining({
           phase: 'preload',
           status: 'success',
-          lifecycle: 'generatePreloadAssets',
-          message: 'preload:assets-ready',
+          lifecycle: 'afterPreloadRemote',
+          message: 'preload:js:success',
         }),
       ]),
     );
+  });
+
+  it('records failed preloadRemote resources with resource details', async () => {
+    const observability = createObservability({
+      level: 'verbose',
+      console: false,
+    });
+
+    await observability.plugin.afterPreloadRemote?.({
+      origin: enabledOrigin,
+      results: [
+        {
+          remote: {
+            name: 'runtime_remote2',
+            alias: 'dynamic-remote',
+            entry: 'http://localhost:3007/mf-manifest.json',
+          },
+          remoteInfo: {
+            name: 'runtime_remote2',
+            alias: 'dynamic-remote',
+            entry: 'http://localhost:3007/mf-manifest.json',
+          },
+          preloadConfig: {
+            nameOrAlias: 'dynamic-remote',
+            exposes: ['ButtonOldAnt'],
+          },
+          id: 'runtime_remote2/ButtonOldAnt',
+          results: [
+            {
+              url: 'http://localhost:3007/static/missing.js',
+              status: 'error',
+              resourceType: 'js',
+              initiator: 'preloadRemote',
+              id: 'runtime_remote2/ButtonOldAnt',
+              error: new Error('LinkNetworkError: Failed to load link'),
+            },
+          ],
+        },
+      ],
+    } as any);
+
+    const report = observability.getLatestReport();
+
+    expect(report).toMatchObject({
+      status: 'error',
+      requestId: 'runtime_remote2/ButtonOldAnt',
+      summary: {
+        outcome: 'failed',
+      },
+      errorContext: {
+        resourceType: 'js',
+        initiator: 'preloadRemote',
+        status: 'error',
+        id: 'runtime_remote2/ButtonOldAnt',
+      },
+    });
+    expect(report?.events[0]).toMatchObject({
+      phase: 'preload',
+      status: 'error',
+      lifecycle: 'afterPreloadRemote',
+      message: 'preload:js:error',
+      sanitizedUrl: 'http://localhost:3007/static/missing.js',
+    });
   });
 
   it('keeps manifest, remoteEntry, and runtime load events in the same remote trace', async () => {
