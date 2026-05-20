@@ -7,6 +7,7 @@ import { ModuleFederationRuntimePlugin } from '../../type/plugin';
 import { RUNTIME_011, runtimeDescMap } from '@module-federation/error-codes';
 import {
   error,
+  composeRemoteRequestId,
   isPureRemoteEntry,
   isRemoteInfoWithEntry,
   getRemoteEntryInfoFromSnapshot,
@@ -46,7 +47,7 @@ export function snapshotPlugin(): ModuleFederationRuntimePlugin {
         const { remoteSnapshot, globalSnapshot } =
           await origin.snapshotHandler.loadRemoteSnapshotInfo({
             moduleInfo: remote,
-            id,
+            id: composeRemoteRequestId(remote.name, expose),
           });
 
         assignRemoteInfo(remoteInfo, remoteSnapshot);
@@ -75,7 +76,10 @@ export function snapshotPlugin(): ModuleFederationRuntimePlugin {
           );
 
         if (assets) {
-          preloadAssets(remoteInfo, origin, assets, false);
+          preloadAssets(remoteInfo, origin, assets, false, {
+            initiator: 'loadRemote',
+            id,
+          }).catch(() => undefined);
         }
 
         return {

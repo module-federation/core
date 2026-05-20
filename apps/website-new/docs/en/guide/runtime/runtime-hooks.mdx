@@ -708,15 +708,25 @@ type CreateScriptOptions ={
   url: string;
   attrs?: Record<string, any>;
   remoteInfo?: RemoteInfo;
+  resourceContext?: ResourceLoadContext;
 }
 
 type CreateScriptHookReturn =
   | HTMLScriptElement
   | { script?: HTMLScriptElement; timeout?: number }
   | void;
+
+type ResourceLoadContext = {
+  initiator: 'loadRemote' | 'preloadRemote';
+  id: string;
+  resourceType: 'manifest' | 'remoteEntry' | 'js' | 'css';
+  url?: string;
+}
 ```
 
 `timeout` is measured in milliseconds and controls the script loading timeout. The default value is `20000`.
+`resourceContext` tells whether this resource load came from `loadRemote` or
+`preloadRemote`, plus the resource type and id.
 
 * example
 
@@ -752,8 +762,16 @@ The `fetch` function allows customizing the request that fetches the manifest JS
 - **Type**
 
 ```typescript
-function fetch(manifestUrl: string, requestInit: RequestInit, remoteInfo?: RemoteInfo): Promise<Response> | void | false;
+function fetch(
+  manifestUrl: string,
+  requestInit: RequestInit,
+  remoteInfo?: RemoteInfo,
+  resourceContext?: ResourceLoadContext,
+): Promise<Response> | void | false;
 ```
+
+`resourceContext` can tell whether this manifest request came from `loadRemote`
+or `preloadRemote`.
 
 - Example for including the credentials when fetching the manifest JSON:
 
@@ -791,8 +809,12 @@ type CreateLinkOptions ={
   url: string;
   attrs?: Record<string, any>;
   remoteInfo?: RemoteInfo;
+  resourceContext?: ResourceLoadContext;
 }
 ```
+
+`resourceContext` has the same shape as in `createScript`. It can distinguish
+preloaded JS/CSS, actual remoteEntry loading, and the related resource id.
 
 ## loadEntryError
 

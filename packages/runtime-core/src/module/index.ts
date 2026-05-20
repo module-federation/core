@@ -3,6 +3,7 @@ import {
   error,
   processModuleAlias,
   optionsToMFContext,
+  composeRemoteRequestId,
 } from '../utils';
 import { safeToString, ModuleInfo } from '@module-federation/sdk';
 import {
@@ -106,7 +107,7 @@ class Module {
     this.host = host;
   }
 
-  async getEntry(): Promise<RemoteEntryExports> {
+  async getEntry(expose?: string): Promise<RemoteEntryExports> {
     if (this.remoteEntryExports) {
       return this.remoteEntryExports;
     }
@@ -115,6 +116,11 @@ class Module {
       origin: this.host,
       remoteInfo: this.remoteInfo,
       remoteEntryExports: this.remoteEntryExports,
+      resourceContext: {
+        initiator: 'loadRemote',
+        id: composeRemoteRequestId(this.remoteInfo.name, expose),
+        resourceType: 'remoteEntry',
+      },
     });
 
     assert(
@@ -132,9 +138,10 @@ class Module {
     id?: string,
     remoteSnapshot?: ModuleInfo,
     rawInitScope?: InitScope,
+    expose?: string,
   ) {
     // Get remoteEntry.js
-    const remoteEntryExports = await this.getEntry();
+    const remoteEntryExports = await this.getEntry(expose);
 
     if (this.inited) {
       await this.host.loaderHook.lifecycle.afterInitRemote.emit({
@@ -282,7 +289,12 @@ class Module {
   ) {
     const { loadFactory = true } = options || { loadFactory: true };
 
-    const remoteEntryExports = await this.init(id, remoteSnapshot);
+    const remoteEntryExports = await this.init(
+      id,
+      remoteSnapshot,
+      undefined,
+      expose,
+    );
     this.lib = remoteEntryExports;
 
     await this.host.loaderHook.lifecycle.beforeGetExpose.emit({

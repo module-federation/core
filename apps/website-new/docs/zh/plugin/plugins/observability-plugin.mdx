@@ -17,11 +17,14 @@ description: 观测 Module Federation 加载过程，收集运行时和构建侧
 - 失败发生在 manifest、remoteEntry、init、expose、factory 还是 shared？
 - 这次加载是否通过运行时 fallback 或恢复路径完成了？
 - 这次命中了哪个 shared provider 和版本？
+- `preloadRemote` 的资源是否真正预加载成功？
 - 应该把哪份报告交给人或 AI coding agent 排查？
 
 shared 观测的边界是实例级别：它用于说明哪个 MF 实例加载了哪个共享依赖、最终使用了哪个已注册的 provider/version，以及对应的 scope、版本、eager 等基础信息。它不保证还原该 shared 是由哪个 remote/expose 间接触发的。一次链路涉及多个 shared 时，请查看 `events` 中所有 `phase: "shared"` 的事件；`summary.shared` 只是最后一次观测到的 shared 摘要。
 
 如果构建插件传入了 `customShareInfo`，但运行时没有匹配到已注册的 shared provider，这不是普通的 fatal error。报告会把它描述为 `summary.outcome: "recovered"`、`summary.phases.shared.status: "complete"`，并在 `shared.reason` 中标记 `"custom-share-info-unmatched"`。它表示运行时走了可继续执行的处理路径；只有当你预期它必须命中某个 provider/version 时，才需要继续检查 shared 配置。
+
+预加载观测用于回答 `preloadRemote` 是否真的把资源加载完。`preloadRemote` 完成后，报告会记录 `phase: "preload"` 的资源结果，包含资源地址、资源类型、状态和这次预加载的 `id`。状态可能是 `success`、`error`、`timeout` 或 `cached`。如果调用时没有指定 `exposes`，`id` 会是 `remoteName/*`；如果指定了 `exposes`，每个 expose 会单独记录成 `remoteName/expose`。
 
 如果你想先体验报告效果，或者希望在页面里直接查看和导出报告，可以安装最新的 [Module Federation Chrome 插件](https://chromewebstore.google.com/detail/module-federation/aeoilchhomapofiopejjlecddfldpeom?hl=zh-CN&utm_source=ext_sidebar)。插件的「加载追踪」Tab 会读取页面已有的观测插件报告；如果页面还没有接入观测插件，也可以在当前 Tab 临时开启采集。更多使用方式见 [Chrome Devtool 加载追踪](../../guide/debug/chrome-devtool#加载追踪)。
 
@@ -201,12 +204,13 @@ export const observabilityPlugin = ObservabilityPlugin({
 
 - 只排查故障：上报 `report.status === "error"` 和 `report.summary.outcome === "recovered"`。
 - 观测 shared 选择结果：额外上报 `report.summary.outcome === "shared-resolved"`，用于查看 shared 使用了哪个 provider 和版本。
+- 观测预加载结果：额外上报 `report.summary.outcome === "preloaded"` 或 `phase: "preload"` 的失败事件，用于统计哪些资源预加载成功、失败、超时或命中缓存。
 - 观测完整加载链路：按比例采样 `runtime-loaded`、`component-loaded`、`shared-resolved` 等成功报告。
 
 拿到报告后，优先按这个顺序分析：
 
 1. `diagnosis`：直接给出问题归属、关键证据和下一步建议。
-2. `summary`：判断最终结果。`runtime-loaded` 表示 remote 已加载，`component-loaded` 表示业务组件主动确认成功，`shared-resolved` 表示 shared 已选出 provider 和版本，`failed` 表示失败，`recovered` 表示走了可继续执行的恢复路径。
+2. `summary`：判断最终结果。`runtime-loaded` 表示 remote 已加载，`component-loaded` 表示业务组件主动确认成功，`shared-resolved` 表示 shared 已选出 provider 和版本，`preloaded` 表示预加载资源已完成，`failed` 表示失败，`recovered` 表示走了可继续执行的恢复路径。
 3. `remote` / `shared`：确认当前加载对象。shared 报告重点看 `provider`、`requiredVersion`、`selectedVersion`、`availableVersions`。
 4. `moduleInfo`：排查依赖部署平台下发的模块信息是否匹配。
 5. `events`：按时间线查看卡在哪个阶段。
@@ -224,7 +228,8 @@ ObservabilityPlugin({
     const shouldUpload =
       report.status === 'error' ||
       outcome === 'recovered' ||
-      outcome === 'shared-resolved';
+      outcome === 'shared-resolved' ||
+      outcome === 'preloaded';
 
     if (!shouldUpload) {
       return;

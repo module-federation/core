@@ -87,6 +87,7 @@ and exposes the final loading state through a small `summary` object:
 - `runtime-loaded`: Module Federation finished loading the remote module.
 - `component-loaded`: business code called `markComponentLoaded`, or a producer
   called the injected `onMFRemoteLoaded` callback.
+- `preloaded`: `preloadRemote` finished loading the selected resources.
 - `failed`: the load failed and `failedPhase` points to the first specific
   failing phase.
 - `recovered`: loading hit an error but a fallback/recovery path returned a
@@ -113,6 +114,20 @@ Successful verbose reports include the key runtime stages: remote match,
 manifest, remoteEntry load, remoteEntry init, expose resolution, module factory
 execution, and final load completion. When a stage has matching start and end
 events, the end event includes a bounded `duration` value.
+
+Preload reports include resource-level results from `preloadRemote`. Each
+result records the resource URL, `resourceType`, `initiator`, preload `id`, and
+status: `success`, `error`, `timeout`, or `cached`. Calls without `exposes` use
+`remoteName/*` as the preload `id`. Calls with `exposes` are recorded per
+expose as `remoteName/expose`. The plugin does not change the existing
+`generatePreloadAssets` return shape; preload resources are still plain URL
+arrays.
+
+Runtime resource hooks also receive a `resourceContext` object on manifest,
+remoteEntry, preload JS, and preload CSS resource loads. It contains
+`initiator`, `id`, `resourceType`, and `url`, so custom loaders can tell whether
+the resource was requested by `loadRemote` or `preloadRemote` without parsing
+the URL.
 
 The report also keeps compact loading state under `summary`. It contains the
 final outcome, per-phase status and duration under `summary.phases`, safe

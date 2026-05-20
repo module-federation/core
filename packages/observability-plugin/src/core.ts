@@ -488,6 +488,30 @@ interface ObservabilityPreloadAssetsArgs {
   remoteInfo?: ObservabilityRuntimeRemoteSource;
 }
 
+interface ObservabilityPreloadAssetResult {
+  url?: string;
+  status?: 'success' | 'error' | 'timeout' | 'cached';
+  resourceType?: string;
+  initiator?: string;
+  id?: string;
+  error?: unknown;
+}
+
+interface ObservabilityPreloadRemoteResult {
+  remote?: ObservabilityRuntimeRemoteSource;
+  remoteInfo?: ObservabilityRuntimeRemoteSource;
+  preloadConfig?: ObservabilityPreloadConfig;
+  id?: string;
+  results?: ObservabilityPreloadAssetResult[];
+}
+
+interface ObservabilityAfterPreloadRemoteArgs {
+  origin: ObservabilityRuntimeOrigin;
+  preloadOps?: ObservabilityPreloadConfig[];
+  results?: ObservabilityPreloadRemoteResult[];
+  error?: unknown;
+}
+
 type ObservabilitySnapshotRemoteSource = ObservabilityRuntimeRemoteSource & {
   remoteEntry?: string;
   ssrRemoteEntry?: string;
@@ -2586,7 +2610,7 @@ export function createObservability(
         return 'Remote loaded successfully';
       }
       if (report.summary.preloaded) {
-        return 'Remote preload prepared';
+        return 'Remote preloaded successfully';
       }
       return 'Remote loading is pending';
     }
@@ -4460,7 +4484,7 @@ export function createObservability(
     plugin.generatePreloadAssets = (args) => {
       const preloadArgs = args as ObservabilityPreloadAssetsArgs;
       if (!prepareRuntimeOrigin(preloadArgs.origin)) {
-        return;
+        return returnHookArgs(args);
       }
 
       const remote = createRemoteInfo(
@@ -4470,7 +4494,7 @@ export function createObservability(
       recordEvent(
         {
           phase: 'preload',
-          status: 'success',
+          status: 'start',
           requestId:
             remote?.name || sanitizeText(preloadConfig?.nameOrAlias, 160),
           remote,
@@ -4488,6 +4512,77 @@ export function createObservability(
         },
         preloadArgs.origin,
       );
+
+      return returnHookArgs(args);
+    };
+
+    plugin.afterPreloadRemote = (args) => {
+      const preloadArgs = args as ObservabilityAfterPreloadRemoteArgs;
+      if (!prepareRuntimeOrigin(preloadArgs.origin)) {
+        return returnHookArgs(args);
+      }
+
+      const results = preloadArgs.results || [];
+      if (results.length === 0 && preloadArgs.error) {
+        recordEvent(
+          {
+            phase: 'preload',
+            status: 'error',
+            requestId: 'preloadRemote',
+            lifecycle: 'afterPreloadRemote',
+            message: 'preload:failed',
+            error: preloadArgs.error,
+          },
+          preloadArgs.origin,
+        );
+        return returnHookArgs(args);
+      }
+
+      results.forEach((preloadResult) => {
+        const remote = createRemoteInfo(
+          preloadResult.remoteInfo || preloadResult.remote,
+        );
+        const requestId =
+          sanitizeRequestId(preloadResult.id) ||
+          remote?.name ||
+          sanitizeText(preloadResult.preloadConfig?.nameOrAlias, 160);
+
+        preloadResult.results?.forEach((assetResult) => {
+          const isError =
+            assetResult.status === 'error' || assetResult.status === 'timeout';
+          recordEvent(
+            {
+              phase: 'preload',
+              status: isError ? 'error' : 'success',
+              requestId,
+              remote,
+              url: assetResult.url,
+              cached: assetResult.status === 'cached',
+              lifecycle: 'afterPreloadRemote',
+              message: `preload:${assetResult.resourceType || 'resource'}:${assetResult.status || 'complete'}`,
+              error: isError ? assetResult.error : undefined,
+              errorContext: isError
+                ? {
+                    resourceType: assetResult.resourceType,
+                    initiator: assetResult.initiator,
+                    status: assetResult.status,
+                    id: assetResult.id,
+                  }
+                : undefined,
+              metadata: clipObservabilityMetadata({
+                resourceType: assetResult.resourceType,
+                initiator: assetResult.initiator,
+                status: assetResult.status,
+                id: assetResult.id,
+                preloadNameOrAlias: preloadResult.preloadConfig?.nameOrAlias,
+              }),
+            },
+            preloadArgs.origin,
+          );
+        });
+      });
+
+      return returnHookArgs(args);
     };
   }
 

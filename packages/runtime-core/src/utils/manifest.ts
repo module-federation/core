@@ -1,5 +1,16 @@
 import { Remote } from '../type';
 
+export function composeRemoteRequestId(
+  remoteName: string,
+  expose?: string,
+): string {
+  if (!expose || expose === '.') {
+    return remoteName;
+  }
+
+  return `${remoteName}/${expose.replace(/^\.\//, '')}`;
+}
+
 // Function to match a remote with its name and expose
 // id: pkgName(@federation/app1) + expose(button) = @federation/app1/button
 // id: alias(app1) + expose(button) = app1/button

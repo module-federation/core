@@ -675,15 +675,24 @@ type CreateScriptOptions ={
   url: string;
   attrs?: Record<string, any>;
   remoteInfo?: RemoteInfo;
+  resourceContext?: ResourceLoadContext;
 }
 
 type CreateScriptHookReturn =
   | HTMLScriptElement
   | { script?: HTMLScriptElement; timeout?: number }
   | void;
+
+type ResourceLoadContext = {
+  initiator: 'loadRemote' | 'preloadRemote';
+  id: string;
+  resourceType: 'manifest' | 'remoteEntry' | 'js' | 'css';
+  url?: string;
+}
 ```
 
 `timeout` 单位为毫秒，用于设置脚本加载超时时间。默认值为 `20000`。
+`resourceContext` 用于判断这次资源加载来自 `loadRemote` 还是 `preloadRemote`，以及对应的资源类型和 id。
 
 * example
 
@@ -719,8 +728,15 @@ const changeScriptAttributePlugin: () => ModuleFederationRuntimePlugin =
 - **Type**
 
 ```typescript
-function fetch(manifestUrl: string, requestInit: RequestInit, remoteInfo?: RemoteInfo): Promise<Response> | void | false;
+function fetch(
+  manifestUrl: string,
+  requestInit: RequestInit,
+  remoteInfo?: RemoteInfo,
+  resourceContext?: ResourceLoadContext,
+): Promise<Response> | void | false;
 ```
+
+`resourceContext` 可用于判断这次 manifest 请求来自 `loadRemote` 还是 `preloadRemote`。
 
 - 示例：在获取清单（manifest）JSON 时包含凭证：
 
@@ -758,8 +774,11 @@ type CreateLinkOptions ={
   url: string;
   attrs?: Record<string, any>;
   remoteInfo?: RemoteInfo;
+  resourceContext?: ResourceLoadContext;
 }
 ```
+
+`resourceContext` 的结构和 `createScript` 一致，可用于区分预加载的 JS/CSS、实际加载的 remoteEntry，以及它们对应的资源 id。
 
 ## loadEntryError
 
