@@ -3174,7 +3174,7 @@ export function createObservability(
     event: ObservabilityEvent,
     report: ObservabilityReport,
   ) => {
-    if (!collectorOptions || !isDebugMode()) {
+    if (!collectorOptions) {
       return;
     }
 
