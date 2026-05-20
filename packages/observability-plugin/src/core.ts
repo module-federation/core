@@ -2,6 +2,7 @@ import type {
   ModuleFederation,
   ModuleFederationRuntimePlugin,
 } from '@module-federation/runtime';
+import { createLogger, isDebugMode } from '@module-federation/sdk';
 
 export type ObservabilityLevel = 'error' | 'summary' | 'verbose';
 export type ObservabilityEventStatus =
@@ -649,6 +650,7 @@ const DEFAULT_MAX_EVENTS = 100;
 const HARD_MAX_EVENTS = 1000;
 const DEFAULT_COLLECTOR_PORT = 17891;
 const COLLECTOR_PATH = '/__mf_observability';
+const logger = createLogger('[ Module Federation Observability Plugin ]');
 const DEFAULT_DEVTOOLS_SOURCE = 'module-federation/observability';
 const COMPONENT_BUSINESS_LOADED_EVENT = 'component:business-loaded';
 const ON_MF_REMOTE_LOADED_PROP = 'onMFRemoteLoaded';
@@ -3172,7 +3174,7 @@ export function createObservability(
     event: ObservabilityEvent,
     report: ObservabilityReport,
   ) => {
-    if (!collectorOptions) {
+    if (!collectorOptions || !isDebugMode()) {
       return;
     }
 
@@ -3200,11 +3202,13 @@ export function createObservability(
         keepalive: body.length <= 64 * 1024,
         credentials: 'omit',
         mode: 'cors',
-      }).catch(() => {
+      }).catch((error) => {
         // The local collector is optional and must not affect MF loading.
+        logger.debug('Failed to notify local observability collector.', error);
       });
-    } catch {
+    } catch (error) {
       // The local collector is optional and must not affect MF loading.
+      logger.debug('Failed to notify local observability collector.', error);
     }
   };
 
@@ -3394,6 +3398,18 @@ export function createObservability(
   };
 
   const shouldUseConsole = () => options.console !== false;
+
+  const shouldUseDevelopmentChannels = () => {
+    if (
+      typeof process === 'undefined' ||
+      !process.env ||
+      typeof process.env.NODE_ENV === 'undefined'
+    ) {
+      return false;
+    }
+
+    return process.env.NODE_ENV !== 'production';
+  };
 
   const shouldUseMinimalBrowserConsole = () =>
     options.browser?.mode === 'production';
@@ -3591,8 +3607,10 @@ export function createObservability(
     const report = updateReport(event);
     emitStartConsoleHint(event, report);
     emitConsoleHint(event, report, input.error);
-    notifyCollector(event, report);
-    notifyDevtools(event, report);
+    if (shouldUseDevelopmentChannels()) {
+      notifyCollector(event, report);
+      notifyDevtools(event, report);
+    }
     notifyRawError(input.error, event, report, origin);
     notifyEvent(event, report, origin);
     notifyReport(report, origin);
