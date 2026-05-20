@@ -1392,6 +1392,73 @@ describe('ObservabilityPlugin', () => {
     );
   });
 
+  it('matches React callback injection by remote alias and expose', async () => {
+    const react = {
+      createElement: vi.fn((type: unknown, props?: unknown) => ({
+        type,
+        props,
+      })),
+    };
+    const observability = createObservability({
+      level: 'verbose',
+      react: {
+        injectLoadedCallback: true,
+        remoteIds: ['rslibProvider/Card'],
+      },
+    });
+
+    function ProviderCard() {
+      return null;
+    }
+
+    const wrapped = await observability.plugin.onLoad?.({
+      id: '@vmok-demo/rslib-provider/Card',
+      pkgNameOrAlias: '@vmok-demo/rslib-provider',
+      expose: './Card',
+      remote: {
+        name: '@vmok-demo/rslib-provider',
+        alias: 'rslibProvider',
+        entry: 'http://localhost:3001/mf-manifest.json',
+      },
+      options: {},
+      origin: {
+        ...enabledOrigin,
+        loadShareSync: () => () => react,
+      },
+      exposeModule: ProviderCard,
+      exposeModuleFactory: undefined,
+      moduleInstance: {},
+    } as any);
+
+    expect(typeof wrapped).toBe('function');
+
+    (wrapped as (props: Record<string, unknown>) => unknown)({});
+
+    expect(react.createElement).toHaveBeenCalledWith(
+      ProviderCard,
+      expect.objectContaining({
+        onMFRemoteLoaded: expect.any(Function),
+      }),
+    );
+
+    expect(observability.getLatestReport()).toMatchObject({
+      requestId: '@vmok-demo/rslib-provider/Card',
+      requestAlias: 'rslibProvider/Card',
+      remote: {
+        name: '@vmok-demo/rslib-provider',
+        alias: 'rslibProvider',
+      },
+      diagnosis: {
+        facts: expect.objectContaining({
+          requestId: '@vmok-demo/rslib-provider/Card',
+          requestAlias: 'rslibProvider/Card',
+          remoteName: '@vmok-demo/rslib-provider',
+          remoteAlias: 'rslibProvider',
+        }),
+      },
+    });
+  });
+
   it('injects the producer loaded callback even when React cannot be resolved from shared scope', async () => {
     const observability = createObservability({
       level: 'verbose',
