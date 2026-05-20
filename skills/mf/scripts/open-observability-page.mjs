@@ -675,6 +675,7 @@ async function main() {
     scopes: pageState?.scopes,
     readExpression:
       "window.__FEDERATION__.__OBSERVABILITY__['chrome_extension'].getLatestReport()",
+    readCommand: `node skills/mf/scripts/read-observability-report.mjs --port ${port} --page-id ${page.id} --scope chrome_extension --output /tmp/mf-observability-report.json --json`,
     message:
       'Opened page with the observability init script registered before navigation.',
   };

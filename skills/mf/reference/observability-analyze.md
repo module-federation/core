@@ -98,6 +98,18 @@ plugin; it no longer observes React render lifecycle events. Because callback
 injection changes the component reference, treat it as a temporary production
 debugging switch and ask the user to remove it after the issue is fixed.
 
+## Shared Evidence Limits
+
+Do not make shared dependency analysis the default path. If the user did not ask
+about shared dependencies and the report does not point to shared loading, do
+not rerun the reader just because shared fields are absent.
+
+Shared dependency evidence is only expected when the page uses Module
+Federation `>= 2.5.0` and the active runtime path emits shared observability
+events. If the version is unknown or below `2.5.0`, say shared dependency
+details were not available from this report; do not treat that as a failed read
+and do not claim that shared dependencies are definitely fine.
+
 ## Decide The Likely Owner
 
 Use `diagnosis.ownerHint` first:
