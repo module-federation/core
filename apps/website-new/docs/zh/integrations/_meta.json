@@ -16,11 +16,6 @@
   },
   {
     "type": "dir-section-header",
-    "name": "runtime",
-    "label": "Runtime"
-  },
-  {
-    "type": "dir-section-header",
     "name": "documentation",
     "label": "文档解决方案"
   },

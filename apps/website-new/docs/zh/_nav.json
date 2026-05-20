@@ -43,10 +43,6 @@
         "link": "/integrations/bundler/metro"
       },
       {
-        "text": "Runtime",
-        "link": "/integrations/runtime"
-      },
-      {
         "text": "Rspress",
         "link": "/integrations/documentation/rspress"
       },

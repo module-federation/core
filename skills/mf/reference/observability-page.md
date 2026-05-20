@@ -39,6 +39,10 @@ immediately. Only use the user's existing Chrome window, current tab, cookies,
 or logged-in state when the user explicitly asks for current login/session
 state.
 
+If connecting to the local Chrome debug port is blocked by sandbox permissions,
+rerun the same skill script with permission. Do not create ad hoc WebSocket or
+CDP scripts in `/tmp`.
+
 ## Fast Integration Check
 
 Run this only when a project path or local dev context is available.
@@ -116,3 +120,15 @@ Do not pass `browser.scope`. The browser reader scope is fixed to
 `chrome_extension` by the `chrome-devtool` export. After the script opens the
 page and the user flow is reproduced, route to `observability-read.md` and read
 `window.__FEDERATION__.__OBSERVABILITY__.chrome_extension`.
+
+Use the `readCommand` printed by this script, or run the built-in reader
+directly:
+
+```bash
+node skills/mf/scripts/read-observability-report.mjs \
+  --port "<returned-port>" \
+  --page-id "<opened-page-id>" \
+  --scope chrome_extension \
+  --output "/tmp/mf-observability-report.json" \
+  --json
+```
