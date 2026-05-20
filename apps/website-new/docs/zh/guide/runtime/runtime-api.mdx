@@ -494,38 +494,6 @@ const mf = createInstance({
 
 为了保证行为可预期，建议在创建或使用 runtime 实例之前注册全局插件。
 
-## getRemoteInfo
-
-- type
-
-```typescript
-function getRemoteInfo(remote: Remote): RemoteInfo {}
-```
-
-把 remote 配置归一化为 runtime 内部使用的 `RemoteInfo` 结构。
-
-这个 helper 会补齐一些默认值，比如：
-
-- `type`
-- `entryGlobalName`
-- `shareScope`
-
-
-```ts
-import { getRemoteInfo } from '@module-federation/enhanced/runtime';
-
-const remoteInfo = getRemoteInfo({
-  name: 'sub1',
-  entry: 'http://localhost:2001/mf-manifest.json',
-});
-
-console.log(remoteInfo.entryGlobalName);
-console.log(remoteInfo.shareScope);
-```
-
-
-这是一个偏底层的 helper。大多数应用仍然应该优先使用 `createInstance`、`registerRemotes` 或构建插件去管理 remotes。
-
 ## getRemoteEntry
 
 - type
@@ -562,70 +530,6 @@ const remoteEntryExports = await getRemoteEntry({
   remoteInfo,
 });
 ```
-
-
-## loadScript
-
-- type
-
-```typescript
-function loadScript(
-  url: string,
-  info: {
-    attrs?: Record<string, any>;
-    createScriptHook?: CreateScriptHookDom;
-  },
-): Promise<void> {}
-```
-
-浏览器侧的底层 helper，用于插入并加载 remote entry script。
-
-只有在你需要绕过 `loadRemote` / `getRemoteEntry`、自己控制 script 加载流程时才需要直接使用它。
-
-
-```ts
-import { loadScript } from '@module-federation/enhanced/runtime';
-
-await loadScript('http://localhost:2001/remoteEntry.js', {
-  attrs: {
-    crossorigin: 'anonymous',
-  },
-});
-```
-
-
-## loadScriptNode
-
-- type
-
-```typescript
-function loadScriptNode(
-  url: string,
-  info: {
-    attrs?: Record<string, any>;
-    loaderHook?: {
-      createScriptHook?: CreateScriptHookNode;
-    };
-  },
-): Promise<void> {}
-```
-
-Node.js 侧的底层 helper，用于把 remote entry 加载到当前进程。
-
-适合 Node 端集成或自定义 loader。浏览器环境请使用 `loadScript`。
-
-
-```ts
-import { loadScriptNode } from '@module-federation/enhanced/runtime';
-
-await loadScriptNode('http://localhost:2001/remoteEntry.js', {
-  attrs: {
-    name: 'sub1',
-    globalName: 'sub1',
-  },
-});
-```
-
 
 ## registerShared
 
