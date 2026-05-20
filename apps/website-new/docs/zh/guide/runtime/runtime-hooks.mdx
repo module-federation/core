@@ -675,15 +675,25 @@ type CreateScriptOptions ={
   url: string;
   attrs?: Record<string, any>;
   remoteInfo?: RemoteInfo;
+  resourceContext?: ResourceLoadContext;
 }
 
 type CreateScriptHookReturn =
   | HTMLScriptElement
   | { script?: HTMLScriptElement; timeout?: number }
   | void;
+
+type ResourceLoadContext = {
+  initiator: 'loadRemote' | 'preloadRemote';
+  id: string;
+  resourceType: 'manifest' | 'remoteEntry' | 'js' | 'css';
+  url?: string;
+}
 ```
 
 `timeout` 单位为毫秒，用于设置脚本加载超时时间。默认值为 `20000`。
+`resourceContext` 用于判断这次资源加载来自 `loadRemote` 还是 `preloadRemote`，以及对应的资源类型和 id。
+可以结合 `timeout` 和 `resourceContext`，为实际远程加载和预加载设置不同的超时时间。
 
 * example
 
@@ -719,8 +729,15 @@ const changeScriptAttributePlugin: () => ModuleFederationRuntimePlugin =
 - **Type**
 
 ```typescript
-function fetch(manifestUrl: string, requestInit: RequestInit, remoteInfo?: RemoteInfo): Promise<Response> | void | false;
+function fetch(
+  manifestUrl: string,
+  requestInit: RequestInit,
+  remoteInfo?: RemoteInfo,
+  resourceContext?: ResourceLoadContext,
+): Promise<Response> | void | false;
 ```
+
+`resourceContext` 可用于判断这次 manifest 请求来自 `loadRemote` 还是 `preloadRemote`。
 
 - 示例：在获取清单（manifest）JSON 时包含凭证：
 
@@ -758,7 +775,43 @@ type CreateLinkOptions ={
   url: string;
   attrs?: Record<string, any>;
   remoteInfo?: RemoteInfo;
+  resourceContext?: ResourceLoadContext;
 }
+
+type CreateLinkHookReturn =
+  | HTMLLinkElement
+  | { link?: HTMLLinkElement; timeout?: number }
+  | void;
+```
+
+`resourceContext` 的结构和 `createScript` 一致，可用于区分预加载的 JS/CSS、实际加载的 remoteEntry，以及它们对应的资源 id。
+`timeout` 单位为毫秒，用于设置 link 加载超时时间。默认值为 `20000`。
+
+示例：让实际加载 remoteEntry 时等待更久，让低优先级预加载资源更快结束。
+
+```ts
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+const resourceTimeoutPlugin = (): ModuleFederationRuntimePlugin => ({
+  name: 'resource-timeout-plugin',
+  createScript({ resourceContext }) {
+    if (
+      resourceContext?.initiator === 'loadRemote' &&
+      resourceContext.resourceType === 'remoteEntry'
+    ) {
+      return {
+        timeout: 30000,
+      };
+    }
+  },
+  createLink({ resourceContext }) {
+    if (resourceContext?.initiator === 'preloadRemote') {
+      return {
+        timeout: 5000,
+      };
+    }
+  },
+});
 ```
 
 ## loadEntryError

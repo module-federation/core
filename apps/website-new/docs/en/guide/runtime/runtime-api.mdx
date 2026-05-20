@@ -796,6 +796,81 @@ Through `preloadRemote`, you can start preloading module resources at an earlier
 * `remote`'s synchronous or asynchronous resources
 * `remote`'s dependent `remote` resources
 
+`preloadRemote` waits for the resources involved in the current preload call to
+finish. The Promise resolves when every resource succeeds or is already cached.
+If any resource fails or times out, the Promise rejects and the error object
+contains the preload resource results.
+
+If you only need the final result, use `await` or `.then/.catch`:
+
+```ts
+import { preloadRemote } from '@module-federation/enhanced/runtime';
+
+try {
+  await preloadRemote([
+    {
+      nameOrAlias: 'sub1',
+      exposes: ['add'],
+      resourceCategory: 'all',
+    },
+  ]);
+
+  console.log('sub1/add preload success');
+} catch (error) {
+  console.error('sub1/add preload failed', error);
+}
+```
+
+If you need to count which resources succeeded, failed, timed out, or came from
+cache, read `results` from the error object:
+
+```ts
+type PreloadRemoteError = Error & {
+  results?: Array<{
+    id: string;
+    results: Array<{
+      url: string;
+      status: 'success' | 'error' | 'timeout' | 'cached';
+      resourceType: 'manifest' | 'remoteEntry' | 'js' | 'css';
+      error?: unknown;
+    }>;
+  }>;
+};
+
+preloadRemote([
+  {
+    nameOrAlias: 'sub1',
+    exposes: ['add'],
+    resourceCategory: 'all',
+  },
+]).catch((error: PreloadRemoteError) => {
+  const failedResources =
+    error.results
+      ?.flatMap((remoteResult) =>
+        remoteResult.results.map((resource) => ({
+          id: remoteResult.id,
+          ...resource,
+        })),
+      )
+      .filter(
+        (resource) =>
+          resource.status === 'error' || resource.status === 'timeout',
+      ) ?? [];
+
+  failedResources.forEach((resource) => {
+    console.error(
+      `[preloadRemote] ${resource.id} ${resource.resourceType} failed`,
+      resource.url,
+      resource.error,
+    );
+  });
+});
+```
+
+When `exposes` is not specified, the resource id is `remoteName/*`. When
+`exposes` is specified, the runtime generates resources per expose and the
+resource id is `remoteName/expose`.
+
 <Tabs>
   <Tab label="Build Plugin(Use build plugin)">
   ```tsx

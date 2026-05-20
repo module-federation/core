@@ -1,5 +1,6 @@
 import { isBrowserEnvValue } from '@module-federation/sdk';
 import type {
+  CreateLinkHookReturnDom,
   CreateScriptHookReturn,
   GlobalModuleInfo,
   ModuleInfo,
@@ -17,6 +18,7 @@ import {
   InitScope,
   RemoteEntryInitOptions,
   CallFrom,
+  ResourceLoadContext,
 } from './type';
 import { getBuilderId, registerPlugins, getRemoteEntry, error } from './utils';
 import {
@@ -120,6 +122,7 @@ export class ModuleFederation {
            * (e.g. preloadRemote / loading remoteEntry).
            */
           remoteInfo?: RemoteInfo;
+          resourceContext?: ResourceLoadContext;
         },
       ],
       CreateScriptHookReturn
@@ -135,12 +138,13 @@ export class ModuleFederation {
            * (e.g. preloadRemote / loading remoteEntry).
            */
           remoteInfo?: RemoteInfo;
+          resourceContext?: ResourceLoadContext;
         },
       ],
-      HTMLLinkElement | void
+      CreateLinkHookReturnDom
     >(),
     fetch: new AsyncHook<
-      [string, RequestInit, RemoteInfo?],
+      [string, RequestInit, RemoteInfo?, ResourceLoadContext?],
       Promise<Response> | void | false
     >(),
     loadEntryError: new AsyncHook<

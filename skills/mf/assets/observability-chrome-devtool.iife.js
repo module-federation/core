@@ -1230,7 +1230,7 @@
         }
         if (report.summary.componentLoaded) return 'Business component loaded';
         if (report.summary.runtimeLoaded) return 'Remote loaded successfully';
-        if (report.summary.preloaded) return 'Remote preload prepared';
+        if (report.summary.preloaded) return 'Remote preloaded successfully';
         return 'Remote loading is pending';
       }
       switch (report.errorCode) {
