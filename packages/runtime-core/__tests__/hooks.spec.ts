@@ -404,6 +404,95 @@ describe('hooks', () => {
     reset();
   });
 
+  it('preloadRemote reports timeout from createLink hook timeout', async () => {
+    const remotePublicPath = 'http://localhost:1111/';
+    const reset = addGlobalSnapshot({
+      '@loader-hooks/globalinfo': {
+        globalName: '',
+        buildVersion: '',
+        publicPath: '',
+        remoteTypes: '',
+        shared: [],
+        remoteEntry: '',
+        remoteEntryType: 'global',
+        modules: [],
+        version: '0.0.1',
+        remotesInfo: {
+          '@loader-hooks/app3': {
+            matchedVersion: '0.0.1',
+          },
+        },
+      },
+      '@loader-hooks/app3:0.0.1': {
+        globalName: '@loader-hooks/app3',
+        publicPath: remotePublicPath,
+        remoteTypes: '',
+        shared: [],
+        buildVersion: 'custom',
+        remotesInfo: {},
+        remoteEntryType: 'global',
+        modules: [],
+        version: '0.0.1',
+        remoteEntry: 'resources/hooks/app3/federation-remote-entry.js',
+      },
+    });
+
+    let afterPreloadArgs: any;
+    const INSTANCE = new ModuleFederation({
+      name: '@loader-hooks/globalinfo',
+      remotes: [
+        {
+          name: '@loader-hooks/app3',
+          version: '*',
+        },
+      ],
+      plugins: [
+        {
+          name: 'timeout-preload-assets',
+          async generatePreloadAssets() {
+            return {
+              cssAssets: [],
+              jsAssetsWithoutEntry: [
+                'http://localhost:1111/__virtual__/timeout-chunk.js',
+              ],
+              entryAssets: [],
+            } as any;
+          },
+          createLink({ url, resourceContext }) {
+            expect(resourceContext).toMatchObject({
+              initiator: 'preloadRemote',
+              resourceType: 'js',
+              id: '@loader-hooks/app3/*',
+            });
+            const link = document.createElement('link');
+            link.href = url;
+            return {
+              link,
+              timeout: 1,
+            };
+          },
+          afterPreloadRemote(args) {
+            afterPreloadArgs = args;
+          },
+        },
+      ],
+    });
+
+    await expect(
+      INSTANCE.preloadRemote([{ nameOrAlias: '@loader-hooks/app3' }]),
+    ).rejects.toThrow('preloadRemote failed to load 1 resource');
+
+    expect(afterPreloadArgs.results[0].results[0]).toMatchObject({
+      url: 'http://localhost:1111/__virtual__/timeout-chunk.js',
+      status: 'timeout',
+      resourceType: 'js',
+      initiator: 'preloadRemote',
+      id: '@loader-hooks/app3/*',
+    });
+
+    reset();
+  });
+
   it('uses exact expose ids when preloadRemote is configured with exposes', async () => {
     const remotePublicPath = 'http://localhost:1111/';
     const reset = addGlobalSnapshot({
