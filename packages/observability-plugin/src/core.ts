@@ -342,6 +342,7 @@ export interface ObservabilityRuntimeAdapterOptions {
   guardRuntimeHooksByRuntimeVersion?: boolean;
   disablePreloadHooks?: boolean;
   returnHookArgs?: boolean;
+  forceDevelopmentChannels?: boolean;
 }
 
 declare module '@module-federation/runtime-core' {
@@ -2143,6 +2144,8 @@ export function createObservability(
     adapterOptions.guardRuntimeHooksByRuntimeVersion === true;
   const shouldDisablePreloadHooks = adapterOptions.disablePreloadHooks === true;
   const shouldReturnHookArgs = adapterOptions.returnHookArgs === true;
+  const shouldForceDevelopmentChannels =
+    adapterOptions.forceDevelopmentChannels === true;
   const returnHookArgs = <T>(args: T): T | undefined =>
     shouldReturnHookArgs ? args : undefined;
   const level = options.level || 'summary';
@@ -3424,16 +3427,25 @@ export function createObservability(
   const shouldUseConsole = () => options.console !== false;
 
   const shouldUseDevelopmentChannels = () => {
-    if (
-      typeof process === 'undefined' ||
-      !process.env ||
-      typeof process.env.NODE_ENV === 'undefined'
-    ) {
+    if (shouldUseMinimalBrowserConsole()) {
       return false;
+    }
+
+    if (shouldForceDevelopmentChannels) {
+      return true;
+    }
+
+    if (typeof process === 'undefined' || !process.env) {
+      return true;
     }
 
     return process.env.NODE_ENV !== 'production';
   };
+
+  const shouldNotifyCollector = () =>
+    shouldUseDevelopmentChannels() && isDebugMode();
+
+  const shouldNotifyDevtools = () => shouldUseDevelopmentChannels();
 
   const shouldUseMinimalBrowserConsole = () =>
     options.browser?.mode === 'production';
@@ -3631,8 +3643,10 @@ export function createObservability(
     const report = updateReport(event);
     emitStartConsoleHint(event, report);
     emitConsoleHint(event, report, input.error);
-    if (shouldUseDevelopmentChannels()) {
+    if (shouldNotifyCollector()) {
       notifyCollector(event, report);
+    }
+    if (shouldNotifyDevtools()) {
       notifyDevtools(event, report);
     }
     notifyRawError(input.error, event, report, origin);

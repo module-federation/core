@@ -14,6 +14,7 @@ export function ChromeObservabilityPlugin(
     guardRuntimeHooksByRuntimeVersion: true,
     disablePreloadHooks: true,
     returnHookArgs: true,
+    forceDevelopmentChannels: true,
   }).plugin;
 }
 
