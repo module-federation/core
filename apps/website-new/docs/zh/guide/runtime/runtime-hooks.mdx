@@ -676,10 +676,16 @@ type CreateScriptOptions ={
   attrs?: Record<string, any>;
   remoteInfo?: RemoteInfo;
 }
+
+type CreateScriptHookReturn =
+  | HTMLScriptElement
+  | { script?: HTMLScriptElement; timeout?: number }
+  | void;
 ```
 
-* example
+`timeout` 单位为毫秒，用于设置脚本加载超时时间。默认值为 `20000`。
 
+* example
 
 ```ts
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
@@ -694,7 +700,10 @@ const changeScriptAttributePlugin: () => ModuleFederationRuntimePlugin =
           script.src = testRemoteEntry;
           script.setAttribute('loader-hooks', 'isTrue');
           script.setAttribute('crossorigin', 'anonymous');
-          return script;
+          return {
+            script,
+            timeout: 30000,
+          };
         }
       }
     };
