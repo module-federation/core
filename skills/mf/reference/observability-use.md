@@ -83,3 +83,9 @@ extension page and the Chrome Devtool Loading Trace docs.
 For agent-driven live page checks, `reference/observability-page.md` can inject
 the same `chrome-devtool` observability entry before navigation and then route
 to `reference/observability-read.md`.
+
+After the user reproduces the issue with an installed browser reader, route to
+`reference/observability-read.md` and read the page with
+`skills/mf/scripts/read-observability-report.mjs --scope auto`. Do not start
+the collector for this browser-reader setup unless the user asks for a
+collector loop or page reading is blocked.

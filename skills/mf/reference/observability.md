@@ -1,10 +1,13 @@
-# Observability
+# obs (Observability)
 
 Use this sub-skill as the single entry for Module Federation observability
 plugin work.
 
 Do not put the full workflow here. Decide the user's current phase, then load
 the smallest needed reference below.
+
+Treat `obs` as shorthand for observability in user prompts, reports, file
+names, and follow-up requests.
 
 ## Route
 
@@ -19,6 +22,7 @@ Typical triggers:
 - enable observability
 - install observability
 - observability setup
+- obs setup
 - onReport
 - onEvent
 - production telemetry
@@ -40,6 +44,8 @@ Typical triggers:
 - visit URL
 - observe page
 - browser observability
+- obs
+- mf obs
 - debug current page
 - no report
 - 看下 MF 加载情况
@@ -51,8 +57,10 @@ Typical triggers:
 
 Use [observability-read.md](observability-read.md) when the user provides a
 trace id, a console `read:` command, a browser reader expression, or asks the
-agent to collect reports from a live page, Chrome DevTools export, local
-collector, Node/SSR output, or build output.
+agent to read reports from a live page, Chrome DevTools export, local
+collector, Node/SSR output, or build output. For a live browser page, read the
+page's existing browser report first; the local collector is not the default
+path unless the user explicitly asks for it or page reading is blocked.
 
 Typical triggers:
 
@@ -85,6 +93,7 @@ a report JSON/file or asks what an observability report means.
 Typical triggers:
 
 - observability report
+- obs report
 - `Observability report generated`
 - `diagnosis`
 - `summary.phases`
