@@ -11,8 +11,10 @@ URL", "看下 MF 加载情况", or live diagnosis with no report yet.
 - If a project path or local dev context is available, run Fast Integration
   Check, then follow its result:
   - Existing integration found: open or reload the page and route to
-    `observability-read.md` to read the existing report. Do not inject another
-    observability plugin.
+    `observability-read.md` to read the existing report with
+    `skills/mf/scripts/read-observability-report.mjs --scope auto`. Do not
+    inject another observability plugin, start the collector, or try Playwright
+    first.
   - Integration absent or unconfirmed: use Live Browser Injection.
 - If no project context is available, use Live Browser Injection.
 
@@ -43,6 +45,9 @@ If connecting to the local Chrome debug port is blocked by sandbox permissions,
 rerun the same skill script with permission. Do not create ad hoc WebSocket or
 CDP scripts in `/tmp`.
 
+Do not use Playwright or a generic browser automation runtime for the first
+report read. The skill already provides CDP helpers for this flow.
+
 Do not use a quick-completion heuristic for normal page observation. A single
 remote or shared event does not prove the page is finished, because Module
 Federation may be only one part of the page. Also do not take screenshots unless
@@ -60,7 +65,8 @@ Run this only when a project path or local dev context is available.
    `rsbuild.config.*`, `rspack.config.*`, `webpack.config.*`,
    `modern.config.*`, `edenx.config.*`, `src/runtime*`, and `src/main*`.
 4. If both dependency and registration are found, open the page and read the
-   existing report; do not inject another observability plugin.
+   existing report with the built-in reader using `--scope auto`; do not inject
+   another observability plugin and do not use the collector for the first read.
 5. If only the dependency is found but no registration is found quickly, treat
    integration as unconfirmed. Do not block one-time diagnosis; use Live Browser
    Injection unless the user asked for project setup.

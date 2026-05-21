@@ -1,6 +1,6 @@
 ---
 name: mf
-description: "All-in-one Module Federation skill. Use when the user asks anything about MF — concepts, configuration, runtime API, shared dependencies, type errors, runtime error code troubleshooting, observability, slow builds, Bridge integration, or adding MF to an existing project."
+description: "All-in-one Module Federation skill. Use when the user asks anything about MF — concepts, configuration, runtime API, shared dependencies, type errors, runtime error code troubleshooting, observability/obs, slow builds, Bridge integration, or adding MF to an existing project."
 argument-hint: <sub-command | natural-language-query> [args...]
 allowed-tools: Read Glob Bash(node *) Bash(npx tsc*) Bash(npx mf dts*) Bash(curl *) WebFetch Write Edit AskUserQuestion
 ---
@@ -23,13 +23,14 @@ Parse `$ARGUMENTS` and map to a reference file in the `reference/` directory (sa
 | `config-check` | `config`, `plugin`, `exposes` | `reference/config-check.md` |
 | `bridge-check` | `bridge`, `sub-app` | `reference/bridge-check.md` |
 | `runtime-error` | `runtime-code`, `runtime-008`, `runtime-001`, `remote-entry` | `reference/runtime-error.md` |
-| `observability` | `observe`, `trace`, `traceId`, `report`, `observability`, `debug-loading`, `telemetry`, `runtime-007`, `moduleInfo`, `snapshot` | `reference/observability.md` |
+| `observability` | `obs`, `observe`, `trace`, `traceId`, `report`, `observability`, `debug-loading`, `telemetry`, `runtime-007`, `moduleInfo`, `snapshot` | `reference/observability.md` |
 
 **If no explicit sub-command is found**, detect intent from the full input:
 
 If the input contains an observability report, `traceId`, console `read:` command,
 `.mf/observability` file path, or asks how to observe, debug, trace, inspect, or
-upload Module Federation loading data, choose `reference/observability.md` even
+upload Module Federation loading data, or uses `obs` as shorthand for
+observability, choose `reference/observability.md` even
 when the same input also contains a `RUNTIME-xxx` code.
 
 | Signal in input | Reference file |
@@ -42,7 +43,7 @@ when the same input also contains a `RUNTIME-xxx` code.
 | "plugin", "asyncStartup", "exposes key", "config" | `reference/config-check.md` |
 | "bridge", "sub-app", "export-app", "createRemoteAppComponent" | `reference/bridge-check.md` |
 | "RUNTIME-001", "RUNTIME-008", "runtime error code", "remote entry load failed", "ScriptNetworkError", "ScriptExecutionError", "container missing", "window[remoteEntryKey]" | `reference/runtime-error.md` |
-| "Observability report generated", "console.error", "traceId", "read:", "diagnosis", "ownerHint", "summary.phases", ".mf/observability", "build-report.json", "latest.json", "RUNTIME-007", "moduleInfo", "remote snapshot", "global snapshot", "snapshot match", "observability", "observe MF", "debug MF loading", "trace loading", "loading report", "open page and inspect MF", "visit URL and observe MF", "看下 MF 加载情况", "telemetry", "onReport", "onEvent", "production report", "upload observability" | `reference/observability.md` |
+| "obs", "mf obs", "Observability report generated", "console.error", "traceId", "read:", "diagnosis", "ownerHint", "summary.phases", ".mf/observability", "build-report.json", "latest.json", "RUNTIME-007", "moduleInfo", "remote snapshot", "global snapshot", "snapshot match", "observability", "observe MF", "debug MF loading", "trace loading", "loading report", "open page and inspect MF", "visit URL and observe MF", "看下 MF 加载情况", "telemetry", "onReport", "onEvent", "production report", "upload observability" | `reference/observability.md` |
 | "manifest", "remoteEntry URL", "module info", "publicPath" | `reference/module-info.md` |
 | "context", "what is configured", "MF role", "bundler" | `reference/context.md` |
 

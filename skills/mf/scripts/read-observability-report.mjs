@@ -7,7 +7,7 @@ import net from 'node:net';
 import path from 'node:path';
 
 const DEFAULT_PORT = 9222;
-const DEFAULT_SCOPE = 'chrome_extension';
+const DEFAULT_SCOPE = 'auto';
 const DEFAULT_LIMIT = 10;
 
 function readArg(name, fallback) {
@@ -31,13 +31,13 @@ function print(payload, asJson) {
 
 function usage() {
   process.stdout.write(`Usage:
-  node scripts/read-observability-report.mjs --port <port> [options]
+  node skills/mf/scripts/read-observability-report.mjs --port <port> [options]
 
 Options:
   --port <port>          Chrome remote debugging port. Default: 9222.
   --page-id <id>         Read a specific Chrome target page id.
   --url-contains <text>  Read the first page whose URL contains this text.
-  --scope <scope>        Browser report scope. Default: chrome_extension.
+  --scope <scope>        Browser report scope. Default: auto. Use chrome_extension for temporary injection.
   --limit <n>            Number of recent reports to read. Default: 10.
   --trace-id <id>        Read and export a specific trace id.
   --remote <name>        Also run findReports({ remote }).
@@ -312,11 +312,17 @@ function buildReadExpression({
     const observability =
       window.__FEDERATION__ && window.__FEDERATION__.__OBSERVABILITY__;
     const scopes = observability ? Object.keys(observability) : [];
-    const reader = observability && observability[${JSON.stringify(scope)}];
+    const requestedScope = ${JSON.stringify(scope)};
+    const selectedScope =
+      requestedScope === 'auto'
+        ? (scopes.includes('chrome_extension') ? 'chrome_extension' : scopes[0])
+        : requestedScope;
+    const reader = observability && selectedScope ? observability[selectedScope] : null;
     const result = {
       href: location.href,
       title: document.title,
-      scope: ${JSON.stringify(scope)},
+      requestedScope,
+      scope: selectedScope || requestedScope,
       scopes,
       hasFederation: Boolean(window.__FEDERATION__),
       hasVmok: Boolean(window.__VMOK__),
@@ -465,9 +471,11 @@ async function main() {
     pageId: page.id,
     pageUrl: page.url,
     pageTitle: page.title,
-    readerExpression: `window.__FEDERATION__.__OBSERVABILITY__[${JSON.stringify(
-      scope,
-    )}]`,
+    selectedScope: resultValue?.scope,
+    readerExpression:
+      scope === 'auto'
+        ? 'window.__FEDERATION__.__OBSERVABILITY__[auto-selected scope]'
+        : `window.__FEDERATION__.__OBSERVABILITY__[${JSON.stringify(scope)}]`,
     result: resultValue,
     exceptionDetails: readResult?.exceptionDetails,
     message: 'Observability report read finished.',

@@ -7,29 +7,56 @@ If the user asks to open or visit a real page and observe Module Federation
 loading with no existing report, use `reference/observability-page.md` first so
 it can choose existing project integration or temporary browser injection.
 
-If the report source is a temporary browser injection from
-`reference/observability-page.md`, use
+If the report source is an already installed browser reader or a temporary
+browser injection from `reference/observability-page.md`, use
 `skills/mf/scripts/read-observability-report.mjs` first. Do not create a
-one-off CDP or WebSocket reader script.
+one-off CDP or WebSocket reader script. Do not try Playwright before this
+built-in reader.
 
 If `skills/mf/scripts/open-observability-page.mjs` already returned
 `initialRead`, analyze that result before running another read. Rerun the reader
 only after user interaction, reload, or a specific follow-up target.
 
+## Installed Plugin Fast Path
+
+When `reference/observability-page.md` found that the project already
+registered the observability plugin, the shortest path is:
+
+```bash
+node skills/mf/scripts/read-observability-report.mjs \
+  --port "<returned-port>" \
+  --page-id "<opened-page-id>" \
+  --scope auto \
+  --limit 10 \
+  --output "/tmp/mf-observability-report.json" \
+  --json
+```
+
+`--scope auto` reads the page's existing
+`window.__FEDERATION__.__OBSERVABILITY__` scopes and selects
+`chrome_extension` when present, otherwise the first available scope. This
+avoids an extra "inspect scopes, then rerun" step for locally installed
+plugins that use project-defined scopes such as `runtime_host`.
+
+Only start the local collector when the user explicitly asks for a collector
+dev loop, or when this built-in browser read is blocked and cannot be rerun
+with permission.
+
 ## Browser Capability Check
 
-For a browser page, first try the least intrusive path:
+For a browser page, first use the built-in CDP reader or another backend that
+can evaluate JavaScript in the page context:
 
 1. open or inspect the target page
-2. check whether the current agent/browser tool can evaluate JavaScript in the
-   page context
+2. evaluate JavaScript in the page context through the built-in reader when a
+   Chrome debug port is available
 3. if evaluation works, read
    `window.__FEDERATION__.__OBSERVABILITY__` directly and do not start the local
    collector
 
-Use the local collector only when page-context evaluation is unavailable,
-blocked, or unreliable. The collector is a fallback for agent environments that
-can open a page but cannot execute `window.__FEDERATION__...` in that page.
+Use the local collector only after the built-in browser reader is unavailable,
+blocked after the appropriate permission retry, unreliable for the current
+page, or when the user explicitly wants a repeatable local collector loop.
 
 ## Browser Console Or Page Global
 

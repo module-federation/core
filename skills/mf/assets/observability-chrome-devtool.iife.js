@@ -1,13 +1,62 @@
-// Generated from @module-federation/observability-plugin@0.0.0-pre-release-2-5-20260518135705.
-// This file is a ready-to-run chrome-devtool browser IIFE for vmok live page observation.
+// Generated from @module-federation/observability-plugin@2.4.0 dist/chrome-devtool.js + dist/core-SUVp26mD.js.
+// This file is a ready-to-run chrome-devtool browser IIFE for MF live page observation.
 (function (global) {
   var exports = {};
+  var _module_federation_sdk = {
+    isDebugMode: function () {
+      try {
+        if (
+          typeof process !== 'undefined' &&
+          process.env &&
+          process.env.FEDERATION_DEBUG
+        )
+          return true;
+      } catch {}
+      try {
+        if (
+          typeof FEDERATION_DEBUG !== 'undefined' &&
+          Boolean(FEDERATION_DEBUG)
+        )
+          return true;
+      } catch {}
+      try {
+        if (
+          global &&
+          global.localStorage &&
+          global.localStorage.getItem('FEDERATION_DEBUG')
+        )
+          return true;
+      } catch {}
+      return false;
+    },
+    createLogger: function (prefix) {
+      return {
+        debug: function () {
+          if (!_module_federation_sdk.isDebugMode()) return;
+          try {
+            var logger =
+              global &&
+              global.console &&
+              (global.console.debug || global.console.log);
+            if (typeof logger === 'function')
+              logger.apply(
+                global.console,
+                [prefix].concat(Array.prototype.slice.call(arguments)),
+              );
+          } catch {}
+        },
+      };
+    },
+  };
 
   //#region src/core.ts
   const DEFAULT_MAX_EVENTS = 100;
   const HARD_MAX_EVENTS = 1e3;
   const DEFAULT_COLLECTOR_PORT = 17891;
   const COLLECTOR_PATH = '/__mf_observability';
+  const logger = (0, _module_federation_sdk.createLogger)(
+    '[ Module Federation Observability Plugin ]',
+  );
   const DEFAULT_DEVTOOLS_SOURCE = 'module-federation/observability';
   const COMPONENT_BUSINESS_LOADED_EVENT = 'component:business-loaded';
   const ON_MF_REMOTE_LOADED_PROP = 'onMFRemoteLoaded';
@@ -678,6 +727,12 @@
       })[0];
     return createRemoteInfo(matchedRemote);
   }
+  function resolveAliasRequestId(requestId, remote) {
+    if (!requestId || !remote?.alias || remote.alias === remote.name) return;
+    if (requestId === remote.name) return remote.alias;
+    if (requestId.startsWith(`${remote.name}/`))
+      return `${remote.alias}/${requestId.slice(remote.name.length + 1)}`;
+  }
   function sanitizeModuleInfoPath(value) {
     if (typeof value !== 'string') return;
     return clipText(value, 320);
@@ -874,6 +929,7 @@
     const context = { ...inputContext };
     if (event.lifecycle) context.lifecycle = event.lifecycle;
     if (event.requestId) context.requestId = event.requestId;
+    if (event.requestAlias) context.requestAlias = event.requestAlias;
     if (event.remote?.name) context.remoteName = event.remote.name;
     if (event.remote?.alias) context.remoteAlias = event.remote.alias;
     if (event.remote?.type) context.remoteType = event.remote.type;
@@ -917,6 +973,8 @@
     const shouldDisablePreloadHooks =
       adapterOptions.disablePreloadHooks === true;
     const shouldReturnHookArgs = adapterOptions.returnHookArgs === true;
+    const shouldForceDevelopmentChannels =
+      adapterOptions.forceDevelopmentChannels === true;
     const returnHookArgs = (args) => (shouldReturnHookArgs ? args : void 0);
     const level = options.level || 'summary';
     const configuredMaxEvents = normalizeMaxEvents(
@@ -970,6 +1028,9 @@
       const errorInfo = getErrorInfo(event.error, options.stackTrace);
       const sanitizedRemote = sanitizeRemote(event.remote);
       const sanitizedShared = sanitizeShared(event.shared);
+      const requestAlias =
+        sanitizeRequestId(event.requestAlias) ||
+        resolveAliasRequestId(event.requestId, sanitizedRemote);
       const hostName =
         sanitizeText(event.hostName, 120) ||
         sanitizeText(origin?.options?.name, 120);
@@ -982,6 +1043,7 @@
         phase: sanitizeText(event.phase, 120) || 'runtime',
         status: event.status,
         requestId: sanitizeRequestId(event.requestId),
+        requestAlias,
         hostName,
         runtimeVersion,
         remote: sanitizedRemote,
@@ -1311,6 +1373,10 @@
       addFact('ownerHint', ownerHint);
       addFact('retryable', report.retryable ?? report.summary.error?.retryable);
       addFact('requestId', report.requestId);
+      addFact(
+        'requestAlias',
+        report.requestAlias || report.summary.error?.context?.['requestAlias'],
+      );
       addFact('hostName', report.hostName);
       addFact('remoteName', report.remote?.name);
       addFact('remoteAlias', report.remote?.alias);
@@ -1589,6 +1655,7 @@
           traceId: event.traceId,
           status: event.status === 'error' ? 'error' : 'pending',
           requestId: event.requestId,
+          requestAlias: event.requestAlias,
           hostName: event.hostName,
           runtimeVersion: event.runtimeVersion,
           remote: event.remote ? { ...event.remote } : void 0,
@@ -1627,6 +1694,7 @@
         reports.set(event.traceId, report);
       }
       if (event.requestId) report.requestId = event.requestId;
+      if (event.requestAlias) report.requestAlias = event.requestAlias;
       if (event.hostName) report.hostName = event.hostName;
       if (event.runtimeVersion) report.runtimeVersion = event.runtimeVersion;
       if (event.remote) report.remote = { ...event.remote };
@@ -1699,8 +1767,15 @@
           keepalive: body.length <= 64 * 1024,
           credentials: 'omit',
           mode: 'cors',
-        }).catch(() => {});
-      } catch {}
+        }).catch((error) => {
+          logger.debug(
+            'Failed to notify local observability collector.',
+            error,
+          );
+        });
+      } catch (error) {
+        logger.debug('Failed to notify local observability collector.', error);
+      }
     };
     const notifyDevtools = (event, report) => {
       if (!devtoolsOptions) return;
@@ -1751,6 +1826,7 @@
           report.remote?.alias,
           report.remote?.entry,
           report.requestId,
+          report.requestAlias,
           report.sanitizedUrl,
         ].some((value) => matchesReportValue(value, query.remote))
       )
@@ -1828,6 +1904,16 @@
       }
     };
     const shouldUseConsole = () => options.console !== false;
+    const shouldUseDevelopmentChannels = () => {
+      if (shouldUseMinimalBrowserConsole()) return false;
+      if (shouldForceDevelopmentChannels) return true;
+      if (typeof process === 'undefined' || !process.env) return true;
+      return process.env.NODE_ENV !== 'production';
+    };
+    const shouldNotifyCollector = () =>
+      shouldUseDevelopmentChannels() &&
+      (0, _module_federation_sdk.isDebugMode)();
+    const shouldNotifyDevtools = () => shouldUseDevelopmentChannels();
     const shouldUseMinimalBrowserConsole = () =>
       options.browser?.mode === 'production';
     const shouldUseStartTrace = () =>
@@ -1874,6 +1960,8 @@
         `phase: ${report.failedPhase || event.phase}`,
       ];
       if (report.requestId) lines.push(`requestId: ${report.requestId}`);
+      if (report.requestAlias)
+        lines.push(`requestAlias: ${report.requestAlias}`);
       if (report.errorCode) lines.push(`errorCode: ${report.errorCode}`);
       if (report.shared?.name) lines.push(`shared: ${report.shared.name}`);
       const browserReadCommand = getBrowserReadCommand(report.traceId);
@@ -1902,6 +1990,7 @@
         `phase: ${event.phase}`,
       ];
       if (event.requestId) lines.push(`requestId: ${event.requestId}`);
+      if (event.requestAlias) lines.push(`requestAlias: ${event.requestAlias}`);
       if (event.remote?.name) lines.push(`remote: ${event.remote.name}`);
       if (event.shared?.name) lines.push(`shared: ${event.shared.name}`);
       if (event.lifecycle) lines.push(`lifecycle: ${event.lifecycle}`);
@@ -1936,8 +2025,8 @@
       const report = updateReport(event);
       emitStartConsoleHint(event, report);
       emitConsoleHint(event, report, input.error);
-      notifyCollector(event, report);
-      notifyDevtools(event, report);
+      if (shouldNotifyCollector()) notifyCollector(event, report);
+      if (shouldNotifyDevtools()) notifyDevtools(event, report);
       notifyRawError(input.error, event, report, origin);
       notifyEvent(event, report, origin);
       notifyReport(report, origin);
@@ -2000,8 +2089,33 @@
         return;
       const remoteIds = options.react.remoteIds || [];
       if (!remoteIds.length) return { allowAnonymousComponent: false };
-      return remoteIds.includes(loadArgs.id) ||
-        (loadArgs.expose ? remoteIds.includes(loadArgs.expose) : false)
+      const normalizeRemoteId = (value) =>
+        value.replace(/\/\.\//g, '/').replace(/^\.\//, '');
+      const expectedRemoteIds = new Set(remoteIds.map(normalizeRemoteId));
+      const candidates = /* @__PURE__ */ new Set();
+      const addCandidate = (value) => {
+        if (!value) return;
+        candidates.add(value);
+        candidates.add(normalizeRemoteId(value));
+      };
+      const exposeValues = [loadArgs.expose];
+      if (loadArgs.expose?.startsWith('./'))
+        exposeValues.push(loadArgs.expose.slice(2));
+      const remoteNames = [
+        loadArgs.pkgNameOrAlias,
+        loadArgs.remote?.alias,
+        loadArgs.remote?.name,
+      ];
+      addCandidate(loadArgs.id);
+      addCandidate(loadArgs.expose);
+      remoteNames.forEach((remoteName) => {
+        exposeValues.forEach((expose) => {
+          addCandidate(remoteName && expose ? `${remoteName}/${expose}` : '');
+        });
+      });
+      return Array.from(candidates).some((candidate) =>
+        expectedRemoteIds.has(candidate),
+      )
         ? { allowAnonymousComponent: true }
         : void 0;
     };
@@ -2611,10 +2725,11 @@
         return returnHookArgs(args);
       },
     };
-    if (!shouldDisablePreloadHooks)
+    if (!shouldDisablePreloadHooks) {
       plugin.generatePreloadAssets = (args) => {
         const preloadArgs = args;
-        if (!prepareRuntimeOrigin(preloadArgs.origin)) return;
+        if (!prepareRuntimeOrigin(preloadArgs.origin))
+          return returnHookArgs(args);
         const remote = createRemoteInfo(
           preloadArgs.remoteInfo || preloadArgs.remote,
         );
@@ -2622,7 +2737,7 @@
         recordEvent(
           {
             phase: 'preload',
-            status: 'success',
+            status: 'start',
             requestId:
               remote?.name || sanitizeText(preloadConfig?.nameOrAlias, 160),
             remote,
@@ -2640,7 +2755,73 @@
           },
           preloadArgs.origin,
         );
+        return returnHookArgs(args);
       };
+      plugin.afterPreloadRemote = (args) => {
+        const preloadArgs = args;
+        if (!prepareRuntimeOrigin(preloadArgs.origin))
+          return returnHookArgs(args);
+        const results = preloadArgs.results || [];
+        if (results.length === 0 && preloadArgs.error) {
+          recordEvent(
+            {
+              phase: 'preload',
+              status: 'error',
+              requestId: 'preloadRemote',
+              lifecycle: 'afterPreloadRemote',
+              message: 'preload:failed',
+              error: preloadArgs.error,
+            },
+            preloadArgs.origin,
+          );
+          return returnHookArgs(args);
+        }
+        results.forEach((preloadResult) => {
+          const remote = createRemoteInfo(
+            preloadResult.remoteInfo || preloadResult.remote,
+          );
+          const requestId =
+            sanitizeRequestId(preloadResult.id) ||
+            remote?.name ||
+            sanitizeText(preloadResult.preloadConfig?.nameOrAlias, 160);
+          preloadResult.results?.forEach((assetResult) => {
+            const isError =
+              assetResult.status === 'error' ||
+              assetResult.status === 'timeout';
+            recordEvent(
+              {
+                phase: 'preload',
+                status: isError ? 'error' : 'success',
+                requestId,
+                remote,
+                url: assetResult.url,
+                cached: assetResult.status === 'cached',
+                lifecycle: 'afterPreloadRemote',
+                message: `preload:${assetResult.resourceType || 'resource'}:${assetResult.status || 'complete'}`,
+                error: isError ? assetResult.error : void 0,
+                errorContext: isError
+                  ? {
+                      resourceType: assetResult.resourceType,
+                      initiator: assetResult.initiator,
+                      status: assetResult.status,
+                      id: assetResult.id,
+                    }
+                  : void 0,
+                metadata: clipObservabilityMetadata({
+                  resourceType: assetResult.resourceType,
+                  initiator: assetResult.initiator,
+                  status: assetResult.status,
+                  id: assetResult.id,
+                  preloadNameOrAlias: preloadResult.preloadConfig?.nameOrAlias,
+                }),
+              },
+              preloadArgs.origin,
+            );
+          });
+        });
+        return returnHookArgs(args);
+      };
+    }
     return {
       plugin,
       getEvents() {
@@ -2691,7 +2872,7 @@
       return createObservability;
     },
   });
-  function ChromeObservabilityPlugin(options) {
+  function ChromeObservabilityPlugin(options = {}) {
     return exports.createObservability(options, {
       pluginName: 'observability-plugin:chrome-extension',
       fixedBrowserScope: 'chrome_extension',
@@ -2700,8 +2881,10 @@
       guardRuntimeHooksByRuntimeVersion: true,
       disablePreloadHooks: true,
       returnHookArgs: true,
+      forceDevelopmentChannels: true,
     }).plugin;
   }
+
   global.ChromeObservabilityPlugin = ChromeObservabilityPlugin;
   global.ModuleFederationChromeObservabilityPlugin = {
     ChromeObservabilityPlugin: ChromeObservabilityPlugin,
