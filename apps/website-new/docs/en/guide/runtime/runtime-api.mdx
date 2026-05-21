@@ -257,6 +257,7 @@ if (!mfInstance) {
 mfInstance.loadRemote('remote/util');
 ```
 
+If the build plugin is not used, calling `getInstance` will throw an exception. In this case, you need to use the [createInstance](#createinstance) to create a new instance.
 
 Instances created by [createInstance](#createinstance) do not replace the default instance, but they are still registered globally. You can pass a finder callback to `getInstance` to retrieve one later even if you did not keep the returned reference.
 
