@@ -27,20 +27,20 @@
 
 ## Bundler
 
-指 [Rspack](https://rspack.dev/)、[Webpack](https://webpack.js.org/) 等模块打包工具。
+指 [Webpack](https://webpack.js.org/)、[Rspack](https://rspack.dev/)、Vite、Metro 等模块打包工具。
 
 打包工具的主要目标是将 JavaScript、CSS 等文件打包在一起，打包后的文件可以在浏览器、Node.js 等环境中使用。当 Bundler 处理 Web 应用时，它会构建一个依赖关系图，其中包含应用需要的各个模块，然后将所有模块打包成一个或多个 bundle。
 
-## Rspack
+具体项目应该选择哪个工具和插件，可以查看[接入方案](/integrations)。
 
-[Rspack](https://www.rspack.dev/) 是一个基于 Rust 的高性能 Web 构建工具，具备与 webpack 生态系统的互操作性，可以被 webpack 项目低成本集成，并提供更好的构建性能。
+## Manifest
 
-相较于 webpack，Rspack 的构建性能有明显提升，除了 Rust 带来的语言优势，这也来自于它的并行架构和增量编译等特性。经过 benchmark 验证，Rspack 可以带来 5 ～ 10 倍编译性能的提升。
+Manifest 是生产者在构建时生成的运行时清单，用于描述远程入口、暴露模块、资源、共享依赖和类型信息。消费者可以通过 `mf-manifest.json` 获取这些信息，再加载对应的远程模块。
 
-## Rsbuild
+更多内容可以查看 [Manifest 与 Snapshot](/guide/basic/manifest-snapshot)、[manifest 配置](/configure/manifest) 和 [mf-manifest.json 字段定义](/configure/manifest-fields)。
 
-[Rsbuild](https://rsbuild.dev/) 是一个基于 Rspack 的 web 构建工具，具备以下特点：
+## Snapshot
 
-- Rsbuild 是一个增强版的 Rspack CLI，更易用、更开箱即用。
-- Rsbuild 是 Rspack 团队对于 web 构建最佳实践的探索和实现。
-- Rsbuild 是 Webpack 应用迁移到 Rspack 的最佳方案，减少 90% 配置，构建快 10 倍。
+Snapshot 是对 Manifest 信息的浓缩和预解析结果。运行时可以从 Manifest 生成 Snapshot；有部署服务时，也可以提前生成并下发 Snapshot，让消费者直接获得远程入口和可预加载资源。
+
+Snapshot 会被用于远程模块加载、资源预加载、调试工具、代理和运行时诊断等场景。

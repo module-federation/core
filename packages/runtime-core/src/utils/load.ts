@@ -7,7 +7,12 @@ import {
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { ModuleFederation } from '../core';
 import { globalLoading, getRemoteEntryExports } from '../global';
-import { Remote, RemoteEntryExports, RemoteInfo } from '../type';
+import {
+  Remote,
+  RemoteEntryExports,
+  RemoteInfo,
+  ResourceLoadContext,
+} from '../type';
 import { assert, error } from './logger';
 import {
   RUNTIME_001,
@@ -107,6 +112,7 @@ async function loadEntryScript({
   remoteInfo,
   loaderHook,
   getEntryUrl,
+  resourceContext,
 }: {
   name: string;
   globalName: string;
@@ -114,6 +120,7 @@ async function loadEntryScript({
   remoteInfo: RemoteInfo;
   loaderHook: ModuleFederation['loaderHook'];
   getEntryUrl?: (url: string) => string;
+  resourceContext?: ResourceLoadContext;
 }): Promise<RemoteEntryExports> {
   const { entryExports: remoteEntryExports } = getRemoteEntryExports(
     name,
@@ -133,6 +140,12 @@ async function loadEntryScript({
         url,
         attrs,
         remoteInfo,
+        resourceContext: resourceContext
+          ? {
+              ...resourceContext,
+              url,
+            }
+          : undefined,
       });
 
       if (!res) return;
@@ -178,11 +191,13 @@ async function loadEntryDom({
   remoteEntryExports,
   loaderHook,
   getEntryUrl,
+  resourceContext,
 }: {
   remoteInfo: RemoteInfo;
   remoteEntryExports?: RemoteEntryExports;
   loaderHook: ModuleFederation['loaderHook'];
   getEntryUrl?: (url: string) => string;
+  resourceContext?: ResourceLoadContext;
 }) {
   const { entry, entryGlobalName: globalName, name, type } = remoteInfo;
   switch (type) {
@@ -199,6 +214,7 @@ async function loadEntryDom({
         remoteInfo,
         loaderHook,
         getEntryUrl,
+        resourceContext,
       });
   }
 }
@@ -206,9 +222,11 @@ async function loadEntryDom({
 async function loadEntryNode({
   remoteInfo,
   loaderHook,
+  resourceContext,
 }: {
   remoteInfo: RemoteInfo;
   loaderHook: ModuleFederation['loaderHook'];
+  resourceContext?: ResourceLoadContext;
 }) {
   const { entry, entryGlobalName: globalName, name, type } = remoteInfo;
   const { entryExports: remoteEntryExports } = getRemoteEntryExports(
@@ -228,6 +246,12 @@ async function loadEntryNode({
           url,
           attrs,
           remoteInfo,
+          resourceContext: resourceContext
+            ? {
+                ...resourceContext,
+                url,
+              }
+            : undefined,
         });
 
         if (!res) return;
@@ -262,12 +286,14 @@ export async function getRemoteEntry(params: {
   remoteEntryExports?: RemoteEntryExports | undefined;
   getEntryUrl?: (url: string) => string;
   _inErrorHandling?: boolean; // Add flag to prevent recursion
+  resourceContext?: ResourceLoadContext;
 }): Promise<RemoteEntryExports | false | void> {
   const {
     origin,
     remoteEntryExports,
     remoteInfo,
     getEntryUrl,
+    resourceContext,
     _inErrorHandling = false,
   } = params;
   const uniqueKey = getRemoteEntryUniqueKey(remoteInfo);
@@ -281,6 +307,7 @@ export async function getRemoteEntry(params: {
 
     globalLoading[uniqueKey] = loadEntryHook
       .emit({
+        origin,
         loaderHook,
         remoteInfo,
         remoteEntryExports,
@@ -301,8 +328,17 @@ export async function getRemoteEntry(params: {
               remoteEntryExports,
               loaderHook,
               getEntryUrl,
+              resourceContext,
             })
-          : loadEntryNode({ remoteInfo, loaderHook });
+          : loadEntryNode({ remoteInfo, loaderHook, resourceContext });
+      })
+      .then(async (res) => {
+        await origin.loaderHook.lifecycle.afterLoadEntry.emit({
+          origin,
+          remoteInfo,
+          remoteEntryExports: res,
+        });
+        return res;
       })
       .catch(async (err) => {
         const uniqueKey = getRemoteEntryUniqueKey(remoteInfo);
@@ -333,9 +369,20 @@ export async function getRemoteEntry(params: {
             });
 
           if (RemoteEntryExports) {
+            await origin.loaderHook.lifecycle.afterLoadEntry.emit({
+              origin,
+              remoteInfo,
+              remoteEntryExports: RemoteEntryExports,
+              recovered: true,
+            });
             return RemoteEntryExports;
           }
         }
+        await origin.loaderHook.lifecycle.afterLoadEntry.emit({
+          origin,
+          remoteInfo,
+          error: err,
+        });
         throw err;
       });
   }

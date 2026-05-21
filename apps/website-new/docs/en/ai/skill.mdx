@@ -14,7 +14,7 @@ If you have not read it yet, start with [AI Quick Start](./index).
 ## Installation
 
 ```bash
-npx skills add module-federation/core --skill mf -y
+npx skills add module-federation/agent-skills --skill mf -y
 ```
 
 After that, the main entry is:
@@ -26,7 +26,7 @@ After that, the main entry is:
 If you cannot use the CLI, you can also copy the directory manually from GitHub:
 
 ```text
-https://github.com/module-federation/core/tree/main/skills/mf
+https://github.com/module-federation/agent-skills/tree/main/skills/mf
 ```
 
 ## How to use it
@@ -40,6 +40,7 @@ With explicit sub-commands:
 /mf integrate
 /mf type-check
 /mf runtime-error RUNTIME-008
+/mf observability
 ```
 
 With natural language:
@@ -48,6 +49,7 @@ With natural language:
 /mf What's the difference between singleton and requiredVersion in shared?
 /mf Help me figure out why this project is not pulling remote types
 /mf Add Module Federation to the current project
+/mf I saw a Module Federation console error with traceId mf-...
 ```
 
 ## What `mf` supports
@@ -64,6 +66,7 @@ With natural language:
 | `config-check` | Troubleshoot config mistakes, missing files, and plugin mismatches |
 | `bridge-check` | Troubleshoot Bridge integration issues |
 | `runtime-error` | Troubleshoot explicit runtime error codes, especially `RUNTIME-001` and `RUNTIME-008` |
+| `observability` | Read observability reports, trace loading phases, and debug runtime/build loading failures |
 
 ## The most common workflows
 
@@ -96,9 +99,34 @@ If you already have a concrete problem:
 /mf shared-deps
 /mf config-check
 /mf runtime-error RUNTIME-008
+/mf observability
 ```
 
 At that point, the goal is not for you to manually investigate first. The goal is to let the agent start diagnosing immediately.
+
+### 4. Let the agent read MF observability
+
+For full loading observability, install the [Observability Plugin](../plugin/plugins/observability-plugin)
+in your app. When a browser console error prints a `traceId` and `read:`
+command, pass it to the skill:
+
+```text
+/mf observability
+I saw this Module Federation console error:
+
+[Module Federation] Observability report generated
+traceId: mf-...
+read: window.__FEDERATION__.__OBSERVABILITY__["runtime_host"].getReport("mf-...")
+
+Please read the report and fix the issue.
+```
+
+For Node, SSR, or production uploads:
+
+```text
+/mf observability
+Read .mf/observability/latest.json and explain the likely owner and fix.
+```
 
 ## The one thing you really need to remember
 

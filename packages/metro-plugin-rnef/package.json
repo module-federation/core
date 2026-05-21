@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/metro-plugin-rnef",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "description": "Metro Module Federation plugin for React Native Enterprise Framework (RNEF). Deprecated: use @module-federation/metro-plugin-rock instead.",
   "keywords": [
     "rnef",

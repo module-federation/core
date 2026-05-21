@@ -1,0 +1,36 @@
+[
+  {
+    "type": "file",
+    "name": "index",
+    "label": "总览"
+  },
+  {
+    "type": "dir-section-header",
+    "name": "build-tool",
+    "label": "Build Tool"
+  },
+  {
+    "type": "dir-section-header",
+    "name": "bundler",
+    "label": "Bundler"
+  },
+  {
+    "type": "dir-section-header",
+    "name": "documentation",
+    "label": "文档解决方案"
+  },
+  {
+    "type": "dir-section-header",
+    "name": "framework",
+    "label": "Framework",
+    "collapsible": true,
+    "collapsed": true
+  },
+  {
+    "type": "dir-section-header",
+    "name": "practice",
+    "label": "实践",
+    "collapsible": true,
+    "collapsed": true
+  }
+]

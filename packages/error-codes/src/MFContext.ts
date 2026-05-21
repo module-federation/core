@@ -56,7 +56,7 @@ export interface MFEnvironmentInfo {
   isCI?: boolean;
 }
 
-/** Most recent diagnostic event (from .mf/diagnostics/latest.json) */
+/** Most recent observability event (from .mf/observability/latest.json) */
 export interface MFLatestErrorEvent {
   code: string;
   message: string;

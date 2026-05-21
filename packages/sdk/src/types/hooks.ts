@@ -5,6 +5,11 @@ export type CreateScriptHookReturnDom =
   | { script?: HTMLScriptElement; timeout?: number }
   | void;
 
+export type CreateLinkHookReturnDom =
+  | HTMLLinkElement
+  | { link?: HTMLLinkElement; timeout?: number }
+  | void;
+
 export type CreateScriptHookReturn =
   | CreateScriptHookReturnNode
   | CreateScriptHookReturnDom;
@@ -18,6 +23,11 @@ export type CreateScriptHookDom = (
   url: string,
   attrs?: Record<string, any> | undefined,
 ) => CreateScriptHookReturnDom;
+
+export type CreateLinkHookDom = (
+  url: string,
+  attrs?: Record<string, any> | undefined,
+) => CreateLinkHookReturnDom;
 
 export type CreateScriptHook = (
   url: string,

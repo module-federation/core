@@ -1,4 +1,9 @@
-import type { CreateScriptHookDom, CreateScriptHookReturnDom } from './types';
+import type {
+  CreateLinkHookDom,
+  CreateLinkHookReturnDom,
+  CreateScriptHookDom,
+  CreateScriptHookReturnDom,
+} from './types';
 import { warn } from './utils';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function safeWrapper<T extends (...args: Array<any>) => any>(
@@ -170,16 +175,15 @@ export function createLink(info: {
   onErrorCallback?: (error: Error) => void;
   attrs: Record<string, string>;
   needDeleteLink?: boolean;
-  createLinkHook?: (
-    url: string,
-    attrs?: Record<string, any>,
-  ) => HTMLLinkElement | void;
+  createLinkHook?: CreateLinkHookDom;
 }) {
   // <link rel="preload" href="script.js" as="script">
 
   // Retrieve the existing script element by its src attribute
   let link: HTMLLinkElement | null = null;
   let needAttach = true;
+  let timeout = 20000;
+  let timeoutId: NodeJS.Timeout | undefined;
   const links = document.getElementsByTagName('link');
   for (let i = 0; i < links.length; i++) {
     const l = links[i];
@@ -200,17 +204,27 @@ export function createLink(info: {
     link = document.createElement('link');
     link.setAttribute('href', info.url);
 
-    let createLinkRes: void | HTMLLinkElement = undefined;
+    let createLinkRes: CreateLinkHookReturnDom = undefined;
+    let shouldApplyAttrs = true;
     const attrs = info.attrs;
 
     if (info.createLinkHook) {
       createLinkRes = info.createLinkHook(info.url, attrs);
       if (createLinkRes instanceof HTMLLinkElement) {
         link = createLinkRes;
+        shouldApplyAttrs = false;
+      } else if (typeof createLinkRes === 'object') {
+        if ('link' in createLinkRes && createLinkRes.link) {
+          link = createLinkRes.link;
+          shouldApplyAttrs = false;
+        }
+        if ('timeout' in createLinkRes && createLinkRes.timeout) {
+          timeout = createLinkRes.timeout;
+        }
       }
     }
 
-    if (attrs && !createLinkRes) {
+    if (attrs && shouldApplyAttrs) {
       Object.keys(attrs).forEach((name) => {
         if (link && !link.getAttribute(name)) {
           link.setAttribute(name, attrs[name]);
@@ -219,14 +233,30 @@ export function createLink(info: {
     }
   }
 
+  if (!needAttach) {
+    Promise.resolve().then(() => {
+      info?.cb && info?.cb();
+    });
+    return { link, needAttach };
+  }
+
   const onLinkComplete = (
     prev: OnErrorEventHandler | GlobalEventHandlers['onload'] | null,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     event: any,
   ): void => {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
     const onLinkCompleteCallback = () => {
       if (event?.type === 'error') {
-        info?.onErrorCallback && info?.onErrorCallback(event);
+        const linkError = new Error(
+          event?.isTimeout
+            ? `LinkNetworkError: Link "${info.url}" timed out.`
+            : `LinkNetworkError: Failed to load link "${info.url}" - the URL is unreachable or the server returned an error.`,
+        );
+        linkError.name = 'LinkNetworkError';
+        info?.onErrorCallback && info?.onErrorCallback(linkError);
       } else {
         info?.cb && info?.cb();
       }
@@ -253,6 +283,9 @@ export function createLink(info: {
 
   link.onerror = onLinkComplete.bind(null, link.onerror);
   link.onload = onLinkComplete.bind(null, link.onload);
+  timeoutId = setTimeout(() => {
+    onLinkComplete(null, { type: 'error', isTimeout: true });
+  }, timeout);
 
   return { link, needAttach };
 }

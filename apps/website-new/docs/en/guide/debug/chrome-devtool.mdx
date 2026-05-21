@@ -8,10 +8,17 @@ The `Micro-frontend` architecture differs from the traditional monolithic applic
 - Switch online page `Module Federation` versions for quick functional verification.
 - Support viewing module dependency information.
 - Support filtering specified module dependency information.
+- Support Loading Trace for remote, shared, component-ready signals, and failure reports.
 
 ::: tip Limitations of Chrome Devtool:
 
 You must use `mf-manifest.json` to use the visualization and proxy capabilities provided by `Chrome devtool`.
+
+:::
+
+::: tip Loading Trace availability
+
+The Chrome extension version that includes the Loading Trace tab is under review and will be available in the Chrome Web Store soon.
 
 :::
 
@@ -31,6 +38,12 @@ DevTools provides multiple functional panels suitable for different debugging ne
   - View loaded and unloaded shared dependencies.
   - Analyze version reuse of shared dependencies (Loaded / Reused).
   - Check the effective status of configurations such as Singleton and Strict Version.
+
+- **Loading Trace**: Records Module Federation loading on the current page.
+  - Inspect `loadRemote` and `loadShare` start, success, failure, and recovery states.
+  - See which consumer loaded which remote and expose, and which shared provider/version was selected.
+  - If the page already uses the [Observability Plugin](../../plugin/plugins/observability-plugin), the panel reads those reports and shows `CUSTOM`.
+  - If the page does not use the plugin, click `Observe now` to temporarily inject the Chrome collection plugin for the current tab.
 
 ![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/shared-overview.png)
 
@@ -57,6 +70,59 @@ As shown below, the proxy page provides options such as `add new proxy module`, 
 - **Support Multi-Tab Isolation**: When opening pages using Module Federation in multiple tabs simultaneously, the proxy rules and module information of each tab are independent. Proxy rules set in Tab A will not affect Tab B, and vice versa. This allows you to debug multiple environments or application states simultaneously.
 
 ![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/proxy.png)
+{/*
+## Loading Trace
+
+The `Loading Trace` tab answers what actually happened during Module Federation loading. Use it when the page is blank, a component stays in loading, shared versions are unclear, or a producer fails intermittently.
+
+![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/loading-trace-overview-en.png)
+
+The top status means:
+
+- `OFF`: no readable loading report has been found on the current page.
+- `ON`: Chrome collection is enabled for the current tab.
+- `CUSTOM`: the inspected page already registered its own observability plugin, and DevTools is reading those reports.
+
+Common workflow:
+
+1. Open the target page.
+2. Open Chrome DevTools and choose the `Module Federation` panel.
+3. Open `Loading Trace`.
+4. If the status is `OFF`, click `Observe now`. The page reloads once.
+5. Reproduce the issue or trigger the remote component load you want to inspect.
+6. Select a report and inspect current loading, previous loading records, the event timeline, and troubleshooting suggestions.
+7. Click `Export` to save the full report.
+
+Report states:
+
+- `Success`: the MF chain completed. Remote reports show the remote result; shared reports show the selected provider and version.
+- `Failed`: the chain failed. Start from the failed phase, error code, and suggested actions.
+- `Pending`: a start event was recorded, but no completion, failure, or recovery event was seen yet.
+- `Recovered`: loading hit a problem first, then continued through fallback or recovery.
+- `Basic observability`: the runtime version is too low or cannot be detected, so detailed phases may be missing.
+
+### Analyze an exported report
+
+The exported JSON contains `config`, `scopes`, and `reports`. For each report, start with:
+
+![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/loading-trace-shared-report-en.png)
+
+- `diagnosis`: the troubleshooting conclusion, facts, and next actions.
+- `summary`: the final state, such as `runtime-loaded`, `component-loaded`, `shared-resolved`, `failed`, `recovered`, or `pending`.
+- `remote` / `shared`: what was loaded. For shared reports, inspect provider, required version, selected version, and available versions.
+- `loadedBefore`: whether the same producer had already been loaded by another consumer.
+- `events`: the ordered timeline, useful for finding the phase that got stuck.
+
+You can give the exported report directly to an AI coding agent:
+
+```text
+/mf observability
+
+I have an MF Loading Trace report exported from Chrome DevTools.
+Please tell me whether the load succeeded, where it failed, who likely owns the issue, and how to fix it.
+
+<paste the exported JSON>
+``` */}
 
 
 ## How to Proxy Locally Developed Modules to Online

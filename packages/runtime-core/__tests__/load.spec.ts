@@ -2,7 +2,11 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { getRemoteEntry, getRemoteInfo } from '../src/utils/load';
 import { ModuleFederation } from '../src/core';
 import { resetFederationGlobalInfo } from '../src/global';
-import { RUNTIME_001, RUNTIME_008 } from '@module-federation/error-codes';
+import {
+  RUNTIME_001,
+  RUNTIME_008,
+  RUNTIME_015,
+} from '@module-federation/error-codes';
 import { mockStaticServer, removeScriptTags } from './mock/utils';
 
 // All fixture URLs are served via two complementary mechanisms both pointing to __tests__/:
@@ -91,5 +95,19 @@ describe('getRemoteEntry - script load error discrimination', () => {
         init: expect.any(Function),
       }),
     );
+  });
+
+  it('remote container init failure is reported as RUNTIME_015 with the original error', async () => {
+    const entry = `${BASE}/init-error.js`;
+    const mf = new ModuleFederation({
+      name: 'test-host',
+      remotes: [{ name: 'remote', entry }],
+    });
+
+    const err = await mf.loadRemote('remote/Button').catch((e) => e);
+
+    expect(err.message).toContain(RUNTIME_015);
+    expect(err.message).toContain('remote init failed');
+    expect(err.message).toContain('remoteEntryUrl');
   });
 });

@@ -1,0 +1,120 @@
+# Manifest 与 Snapshot
+
+`mf-manifest.json` 是生产者构建后生成的运行时清单。它描述这个生产者暴露了哪些模块、远程入口在哪里、模块依赖哪些资源、有哪些共享依赖，以及类型文件在哪里。
+
+Snapshot 是对 Manifest 信息的高度浓缩和预解析结果。运行时可以请求 Manifest 后临时生成 Snapshot；如果你有部署服务，也可以提前生成 Snapshot 并下发给消费者，让消费者直接获得远程入口和可预加载资源。
+
+这篇文档只介绍概念和使用场景。具体配置见 [manifest 配置](/configure/manifest)，完整字段见 [mf-manifest.json 字段定义](/configure/manifest-fields)。
+
+## 为什么需要 Manifest
+
+只使用 `remoteEntry.js` 时，消费者可以加载远程模块，但很难提前知道远程模块背后的资源、类型和共享依赖信息。
+
+使用 `mf-manifest.json` 时，消费者可以在真正加载远程模块前拿到更多信息：
+
+- 远程入口地址和加载类型
+- 暴露模块与资源列表
+- 可预加载的 JavaScript 与 CSS
+- 共享依赖名称、版本和资源
+- 类型文件地址
+
+因此，Manifest 不只是一个入口文件地址，它更像生产者给消费者提供的运行时说明书。
+
+## Manifest 和 Stats 的区别
+
+启用 [manifest 配置](/configure/manifest) 后，构建插件会生成 `mf-manifest.json` 和 `mf-stats.json`。
+
+| 文件 | 用途 |
+| --- | --- |
+| `mf-manifest.json` | 给消费者运行时读取，字段更稳定、更精简 |
+| `mf-stats.json` | 给构建分析、诊断和工具使用，字段更完整 |
+
+如果你只是接入远程模块，通常只需要配置和访问 `mf-manifest.json`。如果你要做构建分析、诊断工具或平台集成，再查看 `mf-stats.json`。
+
+## Snapshot 是什么
+
+Snapshot 可以理解为运行时真正消费的模块信息。
+
+Manifest 来自单个生产者的构建产物，内容更接近“原始清单”。Snapshot 则会把这些信息整理成运行时更容易使用的结构，比如：
+
+- 当前生产者的真实 `remoteEntry`
+- 暴露模块对应的资源
+- 可用于 preload 的资源
+- shared 依赖信息
+- 生产者依赖的其他远程模块
+
+在没有部署服务的场景下，消费者会先请求 `mf-manifest.json`，再由运行时生成 Snapshot。
+
+```txt
+Host 配置 remotes
+  -> 请求 mf-manifest.json
+  -> 解析 Manifest
+  -> 生成 Snapshot
+  -> 加载 remoteEntry、expose、shared 和 preload assets
+```
+
+在有部署服务的场景下，部署服务可以提前消费 Manifest，生成 Snapshot 并下发给消费者。
+
+```txt
+生产者构建 Manifest
+  -> 部署服务提前解析 Manifest
+  -> 生成 Snapshot
+  -> Host 直接拿到 remoteEntry 和 preload assets
+```
+
+这样可以减少运行时多请求一次 Manifest 的开销，也可以让服务端提前完成资源定位。
+
+## 我们在哪里用到它
+
+### 远程模块加载
+
+当 `remotes` 指向 `mf-manifest.json` 时，运行时会读取 Manifest，生成 Snapshot，再从 Snapshot 中得到最终的 `remoteEntry` 地址。
+
+相关配置见 [remotes](/configure/remotes)。
+
+### 资源预加载
+
+Manifest 中包含 exposes、shared 等资源信息。运行时生成 Snapshot 后，可以基于这些信息提前加载远程模块需要的 JavaScript 和 CSS。
+
+### Chrome DevTools
+
+[Chrome DevTools](/guide/debug/chrome-devtool) 需要基于 Manifest / Snapshot 获取当前页面有哪些联邦模块、模块之间的依赖关系、共享依赖复用情况，以及代理所需的远程入口信息。
+
+### 本地代理
+
+调试线上页面时，代理工具可以根据 Snapshot 识别目标生产者，并把它替换成本地启动的 Manifest 或远程入口。
+
+### 运行时诊断
+
+当远程模块加载失败时，可以通过 Manifest / Snapshot 判断问题发生在哪一层：
+
+- Manifest 地址是否可以访问
+- Manifest 字段是否完整
+- Snapshot 中是否存在目标生产者
+- Snapshot 是否能解析出 `remoteEntry`
+- `remoteEntry` 是否加载成功
+- expose 是否存在
+
+这能帮助你区分问题是 Manifest 请求失败、Snapshot 缺失，还是后续远程入口加载失败。
+
+## 可以基于它做什么
+
+Manifest / Snapshot 适合作为运行时插件、调试工具和部署平台的输入。
+
+你可以基于它做：
+
+- **预加载优化**：提前拿到远程模块关联的 JS 和 CSS，减少用户点击后的等待时间。
+- **模块关系可视化**：展示当前页面加载了哪些生产者、消费者和 shared 依赖。
+- **本地代理调试**：把线上页面里的某个生产者替换成本地开发中的生产者。
+- **加载诊断**：判断失败发生在 Manifest、Snapshot、remoteEntry 还是 expose 阶段。
+- **Shared 分析**：判断共享依赖是否被复用、是否重复加载、版本是否符合预期。
+
+不建议业务代码直接修改全局 Snapshot。更推荐通过 Runtime Plugin、DevTools 或部署服务来消费这些信息。
+
+## disableSnapshot 的影响
+
+如果开启 `optimization.disableSnapshot`，运行时会移除 Snapshot 与预加载相关能力，以换取更小的运行时代码体积。
+
+这意味着依赖 Manifest / Snapshot 的能力会受到影响，例如动态类型提示、预加载、DevTools 可视化和代理等。
+
+更多说明见 [optimization.disableSnapshot](/configure/experiments#disablesnapshot)。

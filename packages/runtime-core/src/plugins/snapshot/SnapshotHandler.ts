@@ -9,9 +9,10 @@ import {
 import {
   RUNTIME_003,
   RUNTIME_007,
+  RUNTIME_013,
   runtimeDescMap,
 } from '@module-federation/error-codes';
-import { Options, Remote } from '../../type';
+import { Options, Remote, ResourceLoadInitiator } from '../../type';
 import {
   isRemoteInfoWithEntry,
   error,
@@ -28,7 +29,6 @@ import {
 } from '../../global';
 import { PluginSystem, AsyncHook, AsyncWaterfallHook } from '../../utils/hooks';
 import { ModuleFederation } from '../../core';
-import { assert } from '../../utils/logger';
 
 export function getGlobalRemoteInfo(
   moduleInfo: Remote,
@@ -81,6 +81,7 @@ export class SnapshotHandler {
         {
           options: Options;
           moduleInfo: Remote;
+          origin: ModuleFederation;
         },
       ],
       void
@@ -121,11 +122,11 @@ export class SnapshotHandler {
   async loadRemoteSnapshotInfo({
     moduleInfo,
     id,
-    expose,
+    initiator = 'loadRemote',
   }: {
     moduleInfo: Remote;
     id?: string;
-    expose?: string;
+    initiator?: ResourceLoadInitiator;
   }):
     | Promise<{
         remoteSnapshot: ModuleInfo;
@@ -137,6 +138,7 @@ export class SnapshotHandler {
     await this.hooks.lifecycle.beforeLoadRemoteSnapshot.emit({
       options,
       moduleInfo,
+      origin: this.HostInstance,
     });
 
     let hostSnapshot = getGlobalSnapshotInfoByModuleInfo({
@@ -196,10 +198,14 @@ export class SnapshotHandler {
           : globalRemoteSnapshot.ssrRemoteEntry ||
             globalRemoteSnapshot.remoteEntry ||
             '';
-        const moduleSnapshot = await this.getManifestJson(
+        const moduleSnapshot = await this.loadManifestSnapshot(
           remoteEntry,
           moduleInfo,
           {},
+          {
+            initiator,
+            id: id || moduleInfo.name,
+          },
         );
         // eslint-disable-next-line @typescript-eslint/no-shadow
         const globalSnapshotRes = setGlobalSnapshotInfoByModuleInfo(
@@ -227,25 +233,21 @@ export class SnapshotHandler {
     } else {
       if (isRemoteInfoWithEntry(moduleInfo)) {
         // get from manifest.json and merge remote info from remote server
-        const moduleSnapshot = await this.getManifestJson(
+        const moduleSnapshot = await this.loadManifestSnapshot(
           moduleInfo.entry,
           moduleInfo,
           {},
+          {
+            initiator,
+            id: id || moduleInfo.name,
+          },
         );
         // eslint-disable-next-line @typescript-eslint/no-shadow
         const globalSnapshotRes = setGlobalSnapshotInfoByModuleInfo(
           moduleInfo,
           moduleSnapshot,
         );
-        const { remoteSnapshot: remoteSnapshotRes } =
-          await this.hooks.lifecycle.loadRemoteSnapshot.emit({
-            options: this.HostInstance.options,
-            moduleInfo,
-            remoteSnapshot: moduleSnapshot,
-            from: 'global',
-          });
-
-        mSnapshot = remoteSnapshotRes;
+        mSnapshot = moduleSnapshot;
         gSnapshot = globalSnapshotRes;
       } else {
         error(
@@ -289,8 +291,13 @@ export class SnapshotHandler {
     manifestUrl: string,
     moduleInfo: Remote,
     extraOptions: Record<string, any>,
-  ): Promise<ModuleInfo> {
+    resourceOptions?: {
+      initiator: ResourceLoadInitiator;
+      id: string;
+    },
+  ): Promise<Manifest> {
     const getManifest = async (): Promise<Manifest> => {
+      const remoteInfo = getRemoteInfo(moduleInfo);
       let manifestJson: Manifest | undefined =
         this.manifestCache.get(manifestUrl);
       if (manifestJson) {
@@ -300,7 +307,14 @@ export class SnapshotHandler {
         let res = await this.loaderHook.lifecycle.fetch.emit(
           manifestUrl,
           {},
-          getRemoteInfo(moduleInfo),
+          remoteInfo,
+          resourceOptions
+            ? {
+                ...resourceOptions,
+                url: manifestUrl,
+                resourceType: 'manifest',
+              }
+            : undefined,
         );
         if (!res || !(res instanceof Response)) {
           res = await fetch(manifestUrl, {});
@@ -314,6 +328,7 @@ export class SnapshotHandler {
               error: err,
               from: 'runtime',
               lifecycle: 'afterResolve',
+              remote: remoteInfo,
               origin: this.HostInstance,
             },
           )) as Manifest | undefined;
@@ -334,16 +349,63 @@ export class SnapshotHandler {
         }
       }
 
-      assert(
-        manifestJson.metaData && manifestJson.exposes && manifestJson.shared,
-        `"${manifestUrl}" is not a valid federation manifest for remote "${moduleInfo.name}". Missing required fields: ${[!manifestJson.metaData && 'metaData', !manifestJson.exposes && 'exposes', !manifestJson.shared && 'shared'].filter(Boolean).join(', ')}.`,
-      );
+      const missingRequiredFields = [
+        !manifestJson.metaData && 'metaData',
+        !manifestJson.exposes && 'exposes',
+        !manifestJson.shared && 'shared',
+      ].filter(Boolean);
+      if (missingRequiredFields.length > 0) {
+        await this.HostInstance.remoteHandler.hooks.lifecycle.errorLoadRemote.emit(
+          {
+            id: manifestUrl,
+            error: new Error(
+              `"${manifestUrl}" is not a valid federation manifest for remote "${moduleInfo.name}". Missing required fields: ${missingRequiredFields.join(', ')}.`,
+            ),
+            from: 'runtime',
+            lifecycle: 'afterResolve',
+            remote: remoteInfo,
+            origin: this.HostInstance,
+          },
+        );
+      }
+
+      if (missingRequiredFields.length > 0) {
+        error(
+          RUNTIME_013,
+          runtimeDescMap,
+          {
+            manifestUrl,
+            moduleName: moduleInfo.name,
+            hostName: this.HostInstance.options.name,
+            missingFields: missingRequiredFields.join(','),
+          },
+          undefined,
+          optionsToMFContext(this.HostInstance.options),
+        );
+      }
       this.manifestCache.set(manifestUrl, manifestJson);
       return manifestJson;
     };
 
+    return getManifest();
+  }
+
+  private async loadManifestSnapshot(
+    manifestUrl: string,
+    moduleInfo: Remote,
+    extraOptions: Record<string, any>,
+    resourceOptions?: {
+      initiator: ResourceLoadInitiator;
+      id: string;
+    },
+  ): Promise<ModuleInfo> {
     const asyncLoadProcess = async () => {
-      const manifestJson = await getManifest();
+      const manifestJson = await this.getManifestJson(
+        manifestUrl,
+        moduleInfo,
+        extraOptions,
+        resourceOptions,
+      );
       const remoteSnapshot = generateSnapshotFromManifest(manifestJson, {
         version: manifestUrl,
       });

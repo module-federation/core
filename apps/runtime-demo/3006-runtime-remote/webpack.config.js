@@ -1,3 +1,5 @@
+/* eslint-env node */
+
 const path = require('path');
 const reactPath = path.dirname(require.resolve('react/package.json'));
 const reactDomPath = path.dirname(require.resolve('react-dom/package.json'));
@@ -141,6 +143,8 @@ module.exports = (_env, argv = {}) => {
       host: '127.0.0.1',
       port: 3006,
       allowedHosts: 'all',
+      hot: false,
+      liveReload: false,
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods':
@@ -150,6 +154,7 @@ module.exports = (_env, argv = {}) => {
       },
       client: {
         overlay: false,
+        reconnect: false,
       },
       devMiddleware: {
         writeToDisk: true,
