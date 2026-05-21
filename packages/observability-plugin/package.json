@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/observability-plugin",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "author": "module-federation",
   "main": "./dist/index.js",
   "module": "./dist/esm/index.js",

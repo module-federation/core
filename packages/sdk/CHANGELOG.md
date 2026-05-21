@@ -1,5 +1,15 @@
 # @module-federation/sdk
 
+## 2.5.0
+
+### Patch Changes
+
+- 5d4095d: feat(metro): add manifest SHA-256 bundle hashes and optional cache layer integration for bundle loading.
+
+  Credit: originally contributed by @zhongwuzw in #4576.
+
+- 0716c11: Track preload resource results and expose resource context to loader hooks.
+
 ## 2.4.0
 
 ### Minor Changes

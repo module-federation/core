@@ -1,5 +1,18 @@
 # @module-federation/dts-plugin
 
+## 2.5.0
+
+### Patch Changes
+
+- 13dce52: fix(dts-plugin): read manifest metadata when consuming DTS files from manifest remotes.
+- Updated dependencies [5d4095d]
+- Updated dependencies [0716c11]
+- Updated dependencies [41281f4]
+  - @module-federation/sdk@2.5.0
+  - @module-federation/error-codes@2.5.0
+  - @module-federation/managers@2.5.0
+  - @module-federation/third-party-dts-extractor@2.5.0
+
 ## 2.4.0
 
 ### Patch Changes

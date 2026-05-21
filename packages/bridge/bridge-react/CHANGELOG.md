@@ -1,5 +1,14 @@
 # @module-federation/bridge-react
 
+## 2.5.0
+
+### Patch Changes
+
+- 180004d: Expose data-fetch subpaths for bridge-react and Modern.js users, and remove hono from bridge-react peer dependencies.
+- Updated dependencies [5d4095d]
+- Updated dependencies [0716c11]
+  - @module-federation/sdk@2.5.0
+
 ## 2.4.0
 
 ### Patch Changes
