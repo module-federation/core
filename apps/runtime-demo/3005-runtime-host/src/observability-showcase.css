@@ -136,6 +136,12 @@
   min-height: 430px;
 }
 
+.customer-portal__side-stack {
+  display: grid;
+  gap: 20px;
+  align-content: start;
+}
+
 .customer-portal__card-header {
   display: flex;
   gap: 16px;
@@ -156,6 +162,11 @@
 .customer-portal__status--ready {
   color: #245275;
   background: #e6f2fb;
+}
+
+.customer-portal__status--idle {
+  color: #526274;
+  background: #eef2f6;
 }
 
 .customer-portal__status--loading {
@@ -327,6 +338,69 @@
   background: #f4f9fd;
   font-size: 13px;
   font-weight: 700;
+}
+
+.customer-portal__handoff-copy {
+  margin: 16px 0;
+  color: #526274;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.customer-portal__handoff-button {
+  width: 100%;
+}
+
+.customer-portal__handoff-error {
+  margin: 14px 0 0;
+}
+
+.customer-portal__handoff-list {
+  display: grid;
+  gap: 10px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.customer-portal__handoff-list li {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid #dde4eb;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.customer-portal__handoff-list strong,
+.customer-portal__handoff-list span,
+.customer-portal__handoff-list code {
+  display: block;
+}
+
+.customer-portal__handoff-list strong {
+  color: #111827;
+  font-size: 14px;
+}
+
+.customer-portal__handoff-list span {
+  color: #667789;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.customer-portal__handoff-list code {
+  width: fit-content;
+  max-width: 100%;
+  padding: 3px 6px;
+  border-radius: 4px;
+  color: #245275;
+  background: #dceefb;
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
+    monospace;
+  font-size: 12px;
+  overflow-wrap: anywhere;
 }
 
 .customer-portal__primary-button,

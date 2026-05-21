@@ -319,7 +319,9 @@ ObservabilityPlugin({
 The runtime plugin does not create a server. The MF skill starts a temporary
 local Node collector, writes reports under `.mf/observability/collector`, and
 the agent reads those files. The collector path is local-only and does not
-execute code or control the page.
+execute code or control the page. Collector delivery is controlled by the
+`collector` option; debug mode only decides whether a failed collector request
+prints a debug log.
 
 For browser production use, set `browser.mode: "production"` when the runtime
 console must stay minimal:

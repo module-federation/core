@@ -19,6 +19,26 @@ type LoadResult = {
   status?: ShowcaseStatus;
   message?: string;
 };
+type HandoffStatus = 'idle' | 'loading' | 'success' | 'error';
+type HandoffResult = {
+  owner: string;
+  step: string;
+  request: string;
+  expose: string;
+  shared: string;
+  traceId: string;
+};
+type HandoffScenario = {
+  owner: string;
+  consumerName: string;
+  request: string;
+  expose: string;
+  componentName: string;
+  sharedName: string;
+  sharedScope: string;
+  sharedVersion: string;
+  requiredVersion: string;
+};
 
 const producerName = 'runtime_remote2';
 const producerAlias = 'dynamic-remote';
@@ -26,6 +46,41 @@ const producerManifest = 'http://127.0.0.1:3007/mf-manifest.json';
 const profileRequest = `${producerAlias}/ProfileCard`;
 const analyticsRequest = `${producerAlias}/AnalyticsPanel`;
 const analyticsConsumerName = 'observability_showcase_analytics_consumer';
+const renewalHandoffScenarios: HandoffScenario[] = [
+  {
+    owner: 'Account desk',
+    consumerName: 'observability_showcase_account_desk',
+    request: profileRequest,
+    expose: 'ProfileCard',
+    componentName: 'ProfileCard',
+    sharedName: 'renewal-account-context',
+    sharedScope: 'renewal-account-scope',
+    sharedVersion: '1.3.0',
+    requiredVersion: '^1.0.0',
+  },
+  {
+    owner: 'Expansion desk',
+    consumerName: 'observability_showcase_expansion_desk',
+    request: analyticsRequest,
+    expose: 'AnalyticsPanel',
+    componentName: 'AnalyticsPanel',
+    sharedName: 'renewal-insight-context',
+    sharedScope: 'renewal-insight-scope',
+    sharedVersion: '2.2.0',
+    requiredVersion: '^2.0.0',
+  },
+  {
+    owner: 'Success desk',
+    consumerName: 'observability_showcase_success_desk',
+    request: profileRequest,
+    expose: 'ProfileCard',
+    componentName: 'ProfileCard',
+    sharedName: 'renewal-account-context',
+    sharedScope: 'renewal-account-scope',
+    sharedVersion: '1.3.0',
+    requiredVersion: '^1.0.0',
+  },
+];
 
 function getRoute(pathname: string): ShowcaseRoute {
   return pathname.endsWith('/analytics') ? 'analytics' : 'profile';
@@ -167,6 +222,86 @@ async function loadAnalyticsWorkspace() {
   } satisfies LoadResult;
 }
 
+async function loadRenewalHandoffChain() {
+  const results: HandoffResult[] = [];
+
+  for (const scenario of renewalHandoffScenarios) {
+    const consumer = createConsumer(scenario.consumerName, {
+      [scenario.sharedName]: {
+        version: scenario.sharedVersion,
+        scope: [scenario.sharedScope],
+        lib: () => ({
+          provider: scenario.consumerName,
+          version: scenario.sharedVersion,
+          owner: scenario.owner,
+        }),
+        shareConfig: {
+          requiredVersion: scenario.requiredVersion,
+          singleton: false,
+          eager: false,
+          strictVersion: false,
+        },
+      },
+    });
+    const sharedFactory = await consumer.loadShare<{
+      provider: string;
+      version: string;
+      owner: string;
+    }>(scenario.sharedName, {
+      customShareInfo: {
+        version: scenario.sharedVersion,
+        scope: [scenario.sharedScope],
+        shareConfig: {
+          requiredVersion: scenario.requiredVersion,
+          singleton: false,
+          eager: false,
+          strictVersion: false,
+        },
+      },
+    });
+
+    if (sharedFactory === false) {
+      throw new Error(`${scenario.sharedName} was not resolved`);
+    }
+
+    const sharedValue = sharedFactory();
+    const sharedReport = observability.getLatestReport();
+    const remoteModule = await consumer.loadRemote(scenario.request);
+    resolveRemoteComponent(remoteModule);
+    const remoteReport = observability.getLatestReport();
+    const traceId = remoteReport?.traceId || '';
+
+    observability.markComponentLoaded({
+      traceId,
+      requestId: scenario.request,
+      componentName: scenario.componentName,
+      metadata: {
+        scenario: 'renewal-handoff-chain',
+        consumer: scenario.consumerName,
+        owner: scenario.owner,
+        producer: producerName,
+        expose: `./${scenario.expose}`,
+        sharedName: scenario.sharedName,
+        sharedTraceId: sharedReport?.traceId || '',
+      },
+    });
+
+    results.push({
+      owner: scenario.owner,
+      step:
+        scenario.expose === 'AnalyticsPanel'
+          ? 'Expansion risk review'
+          : 'Account owner review',
+      request: scenario.request,
+      expose: scenario.expose,
+      shared: `${scenario.sharedName} from ${sharedValue.provider}@${sharedValue.version}`,
+      traceId,
+    });
+  }
+
+  return results;
+}
+
 function AnalyticsFallback() {
   return (
     <section
@@ -201,6 +336,9 @@ export default function ObservabilityShowcase() {
   const [remoteComponent, setRemoteComponent] =
     useState<RemoteComponent | null>(null);
   const [sharedEvidence, setSharedEvidence] = useState<string[]>([]);
+  const [handoffStatus, setHandoffStatus] = useState<HandoffStatus>('idle');
+  const [handoffResults, setHandoffResults] = useState<HandoffResult[]>([]);
+  const [handoffError, setHandoffError] = useState('');
 
   useEffect(() => {
     let disposed = false;
@@ -260,6 +398,20 @@ export default function ObservabilityShowcase() {
   const openAnalyticsWorkspace = useCallback(() => {
     navigate('/observability-showcase/analytics');
   }, [navigate]);
+  const runRenewalHandoff = useCallback(async () => {
+    setHandoffStatus('loading');
+    setHandoffError('');
+    setHandoffResults([]);
+
+    try {
+      const results = await loadRenewalHandoffChain();
+      setHandoffResults(results);
+      setHandoffStatus('success');
+    } catch (error) {
+      setHandoffError(error instanceof Error ? error.message : String(error));
+      setHandoffStatus('error');
+    }
+  }, []);
 
   const isAnalytics = route === 'analytics';
   const RemoteComponent = remoteComponent;
@@ -387,14 +539,14 @@ export default function ObservabilityShowcase() {
                 className="customer-portal__hint"
                 data-testid="observability-showcase-message"
               >
-                {isAnalytics
+                {/* {isAnalytics
                   ? 'This view loads a second expose and resolves React plus the customer SDK as shared dependencies.'
-                  : 'This view is loaded by createInstance when the page opens.'}
+                  : 'The owner profile is ready for the renewal workspace.'}
                 {referenceId ? (
                   <code data-testid="observability-showcase-trace">
                     {referenceId}
                   </code>
-                ) : null}
+                ) : null} */}
               </div>
             )}
 
@@ -420,22 +572,84 @@ export default function ObservabilityShowcase() {
             ) : null}
           </div>
 
-          <div className="customer-portal__card">
-            <p className="customer-portal__eyebrow">Recent activity</p>
-            <ul className="customer-portal__activity">
-              <li>
-                <span>Profile expose loaded on overview route</span>
-                <time>09:12</time>
-              </li>
-              <li>
-                <span>Analytics expose waits for route navigation</span>
-                <time>Yesterday</time>
-              </li>
-              <li>
-                <span>Shared dependency evidence is kept in reports</span>
-                <time>May 6</time>
-              </li>
-            </ul>
+          <div className="customer-portal__side-stack">
+            <div className="customer-portal__card">
+              <div className="customer-portal__card-header">
+                <div>
+                  <p className="customer-portal__eyebrow">Renewal handoff</p>
+                  <h2>Prepare account review</h2>
+                </div>
+                <span
+                  className={`customer-portal__status customer-portal__status--${handoffStatus}`}
+                  data-testid="observability-showcase-handoff-status"
+                >
+                  {handoffStatus}
+                </span>
+              </div>
+              <p className="customer-portal__handoff-copy">
+                Pull the owner card, expansion insight, and success desk context
+                before the renewal meeting starts.
+              </p>
+              <button
+                type="button"
+                className="customer-portal__secondary-button customer-portal__handoff-button"
+                data-testid="observability-showcase-handoff"
+                onClick={runRenewalHandoff}
+                disabled={handoffStatus === 'loading'}
+              >
+                Prepare renewal handoff
+              </button>
+              {handoffError ? (
+                <div
+                  className="customer-portal__error customer-portal__handoff-error"
+                  data-testid="observability-showcase-handoff-error"
+                >
+                  {handoffError}
+                </div>
+              ) : null}
+              {handoffResults.length ? (
+                <ul
+                  className="customer-portal__handoff-list"
+                  data-testid="observability-showcase-handoff-results"
+                >
+                  {handoffResults.map((result) => (
+                    <li key={`${result.owner}-${result.traceId}`}>
+                      <div>
+                        <strong>{result.owner}</strong>
+                        <span>{result.step}</span>
+                      </div>
+                      <code>{result.request}</code>
+                      <span>{result.shared}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+
+              <div hidden data-testid="observability-showcase-handoff-report">
+                {JSON.stringify({
+                  scenario: 'renewal-handoff-chain',
+                  results: handoffResults,
+                })}
+              </div>
+            </div>
+
+            <div className="customer-portal__card">
+              <p className="customer-portal__eyebrow">Recent activity</p>
+              <ul className="customer-portal__activity">
+                <li>
+                  <span>Profile expose loaded on overview route</span>
+                  <time>09:12</time>
+                </li>
+                <li>
+                  <span>Analytics expose waits for route navigation</span>
+                  <time>Yesterday</time>
+                </li>
+                <li>
+                  <span>Shared dependency evidence is kept in reports</span>
+                  <time>May 6</time>
+                </li>
+              </ul>
+            </div>
           </div>
         </section>
       </section>

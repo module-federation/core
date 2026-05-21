@@ -138,6 +138,8 @@ module.exports = (_env, argv = {}) => {
     devServer: {
       host: '127.0.0.1',
       allowedHosts: 'all',
+      hot: false,
+      liveReload: false,
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods':
@@ -145,9 +147,7 @@ module.exports = (_env, argv = {}) => {
         'Access-Control-Allow-Headers':
           'X-Requested-With, content-type, Authorization',
       },
-      client: {
-        overlay: false,
-      },
+      client: false,
       devMiddleware: {
         writeToDisk: true,
       },

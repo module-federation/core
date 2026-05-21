@@ -1569,7 +1569,7 @@ describe('ObservabilityPlugin', () => {
     expect(report?.events).toHaveLength(2);
   });
 
-  it('skips the local collector outside debug mode', () => {
+  it('posts events to the local collector outside debug mode', () => {
     const originalFetch = globalThis.fetch;
     const originalDebug = process.env['FEDERATION_DEBUG'];
     const fetchMock = vi.fn(() => Promise.resolve({ ok: true }));
@@ -1588,7 +1588,36 @@ describe('ObservabilityPlugin', () => {
 
       emitRemoteStart(observability);
 
-      expect(fetchMock).not.toHaveBeenCalled();
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(fetchMock.mock.calls[0]?.[0]).toBe(
+        'http://127.0.0.1:17891/__mf_observability',
+      );
+
+      const requestInit = fetchMock.mock.calls[0]?.[1] as {
+        body: string;
+        credentials: string;
+        mode: string;
+      };
+      const payload = JSON.parse(requestInit.body);
+
+      expect(requestInit).toMatchObject({
+        credentials: 'omit',
+        mode: 'cors',
+      });
+      expect(payload).toMatchObject({
+        schemaVersion: 1,
+        source: 'browser',
+        kind: 'event',
+        event: {
+          phase: 'loadRemote',
+          status: 'start',
+          requestId: 'remote/Button',
+        },
+        report: {
+          requestId: 'remote/Button',
+          status: 'pending',
+        },
+      });
     } finally {
       if (originalDebug === undefined) {
         delete process.env['FEDERATION_DEBUG'];
@@ -1727,6 +1756,53 @@ describe('ObservabilityPlugin', () => {
     }
   });
 
+  it('hides local collector connection failures outside debug mode', async () => {
+    const originalFetch = globalThis.fetch;
+    const originalDebug = process.env['FEDERATION_DEBUG'];
+    const consoleDebug = vi
+      .spyOn(console, 'debug')
+      .mockImplementation(() => undefined);
+    const fetchError = new Error('collector unavailable');
+    const fetchMock = vi.fn(() => Promise.reject(fetchError));
+    Object.defineProperty(globalThis, 'fetch', {
+      value: fetchMock,
+      configurable: true,
+      writable: true,
+    });
+    delete process.env['FEDERATION_DEBUG'];
+
+    try {
+      const observability = createObservability({
+        level: 'verbose',
+        collector: true,
+      });
+
+      emitRemoteStart(observability);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(consoleDebug).not.toHaveBeenCalled();
+    } finally {
+      consoleDebug.mockRestore();
+
+      if (originalDebug === undefined) {
+        delete process.env['FEDERATION_DEBUG'];
+      } else {
+        process.env['FEDERATION_DEBUG'] = originalDebug;
+      }
+
+      if (originalFetch) {
+        Object.defineProperty(globalThis, 'fetch', {
+          value: originalFetch,
+          configurable: true,
+          writable: true,
+        });
+      } else {
+        Reflect.deleteProperty(globalThis, 'fetch');
+      }
+    }
+  });
+
   it('posts events to the browser devtools channel when enabled', () => {
     const originalPostMessage = (globalThis as { postMessage?: unknown })
       .postMessage;
@@ -1780,7 +1856,7 @@ describe('ObservabilityPlugin', () => {
     }
   });
 
-  it('skips collector and devtools channels in production mode', () => {
+  it('posts collector events and skips devtools channel in production mode', () => {
     const originalFetch = globalThis.fetch;
     const originalDebug = process.env['FEDERATION_DEBUG'];
     const originalNodeEnv = process.env['NODE_ENV'];
@@ -1816,7 +1892,7 @@ describe('ObservabilityPlugin', () => {
 
       emitRemoteStart(observability);
 
-      expect(fetchMock).not.toHaveBeenCalled();
+      expect(fetchMock).toHaveBeenCalledTimes(1);
       expect(postMessageMock).not.toHaveBeenCalled();
     } finally {
       if (originalDebug === undefined) {

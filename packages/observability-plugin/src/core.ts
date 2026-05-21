@@ -3442,8 +3442,7 @@ export function createObservability(
     return process.env.NODE_ENV !== 'production';
   };
 
-  const shouldNotifyCollector = () =>
-    shouldUseDevelopmentChannels() && isDebugMode();
+  const shouldNotifyCollector = () => Boolean(collectorOptions);
 
   const shouldNotifyDevtools = () => shouldUseDevelopmentChannels();
 

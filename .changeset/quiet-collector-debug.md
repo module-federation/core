@@ -2,4 +2,4 @@
 "@module-federation/observability-plugin": patch
 ---
 
-Only notify local observability development channels outside production mode.
+Send configured local collector events outside debug mode while keeping failures quiet unless debug logging is enabled.

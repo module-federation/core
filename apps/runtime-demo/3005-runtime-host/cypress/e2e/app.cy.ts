@@ -656,6 +656,9 @@ describe('3005-runtime-host/', () => {
       cy.contains('Suggested prompt').should('not.exist');
       cy.contains('AI-ready evidence').should('not.exist');
       cy.contains('Show latest observability report').should('not.exist');
+      cy.contains(
+        'This view is loaded by createInstance when the page opens.',
+      ).should('not.exist');
       cy.get('[data-testid="observability-showcase-status"]').contains(
         'success',
       );
@@ -680,6 +683,66 @@ describe('3005-runtime-host/', () => {
               event.metadata?.producer === 'runtime_remote2',
           ),
         ).to.equal(true);
+      });
+      cy.get('[data-testid="observability-showcase-handoff"]').click();
+      cy.get('[data-testid="observability-showcase-handoff-status"]').contains(
+        'success',
+      );
+      cy.get('[data-testid="observability-showcase-handoff-results"]')
+        .should('contain', 'Account desk')
+        .should('contain', 'Expansion desk')
+        .should('contain', 'Success desk')
+        .should('contain', 'dynamic-remote/ProfileCard')
+        .should('contain', 'dynamic-remote/AnalyticsPanel')
+        .should('contain', 'renewal-account-context')
+        .should('contain', 'renewal-insight-context');
+      cy.get('[data-testid="observability-showcase-handoff-report"]')
+        .should('contain', 'renewal-handoff-chain')
+        .should('contain', 'observability_showcase_account_desk')
+        .should('contain', 'observability_showcase_expansion_desk');
+      cy.window().then((win) => {
+        const reader = getObservabilityReader(win);
+        const profileReports = reader.findReports({
+          remote: 'runtime_remote2',
+          expose: 'ProfileCard',
+        });
+        const analyticsReports = reader.findReports({
+          remote: 'runtime_remote2',
+          expose: 'AnalyticsPanel',
+        });
+        const accountSharedReports = reader.findReports({
+          shared: 'renewal-account-context',
+        });
+        const insightSharedReports = reader.findReports({
+          shared: 'renewal-insight-context',
+        });
+        const handoffProfileReport = (
+          profileReports as ObservabilityTestReport[]
+        ).find((report) =>
+          report.events.some(
+            (event) =>
+              event.eventName === 'component:business-loaded' &&
+              event.metadata?.scenario === 'renewal-handoff-chain' &&
+              event.metadata?.owner === 'Account desk',
+          ),
+        );
+
+        expect(profileReports.length).to.be.greaterThan(1);
+        expect(analyticsReports.length).to.be.greaterThan(0);
+        expect(accountSharedReports.length).to.be.greaterThan(0);
+        expect(insightSharedReports.length).to.be.greaterThan(0);
+        expect(
+          (accountSharedReports as ObservabilityTestReport[]).some(
+            (report) =>
+              report.shared?.provider ===
+                'observability_showcase_account_desk' ||
+              report.shared?.provider === 'observability_showcase_success_desk',
+          ),
+        ).to.equal(true);
+        expect(
+          (insightSharedReports[0] as ObservabilityTestReport).shared?.provider,
+        ).to.equal('observability_showcase_expansion_desk');
+        expect(handoffProfileReport?.summary.componentLoaded).to.equal(true);
       });
       cy.get('[data-testid="observability-showcase-load"]').click();
       cy.location('pathname').should(
