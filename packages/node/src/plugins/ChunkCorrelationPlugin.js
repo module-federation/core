@@ -333,156 +333,6 @@ function getMainSharedModules(stats) {
 }
 
 /**
- * Builds a lightweight stats-like object directly from the compilation,
- * avoiding the expensive compilation.getStats().toJson() serialization.
- *
- * @param {import("webpack").Compilation} compilation
- * @returns {WebpackStats}
- */
-const buildLightweightStats = (compilation) => {
-  const { chunkGraph, moduleGraph } = compilation;
-  const requestShortener = compilation.requestShortener;
-  const publicPath = compilation.outputOptions.publicPath || '';
-
-  const getModuleIdSafe = (mod) => {
-    try {
-      return chunkGraph.getModuleId(mod);
-    } catch {
-      return null;
-    }
-  };
-
-  const moduleDataMap = new Map();
-
-  const getModuleData = (mod) => {
-    if (moduleDataMap.has(mod)) {
-      return moduleDataMap.get(mod);
-    }
-
-    const issuerModule = moduleGraph.getIssuer(mod);
-
-    const reasons = [];
-    const incomingConnections = moduleGraph.getIncomingConnections(mod);
-    if (incomingConnections) {
-      for (const connection of incomingConnections) {
-        if (connection.originModule) {
-          reasons.push({
-            moduleIdentifier: connection.originModule.identifier(),
-          });
-        }
-      }
-    }
-
-    let nestedModules;
-    if (mod.modules) {
-      nestedModules = [];
-      for (const nested of mod.modules) {
-        nestedModules.push(getModuleData(nested));
-      }
-    }
-
-    const data = {
-      id: getModuleIdSafe(mod),
-      name:
-        typeof mod.readableIdentifier === 'function'
-          ? mod.readableIdentifier(requestShortener)
-          : mod.identifier(),
-      moduleType: mod.type,
-      identifier: mod.identifier(),
-      issuer: issuerModule?.identifier() ?? null,
-      issuerId: issuerModule ? getModuleIdSafe(issuerModule) : null,
-      nameForCondition:
-        typeof mod.nameForCondition === 'function'
-          ? mod.nameForCondition()
-          : null,
-      reasons,
-      modules: nestedModules,
-    };
-
-    moduleDataMap.set(mod, data);
-    return data;
-  };
-
-  const modules = [];
-  for (const mod of compilation.modules) {
-    modules.push(getModuleData(mod));
-  }
-
-  const chunks = [];
-  for (const chunk of compilation.chunks) {
-    const chunkModules = chunkGraph.getChunkModules(chunk);
-    const entryModules = new Set(
-      chunkGraph.getChunkEntryModulesIterable(chunk),
-    );
-
-    const chunkModulesData = chunkModules.map((mod) => {
-      const data = getModuleData(mod);
-      return { ...data, dependent: !entryModules.has(mod) };
-    });
-
-    const children = new Set();
-    const parents = new Set();
-
-    for (const group of chunk.groupsIterable) {
-      if (group.childrenIterable) {
-        for (const childGroup of group.childrenIterable) {
-          for (const childChunk of childGroup.chunks) {
-            children.add(childChunk.id);
-          }
-        }
-      }
-      if (group.parentsIterable) {
-        for (const parentGroup of group.parentsIterable) {
-          for (const parentChunk of parentGroup.chunks) {
-            parents.add(parentChunk.id);
-          }
-        }
-      }
-    }
-
-    chunks.push({
-      id: chunk.id,
-      files: Array.from(chunk.files),
-      children: Array.from(children),
-      parents: Array.from(parents),
-      modules: chunkModulesData,
-    });
-  }
-
-  const entrypoints = {};
-  for (const [name, entrypoint] of compilation.entrypoints) {
-    entrypoints[name] = {
-      chunks: entrypoint.chunks.map((c) => c.id),
-    };
-  }
-
-  const namedChunkGroups = {};
-  if (compilation.namedChunkGroups) {
-    for (const [name, group] of compilation.namedChunkGroups) {
-      namedChunkGroups[name] = {
-        chunks: group.chunks.map((c) => c.id),
-      };
-    }
-  }
-
-  const assetsByChunkName = {};
-  for (const chunk of compilation.chunks) {
-    if (chunk.name) {
-      assetsByChunkName[chunk.name] = Array.from(chunk.files);
-    }
-  }
-
-  return {
-    publicPath,
-    modules,
-    chunks,
-    entrypoints,
-    namedChunkGroups,
-    assetsByChunkName,
-  };
-};
-
-/**
  *
  * @param {WebpackStats} stats
  * @param {import("webpack").container.ModuleFederationPlugin} federationPlugin
@@ -662,7 +512,71 @@ class FederationStatsPlugin {
             }
           }
 
-          const stats = buildLightweightStats(compilation);
+          // Generate a JSON object that contains detailed information about the compilation.
+          const stats = compilation.getStats().toJson({
+            all: false,
+            assets:true,    
+            reasons: false,
+            modules: true,
+            children: true,
+            chunkGroups: true,
+            entrypoints: true,
+            namedChunkGroups: true,
+            chunkRelations: true,
+            chunks: true,
+            ids: true,
+            publicPath: true,
+          });
+
+          // Lazily populate reasons only for modules in the 'main' chunk group.
+          const mainModuleIds = new Set();
+          if (stats.namedChunkGroups?.['main']) {
+            const mainChunks = stats.namedChunkGroups['main'].chunks;
+            for (const chunk of stats.chunks) {
+              if (mainChunks.includes(chunk.id)) {
+                for (const mod of chunk.modules) {
+                  mainModuleIds.add(mod.identifier);
+                }
+              }
+            }
+          }
+
+          const reasonsCache = new Map();
+          const getReasonsForModule = (mod) => {
+            if (reasonsCache.has(mod.identifier)) {
+              return reasonsCache.get(mod.identifier);
+            }
+            const incomingConnections = compilation.moduleGraph.getIncomingConnections(
+              mod,
+            );
+            const res = [];
+            if (incomingConnections) {
+              for (const connection of incomingConnections) {
+                if (connection.originModule) {
+                  res.push({
+                    moduleIdentifier: connection.originModule.identifier(),
+                  });
+                }
+              }
+            }
+            reasonsCache.set(mod.identifier, res);
+            return res;
+          };
+
+          // Patch reasons only for main chunk group modules.
+          if (mainModuleIds.size > 0) {
+            const compilationModules = Array.from(compilation.modules);
+            for (const mod of stats.modules) {
+              if (mainModuleIds.has(mod.identifier)) {
+                const webpackMod = compilationModules.find(
+                  (m) => m.identifier() === mod.identifier,
+                );
+                if (webpackMod) {
+                  mod.reasons = getReasonsForModule(webpackMod);
+                }
+              }
+            }
+          }
 
           // Apply a function 'getFederationStats' on the stats with the federation plugin options as the second argument.
           const federatedModules = getFederationStats(stats, federationOpts);
