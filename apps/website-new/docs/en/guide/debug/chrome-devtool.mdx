@@ -16,12 +16,6 @@ You must use `mf-manifest.json` to use the visualization and proxy capabilities 
 
 :::
 
-::: tip Loading Trace availability
-
-The Chrome extension version that includes the Loading Trace tab is under review and will be available in the Chrome Web Store soon.
-
-:::
-
 ## Usage Scenarios
 
 DevTools provides multiple functional panels suitable for different debugging needs in development and production environments:
@@ -70,7 +64,7 @@ As shown below, the proxy page provides options such as `add new proxy module`, 
 - **Support Multi-Tab Isolation**: When opening pages using Module Federation in multiple tabs simultaneously, the proxy rules and module information of each tab are independent. Proxy rules set in Tab A will not affect Tab B, and vice versa. This allows you to debug multiple environments or application states simultaneously.
 
 ![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/proxy.png)
-{/*
+
 ## Loading Trace
 
 The `Loading Trace` tab answers what actually happened during Module Federation loading. Use it when the page is blank, a component stays in loading, shared versions are unclear, or a producer fails intermittently.
@@ -116,13 +110,13 @@ The exported JSON contains `config`, `scopes`, and `reports`. For each report, s
 You can give the exported report directly to an AI coding agent:
 
 ```text
-/mf observability
+/mf obs
 
 I have an MF Loading Trace report exported from Chrome DevTools.
 Please tell me whether the load succeeded, where it failed, who likely owns the issue, and how to fix it.
 
 <paste the exported JSON>
-``` */}
+```
 
 
 ## How to Proxy Locally Developed Modules to Online
