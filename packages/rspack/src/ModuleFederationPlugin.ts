@@ -13,10 +13,10 @@ import {
 
 import { StatsPlugin } from '@module-federation/manifest';
 import { ContainerManager, utils } from '@module-federation/managers';
-import { DtsPlugin } from '@module-federation/dts-plugin';
 import ReactBridgePlugin from '@module-federation/bridge-react-webpack-plugin';
 import path from 'node:path';
 import fs from 'node:fs';
+import { createRequire } from 'node:module';
 import { RemoteEntryPlugin } from './RemoteEntryPlugin';
 import logger from './logger';
 
@@ -26,9 +26,20 @@ type NonUndefined<T = SplitChunks> = ExcludeFalse<T>;
 type NonFalseSplitChunks = NonUndefined<SplitChunks>;
 type CacheGroups = NonUndefined<NonFalseSplitChunks['cacheGroups']>;
 type CacheGroup = CacheGroups[string];
+type DtsPluginModule = {
+  DtsPlugin: new (
+    options: moduleFederationPlugin.ModuleFederationPluginOptions,
+  ) => {
+    apply(compiler: Compiler): void;
+    addRuntimePlugins(): void;
+  };
+};
 
 declare const __VERSION__: string;
 export const PLUGIN_NAME = 'RspackModuleFederationPlugin';
+// Rslib rewrites import.meta.url for both CJS and ESM outputs.
+// @ts-ignore
+const nodeRequire = createRequire(import.meta.url);
 
 type ResolveFn = typeof require.resolve;
 type RuntimeEntrySpec = {
@@ -199,6 +210,9 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     let disableDts = options.dts === false;
 
     if (!disableDts) {
+      const { DtsPlugin } = nodeRequire(
+        '@module-federation/dts-plugin',
+      ) as DtsPluginModule;
       const dtsPlugin = new DtsPlugin(options);
       // @ts-ignore
       dtsPlugin.apply(compiler);
