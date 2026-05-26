@@ -14,6 +14,13 @@ export default defineConfig({
         '@module-federation/bridge-shared',
         'react-error-boundary',
       ],
+      afterDiagnostic(diagnostics) {
+        if (diagnostics.length > 0) {
+          throw new Error(
+            `Declaration generation failed with ${diagnostics.length} TypeScript diagnostic(s).`,
+          );
+        }
+      },
     }),
   ],
   build: {
