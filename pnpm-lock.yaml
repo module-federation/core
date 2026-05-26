@@ -10,6 +10,7 @@ overrides:
   eslint>ajv: 6.14.0
   '@eslint/eslintrc>ajv': 6.14.0
   schema-utils@3.3.0>ajv: 6.14.0
+  flatted: 3.4.2
 
 packageExtensionsChecksum: sha256-kYpp54Qa8oxHK52n1gCLre9EEtYoXU9UlxKnD05EOBo=
 
@@ -17852,7 +17853,7 @@ packages:
     resolution: {integrity: sha512-b6suED+5/3rTpUBdG1gupIl8MPFCAMA0QXwmljLhvCUKcUvdE4gWky9zpuGCcXHOsz4J9wPGNWq6OKpmIzz3hQ==}
     hasBin: true
 
-  flatted@3.4.1:
+  flatted@3.4.2:
     resolution: {integrity: sha512-IxfVbRFVlV8V/yRaGzk0UVIcsKKHMSfYw66T/u4nTwlWteQePsxe//LjudR1AMX4tZW3WFCh3Zqa/sjlqpbURQ==}
 
   flexsearch@0.8.212:
@@ -30205,7 +30206,7 @@ snapshots:
       es-module-lexer: 1.5.3
       esbuild: 0.25.5
       esbuild-register: 3.6.0(esbuild@0.25.5)
-      flatted: 3.4.1
+      flatted: 3.4.2
       mlly: 1.8.1
       ndepe: 0.1.13(encoding@0.1.13)(rollup@4.59.0)
       pkg-types: 1.3.1
@@ -30267,7 +30268,7 @@ snapshots:
       es-module-lexer: 1.7.0
       esbuild: 0.25.5
       esbuild-register: 3.6.0(esbuild@0.25.5)
-      flatted: 3.4.1
+      flatted: 3.4.2
       mlly: 1.8.1
       ndepe: 0.1.13(encoding@0.1.13)(rollup@4.59.0)
       pkg-types: 1.3.1
@@ -30324,7 +30325,7 @@ snapshots:
       es-module-lexer: 1.7.0
       esbuild: 0.25.5
       esbuild-register: 3.6.0(esbuild@0.25.5)
-      flatted: 3.4.1
+      flatted: 3.4.2
       mlly: 1.8.1
       ndepe: 0.1.13(encoding@0.1.13)(rollup@4.59.0)
       pkg-types: 1.3.1
@@ -30375,7 +30376,7 @@ snapshots:
       es-module-lexer: 1.7.0
       esbuild: 0.25.5
       esbuild-register: 3.6.0(esbuild@0.25.5)
-      flatted: 3.4.1
+      flatted: 3.4.2
       mlly: 1.8.1
       ndepe: 0.1.13(encoding@0.1.13)(rollup@4.59.0)
       pkg-types: 1.3.1
@@ -30426,7 +30427,7 @@ snapshots:
       es-module-lexer: 1.7.0
       esbuild: 0.25.5
       esbuild-register: 3.6.0(esbuild@0.25.5)
-      flatted: 3.4.1
+      flatted: 3.4.2
       mlly: 1.8.1
       ndepe: 0.1.13(encoding@0.1.13)(rollup@4.59.0)
       pkg-types: 1.3.1
@@ -31269,7 +31270,7 @@ snapshots:
       '@web-std/file': 3.0.3
       '@web-std/stream': 1.0.3
       cloneable-readable: 3.0.0
-      flatted: 3.4.1
+      flatted: 3.4.2
       hono: 3.12.12
       ts-deepmerge: 7.0.2
     transitivePeerDependencies:
@@ -31287,7 +31288,7 @@ snapshots:
       '@web-std/file': 3.0.3
       '@web-std/stream': 1.0.3
       cloneable-readable: 3.0.0
-      flatted: 3.4.1
+      flatted: 3.4.2
       hono: 3.12.12
       ts-deepmerge: 7.0.2
     transitivePeerDependencies:
@@ -31304,7 +31305,7 @@ snapshots:
       '@web-std/file': 3.0.3
       '@web-std/stream': 1.0.3
       cloneable-readable: 3.0.0
-      flatted: 3.4.1
+      flatted: 3.4.2
       hono: 4.12.7
       ts-deepmerge: 7.0.3
     transitivePeerDependencies:
@@ -31323,7 +31324,7 @@ snapshots:
       '@web-std/file': 3.0.3
       '@web-std/stream': 1.0.3
       cloneable-readable: 3.0.0
-      flatted: 3.4.1
+      flatted: 3.4.2
       hono: 4.12.7
       ts-deepmerge: 7.0.3
     transitivePeerDependencies:
@@ -40558,7 +40559,7 @@ snapshots:
       '@vitest/utils': 1.6.0
       fast-glob: 3.3.3
       fflate: 0.8.2
-      flatted: 3.4.1
+      flatted: 3.4.2
       pathe: 1.1.2
       picocolors: 1.1.1
       sirv: 2.0.4
@@ -40570,7 +40571,7 @@ snapshots:
       '@vitest/utils': 1.6.0
       fast-glob: 3.3.3
       fflate: 0.8.2
-      flatted: 3.4.1
+      flatted: 3.4.2
       pathe: 1.1.2
       picocolors: 1.1.1
       sirv: 2.0.4
@@ -45938,18 +45939,18 @@ snapshots:
 
   flat-cache@3.2.0:
     dependencies:
-      flatted: 3.4.1
+      flatted: 3.4.2
       keyv: 4.5.4
       rimraf: 3.0.2
 
   flat-cache@4.0.1:
     dependencies:
-      flatted: 3.4.1
+      flatted: 3.4.2
       keyv: 4.5.4
 
   flat@5.0.2: {}
 
-  flatted@3.4.1: {}
+  flatted@3.4.2: {}
 
   flexsearch@0.8.212: {}
 
@@ -48691,7 +48692,7 @@ snapshots:
     dependencies:
       date-format: 4.0.14
       debug: 4.4.3(supports-color@8.1.1)
-      flatted: 3.4.1
+      flatted: 3.4.2
       rfdc: 1.4.1
       streamroller: 3.1.5
     transitivePeerDependencies:
