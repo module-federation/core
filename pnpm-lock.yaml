@@ -3238,7 +3238,7 @@ importers:
         version: 4.1.3
       isomorphic-ws:
         specifier: 5.0.0
-        version: 5.0.0(ws@8.18.0)
+        version: 5.0.0(ws@8.20.1)
       node-schedule:
         specifier: 2.1.1
         version: 2.1.1
@@ -3249,8 +3249,8 @@ importers:
         specifier: 7.24.7
         version: 7.24.7
       ws:
-        specifier: 8.18.0
-        version: 8.18.0
+        specifier: 8.20.1
+        version: 8.20.1
     devDependencies:
       '@module-federation/runtime':
         specifier: workspace:*
@@ -26378,8 +26378,8 @@ packages:
       utf-8-validate:
         optional: true
 
-  ws@8.18.0:
-    resolution: {integrity: sha512-8VbfWfHLbbwu3+N6OKsOMpBdT4kXPDDB9cJk2bJ6mh9ucxdlnNvH1e+roYkKmN9Nxw2yjz7VzeO9oOz2zJ04Pw==}
+  ws@8.20.0:
+    resolution: {integrity: sha512-sAt8BhgNbzCtgGbt2OxmpuryO63ZoDk/sqaB/znQm94T4fCEsy/yV+7CdC1kJhOU9lboAEU7R3kquuycDoibVA==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
@@ -26390,8 +26390,8 @@ packages:
       utf-8-validate:
         optional: true
 
-  ws@8.20.0:
-    resolution: {integrity: sha512-sAt8BhgNbzCtgGbt2OxmpuryO63ZoDk/sqaB/znQm94T4fCEsy/yV+7CdC1kJhOU9lboAEU7R3kquuycDoibVA==}
+  ws@8.20.1:
+    resolution: {integrity: sha512-It4dO0K5v//JtTXuPkfEOaI3uUN87iYPnqo/ZzqCoG3g8uhA66QUMs/SrM0YK7/NAu+r4LMh/9dq2A7k+rHs+w==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
@@ -31443,7 +31443,7 @@ snapshots:
       http-compression: 1.0.6
       minimatch: 3.1.5
       path-to-regexp: 6.3.0
-      ws: 8.18.0
+      ws: 8.20.1
     optionalDependencies:
       ts-node: 10.9.2(@swc/core@1.15.10(@swc/helpers@0.5.17))(@types/node@25.6.0)(typescript@5.9.3)
       tsconfig-paths: 4.2.0
@@ -31472,7 +31472,7 @@ snapshots:
       http-compression: 1.0.6
       minimatch: 3.1.5
       path-to-regexp: 6.3.0
-      ws: 8.18.0
+      ws: 8.20.1
     optionalDependencies:
       ts-node: 10.9.2(@swc/core@1.15.10(@swc/helpers@0.5.19))(@types/node@20.19.5)(typescript@5.9.3)
       tsconfig-paths: 4.2.0
@@ -32064,14 +32064,14 @@ snapshots:
       axios: 1.15.0
       chalk: 3.0.0
       fs-extra: 9.1.0
-      isomorphic-ws: 5.0.0(ws@8.18.0)
+      isomorphic-ws: 5.0.0(ws@8.20.1)
       koa: 3.0.3
       lodash.clonedeepwith: 4.5.0
       log4js: 6.9.1
       node-schedule: 2.1.1
       rambda: 9.2.1
       typescript: 5.9.3
-      ws: 8.18.0
+      ws: 8.20.1
     optionalDependencies:
       vue-tsc: 2.2.12(typescript@5.9.3)
     transitivePeerDependencies:
@@ -32091,13 +32091,13 @@ snapshots:
       axios: 1.15.0
       chalk: 3.0.0
       fs-extra: 9.1.0
-      isomorphic-ws: 5.0.0(ws@8.18.0)
+      isomorphic-ws: 5.0.0(ws@8.20.1)
       lodash.clonedeepwith: 4.5.0
       log4js: 6.9.1
       node-schedule: 2.1.1
       rambda: 9.2.1
       typescript: 5.9.3
-      ws: 8.18.0
+      ws: 8.20.1
     optionalDependencies:
       vue-tsc: 2.2.12(typescript@5.9.3)
     transitivePeerDependencies:
@@ -37402,7 +37402,7 @@ snapshots:
       p-retry: 6.2.1
       webpack-dev-middleware: 7.4.5(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.27.3)(webpack-cli@5.1.4))
       webpack-dev-server: 5.2.0(webpack-cli@5.1.4)(webpack@5.104.1)
-      ws: 8.18.0
+      ws: 8.20.1
     transitivePeerDependencies:
       - '@types/express'
       - bufferutil
@@ -38020,7 +38020,7 @@ snapshots:
       util: 0.12.5
       util-deprecate: 1.0.2
       watchpack: 2.5.1
-      ws: 8.18.0
+      ws: 8.20.1
     transitivePeerDependencies:
       - bufferutil
       - encoding
@@ -38049,7 +38049,7 @@ snapshots:
       recast: 0.23.11
       semver: 7.6.3
       util: 0.12.5
-      ws: 8.18.0
+      ws: 8.20.1
     optionalDependencies:
       prettier: 3.8.1
     transitivePeerDependencies:
@@ -38070,7 +38070,7 @@ snapshots:
       recast: 0.23.11
       semver: 7.6.3
       util: 0.12.5
-      ws: 8.18.0
+      ws: 8.20.1
     optionalDependencies:
       prettier: 3.8.1
     transitivePeerDependencies:
@@ -47601,9 +47601,9 @@ snapshots:
 
   isobject@3.0.1: {}
 
-  isomorphic-ws@5.0.0(ws@8.18.0):
+  isomorphic-ws@5.0.0(ws@8.20.1):
     dependencies:
-      ws: 8.18.0
+      ws: 8.20.1
 
   isstream@0.1.2: {}
 
@@ -48279,7 +48279,7 @@ snapshots:
       whatwg-encoding: 2.0.0
       whatwg-mimetype: 3.0.0
       whatwg-url: 11.0.0
-      ws: 8.18.0
+      ws: 8.20.1
       xml-name-validator: 4.0.0
     transitivePeerDependencies:
       - bufferutil
@@ -58158,7 +58158,7 @@ snapshots:
       sockjs: 0.3.24
       spdy: 4.0.2
       webpack-dev-middleware: 7.4.5(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.27.3)(webpack-cli@5.1.4))
-      ws: 8.18.0
+      ws: 8.20.1
     optionalDependencies:
       webpack: 5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.27.3)(webpack-cli@5.1.4)
       webpack-cli: 5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)
@@ -58197,7 +58197,7 @@ snapshots:
       sockjs: 0.3.24
       spdy: 4.0.2
       webpack-dev-middleware: 7.4.5(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.17))(esbuild@0.25.5)(webpack-cli@5.1.4))
-      ws: 8.18.0
+      ws: 8.20.1
     optionalDependencies:
       webpack: 5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.17))(esbuild@0.25.5)(webpack-cli@5.1.4)
       webpack-cli: 5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)
@@ -58237,7 +58237,7 @@ snapshots:
       sockjs: 0.3.24
       spdy: 4.0.2
       webpack-dev-middleware: 7.4.5(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.19))(esbuild@0.18.20)(webpack-cli@5.1.4))
-      ws: 8.18.0
+      ws: 8.20.1
     optionalDependencies:
       webpack: 5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.19))(esbuild@0.18.20)(webpack-cli@5.1.4)
       webpack-cli: 5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)
@@ -58277,7 +58277,7 @@ snapshots:
       sockjs: 0.3.24
       spdy: 4.0.2
       webpack-dev-middleware: 7.4.5(webpack@5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.19))(esbuild@0.25.0)(webpack-cli@5.1.4))
-      ws: 8.18.0
+      ws: 8.20.1
     optionalDependencies:
       webpack: 5.104.1(@swc/core@1.15.10(@swc/helpers@0.5.19))(esbuild@0.25.0)(webpack-cli@5.1.4)
       webpack-cli: 5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)
@@ -58316,7 +58316,7 @@ snapshots:
       sockjs: 0.3.24
       spdy: 4.0.2
       webpack-dev-middleware: 7.4.5(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.27.3)(webpack-cli@5.1.4))
-      ws: 8.18.0
+      ws: 8.20.1
     optionalDependencies:
       webpack: 5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.27.3)(webpack-cli@5.1.4)
       webpack-cli: 5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)
@@ -58831,9 +58831,9 @@ snapshots:
 
   ws@7.5.10: {}
 
-  ws@8.18.0: {}
-
   ws@8.20.0: {}
+
+  ws@8.20.1: {}
 
   wsl-utils@0.1.0:
     dependencies:
