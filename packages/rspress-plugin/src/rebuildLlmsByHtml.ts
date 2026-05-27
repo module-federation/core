@@ -69,6 +69,8 @@ function normalizeText(text: string) {
 function htmlToMarkdown(html: string) {
   const $ = cheerio.load(html);
 
+  // Strip chrome and runtime-only nodes before converting the page body into
+  // Markdown, so llms output contains document content instead of navigation UI.
   $('script, style, noscript, template').remove();
   $('header, nav, aside, footer').remove();
   $(
@@ -204,6 +206,8 @@ async function writeRouteMarkdownIfEmpty(
   routeMarkdownList: RouteMarkdown[],
   options: RebuildLlmsByHtmlOptions,
 ) {
+  // Rspress may already emit route-level Markdown files. Only fill missing or
+  // empty files from HTML so user-authored content is never overwritten.
   await Promise.all(
     routeMarkdownList.map(async ({ route, markdown }) => {
       const mdFilename = routePageToMdFilename(route.routePath);
@@ -254,6 +258,8 @@ async function patchLlmsFullTxtIfEmpty(
     }
   }
 
+  // If llms-full.txt was not generated, create the whole file from the HTML
+  // conversion. Otherwise only patch sections whose body is still empty.
   if (!original) {
     await fs.writeFile(
       llmsFullPath,
@@ -296,6 +302,8 @@ async function patchLlmsTxtIfEmpty(
     return;
   }
 
+  // Rspress can emit placeholder entries like "- [](url)" when route metadata
+  // is unavailable at compile time. Backfill those labels from built HTML.
   const pageInfoMap = new Map(
     routeMarkdownList.map(({ route, title, description }) => [
       routePathToMdPath(route.routePath, options.base),
@@ -327,6 +335,8 @@ export async function rebuildLlmsByHtml(
   routes: RouteMeta[],
   options: RebuildLlmsByHtmlOptions,
 ) {
+  // Treat the generated HTML as the source of truth after federation has
+  // rendered remote content into the static output.
   const routeMarkdownList = await extractRouteMarkdown(routes, options);
   const defaultVersion =
     options.defaultVersion || getDefaultVersion(routeMarkdownList);
@@ -334,6 +344,8 @@ export async function rebuildLlmsByHtml(
 
   await writeRouteMarkdownIfEmpty(routeMarkdownList, options);
 
+  // llms.txt and llms-full.txt are emitted per version/language prefix, so
+  // patch each output group independently.
   for (const routeMarkdown of routeMarkdownList) {
     const outputPrefix = getLlmsOutputPrefix(
       routeMarkdown.route,
