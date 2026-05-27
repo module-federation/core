@@ -144,7 +144,8 @@
       "ajv": "8.18.0",
       "eslint>ajv": "6.14.0",
       "@eslint/eslintrc>ajv": "6.14.0",
-      "schema-utils@3.3.0>ajv": "6.14.0"
+      "schema-utils@3.3.0>ajv": "6.14.0",
+      "flatted": "3.4.2"
     },
     "onlyBuiltDependencies": [
       "@parcel/watcher",
