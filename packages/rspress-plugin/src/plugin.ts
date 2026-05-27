@@ -6,11 +6,13 @@ import logger from './logger';
 
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import type { RspressPlugin, RouteMeta } from '@rspress/core';
+import { rebuildLlmsByHtml } from './rebuildLlmsByHtml';
 import { rebuildSearchIndexByHtml } from './rebuildSearchIndexByHtml';
 
 type RspressPluginOptions = {
   autoShared?: boolean;
   rebuildSearchIndex?: boolean;
+  rebuildLlms?: boolean;
 };
 
 const isDev = () => process.env.NODE_ENV === 'development';
@@ -19,7 +21,11 @@ export function pluginModuleFederation(
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
   rspressOptions?: RspressPluginOptions,
 ): RspressPlugin {
-  const { autoShared = true, rebuildSearchIndex = true } = rspressOptions || {};
+  const {
+    autoShared = true,
+    rebuildSearchIndex = true,
+    rebuildLlms = true,
+  } = rspressOptions || {};
 
   if (autoShared) {
     mfConfig.shared = {
@@ -137,28 +143,46 @@ export function pluginModuleFederation(
       routes = routeMetaArr;
     },
     async afterBuild(config) {
-      if (!mfConfig.remotes || isDev() || !rebuildSearchIndex) {
+      if (!mfConfig.remotes || isDev()) {
         return;
       }
       if (!enableSSG) {
-        logger.error('rebuildSearchIndex is only supported for ssg');
+        logger.error(
+          'rebuildSearchIndex and rebuildLlms are only supported for ssg',
+        );
         process.exit(1);
       }
-      const searchConfig = config?.search || {};
-      const replaceRules = config?.replaceRules || [];
-      const domain = '';
-      const versioned = searchConfig && searchConfig.versioned;
-      const searchCodeBlocks =
-        'codeBlocks' in searchConfig ? Boolean(searchConfig.codeBlocks) : true;
-      await rebuildSearchIndexByHtml(routes, {
-        outputDir,
-        versioned,
-        replaceRules,
-        domain,
-        searchCodeBlocks,
-        defaultLang: config.lang || 'en',
-      });
-      logger.info('rebuildSearchIndex success!');
+      const defaultLang = config.lang || 'en';
+
+      if (rebuildSearchIndex) {
+        const searchConfig = config?.search || {};
+        const replaceRules = config?.replaceRules || [];
+        const domain = '';
+        const versioned = searchConfig && searchConfig.versioned;
+        const searchCodeBlocks =
+          'codeBlocks' in searchConfig
+            ? Boolean(searchConfig.codeBlocks)
+            : true;
+        await rebuildSearchIndexByHtml(routes, {
+          outputDir,
+          versioned,
+          replaceRules,
+          domain,
+          searchCodeBlocks,
+          defaultLang,
+        });
+        logger.info('rebuildSearchIndex success!');
+      }
+
+      if (config.llms && rebuildLlms) {
+        await rebuildLlmsByHtml(routes, {
+          outputDir,
+          defaultLang,
+          base: config.base,
+          defaultVersion: config.multiVersion?.default,
+        });
+        logger.info('rebuildLlms success!');
+      }
     },
   };
 }
