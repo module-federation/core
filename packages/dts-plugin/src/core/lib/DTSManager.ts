@@ -40,6 +40,31 @@ interface UpdateTypesOptions {
   once?: boolean;
 }
 
+const buildManifestConventionZipUrl = (
+  remoteUrl: string,
+  remoteTypesFolder = '@mf-types',
+) => {
+  const parsedRemoteUrl = new URL(remoteUrl, 'file:');
+
+  const pathnameWithoutEntry = parsedRemoteUrl.pathname
+    .split('/')
+    .slice(0, -1)
+    .join('/');
+  parsedRemoteUrl.pathname = `${pathnameWithoutEntry}/${remoteTypesFolder}.zip`;
+
+  return parsedRemoteUrl.protocol === 'file:'
+    ? parsedRemoteUrl.pathname
+    : parsedRemoteUrl.href;
+};
+
+const buildManifestConventionApiTypeUrl = (zipUrl?: string) => {
+  if (!zipUrl) {
+    return '';
+  }
+
+  return zipUrl.replace('.zip', '.d.ts');
+};
+
 class DTSManager {
   options: DTSManagerOptions;
   runtimePkgs: string[];
@@ -221,6 +246,17 @@ class DTSManager {
       if (remoteInfo.zipUrl) {
         return remoteInfo as Required<RemoteInfo>;
       }
+
+      const fallbackZipUrl = buildManifestConventionZipUrl(
+        remoteInfo.url,
+        hostOptions.remoteTypesFolder,
+      );
+      const fallbackRemoteInfo = {
+        ...remoteInfo,
+        zipUrl: fallbackZipUrl,
+        apiTypeUrl: buildManifestConventionApiTypeUrl(fallbackZipUrl),
+      } as Required<RemoteInfo>;
+
       const url = remoteInfo.url;
       const res = await nativeFetch(url, {
         timeout: hostOptions.timeout,
@@ -228,7 +264,7 @@ class DTSManager {
       });
       const manifestJson = res.data as unknown as Manifest;
       if (!manifestJson.metaData.types.zip) {
-        throw new Error(`Can not get ${remoteInfo.name}'s types archive url!`);
+        return fallbackRemoteInfo;
       }
       const addProtocol = (u: string): string => {
         if (u.startsWith('//')) {
@@ -268,12 +304,20 @@ class DTSManager {
       ).href;
       return remoteInfo as Required<RemoteInfo>;
     } catch (_err) {
+      const fallbackZipUrl = buildManifestConventionZipUrl(
+        remoteInfo.url,
+        hostOptions.remoteTypesFolder,
+      );
       fileLog(
         `fetch manifest failed, ${_err}, ${remoteInfo.name} will be ignored`,
         'requestRemoteManifest',
         'error',
       );
-      return remoteInfo as Required<RemoteInfo>;
+      return {
+        ...remoteInfo,
+        zipUrl: fallbackZipUrl,
+        apiTypeUrl: buildManifestConventionApiTypeUrl(fallbackZipUrl),
+      } as Required<RemoteInfo>;
     }
   }
 

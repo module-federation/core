@@ -190,6 +190,35 @@ describe('DTSManager General Tests', () => {
       expect(result.apiTypeUrl).toBe('');
     });
 
+    it('should fall back to convention-based type URLs when manifest metadata lacks types', async () => {
+      vi.spyOn(utils, 'nativeFetch').mockResolvedValueOnce({
+        data: {
+          metaData: {
+            publicPath: 'http://example.com/static/',
+          },
+        },
+        status: 200,
+        headers: {},
+      } as any);
+
+      const remoteInfo: RemoteInfo = {
+        name: 'test',
+        url: 'http://example.com/static/mf-manifest.json',
+        alias: 'test-alias',
+      };
+
+      const result = await dtsManager.requestRemoteManifest(remoteInfo, {
+        remoteTypesFolder: '@mf-types',
+        timeout: 60000,
+        family: 4,
+      } as any);
+
+      expect(result.zipUrl).toBe('http://example.com/static/@mf-types.zip');
+      expect(result.apiTypeUrl).toBe(
+        'http://example.com/static/@mf-types.d.ts',
+      );
+    });
+
     it('should handle manifest fetch errors', async () => {
       vi.spyOn(utils, 'nativeFetch').mockRejectedValueOnce(
         new Error('Network error'),
@@ -201,9 +230,13 @@ describe('DTSManager General Tests', () => {
         alias: 'test-alias',
       };
 
-      // @ts-expect-error only need timeout, which is not required
-      const result = await dtsManager.requestRemoteManifest(remoteInfo, {});
-      expect(result).toEqual(remoteInfo);
+      const result = await dtsManager.requestRemoteManifest(remoteInfo, {
+        remoteTypesFolder: '@mf-types',
+        timeout: 60000,
+        family: 4,
+      } as any);
+      expect(result.zipUrl).toBe('http://example.com/@mf-types.zip');
+      expect(result.apiTypeUrl).toBe('http://example.com/@mf-types.d.ts');
     });
 
     it('should handle manifest with getPublicPath function', async () => {
