@@ -8,6 +8,49 @@ import { correctImportPath } from './correctImportPath.js';
 import type { RsbuildConfig, RsbuildPlugin } from '@rsbuild/core';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 
+const moduleFederationOptionKeys = [
+  'async',
+  'bridge',
+  'dev',
+  'dts',
+  'experiments',
+  'exposes',
+  'filename',
+  'getPublicPath',
+  'implementation',
+  'injectTreeShakingUsedExports',
+  'library',
+  'manifest',
+  'name',
+  'remoteType',
+  'remotes',
+  'runtime',
+  'runtimePlugins',
+  'shareScope',
+  'shareStrategy',
+  'shared',
+  'treeShakingDir',
+  'treeShakingSharedExcludePlugins',
+  'treeShakingSharedPlugins',
+  'virtualRuntimeEntry',
+] as const satisfies readonly (keyof moduleFederationPlugin.ModuleFederationPluginOptions)[];
+
+type StorybookRsbuildOptions =
+  moduleFederationPlugin.ModuleFederationPluginOptions &
+    Record<string, unknown>;
+
+const getModuleFederationOptions = (
+  options: StorybookRsbuildOptions,
+): moduleFederationPlugin.ModuleFederationPluginOptions => {
+  return Object.fromEntries(
+    moduleFederationOptionKeys.flatMap((key) => {
+      const value = options[key];
+
+      return value === undefined ? [] : [[key, value]];
+    }),
+  ) as moduleFederationPlugin.ModuleFederationPluginOptions;
+};
+
 const tempDirPath = path.resolve(process.cwd(), `node_modules/${TEMP_DIR}`);
 export const PLUGIN_NAME = 'module-federation-storybook-addon';
 // add bootstrap for host project
@@ -32,6 +75,10 @@ export const withModuleFederation = (
   rsbuildConfig: RsbuildConfig,
   options: moduleFederationPlugin.ModuleFederationPluginOptions,
 ) => {
+  const moduleFederationOptions = getModuleFederationOptions(
+    options as StorybookRsbuildOptions,
+  );
+
   rsbuildConfig.plugins ??= [];
   rsbuildConfig.source ??= {};
   rsbuildConfig.source.entry ??= {};
@@ -60,8 +107,8 @@ export const withModuleFederation = (
       api.modifyBundlerChain(async (chain) => {
         chain.plugin(PLUGIN_NAME).use(ModuleFederationPlugin, [
           {
-            ...options,
-            name: options.name || PLUGIN_NAME,
+            ...moduleFederationOptions,
+            name: moduleFederationOptions.name || PLUGIN_NAME,
             shared: {
               react: {
                 singleton: true,
@@ -69,12 +116,12 @@ export const withModuleFederation = (
               'react-dom': {
                 singleton: true,
               },
-              ...options.shared,
+              ...moduleFederationOptions.shared,
             },
             remotes: {
-              ...options.remotes,
+              ...moduleFederationOptions.remotes,
             },
-            shareStrategy: options.shareStrategy,
+            shareStrategy: moduleFederationOptions.shareStrategy,
           },
         ]);
       });
