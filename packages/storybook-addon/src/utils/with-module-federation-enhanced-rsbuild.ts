@@ -60,6 +60,7 @@ export const withModuleFederation = (
       api.modifyBundlerChain(async (chain) => {
         chain.plugin(PLUGIN_NAME).use(ModuleFederationPlugin, [
           {
+            ...options,
             name: options.name || PLUGIN_NAME,
             shared: {
               react: {
