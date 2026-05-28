@@ -143,7 +143,12 @@ export function pluginModuleFederation(
       routes = routeMetaArr;
     },
     async afterBuild(config) {
-      if (!mfConfig.remotes || isDev()) {
+      const shouldRebuildLlms = Boolean(config.llms && rebuildLlms);
+      if (
+        !mfConfig.remotes ||
+        isDev() ||
+        (!rebuildSearchIndex && !shouldRebuildLlms)
+      ) {
         return;
       }
       if (!enableSSG) {
@@ -174,7 +179,7 @@ export function pluginModuleFederation(
         logger.info('rebuildSearchIndex success!');
       }
 
-      if (config.llms && rebuildLlms) {
+      if (shouldRebuildLlms) {
         await rebuildLlmsByHtml(routes, {
           outputDir,
           defaultLang,
