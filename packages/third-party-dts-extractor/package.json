@@ -32,8 +32,8 @@
   "author": "hanric <hanric.zhang@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "find-pkg": "2.0.0",
-    "resolve": "1.22.8"
+    "exsolve": "1.0.8",
+    "find-pkg": "2.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.19.5",

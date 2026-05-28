@@ -2,7 +2,7 @@ import findPkg from 'find-pkg';
 import { copyFile, lstat, mkdir, readdir } from 'fs/promises';
 import { existsSync, readFileSync } from 'fs';
 import path from 'path';
-import resolve from 'resolve';
+import { resolveModulePath } from 'exsolve';
 import { getTypedName, getPackageRootDir } from './utils';
 
 const ignoredPkgs = ['typescript'];
@@ -98,8 +98,8 @@ class ThirdPartyExtractor {
       } else {
         const typedPkgName = getTypedName(pkg.name);
         const typedPkgJsonPath = findPkg.sync(
-          resolve.sync(`${typedPkgName}/package.json`, {
-            basedir: this.context,
+          resolveModulePath(`${typedPkgName}/package.json`, {
+            from: this.context,
           }),
         ) as string;
         const typedDir = path.dirname(typedPkgJsonPath);
