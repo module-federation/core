@@ -1,4 +1,4 @@
-import WebSocket from 'isomorphic-ws';
+import WebSocket from 'ws';
 import {
   DEFAULT_WEB_SOCKET_PORT,
   WEB_SOCKET_CONNECT_MAGIC_ID,

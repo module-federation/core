@@ -3237,9 +3237,6 @@ importers:
       ansi-colors:
         specifier: 4.1.3
         version: 4.1.3
-      isomorphic-ws:
-        specifier: 5.0.0
-        version: 5.0.0(ws@8.21.0)
       node-schedule:
         specifier: 2.1.1
         version: 2.1.1
@@ -48409,10 +48406,6 @@ snapshots:
   isomorphic-ws@5.0.0(ws@8.18.0):
     dependencies:
       ws: 8.18.0
-
-  isomorphic-ws@5.0.0(ws@8.21.0):
-    dependencies:
-      ws: 8.21.0
 
   isstream@0.1.2: {}
 

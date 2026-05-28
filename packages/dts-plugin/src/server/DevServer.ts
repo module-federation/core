@@ -1,4 +1,4 @@
-import WebSocket from 'isomorphic-ws';
+import WebSocket from 'ws';
 import { UpdateMode } from './constant';
 import { Broker } from './broker/Broker';
 import { fib, getIdentifier, getIPV4, fileLog } from './utils';
