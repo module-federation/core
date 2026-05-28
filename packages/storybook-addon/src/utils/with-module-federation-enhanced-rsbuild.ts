@@ -8,47 +8,22 @@ import { correctImportPath } from './correctImportPath.js';
 import type { RsbuildConfig, RsbuildPlugin } from '@rsbuild/core';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 
-const moduleFederationOptionKeys = [
-  'async',
-  'bridge',
-  'dev',
-  'dts',
-  'experiments',
-  'exposes',
-  'filename',
-  'getPublicPath',
-  'implementation',
-  'injectTreeShakingUsedExports',
-  'library',
-  'manifest',
-  'name',
-  'remoteType',
-  'remotes',
-  'runtime',
-  'runtimePlugins',
-  'shareScope',
-  'shareStrategy',
-  'shared',
-  'treeShakingDir',
-  'treeShakingSharedExcludePlugins',
-  'treeShakingSharedPlugins',
-  'virtualRuntimeEntry',
-] as const satisfies readonly (keyof moduleFederationPlugin.ModuleFederationPluginOptions)[];
-
 type StorybookRsbuildOptions =
-  moduleFederationPlugin.ModuleFederationPluginOptions &
-    Record<string, unknown>;
+  moduleFederationPlugin.ModuleFederationPluginOptions & {
+    cacheKey?: string;
+    configDir?: string;
+    configType?: string;
+    presets?: unknown;
+  } & Record<string, unknown>;
 
-const getModuleFederationOptions = (
-  options: StorybookRsbuildOptions,
-): moduleFederationPlugin.ModuleFederationPluginOptions => {
-  return Object.fromEntries(
-    moduleFederationOptionKeys.flatMap((key) => {
-      const value = options[key];
-
-      return value === undefined ? [] : [[key, value]];
-    }),
-  ) as moduleFederationPlugin.ModuleFederationPluginOptions;
+const getModuleFederationOptions = ({
+  cacheKey,
+  configDir,
+  configType,
+  presets,
+  ...moduleFederationOptions
+}: StorybookRsbuildOptions): moduleFederationPlugin.ModuleFederationPluginOptions => {
+  return moduleFederationOptions;
 };
 
 const tempDirPath = path.resolve(process.cwd(), `node_modules/${TEMP_DIR}`);

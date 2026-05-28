@@ -86,10 +86,16 @@ describe(`${withModuleFederation.name}()`, () => {
   });
 
   it('does not forward Storybook preset metadata into the Rsbuild plugin options', async () => {
+    const futureFederationOption = {
+      enabled: true,
+    };
     const storybookOptions: moduleFederationPlugin.ModuleFederationPluginOptions & {
       cacheKey: string;
       configDir: string;
       configType: string;
+      futureFederationOption: {
+        enabled: boolean;
+      };
       presets: {
         apply: () => void;
       };
@@ -101,6 +107,7 @@ describe(`${withModuleFederation.name}()`, () => {
       cacheKey: 'storybook-cache-key',
       configDir: '.storybook',
       configType: 'DEVELOPMENT',
+      futureFederationOption,
       presets: {
         apply: () => undefined,
       },
@@ -114,6 +121,7 @@ describe(`${withModuleFederation.name}()`, () => {
       remotes: {
         remote: 'remote@http://localhost:3001/mf-manifest.json',
       },
+      futureFederationOption,
     });
     expect(pluginOptions).not.toHaveProperty('cacheKey');
     expect(pluginOptions).not.toHaveProperty('configDir');
