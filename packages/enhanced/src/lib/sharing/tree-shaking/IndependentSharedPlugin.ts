@@ -13,6 +13,8 @@ import {
   StatsFileName,
 } from '@module-federation/sdk';
 import CollectSharedEntryPlugin, {
+  collectInstalledSharedPackageVersions,
+  mergeShareRequestsMap,
   type ShareRequestsMap,
 } from './CollectSharedEntryPlugin';
 import SharedUsedExportsOptimizerPlugin from './SharedUsedExportsOptimizerPlugin';
@@ -240,13 +242,26 @@ export default class IndependentSharedPlugin {
 
     const shareRequestsMap: ShareRequestsMap =
       await this.createIndependentCompiler(parentCompiler);
+    mergeShareRequestsMap(
+      shareRequestsMap,
+      collectInstalledSharedPackageVersions(
+        parentCompiler.context,
+        sharedOptions,
+      ),
+    );
 
     await Promise.all(
       sharedOptions.map(async ([shareName, shareConfig]) => {
         if (!shareConfig.treeShaking) {
           return;
         }
-        const shareRequests = shareRequestsMap[shareName].requests;
+        const shareRequests = Array.from(
+          new Map(
+            (shareRequestsMap[shareName]?.requests || []).map(
+              ([request, version]) => [version, [request, version] as const],
+            ),
+          ).values(),
+        );
         await Promise.all(
           shareRequests.map(async ([request, version]) => {
             const sharedConfig = sharedOptions.find(
@@ -455,8 +470,9 @@ export default class IndependentSharedPlugin {
           return;
         }
 
-        shareRequestsMap &&
+        if (shareRequestsMap) {
           console.log(`Shared "${shareName}" compilation succeeded`);
+        }
 
         resolve(extraPlugin.getData());
       });
