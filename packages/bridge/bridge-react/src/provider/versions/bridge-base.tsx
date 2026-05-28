@@ -53,20 +53,24 @@ export function createBaseBridgeComponent<T>({
     const ErrorBoundaryComponent =
       ErrorBoundary as unknown as React.ComponentType<any>;
 
+    const omitHostFallback = <P extends Record<string, unknown>>(props: P) => {
+      const nextProps = { ...props };
+      delete nextProps.fallback;
+      return nextProps;
+    };
+
     const BridgeWrapper = ({
       basename,
       moduleName,
       memoryRoute,
       propsInfo,
-      fallback,
     }: {
       basename?: string;
       moduleName?: string;
       memoryRoute?: any;
       propsInfo: T;
-      fallback?: React.ComponentType<FallbackProps>;
     }) => (
-      <ErrorBoundaryComponent FallbackComponent={fallback || DefaultFallback}>
+      <ErrorBoundaryComponent FallbackComponent={DefaultFallback}>
         <RawComponent
           appInfo={{
             moduleName,
@@ -86,7 +90,6 @@ export function createBaseBridgeComponent<T>({
           dom,
           basename,
           memoryRoute,
-          fallback,
           rootOptions,
           ...propsInfo
         } = info;
@@ -104,10 +107,9 @@ export function createBaseBridgeComponent<T>({
             basename={basename}
             moduleName={moduleName}
             memoryRoute={memoryRoute}
-            fallback={fallback as React.ComponentType<FallbackProps>}
             propsInfo={
               {
-                ...propsInfo,
+                ...omitHostFallback(propsInfo as Record<string, unknown>),
                 basename,
                 ...(beforeBridgeRenderRes as any)?.extraProps,
               } as T
