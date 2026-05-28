@@ -382,7 +382,7 @@ export interface DtsHostOptions {
   remoteTypeUrls?: (() => Promise<RemoteTypeUrls>) | RemoteTypeUrls;
   timeout?: number;
   /** The family of IP, used for network requests */
-  family?: 4 | 6;
+  family?: 0 | 4 | 6;
   typesOnBuild?: boolean;
 }
 

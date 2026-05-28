@@ -43,7 +43,7 @@ describe('hostPlugin', () => {
           runtimePkgs: [],
           remoteTypeUrls: {},
           timeout: 60000,
-          family: 4,
+          family: 0,
           typesOnBuild: false,
         });
 
@@ -102,6 +102,17 @@ describe('hostPlugin', () => {
             'moduleFederationTypescript',
           ),
         ).toStrictEqual(destinationPath);
+      });
+
+      it('preserves an explicit IPv6 family override', () => {
+        const options = {
+          moduleFederationConfig,
+          family: 6 as const,
+        };
+
+        const { hostOptions } = retrieveHostConfig(options);
+
+        expect(hostOptions.family).toBe(6);
       });
     });
 
