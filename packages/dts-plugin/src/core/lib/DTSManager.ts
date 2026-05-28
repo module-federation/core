@@ -40,6 +40,24 @@ interface UpdateTypesOptions {
   once?: boolean;
 }
 
+const addProtocol = (url: string): string => {
+  if (url.startsWith('//')) {
+    return `https:${url}`;
+  }
+  return url;
+};
+
+const joinUrl = (baseUrl: string, filePath: string): string => {
+  const normalizedFilePath = addProtocol(filePath);
+  if (/^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(normalizedFilePath)) {
+    return new URL(normalizedFilePath).href;
+  }
+
+  const normalizedBaseUrl = addProtocol(baseUrl).replace(/\/?$/, '/');
+  return new URL(normalizedFilePath.replace(/^\/+/, ''), normalizedBaseUrl)
+    .href;
+};
+
 class DTSManager {
   options: DTSManagerOptions;
   runtimePkgs: string[];
@@ -230,13 +248,6 @@ class DTSManager {
       if (!manifestJson.metaData.types.zip) {
         throw new Error(`Can not get ${remoteInfo.name}'s types archive url!`);
       }
-      const addProtocol = (u: string): string => {
-        if (u.startsWith('//')) {
-          return `https:${u}`;
-        }
-        return u;
-      };
-
       let publicPath;
 
       if ('publicPath' in manifestJson.metaData) {
@@ -255,17 +266,16 @@ class DTSManager {
         publicPath = inferAutoPublicPath(remoteInfo.url);
       }
 
-      remoteInfo.zipUrl = new URL(
-        path.join(addProtocol(publicPath), manifestJson.metaData.types.zip),
-      ).href;
+      remoteInfo.zipUrl = joinUrl(publicPath, manifestJson.metaData.types.zip);
       if (!manifestJson.metaData.types.api) {
         console.warn(`Can not get ${remoteInfo.name}'s api types url!`);
         remoteInfo.apiTypeUrl = '';
         return remoteInfo as Required<RemoteInfo>;
       }
-      remoteInfo.apiTypeUrl = new URL(
-        path.join(addProtocol(publicPath), manifestJson.metaData.types.api),
-      ).href;
+      remoteInfo.apiTypeUrl = joinUrl(
+        publicPath,
+        manifestJson.metaData.types.api,
+      );
       return remoteInfo as Required<RemoteInfo>;
     } catch (_err) {
       fileLog(
