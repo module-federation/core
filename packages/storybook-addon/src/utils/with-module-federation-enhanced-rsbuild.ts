@@ -9,20 +9,57 @@ import type { RsbuildConfig, RsbuildPlugin } from '@rsbuild/core';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 
 type StorybookRsbuildOptions =
-  moduleFederationPlugin.ModuleFederationPluginOptions & {
-    cacheKey?: string;
-    configDir?: string;
-    configType?: string;
-    presets?: unknown;
-  } & Record<string, unknown>;
+  moduleFederationPlugin.ModuleFederationPluginOptions &
+    Record<string, unknown>;
 
-const getModuleFederationOptions = ({
-  cacheKey,
-  configDir,
-  configType,
-  presets,
-  ...moduleFederationOptions
-}: StorybookRsbuildOptions): moduleFederationPlugin.ModuleFederationPluginOptions => {
+// Storybook passes its full `Options` object (configDir, configType, presets,
+// presetsList, cache, features, packageJson, port, ...) as the second argument
+// to the `rsbuildFinal` hook. The enhanced `ModuleFederationPlugin` schema is
+// strict (`additionalProperties: false`) and rejects any unknown key, so we
+// must keep only valid Module Federation options and drop Storybook metadata.
+// An allowlist is used (rather than stripping known Storybook keys) so the
+// addon stays robust as Storybook adds new metadata fields.
+const MODULE_FEDERATION_OPTION_KEYS = [
+  'async',
+  'bridge',
+  'dev',
+  'dts',
+  'experiments',
+  'exposes',
+  'filename',
+  'getPublicPath',
+  'implementation',
+  'injectTreeShakingUsedExports',
+  'library',
+  'manifest',
+  'name',
+  'remoteType',
+  'remotes',
+  'runtime',
+  'runtimePlugins',
+  'shareScope',
+  'shareStrategy',
+  'shared',
+  'treeShakingDir',
+  'treeShakingSharedExcludePlugins',
+  'treeShakingSharedPlugins',
+  'virtualRuntimeEntry',
+] as const satisfies ReadonlyArray<
+  keyof moduleFederationPlugin.ModuleFederationPluginOptions
+>;
+
+const getModuleFederationOptions = (
+  options: StorybookRsbuildOptions,
+): moduleFederationPlugin.ModuleFederationPluginOptions => {
+  const moduleFederationOptions: moduleFederationPlugin.ModuleFederationPluginOptions =
+    {};
+
+  for (const key of MODULE_FEDERATION_OPTION_KEYS) {
+    if (options[key] !== undefined) {
+      (moduleFederationOptions as Record<string, unknown>)[key] = options[key];
+    }
+  }
+
   return moduleFederationOptions;
 };
 

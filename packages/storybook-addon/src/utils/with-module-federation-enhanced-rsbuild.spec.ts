@@ -85,33 +85,33 @@ describe(`${withModuleFederation.name}()`, () => {
     });
   });
 
-  it('does not forward Storybook preset metadata into the Rsbuild plugin options', async () => {
-    const futureFederationOption = {
-      enabled: true,
+  it('does not forward Storybook metadata into the Rsbuild plugin options', async () => {
+    // Keys Storybook injects into the `Options` object passed to `rsbuildFinal`.
+    // The enhanced ModuleFederationPlugin schema is strict
+    // (`additionalProperties: false`), so any of these leaking through would
+    // fail validation and break Storybook startup.
+    const storybookMetadata = {
+      cacheKey: 'storybook-cache-key',
+      configDir: '.storybook',
+      configType: 'DEVELOPMENT',
+      presets: { apply: () => undefined },
+      presetsList: [],
+      cache: {},
+      features: {},
+      packageJson: { name: 'host' },
+      port: 6006,
+      outputDir: 'storybook-static',
+      // An unknown/unrecognized key must also be dropped, since the schema
+      // rejects additional properties.
+      futureStorybookOption: { enabled: true },
     };
-    const storybookOptions: moduleFederationPlugin.ModuleFederationPluginOptions & {
-      cacheKey: string;
-      configDir: string;
-      configType: string;
-      futureFederationOption: {
-        enabled: boolean;
-      };
-      presets: {
-        apply: () => void;
-      };
-    } = {
+    const storybookOptions = {
       name: 'storybook-host',
       remotes: {
         remote: 'remote@http://localhost:3001/mf-manifest.json',
       },
-      cacheKey: 'storybook-cache-key',
-      configDir: '.storybook',
-      configType: 'DEVELOPMENT',
-      futureFederationOption,
-      presets: {
-        apply: () => undefined,
-      },
-    };
+      ...storybookMetadata,
+    } as unknown as moduleFederationPlugin.ModuleFederationPluginOptions;
 
     const pluginOptions =
       await getModuleFederationPluginOptions(storybookOptions);
@@ -121,11 +121,10 @@ describe(`${withModuleFederation.name}()`, () => {
       remotes: {
         remote: 'remote@http://localhost:3001/mf-manifest.json',
       },
-      futureFederationOption,
     });
-    expect(pluginOptions).not.toHaveProperty('cacheKey');
-    expect(pluginOptions).not.toHaveProperty('configDir');
-    expect(pluginOptions).not.toHaveProperty('configType');
-    expect(pluginOptions).not.toHaveProperty('presets');
+
+    for (const key of Object.keys(storybookMetadata)) {
+      expect(pluginOptions).not.toHaveProperty(key);
+    }
   });
 });
