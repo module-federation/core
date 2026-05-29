@@ -8,14 +8,7 @@ export default {
     config: RsbuildConfig,
     options: moduleFederationPlugin.ModuleFederationPluginOptions,
   ) => {
-    const { remotes, shared, name, shareStrategy } = options;
-
-    return withModuleFederation(config, {
-      name,
-      remotes,
-      shared,
-      shareStrategy,
-    });
+    return withModuleFederation(config, options);
   },
 };
 export { PLUGIN_NAME } from './src/utils/with-module-federation-enhanced-rsbuild.js';
