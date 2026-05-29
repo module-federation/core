@@ -236,6 +236,57 @@ describe('DTSManager General Tests', () => {
       expect(result.zipUrl).toContain('http://example.com/custom/types.zip');
       expect(result.apiTypeUrl).toContain('http://example.com/custom/api.d.ts');
     });
+
+    it('should respect remoteTypeUrls and skip manifest fetch for manifest URLs', async () => {
+      const remoteInfo: RemoteInfo = {
+        name: 'test',
+        url: 'http://example.com/remote.manifest.json',
+        alias: 'test-alias',
+        zipUrl: 'http://example.com/explicit/types.zip',
+        apiTypeUrl: 'http://example.com/explicit/api.d.ts',
+        hasExplicitTypeUrls: true,
+      };
+
+      const nativeFetchSpy = vi.spyOn(utils, 'nativeFetch');
+
+      // @ts-expect-error only need timeout, which is not required
+      const result = await dtsManager.requestRemoteManifest(remoteInfo, {});
+      expect(result.zipUrl).toBe('http://example.com/explicit/types.zip');
+      expect(result.apiTypeUrl).toBe('http://example.com/explicit/api.d.ts');
+      expect(nativeFetchSpy).not.toHaveBeenCalled();
+    });
+
+    it('should fetch manifest and override pre-populated zipUrl when not from remoteTypeUrls', async () => {
+      const manifestResponse = {
+        data: {
+          metaData: {
+            types: {
+              zip: 'types.zip',
+              api: 'api.d.ts',
+            },
+            publicPath: 'http://example.com/custom/',
+          },
+        },
+      };
+
+      vi.spyOn(utils, 'nativeFetch').mockResolvedValueOnce({
+        data: manifestResponse.data,
+        status: 200,
+        headers: {},
+      } as any);
+
+      const remoteInfo: RemoteInfo = {
+        name: 'test',
+        url: 'http://example.com/remote.manifest.json',
+        alias: 'test-alias',
+        zipUrl: 'http://example.com/wrong.zip',
+      };
+
+      // @ts-expect-error only need timeout, which is not required
+      const result = await dtsManager.requestRemoteManifest(remoteInfo, {});
+      expect(result.zipUrl).toContain('http://example.com/custom/types.zip');
+      expect(result.apiTypeUrl).toContain('http://example.com/custom/api.d.ts');
+    });
   });
 
   describe('consumeTargetRemotes', () => {

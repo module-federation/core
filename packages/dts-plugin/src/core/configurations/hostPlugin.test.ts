@@ -54,6 +54,7 @@ describe('hostPlugin', () => {
             name: 'http://localhost:3000/remoteEntry.js',
             url: 'http://localhost:3000/remoteEntry.js',
             zipUrl: 'http://localhost:3000/@mf-types.zip',
+            hasExplicitTypeUrls: false,
           },
         });
       });
@@ -88,6 +89,7 @@ describe('hostPlugin', () => {
             name: 'http://localhost:3000/remoteEntry.js',
             url: 'http://localhost:3000/remoteEntry.js',
             zipUrl: 'http://localhost:3000/@remote-mf-types.zip',
+            hasExplicitTypeUrls: false,
           },
         });
 
@@ -125,6 +127,7 @@ describe('hostPlugin', () => {
           name: 'http://localhost:3000/subpatha/subpathb/remoteEntry.js',
           url: 'http://localhost:3000/subpatha/subpathb/remoteEntry.js',
           zipUrl: 'http://localhost:3000/subpatha/subpathb/@mf-types.zip',
+          hasExplicitTypeUrls: false,
         },
       });
     });
@@ -148,6 +151,7 @@ describe('hostPlugin', () => {
           name: '/subpatha/mf-manifest.json',
           url: '/subpatha/mf-manifest.json',
           zipUrl: '',
+          hasExplicitTypeUrls: false,
         },
       });
     });
@@ -179,6 +183,7 @@ describe('hostPlugin', () => {
           url: 'http://localhost:3001/remoteEntry.js',
           zipUrl: 'http://localhost:3001/custom-dir/@mf-types.zip',
           apiTypeUrl: 'http://localhost:3001/custom-dir/@mf-types.d.ts',
+          hasExplicitTypeUrls: true,
         },
         'remote2-alias': {
           name: 'remote2',
@@ -186,6 +191,7 @@ describe('hostPlugin', () => {
           url: 'http://localhost:3002/remoteEntry.js',
           zipUrl: 'http://localhost:3002/@mf-types.zip',
           apiTypeUrl: 'http://localhost:3002/@mf-types.d.ts',
+          hasExplicitTypeUrls: false,
         },
       });
     });
@@ -217,6 +223,7 @@ describe('hostPlugin', () => {
           url: 'http://localhost:3001/static/mf-manifest.json',
           zipUrl: 'http://localhost:3001/custom-dir/@mf-types.zip',
           apiTypeUrl: 'http://localhost:3001/custom-dir/@mf-types.d.ts',
+          hasExplicitTypeUrls: true,
         },
       });
     });

@@ -13,4 +13,5 @@ export interface RemoteInfo {
   alias: string;
   zipUrl?: string;
   apiTypeUrl?: string;
+  hasExplicitTypeUrls?: boolean;
 }

@@ -218,7 +218,7 @@ class DTSManager {
       if (!remoteInfo.url.includes(MANIFEST_EXT)) {
         return remoteInfo as Required<RemoteInfo>;
       }
-      if (remoteInfo.zipUrl) {
+      if (remoteInfo.hasExplicitTypeUrls) {
         return remoteInfo as Required<RemoteInfo>;
       }
       const url = remoteInfo.url;

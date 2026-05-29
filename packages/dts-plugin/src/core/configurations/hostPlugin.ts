@@ -98,6 +98,7 @@ export const retrieveRemoteInfo = (options: {
     zipUrl,
     apiTypeUrl,
     alias: remoteAlias,
+    hasExplicitTypeUrls: Boolean(remoteTypeUrl),
   };
 };
 
@@ -127,6 +128,7 @@ const resolveRemotes = (hostOptions: Required<HostOptions>) => {
         zipUrl: zip,
         apiTypeUrl: api,
         alias: alias || remoteName,
+        hasExplicitTypeUrls: true,
       };
       return sum;
     },
@@ -146,6 +148,8 @@ const resolveRemotes = (hostOptions: Required<HostOptions>) => {
         ...accumulator[key],
         url: res.url,
         apiTypeUrl: accumulator[key].apiTypeUrl || res.apiTypeUrl,
+        hasExplicitTypeUrls:
+          accumulator[key].hasExplicitTypeUrls || res.hasExplicitTypeUrls,
       };
       return accumulator;
     }
