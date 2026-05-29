@@ -444,7 +444,7 @@ const t = {
                         ],
                       },
                       timeout: { type: 'number' },
-                      family: { enum: [4, 6] },
+                      family: { enum: [0, 4, 6] },
                       typesOnBuild: { type: 'boolean' },
                     },
                   },
@@ -4361,6 +4361,8 @@ function D(
                                                                             const n =
                                                                               c;
                                                                             if (
+                                                                              0 !==
+                                                                                e &&
                                                                               4 !==
                                                                                 e &&
                                                                               6 !==
