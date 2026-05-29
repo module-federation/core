@@ -5,6 +5,27 @@ import { sanitizePostMessagePayload } from './safe-post-message';
 
 export * from './storage';
 
+const isModuleInfoRecord = (value: unknown): value is Record<string, unknown> =>
+  Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+
+export const normalizeModuleInfoPayload = (
+  moduleInfo: unknown,
+): GlobalModuleInfo => {
+  const sanitized = sanitizePostMessagePayload(moduleInfo);
+  if (!isModuleInfoRecord(sanitized)) {
+    return {} as GlobalModuleInfo;
+  }
+  return Object.entries(sanitized).reduce<GlobalModuleInfo>(
+    (moduleMap, [moduleId, snapshot]) => {
+      if (moduleId === 'extendInfos' || isModuleInfoRecord(snapshot)) {
+        moduleMap[moduleId] = snapshot as GlobalModuleInfo[string];
+      }
+      return moduleMap;
+    },
+    {},
+  );
+};
+
 const sleep = (num: number) => {
   return new Promise<void>((resolve) => {
     setTimeout(() => {
@@ -109,11 +130,7 @@ export const getGlobalModuleInfo = async (
   callback: (moduleInfo: GlobalModuleInfo) => void,
 ) => {
   if (typeof window !== 'undefined' && window.__FEDERATION__?.moduleInfo) {
-    callback(
-      sanitizePostMessagePayload(
-        window.__FEDERATION__?.moduleInfo,
-      ) as GlobalModuleInfo,
-    );
+    callback(normalizeModuleInfoPayload(window.__FEDERATION__?.moduleInfo));
   }
   await sleep(300);
 
@@ -127,7 +144,7 @@ export const getGlobalModuleInfo = async (
       definePropertyGlobalVal(window, '__FEDERATION__', {});
       definePropertyGlobalVal(window, '__VMOK__', window.__FEDERATION__);
     }
-    window.__FEDERATION__.originModuleInfo = sanitizePostMessagePayload(
+    window.__FEDERATION__.originModuleInfo = normalizeModuleInfoPayload(
       data?.moduleInfo,
     );
     if (data?.updateModule) {
@@ -149,7 +166,7 @@ export const getGlobalModuleInfo = async (
     if (data?.share) {
       window.__FEDERATION__.__SHARE__ = sanitizePostMessagePayload(data.share);
     }
-    window.__FEDERATION__.moduleInfo = sanitizePostMessagePayload(
+    window.__FEDERATION__.moduleInfo = normalizeModuleInfoPayload(
       window.__FEDERATION__.originModuleInfo,
     );
     console.log('getGlobalModuleInfo window', window.__FEDERATION__);
