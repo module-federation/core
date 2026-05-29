@@ -255,8 +255,13 @@ class DTSManager {
         publicPath = inferAutoPublicPath(remoteInfo.url);
       }
 
+      const normalizedPublicPath = addProtocol(publicPath).endsWith('/')
+        ? addProtocol(publicPath)
+        : `${addProtocol(publicPath)}/`;
+
       remoteInfo.zipUrl = new URL(
-        path.join(addProtocol(publicPath), manifestJson.metaData.types.zip),
+        manifestJson.metaData.types.zip,
+        normalizedPublicPath,
       ).href;
       if (!manifestJson.metaData.types.api) {
         console.warn(`Can not get ${remoteInfo.name}'s api types url!`);
@@ -264,7 +269,8 @@ class DTSManager {
         return remoteInfo as Required<RemoteInfo>;
       }
       remoteInfo.apiTypeUrl = new URL(
-        path.join(addProtocol(publicPath), manifestJson.metaData.types.api),
+        manifestJson.metaData.types.api,
+        normalizedPublicPath,
       ).href;
       return remoteInfo as Required<RemoteInfo>;
     } catch (_err) {
