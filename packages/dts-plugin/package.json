@@ -74,7 +74,7 @@
     "isomorphic-ws": "5.0.0",
     "undici": "7.24.7",
     "node-schedule": "2.1.1",
-    "ws": "8.18.0"
+    "ws": "8.21.0"
   },
   "devDependencies": {
     "@module-federation/runtime": "workspace:*",

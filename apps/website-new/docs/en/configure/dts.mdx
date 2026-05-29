@@ -223,7 +223,7 @@ interface DtsHostOptions {
   deleteTypesFolder?: boolean;
   maxRetries?: number;
   consumeAPITypes?: boolean;
-  family?: 4 | 6;
+  family?: 0 | 4 | 6;
 }
 ```
 
@@ -356,9 +356,9 @@ export default createModuleFederationConfig({
 
 #### family
 
-- Type: `4 | 6`
+- Type: `0 | 4 | 6`
 - Required: No
-- Default value: 4
+- Default value: 0
 
 Configure the IP version family that will be used for network operations.
 

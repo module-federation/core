@@ -121,6 +121,19 @@ If you are using remoteSearch or other search functions, you can set `rebuildSea
 
 > Note: This feature is only effective in ssg mode.
 
+#### rebuildLlms
+
+* Type: `boolean`
+* Default: `true`
+
+When Rspress generates `llms.txt` and `llms-full.txt`, federated document fragments may not have title, description, or page content available yet.
+
+To avoid empty llms output, the MF Rspress Plugin rebuilds the llms output from the rendered `html` after SSG is complete.
+
+You can set `rebuildLlms: false` to disable this behavior.
+
+> Note: This feature is only effective in ssg mode and only runs when Rspress `llms` is enabled.
+
 ## FAQ
 
 ### Does it support local search?

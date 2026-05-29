@@ -38,7 +38,6 @@ export async function prefetch(options: PrefetchOptions) {
     await instance.snapshotHandler.loadRemoteSnapshotInfo({
       moduleInfo: remote,
       id,
-      expose,
     });
 
   if (preloadComponentResource) {
