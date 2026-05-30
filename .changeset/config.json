@@ -22,7 +22,6 @@
       "@module-federation/modern-js",
       "@module-federation/modern-js-v3",
       "@module-federation/retry-plugin",
-      "@module-federation/data-prefetch",
       "@module-federation/rsbuild-plugin",
       "@module-federation/error-codes",
       "@module-federation/inject-external-runtime-core-plugin",
@@ -34,6 +33,7 @@
       "@module-federation/treeshake-frontend",
       "@module-federation/metro",
       "@module-federation/metro-plugin-rnef",
+      "@module-federation/metro-plugin-rock",
       "@module-federation/metro-plugin-rnc-cli"
     ]
   ],

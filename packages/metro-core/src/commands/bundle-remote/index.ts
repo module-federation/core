@@ -365,6 +365,7 @@ async function bundleFederatedRemote(
       await fs.readFile(manifestFilepath, 'utf-8'),
     );
     applyTypesMetaToManifest(rawManifest, typesMeta);
+
     await fs.writeFile(
       manifestOutputFilepath,
       JSON.stringify(rawManifest, undefined, 2),

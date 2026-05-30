@@ -37,30 +37,43 @@ import Runtime from '@components/zh/runtime/index';
 
 ## 安装
 
-import { PackageManagerTabs } from '@theme';
+不同项目需要安装和引用不同的 Runtime 入口。大多数项目默认安装 `@module-federation/enhanced`，并从 `@module-federation/enhanced/runtime` 引用 Runtime API。Modern.js 项目如果已经使用 Module Federation 插件，应该从对应插件的 `/runtime` 入口引用 Runtime API，保证框架插件和手动调用的 Runtime 使用同一个实例。
+
+import { PackageManagerTabs, Tab, Tabs } from '@theme';
+
+### @module-federation/enhanced
 
 <PackageManagerTabs
   command={{
-    npm: 'npm add @module-federation/enhanced --save',
+    npm: 'npm install @module-federation/enhanced --save',
     yarn: 'yarn add @module-federation/enhanced --save',
     pnpm: 'pnpm add @module-federation/enhanced --save',
     bun: 'bun add @module-federation/enhanced --save',
   }}
 />
 
-::: tip 注意：
+```ts
+import { createInstance, loadRemote } from '@module-federation/enhanced/runtime';
+```
 
-- 以下 `Federation Runtime` 示例我们均展示脱离特定框架如 Modern.js 的 case, 所以 API 将均从初始 `@module-federation/enhanced/runtime` 包中导出。
+### Modern.js
 
-- 如果你的项目是 Modern.js 项目且使用 `@module-federation/modern-js-v3`，运行时应该从 `@module-federation/modern-js-v3/runtime` 中导出运行时 API。这样能保证插件和运行时使用的是同一个运行时实例，保证模块加载正常
+<PackageManagerTabs
+  command={{
+    npm: 'npm install @module-federation/modern-js-v3 --save',
+    yarn: 'yarn add @module-federation/modern-js-v3 --save',
+    pnpm: 'pnpm add @module-federation/modern-js-v3 --save',
+    bun: 'bun add @module-federation/modern-js-v3 --save',
+  }}
+/>
 
-- 如果你的项目是 Modern.js 项目但是没有使用 `@module-federation/modern-js-v3`，则应当从 `@module-federation/enhanced/runtime` 导出 runtime API。但是我们推荐你使用 `@module-federation/modern-js-v3` 进行模块注册和加载，这将使你享受到更多和框架结合的能力。
+```ts
+import { createInstance, loadRemote } from '@module-federation/modern-js-v3/runtime';
+```
 
-:::
+如果是 Modern.js v2 项目，请安装 `@module-federation/modern-js`，并从 `@module-federation/modern-js/runtime` 引用 Runtime API。
 
 ## 模块注册
-
-import { Steps, Tab, Tabs } from '@theme';
 
 <Tabs>
   <Tab label="Build Plugin（使用构建插件）">
@@ -323,3 +336,9 @@ import { Steps, Tab, Tabs } from '@theme';
     ```
     </Tab>
  </Tabs>
+
+## 继续阅读
+
+- [Runtime API](./runtime-api)：查看 `createInstance`、`loadRemote`、`registerRemotes` 等 API。
+- [Runtime 插件](./runtime-plugins)：了解如何扩展运行时加载流程。
+- [Runtime Hooks](./runtime-hooks)：查看插件可使用的生命周期。

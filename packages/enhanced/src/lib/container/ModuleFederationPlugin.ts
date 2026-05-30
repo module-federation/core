@@ -13,7 +13,6 @@ import {
   type moduleFederationPlugin,
   infrastructureLogger,
 } from '@module-federation/sdk';
-import { PrefetchPlugin } from '@module-federation/data-prefetch/cli';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import type { Compiler, WebpackPluginInstance } from 'webpack';
 import fs from 'node:fs';
@@ -186,11 +185,6 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
       dtsPlugin.apply(compiler);
       dtsPlugin.addRuntimePlugins();
     }
-    // TODO: REMOVE in next major version
-    if (options.dataPrefetch) {
-      new PrefetchPlugin(options).apply(compiler);
-    }
-
     new FederationRuntimePlugin(options).apply(compiler);
 
     const library = options.library || { type: 'var', name: name };

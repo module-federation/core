@@ -1,0 +1,13 @@
+[
+  {
+    "type": "file",
+    "name": "index",
+    "label": "接入概览"
+  },
+  "basic-example",
+  "dynamic-remotes",
+  "importing-components",
+  "importing-pages",
+  "express",
+  "presets"
+]

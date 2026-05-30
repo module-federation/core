@@ -38,10 +38,11 @@ export const syncActiveTab = async (tabId?: number) => {
       setTargetTab(tab);
       return tab;
     }
-    const [activeTab] = await getTabs({
+    const tabs = await getTabs({
       active: true,
       lastFocusedWindow: true,
     });
+    const activeTab = Array.isArray(tabs) ? tabs[0] : undefined;
     setTargetTab(activeTab);
     return activeTab;
   } catch (error) {
@@ -66,9 +67,9 @@ export function getInspectWindowTabId() {
         function (info, error) {
           const { tabId } = chrome.devtools.inspectedWindow;
           getTabs().then((tabs) => {
-            const target = tabs.find(
-              (tab: chrome.tabs.Tab) => tab.id === tabId,
-            );
+            const target = Array.isArray(tabs)
+              ? tabs.find((tab: chrome.tabs.Tab) => tab.id === tabId)
+              : undefined;
             setTargetTab(target as chrome.tabs.Tab);
           });
           console.log(

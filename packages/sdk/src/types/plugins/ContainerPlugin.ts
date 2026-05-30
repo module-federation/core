@@ -38,10 +38,6 @@ export interface ContainerPluginOptions {
     provideExternalRuntime?: boolean;
   };
   /**
-   * Enable data prefetching for container modules.
-   */
-  dataPrefetch?: boolean;
-  /**
    * Array of runtime plugins to be applied
    */
   runtimePlugins?: (string | unknown[])[];

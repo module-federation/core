@@ -1,0 +1,15 @@
+# Angular 接入概览
+
+Angular 接入 Module Federation 时，先根据项目的构建方式选择文档。
+
+| 项目类型 | 推荐阅读 |
+| --- | --- |
+| Angular CLI 项目 | [Angular CLI 设置](./angular-cli) |
+| 需要完整微前端示例 | [Angular MFE](./angular-mfe) |
+| SSR 场景 | [Angular SSR](./mf-ssr-angular) |
+| Service Worker 场景 | [Service Worker 与 Module Federation](./service-workers-mf) |
+
+Angular 生态中常见接入方式会依赖 Angular CLI、自定义 Webpack Builder 或 Nx。进入具体文档前，建议先确认当前项目的构建方式和是否需要 SSR。
+
+如果你只是想了解 Module Federation 的通用配置，可以回到 [配置](/configure/) 查看 `name`、`remotes`、`exposes` 和 `shared` 等基础配置。
+

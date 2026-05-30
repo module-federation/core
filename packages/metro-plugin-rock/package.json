@@ -1,0 +1,53 @@
+{
+  "name": "@module-federation/metro-plugin-rock",
+  "version": "2.5.0",
+  "description": "Metro Module Federation plugin for Rock",
+  "keywords": [
+    "rock",
+    "rockjs",
+    "module-federation",
+    "metro",
+    "react-native"
+  ],
+  "type": "module",
+  "license": "MIT",
+  "author": "Jakub Romańczyk <j.romanczyk@gmail.com> (https://github.com/jbroma)",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/module-federation/core.git",
+    "directory": "packages/metro-plugin-rock"
+  },
+  "files": [
+    "dist/"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "types": "./dist/index.d.ts",
+    "require": "./dist/index.cjs",
+    "default": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "rslib build",
+    "typecheck": "tsc --noEmit",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.{js,ts}\""
+  },
+  "peerDependencies": {
+    "@module-federation/metro": "workspace:*",
+    "@rock-js/tools": "^0.13.0"
+  },
+  "devDependencies": {
+    "@module-federation/metro": "workspace:*",
+    "@rock-js/config": "^0.13.0",
+    "@rock-js/tools": "^0.13.0",
+    "@rslib/core": "^0.10.0",
+    "@typescript-eslint/eslint-plugin": "8.54.0",
+    "@typescript-eslint/parser": "8.54.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.8.3"
+  }
+}

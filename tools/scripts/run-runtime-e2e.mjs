@@ -21,7 +21,7 @@ const RUNTIME_SERVE_APPS = [
   'runtime-remote1',
   'runtime-remote2',
 ];
-const RUNTIME_E2E_APP = 'runtime-host';
+const RUNTIME_E2E_APP_DIR = 'apps/runtime-demo/3005-runtime-host';
 
 const KILL_PORT_ARGS = ['npx', 'kill-port', ...RUNTIME_PORTS];
 const RUNTIME_WAIT_TIMEOUT_MS = 180_000;
@@ -29,6 +29,14 @@ const RUNTIME_WAIT_TIMEOUT_MS = 180_000;
 const SCENARIOS = {
   dev: {
     label: 'runtime demo e2e',
+    prepareCmd: [
+      'pnpm',
+      'exec',
+      'turbo',
+      'run',
+      'build',
+      ...RUNTIME_SERVE_APPS.map((appName) => `--filter=${appName}^...`),
+    ],
     serveCmd: [
       'pnpm',
       'exec',
@@ -37,14 +45,7 @@ const SCENARIOS = {
       'serve:development',
       ...RUNTIME_SERVE_APPS.map((appName) => `--filter=${appName}`),
     ],
-    e2eCmd: [
-      'pnpm',
-      'exec',
-      'turbo',
-      'run',
-      'e2e',
-      `--filter=${RUNTIME_E2E_APP}`,
-    ],
+    e2eCmd: ['pnpm', '--dir', RUNTIME_E2E_APP_DIR, 'run', 'e2e'],
     waitTargets: RUNTIME_WAIT_TARGETS,
   },
 };
@@ -79,6 +80,11 @@ async function runScenario(name) {
   console.log(`\n[runtime-e2e] Starting ${scenario.label}`);
 
   await runKillPort();
+
+  if (scenario.prepareCmd) {
+    await spawnWithPromise(scenario.prepareCmd[0], scenario.prepareCmd.slice(1))
+      .promise;
+  }
 
   const serve = spawn(scenario.serveCmd[0], scenario.serveCmd.slice(1), {
     stdio: 'inherit',

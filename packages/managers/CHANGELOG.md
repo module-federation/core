@@ -1,5 +1,21 @@
 # @module-federation/managers
 
+## 2.5.0
+
+### Patch Changes
+
+- Updated dependencies [5d4095d]
+- Updated dependencies [0716c11]
+  - @module-federation/sdk@2.5.0
+
+## 2.4.0
+
+### Patch Changes
+
+- Updated dependencies [5eba770]
+- Updated dependencies [13b1e84]
+  - @module-federation/sdk@2.4.0
+
 ## 2.3.3
 
 ### Patch Changes

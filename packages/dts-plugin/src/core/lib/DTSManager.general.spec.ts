@@ -160,6 +160,46 @@ describe('DTSManager General Tests', () => {
       expect(result.zipUrl).toContain('http://example.com/types.zip');
     });
 
+    it('should preserve manifest type URLs under Windows path semantics', async () => {
+      const manifestResponse = {
+        data: {
+          metaData: {
+            types: {
+              zip: '@mf-types.zip',
+              api: '@mf-types.d.ts',
+            },
+            publicPath: 'http://localhost:8090',
+          },
+        },
+      };
+
+      vi.spyOn(utils, 'nativeFetch').mockResolvedValueOnce({
+        data: manifestResponse.data,
+        status: 200,
+        headers: {},
+      } as any);
+
+      const remoteInfo: RemoteInfo = {
+        name: 'test',
+        url: 'http://localhost:8090/mf-manifest.json',
+        alias: 'test-alias',
+      };
+
+      const joinSpy = vi
+        .spyOn(path, 'join')
+        .mockImplementation(path.win32.join as typeof path.join);
+
+      try {
+        // @ts-expect-error only need timeout, which is not required
+        const result = await dtsManager.requestRemoteManifest(remoteInfo, {});
+
+        expect(result.zipUrl).toBe('http://localhost:8090/@mf-types.zip');
+        expect(result.apiTypeUrl).toBe('http://localhost:8090/@mf-types.d.ts');
+      } finally {
+        joinSpy.mockRestore();
+      }
+    });
+
     it('should handle manifest URLs without API types', async () => {
       const manifestResponse = {
         data: {

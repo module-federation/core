@@ -3,9 +3,9 @@ import { isObject } from '../tool';
 import { SyncHook } from './syncHook';
 import { checkReturnData } from './syncWaterfallHook';
 
-type CallbackReturnType<T> = T | Promise<T>;
+type CallbackReturnType<T> = T | void | Promise<T | void>;
 
-export class AsyncWaterfallHook<T extends Record<string, any>> extends SyncHook<
+export class AsyncWaterfallHook<T extends object> extends SyncHook<
   [T],
   CallbackReturnType<T>
 > {
@@ -23,26 +23,27 @@ export class AsyncWaterfallHook<T extends Record<string, any>> extends SyncHook<
 
     if (ls.length > 0) {
       let i = 0;
-      const processError = (e: any) => {
+      const processError = (e: unknown): T => {
         warn(e);
         this.onerror(e);
         return data;
       };
 
-      const call = (prevData: T): any => {
-        if (checkReturnData(data, prevData)) {
+      const call = (prevData?: T | Awaited<T> | void): T | Promise<T> => {
+        if (prevData !== undefined && checkReturnData(data, prevData)) {
           data = prevData as T;
-          if (i < ls.length) {
-            try {
-              return Promise.resolve(ls[i++](data)).then(call, processError);
-            } catch (e) {
-              return processError(e);
-            }
-          }
-        } else {
+        } else if (prevData !== undefined) {
           this.onerror(
             `A plugin returned an incorrect value for the "${this.type}" type.`,
           );
+          return data;
+        }
+        if (i < ls.length) {
+          try {
+            return Promise.resolve(ls[i++](data)).then(call, processError);
+          } catch (e) {
+            return processError(e);
+          }
         }
         return data;
       };

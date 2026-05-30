@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "devDependencies": {
     "@module-federation/core": "workspace:*",
+    "@module-federation/observability-plugin": "workspace:*",
     "@module-federation/runtime": "workspace:*",
     "@module-federation/typescript": "workspace:*",
     "@module-federation/enhanced": "workspace:*",
@@ -17,7 +18,7 @@
     "antd": "4.24.15",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-router-dom": "^6.30.2"
+    "react-router-dom": "^6.30.3"
   },
   "scripts": {
     "build": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config webpack.config.js --mode production",
@@ -26,7 +27,7 @@
     "serve": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config webpack.config.js --mode production --port 3005 --no-hot",
     "serve:development": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config webpack.config.js --mode development --port 3005",
     "serve:production": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli serve --config webpack.config.js --mode production --port 3005 --no-hot",
-    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --no-error-on-unmatched-pattern --ignore-pattern node_modules **/*.{ts,tsx,js,jsx}",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --no-error-on-unmatched-pattern --ignore-pattern node_modules src/**/*.{ts,tsx,js,jsx} cypress/**/*.{ts,tsx,js,jsx} cypress.config.ts webpack.config.js remotes.d.ts @mf-types/**/*.ts",
     "serve-static": "pnpm exec serve dist -l 3005 --cors",
     "e2e": "pnpm exec cypress run --project . --e2e --config baseUrl=http://127.0.0.1:3005 --browser chrome",
     "e2e:development": "pnpm exec cypress open --project . --e2e --config baseUrl=http://127.0.0.1:3005 --browser electron",

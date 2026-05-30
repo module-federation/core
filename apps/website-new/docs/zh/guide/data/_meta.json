@@ -1,0 +1,17 @@
+[
+  {
+    "type": "file",
+    "name": "data-fetch",
+    "label": "数据获取"
+  },
+  {
+    "type": "file",
+    "name": "data-fetch-cache",
+    "label": "数据缓存"
+  },
+  {
+    "type": "file",
+    "name": "data-prefetch",
+    "label": "数据预取"
+  }
+]

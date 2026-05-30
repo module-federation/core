@@ -1,4 +1,8 @@
 {
-  "extends": ["config:recommended"],
+  "extends": [
+    "config:recommended",
+    "helpers:pinGitHubActionDigests",
+    "helpers:githubDigestChangelogs"
+  ],
   "ignorePaths": ["**/demo/**", "**test/**", "**/configCases/**"]
 }

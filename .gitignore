@@ -10,6 +10,8 @@ update-commit-messages.sh
 /.turbo
 **/.turbo/
 /.nx
+.cxx
+**/android/build/
 **/.nx/
 # dependencies
 node_modules
@@ -107,3 +109,4 @@ packages/enhanced/generated/**
 .pnpm-store/
 apps/rsc-demo/**/build/
 apps/rsc-demo/e2e/test-results/
+.kiro

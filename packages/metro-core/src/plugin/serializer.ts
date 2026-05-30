@@ -5,6 +5,11 @@ import type { ModuleFederationConfigNormalized, ShareObject } from '../types';
 import { ConfigError } from '../utils/errors';
 import { toPosixPath } from './helpers';
 import {
+  type ManifestGenerationOptions,
+  recordBundleHash,
+  updateManifest,
+} from './manifest';
+import {
   CountingSet,
   baseJSBundle,
   bundleToString,
@@ -15,10 +20,17 @@ type CustomSerializer = SerializerConfigT['customSerializer'];
 export function getModuleFederationSerializer(
   mfConfig: ModuleFederationConfigNormalized,
   isUsingMFBundleCommand: boolean,
+  manifestPath?: string,
+  manifestOptions?: ManifestGenerationOptions,
 ): CustomSerializer {
+  const bundleHashes = new Map<string, string>();
+
   return async (entryPoint, preModules, graph, options) => {
     const syncRemoteModules = collectSyncRemoteModules(graph, mfConfig.remotes);
     const syncSharedModules = collectSyncSharedModules(graph, mfConfig.shared);
+
+    let code: string;
+
     // main entrypoints always have runModule set to true
     if (options.runModule === true) {
       const finalPreModules = [
@@ -26,34 +38,46 @@ export function getModuleFederationSerializer(
         getEarlyRemotes(syncRemoteModules),
         ...preModules,
       ];
-      return getBundleCode(entryPoint, finalPreModules, graph, options);
+      code = getBundleCode(entryPoint, finalPreModules, graph, options);
+    } else if (!isProjectSource(entryPoint, options.projectRoot)) {
+      // skip non-project source like node_modules
+      // this includes handling of shared modules!
+      code = getBundleCode(entryPoint, preModules, graph, options);
+    } else {
+      const bundlePath = getBundlePath(
+        entryPoint,
+        options.projectRoot,
+        mfConfig.exposes,
+        isUsingMFBundleCommand,
+      );
+      const finalPreModules = [
+        getSyncShared(syncSharedModules, bundlePath, mfConfig.name),
+        getSyncRemotes(syncRemoteModules, bundlePath, mfConfig.name),
+      ];
+
+      // include the original preModules if not in modulesOnly mode
+      if (options.modulesOnly === false) {
+        finalPreModules.push(...preModules);
+      }
+
+      // prevent resetting preModules in metro/src/DeltaBundler/Serializers/baseJSBundle.js
+      const finalOptions = { ...options, modulesOnly: false };
+      code = getBundleCode(entryPoint, finalPreModules, graph, finalOptions);
     }
 
-    // skip non-project source like node_modules
-    // this includes handling of shared modules!
-    if (!isProjectSource(entryPoint, options.projectRoot)) {
-      return getBundleCode(entryPoint, preModules, graph, options);
+    // Compute SHA-256 for matching manifest entries and regenerate manifest
+    if (manifestPath) {
+      recordBundleHash(
+        bundleHashes,
+        code,
+        entryPoint,
+        options.projectRoot,
+        mfConfig,
+      );
+      updateManifest(manifestPath, mfConfig, bundleHashes, manifestOptions);
     }
 
-    const bundlePath = getBundlePath(
-      entryPoint,
-      options.projectRoot,
-      mfConfig.exposes,
-      isUsingMFBundleCommand,
-    );
-    const finalPreModules = [
-      getSyncShared(syncSharedModules, bundlePath, mfConfig.name),
-      getSyncRemotes(syncRemoteModules, bundlePath, mfConfig.name),
-    ];
-
-    // include the original preModules if not in modulesOnly mode
-    if (options.modulesOnly === false) {
-      finalPreModules.push(...preModules);
-    }
-
-    // prevent resetting preModules in metro/src/DeltaBundler/Serializers/baseJSBundle.js
-    const finalOptions = { ...options, modulesOnly: false };
-    return getBundleCode(entryPoint, finalPreModules, graph, finalOptions);
+    return code;
   };
 }
 

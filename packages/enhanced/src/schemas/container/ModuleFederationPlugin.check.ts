@@ -444,7 +444,7 @@ const t = {
                         ],
                       },
                       timeout: { type: 'number' },
-                      family: { enum: [4, 6] },
+                      family: { enum: [0, 4, 6] },
                       typesOnBuild: { type: 'boolean' },
                     },
                   },
@@ -528,7 +528,6 @@ const t = {
         },
       },
       getPublicPath: { type: 'string' },
-      dataPrefetch: { type: 'boolean' },
       implementation: { type: 'string' },
     },
   },
@@ -4362,6 +4361,8 @@ function D(
                                                                             const n =
                                                                               c;
                                                                             if (
+                                                                              0 !==
+                                                                                e &&
                                                                               4 !==
                                                                                 e &&
                                                                               6 !==
@@ -5427,21 +5428,21 @@ function D(
                                                         );
                                                       b = e === c;
                                                     } else b = !0;
-                                                    if (b) {
+                                                    if (b)
                                                       if (
                                                         void 0 !==
-                                                        o.dataPrefetch
+                                                        o.implementation
                                                       ) {
                                                         const e = c;
                                                         if (
-                                                          'boolean' !=
-                                                          typeof o.dataPrefetch
+                                                          'string' !=
+                                                          typeof o.implementation
                                                         )
                                                           return (
                                                             (D.errors = [
                                                               {
                                                                 params: {
-                                                                  type: 'boolean',
+                                                                  type: 'string',
                                                                 },
                                                               },
                                                             ]),
@@ -5449,29 +5450,6 @@ function D(
                                                           );
                                                         b = e === c;
                                                       } else b = !0;
-                                                      if (b)
-                                                        if (
-                                                          void 0 !==
-                                                          o.implementation
-                                                        ) {
-                                                          const e = c;
-                                                          if (
-                                                            'string' !=
-                                                            typeof o.implementation
-                                                          )
-                                                            return (
-                                                              (D.errors = [
-                                                                {
-                                                                  params: {
-                                                                    type: 'string',
-                                                                  },
-                                                                },
-                                                              ]),
-                                                              !1
-                                                            );
-                                                          b = e === c;
-                                                        } else b = !0;
-                                                    }
                                                   }
                                                 }
                                               }

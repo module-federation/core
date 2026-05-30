@@ -18,6 +18,7 @@ import {
   PreloadAssets,
   PreloadOptions,
   PreloadRemoteArgs,
+  PreloadRemoteResult,
   Remote,
   RemoteInfo,
   RemoteEntryExports,
@@ -36,6 +37,7 @@ import {
   error,
   getRemoteInfo,
   getRemoteEntryUniqueKey,
+  composeRemoteRequestId,
   matchRemoteWithNameAndExpose,
   optionsToMFContext,
   logger,
@@ -75,6 +77,20 @@ export class RemoteHandler {
       options: Options;
       origin: ModuleFederation;
     }>('beforeRequest'),
+    afterMatchRemote: new AsyncHook<
+      [
+        {
+          id: string;
+          options: Options;
+          remote?: Remote;
+          expose?: string;
+          remoteInfo?: RemoteInfo;
+          error?: unknown;
+          origin: ModuleFederation;
+        },
+      ],
+      void
+    >('afterMatchRemote'),
     onLoad: new AsyncHook<
       [
         {
@@ -89,8 +105,25 @@ export class RemoteHandler {
           moduleInstance: Module;
         },
       ],
-      void
+      unknown
     >('onLoad'),
+    afterLoadRemote: new AsyncHook<
+      [
+        {
+          id: string;
+          expose?: string;
+          remote?: RemoteInfo;
+          options?: {
+            loadFactory?: boolean;
+            from?: CallFrom;
+          };
+          error?: unknown;
+          recovered?: boolean;
+          origin: ModuleFederation;
+        },
+      ],
+      void
+    >('afterLoadRemote'),
     handlePreloadModule: new SyncHook<
       [
         {
@@ -116,6 +149,8 @@ export class RemoteHandler {
             | 'beforeLoadShare'
             | 'afterResolve'
             | 'onLoad';
+          remote?: RemoteInfo;
+          expose?: string;
           origin: ModuleFederation;
         },
       ],
@@ -143,22 +178,28 @@ export class RemoteHandler {
       ],
       Promise<PreloadAssets>
     >('generatePreloadAssets'),
-    // not used yet
-    afterPreloadRemote: new AsyncHook<{
-      preloadOps: Array<PreloadRemoteArgs>;
-      options: Options;
-      origin: ModuleFederation;
-    }>(),
+    afterPreloadRemote: new AsyncHook<
+      [
+        {
+          preloadOps: Array<PreloadRemoteArgs>;
+          options: Options;
+          origin: ModuleFederation;
+          results: PreloadRemoteResult[];
+          error?: unknown;
+        },
+      ]
+    >('afterPreloadRemote'),
     // TODO: Move to loaderHook
     loadEntry: new AsyncHook<
       [
         {
+          origin: ModuleFederation;
           loaderHook: ModuleFederation['loaderHook'];
           remoteInfo: RemoteInfo;
           remoteEntryExports?: RemoteEntryExports;
         },
       ],
-      Promise<RemoteEntryExports>
+      Promise<RemoteEntryExports | void> | RemoteEntryExports | void
     >(),
   });
 
@@ -199,6 +240,21 @@ export class RemoteHandler {
     options?: { loadFactory?: boolean; from: CallFrom },
   ): Promise<T | null> {
     const { host } = this;
+    const startMatchInfo = matchRemoteWithNameAndExpose(
+      host.options.remotes,
+      id,
+    );
+    let completeRequestId = id;
+    let completeExpose = startMatchInfo?.expose;
+    let completeRemote = startMatchInfo
+      ? getRemoteInfo(startMatchInfo.remote)
+      : undefined;
+    let afterLoadRemoteArgs:
+      | Parameters<
+          RemoteHandler['hooks']['lifecycle']['afterLoadRemote']['emit']
+        >[0]
+      | undefined;
+
     try {
       const { loadFactory = true } = options || {
         loadFactory: true,
@@ -221,6 +277,9 @@ export class RemoteHandler {
         id: idRes,
         remoteSnapshot,
       } = remoteMatchInfo;
+      completeRequestId = idRes;
+      completeExpose = expose;
+      completeRemote = getRemoteInfo(remote);
 
       const moduleOrFactory = (await module.get(
         idRes,
@@ -242,6 +301,14 @@ export class RemoteHandler {
       });
 
       this.setIdToRemoteMap(id, remoteMatchInfo);
+      afterLoadRemoteArgs = {
+        id: completeRequestId,
+        expose: completeExpose,
+        remote: completeRemote,
+        options,
+        origin: host,
+      };
+
       if (typeof moduleWrapper === 'function') {
         return moduleWrapper as T;
       }
@@ -250,25 +317,63 @@ export class RemoteHandler {
     } catch (error) {
       const { from = 'runtime' } = options || { from: 'runtime' };
 
-      const failOver = await this.hooks.lifecycle.errorLoadRemote.emit({
-        id,
-        error,
-        from,
-        lifecycle: 'onLoad',
-        origin: host,
-      });
+      let failOver;
+      try {
+        failOver = await this.hooks.lifecycle.errorLoadRemote.emit({
+          id,
+          error,
+          from,
+          lifecycle: 'onLoad',
+          expose: completeExpose,
+          remote: completeRemote,
+          origin: host,
+        });
+      } catch (hookError) {
+        afterLoadRemoteArgs = {
+          id: completeRequestId,
+          expose: completeExpose,
+          remote: completeRemote,
+          options,
+          error: hookError,
+          origin: host,
+        };
+        throw hookError;
+      }
 
       if (!failOver) {
+        afterLoadRemoteArgs = {
+          id: completeRequestId,
+          expose: completeExpose,
+          remote: completeRemote,
+          options,
+          error,
+          origin: host,
+        };
         throw error;
       }
 
+      afterLoadRemoteArgs = {
+        id: completeRequestId,
+        expose: completeExpose,
+        remote: completeRemote,
+        options,
+        error,
+        origin: host,
+        recovered: true,
+      };
+
       return failOver as T;
+    } finally {
+      if (afterLoadRemoteArgs) {
+        await this.hooks.lifecycle.afterLoadRemote.emit(afterLoadRemoteArgs);
+      }
     }
   }
 
   // eslint-disable-next-line @typescript-eslint/member-ordering
   async preloadRemote(preloadOptions: Array<PreloadRemoteArgs>): Promise<void> {
     const { host } = this;
+    const preloadResults: PreloadRemoteResult[] = [];
 
     await this.hooks.lifecycle.beforePreloadRemote.emit({
       preloadOps: preloadOptions,
@@ -281,29 +386,117 @@ export class RemoteHandler {
       preloadOptions,
     );
 
-    await Promise.all(
-      preloadOps.map(async (ops) => {
-        const { remote } = ops;
-        const remoteInfo = getRemoteInfo(remote);
-        const { globalSnapshot, remoteSnapshot } =
-          await host.snapshotHandler.loadRemoteSnapshotInfo({
-            moduleInfo: remote,
-          });
+    const createPreloadAssetOps = (ops: PreloadOptions[number]) => {
+      const { preloadConfig, remote } = ops;
+      const exposes = preloadConfig.exposes || [];
 
-        const assets = await this.hooks.lifecycle.generatePreloadAssets.emit({
-          origin: host,
-          preloadOptions: ops,
-          remote,
-          remoteInfo,
-          globalSnapshot,
-          remoteSnapshot,
-        });
-        if (!assets) {
-          return;
+      if (!exposes.length) {
+        return [
+          {
+            ops,
+            id: `${remote.name}/*`,
+          },
+        ];
+      }
+
+      return exposes.map((expose) => ({
+        ops: {
+          ...ops,
+          preloadConfig: {
+            ...preloadConfig,
+            exposes: [expose],
+          },
+        },
+        id: composeRemoteRequestId(remote.name, expose),
+      }));
+    };
+
+    let preloadError: Error | undefined;
+
+    await Promise.all(
+      preloadOps.flatMap(createPreloadAssetOps).map(async (assetOps) => {
+        const { ops, id: preloadId } = assetOps;
+        const { remote, preloadConfig } = ops;
+        const remoteInfo = getRemoteInfo(remote);
+        try {
+          const { globalSnapshot, remoteSnapshot } =
+            await host.snapshotHandler.loadRemoteSnapshotInfo({
+              moduleInfo: remote,
+              id: preloadId,
+              initiator: 'preloadRemote',
+            });
+
+          const assets = await this.hooks.lifecycle.generatePreloadAssets.emit({
+            origin: host,
+            preloadOptions: ops,
+            remote,
+            remoteInfo,
+            globalSnapshot,
+            remoteSnapshot,
+          });
+          if (!assets) {
+            return;
+          }
+          const results = await preloadAssets(remoteInfo, host, assets, true, {
+            initiator: 'preloadRemote',
+            id: preloadId,
+          });
+          preloadResults.push({
+            remote,
+            remoteInfo,
+            preloadConfig,
+            id: preloadId,
+            results,
+          });
+        } catch (error) {
+          preloadResults.push({
+            remote,
+            remoteInfo,
+            preloadConfig,
+            id: preloadId,
+            results: [
+              {
+                url: remoteInfo.entry,
+                status: 'error',
+                resourceType: /\.json(?:$|[?#])/i.test(remoteInfo.entry)
+                  ? 'manifest'
+                  : 'remoteEntry',
+                initiator: 'preloadRemote',
+                id: preloadId,
+                error,
+              },
+            ],
+          });
         }
-        preloadAssets(remoteInfo, host, assets);
       }),
     );
+
+    const failedResults = preloadResults.flatMap((preloadResult) =>
+      preloadResult.results.filter(
+        (result) => result.status === 'error' || result.status === 'timeout',
+      ),
+    );
+    if (failedResults.length > 0) {
+      preloadError = new Error(
+        `preloadRemote failed to load ${failedResults.length} resource(s).`,
+      );
+      Object.assign(preloadError, {
+        results: preloadResults,
+        failedResults,
+      });
+    }
+
+    await this.hooks.lifecycle.afterPreloadRemote.emit({
+      preloadOps: preloadOptions,
+      options: host.options,
+      origin: host,
+      results: preloadResults,
+      error: preloadError,
+    });
+
+    if (preloadError) {
+      throw preloadError;
+    }
   }
 
   registerRemotes(remotes: Remote[], options?: { force?: boolean }): void {
@@ -356,20 +549,37 @@ export class RemoteHandler {
       idRes,
     );
     if (!remoteSplitInfo) {
-      error(
-        RUNTIME_004,
-        runtimeDescMap,
-        {
-          hostName: host.options.name,
-          requestId: idRes,
-        },
-        undefined,
-        optionsToMFContext(host.options),
-      );
+      try {
+        error(
+          RUNTIME_004,
+          runtimeDescMap,
+          {
+            hostName: host.options.name,
+            requestId: idRes,
+          },
+          undefined,
+          optionsToMFContext(host.options),
+        );
+      } catch (matchError) {
+        await this.hooks.lifecycle.afterMatchRemote.emit({
+          id: idRes,
+          options: host.options,
+          error: matchError,
+          origin: host,
+        });
+        throw matchError;
+      }
     }
 
     const { remote: rawRemote } = remoteSplitInfo;
     const remoteInfo = getRemoteInfo(rawRemote);
+    await this.hooks.lifecycle.afterMatchRemote.emit({
+      id: idRes,
+      ...remoteSplitInfo,
+      options: host.options,
+      remoteInfo,
+      origin: host,
+    });
     const matchInfo =
       await host.sharedHandler.hooks.lifecycle.afterResolve.emit({
         id: idRes,

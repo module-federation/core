@@ -23,6 +23,7 @@ Examples:
 /mf shared-deps
 /mf config-check
 /mf runtime-error RUNTIME-008
+/mf observability
 ```
 
 Public skill:

@@ -1,0 +1,17 @@
+[
+  {
+    "type": "file",
+    "name": "data-fetch",
+    "label": "Data Fetching"
+  },
+  {
+    "type": "file",
+    "name": "data-fetch-cache",
+    "label": "Data Cache"
+  },
+  {
+    "type": "file",
+    "name": "data-prefetch",
+    "label": "Data Prefetch"
+  }
+]

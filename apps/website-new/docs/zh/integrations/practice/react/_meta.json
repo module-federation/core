@@ -1,0 +1,13 @@
+[
+  {
+    "type": "file",
+    "name": "index",
+    "label": "接入概览"
+  },
+  {
+    "type": "file",
+    "name": "rsbuild-cra",
+    "label": "Rsbuild CRA"
+  },
+  "i18n-react"
+]

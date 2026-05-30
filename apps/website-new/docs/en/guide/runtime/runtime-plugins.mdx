@@ -17,7 +17,8 @@ If you only need to **register** a plugin path in build config, see [`runtimePlu
 
 A runtime plugin is a function that returns a `ModuleFederationRuntimePlugin`:
 
-```ts title="my-runtime-plugin.ts"
+
+```ts
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
 export default function myRuntimePlugin(): ModuleFederationRuntimePlugin {
@@ -26,6 +27,7 @@ export default function myRuntimePlugin(): ModuleFederationRuntimePlugin {
   };
 }
 ```
+
 
 The function form matters because it lets you:
 
@@ -69,8 +71,10 @@ export default {
 
 Use runtime registration when the plugin depends on user state, environment, feature flags, or data fetched after startup.
 
-```ts title="bootstrap.ts"
+
+```ts
 import { createInstance } from '@module-federation/enhanced/runtime';
+
 import rewriteRemoteEntryPlugin from './plugins/rewrite-remote-entry';
 
 const mf = createInstance({
@@ -91,17 +95,17 @@ mf.registerPlugins([
 ]);
 ```
 
+
 ### Global runtime registration
 
 Use `registerGlobalPlugins(...)` when you want the plugin to be available to all future runtime instances, instead of only one current instance.
 
 This is best suited for shared instrumentation, cross-app policy, or host-wide defaults.
 
-```ts title="bootstrap.ts"
-import {
-  registerGlobalPlugins,
-  createInstance,
-} from '@module-federation/enhanced/runtime';
+
+```ts
+import { registerGlobalPlugins, createInstance } from '@module-federation/enhanced/runtime';
+
 import runtimePlugin from './plugins/runtime-plugin';
 
 registerGlobalPlugins([runtimePlugin()]);
@@ -117,6 +121,7 @@ const mf = createInstance({
 });
 ```
 
+
 `registerGlobalPlugins(...)` deduplicates plugins by `name`. In practice, call it before creating or using runtime instances so the global plugins are incorporated consistently.
 
 ## Choose the right hook
@@ -129,6 +134,8 @@ const mf = createInstance({
 | Customize injected scripts and links | `createScript`, `createLink` | You need to add attributes like `crossorigin`, timeouts, or custom script/link elements. When available, `remoteInfo` is provided so you can apply per-remote policy. |
 | Align or rewrite share scopes before remote init | `beforeInitContainer`, `initContainerShareScopeMap` | You need to change which share scope a remote initializes against |
 | Override the shared winner | `resolveShare` | You want to force a different shared implementation than the runtime would normally pick |
+| Observe remote load status | `afterMatchRemote`, `afterLoadRemote` | You need request tracing or final success/failure status for `loadRemote` |
+| Observe shared dependency status | `afterLoadShare`, `errorLoadShare` | You need to diagnose missing shared dependencies, version mismatch, or eager configuration errors |
 | Recover from load failures | `errorLoadRemote` | You need fallback modules, offline behavior, or layered recovery |
 | Implement a new remote loading strategy | `loadEntry` | You want to fully customize how a remote entry is loaded or support a new remote type |
 
@@ -143,7 +150,8 @@ This pattern is useful for:
 - registry-backed routing
 - domain normalization
 
-```ts title="plugins/rewrite-remote-entry.ts"
+
+```ts
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
 interface RewriteRemoteEntryOptions {
@@ -181,6 +189,7 @@ export default function rewriteRemoteEntryPlugin(
 }
 ```
 
+
 Why this hook:
 
 - `beforeRequest` is earlier; the remote is not resolved yet
@@ -197,7 +206,8 @@ An `afterResolve` rewrite changes runtime loading behavior. It does not automati
 
 Use `fetch` when the manifest request itself needs custom behavior.
 
-```ts title="plugins/fetch-manifest-with-credentials.ts"
+
+```ts
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
 export default function fetchManifestWithCredentials(): ModuleFederationRuntimePlugin {
@@ -220,6 +230,7 @@ export default function fetchManifestWithCredentials(): ModuleFederationRuntimeP
 }
 ```
 
+
 Use `fetch` for:
 
 - credentials
@@ -235,7 +246,8 @@ If you need a ready-made transport policy, see the built-in retry plugin.
 
 The important part: changing `args.scope` or `args.version` alone is not enough. To change the actual winner, replace `args.resolver`.
 
-```ts title="plugins/prefer-host-react.ts"
+
+```ts
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
 export default function preferHostReact(): ModuleFederationRuntimePlugin {
@@ -267,6 +279,7 @@ export default function preferHostReact(): ModuleFederationRuntimePlugin {
   };
 }
 ```
+
 
 ## Failure handling and `shareStrategy`
 
