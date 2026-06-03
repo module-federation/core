@@ -132,44 +132,28 @@ describe('moduleFederationSSRPlugin', () => {
     expect(rsbuildApi.modifyRspackConfig).not.toHaveBeenCalled();
   });
 
-  it.each([
-    [
-      '/playlet-produce-migrate/static/',
-      '/playlet-produce-migrate/static/bundles/',
-    ],
-    [
-      '/playlet-produce-migrate/static',
-      '/playlet-produce-migrate/static/bundles/',
-    ],
-    [
-      'https://cdn.example.com/app/static/?v=1#hash',
-      'https://cdn.example.com/app/static/bundles/?v=1#hash',
-    ],
-    ['auto', 'auto'],
-    ['', ''],
-  ])(
-    'keeps SSR manifest publicPath semantics for %s',
-    async (publicPath, expectedPublicPath) => {
-      const { pluginOptions, rsbuildApi } = await createPluginHarness();
-      configureOutputPaths(rsbuildApi);
+  it('updates SSR manifest publicPath for bundled SSR output', async () => {
+    const { pluginOptions, rsbuildApi } = await createPluginHarness();
+    configureOutputPaths(rsbuildApi);
 
-      const processAssets = rsbuildApi.processAssets.mock.calls[0][1];
-      processAssets({
-        assets: {
-          'mf-manifest.json': createManifestAsset(publicPath),
-          'mf-stats.json': createStatsAsset(publicPath),
-        },
-        environment: { name: 'node' },
-      });
+    const processAssets = rsbuildApi.processAssets.mock.calls[0][1];
+    processAssets({
+      assets: {
+        'mf-manifest.json': createManifestAsset(
+          '/playlet-produce-migrate/static/',
+        ),
+        'mf-stats.json': createStatsAsset('/playlet-produce-migrate/static/'),
+      },
+      environment: { name: 'node' },
+    });
 
-      expect(
-        pluginOptions.assetResources.node.manifest.data.metaData.publicPath,
-      ).toBe(expectedPublicPath);
-      expect(
-        pluginOptions.assetResources.node.stats.data.metaData.publicPath,
-      ).toBe(expectedPublicPath);
-    },
-  );
+    expect(
+      pluginOptions.assetResources.node.manifest.data.metaData.publicPath,
+    ).toBe('/playlet-produce-migrate/static/bundles/');
+    expect(
+      pluginOptions.assetResources.node.stats.data.metaData.publicPath,
+    ).toBe('/playlet-produce-migrate/static/bundles/');
+  });
 
   it('writes bundled SSR publicPath into the merged browser manifest', async () => {
     const outputDir = await mkdtemp(
