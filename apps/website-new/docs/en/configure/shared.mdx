@@ -160,7 +160,7 @@ shared: {
 This is essential for packages that expose subpath modules (e.g. `react-dom/client`, `lodash/debounce`, `@scope/package/subpath`). Without the trailing slash, only the exact package name is intercepted; subpath imports will be bundled locally and will not participate in shared scope negotiation.
 
 :::warning Common mistake
-Writing `'react-dom'` (no trailing slash) only intercepts `import 'react-dom'`. Any code that does `import { createRoot } from 'react-dom/client'` will load a second copy of React DOM, which breaks React singleton requirements and causes hydration errors.
+Writing `'react-dom'` (no trailing slash) only intercepts `import 'react-dom'`. Any code that does `import { createRoot } from 'react-dom/client'` will load a second copy of React DOM, which breaks React singleton requirements and causes hydration errors. See the [troubleshooting FAQ](../../guide/troubleshooting/runtime#subpath-imports-are-not-shared-duplicate-dependency-loaded) for more details.
 :::
 
 ## allowNodeModulesSuffixMatch
