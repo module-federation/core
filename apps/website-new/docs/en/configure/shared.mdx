@@ -157,6 +157,17 @@ shared: {
 }
 ```
 
+The same pattern works for utility libraries such as `lodash`:
+
+```ts
+shared: {
+  'lodash/': {
+    request: 'lodash/',    // intercepts import 'lodash/debounce', 'lodash/get', etc.
+    shareKey: 'lodash/',   // final shareKey = "lodash/" + subpath suffix
+  },
+}
+```
+
 This is essential for packages that expose subpath modules (e.g. `react-dom/client`, `lodash/debounce`, `@scope/package/subpath`). Without the trailing slash, only the exact package name is intercepted; subpath imports will be bundled locally and will not participate in shared scope negotiation.
 
 :::warning Common mistake
