@@ -155,6 +155,10 @@ shared: {
 }
 ```
 
+:::warning 常见错误
+`'react-dom'`（无尾部斜杠）只会拦截 `import 'react-dom'`。任何执行 `import { createRoot } from 'react-dom/client'` 的代码都会加载第二份 React DOM 副本，破坏 React 单例要求并导致 hydration 错误。
+:::
+
 ## allowNodeModulesSuffixMatch
 
 - 类型：`boolean`
