@@ -24,11 +24,7 @@ import {
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import { isWebTarget, skipByTarget } from './utils';
 
-import type {
-  RsbuildPlugin,
-  ModifyWebpackConfigFn,
-  ModifyRspackConfigFn,
-} from '@rsbuild/core';
+import type { RsbuildPlugin } from '@rsbuild/core';
 import type { CliPluginFuture, AppTools } from '@modern-js/app-tools';
 import type {
   AssetFileNames,
@@ -74,12 +70,50 @@ function getManifestAssetFileNames(
   };
 }
 
-type ModifyBundlerConfiguration =
-  | Parameters<ModifyWebpackConfigFn>[0]
-  | Parameters<ModifyRspackConfigFn>[0];
-type ModifyBundlerUtils =
-  | Parameters<ModifyWebpackConfigFn>[1]
-  | Parameters<ModifyRspackConfigFn>[1];
+const appendPathToPublicPath = (publicPath: unknown, pathname: string) => {
+  if (
+    typeof publicPath !== 'string' ||
+    publicPath === '' ||
+    publicPath === 'auto' ||
+    !pathname
+  ) {
+    return publicPath;
+  }
+  const normalizedPathname = pathname.split(path.sep).join('/');
+  if (!normalizedPathname || normalizedPathname === '.') {
+    return publicPath;
+  }
+  const suffixStart = publicPath.search(/[?#]/);
+  const base =
+    suffixStart === -1 ? publicPath : publicPath.slice(0, suffixStart);
+  const suffix = suffixStart === -1 ? '' : publicPath.slice(suffixStart);
+
+  return `${base.replace(/\/?$/, '/')}${normalizedPathname}/${suffix}`;
+};
+
+const updateAssetResourcePublicPath = (
+  assetResource: StatsAssetResource,
+  publicPath: unknown,
+) => {
+  if (assetResource.stats?.data?.metaData) {
+    (assetResource.stats.data.metaData as { publicPath?: unknown }).publicPath =
+      publicPath;
+  }
+  if (assetResource.manifest?.data?.metaData) {
+    (
+      assetResource.manifest.data.metaData as { publicPath?: unknown }
+    ).publicPath = publicPath;
+  }
+};
+
+const getAssetResourcePublicPath = (assetResource: StatsAssetResource) =>
+  (
+    assetResource.manifest?.data?.metaData as
+      | { publicPath?: unknown }
+      | undefined
+  )?.publicPath ??
+  (assetResource.stats?.data?.metaData as { publicPath?: unknown } | undefined)
+    ?.publicPath;
 
 const mfSSRRsbuildPlugin = (
   pluginOptions: Required<InternalModernPluginOptions>,
@@ -157,32 +191,20 @@ const mfSSRRsbuildPlugin = (
         return config;
       });
 
-      const modifySSRPublicPath = (
-        config: ModifyBundlerConfiguration,
-        utils: ModifyBundlerUtils,
-      ) => {
-        if (ssrEnv !== utils.environment.name) {
-          return config;
-        }
+      const getSSRAssetPublicPath = (publicPath: unknown) => {
         const userSSRConfig = pluginOptions.userConfig.ssr
           ? typeof pluginOptions.userConfig.ssr === 'object'
             ? pluginOptions.userConfig.ssr
             : {}
           : {};
         if (!userSSRConfig.distOutputDir) {
-          return;
+          return publicPath;
         }
-        config.output!.publicPath = `${config.output!.publicPath}${path.relative(csrOutputPath, ssrOutputPath)}/`;
-        return config;
+        return appendPathToPublicPath(
+          publicPath,
+          path.relative(csrOutputPath, ssrOutputPath),
+        );
       };
-      api.modifyWebpackConfig((config, utils) => {
-        modifySSRPublicPath(config, utils);
-        return config;
-      });
-      api.modifyRspackConfig((config, utils) => {
-        modifySSRPublicPath(config, utils);
-        return config;
-      });
 
       api.processAssets(
         { stage: 'report' },
@@ -215,6 +237,10 @@ const mfSSRRsbuildPlugin = (
               'node',
             );
             if (nodeAssets) {
+              updateAssetResourcePublicPath(
+                nodeAssets,
+                getSSRAssetPublicPath(getAssetResourcePublicPath(nodeAssets)),
+              );
               pluginOptions.assetResources.node = nodeAssets;
             }
           }
