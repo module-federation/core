@@ -1,5 +1,11 @@
 # @module-federation/native-federation-typescript
 
+## 0.6.4
+
+### Patch Changes
+
+- 2f9007d: Update direct axios dependencies to the current security release.
+
 ## 0.6.3
 
 ### Patch Changes

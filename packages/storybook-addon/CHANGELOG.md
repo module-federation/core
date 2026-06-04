@@ -1,5 +1,16 @@
 # @module-federation/storybook-addon
 
+## 6.0.13
+
+### Patch Changes
+
+- f81b587: Expand `@storybook/node-logger` peer dependency range to include Storybook v9 and v10.
+- 5a8db3e: Pass all Rsbuild Module Federation options through the Storybook addon preset so advanced options such as `dts.consumeTypes.remoteTypeUrls`, `manifest`, and `runtimePlugins` are preserved.
+- Updated dependencies [4da5508]
+- Updated dependencies [b9b3b8c]
+  - @module-federation/enhanced@2.5.1
+  - @module-federation/sdk@2.5.1
+
 ## 6.0.12
 
 ### Patch Changes
