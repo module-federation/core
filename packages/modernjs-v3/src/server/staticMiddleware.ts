@@ -13,15 +13,6 @@ const pathExists = async (filepath: string): Promise<boolean> => {
 };
 
 const bundlesAssetPrefix = '/bundles';
-const manifestFileNames = new Set(['/mf-manifest.json', '/mf-stats.json']);
-
-const getContentType = (filepath: string) => {
-  if (path.extname(filepath) === '.json') {
-    return 'application/json';
-  }
-  return 'application/javascript';
-};
-
 // Remove domain name from assetPrefix if it exists
 // and remove trailing slash if it exists, if the url is a single slash, return it as empty string
 const removeHost = (url: string): string => {
@@ -33,7 +24,7 @@ const removeHost = (url: string): string => {
       ? new URL(hasProtocol ? url : `http:${url}`).pathname
       : url;
 
-    return pathname === '/' ? '' : pathname.replace(/\/$/, '');
+    return pathname;
   } catch (e) {
     return url;
   }
@@ -44,29 +35,24 @@ const createStaticMiddleware = (options: {
   pwd: string;
 }): MiddlewareHandler => {
   const { assetPrefix, pwd } = options;
-  const prefixWithoutHost = removeHost(assetPrefix);
-  const prefixWithBundle = path.join(prefixWithoutHost, bundlesAssetPrefix);
 
   return async (c, next) => {
     const pathname = c.req.path;
 
-    const pathnameWithoutAssetPrefix = pathname.replace(prefixWithoutHost, '');
-    const isBundleJs =
-      path.extname(pathname) === '.js' && pathname.startsWith(prefixWithBundle);
-    const isManifestJson = manifestFileNames.has(pathnameWithoutAssetPrefix);
-
-    // Only serve bundled JS files and root federation manifest files.
-    if (!isBundleJs && !isManifestJson) {
+    // We only handle js file for performance
+    if (path.extname(pathname) !== '.js') {
       return next();
     }
 
-    const filepath = isBundleJs
-      ? path.join(
-          pwd,
-          bundlesAssetPrefix,
-          pathname.replace(prefixWithBundle, ''),
-        )
-      : path.join(pwd, pathnameWithoutAssetPrefix);
+    const prefixWithoutHost = removeHost(assetPrefix);
+    const prefixWithBundle = path.join(prefixWithoutHost, bundlesAssetPrefix);
+    // Skip if the request is not for asset prefix + `/bundles`
+    if (!pathname.startsWith(prefixWithBundle)) {
+      return next();
+    }
+
+    const pathnameWithoutPrefix = pathname.replace(prefixWithBundle, '');
+    const filepath = path.join(pwd, bundlesAssetPrefix, pathnameWithoutPrefix);
     if (!(await pathExists(filepath))) {
       return next();
     }
@@ -76,7 +62,7 @@ const createStaticMiddleware = (options: {
       return next();
     }
 
-    c.header('Content-Type', getContentType(filepath));
+    c.header('Content-Type', 'application/javascript');
     c.header('Content-Length', String(fileResult.content.length));
     return c.body(fileResult.content, 200);
   };

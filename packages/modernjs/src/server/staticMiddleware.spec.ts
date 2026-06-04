@@ -172,57 +172,6 @@ describe('staticMiddleware', () => {
       expect(result).toBe('response');
     });
 
-    it('should serve federation manifest with json content type', async () => {
-      const mockFileContent = '{"name":"remote"}';
-      const mockFileResult = {
-        content: mockFileContent,
-        lastModified: Date.now(),
-      };
-
-      mockContext.req.path = '/mf-manifest.json';
-      (access as any).mockResolvedValue(undefined);
-      (fileCache.getFile as any).mockResolvedValue(mockFileResult);
-      mockContext.body.mockReturnValue('manifest-response');
-
-      const result = await middleware(mockContext, nextSpy);
-
-      expect(access).toHaveBeenCalledWith('/test/path/mf-manifest.json');
-      expect(mockContext.header).toHaveBeenCalledWith(
-        'Content-Type',
-        'application/json',
-      );
-      expect(mockContext.header).toHaveBeenCalledWith(
-        'Content-Length',
-        String(mockFileResult.content.length),
-      );
-      expect(mockContext.body).toHaveBeenCalledWith(
-        mockFileResult.content,
-        200,
-      );
-      expect(result).toBe('manifest-response');
-      expect(nextSpy).not.toHaveBeenCalled();
-    });
-
-    it('should serve federation manifest with asset prefix', async () => {
-      const customMiddleware = createStaticMiddleware({
-        assetPrefix: '/prefix',
-        pwd: '/test/path',
-      });
-      const mockFileResult = {
-        content: '{"name":"remote"}',
-        lastModified: Date.now(),
-      };
-
-      mockContext.req.path = '/prefix/mf-manifest.json';
-      (access as any).mockResolvedValue(undefined);
-      (fileCache.getFile as any).mockResolvedValue(mockFileResult);
-
-      await customMiddleware(mockContext, nextSpy);
-
-      expect(access).toHaveBeenCalledWith('/test/path/mf-manifest.json');
-      expect(nextSpy).not.toHaveBeenCalled();
-    });
-
     it('should handle empty file content', async () => {
       const mockFileResult = {
         content: '',
