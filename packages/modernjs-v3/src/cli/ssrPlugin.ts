@@ -61,25 +61,107 @@ function getManifestAssetFileNames(
   };
 }
 
-const appendPathToPublicPath = (publicPath: unknown, pathname: string) => {
+const parsePublicPath = (publicPath: unknown, pathname: string) => {
   if (
     typeof publicPath !== 'string' ||
     publicPath === '' ||
     publicPath === 'auto' ||
     !pathname
   ) {
-    return publicPath;
+    return undefined;
   }
   const normalizedPathname = pathname.split(path.sep).join('/');
   if (!normalizedPathname || normalizedPathname === '.') {
-    return publicPath;
+    return undefined;
   }
   const suffixStart = publicPath.search(/[?#]/);
-  const base =
-    suffixStart === -1 ? publicPath : publicPath.slice(0, suffixStart);
-  const suffix = suffixStart === -1 ? '' : publicPath.slice(suffixStart);
+
+  return {
+    base: suffixStart === -1 ? publicPath : publicPath.slice(0, suffixStart),
+    normalizedPathname,
+    suffix: suffixStart === -1 ? '' : publicPath.slice(suffixStart),
+  };
+};
+
+const appendPathToPublicPath = (publicPath: unknown, pathname: string) => {
+  const parsed = parsePublicPath(publicPath, pathname);
+  if (!parsed) {
+    return publicPath;
+  }
+  const { base, normalizedPathname, suffix } = parsed;
+  const baseWithoutTrailingSlash = base.replace(/\/+$/, '');
+  if (
+    baseWithoutTrailingSlash === normalizedPathname ||
+    baseWithoutTrailingSlash.endsWith(`/${normalizedPathname}`)
+  ) {
+    return publicPath;
+  }
 
   return `${base.replace(/\/?$/, '/')}${normalizedPathname}/${suffix}`;
+};
+
+const removePathFromPublicPath = (publicPath: unknown, pathname: string) => {
+  const parsed = parsePublicPath(publicPath, pathname);
+  if (!parsed) {
+    return publicPath;
+  }
+  const { base, normalizedPathname, suffix } = parsed;
+  const baseWithoutTrailingSlash = base.replace(/\/+$/, '');
+  const segmentWithSlash = `/${normalizedPathname}`;
+
+  if (baseWithoutTrailingSlash === normalizedPathname) {
+    return `/${suffix}`;
+  }
+  if (!baseWithoutTrailingSlash.endsWith(segmentWithSlash)) {
+    return publicPath;
+  }
+
+  return `${baseWithoutTrailingSlash.slice(
+    0,
+    -segmentWithSlash.length,
+  )}/${suffix}`;
+};
+
+type BundlerConfigWithPublicPath = {
+  output?: {
+    publicPath?: unknown;
+  };
+};
+
+const rewriteStaticAssetRuntimePublicPath = (
+  assets: Record<string, { source: () => string | Buffer }>,
+  sources: {
+    RawSource: new (source: string) => { source: () => string | Buffer };
+  },
+  publicPath: unknown,
+) => {
+  if (
+    typeof publicPath !== 'string' ||
+    publicPath === '' ||
+    publicPath === 'auto'
+  ) {
+    return;
+  }
+
+  const normalizedPublicPath = publicPath.replace(/\/?$/, '/');
+  const staticAssetPublicPath = normalizedPublicPath.endsWith('/static/')
+    ? normalizedPublicPath
+    : `${normalizedPublicPath}static/`;
+  for (const [filename, asset] of Object.entries(assets)) {
+    if (!filename.endsWith('.js')) {
+      continue;
+    }
+    const rawSource = asset.source();
+    const source =
+      typeof rawSource === 'string' ? rawSource : rawSource.toString();
+    const rewritten = source.replace(
+      /__webpack_require__\.p\s*\+\s*(["'])static\//g,
+      (_match, quote: string) => `${quote}${staticAssetPublicPath}`,
+    );
+    if (rewritten !== source) {
+      assets[filename] = new sources.RawSource(rewritten);
+    }
+  }
 };
 
 const updateAssetResourcePublicPath = (
@@ -183,6 +265,10 @@ const mfSSRRsbuildPlugin = (
       });
 
       const getSSRAssetPublicPath = (publicPath: unknown) => {
+        const ssrOutputRelativePath = path.relative(
+          csrOutputPath,
+          ssrOutputPath,
+        );
         const userSSRConfig = pluginOptions.userConfig.ssr
           ? typeof pluginOptions.userConfig.ssr === 'object'
             ? pluginOptions.userConfig.ssr
@@ -191,15 +277,34 @@ const mfSSRRsbuildPlugin = (
         if (!userSSRConfig.distOutputDir) {
           return publicPath;
         }
-        return appendPathToPublicPath(
+        return appendPathToPublicPath(publicPath, ssrOutputRelativePath);
+      };
+
+      const getStaticAssetPublicPath = (publicPath: unknown) => {
+        return removePathFromPublicPath(
           publicPath,
           path.relative(csrOutputPath, ssrOutputPath),
         );
       };
 
+      const modifyBundlerPublicPath = (config: BundlerConfigWithPublicPath) => {
+        const publicPath = config.output?.publicPath;
+        const ssrPublicPath = getSSRAssetPublicPath(publicPath);
+        if (config.output) {
+          config.output.publicPath = ssrPublicPath;
+        }
+      };
+
+      api.modifyRspackConfig((config, { environment }) => {
+        if (ssrEnv && environment.name === ssrEnv) {
+          modifyBundlerPublicPath(config);
+        }
+        return config;
+      });
+
       api.processAssets(
         { stage: 'report' },
-        ({ assets, environment: envContext }) => {
+        ({ assets, environment: envContext, sources }) => {
           const envName = envContext.name;
 
           if (
@@ -228,9 +333,15 @@ const mfSSRRsbuildPlugin = (
               'node',
             );
             if (nodeAssets) {
+              const publicPath = getAssetResourcePublicPath(nodeAssets);
+              rewriteStaticAssetRuntimePublicPath(
+                assets,
+                sources,
+                getStaticAssetPublicPath(publicPath),
+              );
               updateAssetResourcePublicPath(
                 nodeAssets,
-                getSSRAssetPublicPath(getAssetResourcePublicPath(nodeAssets)),
+                getSSRAssetPublicPath(publicPath),
               );
               pluginOptions.assetResources.node = nodeAssets;
             }

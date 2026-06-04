@@ -110,6 +110,19 @@ describe('moduleFederationSSRPlugin', () => {
     source: () => JSON.stringify(content),
   });
 
+  const createJsAsset = (content: string) => ({
+    source: () => content,
+  });
+
+  const sources = {
+    RawSource: class RawSource {
+      constructor(private content: string) {}
+      source() {
+        return this.content;
+      }
+    },
+  };
+
   const createManifestAsset = (publicPath: string) =>
     createJsonAsset({
       metaData: {
@@ -132,12 +145,22 @@ describe('moduleFederationSSRPlugin', () => {
       },
     });
 
-  it('does not register bundler publicPath mutation hooks for SSR output under bundles', async () => {
+  it('sets bundled SSR publicPath for SSR output', async () => {
     const { rsbuildApi } = await createPluginHarness();
     configureOutputPaths(rsbuildApi);
 
-    expect(rsbuildApi.modifyWebpackConfig).not.toHaveBeenCalled();
-    expect(rsbuildApi.modifyRspackConfig).not.toHaveBeenCalled();
+    const modifyWebpackConfig = rsbuildApi.modifyWebpackConfig.mock.calls[0][0];
+    const config = {
+      output: {
+        publicPath: '/playlet-produce-migrate/static/',
+      },
+    };
+
+    modifyWebpackConfig(config, { environment: { name: 'node' } });
+
+    expect(config.output.publicPath).toBe(
+      '/playlet-produce-migrate/static/bundles/',
+    );
   });
 
   it('updates SSR manifest publicPath for bundled SSR output', async () => {
@@ -153,6 +176,110 @@ describe('moduleFederationSSRPlugin', () => {
         'mf-stats.json': createStatsAsset('/playlet-produce-migrate/static/'),
       },
       environment: { name: 'node' },
+      sources,
+    });
+
+    expect(
+      pluginOptions.assetResources.node.manifest.data.metaData.publicPath,
+    ).toBe('/playlet-produce-migrate/static/bundles/');
+    expect(
+      pluginOptions.assetResources.node.stats.data.metaData.publicPath,
+    ).toBe('/playlet-produce-migrate/static/bundles/');
+  });
+
+  it('rewrites SSR static asset runtime publicPath to the app publicPath', async () => {
+    const { rsbuildApi } = await createPluginHarness();
+    configureOutputPaths(rsbuildApi);
+
+    const processAssets = rsbuildApi.processAssets.mock.calls[0][1];
+    const assets = {
+      'mf-manifest.json': createManifestAsset(
+        '/playlet-produce-migrate/static/bundles/',
+      ),
+      'mf-stats.json': createStatsAsset(
+        '/playlet-produce-migrate/static/bundles/',
+      ),
+      'remote.js': createJsAsset(
+        'const asset = __webpack_require__.p + "static/svg/icon.svg";',
+      ),
+    };
+    processAssets({
+      assets,
+      environment: { name: 'node' },
+      sources,
+    });
+
+    expect(assets['remote.js'].source()).toBe(
+      'const asset = "/playlet-produce-migrate/static/svg/icon.svg";',
+    );
+  });
+
+  it('rewrites SSR static asset runtime publicPath with default static dist path', async () => {
+    const { rsbuildApi } = await createPluginHarness();
+    configureOutputPaths(rsbuildApi);
+
+    const processAssets = rsbuildApi.processAssets.mock.calls[0][1];
+    const assets = {
+      'mf-manifest.json': createManifestAsset('http://localhost:3061/bundles/'),
+      'mf-stats.json': createStatsAsset('http://localhost:3061/bundles/'),
+      'remote.js': createJsAsset(
+        'const asset = __webpack_require__.p + "static/svg/icon.svg";',
+      ),
+    };
+    processAssets({
+      assets,
+      environment: { name: 'node' },
+      sources,
+    });
+
+    expect(assets['remote.js'].source()).toBe(
+      'const asset = "http://localhost:3061/static/svg/icon.svg";',
+    );
+  });
+
+  it('does not rewrite SSR chunk runtime publicPath usage', async () => {
+    const { rsbuildApi } = await createPluginHarness();
+    configureOutputPaths(rsbuildApi);
+
+    const processAssets = rsbuildApi.processAssets.mock.calls[0][1];
+    const assets = {
+      'mf-manifest.json': createManifestAsset(
+        '/playlet-produce-migrate/static/bundles/',
+      ),
+      'mf-stats.json': createStatsAsset(
+        '/playlet-produce-migrate/static/bundles/',
+      ),
+      'remote.js': createJsAsset(
+        'const chunk = new URL(chunkName, __webpack_require__.p);',
+      ),
+    };
+    processAssets({
+      assets,
+      environment: { name: 'node' },
+      sources,
+    });
+
+    expect(assets['remote.js'].source()).toBe(
+      'const chunk = new URL(chunkName, __webpack_require__.p);',
+    );
+  });
+
+  it('keeps SSR manifest publicPath unchanged when it already includes bundles', async () => {
+    const { pluginOptions, rsbuildApi } = await createPluginHarness();
+    configureOutputPaths(rsbuildApi);
+
+    const processAssets = rsbuildApi.processAssets.mock.calls[0][1];
+    processAssets({
+      assets: {
+        'mf-manifest.json': createManifestAsset(
+          '/playlet-produce-migrate/static/bundles/',
+        ),
+        'mf-stats.json': createStatsAsset(
+          '/playlet-produce-migrate/static/bundles/',
+        ),
+      },
+      environment: { name: 'node' },
+      sources,
     });
 
     expect(
@@ -188,6 +315,7 @@ describe('moduleFederationSSRPlugin', () => {
         'mf-stats.json': createStatsAsset('/playlet-produce-migrate/static/'),
       },
       environment: { name: 'node' },
+      sources,
     });
 
     try {
