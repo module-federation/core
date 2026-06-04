@@ -92,7 +92,7 @@ class CollectSharedEntryPlugin {
     this._collectedEntries = {};
   }
 
-  private getSharedName(request: string) {
+  private getMatchedSharedOption(request: string) {
     const matchedSharedOption = this.sharedOptions.find(
       ([sharedName, sharedConfig]) =>
         request === sharedName ||
@@ -100,7 +100,7 @@ class CollectSharedEntryPlugin {
         request === sharedConfig.request ||
         request === sharedConfig.shareKey,
     );
-    return matchedSharedOption?.[0];
+    return matchedSharedOption;
   }
 
   private addRequest(sharedName: string, resource: string, version: string) {
@@ -123,11 +123,19 @@ class CollectSharedEntryPlugin {
             if (!resource || !('rawRequest' in module)) {
               return module;
             }
-            const sharedName = this.getSharedName(module.rawRequest as string);
-            if (!sharedName) {
+            const matchedSharedOption = this.getMatchedSharedOption(
+              module.rawRequest as string,
+            );
+            if (!matchedSharedOption) {
               return module;
             }
-            const sharedVersion = inferPkgVersionFromResource(resource);
+            const [sharedName, sharedConfig] = matchedSharedOption;
+            const configuredVersion =
+              typeof sharedConfig.version === 'string'
+                ? sharedConfig.version
+                : undefined;
+            const sharedVersion =
+              inferPkgVersionFromResource(resource) || configuredVersion;
             if (!sharedVersion) {
               return module;
             }
