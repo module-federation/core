@@ -3733,6 +3733,9 @@ importers:
       '@rslib/core':
         specifier: 0.18.5
         version: 0.18.5(@microsoft/api-extractor@7.57.7(@types/node@25.9.1))(typescript@5.9.3)
+      '@rspack/core':
+        specifier: 2.0.0-beta.0
+        version: 2.0.0-beta.0(@module-federation/runtime-tools@2.5.0(node-fetch@3.3.0))(@swc/helpers@0.5.17)
       '@types/react':
         specifier: ^18.3.11
         version: 18.3.28
