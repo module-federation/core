@@ -1,5 +1,11 @@
 # @module-federation/sdk
 
+## 2.5.1
+
+### Patch Changes
+
+- b9b3b8c: Fix Windows manifest type URL resolution in dts-plugin consumeTypes and allow the default IP family option to auto-select with `0`.
+
 ## 2.5.0
 
 ### Patch Changes
