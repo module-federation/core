@@ -1,5 +1,18 @@
 # @module-federation/rspress-plugin
 
+## 2.5.1
+
+### Patch Changes
+
+- 7c04e74: Rebuild llms output from generated HTML for federated Rspress builds.
+- Updated dependencies [4da5508]
+- Updated dependencies [b50395e]
+- Updated dependencies [b9b3b8c]
+  - @module-federation/enhanced@2.5.1
+  - @module-federation/rsbuild-plugin@2.5.1
+  - @module-federation/sdk@2.5.1
+  - @module-federation/error-codes@2.5.1
+
 ## 2.5.0
 
 ### Patch Changes

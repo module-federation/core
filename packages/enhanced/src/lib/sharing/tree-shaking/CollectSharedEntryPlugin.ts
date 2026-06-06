@@ -18,19 +18,26 @@ export type CollectSharedEntryPluginOptions = {
   shareScope?: string;
 };
 
+const NODE_MODULES = 'node_modules';
+const PNPM_STORE = '.pnpm';
+
 function inferPkgVersionFromResource(resource: string): string | undefined {
   try {
-    const nmIndex = resource.lastIndexOf('node_modules');
+    const nmIndex = resource.lastIndexOf(NODE_MODULES);
     if (nmIndex === -1) {
       return undefined;
     }
-    const after = resource.substring(nmIndex + 'node_modules'.length + 1);
+    const after = resource.substring(nmIndex + NODE_MODULES.length + 1);
 
     // pnpm layout: node_modules/.pnpm/<encoded@version>/node_modules/<pkg>/...
-    if (after.startsWith('.pnpm/')) {
-      const m = after.match(/\.pnpm\/(?:[^/]+)@([^/]+)\/node_modules\//);
-      if (m && m[1]) {
-        return m[1];
+    if (after.startsWith(`${PNPM_STORE}/`)) {
+      const encodedPkgWithVersion = after.split(/[\\/]+/)[1];
+      if (encodedPkgWithVersion) {
+        const encodedPkgWithoutPeers = encodedPkgWithVersion.split('_')[0];
+        const versionStart = encodedPkgWithoutPeers.lastIndexOf('@');
+        if (versionStart > 0) {
+          return encodedPkgWithoutPeers.slice(versionStart + 1);
+        }
       }
     }
 
@@ -44,7 +51,7 @@ function inferPkgVersionFromResource(resource: string): string | undefined {
     } else {
       pkgPathParts = [parts[0]];
     }
-    const nmBase = resource.substring(0, nmIndex + 'node_modules'.length + 1);
+    const nmBase = resource.substring(0, nmIndex + NODE_MODULES.length + 1);
     const pkgJsonPath = path.join(nmBase, ...pkgPathParts, 'package.json');
     try {
       const content = fs.readFileSync(pkgJsonPath, 'utf-8');
@@ -81,53 +88,59 @@ class CollectSharedEntryPlugin {
     return this._collectedEntries;
   }
 
+  private resetData() {
+    this._collectedEntries = {};
+  }
+
+  private getMatchedSharedOption(request: string) {
+    const matchedSharedOption = this.sharedOptions.find(
+      ([sharedName, sharedConfig]) =>
+        request === sharedName ||
+        request === sharedConfig.import ||
+        request === sharedConfig.request ||
+        request === sharedConfig.shareKey,
+    );
+    return matchedSharedOption;
+  }
+
+  private addRequest(sharedName: string, resource: string, version: string) {
+    this._collectedEntries[sharedName] ||= { requests: [] };
+    const requests = this._collectedEntries[sharedName].requests;
+    if (requests.some(([, existingVersion]) => existingVersion === version)) {
+      return;
+    }
+    requests.push([resource, version]);
+  }
+
   apply(compiler: Compiler): void {
-    const { sharedOptions } = this;
-    const { _collectedEntries: collectedEntries } = this;
     compiler.hooks.compilation.tap(
       'CollectSharedEntryPlugin',
       (_compilation, { normalModuleFactory }) => {
+        this.resetData();
         normalModuleFactory.hooks.module.tap(
           'CollectSharedEntryPlugin',
-          (module, { resource }, resolveData) => {
+          (module, { resource }) => {
             if (!resource || !('rawRequest' in module)) {
               return module;
             }
-            const matchedSharedOption = sharedOptions.find(
-              (item) => item[0] === (module.rawRequest as string),
+            const matchedSharedOption = this.getMatchedSharedOption(
+              module.rawRequest as string,
             );
             if (!matchedSharedOption) {
               return module;
             }
-            const [sharedName, _] = matchedSharedOption;
-            const sharedVersion = inferPkgVersionFromResource(resource);
+            const [sharedName, sharedConfig] = matchedSharedOption;
+            const configuredVersion =
+              typeof sharedConfig.version === 'string'
+                ? sharedConfig.version
+                : undefined;
+            const sharedVersion =
+              inferPkgVersionFromResource(resource) || configuredVersion;
             if (!sharedVersion) {
               return module;
             }
-            collectedEntries[sharedName] ||= { requests: [] };
-            collectedEntries[sharedName].requests.push([
-              resource,
-              sharedVersion,
-            ]);
+            this.addRequest(sharedName, resource, sharedVersion);
             return module;
-          },
-        );
-      },
-    );
-
-    compiler.hooks.thisCompilation.tap(
-      'Collect shared entry',
-      (compilation) => {
-        compilation.hooks.processAssets.tapPromise(
-          {
-            name: 'CollectSharedEntry',
-            stage:
-              compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_OPTIMIZE_INLINE,
-          },
-          async () => {
-            compilation.getAssets().forEach((asset) => {
-              compilation.deleteAsset(asset.name);
-            });
           },
         );
       },

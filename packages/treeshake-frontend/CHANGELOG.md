@@ -1,5 +1,11 @@
 # @module-federation/treeshake-frontend
 
+## 2.5.1
+
+### Patch Changes
+
+- d7b8a57: Update react-router dependencies and the @remix-run/router override to patched security releases.
+
 ## 2.5.0
 
 ## 2.4.0

@@ -206,6 +206,37 @@ describe('typeScriptCompiler', () => {
       expect(args[4]).toEqual(expect.any(String));
     });
 
+    it('does not wrap project path in single quotes on Windows (#4133)', async () => {
+      const execPromise = vi.fn().mockRejectedValue(new Error('tsc error'));
+      vi.spyOn(util, 'promisify').mockReturnValue(
+        execPromise as unknown as ReturnType<typeof util.promisify>,
+      );
+      const restorePlatform = withProcessPlatform('win32');
+      const filepath = join(__dirname, './typeScriptCompiler.ts');
+      const mapToExpose = {
+        tsCompiler: filepath,
+      };
+
+      try {
+        await compileTs(
+          mapToExpose,
+          { ...tsConfig, files: [filepath] },
+          remoteOptions,
+        );
+      } catch {
+        // expected to throw because execPromise is rejected
+      } finally {
+        restorePlatform();
+      }
+
+      const args = execPromise.mock.calls[0]?.[1] as string[];
+      const projectIndex = args.indexOf('--project');
+      expect(projectIndex).toBeGreaterThan(-1);
+      const projectPath = args[projectIndex + 1];
+      expect(projectPath).toBeDefined();
+      expect(projectPath).not.toContain("'");
+    });
+
     it('ignores inherited declarationDir', async () => {
       const projectDir = join(tmpDir, 'declarationDirProject');
       const srcDir = join(projectDir, 'src');
