@@ -83,7 +83,7 @@ const getDependentFiles = (
   const sourceFiles = program.getSourceFiles();
   const dependentFiles = sourceFiles
     .map((file) => file.fileName)
-    .filter((file) => !file.endsWith('.d.ts') && file.startsWith(rootDir));
+    .filter((file) => !file.endsWith('.d.ts') && file.startsWith(rootDir + '/'));
   return dependentFiles.length ? dependentFiles : rootFiles;
 };
 
