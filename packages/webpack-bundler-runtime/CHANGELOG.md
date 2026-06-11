@@ -1,5 +1,80 @@
 # @module-federation/webpack-bundler-runtime
 
+## 2.5.1
+
+### Patch Changes
+
+- Updated dependencies [b9b3b8c]
+  - @module-federation/sdk@2.5.1
+  - @module-federation/runtime@2.5.1
+  - @module-federation/error-codes@2.5.1
+
+## 2.5.0
+
+### Patch Changes
+
+- Updated dependencies [5d4095d]
+- Updated dependencies [d433ec9]
+- Updated dependencies [0716c11]
+- Updated dependencies [41281f4]
+  - @module-federation/sdk@2.5.0
+  - @module-federation/runtime@2.5.0
+  - @module-federation/error-codes@2.5.0
+
+## 2.4.0
+
+### Minor Changes
+
+- 13b1e84: chore: remove the legacy Data Prefetch package and its related configuration, manifest fields, and runtime hooks.
+
+### Patch Changes
+
+- Updated dependencies [5eba770]
+- Updated dependencies [3a3414c]
+- Updated dependencies [13b1e84]
+  - @module-federation/sdk@2.4.0
+  - @module-federation/runtime@2.4.0
+  - @module-federation/error-codes@2.4.0
+
+## 2.3.3
+
+### Patch Changes
+
+- @module-federation/runtime@2.3.3
+- @module-federation/sdk@2.3.3
+- @module-federation/error-codes@2.3.3
+
+## 2.3.2
+
+### Patch Changes
+
+- @module-federation/runtime@2.3.2
+- @module-federation/sdk@2.3.2
+- @module-federation/error-codes@2.3.2
+
+## 2.3.1
+
+### Patch Changes
+
+- @module-federation/runtime@2.3.1
+- @module-federation/sdk@2.3.1
+- @module-federation/error-codes@2.3.1
+
+## 2.3.0
+
+### Patch Changes
+
+- f1d79b2: feat(webpack-bundler-runtime): add RUNTIME-012 error for invalid shared module getter
+
+  When `loadShare` returns `false` and the local `getter` is not a function (e.g. `undefined`), throw a `RUNTIME-012` error with the affected `shareKey`. This typically happens when `shared.import: false` is set but no host provides the corresponding `lib`.
+
+- Updated dependencies [eb26065]
+- Updated dependencies [f1d79b2]
+- Updated dependencies [8f2ec9b]
+  - @module-federation/sdk@2.3.0
+  - @module-federation/error-codes@2.3.0
+  - @module-federation/runtime@2.3.0
+
 ## 2.2.3
 
 ### Patch Changes

@@ -99,12 +99,12 @@ function generateRemotes(remotes: Record<string, string> = {}) {
     const remoteEntryUrl = remoteEntryParts.slice(1).join('@');
 
     remotesEntries.push(
-      `{ 
-          alias: "${remoteAlias}", 
-          name: "${remoteName}", 
-          entry: "${remoteEntryUrl}", 
-          entryGlobalName: "${remoteName}", 
-          type: "var" 
+      `{
+          alias: ${JSON.stringify(remoteAlias)},
+          name: ${JSON.stringify(remoteName)},
+          entry: ${JSON.stringify(remoteEntryUrl)},
+          entryGlobalName: ${JSON.stringify(remoteName)},
+          type: "var"
        }`,
     );
   }

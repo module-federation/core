@@ -1,10 +1,13 @@
 # Runtime API
 
 import { Steps, Tab, Tabs, Badge, Aside } from '@theme';
-import Collapse from '@components/Collapse'
-import Runtime from '@components/zh/runtime/index';
+import Collapse from '@components/Collapse';
 
-<Runtime />
+MF 的运行时 API 围绕 `ModuleFederation` 实例展开。除 [createInstance](#createinstance) 会创建并返回新的实例外，其他 API 都会基于运行时中的已有实例执行对应操作。
+
+默认实例通常由构建插件自动创建，也可以通过 [init](#init) 手动初始化。调用运行时 API 时，无需显式传入 `ModuleFederation` 实例，它们会自动使用运行时中的默认实例。
+
+需要注意的是，[createInstance](#createinstance) 创建的新实例不会替换默认实例，但会被加入全局实例列表。后续可以通过 [getInstance](#getinstance) 配合 finder 回调重新获取该实例。
 
 ## createInstance
 
@@ -12,16 +15,13 @@ import Runtime from '@components/zh/runtime/index';
 
 * 什么时候使用 `createInstance` ？
 
-  为了保证 `ModuleFederation` 实例的唯一性，我们在构建插件创建实例后，会将其存储到内存中，导出的 API 都是先从内存中获取 `ModuleFederation` 实例，然后再调用 `ModuleFederation` 实例的 API。这也是为什么 `loadRemote` 等 API 可以直接使用的原因。
-
-  这种单例模式适用于大多数场景，但如果在以下场景，你需要使用 `createInstance`：
+  默认实例模式适用于大多数场景，但如果在以下场景，你需要使用 `createInstance`：
 
   - 没有使用构建插件（纯运行时场景）
   - 需要创建多个 ModuleFederation 实例，每个实例的配置不同
   - 希望使用 ModuleFederation 分治特性，封装相应的 API 提供给其他项目使用
 
-
-* `createInstance` 不会对已存在的实例进行覆盖，每次调用都会创建一个新的实例。
+* `createInstance` 每次都会创建一个全新的 `ModuleFederation` 实例，并将其注册到全局实例列表中。它不会根据 `name` / `version` 查找已有实例，也不会把新配置合并到已有实例上。
 
 ```ts
 import { createInstance } from '@module-federation/enhanced/runtime';
@@ -39,20 +39,25 @@ const mf = createInstance({
 mf.loadRemote('sub1/util').then((m) => m.add(1, 2, 3));
 ```
 
-## init <Badge type='danger'>废弃</Badge>
+## init <Badge type='warning'>谨慎使用</Badge>
 
 :::warning Warning
 
-此 API 将被废弃。如果需要获取已创建的实例，可以使用 [getInstance](#getinstance) 获取已创建的实例。
+`init` 用于初始化运行时实例，但它并不总是创建新的 `ModuleFederation` 实例。
 
-如果需要创建新的实例，请使用 [createInstance](#createinstance)。
+调用 `init` 时，运行时会先根据 `name` 和 `version` 查找已有实例。若找到匹配实例，则复用该实例，并通过 `instance.initOptions(options)` 合并本次传入的配置；若未找到匹配实例，才会创建新的实例。
+
+因此，`init` 更适合用于同一个 host 多次初始化，并希望复用、扩展同一个运行时实例的场景。
+
+- 如果你需要创建一个完全独立的新实例，请使用 [createInstance](#createinstance)。
+
+- 如果你只是想获取由构建插件创建的实例，请使用 [getInstance](#getinstance)。
 
 :::
 
-- Type: `init(options: InitOptions): void`
-- 用于运行时动态注册 `Vmok` 模块
+- Type: `init(options: InitOptions): ModuleFederation`
+- 用于初始化或复用 `ModuleFederation` 运行时实例
 - InitOptions:
-
 
 <Collapse>
 ```ts
@@ -120,6 +125,7 @@ type Share = {
 
 <Collapse title="示例">
 
+
 ```ts
 import { init, loadRemote } from '@module-federation/enhanced/runtime';
 
@@ -136,9 +142,10 @@ init({
     ],
 });
 ```
+
 </Collapse>
 
-### 如何迁移
+### 推荐替代方式
 
 #### Build Plugin（使用构建插件）
 
@@ -229,23 +236,43 @@ plugins: [mfRuntimePlugin()]
 ```
 
 
-如果没有使用构建插件，你可以使用 [createInstance](#createinstance)替换 `init` ，其参数完全一致。
+如果没有使用构建插件，你可以从 `init` 切换到 [createInstance](#createinstance)，因为两者接收的配置形状是一致的。但要注意实例语义不同：`createInstance` 总是创建新实例，而 `init` 可能会复用同一个 `name` / `version` 对应的已有实例，并把新配置合并进去。
 
 ## getInstance
 
-- Type: `getInstance(): ModuleFederation`
-- 获取构建插件创建的 `ModuleFederation` 实例
+- Type: `getInstance(): ModuleFederation | null`
+- Type: `getInstance(finder: (instance: ModuleFederation) => boolean): ModuleFederation | null`
+- 获取默认的 `ModuleFederation` 实例，或者返回首个匹配 finder 回调的已注册实例
 
-当使用了构建插件后，可以调用 `getInstance` 获取构建插件创建的 `ModuleFederation` 实例。
+当使用构建插件或 [init](#init) 创建默认实例后，可以调用 `getInstance()` 获取这个默认实例。
+
 
 ```ts
 import { getInstance } from '@module-federation/enhanced/runtime';
 
 const mfInstance = getInstance();
+if (!mfInstance) {
+  throw new Error('Module Federation instance is not initialized');
+}
+
 mfInstance.loadRemote('remote/util');
 ```
 
 如果没有使用构建插件，调用 `getInstance` 会抛出异常，此时你需要使用 [createInstance](#createinstance) 来创建一个新的实例。
+
+通过 [createInstance](#createinstance) 创建的实例不会替换默认实例，但仍然会注册到全局实例列表中。所以即使你没有保存它的返回值，也可以通过给 `getInstance` 传入 finder 回调把它找回来。
+
+finder 回调的行为和 `Array.prototype.find` 类似：运行时会遍历当前已注册的实例，并返回第一个匹配项。如果没有找到匹配实例，`getInstance` 会返回 `null`。
+
+```ts
+const targetInstance = getInstance(
+  (instance) => instance.name === 'remote-host',
+);
+
+if (targetInstance) {
+  targetInstance.loadRemote('remote/util');
+}
+```
 
 ## registerRemotes
 
@@ -427,6 +454,46 @@ function registerPlugins(plugins: ModuleFederationRuntimePlugin[]) {}
   ```
   </Tab>
 </Tabs>
+
+## registerGlobalPlugins
+
+- type
+
+```typescript
+function registerGlobalPlugins(plugins: ModuleFederationRuntimePlugin[]): void {}
+```
+
+用于把插件注册到全局 federation 状态，而不是只注册到某一个当前实例。
+
+适合这类场景：
+
+- 通用埋点
+- 环境级统一策略
+- host 级默认插件
+
+全局插件会按 `plugin.name` 去重。
+
+
+```ts
+import { registerGlobalPlugins, createInstance } from '@module-federation/enhanced/runtime';
+
+import runtimePlugin from './runtime-plugin';
+
+registerGlobalPlugins([runtimePlugin()]);
+
+const mf = createInstance({
+  name: 'mf_host',
+  remotes: [
+    {
+      name: 'sub1',
+      entry: 'http://localhost:2001/mf-manifest.json',
+    },
+  ],
+});
+```
+
+
+为了保证行为可预期，建议在创建或使用 runtime 实例之前注册全局插件。
 
 ## registerShared
 
@@ -704,8 +771,6 @@ type depsPreloadArg = Omit<PreloadRemoteArgs, 'depsRemote'>;
 type PreloadRemoteArgs = {
   // 预加载 remote 的名称和别名
   nameOrAlias: string;
-  // 是否需要预加载模块的接口，默认值为 false，具体参考<性能优化>中<Interface Prefetch 接口预请求>章节，@vmok/kit 版本需要大于 1.7.6
-  prefetchInterface?: boolean;
   // 需要预加载的 expose
   // 默认预加载所有的 expose
   // 提供了 expose 时只会加载所需要的 expose
@@ -732,6 +797,75 @@ type PreloadRemoteArgs = {
 * `remote` 的 `expose`
 * `remote` 的同步资源还是异步资源
 * `remote` 依赖的 `remote` 资源
+
+`preloadRemote` 会等待本次预加载涉及的资源完成。如果资源全部成功加载或命中缓存，Promise 会 resolve；如果有资源加载失败或超时，Promise 会 reject，并在错误对象上携带本次预加载的资源结果。
+
+如果只关心最终结果，可以直接用 `await` 或 `.then/.catch` 判断：
+
+```ts
+import { preloadRemote } from '@module-federation/enhanced/runtime';
+
+try {
+  await preloadRemote([
+    {
+      nameOrAlias: 'sub1',
+      exposes: ['add'],
+      resourceCategory: 'all',
+    },
+  ]);
+
+  console.log('sub1/add preload success');
+} catch (error) {
+  console.error('sub1/add preload failed', error);
+}
+```
+
+如果需要统计具体哪些资源成功、失败、超时或命中缓存，可以读取错误对象上的 `results`：
+
+```ts
+type PreloadRemoteError = Error & {
+  results?: Array<{
+    id: string;
+    results: Array<{
+      url: string;
+      status: 'success' | 'error' | 'timeout' | 'cached';
+      resourceType: 'manifest' | 'remoteEntry' | 'js' | 'css';
+      error?: unknown;
+    }>;
+  }>;
+};
+
+preloadRemote([
+  {
+    nameOrAlias: 'sub1',
+    exposes: ['add'],
+    resourceCategory: 'all',
+  },
+]).catch((error: PreloadRemoteError) => {
+  const failedResources =
+    error.results
+      ?.flatMap((remoteResult) =>
+        remoteResult.results.map((resource) => ({
+          id: remoteResult.id,
+          ...resource,
+        })),
+      )
+      .filter(
+        (resource) =>
+          resource.status === 'error' || resource.status === 'timeout',
+      ) ?? [];
+
+  failedResources.forEach((resource) => {
+    console.error(
+      `[preloadRemote] ${resource.id} ${resource.resourceType} failed`,
+      resource.url,
+      resource.error,
+    );
+  });
+});
+```
+
+如果没有指定 `exposes`，本次预加载的资源 id 是 `remoteName/*`。如果指定了 `exposes`，运行时会按 expose 单独生成资源，资源 id 是 `remoteName/expose`。
 
 <Tabs>
   <Tab label="Build Plugin（使用构建插件）">

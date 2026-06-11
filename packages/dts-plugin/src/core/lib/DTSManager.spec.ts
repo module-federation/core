@@ -1,11 +1,11 @@
 import AdmZip from 'adm-zip';
-import axios from 'axios';
 import dirTree from 'directory-tree';
 import { rmSync, existsSync } from 'fs';
 import { join } from 'path';
 import { describe, expect, it, vi, beforeAll } from 'vitest';
 import { DTSManager } from './DTSManager';
 import { UpdateMode } from '../../server/constant';
+import * as utils from './utils';
 
 const TEST_DIT_DIR = 'dist-test';
 
@@ -326,7 +326,11 @@ describe('DTSManager', () => {
       const distFolder = join(projectRoot, TEST_DIT_DIR, typesFolder);
       const zip = new AdmZip();
       zip.addLocalFolder(distFolder);
-      axios.get = vi.fn().mockResolvedValueOnce({ data: zip.toBuffer() });
+      vi.spyOn(utils, 'nativeFetch').mockResolvedValueOnce({
+        data: zip.toBuffer(),
+        status: 200,
+        headers: {},
+      } as any);
       await dtsManager.consumeTypes();
 
       expect(
@@ -336,8 +340,75 @@ describe('DTSManager', () => {
       ).toMatchObject(expectedStructure);
     });
 
+    it('fetches manifest remotes before downloading types from manifest metadata', async () => {
+      const distFolder = join(projectRoot, TEST_DIT_DIR, typesFolder);
+      const zip = new AdmZip();
+      zip.addLocalFolder(distFolder);
+
+      const manifestUrl = 'https://foo.it/static/mf-manifest.json';
+      const manifestTypesUrl = 'https://foo.it/@mf-types.zip';
+      const conventionTypesUrl = 'https://foo.it/static/@mf-types.zip';
+      const nativeFetchSpy = vi
+        .spyOn(utils, 'nativeFetch')
+        .mockImplementation((url) => {
+          if (url === manifestUrl) {
+            return Promise.resolve({
+              data: {
+                metaData: {
+                  types: {
+                    zip: '@mf-types.zip',
+                    api: '@mf-types.d.ts',
+                  },
+                  publicPath: 'https://foo.it/',
+                },
+              },
+              status: 200,
+              headers: {},
+            } as any);
+          }
+
+          if (url === manifestTypesUrl) {
+            return Promise.resolve({
+              data: zip.toBuffer(),
+              status: 200,
+              headers: {},
+            } as any);
+          }
+
+          return Promise.reject(new Error(`Unexpected url: ${url}`));
+        });
+
+      const manifestDtsManager = new DTSManager({
+        host: {
+          ...hostOptions,
+          typesFolder: `${TEST_DIT_DIR}/@mf-types-dts-test-consume-manifest-types`,
+          moduleFederationConfig: {
+            ...hostOptions.moduleFederationConfig,
+            remotes: {
+              remotes: `remote@${manifestUrl}`,
+            },
+          },
+        },
+      });
+
+      await manifestDtsManager.consumeTypes();
+
+      expect(nativeFetchSpy).toHaveBeenCalledWith(
+        manifestUrl,
+        expect.any(Object),
+      );
+      expect(nativeFetchSpy).toHaveBeenCalledWith(
+        manifestTypesUrl,
+        expect.any(Object),
+      );
+      expect(nativeFetchSpy).not.toHaveBeenCalledWith(
+        conventionTypesUrl,
+        expect.any(Object),
+      );
+    });
+
     it('no delete exist remote types if fetch new remote types failed', async () => {
-      axios.get = vi.fn().mockRejectedValue(new Error('error'));
+      vi.spyOn(utils, 'nativeFetch').mockRejectedValueOnce(new Error('error'));
       await dtsManager.consumeTypes();
       expect(
         dirTree(targetFolder, {
@@ -492,7 +563,11 @@ describe('DTSManager', () => {
     const distFolder = join(projectRoot, TEST_DIT_DIR, typesFolder);
     const zip = new AdmZip();
     zip.addLocalFolder(distFolder);
-    axios.get = vi.fn().mockResolvedValueOnce({ data: zip.toBuffer() });
+    vi.spyOn(utils, 'nativeFetch').mockResolvedValueOnce({
+      data: zip.toBuffer(),
+      status: 200,
+      headers: {},
+    } as any);
 
     await dtsManager.updateTypes({
       remoteName: 'remote',

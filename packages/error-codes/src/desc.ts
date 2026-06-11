@@ -10,6 +10,10 @@ import {
   RUNTIME_009,
   RUNTIME_010,
   RUNTIME_011,
+  RUNTIME_012,
+  RUNTIME_013,
+  RUNTIME_014,
+  RUNTIME_015,
   TYPE_001,
   BUILD_001,
   BUILD_002,
@@ -28,6 +32,11 @@ export const runtimeDescMap = {
   [RUNTIME_010]:
     'The name option cannot be changed after initialization. If you want to create a new instance with a different name, please use "createInstance" api.',
   [RUNTIME_011]: 'The remoteEntry URL is missing from the remote snapshot.',
+  [RUNTIME_012]:
+    'The getter for the shared module is not a function. This may be caused by setting "shared.import: false" without the host providing the corresponding lib.',
+  [RUNTIME_013]: 'The manifest is not a valid Module Federation manifest.',
+  [RUNTIME_014]: 'The remote does not expose the requested module.',
+  [RUNTIME_015]: 'Remote container initialization failed.',
 };
 
 export const typeDescMap = {

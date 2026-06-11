@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/bridge-react",
-  "version": "2.2.3",
+  "version": "2.5.1",
   "sideEffects": false,
   "publishConfig": {
     "access": "public"
@@ -12,6 +12,10 @@
     "url": "git+https://github.com/module-federation/core.git",
     "directory": "packages/bridge/bridge-react"
   },
+  "files": [
+    "dist/",
+    "README.md"
+  ],
   "main": "./dist/index.cjs.js",
   "module": "./dist/index.es.js",
   "types": "./dist/index.d.ts",
@@ -71,6 +75,11 @@
       "import": "./dist/data-fetch-utils.es.js",
       "require": "./dist/data-fetch-utils.cjs.js"
     },
+    "./data-fetch": {
+      "types": "./dist/data-fetch.d.ts",
+      "import": "./dist/data-fetch.es.js",
+      "require": "./dist/data-fetch.cjs.js"
+    },
     "./data-fetch-server-middleware": {
       "types": "./dist/data-fetch-server-middleware.d.ts",
       "import": "./dist/data-fetch-server-middleware.es.js",
@@ -121,6 +130,9 @@
       "data-fetch-utils": [
         "./dist/data-fetch-utils.d.ts"
       ],
+      "data-fetch": [
+        "./dist/data-fetch.d.ts"
+      ],
       "data-fetch-server-middleware": [
         "./dist/data-fetch-server-middleware.d.ts"
       ]
@@ -133,17 +145,14 @@
     "test": "pnpm exec jest --config jest.config.ts --passWithNoTests"
   },
   "dependencies": {
-    "@module-federation/bridge-shared": "workspace:*",
     "@module-federation/sdk": "workspace:*",
-    "react-error-boundary": "^4.1.2",
-    "lru-cache": "^10.4.3"
+    "lru-cache": "10.4.3"
   },
   "peerDependencies": {
     "react": ">=16.9.0",
     "react-dom": ">=16.9.0",
     "react-router-dom": "^4 || ^5 || ^6 || ^7",
-    "react-router": "^6 || ^7",
-    "hono": "^4.12.7"
+    "react-router": "^6 || ^7"
   },
   "peerDependenciesMeta": {
     "react-router-dom": {
@@ -151,12 +160,11 @@
     },
     "react-router": {
       "optional": true
-    },
-    "hono": {
-      "optional": true
     }
   },
   "devDependencies": {
+    "react-error-boundary": "^4.1.2",
+    "@module-federation/bridge-shared": "workspace:*",
     "@testing-library/react": "15.0.7",
     "@testing-library/jest-dom": "6.6.3",
     "@types/react": "18.2.79",
@@ -166,8 +174,8 @@
     "@vitejs/plugin-vue-jsx": "^4.0.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-router-dom": "6.30.2",
-    "react-router": "7.12.0",
+    "react-router-dom": "6.30.3",
+    "react-router": "7.15.1",
     "typescript": "^5.2.2",
     "vite": "^5.4.21",
     "vite-plugin-dts": "^4.3.0",

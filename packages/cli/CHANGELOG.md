@@ -1,5 +1,66 @@
 # @module-federation/cli
 
+## 2.5.1
+
+### Patch Changes
+
+- Updated dependencies [b79ba22]
+- Updated dependencies [b553153]
+- Updated dependencies [b9b3b8c]
+  - @module-federation/dts-plugin@2.5.1
+  - @module-federation/sdk@2.5.1
+
+## 2.5.0
+
+### Patch Changes
+
+- Updated dependencies [5d4095d]
+- Updated dependencies [0716c11]
+- Updated dependencies [13dce52]
+  - @module-federation/sdk@2.5.0
+  - @module-federation/dts-plugin@2.5.0
+
+## 2.4.0
+
+### Patch Changes
+
+- Updated dependencies [5eba770]
+- Updated dependencies [13b1e84]
+  - @module-federation/sdk@2.4.0
+  - @module-federation/dts-plugin@2.4.0
+
+## 2.3.3
+
+### Patch Changes
+
+- Updated dependencies [6d33275]
+  - @module-federation/dts-plugin@2.3.3
+  - @module-federation/sdk@2.3.3
+
+## 2.3.2
+
+### Patch Changes
+
+- Updated dependencies [1c02710]
+  - @module-federation/dts-plugin@2.3.2
+  - @module-federation/sdk@2.3.2
+
+## 2.3.1
+
+### Patch Changes
+
+- @module-federation/sdk@2.3.1
+- @module-federation/dts-plugin@2.3.1
+
+## 2.3.0
+
+### Patch Changes
+
+- Updated dependencies [eb26065]
+- Updated dependencies [8f2ec9b]
+  - @module-federation/dts-plugin@2.3.0
+  - @module-federation/sdk@2.3.0
+
 ## 2.2.3
 
 ### Patch Changes

@@ -1,5 +1,71 @@
 # @module-federation/devtools
 
+## 2.5.1
+
+### Patch Changes
+
+- Updated dependencies [b9b3b8c]
+  - @module-federation/sdk@2.5.1
+  - @module-federation/observability-plugin@2.5.1
+
+## 2.5.0
+
+### Minor Changes
+
+- 41281f4: Add a Loading Trace panel that can configure and inject the observability plugin, reload the inspected page, stream loading events, and export collected reports.
+
+### Patch Changes
+
+- d2e8d79: Consolidate the Chrome DevTools proxy logic into a bundled proxy asset.
+- Updated dependencies [41281f4]
+- Updated dependencies [5d4095d]
+- Updated dependencies [0716c11]
+- Updated dependencies [328542c]
+- Updated dependencies [41281f4]
+  - @module-federation/observability-plugin@2.5.0
+  - @module-federation/sdk@2.5.0
+
+## 2.4.0
+
+### Minor Changes
+
+- 2dc50ff: feat: support proxying runtime-registered React and ReactDOM in devtools fast refresh across multiple share scopes.
+
+### Patch Changes
+
+- 7356321: fix(chrome-devtools): update remote identifier to use MODULE_DEVTOOL_IDENTIFIER
+- Updated dependencies [5eba770]
+- Updated dependencies [13b1e84]
+  - @module-federation/sdk@2.4.0
+
+## 2.3.3
+
+### Patch Changes
+
+- @module-federation/sdk@2.3.3
+
+## 2.3.2
+
+### Patch Changes
+
+- 1c02710: chore: lock deps
+  - @module-federation/sdk@2.3.2
+
+## 2.3.1
+
+### Patch Changes
+
+- e7d83ea: fix(chrome-devtool): Avoid message crashes in devtools by converting functions and other unsafe values into safe placeholders before forwarding module data.
+  - @module-federation/sdk@2.3.1
+
+## 2.3.0
+
+### Patch Changes
+
+- Updated dependencies [eb26065]
+- Updated dependencies [8f2ec9b]
+  - @module-federation/sdk@2.3.0
+
 ## 2.2.3
 
 ### Patch Changes

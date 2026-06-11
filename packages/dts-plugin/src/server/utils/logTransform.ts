@@ -1,13 +1,12 @@
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 import { BrokerExitLog, PublisherRegisteredLog, LogKind } from '../message/Log';
 
 function transformBrokerExitLog(log: BrokerExitLog): string {
-  return chalk`{bold {cyan [ Broker Exit ]}
-  {grey LEVEL} {white ${log.level}}}`;
+  return `${styleText(['bold', 'cyan'], '[ Broker Exit ]')}\n  ${styleText(['bold', 'gray'], 'LEVEL')} ${styleText(['bold', 'white'], log.level)}`;
 }
 
 function transformPublisherRegisteredLog(log: PublisherRegisteredLog): string {
-  return chalk`{bold {cyan [ Publisher Registered ]} {grey LEVEL} {white ${log.level}}}`;
+  return `${styleText(['bold', 'cyan'], '[ Publisher Registered ]')} ${styleText(['bold', 'gray'], 'LEVEL')} ${styleText(['bold', 'white'], log.level)}`;
 }
 
 export type Log = BrokerExitLog | PublisherRegisteredLog;

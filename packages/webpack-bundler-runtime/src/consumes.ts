@@ -3,6 +3,7 @@ import { attachShareScopeMap } from './attachShareScopeMap';
 import { updateConsumeOptions } from './updateOptions';
 import { getUsedExports } from './getUsedExports';
 import type { Shared } from '@module-federation/runtime/types';
+import { getShortErrorMsg, RUNTIME_012 } from '@module-federation/error-codes';
 
 export function consumes(options: ConsumesOptions) {
   updateConsumeOptions(options);
@@ -84,6 +85,18 @@ export function consumes(options: ConsumesOptions) {
           })
           .then((factory: any) => {
             if (factory === false) {
+              if (typeof getter !== 'function') {
+                throw new Error(
+                  getShortErrorMsg(
+                    RUNTIME_012,
+                    {
+                      [RUNTIME_012]:
+                        'The getter for the shared module is not a function. This may be caused by setting "shared.import: false" without the host providing the corresponding lib.',
+                    },
+                    { shareKey },
+                  ),
+                );
+              }
               return treeShakingGetter?.() || getter();
             }
             return factory;

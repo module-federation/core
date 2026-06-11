@@ -1,7 +1,6 @@
 import path from 'path';
-import { rm } from 'fs/promises';
+import { cp, mkdir, rm } from 'fs/promises';
 import fs from 'fs';
-import fse from 'fs-extra';
 import {
   MANIFEST_EXT,
   Manifest,
@@ -28,7 +27,7 @@ import {
   HOST_API_TYPES_FILE_NAME,
 } from '../constant';
 import { fileLog, logger } from '../../server';
-import { axiosGet, cloneDeepOptions, isDebugMode } from './utils';
+import { nativeFetch, cloneDeepOptions, isDebugMode } from './utils';
 import { UpdateMode } from '../../server/constant';
 
 export const MODULE_DTS_MANAGER_IDENTIFIER = 'MF DTS Manager';
@@ -114,8 +113,11 @@ class DTSManager {
         const targetDir = path.join(mfTypesPath, 'node_modules');
         if (fs.existsSync(remoteTypesFolder)) {
           const targetFolder = path.resolve(remoteOptions.context, targetDir);
-          await fse.ensureDir(targetFolder);
-          await fse.copy(remoteTypesFolder, targetFolder, { overwrite: true });
+          await mkdir(targetFolder, { recursive: true });
+          await cp(remoteTypesFolder, targetFolder, {
+            recursive: true,
+            force: true,
+          });
         }
       } catch (err) {
         if (this.options.host?.abortOnError === false) {
@@ -220,7 +222,7 @@ class DTSManager {
         return remoteInfo as Required<RemoteInfo>;
       }
       const url = remoteInfo.url;
-      const res = await axiosGet(url, {
+      const res = await nativeFetch(url, {
         timeout: hostOptions.timeout,
         family: hostOptions.family,
       });
@@ -253,8 +255,13 @@ class DTSManager {
         publicPath = inferAutoPublicPath(remoteInfo.url);
       }
 
+      const normalizedPublicPath = addProtocol(publicPath).endsWith('/')
+        ? addProtocol(publicPath)
+        : `${addProtocol(publicPath)}/`;
+
       remoteInfo.zipUrl = new URL(
-        path.join(addProtocol(publicPath), manifestJson.metaData.types.zip),
+        manifestJson.metaData.types.zip,
+        normalizedPublicPath,
       ).href;
       if (!manifestJson.metaData.types.api) {
         console.warn(`Can not get ${remoteInfo.name}'s api types url!`);
@@ -262,7 +269,8 @@ class DTSManager {
         return remoteInfo as Required<RemoteInfo>;
       }
       remoteInfo.apiTypeUrl = new URL(
-        path.join(addProtocol(publicPath), manifestJson.metaData.types.api),
+        manifestJson.metaData.types.api,
+        normalizedPublicPath,
       ).href;
       return remoteInfo as Required<RemoteInfo>;
     } catch (_err) {
@@ -297,7 +305,7 @@ class DTSManager {
     }
     try {
       const url = apiTypeUrl;
-      const res = await axiosGet(url, {
+      const res = await nativeFetch(url, {
         timeout: hostOptions.timeout,
         family: hostOptions.family,
       });

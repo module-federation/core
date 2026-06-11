@@ -1,10 +1,13 @@
 # Runtime API
 
 import { Steps, Tab, Tabs, Badge, Aside } from '@theme';
-import Collapse from '@components/Collapse'
-import Runtime from '@components/en/runtime/index';
+import Collapse from '@components/Collapse';
 
-<Runtime />
+MF runtime APIs are built around the `ModuleFederation` instance. Except for [createInstance](#createinstance), which creates and returns a new instance, the other APIs run against an existing runtime instance.
+
+The default instance is usually created automatically by the build plugin, or initialized manually through [init](#init). When calling runtime APIs, you do not need to pass a `ModuleFederation` instance explicitly. They automatically use the default instance from the runtime.
+
+It is important to note that the new instance created by [createInstance](#createinstance) does not replace the default instance, but it is added to the global instance registry. You can later retrieve it through [getInstance](#getinstance) with a finder callback.
 
 ## createInstance
 
@@ -12,15 +15,13 @@ Used to create ModuleFederation instance.
 
 * When to use `createInstance`?
 
-  To ensure the uniqueness of the ModuleFederation instance, after the build plugin creates an instance, it will be stored in memory. The exported APIs all first obtain the ModuleFederation instance from memory and then call the APIs of the ModuleFederation instance. This is also why APIs like loadRemote can be used directly from the `@module-federation/enhanced/runtime` package and inherently understand what application container they are attached to.
-
-  This singleton pattern works for most scenarios, but in the following cases, you need to use `createInstance`:
+  The default instance pattern works for most scenarios, but in the following cases, you need to use `createInstance`:
 
   - No build plugin is used  (Only use runtime)
   - Multiple ModuleFederation instances need to be created with different configurations for each instance
   - You want to use ModuleFederation's partitioning feature to encapsulate corresponding APIs for use in other projects
 
-* `createInstance` will not overwrite an existing instance. Each call will create a new instance.
+* `createInstance` always creates a fresh `ModuleFederation` instance and registers it in the global instance registry. It does not look up an existing instance by `name` / `version`, and it does not merge options into an existing instance.
 
 ```ts
 import { createInstance } from '@module-federation/enhanced/runtime';
@@ -38,18 +39,24 @@ const mf = createInstance({
 mf.loadRemote('sub1/util').then((m) => m.add(1, 2, 3));
 ```
 
-## init <Badge type='danger'>Deprecated</Badge>
+## init <Badge type='warning'>Use with caution</Badge>
 
 :::warning Warning
 
-This API will be deprecated. If you need to get an existing instance, you can use [getInstance](#getinstance) to retrieve the created instance.
+`init` is used to initialize a runtime instance, but it does not always create a new `ModuleFederation` instance.
 
-If you need to create a new instance, please use the [createInstance](#createinstance).
+When `init` is called, the runtime first looks for an existing instance by `name` and `version`. If a matching instance is found, it will be reused, and the new options will be merged through `instance.initOptions(options)`. If no matching instance is found, a new instance will be created.
+
+Therefore, `init` is more suitable when the same host may be initialized multiple times and you want to reuse and extend the same runtime instance.
+
+- If you need to create a completely independent new instance, use [createInstance](#createinstance).
+
+- If you only want to access the instance created by the build plugin, use [getInstance](#getinstance).
 
 :::
 
-- Type: `init(options: InitOptions): void`
-- Used for dynamically registering `Vmok` modules at runtime.
+- Type: `init(options: InitOptions): ModuleFederation`
+- Used to initialize or reuse a `ModuleFederation` runtime instance
 - InitOptions:
 
 <Collapse>
@@ -119,6 +126,7 @@ type Share = {
 
 <Collapse title="Example">
 
+
 ```ts
 import { init, loadRemote } from '@module-federation/enhanced/runtime';
 
@@ -135,9 +143,10 @@ init({
     ],
 });
 ```
+
 </Collapse>
 
-### How to Migrate
+### Recommended alternatives
 
 #### Build Plugin(Use build plugin)
 
@@ -226,23 +235,43 @@ plugins: [mfRuntimePlugin()]
 });
 ```
 
-If you are not using the build plugin, you can replace `init` with [createInstance](#createinstance), which has exactly the same parameters.
+If you are not using the build plugin, you can switch from `init` to [createInstance](#createinstance) because the option shape is the same. However, the instance semantics are different: `createInstance` always creates a fresh instance, while `init` may reuse an existing one with the same `name` / `version` and merge the new options into it.
 
 ## getInstance
 
-- Type: `getInstance(): ModuleFederation`
-- Retrieves the `ModuleFederation` instance created by the build plugin
+- Type: `getInstance(): ModuleFederation | null`
+- Type: `getInstance(finder: (instance: ModuleFederation) => boolean): ModuleFederation | null`
+- Retrieves the default `ModuleFederation` instance, or the first registered instance that matches a finder callback
 
-When the build plugin is used, you can call `getInstance` to retrieve the `ModuleFederation` instance created by the build plugin.
+When the build plugin or [init](#init) creates the default instance, you can call `getInstance()` to retrieve it.
+
 
 ```ts
 import { getInstance } from '@module-federation/enhanced/runtime';
 
 const mfInstance = getInstance();
+if (!mfInstance) {
+  throw new Error('Module Federation instance is not initialized');
+}
+
 mfInstance.loadRemote('remote/util');
 ```
 
 If the build plugin is not used, calling `getInstance` will throw an exception. In this case, you need to use the [createInstance](#createinstance) to create a new instance.
+
+Instances created by [createInstance](#createinstance) do not replace the default instance, but they are still registered globally. You can pass a finder callback to `getInstance` to retrieve one later even if you did not keep the returned reference.
+
+The finder callback works like `Array.prototype.find`: the runtime iterates over the registered instances and returns the first match. If no matching instance exists, `getInstance` returns `null`.
+
+```ts
+const targetInstance = getInstance(
+  (instance) => instance.name === 'remote-host',
+);
+
+if (targetInstance) {
+  targetInstance.loadRemote('remote/util');
+}
+```
 
 ## registerRemotes
 
@@ -424,6 +453,46 @@ function registerPlugins(plugins: ModuleFederationRuntimePlugin[]) {}
   ```
   </Tab>
 </Tabs>
+
+## registerGlobalPlugins
+
+- type
+
+```typescript
+function registerGlobalPlugins(plugins: ModuleFederationRuntimePlugin[]): void {}
+```
+
+Registers plugins on the global federation state instead of on a single current instance.
+
+Use this when you want a plugin to be picked up by all future runtime instances, such as:
+
+- shared instrumentation
+- environment-wide policy
+- host-wide defaults
+
+Global plugins are deduplicated by `plugin.name`.
+
+
+```ts
+import { registerGlobalPlugins, createInstance } from '@module-federation/enhanced/runtime';
+
+import runtimePlugin from './runtime-plugin';
+
+registerGlobalPlugins([runtimePlugin()]);
+
+const mf = createInstance({
+  name: 'mf_host',
+  remotes: [
+    {
+      name: 'sub1',
+      entry: 'http://localhost:2001/mf-manifest.json',
+    },
+  ],
+});
+```
+
+
+For predictable behavior, register global plugins before creating or using runtime instances.
 
 ## registerShared
 
@@ -701,8 +770,6 @@ type depsPreloadArg = Omit<PreloadRemoteArgs, 'depsRemote'>;
 type PreloadRemoteArgs = {
   // Name or alias of the remote to be preloaded
   nameOrAlias: string;
-  // Whether to preload the module's interface, the default value is false. For details, please refer to the <Interface Prefetch> chapter in <Performance Optimization>. The @vmok/kit version needs to be greater than 1.7.6.
-  prefetchInterface?: boolean;
   // The exposes to be preloaded
   // By default, all exposes are preloaded
   // When exposes are provided, only the required exposes will be loaded
@@ -729,6 +796,82 @@ Through `preloadRemote`, you can start preloading module resources at an earlier
 * `remote`'s `expose`
 * `remote`'s synchronous or asynchronous resources
 * `remote`'s dependent `remote` resources
+
+`preloadRemote` waits for the resources involved in the current preload call to
+finish. The Promise resolves when every resource succeeds or is already cached.
+If any resource fails or times out, the Promise rejects and the error object
+contains the preload resource results.
+
+If you only need the final result, use `await` or `.then/.catch`:
+
+```ts
+import { preloadRemote } from '@module-federation/enhanced/runtime';
+
+try {
+  await preloadRemote([
+    {
+      nameOrAlias: 'sub1',
+      exposes: ['add'],
+      resourceCategory: 'all',
+    },
+  ]);
+
+  console.log('sub1/add preload success');
+} catch (error) {
+  console.error('sub1/add preload failed', error);
+}
+```
+
+If you need to count which resources succeeded, failed, timed out, or came from
+cache, read `results` from the error object:
+
+```ts
+type PreloadRemoteError = Error & {
+  results?: Array<{
+    id: string;
+    results: Array<{
+      url: string;
+      status: 'success' | 'error' | 'timeout' | 'cached';
+      resourceType: 'manifest' | 'remoteEntry' | 'js' | 'css';
+      error?: unknown;
+    }>;
+  }>;
+};
+
+preloadRemote([
+  {
+    nameOrAlias: 'sub1',
+    exposes: ['add'],
+    resourceCategory: 'all',
+  },
+]).catch((error: PreloadRemoteError) => {
+  const failedResources =
+    error.results
+      ?.flatMap((remoteResult) =>
+        remoteResult.results.map((resource) => ({
+          id: remoteResult.id,
+          ...resource,
+        })),
+      )
+      .filter(
+        (resource) =>
+          resource.status === 'error' || resource.status === 'timeout',
+      ) ?? [];
+
+  failedResources.forEach((resource) => {
+    console.error(
+      `[preloadRemote] ${resource.id} ${resource.resourceType} failed`,
+      resource.url,
+      resource.error,
+    );
+  });
+});
+```
+
+When `exposes` is not specified, the resource id is `remoteName/*`. When
+`exposes` is specified, the runtime generates resources per expose and the
+resource id is `remoteName/expose`.
+
 <Tabs>
   <Tab label="Build Plugin(Use build plugin)">
   ```tsx

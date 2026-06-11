@@ -1,4 +1,5 @@
-import fs from 'fs-extra';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 import path from 'path';
 import { createDevWorker } from '../dev-worker';
 import {
@@ -18,6 +19,9 @@ import { isTSProject } from '../core/lib/utils';
 import type { Compiler, WebpackPluginInstance } from 'webpack';
 import type { DevWorker } from '../dev-worker';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 enum PROCESS_EXIT_CODE {
   SUCCESS = 0,
   FAILURE = 1,
@@ -26,7 +30,7 @@ enum PROCESS_EXIT_CODE {
 function ensureTempDir(filePath: string): void {
   try {
     const dir = path.dirname(filePath);
-    fs.ensureDirSync(dir);
+    fs.mkdirSync(dir, { recursive: true });
   } catch (_err) {
     // noop
   }

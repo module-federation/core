@@ -49,19 +49,24 @@ describe('createScript', () => {
     expect(cb).toHaveBeenCalled();
   });
 
-  it('should call the callback when the script times out', () => {
+  it('should call onErrorCallback (not cb) when the script times out', () => {
+    jest.useFakeTimers();
     const url = 'https://example.com/script.js';
     const cb = jest.fn();
+    const onErrorCallback = jest.fn();
     createScript({
       url,
       cb,
+      onErrorCallback,
       attrs: {},
       createScriptHook: () => ({ timeout: 100 }),
     });
 
-    setTimeout(() => {
-      expect(cb).toHaveBeenCalled();
-    }, 150);
+    jest.advanceTimersByTime(100);
+
+    expect(onErrorCallback).toHaveBeenCalledTimes(1);
+    expect(cb).not.toHaveBeenCalled();
+    jest.useRealTimers();
   });
 
   describe('Timeout', () => {
@@ -250,6 +255,79 @@ describe('createScript - error handling', () => {
     );
   });
 
+  it('timeout calls onErrorCallback with ScriptNetworkError containing "timed out"', () => {
+    jest.useFakeTimers();
+    const url = 'https://example.com/timeout-error.js';
+    const cb = jest.fn();
+    const onErrorCallback = jest.fn();
+    createScript({
+      url,
+      cb,
+      onErrorCallback,
+      attrs: {},
+      createScriptHook: () => ({ timeout: 500 }),
+    });
+
+    jest.advanceTimersByTime(500);
+
+    expect(onErrorCallback).toHaveBeenCalledTimes(1);
+    const err = onErrorCallback.mock.calls[0][0] as Error;
+    expect(err).toBeInstanceOf(Error);
+    expect(err.name).toBe('ScriptNetworkError');
+    expect(err.message).toContain(url);
+    expect(err.message).toContain('timed out');
+    expect(cb).not.toHaveBeenCalled();
+    jest.useRealTimers();
+  });
+
+  it('timeout removes window error listener', () => {
+    jest.useFakeTimers();
+    const url = 'https://example.com/timeout-cleanup.js';
+    const cb = jest.fn();
+    const onErrorCallback = jest.fn();
+    const removeEventListenerSpy = jest.spyOn(window, 'removeEventListener');
+    createScript({
+      url,
+      cb,
+      onErrorCallback,
+      attrs: {},
+      createScriptHook: () => ({ timeout: 100 }),
+    });
+
+    jest.advanceTimersByTime(100);
+
+    expect(removeEventListenerSpy).toHaveBeenCalledWith(
+      'error',
+      expect.any(Function),
+    );
+    jest.useRealTimers();
+  });
+
+  it('onload after timeout does not call cb or onErrorCallback again', () => {
+    jest.useFakeTimers();
+    const url = 'https://example.com/late-load.js';
+    const cb = jest.fn();
+    const onErrorCallback = jest.fn();
+    const { script, needAttach } = createScript({
+      url,
+      cb,
+      onErrorCallback,
+      attrs: {},
+      createScriptHook: () => ({ timeout: 100 }),
+    });
+    if (needAttach) document.body.appendChild(script);
+
+    jest.advanceTimersByTime(100);
+    expect(onErrorCallback).toHaveBeenCalledTimes(1);
+
+    // onload fires late (after timeout already cleared script.onload)
+    script?.onload?.(new Event('load'));
+
+    expect(cb).not.toHaveBeenCalled();
+    expect(onErrorCallback).toHaveBeenCalledTimes(1);
+    jest.useRealTimers();
+  });
+
   it('window error listener is removed after onerror fires', () => {
     const url = 'https://example.com/remove-on-error.js';
     const cb = jest.fn();
@@ -270,6 +348,8 @@ describe('createScript - error handling', () => {
 describe('createLink', () => {
   afterEach(() => {
     document.getElementsByTagName('html')[0].innerHTML = '';
+    jest.useRealTimers();
+    jest.restoreAllMocks();
   });
 
   it('should create a new link element if one does not exist', () => {
@@ -377,6 +457,50 @@ describe('createLink', () => {
     }
     link?.onerror?.(new Event('error'));
     expect(onErrorCallback).toHaveBeenCalled();
+  });
+
+  it('should use the timeout specified in the createLinkHook', () => {
+    jest.spyOn(global, 'setTimeout');
+    const url = 'https://example.com/script.js';
+    const cb = jest.fn();
+    const customTimeout = 5000;
+    const { link } = createLink({
+      url,
+      cb,
+      attrs: { rel: 'preload', as: 'script' },
+      createLinkHook: () => ({ timeout: customTimeout }),
+    });
+
+    expect(setTimeout).toHaveBeenCalledWith(
+      expect.any(Function),
+      customTimeout,
+    );
+
+    link?.onload?.(new Event('load'));
+  });
+
+  it('timeout calls onErrorCallback with LinkNetworkError', () => {
+    jest.useFakeTimers();
+    const url = 'https://example.com/timeout.css';
+    const cb = jest.fn();
+    const onErrorCallback = jest.fn();
+
+    createLink({
+      url,
+      cb,
+      onErrorCallback,
+      attrs: { rel: 'preload', as: 'style' },
+      createLinkHook: () => ({ timeout: 100 }),
+    });
+
+    jest.advanceTimersByTime(100);
+
+    expect(onErrorCallback).toHaveBeenCalledTimes(1);
+    expect(onErrorCallback.mock.calls[0][0]).toMatchObject({
+      name: 'LinkNetworkError',
+      message: expect.stringContaining('timed out'),
+    });
+    expect(cb).not.toHaveBeenCalled();
   });
 
   it('should use the link element returned by createLinkHook', () => {

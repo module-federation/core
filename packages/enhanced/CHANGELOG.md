@@ -1,5 +1,141 @@
 # @module-federation/enhanced
 
+## 2.5.1
+
+### Patch Changes
+
+- 4da5508: Preserve all compiled shared fallback versions for webpack tree shaking.
+- Updated dependencies [b79ba22]
+- Updated dependencies [b553153]
+- Updated dependencies [b9b3b8c]
+  - @module-federation/dts-plugin@2.5.1
+  - @module-federation/sdk@2.5.1
+  - @module-federation/cli@2.5.1
+  - @module-federation/manifest@2.5.1
+  - @module-federation/rspack@2.5.1
+  - @module-federation/bridge-react-webpack-plugin@2.5.1
+  - @module-federation/managers@2.5.1
+  - @module-federation/webpack-bundler-runtime@2.5.1
+  - @module-federation/runtime-tools@2.5.1
+  - @module-federation/inject-external-runtime-core-plugin@2.5.1
+  - @module-federation/error-codes@2.5.1
+
+## 2.5.0
+
+### Patch Changes
+
+- Updated dependencies [5d4095d]
+- Updated dependencies [0716c11]
+- Updated dependencies [13dce52]
+- Updated dependencies [41281f4]
+  - @module-federation/sdk@2.5.0
+  - @module-federation/dts-plugin@2.5.0
+  - @module-federation/error-codes@2.5.0
+  - @module-federation/bridge-react-webpack-plugin@2.5.0
+  - @module-federation/cli@2.5.0
+  - @module-federation/managers@2.5.0
+  - @module-federation/manifest@2.5.0
+  - @module-federation/rspack@2.5.0
+  - @module-federation/webpack-bundler-runtime@2.5.0
+  - @module-federation/runtime-tools@2.5.0
+  - @module-federation/inject-external-runtime-core-plugin@2.5.0
+
+## 2.4.0
+
+### Minor Changes
+
+- 13b1e84: chore: remove the legacy Data Prefetch package and its related configuration, manifest fields, and runtime hooks.
+
+### Patch Changes
+
+- Updated dependencies [5eba770]
+- Updated dependencies [13b1e84]
+  - @module-federation/sdk@2.4.0
+  - @module-federation/manifest@2.4.0
+  - @module-federation/webpack-bundler-runtime@2.4.0
+  - @module-federation/bridge-react-webpack-plugin@2.4.0
+  - @module-federation/cli@2.4.0
+  - @module-federation/dts-plugin@2.4.0
+  - @module-federation/managers@2.4.0
+  - @module-federation/rspack@2.4.0
+  - @module-federation/runtime-tools@2.4.0
+  - @module-federation/inject-external-runtime-core-plugin@2.4.0
+  - @module-federation/error-codes@2.4.0
+
+## 2.3.3
+
+### Patch Changes
+
+- Updated dependencies [6d33275]
+  - @module-federation/dts-plugin@2.3.3
+  - @module-federation/cli@2.3.3
+  - @module-federation/manifest@2.3.3
+  - @module-federation/rspack@2.3.3
+  - @module-federation/webpack-bundler-runtime@2.3.3
+  - @module-federation/sdk@2.3.3
+  - @module-federation/runtime-tools@2.3.3
+  - @module-federation/managers@2.3.3
+  - @module-federation/bridge-react-webpack-plugin@2.3.3
+  - @module-federation/data-prefetch@2.3.3
+  - @module-federation/error-codes@2.3.3
+  - @module-federation/inject-external-runtime-core-plugin@2.3.3
+
+## 2.3.2
+
+### Patch Changes
+
+- 1c02710: chore: lock deps
+- Updated dependencies [1c02710]
+  - @module-federation/data-prefetch@2.3.2
+  - @module-federation/dts-plugin@2.3.2
+  - @module-federation/cli@2.3.2
+  - @module-federation/manifest@2.3.2
+  - @module-federation/rspack@2.3.2
+  - @module-federation/webpack-bundler-runtime@2.3.2
+  - @module-federation/sdk@2.3.2
+  - @module-federation/runtime-tools@2.3.2
+  - @module-federation/managers@2.3.2
+  - @module-federation/bridge-react-webpack-plugin@2.3.2
+  - @module-federation/error-codes@2.3.2
+  - @module-federation/inject-external-runtime-core-plugin@2.3.2
+
+## 2.3.1
+
+### Patch Changes
+
+- @module-federation/rspack@2.3.1
+- @module-federation/webpack-bundler-runtime@2.3.1
+- @module-federation/sdk@2.3.1
+- @module-federation/runtime-tools@2.3.1
+- @module-federation/managers@2.3.1
+- @module-federation/manifest@2.3.1
+- @module-federation/dts-plugin@2.3.1
+- @module-federation/bridge-react-webpack-plugin@2.3.1
+- @module-federation/data-prefetch@2.3.1
+- @module-federation/error-codes@2.3.1
+- @module-federation/inject-external-runtime-core-plugin@2.3.1
+- @module-federation/cli@2.3.1
+
+## 2.3.0
+
+### Patch Changes
+
+- Updated dependencies [eb26065]
+- Updated dependencies [f1d79b2]
+- Updated dependencies [8f2ec9b]
+  - @module-federation/dts-plugin@2.3.0
+  - @module-federation/sdk@2.3.0
+  - @module-federation/webpack-bundler-runtime@2.3.0
+  - @module-federation/error-codes@2.3.0
+  - @module-federation/cli@2.3.0
+  - @module-federation/manifest@2.3.0
+  - @module-federation/rspack@2.3.0
+  - @module-federation/bridge-react-webpack-plugin@2.3.0
+  - @module-federation/data-prefetch@2.3.0
+  - @module-federation/managers@2.3.0
+  - @module-federation/runtime-tools@2.3.0
+  - @module-federation/inject-external-runtime-core-plugin@2.3.0
+
 ## 2.2.3
 
 ### Patch Changes

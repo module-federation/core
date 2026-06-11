@@ -1,0 +1,145 @@
+---
+pageType: doc-wide
+sidebar: false
+---
+
+# Skills
+
+Module Federation 现在对外提供一个统一的 **`mf` skill**。
+
+你不需要在很多 skill 之间自己挑，也不需要先把文档看完再转述给 Agent。更直接的方式是安装这一个 skill，然后让 Agent 自己判断现在该走“读文档”、“看配置”还是“排查问题”。
+
+如果你还没看过，建议先从 [AI 快速开始](./index) 开始。
+
+## 安装
+
+```bash
+npx skills add module-federation/agent-skills --skill mf -y
+```
+
+安装后，主入口就是：
+
+```text
+/mf <子命令或问题>
+```
+
+如果无法使用命令行安装，也可以直接从 GitHub 手动复制目录：
+
+```text
+https://github.com/module-federation/agent-skills/tree/main/skills/mf
+```
+
+## 这个 skill 是怎么用的
+
+`mf` 只有一个入口，但里面包含多个能力。你可以显式写子命令，也可以直接用自然语言提问。
+
+显式写子命令：
+
+```text
+/mf docs 如何在 Modern.js 里使用 Module Federation？
+/mf integrate
+/mf type-check
+/mf runtime-error RUNTIME-008
+/mf observability 帮我接入观测插件，记录 MF 加载过程
+```
+
+直接写自然语言：
+
+```text
+/mf shared 里的 singleton 和 requiredVersion 有什么区别？
+/mf 帮我看看这个项目为什么 remote types 没拉下来
+/mf 帮我把 Module Federation 接到当前项目里
+/mf 我想让 AI 能看见 MF remote 和 shared 的加载状态，应该怎么接
+/mf 我看到 Module Federation console error，traceId 是 mf-...
+```
+
+## `mf` 目前支持什么
+
+| 子命令 | 适合做什么 |
+|---|---|
+| `docs` | 先读最新文档，再回答配置、API、概念问题 |
+| `context` | 快速查看当前项目的 MF 配置情况 |
+| `module-info` | 查看远端模块的地址、暴露内容和相关信息 |
+| `integrate` | 把 Module Federation 接入已有项目 |
+| `type-check` | 排查类型相关问题 |
+| `shared-deps` | 排查共享依赖冲突和重复打包 |
+| `perf` | 排查本地开发慢、HMR 慢的问题 |
+| `config-check` | 排查配置错误、暴露路径错误、插件不匹配 |
+| `bridge-check` | 排查 Bridge 接入问题 |
+| `runtime-error` | 排查明确的运行时报错码，尤其是 `RUNTIME-001` / `RUNTIME-008` |
+| `observability` | 配合观测插件记录 MF 加载过程，读取观测报告，排查运行时和构建加载问题 |
+
+## 最常用的几类场景
+
+### 1. 先读文档再回答
+
+这是最常见的用法，也是最推荐的起点：
+
+```text
+/mf docs shared 里的 singleton 和 requiredVersion 有什么区别？
+```
+
+这样 Agent 会先去读最新文档，再回来回答你，而不是靠过时记忆硬猜。
+
+### 2. 让 Agent 直接接入
+
+如果你想把 Module Federation 接进现有项目：
+
+```text
+/mf integrate
+```
+
+它会自动看你当前项目的构建器和配置，再决定下一步怎么做。
+
+### 3. 让 Agent 直接排查
+
+如果你已经遇到具体问题：
+
+```text
+/mf type-check
+/mf shared-deps
+/mf config-check
+/mf runtime-error RUNTIME-008
+/mf observability
+```
+
+这时候重点不是你自己查，而是让 Agent 直接开始定位。
+
+### 4. 让 Agent 分析 MF 加载过程
+
+如果你希望 AI 不只是“看到报错”，而是能知道 MF 的 remote、shared、组件加载状态在哪里成功、在哪里失败，可以用 `observability` 子命令。
+
+要读取真实的 MF 加载报告，需要先接入 [观测插件](../plugin/plugins/observability-plugin)。观测插件会把 MF 加载过程整理成报告，包括加载成功、加载失败、错误原因、`traceId` 和读取方式；skill 负责帮你接入、读取和分析这些信息，再判断问题更可能在宿主、远端、共享依赖、构建配置还是部署地址。
+
+如果你还没有接入观测插件，可以先这样问：
+
+```text
+/mf observability
+帮我看当前项目怎么接入观测插件，记录 MF 加载过程。
+```
+
+接入后，如果你看到浏览器控制台打印了 `traceId` 和 `read:` 命令，再把它交给 skill：
+
+```text
+/mf observability
+我看到了这条 Module Federation console error：
+
+[Module Federation] Observability report generated
+traceId: mf-...
+read: window.__FEDERATION__.__OBSERVABILITY__["runtime_host"].getReport("mf-...")
+
+请读取报告并帮我修复问题。
+```
+
+这里的“报告”不是让你手动整理出来的长日志，而是观测插件生成的结构化结果。浏览器里通常通过控制台里的 `read:` 命令读取；Node、SSR 或生产环境上报场景，可以让 Agent 读取文件或你们自己上报系统里的报告：
+
+```text
+/mf observability
+请读取 .mf/observability/latest.json，告诉我可能是谁的问题，以及应该怎么修。
+```
+
+## 你真正需要记住的只有一件事
+
+不是你自己先读文档、再告诉 Agent 该怎么办。
+
+而是直接把 `mf` 装上，然后让 Agent 先读、先看、先判断、先动手。

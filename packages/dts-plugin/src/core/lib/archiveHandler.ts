@@ -6,7 +6,7 @@ import { HostOptions } from '../interfaces/HostOptions';
 import { RemoteOptions } from '../interfaces/RemoteOptions';
 import { retrieveMfTypesPath } from './typeScriptCompiler';
 import { fileLog } from '../../server';
-import { axiosGet } from './utils';
+import { nativeFetch } from './utils';
 import { TsConfigJson } from '../interfaces/TsConfigJson';
 import { logger } from '../../server';
 
@@ -61,7 +61,7 @@ export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => {
     while (retries++ < hostOptions.maxRetries) {
       try {
         const url = new URL(fileToDownload).href;
-        const response = await axiosGet(url, {
+        const response = await nativeFetch(url, {
           responseType: 'arraybuffer',
           timeout: hostOptions.timeout,
           family: hostOptions.family,

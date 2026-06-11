@@ -1,5 +1,60 @@
 # @module-federation/bridge-react
 
+## 2.5.1
+
+### Patch Changes
+
+- 0d06c4a: Align bridge-react prefetch snapshot arguments with the runtime-core snapshot handler type.
+- d7b8a57: Update react-router dependencies and the @remix-run/router override to patched security releases.
+- Updated dependencies [b9b3b8c]
+  - @module-federation/sdk@2.5.1
+
+## 2.5.0
+
+### Patch Changes
+
+- 180004d: Expose data-fetch subpaths for bridge-react and Modern.js users, and remove hono from bridge-react peer dependencies.
+- Updated dependencies [5d4095d]
+- Updated dependencies [0716c11]
+  - @module-federation/sdk@2.5.0
+
+## 2.4.0
+
+### Patch Changes
+
+- Updated dependencies [5eba770]
+- Updated dependencies [13b1e84]
+  - @module-federation/sdk@2.4.0
+
+## 2.3.3
+
+### Patch Changes
+
+- @module-federation/sdk@2.3.3
+
+## 2.3.2
+
+### Patch Changes
+
+- 1c02710: chore: lock deps
+  - @module-federation/sdk@2.3.2
+
+## 2.3.1
+
+### Patch Changes
+
+- @module-federation/sdk@2.3.1
+- @module-federation/bridge-shared@2.3.1
+
+## 2.3.0
+
+### Patch Changes
+
+- Updated dependencies [eb26065]
+- Updated dependencies [8f2ec9b]
+  - @module-federation/sdk@2.3.0
+  - @module-federation/bridge-shared@2.3.0
+
 ## 2.2.3
 
 ### Patch Changes

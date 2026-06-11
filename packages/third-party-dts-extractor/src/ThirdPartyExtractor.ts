@@ -1,5 +1,6 @@
 import findPkg from 'find-pkg';
-import fs from 'fs-extra';
+import { copyFile, lstat, mkdir, readdir } from 'fs/promises';
+import { existsSync, readFileSync } from 'fs';
 import path from 'path';
 import resolve from 'resolve';
 import { getTypedName, getPackageRootDir } from './utils';
@@ -78,7 +79,7 @@ class ThirdPartyExtractor {
       const pkgJsonPath = path.join(packageDir, 'package.json');
 
       const dir = path.dirname(pkgJsonPath);
-      const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf-8')) as Record<
+      const pkg = JSON.parse(readFileSync(pkgJsonPath, 'utf-8')) as Record<
         string,
         any
       >;
@@ -91,7 +92,7 @@ class ThirdPartyExtractor {
         const typesDir = path.dirname(path.resolve(dir, types));
         this.addPkgs(pkg.name, typesDir);
         return typesDir;
-      } else if (fs.existsSync(path.resolve(dir, 'index.d.ts'))) {
+      } else if (existsSync(path.resolve(dir, 'index.d.ts'))) {
         this.addPkgs(pkg.name, dir);
         return dir;
       } else {
@@ -102,7 +103,7 @@ class ThirdPartyExtractor {
           }),
         ) as string;
         const typedDir = path.dirname(typedPkgJsonPath);
-        fs.readFileSync(typedPkgJsonPath, 'utf-8');
+        readFileSync(typedPkgJsonPath, 'utf-8');
         this.addPkgs(typedPkgName, typedDir);
         return typedDir;
       }
@@ -134,19 +135,13 @@ class ThirdPartyExtractor {
     if (!Object.keys(this.pkgs).length) {
       return;
     }
-    const ensureDir = async (dir: string) => {
-      try {
-        await fs.mkdir(dir, { recursive: true });
-      } catch (err) {
-        if (err.code !== 'EEXIST') throw err;
-      }
-    };
+    const ensureDir = async (dir: string) => mkdir(dir, { recursive: true });
     const copyFiles = async (srcDir: string, destDir: string) => {
       if (srcDir.startsWith('.')) {
         return;
       }
 
-      const files = await fs.readdir(srcDir);
+      const files = await readdir(srcDir);
 
       await Promise.all(
         files.map(async (file) => {
@@ -157,7 +152,7 @@ class ThirdPartyExtractor {
             return;
           }
 
-          const stats = await fs.lstat(fullPath);
+          const stats = await lstat(fullPath);
 
           if (stats.isDirectory()) {
             // create target dir
@@ -169,7 +164,7 @@ class ThirdPartyExtractor {
               fullPath.endsWith('.d.ts') ||
               fullPath.endsWith('package.json')
             ) {
-              await fs.copyFile(fullPath, path.join(destDir, file));
+              await copyFile(fullPath, path.join(destDir, file));
             }
           }
         }),

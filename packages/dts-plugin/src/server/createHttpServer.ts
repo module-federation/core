@@ -1,5 +1,5 @@
 import http from 'http';
-import fs from 'fs-extra';
+import fs from 'fs';
 import { getFreePort, getIPV4 } from './utils';
 import { DEFAULT_TAR_NAME } from './constant';
 

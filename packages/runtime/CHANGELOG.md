@@ -1,5 +1,77 @@
 # @module-federation/runtime
 
+## 2.5.1
+
+### Patch Changes
+
+- Updated dependencies [b9b3b8c]
+  - @module-federation/sdk@2.5.1
+  - @module-federation/runtime-core@2.5.1
+  - @module-federation/error-codes@2.5.1
+
+## 2.5.0
+
+### Minor Changes
+
+- d433ec9: feat(runtime): support finder callbacks in `getInstance` and clarify runtime instance API usage.
+- 41281f4: Add an opt-in observability plugin, a Chrome-extension-safe observability plugin entry with an independent name and fixed browser scope, a direct runtime plugin API with instance-bound component loaded marks, explicit temporary React `onMFRemoteLoaded` callback injection for matched remotes, opt-in start console traces for `loadRemote` and `loadShare`, a local collector mode for AI-assisted browser debugging, a Node-specific export for file reports, a build-specific export for build summaries and build error reports, remote and shared lifecycle hooks, console trace hints, safe browser/Node report outputs, configurable error stack capture with explicit console raw-stack opt-ins, shared/eager loading evidence gated to stable runtime `2.5.0+` for Chrome-extension compatibility, final loading outcome summaries for Module Federation loading reports including resolved shared dependencies, deterministic fact reports for runtime and build failures, no-op return handling for observer hooks, detailed remote match/init/expose/factory phase events with phase durations, compact phase summaries, cache/fallback markers, loaded-before evidence from existing federation instances when a remote load fails, length-limited business component metadata, clipped moduleInfo evidence with preserved deployment locator fields for snapshot-dependent failures, normalized runtime error summaries with error codes, owner hints, retryability, and safe context, dedicated runtime error codes for invalid manifests, missing exposes, and remote container init failures, plus MF skill guidance for reading and fixing observability reports.
+
+### Patch Changes
+
+- Updated dependencies [5d4095d]
+- Updated dependencies [0716c11]
+- Updated dependencies [41281f4]
+  - @module-federation/sdk@2.5.0
+  - @module-federation/runtime-core@2.5.0
+  - @module-federation/error-codes@2.5.0
+
+## 2.4.0
+
+### Patch Changes
+
+- 3a3414c: fix(runtime): ensure instance creation includes id and options
+- Updated dependencies [5eba770]
+- Updated dependencies [3a3414c]
+- Updated dependencies [13b1e84]
+  - @module-federation/sdk@2.4.0
+  - @module-federation/runtime-core@2.4.0
+  - @module-federation/error-codes@2.4.0
+
+## 2.3.3
+
+### Patch Changes
+
+- @module-federation/sdk@2.3.3
+- @module-federation/error-codes@2.3.3
+- @module-federation/runtime-core@2.3.3
+
+## 2.3.2
+
+### Patch Changes
+
+- @module-federation/sdk@2.3.2
+- @module-federation/error-codes@2.3.2
+- @module-federation/runtime-core@2.3.2
+
+## 2.3.1
+
+### Patch Changes
+
+- @module-federation/sdk@2.3.1
+- @module-federation/error-codes@2.3.1
+- @module-federation/runtime-core@2.3.1
+
+## 2.3.0
+
+### Patch Changes
+
+- Updated dependencies [eb26065]
+- Updated dependencies [f1d79b2]
+- Updated dependencies [8f2ec9b]
+  - @module-federation/sdk@2.3.0
+  - @module-federation/error-codes@2.3.0
+  - @module-federation/runtime-core@2.3.0
+
 ## 2.2.3
 
 ### Patch Changes

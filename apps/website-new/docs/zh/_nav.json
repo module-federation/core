@@ -1,13 +1,68 @@
 [
   {
+    "text": "AI",
+    "link": "/ai/",
+    "activeMatch": "/ai/"
+  },
+  {
     "text": "指南",
     "link": "/guide/start/",
     "activeMatch": "/guide/"
   },
   {
-    "text": "实践",
-    "link": "/practice/overview",
-    "activeMatch": "/practice/"
+    "text": "接入方案",
+    "link": "/integrations/",
+    "activeMatch": "/integrations/",
+    "items": [
+      {
+        "text": "总览",
+        "link": "/integrations/"
+      },
+      {
+        "text": "Rsbuild",
+        "link": "/integrations/build-tool/rsbuild"
+      },
+      {
+        "text": "Rslib",
+        "link": "/integrations/build-tool/rslib"
+      },
+      {
+        "text": "Vite",
+        "link": "/integrations/build-tool/vite"
+      },
+      {
+        "text": "Rspack",
+        "link": "/integrations/bundler/rspack"
+      },
+      {
+        "text": "Webpack",
+        "link": "/integrations/bundler/webpack"
+      },
+      {
+        "text": "Metro",
+        "link": "/integrations/bundler/metro"
+      },
+      {
+        "text": "Rspress",
+        "link": "/integrations/documentation/rspress"
+      },
+      {
+        "text": "Modern.js",
+        "link": "/integrations/framework/modernjs"
+      },
+      {
+        "text": "Next.js",
+        "link": "/integrations/framework/nextjs"
+      },
+      {
+        "text": "Angular",
+        "link": "/integrations/framework/angular"
+      },
+      {
+        "text": "实践",
+        "link": "/integrations/practice"
+      }
+    ]
   },
   {
     "text": "配置",

@@ -1,7 +1,16 @@
-import fs from 'fs-extra';
+import { access } from 'fs/promises';
 import path from 'node:path';
 import { fileCache } from './fileCache';
 import type { MiddlewareHandler } from '@modern-js/server-runtime';
+
+const pathExists = async (filepath: string): Promise<boolean> => {
+  try {
+    await access(filepath);
+    return true;
+  } catch {
+    return false;
+  }
+};
 
 const bundlesAssetPrefix = '/bundles';
 // Remove domain name from assetPrefix if it exists
@@ -44,7 +53,7 @@ const createStaticMiddleware = (options: {
 
     const pathnameWithoutPrefix = pathname.replace(prefixWithBundle, '');
     const filepath = path.join(pwd, bundlesAssetPrefix, pathnameWithoutPrefix);
-    if (!(await fs.pathExists(filepath))) {
+    if (!(await pathExists(filepath))) {
       return next();
     }
 

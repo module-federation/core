@@ -1,6 +1,7 @@
 import { GlobalModuleInfo } from '@module-federation/sdk';
 import { FormID } from '../../template/constant';
 import { definePropertyGlobalVal } from '../sdk';
+import { sanitizePostMessagePayload } from './safe-post-message';
 
 export * from './storage';
 
@@ -37,10 +38,11 @@ export const syncActiveTab = async (tabId?: number) => {
       setTargetTab(tab);
       return tab;
     }
-    const [activeTab] = await getTabs({
+    const tabs = await getTabs({
       active: true,
       lastFocusedWindow: true,
     });
+    const activeTab = Array.isArray(tabs) ? tabs[0] : undefined;
     setTargetTab(activeTab);
     return activeTab;
   } catch (error) {
@@ -65,9 +67,9 @@ export function getInspectWindowTabId() {
         function (info, error) {
           const { tabId } = chrome.devtools.inspectedWindow;
           getTabs().then((tabs) => {
-            const target = tabs.find(
-              (tab: chrome.tabs.Tab) => tab.id === tabId,
-            );
+            const target = Array.isArray(tabs)
+              ? tabs.find((tab: chrome.tabs.Tab) => tab.id === tabId)
+              : undefined;
             setTargetTab(target as chrome.tabs.Tab);
           });
           console.log(
@@ -108,8 +110,8 @@ export const getGlobalModuleInfo = async (
 ) => {
   if (typeof window !== 'undefined' && window.__FEDERATION__?.moduleInfo) {
     callback(
-      JSON.parse(
-        JSON.stringify(window.__FEDERATION__?.moduleInfo),
+      sanitizePostMessagePayload(
+        window.__FEDERATION__?.moduleInfo,
       ) as GlobalModuleInfo,
     );
   }
@@ -125,8 +127,8 @@ export const getGlobalModuleInfo = async (
       definePropertyGlobalVal(window, '__FEDERATION__', {});
       definePropertyGlobalVal(window, '__VMOK__', window.__FEDERATION__);
     }
-    window.__FEDERATION__.originModuleInfo = JSON.parse(
-      JSON.stringify(data?.moduleInfo),
+    window.__FEDERATION__.originModuleInfo = sanitizePostMessagePayload(
+      data?.moduleInfo,
     );
     if (data?.updateModule) {
       const moduleIds = Object.keys(window.__FEDERATION__.originModuleInfo);
@@ -145,10 +147,10 @@ export const getGlobalModuleInfo = async (
       }
     }
     if (data?.share) {
-      window.__FEDERATION__.__SHARE__ = data.share;
+      window.__FEDERATION__.__SHARE__ = sanitizePostMessagePayload(data.share);
     }
-    window.__FEDERATION__.moduleInfo = JSON.parse(
-      JSON.stringify(window.__FEDERATION__.originModuleInfo),
+    window.__FEDERATION__.moduleInfo = sanitizePostMessagePayload(
+      window.__FEDERATION__.originModuleInfo,
     );
     console.log('getGlobalModuleInfo window', window.__FEDERATION__);
     callback(window.__FEDERATION__.moduleInfo);

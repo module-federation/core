@@ -1,6 +1,6 @@
 import type { RuntimePlugin } from '@modern-js/runtime';
 import { SSRLiveReload } from './SSRLiveReload';
-import { flushDataFetch } from '@module-federation/bridge-react/lazy-utils';
+import { flushDataFetch } from '@module-federation/bridge-react/data-fetch';
 
 export const mfSSRDevPlugin = (): RuntimePlugin => ({
   name: '@module-federation/modern-js-v3',

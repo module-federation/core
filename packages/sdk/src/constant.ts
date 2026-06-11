@@ -34,14 +34,6 @@ export const MODULE_DEVTOOL_IDENTIFIER = '__MF_DEVTOOLS_MODULE_INFO__';
 export const ENCODE_NAME_PREFIX = 'ENCODE_NAME_PREFIX';
 export const TEMP_DIR = '.federation';
 
-export const MFPrefetchCommon = {
-  identifier: 'MFDataPrefetch',
-  globalKey: '__PREFETCH__',
-  library: 'mf-data-prefetch',
-  exportsKey: '__PREFETCH_EXPORTS__',
-  fileName: 'bootstrap.js',
-};
-
 export const enum TreeShakingStatus {
   /**
    * Not handled by deploy server, needs to infer by the real runtime period.

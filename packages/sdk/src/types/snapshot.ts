@@ -37,11 +37,6 @@ export interface BasicProviderModuleInfo extends BasicModuleInfo {
     modulePath?: string;
     assets: StatsAssets;
   }>;
-  prefetchInterface?: boolean;
-  // @deprecated
-  prefetchEntry?: string;
-  // @deprecated
-  prefetchEntryType?: RemoteEntryType;
 }
 
 interface BasicProviderModuleInfoWithPublicPath extends BasicProviderModuleInfo {

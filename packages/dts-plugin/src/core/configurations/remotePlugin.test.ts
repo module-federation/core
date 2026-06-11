@@ -53,6 +53,10 @@ describe('hostPlugin', () => {
               remoteOptions.context,
               'dist/@mf-types/compiled-types',
             ),
+            declarationDir: resolve(
+              remoteOptions.context,
+              'dist/@mf-types/compiled-types',
+            ),
             rootDir: resolve(__dirname),
             incremental: true,
             tsBuildInfoFile: resolve(
@@ -120,6 +124,10 @@ describe('hostPlugin', () => {
             noEmit: false,
             declaration: true,
             outDir: resolve(
+              remoteOptions.context,
+              'dist/typesFolder/compiledTypesFolder',
+            ),
+            declarationDir: resolve(
               remoteOptions.context,
               'dist/typesFolder/compiledTypesFolder',
             ),

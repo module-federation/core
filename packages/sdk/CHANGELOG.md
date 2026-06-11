@@ -1,5 +1,67 @@
 # @module-federation/sdk
 
+## 2.5.1
+
+### Patch Changes
+
+- b9b3b8c: Fix Windows manifest type URL resolution in dts-plugin consumeTypes and allow the default IP family option to auto-select with `0`.
+
+## 2.5.0
+
+### Patch Changes
+
+- 5d4095d: feat(metro): add manifest SHA-256 bundle hashes and optional cache layer integration for bundle loading.
+
+  Credit: originally contributed by @zhongwuzw in #4576.
+
+- 0716c11: Track preload resource results and expose resource context to loader hooks.
+
+## 2.4.0
+
+### Minor Changes
+
+- 13b1e84: chore: remove the legacy Data Prefetch package and its related configuration, manifest fields, and runtime hooks.
+
+### Patch Changes
+
+- 5eba770: Widen node-fetch peerOptional range from `^3.3.2` to `^2.7.0 || ^3.3.2` to resolve version conflict with `@module-federation/node`.
+
+## 2.3.3
+
+## 2.3.2
+
+## 2.3.1
+
+## 2.3.0
+
+### Minor Changes
+
+- eb26065: feat(dts-plugin): add `dts.generateTypes.afterGenerate` callback
+
+  Allows users to hook into the type generation lifecycle from
+  `dts.generateTypes`. The callback runs after each successful type generation in
+  both dev and prod modes, making it possible to do follow-up work with the
+  generated files.
+
+  ```ts
+  new ModuleFederationPlugin({
+    dts: {
+      generateTypes: {
+        afterGenerate: async ({ zipTypesPath, apiTypesPath }) => {
+          await analyzeTypesAndGenerateJson({
+            zipTypesPath,
+            apiTypesPath,
+          });
+        },
+      },
+    },
+  });
+  ```
+
+### Patch Changes
+
+- 8f2ec9b: fix(sdk): capture timeout network error
+
 ## 2.2.3
 
 ## 2.2.2

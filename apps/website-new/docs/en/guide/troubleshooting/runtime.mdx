@@ -19,6 +19,10 @@ This page collects runtime-related error codes and common troubleshooting guidan
 - [RUNTIME-008](#runtime-008)
 - [RUNTIME-009](#runtime-009)
 - [RUNTIME-010](#runtime-010)
+- [RUNTIME-012](#runtime-012)
+- [RUNTIME-013](#runtime-013)
+- [RUNTIME-014](#runtime-014)
+- [RUNTIME-015](#runtime-015)
 
 ## RUNTIME-001
 
@@ -129,11 +133,21 @@ init({
 
 Once added, runtime exceptions thrown by cross-origin scripts will include the full `filename`, `lineno`, and `message`, making it easier to locate the specific error.
 
-:::tip
+
+:::warning
+
+* After adding this plugin, you must also set `output.crossOriginLoading` to `'anonymous'` in the build config of **all producers**, otherwise preloading will stop working.
+
+```js
+// webpack.config.js / rspack.config.js (producer side)
+module.exports = {
+  output: {
+    crossOriginLoading: 'anonymous',
+  },
+};
+```
 
 * If the server does not have CORS headers configured, adding the `crossorigin` attribute will instead cause the script to fail to load (network error). Confirm the server is correctly configured before using this approach.
-
-* MF does not sync this automatically because doing so would require calling the `createScript` hook speculatively during preload to read the `crossOrigin` value — hook implementations may have side effects (e.g. registering listeners, mutating global state), so invoking the hook twice could cause unpredictable behavior.
 
 :::
 
@@ -276,7 +290,7 @@ A `ScriptExecutionError` means the script was downloaded successfully — retryi
 
 ### Getting More Detailed Error Information
 
-Prior to **v2.2.0**, RUNTIME-008 error messages may not include specific exception details. If the error message is not descriptive enough, refer to 「[RUNTIME-001 Getting More Detailed Error Information](#getting-more-detailed-error-information)」 for how to add the `crossorigin` attribute to retrieve the full error stack.
+Prior to **v2.3.0**, RUNTIME-008 error messages may not include specific exception details. If the error message is not descriptive enough, refer to 「[RUNTIME-001 Getting More Detailed Error Information](#getting-more-detailed-error-information)」 for how to add the `crossorigin` attribute to retrieve the full error stack.
 
 ## RUNTIME-009
 
@@ -302,6 +316,100 @@ Not use build plugin, but directly call runtime api.
 
 - If you need an instance with a different `name`, use the `createInstance` API to create a new instance instead of modifying the existing one.
 - If changing the `name` is not required, omit the `name` field in the `initOptions` call or keep it consistent with the value used during initialization.
+
+## RUNTIME-012
+
+<ErrorCodeTitle code='RUNTIME-012'/>
+
+### Reason
+
+When loading a shared module, the local `getter` is not a function (it is `undefined` or another non-function type).
+
+When `loadShare` returns `false` — meaning the remote did not provide the shared module — the runtime falls back to the local `getter` to resolve the module. If the `getter` is not a function at that point, neither the remote nor the local fallback can supply the module, and this error is thrown.
+
+**Most common cause**: `import: false` is set for the shared module in one of the applications, which tells the bundler not to include that module locally. In this case the host app **must** provide the module via a `lib` function — if no host provides it, the fallback has nothing to call.
+
+### Solution
+
+1. **Check the `shared.import` configuration**
+
+   If you set `import: false` for this shared module in any application, you must ensure the host provides a corresponding `lib` function, for example:
+
+   ```ts title="host/webpack.config.ts"
+   new ModuleFederationPlugin({
+     name: 'host',
+     shared: {
+       react: {
+         singleton: true,
+         lib: () => require('react'), // host must provide lib
+       },
+     },
+   });
+   ```
+
+2. **Remove `import: false`**
+
+   If the optimization is not required, remove `import: false` and let the bundler handle the dependency automatically.
+
+3. **Verify shared module name and version range**
+
+   Make sure the shared module name and version range are consistent between the host and all remotes, so a match can be found and the fallback is never reached with an empty `getter`.
+
+## RUNTIME-013
+
+<ErrorCodeTitle code='RUNTIME-013'/>
+
+### Reason
+
+The manifest can be reached and parsed as JSON, but it is not a valid Module Federation manifest.
+
+The most common case is that required fields such as `metaData`, `exposes`, or `shared` are missing. This usually means the URL returned the wrong JSON, a gateway returned incomplete data, or the producer did not emit a valid MF manifest.
+
+### Solution
+
+1. Open the manifestUrl from the error message directly and confirm that it returns an MF manifest, not another business JSON response or an empty object
+2. Check that manifest output is enabled in the producer and that the build artifact contains `metaData`, `exposes`, and `shared`
+3. Check whether a gateway, deployment platform, or proxy rewrote the manifest response
+4. If the observability plugin is enabled, start from `diagnosis.facts.url` and `diagnosis.actions`
+
+## RUNTIME-014
+
+<ErrorCodeTitle code='RUNTIME-014'/>
+
+### Reason
+
+The producer entry was loaded and initialized, but the producer did not export the requested expose.
+
+Common causes include:
+
+1. The expose name requested by the consumer is wrong
+2. The producer build config does not declare this expose
+3. The `./` prefix, letter case, or alias does not match
+4. The consumer is using an old build artifact and the latest producer expose has not been deployed
+
+### Solution
+
+1. Compare the consumer `loadRemote('remote/expose')` request with the producer `exposes` config
+2. Check whether the expose needs the `./` prefix, and verify that the case matches exactly
+3. If loading through manifest, check whether the manifest `exposes` list contains the module
+4. If the observability plugin is enabled, inspect `diagnosis.facts.expose` and the related `check-expose` action
+
+## RUNTIME-015
+
+<ErrorCodeTitle code='RUNTIME-015'/>
+
+### Reason
+
+The producer entry was loaded, but container initialization failed.
+
+This usually happens while the producer runs `init`, for example because shared dependency initialization failed, shareScope data did not match expectations, or the producer entry threw an internal error.
+
+### Solution
+
+1. Read the original error in the message; it points to the actual failure thrown during `init`
+2. Check shared config between the host and producer, especially shareScope, singleton, strictVersion, requiredVersion, and eager
+3. Confirm that the producer remoteEntry type and global name match the consumer config
+4. If the observability plugin is enabled, inspect `summary.phases.remoteEntry`, `diagnosis.facts`, and the `check-shared-provider` action
 
 ## Common Issues (No Error Code)
 

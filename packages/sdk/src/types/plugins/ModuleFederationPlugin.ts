@@ -364,6 +364,13 @@ export interface RemoteTypeUrls {
   [remoteName: string]: RemoteTypeUrl;
 }
 
+export interface DtsGenerateTypesHookOptions {
+  zipTypesPath: string;
+  apiTypesPath: string;
+  zipName: string;
+  apiFileName: string;
+}
+
 export interface DtsHostOptions {
   typesFolder?: string;
   abortOnError?: boolean;
@@ -375,7 +382,7 @@ export interface DtsHostOptions {
   remoteTypeUrls?: (() => Promise<RemoteTypeUrls>) | RemoteTypeUrls;
   timeout?: number;
   /** The family of IP, used for network requests */
-  family?: 4 | 6;
+  family?: 0 | 4 | 6;
   typesOnBuild?: boolean;
 }
 
@@ -398,6 +405,9 @@ export interface DtsRemoteOptions {
   extractRemoteTypes?: boolean;
   abortOnError?: boolean;
   deleteTsConfig?: boolean;
+  afterGenerate?: (
+    options: DtsGenerateTypesHookOptions,
+  ) => Promise<void> | void;
 }
 
 export interface PluginDtsOptions {

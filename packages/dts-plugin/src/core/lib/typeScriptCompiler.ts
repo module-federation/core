@@ -1,5 +1,4 @@
-import fse from 'fs-extra';
-const { ensureDirSync, writeFileSync, existsSync } = fse;
+import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import crypto from 'crypto';
 import { stat, readdir, writeFile, rm, readFile } from 'fs/promises';
 import {
@@ -73,7 +72,7 @@ function writeTempTsConfig(
     TEMP_DIR,
     `tsconfig.${hash}.json`,
   );
-  ensureDirSync(dirname(tempTsConfigJsonPath));
+  mkdirSync(dirname(tempTsConfigJsonPath), { recursive: true });
   writeFileSync(tempTsConfigJsonPath, JSON.stringify(tsConfig, null, 2));
   return tempTsConfigJsonPath;
 }
@@ -146,7 +145,7 @@ const processTypesFile = async (options: {
         .replace(STARTS_WITH_SLASH, '')
         .split(sep) // Windows platform-specific file system path fix
         .join('/');
-      ensureDirSync(mfeTypeEntryDirectory);
+      mkdirSync(mfeTypeEntryDirectory, { recursive: true });
       await writeFile(
         mfeTypeEntry,
         `export * from './${relativePathToOutput}';\nexport { default } from './${relativePathToOutput}';`,

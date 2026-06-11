@@ -22,3 +22,6 @@ packages/enhanced/task/**
 
 # Temporarily ignore assemble-release-plan package until build formatting churn is addressed.
 packages/assemble-release-plan/**
+
+# Generated Chrome DevTools proxy asset
+packages/chrome-devtools/src/vendor/basic-proxy-core.js

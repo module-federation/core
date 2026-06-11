@@ -3,12 +3,8 @@
   "compilerOptions": {
     "composite": true,
     "declaration": true,
-    "types": [
-      "node",
-      "../../../typings/cssmodule.d.ts",
-      "../../../typings/image.d.ts"
-    ]
+    "types": ["node"]
   },
-  "files": ["../../../typings/cssmodule.d.ts", "../../../typings/image.d.ts"],
+  "files": ["../typings/cssmodule.d.ts", "../typings/image.d.ts"],
   "include": ["src/**/*"]
 }

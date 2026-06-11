@@ -1,0 +1,15 @@
+[
+  {
+    "type": "file",
+    "name": "index",
+    "label": "接入概览"
+  },
+  "angular-cli",
+  "angular-mfe",
+  "mf-ssr-angular",
+  "service-workers-mf",
+  "auth0",
+  "okta-auth",
+  "splitting-to-mf-part1",
+  "splitting-to-mf-part2"
+]

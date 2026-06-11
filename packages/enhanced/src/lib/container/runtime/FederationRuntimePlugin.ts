@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import pBtoa from 'btoa';
 import type {
   Compiler,
   WebpackPluginInstance,
@@ -8,7 +7,6 @@ import type {
   Chunk,
 } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import { PrefetchPlugin } from '@module-federation/data-prefetch/cli';
 import { moduleFederationPlugin } from '@module-federation/sdk';
 import FederationRuntimeModule from './FederationRuntimeModule';
 import {
@@ -228,9 +226,6 @@ class FederationRuntimePlugin {
         Template.indent([`${federationGlobal}.installInitialConsumes()`]),
         '}',
       ]),
-      PrefetchPlugin.addRuntime(compiler, {
-        name: options.name!,
-      }),
       '}',
     ]);
   }
@@ -258,13 +253,14 @@ class FederationRuntimePlugin {
       );
       entryFilePath = path.join(TEMP_DIR, `entry.${hash}.js`);
     } else {
-      entryFilePath = `data:text/javascript;charset=utf-8;base64,${pBtoa(
+      entryFilePath = `data:text/javascript;charset=utf-8;base64,${Buffer.from(
         FederationRuntimePlugin.getTemplate(
           compiler,
           this.options,
           this.bundlerRuntimePath,
         ),
-      )}`;
+        'utf8',
+      ).toString('base64')}`;
     }
 
     onceForCompilerEntryMap.set(compiler, entryFilePath);

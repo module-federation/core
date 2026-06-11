@@ -177,9 +177,10 @@ const readTsConfig = (
   'references' in rawTsConfigJson && delete rawTsConfigJson.references;
 
   rawTsConfigJson.extends = resolvedTsConfigPath;
-  if (rawTsConfigJson.compilerOptions.declarationDir) {
-    delete rawTsConfigJson.compilerOptions.declarationDir;
-  }
+
+  // Force override inherited declarationDir
+  rawTsConfigJson.compilerOptions.declarationDir = outDir;
+
   return rawTsConfigJson;
 };
 
@@ -232,10 +233,10 @@ const resolveExposes = (remoteOptions: Required<RemoteOptions>) => {
 export const retrieveRemoteConfig = (options: RemoteOptions) => {
   validateOptions(options);
 
-  const remoteOptions: Required<RemoteOptions> = {
+  const remoteOptions = {
     ...defaultOptions,
     ...options,
-  };
+  } as Required<RemoteOptions>;
   const mapComponentsToExpose = resolveExposes(remoteOptions);
   const tsConfig = readTsConfig(remoteOptions, mapComponentsToExpose);
 

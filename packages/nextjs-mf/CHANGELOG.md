@@ -1,5 +1,89 @@
 # @module-federation/nextjs-mf
 
+## 8.8.68
+
+### Patch Changes
+
+- Updated dependencies [4da5508]
+- Updated dependencies [b9b3b8c]
+  - @module-federation/enhanced@2.5.1
+  - @module-federation/sdk@2.5.1
+  - @module-federation/node@2.7.44
+  - @module-federation/runtime@2.5.1
+  - @module-federation/webpack-bundler-runtime@2.5.1
+
+## 8.8.67
+
+### Patch Changes
+
+- Updated dependencies [5d4095d]
+- Updated dependencies [d433ec9]
+- Updated dependencies [0716c11]
+- Updated dependencies [41281f4]
+  - @module-federation/sdk@2.5.0
+  - @module-federation/runtime@2.5.0
+  - @module-federation/enhanced@2.5.0
+  - @module-federation/node@2.7.43
+  - @module-federation/webpack-bundler-runtime@2.5.0
+
+## 8.8.66
+
+### Patch Changes
+
+- Updated dependencies [5eba770]
+- Updated dependencies [3a3414c]
+- Updated dependencies [13b1e84]
+  - @module-federation/sdk@2.4.0
+  - @module-federation/runtime@2.4.0
+  - @module-federation/enhanced@2.4.0
+  - @module-federation/webpack-bundler-runtime@2.4.0
+  - @module-federation/node@2.7.42
+
+## 8.8.65
+
+### Patch Changes
+
+- Updated dependencies [bc49c23]
+  - @module-federation/node@2.7.41
+  - @module-federation/enhanced@2.3.3
+  - @module-federation/runtime@2.3.3
+  - @module-federation/webpack-bundler-runtime@2.3.3
+  - @module-federation/sdk@2.3.3
+
+## 8.8.64
+
+### Patch Changes
+
+- Updated dependencies [1c02710]
+  - @module-federation/enhanced@2.3.2
+  - @module-federation/node@2.7.40
+  - @module-federation/runtime@2.3.2
+  - @module-federation/webpack-bundler-runtime@2.3.2
+  - @module-federation/sdk@2.3.2
+
+## 8.8.63
+
+### Patch Changes
+
+- @module-federation/runtime@2.3.1
+- @module-federation/enhanced@2.3.1
+- @module-federation/webpack-bundler-runtime@2.3.1
+- @module-federation/sdk@2.3.1
+- @module-federation/node@2.7.39
+
+## 8.8.62
+
+### Patch Changes
+
+- Updated dependencies [eb26065]
+- Updated dependencies [f1d79b2]
+- Updated dependencies [8f2ec9b]
+  - @module-federation/sdk@2.3.0
+  - @module-federation/webpack-bundler-runtime@2.3.0
+  - @module-federation/enhanced@2.3.0
+  - @module-federation/node@2.7.38
+  - @module-federation/runtime@2.3.0
+
 ## 8.8.61
 
 ### Patch Changes

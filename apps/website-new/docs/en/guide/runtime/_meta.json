@@ -4,12 +4,17 @@
     "name": "index",
     "label": "Overview"
   },
-    {
+  {
     "type": "file",
     "name": "runtime-api",
     "label": "Runtime API"
   },
-    {
+  {
+    "type": "file",
+    "name": "runtime-plugins",
+    "label": "Runtime Plugins"
+  },
+  {
     "type": "file",
     "name": "runtime-hooks",
     "label": "Runtime Hooks"

@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/dts-plugin",
-  "version": "2.2.3",
+  "version": "2.5.1",
   "author": "hanric <hanric.zhang@gmail.com>",
   "main": "./dist/index.js",
   "module": "./dist/esm/index.mjs",
@@ -69,17 +69,12 @@
     "@module-federation/managers": "workspace:*",
     "@module-federation/sdk": "workspace:*",
     "@module-federation/third-party-dts-extractor": "workspace:*",
-    "adm-zip": "^0.5.10",
-    "ansi-colors": "^4.1.3",
-    "axios": "^1.13.5",
-    "chalk": "3.0.0",
-    "fs-extra": "9.1.0",
+    "adm-zip": "0.5.10",
+    "ansi-colors": "4.1.3",
     "isomorphic-ws": "5.0.0",
-    "lodash.clonedeepwith": "4.5.0",
-    "log4js": "6.9.1",
+    "undici": "7.24.7",
     "node-schedule": "2.1.1",
-    "rambda": "^9.1.0",
-    "ws": "8.18.0"
+    "ws": "8.21.0"
   },
   "devDependencies": {
     "@module-federation/runtime": "workspace:*",
@@ -103,7 +98,7 @@
     }
   },
   "scripts": {
-    "build": "tsdown --config ./tsdown.config.ts && sleep 1 && cp package.json ./dist && cp *.md ./dist",
+    "build": "tsdown --config ./tsdown.config.ts && sleep 1 && cp *.md ./dist",
     "test": "node -e \"require('fs').rmSync('dist-test',{recursive:true,force:true,maxRetries:20,retryDelay:50})\" && pnpm run test-impl",
     "test-impl": "pnpm exec vitest run --passWithNoTests --config vite.config.mts",
     "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",

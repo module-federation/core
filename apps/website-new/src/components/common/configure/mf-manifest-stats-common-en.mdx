@@ -11,18 +11,16 @@
 
 Shared fields:
 
-| Field               | Type             | Required | Description                           |
-| ------------------- | ---------------- | -------- | ------------------------------------- | --- |
-| `name`              | `string`         | Yes      | Current remote/host name              |
-| `globalName`        | `string`         | Yes      | Global name for the remoteEntry       |
-| `buildInfo`         | `StatsBuildInfo` | Yes      | Build information                     |
-| `remoteEntry`       | `ResourceInfo`   | Yes      | Remote entry resource                 |
-| `ssrRemoteEntry`    | `ResourceInfo`   | No       | SSR remote entry (if any)             |
-| `prefetchInterface` | `boolean`        | No       | Whether prefetch interface is enabled |
-| `prefetchEntry`     | `ResourceInfo`   | No       | Prefetch resource (if any)            |
-| `types`             | `MetaDataTypes`  | No       | Types bundle info (if any)            |
-| `type`              | `string`         | Yes      | APP                                   | NPM |
-| `pluginVersion`     | `string`         | No       | MF Plugin version                     |
+| Field            | Type             | Required | Description                     |
+| ---------------- | ---------------- | -------- | ------------------------------- | --- |
+| `name`           | `string`         | Yes      | Current remote/host name        |
+| `globalName`     | `string`         | Yes      | Global name for the remoteEntry |
+| `buildInfo`      | `StatsBuildInfo` | Yes      | Build information               |
+| `remoteEntry`    | `ResourceInfo`   | Yes      | Remote entry resource           |
+| `ssrRemoteEntry` | `ResourceInfo`   | No       | SSR remote entry (if any)       |
+| `types`          | `MetaDataTypes`  | No       | Types bundle info (if any)      |
+| `type`           | `string`         | Yes      | APP                             | NPM |
+| `pluginVersion`  | `string`         | No       | MF Plugin version               |
 
 ### ResourceInfo
 

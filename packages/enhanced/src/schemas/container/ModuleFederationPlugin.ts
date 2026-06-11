@@ -864,6 +864,11 @@ export default {
                     abortOnError: {
                       type: 'boolean',
                     },
+                    afterGenerate: {
+                      description:
+                        'Hook called after federated types are generated and before assets are emitted',
+                      instanceof: 'Function',
+                    },
                   },
                 },
               ],
@@ -1105,10 +1110,6 @@ export default {
       description:
         "Stringified function or return expression to compute dynamic publicPath. Effective only when 'exposes' is set. Example: `function(){ return window.cdn_prefix }` or `return 'https://cdn.example.com/app/'`.",
       type: 'string',
-    },
-    dataPrefetch: {
-      description: 'Whether enable data prefetch',
-      type: 'boolean',
     },
     implementation: {
       description: 'Bundler runtime path',

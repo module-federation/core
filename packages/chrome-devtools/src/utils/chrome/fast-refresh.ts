@@ -1,8 +1,5 @@
 import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime';
-import type { Shared } from '@module-federation/runtime/types';
-import { loadScript, createScript } from '@module-federation/sdk';
-
-import { isObject, getUnpkgUrl } from '../index';
+import { getUnpkgUrl } from '../index';
 import { definePropertyGlobalVal } from '../sdk';
 import {
   __FEDERATION_DEVTOOLS__,
@@ -11,16 +8,97 @@ import {
 } from '../../template/constant';
 
 const SUPPORT_PKGS = ['react', 'react-dom'];
-type BeforeInitArgs = Parameters<
-  NonNullable<ModuleFederationRuntimePlugin['beforeInit']>
+type BeforeRegisterShareArgs = Parameters<
+  NonNullable<ModuleFederationRuntimePlugin['beforeRegisterShare']>
 >[0];
+type SupportPkg = (typeof SUPPORT_PKGS)[number];
+type EagerShareInfo = [string, string, Array<string>?];
 
-/**
- * Fetch and execute a UMD module synchronously
- * @param url - URL of the UMD module to load
- * @returns The module exports
- */
-const fetchAndExecuteUmdSync = (url: string): any => {
+const DEFAULT_SHARE_SCOPE = 'default';
+const DEFAULT_GLOBAL_KEY_MAP: Record<SupportPkg, string> = {
+  react: 'React',
+  'react-dom': 'ReactDOM',
+};
+
+const sanitizeWindowKey = (value: string) =>
+  value.replace(/[^a-zA-Z0-9_$]/g, '_');
+
+const getShareScopes = (scope?: Array<string>) =>
+  Array.isArray(scope) && scope.length ? scope : [DEFAULT_SHARE_SCOPE];
+
+const getDefaultGlobalKey = (pkgName: SupportPkg) =>
+  DEFAULT_GLOBAL_KEY_MAP[pkgName];
+
+const getScopedGlobalKey = (scope: string, pkgName: SupportPkg) =>
+  `${sanitizeWindowKey(scope)}_${sanitizeWindowKey(pkgName)}`;
+
+const getWindowValue = (key: string) => (window as Record<string, any>)[key];
+
+const setWindowValue = (key: string, value: unknown) => {
+  (window as Record<string, any>)[key] = value;
+};
+
+const setScopeGlobals = (
+  pkgName: SupportPkg,
+  scopes: Array<string>,
+  source: unknown,
+) => {
+  if (!source) {
+    return source;
+  }
+
+  scopes.forEach((scope) => {
+    setWindowValue(getScopedGlobalKey(scope, pkgName), source);
+  });
+
+  return source;
+};
+
+const getScopeGlobal = (pkgName: SupportPkg, scopes: Array<string>) => {
+  for (const scope of scopes) {
+    const scopeGlobal = getWindowValue(getScopedGlobalKey(scope, pkgName));
+    if (scopeGlobal) {
+      return scopeGlobal;
+    }
+  }
+  return undefined;
+};
+
+const getEagerShareInfo = (eagerShare: unknown) => {
+  if (!Array.isArray(eagerShare) || eagerShare.length < 2) {
+    return null;
+  }
+
+  const [, version, scopes] = eagerShare as EagerShareInfo;
+  if (typeof version !== 'string') {
+    return null;
+  }
+
+  return {
+    version,
+    scopes: getShareScopes(scopes),
+  };
+};
+
+const updateEagerShareInfo = (
+  devtoolsMessage: Record<string, unknown>,
+  pkgName: string,
+  version: string,
+  scopes: Array<string>,
+) => {
+  const existing = getEagerShareInfo(devtoolsMessage[__EAGER_SHARE__]);
+  const mergedScopes = Array.from(
+    new Set([...(existing?.scopes || []), ...scopes]),
+  );
+
+  devtoolsMessage[__EAGER_SHARE__] = [pkgName, version, mergedScopes];
+
+  return {
+    shouldReload: !existing || existing.version !== version,
+  };
+};
+
+const requestUmdSourceSync = (url: string) => {
   try {
     const response = new XMLHttpRequest();
     response.open('GET', url, false);
@@ -28,22 +106,139 @@ const fetchAndExecuteUmdSync = (url: string): any => {
     response.send();
 
     if (response.status === 200) {
-      const scriptContent = response.responseText;
-
-      // Create a new Function constructor to execute the script synchronously
-      const moduleFunction = new Function(scriptContent);
-
-      // Execute the function and return the module exports
-      return moduleFunction(window);
-    } else {
-      throw new Error(
-        `Failed to load module from ${url}: HTTP ${response.status}`,
-      );
+      return response.responseText;
     }
+
+    throw new Error(
+      `Failed to load module from ${url}: HTTP ${response.status}`,
+    );
   } catch (error: any) {
     throw new Error(`Failed to fetch module from ${url}: ${error.message}`);
   }
 };
+
+const requestUmdSource = (url: string) =>
+  new Promise<string>((resolve, reject) => {
+    try {
+      const response = new XMLHttpRequest();
+      response.open('GET', url, true);
+      response.overrideMimeType('text/plain');
+      response.onload = () => {
+        if (response.status === 200) {
+          resolve(response.responseText);
+          return;
+        }
+
+        reject(
+          new Error(
+            `Failed to load module from ${url}: HTTP ${response.status}`,
+          ),
+        );
+      };
+      response.onerror = () => {
+        reject(new Error(`Failed to fetch module from ${url}`));
+      };
+      response.send();
+    } catch (error: any) {
+      reject(new Error(`Failed to fetch module from ${url}: ${error.message}`));
+    }
+  });
+
+const createUmdSandbox = (pkgName: SupportPkg, scopes: Array<string>) => {
+  const sandboxTarget = Object.create(null) as Record<string, any>;
+
+  const sandbox = new Proxy(sandboxTarget, {
+    get(target, key) {
+      if (typeof key === 'symbol') {
+        return Reflect.get(target, key);
+      }
+
+      if (key in target) {
+        return target[key];
+      }
+
+      const value = (window as Record<string, any>)[key];
+      return typeof value === 'function' ? value.bind(window) : value;
+    },
+    set(target, key, value) {
+      target[key as string] = value;
+      return true;
+    },
+    has(target, key) {
+      return key in target || key in window;
+    },
+  }) as Record<string, any>;
+
+  sandboxTarget.window = sandbox;
+  sandboxTarget.self = sandbox;
+  sandboxTarget.globalThis = sandbox;
+  sandboxTarget.global = sandbox;
+  sandboxTarget.document = window.document;
+
+  if (pkgName === 'react-dom') {
+    sandboxTarget.React = getScopeGlobal('react', scopes);
+  }
+
+  return sandbox;
+};
+
+const executeUmdModule = (
+  scriptContent: string,
+  pkgName: SupportPkg,
+  scopes: Array<string>,
+) => {
+  const sandbox = createUmdSandbox(pkgName, scopes);
+
+  const moduleFunction = new Function(
+    'window',
+    'self',
+    'globalThis',
+    'global',
+    'document',
+    'exports',
+    'module',
+    'define',
+    'require',
+    scriptContent,
+  );
+
+  moduleFunction.call(
+    sandbox,
+    sandbox,
+    sandbox,
+    sandbox,
+    sandbox,
+    sandbox.document,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+  );
+
+  return sandbox[getDefaultGlobalKey(pkgName)];
+};
+
+const loadUmdModuleSync = (
+  pkgName: SupportPkg,
+  version: string,
+  scopes: Array<string>,
+) =>
+  executeUmdModule(
+    requestUmdSourceSync(getUnpkgUrl(pkgName, version) as string),
+    pkgName,
+    scopes,
+  );
+
+const loadUmdModule = async (
+  pkgName: SupportPkg,
+  version: string,
+  scopes: Array<string>,
+) =>
+  executeUmdModule(
+    await requestUmdSource(getUnpkgUrl(pkgName, version) as string),
+    pkgName,
+    scopes,
+  );
 
 const getDevtoolsMessage = () => {
   const devtoolsMessageStr = localStorage.getItem(__FEDERATION_DEVTOOLS__);
@@ -58,22 +253,33 @@ const getDevtoolsMessage = () => {
 };
 
 const devtoolsMessage = getDevtoolsMessage();
-if (
-  devtoolsMessage?.[__ENABLE_FAST_REFRESH__] &&
-  devtoolsMessage?.[__EAGER_SHARE__]
-) {
-  // eagerShare is [react, 19.0.0]
-  const [_name, version] = devtoolsMessage[__EAGER_SHARE__] as [string, string];
-  fetchAndExecuteUmdSync(getUnpkgUrl('react', version) as string);
-  fetchAndExecuteUmdSync(getUnpkgUrl('react-dom', version) as string);
+const eagerShareInfo = getEagerShareInfo(devtoolsMessage?.[__EAGER_SHARE__]);
+if (devtoolsMessage?.[__ENABLE_FAST_REFRESH__] && eagerShareInfo) {
+  const { version, scopes } = eagerShareInfo;
+  setScopeGlobals('react', scopes, loadUmdModuleSync('react', version, scopes));
+  setScopeGlobals(
+    'react-dom',
+    scopes,
+    loadUmdModuleSync('react-dom', version, scopes),
+  );
 }
 
 const fastRefreshPlugin = (): ModuleFederationRuntimePlugin => {
+  let orderResolve: (value?: unknown) => void;
+  const orderPromise = new Promise((resolve) => {
+    orderResolve = resolve;
+  });
+
   return {
     name: 'mf-fast-refresh-plugin',
-    beforeInit({ userOptions, ...args }: BeforeInitArgs) {
-      const shareInfo = userOptions.shared;
-      const twinsShareInfo = args.shareInfo;
+    beforeRegisterShare(args: BeforeRegisterShareArgs) {
+      const { pkgName, shared } = args;
+      if (!SUPPORT_PKGS.includes(pkgName)) {
+        return args;
+      }
+      const supportPkgName = pkgName as SupportPkg;
+      const shareScopes = getShareScopes(shared.scope);
+
       let enableFastRefresh = false;
       let devtoolsMessage: Record<string, unknown> = {};
 
@@ -90,115 +296,95 @@ const fastRefreshPlugin = (): ModuleFederationRuntimePlugin => {
       }
 
       if (!enableFastRefresh) {
-        return {
-          userOptions,
-          ...args,
-        };
+        return args;
       }
 
-      if (shareInfo && isObject(shareInfo)) {
-        let orderResolve: (value?: unknown) => void;
-        const orderPromise = new Promise((resolve) => {
-          orderResolve = resolve;
-        });
-        Object.keys(shareInfo).forEach(async (share) => {
-          // @ts-ignore legacy runtime shareInfo[share] is shared , and latest i shard[]
-          const sharedArr: Shared[] = Array.isArray(shareInfo[share])
-            ? shareInfo[share]
-            : [shareInfo[share]];
-
-          let twinsSharedArr: Shared[];
-          if (twinsShareInfo) {
-            // @ts-ignore
-            twinsSharedArr = Array.isArray(twinsShareInfo[share])
-              ? twinsShareInfo[share]
-              : [twinsShareInfo[share]];
+      if (shared.shareConfig?.eager || shared.lib) {
+        if (!devtoolsMessage?.[__EAGER_SHARE__]) {
+          const eagerShareInfo = updateEagerShareInfo(
+            devtoolsMessage,
+            pkgName,
+            shared.version,
+            shareScopes,
+          );
+          localStorage.setItem(
+            __FEDERATION_DEVTOOLS__,
+            JSON.stringify(devtoolsMessage),
+          );
+          if (eagerShareInfo.shouldReload) {
+            window.location.reload();
           }
-
-          sharedArr.forEach((shared, idx) => {
-            if (!SUPPORT_PKGS.includes(share)) {
-              return;
-            }
-            if (shared.shareConfig?.eager) {
-              if (!devtoolsMessage?.[__EAGER_SHARE__]) {
-                const eagerShare: string[] = [];
-                eagerShare.push(share, shared.version);
-                devtoolsMessage[__EAGER_SHARE__] = eagerShare;
-                localStorage.setItem(
-                  __FEDERATION_DEVTOOLS__,
-                  JSON.stringify(devtoolsMessage),
-                );
-                window.location.reload();
-              }
-              if (share === 'react-dom') {
-                shared.lib = () => window.ReactDOM;
-              }
-              if (share === 'react') {
-                shared.lib = () => window.React;
-              }
-              return;
-            }
-            let get: () => any;
-            if (share === 'react') {
-              get = () =>
-                loadScript(getUnpkgUrl(share, shared.version) as string, {
-                  attrs: {
-                    defer: false,
-                    async: false,
-                    'data-mf-injected': 'true',
-                  },
-                }).then(() => {
-                  orderResolve();
-                });
-            }
-            if (share === 'react-dom') {
-              get = () =>
-                orderPromise.then(() =>
-                  loadScript(getUnpkgUrl(share, shared.version) as string, {
-                    attrs: { defer: true, async: false },
-                  }),
-                );
-            }
-            // @ts-expect-error
-            if (typeof get === 'function') {
-              if (share === 'react') {
-                shared.get = async () => {
-                  if (!window.React) {
-                    await get();
-                    console.warn(
-                      '[Module Federation HMR]: You are using Module Federation Devtools to debug online host, it will cause your project load Dev mode React and ReactDOM. If not in this mode, please disable it in Module Federation Devtools',
-                    );
-                  }
-                  shared.lib = () => window.React;
-                  return () => window.React;
-                };
-              }
-              if (share === 'react-dom') {
-                shared.get = async () => {
-                  if (!window.ReactDOM) {
-                    await get();
-                  }
-                  shared.lib = () => window.ReactDOM;
-                  return () => window.ReactDOM;
-                };
-              }
-              if (twinsShareInfo) {
-                twinsSharedArr[idx].get = shared.get;
-              }
-            }
-          });
-        });
-
-        return {
-          userOptions,
-          ...args,
-        };
-      } else {
-        return {
-          userOptions,
-          ...args,
-        };
+        } else {
+          updateEagerShareInfo(
+            devtoolsMessage,
+            pkgName,
+            shared.version,
+            shareScopes,
+          );
+          localStorage.setItem(
+            __FEDERATION_DEVTOOLS__,
+            JSON.stringify(devtoolsMessage),
+          );
+        }
+        if (pkgName === 'react-dom') {
+          shared.lib = () => getScopeGlobal(supportPkgName, shareScopes);
+        }
+        if (pkgName === 'react') {
+          shared.lib = () => getScopeGlobal(supportPkgName, shareScopes);
+        }
+        return args;
       }
+
+      let get: (() => any) | undefined;
+      if (pkgName === 'react') {
+        get = () =>
+          loadUmdModule(supportPkgName, shared.version, shareScopes)
+            .then((moduleValue) => {
+              setScopeGlobals(supportPkgName, shareScopes, moduleValue);
+              return moduleValue;
+            })
+            .then(() => {
+              orderResolve();
+            });
+      }
+      if (pkgName === 'react-dom') {
+        get = () =>
+          orderPromise
+            .then(() =>
+              loadUmdModule(supportPkgName, shared.version, shareScopes),
+            )
+            .then((result) => {
+              setScopeGlobals(supportPkgName, shareScopes, result);
+              return result;
+            });
+      }
+
+      if (typeof get === 'function') {
+        const finalGet = get;
+        if (pkgName === 'react') {
+          shared.get = async () => {
+            if (!getScopeGlobal(supportPkgName, shareScopes)) {
+              await finalGet();
+              console.warn(
+                '[Module Federation HMR]: You are using Module Federation Devtools to debug online host, it will cause your project load Dev mode React and ReactDOM. If not in this mode, please disable it in Module Federation Devtools',
+              );
+            }
+            shared.lib = () => getScopeGlobal(supportPkgName, shareScopes);
+            return () => getScopeGlobal(supportPkgName, shareScopes);
+          };
+        }
+        if (pkgName === 'react-dom') {
+          shared.get = async () => {
+            if (!getScopeGlobal(supportPkgName, shareScopes)) {
+              await finalGet();
+            }
+            shared.lib = () => getScopeGlobal(supportPkgName, shareScopes);
+            return () => getScopeGlobal(supportPkgName, shareScopes);
+          };
+        }
+      }
+
+      return args;
     },
   };
 };

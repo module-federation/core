@@ -1,7 +1,10 @@
-import fs from 'fs-extra';
+import { existsSync, readFileSync, readdirSync } from 'fs';
 import { join } from 'path';
 import { describe, expect, it } from 'vitest';
 import { ThirdPartyExtractor } from './ThirdPartyExtractor';
+
+const readJSONSync = (filePath: string) =>
+  JSON.parse(readFileSync(filePath, 'utf-8'));
 
 describe('ThirdPartyExtractor', () => {
   const projectRoot = join(__dirname, '..', '..', '..');
@@ -20,7 +23,7 @@ describe('ThirdPartyExtractor', () => {
       throw new Error('tsup dir not found');
     }
 
-    const dirContent = fs.readdirSync(tsupDir);
+    const dirContent = readdirSync(tsupDir);
     const dtsFiles = dirContent.filter((file) => file.endsWith('.d.ts'));
 
     expect(dtsFiles.length).toBeGreaterThan(0);
@@ -28,7 +31,7 @@ describe('ThirdPartyExtractor', () => {
 
   it('should correctly infer pkg types dir without types field in package.json', () => {
     const typedReactDir = thirdPartyExtractor.inferPkgDir('react');
-    const pkgJson = fs.readJSONSync(`${typedReactDir}/package.json`);
+    const pkgJson = readJSONSync(`${typedReactDir}/package.json`);
 
     expect(pkgJson.name).toBe('@types/react');
   });
@@ -59,8 +62,8 @@ describe('ThirdPartyExtractor', () => {
 
   it('copyDts to dest dir', async () => {
     await thirdPartyExtractor.copyDts();
-    expect(fs.existsSync(join(destDir, 'tsup'))).toEqual(true);
-    expect(fs.existsSync(join(destDir, '@types/react'))).toEqual(true);
+    expect(existsSync(join(destDir, 'tsup'))).toEqual(true);
+    expect(existsSync(join(destDir, '@types/react'))).toEqual(true);
   });
 
   it('exclude pkg', async () => {

@@ -43,7 +43,7 @@ describe('hostPlugin', () => {
           runtimePkgs: [],
           remoteTypeUrls: {},
           timeout: 60000,
-          family: 4,
+          family: 0,
           typesOnBuild: false,
         });
 
@@ -103,6 +103,17 @@ describe('hostPlugin', () => {
           ),
         ).toStrictEqual(destinationPath);
       });
+
+      it('preserves an explicit IPv6 family override', () => {
+        const options = {
+          moduleFederationConfig,
+          family: 6 as const,
+        };
+
+        const { hostOptions } = retrieveHostConfig(options);
+
+        expect(hostOptions.family).toBe(6);
+      });
     });
 
     it('correctly resolve subpath remotes', () => {
@@ -129,7 +140,7 @@ describe('hostPlugin', () => {
       });
     });
 
-    it('correctly resolve remotes with relative reference in place of absolute url', () => {
+    it('does not resolve type urls by convention for manifest remotes', () => {
       const subpathModuleFederationConfig = {
         ...moduleFederationConfig,
         remotes: {
@@ -144,10 +155,10 @@ describe('hostPlugin', () => {
       expect(mapRemotesToDownload).toStrictEqual({
         moduleFederationTypescript: {
           alias: 'moduleFederationTypescript',
-          apiTypeUrl: '/subpatha/@mf-types.d.ts',
+          apiTypeUrl: '',
           name: '/subpatha/mf-manifest.json',
           url: '/subpatha/mf-manifest.json',
-          zipUrl: '/subpatha/@mf-types.zip',
+          zipUrl: '',
         },
       });
     });
@@ -186,6 +197,37 @@ describe('hostPlugin', () => {
           url: 'http://localhost:3002/remoteEntry.js',
           zipUrl: 'http://localhost:3002/@mf-types.zip',
           apiTypeUrl: 'http://localhost:3002/@mf-types.d.ts',
+        },
+      });
+    });
+
+    it('prefers remoteTypeUrls for manifest remotes', () => {
+      const mfConfigWithManifestRemote = {
+        ...moduleFederationConfig,
+        remotes: {
+          'remote1-alias':
+            'remote1@http://localhost:3001/static/mf-manifest.json',
+        },
+      };
+
+      const { mapRemotesToDownload } = retrieveHostConfig({
+        moduleFederationConfig: mfConfigWithManifestRemote,
+        remoteTypeUrls: {
+          remote1: {
+            alias: 'remote1-alias',
+            zip: 'http://localhost:3001/custom-dir/@mf-types.zip',
+            api: 'http://localhost:3001/custom-dir/@mf-types.d.ts',
+          },
+        },
+      });
+
+      expect(mapRemotesToDownload).toStrictEqual({
+        'remote1-alias': {
+          name: 'remote1',
+          alias: 'remote1-alias',
+          url: 'http://localhost:3001/static/mf-manifest.json',
+          zipUrl: 'http://localhost:3001/custom-dir/@mf-types.zip',
+          apiTypeUrl: 'http://localhost:3001/custom-dir/@mf-types.d.ts',
         },
       });
     });

@@ -1,5 +1,107 @@
 # @module-federation/dts-plugin
 
+## 2.5.1
+
+### Patch Changes
+
+- b79ba22: Update the dts plugin websocket dependency to a version that includes the CVE-2026-45736 fix.
+- b553153: Fix `__dirname is not defined` ReferenceError when `@module-federation/dts-plugin` is consumed as ESM. `DevWorker`, `DevPlugin`, and `createBroker` now derive `__dirname` from `import.meta.url` (matching the existing `DtsWorker` shim) so the ESM build no longer emits bare `__dirname`.
+- b9b3b8c: Fix Windows manifest type URL resolution in dts-plugin consumeTypes and allow the default IP family option to auto-select with `0`.
+- Updated dependencies [b9b3b8c]
+  - @module-federation/sdk@2.5.1
+  - @module-federation/managers@2.5.1
+  - @module-federation/third-party-dts-extractor@2.5.1
+  - @module-federation/error-codes@2.5.1
+
+## 2.5.0
+
+### Patch Changes
+
+- 13dce52: fix(dts-plugin): read manifest metadata when consuming DTS files from manifest remotes.
+- Updated dependencies [5d4095d]
+- Updated dependencies [0716c11]
+- Updated dependencies [41281f4]
+  - @module-federation/sdk@2.5.0
+  - @module-federation/error-codes@2.5.0
+  - @module-federation/managers@2.5.0
+  - @module-federation/third-party-dts-extractor@2.5.0
+
+## 2.4.0
+
+### Patch Changes
+
+- Updated dependencies [5eba770]
+- Updated dependencies [13b1e84]
+  - @module-federation/sdk@2.4.0
+  - @module-federation/managers@2.4.0
+  - @module-federation/third-party-dts-extractor@2.4.0
+  - @module-federation/error-codes@2.4.0
+
+## 2.3.3
+
+### Patch Changes
+
+- 6d33275: fix: override inherited declarationDir in tsconfig and add test for declarationDir handling
+  - @module-federation/sdk@2.3.3
+  - @module-federation/managers@2.3.3
+  - @module-federation/third-party-dts-extractor@2.3.3
+  - @module-federation/error-codes@2.3.3
+
+## 2.3.2
+
+### Patch Changes
+
+- 1c02710: chore: lock deps
+  - @module-federation/sdk@2.3.2
+  - @module-federation/managers@2.3.2
+  - @module-federation/third-party-dts-extractor@2.3.2
+  - @module-federation/error-codes@2.3.2
+
+## 2.3.1
+
+### Patch Changes
+
+- @module-federation/sdk@2.3.1
+- @module-federation/managers@2.3.1
+- @module-federation/third-party-dts-extractor@2.3.1
+- @module-federation/error-codes@2.3.1
+
+## 2.3.0
+
+### Minor Changes
+
+- eb26065: feat(dts-plugin): add `dts.generateTypes.afterGenerate` callback
+
+  Allows users to hook into the type generation lifecycle from
+  `dts.generateTypes`. The callback runs after each successful type generation in
+  both dev and prod modes, making it possible to do follow-up work with the
+  generated files.
+
+  ```ts
+  new ModuleFederationPlugin({
+    dts: {
+      generateTypes: {
+        afterGenerate: async ({ zipTypesPath, apiTypesPath }) => {
+          await analyzeTypesAndGenerateJson({
+            zipTypesPath,
+            apiTypesPath,
+          });
+        },
+      },
+    },
+  });
+  ```
+
+### Patch Changes
+
+- Updated dependencies [eb26065]
+- Updated dependencies [f1d79b2]
+- Updated dependencies [8f2ec9b]
+  - @module-federation/sdk@2.3.0
+  - @module-federation/error-codes@2.3.0
+  - @module-federation/managers@2.3.0
+  - @module-federation/third-party-dts-extractor@2.3.0
+
 ## 2.2.3
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 import path from 'path';
 import { Stats, Manifest } from '@module-federation/sdk';
-import fs from 'fs-extra';
+import fs from 'fs';
 type AssetResource<T> = {
   data: T;
   filename: string;

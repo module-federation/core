@@ -135,27 +135,26 @@ export default class IndependentSharedPlugin {
 
   apply(compiler: Compiler) {
     const { manifest } = this;
-    let runCount = 0;
-
-    compiler.hooks.beforeRun.tapPromise('IndependentSharedPlugin', async () => {
-      if (runCount) {
-        return;
-      }
-      await this.createIndependentCompilers(compiler);
-      runCount++;
+    const collectSharedEntryPlugin = new CollectSharedEntryPlugin({
+      sharedOptions: this.sharedOptions,
     });
-
-    compiler.hooks.watchRun.tapPromise('IndependentSharedPlugin', async () => {
-      if (runCount) {
-        return;
-      }
-      await this.createIndependentCompilers(compiler);
-      runCount++;
-    });
+    collectSharedEntryPlugin.apply(compiler);
 
     compiler.hooks.thisCompilation.tap(
       'IndependentSharedPlugin',
       (compilation) => {
+        compilation.hooks.finishModules.tapPromise(
+          {
+            name: 'IndependentSharedPlugin',
+            stage: 20,
+          },
+          async () => {
+            await this.createIndependentCompilers(
+              compiler,
+              collectSharedEntryPlugin.getData(),
+            );
+          },
+        );
         compilation.hooks.additionalTreeRuntimeRequirements.tap(
           'OptimizeDependencyReferencedExportsPlugin',
           (chunk) => {
@@ -234,47 +233,54 @@ export default class IndependentSharedPlugin {
     return entryPath;
   }
 
-  private async createIndependentCompilers(parentCompiler: Compiler) {
+  private async createIndependentCompilers(
+    parentCompiler: Compiler,
+    shareRequestsMap: ShareRequestsMap,
+  ) {
     const { sharedOptions, outputDir } = this;
-    console.log('Start building shared fallback resources ...');
+    this.buildAssets = {};
 
-    const shareRequestsMap: ShareRequestsMap =
-      await this.createIndependentCompiler(parentCompiler);
+    const hasShareRequests = sharedOptions.some(
+      ([shareName, shareConfig]) =>
+        Boolean(shareConfig.treeShaking) &&
+        Boolean(shareRequestsMap[shareName]?.requests.length),
+    );
+    if (!hasShareRequests) {
+      return;
+    }
+
+    console.log('Start building shared fallback resources ...');
 
     await Promise.all(
       sharedOptions.map(async ([shareName, shareConfig]) => {
         if (!shareConfig.treeShaking) {
           return;
         }
-        const shareRequests = shareRequestsMap[shareName].requests;
-        await Promise.all(
-          shareRequests.map(async ([request, version]) => {
-            const sharedConfig = sharedOptions.find(
-              ([name]) => name === shareName,
-            )?.[1];
-            const [shareFileName, globalName, sharedVersion] =
-              await this.createIndependentCompiler(parentCompiler, {
-                shareRequestsMap,
-                currentShare: {
-                  shareName,
-                  version,
-                  request,
-                  independentShareFileName: sharedConfig?.treeShaking?.filename,
-                },
-              });
-            if (typeof shareFileName === 'string') {
-              this.buildAssets[shareName] ||= [];
-              this.buildAssets[shareName].push([
-                path.join(
-                  resolveOutputDir(outputDir, shareName),
-                  shareFileName,
-                ),
-                sharedVersion,
-                globalName,
-              ]);
-            }
-          }),
-        );
+        const shareRequests = shareRequestsMap[shareName]?.requests ?? [];
+        for (let index = 0; index < shareRequests.length; index++) {
+          const [request, version] = shareRequests[index];
+          const sharedConfig = sharedOptions.find(
+            ([name]) => name === shareName,
+          )?.[1];
+          const [shareFileName, globalName, sharedVersion] =
+            await this.createIndependentCompiler(parentCompiler, {
+              cleanOutput: index === 0,
+              currentShare: {
+                shareName,
+                version,
+                request,
+                independentShareFileName: sharedConfig?.treeShaking?.filename,
+              },
+            });
+          if (typeof shareFileName === 'string') {
+            this.buildAssets[shareName] ||= [];
+            this.buildAssets[shareName].push([
+              path.join(resolveOutputDir(outputDir, shareName), shareFileName),
+              sharedVersion,
+              globalName,
+            ]);
+          }
+        }
       }),
     );
 
@@ -283,9 +289,9 @@ export default class IndependentSharedPlugin {
 
   private async createIndependentCompiler(
     parentCompiler: Compiler,
-    extraOptions?: {
+    extraOptions: {
       currentShare: Omit<SharedContainerPluginOptions, 'mfName'>;
-      shareRequestsMap: ShareRequestsMap;
+      cleanOutput: boolean;
     },
   ) {
     const {
@@ -299,68 +305,60 @@ export default class IndependentSharedPlugin {
     } = this;
     const outputDirWithShareName = resolveOutputDir(
       outputDir,
-      extraOptions?.currentShare?.shareName || '',
+      extraOptions.currentShare.shareName,
     );
 
     const parentConfig = parentCompiler.options;
 
     const finalPlugins = [];
-    let extraPlugin: CollectSharedEntryPlugin | SharedContainerPlugin;
-    if (!extraOptions) {
-      extraPlugin = new CollectSharedEntryPlugin({
-        sharedOptions,
-      });
-    } else {
-      extraPlugin = new SharedContainerPlugin({
-        mfName: `${mfName}_${treeShaking ? 't' : 'f'}`,
-        library: library,
-        ...extraOptions.currentShare,
-      });
-      (parentConfig.plugins || []).forEach((plugin) => {
-        if (
-          plugin !== undefined &&
-          typeof plugin !== 'string' &&
-          filterPlugin(plugin, treeShakingSharedExcludePlugins)
-        ) {
-          finalPlugins.push(plugin);
-        }
-      });
-      plugins.forEach((plugin) => {
+    const extraPlugin = new SharedContainerPlugin({
+      mfName: `${mfName}_${treeShaking ? 't' : 'f'}`,
+      library: library,
+      ...extraOptions.currentShare,
+    });
+    (parentConfig.plugins || []).forEach((plugin) => {
+      if (
+        plugin !== undefined &&
+        typeof plugin !== 'string' &&
+        filterPlugin(plugin, treeShakingSharedExcludePlugins)
+      ) {
         finalPlugins.push(plugin);
-      });
-      finalPlugins.push(
-        new ConsumeSharedPlugin({
-          consumes: sharedOptions
-            .filter(
-              ([key, options]) =>
-                extraOptions?.currentShare.shareName !==
-                (options.shareKey || key),
-            )
-            .map(([key, options]) => ({
-              [key]: {
-                import: !extraOptions ? options.import : false,
-                shareKey: options.shareKey || key,
-                shareScope: options.shareScope,
-                requiredVersion: options.requiredVersion,
-                strictVersion: options.strictVersion,
-                singleton: options.singleton,
-                packageName: options.packageName,
-                eager: options.eager,
-              },
-            })),
-        }),
-      );
-
-      if (treeShaking) {
-        finalPlugins.push(
-          new SharedUsedExportsOptimizerPlugin(
-            sharedOptions,
-            this.injectTreeShakingUsedExports,
-            [IGNORED_ENTRY],
-            this.manifest,
-          ),
-        );
       }
+    });
+    plugins.forEach((plugin) => {
+      finalPlugins.push(plugin);
+    });
+    finalPlugins.push(
+      new ConsumeSharedPlugin({
+        consumes: sharedOptions
+          .filter(
+            ([key, options]) =>
+              extraOptions.currentShare.shareName !== (options.shareKey || key),
+          )
+          .map(([key, options]) => ({
+            [key]: {
+              import: false,
+              shareKey: options.shareKey || key,
+              shareScope: options.shareScope,
+              requiredVersion: options.requiredVersion,
+              strictVersion: options.strictVersion,
+              singleton: options.singleton,
+              packageName: options.packageName,
+              eager: options.eager,
+            },
+          })),
+      }),
+    );
+
+    if (treeShaking) {
+      finalPlugins.push(
+        new SharedUsedExportsOptimizerPlugin(
+          sharedOptions,
+          this.injectTreeShakingUsedExports,
+          [IGNORED_ENTRY],
+          this.manifest,
+        ),
+      );
     }
     finalPlugins.push(extraPlugin);
     const fullOutputDir = path.resolve(
@@ -379,7 +377,7 @@ export default class IndependentSharedPlugin {
       // 输出配置
       output: {
         path: fullOutputDir,
-        clean: true,
+        clean: extraOptions.cleanOutput,
         publicPath: parentConfig.output?.publicPath || 'auto',
       },
 
@@ -408,7 +406,7 @@ export default class IndependentSharedPlugin {
       compiler.intermediateFileSystem = parentCompiler.intermediateFileSystem;
     }
 
-    const { currentShare, shareRequestsMap } = extraOptions || {};
+    const { currentShare } = extraOptions;
 
     return new Promise<any>((resolve, reject) => {
       compiler.run((err: any, stats: any) => {
@@ -455,8 +453,7 @@ export default class IndependentSharedPlugin {
           return;
         }
 
-        shareRequestsMap &&
-          console.log(`Shared "${shareName}" compilation succeeded`);
+        console.log(`Shared "${shareName}" compilation succeeded`);
 
         resolve(extraPlugin.getData());
       });

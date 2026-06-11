@@ -407,6 +407,7 @@ const t = {
                       },
                       extractRemoteTypes: { type: 'boolean' },
                       abortOnError: { type: 'boolean' },
+                      afterGenerate: { instanceof: 'Function' },
                     },
                   },
                 ],
@@ -527,7 +528,6 @@ const t = {
         },
       },
       getPublicPath: { type: 'string' },
-      dataPrefetch: { type: 'boolean' },
       implementation: { type: 'string' },
     },
   },
@@ -3622,7 +3622,7 @@ function D(
                                                                         } else
                                                                           O =
                                                                             !0;
-                                                                        if (O)
+                                                                        if (O) {
                                                                           if (
                                                                             void 0 !==
                                                                             t.abortOnError
@@ -3657,6 +3657,42 @@ function D(
                                                                           } else
                                                                             O =
                                                                               !0;
+                                                                          if (O)
+                                                                            if (
+                                                                              void 0 !==
+                                                                              t.afterGenerate
+                                                                            ) {
+                                                                              const e =
+                                                                                c;
+                                                                              if (
+                                                                                !(
+                                                                                  t.afterGenerate instanceof
+                                                                                  Function
+                                                                                )
+                                                                              ) {
+                                                                                const e =
+                                                                                  {
+                                                                                    params:
+                                                                                      {},
+                                                                                  };
+                                                                                (null ===
+                                                                                u
+                                                                                  ? (u =
+                                                                                      [
+                                                                                        e,
+                                                                                      ])
+                                                                                  : u.push(
+                                                                                      e,
+                                                                                    ),
+                                                                                  c++);
+                                                                              }
+                                                                              O =
+                                                                                e ===
+                                                                                c;
+                                                                            } else
+                                                                              O =
+                                                                                !0;
+                                                                        }
                                                                       }
                                                                     }
                                                                   }
@@ -5390,21 +5426,21 @@ function D(
                                                         );
                                                       b = e === c;
                                                     } else b = !0;
-                                                    if (b) {
+                                                    if (b)
                                                       if (
                                                         void 0 !==
-                                                        o.dataPrefetch
+                                                        o.implementation
                                                       ) {
                                                         const e = c;
                                                         if (
-                                                          'boolean' !=
-                                                          typeof o.dataPrefetch
+                                                          'string' !=
+                                                          typeof o.implementation
                                                         )
                                                           return (
                                                             (D.errors = [
                                                               {
                                                                 params: {
-                                                                  type: 'boolean',
+                                                                  type: 'string',
                                                                 },
                                                               },
                                                             ]),
@@ -5412,29 +5448,6 @@ function D(
                                                           );
                                                         b = e === c;
                                                       } else b = !0;
-                                                      if (b)
-                                                        if (
-                                                          void 0 !==
-                                                          o.implementation
-                                                        ) {
-                                                          const e = c;
-                                                          if (
-                                                            'string' !=
-                                                            typeof o.implementation
-                                                          )
-                                                            return (
-                                                              (D.errors = [
-                                                                {
-                                                                  params: {
-                                                                    type: 'string',
-                                                                  },
-                                                                },
-                                                              ]),
-                                                              !1
-                                                            );
-                                                          b = e === c;
-                                                        } else b = !0;
-                                                    }
                                                   }
                                                 }
                                               }

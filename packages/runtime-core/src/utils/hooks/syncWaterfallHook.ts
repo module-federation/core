@@ -20,7 +20,7 @@ export function checkReturnData(originalData: any, returnedData: any): boolean {
 
 export class SyncWaterfallHook<T extends Record<string, any>> extends SyncHook<
   [T],
-  T
+  T | void
 > {
   onerror: (errMsg: string | Error | unknown) => void = error;
 
@@ -36,6 +36,9 @@ export class SyncWaterfallHook<T extends Record<string, any>> extends SyncHook<
     for (const fn of this.listeners) {
       try {
         const tempData = fn(data);
+        if (tempData === undefined) {
+          continue;
+        }
         if (checkReturnData(data, tempData)) {
           data = tempData;
         } else {

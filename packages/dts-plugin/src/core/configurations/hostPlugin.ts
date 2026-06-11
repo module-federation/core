@@ -2,6 +2,7 @@ import {
   parseEntry,
   ENCODE_NAME_PREFIX,
   decodeName,
+  MANIFEST_EXT,
 } from '@module-federation/sdk';
 import { utils } from '@module-federation/managers';
 import { HostOptions, RemoteInfo } from '../interfaces/HostOptions';
@@ -20,7 +21,7 @@ const defaultOptions = {
   remoteTypeUrls: {},
   timeout: 60000,
   typesOnBuild: false,
-  family: 4,
+  family: 0,
 } satisfies Partial<HostOptions>;
 
 const buildZipUrl = (hostOptions: Required<HostOptions>, url: string) => {
@@ -66,18 +67,28 @@ export const retrieveRemoteInfo = (options: {
   let zipUrl = '';
   let apiTypeUrl = '';
   const name = parsedInfo.name || remoteAlias;
+  const remoteTypeUrl =
+    typeof remoteTypeUrls === 'object' && remoteTypeUrls[name];
 
   // for updated remote
-  if (typeof remoteTypeUrls === 'object' && remoteTypeUrls[name]) {
-    zipUrl = remoteTypeUrls[name].zip;
-    apiTypeUrl = remoteTypeUrls[name].api;
+  if (remoteTypeUrl) {
+    zipUrl = remoteTypeUrl.zip;
+    apiTypeUrl = remoteTypeUrl.api;
   }
 
-  if (!zipUrl && url) {
+  const shouldResolveTypeUrlsByConvention = Boolean(
+    url && !url.includes(MANIFEST_EXT),
+  );
+
+  if (!zipUrl && shouldResolveTypeUrlsByConvention) {
     zipUrl = buildZipUrl(hostOptions, url);
   }
 
-  if (!apiTypeUrl && zipUrl) {
+  if (
+    !apiTypeUrl &&
+    zipUrl &&
+    (remoteTypeUrl || shouldResolveTypeUrlsByConvention)
+  ) {
     apiTypeUrl = buildApiTypeUrl(zipUrl);
   }
 

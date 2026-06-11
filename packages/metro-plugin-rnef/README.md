@@ -1,5 +1,7 @@
 # @module-federation/metro-plugin-rnef
 
+> **Deprecated:** RNEF has been renamed to [Rock](https://rockjs.dev). Please use [`@module-federation/metro-plugin-rock`](https://www.npmjs.com/package/@module-federation/metro-plugin-rock) instead. This package will continue to be published for backward compatibility but will not receive new features.
+
 Module Federation for React Native Enterprise Framework (RNEF) using Metro bundler. This plugin integrates the `@module-federation/metro` package with RNEF, providing commands to bundle Module Federation host and remotes.
 
 ## Installation

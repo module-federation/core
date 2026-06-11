@@ -1,5 +1,82 @@
 # @module-federation/rspress-plugin
 
+## 2.5.1
+
+### Patch Changes
+
+- 7c04e74: Rebuild llms output from generated HTML for federated Rspress builds.
+- Updated dependencies [4da5508]
+- Updated dependencies [b50395e]
+- Updated dependencies [b9b3b8c]
+  - @module-federation/enhanced@2.5.1
+  - @module-federation/rsbuild-plugin@2.5.1
+  - @module-federation/sdk@2.5.1
+  - @module-federation/error-codes@2.5.1
+
+## 2.5.0
+
+### Patch Changes
+
+- Updated dependencies [5d4095d]
+- Updated dependencies [0716c11]
+- Updated dependencies [41281f4]
+  - @module-federation/sdk@2.5.0
+  - @module-federation/error-codes@2.5.0
+  - @module-federation/enhanced@2.5.0
+  - @module-federation/rsbuild-plugin@2.5.0
+
+## 2.4.0
+
+### Patch Changes
+
+- Updated dependencies [5eba770]
+- Updated dependencies [13b1e84]
+  - @module-federation/sdk@2.4.0
+  - @module-federation/enhanced@2.4.0
+  - @module-federation/rsbuild-plugin@2.4.0
+  - @module-federation/error-codes@2.4.0
+
+## 2.3.3
+
+### Patch Changes
+
+- @module-federation/enhanced@2.3.3
+- @module-federation/rsbuild-plugin@2.3.3
+- @module-federation/sdk@2.3.3
+- @module-federation/error-codes@2.3.3
+
+## 2.3.2
+
+### Patch Changes
+
+- 1c02710: chore: lock deps
+- Updated dependencies [1c02710]
+  - @module-federation/enhanced@2.3.2
+  - @module-federation/rsbuild-plugin@2.3.2
+  - @module-federation/sdk@2.3.2
+  - @module-federation/error-codes@2.3.2
+
+## 2.3.1
+
+### Patch Changes
+
+- @module-federation/enhanced@2.3.1
+- @module-federation/sdk@2.3.1
+- @module-federation/rsbuild-plugin@2.3.1
+- @module-federation/error-codes@2.3.1
+
+## 2.3.0
+
+### Patch Changes
+
+- Updated dependencies [eb26065]
+- Updated dependencies [f1d79b2]
+- Updated dependencies [8f2ec9b]
+  - @module-federation/sdk@2.3.0
+  - @module-federation/error-codes@2.3.0
+  - @module-federation/enhanced@2.3.0
+  - @module-federation/rsbuild-plugin@2.3.0
+
 ## 2.2.3
 
 ### Patch Changes

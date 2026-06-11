@@ -1,5 +1,5 @@
 import path from 'path';
-import fs from 'fs-extra';
+import fs from 'fs';
 import {
   ModuleFederationPlugin as RspackModuleFederationPlugin,
   TreeShakingSharedPlugin as RspackTreeShakingSharedPlugin,
@@ -63,6 +63,31 @@ function getManifestAssetFileNames(
 
 type ModifyBundlerConfiguration = Parameters<ModifyRspackConfigFn>[0];
 type ModifyBundlerUtils = Parameters<ModifyRspackConfigFn>[1];
+
+const STATIC_ASSET_MODULE_TYPES = ['asset', 'asset/resource'] as const;
+
+const preserveStaticAssetPublicPath = (
+  config: ModifyBundlerConfiguration,
+  publicPath: unknown,
+) => {
+  if (
+    typeof publicPath !== 'string' ||
+    publicPath === '' ||
+    publicPath === 'auto'
+  ) {
+    return;
+  }
+  config.module ||= {};
+  const moduleConfig = config.module as {
+    generator?: Record<string, Record<string, unknown> | undefined>;
+  };
+  moduleConfig.generator ||= {};
+
+  for (const moduleType of STATIC_ASSET_MODULE_TYPES) {
+    moduleConfig.generator[moduleType] ||= {};
+    moduleConfig.generator[moduleType]!.publicPath ??= publicPath;
+  }
+};
 
 const mfSSRRsbuildPlugin = (
   pluginOptions: Required<InternalModernPluginOptions>,
@@ -155,7 +180,9 @@ const mfSSRRsbuildPlugin = (
         if (!userSSRConfig.distOutputDir) {
           return;
         }
-        config.output!.publicPath = `${config.output!.publicPath}${path.relative(csrOutputPath, ssrOutputPath)}/`;
+        const publicPath = config.output!.publicPath;
+        preserveStaticAssetPublicPath(config, publicPath);
+        config.output!.publicPath = `${publicPath}${path.relative(csrOutputPath, ssrOutputPath)}/`;
         return config;
       };
       api.modifyRspackConfig((config, utils) => {

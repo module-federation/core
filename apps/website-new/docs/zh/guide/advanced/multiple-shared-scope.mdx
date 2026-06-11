@@ -206,7 +206,7 @@ export function multiScopePolicyPlugin(): ModuleFederationRuntimePlugin {
 ### 2) scope 缺失时做别名/回退（initContainerShareScopeMap / resolveShare）
 
 * `initContainerShareScopeMap`：在 remote 初始化共享池过程中，对每个 scope 的 `shareScope` 映射做改写。
-* `resolveShare`：在实际选择某个 shared 版本时介入，可用于“当前 scope 没有就回退到 default”等策略。
+* `resolveShare`：通过改写 `args.resolver` 来改写最终选择结果。按现在的运行时实现，只返回 `{ ...args, scope: 'default' }` 这种写法并不会真的切过去。
 
 示例：如果 `scope1` 中找不到某个包，则回退用 `default` scope：
 
@@ -217,10 +217,31 @@ export function scopeFallbackPlugin(): ModuleFederationRuntimePlugin {
   return {
     name: 'scope-fallback',
     resolveShare(args) {
-      const hasPkg =
-        Boolean(args.shareScopeMap[args.scope]?.[args.pkgName]);
-      if (hasPkg) return args;
-      return { ...args, scope: 'default' };
+      const current =
+        args.shareScopeMap[args.scope]?.[args.pkgName]?.[args.version];
+      if (current) return args;
+
+      args.resolver = () => {
+        const fallbackVersionMap = args.shareScopeMap.default?.[args.pkgName];
+        if (!fallbackVersionMap) {
+          return undefined;
+        }
+
+        const fallbackShared =
+          fallbackVersionMap[args.version] ??
+          Object.values(fallbackVersionMap)[0];
+
+        if (!fallbackShared) {
+          return undefined;
+        }
+
+        return {
+          shared: fallbackShared,
+          useTreesShaking: false,
+        };
+      };
+
+      return args;
     },
   };
 }

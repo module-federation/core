@@ -1,5 +1,59 @@
 # website-new
 
+## 1.3.25
+
+### Patch Changes
+
+- Updated dependencies [7c04e74]
+  - @module-federation/rspress-plugin@2.5.1
+  - @module-federation/error-codes@2.5.1
+
+## 1.3.24
+
+### Patch Changes
+
+- d433ec9: feat(runtime): support finder callbacks in `getInstance` and clarify runtime instance API usage.
+- Updated dependencies [41281f4]
+  - @module-federation/error-codes@2.5.0
+  - @module-federation/rspress-plugin@2.5.0
+
+## 1.3.23
+
+### Patch Changes
+
+- @module-federation/rspress-plugin@2.4.0
+- @module-federation/error-codes@2.4.0
+
+## 1.3.22
+
+### Patch Changes
+
+- @module-federation/rspress-plugin@2.3.3
+- @module-federation/error-codes@2.3.3
+
+## 1.3.21
+
+### Patch Changes
+
+- Updated dependencies [1c02710]
+  - @module-federation/rspress-plugin@2.3.2
+  - @module-federation/error-codes@2.3.2
+
+## 1.3.20
+
+### Patch Changes
+
+- @module-federation/error-codes@2.3.1
+- @module-federation/rspress-plugin@2.3.1
+
+## 1.3.19
+
+### Patch Changes
+
+- Updated dependencies [f1d79b2]
+  - @module-federation/error-codes@2.3.0
+  - @module-federation/rspress-plugin@2.3.0
+
 ## 1.3.18
 
 ### Patch Changes

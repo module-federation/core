@@ -543,7 +543,7 @@ describe('routeUtils', () => {
       expect(dashboardRoute?.path).toBe('/app/dashboard');
     });
 
-    it('should prefix nested children with basename when hashRoute is true', () => {
+    it('should keep relative children paths unchanged when hashRoute is true with basename', () => {
       const routes = createNestedRoutes();
       const router = createRouter({
         history: createWebHistory(),
@@ -558,24 +558,26 @@ describe('routeUtils', () => {
 
       const dashboardRoute = result.routes.find((r) => r.name === 'Dashboard');
       expect(dashboardRoute).toBeDefined();
+      // Top-level route should be prefixed
+      expect(dashboardRoute?.path).toBe('/app/dashboard');
 
       if (dashboardRoute?.children) {
         const profileRoute = dashboardRoute.children.find(
           (child) => child.name === 'Profile',
         );
-        // Paths are now properly joined with '/' separator
-        expect(profileRoute?.path).toBe('/app/profile');
+        // Relative children must stay relative — Vue Router resolves them against the parent
+        expect(profileRoute?.path).toBe('profile');
 
         const settingsRoute = dashboardRoute.children.find(
           (child) => child.name === 'Settings',
         );
-        expect(settingsRoute?.path).toBe('/app/settings');
+        expect(settingsRoute?.path).toBe('settings');
 
         if (settingsRoute?.children) {
           const accountRoute = settingsRoute.children.find(
             (child) => child.name === 'Account',
           );
-          expect(accountRoute?.path).toBe('/app/account');
+          expect(accountRoute?.path).toBe('account');
         }
       }
     });
@@ -874,6 +876,688 @@ describe('routeUtils', () => {
       expect(rootRoute).toBeDefined();
       // Named redirects should be untouched — Vue Router resolves by name, not path
       expect(rootRoute?.redirect).toEqual({ name: 'Dashboard' });
+    });
+  });
+
+  describe('processRoutes hashRoute patchRouter', () => {
+    it('should return patchRouter when hashRoute and basename are set', () => {
+      const routes = createNestedRoutes();
+      const router = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      const result = processRoutes({
+        router,
+        basename: '/barber',
+        hashRoute: true,
+      });
+
+      expect(result.patchRouter).toBeDefined();
+      expect(typeof result.patchRouter).toBe('function');
+    });
+
+    it('should not return patchRouter when hashRoute is true but no basename', () => {
+      const routes = createNestedRoutes();
+      const router = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      const result = processRoutes({
+        router,
+        hashRoute: true,
+      });
+
+      expect(result.patchRouter).toBeUndefined();
+    });
+
+    it('should not return patchRouter in default web history mode', () => {
+      const routes = createNestedRoutes();
+      const router = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      const result = processRoutes({
+        router,
+        basename: '/app',
+      });
+
+      expect(result.patchRouter).toBeUndefined();
+    });
+
+    it('should not return patchRouter in memory route mode', () => {
+      const routes = createNestedRoutes();
+      const router = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      const result = processRoutes({
+        router,
+        basename: '/app',
+        memoryRoute: true,
+      });
+
+      expect(result.patchRouter).toBeUndefined();
+    });
+
+    it('should rewrite string paths in router.push', () => {
+      const routes = createNestedRoutes();
+      const sourceRouter = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      const result = processRoutes({
+        router: sourceRouter,
+        basename: '/barber',
+        hashRoute: true,
+      });
+
+      const targetRouter = createRouter({
+        history: result.history,
+        routes: result.routes,
+      });
+
+      const pushSpy = vi.fn();
+      targetRouter.push = pushSpy;
+      const originalPush = targetRouter.push;
+
+      // Re-apply patch on fresh router to capture spy
+      result.patchRouter!(targetRouter);
+      targetRouter.push('/services');
+
+      expect(pushSpy).toHaveBeenCalledWith('/barber/services');
+    });
+
+    it('should rewrite object paths in router.push', () => {
+      const routes = createNestedRoutes();
+      const sourceRouter = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      const result = processRoutes({
+        router: sourceRouter,
+        basename: '/barber',
+        hashRoute: true,
+      });
+
+      const targetRouter = createRouter({
+        history: result.history,
+        routes: result.routes,
+      });
+
+      const pushSpy = vi.fn();
+      targetRouter.push = pushSpy;
+      result.patchRouter!(targetRouter);
+
+      targetRouter.push({ path: '/services', query: { id: '1' } });
+
+      expect(pushSpy).toHaveBeenCalledWith({
+        path: '/barber/services',
+        query: { id: '1' },
+      });
+    });
+
+    it('should not rewrite named routes in router.push', () => {
+      const routes = createNestedRoutes();
+      const sourceRouter = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      const result = processRoutes({
+        router: sourceRouter,
+        basename: '/barber',
+        hashRoute: true,
+      });
+
+      const targetRouter = createRouter({
+        history: result.history,
+        routes: result.routes,
+      });
+
+      const pushSpy = vi.fn();
+      targetRouter.push = pushSpy;
+      result.patchRouter!(targetRouter);
+
+      targetRouter.push({ name: 'Dashboard' });
+
+      expect(pushSpy).toHaveBeenCalledWith({ name: 'Dashboard' });
+    });
+
+    it('should rewrite string paths in router.replace', () => {
+      const routes = createNestedRoutes();
+      const sourceRouter = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      const result = processRoutes({
+        router: sourceRouter,
+        basename: '/barber',
+        hashRoute: true,
+      });
+
+      const targetRouter = createRouter({
+        history: result.history,
+        routes: result.routes,
+      });
+
+      const replaceSpy = vi.fn();
+      targetRouter.replace = replaceSpy;
+      result.patchRouter!(targetRouter);
+
+      targetRouter.replace('/dashboard');
+
+      expect(replaceSpy).toHaveBeenCalledWith('/barber/dashboard');
+    });
+
+    it('should rewrite paths in router.resolve', () => {
+      const routes = createNestedRoutes();
+      const sourceRouter = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      const result = processRoutes({
+        router: sourceRouter,
+        basename: '/barber',
+        hashRoute: true,
+      });
+
+      const targetRouter = createRouter({
+        history: result.history,
+        routes: result.routes,
+      });
+
+      const resolveSpy = vi.fn().mockReturnValue({});
+      targetRouter.resolve = resolveSpy;
+      result.patchRouter!(targetRouter);
+
+      targetRouter.resolve('/services');
+
+      expect(resolveSpy).toHaveBeenCalledWith('/barber/services');
+    });
+
+    it('should not rewrite paths that already have the basename prefix', () => {
+      const routes = createNestedRoutes();
+      const sourceRouter = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      const result = processRoutes({
+        router: sourceRouter,
+        basename: '/barber',
+        hashRoute: true,
+      });
+
+      const targetRouter = createRouter({
+        history: result.history,
+        routes: result.routes,
+      });
+
+      const pushSpy = vi.fn();
+      targetRouter.push = pushSpy;
+      result.patchRouter!(targetRouter);
+
+      targetRouter.push('/barber/services');
+
+      expect(pushSpy).toHaveBeenCalledWith('/barber/services');
+    });
+
+    it('should not rewrite path equal to basename', () => {
+      const routes = createNestedRoutes();
+      const sourceRouter = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      const result = processRoutes({
+        router: sourceRouter,
+        basename: '/barber',
+        hashRoute: true,
+      });
+
+      const targetRouter = createRouter({
+        history: result.history,
+        routes: result.routes,
+      });
+
+      const pushSpy = vi.fn();
+      targetRouter.push = pushSpy;
+      result.patchRouter!(targetRouter);
+
+      targetRouter.push('/barber');
+
+      expect(pushSpy).toHaveBeenCalledWith('/barber');
+    });
+
+    it('should collapse double slashes from trailing-slash basename', () => {
+      const routes = createNestedRoutes();
+      const sourceRouter = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      const result = processRoutes({
+        router: sourceRouter,
+        basename: '/barber/',
+        hashRoute: true,
+      });
+
+      const targetRouter = createRouter({
+        history: result.history,
+        routes: result.routes,
+      });
+
+      const pushSpy = vi.fn();
+      targetRouter.push = pushSpy;
+      result.patchRouter!(targetRouter);
+
+      targetRouter.push('/services');
+
+      expect(pushSpy).toHaveBeenCalledWith('/barber/services');
+    });
+
+    it('should not rewrite relative path strings (resolved by Vue Router against current route)', () => {
+      const routes = createNestedRoutes();
+      const sourceRouter = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      const result = processRoutes({
+        router: sourceRouter,
+        basename: '/barber',
+        hashRoute: true,
+      });
+
+      const targetRouter = createRouter({
+        history: result.history,
+        routes: result.routes,
+      });
+
+      const pushSpy = vi.fn();
+      targetRouter.push = pushSpy;
+      result.patchRouter!(targetRouter);
+
+      targetRouter.push('settings');
+
+      // Relative path must pass through untouched — Vue Router resolves it
+      expect(pushSpy).toHaveBeenCalledWith('settings');
+    });
+
+    it('should not rewrite relative object paths', () => {
+      const routes = createNestedRoutes();
+      const sourceRouter = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      const result = processRoutes({
+        router: sourceRouter,
+        basename: '/barber',
+        hashRoute: true,
+      });
+
+      const targetRouter = createRouter({
+        history: result.history,
+        routes: result.routes,
+      });
+
+      const pushSpy = vi.fn();
+      targetRouter.push = pushSpy;
+      result.patchRouter!(targetRouter);
+
+      targetRouter.push({ path: 'settings' });
+
+      expect(pushSpy).toHaveBeenCalledWith({ path: 'settings' });
+    });
+
+    it('should not rewrite query-only string navigations', () => {
+      const routes = createNestedRoutes();
+      const sourceRouter = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      const result = processRoutes({
+        router: sourceRouter,
+        basename: '/barber',
+        hashRoute: true,
+      });
+
+      const targetRouter = createRouter({
+        history: result.history,
+        routes: result.routes,
+      });
+
+      const pushSpy = vi.fn();
+      targetRouter.push = pushSpy;
+      result.patchRouter!(targetRouter);
+
+      targetRouter.push('?tab=details');
+
+      expect(pushSpy).toHaveBeenCalledWith('?tab=details');
+    });
+
+    it('should not rewrite hash-only string navigations', () => {
+      const routes = createNestedRoutes();
+      const sourceRouter = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      const result = processRoutes({
+        router: sourceRouter,
+        basename: '/barber',
+        hashRoute: true,
+      });
+
+      const targetRouter = createRouter({
+        history: result.history,
+        routes: result.routes,
+      });
+
+      const replaceSpy = vi.fn();
+      targetRouter.replace = replaceSpy;
+      result.patchRouter!(targetRouter);
+
+      targetRouter.replace('#anchor');
+
+      expect(replaceSpy).toHaveBeenCalledWith('#anchor');
+    });
+
+    it('should not rewrite empty string navigations', () => {
+      const routes = createNestedRoutes();
+      const sourceRouter = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      const result = processRoutes({
+        router: sourceRouter,
+        basename: '/barber',
+        hashRoute: true,
+      });
+
+      const targetRouter = createRouter({
+        history: result.history,
+        routes: result.routes,
+      });
+
+      const pushSpy = vi.fn();
+      targetRouter.push = pushSpy;
+      result.patchRouter!(targetRouter);
+
+      targetRouter.push('');
+
+      expect(pushSpy).toHaveBeenCalledWith('');
+    });
+  });
+
+  describe('processRoutes with default child routes (path: "")', () => {
+    it('should not crash with children using path: "" (no infinite recursion)', () => {
+      const routes = [
+        {
+          path: '/parent',
+          name: 'parent',
+          component: DashboardComponent,
+          children: [
+            {
+              path: '',
+              name: 'parent-default',
+              component: HomeComponent,
+            },
+            {
+              path: 'child',
+              name: 'child',
+              component: ProfileComponent,
+            },
+          ],
+        },
+      ];
+
+      const router = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      // Must not throw "Maximum call stack size exceeded"
+      expect(() => processRoutes({ router })).not.toThrow();
+    });
+
+    it('should preserve default child route structure with path: ""', () => {
+      const routes = [
+        {
+          path: '/parent',
+          name: 'parent',
+          component: DashboardComponent,
+          children: [
+            {
+              path: '',
+              name: 'parent-default',
+              component: HomeComponent,
+            },
+            {
+              path: 'other',
+              name: 'other-child',
+              component: ProfileComponent,
+            },
+          ],
+        },
+      ];
+
+      const router = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      const result = processRoutes({ router });
+
+      const parentRoute = result.routes.find((r) => r.name === 'parent');
+      expect(parentRoute).toBeDefined();
+      expect(parentRoute?.path).toBe('/parent');
+      expect(parentRoute?.children?.length).toBe(2);
+
+      const defaultChild = parentRoute?.children?.find(
+        (c) => c.name === 'parent-default',
+      );
+      expect(defaultChild).toBeDefined();
+      expect(defaultChild?.path).toBe('');
+
+      const otherChild = parentRoute?.children?.find(
+        (c) => c.name === 'other-child',
+      );
+      expect(otherChild).toBeDefined();
+      expect(otherChild?.path).toBe('other');
+    });
+
+    it('should not crash with path: "" children when using hashRoute + basename', () => {
+      const routes = [
+        {
+          path: '/operations',
+          name: 'operations',
+          component: DashboardComponent,
+          children: [
+            {
+              path: '',
+              name: 'operations-default',
+              component: HomeComponent,
+            },
+            {
+              path: 'integrations',
+              name: 'integrations',
+              component: ProfileComponent,
+            },
+          ],
+        },
+      ];
+
+      const router = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      // Must not throw with hashRoute + basename
+      expect(() =>
+        processRoutes({ router, basename: '/do', hashRoute: true }),
+      ).not.toThrow();
+
+      const result = processRoutes({
+        router,
+        basename: '/do',
+        hashRoute: true,
+      });
+
+      // Top-level route should be prefixed
+      const opsRoute = result.routes.find((r) => r.name === 'operations');
+      expect(opsRoute?.path).toBe('/do/operations');
+
+      // Children should remain relative
+      const defaultChild = opsRoute?.children?.find(
+        (c) => c.name === 'operations-default',
+      );
+      expect(defaultChild?.path).toBe('');
+
+      const integrationsChild = opsRoute?.children?.find(
+        (c) => c.name === 'integrations',
+      );
+      expect(integrationsChild?.path).toBe('integrations');
+    });
+  });
+
+  describe('processRoutes with deeply nested relative children + hashRoute', () => {
+    it('should keep relative children paths when using hashRoute + basename', () => {
+      const routes = [
+        {
+          path: '/climate/measurements/results/:measurementId',
+          name: 'measurement-results',
+          component: DashboardComponent,
+          children: [
+            {
+              path: 'summary',
+              name: 'results-summary',
+              component: HomeComponent,
+            },
+            {
+              path: 'questions',
+              name: 'results-by-question',
+              component: ProfileComponent,
+            },
+          ],
+        },
+      ];
+
+      const router = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      const result = processRoutes({
+        router,
+        basename: '/do',
+        hashRoute: true,
+      });
+
+      const parentRoute = result.routes.find(
+        (r) => r.name === 'measurement-results',
+      );
+      expect(parentRoute?.path).toBe(
+        '/do/climate/measurements/results/:measurementId',
+      );
+
+      // Children must stay relative — Vue Router resolves them against the parent.
+      // Before the fix they'd incorrectly become '/do/summary', '/do/questions'.
+      const summaryChild = parentRoute?.children?.find(
+        (c) => c.name === 'results-summary',
+      );
+      expect(summaryChild?.path).toBe('summary');
+
+      const questionsChild = parentRoute?.children?.find(
+        (c) => c.name === 'results-by-question',
+      );
+      expect(questionsChild?.path).toBe('questions');
+    });
+
+    it('should keep optional param children relative with hashRoute + basename', () => {
+      const routes = [
+        {
+          path: '/climate/measurements/config',
+          component: DashboardComponent,
+          children: [
+            {
+              path: ':measurementId?/:type?',
+              name: 'config-surveys',
+              component: HomeComponent,
+            },
+          ],
+        },
+      ];
+
+      const router = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      const result = processRoutes({
+        router,
+        basename: '/do',
+        hashRoute: true,
+      });
+
+      const parentRoute = result.routes.find(
+        (r) => r.path === '/do/climate/measurements/config',
+      );
+      expect(parentRoute).toBeDefined();
+
+      const paramChild = parentRoute?.children?.find(
+        (c) => c.name === 'config-surveys',
+      );
+      // Must stay relative, not become '/do/:measurementId?/:type?' which would match everything
+      expect(paramChild?.path).toBe(':measurementId?/:type?');
+    });
+
+    it('should still prefix absolute children paths with basename in hashRoute', () => {
+      const routes = [
+        {
+          path: '/parent',
+          name: 'parent',
+          component: DashboardComponent,
+          children: [
+            {
+              path: '/absolute-child',
+              name: 'abs-child',
+              component: HomeComponent,
+            },
+          ],
+        },
+      ];
+
+      const router = createRouter({
+        history: createWebHistory(),
+        routes,
+      });
+
+      const result = processRoutes({
+        router,
+        basename: '/app',
+        hashRoute: true,
+      });
+
+      const parentRoute = result.routes.find((r) => r.name === 'parent');
+      expect(parentRoute?.path).toBe('/app/parent');
+
+      // Absolute child paths SHOULD be prefixed
+      const absChild = parentRoute?.children?.find(
+        (c) => c.name === 'abs-child',
+      );
+      expect(absChild?.path).toBe('/app/absolute-child');
     });
   });
 });

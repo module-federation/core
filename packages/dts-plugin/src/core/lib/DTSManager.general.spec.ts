@@ -1,6 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { DTSManager } from './DTSManager';
-import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
 import { UpdateMode } from '../../server/constant';
@@ -8,8 +7,8 @@ import { ThirdPartyExtractor } from '@module-federation/third-party-dts-extracto
 import { HostOptions, RemoteInfo } from '../interfaces/HostOptions';
 import { RemoteOptions } from '../interfaces/RemoteOptions';
 import { downloadTypesArchive } from './archiveHandler';
+import * as utils from './utils';
 
-vi.mock('axios');
 vi.mock('fs/promises');
 vi.mock('fs');
 vi.mock('./archiveHandler');
@@ -143,7 +142,11 @@ describe('DTSManager General Tests', () => {
         },
       };
 
-      vi.mocked(axios.get).mockResolvedValueOnce(manifestResponse);
+      vi.spyOn(utils, 'nativeFetch').mockResolvedValueOnce({
+        data: manifestResponse.data,
+        status: 200,
+        headers: {},
+      } as any);
 
       const remoteInfo: RemoteInfo = {
         name: 'test',
@@ -155,6 +158,46 @@ describe('DTSManager General Tests', () => {
       expect(result.zipUrl).toBeDefined();
       expect(result.apiTypeUrl).toBeDefined();
       expect(result.zipUrl).toContain('http://example.com/types.zip');
+    });
+
+    it('should preserve manifest type URLs under Windows path semantics', async () => {
+      const manifestResponse = {
+        data: {
+          metaData: {
+            types: {
+              zip: '@mf-types.zip',
+              api: '@mf-types.d.ts',
+            },
+            publicPath: 'http://localhost:8090',
+          },
+        },
+      };
+
+      vi.spyOn(utils, 'nativeFetch').mockResolvedValueOnce({
+        data: manifestResponse.data,
+        status: 200,
+        headers: {},
+      } as any);
+
+      const remoteInfo: RemoteInfo = {
+        name: 'test',
+        url: 'http://localhost:8090/mf-manifest.json',
+        alias: 'test-alias',
+      };
+
+      const joinSpy = vi
+        .spyOn(path, 'join')
+        .mockImplementation(path.win32.join as typeof path.join);
+
+      try {
+        // @ts-expect-error only need timeout, which is not required
+        const result = await dtsManager.requestRemoteManifest(remoteInfo, {});
+
+        expect(result.zipUrl).toBe('http://localhost:8090/@mf-types.zip');
+        expect(result.apiTypeUrl).toBe('http://localhost:8090/@mf-types.d.ts');
+      } finally {
+        joinSpy.mockRestore();
+      }
     });
 
     it('should handle manifest URLs without API types', async () => {
@@ -169,7 +212,11 @@ describe('DTSManager General Tests', () => {
         },
       };
 
-      vi.mocked(axios.get).mockResolvedValueOnce(manifestResponse);
+      vi.spyOn(utils, 'nativeFetch').mockResolvedValueOnce({
+        data: manifestResponse.data,
+        status: 200,
+        headers: {},
+      } as any);
 
       const remoteInfo: RemoteInfo = {
         name: 'test',
@@ -184,7 +231,9 @@ describe('DTSManager General Tests', () => {
     });
 
     it('should handle manifest fetch errors', async () => {
-      vi.mocked(axios.get).mockRejectedValueOnce(new Error('Network error'));
+      vi.spyOn(utils, 'nativeFetch').mockRejectedValueOnce(
+        new Error('Network error'),
+      );
 
       const remoteInfo: RemoteInfo = {
         name: 'test',
@@ -210,7 +259,11 @@ describe('DTSManager General Tests', () => {
         },
       };
 
-      vi.mocked(axios.get).mockResolvedValueOnce(manifestResponse);
+      vi.spyOn(utils, 'nativeFetch').mockResolvedValueOnce({
+        data: manifestResponse.data,
+        status: 200,
+        headers: {},
+      } as any);
 
       const remoteInfo: RemoteInfo = {
         name: 'test',
@@ -346,7 +399,11 @@ describe('DTSManager General Tests', () => {
         type PackageType<T> = T extends 'REMOTE_ALIAS_IDENTIFIER/Component' ? typeof import('REMOTE_ALIAS_IDENTIFIER/Component') : any;
       `;
 
-      vi.mocked(axios.get).mockResolvedValueOnce({ data: apiTypeContent });
+      vi.spyOn(utils, 'nativeFetch').mockResolvedValueOnce({
+        data: apiTypeContent,
+        status: 200,
+        headers: {},
+      } as any);
       vi.spyOn(fs, 'writeFileSync');
 
       // @ts-expect-error only need timeout, which is not required
@@ -390,7 +447,9 @@ describe('DTSManager General Tests', () => {
         apiTypeUrl: 'http://example.com/api.d.ts',
       };
 
-      vi.mocked(axios.get).mockRejectedValueOnce(new Error('Network error'));
+      vi.spyOn(utils, 'nativeFetch').mockRejectedValueOnce(
+        new Error('Network error'),
+      );
       vi.spyOn(fs, 'writeFileSync');
 
       await dtsManager.downloadAPITypes(remoteInfo, '/tmp/types');

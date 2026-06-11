@@ -1,4 +1,4 @@
-import fs from 'fs-extra';
+import fs from 'fs';
 import path from 'path';
 import { TEMP_DIR } from '@module-federation/sdk';
 
@@ -48,7 +48,7 @@ export function addDataFetchExposes(
 
   const tempDataFetch = path.resolve(process.cwd(), `node_modules/${TEMP_DIR}`);
   const content = `export const fetchData=()=>{throw new Error('should not be called')};`;
-  fs.ensureDirSync(tempDataFetch);
+  fs.mkdirSync(tempDataFetch, { recursive: true });
 
   Object.keys(exposes).forEach((key, index) => {
     const expose = exposes[key];
