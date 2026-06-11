@@ -21,7 +21,7 @@ export {
   type Federation,
 } from '@module-federation/runtime-core';
 
-export { ModuleFederation };
+export { ModuleFederation, UserOptions };
 
 export function createInstance(options: UserOptions) {
   // Retrieve debug constructor
