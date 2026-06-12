@@ -12,16 +12,6 @@ export const getRuntimePluginName = (runtimePlugin: RuntimePlugin): string => {
   return typeof runtimePlugin === 'string' ? runtimePlugin : runtimePlugin[0];
 };
 
-const toRuntimePluginArray = (
-  runtimePlugins: RuntimePlugin[] | undefined,
-): RuntimePlugin[] => {
-  if (runtimePlugins == null) {
-    return [];
-  }
-
-  return [...runtimePlugins];
-};
-
 const isNodeRuntimePluginName = (name: string): boolean => {
   return name === NODE_RUNTIME_PLUGIN_REQUEST || name === NODE_RUNTIME_PLUGIN;
 };
@@ -46,9 +36,7 @@ export const normalizeRuntimePlugins = (
   runtimePlugins: RuntimePlugin[];
   hasConfiguredNodeRuntimePlugin: boolean;
 } => {
-  const normalized = toRuntimePluginArray(runtimePlugins).map(
-    normalizeRuntimePlugin,
-  );
+  const normalized = (runtimePlugins ?? []).map(normalizeRuntimePlugin);
   const hasConfiguredNodeRuntimePlugin = normalized.some(
     (runtimePlugin) =>
       getRuntimePluginName(runtimePlugin) === NODE_RUNTIME_PLUGIN,

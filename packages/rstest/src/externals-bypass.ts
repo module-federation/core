@@ -2,6 +2,8 @@ import type { Rspack } from '@rsbuild/core';
 
 import { NODE_RUNTIME_PLUGIN } from './runtime-plugin';
 
+const DATA_JAVASCRIPT_REQUEST = /!=!data:text\/javascript(?:;|,)/i;
+
 const isFederationRemoteRequest = (
   request: string,
   remoteNames: Set<string>,
@@ -11,11 +13,16 @@ const isFederationRemoteRequest = (
   }
 
   for (const remoteName of remoteNames) {
-    if (
-      request === remoteName ||
-      request.startsWith(`${remoteName}/`) ||
-      request.startsWith(`${remoteName}@`)
-    ) {
+    if (request === remoteName) {
+      return true;
+    }
+
+    if (!request.startsWith(remoteName)) {
+      continue;
+    }
+
+    const separator = request[remoteName.length];
+    if (separator === '/' || separator === '@') {
       return true;
     }
   }
@@ -27,7 +34,7 @@ export const shouldKeepBundledForFederation = (
   request: string,
   remoteNames?: Set<string>,
 ): boolean => {
-  if (/!=!data:text\/javascript(?:;|,)/i.test(request)) {
+  if (DATA_JAVASCRIPT_REQUEST.test(request)) {
     return true;
   }
 

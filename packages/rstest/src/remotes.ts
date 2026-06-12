@@ -2,16 +2,19 @@ import { parseEntry } from '@module-federation/sdk';
 
 import type { ModuleFederationOptions } from './types';
 
+type ModuleFederationPluginLikeOptions = {
+  name?: unknown;
+  remotes?: unknown;
+  exposes?: unknown;
+  shared?: unknown;
+};
+
 type ModuleFederationPluginLike = {
   constructor?: {
     name?: unknown;
   };
-  _options?: {
-    remotes?: unknown;
-  };
-  options?: {
-    remotes?: unknown;
-  };
+  _options?: ModuleFederationPluginLikeOptions;
+  options?: ModuleFederationPluginLikeOptions;
 };
 
 const addRemoteNameFromString = (entry: string, target: Set<string>): void => {
@@ -20,12 +23,7 @@ const addRemoteNameFromString = (entry: string, target: Set<string>): void => {
     return;
   }
 
-  try {
-    target.add(parseEntry(normalized, undefined, '@').name);
-  } catch {
-    const atIndex = normalized.indexOf('@');
-    target.add(atIndex > 0 ? normalized.slice(0, atIndex) : normalized);
-  }
+  target.add(parseEntry(normalized, undefined, '@').name);
 };
 
 const addRemoteNameFromObject = (
@@ -93,15 +91,34 @@ const addRemoteNames = (remotes: unknown, target: Set<string>): void => {
   }
 };
 
-const isModuleFederationPluginLike = (
+const getModuleFederationPluginOptions = (
   plugin: unknown,
-): plugin is ModuleFederationPluginLike => {
-  return (
-    !!plugin &&
-    typeof plugin === 'object' &&
-    (plugin as ModuleFederationPluginLike).constructor?.name ===
-      'ModuleFederationPlugin'
-  );
+): ModuleFederationPluginLikeOptions | undefined => {
+  if (!plugin || typeof plugin !== 'object') {
+    return undefined;
+  }
+
+  const mf = plugin as ModuleFederationPluginLike;
+  const options = mf._options ?? mf.options;
+  if (!options || typeof options !== 'object') {
+    return undefined;
+  }
+
+  if (mf.constructor?.name === 'ModuleFederationPlugin') {
+    return options;
+  }
+
+  // Duck-type fallback for wrapped or re-exported federation plugins whose
+  // constructor name differs: MF options carry a container name plus at
+  // least one federation-specific field.
+  if (
+    typeof options.name === 'string' &&
+    ('remotes' in options || 'exposes' in options || 'shared' in options)
+  ) {
+    return options;
+  }
+
+  return undefined;
 };
 
 const addFallbackRemoteNamesFromPlugins = (
@@ -113,12 +130,10 @@ const addFallbackRemoteNamesFromPlugins = (
   }
 
   for (const plugin of plugins) {
-    if (!isModuleFederationPluginLike(plugin)) {
-      continue;
+    const options = getModuleFederationPluginOptions(plugin);
+    if (options) {
+      addRemoteNames(options.remotes, target);
     }
-
-    const options = plugin._options ?? plugin.options;
-    addRemoteNames(options?.remotes, target);
   }
 };
 
