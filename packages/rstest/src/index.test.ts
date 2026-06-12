@@ -1,7 +1,11 @@
 import { createRequire } from 'node:module';
 import { describe, expect, it } from '@rstest/core';
 
-import { federation, shouldKeepBundledForFederation } from './index';
+import {
+  federation,
+  pluginModuleFederation,
+  shouldKeepBundledForFederation,
+} from './index';
 
 const require = createRequire(import.meta.url);
 const NODE_RUNTIME_PLUGIN_REQUEST = '@module-federation/node/runtimePlugin';
@@ -69,6 +73,10 @@ describe('shouldKeepBundledForFederation', () => {
 });
 
 describe('federation()', () => {
+  it('exposes pluginModuleFederation as the canonical plugin factory alias', () => {
+    expect(pluginModuleFederation).toBe(federation);
+  });
+
   it('patches rspack config to force CJS output in node/jsdom workers', () => {
     const plugin = federation();
     expect(plugin.name).toBe('rstest:federation');
@@ -274,6 +282,43 @@ describe('federation()', () => {
       NODE_RUNTIME_PLUGIN,
       'custom/runtimePlugin',
     ]);
+  });
+
+  it('forces node optimization target even when configured otherwise', () => {
+    const plugin = federation({
+      name: 'component_app',
+      experiments: {
+        optimization: {
+          target: 'web',
+        },
+      },
+    });
+
+    let envCb:
+      | ((
+          config: any,
+          utils: { mergeEnvironmentConfig: (...configs: any[]) => any },
+        ) => any)
+      | undefined;
+
+    plugin.setup({
+      modifyEnvironmentConfig: (cb: any) => {
+        envCb = cb;
+      },
+    } as any);
+
+    const mergeEnvironmentConfig = (...configs: any[]) =>
+      Object.assign({}, ...configs);
+
+    const merged = envCb!({} as any, { mergeEnvironmentConfig });
+    const rspackConfig: any = {
+      output: {},
+      plugins: [],
+    };
+    merged.tools.rspack(rspackConfig);
+
+    const options = getFederationPluginOptions(rspackConfig.plugins);
+    expect(options.experiments?.optimization?.target).toBe('node');
   });
 
   it('forces async startup even when disabled manually', () => {
