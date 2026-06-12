@@ -1,5 +1,22 @@
 # @module-federation/modern-js
 
+## 2.5.1
+
+### Patch Changes
+
+- Updated dependencies [4da5508]
+- Updated dependencies [0d06c4a]
+- Updated dependencies [b50395e]
+- Updated dependencies [b9b3b8c]
+- Updated dependencies [d7b8a57]
+  - @module-federation/enhanced@2.5.1
+  - @module-federation/bridge-react@2.5.1
+  - @module-federation/rsbuild-plugin@2.5.1
+  - @module-federation/sdk@2.5.1
+  - @module-federation/cli@2.5.1
+  - @module-federation/node@2.7.44
+  - @module-federation/runtime@2.5.1
+
 ## 2.5.0
 
 ### Patch Changes
