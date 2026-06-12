@@ -29,50 +29,21 @@ import { PackageManagerTabs } from '@theme';
   }}
 />
 
+### Create module-federation.config.ts
+
+Create the `module-federation.config.ts` file with the following content:
+
+import CreateConfig from '@components/common/vite/create-config';
+
+<CreateConfig />
+
 ### Register the Plugin
 
 In `Vite`, you can add the plugin through the `plugins` configuration item in the `vite.config.js` file:
 
-```ts title='vite.config.js'
-import { federation } from '@module-federation/vite';
-module.exports = {
-  server: {
-    origin: 'http://localhost:2000',
-    port: 2000,
-  },
-  base: "http://localhost:2000",
-  plugins: [
-    federation({
-      name: 'vite_provider',
-      manifest: true,
-      remotes: {
-        esm_remote: {
-          type: "module",
-          name: "esm_remote",
-          entry: "https://[...]/remoteEntry.js",
-        },
-        var_remote: "var_remote@https://[...]/remoteEntry.js",
-      },
-      exposes: {
-        './button': './src/components/button',
-      },
-      shared: {
-        react: {
-          singleton: true,
-        },
-        'react/': {
-          singleton: true,
-        },
-      },
-    }),
-  ],
-  // Do you need to support build targets lower than chrome89?
-  // You can use 'vite-plugin-top-level-await' plugin for that.
-  build: {
-    target: 'chrome89',
-  },
-};
-```
+import RegisterPlugin from '@components/common/vite/register-plugin';
+
+<RegisterPlugin />
 
 ## Configure the Build Plugin
 
