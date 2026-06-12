@@ -27,7 +27,10 @@ export const applyNodeRspackDefaults = (
   rspackConfig.optimization.splitChunks = false;
 
   rspackConfig.experiments ??= {};
-  rspackConfig.experiments.outputModule = false;
+  // `experiments.outputModule` only exists on rspack/rsbuild 1.x (the peer
+  // range still allows it); there `output.module` alone is not enough when
+  // the experiment is enabled. On 2.x the assignment is a harmless no-op.
+  (rspackConfig.experiments as { outputModule?: boolean }).outputModule = false;
   rspackConfig.output ??= {};
   rspackConfig.output.module = false;
 };
