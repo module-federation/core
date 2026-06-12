@@ -892,9 +892,9 @@ resource id is `remoteName/expose`.
       },
     ]);
 
-    // 预加载 sub1 模块
-    // 过滤资源名称中携带 ignore 的资源信息
-    // 只预加载子依赖的 sub1-button 模块
+    // preload sub1 module
+    // filter the resource information that carries ignore in the resource name
+    // only preload sub-dependent sub1-button modules
     preloadRemote([
         {
             nameOrAlias: 'sub1',
@@ -906,9 +906,9 @@ resource id is `remoteName/expose`.
     ]);
 
 
-    // 预加载 sub2 模块
-    // 预加载 sub2 下的所有 expose
-    // 预加载 sub2 的同步资源和异步资源
+    // preload sub2 module
+    // preload all exposes under sub2
+    // preload synchronous and asynchronous resources of sub2
     preloadRemote([
         {
             nameOrAlias: 'sub2',
@@ -916,7 +916,7 @@ resource id is `remoteName/expose`.
         },
     ]);
 
-    // 预加载 sub3 模块的 add expose
+    // preloaded add expose of sub3 module
     preloadRemote([
         {
             nameOrAlias: 'sub3',
