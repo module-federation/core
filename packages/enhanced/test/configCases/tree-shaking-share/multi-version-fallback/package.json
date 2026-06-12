@@ -1,0 +1,8 @@
+{
+  "name": "multi-version-fallback-test",
+  "private": true,
+  "dependencies": {
+    "legacy-nanoid-v3": "1.0.0",
+    "nanoid": "5.1.6"
+  }
+}

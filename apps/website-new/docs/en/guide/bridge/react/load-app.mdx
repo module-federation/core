@@ -55,6 +55,10 @@ export default defineConfig({
 });
 ```
 
+:::tip
+If the remote uses React 18/19 bridge, make sure to also configure the `shared` section with the trailing-slash prefix form (`'react-dom/'`) so that `react-dom/client` is correctly shared.
+:::
+
 ### Step 2: Create Remote Components
 
 #### 2.1 Define Loading and Error Components
@@ -88,7 +92,7 @@ import { LoadingComponent, ErrorFallback } from '../components/RemoteComponents'
 
 export const Remote1App = createRemoteAppComponent({
   loader: () => loadRemote('remote1/export-app'),
-  loading: LoadingComponent,
+  loading: <LoadingComponent />,
   fallback: ErrorFallback,
 });
 ```

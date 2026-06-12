@@ -1,6 +1,10 @@
+import { fileURLToPath } from 'url';
 import path from 'path';
 import { type DTSManagerOptions, rpc } from '../core/index';
 import { cloneDeepOptions } from '../core/lib/utils';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export interface DevWorkerOptions extends DTSManagerOptions {
   name: string;
