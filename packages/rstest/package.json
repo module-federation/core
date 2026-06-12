@@ -41,7 +41,7 @@
   },
   "devDependencies": {
     "@rslib/core": "^0.12.4",
-    "@rstest/core": "https://pkg.pr.new/@rstest/core@40086e4",
+    "@rstest/core": "https://pkg.pr.new/@rstest/core@773bf1f",
     "@rsbuild/core": "^2.0.12"
   },
   "peerDependencies": {
