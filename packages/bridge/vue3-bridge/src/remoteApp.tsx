@@ -2,9 +2,12 @@ import {
   ref,
   onMounted,
   onBeforeUnmount,
+  onActivated,
+  onDeactivated,
   watch,
   defineComponent,
   useAttrs,
+  nextTick,
 } from 'vue';
 import { dispatchPopstateEnv } from '@module-federation/bridge-shared';
 import { useRoute } from 'vue-router';
@@ -26,11 +29,25 @@ export default defineComponent({
     const rootRef = ref(null);
     const providerInfoRef = ref(null);
     const pathname = ref('');
+    const isRendered = ref(false);
+    const isActive = ref(false);
+    const wasDeactivated = ref(false);
     const route = useRoute();
     const hostInstance = getInstance();
     const componentAttrs = useAttrs();
 
+    const getBridgeRenderProps = () => ({
+      name: props.moduleName,
+      dom: rootRef.value,
+      basename: props.basename,
+      memoryRoute: props.memoryRoute,
+      hashRoute: props.hashRoute,
+    });
+
     const renderComponent = async () => {
+      if (!rootRef.value || isRendered.value) {
+        return;
+      }
       const providerReturn = props.providerInfo?.();
       providerInfoRef.value = providerReturn;
 
@@ -54,18 +71,45 @@ export default defineComponent({
 
       renderProps = { ...renderProps, ...beforeBridgeRenderRes.extraProps };
       providerReturn.render(renderProps);
+      isRendered.value = true;
       hostInstance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(renderProps);
+    };
+
+    const destroyComponent = () => {
+      const providerReturn = providerInfoRef.value as any;
+      if (!providerReturn || !isRendered.value) {
+        return;
+      }
+      LoggerInstance.debug(
+        `createRemoteAppComponent LazyComponent destroy >>>`,
+        {
+          ...props,
+        },
+      );
+
+      const bridgeRenderProps = getBridgeRenderProps();
+      hostInstance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit(
+        bridgeRenderProps,
+      );
+
+      providerReturn.destroy({ dom: rootRef.value });
+      providerInfoRef.value = null;
+      isRendered.value = false;
+
+      hostInstance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(
+        bridgeRenderProps,
+      );
     };
 
     const watchStopHandle = watch(
       () => route?.path,
       (newPath) => {
-        if (newPath !== route.path) {
-          renderComponent();
-        }
-
         // dispatchPopstateEnv
-        if (pathname.value !== '' && pathname.value !== newPath) {
+        if (
+          isActive.value &&
+          pathname.value !== '' &&
+          pathname.value !== newPath
+        ) {
           LoggerInstance.debug(
             `createRemoteAppComponent dispatchPopstateEnv >>>`,
             {
@@ -80,34 +124,29 @@ export default defineComponent({
     );
 
     onMounted(() => {
+      isActive.value = true;
       renderComponent();
     });
 
+    onActivated(async () => {
+      isActive.value = true;
+      if (!wasDeactivated.value) {
+        return;
+      }
+      wasDeactivated.value = false;
+      await nextTick();
+      renderComponent();
+    });
+
+    onDeactivated(() => {
+      isActive.value = false;
+      wasDeactivated.value = true;
+      destroyComponent();
+    });
+
     onBeforeUnmount(() => {
-      LoggerInstance.debug(
-        `createRemoteAppComponent LazyComponent destroy >>>`,
-        {
-          ...props,
-        },
-      );
       watchStopHandle();
-
-      hostInstance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit({
-        name: props.moduleName,
-        dom: rootRef.value,
-        basename: props.basename,
-        memoryRoute: props.memoryRoute,
-        hashRoute: props.hashRoute,
-      });
-
-      (providerInfoRef.value as any)?.destroy({ dom: rootRef.value });
-      hostInstance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit({
-        name: props.moduleName,
-        dom: rootRef.value,
-        basename: props.basename,
-        memoryRoute: props.memoryRoute,
-        hashRoute: props.hashRoute,
-      });
+      destroyComponent();
     });
 
     return () => <div {...(props.rootAttrs || {})} ref={rootRef}></div>;
