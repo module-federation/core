@@ -102,6 +102,37 @@ describe('next-internal-plugin beforeRequest', () => {
     );
   });
 
+  it('does not double-append &t= if already present after other params', () => {
+    const args = makeArgs('app1/button', [
+      {
+        name: 'app1',
+        entry:
+          'https://cdn.example.com/mf-manifest.json?token=abc&t=1234567890',
+      },
+    ]);
+
+    const result = beforeRequest(args);
+
+    expect(result.options.remotes[0].entry).toBe(
+      'https://cdn.example.com/mf-manifest.json?token=abc&t=1234567890',
+    );
+  });
+
+  it('preserves existing query params when appending t=', () => {
+    const args = makeArgs('app1/button', [
+      {
+        name: 'app1',
+        entry: 'https://cdn.example.com/mf-manifest.json?token=abc',
+      },
+    ]);
+
+    const result = beforeRequest(args);
+
+    expect(result.options.remotes[0].entry).toMatch(
+      /^https:\/\/cdn\.example\.com\/mf-manifest\.json\?token=abc&t=\d+$/,
+    );
+  });
+
   it('returns args unchanged when no remote matches', () => {
     const args = makeArgs('unknown-remote/button', [
       { name: 'app1', entry: 'https://cdn.example.com/mf-manifest.json' },

@@ -936,7 +936,7 @@ export default {
                       type: 'number',
                     },
                     family: {
-                      enum: [4, 6],
+                      enum: [0, 4, 6],
                     },
                     typesOnBuild: {
                       type: 'boolean',
