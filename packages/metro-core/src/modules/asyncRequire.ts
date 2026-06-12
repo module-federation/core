@@ -70,19 +70,44 @@ function buildLoadBundleAsyncWrapper() {
   const loadBundleAsync =
     __loadBundleAsync as typeof globalThis.__loadBundleAsync;
 
-  return async (originalBundlePath: string) => {
+  return async (originalBundlePath: string): Promise<void> => {
     const scope = globalThis.__FEDERATION__.__NATIVE__[__METRO_GLOBAL_PREFIX__];
 
     // entry is always in the root directory of assets associated with remote
     // based on that, we extract the public path from the origin URL
     // e.g. http://example.com/a/b/c/mf-manfiest.json -> http://example.com/a/b/c
     const publicPath = getPublicPath(scope.origin);
-    const bundlePath = getBundlePath(originalBundlePath, publicPath);
+    let bundlePath = getBundlePath(originalBundlePath, publicPath);
+
+    const isSplitBundle = !isUrl(originalBundlePath);
+
+    // Cache handler registered externally (e.g. by zephyr-native-cache register()).
+    // Stored under __FEDERATION__.__NATIVE__.__CACHE__ as a singleton (no prefix scope).
+    const cacheHandler = (globalThis as any).__FEDERATION__?.__NATIVE__
+      ?.__CACHE__ as
+      | ((
+          fallback: (path: string) => Promise<void>,
+          bundlePath: string,
+        ) => Promise<void>)
+      | undefined;
+
+    // For remote split bundles with cache enabled, convert relative paths to
+    // full URLs so they enter the same cache path as container bundles.
+    // In dev mode, getBundlePath returns relative paths unchanged, but we need
+    // full URLs for the cache layer (download + eval).
+    if (isSplitBundle && cacheHandler && publicPath && !isUrl(bundlePath)) {
+      bundlePath = joinComponents(publicPath, bundlePath);
+    }
 
     // ../../node_modules/ -> ..%2F..%2Fnode_modules/ so that it's not automatically sanitized
     const encodedBundlePath = bundlePath.replaceAll('../', '..%2F');
 
-    const result = await loadBundleAsync(encodedBundlePath);
+    let result;
+    if (cacheHandler) {
+      await cacheHandler(loadBundleAsync, encodedBundlePath);
+    } else {
+      result = await loadBundleAsync(encodedBundlePath);
+    }
 
     // when the origin is not the same, it means we are loading a remote container
     // we can return early since dependencies are processed differently for entry bundles

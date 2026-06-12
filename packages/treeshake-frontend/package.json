@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/treeshake-frontend",
-  "version": "2.3.2",
+  "version": "2.5.1",
   "scripts": {
     "dev": "rsbuild dev",
     "build": "rsbuild build && rslib build",
@@ -58,7 +58,7 @@
     "react-hook-form": "7.54.2",
     "react-i18next": "16.5.0",
     "react-resizable-panels": "2.1.7",
-    "react-router-dom": "7.6.1",
+    "react-router-dom": "7.15.1",
     "recharts": "2.12.4",
     "sonner": "1.7.2",
     "tailwind-merge": "2.6.0",

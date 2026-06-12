@@ -1,5 +1,45 @@
 # @module-federation/esbuild
 
+## 0.0.108
+
+### Patch Changes
+
+- Updated dependencies [b9b3b8c]
+  - @module-federation/sdk@2.5.1
+  - @module-federation/runtime@2.5.1
+  - @module-federation/webpack-bundler-runtime@2.5.1
+
+## 0.0.107
+
+### Patch Changes
+
+- Updated dependencies [5d4095d]
+- Updated dependencies [d433ec9]
+- Updated dependencies [0716c11]
+- Updated dependencies [41281f4]
+  - @module-federation/sdk@2.5.0
+  - @module-federation/runtime@2.5.0
+  - @module-federation/webpack-bundler-runtime@2.5.0
+
+## 0.0.106
+
+### Patch Changes
+
+- Updated dependencies [5eba770]
+- Updated dependencies [3a3414c]
+- Updated dependencies [13b1e84]
+  - @module-federation/sdk@2.4.0
+  - @module-federation/runtime@2.4.0
+  - @module-federation/webpack-bundler-runtime@2.4.0
+
+## 0.0.105
+
+### Patch Changes
+
+- @module-federation/runtime@2.3.3
+- @module-federation/webpack-bundler-runtime@2.3.3
+- @module-federation/sdk@2.3.3
+
 ## 0.0.104
 
 ### Patch Changes

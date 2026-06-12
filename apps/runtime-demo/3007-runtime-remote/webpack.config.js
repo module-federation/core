@@ -1,3 +1,5 @@
+/* eslint-env node */
+
 const path = require('path');
 const reactPath = path.dirname(require.resolve('react/package.json'));
 const reactDomPath = path.dirname(require.resolve('react-dom/package.json'));
@@ -92,6 +94,8 @@ module.exports = (_env, argv = {}) => {
         filename: 'remoteEntry.js',
         exposes: {
           './ButtonOldAnt': './src/components/ButtonOldAnt',
+          './ProfileCard': './src/components/ProfileCard',
+          './AnalyticsPanel': './src/components/AnalyticsPanel',
         },
         shared: {
           lodash: {
@@ -134,6 +138,8 @@ module.exports = (_env, argv = {}) => {
     devServer: {
       host: '127.0.0.1',
       allowedHosts: 'all',
+      hot: false,
+      liveReload: false,
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods':
@@ -141,9 +147,7 @@ module.exports = (_env, argv = {}) => {
         'Access-Control-Allow-Headers':
           'X-Requested-With, content-type, Authorization',
       },
-      client: {
-        overlay: false,
-      },
+      client: false,
       devMiddleware: {
         writeToDisk: true,
       },

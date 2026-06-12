@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/dts-plugin",
-  "version": "2.3.2",
+  "version": "2.5.1",
   "author": "hanric <hanric.zhang@gmail.com>",
   "main": "./dist/index.js",
   "module": "./dist/esm/index.mjs",
@@ -74,7 +74,7 @@
     "isomorphic-ws": "5.0.0",
     "undici": "7.24.7",
     "node-schedule": "2.1.1",
-    "ws": "8.18.0"
+    "ws": "8.21.0"
   },
   "devDependencies": {
     "@module-federation/runtime": "workspace:*",

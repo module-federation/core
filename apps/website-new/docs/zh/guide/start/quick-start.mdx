@@ -1,12 +1,16 @@
 # 快速上手
 
-:::tip 先走更快的入口
-如果你已经在用 Claude Code、Cursor、Windsurf 这类 AI 编程工具，建议先看 [AI 快速开始](../../ai)。
+本指南将引导你逐步学习使用 Module Federation。我们将构建两个独立的单页面应用程序 (SPA)，它们会使用 Module Federation 共享组件，下文中遇到不熟的名词请查看[名词解释](./glossary)。
 
-很多情况下，你不需要自己先把文档读完，再开始接入。更高效的方式是先让 Agent 读，再让它帮你接入和排查。
-:::
+## 环境要求
 
-在阅读本指南前，请先阅读 [设置环境](./setting-up-env)。本指南将引导你逐步学习使用 Module Federation。我们将构建两个独立的单页面应用程序 (SPA)，它们会使用 Module Federation 共享组件，下文中遇到不熟的名词请查看[名词解释](./glossary)。
+使用 Module Federation 构建插件时，请确保 Node.js 版本不低于 20。
+
+```bash
+node -v
+```
+
+如果你是在已有项目中接入 Module Federation，请先查看[接入方案](../../integrations/)，根据你的框架或构建工具选择对应的包。
 
 ## 新项目创建
 
@@ -100,7 +104,7 @@ Templates:
 │
 ◇  Next steps ─────╮
 │                  │
-│  cd mf_provider  │
+│  cd mf_consumer  │
 │  npm install     │
 │  npm run dev     │
 │                  │
@@ -169,27 +173,13 @@ export default createModuleFederationConfig({
 
 ## 已有项目创建
 
-如果你想将 `Module Federation` 集成到现有项目中，可以参考[此文档](../../practice/frameworks/overview)。
-
-:::tip 使用 AI 一键接入
-已安装 [Claude Code](https://claude.ai/code) 或其他支持 Skills 的 AI 编程助手？可以直接使用统一的 `mf` skill。它会自动检测你的构建器（Rsbuild / Rspack / Webpack / Modern.js / Next.js / Vite），生成完整的 MF 配置，并可选择自动在入口文件中引入远程组件以快速验证效果：
-
-```bash
-npx skills add module-federation/core --skill mf -y
-```
-
-安装后，在项目目录下运行：
-
-```text
-/mf integrate
-```
-:::
+如果你想将 Module Federation 集成到已有项目中，请先查看[接入方案](../../integrations/)。那里会告诉你在 Rsbuild、Rspack、Webpack、Modern.js、Next.js、Vite 等项目中应该安装哪个包，以及下一步该看哪篇文档。
 
 ## 总结
 
 通过上面的流程你已经基于 Module Federation 完成了一个「生产者」导出一个组件给到「消费者」使用，并在过程中初步使用和了解了：Module Federation 插件中的 remotes、exposes、shared 的配置。
 
-如果你希望了解如何直接在 Webpack、Rspack 构建工具上导出和消费远程模块可以参考：[Rspack Plugin](../build-plugins/plugins-rspack)、[Webpack Plugin](../build-plugins/plugins-webpack)
+如果你希望把 Module Federation 接入已有项目，请从[接入方案](../../integrations/)开始选择对应路径。
 
 ## 下一步
 
@@ -200,9 +190,9 @@ import Step from '@components/Step';
 
 <NextSteps>
   <Step
-    href="/guide/start/features"
-    title="功能导航"
-    description="了解 Module Federation 提供的所有功能"
+    href="/integrations"
+    title="接入方案"
+    description="根据你的项目选择应该安装的包"
   />
   <Step
     href="/configure"

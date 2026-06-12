@@ -2,16 +2,12 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "../../../dist/out-tsc",
-    "types": [
-      "node",
-      "../../../typings/cssmodule.d.ts",
-      "../../../typings/image.d.ts"
-    ],
+    "types": ["node"],
     "paths": {
       "*": ["./@mf-types/*"]
     }
   },
-  "files": ["../../../typings/cssmodule.d.ts", "../../../typings/image.d.ts"],
+  "files": ["../typings/cssmodule.d.ts", "../typings/image.d.ts"],
   "exclude": [
     "jest.config.ts",
     "**/*.spec.ts",

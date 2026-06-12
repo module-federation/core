@@ -1,6 +1,7 @@
 import {
   ModuleFederation,
   type UserOptions,
+  CurrentGlobal,
   getGlobalFederationConstructor,
   setGlobalFederationInstance,
   assert,
@@ -26,24 +27,25 @@ export function createInstance(options: UserOptions) {
   // Retrieve debug constructor
   const ModuleFederationConstructor =
     getGlobalFederationConstructor() || ModuleFederation;
-  const instance = new ModuleFederationConstructor(options);
+  const instance = new ModuleFederationConstructor({
+    id: `${options.name}@${options.version || Date.now()}`,
+    ...options,
+  });
   setGlobalFederationInstance(instance);
   return instance;
 }
 
 let FederationInstance: ModuleFederation | null = null;
-/**
- * @deprecated Use createInstance or getInstance instead
- */
 export function init(options: UserOptions): ModuleFederation {
   // Retrieve the same instance with the same name
   const instance = getGlobalFederationInstance(options.name, options.version);
+  const normalizedOptions = { ...options, id: options.id || '' };
   if (!instance) {
-    FederationInstance = createInstance(options);
+    FederationInstance = createInstance(normalizedOptions);
     return FederationInstance;
   } else {
     // Merge options
-    instance.initOptions(options);
+    instance.initOptions(normalizedOptions);
     if (!FederationInstance) {
       FederationInstance = instance;
     }
@@ -105,8 +107,16 @@ export function registerPlugins(
   return FederationInstance.registerPlugins.apply(FederationInstance, args);
 }
 
-export function getInstance() {
-  return FederationInstance;
+export function getInstance(): ModuleFederation | null;
+export function getInstance(
+  finder: (instance: ModuleFederation) => boolean,
+): ModuleFederation | null;
+export function getInstance(finder?: (instance: ModuleFederation) => boolean) {
+  if (!finder) {
+    return FederationInstance;
+  }
+
+  return CurrentGlobal.__FEDERATION__.__INSTANCES__.find(finder) || null;
 }
 
 export function registerShared(

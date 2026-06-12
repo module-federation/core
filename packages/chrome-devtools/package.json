@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/devtools",
-  "version": "2.3.2",
+  "version": "2.5.1",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -60,6 +60,7 @@
   "dependencies": {
     "@modern-js/runtime": "2.70.8",
     "@arco-design/web-react": "2.66.7",
+    "@module-federation/observability-plugin": "workspace:*",
     "@module-federation/sdk": "workspace:*",
     "ahooks": "3.7.10",
     "dagre": "0.8.5",

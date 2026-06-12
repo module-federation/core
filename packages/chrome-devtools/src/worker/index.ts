@@ -18,11 +18,18 @@ const resolveTabId = async (tabId?: number) => {
   return activeTab?.id;
 };
 
-const broadcastActiveTab = (tabId: number) => {
+const broadcastActiveTab = (
+  tabId: number,
+  payload?: {
+    reason?: 'side-panel' | 'activated' | 'updated';
+    status?: chrome.tabs.TabChangeInfo['status'];
+  },
+) => {
   try {
     chrome.runtime.sendMessage({
       type: MESSAGE_ACTIVE_TAB_CHANGED,
       tabId,
+      ...payload,
     });
   } catch (error) {
     console.warn(
@@ -52,12 +59,12 @@ const openSidePanel = async (tabId?: number) => {
   if (sidePanel.open) {
     await sidePanel.open({ tabId: targetTabId });
   }
-  broadcastActiveTab(targetTabId);
+  broadcastActiveTab(targetTabId, { reason: 'side-panel' });
 
   if (sidePanel.getOptions) {
     try {
       const options = await sidePanel.getOptions({ tabId: targetTabId });
-      broadcastActiveTab(targetTabId);
+      broadcastActiveTab(targetTabId, { reason: 'side-panel' });
       return options;
     } catch (error) {
       console.warn('[Module Federation Devtools] getOptions failed', error);
@@ -113,7 +120,7 @@ chrome.tabs.onActivated.addListener(async (activeInfo) => {
     return;
   }
   try {
-    broadcastActiveTab(tabId);
+    broadcastActiveTab(tabId, { reason: 'activated' });
   } catch (error) {
     console.warn(
       '[Module Federation Devtools] Failed to handle tab activation',
@@ -123,12 +130,15 @@ chrome.tabs.onActivated.addListener(async (activeInfo) => {
 });
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.status !== 'complete') {
+  if (changeInfo.status !== 'loading' && changeInfo.status !== 'complete') {
     return;
   }
   if (tab?.active) {
     try {
-      broadcastActiveTab(tabId);
+      broadcastActiveTab(tabId, {
+        reason: 'updated',
+        status: changeInfo.status,
+      });
     } catch (error) {
       console.warn(
         '[Module Federation Devtools] Failed to handle tab update',

@@ -22,7 +22,7 @@ Many models still have incomplete or outdated knowledge of Module Federation 2.0
 If you use Claude Code, Cursor, Windsurf, or another editor with Skills support, install:
 
 ```bash
-npx skills add module-federation/core --skill mf -y
+npx skills add module-federation/agent-skills --skill mf -y
 ```
 
 Then ask the agent to read the docs before answering:
@@ -46,8 +46,33 @@ The `mf` skill does more than answer questions. It can also help your agent:
 - analyze type issues
 - check shared dependency conflicts
 - inspect remote module information
+- read observability reports and debug MF loading failures
 
 👉 [View Agent Skills documentation](./skill)
+
+## Observe and Debug MF Loading
+
+If you want an AI coding agent to debug Module Federation loading with concrete
+runtime facts, enable the [Observability Plugin](../plugin/plugins/observability-plugin)
+first.
+
+After a loading failure, the browser console will print a `traceId` and,
+in development, a `read:` command. Give that console hint to your agent:
+
+```text
+/mf observability
+I saw this Module Federation console error:
+
+[Module Federation] Observability report generated
+traceId: mf-...
+read: window.__FEDERATION__.__OBSERVABILITY__["runtime_host"].getReport("mf-...")
+
+Please read the report and fix the issue.
+```
+
+For Node or SSR, ask the agent to read `.mf/observability/latest.json`. For
+production, upload reports with the plugin's `onReport` callback and give the
+uploaded report or trace ID to your agent.
 
 ## You Can Still Use This Without Installing Anything
 
@@ -87,4 +112,6 @@ If you want to start using this workflow right away:
 
 1. Install `mf`
 2. Ask the question you care about most
-3. Open [Skills documentation](./skill) to see which sub-commands it supports
+3. Enable the [Observability Plugin](../plugin/plugins/observability-plugin) when
+   you need MF loading observability
+4. Open [Skills documentation](./skill) to see which sub-commands it supports

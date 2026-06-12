@@ -1,5 +1,47 @@
 # @module-federation/node
 
+## 2.7.44
+
+### Patch Changes
+
+- Updated dependencies [4da5508]
+- Updated dependencies [b9b3b8c]
+  - @module-federation/enhanced@2.5.1
+  - @module-federation/sdk@2.5.1
+  - @module-federation/runtime@2.5.1
+
+## 2.7.43
+
+### Patch Changes
+
+- Updated dependencies [5d4095d]
+- Updated dependencies [d433ec9]
+- Updated dependencies [0716c11]
+- Updated dependencies [41281f4]
+  - @module-federation/sdk@2.5.0
+  - @module-federation/runtime@2.5.0
+  - @module-federation/enhanced@2.5.0
+
+## 2.7.42
+
+### Patch Changes
+
+- Updated dependencies [5eba770]
+- Updated dependencies [3a3414c]
+- Updated dependencies [13b1e84]
+  - @module-federation/sdk@2.4.0
+  - @module-federation/runtime@2.4.0
+  - @module-federation/enhanced@2.4.0
+
+## 2.7.41
+
+### Patch Changes
+
+- bc49c23: feat(node): enhance error handling and metadata for chunk execution in runtimePlugin
+  - @module-federation/enhanced@2.3.3
+  - @module-federation/runtime@2.3.3
+  - @module-federation/sdk@2.3.3
+
 ## 2.7.40
 
 ### Patch Changes

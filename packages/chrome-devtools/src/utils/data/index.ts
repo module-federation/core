@@ -1,6 +1,15 @@
 import { GlobalModuleInfo, ConsumerModuleInfo } from '@module-federation/sdk';
 
-import { calculateSnapshot, calculateMicroAppSnapshot } from './snapshot';
+const basicProxyCore = require('../../vendor/basic-proxy-core.js') as {
+  getModuleInfo(
+    proxyRules: Array<any>,
+    moduleInfo: GlobalModuleInfo,
+  ): {
+    status: string;
+    moduleInfo: GlobalModuleInfo;
+    overrides: Record<string, string>;
+  };
+};
 
 export const separateType = (moduleInfo: GlobalModuleInfo) => {
   const consumers: Record<string, GlobalModuleInfo[string]> = {};
@@ -38,33 +47,8 @@ export const getModuleInfo = async (
   moduleInfo: GlobalModuleInfo;
   overrides: Record<string, string>;
 }> => {
-  let freshModuleInfo;
-  const { moduleInfo } = window.__FEDERATION__;
-  const { consumers } = separateType(moduleInfo);
-  const overrides: Record<string, string> = {};
-
-  const isMicroMode = Object.keys(consumers).some((moduleId) => {
-    // @ts-expect-error
-    const subApps = consumers[moduleId].consumerList;
-    return Array.isArray(subApps) && subApps.length;
-  });
-
-  proxyRules.forEach((rule: { key: string; value: string }) => {
-    const { key, value } = rule;
-    overrides[key] = value;
-  });
-  if (isMicroMode) {
-    freshModuleInfo = calculateMicroAppSnapshot(moduleInfo, overrides);
-  } else {
-    freshModuleInfo = calculateSnapshot(moduleInfo, overrides);
-  }
-
-  console.debug('New Snapshot: ', freshModuleInfo);
-  return {
-    status: 'success',
-    moduleInfo: freshModuleInfo as GlobalModuleInfo,
-    overrides,
-  };
+  return basicProxyCore.getModuleInfo(
+    proxyRules,
+    window.__FEDERATION__.moduleInfo,
+  );
 };
-
-export * from './snapshot';

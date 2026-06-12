@@ -1,5 +1,7 @@
-import { callDataFetch } from '@module-federation/bridge-react/data-fetch-utils';
-import { setSSREnv } from '@module-federation/bridge-react/lazy-utils';
+import {
+  callDataFetch,
+  setSSREnv,
+} from '@module-federation/bridge-react/data-fetch';
 
 import type { RuntimePlugin } from '@modern-js/runtime';
 

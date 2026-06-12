@@ -32,7 +32,6 @@ function createMockFederation(overrides: FederationOverrides = {}) {
       ...(overrides.initOptions || {}),
     },
     attachShareScopeMap: jest.fn(),
-    prefetch: jest.fn(),
     ...overrides,
   };
 }
@@ -181,7 +180,6 @@ describe('initContainerEntry with non-array-based share scopes', () => {
   test('should initialize container entry with default values', () => {
     // Setup
     const mockIFunction = jest.fn();
-    const mockPrefetch = jest.fn();
     const mockAttachShareScopeMap = jest.fn();
 
     const mockOptions = createMockOptions({
@@ -193,7 +191,6 @@ describe('initContainerEntry with non-array-based share scopes', () => {
             remotes: ['remote1', 'remote2'],
           },
           attachShareScopeMap: mockAttachShareScopeMap,
-          prefetch: mockPrefetch,
         }),
       }),
       shareScope: {
@@ -221,7 +218,6 @@ describe('initContainerEntry with non-array-based share scopes', () => {
     expect(mockAttachShareScopeMap).toHaveBeenCalledWith(
       mockOptions.webpackRequire,
     );
-    expect(mockPrefetch).toHaveBeenCalled();
     expect(mockIFunction).toHaveBeenCalledWith('default', undefined);
   });
 
@@ -314,15 +310,13 @@ describe('initContainerEntry with non-array-based share scopes', () => {
     expect(mockIFunction).toHaveBeenCalledWith('custom', []);
   });
 
-  test('should not call prefetch when it is not a function', () => {
+  test('should initialize when legacy prefetch is absent', () => {
     // Setup
     const mockIFunction = jest.fn();
     const mockOptions = createMockOptions({
       webpackRequire: createMockWebpackRequire({
         I: mockIFunction,
-        federation: createMockFederation({
-          prefetch: undefined, // Set prefetch to undefined
-        }),
+        federation: createMockFederation(),
       }),
     });
 
@@ -516,17 +510,13 @@ describe('initContainerEntry with non-array-based share scopes', () => {
     expect(mockIFunction).toHaveBeenCalledWith('default', undefined);
   });
 
-  test('should call prefetch when it is a function', () => {
-    // Create a mock prefetch function
-    const mockPrefetch = jest.fn();
-
+  test('should ignore legacy prefetch function', () => {
     // Setup
     const mockIFunction = jest.fn().mockReturnValue(true);
     const mockOptions = createMockOptions({
       webpackRequire: createMockWebpackRequire({
         I: mockIFunction,
         federation: createMockFederation({
-          prefetch: mockPrefetch,
           initOptions: {
             name: 'test-app',
             shared: false,
@@ -539,9 +529,6 @@ describe('initContainerEntry with non-array-based share scopes', () => {
 
     // Execute
     initContainerEntry(mockOptions);
-
-    // Verify prefetch was called
-    expect(mockPrefetch).toHaveBeenCalled();
 
     // Verify I function was called
     expect(mockIFunction).toHaveBeenCalledWith('default', undefined);

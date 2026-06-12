@@ -1,5 +1,56 @@
 # @module-federation/metro
 
+## 2.5.1
+
+### Patch Changes
+
+- Updated dependencies [b79ba22]
+- Updated dependencies [b553153]
+- Updated dependencies [b9b3b8c]
+  - @module-federation/dts-plugin@2.5.1
+  - @module-federation/sdk@2.5.1
+  - @module-federation/runtime@2.5.1
+
+## 2.5.0
+
+### Minor Changes
+
+- 5d4095d: feat(metro): add manifest SHA-256 bundle hashes and optional cache layer integration for bundle loading.
+
+  Credit: originally contributed by @zhongwuzw in #4576.
+
+### Patch Changes
+
+- 6c9d2ee: feat(metro): support manifest hashes in dev builds to enable testing federated module caching during development
+- Updated dependencies [5d4095d]
+- Updated dependencies [d433ec9]
+- Updated dependencies [0716c11]
+- Updated dependencies [13dce52]
+- Updated dependencies [41281f4]
+  - @module-federation/sdk@2.5.0
+  - @module-federation/runtime@2.5.0
+  - @module-federation/dts-plugin@2.5.0
+
+## 2.4.0
+
+### Patch Changes
+
+- Updated dependencies [5eba770]
+- Updated dependencies [3a3414c]
+- Updated dependencies [13b1e84]
+  - @module-federation/sdk@2.4.0
+  - @module-federation/runtime@2.4.0
+  - @module-federation/dts-plugin@2.4.0
+
+## 2.3.3
+
+### Patch Changes
+
+- Updated dependencies [6d33275]
+  - @module-federation/dts-plugin@2.3.3
+  - @module-federation/runtime@2.3.3
+  - @module-federation/sdk@2.3.3
+
 ## 2.3.2
 
 ### Patch Changes

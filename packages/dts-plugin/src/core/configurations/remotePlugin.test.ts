@@ -1,9 +1,53 @@
-import { join, resolve } from 'path';
-import { describe, expect, it } from 'vitest';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'fs';
+import os from 'os';
+import { dirname, join, resolve } from 'path';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import { retrieveRemoteConfig } from './remotePlugin';
 
 describe('hostPlugin', () => {
+  const tempDirs: string[] = [];
+
+  const createTemporaryProject = (files: Record<string, string>) => {
+    const context = mkdtempSync(join(os.tmpdir(), 'mf-dts-plugin-remote-'));
+    tempDirs.push(context);
+
+    writeFileSync(
+      join(context, 'tsconfig.json'),
+      JSON.stringify(
+        {
+          compilerOptions: {
+            target: 'es2017',
+            module: 'esnext',
+            lib: ['esnext'],
+            moduleResolution: 'node',
+            esModuleInterop: true,
+            strict: true,
+            strictNullChecks: true,
+            resolveJsonModule: true,
+            rootDir: '.',
+          },
+        },
+        null,
+        2,
+      ),
+    );
+
+    for (const [relativePath, contents] of Object.entries(files)) {
+      const absolutePath = join(context, relativePath);
+      mkdirSync(dirname(absolutePath), { recursive: true });
+      writeFileSync(absolutePath, contents);
+    }
+
+    return context;
+  };
+
+  afterEach(() => {
+    for (const tempDir of tempDirs.splice(0)) {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
   const moduleFederationConfig = {
     name: 'remotePluginTestHost',
     filename: 'remoteEntry.js',
@@ -50,6 +94,10 @@ describe('hostPlugin', () => {
             noEmit: false,
             declaration: true,
             outDir: resolve(
+              remoteOptions.context,
+              'dist/@mf-types/compiled-types',
+            ),
+            declarationDir: resolve(
               remoteOptions.context,
               'dist/@mf-types/compiled-types',
             ),
@@ -120,6 +168,10 @@ describe('hostPlugin', () => {
             noEmit: false,
             declaration: true,
             outDir: resolve(
+              remoteOptions.context,
+              'dist/typesFolder/compiledTypesFolder',
+            ),
+            declarationDir: resolve(
               remoteOptions.context,
               'dist/typesFolder/compiledTypesFolder',
             ),
@@ -200,6 +252,135 @@ describe('hostPlugin', () => {
             'my-types',
             'compiled',
           ),
+        );
+      });
+    });
+    describe('resolves expose paths with supported extensions', () => {
+      const resolveExpose = (
+        exposePath: string,
+        files: Record<string, string>,
+      ) => {
+        const context = createTemporaryProject(files);
+        const { mapComponentsToExpose } = retrieveRemoteConfig({
+          context,
+          tsConfigPath: './tsconfig.json',
+          moduleFederationConfig: {
+            name: 'remotePluginTestHost',
+            filename: 'remoteEntry.js',
+            exposes: {
+              './component': exposePath,
+            },
+          },
+        });
+
+        return {
+          context,
+          resolvedPath: mapComponentsToExpose['./component'],
+        };
+      };
+
+      it('keeps existing single-segment inference for ts files', () => {
+        const { context, resolvedPath } = resolveExpose(
+          './src/components/foo',
+          {
+            'src/components/foo.ts': 'export const foo = 1;\n',
+          },
+        );
+
+        expect(resolvedPath).toBe(resolve(context, 'src/components/foo.ts'));
+      });
+
+      it('infers ts files for multi-dot expose paths', () => {
+        const { context, resolvedPath } = resolveExpose(
+          './src/components/foo.generated',
+          {
+            'src/components/foo.generated.ts': 'export const foo = 1;\n',
+          },
+        );
+
+        expect(resolvedPath).toBe(
+          resolve(context, 'src/components/foo.generated.ts'),
+        );
+      });
+
+      it('preserves explicit multi-dot ts paths', () => {
+        const { context, resolvedPath } = resolveExpose(
+          './src/components/foo.generated.ts',
+          {
+            'src/components/foo.generated.ts': 'export const foo = 1;\n',
+          },
+        );
+
+        expect(resolvedPath).toBe(
+          resolve(context, 'src/components/foo.generated.ts'),
+        );
+      });
+
+      it('infers tsx files for multi-dot expose paths', () => {
+        const { context, resolvedPath } = resolveExpose(
+          './src/components/foo.generated',
+          {
+            'src/components/foo.generated.tsx':
+              'export const Foo = () => null;\n',
+          },
+        );
+
+        expect(resolvedPath).toBe(
+          resolve(context, 'src/components/foo.generated.tsx'),
+        );
+      });
+
+      it('infers vue files for multi-dot expose paths', () => {
+        const { context, resolvedPath } = resolveExpose(
+          './src/components/foo.generated',
+          {
+            'src/components/foo.generated.vue':
+              '<script setup lang="ts">const foo = 1;</script>\n',
+          },
+        );
+
+        expect(resolvedPath).toBe(
+          resolve(context, 'src/components/foo.generated.vue'),
+        );
+      });
+
+      it('infers jsx files for multi-dot expose paths', () => {
+        const { context, resolvedPath } = resolveExpose(
+          './src/components/foo.generated',
+          {
+            'src/components/foo.generated.jsx':
+              'export const Foo = () => null;\n',
+          },
+        );
+
+        expect(resolvedPath).toBe(
+          resolve(context, 'src/components/foo.generated.jsx'),
+        );
+      });
+
+      it('falls back to dotted directory index files', () => {
+        const { context, resolvedPath } = resolveExpose(
+          './src/components/foo.bar',
+          {
+            'src/components/foo.bar/index.ts': 'export const foo = 1;\n',
+          },
+        );
+
+        expect(resolvedPath).toBe(
+          resolve(context, 'src/components/foo.bar/index.ts'),
+        );
+      });
+
+      it('falls back to normal directory index files', () => {
+        const { context, resolvedPath } = resolveExpose(
+          './src/components/foo',
+          {
+            'src/components/foo/index.ts': 'export const foo = 1;\n',
+          },
+        );
+
+        expect(resolvedPath).toBe(
+          resolve(context, 'src/components/foo/index.ts'),
         );
       });
     });

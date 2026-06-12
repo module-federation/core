@@ -166,7 +166,7 @@ const getEnvHeaders = (): Record<string, string> => {
 
 export type FetchRequestConfig = {
   timeout?: number;
-  family?: 4 | 6;
+  family?: 0 | 4 | 6;
   headers?: Record<string, string>;
   responseType?: 'arraybuffer';
   /**
@@ -181,7 +181,7 @@ export type FetchRequestConfig = {
   agent?: unknown;
 };
 
-const createDispatcherFromFamily = (family?: 4 | 6): DispatcherLike => {
+const createDispatcherFromFamily = (family?: 0 | 4 | 6): DispatcherLike => {
   if (!family) return undefined;
   if (dispatcherCache.has(family)) return dispatcherCache.get(family);
   try {

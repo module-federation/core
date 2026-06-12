@@ -347,10 +347,6 @@ export default {
         },
       },
     },
-    dataPrefetch: {
-      description: 'Enable data prefetching for container modules.',
-      type: 'boolean',
-    },
     runtimePlugins: {
       description: 'Array of runtime plugins to be applied',
       type: 'array',

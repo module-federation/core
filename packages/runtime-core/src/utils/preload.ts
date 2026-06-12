@@ -1,11 +1,14 @@
 import { createLink, createScript, safeToString } from '@module-federation/sdk';
 import {
   PreloadAssets,
+  PreloadAssetResult,
   PreloadConfig,
   PreloadOptions,
   PreloadRemoteArgs,
   Remote,
   RemoteInfo,
+  ResourceLoadContext,
+  ResourceLoadType,
   depsPreloadArg,
 } from '../type';
 import { matchRemote } from './manifest';
@@ -20,7 +23,6 @@ export function defaultPreloadArgs(
     resourceCategory: 'sync',
     share: true,
     depsRemote: true,
-    prefetchInterface: false,
     ...preloadConfig,
   } as PreloadConfig;
 }
@@ -64,32 +66,210 @@ export function normalizePreloadExposes(exposes?: string[]): string[] {
   });
 }
 
+function isTimeoutError(error: unknown): boolean {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+  return error.message.includes('timed out') || error.name.includes('Timeout');
+}
+
+function createAssetResult(
+  context: ResourceLoadContext,
+  url: string,
+  status: PreloadAssetResult['status'],
+  error?: unknown,
+): PreloadAssetResult {
+  return {
+    url,
+    status,
+    resourceType: context.resourceType,
+    initiator: context.initiator,
+    id: context.id,
+    error,
+  };
+}
+
+async function waitForRemoteEntryPreload(
+  host: ModuleFederation,
+  remoteInfo: RemoteInfo,
+  entryRemoteInfo: RemoteInfo,
+  context: ResourceLoadContext,
+): Promise<PreloadAssetResult> {
+  const cachedRemote = host.moduleCache.get(entryRemoteInfo.name);
+  const url = entryRemoteInfo.entry;
+  if (cachedRemote?.remoteEntryExports) {
+    return createAssetResult(context, url, 'cached');
+  }
+
+  try {
+    const remoteEntryExports = await getRemoteEntry({
+      origin: host,
+      remoteInfo: entryRemoteInfo,
+      remoteEntryExports: cachedRemote?.remoteEntryExports,
+      resourceContext: {
+        ...context,
+        url,
+      },
+    });
+    if (!remoteEntryExports) {
+      throw new Error(`Failed to load remoteEntry "${url}".`);
+    }
+    return createAssetResult(context, url, 'success');
+  } catch (error) {
+    return createAssetResult(
+      context,
+      url,
+      isTimeoutError(error) ? 'timeout' : 'error',
+      error,
+    );
+  }
+}
+
+function waitForLinkPreload({
+  host,
+  remoteInfo,
+  url,
+  attrs,
+  context,
+  needDeleteLink,
+}: {
+  host: ModuleFederation;
+  remoteInfo: RemoteInfo;
+  url: string;
+  attrs: Record<string, string>;
+  context: ResourceLoadContext;
+  needDeleteLink?: boolean;
+}): Promise<PreloadAssetResult> {
+  return new Promise((resolve) => {
+    const { link, needAttach } = createLink({
+      url,
+      cb: () => {
+        resolve(
+          createAssetResult(context, url, needAttach ? 'success' : 'cached'),
+        );
+      },
+      onErrorCallback: (error) => {
+        resolve(
+          createAssetResult(
+            context,
+            url,
+            isTimeoutError(error) ? 'timeout' : 'error',
+            error,
+          ),
+        );
+      },
+      attrs,
+      createLinkHook: (hookUrl, hookAttrs) => {
+        const res = host.loaderHook.lifecycle.createLink.emit({
+          url: hookUrl,
+          attrs: hookAttrs,
+          remoteInfo,
+          resourceContext: {
+            ...context,
+            url: hookUrl,
+          },
+        });
+        if (res instanceof HTMLLinkElement) {
+          return res;
+        }
+        return res;
+      },
+      needDeleteLink,
+    });
+
+    needAttach && document.head.appendChild(link);
+  });
+}
+
+function waitForScriptPreload({
+  host,
+  remoteInfo,
+  url,
+  attrs,
+  context,
+}: {
+  host: ModuleFederation;
+  remoteInfo: RemoteInfo;
+  url: string;
+  attrs: Record<string, string>;
+  context: ResourceLoadContext;
+}): Promise<PreloadAssetResult> {
+  return new Promise((resolve) => {
+    const { script, needAttach } = createScript({
+      url,
+      cb: () => {
+        resolve(
+          createAssetResult(context, url, needAttach ? 'success' : 'cached'),
+        );
+      },
+      onErrorCallback: (error) => {
+        resolve(
+          createAssetResult(
+            context,
+            url,
+            isTimeoutError(error) ? 'timeout' : 'error',
+            error,
+          ),
+        );
+      },
+      attrs,
+      createScriptHook: (hookUrl: string, hookAttrs: any) => {
+        const res = host.loaderHook.lifecycle.createScript.emit({
+          url: hookUrl,
+          attrs: hookAttrs,
+          remoteInfo,
+          resourceContext: {
+            ...context,
+            url: hookUrl,
+          },
+        });
+        if (res instanceof HTMLScriptElement) {
+          return res;
+        }
+        return res;
+      },
+      needDeleteScript: true,
+    });
+
+    needAttach && document.head.appendChild(script);
+  });
+}
+
+function createResourceContext(
+  baseContext: Omit<ResourceLoadContext, 'resourceType'>,
+  resourceType: ResourceLoadType,
+): ResourceLoadContext {
+  return {
+    ...baseContext,
+    resourceType,
+  };
+}
+
 export function preloadAssets(
   remoteInfo: RemoteInfo,
   host: ModuleFederation,
   assets: PreloadAssets,
   // It is used to distinguish preload from load remote parallel loading
   useLinkPreload = true,
-): void {
+  baseContext: Omit<ResourceLoadContext, 'resourceType'> = {
+    initiator: 'preloadRemote',
+    id: remoteInfo.name,
+  },
+): Promise<PreloadAssetResult[]> {
   const { cssAssets, jsAssetsWithoutEntry, entryAssets } = assets;
+  const results: Array<Promise<PreloadAssetResult>> = [];
 
   if (host.options.inBrowser) {
     entryAssets.forEach((asset) => {
-      const { moduleInfo } = asset;
-      const module = host.moduleCache.get(remoteInfo.name);
-      if (module) {
-        getRemoteEntry({
-          origin: host,
-          remoteInfo: moduleInfo,
-          remoteEntryExports: module.remoteEntryExports,
-        });
-      } else {
-        getRemoteEntry({
-          origin: host,
-          remoteInfo: moduleInfo,
-          remoteEntryExports: undefined,
-        });
-      }
+      const { moduleInfo: entryRemoteInfo } = asset;
+      results.push(
+        waitForRemoteEntryPreload(
+          host,
+          remoteInfo,
+          entryRemoteInfo,
+          createResourceContext(baseContext, 'remoteEntry'),
+        ),
+      );
     });
 
     if (useLinkPreload) {
@@ -98,26 +278,15 @@ export function preloadAssets(
         as: 'style',
       };
       cssAssets.forEach((cssUrl) => {
-        const { link: cssEl, needAttach } = createLink({
-          url: cssUrl,
-          cb: () => {
-            // noop
-          },
-          attrs: defaultAttrs,
-          createLinkHook: (url, attrs) => {
-            const res = host.loaderHook.lifecycle.createLink.emit({
-              url,
-              attrs,
-              remoteInfo,
-            });
-            if (res instanceof HTMLLinkElement) {
-              return res;
-            }
-            return;
-          },
-        });
-
-        needAttach && document.head.appendChild(cssEl);
+        results.push(
+          waitForLinkPreload({
+            host,
+            remoteInfo,
+            url: cssUrl,
+            attrs: defaultAttrs,
+            context: createResourceContext(baseContext, 'css'),
+          }),
+        );
       });
     } else {
       const defaultAttrs = {
@@ -125,27 +294,16 @@ export function preloadAssets(
         type: 'text/css',
       };
       cssAssets.forEach((cssUrl) => {
-        const { link: cssEl, needAttach } = createLink({
-          url: cssUrl,
-          cb: () => {
-            // noop
-          },
-          attrs: defaultAttrs,
-          createLinkHook: (url, attrs) => {
-            const res = host.loaderHook.lifecycle.createLink.emit({
-              url,
-              attrs,
-              remoteInfo,
-            });
-            if (res instanceof HTMLLinkElement) {
-              return res;
-            }
-            return;
-          },
-          needDeleteLink: false,
-        });
-
-        needAttach && document.head.appendChild(cssEl);
+        results.push(
+          waitForLinkPreload({
+            host,
+            remoteInfo,
+            url: cssUrl,
+            attrs: defaultAttrs,
+            needDeleteLink: false,
+            context: createResourceContext(baseContext, 'css'),
+          }),
+        );
       });
     }
 
@@ -155,25 +313,15 @@ export function preloadAssets(
         as: 'script',
       };
       jsAssetsWithoutEntry.forEach((jsUrl) => {
-        const { link: linkEl, needAttach } = createLink({
-          url: jsUrl,
-          cb: () => {
-            // noop
-          },
-          attrs: defaultAttrs,
-          createLinkHook: (url: string, attrs) => {
-            const res = host.loaderHook.lifecycle.createLink.emit({
-              url,
-              attrs,
-              remoteInfo,
-            });
-            if (res instanceof HTMLLinkElement) {
-              return res;
-            }
-            return;
-          },
-        });
-        needAttach && document.head.appendChild(linkEl);
+        results.push(
+          waitForLinkPreload({
+            host,
+            remoteInfo,
+            url: jsUrl,
+            attrs: defaultAttrs,
+            context: createResourceContext(baseContext, 'js'),
+          }),
+        );
       });
     } else {
       const defaultAttrs = {
@@ -181,27 +329,18 @@ export function preloadAssets(
         type: remoteInfo?.type === 'module' ? 'module' : 'text/javascript',
       };
       jsAssetsWithoutEntry.forEach((jsUrl) => {
-        const { script: scriptEl, needAttach } = createScript({
-          url: jsUrl,
-          cb: () => {
-            // noop
-          },
-          attrs: defaultAttrs,
-          createScriptHook: (url: string, attrs: any) => {
-            const res = host.loaderHook.lifecycle.createScript.emit({
-              url,
-              attrs,
-              remoteInfo,
-            });
-            if (res instanceof HTMLScriptElement) {
-              return res;
-            }
-            return;
-          },
-          needDeleteScript: true,
-        });
-        needAttach && document.head.appendChild(scriptEl);
+        results.push(
+          waitForScriptPreload({
+            host,
+            remoteInfo,
+            url: jsUrl,
+            attrs: defaultAttrs,
+            context: createResourceContext(baseContext, 'js'),
+          }),
+        );
       });
     }
   }
+
+  return Promise.all(results);
 }

@@ -1,0 +1,49 @@
+# React Bridge Overview
+
+`@module-federation/bridge-react` is a powerful micro-frontend solution designed specifically for React applications. By providing cross-framework rendering and routing coordination capabilities, you can easily export and load React applications or modules as standalone applications.
+
+## Core Features
+
+### Basic Capabilities
+- **🚀 Application-level Module Export**: Use `createBridgeComponent` to wrap complete React applications as remotely loadable modules
+- **📦 Application-level Module Loading**: Seamlessly integrate remote React applications in host applications through `createRemoteAppComponent`
+- **🎯 Component-level Lazy Loading**: Support `createLazyComponent` for fine-grained component-level lazy loading
+
+### Features
+- **🔄 Cross-framework Rendering**: Support cross-framework rendering between different frameworks (React, Vue, Angular, etc.)
+- **🛣️ Routing Coordination**: Automatically handle React Router basename injection and routing context passing
+- **🔗 Version Compatibility**: Full support for React 16-19, automatically handling rendering differences and lifecycle across versions
+- **⚡ Data Prefetch**: Built-in resource data prefetch mechanism, supporting application, component, and dependency prefetch optimization
+
+### Why This Matters?
+
+- **Progressive Upgrade**: Allow different teams to upgrade React versions at their own pace
+- **Zero-disruption Integration**: New and legacy applications can work together seamlessly without synchronized upgrades
+- **Technical Debt Management**: Avoid integration issues caused by version inconsistencies
+- **Team Autonomy**: Each team can independently choose the most suitable React version
+
+## Smart Version Adaptation
+
+React Bridge provides flexible import methods, allowing users to choose appropriate implementations based on their React version:
+
+```tsx
+// Use when explicitly specifying version
+import { createBridgeComponent } from '@module-federation/bridge-react'; // React 16/17
+import { createBridgeComponent } from '@module-federation/bridge-react/18'; // React 18
+import { createBridgeComponent } from '@module-federation/bridge-react/19'; // React 19
+```
+
+:::warning Important
+`@module-federation/bridge-react/18` and `/19` import `createRoot` from `react-dom/client`. If you only configure `"react-dom"` as a shared dependency, `react-dom/client` will not be shared and can cause React version mismatch errors. Make sure to use the trailing-slash prefix form:
+
+```ts
+shared: {
+  'react-dom/': {
+    singleton: true,
+  },
+}
+```
+:::
+
+### 💡 Examples
+[Complete Examples](https://github.com/module-federation/core/tree/main/apps/router-demo) - Complete micro-frontend project containing multiple React applications

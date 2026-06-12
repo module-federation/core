@@ -1,5 +1,68 @@
 # @module-federation/modern-js
 
+## 2.5.1
+
+### Patch Changes
+
+- Updated dependencies [4da5508]
+- Updated dependencies [0d06c4a]
+- Updated dependencies [b50395e]
+- Updated dependencies [b9b3b8c]
+- Updated dependencies [d7b8a57]
+  - @module-federation/enhanced@2.5.1
+  - @module-federation/bridge-react@2.5.1
+  - @module-federation/rsbuild-plugin@2.5.1
+  - @module-federation/sdk@2.5.1
+  - @module-federation/cli@2.5.1
+  - @module-federation/node@2.7.44
+  - @module-federation/runtime@2.5.1
+
+## 2.5.0
+
+### Patch Changes
+
+- 180004d: Expose data-fetch subpaths for bridge-react and Modern.js users, and remove hono from bridge-react peer dependencies.
+- Updated dependencies [180004d]
+- Updated dependencies [5d4095d]
+- Updated dependencies [d433ec9]
+- Updated dependencies [0716c11]
+- Updated dependencies [41281f4]
+  - @module-federation/bridge-react@2.5.0
+  - @module-federation/sdk@2.5.0
+  - @module-federation/runtime@2.5.0
+  - @module-federation/cli@2.5.0
+  - @module-federation/enhanced@2.5.0
+  - @module-federation/node@2.7.43
+  - @module-federation/rsbuild-plugin@2.5.0
+
+## 2.4.0
+
+### Patch Changes
+
+- Updated dependencies [5eba770]
+- Updated dependencies [3a3414c]
+- Updated dependencies [13b1e84]
+  - @module-federation/sdk@2.4.0
+  - @module-federation/runtime@2.4.0
+  - @module-federation/enhanced@2.4.0
+  - @module-federation/bridge-react@2.4.0
+  - @module-federation/cli@2.4.0
+  - @module-federation/node@2.7.42
+  - @module-federation/rsbuild-plugin@2.4.0
+
+## 2.3.3
+
+### Patch Changes
+
+- Updated dependencies [bc49c23]
+  - @module-federation/node@2.7.41
+  - @module-federation/cli@2.3.3
+  - @module-federation/enhanced@2.3.3
+  - @module-federation/rsbuild-plugin@2.3.3
+  - @module-federation/runtime@2.3.3
+  - @module-federation/sdk@2.3.3
+  - @module-federation/bridge-react@2.3.3
+
 ## 2.3.2
 
 ### Patch Changes

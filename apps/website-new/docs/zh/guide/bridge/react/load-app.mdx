@@ -1,0 +1,427 @@
+# 加载应用
+
+本章将介绍如何使用 `createRemoteAppComponent` 在宿主应用中加载和集成远程 React 应用。
+
+## 什么是 createRemoteAppComponent？
+
+`createRemoteAppComponent` 是 React Bridge 的核心 API，用于在宿主应用中加载远程 React 应用。它具有以下特性：
+
+- **🚀 自动懒加载** - 远程应用会在需要时才开始加载
+- **🔧 生命周期管理** - 自动处理组件的挂载和卸载
+- **🛣️ 路由集成** - 无缝集成 React Router，支持 basename 注入
+- **⚡ 错误处理** - 内置加载失败和运行时错误处理机制
+- **🎨 样式隔离** - 支持组件级样式和类名配置 
+
+
+## 安装
+
+import { PackageManagerTabs } from '@theme';
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm install @module-federation/bridge-react@latest',
+    yarn: 'yarn add @module-federation/bridge-react@latest',
+    pnpm: 'pnpm add @module-federation/bridge-react@latest',
+  }}
+/>
+## 基本使用
+
+### 步骤 1: 配置远程模块
+
+在宿主应用的配置文件中，添加远程应用的配置：
+
+:::tip 构建工具支持
+以下示例使用 Rsbuild 配置，请根据您使用的构建工具进行相应调整：
+- **Rsbuild**: `@module-federation/rsbuild-plugin`
+- **Rspack**: `@module-federation/enhanced/rspack`
+- **Webpack**: `@module-federation/enhanced/webpack`
+- **Vite**: `@module-federation/vite`
+
+:::
+
+
+```ts
+// rsbuild.config.ts
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+import { defineConfig } from '@rsbuild/core';
+
+export default defineConfig({
+  plugins: [
+    pluginModuleFederation({
+      name: 'host-app',
+      remotes: {
+        'remote1': 'remote1@http://localhost:3001/remoteEntry.js',
+      },
+    }),
+  ],
+});
+```
+
+:::tip
+如果远程应用使用 React 18/19 bridge，请确保也使用尾部斜杠前缀形式 (`'react-dom/'`) 配置 `shared` 部分，以便 `react-dom/client` 被正确共享。
+:::
+
+### 步骤 2: 创建远程组件
+
+#### 2.1 定义加载和错误组件
+
+首先，创建加载状态和错误处理组件：
+
+```tsx
+// ./src/components/RemoteComponents.tsx
+import React from 'react';
+
+// 加载状态组件
+export const LoadingComponent = () => (
+  <div style={{ padding: '20px', textAlign: 'center' }}>
+    <div>远程应用加载中...</div>
+  </div>
+);
+
+// 错误回退组件
+export const ErrorFallback = ({ error }: { error: Error }) => (
+  <div style={{ padding: '20px', border: '1px solid #ff6b6b', borderRadius: '8px' }}>
+    <h3>远程应用加载失败</h3>
+    <p>错误详情: {error.message}</p>
+    <button onClick={() => window.location.reload()}>
+      重新加载页面
+    </button>
+  </div>
+);
+```
+
+#### 2.2 创建远程应用组件
+
+使用 `createRemoteAppComponent` 创建远程组件：
+
+```tsx
+// ./src/remotes/Remote1App.tsx
+import { createRemoteAppComponent } from '@module-federation/bridge-react';
+import { loadRemote } from '@module-federation/runtime';
+import { LoadingComponent, ErrorFallback } from '../components/RemoteComponents';
+
+export const Remote1App = createRemoteAppComponent({
+  loader: () => loadRemote('remote1/export-app'),
+  loading: <LoadingComponent />,
+  fallback: ErrorFallback,
+});
+```
+
+#### 2.3 主应用路由配置
+
+在主应用中配置路由：
+
+```tsx
+// ./src/App.tsx
+import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Remote1App } from './remotes/Remote1App';
+
+// 宿主应用首页组件
+const HomePage = () => (
+  <div style={{ padding: '20px' }}>
+    <h1>宿主应用首页</h1>
+    <p>这是宿主应用的首页内容</p>
+  </div>
+);
+
+const App = () => {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route
+          path="/remote1/*"
+          // 使用 Remote1App 组件, 将会被懒加载
+          Component={() => (
+            <Remote1App
+              // 可设置 className 和 style 样式，将自动注入到组件上
+              className={styles.remote1}
+              style={{ color: 'red' }}
+              // name 和 age 为远程组件 props, 将自动透传到远程组件
+              name={'Ming'}
+              age={12}
+              // 可设置 ref, 将自动转发到远程组件，可获取 ref 对象操作 dom
+              ref={ref}
+            />
+          )}
+        />
+      </Routes>
+    </BrowserRouter>
+  );
+};
+
+export default App;
+```
+
+## 远程组件 Props
+
+### 路由相关属性
+
+- **`basename`**: 设置远程应用的基础路径
+- **`memoryRoute`**: 内存路由配置，用于将子应用路由作为 memoryRouter 控制
+
+### 样式属性
+
+- **`style`**: React.CSSProperties - 设置组件样式
+- **`className`**: string - 设置组件类名
+
+### 引用支持
+
+- **`ref`**: React.Ref\<HTMLDivElement\> - 转发引用到内部容器元素，可用于 DOM 操作
+
+### 数据传递
+
+- **`props`**: 传递给远程组件的属性对象
+- 或者直接传递属性，如 `userId={'123'}`
+
+## createRemoteAppComponent API 参考
+
+### 函数签名
+
+```tsx
+function createRemoteAppComponent<T = Record<string, unknown>, E extends keyof T = keyof T>(
+  config: RemoteComponentParams<T, E>
+): React.ForwardRefExoticComponent<
+  Omit<RemoteComponentProps<T>, "ref"> & React.RefAttributes<HTMLDivElement>
+>
+```
+
+#### RemoteComponentParams\<T, E\>
+
+配置参数接口：
+
+```tsx
+interface RemoteComponentParams<T = Record<string, unknown>, E extends keyof T = keyof T> {
+  // 远程模块加载器
+  loader: () => Promise<T>;
+  
+  // 加载状态显示内容
+  loading: React.ReactNode;
+  
+  // 错误回退组件
+  fallback: React.ComponentType<{ error: Error }>;
+  
+  // 导出名称（可选）
+  export?: E;
+  
+  // 传递给远程组件的属性（可选）
+  props?: T;
+}
+```
+
+#### RemoteComponentProps\<T\>
+
+返回组件的属性接口：
+
+```tsx
+interface RemoteComponentProps<T = Record<string, unknown>> {
+  // 传递给远程组件的属性
+  props?: T;
+  
+  // 错误回退组件
+  fallback?: React.ComponentType<{ error: Error }>;
+  
+  // 加载状态显示内容
+  loading?: React.ReactNode;
+  
+  // 路由基础路径
+  basename?: string;
+  
+  // 内存路由配置
+  memoryRoute?: {
+    entryPath: string;
+    initialState?: Record<string, unknown>;
+  };
+  
+  // 样式属性
+  style?: React.CSSProperties;
+  className?: string;
+  
+  // 其他自定义属性
+  [key: string]: unknown;
+}
+```
+
+### 参数详解
+
+#### loader
+
+- **类型**: `() => Promise<T>`
+- **必需**: 是
+- **作用**: 用于加载远程模块的函数，返回一个 Promise，该 Promise 解析为远程模块对象
+- **示例**:
+  ```tsx
+  loader: () => loadRemote('remote1/export-app')
+  loader: () => import('remote1/export-app')
+  ```
+
+#### loading
+
+- **类型**: `React.ReactNode`
+- **必需**: 是
+- **作用**: 在远程应用加载期间显示的加载内容，可以是组件、元素或字符串
+- **示例**:
+  ```tsx
+  loading: <div>Loading...</div>
+  loading: 'Loading remote app...'
+  loading: <Spinner />
+  ```
+
+#### fallback
+
+- **类型**: `React.ComponentType<{ error: Error }>`
+- **必需**: 是
+- **作用**: 当远程应用加载失败时显示的错误回退组件，会接收错误对象作为 `error` 属性
+- **示例**:
+  ```tsx
+  fallback: ({ error }) => <div>Error: {error.message}</div>
+  fallback: ErrorBoundaryComponent
+  ```
+
+#### export
+
+- **类型**: `E extends keyof T` (泛型约束，通常是 `string`)
+- **必需**: 否
+- **默认值**: `'default'`
+- **作用**: 指定要使用的远程模块导出名称
+- **示例**:
+  
+  假设远程模块有以下导出：
+  ```tsx
+  // 远程模块的导出
+  export default App;           // 默认导出
+  export const provider = App;  // 命名导出 provider
+  export const dashboard = Dashboard; // 命名导出 dashboard
+  ```
+  
+  在宿主应用中可以这样使用：
+  ```tsx
+  // 使用默认导出（可以省略 export 参数）
+  createRemoteAppComponent({
+    loader: () => loadRemote('remote1/export-app'),
+    // export: 'default' // 可以省略，默认就是 'default'
+  })
+  
+  // 使用命名导出 provider
+  createRemoteAppComponent({
+    loader: () => loadRemote('remote1/export-app'),
+    export: 'provider'
+  })
+  
+  // 使用命名导出 dashboard
+  createRemoteAppComponent({
+    loader: () => loadRemote('remote1/export-app'),
+    export: 'dashboard'
+  })
+  ```
+
+
+## Bundle 体积优化
+
+### React Router 依赖说明
+
+默认情况下，`@module-federation/bridge-react` 会将 `react-router-dom` 打包到你的 bundle 中，这是为了提供以下开箱即用的能力：
+
+- ✅ 自动 basename 注入 - 无需手动配置路由基础路径
+- ✅ 路由上下文传递 - 自动处理 React Router 上下文
+- ✅ 嵌套路由支持 - 完整的路由集成能力
+
+**但是**，如果你的项目满足以下任一条件：
+- 不需要路由功能（纯组件加载）
+- 使用非 react-router 的路由框架（如 TanStack Router）
+- 希望最小化 bundle 体积
+
+**建议关闭** `enableBridgeRouter` 配置来禁用此能力，这将：
+- ✅ 减小 bundle 体积约 3KB (gzipped)
+- ✅ 避免不必要的依赖注入
+- ✅ 消除潜在的版本冲突风险
+
+### 如何禁用 Router 依赖
+
+你可以通过 `bridge.enableBridgeRouter` 配置来控制是否包含路由支持：
+
+```ts title="rsbuild.config.ts"
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+
+export default {
+  plugins: [
+    pluginModuleFederation({
+      name: 'host-app',
+      remotes: {
+        remote1: 'remote1@http://localhost:3001/mf-manifest.json',
+      },
+      bridge: {
+        // 禁用路由支持以减小 bundle 体积
+        enableBridgeRouter: false,
+      },
+    }),
+  ],
+};
+```
+
+:::tip 配置行为
+- **`enableBridgeRouter: false`**: 自动 alias 到 `/base` 入口（不包含 react-router-dom 代码）
+- **`enableBridgeRouter: true`** 或 **`undefined`**: 包含路由支持（默认行为）
+
+:::
+
+### 何时禁用 Router？
+
+**禁用 router** (`enableBridgeRouter: false`) 适用于：
+- ✅ 应用不使用 react-router
+- ✅ 想要最小化 bundle 体积
+- ✅ 可以手动管理 basename（如果需要）
+
+**保持 router 启用**（默认）适用于：
+- ✅ 应用使用 react-router
+- ✅ 需要自动 basename 注入
+- ✅ 需要路由上下文集成
+
+### 迁移示例
+
+#### 迁移前：启用 Router（默认）
+```tsx
+import { createRemoteAppComponent } from '@module-federation/bridge-react';
+
+const RemoteApp = createRemoteAppComponent({
+  loader: () => loadRemote('remote1/app'),
+  loading: <div>Loading...</div>,
+  fallback: ErrorBoundary,
+});
+
+// basename 自动从路由上下文获取
+<RemoteApp />
+```
+
+#### 迁移后：禁用 Router（优化）
+```ts title="rsbuild.config.ts"
+// 配置
+pluginModuleFederation({
+  bridge: {
+    enableBridgeRouter: false, // 禁用 router
+  },
+})
+```
+
+```tsx
+import { createRemoteAppComponent } from '@module-federation/bridge-react';
+
+const RemoteApp = createRemoteAppComponent({
+  loader: () => loadRemote('remote1/app'),
+  loading: <div>Loading...</div>,
+  fallback: ErrorBoundary,
+});
+
+// 无需修改代码！插件会自动 alias 到 /base 入口
+<RemoteApp basename="/" />  // 如果需要，手动传递 basename
+```
+
+:::info 工作原理
+当设置 `enableBridgeRouter: false` 时，Module Federation 插件会自动设置 webpack alias：
+```
+'@module-federation/bridge-react' → '@module-federation/bridge-react/base'
+```
+
+这意味着你的导入会自动解析到无路由版本，无需修改任何代码！
+:::

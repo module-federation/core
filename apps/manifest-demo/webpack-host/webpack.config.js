@@ -119,7 +119,6 @@ module.exports = (_env, argv = {}) => {
             requiredVersion: '^18.3.1',
           },
         },
-        dataPrefetch: true,
         runtimePlugins: [path.join(__dirname, './runtimePlugin.ts')],
         experiments: {
           provideExternalRuntime: true,

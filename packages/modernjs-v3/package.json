@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/modern-js-v3",
-  "version": "2.3.2",
+  "version": "2.5.1",
   "files": [
     "dist/",
     "types.d.ts",
@@ -29,6 +29,10 @@
     "./runtime": {
       "types": "./dist/types/runtime/index.d.ts",
       "default": "./dist/esm/runtime/index.mjs"
+    },
+    "./data-fetch": {
+      "types": "./dist/types/react/data-fetch.d.ts",
+      "default": "./dist/esm/react/data-fetch.mjs"
     },
     "./react": {
       "types": "./dist/types/react/index.d.ts",
@@ -91,6 +95,9 @@
       "runtime": [
         "./dist/types/runtime/index.d.ts"
       ],
+      "data-fetch": [
+        "./dist/types/react/data-fetch.d.ts"
+      ],
       "react": [
         "./dist/types/react/index.d.ts"
       ],
@@ -149,6 +156,7 @@
     "@module-federation/manifest": "workspace:*",
     "@rslib/core": "0.18.5",
     "@rsbuild/core": "2.0.0-beta.2",
+    "@rspack/core": "2.0.6",
     "@modern-js/app-tools": "3.0.1",
     "@modern-js/server-runtime": "3.0.1",
     "@modern-js/module-tools": "2.70.5",

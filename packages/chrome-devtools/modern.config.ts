@@ -36,6 +36,8 @@ export default defineConfig({
       config.entry['fast-refresh'] = './src/utils/chrome/fast-refresh.ts';
       config.entry['override-remote'] = './src/utils/chrome/override-remote.ts';
       config.entry['snapshot-plugin'] = './src/utils/chrome/snapshot-plugin.ts';
+      config.entry['observability-plugin'] =
+        './src/utils/chrome/observability-plugin.ts';
       config.entry['post-message'] = './src/utils/chrome/post-message.ts';
       config.entry['post-message-init'] =
         './src/utils/chrome/post-message-init.ts';

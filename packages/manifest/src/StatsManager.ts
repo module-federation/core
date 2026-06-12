@@ -1,8 +1,6 @@
 /* eslint-disable max-lines-per-function */
 /* eslint-disable @typescript-eslint/member-ordering */
 /* eslint-disable max-depth */
-import fs from 'fs';
-import path from 'path';
 import {
   StatsRemote,
   StatsBuildInfo,
@@ -12,8 +10,6 @@ import {
   StatsAssets,
   moduleFederationPlugin,
   RemoteEntryType,
-  encodeName,
-  MFPrefetchCommon,
   composeKeyWithSeparator,
   getManifestFileName,
   StatsMetaDataWithGetPublicPath,
@@ -187,19 +183,6 @@ class StatsManager {
       pluginVersion: this._pluginVersion,
     };
 
-    let prefetchInterface = false;
-    const prefetchFilePath = path.resolve(
-      compiler.options.context || process.cwd(),
-      `node_modules/.mf/${encodeName(name!)}/${MFPrefetchCommon.fileName}`,
-    );
-    const existPrefetch = fs.existsSync(prefetchFilePath);
-    if (existPrefetch) {
-      const content = fs.readFileSync(prefetchFilePath).toString();
-      if (content) {
-        prefetchInterface = true;
-      }
-    }
-    metaData.prefetchInterface = prefetchInterface;
     return this.setMetaDataPublicPath(metaData, compiler);
   }
 
@@ -622,9 +605,6 @@ class StatsManager {
       metaData.pluginVersion = this._pluginVersion;
     }
     this.setMetaDataPublicPath(metaData, compiler);
-    // rspack not support legacy prefetch, and this field should be removed in the future
-    metaData.prefetchInterface = false;
-
     return stats;
   }
 

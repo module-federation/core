@@ -94,14 +94,14 @@
 }
 
 .activeTab {
-  border-color: rgba(99, 102, 241, 0.65);
+  border-color: rgba(24, 24, 27, 0.28);
   background: linear-gradient(
     135deg,
-    rgba(59, 130, 246, 0.15),
-    rgba(37, 99, 235, 0.1)
+    rgba(24, 24, 27, 0.08),
+    rgba(113, 113, 122, 0.08)
   );
   color: var(--color-text-1, #1e293b);
-  box-shadow: 0 12px 28px rgba(30, 64, 175, 0.25);
+  box-shadow: 0 12px 28px rgba(24, 24, 27, 0.14);
 }
 
 .panel {

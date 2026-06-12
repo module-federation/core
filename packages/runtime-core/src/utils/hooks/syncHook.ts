@@ -32,7 +32,10 @@ export class SyncHook<T, K> {
     if (this.listeners.size > 0) {
       // eslint-disable-next-line prefer-spread
       this.listeners.forEach((fn) => {
-        result = fn(...data);
+        const nextResult = fn(...data);
+        if (nextResult !== undefined) {
+          result = nextResult;
+        }
       });
     }
     return result;

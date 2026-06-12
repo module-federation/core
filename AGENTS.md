@@ -152,13 +152,13 @@ pnpm run build:packages
 - Metro tests:
 
 ```bash
-pnpm exec turbo run test --filter=@module-federation/metro --filter=@module-federation/metro-plugin-rnef --filter=@module-federation/metro-plugin-rnc-cli
+pnpm exec turbo run test --filter=@module-federation/metro --filter=@module-federation/metro-plugin-rnef --filter=@module-federation/metro-plugin-rock --filter=@module-federation/metro-plugin-rnc-cli
 ```
 
 - Metro lint:
 
 ```bash
-pnpm exec turbo run lint --filter=@module-federation/metro --filter=@module-federation/metro-plugin-rnef --filter=@module-federation/metro-plugin-rnc-cli
+pnpm exec turbo run lint --filter=@module-federation/metro --filter=@module-federation/metro-plugin-rnef --filter=@module-federation/metro-plugin-rock --filter=@module-federation/metro-plugin-rnc-cli
 ```
 
 ### E2E Parity via Local CI Runner

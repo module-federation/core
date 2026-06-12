@@ -20,13 +20,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v5
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
         with:
           # This makes Actions fetch only one branch to release
           fetch-depth: 10
 
       - name: Cache Tool Downloads
-        uses: actions/cache@v5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
         with:
           path: ~/.cache
           key: ${{ runner.os }}-toolcache-${{ hashFiles('pnpm-lock.yaml') }}
@@ -34,10 +34,10 @@ jobs:
             ${{ runner.os }}-toolcache-
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
 
       - name: Setup Node.js 20
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version: '20'
           cache: 'pnpm'
@@ -48,7 +48,7 @@ jobs:
         # assemble-release-plan is forked, so need to build it before execute pnpm changeset version
 
       - name: Restore Turborepo cache
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
         with:
           path: .turbo/cache
           key: ${{ runner.os }}-turbo-${{ github.ref_name }}-${{ hashFiles('pnpm-lock.yaml') }}
@@ -60,7 +60,7 @@ jobs:
         run: pnpm exec turbo run build --filter=@changesets/assemble-release-plan --concurrency=20
 
       - name: Create Release Pull Request
-        uses: module-federation/actions@v2
+        uses: module-federation/actions@842df3a7740093a5ff44de2b9a890106046b8e32 # v2
         with:
           # this expects you to have a script called release which does a build for your packages and calls changeset publish
           version: ${{ github.event.inputs.version || 'latest' }}
