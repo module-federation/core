@@ -181,7 +181,6 @@ export function patchNodeMFConfig(
   mfConfig.exposes = { ...mfConfig.exposes };
   mfConfig.library = {
     ...mfConfig.library,
-    name: mfConfig.name,
     type: mfConfig.library?.type ?? 'commonjs-module',
   };
   mfConfig.runtimePlugins = [...(mfConfig.runtimePlugins || [])];

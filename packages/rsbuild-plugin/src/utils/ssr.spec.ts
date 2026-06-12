@@ -15,6 +15,7 @@ describe('createSSRMFConfig', () => {
     const ssrMFConfig = createSSRMFConfig(baseMFConfig);
     expect(ssrMFConfig.name).toBe('testApp');
     expect(ssrMFConfig.library?.type).toBe('commonjs-module');
+    expect(ssrMFConfig.library?.name).toBeUndefined();
     expect(ssrMFConfig.dts).toBe(false);
     expect(ssrMFConfig.dev).toBe(false);
     expect(ssrMFConfig.runtimePlugins).toHaveLength(1);
@@ -32,6 +33,7 @@ describe('createSSRMFConfig', () => {
       };
     const ssrMFConfig = createSSRMFConfig(mfConfigWithLibraryType);
     expect(ssrMFConfig.library?.type).toBe('umd');
+    expect(ssrMFConfig.library?.name).toBe('testApp');
   });
 
   it('should add record-dynamic-remote-entry-hash-plugin in development', () => {
