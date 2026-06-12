@@ -95,8 +95,12 @@ export default function (): ModuleFederationRuntimePlugin {
       const id = args.id;
       const match = matchRemoteWithNameAndExpose(options.remotes, id);
       if (!match) return args;
-      const remote = match.remote as { entry?: string };
-      if (!remote.entry || /[?&]t=/.test(remote.entry)) {
+      const remote = match.remote;
+      if (
+        !('entry' in remote) ||
+        !remote.entry ||
+        /[?&]t=/.test(remote.entry)
+      ) {
         return args;
       }
       remote.entry =
