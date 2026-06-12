@@ -1,14 +1,12 @@
 # 共享依赖 Tree Shaking
 
-## 背景
-
-在使用 { props.name || 'Module Federation' } 时，我们常常通过 `shared` 配置来共享通用依赖（如 antd, React 等），以减少重复打包和提升应用间的一致性。然而，传统 `shared` 机制存在一个痛点：它总是会打包并提供**完整的**依赖包，即便你的应用实际只用到了其中的一小部分功能（例如，只用了一个 antd 的 `Button` 组件）。
+在使用 { props.name || 'Module Federation' } 时，我们常常通过 `shared` 配置来共享通用依赖（如 antd、React 等），以减少重复打包和提升应用间的一致性。然而，传统 `shared` 机制存在一个痛点：它总是会打包并提供**完整的**依赖包，即便你的应用实际只用到了其中的一小部分功能（例如，只用了一个 antd 的 `Button` 组件）。
 
 这会导致：
 * **构建产物体积过大**：不必要的代码被打包，增加了最终产物的体积。
 * **运行时性能损耗**：浏览器需要下载并执行更多非必需的 JavaScript，延长了页面加载和渲染时间。
 
-**Shared Tree Shaking** 正是为了解决这一问题而生。它能够智能地分析你的代码，精确识别出实际被使用的模块导出（exports），并仅打包这部分代码。最终，你的应用将获得一个经过“摇树”优化、体积更小的共享依赖。
+**Shared Tree Shaking** 正是为了解决这一问题而生。它能够智能地分析你的代码，精确识别出实际被使用的模块导出（exports），并仅打包这部分代码。最终，你的应用将获得一个经过「摇树」优化、体积更小的共享依赖。
 
 :::tip 核心收益
 
@@ -83,7 +81,7 @@ import CreateSharedTreeShakingDeployServer from '@components/zh/create-shared-tr
 
 ### 如何确认 Tree Shaking 生效？
 
-1.  **网络面板检查**：在浏览器开发者工具的“网络 (Network)”面板中，筛选加载的 JS 文件。确认加载的是二次构建生成的、带有特定标识（如 `secondary` 或哈希值）的优化包，而不是原始的全量包。其体积也应该显著小于全量包。
+1.  **网络面板检查**：在浏览器开发者工具的「网络（Network）」面板中，筛选加载的 JS 文件。确认加载的是二次构建生成的、带有特定标识（如 `secondary` 或哈希值）的优化包，而不是原始的全量包。其体积也应该显著小于全量包。
 2.  **产物内容比对**：直接下载并查看加载的共享依赖 JS 文件内容。搜索你**未使用**的组件或函数名（例如，你只用了 `Button`，可以去搜索 `Modal`），如果搜索不到，说明它们已被成功摇掉。
 3.  **Chrome DevTools 验证**：在 Chrome DevTools 的「Shared」面板中选中目标共享依赖，查看其状态标签：出现 `Tree Shaking Loaded` 表示 Tree Shaking 生效并加载了裁剪产物；仅有 `Loaded` 则表示回退为全量包加载；`Tree Shaking Loading` 表示正在按 Tree Shaking 路径加载。
 

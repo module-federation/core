@@ -2,9 +2,9 @@
 
 `mf-manifest.json` 是生产者构建后生成的运行时清单。它描述这个生产者暴露了哪些模块、远程入口在哪里、模块依赖哪些资源、有哪些共享依赖，以及类型文件在哪里。
 
-Snapshot 是对 Manifest 信息的高度浓缩和预解析结果。运行时可以请求 Manifest 后临时生成 Snapshot；如果你有部署服务，也可以提前生成 Snapshot 并下发给消费者，让消费者直接获得远程入口和可预加载资源。
+Snapshot 是对 Manifest 信息的高度浓缩和预解析结果，运行时可以请求 Manifest 后临时生成 Snapshot。如果你有部署服务，也可以提前生成 Snapshot 并下发给消费者，让消费者直接获得远程入口和可预加载资源。
 
-这篇文档只介绍概念和使用场景。具体配置见 [manifest 配置](/configure/manifest)，完整字段见 [mf-manifest.json 字段定义](/configure/manifest-fields)。
+这篇文档只介绍概念和使用场景。具体配置见 [manifest 配置](/configure/manifest)，完整字段见 [mf-manifest.json 字段定义](/guide/advanced/manifest-fields)。
 
 ## 为什么需要 Manifest
 
@@ -68,9 +68,7 @@ Host 配置 remotes
 
 ### 远程模块加载
 
-当 `remotes` 指向 `mf-manifest.json` 时，运行时会读取 Manifest，生成 Snapshot，再从 Snapshot 中得到最终的 `remoteEntry` 地址。
-
-相关配置见 [remotes](/configure/remotes)。
+当 `remotes` 指向 `mf-manifest.json` 时，运行时会读取 Manifest，生成 Snapshot，再从 Snapshot 中得到最终的 `remoteEntry` 地址。相关配置见 [remotes](/configure/remotes)。
 
 ### 资源预加载
 
@@ -113,8 +111,6 @@ Manifest / Snapshot 适合作为运行时插件、调试工具和部署平台的
 
 ## disableSnapshot 的影响
 
-如果开启 `optimization.disableSnapshot`，运行时会移除 Snapshot 与预加载相关能力，以换取更小的运行时代码体积。
+如果开启 [`optimization.disableSnapshot`](/configure/experiments#disablesnapshot)，运行时会移除 Snapshot 与预加载相关能力，以换取更小的运行时代码体积。
 
 这意味着依赖 Manifest / Snapshot 的能力会受到影响，例如动态类型提示、预加载、DevTools 可视化和代理等。
-
-更多说明见 [optimization.disableSnapshot](/configure/experiments#disablesnapshot)。

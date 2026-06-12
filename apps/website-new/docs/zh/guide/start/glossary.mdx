@@ -7,13 +7,21 @@
 这使得可以创建微前端风格的应用程序，多个系统可以共享代码，并在不需要重新构建整个应用程序的情况下进行动态更新。
 
 
+## 构建插件
+
+指官方为各类构建工具或框架提供的 Module Federation 接入插件，例如 `@module-federation/rsbuild-plugin`、`@module-federation/modern-js` 等。
+
+构建插件负责在打包阶段处理 `exposes`、`remotes` 等配置，并生成行时所需产物。下文如无特殊说明，「构建插件」均指此类插件。
+
+不同的构建工具、框架应该选择哪个插件，请查看[接入方案](/integrations)。
+
 ## 生产者
 
-通过 Module federation 构建插件设置了 `exposes` 暴露其他模块给其他 JavaScript 应用消费的应用在 Module federation 中称之为 Provider（生产者），生产者可以同时作为一个消费者。
+通过 Module federation 构建插件设置了 `exposes` 暴露其他模块给其他 JavaScript 应用消费的应用在 Module federation 中称之为 **Provider**（生产者），生产者可以同时作为一个消费者。
 
 ## 消费者
 
-通过 Module federation 构建插件设置了 `remotes` 消费其他生产者的模块称之为 Consumer （消费者），消费者可以同时作为一个生产者。
+通过 Module federation 构建插件设置了 `remotes` 消费其他生产者的模块称之为 **Consumer**（消费者），消费者可以同时作为一个生产者。
 
 ## Micro-frontend
 
@@ -37,10 +45,10 @@
 
 Manifest 是生产者在构建时生成的运行时清单，用于描述远程入口、暴露模块、资源、共享依赖和类型信息。消费者可以通过 `mf-manifest.json` 获取这些信息，再加载对应的远程模块。
 
-更多内容可以查看 [Manifest 与 Snapshot](/guide/basic/manifest-snapshot)、[manifest 配置](/configure/manifest) 和 [mf-manifest.json 字段定义](/configure/manifest-fields)。
+更多内容可以查看 [Manifest 与 Snapshot](/guide/basic/manifest-snapshot)、[manifest 配置](/configure/manifest) 和 [mf-manifest.json 字段定义](/guide/advanced/manifest-fields)。
 
 ## Snapshot
 
-Snapshot 是对 Manifest 信息的浓缩和预解析结果。运行时可以从 Manifest 生成 Snapshot；有部署服务时，也可以提前生成并下发 Snapshot，让消费者直接获得远程入口和可预加载资源。
+Snapshot 是对 Manifest 信息的浓缩和预解析结果，运行时可以从 Manifest 生成 Snapshot。有部署服务时，也可以提前生成并下发 Snapshot，让消费者直接获得远程入口和可预加载资源。
 
 Snapshot 会被用于远程模块加载、资源预加载、调试工具、代理和运行时诊断等场景。

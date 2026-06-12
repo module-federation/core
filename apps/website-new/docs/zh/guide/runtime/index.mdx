@@ -1,24 +1,22 @@
 # Runtime 接入
 
-:::tip
-在阅读本章前，预设你已经了解：
+:::info 前置阅读
 
-- Module Federation 的[特点和能力](../start)
-- Module Federation 的[名词解释](../start/glossary)
-- 了解如何[消费和导出模块](../start/quick-start)
+- Module Federation 的 [特点和能力](../start)
+- Module Federation 的 [名词解释](../start/glossary)
+- 了解如何 [消费和导出模块](../start/quick-start)
 
 :::
 
 目前 `Module Federation` 提供了两种注册模块和加载模块的方式：
 
-- 一种是在构建插件中声明(一般是在 `module-federation.config.ts` 文件中声明)
+- 一种是在构建插件中声明（一般是在 `module-federation.config.ts` 文件中声明）。
 
 - 另一种方式是直接通过 `runtime` 的 api 进行模块注册和加载。
 
-两种模式并不冲突可结合使用。你可以根据你的实际场景灵活选取模块注册方式和时机
+两种模式并不冲突可结合使用。你可以根据你的实际场景灵活选取模块注册方式和时机。
 
-<br />
-**运行时注册模块和构建配置注册模块的区别如下:**
+## 注册方式差异
 
 |运行时注册模块|插件中注册模块|
 |------------------------------------------------------------------------------------------------------------------|---------------------- |
@@ -37,7 +35,10 @@ import Runtime from '@components/zh/runtime/index';
 
 ## 安装
 
-不同项目需要安装和引用不同的 Runtime 入口。大多数项目默认安装 `@module-federation/enhanced`，并从 `@module-federation/enhanced/runtime` 引用 Runtime API。Modern.js 项目如果已经使用 Module Federation 插件，应该从对应插件的 `/runtime` 入口引用 Runtime API，保证框架插件和手动调用的 Runtime 使用同一个实例。
+不同项目需要安装不同的 Runtime 包，并直接从这些包中引用 Runtime API。
+
+- 大多数项目默认安装 `@module-federation/enhanced`
+- Modern.js 项目安装 `@module-federation/modern-js-v3` 插件
 
 import { PackageManagerTabs, Tab, Tabs } from '@theme';
 
@@ -71,7 +72,9 @@ import { createInstance, loadRemote } from '@module-federation/enhanced/runtime'
 import { createInstance, loadRemote } from '@module-federation/modern-js-v3/runtime';
 ```
 
+:::note
 如果是 Modern.js v2 项目，请安装 `@module-federation/modern-js`，并从 `@module-federation/modern-js/runtime` 引用 Runtime API。
+:::
 
 ## 模块注册
 
@@ -83,9 +86,9 @@ import { createInstance, loadRemote } from '@module-federation/modern-js-v3/runt
 
   registerRemotes([
     {
-        name: 'remote1',
-        alias: 'remote-1',
-        entry: 'http://localhost:3001/mf-manifest.json',
+      name: 'remote1',
+      alias: 'remote-1',
+      entry: 'http://localhost:3001/mf-manifest.json',
     }
   ]);
   ```
@@ -108,9 +111,9 @@ import { createInstance, loadRemote } from '@module-federation/modern-js-v3/runt
 
   mf.registerRemotes([
     {
-        name: 'remote1',
-        alias: 'remote-1',
-        entry: 'http://localhost:3001/mf-manifest.json',
+      name: 'remote1',
+      alias: 'remote-1',
+      entry: 'http://localhost:3001/mf-manifest.json',
     }
   ]);
   ```
@@ -307,8 +310,8 @@ import { createInstance, loadRemote } from '@module-federation/modern-js-v3/runt
     import { loadRemote } from '@module-federation/enhanced/runtime';
 
     // 加载 remote1 expose 的 util
-    loadRemote<{add: (...args: Array<number>)=> number }>("remote1/util").then((md)=>{
-        md.add(1,2);
+    loadRemote<{ add: (...args: Array<number>) => number }>('remote1/util').then((md) => {
+      md.add(1, 2);
     });
     ```
     </Tab>
@@ -330,8 +333,8 @@ import { createInstance, loadRemote } from '@module-federation/modern-js-v3/runt
       ]
     });
 
-    mf.loadRemote<{add: (...args: Array<number>)=> number }>("remote1/util").then((md)=>{
-        md.add(1,2);
+    mf.loadRemote<{ add: (...args: Array<number>) => number }>('remote1/util').then((md) => {
+      md.add(1, 2);
     });
     ```
     </Tab>

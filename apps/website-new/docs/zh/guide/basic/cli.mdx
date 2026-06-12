@@ -1,6 +1,10 @@
 # 命令行工具
 
-{props.name || 'Module Federation'} 提供了轻量的命令行工具：{(props.cmdTools || ['@module-federation/enhanced', '@module-federation/modern-js-v3']).map((cmdTool,index,arr)=>(<><code>{cmdTool}</code>{index+1===arr.length ? '':' 和 '}</>))} 。
+{props.name || 'Module Federation'} 提供了轻量的命令行工具 `mf`，由 <code>{props.cmdTool || '@module-federation/enhanced'}</code> 提供。
+
+:::note
+通常情况下，按照[接入方案](/integrations/)接入 Module Federation 后，<code>{props.cmdTool || '@module-federation/enhanced'}</code> 会包含在依赖链中，可直接使用 `mf` 命令。否则，你需要先在项目中手动安装它，再运行下文中的命令。
+:::
 
 ## 查看所有命令
 
