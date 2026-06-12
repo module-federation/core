@@ -1,5 +1,16 @@
 # @module-federation/rsbuild-plugin
 
+## 2.5.1
+
+### Patch Changes
+
+- b50395e: fix(rsbuild-plugin): The Rsbuild plugin no longer requires chunkLoading to be configured.
+- Updated dependencies [4da5508]
+- Updated dependencies [b9b3b8c]
+  - @module-federation/enhanced@2.5.1
+  - @module-federation/sdk@2.5.1
+  - @module-federation/node@2.7.44
+
 ## 2.5.0
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # website-new
 
+## 1.3.25
+
+### Patch Changes
+
+- Updated dependencies [7c04e74]
+  - @module-federation/rspress-plugin@2.5.1
+  - @module-federation/error-codes@2.5.1
+
 ## 1.3.24
 
 ### Patch Changes
