@@ -21,6 +21,8 @@ interface SharedConfig {
   eager?: boolean;
   shareScope?: string;
   import?: string | false;
+  shareKey?: string;
+  request?: string;
   allowNodeModulesSuffixMatch?: boolean;
   treeShaking?: TreeShakingConfig;
 }
@@ -103,6 +105,74 @@ share scope name, default value is `'default'` .
 Control import path of shared dependencies, default value is `undefined` .
 
 If set to `false`, this shared will not be packaged into the product, and only the `shared` provided by the consumer will be used. Therefore, please make sure that the consumer has provided the corresponding `shared` before setting.
+
+## shareKey
+
+- Type: `string`
+- Required: No
+- Default: The property name (`key`) of the `shared` entry
+
+The lookup key used in the shared scope at runtime. Both the provider and the consumer must use the **same** `shareKey` for a shared module to be negotiated successfully; otherwise each side bundles its own copy.
+
+The default is the property name itself, so most of the time you do not need to set it. A typical custom scenario is mapping an alias to a different real package:
+
+```ts
+shared: {
+  'my-alias': {
+    import: 'react',      // actual package to resolve
+    shareKey: 'react',    // negotiate in shared scope as "react"
+  },
+}
+```
+
+:::warning
+If `shareKey` is omitted, the negotiation key is the property name itself (`"my-alias"` in the example above). If the other side registers with `"react"`, the two will never match.
+:::
+
+## request
+
+- Type: `string`
+- Required: No
+- Default: The property name (`key`) of the `shared` entry
+
+The module request path that the bundler intercepts at build time. When the code contains an `import` that matches this value, the bundler replaces it with a shared-scope consumer instead of bundling the dependency into the output.
+
+The default is the property name, which is sufficient for most cases. The difference between `request` and `shareKey`:
+
+| Field | Stage | Question it answers |
+|---|---|---|
+| `request` | Build-time · module graph | Which `import` to intercept |
+| `shareKey` | Runtime · negotiation | Which slot in the shared scope to use |
+
+### Prefix matching with trailing slash
+
+If `request` ends with `/`, the bundler treats it as a **prefix match** and intercepts every subpath import under that namespace. The final `shareKey` is formed by appending the subpath suffix to the configured `shareKey` (or the prefix itself if `shareKey` is omitted).
+
+```ts
+shared: {
+  'react-dom/': {
+    request: 'react-dom/',   // intercepts import 'react-dom/client', 'react-dom/server', etc.
+    shareKey: 'react-dom/',  // final shareKey = "react-dom/" + subpath suffix
+  },
+}
+```
+
+The same pattern works for utility libraries such as `lodash`:
+
+```ts
+shared: {
+  'lodash/': {
+    request: 'lodash/',    // intercepts import 'lodash/debounce', 'lodash/get', etc.
+    shareKey: 'lodash/',   // final shareKey = "lodash/" + subpath suffix
+  },
+}
+```
+
+This is essential for packages that expose subpath modules (e.g. `react-dom/client`, `lodash/debounce`, `@scope/package/subpath`). Without the trailing slash, only the exact package name is intercepted; subpath imports will be bundled locally and will not participate in shared scope negotiation.
+
+:::warning Common mistake
+Writing `'react-dom'` (no trailing slash) only intercepts `import 'react-dom'`. Any code that does `import { createRoot } from 'react-dom/client'` will load a second copy of React DOM, which breaks React singleton requirements and causes hydration errors. See the [troubleshooting FAQ](../../guide/troubleshooting/runtime#subpath-imports-are-not-shared-duplicate-dependency-loaded) for more details.
+:::
 
 ## allowNodeModulesSuffixMatch
 

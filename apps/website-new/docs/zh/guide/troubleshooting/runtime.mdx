@@ -465,6 +465,33 @@ Uncaught TypeError: Cannot read properties on null (reading `useState`)
 
 ![](@public/guide/chrome-devtools/mf-devtool-hmr.jpg)
 
+### 子路径导入未被共享（加载了重复依赖）
+
+#### 现象
+
+- 浏览器下载了同一依赖的两份副本（例如 `react-dom`）
+- React 抛出 "Invalid hook call" 或 hydration 不匹配错误
+- 对 `react-dom/client` 等子路径调用 `loadShare` 返回 `false`
+
+#### 原因
+
+`shared` 配置只列出了精确包名，例如 `'react-dom'`。Module Federation 在构建时拦截导入。精确名称只会拦截 `import 'react-dom'`；子路径导入如 `import { createRoot } from 'react-dom/client'` 会绕过 shared 配置，被本地打包。
+
+#### 解决方案
+
+对任何暴露子路径的依赖，使用**尾部斜杠**开启前缀匹配：
+
+```ts title="rspack.config.ts"
+shared: {
+  react: { singleton: true },
+  'react-dom': { singleton: true },      // 精确匹配 — 仅 'react-dom'
+  'react-dom/': { singleton: true },     // 前缀匹配 — 'react-dom/client'、'react-dom/server'、...
+  'react/': { singleton: true },         // 前缀匹配 — 'react/jsx-runtime'、'react/jsx-dev-runtime'、...
+}
+```
+
+此规则同样适用于作用域包（`'@scope/package/'`）和工具库（`'lodash/'`）。
+
 ### A preload for 'http://resource-url' is found, but is not used because the request credentials mode does not match. Consider taking a look at crossorigin attribute.
 
 #### 原因

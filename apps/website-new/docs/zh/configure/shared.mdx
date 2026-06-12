@@ -20,8 +20,8 @@ interface SharedConfig {
   requiredVersion?: string;
   eager?: boolean;
   shareScope?: string;
-  shareKey?: string;
   import?: string | false;
+  shareKey?: string;
   request?: string;
   allowNodeModulesSuffixMatch?: boolean;
   treeShaking?: TreeShakingConfig;
@@ -148,12 +148,27 @@ shared: {
 
 ```ts
 shared: {
+  'react-dom/': {
+    request: 'react-dom/',    // 拦截所有 import 'react-dom/*'
+    shareKey: 'react-dom/',   // 最终协商 key = "react-dom/" + 子路径后缀
+  },
+}
+```
+
+同样的模式也适用于工具库，例如 `lodash`：
+
+```ts
+shared: {
   'lodash/': {
     request: 'lodash/',    // 拦截所有 import 'lodash/*'
     shareKey: 'lodash/',   // 最终协商 key = "lodash/" + 子路径后缀
   },
 }
 ```
+
+:::warning 常见错误
+`'react-dom'`（无尾部斜杠）只会拦截 `import 'react-dom'`。任何执行 `import { createRoot } from 'react-dom/client'` 的代码都会加载第二份 React DOM 副本，破坏 React 单例要求并导致 hydration 错误。
+:::
 
 ## allowNodeModulesSuffixMatch
 

@@ -105,6 +105,18 @@ export default {
 启用 Bridge Router 时，请勿将 `react-router-dom` 配置为 shared 依赖，否则会导致路由功能异常。
 :::
 
+:::warning 重要
+`@module-federation/bridge-react/18` 和 `/19` 从 `react-dom/client` 导入 `createRoot`。如果你只将 `"react-dom"` 配置为 shared 依赖，`react-dom/client` 将不会被共享，可能导致 React 版本不匹配错误。请确保使用尾部斜杠前缀形式：
+
+```ts
+shared: {
+  'react-dom/': {
+    singleton: true,
+  },
+}
+```
+:::
+
 ## createBridgeComponent API 参考
 
 ### 函数签名

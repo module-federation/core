@@ -31,5 +31,18 @@ import { createBridgeComponent } from '@module-federation/bridge-react'; // Reac
 import { createBridgeComponent } from '@module-federation/bridge-react/18'; // React 18
 import { createBridgeComponent } from '@module-federation/bridge-react/19'; // React 19
 ```
+
+:::warning 重要
+`@module-federation/bridge-react/18` 和 `/19` 从 `react-dom/client` 导入 `createRoot`。如果你只将 `"react-dom"` 配置为 shared 依赖，`react-dom/client` 将不会被共享，可能导致 React 版本不匹配错误。请确保使用尾部斜杠前缀形式：
+
+```ts
+shared: {
+  'react-dom/': {
+    singleton: true,
+  },
+}
+```
+:::
+
 ### 💡 示例
 [完整示例](https://github.com/module-federation/core/tree/main/apps/router-demo) - 包含多个 React 应用的完整微前端项目

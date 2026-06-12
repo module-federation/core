@@ -468,6 +468,33 @@ This problem can be avoided by setting `shared` and setting `singleton: true` si
 
 ![](@public/guide/chrome-devtools/mf-devtool-hmr.jpg)
 
+### Subpath imports are not shared (duplicate dependency loaded)
+
+#### Symptom
+
+- The browser downloads two copies of the same package (e.g. `react-dom`)
+- React throws "Invalid hook call" or hydration mismatch errors
+- `loadShare` returns `false` for subpath imports like `react-dom/client`
+
+#### Root cause
+
+The `shared` config only lists the exact package name, e.g. `'react-dom'`. Module Federation intercepts imports at build time. An exact name only intercepts `import 'react-dom'`; subpath imports such as `import { createRoot } from 'react-dom/client'` bypass the shared config and are bundled locally.
+
+#### Solution
+
+Use a **trailing slash** to enable prefix matching for any package that exposes subpaths:
+
+```ts title="rspack.config.ts"
+shared: {
+  react: { singleton: true },
+  'react-dom': { singleton: true },      // exact match — only 'react-dom'
+  'react-dom/': { singleton: true },     // prefix match — 'react-dom/client', 'react-dom/server', ...
+  'react/': { singleton: true },         // prefix match — 'react/jsx-runtime', 'react/jsx-dev-runtime', ...
+}
+```
+
+The same applies to scoped packages (`'@scope/package/'`) and utility libraries (`'lodash/'`).
+
 ### A preload for 'http://resource-url' is found, but is not used because the request credentials mode does not match. Consider taking a look at crossorigin attribute.
 
 #### Reason
