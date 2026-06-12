@@ -4,8 +4,30 @@ This package contains the `federation()` Rsbuild plugin used by Rstest to enable
 Module Federation compatibility mode for Node test environments
 (JSDOM / Node workers) and browser mode.
 
-It is extracted from `rstest/packages/core/src/core/plugins/federation.ts` to allow shared ownership and versioning
-alongside other Module Federation tooling.
+It is the companion plugin for [Rstest](https://rstest.rs)'s federation mode,
+owned and versioned alongside the rest of the Module Federation tooling.
+
+## Required @rstest/core version
+
+The `federation: true` config key used below is **not available in any released
+`@rstest/core` version yet**. It ships with rstest's federation support
+([web-infra-dev/rstest#1407](https://github.com/web-infra-dev/rstest/pull/1407)).
+Until that release, pair this plugin with a pkg.pr.new canary build from that
+PR, for example:
+
+```bash
+npm install https://pkg.pr.new/@rstest/core@40086e4
+```
+
+Against released `@rstest/core` versions the config snippets below will not
+typecheck and `federation: true` is ignored.
+
+## Stable plugin name
+
+The plugin registers itself with the Rsbuild plugin name `rstest:federation`
+(exported as `FEDERATION_PLUGIN_NAME`). This name is a stable, public contract:
+rstest may detect the plugin by this name to enable federation-specific
+behavior. It will not be renamed without a major version bump.
 
 ## Usage
 
