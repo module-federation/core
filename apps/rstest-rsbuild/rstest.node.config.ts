@@ -25,6 +25,9 @@ export default defineConfig({
       },
     }),
   ],
+  // Requires rstest's federation support (web-infra-dev/rstest#1407). This
+  // demo installs the pkg.pr.new canary of @rstest/core from that PR; the
+  // flag is ignored by released @rstest/core versions (<= 0.10.x).
   federation: true,
   testTimeout: 15_000,
 });

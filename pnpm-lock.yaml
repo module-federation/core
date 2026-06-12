@@ -2442,8 +2442,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/rstest
       '@rsbuild/plugin-react':
-        specifier: ^1.4.2
-        version: 1.4.5(@rsbuild/core@2.0.12(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0))(webpack-hot-middleware@2.26.1)
+        specifier: ^2.0.1
+        version: 2.0.1(@rsbuild/core@2.0.12(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0))(@rspack/core@1.7.9(@swc/helpers@0.5.23))
       '@rspack/cli':
         specifier: ^1.6.8
         version: 1.7.11(@rspack/core@1.7.9(@swc/helpers@0.5.23))(@types/express@4.17.21)(webpack-cli@5.1.4)(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.27.3)(webpack-cli@5.1.4))
@@ -2451,14 +2451,14 @@ importers:
         specifier: ^1.6.8
         version: 1.7.9(@swc/helpers@0.5.23)
       '@rstest/browser':
-        specifier: 0.8.1
-        version: 0.8.1(@rstest/core@0.8.5(jsdom@20.0.3))(playwright@1.57.0)
+        specifier: https://pkg.pr.new/@rstest/browser@40086e4
+        version: https://pkg.pr.new/@rstest/browser@40086e4(@rstest/core@https://pkg.pr.new/@rstest/core@40086e4(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0)(jsdom@20.0.3))(playwright@1.57.0)
       '@rstest/browser-react':
-        specifier: 0.8.1
-        version: 0.8.1(@rstest/core@0.8.5(jsdom@20.0.3))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        specifier: https://pkg.pr.new/@rstest/browser-react@40086e4
+        version: https://pkg.pr.new/@rstest/browser-react@40086e4(@rstest/core@https://pkg.pr.new/@rstest/core@40086e4(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0)(jsdom@20.0.3))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@rstest/core':
-        specifier: ^0.8.1
-        version: 0.8.5(jsdom@20.0.3)
+        specifier: https://pkg.pr.new/@rstest/core@40086e4
+        version: https://pkg.pr.new/@rstest/core@40086e4(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0)(jsdom@20.0.3)
       '@testing-library/dom':
         specifier: ^10.4.1
         version: 10.4.1
@@ -2525,23 +2525,23 @@ importers:
         specifier: workspace:*
         version: link:../../packages/rstest
       '@rsbuild/core':
-        specifier: ^1.7.3
-        version: 1.7.3
+        specifier: ^2.0.12
+        version: 2.0.12(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0)
       '@rsbuild/plugin-react':
-        specifier: ^1.4.2
-        version: 1.4.5(@rsbuild/core@1.7.3)(webpack-hot-middleware@2.26.1)
+        specifier: ^2.0.1
+        version: 2.0.1(@rsbuild/core@2.0.12(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0))(@rspack/core@2.0.8(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(@swc/helpers@0.5.23))
       '@rstest/adapter-rsbuild':
-        specifier: ^0.2.0
-        version: 0.2.6(@rsbuild/core@1.7.3)(@rstest/core@0.8.5(jsdom@20.0.3))
+        specifier: https://pkg.pr.new/@rstest/adapter-rsbuild@40086e4
+        version: https://pkg.pr.new/@rstest/adapter-rsbuild@40086e4(@rsbuild/core@2.0.12(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0))(@rstest/core@https://pkg.pr.new/@rstest/core@40086e4(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0)(jsdom@20.0.3))
       '@rstest/browser':
-        specifier: 0.8.1
-        version: 0.8.1(@rstest/core@0.8.5(jsdom@20.0.3))(playwright@1.57.0)
+        specifier: https://pkg.pr.new/@rstest/browser@40086e4
+        version: https://pkg.pr.new/@rstest/browser@40086e4(@rstest/core@https://pkg.pr.new/@rstest/core@40086e4(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0)(jsdom@20.0.3))(playwright@1.57.0)
       '@rstest/browser-react':
-        specifier: 0.8.1
-        version: 0.8.1(@rstest/core@0.8.5(jsdom@20.0.3))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        specifier: https://pkg.pr.new/@rstest/browser-react@40086e4
+        version: https://pkg.pr.new/@rstest/browser-react@40086e4(@rstest/core@https://pkg.pr.new/@rstest/core@40086e4(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0)(jsdom@20.0.3))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@rstest/core':
-        specifier: ^0.8.1
-        version: 0.8.5(jsdom@20.0.3)
+        specifier: https://pkg.pr.new/@rstest/core@40086e4
+        version: https://pkg.pr.new/@rstest/core@40086e4(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0)(jsdom@20.0.3)
       '@testing-library/dom':
         specifier: ^10.4.1
         version: 10.4.1
@@ -2580,23 +2580,23 @@ importers:
         specifier: workspace:*
         version: link:../../packages/rstest
       '@rsbuild/plugin-react':
-        specifier: ^1.4.2
-        version: 1.4.5(@rsbuild/core@2.0.12(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0))(webpack-hot-middleware@2.26.1)
+        specifier: ^2.0.1
+        version: 2.0.1(@rsbuild/core@2.0.12(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0))(@rspack/core@2.0.8(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(@swc/helpers@0.5.23))
       '@rslib/core':
-        specifier: ^0.19.0
-        version: 0.19.6(@microsoft/api-extractor@7.57.7(@types/node@25.9.1))(typescript@5.9.3)
+        specifier: ^0.22.0
+        version: 0.22.0(@microsoft/api-extractor@7.57.7(@types/node@25.9.1))(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0)(typescript@5.9.3)
       '@rstest/adapter-rslib':
-        specifier: ^0.2.0
-        version: 0.2.2(@rslib/core@0.19.6(@microsoft/api-extractor@7.57.7(@types/node@25.9.1))(typescript@5.9.3))(@rstest/core@0.8.5(jsdom@20.0.3))(typescript@5.9.3)
+        specifier: https://pkg.pr.new/@rstest/adapter-rslib@40086e4
+        version: https://pkg.pr.new/@rstest/adapter-rslib@40086e4(@rslib/core@0.22.0(@microsoft/api-extractor@7.57.7(@types/node@25.9.1))(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0)(typescript@5.9.3))(@rstest/core@https://pkg.pr.new/@rstest/core@40086e4(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0)(jsdom@20.0.3))(typescript@5.9.3)
       '@rstest/browser':
-        specifier: 0.8.1
-        version: 0.8.1(@rstest/core@0.8.5(jsdom@20.0.3))(playwright@1.57.0)
+        specifier: https://pkg.pr.new/@rstest/browser@40086e4
+        version: https://pkg.pr.new/@rstest/browser@40086e4(@rstest/core@https://pkg.pr.new/@rstest/core@40086e4(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0)(jsdom@20.0.3))(playwright@1.57.0)
       '@rstest/browser-react':
-        specifier: 0.8.1
-        version: 0.8.1(@rstest/core@0.8.5(jsdom@20.0.3))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        specifier: https://pkg.pr.new/@rstest/browser-react@40086e4
+        version: https://pkg.pr.new/@rstest/browser-react@40086e4(@rstest/core@https://pkg.pr.new/@rstest/core@40086e4(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0)(jsdom@20.0.3))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@rstest/core':
-        specifier: ^0.8.1
-        version: 0.8.5(jsdom@20.0.3)
+        specifier: https://pkg.pr.new/@rstest/core@40086e4
+        version: https://pkg.pr.new/@rstest/core@40086e4(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0)(jsdom@20.0.3)
       '@testing-library/dom':
         specifier: ^10.4.1
         version: 10.4.1
@@ -4220,8 +4220,8 @@ importers:
         specifier: ^0.12.4
         version: 0.12.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@microsoft/api-extractor@7.57.7(@types/node@25.9.1))(typescript@5.9.3)
       '@rstest/core':
-        specifier: ^0.8.1
-        version: 0.8.5(jsdom@20.0.3)
+        specifier: https://pkg.pr.new/@rstest/core@40086e4
+        version: https://pkg.pr.new/@rstest/core@40086e4(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0)(jsdom@20.0.3)
 
   packages/runtime:
     dependencies:
@@ -11521,6 +11521,14 @@ packages:
     peerDependencies:
       '@rsbuild/core': ^1.0.0 || ^2.0.0-0
 
+  '@rsbuild/plugin-react@2.0.1':
+    resolution: {integrity: sha512-n5m3VxEm6m3Dv1VkI0WnxsildySJ6M+QjGIzkZDy5UebRCIJ1Q/hlQVyhofBL6C+AcsF9fGjlHQkeiteXJSr3Q==}
+    peerDependencies:
+      '@rsbuild/core': ^2.0.0-0
+    peerDependenciesMeta:
+      '@rsbuild/core':
+        optional: true
+
   '@rsbuild/plugin-rem@1.0.5':
     resolution: {integrity: sha512-5I1J7WiNGjblk3LbzJ46ZMbCCUVoTPvmAGj254auKM5lzOt/i78jDgN70UtVJswWY9AAEND6E4MLMDTWjlV5yQ==}
     peerDependencies:
@@ -11659,13 +11667,13 @@ packages:
       typescript:
         optional: true
 
-  '@rslib/core@0.19.6':
-    resolution: {integrity: sha512-/znUZlPX252DhAf2WvzmkZ2rBi85d8TadkABYvWoUGAVGsmFOiX+anDwLOqQ+7m5KsMFzM/SCqB2yEBvAj/T2g==}
-    engines: {node: '>=18.12.0'}
+  '@rslib/core@0.22.0':
+    resolution: {integrity: sha512-DGTMBDTSdILac0SmeBWvdYf/ZDn09vXgbJQ3/N1J7i6vBpFGWCCKjARoz1R5jYqr1Z9tLJ1OfOVZktbNY/XXuA==}
+    engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
     peerDependencies:
       '@microsoft/api-extractor': ^7
-      typescript: ^5
+      typescript: ^5 || ^6
     peerDependenciesMeta:
       '@microsoft/api-extractor':
         optional: true
@@ -12515,6 +12523,15 @@ packages:
       webpack-hot-middleware:
         optional: true
 
+  '@rspack/plugin-react-refresh@2.0.0':
+    resolution: {integrity: sha512-Cf6CxBStNDJbiXMc/GmsvG1G8PRlUpa0MSfWsMTI+e8npzuTN/p8nwLs3shriBZOLciqgkSZpBtPTd10BLpj1g==}
+    peerDependencies:
+      '@rspack/core': ^2.0.0-0
+      react-refresh: '>=0.10.0 <1.0.0'
+    peerDependenciesMeta:
+      '@rspack/core':
+        optional: true
+
   '@rspress/core@2.0.3':
     resolution: {integrity: sha512-a+JJFiALqMxGJBqR38/lkN6tas42UF4jRIhu6RilC/3DdqpfqR8j6jjQFOmqoNKo6ZGXW2W+i1Pscn6drvoG3w==}
     engines: {node: ^20.19.0 || >=22.12.0}
@@ -12529,35 +12546,39 @@ packages:
   '@rspress/shared@2.0.3':
     resolution: {integrity: sha512-yI9G4P165fSsmm6QoYTUrdgUis1aFnDh04GcM4SQIpL3itvEZhGtItgoeGkX9EWbnEjhriwI8mTqDDJIp+vrGA==}
 
-  '@rstest/adapter-rsbuild@0.2.6':
-    resolution: {integrity: sha512-hVAw88FnPwE3HBmstwwV7E3rWJJgiL4kU1yrEpB/+0SX3WO1KqPPztEynKzRTRSXcKcoluIlEusEaCXtO0i5aw==}
+  '@rstest/adapter-rsbuild@https://pkg.pr.new/@rstest/adapter-rsbuild@40086e4':
+    resolution: {integrity: sha512-BpbIvp39rWL2xn7of2ds+2o/zqAefL6YLefJXO8YIDbzl+LE17ht6eTcrU9v8g8t1dF8WSSzu4pFwvSXd5KP8w==, tarball: https://pkg.pr.new/@rstest/adapter-rsbuild@40086e4}
+    version: 0.10.4
     peerDependencies:
       '@rsbuild/core': '*'
-      '@rstest/core': '>=0.7.7'
+      '@rstest/core': ^0.10.4
 
-  '@rstest/adapter-rslib@0.2.2':
-    resolution: {integrity: sha512-pDfROoS8EY5mzxEmy9KVcd+Xila3QYeovlygCVmoc5p95qJ+3h+adr+elHFy/OZWUn/GMDHwYfhAR7BHQyQUKA==}
+  '@rstest/adapter-rslib@https://pkg.pr.new/@rstest/adapter-rslib@40086e4':
+    resolution: {integrity: sha512-UfGDKDaBpn3utvubVIgsXE03jn3YQB7jYjgFqF/u/vQ1ApyagJ0M7/TQjz3lnyamjyL/+xhlXWwX9eRC28WFGQ==, tarball: https://pkg.pr.new/@rstest/adapter-rslib@40086e4}
+    version: 0.10.4
     peerDependencies:
       '@rslib/core': '>=0.18.6'
-      '@rstest/core': '>=0.7.7'
+      '@rstest/core': ^0.10.4
       typescript: ^5 || ^6
     peerDependenciesMeta:
       typescript:
         optional: true
 
-  '@rstest/browser-react@0.8.1':
-    resolution: {integrity: sha512-+loRyl9eDuGWLfnuBfp7364yX2vdX/vHBrZ6sG9WkmCMcm6fS4cBtEm4hG2mqs0ciQVIte9gMp3QS2yjE434tg==}
-    engines: {node: '>=18.12.0'}
+  '@rstest/browser-react@https://pkg.pr.new/@rstest/browser-react@40086e4':
+    resolution: {integrity: sha512-n3AHn5kzhuCn4jX2duXuj2Nzbmxbb3aOyNKLCCvBuPKZnThNPIb26QM6Ji4I8VcPei7u3x52XYuzFUwQJpN6yA==, tarball: https://pkg.pr.new/@rstest/browser-react@40086e4}
+    version: 0.10.4
+    engines: {node: ^20.19.0 || >=22.12.0}
     peerDependencies:
-      '@rstest/core': ^0.8.1
-      react: ^17.0.0 || ^18.0.0 || ^19.0.0
-      react-dom: ^17.0.0 || ^18.0.0 || ^19.0.0
+      '@rstest/core': ^0.10.4
+      react: ^18.0.0 || ^19.0.0
+      react-dom: ^18.0.0 || ^19.0.0
 
-  '@rstest/browser@0.8.1':
-    resolution: {integrity: sha512-TguDhVvLmVwjhbtXBR/C5e3/q2x5uxR7RzgvY22HnC+vtLDk0kevEMtQOSNMDUp2S+kNi8HoVEtQMACC+i4chw==}
-    engines: {node: '>=18.12.0'}
+  '@rstest/browser@https://pkg.pr.new/@rstest/browser@40086e4':
+    resolution: {integrity: sha512-pzs4cb0rR6T7jPWybalgr4gW70EFQFLfBIptVDMgmhmFVno2/sfYz6O/QI02TTQaKGM3WlMykVcMTEv8iGRDCQ==, tarball: https://pkg.pr.new/@rstest/browser@40086e4}
+    version: 0.10.4
+    engines: {node: ^20.19.0 || >=22.12.0}
     peerDependencies:
-      '@rstest/core': ^0.8.1
+      '@rstest/core': ^0.10.4
       playwright: ^1.49.1
     peerDependenciesMeta:
       playwright:
@@ -12582,6 +12603,20 @@ packages:
     hasBin: true
     peerDependencies:
       happy-dom: '*'
+      jsdom: '*'
+    peerDependenciesMeta:
+      happy-dom:
+        optional: true
+      jsdom:
+        optional: true
+
+  '@rstest/core@https://pkg.pr.new/@rstest/core@40086e4':
+    resolution: {integrity: sha512-JcKLCsfuBl7oQQJ8U65jl2Mc0S118TSGmfH3DOXLt2Ds/A9kmsngZi3cfRGQffvvLq3A1kfiVJafm4B5u36+rQ==, tarball: https://pkg.pr.new/@rstest/core@40086e4}
+    version: 0.10.4
+    engines: {node: ^20.19.0 || >=22.12.0}
+    hasBin: true
+    peerDependencies:
+      happy-dom: ^20.8.3
       jsdom: '*'
     peerDependenciesMeta:
       happy-dom:
@@ -12621,6 +12656,9 @@ packages:
 
   '@rushstack/ts-command-line@5.3.3':
     resolution: {integrity: sha512-c+ltdcvC7ym+10lhwR/vWiOhsrm/bP3By2VsFcs5qTKv+6tTmxgbVrtJ5NdNjANiV5TcmOZgUN+5KYQ4llsvEw==}
+
+  '@sec-ant/readable-stream@0.4.1':
+    resolution: {integrity: sha512-831qok9r2t8AlxLko40y2ebgSDhenenCatLVeW/uBtnHPyhHOvG0C7TvfgecV+wHzIm5KUICgzmVpWS+IMEAeg==}
 
   '@selderee/plugin-htmlparser2@0.11.0':
     resolution: {integrity: sha512-P33hHGdldxGabLFjPPpaTxVolMrzrcegejx+0GxjrIb9Zv48D8yAIA/QTDR2dFl7Uz7urX8aX6+5bCZslr+gWQ==}
@@ -12674,6 +12712,10 @@ packages:
   '@sindresorhus/is@5.6.0':
     resolution: {integrity: sha512-TV7t8GKYaJWsn00tFDqBw8+Uqmr8A0fRU1tvTQhyZzGv0sJCGRQL3JGMI3ucuKo3XIZdUP+Lx7/gh2t3lewy7g==}
     engines: {node: '>=14.16'}
+
+  '@sindresorhus/merge-streams@4.0.0':
+    resolution: {integrity: sha512-tlqY9xq5ukxTUZBmoOp+m61cqwQD5pHJtFY3Mn8CA8ps6yghLH/Hw8UPdqg4OLmFW3IFlcXnQNmo/dh8HzXYIQ==}
+    engines: {node: '>=18'}
 
   '@sinonjs/commons@3.0.1':
     resolution: {integrity: sha512-K3mCHKQ9sVh8o1C9cxkwxaOmXoAMlDxC1mYyHrjqOWEcBjYr76t96zL2zlj5dUGZ3HSw240X1qgH3Mjf1yJWpQ==}
@@ -18084,6 +18126,10 @@ packages:
     resolution: {integrity: sha512-VyhnebXciFV2DESc+p6B+y0LjSm0krU4OgJN44qFAhBY0TJ+1V61tYD2+wHusZ6F9n5K+vl8k0sTy7PEfV4qpg==}
     engines: {node: '>=16.17'}
 
+  execa@9.6.1:
+    resolution: {integrity: sha512-9Be3ZoN4LmYR90tUoVu2te2BsbzHfhJyfEiAVfz7N5/zv+jduIfLrV2xdQXOHbaD6KgpGdO9PRPM1Y4Q9QkPkA==}
+    engines: {node: ^18.19.0 || >=20.5.0}
+
   executable@4.1.1:
     resolution: {integrity: sha512-8iA79xD3uAch729dUG8xaaBBFGaEa0wdD2VkYLFHwlqosEj/jT66AzcreRDSgV7ehnNLBW2WR5jIXwGKjVdTLg==}
     engines: {node: '>=4'}
@@ -18263,6 +18309,10 @@ packages:
   figures@3.2.0:
     resolution: {integrity: sha512-yaduQFRKLXYOGgEn6AZau90j3ggSOyiqXU0F9JZfeXYhNa+Jk4X+s45A2zg5jns87GAFa34BBm2kXw4XpNcbdg==}
     engines: {node: '>=8'}
+
+  figures@6.1.0:
+    resolution: {integrity: sha512-d+l3qxjSesT4V7v2fh+QnmFnUWv9lSpjarhShNTgBOfA0ttejbQUAlHLitbjkoRiDulW0OPoQPYIGhIC8ohejg==}
+    engines: {node: '>=18'}
 
   file-entry-cache@6.0.1:
     resolution: {integrity: sha512-7Gps/XWymbLk2QLYK4NzpMOrYjMhdIxXuIvy2QBsLE6ljuodKvdkWs/cpyJJ3CVIVpH0Oi1Hvg1ovbMzLdFBBg==}
@@ -18688,6 +18738,10 @@ packages:
   get-stream@8.0.1:
     resolution: {integrity: sha512-VaUJspBffn/LMCJVoMvSAdmscJyS1auj5Zulnn5UoYcY531UWmdwhRWkcGKnGU93m5HSXP9LP2usOryrBtQowA==}
     engines: {node: '>=16'}
+
+  get-stream@9.0.1:
+    resolution: {integrity: sha512-kVCxPF3vQM/N0B1PmoqVUqgHP+EeVjmZSQn+1oCRPxd2P21P2F19lIgbR3HBosbB1PUhOAoctJnfEn2GbN2eZA==}
+    engines: {node: '>=18'}
 
   get-symbol-description@1.1.0:
     resolution: {integrity: sha512-w9UMqWwJxHNOvoNzSJ2oPF5wvYcvP7jUvYzhp67yEhTi17ZDBBC1z9pTdGuzjD+EFIqLSYRweZjqfiPzQ06Ebg==}
@@ -19259,6 +19313,10 @@ packages:
     resolution: {integrity: sha512-AXcZb6vzzrFAUE61HnN4mpLqd/cSIwNQjtNWR0euPm6y0iqx3G4gOXaIDdtdDwZmhwe82LA6+zinmW4UBWVePQ==}
     engines: {node: '>=16.17.0'}
 
+  human-signals@8.0.1:
+    resolution: {integrity: sha512-eKCa6bwnJhvxj14kZk5NCPc6Hb6BdsU9DZcOnmQKSnO1VKrfV0zCvtttPZUsBvjmNDn8rpcJfpwSYnHBjc95MQ==}
+    engines: {node: '>=18.18.0'}
+
   humps@2.0.1:
     resolution: {integrity: sha512-E0eIbrFWUhwfXJmsbdjRQFQPrl5pTEoKlz163j1mTqqUnU9PgR4AgB8AIITzuB3vLBdxZXyZ9TDIrwB2OASz4g==}
 
@@ -19631,6 +19689,10 @@ packages:
   is-hexadecimal@2.0.1:
     resolution: {integrity: sha512-DgZQp241c8oO6cA1SbTEWiXeoxV42vlcJxgH+B3hi1AiqqKruZR3ZGF8In3fj4+/y/7rHvlOZLZtgJ/4ttYGZg==}
 
+  is-in-ssh@1.0.0:
+    resolution: {integrity: sha512-jYa6Q9rH90kR1vKB6NM7qqd1mge3Fx4Dhw5TVlK1MUBqhEOuCagrEHMevNuCcbECmXZ0ThXkRm+Ymr51HwEPAw==}
+    engines: {node: '>=20'}
+
   is-inside-container@1.0.0:
     resolution: {integrity: sha512-KIYLCCJghfHZxqjYBE7rEy0OBuTd5xCHS7tHVgvCLkx7StIoaxwNW3hCALgEUjFfeRk+MG/Qxmp/vtETEF3tRA==}
     engines: {node: '>=14.16'}
@@ -19756,6 +19818,10 @@ packages:
   is-stream@3.0.0:
     resolution: {integrity: sha512-LnQR4bZ9IADDRSkvpqMGvt/tEJWclzklNgSw48V5EAaAeDd6qGvN8ei6k5p0tvxSR171VmGyHuTiAOfxAbr8kA==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+
+  is-stream@4.0.1:
+    resolution: {integrity: sha512-Dnz92NInDqYckGEUJv689RbRiTSEHCQ7wOVeALbkOz999YpqT46yMRIGtSNl2iCL1waAZSx40+h59NV/EwzV/A==}
+    engines: {node: '>=18'}
 
   is-string@1.1.1:
     resolution: {integrity: sha512-BtEeSsoaQjlSPBemMQIrY1MY0uM6vnS1g5fmufYOtnxLGUZM2178PKbhsk7Ffv58IX+ZtcvoGwccYsh0PglkAA==}
@@ -20332,9 +20398,9 @@ packages:
     resolution: {integrity: sha512-/vlFKAoH5Cgt3Ie+JLhRbwOsCQePABiU3tJ1egGvyQ+33R/vcwM2Zl2QR/LzjsBeItPt3oSVXapn+m4nQDvpzw==}
     engines: {node: '>=14'}
 
-  line-column-path@3.0.0:
-    resolution: {integrity: sha512-Atocnm7Wr9nuvAn97yEPQa3pcQI5eLQGBz+m6iTb+CVw+IOzYB9MrYK7jI7BfC9ISnT4Fu0eiwhAScV//rp4Hw==}
-    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+  line-column-path@4.0.0:
+    resolution: {integrity: sha512-Zvpvd56i9FRV5kaJFiiY1t+FNMEH+dGEaLyQprqKlGHBAxJXmdSk+8tVsh6b9YlxbfyyuLrhJCkzwB+AmOBZ0g==}
+    engines: {node: '>=20'}
 
   lines-and-columns@1.2.4:
     resolution: {integrity: sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg==}
@@ -21514,6 +21580,10 @@ packages:
     resolution: {integrity: sha512-ppwTtiJZq0O/ai0z7yfudtBpWIoxM8yE6nHi1X47eFR2EWORqfbu6CnPlNsjeN683eT0qG6H/Pyf9fCcvjnnnQ==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
 
+  npm-run-path@6.0.0:
+    resolution: {integrity: sha512-9qny7Z9DsQU8Ou39ERsPU4OZQlSTP47ShQzuKZ6PRXpYLtIFgl/DEBYEXKlvcEa+9tHVcK8CF81Y2V72qaZhWA==}
+    engines: {node: '>=18'}
+
   npmlog@5.0.1:
     resolution: {integrity: sha512-AqZtDUWOMKs1G/8lwylVjrdYgqA4d9nu8hc+0gzRxlDb1I10+FHBGMXs6aiQHFdCUUlqH99MUMuLfzWDNDtfxw==}
     deprecated: This package is no longer supported.
@@ -21664,13 +21734,17 @@ packages:
   oniguruma-to-es@4.3.5:
     resolution: {integrity: sha512-Zjygswjpsewa0NLTsiizVuMQZbp0MDyM6lIt66OxsF21npUDlzpHi1Mgb/qhQdkb+dWFTzJmFbEWdvZgRho8eQ==}
 
-  open-editor@4.1.1:
-    resolution: {integrity: sha512-SYtGeZ9Zkzj/naoZaEF9LzwDYEGwuqQ4Fx5E3xdVRN98LFJjvMhG/ElByFEOVOiXepGra/Wi1fA4i/E1fXSBsw==}
-    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+  open-editor@6.0.0:
+    resolution: {integrity: sha512-LGd2Xn6NvFlbx/lg/HK69w6Dbg+21MzJzcPDPQRgDRqc+qiR+2/SN99rzZSo7Qa1ck1hcGYig0CAo53cmXCE0w==}
+    engines: {node: '>=20'}
 
   open@10.2.0:
     resolution: {integrity: sha512-YgBpdJHPyQ2UE5x+hlSXcnejzAvD0b22U2OuAP+8OnlJT+PjWPxtgmGqKKc+RgTM63U9gN0YzrYc71R2WT/hTA==}
     engines: {node: '>=18'}
+
+  open@11.0.0:
+    resolution: {integrity: sha512-smsWv2LzFjP03xmvFoJ331ss6h+jixfA4UUV/Bsiyuu4YJPfN+FIQGOIiv4w9/+MoHkfkJ22UIaQWRVFRfH6Vw==}
+    engines: {node: '>=20'}
 
   open@6.4.0:
     resolution: {integrity: sha512-IFenVPgF70fSm1keSd2iDBIDIBZkroLeuffXq+wKTzTJlBpesFWojV9lb8mzOfaAzM1sr7HQHuO0vtV0zYekGg==}
@@ -21851,6 +21925,10 @@ packages:
   parse-ms@2.1.0:
     resolution: {integrity: sha512-kHt7kzLoS9VBZfUsiKjv43mr91ea+U05EyKkEtqp7vNbHxmaVuEqN7XxeEVnGrMtYOAxGrDElSi96K7EgO1zCA==}
     engines: {node: '>=6'}
+
+  parse-ms@4.0.0:
+    resolution: {integrity: sha512-TXfryirbmq34y8QBwgqCVLi+8oA3oWx2eAnSn62ITyEhEYaWRlVZ2DvMM9eZbMs/RfxPu/PK/aBLyGj4IrqMHw==}
+    engines: {node: '>=18'}
 
   parse-node-version@1.0.1:
     resolution: {integrity: sha512-3YHlOa/JgH6Mnpr05jP9eDG254US9ek25LyIxZlDItp2iJtwyaXQb57lBYLdT3MowkUFYEV2XXNAYIPlESvJlA==}
@@ -22595,6 +22673,10 @@ packages:
     resolution: {integrity: sha512-OW/rX8O/jXnm82Ey1k44pObPtdblfiuWnrd8X7GJ7emImCOstunGbXUpp7HdBrFQX6rJzn3sPT397Wp5aCwCHg==}
     engines: {node: ^10 || ^12 || >=14}
 
+  powershell-utils@0.1.0:
+    resolution: {integrity: sha512-dM0jVuXJPsDN6DvRpea484tCUaMiXWjuCn++HGTqUWzGDjv5tZkEZldAJ/UMlqRYGFrD/etByo4/xOuC/snX2A==}
+    engines: {node: '>=20'}
+
   prelude-ls@1.2.1:
     resolution: {integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==}
     engines: {node: '>= 0.8.0'}
@@ -22717,6 +22799,10 @@ packages:
   pretty-ms@7.0.1:
     resolution: {integrity: sha512-973driJZvxiGOQ5ONsFhOF/DtzPMOMtgC11kCpUrPGMTgqp2q/1gwzCquocrN33is0VZ5GFHXZYMM9l6h67v2Q==}
     engines: {node: '>=10'}
+
+  pretty-ms@9.3.0:
+    resolution: {integrity: sha512-gjVS5hOP+M3wMm5nmNOucbIrqudzs9v/57bWRHQWLYklXqoXKrVfYW2W9+glfGsqtPgpiz5WwyEEB+ksXIx3gQ==}
+    engines: {node: '>=18'}
 
   process-nextick-args@2.0.1:
     resolution: {integrity: sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==}
@@ -24206,14 +24292,14 @@ packages:
       typescript:
         optional: true
 
-  rsbuild-plugin-dts@0.19.6:
-    resolution: {integrity: sha512-ehD3P432VJq6djxfAdWeWSUXPhEAnISlma2EXOSCZSzjerzRrG4H4f6WWw1sxN5qMQXgu5hLPqlUHsFZM9sEIg==}
-    engines: {node: '>=18.12.0'}
+  rsbuild-plugin-dts@0.22.0:
+    resolution: {integrity: sha512-Oyiu5oJDHWOnBv7yRr8eAGfoEddwxfPqUbAX6HvcJxrnR/h6Zd0VgTBWVTgqALYhLcL2ZdyZ2vwnqfhan4krwA==}
+    engines: {node: ^20.19.0 || >=22.12.0}
     peerDependencies:
       '@microsoft/api-extractor': ^7
-      '@rsbuild/core': 1.x
+      '@rsbuild/core': ^1.0.0 || ^2.0.0-0
       '@typescript/native-preview': 7.x
-      typescript: ^5
+      typescript: ^5 || ^6
     peerDependenciesMeta:
       '@microsoft/api-extractor':
         optional: true
@@ -24758,6 +24844,10 @@ packages:
     resolution: {integrity: sha512-94Bdh3cC2PKrbgSOUqTiGPWVZeSiXfKOVZNJniWoqrWrRkB1CJzBU3NEbiTsPcYy1lDsANA/THzS+9WBiy5nfQ==}
     engines: {node: '>= 10'}
 
+  sirv@3.0.2:
+    resolution: {integrity: sha512-2wcC/oGxHis/BoHkkPwldgiPSYcpZK3JU28WoMVv55yHJgcZ8rlXvuG9iZggz+sU1d4bRgIGASwyWqjxu3FM0g==}
+    engines: {node: '>=18'}
+
   sisteransi@1.0.5:
     resolution: {integrity: sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg==}
 
@@ -25157,6 +25247,10 @@ packages:
   strip-final-newline@3.0.0:
     resolution: {integrity: sha512-dOESqjYr96iWYylGObzd39EuNTa5VJxyvVAEm5Jnh7KGo75V43Hk1odPQkNDyXNmUR6k+gEiDVXnjB8HJ3crXw==}
     engines: {node: '>=12'}
+
+  strip-final-newline@4.0.0:
+    resolution: {integrity: sha512-aulFJcD6YK8V1G7iRB5tigAP4TsHBZZrOV8pjV++zdUwmeV8uzbY7yn6h9MswN62adStNZFuCIx4haBnRuMDaw==}
+    engines: {node: '>=18'}
 
   strip-indent@3.0.0:
     resolution: {integrity: sha512-laJTa3Jb+VQpaC6DseHhF7dXVqHTfJPCRDaEbid/drOhgitgYku/letMUqOXFoWV0zIIUbjpdH2t+tYj4bQMRQ==}
@@ -26153,6 +26247,14 @@ packages:
     resolution: {integrity: sha512-lRfVq8fE8gz6QMBuDM6a+LO3IAzTi05H6gCVaUpir2E1Rwpo4ZUog45KpNXKC/Mn3Yb9UDuHumeFTo9iV/D9FQ==}
     engines: {node: '>=18'}
 
+  unicorn-magic@0.3.0:
+    resolution: {integrity: sha512-+QBBXBCvifc56fsbuxZQ6Sic3wqqc3WWaqxs58gvJrcOuN83HGTCwz3oS5phzU9LthRNE9VrJCFCLUgHeeFnfA==}
+    engines: {node: '>=18'}
+
+  unicorn-magic@0.4.0:
+    resolution: {integrity: sha512-wH590V9VNgYH9g3lH9wWjTrUoKsjLF6sGLjhR4sH1LWpLmCOH0Zf7PukhDA8BiS7KHe4oPNkcTHqYkj7SOGUOw==}
+    engines: {node: '>=20'}
+
   unified@10.1.2:
     resolution: {integrity: sha512-pUSWAi/RAnVy1Pif2kAoeWNBa3JVrx0MId2LASj8G+7AiHWoKZNTomq6LG326T68U7/e263X6fTdcXIy7XnF7Q==}
 
@@ -27014,6 +27116,10 @@ packages:
     resolution: {integrity: sha512-h3Fbisa2nKGPxCpm89Hk33lBLsnaGBvctQopaBSOW/uIs6FTe1ATyAnKFJrzVs9vpGdsTe73WF3V4lIsk4Gacw==}
     engines: {node: '>=18'}
 
+  wsl-utils@0.3.1:
+    resolution: {integrity: sha512-g/eziiSUNBSsdDJtCLB8bdYEUMj4jR7AGeUo96p/3dTafgjHhpF4RiCFPiRILwjQoDXx5MqkBr4fwWtR3Ky4Wg==}
+    engines: {node: '>=20'}
+
   xdg-app-paths@5.1.0:
     resolution: {integrity: sha512-RAQ3WkPf4KTU1A8RtFx3gWywzVKe00tfOPFfl2NDGqbIFENQO4kqAJp7mhQjNj/33W5x5hiWWUdyfPq/5SU3QA==}
     engines: {node: '>=6'}
@@ -27137,6 +27243,10 @@ packages:
   yocto-queue@1.2.2:
     resolution: {integrity: sha512-4LCcse/U2MHZ63HAJVE+v71o7yOdIe4cZ70Wpf8D/IyjDKYQLV5GD46B+hSTjJsvV5PztjvHoU580EftxjDZFQ==}
     engines: {node: '>=12.20'}
+
+  yoctocolors@2.1.2:
+    resolution: {integrity: sha512-CzhO+pFNo8ajLM2d2IW/R93ipy99LWjtwblvC1RsoSUMZgyLbYFr221TnSNT7GjGdYui6P459mw9JH/g/zW2ug==}
+    engines: {node: '>=18'}
 
   zod-to-json-schema@3.25.1:
     resolution: {integrity: sha512-pM/SU9d3YAggzi6MtR4h7ruuQlqKtad8e9S0fmxcMi+ueAK5Korys/aWcV9LIIHTVbj01NdzxcnXSN+O74ZIVA==}
@@ -38066,6 +38176,24 @@ snapshots:
     transitivePeerDependencies:
       - webpack-hot-middleware
 
+  '@rsbuild/plugin-react@2.0.1(@rsbuild/core@2.0.12(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0))(@rspack/core@1.7.9(@swc/helpers@0.5.23))':
+    dependencies:
+      '@rspack/plugin-react-refresh': 2.0.0(@rspack/core@1.7.9(@swc/helpers@0.5.23))(react-refresh@0.18.0)
+      react-refresh: 0.18.0
+    optionalDependencies:
+      '@rsbuild/core': 2.0.12(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0)
+    transitivePeerDependencies:
+      - '@rspack/core'
+
+  '@rsbuild/plugin-react@2.0.1(@rsbuild/core@2.0.12(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0))(@rspack/core@2.0.8(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(@swc/helpers@0.5.23))':
+    dependencies:
+      '@rspack/plugin-react-refresh': 2.0.0(@rspack/core@2.0.8(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(@swc/helpers@0.5.23))(react-refresh@0.18.0)
+      react-refresh: 0.18.0
+    optionalDependencies:
+      '@rsbuild/core': 2.0.12(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0)
+    transitivePeerDependencies:
+      - '@rspack/core'
+
   '@rsbuild/plugin-rem@1.0.5(@rsbuild/core@1.7.3)':
     dependencies:
       deepmerge: 4.3.1
@@ -38457,15 +38585,17 @@ snapshots:
     transitivePeerDependencies:
       - '@typescript/native-preview'
 
-  '@rslib/core@0.19.6(@microsoft/api-extractor@7.57.7(@types/node@25.9.1))(typescript@5.9.3)':
+  '@rslib/core@0.22.0(@microsoft/api-extractor@7.57.7(@types/node@25.9.1))(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0)(typescript@5.9.3)':
     dependencies:
-      '@rsbuild/core': 1.7.3
-      rsbuild-plugin-dts: 0.19.6(@microsoft/api-extractor@7.57.7(@types/node@25.9.1))(@rsbuild/core@1.7.3)(typescript@5.9.3)
+      '@rsbuild/core': 2.0.12(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0)
+      rsbuild-plugin-dts: 0.22.0(@microsoft/api-extractor@7.57.7(@types/node@25.9.1))(@rsbuild/core@2.0.12(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0))(typescript@5.9.3)
     optionalDependencies:
       '@microsoft/api-extractor': 7.57.7(@types/node@25.9.1)
       typescript: 5.9.3
     transitivePeerDependencies:
+      - '@module-federation/runtime-tools'
       - '@typescript/native-preview'
+      - core-js
 
   '@rslib/core@0.9.2(@microsoft/api-extractor@7.57.7(@types/node@25.9.1))(typescript@5.9.3)':
     dependencies:
@@ -39324,6 +39454,18 @@ snapshots:
     optionalDependencies:
       webpack-hot-middleware: 2.26.1
 
+  '@rspack/plugin-react-refresh@2.0.0(@rspack/core@1.7.9(@swc/helpers@0.5.23))(react-refresh@0.18.0)':
+    dependencies:
+      react-refresh: 0.18.0
+    optionalDependencies:
+      '@rspack/core': 1.7.9(@swc/helpers@0.5.23)
+
+  '@rspack/plugin-react-refresh@2.0.0(@rspack/core@2.0.8(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(@swc/helpers@0.5.23))(react-refresh@0.18.0)':
+    dependencies:
+      react-refresh: 0.18.0
+    optionalDependencies:
+      '@rspack/core': 2.0.8(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(@swc/helpers@0.5.23)
+
   '@rspress/core@2.0.3(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(@types/react@18.3.28)(core-js@3.49.0)(webpack-hot-middleware@2.26.1)':
     dependencies:
       '@mdx-js/mdx': 3.1.1
@@ -39448,32 +39590,32 @@ snapshots:
       - '@module-federation/runtime-tools'
       - core-js
 
-  '@rstest/adapter-rsbuild@0.2.6(@rsbuild/core@1.7.3)(@rstest/core@0.8.5(jsdom@20.0.3))':
+  '@rstest/adapter-rsbuild@https://pkg.pr.new/@rstest/adapter-rsbuild@40086e4(@rsbuild/core@2.0.12(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0))(@rstest/core@https://pkg.pr.new/@rstest/core@40086e4(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0)(jsdom@20.0.3))':
     dependencies:
-      '@rsbuild/core': 1.7.3
-      '@rstest/core': 0.8.5(jsdom@20.0.3)
+      '@rsbuild/core': 2.0.12(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0)
+      '@rstest/core': https://pkg.pr.new/@rstest/core@40086e4(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0)(jsdom@20.0.3)
 
-  '@rstest/adapter-rslib@0.2.2(@rslib/core@0.19.6(@microsoft/api-extractor@7.57.7(@types/node@25.9.1))(typescript@5.9.3))(@rstest/core@0.8.5(jsdom@20.0.3))(typescript@5.9.3)':
+  '@rstest/adapter-rslib@https://pkg.pr.new/@rstest/adapter-rslib@40086e4(@rslib/core@0.22.0(@microsoft/api-extractor@7.57.7(@types/node@25.9.1))(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0)(typescript@5.9.3))(@rstest/core@https://pkg.pr.new/@rstest/core@40086e4(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0)(jsdom@20.0.3))(typescript@5.9.3)':
     dependencies:
-      '@rslib/core': 0.19.6(@microsoft/api-extractor@7.57.7(@types/node@25.9.1))(typescript@5.9.3)
-      '@rstest/core': 0.8.5(jsdom@20.0.3)
+      '@rslib/core': 0.22.0(@microsoft/api-extractor@7.57.7(@types/node@25.9.1))(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0)(typescript@5.9.3)
+      '@rstest/core': https://pkg.pr.new/@rstest/core@40086e4(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0)(jsdom@20.0.3)
     optionalDependencies:
       typescript: 5.9.3
 
-  '@rstest/browser-react@0.8.1(@rstest/core@0.8.5(jsdom@20.0.3))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+  '@rstest/browser-react@https://pkg.pr.new/@rstest/browser-react@40086e4(@rstest/core@https://pkg.pr.new/@rstest/core@40086e4(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0)(jsdom@20.0.3))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
-      '@rstest/core': 0.8.5(jsdom@20.0.3)
+      '@rstest/core': https://pkg.pr.new/@rstest/core@40086e4(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0)(jsdom@20.0.3)
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
 
-  '@rstest/browser@0.8.1(@rstest/core@0.8.5(jsdom@20.0.3))(playwright@1.57.0)':
+  '@rstest/browser@https://pkg.pr.new/@rstest/browser@40086e4(@rstest/core@https://pkg.pr.new/@rstest/core@40086e4(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0)(jsdom@20.0.3))(playwright@1.57.0)':
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
-      '@rstest/core': 0.8.5(jsdom@20.0.3)
+      '@rstest/core': https://pkg.pr.new/@rstest/core@40086e4(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0)(jsdom@20.0.3)
       convert-source-map: 2.0.0
-      open-editor: 4.1.1
+      open-editor: 6.0.0
       pathe: 2.0.3
-      sirv: 2.0.4
+      sirv: 3.0.2
       ws: 8.21.0
     optionalDependencies:
       playwright: 1.57.0
@@ -39496,6 +39638,16 @@ snapshots:
       tinypool: 1.1.1
     optionalDependencies:
       jsdom: 20.0.3
+
+  '@rstest/core@https://pkg.pr.new/@rstest/core@40086e4(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0)(jsdom@20.0.3)':
+    dependencies:
+      '@rsbuild/core': 2.0.12(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0)
+      '@types/chai': 5.2.3
+    optionalDependencies:
+      jsdom: 20.0.3
+    transitivePeerDependencies:
+      - '@module-federation/runtime-tools'
+      - core-js
 
   '@rtsao/scc@1.1.0': {}
 
@@ -39610,6 +39762,8 @@ snapshots:
     transitivePeerDependencies:
       - '@types/node'
 
+  '@sec-ant/readable-stream@0.4.1': {}
+
   '@selderee/plugin-htmlparser2@0.11.0':
     dependencies:
       domhandler: 5.0.3
@@ -39675,6 +39829,8 @@ snapshots:
   '@sinclair/typebox@0.34.48': {}
 
   '@sindresorhus/is@5.6.0': {}
+
+  '@sindresorhus/merge-streams@4.0.0': {}
 
   '@sinonjs/commons@3.0.1':
     dependencies:
@@ -47539,6 +47695,21 @@ snapshots:
       signal-exit: 4.1.0
       strip-final-newline: 3.0.0
 
+  execa@9.6.1:
+    dependencies:
+      '@sindresorhus/merge-streams': 4.0.0
+      cross-spawn: 7.0.6
+      figures: 6.1.0
+      get-stream: 9.0.1
+      human-signals: 8.0.1
+      is-plain-obj: 4.1.0
+      is-stream: 4.0.1
+      npm-run-path: 6.0.0
+      pretty-ms: 9.3.0
+      signal-exit: 4.1.0
+      strip-final-newline: 4.0.0
+      yoctocolors: 2.1.2
+
   executable@4.1.1:
     dependencies:
       pify: 2.3.0
@@ -47799,6 +47970,10 @@ snapshots:
   figures@3.2.0:
     dependencies:
       escape-string-regexp: 1.0.5
+
+  figures@6.1.0:
+    dependencies:
+      is-unicode-supported: 2.1.0
 
   file-entry-cache@6.0.1:
     dependencies:
@@ -48270,6 +48445,11 @@ snapshots:
   get-stream@6.0.1: {}
 
   get-stream@8.0.1: {}
+
+  get-stream@9.0.1:
+    dependencies:
+      '@sec-ant/readable-stream': 0.4.1
+      is-stream: 4.0.1
 
   get-symbol-description@1.1.0:
     dependencies:
@@ -49128,6 +49308,8 @@ snapshots:
 
   human-signals@5.0.0: {}
 
+  human-signals@8.0.1: {}
+
   humps@2.0.1: {}
 
   husky@8.0.3: {}
@@ -49476,6 +49658,8 @@ snapshots:
 
   is-hexadecimal@2.0.1: {}
 
+  is-in-ssh@1.0.0: {}
+
   is-inside-container@1.0.0:
     dependencies:
       is-docker: 3.0.0
@@ -49565,6 +49749,8 @@ snapshots:
   is-stream@2.0.1: {}
 
   is-stream@3.0.0: {}
+
+  is-stream@4.0.1: {}
 
   is-string@1.1.1:
     dependencies:
@@ -50536,9 +50722,9 @@ snapshots:
 
   lilconfig@3.1.3: {}
 
-  line-column-path@3.0.0:
+  line-column-path@4.0.0:
     dependencies:
-      type-fest: 2.19.0
+      unicorn-magic: 0.4.0
 
   lines-and-columns@1.2.4: {}
 
@@ -52381,6 +52567,11 @@ snapshots:
     dependencies:
       path-key: 4.0.0
 
+  npm-run-path@6.0.0:
+    dependencies:
+      path-key: 4.0.0
+      unicorn-magic: 0.3.0
+
   npmlog@5.0.1:
     dependencies:
       are-we-there-yet: 2.0.0
@@ -52588,12 +52779,12 @@ snapshots:
       regex: 6.1.0
       regex-recursion: 6.0.2
 
-  open-editor@4.1.1:
+  open-editor@6.0.0:
     dependencies:
       env-editor: 1.3.0
-      execa: 5.1.1
-      line-column-path: 3.0.0
-      open: 8.4.2
+      execa: 9.6.1
+      line-column-path: 4.0.0
+      open: 11.0.0
 
   open@10.2.0:
     dependencies:
@@ -52601,6 +52792,15 @@ snapshots:
       define-lazy-prop: 3.0.0
       is-inside-container: 1.0.0
       wsl-utils: 0.1.0
+
+  open@11.0.0:
+    dependencies:
+      default-browser: 5.5.0
+      define-lazy-prop: 3.0.0
+      is-in-ssh: 1.0.0
+      is-inside-container: 1.0.0
+      powershell-utils: 0.1.0
+      wsl-utils: 0.3.1
 
   open@6.4.0:
     dependencies:
@@ -52813,6 +53013,8 @@ snapshots:
       lines-and-columns: 1.2.4
 
   parse-ms@2.1.0: {}
+
+  parse-ms@4.0.0: {}
 
   parse-node-version@1.0.1: {}
 
@@ -53654,6 +53856,8 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
+  powershell-utils@0.1.0: {}
+
   prelude-ls@1.2.1: {}
 
   prettier-eslint@16.3.0:
@@ -53730,6 +53934,10 @@ snapshots:
   pretty-ms@7.0.1:
     dependencies:
       parse-ms: 2.1.0
+
+  pretty-ms@9.3.0:
+    dependencies:
+      parse-ms: 4.0.0
 
   process-nextick-args@2.0.1: {}
 
@@ -56573,10 +56781,10 @@ snapshots:
       '@microsoft/api-extractor': 7.57.7(@types/node@25.9.1)
       typescript: 5.9.3
 
-  rsbuild-plugin-dts@0.19.6(@microsoft/api-extractor@7.57.7(@types/node@25.9.1))(@rsbuild/core@1.7.3)(typescript@5.9.3):
+  rsbuild-plugin-dts@0.22.0(@microsoft/api-extractor@7.57.7(@types/node@25.9.1))(@rsbuild/core@2.0.12(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0))(typescript@5.9.3):
     dependencies:
       '@ast-grep/napi': 0.37.0
-      '@rsbuild/core': 1.7.3
+      '@rsbuild/core': 2.0.12(@module-federation/runtime-tools@2.5.1(node-fetch@3.3.2))(core-js@3.49.0)
     optionalDependencies:
       '@microsoft/api-extractor': 7.57.7(@types/node@25.9.1)
       typescript: 5.9.3
@@ -57166,6 +57374,12 @@ snapshots:
       mrmime: 2.0.1
       totalist: 3.0.1
 
+  sirv@3.0.2:
+    dependencies:
+      '@polka/url': 1.0.0-next.29
+      mrmime: 2.0.1
+      totalist: 3.0.1
+
   sisteransi@1.0.5: {}
 
   size-sensor@1.0.3: {}
@@ -57672,6 +57886,8 @@ snapshots:
   strip-final-newline@2.0.0: {}
 
   strip-final-newline@3.0.0: {}
+
+  strip-final-newline@4.0.0: {}
 
   strip-indent@3.0.0:
     dependencies:
@@ -59271,6 +59487,10 @@ snapshots:
   unicode-property-aliases-ecmascript@2.2.0: {}
 
   unicorn-magic@0.1.0: {}
+
+  unicorn-magic@0.3.0: {}
+
+  unicorn-magic@0.4.0: {}
 
   unified@10.1.2:
     dependencies:
@@ -60944,6 +61164,11 @@ snapshots:
     dependencies:
       is-wsl: 3.1.1
 
+  wsl-utils@0.3.1:
+    dependencies:
+      is-wsl: 3.1.1
+      powershell-utils: 0.1.0
+
   xdg-app-paths@5.1.0:
     dependencies:
       xdg-portable: 7.3.0
@@ -61072,6 +61297,8 @@ snapshots:
   yocto-queue@0.1.0: {}
 
   yocto-queue@1.2.2: {}
+
+  yoctocolors@2.1.2: {}
 
   zod-to-json-schema@3.25.1(zod@3.25.76):
     dependencies:
