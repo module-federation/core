@@ -57,6 +57,10 @@ export default defineConfig({
 });
 ```
 
+:::tip
+如果远程应用使用 React 18/19 bridge，请确保也使用尾部斜杠前缀形式 (`'react-dom/'`) 配置 `shared` 部分，以便 `react-dom/client` 被正确共享。
+:::
+
 ### 步骤 2: 创建远程组件
 
 #### 2.1 定义加载和错误组件

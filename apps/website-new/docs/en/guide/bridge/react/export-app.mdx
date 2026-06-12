@@ -104,6 +104,18 @@ export default {
 When enabling Bridge Router, do not configure `react-router-dom` as a shared dependency, otherwise it will cause routing functionality issues.
 :::
 
+:::warning Important
+`@module-federation/bridge-react/18` and `/19` import `createRoot` from `react-dom/client`. If you only configure `"react-dom"` as a shared dependency, `react-dom/client` will not be shared and can cause React version mismatch errors. Make sure to use the trailing-slash prefix form:
+
+```ts
+shared: {
+  'react-dom/': {
+    singleton: true,
+  },
+}
+```
+:::
+
 ## createBridgeComponent API Reference
 
 ### Function Signature
