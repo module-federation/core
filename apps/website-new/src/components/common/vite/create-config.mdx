@@ -1,0 +1,27 @@
+```ts title='module-federation.config.ts'
+import { createModuleFederationConfig } from '@module-federation/vite';
+
+export default createModuleFederationConfig({
+  name: 'vite_provider',
+  manifest: true,
+  remotes: {
+    esm_remote: {
+      type: 'module',
+      name: 'esm_remote',
+      entry: 'https://[...]/remoteEntry.js',
+    },
+    var_remote: 'var_remote@https://[...]/remoteEntry.js',
+  },
+  exposes: {
+    './button': './src/components/button',
+  },
+  shared: {
+    react: {
+      singleton: true,
+    },
+    'react/': {
+      singleton: true,
+    },
+  },
+});
+```

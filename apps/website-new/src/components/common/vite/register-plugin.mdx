@@ -1,0 +1,18 @@
+```ts title='vite.config.js'
+import { federation } from '@module-federation/vite';
+import mfConfig from './module-federation.config';
+
+module.exports = {
+  server: {
+    origin: 'http://localhost:2000',
+    port: 2000,
+  },
+  base: 'http://localhost:2000',
+  plugins: [federation(mfConfig)],
+  // Do you need to support build targets lower than chrome89?
+  // You can use 'vite-plugin-top-level-await' plugin for that.
+  build: {
+    target: 'chrome89',
+  },
+};
+```
