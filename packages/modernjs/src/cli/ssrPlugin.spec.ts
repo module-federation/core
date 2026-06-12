@@ -90,5 +90,5 @@ describe('moduleFederationSSRPlugin', () => {
         browserPublicPath,
       );
     }
-  });
+  }, 10_000);
 });

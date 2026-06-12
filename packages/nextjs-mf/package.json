@@ -66,6 +66,7 @@
   "dependencies": {
     "fast-glob": "^3.2.11",
     "@module-federation/runtime": "workspace:*",
+    "@module-federation/runtime-core": "workspace:*",
     "@module-federation/sdk": "workspace:*",
     "@module-federation/enhanced": "workspace:*",
     "@module-federation/node": "workspace:*",
