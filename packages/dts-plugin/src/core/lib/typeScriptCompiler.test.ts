@@ -371,6 +371,89 @@ describe('typeScriptCompiler', () => {
       expect(directoryStructure).toMatchObject(expectedStructure);
     });
 
+    it('emits wrapper files for multi-dot expose entries', async () => {
+      const projectDir = join(tmpDir, 'multiDotExposeProject');
+      const srcDir = join(projectDir, 'src', 'components');
+      mkdirSync(srcDir, { recursive: true });
+
+      const entryFile = join(srcDir, 'foo.generated.ts');
+      writeFileSync(entryFile, 'export const foo = 1;\n');
+
+      const baseTsConfigPath = join(projectDir, 'tsconfig.json');
+      writeFileSync(
+        baseTsConfigPath,
+        JSON.stringify(
+          {
+            compilerOptions: {
+              target: 'es2017',
+              module: 'esnext',
+              moduleResolution: 'node',
+              strict: true,
+              esModuleInterop: true,
+              declaration: true,
+              emitDeclarationOnly: true,
+              rootDir: projectDir,
+            },
+            include: ['src'],
+          },
+          null,
+          2,
+        ),
+      );
+
+      const outDir = join(
+        projectDir,
+        'typesRemoteFolder',
+        'compiledTypesFolder',
+      );
+
+      await compileTs(
+        { './foo.generated': entryFile },
+        {
+          extends: baseTsConfigPath,
+          compilerOptions: {
+            target: 'es2017',
+            module: 'esnext',
+            moduleResolution: 'node',
+            strict: true,
+            esModuleInterop: true,
+            emitDeclarationOnly: true,
+            noEmit: false,
+            declaration: true,
+            outDir,
+            declarationDir: outDir,
+            rootDir: projectDir,
+          },
+          files: [entryFile],
+          include: [],
+          exclude: [],
+        },
+        {
+          ...remoteOptions,
+          context: projectDir,
+          tsConfigPath: baseTsConfigPath,
+        },
+      );
+
+      const wrapperPath = join(
+        projectDir,
+        'typesRemoteFolder',
+        'foo.generated.d.ts',
+      );
+      const emittedDefinitionPath = join(
+        outDir,
+        'src',
+        'components',
+        'foo.generated.d.ts',
+      );
+
+      expect(existsSync(emittedDefinitionPath)).toBe(true);
+      expect(existsSync(wrapperPath)).toBe(true);
+      expect(readFileSync(wrapperPath, 'utf-8')).toContain(
+        './compiledTypesFolder/src/components/foo.generated',
+      );
+    });
+
     it('with additionalFilesToCompile', async () => {
       const filepath = join(__dirname, './typeScriptCompiler.ts');
 
