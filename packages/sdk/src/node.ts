@@ -36,6 +36,67 @@ const loadNodeFetch = async (): Promise<typeof fetch> => {
   return (fetchModule.default || fetchModule) as unknown as typeof fetch;
 };
 
+const SCRIPT_RESPONSE_PREVIEW_LENGTH = 240;
+
+const getScriptResponsePreview = (responseText: string): string =>
+  responseText
+    .slice(0, SCRIPT_RESPONSE_PREVIEW_LENGTH)
+    .replace(/\s+/g, ' ')
+    .trim();
+
+const isSuccessfulHttpResponse = (response: Response): boolean => {
+  if (typeof response.ok === 'boolean') {
+    return response.ok;
+  }
+
+  const status = Number(response.status);
+  return (
+    !Number.isFinite(status) || status === 0 || (status >= 200 && status < 300)
+  );
+};
+
+const formatHttpStatus = (response: Response): string => {
+  const status = Number(response.status);
+  const statusText =
+    typeof response.statusText === 'string' ? response.statusText.trim() : '';
+
+  if (!Number.isFinite(status) || status === 0) {
+    return 'non-ok HTTP response';
+  }
+
+  return `HTTP ${status}${statusText ? ` ${statusText}` : ''}`;
+};
+
+const createScriptNetworkError = (
+  response: Response,
+  url: string,
+  responseText: string,
+): Error => {
+  const preview = getScriptResponsePreview(responseText);
+  const previewSuffix = preview ? `; preview: ${preview}` : '';
+  const error = new Error(
+    `ScriptNetworkError: Failed to load Node.js script "${url}" - ${formatHttpStatus(
+      response,
+    )}${previewSuffix}`,
+  );
+
+  error.name = 'ScriptNetworkError';
+  return error;
+};
+
+const readValidatedScriptResponseText = async (
+  response: Response,
+  url: string,
+): Promise<string> => {
+  const responseText = await response.text();
+
+  if (!isSuccessfulHttpResponse(response)) {
+    throw createScriptNetworkError(response, url, responseText);
+  }
+
+  return responseText;
+};
+
 const lazyLoaderHookFetch = async (
   input: RequestInfo | URL,
   init?: RequestInit,
@@ -98,7 +159,10 @@ export const createScriptNode =
         const handleScriptFetch = async (f: typeof fetch, urlObj: URL) => {
           try {
             const res = await f(urlObj.href);
-            const data = await res.text();
+            const data = await readValidatedScriptResponseText(
+              res,
+              urlObj.href,
+            );
             const [path, vm] = await Promise.all([
               importNodeModule<typeof import('path')>('path'),
               importNodeModule<typeof import('vm')>('vm'),
@@ -270,7 +334,7 @@ async function loadModule(
 
   const { fetch, vm } = options;
   const response = await fetch(url);
-  const code = await response.text();
+  const code = await readValidatedScriptResponseText(response, url);
 
   const module: any = new vm.SourceTextModule(code, {
     // @ts-ignore
