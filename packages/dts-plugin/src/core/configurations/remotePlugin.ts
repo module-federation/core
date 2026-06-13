@@ -184,16 +184,19 @@ const readTsConfig = (
   return rawTsConfigJson;
 };
 
-const TS_EXTENSIONS = ['ts', 'tsx', 'vue', 'svelte'];
+const TS_EXTENSIONS = ['.ts', '.tsx', '.vue', '.svelte', '.js', '.jsx'];
 
 const resolveWithExtension = (exposedPath: string, context: string) => {
-  if (extname(exposedPath)) {
+  const explicitExtension = extname(exposedPath);
+
+  if (TS_EXTENSIONS.includes(explicitExtension)) {
     return resolve(context, exposedPath);
   }
+
   for (const extension of TS_EXTENSIONS) {
     const exposedPathWithExtension = resolve(
       context,
-      `${exposedPath}.${extension}`,
+      `${exposedPath}${extension}`,
     );
     if (existsSync(exposedPathWithExtension)) {
       return exposedPathWithExtension;
