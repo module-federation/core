@@ -2,6 +2,8 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
+import { createOpenRuntime } from '@openruntime/core';
+import type { OpenRuntimeWindowHost } from '@openruntime/core';
 import { createObservability, ObservabilityPlugin } from '../src';
 import {
   ObservabilityBuildPlugin,
@@ -33,6 +35,34 @@ const createShared = (overrides: Record<string, unknown> = {}) => ({
   get: () => () => ({ value: 'shared' }),
   ...overrides,
 });
+
+type SharedFixture = ReturnType<typeof createShared>;
+type SharedHookFixturePlugin = {
+  beforeLoadShare?: (args: {
+    pkgName: string;
+    shareInfo?: SharedFixture;
+    shared: Record<string, unknown>;
+    origin: typeof enabledOrigin;
+  }) => unknown;
+  afterLoadShare?: (args: {
+    pkgName: string;
+    shareInfo?: SharedFixture;
+    selectedShared?: Partial<SharedFixture>;
+    shared: Record<string, unknown>;
+    origin: typeof enabledOrigin;
+    lifecycle: 'loadShare' | 'loadShareSync';
+  }) => void;
+  errorLoadShare?: (args: {
+    pkgName: string;
+    shareInfo?: SharedFixture;
+    shared: Record<string, unknown>;
+    shareScopeMap?: Record<string, Record<string, Record<string, unknown>>>;
+    origin: typeof enabledOrigin;
+    lifecycle: 'loadShare' | 'loadShareSync';
+    error?: Error;
+    recovered?: boolean;
+  }) => unknown;
+};
 
 const hasUndefinedField = (value: unknown): boolean => {
   if (Array.isArray(value)) {
@@ -1534,7 +1564,17 @@ describe('ObservabilityPlugin', () => {
   it('records a successful loadRemote report when enabled', async () => {
     const observability = createObservability({ level: 'verbose' });
 
-    emitRemoteStart(observability);
+    emitRemoteStart(observability, {
+      options: {
+        name: 'host',
+        remotes: [
+          {
+            name: 'remote',
+            entry: 'http://localhost:3001/mf-manifest.json',
+          },
+        ],
+      },
+    });
     await emitRemoteLoaded(observability);
 
     const report = observability.getLatestReport();
@@ -1567,6 +1607,466 @@ describe('ObservabilityPlugin', () => {
       actions: [],
     });
     expect(report?.events).toHaveLength(2);
+  });
+
+  it('syncs remote loading reports to OpenRuntime targets', async () => {
+    const runtime = createOpenRuntime();
+    const observability = createObservability({
+      level: 'verbose',
+      console: false,
+      openRuntime: {
+        runtime,
+        source: 'mf-test',
+      },
+    });
+
+    emitRemoteStart(observability, {
+      options: {
+        name: 'host',
+        remotes: [
+          {
+            name: 'remote',
+            entry: 'http://localhost:3001/mf-manifest.json',
+          },
+        ],
+      },
+    });
+
+    expect(runtime.getSnapshot().targets['mf:remote:remote']).toMatchObject({
+      status: 'loading',
+      type: 'mf.remote',
+      source: 'mf-test',
+      data: expect.objectContaining({
+        remote: expect.objectContaining({
+          name: 'remote',
+        }),
+        hostName: ['host'],
+        exposes: [
+          {
+            targetId: 'mf:remote:remote:expose:Button',
+          },
+        ],
+      }),
+    });
+
+    await emitRemoteLoaded(observability);
+
+    const waitResult = await runtime.waitFor({
+      id: 'mf:remote:remote',
+      status: 'ready',
+    });
+    expect(waitResult.success).toBe(true);
+
+    const snapshot = runtime.getSnapshot();
+    expect(snapshot.targets['mf:consumer:host']).toBeUndefined();
+    expect(snapshot.targets['mf:remote:remote']).toMatchObject({
+      status: 'ready',
+      data: expect.objectContaining({
+        remote: expect.objectContaining({
+          name: 'remote',
+        }),
+        hostName: ['host'],
+        exposes: [
+          {
+            targetId: 'mf:remote:remote:expose:Button',
+          },
+        ],
+      }),
+    });
+    expect(snapshot.targets['mf:remote:remote'].data).not.toHaveProperty(
+      'state',
+    );
+    expect(snapshot.targets['mf:remote:remote'].data).not.toHaveProperty(
+      'latestReport',
+    );
+    expect(snapshot.targets['mf:remote:remote'].data).not.toHaveProperty(
+      'currentPhase',
+    );
+    expect(snapshot.targets['mf:remote:remote'].data).not.toHaveProperty(
+      'exposeCount',
+    );
+    expect(snapshot.targets['mf:manifest:remote']).toBeUndefined();
+    expect(snapshot.targets['mf:remote-entry:remote']).toBeUndefined();
+    expect(snapshot.targets['mf:remote:remote:expose:Button']).toMatchObject({
+      status: 'ready',
+      dependsOn: ['mf:remote:remote'],
+      type: 'mf.remote.expose',
+      data: expect.objectContaining({
+        requestId: 'remote/Button',
+        hostName: ['host'],
+        consumers: ['host'],
+        lastPhase: 'loadRemote',
+        phases: expect.objectContaining({
+          loadRemote: expect.any(Object),
+        }),
+      }),
+    });
+    expect(
+      snapshot.targets['mf:remote:remote:expose:Button'].data,
+    ).not.toHaveProperty('remote');
+    expect(
+      snapshot.targets['mf:remote:remote:expose:Button'].data,
+    ).not.toHaveProperty('expose');
+    expect(
+      snapshot.targets['mf:remote:remote:expose:Button'].data,
+    ).not.toHaveProperty('outcome');
+    expect(
+      snapshot.targets['mf:remote:remote:expose:Button'].data,
+    ).not.toHaveProperty('currentPhase');
+    expect(
+      snapshot.targets['mf:remote:remote:expose:Button'].data,
+    ).not.toHaveProperty('status');
+    expect(
+      snapshot.targets['mf:remote:remote:expose:Button'].data,
+    ).not.toHaveProperty('state');
+
+    expect(
+      runtime.getActions({ source: 'mf-test' }).map(({ name }) => name),
+    ).toEqual(
+      expect.arrayContaining([
+        'mf:list-reports',
+        'mf:get-latest-report',
+        'mf:get-report',
+        'mf:export-report',
+        'mf:get-federation-global',
+        'mf:get-federation-module-info',
+        'mf:list-federation-instances',
+        'mf:get-federation-instance-config',
+      ]),
+    );
+
+    const listReports = await runtime.runAction('mf:list-reports', {
+      remote: 'remote',
+    });
+    expect(listReports.success).toBe(true);
+    expect(listReports.result).toMatchObject({
+      count: 1,
+      reports: [
+        expect.objectContaining({
+          requestId: 'remote/Button',
+          remote: expect.objectContaining({
+            name: 'remote',
+          }),
+          outcome: 'runtime-loaded',
+        }),
+      ],
+    });
+
+    const latestReport = await runtime.runAction('mf:get-latest-report');
+    expect(latestReport.success).toBe(true);
+    const latestReportResult = latestReport.result as {
+      report?: {
+        traceId?: string;
+        remote?: {
+          name?: string;
+        };
+      };
+    };
+    expect(latestReportResult.report?.remote?.name).toBe('remote');
+    const traceId = latestReportResult.report?.traceId;
+    if (!traceId) {
+      throw new Error('Expected latest report traceId.');
+    }
+    await expect(
+      runtime.getInputOptions('mf:get-report', 'traceId'),
+    ).resolves.toEqual([
+      expect.objectContaining({
+        value: traceId,
+        description: 'remote',
+      }),
+    ]);
+
+    const reportByTraceId = await runtime.runAction('mf:get-report', {
+      traceId,
+    });
+    expect(reportByTraceId.success).toBe(true);
+    expect(reportByTraceId.result).toMatchObject({
+      found: true,
+      report: expect.objectContaining({
+        traceId,
+      }),
+    });
+
+    const exportedReport = await runtime.runAction('mf:export-report', {
+      traceId,
+    });
+    expect(exportedReport.success).toBe(true);
+    expect(exportedReport.result).toMatchObject({
+      found: true,
+      report: expect.objectContaining({
+        traceId,
+      }),
+    });
+  });
+
+  it('keeps remote target data aggregated when a remote loads multiple exposes', async () => {
+    const runtime = createOpenRuntime();
+    const observability = createObservability({
+      level: 'verbose',
+      console: false,
+      openRuntime: {
+        runtime,
+        source: 'mf-test',
+      },
+    });
+
+    emitRemoteStart(observability, {
+      id: 'remote/Button',
+      origin: {
+        version: '2.5.0',
+        options: {
+          name: 'consumer_a',
+        },
+      },
+    });
+    await emitRemoteLoaded(observability, {
+      id: 'remote/Button',
+      expose: './Button',
+      origin: {
+        version: '2.5.0',
+        options: {
+          name: 'consumer_a',
+        },
+      },
+    });
+    emitRemoteStart(observability, {
+      id: 'remote/Panel',
+      origin: {
+        version: '2.5.0',
+        options: {
+          name: 'consumer_b',
+        },
+      },
+    });
+    await emitRemoteLoaded(observability, {
+      id: 'remote/Panel',
+      expose: './Panel',
+      origin: {
+        version: '2.5.0',
+        options: {
+          name: 'consumer_b',
+        },
+      },
+    });
+
+    const snapshot = runtime.getSnapshot();
+    expect(snapshot.targets['mf:remote:remote']).toMatchObject({
+      status: 'ready',
+      data: expect.objectContaining({
+        remote: expect.objectContaining({
+          name: 'remote',
+        }),
+        hostName: expect.arrayContaining(['consumer_a', 'consumer_b']),
+        exposes: [
+          {
+            targetId: 'mf:remote:remote:expose:Button',
+          },
+          {
+            targetId: 'mf:remote:remote:expose:Panel',
+          },
+        ],
+      }),
+    });
+    expect(snapshot.targets['mf:remote:remote'].data).not.toHaveProperty(
+      'requestId',
+    );
+    expect(snapshot.targets['mf:remote:remote'].data).not.toHaveProperty(
+      'expose',
+    );
+    expect(snapshot.targets['mf:remote:remote'].data).not.toHaveProperty(
+      'state',
+    );
+    expect(snapshot.targets['mf:remote:remote'].data).not.toHaveProperty(
+      'exposeCount',
+    );
+    expect(snapshot.targets['mf:remote:remote'].data).not.toHaveProperty(
+      'latestReport',
+    );
+    expect(snapshot.targets['mf:remote:remote'].data).not.toHaveProperty(
+      'currentPhase',
+    );
+    expect(snapshot.targets['mf:manifest:remote']).toBeUndefined();
+    expect(snapshot.targets['mf:remote-entry:remote']).toBeUndefined();
+    expect(snapshot.targets['mf:remote:remote:expose:Button']).toMatchObject({
+      status: 'ready',
+      data: expect.objectContaining({
+        hostName: ['consumer_a'],
+        consumers: ['consumer_a'],
+      }),
+    });
+    expect(snapshot.targets['mf:remote:remote:expose:Panel']).toMatchObject({
+      status: 'ready',
+      data: expect.objectContaining({
+        hostName: ['consumer_b'],
+        consumers: ['consumer_b'],
+      }),
+    });
+    expect(
+      snapshot.targets['mf:remote:remote:expose:Button'].data,
+    ).not.toHaveProperty('expose');
+    expect(
+      snapshot.targets['mf:remote:remote:expose:Panel'].data,
+    ).not.toHaveProperty('expose');
+  });
+
+  it('exposes federation global queries as OpenRuntime actions', async () => {
+    const globalObject = globalThis as typeof globalThis & {
+      __FEDERATION__?: unknown;
+    };
+    const originalFederation = globalObject.__FEDERATION__;
+    globalObject.__FEDERATION__ = {
+      __GLOBAL_PLUGIN__: [],
+      __DEBUG_CONSTRUCTOR_VERSION__: '2.5.0',
+      moduleInfo: {
+        remote: {
+          name: 'remote',
+          remoteEntry: 'http://localhost:3001/remoteEntry.js',
+        },
+      },
+      __INSTANCES__: [
+        {
+          version: '2.5.0',
+          options: {
+            name: 'host',
+            remotes: [
+              {
+                name: 'remote',
+                entry: 'http://localhost:3001/mf-manifest.json',
+              },
+            ],
+            shared: {
+              react: {
+                singleton: true,
+              },
+            },
+            plugins: [() => 'runtime-plugin'],
+          },
+        },
+      ],
+      __SHARE__: {
+        default: {},
+      },
+      __MANIFEST_LOADING__: {},
+      __PRELOADED_MAP__: new Map([['remote', true]]),
+    };
+    try {
+      const runtime = createOpenRuntime();
+      const observability = createObservability({
+        level: 'verbose',
+        console: false,
+        openRuntime: {
+          runtime,
+          source: 'mf-test',
+        },
+      });
+
+      emitRemoteStart(observability);
+
+      const globalSummary = await runtime.runAction('mf:get-federation-global');
+      expect(globalSummary.success).toBe(true);
+      expect(globalSummary.result).toMatchObject({
+        available: true,
+        moduleInfoKeys: ['remote'],
+        instanceCount: 1,
+      });
+
+      const moduleInfo = await runtime.runAction(
+        'mf:get-federation-module-info',
+        {
+          key: 'remote',
+        },
+      );
+      expect(moduleInfo.success).toBe(true);
+      expect(moduleInfo.result).toMatchObject({
+        found: true,
+        moduleInfo: expect.objectContaining({
+          name: 'remote',
+          remoteEntry: 'http://localhost:3001/remoteEntry.js',
+        }),
+      });
+
+      const instanceList = await runtime.runAction(
+        'mf:list-federation-instances',
+      );
+      expect(instanceList.success).toBe(true);
+      expect(instanceList.result).toMatchObject({
+        count: 1,
+        instances: [
+          expect.objectContaining({
+            index: 0,
+            name: 'host',
+            remoteCount: 1,
+          }),
+        ],
+      });
+      await expect(
+        runtime.getInputOptions('mf:get-federation-instance-config', 'name'),
+      ).resolves.toEqual([
+        expect.objectContaining({
+          value: 'host',
+          description: 'host',
+        }),
+      ]);
+
+      const instanceConfig = await runtime.runAction(
+        'mf:get-federation-instance-config',
+        {
+          name: 'host',
+        },
+      );
+      expect(instanceConfig.success).toBe(true);
+      expect(instanceConfig.result).toMatchObject({
+        found: true,
+        instance: expect.objectContaining({
+          name: 'host',
+          config: expect.objectContaining({
+            remotes: [
+              expect.objectContaining({
+                name: 'remote',
+              }),
+            ],
+            plugins: ['[function anonymous]'],
+          }),
+        }),
+      });
+    } finally {
+      globalObject.__FEDERATION__ = originalFederation;
+    }
+  });
+
+  it('creates an OpenRuntime instance when syncing is enabled without a runtime', async () => {
+    const host: OpenRuntimeWindowHost = {};
+    const observability = createObservability({
+      level: 'verbose',
+      console: false,
+      openRuntime: {
+        host,
+        source: 'mf-test',
+      },
+    });
+
+    expect(host.__OPEN_RUNTIME__).toBeUndefined();
+
+    emitRemoteStart(observability, {
+      options: {
+        name: 'host',
+        remotes: [
+          {
+            name: 'remote',
+            entry: 'http://localhost:3001/mf-manifest.json',
+          },
+        ],
+      },
+    });
+
+    expect(host.__OPEN_RUNTIME__).toBeDefined();
+    expect(
+      host.__OPEN_RUNTIME__?.getSnapshot().targets['mf:remote:remote'],
+    ).toMatchObject({
+      status: 'loading',
+      type: 'mf.remote',
+      source: 'mf-test',
+    });
   });
 
   it('posts events to the local collector outside debug mode', () => {
@@ -3595,6 +4095,200 @@ describe('ObservabilityPlugin', () => {
     });
   });
 
+  it('syncs shared reports to OpenRuntime targets', async () => {
+    const runtime = createOpenRuntime();
+    const sharedTargetId = 'mf:shared:react:18.3.1:default';
+    const observability = createObservability({
+      level: 'verbose',
+      console: false,
+      openRuntime: {
+        runtime,
+        source: 'mf-test',
+      },
+    });
+    const sharedArgs = {
+      pkgName: 'react',
+      shareInfo: createShared(),
+      shared: {},
+      origin: enabledOrigin,
+    };
+    const plugin = observability.plugin as SharedHookFixturePlugin;
+
+    plugin.beforeLoadShare?.(sharedArgs);
+
+    expect(runtime.getSnapshot().targets[sharedTargetId]).toMatchObject({
+      status: 'loading',
+      type: 'mf.shared',
+    });
+
+    plugin.afterLoadShare?.({
+      ...sharedArgs,
+      selectedShared: createShared({
+        loaded: true,
+        loading: true,
+      }),
+      lifecycle: 'loadShare',
+    });
+
+    const waitResult = await runtime.waitFor({
+      id: sharedTargetId,
+      status: 'loaded',
+    });
+    expect(waitResult.success).toBe(true);
+    expect(runtime.getSnapshot().targets[sharedTargetId]).toMatchObject({
+      status: 'loaded',
+      data: expect.objectContaining({
+        shared: expect.objectContaining({
+          name: 'react',
+          version: '18.3.1',
+          provider: 'host',
+          loaded: true,
+        }),
+      }),
+    });
+    expect(
+      runtime.getSnapshot().targets[sharedTargetId].data,
+    ).not.toHaveProperty('loadState');
+    expect(
+      runtime.getSnapshot().targets[sharedTargetId].data,
+    ).not.toHaveProperty('state');
+    expect(
+      runtime.getSnapshot().targets[sharedTargetId].data,
+    ).not.toHaveProperty('status');
+    expect(
+      runtime.getSnapshot().targets[sharedTargetId].data,
+    ).not.toHaveProperty('outcome');
+    expect(
+      (
+        runtime.getSnapshot().targets[sharedTargetId].data?.[
+          'shared'
+        ] as Record<string, unknown>
+      )['from'],
+    ).toBeUndefined();
+    const sharedSnapshot = runtime.getSnapshot().targets[sharedTargetId].data?.[
+      'shared'
+    ] as Record<string, unknown>;
+    expect(sharedSnapshot).not.toHaveProperty('selectedVersion');
+    expect(sharedSnapshot).not.toHaveProperty('availableVersions');
+    expect(sharedSnapshot).not.toHaveProperty('useIn');
+    expect(sharedSnapshot).not.toHaveProperty('get');
+    expect(sharedSnapshot).not.toHaveProperty('loading');
+  });
+
+  it('marks recovered shared reports as recovered OpenRuntime targets', async () => {
+    const runtime = createOpenRuntime();
+    const sharedTargetId = 'mf:shared:react:99.0.0:default';
+    const observability = createObservability({
+      level: 'verbose',
+      console: false,
+      openRuntime: {
+        runtime,
+        source: 'mf-test',
+      },
+    });
+    const requestedShared = createShared({
+      version: '99.0.0',
+      from: 'remote',
+      shareConfig: {
+        requiredVersion: '^99.0.0',
+        singleton: false,
+        strictVersion: true,
+        eager: false,
+      },
+    });
+    const plugin = observability.plugin as SharedHookFixturePlugin;
+
+    plugin.errorLoadShare?.({
+      pkgName: 'react',
+      shareInfo: requestedShared,
+      shared: {},
+      shareScopeMap: {
+        default: {
+          react: {
+            '18.3.1': createShared(),
+          },
+        },
+      },
+      lifecycle: 'loadShare',
+      origin: enabledOrigin,
+      recovered: true,
+    });
+
+    const waitResult = await runtime.waitFor({
+      id: sharedTargetId,
+      status: 'recovered',
+    });
+
+    expect(waitResult.success).toBe(true);
+    expect(runtime.getSnapshot().targets[sharedTargetId]).toMatchObject({
+      status: 'recovered',
+      type: 'mf.shared',
+      data: expect.objectContaining({
+        shared: expect.objectContaining({
+          name: 'react',
+          version: '99.0.0',
+          reason: 'custom-share-info-unmatched',
+          definedBy: 'bundler-runtime',
+        }),
+      }),
+    });
+  });
+
+  it('marks failed shared reports as error OpenRuntime targets', async () => {
+    const runtime = createOpenRuntime();
+    const sharedTargetId = 'mf:shared:observability-async-shared:1.0.0:default';
+    const observability = createObservability({
+      level: 'verbose',
+      console: false,
+      openRuntime: {
+        runtime,
+        source: 'mf-test',
+      },
+    });
+    const plugin = observability.plugin as SharedHookFixturePlugin;
+
+    plugin.errorLoadShare?.({
+      pkgName: 'observability-async-shared',
+      shareInfo: createShared({
+        version: '1.0.0',
+        from: 'remote',
+        shareConfig: {
+          requiredVersion: '^1.0.0',
+          singleton: false,
+          strictVersion: false,
+          eager: false,
+        },
+        get: () => Promise.resolve(() => ({ value: 'async' })),
+      }),
+      shared: {},
+      shareScopeMap: {},
+      lifecycle: 'loadShareSync',
+      origin: enabledOrigin,
+      error: new Error('[ Federation Runtime ]: RUNTIME-005 shared failed'),
+    });
+
+    const waitResult = await runtime.waitFor({
+      id: sharedTargetId,
+      status: 'error',
+    });
+
+    expect(waitResult.success).toBe(true);
+    expect(runtime.getSnapshot().targets[sharedTargetId]).toMatchObject({
+      status: 'error',
+      type: 'mf.shared',
+      data: expect.objectContaining({
+        shared: expect.objectContaining({
+          name: 'observability-async-shared',
+          version: '1.0.0',
+          reason: 'sync-async-boundary',
+        }),
+      }),
+      error: expect.objectContaining({
+        message: expect.stringContaining('RUNTIME-005'),
+      }),
+    });
+  });
+
   it('derives shared success details from loadShare hooks', () => {
     const observability = createObservability({
       level: 'verbose',
@@ -3634,10 +4328,14 @@ describe('ObservabilityPlugin', () => {
     );
     expect(report?.shared).toMatchObject({
       name: 'react',
+      version: '18.3.1',
       selectedVersion: '18.3.1',
       provider: 'host',
+      useIn: ['host'],
       availableVersions: ['18.3.1'],
     });
+    expect(report?.shared).not.toHaveProperty('from');
+    expect(report?.shared).not.toHaveProperty('get');
     expect(report?.summary.shared).toMatchObject({
       name: 'react',
       selectedVersion: '18.3.1',
@@ -3697,9 +4395,15 @@ describe('ObservabilityPlugin', () => {
     });
     expect(report?.shared).toMatchObject({
       name: 'react',
+      version: '99.0.0',
       requiredVersion: '^99.0.0',
       availableVersions: ['18.3.1'],
       reason: 'custom-share-info-unmatched',
+      definedBy: 'bundler-runtime',
+    });
+    expect(report?.diagnosis?.facts).toMatchObject({
+      sharedDefinedBy: 'bundler-runtime',
+      useIn: 'host',
     });
     expect(report?.events.at(-1)).toMatchObject({
       phase: 'shared',
