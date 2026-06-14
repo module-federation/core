@@ -148,6 +148,183 @@ For agent-led debugging, use the repository's single `mf` skill entry with the
 `observability` sub-command. The skill is the maintained guide for reading
 reports and deciding the next debugging step.
 
+## OpenRuntime targets
+
+When `openRuntime` is enabled, the observability plugin syncs Module Federation
+loading state into OpenRuntime targets. The host application does not need to
+import OpenRuntime directly.
+
+```ts
+ObservabilityPlugin({
+  level: 'verbose',
+  openRuntime: {
+    bridge: {
+      port: 17321,
+    },
+  },
+});
+```
+
+Use the OpenRuntime CLI to inspect the page:
+
+```bash
+pnpm exec openruntime targets --url "http://127.0.0.1:3005/observability?openruntimeBridge=1"
+pnpm exec openruntime snapshot --url "http://127.0.0.1:3005/observability?openruntimeBridge=1"
+```
+
+### `mf:remote:<remoteName>`
+
+Type: `mf.remote`
+
+This target represents the remote instance as a whole. Use it to understand
+whether a remote is currently known, loading, ready, failed, or recovered. Do
+not use the remote target to prove that a specific exposed module is ready; use
+the expose target for that.
+
+Statuses:
+
+- `registered`: the remote is known, but no clear loading result has been
+  observed yet.
+- `loading`: a remote lifecycle phase is currently in progress.
+- `ready`: the latest relevant remote lifecycle phase completed successfully.
+- `error`: a remote lifecycle phase failed and no recovery result was observed.
+- `recovered`: loading hit an error path, but Module Federation returned a
+  recovery result.
+
+Snapshot data:
+
+- `hostName`: array of host or consumer names observed for this remote.
+- `runtimeVersion`: Module Federation runtime version from the latest report.
+- `remote`: remote definition fields such as `name`, `alias`, `entry`,
+  `entryGlobalName`, and `type`.
+- `exposes`: array of `{ targetId }` entries. Each target id points to a
+  `mf:remote:<remoteName>:expose:<exposeName>` target.
+- `reportCount`: number of related reports used to build this remote snapshot.
+
+The plugin does not create separate `mf:manifest:*`, `mf:remote-entry:*`, or
+`mf:consumer:*` targets. Manifest and remoteEntry details are kept as phases on
+the remote or expose data.
+
+Common wait:
+
+```bash
+pnpm exec openruntime wait-for mf:remote:runtime_remote2 ready --url "http://127.0.0.1:3005/observability?openruntimeBridge=1"
+```
+
+### `mf:remote:<remoteName>:expose:<exposeName>`
+
+Type: `mf.remote.expose`
+
+This target represents one exposed module request from a remote. Use it when an
+agent needs to wait until a specific remote module is usable.
+
+Statuses are the same as `mf.remote`:
+
+- `registered`
+- `loading`
+- `ready`
+- `error`
+- `recovered`
+
+Snapshot data:
+
+- `traceId`: report id for the latest matching trace.
+- `requestId`: requested remote module id, for example
+  `runtime_remote2/ButtonOldAnt`.
+- `requestAlias`: request alias when Module Federation provides one.
+- `hostName`: array of host or consumer names observed for this expose.
+- `runtimeVersion`: Module Federation runtime version from the latest report.
+- `consumers`: consumer names that loaded this expose.
+- `lastPhase`: latest phase name from the report summary.
+- `phases`: phase summary, including entries such as `matchRemote`,
+  `manifest`, `remoteEntry`, `remoteEntryInit`, `expose`, and `loadRemote`.
+- `loadedBefore`: cached producer/consumer information when the runtime reports
+  that this module was already loaded.
+
+The expose target does not repeat `remote`, `expose`, `status`, `state`,
+`outcome`, or `currentPhase` inside `data`. The target id and outer target
+status already carry that information.
+
+Common wait:
+
+```bash
+pnpm exec openruntime wait-for mf:remote:runtime_remote2:expose:ButtonOldAnt ready --url "http://127.0.0.1:3005/observability?openruntimeBridge=1"
+```
+
+### `mf:shared:<sharedName>:<version>:<shareScope>`
+
+Type: `mf.shared`
+
+This target represents one observed shared dependency entry. The id includes
+the shared package name, selected or requested version, and share scope. The
+plugin only registers shared targets that have been observed by the runtime.
+
+Statuses:
+
+- `unloaded`: the shared dependency was observed, but no active loading or
+  loaded signal was seen.
+- `loading`: shared loading has started or the shared entry is currently
+  loading.
+- `loaded`: the shared entry was loaded or resolved successfully.
+- `recovered`: shared loading hit a handled fallback path, such as a
+  bundler-runtime provided shared entry.
+- `error`: shared loading failed.
+
+Snapshot data:
+
+- `traceId`: report id for the latest matching trace.
+- `requestId`: shared request id.
+- `hostName`: Module Federation host name that resolved the shared dependency.
+- `runtimeVersion`: Module Federation runtime version.
+- `shared.name`: shared package name.
+- `shared.shareScope`: share scope array.
+- `shared.version`: version used in the target id.
+- `shared.requiredVersion`: requested version range when available.
+- `shared.provider`: selected provider when available.
+- `shared.singleton`, `shared.strictVersion`, `shared.eager`,
+  `shared.strategy`: shared config details when available.
+- `shared.loaded`: whether the shared entry is loaded.
+- `shared.loading`: included only while the shared entry is loading. It is
+  omitted once `loaded` is true.
+- `shared.reason`: reason such as `sync-async-boundary` or
+  `custom-share-info-unmatched`.
+- `shared.definedBy`: `bundler-runtime` when the runtime reports a handled
+  bundler-runtime shared path.
+- `lastPhase`: latest phase name from the report summary.
+- `phases`: phase summary for shared loading.
+
+The shared snapshot intentionally omits `selectedVersion`,
+`availableVersions`, `get`, `useIn`, and `from`. If a user needs broader
+runtime global state, use the OpenRuntime actions below.
+
+Common waits:
+
+```bash
+pnpm exec openruntime wait-for mf:shared:observability-provider-choice:2.0.0:observability-provider-scope loaded --url "http://127.0.0.1:3005/observability?openruntimeBridge=1"
+pnpm exec openruntime wait-for mf:shared:observability-async-shared:1.0.0:default error --url "http://127.0.0.1:3005/observability?openruntimeBridge=1"
+```
+
+### Actions
+
+The plugin also registers safe OpenRuntime actions for deeper inspection:
+
+- `mf:list-reports`: list report summaries. Supports filters such as `remote`,
+  `expose`, `shared`, `traceId`, `status`, and `outcome`.
+- `mf:get-latest-report`: read the latest report.
+- `mf:get-report`: read one report by `traceId`.
+- `mf:export-report`: export a report, defaulting to the latest report.
+- `mf:get-federation-global`: read a compact summary of the current
+  `__FEDERATION__` or `__VMOK__` global.
+- `mf:get-federation-module-info`: read `moduleInfo` or one `moduleInfo` entry.
+- `mf:list-federation-instances`: list current runtime instances.
+- `mf:get-federation-instance-config`: read one runtime instance config.
+
+Example:
+
+```bash
+pnpm exec openruntime run-action --url "http://127.0.0.1:3005/observability?openruntimeBridge=1" mf:list-reports --payload '{"remote":"runtime_remote2"}'
+```
+
 `errorLoadShare` is used only for observation. Shared dependency miss, version
 mismatch, and eager boundary errors are not retried by the retry plugin by
 default because they are usually configuration or availability problems instead

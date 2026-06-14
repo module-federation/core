@@ -3,6 +3,40 @@ import { getH1, getH3 } from '../support/app.po';
 const getObservabilityReader = (win: Cypress.AUTWindow) =>
   (win as any).__FEDERATION__?.__OBSERVABILITY__?.runtime_host;
 
+type OpenRuntimeTestTarget = {
+  id: string;
+  type: string;
+  status: string;
+  source?: string;
+  data?: Record<string, unknown>;
+  dependsOn?: string[];
+  error?: {
+    message?: string;
+  };
+};
+type OpenRuntimeTestWaitResult = {
+  success: boolean;
+  target?: OpenRuntimeTestTarget;
+  reason?: string;
+};
+type OpenRuntimeTestRuntime = {
+  waitFor(
+    condition: {
+      id: string;
+      status: string;
+      where?: Array<{ path: string; equals: unknown }>;
+    },
+    options?: { timeout?: number },
+  ): Promise<OpenRuntimeTestWaitResult>;
+  getSnapshot(): {
+    targets: Record<string, OpenRuntimeTestTarget>;
+  };
+};
+
+const getOpenRuntime = (win: Cypress.AUTWindow) =>
+  (win as unknown as { __OPEN_RUNTIME__?: OpenRuntimeTestRuntime })
+    .__OPEN_RUNTIME__;
+
 type ObservabilityTestReport = {
   traceId: string;
   status?: string;
@@ -207,6 +241,170 @@ describe('3005-runtime-host/', () => {
         expect(reader.getReport(latestReport.traceId).traceId).to.equal(
           latestReport.traceId,
         );
+      });
+    });
+
+    it('should sync remote loading state to OpenRuntime targets', () => {
+      cy.get('[data-testid="observability-load-success"]').click();
+
+      cy.window()
+        .then((win) =>
+          getOpenRuntime(win)!.waitFor(
+            {
+              id: 'mf:remote:runtime_remote2',
+              status: 'ready',
+            },
+            { timeout: 5000 },
+          ),
+        )
+        .its('success')
+        .should('equal', true);
+      cy.window()
+        .then((win) =>
+          getOpenRuntime(win)!.waitFor(
+            {
+              id: 'mf:remote:runtime_remote2:expose:ButtonOldAnt',
+              status: 'ready',
+            },
+            { timeout: 5000 },
+          ),
+        )
+        .its('success')
+        .should('equal', true);
+      cy.get('[data-testid="observability-load-status"]').contains('success');
+
+      cy.window().then((win) => {
+        const snapshot = getOpenRuntime(win)!.getSnapshot();
+        expect(snapshot.targets['mf:remote:runtime_remote2']).to.include({
+          type: 'mf.remote',
+          status: 'ready',
+          source: 'mf-runtime-demo',
+        });
+        expect(
+          snapshot.targets['mf:remote:runtime_remote2'].data?.remote,
+        ).to.include({
+          name: 'runtime_remote2',
+        });
+        expect(
+          snapshot.targets['mf:remote:runtime_remote2'].data?.hostName,
+        ).to.include('runtime_host');
+        expect(
+          snapshot.targets['mf:remote:runtime_remote2'].data?.exposes,
+        ).to.deep.include({
+          targetId: 'mf:remote:runtime_remote2:expose:ButtonOldAnt',
+        });
+        expect(
+          snapshot.targets['mf:remote:runtime_remote2'].data,
+        ).not.to.have.property('state');
+        expect(
+          snapshot.targets['mf:remote:runtime_remote2'].data,
+        ).not.to.have.property('latestReport');
+        expect(
+          snapshot.targets['mf:remote:runtime_remote2'].data,
+        ).not.to.have.property('currentPhase');
+        expect(
+          snapshot.targets['mf:remote:runtime_remote2'].data,
+        ).not.to.have.property('exposeCount');
+        expect(snapshot.targets['mf:manifest:runtime_remote2']).to.be.undefined;
+        expect(snapshot.targets['mf:remote-entry:runtime_remote2']).to.be
+          .undefined;
+        expect(
+          snapshot.targets['mf:remote:runtime_remote2:expose:ButtonOldAnt'],
+        ).to.include({
+          type: 'mf.remote.expose',
+          status: 'ready',
+          source: 'mf-runtime-demo',
+        });
+        expect(
+          snapshot.targets['mf:remote:runtime_remote2:expose:ButtonOldAnt']
+            .data,
+        ).to.include({
+          requestId: 'dynamic-remote/ButtonOldAnt',
+          requestAlias: 'dynamic-remote',
+        });
+        expect(
+          snapshot.targets['mf:remote:runtime_remote2:expose:ButtonOldAnt'].data
+            ?.hostName,
+        ).to.include('runtime_host');
+        expect(
+          snapshot.targets['mf:remote:runtime_remote2:expose:ButtonOldAnt'].data
+            ?.consumers,
+        ).to.include('runtime_host');
+        expect(
+          snapshot.targets['mf:remote:runtime_remote2:expose:ButtonOldAnt']
+            .data,
+        ).not.to.have.property('remote');
+        expect(
+          snapshot.targets['mf:remote:runtime_remote2:expose:ButtonOldAnt']
+            .data,
+        ).not.to.have.property('expose');
+        expect(
+          snapshot.targets['mf:remote:runtime_remote2:expose:ButtonOldAnt']
+            .data,
+        ).not.to.have.property('outcome');
+        expect(
+          snapshot.targets['mf:remote:runtime_remote2:expose:ButtonOldAnt']
+            .data,
+        ).not.to.have.property('currentPhase');
+        expect(
+          snapshot.targets['mf:remote:runtime_remote2:expose:ButtonOldAnt']
+            .data,
+        ).not.to.have.property('status');
+        expect(
+          snapshot.targets['mf:remote:runtime_remote2:expose:ButtonOldAnt']
+            .data,
+        ).not.to.have.property('state');
+        expect(
+          snapshot.targets['mf:remote:runtime_remote2:expose:ButtonOldAnt'].data
+            ?.phases,
+        ).to.have.property('loadRemote');
+        expect(
+          snapshot.targets['mf:remote:runtime_remote2:expose:ButtonOldAnt']
+            .data,
+        ).to.include({
+          lastPhase: 'loadRemote',
+        });
+      });
+    });
+
+    it('should wait for an expose target before running the business action', () => {
+      cy.get('[data-testid="observability-load-success"]').click();
+
+      cy.window()
+        .then((win) =>
+          getOpenRuntime(win)!.waitFor(
+            {
+              id: 'mf:remote:runtime_remote2:expose:ButtonOldAnt',
+              status: 'ready',
+            },
+            { timeout: 5000 },
+          ),
+        )
+        .then((result) => {
+          expect(result.success).to.equal(true);
+          expect(result.target?.id).to.equal(
+            'mf:remote:runtime_remote2:expose:ButtonOldAnt',
+          );
+          expect(result.target?.data).to.include({
+            requestId: 'dynamic-remote/ButtonOldAnt',
+          });
+          expect(result.target?.data?.hostName).to.include('runtime_host');
+          expect(result.target?.data?.consumers).to.include('runtime_host');
+          expect(result.target?.data).not.to.have.property('expose');
+          expect(result.target?.data).not.to.have.property('currentPhase');
+          expect(result.target?.data).not.to.have.property('outcome');
+        });
+
+      cy.get('[data-testid="observability-business-loaded"]').click();
+      cy.get('[data-testid="observability-report"]').contains(
+        'component:business-loaded',
+      );
+      cy.window().then((win) => {
+        const latestReport = getObservabilityReader(win).getLatestReport();
+        expect(latestReport.status).to.equal('success');
+        expect(latestReport.summary.componentLoaded).to.equal(true);
+        expect(latestReport.summary.outcome).to.equal('component-loaded');
+        expect(latestReport.diagnosis.facts.componentLoaded).to.equal(true);
       });
     });
 
@@ -520,6 +718,72 @@ describe('3005-runtime-host/', () => {
       });
     });
 
+    it('should sync shared loading state to OpenRuntime targets', () => {
+      const sharedTargetId =
+        'mf:shared:observability-provider-choice:2.0.0:observability-provider-scope';
+      cy.get(
+        '[data-testid="observability-shared-unexpected-provider"]',
+      ).click();
+
+      cy.window()
+        .then((win) =>
+          getOpenRuntime(win)!.waitFor(
+            {
+              id: sharedTargetId,
+              status: 'loaded',
+            },
+            { timeout: 5000 },
+          ),
+        )
+        .its('success')
+        .should('equal', true);
+      cy.get('[data-testid="observability-load-status"]').contains('success');
+
+      cy.window().then((win) => {
+        const snapshot = getOpenRuntime(win)!.getSnapshot();
+        expect(snapshot.targets[sharedTargetId]).to.include({
+          type: 'mf.shared',
+          status: 'loaded',
+          source: 'mf-runtime-demo',
+        });
+        expect(snapshot.targets[sharedTargetId].data).not.to.have.property(
+          'loadState',
+        );
+        expect(snapshot.targets[sharedTargetId].data).not.to.have.property(
+          'state',
+        );
+        expect(snapshot.targets[sharedTargetId].data).not.to.have.property(
+          'status',
+        );
+        expect(snapshot.targets[sharedTargetId].data).not.to.have.property(
+          'outcome',
+        );
+        expect(snapshot.targets[sharedTargetId].data?.shared).to.include({
+          name: 'observability-provider-choice',
+          version: '2.0.0',
+          provider: 'runtime_remote2',
+        });
+        expect(
+          snapshot.targets[sharedTargetId].data?.shared,
+        ).not.to.have.property('selectedVersion');
+        expect(
+          snapshot.targets[sharedTargetId].data?.shared,
+        ).not.to.have.property('availableVersions');
+        expect(
+          snapshot.targets[sharedTargetId].data?.shared,
+        ).not.to.have.property('useIn');
+        expect(
+          snapshot.targets[sharedTargetId].data?.shared,
+        ).not.to.have.property('get');
+        expect(
+          snapshot.targets[sharedTargetId].data?.shared,
+        ).not.to.have.property('loading');
+        expect(
+          snapshot.targets[sharedTargetId].data?.shared,
+        ).not.to.have.property('from');
+      });
+    });
+
     it('should expose a multi-consumer loading chain scenario', () => {
       cy.get('[data-testid="observability-multi-consumer-chain"]').click();
       cy.get('[data-testid="observability-load-status"]').contains('success');
@@ -600,10 +864,43 @@ describe('3005-runtime-host/', () => {
               (checkoutSharedReports[0] as ObservabilityTestReport).traceId,
           ),
         ).to.equal(true);
+
+        const snapshot = getOpenRuntime(win)!.getSnapshot();
+        expect(
+          snapshot.targets['mf:remote:runtime_remote2'].data?.hostName,
+        ).to.include('observability_consumer_checkout');
+        expect(
+          snapshot.targets['mf:remote:runtime_remote2'].data?.hostName,
+        ).to.include('observability_consumer_analytics');
+        expect(
+          snapshot.targets['mf:remote:runtime_remote2:expose:ProfileCard'].data
+            ?.hostName,
+        ).to.include('observability_consumer_checkout');
+        expect(
+          snapshot.targets['mf:remote:runtime_remote2:expose:ProfileCard'].data
+            ?.hostName,
+        ).not.to.include('observability_consumer_analytics');
+        expect(
+          snapshot.targets['mf:remote:runtime_remote2:expose:AnalyticsPanel']
+            .data?.hostName,
+        ).to.include('observability_consumer_analytics');
+        expect(
+          snapshot.targets['mf:remote:runtime_remote2:expose:AnalyticsPanel']
+            .data?.hostName,
+        ).not.to.include('observability_consumer_checkout');
+        expect(
+          snapshot.targets['mf:remote:runtime_remote2:expose:ProfileCard'].data,
+        ).not.to.have.property('expose');
+        expect(
+          snapshot.targets['mf:remote:runtime_remote2:expose:AnalyticsPanel']
+            .data,
+        ).not.to.have.property('expose');
       });
     });
 
     it('should expose an eager config observability scenario', () => {
+      const sharedTargetId =
+        'mf:shared:observability-async-shared:1.0.0:default';
       cy.get('[data-testid="observability-eager-config-error"]').click();
       cy.get('[data-testid="observability-load-status"]').contains('error');
       cy.get('[data-testid="observability-report"]')
@@ -620,6 +917,21 @@ describe('3005-runtime-host/', () => {
             (action: { id: string }) => action.id === 'check-eager-config',
           ),
         ).to.equal(true);
+
+        const snapshot = getOpenRuntime(win)!.getSnapshot();
+        expect(snapshot.targets[sharedTargetId]).to.include({
+          type: 'mf.shared',
+          status: 'error',
+          source: 'mf-runtime-demo',
+        });
+        expect(snapshot.targets[sharedTargetId].data?.shared).to.include({
+          name: 'observability-async-shared',
+          version: '1.0.0',
+          reason: 'sync-async-boundary',
+        });
+        expect(snapshot.targets[sharedTargetId].error?.message).to.contain(
+          'RUNTIME-005',
+        );
       });
     });
 

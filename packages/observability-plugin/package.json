@@ -68,7 +68,8 @@
     "@module-federation/runtime": "workspace:*"
   },
   "dependencies": {
-    "@module-federation/sdk": "workspace:*"
+    "@module-federation/sdk": "workspace:*",
+    "@openruntime/core": "link:/Users/bytedance/ai/openruntime/packages/core"
   },
   "scripts": {
     "build": "tsdown --config tsdown.config.ts && cp *.md dist",
