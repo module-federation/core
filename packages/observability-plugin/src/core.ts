@@ -4,6 +4,11 @@ import type {
 } from '@module-federation/runtime';
 import { createLogger, isDebugMode } from '@module-federation/sdk';
 
+import {
+  createOpenRuntimeObservabilityAdapter,
+  type OpenRuntimeObservabilityOptions,
+} from './openruntime';
+
 export type ObservabilityLevel = 'error' | 'summary' | 'verbose';
 export type ObservabilityEventStatus =
   | 'start'
@@ -147,11 +152,12 @@ export interface ObservabilityRemoteInfo {
 export interface ObservabilitySharedInfo {
   name: string;
   shareScope?: string[];
+  version?: string;
   requiredVersion?: string | false;
   selectedVersion?: string;
   availableVersions?: string[];
   provider?: string;
-  from?: string;
+  useIn?: string[];
   singleton?: boolean;
   strictVersion?: boolean;
   eager?: boolean;
@@ -159,6 +165,7 @@ export interface ObservabilitySharedInfo {
   loaded?: boolean;
   loading?: boolean;
   reason?: string;
+  definedBy?: 'bundler-runtime';
 }
 
 export interface ObservabilityEvent {
@@ -282,6 +289,7 @@ export interface ObservabilityPluginOptions {
     report: ObservabilityReport,
     context?: ObservabilityEventContext,
   ) => void;
+  openRuntime?: boolean | OpenRuntimeObservabilityOptions;
   onRawError?: (error: unknown, context: ObservabilityRawErrorContext) => void;
 }
 
@@ -345,13 +353,7 @@ export interface ObservabilityRuntimeAdapterOptions {
   forceDevelopmentChannels?: boolean;
 }
 
-declare module '@module-federation/runtime-core' {
-  interface ModuleFederation {
-    markComponentLoaded(
-      options?: MarkComponentLoadedOptions,
-    ): ObservabilityEvent | undefined;
-  }
-}
+type ObservableModuleFederation = ModuleFederation & ObservabilityInstanceAPI;
 
 export interface ObservabilityRuntimeEventInput {
   phase: string;
@@ -410,6 +412,7 @@ interface ObservabilityRuntimeSharedSource {
   version?: string;
   scope?: string | string[];
   from?: string;
+  useIn?: string[];
   loaded?: boolean;
   loading?: unknown;
   strategy?: string;
@@ -604,6 +607,9 @@ interface ObservabilitySharedLifecycleArgs {
 }
 
 export type ObservabilityRuntimePlugin = ModuleFederationRuntimePlugin;
+type GeneratePreloadAssetsResult = Awaited<
+  ReturnType<NonNullable<ObservabilityRuntimePlugin['generatePreloadAssets']>>
+>;
 
 export interface ObservabilityBrowserReader {
   getEvents(): ObservabilityEvent[];
@@ -625,6 +631,10 @@ interface ObservabilityRuntimeModuleLike {
   remoteInfo?: ObservabilityRuntimeRemoteSource;
   remoteEntryExports?: unknown;
   inited?: boolean;
+}
+
+function continuePreloadAssetsGeneration(): GeneratePreloadAssetsResult {
+  return undefined as unknown as GeneratePreloadAssetsResult;
 }
 
 interface ObservabilityRuntimeRemoteHandlerLike {
@@ -736,7 +746,7 @@ function normalizeCollectorOptions(
     };
   }
 
-  if (!value || value === false || value.enabled === false) {
+  if (!value || value.enabled === false) {
     return undefined;
   }
 
@@ -756,7 +766,7 @@ function normalizeDevtoolsOptions(
     };
   }
 
-  if (!value || value === false || value.enabled === false) {
+  if (!value || value.enabled === false) {
     return undefined;
   }
 
@@ -1003,6 +1013,18 @@ function getAvailableSharedVersions(args: ObservabilitySharedLifecycleArgs) {
   return Array.from(versions);
 }
 
+function getSharedUseIn(args: ObservabilitySharedLifecycleArgs) {
+  const useIn = [
+    ...(args.selectedShared?.useIn || []),
+    ...(args.shareInfo?.useIn || []),
+    args.origin.options?.name || args.origin.name,
+  ]
+    .map((consumer) => sanitizeText(consumer, 160))
+    .filter((consumer): consumer is string => Boolean(consumer));
+
+  return Array.from(new Set(useIn));
+}
+
 function getSharedMissReason(args: ObservabilitySharedLifecycleArgs) {
   if (!args.shareInfo) {
     return 'missing-config';
@@ -1096,22 +1118,28 @@ function createSharedInfo(
   reason?: string,
 ): ObservabilitySharedInfo {
   const shareConfig = args.shareInfo?.shareConfig;
+  const handledBundlerRuntimeShared = reason === 'custom-share-info-unmatched';
+  const loaded = args.selectedShared?.loaded;
 
   return {
     name: args.pkgName,
     shareScope: getSharedScopes(args.shareInfo),
+    version: args.selectedShared?.version || args.shareInfo?.version,
     requiredVersion: shareConfig?.requiredVersion,
     selectedVersion: args.selectedShared?.version,
     availableVersions: getAvailableSharedVersions(args),
     provider: args.selectedShared?.from,
-    from: args.shareInfo?.from,
+    useIn: getSharedUseIn(args),
     singleton: shareConfig?.singleton,
     strictVersion: shareConfig?.strictVersion,
     eager: shareConfig?.eager,
     strategy: args.shareInfo?.strategy,
-    loaded: args.selectedShared?.loaded,
-    loading: Boolean(args.selectedShared?.loading) || undefined,
+    loaded,
+    loading: loaded
+      ? undefined
+      : Boolean(args.selectedShared?.loading) || undefined,
     reason,
+    definedBy: handledBundlerRuntimeShared ? 'bundler-runtime' : undefined,
   };
 }
 
@@ -1125,6 +1153,7 @@ function sanitizeShared(
   return {
     name: sanitizeText(shared.name, 160) || 'unknown',
     shareScope: normalizeSharedScope(shared.shareScope),
+    version: sanitizeText(shared.version, 120),
     requiredVersion:
       shared.requiredVersion === false
         ? false
@@ -1135,7 +1164,9 @@ function sanitizeShared(
       .filter((version): version is string => Boolean(version))
       .slice(0, 20),
     provider: sanitizeText(shared.provider, 160),
-    from: sanitizeText(shared.from, 160),
+    useIn: (shared.useIn || [])
+      .map((consumer) => sanitizeText(consumer, 160))
+      .filter((consumer): consumer is string => Boolean(consumer)),
     singleton: shared.singleton,
     strictVersion: shared.strictVersion,
     eager: shared.eager,
@@ -1143,6 +1174,8 @@ function sanitizeShared(
     loaded: shared.loaded,
     loading: shared.loading,
     reason: sanitizeText(shared.reason, 120),
+    definedBy:
+      shared.definedBy === 'bundler-runtime' ? 'bundler-runtime' : undefined,
   };
 }
 
@@ -1190,7 +1223,8 @@ function getReactComponentName(component: unknown, fallback: string) {
 
   const render = getObjectValue(component, 'render');
   if (typeof render === 'function') {
-    return render.displayName || render.name || fallback;
+    const renderFunction = render as { displayName?: string; name?: string };
+    return renderFunction.displayName || renderFunction.name || fallback;
   }
 
   return fallback;
@@ -1257,9 +1291,9 @@ function cloneModuleWithDefaultExport(
   defaultExport: unknown,
 ) {
   const descriptors = Object.getOwnPropertyDescriptors(moduleExports);
-  const defaultDescriptor = descriptors.default;
+  const defaultDescriptor = descriptors['default'];
 
-  descriptors.default = {
+  descriptors['default'] = {
     configurable: true,
     enumerable: defaultDescriptor?.enumerable ?? true,
     writable: true,
@@ -1306,7 +1340,7 @@ function resolveReactComponentTarget(
 
       try {
         if (!descriptor || descriptor.writable || descriptor.set) {
-          component.default = wrappedComponent;
+          component['default'] = wrappedComponent;
           defaultExportReplaced = true;
         } else if (descriptor.configurable) {
           Object.defineProperty(component, 'default', {
@@ -1553,7 +1587,9 @@ function getModuleCacheEntries(
 
   const entries =
     typeof moduleCache.entries === 'function'
-      ? Array.from(moduleCache.entries())
+      ? Array.from(
+          moduleCache.entries.call(moduleCache) as Iterable<[unknown, unknown]>,
+        )
       : undefined;
 
   if (entries) {
@@ -1609,9 +1645,7 @@ function collectLoadedBeforeInfo(
 
     const matchedModule = getModuleCacheEntries(instance.moduleCache).find(
       (item): item is ObservabilityRuntimeModuleLike =>
-        isRecord(item) &&
-        isRecord(item.remoteInfo) &&
-        item.remoteInfo.entryGlobalName === entryGlobalName,
+        isRuntimeModuleWithEntryGlobalName(item, entryGlobalName),
     );
 
     if (!matchedModule) {
@@ -1651,6 +1685,21 @@ function collectLoadedBeforeInfo(
     expose: exposeLoadedBefore,
     consumers,
   };
+}
+
+function isRuntimeModuleWithEntryGlobalName(
+  value: unknown,
+  entryGlobalName: string,
+): value is ObservabilityRuntimeModuleLike {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  const remoteInfo = getObjectValue(value, 'remoteInfo');
+  return (
+    isRecord(remoteInfo) &&
+    getObjectValue(remoteInfo, 'entryGlobalName') === entryGlobalName
+  );
 }
 
 function normalizeScope(value: unknown) {
@@ -2069,48 +2118,48 @@ function createErrorContext(
   };
 
   if (event.lifecycle) {
-    context.lifecycle = event.lifecycle;
+    context['lifecycle'] = event.lifecycle;
   }
   if (event.requestId) {
-    context.requestId = event.requestId;
+    context['requestId'] = event.requestId;
   }
   if (event.requestAlias) {
-    context.requestAlias = event.requestAlias;
+    context['requestAlias'] = event.requestAlias;
   }
   if (event.remote?.name) {
-    context.remoteName = event.remote.name;
+    context['remoteName'] = event.remote.name;
   }
   if (event.remote?.alias) {
-    context.remoteAlias = event.remote.alias;
+    context['remoteAlias'] = event.remote.alias;
   }
   if (event.remote?.type) {
-    context.remoteType = event.remote.type;
+    context['remoteType'] = event.remote.type;
   }
   if (event.remote?.entryGlobalName) {
-    context.entryGlobalName = event.remote.entryGlobalName;
+    context['entryGlobalName'] = event.remote.entryGlobalName;
   }
   if (event.sanitizedUrl) {
-    context.url = event.sanitizedUrl;
+    context['url'] = event.sanitizedUrl;
   }
   if (event.expose) {
-    context.expose = event.expose;
+    context['expose'] = event.expose;
   }
   if (event.shared?.name) {
-    context.shareName = event.shared.name;
+    context['shareName'] = event.shared.name;
   }
   if (event.shared?.requiredVersion) {
-    context.requiredVersion = event.shared.requiredVersion;
+    context['requiredVersion'] = event.shared.requiredVersion;
   }
   if (event.shared?.selectedVersion) {
-    context.selectedVersion = event.shared.selectedVersion;
+    context['selectedVersion'] = event.shared.selectedVersion;
   }
   if (event.shared?.provider) {
-    context.provider = event.shared.provider;
+    context['provider'] = event.shared.provider;
   }
 
   const resourceErrorType = getResourceErrorType(event);
   if (resourceErrorType) {
-    context.resourceErrorType = resourceErrorType;
+    context['resourceErrorType'] = resourceErrorType;
   }
 
   return clipObservabilityMetadata(context);
@@ -2729,11 +2778,13 @@ export function createObservability(
     addFact('resourceErrorType', getDiagnosisResourceErrorType(report));
     addFact('shareName', report.shared?.name);
     addFact('shareScope', report.shared?.shareScope);
+    addFact('shareVersion', report.shared?.version);
     addFact('requiredVersion', report.shared?.requiredVersion);
     addFact('selectedVersion', report.shared?.selectedVersion);
     addFact('availableVersions', report.shared?.availableVersions);
     addFact('provider', report.shared?.provider);
-    addFact('sharedFrom', report.shared?.from);
+    addFact('useIn', report.shared?.useIn);
+    addFact('sharedDefinedBy', report.shared?.definedBy);
     addFact('singleton', report.shared?.singleton);
     addFact('strictVersion', report.shared?.strictVersion);
     addFact('eager', report.shared?.eager);
@@ -3382,6 +3433,17 @@ export function createObservability(
   const exportReportSnapshot = (traceId?: string) =>
     traceId ? getReportSnapshot(traceId) : getLatestReportSnapshot();
 
+  const openRuntimeAdapter = createOpenRuntimeObservabilityAdapter(
+    options.openRuntime,
+    {
+      getReports: getReportsSnapshot,
+      findReports: findReportsSnapshot,
+      getLatestReport: getLatestReportSnapshot,
+      getReport: getReportSnapshot,
+      exportReport: exportReportSnapshot,
+    },
+  );
+
   const createBrowserReader = (): ObservabilityBrowserReader => ({
     getEvents: getEventsSnapshot,
     getTraceIds: getTraceIdsSnapshot,
@@ -3439,7 +3501,7 @@ export function createObservability(
       return true;
     }
 
-    return process.env.NODE_ENV !== 'production';
+    return process.env['NODE_ENV'] !== 'production';
   };
 
   const shouldNotifyCollector = () => Boolean(collectorOptions);
@@ -3640,6 +3702,7 @@ export function createObservability(
 
     events.push(event);
     const report = updateReport(event);
+    openRuntimeAdapter?.syncReport(report, { origin });
     emitStartConsoleHint(event, report);
     emitConsoleHint(event, report, input.error);
     if (shouldNotifyCollector()) {
@@ -3896,7 +3959,8 @@ export function createObservability(
       appliedRuntimeVersion =
         sanitizeText(instance.version, 80) || appliedRuntimeVersion;
       if (shouldAttachInstanceApi) {
-        instance.markComponentLoaded = markComponentLoaded;
+        (instance as ObservableModuleFederation).markComponentLoaded =
+          markComponentLoaded;
       }
     },
     beforeRequest(args) {
@@ -4113,6 +4177,7 @@ export function createObservability(
       if (wrappedComponent) {
         return wrappedComponent;
       }
+      return undefined;
     },
     errorLoadRemote(args) {
       const errorArgs = args as ObservabilityRemoteErrorArgs;
@@ -4494,10 +4559,10 @@ export function createObservability(
   } as ObservabilityRuntimePlugin;
 
   if (!shouldDisablePreloadHooks) {
-    plugin.generatePreloadAssets = (args) => {
+    plugin.generatePreloadAssets = async (args) => {
       const preloadArgs = args as ObservabilityPreloadAssetsArgs;
       if (!prepareRuntimeOrigin(preloadArgs.origin)) {
-        return returnHookArgs(args);
+        return continuePreloadAssetsGeneration();
       }
 
       const remote = createRemoteInfo(
@@ -4526,13 +4591,13 @@ export function createObservability(
         preloadArgs.origin,
       );
 
-      return returnHookArgs(args);
+      return continuePreloadAssetsGeneration();
     };
 
     plugin.afterPreloadRemote = (args) => {
       const preloadArgs = args as ObservabilityAfterPreloadRemoteArgs;
       if (!prepareRuntimeOrigin(preloadArgs.origin)) {
-        return returnHookArgs(args);
+        return undefined;
       }
 
       const results = preloadArgs.results || [];
@@ -4548,7 +4613,7 @@ export function createObservability(
           },
           preloadArgs.origin,
         );
-        return returnHookArgs(args);
+        return undefined;
       }
 
       results.forEach((preloadResult) => {
@@ -4595,7 +4660,7 @@ export function createObservability(
         });
       });
 
-      return returnHookArgs(args);
+      return undefined;
     };
   }
 
