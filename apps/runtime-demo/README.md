@@ -25,6 +25,9 @@ The host also installs `ObservabilityBuildPlugin`, so each build writes a
 build summary to `.mf/observability/build-info.json`. If a host build fails
 after the plugin runs, the build-side report is written to
 `.mf/observability/build-report.json`.
+The observability plugin also creates `window.__OPEN_RUNTIME__` for this demo,
+so MF remote, expose, and shared states are synced into OpenRuntime targets
+without the host app importing OpenRuntime directly.
 
 - observability fixture page:
   [localhost:3005/observability](http://localhost:3005/observability)
@@ -118,7 +121,7 @@ Then open the observability fixture page and use these controls:
 - `Shared unexpected provider`: resolves a shared dependency from a remote-like
   provider even though the host provider is present. The report should be
   successful and include `observability-provider-choice`,
-  `provider: "runtime_remote2"`, and `selectedVersion: "2.0.0"`.
+  `provider: "runtime_remote2"`, and the selected version in the report.
 - `Load multi-consumer chain`: creates two runtime consumers with
   `createInstance`, loads different exposes from the real `runtime_remote2`
   remote on port 3007, and gives each consumer its own shared dependency. It
@@ -135,6 +138,76 @@ Then open the observability fixture page and use these controls:
   dependency from the pure runtime path. The report should include
   `observability-runtime-async-shared`, `RUNTIME-006`, and
   `sync-async-boundary`, with the same eager config check.
+
+### OpenRuntime check
+
+The OpenRuntime check reuses the existing `3005-runtime-host` observability
+fixture. No separate demo app is needed.
+
+Automated coverage is included in the runtime host e2e suite:
+
+```bash
+pnpm run ci:local --only=e2e-runtime
+```
+
+The OpenRuntime assertions open `/observability`, click the real MF controls,
+verify that MF targets can be waited for, and then run a business action after
+the exposed module is ready. The covered flow is:
+
+1. Click `Load success remote`.
+2. Wait for `mf:remote:runtime_remote2:expose:ButtonOldAnt` to become `ready`.
+3. Click `Mark business loaded`.
+4. Verify the latest report becomes `component-loaded`.
+
+The suite waits for these targets:
+
+- `mf:remote:runtime_remote2`
+- `mf:remote:runtime_remote2:expose:ButtonOldAnt`
+- `mf:shared:observability-provider-choice:2.0.0:observability-provider-scope`
+
+Manifest and remoteEntry are not exposed as separate OpenRuntime targets. The
+remote target stays centered on the remote instance and lists attempted expose
+target ids only. Specific exposed modules stay available as
+`mf:remote:*:expose:*` targets so they can be waited for and inspected without
+bloating the remote target.
+
+For a manual CLI check, start the OpenRuntime Bridge from the local
+OpenRuntime repo, then start the runtime demo:
+
+```bash
+cd /Users/bytedance/ai/openruntime
+pnpm build
+pnpm exec openruntime bridge start
+```
+
+```bash
+cd /Users/bytedance/outter/core
+pnpm run app:runtime:dev
+```
+
+Open the bridge-enabled fixture page:
+
+```text
+http://127.0.0.1:3005/observability?openruntimeBridge=1
+```
+
+After the page is open, click `Load success remote` and verify the exposed
+module target:
+
+```bash
+cd /Users/bytedance/ai/openruntime
+pnpm exec openruntime wait-for mf:remote:runtime_remote2:expose:ButtonOldAnt ready --url "http://127.0.0.1:3005/observability?openruntimeBridge=1"
+```
+
+After the wait succeeds, click `Mark business loaded` on the page and verify
+the latest report includes `component:business-loaded`.
+
+Then click `Shared unexpected provider` and verify the shared target:
+
+```bash
+cd /Users/bytedance/ai/openruntime
+pnpm exec openruntime wait-for mf:shared:observability-provider-choice:2.0.0:observability-provider-scope loaded --url "http://127.0.0.1:3005/observability?openruntimeBridge=1"
+```
 
 Run the automated verification:
 
