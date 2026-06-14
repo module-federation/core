@@ -256,6 +256,149 @@ export const loadScriptNode =
 
 const esmModuleCache = new Map<string, any>();
 
+const isFetchableRemoteModuleUrl = (url: string): boolean =>
+  url.startsWith('http:') || url.startsWith('https:');
+
+const isBareSpecifier = (specifier: string): boolean =>
+  !specifier.startsWith('./') &&
+  !specifier.startsWith('../') &&
+  !specifier.startsWith('/') &&
+  !specifier.includes(':');
+
+function encodeRemoteModulePath(url: string): string {
+  const remoteUrl = new URL(url);
+  const encodedProtocol = encodeURIComponent(remoteUrl.protocol.slice(0, -1));
+  const encodedHost = encodeURIComponent(remoteUrl.host);
+  const encodedPathname = remoteUrl.pathname
+    .split('/')
+    .map((segment) => encodeURIComponent(segment))
+    .join('/');
+
+  return `/${encodedProtocol}/${encodedHost}${encodedPathname}`;
+}
+
+function createImportMetaUrl(url: string): string {
+  return `file:///__module_federation_remote__${encodeRemoteModulePath(url)}`;
+}
+
+async function isNodeBuiltinSpecifier(specifier: string): Promise<boolean> {
+  if (specifier.startsWith('node:')) {
+    return true;
+  }
+
+  if (!isBareSpecifier(specifier)) {
+    return false;
+  }
+
+  const nodeModule =
+    await importNodeModule<typeof import('node:module')>('node:module');
+
+  return nodeModule.builtinModules.includes(specifier);
+}
+
+function getSyntheticModuleExports(moduleExports: any): Record<string, any> {
+  const namespaceObject =
+    moduleExports &&
+    (typeof moduleExports === 'object' || typeof moduleExports === 'function')
+      ? moduleExports
+      : { default: moduleExports };
+  const effectiveExports = { ...namespaceObject };
+
+  if (!Object.prototype.hasOwnProperty.call(effectiveExports, 'default')) {
+    effectiveExports.default = namespaceObject;
+  }
+
+  return effectiveExports;
+}
+
+async function createSyntheticModuleFromExports(
+  identifier: string,
+  moduleExports: any,
+  vm: any,
+) {
+  if (typeof vm.SyntheticModule !== 'function') {
+    throw new Error(
+      'vm.SyntheticModule is required to load Node.js built-in modules in ESM remote entries.',
+    );
+  }
+
+  const effectiveExports = getSyntheticModuleExports(moduleExports);
+  const exportNames = Object.keys(effectiveExports).filter(
+    (name) => name !== 'constructor',
+  );
+  const syntheticModule = new vm.SyntheticModule(
+    exportNames,
+    function setSyntheticModuleExports(this: {
+      setExport: (name: string, value: any) => void;
+    }) {
+      for (const name of exportNames) {
+        this.setExport(name, effectiveExports[name]);
+      }
+    },
+    { identifier },
+  );
+
+  esmModuleCache.set(identifier, syntheticModule);
+  await syntheticModule.link(async () => {
+    throw new Error(
+      `Node.js built-in module "${identifier}" should not request child modules.`,
+    );
+  });
+  await syntheticModule.evaluate();
+
+  return syntheticModule;
+}
+
+async function loadNodeBuiltinModule(
+  specifier: string,
+  options: {
+    vm: any;
+    fetch: any;
+  },
+) {
+  const cacheKey = `node-builtin:${specifier}`;
+  if (esmModuleCache.has(cacheKey)) {
+    return esmModuleCache.get(cacheKey)!;
+  }
+
+  const moduleExports = await importNodeModule(specifier);
+  return createSyntheticModuleFromExports(cacheKey, moduleExports, options.vm);
+}
+
+async function loadResolvedModule(
+  specifier: string,
+  parentUrl: string,
+  options: {
+    vm: any;
+    fetch: any;
+  },
+) {
+  if (await isNodeBuiltinSpecifier(specifier)) {
+    return loadNodeBuiltinModule(specifier, options);
+  }
+
+  const resolvedUrl = new URL(specifier, parentUrl).href;
+  if (!isFetchableRemoteModuleUrl(resolvedUrl)) {
+    throw new Error(
+      `Unsupported ESM module specifier "${specifier}" resolved to "${resolvedUrl}". Only http(s) remote modules and Node.js built-in modules are supported.`,
+    );
+  }
+
+  return loadModule(resolvedUrl, options);
+}
+
+async function evaluateDynamicModule(module: any) {
+  if (module.status === 'linked') {
+    await module.evaluate();
+  }
+
+  if (module.status === 'errored') {
+    throw module.error;
+  }
+
+  return module;
+}
+
 async function loadModule(
   url: string,
   options: {
@@ -269,14 +412,29 @@ async function loadModule(
   }
 
   const { fetch, vm } = options;
+  if (await isNodeBuiltinSpecifier(url)) {
+    return loadNodeBuiltinModule(url, options);
+  }
+
+  if (!isFetchableRemoteModuleUrl(url)) {
+    throw new Error(
+      `Unsupported ESM module URL "${url}". Only http(s) remote modules and Node.js built-in modules are supported.`,
+    );
+  }
+
   const response = await fetch(url);
   const code = await response.text();
 
   const module: any = new vm.SourceTextModule(code, {
+    identifier: url,
+    initializeImportMeta: (meta: { url: string }) => {
+      meta.url = createImportMetaUrl(url);
+    },
     // @ts-ignore
     importModuleDynamically: async (specifier, script) => {
-      const resolvedUrl = new URL(specifier, url).href;
-      return loadModule(resolvedUrl, options);
+      return evaluateDynamicModule(
+        await loadResolvedModule(specifier, url, options),
+      );
     },
   });
 
@@ -284,9 +442,7 @@ async function loadModule(
   esmModuleCache.set(url, module);
 
   await module.link(async (specifier: string) => {
-    const resolvedUrl = new URL(specifier, url).href;
-    const module = await loadModule(resolvedUrl, options);
-    return module;
+    return loadResolvedModule(specifier, url, options);
   });
 
   return module;
