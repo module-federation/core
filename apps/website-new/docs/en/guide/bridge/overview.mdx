@@ -1,7 +1,5 @@
 # Bridge Overview
 
-## What is Bridge?
-
 `Bridge` is a cross-framework application-level module loading and integration solution provided by Module Federation. It's not just a component loader, but a complete lifecycle management system specifically designed for handling "application-level modules".
 
 The core problem Bridge solves is: how to enable complete applications developed with different frontend frameworks to be dynamically loaded, rendered, and integrated as modules by other applications, while maintaining their respective technology stack independence and business integrity. Unlike traditional component-level sharing, Bridge handles complete application modules that include routing systems and business logic.
@@ -36,7 +34,7 @@ A Bridge toolkit designed specifically for React applications, supporting all ve
 - Use case: When you want to export a React application as a module for use by other applications
 - Features: Automatically handles application lifecycle, routing configuration, and error boundaries
 
-**`createRemoteAppComponent`** 
+**`createRemoteAppComponent`**
 - Purpose: Loads and renders remote React applications in host applications
 - Features: Automatically creates rendering context, handles routing integration and lifecycle management
 - Advantages: Supports error recovery, loading state management, and performance monitoring
@@ -203,24 +201,24 @@ The core idea of Bridge is simple: DOM-based rendering abstraction. Here's the s
 ```tsx
 export default function createProvider() {
   const rootMap = new Map<HTMLElement, ReactDOM.Root>();
-  
+
   return {
     // Render application to specified DOM node
-    render(info: { 
-      dom: HTMLElement; 
-      basename?: string; 
+    render(info: {
+      dom: HTMLElement;
+      basename?: string;
       memoryRoute?: { entryPath: string; }
     }) {
       const root = ReactDOM.createRoot(info.dom);
       rootMap.set(info.dom, root);
-      
+
       root.render(
         <BrowserRouter basename={info.basename}>
           <App />
         </BrowserRouter>
       );
     },
-    
+
     // Clean up resources
     destroy(info: { dom: HTMLElement }) {
       const root = rootMap.get(info.dom);
@@ -238,7 +236,7 @@ const RemoteApp = React.lazy(async () => {
   // Load remote module
   const module = await loadRemote('remote1/export-app');
   const provider = module.default;
-  
+
   return {
     default: () => {
       const containerRef = useRef<HTMLDivElement>(null);
@@ -249,7 +247,7 @@ const RemoteApp = React.lazy(async () => {
           // Create provider instance
           const instance = provider();
           providerRef.current = instance;
-          
+
           // Render remote application
           instance.render({
             dom: containerRef.current,

@@ -1,6 +1,6 @@
 # Style Isolation
 
-To achieve CSS style isolation, the following methods can be used. Here are the detailed usage instructions for each method:
+In Module Federation, the host and remote applications run on the same page and share a single global CSS scope, so styles from one side can easily leak into another and cause unintended "style pollution". Module Federation does not ship built-in style isolation (see the [FAQ](#why-doesnt-module-federation-directly-handle-css-style-isolation) below for the reasoning), so producers should pick the strategy that fits their scenario.
 
 ## BEM (Block Element Modifier)
 
