@@ -1,6 +1,6 @@
 # shareScope
 
-`shareScope` 用于指定生产者（remote）要参与的共享池（share scope）名称。你可以把它理解成“共享依赖的命名空间”：不同 scope 之间的共享依赖互不复用。
+`shareScope` 用于指定生产者要参与的共享池（Share Scope）名称。你可以把它理解成「共享依赖的命名空间」：不同 Scope 之间的共享依赖互不复用。
 
 - 类型：`string | string[]`
 - 是否必填：否
@@ -8,9 +8,9 @@
 
 ## 作用
 
-- 控制 remote（生产者）在运行时会初始化哪些共享池（scope）。
-- 与 `shared[*].shareScope` 配合使用：某个 shared 条目声明在哪个 scope 下，就只会在对应 scope 的共享池里参与版本选择与复用。
-- 与 `remotes[remote].shareScope` 配合使用：host 需要告诉 remote “要对齐哪些 scope”，否则 scope 可能会被补空（导致无法复用）。
+- 控制生产者在运行时会初始化哪些共享池（Scope）。
+- 与 `shared[*].shareScope` 配合使用：某个 shared 条目声明在哪个 Scope 下，就只会在对应 Scope 的共享池里参与版本选择与复用。
+- 与 `remotes[remote].shareScope` 配合使用：消费者需要告诉生产者「要对齐哪些 Scope」，否则 Scope 可能会被补空（导致无法复用）。
 
 ## 示例
 
@@ -46,5 +46,5 @@ new ModuleFederationPlugin({
 
 ## 注意事项
 
-- `shareScope` 只声明“这个 remote 要初始化哪些共享池”，并不等于某个包一定会在这些池里共享；包是否进入某个池取决于 `shared` 条目配置的 `shareScope`。
-- 多共享池要想真正实现“跨应用复用”，通常需要 host/remote 两侧对同一 remote 使用一致的 scope 约定，详见 [remotes](./remotes#sharescope)。
+- `shareScope` 只声明「这个模块要初始化哪些共享池」，并不等于某个包一定会在这些池里共享；包是否进入某个池取决于 `shared` 条目配置的 `shareScope`。
+- 多共享池要想真正实现「跨应用复用」，通常需要生产者 / 消费者两侧使用一致的 Scope 约定，详见 [remotes](./remotes#sharescope)。

@@ -15,7 +15,9 @@
 - 通过自动的异步处理机制防止 "eager consumption" 错误
 
 :::warning
+
 使用此模式时，所有入口都将异步初始化。如果你手动 require 一个打包后的入口或导出 UMD 库，它将返回一个 promise 来解析导出内容。
+
 :::
 
 ## externalRuntime
@@ -32,11 +34,13 @@
 - Required: No
 - Default: `false`
 
-仅用于“纯消费者”（没有设置 `exposes`）的场景。开启后会自动注入 `@module-federation/inject-external-runtime-core-plugin` 以在运行时提供必要的外部 runtime。
+仅用于纯消费者（没有设置 `exposes`）的场景。开启后会自动注入 `@module-federation/inject-external-runtime-core-plugin` 以在运行时提供必要的外部 runtime。
 
 :::warning 注意
+
 - 与 `exposes` 同时使用会报错：仅纯消费者可开启。
 - 建议仅在应用最顶层消费者配置，避免多个消费者重复注入。
+
 :::
 
 
