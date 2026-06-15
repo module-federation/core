@@ -73,7 +73,7 @@ When configuring `generateTypes` to `true`, the following configuration will be 
 - Required: No
 - Default value: `undefined`
 - Usage scenario: When the content of the producer `exposes` has its own `remotes` module that re-exports itself, then `extractRemoteTypes: true` can ensure that the consumer can normally obtain the module type of the producer `exposes`
-- Example: [Nested type re-export](/guide/basic/type-prompt.html#Nested type re-export)
+- Example: [Nested type re-export](/guide/basic/type-prompt.html#nested-type-re-export)
 
 Whether to extract the type of `remotes`.
 
@@ -83,7 +83,7 @@ Whether to extract the type of `remotes`.
 - Required: No
 - Default value: `undefined`
 - Usage scenario: When the content of the producer `exposes` contains a module containing `antd`, and the consumer does not have `antd` installed, then `extractThirdParty: true` can ensure that the consumer can normally obtain the module of the producer `exposes` type
-- Example: [Third-party package type extraction](/guide/basic/type-prompt.html#Third-party package type extraction)
+- Example: [Third-party package type extraction](/guide/basic/type-prompt.html#third-party-package-type-extraction)
 
 Whether to extract third-party package types.
 
