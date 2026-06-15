@@ -69,7 +69,7 @@
   },
   "dependencies": {
     "@module-federation/sdk": "workspace:*",
-    "@openruntime/core": "link:/Users/bytedance/ai/openruntime/packages/core"
+    "@openruntime/core": "https://pkg.pr.new/2heal1/openruntime/@openruntime/core@a13b382"
   },
   "scripts": {
     "build": "tsdown --config tsdown.config.ts && cp *.md dist",
