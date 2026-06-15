@@ -519,7 +519,7 @@ export const pluginModuleFederation = (
             !isActiveRspressSSGEnvironmentConfig &&
             target !== 'node'
           ) {
-            bundlerConfig.output!.chunkLoadingGlobal = `chunk_${moduleFederationOptions.name} `;
+            bundlerConfig.output!.chunkLoadingGlobal = `chunk_${moduleFederationOptions.name}`;
           }
 
           if (isNodeTargetEnvironmentConfig) {
