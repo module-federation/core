@@ -4002,8 +4002,8 @@ importers:
         specifier: workspace:*
         version: link:../sdk
       '@openruntime/core':
-        specifier: link:/Users/bytedance/ai/openruntime/packages/core
-        version: link:/Users/bytedance/ai/openruntime/packages/core
+        specifier: https://pkg.pr.new/2heal1/openruntime/@openruntime/core@a13b382
+        version: https://pkg.pr.new/2heal1/openruntime/@openruntime/core@a13b382
     devDependencies:
       '@module-federation/runtime':
         specifier: workspace:*
@@ -9553,6 +9553,10 @@ packages:
 
   '@open-draft/until@1.0.3':
     resolution: {integrity: sha512-Aq58f5HiWdyDlFffbbSjAlv596h/cOnt2DO1w3DOC7OJ5EHs0hd/nycJfiu9RJbT6Yk6F1knnRRXNSpxoIVZ9Q==}
+
+  '@openruntime/core@https://pkg.pr.new/2heal1/openruntime/@openruntime/core@a13b382':
+    resolution: {integrity: sha512-vXItIt69IUrBMd5ZY2ZW8VfqR1kMo0cg+hgmCys8UFr3BPWopEKXa7w93lECpxPvFVGPs4eaRTFJPJOOl+9BAg==, tarball: https://pkg.pr.new/2heal1/openruntime/@openruntime/core@a13b382}
+    version: 0.0.0
 
   '@oxc-project/types@0.112.0':
     resolution: {integrity: sha512-m6RebKHIRsax2iCwVpYW2ErQwa4ywHJrE4sCK3/8JK8ZZAWOKXaRJFl/uP51gaVyyXlaS4+chU1nSCdzYf6QqQ==}
@@ -36790,6 +36794,8 @@ snapshots:
       - supports-color
 
   '@open-draft/until@1.0.3': {}
+
+  '@openruntime/core@https://pkg.pr.new/2heal1/openruntime/@openruntime/core@a13b382': {}
 
   '@oxc-project/types@0.112.0': {}
 
