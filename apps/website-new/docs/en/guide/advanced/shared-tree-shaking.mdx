@@ -1,8 +1,6 @@
 # Shared Tree Shaking
 
-## Background
-
-When using Module Federation (MF), we often share common dependencies (such as antd, React, etc.) through the `shared` configuration to reduce duplicate bundling and keep dependency versions consistent across applications. However, the classic `shared` mechanism has a downside: it always provides the **full** dependency bundle, even if your application only uses a small portion of it (for example, only the `Button` component from antd).
+When using { props.name || 'Module Federation' }, we often share common dependencies (such as antd, React, etc.) through the `shared` configuration to reduce duplicate bundling and keep dependency versions consistent across applications. However, the classic `shared` mechanism has a downside: it always provides the **full** dependency bundle, even if your application only uses a small portion of it (for example, only the `Button` component from antd).
 
 This can lead to:
 
@@ -47,12 +45,12 @@ After building locally, check the output size and the exported content of the sh
 
 ## Configuration
 
-The core option is [sharedItem.treeShaking](../../configure/shared#treeshaking). You can also control where Tree Shaking artifacts are generated via:
+The core option is [sharedItem.treeShaking](/configure/shared.html#treeshaking). You can also control where Tree Shaking artifacts are generated via:
 
-* [treeShakingDir](../../configure/treeShakingDir)
-* [injectTreeShakingUsedExports](../../configure/injectTreeShakingUsedExports)
-* [treeShakingSharedPlugins](../../configure/treeShakingSharedPlugins)
-* [treeShakingSharedExcludePlugins](../../configure/treeShakingSharedExcludePlugins)
+* [treeShakingDir](/configure/treeShakingDir.html)
+* [injectTreeShakingUsedExports](/configure/injectTreeShakingUsedExports.html)
+* [treeShakingSharedPlugins](/configure/treeShakingSharedPlugins.html)
+* [treeShakingSharedExcludePlugins](/configure/treeShakingSharedExcludePlugins.html)
 
 ## Modes
 

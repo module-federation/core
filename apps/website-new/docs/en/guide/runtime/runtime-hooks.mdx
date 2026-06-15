@@ -1,5 +1,7 @@
 # Runtime Hooks
 
+The Module Federation runtime exposes hooks at key stages — loading remote modules, initializing containers, registering and resolving shared dependencies, and more. They are useful for diagnostics and tracing, error fallbacks, rewriting shared dependencies, customizing resource loading, and similar scenarios.
+
 ## Hook return values
 
 For `SyncHook` and `AsyncHook`, returning `undefined` means the plugin only observes the event. It does not clear a value returned by an earlier plugin. A later plugin can still replace that value by returning another non-`undefined` value.
@@ -12,7 +14,6 @@ For `SyncWaterfallHook` and `AsyncWaterfallHook`, return the full updated args o
 
 Updates the corresponding init configuration before the MF instance is initialized.
 
-* type
 
 ```ts
 function beforeInit(args: BeforeInitOptions): BeforeInitOptions
@@ -41,7 +42,6 @@ interface ModuleFederationRuntimeOptions {
 
 Called after the MF instance is initialized.
 
-* type
 
 ```ts
 function init(args: InitOptions): void
@@ -58,7 +58,6 @@ type InitOptions ={
 
 Called before resolving the remote path, useful for updating something before lookup.
 
-* type
 
 ```ts
 async function beforeRequest(args: BeforeRequestOptions): Promise<BeforeRequestOptions>
@@ -76,7 +75,6 @@ type BeforeRequestOptions ={
 
 Called after the runtime matches a `loadRemote` request to a configured remote. If matching fails, the hook is still called with `error`. It is useful for diagnostics, request tracing, and checking whether a failure happened before manifest or remoteEntry loading.
 
-* type
 
 ```ts
 async function afterMatchRemote(args: AfterMatchRemoteOptions): Promise<void>
@@ -98,7 +96,6 @@ type AfterMatchRemoteOptions ={
 
 Called after resolving the remote path, allowing modification of the resolved content.
 
-* type
 
 ```ts
 async function afterResolve(args: AfterResolveOptions): Promise<AfterResolveOptions>
@@ -121,7 +118,6 @@ type AfterResolveOptions ={
 
 Triggered once a federated module is loaded, allowing access and modification to the exports of the loaded file.
 
-* type
 
 ```ts
 async function onLoad(args: OnLoadOptions): Promise<void>
@@ -162,7 +158,6 @@ Called after a `loadRemote` request finishes. It runs for successful loads, fail
 
 `onLoad` runs before `afterLoadRemote` on a successful load. If a load fails and `errorLoadRemote` returns a fallback, `afterLoadRemote` receives the original `error` and `recovered: true`.
 
-* type
 
 ```ts
 async function afterLoadRemote(args: AfterLoadRemoteOptions): Promise<void>
@@ -187,7 +182,6 @@ type AfterLoadRemoteOptions ={
 
 Triggered before the host calls `remoteEntry.init(...)`. Useful for dynamically rewriting the `shareScope` / `initScope` used in this initialization and the `remoteEntryInitOptions` passed to the remote.
 
-* type
 
 ```ts
 async function beforeInitContainer(args: BeforeInitContainerOptions): Promise<BeforeInitContainerOptions>
@@ -207,7 +201,6 @@ type BeforeInitContainerOptions ={
 
 Triggered after `remoteEntry.init(...)` completes successfully. Useful for metrics, observability, or post-initialization customization.
 
-* type
 
 ```ts
 async function initContainer(args: InitContainerOptions): Promise<InitContainerOptions>
@@ -230,7 +223,6 @@ type InitContainerOptions ={
 
 Handles the preloading logic for remotes.
 
-* type
 
 ```ts
 function handlePreloadModule(args: HandlePreloadModuleOptions): void
@@ -251,7 +243,6 @@ type HandlePreloadModuleOptions ={
 
 Called if loading remotes fails, enabling custom error handling. Can return a custom fallback logic.
 
-* type
 
 ```ts
 async function errorLoadRemote(args: ErrorLoadRemoteOptions): Promise<void | unknown>
@@ -277,7 +268,6 @@ The `lifecycle` parameter indicates the stage where the error occurred:
 
 If this hook returns a fallback module, the runtime uses that value to continue. If a diagnostics or logging plugin returns `undefined`, it does not clear a fallback returned by another plugin.
 
-* example
 
 
 ```ts
@@ -356,7 +346,6 @@ mf.loadRemote('app1/un-existed-module').then(mod=>{
 
 Called before loading shared, can be used to modify the corresponding shared configuration.
 
-* type
 
 ```ts
 async function beforeLoadShare(args: BeforeLoadShareOptions): Promise<BeforeLoadShareOptions>
@@ -375,7 +364,6 @@ type BeforeLoadShareOptions ={
 
 Called after a shared dependency is successfully resolved by `loadShare` or `loadShareSync`. Use it to observe which provider and version were selected.
 
-* type
 
 ```ts
 function afterLoadShare(args: AfterLoadShareOptions): void
@@ -397,7 +385,6 @@ type AfterLoadShareOptions ={
 
 Called when shared dependency resolution fails or cannot select a valid shared dependency. It is useful for diagnostics around missing shared dependencies, version mismatch, and eager configuration errors.
 
-* type
 
 ```ts
 function errorLoadShare(args: ErrorLoadShareOptions): void
@@ -420,7 +407,6 @@ type ErrorLoadShareOptions ={
 
 Triggered when the host aligns a remote’s share-scope mapping. Useful for redirecting one scope to another (for example, aliasing `scope1` to `default` so they share the same pool).
 
-* type
 
 ```ts
 function initContainerShareScopeMap(args: InitContainerShareScopeMapOptions): InitContainerShareScopeMapOptions
@@ -442,7 +428,6 @@ Allows overriding the final shared module selection result.
 
 `resolveShare` runs after the runtime has already picked the candidate scope and version. At this point, changing fields like `scope` or `version` on `args` does not change the final result by itself. To switch to a different shared module, replace `args.resolver` and return the shared record you want to use.
 
-* type
 
 ```ts
 function resolveShare(args: ResolveShareOptions): ResolveShareOptions
@@ -461,7 +446,6 @@ type ResolveShareOptions ={
 }
 ```
 
-* example
 
 
 ```ts
@@ -525,7 +509,6 @@ mf.loadShare('react').then((reactFactory) => {
 
 Called before the preload handler executes any preload logic.
 
-* type
 
 ```ts
 async function beforePreloadRemote(args: BeforePreloadRemoteOptions): Promise<void>
@@ -543,7 +526,6 @@ type BeforePreloadRemoteOptions ={
 
 Used to control the generation of resources that need to be preloaded.
 
-* type
 
 ```ts
 async function generatePreloadAssets(args: GeneratePreloadAssetsOptions): Promise<PreloadAssets>
@@ -574,7 +556,6 @@ interface PreloadAssets {
 
 Called before initializing the remote container with `remoteEntry.init(...)`.
 
-* type
 
 ```ts
 async function beforeInitRemote(args: BeforeInitRemoteOptions): Promise<void>
@@ -593,7 +574,6 @@ type BeforeInitRemoteOptions ={
 
 Called after remote container initialization succeeds or fails. When the remote was already initialized, `cached` is set to `true`.
 
-* type
 
 ```ts
 async function afterInitRemote(args: AfterInitRemoteOptions): Promise<void>
@@ -615,7 +595,6 @@ type AfterInitRemoteOptions ={
 
 Called before `remoteEntry.get(expose)`.
 
-* type
 
 ```ts
 async function beforeGetExpose(args: BeforeGetExposeOptions): Promise<void>
@@ -635,7 +614,6 @@ type BeforeGetExposeOptions ={
 
 Called after `remoteEntry.get(expose)` succeeds or fails.
 
-* type
 
 ```ts
 async function afterGetExpose(args: AfterGetExposeOptions): Promise<void>
@@ -657,7 +635,6 @@ type AfterGetExposeOptions ={
 
 Called before executing the exposed module factory. It is skipped when `loadRemote` is called with `loadFactory: false`.
 
-* type
 
 ```ts
 async function beforeExecuteFactory(args: BeforeExecuteFactoryOptions): Promise<void>
@@ -677,7 +654,6 @@ type BeforeExecuteFactoryOptions ={
 
 Called after the exposed module factory succeeds or fails. It is skipped when `loadRemote` is called with `loadFactory: false`.
 
-* type
 
 ```ts
 async function afterExecuteFactory(args: AfterExecuteFactoryOptions): Promise<void>
@@ -699,7 +675,6 @@ type AfterExecuteFactoryOptions ={
 
 Used to modify the script when loading resources.
 
-* type
 
 ```ts
 function createScript(args: CreateScriptOptions): CreateScriptHookReturn
@@ -730,7 +705,6 @@ type ResourceLoadContext = {
 You can combine `timeout` and `resourceContext` to set different timeouts for
 remoteEntry loads and preload loads.
 
-* example
 
 ```ts
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
@@ -757,11 +731,10 @@ const changeScriptAttributePlugin: () => ModuleFederationRuntimePlugin =
 
 
 ## fetch
-The `fetch` function allows customizing the request that fetches the manifest JSON. A successful `Response` must yield a valid JSON.
 
 `AsyncHook`
 
-- **Type**
+The `fetch` function allows customizing the request that fetches the manifest JSON. A successful `Response` must yield a valid JSON.
 
 ```typescript
 function fetch(
@@ -802,7 +775,6 @@ export default function (): FederationRuntimePlugin {
 
 Used to customize the link element created for preload/style loading.
 
-* type
 
 ```ts
 function createLink(args: CreateLinkOptions): HTMLLinkElement | void
@@ -859,7 +831,6 @@ const resourceTimeoutPlugin = (): ModuleFederationRuntimePlugin => ({
 
 Triggered when loading remoteEntry fails (typically script loading errors). Useful for retries or custom fallback strategies.
 
-* type
 
 ```ts
 async function loadEntryError(args: LoadEntryErrorOptions): Promise<Promise<RemoteEntryExports | undefined> | undefined>
@@ -880,7 +851,6 @@ type LoadEntryErrorOptions ={
 
 Called after loading a remoteEntry succeeds, fails, or is recovered by `loadEntryError`.
 
-* type
 
 ```ts
 async function afterLoadEntry(args: AfterLoadEntryOptions): Promise<void>
@@ -900,7 +870,6 @@ type AfterLoadEntryOptions ={
 
 Triggered before calling `remoteEntry.get(expose)`, allowing custom module-factory resolution.
 
-* type
 
 ```ts
 async function getModuleFactory(args: GetModuleFactoryOptions): Promise<(() => Promise<Module>) | undefined>
@@ -913,11 +882,10 @@ type GetModuleFactoryOptions ={
 ```
 
 ## loadEntry
-The `loadEntry` function allows for full customization of remotes, enabling you to extend and create new remote types. The following two simple examples demonstrate loading JSON data and module delegation.
 
 `asyncHook`
 
-- **Type**
+The `loadEntry` function allows for full customization of remotes, enabling you to extend and create new remote types. The following two simple examples demonstrate loading JSON data and module delegation.
 
 ```typescript
 function loadEntry(args: LoadEntryOptions): RemoteEntryExports | void;
@@ -1062,7 +1030,6 @@ test2 // "test2 value"
 
 Triggered before bridge rendering. You can return an object to augment render arguments (for example, `extraProps`).
 
-* type
 
 ```ts
 function beforeBridgeRender(args: Record<string, any>): void | Record<string, any>
@@ -1074,7 +1041,6 @@ function beforeBridgeRender(args: Record<string, any>): void | Record<string, an
 
 Triggered after bridge rendering.
 
-* type
 
 ```ts
 function afterBridgeRender(args: Record<string, any>): void | Record<string, any>
@@ -1086,7 +1052,6 @@ function afterBridgeRender(args: Record<string, any>): void | Record<string, any
 
 Triggered before bridge teardown.
 
-* type
 
 ```ts
 function beforeBridgeDestroy(args: Record<string, any>): void | Record<string, any>
@@ -1098,7 +1063,6 @@ function beforeBridgeDestroy(args: Record<string, any>): void | Record<string, a
 
 Triggered after bridge teardown.
 
-* type
 
 ```ts
 function afterBridgeDestroy(args: Record<string, any>): void | Record<string, any>

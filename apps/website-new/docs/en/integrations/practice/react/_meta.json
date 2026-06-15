@@ -1,9 +1,5 @@
 [
-  {
-    "type": "file",
-    "name": "index",
-    "label": "Overview"
-  },
+  "index",
   {
     "type": "file",
     "name": "rsbuild-cra",

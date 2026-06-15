@@ -18,7 +18,7 @@ interface PluginDtsOptions {
 }
 ```
 
-### generateTypes
+## generateTypes
 
 - Type: `boolean | DtsRemoteOptions`
 - Required: No
@@ -67,36 +67,36 @@ When configuring `generateTypes` to `true`, the following configuration will be 
 }
 ```
 
-#### extractRemoteTypes
+### extractRemoteTypes
 
 - Type: `boolean`
 - Required: No
 - Default value: `undefined`
 - Usage scenario: When the content of the producer `exposes` has its own `remotes` module that re-exports itself, then `extractRemoteTypes: true` can ensure that the consumer can normally obtain the module type of the producer `exposes`
-- Example: [Nested type re-export](../guide/basic/type-prompt#Nested type re-export)
+- Example: [Nested type re-export](/guide/basic/type-prompt.html#Nested type re-export)
 
 Whether to extract the type of `remotes`.
 
-#### extractThirdParty
+### extractThirdParty
 
 - Type: `boolean`
 - Required: No
 - Default value: `undefined`
 - Usage scenario: When the content of the producer `exposes` contains a module containing `antd`, and the consumer does not have `antd` installed, then `extractThirdParty: true` can ensure that the consumer can normally obtain the module of the producer `exposes` type
-- Example: [Third-party package type extraction](../guide/basic/type-prompt#Third-party package type extraction)
+- Example: [Third-party package type extraction](/guide/basic/type-prompt.html#Third-party package type extraction)
 
 Whether to extract third-party package types.
 
-#### generateAPITypes
+### generateAPITypes
 
 - Type: `boolean`
 - Required: No
 - Default value: `undefined`
-- Example: [Federation Runtime API type prompt](../guide/basic/type-prompt#federation-runtime-api-type-prompt)
+- Example: [Federation Runtime API type prompt](/guide/basic/type-prompt.html#federation-runtime-api-type-prompt)
 
 Whether to generate the `loadRemote` type in `Federation Runtime`
 
-#### compileInChildProcess
+### compileInChildProcess
 
 - Type: `boolean`
 - Required: No
@@ -104,7 +104,7 @@ Whether to generate the `loadRemote` type in `Federation Runtime`
 
 Whether generate types in child process
 
-#### abortOnError
+### abortOnError
 
 - Type: `boolean`
 - Required: No
@@ -112,7 +112,7 @@ Whether generate types in child process
 
 Whether to throw an error when a problem is encountered during type generation
 
-#### afterGenerate
+### afterGenerate
 
 - Type: `(options: DtsGenerateTypesHookOptions) => Promise<void> | void`
 - Required: No
@@ -133,7 +133,7 @@ new ModuleFederationPlugin({
 });
 ```
 
-#### tsConfigPath
+### tsConfigPath
 
 - Type: `string`
 - Required: No
@@ -141,7 +141,7 @@ new ModuleFederationPlugin({
 > priority: dts.generateTypes.tsConfigPath > dts.tsConfigPath
 tsconfig configuration file path
 
-#### outputDir
+### outputDir
 
 - Type: `string`
 - Required: No
@@ -174,7 +174,7 @@ With the config above, the generated files are emitted to
 `dist/react/production/@mf-types.zip` and
 `dist/react/production/@mf-types.d.ts`.
 
-#### typesFolder
+### typesFolder
 
 - Type: `string`
 - Required: No
@@ -182,7 +182,7 @@ With the config above, the generated files are emitted to
 
 The name of the generated compression type file. For example, if typesFolder is set to `custom`, then the name of the generated compression type file is: `custom.zip`
 
-#### deleteTypesFolder
+### deleteTypesFolder
 
 - Type: `boolean`
 - Required: No
@@ -190,7 +190,7 @@ The name of the generated compression type file. For example, if typesFolder is 
 
 Whether to delete the generated type folder
 
-#### compilerInstance
+### compilerInstance
 
 - Type: `'tsc' | 'tsgo' | 'vue-tsc' | 'tspc' | string`
 - Required: No
@@ -198,7 +198,7 @@ Whether to delete the generated type folder
 
 Instance of compiled type
 
-#### deleteTsConfig
+### deleteTsConfig
 
 - Type: `boolean`
 - Required: No
@@ -206,7 +206,7 @@ Instance of compiled type
 
 Whether to delete the temporary tsconfig configuration file.
 
-### consumeTypes
+## consumeTypes
 
 - Type: `boolean | DtsHostOptions`
 - Required: No
@@ -236,16 +236,16 @@ When configuring `consumeTypes` to `true`, the following configuration will be g
 }
 ```
 
-#### consumeAPITypes
+### consumeAPITypes
 
 - Type: `boolean`
 - Required: No
 - Default value: `true`
-- Example: [Federation Runtime API type prompt](../guide/basic/type-prompt#federation-runtime-api-type-prompt)
+- Example: [Federation Runtime API type prompt](/guide/basic/type-prompt.html#federation-runtime-api-type-prompt)
 
 Whether to generate the type of runtime `loadRemote` API
 
-#### maxRetries
+### maxRetries
 
 - Type: `number`
 - Required: No
@@ -253,7 +253,7 @@ Whether to generate the type of runtime `loadRemote` API
 
 Maximum number of retries for failed loading
 
-#### abortOnError
+### abortOnError
 
 - Type: `boolean`
 - Required: No
@@ -261,7 +261,7 @@ Maximum number of retries for failed loading
 
 Whether to throw an error when a problem is encountered during type loading
 
-#### typesFolder
+### typesFolder
 
 - Type: `string`
 - Required: No
@@ -269,7 +269,7 @@ Whether to throw an error when a problem is encountered during type loading
 
 Type storage directory after successful loading
 
-#### deleteTypesFolder
+### deleteTypesFolder
 
 - Type: `boolean`
 - Required: No
@@ -277,7 +277,7 @@ Type storage directory after successful loading
 
 Before loading type files, whether to delete the previously loaded `typesFolder` directory
 
-#### remoteTypesFolder
+### remoteTypesFolder
 
 - Type: `string`
 - Required: No
@@ -285,7 +285,7 @@ Before loading type files, whether to delete the previously loaded `typesFolder`
 
 `typesFolder` corresponding to `remotes` directory configuration
 
-#### remoteTypeUrls
+### remoteTypeUrls
 
 - Type: `(() => Promise<RemoteTypeUrls>) | RemoteTypeUrls`
 - Required: No
@@ -354,22 +354,22 @@ export default createModuleFederationConfig({
 });
 ```
 
-#### family
+### family
 
 - Type: `0 | 4 | 6`
 - Required: No
-- Default value: 0
+- Default value: `0`
 
 Configure the IP version family that will be used for network operations.
 
-#### typesOnBuild
+### typesOnBuild
 - Type: `boolean`
 - Required: No
 - Default: `false`
 
 By default, Module Federation does not load type files in production ( process.env.NODE_ENV === 'production' ). To enable type loading in production builds, set typesOnBuild to true .
 
-### tsConfigPath
+## tsConfigPath
 
 - Type: `string`
 - Required: No
@@ -377,7 +377,7 @@ By default, Module Federation does not load type files in production ( process.e
 
 tsconfig configuration file path
 
-### cwd
+## cwd
 
 - Type: `string`
 - Required: No
@@ -385,7 +385,7 @@ tsconfig configuration file path
 
 The working directory to run the compiler
 
-### displayErrorInTerminal
+## displayErrorInTerminal
 
 - Type: `boolean`
 - Required: No
