@@ -47,4 +47,4 @@ new ModuleFederationPlugin({
 ## 注意事项
 
 - `shareScope` 只声明「这个模块要初始化哪些共享池」，并不等于某个包一定会在这些池里共享；包是否进入某个池取决于 `shared` 条目配置的 `shareScope`。
-- 多共享池要想真正实现「跨应用复用」，通常需要生产者 / 消费者两侧使用一致的 Scope 约定，详见 [remotes](./remotes#sharescope)。
+- 多共享池要想真正实现「跨应用复用」，通常需要生产者 / 消费者两侧使用一致的 Scope 约定，详见 [remotes](/configure/remotes.html#sharescope)。

@@ -13,7 +13,7 @@
 
 构建插件负责在打包阶段处理 `exposes`、`remotes` 等配置，并生成行时所需产物。下文如无特殊说明，「构建插件」均指此类插件。
 
-不同的构建工具、框架应该选择哪个插件，请查看[接入方案](/integrations)。
+不同的构建工具、框架应该选择哪个插件，请查看[接入方案](/integrations/index.html)。
 
 ## 生产者
 
@@ -39,13 +39,13 @@
 
 打包工具的主要目标是将 JavaScript、CSS 等文件打包在一起，打包后的文件可以在浏览器、Node.js 等环境中使用。当 Bundler 处理 Web 应用时，它会构建一个依赖关系图，其中包含应用需要的各个模块，然后将所有模块打包成一个或多个 bundle。
 
-具体项目应该选择哪个工具和插件，可以查看[接入方案](/integrations)。
+具体项目应该选择哪个工具和插件，可以查看[接入方案](/integrations/index.html)。
 
 ## Manifest
 
 Manifest 是生产者在构建时生成的运行时清单，用于描述远程入口、暴露模块、资源、共享依赖和类型信息。消费者可以通过 `mf-manifest.json` 获取这些信息，再加载对应的远程模块。
 
-更多内容可以查看 [Manifest 与 Snapshot](/guide/basic/manifest-snapshot)、[manifest 配置](/configure/manifest) 和 [mf-manifest.json 字段定义](/guide/advanced/manifest-fields)。
+更多内容可以查看 [Manifest 与 Snapshot](/guide/basic/manifest-snapshot.html)、[manifest 配置](/configure/manifest.html) 和 [mf-manifest.json 字段定义](/guide/advanced/manifest-fields.html)。
 
 ## Snapshot
 

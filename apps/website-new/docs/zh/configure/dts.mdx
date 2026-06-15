@@ -72,7 +72,7 @@ interface DtsGenerateTypesHookOptions {
 - 是否必填：否
 - 默认值：`undefined`
 - 使用场景：当生产者 `exposes` 的内容中有重导出自身的 `remotes` 模块，那么 `extractRemoteTypes: true` 能够确保消费者能正常获取生产者 `exposes` 的模块类型
-- 示例：[嵌套类型重导出](../guide/basic/type-prompt#嵌套类型重导出)
+- 示例：[嵌套类型重导出](/guide/basic/type-prompt.html#嵌套类型重导出)
 
 是否抽取 `remotes` 的类型。
 
@@ -82,7 +82,7 @@ interface DtsGenerateTypesHookOptions {
 - 是否必填：否
 - 默认值：`undefined`
 - 使用场景：当生产者 `exposes` 的内容中有包含 `antd` 的模块，并且消费者没装 `antd` ，那么 `extractThirdParty: true` 能够确保消费者能正常获取生产者 `exposes` 的模块类型
-- 示例：[第三方包类型抽取](../guide/basic/type-prompt#第三方包类型抽取)
+- 示例：[第三方包类型抽取](/guide/basic/type-prompt.html#第三方包类型抽取)
 
 是否抽取第三方包类型。
 
@@ -91,7 +91,7 @@ interface DtsGenerateTypesHookOptions {
 - 类型：`boolean`
 - 是否必填：否
 - 默认值：`undefined`
-- 示例：[Federation Runtime API 类型提示](../guide/basic/type-prompt#federation-runtime-api-类型提示)
+- 示例：[Federation Runtime API 类型提示](/guide/basic/type-prompt.html#federation-runtime-api-类型提示)
 
 是否生成 `Federation Runtime` 中 `loadRemote` 类型
 
@@ -240,7 +240,7 @@ interface DtsHostOptions {
 - 类型：`boolean`
 - 是否必填：否
 - 默认值：`true`
-- 示例：[Federation Runtime API 类型提示](../guide/basic/type-prompt#federation-runtime-api-类型提示)
+- 示例：[Federation Runtime API 类型提示](/guide/basic/type-prompt.html#federation-runtime-api-类型提示)
 
 是否生成运行时 `loadRemote` API 的类型
 

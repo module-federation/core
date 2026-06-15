@@ -6,7 +6,7 @@ sidebar: false
 # AI 快速开始
 
 :::tip 想自己阅读完整指南？
-如果你希望按文档顺序自己了解 Module Federation 的概念、配置和接入方式，可以直接前往 [开始使用指南](../guide/start/index)。
+如果你希望按文档顺序自己了解 Module Federation 的概念、配置和接入方式，可以直接前往 [开始使用指南](/guide/start/index.html)。
 :::
 
 ## 更适合的开始方式
@@ -48,12 +48,12 @@ npx skills add module-federation/agent-skills --skill mf -y
 - 帮你分析远端模块信息
 - 帮你读取观测报告并排查 MF 加载失败
 
-👉 [查看 Agent Skills 详细说明](./skill)
+👉 [查看 Agent Skills 详细说明](/ai/skill.html)
 
 ## 观测和调试 MF 加载
 
 如果你希望 AI coding agent 基于真实运行时信息排查 Module Federation
-加载问题，需要先接入 [观测插件](../plugin/plugins/observability-plugin)。
+加载问题，需要先接入 [观测插件](/plugin/plugins/observability-plugin.html)。
 `/mf observability` 这个 skill 负责帮你接入、读取和分析报告；真正的运行时证据由观测插件采集。
 
 加载失败后，浏览器控制台会打印 `traceId`，开发环境还会打印 `read:` 命令。把这段提示交给 Agent：
@@ -109,5 +109,5 @@ https://module-federation.io/guide/basic/runtime.md
 
 1. 先装 `mf`
 2. 问一个你当前最关心的问题
-3. 需要 MF 加载可观测时，先接入 [观测插件](../plugin/plugins/observability-plugin)
-4. 再看 [Skills 说明](./skill)，了解它支持哪些子命令
+3. 需要 MF 加载可观测时，先接入 [观测插件](/plugin/plugins/observability-plugin.html)
+4. 再看 [Skills 说明](/ai/skill.html)，了解它支持哪些子命令

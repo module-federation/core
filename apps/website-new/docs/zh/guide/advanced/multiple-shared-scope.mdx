@@ -14,9 +14,9 @@ import ShareScopeAlignmentPlayground from '@components/common/ShareScopeAlignmen
 
 理解多共享池最简单的方法：只看「生产者怎么配」、「消费者怎么配」、「shared 条目落在哪个池里」，不需要了解运行时内部数据结构与变量名。
 
-* **生产者**：用 [shareScope](../../configure/shareScope) 声明该 Provider 会初始化哪些共享池（默认 `default`，支持 `string | string[]`）。
-* **消费者**：用 [remotes[remote].shareScope](../../configure/remotes#sharescope) 声明与某个 Consumer 需要对齐哪些共享池（默认 `default`）。
-* **shared 条目**：用 `shared[pkg].shareScope` 决定某个依赖注册 / 解析在哪个共享池（见 [shared.shareScope](../../configure/shared#sharescope)）。
+* **生产者**：用 [shareScope](/configure/shareScope.html) 声明该 Provider 会初始化哪些共享池（默认 `default`，支持 `string | string[]`）。
+* **消费者**：用 [remotes[remote].shareScope](/configure/remotes.html#sharescope) 声明与某个 Consumer 需要对齐哪些共享池（默认 `default`）。
+* **shared 条目**：用 `shared[pkg].shareScope` 决定某个依赖注册 / 解析在哪个共享池（见 [shared.shareScope](/configure/shared.html#sharescope)）。
 
 ## 不同 shareScope 组合的效果
 

@@ -78,8 +78,8 @@
 
 ## 配置
 
-- [dts](../../configure/dts)：类型生成/加载
-- [dev](../../configure/dev)：类型热重载
+- [dts](/configure/dts.html)：类型生成/加载
+- [dev](/configure/dev.html)：类型热重载
 
 ## FAQ
 
@@ -96,6 +96,6 @@ config.watchOptions = {
 ### 没有生成类型文件，如何查看原因
 
 1. 在项目启动命令前加上 `FEDERATION_DEBUG=true` 环境变量
-2. 设置 [dts.displayErrorInTerminal](../../configure/dts#displayerrorinterminal) 为 `true`
+2. 设置 [dts.displayErrorInTerminal](/configure/dts.html#displayerrorinterminal) 为 `true`
 3. 启动项目，查看控制台输出
 4. （可选）若控制台没输出错误，查看 `.mf/typesGenerate.log` 日志文件

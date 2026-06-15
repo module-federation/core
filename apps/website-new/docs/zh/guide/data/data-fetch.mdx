@@ -16,7 +16,7 @@ import Consumer from '@components/zh/data-fetch/consumer';
 Module Federation 暴露的模块大体分为两类：
 
 - **组件**：独立的 UI 组件、工具函数等，不带路由系统
-- **应用**：带有完整路由的子应用，通常通过 [Bridge](/guide/bridge/overview) 暴露和消费
+- **应用**：带有完整路由的子应用，通常通过 [Bridge](/guide/bridge/overview.html) 暴露和消费
 
 本文介绍的能力面向前者，即「组件级别」数据获取。你可以参考 [Demo](https://github.com/module-federation/core/tree/main/apps/modern-component-data-fetch) 来了解详细的使用方式。
 :::
@@ -87,7 +87,7 @@ export default List;
 
 #### Loader 函数默认传参
 
-默认会往 loader 函数传递参数，其类型为 [DataFetchParams](/guide/bridge/react/load-component#datafetchparams)，包含以下字段：
+默认会往 loader 函数传递参数，其类型为 [DataFetchParams](/guide/bridge/react/load-component.html#datafetchparams)，包含以下字段：
 
 - `isDowngrade`：表示当前执行上下文是否处于降级模式。例如，在服务端渲染失败，在浏览器端渲染时会重新往服务端发起请求，调用 loader 函数，此时该值为 `true`。
 
