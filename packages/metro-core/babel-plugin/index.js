@@ -80,12 +80,23 @@ function getRejectedPromise(errorMessage) {
   );
 }
 
+// normalize paths to POSIX separators so comparisons against generated
+// paths work on Windows, where Metro and `path.resolve` can disagree
+// on path separators
+function toPosixPath(value) {
+  return typeof value === 'string' ? value.replace(/\\/g, '/') : value;
+}
+
 function moduleFederationMetroBabelPlugin() {
   return {
     name: 'module-federation-metro-babel-plugin',
     visitor: {
       CallExpression(path, state) {
-        if (state.opts.blacklistedPaths.includes(state.filename)) {
+        const filename = toPosixPath(state.filename);
+        const blacklistedPaths = (state.opts.blacklistedPaths || []).map(
+          toPosixPath,
+        );
+        if (blacklistedPaths.includes(filename)) {
           return;
         }
 

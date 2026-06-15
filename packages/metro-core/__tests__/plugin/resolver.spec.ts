@@ -168,4 +168,46 @@ describe('createResolveRequest', () => {
       expect(fallbackResolver).not.toHaveBeenCalled();
     },
   );
+
+  it('matches the init-host origin module path regardless of separator (Windows)', () => {
+    // Metro and `path.resolve` can disagree on path separators on Windows.
+    // The generated init-host path uses native (backslash) separators while
+    // the origin module path reported by Metro may use POSIX separators.
+    const projectDir = 'C:\\project';
+    const tmpDir = 'C:\\project\\node_modules\\.mf-metro';
+    const initHost = 'C:\\project\\node_modules\\.mf-metro\\init-host.js';
+    const config = createConfig('lodash', 'lodash');
+    const fallbackResolver = vi.fn<CustomResolver>(() => ({
+      type: 'sourceFile',
+      filePath: '/fallback.js',
+    }));
+    // Metro reports the same file using POSIX separators
+    const context = createResolverContext(
+      'C:/project/node_modules/.mf-metro/init-host.js',
+      fallbackResolver,
+    );
+    const vmManager: Pick<VirtualModuleManager, 'registerVirtualModule'> = {
+      registerVirtualModule: vi.fn(),
+    };
+
+    const resolveRequest = createResolveRequest({
+      isRemote: false,
+      hacks: { patchHMRClient: false, patchInitializeCore: false },
+      options: config,
+      paths: {
+        ...createPaths(projectDir, tmpDir),
+        initHost,
+      },
+      vmManager,
+    });
+
+    const resolved = resolveRequest(context, 'lodash', 'ios');
+
+    // init-host imports its shared deps directly, so the request should fall
+    // through to the host resolver instead of being rewritten to a virtual
+    // shared module.
+    expect(resolved).toEqual({ type: 'sourceFile', filePath: '/fallback.js' });
+    expect(fallbackResolver).toHaveBeenCalledTimes(1);
+    expect(vmManager.registerVirtualModule).not.toHaveBeenCalled();
+  });
 });
