@@ -1,5 +1,3 @@
-import { defineConfig } from 'tsdown';
-
 const entry = {
   index: 'src/index.ts',
   browser: 'src/browser.ts',
@@ -10,7 +8,7 @@ const entry = {
 
 const baseConfig = {
   cwd: import.meta.dirname,
-  tsconfig: 'tsconfig.json',
+  tsconfig: 'tsconfig.lib.json',
   clean: true,
   entry,
   external: [
@@ -21,7 +19,7 @@ const baseConfig = {
   ],
 };
 
-export default defineConfig([
+export default [
   {
     ...baseConfig,
     name: 'observability-plugin-cjs',
@@ -45,4 +43,4 @@ export default defineConfig([
       js: '.js',
     }),
   },
-]);
+];
