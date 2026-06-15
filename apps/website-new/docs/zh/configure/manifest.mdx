@@ -1,6 +1,7 @@
 # manifest
 
 - 类型：`boolean | PluginManifestOptions`
+- 是否必填：否
 - 默认值：`undefined`
 
 用于控制是否生成 manifest ，以及对应的生成配置。启用后插件会在每次构建中同时产出 <code>{props.manifest || 'mf-manifest.json' }</code> 与 <code>{props.stats || 'mf-stats.json' }</code>（名称可通过 `fileName` 自定义），并写入到构建产物中，供其他工具在 `processAssets` 钩子或构建结果中直接读取。
@@ -21,6 +22,7 @@ interface PluginManifestOptions {
 ## filePath
 
 - 类型：`string`
+- 是否必填：否
 - 默认值：`undefined`
 
 manifest 存放路径
@@ -28,6 +30,7 @@ manifest 存放路径
 ## fileName
 
 - 类型：`string`
+- 是否必填：否
 - 默认值：`'mf-manifest.json'`
 
 manifest 文件名称
