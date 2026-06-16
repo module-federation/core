@@ -58,7 +58,12 @@ describe('rewriteModuleCode', () => {
   });
 });
 
-import { fetchText, loadModule, loadEsmEntryWithFetch } from '../src/blobLoad';
+import {
+  fetchText,
+  loadModule,
+  loadEsmEntryWithFetch,
+  loadCssWithFetch,
+} from '../src/blobLoad';
 
 describe('fetchText', () => {
   beforeEach(() => {
@@ -100,6 +105,18 @@ describe('fetchText', () => {
       'BlobLoaderNetworkError: 401',
     );
   });
+
+  it('normalizes a Headers instance into the request init', async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      text: () => Promise.resolve('CODE'),
+    });
+    await fetchText('https://b.com/e.js', {
+      fetchOptions: { headers: new Headers({ Authorization: 'Bearer t' }) },
+    });
+    const init = (global.fetch as jest.Mock).mock.calls[0][1];
+    expect(init.headers).toEqual({ authorization: 'Bearer t' });
+  });
 });
 
 describe('loadModule', () => {
@@ -126,5 +143,52 @@ describe('loadModule', () => {
     ).toEqual(['https://b.com/dep.js', 'https://b.com/entry.js']);
     await loadModule('https://b.com/entry.js', {});
     expect((global.fetch as jest.Mock).mock.calls.length).toBe(2);
+  });
+
+  it('evicts a failed load from the cache so a later call retries', async () => {
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 503,
+        statusText: 'Unavailable',
+        text: () => Promise.resolve(''),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        text: () => Promise.resolve('export default 1;'),
+      });
+    await expect(loadModule('https://b.com/x.js', {})).rejects.toThrow(
+      'BlobLoaderNetworkError: 503',
+    );
+    const blobUrl = await loadModule('https://b.com/x.js', {});
+    expect(blobUrl).toMatch(/^blob:/);
+    expect((global.fetch as jest.Mock).mock.calls.length).toBe(2);
+  });
+});
+
+describe('loadCssWithFetch', () => {
+  beforeEach(() => {
+    (global as any).fetch = jest
+      .fn()
+      .mockResolvedValue({ ok: true, text: () => Promise.resolve('.a{}') });
+    (global.URL as any).createObjectURL = jest.fn(() => 'blob:css');
+    loadModule.clearCache();
+    document.head.innerHTML = '';
+  });
+
+  it('fetches css with headers and injects a single stylesheet, deduping repeat calls', async () => {
+    await loadCssWithFetch({
+      href: 'https://b.com/a.css',
+      fetchOptions: { headers: { Authorization: 'Bearer t' } },
+    });
+    await loadCssWithFetch({
+      href: 'https://b.com/a.css',
+      fetchOptions: { headers: { Authorization: 'Bearer t' } },
+    });
+    expect((global.fetch as jest.Mock).mock.calls.length).toBe(1);
+    const links = document.head.getElementsByTagName('link');
+    expect(links.length).toBe(1);
+    expect(links[0].rel).toBe('stylesheet');
+    expect(links[0].href).toContain('blob:css');
   });
 });

@@ -73,6 +73,8 @@ const cache = new Map<string, Promise<string>>();
 // absolute url -> the context it was loaded with, so __mfDyn can reuse the
 // right headers for runtime dynamic imports of that module's chunks.
 const contexts = new Map<string, BlobLoadContext>();
+// original css href -> blob url, so repeat calls don't re-fetch or double-inject.
+const cssCache = new Map<string, string>();
 let dynImportInstalled = false;
 
 function isResponseLike(res: unknown): res is Response {
@@ -84,15 +86,29 @@ function isResponseLike(res: unknown): res is Response {
   );
 }
 
+function toHeaderObject(
+  headers: RequestInit['headers'],
+): Record<string, string> {
+  if (!headers) return {};
+  if (typeof Headers !== 'undefined' && headers instanceof Headers) {
+    return Object.fromEntries(
+      (
+        headers as unknown as { entries(): IterableIterator<[string, string]> }
+      ).entries(),
+    );
+  }
+  if (Array.isArray(headers)) {
+    return Object.fromEntries(headers);
+  }
+  return { ...(headers as Record<string, string>) };
+}
+
 export async function fetchText(
   url: string,
   ctx: BlobLoadContext,
 ): Promise<string> {
   const { headers, ...rest } = ctx.fetchOptions || {};
-  const init: RequestInit = {
-    ...rest,
-    headers: { ...(headers as Record<string, string>) },
-  };
+  const init: RequestInit = { ...rest, headers: toHeaderObject(headers) };
   let res: Response | void | false = undefined;
   if (ctx.customFetch) {
     res = await ctx.customFetch(url, init);
@@ -112,8 +128,10 @@ export async function fetchText(
 // Dynamic imports are handled lazily at runtime via __mfDyn,
 // Static relative imports are pre-loaded recursively.
 function loadModuleImpl(url: string, ctx: BlobLoadContext): Promise<string> {
-  if (cache.has(url)) return cache.get(url)!;
+  // Register the context for this url on every call so __mfDyn uses the latest
+  // headers for that module's dynamic imports, even when the blob is cached.
   contexts.set(url, ctx);
+  if (cache.has(url)) return cache.get(url)!;
 
   const promise = (async () => {
     const raw = await fetchText(url, ctx);
@@ -135,6 +153,11 @@ function loadModuleImpl(url: string, ctx: BlobLoadContext): Promise<string> {
   })();
 
   cache.set(url, promise);
+  // Don't permanently cache a failed load — allow a later retry (e.g. via the
+  // runtime loadEntryError hook) to re-fetch instead of replaying the rejection.
+  promise.catch(() => {
+    if (cache.get(url) === promise) cache.delete(url);
+  });
   return promise;
 }
 
@@ -148,6 +171,7 @@ export const loadModule: ((
   clearCache: () => {
     cache.clear();
     contexts.clear();
+    cssCache.clear();
   },
 });
 
@@ -203,8 +227,10 @@ export async function loadCssWithFetch({
   fetchOptions?: RequestInit;
   customFetch?: BlobFetcher;
 }): Promise<void> {
+  if (cssCache.has(href)) return;
   const text = await fetchText(href, { fetchOptions, customFetch });
   const blob = URL.createObjectURL(new Blob([text], { type: 'text/css' }));
+  cssCache.set(href, blob);
   const link = document.createElement('link');
   link.rel = 'stylesheet';
   link.href = blob;
