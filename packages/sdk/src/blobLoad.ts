@@ -73,8 +73,9 @@ const cache = new Map<string, Promise<string>>();
 // absolute url -> the context it was loaded with, so __mfDyn can reuse the
 // right headers for runtime dynamic imports of that module's chunks.
 const contexts = new Map<string, BlobLoadContext>();
-// original css href -> blob url, so repeat calls don't re-fetch or double-inject.
-const cssCache = new Map<string, string>();
+// original css href -> in-flight/settled load, so concurrent or repeat calls
+// don't re-fetch or double-inject the stylesheet.
+const cssCache = new Map<string, Promise<void>>();
 let dynImportInstalled = false;
 
 function isResponseLike(res: unknown): res is Response {
@@ -218,7 +219,7 @@ export async function loadEsmEntryWithFetch({
   return import(/* webpackIgnore: true */ /* @vite-ignore */ blobUrl);
 }
 
-export async function loadCssWithFetch({
+export function loadCssWithFetch({
   href,
   fetchOptions,
   customFetch,
@@ -227,12 +228,20 @@ export async function loadCssWithFetch({
   fetchOptions?: RequestInit;
   customFetch?: BlobFetcher;
 }): Promise<void> {
-  if (cssCache.has(href)) return;
-  const text = await fetchText(href, { fetchOptions, customFetch });
-  const blob = URL.createObjectURL(new Blob([text], { type: 'text/css' }));
-  cssCache.set(href, blob);
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = blob;
-  document.head.appendChild(link);
+  const cached = cssCache.get(href);
+  if (cached) return cached;
+  const promise = (async () => {
+    const text = await fetchText(href, { fetchOptions, customFetch });
+    const blob = URL.createObjectURL(new Blob([text], { type: 'text/css' }));
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = blob;
+    document.head.appendChild(link);
+  })();
+  cssCache.set(href, promise);
+  // Don't permanently cache a failed css load — allow a later retry.
+  promise.catch(() => {
+    if (cssCache.get(href) === promise) cssCache.delete(href);
+  });
+  return promise;
 }
