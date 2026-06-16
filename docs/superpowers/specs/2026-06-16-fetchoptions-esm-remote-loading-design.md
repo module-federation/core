@@ -58,6 +58,17 @@ of scope for this iteration.
   `fetchOptions`, only the manifest is authenticated this iteration.
 - CSS imported from inside JS (`import './x.css'`) — not exercised by the PoC
   and not part of the ESM manifests we target.
+- **JS preload hints** (`jsAssetsWithoutEntry` in `preloadAssets`): these emit
+  header-less `<link rel="preload" as="script">` hints. For `fetchOptions`
+  remotes those hints will 401, but they are harmless — the actual chunk/shared
+  loads run through the authenticated blob graph (`__mfDyn`), exactly like the
+  PoC's suppressed `vite:preloadError` hints. Suppressing the wasted hints is a
+  possible future cleanup, not a correctness fix.
+- **`createLink` lifecycle hook for authenticated CSS:** `loadCssWithFetch`
+  injects the blob `<link>` directly and does not emit the `createLink` hook, so
+  plugins that add CSP `nonce`/SRI attributes do not run for `fetchOptions` CSS.
+  Threading the hook into the sdk loader is a follow-up; unauthenticated CSS
+  still uses the hook.
 
 ## Decisions
 
