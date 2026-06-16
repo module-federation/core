@@ -191,4 +191,23 @@ describe('loadCssWithFetch', () => {
     expect(links[0].rel).toBe('stylesheet');
     expect(links[0].href).toContain('blob:css');
   });
+
+  it('dedupes concurrent loads of the same href (single fetch, single link)', async () => {
+    let resolveFetch: (v: any) => void;
+    (global as any).fetch = jest.fn().mockImplementation(
+      () =>
+        new Promise((r) => {
+          resolveFetch = r;
+        }),
+    );
+    (global.URL as any).createObjectURL = jest.fn(() => 'blob:css');
+    loadModule.clearCache();
+    document.head.innerHTML = '';
+    const p1 = loadCssWithFetch({ href: 'https://b.com/c.css' });
+    const p2 = loadCssWithFetch({ href: 'https://b.com/c.css' });
+    resolveFetch!({ ok: true, text: () => Promise.resolve('.c{}') });
+    await Promise.all([p1, p2]);
+    expect((global.fetch as jest.Mock).mock.calls.length).toBe(1);
+    expect(document.head.getElementsByTagName('link').length).toBe(1);
+  });
 });
