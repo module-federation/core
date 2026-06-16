@@ -1,10 +1,10 @@
 import CommonMfManifestStatsFields from '@components/common/configure/mf-manifest-stats-common.mdx'
 
-# mf-stats.json 字段定义
+# Stats 字段参考
 
-`mf-stats.json` 是启用 [manifest](./manifest) 后生成的构建统计文件，包含本次构建的 exposes/shared/remotes 资源信息、`metaData`（构建信息、remoteEntry 等）以及资产分析结果。
+`mf-stats.json` 是启用 [manifest](/configure/manifest.html) 后生成的构建统计文件，包含本次构建的 exposes/shared/remotes 资源信息、`metaData`（构建信息、remoteEntry 等）以及资产分析结果。
 
-本文按字段解释 `mf-stats.json` 的结构，便于排查“线上到底加载了哪些资源”“某个 shared 在哪些地方被用到”“remoteEntry 的类型/地址是什么”等问题。
+本文按字段解释 `mf-stats.json` 的结构，便于排查「线上到底加载了哪些资源」、「某个 shared 在哪些地方被用到」、「remoteEntry 的类型/地址是什么」等问题。
 
 ## 顶层结构
 

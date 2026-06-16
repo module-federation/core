@@ -25,15 +25,18 @@ interface ModuleFederation {
 
 ### Parameters
 
-- `id` (required): `string`
-  The unique identifier for the remote module, in the format `'<remoteName>/<exposedModule>'`. For example, `'shop/Button'`.
+```ts
+type PrefetchOptions = {
+  // Unique identifier for the remote module, in the format '<remoteName>/<exposedModule>', e.g. 'shop/Button'.
+  id: string;
 
-- `preloadComponentResource` (optional): `boolean`
-  Whether to preload the component's resources, including JavaScript chunks and associated CSS files. Defaults to `false`.
+  // If the remote component has a data fetch function, this object will be passed to it.
+  dataFetchParams?: Record<string, any>;
 
-- `dataFetchParams` (optional): `object`
-  If the remote component has a data fetch function, this object will be passed to it.
-
+  // Whether to preload the component's resources, including JavaScript chunks and associated CSS files. Defaults to false.
+  preloadComponentResource?: boolean;
+};
+```
 
 ## Usage Examples
 
