@@ -55,3 +55,158 @@ export function rewriteModuleCode(
   }
   return { code, deps };
 }
+
+export type BlobFetcher = (
+  url: string,
+  init: RequestInit,
+) => Promise<Response | void | false> | Response | void | false;
+
+export interface BlobLoadContext {
+  fetchOptions?: RequestInit;
+  // Optional custom fetch (e.g. routed through the runtime loaderHook.fetch so
+  // existing fetch-hook plugins still compose). Falls back to native fetch.
+  customFetch?: BlobFetcher;
+}
+
+// absolute url -> Promise<blob url>
+const cache = new Map<string, Promise<string>>();
+// absolute url -> the context it was loaded with, so __mfDyn can reuse the
+// right headers for runtime dynamic imports of that module's chunks.
+const contexts = new Map<string, BlobLoadContext>();
+let dynImportInstalled = false;
+
+function isResponseLike(res: unknown): res is Response {
+  return (
+    !!res &&
+    typeof res === 'object' &&
+    typeof (res as Response).text === 'function' &&
+    'ok' in (res as Response)
+  );
+}
+
+export async function fetchText(
+  url: string,
+  ctx: BlobLoadContext,
+): Promise<string> {
+  const { headers, ...rest } = ctx.fetchOptions || {};
+  const init: RequestInit = {
+    ...rest,
+    headers: { ...(headers as Record<string, string>) },
+  };
+  let res: Response | void | false = undefined;
+  if (ctx.customFetch) {
+    res = await ctx.customFetch(url, init);
+  }
+  if (!isResponseLike(res)) {
+    res = await fetch(url, init);
+  }
+  if (!res.ok) {
+    throw new Error(
+      `BlobLoaderNetworkError: ${res.status} ${res.statusText} for ${url}`,
+    );
+  }
+  return res.text();
+}
+
+// Fetch a module with headers, rewrite its imports.
+// Dynamic imports are handled lazily at runtime via __mfDyn,
+// Static relative imports are pre-loaded recursively.
+function loadModuleImpl(url: string, ctx: BlobLoadContext): Promise<string> {
+  if (cache.has(url)) return cache.get(url)!;
+  contexts.set(url, ctx);
+
+  const promise = (async () => {
+    const raw = await fetchText(url, ctx);
+    const { code: rewritten, deps } = rewriteModuleCode(raw, url);
+    let code = rewritten;
+    const blobUrls = await Promise.all(
+      deps.map((d) => loadModule(d.depUrl, ctx)),
+    );
+    deps.forEach((d, i) => {
+      const replaced = d.original.replace(
+        `${d.quote}${d.spec}${d.quote}`,
+        `${d.quote}${blobUrls[i]}${d.quote}`,
+      );
+      code = code.split(d.original).join(replaced);
+    });
+    return URL.createObjectURL(
+      new Blob([code], { type: 'application/javascript' }),
+    );
+  })();
+
+  cache.set(url, promise);
+  return promise;
+}
+
+// Exported with a clearCache test seam.
+export const loadModule: ((
+  url: string,
+  ctx: BlobLoadContext,
+) => Promise<string>) & {
+  clearCache: () => void;
+} = Object.assign(loadModuleImpl, {
+  clearCache: () => {
+    cache.clear();
+    contexts.clear();
+  },
+});
+
+function installDynImportShim(): void {
+  if (dynImportInstalled) return;
+  dynImportInstalled = true;
+
+  // Runtime dynamic-import shim: resolve url + fetch from cache or with headers + import as blob.
+  (globalThis as Record<string, unknown>)['__mfDyn'] = async (
+    base: string,
+    spec: string,
+  ) => {
+    const resolved = resolveSpec(spec, base);
+    if (/^(blob:|data:)/.test(resolved)) {
+      return import(/* webpackIgnore: true */ /* @vite-ignore */ resolved);
+    }
+    const ctx = contexts.get(base) || {};
+    return import(
+      /* webpackIgnore: true */ /* @vite-ignore */ await loadModule(
+        resolved,
+        ctx,
+      )
+    );
+  };
+
+  // The vite preload helper creates native <link> preloads (no auth header) as a
+  // perf hint; let those 401 quietly instead of throwing — real loads go via __mfDyn.
+  if (typeof window !== 'undefined') {
+    window.addEventListener('vite:preloadError', (e) => e.preventDefault());
+  }
+}
+
+export async function loadEsmEntryWithFetch({
+  entry,
+  fetchOptions,
+  customFetch,
+}: {
+  entry: string;
+  fetchOptions?: RequestInit;
+  customFetch?: BlobFetcher;
+}): Promise<Record<string, unknown>> {
+  installDynImportShim();
+  const blobUrl = await loadModule(entry, { fetchOptions, customFetch });
+  return import(/* webpackIgnore: true */ /* @vite-ignore */ blobUrl);
+}
+
+export async function loadCssWithFetch({
+  href,
+  fetchOptions,
+  customFetch,
+}: {
+  href: string;
+  fetchOptions?: RequestInit;
+  customFetch?: BlobFetcher;
+}): Promise<void> {
+  const text = await fetchText(href, { fetchOptions, customFetch });
+  const blob = URL.createObjectURL(new Blob([text], { type: 'text/css' }));
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = blob;
+  document.head.appendChild(link);
+}

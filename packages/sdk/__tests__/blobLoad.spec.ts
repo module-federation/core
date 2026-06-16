@@ -57,3 +57,74 @@ describe('rewriteModuleCode', () => {
     expect(deps.map((d) => d.spec)).toEqual(['./side.js']);
   });
 });
+
+import { fetchText, loadModule, loadEsmEntryWithFetch } from '../src/blobLoad';
+
+describe('fetchText', () => {
+  beforeEach(() => {
+    (global as any).fetch = jest.fn();
+  });
+
+  it('merges fetchOptions headers and returns response text', async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      text: () => Promise.resolve('CODE'),
+    });
+    const text = await fetchText('https://b.com/e.js', {
+      fetchOptions: { headers: { Authorization: 'Bearer t' } },
+    });
+    expect(text).toBe('CODE');
+    const init = (global.fetch as jest.Mock).mock.calls[0][1];
+    expect(init.headers).toEqual({ Authorization: 'Bearer t' });
+  });
+
+  it('prefers customFetch when it returns a Response', async () => {
+    const customFetch = jest.fn().mockResolvedValue({
+      ok: true,
+      text: () => Promise.resolve('HOOKED'),
+    } as any);
+    const text = await fetchText('https://b.com/e.js', { customFetch });
+    expect(customFetch).toHaveBeenCalled();
+    expect(text).toBe('HOOKED');
+    expect(global.fetch as jest.Mock).not.toHaveBeenCalled();
+  });
+
+  it('throws a descriptive error on non-ok responses', async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: false,
+      status: 401,
+      statusText: 'Unauthorized',
+      text: () => Promise.resolve(''),
+    });
+    await expect(fetchText('https://b.com/e.js', {})).rejects.toThrow(
+      'BlobLoaderNetworkError: 401',
+    );
+  });
+});
+
+describe('loadModule', () => {
+  beforeEach(() => {
+    (global as any).fetch = jest.fn();
+    (global.URL as any).createObjectURL = jest.fn(
+      (blob: Blob) => `blob:${(blob as any).__id || 'x'}`,
+    );
+    loadModule.clearCache();
+  });
+
+  it('rewrites a static dep to a recursively-loaded blob url and caches by url', async () => {
+    const files: Record<string, string> = {
+      'https://b.com/entry.js': `import dep from "./dep.js";`,
+      'https://b.com/dep.js': `export default 1;`,
+    };
+    (global.fetch as jest.Mock).mockImplementation((url: string) =>
+      Promise.resolve({ ok: true, text: () => Promise.resolve(files[url]) }),
+    );
+    const blobUrl = await loadModule('https://b.com/entry.js', {});
+    expect(blobUrl).toMatch(/^blob:/);
+    expect(
+      (global.fetch as jest.Mock).mock.calls.map((c) => c[0]).sort(),
+    ).toEqual(['https://b.com/dep.js', 'https://b.com/entry.js']);
+    await loadModule('https://b.com/entry.js', {});
+    expect((global.fetch as jest.Mock).mock.calls.length).toBe(2);
+  });
+});
