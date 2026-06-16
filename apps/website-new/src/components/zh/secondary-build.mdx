@@ -8,7 +8,7 @@
 
 该过程只构建共享依赖，remotes 不会生效，因此构建前请确保项目入口（entry）只引入了共享依赖。
 
-###### 非 Modern.js 项目
+### 非 Modern.js 项目
 
 在构建配置中使用 `TreeShakingSharedPlugin`，设置 `secondary: true`，并复用现有的 `mfConfig`。
 

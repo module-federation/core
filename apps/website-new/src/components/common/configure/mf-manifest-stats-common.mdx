@@ -12,14 +12,14 @@
 共同字段如下：
 
 | 字段             | 类型             | 必有 | 说明                          |
-| ---------------- | ---------------- | ---- | ----------------------------- | --- |
+| ---------------- | ---------------- | ---- | ----------------------------- |
 | `name`           | `string`         | 是   | 当前 remote/host 名称         |
 | `globalName`     | `string`         | 是   | remoteEntry 对应的 globalName |
 | `buildInfo`      | `StatsBuildInfo` | 是   | 构建信息（版本/构建名等）     |
 | `remoteEntry`    | `ResourceInfo`   | 是   | remoteEntry 资源信息          |
 | `ssrRemoteEntry` | `ResourceInfo`   | 否   | SSR remoteEntry（若有）       |
 | `types`          | `MetaDataTypes`  | 否   | 类型产物信息（若有）          |
-| `type`           | `string`         | 是   | APP                           | NPM |
+| `type`           | `string`         | 是   | APP、NPM                      |
 | `pluginVersion`  | `string`         | 否   | MF 构建插件版本               |
 
 ### ResourceInfo

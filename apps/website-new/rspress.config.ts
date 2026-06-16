@@ -18,6 +18,11 @@ export default defineConfig({
     light: '/module-federation.svg',
     dark: '/module-federation-logo-white.svg',
   },
+  markdown: {
+    image: {
+      checkDeadImages: false,
+    },
+  },
   themeConfig: {
     locales: [
       {

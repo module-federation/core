@@ -2,7 +2,7 @@
 
 `@module-federation/bridge-vue3` 提供了用于 Vue V3 应用的 `bridge` 工具函数，其提供的 `createBridgeComponent` 可用于导出应用级别模块，`createRemoteAppComponent` 用于加载应用级别模块。[Demo](https://github.com/module-federation/core/tree/main/apps/router-demo)
 
-### 安装
+## 安装
 
 import { PackageManagerTabs } from '@theme';
 
@@ -15,7 +15,7 @@ import { PackageManagerTabs } from '@theme';
 />
 
 
-### 类型
+## 类型
 
 ```tsx
 function createRemoteAppComponent<T, E extends keyof T>(
@@ -59,7 +59,7 @@ function createBridgeComponent(bridgeInfo: {
 ```
 
 
-### 示例
+## 示例
 
 > Remote
 
@@ -135,9 +135,9 @@ const router = createRouter({
 export default router;
 ```
 
-### 方法
+## 方法
 
-#### createRemoteAppComponent
+### createRemoteAppComponent
 
 ```tsx
 function createRemoteAppComponent<T, E extends keyof T>(
@@ -209,7 +209,7 @@ const router = createRouter({
 export default router;
 ```
 
-#### createBridgeComponent
+### createBridgeComponent
 
 ```tsx
 function createBridgeComponent(bridgeInfo: {

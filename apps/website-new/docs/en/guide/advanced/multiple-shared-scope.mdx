@@ -3,64 +3,58 @@ import ShareScopeAlignmentPlayground from '@components/common/ShareScopeAlignmen
 
 # Shared Dependency Isolation: Multiple Share Scopes
 
-> Split `shared` dependencies into multiple named shared pools (for example `default`, `scope1`). Dependencies are only reused within the same pool.
-
-## Background
-
-In {props.name || 'Module Federation'}, `shared` dependencies are registered into the `default` share scope by default. A single scope is often not enough when:
+In {props.name || 'Module Federation'}, `shared` dependencies are registered into the `default` Share Scope by default. A single Scope is often not enough when:
 
 * You want to isolate part of your shared dependencies from the default pool (for example, running two React ecosystems side-by-side, gradual upgrades, or domain isolation in micro-frontends).
 * You want the same package to use different versions or strategies in different domains, while still being shared within each domain (singleton/reuse still works within a domain).
 
-The key idea of multiple share scopes is: **move shared dependency registration and resolution into different namespaces (scopes)**, so you can isolate shared pools and layer policies.
+The key idea of multiple Share Scopes is: **move shared dependency registration and resolution into different namespaces (Scopes)**, so you can isolate shared pools and layer policies.
 
 ## Configuration Quick Map
 
-The simplest way to understand multiple share scopes is to focus on what you configure on the producer, the consumer, and each shared entry. You don’t need to learn runtime internal data structures or variable names.
+The simplest way to understand multiple Share Scopes is to focus on what you configure on the producer, the consumer, and each shared entry. You don't need to learn runtime internal data structures or variable names.
 
-* **Producer (remote)**: use [shareScope](../../configure/shareScope) to declare which share scopes this remote initializes (default: `default`, supports `string | string[]`).
-* **Consumer (host)**: use [remotes[remote].shareScope](../../configure/remotes#sharescope) to declare which share scopes the host aligns with that remote (default: `default`).
-* **Shared entry**: use `shared[pkg].shareScope` to decide which pool a dependency is registered/resolved in (see [shared.shareScope](../../configure/shared#sharescope)).
+* **Producer**: use [shareScope](/configure/shareScope.html) to declare which Share Scopes this provider initializes (default: `default`, supports `string | string[]`).
+* **Consumer**: use [remotes[remote].shareScope](/configure/remotes.html#sharescope) to declare which Share Scopes the consumer aligns with a given provider (default: `default`).
+* **Shared entry**: use `shared[pkg].shareScope` to decide which pool a dependency is registered / resolved in (see [shared.shareScope](/configure/shared.html#sharescope)).
 
 ## What Happens for Different Combinations
 
-When the host initializes a remote, it first aligns the share scopes based on both sides’ `shareScope` settings (so the remote knows which shared pools can reuse the host’s), then the remote initializes shared dependencies according to its own `shareScope`.
+When the consumer initializes a provider, it first aligns the Share Scopes based on both sides' `shareScope` settings — so the provider knows which shared pools to reuse — then the provider initializes shared dependencies according to its own `shareScope`.
 
-Below, **HostShareScope** refers to `remotes[remote].shareScope` on the host, and **RemoteShareScope** refers to `shareScope` on the remote.
+To make the alignment and initialization relationship easier to describe, we use:
+
+- **HostShareScope** for `remotes[remote].shareScope` configured on the consumer side
+- **RemoteShareScope** for `shareScope` configured on the provider side
 
 :::warning Note
 
-Although both `shareScope` and `remotes[remote].shareScope` accept `string | string[]`, don’t use arrays casually, especially `['default']` or `[]`:
+Do not configure `shareScope` / `remotes[remote].shareScope` as `['default']` or `[]`:
 
-* **Single scope**: use a string (for example `'default'`), not `['default']`. Based on the runtime implementation, `'default'` and `['default']` follow different branches for alignment/initialization. If the host uses an array and the remote uses a string, the remote aligns scopes using the host’s list; if the remote uses an array, it only processes the remote’s list.
-* **Empty array `[]`**: results in no scopes being initialized (no `default`, no alignment), which is almost certainly a misconfiguration.
+* **Single Scope**: use a string, not an array. The two follow different internal branches for share-pool alignment / initialization. If the consumer uses an array and the provider uses a string, the provider aligns Scopes using the consumer's list; if the provider uses an array, it only processes the provider's list.
+* **Empty array `[]`**: results in no Scopes being initialized (no `default`, no alignment) — this is a misconfiguration.
 
 :::
 
-| HostShareScope (remotes[remote].shareScope) | RemoteShareScope (shareScope) | Share Pool Alignment (pseudo code) | Outcome (key points) |
-| --- | --- | --- | --- |
-| `'default'` | `'default'` | `remote['default'] = host['default']` | The `default` shared pool is fully shared between host and remote. |
-| `['default','scope1']` | `'default'` | `remote['default'] = host['default']; remote['scope1'] = host['scope1'] ?? {}` | The remote prepares both pools, but **only initializes shared deps for RemoteShareScope** (so only `default` is initialized). To actually resolve shared deps from `scope1`, the remote must also be configured with multiple share scopes. |
-| `'default'` | `['default','scope1']` | `remote['default'] = host['default']; remote['scope1'] = {}` | The remote initializes both `default`/`scope1`, but the host only provides `default`. `scope1` becomes `{}`, so deps assigned to `scope1` **cannot be reused from the host** (typically falling back to the remote’s own provided/local deps). |
-| `['scope1','default']` | `['scope1','scope2']` | `remote['scope1'] = host['scope1']; remote['scope2'] = host['scope2'] ?? {}` | `scope1` is aligned (reuses the host’s `scope1`). If the host has no `scope2`, it becomes `{}`. The remote initializes shared deps for its RemoteShareScope (so it will try to initialize `scope1/scope2`). |
+| HostShareScope | RemoteShareScope | Share Pool Behavior |
+| --- | --- | --- |
+| `'default'` | `'default'` | `default` is fully shared. |
+| `['default','scope1']` | `'default'` | Only `default` is shared; `scope1` is not initialized by the provider (the provider must also be configured with multiple Share Scopes). |
+| `'default'` | `['default','scope1']` | `default` is shared; the consumer does not provide `scope1` (it becomes `{}`), so deps under it cannot be reused from the consumer and fall back to local deps. |
+| `['scope1','default']` | `['scope1','scope2']` | `scope1` is shared; the consumer does not provide `scope2` (it becomes `{}`), so deps under it cannot be reused from the consumer. |
+
+:::tip Rule of thumb
+
+**Share pools are provided by the consumer and initialized by the provider.** Scopes the consumer does not list are filled in as `{}` (so missing scope names never crash); Scopes the provider does not list are not initialized. Both sides must list a Scope before a shared dep can really be reused under it.
+
+:::
 
 ### Playground
 
 {props.shareScopeAlignmentPlayground ||
   React.createElement(ShareScopeAlignmentPlayground)}
 
-Notes:
-
-* If a scope does not exist on the host, the host will treat it as `{}` for this initialization, so it won’t crash due to missing scope names.
-* With multiple share scopes, the remote will try to initialize all scopes listed in RemoteShareScope.
-
 ## Build Plugin Configuration
-
-You typically configure share scopes at three levels:
-
-1. **Remote (producer)**: which scopes the remote initializes ([shareScope](../../configure/shareScope)).
-2. **Host (consumer)**: which scopes the host aligns with that remote ([remotes[remote].shareScope](../../configure/remotes#sharescope)).
-3. **Shared entry**: which scope a dependency belongs to (`shared[pkg].shareScope`, see [shared.shareScope](../../configure/shared#sharescope)).
 
 ### Producer
 
@@ -100,8 +94,8 @@ export default {
 
 Key points:
 
-* `shareScope: ['default','scope1']` controls which pools the remote initializes at runtime.
-* `shared[pkg].shareScope` decides which pool a dependency participates in. If `@company/design-system` is in `scope1`, it only participates in version selection and reuse within the `scope1` pool.
+* `shareScope: ['default','scope1']` controls which Scopes the provider's remoteEntry initializes at runtime.
+* `shared[pkg].shareScope` decides which Scope a dependency registers / resolves under. If `@company/design-system` is in `scope1`, it only participates in version selection and reuse within the `scope1` pool.
 
 ### Consumer
 
@@ -125,15 +119,19 @@ export default {
 
 Key points:
 
-* `remotes[remote].shareScope` controls which pools the host aligns when initializing that remote.
-* If the host uses multiple scopes but the remote uses a single scope, the pools are aligned but the remote only initializes shared deps for its single scope. For multi-scope reuse to “really work”, the host and remote usually need to agree on the same scopes.
+* `remotes[remote].shareScope` controls which Scopes the consumer aligns when initializing a provider — they are passed to the provider as `shareScopeKeys`.
+* If the consumer is configured with multiple Scopes but the provider is single-Scope, the scopeMap is aligned but the provider only initializes sharing for its single Scope (see the combination table above). For multi-pool reuse to "really work", both consumer and provider usually need to agree on the same Scopes.
 
 ## Pure Runtime (Runtime API)
 
-If you don’t rely on build-time `remotes` (or you want to register `remotes/shared` dynamically at runtime), you can configure the same idea via runtime API:
+If you do not declare providers and shared dependencies through the build plugin (for example, you want to register them dynamically at runtime), you can use the Runtime API for the same multi-Share-Scope effect. Two key APIs:
 
-* Multi-scope remotes: use `registerRemotes` / `createInstance({ remotes })` and set `shareScope: string | string[]` in the remote config.
-* Shared entry scope: use `registerShared` / `createInstance({ shared })` and set `scope: string | string[]` in the shared config (note the field name is `scope` here).
+* **Register providers**: `registerRemotes` or `createInstance({ remotes })`, declaring the Share Scopes to align via `shareScope: string | string[]` in each provider config.
+* **Register shared dependencies**: `registerShared` or `createInstance({ shared })`, deciding which Share Scope a dependency lands in via `scope: string | string[]` in each entry.
+
+:::warning Field-name difference
+The field name when registering shared dependencies is **`scope`**, not `shareScope` (different from the build plugin's `shared[pkg].shareScope`).
+:::
 
 ```ts title="host/runtime.ts"
 import React from 'react';
@@ -172,11 +170,11 @@ registerShared({
 
 ## Fine-grained Control with Runtime Hooks
 
-Multiple share scopes essentially group shared pools by name. If you need finer control over scope selection, alignment, and fallback strategies, you can use runtime hooks (runtime plugins) to intervene during remote initialization or shared resolution.
+Multiple Share Scopes essentially group shared pools by name. If you need finer control over Scope selection, alignment, and fallback strategies, you can use Runtime Hooks to intervene during the init phase or shared resolution.
 
-### 1) Force a remote to use a specific scope (beforeInitContainer)
+### 1. Rewrite shareScopeKeys per provider (beforeInitContainer)
 
-The example below forces `legacy_remote` to always use the `legacy` scope:
+The example below forces `legacy_remote` to always use the `legacy` Scope (even if a different shareScope was set at build time or runtime registration):
 
 ```ts title="multi-scope-policy-plugin.ts"
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
@@ -201,12 +199,12 @@ export function multiScopePolicyPlugin(): ModuleFederationRuntimePlugin {
 }
 ```
 
-### 2) Fallback / alias when a scope is missing (initContainerShareScopeMap / resolveShare)
+### 2. Alias / fallback when a Scope is missing (initContainerShareScopeMap / resolveShare)
 
-* `initContainerShareScopeMap`: adjust the share pool mapping during remote initialization.
+* `initContainerShareScopeMap`: adjust each Scope's `shareScope` mapping during the provider's share-pool initialization.
 * `resolveShare`: override the final selection result by replacing `args.resolver`. Returning `{ ...args, scope: 'default' }` alone is not enough in the current runtime implementation.
 
-Example: if a package is not found in `scope1`, fall back to `default`:
+Example: if a package is not found in `scope1`, fall back to the `default` Scope:
 
 ```ts title="scope-fallback-plugin.ts"
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
@@ -245,7 +243,7 @@ export function scopeFallbackPlugin(): ModuleFederationRuntimePlugin {
 }
 ```
 
-You can also alias one scope to another (so they share the same pool object):
+You can also alias one Scope to another in `initContainerShareScopeMap` (so two Scopes share the same pool object):
 
 ```ts title="scope-alias-plugin.ts"
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';

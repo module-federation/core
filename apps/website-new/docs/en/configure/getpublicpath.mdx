@@ -4,11 +4,12 @@
 - Required: No
 - Default value: `undefined`
 - Effective condition: only effective when `exposes` is set
-- Purpose: Used to set a dynamic `publicPath`. The value must be a stringified function or a stringified return expression. When other consumers load this provider, the string in `getPublicPath` will be executed via `new Function` to obtain the return value, which will be used as the `publicPath` prefix for the module’s static assets.
-  - Function form: ``function(){ return window.cdn_prefix }``
-  - Return form: ``return "https:" + window.navigator.cdn_host + "/resource/app/"``
 
-- Example:
+
+Used to set a dynamic `publicPath`. The value must be a stringified function or a stringified return expression. When other consumers load this provider, the string in `getPublicPath` will be executed via `new Function` to obtain the return value, which will be used as the `publicPath` prefix for the module’s static assets. For example, if your deployed project receives a dynamic `cdn_prefix`, you can configure it as:
+
+- Function form: ``function(){ return window.cdn_prefix }``
+- Return form: ``return "https:" + window.navigator.cdn_host + "/resource/app/"``
 
 In the example below, `getPublicPath` is set. When other consumers load this provider, the string in `getPublicPath` will be executed using `new Function` to obtain the value, which will be used as the `publicPath` prefix for the module’s static assets.
 

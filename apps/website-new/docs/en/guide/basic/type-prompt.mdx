@@ -12,9 +12,7 @@ When building with the build plugin provided by <code>{props.pkgName || '@module
 
 ### Loading Types
 
-1. Consumer modifies `tsconfig.json`
-
-Add `paths` in `tsconfig.json`:
+1. Consumer modifies `tsconfig.json` and adds `paths`:
 
 ```json
 {
@@ -26,11 +24,15 @@ Add `paths` in `tsconfig.json`:
 }
 ```
 
-2. Start the consumer and producer
-
-> info: You don't need to worry about the startup order of the producer and consumer.
+2. Start the applications
 
 After starting, the consumer will automatically fetch the producer's type files.
+
+:::tip
+You don't need to worry about the startup order of the producer and consumer.
+:::
+
+
 
 ### Type Hot Reloading
 
@@ -40,11 +42,7 @@ After modifying the producer's code, the consumer will automatically fetch the p
 
 ### Runtime API Type Hinting
 
-:::info
-If the builder is `webpack`, you also need to add `**/@mf-types/**` to [watchOptions.ignored](https://webpack.js.org/configuration/watch/#watchoptionsignored) to avoid circular compilation issues caused by type updates.
-:::
-
-You need to add `./@mf-types/*` to the `include` field to enjoy `Runtime` `loadRemote` type hinting and type hot reloading.
+Add `./@mf-types/*` to the `include` field to enjoy `Runtime` `loadRemote` type hinting and type hot reloading:
 
 ```json title="tsconfig.json"
 {
@@ -53,6 +51,11 @@ You need to add `./@mf-types/*` to the `include` field to enjoy `Runtime` `loadR
 ```
 
 ![hot-types-reload](@public/guide/type-prompt/hot-types-reload.gif)
+
+:::info
+When the builder is `webpack`, add `**/@mf-types/**` to [watchOptions.ignored](https://webpack.js.org/configuration/watch/#watchoptionsignored) to avoid circular compilation issues caused by type updates.
+:::
+
 
 ### Third-Party Package Type Extraction
 
@@ -74,16 +77,14 @@ You need to add `./@mf-types/*` to the `include` field to enjoy `Runtime` `loadR
 
 ## Configuration
 
-- [dts](../../configure/dts): Type generation/loading
-- [dev](../../configure/dev): Type hot reloading
+- [dts](/configure/dts.html): Type generation/loading
+- [dev](/configure/dev.html): Type hot reloading
 
 ## FAQ
 
 ### Project has circular compilation and cannot be terminated
 
-A: It is likely that the compiler is watching for changes in the type folder or the `dist` directory. Add `@mf-types` to the ignored files.
-
-For example, with webpack/rspack:
+This is likely caused by the compiler watching changes in the type folder or the `dist` directory. Add `@mf-types` to the ignored files. For example, with webpack/rspack:
 
 ```ts
 config.watchOptions = {
@@ -91,11 +92,9 @@ config.watchOptions = {
 };
 ```
 
-### 2. No type files are generated, how to find the reason?
-
-**Solution**
+### No type files are generated, how to find the reason?
 
 1. Add the `FEDERATION_DEBUG=true` environment variable before the project startup command.
-2. Set [dts.displayErrorInTerminal](../../configure/dts#displayerrorinterminal) to `true`.
+2. Set [dts.displayErrorInTerminal](/configure/dts.html#displayerrorinterminal) to `true`.
 3. Start the project and check the console output.
 4. (Optional) If there is no error in the console, check the `.mf/typesGenerate.log` log file.

@@ -296,14 +296,10 @@ export default {
 };
 ```
 
-:::tip Configuration Behavior
-- `enableBridgeRouter: false`: Automatically aliases to the router-free `/base` entry.
-- `enableBridgeRouter: true` / `undefined`: Includes router support (default).
-:::
+By default, Bridge enables router support to provide the best development experience and compatibility. When you set `enableBridgeRouter: false`, the plugin automatically switches to a build that does not include `react-router-dom`, reducing your bundle size.
 
 :::info How It Works
-When `enableBridgeRouter: false`, the plugin sets up an alias:
-```
-'@module-federation/bridge-react' → '@module-federation/bridge-react/base'
-```
+
+The plugin automatically resolves imports of `@module-federation/bridge-react` to `@module-federation/bridge-react/base`. That entry does not bundle `react-router-dom`, so no code changes are required.
+
 :::

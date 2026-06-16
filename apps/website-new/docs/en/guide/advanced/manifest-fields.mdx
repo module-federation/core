@@ -1,8 +1,8 @@
 import CommonMfManifestStatsFields from '@components/common/configure/mf-manifest-stats-common-en.mdx'
 
-# mf-manifest.json Field Reference
+# Manifest Field Reference
 
-`mf-manifest.json` is generated when [manifest](./manifest) is enabled. It is a runtime-oriented manifest distilled from `mf-stats.json`, keeping a stable, consumer-friendly shape.
+`mf-manifest.json` is generated when [manifest](/configure/manifest.html) is enabled. It is a runtime-oriented manifest distilled from `mf-stats.json`, keeping a stable, consumer-friendly shape.
 
 ## Top-level
 
@@ -16,7 +16,7 @@ import CommonMfManifestStatsFields from '@components/common/configure/mf-manifes
 | `exposes` | `ManifestExpose[]` | Yes | Yes (fuller) | Exposes list (trimmed fields) |
 
 :::tip disableAssetsAnalyze impact
-When `disableAssetsAnalyze: true` is set in [manifest](./manifest), `mf-manifest.json` will omit `shared` and `exposes`, and `remotes` will omit `assets`.
+When `disableAssetsAnalyze: true` is set in [manifest](/configure/manifest.html), `mf-manifest.json` will omit `shared` and `exposes`, and `remotes` will omit `assets`.
 :::
 
 ## Field Differences vs mf-stats.json

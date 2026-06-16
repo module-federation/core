@@ -4,9 +4,9 @@ The `experiments` configuration enables advanced and experimental capabilities i
 
 ## asyncStartup
 
-- **Type:** `boolean`
-- **Required:** No
-- **Default:** `false`
+- Type: `boolean`
+- Required: No
+- Default: `false`
 
 When `asyncStartup` is enabled, all Module Federation entrypoints will initialize asynchronously by default. This means:
 
@@ -15,28 +15,32 @@ When `asyncStartup` is enabled, all Module Federation entrypoints will initializ
 - Prevention of "eager consumption" errors through automatic async handling
 
 :::warning
+
 When using this mode, all entrypoints will initialize asynchronously. If you're manually requiring a bundled entrypoint or exposing a UMD library, it will return a promise resolving to the exports.
+
 :::
 
 ## externalRuntime
 
-- **Type:** `boolean`
-- **Required:** No
-- **Default:** `false`
+- Type: `boolean`
+- Required: No
+- Default: `false`
 
 When set to `true`, `@module-federation/runtime-core` will be treated as an external and read from the global `_FEDERATION_RUNTIME_CORE` at runtime. Ensure the consumer provides this global (typically used together with `provideExternalRuntime`), otherwise it will not work.
 
 ## provideExternalRuntime
 
-- **Type:** `boolean`
-- **Required:** No
-- **Default:** `false`
+- Type: `boolean`
+- Required: No
+- Default: `false`
 
-Only for “pure consumer” scenarios (no `exposes`). When enabled, automatically injects `@module-federation/inject-external-runtime-core-plugin` to provide the external runtime at execution time.
+Only for pure consumer scenarios (no `exposes`). When enabled, automatically injects `@module-federation/inject-external-runtime-core-plugin` to provide the external runtime at execution time.
 
 :::warning Notes
+
 - Using this together with `exposes` will throw an error — only pure consumers can enable it.
 - Prefer configuring it at the topmost consumer to avoid multiple injections.
+
 :::
 
 ## optimization
@@ -45,9 +49,9 @@ This object contains flags related to build-time optimizations that can affect t
 
 ### disableSnapshot
 
-- **Type:** `boolean`
-- **Required:** No
-- **Default:** `false`
+- Type: `boolean`
+- Required: No
+- Default: `false`
 
 When set to `true`, this option defines the `FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN` global constant as `true` during the build. In the `@module-federation/runtime-core`, this prevents the `snapshotPlugin()` and `generatePreloadAssetsPlugin()` from being included and initialized within the Module Federation instance.
 
@@ -64,9 +68,9 @@ When set to `true`, this option defines the `FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLU
 
 ### target
 
-- **Type:** `'web' | 'node'`
-- **Required:** No
-- **Default:** Inferred from Webpack's `target` option (usually `'web'`)
+- Type: `'web' | 'node'`
+- Required: No
+- Default: Inferred from Webpack's `target` option (usually `'web'`)
 
 This option defines the `ENV_TARGET` global constant during the build, specifying the intended execution environment.
 

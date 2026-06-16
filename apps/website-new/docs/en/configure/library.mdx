@@ -29,10 +29,11 @@ type LibraryType =
   | 'jsonp' | 'system' | string;
 ```
 
-## type (required)
+## type
 
 - Type: `LibraryType`
-- Required: **Yes**
+- Required: Yes
+- Default: -
 
 Specifies the output library type for the container. Common values:
 
@@ -87,7 +88,7 @@ Add a container prefix for `define`/`require` functions in the AMD module.
 
 Add a comment in the UMD wrapper for each module format.
 
-- Example
+## Example
 
 ```ts
 new ModuleFederationPlugin({

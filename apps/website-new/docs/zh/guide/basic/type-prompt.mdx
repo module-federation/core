@@ -12,9 +12,7 @@
 
 ### 加载类型
 
-1. 消费者修改 `tsconfig.json`
-
-在 `tsconfig.json` 添加 `paths` ：
+1. 消费者修改 `tsconfig.json`，添加 `paths` ：
 
 ```json
 {
@@ -26,11 +24,14 @@
 }
 ```
 
-2. 启动消费者和生产者
-
-> info: 不需要关注生产者和消费者的启动顺序
+2. 启动应用
 
 启动后，消费者会自动取拉取生产者的类型文件。
+
+:::tip
+开发者不需要关注生产者和消费者的启动顺序。
+:::
+
 
 ### 类型热重载
 
@@ -40,11 +41,7 @@
 
 ### Runtime API 类型提示
 
-:::info
-如果构建器为 `webpack` ，还需要再 [watchOptions.ignored](https://webpack.js.org/configuration/watch/#watchoptionsignored) 增加 `**/@mf-types/**`，以避免类型更新导致的循环编译问题
-:::
-
-需要在 `include` 字段增加 `./@mf-types/*` 以享有 `Runtime` `loadRemote` 类型提示以及类型热重载
+在 `include` 字段增加 `./@mf-types/*` 以享有 `Runtime` `loadRemote` 类型提示以及类型热重载：
 
 ```json title="tsconfig.json"
 {
@@ -53,6 +50,11 @@
 ```
 
 ![hot-types-reload](@public/guide/type-prompt/hot-types-reload.gif)
+
+:::info
+构建器是 `webpack` 时，需要在 [watchOptions.ignored](https://webpack.js.org/configuration/watch/#watchoptionsignored) 增加 `**/@mf-types/**`，避免类型更新导致的循环编译问题。
+:::
+
 
 ### 第三方包类型抽取
 
@@ -76,16 +78,14 @@
 
 ## 配置
 
-- [dts](../../configure/dts)：类型生成/加载
-- [dev](../../configure/dev)：类型热重载
+- [dts](/configure/dts.html)：类型生成/加载
+- [dev](/configure/dev.html)：类型热重载
 
 ## FAQ
 
 ### 项目循环编译，无法终止
 
-A: 大概率是编译器监听了类型文件夹或者 `dist` 里的变动导致，将 `@mf-types` 添加至忽略文件即可。
-
-以 webpack/rspack 为例：
+大概率是编译器监听了类型文件夹或者 `dist` 里的变动导致，将 `@mf-types` 添加至忽略文件即可。以 webpack/rspack 为例：
 
 ```ts
 config.watchOptions = {
@@ -93,11 +93,9 @@ config.watchOptions = {
 };
 ```
 
-### 2. 没有生成类型文件，如何查看原因
-
-**解决方案**
+### 没有生成类型文件，如何查看原因
 
 1. 在项目启动命令前加上 `FEDERATION_DEBUG=true` 环境变量
-2. 设置 [dts.displayErrorInTerminal](../../configure/dts#displayerrorinterminal) 为 `true`
+2. 设置 [dts.displayErrorInTerminal](/configure/dts.html#displayerrorinterminal) 为 `true`
 3. 启动项目，查看控制台输出
 4. （可选）若控制台没输出错误，查看 `.mf/typesGenerate.log` 日志文件

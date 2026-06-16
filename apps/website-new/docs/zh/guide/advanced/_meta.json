@@ -1,1 +1,14 @@
-["shared-tree-shaking", "multiple-shared-scope"]
+[
+  "shared-tree-shaking",
+  "multiple-shared-scope",
+  {
+    "type": "file",
+    "name": "manifest-fields",
+    "label": "Manifest 字段参考"
+  },
+  {
+    "type": "file",
+    "name": "stats-fields",
+    "label": "Stats 字段参考"
+  }
+]

@@ -1,5 +1,7 @@
 # Runtime Hooks
 
+Module Federation 运行时在加载远程模块、初始化容器、注册 / 解析 shared 等关键阶段都暴露了 hooks。可用于诊断埋点、错误兜底、改写共享依赖、自定义资源加载等场景。
+
 ## Hook 返回值
 
 对于 `SyncHook` 和 `AsyncHook`，返回 `undefined` 表示插件只观察事件，不会清空前一个插件已经返回的结果。后续插件如果返回新的非 `undefined` 值，仍然可以替换这个结果。
@@ -12,7 +14,6 @@
 
 在 MF 实例初始化之前更新对应 init 配置
 
-* type
 
 ```ts
 function beforeInit(args: BeforeInitOptions): BeforeInitOptions
@@ -41,7 +42,6 @@ interface ModuleFederationRuntimeOptions {
 
 在 MF 实例初始化后调用
 
-* type
 
 ```ts
 function init(args: InitOptions): void
@@ -58,7 +58,6 @@ type InitOptions ={
 
 在解析 remote 路径前调用，对于在查找之前更新某些内容很有用。
 
-* type
 
 ```ts
 async function beforeRequest(args: BeforeRequestOptions): Promise<BeforeRequestOptions>
@@ -76,7 +75,6 @@ type BeforeRequestOptions ={
 
 在 runtime 把一次 `loadRemote` 请求匹配到具体 remote 之后触发。如果匹配失败，也会带着 `error` 触发。适合用于诊断、链路追踪，以及判断问题是否发生在 manifest 或 remoteEntry 加载之前。
 
-* type
 
 ```ts
 async function afterMatchRemote(args: AfterMatchRemoteOptions): Promise<void>
@@ -98,7 +96,6 @@ type AfterMatchRemoteOptions ={
 
 在解析 remote 路径后调用，允许修改解析后的内容。
 
-* type
 
 ```ts
 async function afterResolve(args: AfterResolveOptions): Promise<AfterResolveOptions>
@@ -123,7 +120,6 @@ Triggered once a federated module is loaded, allowing access and modification to
 
 加载 remote 后触发，允许访问和修改已加载文件的导出(exposes)。
 
-* type
 
 ```ts
 async function onLoad(args: OnLoadOptions): Promise<void>
@@ -164,7 +160,6 @@ interface RemoteInfo {
 
 成功加载时，`onLoad` 会先于 `afterLoadRemote` 触发。如果加载失败后由 `errorLoadRemote` 返回兜底结果，`afterLoadRemote` 会带上原始 `error` 和 `recovered: true`。
 
-* type
 
 ```ts
 async function afterLoadRemote(args: AfterLoadRemoteOptions): Promise<void>
@@ -189,7 +184,6 @@ type AfterLoadRemoteOptions ={
 
 在 host（消费者）调用 `remoteEntry.init(...)` 之前触发，可用于动态改写本次初始化使用的 `shareScope` / `initScope`，以及传给 remote 的 `remoteEntryInitOptions`。
 
-* type
 
 ```ts
 async function beforeInitContainer(args: BeforeInitContainerOptions): Promise<BeforeInitContainerOptions>
@@ -209,7 +203,6 @@ type BeforeInitContainerOptions ={
 
 在 `remoteEntry.init(...)` 调用成功后触发。可用于在容器初始化完成后执行观测、埋点或补充处理。
 
-* type
 
 ```ts
 async function initContainer(args: InitContainerOptions): Promise<InitContainerOptions>
@@ -232,7 +225,6 @@ type InitContainerOptions ={
 
 处理 remotes 的预加载逻辑。
 
-* type
 
 ```ts
 function handlePreloadModule(args: HandlePreloadModuleOptions): void
@@ -253,7 +245,6 @@ type HandlePreloadModuleOptions ={
 
 如果加载 remotes 失败，则调用，从而启用自定义错误处理。可返回自定义的兜底逻辑。
 
-* type
 
 ```ts
 async function errorLoadRemote(args: ErrorLoadRemoteOptions): Promise<void | unknown>
@@ -279,7 +270,6 @@ type ErrorLoadRemoteOptions ={
 
 如果这个 hook 返回兜底模块，runtime 会使用这个值继续执行。如果诊断或日志插件返回 `undefined`，不会清空其他插件已经返回的兜底结果。
 
-* example
 
 
 ```ts
@@ -323,7 +313,6 @@ mf.loadRemote('app1/un-existed-module').then(mod=>{
 
 在加载 shared 之前调用，可用于修改对应的 shared 配置
 
-* type
 
 ```ts
 async function beforeLoadShare(args: BeforeLoadShareOptions): Promise<BeforeLoadShareOptions>
@@ -342,7 +331,6 @@ type BeforeLoadShareOptions ={
 
 在 `loadShare` 或 `loadShareSync` 成功解析 shared 依赖后触发。适合观察最终选中了哪个提供方和版本。
 
-* type
 
 ```ts
 function afterLoadShare(args: AfterLoadShareOptions): void
@@ -364,7 +352,6 @@ type AfterLoadShareOptions ={
 
 在 shared 依赖解析失败，或者无法选中可用 shared 依赖时触发。适合诊断 shared 缺失、版本不匹配、eager 配置错误等问题。
 
-* type
 
 ```ts
 function errorLoadShare(args: ErrorLoadShareOptions): void
@@ -387,7 +374,6 @@ type ErrorLoadShareOptions ={
 
 在 host（消费者）初始化 remote（生产者）共享池映射时触发，可用于对齐/重定向某个 scope 的共享池对象（例如把 `scope1` 直接指向 `default`，让两者共用同一套共享依赖池）。
 
-* type
 
 ```ts
 function initContainerShareScopeMap(args: InitContainerShareScopeMapOptions): InitContainerShareScopeMapOptions
@@ -409,7 +395,6 @@ type InitContainerShareScopeMapOptions ={
 
 `resolveShare` 触发时，运行时已经先选好了候选的 scope 和 version。这个阶段单独修改 `args.scope`、`args.version` 之类的字段，并不会自动影响最终结果。要真正改掉最终使用的 shared，需要改写 `args.resolver`，让它返回你希望使用的那条记录。
 
-* type
 
 ```ts
 function resolveShare(args: ResolveShareOptions): ResolveShareOptions
@@ -428,7 +413,6 @@ type ResolveShareOptions ={
 }
 ```
 
-* example
 
 
 ```ts
@@ -492,7 +476,6 @@ mf.loadShare('react').then((reactFactory) => {
 
 在预加载处理程序执行任何预加载逻辑之前调用
 
-* type
 
 ```ts
 async function beforePreloadRemote(args: BeforePreloadRemoteOptions): Promise<void>
@@ -510,7 +493,6 @@ type BeforePreloadRemoteOptions ={
 
 用于控制生成需要预加载的资源
 
-* type
 
 ```ts
 async function generatePreloadAssets(args: GeneratePreloadAssetsOptions): Promise<PreloadAssets>
@@ -541,7 +523,6 @@ interface PreloadAssets {
 
 在调用 `remoteEntry.init(...)` 初始化 remote 容器之前触发。
 
-* type
 
 ```ts
 async function beforeInitRemote(args: BeforeInitRemoteOptions): Promise<void>
@@ -560,7 +541,6 @@ type BeforeInitRemoteOptions ={
 
 在 remote 容器初始化成功或失败后触发。如果 remote 已经初始化过，会带上 `cached: true`。
 
-* type
 
 ```ts
 async function afterInitRemote(args: AfterInitRemoteOptions): Promise<void>
@@ -582,7 +562,6 @@ type AfterInitRemoteOptions ={
 
 在调用 `remoteEntry.get(expose)` 之前触发。
 
-* type
 
 ```ts
 async function beforeGetExpose(args: BeforeGetExposeOptions): Promise<void>
@@ -602,7 +581,6 @@ type BeforeGetExposeOptions ={
 
 在 `remoteEntry.get(expose)` 成功或失败后触发。
 
-* type
 
 ```ts
 async function afterGetExpose(args: AfterGetExposeOptions): Promise<void>
@@ -624,7 +602,6 @@ type AfterGetExposeOptions ={
 
 在执行 exposed module factory 之前触发。`loadRemote` 使用 `loadFactory: false` 时不会触发。
 
-* type
 
 ```ts
 async function beforeExecuteFactory(args: BeforeExecuteFactoryOptions): Promise<void>
@@ -644,7 +621,6 @@ type BeforeExecuteFactoryOptions ={
 
 在 exposed module factory 执行成功或失败后触发。`loadRemote` 使用 `loadFactory: false` 时不会触发。
 
-* type
 
 ```ts
 async function afterExecuteFactory(args: AfterExecuteFactoryOptions): Promise<void>
@@ -666,7 +642,6 @@ type AfterExecuteFactoryOptions ={
 
 用于修改加载资源时的 script
 
-* type
 
 ```ts
 function createScript(args: CreateScriptOptions): CreateScriptHookReturn
@@ -695,7 +670,6 @@ type ResourceLoadContext = {
 `resourceContext` 用于判断这次资源加载来自 `loadRemote` 还是 `preloadRemote`，以及对应的资源类型和 id。
 可以结合 `timeout` 和 `resourceContext`，为实际远程加载和预加载设置不同的超时时间。
 
-* example
 
 ```ts
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
@@ -722,11 +696,10 @@ const changeScriptAttributePlugin: () => ModuleFederationRuntimePlugin =
 
 
 ## fetch
-`fetch` 函数允许自定义获取清单（manifest）JSON 的请求。成功的 `Response` 必须返回一个有效的 JSON。
 
 `AsyncHook`
 
-- **Type**
+`fetch` 函数允许自定义获取清单（manifest）JSON 的请求。成功的 `Response` 必须返回一个有效的 JSON。
 
 ```typescript
 function fetch(
@@ -766,7 +739,6 @@ export default function (): FederationRuntimePlugin {
 
 用于修改预加载/样式加载时创建的 link 元素。
 
-* type
 
 ```ts
 function createLink(args: CreateLinkOptions): HTMLLinkElement | void
@@ -820,7 +792,6 @@ const resourceTimeoutPlugin = (): ModuleFederationRuntimePlugin => ({
 
 在 remoteEntry 加载失败（通常是脚本加载异常）时触发，可用于重试或自定义兜底。
 
-* type
 
 ```ts
 async function loadEntryError(args: LoadEntryErrorOptions): Promise<Promise<RemoteEntryExports | undefined> | undefined>
@@ -841,7 +812,6 @@ type LoadEntryErrorOptions ={
 
 在 remoteEntry 加载成功、失败，或被 `loadEntryError` 恢复之后触发。
 
-* type
 
 ```ts
 async function afterLoadEntry(args: AfterLoadEntryOptions): Promise<void>
@@ -861,7 +831,6 @@ type AfterLoadEntryOptions ={
 
 在调用 `remoteEntry.get(expose)` 前触发，可自定义模块工厂获取逻辑。
 
-* type
 
 ```ts
 async function getModuleFactory(args: GetModuleFactoryOptions): Promise<(() => Promise<Module>) | undefined>
@@ -874,11 +843,10 @@ type GetModuleFactoryOptions ={
 ```
 
 ## loadEntry
-`loadEntry` 函数允许对 remotes 进行完全自定义，从而可以扩展并创建新的 remote 类型。以下两个简单示例分别演示了如何加载 JSON 数据以及模块代理（module delegation）。
 
 `asyncHook`
 
-- **Type**
+`loadEntry` 函数允许对 remotes 进行完全自定义，从而可以扩展并创建新的 remote 类型。以下两个简单示例分别演示了如何加载 JSON 数据以及模块代理（module delegation）。
 
 ```typescript
 function loadEntry(args: LoadEntryOptions): RemoteEntryExports | void;
@@ -1023,7 +991,6 @@ test2 // "test2 value"
 
 在桥接渲染前触发，可返回对象扩展渲染参数（例如追加 `extraProps`）。
 
-* type
 
 ```ts
 function beforeBridgeRender(args: Record<string, any>): void | Record<string, any>
@@ -1035,7 +1002,6 @@ function beforeBridgeRender(args: Record<string, any>): void | Record<string, an
 
 在桥接渲染后触发。
 
-* type
 
 ```ts
 function afterBridgeRender(args: Record<string, any>): void | Record<string, any>
@@ -1047,7 +1013,6 @@ function afterBridgeRender(args: Record<string, any>): void | Record<string, any
 
 在桥接销毁前触发。
 
-* type
 
 ```ts
 function beforeBridgeDestroy(args: Record<string, any>): void | Record<string, any>
@@ -1059,7 +1024,6 @@ function beforeBridgeDestroy(args: Record<string, any>): void | Record<string, a
 
 在桥接销毁后触发。
 
-* type
 
 ```ts
 function afterBridgeDestroy(args: Record<string, any>): void | Record<string, any>

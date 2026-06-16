@@ -25,15 +25,18 @@ interface ModuleFederation {
 
 ### 参数
 
-- `id` (必填): `string`
-  远程模块的唯一标识符，格式为 `'<remoteName>/<exposedModule>'`。例如, `'shop/Button'`。
+```ts
+type PrefetchOptions = {
+  // 远程模块的唯一标识符，格式为 '<remoteName>/<exposedModule>'，例如 'shop/Button'。
+  id: string;
 
-- `preloadComponentResource` (可选): `boolean`
-  是否预加载组件的资源，包括 JavaScript chunk 和关联的 CSS 文件。默认为 `false`。
+  // 如果远程组件存在数据获取函数，设置后会传递给数据获取函数。
+  dataFetchParams?: Record<string, any>;
 
-- `dataFetchParams` (可选): `object`
-  如果远程组件存在数据获取函数，设置后会传递给数据获取函数。
-
+  // 是否预加载组件的资源，包括 JavaScript chunk 和关联的 CSS 文件。默认为 false。
+  preloadComponentResource?: boolean;
+};
+```
 
 ## 使用示例
 

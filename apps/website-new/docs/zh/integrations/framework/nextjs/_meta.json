@@ -1,9 +1,6 @@
 [
-  {
-    "type": "file",
-    "name": "index",
-    "label": "接入概览"
-  },
+
+  "index",
   "basic-example",
   "dynamic-remotes",
   "importing-components",

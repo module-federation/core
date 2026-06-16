@@ -1,9 +1,5 @@
 [
-  {
-    "type": "file",
-    "name": "index",
-    "label": "接入概览"
-  },
+  "index",
   "angular-cli",
   "angular-mfe",
   "mf-ssr-angular",

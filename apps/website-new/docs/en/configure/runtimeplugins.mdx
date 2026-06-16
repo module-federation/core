@@ -5,14 +5,12 @@
 - Default: `undefined`
 
 The `runtimePlugins` configuration is used to add additional plugins needed at runtime. The value can be:
-- A string representing the path to the specific plugin (absolute/relative path or package name)
+- A string representing the path to the specific plugin (absolute / relative path or package name)
 - An array where each element can be either a string or a tuple with [string path, object options]
 
-For a task-oriented guide to choosing hooks and building plugins, see [Runtime Plugins](../guide/runtime/runtime-plugins). For the full hook reference, see [Runtime Hooks](../guide/runtime/runtime-hooks). For lower-level plugin authoring details, see the [Plugin System](../plugin/dev/index).
+For a task-oriented guide to choosing Hooks and building plugins, see [Runtime Plugins](/guide/runtime/runtime-plugins.html). For the full Hook reference, see [Runtime Hooks](/guide/runtime/runtime-hooks.html). For lower-level plugin authoring details, see the [Plugin System](/plugin/dev/index.html).
 
 Once set, runtime plugins will be automatically injected and used during the build process.
-
-- Examples
 
 **Basic usage:**
 To create a runtime plugin file, you can name it `custom-runtime-plugin.ts`:

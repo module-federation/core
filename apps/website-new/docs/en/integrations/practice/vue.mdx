@@ -2,7 +2,7 @@
 
 `@module-federation/bridge-vue3` provides a `bridge` utility function for Vue V3 applications. The provided `createBridgeComponent` can be used to export application-level modules, and `createRemoteAppComponent` can be used to load application-level modules.
 
-### Installation
+## Installation
 
 import { PackageManagerTabs } from '@theme';
 
@@ -14,7 +14,7 @@ import { PackageManagerTabs } from '@theme';
   }}
 />
 
-### Type
+## Type
 
 ```tsx
 function createRemoteAppComponent<T, E extends keyof T>(
@@ -57,7 +57,7 @@ function createBridgeComponent(bridgeInfo: {
 }
 ```
 
-### Example
+## Example
 
 > Remote
 
@@ -131,9 +131,9 @@ const router = createRouter({
 export default router;
 ```
 
-### Parameters
+## Parameters
 
-#### createRemoteAppComponent
+### createRemoteAppComponent
 
 ```tsx
 function createRemoteAppComponent<T, E extends keyof T>(
@@ -205,7 +205,7 @@ const router = createRouter({
 export default router;
 ```
 
-#### createBridgeComponent
+### createBridgeComponent
 
 ```tsx
 function createBridgeComponent(bridgeInfo: {

@@ -1,9 +1,5 @@
 [
-  {
-    "type": "file",
-    "name": "index",
-    "label": "接入概览"
-  },
+  "index",
   "quick-start",
   "dynamic-remote"
 ]

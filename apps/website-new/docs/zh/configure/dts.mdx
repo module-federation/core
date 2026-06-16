@@ -17,7 +17,7 @@ interface PluginDtsOptions {
 }
 ```
 
-### generateTypes
+## generateTypes
 
 - 类型：`boolean | DtsRemoteOptions`
 - 是否必填：否
@@ -66,36 +66,36 @@ interface DtsGenerateTypesHookOptions {
 }
 ```
 
-#### extractRemoteTypes
+### extractRemoteTypes
 
 - 类型：`boolean`
 - 是否必填：否
 - 默认值：`undefined`
 - 使用场景：当生产者 `exposes` 的内容中有重导出自身的 `remotes` 模块，那么 `extractRemoteTypes: true` 能够确保消费者能正常获取生产者 `exposes` 的模块类型
-- 示例：[嵌套类型重导出](../guide/basic/type-prompt#嵌套类型重导出)
+- 示例：[嵌套类型重导出](/guide/basic/type-prompt.html#嵌套类型重导出)
 
 是否抽取 `remotes` 的类型。
 
-#### extractThirdParty
+### extractThirdParty
 
 - 类型：`boolean`
 - 是否必填：否
 - 默认值：`undefined`
 - 使用场景：当生产者 `exposes` 的内容中有包含 `antd` 的模块，并且消费者没装 `antd` ，那么 `extractThirdParty: true` 能够确保消费者能正常获取生产者 `exposes` 的模块类型
-- 示例：[第三方包类型抽取](../guide/basic/type-prompt#第三方包类型抽取)
+- 示例：[第三方包类型抽取](/guide/basic/type-prompt.html#第三方包类型抽取)
 
 是否抽取第三方包类型。
 
-#### generateAPITypes
+### generateAPITypes
 
 - 类型：`boolean`
 - 是否必填：否
 - 默认值：`undefined`
-- 示例：[Federation Runtime API 类型提示](../guide/basic/type-prompt#federation-runtime-api-类型提示)
+- 示例：[Federation Runtime API 类型提示](/guide/basic/type-prompt.html#federation-runtime-api-类型提示)
 
 是否生成 `Federation Runtime` 中 `loadRemote` 类型
 
-#### compileInChildProcess
+### compileInChildProcess
 
 - 类型：`boolean`
 - 是否必填：否
@@ -103,7 +103,7 @@ interface DtsGenerateTypesHookOptions {
 
 是否在子进程中编译生成类型
 
-#### abortOnError
+### abortOnError
 
 - 类型：`boolean`
 - 是否必填：否
@@ -111,7 +111,7 @@ interface DtsGenerateTypesHookOptions {
 
 是否抛出错误当类型生成过程中碰到问题
 
-#### afterGenerate
+### afterGenerate
 
 - 类型：`(options: DtsGenerateTypesHookOptions) => Promise<void> | void`
 - 是否必填：否
@@ -132,7 +132,7 @@ new ModuleFederationPlugin({
 });
 ```
 
-#### tsConfigPath
+### tsConfigPath
 
 - 类型：`string`
 - 是否必填：否
@@ -141,7 +141,7 @@ new ModuleFederationPlugin({
 
 tsconfig 配置文件路径
 
-#### outputDir
+### outputDir
 
 - 类型：`string`
 - 是否必填：否
@@ -174,7 +174,7 @@ new ModuleFederationPlugin({
 `dist/react/production/@mf-types.zip` 和
 `dist/react/production/@mf-types.d.ts`。
 
-#### typesFolder
+### typesFolder
 
 - 类型：`string`
 - 是否必填：否
@@ -182,7 +182,7 @@ new ModuleFederationPlugin({
 
 生成的压缩类型文件名称，例如设置了typesFolder为 `custom`，那么生成的压缩类型文件名称为： `custom.zip`
 
-#### deleteTypesFolder
+### deleteTypesFolder
 
 - 类型：`boolean`
 - 是否必填：否
@@ -190,7 +190,7 @@ new ModuleFederationPlugin({
 
 是否删除生成的类型文件夹
 
-#### compilerInstance
+### compilerInstance
 
 - 类型：`'tsc' | 'tsgo' | 'vue-tsc' | 'tspc' | string`
 - 是否必填：否
@@ -198,7 +198,7 @@ new ModuleFederationPlugin({
 
 编译类型的示例
 
-#### deleteTsConfig
+### deleteTsConfig
 
 - 类型：`boolean`
 - 是否必填：否
@@ -206,7 +206,7 @@ new ModuleFederationPlugin({
 
 是否删除临时 tsconfig 配置文件。
 
-### consumeTypes
+## consumeTypes
 
 - 类型：`boolean | DtsHostOptions`
 - 是否必填：否
@@ -235,16 +235,16 @@ interface DtsHostOptions {
 }
 ```
 
-#### consumeAPITypes
+### consumeAPITypes
 
 - 类型：`boolean`
 - 是否必填：否
 - 默认值：`true`
-- 示例：[Federation Runtime API 类型提示](../guide/basic/type-prompt#federation-runtime-api-类型提示)
+- 示例：[Federation Runtime API 类型提示](/guide/basic/type-prompt.html#federation-runtime-api-类型提示)
 
 是否生成运行时 `loadRemote` API 的类型
 
-#### maxRetries
+### maxRetries
 
 - 类型：`number`
 - 是否必填：否
@@ -252,7 +252,7 @@ interface DtsHostOptions {
 
 最大加载失败重试次数
 
-#### abortOnError
+### abortOnError
 
 - 类型：`boolean`
 - 是否必填：否
@@ -260,7 +260,7 @@ interface DtsHostOptions {
 
 是否抛出错误当类型加载过程中碰到问题
 
-#### typesFolder
+### typesFolder
 
 - 类型：`string`
 - 是否必填：否
@@ -268,7 +268,7 @@ interface DtsHostOptions {
 
 加载成功后的的类型存放目录
 
-#### deleteTypesFolder
+### deleteTypesFolder
 
 - 类型：`boolean`
 - 是否必填：否
@@ -276,7 +276,7 @@ interface DtsHostOptions {
 
 加载类型文件之前，是否删除之前加载的 `typesFolder` 目录
 
-#### remoteTypesFolder
+### remoteTypesFolder
 
 - 类型：`string`
 - 是否必填：否
@@ -284,7 +284,7 @@ interface DtsHostOptions {
 
 对应 `remotes` 目录配置的 `typesFolder`
 
-#### remoteTypeUrls
+### remoteTypeUrls
 
 - 类型：`(() => Promise<RemoteTypeUrls>) | RemoteTypeUrls`
 - 是否必填：否
@@ -351,15 +351,15 @@ export default createModuleFederationConfig({
   }
 });
 ```
-#### family
+### family
 
-- Type: `0 | 4 | 6`
-- Required: No
-- Default value: 0
+- 类型：`0 | 4 | 6`
+- 是否必填：否
+- 默认值：`0`
 
 配置 ip 版本，用于加载生产者类型文件。
 
-#### typesOnBuild
+### typesOnBuild
 
 - 类型：`boolean`
 - 是否必填：否
@@ -367,7 +367,7 @@ export default createModuleFederationConfig({
 
 默认情况下，MF 不会在生产环境（process.env.NODE_ENV === 'production'）去加载类型文件。如果需要在生产环境去加载类型文件，需要设置 `typesOnBuild` 为 `true`。
 
-### tsConfigPath
+## tsConfigPath
 
 - 类型：`string`
 - 是否必填：否
@@ -375,7 +375,7 @@ export default createModuleFederationConfig({
 
 tsconfig 配置文件路径
 
-### cwd
+## cwd
 
 - 类型：`string`
 - 是否必填：否
@@ -383,7 +383,7 @@ tsconfig 配置文件路径
 
 运行 tsc 的路径，默认为项目根目录。
 
-### displayErrorInTerminal
+## displayErrorInTerminal
 
 - 类型：`boolean`
 - 是否必填：否

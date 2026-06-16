@@ -1,9 +1,6 @@
 [
-  {
-    "type": "file",
-    "name": "index",
-    "label": "Overview"
-  },
+
+  "index",
   "basic-example",
   "dynamic-remotes",
   "importing-components",
