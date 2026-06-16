@@ -22,6 +22,7 @@
     "strict": true,
     "moduleResolution": "node10",
     "lib": ["esnext", "dom"],
+    "types": ["node"],
     "jsx": "preserve",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
