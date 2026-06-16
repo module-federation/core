@@ -1,44 +1,63 @@
 # website-new
 
-This is the example application for Module Federation core.
-
-## Usage
-
-Run the development server and navigate to the provided localhost URL.
-
-## Troubleshooting
-
-Clear `.nx` cache if you encounter unexpected build issues.
-
-## Build
-
-Output will be located in the `dist` or `.next` folder.
+This is a website built with Rspress and Webpack 5 Module Federation, serving as a playground for testing and demonstrating the capabilities of Module Federation in a real-world application.
 
 ## Scripts
 
-- `pnpm start`: Start dev server
+- `pnpm dev`: Start dev server
 - `pnpm build`: Build production bundle
 
 ## Configuration
 
-Check `webpack.config.js` or `next.config.js` for federation settings.
+Check `rspress.config.ts` for federation settings.
 
-## Description
+## Authoring docs: where to put reusable mdx
 
-This package demonstrates a specific use case of Module Federation within the ecosystem.
+The docs site has two kinds of reusable mdx pieces. Pick the right bucket so links keep working under both `/en` and `/zh`.
 
-## Features
-
-- Remote loading
-- Shared dependencies
-- Type safety
-
----
-
-_Optimized by Aiden_
-
-## Installation
-
-```bash
-pnpm install
 ```
+docs/
+  _snippets/                # shared, language-agnostic code snippets
+    install-kit.mdx
+    rspack/create-config.mdx
+    node/*.mdx
+    ...
+  en/
+    _components/            # English-only doc fragments
+      runtime/index.mdx
+      secondary-build.mdx
+      ...
+  zh/
+    _components/            # Chinese-only doc fragments
+      runtime/index.mdx
+      ...
+```
+
+**Use `docs/_snippets/` when the file is:**
+
+- A pure code/command snippet (bash output, ts/js config example)
+- Reusable across languages with no prose
+- Possibly parameterized via `props` (e.g. `install-kit.mdx` uses `${props.pkgName}`)
+
+**Use `docs/<lang>/_components/` when the file contains:**
+
+- Localized prose / explanatory text
+- Cross-page markdown links like `/guide/...` — these must live under `docs/<lang>/` so rspress prefixes them with the correct locale, otherwise the zh site will jump to en pages
+
+### Import aliases
+
+`rspress.config.ts` provides:
+
+- `@components` → `src/components/` — real React components (`.tsx`)
+- `@docs` → `docs/` — used to import the mdx partials above
+
+Examples:
+
+```mdx
+import Collapse from '@components/Collapse'; // tsx component
+import InstallKit from '@docs/_snippets/install-kit'; // shared snippet
+import Runtime from '@docs/zh/_components/runtime/index'; // zh fragment
+import Runtime from '@docs/en/_components/runtime/index'; // en fragment
+```
+
+Both `_snippets/` and `_components/` are excluded from routing by rspress's default `excludeConvention` (`**/_[^_]*`), so they never produce a public page.

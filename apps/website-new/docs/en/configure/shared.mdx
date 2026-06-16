@@ -246,7 +246,7 @@ Depending on the use case, {props.brandName || props.name || 'Module Federation'
 
 Simply add the corresponding dependencies to the `shared` configuration in the {props.brandName || props.name || 'Module Federation'} build configuration, for example:
 
-import ArrayShared from '@components/common/configure/array-shared';
+import ArrayShared from '@docs/_snippets/configure/array-shared';
 import React from 'react';
 
 {props.arrayShared || React.createElement(ArrayShared)}
@@ -255,6 +255,6 @@ import React from 'react';
 
 Add the shared dependencies in the `shared` configuration of the {props.brandName || props.name || 'Module Federation'}, with the `key` being the dependency name and the `value` being the provided configuration.
 
-import ObjectShared from '@components/common/configure/object-shared'
+import ObjectShared from '@docs/_snippets/configure/object-shared'
 
 {props.objectShared || React.createElement(ObjectShared)}

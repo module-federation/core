@@ -71,7 +71,7 @@ export default {
 
 `server-calc` 是**强烈推荐的最佳实践**。它通过中心化的服务来最大化 Tree Shaking 的收益，实现全局最优。
 
-import CreateSharedTreeShakingDeployServer from '@components/zh/create-shared-tree-shaking-deploy-server.mdx'
+import CreateSharedTreeShakingDeployServer from '@docs/zh/_components/create-shared-tree-shaking-deploy-server.mdx'
 
 {!props.name && (
   <CreateSharedTreeShakingDeployServer />
@@ -93,7 +93,7 @@ import CreateSharedTreeShakingDeployServer from '@components/zh/create-shared-tr
 
 如果你需要手动禁用此功能，只需在部署服务中停止二次构建和 Snapshot 更新流程即可。
 
-import SecondaryBuild from '@components/zh/secondary-build.mdx'
+import SecondaryBuild from '@docs/zh/_components/secondary-build.mdx'
 import React from 'react';
 
 {props.secondaryBuild || React.createElement(SecondaryBuild)}

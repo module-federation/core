@@ -242,7 +242,7 @@ shared: {
 
 仅需在 {props.brandName || props.name || 'Module Federation'} 构建配置中的 `shared` 配置添加对应的依赖即可，例如：
 
-import ArrayShared from '@components/common/configure/array-shared';
+import ArrayShared from '@docs/_snippets/configure/array-shared';
 import React from 'react';
 
 {props.arrayShared || React.createElement(ArrayShared)}
@@ -252,6 +252,6 @@ import React from 'react';
 
 在 {props.brandName || props.name || 'Module Federation'} 中的 `shared` 配置添加需要共享的依赖， `key` 为依赖名称，`value` 为提供的配置。
 
-import ObjectShared from '@components/common/configure/object-shared'
+import ObjectShared from '@docs/_snippets/configure/object-shared'
 
 {props.objectShared || React.createElement(ObjectShared)}
