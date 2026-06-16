@@ -44,7 +44,7 @@ export default defineConfig({
 ```
 
 ### 注意
-如果需要使用 Module Federation 运行时能力，请安装 [@module-federation/enhanced](/zh/guide/runtime/index.html)
+如果需要使用 Module Federation 运行时能力，请安装 [@module-federation/enhanced](/guide/runtime/index.html)
 
 ## 配置
 
@@ -63,7 +63,7 @@ type RSBUILD_PLUGIN_OPTIONS = {
 
 ### moduleFederationOptions
 
-[Module Federation 配置项](/configure/index)
+[Module Federation 配置项](/configure/index.html)
 
 ### rsbuildOptions
 
@@ -82,7 +82,7 @@ Rsbuild 插件额外配置。
 
 用于指定产物的运行目标环境。当设置为 `dual` 时，会同时构建 Web（浏览器）产物与 Node.js（SSR）产物。
 
-使用 `target: 'dual'` 生成 SSR 产物后，可参考 [创建 Modern.js 消费者](/integrations/framework/modernjs/quick-start) 创建消费者，并接入对应的 Rslib SSR 生产者进行开发。
+使用 `target: 'dual'` 生成 SSR 产物后，可参考 [创建 Modern.js 消费者](/integrations/framework/modernjs/quick-start.html) 创建消费者，并接入对应的 Rslib SSR 生产者进行开发。
 
 对于 Rsbuild App 的 SSR，可使用 `target: 'node'` + `environment`，将 Module Federation 应用到指定环境。
 

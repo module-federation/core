@@ -19,7 +19,8 @@
     },
     "website-new#build": {
       "dependsOn": ["^build"],
-      "outputs": ["doc_build/**"]
+      "outputs": ["doc_build/**"],
+      "env": ["CONTEXT", "DEPLOY_PRIME_URL"]
     },
     "@module-federation/metro-plugin-rnc-cli#build": {
       "dependsOn": ["^build"],

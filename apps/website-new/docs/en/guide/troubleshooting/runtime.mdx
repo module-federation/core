@@ -1,6 +1,6 @@
 import ErrorCodeTitle from '@components/ErrorCodeTitle';
-import EnableAsyncEntry from '@components/en/EnableAsyncEntry';
-import Runtime from '@components/en/runtime/index';
+import EnableAsyncEntry from '@docs/en/_components/EnableAsyncEntry';
+import Runtime from '@docs/en/_components/runtime/index';
 import { Tab, Tabs } from '@theme';
 
 # Runtime
@@ -54,7 +54,7 @@ There are corresponding solutions for the reasons:
 
 If you have confirmed that `window[remoteEntryKey]` does not exist (i.e. the script failed to register the container), but there is no clear error message in the console, it may be because the producer script is a cross-origin resource. Browsers hide error details for cross-origin scripts by default (`filename`, `lineno`, and `message` are all empty).
 
-You can add a `crossorigin` attribute to the script via the [`createScript`](../../plugin/dev/index#createscript) hook, provided that the producer server has `Access-Control-Allow-Origin` configured.
+You can add a `crossorigin` attribute to the script via the [`createScript`](/plugin/dev/index.html#createscript) hook, provided that the producer server has `Access-Control-Allow-Origin` configured.
 
 First, create the runtime plugin file:
 
@@ -165,7 +165,7 @@ A normal producer container exports `{ get, init }`. In this load, `init` is `un
 
 Troubleshoot in the following order:
 
-1. Before loading the producer, run window[remoteEntryKey] in `terminal` to check whether this object is already occupied. If so, rename the producer [name](../../configure/name#name)
+1. Before loading the producer, run window[remoteEntryKey] in `terminal` to check whether this object is already occupied. If so, rename the producer [name](/configure/name.html#name)
 2. If the project builder is rspack, check whether [runtimeChunk](https://rspack.dev/config/optimization#optimizationruntimechunk) is set in the final build configuration. If so, delete this configuration.
 
 ## RUNTIME-003
@@ -230,7 +230,7 @@ The current shared dependency is not loaded, so `loadShareSync` cannot be used.
 Just choose one of the two:
 
 1. Use `loadShare` instead of `loadShareSync`
-2. Provide the [lib](../runtime/runtime-api#loadshare) function to the current shared dependency
+2. Provide the [lib](/guide/runtime/runtime-api.html#loadshare) function to the current shared dependency
 
 ## RUNTIME-007
 
@@ -275,7 +275,7 @@ The script file downloaded successfully, but its IIFE threw a runtime exception 
 
 1. Open the resource URL from the error message directly in the browser to confirm it is accessible
 2. Verify the producer's `publicPath` and `remoteEntry` address configuration
-3. Check for CORS issues; if needed, configure CORS on the server or use the [`createScript`](../../plugin/dev/index#createscript) hook to add a `crossOrigin` attribute
+3. Check for CORS issues; if needed, configure CORS on the server or use the [`createScript`](/plugin/dev/index.html#createscript) hook to add a `crossOrigin` attribute
 4. For flaky networks, add a retry mechanism — refer to [Runtime retry](/plugin/plugins/retry-plugin.html)
 
 **For ScriptExecutionError:**
@@ -464,7 +464,7 @@ This problem can be avoided by setting `shared` and setting `singleton: true` si
 
 * Use [React Developer Tools](https://chromewebstore.google.com/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi)
 
-* If shared is provided from online host, use [Module Federation DevTools](../debug/chrome-devtool), and click `Enable HMR` button .
+* If shared is provided from online host, use [Module Federation DevTools](/guide/debug/chrome-devtool.html), and click `Enable HMR` button .
 
 ![](@public/guide/chrome-devtools/mf-devtool-hmr.jpg)
 
@@ -503,7 +503,7 @@ When the producer URL is a manifest, loading this producer module will automatic
 
 #### Solution
 
-Add a runtime plugin via [runtimePlugins](../../configure/runtimeplugins) and configure the `crossorigin` attribute in the [createLink](../../plugin/dev/index#createlink) hook. Its value needs to be consistent with the actual `load script`.
+Add a runtime plugin via [runtimePlugins](/configure/runtimeplugins.html) and configure the `crossorigin` attribute in the [createLink](/plugin/dev/index.html#createlink) hook. Its value needs to be consistent with the actual `load script`.
 
 For example, to modify the crossorigin attribute of the preloaded link to `anonymous`:
 

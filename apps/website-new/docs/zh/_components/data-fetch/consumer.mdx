@@ -1,8 +1,8 @@
-::: info Note
-In SSR scenarios, this can only be used with [Modern.js](/integrations/framework/modernjs).
+::: info 注意
+目前仅 [Modern.js](/integrations/framework/modernjs/index.html) 支持在 SSR 环境下使用数据获取能力。
 :::
 
-In the consumer, we need to use the [createLazyComponent](/guide/bridge/react/load-component.html#what-is-createlazycomponent) API to load the remote component and fetch its data.
+在消费者中，我们需要通过 [createLazyComponent](/guide/bridge/react/load-component.html#什么是-createlazycomponent) API 来加载远程组件，并获取数据。
 
 ```tsx
 import { getInstance } from '@module-federation/enhanced/runtime';

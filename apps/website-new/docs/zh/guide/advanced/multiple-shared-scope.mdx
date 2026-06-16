@@ -3,65 +3,59 @@ import ShareScopeAlignmentPlayground from '@components/common/ShareScopeAlignmen
 
 # 共享依赖隔离：多共享池（Share Scope）
 
-> 把 `shared` 分到多个命名的“共享池”（例如 `default`、`scope1`），不同池之间互不共享。
+在 {props.name || 'Module Federation'} 中，`shared` 默认都注册在 `default` 这个 Share Scope 下。当你的系统里存在以下情况时，单一 Scope 往往不够用：
 
-## 背景
+* 希望把一部分共享依赖「隔离」出来，避免与默认共享池互相影响（例如两套 React 生态并存、灰度升级、微前端子域隔离）。
+* 希望同一个包在不同业务域使用不同版本 / 策略，但仍保持在各自域内共享（每个域内仍可 singleton / 复用）。
 
-在 {props.name || 'Module Federation'} 中，`shared` 默认都注册在 `default` 这个 share scope 下。当你的系统里存在以下情况时，单一 scope 往往不够用：
-
-* 希望把一部分共享依赖“隔离”出来，避免与默认共享池互相影响（例如两套 React 生态并存、灰度升级、微前端子域隔离）。
-* 希望同一个包在不同业务域使用不同版本/策略，但仍保持在各自域内共享（每个域内仍可 singleton / 复用）。
-
-多共享池（share scope）的核心价值是：**把共享依赖的注册与解析切到不同的命名空间（scope）里**，从而实现共享池隔离与策略分层。
+多共享池（Share Scope）的核心价值是：**把共享依赖的注册与解析切到不同的命名空间（Scope）里**，从而实现共享池隔离与策略分层。
 
 ## 配置项速览
 
-理解多共享池最简单的方法：只看“生产者怎么配”、“消费者怎么配”、“shared 条目落在哪个池里”，不需要了解运行时内部数据结构与变量名。
+理解多共享池最简单的方法：只看「生产者怎么配」、「消费者怎么配」、「shared 条目落在哪个池里」，不需要了解运行时内部数据结构与变量名。
 
-* **生产者（remote）**：用 [shareScope](../../configure/shareScope) 声明该 remote 会初始化哪些共享池（默认 `default`，支持 `string | string[]`）。
-* **消费者（host）**：用 [remotes[remote].shareScope](../../configure/remotes#sharescope) 声明 host 与该 remote 需要对齐哪些共享池（默认 `default`）。
-* **shared 条目**：用 `shared[pkg].shareScope` 决定某个依赖注册/解析在哪个共享池（见 [shared.shareScope](../../configure/shared#sharescope)）。
+* **生产者**：用 [shareScope](/configure/shareScope.html) 声明该 Provider 会初始化哪些共享池（默认 `default`，支持 `string | string[]`）。
+* **消费者**：用 [remotes[remote].shareScope](/configure/remotes.html#sharescope) 声明与某个 Consumer 需要对齐哪些共享池（默认 `default`）。
+* **shared 条目**：用 `shared[pkg].shareScope` 决定某个依赖注册 / 解析在哪个共享池（见 [shared.shareScope](/configure/shared.html#sharescope)）。
 
 ## 不同 shareScope 组合的效果
 
-host 初始化某个 remote 时，会先根据双方的 `shareScope` 配置把“共享池”对齐（让 remote 知道哪些共享池要复用 host 的），随后 remote 再按自己的 `shareScope` 初始化共享依赖。
+当消费者初始化某个生产者时，会先根据双方的 `shareScope` 配置把「共享池」对齐。让生产者知道哪些共享池要复用的，随后再按自己的 `shareScope` 初始化共享依赖。
 
-下面用 **HostShareScope** 表示 host（消费者）侧为某个 remote 配置的 `remotes[remote].shareScope`，用 **RemoteShareScope** 表示 remote（生产者）侧配置的 `shareScope`：
+为了更简单地说明对齐与初始化的关系，我们用：
+
+- **HostShareScope** 表示消费者侧为某个生产者配置的 `remotes[remote].shareScope`
+- **RemoteShareScope** 表示生产者侧配置的 `shareScope`
 
 :::warning 注意
 
-`shareScope` / `remotes[remote].shareScope` 虽然都支持 `string | string[]`，但不要随意用数组，尤其不要写成 `['default']` 或 `[]`：
+不要将 `shareScope` / `remotes[remote].shareScope` 配置为 `['default']` 或 `[]`：
 
-* **单个 scope**：请用字符串（例如 `'default'`），不要写成 `['default']`。根据运行时实现，`'default'` 与 `['default']` 在“共享池对齐/初始化”的分支上是不同的：当 host 配的是数组而 remote 配的是字符串时，remote 会按 host 的列表去对齐 scope；而 remote 配成数组时，则只会按 remote 的列表处理。
-* **空数组 `[]`**：会导致没有任何 scope 被初始化（既不会初始化 `default`，也不会对齐其它 scope），基本一定是错误配置。
+* **单个 Scope**：使用字符串，不要使用数组。两者的内部实现在「共享池对齐 / 初始化」的分支上是不同的：当消费者配的是数组而生产者配的是字符串时，生产者会按消费者的列表去对齐 Scope；而生产者配成数组时，则只会按生产者的列表处理。
+* **空数组 `[]`**：会导致没有任何 Scope 被初始化（既不会初始化 `default`，也不会对齐其它 Scope），是错误配置。
 
 :::
 
 
-| HostShareScope（remotes[remote].shareScope） | RemoteShareScope（shareScope） | 共享池对齐（伪代码） | 最终效果（关键点） |
-| --- | --- | --- | --- |
-| `'default'` | `'default'` | `remote['default'] = host['default']` | remote 的 `shareScopeMap['default']` 指向 host 的 `shareScopeMap['default']`，共享池完全一致。 |
-| `['default','scope1']` | `'default'` | `remote['default'] = host['default']; remote['scope1'] = host['scope1'] ?? {}` | remote 会把 `default/scope1` 都准备好，但 **只会按 RemoteShareScope 初始化共享依赖**（因此只会初始化 `default` 共享池）。要让 remote 真正使用 `scope1` 去解析 shared，需要把 remote（生产者）也配置为多共享池。 |
-| `'default'` | `['default','scope1']` | `remote['default'] = host['default']; remote['scope1'] = {}` | remote 会初始化 `default/scope1` 两个 scope；但 host 只提供 `default`，`scope1` 会被补成空对象 `{}`，因此 remote 中声明在 `scope1` 下的 shared **无法从 host 复用**（通常会回退到自身提供/本地依赖）。 |
-| `['scope1','default']` | `['scope1','scope2']` | `remote['scope1'] = host['scope1']; remote['scope2'] = host['scope2'] ?? {}` | remote 会对齐 `scope1`（复用 host 的 `scope1`），`scope2` 若 host 没有会被补空 `{}`；remote 会按 RemoteShareScope 初始化共享依赖（因此会尝试初始化 `scope1/scope2` 两个共享池）。 |
+| HostShareScope | RemoteShareScope | 共享池行为 |
+| --- | --- | --- |
+| `'default'` | `'default'` | `default` 完全共用。 |
+| `['default','scope1']` | `'default'` | 仅 `default` 共用；`scope1` 不会被生产者初始化（需要生产者也配置多共享池）。 |
+| `'default'` | `['default','scope1']` | `default` 共用；`scope1` 消费者未提供（被补成 `{}`），其下的 shared 无法从消费者复用，会回退到本地依赖。 |
+| `['scope1','default']` | `['scope1','scope2']` | `scope1` 共用；`scope2` 消费者未提供（被补成 `{}`），其下的 shared 无法从消费者复用。 |
+
+:::tip 规则速记
+
+**共享池由消费者提供，由生产者初始化** —— 消费者没列出的 Scope 会被补成 `{}`（不会因找不到而崩溃），生产者没列出的 Scope 则不会被初始化。两边都列出，shared 才能真正在该 Scope 下复用。
+
+:::
 
 ### Playground
 
 {props.shareScopeAlignmentPlayground ||
   React.createElement(ShareScopeAlignmentPlayground)}
 
-补充说明：
-
-* 当某个 scope 在 host 的 `shareScopeMap` 中不存在时，host 会先补齐为 `{}` 后再参与 init（因此不会出现 scopeName 找不到导致崩溃）。
-* 多共享池下，remote 会尝试把 RemoteShareScope 中列出的 scope 都初始化到位。
-
 ## 构建插件如何配置
-
-构建插件需要关注三个层面的 scope：
-
-1. **Remote（生产者）侧**：remote 自身要初始化哪些 scope（[shareScope](../../configure/shareScope)）。
-2. **Host（消费者）侧**：host 与某个 remote 对齐哪些 scope（[remotes[remote].shareScope](../../configure/remotes#sharescope)）。
-3. **Shared（依赖条目）层**：某个 shared 依赖注册在哪个 scope 下（`shared[pkg].shareScope`）。
 
 ### 生产者
 
@@ -101,8 +95,8 @@ export default {
 
 要点：
 
-* `shareScope: ['default','scope1']` 决定 remoteEntry 在运行时会初始化哪些 scope。
-* `shared[pkg].shareScope` 决定该包最终注册/解析时使用哪个 scope；如果你把 `@company/design-system` 放在 `scope1`，它将只在 `scope1` 的共享池中参与版本选择与复用。
+* `shareScope: ['default','scope1']` 决定生产者的 remoteEntry 在运行时会初始化哪些 Scope。
+* `shared[pkg].shareScope` 决定该包最终注册/解析时使用哪个 Scope；如果你把 `@company/design-system` 放在 `scope1`，它将只在 `scope1` 的共享池中参与版本选择与复用。
 
 ### 消费者
 
@@ -126,15 +120,19 @@ export default {
 
 要点：
 
-* `remotes[remote].shareScope` 决定 host 运行时在 init 这个 remote 时，会把哪些 scope 作为 `shareScopeKeys` 传入 remote。
-* 如果 host 配了多 scope，但 remote 仍是单 scope，remote 会把 scopeMap 对齐好，但只会初始化单 scope 的 sharing（见上面的组合表）。因此多共享池要想“真正生效”，通常需要 host/remote 两侧都配置一致。
+* `remotes[remote].shareScope` 决定消费者在运行时初始化生产者时，会把哪些 Scope 作为 `shareScopeKeys` 传入生产者。
+* 如果消费者配了多 Scope，但生产者仍是单 Scope，生产者会把 scopeMap 对齐好，但只会初始化单 Scope 的 sharing（见上面的组合表）。因此多共享池要想「真正生效」，通常需要消费者和生产者两侧都配置一致。
 
 ## 纯运行时（Runtime API）如何配置
 
-当你不依赖构建插件 remotes（或希望在运行时动态注册 remotes/shared）时，可以用 runtime API 来完成同样的事情：
+如果你不通过构建插件声明生产者和共享依赖（例如希望在运行时动态注册），可以改用 Runtime API 实现相同的多共享池效果。两个关键 API：
 
-* remotes 的多 scope：使用 `registerRemotes` / `createInstance({ remotes })`，在 remote 配置里设置 `shareScope: string | string[]`。
-* shared 的 scope：使用 `registerShared` / `createInstance({ shared })`，在 shared 配置里设置 `scope: string | string[]`（注意这里字段名是 `scope`）。
+* **注册生产者**：`registerRemotes` 或 `createInstance({ remotes })`，在每条生产者配置里用 `shareScope: string | string[]` 声明要对齐的共享池。
+* **注册共享依赖**：`registerShared` 或 `createInstance({ shared })`，在每条依赖配置里用 `scope: string | string[]` 决定它落在哪个共享池。
+
+:::warning 字段名差异
+注册共享依赖时字段名是 **`scope`**，不是 `shareScope`（与构建插件的 `shared[pkg].shareScope` 不一致）。
+:::
 
 ```ts title="host/runtime.ts"
 import React from 'react';
@@ -173,12 +171,12 @@ registerShared({
 
 ## 用 Runtime Hook 做更精细的控制
 
-多 scope 的本质是“把共享池按名称分组”。当你希望更细粒度地控制 scope 的选择、对齐与回退策略时，可以使用 runtime hooks（runtime plugin）在 init 阶段或共享解析阶段介入。
+多 Scope 的本质是「把共享池按名称分组」。当你希望更细粒度地控制 Scope 的选择、对齐与回退策略时，可以使用 Runtime Hooks 在 init 阶段或共享解析阶段介入。
 
 
-### 1) 按 remote 动态改写 shareScopeKeys（beforeInitContainer）
+### 1. 按生产者动态改写 shareScopeKeys（beforeInitContainer）
 
-下面的例子会让 `legacy_remote` 永远使用 `legacy` scope（即使它在构建期或运行时注册时写的是别的 shareScope）：
+下面的例子会让 `legacy_remote` 永远使用 `legacy` Scope（即使它在构建期或运行时注册时写的是别的 shareScope）：
 
 ```ts title="multi-scope-policy-plugin.ts"
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
@@ -203,12 +201,12 @@ export function multiScopePolicyPlugin(): ModuleFederationRuntimePlugin {
 }
 ```
 
-### 2) scope 缺失时做别名/回退（initContainerShareScopeMap / resolveShare）
+### 2. Scope 缺失时做别名 / 回退（initContainerShareScopeMap / resolveShare）
 
-* `initContainerShareScopeMap`：在 remote 初始化共享池过程中，对每个 scope 的 `shareScope` 映射做改写。
+* `initContainerShareScopeMap`：在生产者初始化共享池过程中，对每个 Scope 的 `shareScope` 映射做改写。
 * `resolveShare`：通过改写 `args.resolver` 来改写最终选择结果。按现在的运行时实现，只返回 `{ ...args, scope: 'default' }` 这种写法并不会真的切过去。
 
-示例：如果 `scope1` 中找不到某个包，则回退用 `default` scope：
+示例：如果 `scope1` 中找不到某个包，则回退用 `default` Scope：
 
 ```ts title="scope-fallback-plugin.ts"
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
@@ -247,7 +245,7 @@ export function scopeFallbackPlugin(): ModuleFederationRuntimePlugin {
 }
 ```
 
-你也可以在 `initContainerShareScopeMap` 中把某个 scope 直接别名到另一个 scope（让两个 scope 共用同一个共享池）：
+你也可以在 `initContainerShareScopeMap` 中把某个 Scope 直接别名到另一个 Scope（让两个 Scope 共用同一个共享池）：
 
 ```ts title="scope-alias-plugin.ts"
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';

@@ -4,18 +4,19 @@ title: "Quick Start"
 
 # Modern.js
 
+This chapter explains how to use the Module Federation plugin in Modern.js and provides a simple example that demonstrates how to create provider and consumer applications.
+
 :::tip
 
 * Example Demo [Modern.js SSR](https://github.com/module-federation/module-federation-examples/tree/master/modernjs-ssr)
 
 :::
 
-
 ## Environment
 
 ### Node.js
 
-Before getting started, you will need to install [Node.js](https://nodejs.org/), and ensure that your Node.js version is higher than 16.2.0. **We recommend using the LTS version of Node.js 18.**
+Before getting started, you will need to install [Node.js](https://nodejs.org/), and ensure that your Node.js version is no lower than v20.19.5. **We recommend using the LTS version of Node.js 22.**
 
 You can check the currently used Node.js version with the following command:
 
@@ -23,19 +24,19 @@ You can check the currently used Node.js version with the following command:
 node -v
 ```
 
-If you do not have Node.js installed in your current environment, or the installed version is lower than 16.2.0, you can use [nvm](https://github.com/nvm-sh/nvm) or [fnm](https://github.com/Schniz/fnm) to install the required version.
+If you do not have Node.js installed in your current environment, or the installed version is lower than v20.19.5, you can use [nvm](https://github.com/nvm-sh/nvm) or [fnm](https://github.com/Schniz/fnm) to install the required version.
 
-Here is an example of how to install the Node.js 18 LTS version via nvm:
+Here is an example of how to install the Node.js 22 LTS version via nvm:
 
 ```bash
-# Install the long-term support version of Node.js 18
-nvm install 18 --lts
+# Install the long-term support version of Node.js 22
+nvm install 22 --lts
 
-# Make the newly installed Node.js 18 as the default version
-nvm alias default 18
+# Make the newly installed Node.js 22 as the default version
+nvm alias default 22
 
-# Switch to the newly installed Node.js 18
-nvm use 18
+# Switch to the newly installed Node.js 22
+nvm use 22
 ```
 
 :::tip nvm and fnm
@@ -242,13 +243,11 @@ export default Index;
 
 ## CSS flickering issue
 
-Start the project and visit `http://localhost:3007/` and find that SSR is working normally and the page can be rendered normally, but there will be a problem of style flickering.
+Start the project and visit `http://localhost:3007/` and find that SSR is working normally and the page can be rendered normally, but there will be a problem of style flickering. This is because the producer's style files cannot be injected into the corresponding HTML. This issue can be resolved with [createLazyComponent](/guide/bridge/react/load-component.html#what-is-createlazycomponent).
 
-This is because the producer's style files cannot be injected into the corresponding html.
+Modify the consumer code that references the producer:
 
-This issue can be solved by using the [createremotessrcomponent](/integrations/framework/modernjs#createremotessrcomponent) provided by `@module-federation/modern-js-v3`.
-
-```tsx title='page.tsx'
+```tsx title='src/routes/page.tsx'
 import { getInstance } from '@module-federation/modern-js-v3/runtime';
 import { lazyLoadComponentPlugin } from '@module-federation/modern-js-v3/data-fetch';
 import './index.css';

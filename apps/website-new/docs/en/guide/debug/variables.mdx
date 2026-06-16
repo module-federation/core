@@ -1,7 +1,9 @@
 # Global variables
 
-:::note
-Global variables are readable only, do not modify them!
+In {props.brandName || props.name || 'Module Federation'}, the main global variables are `__FEDERATION__`, `__SHARE__` and `__INSTANCES__`. They record the module federation info, shared module info, and instance info of the current application, and help us understand and debug the runtime behavior of module federation.
+
+:::warning Note
+Global variables are read-only — do not modify them.
 :::
 
 ## __FEDERATION__
@@ -13,16 +15,16 @@ After initialization, the `__FEDERATION__` variable will be injected globally. T
 import Collapse from '@components/Collapse'
 
 :::tip
-It is recommended to use [chrome devtools](./chrome-devtool) to view the processed `moduleInfo`.
+It is recommended to use [chrome devtools](/guide/debug/chrome-devtool.html) to view the processed `moduleInfo`.
 :::
 
 Record all module information of the current application. Based on this information, you can get the module's dependencies.
 
-The moduleInfo structure is an object, where the key consists of two parts: `moduleName` and `moduleVersion`: `{moduleName}(:{moduleVersion})`.
+The `moduleInfo` structure is an object whose key consists of two parts: `{moduleName}(:{moduleVersion})`.
 
-`moduleName` is the name of the module, and `moduleVersion` is the version of the module or `url`.
+- `moduleName` is the name of the module, and `moduleVersion` is the version of the module or its `url`.
 
-`moduleVersion` only exists in the producer module.
+- `moduleVersion` only exists for producer modules.
 
 The following example shows how to use `moduleInfo` to get dependencies, assuming the following `moduleInfo`:
 
@@ -541,18 +543,18 @@ All shared module information that the current module depends on. The type defin
 
 ```ts
 type Shared = Array<{
-    sharedName: string;
-    version?: string;
-    assets:  {
-      js: {
-        sync: string[];
-        async: string[];
-      };
-      css: {
-        sync: string[];
-        async: string[];
-      };
+  sharedName: string;
+  version?: string;
+  assets:  {
+    js: {
+      sync: string[];
+      async: string[];
     };
+    css: {
+      sync: string[];
+      async: string[];
+    };
+  };
 }>;
 ```
 
@@ -564,18 +566,18 @@ All module information exported by the current module. The type definition is as
 
 ```ts
 type Modules = Array<{
-    moduleName: string;
-    modulePath: string;
-    assets:  {
-      js: {
-        sync: string[];
-        async: string[];
-      };
-      css: {
-        sync: string[];
-        async: string[];
-      };
+  moduleName: string;
+  modulePath: string;
+  assets:  {
+    js: {
+      sync: string[];
+      async: string[];
     };
+    css: {
+      sync: string[];
+      async: string[];
+    };
+  };
 }>;
 ```
 ### __SHARE__
@@ -626,262 +628,221 @@ We can use `__SHARE__` to query the loading status of a specific `shared`. For e
 
 ```json
 "__SHARE__": {
-    "manifest_host:0.0.0": {
-        "default": {
-            "react-dom/client": {
-                "18.3.1": {
-                    "deps": [],
-                    "useIn": [],
-                    "from": "webpack_provider",
-                    "loading": {},
-                    "get": "function (){}",
-                    "scope": [
-                        "default"
-                    ],
-                    "shareConfig": {
-                        "requiredVersion": "^18.3.1",
-                        "singleton": true,
-                        "eager": false,
-                        "strictVersion": false,
-                        "layer": null
-                    },
-                    "loaded": true,
-                    "strategy": "version-first",
-                    "lib": "function (){}"
-                }
-            },
-            "react-dom": {
-                "18.3.1": {
-                    "deps": [],
-                    "useIn": [
-                        "webpack_provider",
-                        "rspack_provider"
-                    ],
-                    "from": "webpack_provider",
-                    "loading": {},
-                    "get": "function (){}",
-                    "scope": [
-                        "default"
-                    ],
-                    "shareConfig": {
-                        "requiredVersion": "^18.3.1",
-                        "singleton": true,
-                        "eager": false,
-                        "strictVersion": false,
-                        "layer": null
-                    },
-                    "loaded": true,
-                    "strategy": "version-first",
-                    "lib": "function (){}"
-                }
-            },
-            "react/jsx-dev-runtime": {
-                "18.3.1": {
-                    "deps": [],
-                    "useIn": [
-                        "app1",
-                        "webpack_provider"
-                    ],
-                    "from": "webpack_provider",
-                    "loading": {},
-                    "get": "function (){}",
-                    "scope": [
-                        "default"
-                    ],
-                    "shareConfig": {
-                        "requiredVersion": "^18.3.1",
-                        "singleton": true,
-                        "eager": false,
-                        "strictVersion": false,
-                        "layer": null
-                    },
-                    "loaded": true,
-                    "strategy": "version-first",
-                    "lib": "function (){}"
-                }
-            },
-            "react": {
-                "18.3.1": {
-                    "deps": [],
-                    "useIn": [
-                        "webpack_provider",
-                        "app1",
-                        "rspack_provider"
-                    ],
-                    "from": "webpack_provider",
-                    "loading": {},
-                    "get": "function (){}",
-                    "scope": [
-                        "default"
-                    ],
-                    "shareConfig": {
-                        "requiredVersion": "^18.3.1",
-                        "singleton": true,
-                        "eager": false,
-                        "strictVersion": false,
-                        "layer": null
-                    },
-                    "loaded": true,
-                    "strategy": "version-first",
-                    "lib": "function (){}"
-                }
-            },
-            "react/jsx-runtime": {
-                "18.3.1": {
-                    "deps": [],
-                    "useIn": [],
-                    "from": "app1",
-                    "loading": null,
-                    "get": "function (){}",
-                    "scope": [
-                        "default"
-                    ],
-                    "shareConfig": {
-                        "requiredVersion": "^18.3.1",
-                        "singleton": true,
-                        "eager": false,
-                        "strictVersion": false,
-                        "layer": null
-                    },
-                    "strategy": "loaded-first"
-                }
-            }
+  "manifest_host:0.0.0": {
+    "default": {
+      "react-dom/client": {
+        "18.3.1": {
+          "deps": [],
+          "useIn": [],
+          "from": "webpack_provider",
+          "loading": {},
+          "get": "function (){}",
+          "scope": ["default"],
+          "shareConfig": {
+            "requiredVersion": "^18.3.1",
+            "singleton": true,
+            "eager": false,
+            "strictVersion": false,
+            "layer": null
+          },
+          "loaded": true,
+          "strategy": "version-first",
+          "lib": "function (){}"
         }
-    },
-    "app1:0.1.94": {
-        "default": {
-            "react-dom/client": {
-                "18.3.1": {
-                    "deps": [],
-                    "useIn": [],
-                    "from": "webpack_provider",
-                    "loading": {},
-                    "get": "function (){}",
-                    "scope": [
-                        "default"
-                    ],
-                    "shareConfig": {
-                        "requiredVersion": "^18.3.1",
-                        "singleton": true,
-                        "eager": false,
-                        "strictVersion": false,
-                        "layer": null
-                    },
-                    "loaded": true,
-                    "strategy": "version-first",
-                    "lib": "function (){}"
-                }
-            },
-            "react-dom": {
-                "18.3.1": {
-                    "deps": [],
-                    "useIn": [
-                        "webpack_provider",
-                        "rspack_provider"
-                    ],
-                    "from": "webpack_provider",
-                    "loading": {},
-                    "get": "function (){}",
-                    "scope": [
-                        "default"
-                    ],
-                    "shareConfig": {
-                        "requiredVersion": "^18.3.1",
-                        "singleton": true,
-                        "eager": false,
-                        "strictVersion": false,
-                        "layer": null
-                    },
-                    "loaded": true,
-                    "strategy": "version-first",
-                    "lib": "function (){}"
-                }
-            },
-            "react/jsx-dev-runtime": {
-                "18.3.1": {
-                    "deps": [],
-                    "useIn": [
-                        "app1",
-                        "webpack_provider"
-                    ],
-                    "from": "webpack_provider",
-                    "loading": {},
-                    "get": "function (){}",
-                    "scope": [
-                        "default"
-                    ],
-                    "shareConfig": {
-                        "requiredVersion": "^18.3.1",
-                        "singleton": true,
-                        "eager": false,
-                        "strictVersion": false,
-                        "layer": null
-                    },
-                    "loaded": true,
-                    "strategy": "version-first",
-                    "lib": "function (){}"
-                }
-            },
-            "react": {
-                "18.3.1": {
-                    "deps": [],
-                    "useIn": [
-                        "webpack_provider",
-                        "app1",
-                        "rspack_provider"
-                    ],
-                    "from": "webpack_provider",
-                    "loading": {},
-                    "get": "function (){}",
-                    "scope": [
-                        "default"
-                    ],
-                    "shareConfig": {
-                        "requiredVersion": "^18.3.1",
-                        "singleton": true,
-                        "eager": false,
-                        "strictVersion": false,
-                        "layer": null
-                    },
-                    "loaded": true,
-                    "strategy": "version-first",
-                    "lib": "function (){}"
-                }
-            },
-            "react/jsx-runtime": {
-                "18.3.1": {
-                    "deps": [],
-                    "useIn": [],
-                    "from": "app1",
-                    "loading": null,
-                    "get": "function (){}",
-                    "scope": [
-                        "default"
-                    ],
-                    "shareConfig": {
-                        "requiredVersion": "^18.3.1",
-                        "singleton": true,
-                        "eager": false,
-                        "strictVersion": false,
-                        "layer": null
-                    },
-                    "strategy": "loaded-first"
-                }
-            }
+      },
+      "react-dom": {
+        "18.3.1": {
+          "deps": [],
+          "useIn": ["webpack_provider", "rspack_provider"],
+          "from": "webpack_provider",
+          "loading": {},
+          "get": "function (){}",
+          "scope": ["default"],
+          "shareConfig": {
+            "requiredVersion": "^18.3.1",
+            "singleton": true,
+            "eager": false,
+            "strictVersion": false,
+            "layer": null
+          },
+          "loaded": true,
+          "strategy": "version-first",
+          "lib": "function (){}"
         }
+      },
+      "react/jsx-dev-runtime": {
+        "18.3.1": {
+          "deps": [],
+          "useIn": ["app1", "webpack_provider"],
+          "from": "webpack_provider",
+          "loading": {},
+          "get": "function (){}",
+          "scope": ["default"],
+          "shareConfig": {
+            "requiredVersion": "^18.3.1",
+            "singleton": true,
+            "eager": false,
+            "strictVersion": false,
+            "layer": null
+          },
+          "loaded": true,
+          "strategy": "version-first",
+          "lib": "function (){}"
+        }
+      },
+      "react": {
+        "18.3.1": {
+          "deps": [],
+          "useIn": ["webpack_provider", "app1", "rspack_provider"],
+          "from": "webpack_provider",
+          "loading": {},
+          "get": "function (){}",
+          "scope": ["default"],
+          "shareConfig": {
+            "requiredVersion": "^18.3.1",
+            "singleton": true,
+            "eager": false,
+            "strictVersion": false,
+            "layer": null
+          },
+          "loaded": true,
+          "strategy": "version-first",
+          "lib": "function (){}"
+        }
+      },
+      "react/jsx-runtime": {
+        "18.3.1": {
+          "deps": [],
+          "useIn": [],
+          "from": "app1",
+          "loading": null,
+          "get": "function (){}",
+          "scope": ["default"],
+          "shareConfig": {
+            "requiredVersion": "^18.3.1",
+            "singleton": true,
+            "eager": false,
+            "strictVersion": false,
+            "layer": null
+          },
+          "strategy": "loaded-first"
+        }
+      }
     }
+  },
+  "app1:0.1.94": {
+    "default": {
+      "react-dom/client": {
+        "18.3.1": {
+          "deps": [],
+          "useIn": [],
+          "from": "webpack_provider",
+          "loading": {},
+          "get": "function (){}",
+          "scope": ["default"],
+          "shareConfig": {
+            "requiredVersion": "^18.3.1",
+            "singleton": true,
+            "eager": false,
+            "strictVersion": false,
+            "layer": null
+          },
+          "loaded": true,
+          "strategy": "version-first",
+          "lib": "function (){}"
+        }
+      },
+      "react-dom": {
+        "18.3.1": {
+          "deps": [],
+          "useIn": ["webpack_provider", "rspack_provider"],
+          "from": "webpack_provider",
+          "loading": {},
+          "get": "function (){}",
+          "scope": ["default"],
+          "shareConfig": {
+            "requiredVersion": "^18.3.1",
+            "singleton": true,
+            "eager": false,
+            "strictVersion": false,
+            "layer": null
+          },
+          "loaded": true,
+          "strategy": "version-first",
+          "lib": "function (){}"
+        }
+      },
+      "react/jsx-dev-runtime": {
+        "18.3.1": {
+          "deps": [],
+          "useIn": ["app1", "webpack_provider"],
+          "from": "webpack_provider",
+          "loading": {},
+          "get": "function (){}",
+          "scope": ["default"],
+          "shareConfig": {
+            "requiredVersion": "^18.3.1",
+            "singleton": true,
+            "eager": false,
+            "strictVersion": false,
+            "layer": null
+          },
+          "loaded": true,
+          "strategy": "version-first",
+          "lib": "function (){}"
+        }
+      },
+      "react": {
+        "18.3.1": {
+          "deps": [],
+          "useIn": ["webpack_provider", "app1", "rspack_provider"],
+          "from": "webpack_provider",
+          "loading": {},
+          "get": "function (){}",
+          "scope": ["default"],
+          "shareConfig": {
+            "requiredVersion": "^18.3.1",
+            "singleton": true,
+            "eager": false,
+            "strictVersion": false,
+            "layer": null
+          },
+          "loaded": true,
+          "strategy": "version-first",
+          "lib": "function (){}"
+        }
+      },
+      "react/jsx-runtime": {
+        "18.3.1": {
+          "deps": [],
+          "useIn": [],
+          "from": "app1",
+          "loading": null,
+          "get": "function (){}",
+          "scope": ["default"],
+          "shareConfig": {
+            "requiredVersion": "^18.3.1",
+            "singleton": true,
+            "eager": false,
+            "strictVersion": false,
+            "layer": null
+          },
+          "strategy": "loaded-first"
+        }
+      }
+    }
+  }
 }
 ```
 
 </Collapse>
 
-In the above data, you can see the shared module information of the two modules `manifest_host` and `app1`. Among them, `react` has only one version `18.3.1`.
+In the data above, you can see the shared module information for the two modules `manifest_host` and `app1`. For example, to inspect how the `react` module was loaded, follow these steps:
 
-Check `__SHARE__["app1:0.1.94"].default.react["18.3.1"]` to see the information of the `react` module, and find that `loaded` is true, indicating that the `react` module has been loaded.
-
-In addition, the `from` field is `webpack_provider`, indicating that the `react` module is provided by the `webpack_provider` module.
-
-Looking at the `useIn` field, you can see that the `useIn` field contains the `webpack_provider` and `app1` modules, indicating that the `react` module is used by the `webpack_provider` and `app1` modules.
+1. `react` has only one version, `18.3.1`.
+2. Check `__SHARE__["app1:0.1.94"].default.react["18.3.1"]` — `loaded` is `true`, indicating the module has been loaded.
+3. The `from` field is `webpack_provider`, meaning the `react` module was provided by that module.
+4. Finally, look at the `useIn` field: it contains `webpack_provider` and `app1`, meaning this version of `react` is consumed by both modules.
 
 ### __INSTANCES__
 

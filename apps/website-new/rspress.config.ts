@@ -18,6 +18,11 @@ export default defineConfig({
     light: '/module-federation.svg',
     dark: '/module-federation-logo-white.svg',
   },
+  markdown: {
+    image: {
+      checkDeadImages: false,
+    },
+  },
   themeConfig: {
     locales: [
       {
@@ -88,6 +93,7 @@ export default defineConfig({
       alias: {
         '@site': path.resolve(__dirname),
         '@components': path.join(__dirname, 'src/components'),
+        '@docs': path.join(__dirname, 'docs'),
         '@public': path.join(__dirname, 'docs/public'),
       },
     },
