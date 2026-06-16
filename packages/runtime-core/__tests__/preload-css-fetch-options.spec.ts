@@ -49,14 +49,40 @@ describe('preloadAssets CSS with fetchOptions', () => {
     };
     const host: any = {
       options: { inBrowser: true },
-      loaderHook: { lifecycle: { fetch: { emit: vi.fn() } } },
+      loaderHook: {
+        lifecycle: {
+          fetch: { emit: vi.fn() },
+          createLink: { emit: vi.fn() },
+          createScript: { emit: vi.fn() },
+        },
+      },
     };
     const assets: any = {
       cssAssets: ['http://x/b.css'],
       jsAssetsWithoutEntry: [],
       entryAssets: [],
     };
-    await preloadAssets(remoteInfo, host, assets, false).catch(() => undefined);
+    // jsdom env (see vitest.config.ts) provides DOM, so the no-fetchOptions
+    // else-branch (waitForLinkPreload -> createLink) runs cleanly without a
+    // swallowing .catch. createLink resolves on the <link> load event, which
+    // jsdom does not dispatch on its own, so we fire it (as a real browser
+    // would) to let the branch settle. A genuine crash before/during the
+    // branch would still reject and fail the test.
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((m) =>
+        m.addedNodes.forEach((node) => {
+          if (node instanceof HTMLLinkElement) {
+            node.dispatchEvent(new Event('load'));
+          }
+        }),
+      );
+    });
+    observer.observe(document.head, { childList: true });
+    try {
+      await preloadAssets(remoteInfo, host, assets, false);
+    } finally {
+      observer.disconnect();
+    }
     expect(spy).not.toHaveBeenCalled();
   });
 });
