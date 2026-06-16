@@ -306,7 +306,7 @@ export class SnapshotHandler {
       try {
         let res = await this.loaderHook.lifecycle.fetch.emit(
           manifestUrl,
-          {},
+          remoteInfo.fetchOptions ?? {},
           remoteInfo,
           resourceOptions
             ? {
@@ -317,7 +317,7 @@ export class SnapshotHandler {
             : undefined,
         );
         if (!res || !(res instanceof Response)) {
-          res = await fetch(manifestUrl, {});
+          res = await fetch(manifestUrl, remoteInfo.fetchOptions ?? {});
         }
         manifestJson = (await res.json()) as Manifest;
       } catch (err) {
