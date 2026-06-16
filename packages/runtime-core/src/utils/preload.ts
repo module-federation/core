@@ -1,4 +1,9 @@
-import { createLink, createScript, safeToString } from '@module-federation/sdk';
+import {
+  createLink,
+  createScript,
+  loadCssWithFetch,
+  safeToString,
+} from '@module-federation/sdk';
 import {
   PreloadAssets,
   PreloadAssetResult,
@@ -181,6 +186,37 @@ function waitForLinkPreload({
   });
 }
 
+// When the remote carries fetchOptions, CSS must be fetched WITH headers and
+// injected as a blob <link> — a native <link href> cannot carry headers, and a
+// rel=preload hint would 401. Mirrors loadCss in the loader PoC.
+function waitForCssFetch({
+  host,
+  remoteInfo,
+  url,
+  context,
+}: {
+  host: ModuleFederation;
+  remoteInfo: RemoteInfo;
+  url: string;
+  context: ResourceLoadContext;
+}): Promise<PreloadAssetResult> {
+  return loadCssWithFetch({
+    href: url,
+    fetchOptions: remoteInfo.fetchOptions,
+    customFetch: async (u, init) =>
+      host.loaderHook.lifecycle.fetch.emit(u, init, remoteInfo),
+  })
+    .then(() => createAssetResult(context, url, 'success'))
+    .catch((error) =>
+      createAssetResult(
+        context,
+        url,
+        isTimeoutError(error) ? 'timeout' : 'error',
+        error,
+      ),
+    );
+}
+
 function waitForScriptPreload({
   host,
   remoteInfo,
@@ -272,7 +308,18 @@ export function preloadAssets(
       );
     });
 
-    if (useLinkPreload) {
+    if (remoteInfo.fetchOptions) {
+      cssAssets.forEach((cssUrl) => {
+        results.push(
+          waitForCssFetch({
+            host,
+            remoteInfo,
+            url: cssUrl,
+            context: createResourceContext(baseContext, 'css'),
+          }),
+        );
+      });
+    } else if (useLinkPreload) {
       const defaultAttrs = {
         rel: 'preload',
         as: 'style',
