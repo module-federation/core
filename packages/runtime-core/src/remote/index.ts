@@ -499,9 +499,17 @@ export class RemoteHandler {
     }
   }
 
-  registerRemotes(remotes: Remote[], options?: { force?: boolean }): void {
+  registerRemotes(
+    remotes: Remote[],
+    options?: { force?: boolean; fetchOptions?: RequestInit },
+  ): void {
     const { host } = this;
     remotes.forEach((remote) => {
+      // fetchOptions passed to this call applies to each remote registered in
+      // it; an explicit per-remote fetchOptions on the remote object wins.
+      if (options?.fetchOptions && remote.fetchOptions === undefined) {
+        remote.fetchOptions = options.fetchOptions;
+      }
       this.registerRemote(remote, host.options.remotes, {
         force: options?.force,
       });
