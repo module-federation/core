@@ -464,7 +464,10 @@ export class ModuleFederation {
   registerPlugins(plugins: UserOptions['plugins']) {
     this.options.plugins = registerPlugins(plugins, this);
   }
-  registerRemotes(remotes: Remote[], options?: { force?: boolean }): void {
+  registerRemotes(
+    remotes: Remote[],
+    options?: { force?: boolean; fetchOptions?: RequestInit },
+  ): void {
     return this.remoteHandler.registerRemotes(remotes, options);
   }
 

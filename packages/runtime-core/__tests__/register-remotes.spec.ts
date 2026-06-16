@@ -209,4 +209,31 @@ describe('ModuleFederation', () => {
     expect(await nextAppModule()).toBe('hello world "@snapshot/remote2"');
     expect(manifestFetch).toHaveBeenCalledTimes(2);
   });
+  it('stamps call-level fetchOptions onto each remote that lacks its own', () => {
+    const FM = new ModuleFederation({
+      name: '@federation/instance',
+      version: '1.0.1',
+      remotes: [],
+    });
+    const fetchOptions: RequestInit = {
+      headers: { Authorization: 'Bearer t' },
+    };
+    const r1 = {
+      name: '@register-remotes/fetch-a',
+      entry: 'http://localhost:1111/resources/register-remotes/app1/a.js',
+    };
+    const r2 = {
+      name: '@register-remotes/fetch-b',
+      entry: 'http://localhost:1111/resources/register-remotes/app1/b.js',
+      fetchOptions: { headers: { 'X-B': '1' } } as RequestInit,
+    };
+    FM.registerRemotes([r1, r2], { fetchOptions });
+    const stored = FM.options.remotes;
+    expect(
+      stored.find((r) => r.name === '@register-remotes/fetch-a')!.fetchOptions,
+    ).toBe(fetchOptions);
+    expect(
+      stored.find((r) => r.name === '@register-remotes/fetch-b')!.fetchOptions,
+    ).toEqual({ headers: { 'X-B': '1' } });
+  });
 });
