@@ -17,6 +17,7 @@ export interface RemoteInfoCommon {
   shareScope?: string | string[];
   type?: RemoteEntryType;
   entryGlobalName?: string;
+  fetchOptions?: RequestInit;
 }
 
 export type RemoteInfoOptionalVersion = {
@@ -40,6 +41,7 @@ export interface RemoteInfo {
   type: RemoteEntryType;
   entryGlobalName: string;
   shareScope: string | string[];
+  fetchOptions?: RequestInit;
 }
 
 export type HostInfo = Pick<
