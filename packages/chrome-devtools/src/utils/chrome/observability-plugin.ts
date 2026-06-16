@@ -68,8 +68,9 @@ const ensureFederationGlobal = () => {
   }
 
   if (!targetWindow.__FEDERATION__?.__GLOBAL_PLUGIN__) {
-    targetWindow.__FEDERATION__ = targetWindow.__FEDERATION__ || federation;
-    targetWindow.__FEDERATION__.__GLOBAL_PLUGIN__ = [];
+    targetWindow.__FEDERATION__ = (targetWindow.__FEDERATION__ ||
+      federation) as typeof targetWindow.__FEDERATION__;
+    targetWindow.__FEDERATION__!.__GLOBAL_PLUGIN__ = [];
   }
 
   return targetWindow.__FEDERATION__;
