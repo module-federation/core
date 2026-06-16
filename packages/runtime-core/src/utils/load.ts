@@ -3,6 +3,7 @@ import {
   loadScriptNode,
   composeKeyWithSeparator,
   isBrowserEnvValue,
+  loadEsmEntryWithFetch,
 } from '@module-federation/sdk';
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { ModuleFederation } from '../core';
@@ -253,7 +254,19 @@ async function loadEntryDom({
 }) {
   const { entry, entryGlobalName: globalName, name, type } = remoteInfo;
   if (isEsmRemoteType(type)) {
-    return loadEsmEntry({ entry, remoteEntryExports, name, getEntryUrl });
+    return remoteInfo.fetchOptions
+      ? (loadEsmEntryWithFetch({
+          entry,
+          fetchOptions: remoteInfo.fetchOptions,
+          // Route the loader's fetches through the runtime fetch hook so
+          // existing fetch-hook plugins still compose; merged headers are
+          // applied inside the sdk loader, native fetch is the fallback.
+          // The async arrow flattens the hook's nested-promise return to the
+          // Response | void | false shape the sdk loader expects.
+          customFetch: async (url, init) =>
+            loaderHook.lifecycle.fetch.emit(url, init, remoteInfo),
+        }) as Promise<RemoteEntryExports>)
+      : loadEsmEntry({ entry, remoteEntryExports, name, getEntryUrl });
   }
 
   if (type === 'system') {
@@ -484,3 +497,5 @@ export function getRemoteInfo(remote: Remote): RemoteInfo {
     shareScope: remote.shareScope || DEFAULT_SCOPE,
   };
 }
+
+export const __loadEntryDomForTest = loadEntryDom;
