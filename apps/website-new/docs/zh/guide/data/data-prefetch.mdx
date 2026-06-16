@@ -3,7 +3,7 @@
 `prefetch` 函数用于预取远程模块的资源和**数据**，从而提升应用的性能和用户体验。通过在用户访问某个功能之前提前加载所需内容，可以显著减少等待时间。
 
 import React from 'react';
-import PrefetchTip from '@components/zh/data-fetch/prefetch-tip';
+import PrefetchTip from '@docs/zh/_components/data-fetch/prefetch-tip';
 
 {props.prefetchTip || React.createElement(PrefetchTip)}
 
@@ -42,7 +42,7 @@ type PrefetchOptions = {
 
 假设我们有一个远程应用 `shop`，它暴露了一个组件 `Button`，并且该组件关联了一个数据获取函数。
 
-import PrefetchDemo from '@components/zh/data-fetch/prefetch-demo';
+import PrefetchDemo from '@docs/zh/_components/data-fetch/prefetch-demo';
 
 {props.prefetchDemo || React.createElement(PrefetchDemo)}
 
