@@ -47,5 +47,13 @@ describe('rewriteModuleCode', () => {
     expect(deps.find((d) => d.spec === './a.js')!.depUrl).toBe(
       'https://b.com/app/a.js',
     );
+    const aDep = deps.find((d) => d.spec === './a.js')!;
+    expect(aDep.original).toBe('from "./a.js"');
+    expect(aDep.quote).toBe('"');
+  });
+
+  it('collects side-effect imports', () => {
+    const { deps } = rewriteModuleCode('import "./side.js";', url);
+    expect(deps.map((d) => d.spec)).toEqual(['./side.js']);
   });
 });
