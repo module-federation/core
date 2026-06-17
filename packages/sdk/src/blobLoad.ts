@@ -19,7 +19,7 @@ export function resolveSpec(spec: string, base: string): string {
 }
 
 // Rewrite a module's source: pin import.meta.url, route dynamic imports through
-// __mfDyn, and collect static relative/absolute specifiers (to be replaced with
+// __mfDynImport, and collect static relative/absolute specifiers (to be replaced with
 // recursively-loaded blob urls by the caller).
 export function rewriteModuleCode(
   code: string,
@@ -29,10 +29,10 @@ export function rewriteModuleCode(
   // In this case, modules with publicPath:"auto" can derive paths from it.
   code = code.replace(/\bimport\.meta\.url\b/g, JSON.stringify(url));
 
-  // Dynamic import(...) -> __mfDyn("<url>", ...).
+  // Dynamic import(...) -> __mfDynImport("<url>", ...).
   code = code.replace(
     /(?<![.\w$])import\s*\(/g,
-    `__mfDyn(${JSON.stringify(url)},`,
+    `__mfDynImport(${JSON.stringify(url)},`,
   );
 
   // Static `import * from ...` and `import ...` -> recursively-loaded blob urls.
@@ -57,37 +57,35 @@ export type BlobFetcher = (
   init: RequestInit,
 ) => Promise<Response | void | false> | Response | void | false;
 
-export interface BlobLoadContext {
+export interface BlobLoaderContext {
   fetchOptions?: RequestInit;
   // Optional custom fetch (e.g. routed through the runtime loaderHook.fetch so
   // existing fetch-hook plugins still compose). Falls back to native fetch.
   customFetch?: BlobFetcher;
 }
 
-// The dynamic-import shim installed on globalThis as __mfDyn. Its context
+// The dynamic-import shim installed on globalThis as __mfDynImport. Its context
 // registry (absolute url -> fetcher + options) hangs off the function itself
-// rather than living in a second global: if two bundled copies/versions of the
-// SDK coexist, every copy reads and writes the same map through whichever shim
-// is installed, so a blob module's dynamic imports never lose their fetch
-// context — and we don't pollute globalThis with an extra variable.
-type MFDynShim = ((base: string, spec: string) => Promise<unknown>) & {
-  contexts?: Map<string, BlobLoadContext>;
+// rather than living in a second global, so two bundled copies/versions of the
+// SDK can coexist.
+type MFDynImportShim = ((base: string, spec: string) => Promise<unknown>) & {
+  blobLoaderContexts?: Map<string, BlobLoaderContext>;
 };
 
-// Resolve the blob loader context registry, lazily installing the global __mfDyn
+// Resolve the blob loader context registry, lazily installing the global __mfDynImport
 // shim on first use (loadModule can run before the shim is formally installed).
-function getContexts(): Map<string, BlobLoadContext> {
+function createOrGetBlobLoaderContexts(): Map<string, BlobLoaderContext> {
   const g = globalThis as Record<string, unknown>;
-  let shim = g['__mfDyn'] as MFDynShim | undefined;
+  let shim = g['__mfDynImport'] as MFDynImportShim | undefined;
   // If an existing shim from another SDK copy is installed, we reuse it instead of reinstalling.
   if (typeof shim !== 'function') {
     shim = createDynImportShim();
-    g['__mfDyn'] = shim;
+    g['__mfDynImport'] = shim;
   }
-  if (!shim.contexts) {
-    shim.contexts = new Map<string, BlobLoadContext>();
+  if (!shim.blobLoaderContexts) {
+    shim.blobLoaderContexts = new Map<string, BlobLoaderContext>();
   }
-  return shim.contexts;
+  return shim.blobLoaderContexts;
 }
 // absolute url -> Promise<blob url> for JS modules
 const jsCache = new Map<string, Promise<string>>();
@@ -119,7 +117,7 @@ export function toHeaderObject(
 
 export async function fetchText(
   url: string,
-  ctx: BlobLoadContext,
+  ctx: BlobLoaderContext,
 ): Promise<string> {
   const init: RequestInit = {
     ...(ctx.fetchOptions || {}),
@@ -141,12 +139,12 @@ export async function fetchText(
 }
 
 // Fetch a module with headers, rewrite its imports.
-// Dynamic imports are handled lazily at runtime via __mfDyn,
+// Dynamic imports are handled lazily at runtime via __mfDynImport,
 // Static relative imports are pre-loaded recursively.
-function loadModuleImpl(url: string, ctx: BlobLoadContext): Promise<string> {
-  // Register the context for this url on every call so __mfDyn uses the latest
+function loadModuleImpl(url: string, ctx: BlobLoaderContext): Promise<string> {
+  // Register the context for this url on every call so __mfDynImport uses the latest
   // headers for that module's dynamic imports, even when the blob is cached.
-  getContexts().set(url, ctx);
+  createOrGetBlobLoaderContexts().set(url, ctx);
   if (jsCache.has(url)) return jsCache.get(url)!;
 
   const promise = (async () => {
@@ -182,47 +180,47 @@ function loadModuleImpl(url: string, ctx: BlobLoadContext): Promise<string> {
 // Exported with a clearCache test seam.
 export const loadModule: ((
   url: string,
-  ctx: BlobLoadContext,
+  ctx: BlobLoaderContext,
 ) => Promise<string>) & {
   clearCache: () => void;
 } = Object.assign(loadModuleImpl, {
   clearCache: () => {
+    createOrGetBlobLoaderContexts().clear();
     jsCache.clear();
-    getContexts().clear();
     cssCache.clear();
   },
 });
 
 // Runtime dynamic-import shim: resolve url + fetch from cache or with headers +
-// import as blob. Reads its context off the shared registry (getContexts) so it
+// import as blob. Reads its context off the shared registry (createOrGetBlobLoaderContexts) so it
 // works for blob modules created by any bundled copy of the SDK.
-function createDynImportShim(): MFDynShim {
+function createDynImportShim(): MFDynImportShim {
   return (async (base: string, spec: string) => {
     const resolved = resolveSpec(spec, base);
     if (/^(blob:|data:)/.test(resolved)) {
       return import(/* webpackIgnore: true */ /* @vite-ignore */ resolved);
     }
-    const ctx = getContexts().get(base) || {};
+    const ctx = createOrGetBlobLoaderContexts().get(base) || {};
     return import(
       /* webpackIgnore: true */ /* @vite-ignore */ await loadModule(
         resolved,
         ctx,
       )
     );
-  }) as MFDynShim;
+  }) as MFDynImportShim;
 }
 
 // The vite preload helper creates native <link> preloads (no auth header) as a
 // perf hint; those 401 errors should be ignored instead of throwing — real
-// loads go via __mfDyn. A stable handler ref lets addEventListener dedupe repeat
+// loads go via __mfDynImport. A stable handler ref lets addEventListener dedupe repeat
 // installs (identical callback + capture is a no-op per the DOM spec).
 const ignoreVitePreloadError = (e: Event) => e.preventDefault();
 
 function installMFDynImportShim(): void {
-  // Ensure the single global __mfDyn shim (and its shared contexts map) exists.
-  // getContexts() is idempotent: it installs the shim on first use and never
+  // Ensure the single global __mfDynImport shim (and its shared contexts map) exists.
+  // createOrGetBlobLoaderContexts() is idempotent: it installs the shim on first use and never
   // clobbers one already installed by another bundled copy of the SDK.
-  getContexts();
+  createOrGetBlobLoaderContexts();
 
   if (typeof window !== 'undefined') {
     window.addEventListener('vite:preloadError', ignoreVitePreloadError);
