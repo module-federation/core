@@ -298,11 +298,16 @@ export function preloadAssets(
   if (host.options.inBrowser) {
     entryAssets.forEach((asset) => {
       const { moduleInfo: entryRemoteInfo } = asset;
+      const entryRemoteInfoWithAuth =
+        // Respect fetchOptions added to entryRemoteInfo via generatePreloadAssetsPlugin.
+        !entryRemoteInfo.fetchOptions && remoteInfo.fetchOptions
+          ? { ...entryRemoteInfo, fetchOptions: remoteInfo.fetchOptions }
+          : entryRemoteInfo;
       results.push(
         waitForRemoteEntryPreload(
           host,
           remoteInfo,
-          entryRemoteInfo,
+          entryRemoteInfoWithAuth,
           createResourceContext(baseContext, 'remoteEntry'),
         ),
       );
