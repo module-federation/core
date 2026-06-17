@@ -92,11 +92,7 @@ function toHeaderObject(
 ): Record<string, string> {
   if (!headers) return {};
   if (typeof Headers !== 'undefined' && headers instanceof Headers) {
-    return Object.fromEntries(
-      (
-        headers as unknown as { entries(): IterableIterator<[string, string]> }
-      ).entries(),
-    );
+    return Object.fromEntries(headers.entries());
   }
   if (Array.isArray(headers)) {
     return Object.fromEntries(headers);
