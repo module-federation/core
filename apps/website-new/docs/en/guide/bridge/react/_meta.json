@@ -17,6 +17,6 @@
   {
     "type": "file",
     "name": "load-component",
-    "label": "Load Component"
+    "label": "Lazy Load and Prefetch Components"
   }
 ]

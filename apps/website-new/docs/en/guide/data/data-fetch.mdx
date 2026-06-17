@@ -8,8 +8,9 @@ Mainstream SSR frameworks (Next.js, Remix, Modern.js, etc.) usually provide rout
 
 To solve this, {props.name || 'Module Federation'} provides **component-level** data fetching capabilities, so developers can fetch data and render components in SSR scenarios.
 
-:::note What is component-level?
-Modules exposed via Module Federation fall into two broad categories:
+:::note Component-level
+
+Modules exposed via {props.name || 'Module Federation'} fall into two broad categories:
 
 - **Components**: standalone UI components, utility functions, etc., without their own router.
 - **Applications**: sub-applications with a complete router, typically exposed and consumed via [Bridge](/guide/bridge/overview.html).
@@ -71,12 +72,11 @@ The function is called before the component renders, and the runtime injects the
 import React from 'react';
 import type { Data } from './index.data';
 
-const List = (props: {
-  mfData?: Data;
-}): JSX.Element => {
+const List = (props: { mfData?: Data }): JSX.Element => {
   return (
     <div>
-     {props.mfData?.data && props.mfData?.data.map((item,index)=><p key={index}>{item}</p>)}
+      {props.mfData?.data &&
+        props.mfData?.data.map((item, index) => <p key={index}>{item}</p>)}
     </div>
   );
 };
@@ -100,9 +100,9 @@ In SSR applications, the loader function is only executed on the server, so they
 
 :::info Benefits of running the SSR loader only on the server
 
--   **Simplified Usage**: It ensures that the data fetching method in SSR applications is isomorphic, so developers don't need to differentiate code execution based on the environment.
--   **Reduced Browser Bundle Size**: Logic code and its dependencies are moved from the browser to the server.
--   **Improved Maintainability**: Moving logic code to the server reduces the direct impact of data logic on the front-end UI. It also prevents accidentally including server-side dependencies in the browser bundle or vice versa.
+- **Simplified Usage**: It ensures that the data fetching method in SSR applications is isomorphic, so developers don't need to differentiate code execution based on the environment.
+- **Reduced Browser Bundle Size**: Logic code and its dependencies are moved from the browser to the server.
+- **Improved Maintainability**: Moving logic code to the server reduces the direct impact of data logic on the front-end UI. It also prevents accidentally including server-side dependencies in the browser bundle or vice versa.
 
 :::
 
@@ -125,9 +125,10 @@ export async function loader({ params }) {
   const res = await fetch('URL_ADDRESS?id={params.id}');
   return {
     message: res.message,
-  }
+  };
 }
 ```
+
 :::warning WARNING
 
 To use a Client Loader, there must be a corresponding Server Loader, and the Server Loader must be defined in a `.data` file.
@@ -143,7 +144,7 @@ A producer may also be visited as a standalone page. In that case, it needs to b
 
 For example, if the producer uses Modern.js, it needs to support both being loaded by a consumer and being visited directly as a producer page. This can be done as follows:
 
-* Create a `page.data.ts` file in the producer's page directory and export a function named `loader`:
+- Create a `page.data.ts` file in the producer's page directory and export a function named `loader`:
 
 :::info
 Modern.js convention is to export a `loader` function from `page.data.ts` to [fetch data](https://modernjs.dev/guides/basic-features/data/data-fetch.html).
@@ -154,12 +155,12 @@ Modern.js convention is to export a `loader` function from `page.data.ts` to [fe
 import { fetchData } from '../components/List.data';
 import type { Data } from '../components/List.data';
 
-export const loader = fetchData
+export const loader = fetchData;
 
-export type {Data}
+export type { Data };
 ```
 
-* Consume this data on the producer's `page`:
+- Consume this data on the producer's `page`:
 
 ```tsx title="page.tsx"
 import { useLoaderData } from '@modern-js/runtime/router';
@@ -176,7 +177,8 @@ const Index = () => {
     <div className="container-box">
       <List mfData={data} />
     </div>
-)};
+  );
+};
 
 export default Index;
 ```

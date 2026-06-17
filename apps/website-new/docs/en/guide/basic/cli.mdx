@@ -1,9 +1,9 @@
 # Command Line Tool
 
-{props.name || 'Module Federation'} provides a lightweight command-line tool `mf`, shipped by <code>{props.cmdTool || '@module-federation/enhanced'}</code>.
+{props.name || 'Module Federation'} provides a lightweight command-line tool <code>{props.cmd || 'mf'}</code>, shipped by <code>{props.cmdTool || '@module-federation/enhanced'}</code>.
 
 :::note
-Once you have integrated Module Federation by following an [integration guide](/integrations/index.html), <code>{props.cmdTool || '@module-federation/enhanced'}</code> is typically already in your dependency tree and the `mf` command is available out of the box. Otherwise, install it manually in your project before running the commands below.
+Once you have completed integration by following an [integration guide](/integrations/index.html), <code>{props.cmdTool || '@module-federation/enhanced'}</code> is typically already in your dependency tree and this command is available out of the box. Otherwise, install it manually in your project before running the commands below.
 :::
 
 ## View All Commands
@@ -11,22 +11,23 @@ Once you have integrated Module Federation by following an [integration guide](/
 import React from 'react';
 import ViewAllCmdsMdx from '@docs/en/_components/cli/view-all-cmds';
 
-{/* rspress flattenMdxContent issue  */}
+{/* rspress flattenMdxContent issue */}
 {props.show || React.createElement(ViewAllCmdsMdx)}
 
 ## Common Options
 
 {props.name || 'Module Federation'} CLI provides some common options that can be used for all commands:
 
-| Option                       | Description                                                                                                              |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `-c, --config <config>`    | Specify the configuration file path, which can be a relative or absolute path. The default value is {props.configName ? props.configName : 'module-federation.config.ts' }      |
-| `-m, --mode <mode>`        | Specify the running environment, you can choose "dev" or "prod". The default value is "dev". After setting, "development" or "production" will be automatically injected into the `process.env.NODE_ENV` environment variable according to the value.   |
-| `-h, --help`               | Show command help                                                                                                      |
+| Option                  | Description                                                                                                                                                                                                                                           |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `-c, --config <config>` | Specify the configuration file path, which can be a relative or absolute path. The default value is {props.configName ? props.configName : 'module-federation.config.ts' }                                                                            |
+| `-m, --mode <mode>`     | Specify the running environment, you can choose "dev" or "prod". The default value is "dev". After setting, "development" or "production" will be automatically injected into the `process.env.NODE_ENV` environment variable according to the value. |
+| `-h, --help`            | Show command help                                                                                                                                                                                                                                     |
 
 ## {props.cmd || 'mf'} dts
 
-  The <code>{props.cmd || 'mf'} dts</code> command is used to pull or generate TypeScript type declaration files.
+<code>{props.cmd || 'mf'} dts</code>
+is used to pull or generate TypeScript type declaration files.
 
 import CommandInfo from '@docs/_snippets/cli/cmd-info';
 

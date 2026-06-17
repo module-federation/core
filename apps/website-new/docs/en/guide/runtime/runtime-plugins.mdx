@@ -17,7 +17,6 @@ If you only need to **register** a plugin path in build config, see [`runtimePlu
 
 A runtime plugin is a function that returns a `ModuleFederationRuntimePlugin`:
 
-
 ```ts
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
@@ -27,7 +26,6 @@ export default function myRuntimePlugin(): ModuleFederationRuntimePlugin {
   };
 }
 ```
-
 
 The function form matters because it lets you:
 
@@ -71,7 +69,6 @@ export default {
 
 Use runtime registration when the plugin depends on user state, environment, feature flags, or data fetched after startup.
 
-
 ```ts
 import { createInstance } from '@module-federation/enhanced/runtime';
 
@@ -95,16 +92,17 @@ mf.registerPlugins([
 ]);
 ```
 
-
 ### Global runtime registration
 
 Use `registerGlobalPlugins(...)` when you want the plugin to be available to all future runtime instances, instead of only one current instance.
 
 This is best suited for shared instrumentation, cross-app policy, or host-wide defaults.
 
-
 ```ts
-import { registerGlobalPlugins, createInstance } from '@module-federation/enhanced/runtime';
+import {
+  registerGlobalPlugins,
+  createInstance,
+} from '@module-federation/enhanced/runtime';
 
 import runtimePlugin from './plugins/runtime-plugin';
 
@@ -121,23 +119,22 @@ const mf = createInstance({
 });
 ```
 
-
 `registerGlobalPlugins(...)` deduplicates plugins by `name`. In practice, call it before creating or using runtime instances so the global plugins are incorporated consistently.
 
 ## Choose the right hook
 
-| Job | Hook | Use it when |
-| --- | --- | --- |
-| Change remote lookup input | `beforeRequest` | You need to rewrite the request before remote resolution starts |
-| Rewrite a resolved entry URL | `afterResolve` | You want to change `remoteInfo.entry` after the runtime has resolved the remote |
-| Customize manifest network requests | `fetch` | You need credentials, headers, retries, or alternate fetch behavior for manifest loading |
-| Customize injected scripts and links | `createScript`, `createLink` | You need to add attributes like `crossorigin`, timeouts, or custom script/link elements. When available, `remoteInfo` is provided so you can apply per-remote policy. |
-| Align or rewrite share scopes before remote init | `beforeInitContainer`, `initContainerShareScopeMap` | You need to change which share scope a remote initializes against |
-| Override the shared winner | `resolveShare` | You want to force a different shared implementation than the runtime would normally pick |
-| Observe remote load status | `afterMatchRemote`, `afterLoadRemote` | You need request tracing or final success/failure status for `loadRemote` |
-| Observe shared dependency status | `afterLoadShare`, `errorLoadShare` | You need to diagnose missing shared dependencies, version mismatch, or eager configuration errors |
-| Recover from load failures | `errorLoadRemote` | You need fallback modules, offline behavior, or layered recovery |
-| Implement a new remote loading strategy | `loadEntry` | You want to fully customize how a remote entry is loaded or support a new remote type |
+| Job                                              | Hook                                                | Use it when                                                                                                                                                           |
+| ------------------------------------------------ | --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Change remote lookup input                       | `beforeRequest`                                     | You need to rewrite the request before remote resolution starts                                                                                                       |
+| Rewrite a resolved entry URL                     | `afterResolve`                                      | You want to change `remoteInfo.entry` after the runtime has resolved the remote                                                                                       |
+| Customize manifest network requests              | `fetch`                                             | You need credentials, headers, retries, or alternate fetch behavior for manifest loading                                                                              |
+| Customize injected scripts and links             | `createScript`, `createLink`                        | You need to add attributes like `crossorigin`, timeouts, or custom script/link elements. When available, `remoteInfo` is provided so you can apply per-remote policy. |
+| Align or rewrite share scopes before remote init | `beforeInitContainer`, `initContainerShareScopeMap` | You need to change which share scope a remote initializes against                                                                                                     |
+| Override the shared winner                       | `resolveShare`                                      | You want to force a different shared implementation than the runtime would normally pick                                                                              |
+| Observe remote load status                       | `afterMatchRemote`, `afterLoadRemote`               | You need request tracing or final success/failure status for `loadRemote`                                                                                             |
+| Observe shared dependency status                 | `afterLoadShare`, `errorLoadShare`                  | You need to diagnose missing shared dependencies, version mismatch, or eager configuration errors                                                                     |
+| Recover from load failures                       | `errorLoadRemote`                                   | You need fallback modules, offline behavior, or layered recovery                                                                                                      |
+| Implement a new remote loading strategy          | `loadEntry`                                         | You want to fully customize how a remote entry is loaded or support a new remote type                                                                                 |
 
 ## Recipe: rewrite the resolved remote entry
 
@@ -149,7 +146,6 @@ This pattern is useful for:
 - environment switching
 - registry-backed routing
 - domain normalization
-
 
 ```ts
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
@@ -189,7 +185,6 @@ export default function rewriteRemoteEntryPlugin(
 }
 ```
 
-
 Why this hook:
 
 - `beforeRequest` is earlier; the remote is not resolved yet
@@ -205,7 +200,6 @@ An `afterResolve` rewrite changes runtime loading behavior. It does not automati
 ## Recipe: customize manifest fetch
 
 Use `fetch` when the manifest request itself needs custom behavior.
-
 
 ```ts
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
@@ -230,7 +224,6 @@ export default function fetchManifestWithCredentials(): ModuleFederationRuntimeP
 }
 ```
 
-
 Use `fetch` for:
 
 - credentials
@@ -245,7 +238,6 @@ If you need a ready-made transport policy, see the built-in retry plugin.
 `resolveShare` is the hook for overriding the final shared module selection.
 
 The important part: changing `args.scope` or `args.version` alone is not enough. To change the actual winner, replace `args.resolver`.
-
 
 ```ts
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
@@ -279,7 +271,6 @@ export default function preferHostReact(): ModuleFederationRuntimePlugin {
   };
 }
 ```
-
 
 ## Failure handling and `shareStrategy`
 

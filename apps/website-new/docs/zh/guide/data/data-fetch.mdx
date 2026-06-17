@@ -10,10 +10,11 @@ import Consumer from '@docs/zh/_components/data-fetch/consumer';
 
 主流的 SSR 框架（如 Next.js、Remix、Modern.js 等）通常会在路由层面提供数据预取能力：路由命中时先执行数据加载函数拿到数据，再注入对应的路由组件参与渲染。但这套机制依赖框架自身的路由系统，{props.name || 'Module Federation'} 暴露的模块并不在宿主的路由树中，无法直接复用。
 
-为了解决这一问题，Module Federation 提供了**组件**级别数据获取能力，以便开发者可以在 SSR 场景下获取数据并渲染组件。
+为了解决这一问题，{ props.name || 'Module Federation' } 提供了**组件**级别数据获取能力，以便开发者可以在 SSR 场景下获取数据并渲染组件。
 
-:::note 什么是组件级别？
-Module Federation 暴露的模块大体分为两类：
+:::note 组件级别
+
+{ props.name || 'Module Federation' } 暴露的模块大体分为两类：
 
 - **组件**：独立的 UI 组件、工具函数等，不带路由系统
 - **应用**：带有完整路由的子应用，通常通过 [Bridge](/guide/bridge/overview.html) 暴露和消费
@@ -72,12 +73,11 @@ export const fetchData = async (params: DataFetchParams): Promise<Data> => {
 import React from 'react';
 import type { Data } from './index.data';
 
-const List = (props: {
-  mfData?: Data;
-}): JSX.Element => {
+const List = (props: { mfData?: Data }): JSX.Element => {
   return (
     <div>
-     {props.mfData?.data && props.mfData?.data.map((item,index)=><p key={index}>{item}</p>)}
+      {props.mfData?.data &&
+        props.mfData?.data.map((item, index) => <p key={index}>{item}</p>)}
     </div>
   );
 };
@@ -128,9 +128,10 @@ export async function loader({ params }) {
   const res = await fetch('URL_ADDRESS?id={params.id}');
   return {
     message: res.message,
-  }
+  };
 }
 ```
+
 :::warning WARNING
 
 要使用 Client Loader，必须有对应的 Server Loader，且 Server Loader 必须是 `.data` 文件约定。
@@ -146,7 +147,7 @@ export async function loader({ params }) {
 
 例如，如果生产者使用 Modern.js，它既要支持被消费者加载获取数据，也要支持在生产者页面独立访问获取数据。这时可以通过以下方式实现：
 
-* 在生产者页面创建 `page.data.ts` 文件，导出名为 `loader` 的函数：
+- 在生产者页面创建 `page.data.ts` 文件，导出名为 `loader` 的函数：
 
 :::info
 Modern.js 约定 `page.data.ts` 中导出 `loader` 函数来 [获取数据](https://modernjs.dev/zh/guides/basic-features/data/data-fetch.html)。
@@ -157,12 +158,12 @@ Modern.js 约定 `page.data.ts` 中导出 `loader` 函数来 [获取数据](http
 import { fetchData } from '../components/List.data';
 import type { Data } from '../components/List.data';
 
-export const loader = fetchData
+export const loader = fetchData;
 
-export type {Data}
+export type { Data };
 ```
 
-* 在生产者 `page` 页面消费此数据：
+- 在生产者 `page` 页面消费此数据：
 
 ```tsx title="page.tsx"
 import { useLoaderData } from '@modern-js/runtime/router';
@@ -179,7 +180,8 @@ const Index = () => {
     <div className="container-box">
       <List mfData={data} />
     </div>
-)};
+  );
+};
 
 export default Index;
 ```

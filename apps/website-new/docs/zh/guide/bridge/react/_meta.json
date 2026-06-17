@@ -17,6 +17,6 @@
   {
     "type": "file",
     "name": "load-component",
-    "label": "加载模块"
+    "label": "懒加载与预取组件"
   }
 ]

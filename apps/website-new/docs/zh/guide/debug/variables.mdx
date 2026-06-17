@@ -1,12 +1,12 @@
 # 全局变量
 
-在 {props.brandName || props.name || 'Module Federation'} 中，全局变量主要有 `__FEDERATION__`、`__SHARE__` 和 `__INSTANCES__`，这些变量记录了当前应用的模块联邦信息、共享模块信息和实例信息，可以帮助我们更好地理解和调试模块联邦的运行时行为。
+在 { props.name || 'Module Federation'} 中，全局变量主要有 `__FEDERATION__`、<code>{ props.shareVar || 'SHARE' }</code> 和 <code>{ props.instanceVar || 'INSTANCES' }</code>，这些变量记录了当前应用的模块联邦信息、共享模块信息和实例信息，可以帮助我们更好地理解和调试模块联邦的运行时行为。
 
 :::warning 注意
 全局变量仅可读，不要修改此变量。
 :::
 
-## __FEDERATION__
+## **FEDERATION**
 
 初始化完成后，会在全局注入 `__FEDERATION__` 变量，该变量是一个对象，包含了当前应用的所有模块联邦信息。
 
@@ -26,7 +26,7 @@
 
 下面举例如何利用 `moduleInfo` 获取依赖关系，假设有下列的 `moduleInfo`：
 
-import Collapse from '@components/Collapse'
+import Collapse from '@components/Collapse';
 
 <Collapse title='moduleInfo'>
 
@@ -476,6 +476,7 @@ moduleInfo: {
   }
 }
 ```
+
 </Collapse>
 
 在上述示例中，`moduleInfo` 包含了 5 个模块的信息，其中 `manifest_host` 后面没带有版本号，说明它是一个消费者模块。
@@ -526,7 +527,6 @@ moduleInfo: {
 
 当前生产者模块的入口文件类型。
 
-
 #### remoteTypesZip
 
 > 仅存在于生产者
@@ -547,7 +547,7 @@ moduleInfo: {
 type Shared = Array<{
   sharedName: string;
   version?: string;
-  assets:  {
+  assets: {
     js: {
       sync: string[];
       async: string[];
@@ -570,7 +570,7 @@ type Shared = Array<{
 type Modules = Array<{
   moduleName: string;
   modulePath: string;
-  assets:  {
+  assets: {
     js: {
       sync: string[];
       async: string[];
@@ -583,7 +583,7 @@ type Modules = Array<{
 }>;
 ```
 
-### __SHARE__
+### **SHARE**
 
 当前已注册（加载）的所有共享模块信息，类型定义如下：
 
@@ -596,14 +596,14 @@ type GlobalShareScopeMap = {
       [pkgName: string]: {
         [sharedVersion: string]: {
           version: string;
-          get:  (() => () => Module) | (() => Promise<() => Module>);
+          get: (() => () => Module) | (() => Promise<() => Module>);
           shareConfig: {
             singleton?: boolean;
             requiredVersion: false | string;
             eager?: boolean;
             strictVersion?: boolean;
             layer?: string | null;
-          }
+          };
           scope: Array<string>;
           useIn: Array<string>;
           from: string;
@@ -617,7 +617,7 @@ type GlobalShareScopeMap = {
            * @deprecated set in initOptions.shareStrategy instead
            */
           strategy: 'version-first' | 'loaded-first';
-        }
+        };
       };
     };
   };
@@ -838,6 +838,7 @@ type GlobalShareScopeMap = {
   }
 }
 ```
+
 </Collapse>
 
 在上述的数据中，可以看到 `manifest_host` 和 `app1` 两个模块的共享模块信息。例如我们希望查看 `react` 模块的加载情况，可以按照以下步骤进行分析：
@@ -847,6 +848,6 @@ type GlobalShareScopeMap = {
 3. `from` 字段为 `webpack_provider`，说明 `react` 模块是由该模块提供的。
 4. 最后查看 `useIn` 字段，可以看到字段中包含了 `webpack_provider` 和 `app1` 两个模块，说明这个版本的 `react` 模块被这两个模块使用了。
 
-### __INSTANCES__
+### **INSTANCES**
 
 当前已加载的 MF 实例。

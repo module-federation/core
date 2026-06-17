@@ -96,6 +96,21 @@ export default createModuleFederationConfig({
 
 所有数据获取的 API 都被放在了 `@module-federation/modern-js-v3/data-fetch` 中，你可以从这个路径下引入并使用它们。
 
+## Bridge API
+
+参考 [React Bridge](/guide/bridge/react/getting-started.html)。
+
+在 Modern.js v3 中，Bridge API 已经被内置在 `@module-federation/modern-js-v3` 插件中，不需要额外安装 `@module-federation/bridge-react` 来使用 Bridge API。
+
+所有 Bridge API 都被放在了 `@module-federation/modern-js-v3/react` 中，你可以从这个路径下引入并使用它们。如果需要显式区分 React 18 或 React 19 下对 `createBridgeComponent` 的调用，Modern.js v3 插件的导出路径略有不同：
+
+```ts
+// @module-federation/modern-js-v3
+import { createBridgeComponent } from '@module-federation/modern-js-v3/react'; // React 16/17
+import { createBridgeComponent } from '@module-federation/modern-js-v3/react-v18'; // React 18
+import { createBridgeComponent } from '@module-federation/modern-js-v3/react-v19'; // React 19
+```
+
 ## Runtime API
 
 所有 Module Federation 的 Runtime 相关 API 都被放在了 `@module-federation/modern-js-v3/runtime` 中，你可以从这个路径下引入并使用它们。

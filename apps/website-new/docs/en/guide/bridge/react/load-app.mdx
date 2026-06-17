@@ -31,7 +31,9 @@ import { PackageManagerTabs } from '@theme';
 Add remote configuration to the host application's Module Federation config.
 
 :::tip Build Tool Support
+
 The following example uses Rsbuild configuration. Please adjust according to your build tool:
+
 - **Rsbuild**: `@module-federation/rsbuild-plugin`
 - **Rspack**: `@module-federation/enhanced/rspack`
 - **Webpack**: `@module-federation/enhanced/webpack`
@@ -61,7 +63,7 @@ If the remote uses React 18/19 bridge, make sure to also configure the `shared` 
 
 ### Step 2: Create Remote Components
 
-#### 2.1 Define Loading and Error Components
+#### Define Loading and Error Components
 
 ```tsx
 // ./src/components/RemoteComponents.tsx
@@ -82,7 +84,7 @@ export const ErrorFallback = ({ error }: { error: Error }) => (
 );
 ```
 
-#### 2.2 Create Remote Application Component
+#### Create Remote Application Component
 
 ```tsx
 // ./src/remotes/Remote1App.tsx
@@ -97,7 +99,7 @@ export const Remote1App = createRemoteAppComponent({
 });
 ```
 
-#### 2.3 Main Application Router Configuration
+#### Main Application Router Configuration
 
 ```tsx
 // ./src/App.tsx
