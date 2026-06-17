@@ -8,6 +8,7 @@ import { attachShareScopeMap } from './attachShareScopeMap';
 import { initContainerEntry } from './initContainerEntry';
 import { init } from './init';
 import { getSharedFallbackGetter } from './getSharedFallbackGetter';
+import { clearCache, installClearCache } from './clearCache';
 
 export * from './types';
 
@@ -24,6 +25,8 @@ const federation: Federation = {
     initContainerEntry,
     init,
     getSharedFallbackGetter,
+    clearCache,
+    installClearCache,
   },
   attachShareScopeMap,
   bundlerRuntimeOptions: {},

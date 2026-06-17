@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { createInstance, getInstance, init } from '../src';
+import { describe, it, expect, vi } from 'vitest';
+import { createInstance, getInstance, init, removeRemote } from '../src';
 
 // eslint-disable-next-line max-lines-per-function
 describe('api', () => {
@@ -138,6 +138,47 @@ describe('api', () => {
     });
 
     expect(FM.options.id).toBe('');
+  });
+
+  it('removes a remote through the public runtime API', async () => {
+    const onRemoveRemote = vi.fn();
+    const FM = init({
+      name: '@federation/remove-remote-api',
+      remotes: [
+        {
+          name: '@federation/sub-remove',
+          alias: 'sub-remove',
+          entry:
+            'http://localhost:1111/resources/register-remotes/app1/federation-remote-entry.js',
+        },
+      ],
+      plugins: [
+        {
+          name: 'runtime-api-remove-remote-test-plugin',
+          removeRemote: onRemoveRemote,
+        },
+      ],
+    });
+
+    await removeRemote('sub-remove');
+
+    expect(FM.options.remotes).toHaveLength(0);
+    expect(onRemoveRemote).toHaveBeenCalledWith({
+      remote: expect.objectContaining({
+        name: '@federation/sub-remove',
+        alias: 'sub-remove',
+      }),
+      origin: FM,
+    });
+
+    await removeRemote('sub-remove');
+    expect(onRemoveRemote).toHaveBeenCalledTimes(2);
+    expect(onRemoveRemote).toHaveBeenLastCalledWith({
+      remote: expect.objectContaining({
+        name: 'sub-remove',
+      }),
+      origin: FM,
+    });
   });
 
   it('alias check', () => {

@@ -459,6 +459,20 @@ export class ModuleFederation {
     return this.remoteHandler.registerRemotes(remotes, options);
   }
 
+  removeRemote(remote: Remote | string): Promise<void> {
+    let targetRemote: Remote | undefined =
+      typeof remote === 'string' ? undefined : remote;
+    if (typeof remote === 'string') {
+      targetRemote = this.options.remotes.find(
+        (item) => item.name === remote || item.alias === remote,
+      );
+      targetRemote ||= { name: remote, alias: remote } as Remote;
+    }
+    if (!targetRemote) return Promise.resolve();
+
+    return this.remoteHandler.removeRemote(targetRemote);
+  }
+
   registerShared(shared: UserOptions['shared']) {
     this.sharedHandler.registerShared(this.options, {
       ...this.options,

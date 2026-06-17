@@ -13,16 +13,9 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "declaration": true,
-    "noImplicitReturns": false
+    "noImplicitReturns": false,
+    "types": ["jest", "node"],
+    "noEmit": true
   },
-  "files": [],
-  "include": [],
-  "references": [
-    {
-      "path": "./tsconfig.lib.json"
-    },
-    {
-      "path": "./tsconfig.spec.json"
-    }
-  ]
+  "include": ["src/**/*.ts"]
 }

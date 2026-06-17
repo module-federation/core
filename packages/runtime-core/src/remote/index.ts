@@ -670,7 +670,7 @@ export class RemoteHandler {
       ];
       if (options?.force) {
         // remove registered remote
-        this.removeRemote(registeredRemote);
+        void this.removeRemote(registeredRemote);
         normalizeRemote();
         targetRemotes.push(remote);
         this.hooks.lifecycle.registerRemote.emit({ remote, origin: host });
@@ -679,10 +679,13 @@ export class RemoteHandler {
     }
   }
 
-  private removeRemote(remote: Remote): void {
-    try {
-      const { host } = this;
-      const { name } = remote;
+  removeRemote(remote: Remote): Promise<void> {
+    const { host } = this;
+    const { name } = remote;
+    return Promise.resolve(
+      this.hooks.lifecycle.removeRemote.emit({ remote, origin: host }),
+    )
+      .then(() => {
       const remoteIndex = host.options.remotes.findIndex(
         (item) => item.name === name,
       );
@@ -816,10 +819,12 @@ export class RemoteHandler {
 
         host.moduleCache.delete(remote.name);
       }
-    } catch (err) {
-      logger.error(
-        `removeRemote failed: ${err instanceof Error ? err.message : String(err)}`,
-      );
-    }
+      })
+      .catch((err) => {
+        logger.error(
+          `removeRemote failed: ${err instanceof Error ? err.message : String(err)}`,
+        );
+        throw err;
+      });
   }
 }
