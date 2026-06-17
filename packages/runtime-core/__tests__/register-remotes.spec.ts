@@ -209,4 +209,83 @@ describe('ModuleFederation', () => {
     expect(await nextAppModule()).toBe('hello world "@snapshot/remote2"');
     expect(manifestFetch).toHaveBeenCalledTimes(2);
   });
+
+  it('emits removeRemote hook before force registering an existing remote', () => {
+    const removeRemote = vi.fn();
+    const FM = new ModuleFederation({
+      name: '@federation/instance',
+      version: '1.0.1',
+      remotes: [
+        {
+          name: '@register-remotes/app1',
+          entry:
+            'http://localhost:1111/resources/register-remotes/app1/federation-remote-entry.js',
+        },
+      ],
+      plugins: [
+        {
+          name: 'remove-remote-test-plugin',
+          removeRemote,
+        },
+      ],
+    });
+
+    FM.registerRemotes(
+      [
+        {
+          name: '@register-remotes/app1',
+          entry:
+            'http://localhost:1111/resources/register-remotes/app1/federation-remote-entry2.js',
+        },
+      ],
+      { force: true },
+    );
+
+    expect(removeRemote).toHaveBeenCalledWith({
+      remote: expect.objectContaining({ name: '@register-remotes/app1' }),
+      origin: FM,
+    });
+  });
+
+  it('removes a registered remote by name and emits removeRemote hook', async () => {
+    const removeRemote = vi.fn();
+    const FM = new ModuleFederation({
+      name: '@federation/instance',
+      version: '1.0.1',
+      remotes: [
+        {
+          name: '@register-remotes/app1',
+          alias: 'app1',
+          entry:
+            'http://localhost:1111/resources/register-remotes/app1/federation-remote-entry.js',
+        },
+      ],
+      plugins: [
+        {
+          name: 'direct-remove-remote-test-plugin',
+          removeRemote,
+        },
+      ],
+    });
+
+    await FM.removeRemote('app1');
+
+    expect(FM.options.remotes).toHaveLength(0);
+    expect(removeRemote).toHaveBeenCalledWith({
+      remote: expect.objectContaining({
+        name: '@register-remotes/app1',
+        alias: 'app1',
+      }),
+      origin: FM,
+    });
+
+    await FM.removeRemote('app1');
+    expect(removeRemote).toHaveBeenCalledTimes(2);
+    expect(removeRemote).toHaveBeenLastCalledWith({
+      remote: expect.objectContaining({
+        name: 'app1',
+      }),
+      origin: FM,
+    });
+  });
 });
