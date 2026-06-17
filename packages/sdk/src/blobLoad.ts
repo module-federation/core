@@ -1,7 +1,3 @@
-// Hardened port of the fetch + blob import-rewriting loader PoC
-// (js-module-import/index.html). Comments are retained from the PoC where the
-// logic is carried over verbatim.
-
 export interface BlobDep {
   original: string;
   spec: string;
@@ -68,13 +64,12 @@ export interface BlobLoadContext {
   customFetch?: BlobFetcher;
 }
 
-// absolute url -> Promise<blob url> for JS modules (parallel to cssCache below)
-const jsCache = new Map<string, Promise<string>>();
 // absolute url -> fetcher and its options
 // __mfDyn should reuse the right load context for each module's chunks request.
 const contexts = new Map<string, BlobLoadContext>();
-// original css href -> in-flight/settled load, so concurrent or repeat calls
-// don't re-fetch or double-inject the stylesheet.
+// absolute url -> Promise<blob url> for JS modules
+const jsCache = new Map<string, Promise<string>>();
+// absolute url -> in-flight/settled promise, used to prevent double-inject the stylesheet.
 const cssCache = new Map<string, Promise<void>>();
 let dynImportInstalled = false;
 
@@ -87,6 +82,7 @@ function isResponseLike(res: unknown): res is Response {
   );
 }
 
+// Create a const copy of headers, to avoid the case when the original headers are mutated by fetcher.
 function toHeaderObject(
   headers: RequestInit['headers'],
 ): Record<string, string> {
@@ -134,11 +130,13 @@ function loadModuleImpl(url: string, ctx: BlobLoadContext): Promise<string> {
 
   const promise = (async () => {
     const raw = await fetchText(url, ctx);
+    // Stage 1 rewrite: replace import.meta.url with url, and dynamic import(), collect static deps.
     const { code: rewritten, deps } = rewriteModuleCode(raw, url);
     let code = rewritten;
     const blobUrls = await Promise.all(
       deps.map((d) => loadModule(d.depUrl, ctx)),
     );
+    // Stage 2 rewrite: replace static deps with blob urls.
     deps.forEach((d, i) => {
       const replaced = d.original.replace(
         `${d.quote}${d.spec}${d.quote}`,
@@ -174,7 +172,7 @@ export const loadModule: ((
   },
 });
 
-function installDynImportShim(): void {
+function installMFDynImportShim(): void {
   if (dynImportInstalled) return;
   dynImportInstalled = true;
 
@@ -197,7 +195,7 @@ function installDynImportShim(): void {
   };
 
   // The vite preload helper creates native <link> preloads (no auth header) as a
-  // perf hint; let those 401 quietly instead of throwing — real loads go via __mfDyn.
+  // perf hint; those 401 errors should be ignored instead of throwing — real loads go via __mfDyn.
   if (typeof window !== 'undefined') {
     window.addEventListener('vite:preloadError', (e) => e.preventDefault());
   }
@@ -212,7 +210,7 @@ export async function loadEsmEntryWithFetch({
   fetchOptions?: RequestInit;
   customFetch?: BlobFetcher;
 }): Promise<Record<string, unknown>> {
-  installDynImportShim();
+  installMFDynImportShim();
   const blobUrl = await loadModule(entry, { fetchOptions, customFetch });
   return import(/* webpackIgnore: true */ /* @vite-ignore */ blobUrl);
 }
