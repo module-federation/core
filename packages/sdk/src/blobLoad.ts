@@ -6,9 +6,9 @@ export interface BlobDep {
 }
 
 // Resolve a specifier (relative, absolute-path, or already-absolute-url)
-// against a base url to a concrete fetchable url. The MF runtime resolves
-// shared deps to relative loadShare asset urls, so bare specifiers never reach
-// the loader; anything bare is unexpected and throws.
+// against a base url to a concrete fetchable url.
+// Shared dependencies should have already been resolved by the MF runtime
+// as relative loadShare asset urls, so anything bare is unexpected and throws.
 export function resolveSpec(spec: string, base: string): string {
   if (/^(blob:|https?:|data:)/.test(spec)) return spec;
   if (spec.startsWith('.') || spec.startsWith('/'))
@@ -74,12 +74,12 @@ type MFDynShim = ((base: string, spec: string) => Promise<unknown>) & {
   contexts?: Map<string, BlobLoadContext>;
 };
 
-// Resolve the shared context registry, lazily installing the global __mfDyn
+// Resolve the blob loader context registry, lazily installing the global __mfDyn
 // shim on first use (loadModule can run before the shim is formally installed).
-// An existing shim from another SDK copy is reused, never overwritten.
 function getContexts(): Map<string, BlobLoadContext> {
   const g = globalThis as Record<string, unknown>;
   let shim = g['__mfDyn'] as MFDynShim | undefined;
+  // If an existing shim from another SDK copy is installed, we reuse it instead of reinstalling.
   if (typeof shim !== 'function') {
     shim = createDynImportShim();
     g['__mfDyn'] = shim;
@@ -93,7 +93,6 @@ function getContexts(): Map<string, BlobLoadContext> {
 const jsCache = new Map<string, Promise<string>>();
 // absolute url -> in-flight/settled promise, used to prevent double-inject the stylesheet.
 const cssCache = new Map<string, Promise<void>>();
-let dynImportInstalled = false;
 
 function isResponseLike(res: unknown): res is Response {
   return (
@@ -104,7 +103,7 @@ function isResponseLike(res: unknown): res is Response {
   );
 }
 
-// Create a const copy of headers, to avoid the case when the original headers are mutated by fetcher.
+// Create and normalize a const copy of headers, to avoid the case when the original headers are mutated by fetcher.
 export function toHeaderObject(
   headers: RequestInit['headers'],
 ): Record<string, string> {
@@ -213,19 +212,20 @@ function createDynImportShim(): MFDynShim {
   }) as MFDynShim;
 }
 
-function installMFDynImportShim(): void {
-  if (dynImportInstalled) return;
-  dynImportInstalled = true;
+// The vite preload helper creates native <link> preloads (no auth header) as a
+// perf hint; those 401 errors should be ignored instead of throwing — real
+// loads go via __mfDyn. A stable handler ref lets addEventListener dedupe repeat
+// installs (identical callback + capture is a no-op per the DOM spec).
+const ignoreVitePreloadError = (e: Event) => e.preventDefault();
 
+function installMFDynImportShim(): void {
   // Ensure the single global __mfDyn shim (and its shared contexts map) exists.
-  // getContexts() installs the shim on first use and never clobbers one already
-  // installed by another bundled copy of the SDK.
+  // getContexts() is idempotent: it installs the shim on first use and never
+  // clobbers one already installed by another bundled copy of the SDK.
   getContexts();
 
-  // The vite preload helper creates native <link> preloads (no auth header) as a
-  // perf hint; those 401 errors should be ignored instead of throwing — real loads go via __mfDyn.
   if (typeof window !== 'undefined') {
-    window.addEventListener('vite:preloadError', (e) => e.preventDefault());
+    window.addEventListener('vite:preloadError', ignoreVitePreloadError);
   }
 }
 
