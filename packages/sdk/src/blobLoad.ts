@@ -108,8 +108,10 @@ export async function fetchText(
   url: string,
   ctx: BlobLoadContext,
 ): Promise<string> {
-  const { headers, ...rest } = ctx.fetchOptions || {};
-  const init: RequestInit = { ...rest, headers: toHeaderObject(headers) };
+  const init: RequestInit = {
+    ...(ctx.fetchOptions || {}),
+    headers: toHeaderObject(ctx.fetchOptions?.headers),
+  };
   let res: Response | void | false = undefined;
   if (ctx.customFetch) {
     res = await ctx.customFetch(url, init);
