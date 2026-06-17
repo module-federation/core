@@ -1,18 +1,18 @@
 # Global variables
 
-In {props.brandName || props.name || 'Module Federation'}, the main global variables are `__FEDERATION__`, `__SHARE__` and `__INSTANCES__`. They record the module federation info, shared module info, and instance info of the current application, and help us understand and debug the runtime behavior of module federation.
+In {props.name || 'Module Federation'}, the main global variables are `__FEDERATION__`, <code>{props.shareVar || 'SHARE'}</code> and <code>{props.instanceVar || 'INSTANCES'}</code>. They record the module federation info, shared module info, and instance info of the current application, and help us understand and debug the runtime behavior of module federation.
 
 :::warning Note
 Global variables are read-only — do not modify them.
 :::
 
-## __FEDERATION__
+## **FEDERATION**
 
 After initialization, the `__FEDERATION__` variable will be injected globally. This variable is an object that contains all the module federation information of the current application.
 
 ### moduleInfo
 
-import Collapse from '@components/Collapse'
+import Collapse from '@components/Collapse';
 
 :::tip
 It is recommended to use [chrome devtools](/guide/debug/chrome-devtool.html) to view the processed `moduleInfo`.
@@ -476,6 +476,7 @@ moduleInfo: {
   }
 }
 ```
+
 </Collapse>
 
 In the above example, `moduleInfo` contains information about 5 modules, among which `manifest_host` does not have a version number after it, indicating that it is a consumer module.
@@ -525,6 +526,7 @@ The name of the entry file of the current producer module.
 > Only exists in the producer
 
 The entry file type of the current producer module.
+
 #### remoteTypesZip
 
 > Only exists in the producer
@@ -545,7 +547,7 @@ All shared module information that the current module depends on. The type defin
 type Shared = Array<{
   sharedName: string;
   version?: string;
-  assets:  {
+  assets: {
     js: {
       sync: string[];
       async: string[];
@@ -568,7 +570,7 @@ All module information exported by the current module. The type definition is as
 type Modules = Array<{
   moduleName: string;
   modulePath: string;
-  assets:  {
+  assets: {
     js: {
       sync: string[];
       async: string[];
@@ -580,7 +582,8 @@ type Modules = Array<{
   };
 }>;
 ```
-### __SHARE__
+
+### **SHARE**
 
 All shared module information currently registered (loaded), the type definition is as follows:
 
@@ -593,14 +596,14 @@ type GlobalShareScopeMap = {
       [pkgName: string]: {
         [sharedVersion: string]: {
           version: string;
-          get:  (() => () => Module) | (() => Promise<() => Module>);
+          get: (() => () => Module) | (() => Promise<() => Module>);
           shareConfig: {
             singleton?: boolean;
             requiredVersion: false | string;
             eager?: boolean;
             strictVersion?: boolean;
             layer?: string | null;
-          }
+          };
           scope: Array<string>;
           useIn: Array<string>;
           from: string;
@@ -614,12 +617,13 @@ type GlobalShareScopeMap = {
            * @deprecated set in initOptions.shareStrategy instead
            */
           strategy: 'version-first' | 'loaded-first';
-        }
+        };
       };
     };
   };
 };
 ```
+
 </Collapse>
 
 We can use `__SHARE__` to query the loading status of a specific `shared`. For example, if the following `__SHARE__` exists:
@@ -844,49 +848,62 @@ In the data above, you can see the shared module information for the two modules
 3. The `from` field is `webpack_provider`, meaning the `react` module was provided by that module.
 4. Finally, look at the `useIn` field: it contains `webpack_provider` and `app1`, meaning this version of `react` is consumed by both modules.
 
-### __INSTANCES__
+### **INSTANCES**
 
 The currently loaded MF instance. It stores a list of all loaded MF modules. Every list entry has the following structure:
 
 #### bridgeHook
+
 Contains metadata about the MF bridge which is used to enable cross-application use-cases (React, Vue) to load properly.
 
 #### hooks
+
 Contains metadata about the MF hooks which are used to tap into the MF lifecycle.
 
 #### loaderHook
+
 Contains metadata about the MF loaderHook.
 
 #### moduleCache
+
 Contains a Map storing all MF modules with their metadata available in the moduleCache.
 
 #### name
+
 The name of the MF module.
 
 #### options
+
 > Useful for debugging your modules.
 
 Vital data about the MF module, such as loaded plugins, connected remotes, shareStrategy and the shared dependency object.
 
 #### remoteHandler
+
 Contains metadata about the MF remoteHandler including the idToRemoteMap which stores all bindings to connected remote components exposed by the connected MF remotes.
 
 #### shareScopeMap
+
 Contains metadata about the MF shared scope including data about every connected shared dependency.
 
 #### sharedHandler
+
 Contains metadata about the MF sharedHandler.
 
 #### snapshotHandler
+
 > Useful to check the mf-manifest.json structure and status.
 
 Contains metadata about the MF snapshotHandler including the manifestCache object and the manifestLoading object.
 
 #### version
+
 The version of the Mf module.
 
-### __PRELOADED_MAP__
+### **PRELOADED_MAP**
+
 The key-value-map of all preloaded modules (build-time). `key` represents the module name, and `value` represents the boolean value of the loaded status.
 
-### __MANIFEST_LOADING__
+### **MANIFEST_LOADING**
+
 Contains metadata about the manifestLoading object. This is the same as the `snapshotHandler.manifestLoading` in `__INSTANCES__`.
