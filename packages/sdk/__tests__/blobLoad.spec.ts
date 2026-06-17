@@ -212,8 +212,6 @@ describe('loadCssWithFetch', () => {
 });
 
 describe('cross-instance dynamic-import context', () => {
-  const CONTEXTS_KEY = '__MF_BLOB_LOAD_CONTEXTS__';
-
   beforeEach(() => {
     (global as any).fetch = jest
       .fn()
@@ -222,17 +220,16 @@ describe('cross-instance dynamic-import context', () => {
     loadModule.clearCache();
   });
 
-  it('stores load contexts in a shared globalThis registry', async () => {
+  it('stores load contexts on the shared __mfDyn shim', async () => {
     const ctx = { fetchOptions: { headers: { Authorization: 'Bearer t' } } };
     await loadModule('https://b.com/entry.js', ctx);
-    // A second bundled copy of the SDK reads the same global map, so a blob
-    // module from this copy keeps its fetch context regardless of which copy's
-    // __mfDyn shim is installed.
-    const registry = (globalThis as Record<string, unknown>)[
-      CONTEXTS_KEY
-    ] as Map<string, unknown>;
-    expect(registry).toBeInstanceOf(Map);
-    expect(registry.get('https://b.com/entry.js')).toBe(ctx);
+    // The registry hangs off the single global __mfDyn function, so a second
+    // bundled copy of the SDK reading the same shim keeps the fetch context
+    // regardless of which copy's shim is installed.
+    const shim = (globalThis as Record<string, any>)['__mfDyn'];
+    expect(typeof shim).toBe('function');
+    expect(shim.contexts).toBeInstanceOf(Map);
+    expect(shim.contexts.get('https://b.com/entry.js')).toBe(ctx);
   });
 
   it('does not clobber a __mfDyn shim already installed by another copy', async () => {
