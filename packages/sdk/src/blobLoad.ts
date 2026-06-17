@@ -68,10 +68,10 @@ export interface BlobLoadContext {
   customFetch?: BlobFetcher;
 }
 
-// absolute url -> Promise<blob url>
-const cache = new Map<string, Promise<string>>();
-// absolute url -> the context it was loaded with, so __mfDyn can reuse the
-// right headers for runtime dynamic imports of that module's chunks.
+// absolute url -> Promise<blob url> for JS modules (parallel to cssCache below)
+const jsCache = new Map<string, Promise<string>>();
+// absolute url -> fetcher and its options
+// __mfDyn should reuse the right load context for each module's chunks request.
 const contexts = new Map<string, BlobLoadContext>();
 // original css href -> in-flight/settled load, so concurrent or repeat calls
 // don't re-fetch or double-inject the stylesheet.
@@ -132,7 +132,7 @@ function loadModuleImpl(url: string, ctx: BlobLoadContext): Promise<string> {
   // Register the context for this url on every call so __mfDyn uses the latest
   // headers for that module's dynamic imports, even when the blob is cached.
   contexts.set(url, ctx);
-  if (cache.has(url)) return cache.get(url)!;
+  if (jsCache.has(url)) return jsCache.get(url)!;
 
   const promise = (async () => {
     const raw = await fetchText(url, ctx);
@@ -153,11 +153,11 @@ function loadModuleImpl(url: string, ctx: BlobLoadContext): Promise<string> {
     );
   })();
 
-  cache.set(url, promise);
+  jsCache.set(url, promise);
   // Don't permanently cache a failed load — allow a later retry (e.g. via the
   // runtime loadEntryError hook) to re-fetch instead of replaying the rejection.
   promise.catch(() => {
-    if (cache.get(url) === promise) cache.delete(url);
+    if (jsCache.get(url) === promise) jsCache.delete(url);
   });
   return promise;
 }
@@ -170,7 +170,7 @@ export const loadModule: ((
   clearCache: () => void;
 } = Object.assign(loadModuleImpl, {
   clearCache: () => {
-    cache.clear();
+    jsCache.clear();
     contexts.clear();
     cssCache.clear();
   },
