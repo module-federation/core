@@ -64,21 +64,31 @@ export interface BlobLoadContext {
   customFetch?: BlobFetcher;
 }
 
-// absolute url -> fetcher and its options
-// __mfDyn should reuse the right load context for each module's chunks request.
-// Stored on globalThis so that if two bundled copies/versions of the SDK exist,
-// a blob module created by one copy still resolves its fetch context through
-// whichever copy's __mfDyn shim happens to be installed — every copy reads and
-// writes the same shared registry, so contexts are never lost on overwrite.
-const CONTEXTS_KEY = '__MF_BLOB_LOAD_CONTEXTS__';
-const contexts: Map<string, BlobLoadContext> =
-  ((globalThis as Record<string, unknown>)[CONTEXTS_KEY] as
-    | Map<string, BlobLoadContext>
-    | undefined) ||
-  ((globalThis as Record<string, unknown>)[CONTEXTS_KEY] = new Map<
-    string,
-    BlobLoadContext
-  >());
+// The dynamic-import shim installed on globalThis as __mfDyn. Its context
+// registry (absolute url -> fetcher + options) hangs off the function itself
+// rather than living in a second global: if two bundled copies/versions of the
+// SDK coexist, every copy reads and writes the same map through whichever shim
+// is installed, so a blob module's dynamic imports never lose their fetch
+// context — and we don't pollute globalThis with an extra variable.
+type MFDynShim = ((base: string, spec: string) => Promise<unknown>) & {
+  contexts?: Map<string, BlobLoadContext>;
+};
+
+// Resolve the shared context registry, lazily installing the global __mfDyn
+// shim on first use (loadModule can run before the shim is formally installed).
+// An existing shim from another SDK copy is reused, never overwritten.
+function getContexts(): Map<string, BlobLoadContext> {
+  const g = globalThis as Record<string, unknown>;
+  let shim = g['__mfDyn'] as MFDynShim | undefined;
+  if (typeof shim !== 'function') {
+    shim = createDynImportShim();
+    g['__mfDyn'] = shim;
+  }
+  if (!shim.contexts) {
+    shim.contexts = new Map<string, BlobLoadContext>();
+  }
+  return shim.contexts;
+}
 // absolute url -> Promise<blob url> for JS modules
 const jsCache = new Map<string, Promise<string>>();
 // absolute url -> in-flight/settled promise, used to prevent double-inject the stylesheet.
@@ -137,7 +147,7 @@ export async function fetchText(
 function loadModuleImpl(url: string, ctx: BlobLoadContext): Promise<string> {
   // Register the context for this url on every call so __mfDyn uses the latest
   // headers for that module's dynamic imports, even when the blob is cached.
-  contexts.set(url, ctx);
+  getContexts().set(url, ctx);
   if (jsCache.has(url)) return jsCache.get(url)!;
 
   const promise = (async () => {
@@ -179,35 +189,38 @@ export const loadModule: ((
 } = Object.assign(loadModuleImpl, {
   clearCache: () => {
     jsCache.clear();
-    contexts.clear();
+    getContexts().clear();
     cssCache.clear();
   },
 });
+
+// Runtime dynamic-import shim: resolve url + fetch from cache or with headers +
+// import as blob. Reads its context off the shared registry (getContexts) so it
+// works for blob modules created by any bundled copy of the SDK.
+function createDynImportShim(): MFDynShim {
+  return (async (base: string, spec: string) => {
+    const resolved = resolveSpec(spec, base);
+    if (/^(blob:|data:)/.test(resolved)) {
+      return import(/* webpackIgnore: true */ /* @vite-ignore */ resolved);
+    }
+    const ctx = getContexts().get(base) || {};
+    return import(
+      /* webpackIgnore: true */ /* @vite-ignore */ await loadModule(
+        resolved,
+        ctx,
+      )
+    );
+  }) as MFDynShim;
+}
 
 function installMFDynImportShim(): void {
   if (dynImportInstalled) return;
   dynImportInstalled = true;
 
-  const g = globalThis as Record<string, unknown>;
-  // Don't clobber a shim already installed by another bundled copy of the SDK:
-  // its closure resolves contexts through the same shared registry, so blob
-  // modules from either copy keep working through whichever shim wins.
-  if (typeof g['__mfDyn'] !== 'function') {
-    // Runtime dynamic-import shim: resolve url + fetch from cache or with headers + import as blob.
-    g['__mfDyn'] = async (base: string, spec: string) => {
-      const resolved = resolveSpec(spec, base);
-      if (/^(blob:|data:)/.test(resolved)) {
-        return import(/* webpackIgnore: true */ /* @vite-ignore */ resolved);
-      }
-      const ctx = contexts.get(base) || {};
-      return import(
-        /* webpackIgnore: true */ /* @vite-ignore */ await loadModule(
-          resolved,
-          ctx,
-        )
-      );
-    };
-  }
+  // Ensure the single global __mfDyn shim (and its shared contexts map) exists.
+  // getContexts() installs the shim on first use and never clobbers one already
+  // installed by another bundled copy of the SDK.
+  getContexts();
 
   // The vite preload helper creates native <link> preloads (no auth header) as a
   // perf hint; those 401 errors should be ignored instead of throwing — real loads go via __mfDyn.
