@@ -83,7 +83,7 @@ function isResponseLike(res: unknown): res is Response {
 }
 
 // Create a const copy of headers, to avoid the case when the original headers are mutated by fetcher.
-function toHeaderObject(
+export function toHeaderObject(
   headers: RequestInit['headers'],
 ): Record<string, string> {
   if (!headers) return {};

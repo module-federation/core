@@ -102,7 +102,7 @@ describe('ModuleFederation', () => {
     // Value is different from the registered remote
     expect(newApp1Res).toBe('hello app1 entry2');
   });
-  it('stamps call-level fetchOptions onto each remote that lacks its own', () => {
+  it('merges call-level fetchOptions with each remote (remote wins on conflict)', () => {
     const FM = new ModuleFederation({
       name: '@federation/instance',
       version: '1.0.1',
@@ -111,22 +111,35 @@ describe('ModuleFederation', () => {
     const fetchOptions: RequestInit = {
       headers: { Authorization: 'Bearer t' },
     };
+    // No own fetchOptions: gets the call-level defaults.
     const r1 = {
       name: '@register-remotes/fetch-a',
       entry: 'http://localhost:1111/resources/register-remotes/app1/a.js',
     };
+    // Own header added: merged on top of the call-level Authorization.
     const r2 = {
       name: '@register-remotes/fetch-b',
       entry: 'http://localhost:1111/resources/register-remotes/app1/b.js',
       fetchOptions: { headers: { 'X-B': '1' } } as RequestInit,
     };
-    FM.registerRemotes([r1, r2], { fetchOptions });
+    // Own header conflicts with the call-level one: remote wins.
+    const r3 = {
+      name: '@register-remotes/fetch-c',
+      entry: 'http://localhost:1111/resources/register-remotes/app1/c.js',
+      fetchOptions: {
+        headers: { Authorization: 'Bearer override' },
+      } as RequestInit,
+    };
+    FM.registerRemotes([r1, r2, r3], { fetchOptions });
     const stored = FM.options.remotes;
     expect(
       stored.find((r) => r.name === '@register-remotes/fetch-a')!.fetchOptions,
-    ).toBe(fetchOptions);
+    ).toEqual({ headers: { Authorization: 'Bearer t' } });
     expect(
       stored.find((r) => r.name === '@register-remotes/fetch-b')!.fetchOptions,
-    ).toEqual({ headers: { 'X-B': '1' } });
+    ).toEqual({ headers: { Authorization: 'Bearer t', 'X-B': '1' } });
+    expect(
+      stored.find((r) => r.name === '@register-remotes/fetch-c')!.fetchOptions,
+    ).toEqual({ headers: { Authorization: 'Bearer override' } });
   });
 });
