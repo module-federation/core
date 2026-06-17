@@ -37,6 +37,29 @@ describe('loadEntryDom ESM fetchOptions gate', () => {
     );
   });
 
+  it('wraps blob loader failures as RUNTIME_008 so loadEntryError recovery can fire', async () => {
+    loadEsmEntryWithFetch.mockRejectedValueOnce(
+      new Error('BlobLoaderNetworkError: 401 Unauthorized for http://x/e.js'),
+    );
+    const remoteInfo: any = {
+      name: 'a',
+      entry: 'http://x/e.js',
+      type: 'module',
+      entryGlobalName: 'a',
+      shareScope: 'default',
+      fetchOptions: { headers: { Authorization: 'Bearer t' } },
+    };
+    const err = await __loadEntryDomForTest({ remoteInfo, loaderHook }).then(
+      () => undefined,
+      (e: unknown) => e,
+    );
+    expect(err).toBeInstanceOf(Error);
+    // RUNTIME_008 = 'RUNTIME-008'; getRemoteEntry keys recovery off this code.
+    expect((err as Error).message).toContain('RUNTIME-008');
+    // The original failure is preserved for diagnostics.
+    expect((err as Error).message).toContain('401 Unauthorized');
+  });
+
   it('does NOT use the blob loader for module remotes without fetchOptions', async () => {
     const remoteInfo: any = {
       name: 'b',

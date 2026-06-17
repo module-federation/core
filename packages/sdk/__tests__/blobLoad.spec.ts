@@ -210,3 +210,40 @@ describe('loadCssWithFetch', () => {
     expect(document.head.getElementsByTagName('link').length).toBe(1);
   });
 });
+
+describe('cross-instance dynamic-import context', () => {
+  const CONTEXTS_KEY = '__MF_BLOB_LOAD_CONTEXTS__';
+
+  beforeEach(() => {
+    (global as any).fetch = jest
+      .fn()
+      .mockResolvedValue({ ok: true, text: () => Promise.resolve('') });
+    (global.URL as any).createObjectURL = jest.fn(() => 'blob:m');
+    loadModule.clearCache();
+  });
+
+  it('stores load contexts in a shared globalThis registry', async () => {
+    const ctx = { fetchOptions: { headers: { Authorization: 'Bearer t' } } };
+    await loadModule('https://b.com/entry.js', ctx);
+    // A second bundled copy of the SDK reads the same global map, so a blob
+    // module from this copy keeps its fetch context regardless of which copy's
+    // __mfDyn shim is installed.
+    const registry = (globalThis as Record<string, unknown>)[
+      CONTEXTS_KEY
+    ] as Map<string, unknown>;
+    expect(registry).toBeInstanceOf(Map);
+    expect(registry.get('https://b.com/entry.js')).toBe(ctx);
+  });
+
+  it('does not clobber a __mfDyn shim already installed by another copy', async () => {
+    const existing = jest.fn();
+    (globalThis as Record<string, unknown>)['__mfDyn'] = existing;
+    // The shim installs synchronously before the (jsdom-unsupported) blob
+    // import, so swallow the import rejection; we only assert the shim survived.
+    await loadEsmEntryWithFetch({ entry: 'https://b.com/e.js' }).catch(
+      () => undefined,
+    );
+    expect((globalThis as Record<string, unknown>)['__mfDyn']).toBe(existing);
+    delete (globalThis as Record<string, unknown>)['__mfDyn'];
+  });
+});
