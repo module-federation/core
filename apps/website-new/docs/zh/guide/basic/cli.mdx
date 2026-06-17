@@ -1,9 +1,9 @@
 # 命令行工具
 
-{props.name || 'Module Federation'} 提供了轻量的命令行工具 `mf`，由 <code>{props.cmdTool || '@module-federation/enhanced'}</code> 提供。
+{props.name || 'Module Federation'} 提供了轻量的命令行工具 <code>{props.cmd || 'mf'}</code>，由 <code>{props.cmdTool || '@module-federation/enhanced'}</code> 提供。
 
 :::note
-通常情况下，按照[接入方案](/integrations/index.html)接入 Module Federation 后，<code>{props.cmdTool || '@module-federation/enhanced'}</code> 会包含在依赖链中，可直接使用 `mf` 命令。否则，你需要先在项目中手动安装它，再运行下文中的命令。
+通常情况下，按照 [接入方案](/integrations/index.html) 完成接入后，<code>{props.cmdTool || '@module-federation/enhanced'}</code> 会包含在依赖链中，可直接使用本命令。否则，你需要先在项目中手动安装它，再执行下文中的命令。
 :::
 
 ## 查看所有命令
@@ -11,23 +11,23 @@
 import React from 'react';
 import ViewAllCmdsMdx from '@docs/zh/_components/cli/view-all-cmds';
 
-{/* rspress flattenMdxContent issue  */}
+{/* rspress flattenMdxContent issue */}
 {props.show || React.createElement(ViewAllCmdsMdx)}
 
 ## 公共选项
 
 {props.name || 'Module Federation'} CLI 提供了一些公共选项，可以用于所有命令：
 
-| 选项                       | 描述                                                                                                              |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `-c, --config <config>`    | 指定配置文件路径，可以为相对路径或绝对路径，默认值为 {props.configName ? props.configName : 'module-federation.config.ts'}      |
-| `-m, --mode <mode>`        | 指定运行环境，可以选择 "dev" 或 "prod" ，默认值为 "dev" ，设置后会按照值自动往 `process.env.NODE_ENV` 环境变量注入  "development" 或 "production"   |
-| `-h, --help`               | 显示命令帮助                                                                                                      |
+| 选项                    | 描述                                                                                                                                             |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `-c, --config <config>` | 指定配置文件路径，可以为相对路径或绝对路径，默认值为 {props.configName ? props.configName : 'module-federation.config.ts'}                       |
+| `-m, --mode <mode>`     | 指定运行环境，可以选择 "dev" 或 "prod" ，默认值为 "dev" ，设置后会按照值自动往 `process.env.NODE_ENV` 环境变量注入 "development" 或 "production" |
+| `-h, --help`            | 显示命令帮助                                                                                                                                     |
 
 ## {props.cmd || 'mf'} dts
 
-  <code>{props.cmd || 'mf'} dts</code>
-  命令用于拉取或生成 TypeScript 类型声明文件。
+<code>{props.cmd || 'mf'} dts</code>
+命令用于拉取或生成 TypeScript 类型声明文件。
 
 import CommandInfo from '@docs/_snippets/cli/cmd-info';
 
@@ -35,8 +35,11 @@ import CommandInfo from '@docs/_snippets/cli/cmd-info';
 
 :::info 注意
 
-<code>{props.cmd || 'mf'} dts</code> 命令会自动根据 <code>{props.configName || 'module-federation.config.ts'}</code> 中的配置生成或拉取类型声明文件。 这意味着你必须提供一个有效的配置文件，否则命令将无法正常运行。
+<code>{props.cmd || 'mf'} dts</code> 命令会自动根据
+<code>{props.configName || 'module-federation.config.ts'}</code>
+中的配置生成或拉取类型声明文件。
+这意味着你必须提供一个有效的配置文件，否则命令将无法正常运行。
 
-如果你是只使用了 runtime API，那么你需要创建一份临时的 <code>{props.configName || 'module-federation.config.ts'}</code> 文件，配置 [dts.consumeTypes.remoteTypeUrls](/configure/dts.html#remotetypeurls)，然后运行 <code>{props.cmd || 'mf'} dts</code>  命令。
+如果你是只使用了 runtime API，那么你需要创建一份临时的 <code>{props.configName || 'module-federation.config.ts'}</code> 文件，配置 [dts.consumeTypes.remoteTypeUrls](/configure/dts.html#remotetypeurls)，然后运行 <code>{props.cmd || 'mf'} dts</code> 命令。
 
 :::

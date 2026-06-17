@@ -95,6 +95,21 @@ In Modern.js v3, component-level data fetching has been built into the `@module-
 
 All data fetching APIs are placed in `@module-federation/modern-js-v3/data-fetch`. You can import and use them from this subpath.
 
+## Bridge API
+
+See [React Bridge](/guide/bridge/react/getting-started.html).
+
+In Modern.js v3, Bridge APIs are built into the `@module-federation/modern-js-v3` plugin, so you no longer need to install `@module-federation/bridge-react` separately to use Bridge APIs.
+
+All Bridge APIs are placed in `@module-federation/modern-js-v3/react`. You can import and use them from this subpath. If you need to explicitly distinguish calls to `createBridgeComponent` for React 18 or React 19, the Modern.js v3 plugin uses slightly different export paths:
+
+```ts
+// @module-federation/modern-js-v3
+import { createBridgeComponent } from '@module-federation/modern-js-v3/react'; // React 16/17
+import { createBridgeComponent } from '@module-federation/modern-js-v3/react-v18'; // React 18
+import { createBridgeComponent } from '@module-federation/modern-js-v3/react-v19'; // React 19
+```
+
 ## Runtime API
 
 All Module Federation Runtime APIs are placed in `@module-federation/modern-js-v3/runtime`. You can import and use them from this subpath.
