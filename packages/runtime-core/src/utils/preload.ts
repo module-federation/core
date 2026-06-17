@@ -188,7 +188,7 @@ function waitForLinkPreload({
 
 // When the remote carries fetchOptions, CSS must be fetched WITH headers and
 // injected as a blob <link> — a native <link href> cannot carry headers, and a
-// rel=preload hint would 401. Mirrors loadCss in the loader PoC.
+// rel=preload hint would 401.
 function waitForCssFetch({
   host,
   remoteInfo,

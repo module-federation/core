@@ -62,12 +62,8 @@ describe('preloadAssets CSS with fetchOptions', () => {
       jsAssetsWithoutEntry: [],
       entryAssets: [],
     };
-    // jsdom env (see vitest.config.ts) provides DOM, so the no-fetchOptions
-    // else-branch (waitForLinkPreload -> createLink) runs cleanly without a
-    // swallowing .catch. createLink resolves on the <link> load event, which
-    // jsdom does not dispatch on its own, so we fire it (as a real browser
-    // would) to let the branch settle. A genuine crash before/during the
-    // branch would still reject and fail the test.
+    // We must fire the load event for the <link> created by createLink function,
+    // this mimics the browser behavior and let the branch settle.
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((m) =>
         m.addedNodes.forEach((node) => {
