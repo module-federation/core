@@ -39,6 +39,31 @@ describe('preloadAssets CSS with fetchOptions', () => {
     );
   });
 
+  it('does NOT apply authenticated CSS during a preload hint (useLinkPreload)', async () => {
+    const remoteInfo: any = {
+      name: 'a',
+      entry: 'http://x/e.js',
+      type: 'module',
+      entryGlobalName: 'a',
+      shareScope: 'default',
+      fetchOptions: { headers: { Authorization: 'Bearer t' } },
+    };
+    const host: any = {
+      options: { inBrowser: true },
+      loaderHook: { lifecycle: { fetch: { emit: vi.fn() } } },
+    };
+    const assets: any = {
+      cssAssets: ['http://x/a.css'],
+      jsAssetsWithoutEntry: [],
+      entryAssets: [],
+    };
+    // useLinkPreload defaults to true (preloadRemote). The blob loader injects a
+    // rel=stylesheet that would apply the remote's CSS before it is loaded, so it
+    // must be skipped here rather than overriding host styles.
+    await preloadAssets(remoteInfo, host, assets);
+    expect(spy).not.toHaveBeenCalled();
+  });
+
   it('does NOT use the blob loader when fetchOptions is absent', async () => {
     const remoteInfo: any = {
       name: 'b',

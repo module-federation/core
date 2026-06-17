@@ -314,16 +314,24 @@ export function preloadAssets(
     });
 
     if (remoteInfo.fetchOptions) {
-      cssAssets.forEach((cssUrl) => {
-        results.push(
-          waitForCssFetch({
-            host,
-            remoteInfo,
-            url: cssUrl,
-            context: createResourceContext(baseContext, 'css'),
-          }),
-        );
-      });
+      // Authenticated CSS must be fetched WITH headers and injected as a blob
+      // <link rel=stylesheet> — which *applies* it. Only do that during an
+      // actual load (useLinkPreload=false). During a preload hint we skip it:
+      // a native rel=preload can't carry headers (it would 401), and applying
+      // the remote's stylesheet now would override host styles before the
+      // remote is loaded. The stylesheet is fetched+applied later, on load.
+      if (!useLinkPreload) {
+        cssAssets.forEach((cssUrl) => {
+          results.push(
+            waitForCssFetch({
+              host,
+              remoteInfo,
+              url: cssUrl,
+              context: createResourceContext(baseContext, 'css'),
+            }),
+          );
+        });
+      }
     } else if (useLinkPreload) {
       const defaultAttrs = {
         rel: 'preload',

@@ -66,7 +66,19 @@ export interface BlobLoadContext {
 
 // absolute url -> fetcher and its options
 // __mfDyn should reuse the right load context for each module's chunks request.
-const contexts = new Map<string, BlobLoadContext>();
+// Stored on globalThis so that if two bundled copies/versions of the SDK exist,
+// a blob module created by one copy still resolves its fetch context through
+// whichever copy's __mfDyn shim happens to be installed — every copy reads and
+// writes the same shared registry, so contexts are never lost on overwrite.
+const CONTEXTS_KEY = '__MF_BLOB_LOAD_CONTEXTS__';
+const contexts: Map<string, BlobLoadContext> =
+  ((globalThis as Record<string, unknown>)[CONTEXTS_KEY] as
+    | Map<string, BlobLoadContext>
+    | undefined) ||
+  ((globalThis as Record<string, unknown>)[CONTEXTS_KEY] = new Map<
+    string,
+    BlobLoadContext
+  >());
 // absolute url -> Promise<blob url> for JS modules
 const jsCache = new Map<string, Promise<string>>();
 // absolute url -> in-flight/settled promise, used to prevent double-inject the stylesheet.
@@ -176,23 +188,26 @@ function installMFDynImportShim(): void {
   if (dynImportInstalled) return;
   dynImportInstalled = true;
 
-  // Runtime dynamic-import shim: resolve url + fetch from cache or with headers + import as blob.
-  (globalThis as Record<string, unknown>)['__mfDyn'] = async (
-    base: string,
-    spec: string,
-  ) => {
-    const resolved = resolveSpec(spec, base);
-    if (/^(blob:|data:)/.test(resolved)) {
-      return import(/* webpackIgnore: true */ /* @vite-ignore */ resolved);
-    }
-    const ctx = contexts.get(base) || {};
-    return import(
-      /* webpackIgnore: true */ /* @vite-ignore */ await loadModule(
-        resolved,
-        ctx,
-      )
-    );
-  };
+  const g = globalThis as Record<string, unknown>;
+  // Don't clobber a shim already installed by another bundled copy of the SDK:
+  // its closure resolves contexts through the same shared registry, so blob
+  // modules from either copy keep working through whichever shim wins.
+  if (typeof g['__mfDyn'] !== 'function') {
+    // Runtime dynamic-import shim: resolve url + fetch from cache or with headers + import as blob.
+    g['__mfDyn'] = async (base: string, spec: string) => {
+      const resolved = resolveSpec(spec, base);
+      if (/^(blob:|data:)/.test(resolved)) {
+        return import(/* webpackIgnore: true */ /* @vite-ignore */ resolved);
+      }
+      const ctx = contexts.get(base) || {};
+      return import(
+        /* webpackIgnore: true */ /* @vite-ignore */ await loadModule(
+          resolved,
+          ctx,
+        )
+      );
+    };
+  }
 
   // The vite preload helper creates native <link> preloads (no auth header) as a
   // perf hint; those 401 errors should be ignored instead of throwing — real loads go via __mfDyn.

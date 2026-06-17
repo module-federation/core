@@ -215,6 +215,24 @@ async function loadEntryDom({
             // Response | void | false shape the sdk loader expects.
             customFetch: async (url, init) =>
               loaderHook.lifecycle.fetch.emit(url, init, remoteInfo),
+          }).catch((loadError: unknown) => {
+            // Mirror loadEntryScript: surface blob-loader fetch/exec failures
+            // (e.g. BlobLoaderNetworkError on a 401) as RUNTIME_008 so
+            // getRemoteEntry's loadEntryError recovery — token refresh,
+            // failover — still fires for authenticated ESM remotes.
+            const originalMsg =
+              loadError instanceof Error
+                ? loadError.message
+                : String(loadError);
+            error(
+              RUNTIME_008,
+              runtimeDescMap,
+              {
+                remoteName: name,
+                resourceUrl: entry,
+              },
+              originalMsg,
+            );
           }) as Promise<RemoteEntryExports>)
         : loadEsmEntry({ entry, remoteEntryExports });
     case 'system':
