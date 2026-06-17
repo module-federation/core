@@ -44,10 +44,9 @@ describe('rewriteModuleCode', () => {
     const src = `import a from "./a.js";\nexport { b } from "/b.js";\nimport c from "react";`;
     const { deps } = rewriteModuleCode(src, url);
     expect(deps.map((d) => d.spec).sort()).toEqual(['./a.js', '/b.js']);
-    expect(deps.find((d) => d.spec === './a.js')!.depUrl).toBe(
-      'https://b.com/app/a.js',
-    );
+
     const aDep = deps.find((d) => d.spec === './a.js')!;
+    expect(aDep.depUrl).toBe('https://b.com/app/a.js');
     expect(aDep.original).toBe('from "./a.js"');
     expect(aDep.quote).toBe('"');
   });
@@ -79,8 +78,8 @@ describe('fetchText', () => {
       fetchOptions: { headers: { Authorization: 'Bearer t' } },
     });
     expect(text).toBe('CODE');
-    const init = (global.fetch as jest.Mock).mock.calls[0][1];
-    expect(init.headers).toEqual({ Authorization: 'Bearer t' });
+    const requestInit = (global.fetch as jest.Mock).mock.calls[0][1];
+    expect(requestInit.headers).toEqual({ Authorization: 'Bearer t' });
   });
 
   it('prefers customFetch when it returns a Response', async () => {
@@ -122,9 +121,7 @@ describe('fetchText', () => {
 describe('loadModule', () => {
   beforeEach(() => {
     (global as any).fetch = jest.fn();
-    (global.URL as any).createObjectURL = jest.fn(
-      (blob: Blob) => `blob:${(blob as any).__id || 'x'}`,
-    );
+    (global.URL as any).createObjectURL = jest.fn(() => `blob:`);
     loadModule.clearCache();
   });
 
@@ -138,9 +135,11 @@ describe('loadModule', () => {
     );
     const blobUrl = await loadModule('https://b.com/entry.js', {});
     expect(blobUrl).toMatch(/^blob:/);
+    // recursively loads all dependencies
     expect(
       (global.fetch as jest.Mock).mock.calls.map((c) => c[0]).sort(),
     ).toEqual(['https://b.com/dep.js', 'https://b.com/entry.js']);
+    // only fetches once and caches them, reload does not invoke more fetches
     await loadModule('https://b.com/entry.js', {});
     expect((global.fetch as jest.Mock).mock.calls.length).toBe(2);
   });
