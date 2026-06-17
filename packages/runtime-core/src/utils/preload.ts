@@ -313,59 +313,38 @@ export function preloadAssets(
       );
     });
 
-    if (remoteInfo.fetchOptions) {
-      // Authenticated CSS must be fetched WITH headers and injected as a blob
-      // <link rel=stylesheet> — which *applies* it. Only do that during an
-      // actual load (useLinkPreload=false). During a preload hint we skip it:
-      // a native rel=preload can't carry headers (it would 401), and applying
-      // the remote's stylesheet now would override host styles before the
-      // remote is loaded. The stylesheet is fetched+applied later, on load.
-      if (!useLinkPreload) {
-        cssAssets.forEach((cssUrl) => {
+    // Push the preload/load task for a single CSS asset.
+    const pushCssAsset = (cssUrl: string) => {
+      const context = createResourceContext(baseContext, 'css');
+
+      // Authenticated CSS: fetch WITH headers and inject as a blob stylesheet
+      // We should only do that on an actual load because
+      // 1. native rel=preload can't carry headers so we must skip it
+      // 2. applying the remote's CSS in preload might override host styles before remote module is loaded
+      if (remoteInfo.fetchOptions) {
+        if (!useLinkPreload) {
           results.push(
-            waitForCssFetch({
-              host,
-              remoteInfo,
-              url: cssUrl,
-              context: createResourceContext(baseContext, 'css'),
-            }),
+            waitForCssFetch({ host, remoteInfo, url: cssUrl, context }),
           );
-        });
+        }
+        return;
       }
-    } else if (useLinkPreload) {
-      const defaultAttrs = {
-        rel: 'preload',
-        as: 'style',
-      };
-      cssAssets.forEach((cssUrl) => {
-        results.push(
-          waitForLinkPreload({
-            host,
-            remoteInfo,
-            url: cssUrl,
-            attrs: defaultAttrs,
-            context: createResourceContext(baseContext, 'css'),
-          }),
-        );
-      });
-    } else {
-      const defaultAttrs = {
-        rel: 'stylesheet',
-        type: 'text/css',
-      };
-      cssAssets.forEach((cssUrl) => {
-        results.push(
-          waitForLinkPreload({
-            host,
-            remoteInfo,
-            url: cssUrl,
-            attrs: defaultAttrs,
-            needDeleteLink: false,
-            context: createResourceContext(baseContext, 'css'),
-          }),
-        );
-      });
-    }
+
+      // Plain CSS via <link>: a rel=preload hint, or an applied rel=stylesheet.
+      results.push(
+        waitForLinkPreload({
+          host,
+          remoteInfo,
+          url: cssUrl,
+          attrs: useLinkPreload
+            ? { rel: 'preload', as: 'style' }
+            : { rel: 'stylesheet', type: 'text/css' },
+          needDeleteLink: useLinkPreload ? undefined : false,
+          context,
+        }),
+      );
+    };
+    cssAssets.forEach(pushCssAsset);
 
     if (useLinkPreload) {
       const defaultAttrs = {
