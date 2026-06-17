@@ -2,20 +2,6 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { ModuleFederation } from '../src';
 import { resetFederationGlobalInfo } from '../src/global';
 
-// Uses the snapshot manifest fixtures served by the MSW mock server
-// (see __tests__/mock + __tests__/resources/snapshot). When a remote is
-// registered with fetchOptions, the manifest network request must carry
-// those fetchOptions.
-//
-// The production change lives in SnapshotHandler.getManifestJson, where the
-// fetch hook is invoked as:
-//   loaderHook.lifecycle.fetch.emit(manifestUrl, remoteInfo.fetchOptions ?? {}, ...)
-// and the native fallback as:
-//   fetch(manifestUrl, remoteInfo.fetchOptions ?? {})
-//
-// We assert on the fetch-hook emit arguments (the first network entry point),
-// which deterministically receive the fetchOptions regardless of whether a
-// plugin or the native fetch ultimately resolves the request.
 describe('manifest fetch carries fetchOptions', () => {
   afterEach(() => {
     resetFederationGlobalInfo();
@@ -57,7 +43,7 @@ describe('manifest fetch carries fetchOptions', () => {
     expect(manifestCall).toBeTruthy();
     // 2nd argument is the request options threaded from the remote.
     expect(manifestCall?.[1]).toEqual(fetchOptions);
-    // remoteInfo (3rd argument) carries the fetchOptions too.
+    // 3rd argument is remoteInfo, and should carry the fetchOptions too.
     expect((manifestCall?.[2] as any)?.fetchOptions).toEqual(fetchOptions);
   });
 });
