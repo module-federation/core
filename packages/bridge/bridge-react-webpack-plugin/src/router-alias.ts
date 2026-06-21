@@ -8,22 +8,52 @@ const reactRouterDomV6AliasPath =
   '@module-federation/bridge-react/dist/router-v6.es.js';
 const reactRouterDomV7AliasPath =
   '@module-federation/bridge-react/dist/router-v7.es.js';
+const reactRouterV8AliasPath =
+  '@module-federation/bridge-react/dist/router-v8.es.js';
+const reactRouterV8DomAliasPath =
+  '@module-federation/bridge-react/dist/router-v8-dom.es.js';
+const reactRouterRuntimeAlias =
+  '@module-federation/bridge-react/router-runtime$';
+
+type BridgeRouterAliasOptions = {
+  reactRouterAlias?: string;
+  reactRouterDomAlias?: string;
+};
+
+const getPackageInfo = (
+  routerPackagePath: string,
+): { majorVersion: number; packagePath: string } | null => {
+  const packageJsonPath = findPackageJson(routerPackagePath);
+  if (!packageJsonPath) {
+    return null;
+  }
+
+  const packageJsonContent = JSON.parse(
+    fs.readFileSync(packageJsonPath, 'utf-8'),
+  );
+
+  return {
+    majorVersion: checkVersion(packageJsonContent.version),
+    packagePath: path.dirname(packageJsonPath),
+  };
+};
 
 const createReactRouterV7Alias = (
-  reactRouterDomPath: string,
+  routerPackagePath: string,
 ): Record<string, string> => {
   const baseAlias = {
     'react-router$': reactRouterDomV7AliasPath,
     'react-router-dom$': reactRouterDomV7AliasPath, // Keep compatibility for old imports
+    [reactRouterRuntimeAlias]: reactRouterDomV7AliasPath,
   };
 
   const resolvedDistPaths: Record<string, string> = {
-    'react-router/dist/development/index.js': reactRouterDomPath,
-    'react-router/dist/production/index.js': reactRouterDomPath,
+    'react-router/dist/development/index.js': routerPackagePath,
+    'react-router/dist/production/index.js': routerPackagePath,
   };
 
   const legacyCompatibility: Record<string, string> = {
-    'react-router-dom/dist/index.js': reactRouterDomPath,
+    'react-router-dom/dist/index.js': routerPackagePath,
   };
 
   return {
@@ -33,77 +63,137 @@ const createReactRouterV7Alias = (
   };
 };
 
+const createReactRouterV8Alias = (
+  routerPackagePath: string,
+): Record<string, string> => {
+  return {
+    'react-router$': reactRouterV8AliasPath,
+    'react-router/dom$': reactRouterV8DomAliasPath,
+    [reactRouterRuntimeAlias]: reactRouterV8AliasPath,
+    'react-router/dist/development/index.js': routerPackagePath,
+    'react-router/dist/production/index.js': routerPackagePath,
+    'react-router/dist/development/dom-export.js': path.join(
+      routerPackagePath,
+      'dist/development/dom-export.js',
+    ),
+    'react-router/dist/production/dom-export.js': path.join(
+      routerPackagePath,
+      'dist/production/dom-export.js',
+    ),
+  };
+};
+
 const createReactRouterV5Alias = (
-  reactRouterDomPath: string,
+  routerPackagePath: string,
 ): Record<string, string> => {
   return {
     'react-router-dom$': reactRouterDomV5AliasPath,
-    'react-router-dom/index.js': reactRouterDomPath,
+    [reactRouterRuntimeAlias]: reactRouterDomV5AliasPath,
+    'react-router-dom/index.js': routerPackagePath,
   };
 };
 
 const createReactRouterV6Alias = (
-  reactRouterDomPath: string,
+  routerPackagePath: string,
 ): Record<string, string> => {
   return {
     'react-router-dom$': reactRouterDomV6AliasPath,
-    'react-router-dom/dist/index.js': reactRouterDomPath,
+    [reactRouterRuntimeAlias]: reactRouterDomV6AliasPath,
+    'react-router-dom/dist/index.js': routerPackagePath,
   };
 };
 
 const setRouterAlias = (
   majorVersion: number,
-  reactRouterDomPath: string,
+  routerPackagePath: string,
 ): Record<string, string> => {
   switch (majorVersion) {
     case 5:
-      return createReactRouterV5Alias(reactRouterDomPath);
+      return createReactRouterV5Alias(routerPackagePath);
     case 6:
-      return createReactRouterV6Alias(reactRouterDomPath);
+      return createReactRouterV6Alias(routerPackagePath);
     case 7:
-      return createReactRouterV7Alias(reactRouterDomPath);
+      return createReactRouterV7Alias(routerPackagePath);
+    case 8:
+      return createReactRouterV8Alias(routerPackagePath);
     default:
       console.warn(
         `Unsupported React Router version: ${majorVersion}. Defaulting to v7.`,
       );
-      return createReactRouterV7Alias(reactRouterDomPath);
+      return createReactRouterV7Alias(routerPackagePath);
   }
 };
 
-export const getBridgeRouterAlias = (
-  originalAlias: string,
-): Record<string, string> => {
-  const userDependencies = getDependencies();
-  let reactRouterDomPath = '';
+const resolveAliasPackagePath = (
+  aliasOptions: BridgeRouterAliasOptions,
+): string => {
+  if (aliasOptions.reactRouterAlias) {
+    const reactRouterPackage = getPackageInfo(aliasOptions.reactRouterAlias);
 
-  if (originalAlias) {
-    reactRouterDomPath = originalAlias;
-  } else if (userDependencies['react-router']) {
-    // React Router v7 uses 'react-router' package name
-    reactRouterDomPath = path.resolve(
-      process.cwd(),
-      'node_modules/react-router',
-    );
-  } else if (userDependencies['react-router-dom']) {
-    // React Router v5/v6 uses 'react-router-dom' package name
-    reactRouterDomPath = path.resolve(
-      process.cwd(),
-      'node_modules/react-router-dom',
-    );
+    if (reactRouterPackage && reactRouterPackage.majorVersion >= 7) {
+      return reactRouterPackage.packagePath;
+    }
+
+    if (reactRouterPackage && reactRouterPackage.majorVersion < 7) {
+      return aliasOptions.reactRouterDomAlias || '';
+    }
   }
 
+  if (aliasOptions.reactRouterDomAlias) {
+    return aliasOptions.reactRouterDomAlias;
+  }
+
+  return aliasOptions.reactRouterAlias || '';
+};
+
+const resolveDependencyPackagePath = (
+  userDependencies: Record<string, string>,
+): string => {
+  const reactRouterPath = path.resolve(
+    process.cwd(),
+    'node_modules/react-router',
+  );
+
+  if (userDependencies['react-router']) {
+    const reactRouterPackage = getPackageInfo(reactRouterPath);
+
+    if (reactRouterPackage && reactRouterPackage.majorVersion >= 7) {
+      return reactRouterPath;
+    }
+  }
+
+  if (userDependencies['react-router-dom']) {
+    return path.resolve(process.cwd(), 'node_modules/react-router-dom');
+  }
+
+  if (userDependencies['react-router']) {
+    return reactRouterPath;
+  }
+
+  return '';
+};
+
+export const getBridgeRouterAlias = (
+  originalAlias?: string | BridgeRouterAliasOptions,
+): Record<string, string> => {
+  const aliasOptions =
+    typeof originalAlias === 'string'
+      ? { reactRouterDomAlias: originalAlias }
+      : originalAlias || {};
+  const userDependencies = getDependencies();
+  const routerPackagePath =
+    resolveAliasPackagePath(aliasOptions) ||
+    resolveDependencyPackagePath(userDependencies);
+
   // Generate alias based on detected router package
-  if (reactRouterDomPath) {
-    const packageJsonPath = findPackageJson(reactRouterDomPath);
+  if (routerPackagePath) {
+    const packageJsonPath = findPackageJson(routerPackagePath);
     if (packageJsonPath) {
       const packageJsonContent = JSON.parse(
         fs.readFileSync(packageJsonPath, 'utf-8'),
       );
       const majorVersion = checkVersion(packageJsonContent.version);
-      const bridgeRouterAlias = setRouterAlias(
-        majorVersion,
-        reactRouterDomPath,
-      );
+      const bridgeRouterAlias = setRouterAlias(majorVersion, routerPackagePath);
       console.log(
         '<<<<<<<<<<<<< bridgeRouterAlias >>>>>>>>>>>>>',
         bridgeRouterAlias,
@@ -115,6 +205,7 @@ export const getBridgeRouterAlias = (
   // Default to v6 which uses 'react-router-dom'
   const bridgeRouterAlias = {
     'react-router-dom$': reactRouterDomV6AliasPath,
+    [reactRouterRuntimeAlias]: reactRouterDomV6AliasPath,
   };
   console.log(
     '<<<<<<<<<<<<< default bridgeRouterAlias >>>>>>>>>>>>>',

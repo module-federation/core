@@ -40,4 +40,8 @@ function WraperRouter(props: Record<string, unknown>) {
 // it will be replace by react-router-dom/index.js in building phase
 export * from 'react-router-dom/';
 
+export function readReactRouter() {
+  return ReactRouterDom;
+}
+
 export { WraperRouter as BrowserRouter };

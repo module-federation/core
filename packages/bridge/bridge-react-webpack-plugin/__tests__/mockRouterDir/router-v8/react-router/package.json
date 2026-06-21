@@ -1,0 +1,36 @@
+{
+  "name": "react-router",
+  "version": "8.0.0",
+  "description": "Declarative routing for React applications",
+  "keywords": [
+    "react",
+    "router",
+    "route",
+    "routing"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/remix-run/react-router",
+    "directory": "packages/react-router"
+  },
+  "license": "MIT",
+  "author": "Remix Software <hello@remix.run>",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/production/index.d.ts",
+      "default": "./dist/production/index.js"
+    },
+    "./dom": {
+      "types": "./dist/production/dom-export.d.ts",
+      "default": "./dist/production/dom-export.js"
+    }
+  },
+  "peerDependencies": {
+    "react": ">=19.2.7",
+    "react-dom": ">=19.2.7"
+  },
+  "engines": {
+    "node": ">=22.22.0"
+  }
+}

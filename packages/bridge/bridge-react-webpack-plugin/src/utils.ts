@@ -16,8 +16,13 @@ export const checkVersion = (version: string) => {
     semver.lt(cleanVersion, '7.0.0')
   ) {
     return 6;
-  } else if (semver.gte(cleanVersion, '7.0.0')) {
+  } else if (
+    semver.gte(cleanVersion, '7.0.0') &&
+    semver.lt(cleanVersion, '8.0.0')
+  ) {
     return 7;
+  } else if (semver.gte(cleanVersion, '8.0.0')) {
+    return 8;
   }
 
   return 0;
