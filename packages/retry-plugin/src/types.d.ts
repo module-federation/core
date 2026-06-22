@@ -12,9 +12,10 @@ export type CommonRetryOptions = {
    */
   successTimes?: number;
   /**
-   * retry delay
+   * retry delay in milliseconds, or a function that returns delay per attempt.
+   * When a function, `attempt` is 1-indexed (the nth retry, not the initial call).
    */
-  retryDelay?: number;
+  retryDelay?: number | ((attempt: number) => number);
   /**
    * retry path
    */
