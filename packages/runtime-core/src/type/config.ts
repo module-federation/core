@@ -163,4 +163,5 @@ export type RemoteEntryExports = {
     initScope?: InitScope,
     remoteEntryInitOPtions?: RemoteEntryInitOptions,
   ) => void | Promise<void>;
+  __webpack_clear_cache__?: () => void;
 };

@@ -4,6 +4,8 @@ import {
   registerRemotes,
 } from '@module-federation/modern-js-v3/runtime';
 
+type LazyRemoteModule = { default: React.ComponentType<any> };
+
 registerRemotes([
   {
     name: 'dynamic_nested_remote',
@@ -13,7 +15,7 @@ registerRemotes([
 
 const DynamicNestedRemote = React.lazy(() =>
   loadRemote('dynamic_nested_remote/Content').then((m) => {
-    return m;
+    return m as LazyRemoteModule;
   }),
 );
 

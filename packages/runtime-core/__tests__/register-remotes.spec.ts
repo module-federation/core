@@ -1,5 +1,6 @@
 import { assert, describe, it, expect, vi } from 'vitest';
 import { ModuleFederation } from '../src/index';
+import { Global } from '../src/global';
 
 describe('ModuleFederation', () => {
   it('registers new remotes and loads them correctly', async () => {
@@ -287,5 +288,184 @@ describe('ModuleFederation', () => {
       }),
       origin: FM,
     });
+  });
+
+  it('clears loaded remote entry cache when removing a remote', async () => {
+    const entry =
+      'http://localhost:1111/resources/register-remotes/app1/federation-remote-entry.js';
+    const remoteEntryClear = vi.fn();
+    const libClear = vi.fn();
+    const globalClear = vi.fn();
+    const FM = new ModuleFederation({
+      name: '@federation/instance',
+      version: '1.0.1',
+      remotes: [
+        {
+          name: '@register-remotes/app1',
+          alias: 'app1',
+          entry,
+        },
+      ],
+    });
+
+    FM.moduleCache.set('@register-remotes/app1', {
+      remoteInfo: {
+        name: '@register-remotes/app1',
+        alias: 'app1',
+        entry,
+        type: 'global',
+        entryGlobalName: 'app1',
+        shareScope: 'default',
+      },
+      remoteEntryExports: {
+        get: vi.fn(),
+        init: vi.fn(),
+        __webpack_clear_cache__: remoteEntryClear,
+      },
+      lib: {
+        get: vi.fn(),
+        init: vi.fn(),
+        __webpack_clear_cache__: libClear,
+      },
+    } as any);
+    (globalThis as any).app1 = {
+      get: vi.fn(),
+      init: vi.fn(),
+      __webpack_clear_cache__: globalClear,
+    };
+    Global.__FEDERATION__.moduleInfo = {
+      '@federation/instance:1.0.1': {
+        version: '1.0.1',
+        remoteEntry: '',
+        remotesInfo: {
+          '@register-remotes/app1': {
+            matchedVersion: entry,
+          },
+          '@register-remotes/app2': {
+            matchedVersion: 'http://localhost:1111/app2/mf-manifest.json',
+          },
+        },
+      },
+      [`@register-remotes/app1:${entry}`]: {
+        version: entry,
+        remoteEntry: 'static/remoteEntry.js',
+      },
+    } as any;
+    Global.__FEDERATION__.__MANIFEST_LOADING__[entry] = Promise.resolve(
+      {} as any,
+    );
+    FM.snapshotHandler.manifestCache.set(entry, {} as any);
+
+    await FM.removeRemote('app1');
+
+    expect(remoteEntryClear).toHaveBeenCalledTimes(1);
+    expect(libClear).toHaveBeenCalledTimes(1);
+    expect(globalClear).toHaveBeenCalledTimes(1);
+    expect(FM.moduleCache.has('@register-remotes/app1')).toBe(false);
+    expect((globalThis as any).app1).toBeUndefined();
+    expect(
+      Global.__FEDERATION__.moduleInfo['@federation/instance:1.0.1']
+        .remotesInfo?.['@register-remotes/app1'],
+    ).toBeUndefined();
+    expect(
+      Global.__FEDERATION__.moduleInfo['@federation/instance:1.0.1']
+        .remotesInfo?.['@register-remotes/app2'],
+    ).toEqual({
+      matchedVersion: 'http://localhost:1111/app2/mf-manifest.json',
+    });
+    expect(
+      Global.__FEDERATION__.moduleInfo[`@register-remotes/app1:${entry}`],
+    ).toBeUndefined();
+    expect(Global.__FEDERATION__.__MANIFEST_LOADING__[entry]).toBeUndefined();
+    expect(FM.snapshotHandler.manifestCache.has(entry)).toBe(false);
+  });
+
+  it('keeps loaded remote cleanup context when removeRemote hook clears moduleCache first', async () => {
+    const entry =
+      'http://localhost:1111/resources/register-remotes/app1/federation-remote-entry.js';
+    const remoteEntryClear = vi.fn();
+    const libClear = vi.fn();
+    const globalClear = vi.fn();
+    const FM = new ModuleFederation({
+      name: '@federation/instance',
+      version: '1.0.1',
+      remotes: [
+        {
+          name: '@register-remotes/app1',
+          alias: 'app1',
+          entry,
+        },
+      ],
+      plugins: [
+        {
+          name: 'module-cache-first-remove-plugin',
+          removeRemote({ origin }) {
+            origin.moduleCache.delete('@register-remotes/app1');
+          },
+        },
+      ],
+    });
+
+    FM.moduleCache.set('@register-remotes/app1', {
+      remoteInfo: {
+        name: '@register-remotes/app1',
+        alias: 'app1',
+        entry,
+        type: 'global',
+        entryGlobalName: 'app1',
+        shareScope: 'default',
+      },
+      remoteEntryExports: {
+        get: vi.fn(),
+        init: vi.fn(),
+        __webpack_clear_cache__: remoteEntryClear,
+      },
+      lib: {
+        get: vi.fn(),
+        init: vi.fn(),
+        __webpack_clear_cache__: libClear,
+      },
+    } as any);
+    (globalThis as any).app1 = {
+      get: vi.fn(),
+      init: vi.fn(),
+      __webpack_clear_cache__: globalClear,
+    };
+    Global.__FEDERATION__.moduleInfo = {
+      '@federation/instance:1.0.1': {
+        version: '1.0.1',
+        remoteEntry: '',
+        remotesInfo: {
+          '@register-remotes/app1': {
+            matchedVersion: entry,
+          },
+        },
+      },
+      [`@register-remotes/app1:${entry}`]: {
+        version: entry,
+        remoteEntry: 'static/remoteEntry.js',
+      },
+    } as any;
+    Global.__FEDERATION__.__MANIFEST_LOADING__[entry] = Promise.resolve(
+      {} as any,
+    );
+    FM.snapshotHandler.manifestCache.set(entry, {} as any);
+
+    await FM.removeRemote('app1');
+
+    expect(remoteEntryClear).toHaveBeenCalledTimes(1);
+    expect(libClear).toHaveBeenCalledTimes(1);
+    expect(globalClear).toHaveBeenCalledTimes(1);
+    expect(FM.moduleCache.has('@register-remotes/app1')).toBe(false);
+    expect((globalThis as any).app1).toBeUndefined();
+    expect(
+      Global.__FEDERATION__.moduleInfo['@federation/instance:1.0.1']
+        .remotesInfo?.['@register-remotes/app1'],
+    ).toBeUndefined();
+    expect(
+      Global.__FEDERATION__.moduleInfo[`@register-remotes/app1:${entry}`],
+    ).toBeUndefined();
+    expect(Global.__FEDERATION__.__MANIFEST_LOADING__[entry]).toBeUndefined();
+    expect(FM.snapshotHandler.manifestCache.has(entry)).toBe(false);
   });
 });

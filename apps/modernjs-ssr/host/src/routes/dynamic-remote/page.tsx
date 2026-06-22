@@ -5,6 +5,8 @@ import {
   registerRemotes,
 } from '@module-federation/modern-js-v3/runtime';
 
+type LazyRemoteModule = { default: React.ComponentType<any> };
+
 registerRemotes([
   {
     name: 'dynamic_remote',
@@ -21,12 +23,12 @@ const RemoteSSRComponent = getInstance()!.createLazyComponent({
     }
     return <div>fallback</div>;
   },
-});
+}) as React.ComponentType<{ text: string }>;
 
 const NewRemoteCom = React.lazy(() =>
   loadRemote('dynamic_remote').then((m) => {
     console.log('加载');
-    return m;
+    return m as LazyRemoteModule;
   }),
 );
 const Index = (): JSX.Element => {

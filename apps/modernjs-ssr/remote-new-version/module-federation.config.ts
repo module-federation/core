@@ -3,6 +3,7 @@ export default createModuleFederationConfig({
   name: 'remote',
   exposes: {
     './Image': './src/components/Image.tsx',
+    './Heavy': './src/components/Heavy.tsx',
   },
   shared: {
     react: { singleton: true },

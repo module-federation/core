@@ -4,10 +4,10 @@
   "version": "0.1.34",
   "scripts": {
     "reset": "npx rimraf ./**/node_modules",
-    "dev": "modern dev",
+    "dev": "node --expose-gc ./node_modules/@modern-js/app-tools/bin/modern.js dev",
     "build": "modern build",
     "start": "modern start",
-    "serve": "modern serve",
+    "serve": "node --expose-gc ./node_modules/@modern-js/app-tools/bin/modern.js serve",
     "new": "modern new",
     "lint": "modern lint",
     "upgrade": "modern upgrade",

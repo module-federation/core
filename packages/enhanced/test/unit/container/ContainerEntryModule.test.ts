@@ -450,6 +450,12 @@ describe('ContainerEntryModule', () => {
       expect(result.sources).toBeDefined();
       // Check for the runtime requirement that's actually set in the module
       expect(result.runtimeRequirements).toBeDefined();
+      expect(
+        result.runtimeRequirements.has(webpack.RuntimeGlobals.moduleCache),
+      ).toBe(true);
+      const source = result.sources.get('javascript').source();
+      expect(source).toContain('__webpack_clear_cache__');
+      expect(source).toContain('__webpack_require__.c');
     });
   });
 });
