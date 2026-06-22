@@ -12,7 +12,6 @@
 - **⚡ 错误处理** - 内置加载失败和运行时错误处理机制
 - **🎨 样式隔离** - 支持组件级样式和类名配置
 
-
 ## 安装
 
 import { PackageManagerTabs } from '@theme';
@@ -31,6 +30,7 @@ import { PackageManagerTabs } from '@theme';
 在宿主应用的配置文件中，添加远程应用的配置：
 
 :::tip 构建工具支持
+
 以下示例使用 Rsbuild 配置，请根据您使用的构建工具进行相应调整：
 - **Rsbuild**: `@module-federation/rsbuild-plugin`
 - **Rspack**: `@module-federation/enhanced/rspack`
@@ -63,7 +63,7 @@ export default defineConfig({
 
 ### 步骤 2: 创建远程组件
 
-#### 2.1 定义加载和错误组件
+#### 定义加载和错误组件
 
 首先，创建加载状态和错误处理组件：
 
@@ -90,7 +90,7 @@ export const ErrorFallback = ({ error }: { error: Error }) => (
 );
 ```
 
-#### 2.2 创建远程应用组件
+#### 创建远程应用组件
 
 使用 `createRemoteAppComponent` 创建远程组件：
 
@@ -107,7 +107,7 @@ export const Remote1App = createRemoteAppComponent({
 });
 ```
 
-#### 2.3 主应用路由配置
+#### 主应用路由配置
 
 在主应用中配置路由：
 
