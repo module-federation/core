@@ -15,7 +15,11 @@ import {
   Outlet as OutletV8,
   createBrowserRouter as createBrowserRouterV8,
 } from 'react-router';
-import { BrowserRouter, RouterProvider } from '../src/router/default';
+import {
+  BrowserRouter,
+  RouterProvider,
+  readReactRouter as readDefaultReactRouter,
+} from '../src/router/default';
 import {
   BrowserRouter as BrowserRouterV8,
   RouterProvider as RootRouterProviderV8,
@@ -25,6 +29,10 @@ import { RouterContext } from '../src/provider/context';
 import { getHtml, getWindowImpl } from './util';
 
 describe('react router proxy', () => {
+  it('exports the router runtime contract from the default proxy', () => {
+    expect(typeof readDefaultReactRouter().useLocation).toBe('function');
+  });
+
   it('BrowserRouter not wraper context', async () => {
     let { container } = render(
       <RouterContext.Provider value={{ basename: '/test' } as any}>

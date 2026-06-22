@@ -48,6 +48,10 @@ export default defineConfig({
         __dirname,
         'node_modules/@module-federation/bridge-react/dist/router.es.js',
       ),
+      '@module-federation/bridge-react/router-runtime$': path.resolve(
+        __dirname,
+        'node_modules/@module-federation/bridge-react/dist/router.es.js',
+      ),
     },
   },
   server: {
