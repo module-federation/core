@@ -82,20 +82,37 @@ export default createModuleFederationConfig({
 ## Server-Side Rendering (SSR)
 
 :::info Note
-For a better performance experience, Module Federation X Modern.js SSR only supports stream SSR.
+For a better performance experience, Module Federation & Modern.js SSR only supports stream SSR.
 :::
 
 There is no difference in using Module Federation in SSR scenarios compared to CSR scenarios; developers can continue with their existing development practices.
 
 ## Component-Level Data Fetch
 
-See [Data Fetching](/guide/data/data-fetch).
+See [Data Fetching](/guide/data/data-fetch.html).
 
-The Modern.js plugin provides `lazyLoadComponentPlugin` from the `@module-federation/modern-js-v3/data-fetch` subpath, so you don't need to install `@module-federation/bridge-react` separately.
+In Modern.js v3, component-level data fetching has been built into the `@module-federation/modern-js-v3` plugin, so you no longer need to install `@module-federation/bridge-react` separately to use it.
 
-## API
+All data fetching APIs are placed in `@module-federation/modern-js-v3/data-fetch`. You can import and use them from this subpath.
 
-`@module-federation/modern-js-v3` re-exports `@module-federation/modern-js-v3/runtime` from the `runtime` subpath. You can use `@module-federation/modern-js-v3/runtime` to get the MF Runtime.Runtime。
+## Bridge API
+
+See [React Bridge](/guide/bridge/react/getting-started.html).
+
+In Modern.js v3, Bridge APIs are built into the `@module-federation/modern-js-v3` plugin, so you no longer need to install `@module-federation/bridge-react` separately to use Bridge APIs.
+
+All Bridge APIs are placed in `@module-federation/modern-js-v3/react`. You can import and use them from this subpath. If you need to explicitly distinguish calls to `createBridgeComponent` for React 18 or React 19, the Modern.js v3 plugin uses slightly different export paths:
+
+```ts
+// @module-federation/modern-js-v3
+import { createBridgeComponent } from '@module-federation/modern-js-v3/react'; // React 16/17
+import { createBridgeComponent } from '@module-federation/modern-js-v3/react-v18'; // React 18
+import { createBridgeComponent } from '@module-federation/modern-js-v3/react-v19'; // React 19
+```
+
+## Runtime API
+
+All Module Federation Runtime APIs are placed in `@module-federation/modern-js-v3/runtime`. You can import and use them from this subpath.
 
 
 ### createRemoteComponent <Badge type="danger">Deprecated</Badge>
@@ -104,9 +121,7 @@ The Modern.js plugin provides `lazyLoadComponentPlugin` from the `@module-federa
 This API has been deprecated. Please use [createLazyComponent](/guide/bridge/react/load-component.html#what-is-createlazycomponent) instead.
 :::
 
-#### Migration Guide
-
-The parameters for `createRemoteComponent` and `createLazyComponent` are identical. The only difference is that the `createLazyComponent` API needs to be called through an instance after registering the plugin.
+The parameters for `createRemoteComponent` and `createLazyComponent` are identical. The only difference is that `createLazyComponent` needs to be called through an instance after registering the plugin.
 
 ```diff
 - import { createRemoteComponent } from '@module-federation/modern-js-v3/runtime';
@@ -141,9 +156,7 @@ export default App;
 This API has been deprecated. Please use [createLazyComponent](/guide/bridge/react/load-component.html#createlazycomponent-vs-createremoteappcomponent) instead.
 :::
 
-#### Migration Guide
-
-Same as [createRemoteComponent#migration-guide](#migration-guide)
+Migration is the same as [createRemoteComponent](#createremotecomponent).
 
 ## Configuration
 

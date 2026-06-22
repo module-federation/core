@@ -1,6 +1,6 @@
 # 数据缓存
 
-`cache` 函数可以让你缓存数据获取或计算的结果，它提供了更精细的数据粒度控制，并且适用于客户端渲染(CSR)、服务端渲染（SSR）、API 服务(BFF)等多种场景。
+`cache` 函数可以让你缓存数据获取或计算的结果，它提供了更精细的数据粒度控制，并且适用于客户端渲染（CSR）、服务端渲染（SSR）等场景。
 
 ## 基本用法
 
@@ -20,7 +20,6 @@ export const fetchData = cache(async (): Promise<Data> => {
     }, 1000);
   });
 });
-
 ```
 
 ### 参数
@@ -148,11 +147,11 @@ await getUser(123, { language: 'en' }); // 命中缓存，不会重新请求
 await getUser(456, { language: 'zh' }); // 不会命中缓存，会重新请求
 ```
 
-你也可以使用 Modern.js 提供的 `generateKey` 函数配合 getKey 生成缓存的键：
+你也可以使用 `generateKey` 函数配合 getKey 生成缓存的键：
 
 :::info
 
-Modern.js 中的 `generateKey` 函数确保即使对象属性顺序发生变化，也能生成一致的唯一键值，保证稳定的缓存
+`generateKey` 函数确保即使对象属性顺序发生变化，也能生成一致的唯一键值，保证稳定的缓存
 
 :::
 
@@ -174,31 +173,28 @@ const getUser = cache(
 
 #### `customKey`
 
-`customKey` 参数用于定制缓存的键，它是一个函数，接收一个包含以下属性的对象，返回值必须是字符串或 Symbol 类型，将作为缓存的键：
+`customKey` 与 `getKey` 都用于自定义缓存键，区别在于**覆盖范围**：
 
-- `params`：调用缓存函数时传入的参数数组
-- `fn`：原始被缓存的函数引用
-- `generatedKey`：框架基于入参自动生成的原始缓存键
+- **`getKey`** 只覆盖「入参部分」的键，**函数本身仍然会参与缓存键的计算**。也就是说，两个不同的函数即使 `getKey` 返回相同结果，缓存也不会互相命中。
+- **`customKey`** 直接返回**最终的完整缓存键**，会替代框架默认基于「函数 + 入参」生成的键。因此可以让**不同的函数共享同一份缓存**。
 
-:::info
-
-一般在以下场景，缓存会失效：
-1. 缓存的函数引用发生变化
-2. 函数的入参发生变化
-3. 不满足 maxAge
-4. 调用了 `revalidateTag`
-
-`customKey` 可以用在函数引用不同，但希望共享缓存的场景，如果只是自定义缓存键，推荐使用 `getKey`
-
+:::tip 何时使用
+如果只是想根据部分入参生成缓存键，使用 `getKey`，只有在需要跨函数共享缓存等场景下才使用 `customKey`。
 :::
 
-这在某些场景下非常有用，比如当函数引用发生变化时，但你希望仍然返回缓存的数据。
+`customKey` 接收一个包含以下属性的对象，返回值将作为最终的缓存键，必须是字符串或 Symbol 类型。
+
+- `params`：调用缓存函数时传入的参数数组
+- `fn`：原始被缓存的函数
+- `generatedKey`：框架基于入参自动生成的原始缓存键
+
+下面的示例展示了 `customKey` 跨函数共享缓存的能力：
 
 ```ts
 import { cache } from '@module-federation/bridge-react/data-fetch';
 import { fetchUserData } from './api';
 
-// 不同的函数引用，但是通过 customKey 可以使它们共享一个缓存
+// 不同的函数，但是通过 customKey 可以使它们共享一个缓存
 const getUserA = cache(
   fetchUserData,
   {
@@ -210,9 +206,9 @@ const getUserA = cache(
   }
 );
 
-// 即使函数引用变了，只要 customKey 返回相同的值，也会命中缓存
+// 即使函数变了，只要 customKey 返回相同的值，也会命中缓存
 const getUserB = cache(
-  (...args) => fetchUserData(...args), // 新的函数引用
+  (...args) => fetchUserData(...args), // 新的函数
   {
     maxAge: CacheTime.MINUTE * 5,
     customKey: ({ params }) => {
@@ -222,7 +218,7 @@ const getUserB = cache(
   }
 );
 
-// 即使 getUserA 和 getUserB 是不同的函数引用，但由于它们的 customKey 返回相同的值
+// 即使 getUserA 和 getUserB 是不同的函数，但由于它们的 customKey 返回相同的值
 // 所以当调用参数相同时，它们会共享缓存
 const dataA = await getUserA(1);
 const dataB = await getUserB(1); // 这里会命中缓存，不会再次发起请求

@@ -1,16 +1,16 @@
-## 生成二次构建（secondary）共享产物
+## Producing a secondary tree-shaken shared artifact
 
-:::warning 注意
-如果你的诉求是“让单个应用按需裁剪共享依赖”，通常只需要配置 [usedExports](../../../docs/configure/shared#usedexports)。
+:::warning Note
+If your goal is “tree-shake a shared dependency for a single application”, [usedExports](/configure/shared.html#usedexports) is usually enough.
 
-本节介绍的是生成一份可被运行时按需加载的独立共享产物（secondary），用于在部署侧统一下发或复用。
+This section is about generating a standalone secondary artifact that can be loaded at runtime on demand, and can be distributed or reused from the deployment side.
 :::
 
-该过程只构建共享依赖，remotes 不会生效，因此构建前请确保项目入口（entry）只引入了共享依赖。
+This process builds only shared dependencies; remotes will not take effect. The original project entry is automatically ignored during the build, and only shared modules are bundled.
 
-###### 非 Modern.js 项目
+### Non-Modern.js projects
 
-在构建配置中使用 `TreeShakingSharedPlugin`，设置 `secondary: true`，并复用现有的 `mfConfig`。
+Use `TreeShakingSharedPlugin` in your build configuration, set `secondary: true`, and reuse your existing `mfConfig`.
 
 import { Tab, Tabs } from '@theme';
 
@@ -55,13 +55,13 @@ import { Tab, Tabs } from '@theme';
 </Tab>
 </Tabs>
 
-### Modern.js 项目
+### Modern.js projects
 
-当你使用 `@module-federation/modern-js-v3` 插件时，可以在插件配置中设置 `secondarySharedTreeShaking: true` 来开启二次构建产物生成。
+When using `@module-federation/modern-js-v3`, enable `secondarySharedTreeShaking: true` in the plugin options to generate the secondary artifact.
 
 ```ts title="modern.config.ts"
 import mfPlugin from '@module-federation/modern-js-v3';
-//...
+// ...
 plugins: [
   mfPlugin({
     secondarySharedTreeShaking: true,

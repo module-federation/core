@@ -29,10 +29,11 @@ type LibraryType =
   | 'jsonp' | 'system' | string;
 ```
 
-## type（必填）
+## type
 
 - 类型：`LibraryType`
-- 是否必填：**是**
+- 是否必填：是
+- 默认值：-
 
 指定容器的输出库类型。常用值：
 
@@ -87,7 +88,7 @@ type LibraryType =
 
 在 UMD 包装器中为各模块格式添加注释。
 
-- Example
+## 示例
 
 ```ts
 new ModuleFederationPlugin({

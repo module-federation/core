@@ -1,14 +1,14 @@
 # treeShakingSharedPlugins
 
-A list of plugin module paths used when building independent shared fallbacks. During the secondary tree-shaking build, each item will be `require(p)`-loaded and instantiated to participate in compilation.
+A list of plugin module paths used when building independent shared fallbacks. During the secondary Tree Shaking build, each item will be `require(p)`-loaded and instantiated to participate in compilation.
 
 - Type: `string[]`
 - Required: No
 - Default: `undefined`
 
-If `shared.treeShaking.mode` is set to `'server-calc'`, the deployment service will rebuild the shared dependencies that need tree shaking. In this process, only the shared dependencies are built, and the original project's build configuration is not loaded.
+If `shared.treeShaking.mode` is set to `'server-calc'`, the deployment service will rebuild the shared dependencies that need Tree Shaking. In this process, only the shared dependencies are built, and the original project's build configuration is not loaded.
 
-If your project relies on special build configuration—for example, setting `externals`—you can package that configuration into an NPM package, then provide the plugin name and version in `treeShakingSharedPlugins`. This allows the plugin to participate in the second tree-shaking pass for shared modules.
+If the original project depends on special build configuration (for example `externals`), you can wrap that configuration into an NPM plugin and publish it, then list the package name in `treeShakingSharedPlugins`. The secondary Tree Shaking pass will automatically `require` and instantiate these plugins so that the shared module build inherits the original configuration.
 
 For example, suppose you provide a plugin `my-build-plugin` that sets `externals`:
 
@@ -23,7 +23,7 @@ class MyBuildPlugin {
 export default MyBuildPlugin;
 ```
 
-If you publish this plugin as version `0.0.2`, you only need to specify its name and version in `treeShakingSharedPlugins`:
+Once you publish this plugin to npm, simply list its package name in `treeShakingSharedPlugins`:
 
 ```ts title='module-federation.config.ts'
 

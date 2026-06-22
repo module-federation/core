@@ -1,9 +1,5 @@
 [
-  {
-    "type": "file",
-    "name": "index",
-    "label": "Overview"
-  },
+  "index",
   "angular-cli",
   "using-nx-for-angular",
   "angular-mfe",
