@@ -69,8 +69,15 @@ async function fetchRetry(
     });
   }
   try {
-    if (!isFirstAttempt && retryDelay > 0) {
-      await new Promise((resolve) => setTimeout(resolve, retryDelay));
+    if (!isFirstAttempt) {
+      const attemptIndex = total - retryTimes;
+      const delay =
+        typeof retryDelay === 'function'
+          ? retryDelay(attemptIndex)
+          : retryDelay;
+      if (delay > 0) {
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
     }
     const response = await fetch(requestUrl, fetchOptions);
     const responseClone = response.clone();

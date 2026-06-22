@@ -93,18 +93,18 @@ export default () =>
 
 ### CommonRetryOptions
 
-| Option            | Type                  | Default     | Description                              |
-| ----------------- | --------------------- | ----------- | ---------------------------------------- |
-| `retryTimes`      | `number`              | `3`         | Number of retry attempts                 |
-| `retryDelay`      | `number`              | `1000`      | Delay between retries in milliseconds    |
-| `successTimes`    | `number`              | `0`         | Number of successful requests required   |
-| `domains`         | `string[]`            | `[]`        | Alternative domains for script resources |
-| `manifestDomains` | `string[]`            | `[]`        | Alternative domains for manifest files   |
-| `addQuery`        | `boolean \| function` | `false`     | Add query parameters for cache busting   |
-| `fetchOptions`    | `RequestInit`         | `{}`        | Additional fetch options                 |
-| `onRetry`         | `function`            | `undefined` | Callback when retry occurs               |
-| `onSuccess`       | `function`            | `undefined` | Callback when request succeeds           |
-| `onError`         | `function`            | `undefined` | Callback when all retries fail           |
+| Option            | Type                                    | Default     | Description                                                                                      |
+| ----------------- | --------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------ |
+| `retryTimes`      | `number`                                | `3`         | Number of retry attempts                                                                         |
+| `retryDelay`      | `number \| (attempt: number) => number` | `1000`      | Delay between retries in milliseconds, or a function returning delay per 1-indexed retry attempt |
+| `successTimes`    | `number`                                | `0`         | Number of successful requests required                                                           |
+| `domains`         | `string[]`                              | `[]`        | Alternative domains for script resources                                                         |
+| `manifestDomains` | `string[]`                              | `[]`        | Alternative domains for manifest files                                                           |
+| `addQuery`        | `boolean \| function`                   | `false`     | Add query parameters for cache busting                                                           |
+| `fetchOptions`    | `RequestInit`                           | `{}`        | Additional fetch options                                                                         |
+| `onRetry`         | `function`                              | `undefined` | Callback when retry occurs                                                                       |
+| `onSuccess`       | `function`                              | `undefined` | Callback when request succeeds                                                                   |
+| `onError`         | `function`                              | `undefined` | Callback when all retries fail                                                                   |
 
 ### addQuery Function
 
@@ -142,7 +142,7 @@ onError: ({ domains, url, tagName }) => {
 ```ts
 RetryPlugin({
   retryTimes: 5,
-  retryDelay: (attempt) => Math.pow(2, attempt) * 1000, // Exponential backoff
+  retryDelay: (attempt) => 1000 * 2 ** (attempt - 1), // Exponential backoff: 1s, 2s, 4s, ...
   domains: ['https://cdn1.example.com', 'https://cdn2.example.com', 'https://cdn3.example.com'],
   manifestDomains: ['https://api1.example.com', 'https://api2.example.com'],
   addQuery: ({ times, originalQuery }) => {
