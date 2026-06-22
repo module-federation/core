@@ -5,11 +5,13 @@
 ## 核心功能
 
 ### 基础能力
+
 - **🚀 应用级模块导出**：使用 `createBridgeComponent` 将完整的 React 应用包装为可远程加载的模块
 - **📦 应用级模块加载**：通过 `createRemoteAppComponent` 在宿主应用中无缝集成远程 React 应用
 - **🎯 组件级懒加载**：支持 `createLazyComponent` 实现细粒度的组件级懒加载
 
 ### 特性
+
 - **� 跨框架渲染**：支持不同框架（如 React、Vue、Angular 等）间的跨框架渲染
 - **🛣️ 路由协同能力**：自动处理 React Router 的 basename 注入和路由上下文传递
 - **🔗 版本兼容**：完全支持 React 16-19，自动处理不同版本间的渲染差异和生命周期
@@ -22,14 +24,42 @@
 - **技术债务管理**：避免因版本不一致导致的集成问题
 - **团队自主性**：每个团队可以独立选择最适合的 React 版本
 
-## 灵活的导入方式
+## 关键 API 概览
 
-React Bridge 提供了灵活的导入方式，用户可根据自己的 React 版本选择合适的实现：
+### 生产者端 API
 
-```tsx
-import { createBridgeComponent } from '@module-federation/bridge-react'; // React 16/17
-import { createBridgeComponent } from '@module-federation/bridge-react/18'; // React 18
-import { createBridgeComponent } from '@module-federation/bridge-react/19'; // React 19
+`createBridgeComponent`：将 React 应用包装为 Bridge 组件（应用组件），供消费者远程加载。需根据生产者项目使用的 React 版本选择对应的导入路径：
+
+| React 版本 | 导入路径 |
+|---------|---------|
+| React 19 | `@module-federation/bridge-react/v19` |
+| React 18 | `@module-federation/bridge-react/v18` |
+| React 16 / 17 | `@module-federation/bridge-react/react` |
+
+:::warning 重要
+
+`@module-federation/bridge-react/v18` 和 `/v19` 从 `react-dom/client` 导入 `createRoot`。
+
+如果你只将 `"react-dom"` 配置为 shared 依赖，`react-dom/client` 将不会被共享，可能导致 React 版本不匹配错误。请确保使用尾部斜杠前缀形式：
+
+```ts
+shared: {
+  'react-dom/': {
+    singleton: true,
+  },
+}
 ```
+
+:::
+
+
+### 消费者端 API
+
+| API | 描述 | 导入路径 |
+|-----|------|----------|
+| `createRemoteAppComponent` | 在宿主中加载并渲染远程 Bridge 组件，自动处理渲染上下文与路由集成 | `@module-federation/bridge-react/react` |
+| `lazyLoadComponentPlugin` | 预取与懒加载插件 | `@module-federation/bridge-react/react` |
+
 ### 💡 示例
+
 [完整示例](https://github.com/module-federation/core/tree/main/apps/router-demo) - 包含多个 React 应用的完整微前端项目

@@ -1,6 +1,6 @@
 # shared
 
-`shared` 用于在消费者和生产间共享公共依赖，降低运行时下载体积从而提升性能，`shared` 可以配置依赖版本的复用规则，可以通过 [FAQ](#faq) 了解 `shared` 适用场景以及如何使用 `shared`
+`shared` 用于在消费者和生产者之间共享公共依赖，降低运行时下载体积从而提升性能，`shared` 可以配置依赖版本的复用规则，可以通过 [FAQ](#faq) 了解 `shared` 适用场景以及如何使用 `shared`
 
 - 类型：`PluginSharedOptions`
 - 是否必填：否
@@ -20,8 +20,8 @@ interface SharedConfig {
   requiredVersion?: string;
   eager?: boolean;
   shareScope?: string;
-  shareKey?: string;
   import?: string | false;
+  shareKey?: string;
   request?: string;
   allowNodeModulesSuffixMatch?: boolean;
   treeShaking?: TreeShakingConfig;
@@ -34,7 +34,7 @@ interface TreeShakingConfig {
 
 ```
 
-- Example
+## 示例
 
 ```ts
 new ModuleFederationPlugin({
@@ -57,11 +57,11 @@ new ModuleFederationPlugin({
 - 是否必填：否
 - 默认值：`false`
 
-是否在共享作用域中只允许共享模块的一个版本 (单例模式).
+是否在共享作用域中只允许共享模块的一个版本（单例模式）。
 
 - 如果值为 true，开启单例模式；值为 false，不开启单例模式。
-- 如果启用单例模式，那么 remote 应用组件和 host 应用共享的依赖只加载一次，当版本不一致时加载更高的版本。此时对于版本更低的那一方会给出警告。
-- 不开启单例模式下，如果 remote 应用和 host 应用共享依赖的版本不一致，则 remote 应用和 host 应用加载各自的依赖。
+- 如果启用单例模式，那么生产者组件和消费者共享的依赖只加载一次，当版本不一致时加载更高的版本。此时对于版本更低的那一方会给出警告。
+- 不开启单例模式下，如果生产者和消费者共享依赖的版本不一致，则两侧加载各自的依赖。
 
 ## requiredVersion
 
@@ -102,7 +102,7 @@ new ModuleFederationPlugin({
 - 是否必填：否
 - 默认值：`shared` 配置的属性名（`key`）
 
-共享模块在 shared scope 中的协商 key。Provider 发布模块和 Consumer 匹配模块时都通过该 key 进行查找，**两端必须一致才能协商成功**，否则双方各自打包一份依赖。
+共享模块在 Share Scope 中的协商 key。生产者发布模块和消费者匹配模块时都通过该 key 进行查找，**两端必须一致才能协商成功**，否则双方各自打包一份依赖。
 
 默认值为 `shared` 配置的属性名，大多数场景无需手动设置。典型的自定义场景是通过 `import` 将属性名映射到不同的实际包：
 
@@ -110,7 +110,7 @@ new ModuleFederationPlugin({
 shared: {
   'my-alias': {
     import: 'react',     // 实际 resolve 的包
-    shareKey: 'react',   // shared scope 里用 "react" 协商，与其他应用对齐
+    shareKey: 'react',   // Share Scope 里用 "react" 协商，与其他应用对齐
   },
 }
 ```
@@ -135,16 +135,27 @@ shared: {
 - 是否必填：否
 - 默认值：`shared` 配置的属性名（`key`）
 
-构建时需要拦截的模块请求路径。当代码中出现匹配该值的 `import` 时，构建器会将其替换为消费 shared scope 的模块，而不是打包进产物。
+构建时需要拦截的模块请求路径。当代码中出现匹配该值的 `import` 时，构建器会将其替换为消费 Share Scope 的模块，而不是打包进产物。
 
 默认值与属性名相同，大多数场景无需设置。`request` 与 `shareKey` 的区别：
 
 | 字段 | 作用层面 | 回答的问题 |
 |---|---|---|
 | `request` | 构建时 · 模块图 | 拦截哪个 `import` |
-| `shareKey` | 运行时 · 协商 | 去 shared scope 的哪个槽取模块 |
+| `shareKey` | 运行时 · 协商 | 去 Share Scope 的哪个槽取模块 |
 
 前缀匹配场景下两者会配合使用：
+
+```ts
+shared: {
+  'react-dom/': {
+    request: 'react-dom/',    // 拦截所有 import 'react-dom/*'
+    shareKey: 'react-dom/',   // 最终协商 key = "react-dom/" + 子路径后缀
+  },
+}
+```
+
+同样的模式也适用于工具库，例如 `lodash`：
 
 ```ts
 shared: {
@@ -155,13 +166,19 @@ shared: {
 }
 ```
 
+:::warning 常见错误
+`'react-dom'`（无尾部斜杠）只会拦截 `import 'react-dom'`。
+
+任何执行 `import { createRoot } from 'react-dom/client'` 的代码都会加载第二份 React DOM 副本，破坏 React 单例要求并导致 hydration 错误。
+:::
+
 ## allowNodeModulesSuffixMatch
 
 - 类型：`boolean`
 - 是否必填：否
 - 默认值：`false`
 
-开启后，共享解析会使用模块解析路径中 `node_modules/` 之后的部分进行后缀匹配。当宿主与远程通过不同的绝对路径解析同一依赖（例如 pnpm hoisting、软链接或自定义打包器加载路径）时，可以借助该选项依然匹配到同一个共享模块。
+开启后，共享解析会使用模块解析路径中 `node_modules/` 之后的部分进行后缀匹配。当消费者与生产者通过不同的绝对路径解析同一依赖（例如 pnpm hoisting、软链接或自定义打包器加载路径）时，可以借助该选项依然匹配到同一个共享模块。
 
 > 该选项此前名为 `nodeModulesReconstructedLookup`。
 
@@ -225,7 +242,7 @@ shared: {
 
 仅需在 {props.brandName || props.name || 'Module Federation'} 构建配置中的 `shared` 配置添加对应的依赖即可，例如：
 
-import ArrayShared from '@components/common/configure/array-shared';
+import ArrayShared from '@docs/_snippets/configure/array-shared';
 import React from 'react';
 
 {props.arrayShared || React.createElement(ArrayShared)}
@@ -235,6 +252,6 @@ import React from 'react';
 
 在 {props.brandName || props.name || 'Module Federation'} 中的 `shared` 配置添加需要共享的依赖， `key` 为依赖名称，`value` 为提供的配置。
 
-import ObjectShared from '@components/common/configure/object-shared'
+import ObjectShared from '@docs/_snippets/configure/object-shared'
 
 {props.objectShared || React.createElement(ObjectShared)}

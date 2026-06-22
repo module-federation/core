@@ -1,8 +1,8 @@
 # Style Isolation
 
-To achieve CSS style isolation, the following methods can be used. Here are the detailed usage instructions for each method:
+In Module Federation, the host and remote applications run on the same page and share a single global CSS scope, so styles from one side can easily leak into another and cause unintended "style pollution". Module Federation does not ship built-in style isolation (see the [FAQ](#why-doesnt-module-federation-directly-handle-css-style-isolation) below for the reasoning), so producers should pick the strategy that fits their scenario.
 
-## 1. BEM (Block Element Modifier)
+## BEM (Block Element Modifier)
 
 BEM is a naming convention that achieves style isolation by adding prefixes and suffixes to class names. The structure of BEM is as follows:
 
@@ -10,7 +10,6 @@ BEM is a naming convention that achieves style isolation by adding prefixes and 
 - **Element**: Represents a part of the block, e.g., `.button__text`
 - **Modifier**: Represents different states or versions of the block or element, e.g., `.button--primary`
 
-### Usage Example
 ```html
 <div class="button">
   <span class="button__text">Button</span>
@@ -32,11 +31,10 @@ BEM is a naming convention that achieves style isolation by adding prefixes and 
 }
 ```
 
-## 2. CSS Modules
+## CSS Modules
 
-CSS Modules achieve style isolation by treating each CSS file as a module, where each class name is transformed into a unique identifier during compilation.
+CSS Modules achieve style isolation by treating each CSS file as a module, where each class name is transformed into a unique identifier during compilation. [Using CSS Modules in Rsbuild](https://v2.rsbuild.rs/guide/styling/css-modules)
 
-### Usage Example
 
 1. Create a CSS file named `styles.module.css`:
 
@@ -61,11 +59,10 @@ function App() {
 export default App;
 ```
 
-## 3. CSS-in-JS
+## CSS-in-JS
 
-CSS-in-JS writes styles directly in JavaScript files. Common libraries include [styled-components](https://styled-components.com/) and [emotion](https://github.com/emotion-js/emotion).
+CSS-in-JS writes styles directly in JavaScript files. Common libraries include [styled-components](https://styled-components.com/) and [emotion](https://github.com/emotion-js/emotion). [Using CSS-in-JS in Rsbuild](https://rsbuild.rs/guide/styling/css-in-js)
 
-### Usage Example
 
 1. Install styled-components:
 
@@ -91,11 +88,10 @@ function App() {
 export default App;
 ```
 
-## 4. Shadow DOM
+## Shadow DOM
 
 Shadow DOM is part of the Web Components technology, creating an isolated DOM tree to achieve style isolation. React can use Shadow DOM via [react-shadow](https://www.npmjs.com/package/react-shadow).
 
-### Usage Example
 
 1. Create an HTML template:
 
@@ -132,11 +128,10 @@ customElements.define('my-component', MyComponent);
 <my-component></my-component>
 ```
 
-## 5. Vue Scoped Styles
+## Vue Scoped Styles
 
 In Vue, the `scoped` attribute can be used to achieve component-level style isolation.
 
-### Usage Example
 
 1. Define styles in a Vue component:
 

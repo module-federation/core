@@ -29,50 +29,21 @@ import { PackageManagerTabs } from '@theme';
   }}
 />
 
+### 创建 module-federation.config.ts
+
+创建 `module-federation.config.ts` 文件，内容如下：
+
+import CreateConfig from '@docs/_snippets/vite/create-config';
+
+<CreateConfig />
+
 ### 注册插件
 
 在 `vite` 中，你可以通过 `vite.config.js` 配置文件中的 `plugins` 配置项来添加插件：
 
-```ts title='vite.config.js'
-import { federation } from '@module-federation/vite';
-module.exports = {
-  server: {
-    origin: 'http://localhost:2000',
-    port: 2000,
-  },
-  base: "http://localhost:2000",
-  plugins: [
-    federation({
-      name: 'vite_provider',
-      manifest: true,
-      remotes: {
-        esm_remote: {
-          type: "module",
-          name: "esm_remote",
-          entry: "https://[...]/remoteEntry.js",
-        },
-        var_remote: "var_remote@https://[...]/remoteEntry.js",
-      },
-      exposes: {
-        './button': './src/components/button',
-      },
-      shared: {
-        react: {
-          singleton: true,
-        },
-        'react/': {
-          singleton: true,
-        },
-      },
-    }),
-  ],
-  // Do you need to support build targets lower than chrome89?
-  // You can use 'vite-plugin-top-level-await' plugin for that.
-  build: {
-    target: 'chrome89',
-  },
-};
-```
+import RegisterPlugin from '@docs/_snippets/vite/register-plugin';
+
+<RegisterPlugin />
 
 ## 配置构建插件
 
@@ -89,4 +60,4 @@ type ModuleFederationOptions {
 };
 ```
 
-你可以在 [Config 总览](/configure/index) 页面找到所有配置项的详细说明。
+你可以在 [Config 总览](/configure/index.html) 页面找到所有配置项的详细说明。

@@ -1,20 +1,12 @@
-# Loading Components
+# Lazy Load and Prefetch Components
 
-This chapter will introduce how to use `createLazyComponent` to load and integrate remote React component modules in host applications.
+This chapter introduces how to use `createLazyComponent` to load remote React components on demand in a host application.
 
-## What is createLazyComponent?
+`createLazyComponent` is a higher-level loading API for React component scenarios. Compared with directly loading a module and wiring up `React.lazy`, `Suspense`, and error boundaries yourself, it builds those pieces into the API and additionally provides:
 
-`createLazyComponent` is an API provided by React Bridge for loading individual remote components. Unlike `createRemoteAppComponent`, it is specifically designed for loading specific React components rather than complete applications.
-
-### createLazyComponent vs createRemoteAppComponent
-
-| Feature | createLazyComponent | createRemoteAppComponent |
-|---------|---------------------|--------------------------|
-| **Use Case** | Load individual remote components | Load complete remote applications |
-| **Router Support** | ❌ No routing functionality | ✅ Complete router integration |
-| **Lifecycle** | ✅ Basic component lifecycle | ✅ Complete application lifecycle |
-| **Data Fetching** | ✅ Supports data fetching | ❌ Depends on application internal handling |
-| **SSR Control** | ✅ Controllable SSR | ❌ Determined by application |
+- **Declarative loading and fallback**: no need to manually wrap `React.Suspense` and error boundaries
+- **Data prefetching**: use `prefetch` to start dependency requests before the component loads, avoiding request waterfalls where data is requested only after the component is ready
+- **SSR control**: precisely control whether remote components render on the server, helping avoid CSS flickering issues
 
 ## Installation
 

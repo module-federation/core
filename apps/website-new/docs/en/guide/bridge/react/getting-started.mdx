@@ -5,11 +5,13 @@
 ## Core Features
 
 ### Basic Capabilities
+
 - **🚀 Application-level Module Export**: Use `createBridgeComponent` to wrap complete React applications as remotely loadable modules
 - **📦 Application-level Module Loading**: Seamlessly integrate remote React applications in host applications through `createRemoteAppComponent`
 - **🎯 Component-level Lazy Loading**: Support `createLazyComponent` for fine-grained component-level lazy loading
 
 ### Features
+
 - **🔄 Cross-framework Rendering**: Support cross-framework rendering between different frameworks (React, Vue, Angular, etc.)
 - **🛣️ Routing Coordination**: Automatically handle React Router basename injection and routing context passing
 - **🔗 Version Compatibility**: Full support for React 16-19, automatically handling rendering differences and lifecycle across versions
@@ -22,16 +24,41 @@
 - **Technical Debt Management**: Avoid integration issues caused by version inconsistencies
 - **Team Autonomy**: Each team can independently choose the most suitable React version
 
-## Smart Version Adaptation
+## Key API Overview
 
-React Bridge provides flexible import methods, allowing users to choose appropriate implementations based on their React version:
+### Producer API
 
-```tsx
-// Use when explicitly specifying version
-import { createBridgeComponent } from '@module-federation/bridge-react'; // React 16/17
-import { createBridgeComponent } from '@module-federation/bridge-react/18'; // React 18
-import { createBridgeComponent } from '@module-federation/bridge-react/19'; // React 19
+`createBridgeComponent`: wraps a React application as a Bridge component (application component) so consumers can load it remotely. Choose the import path that matches the React version used by the producer project:
+
+| React Version | Import Path |
+| ------------- | ----------- |
+| React 19      | `@module-federation/bridge-react/v19` |
+| React 18      | `@module-federation/bridge-react/v18` |
+| React 16 / 17 | `@module-federation/bridge-react/react` |
+
+:::warning Important
+
+`@module-federation/bridge-react/v18` and `/v19` import `createRoot` from `react-dom/client`.
+
+If you only configure `"react-dom"` as a shared dependency, `react-dom/client` will not be shared and can cause React version mismatch errors. Make sure to use the trailing-slash prefix form:
+
+```ts
+shared: {
+  'react-dom/': {
+    singleton: true,
+  },
+}
 ```
 
+:::
+
+### Consumer API
+
+| API                        | Description                                                                                         | Import Path                              |
+| -------------------------- | --------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| `createRemoteAppComponent` | Loads and renders a remote Bridge component in the host, automatically handling rendering context and router integration | `@module-federation/bridge-react/react` |
+| `lazyLoadComponentPlugin`  | Prefetch and lazy-loading plugin                                                                    | `@module-federation/bridge-react/react` |
+
 ### 💡 Examples
+
 [Complete Examples](https://github.com/module-federation/core/tree/main/apps/router-demo) - Complete micro-frontend project containing multiple React applications

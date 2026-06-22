@@ -1,6 +1,6 @@
 import ErrorCodeTitle from '@components/ErrorCodeTitle';
-import EnableAsyncEntry from '@components/zh/EnableAsyncEntry';
-import Runtime from '@components/zh/runtime/index';
+import EnableAsyncEntry from '@docs/zh/_components/EnableAsyncEntry';
+import Runtime from '@docs/zh/_components/runtime/index';
 import { Tab, Tabs } from '@theme';
 
 # 运行时
@@ -51,7 +51,7 @@ import { Tab, Tabs } from '@theme';
 
 如果已确认 `window[remoteEntryKey]` 不存在（即脚本未能正常挂载容器），但控制台没有明确的报错信息，可能是因为生产者脚本为跨域资源，浏览器出于安全限制会隐藏跨域脚本的错误详情（`filename`、`lineno`、`message` 均为空）。
 
-此时可通过 [`createScript`](../../plugin/dev/index#createscript) hook 为脚本添加 `crossorigin` 属性，前提是生产者服务端已配置 `Access-Control-Allow-Origin` 响应头。
+此时可通过 [`createScript`](/plugin/dev/index.html#createscript) hook 为脚本添加 `crossorigin` 属性，前提是生产者服务端已配置 `Access-Control-Allow-Origin` 响应头。
 
 首先创建运行时插件文件：
 
@@ -160,7 +160,7 @@ module.exports = {
 
 按照下列顺序依次排查：
 
-1. 在加载生产者之前，在 `terminal` 输入 window[remoteEntryKey] 查看此对象是否已占用，若是，则需要重命名生产者 [name](../../configure/name#name)
+1. 在加载生产者之前，在 `terminal` 输入 window[remoteEntryKey] 查看此对象是否已占用，若是，则需要重命名生产者 [name](/configure/name.html#name)
 2. 若项目构建器为 rspack ，查看最终构建配置是否设置了 [runtimeChunk](https://rspack.dev/config/optimization#optimizationruntimechunk) ，若是则删除此配置
 
 ## RUNTIME-003
@@ -227,7 +227,7 @@ module.exports = {
 两者选一即可：
 
 1. 使用 `loadShare` 替代 `loadShareSync`
-2. 给当前共享依赖提供 [lib](../runtime/runtime-api#loadshare) 函数
+2. 给当前共享依赖提供 [lib](/guide/runtime/runtime-api.html#loadshare) 函数
 
 ## RUNTIME-007
 
@@ -272,7 +272,7 @@ module.exports = {
 
 1. 直接在浏览器地址栏访问错误信息中的资源 URL，确认是否可以正常返回
 2. 检查生产者的 `publicPath` 和 `remoteEntry` 地址配置是否正确
-3. 检查是否存在跨域问题，必要时配置 CORS 或使用 [`createScript`](../../plugin/dev/index#createscript) hook 添加 `crossOrigin` 属性
+3. 检查是否存在跨域问题，必要时配置 CORS 或使用 [`createScript`](/plugin/dev/index.html#createscript) hook 添加 `crossOrigin` 属性
 4. 网络不稳定时，可接入重试机制，参考 [Runtime 重试机制](/plugin/plugins/retry-plugin.html)
 
 **针对 ScriptExecutionError：**
@@ -461,9 +461,36 @@ Uncaught TypeError: Cannot read properties on null (reading `useState`)
 
 * 使用 [React Developer Tools](https://chromewebstore.google.com/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi)
 
-* 若 shared 提供方是线上的 react ，那么需要使用 [Module Federation DevTools](../debug/chrome-devtool)，并点击 `Enable HMR` 按钮
+* 若 shared 提供方是线上的 react ，那么需要使用 [Module Federation DevTools](/guide/debug/chrome-devtool.html)，并点击 `Enable HMR` 按钮
 
 ![](@public/guide/chrome-devtools/mf-devtool-hmr.jpg)
+
+### 子路径导入未被共享（加载了重复依赖）
+
+#### 现象
+
+- 浏览器下载了同一依赖的两份副本（例如 `react-dom`）
+- React 抛出 "Invalid hook call" 或 hydration 不匹配错误
+- 对 `react-dom/client` 等子路径调用 `loadShare` 返回 `false`
+
+#### 原因
+
+`shared` 配置只列出了精确包名，例如 `'react-dom'`。Module Federation 在构建时拦截导入。精确名称只会拦截 `import 'react-dom'`；子路径导入如 `import { createRoot } from 'react-dom/client'` 会绕过 shared 配置，被本地打包。
+
+#### 解决方案
+
+对任何暴露子路径的依赖，使用**尾部斜杠**开启前缀匹配：
+
+```ts title="rspack.config.ts"
+shared: {
+  react: { singleton: true },
+  'react-dom': { singleton: true },      // 精确匹配 — 仅 'react-dom'
+  'react-dom/': { singleton: true },     // 前缀匹配 — 'react-dom/client'、'react-dom/server'、...
+  'react/': { singleton: true },         // 前缀匹配 — 'react/jsx-runtime'、'react/jsx-dev-runtime'、...
+}
+```
+
+此规则同样适用于作用域包（`'@scope/package/'`）和工具库（`'lodash/'`）。
 
 ### A preload for 'http://resource-url' is found, but is not used because the request credentials mode does not match. Consider taking a look at crossorigin attribute.
 
@@ -473,7 +500,7 @@ Uncaught TypeError: Cannot read properties on null (reading `useState`)
 
 #### 解决方案
 
-通过 [runtimePlugins](../../configure/runtimeplugins) 添加运行时插件，在 [createLink](../../plugin/dev/index#createlink) hook 中配置 `crossorigin` 属性，其值需要和实际 load script 保持一致。
+通过 [runtimePlugins](/configure/runtimeplugins.html) 添加运行时插件，在 [createLink](/plugin/dev/index.html#createlink) hook 中配置 `crossorigin` 属性，其值需要和实际 load script 保持一致。
 
 例如需要修改预加载 link 的 crossorigin 属性为 `anonymous`：
 

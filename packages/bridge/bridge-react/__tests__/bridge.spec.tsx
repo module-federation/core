@@ -55,6 +55,41 @@ describe('bridge', () => {
     );
   });
 
+  it('does not render host fallback inside the remote root', async () => {
+    const consoleError = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+    const HostFallback = jest.fn(() => <div>host fallback</div>);
+    function BrokenComponent() {
+      throw new Error('remote render failed');
+    }
+    const lifeCycle = createBridgeComponent({
+      rootComponent: BrokenComponent,
+    })();
+
+    lifeCycle.render({
+      dom: containerInfo?.container,
+      fallback: HostFallback,
+    });
+
+    await waitFor(
+      () => {
+        expect(getHtml(containerInfo.container)).toMatch(
+          'Something went wrong',
+        );
+        expect(getHtml(containerInfo.container)).not.toMatch('host fallback');
+      },
+      { timeout: 2000 },
+    );
+    expect(HostFallback).not.toHaveBeenCalled();
+
+    lifeCycle.destroy({
+      dom: containerInfo?.container,
+      moduleName: 'test',
+    });
+    consoleError.mockRestore();
+  });
+
   it('createRemoteAppComponent', async () => {
     function Component({ props }: { props?: Record<string, any> }) {
       return <div>life cycle render {props?.msg}</div>;

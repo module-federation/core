@@ -1,0 +1,34 @@
+::: info Note
+Currently, only [Modern.js](/integrations/framework/modernjs/index.html) supports data fetching in SSR environments.
+:::
+
+In the consumer, we need to use the [createLazyComponent](/guide/bridge/react/load-component.html#what-is-createlazycomponent) API to load the remote component and fetch its data.
+
+```tsx
+import { getInstance } from '@module-federation/enhanced/runtime';
+import { ERROR_TYPE } from '@module-federation/bridge-react/data-fetch';
+import { lazyLoadComponentPlugin } from '@module-federation/bridge-react/data-fetch';
+
+const instance = getInstance();
+instance.registerPlugins([lazyLoadComponentPlugin()]);
+
+const List = instance.createLazyComponent({
+  loader: () => import('remote/List'),
+  loading: 'loading...',
+  export: 'default',
+  fallback: ({ error, errorType, dataFetchMapKey }) => {
+    console.error(error);
+    if (errorType === ERROR_TYPE.LOAD_REMOTE) {
+      return <div>load remote failed</div>;
+    }
+    if (errorType === ERROR_TYPE.DATA_FETCH) {
+      return <div>data fetch failed: {dataFetchMapKey}</div>;
+    }
+    return <div>error type is unknown</div>;
+  },
+});
+
+export default function Index() {
+  return <List />;
+}
+```

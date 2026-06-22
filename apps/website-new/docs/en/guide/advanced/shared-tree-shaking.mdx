@@ -1,8 +1,6 @@
 # Shared Tree Shaking
 
-## Background
-
-When using Module Federation (MF), we often share common dependencies (such as antd, React, etc.) through the `shared` configuration to reduce duplicate bundling and keep dependency versions consistent across applications. However, the classic `shared` mechanism has a downside: it always provides the **full** dependency bundle, even if your application only uses a small portion of it (for example, only the `Button` component from antd).
+When using { props.name || 'Module Federation' }, we often share common dependencies (such as antd, React, etc.) through the `shared` configuration to reduce duplicate bundling and keep dependency versions consistent across applications. However, the classic `shared` mechanism has a downside: it always provides the **full** dependency bundle, even if your application only uses a small portion of it (for example, only the `Button` component from antd).
 
 This can lead to:
 
@@ -47,12 +45,12 @@ After building locally, check the output size and the exported content of the sh
 
 ## Configuration
 
-The core option is [sharedItem.treeShaking](../../configure/shared#treeshaking). You can also control where Tree Shaking artifacts are generated via:
+The core option is [sharedItem.treeShaking](/configure/shared.html#treeshaking). You can also control where Tree Shaking artifacts are generated via:
 
-* [treeShakingDir](../../configure/treeShakingDir)
-* [injectTreeShakingUsedExports](../../configure/injectTreeShakingUsedExports)
-* [treeShakingSharedPlugins](../../configure/treeShakingSharedPlugins)
-* [treeShakingSharedExcludePlugins](../../configure/treeShakingSharedExcludePlugins)
+* [treeShakingDir](/configure/treeShakingDir.html)
+* [injectTreeShakingUsedExports](/configure/injectTreeShakingUsedExports.html)
+* [treeShakingSharedPlugins](/configure/treeShakingSharedPlugins.html)
+* [treeShakingSharedExcludePlugins](/configure/treeShakingSharedExcludePlugins.html)
 
 ## Modes
 
@@ -74,7 +72,7 @@ There are two modes to fit different team setups and project scales.
 
 `server-calc` is the **strongly recommended best practice**. It leverages a centralized service to maximize the benefits of Tree Shaking and achieve a global optimum.
 
-import CreateSharedTreeShakingDeployServer from '@components/en/create-shared-tree-shaking-deploy-server.mdx'
+import CreateSharedTreeShakingDeployServer from '@docs/en/_components/create-shared-tree-shaking-deploy-server.mdx'
 
 {!props.name && (
   <CreateSharedTreeShakingDeployServer />
@@ -96,7 +94,7 @@ Shared dependency Tree Shaking is designed with an **automatic safe fallback**. 
 
 If you need to disable it manually, stop the secondary-build and Snapshot-update steps in your deployment service.
 
-import SecondaryBuild from '@components/en/secondary-build.mdx'
+import SecondaryBuild from '@docs/en/_components/secondary-build.mdx'
 import React from 'react';
 
 {props.secondaryBuild || React.createElement(SecondaryBuild)}
