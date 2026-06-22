@@ -1,13 +1,14 @@
 # treeShakingSharedPlugins
 
-用于构建独立共享 fallback 的插件模块路径列表。构建二次 treeshaking 时会通过 `require(p)` 加载并实例化插件参与构建。
+用于构建独立共享 fallback 的插件模块路径列表。构建二次 Tree Shaking 时会通过 `require(p)` 加载并实例化插件参与构建。
 
 - 类型：`string[]`
 - 是否必填：否
 - 默认值：`undefined`
 
-如果设置了 `shared.treeShaking.mode` 为 'server-calc'，那么在部署服务中，会重新构建需要 tree shaking 的共享依赖，此时仅构建共享依赖，不会加载原项目的构建配置。
-如果你的项目有特殊的构建配置，例如设置了 externals ，那么你可以把这些构建配置集成到一个 NPM Package ，然后在 `treeShakingSharedPlugins` 中填写此插件的名称和版本，这样就可以在第二次 treeshaking 过程中参与 shared 模块的 treeshaking 过程。
+如果设置了 `shared.treeShaking.mode` 为 `'server-calc'`，那么在部署服务中，会重新构建需要 Tree Shaking 的共享依赖，此时仅构建共享依赖，不会加载原项目的构建配置。
+
+如果原项目依赖一些特殊的构建配置（例如 `externals`），可以把这些配置封装成一个 NPM 插件发布，再在 `treeShakingSharedPlugins` 里列出该插件的包名。二次 Tree Shaking 时会自动 `require` 并实例化这些插件，让 shared 模块的构建沿用原有配置。
 
 例如提供了一个插件 `my-build-plugin`，它会设置 `externals`：
 
@@ -22,7 +23,7 @@ class MyBuildPlugin {
 export default MyBuildPlugin;
 ```
 
-将此插件发布的版本为 `0.0.2` ，那么此时只需要在 `treeShakingSharedPlugins` 中填写插件的名称和版本即可：
+将此插件发布到 npm 后，在 `treeShakingSharedPlugins` 中列出包名即可：
 
 ```ts title='module-federation.config.ts'
 

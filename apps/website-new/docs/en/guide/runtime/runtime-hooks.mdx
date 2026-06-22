@@ -1,5 +1,7 @@
 # Runtime Hooks
 
+The Module Federation runtime exposes hooks at key stages — loading remote modules, initializing containers, registering and resolving shared dependencies, and more. They are useful for diagnostics and tracing, error fallbacks, rewriting shared dependencies, customizing resource loading, and similar scenarios.
+
 ## Hook return values
 
 For `SyncHook` and `AsyncHook`, returning `undefined` means the plugin only observes the event. It does not clear a value returned by an earlier plugin. A later plugin can still replace that value by returning another non-`undefined` value.
@@ -12,17 +14,15 @@ For `SyncWaterfallHook` and `AsyncWaterfallHook`, return the full updated args o
 
 Updates the corresponding init configuration before the MF instance is initialized.
 
-* type
-
 ```ts
-function beforeInit(args: BeforeInitOptions): BeforeInitOptions
+function beforeInit(args: BeforeInitOptions): BeforeInitOptions;
 
-type BeforeInitOptions ={
-    userOptions: UserOptions;
-    options: ModuleFederationRuntimeOptions;
-    origin: ModuleFederation;
-    shareInfo: ShareInfos;
-}
+type BeforeInitOptions = {
+  userOptions: UserOptions;
+  options: ModuleFederationRuntimeOptions;
+  origin: ModuleFederation;
+  shareInfo: ShareInfos;
+};
 
 interface ModuleFederationRuntimeOptions {
   id?: string;
@@ -41,15 +41,13 @@ interface ModuleFederationRuntimeOptions {
 
 Called after the MF instance is initialized.
 
-* type
-
 ```ts
-function init(args: InitOptions): void
+function init(args: InitOptions): void;
 
-type InitOptions ={
+type InitOptions = {
   options: ModuleFederationRuntimeOptions;
   origin: ModuleFederation;
-}
+};
 ```
 
 ## beforeRequest
@@ -58,16 +56,16 @@ type InitOptions ={
 
 Called before resolving the remote path, useful for updating something before lookup.
 
-* type
-
 ```ts
-async function beforeRequest(args: BeforeRequestOptions): Promise<BeforeRequestOptions>
+async function beforeRequest(
+  args: BeforeRequestOptions,
+): Promise<BeforeRequestOptions>;
 
-type BeforeRequestOptions ={
+type BeforeRequestOptions = {
   id: string;
   options: ModuleFederationRuntimeOptions;
   origin: ModuleFederation;
-}
+};
 ```
 
 ## afterMatchRemote
@@ -76,12 +74,10 @@ type BeforeRequestOptions ={
 
 Called after the runtime matches a `loadRemote` request to a configured remote. If matching fails, the hook is still called with `error`. It is useful for diagnostics, request tracing, and checking whether a failure happened before manifest or remoteEntry loading.
 
-* type
-
 ```ts
-async function afterMatchRemote(args: AfterMatchRemoteOptions): Promise<void>
+async function afterMatchRemote(args: AfterMatchRemoteOptions): Promise<void>;
 
-type AfterMatchRemoteOptions ={
+type AfterMatchRemoteOptions = {
   id: string;
   options: ModuleFederationRuntimeOptions;
   remote?: Remote;
@@ -89,7 +85,7 @@ type AfterMatchRemoteOptions ={
   remoteInfo?: RemoteInfo;
   error?: unknown;
   origin: ModuleFederation;
-}
+};
 ```
 
 ## afterResolve
@@ -98,12 +94,12 @@ type AfterMatchRemoteOptions ={
 
 Called after resolving the remote path, allowing modification of the resolved content.
 
-* type
-
 ```ts
-async function afterResolve(args: AfterResolveOptions): Promise<AfterResolveOptions>
+async function afterResolve(
+  args: AfterResolveOptions,
+): Promise<AfterResolveOptions>;
 
-type AfterResolveOptions ={
+type AfterResolveOptions = {
   id: string;
   pkgNameOrAlias: string;
   expose: string;
@@ -112,21 +108,19 @@ type AfterResolveOptions ={
   origin: ModuleFederation;
   remoteInfo: RemoteInfo;
   remoteSnapshot?: ModuleInfo;
-}
+};
 ```
 
 ## onLoad
 
 `AsyncHook`
 
-Triggered once a federated module is loaded, allowing access and modification to the exports of the loaded file.
-
-* type
+Triggered after a remote is loaded, allowing access to and modification of the loaded file's exposed exports.
 
 ```ts
-async function onLoad(args: OnLoadOptions): Promise<void>
+async function onLoad(args: OnLoadOptions): Promise<void>;
 
-type OnLoadOptions ={
+type OnLoadOptions = {
   id: string;
   expose: string;
   pkgNameOrAlias: string;
@@ -136,12 +130,12 @@ type OnLoadOptions ={
   exposeModule: any;
   exposeModuleFactory: any;
   moduleInstance: Module;
-}
+};
 
 type ModuleOptions = {
-    remoteInfo: RemoteInfo;
-    host: ModuleFederation;
-}
+  remoteInfo: RemoteInfo;
+  host: ModuleFederation;
+};
 
 interface RemoteInfo {
   name: string;
@@ -162,12 +156,10 @@ Called after a `loadRemote` request finishes. It runs for successful loads, fail
 
 `onLoad` runs before `afterLoadRemote` on a successful load. If a load fails and `errorLoadRemote` returns a fallback, `afterLoadRemote` receives the original `error` and `recovered: true`.
 
-* type
-
 ```ts
-async function afterLoadRemote(args: AfterLoadRemoteOptions): Promise<void>
+async function afterLoadRemote(args: AfterLoadRemoteOptions): Promise<void>;
 
-type AfterLoadRemoteOptions ={
+type AfterLoadRemoteOptions = {
   id: string;
   expose?: string;
   remote?: RemoteInfo;
@@ -178,7 +170,7 @@ type AfterLoadRemoteOptions ={
   error?: unknown;
   recovered?: boolean;
   origin: ModuleFederation;
-}
+};
 ```
 
 ## beforeInitContainer
@@ -187,18 +179,18 @@ type AfterLoadRemoteOptions ={
 
 Triggered before the host calls `remoteEntry.init(...)`. Useful for dynamically rewriting the `shareScope` / `initScope` used in this initialization and the `remoteEntryInitOptions` passed to the remote.
 
-* type
-
 ```ts
-async function beforeInitContainer(args: BeforeInitContainerOptions): Promise<BeforeInitContainerOptions>
+async function beforeInitContainer(
+  args: BeforeInitContainerOptions,
+): Promise<BeforeInitContainerOptions>;
 
-type BeforeInitContainerOptions ={
+type BeforeInitContainerOptions = {
   shareScope: ShareScopeMap[string];
   initScope: InitScope;
   remoteEntryInitOptions: RemoteEntryInitOptions;
   remoteInfo: RemoteInfo;
   origin: ModuleFederation;
-}
+};
 ```
 
 ## initContainer
@@ -207,12 +199,12 @@ type BeforeInitContainerOptions ={
 
 Triggered after `remoteEntry.init(...)` completes successfully. Useful for metrics, observability, or post-initialization customization.
 
-* type
-
 ```ts
-async function initContainer(args: InitContainerOptions): Promise<InitContainerOptions>
+async function initContainer(
+  args: InitContainerOptions,
+): Promise<InitContainerOptions>;
 
-type InitContainerOptions ={
+type InitContainerOptions = {
   shareScope: ShareScopeMap[string];
   initScope: InitScope;
   remoteEntryInitOptions: RemoteEntryInitOptions;
@@ -221,7 +213,7 @@ type InitContainerOptions ={
   origin: ModuleFederation;
   id?: string;
   remoteSnapshot?: ModuleInfo;
-}
+};
 ```
 
 ## handlePreloadModule
@@ -230,19 +222,17 @@ type InitContainerOptions ={
 
 Handles the preloading logic for remotes.
 
-* type
-
 ```ts
-function handlePreloadModule(args: HandlePreloadModuleOptions): void
+function handlePreloadModule(args: HandlePreloadModuleOptions): void;
 
-type HandlePreloadModuleOptions ={
+type HandlePreloadModuleOptions = {
   id: string;
   name: string;
   remote: Remote;
   remoteSnapshot: ModuleInfo;
   preloadConfig: PreloadRemoteArgs;
   origin: ModuleFederation;
-}
+};
 ```
 
 ## errorLoadRemote
@@ -251,12 +241,12 @@ type HandlePreloadModuleOptions ={
 
 Called if loading remotes fails, enabling custom error handling. Can return a custom fallback logic.
 
-* type
-
 ```ts
-async function errorLoadRemote(args: ErrorLoadRemoteOptions): Promise<void | unknown>
+async function errorLoadRemote(
+  args: ErrorLoadRemoteOptions,
+): Promise<void | unknown>;
 
-type ErrorLoadRemoteOptions ={
+type ErrorLoadRemoteOptions = {
   id: string;
   error: unknown;
   options?: any;
@@ -265,7 +255,7 @@ type ErrorLoadRemoteOptions ={
   remote?: RemoteInfo;
   expose?: string;
   origin: ModuleFederation;
-}
+};
 ```
 
 The `lifecycle` parameter indicates the stage where the error occurred:
@@ -276,9 +266,6 @@ The `lifecycle` parameter indicates the stage where the error occurred:
 - `beforeLoadShare`: Error while loading a remoteEntry during shared dependency initialization
 
 If this hook returns a fallback module, the runtime uses that value to continue. If a diagnostics or logging plugin returns `undefined`, it does not clear a fallback returned by another plugin.
-
-* example
-
 
 ```ts
 import { createInstance, loadRemote } from '@module-federation/enhanced/runtime';
@@ -349,24 +336,23 @@ mf.loadRemote('app1/un-existed-module').then(mod=>{
 });
 ```
 
-
 ## beforeLoadShare
 
 `AsyncWaterfallHook`
 
 Called before loading shared, can be used to modify the corresponding shared configuration.
 
-* type
-
 ```ts
-async function beforeLoadShare(args: BeforeLoadShareOptions): Promise<BeforeLoadShareOptions>
+async function beforeLoadShare(
+  args: BeforeLoadShareOptions,
+): Promise<BeforeLoadShareOptions>;
 
-type BeforeLoadShareOptions ={
+type BeforeLoadShareOptions = {
   pkgName: string;
   shareInfo?: Shared;
   shared: Options['shared'];
   origin: ModuleFederation;
-}
+};
 ```
 
 ## afterLoadShare
@@ -375,12 +361,10 @@ type BeforeLoadShareOptions ={
 
 Called after a shared dependency is successfully resolved by `loadShare` or `loadShareSync`. Use it to observe which provider and version were selected.
 
-* type
-
 ```ts
-function afterLoadShare(args: AfterLoadShareOptions): void
+function afterLoadShare(args: AfterLoadShareOptions): void;
 
-type AfterLoadShareOptions ={
+type AfterLoadShareOptions = {
   pkgName: string;
   shareInfo?: Partial<Shared>;
   selectedShared?: Partial<Shared>;
@@ -388,7 +372,7 @@ type AfterLoadShareOptions ={
   shareScopeMap: ShareScopeMap;
   lifecycle: 'loadShare' | 'loadShareSync';
   origin: ModuleFederation;
-}
+};
 ```
 
 ## errorLoadShare
@@ -397,12 +381,10 @@ type AfterLoadShareOptions ={
 
 Called when shared dependency resolution fails or cannot select a valid shared dependency. It is useful for diagnostics around missing shared dependencies, version mismatch, and eager configuration errors.
 
-* type
-
 ```ts
-function errorLoadShare(args: ErrorLoadShareOptions): void
+function errorLoadShare(args: ErrorLoadShareOptions): void;
 
-type ErrorLoadShareOptions ={
+type ErrorLoadShareOptions = {
   pkgName: string;
   shareInfo?: Partial<Shared>;
   shared: Options['shared'];
@@ -411,7 +393,7 @@ type ErrorLoadShareOptions ={
   origin: ModuleFederation;
   error?: unknown;
   recovered?: boolean;
-}
+};
 ```
 
 ## initContainerShareScopeMap
@@ -420,18 +402,18 @@ type ErrorLoadShareOptions ={
 
 Triggered when the host aligns a remote’s share-scope mapping. Useful for redirecting one scope to another (for example, aliasing `scope1` to `default` so they share the same pool).
 
-* type
-
 ```ts
-function initContainerShareScopeMap(args: InitContainerShareScopeMapOptions): InitContainerShareScopeMapOptions
+function initContainerShareScopeMap(
+  args: InitContainerShareScopeMapOptions,
+): InitContainerShareScopeMapOptions;
 
-type InitContainerShareScopeMapOptions ={
+type InitContainerShareScopeMapOptions = {
   shareScope: ShareScopeMap[string];
   options: Options;
   origin: ModuleFederation;
   scopeName: string;
   hostShareScopeMap?: ShareScopeMap;
-}
+};
 ```
 
 ## resolveShare
@@ -442,75 +424,73 @@ Allows overriding the final shared module selection result.
 
 `resolveShare` runs after the runtime has already picked the candidate scope and version. At this point, changing fields like `scope` or `version` on `args` does not change the final result by itself. To switch to a different shared module, replace `args.resolver` and return the shared record you want to use.
 
-* type
-
 ```ts
-function resolveShare(args: ResolveShareOptions): ResolveShareOptions
+function resolveShare(args: ResolveShareOptions): ResolveShareOptions;
 
-type ResolveShareOptions ={
+type ResolveShareOptions = {
   shareScopeMap: ShareScopeMap;
   scope: string;
   pkgName: string;
   version: string;
   shareInfo: Shared;
   GlobalFederation: Federation;
-  resolver: () => {
-    shared: Shared;
-    useTreesShaking: boolean;
-  } | undefined;
-}
+  resolver: () =>
+    | {
+        shared: Shared;
+        useTreesShaking: boolean;
+      }
+    | undefined;
+};
 ```
 
-* example
-
-
 ```ts
-import { createInstance, loadRemote } from '@module-federation/enhanced/runtime';
+import {
+  createInstance,
+  loadRemote,
+} from '@module-federation/enhanced/runtime';
 
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
-const customSharedPlugin: () => ModuleFederationRuntimePlugin =
-  function () {
-    return {
-      name: 'custom-shared-plugin',
-      resolveShare(args) {
-        const { pkgName, shareScopeMap } = args;
+const customSharedPlugin: () => ModuleFederationRuntimePlugin = function () {
+  return {
+    name: 'custom-shared-plugin',
+    resolveShare(args) {
+      const { pkgName, shareScopeMap } = args;
 
-        if (pkgName !== 'react') {
-          return args;
-        }
-
-        const fallbackShared = shareScopeMap.default?.react?.['17.0.0'];
-        if (!fallbackShared) {
-          return args;
-        }
-
-        args.resolver = function () {
-          return {
-            shared: fallbackShared,
-            useTreesShaking: false,
-          };
-        };
+      if (pkgName !== 'react') {
         return args;
-      },
-    };
-  };
+      }
 
+      const fallbackShared = shareScopeMap.default?.react?.['17.0.0'];
+      if (!fallbackShared) {
+        return args;
+      }
+
+      args.resolver = function () {
+        return {
+          shared: fallbackShared,
+          useTreesShaking: false,
+        };
+      };
+      return args;
+    },
+  };
+};
 
 const mf = createInstance({
-    name: 'mf_host',
-    shared: {
-      react: {
-        version: '17.0.0',
-        scope: 'default',
-        lib: () => React,
-        shareConfig: {
-          singleton: true,
-          requiredVersion: '^17.0.0',
-        },
+  name: 'mf_host',
+  shared: {
+    react: {
+      version: '17.0.0',
+      scope: 'default',
+      lib: () => React,
+      shareConfig: {
+        singleton: true,
+        requiredVersion: '^17.0.0',
       },
     },
-    plugins: [customSharedPlugin()]
+  },
+  plugins: [customSharedPlugin()],
 });
 
 mf.loadShare('react').then((reactFactory) => {
@@ -518,23 +498,22 @@ mf.loadShare('react').then((reactFactory) => {
 });
 ```
 
-
 ## beforePreloadRemote
 
 `AsyncHook`
 
 Called before the preload handler executes any preload logic.
 
-* type
-
 ```ts
-async function beforePreloadRemote(args: BeforePreloadRemoteOptions): Promise<void>
+async function beforePreloadRemote(
+  args: BeforePreloadRemoteOptions,
+): Promise<void>;
 
-type BeforePreloadRemoteOptions ={
+type BeforePreloadRemoteOptions = {
   preloadOps: Array<PreloadRemoteArgs>;
   options: Options;
   origin: ModuleFederation;
-}
+};
 ```
 
 ## generatePreloadAssets
@@ -543,19 +522,19 @@ type BeforePreloadRemoteOptions ={
 
 Used to control the generation of resources that need to be preloaded.
 
-* type
-
 ```ts
-async function generatePreloadAssets(args: GeneratePreloadAssetsOptions): Promise<PreloadAssets>
+async function generatePreloadAssets(
+  args: GeneratePreloadAssetsOptions,
+): Promise<PreloadAssets>;
 
-type GeneratePreloadAssetsOptions ={
+type GeneratePreloadAssetsOptions = {
   origin: ModuleFederation;
   preloadOptions: PreloadOptions[number];
   remote: Remote;
   remoteInfo: RemoteInfo;
   remoteSnapshot: ModuleInfo;
   globalSnapshot: GlobalModuleInfo;
-}
+};
 
 interface PreloadAssets {
   cssAssets: Array<string>;
@@ -574,17 +553,15 @@ interface PreloadAssets {
 
 Called before initializing the remote container with `remoteEntry.init(...)`.
 
-* type
-
 ```ts
-async function beforeInitRemote(args: BeforeInitRemoteOptions): Promise<void>
+async function beforeInitRemote(args: BeforeInitRemoteOptions): Promise<void>;
 
-type BeforeInitRemoteOptions ={
+type BeforeInitRemoteOptions = {
   id?: string;
   remoteInfo: RemoteInfo;
   remoteSnapshot?: ModuleInfo;
   origin: ModuleFederation;
-}
+};
 ```
 
 ## afterInitRemote
@@ -593,12 +570,10 @@ type BeforeInitRemoteOptions ={
 
 Called after remote container initialization succeeds or fails. When the remote was already initialized, `cached` is set to `true`.
 
-* type
-
 ```ts
-async function afterInitRemote(args: AfterInitRemoteOptions): Promise<void>
+async function afterInitRemote(args: AfterInitRemoteOptions): Promise<void>;
 
-type AfterInitRemoteOptions ={
+type AfterInitRemoteOptions = {
   id?: string;
   remoteInfo: RemoteInfo;
   remoteSnapshot?: ModuleInfo;
@@ -606,7 +581,7 @@ type AfterInitRemoteOptions ={
   error?: unknown;
   cached?: boolean;
   origin: ModuleFederation;
-}
+};
 ```
 
 ## beforeGetExpose
@@ -615,18 +590,16 @@ type AfterInitRemoteOptions ={
 
 Called before `remoteEntry.get(expose)`.
 
-* type
-
 ```ts
-async function beforeGetExpose(args: BeforeGetExposeOptions): Promise<void>
+async function beforeGetExpose(args: BeforeGetExposeOptions): Promise<void>;
 
-type BeforeGetExposeOptions ={
+type BeforeGetExposeOptions = {
   id: string;
   expose: string;
   moduleInfo: RemoteInfo;
   remoteEntryExports: RemoteEntryExports;
   origin: ModuleFederation;
-}
+};
 ```
 
 ## afterGetExpose
@@ -635,12 +608,10 @@ type BeforeGetExposeOptions ={
 
 Called after `remoteEntry.get(expose)` succeeds or fails.
 
-* type
-
 ```ts
-async function afterGetExpose(args: AfterGetExposeOptions): Promise<void>
+async function afterGetExpose(args: AfterGetExposeOptions): Promise<void>;
 
-type AfterGetExposeOptions ={
+type AfterGetExposeOptions = {
   id: string;
   expose: string;
   moduleInfo: RemoteInfo;
@@ -648,7 +619,7 @@ type AfterGetExposeOptions ={
   moduleFactory?: () => unknown | Promise<unknown>;
   error?: unknown;
   origin: ModuleFederation;
-}
+};
 ```
 
 ## beforeExecuteFactory
@@ -657,18 +628,18 @@ type AfterGetExposeOptions ={
 
 Called before executing the exposed module factory. It is skipped when `loadRemote` is called with `loadFactory: false`.
 
-* type
-
 ```ts
-async function beforeExecuteFactory(args: BeforeExecuteFactoryOptions): Promise<void>
+async function beforeExecuteFactory(
+  args: BeforeExecuteFactoryOptions,
+): Promise<void>;
 
-type BeforeExecuteFactoryOptions ={
+type BeforeExecuteFactoryOptions = {
   id: string;
   expose: string;
   moduleInfo: RemoteInfo;
   loadFactory: boolean;
   origin: ModuleFederation;
-}
+};
 ```
 
 ## afterExecuteFactory
@@ -677,12 +648,12 @@ type BeforeExecuteFactoryOptions ={
 
 Called after the exposed module factory succeeds or fails. It is skipped when `loadRemote` is called with `loadFactory: false`.
 
-* type
-
 ```ts
-async function afterExecuteFactory(args: AfterExecuteFactoryOptions): Promise<void>
+async function afterExecuteFactory(
+  args: AfterExecuteFactoryOptions,
+): Promise<void>;
 
-type AfterExecuteFactoryOptions ={
+type AfterExecuteFactoryOptions = {
   id: string;
   expose: string;
   moduleInfo: RemoteInfo;
@@ -690,7 +661,7 @@ type AfterExecuteFactoryOptions ={
   exposeModule?: unknown;
   error?: unknown;
   origin: ModuleFederation;
-}
+};
 ```
 
 ## createScript
@@ -699,17 +670,15 @@ type AfterExecuteFactoryOptions ={
 
 Used to modify the script when loading resources.
 
-* type
-
 ```ts
-function createScript(args: CreateScriptOptions): CreateScriptHookReturn
+function createScript(args: CreateScriptOptions): CreateScriptHookReturn;
 
-type CreateScriptOptions ={
+type CreateScriptOptions = {
   url: string;
   attrs?: Record<string, any>;
   remoteInfo?: RemoteInfo;
   resourceContext?: ResourceLoadContext;
-}
+};
 
 type CreateScriptHookReturn =
   | HTMLScriptElement
@@ -721,7 +690,7 @@ type ResourceLoadContext = {
   id: string;
   resourceType: 'manifest' | 'remoteEntry' | 'js' | 'css';
   url?: string;
-}
+};
 ```
 
 `timeout` is measured in milliseconds and controls the script loading timeout. The default value is `20000`.
@@ -729,8 +698,6 @@ type ResourceLoadContext = {
 `preloadRemote`, plus the resource type and id.
 You can combine `timeout` and `resourceContext` to set different timeouts for
 remoteEntry loads and preload loads.
-
-* example
 
 ```ts
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
@@ -750,18 +717,16 @@ const changeScriptAttributePlugin: () => ModuleFederationRuntimePlugin =
             timeout: 30000,
           };
         }
-      }
+      },
     };
   };
 ```
 
-
 ## fetch
-The `fetch` function allows customizing the request that fetches the manifest JSON. A successful `Response` must yield a valid JSON.
 
 `AsyncHook`
 
-- **Type**
+The `fetch` function allows customizing the request that fetches the manifest JSON. A successful `Response` must yield a valid JSON.
 
 ```typescript
 function fetch(
@@ -777,7 +742,6 @@ or `preloadRemote`.
 
 - Example for including the credentials when fetching the manifest JSON:
 
-
 ```ts
 import type { FederationRuntimePlugin } from '@module-federation/enhanced/runtime';
 
@@ -788,13 +752,12 @@ export default function (): FederationRuntimePlugin {
     fetch(manifestUrl, requestInit) {
       return fetch(manifestUrl, {
         ...requestInit,
-        credentials: 'include'
+        credentials: 'include',
       });
     },
-  }
-};
+  };
+}
 ```
-
 
 ## createLink
 
@@ -802,17 +765,15 @@ export default function (): FederationRuntimePlugin {
 
 Used to customize the link element created for preload/style loading.
 
-* type
-
 ```ts
-function createLink(args: CreateLinkOptions): HTMLLinkElement | void
+function createLink(args: CreateLinkOptions): HTMLLinkElement | void;
 
-type CreateLinkOptions ={
+type CreateLinkOptions = {
   url: string;
   attrs?: Record<string, any>;
   remoteInfo?: RemoteInfo;
   resourceContext?: ResourceLoadContext;
-}
+};
 
 type CreateLinkHookReturn =
   | HTMLLinkElement
@@ -859,19 +820,19 @@ const resourceTimeoutPlugin = (): ModuleFederationRuntimePlugin => ({
 
 Triggered when loading remoteEntry fails (typically script loading errors). Useful for retries or custom fallback strategies.
 
-* type
-
 ```ts
-async function loadEntryError(args: LoadEntryErrorOptions): Promise<Promise<RemoteEntryExports | undefined> | undefined>
+async function loadEntryError(
+  args: LoadEntryErrorOptions,
+): Promise<Promise<RemoteEntryExports | undefined> | undefined>;
 
-type LoadEntryErrorOptions ={
+type LoadEntryErrorOptions = {
   getRemoteEntry: typeof getRemoteEntry;
   origin: ModuleFederation;
   remoteInfo: RemoteInfo;
   remoteEntryExports?: RemoteEntryExports;
   globalLoading: Record<string, Promise<void | RemoteEntryExports> | undefined>;
   uniqueKey: string;
-}
+};
 ```
 
 ## afterLoadEntry
@@ -880,18 +841,16 @@ type LoadEntryErrorOptions ={
 
 Called after loading a remoteEntry succeeds, fails, or is recovered by `loadEntryError`.
 
-* type
-
 ```ts
-async function afterLoadEntry(args: AfterLoadEntryOptions): Promise<void>
+async function afterLoadEntry(args: AfterLoadEntryOptions): Promise<void>;
 
-type AfterLoadEntryOptions ={
+type AfterLoadEntryOptions = {
   origin: ModuleFederation;
   remoteInfo: RemoteInfo;
   remoteEntryExports?: RemoteEntryExports | false | void;
   error?: unknown;
   recovered?: boolean;
-}
+};
 ```
 
 ## getModuleFactory
@@ -900,32 +859,31 @@ type AfterLoadEntryOptions ={
 
 Triggered before calling `remoteEntry.get(expose)`, allowing custom module-factory resolution.
 
-* type
-
 ```ts
-async function getModuleFactory(args: GetModuleFactoryOptions): Promise<(() => Promise<Module>) | undefined>
+async function getModuleFactory(
+  args: GetModuleFactoryOptions,
+): Promise<(() => Promise<Module>) | undefined>;
 
-type GetModuleFactoryOptions ={
+type GetModuleFactoryOptions = {
   remoteEntryExports: RemoteEntryExports;
   expose: string;
   moduleInfo: RemoteInfo;
-}
+};
 ```
 
 ## loadEntry
-The `loadEntry` function allows for full customization of remotes, enabling you to extend and create new remote types. The following two simple examples demonstrate loading JSON data and module delegation.
 
 `asyncHook`
 
-- **Type**
+The `loadEntry` function allows for full customization of remotes, enabling you to extend and create new remote types. The following two simple examples demonstrate loading JSON data and module delegation.
 
 ```typescript
 function loadEntry(args: LoadEntryOptions): RemoteEntryExports | void;
 
 type LoadEntryOptions = {
-  createScriptHook: SyncHook,
-  remoteEntryExports?: RemoteEntryExports,
-  remoteInfo: RemoteInfo
+  createScriptHook: SyncHook;
+  remoteEntryExports?: RemoteEntryExports;
+  remoteInfo: RemoteInfo;
 };
 interface RemoteInfo {
   name: string;
@@ -948,7 +906,6 @@ export type RemoteEntryExports = {
 
 - Example Loading JSON Data
 
-
 ```ts
 import { init } from '@module-federation/enhanced/runtime';
 
@@ -959,17 +916,19 @@ const changeScriptAttributePlugin: () => FederationRuntimePlugin = function () {
   return {
     name: 'load-json-data-plugin',
     loadEntry({ remoteInfo }) {
-      if (remoteInfo.jsonA === "jsonA") {
+      if (remoteInfo.jsonA === 'jsonA') {
         return {
           init(shareScope, initScope, remoteEntryInitOPtions) {},
           async get(path) {
-            const json = await fetch(remoteInfo.entry + ".json").then(res => res.json())
+            const json = await fetch(remoteInfo.entry + '.json').then((res) =>
+              res.json(),
+            );
             return () => ({
               path,
-              json
-            })
-          }
-        }
+              json,
+            });
+          },
+        };
       }
     },
   };
@@ -980,18 +939,18 @@ const changeScriptAttributePlugin: () => FederationRuntimePlugin = function () {
 // module-federation-config
 {
   remotes: {
-    jsonA: "jsonA@https://cdn.jsdelivr.net/npm/@module-federation/runtime/package"
+    jsonA: "jsonA@https://cdn.jsdelivr.net/npm/@module-federation/runtime/package";
   }
 }
 ```
+
 ```ts
 // src/bootstrap.js
-import jsonA from "jsonA"
-jsonA // {...json data}
+import jsonA from 'jsonA';
+jsonA; // {...json data}
 ```
 
 - Example Delegate Modules
-
 
 ```ts
 import { init } from '@module-federation/enhanced/runtime';
@@ -1003,16 +962,16 @@ const changeScriptAttributePlugin: () => FederationRuntimePlugin = function () {
   return {
     name: 'delegate-modules-plugin',
     loadEntry({ remoteInfo }) {
-      if (remoteInfo.name === "delegateModulesA") {
+      if (remoteInfo.name === 'delegateModulesA') {
         return {
           init(shareScope, initScope, remoteEntryInitOPtions) {},
           async get(path) {
-            path = path.replace("./", "")
-            const {[path]: factory} = await import("./delegateModulesA.js")
-            const result = await factory()
-            return () => result
-          }
-        }
+            path = path.replace('./', '');
+            const { [path]: factory } = await import('./delegateModulesA.js');
+            const result = await factory();
+            return () => result;
+          },
+        };
       }
     },
   };
@@ -1022,34 +981,36 @@ const changeScriptAttributePlugin: () => FederationRuntimePlugin = function () {
 ```ts
 // ./src/delegateModulesA.js
 export async function test1() {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setTimeout(() => {
-      resolve("test1 value")
-    }, 3000)
-  })
+      resolve('test1 value');
+    }, 3000);
+  });
 }
 export async function test2() {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setTimeout(() => {
-      resolve("test2 value")
-    }, 3000)
-  })
+      resolve('test2 value');
+    }, 3000);
+  });
 }
 ```
+
 ```ts
 // module-federation-config
 {
   remotes: {
-    delegateModulesA: "delegateModulesA@https://delegateModulesA.js"
+    delegateModulesA: 'delegateModulesA@https://delegateModulesA.js';
   }
 }
 ```
+
 ```ts
 // src/bootstrap.js
-import test1 from "delegateModulesA/test1"
-import test2 from "delegateModulesA/test2"
-test1 // "test1 value"
-test2 // "test2 value"
+import test1 from 'delegateModulesA/test1';
+import test2 from 'delegateModulesA/test2';
+test1; // "test1 value"
+test2; // "test2 value"
 ```
 
 ## bridgeHook
@@ -1062,10 +1023,10 @@ test2 // "test2 value"
 
 Triggered before bridge rendering. You can return an object to augment render arguments (for example, `extraProps`).
 
-* type
-
 ```ts
-function beforeBridgeRender(args: Record<string, any>): void | Record<string, any>
+function beforeBridgeRender(
+  args: Record<string, any>,
+): void | Record<string, any>;
 ```
 
 ## afterBridgeRender
@@ -1074,10 +1035,10 @@ function beforeBridgeRender(args: Record<string, any>): void | Record<string, an
 
 Triggered after bridge rendering.
 
-* type
-
 ```ts
-function afterBridgeRender(args: Record<string, any>): void | Record<string, any>
+function afterBridgeRender(
+  args: Record<string, any>,
+): void | Record<string, any>;
 ```
 
 ## beforeBridgeDestroy
@@ -1086,10 +1047,10 @@ function afterBridgeRender(args: Record<string, any>): void | Record<string, any
 
 Triggered before bridge teardown.
 
-* type
-
 ```ts
-function beforeBridgeDestroy(args: Record<string, any>): void | Record<string, any>
+function beforeBridgeDestroy(
+  args: Record<string, any>,
+): void | Record<string, any>;
 ```
 
 ## afterBridgeDestroy
@@ -1098,8 +1059,8 @@ function beforeBridgeDestroy(args: Record<string, any>): void | Record<string, a
 
 Triggered after bridge teardown.
 
-* type
-
 ```ts
-function afterBridgeDestroy(args: Record<string, any>): void | Record<string, any>
+function afterBridgeDestroy(
+  args: Record<string, any>,
+): void | Record<string, any>;
 ```
