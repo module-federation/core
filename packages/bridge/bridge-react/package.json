@@ -175,13 +175,13 @@
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "6.30.3",
-    "react-router": "7.15.1",
+    "react-router": "7.16.0",
     "typescript": "^5.2.2",
     "vite": "^5.4.21",
     "vite-plugin-dts": "^4.3.0",
     "@module-federation/runtime": "workspace:*",
     "@module-federation/runtime-core": "workspace:*",
-    "hono": "4.12.7",
+    "hono": "4.12.25",
     "vitest": "1.6.0"
   }
 }
