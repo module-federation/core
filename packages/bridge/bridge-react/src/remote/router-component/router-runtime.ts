@@ -14,6 +14,7 @@ declare const require: RouterRequire;
 
 let reactRouter: ReactRouterModule | null | undefined;
 let reactRouterPromise: Promise<ReactRouterModule | null> | undefined;
+let reactRouterImporter: RouterImporter | undefined;
 
 function normalizeRouterModule(module: unknown): ReactRouterModule | null {
   if (!module || typeof module !== 'object') {
@@ -76,14 +77,19 @@ function isServerRuntime(options?: RouterRuntimeOptions) {
   return options?.isServer ?? typeof window === 'undefined';
 }
 
-function importRouterPackage(id: RouterPackageName) {
-  const runtimeImport = Function('id', 'return import(id)') as RouterImporter;
-  return runtimeImport(id);
+function resetReactRouterCache() {
+  reactRouter = undefined;
+  reactRouterPromise = undefined;
 }
 
 export function resetReactRouterRuntime() {
-  reactRouter = undefined;
-  reactRouterPromise = undefined;
+  reactRouterImporter = undefined;
+  resetReactRouterCache();
+}
+
+export function setReactRouterRuntimeImporter(importer?: RouterImporter) {
+  reactRouterImporter = importer;
+  resetReactRouterCache();
 }
 
 export function loadReactRouter(options?: RouterRuntimeOptions) {
@@ -99,7 +105,12 @@ export function loadReactRouter(options?: RouterRuntimeOptions) {
   }
 
   if (!reactRouterPromise) {
-    const importPackage = options?.importRouterPackage || importRouterPackage;
+    const importPackage = options?.importRouterPackage || reactRouterImporter;
+
+    if (!importPackage) {
+      reactRouter = null;
+      return Promise.resolve(reactRouter);
+    }
 
     reactRouterPromise = importPackage('react-router-dom')
       .then(normalizeRouterModule)

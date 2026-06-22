@@ -2,6 +2,7 @@ import {
   loadReactRouter,
   readReactRouter,
   resetReactRouterRuntime,
+  setReactRouterRuntimeImporter,
 } from '../src/remote/router-component/router-runtime';
 
 describe('router runtime', () => {
@@ -85,6 +86,65 @@ describe('router runtime', () => {
     expect(readReactRouter({ requireFn: undefined })).toBe(router);
     expect(importRouterPackage).toHaveBeenCalledWith('react-router-dom');
     expect(importRouterPackage).toHaveBeenCalledWith('react-router');
+  });
+
+  it('uses an injected importer in native ESM SSR without eval', async () => {
+    const router = { useLocation: jest.fn() };
+    const functionSpy = jest.fn(() => {
+      throw new Error('eval is unavailable');
+    });
+    const originalFunction = globalThis.Function;
+    globalThis.Function = functionSpy as unknown as FunctionConstructor;
+    setReactRouterRuntimeImporter((id) => {
+      if (id === 'react-router') {
+        return Promise.resolve(router);
+      }
+      return Promise.reject(new Error('react-router-dom is unavailable'));
+    });
+
+    let thrownPromise: Promise<unknown> | undefined;
+
+    try {
+      readReactRouter({
+        requireFn: undefined,
+        isServer: true,
+      });
+    } catch (error) {
+      thrownPromise = error as Promise<unknown>;
+    } finally {
+      globalThis.Function = originalFunction;
+    }
+
+    expect(thrownPromise).toBeInstanceOf(Promise);
+    await thrownPromise;
+    expect(readReactRouter({ requireFn: undefined })).toBe(router);
+    expect(functionSpy).not.toHaveBeenCalled();
+  });
+
+  it('returns null in native ESM SSR when no importer is injected', async () => {
+    const functionSpy = jest.fn(() => {
+      throw new Error('eval is unavailable');
+    });
+    const originalFunction = globalThis.Function;
+    globalThis.Function = functionSpy as unknown as FunctionConstructor;
+
+    let thrownPromise: Promise<unknown> | undefined;
+
+    try {
+      readReactRouter({
+        requireFn: undefined,
+        isServer: true,
+      });
+    } catch (error) {
+      thrownPromise = error as Promise<unknown>;
+    } finally {
+      globalThis.Function = originalFunction;
+    }
+
+    expect(thrownPromise).toBeInstanceOf(Promise);
+    await thrownPromise;
+    expect(readReactRouter({ requireFn: undefined })).toBeNull();
+    expect(functionSpy).not.toHaveBeenCalled();
   });
 
   it('returns null after server-side router imports fail', async () => {
