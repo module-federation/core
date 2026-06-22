@@ -1,4 +1,4 @@
-import { assert, describe, it, expect } from 'vitest';
+import { assert, describe, it, expect, vi } from 'vitest';
 import { ModuleFederation } from '../src/index';
 
 describe('ModuleFederation', () => {
@@ -101,5 +101,112 @@ describe('ModuleFederation', () => {
     const newApp1Res = await newApp1Module();
     // Value is different from the registered remote
     expect(newApp1Res).toBe('hello app1 entry2');
+  });
+  it('reloads manifest snapshots when a manifest remote is force registered with the same entry', async () => {
+    const manifestUrl =
+      'http://localhost:1111/resources/register-remotes/manifest/federation-manifest.json';
+    const manifests = [
+      {
+        id: '@register-remotes/manifest',
+        name: '@register-remotes/manifest',
+        metaData: {
+          name: '@register-remotes/manifest',
+          publicPath: 'http://localhost:1111/',
+          type: 'app',
+          globalName: '@snapshot/remote1',
+          buildInfo: {
+            buildVersion: 'first',
+          },
+          remoteEntry: {
+            name: 'federation-remote-entry.js',
+            path: 'resources/snapshot/remote1',
+          },
+          types: {
+            name: 'index.d.ts',
+            path: './',
+          },
+        },
+        remotes: [],
+        shared: [],
+        exposes: [],
+      },
+      {
+        id: '@register-remotes/manifest',
+        name: '@register-remotes/manifest',
+        metaData: {
+          name: '@register-remotes/manifest',
+          publicPath: 'http://localhost:1111/',
+          type: 'app',
+          globalName: '@snapshot/remote2',
+          buildInfo: {
+            buildVersion: 'second',
+          },
+          remoteEntry: {
+            name: 'federation-remote-entry.js',
+            path: 'resources/snapshot/remote2',
+          },
+          types: {
+            name: 'index.d.ts',
+            path: './',
+          },
+        },
+        remotes: [],
+        shared: [],
+        exposes: [],
+      },
+    ];
+    const manifestFetch = vi.fn((url: string) => {
+      if (url === manifestUrl) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify(manifests[manifestFetch.mock.calls.length - 1]),
+            {
+              status: 200,
+              statusText: 'OK',
+              headers: { 'Content-Type': 'application/json' },
+            },
+          ),
+        );
+      }
+    });
+    const FM = new ModuleFederation({
+      name: '@federation/instance',
+      version: '1.0.1',
+      remotes: [
+        {
+          name: '@register-remotes/manifest',
+          entry: manifestUrl,
+        },
+      ],
+      plugins: [
+        {
+          name: 'manifest-fetch',
+          fetch: manifestFetch,
+        },
+      ],
+    });
+
+    const appModule = await FM.loadRemote<Promise<() => string>>(
+      '@register-remotes/manifest/say',
+    );
+    assert(appModule);
+    expect(await appModule()).toBe('hello world "@snapshot/remote1"');
+
+    FM.registerRemotes(
+      [
+        {
+          name: '@register-remotes/manifest',
+          entry: manifestUrl,
+        },
+      ],
+      { force: true },
+    );
+
+    const nextAppModule = await FM.loadRemote<Promise<() => string>>(
+      '@register-remotes/manifest/say',
+    );
+    assert(nextAppModule);
+    expect(await nextAppModule()).toBe('hello world "@snapshot/remote2"');
+    expect(manifestFetch).toHaveBeenCalledTimes(2);
   });
 });
