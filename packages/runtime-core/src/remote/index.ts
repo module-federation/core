@@ -37,6 +37,7 @@ import {
   error,
   getRemoteInfo,
   getRemoteEntryUniqueKey,
+  getFMId,
   composeRemoteRequestId,
   matchRemoteWithNameAndExpose,
   optionsToMFContext,
@@ -688,6 +689,29 @@ export class RemoteHandler {
       if (remoteIndex !== -1) {
         host.options.remotes.splice(remoteIndex, 1);
       }
+      const globalSnapshotKey = getInfoWithoutType(
+        CurrentGlobal.__FEDERATION__.moduleInfo,
+        getFMId(remote),
+      ).key;
+      delete CurrentGlobal.__FEDERATION__.moduleInfo[globalSnapshotKey];
+
+      if ('entry' in remote) {
+        host.snapshotHandler.manifestCache.delete(remote.entry);
+        delete Global.__FEDERATION__.__MANIFEST_LOADING__[remote.entry];
+      }
+
+      const { hostGlobalSnapshot } = getGlobalRemoteInfo(remote, host);
+      if (hostGlobalSnapshot) {
+        const remoteKey =
+          hostGlobalSnapshot &&
+          'remotesInfo' in hostGlobalSnapshot &&
+          hostGlobalSnapshot.remotesInfo &&
+          getInfoWithoutType(hostGlobalSnapshot.remotesInfo, remote.name).key;
+        if (remoteKey) {
+          delete hostGlobalSnapshot.remotesInfo[remoteKey];
+        }
+      }
+
       const loadedModule = host.moduleCache.get(remote.name);
       if (loadedModule) {
         const remoteInfo = loadedModule.remoteInfo;
@@ -710,8 +734,6 @@ export class RemoteHandler {
         if (globalLoading[remoteEntryUniqueKey]) {
           delete globalLoading[remoteEntryUniqueKey];
         }
-
-        host.snapshotHandler.manifestCache.delete(remoteInfo.entry);
 
         // delete unloaded shared and instance
         let remoteInsId = remoteInfo.buildVersion
@@ -790,24 +812,6 @@ export class RemoteHandler {
             },
           );
           CurrentGlobal.__FEDERATION__.__INSTANCES__.splice(remoteInsIndex, 1);
-        }
-
-        const { hostGlobalSnapshot } = getGlobalRemoteInfo(remote, host);
-        if (hostGlobalSnapshot) {
-          const remoteKey =
-            hostGlobalSnapshot &&
-            'remotesInfo' in hostGlobalSnapshot &&
-            hostGlobalSnapshot.remotesInfo &&
-            getInfoWithoutType(hostGlobalSnapshot.remotesInfo, remote.name).key;
-          if (remoteKey) {
-            delete hostGlobalSnapshot.remotesInfo[remoteKey];
-            if (
-              //eslint-disable-next-line no-extra-boolean-cast
-              Boolean(Global.__FEDERATION__.__MANIFEST_LOADING__[remoteKey])
-            ) {
-              delete Global.__FEDERATION__.__MANIFEST_LOADING__[remoteKey];
-            }
-          }
         }
 
         host.moduleCache.delete(remote.name);
