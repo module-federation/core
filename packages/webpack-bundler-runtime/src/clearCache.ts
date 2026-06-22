@@ -553,6 +553,18 @@ const createClearSnapshot = (
   };
 };
 
+const cleanupRemoteEntryInternalCache = (remoteEntryExports: unknown) => {
+  const clear = (
+    remoteEntryExports as
+      | { __webpack_clear_cache__?: () => void }
+      | null
+      | undefined
+  )?.__webpack_clear_cache__;
+  if (typeof clear === 'function') {
+    clear();
+  }
+};
+
 const cleanupRemoteEntryCache = (
   webpackRequire: WebpackRequire,
   target: ClearCacheTarget,
@@ -567,6 +579,7 @@ const cleanupRemoteEntryCache = (
       if (!Object.prototype.hasOwnProperty.call(globalThis, globalKey)) {
         continue;
       }
+      cleanupRemoteEntryInternalCache((globalThis as any)[globalKey]);
       const descriptor = Object.getOwnPropertyDescriptor(globalThis, globalKey);
       if (descriptor?.configurable) {
         delete (globalThis as any)[globalKey];
@@ -601,7 +614,17 @@ const cleanupRemoteRuntimeCache = (
     return;
   }
   for (const remoteName of target.remoteNames) {
+    const module = instance.moduleCache?.get(remoteName) as
+      | Record<string, unknown>
+      | undefined;
+    cleanupRemoteEntryInternalCache(module?.remoteEntryExports);
+    cleanupRemoteEntryInternalCache(module?.lib);
     instance.moduleCache?.delete(remoteName);
+  }
+  for (const remoteInfo of target.remoteInfos) {
+    for (const globalKey of getRemoteEntryGlobalKeys(remoteInfo)) {
+      cleanupRemoteEntryInternalCache((globalThis as any)[globalKey]);
+    }
   }
   const idToRemoteMap = instance.remoteHandler?.idToRemoteMap;
   if (idToRemoteMap) {
@@ -796,25 +819,6 @@ const invalidateNodeChunkGenerations = (
   }
 };
 
-const waitForPendingNodeChunkLoads = (
-  webpackRequire: WebpackRequire,
-  target: ClearCacheTarget,
-) => {
-  if (target.chunkIds.length === 0) {
-    return;
-  }
-  const waits: Promise<unknown>[] = [];
-  for (const control of getNodeChunkCacheControls(webpackRequire)) {
-    if (typeof control?.wait === 'function') {
-      waits.push(control.wait(target.chunkIds));
-    }
-  }
-  if (waits.length === 0) {
-    return;
-  }
-  return waitWithTimeout(Promise.all(waits));
-};
-
 const cleanupNodeChunkCache = (
   webpackRequire: WebpackRequire,
   target: ClearCacheTarget,
@@ -855,8 +859,8 @@ const cleanupStaleRemoteCache = (
   deleteModuleCache(webpackRequire, target.remoteModuleIds);
   deleteModuleCache(webpackRequire, target.externalModuleIds);
   deleteModuleCache(webpackRequire, consumerModuleIds);
-  cleanupRemoteRuntimeCache(webpackRequire, target);
   cleanupRemoteEntryCache(webpackRequire, target);
+  cleanupRemoteRuntimeCache(webpackRequire, target);
 };
 
 export const runStaleRemoteCleanups = (
@@ -933,98 +937,79 @@ const clearRemoteTarget = (
   webpackRequire: WebpackRequire,
 ): Promise<ClearCacheResult> => {
   const releaseBarrier = beginRemoteClear(webpackRequire, target.remoteNames);
-  let chunkCacheSnapshot = { restore() {} };
+  const idToExternalAndNameMapping =
+    webpackRequire.federation.bundlerRuntimeOptions.remotes
+      ?.idToExternalAndNameMapping ?? {};
+  const pendingRemoteLoads: Promise<unknown>[] = [];
+  for (const remoteModuleId of target.remoteModuleIds) {
+    for (const data of [
+      webpackRequire.remotesLoadingData?.moduleIdToRemoteDataMapping?.[
+        remoteModuleId
+      ],
+      idToExternalAndNameMapping[remoteModuleId],
+    ]) {
+      if (data?.p && typeof data.p === 'object' && 'then' in data.p) {
+        pendingRemoteLoads.push(data.p.catch(() => {}));
+      }
+    }
+  }
+  const consumerModuleIds = isBrowserRuntime()
+    ? []
+    : getAffectedConsumerModuleIds(webpackRequire, target.remoteModuleIds);
+  const chunkCacheSnapshot = createNodeChunkCacheSnapshot(
+    webpackRequire,
+    target,
+  );
+  let snapshot: ReturnType<typeof createClearSnapshot> | undefined;
   let clearSucceeded = false;
 
-  return Promise.resolve()
-    .then(() => waitForPendingNodeChunkLoads(webpackRequire, target))
-    .then(() => {
-      chunkCacheSnapshot = createNodeChunkCacheSnapshot(webpackRequire, target);
-      const idToExternalAndNameMapping =
-        webpackRequire.federation.bundlerRuntimeOptions.remotes
-          ?.idToExternalAndNameMapping ?? {};
+  try {
+    const state = getState(webpackRequire);
+    for (const remoteName of target.remoteNames) {
+      state.remoteGenerations[remoteName] =
+        getRemoteGeneration(webpackRequire, remoteName) + 1;
+    }
+    invalidateNodeChunkGenerations(webpackRequire, target);
+    snapshot = createClearSnapshot(webpackRequire, target, consumerModuleIds);
+    cleanupStaleRemoteCache(webpackRequire, target, consumerModuleIds);
+    invalidateRemoteEntryUrlGenerations(webpackRequire, target);
+    cleanupSharedCache(webpackRequire, target);
+  } catch (error) {
+    if (snapshot) {
+      snapshot.restore();
+    }
+    chunkCacheSnapshot.restore();
+    restoreRemoteGenerations(webpackRequire, target);
+    releaseBarrier();
+    return Promise.reject(error);
+  }
 
-      const pendingRemoteLoads: Promise<unknown>[] = [];
-      for (const remoteModuleId of target.remoteModuleIds) {
-        for (const data of [
-          webpackRequire.remotesLoadingData?.moduleIdToRemoteDataMapping?.[
-            remoteModuleId
-          ],
-          idToExternalAndNameMapping[remoteModuleId],
-        ]) {
-          if (data?.p && typeof data.p === 'object' && 'then' in data.p) {
-            pendingRemoteLoads.push(data.p.catch(() => {}));
-          }
-        }
+  return waitWithTimeout(Promise.all(pendingRemoteLoads))
+    .then((timedOut) =>
+      waitForSettledLoadConsumers().then(() => {
+        cleanupStaleRemoteCache(webpackRequire, target, consumerModuleIds);
+        return timedOut;
+      }),
+    )
+    .then((timedOut) => {
+      if (timedOut) {
+        trackStaleRemoteCleanup(
+          webpackRequire,
+          target,
+          consumerModuleIds,
+          pendingRemoteLoads,
+        );
       }
-      const consumerModuleIds = isBrowserRuntime()
-        ? []
-        : getAffectedConsumerModuleIds(webpackRequire, target.remoteModuleIds);
+      clearSucceeded = true;
 
-      return waitWithTimeout(Promise.all(pendingRemoteLoads))
-        .then((timedOut) => waitForSettledLoadConsumers().then(() => timedOut))
-        .then((timedOut) => {
-          const state = getState(webpackRequire);
-          for (const remoteName of target.remoteNames) {
-            state.remoteGenerations[remoteName] =
-              getRemoteGeneration(webpackRequire, remoteName) + 1;
-          }
-          invalidateNodeChunkGenerations(webpackRequire, target);
-
-          let snapshot: ReturnType<typeof createClearSnapshot> | undefined;
-          try {
-            snapshot = createClearSnapshot(
-              webpackRequire,
-              target,
-              consumerModuleIds,
-            );
-            for (const remoteModuleId of target.remoteModuleIds) {
-              const data =
-                webpackRequire.remotesLoadingData
-                  ?.moduleIdToRemoteDataMapping?.[remoteModuleId];
-              const runtimeData = idToExternalAndNameMapping[remoteModuleId];
-              if (data) {
-                delete data.p;
-              }
-              if (runtimeData) {
-                delete runtimeData.p;
-              }
-              delete webpackRequire.m[remoteModuleId];
-            }
-            deleteModuleCache(webpackRequire, target.remoteModuleIds);
-            deleteModuleCache(webpackRequire, target.externalModuleIds);
-            deleteModuleCache(webpackRequire, consumerModuleIds);
-            invalidateRemoteEntryUrlGenerations(webpackRequire, target);
-            cleanupRemoteEntryCache(webpackRequire, target);
-            cleanupRemoteRuntimeCache(webpackRequire, target);
-            cleanupNodeChunkCache(webpackRequire, target);
-            cleanupSharedCache(webpackRequire, target);
-            if (timedOut) {
-              trackStaleRemoteCleanup(
-                webpackRequire,
-                target,
-                consumerModuleIds,
-                pendingRemoteLoads,
-              );
-            }
-            clearSucceeded = true;
-          } catch (error) {
-            if (snapshot) {
-              snapshot.restore();
-            } else {
-              restoreRemoteGenerations(webpackRequire, target);
-            }
-            throw error;
-          }
-
-          return {
-            name: target.name,
-            cleared: true as const,
-          };
-        });
+      return {
+        name: target.name,
+        cleared: true as const,
+      };
     })
     .catch((error) => {
       if (!clearSucceeded) {
+        snapshot?.restore();
         chunkCacheSnapshot.restore();
         restoreRemoteGenerations(webpackRequire, target);
       }

@@ -6,7 +6,7 @@ const typeCheckerTypeScriptPath = require.resolve('typescript-compiler');
 // https://modernjs.dev/en/configure/app/usage
 export default defineConfig({
   output: {
-    assetPrefix: 'http://localhost:3051',
+    assetPrefix: 'http://127.0.0.1:3051',
   },
   tools: {
     tsChecker: {
