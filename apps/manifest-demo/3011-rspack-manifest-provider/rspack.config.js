@@ -65,6 +65,7 @@ module.exports = (_env, argv = {}) => {
         },
       ],
     },
+    lazyCompilation: false,
     plugins: [
       new HtmlRspackPlugin({
         template: path.resolve(__dirname, 'src/index.html'),
