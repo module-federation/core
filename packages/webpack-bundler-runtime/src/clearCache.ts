@@ -66,8 +66,28 @@ type ClearCacheState = {
 
 const clearCacheStates = new WeakMap<WebpackRequire, ClearCacheState>();
 
-const hasOwn = (obj: Record<string | number, unknown>, key: string | number) =>
+const hasOwn = (obj: object, key: string | number) =>
   Object.prototype.hasOwnProperty.call(obj, key);
+
+const getOwn = <T>(
+  obj: Record<string | number, T> | undefined | null,
+  key: string | number,
+): T | undefined => {
+  if (!obj || !hasOwn(obj, key)) {
+    return undefined;
+  }
+  return obj[key];
+};
+
+const deleteOwn = (
+  obj: object | undefined | null,
+  key: string | number,
+) => {
+  if (!obj || obj === Object.prototype || !hasOwn(obj, key)) {
+    return;
+  }
+  Reflect.deleteProperty(obj, key);
+};
 
 const toList = <T>(value: T[] | undefined | null): T[] =>
   Array.isArray(value) ? value : [];
@@ -199,7 +219,7 @@ export const getRemoteKeysForChunk = (
     webpackRequire.remotesLoadingData?.moduleIdToRemoteDataMapping ?? {};
 
   for (const remoteModuleId of toList(chunkMapping[chunkId])) {
-    const data = moduleIdToRemoteDataMapping[remoteModuleId];
+    const data = getOwn(moduleIdToRemoteDataMapping, remoteModuleId);
     if (data) {
       pushUnique(remoteKeys, [data.remoteName]);
     }
@@ -379,7 +399,7 @@ const getClearTarget = (
     toList(remotesLoadingData.remoteKeyToExternalModuleIds?.[remoteKey]),
   );
   for (const remoteModuleId of remoteModuleIds) {
-    const data = moduleIdToRemoteDataMapping[remoteModuleId];
+    const data = getOwn(moduleIdToRemoteDataMapping, remoteModuleId);
     if (data) {
       pushUnique(externalModuleIds, [data.externalModuleId]);
     }
@@ -421,11 +441,10 @@ const createClearSnapshot = (
   const idToExternalAndNameMapping =
     webpackRequire.federation.bundlerRuntimeOptions.remotes
       ?.idToExternalAndNameMapping ?? {};
+  const moduleIdToRemoteDataMapping =
+    webpackRequire.remotesLoadingData?.moduleIdToRemoteDataMapping;
   const remoteLoadingPromises = remoteModuleIds.map((remoteModuleId) => {
-    const data =
-      webpackRequire.remotesLoadingData?.moduleIdToRemoteDataMapping?.[
-        remoteModuleId
-      ];
+    const data = getOwn(moduleIdToRemoteDataMapping, remoteModuleId);
     return {
       data,
       had: data ? Object.prototype.hasOwnProperty.call(data, 'p') : false,
@@ -433,7 +452,7 @@ const createClearSnapshot = (
     };
   });
   const runtimeLoadingPromises = remoteModuleIds.map((remoteModuleId) => {
-    const data = idToExternalAndNameMapping[remoteModuleId];
+    const data = getOwn(idToExternalAndNameMapping, remoteModuleId);
     return {
       data,
       had: data ? Object.prototype.hasOwnProperty.call(data, 'p') : false,
@@ -841,19 +860,21 @@ const cleanupStaleRemoteCache = (
   const idToExternalAndNameMapping =
     webpackRequire.federation.bundlerRuntimeOptions.remotes
       ?.idToExternalAndNameMapping ?? {};
+  const moduleIdToRemoteDataMapping =
+    webpackRequire.remotesLoadingData?.moduleIdToRemoteDataMapping;
   cleanupNodeChunkCache(webpackRequire, target);
   for (const remoteModuleId of target.remoteModuleIds) {
-    const data =
-      webpackRequire.remotesLoadingData?.moduleIdToRemoteDataMapping?.[
-        remoteModuleId
-      ];
-    const runtimeData = idToExternalAndNameMapping[remoteModuleId];
-    if (data) {
-      delete data.p;
+    if (
+      remoteModuleId === '__proto__' ||
+      remoteModuleId === 'constructor' ||
+      remoteModuleId === 'prototype'
+    ) {
+      continue;
     }
-    if (runtimeData) {
-      delete runtimeData.p;
-    }
+    const data = getOwn(moduleIdToRemoteDataMapping, remoteModuleId);
+    const runtimeData = getOwn(idToExternalAndNameMapping, remoteModuleId);
+    deleteOwn(data, 'p');
+    deleteOwn(runtimeData, 'p');
     delete webpackRequire.m[remoteModuleId];
   }
   deleteModuleCache(webpackRequire, target.remoteModuleIds);
@@ -940,13 +961,13 @@ const clearRemoteTarget = (
   const idToExternalAndNameMapping =
     webpackRequire.federation.bundlerRuntimeOptions.remotes
       ?.idToExternalAndNameMapping ?? {};
+  const moduleIdToRemoteDataMapping =
+    webpackRequire.remotesLoadingData?.moduleIdToRemoteDataMapping;
   const pendingRemoteLoads: Promise<unknown>[] = [];
   for (const remoteModuleId of target.remoteModuleIds) {
     for (const data of [
-      webpackRequire.remotesLoadingData?.moduleIdToRemoteDataMapping?.[
-        remoteModuleId
-      ],
-      idToExternalAndNameMapping[remoteModuleId],
+      getOwn(moduleIdToRemoteDataMapping, remoteModuleId),
+      getOwn(idToExternalAndNameMapping, remoteModuleId),
     ]) {
       if (data?.p && typeof data.p === 'object' && 'then' in data.p) {
         pendingRemoteLoads.push(data.p.catch(() => {}));
