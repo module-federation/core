@@ -79,10 +79,7 @@ const getOwn = <T>(
   return obj[key];
 };
 
-const deleteOwn = (
-  obj: object | undefined | null,
-  key: string | number,
-) => {
+const deleteOwn = (obj: object | undefined | null, key: string | number) => {
   if (!obj || obj === Object.prototype || !hasOwn(obj, key)) {
     return;
   }
