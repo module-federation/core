@@ -125,6 +125,15 @@ export class RemoteHandler {
       remote: Remote;
       origin: ModuleFederation;
     }>('registerRemote'),
+    removeRemote: new AsyncHook<
+      [
+        {
+          remote: Remote;
+          origin: ModuleFederation;
+        },
+      ],
+      void
+    >('removeRemote'),
     beforeRequest: new AsyncWaterfallHook<{
       id: string;
       options: Options;
