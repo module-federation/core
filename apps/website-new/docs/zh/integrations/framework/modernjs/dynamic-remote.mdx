@@ -89,7 +89,9 @@ export default (): JSX.Element => (
   </div>
 );
 ```
+
 并创建对应的样式文件，内容如下：
+
 ```css title='Image.module.css'
 .button {
   background: red;
@@ -104,35 +106,37 @@ export default (): JSX.Element => (
 import { LoaderFunctionArgs } from '@modern-js/runtime/router';
 
 export type DataLoaderRes = {
-    providerList: Array<{
-        name: string,
-        entry: string,
-        id: string;
-    }>
-}
+  providerList: Array<{
+    name: string;
+    entry: string;
+    id: string;
+  }>;
+};
 
 const fetchProviderList = async () => {
-    const res = await new Promise(resolve => {
-        setTimeout(() => {
-            resolve([
-                {
-                    name: 'dynamic_provider',
-                    entry: 'http://localhost:3008/mf-manifest.json',
-                    id: 'dynamic_provider/Image'
-                }
-            ])
-        }, 1000);
-    });
+  const res = await new Promise(resolve => {
+    setTimeout(() => {
+      resolve([
+        {
+          name: 'dynamic_provider',
+          entry: 'http://localhost:3008/mf-manifest.json',
+          id: 'dynamic_provider/Image',
+        },
+      ]);
+    }, 1000);
+  });
 
-    return res as DataLoaderRes['providerList']
-}
+  return res as DataLoaderRes['providerList'];
+};
 
-export const loader = async ({ request }: LoaderFunctionArgs): Promise<DataLoaderRes> => {
-    console.log('request params', request);
-    const providerList = await fetchProviderList();
-    return {
-        providerList
-    }
+export const loader = async ({
+  request,
+}: LoaderFunctionArgs): Promise<DataLoaderRes> => {
+  console.log('request params', request);
+  const providerList = await fetchProviderList();
+  return {
+    providerList,
+  };
 };
 ```
 

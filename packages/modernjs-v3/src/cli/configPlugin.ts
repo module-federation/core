@@ -96,10 +96,10 @@ export const getMFConfig = async (
   if (config) {
     return config;
   }
-  const mfConfigPath = configPath ? configPath : defaultPath;
+  const mfConfigPath = path.resolve(configPath || defaultPath);
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { createJiti } = require('jiti');
-  const jit = createJiti(__filename, {
+  const jit = createJiti(mfConfigPath, {
     interopDefault: true,
   });
   const configModule = await jit(mfConfigPath);

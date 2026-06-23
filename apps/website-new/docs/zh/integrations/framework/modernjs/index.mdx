@@ -83,20 +83,37 @@ export default createModuleFederationConfig({
 ## 服务端渲染（SSR）
 
 :::info 注意
-为更好的性能体验，Module Federation X Modern.js SSR 仅支持 stream SSR 。
+为更好的性能体验，Module Federation & Modern.js SSR 仅支持 stream SSR 。
 :::
 
 在 SSR 场景与 CSR 场景中使用 Module Federation 没有任何区别，开发者保持按照原有的开发行为即可。
 
 ## 组件级别数据获取
 
-参考[数据获取](/guide/data/data-fetch)。
+参考[数据获取](/guide/data/data-fetch.html)。
 
-其中 Modern.js 插件在 `@module-federation/modern-js-v3/data-fetch` 子路径提供了 `lazyLoadComponentPlugin`，因此你不需要额外安装 `@module-federation/bridge-react`。
+在 Modern.js v3 中，组件级别数据获取的功能已经被内置在 `@module-federation/modern-js-v3` 插件中，不需要额外安装 `@module-federation/bridge-react` 来使用组件级别数据获取的功能了。
 
-## API
+所有数据获取的 API 都被放在了 `@module-federation/modern-js-v3/data-fetch` 中，你可以从这个路径下引入并使用它们。
 
-`@module-federation/modern-js-v3` 在子路径 `runtime` 重导出了 `@module-federation/modern-js-v3/runtime` ，你可以使用 `@module-federation/modern-js-v3/runtime` 来获取 MF Runtime。
+## Bridge API
+
+参考 [React Bridge](/guide/bridge/react/getting-started.html)。
+
+在 Modern.js v3 中，Bridge API 已经被内置在 `@module-federation/modern-js-v3` 插件中，不需要额外安装 `@module-federation/bridge-react` 来使用 Bridge API。
+
+所有 Bridge API 都被放在了 `@module-federation/modern-js-v3/react` 中，你可以从这个路径下引入并使用它们。如果需要显式区分 React 18 或 React 19 下对 `createBridgeComponent` 的调用，Modern.js v3 插件的导出路径略有不同：
+
+```ts
+// @module-federation/modern-js-v3
+import { createBridgeComponent } from '@module-federation/modern-js-v3/react'; // React 16/17
+import { createBridgeComponent } from '@module-federation/modern-js-v3/react-v18'; // React 18
+import { createBridgeComponent } from '@module-federation/modern-js-v3/react-v19'; // React 19
+```
+
+## Runtime API
+
+所有 Module Federation 的 Runtime 相关 API 都被放在了 `@module-federation/modern-js-v3/runtime` 中，你可以从这个路径下引入并使用它们。
 
 ### createRemoteComponent <Badge type="danger">废弃</Badge>
 
@@ -104,9 +121,7 @@ export default createModuleFederationConfig({
 此 API 已被废弃，请使用[createLazyComponent](/guide/bridge/react/load-component.html#什么是-createlazycomponent) 。
 :::
 
-#### 如何迁移
-
-createRemoteComponent 参数和 createLazyComponent 完全一致，区别在于 createLazyComponent API 需要注册插件后，通过实例调用。
+`createRemoteComponent` 参数和 `createLazyComponent` 完全一致，区别在于 `createLazyComponent` 需要注册插件后，通过实例调用。
 
 ```diff
 - import { createRemoteComponent } from '@module-federation/modern-js-v3/runtime';
@@ -141,9 +156,7 @@ export default App;
 此 API 已被废弃，请使用[createLazyComponent](/guide/bridge/react/load-component.html#什么是-createlazycomponent) 。
 :::
 
-#### 如何迁移
-
-同 [createRemoteComponent#如何迁移](#如何迁移)
+迁移方式同 [createRemoteComponent](#createremotecomponent)。
 
 ## 配置
 

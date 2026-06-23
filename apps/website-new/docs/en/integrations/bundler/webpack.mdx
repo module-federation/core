@@ -16,7 +16,7 @@
 
 You can install the plugin with the following command:
 
-import InstallKit from '@components/common/install-kit';
+import InstallKit from '@docs/_snippets/install-kit';
 
 <InstallKit
   pkgName={props.enhancedPackage || props.pkgName}
@@ -26,7 +26,7 @@ import InstallKit from '@components/common/install-kit';
 
 Create a {props.configName || 'module-federation.config.js'} file with the following content:
 
-import CreateConfig from '@components/common/webpack/create-config';
+import CreateConfig from '@docs/_snippets/webpack/create-config';
 
 {props.createConfig || <CreateConfig />}
 
@@ -34,10 +34,10 @@ import CreateConfig from '@components/common/webpack/create-config';
 
 In `Webpack`, you can add the plugin through the `plugins` configuration item in the `webpack.config.js` configuration file:
 
-import RegisterPlugin from '@components/common/webpack/register-plugin';
+import RegisterPlugin from '@docs/_snippets/webpack/register-plugin';
 
 {props.registerPlugin || <RegisterPlugin />}
 
 ## Configuration
 
-You can find detailed descriptions of all configuration items on the [Config Overview](/configure/index) page.
+You can find detailed descriptions of all configuration items on the [Config Overview](/configure/index.html) page.

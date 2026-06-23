@@ -239,6 +239,33 @@ describe('pluginModuleFederation node target environment behavior', () => {
     expect(mfOptions.remoteType).toBeUndefined();
   });
 
+  it('sets a chunk loading global without whitespace for web targets', () => {
+    const plugin = pluginModuleFederation(createMfOptions());
+    const { api, state } = createMockApi({
+      environments: {
+        web: {},
+      },
+    });
+    const webBundlerConfig: Rspack.Configuration = {
+      name: 'web',
+      output: {
+        path: '/tmp/web',
+      },
+      optimization: {},
+      plugins: [],
+    };
+
+    plugin.setup(api as any);
+    expect(state.beforeCreateCompiler).toBeDefined();
+
+    state.beforeCreateCompiler!({
+      bundlerConfigs: [webBundlerConfig],
+    });
+
+    expect(webBundlerConfig.output?.chunkLoadingGlobal).toBe('chunk_host');
+    expect(webBundlerConfig.output?.chunkLoadingGlobal).not.toMatch(/\s/);
+  });
+
   it('keeps target=dual restriction for non-rslib/non-rspress callers', () => {
     const plugin = pluginModuleFederation(createMfOptions(), {
       target: 'dual',

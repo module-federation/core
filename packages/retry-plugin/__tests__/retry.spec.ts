@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { fetchRetry } from '../src/fetch-retry';
 import { scriptRetry } from '../src/script-retry';
 import { ERROR_ABANDONED, RUNTIME_008 } from '../src/constant';
@@ -18,6 +18,7 @@ describe('Retry Plugin', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockFetch.mockClear();
+    vi.useRealTimers();
   });
 
   describe('fetchRetry', () => {
@@ -381,6 +382,64 @@ describe('Retry Plugin', () => {
       );
       expect(sequence[2]).not.toContain('retry=1');
       expect(sequence[2]).not.toContain('retry=2');
+    });
+  });
+
+  describe('exponential backoff', () => {
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('should apply exponential backoff when retryDelay is a function for fetchRetry', async () => {
+      vi.useFakeTimers();
+      const setTimeoutSpy = vi.spyOn(global, 'setTimeout');
+      mockFetch.mockRejectedValue(new Error('fail'));
+
+      const backoff = (attempt: number) => 1000 * 2 ** (attempt - 1);
+
+      const fetchPromise = fetchRetry({
+        url: 'https://example.com/api',
+        retryTimes: 3,
+        retryDelay: backoff,
+      });
+
+      const assertion = expect(fetchPromise).rejects.toThrow();
+      await vi.runAllTimersAsync();
+      await assertion;
+
+      const delays = setTimeoutSpy.mock.calls.map(([, ms]) => ms);
+      expect(delays).toEqual([1000, 2000, 4000]);
+      setTimeoutSpy.mockRestore();
+    });
+
+    it('should apply exponential backoff when retryDelay is a function for scriptRetry', async () => {
+      vi.useFakeTimers();
+      const setTimeoutSpy = vi.spyOn(global, 'setTimeout');
+      const mockRetryFn = vi
+        .fn()
+        .mockRejectedValue(new Error('Script load error'));
+
+      const backoff = (attempt: number) => 1000 * 2 ** (attempt - 1);
+
+      const retryFunction = scriptRetry({
+        retryOptions: {
+          retryTimes: 3,
+          retryDelay: backoff,
+        },
+        retryFn: mockRetryFn,
+      });
+
+      const retryPromise = retryFunction({
+        url: 'https://example.com/script.js',
+      });
+
+      const assertion = expect(retryPromise).rejects.toThrow(ERROR_ABANDONED);
+      await vi.runAllTimersAsync();
+      await assertion;
+
+      const delays = setTimeoutSpy.mock.calls.map(([, ms]) => ms);
+      expect(delays).toEqual([1000, 2000, 4000]);
+      setTimeoutSpy.mockRestore();
     });
   });
 });
