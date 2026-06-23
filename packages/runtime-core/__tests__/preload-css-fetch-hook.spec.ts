@@ -2,26 +2,26 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as sdk from '@module-federation/sdk';
 import { preloadAssets } from '../src/utils/preload';
 
-// Build a host whose fetch lifecycle exposes a real `listeners` Set so
-// preload.ts can gate the blob loader on `listeners.size`.
-function createHost(hasFetchListener: boolean): any {
-  const fetchListeners = new Set<any>();
+// Create a mocked fetch lifecycle loader hook
+function createLoaderHook(hasFetchListener: boolean) {
+  const listeners = new Set<any>();
   if (hasFetchListener) {
-    fetchListeners.add(() => undefined);
+    listeners.add(() => undefined);
   }
   return {
     options: { inBrowser: true },
     loaderHook: {
       lifecycle: {
-        fetch: { emit: vi.fn(), listeners: fetchListeners },
+        fetch: { emit: vi.fn(), listeners },
         createLink: { emit: vi.fn() },
         createScript: { emit: vi.fn() },
       },
     },
-  };
+  } as any;
 }
 
-const remoteInfo = (name: string): any => ({
+// Create a mocked remote info
+const createRemoteInfo = (name: string): any => ({
   name,
   entry: 'http://x/e.js',
   type: 'module',
@@ -29,25 +29,29 @@ const remoteInfo = (name: string): any => ({
   shareScope: 'default',
 });
 
-describe('preloadAssets CSS with a fetch hook', () => {
-  let spy: any;
+describe('preloadAssets CSS with fetch lifecycle loader hook', () => {
+  let loadCssWithFetch: ReturnType<typeof vi.spyOn>;
+
   beforeEach(() => {
-    spy = vi.spyOn(sdk, 'loadCssWithFetch').mockResolvedValue(undefined as any);
-  });
-  afterEach(() => {
-    spy.mockRestore();
     vi.clearAllMocks();
+    loadCssWithFetch = vi
+      .spyOn(sdk, 'loadCssWithFetch')
+      .mockResolvedValue(undefined as any);
   });
 
-  it('routes manifest CSS through the blob loader when a fetch hook is registered', async () => {
-    const host = createHost(true);
+  afterEach(() => {
+    loadCssWithFetch.mockRestore();
+  });
+
+  it('uses the blob loader for manifest CSS when a fetch hook is registered', async () => {
+    const host = createLoaderHook(true);
     const assets: any = {
       cssAssets: ['http://x/a.css'],
       jsAssetsWithoutEntry: [],
       entryAssets: [],
     };
-    await preloadAssets(remoteInfo('a'), host, assets, false);
-    expect(spy).toHaveBeenCalledWith(
+    await preloadAssets(createRemoteInfo('a'), host, assets, false);
+    expect(loadCssWithFetch).toHaveBeenCalledWith(
       expect.objectContaining({
         href: 'http://x/a.css',
         customFetch: expect.any(Function),
@@ -56,7 +60,7 @@ describe('preloadAssets CSS with a fetch hook', () => {
   });
 
   it('does NOT apply CSS through the blob loader during a preload hint (useLinkPreload)', async () => {
-    const host = createHost(true);
+    const host = createLoaderHook(true);
     const assets: any = {
       cssAssets: ['http://x/a.css'],
       jsAssetsWithoutEntry: [],
@@ -65,12 +69,12 @@ describe('preloadAssets CSS with a fetch hook', () => {
     // useLinkPreload defaults to true (preloadRemote). The blob loader injects a
     // rel=stylesheet that would apply the remote's CSS before it is loaded, so it
     // must be skipped here rather than overriding host styles.
-    await preloadAssets(remoteInfo('a'), host, assets);
-    expect(spy).not.toHaveBeenCalled();
+    await preloadAssets(createRemoteInfo('a'), host, assets);
+    expect(loadCssWithFetch).not.toHaveBeenCalled();
   });
 
-  it('does NOT use the blob loader when no fetch hook is registered', async () => {
-    const host = createHost(false);
+  it('does NOT use the blob loader for manifest CSS when no fetch hook is registered', async () => {
+    const host = createLoaderHook(false);
     const assets: any = {
       cssAssets: ['http://x/b.css'],
       jsAssetsWithoutEntry: [],
@@ -89,10 +93,10 @@ describe('preloadAssets CSS with a fetch hook', () => {
     });
     observer.observe(document.head, { childList: true });
     try {
-      await preloadAssets(remoteInfo('b'), host, assets, false);
+      await preloadAssets(createRemoteInfo('b'), host, assets, false);
     } finally {
       observer.disconnect();
     }
-    expect(spy).not.toHaveBeenCalled();
+    expect(loadCssWithFetch).not.toHaveBeenCalled();
   });
 });
