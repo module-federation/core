@@ -223,11 +223,16 @@ async function requestProbe() {
 }
 
 function decodeHtml(value) {
-  return value
-    .replace(/&quot;/g, '"')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>');
+  const entities = {
+    '&quot;': '"',
+    '&amp;': '&',
+    '&lt;': '<',
+    '&gt;': '>',
+  };
+  return value.replace(
+    /&(quot|amp|lt|gt);/g,
+    (entity) => entities[entity] || entity,
+  );
 }
 
 function findSnapshot(result, label) {
