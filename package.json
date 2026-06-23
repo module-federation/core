@@ -212,7 +212,7 @@
     "@rslib/core": "^0.10.4",
     "@rspack/cli": "npm:@rspack-canary/cli@2.0.9-canary-cb6bd31a-20260617080342",
     "@rspack/core": "npm:@rspack-canary/core@2.0.9-canary-cb6bd31a-20260617080342",
-    "@rspack/dev-server": "1.1.1",
+    "@rspack/dev-server": "2.1.0",
     "@rstest/core": "^0.8.0",
     "@storybook/addon-docs": "9.0.17",
     "@storybook/nextjs": "9.0.9",
