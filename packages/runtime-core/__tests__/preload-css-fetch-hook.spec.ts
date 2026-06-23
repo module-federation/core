@@ -2,7 +2,34 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as sdk from '@module-federation/sdk';
 import { preloadAssets } from '../src/utils/preload';
 
-describe('preloadAssets CSS with fetchOptions', () => {
+// Build a host whose fetch lifecycle exposes a real `listeners` Set so
+// preload.ts can gate the blob loader on `listeners.size`.
+function createHost(hasFetchListener: boolean): any {
+  const fetchListeners = new Set<any>();
+  if (hasFetchListener) {
+    fetchListeners.add(() => undefined);
+  }
+  return {
+    options: { inBrowser: true },
+    loaderHook: {
+      lifecycle: {
+        fetch: { emit: vi.fn(), listeners: fetchListeners },
+        createLink: { emit: vi.fn() },
+        createScript: { emit: vi.fn() },
+      },
+    },
+  };
+}
+
+const remoteInfo = (name: string): any => ({
+  name,
+  entry: 'http://x/e.js',
+  type: 'module',
+  entryGlobalName: name,
+  shareScope: 'default',
+});
+
+describe('preloadAssets CSS with a fetch hook', () => {
   let spy: any;
   beforeEach(() => {
     spy = vi.spyOn(sdk, 'loadCssWithFetch').mockResolvedValue(undefined as any);
@@ -12,46 +39,24 @@ describe('preloadAssets CSS with fetchOptions', () => {
     vi.clearAllMocks();
   });
 
-  it('routes manifest CSS through the blob loader when fetchOptions is set', async () => {
-    const remoteInfo: any = {
-      name: 'a',
-      entry: 'http://x/e.js',
-      type: 'module',
-      entryGlobalName: 'a',
-      shareScope: 'default',
-      fetchOptions: { headers: { Authorization: 'Bearer t' } },
-    };
-    const host: any = {
-      options: { inBrowser: true },
-      loaderHook: { lifecycle: { fetch: { emit: vi.fn() } } },
-    };
+  it('routes manifest CSS through the blob loader when a fetch hook is registered', async () => {
+    const host = createHost(true);
     const assets: any = {
       cssAssets: ['http://x/a.css'],
       jsAssetsWithoutEntry: [],
       entryAssets: [],
     };
-    await preloadAssets(remoteInfo, host, assets, false);
+    await preloadAssets(remoteInfo('a'), host, assets, false);
     expect(spy).toHaveBeenCalledWith(
       expect.objectContaining({
         href: 'http://x/a.css',
-        fetchOptions: remoteInfo.fetchOptions,
+        customFetch: expect.any(Function),
       }),
     );
   });
 
-  it('does NOT apply authenticated CSS during a preload hint (useLinkPreload)', async () => {
-    const remoteInfo: any = {
-      name: 'a',
-      entry: 'http://x/e.js',
-      type: 'module',
-      entryGlobalName: 'a',
-      shareScope: 'default',
-      fetchOptions: { headers: { Authorization: 'Bearer t' } },
-    };
-    const host: any = {
-      options: { inBrowser: true },
-      loaderHook: { lifecycle: { fetch: { emit: vi.fn() } } },
-    };
+  it('does NOT apply CSS through the blob loader during a preload hint (useLinkPreload)', async () => {
+    const host = createHost(true);
     const assets: any = {
       cssAssets: ['http://x/a.css'],
       jsAssetsWithoutEntry: [],
@@ -60,28 +65,12 @@ describe('preloadAssets CSS with fetchOptions', () => {
     // useLinkPreload defaults to true (preloadRemote). The blob loader injects a
     // rel=stylesheet that would apply the remote's CSS before it is loaded, so it
     // must be skipped here rather than overriding host styles.
-    await preloadAssets(remoteInfo, host, assets);
+    await preloadAssets(remoteInfo('a'), host, assets);
     expect(spy).not.toHaveBeenCalled();
   });
 
-  it('does NOT use the blob loader when fetchOptions is absent', async () => {
-    const remoteInfo: any = {
-      name: 'b',
-      entry: 'http://x/e.js',
-      type: 'module',
-      entryGlobalName: 'b',
-      shareScope: 'default',
-    };
-    const host: any = {
-      options: { inBrowser: true },
-      loaderHook: {
-        lifecycle: {
-          fetch: { emit: vi.fn() },
-          createLink: { emit: vi.fn() },
-          createScript: { emit: vi.fn() },
-        },
-      },
-    };
+  it('does NOT use the blob loader when no fetch hook is registered', async () => {
+    const host = createHost(false);
     const assets: any = {
       cssAssets: ['http://x/b.css'],
       jsAssetsWithoutEntry: [],
@@ -100,7 +89,7 @@ describe('preloadAssets CSS with fetchOptions', () => {
     });
     observer.observe(document.head, { childList: true });
     try {
-      await preloadAssets(remoteInfo, host, assets, false);
+      await preloadAssets(remoteInfo('b'), host, assets, false);
     } finally {
       observer.disconnect();
     }

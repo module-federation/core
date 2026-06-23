@@ -275,10 +275,7 @@ if (targetInstance) {
 <Collapse>
 
 ```typescript
-function registerRemotes(
-  remotes: Remote[],
-  options?: { force?: boolean; fetchOptions?: RequestInit },
-) {}
+function registerRemotes(remotes: Remote[], options?: { force?: boolean }) {}
 
 type Remote = (RemoteWithEntry | RemoteWithVersion) & RemoteInfoCommon;
 
@@ -287,8 +284,6 @@ interface RemoteInfoCommon {
   shareScope?: string;
   type?: RemoteEntryType;
   entryGlobalName?: string;
-  // 加载该 remote 时使用的自定义请求配置（如 `headers`）。
-  fetchOptions?: RequestInit;
 }
 
 interface RemoteWithEntry {
@@ -310,37 +305,42 @@ interface RemoteWithVersion {
 
 :::
 
-### 使用自定义请求头加载 remote（`fetchOptions`）
+### 使用自定义请求头加载 remote（`fetch` 钩子）
 
-`fetchOptions`（标准的 [`RequestInit`](https://developer.mozilla.org/zh-CN/docs/Web/API/RequestInit)）用于为加载 remote 的请求附加自定义 HTTP 配置——最常见的是 `Authorization` 等 `headers`。它既可以设置在单个 remote 上，也可以设置在调用级别（对本次调用的所有 remote 生效）。单个 remote 自身的 `fetchOptions` 会与调用级别的合并，且在 `headers` 冲突时以前者为准。
+自定义 HTTP 配置——最常见的是 `Authorization` 等 `headers`——属于请求行为，因此通过运行时的 [`fetch` 钩子](./runtime-hooks#fetch) 配置，而不是在 remote 注册时配置。该钩子会接收请求 URL、对应的 `RequestInit` 以及目标 `remoteInfo`，因此你可以按 remote 决定请求头，并处理诸如 token 刷新、按请求鉴权等动态场景。
 
-该能力适用于 **`module` / `esm`** 类型的 remote：其 manifest、remote entry、分包 chunk、共享依赖以及 manifest 中声明的 CSS，都会通过 `fetch` + blob 加载器加载，从而让请求头能够作用到每一个资源请求上。未设置 `fetchOptions` 的 remote（以及非 ESM 的 remote）按原有方式加载——注意基于 `<script>` / `<link>` 的加载方式无法携带自定义请求头。
+对于 **`module` / `esm`** 类型的 remote：当注册了 `fetch` 钩子时，其 remote entry 以及 manifest 中声明的 CSS 会通过 `fetch` + blob 加载器加载，从而让你添加的请求头能够作用到每一个资源请求上。manifest 请求本身已经会走该钩子。未注册 `fetch` 钩子时，remote 仍按原有方式通过原生 `import()` / `<link>` 加载（这些方式无法携带自定义请求头）。
 
 ```ts
 import { createInstance } from '@module-federation/enhanced/runtime';
 
-const mf = createInstance({ name: 'mf_host', remotes: [] });
-
-// 单个 remote
-mf.registerRemotes([
-  {
-    name: 'sub1',
-    entry: 'https://localhost:2001/mf-manifest.json',
-    type: 'module',
-    fetchOptions: { headers: { Authorization: `Bearer ${token}` } },
-  },
-]);
-
-// 调用级别——对本次调用的所有 remote 生效
-mf.registerRemotes(
-  [{ name: 'sub2', entry: 'https://localhost:2002/mf-manifest.json', type: 'module' }],
-  { fetchOptions: { headers: { Authorization: `Bearer ${token}` } } },
-);
+const mf = createInstance({
+  name: 'mf_host',
+  remotes: [
+    {
+      name: 'sub1',
+      entry: 'https://localhost:2001/mf-manifest.json',
+      type: 'module',
+    },
+  ],
+  plugins: [
+    {
+      name: 'auth-fetch',
+      // 通过 `remoteInfo` 可将请求头限定到特定 remote
+      fetch(url, init, remoteInfo) {
+        return fetch(url, {
+          ...init,
+          headers: { ...init.headers, Authorization: `Bearer ${token}` },
+        });
+      },
+    },
+  ],
+});
 ```
 
 :::info
 
-原生的预加载提示（`<link rel="modulepreload">` / `<link rel="preload">`）无法携带请求头，因此在需要鉴权的源上可能会失败；但真正的模块加载仍会走带鉴权的 `fetch` 加载器。带鉴权的 CSS 是直接注入的，不会触发 `createLink` 钩子，因此插件添加的 `nonce`/SRI 属性不会作用于这类 CSS。
+原生的预加载提示（`<link rel="modulepreload">` / `<link rel="preload">`）无法携带请求头，因此在需要鉴权的源上可能会失败；但真正的模块加载仍会走 `fetch` 钩子。带鉴权的 CSS 是直接注入的，不会触发 `createLink` 钩子，因此插件添加的 `nonce`/SRI 属性不会作用于这类 CSS。
 
 :::
 

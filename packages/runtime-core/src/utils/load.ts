@@ -204,17 +204,16 @@ async function loadEntryDom({
   switch (type) {
     case 'esm':
     case 'module':
-      return remoteInfo.fetchOptions
+      return loaderHook.lifecycle.fetch.listeners.size > 0
         ? (loadEsmEntryWithFetch({
             entry,
-            fetchOptions: remoteInfo.fetchOptions,
-            // Route the loader's fetches through the runtime fetch hook so
-            // existing fetch-hook plugins still compose; merged headers are
-            // applied inside the sdk loader, native fetch is the fallback.
-            // The async arrow flattens the hook's nested-promise return to the
-            // Response | void | false shape the sdk loader expects.
             customFetch: async (url, init) =>
-              loaderHook.lifecycle.fetch.emit(url, init, remoteInfo),
+              loaderHook.lifecycle.fetch.emit(
+                url,
+                init,
+                remoteInfo,
+                resourceContext,
+              ),
           }).catch((loadError: unknown) => {
             // Mirror loadEntryScript: surface blob-loader fetch/exec failures
             // (e.g. BlobLoaderNetworkError on a 401) as RUNTIME_008 so

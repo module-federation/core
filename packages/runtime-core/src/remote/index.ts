@@ -4,7 +4,6 @@ import {
   composeKeyWithSeparator,
   ModuleInfo,
   GlobalModuleInfo,
-  toHeaderObject,
 } from '@module-federation/sdk';
 import { RUNTIME_004, runtimeDescMap } from '@module-federation/error-codes';
 import {
@@ -48,23 +47,6 @@ import { Module, ModuleOptions } from '../module';
 import { formatPreloadArgs, preloadAssets } from '../utils/preload';
 import { getGlobalShareScope } from '../utils/share';
 import { getGlobalRemoteInfo } from '../plugins/snapshot/SnapshotHandler';
-
-// Merge call-level fetchOptions (defaults) with a remote's own (overrides).
-// Non-header fields shallow-merge with the remote winning; headers merge
-// per-key so a remote adding one header doesn't drop the call-level ones.
-function mergeFetchOptions(
-  base: RequestInit,
-  override: RequestInit | undefined,
-): RequestInit {
-  return {
-    ...base,
-    ...(override ?? {}),
-    headers: {
-      ...toHeaderObject(base.headers),
-      ...toHeaderObject(override?.headers),
-    },
-  };
-}
 
 export interface LoadRemoteMatch {
   id: string;
@@ -517,21 +499,9 @@ export class RemoteHandler {
     }
   }
 
-  registerRemotes(
-    remotes: Remote[],
-    options?: { force?: boolean; fetchOptions?: RequestInit },
-  ): void {
+  registerRemotes(remotes: Remote[], options?: { force?: boolean }): void {
     const { host } = this;
     remotes.forEach((remote) => {
-      // Call-level fetchOptions act as defaults for every remote in this call;
-      // a remote's own fetchOptions are merged on top and win on conflict
-      // (headers are merged per-key, not replaced wholesale).
-      if (options?.fetchOptions) {
-        remote.fetchOptions = mergeFetchOptions(
-          options.fetchOptions,
-          remote.fetchOptions,
-        );
-      }
       this.registerRemote(remote, host.options.remotes, {
         force: options?.force,
       });

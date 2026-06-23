@@ -275,10 +275,7 @@ if (targetInstance) {
 <Collapse>
 
 ```typescript
-function registerRemotes(
-  remotes: Remote[],
-  options?: { force?: boolean; fetchOptions?: RequestInit },
-) {}
+function registerRemotes(remotes: Remote[], options?: { force?: boolean }) {}
 
 type Remote = (RemoteWithEntry | RemoteWithVersion) & RemoteInfoCommon;
 
@@ -287,8 +284,6 @@ interface RemoteInfoCommon {
   shareScope?: string;
   type?: RemoteEntryType;
   entryGlobalName?: string;
-  // Custom request options (e.g. `headers`) used when loading this remote.
-  fetchOptions?: RequestInit;
 }
 
 interface RemoteWithEntry {
@@ -310,37 +305,42 @@ When `force: true` is set, the newly registered modules will overwrite already-r
 
 :::
 
-### Loading remotes with custom headers (`fetchOptions`)
+### Loading remotes with custom headers (the `fetch` hook)
 
-`fetchOptions` (a standard [`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit)) attaches custom HTTP options — most commonly `headers` such as `Authorization` — to the requests used to load a remote. It can be set per remote, or at the call level where it applies to every remote in that call. A remote's own `fetchOptions` is merged on top of the call-level one, and its `headers` win on conflict.
+Custom HTTP options — most commonly `headers` such as `Authorization` — are request behavior, so they are configured through the runtime [`fetch` hook](./runtime-hooks#fetch) rather than on remote registration. The hook receives the request URL, its `RequestInit`, and the target `remoteInfo`, so you can decide headers per remote and handle dynamic cases such as token refresh or per-request auth logic.
 
-This is supported for **`module` / `esm`** remotes: their manifest, remote entry, split chunks, shared dependencies, and manifest-declared CSS are loaded through a `fetch` + blob loader so the headers reach every asset request. Remotes without `fetchOptions` (and non-ESM remotes) are loaded as before — note that `<script>` / `<link>`-based loading cannot carry custom headers.
+For **`module` / `esm`** remotes, when a `fetch` hook is registered the remote entry and its manifest-declared CSS are loaded through a `fetch` + blob loader so the headers you add reach every asset request. The manifest request already flows through this hook. With no `fetch` hook registered, remotes load as before via native `import()` / `<link>` (which cannot carry custom headers).
 
 ```ts
 import { createInstance } from '@module-federation/enhanced/runtime';
 
-const mf = createInstance({ name: 'mf_host', remotes: [] });
-
-// Per remote
-mf.registerRemotes([
-  {
-    name: 'sub1',
-    entry: 'https://localhost:2001/mf-manifest.json',
-    type: 'module',
-    fetchOptions: { headers: { Authorization: `Bearer ${token}` } },
-  },
-]);
-
-// Call level — applies to every remote in this call
-mf.registerRemotes(
-  [{ name: 'sub2', entry: 'https://localhost:2002/mf-manifest.json', type: 'module' }],
-  { fetchOptions: { headers: { Authorization: `Bearer ${token}` } } },
-);
+const mf = createInstance({
+  name: 'mf_host',
+  remotes: [
+    {
+      name: 'sub1',
+      entry: 'https://localhost:2001/mf-manifest.json',
+      type: 'module',
+    },
+  ],
+  plugins: [
+    {
+      name: 'auth-fetch',
+      // `remoteInfo` lets you scope headers to specific remotes
+      fetch(url, init, remoteInfo) {
+        return fetch(url, {
+          ...init,
+          headers: { ...init.headers, Authorization: `Bearer ${token}` },
+        });
+      },
+    },
+  ],
+});
 ```
 
 :::info
 
-Native preload hints (`<link rel="modulepreload">` / `<link rel="preload">`) cannot carry headers, so they may fail on an authenticated origin; the actual module loads still go through the authenticated `fetch` loader. Authenticated CSS is injected directly and does not emit the `createLink` hook, so plugin-added `nonce`/SRI attributes are not applied to it.
+Native preload hints (`<link rel="modulepreload">` / `<link rel="preload">`) cannot carry headers, so they may fail on an authenticated origin; the actual module loads still go through the `fetch` hook. Authenticated CSS is injected directly and does not emit the `createLink` hook, so plugin-added `nonce`/SRI attributes are not applied to it.
 
 :::
 
