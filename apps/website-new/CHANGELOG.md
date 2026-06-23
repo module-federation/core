@@ -1,5 +1,27 @@
 # website-new
 
+## 1.3.26
+
+### Patch Changes
+
+- 3727b3e: docs: improve guides, configuration, and integrations content
+  - Unify internal links to absolute `/path/to/page.html` form (drop relative paths and `/zh` / `/en` prefixes).
+  - Restructure configuration option pages for consistent formatting.
+  - Refresh integration guides for Modern.js, Next.js, Angular, Vue, and React.
+  - Reorganize runtime API and hooks reference, and rewrite advanced/start/data guides.
+  - Sync all updates between EN and ZH locales.
+  - Bump `@rspress/shared` runtime dep and `@rspress/core` peer to `2.0.14`.
+
+- cc37b1b: docs: document shared config subpath/prefix matching and bridge-react warnings
+  - Add missing `shareKey` and `request` sections to English `shared.mdx` with prefix-matching explanation and trailing-slash examples.
+  - Add `:::warning` callouts to Chinese `shared.mdx` for the common subpath mistake.
+  - Add troubleshooting FAQ entries for duplicate subpath imports in both EN and ZH runtime docs.
+  - Add `react-dom/client` shared-config warnings to bridge-react docs (`getting-started`, `export-app`, `load-app`) in both EN and ZH.
+
+- Updated dependencies [3727b3e]
+  - @module-federation/rspress-plugin@2.6.0
+  - @module-federation/error-codes@2.6.0
+
 ## 1.3.25
 
 ### Patch Changes
