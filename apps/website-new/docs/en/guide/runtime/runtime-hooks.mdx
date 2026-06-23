@@ -734,7 +734,8 @@ const changeScriptAttributePlugin: () => ModuleFederationRuntimePlugin =
 
 `AsyncHook`
 
-The `fetch` function allows customizing the requests used to load a remote. It is always applied to the manifest JSON request (a successful `Response` must yield a valid JSON). If a `fetch` hook is registered, it is additionally applied to the remote entry and manifest-declared CSS of **`module` / `esm`** remotes, which are then loaded through a `fetch` + blob loader so custom `headers` (e.g. `Authorization`) can be applied those requests too.
+The `fetch` function allows customizing the request used to fetch the manifest JSON; a successfully loaded manifest `Response` must yield a valid JSON.
+You can also use the `fetch` function to apply custom `headers` (e.g. `Authorization`) to the remote entry and manifest-declared CSS resources of **`module` / `esm`** remotes.
 
 ```typescript
 function fetch(

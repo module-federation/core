@@ -305,11 +305,11 @@ interface RemoteWithVersion {
 
 :::
 
-### 使用自定义请求头加载 remote（`fetch` 钩子）
+### 通过 fetch 钩子使用自定义请求头加载 remote
 
-自定义 HTTP 配置——最常见的是 `Authorization` 等 `headers`——属于请求行为，因此通过运行时的 [`fetch` 钩子](./runtime-hooks#fetch) 配置，而不是在 remote 注册时配置。该钩子会接收请求 URL、对应的 `RequestInit` 以及目标 `remoteInfo`，因此你可以按 remote 决定请求头，并处理诸如 token 刷新、按请求鉴权等动态场景。
+某些 remote 需要特定的请求头才能访问，此时可以通过运行时的 [`fetch` 钩子](./runtime-hooks#fetch) 配置请求头。你可以在该钩子中处理诸如 token 刷新、按请求鉴权等动态场景。
 
-对于 **`module` / `esm`** 类型的 remote：当注册了 `fetch` 钩子时，其 remote entry 以及 manifest 中声明的 CSS 会通过 `fetch` + blob 加载器加载，从而让你添加的请求头能够作用到每一个资源请求上。manifest 请求本身已经会走该钩子。未注册 `fetch` 钩子时，remote 仍按原有方式通过原生 `import()` / `<link>` 加载（这些方式无法携带自定义请求头）。
+对于 **`module` / `esm`** 类型的 remote：当注册了 `fetch` 钩子时，其 remote entry 以及 manifest 中声明的 CSS 都会通过 `fetch` + blob 加载器加载，从而让你添加的请求头能够应用到每一个资源请求上。未注册 `fetch` 钩子时，remote 仍按原有方式通过原生 `import()` / `<link>` 加载（这些方式无法携带自定义请求头）。
 
 ```ts
 import { createInstance } from '@module-federation/enhanced/runtime';
@@ -326,7 +326,7 @@ const mf = createInstance({
   plugins: [
     {
       name: 'auth-fetch',
-      // 通过 `remoteInfo` 可将请求头限定到特定 remote
+      // 可通过 `remoteInfo` 对特定 remote 使用不同的请求配置
       fetch(url, init, remoteInfo) {
         return fetch(url, {
           ...init,
@@ -340,7 +340,7 @@ const mf = createInstance({
 
 :::info
 
-原生的预加载提示（`<link rel="modulepreload">` / `<link rel="preload">`）无法携带请求头，因此在需要鉴权的源上可能会失败；但真正的模块加载仍会走 `fetch` 钩子。带鉴权的 CSS 是直接注入的，不会触发 `createLink` 钩子，因此插件添加的 `nonce`/SRI 属性不会作用于这类 CSS。
+原生的预加载提示（`<link rel="modulepreload">` / `<link rel="preload">`）无法携带请求头，因此在需要鉴权的源上可能会失败；但最终使用时仍会通过 `fetch` 钩子加载。带鉴权的 CSS 是直接注入的，不会触发 `createLink` 钩子，因此插件添加的 `nonce`/SRI 属性不会作用于这类 CSS。
 
 :::
 

@@ -699,7 +699,8 @@ const changeScriptAttributePlugin: () => ModuleFederationRuntimePlugin =
 
 `AsyncHook`
 
-`fetch` 函数允许自定义加载 remote 时使用的请求。它始终会作用于清单（manifest）JSON 请求（成功的 `Response` 必须返回一个有效的 JSON）。当注册了 `fetch` 钩子时，它还会额外作用于 **`module` / `esm`** 类型 remote 的 remote entry 及 manifest 中声明的 CSS——这些资源会通过 `fetch` + blob 加载器加载，从而让自定义的 `headers`（如 `Authorization`）也能应用到这些请求上。
+`fetch` 函数允许自定义获取清单（manifest）JSON 的请求，成功加载的清单 `Response` 必须返回一个有效的 JSON。
+你还可通过 `fetch` 函数将自定义的 `headers`（如 `Authorization`）应用到 **`module` / `esm`** 类型 remote 的 remote entry 及 manifest 中声明的 CSS 资源上。
 
 ```typescript
 function fetch(
