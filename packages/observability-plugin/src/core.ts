@@ -166,6 +166,23 @@ export interface ObservabilitySharedInfo {
   loading?: boolean;
   reason?: string;
   definedBy?: 'bundler-runtime';
+  conflict?: ObservabilitySharedConflictInfo;
+}
+
+export interface ObservabilitySharedConflictVersion {
+  version: string;
+  from?: string;
+  singleton?: boolean;
+  loaded?: boolean;
+}
+
+export interface ObservabilitySharedConflictInfo {
+  reason: 'singleton-multiple-versions';
+  scope: string;
+  currentVersion?: string;
+  currentFrom?: string;
+  versions: string[];
+  existingVersions: ObservabilitySharedConflictVersion[];
 }
 
 export interface ObservabilityEvent {
@@ -387,6 +404,10 @@ export interface ObservabilityRuntimeOrigin {
   options?: {
     id?: string;
     name?: string;
+  };
+  shareScopeMap?: ObservabilityRuntimeShareScopeMap;
+  sharedHandler?: {
+    shareScopeMap?: ObservabilityRuntimeShareScopeMap;
   };
   loadShare?: (pkgName: string) => Promise<false | (() => unknown)>;
   loadShareSync?: (pkgName: string) => false | (() => unknown);
@@ -689,6 +710,8 @@ const logger = createLogger('[ Module Federation Observability Plugin ]');
 const DEFAULT_DEVTOOLS_SOURCE = 'module-federation/observability';
 const COMPONENT_BUSINESS_LOADED_EVENT = 'component:business-loaded';
 const ON_MF_REMOTE_LOADED_PROP = 'onMFRemoteLoaded';
+const SHARED_SINGLETON_MULTIPLE_VERSIONS_REASON =
+  'singleton-multiple-versions' as const;
 const SENSITIVE_PAIR_PATTERN =
   /\b(token|authorization|cookie|secret|password|session|access_token|refresh_token|api_key|apikey|key)\s*[:=]\s*([^&\s'",;<>]+)/gi;
 const ERROR_CODE_PATTERN = /\b(?:RUNTIME|TYPE|BUILD)-\d{3}\b/;
@@ -1013,6 +1036,127 @@ function getAvailableSharedVersions(args: ObservabilitySharedLifecycleArgs) {
   return Array.from(versions);
 }
 
+function getOriginShareScopeMap(
+  origin: ObservabilityRuntimeOrigin,
+): ObservabilityRuntimeShareScopeMap {
+  return origin.shareScopeMap || origin.sharedHandler?.shareScopeMap || {};
+}
+
+function getSharedVersion(value: ObservabilityRuntimeSharedSource | undefined) {
+  return sanitizeText(value?.version, 120);
+}
+
+function isSingletonShared(
+  value: ObservabilityRuntimeSharedSource | undefined,
+) {
+  return value?.shareConfig?.singleton === true;
+}
+
+function createSharedConflictVersion(
+  version: string,
+  shared: ObservabilityRuntimeSharedSource | undefined,
+): ObservabilitySharedConflictVersion {
+  return {
+    version,
+    from: sanitizeText(shared?.from, 160),
+    singleton: isSingletonShared(shared) || undefined,
+    loaded: shared?.loaded === true || undefined,
+  };
+}
+
+function createSharedSingletonConflict(args: {
+  pkgName: string;
+  shared: ObservabilityRuntimeSharedSource;
+  scope: string;
+  shareScopeMap: ObservabilityRuntimeShareScopeMap;
+}): ObservabilitySharedConflictInfo | undefined {
+  const currentVersion = getSharedVersion(args.shared);
+  if (!currentVersion) {
+    return undefined;
+  }
+
+  const existingVersionMap =
+    args.shareScopeMap[args.scope]?.[args.pkgName] || {};
+  const existingVersions = Object.entries(existingVersionMap)
+    .map(([version, shared]) =>
+      createSharedConflictVersion(
+        sanitizeText(version, 120) || version,
+        shared,
+      ),
+    )
+    .filter((item) => item.version && item.version !== currentVersion);
+
+  if (!existingVersions.length) {
+    return undefined;
+  }
+
+  const hasSingleton =
+    isSingletonShared(args.shared) ||
+    existingVersions.some((item) => item.singleton === true);
+
+  if (!hasSingleton) {
+    return undefined;
+  }
+
+  const versions = Array.from(
+    new Set([currentVersion, ...existingVersions.map((item) => item.version)]),
+  ).sort();
+
+  if (versions.length <= 1) {
+    return undefined;
+  }
+
+  return {
+    reason: SHARED_SINGLETON_MULTIPLE_VERSIONS_REASON,
+    scope: args.scope,
+    currentVersion,
+    currentFrom: sanitizeText(args.shared.from, 160),
+    versions,
+    existingVersions,
+  };
+}
+
+function createSharedConflictInfo(args: {
+  pkgName: string;
+  shared: ObservabilityRuntimeSharedSource;
+  conflict: ObservabilitySharedConflictInfo;
+}): ObservabilitySharedInfo {
+  const shareConfig = args.shared.shareConfig;
+
+  return {
+    name: args.pkgName,
+    shareScope: [args.conflict.scope],
+    version: args.conflict.currentVersion || args.shared.version,
+    requiredVersion: shareConfig?.requiredVersion,
+    availableVersions: args.conflict.versions,
+    provider: args.conflict.currentFrom,
+    useIn: args.shared.useIn,
+    singleton: true,
+    strictVersion: shareConfig?.strictVersion,
+    eager: shareConfig?.eager,
+    strategy: args.shared.strategy,
+    loaded: args.shared.loaded,
+    loading: args.shared.loaded
+      ? undefined
+      : Boolean(args.shared.loading) || undefined,
+    reason: SHARED_SINGLETON_MULTIPLE_VERSIONS_REASON,
+    conflict: args.conflict,
+  };
+}
+
+function getSharedConflictKey(args: {
+  hostName?: string;
+  pkgName: string;
+  conflict: ObservabilitySharedConflictInfo;
+}) {
+  return [
+    args.hostName || 'unknown',
+    args.pkgName,
+    args.conflict.scope,
+    args.conflict.versions.join(','),
+  ].join('|');
+}
+
 function getSharedUseIn(args: ObservabilitySharedLifecycleArgs) {
   const useIn = [
     ...(args.selectedShared?.useIn || []),
@@ -1176,6 +1320,42 @@ function sanitizeShared(
     reason: sanitizeText(shared.reason, 120),
     definedBy:
       shared.definedBy === 'bundler-runtime' ? 'bundler-runtime' : undefined,
+    conflict: sanitizeSharedConflict(shared.conflict),
+  };
+}
+
+function sanitizeSharedConflict(
+  conflict: ObservabilitySharedConflictInfo | undefined,
+): ObservabilitySharedConflictInfo | undefined {
+  if (!conflict) {
+    return undefined;
+  }
+
+  const scope = sanitizeText(conflict.scope, 120) || 'default';
+  const versions = (conflict.versions || [])
+    .map((version) => sanitizeText(version, 120))
+    .filter((version): version is string => Boolean(version))
+    .slice(0, 20);
+  const existingVersions = (conflict.existingVersions || [])
+    .map((item) => ({
+      version: sanitizeText(item.version, 120),
+      from: sanitizeText(item.from, 160),
+      singleton: item.singleton === true || undefined,
+      loaded: item.loaded === true || undefined,
+    }))
+    .filter(
+      (item): item is ObservabilitySharedConflictVersion =>
+        typeof item.version === 'string' && item.version.length > 0,
+    )
+    .slice(0, 20);
+
+  return {
+    reason: SHARED_SINGLETON_MULTIPLE_VERSIONS_REASON,
+    scope,
+    currentVersion: sanitizeText(conflict.currentVersion, 120),
+    currentFrom: sanitizeText(conflict.currentFrom, 160),
+    versions,
+    existingVersions,
   };
 }
 
@@ -1444,12 +1624,27 @@ function copyEvent(event: ObservabilityEvent): ObservabilityEvent {
           availableVersions: event.shared.availableVersions
             ? [...event.shared.availableVersions]
             : undefined,
+          conflict: copySharedConflict(event.shared.conflict),
         }
       : undefined,
     errorContext: event.errorContext ? { ...event.errorContext } : undefined,
     metadata: event.metadata ? { ...event.metadata } : undefined,
     loadedBefore: copyLoadedBeforeInfo(event.loadedBefore),
   });
+}
+
+function copySharedConflict(
+  conflict: ObservabilitySharedConflictInfo | undefined,
+): ObservabilitySharedConflictInfo | undefined {
+  if (!conflict) {
+    return undefined;
+  }
+
+  return {
+    ...conflict,
+    versions: [...conflict.versions],
+    existingVersions: conflict.existingVersions.map((item) => ({ ...item })),
+  };
 }
 
 function copySummary(
@@ -1546,6 +1741,7 @@ function copyReport(report: ObservabilityReport): ObservabilityReport {
           availableVersions: report.shared.availableVersions
             ? [...report.shared.availableVersions]
             : undefined,
+          conflict: copySharedConflict(report.shared.conflict),
         }
       : undefined,
     errorContext: report.errorContext ? { ...report.errorContext } : undefined,
@@ -2207,6 +2403,7 @@ export function createObservability(
   const traceByRequest = new Map<string, string>();
   const traceByRemote = new Map<string, string>();
   const phaseStartTimes = new Map<string, number>();
+  const reportedSharedConflictKeys = new Set<string>();
   const collectorOptions = normalizeCollectorOptions(options.collector);
   const devtoolsOptions = normalizeDevtoolsOptions(options.devtools);
   const seenManifestUrls = new Set<string>();
@@ -2650,6 +2847,11 @@ export function createObservability(
   const getDiagnosisTitle = (report: ObservabilityReport) => {
     if (report.status !== 'error') {
       if (report.shared) {
+        if (
+          report.shared.reason === SHARED_SINGLETON_MULTIPLE_VERSIONS_REASON
+        ) {
+          return 'Singleton shared dependency version conflict detected';
+        }
         if (report.summary.sharedResolved) {
           return 'Shared dependency resolved successfully';
         }
@@ -2829,6 +3031,11 @@ export function createObservability(
         'No matching clipped moduleInfo entry was found for the failed remote',
       );
     }
+    if (report.shared?.reason === SHARED_SINGLETON_MULTIPLE_VERSIONS_REASON) {
+      warnings.push(
+        'Singleton shared dependency has multiple versions in the same share scope',
+      );
+    }
 
     return warnings;
   };
@@ -2851,6 +3058,20 @@ export function createObservability(
         detail,
       });
     };
+
+    if (report.shared?.reason === SHARED_SINGLETON_MULTIPLE_VERSIONS_REASON) {
+      pushAction(
+        'check-shared-version',
+        'Align singleton shared dependency versions in the same share scope',
+        'shared',
+      );
+      pushAction(
+        'check-shared-provider',
+        'Check which host or remote registered each shared version',
+        'shared',
+      );
+      return actions;
+    }
 
     if (report.status !== 'error' && !report.summary.error) {
       return actions;
@@ -4467,6 +4688,72 @@ export function createObservability(
         },
         factoryArgs.origin,
       );
+    },
+    beforeRegisterShare(args) {
+      if (
+        shouldGuardSharedHooksByRuntimeVersion &&
+        !supportsRuntimeHookObservability(args.origin)
+      ) {
+        return returnHookArgs(args);
+      }
+
+      if (!prepareRuntimeOrigin(args.origin)) {
+        return returnHookArgs(args);
+      }
+
+      const shareScopeMap = getOriginShareScopeMap(args.origin);
+      const hostName =
+        sanitizeText(args.origin.options?.name, 120) ||
+        sanitizeText(args.origin.name, 120);
+
+      getSharedScopes(args.shared).forEach((scope) => {
+        const conflict = createSharedSingletonConflict({
+          pkgName: args.pkgName,
+          shared: args.shared,
+          scope,
+          shareScopeMap,
+        });
+
+        if (!conflict) {
+          return;
+        }
+
+        const conflictKey = getSharedConflictKey({
+          hostName,
+          pkgName: args.pkgName,
+          conflict,
+        });
+        if (reportedSharedConflictKeys.has(conflictKey)) {
+          return;
+        }
+        reportedSharedConflictKeys.add(conflictKey);
+
+        recordEvent(
+          {
+            phase: 'shared-conflict',
+            status: 'complete',
+            requestId: `shared:${args.pkgName}`,
+            lifecycle: 'beforeRegisterShare',
+            shared: createSharedConflictInfo({
+              pkgName: args.pkgName,
+              shared: args.shared,
+              conflict,
+            }),
+            message: `shared:${SHARED_SINGLETON_MULTIPLE_VERSIONS_REASON}`,
+            metadata: {
+              scope,
+              currentVersion: conflict.currentVersion || '',
+              versions: conflict.versions.join(','),
+              existingVersions: conflict.existingVersions
+                .map((item) => item.version)
+                .join(','),
+            },
+          },
+          args.origin,
+        );
+      });
+
+      return returnHookArgs(args);
     },
     beforeLoadShare(args) {
       if (
