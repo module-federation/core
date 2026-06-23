@@ -186,9 +186,9 @@ function waitForLinkPreload({
   });
 }
 
-// When the remote carries fetchOptions, CSS must be fetched WITH headers and
-// injected as a blob <link> — a native <link href> cannot carry headers, and a
-// rel=preload hint would 401.
+// When a fetch hook is present it may modify request headers, so CSS must be
+// fetched through it and injected as a blob. A native <link href> cannot carry
+// headers, and a rel=preload hint would 401 on an authenticated origin.
 function waitForCssFetch({
   host,
   remoteInfo,
@@ -202,9 +202,8 @@ function waitForCssFetch({
 }): Promise<PreloadAssetResult> {
   return loadCssWithFetch({
     href: url,
-    fetchOptions: remoteInfo.fetchOptions,
     customFetch: async (u, init) =>
-      host.loaderHook.lifecycle.fetch.emit(u, init, remoteInfo),
+      host.loaderHook.lifecycle.fetch.emit(u, init, remoteInfo, context),
   })
     .then(() => createAssetResult(context, url, 'success'))
     .catch((error) =>
@@ -298,16 +297,11 @@ export function preloadAssets(
   if (host.options.inBrowser) {
     entryAssets.forEach((asset) => {
       const { moduleInfo: entryRemoteInfo } = asset;
-      const entryRemoteInfoWithAuth =
-        // Respect fetchOptions added to entryRemoteInfo via generatePreloadAssetsPlugin.
-        !entryRemoteInfo.fetchOptions && remoteInfo.fetchOptions
-          ? { ...entryRemoteInfo, fetchOptions: remoteInfo.fetchOptions }
-          : entryRemoteInfo;
       results.push(
         waitForRemoteEntryPreload(
           host,
           remoteInfo,
-          entryRemoteInfoWithAuth,
+          entryRemoteInfo,
           createResourceContext(baseContext, 'remoteEntry'),
         ),
       );
@@ -317,11 +311,12 @@ export function preloadAssets(
     const pushCssAsset = (cssUrl: string) => {
       const context = createResourceContext(baseContext, 'css');
 
-      // Authenticated CSS: fetch WITH headers and inject as a blob stylesheet
+      // Authenticated CSS: when a fetch hook is present it can add headers per
+      // remoteInfo, so fetch through it and inject as a blob stylesheet.
       // We should only do that on an actual load because
       // 1. native rel=preload can't carry headers so we must skip it
       // 2. applying the remote's CSS in preload might override host styles before remote module is loaded
-      if (remoteInfo.fetchOptions) {
+      if (host.loaderHook.lifecycle.fetch.listeners.size > 0) {
         if (!useLinkPreload) {
           results.push(
             waitForCssFetch({ host, remoteInfo, url: cssUrl, context }),
