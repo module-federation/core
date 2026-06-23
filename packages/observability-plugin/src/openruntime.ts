@@ -51,6 +51,7 @@ type SharedTargetStatus =
   | 'loaded'
   | 'recovered'
   | 'error';
+type SharedConflictTargetStatus = 'warning';
 
 const openRuntimeSource = 'module-federation';
 const loadingStatuses: LoadingTargetStatus[] = [
@@ -67,6 +68,7 @@ const sharedStatuses: SharedTargetStatus[] = [
   'recovered',
   'error',
 ];
+const sharedConflictStatuses: SharedConflictTargetStatus[] = ['warning'];
 const remoteLifecyclePhases = new Set([
   'matchRemote',
   'manifest',
@@ -171,6 +173,7 @@ function syncReportToOpenRuntime(
 
   if (report.shared) {
     syncShared(runtime, source, report);
+    syncSharedConflict(runtime, source, report);
   }
 }
 
@@ -278,6 +281,36 @@ function syncShared(
   });
 }
 
+function syncSharedConflict(
+  runtime: OpenRuntimeCore,
+  source: string,
+  report: ObservabilityReport,
+): void {
+  const shared = report.shared;
+  if (!shared?.name || shared.reason !== 'singleton-multiple-versions') {
+    return;
+  }
+
+  const targetId = targetIds.sharedConflict(shared);
+  const data = getSharedConflictTargetData(report, shared);
+  runtime.registerTarget({
+    id: targetId,
+    type: targetTypes.sharedConflict,
+    source,
+    label: `MF shared conflict ${shared.name}`,
+    description:
+      'Module Federation singleton shared dependency version conflict.',
+    statuses: sharedConflictStatuses,
+    data,
+  });
+  runtime.updateSnapshot({
+    id: targetId,
+    status: 'warning',
+    source,
+    data,
+  });
+}
+
 function getRemoteTargetData(
   remote: ObservabilityRemoteInfo,
   reports: ObservabilityReport[],
@@ -326,6 +359,29 @@ function getSharedTargetData(
   });
 }
 
+function getSharedConflictTargetData(
+  report: ObservabilityReport,
+  shared: ObservabilitySharedInfo,
+): Record<string, unknown> {
+  const conflict = shared.conflict;
+
+  return compactObject({
+    traceId: report.traceId,
+    requestId: report.requestId,
+    hostName: report.hostName,
+    runtimeVersion: report.runtimeVersion,
+    reason: shared.reason,
+    sharedName: shared.name,
+    scope: conflict?.scope || getSharedTargetScope(shared),
+    singleton: shared.singleton,
+    currentVersion: conflict?.currentVersion || getSharedTargetVersion(shared),
+    currentFrom: conflict?.currentFrom || shared.provider,
+    versions: conflict?.versions || shared.availableVersions,
+    existingVersions: conflict?.existingVersions,
+    shared: getSharedSnapshotData(shared),
+  });
+}
+
 function getSharedSnapshotData(
   shared: ObservabilitySharedInfo,
 ): Record<string, unknown> {
@@ -343,6 +399,7 @@ function getSharedSnapshotData(
     loading: shared.loaded ? undefined : shared.loading,
     reason: shared.reason,
     definedBy: shared.definedBy,
+    conflict: shared.conflict,
   });
 }
 
@@ -749,6 +806,7 @@ const targetTypes = {
   remote: 'mf.remote',
   remoteModule: 'mf.remote.expose',
   shared: 'mf.shared',
+  sharedConflict: 'mf.shared.conflict',
 } as const;
 
 const targetIds = {
@@ -763,6 +821,11 @@ const targetIds = {
   shared(shared: ObservabilitySharedInfo): string {
     return `mf:shared:${normalizeSegment(shared.name)}:${normalizeSegment(
       getSharedTargetVersion(shared),
+    )}:${normalizeSegment(getSharedTargetScope(shared))}`;
+  },
+  sharedConflict(shared: ObservabilitySharedInfo): string {
+    return `mf:shared-conflict:${normalizeSegment(
+      shared.name,
     )}:${normalizeSegment(getSharedTargetScope(shared))}`;
   },
 };

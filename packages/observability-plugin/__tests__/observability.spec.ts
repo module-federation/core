@@ -37,19 +37,34 @@ const createShared = (overrides: Record<string, unknown> = {}) => ({
 });
 
 type SharedFixture = ReturnType<typeof createShared>;
+type ShareScopeMapFixture = Record<
+  string,
+  Record<string, Record<string, SharedFixture>>
+>;
+type EnabledOriginFixture = typeof enabledOrigin & {
+  shareScopeMap?: ShareScopeMapFixture;
+  sharedHandler?: {
+    shareScopeMap?: ShareScopeMapFixture;
+  };
+};
 type SharedHookFixturePlugin = {
+  beforeRegisterShare?: (args: {
+    pkgName: string;
+    shared: SharedFixture;
+    origin: EnabledOriginFixture;
+  }) => unknown;
   beforeLoadShare?: (args: {
     pkgName: string;
     shareInfo?: SharedFixture;
     shared: Record<string, unknown>;
-    origin: typeof enabledOrigin;
+    origin: EnabledOriginFixture;
   }) => unknown;
   afterLoadShare?: (args: {
     pkgName: string;
     shareInfo?: SharedFixture;
     selectedShared?: Partial<SharedFixture>;
     shared: Record<string, unknown>;
-    origin: typeof enabledOrigin;
+    origin: EnabledOriginFixture;
     lifecycle: 'loadShare' | 'loadShareSync';
   }) => void;
   errorLoadShare?: (args: {
@@ -57,7 +72,7 @@ type SharedHookFixturePlugin = {
     shareInfo?: SharedFixture;
     shared: Record<string, unknown>;
     shareScopeMap?: Record<string, Record<string, Record<string, unknown>>>;
-    origin: typeof enabledOrigin;
+    origin: EnabledOriginFixture;
     lifecycle: 'loadShare' | 'loadShareSync';
     error?: Error;
     recovered?: boolean;
@@ -4173,6 +4188,283 @@ describe('ObservabilityPlugin', () => {
     expect(sharedSnapshot).not.toHaveProperty('useIn');
     expect(sharedSnapshot).not.toHaveProperty('get');
     expect(sharedSnapshot).not.toHaveProperty('loading');
+  });
+
+  it('reports singleton shared version conflicts to OpenRuntime', async () => {
+    const runtime = createOpenRuntime();
+    const conflictTargetId = 'mf:shared-conflict:react:default';
+    const observability = createObservability({
+      level: 'verbose',
+      console: false,
+      openRuntime: {
+        runtime,
+        source: 'mf-test',
+      },
+    });
+    const hostReact = createShared({
+      version: '17.0.2',
+      from: 'host',
+      shareConfig: {
+        requiredVersion: '^17.0.0',
+        singleton: true,
+        strictVersion: false,
+        eager: false,
+      },
+    });
+    const remoteReact = createShared({
+      version: '18.3.1',
+      from: 'remote',
+      shareConfig: {
+        requiredVersion: '^18.0.0',
+        singleton: true,
+        strictVersion: false,
+        eager: false,
+      },
+    });
+    const plugin = observability.plugin as SharedHookFixturePlugin;
+
+    plugin.beforeRegisterShare?.({
+      pkgName: 'react',
+      shared: remoteReact,
+      origin: {
+        ...enabledOrigin,
+        shareScopeMap: {
+          default: {
+            react: {
+              '17.0.2': hostReact,
+            },
+          },
+        },
+      },
+    });
+
+    const report = observability.getLatestReport();
+
+    expect(report?.events.at(-1)).toMatchObject({
+      phase: 'shared-conflict',
+      status: 'complete',
+      message: 'shared:singleton-multiple-versions',
+    });
+    expect(report?.shared).toMatchObject({
+      name: 'react',
+      reason: 'singleton-multiple-versions',
+      availableVersions: ['17.0.2', '18.3.1'],
+      conflict: {
+        scope: 'default',
+        currentVersion: '18.3.1',
+        currentFrom: 'remote',
+        versions: ['17.0.2', '18.3.1'],
+        existingVersions: [
+          expect.objectContaining({
+            version: '17.0.2',
+            from: 'host',
+            singleton: true,
+          }),
+        ],
+      },
+    });
+    expect(report?.diagnosis).toMatchObject({
+      title: 'Singleton shared dependency version conflict detected',
+      ownerHint: 'shared',
+      facts: expect.objectContaining({
+        shareName: 'react',
+        availableVersions: '17.0.2,18.3.1',
+        sharedReason: 'singleton-multiple-versions',
+        singleton: true,
+      }),
+      actions: [
+        expect.objectContaining({
+          id: 'check-shared-version',
+          ownerHint: 'shared',
+        }),
+        expect.objectContaining({
+          id: 'check-shared-provider',
+          ownerHint: 'shared',
+        }),
+      ],
+    });
+    expect(report?.diagnosis?.warnings).toContain(
+      'Singleton shared dependency has multiple versions in the same share scope',
+    );
+
+    const waitResult = await runtime.waitFor({
+      id: conflictTargetId,
+      status: 'warning',
+    });
+    expect(waitResult.success).toBe(true);
+    expect(runtime.getSnapshot().targets[conflictTargetId]).toMatchObject({
+      status: 'warning',
+      type: 'mf.shared.conflict',
+      data: expect.objectContaining({
+        reason: 'singleton-multiple-versions',
+        sharedName: 'react',
+        scope: 'default',
+        singleton: true,
+        currentVersion: '18.3.1',
+        currentFrom: 'remote',
+        versions: ['17.0.2', '18.3.1'],
+        existingVersions: [
+          expect.objectContaining({
+            version: '17.0.2',
+            from: 'host',
+            singleton: true,
+          }),
+        ],
+      }),
+    });
+  });
+
+  it('reports singleton shared version conflicts when the existing version is singleton', () => {
+    const observability = createObservability({
+      level: 'verbose',
+      console: false,
+    });
+    const plugin = observability.plugin as SharedHookFixturePlugin;
+
+    plugin.beforeRegisterShare?.({
+      pkgName: 'react',
+      shared: createShared({
+        version: '18.3.1',
+        from: 'remote',
+        shareConfig: {
+          requiredVersion: '^18.0.0',
+          singleton: false,
+          strictVersion: false,
+          eager: false,
+        },
+      }),
+      origin: {
+        ...enabledOrigin,
+        shareScopeMap: {
+          default: {
+            react: {
+              '17.0.2': createShared({
+                version: '17.0.2',
+                from: 'host',
+                shareConfig: {
+                  requiredVersion: '^17.0.0',
+                  singleton: true,
+                  strictVersion: false,
+                  eager: false,
+                },
+              }),
+            },
+          },
+        },
+      },
+    });
+
+    expect(observability.getLatestReport()?.shared).toMatchObject({
+      name: 'react',
+      reason: 'singleton-multiple-versions',
+      availableVersions: ['17.0.2', '18.3.1'],
+    });
+  });
+
+  it('does not report shared version conflicts for safe registrations', () => {
+    const cases = [
+      {
+        name: 'same version',
+        shared: createShared({
+          version: '18.3.1',
+          shareConfig: {
+            requiredVersion: '^18.0.0',
+            singleton: true,
+            strictVersion: false,
+            eager: false,
+          },
+        }),
+        shareScopeMap: {
+          default: {
+            react: {
+              '18.3.1': createShared({
+                version: '18.3.1',
+                shareConfig: {
+                  requiredVersion: '^18.0.0',
+                  singleton: true,
+                  strictVersion: false,
+                  eager: false,
+                },
+              }),
+            },
+          },
+        },
+      },
+      {
+        name: 'different scope',
+        shared: createShared({
+          version: '18.3.1',
+          scope: ['custom'],
+          shareConfig: {
+            requiredVersion: '^18.0.0',
+            singleton: true,
+            strictVersion: false,
+            eager: false,
+          },
+        }),
+        shareScopeMap: {
+          default: {
+            react: {
+              '17.0.2': createShared({
+                version: '17.0.2',
+                shareConfig: {
+                  requiredVersion: '^17.0.0',
+                  singleton: true,
+                  strictVersion: false,
+                  eager: false,
+                },
+              }),
+            },
+          },
+        },
+      },
+      {
+        name: 'non-singleton versions',
+        shared: createShared({
+          version: '18.3.1',
+          shareConfig: {
+            requiredVersion: '^18.0.0',
+            singleton: false,
+            strictVersion: false,
+            eager: false,
+          },
+        }),
+        shareScopeMap: {
+          default: {
+            react: {
+              '17.0.2': createShared({
+                version: '17.0.2',
+                shareConfig: {
+                  requiredVersion: '^17.0.0',
+                  singleton: false,
+                  strictVersion: false,
+                  eager: false,
+                },
+              }),
+            },
+          },
+        },
+      },
+    ];
+
+    cases.forEach((item) => {
+      const observability = createObservability({
+        level: 'verbose',
+        console: false,
+      });
+      const plugin = observability.plugin as SharedHookFixturePlugin;
+
+      plugin.beforeRegisterShare?.({
+        pkgName: 'react',
+        shared: item.shared,
+        origin: {
+          ...enabledOrigin,
+          shareScopeMap: item.shareScopeMap,
+        },
+      });
+
+      expect(observability.getLatestReport(), item.name).toBeUndefined();
+    });
   });
 
   it('marks recovered shared reports as recovered OpenRuntime targets', async () => {
