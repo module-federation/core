@@ -3,4 +3,8 @@
 '@module-federation/sdk': minor
 ---
 
-Enable header-authenticated ESM remote loading through the existing runtime `fetch` hook. When a `fetch` hook plugin is registered, `module`/`esm` remotes load their remote entry and manifest-declared CSS via a fetch + blob import-rewriting loader (instead of native `import()` / `<link>`), so custom HTTP headers (e.g. `Authorization`) be applied on every asset request. The hook receives `remoteInfo`, so headers can be decided per remote and support dynamic cases such as token refresh. Remote registration is unchanged and no new remote config is introduced; remotes load as before when no `fetch` hook is present.
+Support loading remote assets in the manifest with custom headers through the existing runtime `fetch` hook.
+
+- When a `fetch` hook plugin is registered, `module`/`esm` remotes load their remote entry and manifest-declared CSS through a fetch + blob loader, instead of native `import()` / `<link>`.
+- The hook receives `remoteInfo`, so headers can be set per remote and support dynamic cases such as token refresh.
+- When no `fetch` hook is present, remotes load exactly as before.
