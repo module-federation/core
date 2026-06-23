@@ -3,11 +3,10 @@
 - Type: `PluginRemoteOptions`
 - Required: No
 - Default: `undefined`
-- Usage: Used for consuming remote modules in `Module Federation`
+- Usage: Used for consuming producer modules with <code>{props.brandName || props.name || 'Module Federation'}</code>
 
 :::tip
 A parameter unique to consumers. If `remotes` is set, it can be considered that this is a consumer.
-
 :::
 
 The `PluginRemoteOptions` type is as follows:
@@ -40,7 +39,7 @@ module.exports = {
   plugins: [
     new ModuleFederationPlugin({
       name: 'host',
-      // The `remotes` below defines two remotes, named `manifest-provider` for the project started on port 3011 and `js-entry-provider` for the project started on port 3012
+      // The `remotes` below defines two producers, named `manifest-provider` for the project started on port 3011 and `js-entry-provider` for the project started on port 3012
       remotes: {
         'manifest-provider':
           'manifest_provider@http://localhost:3011/mf-manifest.json',
@@ -58,7 +57,7 @@ module.exports = {
 - Required: No
 - Default: `'default'`
 
-Defines which share scopes (shared dependency pools) the host aligns with a given remote. This is useful for isolating certain shared dependencies away from the default pool (for example, putting an internal design system into `scope1` while keeping React in `default`).
+Defines which share scopes (Share Scope) the consumer aligns with a given producer. This is useful for isolating certain shared dependencies away from the default pool (for example, putting an internal design system into `scope1` while keeping React in `default`).
 
 ```ts
 new ModuleFederationPlugin({
@@ -74,5 +73,5 @@ new ModuleFederationPlugin({
 
 Related configuration:
 
-- The producer (remote) should declare which scopes it initializes via [shareScope](./shareScope).
-- Each shared dependency chooses its scope via [shared.shareScope](./shared#sharescope).
+- The producer should declare which scopes it initializes via [shareScope](/configure/shareScope.html).
+- Each shared dependency chooses its scope via [shared.shareScope](/configure/shared.html#sharescope).

@@ -1,6 +1,6 @@
 # shareScope
 
-`shareScope` specifies which shared dependency pools (share scopes) a producer (remote) participates in. You can think of a share scope as a named shared-dependency pool: dependencies are only reused within the same scope.
+`shareScope` specifies which shared dependency pools (Share Scope) a producer participates in. You can think of a Share Scope as a named shared-dependency pool: dependencies are only reused within the same Scope.
 
 - Type: `string | string[]`
 - Required: No
@@ -8,9 +8,9 @@
 
 ## What It Does
 
-- Controls which share scopes a remote initializes at runtime.
-- Works with `shared[*].shareScope`: a shared dependency only participates in the scope it is assigned to.
-- Works with `remotes[remote].shareScope`: the host must align the scopes it wants to reuse with the remote, otherwise missing scopes are treated as empty and cannot be reused.
+- Controls which Share Scopes a producer initializes at runtime.
+- Works with `shared[*].shareScope`: a shared dependency only participates in the Scope it is assigned to.
+- Works with `remotes[remote].shareScope`: the consumer must align the Scopes it wants to reuse with the producer, otherwise missing Scopes are treated as empty and cannot be reused.
 
 ## Examples
 
@@ -46,6 +46,6 @@ new ModuleFederationPlugin({
 
 ## Notes
 
-- `shareScope` declares which share scopes this remote initializes. It does not automatically put dependencies into those scopes; that is controlled by each `shared` entry's `shareScope`.
-- To actually reuse dependencies across apps, the host and remote typically need to agree on the same share scopes for that remote. See [remotes.shareScope](./remotes#sharescope).
+- `shareScope` declares which Share Scopes this module initializes. It does not automatically put dependencies into those Scopes; that is controlled by each `shared` entry's `shareScope`.
+- To actually reuse dependencies across apps, the producer and consumer typically need to agree on the same Scopes. See [remotes.shareScope](/configure/remotes.html#sharescope).
 

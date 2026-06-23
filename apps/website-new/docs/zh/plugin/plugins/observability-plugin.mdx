@@ -26,7 +26,7 @@ shared 观测的边界是实例级别：它用于说明哪个 MF 实例加载了
 
 预加载观测用于回答 `preloadRemote` 是否真的把资源加载完。`preloadRemote` 完成后，报告会记录 `phase: "preload"` 的资源结果，包含资源地址、资源类型、状态和这次预加载的 `id`。状态可能是 `success`、`error`、`timeout` 或 `cached`。如果调用时没有指定 `exposes`，`id` 会是 `remoteName/*`；如果指定了 `exposes`，每个 expose 会单独记录成 `remoteName/expose`。
 
-如果你想先体验报告效果，或者希望在页面里直接查看和导出报告，可以安装最新的 [Module Federation Chrome 插件](https://chromewebstore.google.com/detail/module-federation/aeoilchhomapofiopejjlecddfldpeom?hl=zh-CN&utm_source=ext_sidebar)。插件的「加载追踪」Tab 会读取页面已有的观测插件报告；如果页面还没有接入观测插件，也可以在当前 Tab 临时开启采集。更多使用方式见 [Chrome Devtool 加载追踪](../../guide/debug/chrome-devtool#加载追踪)。
+如果你想先体验报告效果，或者希望在页面里直接查看和导出报告，可以安装最新的 [Module Federation Chrome 插件](https://chromewebstore.google.com/detail/module-federation/aeoilchhomapofiopejjlecddfldpeom?hl=zh-CN&utm_source=ext_sidebar)。插件的「加载追踪」Tab 会读取页面已有的观测插件报告；如果页面还没有接入观测插件，也可以在当前 Tab 临时开启采集。更多使用方式见 [Chrome Devtool 加载追踪](/guide/debug/chrome-devtool.html#加载追踪)。
 
 ## 安装
 

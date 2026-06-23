@@ -34,7 +34,7 @@ interface TreeShakingConfig {
 
 ```
 
-- Example
+## Example
 
 ```ts
 new ModuleFederationPlugin({
@@ -60,8 +60,8 @@ new ModuleFederationPlugin({
 Whether to allow only one version of the shared module within the shared scope (singleton mode).
 
 - If set to true, singleton mode is enabled; if set to false, singleton mode is not enabled.
-- If singleton mode is enabled, the shared dependencies between the remote application components and the host application will only be loaded once, and a higher version will be loaded if the versions are inconsistent. A warning will be given for the party with the lower version.
-- If singleton mode is not enabled, and the shared dependencies between the remote application and the host application have different versions, each will load their own dependencies.
+- If singleton mode is enabled, the shared dependencies between the producer components and the consumer will only be loaded once, and a higher version will be loaded if the versions are inconsistent. A warning will be given for the party with the lower version.
+- If singleton mode is not enabled, and the shared dependencies between the producer and the consumer have different versions, each side will load its own dependencies.
 
 ## requiredVersion
 
@@ -112,7 +112,7 @@ If set to `false`, this shared will not be packaged into the product, and only t
 - Required: No
 - Default: The property name (`key`) of the `shared` entry
 
-The lookup key used in the shared scope at runtime. Both the provider and the consumer must use the **same** `shareKey` for a shared module to be negotiated successfully; otherwise each side bundles its own copy.
+The lookup key used in the Share Scope at runtime. Both the producer and the consumer must use the **same** `shareKey` for a shared module to be negotiated successfully; otherwise each side bundles its own copy.
 
 The default is the property name itself, so most of the time you do not need to set it. A typical custom scenario is mapping an alias to a different real package:
 
@@ -120,7 +120,7 @@ The default is the property name itself, so most of the time you do not need to 
 shared: {
   'my-alias': {
     import: 'react',      // actual package to resolve
-    shareKey: 'react',    // negotiate in shared scope as "react"
+    shareKey: 'react',    // negotiate in Share Scope as "react"
   },
 }
 ```
@@ -135,14 +135,14 @@ If `shareKey` is omitted, the negotiation key is the property name itself (`"my-
 - Required: No
 - Default: The property name (`key`) of the `shared` entry
 
-The module request path that the bundler intercepts at build time. When the code contains an `import` that matches this value, the bundler replaces it with a shared-scope consumer instead of bundling the dependency into the output.
+The module request path that the bundler intercepts at build time. When the code contains an `import` that matches this value, the bundler replaces it with a Share Scope consumer instead of bundling the dependency into the output.
 
 The default is the property name, which is sufficient for most cases. The difference between `request` and `shareKey`:
 
 | Field | Stage | Question it answers |
 |---|---|---|
 | `request` | Build-time · module graph | Which `import` to intercept |
-| `shareKey` | Runtime · negotiation | Which slot in the shared scope to use |
+| `shareKey` | Runtime · negotiation | Which slot in the Share Scope to use |
 
 ### Prefix matching with trailing slash
 
@@ -171,7 +171,9 @@ shared: {
 This is essential for packages that expose subpath modules (e.g. `react-dom/client`, `lodash/debounce`, `@scope/package/subpath`). Without the trailing slash, only the exact package name is intercepted; subpath imports will be bundled locally and will not participate in shared scope negotiation.
 
 :::warning Common mistake
-Writing `'react-dom'` (no trailing slash) only intercepts `import 'react-dom'`. Any code that does `import { createRoot } from 'react-dom/client'` will load a second copy of React DOM, which breaks React singleton requirements and causes hydration errors. See the [troubleshooting FAQ](../../guide/troubleshooting/runtime#subpath-imports-are-not-shared-duplicate-dependency-loaded) for more details.
+Writing `'react-dom'` (no trailing slash) only intercepts `import 'react-dom'`.
+
+Any code that does `import { createRoot } from 'react-dom/client'` will load a second copy of React DOM, which breaks React singleton requirements and causes hydration errors. See the [troubleshooting FAQ](/guide/troubleshooting/runtime.html#subpath-imports-are-not-shared-duplicate-dependency-loaded) for more details.
 :::
 
 ## allowNodeModulesSuffixMatch
@@ -180,7 +182,7 @@ Writing `'react-dom'` (no trailing slash) only intercepts `import 'react-dom'`. 
 - Required: No
 - Default: `false`
 
-Enables a fallback lookup that matches shared modules by the portion of their resolved path that appears after `node_modules/`. Turn this on when your host and remote resolve the same package through different absolute paths (for example, due to pnpm hoisting, symlinks, or custom bundler loaders) but you still want them to be considered the same shared module.
+Enables a fallback lookup that matches shared modules by the portion of their resolved path that appears after `node_modules/`. Turn this on when your consumer and producer resolve the same package through different absolute paths (for example, due to pnpm hoisting, symlinks, or custom bundler loaders) but you still want them to be considered the same shared module.
 
 > Previously this option was called `nodeModulesReconstructedLookup`.
 
@@ -244,7 +246,7 @@ Depending on the use case, {props.brandName || props.name || 'Module Federation'
 
 Simply add the corresponding dependencies to the `shared` configuration in the {props.brandName || props.name || 'Module Federation'} build configuration, for example:
 
-import ArrayShared from '@components/common/configure/array-shared';
+import ArrayShared from '@docs/_snippets/configure/array-shared';
 import React from 'react';
 
 {props.arrayShared || React.createElement(ArrayShared)}
@@ -253,6 +255,6 @@ import React from 'react';
 
 Add the shared dependencies in the `shared` configuration of the {props.brandName || props.name || 'Module Federation'}, with the `key` being the dependency name and the `value` being the provided configuration.
 
-import ObjectShared from '@components/common/configure/object-shared'
+import ObjectShared from '@docs/_snippets/configure/object-shared'
 
 {props.objectShared || React.createElement(ObjectShared)}

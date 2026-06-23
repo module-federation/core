@@ -9,7 +9,7 @@ Module Federation 现在对外提供一个统一的 **`mf` skill**。
 
 你不需要在很多 skill 之间自己挑，也不需要先把文档看完再转述给 Agent。更直接的方式是安装这一个 skill，然后让 Agent 自己判断现在该走“读文档”、“看配置”还是“排查问题”。
 
-如果你还没看过，建议先从 [AI 快速开始](./index) 开始。
+如果你还没看过，建议先从 [AI 快速开始](/ai/index.html) 开始。
 
 ## 安装
 
@@ -109,7 +109,7 @@ https://github.com/module-federation/agent-skills/tree/main/skills/mf
 
 如果你希望 AI 不只是“看到报错”，而是能知道 MF 的 remote、shared、组件加载状态在哪里成功、在哪里失败，可以用 `observability` 子命令。
 
-要读取真实的 MF 加载报告，需要先接入 [观测插件](../plugin/plugins/observability-plugin)。观测插件会把 MF 加载过程整理成报告，包括加载成功、加载失败、错误原因、`traceId` 和读取方式；skill 负责帮你接入、读取和分析这些信息，再判断问题更可能在宿主、远端、共享依赖、构建配置还是部署地址。
+要读取真实的 MF 加载报告，需要先接入 [观测插件](/plugin/plugins/observability-plugin.html)。观测插件会把 MF 加载过程整理成报告，包括加载成功、加载失败、错误原因、`traceId` 和读取方式；skill 负责帮你接入、读取和分析这些信息，再判断问题更可能在宿主、远端、共享依赖、构建配置还是部署地址。
 
 如果你还没有接入观测插件，可以先这样问：
 

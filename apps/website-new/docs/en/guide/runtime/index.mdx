@@ -1,25 +1,22 @@
 # Runtime Access
 
-:::tip
+:::info Prerequisite reading
 
-Before reading this chapter, it is assumed that you already understand:
-
-- The [features and capabilities](../start) of Module Federation
-- The [glossary](../start/glossary) of Module Federation
-- How to [consume and export modules](../start/quick-start)
+- The [features and capabilities](/guide/start/index.html) of Module Federation
+- The [glossary](/guide/start/glossary.html) of Module Federation
+- How to [consume and export modules](/guide/start/quick-start.html)
 
 :::
 
 Currently, `Module Federation` provides two ways to register and load modules:
 
-- One is to declare it in the build plugin (usually in the `module-federation.config.ts` file)
+- One is to declare it in the build plugin (usually in the `module-federation.config.ts` file).
 
 - The other way is to directly register and load modules through the `runtime` API.
 
 The two modes are not conflicting and can be used together. You can flexibly choose the module registration method and timing according to your actual scenario.
 
-<br />
-**The differences between registering modules at runtime and registering modules in the build configuration are as follows:**
+## Differences between the two approaches
 
 |Registering modules at runtime|Registering modules in the plugin|
 |------------------------------------------------------------------------------------------------------------------|---------------------- |
@@ -32,7 +29,7 @@ The two modes are not conflicting and can be used together. You can flexibly cho
 |The loading process can be affected through the `runtime`'s `plugin` mechanism|Currently does not support providing `plugin` to affect the loading process|
 |Does not support remote type hints|Supports remote type hints|
 
-import Runtime from '@components/en/runtime/index';
+import Runtime from '@docs/en/_components/runtime/index';
 
 <Runtime />
 
@@ -340,6 +337,6 @@ For Modern.js v2 projects, install `@module-federation/modern-js` and import Run
 
 ## Read Next
 
-- [Runtime API](./runtime-api): `createInstance`, `loadRemote`, `registerRemotes`, and other runtime APIs.
-- [Runtime Plugins](./runtime-plugins): extend the runtime loading flow.
-- [Runtime Hooks](./runtime-hooks): lifecycle hooks available to runtime plugins.
+- [Runtime API](/guide/runtime/runtime-api.html): `createInstance`, `loadRemote`, `registerRemotes`, and other runtime APIs.
+- [Runtime Plugins](/guide/runtime/runtime-plugins.html): extend the runtime loading flow.
+- [Runtime Hooks](/guide/runtime/runtime-hooks.html): lifecycle hooks available to runtime plugins.
