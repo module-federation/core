@@ -1,5 +1,15 @@
 # @module-federation/dts-plugin
 
+## 2.6.0
+
+### Patch Changes
+
+- 2a7f724: Fix dts-plugin expose resolution for extensionless multi-dot paths like `foo.generated` so they correctly infer supported source files such as `.ts`, `.tsx`, `.vue`, `.js`, and `.jsx`, while preserving explicit extensions and directory `index` fallback behavior.
+  - @module-federation/sdk@2.6.0
+  - @module-federation/managers@2.6.0
+  - @module-federation/third-party-dts-extractor@2.6.0
+  - @module-federation/error-codes@2.6.0
+
 ## 2.5.1
 
 ### Patch Changes

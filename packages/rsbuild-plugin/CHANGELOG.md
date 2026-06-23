@@ -1,5 +1,15 @@
 # @module-federation/rsbuild-plugin
 
+## 2.6.0
+
+### Patch Changes
+
+- 5776688: Fix the default Rsbuild chunk loading global name so it does not include whitespace.
+- Updated dependencies [9dd3a5b]
+  - @module-federation/enhanced@2.6.0
+  - @module-federation/node@2.7.45
+  - @module-federation/sdk@2.6.0
+
 ## 2.5.1
 
 ### Patch Changes

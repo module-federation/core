@@ -1,5 +1,14 @@
 # @module-federation/bridge-vue3
 
+## 2.6.0
+
+### Patch Changes
+
+- 56991cc: Fix RemoteApp lifecycle handling when it is wrapped by Vue KeepAlive.
+  - @module-federation/runtime@2.6.0
+  - @module-federation/sdk@2.6.0
+  - @module-federation/bridge-shared@2.6.0
+
 ## 2.5.1
 
 ### Patch Changes

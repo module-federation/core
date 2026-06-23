@@ -1,5 +1,24 @@
 # @module-federation/rspress-plugin
 
+## 2.6.0
+
+### Patch Changes
+
+- 3727b3e: docs: improve guides, configuration, and integrations content
+  - Unify internal links to absolute `/path/to/page.html` form (drop relative paths and `/zh` / `/en` prefixes).
+  - Restructure configuration option pages for consistent formatting.
+  - Refresh integration guides for Modern.js, Next.js, Angular, Vue, and React.
+  - Reorganize runtime API and hooks reference, and rewrite advanced/start/data guides.
+  - Sync all updates between EN and ZH locales.
+  - Bump `@rspress/shared` runtime dep and `@rspress/core` peer to `2.0.14`.
+
+- Updated dependencies [5776688]
+- Updated dependencies [9dd3a5b]
+  - @module-federation/rsbuild-plugin@2.6.0
+  - @module-federation/enhanced@2.6.0
+  - @module-federation/sdk@2.6.0
+  - @module-federation/error-codes@2.6.0
+
 ## 2.5.1
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # @module-federation/bridge-react
 
+## 2.6.0
+
+### Patch Changes
+
+- 39965b4: Keep host fallback components out of the remote React root.
+  - @module-federation/sdk@2.6.0
+
 ## 2.5.1
 
 ### Patch Changes
