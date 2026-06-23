@@ -1,5 +1,14 @@
 # @module-federation/metro
 
+## 2.6.0
+
+### Patch Changes
+
+- Updated dependencies [2a7f724]
+  - @module-federation/dts-plugin@2.6.0
+  - @module-federation/runtime@2.6.0
+  - @module-federation/sdk@2.6.0
+
 ## 2.5.1
 
 ### Patch Changes
