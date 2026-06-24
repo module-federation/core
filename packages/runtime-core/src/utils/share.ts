@@ -54,10 +54,10 @@ function formatShare(
     ...shareArgs,
     shareConfig: {
       requiredVersion: `^${shareArgs.version}`,
-      singleton: false,
-      eager: false,
-      strictVersion: false,
       ...shareArgs.shareConfig,
+      singleton: Boolean(shareArgs.shareConfig?.singleton),
+      eager: Boolean(shareArgs.shareConfig?.eager),
+      strictVersion: Boolean(shareArgs.shareConfig?.strictVersion),
     },
     get,
     loaded: shareArgs?.loaded || 'lib' in shareArgs ? true : undefined,
