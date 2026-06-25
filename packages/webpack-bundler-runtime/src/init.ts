@@ -5,6 +5,7 @@ import {
 } from '@module-federation/runtime';
 import { ShareArgs } from '@module-federation/runtime/types';
 import helpers from '@module-federation/runtime/helpers';
+import { createClearCacheRuntimePlugin, installClearCache } from './clearCache';
 
 export function init({ webpackRequire }: { webpackRequire: WebpackRequire }) {
   const { initOptions, runtime, sharedFallback, bundlerRuntime, libraryType } =
@@ -124,7 +125,11 @@ export function init({ webpackRequire }: { webpackRequire: WebpackRequire }) {
       };
     };
 
-  initOptions.plugins ||= [];
-  initOptions.plugins.push(treeShakingSharePlugin());
-  return runtime!.init(initOptions);
+  const plugins = (initOptions['plugins'] ||= []);
+  plugins.push(treeShakingSharePlugin());
+  plugins.push(createClearCacheRuntimePlugin({ webpackRequire }));
+
+  const instance = runtime!.init(initOptions);
+  installClearCache({ webpackRequire, instance });
+  return instance;
 }

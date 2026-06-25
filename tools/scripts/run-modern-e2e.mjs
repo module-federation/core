@@ -60,6 +60,23 @@ const SCENARIOS = {
     serveCmd: MODERN_SERVE_CMD,
     waitTargets: MODERN_WAIT_TARGETS,
     verifyManifest: true,
+    e2eCmd: [
+      'pnpm',
+      '--dir',
+      'apps/modernjs-ssr/host',
+      'exec',
+      'cypress',
+      'run',
+      '--project',
+      '.',
+      '--e2e',
+      '--config',
+      'baseUrl=http://localhost:3050,responseTimeout=120000,pageLoadTimeout=120000,defaultCommandTimeout=120000',
+      '--browser',
+      'chrome',
+      '--spec',
+      'cypress/e2e/remove-remote-cache.cy.ts',
+    ],
   },
 };
 
@@ -188,18 +205,41 @@ function buildManifestValidationScript(urls) {
   return `
     (async () => {
       const urls = ${JSON.stringify(urls)};
+      const timeoutMs = 60000;
+      const retryIntervalMs = 500;
+      const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+      async function validateManifest(url) {
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(\`\${url} responded with status \${response.status}\`);
+        }
+        const payload = await response.text();
+        try {
+          JSON.parse(payload);
+        } catch (error) {
+          throw new Error(\`\${url} did not return valid JSON\`);
+        }
+      }
+
       await Promise.all(
         urls.map(async (url) => {
-          const response = await fetch(url);
-          if (!response.ok) {
-            throw new Error(\`\${url} responded with status \${response.status}\`);
+          const startedAt = Date.now();
+          let lastError;
+
+          while (Date.now() - startedAt < timeoutMs) {
+            try {
+              await validateManifest(url);
+              return;
+            } catch (error) {
+              lastError = error;
+              await sleep(retryIntervalMs);
+            }
           }
-          const payload = await response.text();
-          try {
-            JSON.parse(payload);
-          } catch (error) {
-            throw new Error(\`\${url} did not return valid JSON\`);
-          }
+
+          throw new Error(
+            \`\${url} did not return valid JSON within \${timeoutMs}ms: \${lastError?.message || 'unknown error'}\`,
+          );
         }),
       );
     })().catch((error) => {

@@ -60,11 +60,16 @@ module.exports = (_env, argv = {}) => {
           },
           type: 'javascript/auto',
         },
+        {
+          test: /\.module\.css$/,
+          type: 'css/module',
+        },
       ],
     },
     experiments: {
       css: true,
     },
+    lazyCompilation: false,
     plugins: [
       new HtmlRspackPlugin({
         template: path.resolve(__dirname, 'src/index.html'),
