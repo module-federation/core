@@ -102,6 +102,10 @@ describe('test findPackageJson: should return the correct package.json path for 
     expect(findPackageJson(resolveRouterV7)).toBe(resolveRouterV7_PkgPath);
     expect(findPackageJson(resolveRouterV8)).toBe(resolveRouterV8_PkgPath);
   });
+
+  it('should not treat bare package requests as filesystem paths', () => {
+    expect(findPackageJson('react-router')).toBe(null);
+  });
 });
 
 describe('test getBridgeRouterAlias: should return the correct alias for react-router-dom v5/v6 and react-router v7/v8', () => {
@@ -184,6 +188,19 @@ describe('test getBridgeRouterAlias: should return the correct alias for react-r
     expect(res['react-router/dist/production/dom-export.js']).toBe(
       path.join(resolveRouterV8, 'dist/production/dom-export.js'),
     );
+  });
+
+  it('should ignore bare react-router aliases before package lookup', () => {
+    const res = getBridgeRouterAlias({
+      reactRouterAlias: 'react-router',
+    });
+
+    expect(res).toEqual({
+      'react-router-dom$':
+        '@module-federation/bridge-react/dist/router-v6.es.js',
+      '@module-federation/bridge-react/router-runtime$':
+        '@module-federation/bridge-react/dist/router-v6.es.js',
+    });
   });
 
   it('should prefer an explicit react-router-dom alias for router v6 when both aliases exist', () => {

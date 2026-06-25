@@ -20,6 +20,14 @@ type BridgeRouterAliasOptions = {
   reactRouterDomAlias?: string;
 };
 
+const getAliasPackagePath = (alias?: string): string => {
+  if (!alias) {
+    return '';
+  }
+
+  return path.isAbsolute(alias) || alias.startsWith('.') ? alias : '';
+};
+
 const getPackageInfo = (
   routerPackagePath: string,
 ): { majorVersion: number; packagePath: string } | null => {
@@ -135,15 +143,18 @@ const resolveAliasPackagePath = (
     }
 
     if (reactRouterPackage && reactRouterPackage.majorVersion < 7) {
-      return aliasOptions.reactRouterDomAlias || '';
+      return getAliasPackagePath(aliasOptions.reactRouterDomAlias);
     }
   }
 
-  if (aliasOptions.reactRouterDomAlias) {
-    return aliasOptions.reactRouterDomAlias;
+  const reactRouterDomAlias = getAliasPackagePath(
+    aliasOptions.reactRouterDomAlias,
+  );
+  if (reactRouterDomAlias) {
+    return reactRouterDomAlias;
   }
 
-  return aliasOptions.reactRouterAlias || '';
+  return getAliasPackagePath(aliasOptions.reactRouterAlias);
 };
 
 const resolveDependencyPackagePath = (
