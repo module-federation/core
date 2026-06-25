@@ -4,6 +4,36 @@ import { RouterProvider as ReactRouterProvider } from 'react-router/dom';
 import { RouterContext } from '../provider/context';
 import { LoggerInstance } from '../utils';
 
+function WrapperRouter(props: Record<string, unknown>) {
+  const { basename, ...propsRes } = props;
+  const routerContextProps = useContext(RouterContext) || {};
+  const MemoryRouter =
+    ReactRouter.MemoryRouter as unknown as React.ComponentType<any>;
+  const BrowserRouter =
+    ReactRouter.BrowserRouter as unknown as React.ComponentType<any>;
+
+  LoggerInstance.debug(`WrapperRouter info >>>`, {
+    ...routerContextProps,
+    routerContextProps,
+    WrapperRouterProps: props,
+  });
+
+  if (routerContextProps?.memoryRoute) {
+    return (
+      <MemoryRouter
+        {...props}
+        initialEntries={[routerContextProps?.memoryRoute.entryPath]}
+      />
+    );
+  }
+  return (
+    <BrowserRouter
+      {...propsRes}
+      basename={routerContextProps?.basename || basename}
+    />
+  );
+}
+
 function WrapperRouterProvider(props: Record<string, unknown>) {
   const { router, ...propsRes } = props as { router: any };
   const routerContextProps = useContext(RouterContext) || {};
@@ -34,4 +64,5 @@ function WrapperRouterProvider(props: Record<string, unknown>) {
 }
 
 export * from 'react-router/dom';
+export { WrapperRouter as BrowserRouter };
 export { WrapperRouterProvider as RouterProvider };

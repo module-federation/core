@@ -85,7 +85,7 @@ to the v8 bridge proxies:
 
 ```js
 //rsbuild.config.ts
-const reactRouterPath = path.dirname(require.resolve('react-router/package.json'));
+const reactRouterPath = path.resolve(path.dirname(require.resolve('react-router')), '../..');
 
 export default defineConfig({
   source: {
