@@ -1,5 +1,6 @@
 import React, { useContext } from 'react';
 import * as ReactRouter from 'react-router';
+import * as ReactRouterDom from 'react-router/dom';
 import { RouterContext } from '../provider/context';
 import { LoggerInstance } from '../utils';
 
@@ -8,8 +9,8 @@ function WrapperRouter(props: Record<string, unknown>) {
   const routerContextProps = useContext(RouterContext) || {};
   const MemoryRouter =
     ReactRouter.MemoryRouter as unknown as React.ComponentType<any>;
-  const BrowserRouter =
-    ReactRouter.BrowserRouter as unknown as React.ComponentType<any>;
+  const BrowserRouter = (ReactRouterDom as any)
+    .BrowserRouter as React.ComponentType<any>;
 
   LoggerInstance.debug(`WrapperRouter info >>>`, {
     ...routerContextProps,
@@ -47,7 +48,9 @@ function WrapperRouterProvider(props: Record<string, unknown>) {
     'Router' + 'Provider'
   ] as React.ComponentType<any>;
   const createMemoryRouter = (ReactRouter as any)['create' + 'MemoryRouter'];
-  const createBrowserRouter = (ReactRouter as any)['create' + 'BrowserRouter'];
+  const createBrowserRouter = (ReactRouterDom as any)[
+    'create' + 'BrowserRouter'
+  ];
 
   if (routerContextProps.memoryRoute) {
     const MemoryRouterInstance = createMemoryRouter(routers, {
