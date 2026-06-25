@@ -450,8 +450,8 @@ export const moduleFederationConfigPlugin = (
       const exposes = userConfig.csrConfig?.exposes;
       const hasExposes =
         exposes && Array.isArray(exposes)
-          ? exposes.length
-          : Object.keys(exposes ?? {}).length;
+          ? exposes.length > 0
+          : Object.keys(exposes ?? {}).length > 0;
 
       if (corsWarnMsgs.length > 1 && hasExposes) {
         logger.warn(corsWarnMsgs.join('\n'));
@@ -486,6 +486,9 @@ export const moduleFederationConfigPlugin = (
           assetPrefix: modernjsConfig?.dev?.assetPrefix
             ? modernjsConfig.dev.assetPrefix
             : 'auto',
+          lazyCompilation: hasExposes
+            ? false
+            : modernjsConfig?.dev?.lazyCompilation,
         },
       };
     });

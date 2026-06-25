@@ -1,6 +1,5 @@
-import { it, expect, describe } from 'vitest';
-import { patchMFConfig } from './configPlugin';
-import { getIPV4 } from './utils';
+import { it, expect, describe, vi } from 'vitest';
+import { moduleFederationConfigPlugin, patchMFConfig } from './configPlugin';
 
 const mfConfig = {
   name: 'host',
@@ -13,6 +12,30 @@ const mfConfig = {
     'react-dom': { singleton: true, eager: true },
   },
 };
+
+const getModernJsConfig = async (
+  moduleFederationConfig: Record<string, unknown>,
+  modernjsConfig: Record<string, unknown> = {},
+) => {
+  const configCallbacks: Array<() => unknown> = [];
+  const plugin = moduleFederationConfigPlugin({
+    originPluginOptions: {
+      config: moduleFederationConfig,
+    },
+    userConfig: {},
+  } as any);
+
+  await plugin.setup!({
+    config: vi.fn((callback) => {
+      configCallbacks.push(callback);
+    }),
+    getConfig: vi.fn(() => modernjsConfig),
+    modifyBundlerChain: vi.fn(),
+  } as any);
+
+  return configCallbacks[0]();
+};
+
 describe('patchMFConfig', async () => {
   it('patchMFConfig: server', async () => {
     const patchedConfig = JSON.parse(JSON.stringify(mfConfig));
@@ -77,6 +100,57 @@ describe('patchMFConfig', async () => {
         consumeTypes: {
           runtimePkgs: ['@module-federation/modern-js-v3/runtime'],
         },
+      },
+    });
+  });
+});
+
+describe('moduleFederationConfigPlugin', async () => {
+  it('disables lazyCompilation when the project is a producer', async () => {
+    const modernJsConfig = await getModernJsConfig(
+      {
+        name: 'remote',
+        exposes: {
+          './Button': './src/Button',
+        },
+      },
+      {
+        tools: {
+          devServer: {
+            headers: {},
+          },
+        },
+      },
+    );
+
+    expect(modernJsConfig).toMatchObject({
+      dev: {
+        assetPrefix: 'auto',
+        lazyCompilation: false,
+      },
+    });
+  });
+
+  it('keeps lazyCompilation unchanged when the project is not a producer', async () => {
+    const modernJsConfig = await getModernJsConfig(
+      {
+        name: 'host',
+        remotes: {
+          remote: 'http://localhost:3000/remoteEntry.js',
+        },
+      },
+      {
+        dev: {
+          assetPrefix: 'http://localhost:3001/',
+          lazyCompilation: true,
+        },
+      },
+    );
+
+    expect(modernJsConfig).toMatchObject({
+      dev: {
+        assetPrefix: 'http://localhost:3001/',
+        lazyCompilation: true,
       },
     });
   });
