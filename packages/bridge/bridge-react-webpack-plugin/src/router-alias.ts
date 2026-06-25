@@ -12,6 +12,8 @@ const reactRouterV8AliasPath =
   '@module-federation/bridge-react/dist/router-v8.es.js';
 const reactRouterV8DomAliasPath =
   '@module-federation/bridge-react/dist/router-v8-dom.es.js';
+const reactRouterRuntimeAliasPath =
+  '@module-federation/bridge-react/dist/router-runtime.es.js';
 const reactRouterRuntimeAlias =
   '@module-federation/bridge-react/router-runtime$';
 
@@ -213,10 +215,10 @@ export const getBridgeRouterAlias = (
     }
   }
 
-  // Default to v6 which uses 'react-router-dom'
+  // Default router imports to v6 but keep runtime neutral without a router.
   const bridgeRouterAlias = {
     'react-router-dom$': reactRouterDomV6AliasPath,
-    [reactRouterRuntimeAlias]: reactRouterDomV6AliasPath,
+    [reactRouterRuntimeAlias]: reactRouterRuntimeAliasPath,
   };
   console.log(
     '<<<<<<<<<<<<< default bridgeRouterAlias >>>>>>>>>>>>>',

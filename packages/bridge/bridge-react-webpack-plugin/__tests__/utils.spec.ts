@@ -199,8 +199,27 @@ describe('test getBridgeRouterAlias: should return the correct alias for react-r
       'react-router-dom$':
         '@module-federation/bridge-react/dist/router-v6.es.js',
       '@module-federation/bridge-react/router-runtime$':
-        '@module-federation/bridge-react/dist/router-v6.es.js',
+        '@module-federation/bridge-react/dist/router-runtime.es.js',
     });
+  });
+
+  it('should keep router runtime neutral when no router package is detected', () => {
+    const cwdSpy = vi
+      .spyOn(process, 'cwd')
+      .mockReturnValue(path.resolve(__dirname, '..'));
+
+    try {
+      const res = getBridgeRouterAlias();
+
+      expect(res).toEqual({
+        'react-router-dom$':
+          '@module-federation/bridge-react/dist/router-v6.es.js',
+        '@module-federation/bridge-react/router-runtime$':
+          '@module-federation/bridge-react/dist/router-runtime.es.js',
+      });
+    } finally {
+      cwdSpy.mockRestore();
+    }
   });
 
   it('should prefer an explicit react-router-dom alias for router v6 when both aliases exist', () => {

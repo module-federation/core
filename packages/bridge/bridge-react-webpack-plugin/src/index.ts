@@ -36,8 +36,12 @@ const hasSharedPackage = (
   shared: moduleFederationPlugin.ModuleFederationPluginOptions['shared'],
   packageName: string,
 ): boolean => {
+  const matchesPackageRequest = (value: unknown): boolean =>
+    typeof value === 'string' &&
+    (value === packageName || value.startsWith(`${packageName}/`));
+
   const sharedValueReferencesPackage = (value: unknown): boolean => {
-    if (value === packageName) {
+    if (matchesPackageRequest(value)) {
       return true;
     }
 
@@ -47,15 +51,15 @@ const hasSharedPackage = (
 
     const sharedConfig = value as { import?: unknown; request?: unknown };
     return (
-      sharedConfig.request === packageName ||
-      sharedConfig.import === packageName
+      matchesPackageRequest(sharedConfig.request) ||
+      matchesPackageRequest(sharedConfig.import)
     );
   };
 
   const sharedObjectHasPackage = (sharedObject: Record<string, unknown>) =>
     Object.entries(sharedObject).some(
       ([key, value]) =>
-        key === packageName || sharedValueReferencesPackage(value),
+        matchesPackageRequest(key) || sharedValueReferencesPackage(value),
     );
 
   if (!shared) {
@@ -64,7 +68,7 @@ const hasSharedPackage = (
 
   if (Array.isArray(shared)) {
     return shared.some((item) => {
-      if (item === packageName) {
+      if (matchesPackageRequest(item)) {
         return true;
       }
 
