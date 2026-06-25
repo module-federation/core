@@ -14,8 +14,7 @@ export default {
   moduleNameMapper: {
     '^@module-federation/bridge-react/router-runtime$':
       '<rootDir>/src/remote/router-component/router-runtime.ts',
-    '^react-router/dom$':
-      '<rootDir>/node_modules/react-router/dist/development/dom-export.js',
+    '^react-router/dom$': '<rootDir>/__tests__/react-router-dom-subpath.ts',
     '^react-router/dist/development/dom-export\\.js$':
       '<rootDir>/node_modules/react-router/dist/development/dom-export.js',
   },

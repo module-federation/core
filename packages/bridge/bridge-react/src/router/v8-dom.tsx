@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import * as ReactRouter from 'react-router';
-import { RouterProvider as ReactRouterProvider } from 'react-router/dom';
+import * as ReactRouterDom from 'react-router/dom';
 import { RouterContext } from '../provider/context';
 import { LoggerInstance } from '../utils';
 
@@ -9,8 +9,8 @@ function WrapperRouter(props: Record<string, unknown>) {
   const routerContextProps = useContext(RouterContext) || {};
   const MemoryRouter =
     ReactRouter.MemoryRouter as unknown as React.ComponentType<any>;
-  const BrowserRouter =
-    ReactRouter.BrowserRouter as unknown as React.ComponentType<any>;
+  const BrowserRouter = (ReactRouterDom as any)
+    .BrowserRouter as React.ComponentType<any>;
 
   LoggerInstance.debug(`WrapperRouter info >>>`, {
     ...routerContextProps,
@@ -45,13 +45,15 @@ function WrapperRouterProvider(props: Record<string, unknown>) {
     router,
   });
   const createMemoryRouter = (ReactRouter as any)['create' + 'MemoryRouter'];
-  const createBrowserRouter = (ReactRouter as any)['create' + 'BrowserRouter'];
+  const createBrowserRouter = (ReactRouterDom as any)[
+    'create' + 'BrowserRouter'
+  ];
 
   if (routerContextProps.memoryRoute) {
     const MemoryRouterInstance = createMemoryRouter(routers, {
       initialEntries: [routerContextProps?.memoryRoute.entryPath],
     });
-    return <ReactRouterProvider router={MemoryRouterInstance} />;
+    return <ReactRouterDom.RouterProvider router={MemoryRouterInstance} />;
   } else {
     const BrowserRouterInstance = createBrowserRouter(routers, {
       // In host app, the routerContextProps is {}, so we should use router.basename as fallback
@@ -59,7 +61,12 @@ function WrapperRouterProvider(props: Record<string, unknown>) {
       future: router.future,
       window: router.window,
     });
-    return <ReactRouterProvider {...propsRes} router={BrowserRouterInstance} />;
+    return (
+      <ReactRouterDom.RouterProvider
+        {...propsRes}
+        router={BrowserRouterInstance}
+      />
+    );
   }
 }
 
