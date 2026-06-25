@@ -96,6 +96,7 @@
   },
   "devDependencies": {
     "directory-tree": "3.5.2",
+    "typescript": "6.0.3",
     "vitest": "1.6.0"
   },
   "scripts": {

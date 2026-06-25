@@ -123,6 +123,9 @@
       "optional": true
     }
   },
+  "devDependencies": {
+    "typescript": "6.0.3"
+  },
   "scripts": {
     "build": "tsdown --config tsdown.config.mts",
     "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.js\" \"**/*.ts\"",

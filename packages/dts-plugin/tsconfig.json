@@ -4,7 +4,7 @@
     "sourceMap": false,
     "target": "es6",
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "node10",
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
@@ -12,7 +12,8 @@
     "declaration": true,
     "allowJs": true,
     "lib": ["ES2021", "DOM"],
-    "types": ["node"]
+    "types": ["node"],
+    "ignoreDeprecations": "6.0"
   },
   "include": ["src", "__tests__"]
 }

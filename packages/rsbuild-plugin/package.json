@@ -56,6 +56,7 @@
   "devDependencies": {
     "@rslib/core": "^0.12.4",
     "@rsbuild/core": "2.0.0-beta.2",
+    "typescript": "6.0.3",
     "vitest": "1.6.0"
   },
   "peerDependencies": {

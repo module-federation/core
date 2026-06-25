@@ -48,6 +48,9 @@
     "node-fetch": "2.7.0",
     "tapable": "2.3.0"
   },
+  "devDependencies": {
+    "typescript": "6.0.3"
+  },
   "peerDependenciesMeta": {
     "react": {
       "optional": true
