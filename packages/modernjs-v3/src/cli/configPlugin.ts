@@ -452,9 +452,16 @@ export const moduleFederationConfigPlugin = (
         exposes && Array.isArray(exposes)
           ? exposes.length > 0
           : Object.keys(exposes ?? {}).length > 0;
+      const lazyCompilationDisabledByPlugin =
+        hasExposes && modernjsConfig?.dev?.lazyCompilation !== false;
 
       if (corsWarnMsgs.length > 1 && hasExposes) {
         logger.warn(corsWarnMsgs.join('\n'));
+      }
+      if (lazyCompilationDisabledByPlugin) {
+        logger.warn(
+          'Detected exposes in the Module Federation config. The Modern.js v3 Module Federation plugin will set dev.lazyCompilation to false for producer apps.',
+        );
       }
 
       const corsHeaders = hasExposes

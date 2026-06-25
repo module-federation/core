@@ -1,5 +1,6 @@
-import { it, expect, describe, vi } from 'vitest';
+import { it, expect, describe, vi, afterEach } from 'vitest';
 import { moduleFederationConfigPlugin, patchMFConfig } from './configPlugin';
+import logger from '../logger';
 
 const mfConfig = {
   name: 'host',
@@ -35,6 +36,10 @@ const getModernJsConfig = async (
 
   return configCallbacks[0]();
 };
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 describe('patchMFConfig', async () => {
   it('patchMFConfig: server', async () => {
@@ -107,6 +112,7 @@ describe('patchMFConfig', async () => {
 
 describe('moduleFederationConfigPlugin', async () => {
   it('disables lazyCompilation when the project is a producer', async () => {
+    const warnSpy = vi.spyOn(logger, 'warn').mockImplementation(() => {});
     const modernJsConfig = await getModernJsConfig(
       {
         name: 'remote',
@@ -129,9 +135,13 @@ describe('moduleFederationConfigPlugin', async () => {
         lazyCompilation: false,
       },
     });
+    expect(warnSpy).toHaveBeenCalledWith(
+      'Detected exposes in the Module Federation config. The Modern.js v3 Module Federation plugin will set dev.lazyCompilation to false for producer apps.',
+    );
   });
 
   it('keeps lazyCompilation unchanged when the project is not a producer', async () => {
+    const warnSpy = vi.spyOn(logger, 'warn').mockImplementation(() => {});
     const modernJsConfig = await getModernJsConfig(
       {
         name: 'host',
@@ -153,5 +163,6 @@ describe('moduleFederationConfigPlugin', async () => {
         lazyCompilation: true,
       },
     });
+    expect(warnSpy).not.toHaveBeenCalled();
   });
 });
