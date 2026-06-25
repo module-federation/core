@@ -32,24 +32,36 @@ const getExactBridgeRouterAlias = (
   return exactAlias;
 };
 
+const hasSharedPackage = (
+  shared: moduleFederationPlugin.ModuleFederationPluginOptions['shared'],
+  packageName: string,
+): boolean => {
+  if (!shared) {
+    return false;
+  }
+
+  if (Array.isArray(shared)) {
+    return shared.some((item) => {
+      if (item === packageName) {
+        return true;
+      }
+
+      if (item && typeof item === 'object') {
+        return Object.prototype.hasOwnProperty.call(item, packageName);
+      }
+
+      return false;
+    });
+  }
+
+  return Object.prototype.hasOwnProperty.call(shared, packageName);
+};
+
 const assertRouterPackageNotShared = (
   shared: moduleFederationPlugin.ModuleFederationPluginOptions['shared'],
   packageName: string,
 ) => {
-  if (!shared) {
-    return;
-  }
-
-  if (Array.isArray(shared)) {
-    if (shared.includes(packageName)) {
-      throw Error(
-        `${packageName} cannot be set to shared after react bridge is used`,
-      );
-    }
-    return;
-  }
-
-  if (shared[packageName]) {
+  if (hasSharedPackage(shared, packageName)) {
     throw Error(
       `${packageName} cannot be set to shared after react bridge is used`,
     );

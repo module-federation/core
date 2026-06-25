@@ -64,6 +64,19 @@ describe('ReactBridgeAliasChangerPlugin shared router guards', () => {
     );
   });
 
+  it('rejects react-router-dom in array object shared config', () => {
+    expect(
+      () =>
+        new ReactBridgeAliasChangerPlugin({
+          moduleFederationOptions: {
+            shared: [{ 'react-router-dom': { singleton: true } }],
+          } as any,
+        }),
+    ).toThrow(
+      'react-router-dom cannot be set to shared after react bridge is used',
+    );
+  });
+
   it('allows react-router in array shared config before the bridge proxies react-router', () => {
     expect(
       () =>
@@ -79,6 +92,20 @@ describe('ReactBridgeAliasChangerPlugin shared router guards', () => {
     const plugin = new ReactBridgeAliasChangerPlugin({
       moduleFederationOptions: {
         shared: ['react-router'],
+      } as any,
+    });
+
+    expect(() =>
+      runPlugin(plugin, { 'react-router': resolveRouterV8 }),
+    ).toThrow(
+      'react-router cannot be set to shared after react bridge is used',
+    );
+  });
+
+  it('rejects react-router in array object shared config when the bridge proxies react-router', () => {
+    const plugin = new ReactBridgeAliasChangerPlugin({
+      moduleFederationOptions: {
+        shared: [{ 'react-router': { singleton: true } }],
       } as any,
     });
 
