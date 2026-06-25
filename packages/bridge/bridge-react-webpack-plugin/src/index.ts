@@ -36,6 +36,28 @@ const hasSharedPackage = (
   shared: moduleFederationPlugin.ModuleFederationPluginOptions['shared'],
   packageName: string,
 ): boolean => {
+  const sharedValueReferencesPackage = (value: unknown): boolean => {
+    if (value === packageName) {
+      return true;
+    }
+
+    if (!value || typeof value !== 'object') {
+      return false;
+    }
+
+    const sharedConfig = value as { import?: unknown; request?: unknown };
+    return (
+      sharedConfig.request === packageName ||
+      sharedConfig.import === packageName
+    );
+  };
+
+  const sharedObjectHasPackage = (sharedObject: Record<string, unknown>) =>
+    Object.entries(sharedObject).some(
+      ([key, value]) =>
+        key === packageName || sharedValueReferencesPackage(value),
+    );
+
   if (!shared) {
     return false;
   }
@@ -47,14 +69,14 @@ const hasSharedPackage = (
       }
 
       if (item && typeof item === 'object') {
-        return Object.prototype.hasOwnProperty.call(item, packageName);
+        return sharedObjectHasPackage(item as Record<string, unknown>);
       }
 
       return false;
     });
   }
 
-  return Object.prototype.hasOwnProperty.call(shared, packageName);
+  return sharedObjectHasPackage(shared as Record<string, unknown>);
 };
 
 const assertRouterPackageNotShared = (

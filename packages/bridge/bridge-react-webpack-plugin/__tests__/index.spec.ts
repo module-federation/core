@@ -77,6 +77,26 @@ describe('ReactBridgeAliasChangerPlugin shared router guards', () => {
     );
   });
 
+  it('rejects react-router-dom in aliased array object shared config', () => {
+    expect(
+      () =>
+        new ReactBridgeAliasChangerPlugin({
+          moduleFederationOptions: {
+            shared: [
+              {
+                rrdom: {
+                  request: 'react-router-dom',
+                  import: 'react-router-dom',
+                },
+              },
+            ],
+          } as any,
+        }),
+    ).toThrow(
+      'react-router-dom cannot be set to shared after react bridge is used',
+    );
+  });
+
   it('allows react-router in array shared config before the bridge proxies react-router', () => {
     expect(
       () =>
@@ -116,6 +136,27 @@ describe('ReactBridgeAliasChangerPlugin shared router guards', () => {
     );
   });
 
+  it('rejects react-router in aliased array object shared config when the bridge proxies react-router', () => {
+    const plugin = new ReactBridgeAliasChangerPlugin({
+      moduleFederationOptions: {
+        shared: [
+          {
+            rr: {
+              request: 'react-router',
+              import: 'react-router',
+            },
+          },
+        ],
+      } as any,
+    });
+
+    expect(() =>
+      runPlugin(plugin, { 'react-router': resolveRouterV8 }),
+    ).toThrow(
+      'react-router cannot be set to shared after react bridge is used',
+    );
+  });
+
   it('rejects react-router-dom in object shared config', () => {
     expect(
       () =>
@@ -131,11 +172,48 @@ describe('ReactBridgeAliasChangerPlugin shared router guards', () => {
     );
   });
 
+  it('rejects react-router-dom in aliased object shared config', () => {
+    expect(
+      () =>
+        new ReactBridgeAliasChangerPlugin({
+          moduleFederationOptions: {
+            shared: {
+              rrdom: {
+                request: 'react-router-dom',
+                import: 'react-router-dom',
+              },
+            },
+          } as any,
+        }),
+    ).toThrow(
+      'react-router-dom cannot be set to shared after react bridge is used',
+    );
+  });
+
   it('rejects react-router in object shared config when the bridge proxies react-router', () => {
     const plugin = new ReactBridgeAliasChangerPlugin({
       moduleFederationOptions: {
         shared: {
           'react-router': { singleton: true },
+        },
+      } as any,
+    });
+
+    expect(() =>
+      runPlugin(plugin, { 'react-router': resolveRouterV8 }),
+    ).toThrow(
+      'react-router cannot be set to shared after react bridge is used',
+    );
+  });
+
+  it('rejects react-router in aliased object shared config when the bridge proxies react-router', () => {
+    const plugin = new ReactBridgeAliasChangerPlugin({
+      moduleFederationOptions: {
+        shared: {
+          rr: {
+            request: 'react-router',
+            import: 'react-router',
+          },
         },
       } as any,
     });
