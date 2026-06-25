@@ -213,3 +213,31 @@ export const getBridgeRouterAlias = (
   );
   return bridgeRouterAlias;
 };
+
+export const shouldGuardSharedReactRouter = (
+  originalAlias?: string | BridgeRouterAliasOptions,
+): boolean => {
+  const aliasOptions =
+    typeof originalAlias === 'string'
+      ? { reactRouterDomAlias: originalAlias }
+      : originalAlias || {};
+  const userDependencies = getDependencies();
+  const routerPackagePath =
+    resolveAliasPackagePath(aliasOptions) ||
+    resolveDependencyPackagePath(userDependencies);
+
+  if (!routerPackagePath) {
+    return false;
+  }
+
+  const packageJsonPath = findPackageJson(routerPackagePath);
+  if (!packageJsonPath) {
+    return false;
+  }
+
+  const packageJsonContent = JSON.parse(
+    fs.readFileSync(packageJsonPath, 'utf-8'),
+  );
+
+  return checkVersion(packageJsonContent.version) >= 7;
+};

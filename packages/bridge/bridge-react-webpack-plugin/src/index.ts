@@ -1,7 +1,36 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
-import { getBridgeRouterAlias } from './router-alias';
+import {
+  getBridgeRouterAlias,
+  shouldGuardSharedReactRouter,
+} from './router-alias';
+
+const guardedRouterPackages = ['react-router-dom'];
+
+const assertRouterPackageNotShared = (
+  shared: moduleFederationPlugin.ModuleFederationPluginOptions['shared'],
+  packageName: string,
+) => {
+  if (!shared) {
+    return;
+  }
+
+  if (Array.isArray(shared)) {
+    if (shared.includes(packageName)) {
+      throw Error(
+        `${packageName} cannot be set to shared after react bridge is used`,
+      );
+    }
+    return;
+  }
+
+  if (shared[packageName]) {
+    throw Error(
+      `${packageName} cannot be set to shared after react bridge is used`,
+    );
+  }
+};
 
 class ReactBridgeAliasChangerPlugin {
   alias: string;
@@ -15,18 +44,11 @@ class ReactBridgeAliasChangerPlugin {
     this.targetFile = '@module-federation/bridge-react/dist/router.es.js';
 
     if (this.moduleFederationOptions.shared) {
-      if (Array.isArray(this.moduleFederationOptions.shared)) {
-        if (this.moduleFederationOptions.shared.includes('react-router-dom')) {
-          throw Error(
-            'React-router-dom cannot be set to shared after react bridge is used',
-          );
-        }
-      } else {
-        if (this.moduleFederationOptions.shared['react-router-dom']) {
-          throw Error(
-            'React-router-dom cannot be set to shared after react bridge is used',
-          );
-        }
+      for (const packageName of guardedRouterPackages) {
+        assertRouterPackageNotShared(
+          this.moduleFederationOptions.shared,
+          packageName,
+        );
       }
     }
   }
@@ -40,15 +62,23 @@ class ReactBridgeAliasChangerPlugin {
       if (fs.existsSync(targetFilePath)) {
         const originalResolve = compiler.options.resolve || {};
         const originalAlias = originalResolve.alias || {};
+        const routerAliasOptions = {
+          reactRouterAlias: originalAlias['react-router'],
+          reactRouterDomAlias: originalAlias['react-router-dom'],
+        };
+
+        if (shouldGuardSharedReactRouter(routerAliasOptions)) {
+          assertRouterPackageNotShared(
+            this.moduleFederationOptions.shared,
+            'react-router',
+          );
+        }
 
         // Update alias - set up router version alias
         const updatedAlias: Record<string, string> = {
           // allow `alias` can be override
           // [this.alias]: targetFilePath,
-          ...getBridgeRouterAlias({
-            reactRouterAlias: originalAlias['react-router'],
-            reactRouterDomAlias: originalAlias['react-router-dom'],
-          }),
+          ...getBridgeRouterAlias(routerAliasOptions),
           ...originalAlias,
         };
 
