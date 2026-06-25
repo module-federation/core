@@ -7,6 +7,10 @@ const resolveRouterV8 = path.resolve(
   __dirname,
   '../__tests__/mockRouterDir/router-v8/react-router',
 );
+const resolveRouterV8DomExport = path.join(
+  resolveRouterV8,
+  'dist/development/dom-export.js',
+);
 
 const runPlugin = (
   plugin: ReactBridgeAliasChangerPlugin,
@@ -127,5 +131,33 @@ describe('ReactBridgeAliasChangerPlugin shared router guards', () => {
           } as any,
         }),
     ).not.toThrow();
+  });
+});
+
+describe('ReactBridgeAliasChangerPlugin router aliases', () => {
+  it('keeps generated v8 exact bridge aliases over existing exact router aliases', () => {
+    const plugin = new ReactBridgeAliasChangerPlugin({
+      moduleFederationOptions: {} as any,
+    });
+
+    const alias = runPlugin(plugin, {
+      react: 'react',
+      'react-router$': resolveRouterV8,
+      'react-router/dom$': resolveRouterV8DomExport,
+    });
+
+    expect(alias.react).toBe('react');
+    expect(alias['react-router$']).toBe(
+      '@module-federation/bridge-react/dist/router-v8.es.js',
+    );
+    expect(alias['react-router/dom$']).toBe(
+      '@module-federation/bridge-react/dist/router-v8-dom.es.js',
+    );
+    expect(alias['react-router/dist/development/index.js']).toBe(
+      resolveRouterV8,
+    );
+    expect(alias['react-router/dist/development/dom-export.js']).toBe(
+      resolveRouterV8DomExport,
+    );
   });
 });

@@ -8,6 +8,30 @@ import {
 
 const guardedRouterPackages = ['react-router-dom'];
 
+const getAliasValue = (
+  alias: Record<string, string>,
+  keys: Array<string>,
+): string | undefined => {
+  for (const key of keys) {
+    if (alias[key]) {
+      return alias[key];
+    }
+  }
+  return undefined;
+};
+
+const getExactBridgeRouterAlias = (
+  alias: Record<string, string>,
+): Record<string, string> => {
+  const exactAlias: Record<string, string> = {};
+  for (const key of Object.keys(alias)) {
+    if (key.endsWith('$')) {
+      exactAlias[key] = alias[key];
+    }
+  }
+  return exactAlias;
+};
+
 const assertRouterPackageNotShared = (
   shared: moduleFederationPlugin.ModuleFederationPluginOptions['shared'],
   packageName: string,
@@ -63,8 +87,15 @@ class ReactBridgeAliasChangerPlugin {
         const originalResolve = compiler.options.resolve || {};
         const originalAlias = originalResolve.alias || {};
         const routerAliasOptions = {
-          reactRouterAlias: originalAlias['react-router'],
-          reactRouterDomAlias: originalAlias['react-router-dom'],
+          reactRouterAlias: getAliasValue(originalAlias, [
+            'react-router',
+            'react-router$',
+            'react-router/dom$',
+          ]),
+          reactRouterDomAlias: getAliasValue(originalAlias, [
+            'react-router-dom',
+            'react-router-dom$',
+          ]),
         };
 
         if (shouldGuardSharedReactRouter(routerAliasOptions)) {
@@ -75,11 +106,12 @@ class ReactBridgeAliasChangerPlugin {
         }
 
         // Update alias - set up router version alias
+        const bridgeRouterAlias = getBridgeRouterAlias(routerAliasOptions);
         const updatedAlias: Record<string, string> = {
-          // allow `alias` can be override
-          // [this.alias]: targetFilePath,
-          ...getBridgeRouterAlias(routerAliasOptions),
+          ...bridgeRouterAlias,
           ...originalAlias,
+          // Keep exact router entrypoints on the bridge proxies.
+          ...getExactBridgeRouterAlias(bridgeRouterAlias),
         };
 
         // Update the webpack configuration
