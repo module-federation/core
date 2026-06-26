@@ -1,0 +1,13 @@
+.page {
+  height: calc(100dvh - var(--rp-nav-height, 64px));
+  overflow: hidden;
+}
+
+.loading {
+  align-items: center;
+  color: var(--rp-c-text-2);
+  display: flex;
+  font-size: 14px;
+  height: 100%;
+  justify-content: center;
+}

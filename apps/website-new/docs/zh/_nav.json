@@ -105,5 +105,10 @@
         "link": "https://nx.dev/"
       }
     ]
+  },
+  {
+    "text": "Playground",
+    "link": "/playground/",
+    "activeMatch": "/playground/"
   }
 ]

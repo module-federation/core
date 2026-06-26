@@ -1,0 +1,61 @@
+{
+  "name": "@module-federation/playground",
+  "version": "0.0.1",
+  "description": "Module Federation Playground",
+  "homepage": "https://module-federation.io",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/module-federation/core.git",
+    "directory": "packages/playground"
+  },
+  "license": "MIT",
+  "author": "2heal1 <hanric.zhang@gmail.com>",
+  "exports": {
+    ".": {
+      "types": "./dist/cjs/index.d.ts",
+      "import": "./dist/esm/index.mjs",
+      "require": "./dist/cjs/index.js"
+    }
+  },
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.mjs",
+  "types": "./dist/cjs/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "sync:bridge-runtime": "node ./scripts/generateBridgeRuntime.mjs",
+    "predev": "pnpm run sync:bridge-runtime",
+    "prestart": "pnpm run sync:bridge-runtime",
+    "prebuild": "pnpm run sync:bridge-runtime",
+    "dev": "rslib mf-dev",
+    "start": "rsbuild dev",
+    "build": "rslib build",
+    "pre-release": "pnpm run build"
+  },
+  "dependencies": {
+    "@module-federation/bridge-react": "workspace:*",
+    "@module-federation/runtime": "workspace:*",
+    "@monaco-editor/react": "4.7.0",
+    "monaco-editor": "0.52.2",
+    "typescript": "^5.9.3"
+  },
+  "devDependencies": {
+    "@module-federation/rsbuild-plugin": "workspace:*",
+    "@rsbuild/core": "^1.4.16",
+    "@rsbuild/plugin-react": "^1.4.5",
+    "@rslib/core": "^0.12.4",
+    "@types/node": "^20.19.5",
+    "@types/react": "^19.1.6",
+    "@types/react-dom": "^19.1.5",
+    "react": "19.1.1",
+    "react-dom": "19.1.1"
+  },
+  "peerDependencies": {
+    "react": "*",
+    "react-dom": "*"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
