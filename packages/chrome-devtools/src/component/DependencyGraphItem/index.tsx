@@ -6,6 +6,26 @@ import { useTranslation } from 'react-i18next';
 import styles from './index.module.scss';
 import 'reactflow/dist/style.css';
 
+const parseInfo = (info: string) => {
+  const array = info.split(':');
+  const [fallbackName, fallbackVersion = ''] = array;
+  const idx = array.findIndex((item, index) => {
+    return index > 0 && (item.startsWith('http') || item.startsWith('//'));
+  });
+
+  if (idx > 0) {
+    return {
+      name: array.slice(0, idx).join(':'),
+      version: array.slice(idx).join(':'),
+    };
+  }
+
+  return {
+    name: fallbackName,
+    version: fallbackVersion,
+  };
+};
+
 const GraphItem = (props: {
   data: { info?: string; color?: string; remote?: any };
 }) => {
@@ -16,13 +36,7 @@ const GraphItem = (props: {
   let name: string;
   let version: string;
   const { info = '', color, remote } = props.data;
-  const infoArray = info.split(':');
-  if (info.endsWith('.json') || info.endsWith('.js')) {
-    name = infoArray.shift() as string;
-    version = infoArray.join(':');
-  } else {
-    [name, version] = infoArray;
-  }
+  ({ name, version } = parseInfo(info));
 
   const isEntryType = version?.startsWith('http') || version?.startsWith('//');
 
