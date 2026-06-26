@@ -5,6 +5,11 @@
     "activeMatch": "/ai/"
   },
   {
+    "text": "Playground",
+    "link": "/playground/",
+    "activeMatch": "/playground/"
+  },
+  {
     "text": "Guide",
     "link": "/guide/start/",
     "activeMatch": "/guide/"
