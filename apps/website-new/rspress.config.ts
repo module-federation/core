@@ -6,18 +6,34 @@ import { pluginSass } from '@rsbuild/plugin-sass';
 import { pluginModuleFederation } from '@module-federation/rspress-plugin';
 import mfConfig from './module-federation.config';
 
+const siteOrigin = 'https://module-federation.io';
+const siteIcon = '/svg.svg';
+const siteIconUrl = `${siteOrigin}${siteIcon}`;
+const siteIconAlt = 'Module Federation icon';
+
 export default defineConfig({
   root: path.join(__dirname, 'docs'),
   llms: true,
   title: 'Module federation',
   description:
     'Module Federation is a concept that allows developers to share code and resources across multiple JavaScript applications',
-  icon: '/svg.svg',
+  icon: siteIcon,
   lang: 'en',
   logo: {
     light: '/module-federation.svg',
     dark: '/module-federation-logo-white.svg',
   },
+  head: [
+    ['meta', { property: 'og:site_name', content: 'module-federation.io' }],
+    ['meta', { property: 'og:image', content: siteIconUrl }],
+    ['meta', { property: 'og:image:type', content: 'image/svg+xml' }],
+    ['meta', { property: 'og:image:width', content: '43' }],
+    ['meta', { property: 'og:image:height', content: '40' }],
+    ['meta', { property: 'og:image:alt', content: siteIconAlt }],
+    ['meta', { name: 'twitter:card', content: 'summary' }],
+    ['meta', { name: 'twitter:image', content: siteIconUrl }],
+    ['meta', { name: 'twitter:image:alt', content: siteIconAlt }],
+  ],
   markdown: {
     image: {
       checkDeadImages: false,
