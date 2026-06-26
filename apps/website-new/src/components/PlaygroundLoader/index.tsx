@@ -5,7 +5,7 @@ import styles from './index.module.scss';
 import type { PlaygroundProps } from '../../types/mf-playground';
 
 const DEFAULT_EXAMPLE_MANIFEST_URL =
-  'https://module-federation.io/mf-manifest.json';
+  'https://unpkg.com/module-federation-rslib-provider@latest/dist/mf/mf-manifest.json';
 const MONACO_VS_URL =
   'https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs';
 const RUNTIME_MODULE_URL =
