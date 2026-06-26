@@ -30,7 +30,8 @@ loader.config({
   },
 });
 
-const DEFAULT_MANIFEST_URL = 'https://module-federation.io/mf-manifest.json';
+const DEFAULT_MANIFEST_URL =
+  'https://unpkg.com/module-federation-rslib-provider@latest/dist/mf/mf-manifest.json';
 const DEFAULT_RUNTIME_MODULE_URL =
   'https://esm.sh/@module-federation/runtime@2.6.0?bundle';
 const DEFAULT_REACT_VERSION = '19.1.1';
