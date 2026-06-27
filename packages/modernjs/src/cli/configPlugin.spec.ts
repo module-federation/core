@@ -1,5 +1,6 @@
-import { it, expect, describe } from 'vitest';
-import { patchMFConfig } from './configPlugin';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { patchBundlerConfig, patchMFConfig } from './configPlugin';
+import logger from '../logger';
 import { getIPV4 } from './utils';
 
 const mfConfig = {
@@ -13,6 +14,58 @@ const mfConfig = {
     'react-dom': { singleton: true, eager: true },
   },
 };
+
+const createBundlerChain = (splitChunkConfig: Record<string, unknown>): any => {
+  const outputValues = new Map<string, unknown>();
+  const fallback = {
+    set: vi.fn(() => fallback),
+  };
+
+  return {
+    get: vi.fn((key: string) => (key === 'ignoreWarnings' ? [] : undefined)),
+    ignoreWarnings: vi.fn(),
+    optimization: {
+      delete: vi.fn(),
+      splitChunks: {
+        entries: vi.fn(() => splitChunkConfig),
+      },
+      usedExports: vi.fn(),
+    },
+    output: {
+      chunkFilename: vi.fn(),
+      chunkLoadingGlobal: vi.fn((value: string) => {
+        outputValues.set('chunkLoadingGlobal', value);
+      }),
+      get: vi.fn((key: string) => outputValues.get(key)),
+      publicPath: vi.fn(),
+      uniqueName: vi.fn((value: string) => {
+        outputValues.set('uniqueName', value);
+      }),
+    },
+    resolve: {
+      fallback,
+    },
+  };
+};
+
+const patchClientBundlerConfig = (
+  splitChunkConfig: Record<string, unknown>,
+) => {
+  patchBundlerConfig({
+    chain: createBundlerChain(splitChunkConfig),
+    enableSSR: true,
+    isServer: false,
+    modernjsConfig: {},
+    mfConfig: {
+      name: 'host',
+    },
+  } as any);
+};
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
 describe('patchMFConfig', async () => {
   it('patchMFConfig: server', async () => {
     const patchedConfig = JSON.parse(JSON.stringify(mfConfig));
@@ -79,4 +132,34 @@ describe('patchMFConfig', async () => {
       },
     });
   });
+});
+
+describe('patchBundlerConfig', () => {
+  const warning =
+    'splitChunks.chunks = async is not allowed with stream SSR mode, it will auto changed to "async"';
+
+  it.each([
+    { chunks: 'async', warns: false },
+    { chunks: 'all', warns: true },
+  ])(
+    'normalizes stream SSR splitChunks from $chunks and warns: $warns',
+    ({ chunks, warns }) => {
+      const warnSpy = vi.spyOn(logger, 'warn').mockImplementation(() => {});
+      const splitChunkConfig = {
+        cacheGroups: {
+          vendors: {},
+        },
+        chunks,
+      };
+
+      patchClientBundlerConfig(splitChunkConfig);
+
+      expect(splitChunkConfig.chunks).toBe('async');
+      if (warns) {
+        expect(warnSpy).toHaveBeenCalledWith(warning);
+      } else {
+        expect(warnSpy).not.toHaveBeenCalledWith(warning);
+      }
+    },
+  );
 });
