@@ -139,6 +139,7 @@ describe('patchBundlerConfig', () => {
     'splitChunks.chunks = async is not allowed with stream SSR mode, it will auto changed to "async"';
 
   it.each([
+    { chunks: undefined, warns: false },
     { chunks: 'async', warns: false },
     { chunks: 'all', warns: true },
   ])(

@@ -338,7 +338,9 @@ export function patchBundlerConfig(options: {
     splitChunkConfig &&
     typeof splitChunkConfig === 'object'
   ) {
-    let shouldWarn = splitChunkConfig.chunks !== 'async';
+    let shouldWarn =
+      splitChunkConfig.chunks !== undefined &&
+      splitChunkConfig.chunks !== 'async';
     splitChunkConfig.chunks = 'async';
 
     if (
