@@ -336,22 +336,37 @@ export function patchBundlerConfig(options: {
     !isServer &&
     enableSSR &&
     splitChunkConfig &&
-    typeof splitChunkConfig === 'object' &&
-    splitChunkConfig.cacheGroups
+    typeof splitChunkConfig === 'object'
   ) {
     let shouldWarn = splitChunkConfig.chunks !== 'async';
     splitChunkConfig.chunks = 'async';
 
-    for (const cacheGroup of Object.values(splitChunkConfig.cacheGroups)) {
-      if (
-        cacheGroup &&
-        typeof cacheGroup === 'object' &&
-        'chunks' in cacheGroup &&
-        cacheGroup.chunks !== 'async'
-      ) {
-        cacheGroup.chunks = 'async';
-        shouldWarn = true;
+    if (
+      splitChunkConfig.cacheGroups &&
+      typeof splitChunkConfig.cacheGroups === 'object'
+    ) {
+      for (const cacheGroup of Object.values(splitChunkConfig.cacheGroups)) {
+        if (
+          cacheGroup &&
+          typeof cacheGroup === 'object' &&
+          'chunks' in cacheGroup &&
+          cacheGroup.chunks !== 'async'
+        ) {
+          cacheGroup.chunks = 'async';
+          shouldWarn = true;
+        }
       }
+    }
+
+    const { fallbackCacheGroup } = splitChunkConfig;
+    if (
+      fallbackCacheGroup &&
+      typeof fallbackCacheGroup === 'object' &&
+      'chunks' in fallbackCacheGroup &&
+      fallbackCacheGroup.chunks !== 'async'
+    ) {
+      fallbackCacheGroup.chunks = 'async';
+      shouldWarn = true;
     }
 
     if (shouldWarn) {

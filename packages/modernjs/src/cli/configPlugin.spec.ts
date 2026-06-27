@@ -180,4 +180,23 @@ describe('patchBundlerConfig', () => {
     expect(splitChunkConfig.cacheGroups.vendors.chunks).toBe('async');
     expect(warnSpy).toHaveBeenCalledWith(warning);
   });
+
+  it('normalizes stream SSR fallback cache group chunks', () => {
+    const warnSpy = vi.spyOn(logger, 'warn').mockImplementation(() => {});
+    const splitChunkConfig = {
+      cacheGroups: {
+        vendors: {},
+      },
+      chunks: 'async',
+      fallbackCacheGroup: {
+        chunks: 'initial',
+      },
+    };
+
+    patchClientBundlerConfig(splitChunkConfig);
+
+    expect(splitChunkConfig.chunks).toBe('async');
+    expect(splitChunkConfig.fallbackCacheGroup.chunks).toBe('async');
+    expect(warnSpy).toHaveBeenCalledWith(warning);
+  });
 });
