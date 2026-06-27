@@ -339,9 +339,22 @@ export function patchBundlerConfig(options: {
     typeof splitChunkConfig === 'object' &&
     splitChunkConfig.cacheGroups
   ) {
-    const currentChunks = splitChunkConfig.chunks;
+    let shouldWarn = splitChunkConfig.chunks !== 'async';
     splitChunkConfig.chunks = 'async';
-    if (currentChunks !== 'async') {
+
+    for (const cacheGroup of Object.values(splitChunkConfig.cacheGroups)) {
+      if (
+        cacheGroup &&
+        typeof cacheGroup === 'object' &&
+        'chunks' in cacheGroup &&
+        cacheGroup.chunks !== 'async'
+      ) {
+        cacheGroup.chunks = 'async';
+        shouldWarn = true;
+      }
+    }
+
+    if (shouldWarn) {
       logger.warn(
         `splitChunks.chunks = async is not allowed with stream SSR mode, it will auto changed to "async"`,
       );

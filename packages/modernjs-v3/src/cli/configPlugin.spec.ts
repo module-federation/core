@@ -189,6 +189,24 @@ describe('patchBundlerConfig', () => {
       }
     },
   );
+
+  it('normalizes stream SSR cache group chunks', () => {
+    const warnSpy = vi.spyOn(logger, 'warn').mockImplementation(() => {});
+    const splitChunkConfig = {
+      cacheGroups: {
+        vendors: {
+          chunks: 'all',
+        },
+      },
+      chunks: 'async',
+    };
+
+    patchClientBundlerConfig(splitChunkConfig);
+
+    expect(splitChunkConfig.chunks).toBe('async');
+    expect(splitChunkConfig.cacheGroups.vendors.chunks).toBe('async');
+    expect(warnSpy).toHaveBeenCalledWith(warning);
+  });
 });
 
 describe('moduleFederationConfigPlugin', async () => {
