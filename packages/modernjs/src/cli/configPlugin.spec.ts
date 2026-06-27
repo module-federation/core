@@ -200,4 +200,31 @@ describe('patchBundlerConfig', () => {
     expect(splitChunkConfig.fallbackCacheGroup.chunks).toBe('async');
     expect(warnSpy).toHaveBeenCalledWith(warning);
   });
+
+  it('preserves stream SSR function chunk filters', () => {
+    const warnSpy = vi.spyOn(logger, 'warn').mockImplementation(() => {});
+    const splitChunks = vi.fn(() => true);
+    const cacheGroupChunks = vi.fn(() => true);
+    const fallbackCacheGroupChunks = vi.fn(() => true);
+    const splitChunkConfig = {
+      cacheGroups: {
+        vendors: {
+          chunks: cacheGroupChunks,
+        },
+      },
+      chunks: splitChunks,
+      fallbackCacheGroup: {
+        chunks: fallbackCacheGroupChunks,
+      },
+    };
+
+    patchClientBundlerConfig(splitChunkConfig);
+
+    expect(splitChunkConfig.chunks).toBe(splitChunks);
+    expect(splitChunkConfig.cacheGroups.vendors.chunks).toBe(cacheGroupChunks);
+    expect(splitChunkConfig.fallbackCacheGroup.chunks).toBe(
+      fallbackCacheGroupChunks,
+    );
+    expect(warnSpy).not.toHaveBeenCalledWith(warning);
+  });
 });

@@ -338,10 +338,12 @@ export function patchBundlerConfig(options: {
     splitChunkConfig &&
     typeof splitChunkConfig === 'object'
   ) {
+    const splitChunksValue = splitChunkConfig.chunks;
     let shouldWarn =
-      splitChunkConfig.chunks !== undefined &&
-      splitChunkConfig.chunks !== 'async';
-    splitChunkConfig.chunks = 'async';
+      typeof splitChunksValue === 'string' && splitChunksValue !== 'async';
+    if (splitChunksValue === undefined || shouldWarn) {
+      splitChunkConfig.chunks = 'async';
+    }
 
     if (
       splitChunkConfig.cacheGroups &&
@@ -351,7 +353,7 @@ export function patchBundlerConfig(options: {
         if (
           cacheGroup &&
           typeof cacheGroup === 'object' &&
-          'chunks' in cacheGroup &&
+          typeof cacheGroup.chunks === 'string' &&
           cacheGroup.chunks !== 'async'
         ) {
           cacheGroup.chunks = 'async';
@@ -364,7 +366,7 @@ export function patchBundlerConfig(options: {
     if (
       fallbackCacheGroup &&
       typeof fallbackCacheGroup === 'object' &&
-      'chunks' in fallbackCacheGroup &&
+      typeof fallbackCacheGroup.chunks === 'string' &&
       fallbackCacheGroup.chunks !== 'async'
     ) {
       fallbackCacheGroup.chunks = 'async';
