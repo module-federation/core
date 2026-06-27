@@ -131,6 +131,8 @@ describe('collectSSRAssets', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    document.head.innerHTML = '';
+    document.body.innerHTML = '';
     mockInstance = {
       name: 'host-app',
       options: { version: '1.0.0' },
@@ -204,6 +206,88 @@ describe('collectSSRAssets', () => {
     );
     expect((scripts[1] as React.ReactElement).props.src).toBe(
       'http://localhost:3001/main.js',
+    );
+  });
+
+  it('should skip CSS links that are already emitted in document head', () => {
+    mockGetLoadedRemoteInfos.mockReturnValue({
+      name: 'remoteApp',
+      expose: './Component',
+      snapshot: {
+        publicPath: 'http://localhost:3001/',
+        remoteEntry: 'remoteEntry.js',
+        modules: [
+          {
+            modulePath: './Component',
+            assets: {
+              css: { sync: ['main.css'], async: ['extra.css'] },
+              js: { sync: ['main.js'], async: [] },
+            },
+          },
+        ],
+      },
+    });
+    document.head.innerHTML =
+      '<link rel="stylesheet" href="http://localhost:3001/extra.css">';
+
+    const assets = collectSSRAssets({
+      id: 'remoteApp/Component',
+      instance: mockInstance,
+      injectScript: true,
+      injectLink: true,
+    });
+
+    const links = assets.filter(
+      (asset) => (asset as React.ReactElement).type === 'link',
+    );
+    const scripts = assets.filter(
+      (asset) => (asset as React.ReactElement).type === 'script',
+    );
+
+    expect(links).toHaveLength(1);
+    expect((links[0] as React.ReactElement).props.href).toBe(
+      'http://localhost:3001/main.css',
+    );
+    expect(scripts).toHaveLength(2);
+  });
+
+  it('should keep CSS links when the existing link is not in document head', () => {
+    mockGetLoadedRemoteInfos.mockReturnValue({
+      name: 'remoteApp',
+      expose: './Component',
+      snapshot: {
+        publicPath: 'http://localhost:3001/',
+        remoteEntry: 'remoteEntry.js',
+        modules: [
+          {
+            modulePath: './Component',
+            assets: {
+              css: { sync: ['main.css'], async: ['extra.css'] },
+              js: { sync: [], async: [] },
+            },
+          },
+        ],
+      },
+    });
+    document.body.innerHTML =
+      '<link rel="stylesheet" href="http://localhost:3001/extra.css">';
+
+    const assets = collectSSRAssets({
+      id: 'remoteApp/Component',
+      instance: mockInstance,
+      injectLink: true,
+    });
+
+    const links = assets.filter(
+      (asset) => (asset as React.ReactElement).type === 'link',
+    );
+
+    expect(links).toHaveLength(2);
+    expect((links[0] as React.ReactElement).props.href).toBe(
+      'http://localhost:3001/extra.css',
+    );
+    expect((links[1] as React.ReactElement).props.href).toBe(
+      'http://localhost:3001/main.css',
     );
   });
 });

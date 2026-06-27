@@ -49,6 +49,39 @@ export type CreateLazyComponentOptions<T, E extends keyof T> = {
 
 type ReactKey = { key?: React.Key | null };
 
+function normalizeHref(href: string) {
+  if (typeof document === 'undefined') {
+    return href;
+  }
+
+  try {
+    return new URL(href, document.baseURI).href;
+  } catch {
+    return href;
+  }
+}
+
+function isStylesheetLink(link: HTMLLinkElement) {
+  return (
+    link.relList.contains('stylesheet') ||
+    link.rel.toLowerCase().split(/\s+/u).includes('stylesheet')
+  );
+}
+
+function hasStylesheetLinkInHead(href: string) {
+  if (typeof document === 'undefined' || !document.head) {
+    return false;
+  }
+
+  const normalizedHref = normalizeHref(href);
+  return Array.from(
+    document.head.querySelectorAll<HTMLLinkElement>('link[href]'),
+  ).some(
+    (link) =>
+      isStylesheetLink(link) && normalizeHref(link.href) === normalizedHref,
+  );
+}
+
 function getTargetModuleInfo(
   id: string,
   instance?: ModuleFederation,
@@ -117,13 +150,19 @@ export function collectSSRAssets(options: IProps) {
   }
   const { module: targetModule, publicPath, remoteEntry } = moduleAndPublicPath;
   if (injectLink) {
+    const stylesheetHrefs = new Set<string>();
     [...targetModule.assets.css.sync, ...targetModule.assets.css.async]
       .sort()
       .forEach((file, index) => {
+        const href = `${publicPath}${file}`;
+        if (stylesheetHrefs.has(href) || hasStylesheetLinkInHead(href)) {
+          return;
+        }
+        stylesheetHrefs.add(href);
         links.push(
           <link
             key={`${file.split('.')[0]}_${index}`}
-            href={`${publicPath}${file}`}
+            href={href}
             rel="stylesheet"
             type="text/css"
           />,
