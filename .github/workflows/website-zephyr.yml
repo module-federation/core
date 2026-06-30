@@ -2,6 +2,7 @@ name: Website Zephyr Deploy
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, closed]
     branches: [main]
     paths:
       - 'apps/website-new/**'
@@ -23,6 +24,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -65,8 +67,14 @@ jobs:
             ${{ runner.os }}-turbo-
 
       - name: Build and deploy website with Zephyr
-        if: ${{ env.ZE_SECRET_TOKEN != '' }}
+        if: ${{ env.ZE_SECRET_TOKEN != '' && github.event.action != 'closed' }}
         run: pnpm run build:website
+
+      - name: Update Zephyr preview environment
+        if: ${{ env.ZE_SECRET_TOKEN != '' && github.event_name == 'pull_request' }}
+        uses: ZephyrCloudIO/zephyr-preview-environment-action@v0.1.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Skip Zephyr deploy without token
         if: ${{ env.ZE_SECRET_TOKEN == '' }}
