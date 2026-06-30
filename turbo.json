@@ -20,7 +20,7 @@
     "website-new#build": {
       "dependsOn": ["^build"],
       "outputs": ["doc_build/**"],
-      "env": ["CONTEXT", "DEPLOY_PRIME_URL"]
+      "env": ["SITE_ORIGIN", "ZE_SECRET_TOKEN"]
     },
     "@module-federation/metro-plugin-rnc-cli#build": {
       "dependsOn": ["^build"],
