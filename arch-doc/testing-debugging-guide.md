@@ -1,6 +1,6 @@
 # Module Federation Testing & Debugging Guide
 
-A comprehensive guide for testing and debugging Module Federation applications across different bundlers and runtime environments.
+A guide for testing and debugging Module Federation packages, framework integrations, runtime plugins, examples, and e2e fixtures across the current pnpm/Turbo monorepo.
 
 ## Table of Contents
 - [Module Federation Testing Strategies](#module-federation-testing-strategies)
@@ -9,6 +9,24 @@ A comprehensive guide for testing and debugging Module Federation applications a
 - [Common Issues and Solutions](#common-issues-and-solutions)
 - [Performance Debugging](#performance-debugging)
 - [Advanced Debugging Techniques](#advanced-debugging-techniques)
+
+## Current Validation Architecture
+
+The repository validates architecture through package-level scripts, Turbo fanout, local CI parity jobs, and example applications:
+
+| Surface | What it proves | Default command family |
+| --- | --- | --- |
+| Package builds/tests/lints | Runtime, SDK, enhanced/rspack, manifest, DTS, managers, adapters, bridge, devtools, and utility package correctness. | `pnpm run build:packages`, `pnpm run test:packages`, `pnpm run lint:packages`, or targeted `pnpm exec turbo run <task> --filter=<package>`. |
+| Runtime examples | `@module-federation/runtime` APIs and remote loading behavior. | `pnpm run ci:local --only=e2e-runtime`. |
+| Manifest examples | Webpack/Rspack manifest generation and consumption. | `pnpm run ci:local --only=e2e-manifest`. |
+| Metro examples | Metro resolver/serializer/manifest/React Native adapter behavior. | Metro package Turbo filters or the Metro local CI job. |
+| Next.js examples | `nextjs-mf` pages/app-router development and production paths. | `pnpm run ci:local --only=e2e-next-dev` and `--only=e2e-next-prod`. |
+| Modern/Rsbuild examples | Modern.js, Rsbuild, SSR, data-fetch, and router fixtures. | `e2e-modern`, `e2e-modern-ssr`, `e2e-router`, or matching app scripts. |
+| Shared tree shaking | Federated tree-shaking server/frontend behavior and runtime inference/server calculation modes. | `pnpm run ci:local --only=e2e-shared-tree-shaking` and `--only=e2e-treeshake`. |
+| Devtools and observability | Browser extension/devtools UI, runtime graph and safe post-message behavior. | `pnpm run ci:local --only=devtools` plus package tests. |
+| Docs/playground | `website-new`, `rspress-plugin`, and `@module-federation/playground` integration. | `pnpm run build:website` or targeted package/app scripts. |
+
+For docs-only architecture edits, no runtime checks are required by default. Formatting is still useful when markdown tables or Mermaid blocks are changed.
 
 ## Module Federation Testing Strategies
 

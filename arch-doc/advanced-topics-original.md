@@ -2,9 +2,23 @@
 
 ⚠️ **CRITICAL WARNING**: This document contains production-critical information about Module Federation. Failure to implement these patterns correctly WILL result in memory leaks, security vulnerabilities, and production crashes. Read every warning carefully.
 
-**PRODUCTION IMPACT**: Every feature described here has performance implications. Plugin overhead ranges from 30-50% (not "minimal"). Mobile devices experience 10x slower load times. Plan accordingly.
+**PRODUCTION IMPACT**: Every feature described here has performance implications. Plugin overhead varies by runtime hook, bundler, remote topology, cache state, and target device. Measure against the relevant package/app fixture before treating any number as authoritative.
 
 **SECURITY NOTICE**: Module Federation exposes your application to cross-origin security risks. Implement ALL security measures described or risk data breaches.
+
+## Current Advanced Architecture Scope
+
+Advanced production behavior spans several package families:
+
+| Concern | Package area | Notes |
+| --- | --- | --- |
+| Runtime lifecycle and hooks | `runtime-core`, `runtime`, `webpack-bundler-runtime`, `runtime-tools` | Owns remote/share/snapshot loading, global instance state, runtime plugin hooks, and webpack runtime bridging. |
+| Retry and observability | `retry-plugin`, `observability-plugin`, `devtools` | Adds resilience and inspection without changing the core container contract. |
+| Framework/platform production behavior | `nextjs-mf`, `node`, `modern-js`, `rsbuild-plugin`, `rspress-plugin`, `esbuild`, `metro` | Owns SSR, filesystem/Metro loading, dev-server middleware, router/data-fetch integration, and platform-specific asset serving. |
+| Manifests and types | `manifest`, `managers`, `dts-plugin`, `third-party-dts-extractor`, `sdk` | Drives snapshot/preload metadata, type publication/consumption, and build/runtime artifact consistency. |
+| Validation | `apps/*`, `playground`, `website-new`, `treeshake-*`, local CI jobs | Production guidance should be validated against the relevant example or package family, not only against isolated runtime snippets. |
+
+Use this document for production patterns and hazards. Use `architecture-overview.md` for the repo-wide package map, `runtime-architecture.md` for runtime boundaries, and `plugin-architecture.md` for build/plugin boundaries.
 
 ## Table of Contents
 - [Runtime Plugin System](#runtime-plugin-system)

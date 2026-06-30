@@ -1,6 +1,6 @@
 # Module Federation Runtime Architecture
 
-This document details the actual runtime architecture of Module Federation based on the real implementation, explaining how the three runtime layers work together to enable dynamic module sharing.
+This document details the current runtime architecture of Module Federation, explaining how runtime-core, the singleton runtime package, webpack-bundler-runtime, runtime plugins, and platform adapters cooperate to preserve the container contract across browser, Node, Next.js, Modern.js, Rsbuild/Rspress, Esbuild, Metro, and bridge-based rendering flows.
 
 ## Table of Contents
 - [Runtime Package Structure](#runtime-package-structure)
@@ -10,6 +10,21 @@ This document details the actual runtime architecture of Module Federation based
 - [Global Instance Management](#global-instance-management)
 - [Hook System Implementation](#hook-system-implementation)
 - [Module Loading Architecture](#module-loading-architecture)
+- [Current Runtime Boundaries](#current-runtime-boundaries)
+
+## Current Runtime Boundaries
+
+Runtime code is intentionally split by responsibility:
+
+| Boundary | Primary package(s) | Owns | Does not own |
+| --- | --- | --- | --- |
+| Core loading semantics | `@module-federation/runtime-core` | `ModuleFederation`, `RemoteHandler`, `SharedHandler`, optional `SnapshotHandler`, plugin hooks, share scopes, module cache, global federation state. | Bundler module factories, framework routing, filesystem chunk loading, or build-time config parsing. |
+| Convenience API | `@module-federation/runtime` | Singleton/global APIs such as `init`, `loadRemote`, `loadShare`, `registerRemotes`, and instance discovery by build id/name/version. | Bundler-specific runtime glue. |
+| Webpack bridge | `@module-federation/webpack-bundler-runtime` | `__webpack_require__.federation`, remote and consume chunk handlers, share scope attachment, initial consumes, and container entry initialization. | Build-time plugin orchestration. |
+| Runtime helper layer | `@module-federation/runtime-tools` and runtime plugins | Additional runtime adapters and cross-package helpers layered over `runtime` and `webpack-bundler-runtime`. | Core policy that belongs in runtime-core. |
+| Platform runtimes | `@module-federation/node`, `nextjs-mf`, `modern-js`, `rsbuild-plugin`, `metro`, bridge packages | Environment-specific loading, SSR/server concerns, router/render bridges, filesystem or Metro request behavior. | Redefining the container contract. |
+
+The invariant across all layers is the remote container interface: a remote entry must be loadable, initialized with a share scope, and queried with `get(expose)`. Build integrations can generate different assets, but runtime-core sees normalized remote/share/snapshot data.
 
 ## Runtime Package Structure
 
@@ -19,7 +34,7 @@ Module Federation's runtime consists of three distinct packages that build upon 
 graph TB
     subgraph "Layer 3: Bundler Bridge"
         WebpackBR[webpack-bundler-runtime<br/>Webpack-specific integration]
-        OtherBR[Other Bundler Runtimes<br/>vite, rollup, etc.]
+        OtherBR[Platform bridges<br/>Node, Next.js, Modern.js, Esbuild, Metro]
     end
     
     subgraph "Layer 2: Convenience Layer"

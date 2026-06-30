@@ -1,6 +1,6 @@
 # Module Federation Plugin Architecture
 
-This document provides a comprehensive guide to the Module Federation plugin system based on the actual webpack implementation, detailing how plugins interact with webpack during build time and the patterns other bundler teams need to implement for similar functionality.
+This document describes the current plugin architecture across the monorepo. The webpack-oriented `@module-federation/enhanced` and `@module-federation/rspack` packages still define the deepest build-time model, but the architecture now also includes Rsbuild/Rspress, Esbuild, Metro, Next.js, Node, Modern.js, Storybook, bridge, manifest, DTS, retry, observability, devtools, and playground integrations.
 
 ## Table of Contents
 - [Plugin Overview](#plugin-overview)
@@ -9,6 +9,20 @@ This document provides a comprehensive guide to the Module Federation plugin sys
 - [Webpack Integration Patterns](#webpack-integration-patterns)
 - [Hook Timing and Interception](#hook-timing-and-interception)
 - [Bundler Integration Requirements](#bundler-integration-requirements)
+- [Current Plugin Families](#current-plugin-families)
+
+## Current Plugin Families
+
+| Family | Packages | Architectural role |
+| --- | --- | --- |
+| Container/share compiler plugins | `@module-federation/enhanced`, `@module-federation/rspack` | Create containers, references, runtime modules, shared providers/consumers, and schema-normalized federation config for webpack-compatible compilers. |
+| Runtime bridge plugins | `@module-federation/webpack-bundler-runtime`, `@module-federation/runtime-tools`, `packages/runtime-plugins/inject-external-runtime-core-plugin` | Attach runtime-core semantics to bundler runtime systems and optionally externalize/inject runtime code. |
+| Framework and platform plugins | `@module-federation/rsbuild-plugin`, `@module-federation/rspress-plugin`, `@module-federation/nextjs-mf`, `@module-federation/node`, `@module-federation/modern-js`, `@module-federation/modern-js-v3`, `@module-federation/esbuild`, `@module-federation/metro` | Translate framework or bundler lifecycle hooks into the shared container/share/runtime contract. |
+| Metadata/type plugins | `@module-federation/manifest`, `@module-federation/managers`, `@module-federation/dts-plugin`, `@module-federation/third-party-dts-extractor`, `@module-federation/typescript` | Normalize options, emit stats/manifests, generate and consume federated declaration files, and surface type hints during development. |
+| UI/DX plugins | `@module-federation/storybook-addon`, `@module-federation/devtools`, `@module-federation/observability-plugin`, `@module-federation/retry-plugin`, bridge packages | Provide Storybook consumption, browser/runtime inspection, loading graph observability, retry/fallback behavior, and render bridges for React/Vue. |
+| Productized examples | `@module-federation/playground`, `apps/website-new`, `apps/*` fixtures | Exercise plugin behavior through docs, playground, and e2e scenario apps. |
+
+The common pattern is: normalize user intent, register bundler/framework hooks at the correct lifecycle point, generate or reference container artifacts, connect share scopes, emit metadata/type artifacts when configured, then delegate dynamic loading to the runtime contract.
 
 ## Plugin Overview
 

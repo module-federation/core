@@ -1,6 +1,6 @@
 # Module Federation Error Handling Specification
 
-This document provides a comprehensive error handling specification for Module Federation implementations, defining standard error codes, recovery strategies, and patterns that bundler teams should implement for consistent error handling across different Module Federation implementations.
+This document describes error handling across the current Module Federation architecture. The canonical exported codes live in `@module-federation/error-codes`; platform packages such as enhanced, runtime-core, dts-plugin, rsbuild-plugin, rspress-plugin, metro, nextjs-mf, and node should map their failures into those canonical codes or into local typed errors that preserve enough context for diagnosis.
 
 ## Table of Contents
 - [Overview](#overview)
@@ -16,6 +16,18 @@ This document provides a comprehensive error handling specification for Module F
 - [Runtime Error Handling](#runtime-error-handling)
 - [Build-Time Error Handling](#build-time-error-handling)
 
+## Current Error Architecture
+
+| Layer | Package(s) | Error responsibility |
+| --- | --- | --- |
+| Canonical formatting | `@module-federation/error-codes` | Exports `RUNTIME-001` through `RUNTIME-015`, `TYPE-001`, `BUILD-001`, `BUILD-002`, `errorDescMap`, `runtimeDescMap`, `typeDescMap`, `buildDescMap`, browser/node helpers, and `getShortErrorMsg`. |
+| Runtime loading | `runtime-core`, `runtime`, `webpack-bundler-runtime` | Fails remote entry, manifest, snapshot, share loading, container init, missing exposes, invalid singleton usage, and uninitialized runtime states through canonical runtime codes and lifecycle hooks. |
+| Build integration | `enhanced`, `rspack`, `rsbuild-plugin`, `rspress-plugin`, `esbuild`, `metro` | Validates options, exposes, public paths, runtime generation, bundler hooks, and platform-specific artifact creation. |
+| Metadata and types | `dts-plugin`, `third-party-dts-extractor`, `manifest`, `managers`, `typescript` | Reports type generation/consumption failures, manifest/stat generation failures, extraction problems, and option-normalization failures. |
+| Resilience and observability | `retry-plugin`, `observability-plugin`, `devtools`, bridge packages | Converts load failures into retry/fallback/inspection events without changing the runtime container contract. |
+
+Do not add new documented error code families here unless they are exported from `packages/error-codes/src/error-codes.ts`. Recovery policy can be richer than the code set, but the public code list must stay tied to the package.
+
 ## Overview
 
 Module Federation's error handling system is built on a multi-layered approach that provides resilience at every level of the federation architecture. The system must handle failures gracefully while maintaining application stability and providing clear debugging information.
@@ -30,7 +42,7 @@ Module Federation's error handling system is built on a multi-layered approach t
 
 ## Standard Error Codes
 
-All Module Federation implementations must support the following standardized error codes:
+All Module Federation implementations should preserve the following exported standardized codes when they cross package or runtime boundaries:
 
 ### Runtime Error Codes (RUNTIME-xxx)
 
@@ -43,29 +55,18 @@ export const RUNTIME_004 = 'RUNTIME-004'; // Failed to locate remote
 export const RUNTIME_007 = 'RUNTIME-007'; // Failed to get remote snapshot
 export const RUNTIME_008 = 'RUNTIME-008'; // Failed to load script resources
 
-// Module Loading Errors
-export const RUNTIME_010 = 'RUNTIME-010'; // Module not found in remote
-export const RUNTIME_011 = 'RUNTIME-011'; // Module initialization failed
-export const RUNTIME_012 = 'RUNTIME-012'; // Module execution timeout
-export const RUNTIME_013 = 'RUNTIME-013'; // Module version mismatch
+// Module and manifest loading errors
+export const RUNTIME_010 = 'RUNTIME-010'; // Entry cannot be loaded using the registered type
+export const RUNTIME_011 = 'RUNTIME-011'; // Remote entry URL missing from snapshot
+export const RUNTIME_012 = 'RUNTIME-012'; // Manifest missing required remote entry data
+export const RUNTIME_013 = 'RUNTIME-013'; // Manifest is not valid
+export const RUNTIME_014 = 'RUNTIME-014'; // Remote does not expose requested module
+export const RUNTIME_015 = 'RUNTIME-015'; // Remote container initialization failed
 
-// Sharing Errors
+// Sharing and state errors
 export const RUNTIME_005 = 'RUNTIME-005'; // Invalid loadShareSync function call from bundler runtime
 export const RUNTIME_006 = 'RUNTIME-006'; // Invalid loadShareSync function call from runtime
-export const RUNTIME_014 = 'RUNTIME-014'; // Shared dependency not found
-export const RUNTIME_015 = 'RUNTIME-015'; // Shared dependency version conflict
-
-// Network Errors
-export const RUNTIME_020 = 'RUNTIME-020'; // Network timeout
-export const RUNTIME_021 = 'RUNTIME-021'; // Network connection failed
-export const RUNTIME_022 = 'RUNTIME-022'; // Resource not found (404)
-export const RUNTIME_023 = 'RUNTIME-023'; // Server error (5xx)
-
-// Runtime State Errors
 export const RUNTIME_009 = 'RUNTIME-009'; // Please call createInstance first
-export const RUNTIME_030 = 'RUNTIME-030'; // Runtime not initialized
-export const RUNTIME_031 = 'RUNTIME-031'; // Invalid runtime configuration
-export const RUNTIME_032 = 'RUNTIME-032'; // Runtime instance already exists
 ```
 
 ### Build-Time Error Codes (BUILD-xxx)
@@ -74,29 +75,14 @@ export const RUNTIME_032 = 'RUNTIME-032'; // Runtime instance already exists
 // Module Federation Build Errors
 export const BUILD_001 = 'BUILD-001'; // Failed to find expose module
 export const BUILD_002 = 'BUILD-002'; // PublicPath is required in prod mode
-export const BUILD_003 = 'BUILD-003'; // Invalid module federation configuration
-export const BUILD_004 = 'BUILD-004'; // Circular dependency detected
-export const BUILD_005 = 'BUILD-005'; // Incompatible bundler version
-
-// Manifest Generation Errors
-export const BUILD_010 = 'BUILD-010'; // Failed to generate manifest
-export const BUILD_011 = 'BUILD-011'; // Invalid manifest format
-export const BUILD_012 = 'BUILD-012'; // Manifest validation failed
-
-// Type Generation Errors
-export const TYPE_001 = 'TYPE-001'; // Failed to generate type declaration
-export const TYPE_002 = 'TYPE-002'; // Type extraction failed
-export const TYPE_003 = 'TYPE-003'; // TypeScript compilation error
 ```
 
-### System Error Codes (SYSTEM-xxx)
+Build integrations can throw additional local validation errors, but only `BUILD-001` and `BUILD-002` are exported as canonical codes today.
+
+### Type Error Codes (TYPE-xxx)
 
 ```typescript
-// Infrastructure Errors
-export const SYSTEM_001 = 'SYSTEM-001'; // Memory limit exceeded
-export const SYSTEM_002 = 'SYSTEM-002'; // File system error
-export const SYSTEM_003 = 'SYSTEM-003'; // Permission denied
-export const SYSTEM_004 = 'SYSTEM-004'; // Resource exhausted
+export const TYPE_001 = 'TYPE-001'; // Failed to generate type declaration
 ```
 
 ## Error Categories
@@ -110,7 +96,7 @@ Errors that can be handled with retry mechanisms or fallbacks:
 ### 2. Configuration Errors
 Errors caused by incorrect setup:
 - Missing remote entry (RUNTIME-004)
-- Invalid configuration (BUILD_003)
+- Invalid configuration (local validation errors, with canonical codes when exported)
 - Missing required dependencies (RUNTIME-014)
 
 ### 3. Critical Errors

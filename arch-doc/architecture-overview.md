@@ -1,15 +1,132 @@
 # Module Federation Architecture Overview
 
-Module Federation is a sophisticated runtime and build-time system that enables dynamic code sharing between independent JavaScript applications. This document provides a comprehensive overview based on the actual implementation, designed to help bundler teams understand the architecture and implement Module Federation support.
+Module Federation is a runtime, build-time, type-generation, manifest, and tooling system for dynamic code sharing across independent JavaScript applications. This overview reflects the current monorepo shape: framework and bundler integrations sit on top of a shared runtime contract, while manifests, DTS generation, devtools, retry/observability plugins, examples, and release tooling support the same container protocol.
 
 ## Table of Contents
+- [Current Repository Map](#current-repository-map)
 - [Core Architecture](#core-architecture)
 - [Package Architecture](#package-architecture)
 - [Runtime Layers](#runtime-layers)
 - [Build-Time Integration](#build-time-integration)
+- [Tooling, Examples, and CI](#tooling-examples-and-ci)
 - [Key Integration Points](#key-integration-points)
 - [Architecture Diagrams](#architecture-diagrams)
 - [Security Architecture](#security-architecture)
+
+## Current Repository Map
+
+The repository is a pnpm/Turbo monorepo. The root orchestration layer is `package.json`, `pnpm-workspace.yaml`, `turbo.json`, and `.github/workflows/*`; package and app scripts are the executable source of truth for build, lint, test, e2e, docs, and release behavior.
+
+```mermaid
+graph TB
+    subgraph "Orchestration"
+        Workspace["pnpm-workspace.yaml"]
+        Turbo["turbo.json tasks"]
+        LocalCI["tools/scripts/ci-local.mjs"]
+        Workflows[".github/workflows"]
+    end
+
+    subgraph "Foundation"
+        SDK["@module-federation/sdk"]
+        ErrorCodes["@module-federation/error-codes"]
+    end
+
+    subgraph "Runtime Contract"
+        RuntimeCore["@module-federation/runtime-core"]
+        Runtime["@module-federation/runtime"]
+        WebpackRuntime["@module-federation/webpack-bundler-runtime"]
+        RuntimeTools["@module-federation/runtime-tools"]
+    end
+
+    subgraph "Build Integrations"
+        Enhanced["@module-federation/enhanced"]
+        Rspack["@module-federation/rspack"]
+        Rsbuild["@module-federation/rsbuild-plugin"]
+        Rspress["@module-federation/rspress-plugin"]
+        Esbuild["@module-federation/esbuild"]
+        Metro["@module-federation/metro"]
+    end
+
+    subgraph "Platform Adapters"
+        Next["@module-federation/nextjs-mf"]
+        Node["@module-federation/node"]
+        Modern["@module-federation/modern-js and modern-js-v3"]
+        Bridge["@module-federation/bridge-react, bridge-react-webpack-plugin, vue3-bridge"]
+        Storybook["@module-federation/storybook-addon"]
+    end
+
+    subgraph "Metadata and DX"
+        Manifest["@module-federation/manifest"]
+        Managers["@module-federation/managers"]
+        DTS["@module-federation/dts-plugin"]
+        ThirdPartyDts["@module-federation/third-party-dts-extractor"]
+        CLI["@module-federation/cli and create-module-federation"]
+        Devtools["@module-federation/devtools"]
+        RuntimePlugins["retry-plugin, observability-plugin, inject-external-runtime-core-plugin"]
+    end
+
+    subgraph "Validation Surfaces"
+        Apps["apps/* examples and e2e fixtures"]
+        Playground["@module-federation/playground"]
+        Website["apps/website-new + rspress-plugin"]
+        Treeshake["treeshake frontend/server"]
+        Release["@changesets/assemble-release-plan"]
+        WebpackMirror["webpack/ compatibility surface"]
+    end
+
+    Workspace --> Turbo --> LocalCI --> Workflows
+    SDK --> RuntimeCore
+    ErrorCodes --> RuntimeCore
+    RuntimeCore --> Runtime --> WebpackRuntime
+    Runtime --> RuntimeTools
+    SDK --> Enhanced
+    WebpackRuntime --> Enhanced
+    Rspack --> Enhanced
+    Enhanced --> Rsbuild
+    Rsbuild --> Rspress
+    Runtime --> Esbuild
+    Runtime --> Metro
+    Enhanced --> Next
+    Enhanced --> Node
+    Enhanced --> Modern
+    Bridge --> Modern
+    Enhanced --> Storybook
+    Managers --> Manifest
+    SDK --> Managers
+    SDK --> DTS
+    ThirdPartyDts --> DTS
+    DTS --> Enhanced
+    Manifest --> Enhanced
+    CLI --> Enhanced
+    RuntimePlugins --> Runtime
+    Enhanced --> Apps
+    Rspack --> Apps
+    Rsbuild --> Apps
+    Rspress --> Website
+    Esbuild --> Apps
+    Metro --> Apps
+    Next --> Apps
+    Node --> Apps
+    Modern --> Apps
+    Storybook --> Apps
+    Playground --> Website
+    Treeshake --> Apps
+    Release --> Workflows
+```
+
+### Architectural Layers
+
+| Layer | Packages | Responsibility |
+| --- | --- | --- |
+| Foundation | `sdk`, `error-codes` | Shared types, manifest/snapshot helpers, environment utilities, normalized webpack-path access, and canonical error formatting. |
+| Runtime contract | `runtime-core`, `runtime`, `webpack-bundler-runtime`, `runtime-tools` | Container-compatible loading, shared dependency negotiation, instance/global state, runtime hooks, and webpack runtime bridging. |
+| Build integrations | `enhanced`, `rspack`, `rsbuild-plugin`, `rspress-plugin`, `esbuild`, `metro` | Convert bundler/framework config into remote entries, container references, share providers/consumers, manifests, runtime modules, and platform-specific loading. |
+| Platform adapters | `nextjs-mf`, `node`, `modern-js`, `modern-js-v3`, bridge packages, `storybook-addon` | Bind the build/runtime contract to framework lifecycles, SSR/server execution, React/Vue bridge rendering, Storybook, and application-specific conventions. |
+| Metadata and type tooling | `manifest`, `managers`, `dts-plugin`, `third-party-dts-extractor`, `typescript`, `cli`, `create-module-federation` | Generate and consume manifests/stats, derive normalized config, publish/consume federated types, and expose CLI/scaffolding flows. |
+| Observability and resilience | `observability-plugin`, `retry-plugin`, `devtools` | Runtime visibility, retry/fallback behavior, dependency graph UI, and browser extension/debugging surfaces. |
+| Validation and product surfaces | `apps/*`, `playground`, `website-new`, `treeshake-*`, `assemble-release-plan`, `webpack/` | Examples, e2e fixtures, docs/playground delivery, federated tree-shaking validation, release planning, and compatibility fixtures. |
+
+The core architectural intent is to preserve the webpack container contract (`init`, `get`, share scopes, remote entries) while moving policy into reusable layers: runtime-core owns dynamic loading semantics, build integrations own bundler interception/codegen, metadata packages own manifest/type artifacts, and platform adapters own framework-specific lifecycle details.
 
 ## Core Architecture
 
@@ -20,11 +137,13 @@ graph TB
     subgraph "Build-Time Layer"
         Enhanced["@module-federation/enhanced<br/>Webpack Build Integration"]
         Rspack["@module-federation/rspack<br/>Rspack Build Integration"]
+        Rsbuild["@module-federation/rsbuild-plugin<br/>Rsbuild/Rslib Integration"]
+        Metro["@module-federation/metro<br/>Metro/React Native Integration"]
     end
     
     subgraph "Bundler Runtime Adapters"
         WebpackRuntime["@module-federation/webpack-bundler-runtime<br/>Webpack Runtime Bridge"]
-        OtherRuntimes["Other Bundler Runtimes<br/>vite, rollup, etc."]
+        OtherRuntimes["Platform Bridges<br/>Node, Next.js, Modern.js, Esbuild"]
     end
     
     subgraph "Convenience APIs"
@@ -42,6 +161,8 @@ graph TB
     
     Enhanced --> WebpackRuntime
     Rspack --> WebpackRuntime
+    Rsbuild --> Enhanced
+    Metro --> Runtime
     WebpackRuntime --> Runtime
     OtherRuntimes --> Runtime
     Runtime --> RuntimeCore
@@ -127,7 +248,7 @@ graph TB
 
 #### **@module-federation/enhanced**
 - **Purpose**: Webpack build-time integration and code generation
-- **Dependencies**: Full workspace ecosystem including `@module-federation/error-codes`, `@module-federation/sdk`, `@module-federation/dts-plugin`, `@module-federation/data-prefetch`, `@module-federation/managers`, `@module-federation/manifest`, `@module-federation/rspack`
+- **Dependencies**: Full workspace ecosystem including `@module-federation/error-codes`, `@module-federation/sdk`, `@module-federation/dts-plugin`, `@module-federation/managers`, `@module-federation/manifest`, `@module-federation/rspack`, `@module-federation/runtime-tools`, and `@module-federation/webpack-bundler-runtime`
 - **Key Components**:
   - **`ModuleFederationPlugin`**: Main orchestrator with two-phase plugin application
   - **`RemoteEntryPlugin`**: Entry point modification (applied first)
@@ -136,8 +257,60 @@ graph TB
   - **`ContainerPlugin`**: Container creation and module exposure (conditional)
   - **`ContainerReferencePlugin`**: Remote module reference handling (conditional)
   - **`SharePlugin`**: Shared dependency coordination (conditional)
-  - **Additional Plugins**: DTS generation, data prefetch, manifest generation
+  - **Additional Plugins**: DTS generation, manifest generation, bridge/runtime helpers, and runtime-tool integration
   - **Schema Validation**: Runtime configuration validation
+
+### 6. Metadata and Type Layer
+
+#### **@module-federation/managers**
+- **Purpose**: Normalize and manage container, remote, shared, package-json, and base plugin options for downstream build tools.
+- **Key Components**: `BasicPluginOptionsManager`, `ContainerManager`, `RemoteManager`, `SharedManager`, `PKGJsonManager`.
+
+#### **@module-federation/manifest**
+- **Purpose**: Generate manifest and stats artifacts that describe exposed modules, remotes, shared dependencies, assets, and snapshots.
+- **Key Components**: `ManifestManager`, `StatsManager`, `StatsPlugin`, `ModuleHandler`, manifest utilities.
+
+#### **@module-federation/dts-plugin**
+- **Purpose**: Generate, serve, consume, and hot-update federated TypeScript declarations.
+- **Key Components**: `DtsPlugin`, `GenerateTypesPlugin`, `ConsumeTypesPlugin`, `DevPlugin`, dev worker, websocket/http type server, third-party DTS extraction.
+
+### 7. Platform and Framework Layer
+
+#### **Next.js and Node**
+- `@module-federation/nextjs-mf` composes enhanced, node, runtime, runtime-core, sdk, and webpack-bundler-runtime to patch Next-specific webpack/runtime behavior.
+- `@module-federation/node` adapts federation to server execution with filesystem chunk loading, streaming target support, automatic public path handling, and universal federation plugins.
+
+#### **Modern.js, Rsbuild, Rspress, Esbuild, and Metro**
+- `@module-federation/modern-js` and `@module-federation/modern-js-v3` compose Modern, Rsbuild, Node, bridge-react, manifest, runtime, and CLI integration.
+- `@module-federation/rsbuild-plugin` wraps enhanced/node/sdk behavior for Rsbuild and Rslib, including SSR-oriented utilities and manifest integration.
+- `@module-federation/rspress-plugin` layers Rspress docs behavior on top of enhanced, error-codes, rsbuild-plugin, and sdk.
+- `@module-federation/esbuild` provides an Esbuild integration that still reuses runtime, sdk, and webpack-bundler-runtime semantics.
+- `@module-federation/metro` owns Metro and React Native behavior: resolver, serializer, manifest middleware, request rewriting, bundle-remote CLI, VM management, and plugin compatibility helpers. `metro-plugin-rock`, `metro-plugin-rnef`, and `metro-plugin-rnc-cli` are thin adapters on top of it.
+
+#### **Bridge, Storybook, Devtools, and Playground**
+- Bridge packages (`bridge-react`, `bridge-react-webpack-plugin`, `bridge-shared`, `vue3-bridge`) translate remote component/rendering contracts into React, Vue, router, lazy, and data-fetch flows.
+- `@module-federation/storybook-addon` wires federated remotes into Storybook.
+- `@module-federation/devtools` and `@module-federation/observability-plugin` expose runtime dependency graph and browser debugging surfaces.
+- `@module-federation/playground` is a runnable in-repo playground consumed by `apps/website-new` through the Rspress plugin path.
+
+## Tooling, Examples, and CI
+
+- **Workspace layout**: `pnpm-workspace.yaml` includes `packages/*`, `packages/bridge/*`, `packages/runtime-plugins/*`, `webpack`, `assemble-release-plan`, and nested app fixture groups under `apps/runtime-demo`, `apps/next-app-router`, `apps/modern-component-data-fetch`, `apps/modernjs-ssr`, `apps/shared-tree-shaking`, `apps/router-demo`, and `apps/manifest-demo`.
+- **Task graph**: `turbo.json` defines `build`, `test`, `lint`, e2e tasks, persistent serve/dev tasks, and package-specific overrides such as treeshake and website builds.
+- **CI parity**: `tools/scripts/ci-local.mjs` is the local entry point for workflow-shaped jobs such as package build/test, Metro, modern, runtime, manifest, Next, router, shared tree-shaking, devtools, bundle-size, and treeshake.
+- **Example coverage**: `apps/*` fixtures exercise Next pages/app router, runtime API, manifest providers, router demos, Modern SSR/data-fetch, Node remotes, Metro/React Native, Esbuild, Rsbuild/Rslib, shared tree shaking, Storybook, and the docs website.
+- **Release flow**: `.changeset/*`, `@changesets/assemble-release-plan`, `release.yml`, and `release-pull-request.yml` drive publish planning. Release tooling is architecture-relevant because package dependency edges decide dependent bumps.
+
+## Dependency Structure and Risk Areas
+
+TraceDecay reports the current graph at 5,501 indexed files, 43,815 nodes, and 7,018 edges. The coupling hotspots are expected around orchestration modules:
+
+- `packages/runtime-core/src/remote/index.ts`, `packages/runtime-core/src/core.ts`, and `packages/runtime-core/src/plugins/snapshot/SnapshotHandler.ts` sit on the runtime loading path.
+- `packages/enhanced/src/lib/container/*`, `packages/enhanced/src/lib/sharing/*`, and `packages/webpack-bundler-runtime/src/*` are the webpack container/share integration core.
+- `packages/dts-plugin/src/core/lib/DTSManager.ts`, `packages/dts-plugin/src/server/broker/Broker.ts`, `packages/manifest/src/StatsManager.ts`, and `packages/manifest/src/utils.ts` form the metadata/type artifact path.
+- `packages/nextjs-mf/src/plugins/NextFederationPlugin/index.ts`, `packages/node/src/plugins/*`, `packages/metro-core/src/commands/bundle-remote/index.ts`, and `packages/metro-core/src/plugin/*` are platform integration hot paths.
+
+Known file-cycle clusters exist in runtime-core (`core`, `global`, snapshot, load/preload/share utilities), enhanced runtime utilities, enhanced sharing, manifest/observability/sdk snapshot generation, bridge lazy data-fetch, and treeshake server services. Treat these as coordination boundaries: new behavior should prefer existing handlers/managers/plugins rather than adding another cross-layer import.
 
 ## Global State Structure
 

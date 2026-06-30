@@ -1,6 +1,6 @@
 # Module Federation Manifest Specification
 
-This document defines the complete JSON schema specifications for Module Federation manifest files, which are essential for cross-bundler compatibility and runtime optimization.
+This document defines the manifest architecture used by the current Module Federation monorepo. Manifests are produced and consumed by `@module-federation/manifest`, `@module-federation/managers`, `@module-federation/sdk`, `@module-federation/dts-plugin`, build integrations such as enhanced/rspack/rsbuild/rspress/metro, and runtime snapshot loading in `runtime-core`.
 
 ## Table of Contents
 - [Overview](#overview)
@@ -9,6 +9,19 @@ This document defines the complete JSON schema specifications for Module Federat
 - [Shared Manifest Schema](#shared-manifest-schema)
 - [Examples](#examples)
 - [Validation](#validation)
+
+## Current Manifest Architecture
+
+| Layer | Package(s) | Manifest responsibility |
+| --- | --- | --- |
+| Type and utility source | `@module-federation/sdk` | Defines manifest, stats, and snapshot types plus `generateSnapshotFromManifest` and `inferAutoPublicPath`. |
+| Build metadata generation | `@module-federation/manifest` | Uses `ManifestManager`, `StatsManager`, `StatsPlugin`, and `ModuleHandler` to collect build stats, exposed modules, remote metadata, shared dependency data, and assets. |
+| Option normalization | `@module-federation/managers` | Normalizes remotes, containers, shared config, package metadata, and base plugin options before manifest/stat emission. |
+| Type metadata | `@module-federation/dts-plugin` | Publishes and consumes type artifacts that manifests and runtime type hints can point to. |
+| Runtime consumption | `@module-federation/runtime-core` | `SnapshotHandler` reads manifest data and converts it into remote snapshots for loading, preloading, and version decisions. |
+| Platform integrations | `enhanced`, `rspack`, `rsbuild-plugin`, `rspress-plugin`, `metro`, `nextjs-mf`, `node`, `modern-js` | Decide when and where manifests are generated, served, rewritten, or fetched for each build/runtime environment. |
+
+The manifest is an interoperability artifact, not a replacement for the remote container contract. A remote still needs a loadable entry with `init` and `get`; the manifest makes the entry discoverable, enriches it with asset/type/shared metadata, and gives the runtime enough information to preload or resolve snapshots safely.
 
 ## Overview
 

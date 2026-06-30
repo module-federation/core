@@ -1,6 +1,6 @@
 # Module Federation SDK Reference
 
-This document provides a comprehensive reference for the Module Federation SDK, including all interfaces, types, and utilities needed to implement Module Federation in your bundler.
+This document provides a reference for the current `@module-federation/sdk` role in the monorepo. The SDK is the foundation package used by runtime-core, runtime, enhanced/rspack, rsbuild/rspress, metro, manifest, managers, dts-plugin, webpack-bundler-runtime, utilities, devtools, and platform adapters.
 
 ## Table of Contents
 - [Core Interfaces](#core-interfaces)
@@ -13,6 +13,21 @@ This document provides a comprehensive reference for the Module Federation SDK, 
 - [Usage Examples](#usage-examples)
 - [Best Practices](#best-practices)
 - [SDK Exports](#sdk-exports)
+
+## Current SDK Architecture
+
+The SDK exports the shared vocabulary for the rest of the architecture:
+
+| Export area | Source files | Used by |
+| --- | --- | --- |
+| Constants and common utilities | `constant.ts`, `utils.ts` | Runtime packages, build plugins, managers, utilities, manifests, and tests. |
+| Typed contracts | `types/common.ts`, `types/hooks.ts`, `types/manifest.ts`, `types/snapshot.ts`, `types/stats.ts`, `types/plugins/*` | Plugin option schemas, manifest/stat/snapshot data, runtime plugin hooks, container/share plugin contracts. |
+| Environment loaders | `env.ts`, `dom.ts`, `node.ts` | Browser and Node remote entry loading, script/link creation, environment detection. |
+| Manifest/snapshot helpers | `generateSnapshotFromManifest.ts` | Runtime snapshot loading, manifest consumers, preload and asset decisions. |
+| Config normalization helpers | `normalizeOptions.ts`, `createModuleFederationConfig.ts` | User-facing config helpers and build integration normalization. |
+| Webpack path normalization | `normalize-webpack-path.ts` | Repo code that needs webpack internals without hard-coded bare webpack paths. |
+
+Architecturally, packages should depend on SDK for shared types and primitives, not on each other for incidental utility code. If a helper is needed by runtime, manifest, and multiple build integrations, it belongs in SDK only when it is stable and not tied to a specific bundler lifecycle.
 
 ## Core Interfaces
 

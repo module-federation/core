@@ -1,6 +1,6 @@
 # Module Federation Implementation Guide
 
-This guide provides step-by-step instructions for bundler teams to implement Module Federation in their build tools. It covers the essential components, integration points, and best practices.
+This guide provides implementation guidance for teams adding or maintaining Module Federation integrations in this monorepo. It applies to webpack-compatible compiler plugins, Rsbuild/Rspress, Esbuild, Metro, framework adapters, manifest/type tooling, runtime plugins, and example applications.
 
 ## Table of Contents
 - [Prerequisites](#prerequisites)
@@ -10,6 +10,22 @@ This guide provides step-by-step instructions for bundler teams to implement Mod
 - [Testing and Validation](#testing-and-validation)
 - [Common Patterns](#common-patterns)
 - [Troubleshooting](#troubleshooting)
+
+## Current Implementation Targets
+
+Choose the target layer before adding code:
+
+| Target | Preferred package area | Implementation shape |
+| --- | --- | --- |
+| Shared config/types/utilities | `@module-federation/sdk` | Add stable primitives, manifest/snapshot/stat types, environment helpers, or config helpers that are not tied to one bundler lifecycle. |
+| Runtime behavior | `runtime-core`, `runtime`, `webpack-bundler-runtime`, `runtime-tools` | Add lifecycle hooks, remote/share/snapshot loading behavior, singleton APIs, or bundler runtime bridges. |
+| Webpack/Rspack compiler behavior | `enhanced`, `rspack` | Add/adjust container, reference, sharing, runtime module, schema, tree-shaking, or startup plugins. |
+| Rsbuild/Rspress/Esbuild/Metro behavior | `rsbuild-plugin`, `rspress-plugin`, `esbuild`, `metro-core`, metro adapter packages | Wrap the core container/runtime contract in platform hooks, resolvers, serializers, dev-server middleware, or CLI commands. |
+| Framework behavior | `nextjs-mf`, `node`, `modern-js`, `modern-js-v3`, bridge packages, `storybook-addon` | Compose existing build/runtime packages with framework-specific lifecycle, SSR, rendering, router, or server concerns. |
+| Metadata/type behavior | `manifest`, `managers`, `dts-plugin`, `third-party-dts-extractor`, `typescript`, `cli` | Normalize config, emit/consume manifests and stats, generate/serve type declarations, or expose CLI/scaffold workflows. |
+| Validation surface | `apps/*`, `packages/playground`, `apps/website-new`, `treeshake-*` | Add examples, e2e fixtures, or docs/playground integration that prove the behavior. |
+
+Keep the build/runtime boundary explicit: build plugins generate or reference remote entries, manifests, share metadata, runtime modules, and type artifacts; runtime packages load, initialize, negotiate, cache, and observe those artifacts.
 
 ## Prerequisites
 
