@@ -1,4 +1,5 @@
 import * as path from 'path';
+import { withZephyr } from 'zephyr-rspress-plugin';
 import { defineConfig } from '@rspress/core';
 import { moduleFederationPluginOverview } from './src/moduleFederationPluginOverview';
 // import { pluginAnnotationWords } from 'rspress-plugin-annotation-words';
@@ -80,6 +81,7 @@ export default defineConfig({
     //   wordsMapPath: 'words-map.json',
     // }),
     pluginModuleFederation(mfConfig),
+    withZephyr(),
   ],
   builderConfig: {
     plugins: [moduleFederationPluginOverview, pluginSass()],
