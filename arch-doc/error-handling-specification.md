@@ -3,6 +3,7 @@
 This document describes error handling across the current Module Federation architecture. The canonical exported codes live in `@module-federation/error-codes`; platform packages such as enhanced, runtime-core, dts-plugin, rsbuild-plugin, rspress-plugin, metro, nextjs-mf, and node should map their failures into those canonical codes or into local typed errors that preserve enough context for diagnosis.
 
 ## Table of Contents
+
 - [Overview](#overview)
 - [Standard Error Codes](#standard-error-codes)
 - [Error Categories](#error-categories)
@@ -10,11 +11,7 @@ This document describes error handling across the current Module Federation arch
 - [Fallback Mechanisms](#fallback-mechanisms)
 - [Circuit Breaker Patterns](#circuit-breaker-patterns)
 - [Error Boundary Implementations](#error-boundary-implementations)
-- [Monitoring and Observability](#monitoring-and-observability)
-- [Error Propagation](#error-propagation)
-- [Implementation Guidelines](#implementation-guidelines)
-- [Runtime Error Handling](#runtime-error-handling)
-- [Build-Time Error Handling](#build-time-error-handling)
+- [Monitoring, Propagation, and Implementation Examples](#monitoring-propagation-and-implementation-examples)
 
 ## Error Ownership
 
@@ -114,6 +111,28 @@ Errors where the application can continue with reduced functionality:
 - Non-critical shared dependency conflicts
 - Feature-specific module failures
 
+### Local Error Normalization in App Code
+
+The repository does not expose a canonical `ModuleFederationError` class. Package-owned public diagnostics are the exported codes and description maps from `@module-federation/error-codes`. App-level resilience examples can normalize unknown caught values into ordinary `Error` objects and optionally preserve a local `code`/`context` shape:
+
+```typescript
+type ErrorWithCode = Error & {
+  code?: string;
+  context?: Record<string, unknown>;
+};
+
+function toError(error: unknown): ErrorWithCode {
+  if (error instanceof Error) {
+    return error;
+  }
+
+  return Object.assign(
+    new Error(typeof error === 'string' ? error : 'Unknown error'),
+    { context: { originalValue: error } },
+  );
+}
+```
+
 ## Error Recovery Strategies
 
 ### 1. Retry Mechanisms
@@ -150,31 +169,31 @@ async function retryWithBackoff<T>(
   errorCode?: string
 ): Promise<T> {
   let lastError: Error;
-  
+
   for (let attempt = 1; attempt <= config.attempts; attempt++) {
     try {
       return await operation();
     } catch (error) {
       lastError = error;
-      
+
       // Check if error is retryable
       if (errorCode && !config.retryableCodes.includes(errorCode)) {
         throw error;
       }
-      
+
       if (attempt === config.attempts) {
         throw error;
       }
-      
+
       const delay = Math.min(
         config.delay * Math.pow(config.backoffFactor, attempt - 1),
         config.maxDelay
       );
-      
+
       await new Promise(resolve => setTimeout(resolve, delay));
     }
   }
-  
+
   throw lastError;
 }
 ```
@@ -218,12 +237,12 @@ function createRemoteComponent(
     } catch (error) {
       // Log error for monitoring
       reportError(error);
-      
+
       // Return fallback component
       if (fallbackConfig.component) {
         return { default: fallbackConfig.component };
       }
-      
+
       // Return error component with retry capability
       return {
         default: (props: any) => {
@@ -231,12 +250,12 @@ function createRemoteComponent(
             // Trigger component re-render
             window.location.reload();
           };
-          
+
           if (fallbackConfig.error) {
             return React.createElement(fallbackConfig.error, { error, retry, ...props });
           }
-          
-          return React.createElement('div', {}, 
+
+          return React.createElement('div', {},
             `Failed to load remote component: ${error.message}`
           );
         }
@@ -263,12 +282,12 @@ async function loadRemoteModule(
   try {
     return await __federation_method_getRemote(remoteName, moduleName);
   } catch (error) {
-    const federationError = ensureModuleFederationError(error);
-    
+    const federationError = toError(error);
+
     switch (config.errorMode) {
       case 'throw':
         throw federationError;
-        
+
       case 'fallback':
         if (config.localFallback) {
           return config.localFallback;
@@ -277,10 +296,10 @@ async function loadRemoteModule(
           return await import(config.fallbackModule);
         }
         throw new Error(`No fallback available for ${remoteName}/${moduleName}`);
-        
+
       case 'ignore':
         return null;
-        
+
       default:
         throw federationError;
     }
@@ -304,7 +323,7 @@ async function loadRemoteWithFallback(
 ): Promise<any> {
   const remotes = [primaryRemote, ...(config.fallbackRemotes || [])];
   let lastError: Error;
-  
+
   for (const remote of remotes) {
     try {
       return await loadRemoteModule(remote, moduleName, { errorMode: 'throw' });
@@ -313,17 +332,17 @@ async function loadRemoteWithFallback(
       reportError(error, { remote, module: moduleName, fallback: true });
     }
   }
-  
+
   // If critical module, throw error
   if (config.criticalModules?.includes(moduleName)) {
     throw new Error(`Critical module ${moduleName} failed to load from all remotes`);
   }
-  
+
   // If graceful degradation enabled, return null
   if (config.gracefulDegradation) {
     return null;
   }
-  
+
   throw lastError;
 }
 ```
@@ -352,9 +371,9 @@ class CircuitBreaker {
   private successes = 0;
   private nextAttempt = 0;
   private lastFailureTime = 0;
-  
+
   constructor(private config: CircuitBreakerConfig) {}
-  
+
   async call<T>(operation: () => Promise<T>): Promise<T> {
     if (this.state === CircuitState.OPEN) {
       if (Date.now() < this.nextAttempt) {
@@ -362,7 +381,7 @@ class CircuitBreaker {
       }
       this.state = CircuitState.HALF_OPEN;
     }
-    
+
     try {
       const result = await operation();
       this.onSuccess();
@@ -372,24 +391,24 @@ class CircuitBreaker {
       throw error;
     }
   }
-  
+
   private onSuccess(): void {
     this.failures = 0;
     if (this.state === CircuitState.HALF_OPEN) {
       this.state = CircuitState.CLOSED;
     }
   }
-  
+
   private onFailure(): void {
     this.failures++;
     this.lastFailureTime = Date.now();
-    
+
     if (this.failures >= this.config.failureThreshold) {
       this.state = CircuitState.OPEN;
       this.nextAttempt = Date.now() + this.config.recoveryTimeout;
     }
   }
-  
+
   getState(): CircuitState {
     return this.state;
   }
@@ -401,7 +420,7 @@ class CircuitBreaker {
 ```typescript
 class RemoteCircuitBreakerManager {
   private circuitBreakers = new Map<string, CircuitBreaker>();
-  
+
   private getCircuitBreaker(remoteName: string): CircuitBreaker {
     if (!this.circuitBreakers.has(remoteName)) {
       this.circuitBreakers.set(remoteName, new CircuitBreaker({
@@ -413,7 +432,7 @@ class RemoteCircuitBreakerManager {
     }
     return this.circuitBreakers.get(remoteName)!;
   }
-  
+
   async loadRemote<T>(
     remoteName: string,
     operation: () => Promise<T>
@@ -421,7 +440,7 @@ class RemoteCircuitBreakerManager {
     const circuitBreaker = this.getCircuitBreaker(remoteName);
     return circuitBreaker.call(operation);
   }
-  
+
   getRemoteHealth(): Record<string, CircuitState> {
     const health: Record<string, CircuitState> = {};
     for (const [remote, cb] of this.circuitBreakers) {
@@ -455,28 +474,28 @@ class ModuleFederationErrorBoundary extends React.Component<
   { hasError: boolean; error?: Error; errorInfo?: React.ErrorInfo }
 > {
   private retryTimeoutId?: NodeJS.Timeout;
-  
+
   constructor(props: ModuleFederationErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false };
   }
-  
+
   static getDerivedStateFromError(error: Error) {
     return { hasError: true, error };
   }
-  
+
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     this.setState({ errorInfo });
-    
+
     // Report error for monitoring
     reportError(error, {
       context: 'ModuleFederationErrorBoundary',
       componentStack: errorInfo.componentStack,
     });
-    
+
     // Call custom error handler
     this.props.onError?.(error, errorInfo);
-    
+
     // Auto-retry for specific errors after delay
     if (this.shouldAutoRetry(error)) {
       this.retryTimeoutId = setTimeout(() => {
@@ -484,30 +503,30 @@ class ModuleFederationErrorBoundary extends React.Component<
       }, 5000);
     }
   }
-  
+
   componentWillUnmount() {
     if (this.retryTimeoutId) {
       clearTimeout(this.retryTimeoutId);
     }
   }
-  
+
   private shouldAutoRetry(error: Error): boolean {
-    const federationError = ensureModuleFederationError(error);
+    const federationError = toError(error);
     return [
       'RUNTIME-003', // Failed to get manifest
       'RUNTIME-004', // Failed to locate remote
       'RUNTIME-008', // Failed to load script resources
     ].includes(federationError.code);
   }
-  
+
   private retry = () => {
     this.setState({ hasError: false, error: undefined, errorInfo: undefined });
   };
-  
+
   render() {
     if (this.state.hasError) {
       const FallbackComponent = this.props.fallback;
-      
+
       if (FallbackComponent) {
         return React.createElement(FallbackComponent, {
           error: this.state.error!,
@@ -515,7 +534,7 @@ class ModuleFederationErrorBoundary extends React.Component<
           retry: this.retry,
         });
       }
-      
+
       return React.createElement('div', {
         style: { padding: '20px', border: '1px solid #ff6b6b', borderRadius: '4px' }
       }, [
@@ -528,7 +547,7 @@ class ModuleFederationErrorBoundary extends React.Component<
         }, 'Retry'),
       ]);
     }
-    
+
     return this.props.children;
   }
 }
@@ -541,14 +560,14 @@ class ModuleFederationErrorBoundary extends React.Component<
 const ModuleFederationErrorHandler = {
   install(app: App) {
     app.config.errorHandler = (err: unknown, instance, info) => {
-      const error = ensureModuleFederationError(err);
-      
+      const error = toError(err);
+
       reportError(error, {
         context: 'Vue',
         componentInstance: instance,
         errorInfo: info,
       });
-      
+
       // Handle specific federation errors
       if (error.code?.startsWith('RUNTIME-')) {
         // Show user-friendly error message
@@ -565,500 +584,28 @@ const ModuleFederationErrorHandler = {
 @Injectable()
 export class ModuleFederationErrorHandler implements ErrorHandler {
   handleError(error: any): void {
-    const federationError = ensureModuleFederationError(error);
-    
+    const federationError = toError(error);
+
     reportError(federationError, {
       context: 'Angular',
     });
-    
+
     // Handle federation-specific errors
     if (federationError.code?.startsWith('RUNTIME-')) {
       this.handleRuntimeError(federationError);
     }
   }
-  
-  private handleRuntimeError(error: ModuleFederationError): void {
+
+  private handleRuntimeError(error: ErrorWithCode): void {
     // Implement Angular-specific error handling
     console.error('Module Federation Runtime Error:', error.message);
   }
 }
 ```
 
-## Monitoring and Observability
+## Monitoring, Propagation, and Implementation Examples
 
-### 1. Error Reporting Interface
-
-```typescript
-interface ErrorReportData {
-  code: string;
-  message: string;
-  timestamp: number;
-  context?: Record<string, any>;
-  stackTrace?: string;
-  userAgent?: string;
-  url?: string;
-  userId?: string;
-  sessionId?: string;
-}
-
-interface ErrorReporter {
-  report(error: ModuleFederationError, context?: Record<string, any>): void;
-  flush(): Promise<void>;
-  setUser(userId: string): void;
-  setSession(sessionId: string): void;
-}
-```
-
-### 2. Default Error Reporter
-
-```typescript
-class DefaultErrorReporter implements ErrorReporter {
-  private buffer: ErrorReportData[] = [];
-  private userId?: string;
-  private sessionId?: string;
-  private endpoint?: string;
-  
-  constructor(config: { endpoint?: string; bufferSize?: number } = {}) {
-    this.endpoint = config.endpoint;
-  }
-  
-  report(error: ModuleFederationError, context?: Record<string, any>): void {
-    const reportData: ErrorReportData = {
-      code: error.code,
-      message: error.message,
-      timestamp: Date.now(),
-      context,
-      stackTrace: error.stack,
-      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
-      url: typeof window !== 'undefined' ? window.location.href : undefined,
-      userId: this.userId,
-      sessionId: this.sessionId,
-    };
-    
-    this.buffer.push(reportData);
-    
-    // Auto-flush critical errors
-    if (this.isCriticalError(error)) {
-      this.flush();
-    }
-  }
-  
-  async flush(): Promise<void> {
-    if (this.buffer.length === 0 || !this.endpoint) {
-      return;
-    }
-    
-    const data = [...this.buffer];
-    this.buffer = [];
-    
-    try {
-      await fetch(this.endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ errors: data }),
-      });
-    } catch (error) {
-      // Re-add to buffer on failure
-      this.buffer.unshift(...data);
-    }
-  }
-  
-  setUser(userId: string): void {
-    this.userId = userId;
-  }
-  
-  setSession(sessionId: string): void {
-    this.sessionId = sessionId;
-  }
-  
-  private isCriticalError(error: ModuleFederationError): boolean {
-    return [
-      'RUNTIME-009', // createInstance has not been called
-      'RUNTIME-010', // Runtime name changed after initialization
-      'RUNTIME-015', // Remote container initialization failed
-    ].includes(error.code);
-  }
-}
-```
-
-### 3. Performance Monitoring
-
-```typescript
-interface PerformanceMetrics {
-  remoteLoadTime: number;
-  moduleInitTime: number;
-  networkLatency: number;
-  cacheHitRate: number;
-}
-
-class ModuleFederationMonitor {
-  private metrics = new Map<string, PerformanceMetrics>();
-  
-  startRemoteLoad(remoteName: string): () => void {
-    const startTime = performance.now();
-    
-    return () => {
-      const loadTime = performance.now() - startTime;
-      this.recordMetric(remoteName, 'remoteLoadTime', loadTime);
-    };
-  }
-  
-  recordError(error: ModuleFederationError, context?: Record<string, any>): void {
-    // Send to error reporter
-    errorReporter.report(error, context);
-    
-    // Track error metrics
-    this.incrementErrorCount(error.code);
-    
-    // Update circuit breaker if applicable
-    if (context?.remoteName) {
-      this.updateRemoteHealth(context.remoteName, false);
-    }
-  }
-  
-  private recordMetric(remote: string, metric: keyof PerformanceMetrics, value: number): void {
-    if (!this.metrics.has(remote)) {
-      this.metrics.set(remote, {
-        remoteLoadTime: 0,
-        moduleInitTime: 0,
-        networkLatency: 0,
-        cacheHitRate: 0,
-      });
-    }
-    
-    const metrics = this.metrics.get(remote)!;
-    metrics[metric] = value;
-  }
-  
-  getHealthReport(): Record<string, any> {
-    return {
-      remoteHealth: this.getRemoteHealth(),
-      errorCounts: this.getErrorCounts(),
-      performanceMetrics: Object.fromEntries(this.metrics),
-    };
-  }
-  
-  private incrementErrorCount(code: string): void {
-    // Implementation for error counting
-  }
-  
-  private updateRemoteHealth(remote: string, healthy: boolean): void {
-    // Implementation for health tracking
-  }
-  
-  private getRemoteHealth(): Record<string, boolean> {
-    // Implementation for health reporting
-    return {};
-  }
-  
-  private getErrorCounts(): Record<string, number> {
-    // Implementation for error count reporting
-    return {};
-  }
-}
-```
-
-## Error Propagation
-
-### 1. Error Context Preservation
-
-```typescript
-class ModuleFederationError extends Error {
-  public readonly code: string;
-  public readonly context: Record<string, any>;
-  public readonly originalError?: Error;
-  
-  constructor(
-    code: string,
-    message: string,
-    context: Record<string, any> = {},
-    originalError?: Error
-  ) {
-    super(message);
-    this.name = 'ModuleFederationError';
-    this.code = code;
-    this.context = context;
-    this.originalError = originalError;
-    
-    // Preserve original stack trace if available
-    if (originalError?.stack) {
-      this.stack = originalError.stack;
-    }
-  }
-  
-  toJSON(): any {
-    return {
-      name: this.name,
-      code: this.code,
-      message: this.message,
-      context: this.context,
-      stack: this.stack,
-      originalError: this.originalError ? {
-        name: this.originalError.name,
-        message: this.originalError.message,
-        stack: this.originalError.stack,
-      } : undefined,
-    };
-  }
-}
-
-function ensureModuleFederationError(
-  error: any
-): Error & { code?: string; context?: Record<string, any> } {
-  if (error instanceof ModuleFederationError) {
-    return error;
-  }
-  
-  if (error instanceof Error) {
-    return error;
-  }
-  
-  return Object.assign(
-    new Error(typeof error === 'string' ? error : 'Unknown error'),
-    { context: { originalValue: error } },
-  );
-}
-```
-
-### 2. Error Boundary Chain
-
-```typescript
-interface ErrorBoundaryConfig {
-  level: 'application' | 'remote' | 'module';
-  isolate: boolean;
-  fallback?: React.ComponentType<any>;
-  onError?: (error: Error) => void;
-}
-
-function createErrorBoundaryChain(configs: ErrorBoundaryConfig[]) {
-  return configs.reduce((children, config) => {
-    return React.createElement(ModuleFederationErrorBoundary, {
-      fallback: config.fallback,
-      onError: config.onError,
-      isolateFailures: config.isolate,
-    }, children);
-  });
-}
-```
-
-## Implementation Guidelines
-
-### 1. Bundler Integration Requirements
-
-All Module Federation bundler integrations must implement:
-
-1. **Error Code Support**: Support all standardized error codes
-2. **Retry Logic**: Implement configurable retry mechanisms
-3. **Circuit Breakers**: Include circuit breaker patterns for remote failures
-4. **Fallback Support**: Enable component and module-level fallbacks
-5. **Error Reporting**: Integrate with monitoring systems
-6. **Debug Information**: Provide detailed error context for development
-
-### 2. Runtime Integration
-
-```typescript
-interface RuntimeErrorConfig {
-  retryConfig: RetryConfig;
-  circuitBreakerConfig: CircuitBreakerConfig;
-  fallbackConfig: ModuleFallbackConfig;
-  errorReporter: ErrorReporter;
-  monitor: ModuleFederationMonitor;
-}
-
-function initializeErrorHandling(config: RuntimeErrorConfig): void {
-  // Initialize global error handling
-  setupGlobalErrorHandlers(config.errorReporter);
-  
-  // Configure retry mechanisms
-  setDefaultRetryConfig(config.retryConfig);
-  
-  // Initialize circuit breakers
-  initializeCircuitBreakers(config.circuitBreakerConfig);
-  
-  // Setup monitoring
-  setupMonitoring(config.monitor);
-}
-```
-
-### 3. Build-Time Integration
-
-```typescript
-interface BuildErrorConfig {
-  validateManifest: boolean;
-  strictTypeChecking: boolean;
-  failOnMissingRemotes: boolean;
-  generateErrorCodes: boolean;
-}
-
-function configureBuildErrorHandling(config: BuildErrorConfig): void {
-  // Configure build-time error handling
-  if (config.validateManifest) {
-    enableManifestValidation();
-  }
-  
-  if (config.strictTypeChecking) {
-    enableStrictTypeChecking();
-  }
-  
-  if (config.generateErrorCodes) {
-    enableErrorCodeGeneration();
-  }
-}
-```
-
-## Runtime Error Handling
-
-### 1. Module Loading Error Handling
-
-```typescript
-async function loadRemoteModule(
-  remoteName: string,
-  moduleName: string,
-  options: {
-    retry?: RetryConfig;
-    timeout?: number;
-    fallback?: any;
-  } = {}
-): Promise<any> {
-  const monitor = getModuleFederationMonitor();
-  const endTimer = monitor.startRemoteLoad(remoteName);
-  
-  try {
-    const result = await withTimeout(
-      retryWithBackoff(
-        () => __federation_method_getRemote(remoteName, moduleName),
-        options.retry || getDefaultRetryConfig(),
-        'RUNTIME-008'
-      ),
-      options.timeout || 30000
-    );
-    
-    endTimer();
-    return result;
-  } catch (error) {
-    endTimer();
-    const federationError = ensureModuleFederationError(error);
-    
-    monitor.recordError(federationError, {
-      remoteName,
-      moduleName,
-      operation: 'loadRemoteModule',
-    });
-    
-    // Try fallback if available
-    if (options.fallback) {
-      return options.fallback;
-    }
-    
-    throw federationError;
-  }
-}
-```
-
-### 2. Shared Module Error Handling
-
-```typescript
-async function loadSharedModule(
-  packageName: string,
-  version: string,
-  options: {
-    fallbackVersion?: string;
-    required?: boolean;
-  } = {}
-): Promise<any> {
-  try {
-    return await __federation_method_loadShare(packageName, version);
-  } catch (error) {
-    const federationError = ensureModuleFederationError(error);
-    
-    // Try fallback version
-    if (options.fallbackVersion) {
-      try {
-        return await __federation_method_loadShare(packageName, options.fallbackVersion);
-      } catch (fallbackError) {
-        // Log fallback failure but continue with original error
-        console.warn('Fallback version also failed:', fallbackError);
-      }
-    }
-    
-    // If not required, return null
-    if (!options.required) {
-      return null;
-    }
-    
-    throw new Error(`Failed to load shared module ${packageName}@${version}`, {
-      cause: federationError,
-    });
-  }
-}
-```
-
-## Build-Time Error Handling
-
-### 1. Configuration Validation
-
-```typescript
-function validateModuleFederationConfig(config: any): void {
-  if (!config.name) {
-    throw new Error('Module Federation configuration must include a name');
-  }
-  
-  if (config.exposes) {
-    for (const [key, path] of Object.entries(config.exposes)) {
-      if (typeof path !== 'string') {
-        throw new Error(`Invalid expose path for ${key}`);
-      }
-    }
-  }
-  
-  if (config.remotes) {
-    for (const [name, remote] of Object.entries(config.remotes)) {
-      if (typeof remote !== 'string' && typeof remote !== 'object') {
-        throw new Error(`Invalid remote configuration for ${name}`);
-      }
-    }
-  }
-}
-```
-
-### 2. Manifest Generation Error Handling
-
-```typescript
-function generateManifest(config: any): any {
-  try {
-    validateModuleFederationConfig(config);
-    
-    const manifest = {
-      name: config.name,
-      exposes: config.exposes || {},
-      remotes: config.remotes || {},
-      shared: config.shared || {},
-      version: config.version || '1.0.0',
-    };
-    
-    // Validate generated manifest
-    validateManifest(manifest);
-    
-    return manifest;
-  } catch (error) {
-    throw new Error('Failed to generate manifest', {
-      cause: ensureModuleFederationError(error),
-    });
-  }
-}
-
-function validateManifest(manifest: any): void {
-  if (!manifest.name || typeof manifest.name !== 'string') {
-    throw new Error('Manifest must have a valid name');
-  }
-  
-  // Additional validation logic...
-}
-```
-
----
-
-This specification provides a comprehensive framework for error handling in Module Federation implementations. Bundler teams should implement these patterns to ensure consistent, reliable error handling across different Module Federation environments.
+Monitoring, propagation, implementation guidelines, runtime examples, and build-time examples live in [error-monitoring-propagation.md](./error-monitoring-propagation.md).
 
 ## Related Documentation
 

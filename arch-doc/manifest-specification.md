@@ -45,17 +45,17 @@ The main federation manifest (`federation-manifest.json`) provides a complete vi
 
 ```typescript
 interface FederationManifest {
-  /** 
+  /**
    * Unique identifier for this federated application
    * Used for runtime instance identification
    */
   id: string;
-  
+
   /**
    * Human-readable name of the application
    */
   name: string;
-  
+
   /**
    * Metadata about the build and environment
    */
@@ -78,27 +78,27 @@ interface FederationManifest {
       version: string;
     };
   };
-  
+
   /**
    * Remote applications this host can consume
    */
   remotes: RemoteManifest[];
-  
+
   /**
    * Modules exposed by this application
    */
   exposes?: ExposeManifest[];
-  
+
   /**
    * Shared dependencies configuration
    */
   shared?: SharedManifest[];
-  
+
   /**
    * Runtime plugins to be loaded
    */
   runtimePlugins?: RuntimePluginManifest[];
-  
+
   /**
    * Performance and optimization hints
    */
@@ -245,7 +245,7 @@ interface MFManifest {
     target: 'web' | 'node' | 'webworker';
     timestamp?: number;
   };
-  
+
   /** Exposed modules */
   exposes: {
     [key: string]: {
@@ -266,7 +266,7 @@ interface MFManifest {
       };
     };
   };
-  
+
   /** Shared dependencies provided by this remote */
   shared?: {
     [packageName: string]: {
@@ -277,7 +277,7 @@ interface MFManifest {
       assets?: AssetInfo[];
     };
   };
-  
+
   /** Remote-specific runtime plugins */
   runtimePlugins?: RuntimePluginManifest[];
 }
@@ -291,7 +291,7 @@ Optional shared dependency manifest (`shared-manifest.json`):
 interface SharedManifest {
   /** Share scope name */
   scope: string;
-  
+
   /** Available shared packages */
   shared: {
     [packageName: string]: {
@@ -557,18 +557,18 @@ export function validateFederationManifest(manifest: any): FederationManifest {
   if (!manifest.id || typeof manifest.id !== 'string') {
     throw new Error('Invalid manifest: missing or invalid id');
   }
-  
+
   if (!manifest.metaData || !manifest.metaData.version) {
     throw new Error('Invalid manifest: missing metadata or version');
   }
-  
+
   // Validate remotes
   if (manifest.remotes) {
     manifest.remotes.forEach((remote: any, index: number) => {
       if (!remote.id || !remote.entry) {
         throw new Error(`Invalid remote at index ${index}: missing id or entry`);
       }
-      
+
       try {
         new URL(remote.entry);
       } catch {
@@ -576,7 +576,7 @@ export function validateFederationManifest(manifest: any): FederationManifest {
       }
     });
   }
-  
+
   return manifest as FederationManifest;
 }
 ```
