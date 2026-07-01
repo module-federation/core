@@ -33,6 +33,7 @@ concurrency:
 env:
   SITE_ORIGIN: https://module-federation.io
   ZE_SECRET_TOKEN: ${{ secrets.ZE_SECRET_TOKEN }}
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
 
 jobs:
   deploy:
@@ -67,12 +68,12 @@ jobs:
             ${{ runner.os }}-turbo-
 
       - name: Build and deploy website with Zephyr
-        if: ${{ env.ZE_SECRET_TOKEN != '' }}
-        run: pnpm run build:website
+        if: ${{ env.ZE_SECRET_TOKEN != '' && github.event.action != 'closed' }}
+        run: pnpm exec turbo run build --filter=website-new --only
 
       - name: Update Zephyr preview environment
         if: ${{ env.ZE_SECRET_TOKEN != '' && github.event_name == 'pull_request' }}
-        uses: ZephyrCloudIO/zephyr-preview-environment-action@v0.1.1
+        uses: ZephyrCloudIO/zephyr-preview-environment-action@b3ada4d42eb404c8af6da6299c1b0585d238fdd0 # main, pending Node 24 release
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
