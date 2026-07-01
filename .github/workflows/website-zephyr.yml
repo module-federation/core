@@ -69,7 +69,7 @@ jobs:
 
       - name: Build and deploy website with Zephyr
         if: ${{ env.ZE_SECRET_TOKEN != '' && github.event.action != 'closed' }}
-        run: pnpm exec turbo run build --filter=website-new --only
+        run: pnpm run build:website
 
       - name: Update Zephyr preview environment
         if: ${{ env.ZE_SECRET_TOKEN != '' && github.event_name == 'pull_request' }}
