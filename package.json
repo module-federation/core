@@ -58,7 +58,7 @@
     "app:next-router:build": "pnpm exec turbo run build --filter=app-router-4000 --filter=app-router-4001 --concurrency=20",
     "app:next-router:dev": "pnpm exec turbo run serve --filter=app-router-4000 --filter=app-router-4001",
     "serve:website": "pnpm --filter website-new run serve",
-    "build:website": "pnpm exec turbo run build --filter=@module-federation/bridge-react-webpack-plugin --filter=@module-federation/rspack --filter=@module-federation/enhanced --filter=@module-federation/sdk --filter=@module-federation/error-codes --filter=@module-federation/rsbuild-plugin --filter=@module-federation/rspress-plugin --filter=website-new --only",
+    "build:website": "pnpm exec turbo run build --filter=website-new",
     "extract-i18n:website": "pnpm --filter website-new run extract-i18n",
     "sync:webpack:types": "node ./scripts/sync-webpack-unbundled-types.mjs",
     "sync:pullMFTypes": "concurrently \"node ./packages/enhanced/pullts.js\"",
