@@ -831,6 +831,7 @@ Module loading flow, integration patterns, build/runtime boundaries, key runtime
 For comprehensive understanding, see:
 - [Architecture Overview](./architecture-overview.md) - System architecture and component relationships
 - [Plugin Architecture](./plugin-architecture.md) - Build-time integration patterns
+- [Shared Tree-Shaking Architecture](./shared-tree-shaking-architecture.md) - Shared dependency pruning and runtime candidate selection
 - [Implementation Guide](./implementation-guide.md) - Bundler integration steps
 - [SDK Reference](./sdk-reference.md) - Runtime interfaces, types, and utilities
 - [Manifest Specification](./manifest-specification.md) - Runtime manifest consumption patterns

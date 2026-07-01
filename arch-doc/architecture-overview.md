@@ -6,6 +6,7 @@ Module Federation is a runtime, build-time, type-generation, manifest, and tooli
 - [Repository Map and Canonical Ownership](#repository-map-and-canonical-ownership)
 - [Core Architecture](#core-architecture)
 - [Package Architecture](#package-architecture)
+- [Shared Tree-Shaking Architecture](./shared-tree-shaking-architecture.md)
 - [Runtime Layers](#runtime-layers)
 - [Build-Time Integration](#build-time-integration)
 - [Tooling, Examples, and CI](#tooling-examples-and-ci)
@@ -954,6 +955,7 @@ This architecture enables Module Federation to work across different bundlers wh
 For detailed implementation guidance, see:
 - [Plugin Architecture](./plugin-architecture.md) - Core plugin system design
 - [Runtime Architecture](./runtime-architecture.md) - Runtime behavior and lifecycle
+- [Shared Tree-Shaking Architecture](./shared-tree-shaking-architecture.md) - Shared dependency pruning, fallback assets, and runtime selection flows
 - [Implementation Guide](./implementation-guide.md) - Step-by-step implementation instructions
 - [SDK Reference](./sdk-reference.md) - Complete API documentation and interfaces
 - [Manifest Specification](./manifest-specification.md) - Manifest file formats and schemas

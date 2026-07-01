@@ -738,6 +738,7 @@ For comprehensive understanding, see:
 - [Architecture Overview](./architecture-overview.md) - System understanding and component relationships
 - [Plugin Architecture](./plugin-architecture.md) - Build-time plugin system details
 - [Runtime Architecture](./runtime-architecture.md) - Runtime behavior and lifecycle
+- [Shared Tree-Shaking Architecture](./shared-tree-shaking-architecture.md) - Build, runtime, and re-shake flow for shared dependency pruning
 - [SDK Reference](./sdk-reference.md) - All available types, interfaces, and utilities
 - [Manifest Specification](./manifest-specification.md) - Manifest generation and validation
 - [Error Handling Specification](./error-handling-specification.md) - Implementation error patterns

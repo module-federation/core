@@ -986,6 +986,7 @@ This architecture provides a robust foundation for implementing Module Federatio
 For comprehensive understanding, see:
 - [Architecture Overview](./architecture-overview.md) - High-level system architecture
 - [Runtime Architecture](./runtime-architecture.md) - Runtime behavior and lifecycle hooks
+- [Shared Tree-Shaking Architecture](./shared-tree-shaking-architecture.md) - Build/runtime flow for tree-shakable shared dependencies
 - [Implementation Guide](./implementation-guide.md) - Practical implementation steps
 - [SDK Reference](./sdk-reference.md) - Plugin interfaces and types
 - [Manifest Specification](./manifest-specification.md) - Build-time manifest generation
