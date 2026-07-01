@@ -6,8 +6,8 @@ Module Federation is a runtime, build-time, type-generation, manifest, and tooli
 - [Repository Map and Canonical Ownership](#repository-map-and-canonical-ownership)
 - [Core Architecture](#core-architecture)
 - [Package Architecture](#package-architecture)
+- [Layer Architecture](./layers-architecture.md)
 - [Shared Tree-Shaking Architecture](./shared-tree-shaking-architecture.md)
-- [Runtime Layers](#runtime-layers)
 - [Build-Time Integration](#build-time-integration)
 - [Tooling, Examples, and CI](#tooling-examples-and-ci)
 - [Key Integration Points](#key-integration-points)
@@ -128,128 +128,16 @@ graph TB
 
 ### Canonical Ownership Layers
 
-This table is the canonical package taxonomy for the architecture docs. Topic-specific documents should describe their local boundary and link back here instead of copying the full package map.
+The architecture docs use this package taxonomy as their shared map:
 
-| Layer | Packages | Responsibility |
-| --- | --- | --- |
-| Foundation and legacy utilities | `sdk`, `error-codes`, `utilities`, `core` | Shared types, manifest/snapshot helpers, environment utilities, React helper utilities, normalized webpack-path access, canonical error formatting, and legacy/simple runtime compatibility surfaces. |
-| Runtime contract | `runtime-core`, `runtime`, `webpack-bundler-runtime`, `runtime-tools` | Container-compatible loading, shared dependency negotiation, instance/global state, runtime hooks, and webpack runtime bridging. |
-| Build integrations | `enhanced`, `rspack`, `rsbuild-plugin`, `rspress-plugin`, `esbuild`, `metro`, Metro adapter packages | Convert bundler/framework config into remote entries, container references, share providers/consumers, manifests, runtime modules, Metro/Rock/RNEF/RNC-CLI behavior, and platform-specific loading. |
-| Platform adapters | `nextjs-mf`, `node`, `modern-js`, `modern-js-v3`, bridge packages, `storybook-addon`, native-federation packages | Bind the build/runtime contract to framework lifecycles, SSR/server execution, React/Vue bridge rendering, native federation validation/type flows, Storybook, and application-specific conventions. |
-| Metadata and type tooling | `manifest`, `managers`, `dts-plugin`, `third-party-dts-extractor`, `typescript`, `cli`, `create-module-federation` | Generate and consume manifests/stats, derive normalized config, publish/consume federated types, and expose CLI/scaffolding flows. |
-| Observability and resilience | `observability-plugin`, `retry-plugin`, `devtools` | Runtime visibility, retry/fallback behavior, dependency graph UI, and browser extension/debugging surfaces. |
-| Validation and product surfaces | `apps/*`, `playground`, `website-new`, `treeshake-*`, `assemble-release-plan`, `webpack/` | Examples, e2e fixtures, docs/playground delivery, federated tree-shaking services/UI, release planning, and compatibility fixtures. |
+- Foundation and legacy utilities: `sdk`, `error-codes`, `utilities`, `core`
+- Runtime contract: `runtime-core`, `runtime`, `webpack-bundler-runtime`, `runtime-tools`
+- Build integrations: `enhanced`, `rspack`, `rsbuild-plugin`, `rspress-plugin`, `esbuild`, `metro`, Metro adapter packages
+- Platform adapters: `nextjs-mf`, `node`, `modern-js`, bridge packages, `storybook-addon`, native federation packages
+- Metadata and type tooling: `manifest`, `managers`, `dts-plugin`, `third-party-dts-extractor`, `typescript`, `cli`, `create-module-federation`
+- Observability and validation surfaces: runtime plugins, devtools, `apps/*`, `playground`, `website-new`, `treeshake-*`, release tooling, and `webpack/`
 
-The core architectural intent is to preserve the webpack container contract (`init`, `get`, share scopes, remote entries) while moving policy into reusable layers: runtime-core owns dynamic loading semantics, build integrations own bundler interception/codegen, metadata packages own manifest/type artifacts, and platform adapters own framework-specific lifecycle details.
-
-### Layer Interaction Flow
-
-The layers are not just package groups; they form a one-way contract pipeline. Configuration moves down into build-time code generation, build metadata moves sideways into manifests and DTS artifacts, and runtime layers consume normalized records rather than raw bundler internals.
-
-```mermaid
-flowchart LR
-    subgraph Authoring["Authoring Layer"]
-        UserConfig["module federation config<br/>remotes, exposes, shared, dts, manifest"]
-        AppCode["application imports<br/>remote requests and shared packages"]
-    end
-
-    subgraph Normalize["Normalization and Metadata Layer"]
-        Managers["managers<br/>normalized plugin options"]
-        SDKTypes["sdk<br/>types, path helpers, manifest helpers"]
-        Manifest["manifest<br/>stats and snapshot artifacts"]
-        DTS["dts-plugin<br/>federated type artifacts"]
-    end
-
-    subgraph Build["Build Integration Layer"]
-        Enhanced["enhanced / rspack<br/>container, reference, share plugins"]
-        PlatformBuild["rsbuild, rspress, modern, next, node, metro, esbuild<br/>framework hooks"]
-        RuntimeModules["generated runtime modules<br/>remote entries, share init, tree-shaking metadata"]
-    end
-
-    subgraph RuntimeLayer["Runtime Contract Layer"]
-        BundlerRuntime["webpack-bundler-runtime<br/>bundler bridge"]
-        Runtime["runtime<br/>singleton API"]
-        RuntimeCore["runtime-core<br/>remote, shared, snapshot handlers"]
-        GlobalState["global federation state<br/>instances, share scopes, manifests"]
-    end
-
-    UserConfig --> Managers
-    UserConfig --> PlatformBuild
-    AppCode --> Enhanced
-    Managers --> Enhanced
-    SDKTypes --> Managers
-    SDKTypes --> Manifest
-    Enhanced --> RuntimeModules
-    Enhanced --> Manifest
-    Enhanced --> DTS
-    PlatformBuild --> Enhanced
-    PlatformBuild --> Manifest
-    RuntimeModules --> BundlerRuntime
-    Manifest --> RuntimeCore
-    BundlerRuntime --> Runtime
-    Runtime --> RuntimeCore
-    RuntimeCore --> GlobalState
-    GlobalState --> AppCode
-
-    style UserConfig fill:#fff2cc,stroke:#333,stroke-width:2px
-    style Enhanced fill:#f8cecc,stroke:#333,stroke-width:2px
-    style Manifest fill:#d5e8d4,stroke:#333,stroke-width:2px
-    style RuntimeCore fill:#dae8fc,stroke:#333,stroke-width:3px
-```
-
-Two rules keep this pipeline maintainable:
-
-- Build integrations may inspect bundler-specific objects, but they should emit normalized runtime data, manifest records, or generated runtime modules before crossing into runtime packages.
-- Runtime packages should negotiate remotes and shared dependencies through `runtime-core` handlers and hooks. Platform adapters can add loading mechanics, but they should not invent a different container or share-scope contract.
-
-### Layer Handoff Sequence
-
-```mermaid
-sequenceDiagram
-    participant Author as App / Package Author
-    participant Adapter as Platform Adapter
-    participant Build as Build Integration
-    participant Metadata as Metadata Layer
-    participant Bridge as Bundler Runtime Bridge
-    participant Runtime as Runtime Layer
-    participant Core as Runtime Core
-
-    Author->>Adapter: framework config and federation options
-    Adapter->>Build: normalized bundler hooks and environment targets
-    Build->>Metadata: remotes, exposes, shared, assets, type settings
-    Metadata-->>Build: manifest, stats, DTS, normalized manager output
-    Build->>Bridge: generated remote entries and runtime modules
-    Bridge->>Runtime: loadRemote / loadShare calls
-    Runtime->>Core: ModuleFederation instance methods
-    Core->>Core: RemoteHandler, SharedHandler, SnapshotHandler
-    Core-->>Runtime: normalized module factory or shared factory
-    Runtime-->>Bridge: runtime result
-    Bridge-->>Author: application import resolves
-```
-
-### Cross-Layer Feature Example: Shared Tree Shaking
-
-Shared tree shaking is the clearest example of a feature spanning multiple layers without breaking ownership boundaries:
-
-```mermaid
-flowchart TD
-    Config["shared package config<br/>treeShaking mode and usedExports"] --> BuildPlugin["TreeShakingSharedPlugin"]
-    BuildPlugin --> ExportAnalysis["SharedUsedExportsOptimizerPlugin<br/>collect referenced exports"]
-    BuildPlugin --> FallbackBuild["IndependentSharedPlugin<br/>child builds for shared fallbacks"]
-    ExportAnalysis --> UsedExportsRuntime["runtime module writes<br/>federation usedExports"]
-    FallbackBuild --> FallbackAssets["independent shared assets<br/>independent-packages/<share>"]
-    FallbackBuild --> FallbackRuntime["runtime module writes<br/>sharedFallback and libraryType"]
-    FallbackAssets --> ManifestStats["stats and manifest fallback fields"]
-    ManifestStats --> Snapshot["runtime snapshot / manifest data"]
-    UsedExportsRuntime --> RuntimeShare["runtime-core SharedHandler"]
-    FallbackRuntime --> RuntimeShare
-    Snapshot --> RuntimeShare
-    RuntimeShare --> Decision["shouldUseTreeShaking<br/>status, mode, requested exports"]
-    Decision --> Pruned["load pruned shared factory"]
-    Decision --> Full["fall back to normal shared factory"]
-```
-
-The important boundary is that webpack/rspack plugins perform graph analysis and asset generation, while `runtime-core` only decides whether a registered shared candidate is usable for the current request. This is why `runtime-infer` and `server-calc` can share the same runtime shape even though one depends on locally inferred used exports and the other depends on externally produced snapshot/fallback artifacts.
+For the rich ownership table, layer handoff sequence, and layer-aware sharing diagrams, see [Layer Architecture](./layers-architecture.md). For the feature that crosses the most layers, see [Shared Tree-Shaking Architecture](./shared-tree-shaking-architecture.md).
 
 ## Core Architecture
 
@@ -823,53 +711,6 @@ sequenceDiagram
     RC->>R: Module/Error
     R->>BR: Module/Error
     BR->>App: Component/Error
-```
-
-### Shared Dependency Loading Flow
-
-```mermaid
-sequenceDiagram
-    participant App as Application
-    participant BR as Bundler Runtime
-    participant R as Runtime Layer
-    participant RC as Runtime Core
-    participant SH as SharedHandler
-    participant Scope as Share Scope Map
-    participant Hooks as Share Hooks
-    participant Provider as Shared Provider
-
-    App->>BR: import shared package
-    BR->>BR: consumes() resolves shareKey and usedExports
-    BR->>R: federation.loadShare('react', customShareInfo)
-    R->>RC: instance.loadShare('react')
-    RC->>SH: sharedHandler.loadShare('react')
-
-    SH->>Hooks: beforeLoadShare(pkgName, shareInfo, shared)
-    Hooks-->>SH: possibly updated share info
-    SH->>Scope: read share candidates by scope, package, version
-
-    alt no candidate registered
-        SH->>Hooks: errorLoadShare(lifecycle: loadShare)
-        Hooks-->>SH: optional recovery
-        SH-->>RC: false or recovered factory
-    else candidates available
-        SH->>SH: apply shareStrategy<br/>version-first or loaded-first
-        SH->>SH: enforce singleton and requiredVersion
-        alt treeShaking metadata exists
-            SH->>SH: shouldUseTreeShaking(status, mode, usedExports)
-            SH->>Provider: choose tree-shaken get/lib when valid
-        else normal shared
-            SH->>Provider: choose normal get/lib
-        end
-        SH->>Hooks: resolveShare(candidate resolver)
-        Hooks-->>SH: selected shared candidate
-        SH->>Hooks: loadShare(origin, pkgName, ShareInfos)
-        SH-->>RC: shared factory
-    end
-
-    RC-->>R: factory or false
-    R-->>BR: factory or fallback result
-    BR-->>App: shared module exports
 ```
 
 ### Snapshot Optimization System

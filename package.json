@@ -198,6 +198,7 @@
     "@commitlint/cz-commitlint": "19.5.0",
     "@fontsource/roboto": "5.1.0",
     "@fontsource/roboto-mono": "5.1.0",
+    "@mermaid-js/mermaid-cli": "11.16.0",
     "@playwright/test": "1.57.0",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.15",
     "@rollup/plugin-alias": "5.1.1",

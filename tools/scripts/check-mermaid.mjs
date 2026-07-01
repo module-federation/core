@@ -177,7 +177,10 @@ function resolveMmdcCommand() {
     return { command: localMmdc, args: [] };
   }
 
-  return { command: 'pnpm', args: ['dlx', '@mermaid-js/mermaid-cli'] };
+  console.error(
+    '[check-mermaid] Missing local Mermaid CLI. Run `pnpm install --frozen-lockfile` before running this check.',
+  );
+  process.exit(1);
 }
 
 function resolvePuppeteerEnv() {

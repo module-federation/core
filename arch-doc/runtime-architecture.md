@@ -201,29 +201,7 @@ class SharedHandler {
 
 Runtime-core does not analyze the module graph. It receives normalized shared records with optional `treeShaking` metadata and decides whether a tree-shaken candidate is valid for a specific `loadShare` request. The build layer may have produced `usedExports`, fallback factories, or manifest snapshot fields, but the runtime decision still happens inside the same shared resolver that enforces version, singleton, and strategy rules.
 
-```mermaid
-flowchart TD
-    Register["registerShared / init options"] --> Format["formatShareConfigs"]
-    Format --> ShareInfo["ShareInfos<br/>version, scope, strategy, treeShaking"]
-    Load["loadShare(pkgName)"] --> Target["getTargetSharedOptions"]
-    ShareInfo --> Target
-    Target --> Strategy{"share strategy"}
-    Strategy -->|"version-first"| VersionOrder["findSingletonVersionOrderByVersion"]
-    Strategy -->|"loaded-first"| LoadedOrder["findSingletonVersionOrderByLoaded"]
-    VersionOrder --> Candidate["candidate shared version"]
-    LoadedOrder --> Candidate
-    Candidate --> UseTree{"shouldUseTreeShaking"}
-    UseTree -->|"NO_USE or unknown server-calc"| Normal["normal shared factory"]
-    UseTree -->|"CALCULATED"| Pruned["tree-shaken shared factory"]
-    UseTree -->|"runtime-infer"| MatchExports{"usedExports match request"}
-    MatchExports -->|"yes"| Pruned
-    MatchExports -->|"no"| Normal
-    Pruned --> Hooks["resolveShare / loadShare hooks"]
-    Normal --> Hooks
-    Hooks --> Return["factory returned to caller"]
-```
-
-The decision inputs map directly to `TreeShakingArgs`: `mode` distinguishes `server-calc` from `runtime-infer`, `status` distinguishes calculated/no-use/unknown states, `usedExports` describes the export subset, and `get` or `lib` provides the candidate factory. `formatShare` defaults tree-shaking mode to `server-calc` when tree-shaking metadata exists, and rejects the invalid combination of `eager: true` with a tree-shaking mode. If a tree-shaken candidate cannot satisfy the requested version or export subset, runtime-core falls back to the normal shared candidate search instead of failing the load immediately.
+The runtime-specific invariant is small: `formatShare` defaults tree-shaking mode to `server-calc` when tree-shaking metadata exists, rejects `eager: true` with tree-shaking mode, and falls back to the normal shared candidate search when a tree-shaken candidate cannot satisfy the requested version or export subset. For the full decision diagram and mode semantics, see [Shared Tree-Shaking Architecture](./shared-tree-shaking-architecture.md).
 
 #### RemoteHandler - Module Loading
 ```typescript
