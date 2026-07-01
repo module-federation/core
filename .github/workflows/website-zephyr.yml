@@ -1,0 +1,82 @@
+name: Website Zephyr Deploy
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches: [main]
+    paths:
+      - 'apps/website-new/**'
+      - 'packages/rspress-plugin/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'turbo.json'
+      - '.github/workflows/website-zephyr.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/website-new/**'
+      - 'packages/rspress-plugin/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'turbo.json'
+      - '.github/workflows/website-zephyr.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  SITE_ORIGIN: https://module-federation.io
+  ZE_SECRET_TOKEN: ${{ secrets.ZE_SECRET_TOKEN }}
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Restore Turborepo cache
+        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
+        with:
+          path: .turbo/cache
+          key: ${{ runner.os }}-turbo-${{ github.ref_name }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-${{ github.ref_name }}-
+            ${{ runner.os }}-turbo-
+
+      - name: Build and deploy website with Zephyr
+        if: ${{ env.ZE_SECRET_TOKEN != '' && github.event.action != 'closed' }}
+        run: pnpm run build:website
+
+      - name: Update Zephyr preview environment
+        if: ${{ env.ZE_SECRET_TOKEN != '' && github.event_name == 'pull_request' }}
+        uses: ZephyrCloudIO/zephyr-preview-environment-action@b3ada4d42eb404c8af6da6299c1b0585d238fdd0 # main, pending Node 24 release
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Skip Zephyr deploy without token
+        if: ${{ env.ZE_SECRET_TOKEN == '' }}
+        run: echo "ZE_SECRET_TOKEN is not available for this workflow run; skipping Zephyr deploy."

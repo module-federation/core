@@ -1,4 +1,5 @@
 import * as path from 'path';
+import { withZephyr } from 'zephyr-rspress-plugin';
 import { defineConfig } from '@rspress/core';
 import { moduleFederationPluginOverview } from './src/moduleFederationPluginOverview';
 // import { pluginAnnotationWords } from 'rspress-plugin-annotation-words';
@@ -7,9 +8,7 @@ import { pluginModuleFederation } from '@module-federation/rspress-plugin';
 import mfConfig from './module-federation.config';
 
 const siteOrigin = (
-  process.env.CONTEXT === 'deploy-preview' && process.env.DEPLOY_PRIME_URL
-    ? process.env.DEPLOY_PRIME_URL
-    : 'https://module-federation.io'
+  process.env.SITE_ORIGIN || 'https://module-federation.io'
 ).replace(/\/$/, '');
 const siteIcon = '/svg.svg';
 const socialImageUrl = `${siteOrigin}/module-federation-social.svg`;
@@ -80,14 +79,12 @@ export default defineConfig({
     //   wordsMapPath: 'words-map.json',
     // }),
     pluginModuleFederation(mfConfig),
+    withZephyr(),
   ],
   builderConfig: {
     plugins: [moduleFederationPluginOverview, pluginSass()],
     output: {
-      assetPrefix:
-        process.env.CONTEXT === 'deploy-preview'
-          ? process.env.DEPLOY_PRIME_URL
-          : 'https://module-federation.io/',
+      assetPrefix: `${siteOrigin}/`,
     },
     dev: {
       assetPrefix: true,
