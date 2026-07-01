@@ -412,6 +412,73 @@ class SharePlugin {
 }
 ```
 
+### Shared Tree-Shaking Build Pipeline
+
+Shared tree shaking extends normal `SharePlugin` behavior without changing the container contract. The build layer is responsible for discovering which shared exports are actually referenced and for emitting optional fallback assets. The runtime layer later consumes that metadata through the same shared registration shape used by ordinary shared dependencies.
+
+```mermaid
+flowchart TD
+    SharedConfig["shared config<br/>treeShaking enabled"] --> TreePlugin["TreeShakingSharedPlugin"]
+
+    TreePlugin -->|"non-secondary build"| UsedExportsPlugin["SharedUsedExportsOptimizerPlugin"]
+    UsedExportsPlugin --> DependencyExports["dependencyReferencedExports hook<br/>collect named shared exports"]
+    DependencyExports --> OptimizeDeps["optimizeDependencies hook<br/>mark only referenced exports used"]
+    OptimizeDeps --> UsedExportsRuntime["SharedUsedExportsOptimizerRuntimeModule<br/>writes federation usedExports"]
+
+    TreePlugin --> IndependentPlugin["IndependentSharedPlugin"]
+    IndependentPlugin --> CollectEntries["CollectSharedEntryPlugin<br/>discover shared requests"]
+    CollectEntries --> ChildCompilers["child webpack compilers<br/>one output per shared request"]
+    ChildCompilers --> SharedContainer["SharedContainerPlugin<br/>shared package as container"]
+    SharedContainer --> FallbackAsset["independent-packages/<share>/<asset>.js"]
+    FallbackAsset --> StatsPatch["stats manifest patch<br/>fallback and fallbackName"]
+    IndependentPlugin --> FallbackRuntime["IndependentSharedRuntimeModule<br/>writes sharedFallback and libraryType"]
+
+    UsedExportsRuntime --> RuntimeDecision["runtime-core shared resolver"]
+    FallbackRuntime --> RuntimeDecision
+    StatsPatch --> RuntimeDecision
+```
+
+The source ownership is intentionally split:
+
+- `TreeShakingSharedPlugin` decides whether a shared config participates and wires the optimizer plus independent shared build path.
+- `SharedUsedExportsOptimizerPlugin` listens to webpack's referenced-export information, applies `treeShaking.usedExports` overrides, requires the real shared module to be side-effect free before pruning, and marks only selected exports as used.
+- `IndependentSharedPlugin` creates child compilers for tree-shakable shared requests, filters out federation/HTML/plugins that would recurse, emits `independent-packages`, and patches stats/manifest shared records with fallback asset information.
+- `IndependentSharedRuntimeModule` and `SharedUsedExportsOptimizerRuntimeModule` publish the generated fallback map and used-export list into the federation global for runtime consumption.
+- `webpack-bundler-runtime` bridges those globals back into runtime share records: fallback assets wrap the normal shared getter instead of deleting it, and consume metadata injects `treeShaking.usedExports` before `runtime-core` resolves the candidate.
+
+There are two operational modes:
+
+| Mode | Where export knowledge comes from | Primary use | Runtime behavior |
+| --- | --- | --- | --- |
+| `runtime-infer` | Build/runtime-injected used-export metadata plus optional `treeShaking.usedExports` config. | No external re-shake server; the host infers a safe pruned subset. | `runtime-core` allows tree shaking when the candidate has compatible `usedExports`, otherwise falls back to normal shared resolution. |
+| `server-calc` | Precomputed independent shared assets and snapshot/manifest metadata from the re-shake flow. | Precise shared pruning when fallback artifacts can be built and served. | `runtime-core` treats `CALCULATED` tree-shaking candidates as usable and loads the pruned factory when version and singleton rules also match. |
+
+Important constraints:
+
+- `eager: true` and `treeShaking.mode` are mutually exclusive in runtime share formatting.
+- If a real shared module is not marked side-effect free, the optimizer clears the referenced export set instead of pretending pruning is safe.
+- Multiple resolved versions can produce multiple fallback entries for the same shared package. The independent build path records `[asset, version, globalName]` entries so runtime can still select by version rules before preferring a pruned factory.
+- Tree-shaking candidates still pass through normal version, singleton, `requiredVersion`, and `shareStrategy` resolution. Pruned shared factories are a candidate preference, not a bypass around shared dependency negotiation.
+
+### Layer-Aware Sharing
+
+Shared `layer` and `issuerLayer` are build-time routing hints. They let framework integrations, especially Next.js and SSR-capable adapters, keep server/client or framework-specific sharing boundaries separate while still emitting ordinary shared records for the runtime.
+
+```mermaid
+flowchart LR
+    Framework["framework adapter<br/>server/client/runtime layer names"] --> SharedConfig["SharedConfig<br/>layer and issuerLayer"]
+    SharedConfig --> SharePlugin["SharePlugin<br/>consume and provide maps"]
+    SharePlugin --> Provide["ProvideSharedPlugin<br/>match module.layer"]
+    SharePlugin --> Consume["ConsumeSharedPlugin<br/>match contextInfo.issuerLayer"]
+    Provide --> ProvidedModule["provided shared module<br/>layer-scoped"]
+    Consume --> ConsumedModule["consume shared module<br/>issuer-scoped"]
+    ProvidedModule --> RuntimeBridge["webpack-bundler-runtime<br/>preserve shareConfig.layer"]
+    ConsumedModule --> RuntimeBridge
+    RuntimeBridge --> RuntimeCore["runtime-core<br/>version and scope negotiation"]
+```
+
+Use layer fields when a bundler/framework has separate compilation surfaces that should not accidentally consume each other's shared implementation. Do not use them as a runtime policy replacement: runtime-core still sees normalized shared candidates and resolves them through scope, version, singleton, and strategy semantics.
+
 ## Webpack Integration Patterns
 
 ### Module Resolution Interception

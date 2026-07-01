@@ -198,6 +198,34 @@ class SharedHandler {
 }
 ```
 
+#### Shared Tree-Shaking Resolution
+
+Runtime-core does not analyze the module graph. It receives normalized shared records with optional `treeShaking` metadata and decides whether a tree-shaken candidate is valid for a specific `loadShare` request. The build layer may have produced `usedExports`, fallback factories, or manifest snapshot fields, but the runtime decision still happens inside the same shared resolver that enforces version, singleton, and strategy rules.
+
+```mermaid
+flowchart TD
+    Register["registerShared / init options"] --> Format["formatShareConfigs"]
+    Format --> ShareInfo["ShareInfos<br/>version, scope, strategy, treeShaking"]
+    Load["loadShare(pkgName)"] --> Target["getTargetSharedOptions"]
+    ShareInfo --> Target
+    Target --> Strategy{"share strategy"}
+    Strategy -->|"version-first"| VersionOrder["findSingletonVersionOrderByVersion"]
+    Strategy -->|"loaded-first"| LoadedOrder["findSingletonVersionOrderByLoaded"]
+    VersionOrder --> Candidate["candidate shared version"]
+    LoadedOrder --> Candidate
+    Candidate --> UseTree{"shouldUseTreeShaking"}
+    UseTree -->|"NO_USE or unknown server-calc"| Normal["normal shared factory"]
+    UseTree -->|"CALCULATED"| Pruned["tree-shaken shared factory"]
+    UseTree -->|"runtime-infer"| MatchExports{"usedExports match request"}
+    MatchExports -->|"yes"| Pruned
+    MatchExports -->|"no"| Normal
+    Pruned --> Hooks["resolveShare / loadShare hooks"]
+    Normal --> Hooks
+    Hooks --> Return["factory returned to caller"]
+```
+
+The decision inputs map directly to `TreeShakingArgs`: `mode` distinguishes `server-calc` from `runtime-infer`, `status` distinguishes calculated/no-use/unknown states, `usedExports` describes the export subset, and `get` or `lib` provides the candidate factory. `formatShare` defaults tree-shaking mode to `server-calc` when tree-shaking metadata exists, and rejects the invalid combination of `eager: true` with a tree-shaking mode. If a tree-shaken candidate cannot satisfy the requested version or export subset, runtime-core falls back to the normal shared candidate search instead of failing the load immediately.
+
 #### RemoteHandler - Module Loading
 ```typescript
 class RemoteHandler {
@@ -583,13 +611,36 @@ hooks = new PluginSystem({
 ```typescript
 loaderHook = new PluginSystem({
   getModuleInfo: new SyncHook<[{ target: Record<string, any>; key: any; }], { value: any | undefined; key: string } | void>('getModuleInfo'),
-  createScript: new SyncHook<[{ url: string; attrs?: Record<string, any>; }], CreateScriptHookReturn>('createScript'),
-  createLink: new SyncHook<[{ url: string; attrs?: Record<string, any>; }], HTMLLinkElement | void>('createLink'),
-  fetch: new AsyncHook<[string, RequestInit], Promise<Response> | void | false>('fetch'),
+  createScript: new SyncHook<[{
+    url: string;
+    attrs?: Record<string, any>;
+    remoteInfo?: RemoteInfo;
+    resourceContext?: ResourceLoadContext;
+  }], CreateScriptHookReturn>('createScript'),
+  createLink: new SyncHook<[{
+    url: string;
+    attrs?: Record<string, any>;
+    remoteInfo?: RemoteInfo;
+    resourceContext?: ResourceLoadContext;
+  }], CreateLinkHookReturnDom>('createLink'),
+  fetch: new AsyncHook<[string, RequestInit, RemoteInfo?, ResourceLoadContext?], Promise<Response> | void | false>('fetch'),
   loadEntryError: new AsyncHook<[{
+    getRemoteEntry: typeof getRemoteEntry;
+    origin: ModuleFederation;
     remoteInfo: RemoteInfo;
-    error: any;
-  }], Promise<(() => Promise<RemoteEntryExports | undefined>) | undefined>>('loadEntryError'),
+    remoteEntryExports?: RemoteEntryExports;
+    globalLoading: Record<string, Promise<void | RemoteEntryExports> | undefined>;
+    uniqueKey: string;
+  }], Promise<Promise<RemoteEntryExports | undefined> | undefined>>('loadEntryError'),
+  afterLoadEntry: new AsyncHook<[{
+    origin: ModuleFederation;
+    remoteInfo: RemoteInfo;
+    remoteEntryExports?: RemoteEntryExports | false | void;
+    error?: unknown;
+    recovered?: boolean;
+  }], void>('afterLoadEntry'),
+  beforeInitRemote: new AsyncHook<[{ id?: string; remoteInfo: RemoteInfo; remoteSnapshot?: ModuleInfo; origin: ModuleFederation; }], void>('beforeInitRemote'),
+  afterInitRemote: new AsyncHook<[{ id?: string; remoteInfo: RemoteInfo; remoteSnapshot?: ModuleInfo; remoteEntryExports?: RemoteEntryExports; error?: unknown; cached?: boolean; origin: ModuleFederation; }], void>('afterInitRemote'),
   getModuleFactory: new AsyncHook<[{
     remoteEntryExports: RemoteEntryExports;
     expose: string;
@@ -597,6 +648,8 @@ loaderHook = new PluginSystem({
   }], Promise<(() => Promise<Module>) | undefined>>('getModuleFactory'),
 });
 ```
+
+`remoteInfo` and `resourceContext` let plugins distinguish a manifest fetch from a remote-entry/script/css load and whether the request came from `loadRemote` or `preloadRemote`. Recovery is split across `loadEntryError`, which can supply a replacement remote-entry promise, and `afterLoadEntry`, which observes success, failure, and recovered entry-load states.
 
 #### Bridge Hook System
 ```typescript

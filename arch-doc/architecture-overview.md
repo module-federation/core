@@ -141,6 +141,90 @@ This table is the canonical package taxonomy for the architecture docs. Topic-sp
 
 The core architectural intent is to preserve the webpack container contract (`init`, `get`, share scopes, remote entries) while moving policy into reusable layers: runtime-core owns dynamic loading semantics, build integrations own bundler interception/codegen, metadata packages own manifest/type artifacts, and platform adapters own framework-specific lifecycle details.
 
+### Layer Interaction Flow
+
+The layers are not just package groups; they form a one-way contract pipeline. Configuration moves down into build-time code generation, build metadata moves sideways into manifests and DTS artifacts, and runtime layers consume normalized records rather than raw bundler internals.
+
+```mermaid
+flowchart LR
+    subgraph Authoring["Authoring Layer"]
+        UserConfig["module federation config<br/>remotes, exposes, shared, dts, manifest"]
+        AppCode["application imports<br/>remote requests and shared packages"]
+    end
+
+    subgraph Normalize["Normalization and Metadata Layer"]
+        Managers["managers<br/>normalized plugin options"]
+        SDKTypes["sdk<br/>types, path helpers, manifest helpers"]
+        Manifest["manifest<br/>stats and snapshot artifacts"]
+        DTS["dts-plugin<br/>federated type artifacts"]
+    end
+
+    subgraph Build["Build Integration Layer"]
+        Enhanced["enhanced / rspack<br/>container, reference, share plugins"]
+        PlatformBuild["rsbuild, rspress, modern, next, node, metro, esbuild<br/>framework hooks"]
+        RuntimeModules["generated runtime modules<br/>remote entries, share init, tree-shaking metadata"]
+    end
+
+    subgraph RuntimeLayer["Runtime Contract Layer"]
+        BundlerRuntime["webpack-bundler-runtime<br/>bundler bridge"]
+        Runtime["runtime<br/>singleton API"]
+        RuntimeCore["runtime-core<br/>remote, shared, snapshot handlers"]
+        GlobalState["global federation state<br/>instances, share scopes, manifests"]
+    end
+
+    UserConfig --> Managers
+    UserConfig --> PlatformBuild
+    AppCode --> Enhanced
+    Managers --> Enhanced
+    SDKTypes --> Managers
+    SDKTypes --> Manifest
+    Enhanced --> RuntimeModules
+    Enhanced --> Manifest
+    Enhanced --> DTS
+    PlatformBuild --> Enhanced
+    PlatformBuild --> Manifest
+    RuntimeModules --> BundlerRuntime
+    Manifest --> RuntimeCore
+    BundlerRuntime --> Runtime
+    Runtime --> RuntimeCore
+    RuntimeCore --> GlobalState
+    GlobalState --> AppCode
+
+    style UserConfig fill:#fff2cc,stroke:#333,stroke-width:2px
+    style Enhanced fill:#f8cecc,stroke:#333,stroke-width:2px
+    style Manifest fill:#d5e8d4,stroke:#333,stroke-width:2px
+    style RuntimeCore fill:#dae8fc,stroke:#333,stroke-width:3px
+```
+
+Two rules keep this pipeline maintainable:
+
+- Build integrations may inspect bundler-specific objects, but they should emit normalized runtime data, manifest records, or generated runtime modules before crossing into runtime packages.
+- Runtime packages should negotiate remotes and shared dependencies through `runtime-core` handlers and hooks. Platform adapters can add loading mechanics, but they should not invent a different container or share-scope contract.
+
+### Cross-Layer Feature Example: Shared Tree Shaking
+
+Shared tree shaking is the clearest example of a feature spanning multiple layers without breaking ownership boundaries:
+
+```mermaid
+flowchart TD
+    Config["shared package config<br/>treeShaking mode and usedExports"] --> BuildPlugin["TreeShakingSharedPlugin"]
+    BuildPlugin --> ExportAnalysis["SharedUsedExportsOptimizerPlugin<br/>collect referenced exports"]
+    BuildPlugin --> FallbackBuild["IndependentSharedPlugin<br/>child builds for shared fallbacks"]
+    ExportAnalysis --> UsedExportsRuntime["runtime module writes<br/>federation usedExports"]
+    FallbackBuild --> FallbackAssets["independent shared assets<br/>independent-packages/<share>"]
+    FallbackBuild --> FallbackRuntime["runtime module writes<br/>sharedFallback and libraryType"]
+    FallbackAssets --> ManifestStats["stats and manifest fallback fields"]
+    ManifestStats --> Snapshot["runtime snapshot / manifest data"]
+    UsedExportsRuntime --> RuntimeShare["runtime-core SharedHandler"]
+    FallbackRuntime --> RuntimeShare
+    Snapshot --> RuntimeShare
+    RuntimeShare --> Decision["shouldUseTreeShaking<br/>status, mode, requested exports"]
+    Decision --> Pruned["load pruned shared factory"]
+    Decision --> Full["fall back to normal shared factory"]
+```
+
+The important boundary is that webpack/rspack plugins perform graph analysis and asset generation, while `runtime-core` only decides whether a registered shared candidate is usable for the current request. This is why `runtime-infer` and `server-calc` can share the same runtime shape even though one depends on locally inferred used exports and the other depends on externally produced snapshot/fallback artifacts.
+
 ## Core Architecture
 
 Module Federation consists of a **layered package architecture** that enables dynamic module sharing across different bundlers and environments:

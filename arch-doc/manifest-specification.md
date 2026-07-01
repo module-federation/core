@@ -25,6 +25,40 @@ Use `architecture-overview.md` for the canonical repo-wide package taxonomy. Thi
 
 The manifest is an interoperability artifact, not a replacement for the remote container contract. A remote still needs a loadable entry with `init` and `get`; the manifest makes the entry discoverable, enriches it with asset/type/shared metadata, and gives the runtime enough information to preload or resolve snapshots safely.
 
+### Manifest Production and Consumption Flow
+
+Manifest data crosses three ownership boundaries: build-time collection, artifact publication, and runtime snapshot consumption. The build integration owns compiler hooks and asset emission; the manifest package owns stats-to-manifest shaping; runtime-core owns fetching, caching, and converting manifests into remote snapshot data.
+
+```mermaid
+sequenceDiagram
+    participant Compiler as Bundler Compiler
+    participant StatsPlugin
+    participant StatsManager
+    participant ModuleHandler
+    participant ManifestManager
+    participant Artifact as mf-manifest.json
+    participant SnapshotHandler
+    participant SDK as SDK Snapshot Helpers
+    participant RemoteHandler
+
+    Compiler->>StatsPlugin: processAssets
+    StatsPlugin->>StatsManager: collect compilation stats
+    StatsManager->>ModuleHandler: collect exposes, remotes, shared, assets
+    ModuleHandler-->>StatsManager: normalized stats records
+    StatsManager->>ManifestManager: generate manifest input
+    ManifestManager-->>StatsPlugin: manifest with exposes, shared, remotes
+    StatsPlugin->>Artifact: emit stats and manifest assets
+
+    RemoteHandler->>SnapshotHandler: loadRemoteSnapshotInfo
+    SnapshotHandler->>Artifact: fetch/cache manifest JSON
+    SnapshotHandler->>SDK: generateSnapshotFromManifest
+    SDK-->>SnapshotHandler: ProviderModuleInfo snapshot
+    SnapshotHandler-->>RemoteHandler: global and remote snapshot data
+    RemoteHandler->>RemoteHandler: choose entry, assets, shared metadata
+```
+
+Recent architecture changes make this flow more important than the raw schema alone: DTS metadata may point to zip/API type URLs, platform adapters may merge browser and node manifests, and Metro/Rsbuild/Modern integrations may generate or rewrite manifests in environment-specific ways. Keep docs about manifest fields tied to SDK types and the producing/consuming package that owns each field.
+
 ## Overview
 
 Module Federation uses several manifest files to coordinate runtime behavior:

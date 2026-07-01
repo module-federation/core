@@ -486,6 +486,7 @@ interface DtsRemoteOptions {
   tsConfigPath?: string;
   typesFolder?: string;
   compiledTypesFolder?: string;
+  outputDir?: string;
   deleteTypesFolder?: boolean;
   additionalFilesToCompile?: string[];
   compileInChildProcess?: boolean;
@@ -514,6 +515,7 @@ interface DtsHostOptions {
   runtimePkgs?: string[];
   remoteTypeUrls?: (() => Promise<RemoteTypeUrls>) | RemoteTypeUrls;
   timeout?: number;
+  family?: 0 | 4 | 6;
   typesOnBuild?: boolean;
 }
 

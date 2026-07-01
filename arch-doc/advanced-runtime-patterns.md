@@ -196,26 +196,25 @@ registerGlobalPlugins([productionSafePlugin]);
 
 ## Error Handling and Recovery
 
-⚠️ **CRITICAL WARNING**: The `errorLoadRemote` hook DOES NOT catch CORS errors, network timeouts, or CSP violations. These bypass the error recovery system entirely.
+⚠️ **CRITICAL WARNING**: `errorLoadRemote` is not a blanket network safety net. Remote-entry loading has its own loader hooks (`loadEntryError` and `afterLoadEntry`), while `errorLoadRemote` handles runtime lifecycle failures such as request, share-load, and module-load recovery.
 
 ### Error Types NOT Handled by errorLoadRemote
 
 ```typescript
-// These errors BYPASS errorLoadRemote:
+// These errors should be handled outside errorLoadRemote or through loader hooks:
 // 1. CORS errors (most common in production)
 // 2. Network timeouts
 // 3. CSP violations
 // 4. DNS failures
 // 5. SSL/TLS errors
 
-// ❌ THIS WILL NOT WORK
-const brokenErrorHandler: ModuleFederationRuntimePlugin = {
-  name: 'BrokenHandler',
-  errorLoadRemote(args) {
-    // This is NEVER called for CORS/network errors!
-    return () => 'Fallback';
-  }
-};
+// ✅ Remote-entry recovery belongs in loaderHook.loadEntryError
+federationInstance.loaderHook.lifecycle.loadEntryError.on(
+  async ({ remoteInfo, getRemoteEntry }) => {
+    reportEntryFailure(remoteInfo);
+    return getRemoteEntry(alternateRemoteInfo(remoteInfo));
+  },
+);
 
 // ✅ PRODUCTION FIX - Wrap ALL remote loads
 async function safeLoadRemote(id: string) {
@@ -672,7 +671,17 @@ interface PreloadRemoteArgs {
   exposes?: string[];
   resourceCategory?: 'all' | 'sync';
   share?: boolean;
-  depsRemote?: boolean;
+  depsRemote?: boolean | Array<depsPreloadArg>;
+  filter?: (assetUrl: string) => boolean;
+}
+
+interface PreloadAssetResult {
+  url: string;
+  status: 'success' | 'error' | 'timeout' | 'cached';
+  resourceType: 'manifest' | 'remoteEntry' | 'js' | 'css';
+  initiator: 'loadRemote' | 'preloadRemote';
+  id: string;
+  error?: unknown;
 }
 
 // Usage example
