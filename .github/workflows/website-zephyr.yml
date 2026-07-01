@@ -33,7 +33,6 @@ concurrency:
 env:
   SITE_ORIGIN: https://module-federation.io
   ZE_SECRET_TOKEN: ${{ secrets.ZE_SECRET_TOKEN }}
-  ZE_IS_PREVIEW: ${{ github.event_name == 'pull_request' && 'true' || 'false' }}
 
 jobs:
   deploy:
