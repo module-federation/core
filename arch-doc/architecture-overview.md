@@ -3,6 +3,8 @@
 Module Federation is a runtime, build-time, type-generation, manifest, and tooling system for dynamic code sharing across independent JavaScript applications. This overview reflects the current monorepo shape: framework and bundler integrations sit on top of a shared runtime contract, while manifests, DTS generation, devtools, retry/observability plugins, examples, and release tooling support the same container protocol.
 
 ## Table of Contents
+
+- [Module Federation Explained](./module-federation-explained.md)
 - [Repository Map and Canonical Ownership](#repository-map-and-canonical-ownership)
 - [Core Architecture](#core-architecture)
 - [Package Architecture](#package-architecture)
@@ -866,6 +868,8 @@ This architecture enables Module Federation to work across different bundlers wh
 ## Related Documentation
 
 For detailed implementation guidance, see:
+
+- [Module Federation Explained](./module-federation-explained.md) - Conceptual introduction with real-world scenarios and visual diagrams
 - [Plugin Architecture](./plugin-architecture.md) - Core plugin system design
 - [Runtime Architecture](./runtime-architecture.md) - Runtime behavior and lifecycle
 - [Shared Tree-Shaking Architecture](./shared-tree-shaking-architecture.md) - Shared dependency pruning, fallback assets, and runtime selection flows
