@@ -11,9 +11,11 @@ This guide provides implementation guidance for teams adding or maintaining Modu
 - [Common Patterns](#common-patterns)
 - [Troubleshooting](#troubleshooting)
 
-## Current Implementation Targets
+## Implementation Scope
 
 Choose the target layer before adding code:
+
+Use `architecture-overview.md` for the canonical repo-wide package taxonomy. This table is a local implementation routing aid: it helps decide where behavior belongs before selecting package-specific commands or fixtures.
 
 | Target | Preferred package area | Implementation shape |
 | --- | --- | --- |

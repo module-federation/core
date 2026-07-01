@@ -10,11 +10,13 @@ This document details the current runtime architecture of Module Federation, exp
 - [Global Instance Management](#global-instance-management)
 - [Hook System Implementation](#hook-system-implementation)
 - [Module Loading Architecture](#module-loading-architecture)
-- [Current Runtime Boundaries](#current-runtime-boundaries)
+- [Runtime Boundaries](#runtime-boundaries)
 
-## Current Runtime Boundaries
+## Runtime Boundaries
 
 Runtime code is intentionally split by responsibility:
+
+Use `architecture-overview.md` for the canonical repo-wide package taxonomy. This section only defines runtime ownership boundaries and the contract each runtime-facing layer must preserve.
 
 | Boundary | Primary package(s) | Owns | Does not own |
 | --- | --- | --- | --- |

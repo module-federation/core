@@ -3,7 +3,7 @@
 Module Federation is a runtime, build-time, type-generation, manifest, and tooling system for dynamic code sharing across independent JavaScript applications. This overview reflects the current monorepo shape: framework and bundler integrations sit on top of a shared runtime contract, while manifests, DTS generation, devtools, retry/observability plugins, examples, and release tooling support the same container protocol.
 
 ## Table of Contents
-- [Current Repository Map](#current-repository-map)
+- [Repository Map and Canonical Ownership](#repository-map-and-canonical-ownership)
 - [Core Architecture](#core-architecture)
 - [Package Architecture](#package-architecture)
 - [Runtime Layers](#runtime-layers)
@@ -12,8 +12,9 @@ Module Federation is a runtime, build-time, type-generation, manifest, and tooli
 - [Key Integration Points](#key-integration-points)
 - [Architecture Diagrams](#architecture-diagrams)
 - [Security Architecture](#security-architecture)
+- [Documentation Freshness Checklist](#documentation-freshness-checklist)
 
-## Current Repository Map
+## Repository Map and Canonical Ownership
 
 The repository is a pnpm/Turbo monorepo. The root orchestration layer is `package.json`, `pnpm-workspace.yaml`, `turbo.json`, and `.github/workflows/*`; package and app scripts are the executable source of truth for build, lint, test, e2e, docs, and release behavior.
 
@@ -51,7 +52,7 @@ graph TB
         Next["@module-federation/nextjs-mf"]
         Node["@module-federation/node"]
         Modern["@module-federation/modern-js and modern-js-v3"]
-        Bridge["@module-federation/bridge-react, bridge-react-webpack-plugin, vue3-bridge"]
+        Bridge["@module-federation/bridge-react, bridge-react-webpack-plugin, bridge-vue3"]
         Storybook["@module-federation/storybook-addon"]
     end
 
@@ -114,7 +115,9 @@ graph TB
     Release --> Workflows
 ```
 
-### Architectural Layers
+### Canonical Ownership Layers
+
+This table is the canonical package taxonomy for the architecture docs. Topic-specific documents should describe their local boundary and link back here instead of copying the full package map.
 
 | Layer | Packages | Responsibility |
 | --- | --- | --- |
@@ -288,7 +291,7 @@ graph TB
 - `@module-federation/metro` owns Metro and React Native behavior: resolver, serializer, manifest middleware, request rewriting, bundle-remote CLI, VM management, and plugin compatibility helpers. `metro-plugin-rock`, `metro-plugin-rnef`, and `metro-plugin-rnc-cli` are thin adapters on top of it.
 
 #### **Bridge, Storybook, Devtools, and Playground**
-- Bridge packages (`bridge-react`, `bridge-react-webpack-plugin`, `bridge-shared`, `vue3-bridge`) translate remote component/rendering contracts into React, Vue, router, lazy, and data-fetch flows.
+- Bridge packages (`bridge-react`, `bridge-react-webpack-plugin`, `bridge-shared`, `bridge-vue3`) translate remote component/rendering contracts into React, Vue, router, lazy, and data-fetch flows.
 - `@module-federation/storybook-addon` wires federated remotes into Storybook.
 - `@module-federation/devtools` and `@module-federation/observability-plugin` expose runtime dependency graph and browser debugging surfaces.
 - `@module-federation/playground` is a runnable in-repo playground consumed by `apps/website-new` through the Rspress plugin path.
@@ -303,14 +306,26 @@ graph TB
 
 ## Dependency Structure and Risk Areas
 
-TraceDecay reports the current graph at 5,501 indexed files, 43,815 nodes, and 7,018 edges. The coupling hotspots are expected around orchestration modules:
+Use TraceDecay or the package scripts to refresh coupling evidence before changing dependency boundaries. The most important coordination points are stable even when exact graph counts drift:
 
 - `packages/runtime-core/src/remote/index.ts`, `packages/runtime-core/src/core.ts`, and `packages/runtime-core/src/plugins/snapshot/SnapshotHandler.ts` sit on the runtime loading path.
 - `packages/enhanced/src/lib/container/*`, `packages/enhanced/src/lib/sharing/*`, and `packages/webpack-bundler-runtime/src/*` are the webpack container/share integration core.
 - `packages/dts-plugin/src/core/lib/DTSManager.ts`, `packages/dts-plugin/src/server/broker/Broker.ts`, `packages/manifest/src/StatsManager.ts`, and `packages/manifest/src/utils.ts` form the metadata/type artifact path.
 - `packages/nextjs-mf/src/plugins/NextFederationPlugin/index.ts`, `packages/node/src/plugins/*`, `packages/metro-core/src/commands/bundle-remote/index.ts`, and `packages/metro-core/src/plugin/*` are platform integration hot paths.
 
-Known file-cycle clusters exist in runtime-core (`core`, `global`, snapshot, load/preload/share utilities), enhanced runtime utilities, enhanced sharing, manifest/observability/sdk snapshot generation, bridge lazy data-fetch, and treeshake server services. Treat these as coordination boundaries: new behavior should prefer existing handlers/managers/plugins rather than adding another cross-layer import.
+When refreshed graph evidence reports cycles around runtime-core loading utilities, enhanced runtime/sharing utilities, bridge lazy data-fetch, manifest/observability snapshot generation, or treeshake services, treat those as coordination boundaries, not invitation points: new behavior should prefer existing handlers, managers, or plugins rather than adding another cross-layer import.
+
+## Documentation Freshness Checklist
+
+Use this checklist when a code, package, workflow, or release change crosses an architecture boundary:
+
+| Change type | Docs to check | Freshness rule |
+| --- | --- | --- |
+| Package added, renamed, moved, or removed | `architecture-overview.md` plus the topic doc for the affected layer | Update the canonical ownership table here first. Topic docs should keep local boundary notes and link back instead of copying the full repo map. |
+| Runtime loading, sharing, snapshot, or plugin hook behavior changed | `runtime-architecture.md`, `advanced-topics.md`, `plugin-architecture.md`, and `error-handling-specification.md` when failures change | Keep examples tied to exported APIs and source-backed behavior. Do not invent public error codes or imply local errors are canonical package exports. |
+| Build, manifest, DTS, or bundler integration behavior changed | `implementation-guide.md`, `plugin-architecture.md`, `manifest-specification.md`, and `sdk-reference.md` when shared SDK contracts change | State which layer owns the behavior, which package integrates it, and which fixture or package script proves it. |
+| CI job, local validation command, or workflow changed | `testing-debugging-guide.md` and this overview's tooling section | Follow `.github/workflows/*` and `tools/scripts/ci-local.mjs` over prose. Record the command family, not a stale one-off invocation. |
+| Coupling, cycle, or dependency-boundary evidence refreshed | This overview's dependency risk section | Prefer stable coordination guidance. Put exact TraceDecay counts, dated snapshots, and generated reports in a separate health report or PR note. |
 
 ## Global State Structure
 

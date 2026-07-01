@@ -10,7 +10,9 @@ This document defines the manifest architecture used by the current Module Feder
 - [Examples](#examples)
 - [Validation](#validation)
 
-## Current Manifest Architecture
+## Manifest Ownership
+
+Use `architecture-overview.md` for the canonical repo-wide package taxonomy. This section only maps manifest production and consumption responsibilities.
 
 | Layer | Package(s) | Manifest responsibility |
 | --- | --- | --- |

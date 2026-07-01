@@ -9,9 +9,11 @@ This document describes the current plugin architecture across the monorepo. The
 - [Webpack Integration Patterns](#webpack-integration-patterns)
 - [Hook Timing and Interception](#hook-timing-and-interception)
 - [Bundler Integration Requirements](#bundler-integration-requirements)
-- [Current Plugin Families](#current-plugin-families)
+- [Plugin Families](#plugin-families)
 
-## Current Plugin Families
+## Plugin Families
+
+Use `architecture-overview.md` for the canonical repo-wide package taxonomy. This section only groups plugin-facing package families by how they participate in build-time, runtime, metadata, and DX flows.
 
 | Family | Packages | Architectural role |
 | --- | --- | --- |
@@ -43,7 +45,7 @@ graph TB
     subgraph "Feature Plugins - Applied via afterPlugins Hook"
         CP[ContainerPlugin<br/>if options.exposes]
         CRP[ContainerReferencePlugin<br/>if options.remotes]
-        SP[SharePlugin<br/>always applied]
+        SP[SharePlugin<br/>if options.shared]
     end
 
     subgraph "Share System"
@@ -117,7 +119,7 @@ class ModuleFederationPlugin {
         }).apply(compiler);
       }
       
-      // SharePlugin is always applied (if options.shared exists)
+      // SharePlugin is applied with tree-shaking support when shared config exists
       if (options.shared) {
         new SharePlugin({
           shared: options.shared,

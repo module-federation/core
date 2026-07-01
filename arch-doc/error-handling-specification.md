@@ -16,7 +16,9 @@ This document describes error handling across the current Module Federation arch
 - [Runtime Error Handling](#runtime-error-handling)
 - [Build-Time Error Handling](#build-time-error-handling)
 
-## Current Error Architecture
+## Error Ownership
+
+Use `architecture-overview.md` for the canonical repo-wide package taxonomy. This section only maps error-code ownership, recovery policy, and local error boundaries.
 
 | Layer | Package(s) | Error responsibility |
 | --- | --- | --- |
@@ -30,7 +32,7 @@ Do not add new documented error code families here unless they are exported from
 
 ## Overview
 
-Module Federation's error handling system is built on a multi-layered approach that provides resilience at every level of the federation architecture. The system must handle failures gracefully while maintaining application stability and providing clear debugging information.
+Module Federation's error handling system is built on a multi-layered approach that provides resilience at every level of the federation architecture. The exported error-code package defines the public diagnostic vocabulary. Packages may keep richer local error metadata, but examples in this document should not invent additional public code families.
 
 ### Core Principles
 
@@ -56,9 +58,9 @@ export const RUNTIME_007 = 'RUNTIME-007'; // Failed to get remote snapshot
 export const RUNTIME_008 = 'RUNTIME-008'; // Failed to load script resources
 
 // Module and manifest loading errors
-export const RUNTIME_010 = 'RUNTIME-010'; // Entry cannot be loaded using the registered type
+export const RUNTIME_010 = 'RUNTIME-010'; // Runtime name changed after initialization
 export const RUNTIME_011 = 'RUNTIME-011'; // Remote entry URL missing from snapshot
-export const RUNTIME_012 = 'RUNTIME-012'; // Manifest missing required remote entry data
+export const RUNTIME_012 = 'RUNTIME-012'; // Shared module getter is not a function
 export const RUNTIME_013 = 'RUNTIME-013'; // Manifest is not valid
 export const RUNTIME_014 = 'RUNTIME-014'; // Remote does not expose requested module
 export const RUNTIME_015 = 'RUNTIME-015'; // Remote container initialization failed
@@ -89,19 +91,20 @@ export const TYPE_001 = 'TYPE-001'; // Failed to generate type declaration
 
 ### 1. Recoverable Errors
 Errors that can be handled with retry mechanisms or fallbacks:
-- Network timeouts (RUNTIME-020)
-- Temporary server errors (RUNTIME-023)
-- Resource loading failures (RUNTIME-008)
+- Manifest fetch failures (`RUNTIME-003`)
+- Remote location or snapshot failures (`RUNTIME-004`, `RUNTIME-007`)
+- Script/resource loading failures (`RUNTIME-008`)
 
 ### 2. Configuration Errors
 Errors caused by incorrect setup:
 - Missing remote entry (RUNTIME-004)
 - Invalid configuration (local validation errors, with canonical codes when exported)
-- Missing required dependencies (RUNTIME-014)
+- Missing exposed module (RUNTIME-014)
 
 ### 3. Critical Errors
 Errors that prevent application startup:
-- Runtime not initialized (RUNTIME-030)
+- Runtime instance missing (`RUNTIME-009`)
+- Remote container initialization failure (`RUNTIME-015`)
 - Critical dependency failures
 - Security violations
 
@@ -121,7 +124,7 @@ interface RetryConfig {
   delay: number;
   backoffFactor: number;
   maxDelay: number;
-  retryableErrors: string[];
+  retryableCodes: string[];
 }
 
 const defaultRetryConfig: RetryConfig = {
@@ -129,10 +132,10 @@ const defaultRetryConfig: RetryConfig = {
   delay: 1000,
   backoffFactor: 2,
   maxDelay: 10000,
-  retryableErrors: [
-    'RUNTIME-020', // Network timeout
-    'RUNTIME-021', // Network connection failed
-    'RUNTIME-023', // Server error
+  retryableCodes: [
+    'RUNTIME-003', // Failed to get manifest
+    'RUNTIME-004', // Failed to locate remote
+    'RUNTIME-007', // Failed to get remote snapshot
     'RUNTIME-008', // Failed to load script resources
   ],
 };
@@ -155,7 +158,7 @@ async function retryWithBackoff<T>(
       lastError = error;
       
       // Check if error is retryable
-      if (errorCode && !config.retryableErrors.includes(errorCode)) {
+      if (errorCode && !config.retryableCodes.includes(errorCode)) {
         throw error;
       }
       
@@ -181,14 +184,13 @@ async function retryWithBackoff<T>(
 ```typescript
 function withTimeout<T>(
   promise: Promise<T>,
-  timeoutMs: number,
-  errorCode: string = 'RUNTIME-012'
+  timeoutMs: number
 ): Promise<T> {
   return Promise.race([
     promise,
     new Promise<never>((_, reject) => {
       setTimeout(() => {
-        reject(new ModuleFederationError(errorCode, `Operation timed out after ${timeoutMs}ms`));
+        reject(new Error(`Operation timed out after ${timeoutMs}ms`));
       }, timeoutMs);
     })
   ]);
@@ -274,10 +276,7 @@ async function loadRemoteModule(
         if (config.fallbackModule) {
           return await import(config.fallbackModule);
         }
-        throw new ModuleFederationError(
-          'RUNTIME-010', 
-          `No fallback available for ${remoteName}/${moduleName}`
-        );
+        throw new Error(`No fallback available for ${remoteName}/${moduleName}`);
         
       case 'ignore':
         return null;
@@ -317,10 +316,7 @@ async function loadRemoteWithFallback(
   
   // If critical module, throw error
   if (config.criticalModules?.includes(moduleName)) {
-    throw new ModuleFederationError(
-      'RUNTIME-011',
-      `Critical module ${moduleName} failed to load from all remotes`
-    );
+    throw new Error(`Critical module ${moduleName} failed to load from all remotes`);
   }
   
   // If graceful degradation enabled, return null
@@ -362,10 +358,7 @@ class CircuitBreaker {
   async call<T>(operation: () => Promise<T>): Promise<T> {
     if (this.state === CircuitState.OPEN) {
       if (Date.now() < this.nextAttempt) {
-        throw new ModuleFederationError(
-          'RUNTIME-021',
-          'Circuit breaker is OPEN'
-        );
+        throw new Error('Circuit breaker is OPEN');
       }
       this.state = CircuitState.HALF_OPEN;
     }
@@ -501,8 +494,8 @@ class ModuleFederationErrorBoundary extends React.Component<
   private shouldAutoRetry(error: Error): boolean {
     const federationError = ensureModuleFederationError(error);
     return [
-      'RUNTIME-020', // Network timeout
-      'RUNTIME-021', // Network connection failed
+      'RUNTIME-003', // Failed to get manifest
+      'RUNTIME-004', // Failed to locate remote
       'RUNTIME-008', // Failed to load script resources
     ].includes(federationError.code);
   }
@@ -680,9 +673,9 @@ class DefaultErrorReporter implements ErrorReporter {
   
   private isCriticalError(error: ModuleFederationError): boolean {
     return [
-      'RUNTIME-030', // Runtime not initialized
-      'SYSTEM-001',  // Memory limit exceeded
-      'SYSTEM-003',  // Permission denied
+      'RUNTIME-009', // createInstance has not been called
+      'RUNTIME-010', // Runtime name changed after initialization
+      'RUNTIME-015', // Remote container initialization failed
     ].includes(error.code);
   }
 }
@@ -809,24 +802,20 @@ class ModuleFederationError extends Error {
   }
 }
 
-function ensureModuleFederationError(error: any): ModuleFederationError {
+function ensureModuleFederationError(
+  error: any
+): Error & { code?: string; context?: Record<string, any> } {
   if (error instanceof ModuleFederationError) {
     return error;
   }
   
   if (error instanceof Error) {
-    return new ModuleFederationError(
-      'RUNTIME-000', // Generic runtime error
-      error.message,
-      {},
-      error
-    );
+    return error;
   }
   
-  return new ModuleFederationError(
-    'RUNTIME-000',
-    typeof error === 'string' ? error : 'Unknown error',
-    { originalValue: error }
+  return Object.assign(
+    new Error(typeof error === 'string' ? error : 'Unknown error'),
+    { context: { originalValue: error } },
   );
 }
 ```
@@ -939,10 +928,9 @@ async function loadRemoteModule(
       retryWithBackoff(
         () => __federation_method_getRemote(remoteName, moduleName),
         options.retry || getDefaultRetryConfig(),
-        'RUNTIME-010'
+        'RUNTIME-008'
       ),
-      options.timeout || 30000,
-      'RUNTIME-012'
+      options.timeout || 30000
     );
     
     endTimer();
@@ -998,12 +986,9 @@ async function loadSharedModule(
       return null;
     }
     
-    throw new ModuleFederationError(
-      'RUNTIME-014',
-      `Failed to load shared module ${packageName}@${version}`,
-      { packageName, version },
-      federationError
-    );
+    throw new Error(`Failed to load shared module ${packageName}@${version}`, {
+      cause: federationError,
+    });
   }
 }
 ```
@@ -1015,21 +1000,13 @@ async function loadSharedModule(
 ```typescript
 function validateModuleFederationConfig(config: any): void {
   if (!config.name) {
-    throw new ModuleFederationError(
-      'BUILD-003',
-      'Module Federation configuration must include a name',
-      { config }
-    );
+    throw new Error('Module Federation configuration must include a name');
   }
   
   if (config.exposes) {
     for (const [key, path] of Object.entries(config.exposes)) {
       if (typeof path !== 'string') {
-        throw new ModuleFederationError(
-          'BUILD-001',
-          `Invalid expose path for ${key}`,
-          { key, path }
-        );
+        throw new Error(`Invalid expose path for ${key}`);
       }
     }
   }
@@ -1037,11 +1014,7 @@ function validateModuleFederationConfig(config: any): void {
   if (config.remotes) {
     for (const [name, remote] of Object.entries(config.remotes)) {
       if (typeof remote !== 'string' && typeof remote !== 'object') {
-        throw new ModuleFederationError(
-          'BUILD-003',
-          `Invalid remote configuration for ${name}`,
-          { name, remote }
-        );
+        throw new Error(`Invalid remote configuration for ${name}`);
       }
     }
   }
@@ -1068,22 +1041,15 @@ function generateManifest(config: any): any {
     
     return manifest;
   } catch (error) {
-    throw new ModuleFederationError(
-      'BUILD-010',
-      'Failed to generate manifest',
-      { config },
-      ensureModuleFederationError(error)
-    );
+    throw new Error('Failed to generate manifest', {
+      cause: ensureModuleFederationError(error),
+    });
   }
 }
 
 function validateManifest(manifest: any): void {
   if (!manifest.name || typeof manifest.name !== 'string') {
-    throw new ModuleFederationError(
-      'BUILD-011',
-      'Manifest must have a valid name',
-      { manifest }
-    );
+    throw new Error('Manifest must have a valid name');
   }
   
   // Additional validation logic...

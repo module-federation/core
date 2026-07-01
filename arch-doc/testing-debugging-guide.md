@@ -10,9 +10,11 @@ A guide for testing and debugging Module Federation packages, framework integrat
 - [Performance Debugging](#performance-debugging)
 - [Advanced Debugging Techniques](#advanced-debugging-techniques)
 
-## Current Validation Architecture
+## Validation Scope
 
 The repository validates architecture through package-level scripts, Turbo fanout, local CI parity jobs, and example applications:
+
+Use `architecture-overview.md` for the canonical repo-wide package taxonomy. This section only maps validation surfaces to the command families that prove them.
 
 | Surface | What it proves | Default command family |
 | --- | --- | --- |

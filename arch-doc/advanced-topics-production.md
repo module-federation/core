@@ -6,19 +6,9 @@
 
 **SECURITY NOTICE**: Module Federation exposes your application to cross-origin security risks. Implement ALL security measures described or risk data breaches.
 
-## Current Advanced Architecture Scope
+## Scope
 
-Advanced production behavior spans several package families:
-
-| Concern | Package area | Notes |
-| --- | --- | --- |
-| Runtime lifecycle and hooks | `runtime-core`, `runtime`, `webpack-bundler-runtime`, `runtime-tools` | Owns remote/share/snapshot loading, global instance state, runtime plugin hooks, and webpack runtime bridging. |
-| Retry and observability | `retry-plugin`, `observability-plugin`, `devtools` | Adds resilience and inspection without changing the core container contract. |
-| Framework/platform production behavior | `nextjs-mf`, `node`, `modern-js`, `rsbuild-plugin`, `rspress-plugin`, `esbuild`, `metro` | Owns SSR, filesystem/Metro loading, dev-server middleware, router/data-fetch integration, and platform-specific asset serving. |
-| Manifests and types | `manifest`, `managers`, `dts-plugin`, `third-party-dts-extractor`, `sdk` | Drives snapshot/preload metadata, type publication/consumption, and build/runtime artifact consistency. |
-| Validation | `apps/*`, `playground`, `website-new`, `treeshake-*`, local CI jobs | Production guidance should be validated against the relevant example or package family, not only against isolated runtime snippets. |
-
-Use this document for production patterns and hazards. Use `architecture-overview.md` for the repo-wide package map, `runtime-architecture.md` for runtime boundaries, and `plugin-architecture.md` for build/plugin boundaries.
+Use this document for production behavior, runtime hazards, resilience, security, and performance patterns. The canonical package map lives in `architecture-overview.md`; this guide only calls out package ownership when a production pattern depends on it. Validate changes against the relevant package or app fixture instead of treating isolated runtime snippets as sufficient evidence.
 
 ## Table of Contents
 - [Critical Production Warnings](#critical-production-warnings)

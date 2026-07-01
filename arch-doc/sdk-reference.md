@@ -14,9 +14,11 @@ This document provides a reference for the current `@module-federation/sdk` role
 - [Best Practices](#best-practices)
 - [SDK Exports](#sdk-exports)
 
-## Current SDK Architecture
+## SDK Ownership
 
 The SDK exports the shared vocabulary for the rest of the architecture:
+
+Use `architecture-overview.md` for the canonical repo-wide package taxonomy. This section only describes SDK-owned contracts and helper surfaces.
 
 | Export area | Source files | Used by |
 | --- | --- | --- |
