@@ -1,6 +1,6 @@
 # Shared Tree-Shaking Architecture
 
-This document explains how shared dependency tree shaking works across the Module Federation build layer, bundler runtime bridge, runtime-core shared resolver, optional re-shake server flow, and validation fixtures.
+Shared dependency tree shaking spans the Module Federation build layer, bundler runtime bridge, runtime-core shared resolver, optional re-shake server flow, and validation fixtures.
 
 ## Table of Contents
 
@@ -25,7 +25,7 @@ Normal shared dependencies optimize for one loaded implementation per share scop
 4. Runtime-core decides whether a tree-shaken shared candidate satisfies the same version, singleton, scope, and strategy constraints as a normal shared candidate.
 5. If the candidate is not safe, the runtime falls back to the ordinary shared factory.
 
-The key design constraint is that tree shaking is a candidate preference, not a new federation contract. The remote container interface, share scopes, and `loadShare` semantics remain the same.
+Tree shaking is a candidate preference, not a new federation contract. The remote container interface, share scopes, and `loadShare` semantics remain the same.
 
 ## Ownership Map
 

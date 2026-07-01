@@ -196,7 +196,7 @@ registerGlobalPlugins([productionSafePlugin]);
 
 ## Error Handling and Recovery
 
-⚠️ **CRITICAL WARNING**: `errorLoadRemote` is not a blanket network safety net. Remote-entry loading has its own loader hooks (`loadEntryError` and `afterLoadEntry`), while `errorLoadRemote` handles runtime lifecycle failures such as request, share-load, and module-load recovery.
+⚠️ **Recovery boundary**: `errorLoadRemote` is not a blanket network safety net. Remote-entry loading has its own loader hooks (`loadEntryError` and `afterLoadEntry`), while `errorLoadRemote` handles runtime lifecycle failures such as request, share-load, and module-load recovery.
 
 ### Error Types NOT Handled by errorLoadRemote
 
@@ -411,7 +411,7 @@ export type ShareScopeMap = {
   }
 };
 
-// From core.ts - actual shareScopeMap initialization
+// shareScopeMap initialization shape
 class ModuleFederation {
   shareScopeMap: ShareScopeMap;
 
@@ -426,14 +426,13 @@ class ModuleFederation {
 ### Share Scope Plugin Example
 
 ```typescript
-// Working with actual share scope system
 const shareScopePlugin: ModuleFederationRuntimePlugin = {
   name: 'ShareScopePlugin',
 
   beforeLoadShare(args) {
     const { pkgName, shareInfo, shared, origin } = args;
 
-    // Access the actual share scope map
+    // Access the share scope map.
     const scopeMap = origin.shareScopeMap;
     console.log('Available scopes:', Object.keys(scopeMap));
 
@@ -583,7 +582,7 @@ sequenceDiagram
 ### Real Preload Implementation
 
 ```typescript
-// From runtime-core/src/remote/index.ts - actual preloadRemote implementation
+// From runtime-core/src/remote/index.ts
 class RemoteHandler {
   async preloadRemote(preloadOptions: Array<PreloadRemoteArgs>): Promise<void> {
     const { host } = this;
@@ -621,14 +620,13 @@ class RemoteHandler {
           remoteSnapshot,
         });
 
-        // Actually preload the assets
         preloadAssets(remoteInfo, host, assets);
       }),
     );
   }
 }
 
-// From utils/preload.ts - actual asset preloading
+// From utils/preload.ts
 export function preloadAssets(
   remoteInfo: RemoteInfo,
   host: ModuleFederation,

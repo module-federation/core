@@ -165,7 +165,6 @@ classDiagram
 
 #### SharedHandler - Dependency Resolution
 ```typescript
-// Actual implementation responsibilities
 class SharedHandler {
   // 1. Register shared dependencies in global share scope
   registerShared(globalOptions: Options, userOptions: UserOptions) {
@@ -274,7 +273,6 @@ The `@module-federation/runtime` package provides singleton management and simpl
 
 ### Singleton Pattern Implementation
 ```typescript
-// Actual singleton implementation in runtime package
 import { ModuleFederation, getGlobalFederationConstructor, setGlobalFederationInstance } from '@module-federation/runtime-core';
 
 let FederationInstance: ModuleFederation | null = null;
@@ -353,7 +351,6 @@ The `@module-federation/webpack-bundler-runtime` creates a bridge between webpac
 
 ### Federation Object Structure
 ```typescript
-// Actual webpack bundler runtime implementation
 import * as runtime from '@module-federation/runtime';
 
 const federation: Federation = {
@@ -500,7 +497,6 @@ flowchart TD
 
 ### Hook Types and Implementation
 ```typescript
-// Actual hook system from runtime-core
 export class SyncHook<T, K> {
   listeners = new Set<Callback<T, K>>();
 
@@ -828,7 +824,7 @@ Module loading flow, integration patterns, build/runtime boundaries, key runtime
 
 ## Related Documentation
 
-For comprehensive understanding, see:
+For related architecture details, see:
 - [Architecture Overview](./architecture-overview.md) - System architecture and component relationships
 - [Plugin Architecture](./plugin-architecture.md) - Build-time integration patterns
 - [Shared Tree-Shaking Architecture](./shared-tree-shaking-architecture.md) - Shared dependency pruning and runtime candidate selection

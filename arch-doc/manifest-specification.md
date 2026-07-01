@@ -636,7 +636,7 @@ When generating manifests, bundlers should:
 6. **Development vs Production**: Include different optimization levels
 7. **Cross-Origin**: Configure CORS headers for manifest files
 
-This manifest specification ensures consistent metadata exchange between all Module Federation implementations, enabling seamless cross-bundler interoperability.
+This manifest specification keeps metadata exchange consistent across Module Federation implementations and bundler integrations.
 
 ## Related Documentation
 

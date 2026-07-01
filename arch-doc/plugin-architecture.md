@@ -75,17 +75,17 @@ graph TB
 
 ## ModuleFederationPlugin Orchestration
 
-Based on the actual implementation in `/packages/enhanced/src/lib/container/ModuleFederationPlugin.ts`, the main plugin follows this pattern:
+Based on `/packages/enhanced/src/lib/container/ModuleFederationPlugin.ts`, the main plugin follows this pattern:
 
 ### Plugin Structure
 
 ```typescript
-// Actual ModuleFederationPlugin implementation pattern (packages/enhanced/src/lib/container/ModuleFederationPlugin.ts)
+// ModuleFederationPlugin implementation pattern (packages/enhanced/src/lib/container/ModuleFederationPlugin.ts)
 class ModuleFederationPlugin {
   constructor(private options: ModuleFederationPluginOptions) {}
 
   apply(compiler: Compiler) {
-    // Phase 1: Apply core plugins immediately - FIXED ORDER
+    // Phase 1: Apply core plugins immediately in fixed order
     // 1. RemoteEntryPlugin MUST be first (from @module-federation/rspack package)
     (new RemoteEntryPlugin(options) as unknown as WebpackPluginInstance).apply(compiler);
 
@@ -206,13 +206,12 @@ class ContainerPlugin {
 ### ContainerReferencePlugin - Consuming Remote Modules
 
 ```typescript
-// CORRECTED: No remoteToExternals method exists - externals are built inline
 class ContainerReferencePlugin {
   apply(compiler: Compiler) {
     // Apply FederationRuntimePlugin
     new FederationRuntimePlugin().apply(compiler);
 
-    // Build remote externals inline (NOT via remoteToExternals method)
+    // Build remote externals inline.
     const remoteExternals: Record<string, string> = {};
     for (const [key, config] of remotes) {
       let i = 0;
@@ -325,10 +324,8 @@ flowchart TD
 ```
 
 ```typescript
-// CORRECTED: SharePlugin uses parseOptions utility, not parseSharedConfig method
 class SharePlugin {
   constructor(options: SharePluginOptions) {
-    // Uses parseOptions utility from '../container/options'
     const sharedOptions: [string, SharedConfig][] = parseOptions(
       options.shared,
       (item, key) => {
@@ -522,12 +519,10 @@ sequenceDiagram
 ### Critical Hook Implementation
 
 ```typescript
-// CORRECTED: ConsumeSharedPlugin uses thisCompilation and createModule hooks
 class ConsumeSharedPlugin {
   apply(compiler: Compiler) {
     new FederationRuntimePlugin().apply(compiler);
 
-    // CORRECTED: Uses thisCompilation hook, not compilation
     compiler.hooks.thisCompilation.tap(
       'ConsumeSharedPlugin',
       (compilation: Compilation, { normalModuleFactory }) => {
@@ -546,7 +541,7 @@ class ConsumeSharedPlugin {
           },
         );
 
-        // CRITICAL: Hook factorize to intercept before module creation
+        // Intercept before normal module creation.
         normalModuleFactory.hooks.factorize.tapPromise(
           'ConsumeSharedPlugin',
           async (resolveData: ResolveData): Promise<Module | undefined> => {
@@ -571,7 +566,6 @@ class ConsumeSharedPlugin {
           },
         );
 
-        // ADDED: Missing createModule hook
         normalModuleFactory.hooks.createModule.tapPromise(
           'ConsumeSharedPlugin',
           ({ resource }, { context, dependencies }) => {
@@ -595,7 +589,6 @@ class ConsumeSharedPlugin {
   }
 }
 
-// CORRECTED: ProvideSharedPlugin uses compilation hook for module processing and finishMake for dependency addition
 class ProvideSharedPlugin {
   apply(compiler: Compiler) {
     new FederationRuntimePlugin().apply(compiler);
@@ -610,7 +603,7 @@ class ProvideSharedPlugin {
 
         compilationData.set(compilation, resolvedProvideMap);
 
-        // Hook module to inspect created modules
+        // Inspect created modules before registering shared provides.
         normalModuleFactory.hooks.module.tap(
           'ProvideSharedPlugin',
           (module, { resource, resourceResolveData }, resolveData) => {
@@ -658,7 +651,6 @@ class ProvideSharedPlugin {
       }
     );
 
-    // ADDED: Missing finishMake hook for adding provide shared dependencies
     compiler.hooks.finishMake.tapPromise(
       'ProvideSharedPlugin',
       async (compilation: Compilation) => {
@@ -979,11 +971,11 @@ These plugins exist but are not part of the main ModuleFederationPlugin flow.
 10. **Dependency Management**: Custom dependency types enable federation-specific behavior
 11. **Webpack Coupling**: Tightly coupled to webpack's internal APIs and lifecycle
 
-This architecture provides a robust foundation for implementing Module Federation in any bundler that supports similar plugin and module systems.
+This architecture is the reference shape for bundlers that support comparable plugin and module systems.
 
 ## Related Documentation
 
-For comprehensive understanding, see:
+For related architecture details, see:
 - [Architecture Overview](./architecture-overview.md) - High-level system architecture
 - [Runtime Architecture](./runtime-architecture.md) - Runtime behavior and lifecycle hooks
 - [Shared Tree-Shaking Architecture](./shared-tree-shaking-architecture.md) - Build/runtime flow for tree-shakable shared dependencies

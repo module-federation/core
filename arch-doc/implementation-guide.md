@@ -108,7 +108,7 @@ import {
 } from '@module-federation/sdk';
 import { createSchemaValidation } from './utils';
 
-// Create schema validation using actual webpack pattern
+// Create schema validation using the webpack-style schema pattern.
 const validate = createSchemaValidation(
   require('./schemas/container/ModuleFederationPlugin.check.js').validate,
   () => require('./schemas/container/ModuleFederationPlugin').default,
@@ -249,7 +249,7 @@ export class ConsumeSharedPlugin {
     compiler.hooks.compilation.tap('ConsumeSharedPlugin',
       (compilation, { normalModuleFactory }) => {
 
-        // CRITICAL: Hook BEFORE module creation
+        // Intercept before normal module creation.
         normalModuleFactory.hooks.factorize.tapPromise(
           'ConsumeSharedPlugin',
           async (resolveData) => {
@@ -676,7 +676,7 @@ export class FederationRuntimeModule extends RuntimeModule {
 ### Bundler Runtime Bridge Implementation
 
 ```typescript
-// bundler-runtime.ts - Based on actual webpack-bundler-runtime structure
+// bundler-runtime.ts - webpack-bundler-runtime structure
 const federation = {
   runtime, // Core runtime from @module-federation/runtime
   instance: undefined,
@@ -734,7 +734,7 @@ export default federation;
 
 ## Related Documentation
 
-For comprehensive understanding, see:
+For related architecture details, see:
 - [Architecture Overview](./architecture-overview.md) - System understanding and component relationships
 - [Plugin Architecture](./plugin-architecture.md) - Build-time plugin system details
 - [Runtime Architecture](./runtime-architecture.md) - Runtime behavior and lifecycle

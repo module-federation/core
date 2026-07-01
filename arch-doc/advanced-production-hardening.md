@@ -778,4 +778,4 @@ function checkCompatibility(hostVersion: string, remoteVersion: string): boolean
 - [ ] Document fallback strategies
 - [ ] Load test with expected traffic
 
-This document provides production-critical information for Module Federation. Ignoring these warnings WILL result in production failures, security vulnerabilities, and poor user experience.
+Treat these hardening checks as release gates for production federation surfaces, especially when remotes cross deployment or trust boundaries.

@@ -202,6 +202,31 @@ Two rules keep this pipeline maintainable:
 - Build integrations may inspect bundler-specific objects, but they should emit normalized runtime data, manifest records, or generated runtime modules before crossing into runtime packages.
 - Runtime packages should negotiate remotes and shared dependencies through `runtime-core` handlers and hooks. Platform adapters can add loading mechanics, but they should not invent a different container or share-scope contract.
 
+### Layer Handoff Sequence
+
+```mermaid
+sequenceDiagram
+    participant Author as App / Package Author
+    participant Adapter as Platform Adapter
+    participant Build as Build Integration
+    participant Metadata as Metadata Layer
+    participant Bridge as Bundler Runtime Bridge
+    participant Runtime as Runtime Layer
+    participant Core as Runtime Core
+
+    Author->>Adapter: framework config and federation options
+    Adapter->>Build: normalized bundler hooks and environment targets
+    Build->>Metadata: remotes, exposes, shared, assets, type settings
+    Metadata-->>Build: manifest, stats, DTS, normalized manager output
+    Build->>Bridge: generated remote entries and runtime modules
+    Bridge->>Runtime: loadRemote / loadShare calls
+    Runtime->>Core: ModuleFederation instance methods
+    Core->>Core: RemoteHandler, SharedHandler, SnapshotHandler
+    Core-->>Runtime: normalized module factory or shared factory
+    Runtime-->>Bridge: runtime result
+    Bridge-->>Author: application import resolves
+```
+
 ### Cross-Layer Feature Example: Shared Tree Shaking
 
 Shared tree shaking is the clearest example of a feature spanning multiple layers without breaking ownership boundaries:
@@ -798,6 +823,53 @@ sequenceDiagram
     RC->>R: Module/Error
     R->>BR: Module/Error
     BR->>App: Component/Error
+```
+
+### Shared Dependency Loading Flow
+
+```mermaid
+sequenceDiagram
+    participant App as Application
+    participant BR as Bundler Runtime
+    participant R as Runtime Layer
+    participant RC as Runtime Core
+    participant SH as SharedHandler
+    participant Scope as Share Scope Map
+    participant Hooks as Share Hooks
+    participant Provider as Shared Provider
+
+    App->>BR: import shared package
+    BR->>BR: consumes() resolves shareKey and usedExports
+    BR->>R: federation.loadShare('react', customShareInfo)
+    R->>RC: instance.loadShare('react')
+    RC->>SH: sharedHandler.loadShare('react')
+
+    SH->>Hooks: beforeLoadShare(pkgName, shareInfo, shared)
+    Hooks-->>SH: possibly updated share info
+    SH->>Scope: read share candidates by scope, package, version
+
+    alt no candidate registered
+        SH->>Hooks: errorLoadShare(lifecycle: loadShare)
+        Hooks-->>SH: optional recovery
+        SH-->>RC: false or recovered factory
+    else candidates available
+        SH->>SH: apply shareStrategy<br/>version-first or loaded-first
+        SH->>SH: enforce singleton and requiredVersion
+        alt treeShaking metadata exists
+            SH->>SH: shouldUseTreeShaking(status, mode, usedExports)
+            SH->>Provider: choose tree-shaken get/lib when valid
+        else normal shared
+            SH->>Provider: choose normal get/lib
+        end
+        SH->>Hooks: resolveShare(candidate resolver)
+        Hooks-->>SH: selected shared candidate
+        SH->>Hooks: loadShare(origin, pkgName, ShareInfos)
+        SH-->>RC: shared factory
+    end
+
+    RC-->>R: factory or false
+    R-->>BR: factory or fallback result
+    BR-->>App: shared module exports
 ```
 
 ### Snapshot Optimization System

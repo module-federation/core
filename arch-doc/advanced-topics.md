@@ -1,10 +1,10 @@
 # Module Federation Advanced Topics: Production-Ready Guide
 
-⚠️ **CRITICAL WARNING**: This document contains production-critical information about Module Federation. Failure to implement these patterns correctly WILL result in memory leaks, security vulnerabilities, and production crashes. Read every warning carefully.
+⚠️ **Production note**: The patterns in this document affect memory use, security boundaries, and runtime stability. Validate them against the relevant app or package fixture before shipping.
 
-**PRODUCTION IMPACT**: Every feature described here has performance implications. Plugin overhead can be significant and varies by implementation complexity. Mobile devices may experience substantially slower load times. Plan and test accordingly.
+**Production impact**: Every feature described here has performance implications. Plugin overhead can be significant and varies by implementation complexity. Mobile devices may experience substantially slower load times. Plan and test accordingly.
 
-**SECURITY NOTICE**: Module Federation exposes your application to cross-origin security risks. Implement ALL security measures described or risk data breaches.
+**Security notice**: Module Federation crosses origin and deployment boundaries. Apply the relevant security controls for each remote-loading path.
 
 ## Scope
 
