@@ -81,7 +81,7 @@ sequenceDiagram
 ### Version Resolution in Shared Loading with Error Handling
 ```mermaid
 flowchart TD
-    LoadShare[loadShare('react')]
+    LoadShare["loadShare('react')"]
     BeforeHook[hooks.beforeLoadShare.emit]
     CheckScope{In Share Scope?}
     GetVersions[Get Available Versions]

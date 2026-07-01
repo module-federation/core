@@ -22,6 +22,7 @@
     "turbo": "turbo",
     "commit": "cz",
     "docs": "typedoc",
+    "check:mermaid": "node tools/scripts/check-mermaid.mjs",
     "f": "pnpm exec prettier --write .",
     "ci:local": "node tools/scripts/ci-local.mjs",
     "verify:turbo": "node tools/scripts/verify-turbo-conventions.mjs",
