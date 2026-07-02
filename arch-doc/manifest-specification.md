@@ -490,6 +490,11 @@ const manifestSchema = {
     "metaData": {
       "type": "object",
       "required": ["name", "globalName", "buildInfo", "remoteEntry", "type"],
+      // StatsMetaData is a union: one of publicPath / getPublicPath must be present
+      "anyOf": [
+        { "required": ["publicPath"] },
+        { "required": ["getPublicPath"] }
+      ],
       "properties": {
         "name": {
           "type": "string"

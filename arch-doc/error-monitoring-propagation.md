@@ -355,20 +355,28 @@ async function loadSharedModule(
   } = {}
 ): Promise<any> {
   try {
-    return await loadShare(packageName, {
+    // loadShare resolves to a factory (or false), not the module itself
+    const factory = await loadShare(packageName, {
       customShareInfo: { shareConfig: { requiredVersion: version } },
     });
+    if (factory) {
+      return factory();
+    }
+    throw new Error(`Shared module ${packageName} not found in share scope`);
   } catch (error) {
     const federationError = toError(error);
 
     // Try fallback version
     if (options.fallbackVersion) {
       try {
-        return await loadShare(packageName, {
+        const fallbackFactory = await loadShare(packageName, {
           customShareInfo: {
             shareConfig: { requiredVersion: options.fallbackVersion },
           },
         });
+        if (fallbackFactory) {
+          return fallbackFactory();
+        }
       } catch (fallbackError) {
         // Log fallback failure but continue with original error
         console.warn('Fallback version also failed:', fallbackError);
