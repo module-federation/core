@@ -1,4 +1,4 @@
-import findPkg from 'find-pkg';
+import { up as findPkgUp } from 'empathic/package';
 import { copyFile, lstat, mkdir, readdir } from 'fs/promises';
 import { existsSync, readFileSync } from 'fs';
 import path from 'path';
@@ -97,11 +97,13 @@ class ThirdPartyExtractor {
         return dir;
       } else {
         const typedPkgName = getTypedName(pkg.name);
-        const typedPkgJsonPath = findPkg.sync(
-          resolve.sync(`${typedPkgName}/package.json`, {
-            basedir: this.context,
-          }),
-        ) as string;
+        const typedPkgJsonPath = findPkgUp({
+          cwd: path.dirname(
+            resolve.sync(`${typedPkgName}/package.json`, {
+              basedir: this.context,
+            }),
+          ),
+        }) as string;
         const typedDir = path.dirname(typedPkgJsonPath);
         readFileSync(typedPkgJsonPath, 'utf-8');
         this.addPkgs(typedPkgName, typedDir);
