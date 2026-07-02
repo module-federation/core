@@ -1216,7 +1216,15 @@ async function ciIsAffected(appName, ctx) {
     ['tools/scripts/ci-is-affected.mjs', `--appName=${appName}`],
     { ...ctx, allowFailure: true },
   );
-  return result.code === 0;
+  if (result.code === 0) {
+    return true;
+  }
+  if (result.code === 1) {
+    return false;
+  }
+  throw new Error(
+    `ci-is-affected failed with unexpected ${formatExit(result)}`,
+  );
 }
 
 function logStepSkip(ctx, reason) {
