@@ -1,5 +1,15 @@
 # @module-federation/retry-plugin
 
+## 2.6.0
+
+### Minor Changes
+
+- 64719e2: Support function-based `retryDelay` for per-attempt delay strategies such as exponential backoff.
+
+### Patch Changes
+
+- @module-federation/sdk@2.6.0
+
 ## 2.5.1
 
 ### Patch Changes

@@ -96,10 +96,10 @@ export const getMFConfig = async (
   if (config) {
     return config;
   }
-  const mfConfigPath = configPath ? configPath : defaultPath;
+  const mfConfigPath = path.resolve(configPath || defaultPath);
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { createJiti } = require('jiti');
-  const jit = createJiti(__filename, {
+  const jit = createJiti(mfConfigPath, {
     interopDefault: true,
   });
   const configModule = await jit(mfConfigPath);
@@ -450,11 +450,18 @@ export const moduleFederationConfigPlugin = (
       const exposes = userConfig.csrConfig?.exposes;
       const hasExposes =
         exposes && Array.isArray(exposes)
-          ? exposes.length
-          : Object.keys(exposes ?? {}).length;
+          ? exposes.length > 0
+          : Object.keys(exposes ?? {}).length > 0;
+      const lazyCompilationDisabledByPlugin =
+        hasExposes && modernjsConfig?.dev?.lazyCompilation !== false;
 
       if (corsWarnMsgs.length > 1 && hasExposes) {
         logger.warn(corsWarnMsgs.join('\n'));
+      }
+      if (lazyCompilationDisabledByPlugin) {
+        logger.warn(
+          'Detected exposes in the Module Federation config. The Modern.js v3 Module Federation plugin will set dev.lazyCompilation to false for producer apps.',
+        );
       }
 
       const corsHeaders = hasExposes
@@ -486,6 +493,9 @@ export const moduleFederationConfigPlugin = (
           assetPrefix: modernjsConfig?.dev?.assetPrefix
             ? modernjsConfig.dev.assetPrefix
             : 'auto',
+          lazyCompilation: hasExposes
+            ? false
+            : modernjsConfig?.dev?.lazyCompilation,
         },
       };
     });
