@@ -1,6 +1,5 @@
 import ts from 'typescript';
 import { Compiler } from 'webpack';
-import get from 'lodash.get';
 import path from 'path';
 
 import type { FederatedTypesPluginOptions, TypeServeOptions } from '../types';
@@ -80,9 +79,14 @@ export const normalizeOptions = (
 
   const federationFileName = (federationConfig.filename ??
     'remoteEntry.js') as string;
+  const devServer = (
+    webpackCompilerOptions as {
+      devServer?: { static?: { directory?: string } };
+    }
+  ).devServer;
   const distPath =
-    get(webpackCompilerOptions, 'devServer.static.directory') ||
-    get(webpackCompilerOptions, 'output.path') ||
+    devServer?.static?.directory ||
+    webpackCompilerOptions.output?.path ||
     'dist';
 
   const typesPath = federationFileName.substring(

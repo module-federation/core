@@ -295,6 +295,8 @@ function configureBuildErrorHandling(config: BuildErrorConfig): void {
 ### 1. Module Loading Error Handling
 
 ```typescript
+import { loadRemote } from '@module-federation/runtime';
+
 async function loadRemoteModule(
   remoteName: string,
   moduleName: string,
@@ -310,7 +312,7 @@ async function loadRemoteModule(
   try {
     const result = await withTimeout(
       retryWithBackoff(
-        () => __federation_method_getRemote(remoteName, moduleName),
+        () => loadRemote(`${remoteName}/${moduleName}`),
         options.retry || getDefaultRetryConfig(),
         'RUNTIME-008'
       ),
@@ -342,6 +344,8 @@ async function loadRemoteModule(
 ### 2. Shared Module Error Handling
 
 ```typescript
+import { loadShare } from '@module-federation/runtime';
+
 async function loadSharedModule(
   packageName: string,
   version: string,
@@ -351,14 +355,28 @@ async function loadSharedModule(
   } = {}
 ): Promise<any> {
   try {
-    return await __federation_method_loadShare(packageName, version);
+    // loadShare resolves to a factory (or false), not the module itself
+    const factory = await loadShare(packageName, {
+      customShareInfo: { shareConfig: { requiredVersion: version } },
+    });
+    if (factory) {
+      return factory();
+    }
+    throw new Error(`Shared module ${packageName} not found in share scope`);
   } catch (error) {
     const federationError = toError(error);
 
     // Try fallback version
     if (options.fallbackVersion) {
       try {
-        return await __federation_method_loadShare(packageName, options.fallbackVersion);
+        const fallbackFactory = await loadShare(packageName, {
+          customShareInfo: {
+            shareConfig: { requiredVersion: options.fallbackVersion },
+          },
+        });
+        if (fallbackFactory) {
+          return fallbackFactory();
+        }
       } catch (fallbackError) {
         // Log fallback failure but continue with original error
         console.warn('Fallback version also failed:', fallbackError);

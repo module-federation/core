@@ -87,7 +87,6 @@ graph TB
     SDK --> RuntimeCore
     ErrorCodes --> RuntimeCore
     Utilities --> Storybook
-    LegacyCore --> Runtime
     RuntimeCore --> Runtime --> WebpackRuntime
     Runtime --> RuntimeTools
     SDK --> Enhanced
@@ -380,15 +379,15 @@ classDiagram
         -sharedHandler: SharedHandler
         +loadRemote(id): Promise~Module~
         +loadShare(pkgName): Promise~Module~
-        +init(options): void
-        +registerRemote(remote): void
+        +initOptions(options): Options
+        +registerRemotes(remotes): void
     }
 
     class RemoteHandler {
         -remoteCache: Map
         -loadingPromises: Map
         +loadRemote(id): Promise~Module~
-        +registerRemote(info): void
+        +registerRemotes(remotes): void
         +preloadRemote(id): Promise
     }
 
@@ -547,7 +546,7 @@ interface WebpackIntegrationPoints {
   'compilation.addRuntimeModule': 'Injects federation runtime modules into webpack bundle';
 
   // Entry point handling
-  'compiler.hooks.entryOption': 'RemoteEntryPlugin modifies webpack entry configuration';
+  'webpack.EntryPlugin (via compiler.hooks.afterPlugins)': 'RemoteEntryPlugin prepends a getPublicPath entry';
 }
 ```
 
