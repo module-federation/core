@@ -160,12 +160,14 @@ function transformInvalidVersion(version: string): string {
  * compare version a and b, return true if a is less than or equal to b
  */
 export function versionLt(a: string, b: string): boolean {
-  const aAtom = toCompareAtom(transformInvalidVersion(a));
-  const bAtom = toCompareAtom(transformInvalidVersion(b));
-  if (!aAtom || !bAtom) {
-    return false;
+  const normalizedA = transformInvalidVersion(a);
+  const normalizedB = transformInvalidVersion(b);
+  const aAtom = toCompareAtom(normalizedA);
+  const bAtom = toCompareAtom(normalizedB);
+  if (aAtom && bAtom) {
+    return compare({ ...bAtom, operator: '<=' }, aAtom);
   }
-  return compare({ ...bAtom, operator: '<=' }, aAtom);
+  return satisfy(normalizedA, `<=${normalizedB}`);
 }
 
 export const findVersion = (

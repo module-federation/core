@@ -102,6 +102,23 @@ describe('findVersion', () => {
 
     expect(findVersion(shareVersionMap)).toBe('1.2.3');
   });
+
+  test('prefers wildcard versions over concrete versions', () => {
+    const shareVersionMap = {
+      '1.0.0': {},
+      '*': {},
+    };
+
+    expect(findVersion(shareVersionMap)).toBe('*');
+  });
+});
+
+describe('versionLt wildcard parity', () => {
+  test('wildcard upper bound matches legacy satisfy behavior', () => {
+    expect(versionLt('1.0.0', '*')).toBe(legacyVersionLt('1.0.0', '*'));
+    expect(versionLt('1.0.0', 'x')).toBe(legacyVersionLt('1.0.0', 'x'));
+    expect(versionLt('1.0.0', '1.x')).toBe(legacyVersionLt('1.0.0', '1.x'));
+  });
 });
 
 describe('parseRangeComparators cache', () => {
