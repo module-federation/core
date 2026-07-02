@@ -405,10 +405,11 @@ class DynamicFederationDebugger {
       const container = window[remoteName];
       console.log('Container object:', container);
 
-      // Try to get metadata if available
-      if (container.__remoteEntryModule) {
-        console.log('Remote entry module:', container.__remoteEntryModule);
-      }
+      // Containers expose only get() and init()
+      console.log('Container API:', {
+        get: typeof container.get,
+        init: typeof container.init
+      });
 
       // Test basic functionality
       this.testRemoteBasics(remoteName);
@@ -495,23 +496,29 @@ class DynamicFederationDebugger {
 
     const { manifest } = manifestData;
 
-    // Analyze manifest structure
+    // Analyze manifest structure (shared/remotes/exposes are arrays)
     console.log('📋 Manifest structure:');
     console.log('ID:', manifest.id);
     console.log('Name:', manifest.name);
-    console.log('Version:', manifest.version);
-    console.log('Remotes:', Object.keys(manifest.remotes || {}));
-    console.log('Shared:', Object.keys(manifest.shared || {}));
+    console.log('Build version:', manifest.metaData?.buildInfo?.buildVersion);
+    console.log('Remotes:', (manifest.remotes || []).map(r => r.federationContainerName));
+    console.log('Shared:', (manifest.shared || []).map(s => s.name));
 
     // Validate remote URLs
-    if (manifest.remotes) {
+    if (manifest.remotes && manifest.remotes.length > 0) {
       console.log('🔗 Validating remote URLs:');
-      Object.entries(manifest.remotes).forEach(([name, config]) => {
-        const url = typeof config === 'string' ? config : config.entry;
-        console.log(`${name}: ${url}`);
+      manifest.remotes.forEach((remote) => {
+        const name = remote.federationContainerName;
+
+        if (!('entry' in remote)) {
+          console.log(`${name}: resolved by version (${remote.version})`);
+          return;
+        }
+
+        console.log(`${name}: ${remote.entry}`);
 
         // Test URL accessibility
-        fetch(url, { method: 'HEAD' })
+        fetch(remote.entry, { method: 'HEAD' })
           .then(response => {
             const status = response.ok ? '✅' : '❌';
             console.log(`${status} ${name}: ${response.status}`);
@@ -523,16 +530,16 @@ class DynamicFederationDebugger {
     }
 
     // Check for version conflicts
-    if (manifest.shared) {
+    if (manifest.shared && manifest.shared.length > 0) {
       console.log('🔄 Checking shared dependencies:');
-      Object.entries(manifest.shared).forEach(([name, config]) => {
-        const version = config.version || config.requiredVersion;
-        console.log(`${name}@${version}`);
+      manifest.shared.forEach((shared) => {
+        const version = shared.version || shared.requiredVersion;
+        console.log(`${shared.name}@${version}`);
 
         // Check against current share scope
         const shareScope = window.__webpack_share_scopes__.default || {};
-        if (shareScope[name]) {
-          const availableVersions = Object.keys(shareScope[name]);
+        if (shareScope[shared.name]) {
+          const availableVersions = Object.keys(shareScope[shared.name]);
           const hasConflict = !availableVersions.includes(version);
           const icon = hasConflict ? '⚠️' : '✅';
           console.log(`${icon} Available versions: ${availableVersions.join(', ')}`);

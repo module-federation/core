@@ -77,16 +77,16 @@ type CoreLifeCycle = {
   beforeInit: (args: { userOptions: UserOptions; options: Options; origin: ModuleFederation; shareInfo: ShareInfos }) => void;
   init: (args: { options: Options; origin: ModuleFederation }) => void;
   beforeInitContainer: (args: { shareScope: ShareScopeMap[string]; initScope: InitScope; remoteEntryInitOptions: RemoteEntryInitOptions; remoteInfo: RemoteInfo; origin: ModuleFederation }) => Promise<any>;
-  initContainer: (args: { shareScope: ShareScopeMap[string]; initScope: InitScope; remoteEntryInitOptions: RemoteEntryInitOptions; remoteInfo: RemoteInfo; remoteEntryExports: RemoteEntryExports; origin: ModuleFederation; id: string; remoteSnapshot?: ModuleInfo }) => Promise<any>;
+  initContainer: (args: { shareScope: ShareScopeMap[string]; initScope: InitScope; remoteEntryInitOptions: RemoteEntryInitOptions; remoteInfo: RemoteInfo; remoteEntryExports: RemoteEntryExports; origin: ModuleFederation; id?: string; remoteSnapshot?: ModuleInfo }) => Promise<any>;
 };
 
 // Remote lifecycle hooks available:
 type RemoteLifeCycle = {
   beforeRequest: (args: { id: string; options: Options; origin: ModuleFederation }) => Promise<any>;
   onLoad: (args: { id: string; pkgNameOrAlias: string; expose: string; exposeModule?: any; exposeModuleFactory?: any; remote: Remote; options: ModuleOptions; moduleInstance: Module; origin: ModuleFederation }) => Promise<any>;
-  errorLoadRemote: (args: { id: string; error: Error; from: CallFrom; lifecycle: 'onLoad' | 'beforeRequest' | 'afterResolve'; origin: ModuleFederation }) => Promise<any>;
+  errorLoadRemote: (args: { id: string; error: unknown; from: CallFrom; lifecycle: 'onLoad' | 'beforeRequest' | 'beforeLoadShare' | 'afterResolve'; origin: ModuleFederation }) => Promise<any>;
   beforePreloadRemote: (args: { preloadOps: Array<PreloadRemoteArgs>; options: Options; origin: ModuleFederation }) => Promise<any>;
-  generatePreloadAssets: (args: { origin: ModuleFederation; preloadOptions: PreloadOptions[number]; remote: Remote; remoteInfo: RemoteInfo; globalSnapshot: ModuleInfo; remoteSnapshot: ModuleInfo }) => Promise<any>;
+  generatePreloadAssets: (args: { origin: ModuleFederation; preloadOptions: PreloadOptions[number]; remote: Remote; remoteInfo: RemoteInfo; globalSnapshot: GlobalModuleInfo; remoteSnapshot: ModuleInfo }) => Promise<any>;
 };
 
 // Shared lifecycle hooks available:
@@ -210,9 +210,12 @@ registerGlobalPlugins([productionSafePlugin]);
 
 // ✅ Remote-entry recovery belongs in loaderHook.loadEntryError
 federationInstance.loaderHook.lifecycle.loadEntryError.on(
-  async ({ remoteInfo, getRemoteEntry }) => {
+  async ({ origin, remoteInfo, getRemoteEntry }) => {
     reportEntryFailure(remoteInfo);
-    return getRemoteEntry(alternateRemoteInfo(remoteInfo));
+    return getRemoteEntry({
+      origin,
+      remoteInfo: alternateRemoteInfo(remoteInfo),
+    });
   },
 );
 
@@ -270,64 +273,61 @@ const errorRecoveryPlugin: ModuleFederationRuntimePlugin = {
 
 ### Retry Plugin Implementation
 
-The codebase includes a real retry plugin for fetch operations:
+The codebase includes a real retry plugin that retries manifest fetches (via the `fetch` loader hook) and remote entry loading (via `loadEntryError`):
 
 ```typescript
-// From packages/retry-plugin/src/fetch-retry.ts
-import { fetchWithRetry } from '@module-federation/retry-plugin';
+// From packages/retry-plugin/src/index.ts
+import { RetryPlugin } from '@module-federation/retry-plugin';
 
-const retryPlugin: ModuleFederationRuntimePlugin = {
-  name: 'RetryPlugin',
+const federationInstance = new ModuleFederation({
+  name: 'my-app',
+  remotes: [/* ... */],
+  plugins: [
+    RetryPlugin({
+      retryTimes: 3,    // default 3
+      retryDelay: 1000, // default 1000ms; can also be (attempt) => number
+      // Backup domains rotated through on failed attempts
+      domains: ['https://cdn-primary.example.com', 'https://cdn-backup.example.com'],
+      addQuery: true,   // appends retryCount=N query to bust caches
+      onRetry: ({ times, url }) => console.warn(`Retry #${times} for ${url}`),
+      onError: ({ url }) => console.error(`Gave up on ${url}`),
+    }),
+  ],
+});
 
-  fetch(url, options) {
-    return fetchWithRetry({
-      url,
-      options,
-      retryTimes: 3,
-      retryDelay: 1000,
-      fallback: (originalUrl) => {
-        // Return fallback URL
-        return originalUrl.replace('/primary/', '/fallback/');
-      }
-    });
-  }
-};
+// Simplified internal fetchRetry implementation
+// (from packages/retry-plugin/src/fetch-retry.ts)
+async function fetchRetry(params: FetchRetryOptions, lastRequestUrl?: string, originalTotal?: number) {
+  const {
+    url,
+    fetchOptions = {},
+    retryTimes = 3,
+    retryDelay = 1000,
+    domains,
+    addQuery,
+    onRetry,
+    onSuccess,
+    onError,
+  } = params;
 
-// Real fetchWithRetry implementation
-async function fetchWithRetry({
-  url,
-  options = {},
-  retryTimes = 3,
-  retryDelay = 1000,
-  fallback
-}) {
+  // Retries rotate through backup domains and can append a retryCount
+  // query parameter; before each retry it waits retryDelay
+  // (a fixed number of milliseconds or a per-attempt function)
+  const requestUrl = getRetryUrl(url, { domains, addQuery /* ... */ });
+
   try {
-    const response = await fetch(url, options);
+    const response = await fetch(requestUrl, fetchOptions);
     if (!response.ok) {
-      throw new Error(`Server error: ${response.status}`);
+      throw new Error(`Request failed: ${response.status}`);
     }
     return response;
   } catch (error) {
     if (retryTimes <= 0) {
-      if (fallback && typeof fallback === 'function') {
-        return fetchWithRetry({
-          url: fallback(url),
-          options,
-          retryTimes: 0,
-          retryDelay: 0
-        });
-      }
-      throw new Error('Request failed after all retries');
+      onError?.({ domains, url: requestUrl, tagName: 'fetch' });
+      throw new Error('The request failed and has now been abandoned');
     }
-
-    // Exponential backoff
-    await new Promise(resolve => setTimeout(resolve, retryDelay));
-    return fetchWithRetry({
-      url,
-      options,
-      retryTimes: retryTimes - 1,
-      retryDelay: retryDelay * 1.5
-    });
+    onRetry?.({ times: (originalTotal ?? retryTimes) - retryTimes + 1, domains, url: requestUrl, tagName: 'fetch' });
+    return fetchRetry({ ...params, retryTimes: retryTimes - 1 }, requestUrl, originalTotal ?? retryTimes);
   }
 }
 ```
@@ -395,29 +395,29 @@ class ShareScopeManager {
 ### Share Scope Architecture
 
 ```typescript
-// Real share scope structure from runtime-core/src/type/index.ts
+// Real share scope structure from runtime-core/src/type/config.ts
 export type ShareScopeMap = {
-  [scopeName: string]: {
-    [packageName: string]: {
-      [version: string]: {
-        get: () => Promise<any>;
-        loaded?: boolean;
-        loading?: Promise<any>;
-        from?: string;
-        lib?: () => any;
-        shareConfig?: ShareConfig;
-      }
+  [scope: string]: {
+    [pkgName: string]: {
+      [sharedVersion: string]: Shared;
     }
   }
 };
+
+// Each Shared entry includes:
+// {
+//   version, get, shareConfig: SharedConfig, scope, useIn, from, deps,
+//   lib?, loaded?, loading?, eager?, strategy, treeShaking?
+// }
 
 // shareScopeMap initialization shape
 class ModuleFederation {
   shareScopeMap: ShareScopeMap;
 
   constructor(userOptions: UserOptions) {
-    // Initialize share scope map
-    this.shareScopeMap = {};
+    // The map is owned by the SharedHandler and mirrored on the instance
+    this.sharedHandler = new SharedHandler(this);
+    this.shareScopeMap = this.sharedHandler.shareScopeMap;
     // ... initialization logic
   }
 }
@@ -457,29 +457,43 @@ const shareScopePlugin: ModuleFederationRuntimePlugin = {
 ### Share Scope Initialization
 
 ```typescript
-// From webpack-bundler-runtime/src/initializeSharing.ts
-function initializeSharing(shareScopeName: string | string[]) {
+// Simplified from webpack-bundler-runtime/src/initializeSharing.ts
+function initializeSharing({
+  shareScopeName,
+  webpackRequire,
+  initPromises,
+  initTokens,
+  initScope,
+}: InitializeSharingOptions) {
   const shareScopeKeys = Array.isArray(shareScopeName)
     ? shareScopeName
     : [shareScopeName];
 
-  const initPromises: Record<string, any> = {};
-  const initTokens: Record<string, any> = {};
-
   const _initializeSharing = function(shareScopeKey: string) {
+    const mfInstance = webpackRequire.federation.instance;
+    // initTokens/initScope guard against circular init calls (elided)
+
     const promise = initPromises[shareScopeKey];
     if (promise) return promise;
 
-    // Initialize the share scope
+    // Initialize the share scope through the runtime
     const promises = mfInstance.initializeSharing(shareScopeKey, {
-      shareScopeMap: webpackRequire.S || {},
-      shareScopeKeys: shareScopeName
+      strategy: mfInstance.options.shareStrategy,
+      initScope,
+      from: 'build'
     });
+    attachShareScopeMap(webpackRequire);
 
-    return initPromises[shareScopeKey] = Promise.all(promises);
+    if (!promises.length) {
+      return (initPromises[shareScopeKey] = true);
+    }
+
+    return (initPromises[shareScopeKey] = Promise.all(promises).then(
+      () => (initPromises[shareScopeKey] = true),
+    ));
   };
 
-  return Promise.all(shareScopeKeys.map(_initializeSharing));
+  return Promise.all(shareScopeKeys.map(_initializeSharing)).then(() => true);
 }
 ```
 
@@ -582,10 +596,12 @@ sequenceDiagram
 ### Real Preload Implementation
 
 ```typescript
-// From runtime-core/src/remote/index.ts
+// Simplified from runtime-core/src/remote/index.ts
 class RemoteHandler {
   async preloadRemote(preloadOptions: Array<PreloadRemoteArgs>): Promise<void> {
     const { host } = this;
+    const preloadResults: PreloadRemoteResult[] = [];
+    let preloadError: Error | undefined;
 
     // Call beforePreloadRemote hook
     await this.hooks.lifecycle.beforePreloadRemote.emit({
@@ -601,8 +617,9 @@ class RemoteHandler {
 
     await Promise.all(
       preloadOps.map(async (ops) => {
-        const { remote } = ops;
+        const { remote, preloadConfig } = ops;
         const remoteInfo = getRemoteInfo(remote);
+        const id = `${remote.name}/*`;
 
         // Load snapshot information
         const { globalSnapshot, remoteSnapshot } =
@@ -620,43 +637,65 @@ class RemoteHandler {
           remoteSnapshot,
         });
 
-        preloadAssets(remoteInfo, host, assets);
+        const results = await preloadAssets(remoteInfo, host, assets);
+        preloadResults.push({ remote, remoteInfo, preloadConfig, id, results });
       }),
     );
+
+    // Per-asset results are reported to plugins; failures throw
+    await this.hooks.lifecycle.afterPreloadRemote.emit({
+      preloadOps: preloadOptions,
+      options: host.options,
+      origin: host,
+      results: preloadResults,
+      error: preloadError,
+    });
+    if (preloadError) {
+      throw preloadError;
+    }
   }
 }
 
-// From utils/preload.ts
+// Simplified from utils/preload.ts (assets are URL strings)
 export function preloadAssets(
   remoteInfo: RemoteInfo,
   host: ModuleFederation,
   assets: PreloadAssets
-) {
+): Promise<PreloadAssetResult[]> {
   const { cssAssets, jsAssetsWithoutEntry, entryAssets } = assets;
+  const results: Array<Promise<PreloadAssetResult>> = [];
 
-  // Preload CSS files
-  cssAssets.forEach((asset) => {
-    const link = document.createElement('link');
-    link.rel = 'preload';
-    link.as = 'style';
-    link.href = asset.src;
-    if (asset.crossorigin) {
-      link.crossOrigin = asset.crossorigin;
-    }
-    document.head.appendChild(link);
-  });
+  if (host.options.inBrowser) {
+    // Remote entries are loaded (and cached) via getRemoteEntry
+    entryAssets.forEach(({ moduleInfo }) => {
+      results.push(waitForRemoteEntryPreload(host, remoteInfo, moduleInfo, context));
+    });
 
-  // Preload JS assets
-  jsAssetsWithoutEntry.forEach((asset) => {
-    const link = document.createElement('link');
-    link.rel = 'preload';
-    link.as = 'script';
-    link.href = asset.src;
-    if (asset.crossorigin) {
-      link.crossOrigin = asset.crossorigin;
-    }
-    document.head.appendChild(link);
-  });
+    // CSS files are preloaded via <link rel="preload" as="style">
+    // created through the createLink loader hook
+    cssAssets.forEach((cssUrl) => {
+      results.push(waitForLinkPreload({
+        host,
+        remoteInfo,
+        url: cssUrl,
+        attrs: { rel: 'preload', as: 'style' },
+        context,
+      }));
+    });
+
+    // JS assets are preloaded via <link rel="preload" as="script">
+    jsAssetsWithoutEntry.forEach((jsUrl) => {
+      results.push(waitForLinkPreload({
+        host,
+        remoteInfo,
+        url: jsUrl,
+        attrs: { rel: 'preload', as: 'script' },
+        context,
+      }));
+    });
+  }
+
+  return Promise.all(results);
 }
 ```
 
@@ -714,7 +753,7 @@ const preloadPlugin: ModuleFederationRuntimePlugin = {
   generatePreloadAssets(args) {
     const { origin, preloadOptions, remote, remoteInfo, globalSnapshot, remoteSnapshot } = args;
 
-    // Custom asset generation logic
+    // Custom asset generation logic (css/js assets are URL strings)
     const customAssets = {
       cssAssets: [],
       jsAssetsWithoutEntry: [],
@@ -723,10 +762,9 @@ const preloadPlugin: ModuleFederationRuntimePlugin = {
 
     // Add critical CSS for faster rendering
     if (remoteInfo.name === 'shell') {
-      customAssets.cssAssets.push({
-        src: `${remoteInfo.entry.replace('/remoteEntry.js', '/critical.css')}`,
-        crossorigin: 'anonymous'
-      });
+      customAssets.cssAssets.push(
+        remoteInfo.entry.replace('/remoteEntry.js', '/critical.css')
+      );
     }
 
     return customAssets;

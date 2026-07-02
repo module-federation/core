@@ -80,7 +80,7 @@ The foundation of the runtime system is the `ModuleFederation` class in `@module
 
 ### Conditional Feature Inclusion
 
-The `SnapshotHandler` is conditionally included based on the `FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN` build-time flag:
+The snapshot plugins (`snapshotPlugin()` and `generatePreloadAssetsPlugin()`) are conditionally registered based on the `FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN` build-time flag (the `SnapshotHandler` instance itself is always constructed):
 
 ```typescript
 // Declared in core.ts with DefinePlugin
@@ -114,7 +114,7 @@ classDiagram
         +preloadRemote(options: Array): Promise~void~
         +initializeSharing(scope: string): Array~Promise~
         +registerRemotes(remotes: Remote[]): void
-        +registerShared(shared: UserOptions): void
+        +registerShared(shared: UserOptions.shared): void
     }
 
     class SharedHandler {
@@ -143,7 +143,7 @@ classDiagram
     }
 
     class SnapshotHandler {
-        +host: ModuleFederation
+        +HostInstance: ModuleFederation
         +manifestCache: Map~string, Manifest~
         +hooks: PluginSystem
         +loadingHostSnapshot: Promise~GlobalModuleInfo | void~ | null
@@ -151,10 +151,10 @@ classDiagram
 
         +loadRemoteSnapshotInfo(options): Promise~Object~
         +getGlobalRemoteInfo(moduleInfo): Object
-        +getManifestJson(url, moduleInfo, extraOptions): Promise~ModuleInfo~
+        -getManifestJson(url, moduleInfo, extraOptions): Promise~Manifest~
     }
 
-    Note: SnapshotHandler is conditionally included based on FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN flag
+    note "Snapshot plugins are conditionally registered based on the FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN flag"
 
     ModuleFederation --> SharedHandler
     ModuleFederation --> RemoteHandler
@@ -257,17 +257,22 @@ let FederationInstance: ModuleFederation | null = null;
 
 export function createInstance(options: UserOptions) {
   const ModuleFederationConstructor = getGlobalFederationConstructor() || ModuleFederation;
-  return new ModuleFederationConstructor(options);
+  const instance = new ModuleFederationConstructor({
+    id: `${options.name}@${options.version || Date.now()}`,
+    ...options,
+  });
+  setGlobalFederationInstance(instance);
+  return instance;
 }
 
 export function init(options: UserOptions): ModuleFederation {
   const instance = getGlobalFederationInstance(options.name, options.version);
+  const normalizedOptions = { ...options, id: options.id || '' };
   if (!instance) {
-    FederationInstance = createInstance(options);
-    setGlobalFederationInstance(FederationInstance);
+    FederationInstance = createInstance(normalizedOptions);
     return FederationInstance;
   } else {
-    instance.initOptions(options);
+    instance.initOptions(normalizedOptions);
     if (!FederationInstance) {
       FederationInstance = instance;
     }
@@ -342,6 +347,8 @@ const federation: Federation = {
     S: {},                   // Share scope registry
     installInitialConsumes,  // Initial consumption setup
     initContainerEntry,      // Container initialization
+    init,                    // Bundler runtime init
+    getSharedFallbackGetter, // Shared fallback getter resolution
   },
   attachShareScopeMap,       // Share scope attachment
   bundlerRuntimeOptions: {}, // Bundler-specific options
@@ -362,11 +369,14 @@ export const remotes = (options: RemotesOptions) => {
       if (!getScope) getScope = [];
 
       const data = idToExternalAndNameMapping[id];
-      const remoteInfo = idToRemoteMap[id];
+      const remoteInfos = idToRemoteMap[id] || [];
 
       // Integration with Module Federation runtime
       const loadRemoteWithWebpackContext = async () => {
-        const module = await webpackRequire.federation.instance.loadRemote(id, {
+        // data[1] is the expose path (e.g. './Button')
+        const remoteName = decodeName(remoteInfos[0].name, ENCODE_NAME_PREFIX);
+        const remoteModuleName = remoteName + data[1].slice(1);
+        const module = await webpackRequire.federation.instance.loadRemote(remoteModuleName, {
           loadFactory: false,
           from: 'build'
         });
@@ -379,27 +389,25 @@ export const remotes = (options: RemotesOptions) => {
 };
 
 // webpack-bundler-runtime/src/consumes.ts
-export const consumes = (options: ConsumeOptions) => {
-  const { installedModules, moduleToHandlerMapping, webpackRequire } = options;
+export const consumes = (options: ConsumesOptions) => {
+  const { chunkId, chunkMapping, installedModules, moduleToHandlerMapping, webpackRequire } = options;
 
-  Object.keys(moduleToHandlerMapping).forEach((moduleId) => {
-    const handlers = moduleToHandlerMapping[moduleId];
+  chunkMapping[chunkId].forEach((moduleId) => {
+    const { shareKey, getter, shareInfo } = moduleToHandlerMapping[moduleId];
 
-    handlers.forEach((handler) => {
-      const { shareKey, getter, shareInfo } = handler;
-
-      // Use Module Federation runtime for shared module loading
-      const loadSharedModule = async () => {
-        const sharedModule = await webpackRequire.federation.instance.loadShare(shareKey);
-        if (sharedModule) {
-          return sharedModule();
-        }
+    // Use Module Federation runtime for shared module loading
+    const loadSharedModule = async () => {
+      const factory = await webpackRequire.federation.instance.loadShare(shareKey, {
+        customShareInfo: shareInfo,
+      });
+      if (factory === false) {
         // Fallback to getter
         return getter();
-      };
+      }
+      return factory;
+    };
 
-      installedModules[moduleId] = loadSharedModule;
-    });
+    installedModules[moduleId] = loadSharedModule();
   });
 };
 ```
@@ -478,70 +486,111 @@ flowchart TD
 export class SyncHook<T, K> {
   listeners = new Set<Callback<T, K>>();
 
-  emit(...data: ArgsType<T>): void | K {
+  emit(...data: ArgsType<T>): void | K | Promise<any> {
     let result;
     if (this.listeners.size > 0) {
       this.listeners.forEach((fn) => {
-        result = fn(...data);
+        const nextResult = fn(...data);
+        if (nextResult !== undefined) {
+          result = nextResult;
+        }
       });
     }
     return result;
   }
 
   on(fn: Callback<T, K>): void {
-    this.listeners.add(fn);
+    if (typeof fn === 'function') {
+      this.listeners.add(fn);
+    }
   }
 }
 
 export class AsyncHook<T, ExternalEmitReturnType = CallbackReturnType> extends SyncHook<T, ExternalEmitReturnType> {
   override emit(...data: ArgsType<T>): Promise<void | false | ExternalEmitReturnType> {
+    let result;
     const ls = Array.from(this.listeners);
     if (ls.length > 0) {
       let i = 0;
-      const call = (prev?: any): any => {
+      const call = (prev?: unknown): unknown => {
         if (prev === false) {
           return false; // Abort process
         } else if (i < ls.length) {
-          return Promise.resolve(ls[i++].apply(null, data)).then(call);
+          return Promise.resolve(ls[i++].apply(null, data)).then((result) => {
+            // undefined (or echoing back the single input) keeps the previous result
+            if (result === undefined || (data.length === 1 && result === data[0])) {
+              return call(prev);
+            }
+            return call(result);
+          });
         } else {
           return prev;
         }
       };
-      return call();
+      result = call();
     }
-    return Promise.resolve();
+    return Promise.resolve(result);
   }
 }
 
-export class SyncWaterfallHook<T> extends SyncHook<T, ArgsType<T>[0]> {
-  override emit(...data: ArgsType<T>): ArgsType<T>[0] {
-    if (this.listeners.size > 0) {
-      this.listeners.forEach((fn) => {
-        data[0] = fn(...data) || data[0];
-      });
+// Waterfall hooks take a single object payload and validate plugin returns
+export class SyncWaterfallHook<T extends Record<string, any>> extends SyncHook<[T], T | void> {
+  onerror: (errMsg: string | Error | unknown) => void = error;
+
+  override emit(data: T): T {
+    for (const fn of this.listeners) {
+      try {
+        const tempData = fn(data);
+        if (tempData === undefined) {
+          continue;
+        }
+        // Returned object must retain the original keys
+        if (checkReturnData(data, tempData)) {
+          data = tempData;
+        } else {
+          this.onerror(`A plugin returned an unacceptable value for the "${this.type}" type.`);
+          break;
+        }
+      } catch (e) {
+        warn(e);
+        this.onerror(e);
+      }
     }
-    return data[0];
+    return data;
   }
 }
 
-export class AsyncWaterfallHook<T> extends AsyncHook<T, ArgsType<T>[0]> {
-  override emit(...data: ArgsType<T>): Promise<ArgsType<T>[0]> {
+export class AsyncWaterfallHook<T extends object> extends SyncHook<[T], CallbackReturnType<T>> {
+  onerror: (errMsg: string | Error | unknown) => void = error;
+
+  override emit(data: T): Promise<T> {
     const ls = Array.from(this.listeners);
     if (ls.length > 0) {
       let i = 0;
-      const call = (prev: ArgsType<T>[0]): Promise<ArgsType<T>[0]> => {
-        if (i < ls.length) {
-          data[0] = prev;
-          return Promise.resolve(ls[i++].apply(null, data)).then((result) =>
-            call(result || prev),
-          );
-        } else {
-          return Promise.resolve(prev);
-        }
+      const processError = (e: unknown): T => {
+        warn(e);
+        this.onerror(e);
+        return data;
       };
-      return call(data[0]);
+      const call = (prevData?: T | void): T | Promise<T> => {
+        if (prevData !== undefined && checkReturnData(data, prevData)) {
+          data = prevData as T;
+        } else if (prevData !== undefined) {
+          this.onerror(`A plugin returned an incorrect value for the "${this.type}" type.`);
+          return data;
+        }
+        if (i < ls.length) {
+          try {
+            return Promise.resolve(ls[i++](data)).then(call, processError);
+          } catch (e) {
+            return processError(e);
+          }
+        }
+        return data;
+      };
+      return Promise.resolve(call(data));
     }
-    return Promise.resolve(data[0]);
+    return Promise.resolve(data);
   }
 }
 ```
@@ -575,7 +624,7 @@ hooks = new PluginSystem({
     remoteInfo: RemoteInfo;
     remoteEntryExports: RemoteEntryExports;
     origin: ModuleFederation;
-    id: string;
+    id?: string;
     remoteSnapshot?: ModuleInfo;
   }]>('initContainer'),
 });
@@ -618,8 +667,8 @@ loaderHook = new PluginSystem({
   getModuleFactory: new AsyncHook<[{
     remoteEntryExports: RemoteEntryExports;
     expose: string;
-    moduleInfo: Remote;
-  }], Promise<(() => Promise<Module>) | undefined>>('getModuleFactory'),
+    moduleInfo: RemoteInfo;
+  }], RemoteModuleFactory | Promise<RemoteModuleFactory | undefined> | undefined>('getModuleFactory'),
 });
 ```
 
@@ -645,16 +694,19 @@ hooks = new PluginSystem({
     origin: ModuleFederation;
   }>('beforeLoadShare'),
 
-  loadShare: new AsyncHook<[ModuleFederation, string, ShareInfos]>('loadShare'),
+  // not emitted by the runtime yet
+  loadShare: new AsyncHook<[ModuleFederation, string, ShareInfos]>(),
 
+  // Receives the remote match result (LoadRemoteMatch)
   afterResolve: new AsyncWaterfallHook<{
     id: string;
-    pkgName: string;
-    version?: string;
-    scope: ShareScopeMap[string];
-    shareInfo: Shared;
-    resolver?: (sharedOptions: ShareInfos[string]) => Shared;
+    pkgNameOrAlias: string;
+    expose: string;
+    remote: Remote;
+    options: Options;
     origin: ModuleFederation;
+    remoteInfo: RemoteInfo;
+    remoteSnapshot?: ModuleInfo;
   }>('afterResolve'),
 
   resolveShare: new SyncWaterfallHook<{
@@ -671,6 +723,8 @@ hooks = new PluginSystem({
     shareScope: ShareScopeMap[string];
     options: Options;
     origin: ModuleFederation;
+    scopeName: string;
+    hostShareScopeMap?: ShareScopeMap;
   }>('initContainerShareScopeMap'),
 });
 ```
@@ -692,41 +746,53 @@ hooks = new PluginSystem({
     exposeModule: any;
     exposeModuleFactory: any;
     moduleInstance: Module;
-  }], void>('onLoad'),
+  }], unknown>('onLoad'),
 
   handlePreloadModule: new SyncHook<[{
     id: string;
     name: string;
+    remote: Remote;
     remoteSnapshot: ModuleInfo;
-    preloadOptions: PreloadRemoteArgs;
+    preloadConfig: PreloadRemoteArgs;
+    origin: ModuleFederation;
   }], void>('handlePreloadModule'),
 
   errorLoadRemote: new AsyncHook<[{
     id: string;
-    error: any;
-    from: 'runtime';
-    lifecycle: 'beforeRequest' | 'afterResolve';
+    error: unknown;
+    options?: any;
+    from: CallFrom;
+    lifecycle: 'beforeRequest' | 'beforeLoadShare' | 'afterResolve' | 'onLoad';
+    remote?: RemoteInfo;
+    expose?: string;
     origin: ModuleFederation;
-  }], Promise<any> | void>('errorLoadRemote'),
+  }], void | unknown>('errorLoadRemote'),
 
-  beforePreloadRemote: new AsyncHook<[{ preloadOptions: PreloadRemoteArgs[]; options: Options; origin: ModuleFederation; }], void>('beforePreloadRemote'),
+  beforePreloadRemote: new AsyncHook<[{ preloadOps: Array<PreloadRemoteArgs>; options: Options; origin: ModuleFederation; }]>('beforePreloadRemote'),
 
   generatePreloadAssets: new AsyncHook<[{
     origin: ModuleFederation;
-    preloadOptions: PreloadRemoteArgs[];
+    preloadOptions: PreloadOptions[number];
     remote: Remote;
     remoteInfo: RemoteInfo;
     remoteSnapshot: ModuleInfo;
     globalSnapshot: GlobalModuleInfo;
-  }], PreloadAssets[]>('generatePreloadAssets'),
+  }], Promise<PreloadAssets>>('generatePreloadAssets'),
 
-  afterPreloadRemote: new AsyncHook<[{ preloadOptions: PreloadRemoteArgs[]; options: Options; origin: ModuleFederation; }], void>('afterPreloadRemote'),
+  afterPreloadRemote: new AsyncHook<[{
+    preloadOps: Array<PreloadRemoteArgs>;
+    options: Options;
+    origin: ModuleFederation;
+    results: PreloadRemoteResult[];
+    error?: unknown;
+  }]>('afterPreloadRemote'),
 
   loadEntry: new AsyncHook<[{
+    origin: ModuleFederation;
+    loaderHook: ModuleFederation['loaderHook'];
     remoteInfo: RemoteInfo;
     remoteEntryExports?: RemoteEntryExports;
-    moduleInfo: Remote;
-  }], Promise<RemoteEntryExports | void>>('loadEntry'),
+  }], Promise<RemoteEntryExports | void> | RemoteEntryExports | void>(),
 });
 ```
 
@@ -736,9 +802,11 @@ hooks = new PluginSystem({
   beforeLoadRemoteSnapshot: new AsyncHook<[{
     options: Options;
     moduleInfo: Remote;
+    origin: ModuleFederation;
   }], void>('beforeLoadRemoteSnapshot'),
 
-  loadGlobalSnapshot: new AsyncWaterfallHook<{
+  // plugin key is `loadSnapshot` (hook type string is 'loadGlobalSnapshot')
+  loadSnapshot: new AsyncWaterfallHook<{
     options: Options;
     moduleInfo: Remote;
     hostGlobalSnapshot: GlobalModuleInfo[string] | undefined;

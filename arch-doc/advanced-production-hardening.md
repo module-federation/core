@@ -118,16 +118,18 @@ const securePlugin: ModuleFederationRuntimePlugin = {
 };
 ```
 
-### 🚨 CORS ERRORS BYPASS ERROR RECOVERY
+### 🚨 CORS ERRORS ARE MASKED AS GENERIC NETWORK ERRORS
 
 ```typescript
-// ❌ THIS WILL NOT WORK FOR CORS ERRORS
+// ❌ NOT ENOUGH ON ITS OWN FOR CORS ERRORS
 const brokenErrorHandler: ModuleFederationRuntimePlugin = {
   name: 'BrokenErrorHandler',
 
   errorLoadRemote(args) {
-    // CORS errors are network errors - this hook is NEVER called!
-    return () => 'Fallback'; // Never executed for CORS
+    // CORS failures DO reach this hook, but only as a generic
+    // ScriptNetworkError (network failure, 404, CORS, etc.) - the browser
+    // masks the cause, so blind retries against a broken remote keep failing.
+    return () => 'Fallback';
   }
 };
 
@@ -396,8 +398,8 @@ const shareOptimizationPlugin: ModuleFederationRuntimePlugin = {
     // Log share scope usage for analysis
     console.log(`Requesting shared: ${pkgName}`, {
       version: shareInfo?.version,
-      singleton: shareInfo?.singleton,
-      eager: shareInfo?.eager
+      singleton: shareInfo?.shareConfig?.singleton,
+      eager: shareInfo?.shareConfig?.eager
     });
 
     return args;
@@ -420,7 +422,7 @@ const shareOptimizationPlugin: ModuleFederationRuntimePlugin = {
 // Real asset optimization from generate-preload-assets plugin
 const generatePreloadAssetsPlugin = (): ModuleFederationRuntimePlugin => {
   return {
-    name: 'GeneratePreloadAssetsPlugin',
+    name: 'generate-preload-assets-plugin',
 
     generatePreloadAssets(args) {
       const { remoteInfo, remoteSnapshot } = args;
@@ -610,9 +612,13 @@ class ProductionFederationHost {
     this.intervals.forEach(interval => clearInterval(interval));
     this.intervals.clear();
 
-    // Remove global references
-    if (window.__FEDERATION_INSTANCES__) {
-      delete window.__FEDERATION_INSTANCES__[this.name];
+    // Remove this instance from the global registry
+    const instances = globalThis.__FEDERATION__?.__INSTANCES__;
+    if (instances) {
+      const index = instances.findIndex((ins) => ins.name === this.name);
+      if (index !== -1) {
+        instances.splice(index, 1);
+      }
     }
   }
 }

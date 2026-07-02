@@ -91,13 +91,15 @@ async function loadRemoteComponent(
   modulePath: string
 ) {
   // Register remote dynamically
-  await __bundler_require__.federation.registerRemote({
-    name: remoteName,
-    entry: remoteUrl
-  });
+  __bundler_require__.federation.instance.registerRemotes([
+    {
+      name: remoteName,
+      entry: remoteUrl
+    }
+  ]);
 
   // Load component
-  const module = await __bundler_require__.federation.loadRemote(
+  const module = await __bundler_require__.federation.instance.loadRemote(
     `${remoteName}/${modulePath}`
   );
 
@@ -242,8 +244,8 @@ window.addEventListener('error', (event) => {
 1. **Preload Critical Remotes**
 ```typescript
 // Preload remote entries
-const preloadRemotes = ['app1', 'app2'].map(name =>
-  fetch(`http://localhost:${3000 + i}/remoteEntry.js`)
+const preloadRemotes = ['app1', 'app2'].map((name, i) =>
+  fetch(`http://localhost:${3001 + i}/remoteEntry.js`)
 );
 await Promise.all(preloadRemotes);
 ```
@@ -251,8 +253,9 @@ await Promise.all(preloadRemotes);
 2. **Use Module Federation Manifest**
 ```typescript
 // Load with manifest for better caching
+// manifest.remotes is an array of remote records, not a keyed object
 const manifest = await fetch('/mf-manifest.json').then(r => r.json());
-const remoteUrl = manifest.remotes[remoteName].entry;
+const remoteUrl = manifest.remotes.find(r => r.alias === remoteName)?.entry;
 ```
 
 3. **Implement Retry Logic**
