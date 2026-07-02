@@ -515,22 +515,68 @@ class FederationStatsPlugin {
           // Generate a JSON object that contains detailed information about the compilation.
           const stats = compilation.getStats().toJson({
             all: false,
-            assets: true,
-            reasons: true,
+            assets:true,    
+            reasons: false,
             modules: true,
             children: true,
             chunkGroups: true,
-            chunkModules: true,
-            chunkOrigins: false,
             entrypoints: true,
-            namedChunkGroups: false,
+            namedChunkGroups: true,
             chunkRelations: true,
             chunks: true,
             ids: true,
-            nestedModules: false,
-            outputPath: true,
             publicPath: true,
           });
+
+          // Lazily populate reasons only for modules in the 'main' chunk group.
+          const mainModuleIds = new Set();
+          if (stats.namedChunkGroups?.['main']) {
+            const mainChunks = stats.namedChunkGroups['main'].chunks;
+            for (const chunk of stats.chunks) {
+              if (mainChunks.includes(chunk.id)) {
+                for (const mod of chunk.modules) {
+                  mainModuleIds.add(mod.identifier);
+                }
+              }
+            }
+          }
+
+          const reasonsCache = new Map();
+          const getReasonsForModule = (mod) => {
+            if (reasonsCache.has(mod.identifier)) {
+              return reasonsCache.get(mod.identifier);
+            }
+            const incomingConnections = compilation.moduleGraph.getIncomingConnections(
+              mod,
+            );
+            const res = [];
+            if (incomingConnections) {
+              for (const connection of incomingConnections) {
+                if (connection.originModule) {
+                  res.push({
+                    moduleIdentifier: connection.originModule.identifier(),
+                  });
+                }
+              }
+            }
+            reasonsCache.set(mod.identifier, res);
+            return res;
+          };
+
+          // Patch reasons only for main chunk group modules.
+          if (mainModuleIds.size > 0) {
+            const compilationModules = Array.from(compilation.modules);
+            for (const mod of stats.modules) {
+              if (mainModuleIds.has(mod.identifier)) {
+                const webpackMod = compilationModules.find(
+                  (m) => m.identifier() === mod.identifier,
+                );
+                if (webpackMod) {
+                  mod.reasons = getReasonsForModule(webpackMod);
+                }
+              }
+            }
+          }
 
           // Apply a function 'getFederationStats' on the stats with the federation plugin options as the second argument.
           const federatedModules = getFederationStats(stats, federationOpts);
