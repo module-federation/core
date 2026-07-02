@@ -70,8 +70,8 @@ const appNames = argv.appName
   .filter(Boolean);
 
 if (appNames.length === 0) {
-  console.log('No valid app names were provided.');
-  decide(false);
+  console.error('No valid app names were provided.');
+  process.exit(2);
 }
 
 const base = resolveBase(argv.base);

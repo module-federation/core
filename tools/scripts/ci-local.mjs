@@ -27,13 +27,60 @@ const onlyJobNames = args.only
   : [];
 const onlyJobs = args.only === null ? null : new Set(onlyJobNames);
 
-function setupE2E() {
+function installDependenciesStep() {
+  return step('Install dependencies', (ctx) =>
+    runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
+  );
+}
+
+function checkAffectedStep(appName) {
+  return step('Check CI conditions', async (ctx) => {
+    const resolvedAppName =
+      typeof appName === 'function' ? appName(ctx) : appName;
+    ctx.state.shouldRun = await ciIsAffected(resolvedAppName, ctx);
+    ctx.state.skipReason = ctx.state.shouldRun
+      ? null
+      : 'Not affected by current changes.';
+  });
+}
+
+function setupAffectedE2E({ cypress = true } = {}) {
   return step('Setup E2E dependencies and package build', async (ctx) => {
-    await runCommand('pnpm', ['install', '--frozen-lockfile'], ctx);
-    await runCommand('npx', ['cypress', 'install'], ctx);
+    if (!ctx.state.shouldRun) {
+      logStepSkip(ctx, currentSkipReason(ctx));
+      return;
+    }
+    if (cypress) {
+      await runCommand('npx', ['cypress', 'install'], ctx);
+    }
     await runPackagesBuild(ctx);
   });
 }
+
+function e2eSetupSteps(appName, options) {
+  return [
+    installDependenciesStep(),
+    checkAffectedStep(appName),
+    setupAffectedE2E(options),
+  ];
+}
+
+const E2E_APP_NAMES = {
+  modern: '@module-federation/modern-js,@module-federation/modern-js-v3',
+  runtime: 'runtime-host,runtime-remote1,runtime-remote2',
+  manifest:
+    '3008-webpack-host,3009-webpack-provider,3010-rspack-provider,3011-rspack-manifest-provider,3012-rspack-js-entry-provider',
+  node: 'node-host,node-local-remote,node-remote,node-dynamic-remote-new-version,node-dynamic-remote,node-host-e2e',
+  next: '@module-federation/3000-home,@module-federation/3001-shop,@module-federation/3002-checkout',
+  treeshake:
+    '@module-federation/treeshake-server,@module-federation/treeshake-frontend',
+  modernSsr:
+    '@module-federation/modern-js,@module-federation/modern-js-v3,modernjs-ssr-host,modernjs-ssr-remote,modernjs-ssr-remote-new-version,modernjs-ssr-nested-remote,modernjs-ssr-dynamic-remote,modernjs-ssr-dynamic-remote-new-version,modernjs-ssr-dynamic-nested-remote,modernjs-ssr-data-fetch-host,modernjs-ssr-data-fetch-provider,modernjs-ssr-data-fetch-provider-csr',
+  router:
+    'host,host-v5,host-vue3,remote1,remote2,remote3,remote4,remote5,remote6',
+  sharedTreeShaking:
+    'shared-tree-shaking-no-server-host,shared-tree-shaking-no-server-provider,shared-tree-shaking-with-server-host,shared-tree-shaking-with-server-provider',
+};
 
 const jobs = [
   {
@@ -174,19 +221,11 @@ const jobs = [
     name: 'e2e-modern',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      setupE2E(),
-      step('Check CI conditions', async (ctx) => {
-        ctx.state.shouldRun = await ciIsAffected(
-          '@module-federation/modern-js,@module-federation/modern-js-v3',
-          ctx,
-        );
-      }),
+      ...e2eSetupSteps(E2E_APP_NAMES.modern),
       step('E2E Test for ModernJS', async (ctx) => {
-        if (!ctx.state.shouldRun) {
-          logStepSkip(ctx, 'Not affected by current changes.');
-          return;
-        }
-        await runCommand('pnpm', ['run', 'e2e:modern'], ctx);
+        await runWhenAffected(ctx, () =>
+          runCommand('pnpm', ['run', 'e2e:modern'], ctx),
+        );
       }),
     ],
   },
@@ -194,9 +233,9 @@ const jobs = [
     name: 'e2e-runtime',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      setupE2E(),
+      ...e2eSetupSteps(E2E_APP_NAMES.runtime),
       step('E2E Test for Runtime Demo', (ctx) =>
-        runIfAffected(ctx, 'runtime-host,runtime-remote1,runtime-remote2', () =>
+        runWhenAffected(ctx, () =>
           runCommand('pnpm', ['run', 'e2e:runtime'], ctx),
         ),
       ),
@@ -206,19 +245,15 @@ const jobs = [
     name: 'e2e-manifest',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      setupE2E(),
+      ...e2eSetupSteps(E2E_APP_NAMES.manifest),
       step('E2E Test for Manifest Demo (dev)', (ctx) =>
-        runIfAffected(
-          ctx,
-          '3008-webpack-host,3009-webpack-provider,3010-rspack-provider,3011-rspack-manifest-provider,3012-rspack-js-entry-provider',
-          () => runCommand('pnpm', ['run', 'e2e:manifest:dev'], ctx),
+        runWhenAffected(ctx, () =>
+          runCommand('pnpm', ['run', 'e2e:manifest:dev'], ctx),
         ),
       ),
       step('E2E Test for Manifest Demo (prod)', (ctx) =>
-        runIfAffected(
-          ctx,
-          '3008-webpack-host,3009-webpack-provider,3010-rspack-provider,3011-rspack-manifest-provider,3012-rspack-js-entry-provider',
-          () => runCommand('pnpm', ['run', 'e2e:manifest:prod'], ctx),
+        runWhenAffected(ctx, () =>
+          runCommand('pnpm', ['run', 'e2e:manifest:prod'], ctx),
         ),
       ),
     ],
@@ -227,19 +262,11 @@ const jobs = [
     name: 'e2e-node',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      setupE2E(),
-      step('Check CI conditions', async (ctx) => {
-        ctx.state.shouldRun = await ciIsAffected(
-          'node-host,node-local-remote,node-remote,node-dynamic-remote-new-version,node-dynamic-remote,node-host-e2e',
-          ctx,
-        );
-      }),
+      ...e2eSetupSteps(E2E_APP_NAMES.node),
       step('E2E Node Federation', async (ctx) => {
-        if (!ctx.state.shouldRun) {
-          logStepSkip(ctx, 'Not affected by current changes.');
-          return;
-        }
-        await runCommand('pnpm', ['run', 'e2e:node'], ctx);
+        await runWhenAffected(ctx, () =>
+          runCommand('pnpm', ['run', 'e2e:node'], ctx),
+        );
       }),
     ],
   },
@@ -250,12 +277,10 @@ const jobs = [
       NEXT_PRIVATE_LOCAL_WEBPACK: 'true',
     },
     steps: [
-      setupE2E(),
+      ...e2eSetupSteps(E2E_APP_NAMES.next),
       step('E2E Test for Next.js Dev', (ctx) =>
-        runIfAffected(
-          ctx,
-          '@module-federation/3000-home,@module-federation/3001-shop,@module-federation/3002-checkout',
-          () => runCommand('pnpm', ['run', 'e2e:next:dev'], ctx),
+        runWhenAffected(ctx, () =>
+          runCommand('pnpm', ['run', 'e2e:next:dev'], ctx),
         ),
       ),
     ],
@@ -264,12 +289,10 @@ const jobs = [
     name: 'e2e-next-prod',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      setupE2E(),
+      ...e2eSetupSteps(E2E_APP_NAMES.next),
       step('E2E Test for Next.js Prod', (ctx) =>
-        runIfAffected(
-          ctx,
-          '@module-federation/3000-home,@module-federation/3001-shop,@module-federation/3002-checkout',
-          () => runCommand('pnpm', ['run', 'e2e:next:prod'], ctx),
+        runWhenAffected(ctx, () =>
+          runCommand('pnpm', ['run', 'e2e:next:prod'], ctx),
         ),
       ),
     ],
@@ -278,29 +301,16 @@ const jobs = [
     name: 'e2e-treeshake',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      step('Install dependencies', (ctx) =>
-        runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
-      ),
-      step('Build packages', (ctx) => runPackagesBuild(ctx)),
-      step('Check CI conditions', async (ctx) => {
-        ctx.state.shouldRun = await ciIsAffected(
-          '@module-federation/treeshake-server,@module-federation/treeshake-frontend',
-          ctx,
+      ...e2eSetupSteps(E2E_APP_NAMES.treeshake, { cypress: false }),
+      step('E2E Treeshake Server', async (ctx) => {
+        await runWhenAffected(ctx, () =>
+          runCommand('pnpm', ['run', 'e2e:treeshake:server'], ctx),
         );
       }),
-      step('E2E Treeshake Server', async (ctx) => {
-        if (!ctx.state.shouldRun) {
-          logStepSkip(ctx, 'Not affected by current changes.');
-          return;
-        }
-        await runCommand('pnpm', ['run', 'e2e:treeshake:server'], ctx);
-      }),
       step('E2E Treeshake Frontend', async (ctx) => {
-        if (!ctx.state.shouldRun) {
-          logStepSkip(ctx, 'Not affected by current changes.');
-          return;
-        }
-        await runCommand('pnpm', ['run', 'e2e:treeshake:frontend'], ctx);
+        await runWhenAffected(ctx, () =>
+          runCommand('pnpm', ['run', 'e2e:treeshake:frontend'], ctx),
+        );
       }),
     ],
   },
@@ -308,19 +318,11 @@ const jobs = [
     name: 'e2e-modern-ssr',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      setupE2E(),
-      step('Check CI conditions', async (ctx) => {
-        ctx.state.shouldRun = await ciIsAffected(
-          '@module-federation/modern-js,@module-federation/modern-js-v3,modernjs-ssr-host,modernjs-ssr-remote,modernjs-ssr-remote-new-version,modernjs-ssr-nested-remote,modernjs-ssr-dynamic-remote,modernjs-ssr-dynamic-remote-new-version,modernjs-ssr-dynamic-nested-remote,modernjs-ssr-data-fetch-host,modernjs-ssr-data-fetch-provider,modernjs-ssr-data-fetch-provider-csr',
-          ctx,
-        );
-      }),
+      ...e2eSetupSteps(E2E_APP_NAMES.modernSsr),
       step('E2E Test for ModernJS SSR', async (ctx) => {
-        if (!ctx.state.shouldRun) {
-          logStepSkip(ctx, 'Not affected by current changes.');
-          return;
-        }
-        await runCommand('pnpm', ['run', 'e2e:modern:ssr'], ctx);
+        await runWhenAffected(ctx, () =>
+          runCommand('pnpm', ['run', 'e2e:modern:ssr'], ctx),
+        );
       }),
     ],
   },
@@ -328,19 +330,11 @@ const jobs = [
     name: 'e2e-router',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      setupE2E(),
-      step('Check CI conditions', async (ctx) => {
-        ctx.state.shouldRun = await ciIsAffected(
-          'host,host-v5,host-vue3,remote1,remote2,remote3,remote4,remote5,remote6',
-          ctx,
-        );
-      }),
+      ...e2eSetupSteps(E2E_APP_NAMES.router),
       step('E2E Test for Router', async (ctx) => {
-        if (!ctx.state.shouldRun) {
-          logStepSkip(ctx, 'Not affected by current changes.');
-          return;
-        }
-        await runCommand('pnpm', ['run', 'e2e:router'], ctx);
+        await runWhenAffected(ctx, () =>
+          runCommand('pnpm', ['run', 'e2e:router'], ctx),
+        );
       }),
     ],
   },
@@ -351,12 +345,8 @@ const jobs = [
       METRO_APP_NAME: process.env.CI_LOCAL_METRO_APP_NAME ?? 'example-host',
     },
     steps: [
-      step('Install dependencies', (ctx) =>
-        runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
-      ),
-      step('Check CI conditions', async (ctx) => {
-        ctx.state.shouldRun = await ciIsAffected(ctx.env.METRO_APP_NAME, ctx);
-      }),
+      installDependenciesStep(),
+      checkAffectedStep((ctx) => ctx.env.METRO_APP_NAME),
       step('Print Metro affected result', (ctx) => {
         if (ctx.state.shouldRun) {
           console.log(
@@ -378,27 +368,21 @@ const jobs = [
       METRO_APP_NAME: process.env.CI_LOCAL_METRO_APP_NAME ?? 'example-host',
     },
     steps: [
-      step('Install dependencies', (ctx) =>
-        runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
-      ),
-      step('Build shared packages', (ctx) => runPackagesBuild(ctx)),
-      step('Check CI conditions', async (ctx) => {
-        ctx.state.shouldRun = await ciIsAffected(ctx.env.METRO_APP_NAME, ctx);
-      }),
+      installDependenciesStep(),
+      checkAffectedStep((ctx) => ctx.env.METRO_APP_NAME),
+      setupAffectedE2E({ cypress: false }),
       step('Run Metro Android E2E tests', async (ctx) => {
-        if (!ctx.state.shouldRun) {
-          logStepSkip(ctx, 'Not affected by current changes.');
-          return;
-        }
-        await runCommand(
-          'node',
-          [
-            'tools/scripts/run-metro-e2e.mjs',
-            '--platform=android',
-            `--appName=${ctx.env.METRO_APP_NAME}`,
-            '--skip-on-missing-prereqs',
-          ],
-          ctx,
+        await runWhenAffected(ctx, () =>
+          runCommand(
+            'node',
+            [
+              'tools/scripts/run-metro-e2e.mjs',
+              '--platform=android',
+              `--appName=${ctx.env.METRO_APP_NAME}`,
+              '--skip-on-missing-prereqs',
+            ],
+            ctx,
+          ),
         );
       }),
     ],
@@ -416,13 +400,8 @@ const jobs = [
       METRO_APP_NAME: process.env.CI_LOCAL_METRO_APP_NAME ?? 'example-host',
     },
     steps: [
-      step('Install dependencies', (ctx) =>
-        runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
-      ),
-      step('Build shared packages', (ctx) => runPackagesBuild(ctx)),
-      step('Check CI conditions', async (ctx) => {
-        ctx.state.shouldRun = await ciIsAffected(ctx.env.METRO_APP_NAME, ctx);
-      }),
+      installDependenciesStep(),
+      checkAffectedStep((ctx) => ctx.env.METRO_APP_NAME),
       step('Check Metro iOS compatibility', (ctx) => {
         if (!ctx.state.shouldRun) {
           logStepSkip(ctx, 'Not affected by current changes.');
@@ -430,23 +409,23 @@ const jobs = [
         }
         if (process.platform !== 'darwin') {
           ctx.state.shouldRun = false;
-          logStepSkip(ctx, 'Requires macOS to run iOS simulator tests.');
+          ctx.state.skipReason = 'Requires macOS to run iOS simulator tests.';
+          logStepSkip(ctx, ctx.state.skipReason);
         }
       }),
+      setupAffectedE2E({ cypress: false }),
       step('Run Metro iOS E2E tests', async (ctx) => {
-        if (!ctx.state.shouldRun) {
-          logStepSkip(ctx, 'Not affected by current changes.');
-          return;
-        }
-        await runCommand(
-          'node',
-          [
-            'tools/scripts/run-metro-e2e.mjs',
-            '--platform=ios',
-            `--appName=${ctx.env.METRO_APP_NAME}`,
-            '--skip-on-missing-prereqs',
-          ],
-          ctx,
+        await runWhenAffected(ctx, () =>
+          runCommand(
+            'node',
+            [
+              'tools/scripts/run-metro-e2e.mjs',
+              '--platform=ios',
+              `--appName=${ctx.env.METRO_APP_NAME}`,
+              '--skip-on-missing-prereqs',
+            ],
+            ctx,
+          ),
         );
       }),
     ],
@@ -461,33 +440,23 @@ const jobs = [
     name: 'e2e-shared-tree-shaking',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      setupE2E(),
-      step('Check CI conditions', async (ctx) => {
-        ctx.state.shouldRun = await ciIsAffected(
-          'shared-tree-shaking-no-server-host,shared-tree-shaking-no-server-provider,shared-tree-shaking-with-server-host,shared-tree-shaking-with-server-provider',
-          ctx,
-        );
-      }),
+      ...e2eSetupSteps(E2E_APP_NAMES.sharedTreeShaking),
       step('E2E Shared Tree Shaking (runtime-infer)', async (ctx) => {
-        if (!ctx.state.shouldRun) {
-          logStepSkip(ctx, 'Not affected by current changes.');
-          return;
-        }
-        await runCommand(
-          'pnpm',
-          ['run', 'e2e:shared-tree-shaking:runtime-infer'],
-          ctx,
+        await runWhenAffected(ctx, () =>
+          runCommand(
+            'pnpm',
+            ['run', 'e2e:shared-tree-shaking:runtime-infer'],
+            ctx,
+          ),
         );
       }),
       step('E2E Shared Tree Shaking (server-calc)', async (ctx) => {
-        if (!ctx.state.shouldRun) {
-          logStepSkip(ctx, 'Not affected by current changes.');
-          return;
-        }
-        await runCommand(
-          'pnpm',
-          ['run', 'e2e:shared-tree-shaking:server-calc'],
-          ctx,
+        await runWhenAffected(ctx, () =>
+          runCommand(
+            'pnpm',
+            ['run', 'e2e:shared-tree-shaking:server-calc'],
+            ctx,
+          ),
         );
       }),
     ],
@@ -1034,13 +1003,16 @@ function getSelectableJobNames(jobList) {
   return names;
 }
 
-async function runIfAffected(ctx, affectedAppName, run) {
-  const shouldRun = await ciIsAffected(affectedAppName, ctx);
-  if (!shouldRun) {
-    logStepSkip(ctx, 'Not affected by current changes.');
+async function runWhenAffected(ctx, run) {
+  if (!ctx.state.shouldRun) {
+    logStepSkip(ctx, currentSkipReason(ctx));
     return;
   }
   await run();
+}
+
+function currentSkipReason(ctx) {
+  return ctx.state.skipReason ?? 'Not affected by current changes.';
 }
 
 async function runChangedPackageTests(ctx) {
