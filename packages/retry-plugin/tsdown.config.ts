@@ -9,7 +9,11 @@ const baseConfig = {
   tsconfig: 'tsconfig.json',
   clean: true,
   entry,
-  external: ['@module-federation/sdk'],
+  external: [
+    '@module-federation/sdk',
+    '@module-federation/runtime',
+    '@module-federation/runtime-core',
+  ],
 };
 
 export default defineConfig([
