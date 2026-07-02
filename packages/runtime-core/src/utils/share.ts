@@ -15,7 +15,8 @@ import {
   SharedGetter,
 } from '../type';
 import { warn, error } from './logger';
-import { satisfy } from './semver';
+import { satisfy, toCompareAtom } from './semver';
+import { compare } from './semver/compare';
 import { SyncWaterfallHook } from './hooks';
 import { addUniqueItem, arrayOptions } from './tool';
 
@@ -142,27 +143,29 @@ export function shouldUseTreeShaking(
   return false;
 }
 
+function transformInvalidVersion(version: string): string {
+  const isNumberVersion = !Number.isNaN(Number(version));
+  if (isNumberVersion) {
+    const splitArr = version.split('.');
+    let validVersion = version;
+    for (let i = 0; i < 3 - splitArr.length; i++) {
+      validVersion += '.0';
+    }
+    return validVersion;
+  }
+  return version;
+}
+
 /**
- * compare version a and b, return true if a is less than b
+ * compare version a and b, return true if a is less than or equal to b
  */
 export function versionLt(a: string, b: string): boolean {
-  const transformInvalidVersion = (version: string) => {
-    const isNumberVersion = !Number.isNaN(Number(version));
-    if (isNumberVersion) {
-      const splitArr = version.split('.');
-      let validVersion = version;
-      for (let i = 0; i < 3 - splitArr.length; i++) {
-        validVersion += '.0';
-      }
-      return validVersion;
-    }
-    return version;
-  };
-  if (satisfy(transformInvalidVersion(a), `<=${transformInvalidVersion(b)}`)) {
-    return true;
-  } else {
+  const aAtom = toCompareAtom(transformInvalidVersion(a));
+  const bAtom = toCompareAtom(transformInvalidVersion(b));
+  if (!aAtom || !bAtom) {
     return false;
   }
+  return compare({ ...bAtom, operator: '<=' }, aAtom);
 }
 
 export const findVersion = (
