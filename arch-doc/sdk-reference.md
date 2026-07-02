@@ -99,10 +99,6 @@ interface ModuleFederationPluginOptions {
    */
   dts?: boolean | PluginDtsOptions;
   /**
-   * Enable Data Prefetch
-   */
-  dataPrefetch?: DataPrefetch;
-  /**
    * Virtual runtime entry configuration.
    */
   virtualRuntimeEntry?: boolean;
@@ -584,17 +580,10 @@ interface PluginManifestOptions {
 
 interface AdditionalDataOptions {
   stats: Stats;
-  manifest?: Manifest;
-  pluginOptions: ModuleFederationPluginOptions;
-  compiler: any; // webpack.Compiler
-  compilation: any; // webpack.Compilation
+  compiler: webpack.Compiler;
+  compilation: webpack.Compilation;
   bundler: 'webpack' | 'rspack';
 }
-
-/**
- * Enable Data Prefetch
- */
-type DataPrefetch = boolean;
 
 /**
  * Async boundary options
@@ -730,11 +719,11 @@ Runtime plugin interface that extends multiple lifecycle partials:
 
 ```typescript
 type ModuleFederationRuntimePlugin = CoreLifeCyclePartial &
-  SnapshotLifeCyclePartial &
-  SharedLifeCyclePartial &
-  RemoteLifeCyclePartial &
-  ModuleLifeCyclePartial &
-  ModuleBridgeLifeCyclePartial & {
+  SnapshotLifeCycleCyclePartial &
+  SharedLifeCycleCyclePartial &
+  RemoteLifeCycleCyclePartial &
+  ModuleLifeCycleCyclePartial &
+  ModuleBridgeLifeCycleCyclePartial & {
     name: string;
     version?: string;
     apply?: (instance: ModuleFederation) => void;
@@ -745,11 +734,11 @@ type CoreLifeCyclePartial = Partial<{
 }>;
 
 // Similar partial types exist for:
-// - SnapshotLifeCyclePartial
-// - SharedLifeCyclePartial
-// - RemoteLifeCyclePartial
-// - ModuleLifeCyclePartial
-// - ModuleBridgeLifeCyclePartial
+// - SnapshotLifeCycleCyclePartial
+// - SharedLifeCycleCyclePartial
+// - RemoteLifeCycleCyclePartial
+// - ModuleLifeCycleCyclePartial
+// - ModuleBridgeLifeCycleCyclePartial
 ```
 
 ## SDK Utilities, Manifests, Snapshots, Stats, and Exports

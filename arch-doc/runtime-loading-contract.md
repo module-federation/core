@@ -99,7 +99,7 @@ flowchart TD
     FallbackCheck{Has Fallback?}
     LoadFallback[Load Fallback Module]
     ResolveHook[hooks.resolveShare.emit]
-    LoadHook[hooks.loadShare.emit]
+    LoadHook[hooks.afterLoadShare.emit]
     ReturnModule[Return Module]
     ReturnFalse[Return false]
 
@@ -315,7 +315,7 @@ const buildId = getBuilderId(); // Reads FEDERATION_BUILD_IDENTIFIER
 const useSnapshot = !FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN; // Feature flag
 
 // Build-time generates manifest, runtime consumes it
-const manifest = await fetch('./federation-manifest.json');
+const manifest = await fetch('./mf-manifest.json');
 const moduleInfo = generateSnapshotFromManifest(manifest);
 ```
 
@@ -348,10 +348,14 @@ interface RemoteContainer {
   /**
    * Initialize the container with the provided share scope
    * MUST be called before any get() operations
-   * @param shareScope - The share scope map for dependency resolution
-   * @returns Promise that resolves when initialization is complete
+   * @param shareScope - The share scope object for the selected scope (e.g. shareScopeMap['default'])
+   * @returns void or a Promise that resolves when initialization is complete
    */
-  init(shareScope: ShareScopeMap): Promise<void>;
+  init(
+    shareScope: ShareScopeMap[string],
+    initScope?: InitScope,
+    remoteEntryInitOptions?: RemoteEntryInitOptions,
+  ): void | Promise<void>;
 
   /**
    * Get a module from the container
@@ -441,21 +445,16 @@ Containers must properly integrate with the share scope system:
 ```typescript
 // Container initialization with share scope
 const container = {
-  init: async (shareScope: ShareScopeMap) => {
-    // Register shared dependencies
+  init: async (shareScope: ShareScopeMap[string]) => {
+    // Register shared dependencies into the provided scope object
     Object.keys(sharedConfig).forEach(pkgName => {
       const config = sharedConfig[pkgName];
-      const scopeName = config.shareScope || 'default';
 
-      if (!shareScope[scopeName]) {
-        shareScope[scopeName] = {};
+      if (!shareScope[pkgName]) {
+        shareScope[pkgName] = {};
       }
 
-      if (!shareScope[scopeName][pkgName]) {
-        shareScope[scopeName][pkgName] = {};
-      }
-
-      shareScope[scopeName][pkgName][config.version] = {
+      shareScope[pkgName][config.version] = {
         get: () => import(config.import || pkgName),
         loaded: config.eager ? 1 : undefined,
         from: REMOTE_NAME,

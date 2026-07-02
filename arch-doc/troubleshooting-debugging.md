@@ -215,7 +215,9 @@ class ShareScopeResolver {
 
         if (versionEntries.length > 1) {
           const loadedVersions = versionEntries.filter(([, info]) => info.loaded);
-          const singletonVersions = versionEntries.filter(([, info]) => info.singleton);
+          const singletonVersions = versionEntries.filter(
+            ([, info]) => info.shareConfig?.singleton
+          );
 
           if (singletonVersions.length > 0 && loadedVersions.length > 1) {
             issues.push({
