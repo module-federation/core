@@ -1,12 +1,14 @@
 import { createRequire } from 'node:module';
 import { describe, expect, it } from '@rstest/core';
+import type {
+  EnvironmentConfig,
+  RsbuildPluginAPI,
+  Rspack,
+} from '@rsbuild/core';
 
-import {
-  FEDERATION_PLUGIN_NAME,
-  federation,
-  pluginModuleFederation,
-  shouldKeepBundledForFederation,
-} from './index';
+import { shouldKeepBundledForFederation } from './externals-bypass';
+import { FEDERATION_PLUGIN_NAME, federation } from './index';
+import type { ModuleFederationOptions } from './types';
 
 const require = createRequire(import.meta.url);
 const NODE_RUNTIME_PLUGIN_REQUEST = '@module-federation/node/runtimePlugin';
@@ -14,20 +16,75 @@ const NODE_RUNTIME_PLUGIN = require.resolve(NODE_RUNTIME_PLUGIN_REQUEST);
 
 type FederationPlugin = ReturnType<typeof federation>;
 
-type EnvHook = (
-  config: any,
-  utils: { mergeEnvironmentConfig: (...configs: any[]) => any },
-) => any;
+type MergeEnvironmentConfig = (
+  ...configs: EnvironmentConfig[]
+) => EnvironmentConfig;
 
-const shallowMergeEnvironmentConfig = (...configs: any[]) =>
+type EnvHook = (
+  config: EnvironmentConfig,
+  utils: { mergeEnvironmentConfig: MergeEnvironmentConfig },
+) => EnvironmentConfig;
+
+type EnvHookDescriptor =
+  | EnvHook
+  | { handler: EnvHook; order?: 'pre' | 'post' | 'default' };
+
+// Loose rspack-config shape for tests: real Rspack.Configuration rejects the
+// fake plugin objects the tests construct, so the cast to the real type
+// happens once, at the hook boundary in runRspackHooks.
+type TestRspackConfig = {
+  target?: unknown;
+  output?: { module?: boolean };
+  optimization?: { splitChunks?: unknown };
+  experiments?: { outputModule?: boolean };
+  externals?: unknown[];
+  plugins?: unknown[];
+};
+
+type ExternalFunction = (
+  data: { request?: string },
+  callback: (err?: Error, result?: unknown) => void,
+) => void;
+
+const getExternalBypass = (config: TestRspackConfig): ExternalFunction => {
+  expect(Array.isArray(config.externals)).toBe(true);
+  const fn = config.externals?.[0];
+  expect(typeof fn).toBe('function');
+  return fn as ExternalFunction;
+};
+
+const callExternal = (fn: ExternalFunction, request: string): unknown => {
+  let result: unknown = 'unset';
+  fn({ request }, (_err, res) => {
+    result = res;
+  });
+  return result;
+};
+
+// The plugin instances pushed into rspackConfig.plugins by the federation
+// plugin. `_options` is the private field of ModuleFederationPlugin; the
+// tests read it the same way `remotes.ts` does.
+type ModuleFederationPluginInstance = {
+  constructor?: { name?: string };
+  _options?: ModuleFederationOptions;
+  options?: ModuleFederationOptions;
+};
+
+const shallowMergeEnvironmentConfig: MergeEnvironmentConfig = (...configs) =>
   Object.assign({}, ...configs);
 
-const getFederationPluginOptions = (plugins: unknown[]) => {
-  const plugin = (plugins as any[]).find(
-    (item) => item?.constructor?.name === 'ModuleFederationPlugin',
+const getFederationPluginOptions = (
+  plugins: unknown[] | undefined,
+): ModuleFederationOptions => {
+  const plugin = (plugins ?? []).find(
+    (item): item is ModuleFederationPluginInstance =>
+      (item as ModuleFederationPluginInstance | undefined)?.constructor
+        ?.name === 'ModuleFederationPlugin',
   );
   expect(plugin).toBeTruthy();
-  return (plugin as any)._options ?? (plugin as any).options;
+  const options = plugin!._options ?? plugin!.options;
+  expect(options).toBeTruthy();
+  return options!;
 };
 
 // Minimal Rsbuild API surface used by the plugin. rstest sets callerName to
@@ -39,9 +96,9 @@ const setupFederationPlugin = (
   let envHook: EnvHook | undefined;
   let order: unknown;
 
-  plugin.setup({
+  const fakeApi = {
     context: { callerName },
-    modifyEnvironmentConfig: (hook: any) => {
+    modifyEnvironmentConfig: (hook: EnvHookDescriptor) => {
       if (typeof hook === 'function') {
         envHook = hook;
       } else {
@@ -49,10 +106,28 @@ const setupFederationPlugin = (
         order = hook.order;
       }
     },
-  } as any);
+  };
+
+  plugin.setup(fakeApi as unknown as RsbuildPluginAPI);
 
   expect(typeof envHook).toBe('function');
   return { envHook: envHook!, order };
+};
+
+const runRspackHooks = (
+  merged: EnvironmentConfig,
+  rspackConfig: TestRspackConfig,
+): void => {
+  const registered = merged.tools?.rspack;
+  const hooks = Array.isArray(registered) ? registered : [registered];
+  for (const hook of hooks) {
+    if (typeof hook === 'function') {
+      (hook as (cfg: TestRspackConfig, utils: unknown) => void)(
+        rspackConfig,
+        {},
+      );
+    }
+  }
 };
 
 // Runs the plugin's environment hook and every registered tools.rspack hook
@@ -66,22 +141,15 @@ const applyFederationPlugin = (
     rspackConfig = { output: {}, plugins: [] },
   }: {
     callerName?: string;
-    config?: any;
-    mergeEnvironmentConfig?: (...configs: any[]) => any;
-    rspackConfig?: any;
+    config?: EnvironmentConfig;
+    mergeEnvironmentConfig?: MergeEnvironmentConfig;
+    rspackConfig?: TestRspackConfig;
   } = {},
 ) => {
   const { envHook } = setupFederationPlugin(plugin, callerName);
   const merged = envHook(config, { mergeEnvironmentConfig });
 
-  const hooks = Array.isArray(merged.tools?.rspack)
-    ? merged.tools.rspack
-    : [merged.tools?.rspack];
-  for (const hook of hooks) {
-    if (typeof hook === 'function') {
-      hook(rspackConfig, {} as any);
-    }
-  }
+  runRspackHooks(merged, rspackConfig);
 
   return { merged, rspackConfig };
 };
@@ -160,10 +228,6 @@ describe('shouldKeepBundledForFederation', () => {
 });
 
 describe('federation()', () => {
-  it('exposes pluginModuleFederation as the canonical plugin factory alias', () => {
-    expect(pluginModuleFederation).toBe(federation);
-  });
-
   it('uses the stable public plugin name', () => {
     expect(FEDERATION_PLUGIN_NAME).toBe('rstest:federation');
     expect(federation().name).toBe('rstest:federation');
@@ -208,26 +272,9 @@ describe('federation()', () => {
       },
     });
 
-    expect(Array.isArray(rspackConfig.externals)).toBe(true);
-    expect(typeof rspackConfig.externals[0]).toBe('function');
-
-    let keptResult: any = 'unset';
-    rspackConfig.externals[0](
-      { request: 'component-app/Button' },
-      (_err: unknown, result?: unknown) => {
-        keptResult = result;
-      },
-    );
-    expect(keptResult).toBe(false);
-
-    let passThroughResult: any = 'unset';
-    rspackConfig.externals[0](
-      { request: 'react' },
-      (_err: unknown, result?: unknown) => {
-        passThroughResult = result;
-      },
-    );
-    expect(passThroughResult).toBe(undefined);
+    const bypass = getExternalBypass(rspackConfig);
+    expect(callExternal(bypass, 'component-app/Button')).toBe(false);
+    expect(callExternal(bypass, 'react')).toBe(undefined);
   });
 
   it('auto-applies ModuleFederationPlugin with node defaults', () => {
@@ -249,13 +296,13 @@ describe('federation()', () => {
     expect(rspackConfig.output?.module).toBe(false);
 
     const options = getFederationPluginOptions(rspackConfig.plugins);
-    expect(options.name).toBe('main_app_web');
-    expect(options.library?.type).toBe('commonjs-module');
-    expect(options.library?.name).toBe('main_app_web');
-    expect(options.remoteType).toBe(undefined);
-    expect(options.runtimePlugins).toEqual([NODE_RUNTIME_PLUGIN]);
-    expect(options.experiments?.asyncStartup).toBe(true);
-    expect(options.experiments?.optimization?.target).toBe('node');
+    expect(options!.name).toBe('main_app_web');
+    expect(options!.library?.type).toBe('commonjs-module');
+    expect(options!.library?.name).toBe('main_app_web');
+    expect(options!.remoteType).toBe(undefined);
+    expect(options!.runtimePlugins).toEqual([NODE_RUNTIME_PLUGIN]);
+    expect(options!.experiments?.asyncStartup).toBe(true);
+    expect(options!.experiments?.optimization?.target).toBe('node');
   });
 
   it('disables dts, manifest, and dev machinery by default', () => {
@@ -264,9 +311,9 @@ describe('federation()', () => {
     );
 
     const options = getFederationPluginOptions(rspackConfig.plugins);
-    expect(options.dts).toBe(false);
-    expect(options.manifest).toBe(false);
-    expect(options.dev).toBe(false);
+    expect(options!.dts).toBe(false);
+    expect(options!.manifest).toBe(false);
+    expect(options!.dev).toBe(false);
   });
 
   it('disables dts, manifest, and dev by default for browser target too', () => {
@@ -275,9 +322,9 @@ describe('federation()', () => {
     );
 
     const options = getFederationPluginOptions(rspackConfig.plugins);
-    expect(options.dts).toBe(false);
-    expect(options.manifest).toBe(false);
-    expect(options.dev).toBe(false);
+    expect(options!.dts).toBe(false);
+    expect(options!.manifest).toBe(false);
+    expect(options!.dev).toBe(false);
   });
 
   it('preserves explicit dts, manifest, and dev values', () => {
@@ -291,13 +338,13 @@ describe('federation()', () => {
     );
 
     const options = getFederationPluginOptions(rspackConfig.plugins);
-    expect(options.dts).toBe(true);
-    expect(options.manifest).toEqual({ filePath: 'custom' });
-    expect(options.dev).toBe(true);
+    expect(options!.dts).toBe(true);
+    expect(options!.manifest).toEqual({ filePath: 'custom' });
+    expect(options!.dev).toBe(true);
   });
 
   it('preserves user overrides while still injecting node runtime plugin', () => {
-    let options: any;
+    let options: ModuleFederationOptions | undefined;
     const warnings = captureWarnings(() => {
       const { rspackConfig } = applyFederationPlugin(
         federation({
@@ -321,11 +368,11 @@ describe('federation()', () => {
       options = getFederationPluginOptions(rspackConfig.plugins);
     });
 
-    expect(options.remoteType).toBe('commonjs');
-    expect(options.library?.type).toBe('var');
-    expect(options.library?.name).toBe('component_app');
-    expect(options.experiments?.asyncStartup).toBe(true);
-    expect(options.runtimePlugins).toEqual([
+    expect(options!.remoteType).toBe('commonjs');
+    expect(options!.library?.type).toBe('var');
+    expect(options!.library?.name).toBe('component_app');
+    expect(options!.experiments?.asyncStartup).toBe(true);
+    expect(options!.runtimePlugins).toEqual([
       NODE_RUNTIME_PLUGIN,
       'custom/runtimePlugin',
     ]);
@@ -335,7 +382,7 @@ describe('federation()', () => {
   });
 
   it('forces node optimization target even when configured otherwise', () => {
-    let options: any;
+    let options: ModuleFederationOptions | undefined;
     const warnings = captureWarnings(() => {
       const { rspackConfig } = applyFederationPlugin(
         federation({
@@ -350,14 +397,14 @@ describe('federation()', () => {
       options = getFederationPluginOptions(rspackConfig.plugins);
     });
 
-    expect(options.experiments?.optimization?.target).toBe('node');
+    expect(options!.experiments?.optimization?.target).toBe('node');
     expect(warnings.join('\n')).toContain(
       'experiments.optimization.target "web" is overridden with "node"',
     );
   });
 
   it('forces async startup and warns when disabled manually', () => {
-    let options: any;
+    let options: ModuleFederationOptions | undefined;
     const warnings = captureWarnings(() => {
       const { rspackConfig } = applyFederationPlugin(
         federation({
@@ -370,14 +417,14 @@ describe('federation()', () => {
       options = getFederationPluginOptions(rspackConfig.plugins);
     });
 
-    expect(options.experiments?.asyncStartup).toBe(true);
+    expect(options!.experiments?.asyncStartup).toBe(true);
     expect(warnings.join('\n')).toContain(
       'experiments.asyncStartup was set to false but is forced to true',
     );
   });
 
   it('warns when the node runtime plugin is configured manually', () => {
-    let options: any;
+    let options: ModuleFederationOptions | undefined;
     const warnings = captureWarnings(() => {
       const { rspackConfig } = applyFederationPlugin(
         federation({
@@ -393,7 +440,7 @@ describe('federation()', () => {
       options = getFederationPluginOptions(rspackConfig.plugins);
     });
 
-    expect(options.runtimePlugins).toEqual([NODE_RUNTIME_PLUGIN]);
+    expect(options!.runtimePlugins).toEqual([NODE_RUNTIME_PLUGIN]);
     expect(warnings.join('\n')).toContain(
       'manual configuration is unnecessary',
     );
@@ -430,8 +477,8 @@ describe('federation()', () => {
     expect(rspackConfig.output?.module).toBe(undefined);
 
     const options = getFederationPluginOptions(rspackConfig.plugins);
-    expect(options.library).toBe(undefined);
-    expect(options.runtimePlugins).toBe(undefined);
+    expect(options!.library).toBe(undefined);
+    expect(options!.runtimePlugins).toBe(undefined);
   });
 
   it('lets an explicit node target win over the rstest-browser caller', () => {
@@ -467,10 +514,10 @@ describe('federation()', () => {
     expect(rspackConfig.output?.module).toBe(undefined);
 
     const options = getFederationPluginOptions(rspackConfig.plugins);
-    expect(options.remoteType).toBe(undefined);
-    expect(options.library).toBe(undefined);
-    expect(options.runtimePlugins).toBe(undefined);
-    expect(options.experiments?.asyncStartup).toBe(true);
+    expect(options!.remoteType).toBe(undefined);
+    expect(options!.library).toBe(undefined);
+    expect(options!.runtimePlugins).toBe(undefined);
+    expect(options!.experiments?.asyncStartup).toBe(true);
   });
 
   it('does not force remoteType when remotes are configured', () => {
@@ -484,7 +531,7 @@ describe('federation()', () => {
     );
 
     const options = getFederationPluginOptions(rspackConfig.plugins);
-    expect(options.remoteType).toBe(undefined);
+    expect(options!.remoteType).toBe(undefined);
   });
 
   it('does not force remoteType when no remotes are configured', () => {
@@ -498,7 +545,7 @@ describe('federation()', () => {
     );
 
     const options = getFederationPluginOptions(rspackConfig.plugins);
-    expect(options.remoteType).toBe(undefined);
+    expect(options!.remoteType).toBe(undefined);
   });
 
   it('collects remote names from string remotes (mf-manifest) and bypasses externals', () => {
@@ -522,30 +569,26 @@ describe('federation()', () => {
       },
     });
 
-    let keptResult: any = 'unset';
-    rspackConfig.externals[0](
-      { request: 'component-app/Button' },
-      (_err: unknown, result?: unknown) => {
-        keptResult = result;
-      },
-    );
-    expect(keptResult).toBe(false);
+    const bypass = getExternalBypass(rspackConfig);
+    expect(callExternal(bypass, 'component-app/Button')).toBe(false);
   });
 
   it('composes with existing tools.rspack hook instead of overwriting it', () => {
-    const mergeEnvironmentConfig = (...configs: any[]) => {
+    const mergeEnvironmentConfig: MergeEnvironmentConfig = (...configs) => {
       // Basic merge that preserves nested objects we care about for this test.
-      const out: any = {};
+      const out: EnvironmentConfig = {};
       for (const c of configs) {
         if (!c) continue;
-        if (c.output) out.output = { ...(out.output || {}), ...c.output };
-        if (c.tools) out.tools = { ...(out.tools || {}), ...c.tools };
+        if (c.output) out.output = { ...out.output, ...c.output };
+        if (c.tools) out.tools = { ...out.tools, ...c.tools };
       }
       return out;
     };
 
-    const existingHook = (cfg: any) => {
-      cfg.__existingHookRan = true;
+    const existingHook = (cfg: Rspack.Configuration) => {
+      (
+        cfg as TestRspackConfig & { __existingHookRan?: boolean }
+      ).__existingHookRan = true;
     };
 
     const { envHook } = setupFederationPlugin(federation());
@@ -556,10 +599,11 @@ describe('federation()', () => {
 
     expect(Array.isArray(merged.tools?.rspack)).toBe(true);
 
-    const rspackConfig: any = { output: {}, plugins: [] };
-    for (const hook of merged.tools.rspack) {
-      if (typeof hook === 'function') hook(rspackConfig, {} as any);
-    }
+    const rspackConfig: TestRspackConfig & { __existingHookRan?: boolean } = {
+      output: {},
+      plugins: [],
+    };
+    runRspackHooks(merged, rspackConfig);
 
     expect(rspackConfig.__existingHookRan).toBe(true);
     expect(rspackConfig.experiments?.outputModule).toBe(false);

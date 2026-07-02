@@ -3,7 +3,6 @@ import { defineConfig } from '@rstest/core';
 
 export default defineConfig({
   name: 'browser',
-  setupFiles: ['./scripts/rstest.browser.setup.ts'],
   browser: {
     enabled: true,
     provider: 'playwright',

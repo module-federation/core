@@ -7,7 +7,7 @@ export const withRstestDefaults = (
 ): ModuleFederationOptions => {
   if (options.experiments?.asyncStartup === false) {
     logger.warn(
-      '[Rstest Federation] experiments.asyncStartup was set to false but is forced to true: rstest bootstraps federation containers inside test workers, which requires async startup.',
+      'experiments.asyncStartup was set to false but is forced to true: rstest bootstraps federation containers inside test workers, which requires async startup.',
     );
   }
 
@@ -26,6 +26,18 @@ export const withRstestDefaults = (
   };
 };
 
+/**
+ * Node-target MF defaults for rstest test workers.
+ *
+ * `@module-federation/rsbuild-plugin` has a sibling helper
+ * (`patchNodeMFConfig` in packages/rsbuild-plugin/src/utils/ssr.ts) with
+ * deliberately different policy: SSR bundles fetch remotes as scripts
+ * (`remoteType: 'script'`) and keep the bundler-derived library name. Test
+ * workers instead infer the transport from each remote declaration (so
+ * `remoteType` is never forced) and require `library.name` to equal the
+ * container name so the container is resolvable inside the worker. Keep
+ * divergence between the two intentional and documented.
+ */
 export const withNodeDefaults = (
   options: ModuleFederationOptions,
 ): ModuleFederationOptions => {
@@ -35,20 +47,20 @@ export const withNodeDefaults = (
 
   if (hasConfiguredNodeRuntimePlugin) {
     logger.warn(
-      '[Rstest Federation] The node runtime plugin is injected automatically; manual configuration is unnecessary.',
+      'The node runtime plugin is injected automatically; manual configuration is unnecessary.',
     );
   }
 
   if (merged.library?.name != null && merged.library.name !== merged.name) {
     logger.warn(
-      `[Rstest Federation] library.name "${String(merged.library.name)}" is overridden with the container name "${String(merged.name)}" so the container can be resolved in Node test workers.`,
+      `library.name "${String(merged.library.name)}" is overridden with the container name "${String(merged.name)}" so the container can be resolved in Node test workers.`,
     );
   }
 
   const userOptimizationTarget = merged.experiments?.optimization?.target;
   if (userOptimizationTarget != null && userOptimizationTarget !== 'node') {
     logger.warn(
-      `[Rstest Federation] experiments.optimization.target "${String(userOptimizationTarget)}" is overridden with "node": rstest executes federation builds in Node test workers.`,
+      `experiments.optimization.target "${String(userOptimizationTarget)}" is overridden with "node": rstest executes federation builds in Node test workers.`,
     );
   }
 

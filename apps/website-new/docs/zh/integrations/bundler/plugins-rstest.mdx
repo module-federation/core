@@ -50,7 +50,7 @@ export default defineConfig({
 
 - `target: async-node`
 - CommonJS 库输出（`library.type = 'commonjs-module'`）
-- 当存在 remotes 时，`remoteType = 'script'`
+- 远程模块的传输方式由各个 remote 声明自动推断（不会强制设置 `remoteType`）
 - 从 `@module-federation/rstest` 包自身解析的 Node runtime plugin
 - `experiments.optimization.target = 'node'`
 

@@ -11,7 +11,6 @@ export default defineConfig({
     }),
   }),
   name: 'rslib-browser',
-  setupFiles: ['./scripts/rstest.browser.setup.ts'],
   browser: {
     enabled: true,
     provider: 'playwright',

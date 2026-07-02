@@ -4,7 +4,6 @@ import { defineConfig } from '@rstest/core';
 export default defineConfig({
   extends: withRsbuildConfig({ cwd: __dirname }),
   name: 'rsbuild-browser',
-  setupFiles: ['./scripts/rstest.browser.setup.ts'],
   browser: {
     enabled: true,
     provider: 'playwright',

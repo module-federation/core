@@ -12,31 +12,23 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
         with:
           fetch-depth: 0
 
       - name: Cache Tool Downloads
-        uses: actions/cache@v5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
         with:
           path: ~/.cache
           key: ${{ runner.os }}-toolcache-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-toolcache-
 
-      - name: Set Playwright cache status
-        run: |
-          if [ -d "$HOME/.cache/ms-playwright" ] || [ -d "$HOME/.cache/Cypress" ]; then
-            echo "PLAYWRIGHT_CACHE_HIT=true" >> "$GITHUB_ENV"
-          else
-            echo "PLAYWRIGHT_CACHE_HIT=false" >> "$GITHUB_ENV"
-          fi
-
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
 
       - name: Setup Node.js 20
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version: '20'
           cache: 'pnpm'
@@ -47,15 +39,6 @@ jobs:
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Install Playwright
-        run: pnpm exec playwright install --with-deps chromium
-
-      - name: Install Cypress
-        run: npx cypress install
-
-      - name: Run Build for Rstest Demos
-        run: pnpm exec turbo run build --filter=rstest-demo --filter=rstest-remote-demo --filter=rstest-rsbuild-demo --filter=rstest-rslib-demo --concurrency=20
 
       - name: Run condition check script
         id: check-ci
@@ -70,6 +53,14 @@ jobs:
             echo "ci-is-affected failed with unexpected exit code: $ci_status" >&2
             exit "$ci_status"
           fi
+
+      - name: Install Playwright
+        if: steps.check-ci.outputs.run-e2e == 'true'
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run Build for Rstest Demos
+        if: steps.check-ci.outputs.run-e2e == 'true'
+        run: pnpm exec turbo run build --filter=rstest-demo --filter=rstest-remote-demo --filter=rstest-rsbuild-demo --filter=rstest-rslib-demo --concurrency=20
 
       - name: E2E Test for rstest demos
         if: steps.check-ci.outputs.run-e2e == 'true'

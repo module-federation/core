@@ -50,7 +50,7 @@ By default, `federation()` applies Node-safe Module Federation settings:
 
 - `target: async-node`
 - CommonJS library output (`library.type = 'commonjs-module'`)
-- `remoteType = 'script'` when remotes are present
+- Remote transport inferred from each remote declaration (`remoteType` is never forced)
 - Node runtime plugin resolved from the `@module-federation/rstest` package
 - `experiments.optimization.target = 'node'`
 

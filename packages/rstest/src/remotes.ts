@@ -91,6 +91,18 @@ const addRemoteNames = (remotes: unknown, target: Set<string>): void => {
   }
 };
 
+/**
+ * Reads MF options off an already-registered plugin instance so users of the
+ * rstest adapters (whose rsbuild config registers ModuleFederationPlugin via
+ * `@module-federation/rsbuild-plugin`) do not have to redeclare remotes.
+ *
+ * `_options` is a private field of the ModuleFederationPlugin classes in
+ * `packages/enhanced` and `packages/rspack` (no public accessor exists).
+ * Scraping it is tolerated only because both packages live in this monorepo:
+ * if that field is renamed, update this reader in the same change. The
+ * duck-type fallback below guards against false positives from unrelated
+ * plugins.
+ */
 const getModuleFederationPluginOptions = (
   plugin: unknown,
 ): ModuleFederationPluginLikeOptions | undefined => {

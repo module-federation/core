@@ -9,8 +9,10 @@ import { appendRspackHook, applyNodeRspackDefaults } from './rspack-hook';
 import type { ModuleFederationOptions, RstestFederationOptions } from './types';
 
 /**
- * Stable, public plugin name. Rstest may detect this plugin by name to enable
- * federation-specific behavior, so treat renames as breaking changes.
+ * Stable, public plugin name. Rstest does not currently detect this plugin by
+ * name — the runner-side integration is enabled via its own `federation: true`
+ * config — but the name is exported so tooling can identify the plugin, so
+ * treat renames as breaking changes.
  */
 export const FEDERATION_PLUGIN_NAME = 'rstest:federation';
 
@@ -98,7 +100,7 @@ export const federation = (
       callerName !== RSTEST_BROWSER_CALLER
     ) {
       logger.warn(
-        `[Rstest Federation] This plugin is designed to run under rstest, but the current caller is "${callerName}". Federation test defaults may not fit this environment.`,
+        `This plugin is designed to run under rstest, but the current caller is "${callerName}". Federation test defaults may not fit this environment.`,
       );
     }
 
@@ -132,5 +134,3 @@ export const federation = (
     });
   },
 });
-
-export const pluginModuleFederation = federation;
