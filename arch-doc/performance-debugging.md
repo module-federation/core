@@ -496,7 +496,7 @@ class DynamicFederationDebugger {
 
     const { manifest } = manifestData;
 
-    // Analyze manifest structure (shared/remotes/exposes are arrays)
+    // Analyze manifest structure
     console.log('📋 Manifest structure:');
     console.log('ID:', manifest.id);
     console.log('Name:', manifest.name);

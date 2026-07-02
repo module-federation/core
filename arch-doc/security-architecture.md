@@ -16,9 +16,8 @@ Module Federation's dynamic loading of remote code presents significant challeng
 // Required CSP directives:
 'script-src': [
   "'self'",
-  "'unsafe-eval'",  // Not needed for remote-entry loading itself (script tags / dynamic import);
-                    // only required for eval-based paths such as manifest getPublicPath
-                    // functions, which the runtime evaluates via new Function
+  "'unsafe-eval'",  // Only needed for eval-based paths (e.g. manifest getPublicPath
+                    // runs via new Function); plain remote-entry loading works without it
   ...trustedRemoteDomains,  // All remote hosts
   "'nonce-' + nonceValue"  // Recommended for additional security
 ]

@@ -126,9 +126,9 @@ const brokenErrorHandler: ModuleFederationRuntimePlugin = {
   name: 'BrokenErrorHandler',
 
   errorLoadRemote(args) {
-    // CORS failures DO reach this hook, but only as a generic
-    // ScriptNetworkError (network failure, 404, CORS, etc.) - the browser
-    // masks the cause, so blind retries against a broken remote keep failing.
+    // CORS failures reach this hook only as a generic ScriptNetworkError
+    // (network failure, 404, CORS, etc.) - the browser masks the cause,
+    // so blind retries against a broken remote keep failing.
     return () => 'Fallback';
   }
 };

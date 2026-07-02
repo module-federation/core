@@ -253,7 +253,6 @@ await Promise.all(preloadRemotes);
 2. **Use Module Federation Manifest**
 ```typescript
 // Load with manifest for better caching
-// manifest.remotes is an array of remote records, not a keyed object
 const manifest = await fetch('/mf-manifest.json').then(r => r.json());
 const remoteUrl = manifest.remotes.find(r => r.alias === remoteName)?.entry;
 ```

@@ -642,7 +642,17 @@ class RemoteHandler {
       }),
     );
 
-    // Per-asset results are reported to plugins; failures throw
+    const failedResults = preloadResults.flatMap((preloadResult) =>
+      preloadResult.results.filter(
+        (result) => result.status === 'error' || result.status === 'timeout',
+      ),
+    );
+    if (failedResults.length > 0) {
+      preloadError = new Error(
+        `preloadRemote failed to load ${failedResults.length} resource(s).`,
+      );
+    }
+
     await this.hooks.lifecycle.afterPreloadRemote.emit({
       preloadOps: preloadOptions,
       options: host.options,
@@ -668,7 +678,7 @@ export function preloadAssets(
   if (host.options.inBrowser) {
     // Remote entries are loaded (and cached) via getRemoteEntry
     entryAssets.forEach(({ moduleInfo }) => {
-      results.push(waitForRemoteEntryPreload(host, remoteInfo, moduleInfo, context));
+      results.push(waitForRemoteEntryPreload(host, remoteInfo, moduleInfo));
     });
 
     // CSS files are preloaded via <link rel="preload" as="style">
@@ -679,7 +689,6 @@ export function preloadAssets(
         remoteInfo,
         url: cssUrl,
         attrs: { rel: 'preload', as: 'style' },
-        context,
       }));
     });
 
@@ -690,7 +699,6 @@ export function preloadAssets(
         remoteInfo,
         url: jsUrl,
         attrs: { rel: 'preload', as: 'script' },
-        context,
       }));
     });
   }

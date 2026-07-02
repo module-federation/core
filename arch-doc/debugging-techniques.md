@@ -289,7 +289,7 @@ class ShareScopeAnalyzer {
         });
       }
 
-      // Check for singleton violations (singleton lives on shareConfig)
+      // Check for singleton violations
       versionEntries.forEach(([version, info]) => {
         if (info.shareConfig?.singleton && versionEntries.length > 1) {
           analysis.singletonViolations.push({
