@@ -3,6 +3,7 @@ import {
   loadScriptNode,
   composeKeyWithSeparator,
   isBrowserEnvValue,
+  loadEsmEntryWithFetch,
 } from '@module-federation/sdk';
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { ModuleFederation } from '../core';
@@ -203,7 +204,36 @@ async function loadEntryDom({
   switch (type) {
     case 'esm':
     case 'module':
-      return loadEsmEntry({ entry, remoteEntryExports });
+      return loaderHook.lifecycle.fetch.listeners.size > 0
+        ? (loadEsmEntryWithFetch({
+            entry,
+            customFetch: async (url, init) =>
+              loaderHook.lifecycle.fetch.emit(
+                url,
+                init,
+                remoteInfo,
+                resourceContext,
+              ),
+          }).catch((loadError: unknown) => {
+            // Mirror loadEntryScript: surface blob-loader fetch/exec failures
+            // (e.g. BlobLoaderNetworkError on a 401) as RUNTIME_008 so
+            // getRemoteEntry's loadEntryError recovery — token refresh,
+            // failover — still fires for authenticated ESM remotes.
+            const originalMsg =
+              loadError instanceof Error
+                ? loadError.message
+                : String(loadError);
+            error(
+              RUNTIME_008,
+              runtimeDescMap,
+              {
+                remoteName: name,
+                resourceUrl: entry,
+              },
+              originalMsg,
+            );
+          }) as Promise<RemoteEntryExports>)
+        : loadEsmEntry({ entry, remoteEntryExports });
     case 'system':
       return loadSystemJsEntry({ entry, remoteEntryExports });
     default:
@@ -399,3 +429,5 @@ export function getRemoteInfo(remote: Remote): RemoteInfo {
     shareScope: remote.shareScope || DEFAULT_SCOPE,
   };
 }
+
+export const __loadEntryDomForTest = loadEntryDom;

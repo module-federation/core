@@ -1,4 +1,9 @@
-import { createLink, createScript, safeToString } from '@module-federation/sdk';
+import {
+  createLink,
+  createScript,
+  loadCssWithFetch,
+  safeToString,
+} from '@module-federation/sdk';
 import {
   PreloadAssets,
   PreloadAssetResult,
@@ -181,6 +186,36 @@ function waitForLinkPreload({
   });
 }
 
+// When a fetch hook is present it may modify request headers, so CSS must be
+// fetched through it and injected as a blob. A native <link href> cannot carry
+// headers, and a rel=preload hint would 401 on an authenticated origin.
+function waitForCssFetch({
+  host,
+  remoteInfo,
+  url,
+  context,
+}: {
+  host: ModuleFederation;
+  remoteInfo: RemoteInfo;
+  url: string;
+  context: ResourceLoadContext;
+}): Promise<PreloadAssetResult> {
+  return loadCssWithFetch({
+    href: url,
+    customFetch: async (u, init) =>
+      host.loaderHook.lifecycle.fetch.emit(u, init, remoteInfo, context),
+  })
+    .then(() => createAssetResult(context, url, 'success'))
+    .catch((error) =>
+      createAssetResult(
+        context,
+        url,
+        isTimeoutError(error) ? 'timeout' : 'error',
+        error,
+      ),
+    );
+}
+
 function waitForScriptPreload({
   host,
   remoteInfo,
@@ -272,40 +307,39 @@ export function preloadAssets(
       );
     });
 
-    if (useLinkPreload) {
-      const defaultAttrs = {
-        rel: 'preload',
-        as: 'style',
-      };
-      cssAssets.forEach((cssUrl) => {
-        results.push(
-          waitForLinkPreload({
-            host,
-            remoteInfo,
-            url: cssUrl,
-            attrs: defaultAttrs,
-            context: createResourceContext(baseContext, 'css'),
-          }),
-        );
-      });
-    } else {
-      const defaultAttrs = {
-        rel: 'stylesheet',
-        type: 'text/css',
-      };
-      cssAssets.forEach((cssUrl) => {
-        results.push(
-          waitForLinkPreload({
-            host,
-            remoteInfo,
-            url: cssUrl,
-            attrs: defaultAttrs,
-            needDeleteLink: false,
-            context: createResourceContext(baseContext, 'css'),
-          }),
-        );
-      });
-    }
+    // Push the preload/load task for a single CSS asset.
+    const pushCssAsset = (cssUrl: string) => {
+      const context = createResourceContext(baseContext, 'css');
+
+      // Authenticated CSS: when a fetch hook is present it can add headers per
+      // remoteInfo, so fetch through it and inject as a blob stylesheet.
+      // We should only do that on an actual load because
+      // 1. native rel=preload can't carry headers so we must skip it
+      // 2. applying the remote's CSS in preload might override host styles before remote module is loaded
+      if (host.loaderHook.lifecycle.fetch.listeners.size > 0) {
+        if (!useLinkPreload) {
+          results.push(
+            waitForCssFetch({ host, remoteInfo, url: cssUrl, context }),
+          );
+        }
+        return;
+      }
+
+      // Plain CSS via <link>: a rel=preload hint, or an applied rel=stylesheet.
+      results.push(
+        waitForLinkPreload({
+          host,
+          remoteInfo,
+          url: cssUrl,
+          attrs: useLinkPreload
+            ? { rel: 'preload', as: 'style' }
+            : { rel: 'stylesheet', type: 'text/css' },
+          needDeleteLink: useLinkPreload ? undefined : false,
+          context,
+        }),
+      );
+    };
+    cssAssets.forEach(pushCssAsset);
 
     if (useLinkPreload) {
       const defaultAttrs = {
