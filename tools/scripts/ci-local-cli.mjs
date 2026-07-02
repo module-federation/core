@@ -1,9 +1,9 @@
 export function parseArgs(argv) {
+  const onlyTokens = [];
   const result = {
     help: false,
     list: false,
     only: null,
-    onlyTokens: [],
     printParity: false,
     skipCache: false,
     strictParity: false,
@@ -26,12 +26,12 @@ export function parseArgs(argv) {
         result.errors.push('Missing value for --only.');
         continue;
       }
-      result.onlyTokens.push(onlyValue);
+      onlyTokens.push(onlyValue);
       i += 1;
       continue;
     }
     if (arg.startsWith('--only=')) {
-      result.onlyTokens.push(arg.slice('--only='.length));
+      onlyTokens.push(arg.slice('--only='.length));
       continue;
     }
     if (arg === '--print-parity') {
@@ -48,10 +48,9 @@ export function parseArgs(argv) {
     }
     result.unknownArgs.push(arg);
   }
-  if (result.onlyTokens.length > 0) {
-    result.only = result.onlyTokens.join(',');
+  if (onlyTokens.length > 0) {
+    result.only = onlyTokens.join(',');
   }
-  delete result.onlyTokens;
   return result;
 }
 

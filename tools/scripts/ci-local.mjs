@@ -27,6 +27,13 @@ const DEFAULT_EXPECTED_NODE_MAJOR = 20;
 const ROOT_PACKAGE_JSON = readRootPackageJson();
 const EXPECTED_NODE_MAJOR = resolveExpectedNodeMajor(ROOT_PACKAGE_JSON);
 const EXPECTED_PNPM_VERSION = resolveExpectedPnpmVersion(ROOT_PACKAGE_JSON);
+const SKIP_DEVTOOLS_POSTINSTALL_ENV = { SKIP_DEVTOOLS_POSTINSTALL: 'true' };
+const METRO_APP_NAME =
+  process.env.CI_LOCAL_METRO_APP_NAME ?? E2E_SUITES.metro[0];
+const METRO_E2E_ENV = {
+  ...SKIP_DEVTOOLS_POSTINSTALL_ENV,
+  METRO_APP_NAME,
+};
 
 const args = parseArgs(process.argv);
 const onlyJobNames = getOnlyJobNames(args);
@@ -183,19 +190,19 @@ const jobs = [
   },
   {
     name: 'e2e-modern',
-    env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
+    env: SKIP_DEVTOOLS_POSTINSTALL_ENV,
     steps: [
       ...e2eSetupSteps(E2E_SUITES.modern),
-      step('E2E Test for ModernJS', async (ctx) => {
-        await runWhenAffected(ctx, () =>
+      step('E2E Test for ModernJS', (ctx) =>
+        runWhenAffected(ctx, () =>
           runCommand('pnpm', ['run', 'e2e:modern'], ctx),
-        );
-      }),
+        ),
+      ),
     ],
   },
   {
     name: 'e2e-runtime',
-    env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
+    env: SKIP_DEVTOOLS_POSTINSTALL_ENV,
     steps: [
       ...e2eSetupSteps(E2E_SUITES.runtime),
       step('E2E Test for Runtime Demo', (ctx) =>
@@ -207,7 +214,7 @@ const jobs = [
   },
   {
     name: 'e2e-manifest',
-    env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
+    env: SKIP_DEVTOOLS_POSTINSTALL_ENV,
     steps: [
       ...e2eSetupSteps(E2E_SUITES.manifest),
       step('E2E Test for Manifest Demo (dev)', (ctx) =>
@@ -224,20 +231,20 @@ const jobs = [
   },
   {
     name: 'e2e-node',
-    env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
+    env: SKIP_DEVTOOLS_POSTINSTALL_ENV,
     steps: [
       ...e2eSetupSteps(E2E_SUITES.node),
-      step('E2E Node Federation', async (ctx) => {
-        await runWhenAffected(ctx, () =>
+      step('E2E Node Federation', (ctx) =>
+        runWhenAffected(ctx, () =>
           runCommand('pnpm', ['run', 'e2e:node'], ctx),
-        );
-      }),
+        ),
+      ),
     ],
   },
   {
     name: 'e2e-next-dev',
     env: {
-      SKIP_DEVTOOLS_POSTINSTALL: 'true',
+      ...SKIP_DEVTOOLS_POSTINSTALL_ENV,
       NEXT_PRIVATE_LOCAL_WEBPACK: 'true',
     },
     steps: [
@@ -251,7 +258,7 @@ const jobs = [
   },
   {
     name: 'e2e-next-prod',
-    env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
+    env: SKIP_DEVTOOLS_POSTINSTALL_ENV,
     steps: [
       ...e2eSetupSteps(E2E_SUITES.next),
       step('E2E Test for Next.js Prod', (ctx) =>
@@ -263,52 +270,48 @@ const jobs = [
   },
   {
     name: 'e2e-treeshake',
-    env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
+    env: SKIP_DEVTOOLS_POSTINSTALL_ENV,
     steps: [
       ...e2eSetupSteps(E2E_SUITES.treeshake, { cypress: false }),
-      step('E2E Treeshake Server', async (ctx) => {
-        await runWhenAffected(ctx, () =>
+      step('E2E Treeshake Server', (ctx) =>
+        runWhenAffected(ctx, () =>
           runCommand('pnpm', ['run', 'e2e:treeshake:server'], ctx),
-        );
-      }),
-      step('E2E Treeshake Frontend', async (ctx) => {
-        await runWhenAffected(ctx, () =>
+        ),
+      ),
+      step('E2E Treeshake Frontend', (ctx) =>
+        runWhenAffected(ctx, () =>
           runCommand('pnpm', ['run', 'e2e:treeshake:frontend'], ctx),
-        );
-      }),
+        ),
+      ),
     ],
   },
   {
     name: 'e2e-modern-ssr',
-    env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
+    env: SKIP_DEVTOOLS_POSTINSTALL_ENV,
     steps: [
       ...e2eSetupSteps(E2E_SUITES.modernSsr),
-      step('E2E Test for ModernJS SSR', async (ctx) => {
-        await runWhenAffected(ctx, () =>
+      step('E2E Test for ModernJS SSR', (ctx) =>
+        runWhenAffected(ctx, () =>
           runCommand('pnpm', ['run', 'e2e:modern:ssr'], ctx),
-        );
-      }),
+        ),
+      ),
     ],
   },
   {
     name: 'e2e-router',
-    env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
+    env: SKIP_DEVTOOLS_POSTINSTALL_ENV,
     steps: [
       ...e2eSetupSteps(E2E_SUITES.router),
-      step('E2E Test for Router', async (ctx) => {
-        await runWhenAffected(ctx, () =>
+      step('E2E Test for Router', (ctx) =>
+        runWhenAffected(ctx, () =>
           runCommand('pnpm', ['run', 'e2e:router'], ctx),
-        );
-      }),
+        ),
+      ),
     ],
   },
   {
     name: 'metro-affected-check',
-    env: {
-      SKIP_DEVTOOLS_POSTINSTALL: 'true',
-      METRO_APP_NAME:
-        process.env.CI_LOCAL_METRO_APP_NAME ?? E2E_SUITES.metro[0],
-    },
+    env: METRO_E2E_ENV,
     steps: [
       installDependenciesStep(),
       checkAffectedStep((ctx) => ctx.env.METRO_APP_NAME),
@@ -328,11 +331,7 @@ const jobs = [
   },
   {
     name: 'metro-android-e2e',
-    env: {
-      SKIP_DEVTOOLS_POSTINSTALL: 'true',
-      METRO_APP_NAME:
-        process.env.CI_LOCAL_METRO_APP_NAME ?? E2E_SUITES.metro[0],
-    },
+    env: METRO_E2E_ENV,
     steps: [
       installDependenciesStep(),
       checkAffectedStep((ctx) => ctx.env.METRO_APP_NAME),
@@ -361,11 +360,7 @@ const jobs = [
   },
   {
     name: 'metro-ios-e2e',
-    env: {
-      SKIP_DEVTOOLS_POSTINSTALL: 'true',
-      METRO_APP_NAME:
-        process.env.CI_LOCAL_METRO_APP_NAME ?? E2E_SUITES.metro[0],
-    },
+    env: METRO_E2E_ENV,
     steps: [
       installDependenciesStep(),
       checkAffectedStep((ctx) => ctx.env.METRO_APP_NAME),
@@ -405,27 +400,27 @@ const jobs = [
   },
   {
     name: 'e2e-shared-tree-shaking',
-    env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
+    env: SKIP_DEVTOOLS_POSTINSTALL_ENV,
     steps: [
       ...e2eSetupSteps(E2E_SUITES.sharedTreeShaking),
-      step('E2E Shared Tree Shaking (runtime-infer)', async (ctx) => {
-        await runWhenAffected(ctx, () =>
+      step('E2E Shared Tree Shaking (runtime-infer)', (ctx) =>
+        runWhenAffected(ctx, () =>
           runCommand(
             'pnpm',
             ['run', 'e2e:shared-tree-shaking:runtime-infer'],
             ctx,
           ),
-        );
-      }),
-      step('E2E Shared Tree Shaking (server-calc)', async (ctx) => {
-        await runWhenAffected(ctx, () =>
+        ),
+      ),
+      step('E2E Shared Tree Shaking (server-calc)', (ctx) =>
+        runWhenAffected(ctx, () =>
           runCommand(
             'pnpm',
             ['run', 'e2e:shared-tree-shaking:server-calc'],
             ctx,
           ),
-        );
-      }),
+        ),
+      ),
     ],
   },
   {
