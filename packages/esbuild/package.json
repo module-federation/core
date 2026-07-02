@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/esbuild",
-  "version": "0.0.108",
+  "version": "0.0.109",
   "author": "Zack Jackson (@ScriptedAlchemy)",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -58,7 +58,7 @@
     "cjs-module-lexer": "1.3.1",
     "enhanced-resolve": "5.16.1",
     "es-module-lexer": "1.5.3",
-    "esbuild": "0.25.0",
+    "esbuild": "0.28.1",
     "json5": "2.2.3",
     "npmlog": "7.0.1"
   },
