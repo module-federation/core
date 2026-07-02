@@ -10,11 +10,13 @@
  */
 
 import { isBuiltin } from 'node:module';
+import type { InitializeHook, LoadHook, ResolveHook } from 'node:module';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import {
   ACK_MESSAGE,
   ADD_ORIGIN_MESSAGE,
+  MF_NODE_LOG_PREFIX,
   isHttpUrl,
   normalizeOrigin,
 } from './protocol';
@@ -23,40 +25,8 @@ import type {
   NativeHttpLoaderInitializeData,
 } from './protocol';
 
-interface ResolveContext {
-  conditions: string[];
-  importAttributes: Record<string, string>;
-  parentURL?: string;
-}
-
-interface ResolveResult {
-  url: string;
-  format?: string | null;
-  importAttributes?: Record<string, string>;
-  shortCircuit?: boolean;
-}
-
-interface LoadContext {
-  conditions: string[];
-  format?: string | null;
-  importAttributes: Record<string, string>;
-}
-
-interface LoadResult {
-  format: string;
-  source?: string | ArrayBuffer | Uint8Array;
-  shortCircuit?: boolean;
-}
-
-type NextResolve = (
-  specifier: string,
-  context?: ResolveContext,
-) => ResolveResult | Promise<ResolveResult>;
-
-type NextLoad = (
-  url: string,
-  context?: LoadContext,
-) => LoadResult | Promise<LoadResult>;
+/** How long a module source fetch may take before it is aborted. */
+const FETCH_TIMEOUT_MS = 30_000;
 
 interface FetchedModule {
   source: string;
@@ -77,7 +47,7 @@ export function isOriginAllowed(url: string): boolean {
 function assertAllowed(url: string): void {
   if (!isOriginAllowed(url)) {
     throw new Error(
-      `[@module-federation/node] Refusing to load "${url}": its origin is not in the ` +
+      `${MF_NODE_LOG_PREFIX} Refusing to load "${url}": its origin is not in the ` +
         `native HTTP loader allowlist (${
           allowedOrigins.size ? Array.from(allowedOrigins).join(', ') : 'empty'
         }). Origins are allowed automatically for registered Module Federation ` +
@@ -114,17 +84,47 @@ async function fetchSource(url: string): Promise<FetchedModule> {
   if (cached) {
     return cached;
   }
-  const promise = fetch(url).then(async (response) => {
+  const promise = (async () => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+    timer.unref?.();
+    let response: Response;
+    try {
+      // Redirects are rejected rather than followed so an allowlisted origin
+      // cannot redirect module source to an un-allowlisted (e.g. internal)
+      // target whose body would then be evaluated. Allowlist the final URL
+      // and point the remote at it directly instead.
+      response = await fetch(url, {
+        redirect: 'manual',
+        signal: controller.signal,
+      });
+    } catch (error) {
+      if (controller.signal.aborted) {
+        throw new Error(
+          `${MF_NODE_LOG_PREFIX} Timed out fetching "${url}" after ${FETCH_TIMEOUT_MS}ms.`,
+        );
+      }
+      throw error;
+    } finally {
+      clearTimeout(timer);
+    }
+    if (response.status >= 300 && response.status < 400) {
+      throw new Error(
+        `${MF_NODE_LOG_PREFIX} Refusing to follow redirect (HTTP ${response.status}) ` +
+          `while fetching "${url}": redirects are not followed by the native ` +
+          `HTTP loader. Use the redirect target URL directly and allowlist its origin.`,
+      );
+    }
     if (!response.ok) {
       throw new Error(
-        `[@module-federation/node] Failed to fetch "${url}": HTTP ${response.status} ${response.statusText}`,
+        `${MF_NODE_LOG_PREFIX} Failed to fetch "${url}": HTTP ${response.status} ${response.statusText}`,
       );
     }
     return {
       source: await response.text(),
       contentType: response.headers.get('content-type'),
     };
-  });
+  })();
   promise.catch(() => {
     // Allow retries after network failures instead of caching the rejection.
     sourceCache.delete(url);
@@ -143,7 +143,9 @@ export function hostFallbackParentURL(): string {
     .href;
 }
 
-export function initialize(data?: NativeHttpLoaderInitializeData): void {
+export const initialize: InitializeHook<
+  NativeHttpLoaderInitializeData | undefined
+> = (data) => {
   for (const origin of data?.allowedOrigins ?? []) {
     try {
       allowedOrigins.add(normalizeOrigin(origin));
@@ -167,13 +169,9 @@ export function initialize(data?: NativeHttpLoaderInitializeData): void {
     });
     port.unref?.();
   }
-}
+};
 
-export async function resolve(
-  specifier: string,
-  context: ResolveContext,
-  nextResolve: NextResolve,
-): Promise<ResolveResult> {
+export const resolve: ResolveHook = async (specifier, context, nextResolve) => {
   const { parentURL } = context;
 
   if (isHttpUrl(specifier)) {
@@ -206,13 +204,9 @@ export async function resolve(
   }
 
   return nextResolve(specifier, context);
-}
+};
 
-export async function load(
-  url: string,
-  context: LoadContext,
-  nextLoad: NextLoad,
-): Promise<LoadResult> {
+export const load: LoadHook = async (url, context, nextLoad) => {
   if (!isHttpUrl(url)) {
     return nextLoad(url, context);
   }
@@ -226,7 +220,7 @@ export async function load(
     source,
     shortCircuit: true,
   };
-}
+};
 
 /** Test-only helper: clears allowlist and source cache. */
 export function resetNativeHttpLoaderStateForTesting(): void {

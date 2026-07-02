@@ -19,6 +19,12 @@ const hooksSupported =
   typeof (nodeModule as { register?: unknown }).register === 'function';
 
 const describeSmoke = distAvailable ? describe : describe.skip;
+if (!distAvailable) {
+  console.warn(
+    `[@module-federation/node] register-smoke tests skipped: built dist not ` +
+      `found at ${distSrc}. Run the package build first to exercise them.`,
+  );
+}
 
 function runNode(args: string[], env: NodeJS.ProcessEnv = {}): string {
   return execFileSync(process.execPath, args, {

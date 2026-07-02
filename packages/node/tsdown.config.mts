@@ -22,7 +22,6 @@ export default defineConfig([
         'src/loader-hooks/register': 'src/loader-hooks/register.ts',
         'src/loader-hooks/entryLoader': 'src/loader-hooks/entryLoader.ts',
         'src/loader-hooks/protocol': 'src/loader-hooks/protocol.ts',
-        'src/loader-hooks/state': 'src/loader-hooks/state.ts',
         'src/utils/flush-chunks': 'src/utils/flush-chunks.ts',
         'src/utils/hot-reload': 'src/utils/hot-reload.ts',
         'src/filesystem/stratagies': 'src/filesystem/stratagies.ts',

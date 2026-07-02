@@ -5,15 +5,21 @@ import { MessageChannel } from 'node:worker_threads';
 import {
   ACK_MESSAGE,
   ADD_ORIGIN_MESSAGE,
+  MF_NATIVE_LOADER_ENV_FLAG,
   MF_NATIVE_LOADER_HOSTS_ENV,
+  MF_NODE_LOG_PREFIX,
+  getNativeHttpLoaderState,
   normalizeOrigin,
+  setNativeHttpLoaderState,
 } from './protocol';
 import type {
   AckMessage,
   NativeHttpLoaderInitializeData,
   NativeHttpLoaderState,
 } from './protocol';
-import { getNativeHttpLoaderState, setNativeHttpLoaderState } from './state';
+
+/** How long to wait for the hooks thread to acknowledge an allowlist update. */
+const ACK_TIMEOUT_MS = 10_000;
 
 type ModuleRegisterFn = (
   specifier: string,
@@ -42,6 +48,11 @@ function getModuleRegister(): ModuleRegisterFn | undefined {
     : undefined;
 }
 
+function isDisabledByEnv(): boolean {
+  const flag = process.env[MF_NATIVE_LOADER_ENV_FLAG];
+  return flag === '0' || flag === 'false';
+}
+
 function defaultHooksUrl(): string {
   // `__dirname` only exists in the CommonJS build; the ESM build (and the
   // `@module-federation/node/register` entry point) passes `hooksUrl` in.
@@ -49,7 +60,7 @@ function defaultHooksUrl(): string {
     return pathToFileURL(join(__dirname, 'hooks.mjs')).href;
   }
   throw new Error(
-    '[@module-federation/node] Unable to locate the loader hooks module. ' +
+    `${MF_NODE_LOG_PREFIX} Unable to locate the loader hooks module. ` +
       'Either import "@module-federation/node/register" (which resolves it ' +
       'automatically) or pass `hooksUrl` to registerNativeHttpLoader().',
   );
@@ -73,7 +84,7 @@ function collectOrigins(values: string[]): string[] {
       origins.push(normalizeOrigin(value));
     } catch {
       console.warn(
-        `[@module-federation/node] Ignoring invalid allowlist entry "${value}" for the native HTTP loader.`,
+        `${MF_NODE_LOG_PREFIX} Ignoring invalid allowlist entry "${value}" for the native HTTP loader.`,
       );
     }
   }
@@ -94,11 +105,21 @@ export function isNativeHttpLoaderSupported(): boolean {
  * origins into the existing registration.
  *
  * Returns the loader state, or `undefined` when the running Node.js version
- * does not support module customization hooks.
+ * does not support module customization hooks or the loader is disabled via
+ * `MF_NODE_NATIVE_LOADER=0`.
  */
 export function registerNativeHttpLoader(
   options: RegisterNativeHttpLoaderOptions = {},
 ): NativeHttpLoaderState | undefined {
+  // Kill switch: when disabled, module.register() must never be called and no
+  // state is created, so the runtime plugin falls back to the vm-based path.
+  if (isDisabledByEnv()) {
+    console.debug(
+      `${MF_NODE_LOG_PREFIX} Native HTTP loader disabled via ${MF_NATIVE_LOADER_ENV_FLAG}; skipping registration.`,
+    );
+    return undefined;
+  }
+
   const existing = getNativeHttpLoaderState();
   const staticOrigins = collectOrigins([
     ...(options.allowedOrigins ?? []),
@@ -106,8 +127,17 @@ export function registerNativeHttpLoader(
   ]);
 
   if (existing) {
+    // Fire-and-forget is safe here: allowOrigin() shares one in-flight
+    // acknowledgement per origin, so any later import path that awaits
+    // allowOrigin() for the same origin joins the pending ack instead of
+    // racing ahead of the hooks thread.
     for (const origin of staticOrigins) {
-      void existing.allowOrigin(origin);
+      existing.allowOrigin(origin).catch((error) => {
+        console.warn(
+          `${MF_NODE_LOG_PREFIX} Failed to allow origin "${origin}" on the native HTTP loader:`,
+          error,
+        );
+      });
     }
     return existing;
   }
@@ -115,7 +145,7 @@ export function registerNativeHttpLoader(
   const moduleRegister = getModuleRegister();
   if (!moduleRegister) {
     console.warn(
-      '[@module-federation/node] module.register() is not available in this ' +
+      `${MF_NODE_LOG_PREFIX} module.register() is not available in this ` +
         'Node.js version; the native HTTP loader is disabled and Module ' +
         'Federation will keep using the default vm-based loading path.',
     );
@@ -125,7 +155,11 @@ export function registerNativeHttpLoader(
   const hooksUrl = options.hooksUrl ?? defaultHooksUrl();
   const { port1, port2 } = new MessageChannel();
 
+  // Origins the hooks thread is known to accept: statically seeded origins are
+  // passed through the (synchronously applied) initialize data; dynamic ones
+  // are added only once the hooks thread acknowledges them.
   const allowedOrigins = new Set<string>(staticOrigins);
+  const pendingByOrigin = new Map<string, Promise<void>>();
   let nextMessageId = 0;
   const pendingAcks = new Map<number, () => void>();
 
@@ -157,17 +191,46 @@ export function registerNativeHttpLoader(
   });
 
   const state: NativeHttpLoaderState = {
-    enabled: true,
     allowedOrigins,
     allowOrigin(origin: string): Promise<void> {
       const normalized = normalizeOrigin(origin);
       if (allowedOrigins.has(normalized)) {
         return Promise.resolve();
       }
-      allowedOrigins.add(normalized);
-      return new Promise<void>((resolve) => {
+      // Concurrent callers for the same origin share the in-flight ack, so
+      // nobody resolves before the hooks thread has actually applied the
+      // allowlist update.
+      const pending = pendingByOrigin.get(normalized);
+      if (pending) {
+        return pending;
+      }
+      const promise = new Promise<void>((resolve, reject) => {
         const id = nextMessageId++;
-        pendingAcks.set(id, resolve);
+        const settle = () => {
+          clearTimeout(timer);
+          pendingAcks.delete(id);
+          pendingByOrigin.delete(normalized);
+          if (pendingAcks.size === 0) {
+            port1.unref();
+          }
+        };
+        // Bounded wait: a broken port must fail loudly instead of hanging the
+        // process forever via port1.ref().
+        const timer = setTimeout(() => {
+          settle();
+          reject(
+            new Error(
+              `${MF_NODE_LOG_PREFIX} Timed out after ${ACK_TIMEOUT_MS}ms waiting ` +
+                `for the loader hooks thread to acknowledge origin "${normalized}".`,
+            ),
+          );
+        }, ACK_TIMEOUT_MS);
+        timer.unref?.();
+        pendingAcks.set(id, () => {
+          settle();
+          allowedOrigins.add(normalized);
+          resolve();
+        });
         // Keep the event loop alive until the hooks thread acknowledges.
         port1.ref();
         port1.postMessage({
@@ -176,6 +239,8 @@ export function registerNativeHttpLoader(
           origin: normalized,
         });
       });
+      pendingByOrigin.set(normalized, promise);
+      return promise;
     },
   };
 

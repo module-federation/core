@@ -31,14 +31,14 @@ const origin = `http://127.0.0.1:${server.address().port}`;
 
 const distSrc = new URL(process.env.MF_NODE_DIST_SRC);
 const { getNativeHttpLoaderState } = await import(
-  new URL('loader-hooks/state.mjs', distSrc)
+  new URL('loader-hooks/protocol.mjs', distSrc)
 );
 const { loadEntryViaNativeHttpLoader } = await import(
   new URL('loader-hooks/entryLoader.mjs', distSrc)
 );
 
 const state = getNativeHttpLoaderState();
-assert.ok(state?.enabled, 'register entry point must create loader state');
+assert.ok(state, 'register entry point must create loader state');
 
 // Origins outside the allowlist must be refused.
 await assert.rejects(

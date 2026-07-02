@@ -1,4 +1,5 @@
 import { MessageChannel } from 'node:worker_threads';
+import type { LoadHookContext, ResolveHookContext } from 'node:module';
 import {
   initialize,
   load,
@@ -10,15 +11,12 @@ import {
 import {
   ACK_MESSAGE,
   ADD_ORIGIN_MESSAGE,
-  MF_NATIVE_LOADER_ENV_FLAG,
   isHttpUrl,
   normalizeOrigin,
-} from '../loader-hooks/protocol';
-import {
   getNativeHttpLoaderState,
   setNativeHttpLoaderState,
   clearNativeHttpLoaderStateForTesting,
-} from '../loader-hooks/state';
+} from '../loader-hooks/protocol';
 import { loadEntryViaNativeHttpLoader } from '../loader-hooks/entryLoader';
 import type { NativeHttpLoaderState } from '../loader-hooks/protocol';
 
@@ -33,14 +31,17 @@ const originalFetch = global.fetch;
 afterEach(() => {
   resetNativeHttpLoaderStateForTesting();
   clearNativeHttpLoaderStateForTesting();
-  delete process.env[MF_NATIVE_LOADER_ENV_FLAG];
   global.fetch = originalFetch;
   jest.clearAllMocks();
 });
 
 function mockFetchResponse(
   body: string,
-  init: { ok?: boolean; status?: number; contentType?: string | null } = {},
+  init: {
+    ok?: boolean;
+    status?: number;
+    contentType?: string | null;
+  } = {},
 ): jest.Mock {
   const { ok = true, status = 200, contentType = 'text/javascript' } = init;
   const fetchMock = jest.fn().mockResolvedValue({
@@ -94,7 +95,12 @@ describe('loader hooks: initialize', () => {
 });
 
 describe('loader hooks: resolve', () => {
-  const context = { conditions: [], importAttributes: {} };
+  const context: ResolveHookContext = {
+    conditions: [],
+    importAssertions: {},
+    importAttributes: {},
+    parentURL: undefined,
+  };
 
   it('short-circuits allowed http specifiers', async () => {
     initialize({ allowedOrigins: [ORIGIN] });
@@ -161,7 +167,12 @@ describe('loader hooks: resolve', () => {
 });
 
 describe('loader hooks: load', () => {
-  const context = { conditions: [], importAttributes: {} };
+  const context: LoadHookContext = {
+    conditions: [],
+    format: undefined,
+    importAssertions: {},
+    importAttributes: {},
+  };
 
   it('passes non-http URLs through to the default loader', async () => {
     nextLoad.mockResolvedValue({ format: 'module', source: '' });
@@ -178,7 +189,13 @@ describe('loader hooks: load', () => {
       source: 'export const x = 1;',
       shortCircuit: true,
     });
-    expect(fetchMock).toHaveBeenCalledWith(ENTRY_URL);
+    expect(fetchMock).toHaveBeenCalledWith(
+      ENTRY_URL,
+      expect.objectContaining({
+        redirect: 'manual',
+        signal: expect.any(AbortSignal),
+      }),
+    );
     expect(nextLoad).not.toHaveBeenCalled();
   });
 
@@ -197,6 +214,18 @@ describe('loader hooks: load', () => {
       /allowlist/,
     );
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('refuses to follow redirects from allowlisted origins', async () => {
+    initialize({ allowedOrigins: [ORIGIN] });
+    const fetchMock = mockFetchResponse('export const stolen = 1;', {
+      ok: false,
+      status: 302,
+    });
+    await expect(load(ENTRY_URL, context, nextLoad)).rejects.toThrow(
+      /redirect/i,
+    );
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it('throws a descriptive error on non-OK responses', async () => {
@@ -220,7 +249,6 @@ describe('native loader global state', () => {
   it('stores and clears state on globalThis', () => {
     expect(getNativeHttpLoaderState()).toBeUndefined();
     const state: NativeHttpLoaderState = {
-      enabled: true,
       allowedOrigins: new Set(),
       allowOrigin: jest.fn().mockResolvedValue(undefined),
     };
@@ -236,7 +264,6 @@ describe('loadEntryViaNativeHttpLoader', () => {
 
   function activateState(): NativeHttpLoaderState {
     const state: NativeHttpLoaderState = {
-      enabled: true,
       allowedOrigins: new Set(),
       allowOrigin: jest.fn().mockResolvedValue(undefined),
     };
@@ -248,15 +275,6 @@ describe('loadEntryViaNativeHttpLoader', () => {
     await expect(loadEntryViaNativeHttpLoader(remoteInfo)).resolves.toBe(
       undefined,
     );
-  });
-
-  it('returns undefined when disabled through the env flag', async () => {
-    const state = activateState();
-    process.env[MF_NATIVE_LOADER_ENV_FLAG] = '0';
-    await expect(loadEntryViaNativeHttpLoader(remoteInfo)).resolves.toBe(
-      undefined,
-    );
-    expect(state.allowOrigin).not.toHaveBeenCalled();
   });
 
   it('returns undefined for non-http entries', async () => {

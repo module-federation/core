@@ -6,6 +6,8 @@
  * application code (the runtime plugin) as well as loaded on the hooks thread.
  */
 
+export const MF_NODE_LOG_PREFIX = '[@module-federation/node]';
+
 export const MF_NATIVE_LOADER_ENV_FLAG = 'MF_NODE_NATIVE_LOADER';
 export const MF_NATIVE_LOADER_HOSTS_ENV = 'MF_NODE_NATIVE_LOADER_HOSTS';
 
@@ -48,12 +50,13 @@ export interface NativeHttpLoaderInitializeData {
  * sharing module instances.
  */
 export interface NativeHttpLoaderState {
-  enabled: boolean;
+  /** Origins acknowledged by the hooks thread (plus statically seeded ones). */
   allowedOrigins: Set<string>;
   /**
    * Allow an origin (e.g. `https://cdn.example.com`) and wait until the hooks
    * thread has acknowledged the update, so a subsequent `import()` cannot race
-   * ahead of the allowlist.
+   * ahead of the allowlist. Concurrent calls for the same origin share one
+   * in-flight acknowledgement.
    */
   allowOrigin(origin: string): Promise<void>;
 }
@@ -61,6 +64,29 @@ export interface NativeHttpLoaderState {
 export const NATIVE_LOADER_GLOBAL_KEY = Symbol.for(
   '@module-federation/node:native-http-loader',
 );
+
+type GlobalWithLoaderState = typeof globalThis & {
+  [NATIVE_LOADER_GLOBAL_KEY]?: NativeHttpLoaderState;
+};
+
+/**
+ * Returns the active native HTTP loader state, if `registerNativeHttpLoader()`
+ * (or the `@module-federation/node/register` entry point) has been executed in
+ * this process. The state lives on `globalThis` so that application bundles
+ * and the registration entry point do not need to share module instances.
+ */
+export function getNativeHttpLoaderState(): NativeHttpLoaderState | undefined {
+  return (globalThis as GlobalWithLoaderState)[NATIVE_LOADER_GLOBAL_KEY];
+}
+
+export function setNativeHttpLoaderState(state: NativeHttpLoaderState): void {
+  (globalThis as GlobalWithLoaderState)[NATIVE_LOADER_GLOBAL_KEY] = state;
+}
+
+/** Test-only helper: removes the global loader state. */
+export function clearNativeHttpLoaderStateForTesting(): void {
+  delete (globalThis as GlobalWithLoaderState)[NATIVE_LOADER_GLOBAL_KEY];
+}
 
 export function normalizeOrigin(originOrUrl: string): string {
   return new URL(originOrUrl).origin;

@@ -497,10 +497,7 @@ export default function (): ModuleFederationRuntimePlugin {
     // programmatic `registerNativeHttpLoader()`); otherwise resolves to
     // undefined and the default vm-based entry loading runs unchanged.
     async loadEntry(args) {
-      const container = await loadEntryViaNativeHttpLoader(args.remoteInfo);
-      return container as Awaited<
-        ReturnType<NonNullable<ModuleFederationRuntimePlugin['loadEntry']>>
-      >;
+      return loadEntryViaNativeHttpLoader(args.remoteInfo);
     },
     beforeInit(args) {
       // Patch webpack chunk loading handlers

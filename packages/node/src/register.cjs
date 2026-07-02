@@ -12,10 +12,8 @@
  */
 'use strict';
 
-const { join } = require('node:path');
-const { pathToFileURL } = require('node:url');
 const { registerNativeHttpLoader } = require('./loader-hooks/register.js');
 
-registerNativeHttpLoader({
-  hooksUrl: pathToFileURL(join(__dirname, 'loader-hooks', 'hooks.mjs')).href,
-});
+// The CJS build of register.ts resolves the sibling hooks.mjs itself via
+// `__dirname` (see defaultHooksUrl), so no hooksUrl is needed here.
+registerNativeHttpLoader();
