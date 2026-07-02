@@ -64,6 +64,11 @@ export function createResolveRequest({
   });
 
   return function resolveRequest(context, moduleName, platform) {
+    // normalize the origin module path so comparisons against generated
+    // paths work on Windows, where Metro and `path.resolve` can disagree
+    // on path separators
+    const originModulePath = toPosixPath(context.originModulePath);
+
     // virtual entrypoint for host
     if (moduleName.match(hostEntryPathRegex)) {
       const hostEntryGenerator = () =>
@@ -119,7 +124,7 @@ export function createResolveRequest({
     }
 
     // shared modules handling in init-host.js
-    if ([paths.initHost].includes(context.originModulePath)) {
+    if (toPosixPath(paths.initHost) === originModulePath) {
       // init-host contains definition of shared modules so we need to prevent
       // circular import of shared module, by allowing import shared dependencies directly
       return customResolver
@@ -128,7 +133,7 @@ export function createResolveRequest({
     }
 
     // shared modules handling in remote-entry.js
-    if ([paths.remoteEntry].includes(context.originModulePath)) {
+    if (toPosixPath(paths.remoteEntry) === originModulePath) {
       const sharedModule = options.shared[moduleName];
       // import: false means that the module is marked as external
       if (sharedModule && sharedModule.import === false) {
@@ -192,7 +197,7 @@ export function createResolveRequest({
     if (
       hacks.patchHMRClient &&
       moduleName.endsWith('HMRClient') &&
-      context.originModulePath !== resolveModule('HMRClient.ts')
+      originModulePath !== toPosixPath(resolveModule('HMRClient.ts'))
     ) {
       const res = customResolver
         ? customResolver(context, moduleName, platform)
