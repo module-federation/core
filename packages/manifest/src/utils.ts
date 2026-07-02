@@ -5,6 +5,7 @@ import type {
 } from 'webpack/lib/stats/DefaultStatsFactoryPlugin';
 import path from 'path';
 import fs from 'fs';
+import { createRequire } from 'node:module';
 import {
   StatsAssets,
   moduleFederationPlugin,
@@ -14,12 +15,27 @@ import {
   normalizeOptions,
   MetaDataTypes,
 } from '@module-federation/sdk';
-import {
-  isTSProject,
-  retrieveTypesAssetsInfo,
-} from '@module-federation/dts-plugin/core';
 import { HOT_UPDATE_SUFFIX, PLUGIN_IDENTIFIER } from './constants';
 import logger from './logger';
+
+// Rslib rewrites import.meta.url for both CJS and ESM outputs.
+// @ts-ignore
+const nodeRequire = createRequire(import.meta.url);
+type DtsCoreModule = {
+  isTSProject: (
+    dtsOptions: moduleFederationPlugin.ModuleFederationPluginOptions['dts'],
+    context: string,
+  ) => boolean;
+  retrieveTypesAssetsInfo: (
+    options: moduleFederationPlugin.DtsRemoteOptions & {
+      context: string;
+      moduleFederationConfig: moduleFederationPlugin.ModuleFederationPluginOptions;
+    },
+  ) => {
+    apiFileName: string;
+    zipName: string;
+  };
+};
 
 function isHotFile(file: string) {
   return file.includes(HOT_UPDATE_SUFFIX);
@@ -238,7 +254,13 @@ export function getTypesMetaInfo(
     zip: '',
     api: '',
   };
+  if (pluginOptions.dts === false) {
+    return defaultTypesMetaInfo;
+  }
   try {
+    const { isTSProject, retrieveTypesAssetsInfo } = nodeRequire(
+      '@module-federation/dts-plugin/core',
+    ) as DtsCoreModule;
     const normalizedDtsOptions =
       normalizeOptions<moduleFederationPlugin.PluginDtsOptions>(
         isTSProject(pluginOptions.dts, context),
