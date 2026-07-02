@@ -426,6 +426,98 @@ describe('runtimePlugin', () => {
       expect(callback).toHaveBeenCalledWith(expect.any(Error), null);
     });
 
+    it('should report HTTP status before evaluating a non-ok loader hook response', async () => {
+      const url = Object.assign(new URL('http://example.com/chunk.js'), {
+        mfMetadata: {
+          resolvedFrom: 'public-path',
+          remoteName: 'chunk.js',
+          publicPath: 'http://localhost:3000/',
+        },
+      });
+      const callback = jest.fn();
+      const args = {
+        origin: {
+          options: {
+            name: 'test-host',
+          },
+          loaderHook: {
+            lifecycle: {
+              fetch: {
+                emit: jest.fn().mockResolvedValue(
+                  new Response('Injected missing chunk', {
+                    status: 404,
+                    statusText: 'Not Found',
+                    headers: {
+                      'content-type': 'text/plain',
+                    },
+                  }),
+                ),
+              },
+            },
+          },
+        },
+      };
+
+      fetchAndRun(url, 'chunk.js', callback, args);
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      const error = callback.mock.calls[0][0] as Error;
+      expect(error).toBeInstanceOf(Error);
+      expect(error.message).toContain('HTTP 404');
+      expect(error.message).toContain(url.href);
+      expect(error.message).not.toContain('Unexpected identifier');
+      expect(error.message).not.toContain('Federated chunk execution failed.');
+      expect(callback).toHaveBeenCalledWith(error, null);
+    });
+
+    it('should report HTTP status before evaluating a non-ok fallback fetch response', async () => {
+      (global.fetch as jest.Mock).mockResolvedValue(
+        new Response('Service unavailable chunk', {
+          status: 503,
+          statusText: 'Service Unavailable',
+          headers: {
+            'content-type': 'text/plain',
+          },
+        }),
+      );
+
+      const url = Object.assign(new URL('http://example.com/chunk.js'), {
+        mfMetadata: {
+          resolvedFrom: 'public-path',
+          remoteName: 'chunk.js',
+          publicPath: 'http://localhost:3000/',
+        },
+      });
+      const callback = jest.fn();
+      const args = {
+        origin: {
+          options: {
+            name: 'test-host',
+          },
+          loaderHook: {
+            lifecycle: {
+              fetch: {
+                emit: jest.fn().mockResolvedValue(null),
+              },
+            },
+          },
+        },
+      };
+
+      fetchAndRun(url, 'chunk.js', callback, args);
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      const error = callback.mock.calls[0][0] as Error;
+      expect(error).toBeInstanceOf(Error);
+      expect(error.message).toContain('HTTP 503');
+      expect(error.message).toContain(url.href);
+      expect(error.message).not.toContain('Unexpected identifier');
+      expect(error.message).not.toContain('Federated chunk execution failed.');
+      expect(callback).toHaveBeenCalledWith(error, null);
+    });
+
     it('should attach remote chunk context when execution fails', async () => {
       const syntaxError = new SyntaxError('Unexpected token :');
       (global.fetch as jest.Mock).mockResolvedValue({
