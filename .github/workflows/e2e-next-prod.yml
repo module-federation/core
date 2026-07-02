@@ -29,21 +29,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Restore Turborepo cache
-        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
-        with:
-          path: .turbo/cache
-          key: ${{ runner.os }}-turbo-${{ github.ref_name }}-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-turbo-${{ github.ref_name }}-
-            ${{ runner.os }}-turbo-
-
-      - name: Install Cypress
-        run: npx cypress install
-
-      - name: Build shared packages
-        run: pnpm run build:packages
-
       - name: Check CI conditions
         id: check-ci
         run: |
@@ -57,6 +42,24 @@ jobs:
             echo "ci-is-affected failed with unexpected exit code: $ci_status" >&2
             exit "$ci_status"
           fi
+
+      - name: Restore Turborepo cache
+        if: steps.check-ci.outputs.run-e2e == 'true'
+        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
+        with:
+          path: .turbo/cache
+          key: ${{ runner.os }}-turbo-${{ github.ref_name }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-${{ github.ref_name }}-
+            ${{ runner.os }}-turbo-
+
+      - name: Install Cypress
+        if: steps.check-ci.outputs.run-e2e == 'true'
+        run: npx cypress install
+
+      - name: Build shared packages
+        if: steps.check-ci.outputs.run-e2e == 'true'
+        run: pnpm run build:packages
 
       - name: E2E Test for Next.js Prod
         if: steps.check-ci.outputs.run-e2e == 'true'
