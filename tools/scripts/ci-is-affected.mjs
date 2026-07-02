@@ -7,7 +7,11 @@ import {
   hasGitRef as hasGitRefInRepo,
   parseJsonFromTurboOutput,
 } from './turbo-script-utils.mjs';
-import { resolveE2ESuiteAppNames } from './ci-e2e-suites.mjs';
+import {
+  normalizeAppNames,
+  resolveE2ESuiteAppNames,
+  serializeAppNames,
+} from './ci-e2e-suites.mjs';
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(SCRIPT_DIR, '../..');
@@ -74,16 +78,15 @@ function decide(runE2E) {
   process.exit(runE2E ? 0 : 1);
 }
 
-const rawAppNames = argv.appName ?? resolveE2ESuiteAppNames(argv.e2eSuite);
+const rawAppNames = argv.appName
+  ? normalizeAppNames(argv.appName)
+  : resolveE2ESuiteAppNames(argv.e2eSuite);
 if (argv.e2eSuite && !rawAppNames) {
   console.error(`Unknown e2e suite: ${argv.e2eSuite}`);
   process.exit(2);
 }
 
-const appNames = (rawAppNames ?? '')
-  .split(',')
-  .map((name) => name.trim())
-  .filter(Boolean);
+const appNames = normalizeAppNames(rawAppNames);
 
 if (appNames.length === 0) {
   console.error('No valid app names were provided.');
@@ -182,13 +185,13 @@ const isAffected = appNames.some((name) => matchableAffectedNames.has(name));
 
 if (isAffected) {
   console.log(
-    `appNames: ${appNames.join(',')} , base=${base} head=${head}, conditions met, executing e2e CI.`,
+    `appNames: ${serializeAppNames(appNames)} , base=${base} head=${head}, conditions met, executing e2e CI.`,
   );
   decide(true);
 }
 
 console.log(
-  `appNames: ${appNames.join(',')} , base=${base} head=${head}, conditions not met, skipping e2e CI.`,
+  `appNames: ${serializeAppNames(appNames)} , base=${base} head=${head}, conditions not met, skipping e2e CI.`,
 );
 decide(false);
 
