@@ -23,7 +23,11 @@ export class PKGJsonManager {
       return pkg;
     } catch (_err) {
       try {
-        const pkg = findPkgUp({ cwd: root }) as unknown as Record<string, any>;
+        const pkgPath = findPkgUp({ cwd: root });
+        if (!pkgPath) {
+          return {};
+        }
+        const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
         this._pkg = pkg;
         return pkg;
       } catch (err) {
