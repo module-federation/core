@@ -1,6 +1,6 @@
 import type { ModuleFederation, getInstance } from '@module-federation/runtime';
 import type { BasicProviderModuleInfo } from '@module-federation/sdk';
-import React, { ReactNode, useState, useEffect } from 'react';
+import React, { ReactNode, useState, useEffect, useRef } from 'react';
 import type { ErrorInfo } from './AwaitDataFetch';
 import type { DataFetchParams, NoSSRRemoteInfo } from './types';
 
@@ -48,6 +48,59 @@ export type CreateLazyComponentOptions<T, E extends keyof T> = {
 };
 
 type ReactKey = { key?: React.Key | null };
+
+function normalizeHref(href: string) {
+  if (typeof document === 'undefined') {
+    return href;
+  }
+
+  try {
+    return new URL(href, document.baseURI).href;
+  } catch {
+    return href;
+  }
+}
+
+function isStylesheetLink(link: HTMLLinkElement) {
+  return (
+    link.relList.contains('stylesheet') ||
+    link.rel.toLowerCase().split(/\s+/u).includes('stylesheet')
+  );
+}
+
+function hasStylesheetLinkInHead(
+  href: string,
+  ignoredLink?: HTMLLinkElement | null,
+) {
+  if (typeof document === 'undefined' || !document.head) {
+    return false;
+  }
+
+  const normalizedHref = normalizeHref(href);
+  return Array.from(
+    document.head.querySelectorAll<HTMLLinkElement>('link[href]'),
+  ).some(
+    (link) =>
+      link !== ignoredLink &&
+      isStylesheetLink(link) &&
+      normalizeHref(link.href) === normalizedHref,
+  );
+}
+
+function StylesheetAsset({ href }: { href: string }) {
+  const [shouldRender, setShouldRender] = useState(true);
+  const linkRef = useRef<HTMLLinkElement | null>(null);
+
+  useEffect(() => {
+    setShouldRender(!hasStylesheetLinkInHead(href, linkRef.current));
+  }, [href]);
+
+  if (!shouldRender) {
+    return null;
+  }
+
+  return <link ref={linkRef} href={href} rel="stylesheet" type="text/css" />;
+}
 
 function getTargetModuleInfo(
   id: string,
@@ -117,15 +170,19 @@ export function collectSSRAssets(options: IProps) {
   }
   const { module: targetModule, publicPath, remoteEntry } = moduleAndPublicPath;
   if (injectLink) {
+    const stylesheetHrefs = new Set<string>();
     [...targetModule.assets.css.sync, ...targetModule.assets.css.async]
       .sort()
       .forEach((file, index) => {
+        const href = `${publicPath}${file}`;
+        if (stylesheetHrefs.has(href)) {
+          return;
+        }
+        stylesheetHrefs.add(href);
         links.push(
-          <link
+          <StylesheetAsset
             key={`${file.split('.')[0]}_${index}`}
-            href={`${publicPath}${file}`}
-            rel="stylesheet"
-            type="text/css"
+            href={href}
           />,
         );
       });
