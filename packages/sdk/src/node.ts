@@ -256,10 +256,18 @@ export const loadScriptNode =
 
 const esmModuleCache = new Map<string, any>();
 
+type LoadModuleOptions = {
+  vm: typeof import('vm') & {
+    SourceTextModule: any;
+    SyntheticModule: any;
+  };
+  fetch: typeof fetch;
+};
+
 const isFetchableRemoteModuleUrl = (url: string): boolean =>
   url.startsWith('http:') || url.startsWith('https:');
 
-const isBareSpecifier = (specifier: string): boolean =>
+const isBareModuleSpecifier = (specifier: string): boolean =>
   !specifier.startsWith('./') &&
   !specifier.startsWith('../') &&
   !specifier.startsWith('/') &&
@@ -277,8 +285,12 @@ function encodeRemoteModulePath(url: string): string {
   return `/${encodedProtocol}/${encodedHost}${encodedPathname}`;
 }
 
-function createImportMetaUrl(url: string): string {
-  return `file:///__module_federation_remote__${encodeRemoteModulePath(url)}`;
+function createImportMetaUrl(url: string, baseFileUrl: string): string {
+  const baseUrl = baseFileUrl.endsWith('/') ? baseFileUrl : `${baseFileUrl}/`;
+  return new URL(
+    `__module_federation_remote__${encodeRemoteModulePath(url)}`,
+    baseUrl,
+  ).href;
 }
 
 async function isNodeBuiltinSpecifier(specifier: string): Promise<boolean> {
@@ -286,7 +298,7 @@ async function isNodeBuiltinSpecifier(specifier: string): Promise<boolean> {
     return true;
   }
 
-  if (!isBareSpecifier(specifier)) {
+  if (!isBareModuleSpecifier(specifier)) {
     return false;
   }
 
@@ -314,7 +326,7 @@ function getSyntheticModuleExports(moduleExports: any): Record<string, any> {
 async function createSyntheticModuleFromExports(
   identifier: string,
   moduleExports: any,
-  vm: any,
+  vm: LoadModuleOptions['vm'],
 ) {
   if (typeof vm.SyntheticModule !== 'function') {
     throw new Error(
@@ -323,9 +335,7 @@ async function createSyntheticModuleFromExports(
   }
 
   const effectiveExports = getSyntheticModuleExports(moduleExports);
-  const exportNames = Object.keys(effectiveExports).filter(
-    (name) => name !== 'constructor',
-  );
+  const exportNames = Object.keys(effectiveExports);
   const syntheticModule = new vm.SyntheticModule(
     exportNames,
     function setSyntheticModuleExports(this: {
@@ -351,10 +361,7 @@ async function createSyntheticModuleFromExports(
 
 async function loadNodeBuiltinModule(
   specifier: string,
-  options: {
-    vm: any;
-    fetch: any;
-  },
+  vm: LoadModuleOptions['vm'],
 ) {
   const cacheKey = `node-builtin:${specifier}`;
   if (esmModuleCache.has(cacheKey)) {
@@ -362,19 +369,22 @@ async function loadNodeBuiltinModule(
   }
 
   const moduleExports = await importNodeModule(specifier);
-  return createSyntheticModuleFromExports(cacheKey, moduleExports, options.vm);
+  return createSyntheticModuleFromExports(cacheKey, moduleExports, vm);
 }
 
 async function loadResolvedModule(
   specifier: string,
   parentUrl: string,
-  options: {
-    vm: any;
-    fetch: any;
-  },
+  options: LoadModuleOptions,
 ) {
   if (await isNodeBuiltinSpecifier(specifier)) {
-    return loadNodeBuiltinModule(specifier, options);
+    return loadNodeBuiltinModule(specifier, options.vm);
+  }
+
+  if (isBareModuleSpecifier(specifier)) {
+    throw new Error(
+      `Unsupported ESM module specifier "${specifier}". Only relative or absolute http(s) remote modules and Node.js built-in modules are supported.`,
+    );
   }
 
   const resolvedUrl = new URL(specifier, parentUrl).href;
@@ -399,13 +409,7 @@ async function evaluateDynamicModule(module: any) {
   return module;
 }
 
-async function loadModule(
-  url: string,
-  options: {
-    vm: any;
-    fetch: any;
-  },
-) {
+async function loadModule(url: string, options: LoadModuleOptions) {
   // Check cache to prevent infinite recursion in ESM loading
   if (esmModuleCache.has(url)) {
     return esmModuleCache.get(url)!;
@@ -413,7 +417,7 @@ async function loadModule(
 
   const { fetch, vm } = options;
   if (await isNodeBuiltinSpecifier(url)) {
-    return loadNodeBuiltinModule(url, options);
+    return loadNodeBuiltinModule(url, vm);
   }
 
   if (!isFetchableRemoteModuleUrl(url)) {
@@ -424,11 +428,13 @@ async function loadModule(
 
   const response = await fetch(url);
   const code = await response.text();
+  const nodeUrl = await importNodeModule<typeof import('node:url')>('node:url');
+  const cwdFileUrl = nodeUrl.pathToFileURL(process.cwd()).href;
 
   const module: any = new vm.SourceTextModule(code, {
     identifier: url,
     initializeImportMeta: (meta: { url: string }) => {
-      meta.url = createImportMetaUrl(url);
+      meta.url = createImportMetaUrl(url, cwdFileUrl);
     },
     // @ts-ignore
     importModuleDynamically: async (specifier, script) => {
