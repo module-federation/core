@@ -281,8 +281,12 @@ function encodeRemoteModulePath(url: string): string {
     .split('/')
     .map((segment) => encodeURIComponent(segment))
     .join('/');
+  const encodedSearchHash = encodeURIComponent(
+    `${remoteUrl.search}${remoteUrl.hash}`,
+  );
+  const encodedSuffix = encodedSearchHash ? `/${encodedSearchHash}` : '';
 
-  return `/${encodedProtocol}/${encodedHost}${encodedPathname}`;
+  return `/${encodedProtocol}/${encodedHost}${encodedPathname}${encodedSuffix}`;
 }
 
 function createImportMetaUrl(url: string, baseFileUrl: string): string {
@@ -416,10 +420,6 @@ async function loadModule(url: string, options: LoadModuleOptions) {
   }
 
   const { fetch, vm } = options;
-  if (await isNodeBuiltinSpecifier(url)) {
-    return loadNodeBuiltinModule(url, vm);
-  }
-
   if (!isFetchableRemoteModuleUrl(url)) {
     throw new Error(
       `Unsupported ESM module URL "${url}". Only http(s) remote modules and Node.js built-in modules are supported.`,

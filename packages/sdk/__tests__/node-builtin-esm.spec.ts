@@ -90,7 +90,8 @@ describe('Node ESM builtin loading', () => {
   });
 
   it('bases import.meta.url under the current workspace for createRequire package resolution', async () => {
-    const remoteEntryUrl = 'http://example.com/server/remoteEntry.js';
+    const remoteEntryUrl =
+      'http://example.com/server/remoteEntry.js?v=123#entry';
     const fetchMock = setRemoteEntryFetchMock(
       remoteEntryUrl,
       "import { createRequire } from 'node:module'; const require = createRequire(import.meta.url); const webpack = require('webpack'); export const webpackType = typeof webpack; export const metaUrl = import.meta.url; export default {};",
@@ -105,7 +106,7 @@ describe('Node ESM builtin loading', () => {
 
     expect(['function', 'object']).toContain(scriptContext.webpackType);
     expect(scriptContext.metaUrl).toContain(
-      '__module_federation_remote__/http/example.com/server/remoteEntry.js',
+      '__module_federation_remote__/http/example.com/server/remoteEntry.js/%3Fv%3D123%23entry',
     );
     expect(scriptContext.metaUrl.startsWith(cwdBaseUrl)).toBe(true);
     expect(fetchMock).toHaveBeenCalledWith(remoteEntryUrl);
