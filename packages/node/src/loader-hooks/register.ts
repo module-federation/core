@@ -134,10 +134,16 @@ export function registerNativeHttpLoader(
     if (msg && msg.type === ACK_MESSAGE) {
       const resolveAck = pendingAcks.get(msg.id);
       pendingAcks.delete(msg.id);
+      if (pendingAcks.size === 0) {
+        // Idle again: stop keeping the event loop alive.
+        port1.unref();
+      }
       resolveAck?.();
     }
   });
-  // The channel must not keep the process alive on its own.
+  // The channel must not keep the process alive while idle; allowOrigin()
+  // re-refs it while an ack round-trip is in flight so the process cannot
+  // exit mid-handshake.
   port1.unref();
 
   const initializeData: NativeHttpLoaderInitializeData = {
@@ -162,6 +168,8 @@ export function registerNativeHttpLoader(
       return new Promise<void>((resolve) => {
         const id = nextMessageId++;
         pendingAcks.set(id, resolve);
+        // Keep the event loop alive until the hooks thread acknowledges.
+        port1.ref();
         port1.postMessage({
           id,
           type: ADD_ORIGIN_MESSAGE,
