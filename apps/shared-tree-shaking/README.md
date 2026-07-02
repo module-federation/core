@@ -22,14 +22,14 @@ Example dependencies: `antd@6.0.1`, `react@18.3.x`.
 
 2. Build and serve the Provider (start the remote first)
 
-- Build: `nx run shared-tree-shaking-no-server-provider:build`
-- Serve: `nx run shared-tree-shaking-no-server-provider:serve`
+- Build: `pnpm --filter shared-tree-shaking-no-server-provider run build`
+- Serve: `pnpm --filter shared-tree-shaking-no-server-provider run serve`
   - Default: `http://localhost:3002/`
 
 3. Build and serve the Host (local dev)
 
-- Build: `nx run shared-tree-shaking-no-server-host:build`
-- Serve: `nx run shared-tree-shaking-no-server-host:serve`
+- Build: `pnpm --filter shared-tree-shaking-no-server-host run build`
+- Serve: `pnpm --filter shared-tree-shaking-no-server-host run serve`
   - Default: `http://localhost:3001/`
 
 4. Verify the page and the shared dependency
@@ -47,17 +47,17 @@ Example dependencies: `antd@6.0.1`, `react@18.3.x`.
 
 ## Advanced Flow (with‑server)
 
-> `nx run shared-tree-shaking-with-server-host:serve:all` to start all servers (Host, Provider, re‑shake static server).
+> `pnpm --filter shared-tree-shaking-with-server-host run serve:all` to start all servers (Host, Provider, re‑shake static server).
 
 This flow produces “re‑shake” artifacts and serves them via a URL. The Host loads the snapshot and prunes shared packages using the `server` mode.
 
 1. Produce re‑shake artifacts for the Host
 
-- `nx run shared-tree-shaking-with-server-host:build-re-shake`
+- `pnpm --filter shared-tree-shaking-with-server-host run build:re-shake`
 
 2. Serve the re‑shake directory
 
-- `nx run shared-tree-shaking-with-server-host:serve-re-shake`
+- `pnpm --filter shared-tree-shaking-with-server-host run serve:re-shake`
 - Default: `http://localhost:3003/`, e.g., `/independent-packages/antd/xxx.js`
 
 3. Configure the snapshot entry in the Host
@@ -68,13 +68,13 @@ This flow produces “re‑shake” artifacts and serves them via a URL. The Hos
 
 4. Build and serve the Provider
 
-- Build (trigger tree‑shaking): `nx run shared-tree-shaking-with-server-provider:build`
-- Serve: `nx run shared-tree-shaking-with-server-provider:serve` (default `3002`)
+- Build (trigger tree‑shaking): `pnpm --filter shared-tree-shaking-with-server-provider run build`
+- Serve: `pnpm --filter shared-tree-shaking-with-server-provider run serve` (default `3002`)
 
 5. Build and serve the Host
 
-- `nx run shared-tree-shaking-with-server-host:build` (default `3001`)
-- Serve: `nx run shared-tree-shaking-with-server-host:serve` (default `3001`)
+- `pnpm --filter shared-tree-shaking-with-server-host run build` (default `3001`)
+- Serve: `pnpm --filter shared-tree-shaking-with-server-host run serve` (default `3001`)
 
 6. Check the loaded lib
 
@@ -83,12 +83,12 @@ This flow produces “re‑shake” artifacts and serves them via a URL. The Hos
 ## Cypress E2E (no‑server Host)
 
 - Run from the Host root:
-  - `nx run shared-tree-shaking-no-server-host:test:e2e`
+  - `pnpm --filter shared-tree-shaking-no-server-host run test:e2e`
 
 ## Cypress E2E (with-server Host)
 
 - Run from the Host root:
-  - `nx run shared-tree-shaking-with-server-host:test:e2e`
+  - `pnpm --filter shared-tree-shaking-with-server-host run test:e2e`
 
 ## FAQ
 
@@ -96,4 +96,4 @@ This flow produces “re‑shake” artifacts and serves them via a URL. The Hos
 - Keys and versions: `__FEDERATION__.__SHARE__` keys contain `:` or `-`; use bracket notation (e.g., `['mf_host:0.1.34']`, `['ui-lib']`).
 - Console example:
   - `__FEDERATION__.__SHARE__['mf_host:0.1.34'].default['antd']['6.0.1'].lib()`
-- If you use Nx, you can also run `nx build/serve` for the projects; commands must match actual project names.
+- The repo uses Turbo and package scripts rather than Nx; use `pnpm --filter <package> run <script>` or the root `pnpm run ci:local --only=e2e-shared-tree-shaking` job for CI-shaped validation.

@@ -1,22 +1,71 @@
 # Module Federation Manifest Specification
 
-This document defines the complete JSON schema specifications for Module Federation manifest files, which are essential for cross-bundler compatibility and runtime optimization.
+This document defines the manifest architecture used by the current Module Federation monorepo. Manifests are produced and consumed by `@module-federation/manifest`, `@module-federation/managers`, `@module-federation/sdk`, `@module-federation/dts-plugin`, build integrations such as enhanced/rspack/rsbuild/rspress/metro, and runtime snapshot loading in `runtime-core`.
 
 ## Table of Contents
 - [Overview](#overview)
 - [Federation Manifest Schema](#federation-manifest-schema)
-- [MF Manifest Schema](#mf-manifest-schema)
-- [Shared Manifest Schema](#shared-manifest-schema)
+- [MF Stats Schema](#mf-stats-schema)
+- [Shared Dependency Schema](#shared-dependency-schema)
 - [Examples](#examples)
 - [Validation](#validation)
+
+## Manifest Ownership
+
+Use `architecture-overview.md` for the canonical repo-wide package taxonomy. This section only maps manifest production and consumption responsibilities.
+
+| Layer | Package(s) | Manifest responsibility |
+| --- | --- | --- |
+| Type and utility source | `@module-federation/sdk` | Defines manifest, stats, and snapshot types plus `generateSnapshotFromManifest` and `inferAutoPublicPath`. |
+| Build metadata generation | `@module-federation/manifest` | Uses `ManifestManager`, `StatsManager`, `StatsPlugin`, and `ModuleHandler` to collect build stats, exposed modules, remote metadata, shared dependency data, and assets. |
+| Option normalization | `@module-federation/managers` | Normalizes remotes, containers, shared config, package metadata, and base plugin options before manifest/stat emission. |
+| Type metadata | `@module-federation/dts-plugin` | Publishes and consumes type artifacts that manifests and runtime type hints can point to. |
+| Runtime consumption | `@module-federation/runtime-core` | `SnapshotHandler` reads manifest data and converts it into remote snapshots for loading, preloading, and version decisions. |
+| Platform integrations | `enhanced`, `rspack`, `rsbuild-plugin`, `rspress-plugin`, `metro`, `nextjs-mf`, `node`, `modern-js` | Decide when and where manifests are generated, served, rewritten, or fetched for each build/runtime environment. |
+
+The manifest is an interoperability artifact, not a replacement for the remote container contract. A remote still needs a loadable entry with `init` and `get`; the manifest makes the entry discoverable, enriches it with asset/type/shared metadata, and gives the runtime enough information to preload or resolve snapshots safely.
+
+### Manifest Production and Consumption Flow
+
+Manifest data crosses three ownership boundaries: build-time collection, artifact publication, and runtime snapshot consumption. The build integration owns compiler hooks and asset emission; the manifest package owns stats-to-manifest shaping; runtime-core owns fetching, caching, and converting manifests into remote snapshot data.
+
+```mermaid
+sequenceDiagram
+    participant Compiler as Bundler Compiler
+    participant StatsPlugin
+    participant StatsManager
+    participant ModuleHandler
+    participant ManifestManager
+    participant Artifact as mf-manifest.json
+    participant SnapshotHandler
+    participant SDK as SDK Snapshot Helpers
+    participant RemoteHandler
+
+    Compiler->>StatsPlugin: processAssets
+    StatsPlugin->>StatsManager: collect compilation stats
+    StatsManager->>ModuleHandler: collect exposes, remotes, shared, assets
+    ModuleHandler-->>StatsManager: normalized stats records
+    StatsManager->>ManifestManager: generate manifest input
+    ManifestManager-->>StatsPlugin: manifest with exposes, shared, remotes
+    StatsPlugin->>Artifact: emit stats and manifest assets
+
+    RemoteHandler->>SnapshotHandler: loadRemoteSnapshotInfo
+    SnapshotHandler->>Artifact: fetch/cache manifest JSON
+    SnapshotHandler->>SDK: generateSnapshotFromManifest
+    SDK-->>SnapshotHandler: ProviderModuleInfo snapshot
+    SnapshotHandler-->>RemoteHandler: global and remote snapshot data
+    RemoteHandler->>RemoteHandler: choose entry, assets, shared metadata
+```
+
+Recent architecture changes make this flow more important than the raw schema alone: DTS metadata may point to zip/API type URLs, platform adapters may merge browser and node manifests, and Metro/Rsbuild/Modern integrations may generate or rewrite manifests in environment-specific ways. Keep docs about manifest fields tied to SDK types and the producing/consuming package that owns each field.
 
 ## Overview
 
 Module Federation uses several manifest files to coordinate runtime behavior:
 
-1. **`federation-manifest.json`** - Complete application metadata with all remotes and modules
-2. **`mf-manifest.json`** - Individual remote manifest with exposed modules
-3. **`shared-manifest.json`** - Shared dependency information (optional)
+1. **`mf-manifest.json`** - The manifest emitted per build and consumed at runtime (`ManifestFileName` constant, `Manifest` type)
+2. **`mf-stats.json`** - Richer build stats emitted alongside the manifest (`StatsFileName` constant, `Stats` type)
+3. **`federation-manifest.json`** - Legacy manifest file name (`FederationModuleManifest` constant); same `Manifest` schema
 
 These manifests enable:
 - Runtime module discovery and loading
@@ -26,443 +75,394 @@ These manifests enable:
 
 ## Federation Manifest Schema
 
-The main federation manifest (`federation-manifest.json`) provides a complete view of the federated application:
+Both `mf-manifest.json` and the legacy `federation-manifest.json` follow the SDK `Manifest` type (`packages/sdk/src/types/manifest.ts`), emitted by `ManifestManager` in `@module-federation/manifest`:
 
 ```typescript
-interface FederationManifest {
-  /** 
-   * Unique identifier for this federated application
-   * Used for runtime instance identification
+interface Manifest<
+  T = BasicStatsMetaData,
+  K = ManifestRemoteCommonInfo,
+> {
+  /**
+   * Unique identifier for this federated build
    */
   id: string;
-  
+
   /**
-   * Human-readable name of the application
+   * Container name
    */
   name: string;
-  
+
   /**
    * Metadata about the build and environment
    */
-  metaData: {
-    /** Application version */
-    version: string;
-    /** Build identifier for cache busting */
-    buildVersion: string;
-    /** Public path for assets */
-    publicPath: string;
-    /** Production/development mode */
-    mode: 'development' | 'production';
-    /** Target environment */
-    target: 'web' | 'node' | 'webworker';
-    /** Build timestamp */
-    timestamp?: number;
-    /** Bundler information */
-    bundler?: {
-      name: string;
-      version: string;
-    };
-  };
-  
+  metaData: StatsMetaData<T>;
+
   /**
-   * Remote applications this host can consume
+   * Shared dependencies provided by this build
    */
-  remotes: RemoteManifest[];
-  
+  shared: ManifestShared[];
+
   /**
-   * Modules exposed by this application
+   * Remotes this build consumes
    */
-  exposes?: ExposeManifest[];
-  
+  remotes: ManifestRemote<K>[];
+
   /**
-   * Shared dependencies configuration
+   * Modules exposed by this build
    */
-  shared?: SharedManifest[];
-  
-  /**
-   * Runtime plugins to be loaded
-   */
-  runtimePlugins?: RuntimePluginManifest[];
-  
-  /**
-   * Performance and optimization hints
-   */
-  snapshot?: SnapshotManifest;
+  exposes: ManifestExpose[];
 }
 
-interface RemoteManifest {
-  /** Unique identifier for the remote */
-  id: string;
-  /** Human-readable name */
+interface BasicStatsMetaData {
+  /** Container name */
   name: string;
-  /** Remote entry point URL */
-  entry: string;
-  /** Alternative entry points for different environments */
-  entryGlobalName?: string;
-  /** Type of remote ('module' | 'var' | 'assign' | 'this' | 'window' | 'self' | 'global' | 'commonjs' | 'commonjs2' | 'amd' | 'umd' | 'jsonp' | 'system') */
-  type?: string;
-  /** Version information */
-  version: string;
-  /** Build version for cache busting */
+  /** Global variable the remote entry registers on */
+  globalName: string;
+  /** Build identifiers */
+  buildInfo: StatsBuildInfo;
+  /** Remote entry file location and format */
+  remoteEntry: ResourceInfo;
+  /** Server-side remote entry (SSR builds only) */
+  ssrRemoteEntry?: ResourceInfo;
+  /** Type declaration artifacts produced by the DTS plugin */
+  types?: MetaDataTypes;
+  /** Module type, e.g. 'app' */
+  type: string;
+  /** Version of the build plugin that produced the manifest */
+  pluginVersion?: string;
+}
+
+/**
+ * metaData carries either a static publicPath or a serialized getPublicPath function
+ */
+type StatsMetaData<T = BasicStatsMetaData> =
+  | (T & { getPublicPath: string })
+  | (T & { publicPath: string; ssrPublicPath?: string });
+
+interface StatsBuildInfo {
+  /** Build identifier for cache busting */
   buildVersion: string;
-  /** Public path for this remote's assets */
-  publicPath?: string;
-  /** Available modules (populated at runtime or build time) */
-  modules?: ModuleInfo[];
-  /** Runtime availability status */
-  status?: 'loading' | 'loaded' | 'failed';
+  /** Build name */
+  buildName: string;
+  /** Build hash */
+  hash?: string;
 }
 
-interface ExposeManifest {
-  /** Module key as exposed to other applications */
-  key: string;
-  /** Internal module path or identifier */
-  module: string;
-  /** Human-readable name */
-  name?: string;
-  /** Module type information */
-  type?: 'component' | 'utility' | 'service' | 'constant';
-  /** Dependencies required by this module */
-  dependencies?: string[];
-  /** Size information in bytes */
-  size?: number;
+interface ResourceInfo {
+  /** Path relative to the public path */
+  path: string;
+  /** File name */
+  name: string;
+  /** Remote entry format, e.g. 'global', 'module', 'commonjs-module' */
+  type: RemoteEntryType;
 }
 
-interface SharedManifest {
+interface MetaDataTypes {
+  /** Path to the type declaration entry */
+  path: string;
+  /** Type declaration entry file name */
+  name: string;
+  /** API types file name */
+  api: string;
+  /** Zipped types archive file name */
+  zip: string;
+}
+
+interface ManifestShared {
+  /** Identifier, e.g. '<container>:<package>' */
+  id: string;
   /** Package name */
   name: string;
-  /** Required version range */
+  /** Provided version */
   version: string;
-  /** Share scope name */
-  scope?: string;
   /** Singleton requirement */
-  singleton?: boolean;
-  /** Strict version matching */
-  strictVersion?: boolean;
-  /** Load eagerly */
-  eager?: boolean;
-  /** Required at runtime */
-  requiredVersion?: string;
-  /** Package location */
-  import?: string;
-  /** Package identifier for bundler */
-  packageName?: string;
+  singleton: boolean;
+  /** Required version range */
+  requiredVersion: string;
+  /** Build hash for the shared module */
+  hash: string;
+  /** Sync/async js and css assets */
+  assets: StatsAssets;
+  /** Fallback entry for tree-shaken shared modules */
+  fallback?: string;
+  fallbackName?: string;
+  fallbackType?: RemoteEntryType;
 }
 
-interface RuntimePluginManifest {
-  /** Plugin name */
+interface ManifestRemoteCommonInfo {
+  /** Container name of the consumed remote */
+  federationContainerName: string;
+  /** Consumed module name */
+  moduleName: string;
+  /** Alias used by the consumer */
+  alias: string;
+}
+
+/**
+ * Each remote record carries either an `entry` URL or a `version`
+ */
+type ManifestRemote<T = ManifestRemoteCommonInfo> =
+  | ({ entry: string } & T)
+  | ({ version: string } & T);
+
+type ManifestExpose = Pick<
+  StatsExpose,
+  'assets' | 'id' | 'name' | 'path'
+>;
+
+interface StatsAssets {
+  js: {
+    sync: string[];
+    async: string[];
+  };
+  css: {
+    sync: string[];
+    async: string[];
+  };
+}
+```
+
+## MF Stats Schema
+
+The stats file (`mf-stats.json`) is emitted alongside the manifest by `StatsManager` and shares the same top-level shape (`Stats` type in `packages/sdk/src/types/stats.ts`), but keeps extra build-analysis fields that the manifest strips:
+
+```typescript
+interface Stats<T = BasicStatsMetaData, K = StatsRemoteVal> {
+  /** Build identifier */
+  id: string;
+  /** Container name */
   name: string;
-  /** Plugin entry point URL */
-  entry: string;
-  /** Plugin version */
+  /** Same metadata shape as the manifest */
+  metaData: StatsMetaData<T>;
+  /** Shared dependencies with usage analysis */
+  shared: StatsShared[];
+  /** Consumed remotes with usage analysis */
+  remotes: StatsRemote<K>[];
+  /** Exposed modules with source file info */
+  exposes: StatsExpose[];
+}
+
+interface StatsExpose {
+  /** Identifier, e.g. '<container>:<expose name>' */
+  id: string;
+  /** Expose name without the './' prefix */
+  name: string;
+  /** Expose path, e.g. './Button' */
+  path?: string;
+  /** Source file of the exposed module */
+  file: string;
+  /** Shared packages this expose requires */
+  requires: string[];
+  /** Sync/async js and css assets */
+  assets: StatsAssets;
+  /** Build hash */
+  hash?: string;
+}
+
+interface StatsRemoteVal {
+  /** Consumed module name */
+  moduleName: string;
+  /** Container name of the consumed remote */
+  federationContainerName: string;
+  /** Container name of the consumer */
+  consumingFederationContainerName: string;
+  /** Alias used by the consumer */
+  alias: string;
+  /** Modules that use this remote */
+  usedIn: string[];
+}
+
+/**
+ * Each remote record carries either an `entry` URL or a `version`
+ */
+type StatsRemote<T = StatsRemoteVal> =
+  | ({ entry: string } & T)
+  | ({ version: string } & T);
+```
+
+## Shared Dependency Schema
+
+There is no separate shared-dependency manifest file; shared information lives in the `shared` arrays of `mf-manifest.json` (`ManifestShared`) and `mf-stats.json` (`StatsShared`). The stats variant adds usage analysis on top of the manifest fields:
+
+```typescript
+interface StatsShared {
+  /** Identifier, e.g. '<container>:<package>' */
+  id: string;
+  /** Package name */
+  name: string;
+  /** Provided version */
   version: string;
-  /** Load priority */
-  priority?: number;
-  /** Environment constraints */
-  environment?: ('development' | 'production')[];
-}
-
-interface SnapshotManifest {
-  /** Global module information for optimization */
-  moduleInfo: {
-    [remoteName: string]: {
-      version: string;
-      buildVersion: string;
-      modules: ModuleInfo[];
-    };
-  };
-  /** Preload suggestions */
-  preloadAssets?: PreloadAsset[];
-}
-
-interface ModuleInfo {
-  /** Module identifier */
-  id: string;
-  /** Module key */
-  key: string;
-  /** File path or URL */
-  path: string;
-  /** Module size in bytes */
-  size?: number;
-  /** Chunk information */
-  chunks?: string[];
-  /** Assets required by this module */
-  assets?: AssetInfo[];
-}
-
-interface PreloadAsset {
-  /** Asset URL */
-  url: string;
-  /** Asset type */
-  type: 'script' | 'style' | 'font' | 'image';
-  /** Preload priority */
-  priority: 'high' | 'low';
-  /** Cross-origin setting */
-  crossorigin?: 'anonymous' | 'use-credentials';
-}
-
-interface AssetInfo {
-  /** Asset path */
-  path: string;
-  /** Asset type */
-  type: 'js' | 'css' | 'wasm' | 'json';
-  /** Asset size in bytes */
-  size?: number;
-}
-```
-
-## MF Manifest Schema
-
-Individual remote manifests (`mf-manifest.json`) provide detailed information about a specific remote:
-
-```typescript
-interface MFManifest {
-  /** Remote identifier */
-  id: string;
-  /** Remote name */
-  name: string;
-  /** Build metadata */
-  metaData: {
-    version: string;
-    buildVersion: string;
-    publicPath: string;
-    mode: 'development' | 'production';
-    target: 'web' | 'node' | 'webworker';
-    timestamp?: number;
-  };
-  
-  /** Exposed modules */
-  exposes: {
-    [key: string]: {
-      /** Import path within the remote */
-      import: string;
-      /** Module name */
-      name?: string;
-      /** File assets for this module */
-      assets?: {
-        js?: {
-          async?: string[];
-          sync?: string[];
-        };
-        css?: {
-          async?: string[];
-          sync?: string[];
-        };
-      };
-    };
-  };
-  
-  /** Shared dependencies provided by this remote */
-  shared?: {
-    [packageName: string]: {
-      version: string;
-      scope?: string;
-      singleton?: boolean;
-      eager?: boolean;
-      assets?: AssetInfo[];
-    };
-  };
-  
-  /** Remote-specific runtime plugins */
-  runtimePlugins?: RuntimePluginManifest[];
-}
-```
-
-## Shared Manifest Schema
-
-Optional shared dependency manifest (`shared-manifest.json`):
-
-```typescript
-interface SharedManifest {
-  /** Share scope name */
-  scope: string;
-  
-  /** Available shared packages */
-  shared: {
-    [packageName: string]: {
-      /** Available versions */
-      versions: {
-        [version: string]: {
-          /** Package factory function location */
-          get: string;
-          /** Whether package is loaded */
-          loaded?: boolean;
-          /** Source remote name */
-          from: string;
-          /** Load eagerly */
-          eager: boolean;
-          /** Strict version requirement */
-          strict?: boolean;
-        };
-      };
-    };
-  };
+  /** Singleton requirement */
+  singleton: boolean;
+  /** Required version range */
+  requiredVersion: string;
+  /** Build hash for the shared module */
+  hash: string;
+  /** Sync/async js and css assets */
+  assets: StatsAssets;
+  /** Direct shared dependencies of this package */
+  deps: string[];
+  /** Modules that use this shared package */
+  usedIn: string[];
+  /** Export names used from the shared module */
+  usedExports: string[];
+  /** Fallback entry for tree-shaken shared modules */
+  fallback: string;
+  fallbackName: string;
+  fallbackType: RemoteEntryType;
 }
 ```
 
 ## Examples
-
-### Complete Federation Manifest Example
-
-```json
-{
-  "id": "host-app",
-  "name": "Host Application",
-  "metaData": {
-    "version": "1.2.0",
-    "buildVersion": "1.2.0-20240301.123456",
-    "publicPath": "/",
-    "mode": "production",
-    "target": "web",
-    "timestamp": 1709289296123,
-    "bundler": {
-      "name": "webpack",
-      "version": "5.89.0"
-    }
-  },
-  "remotes": [
-    {
-      "id": "shell",
-      "name": "Shell Remote",
-      "entry": "https://cdn.example.com/shell/remoteEntry.js",
-      "entryGlobalName": "shell",
-      "type": "var",
-      "version": "2.1.0",
-      "buildVersion": "2.1.0-20240301.098765",
-      "publicPath": "https://cdn.example.com/shell/",
-      "modules": [
-        {
-          "id": "./Header",
-          "key": "./Header",
-          "path": "src/components/Header.js",
-          "size": 15420,
-          "chunks": ["header_chunk"],
-          "assets": [
-            {
-              "path": "header.css",
-              "type": "css",
-              "size": 2048
-            }
-          ]
-        }
-      ]
-    }
-  ],
-  "exposes": [
-    {
-      "key": "./App",
-      "module": "./src/App.tsx",
-      "name": "Main Application",
-      "type": "component",
-      "dependencies": ["react", "react-dom"],
-      "size": 45000
-    }
-  ],
-  "shared": [
-    {
-      "name": "react",
-      "version": "^18.0.0",
-      "scope": "default",
-      "singleton": true,
-      "strictVersion": false,
-      "eager": false,
-      "requiredVersion": "18.2.0",
-      "import": "react",
-      "packageName": "react"
-    }
-  ],
-  "runtimePlugins": [
-    {
-      "name": "error-boundary-plugin",
-      "entry": "./plugins/errorBoundary.js",
-      "version": "1.0.0",
-      "priority": 10,
-      "environment": ["development", "production"]
-    }
-  ],
-  "snapshot": {
-    "moduleInfo": {
-      "shell": {
-        "version": "2.1.0",
-        "buildVersion": "2.1.0-20240301.098765",
-        "modules": [
-          {
-            "id": "./Header",
-            "key": "./Header",
-            "path": "src/components/Header.js",
-            "size": 15420
-          }
-        ]
-      }
-    },
-    "preloadAssets": [
-      {
-        "url": "https://cdn.example.com/shell/remoteEntry.js",
-        "type": "script",
-        "priority": "high",
-        "crossorigin": "anonymous"
-      }
-    ]
-  }
-}
-```
 
 ### MF Manifest Example
 
 ```json
 {
   "id": "shell",
-  "name": "Shell Remote",
+  "name": "shell",
   "metaData": {
-    "version": "2.1.0",
-    "buildVersion": "2.1.0-20240301.098765",
-    "publicPath": "https://cdn.example.com/shell/",
-    "mode": "production",
-    "target": "web",
-    "timestamp": 1709289296456
+    "name": "shell",
+    "type": "app",
+    "buildInfo": {
+      "buildVersion": "2.1.0",
+      "buildName": "shell"
+    },
+    "remoteEntry": {
+      "name": "remoteEntry.js",
+      "path": "",
+      "type": "global"
+    },
+    "types": {
+      "path": "",
+      "name": "",
+      "zip": "@mf-types.zip",
+      "api": "@mf-types.d.ts"
+    },
+    "globalName": "shell",
+    "pluginVersion": "0.17.0",
+    "publicPath": "https://cdn.example.com/shell/"
   },
-  "exposes": {
-    "./Header": {
-      "import": "./src/components/Header",
-      "name": "Navigation Header",
+  "shared": [
+    {
+      "id": "shell:react",
+      "name": "react",
+      "version": "18.2.0",
+      "singleton": true,
+      "requiredVersion": "^18.0.0",
+      "hash": "6bef1d6f6b04e0c8",
       "assets": {
         "js": {
-          "sync": ["header.js"],
+          "sync": ["__federation_shared_react.js"],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      }
+    }
+  ],
+  "remotes": [
+    {
+      "federationContainerName": "header",
+      "moduleName": "Nav",
+      "alias": "header",
+      "entry": "https://cdn.example.com/header/mf-manifest.json"
+    }
+  ],
+  "exposes": [
+    {
+      "id": "shell:Header",
+      "name": "Header",
+      "path": "./Header",
+      "assets": {
+        "js": {
+          "sync": ["__federation_expose_Header.js"],
           "async": ["header-lazy.js"]
         },
         "css": {
-          "sync": ["header.css"]
+          "sync": ["header.css"],
+          "async": []
         }
       }
+    }
+  ]
+}
+```
+
+### MF Stats Example
+
+```json
+{
+  "id": "shell",
+  "name": "shell",
+  "metaData": {
+    "name": "shell",
+    "type": "app",
+    "buildInfo": {
+      "buildVersion": "2.1.0",
+      "buildName": "shell"
     },
-    "./Footer": {
-      "import": "./src/components/Footer",
-      "name": "Footer Component",
+    "remoteEntry": {
+      "name": "remoteEntry.js",
+      "path": "",
+      "type": "global"
+    },
+    "globalName": "shell",
+    "publicPath": "https://cdn.example.com/shell/"
+  },
+  "shared": [
+    {
+      "id": "shell:react",
+      "name": "react",
+      "version": "18.2.0",
+      "singleton": true,
+      "requiredVersion": "^18.0.0",
+      "hash": "6bef1d6f6b04e0c8",
       "assets": {
         "js": {
-          "sync": ["footer.js"]
+          "sync": ["__federation_shared_react.js"],
+          "async": []
         },
         "css": {
-          "sync": ["footer.css"]
+          "sync": [],
+          "async": []
+        }
+      },
+      "deps": [],
+      "usedIn": ["src/App.tsx"]
+    }
+  ],
+  "remotes": [
+    {
+      "federationContainerName": "header",
+      "moduleName": "Nav",
+      "consumingFederationContainerName": "shell",
+      "alias": "header",
+      "usedIn": ["src/App.tsx"],
+      "entry": "https://cdn.example.com/header/mf-manifest.json"
+    }
+  ],
+  "exposes": [
+    {
+      "id": "shell:Header",
+      "name": "Header",
+      "path": "./Header",
+      "file": "src/components/Header.tsx",
+      "requires": ["react"],
+      "assets": {
+        "js": {
+          "sync": ["__federation_expose_Header.js"],
+          "async": ["header-lazy.js"]
+        },
+        "css": {
+          "sync": ["header.css"],
+          "async": []
         }
       }
     }
-  },
-  "shared": {
-    "react": {
-      "version": "18.2.0",
-      "scope": "default",
-      "singleton": true,
-      "eager": false,
-      "assets": [
-        {
-          "path": "vendors/react.js",
-          "type": "js",
-          "size": 42000
-        }
-      ]
-    }
-  }
+  ]
 }
 ```
 
@@ -473,15 +473,15 @@ interface SharedManifest {
 Bundler implementers should validate manifests using JSON Schema:
 
 ```javascript
-// JSON Schema for federation-manifest.json validation
-const federationManifestSchema = {
+// JSON Schema for mf-manifest.json validation
+const manifestSchema = {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
-  "required": ["id", "name", "metaData"],
+  "required": ["id", "name", "metaData", "shared", "remotes", "exposes"],
   "properties": {
     "id": {
       "type": "string",
-      "pattern": "^[a-zA-Z][a-zA-Z0-9_-]*$"
+      "minLength": 1
     },
     "name": {
       "type": "string",
@@ -489,26 +489,40 @@ const federationManifestSchema = {
     },
     "metaData": {
       "type": "object",
-      "required": ["version", "buildVersion", "publicPath", "mode", "target"],
+      "required": ["name", "globalName", "buildInfo", "remoteEntry", "type"],
+      // StatsMetaData is a union: one of publicPath / getPublicPath must be present
+      "anyOf": [
+        { "required": ["publicPath"] },
+        { "required": ["getPublicPath"] }
+      ],
       "properties": {
-        "version": {
-          "type": "string",
-          "pattern": "^\\d+\\.\\d+\\.\\d+.*$"
-        },
-        "buildVersion": {
+        "name": {
           "type": "string"
+        },
+        "globalName": {
+          "type": "string"
+        },
+        "buildInfo": {
+          "type": "object",
+          "required": ["buildVersion"],
+          "properties": {
+            "buildVersion": {
+              "type": "string"
+            },
+            "buildName": {
+              "type": "string"
+            }
+          }
+        },
+        "remoteEntry": {
+          "type": "object",
+          "required": ["name", "path", "type"]
         },
         "publicPath": {
           "type": "string"
         },
-        "mode": {
-          "enum": ["development", "production"]
-        },
-        "target": {
-          "enum": ["web", "node", "webworker"]
-        },
-        "timestamp": {
-          "type": "number"
+        "getPublicPath": {
+          "type": "string"
         }
       }
     },
@@ -516,15 +530,16 @@ const federationManifestSchema = {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "name", "entry", "version", "buildVersion"],
+        "required": ["federationContainerName", "moduleName", "alias"],
         "properties": {
-          "id": {
-            "type": "string",
-            "pattern": "^[a-zA-Z][a-zA-Z0-9_-]*$"
+          "federationContainerName": {
+            "type": "string"
           },
           "entry": {
-            "type": "string",
-            "format": "uri"
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
           }
         }
       }
@@ -537,32 +552,39 @@ const federationManifestSchema = {
 
 ```typescript
 // Runtime manifest validation
-export function validateFederationManifest(manifest: any): FederationManifest {
+// (SnapshotHandler in runtime-core treats metaData, exposes, and shared as required)
+export function validateManifest(manifest: any): Manifest {
   // Type guards and validation logic
   if (!manifest.id || typeof manifest.id !== 'string') {
     throw new Error('Invalid manifest: missing or invalid id');
   }
-  
-  if (!manifest.metaData || !manifest.metaData.version) {
-    throw new Error('Invalid manifest: missing metadata or version');
+
+  const missingRequiredFields = [
+    !manifest.metaData && 'metaData',
+    !manifest.exposes && 'exposes',
+    !manifest.shared && 'shared',
+  ].filter(Boolean);
+  if (missingRequiredFields.length > 0) {
+    throw new Error(
+      `Invalid manifest: missing required fields: ${missingRequiredFields.join(', ')}`,
+    );
   }
-  
+
   // Validate remotes
   if (manifest.remotes) {
     manifest.remotes.forEach((remote: any, index: number) => {
-      if (!remote.id || !remote.entry) {
-        throw new Error(`Invalid remote at index ${index}: missing id or entry`);
-      }
-      
-      try {
-        new URL(remote.entry);
-      } catch {
-        throw new Error(`Invalid remote entry URL: ${remote.entry}`);
+      if (
+        !remote.federationContainerName ||
+        !('entry' in remote || 'version' in remote)
+      ) {
+        throw new Error(
+          `Invalid remote at index ${index}: missing federationContainerName or entry/version`,
+        );
       }
     });
   }
-  
-  return manifest as FederationManifest;
+
+  return manifest as Manifest;
 }
 ```
 
@@ -570,7 +592,7 @@ export function validateFederationManifest(manifest: any): FederationManifest {
 
 When generating manifests, bundlers should:
 
-1. **Include Complete Metadata**: Always populate version, buildVersion, and publicPath
+1. **Include Complete Metadata**: Always populate name, buildInfo.buildVersion, and publicPath (or getPublicPath)
 2. **Validate URLs**: Ensure all entry points and asset URLs are valid
 3. **Calculate Sizes**: Include accurate size information for optimization
 4. **Handle Assets**: List all associated CSS, JS, and other assets
@@ -587,7 +609,7 @@ When generating manifests, bundlers should:
 6. **Development vs Production**: Include different optimization levels
 7. **Cross-Origin**: Configure CORS headers for manifest files
 
-This manifest specification ensures consistent metadata exchange between all Module Federation implementations, enabling seamless cross-bundler interoperability.
+This manifest specification keeps metadata exchange consistent across Module Federation implementations and bundler integrations.
 
 ## Related Documentation
 

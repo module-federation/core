@@ -24,7 +24,7 @@
   "types": "./dist/index.d.ts",
   "dependencies": {
     "@remix-run/router": "1.23.2",
-    "react-router": "6.30.3"
+    "react-router": "6.30.4"
   },
   "devDependencies": {
     "react": "^18.3.1",

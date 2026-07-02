@@ -12,6 +12,7 @@
   "dependencies": {
     "@module-federation/error-codes": "workspace:*",
     "@module-federation/rspress-plugin": "workspace:*",
+    "@module-federation/runtime": "workspace:*",
     "@rsbuild/plugin-sass": "^1.5.3",
     "@rspress/core": "2.0.14",
     "framer-motion": "^10.0.0",
