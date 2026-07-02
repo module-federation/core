@@ -48,6 +48,10 @@ export default defineConfig({
         __dirname,
         'node_modules/@module-federation/bridge-react/dist/router.es.js',
       ),
+      '@module-federation/bridge-react/router-runtime$': path.resolve(
+        __dirname,
+        'node_modules/@module-federation/bridge-react/dist/router.es.js',
+      ),
     },
   },
   server: {
@@ -69,6 +73,30 @@ export default defineConfig({
           }
         }),
       ]);
+    },
+  },
+});
+```
+
+For React Router 8 applications, `react-router-dom` is no longer installed.
+Import routing APIs from `react-router`, import DOM-specific APIs from
+`react-router/dom`, and alias the router entries plus the bridge router runtime
+to the v8 bridge proxies:
+
+```js
+//rsbuild.config.ts
+const reactRouterPath = path.resolve(path.dirname(require.resolve('react-router')), '../..');
+
+export default defineConfig({
+  source: {
+    alias: {
+      'react-router$': path.resolve(__dirname, 'node_modules/@module-federation/bridge-react/dist/router-v8.es.js'),
+      'react-router/dom$': path.resolve(__dirname, 'node_modules/@module-federation/bridge-react/dist/router-v8-dom.es.js'),
+      '@module-federation/bridge-react/router-runtime$': path.resolve(__dirname, 'node_modules/@module-federation/bridge-react/dist/router-v8.es.js'),
+      'react-router/dist/development/index.js': reactRouterPath,
+      'react-router/dist/production/index.js': reactRouterPath,
+      'react-router/dist/development/dom-export.js': path.join(reactRouterPath, 'dist/development/dom-export.js'),
+      'react-router/dist/production/dom-export.js': path.join(reactRouterPath, 'dist/production/dom-export.js'),
     },
   },
 });

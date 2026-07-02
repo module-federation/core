@@ -45,6 +45,11 @@
       "import": "./dist/router.es.js",
       "require": "./dist/router.cjs.js"
     },
+    "./router-runtime": {
+      "types": "./dist/router-runtime.d.ts",
+      "import": "./dist/router-runtime.es.js",
+      "require": "./dist/router-runtime.cjs.js"
+    },
     "./plugin": {
       "types": "./dist/plugin.d.ts",
       "import": "./dist/plugin.es.js",
@@ -64,6 +69,16 @@
       "types": "./dist/router-v7.d.ts",
       "import": "./dist/router-v7.es.js",
       "require": "./dist/router-v7.cjs.js"
+    },
+    "./router-v8": {
+      "types": "./dist/router-v8.d.ts",
+      "import": "./dist/router-v8.es.js",
+      "require": "./dist/router-v8.cjs.js"
+    },
+    "./router-v8-dom": {
+      "types": "./dist/router-v8-dom.d.ts",
+      "import": "./dist/router-v8-dom.es.js",
+      "require": "./dist/router-v8-dom.cjs.js"
     },
     "./lazy-utils": {
       "types": "./dist/lazy-utils.d.ts",
@@ -109,6 +124,9 @@
       "router": [
         "./dist/router.d.ts"
       ],
+      "router-runtime": [
+        "./dist/router-runtime.d.ts"
+      ],
       "plugin": [
         "./dist/plugin.d.ts"
       ],
@@ -120,6 +138,12 @@
       ],
       "router-v7": [
         "./dist/router-v7.d.ts"
+      ],
+      "router-v8": [
+        "./dist/router-v8.d.ts"
+      ],
+      "router-v8-dom": [
+        "./dist/router-v8-dom.d.ts"
       ],
       "lazy-load-component-plugin": [
         "./dist/lazy-load-component-plugin.d.ts"
@@ -152,7 +176,7 @@
     "react": ">=16.9.0",
     "react-dom": ">=16.9.0",
     "react-router-dom": "^4 || ^5 || ^6 || ^7",
-    "react-router": "^6 || ^7"
+    "react-router": "^6 || ^7 || ^8"
   },
   "peerDependenciesMeta": {
     "react-router-dom": {

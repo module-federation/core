@@ -16,23 +16,36 @@ export const checkVersion = (version: string) => {
     semver.lt(cleanVersion, '7.0.0')
   ) {
     return 6;
-  } else if (semver.gte(cleanVersion, '7.0.0')) {
+  } else if (
+    semver.gte(cleanVersion, '7.0.0') &&
+    semver.lt(cleanVersion, '8.0.0')
+  ) {
     return 7;
+  } else if (semver.gte(cleanVersion, '8.0.0')) {
+    return 8;
   }
 
   return 0;
 };
 
 export const findPackageJson = (startPath: string): string | null => {
-  let currentPath = startPath;
-  while (currentPath !== path.parse(currentPath).root) {
+  if (!path.isAbsolute(startPath) && !startPath.startsWith('.')) {
+    return null;
+  }
+
+  let currentPath = path.resolve(startPath);
+  while (true) {
     const packageJsonPath = path.join(currentPath, 'package.json');
     if (fs.existsSync(packageJsonPath)) {
       return packageJsonPath;
     }
-    currentPath = path.dirname(currentPath);
+
+    const parentPath = path.dirname(currentPath);
+    if (parentPath === currentPath) {
+      return null;
+    }
+    currentPath = parentPath;
   }
-  return null;
 };
 
 export const getDependencies = () => {

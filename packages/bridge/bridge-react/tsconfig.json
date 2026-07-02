@@ -8,7 +8,7 @@
 
     "declarationDir": "./dist/types",
     "rootDir": "./src",
-    "module": "commonjs",
+    "module": "esnext",
     "target": "es2015",
 
     /* Linting */
@@ -20,7 +20,7 @@
     "outDir": "dist",
     "skipLibCheck": true,
     "strict": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "lib": ["esnext", "dom"],
     "jsx": "preserve",
     "esModuleInterop": true,
@@ -28,7 +28,10 @@
     "sourceMap": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@module-federation/bridge-react/router-runtime": [
+        "src/remote/router-component/router-runtime.ts"
+      ]
     }
   },
   "include": [

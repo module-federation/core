@@ -1,16 +1,16 @@
 import React, { useContext } from 'react';
-// The upper alias react-router-dom$ into this file avoids the loop
-import * as ReactRouterDom from 'react-router-dom/';
+import * as ReactRouter from 'react-router';
+import * as ReactRouterDom from 'react-router/dom';
 import { RouterContext } from '../provider/context';
 import { LoggerInstance } from '../utils';
 
-function WrapperRouter(
-  props:
-    | Parameters<typeof ReactRouterDom.BrowserRouter>[0]
-    | Parameters<typeof ReactRouterDom.MemoryRouter>[0],
-) {
+function WrapperRouter(props: Record<string, unknown>) {
   const { basename, ...propsRes } = props;
   const routerContextProps = useContext(RouterContext) || {};
+  const MemoryRouter =
+    ReactRouter.MemoryRouter as unknown as React.ComponentType<any>;
+  const BrowserRouter = (ReactRouter as any)
+    .BrowserRouter as React.ComponentType<any>;
 
   LoggerInstance.debug(`WrapperRouter info >>>`, {
     ...routerContextProps,
@@ -20,24 +20,22 @@ function WrapperRouter(
 
   if (routerContextProps?.memoryRoute) {
     return (
-      <ReactRouterDom.MemoryRouter
+      <MemoryRouter
         {...props}
         initialEntries={[routerContextProps?.memoryRoute.entryPath]}
       />
     );
   }
   return (
-    <ReactRouterDom.BrowserRouter
+    <BrowserRouter
       {...propsRes}
       basename={routerContextProps?.basename || basename}
     />
   );
 }
 
-function WrapperRouterProvider(
-  props: Parameters<typeof ReactRouterDom.RouterProvider>[0],
-) {
-  const { router, ...propsRes } = props;
+function WrapperRouterProvider(props: Record<string, unknown>) {
+  const { router, ...propsRes } = props as { router: any };
   const routerContextProps = useContext(RouterContext) || {};
   const routers = router.routes;
   LoggerInstance.debug(`WrapperRouterProvider info >>>`, {
@@ -46,32 +44,30 @@ function WrapperRouterProvider(
     WrapperRouterProviderProps: props,
     router,
   });
-  const RouterProvider = (ReactRouterDom as any)['Router' + 'Provider'];
-  const createMemoryRouter = (ReactRouterDom as any)['create' + 'MemoryRouter'];
-  const createBrowserRouter = (ReactRouterDom as any)[
-    'create' + 'BrowserRouter'
-  ];
+  const createMemoryRouter = (ReactRouter as any)['create' + 'MemoryRouter'];
+  const createBrowserRouter = (ReactRouter as any)['create' + 'BrowserRouter'];
 
   if (routerContextProps.memoryRoute) {
-    const MemeoryRouterInstance = createMemoryRouter(routers, {
+    const MemoryRouterInstance = createMemoryRouter(routers, {
       initialEntries: [routerContextProps?.memoryRoute.entryPath],
     });
-    return <RouterProvider router={MemeoryRouterInstance} />;
+    return <ReactRouterDom.RouterProvider router={MemoryRouterInstance} />;
   } else {
     const BrowserRouterInstance = createBrowserRouter(routers, {
-      basename: routerContextProps.basename || router?.basename,
+      // In host app, the routerContextProps is {}, so we should use router.basename as fallback
+      basename: routerContextProps.basename || router.basename,
       future: router.future,
       window: router.window,
     });
-    return <RouterProvider {...propsRes} router={BrowserRouterInstance} />;
+    return (
+      <ReactRouterDom.RouterProvider
+        {...propsRes}
+        router={BrowserRouterInstance}
+      />
+    );
   }
 }
 
-export * from 'react-router-dom/';
-
-export function readReactRouter() {
-  return ReactRouterDom;
-}
-
+export * from 'react-router/dom';
 export { WrapperRouter as BrowserRouter };
 export { WrapperRouterProvider as RouterProvider };

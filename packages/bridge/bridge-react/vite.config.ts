@@ -30,9 +30,15 @@ export default defineConfig({
         base: path.resolve(__dirname, 'src/base.ts'),
         plugin: path.resolve(__dirname, 'src/provider/plugin.ts'),
         router: path.resolve(__dirname, 'src/router/default.tsx'),
+        'router-runtime': path.resolve(
+          __dirname,
+          'src/remote/router-component/router-runtime.ts',
+        ),
         'router-v5': path.resolve(__dirname, 'src/router/v5.tsx'),
         'router-v6': path.resolve(__dirname, 'src/router/v6.tsx'),
         'router-v7': path.resolve(__dirname, 'src/router/v7.tsx'),
+        'router-v8': path.resolve(__dirname, 'src/router/v8.tsx'),
+        'router-v8-dom': path.resolve(__dirname, 'src/router/v8-dom.tsx'),
         v18: path.resolve(__dirname, 'src/v18.ts'),
         v19: path.resolve(__dirname, 'src/v19.ts'),
         'lazy-load-component-plugin': path.resolve(
@@ -56,6 +62,7 @@ export default defineConfig({
     rollupOptions: {
       external: [
         ...perDepsKeys,
+        '@module-federation/bridge-react/router-runtime',
         '@remix-run/router',
         /react-dom\/.*/,
         'react-router',
@@ -64,6 +71,9 @@ export default defineConfig({
         'react-router/dist/index.js',
         'react-router/dist/development/index.js',
         'react-router/dist/production/index.js',
+        'react-router/dist/development/dom-export.js',
+        'react-router/dist/production/dom-export.js',
+        'react-router/dom',
         /^react-router\/.*/,
         'react-router-dom/',
         'react-router-dom/index.js',
@@ -83,20 +93,48 @@ export default defineConfig({
                 );
               }
 
-              if (fileName.includes('router-v7') && chunk.type === 'chunk') {
-                // Replace 'react-router' with the correct v7 dist path based on environment
+              if (
+                (fileName.includes('router-v7') ||
+                  fileName.includes('router-v8')) &&
+                chunk.type === 'chunk'
+              ) {
+                // Replace react-router imports with dist keys that the bridge plugin
+                // maps back to the user's installed router package, avoiding an alias loop.
                 const isProduction = process.env.NODE_ENV === 'production';
                 const distPath = isProduction
                   ? 'react-router/dist/production/index.js'
                   : 'react-router/dist/development/index.js';
+                const domDistPath = isProduction
+                  ? 'react-router/dist/production/dom-export.js'
+                  : 'react-router/dist/development/dom-export.js';
 
                 chunk.code = chunk.code.replace(
                   /from\s+['"`]react-router['"`]/g,
                   `from '${distPath}'`,
                 );
                 chunk.code = chunk.code.replace(
+                  /require\((['"`])react-router\1\)/g,
+                  `require('${distPath}')`,
+                );
+                chunk.code = chunk.code.replace(
+                  /from\s+['"`]react-router\/dom['"`]/g,
+                  `from '${domDistPath}'`,
+                );
+                chunk.code = chunk.code.replace(
+                  /require\((['"`])react-router\/dom\1\)/g,
+                  `require('${domDistPath}')`,
+                );
+                chunk.code = chunk.code.replace(
+                  /(['"`])react-router\/dist\/development\/dom-export\.js\1/g,
+                  `'${domDistPath}'`,
+                );
+                chunk.code = chunk.code.replace(
                   /export\s+\*\s+from\s+['"`]react-router['"`]/g,
                   `export * from '${distPath}'`,
+                );
+                chunk.code = chunk.code.replace(
+                  /export\s+\*\s+from\s+['"`]react-router\/dom['"`]/g,
+                  `export * from '${domDistPath}'`,
                 );
               }
 
