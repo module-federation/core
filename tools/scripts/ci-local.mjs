@@ -3,6 +3,20 @@ import { spawn, spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { E2E_SUITES } from './ci-e2e-suites.mjs';
+import { createLocalE2EHelpers } from './ci-local-e2e.mjs';
+import {
+  formatMatrixJobName,
+  getOnlyJobNames,
+  getSelectableJobNames,
+  listJobs,
+  parseArgs,
+  preflight,
+  printHelp,
+  printParity,
+  shouldRunJob,
+  validateArgs,
+} from './ci-local-cli.mjs';
 
 process.env.CI = process.env.CI ?? 'true';
 
@@ -15,25 +29,22 @@ const EXPECTED_NODE_MAJOR = resolveExpectedNodeMajor(ROOT_PACKAGE_JSON);
 const EXPECTED_PNPM_VERSION = resolveExpectedPnpmVersion(ROOT_PACKAGE_JSON);
 
 const args = parseArgs(process.argv);
-const onlyJobNames = args.only
-  ? Array.from(
-      new Set(
-        args.only
-          .split(',')
-          .map((job) => job.trim())
-          .filter(Boolean),
-      ),
-    )
-  : [];
+const onlyJobNames = getOnlyJobNames(args);
 const onlyJobs = args.only === null ? null : new Set(onlyJobNames);
 
-function setupE2E() {
-  return step('Setup E2E dependencies and package build', async (ctx) => {
-    await runCommand('pnpm', ['install', '--frozen-lockfile'], ctx);
-    await runCommand('npx', ['cypress', 'install'], ctx);
-    await runPackagesBuild(ctx);
-  });
-}
+const {
+  checkAffectedStep,
+  e2eSetupSteps,
+  installDependenciesStep,
+  logStepSkip,
+  runWhenAffected,
+  setupAffectedE2E,
+} = createLocalE2EHelpers({
+  formatExit,
+  runCommand,
+  runPackagesBuild,
+  step,
+});
 
 const jobs = [
   {
@@ -174,19 +185,11 @@ const jobs = [
     name: 'e2e-modern',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      setupE2E(),
-      step('Check CI conditions', async (ctx) => {
-        ctx.state.shouldRun = await ciIsAffected(
-          '@module-federation/modern-js,@module-federation/modern-js-v3',
-          ctx,
-        );
-      }),
+      ...e2eSetupSteps(E2E_SUITES.modern),
       step('E2E Test for ModernJS', async (ctx) => {
-        if (!ctx.state.shouldRun) {
-          logStepSkip(ctx, 'Not affected by current changes.');
-          return;
-        }
-        await runCommand('pnpm', ['run', 'e2e:modern'], ctx);
+        await runWhenAffected(ctx, () =>
+          runCommand('pnpm', ['run', 'e2e:modern'], ctx),
+        );
       }),
     ],
   },
@@ -194,9 +197,9 @@ const jobs = [
     name: 'e2e-runtime',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      setupE2E(),
+      ...e2eSetupSteps(E2E_SUITES.runtime),
       step('E2E Test for Runtime Demo', (ctx) =>
-        runIfAffected(ctx, 'runtime-host,runtime-remote1,runtime-remote2', () =>
+        runWhenAffected(ctx, () =>
           runCommand('pnpm', ['run', 'e2e:runtime'], ctx),
         ),
       ),
@@ -206,19 +209,15 @@ const jobs = [
     name: 'e2e-manifest',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      setupE2E(),
+      ...e2eSetupSteps(E2E_SUITES.manifest),
       step('E2E Test for Manifest Demo (dev)', (ctx) =>
-        runIfAffected(
-          ctx,
-          '3008-webpack-host,3009-webpack-provider,3010-rspack-provider,3011-rspack-manifest-provider,3012-rspack-js-entry-provider',
-          () => runCommand('pnpm', ['run', 'e2e:manifest:dev'], ctx),
+        runWhenAffected(ctx, () =>
+          runCommand('pnpm', ['run', 'e2e:manifest:dev'], ctx),
         ),
       ),
       step('E2E Test for Manifest Demo (prod)', (ctx) =>
-        runIfAffected(
-          ctx,
-          '3008-webpack-host,3009-webpack-provider,3010-rspack-provider,3011-rspack-manifest-provider,3012-rspack-js-entry-provider',
-          () => runCommand('pnpm', ['run', 'e2e:manifest:prod'], ctx),
+        runWhenAffected(ctx, () =>
+          runCommand('pnpm', ['run', 'e2e:manifest:prod'], ctx),
         ),
       ),
     ],
@@ -227,19 +226,11 @@ const jobs = [
     name: 'e2e-node',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      setupE2E(),
-      step('Check CI conditions', async (ctx) => {
-        ctx.state.shouldRun = await ciIsAffected(
-          'node-host,node-local-remote,node-remote,node-dynamic-remote-new-version,node-dynamic-remote,node-host-e2e',
-          ctx,
-        );
-      }),
+      ...e2eSetupSteps(E2E_SUITES.node),
       step('E2E Node Federation', async (ctx) => {
-        if (!ctx.state.shouldRun) {
-          logStepSkip(ctx, 'Not affected by current changes.');
-          return;
-        }
-        await runCommand('pnpm', ['run', 'e2e:node'], ctx);
+        await runWhenAffected(ctx, () =>
+          runCommand('pnpm', ['run', 'e2e:node'], ctx),
+        );
       }),
     ],
   },
@@ -250,12 +241,10 @@ const jobs = [
       NEXT_PRIVATE_LOCAL_WEBPACK: 'true',
     },
     steps: [
-      setupE2E(),
+      ...e2eSetupSteps(E2E_SUITES.next),
       step('E2E Test for Next.js Dev', (ctx) =>
-        runIfAffected(
-          ctx,
-          '@module-federation/3000-home,@module-federation/3001-shop,@module-federation/3002-checkout',
-          () => runCommand('pnpm', ['run', 'e2e:next:dev'], ctx),
+        runWhenAffected(ctx, () =>
+          runCommand('pnpm', ['run', 'e2e:next:dev'], ctx),
         ),
       ),
     ],
@@ -264,12 +253,10 @@ const jobs = [
     name: 'e2e-next-prod',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      setupE2E(),
+      ...e2eSetupSteps(E2E_SUITES.next),
       step('E2E Test for Next.js Prod', (ctx) =>
-        runIfAffected(
-          ctx,
-          '@module-federation/3000-home,@module-federation/3001-shop,@module-federation/3002-checkout',
-          () => runCommand('pnpm', ['run', 'e2e:next:prod'], ctx),
+        runWhenAffected(ctx, () =>
+          runCommand('pnpm', ['run', 'e2e:next:prod'], ctx),
         ),
       ),
     ],
@@ -278,29 +265,16 @@ const jobs = [
     name: 'e2e-treeshake',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      step('Install dependencies', (ctx) =>
-        runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
-      ),
-      step('Build packages', (ctx) => runPackagesBuild(ctx)),
-      step('Check CI conditions', async (ctx) => {
-        ctx.state.shouldRun = await ciIsAffected(
-          '@module-federation/treeshake-server,@module-federation/treeshake-frontend',
-          ctx,
+      ...e2eSetupSteps(E2E_SUITES.treeshake, { cypress: false }),
+      step('E2E Treeshake Server', async (ctx) => {
+        await runWhenAffected(ctx, () =>
+          runCommand('pnpm', ['run', 'e2e:treeshake:server'], ctx),
         );
       }),
-      step('E2E Treeshake Server', async (ctx) => {
-        if (!ctx.state.shouldRun) {
-          logStepSkip(ctx, 'Not affected by current changes.');
-          return;
-        }
-        await runCommand('pnpm', ['run', 'e2e:treeshake:server'], ctx);
-      }),
       step('E2E Treeshake Frontend', async (ctx) => {
-        if (!ctx.state.shouldRun) {
-          logStepSkip(ctx, 'Not affected by current changes.');
-          return;
-        }
-        await runCommand('pnpm', ['run', 'e2e:treeshake:frontend'], ctx);
+        await runWhenAffected(ctx, () =>
+          runCommand('pnpm', ['run', 'e2e:treeshake:frontend'], ctx),
+        );
       }),
     ],
   },
@@ -308,19 +282,11 @@ const jobs = [
     name: 'e2e-modern-ssr',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      setupE2E(),
-      step('Check CI conditions', async (ctx) => {
-        ctx.state.shouldRun = await ciIsAffected(
-          '@module-federation/modern-js,@module-federation/modern-js-v3,modernjs-ssr-host,modernjs-ssr-remote,modernjs-ssr-remote-new-version,modernjs-ssr-nested-remote,modernjs-ssr-dynamic-remote,modernjs-ssr-dynamic-remote-new-version,modernjs-ssr-dynamic-nested-remote,modernjs-ssr-data-fetch-host,modernjs-ssr-data-fetch-provider,modernjs-ssr-data-fetch-provider-csr',
-          ctx,
-        );
-      }),
+      ...e2eSetupSteps(E2E_SUITES.modernSsr),
       step('E2E Test for ModernJS SSR', async (ctx) => {
-        if (!ctx.state.shouldRun) {
-          logStepSkip(ctx, 'Not affected by current changes.');
-          return;
-        }
-        await runCommand('pnpm', ['run', 'e2e:modern:ssr'], ctx);
+        await runWhenAffected(ctx, () =>
+          runCommand('pnpm', ['run', 'e2e:modern:ssr'], ctx),
+        );
       }),
     ],
   },
@@ -328,19 +294,11 @@ const jobs = [
     name: 'e2e-router',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      setupE2E(),
-      step('Check CI conditions', async (ctx) => {
-        ctx.state.shouldRun = await ciIsAffected(
-          'host,host-v5,host-vue3,remote1,remote2,remote3,remote4,remote5,remote6',
-          ctx,
-        );
-      }),
+      ...e2eSetupSteps(E2E_SUITES.router),
       step('E2E Test for Router', async (ctx) => {
-        if (!ctx.state.shouldRun) {
-          logStepSkip(ctx, 'Not affected by current changes.');
-          return;
-        }
-        await runCommand('pnpm', ['run', 'e2e:router'], ctx);
+        await runWhenAffected(ctx, () =>
+          runCommand('pnpm', ['run', 'e2e:router'], ctx),
+        );
       }),
     ],
   },
@@ -348,15 +306,12 @@ const jobs = [
     name: 'metro-affected-check',
     env: {
       SKIP_DEVTOOLS_POSTINSTALL: 'true',
-      METRO_APP_NAME: process.env.CI_LOCAL_METRO_APP_NAME ?? 'example-host',
+      METRO_APP_NAME:
+        process.env.CI_LOCAL_METRO_APP_NAME ?? E2E_SUITES.metro[0],
     },
     steps: [
-      step('Install dependencies', (ctx) =>
-        runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
-      ),
-      step('Check CI conditions', async (ctx) => {
-        ctx.state.shouldRun = await ciIsAffected(ctx.env.METRO_APP_NAME, ctx);
-      }),
+      installDependenciesStep(),
+      checkAffectedStep((ctx) => ctx.env.METRO_APP_NAME),
       step('Print Metro affected result', (ctx) => {
         if (ctx.state.shouldRun) {
           console.log(
@@ -375,30 +330,25 @@ const jobs = [
     name: 'metro-android-e2e',
     env: {
       SKIP_DEVTOOLS_POSTINSTALL: 'true',
-      METRO_APP_NAME: process.env.CI_LOCAL_METRO_APP_NAME ?? 'example-host',
+      METRO_APP_NAME:
+        process.env.CI_LOCAL_METRO_APP_NAME ?? E2E_SUITES.metro[0],
     },
     steps: [
-      step('Install dependencies', (ctx) =>
-        runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
-      ),
-      step('Build shared packages', (ctx) => runPackagesBuild(ctx)),
-      step('Check CI conditions', async (ctx) => {
-        ctx.state.shouldRun = await ciIsAffected(ctx.env.METRO_APP_NAME, ctx);
-      }),
+      installDependenciesStep(),
+      checkAffectedStep((ctx) => ctx.env.METRO_APP_NAME),
+      setupAffectedE2E({ cypress: false }),
       step('Run Metro Android E2E tests', async (ctx) => {
-        if (!ctx.state.shouldRun) {
-          logStepSkip(ctx, 'Not affected by current changes.');
-          return;
-        }
-        await runCommand(
-          'node',
-          [
-            'tools/scripts/run-metro-e2e.mjs',
-            '--platform=android',
-            `--appName=${ctx.env.METRO_APP_NAME}`,
-            '--skip-on-missing-prereqs',
-          ],
-          ctx,
+        await runWhenAffected(ctx, () =>
+          runCommand(
+            'node',
+            [
+              'tools/scripts/run-metro-e2e.mjs',
+              '--platform=android',
+              `--appName=${ctx.env.METRO_APP_NAME}`,
+              '--skip-on-missing-prereqs',
+            ],
+            ctx,
+          ),
         );
       }),
     ],
@@ -413,16 +363,12 @@ const jobs = [
     name: 'metro-ios-e2e',
     env: {
       SKIP_DEVTOOLS_POSTINSTALL: 'true',
-      METRO_APP_NAME: process.env.CI_LOCAL_METRO_APP_NAME ?? 'example-host',
+      METRO_APP_NAME:
+        process.env.CI_LOCAL_METRO_APP_NAME ?? E2E_SUITES.metro[0],
     },
     steps: [
-      step('Install dependencies', (ctx) =>
-        runCommand('pnpm', ['install', '--frozen-lockfile'], ctx),
-      ),
-      step('Build shared packages', (ctx) => runPackagesBuild(ctx)),
-      step('Check CI conditions', async (ctx) => {
-        ctx.state.shouldRun = await ciIsAffected(ctx.env.METRO_APP_NAME, ctx);
-      }),
+      installDependenciesStep(),
+      checkAffectedStep((ctx) => ctx.env.METRO_APP_NAME),
       step('Check Metro iOS compatibility', (ctx) => {
         if (!ctx.state.shouldRun) {
           logStepSkip(ctx, 'Not affected by current changes.');
@@ -430,23 +376,23 @@ const jobs = [
         }
         if (process.platform !== 'darwin') {
           ctx.state.shouldRun = false;
-          logStepSkip(ctx, 'Requires macOS to run iOS simulator tests.');
+          ctx.state.skipReason = 'Requires macOS to run iOS simulator tests.';
+          logStepSkip(ctx, ctx.state.skipReason);
         }
       }),
+      setupAffectedE2E({ cypress: false }),
       step('Run Metro iOS E2E tests', async (ctx) => {
-        if (!ctx.state.shouldRun) {
-          logStepSkip(ctx, 'Not affected by current changes.');
-          return;
-        }
-        await runCommand(
-          'node',
-          [
-            'tools/scripts/run-metro-e2e.mjs',
-            '--platform=ios',
-            `--appName=${ctx.env.METRO_APP_NAME}`,
-            '--skip-on-missing-prereqs',
-          ],
-          ctx,
+        await runWhenAffected(ctx, () =>
+          runCommand(
+            'node',
+            [
+              'tools/scripts/run-metro-e2e.mjs',
+              '--platform=ios',
+              `--appName=${ctx.env.METRO_APP_NAME}`,
+              '--skip-on-missing-prereqs',
+            ],
+            ctx,
+          ),
         );
       }),
     ],
@@ -461,33 +407,23 @@ const jobs = [
     name: 'e2e-shared-tree-shaking',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      setupE2E(),
-      step('Check CI conditions', async (ctx) => {
-        ctx.state.shouldRun = await ciIsAffected(
-          'shared-tree-shaking-no-server-host,shared-tree-shaking-no-server-provider,shared-tree-shaking-with-server-host,shared-tree-shaking-with-server-provider',
-          ctx,
-        );
-      }),
+      ...e2eSetupSteps(E2E_SUITES.sharedTreeShaking),
       step('E2E Shared Tree Shaking (runtime-infer)', async (ctx) => {
-        if (!ctx.state.shouldRun) {
-          logStepSkip(ctx, 'Not affected by current changes.');
-          return;
-        }
-        await runCommand(
-          'pnpm',
-          ['run', 'e2e:shared-tree-shaking:runtime-infer'],
-          ctx,
+        await runWhenAffected(ctx, () =>
+          runCommand(
+            'pnpm',
+            ['run', 'e2e:shared-tree-shaking:runtime-infer'],
+            ctx,
+          ),
         );
       }),
       step('E2E Shared Tree Shaking (server-calc)', async (ctx) => {
-        if (!ctx.state.shouldRun) {
-          logStepSkip(ctx, 'Not affected by current changes.');
-          return;
-        }
-        await runCommand(
-          'pnpm',
-          ['run', 'e2e:shared-tree-shaking:server-calc'],
-          ctx,
+        await runWhenAffected(ctx, () =>
+          runCommand(
+            'pnpm',
+            ['run', 'e2e:shared-tree-shaking:server-calc'],
+            ctx,
+          ),
         );
       }),
     ],
@@ -627,17 +563,27 @@ async function main() {
     printHelp();
     return;
   }
-  validateArgs();
+  validateArgs({ args, onlyJobNames, onlyJobs, selectableJobNames });
   if (args.list) {
-    listJobs(jobs);
+    listJobs(jobs, { onlyJobs, selectableJobNames });
     return;
   }
-  preflight();
+  preflight({
+    args,
+    detectPnpmVersion,
+    expectedNodeMajor: EXPECTED_NODE_MAJOR,
+    expectedPnpmVersion: EXPECTED_PNPM_VERSION,
+  });
   if (args.skipCache) {
     console.log('[ci:local] Task cache bypass enabled (--skip-cache).');
   }
   if (args.printParity) {
-    printParity();
+    printParity({
+      detectPnpmVersion,
+      expectedNodeMajor: EXPECTED_NODE_MAJOR,
+      expectedPnpmVersion: EXPECTED_PNPM_VERSION,
+      root: ROOT,
+    });
     return;
   }
   for (const job of jobs) {
@@ -697,49 +643,6 @@ async function runPackagesBuildAtPath(targetPath, ctx) {
   );
 }
 
-function preflight() {
-  const nodeMajor = Number(process.versions.node.split('.')[0]);
-  const parityIssues = [];
-  if (nodeMajor !== EXPECTED_NODE_MAJOR) {
-    parityIssues.push(
-      `node ${process.versions.node} (expected major ${EXPECTED_NODE_MAJOR})`,
-    );
-    const pnpmVersionForHint = EXPECTED_PNPM_VERSION ?? '10.28.0';
-    console.warn(
-      `[ci:local] Warning: running with Node ${process.versions.node}. CI runs with Node ${EXPECTED_NODE_MAJOR}.`,
-    );
-    console.warn(
-      `[ci:local] For closest parity run: source "$HOME/.nvm/nvm.sh" && nvm use ${EXPECTED_NODE_MAJOR} && corepack enable && corepack prepare pnpm@${pnpmVersionForHint} --activate`,
-    );
-  }
-
-  const pnpmCheck = detectPnpmVersion();
-  if (pnpmCheck.status !== 0) {
-    throw new Error(
-      '[ci:local] pnpm not found in PATH. Install/activate pnpm before running ci-local.',
-    );
-  }
-
-  const pnpmVersion = (pnpmCheck.stdout ?? '').trim();
-  if (EXPECTED_PNPM_VERSION && pnpmVersion !== EXPECTED_PNPM_VERSION) {
-    parityIssues.push(
-      `pnpm ${pnpmVersion} (expected ${EXPECTED_PNPM_VERSION})`,
-    );
-    console.warn(
-      `[ci:local] Warning: running with pnpm ${pnpmVersion}. CI parity target is pnpm ${EXPECTED_PNPM_VERSION}.`,
-    );
-    console.warn(
-      `[ci:local] For closest parity run: corepack enable && corepack prepare pnpm@${EXPECTED_PNPM_VERSION} --activate`,
-    );
-  }
-
-  if (args.strictParity && parityIssues.length > 0) {
-    throw new Error(
-      `[ci:local] Strict parity check failed: ${parityIssues.join('; ')}`,
-    );
-  }
-}
-
 async function runJob(job, parentCtx = {}) {
   const skipFilter = parentCtx.skipFilter === true;
   const inheritedCtx = { ...parentCtx };
@@ -749,7 +652,7 @@ async function runJob(job, parentCtx = {}) {
     console.log(`[ci:local] Skipping job "${job.name}": ${job.skipReason}`);
     return;
   }
-  if (!skipFilter && !shouldRunJob(job)) {
+  if (!skipFilter && !shouldRunJob(job, onlyJobs)) {
     console.log(`[ci:local] Skipping job "${job.name}" (filtered).`);
     return;
   }
@@ -803,244 +706,6 @@ async function runJob(job, parentCtx = {}) {
 
 function step(label, run) {
   return { label, run };
-}
-
-function shouldRunJob(job) {
-  if (!onlyJobs) {
-    return true;
-  }
-  if (onlyJobs.has(job.name)) {
-    return true;
-  }
-  if (job.matrix?.length) {
-    return job.matrix.some((entry) =>
-      onlyJobs.has(formatMatrixJobName(job.name, entry)),
-    );
-  }
-  return false;
-}
-
-function listJobs(jobList) {
-  console.log('ci:local job list:');
-  if (onlyJobs) {
-    console.log(
-      `[ci:local] Listing filtered jobs: ${Array.from(onlyJobs).join(', ')}`,
-    );
-  }
-  let listedCount = 0;
-  for (const job of jobList) {
-    if (job.matrix?.length) {
-      const includeAllEntries = !onlyJobs || onlyJobs.has(job.name);
-      if (!includeAllEntries) {
-        const hasMatchingEntry = job.matrix.some((entry) =>
-          onlyJobs.has(formatMatrixJobName(job.name, entry)),
-        );
-        if (!hasMatchingEntry) {
-          continue;
-        }
-      }
-      for (const entry of job.matrix) {
-        const entryName = formatMatrixJobName(job.name, entry);
-        if (!includeAllEntries && onlyJobs && !onlyJobs.has(entryName)) {
-          continue;
-        }
-        console.log(`- ${formatJobListEntry({ name: entryName })}`);
-        listedCount += 1;
-      }
-    } else {
-      if (onlyJobs && !onlyJobs.has(job.name)) {
-        continue;
-      }
-      console.log(`- ${formatJobListEntry(job)}`);
-      listedCount += 1;
-    }
-  }
-  if (listedCount === 0) {
-    console.log('(no matching jobs)');
-  }
-  if (onlyJobs) {
-    console.log(
-      `[ci:local] Matched ${listedCount} of ${selectableJobNames.size} selectable jobs.`,
-    );
-  } else {
-    console.log(`[ci:local] Listed ${listedCount} selectable jobs.`);
-  }
-  console.log('\nUse --only=job1,job2 to run a subset.');
-}
-
-function printParity() {
-  const pnpmCheck = detectPnpmVersion();
-  const currentPnpmVersion =
-    pnpmCheck.status === 0 ? (pnpmCheck.stdout ?? '').trim() : 'unavailable';
-
-  console.log('ci:local parity config:');
-  console.log(`- repo root: ${ROOT}`);
-  console.log(`- expected node major: ${EXPECTED_NODE_MAJOR}`);
-  console.log(
-    `- expected pnpm version: ${EXPECTED_PNPM_VERSION ?? 'unconfigured'}`,
-  );
-  console.log(`- current node: ${process.versions.node}`);
-  console.log(`- current pnpm: ${currentPnpmVersion}`);
-}
-
-function printHelp() {
-  console.log('Usage: node tools/scripts/ci-local.mjs [options]');
-  console.log('');
-  console.log('Options:');
-  console.log('  --list                  List available jobs');
-  console.log(
-    '  --only=<jobs>           Run only specific comma-separated jobs (repeatable)',
-  );
-  console.log(
-    '  --print-parity          Print derived node/pnpm parity settings',
-  );
-  console.log(
-    '  --strict-parity         Fail when node/pnpm parity is mismatched',
-  );
-  console.log(
-    '  --skip-cache           Bypass Turbo task caches for supported ci-local steps',
-  );
-  console.log('  --help                  Show this help message');
-  console.log('');
-  console.log('Examples:');
-  console.log('  node tools/scripts/ci-local.mjs --only=build-metro');
-  console.log(
-    '  node tools/scripts/ci-local.mjs --only=build-metro --only=actionlint',
-  );
-  console.log('  node tools/scripts/ci-local.mjs --list --only=build-metro');
-  console.log('  node tools/scripts/ci-local.mjs --print-parity');
-  console.log(
-    '  node tools/scripts/ci-local.mjs --strict-parity --only=build-and-test',
-  );
-  console.log(
-    '  node tools/scripts/ci-local.mjs --skip-cache --only=build-and-test',
-  );
-}
-
-function parseArgs(argv) {
-  const result = {
-    help: false,
-    list: false,
-    only: null,
-    onlyTokens: [],
-    printParity: false,
-    skipCache: false,
-    strictParity: false,
-    errors: [],
-    unknownArgs: [],
-  };
-  for (let i = 2; i < argv.length; i += 1) {
-    const arg = argv[i];
-    if (arg === '--list') {
-      result.list = true;
-      continue;
-    }
-    if (arg === '--help' || arg === '-h') {
-      result.help = true;
-      continue;
-    }
-    if (arg === '--only') {
-      const onlyValue = argv[i + 1];
-      if (!onlyValue || onlyValue.startsWith('--')) {
-        result.errors.push('Missing value for --only.');
-        continue;
-      }
-      result.onlyTokens.push(onlyValue);
-      i += 1;
-      continue;
-    }
-    if (arg.startsWith('--only=')) {
-      result.onlyTokens.push(arg.slice('--only='.length));
-      continue;
-    }
-    if (arg === '--print-parity') {
-      result.printParity = true;
-      continue;
-    }
-    if (arg === '--skip-cache') {
-      result.skipCache = true;
-      continue;
-    }
-    if (arg === '--strict-parity') {
-      result.strictParity = true;
-      continue;
-    }
-    result.unknownArgs.push(arg);
-  }
-  if (result.onlyTokens.length > 0) {
-    result.only = result.onlyTokens.join(',');
-  }
-  delete result.onlyTokens;
-  return result;
-}
-
-function validateArgs() {
-  const issues = [];
-
-  if (args.errors.length > 0) {
-    issues.push(...args.errors);
-  }
-
-  if (args.unknownArgs.length > 0) {
-    issues.push(
-      `Unknown option(s): ${args.unknownArgs.join(', ')}. Use --help to see supported flags.`,
-    );
-  }
-
-  if (args.only !== null && onlyJobNames.length === 0) {
-    issues.push(
-      'The --only option requires at least one job name (use --list to inspect available jobs).',
-    );
-  }
-
-  if (onlyJobs) {
-    const unknownJobNames = onlyJobNames.filter(
-      (jobName) => !selectableJobNames.has(jobName),
-    );
-    if (unknownJobNames.length > 0) {
-      issues.push(
-        `Unknown job(s) in --only: ${unknownJobNames.join(', ')}. Use --list to inspect available jobs.`,
-      );
-    }
-  }
-
-  if (issues.length > 0) {
-    throw new Error(`[ci:local] ${issues.join(' ')}`);
-  }
-}
-
-function formatMatrixJobName(jobName, entry) {
-  const entryName = entry.name ?? entry.id ?? 'matrix';
-  return `${jobName} (${entryName})`;
-}
-
-function formatJobListEntry(job) {
-  if (!job.skipReason) {
-    return job.name;
-  }
-  return `${job.name} [skip: ${job.skipReason}]`;
-}
-
-function getSelectableJobNames(jobList) {
-  const names = new Set();
-  for (const job of jobList) {
-    names.add(job.name);
-    if (job.matrix?.length) {
-      for (const entry of job.matrix) {
-        names.add(formatMatrixJobName(job.name, entry));
-      }
-    }
-  }
-  return names;
-}
-
-async function runIfAffected(ctx, affectedAppName, run) {
-  const shouldRun = await ciIsAffected(affectedAppName, ctx);
-  if (!shouldRun) {
-    logStepSkip(ctx, 'Not affected by current changes.');
-    return;
-  }
-  await run();
 }
 
 async function runChangedPackageTests(ctx) {
@@ -1208,19 +873,6 @@ function resolveExpectedPnpmVersion(packageJson) {
   }
 
   return null;
-}
-
-async function ciIsAffected(appName, ctx) {
-  const result = await runCommand(
-    'node',
-    ['tools/scripts/ci-is-affected.mjs', `--appName=${appName}`],
-    { ...ctx, allowFailure: true },
-  );
-  return result.code === 0;
-}
-
-function logStepSkip(ctx, reason) {
-  console.log(`[ci:local] ${ctx.jobName} -> Skipped: ${reason}`);
 }
 
 function formatExit({ code, signal }) {

@@ -32,7 +32,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Check CI conditions
+        id: check-ci
+        run: node tools/scripts/ci-is-affected.mjs --e2eSuite=treeshake --githubOutput=run-e2e
+
       - name: Restore Turborepo cache
+        if: steps.check-ci.outputs.run-e2e == 'true'
         uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
         with:
           path: .turbo/cache
@@ -42,21 +47,8 @@ jobs:
             ${{ runner.os }}-turbo-
 
       - name: Build shared packages
+        if: steps.check-ci.outputs.run-e2e == 'true'
         run: pnpm run build:packages
-
-      - name: Check CI conditions
-        id: check-ci
-        run: |
-          ci_status=0
-          node tools/scripts/ci-is-affected.mjs --appName=@module-federation/treeshake-server,@module-federation/treeshake-frontend || ci_status=$?
-          if [ "$ci_status" -eq 0 ]; then
-            echo "run-e2e=true" >> "$GITHUB_OUTPUT"
-          elif [ "$ci_status" -eq 1 ]; then
-            echo "run-e2e=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "ci-is-affected failed with unexpected exit code: $ci_status" >&2
-            exit "$ci_status"
-          fi
 
       - name: E2E Treeshake Server
         if: steps.check-ci.outputs.run-e2e == 'true'

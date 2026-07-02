@@ -1,4 +1,5 @@
 import { spawnSync } from 'node:child_process';
+import { appendFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import yargs from 'yargs';
@@ -6,11 +7,19 @@ import {
   hasGitRef as hasGitRefInRepo,
   parseJsonFromTurboOutput,
 } from './turbo-script-utils.mjs';
+import {
+  E2E_SUITES,
+  normalizeAppNames,
+  serializeAppNames,
+} from './ci-e2e-suites.mjs';
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(SCRIPT_DIR, '../..');
 const GLOBAL_E2E_INPUT_PATTERNS = [
+  '.github/workflows/build-and-test.yml',
+  '.github/workflows/devtools.yml',
   'package.json',
+  'tools/scripts/ci-e2e-suites.mjs',
   'tools/scripts/ci-is-affected.mjs',
   'tools/scripts/e2e-process-utils.mjs',
   'tools/scripts/run-manifest-e2e.mjs',
@@ -22,11 +31,18 @@ const GLOBAL_E2E_INPUT_PATTERNS = [
   'tools/scripts/run-runtime-e2e.mjs',
   'scripts/ensure-playwright.js',
 ];
+const GLOBAL_E2E_INPUT_PREFIXES = ['.github/workflows/e2e-'];
 
 const argv = yargs(process.argv.slice(2))
   .option('appName', {
     type: 'string',
-    demandOption: true,
+    describe:
+      'Comma-separated package/app names. Prefer --e2eSuite for built-in e2e suites.',
+  })
+  .option('e2eSuite', {
+    type: 'string',
+    describe:
+      'Named e2e suite from tools/scripts/ci-e2e-suites.mjs. Used to keep workflows and ci-local aligned.',
   })
   .option('base', {
     type: 'string',
@@ -34,17 +50,47 @@ const argv = yargs(process.argv.slice(2))
   .option('head', {
     type: 'string',
   })
+  .option('githubOutput', {
+    type: 'string',
+    describe:
+      'Write the decision to $GITHUB_OUTPUT under this key (as true/false) and exit 0, instead of signaling via exit code.',
+  })
   .strict(false)
   .parseSync();
 
-const appNames = argv.appName
-  .split(',')
-  .map((name) => name.trim())
-  .filter(Boolean);
+// Decision exits: without --githubOutput, exit 0 means "run e2e" and exit 1
+// means "skip" (consumed by ci-local.mjs and shell-translated workflow
+// steps). With --githubOutput, the decision is written to $GITHUB_OUTPUT and
+// the process exits 0 either way, so genuine crashes (nonzero without
+// output) fail the workflow step instead of silently skipping e2e.
+function decide(runE2E) {
+  if (argv.githubOutput) {
+    if (!process.env.GITHUB_OUTPUT) {
+      console.error('--githubOutput was passed but GITHUB_OUTPUT is not set.');
+      process.exit(2);
+    }
+    appendFileSync(
+      process.env.GITHUB_OUTPUT,
+      `${argv.githubOutput}=${runE2E ? 'true' : 'false'}\n`,
+    );
+    process.exit(0);
+  }
+  process.exit(runE2E ? 0 : 1);
+}
+
+const rawAppNames = argv.appName
+  ? normalizeAppNames(argv.appName)
+  : (E2E_SUITES[argv.e2eSuite] ?? null);
+if (argv.e2eSuite && !rawAppNames) {
+  console.error(`Unknown e2e suite: ${argv.e2eSuite}`);
+  process.exit(2);
+}
+
+const appNames = normalizeAppNames(rawAppNames);
 
 if (appNames.length === 0) {
-  console.log('No valid app names were provided.');
-  process.exit(1);
+  console.error('No valid app names were provided.');
+  process.exit(2);
 }
 
 const base = resolveBase(argv.base);
@@ -54,14 +100,14 @@ if (!base || !head) {
   console.warn(
     `Unable to resolve a valid base/head commit (base=${base}, head=${head}). Running e2e by default.`,
   );
-  process.exit(0);
+  decide(true);
 }
 
 if (base === head) {
   console.warn(
     `Resolved base and head are identical (${base}). Running e2e by default.`,
   );
-  process.exit(0);
+  decide(true);
 }
 
 const changedFiles = listChangedFiles(base, head);
@@ -70,7 +116,7 @@ if (!changedFiles) {
   console.warn(
     `Unable to resolve changed files for base=${base} head=${head}. Running e2e by default.`,
   );
-  process.exit(0);
+  decide(true);
 }
 
 const changedGlobalE2EInputs = changedFiles.filter(isGlobalE2EInput);
@@ -79,7 +125,7 @@ if (changedGlobalE2EInputs.length > 0) {
   console.log(
     `Detected shared e2e harness changes (${changedGlobalE2EInputs.join(', ')}). Running e2e CI.`,
   );
-  process.exit(0);
+  decide(true);
 }
 
 const turboResult = spawnSync(
@@ -107,7 +153,7 @@ if (turboResult.status !== 0) {
   } else if (turboResult.stdout?.trim()) {
     console.warn(turboResult.stdout.trim());
   }
-  process.exit(0);
+  decide(true);
 }
 
 let affectedPackageNames;
@@ -122,7 +168,7 @@ try {
     console.warn(
       `Unable to parse Turbo affected output for base=${base} head=${head}. Running e2e by default.`,
     );
-    process.exit(0);
+    decide(true);
   }
 }
 
@@ -139,15 +185,15 @@ const isAffected = appNames.some((name) => matchableAffectedNames.has(name));
 
 if (isAffected) {
   console.log(
-    `appNames: ${appNames.join(',')} , base=${base} head=${head}, conditions met, executing e2e CI.`,
+    `appNames: ${serializeAppNames(appNames)} , base=${base} head=${head}, conditions met, executing e2e CI.`,
   );
-  process.exit(0);
+  decide(true);
 }
 
 console.log(
-  `appNames: ${appNames.join(',')} , base=${base} head=${head}, conditions not met, skipping e2e CI.`,
+  `appNames: ${serializeAppNames(appNames)} , base=${base} head=${head}, conditions not met, skipping e2e CI.`,
 );
-process.exit(1);
+decide(false);
 
 function hasGitRef(ref) {
   return hasGitRefInRepo(ROOT, ref);
@@ -213,10 +259,9 @@ function listChangedFiles(baseRef, headRef) {
 }
 
 function isGlobalE2EInput(relativePath) {
-  return GLOBAL_E2E_INPUT_PATTERNS.some(
-    (pattern) =>
-      relativePath === pattern ||
-      (pattern.endsWith('/') && relativePath.startsWith(pattern)),
+  return (
+    GLOBAL_E2E_INPUT_PATTERNS.includes(relativePath) ||
+    GLOBAL_E2E_INPUT_PREFIXES.some((prefix) => relativePath.startsWith(prefix))
   );
 }
 
