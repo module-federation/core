@@ -1,5 +1,7 @@
 # @module-federation/treeshake-frontend
 
+## 2.6.0
+
 ## 2.5.1
 
 ### Patch Changes

@@ -11,6 +11,9 @@ import { getFederationGlobalScope } from '../container/runtime/utils';
 const { Template, RuntimeGlobals, RuntimeModule } = require(
   normalizeWebpackPath('webpack'),
 ) as typeof import('webpack');
+const { compareModulesByIdentifier } = require(
+  normalizeWebpackPath('webpack/lib/util/comparators'),
+) as typeof import('webpack/lib/util/comparators');
 
 class ConsumeSharedRuntimeModule extends RuntimeModule {
   private _runtimeRequirements: ReadonlySet<string>;
@@ -100,9 +103,10 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
 
     const allChunks = [...(this.chunk?.getAllReferencedChunks() || [])];
     for (const chunk of allChunks) {
-      const modules = chunkGraph.getChunkModulesIterableBySourceType(
+      const modules = chunkGraph.getOrderedChunkModulesIterableBySourceType(
         chunk,
         'consume-shared',
+        compareModulesByIdentifier,
       );
       if (!modules) continue;
       // chunk.id may equal 0
@@ -116,9 +120,10 @@ class ConsumeSharedRuntimeModule extends RuntimeModule {
       );
     }
     for (const chunk of [...(this.chunk?.getAllInitialChunks() || [])]) {
-      const modules = chunkGraph.getChunkModulesIterableBySourceType(
+      const modules = chunkGraph.getOrderedChunkModulesIterableBySourceType(
         chunk,
         'consume-shared',
+        compareModulesByIdentifier,
       );
       if (!modules) continue;
       addModules(modules, chunk, initialConsumes);

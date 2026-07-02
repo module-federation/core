@@ -1,5 +1,22 @@
 # @module-federation/modern-js-v3
 
+## 2.6.0
+
+### Patch Changes
+
+- 4e72ff6: Keep Modern.js SSR static asset imports on the app public path while preserving bundled SSR JavaScript paths.
+- 42f4e0a: Fix loading Modern.js v3 federation config files from the ESM config plugin build.
+- Updated dependencies [39965b4]
+- Updated dependencies [5776688]
+- Updated dependencies [9dd3a5b]
+  - @module-federation/bridge-react@2.6.0
+  - @module-federation/rsbuild-plugin@2.6.0
+  - @module-federation/enhanced@2.6.0
+  - @module-federation/cli@2.6.0
+  - @module-federation/node@2.7.45
+  - @module-federation/runtime@2.6.0
+  - @module-federation/sdk@2.6.0
+
 ## 2.5.1
 
 ### Patch Changes
