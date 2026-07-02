@@ -1,6 +1,4 @@
-import { E2E_SUITES, serializeAppNames } from './ci-e2e-suites.mjs';
-
-export { E2E_SUITES };
+import { serializeAppNames } from './ci-e2e-suites.mjs';
 
 export function createLocalE2EHelpers({
   formatExit,
@@ -54,15 +52,6 @@ export function createLocalE2EHelpers({
     await run();
   }
 
-  return {
-    checkAffectedStep,
-    e2eSetupSteps,
-    installDependenciesStep,
-    logStepSkip,
-    runWhenAffected,
-    setupAffectedE2E,
-  };
-
   async function ciIsAffected(appNames, ctx) {
     const result = await runCommand(
       'node',
@@ -86,6 +75,15 @@ export function createLocalE2EHelpers({
   function currentSkipReason(ctx) {
     return ctx.state.skipReason ?? 'Not affected by current changes.';
   }
+
+  return {
+    checkAffectedStep,
+    e2eSetupSteps,
+    installDependenciesStep,
+    logStepSkip,
+    runWhenAffected,
+    setupAffectedE2E,
+  };
 }
 
 function logStepSkip(ctx, reason) {

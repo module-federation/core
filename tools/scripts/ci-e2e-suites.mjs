@@ -59,13 +59,6 @@ export const E2E_SUITES = {
   ],
 };
 
-export function resolveE2ESuiteAppNames(suiteName) {
-  if (!suiteName) {
-    return null;
-  }
-  return E2E_SUITES[suiteName] ?? null;
-}
-
 export function normalizeAppNames(appNames) {
   if (Array.isArray(appNames)) {
     return appNames.map((name) => name.trim()).filter(Boolean);

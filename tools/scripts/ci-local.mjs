@@ -3,7 +3,8 @@ import { spawn, spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createLocalE2EHelpers, E2E_SUITES } from './ci-local-e2e.mjs';
+import { E2E_SUITES } from './ci-e2e-suites.mjs';
+import { createLocalE2EHelpers } from './ci-local-e2e.mjs';
 import {
   formatMatrixJobName,
   getOnlyJobNames,

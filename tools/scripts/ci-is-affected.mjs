@@ -8,8 +8,8 @@ import {
   parseJsonFromTurboOutput,
 } from './turbo-script-utils.mjs';
 import {
+  E2E_SUITES,
   normalizeAppNames,
-  resolveE2ESuiteAppNames,
   serializeAppNames,
 } from './ci-e2e-suites.mjs';
 
@@ -80,7 +80,7 @@ function decide(runE2E) {
 
 const rawAppNames = argv.appName
   ? normalizeAppNames(argv.appName)
-  : resolveE2ESuiteAppNames(argv.e2eSuite);
+  : (E2E_SUITES[argv.e2eSuite] ?? null);
 if (argv.e2eSuite && !rawAppNames) {
   console.error(`Unknown e2e suite: ${argv.e2eSuite}`);
   process.exit(2);
