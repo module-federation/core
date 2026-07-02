@@ -32,6 +32,9 @@
       ]
     }
   },
+  "peerDependencies": {
+    "@module-federation/runtime": "*"
+  },
   "devDependencies": {
     "@module-federation/runtime": "workspace:*"
   },
