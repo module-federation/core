@@ -436,8 +436,7 @@ async function loadModule(url: string, options: LoadModuleOptions) {
     initializeImportMeta: (meta: { url: string }) => {
       meta.url = createImportMetaUrl(url, cwdFileUrl);
     },
-    // @ts-ignore
-    importModuleDynamically: async (specifier, script) => {
+    importModuleDynamically: async (specifier: string) => {
       return evaluateDynamicModule(
         await loadResolvedModule(specifier, url, options),
       );
