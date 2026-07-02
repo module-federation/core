@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
+import { styleText } from 'node:util';
 import { moduleFederationPlugin, getProcessEnv } from '@module-federation/sdk';
-import ansiColors from 'ansi-colors';
 import { Agent } from 'undici';
 import { retrieveRemoteConfig } from '../configurations/remotePlugin';
 import { HostOptions } from '../interfaces/HostOptions';
@@ -63,7 +63,9 @@ export function retrieveTypesAssetsInfo(options: RemoteOptions) {
       apiFileName: path.basename(apiTypesPath),
     };
   } catch (err) {
-    console.error(ansiColors.red(`Unable to compile federated types, ${err}`));
+    console.error(
+      styleText('red', `Unable to compile federated types, ${err}`),
+    );
     return {
       apiTypesPath: '',
       zipTypesPath: '',
