@@ -1,0 +1,85 @@
+# Rstest
+
+`@module-federation/rstest` 提供 Rstest 使用的 `federation()` Rsbuild
+插件，用于在 Node / JSDOM 测试环境和浏览器模式下启用 Module Federation
+兼容模式。
+
+## 快速开始
+
+### 安装
+
+你可以通过如下命令安装插件：
+
+import { PackageManagerTabs } from '@theme';
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm add @module-federation/rstest --save-dev',
+    yarn: 'yarn add @module-federation/rstest --save-dev',
+    pnpm: 'pnpm add @module-federation/rstest --save-dev',
+    bun: 'bun add @module-federation/rstest --save-dev',
+  }}
+/>
+
+### 注册插件
+
+#### Node / JSDOM 测试环境
+
+```ts title='rstest.config.ts'
+import { federation } from '@module-federation/rstest';
+import { defineConfig } from '@rstest/core';
+
+export default defineConfig({
+  federation: true,
+  plugins: [
+    federation({
+      name: 'main_app_web',
+      remotes: {
+        'component-app': 'component_app@http://localhost:3001/remoteEntry.js',
+      },
+      shared: {
+        react: { singleton: true },
+        'react-dom': { singleton: true },
+      },
+    }),
+  ],
+});
+```
+
+默认情况下，`federation()` 会应用适合 Node 的 Module Federation 配置：
+
+- `target: async-node`
+- CommonJS 库输出（`library.type = 'commonjs-module'`）
+- 远程模块的传输方式由各个 remote 声明自动推断（不会强制设置 `remoteType`）
+- 从 `@module-federation/rstest` 包自身解析的 Node runtime plugin
+- `experiments.optimization.target = 'node'`
+
+### 浏览器模式
+
+```ts title='rstest.config.ts'
+import { federation } from '@module-federation/rstest';
+import { defineConfig } from '@rstest/core';
+
+export default defineConfig({
+  federation: true,
+  plugins: [
+    federation(
+      {
+        name: 'browser_host',
+        remotes: {
+          app2: 'app2@http://localhost:3001/remoteEntry.js',
+        },
+      },
+      { target: 'browser' },
+    ),
+  ],
+});
+```
+
+在浏览器 target 模式下，不会应用 Node 专属默认值。
+
+### 注意
+
+- Node target 配置会自动从包上下文中注入 Node runtime plugin，因此消费方
+  不需要直接安装 `@module-federation/node`。
+- 当你希望 Rstest 启用这种兼容模式时，在配置中保留 `federation: true`。

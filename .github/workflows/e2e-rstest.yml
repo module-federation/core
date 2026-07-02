@@ -1,0 +1,75 @@
+name: E2E Test for Rstest Demos
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  e2e-rstest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          fetch-depth: 0
+
+      - name: Cache Tool Downloads
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
+        with:
+          path: ~/.cache
+          key: ${{ runner.os }}-toolcache-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-toolcache-
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
+
+      - name: Set SKIP_DEVTOOLS_POSTINSTALL environment variable
+        run: echo "SKIP_DEVTOOLS_POSTINSTALL=true" >> "$GITHUB_ENV"
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run condition check script
+        id: check-ci
+        run: |
+          ci_status=0
+          node tools/scripts/ci-is-affected.mjs --appName=rstest-demo,rstest-remote-demo,rstest-rsbuild-demo,rstest-rslib-demo || ci_status=$?
+          if [ "$ci_status" -eq 0 ]; then
+            echo "run-e2e=true" >> "$GITHUB_OUTPUT"
+          elif [ "$ci_status" -eq 1 ]; then
+            echo "run-e2e=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ci-is-affected failed with unexpected exit code: $ci_status" >&2
+            exit "$ci_status"
+          fi
+
+      - name: Install Playwright
+        if: steps.check-ci.outputs.run-e2e == 'true'
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run Build for Rstest Demos
+        if: steps.check-ci.outputs.run-e2e == 'true'
+        run: pnpm exec turbo run build --filter=rstest-demo --filter=rstest-remote-demo --filter=rstest-rsbuild-demo --filter=rstest-rslib-demo --concurrency=20
+
+      - name: E2E Test for rstest demos
+        if: steps.check-ci.outputs.run-e2e == 'true'
+        run: |
+          npx kill-port --port 3015,3016,3025,3035,3115,3125,3135 || true
+          pnpm --filter rstest-demo run test:node
+          pnpm --filter rstest-demo run test:browser
+          pnpm --filter rstest-rsbuild-demo run test:node
+          pnpm --filter rstest-rsbuild-demo run test:browser
+          pnpm --filter rstest-rslib-demo run test:node
+          pnpm --filter rstest-rslib-demo run test:browser
+          lsof -ti tcp:3015,3016,3025,3035,3115,3125,3135 | xargs kill || true

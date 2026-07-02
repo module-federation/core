@@ -55,6 +55,7 @@ migrations.json
 # build contnt
 packages/**/dist
 apps/**/dist
+apps/rstest-remote/dist-node/
 
 **/@mf-types/**
 **/cypress/downloads
