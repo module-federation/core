@@ -15,8 +15,6 @@ describe('router-host-2000/memory-router', () => {
   });
 
   describe('memory-router', () => {
-    Cypress.on('uncaught:exception', () => false);
-
     it('remote1', () => {
       cy.verifyContent('Remote1 home page');
       cy.clickByClass('.self-remote1-detail-link');
