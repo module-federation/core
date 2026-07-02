@@ -4086,10 +4086,6 @@ importers:
         version: link:../webpack-bundler-runtime
 
   packages/sdk:
-    dependencies:
-      node-fetch:
-        specifier: ^2.7.0 || ^3.3.2
-        version: 3.3.2
     devDependencies:
       '@jest/globals':
         specifier: 29.7.0
