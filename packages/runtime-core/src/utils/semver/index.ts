@@ -64,16 +64,10 @@ function parseRange(range: string) {
     .join(' ');
 }
 
-export function satisfy(version: string, range: string): boolean {
-  if (!version) {
-    return false;
-  }
-
-  // Extract version details once
+export function toCompareAtom(version: string): CompareAtom | null {
   const extractedVersion = extractComparator(version);
   if (!extractedVersion) {
-    // If the version string is invalid, it can't satisfy any range
-    return false;
+    return null;
   }
   const [
     ,
@@ -84,126 +78,159 @@ export function satisfy(version: string, range: string): boolean {
     versionPatch,
     versionPreRelease,
   ] = extractedVersion;
-  const versionAtom: CompareAtom = {
+  return {
     operator: versionOperator,
     version: combineVersion(
       versionMajor,
       versionMinor,
       versionPatch,
       versionPreRelease,
-    ), // exclude build atom
+    ),
     major: versionMajor,
     minor: versionMinor,
     patch: versionPatch,
     preRelease: versionPreRelease?.split('.'),
   };
+}
 
-  // Split the range by || to handle OR conditions
+type OrRangeResult =
+  | { type: 'wildcard' }
+  | { type: 'comparators'; comparators: CompareAtom[] };
+
+const parsedRangeCache = new Map<string, OrRangeResult[]>();
+
+function comparatorStringToAtom(comparator: string): CompareAtom | null {
+  const extractedComparator = extractComparator(comparator);
+  if (!extractedComparator) {
+    return null;
+  }
+  const [
+    ,
+    rangeOperator,
+    ,
+    rangeMajor,
+    rangeMinor,
+    rangePatch,
+    rangePreRelease,
+  ] = extractedComparator;
+  return {
+    operator: rangeOperator,
+    version: combineVersion(
+      rangeMajor,
+      rangeMinor,
+      rangePatch,
+      rangePreRelease,
+    ),
+    major: rangeMajor,
+    minor: rangeMinor,
+    patch: rangePatch,
+    preRelease: rangePreRelease?.split('.'),
+  };
+}
+
+function parseOrRange(trimmedOrRange: string): OrRangeResult | null {
+  if (!trimmedOrRange) {
+    return { type: 'wildcard' };
+  }
+
+  if (trimmedOrRange === '*' || trimmedOrRange === 'x') {
+    return { type: 'wildcard' };
+  }
+
+  try {
+    const parsedSubRange = parseRange(trimmedOrRange);
+
+    if (!parsedSubRange.trim()) {
+      return { type: 'wildcard' };
+    }
+
+    const parsedComparatorString = parsedSubRange
+      .split(' ')
+      .map((rangeVersion) => parseComparatorString(rangeVersion))
+      .join(' ');
+
+    if (!parsedComparatorString.trim()) {
+      return { type: 'wildcard' };
+    }
+
+    const comparatorStrings = parsedComparatorString
+      .split(/\s+/)
+      .map((comparator) => parseGTE0(comparator))
+      .filter(Boolean);
+
+    if (comparatorStrings.length === 0) {
+      return null;
+    }
+
+    const comparators: CompareAtom[] = [];
+    for (const comparator of comparatorStrings) {
+      const rangeAtom = comparatorStringToAtom(comparator);
+      if (!rangeAtom) {
+        return null;
+      }
+      comparators.push(rangeAtom);
+    }
+
+    return { type: 'comparators', comparators };
+  } catch (e) {
+    console.error(
+      `[semver] Error processing range part "${trimmedOrRange}":`,
+      e,
+    );
+    return null;
+  }
+}
+
+export function parseRangeComparators(range: string): OrRangeResult[] {
+  const cached = parsedRangeCache.get(range);
+  if (cached) {
+    return cached;
+  }
+
   const orRanges = range.split('||');
+  const result: OrRangeResult[] = [];
 
   for (const orRange of orRanges) {
-    const trimmedOrRange = orRange.trim();
-    if (!trimmedOrRange) {
-      // An empty range string signifies wildcard *, satisfy any valid version
-      // (We already checked if the version itself is valid)
-      return true;
-    }
-
-    // Handle simple wildcards explicitly before complex parsing
-    if (trimmedOrRange === '*' || trimmedOrRange === 'x') {
-      return true;
-    }
-
-    try {
-      // Apply existing parsing logic to the current OR sub-range
-      const parsedSubRange = parseRange(trimmedOrRange); // Handles hyphens, trims etc.
-
-      // Check if the result of initial parsing is empty, which can happen
-      // for some wildcard cases handled by parseRange/parseComparatorString.
-      // E.g. `parseStar` used in `parseComparatorString` returns ''.
-      if (!parsedSubRange.trim()) {
-        // If parsing results in empty string, treat as wildcard match
-        return true;
-      }
-
-      const parsedComparatorString = parsedSubRange
-        .split(' ')
-        .map((rangeVersion) => parseComparatorString(rangeVersion)) // Expands ^, ~
-        .join(' ');
-
-      // Check again if the comparator string became empty after specific parsing like ^ or ~
-      if (!parsedComparatorString.trim()) {
-        return true;
-      }
-
-      // Split the sub-range by space for implicit AND conditions
-      const comparators = parsedComparatorString
-        .split(/\s+/)
-        .map((comparator) => parseGTE0(comparator))
-        // Filter out empty strings that might result from multiple spaces
-        .filter(Boolean);
-
-      // If a sub-range becomes empty after parsing (e.g., invalid characters),
-      // it cannot be satisfied. This check might be redundant now but kept for safety.
-      if (comparators.length === 0) {
-        continue;
-      }
-
-      let subRangeSatisfied = true;
-      for (const comparator of comparators) {
-        const extractedComparator = extractComparator(comparator);
-
-        // If any part of the AND sub-range is invalid, the sub-range is not satisfied
-        if (!extractedComparator) {
-          subRangeSatisfied = false;
-          break;
-        }
-
-        const [
-          ,
-          rangeOperator,
-          ,
-          rangeMajor,
-          rangeMinor,
-          rangePatch,
-          rangePreRelease,
-        ] = extractedComparator;
-        const rangeAtom: CompareAtom = {
-          operator: rangeOperator,
-          version: combineVersion(
-            rangeMajor,
-            rangeMinor,
-            rangePatch,
-            rangePreRelease,
-          ),
-          major: rangeMajor,
-          minor: rangeMinor,
-          patch: rangePatch,
-          preRelease: rangePreRelease?.split('.'),
-        };
-
-        // Check if the version satisfies this specific comparator in the AND chain
-        if (!compare(rangeAtom, versionAtom)) {
-          subRangeSatisfied = false; // This part of the AND condition failed
-          break; // No need to check further comparators in this sub-range
-        }
-      }
-
-      // If all AND conditions within this OR sub-range were met, the overall range is satisfied
-      if (subRangeSatisfied) {
-        return true;
-      }
-    } catch (e) {
-      // Log error and treat this sub-range as unsatisfied
-      console.error(
-        `[semver] Error processing range part "${trimmedOrRange}":`,
-        e,
-      );
-      continue;
+    const parsed = parseOrRange(orRange.trim());
+    if (parsed) {
+      result.push(parsed);
     }
   }
 
-  // If none of the OR sub-ranges were satisfied
+  parsedRangeCache.set(range, result);
+  return result;
+}
+
+export function satisfy(version: string, range: string): boolean {
+  if (!version) {
+    return false;
+  }
+
+  const versionAtom = toCompareAtom(version);
+  if (!versionAtom) {
+    return false;
+  }
+
+  const orRanges = parseRangeComparators(range);
+
+  for (const orRange of orRanges) {
+    if (orRange.type === 'wildcard') {
+      return true;
+    }
+
+    let subRangeSatisfied = true;
+    for (const rangeAtom of orRange.comparators) {
+      if (!compare(rangeAtom, versionAtom)) {
+        subRangeSatisfied = false;
+        break;
+      }
+    }
+
+    if (subRangeSatisfied) {
+      return true;
+    }
+  }
+
   return false;
 }
 
