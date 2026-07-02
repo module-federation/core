@@ -336,13 +336,48 @@ export function patchBundlerConfig(options: {
     !isServer &&
     enableSSR &&
     splitChunkConfig &&
-    typeof splitChunkConfig === 'object' &&
-    splitChunkConfig.cacheGroups
+    typeof splitChunkConfig === 'object'
   ) {
-    splitChunkConfig.chunks = 'async';
-    logger.warn(
-      `splitChunks.chunks = async is not allowed with stream SSR mode, it will auto changed to "async"`,
-    );
+    const splitChunksValue = splitChunkConfig.chunks;
+    let shouldWarn =
+      typeof splitChunksValue === 'string' && splitChunksValue !== 'async';
+    if (splitChunksValue === undefined || shouldWarn) {
+      splitChunkConfig.chunks = 'async';
+    }
+
+    if (
+      splitChunkConfig.cacheGroups &&
+      typeof splitChunkConfig.cacheGroups === 'object'
+    ) {
+      for (const cacheGroup of Object.values(splitChunkConfig.cacheGroups)) {
+        if (
+          cacheGroup &&
+          typeof cacheGroup === 'object' &&
+          typeof cacheGroup.chunks === 'string' &&
+          cacheGroup.chunks !== 'async'
+        ) {
+          cacheGroup.chunks = 'async';
+          shouldWarn = true;
+        }
+      }
+    }
+
+    const { fallbackCacheGroup } = splitChunkConfig;
+    if (
+      fallbackCacheGroup &&
+      typeof fallbackCacheGroup === 'object' &&
+      typeof fallbackCacheGroup.chunks === 'string' &&
+      fallbackCacheGroup.chunks !== 'async'
+    ) {
+      fallbackCacheGroup.chunks = 'async';
+      shouldWarn = true;
+    }
+
+    if (shouldWarn) {
+      logger.warn(
+        `splitChunks.chunks = async is not allowed with stream SSR mode, it will auto changed to "async"`,
+      );
+    }
   }
 
   if (isDev() && chain.output.get('publicPath') === 'auto') {

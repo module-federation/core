@@ -1,5 +1,9 @@
 import { it, expect, describe, vi, afterEach } from 'vitest';
-import { moduleFederationConfigPlugin, patchMFConfig } from './configPlugin';
+import {
+  moduleFederationConfigPlugin,
+  patchBundlerConfig,
+  patchMFConfig,
+} from './configPlugin';
 import logger from '../logger';
 
 const mfConfig = {
@@ -35,6 +39,53 @@ const getModernJsConfig = async (
   } as any);
 
   return configCallbacks[0]();
+};
+
+const createBundlerChain = (splitChunkConfig: Record<string, unknown>): any => {
+  const outputValues = new Map<string, unknown>();
+  const fallback = {
+    set: vi.fn(() => fallback),
+  };
+
+  return {
+    get: vi.fn((key: string) => (key === 'ignoreWarnings' ? [] : undefined)),
+    ignoreWarnings: vi.fn(),
+    optimization: {
+      delete: vi.fn(),
+      splitChunks: {
+        entries: vi.fn(() => splitChunkConfig),
+      },
+      usedExports: vi.fn(),
+    },
+    output: {
+      chunkFilename: vi.fn(),
+      chunkLoadingGlobal: vi.fn((value: string) => {
+        outputValues.set('chunkLoadingGlobal', value);
+      }),
+      get: vi.fn((key: string) => outputValues.get(key)),
+      publicPath: vi.fn(),
+      uniqueName: vi.fn((value: string) => {
+        outputValues.set('uniqueName', value);
+      }),
+    },
+    resolve: {
+      fallback,
+    },
+  };
+};
+
+const patchClientBundlerConfig = (
+  splitChunkConfig: Record<string, unknown>,
+) => {
+  patchBundlerConfig({
+    chain: createBundlerChain(splitChunkConfig),
+    enableSSR: true,
+    isServer: false,
+    modernjsConfig: {},
+    mfConfig: {
+      name: 'host',
+    },
+  } as any);
 };
 
 afterEach(() => {
@@ -107,6 +158,101 @@ describe('patchMFConfig', async () => {
         },
       },
     });
+  });
+});
+
+describe('patchBundlerConfig', () => {
+  const warning =
+    'splitChunks.chunks = async is not allowed with stream SSR mode, it will auto changed to "async"';
+
+  it.each([
+    { chunks: undefined, warns: false },
+    { chunks: 'async', warns: false },
+    { chunks: 'all', warns: true },
+  ])(
+    'normalizes stream SSR splitChunks from $chunks and warns: $warns',
+    ({ chunks, warns }) => {
+      const warnSpy = vi.spyOn(logger, 'warn').mockImplementation(() => {});
+      const splitChunkConfig = {
+        cacheGroups: {
+          vendors: {},
+        },
+        chunks,
+      };
+
+      patchClientBundlerConfig(splitChunkConfig);
+
+      expect(splitChunkConfig.chunks).toBe('async');
+      if (warns) {
+        expect(warnSpy).toHaveBeenCalledWith(warning);
+      } else {
+        expect(warnSpy).not.toHaveBeenCalledWith(warning);
+      }
+    },
+  );
+
+  it('normalizes stream SSR cache group chunks', () => {
+    const warnSpy = vi.spyOn(logger, 'warn').mockImplementation(() => {});
+    const splitChunkConfig = {
+      cacheGroups: {
+        vendors: {
+          chunks: 'all',
+        },
+      },
+      chunks: 'async',
+    };
+
+    patchClientBundlerConfig(splitChunkConfig);
+
+    expect(splitChunkConfig.chunks).toBe('async');
+    expect(splitChunkConfig.cacheGroups.vendors.chunks).toBe('async');
+    expect(warnSpy).toHaveBeenCalledWith(warning);
+  });
+
+  it('normalizes stream SSR fallback cache group chunks', () => {
+    const warnSpy = vi.spyOn(logger, 'warn').mockImplementation(() => {});
+    const splitChunkConfig = {
+      cacheGroups: {
+        vendors: {},
+      },
+      chunks: 'async',
+      fallbackCacheGroup: {
+        chunks: 'initial',
+      },
+    };
+
+    patchClientBundlerConfig(splitChunkConfig);
+
+    expect(splitChunkConfig.chunks).toBe('async');
+    expect(splitChunkConfig.fallbackCacheGroup.chunks).toBe('async');
+    expect(warnSpy).toHaveBeenCalledWith(warning);
+  });
+
+  it('preserves stream SSR function chunk filters', () => {
+    const warnSpy = vi.spyOn(logger, 'warn').mockImplementation(() => {});
+    const splitChunks = vi.fn(() => true);
+    const cacheGroupChunks = vi.fn(() => true);
+    const fallbackCacheGroupChunks = vi.fn(() => true);
+    const splitChunkConfig = {
+      cacheGroups: {
+        vendors: {
+          chunks: cacheGroupChunks,
+        },
+      },
+      chunks: splitChunks,
+      fallbackCacheGroup: {
+        chunks: fallbackCacheGroupChunks,
+      },
+    };
+
+    patchClientBundlerConfig(splitChunkConfig);
+
+    expect(splitChunkConfig.chunks).toBe(splitChunks);
+    expect(splitChunkConfig.cacheGroups.vendors.chunks).toBe(cacheGroupChunks);
+    expect(splitChunkConfig.fallbackCacheGroup.chunks).toBe(
+      fallbackCacheGroupChunks,
+    );
+    expect(warnSpy).not.toHaveBeenCalledWith(warning);
   });
 });
 
