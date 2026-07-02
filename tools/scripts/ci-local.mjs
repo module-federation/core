@@ -3,6 +3,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { E2E_SUITES } from './ci-e2e-suites.mjs';
 
 process.env.CI = process.env.CI ?? 'true';
 
@@ -64,23 +65,6 @@ function e2eSetupSteps(appName, options) {
     setupAffectedE2E(options),
   ];
 }
-
-const E2E_APP_NAMES = {
-  modern: '@module-federation/modern-js,@module-federation/modern-js-v3',
-  runtime: 'runtime-host,runtime-remote1,runtime-remote2',
-  manifest:
-    '3008-webpack-host,3009-webpack-provider,3010-rspack-provider,3011-rspack-manifest-provider,3012-rspack-js-entry-provider',
-  node: 'node-host,node-local-remote,node-remote,node-dynamic-remote-new-version,node-dynamic-remote,node-host-e2e',
-  next: '@module-federation/3000-home,@module-federation/3001-shop,@module-federation/3002-checkout',
-  treeshake:
-    '@module-federation/treeshake-server,@module-federation/treeshake-frontend',
-  modernSsr:
-    '@module-federation/modern-js,@module-federation/modern-js-v3,modernjs-ssr-host,modernjs-ssr-remote,modernjs-ssr-remote-new-version,modernjs-ssr-nested-remote,modernjs-ssr-dynamic-remote,modernjs-ssr-dynamic-remote-new-version,modernjs-ssr-dynamic-nested-remote,modernjs-ssr-data-fetch-host,modernjs-ssr-data-fetch-provider,modernjs-ssr-data-fetch-provider-csr',
-  router:
-    'host,host-v5,host-vue3,remote1,remote2,remote3,remote4,remote5,remote6',
-  sharedTreeShaking:
-    'shared-tree-shaking-no-server-host,shared-tree-shaking-no-server-provider,shared-tree-shaking-with-server-host,shared-tree-shaking-with-server-provider',
-};
 
 const jobs = [
   {
@@ -221,7 +205,7 @@ const jobs = [
     name: 'e2e-modern',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      ...e2eSetupSteps(E2E_APP_NAMES.modern),
+      ...e2eSetupSteps(E2E_SUITES.modern),
       step('E2E Test for ModernJS', async (ctx) => {
         await runWhenAffected(ctx, () =>
           runCommand('pnpm', ['run', 'e2e:modern'], ctx),
@@ -233,7 +217,7 @@ const jobs = [
     name: 'e2e-runtime',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      ...e2eSetupSteps(E2E_APP_NAMES.runtime),
+      ...e2eSetupSteps(E2E_SUITES.runtime),
       step('E2E Test for Runtime Demo', (ctx) =>
         runWhenAffected(ctx, () =>
           runCommand('pnpm', ['run', 'e2e:runtime'], ctx),
@@ -245,7 +229,7 @@ const jobs = [
     name: 'e2e-manifest',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      ...e2eSetupSteps(E2E_APP_NAMES.manifest),
+      ...e2eSetupSteps(E2E_SUITES.manifest),
       step('E2E Test for Manifest Demo (dev)', (ctx) =>
         runWhenAffected(ctx, () =>
           runCommand('pnpm', ['run', 'e2e:manifest:dev'], ctx),
@@ -262,7 +246,7 @@ const jobs = [
     name: 'e2e-node',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      ...e2eSetupSteps(E2E_APP_NAMES.node),
+      ...e2eSetupSteps(E2E_SUITES.node),
       step('E2E Node Federation', async (ctx) => {
         await runWhenAffected(ctx, () =>
           runCommand('pnpm', ['run', 'e2e:node'], ctx),
@@ -277,7 +261,7 @@ const jobs = [
       NEXT_PRIVATE_LOCAL_WEBPACK: 'true',
     },
     steps: [
-      ...e2eSetupSteps(E2E_APP_NAMES.next),
+      ...e2eSetupSteps(E2E_SUITES.next),
       step('E2E Test for Next.js Dev', (ctx) =>
         runWhenAffected(ctx, () =>
           runCommand('pnpm', ['run', 'e2e:next:dev'], ctx),
@@ -289,7 +273,7 @@ const jobs = [
     name: 'e2e-next-prod',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      ...e2eSetupSteps(E2E_APP_NAMES.next),
+      ...e2eSetupSteps(E2E_SUITES.next),
       step('E2E Test for Next.js Prod', (ctx) =>
         runWhenAffected(ctx, () =>
           runCommand('pnpm', ['run', 'e2e:next:prod'], ctx),
@@ -301,7 +285,7 @@ const jobs = [
     name: 'e2e-treeshake',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      ...e2eSetupSteps(E2E_APP_NAMES.treeshake, { cypress: false }),
+      ...e2eSetupSteps(E2E_SUITES.treeshake, { cypress: false }),
       step('E2E Treeshake Server', async (ctx) => {
         await runWhenAffected(ctx, () =>
           runCommand('pnpm', ['run', 'e2e:treeshake:server'], ctx),
@@ -318,7 +302,7 @@ const jobs = [
     name: 'e2e-modern-ssr',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      ...e2eSetupSteps(E2E_APP_NAMES.modernSsr),
+      ...e2eSetupSteps(E2E_SUITES.modernSsr),
       step('E2E Test for ModernJS SSR', async (ctx) => {
         await runWhenAffected(ctx, () =>
           runCommand('pnpm', ['run', 'e2e:modern:ssr'], ctx),
@@ -330,7 +314,7 @@ const jobs = [
     name: 'e2e-router',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      ...e2eSetupSteps(E2E_APP_NAMES.router),
+      ...e2eSetupSteps(E2E_SUITES.router),
       step('E2E Test for Router', async (ctx) => {
         await runWhenAffected(ctx, () =>
           runCommand('pnpm', ['run', 'e2e:router'], ctx),
@@ -342,7 +326,7 @@ const jobs = [
     name: 'metro-affected-check',
     env: {
       SKIP_DEVTOOLS_POSTINSTALL: 'true',
-      METRO_APP_NAME: process.env.CI_LOCAL_METRO_APP_NAME ?? 'example-host',
+      METRO_APP_NAME: process.env.CI_LOCAL_METRO_APP_NAME ?? E2E_SUITES.metro,
     },
     steps: [
       installDependenciesStep(),
@@ -365,7 +349,7 @@ const jobs = [
     name: 'metro-android-e2e',
     env: {
       SKIP_DEVTOOLS_POSTINSTALL: 'true',
-      METRO_APP_NAME: process.env.CI_LOCAL_METRO_APP_NAME ?? 'example-host',
+      METRO_APP_NAME: process.env.CI_LOCAL_METRO_APP_NAME ?? E2E_SUITES.metro,
     },
     steps: [
       installDependenciesStep(),
@@ -397,7 +381,7 @@ const jobs = [
     name: 'metro-ios-e2e',
     env: {
       SKIP_DEVTOOLS_POSTINSTALL: 'true',
-      METRO_APP_NAME: process.env.CI_LOCAL_METRO_APP_NAME ?? 'example-host',
+      METRO_APP_NAME: process.env.CI_LOCAL_METRO_APP_NAME ?? E2E_SUITES.metro,
     },
     steps: [
       installDependenciesStep(),
@@ -440,7 +424,7 @@ const jobs = [
     name: 'e2e-shared-tree-shaking',
     env: { SKIP_DEVTOOLS_POSTINSTALL: 'true' },
     steps: [
-      ...e2eSetupSteps(E2E_APP_NAMES.sharedTreeShaking),
+      ...e2eSetupSteps(E2E_SUITES.sharedTreeShaking),
       step('E2E Shared Tree Shaking (runtime-infer)', async (ctx) => {
         await runWhenAffected(ctx, () =>
           runCommand(

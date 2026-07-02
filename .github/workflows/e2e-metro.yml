@@ -45,17 +45,7 @@ jobs:
 
       - name: Evaluate Metro affected scope
         id: affected
-        run: |
-          ci_status=0
-          node tools/scripts/ci-is-affected.mjs --appName=${{ env.METRO_APP_NAME }} || ci_status=$?
-          if [ "$ci_status" -eq 0 ]; then
-            echo "should-run-e2e=true" >> "$GITHUB_OUTPUT"
-          elif [ "$ci_status" -eq 1 ]; then
-            echo "should-run-e2e=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "ci-is-affected failed with unexpected exit code: $ci_status" >&2
-            exit "$ci_status"
-          fi
+        run: node tools/scripts/ci-is-affected.mjs --e2eSuite=metro --githubOutput=should-run-e2e
 
   e2e-metro-android:
     needs: e2e-metro-check-affected

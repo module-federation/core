@@ -32,7 +32,7 @@ jobs:
 
       - name: Check CI conditions
         id: check-ci
-        run: node tools/scripts/ci-is-affected.mjs --appName=runtime-host,runtime-remote1,runtime-remote2 --githubOutput=run-e2e
+        run: node tools/scripts/ci-is-affected.mjs --e2eSuite=runtime --githubOutput=run-e2e
 
       - name: Restore Turborepo cache
         if: steps.check-ci.outputs.run-e2e == 'true'

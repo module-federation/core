@@ -7,12 +7,15 @@ import {
   hasGitRef as hasGitRefInRepo,
   parseJsonFromTurboOutput,
 } from './turbo-script-utils.mjs';
+import { resolveE2ESuiteAppNames } from './ci-e2e-suites.mjs';
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(SCRIPT_DIR, '../..');
 const GLOBAL_E2E_INPUT_PATTERNS = [
-  '.github/workflows/',
+  '.github/workflows/build-and-test.yml',
+  '.github/workflows/devtools.yml',
   'package.json',
+  'tools/scripts/ci-e2e-suites.mjs',
   'tools/scripts/ci-is-affected.mjs',
   'tools/scripts/e2e-process-utils.mjs',
   'tools/scripts/run-manifest-e2e.mjs',
@@ -24,11 +27,18 @@ const GLOBAL_E2E_INPUT_PATTERNS = [
   'tools/scripts/run-runtime-e2e.mjs',
   'scripts/ensure-playwright.js',
 ];
+const GLOBAL_E2E_INPUT_PREFIXES = ['.github/workflows/e2e-'];
 
 const argv = yargs(process.argv.slice(2))
   .option('appName', {
     type: 'string',
-    demandOption: true,
+    describe:
+      'Comma-separated package/app names. Prefer --e2eSuite for built-in e2e suites.',
+  })
+  .option('e2eSuite', {
+    type: 'string',
+    describe:
+      'Named e2e suite from tools/scripts/ci-e2e-suites.mjs. Used to keep workflows and ci-local aligned.',
   })
   .option('base', {
     type: 'string',
@@ -64,7 +74,13 @@ function decide(runE2E) {
   process.exit(runE2E ? 0 : 1);
 }
 
-const appNames = argv.appName
+const rawAppNames = argv.appName ?? resolveE2ESuiteAppNames(argv.e2eSuite);
+if (argv.e2eSuite && !rawAppNames) {
+  console.error(`Unknown e2e suite: ${argv.e2eSuite}`);
+  process.exit(2);
+}
+
+const appNames = (rawAppNames ?? '')
   .split(',')
   .map((name) => name.trim())
   .filter(Boolean);
@@ -240,10 +256,9 @@ function listChangedFiles(baseRef, headRef) {
 }
 
 function isGlobalE2EInput(relativePath) {
-  return GLOBAL_E2E_INPUT_PATTERNS.some(
-    (pattern) =>
-      relativePath === pattern ||
-      (pattern.endsWith('/') && relativePath.startsWith(pattern)),
+  return (
+    GLOBAL_E2E_INPUT_PATTERNS.includes(relativePath) ||
+    GLOBAL_E2E_INPUT_PREFIXES.some((prefix) => relativePath.startsWith(prefix))
   );
 }
 

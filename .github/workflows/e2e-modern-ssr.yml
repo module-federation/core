@@ -31,7 +31,7 @@ jobs:
 
       - name: Check CI conditions
         id: check-ci
-        run: node tools/scripts/ci-is-affected.mjs --appName=@module-federation/modern-js,@module-federation/modern-js-v3,modernjs-ssr-host,modernjs-ssr-remote,modernjs-ssr-remote-new-version,modernjs-ssr-nested-remote,modernjs-ssr-dynamic-remote,modernjs-ssr-dynamic-remote-new-version,modernjs-ssr-dynamic-nested-remote,modernjs-ssr-data-fetch-host,modernjs-ssr-data-fetch-provider,modernjs-ssr-data-fetch-provider-csr --githubOutput=run-e2e
+        run: node tools/scripts/ci-is-affected.mjs --e2eSuite=modernSsr --githubOutput=run-e2e
 
       - name: Restore Turborepo cache
         if: steps.check-ci.outputs.run-e2e == 'true'
