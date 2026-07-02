@@ -2,6 +2,18 @@
 
 Status: implemented (opt-in, non-breaking)
 Feature entry points: `@module-federation/node/register`, `@module-federation/node/loader-hooks`
+Working example: `apps/node-esm-remote` + `apps/node-esm-host`
+
+See also (research underpinning this design):
+
+- [research-node-platform.md](./research-node-platform.md) — Node hooks API
+  status (DEP0205), network-import history, integrity, version matrix.
+- [research-runtime-core.md](./research-runtime-core.md) — runtime-core entry
+  loading pipeline, plugin hook surface, bundler-coupling audit, upstream gaps.
+- [esm-chunk-loading-options.md](./esm-chunk-loading-options.md) — bundler
+  output options and the ESM chunk-loading fallback recommendation.
+- [research-prior-art.md](./research-prior-art.md) — Native Federation, JSPM,
+  Deno/Bun, existing HTTPS loaders; lockfile/integrity lessons.
 
 ## 1. Motivation
 
@@ -124,19 +136,41 @@ directory, so they resolve from the host's `node_modules` — matching MF's
 shared-dependency expectations. Builtins (`node:*`) delegate to the default
 resolver.
 
-### Why `module.register()` (async, off-thread) is the primary API
+### Hook API choice: `module.register()` today, `module.registerHooks()` next
 
-- Available on the whole supported range (Node ≥ 18.19 / 20.6; repo baseline
-  is Node 20), while `module.registerHooks()` (synchronous, in-thread) only
-  exists on Node ≥ 22.15 / 23.5.
-- The `load` hook must perform network I/O; the off-thread API allows a plain
-  async `fetch`, whereas synchronous in-thread hooks would need
-  `Atomics.wait`-style blocking fetch machinery.
+This change ships on the **async, off-thread `module.register()`** API because
+it is the only hooks API available on the repo's current Node 20 baseline
+(`registerHooks()` does not exist on any Node 20 release). The code
+feature-detects `module.register` and degrades gracefully: on very old Node
+versions, registration warns once and the vm path remains in force.
 
-`module.registerHooks()` support is therefore a **follow-up**, not part of
-this change (see §7). The code feature-detects `module.register` and degrades
-gracefully: on very old Node versions, registration warns once and the vm path
-remains in force.
+That choice is deliberately **transitional**. Platform research
+([research-node-platform.md](./research-node-platform.md) §1) found the two
+APIs' fortunes have inverted:
+
+- `module.register()` is **deprecated (DEP0205)** — doc-deprecated, then
+  **runtime-deprecated in Node 26.0.0** (calling it emits a
+  `DeprecationWarning`; removal in 27.x was floated). Its caveats (restricted
+  CJS API, `createRequire` bypass, empty-namespace CJS interop, per-crossing
+  IPC/serialization overhead — ~1.9× slower than sync hooks in oxc-node's
+  migration) were judged unresolvable by the Node loaders team.
+- `module.registerHooks()` (synchronous, in-thread; Node ≥ 22.15 / 23.5) is
+  **Release Candidate** and expected to go stable in a 26.x minor; it covers
+  `import`, `require()`, *and* `createRequire()` requires, and shares state
+  with app code directly (no MessageChannel/ack protocol needed).
+
+**Roadmap (phase 2, primary API):** switch feature detection to prefer
+`registerHooks()` wherever available and treat `register()` purely as the
+legacy fallback for Node 20 / early-22. Because sync hooks cannot await, the
+network I/O moves **out of band**: remote sources are prefetched during MF's
+*async* phases (`init` / `loadRemoteSnapshotInfo` / preload, where the
+allowlist is updated today) into an in-memory + disk cache, and the sync
+`load` hook only serves cache hits (missing entry ⇒ actionable error naming
+the remote and URL). This is the same pattern Node itself uses internally,
+removes the ack round-trip entirely, and makes the loader compatible with the
+recommended long-term baseline **`node: "^22.15.0 || >=24"`** (Node 20 is EOL
+2026-04-30). The public surface (`/register`, `registerNativeHttpLoader()`,
+the `loadEntry` bridge) is unchanged by the swap.
 
 ## 4. Compatibility matrix and fallback strategy
 
@@ -172,6 +206,35 @@ so a fetch-and-execute layer would be needed anyway — that layer already
 exists and works. Hosts can mix: ESM remotes go native, CJS remotes go vm,
 within the same process.
 
+Note that runtime-core currently biases *against* ESM entries in Node: when a
+manifest snapshot carries `ssrRemoteEntry` (usually `commonjs-module`), Node
+unconditionally prefers it over the ESM `remoteEntry` — see the upstream PR
+candidates below.
+
+### ESM chunk loading when hooks are NOT registered
+
+For ESM builds (`chunkFormat: 'module'`, `chunkLoading: 'import'`) consumed by
+a process where the loader hooks were *not* registered, webpack's stock
+`import()`-based chunk handler fails for http URLs. The analysis in
+[esm-chunk-loading-options.md](./esm-chunk-loading-options.md) §3–5 recommends
+a **thin wrap — not a replacement — of `__webpack_require__.f.j`**:
+
+- Delegate to the original `f.j` whenever hooks are registered or the chunk
+  resolves to a local file (the stock relative-`import()` path works there).
+- Otherwise fetch the chunk text ourselves (respecting the runtime's
+  `loaderHook.lifecycle.fetch`), evaluate it as ESM, and install the resulting
+  namespace via the module chunk format's own exported install function,
+  **`__webpack_require__.C`** (`RuntimeGlobals.externalInstallChunk`) — the
+  real installer that mutates webpack's actual closure state. Wrapping matters
+  because the emitted export *names* differ across webpack/rspack versions, so
+  re-implementing the handler wholesale (as the CJS `readFileVm` swap does) is
+  brittle; installing through `.C` is not.
+- Guarantee `.C` exists via a one-line build-time `runtimeRequirementInTree`
+  tap adding `RuntimeGlobals.externalInstallChunk`.
+
+This fallback is planned alongside the phase-2 work; the shipped code covers
+the hooks-registered path, where chunk imports need no patching at all.
+
 ### Caching
 
 - **Hooks thread:** in-memory `Map<url, Promise<{source, contentType}>>`;
@@ -180,19 +243,52 @@ within the same process.
   `import()` semantics — same-URL re-imports are free).
 - **Main thread:** the MF runtime's own `globalLoading`/container caches are
   unchanged.
-- **Disk cache** (offline/warm-start) is a follow-up: the `load` hook is the
-  single choke point where a content-addressed disk cache (keyed by URL +
-  `ETag`) can be added without design changes. Until then, offline behavior is
-  a load error surfaced through the runtime's error hooks.
+- **Disk cache** (offline/warm-start) is not a nice-to-have but a
+  **prerequisite for the phase-2 `registerHooks()` migration**: sync hooks
+  cannot await a fetch, so sources must be prefetched during MF's async init /
+  preload phases into a content-addressed cache (keyed by URL + hash/`ETag`)
+  that the sync `load` hook serves from. Prior art
+  ([research-prior-art.md](./research-prior-art.md) §7) recommends different
+  policies per environment: prod fetch-once immutable, dev revalidated per
+  manifest TTL/`ETag`. Until then, offline behavior is a load error surfaced
+  through the runtime's error hooks.
+
+### Upstream runtime-core / sdk PR candidates
+
+The bundler-free path works today from `packages/node` alone, but the
+runtime-core audit ([research-runtime-core.md](./research-runtime-core.md) §7)
+identified quality-of-life gaps that belong upstream:
+
+1. **Node unconditionally prefers `ssrRemoteEntry`** — snapshot resolution
+   (`getRemoteEntryInfoFromSnapshot` in `runtime-core/src/utils/tool.ts` and
+   the manifest-provider branch of `SnapshotHandler`) picks `ssrRemoteEntry`
+   (typically `commonjs-module`) whenever present in a non-browser env. A
+   first-class "prefer the ESM `remoteEntry` in Node" option (e.g.
+   `preferredEntryTarget: 'esm' | 'ssr'`) is needed for manifest-driven
+   remotes to use the native path without fragile snapshot rewriting.
+2. **`loadEntryNode` failures bypass the error-recovery hook** — its catch
+   logs a bare `error(...)` without the `RUNTIME_008` code, while the
+   `loadEntryError` recovery hook is gated on `RUNTIME_008`; Node entry
+   failures are therefore unrecoverable via the hook. Routing them through the
+   same error-code machinery as `loadEntryScript` is a small runtime-core PR.
+3. **`vm.SourceTextModule` ESM fallback is a dead end without
+   `--experimental-vm-modules`** — the sdk's `loadModule` silently assumes the
+   flag and cannot link bare specifiers; it should feature-check and emit an
+   actionable error (or delegate to native `import()` when hooks are
+   registered).
 
 ## 5. Security considerations
 
-- **Allowlist, not open network imports.** Unlike
-  `--experimental-network-imports`, this loader refuses any http(s) URL whose
-  *origin* is not explicitly allowed. Origins enter the allowlist only from:
-  registered MF remotes (the runtime plugin allowlists the remote-entry origin
-  right before importing it), `registerNativeHttpLoader({ allowedOrigins })`,
-  or the `MF_NODE_NATIVE_LOADER_HOSTS` env var.
+- **Allowlist, not open network imports.** Node itself has retreated from
+  open network imports: `--experimental-network-imports` was **removed in
+  22.6.0** (never shipped in 24+), and the policy-manifest integrity system
+  (`--experimental-policy` + SRI) was **removed in 2024** — so both loading
+  and integrity are explicitly library concerns now. This loader refuses any
+  http(s) URL whose *origin* is not explicitly allowed. Origins enter the
+  allowlist only from: registered MF remotes (the runtime plugin allowlists
+  the remote-entry origin right before importing it),
+  `registerNativeHttpLoader({ allowedOrigins })`, or the
+  `MF_NODE_NATIVE_LOADER_HOSTS` env var.
 - **Race-free updates.** Allowlist additions are acknowledged by the hooks
   thread before the import proceeds, so there is no window where an import
   outruns its allowlist entry, and no window where a rejected origin is
@@ -204,6 +300,19 @@ within the same process.
 - The hooks thread never evaluates fetched code itself; it only supplies
   source text to Node's loader, so imported remotes get real URLs, real stack
   traces, and source-map support (`--enable-source-maps`).
+- **Integrity roadmap (manifest-carried SRI + lockfile semantics).** With
+  Node's policy manifests gone, the research
+  ([research-node-platform.md](./research-node-platform.md) §5.3,
+  [research-prior-art.md](./research-prior-art.md) §Lessons 6/8) recommends
+  MF carry its own integrity chain: build-time SRI hashes (`sha384-…`) per
+  remote-entry/chunk in `mf-manifest.json`, verified by the `load` hook
+  against the exact fetched bytes before source ever reaches the module
+  system; plus, longer term, a Deno-style **lockfile / `--frozen` mode** that
+  fails CI on any hash or version drift, and a vendoring command that
+  materializes remotes to disk for airgapped deploys. The honest model is
+  *integrity + allowlist, not sandboxing* — a Node-target remote is
+  server-executed trusted code; verify **what** runs, don't pretend to
+  constrain what it can do.
 
 ## 6. Migration plan
 
@@ -219,13 +328,24 @@ Phase 1 (this change) — opt-in, zero default change:
    the unchanged vm path. `MF_NODE_NATIVE_LOADER=0` offers an emergency
    disable even for registered processes.
 
-Phase 2 (follow-ups, separate changes):
+Phase 2 (the primary-API migration, separate changes):
 
-3. `module.registerHooks()` (sync, in-thread) support on Node ≥ 22.15 where it
-   simplifies allowlist sharing (no message channel needed).
-4. Optional disk cache + offline mode; `import()`-based loading for
-   `commonjs-module` remotes where Node's CJS-source hooks allow it.
-5. Documentation + examples in the website; consider flipping the default for
+3. **Make `module.registerHooks()` (sync, in-thread) the primary API** on
+   Node ≥ 22.15, with `module.register()` demoted to a legacy fallback for
+   Node 20 / early-22 (see §3 "Hook API choice"): `register()` is
+   runtime-deprecated in Node 26 (DEP0205) and will start warning in users'
+   consoles. This requires the **out-of-band prefetch + disk cache** (sources
+   fetched during MF's async init/preload; sync hooks serve cache hits) and
+   removes the MessageChannel/ack allowlist protocol on that path.
+4. The no-hooks ESM chunk fallback: thin `__webpack_require__.f.j` wrap
+   installing fetched chunks via `__webpack_require__.C`
+   (`externalInstallChunk`) — see §4.
+5. Manifest-carried SRI verification in the `load` hook; lockfile/`--frozen`
+   mode (§5). Target engine range moves to `^22.15.0 || >=24` once Node 20
+   support is dropped (EOL 2026-04-30).
+6. Upstream runtime-core PRs from §4 (prefer-ESM-entry option, `RUNTIME_008`
+   normalization for `loadEntryNode`, `vm.SourceTextModule` capability check).
+7. Documentation + examples in the website; consider flipping the default for
    ESM remotes in a future major once the path has soaked.
 
 ## 7. Out of scope / known follow-ups
@@ -233,11 +353,19 @@ Phase 2 (follow-ups, separate changes):
 - **Webpack CJS chunk graphs over native hooks.** Async chunks of
   *non-ESM* builds keep using the patched `readFileVm` path; teaching the CJS
   loader to fetch chunk files over http is not attempted here (see §4).
-- **`registerHooks()` sync API** (Node 22.15+) — feature-detected follow-up.
-- **Disk cache / offline strategy** — see §4 "Caching".
-- **Import maps / integrity metadata** — the manifest already carries asset
-  hashes; wiring them into an `integrity` check inside the `load` hook is a
-  natural hardening follow-up.
+- **`registerHooks()` sync API** (Node 22.15+) — the phase-2 primary API
+  (see §3 and §6), paired with out-of-band prefetch + disk cache.
+- **No-hooks ESM chunk fallback** — the `f.j` wrap via
+  `__webpack_require__.C`, see §4.
+- **Integrity metadata** — manifest-carried SRI verified in the `load` hook,
+  plus lockfile/frozen mode, see §5.
+- **Entry-tracker/flush-chunks parity for ESM output** — the
+  `EntryChunkTrackerPlugin` / `UniverseEntryChunkTrackerPlugin` and
+  `flush-chunks` utilities assume CJS `module.filename`; ESM builds need
+  `import.meta.url`-based equivalents or explicit exclusion
+  ([esm-chunk-loading-options.md](./esm-chunk-loading-options.md) §5).
+- **Upstream runtime-core gaps** — see §4 "Upstream runtime-core / sdk PR
+  candidates".
 
 ## 8. Usage
 
@@ -268,3 +396,8 @@ Programmatic registration (CJS hosts, custom allowlists):
 const { registerNativeHttpLoader } = require('@module-federation/node/loader-hooks');
 registerNativeHttpLoader({ allowedOrigins: ['https://cdn.example.com'] });
 ```
+
+A complete, runnable webpack-built pair (ESM remote with a nested async
+chunk + bundler-free-loading host) lives at
+[`apps/node-esm-remote`](../../../apps/node-esm-remote/README.md) and
+[`apps/node-esm-host`](../../../apps/node-esm-host/README.md).
