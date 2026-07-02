@@ -1,4 +1,5 @@
 import { spawnSync } from 'node:child_process';
+import { appendFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import yargs from 'yargs';
@@ -10,6 +11,7 @@ import {
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(SCRIPT_DIR, '../..');
 const GLOBAL_E2E_INPUT_PATTERNS = [
+  '.github/workflows/',
   'package.json',
   'tools/scripts/ci-is-affected.mjs',
   'tools/scripts/e2e-process-utils.mjs',
@@ -34,8 +36,33 @@ const argv = yargs(process.argv.slice(2))
   .option('head', {
     type: 'string',
   })
+  .option('githubOutput', {
+    type: 'string',
+    describe:
+      'Write the decision to $GITHUB_OUTPUT under this key (as true/false) and exit 0, instead of signaling via exit code.',
+  })
   .strict(false)
   .parseSync();
+
+// Decision exits: without --githubOutput, exit 0 means "run e2e" and exit 1
+// means "skip" (consumed by ci-local.mjs and shell-translated workflow
+// steps). With --githubOutput, the decision is written to $GITHUB_OUTPUT and
+// the process exits 0 either way, so genuine crashes (nonzero without
+// output) fail the workflow step instead of silently skipping e2e.
+function decide(runE2E) {
+  if (argv.githubOutput) {
+    if (!process.env.GITHUB_OUTPUT) {
+      console.error('--githubOutput was passed but GITHUB_OUTPUT is not set.');
+      process.exit(2);
+    }
+    appendFileSync(
+      process.env.GITHUB_OUTPUT,
+      `${argv.githubOutput}=${runE2E ? 'true' : 'false'}\n`,
+    );
+    process.exit(0);
+  }
+  process.exit(runE2E ? 0 : 1);
+}
 
 const appNames = argv.appName
   .split(',')
@@ -44,7 +71,7 @@ const appNames = argv.appName
 
 if (appNames.length === 0) {
   console.log('No valid app names were provided.');
-  process.exit(1);
+  decide(false);
 }
 
 const base = resolveBase(argv.base);
@@ -54,14 +81,14 @@ if (!base || !head) {
   console.warn(
     `Unable to resolve a valid base/head commit (base=${base}, head=${head}). Running e2e by default.`,
   );
-  process.exit(0);
+  decide(true);
 }
 
 if (base === head) {
   console.warn(
     `Resolved base and head are identical (${base}). Running e2e by default.`,
   );
-  process.exit(0);
+  decide(true);
 }
 
 const changedFiles = listChangedFiles(base, head);
@@ -70,7 +97,7 @@ if (!changedFiles) {
   console.warn(
     `Unable to resolve changed files for base=${base} head=${head}. Running e2e by default.`,
   );
-  process.exit(0);
+  decide(true);
 }
 
 const changedGlobalE2EInputs = changedFiles.filter(isGlobalE2EInput);
@@ -79,7 +106,7 @@ if (changedGlobalE2EInputs.length > 0) {
   console.log(
     `Detected shared e2e harness changes (${changedGlobalE2EInputs.join(', ')}). Running e2e CI.`,
   );
-  process.exit(0);
+  decide(true);
 }
 
 const turboResult = spawnSync(
@@ -107,7 +134,7 @@ if (turboResult.status !== 0) {
   } else if (turboResult.stdout?.trim()) {
     console.warn(turboResult.stdout.trim());
   }
-  process.exit(0);
+  decide(true);
 }
 
 let affectedPackageNames;
@@ -122,7 +149,7 @@ try {
     console.warn(
       `Unable to parse Turbo affected output for base=${base} head=${head}. Running e2e by default.`,
     );
-    process.exit(0);
+    decide(true);
   }
 }
 
@@ -141,13 +168,13 @@ if (isAffected) {
   console.log(
     `appNames: ${appNames.join(',')} , base=${base} head=${head}, conditions met, executing e2e CI.`,
   );
-  process.exit(0);
+  decide(true);
 }
 
 console.log(
   `appNames: ${appNames.join(',')} , base=${base} head=${head}, conditions not met, skipping e2e CI.`,
 );
-process.exit(1);
+decide(false);
 
 function hasGitRef(ref) {
   return hasGitRefInRepo(ROOT, ref);

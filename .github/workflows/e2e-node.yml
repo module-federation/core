@@ -1,4 +1,4 @@
-# .github/workflows/e2e-node-federation.yml
+# .github/workflows/e2e-node.yml
 name: E2E Node Federation
 
 on:
@@ -32,17 +32,7 @@ jobs:
 
       - name: Check CI conditions
         id: check-ci
-        run: |
-          ci_status=0
-          node tools/scripts/ci-is-affected.mjs --appName=node-host,node-local-remote,node-remote,node-dynamic-remote-new-version,node-dynamic-remote,node-host-e2e || ci_status=$?
-          if [ "$ci_status" -eq 0 ]; then
-            echo "run-e2e=true" >> "$GITHUB_OUTPUT"
-          elif [ "$ci_status" -eq 1 ]; then
-            echo "run-e2e=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "ci-is-affected failed with unexpected exit code: $ci_status" >&2
-            exit "$ci_status"
-          fi
+        run: node tools/scripts/ci-is-affected.mjs --appName=node-host,node-local-remote,node-remote,node-dynamic-remote-new-version,node-dynamic-remote,node-host-e2e --githubOutput=run-e2e
 
       - name: Restore Turborepo cache
         if: steps.check-ci.outputs.run-e2e == 'true'
