@@ -16,7 +16,7 @@ Until that release, pair this plugin with a pkg.pr.new canary build from that
 PR, for example:
 
 ```bash
-npm install https://pkg.pr.new/@rstest/core@40086e4
+npm install https://pkg.pr.new/@rstest/core@647b5d0
 ```
 
 Against released `@rstest/core` versions the config snippets below will not

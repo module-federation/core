@@ -67,7 +67,7 @@ const createRspackPatcher = (
  * released `@rstest/core` version yet. It requires the upcoming federation
  * release (web-infra-dev/rstest PR #1407); until that ships, pair this plugin
  * with a pkg.pr.new canary of `@rstest/core` from that PR (e.g.
- * `https://pkg.pr.new/@rstest/core@40086e4`). Against released versions the
+ * `https://pkg.pr.new/@rstest/core@647b5d0`). Against released versions the
  * snippet below will not typecheck.
  *
  * Add this to your `rstest.config.*`:
