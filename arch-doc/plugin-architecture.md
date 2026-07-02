@@ -53,7 +53,7 @@ graph TB
         PSP[ProvideSharedPlugin]
     end
 
-    subgraph "Additional Plugins (exists but not in main flow)"
+    subgraph "Runtime Support Plugins - Applied by FederationRuntimePlugin"
         HCP[HoistContainerReferencesPlugin]
         EFRP[EmbedFederationRuntimePlugin]
     end
@@ -64,6 +64,9 @@ graph TB
     MFP -->|"afterPlugins hook"| CP
     MFP -->|"afterPlugins hook"| CRP
     MFP -->|"afterPlugins hook"| SP
+
+    FRP --> EFRP
+    FRP --> HCP
 
     SP --> CSP
     SP --> PSP
@@ -119,8 +122,11 @@ class ModuleFederationPlugin {
         }).apply(compiler);
       }
 
-      // SharePlugin is applied with tree-shaking support when shared config exists
+      // TreeShakingSharedPlugin then SharePlugin are applied when shared config exists
       if (options.shared) {
+        new TreeShakingSharedPlugin({
+          mfConfig: options,
+        }).apply(compiler);
         new SharePlugin({
           shared: options.shared,
           shareScope: options.shareScope,
@@ -193,12 +199,19 @@ class ContainerPlugin {
     });
 
     // Register dependency factory for container entry
-    compiler.hooks.compilation.tap('ContainerPlugin', (compilation) => {
-      compilation.dependencyFactories.set(
-        ContainerEntryDependency,
-        compilation.normalModuleFactory
-      );
-    });
+    compiler.hooks.thisCompilation.tap(
+      'ContainerPlugin',
+      (compilation, { normalModuleFactory }) => {
+        compilation.dependencyFactories.set(
+          ContainerEntryDependency,
+          new ContainerEntryModuleFactory()
+        );
+        compilation.dependencyFactories.set(
+          ContainerExposedDependency,
+          normalModuleFactory
+        );
+      }
+    );
   }
 }
 ```
@@ -903,7 +916,7 @@ The enhanced package also includes:
 - `HoistContainerReferencesPlugin` - For hoisting container references
 - `EmbedFederationRuntimePlugin` - For embedding federation runtime
 
-These plugins exist but are not part of the main ModuleFederationPlugin flow.
+Both plugins are applied by `FederationRuntimePlugin` during its own `apply`, so they run as part of the main ModuleFederationPlugin flow.
 
 ## Key Implementation Insights
 

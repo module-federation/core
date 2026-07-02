@@ -177,12 +177,17 @@ export class ContainerPlugin {
         this.options.shareScope
       );
 
-      // Use addInclude instead of addEntry for proper dependency handling
-      compilation.addInclude(
-        compiler.context,
+      // Add the container as a compilation entry point
+      compilation.addEntry(
+        compilation.options.context || '',
         dep,
-        { name: this.options.name },
-        (err, module) => {
+        {
+          name: this.options.name,
+          filename: this.options.filename,
+          runtime: this.options.runtime,
+          library: this.options.library
+        },
+        (err) => {
           if (err) throw err;
           // Handle successful container creation
         }
@@ -190,16 +195,19 @@ export class ContainerPlugin {
     });
 
     // Register module factories with proper dependency registration
-    compiler.hooks.compilation.tap('ContainerPlugin', (compilation) => {
-      compilation.dependencyFactories.set(
-        ContainerEntryDependency,
-        compilation.normalModuleFactory
-      );
-      compilation.dependencyTemplates.set(
-        ContainerEntryDependency,
-        new ContainerEntryDependency.Template()
-      );
-    });
+    compiler.hooks.thisCompilation.tap(
+      'ContainerPlugin',
+      (compilation, { normalModuleFactory }) => {
+        compilation.dependencyFactories.set(
+          ContainerEntryDependency,
+          new ContainerEntryModuleFactory()
+        );
+        compilation.dependencyFactories.set(
+          ContainerExposedDependency,
+          normalModuleFactory
+        );
+      }
+    );
   }
 }
 ```
@@ -246,7 +254,7 @@ export class SharePlugin {
 // consume-shared-plugin.ts
 export class ConsumeSharedPlugin {
   apply(compiler: YourBundlerCompiler) {
-    compiler.hooks.compilation.tap('ConsumeSharedPlugin',
+    compiler.hooks.thisCompilation.tap('ConsumeSharedPlugin',
       (compilation, { normalModuleFactory }) => {
 
         // Intercept before normal module creation.
@@ -688,6 +696,8 @@ const federation = {
     S: {},          // Share scopes object
     installInitialConsumes, // Install initial shared modules
     initContainerEntry,     // Container entry initialization
+    init,                   // Runtime instance initialization
+    getSharedFallbackGetter, // Fallback getter for shared modules
   },
   attachShareScopeMap,      // Attach share scope to webpack require
   bundlerRuntimeOptions: {},
@@ -717,9 +727,16 @@ const initContainerEntry = (shareScope, initScope) => {
 };
 
 const attachShareScopeMap = (webpackRequire) => {
-  // Attach share scopes to webpack's require function
-  webpackRequire.S = federation.bundlerRuntime.S;
-  webpackRequire.I = federation.bundlerRuntime.I;
+  // Point webpack's share scope object at the runtime instance's shareScopeMap (once)
+  if (
+    !webpackRequire.S ||
+    webpackRequire.federation.hasAttachShareScopeMap ||
+    !webpackRequire.federation.instance
+  ) {
+    return;
+  }
+  webpackRequire.S = webpackRequire.federation.instance.shareScopeMap;
+  webpackRequire.federation.hasAttachShareScopeMap = true;
 };
 
 export default federation;

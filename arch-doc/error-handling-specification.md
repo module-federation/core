@@ -20,7 +20,7 @@ Use `architecture-overview.md` for the canonical repo-wide package taxonomy. Thi
 | Layer | Package(s) | Error responsibility |
 | --- | --- | --- |
 | Canonical formatting | `@module-federation/error-codes` | Exports `RUNTIME-001` through `RUNTIME-015`, `TYPE-001`, `BUILD-001`, `BUILD-002`, `errorDescMap`, `runtimeDescMap`, `typeDescMap`, `buildDescMap`, browser/node helpers, and `getShortErrorMsg`. |
-| Runtime loading | `runtime-core`, `runtime`, `webpack-bundler-runtime` | Fails remote entry, manifest, snapshot, share loading, container init, missing exposes, invalid singleton usage, and uninitialized runtime states through canonical runtime codes and lifecycle hooks. |
+| Runtime loading | `runtime-core`, `runtime`, `webpack-bundler-runtime` | Fails remote entry, manifest, snapshot, share loading, container init, missing exposes, invalid `loadShareSync` usage, and uninitialized runtime states through canonical runtime codes and lifecycle hooks. |
 | Build integration | `enhanced`, `rspack`, `rsbuild-plugin`, `rspress-plugin`, `esbuild`, `metro` | Validates options, exposes, public paths, runtime generation, bundler hooks, and platform-specific artifact creation. |
 | Metadata and types | `dts-plugin`, `third-party-dts-extractor`, `manifest`, `managers`, `typescript` | Reports type generation/consumption failures, manifest/stat generation failures, extraction problems, and option-normalization failures. |
 | Resilience and observability | `retry-plugin`, `observability-plugin`, `devtools`, bridge packages | Converts load failures into retry/fallback/inspection events without changing the runtime container contract. |
@@ -94,7 +94,7 @@ Errors that can be handled with retry mechanisms or fallbacks:
 
 ### 2. Configuration Errors
 Errors caused by incorrect setup:
-- Missing remote entry (RUNTIME-004)
+- Remote not found among registered remotes (RUNTIME-004)
 - Invalid configuration (local validation errors, with canonical codes when exported)
 - Missing exposed module (RUNTIME-014)
 
@@ -268,6 +268,8 @@ function createRemoteComponent(
 ### 2. Module-Level Fallbacks
 
 ```typescript
+import { loadRemote } from '@module-federation/runtime';
+
 interface ModuleFallbackConfig {
   fallbackModule?: string;
   localFallback?: any;
@@ -280,7 +282,7 @@ async function loadRemoteModule(
   config: ModuleFallbackConfig
 ): Promise<any> {
   try {
-    return await __federation_method_getRemote(remoteName, moduleName);
+    return await loadRemote(`${remoteName}/${moduleName}`);
   } catch (error) {
     const federationError = toError(error);
 

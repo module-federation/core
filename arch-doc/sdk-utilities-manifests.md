@@ -13,8 +13,12 @@ Generate snapshot data from manifest information:
 ```typescript
 function generateSnapshotFromManifest(
   manifest: Manifest,
-  options?: GenerateSnapshotOptions
-): ModuleInfo | ProviderModuleInfo;
+  options?: {
+    remotes?: Record<string, string>;
+    overrides?: Record<string, string>;
+    version?: string;
+  }
+): ProviderModuleInfo;
 ```
 
 ### isManifestProvider
@@ -23,7 +27,7 @@ Check if a module info is a manifest provider:
 
 ```typescript
 function isManifestProvider(
-  moduleInfo: ModuleInfo
+  moduleInfo: ModuleInfo | ManifestProvider
 ): moduleInfo is ManifestProvider;
 ```
 
@@ -44,7 +48,7 @@ Infer public path automatically:
 
 ```typescript
 function inferAutoPublicPath(
-  remoteEntry: string
+  url: string
 ): string;
 ```
 
@@ -129,6 +133,9 @@ interface ManifestShared {
   requiredVersion: string;
   hash: string;
   assets: StatsAssets;
+  fallback?: string;
+  fallbackName?: string;
+  fallbackType?: RemoteEntryType;
 }
 
 interface ManifestRemoteCommonInfo {
@@ -174,7 +181,6 @@ interface BasicProviderModuleInfo {
     modulePath?: string;
     assets: StatsAssets;
   }>;
-  prefetchInterface?: boolean;
 }
 
 type ProviderModuleInfo =
@@ -197,18 +203,21 @@ Statistics and assets types:
 
 ```typescript
 /**
- * Webpack/bundler statistics object
+ * Build stats emitted alongside the manifest (mf-stats.json)
  */
-interface Stats {
-  [key: string]: any;
+interface Stats<T = BasicStatsMetaData, K = StatsRemoteVal> {
+  id: string;
+  name: string;
+  metaData: StatsMetaData<T>;
+  shared: StatsShared[];
+  remotes: StatsRemote<K>[];
+  exposes: StatsExpose[];
 }
 
 /**
  * JavaScript module object
  */
-interface Module {
-  [key: string]: any;
-}
+type Module = any;
 
 /**
  * Core lifecycle interfaces (implementation details)
@@ -227,38 +236,51 @@ interface ModuleFederation {
 }
 
 /**
- * Generation options for snapshots
+ * Consumer module information (provider fields plus a consumer list,
+ * with either publicPath or getPublicPath)
  */
-interface GenerateSnapshotOptions {
-  [key: string]: any;
-}
+type ConsumerModuleInfo =
+  | (BasicProviderModuleInfo & {
+      consumerList: Array<string>;
+      publicPath: string;
+      ssrPublicPath?: string;
+    })
+  | (BasicProviderModuleInfo & {
+      consumerList: Array<string>;
+      getPublicPath: string;
+    });
 
 /**
- * Consumer module information
+ * Pure consumer module information (consumer fields without remoteTypes)
  */
-interface ConsumerModuleInfo {
-  [key: string]: any;
-}
-
-/**
- * Pure consumer module information
- */
-interface PureConsumerModuleInfo {
-  [key: string]: any;
-}
+type PureConsumerModuleInfo = {
+  version: string;
+  buildVersion: string;
+  remoteTypesZip: string;
+  remoteTypesAPI?: string;
+  remotesInfo: Record<string, { matchedVersion: string }>;
+  shared: Array<{
+    sharedName: string;
+    version?: string;
+    assets: StatsAssets;
+  }>;
+  consumerList: Array<string>;
+};
 
 /**
  * Manifest provider type
  */
 interface ManifestProvider {
-  [key: string]: any;
+  remoteEntry: string;
+  ssrRemoteEntry?: string;
+  version?: string;
 }
 
 /**
  * Pure entry provider
  */
-interface PureEntryProvider {
-  [key: string]: any;
+interface PureEntryProvider extends ManifestProvider {
+  globalName: string;
 }
 ```
 
@@ -277,22 +299,74 @@ type StatsAssets = {
 interface StatsExpose {
   id: string;
   name: string;
-  path: string;
+  path?: string;
+  file: string;
+  requires: string[];
   assets: StatsAssets;
+  hash?: string;
+}
+
+interface StatsShared {
+  id: string;
+  name: string;
+  version: string;
+  singleton: boolean;
+  requiredVersion: string;
+  hash: string;
+  assets: StatsAssets;
+  deps: string[];
+  usedIn: string[];
+  usedExports: string[];
+  fallback: string;
+  fallbackName: string;
+  fallbackType: RemoteEntryType;
+}
+
+interface StatsRemoteVal {
+  moduleName: string;
+  federationContainerName: string;
+  consumingFederationContainerName: string;
+  alias: string;
+  usedIn: string[];
+}
+
+type StatsRemote<T = StatsRemoteVal> =
+  | (T & Omit<RemoteWithEntry, 'name'>)
+  | (T & Omit<RemoteWithVersion, 'name'>);
+
+interface StatsBuildInfo {
+  buildVersion: string;
+  buildName: string;
+  hash?: string;
+}
+
+interface ResourceInfo {
+  path: string;
+  name: string;
+  type: RemoteEntryType;
+}
+
+interface MetaDataTypes {
+  path: string;
+  name: string;
+  api: string;
+  zip: string;
 }
 
 interface BasicStatsMetaData {
-  [key: string]: any;
+  name: string;
+  globalName: string;
+  buildInfo: StatsBuildInfo;
+  remoteEntry: ResourceInfo;
+  ssrRemoteEntry?: ResourceInfo;
+  types?: MetaDataTypes;
+  type: string;
+  pluginVersion?: string;
 }
 
-interface StatsMetaData<T = BasicStatsMetaData> {
-  version: string;
-  buildVersion: string;
-  name: string;
-  remoteTypesAPI?: string;
-  buildHash?: string;
-  types?: T;
-}
+type StatsMetaData<T = BasicStatsMetaData> =
+  | (T & { getPublicPath: string })
+  | (T & { publicPath: string; ssrPublicPath?: string });
 ```
 
 ## Usage Examples

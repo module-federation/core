@@ -44,10 +44,11 @@ class ChromeDevToolsIntegration {
         console.group(`🔍 Remote: ${remoteName}`);
         console.log('Remote object:', remote);
 
-        // Try to get manifest if available
-        if (remote.manifest) {
-          console.log('Manifest:', remote.manifest);
-        }
+        // Containers expose only get() and init()
+        console.log('Container API:', {
+          get: typeof remote.get,
+          init: typeof remote.init
+        });
 
         console.groupEnd();
       },
