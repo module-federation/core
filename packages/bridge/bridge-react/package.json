@@ -205,7 +205,7 @@
     "vite-plugin-dts": "^4.3.0",
     "@module-federation/runtime": "workspace:*",
     "@module-federation/runtime-core": "workspace:*",
-    "hono": "4.12.25",
+    "hono": "4.12.26",
     "vitest": "1.6.0"
   }
 }
