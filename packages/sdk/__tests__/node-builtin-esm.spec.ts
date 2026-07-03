@@ -8,6 +8,9 @@ const createResponse = (body: string) => ({
   text: async () => body,
 });
 
+const moduleSource = (source: TemplateStringsArray, ...values: string[]) =>
+  String.raw(source, ...values).trim();
+
 const setFetchMock = (
   handler: (url: string) => ReturnType<typeof createResponse>,
 ) => {
@@ -62,7 +65,12 @@ describe('Node ESM builtin loading', () => {
   it('loads node: builtin imports without fetching them as remote chunks', async () => {
     const fetchMock = setRemoteEntryFetchMock(
       DEFAULT_REMOTE_ENTRY_URL,
-      "import { pathToFileURL } from 'node:url'; export const marker = pathToFileURL('/tmp/module-federation').href; export default {};",
+      moduleSource`
+        import { pathToFileURL } from 'node:url';
+
+        export const marker = pathToFileURL('/tmp/module-federation').href;
+        export default {};
+      `,
     );
 
     const scriptContext = await loadNodeEsmScript<{
@@ -77,7 +85,12 @@ describe('Node ESM builtin loading', () => {
   it('loads bare Node.js builtin imports without fetching them as remote chunks', async () => {
     const fetchMock = setRemoteEntryFetchMock(
       DEFAULT_REMOTE_ENTRY_URL,
-      "import { sep } from 'path'; export const separator = sep; export default {};",
+      moduleSource`
+        import { sep } from 'path';
+
+        export const separator = sep;
+        export default {};
+      `,
     );
 
     const scriptContext = await loadNodeEsmScript<{
@@ -94,7 +107,16 @@ describe('Node ESM builtin loading', () => {
       'http://example.com/server/remoteEntry.js?v=123#entry';
     const fetchMock = setRemoteEntryFetchMock(
       remoteEntryUrl,
-      "import { createRequire } from 'node:module'; const require = createRequire(import.meta.url); const webpack = require('webpack'); export const webpackType = typeof webpack; export const metaUrl = import.meta.url; export default {};",
+      moduleSource`
+        import { createRequire } from 'node:module';
+
+        const require = createRequire(import.meta.url);
+        const webpack = require('webpack');
+
+        export const webpackType = typeof webpack;
+        export const metaUrl = import.meta.url;
+        export default {};
+      `,
     );
 
     const scriptContext = await loadNodeEsmScript<{
@@ -118,12 +140,21 @@ describe('Node ESM builtin loading', () => {
     const fetchMock = setFetchMock((url) => {
       if (url === remoteEntryUrl) {
         return createResponse(
-          "export const chunkValuePromise = import('./chunk.mjs').then((chunk) => chunk.value); export default {};",
+          moduleSource`
+            export const chunkValuePromise = import('./chunk.mjs').then(
+              (chunk) => chunk.value,
+            );
+            export default {};
+          `,
         );
       }
 
       if (url === chunkUrl) {
-        return createResponse("export const value = 'loaded chunk';");
+        return createResponse(
+          moduleSource`
+            export const value = 'loaded chunk';
+          `,
+        );
       }
 
       throw new Error(`${url} should not be fetched`);
@@ -143,7 +174,11 @@ describe('Node ESM builtin loading', () => {
     const fileChunkUrl = 'file:///tmp/chunk.mjs';
     const fetchMock = setRemoteEntryFetchMock(
       remoteEntryUrl,
-      `import value from '${fileChunkUrl}'; export default value;`,
+      moduleSource`
+        import value from '${fileChunkUrl}';
+
+        export default value;
+      `,
     );
 
     await expect(loadNodeEsmScript(remoteEntryUrl)).rejects.toThrow(
@@ -158,7 +193,11 @@ describe('Node ESM builtin loading', () => {
     const remoteEntryUrl = 'http://example.com/server/remoteEntry.js';
     const fetchMock = setRemoteEntryFetchMock(
       remoteEntryUrl,
-      "import React from 'react'; export default React;",
+      moduleSource`
+        import React from 'react';
+
+        export default React;
+      `,
     );
 
     await expect(loadNodeEsmScript(remoteEntryUrl)).rejects.toThrow(
