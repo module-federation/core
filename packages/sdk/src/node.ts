@@ -431,7 +431,7 @@ async function loadModule(url: string, options: LoadModuleOptions) {
   const nodeUrl = await importNodeModule<typeof import('node:url')>('node:url');
   const cwdFileUrl = nodeUrl.pathToFileURL(process.cwd()).href;
 
-  const module: any = new vm.SourceTextModule(code, {
+  const sourceTextModule: any = new vm.SourceTextModule(code, {
     identifier: url,
     initializeImportMeta: (meta: { url: string }) => {
       meta.url = createImportMetaUrl(url, cwdFileUrl);
@@ -444,11 +444,11 @@ async function loadModule(url: string, options: LoadModuleOptions) {
   });
 
   // Cache the module before linking to prevent cycles
-  esmModuleCache.set(url, module);
+  esmModuleCache.set(url, sourceTextModule);
 
-  await module.link(async (specifier: string) => {
+  await sourceTextModule.link(async (specifier: string) => {
     return loadResolvedModule(specifier, url, options);
   });
 
-  return module;
+  return sourceTextModule;
 }
