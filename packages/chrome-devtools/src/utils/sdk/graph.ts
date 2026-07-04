@@ -41,35 +41,50 @@ export const validateSemver = (schema: string) => {
 
 export const validatePort = (schema: string) => !isNaN(Number(schema));
 
-const splitModuleId = (target: string) => {
+const isEntrySegment = (segment: string) =>
+  segment.startsWith('http') || segment.startsWith('//');
+
+const parseModuleId = (target: string) => {
   const array = target.split(':');
   const { length } = array;
+  const result = {
+    name: target,
+    version: '',
+  };
+
   if (length === 1) {
-    return target;
+    return result;
   } else if (length >= 3) {
-    // @xxx:https://xxx.xxx.json
-    if (
-      array[length - 1].endsWith('.json') ||
-      array[length - 1].endsWith('.js')
-    ) {
-      const idx = array.findIndex((t) => t.startsWith('http'));
-      return array[idx - 1];
-    } else {
-      // type:@xxx:https://xxx.xxx.json
-      return array[1];
+    const idx = array.findIndex(isEntrySegment);
+    if (idx > 0) {
+      result.name = array[idx - 1];
+      result.version = array.slice(idx).join(':');
+      return result;
     }
+    // type:@xxx:1.0.0
+    result.name = array[1];
+    result.version = array.slice(2).join(':');
+    return result;
   } else {
     const nameOrVersion = array[length - 1];
     if (
       nameOrVersion === '*' ||
       nameOrVersion === 'latest' ||
-      validateSemver(nameOrVersion)
+      validateSemver(nameOrVersion) ||
+      isEntrySegment(nameOrVersion) ||
+      nameOrVersion.endsWith('.json') ||
+      nameOrVersion.endsWith('.js')
     ) {
-      return array[0];
+      result.name = array[0];
+      result.version = nameOrVersion;
+      return result;
     } else {
-      return nameOrVersion;
+      result.name = nameOrVersion;
+      return result;
     }
   }
+
+  return result;
 };
 
 export class DependencyGraph {
@@ -182,7 +197,7 @@ export class DependencyGraph {
     if (!targetGraph || !Object.keys(targetGraph)?.length) {
       return;
     }
-    const name = splitModuleId(target);
+    const { name, version } = parseModuleId(target);
     const targetWithoutType = name;
     let info = name;
 
@@ -190,6 +205,8 @@ export class DependencyGraph {
     if (remote && ('version' in remote || 'remoteEntry' in remote)) {
       // @ts-expect-error
       info += `:${remote.version || remote.remoteEntry}`;
+    } else if (version) {
+      info += `:${version}`;
     }
 
     if (!this.identifyMap.has(targetWithoutType)) {

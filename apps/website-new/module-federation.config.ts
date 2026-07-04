@@ -3,6 +3,13 @@ import * as path from 'path';
 
 const LANGUAGE = 'LANGUAGE';
 const LANGUAGES = ['zh', 'en'];
+const PLAYGROUND_REMOTE_NAME = 'mf_playground';
+const PLAYGROUND_REMOTE_MANIFEST_URL =
+  process.env.PLAYGROUND_REMOTE_MANIFEST_URL ||
+  process.env.PLAYGROUND_MANIFEST_URL ||
+  (process.env.NODE_ENV === 'development'
+    ? 'http://localhost:3006/mf-manifest.json'
+    : 'https://unpkg.com/@module-federation/playground@latest/dist/mf/mf-manifest.json');
 
 const exposes = {
   // basic
@@ -71,6 +78,10 @@ const exposes = {
 export default createModuleFederationConfig({
   filename: 'remoteEntry.js',
   name: 'mf_doc',
+  shareStrategy: 'loaded-first',
+  remotes: {
+    [PLAYGROUND_REMOTE_NAME]: `${PLAYGROUND_REMOTE_NAME}@${PLAYGROUND_REMOTE_MANIFEST_URL}`,
+  },
   exposes: Object.entries(exposes).reduce((acc, [key, value]) => {
     LANGUAGES.forEach((lang) => {
       acc[key.replace(LANGUAGE, lang)] = path.join(

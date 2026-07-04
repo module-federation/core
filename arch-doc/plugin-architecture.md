@@ -1,6 +1,6 @@
 # Module Federation Plugin Architecture
 
-This document provides a comprehensive guide to the Module Federation plugin system based on the actual webpack implementation, detailing how plugins interact with webpack during build time and the patterns other bundler teams need to implement for similar functionality.
+This document describes the current plugin architecture across the monorepo. The webpack-oriented `@module-federation/enhanced` and `@module-federation/rspack` packages still define the deepest build-time model, but the architecture now also includes Rsbuild/Rspress, Esbuild, Metro, Next.js, Node, Modern.js, Storybook, bridge, manifest, DTS, retry, observability, devtools, and playground integrations.
 
 ## Table of Contents
 - [Plugin Overview](#plugin-overview)
@@ -9,6 +9,22 @@ This document provides a comprehensive guide to the Module Federation plugin sys
 - [Webpack Integration Patterns](#webpack-integration-patterns)
 - [Hook Timing and Interception](#hook-timing-and-interception)
 - [Bundler Integration Requirements](#bundler-integration-requirements)
+- [Plugin Families](#plugin-families)
+
+## Plugin Families
+
+Use `architecture-overview.md` for the canonical repo-wide package taxonomy. This section only groups plugin-facing package families by how they participate in build-time, runtime, metadata, and DX flows.
+
+| Family | Packages | Architectural role |
+| --- | --- | --- |
+| Container/share compiler plugins | `@module-federation/enhanced`, `@module-federation/rspack` | Create containers, references, runtime modules, shared providers/consumers, and schema-normalized federation config for webpack-compatible compilers. |
+| Runtime bridge plugins | `@module-federation/webpack-bundler-runtime`, `@module-federation/runtime-tools`, `packages/runtime-plugins/inject-external-runtime-core-plugin` | Attach runtime-core semantics to bundler runtime systems and optionally externalize/inject runtime code. |
+| Framework and platform plugins | `@module-federation/rsbuild-plugin`, `@module-federation/rspress-plugin`, `@module-federation/nextjs-mf`, `@module-federation/node`, `@module-federation/modern-js`, `@module-federation/modern-js-v3`, `@module-federation/esbuild`, `@module-federation/metro` | Translate framework or bundler lifecycle hooks into the shared container/share/runtime contract. |
+| Metadata/type plugins | `@module-federation/manifest`, `@module-federation/managers`, `@module-federation/dts-plugin`, `@module-federation/third-party-dts-extractor`, `@module-federation/typescript` | Normalize options, emit stats/manifests, generate and consume federated declaration files, and surface type hints during development. |
+| UI/DX plugins | `@module-federation/storybook-addon`, `@module-federation/devtools`, `@module-federation/observability-plugin`, `@module-federation/retry-plugin`, bridge packages | Provide Storybook consumption, browser/runtime inspection, loading graph observability, retry/fallback behavior, and render bridges for React/Vue. |
+| Productized examples | `@module-federation/playground`, `apps/website-new`, `apps/*` fixtures | Exercise plugin behavior through docs, playground, and e2e scenario apps. |
+
+The common pattern is: normalize user intent, register bundler/framework hooks at the correct lifecycle point, generate or reference container artifacts, connect share scopes, emit metadata/type artifacts when configured, then delegate dynamic loading to the runtime contract.
 
 ## Plugin Overview
 
@@ -29,7 +45,7 @@ graph TB
     subgraph "Feature Plugins - Applied via afterPlugins Hook"
         CP[ContainerPlugin<br/>if options.exposes]
         CRP[ContainerReferencePlugin<br/>if options.remotes]
-        SP[SharePlugin<br/>always applied]
+        SP[SharePlugin<br/>if options.shared]
     end
 
     subgraph "Share System"
@@ -37,7 +53,7 @@ graph TB
         PSP[ProvideSharedPlugin]
     end
 
-    subgraph "Additional Plugins (exists but not in main flow)"
+    subgraph "Runtime Support Plugins - Applied by FederationRuntimePlugin"
         HCP[HoistContainerReferencesPlugin]
         EFRP[EmbedFederationRuntimePlugin]
     end
@@ -48,10 +64,13 @@ graph TB
     MFP -->|"afterPlugins hook"| CP
     MFP -->|"afterPlugins hook"| CRP
     MFP -->|"afterPlugins hook"| SP
-    
+
+    FRP --> EFRP
+    FRP --> HCP
+
     SP --> CSP
     SP --> PSP
-    
+
     style MFP fill:#f96,stroke:#333,stroke-width:4px
     style REP fill:#96f,stroke:#333,stroke-width:2px
     style SP fill:#69f,stroke:#333,stroke-width:2px
@@ -59,26 +78,26 @@ graph TB
 
 ## ModuleFederationPlugin Orchestration
 
-Based on the actual implementation in `/packages/enhanced/src/lib/container/ModuleFederationPlugin.ts`, the main plugin follows this pattern:
+Based on `/packages/enhanced/src/lib/container/ModuleFederationPlugin.ts`, the main plugin follows this pattern:
 
 ### Plugin Structure
 
 ```typescript
-// Actual ModuleFederationPlugin implementation pattern (packages/enhanced/src/lib/container/ModuleFederationPlugin.ts)
+// ModuleFederationPlugin implementation pattern (packages/enhanced/src/lib/container/ModuleFederationPlugin.ts)
 class ModuleFederationPlugin {
   constructor(private options: ModuleFederationPluginOptions) {}
-  
+
   apply(compiler: Compiler) {
-    // Phase 1: Apply core plugins immediately - FIXED ORDER
+    // Phase 1: Apply core plugins immediately in fixed order
     // 1. RemoteEntryPlugin MUST be first (from @module-federation/rspack package)
     (new RemoteEntryPlugin(options) as unknown as WebpackPluginInstance).apply(compiler);
-    
+
     // 2. FederationModulesPlugin - provides hooks for other plugins
     new FederationModulesPlugin().apply(compiler);
-    
+
     // 3. FederationRuntimePlugin
     new FederationRuntimePlugin(options).apply(compiler);
-    
+
     // Phase 2: Apply feature plugins after all plugins are registered
     compiler.hooks.afterPlugins.tap('ModuleFederationPlugin', () => {
       // Apply container plugin if exposes are configured
@@ -93,7 +112,7 @@ class ModuleFederationPlugin {
           runtimePlugins: options.runtimePlugins,
         }).apply(compiler);
       }
-      
+
       // Apply container reference plugin if remotes are configured
       if (options.remotes && Object.keys(options.remotes).length > 0) {
         new ContainerReferencePlugin({
@@ -102,16 +121,19 @@ class ModuleFederationPlugin {
           remotes: options.remotes,
         }).apply(compiler);
       }
-      
-      // SharePlugin is always applied (if options.shared exists)
+
+      // TreeShakingSharedPlugin then SharePlugin are applied when shared config exists
       if (options.shared) {
+        new TreeShakingSharedPlugin({
+          mfConfig: options,
+        }).apply(compiler);
         new SharePlugin({
           shared: options.shared,
           shareScope: options.shareScope,
         }).apply(compiler);
       }
     });
-    
+
     // Phase 3: Webpack configuration patching
     this._patchBundlerConfig(compiler);
   }
@@ -133,20 +155,20 @@ The `afterPlugins` hook timing is crucial because:
 sequenceDiagram
     participant CP as ContainerPlugin
     participant Compiler
-    participant Compilation  
+    participant Compilation
     participant Factory as DependencyFactory
     participant Entry as ContainerEntry
-    
+
     CP->>Compiler: apply(compiler)
     Compiler->>CP: hooks.make.tapAsync
-    
+
     Note over CP: When make hook fires
     CP->>Compilation: addEntry()
     CP->>Factory: Register ContainerEntryDependency factory
-    
+
     Compilation->>Entry: Create container entry module
     Entry->>Entry: Generate container code with:<br/>- get() method<br/>- init() method<br/>- exposed module map
-    
+
     Note over Entry: Generated container provides:<br/>remoteEntry.js with federation interface
 ```
 
@@ -162,7 +184,7 @@ class ContainerPlugin {
         this.options.exposes,
         this.options.shareScope
       );
-      
+
       // Add as compilation entry point
       compilation.addEntry(
         compilation.options.context || compiler.context,
@@ -175,14 +197,21 @@ class ContainerPlugin {
         callback
       );
     });
-    
+
     // Register dependency factory for container entry
-    compiler.hooks.compilation.tap('ContainerPlugin', (compilation) => {
-      compilation.dependencyFactories.set(
-        ContainerEntryDependency,
-        compilation.normalModuleFactory
-      );
-    });
+    compiler.hooks.thisCompilation.tap(
+      'ContainerPlugin',
+      (compilation, { normalModuleFactory }) => {
+        compilation.dependencyFactories.set(
+          ContainerEntryDependency,
+          new ContainerEntryModuleFactory()
+        );
+        compilation.dependencyFactories.set(
+          ContainerExposedDependency,
+          normalModuleFactory
+        );
+      }
+    );
   }
 }
 ```
@@ -190,13 +219,12 @@ class ContainerPlugin {
 ### ContainerReferencePlugin - Consuming Remote Modules
 
 ```typescript
-// CORRECTED: No remoteToExternals method exists - externals are built inline
 class ContainerReferencePlugin {
   apply(compiler: Compiler) {
     // Apply FederationRuntimePlugin
     new FederationRuntimePlugin().apply(compiler);
-    
-    // Build remote externals inline (NOT via remoteToExternals method)
+
+    // Build remote externals inline.
     const remoteExternals: Record<string, string> = {};
     for (const [key, config] of remotes) {
       let i = 0;
@@ -210,15 +238,15 @@ class ContainerReferencePlugin {
         i++;
       }
     }
-    
+
     // Apply webpack's ExternalsPlugin for remote handling
     const Externals = compiler.webpack.ExternalsPlugin || ExternalsPlugin;
     new Externals(remoteType, remoteExternals).apply(compiler);
-    
+
     // Hook into module resolution for remote modules
-    compiler.hooks.compilation.tap('ContainerReferencePlugin', 
+    compiler.hooks.compilation.tap('ContainerReferencePlugin',
       (compilation, { normalModuleFactory }) => {
-        
+
         // Register dependency factories
         compilation.dependencyFactories.set(
           RemoteToExternalDependency,
@@ -232,9 +260,9 @@ class ContainerReferencePlugin {
           FallbackDependency,
           new FallbackModuleFactory(),
         );
-        
+
         const hooks = FederationModulesPlugin.getCompilationHooks(compilation);
-        
+
         normalModuleFactory.hooks.factorize.tap(
           'ContainerReferencePlugin',
           (data) => {
@@ -264,7 +292,7 @@ class ContainerReferencePlugin {
             }
           }
         );
-        
+
         // Runtime requirements handling
         compilation.hooks.runtimeRequirementInTree
           .for(compiler.webpack.RuntimeGlobals.ensureChunkHandlers)
@@ -287,32 +315,30 @@ class ContainerReferencePlugin {
 ```mermaid
 flowchart TD
     SharePlugin[SharePlugin]
-    
+
     subgraph "Plugin Responsibilities"
         Parse[Parse Shared Config]
         CreateMaps[Create Provide/Consume Maps]
         ApplySubPlugins[Apply Sub-Plugins]
     end
-    
+
     subgraph "Sub-Plugins"
         PSP[ProvideSharedPlugin<br/>Registers modules as shared]
         CSP[ConsumeSharedPlugin<br/>Consumes shared modules]
     end
-    
+
     SharePlugin --> Parse
     Parse --> CreateMaps
     CreateMaps --> ApplySubPlugins
     ApplySubPlugins --> PSP
     ApplySubPlugins --> CSP
-    
+
     style SharePlugin fill:#f96,stroke:#333,stroke-width:2px
 ```
 
 ```typescript
-// CORRECTED: SharePlugin uses parseOptions utility, not parseSharedConfig method
 class SharePlugin {
   constructor(options: SharePluginOptions) {
-    // Uses parseOptions utility from '../container/options'
     const sharedOptions: [string, SharedConfig][] = parseOptions(
       options.shared,
       (item, key) => {
@@ -331,7 +357,7 @@ class SharePlugin {
       },
       (item) => item,
     );
-    
+
     // Build consumes and provides arrays
     const consumes: Record<string, ConsumesConfig>[] = sharedOptions.map(
       ([key, options]) => ({
@@ -352,7 +378,7 @@ class SharePlugin {
         },
       }),
     );
-    
+
     const provides: Record<string, ProvidesConfig>[] = sharedOptions
       .filter(([, options]) => options.import !== false)
       .map(([key, options]) => ({
@@ -375,7 +401,7 @@ class SharePlugin {
     this._consumes = consumes;
     this._provides = provides;
   }
-  
+
   apply(compiler: Compiler) {
     // Set webpack path environment variable
     process.env['FEDERATION_WEBPACK_PATH'] =
@@ -386,7 +412,7 @@ class SharePlugin {
       shareScope: this._shareScope,
       consumes: this._consumes,
     }).apply(compiler);
-    
+
     // Apply provide shared plugin
     new ProvideSharedPlugin({
       shareScope: this._shareScope,
@@ -395,6 +421,21 @@ class SharePlugin {
   }
 }
 ```
+
+### Shared Tree-Shaking Build Pipeline
+
+Shared tree shaking extends normal `SharePlugin` behavior without changing the container contract. The plugin layer owns export analysis and fallback asset generation:
+
+- `TreeShakingSharedPlugin` decides whether a shared config participates and wires the optimizer plus independent shared build path.
+- `SharedUsedExportsOptimizerPlugin` listens to webpack's referenced-export information, applies `treeShaking.usedExports` overrides, requires the real shared module to be side-effect free before pruning, and marks only selected exports as used.
+- `IndependentSharedPlugin` creates child compilers for tree-shakable shared requests, filters out federation/HTML/plugins that would recurse, emits `independent-packages`, and patches stats/manifest shared records with fallback asset information.
+- `IndependentSharedRuntimeModule` and `SharedUsedExportsOptimizerRuntimeModule` publish the generated fallback map and used-export list into the federation global for runtime consumption.
+
+The complete build/runtime flow, mode semantics, fallback rules, and validation matrix live in [Shared Tree-Shaking Architecture](./shared-tree-shaking-architecture.md).
+
+### Layer-Aware Sharing
+
+Shared `layer` and `issuerLayer` are build-time routing hints. Plugin code uses them to keep server/client or framework-specific sharing boundaries separate while still emitting ordinary shared records for the runtime. The rich flow and boundary rules live in [Layer Architecture](./layers-architecture.md).
 
 ## Webpack Integration Patterns
 
@@ -410,41 +451,39 @@ sequenceDiagram
     participant Webpack as Webpack Core
     participant PSP as ProvideSharedPlugin
     participant Module
-    
+
     Request->>NMF: import "react"
-    
+
     Note over NMF,CSP: BEFORE module creation
     NMF->>CSP: factorize hook
     CSP->>CSP: Check if "react" is consumed
-    
+
     alt Is Consumed Shared Module
         CSP->>Module: Return ConsumeSharedModule
         Note over Module: Skip normal webpack module creation
     else Not Consumed
         CSP->>Webpack: Continue normal resolution
         Webpack->>Webpack: Create NormalModule
-        
+
         Note over Webpack,PSP: AFTER module creation
         Webpack->>PSP: module hook
         PSP->>PSP: Check if should provide "react"
-        
+
         alt Should Provide
             PSP->>Module: Register as ProvideSharedModule
         end
     end
-    
+
     Module->>Request: Return final module
 ```
 
 ### Critical Hook Implementation
 
 ```typescript
-// CORRECTED: ConsumeSharedPlugin uses thisCompilation and createModule hooks
 class ConsumeSharedPlugin {
   apply(compiler: Compiler) {
     new FederationRuntimePlugin().apply(compiler);
-    
-    // CORRECTED: Uses thisCompilation hook, not compilation
+
     compiler.hooks.thisCompilation.tap(
       'ConsumeSharedPlugin',
       (compilation: Compilation, { normalModuleFactory }) => {
@@ -453,7 +492,7 @@ class ConsumeSharedPlugin {
           ConsumeSharedFallbackDependency,
           normalModuleFactory,
         );
-        
+
         // Resolve matched configs promise
         const promise = resolveMatchedConfigs(compilation, this._consumes).then(
           ({ resolved, unresolved, prefixed }) => {
@@ -462,8 +501,8 @@ class ConsumeSharedPlugin {
             prefixedConsumes = prefixed;
           },
         );
-        
-        // CRITICAL: Hook factorize to intercept before module creation
+
+        // Intercept before normal module creation.
         normalModuleFactory.hooks.factorize.tapPromise(
           'ConsumeSharedPlugin',
           async (resolveData: ResolveData): Promise<Module | undefined> => {
@@ -487,8 +526,7 @@ class ConsumeSharedPlugin {
             });
           },
         );
-        
-        // ADDED: Missing createModule hook
+
         normalModuleFactory.hooks.createModule.tapPromise(
           'ConsumeSharedPlugin',
           ({ resource }, { context, dependencies }) => {
@@ -512,22 +550,21 @@ class ConsumeSharedPlugin {
   }
 }
 
-// CORRECTED: ProvideSharedPlugin uses compilation hook for module processing and finishMake for dependency addition
 class ProvideSharedPlugin {
   apply(compiler: Compiler) {
     new FederationRuntimePlugin().apply(compiler);
-    
+
     const compilationData: WeakMap<Compilation, ResolvedProvideMap> = new WeakMap();
-    
+
     compiler.hooks.compilation.tap(
       'ProvideSharedPlugin',
       (compilation: Compilation, { normalModuleFactory }) => {
         const resolvedProvideMap: ResolvedProvideMap = new Map();
         // ... build provide maps
-        
+
         compilationData.set(compilation, resolvedProvideMap);
-        
-        // Hook module to inspect created modules
+
+        // Inspect created modules before registering shared provides.
         normalModuleFactory.hooks.module.tap(
           'ProvideSharedPlugin',
           (module, { resource, resourceResolveData }, resolveData) => {
@@ -540,7 +577,7 @@ class ProvideSharedPlugin {
             if (resource && resolvedProvideMap.has(lookupKey)) {
               return module;
             }
-            
+
             const { request } = resolveData;
             const requestKey = createLookupKeyForSharing(
               request,
@@ -558,11 +595,11 @@ class ProvideSharedPlugin {
               );
               resolveData.cacheable = false;
             }
-            
+
             return module;
           }
         );
-        
+
         // Register dependency factories
         compilation.dependencyFactories.set(
           ProvideForSharedDependency,
@@ -574,8 +611,7 @@ class ProvideSharedPlugin {
         );
       }
     );
-    
-    // ADDED: Missing finishMake hook for adding provide shared dependencies
+
     compiler.hooks.finishMake.tapPromise(
       'ProvideSharedPlugin',
       async (compilation: Compilation) => {
@@ -627,7 +663,7 @@ class ProvideSharedPlugin {
 ```mermaid
 stateDiagram-v2
     [*] --> PluginApplication
-    
+
     state PluginApplication {
         [*] --> MFPluginApply
         MFPluginApply --> CorePluginsApply: Immediate
@@ -635,18 +671,18 @@ stateDiagram-v2
         AfterPluginsHook --> FeaturePluginsApply: Hook fires
         FeaturePluginsApply --> [*]
     }
-    
+
     PluginApplication --> CompilationHooks
-    
+
     state CompilationHooks {
         [*] --> Make: Entry creation
-        Make --> Compilation: Module processing  
+        Make --> Compilation: Module processing
         Compilation --> Factorize: Module resolution
         Factorize --> ModuleHook: Module creation
         ModuleHook --> RuntimeRequirements: Runtime injection
         RuntimeRequirements --> [*]
     }
-    
+
     CompilationHooks --> [*]: Build complete
 ```
 
@@ -656,27 +692,27 @@ stateDiagram-v2
 interface EssentialWebpackHooks {
   // Plugin coordination
   'compiler.hooks.afterPlugins': 'Coordinate plugin application order';
-  
+
   // Entry point creation
   'compiler.hooks.make': 'Create container entries and federation dependencies';
-  
+
   // Module resolution interception
   'normalModuleFactory.hooks.factorize': 'Intercept module requests BEFORE creation';
   'normalModuleFactory.hooks.createModule': 'Create modules during resolution';
   'normalModuleFactory.hooks.module': 'Process modules AFTER creation';
-  
+
   // Compilation setup
   'compiler.hooks.compilation': 'Register dependency factories and basic setup';
   'compiler.hooks.thisCompilation': 'Register dependency factories and templates';
-  
+
   // Dependency management
   'compiler.hooks.finishMake': 'Add provide shared dependencies to compilation';
-  
+
   // Runtime code injection
   'compilation.hooks.runtimeRequirementInTree': 'Add federation runtime requirements';
   'compilation.hooks.additionalTreeRuntimeRequirements': 'Add runtime requirements to chunks';
   'compilation.addRuntimeModule': 'Inject federation runtime modules';
-  
+
   // Optimization integration
   'compiler.hooks.compilation': 'Access optimization configuration';
 }
@@ -693,17 +729,17 @@ For other bundlers to support Module Federation, they need these core capabiliti
 interface BundlerPluginSystem {
   // Equivalent to webpack's plugin application
   onPluginsRegistered: Hook;
-  
+
   // Equivalent to webpack's make hook
   onEntryCreation: AsyncHook;
-  
+
   // Equivalent to webpack's compilation hook
   onCompilationStart: Hook;
-  
+
   // Module resolution hooks
   onModuleFactorize: AsyncHook<[ResolveData]>;
   onModuleCreated: Hook<[Module, CreateData, ResolveData]>;
-  
+
   // Runtime injection
   onRuntimeRequirement: Hook<[Chunk, RuntimeRequirement]>;
 }
@@ -714,10 +750,10 @@ interface BundlerPluginSystem {
 interface BundlerModuleFactory {
   // Create different module types
   createModule(type: string, options: any): Module;
-  
+
   // Register custom module factories
   registerModuleFactory(dependency: Function, factory: ModuleFactory): void;
-  
+
   // Register module templates for code generation
   registerModuleTemplate(dependency: Function, template: Template): void;
 }
@@ -728,7 +764,7 @@ interface BundlerModuleFactory {
 interface BundlerEntrySystem {
   // Add new entry points dynamically
   addEntry(context: string, dependency: Dependency, options: EntryOptions): Promise<void>;
-  
+
   // Control entry point compilation
   setEntryOptions(name: string, options: { filename?: string; library?: LibraryOptions }): void;
 }
@@ -739,7 +775,7 @@ interface BundlerEntrySystem {
 interface BundlerExternalSystem {
   // Mark modules as external (not bundled)
   addExternal(request: string, config: ExternalConfig): void;
-  
+
   // Handle external module loading at runtime
   generateExternalLoader(external: ExternalConfig): string;
 }
@@ -750,10 +786,10 @@ interface BundlerExternalSystem {
 interface BundlerRuntimeSystem {
   // Add runtime modules to chunks
   addRuntimeModule(chunk: Chunk, module: RuntimeModule): void;
-  
+
   // Add runtime requirements
   addRuntimeRequirement(chunk: Chunk, requirement: string): void;
-  
+
   // Generate runtime code
   generateRuntimeCode(requirements: Set<string>): string;
 }
@@ -765,19 +801,19 @@ interface BundlerRuntimeSystem {
 // Example pattern for Vite/Rollup/ESBuild
 class ModuleFederationBundlerPlugin {
   apply(bundler: Bundler) {
-    // Phase 1: Apply core plugins immediately  
+    // Phase 1: Apply core plugins immediately
     new BundlerFederationRuntimePlugin(this.options).apply(bundler);
-    
+
     // Phase 2: Apply feature plugins after all plugins registered
     bundler.hooks.afterPlugins.tap('ModuleFederation', () => {
       if (this.options.exposes) {
         new BundlerContainerPlugin(this.options).apply(bundler);
       }
-      
+
       if (this.options.remotes) {
         new BundlerRemotePlugin(this.options).apply(bundler);
       }
-      
+
       // Always apply sharing
       new BundlerSharePlugin(this.options).apply(bundler);
     });
@@ -793,21 +829,21 @@ class BundlerContainerPlugin {
       bundle['remoteEntry.js'] = this.generateContainerEntry();
     });
   }
-  
+
   private generateContainerEntry(): string {
     return `
       // Bundler-specific container implementation
       const moduleMap = ${JSON.stringify(this.generateModuleMap())};
-      
+
       const get = (module) => {
         return ${this.getBundlerModuleLoader()}(moduleMap[module]);
       };
-      
+
       const init = (shareScope) => {
         // Initialize with bundler's share scope system
         return ${this.getBundlerShareInitializer()}(shareScope);
       };
-      
+
       export { get, init };
     `;
   }
@@ -817,7 +853,7 @@ class BundlerContainerPlugin {
 ### Integration Checklist for Bundler Teams
 
 - [ ] **Plugin coordination system** - Equivalent to webpack's afterPlugins hook
-- [ ] **Module resolution interception** - Before and after module creation hooks  
+- [ ] **Module resolution interception** - Before and after module creation hooks
 - [ ] **Custom module types** - Support for federation-specific modules
 - [ ] **Entry point management** - Dynamic entry creation and configuration
 - [ ] **External module handling** - Mark modules as external/remote
@@ -846,7 +882,7 @@ class FederationModulesPlugin {
     }
     return hooks;
   }
-  
+
   apply(compiler: Compiler) {
     compiler.hooks.compilation.tap(
       'FederationModulesPlugin',
@@ -880,7 +916,7 @@ The enhanced package also includes:
 - `HoistContainerReferencesPlugin` - For hoisting container references
 - `EmbedFederationRuntimePlugin` - For embedding federation runtime
 
-These plugins exist but are not part of the main ModuleFederationPlugin flow.
+Both plugins are applied by `FederationRuntimePlugin` during its own `apply`, so they run as part of the main ModuleFederationPlugin flow.
 
 ## Key Implementation Insights
 
@@ -891,18 +927,19 @@ These plugins exist but are not part of the main ModuleFederationPlugin flow.
 5. **No remoteToExternals Method**: ContainerReferencePlugin builds externals inline, doesn't have a separate method
 6. **Missing Hooks Matter**: thisCompilation, finishMake, and createModule hooks are essential for proper operation
 7. **FederationModulesPlugin is Hook Provider**: Only provides hooks for other plugins, doesn't do heavy processing
-8. **Configuration Patching**: Direct webpack config modification prevents optimization conflicts  
+8. **Configuration Patching**: Direct webpack config modification prevents optimization conflicts
 9. **Runtime Integration**: Federation runtime must be injected into webpack's module system
 10. **Dependency Management**: Custom dependency types enable federation-specific behavior
 11. **Webpack Coupling**: Tightly coupled to webpack's internal APIs and lifecycle
 
-This architecture provides a robust foundation for implementing Module Federation in any bundler that supports similar plugin and module systems.
+This architecture is the reference shape for bundlers that support comparable plugin and module systems.
 
 ## Related Documentation
 
-For comprehensive understanding, see:
+For related architecture details, see:
 - [Architecture Overview](./architecture-overview.md) - High-level system architecture
 - [Runtime Architecture](./runtime-architecture.md) - Runtime behavior and lifecycle hooks
+- [Shared Tree-Shaking Architecture](./shared-tree-shaking-architecture.md) - Build/runtime flow for tree-shakable shared dependencies
 - [Implementation Guide](./implementation-guide.md) - Practical implementation steps
 - [SDK Reference](./sdk-reference.md) - Plugin interfaces and types
 - [Manifest Specification](./manifest-specification.md) - Build-time manifest generation
