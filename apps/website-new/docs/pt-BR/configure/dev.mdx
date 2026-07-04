@@ -1,0 +1,40 @@
+# dev
+
+- Tipo: `boolean | PluginDevOptions`
+- Obrigatório: No
+- Padrão valor: `true`
+- Uso scenario: usado para control `Module Federation` dev behavior
+
+O `PluginDevOptions` tipos são as seguintes:
+
+```ts
+interface PluginDevOptions {
+  disableLiveReload?: boolean;
+  disableHotTypesReload?: boolean;
+  disableDynamicRemoteTypeHints?: boolean;
+}
+```
+
+## disableHotTypesReload
+
+- Tipo: `boolean`
+- Obrigatório: No
+- Padrão valor: `false`
+
+Whether para disable tipo hot reloading
+
+## disableLiveReload
+
+- Tipo: `boolean`
+- Obrigatório: No
+- Padrão valor: `false`
+
+Whether para disable `liveReload`, depois setting `true`, any updates do producer vai não trigger o consumer's **page** `liveReload`
+
+## disableDynamicRemoteTypeHints
+
+- Tipo: `boolean`
+- Obrigatório: No
+- Padrão valor: `false`
+
+Whether para disable tipo hot reloading

@@ -1,0 +1,155 @@
+---
+title: "Extending uma Monolith"
+---
+
+# Extending Angular Apps com Module Federation: Uma Step-Step Guia
+
+Welcome para o second part de our series on enhancing Angular aplicações usando Module Federation (MF). In este guia, nós'll delve em como para seamlessly incorporate MF em um existente plain Angular aplicação.
+
+## Understanding Our Tools: @angular-architects/module-federation
+
+It's important para note esse, por padrão, Angular CLI does não facilitate o carregamento de custom Webpack configurações. To address este, our approach involves updating o Angular CLI builder com uma specialized custom builder. Este modification enables o extension do Webpack configuração arquivo, crucial for integrating advanced features like Module Federation.
+
+While este guia focuses on utilizing o custom builder fornecido pelo `@angular-architects/module-federation` library, você have o flexibility para substituir it com um alternative builder, deve your expertise permit. For those interested em exploring como para implement custom Webpack configurações within Angular CLI builders, nós suggest reading o seguintes article [How To Use Custom webpack Configurations with Angular CLI Builders](https://www.digitalocean.com/community/tutorials/angular-custom-webpack-configuração) by DigitalOcean. Este recurso offers valuable insights e practical steps for customizing your Angular build process beyond o standard configurações.
+
+### Library Funções
+
+- **Updates Build Configuração**: It enables o extension do Webpack configuração arquivo.
+- **Aplicação Serving**: Facilitates serving aplicações individually, either por meio de standard navegador interaction ou as uma micro-frontend.
+
+## Setting Up Main App
+
+### Initialization com Schematics
+
+Run o seguintes comando em seu projeto's root diretório:
+
+```bash
+ng add @angular-architects/module-federation --project app-micro --type dynamic-host --port 4200
+```
+
+Este comando configures your principal projeto for Module Federation, updates Angular CLI configurações, cria uma manifest arquivo for carregamento remote entries, e reorganizes o bootstrap process.
+
+### Handling Schematic Conflicts
+
+Some Angular schematics like `@angular/pwa` e `@angular/material` expect bootstrapping em `main.ts`. Se você plan para usar these, toggle o bootstrapping process temporarily:
+
+```bash
+ng g @angular-architects/module-federation:boot-async false --project [YOUR_MAIN_PROJECT]
+ng add [YOUR_LIBRARIES_OF_CHOICE] --project yourProject
+ng g @angular-architects/module-federation:boot-async true --project [YOUR_MAIN_PROJECT]
+```
+
+### Updating o Manifest Arquivo
+
+Depois implementing o schematic changes, it's essential para modificar o manifest arquivo (`mf.manifest.json`) e a aplicação routing configuração (`app-routing.module.ts`) para garantir proper functioning de your Angular aplicação.
+
+O padrão configuração em `mf.manifest.json` é definir para serve uma arquivo on port `4200`. However, este port é typically usado para o principal aplicação.
+
+To avoid conflicts, update o port for serving o secondary aplicação. Por exemplo, change o port para 4201. Your `mf.manifest.json` deve reflect este change as follows:
+
+```json
+{
+  "login": "http://localhost:4201/remoteEntry.js"
+}
+```
+
+By updating these configurações, você establish uma clear e functional structure for running your principal e secondary Angular aplicações on distinct ports, facilitating their independent operation e integração.
+
+- *Simplified Exemplo:* In este guia, o manifest configuração é statically defined em uma JSON arquivo for simplicity.
+
+- *Dynamic Configuração em Production:* For real-life aplicações, it's recomendado para serve o manifest configuração dinamicamente. Este pode ser achieved by either:
+
+   - Replacing o static JSON arquivo com uma production versão.
+   - Setting up um endpoint on your servidor esse retorna o manifest configuração.
+
+:::details NOTE
+     Quando opting for dynamic serving, update o principal.ts arquivo para modificar o URL usado pelo initFederation função para retrieve o manifest dados. Be aware esse em este configuração, se there's no internet connection, a aplicação vai fail para carregar. However, com uma static configuração, você pode handle connection erros, particularly se your app has been previously cached.
+:::
+
+4. **Integrating o Manifest em Routing**:
+
+   *Modify o Manifest Arquivo:*
+
+   - Adjust o port no mf.manifest.json arquivo se necessário, as described em previous sections.
+
+   *Update o Aplicação Routing (`app-routing.module.ts)`:*
+
+   - Remove o existente importe code (e.g., `import('@@login')`).
+   - Replace it com uma call para o `loadRemoteModule` função (imported do `@angular-architects/module-federation module`).
+   - Configure o `loadRemoteModule` função com o seguintes objeto:
+
+```json
+{
+  "type": "manifest",
+  "remoteName": "login",
+  "exposedModule": "./Module",
+}
+```
+
+   - `type`: Denotes o remote configuração tipo (`'manifest'` em este case).
+   - `remoteName`: O módulo's name as declared no manifest.
+   - `exposedModule`: Caminho do módulo no secondary app.
+
+   O final result deve look semelhante a o seguintes exemplo:
+
+```typescript
+const routes: Routes = [
+  ...
+  {
+    path: '',
+    canMatch: [isNotLogged],
+    loadChildren: () =>
+      loadRemoteModule({ type: 'manifest', remoteName: 'login', exposedModule: './Module' }).then(
+        (m) => m.LoginModule,
+      ),
+  },
+  ...
+];
+```
+
+Having followed these steps, o principal aplicação é now configured para carregar other aplicações remotely. O next phase involves setting up o secondary aplicações para garantir eles podem ser carregado em este manner.
+
+## Setting up Remote Apps
+
+Upon configuring o secondary aplicações, semelhante a o principal app, several projeto componentes vai ser updated. Notably, este process does não crie uma manifest arquivo, but it does modify o `webpack.config.js` arquivo, adding mais details than o que é typically encontrada no principal aplicação's configuração.
+
+```bash
+ng add @angular-architects/module-federation --project login --type remote --port 4201
+```
+
+:::tip
+ Instead de usando `--type dynamic-host`, nós são going para usar `--type remote` instead.
+:::
+
+### Understanding 'exposes'
+
+- *Role de 'exposes':* O exposes propriedade within o `webpack.config.js` arquivo plays uma crucial role. It contains um objeto configuração onde each key-valor pair resembles uma rota. Este propriedade dictates o módulos para ser exposto para o loader.
+- *Linking para 'exposedModule':* Este relates para our earlier step onde nós usado o exposedModule propriedade no rota configuração, signifying o specific módulo rota para carregar.
+
+### Adjustments em Webpack Configuração
+
+*Identifying Configuração Mismatch:* No current configuração, o rota configuração attempts para carregar um módulo chamado './Módulo', but este isn't specified no existente Webpack configuração.
+
+To rectify este, modify o `webpack.config.js` arquivo:
+
+- Remove o existente './Componente' key.
+- Add uma nova './Módulo' key, ensuring it points para o correct caminho for carregamento a aplicação módulo. Por exemplo:
+
+```javascript
+exposes: {
+  './Module': './projects/login/src/app/feature/login/login.module.ts',
+},
+```
+
+Com este update, o secondary aplicações são correctly configured para exponha o necessário módulos, aligning com o carregamento de remote requirements definir no principal aplicação.
+
+## Testing e Running o Aplicações
+
+- **Run o Main App**: `ng serve`
+- **Serve o Secondary App**: `ng serve login`
+- Depois serving both apps, refresh o principal aplicação para see o integração em action. O secondary app deve now carregue correctly within o principal app.
+- Moreover, by navigating para `localhost:4201` em your navegador, você pode observe o login aplicação operating as uma standalone entity.
+
+## Optimizing Build Configuração
+
+While nós currently use `shareAll` do `@angular-architects/module-federation/webpack` pacote, uma mais refined approach involves compartilhamento apenas necessário dependências usando o `share` função. Este selective compartilhamento optimizes a aplicação's performance e recurso utilization.
