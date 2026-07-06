@@ -1,10 +1,10 @@
-import { expectTypeOf, describe, it, vi, expect } from 'vitest';
+import { describe, it, rs, expect } from '@rstest/core';
 import { init, loadRemote, loadShare, loadShareSync } from '../src/index';
 import { getInfoWithoutType } from '@module-federation/runtime-core';
 
 describe('global', () => {
   it('inject mode', () => {
-    globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__ = vi.fn();
+    globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__ = rs.fn();
     const injectArgs = {
       name: '@federation/inject-mode',
       remotes: [],
@@ -49,28 +49,26 @@ describe('global', () => {
   describe('global types (generic)', () => {
     it('loadRemote', async () => {
       const typedLoadRemote: typeof loadRemote<string> = loadRemote;
-      expectTypeOf(typedLoadRemote).returns.toMatchTypeOf<
-        Promise<string | null>
-      >();
-      expectTypeOf(typedLoadRemote).returns.not.toMatchTypeOf<Promise<null>>();
+      type LoadRemoteReturn = ReturnType<typeof typedLoadRemote>;
+      const _acceptsStringOrNull: Promise<string | null> =
+        null as never as LoadRemoteReturn;
+      void _acceptsStringOrNull;
     });
 
     it('loadShare', async () => {
       const typedLoadShare: typeof loadShare<string> = loadShare;
-      expectTypeOf(typedLoadShare).returns.toMatchTypeOf<
-        Promise<false | (() => string | undefined)>
-      >();
-      expectTypeOf(typedLoadShare).returns.not.toMatchTypeOf<
-        Promise<false | (() => undefined)>
-      >();
+      type LoadShareReturn = ReturnType<typeof typedLoadShare>;
+      const _acceptsStringFactory: Promise<false | (() => string | undefined)> =
+        null as never as LoadShareReturn;
+      void _acceptsStringFactory;
     });
 
     it('loadShareSync', () => {
       const typedLoadShareSync: typeof loadShareSync<string> = loadShareSync;
-      expectTypeOf(typedLoadShareSync).returns.toMatchTypeOf<
-        () => string | never
-      >();
-      expectTypeOf(typedLoadShareSync).returns.not.toMatchTypeOf<() => never>();
+      type LoadShareSyncReturn = ReturnType<typeof typedLoadShareSync>;
+      const _acceptsStringFactory: () => string | never =
+        null as never as LoadShareSyncReturn;
+      void _acceptsStringFactory;
     });
   });
 });

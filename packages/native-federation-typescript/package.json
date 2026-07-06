@@ -105,13 +105,12 @@
   "devDependencies": {
     "directory-tree": "3.5.2",
     "upath": "2.0.1",
-    "vitest": "1.6.0",
     "webpack": "5.104.1"
   },
   "scripts": {
     "build": "tsdown --config tsdown.config.ts && cp package.json dist && cp *.md dist",
     "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\"",
-    "test": "pnpm exec vitest run --passWithNoTests --config vite.config.mts",
+    "test": "pnpm exec rstest --passWithNoTests --config rstest.config.mts",
     "pre-release": "pnpm run test && pnpm run build"
   }
 }

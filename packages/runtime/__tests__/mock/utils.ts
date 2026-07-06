@@ -1,10 +1,9 @@
-import createFetchMock from 'vitest-fetch-mock';
-import { vi } from 'vitest';
+import { rs } from '@rstest/core';
 import path from 'path';
 import fs from 'fs';
 
 function isAbsolute(url: string) {
-  // `c:\\` 这种 case 返回 false，在浏览器中使用本地图片，应该用 file 协议
+  // Windows drive paths return false here; browser fixtures should use file URLs.
   if (!/^[a-zA-Z]:\\/.test(url)) {
     if (/^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(url)) {
       return true;
@@ -13,7 +12,7 @@ function isAbsolute(url: string) {
   return false;
 }
 
-const fetchMocker = createFetchMock(vi);
+const nativeFetch = globalThis.fetch?.bind(globalThis);
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function mockStaticServer({
@@ -34,60 +33,64 @@ export function mockStaticServer({
       ? !filterKeywords.some((words) => input.url.includes(words))
       : true;
 
-  fetchMocker.enableMocks();
-  fetchMocker.doMock();
-
-  fetchMocker.mockIf(match, (req) => {
-    let pathname = req.url;
-    if (isAbsolute(req.url)) {
-      // eslint-disable-next-line prefer-destructuring
-      pathname = new URL(req.url).pathname;
-      if (basename) {
-        pathname = pathname.replace(basename, './');
+  rs.stubGlobal(
+    'fetch',
+    rs.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const req = input instanceof Request ? input : new Request(input, init);
+      if (!match(req)) {
+        if (!nativeFetch) {
+          throw new Error('No fetch implementation is available.');
+        }
+        return nativeFetch(req);
       }
-    }
-    const fullDir = path.resolve(baseDir, `./${pathname}`);
-    const { ext } = path.parse(fullDir);
-    // prettier-ignore
-    const mimeType =
-        // eslint-disable-next-line no-nested-ternary
-        ext === '.html' ?
-          'text/html' :
-          // eslint-disable-next-line no-nested-ternary
-          ext === '.js' ?
-            'text/javascript' :
-            ext === '.css' ?
-              'text/css' :
-              'text/plain';
-    const { timeConsuming = 0, ...headers } = customerHeaders[pathname] || {
-      timeConsuming: 0,
-    };
 
-    return new Promise((resolve, reject) => {
+      let pathname = req.url;
+      if (isAbsolute(req.url)) {
+        // eslint-disable-next-line prefer-destructuring
+        pathname = new URL(req.url).pathname;
+        if (basename) {
+          pathname = pathname.replace(basename, './');
+        }
+      }
+      const fullDir = path.resolve(baseDir, './' + pathname);
+      const { ext } = path.parse(fullDir);
+      // prettier-ignore
+      const mimeType =
+          // eslint-disable-next-line no-nested-ternary
+          ext === '.html' ?
+            'text/html' :
+            // eslint-disable-next-line no-nested-ternary
+            ext === '.js' ?
+              'text/javascript' :
+              ext === '.css' ?
+                'text/css' :
+                'text/plain';
+      const { timeConsuming = 0, ...headers } = customerHeaders[pathname] || {
+        timeConsuming: 0,
+      };
+
       try {
         const body =
           responseMatchs[pathname] || fs.readFileSync(fullDir, 'utf-8');
-        const res = {
-          url: req.url,
-          body,
+        const response = new Response(body, {
           headers: {
             'Content-Type': mimeType,
             ...(headers || {}),
           },
-        };
+        });
+
         if (timeConsuming) {
-          setTimeout(() => resolve(res), timeConsuming);
-        } else {
-          resolve(res);
+          await new Promise((resolve) => setTimeout(resolve, timeConsuming));
         }
+        return response;
       } catch (err) {
         console.error(
-          `mockStaticServer: request ${pathname}, fullDir: ${fullDir}`,
+          'mockStaticServer: request ' + pathname + ', fullDir: ' + fullDir,
         );
-        return reject(err);
+        throw err;
       }
-    });
-  });
+    }),
+  );
 }
 
 import { ModuleFederationRuntimePlugin } from '../../src/type';

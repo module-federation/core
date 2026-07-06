@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, rs } from '@rstest/core';
 import { ModuleFederation, Module } from '../src/index';
 import type { ModuleFederationRuntimePlugin } from '../src/type/plugin';
 
@@ -14,7 +14,7 @@ describe('ModuleFederation', () => {
   it('deduplicates concurrent remote module init', async () => {
     let beforeInitContainerCalls = 0;
     let initContainerCalls = 0;
-    const initSpy = vi.fn(
+    const initSpy = rs.fn(
       () => new Promise<void>((resolve) => setTimeout(resolve, 10)),
     );
 
@@ -51,7 +51,7 @@ describe('ModuleFederation', () => {
 
     module.remoteEntryExports = {
       init: initSpy,
-      get: vi.fn(),
+      get: rs.fn(),
     } as any;
 
     const firstInit = module.init('first');

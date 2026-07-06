@@ -1,24 +1,24 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, rs } from '@rstest/core';
 import { fetchRetry } from '../src/fetch-retry';
 import { scriptRetry } from '../src/script-retry';
 import { ERROR_ABANDONED, RUNTIME_008 } from '../src/constant';
 
-const mockFetch = vi.fn();
+const mockFetch = rs.fn();
 global.fetch = mockFetch;
 
-vi.mock('../src/logger', () => ({
+rs.mock('../src/logger', () => ({
   default: {
-    log: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
+    log: rs.fn(),
+    warn: rs.fn(),
+    error: rs.fn(),
   },
 }));
 
 describe('Retry Plugin', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    rs.clearAllMocks();
     mockFetch.mockClear();
-    vi.useRealTimers();
+    rs.useRealTimers();
   });
 
   describe('fetchRetry', () => {
@@ -96,7 +96,7 @@ describe('Retry Plugin', () => {
     });
 
     it('should call onRetry callback', async () => {
-      const onRetry = vi.fn();
+      const onRetry = rs.fn();
       mockFetch.mockRejectedValue(new Error('Network error'));
 
       await expect(
@@ -118,7 +118,7 @@ describe('Retry Plugin', () => {
     });
 
     it('should call onSuccess callback on retry success (not on first success)', async () => {
-      const onSuccess = vi.fn();
+      const onSuccess = rs.fn();
       const mockResponse = {
         ok: true,
         json: () => Promise.resolve({ data: 'test' }),
@@ -148,7 +148,7 @@ describe('Retry Plugin', () => {
     });
 
     it('should call onError callback on final failure', async () => {
-      const onError = vi.fn();
+      const onError = rs.fn();
       mockFetch.mockRejectedValue(new Error('Network error'));
 
       await expect(
@@ -170,7 +170,7 @@ describe('Retry Plugin', () => {
 
   describe('scriptRetry', () => {
     it('should retry on script load failure', async () => {
-      const mockRetryFn = vi
+      const mockRetryFn = rs
         .fn()
         .mockRejectedValueOnce(new Error('Script load error'))
         .mockResolvedValueOnce({ module: 'loaded' });
@@ -192,7 +192,7 @@ describe('Retry Plugin', () => {
     });
 
     it('should respect retryTimes limit for scripts', async () => {
-      const mockRetryFn = vi
+      const mockRetryFn = rs
         .fn()
         .mockRejectedValue(new Error('Script load error'));
 
@@ -212,7 +212,7 @@ describe('Retry Plugin', () => {
     });
 
     it('should use getRetryUrl for script retries', async () => {
-      const mockRetryFn = vi
+      const mockRetryFn = rs
         .fn()
         .mockRejectedValue(new Error('Script load error'));
 
@@ -237,10 +237,10 @@ describe('Retry Plugin', () => {
     });
 
     it('should call callbacks for script retry', async () => {
-      const onRetry = vi.fn();
-      const onSuccess = vi.fn();
-      const onError = vi.fn();
-      const mockRetryFn = vi
+      const onRetry = rs.fn();
+      const onSuccess = rs.fn();
+      const onError = rs.fn();
+      const mockRetryFn = rs
         .fn()
         .mockImplementationOnce(({ getEntryUrl }: any) => {
           // trigger onRetry by calling getEntryUrl
@@ -274,7 +274,7 @@ describe('Retry Plugin', () => {
         'http://localhost:2011',
         'http://localhost:2021',
       ];
-      const mockRetryFn = vi.fn().mockImplementation(({ getEntryUrl }: any) => {
+      const mockRetryFn = rs.fn().mockImplementation(({ getEntryUrl }: any) => {
         // Consumer always calls getEntryUrl with the same original URL
         const nextUrl = getEntryUrl('http://localhost:2001/remoteEntry.js');
         sequence.push(nextUrl);
@@ -307,7 +307,7 @@ describe('Retry Plugin', () => {
 
     it('should append retryCount when addQuery is true for scripts', async () => {
       const sequence: string[] = [];
-      const mockRetryFn = vi.fn().mockImplementation(({ getEntryUrl }: any) => {
+      const mockRetryFn = rs.fn().mockImplementation(({ getEntryUrl }: any) => {
         // Consumer always calls getEntryUrl with the same original URL
         const nextUrl = getEntryUrl('https://cdn-a.example.com/entry.js');
         sequence.push(nextUrl);
@@ -341,7 +341,7 @@ describe('Retry Plugin', () => {
 
     it('should prevent query parameter accumulation for scripts with functional addQuery', async () => {
       const sequence: string[] = [];
-      const mockRetryFn = vi.fn().mockImplementation(({ getEntryUrl }: any) => {
+      const mockRetryFn = rs.fn().mockImplementation(({ getEntryUrl }: any) => {
         // Consumer always calls getEntryUrl with the same original URL
         const nextUrl = getEntryUrl('https://m1.example.com/remoteEntry.js');
         sequence.push(nextUrl);
@@ -387,12 +387,12 @@ describe('Retry Plugin', () => {
 
   describe('exponential backoff', () => {
     afterEach(() => {
-      vi.useRealTimers();
+      rs.useRealTimers();
     });
 
     it('should apply exponential backoff when retryDelay is a function for fetchRetry', async () => {
-      vi.useFakeTimers();
-      const setTimeoutSpy = vi.spyOn(global, 'setTimeout');
+      rs.useFakeTimers();
+      const setTimeoutSpy = rs.spyOn(global, 'setTimeout');
       mockFetch.mockRejectedValue(new Error('fail'));
 
       const backoff = (attempt: number) => 1000 * 2 ** (attempt - 1);
@@ -404,7 +404,7 @@ describe('Retry Plugin', () => {
       });
 
       const assertion = expect(fetchPromise).rejects.toThrow();
-      await vi.runAllTimersAsync();
+      await rs.runAllTimersAsync();
       await assertion;
 
       const delays = setTimeoutSpy.mock.calls.map(([, ms]) => ms);
@@ -413,9 +413,9 @@ describe('Retry Plugin', () => {
     });
 
     it('should apply exponential backoff when retryDelay is a function for scriptRetry', async () => {
-      vi.useFakeTimers();
-      const setTimeoutSpy = vi.spyOn(global, 'setTimeout');
-      const mockRetryFn = vi
+      rs.useFakeTimers();
+      const setTimeoutSpy = rs.spyOn(global, 'setTimeout');
+      const mockRetryFn = rs
         .fn()
         .mockRejectedValue(new Error('Script load error'));
 
@@ -434,7 +434,7 @@ describe('Retry Plugin', () => {
       });
 
       const assertion = expect(retryPromise).rejects.toThrow(ERROR_ABANDONED);
-      await vi.runAllTimersAsync();
+      await rs.runAllTimersAsync();
       await assertion;
 
       const delays = setTimeoutSpy.mock.calls.map(([, ms]) => ms);

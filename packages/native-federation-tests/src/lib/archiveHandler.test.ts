@@ -3,7 +3,7 @@ import axios from 'axios';
 import { existsSync, mkdirSync, mkdtempSync, rmSync } from 'fs';
 import os from 'os';
 import { join } from 'path';
-import { afterAll, describe, expect, it, vi } from 'vitest';
+import { afterAll, describe, expect, it, rs } from '@rstest/core';
 
 import { RemoteOptions } from '../interfaces/RemoteOptions';
 import { createTestsArchive, downloadTypesArchive } from './archiveHandler';
@@ -65,7 +65,7 @@ describe('archiveHandler', () => {
       const zip = new AdmZip();
       zip.addLocalFolder(tmpDir);
 
-      axios.get = vi.fn().mockResolvedValueOnce({ data: zip.toBuffer() });
+      axios.get = rs.fn().mockResolvedValueOnce({ data: zip.toBuffer() });
 
       await downloadTypesArchive(hostOptions)([
         destinationFolder,
@@ -78,7 +78,7 @@ describe('archiveHandler', () => {
       const zip = new AdmZip();
       zip.addLocalFolder(tmpDir);
 
-      axios.get = vi.fn().mockResolvedValue({ data: zip.toBuffer() });
+      axios.get = rs.fn().mockResolvedValue({ data: zip.toBuffer() });
 
       const downloader = downloadTypesArchive(hostOptions);
 

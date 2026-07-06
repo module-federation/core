@@ -8,6 +8,6 @@
     "strict": true,
     "strictNullChecks": true,
     "resolveJsonModule": true,
-    "types": ["vitest"]
+    "types": ["@rstest/core"]
   }
 }

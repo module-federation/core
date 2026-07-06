@@ -1,24 +1,24 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, rs } from '@rstest/core';
 import { createApp, defineComponent, h, KeepAlive, nextTick } from 'vue';
 import { createMemoryHistory, createRouter, RouterView } from 'vue-router';
 import RemoteApp from '../src/remoteApp';
 
-const { dispatchPopstateEnv } = vi.hoisted(() => ({
-  dispatchPopstateEnv: vi.fn(),
+const { dispatchPopstateEnv } = rs.hoisted(() => ({
+  dispatchPopstateEnv: rs.fn(),
 }));
 
-vi.mock('@module-federation/bridge-shared', () => ({
+rs.mock('@module-federation/bridge-shared', () => ({
   dispatchPopstateEnv,
 }));
 
-vi.mock('@module-federation/runtime', () => ({
+rs.mock('@module-federation/runtime', () => ({
   getInstance: () => ({
     bridgeHook: {
       lifecycle: {
-        beforeBridgeRender: { emit: vi.fn(async () => ({})) },
-        afterBridgeRender: { emit: vi.fn() },
-        beforeBridgeDestroy: { emit: vi.fn() },
-        afterBridgeDestroy: { emit: vi.fn() },
+        beforeBridgeRender: { emit: rs.fn(async () => ({})) },
+        afterBridgeRender: { emit: rs.fn() },
+        beforeBridgeDestroy: { emit: rs.fn() },
+        afterBridgeDestroy: { emit: rs.fn() },
       },
     },
   }),
@@ -45,8 +45,8 @@ describe('RemoteApp', () => {
 
   it('destroys and re-renders the remote app when used under KeepAlive', async () => {
     const providerReturn = {
-      render: vi.fn(),
-      destroy: vi.fn(),
+      render: rs.fn(),
+      destroy: rs.fn(),
     };
     const RemoteRoute = defineComponent({
       setup() {

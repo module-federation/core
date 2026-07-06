@@ -12,7 +12,7 @@
   "scripts": {
     "build": "rslib build",
     "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\"",
-    "test": "pnpm exec vitest run --passWithNoTests --config vite.config.mts",
+    "test": "pnpm exec rstest --passWithNoTests --config rstest.config.mts",
     "pre-release": "pnpm run test && pnpm run build"
   },
   "repository": {
@@ -163,8 +163,7 @@
     "@modern-js/runtime": "2.70.5",
     "@modern-js/tsconfig": "2.70.5",
     "@types/react": "^18.3.11",
-    "@types/react-dom": "^18.3.0",
-    "vitest": "1.6.0"
+    "@types/react-dom": "^18.3.0"
   },
   "peerDependencies": {
     "react": ">=17",

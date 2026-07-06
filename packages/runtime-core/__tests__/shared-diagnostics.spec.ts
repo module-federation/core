@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from '@rstest/core';
 import { RUNTIME_005 } from '@module-federation/error-codes';
 import { ModuleFederation } from '../src/core';
 import { resetFederationGlobalInfo } from '../src/global';
