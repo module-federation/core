@@ -4,11 +4,20 @@ import {
   OBSERVABILITY_DEVTOOLS_SOURCE,
 } from './messages';
 
+const isModuleInfoPayload = (value: unknown) =>
+  Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+
+const getMessageData = (data: unknown) =>
+  Boolean(data) && typeof data === 'object'
+    ? (data as Record<string, unknown>)
+    : {};
+
 if (window.moduleHandler) {
   window.removeEventListener('message', window.moduleHandler);
 } else {
   window.moduleHandler = (event) => {
-    const { origin, data } = event;
+    const { origin } = event;
+    const data = getMessageData(event.data);
     if (data?.source === OBSERVABILITY_DEVTOOLS_SOURCE) {
       chrome.runtime
         .sendMessage({
@@ -22,7 +31,7 @@ if (window.moduleHandler) {
       return;
     }
 
-    if (!data.moduleInfo) {
+    if (!isModuleInfoPayload(data.moduleInfo)) {
       return;
     }
 
