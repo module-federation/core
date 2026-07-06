@@ -39,7 +39,7 @@
     "minimist": "1.2.8",
     "rslog": "1.2.3",
     "glob": "7.2.0",
-    "handlebars": "4.7.7"
+    "handlebars": "4.7.9"
   },
   "devDependencies": {
     "@types/glob": "7.2.0",

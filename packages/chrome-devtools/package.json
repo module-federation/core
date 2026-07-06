@@ -65,7 +65,7 @@
     "ahooks": "3.7.10",
     "dagre": "0.8.5",
     "reactflow": "11.11.4",
-    "echarts": "6.0.0",
+    "echarts": "6.1.0",
     "lucide-react": "0.364.0",
     "echarts-for-react": "3.0.5",
     "i18next": "23.0.0",

@@ -29,8 +29,7 @@
   "dependencies": {
     "@module-federation/sdk": "workspace:*",
     "@module-federation/dts-plugin": "workspace:*",
-    "@module-federation/managers": "workspace:*",
-    "find-pkg": "2.0.0"
+    "@module-federation/managers": "workspace:*"
   },
   "exports": {
     ".": {
