@@ -1,0 +1,100 @@
+# Dica de tipoing
+
+Just like um NPM Pacote, {props.name || 'Module Federation'} artifacts também generate tipos e enjoy hot-reloading de tipos, even though o artifacts são hosted on uma remote CDN.
+
+<code>{props.pkgName || '@module-federation/enhanced'}</code> has type hinting enabled by default. Isso article will introduce several common usage scenarios and their specific configurations.
+
+## Uso Scenarios
+
+### Generating Tipos
+
+Quando building with the build plugin provided by <code>{props.pkgName || '@module-federation/enhanced'}</code>, type files are automatically generated.
+
+### Carregamento Tipos
+
+1. Consumer modifies `tsconfig.json` e adds `paths`:
+
+```json
+{
+  "compilerOptions": {
+    "paths": {
+      "*": ["./@mf-types/*"]
+    }
+  }
+}
+```
+
+2. Start o aplicações
+
+Depois starting, o consumer vai automatically buscar o producer's tipo arquivos.
+
+:::tip
+Você don't precisa worry about o startup order do producer e consumer.
+:::
+
+
+
+### Tipo Hot Reloading
+
+Depois modifying o producer's code, o consumer vai automatically buscar o producer's tipos.
+
+![hot-types-reload-static](@public/guide/type-prompt/hot-types-reload-static.gif)
+
+### API de runtime Dica de tipoing
+
+Add `./@mf-types/*` para o `include` field para enjoy `Runtime` `loadRemote` tipo hinting e tipo hot reloading:
+
+```json title="tsconfig.json"
+{
+  "include": ["./@mf-types/*"]
+}
+```
+
+![hot-types-reload](@public/guide/type-prompt/hot-types-reload.gif)
+
+:::info
+Quando o builder é `webpack`, add `**/@mf-types/**` para [watchOptions.ignored](https://webpack.js.org/configuration/watch/#watchoptionsignored) para avoid circular compilation issues caused by tipo updates.
+:::
+
+
+### Third-Party Pacote Tipo Extraction
+
+{props.name || 'Module Federation'} automatically extracts third-party pacote tipos para garantir esse `exposes` arquivo tipos pode ser accessed normally.
+
+![third-party](@public/guide/type-prompt/third-party.jpg)
+
+### Nested Tipo Re-exporte
+
+{props.name || 'Module Federation'} suporta nested remotes e vai automatically extract o tipos de nested remotes.
+
+![nested-remote](@public/guide/type-prompt/nested-remote.jpg)
+
+### Dynamic Dica de tipoing
+
+{props.name || 'Module Federation'} suporta carregamento dynamic tipos e também suporta hot updates.
+
+![dynamic-remote-hot-types-reload](@public/guide/type-prompt/dynamic-remote-hot-types-reload-static.gif)
+
+## Configuração
+
+- [dts](/configure/dts.html): Tipo generation/carregamento
+- [dev](/configure/dev.html): Tipo hot reloading
+
+## FAQ
+
+### Project has circular compilation e cannot ser terminated
+
+Este é likely caused pelo compiler watching changes no tipo pasta ou o `dist` diretório. Add `@mf-types` para o ignored arquivos. Por exemplo, com webpack/rspack:
+
+```ts
+config.watchOptions = {
+  ignored: ['**/node_modules/**', '**/@mf-types/**'],
+};
+```
+
+### No tipo arquivos são generated, como para find o reason?
+
+1. Add o `FEDERATION_DEBUG=true` environment variable antes o projeto startup comando.
+2. Set [dts.displayErrorInTerminal](/configure/dts.html#displayerrorinterminal) para `true`.
+3. Start o projeto e check o console output.
+4. (Opcional) Se there é no erro no console, check o `.mf/typesGenerate.log` log arquivo.

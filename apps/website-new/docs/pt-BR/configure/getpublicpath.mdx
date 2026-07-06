@@ -1,0 +1,37 @@
+# getPublicPath
+
+- Tipo: `string`
+- Obrigatório: No
+- Padrão valor: `undefined`
+- Effective condition: apenas effective quando `exposes` é definir
+
+
+Usado para definir uma dynamic `publicPath`. O valor deve ser uma stringified função ou uma stringified retornar expression. Quando other consumers carregue este provider, o string em `getPublicPath` vai ser executed via `new Function` para obtain o retornar valor, que vai ser usado as o `publicPath` prefix para o módulo’s static assets. Por exemplo, se your deployed projeto receives uma dynamic `cdn_prefix`, você pode configure it as:
+
+- Função form: ``function(){ retornar window.cdn_prefix }``
+- Return form: ``retornar "https:" + window.navigator.cdn_host + "/recurso/app/"``
+
+No exemplo below, `getPublicPath` é definir. Quando other consumers carregue este provider, o string em `getPublicPath` vai ser executed usando `new Function` para obtain o valor, que vai ser usado as o `publicPath` prefix para o módulo’s static assets.
+
+:::tip NOTE
+`getPublicPath` deve ser uma stringified função ou uma stringified retornar expression.
+:::
+
+:::tip NOTE
+Se você're usando o módulo federation webpack plugin e want para definir uma dynamic publicPath, você deve definir `__webpack_public_path__ = window.cdn_prefix` no `getPublicPath` função body.
+:::
+
+```ts title="rspack.config.ts"
+module.exports = {
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'provider',
+      exposes: {
+        './Button': './src/components/Button.tsx',
+      },
+      // ...
+      getPublicPath: `function() {return "https:" + window.navigator.cdn_host + "/resource/app/"}`,
+    }),
+  ],
+};
+```

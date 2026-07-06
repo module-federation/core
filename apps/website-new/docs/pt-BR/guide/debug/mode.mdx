@@ -1,0 +1,25 @@
+# Habilite debug mode
+
+To facilitate solução de problemas, {props.name || 'Module Federation'} fornece uma debug mode. Você pode adicione o `FEDERATION_DEBUG=true` environment variable quando executing uma build ou execute `localStorage.setItem('FEDERATION_DEBUG','true')` no navegador para habilite o debug mode de Module Federation.
+
+Build e add environment variables:
+
+```bash
+# Debug development mode
+FEDERATION_DEBUG=true pnpm dev
+
+# Debug production mode
+FEDERATION_DEBUG=true pnpm build
+```
+
+Runtime e add environment variables:
+
+```
+localStorage.setItem('FEDERATION_DEBUG','true')
+```
+
+## Log information
+
+Depois enabling debug mode, você pode see o seguintes information no console:
+
+In debug mode, you will see some logs starting with [ <code>{props.name || 'Module Federation'}</code> ] output in the Terminal.

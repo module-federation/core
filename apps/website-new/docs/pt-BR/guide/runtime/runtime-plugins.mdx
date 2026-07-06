@@ -1,0 +1,308 @@
+# Plugins de runtime
+
+Runtime plugins let você change **runtime behavior** sem changing o core runtime itself.
+
+Use them quando você precisa:
+
+- rewrite remote URLs em runtime
+- customize manifest requests
+- patch script carregamento
+- override shared resolution
+- add recovery ou fallback behavior
+- introduce novo carregamento de remote behavior
+
+Se você apenas precisa **register** um plugin caminho em build configuração, consulte [`runtimePlugins`](/configure/runtimeplugins.html). Se você need o full hook list, consulte [Runtime Hooks](/guide/runtime/runtime-hooks.html).
+
+## Mental model
+
+Uma runtime plugin é uma função esse retorna uma `ModuleFederationRuntimePlugin`:
+
+```ts
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+export default function myRuntimePlugin(): ModuleFederationRuntimePlugin {
+  return {
+    name: 'my-runtime-plugin',
+  };
+}
+```
+
+O função form matters porque it lets você:
+
+- accept opções
+- keep estado em uma closure
+- reuse o mesmo plugin logic across environments
+
+## Register um plugin
+
+Você pode register runtime plugins em three places:
+
+1. Build time, por meio de `runtimePlugins`
+2. Runtime, on uma specific instance, por meio de `registerPlugins(...)` ou `instance.registerPlugins(...)`
+3. Runtime, globally, por meio de `registerGlobalPlugins(...)`
+
+### Build-time registration
+
+Use build-time registration quando o plugin deve always ser present for esse host.
+
+```ts title="module-federation.config.ts"
+const path = require('path');
+
+export default {
+  name: 'host',
+  remotes: {
+    catalog: 'catalog@https://registry.example.com/mf-manifest.json',
+  },
+  runtimePlugins: [
+    [
+      path.resolve(__dirname, './plugins/rewrite-remote-entry.ts'),
+      {
+        fromHost: 'registry.example.com',
+        toHost: 'cdn.example.com',
+      },
+    ],
+  ],
+};
+```
+
+### Runtime registration
+
+Use runtime registration quando o plugin depends on user estado, environment, feature flags, ou dados fetched depois startup.
+
+```ts
+import { createInstance } from '@module-federation/enhanced/runtime';
+
+import rewriteRemoteEntryPlugin from './plugins/rewrite-remote-entry';
+
+const mf = createInstance({
+  name: 'host',
+  remotes: [
+    {
+      name: 'catalog',
+      entry: 'https://registry.example.com/mf-manifest.json',
+    },
+  ],
+});
+
+mf.registerPlugins([
+  rewriteRemoteEntryPlugin({
+    fromHost: 'registry.example.com',
+    toHost: 'cdn.example.com',
+  }),
+]);
+```
+
+### Global runtime registration
+
+Use `registerGlobalPlugins(...)` quando você want o plugin para ser disponível para all future runtime instances, instead de apenas one current instance.
+
+Este é best suited for instrumentação compartilhada, cross-app policy, ou host-wide defaults.
+
+```ts
+import {
+  registerGlobalPlugins,
+  createInstance,
+} from '@module-federation/enhanced/runtime';
+
+import runtimePlugin from './plugins/runtime-plugin';
+
+registerGlobalPlugins([runtimePlugin()]);
+
+const mf = createInstance({
+  name: 'host',
+  remotes: [
+    {
+      name: 'catalog',
+      entry: 'https://registry.example.com/mf-manifest.json',
+    },
+  ],
+});
+```
+
+`registerGlobalPlugins(...)` deduplicates plugins by `name`. In practice, call it antes criação ou usando runtime instances so o global plugins são incorporated consistently.
+
+## Choose o right hook
+
+| Job                                              | Hook                                                | Use it quando                                                                                                                                                           |
+| ------------------------------------------------ | --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Change remote lookup input                       | `beforeRequest`                                     | Você need para rewrite o request antes remote resolution starts                                                                                                       |
+| Rewrite uma resolved entry URL                     | `afterResolve`                                      | Você want para change `remoteInfo.entry` depois o runtime has resolved o remote                                                                                       |
+| Customize manifest network requests              | `fetch`                                             | Você need credentials, headers, retries, ou alternate buscar behavior for manifest carregamento                                                                              |
+| Customize injected scripts e links             | `createScript`, `createLink`                        | Você need para add attributes like `crossorigin`, timeouts, ou custom script/link elements. Quando disponível, `remoteInfo` é fornecido so você pode apply per-remote policy. |
+| Align ou rewrite compartilhe escopos antes remote init | `beforeInitContainer`, `initContainerShareScopeMap` | Você need para change que compartilhe escopo uma remote initializes against                                                                                                     |
+| Override o shared winner                       | `resolveShare`                                      | Você want para force uma diferente shared implementation than o runtime would normally pick                                                                              |
+| Observe remote carregue status                       | `afterMatchRemote`, `afterLoadRemote`               | Você need request tracing ou final success/failure status for `loadRemote`                                                                                             |
+| Observe dependência compartilhada status                 | `afterLoadShare`, `errorLoadShare`                  | Você need para diagnose missing dependências compartilhadas, versão mismatch, ou eager configuração erros                                                                     |
+| Recover de carregue failures                       | `errorLoadRemote`                                   | Você need fallback módulos, offline behavior, ou layered recovery                                                                                                      |
+| Implement uma novo remote carregamento estratégia          | `loadEntry`                                         | Você want para fully customize como uma remote entry é carregado ou suporte uma novo remote tipo                                                                                 |
+
+## Recipe: rewrite o resolved remote entry
+
+`afterResolve` é o right hook quando o remote has já been resolved e você quiser change o final URL antes carregamento continues.
+
+Este pattern é useful for:
+
+- CDN indirection
+- environment switching
+- registry-backed routing
+- domain normalization
+
+```ts
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+interface RewriteRemoteEntryOptions {
+  fromHost: string;
+  toHost: string;
+}
+
+export default function rewriteRemoteEntryPlugin(
+  options: RewriteRemoteEntryOptions,
+): ModuleFederationRuntimePlugin {
+  return {
+    name: 'rewrite-remote-entry',
+    async afterResolve(args) {
+      const entry = args.remoteInfo?.entry;
+      if (!entry) {
+        return args;
+      }
+
+      try {
+        const currentUrl = new URL(entry);
+        if (currentUrl.hostname !== options.fromHost) {
+          return args;
+        }
+
+        const nextUrl = new URL(entry);
+        nextUrl.hostname = options.toHost;
+        args.remoteInfo.entry = nextUrl.toString();
+      } catch {
+        // Ignore non-URL entries and keep the original resolution.
+      }
+
+      return args;
+    },
+  };
+}
+```
+
+Why este hook:
+
+- `beforeRequest` é earlier; o remote é não resolved yet
+- `afterResolve` já gives você `remoteInfo.entry`
+- changing `args.remoteInfo.entry` here keeps o original caminho, query, e hash intact
+
+:::tip Runtime-only caveat
+
+Um `afterResolve` rewrite changes carregamento em runtime behavior. It does não automatically rewrite o remote URL usado by tipo generation ou other build-time tooling. Se você rely on generated remote tipos, keep esse caminho aligned separadamente.
+
+:::
+
+## Recipe: customize manifest buscar
+
+Use `fetch` quando o manifest request itself needs custom behavior.
+
+```ts
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+export default function fetchManifestWithCredentials(): ModuleFederationRuntimePlugin {
+  return {
+    name: 'fetch-manifest-with-credentials',
+    fetch(manifestUrl, requestInit, remoteInfo) {
+      const headers = new Headers(requestInit?.headers);
+      headers.set('x-mf-host', 'host');
+      if (remoteInfo?.name) {
+        headers.set('x-mf-remote', remoteInfo.name);
+      }
+
+      return fetch(manifestUrl, {
+        ...requestInit,
+        credentials: 'include',
+        headers,
+      });
+    },
+  };
+}
+```
+
+Use `fetch` for:
+
+- credentials
+- auth headers
+- manifest retries
+- custom proxy logic
+
+Se você need uma ready-made transport policy, see o built-em retry plugin.
+
+## Recipe: prefer uma host-owned dependência compartilhada
+
+`resolveShare` é o hook for overriding o final shared módulo selection.
+
+O important part: changing `args.scope` ou `args.version` alone é não enough. To change o actual winner, replace `args.resolver`.
+
+```ts
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+export default function preferHostReact(): ModuleFederationRuntimePlugin {
+  return {
+    name: 'prefer-host-react',
+    resolveShare(args) {
+      if (args.pkgName !== 'react') {
+        return args;
+      }
+
+      const hostVersionMap = args.shareScopeMap.default?.react;
+      if (!hostVersionMap) {
+        return args;
+      }
+
+      const preferredShared =
+        hostVersionMap[args.version] ?? Object.values(hostVersionMap)[0];
+      if (!preferredShared) {
+        return args;
+      }
+
+      args.resolver = () => ({
+        shared: preferredShared,
+        useTreesShaking: false,
+      });
+
+      return args;
+    },
+  };
+}
+```
+
+## Failure handling e `shareStrategy`
+
+`errorLoadRemote` é o right place for runtime fallbacks.
+
+One important detail: o behavior changes com `shareStrategy`.
+
+- `version-first` eagerly carrega remote entries during startup para initialize dependências compartilhadas
+- `loaded-first` defers carregamento de remote until o remote é actually usado
+
+Esse means:
+
+- com `version-first`, um offline remote pode fail early com `lifecycle: 'beforeLoadShare'`
+- com `loaded-first`, o mesmo remote geralmente fails later, quando code actually tries para usar it
+
+Se você expect remotes para ser intermittently unavailable, pair `errorLoadRemote` com uma deliberate `shareStrategy`.
+
+## Versão-sensitive hooks
+
+O advanced hooks evolve over time. For comum hooks like `afterResolve`, `fetch`, `createScript`, e `loadEntry`, prefer checking o installed runtime tipos quando você depend on newer arguments ou behaviors.
+
+Esse é especialmente relevant quando você rely on:
+
+- extra script attributes em `createScript`
+- loader hook details passed em `fetch` ou `loadEntry`
+- menos-comum lifecycle hooks usado by built-em plugins
+
+## Related docs
+
+- [`runtimePlugins` configuração](/configure/runtimeplugins.html)
+- [Runtime API](/guide/runtime/runtime-api.html)
+- [Runtime Hooks](/guide/runtime/runtime-hooks.html)
+- [Plugin System](/plugin/dev/index.html)
+- [Retry Plugin](/plugin/plugins/retry-plugin.html)
+- [Error Load Remote Solutions](/blog/error-load-remote.html)

@@ -1,0 +1,31 @@
+Se o plugin de build é usado, um MF instance vai ser automatically criado e stored em memory quando o projeto começa. Você pode diretamente call métodos do MF instance via o.
+
+```ts
+import { loadRemote } from '@module-federation/enhanced/runtime';
+
+loadRemote('remote1');
+```
+
+Se o plugin de build é não usado, você precisa manually crie um MF instance antes chamar o corresponding API.
+
+```ts
+import { createInstance } from '@module-federation/enhanced/runtime';
+
+const mf = createInstance({
+  name: 'host',
+  remotes: [
+    {
+      name: 'remote1',
+      entry: 'http://localhost:2001/vmok-manifest.json',
+    },
+  ],
+});
+
+mf.loadRemote('remote1');
+```
+
+:::tip ModuleFederation instance
+
+Um objeto criado pelo `ModuleFederation` class esse contains all runtime functionality. Você pode enter `__FEDERATION__.__INSTANCES__` no console para view o full instance information.
+
+:::

@@ -1,0 +1,52 @@
+# manifest
+
+- Tipo: `boolean | PluginManifestOptions`
+- Obrigatório: No
+- Padrão valor: `undefined`
+
+Controls whether the plugin generates manifest artifacts and how they are produced. Quando enabled, the plugin emits  <code>{props.manifest || 'mf-manifest.json' }</code> and <code>{props.stats || 'mf-stats.json' }</code> (names can be customized via `fileName`) on every build so that other tools can consume them diretamente por meio de `processAssets` or from the final build output.
+
+- <code>{props.stats || 'mf-stats.json'}</code>: captures the full build statistics, including the assets for exposes/shared/remotes, `metaData` (plugin version, build info, `remoteEntry`, etc.), and any additional asset analysis. Ideal for debugging or merging stats across environments, see field references: [{props.stats || 'mf-stats.json'}](/guide/advanced/stats-fields.html).
+- <code>{props.manifest || 'mf-manifest.json'}</code>: a runtime-oriented manifest distilled from the stats. It keeps the stable structure that {props.brandName  || 'Module Federation'} consumers read quando carregamento remote modules. The exposes/shared/remotes entries describe what is actually available to consumers, see field references: [{props.manifest || 'mf-manifest.json'}](/guide/advanced/manifest-fields.html).
+
+O `PluginManifestOptions` tipos são as seguintes:
+
+```ts
+interface PluginManifestOptions {
+  filePath?: string;
+  disableAssetsAnalyze?: boolean;
+  fileName?: string;
+}
+```
+
+## filePath
+
+- Tipo: `string`
+- Obrigatório: No
+- Padrão valor: `undefined`
+
+manifest filePath
+
+## fileName
+
+- Tipo: `string`
+- Obrigatório: No
+- Padrão valor: `'mf-manifest.json'`
+
+manifest fileName
+
+Se `fileName` é fornecido, o companion stats arquivo automatically receives uma `-stats` suffix (por exemplo, `fileName: 'mf.json'` produces both `mf.json` e `mf-stats.json`). Generated arquivos são written under `filePath` quando esse opção é definir.
+
+## disableAssetsAnalyze
+
+:::warning
+It é não recomendado para definir este configuração. Depois setting, o preload função vai ser disabled!
+:::
+
+- Tipo: `boolean`
+- Obrigatório: No
+- Padrão valor: `undefined`
+
+Quando analyzing assets em complex projetos, ele pode take uma long time. By setting este opção para `true`, asset analysis vai ser disabled, optimizing build time.
+Se o projeto é purely consumer-oriented, it vai ser definir para `true` em dev por padrão.
+Se definir para `true`, o `shared` e `exposes` fields vai não ser present no manifest, e `assets` vai não ser present em `remotes`.

@@ -1,0 +1,77 @@
+import {Tabs, Tab} from '@theme'
+
+# Async Startup em Module Federation
+
+> Sep 5, 2024
+
+We're excited para announce uma nova experimental feature: `experiments.asyncStartup = true`.
+
+Este release introduces **asynchronous startup**, enabling automatic async initialization for Module Federation entrypoints.
+
+## 🚀 Key Features
+
+### Automatic Async Initialization
+
+Com async startup habilitado, **dynamic importa (`import()`) at o top de your app são no longer obrigatório**. All entrypoints vai now initialize asynchronously por padrão. Este means:
+- No mais eager erros
+- No need for "async boundaries" em userland code
+- Automatic handling de async initialization
+
+:::note
+Este apenas affects ponto de entrada initialization. Você pode still use dynamic importa normally throughout your aplicação, including for importing módulos remotos. Este feature doesn't change ou limit como dynamic importa work em your code.
+:::
+
+:::tip
+**Note:** Asynchronous entrypoints vai always exporte uma promise. Este é particularly relevant se você're manually requiring uma bundled entrypoint ou exposing something like uma UMD library para o global escopo.
+:::
+
+#### Antes & Depois Comparison
+
+See como o novo async behavior simplifies entrypoints. Click no "Antes" e "Depois" tabs para see o difference.
+
+<Tabs>
+  <Tab label="Before">
+    ```jsx
+    // entrypoint
+    import('./bootstrap.js')
+
+    // bootstrap.js
+    import React from 'react';
+    import ReactDOM from 'react-dom/client';
+    import App from './App';
+
+    const root = ReactDOM.createRoot(document.getElementById('root')!);
+    root.render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>,
+    );
+    ```
+  </Tab>
+  <Tab label="After">
+    ```jsx
+    // entrypoint
+    import React from 'react';
+    import ReactDOM from 'react-dom/client';
+    import App from './App';
+
+    const root = ReactDOM.createRoot(document.getElementById('root')!);
+    root.render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>,
+    );
+    ```
+  </Tab>
+</Tabs>
+
+### Important Notes
+
+Ao usar async startup:
+- All entrypoints initialize asynchronously por padrão
+- Exporta de entrypoints vai ser promises esse resolve para o actual exporta
+- No manual async boundaries ou dynamic importa needed
+- Eager consumption erros são automatically prevented por meio de async initialization
+
+Esse recurso simplifica Module Federation configuração by removing o need for manual async handling enquanto ensuring proper initialization de módulos federados.
+

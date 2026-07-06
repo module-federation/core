@@ -1,0 +1,51 @@
+# shareScope
+
+`shareScope` specifies que dependência compartilhada pools (Compartilhe Escopo) uma producer participates em. Você pode think de uma Compartilhe Escopo as uma chamado shared-dependência pool: dependências são apenas reused within o mesmo Escopo.
+
+- Tipo: `string | string[]`
+- Obrigatório: No
+- Padrão: `'default'`
+
+## What It Does
+
+- Controls que Compartilhe Escopos uma producer initializes em runtime.
+- Works com `shared[*].shareScope`: uma dependência compartilhada apenas participates no Escopo it é assigned para.
+- Works com `remotes[remote].shareScope`: o consumer deve align o Escopos it wants para reuse com o producer, caso contrário missing Escopos são treated as empty e cannot ser reused.
+
+## Exemplos
+
+### Single Escopo (Padrão)
+
+```ts
+new ModuleFederationPlugin({
+  name: 'app_remote',
+  shareScope: 'default',
+});
+```
+
+### Multiple Escopos (Isolated Shared Pools)
+
+```ts
+new ModuleFederationPlugin({
+  name: 'app_remote',
+  shareScope: ['default', 'scope1'],
+  shared: {
+    react: {
+      singleton: true,
+      requiredVersion: false,
+      shareScope: 'default',
+    },
+    '@company/design-system': {
+      singleton: true,
+      requiredVersion: false,
+      shareScope: 'scope1',
+    },
+  },
+});
+```
+
+## Notes
+
+- `shareScope` declares que Compartilhe Escopos este módulo initializes. It does não automatically put dependências em those Escopos; esse é controlled by each `shared` entry's `shareScope`.
+- To actually reuse dependências across apps, o producer e consumer typically precisa agree no mesmo Escopos. Consulte [remotes.shareScope](/configure/remotes.html#sharescope).
+

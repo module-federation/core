@@ -1,0 +1,22 @@
+[
+  {
+    "type": "file",
+    "name": "index",
+    "label": "Visão geral"
+  },
+  {
+    "type": "file",
+    "name": "runtime-api",
+    "label": "API de runtime"
+  },
+  {
+    "type": "file",
+    "name": "runtime-plugins",
+    "label": "Plugins de runtime"
+  },
+  {
+    "type": "file",
+    "name": "runtime-hooks",
+    "label": "Hooks de runtime"
+  }
+]
