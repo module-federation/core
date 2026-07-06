@@ -1,0 +1,25 @@
+# implementation
+
+- Tipo: `string`
+- Obrigatório: No
+- Padrão valor: `undefined`
+
+O `implementation` opção é usado para modificar o actual bundler runtime versão. It deve ser definir para o caminho de `@module-federation/runtime-tools`.
+
+Quando working com Module Federation, o runtime é responsible for handling o carregamento e compartilhamento de módulos remotos. Por padrão, o bundler usa uma specific versão do runtime esse é compatible com its versão. However, em some cases, você might precisa use uma diferente versão do runtime ou uma custom implementation.
+
+By specifying o `implementation` opção, você pode forneça uma caminho para o desired runtime implementation. Este é particularly useful se você precisa use features de uma newer ou older versão do runtime esse não são disponível no padrão versão fornecido pelo bundler.
+
+Por exemplo, se você quiser use uma specific versão de `@module-federation/runtime-tools`, você pode definir o `implementation` opção em your configuração arquivo:
+
+```javascript
+module.exports = {
+  // ...other configurations
+  plugins: [
+    new ModuleFederationPlugin({
+      // ...other Module Federation options
+      implementation: require.resolve('@module-federation/runtime-tools'),
+    }),
+  ],
+};
+```

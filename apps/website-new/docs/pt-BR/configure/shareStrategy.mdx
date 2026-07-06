@@ -1,0 +1,49 @@
+# shareStrategy
+
+- Tipo: `'version-first' | 'loaded-first'`
+- Obrigatório: No
+- Padrão: `'version-first'` (definir by webpack plugin/bundler runtime)
+
+Control o carregamento estratégia de dependências compartilhadas:
+
+- `'version-first'`: Versão priority, ensuring esse o versão mais alta de dependências compartilhadas é usado. **All remotes arquivo de entradas vai ser automatically carregado during initialization** para register dependências compartilhadas e ensure versão compatibility. Este estratégia é recomendado quando there são strict versão requirements.
+
+- `'loaded-first'`: Prioritize reuse de já carregado dependências compartilhadas. Remotes são carregado on-demand rather than during initialization. Este estratégia é recomendado quando você quiser reuse carregado dependências for performance.
+
+:::warning Offline Remote Considerations
+
+O `'version-first'` estratégia automatically carrega remote arquivo de entradas during aplicação startup para initialize dependências compartilhadas. Se any remote é offline ou unreachable, este vai trigger o `errorLoadRemote` hook com `lifecycle: 'beforeLoadShare'` during startup. Sem proper tratamento de erros, este pode cause aplicação initialization falhas.
+
+O `'loaded-first'` estratégia defers carregamento de remote until módulos são actually requested, que means offline remotes apenas cause falhas quando those specific remotes são accessed, não during aplicação startup.
+
+**What happens com versão-primeiro e offline remotes:**
+1. During initialization, remotes são carregado via `initializeSharing()`
+2. Se remote manifest/entry é offline, `module.getEntry()` fails
+3. `errorLoadRemote` hook é chamada com `lifecycle: 'beforeLoadShare'`
+4. Se no fallback é fornecido, o initialization may hang ou fail
+
+**Obrigatório tratamento de erros for versão-primeiro:**
+```ts
+const plugin = {
+  name: 'offline-resilient-plugin',
+  errorLoadRemote(args) {
+    if (args.lifecycle === 'beforeLoadShare') {
+      // Handle version-first offline remote during startup
+      return {
+        init: () => Promise.resolve(),
+        get: (module) => () => Promise.resolve(() => 'Offline Fallback')
+      };
+    }
+  }
+};
+```
+
+For production aplicações com potential network issues, consider:
+- Usando `'loaded-first'` estratégia for better resilience
+- Implementing comprehensive tratamento de erros for `'beforeLoadShare'` lifecycle
+- Adding retry mechanisms via plugins
+- Usando proper erro boundaries e componente de fallbacks
+
+Consulte [Error Load Remote Solutions](/blog/error-load-remote.html) for detailed offline handling estratégias.
+
+:::

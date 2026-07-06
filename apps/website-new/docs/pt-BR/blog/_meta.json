@@ -1,0 +1,16 @@
+[
+  "index",
+  "announcement",
+  "hoisted-runtime",
+  "error-load-remote",
+  {
+    "type": "file",
+    "name": "node",
+    "label": "Module Federation no Node.js, de forma simples"
+  },
+  {
+    "type": "file",
+    "name": "v2-stable-version",
+    "label": "Lançamento estável do MF 2.0"
+  }
+]

@@ -23,6 +23,26 @@ export default defineConfig({
     'Module Federation is a concept that allows developers to share code and resources across multiple JavaScript applications',
   icon: siteIcon,
   lang: 'en',
+  locales: [
+    {
+      lang: 'zh',
+      title: 'Module federation',
+      description: '将你的 Web 应用微前端架构化',
+      label: '简体中文',
+    },
+    {
+      lang: 'en',
+      title: 'Module federation',
+      description: "Architecture your web application's micro-front end",
+      label: 'English',
+    },
+    {
+      lang: 'pt-BR',
+      title: 'Module federation',
+      description: 'Arquiteture o micro-frontend da sua aplicação web',
+      label: 'Português (Brasil)',
+    },
+  ],
   logo: {
     light: '/module-federation.svg',
     dark: '/module-federation-logo-white.svg',
@@ -44,20 +64,6 @@ export default defineConfig({
     },
   },
   themeConfig: {
-    locales: [
-      {
-        lang: 'zh',
-        title: 'Module federation',
-        description: '将你的 Web 应用微前端架构化',
-        label: '简体中文',
-      },
-      {
-        lang: 'en',
-        title: 'Module federation',
-        description: "Architecture your web application's micro-front end",
-        label: 'English',
-      },
-    ],
     editLink: {
       docRepoBaseUrl:
         'https://github.com/module-federation/core/tree/main/apps/website-new/docs',

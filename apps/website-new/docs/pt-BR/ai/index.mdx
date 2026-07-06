@@ -1,0 +1,116 @@
+---
+pageType: doc-wide
+sidebar: false
+---
+
+# Início rápido com AI
+
+:::tip Prefere ler a documentação por conta própria?
+Se quiser percorrer os conceitos, a configuração e as integrações do Module Federation em ordem, acesse o [guia de introdução](/guide/start/index.html).
+:::
+
+## Uma maneira melhor de começar
+
+Se você já usa uma ferramenta de codificação com AI, o melhor ponto de partida não é ler toda a documentação manualmente.
+
+A abordagem mais rápida é: **entregue primeiro a documentação mais recente do Module Federation ao seu agente; depois, deixe-o responder perguntas, depurar problemas, atualizar configurações e escrever código.**
+
+Muitos modelos ainda têm conhecimento incompleto ou desatualizado sobre o Module Federation 2.0. O objetivo desta página não é fazer você estudar primeiro, mas ajudar seu agente a consultar o material correto antes de agir.
+
+## Configuração recomendada
+
+Se você usa Claude Code, Cursor, Windsurf ou outro editor com suporte a Skills, instale:
+
+```bash
+npx skills add module-federation/agent-skills --skill mf -y
+```
+
+Depois peça ao agente para ler a documentação antes de responder:
+
+```text
+/mf docs What's the difference between singleton and requiredVersion in shared?
+```
+
+A ideia é simples:
+
+- você não precisa procurar pela documentação primeiro
+- seu agente lê a documentação mais recente antes de responder
+- o resultado tem muito mais chance de ser correto
+
+## Se quiser que o agente faça mais
+
+A skill `mf` faz mais do que responder perguntas. Ela também pode ajudar seu agente a:
+
+- adicionar Module Federation a um projeto existente
+- inspecionar problemas de configuração
+- analisar problemas de tipos
+- verificar conflitos de dependências compartilhadas
+- inspecionar informações de módulos remotos
+- ler relatórios de observabilidade e depurar falhas de carregamento do MF
+
+[Ver documentação das Agent Skills](/ai/skill.html)
+
+## Observar e depurar carregamento do MF
+
+Se você quiser que um agente de codificação com AI depure carregamento do Module Federation com dados concretos de runtime, habilite o [Observability Plugin](/plugin/plugins/observability-plugin.html)
+primeiro.
+
+Depois de uma falha de carregamento, o console do navegador imprime uma `traceId` e,
+em desenvolvimento, um comando `read:`. Passe essa dica do console para seu agente:
+
+```text
+/mf observability
+I saw this Module Federation console error:
+
+[Module Federation] Observability report generated
+traceId: mf-...
+read: window.__FEDERATION__.__OBSERVABILITY__["runtime_host"].getReport("mf-...")
+
+Please read the report and fix the issue.
+```
+
+Para Node ou SSR, peça ao agente para ler `.mf/observability/latest.json`. Em
+produção, envie relatórios com o callback `onReport` e forneça ao agente o
+relatório enviado ou o trace ID.
+
+## Você ainda pode usar isso sem instalar nada
+
+Se você quiser primeiro uma versão mais leve, envie isto diretamente ao seu agente:
+
+```text
+Before answering, please read https://module-federation.io/llms.txt to learn about the latest Module Federation 2.0 documentation, then answer my question.
+```
+
+Essa é a forma mais simples de impedir que o modelo tente adivinhar quando a skill ainda não foi instalada.
+
+## Documentação que você pode passar ao seu agente
+
+### llms.txt
+
+[module-federation.io](https://module-federation.io) oferece suporte ao padrão [llms.txt](https://llmstxt.org), que é um bom ponto de entrada para sistemas de AI:
+
+```text
+https://module-federation.io/llms.txt
+```
+
+### Documentação em Markdown
+
+Todas as páginas do site de documentação também estão disponíveis em Markdown. Troque `.html` no fim de uma URL de documentação por `.md`:
+
+```text
+# HTML version
+https://module-federation.io/guide/basic/runtime.html
+
+# Markdown version
+https://module-federation.io/guide/basic/runtime.md
+```
+
+## Próximos passos
+
+Se quiser começar usando esse fluxo de trabalho agora:
+
+1. Instale `mf`
+2. Faça a pergunta que você quer responder
+3. Habilite o [Observability Plugin](/plugin/plugins/observability-plugin.html) quando
+   precisar de observabilidade do carregamento do MF
+4. Abra a [documentação das Skills](/ai/skill.html) para ver quais subcomandos ela oferece
