@@ -280,6 +280,7 @@
     "rimraf": "^6.0.1",
     "rollup-plugin-copy": "3.5.0",
     "rsbuild-plugin-publint": "^0.2.1",
+    "rstest-fetch-mock": "0.1.0",
     "serve": "^14.2.4",
     "strip-ansi": "^6.0.0",
     "style-loader": "^3.3.4",
