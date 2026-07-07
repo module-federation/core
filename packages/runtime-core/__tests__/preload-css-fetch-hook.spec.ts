@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from '@rstest/core';
+import { describe, it, expect, rs, beforeEach, afterEach } from '@rstest/core';
 import * as sdk from '@module-federation/sdk';
 import { preloadAssets } from '../src/utils/preload';
 
@@ -12,9 +12,9 @@ function createLoaderHook(hasFetchListener: boolean) {
     options: { inBrowser: true },
     loaderHook: {
       lifecycle: {
-        fetch: { emit: vi.fn(), listeners },
-        createLink: { emit: vi.fn() },
-        createScript: { emit: vi.fn() },
+        fetch: { emit: rs.fn(), listeners },
+        createLink: { emit: rs.fn() },
+        createScript: { emit: rs.fn() },
       },
     },
   } as any;
@@ -30,11 +30,11 @@ const createRemoteInfo = (name: string): any => ({
 });
 
 describe('preloadAssets CSS with fetch lifecycle loader hook', () => {
-  let loadCssWithFetch: ReturnType<typeof vi.spyOn>;
+  let loadCssWithFetch: ReturnType<typeof rs.spyOn>;
 
   beforeEach(() => {
-    vi.clearAllMocks();
-    loadCssWithFetch = vi
+    rs.clearAllMocks();
+    loadCssWithFetch = rs
       .spyOn(sdk, 'loadCssWithFetch')
       .mockResolvedValue(undefined as any);
   });
