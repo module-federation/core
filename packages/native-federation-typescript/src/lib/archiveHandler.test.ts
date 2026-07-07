@@ -40,7 +40,7 @@ describe('archiveHandler', () => {
     });
 
     it('throws for unexisting outDir', async () => {
-      expect(
+      await expect(
         createTypesArchive({ ...tsConfig, outDir: '/foo' }, remoteOptions),
       ).rejects.toThrowError();
     });
