@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from '@rstest/core';
+import { describe, it, expect, rs, beforeEach, afterEach } from '@rstest/core';
 import * as sdk from '@module-federation/sdk';
 import { __loadEntryDomForTest } from '../src/utils/load';
 
@@ -10,7 +10,7 @@ function createLoaderHook(hasFetchListener: boolean) {
   }
   return {
     lifecycle: {
-      fetch: { emit: vi.fn(), listeners },
+      fetch: { emit: rs.fn(), listeners },
     },
   } as any;
 }
@@ -27,11 +27,11 @@ function createRemoteInfo(name: string, entry: string) {
 }
 
 describe('loadEntryDom ESM with fetch lifecycle loader hook', () => {
-  let loadEsmEntryWithFetch: ReturnType<typeof vi.spyOn>;
+  let loadEsmEntryWithFetch: ReturnType<typeof rs.spyOn>;
 
   beforeEach(() => {
-    vi.clearAllMocks();
-    loadEsmEntryWithFetch = vi
+    rs.clearAllMocks();
+    loadEsmEntryWithFetch = rs
       .spyOn(sdk, 'loadEsmEntryWithFetch')
       .mockResolvedValue({ ok: 1 });
   });
