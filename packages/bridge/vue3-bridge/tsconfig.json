@@ -17,7 +17,7 @@
     "outDir": "dist",
     "skipLibCheck": true,
     "strict": true,
-    "moduleResolution": "node",
+    "moduleResolution": "node10",
     "target": "esnext",
     "module": "esnext",
     "lib": ["esnext", "dom"],
@@ -28,7 +28,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
-    }
+    },
+    "ignoreDeprecations": "6.0"
   },
   "include": [
     "src/**/*.ts",

@@ -38,7 +38,7 @@
     "@module-federation/runtime": "workspace:*",
     "@monaco-editor/react": "4.7.0",
     "monaco-editor": "0.52.2",
-    "typescript": "^5.9.3"
+    "typescript": "6.0.3"
   },
   "devDependencies": {
     "@module-federation/rsbuild-plugin": "workspace:*",

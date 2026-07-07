@@ -51,6 +51,7 @@
     }
   },
   "devDependencies": {
+    "typescript": "6.0.3",
     "webpack": "^5.0.0"
   },
   "scripts": {

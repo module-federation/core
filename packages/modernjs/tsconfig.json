@@ -4,8 +4,11 @@
     "declaration": false,
     "jsx": "preserve",
     "baseUrl": "./",
+    "rootDir": "./src",
     "paths": {},
-    "noImplicitAny": false
+    "noImplicitAny": false,
+    "moduleResolution": "node10",
+    "ignoreDeprecations": "6.0"
   },
   "include": ["src", "types", "global.d.ts"]
 }

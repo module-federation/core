@@ -96,7 +96,8 @@
   },
   "devDependencies": {
     "@rstest/core": "^0.10.6",
-    "directory-tree": "3.5.2"
+    "directory-tree": "3.5.2",
+    "typescript": "6.0.3"
   },
   "scripts": {
     "build": "tsdown --config tsdown.config.ts && cp package.json dist && cp *.md dist",
