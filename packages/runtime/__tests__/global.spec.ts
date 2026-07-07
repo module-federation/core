@@ -2,6 +2,11 @@ import { describe, it, rs, expect } from '@rstest/core';
 import { init, loadRemote, loadShare, loadShareSync } from '../src/index';
 import { getInfoWithoutType } from '@module-federation/runtime-core';
 
+type IsAssignable<Actual, Expected> = [Actual] extends [Expected]
+  ? true
+  : false;
+type ExpectFalse<T extends false> = T;
+
 describe('global', () => {
   it('inject mode', () => {
     globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__ = rs.fn();
@@ -52,7 +57,11 @@ describe('global', () => {
       type LoadRemoteReturn = ReturnType<typeof typedLoadRemote>;
       const _acceptsStringOrNull: Promise<string | null> =
         null as never as LoadRemoteReturn;
+      const _rejectsNullOnly: ExpectFalse<
+        IsAssignable<LoadRemoteReturn, Promise<null>>
+      > = false;
       void _acceptsStringOrNull;
+      void _rejectsNullOnly;
     });
 
     it('loadShare', async () => {
@@ -60,7 +69,11 @@ describe('global', () => {
       type LoadShareReturn = ReturnType<typeof typedLoadShare>;
       const _acceptsStringFactory: Promise<false | (() => string | undefined)> =
         null as never as LoadShareReturn;
+      const _rejectsUndefinedOnlyFactory: ExpectFalse<
+        IsAssignable<LoadShareReturn, Promise<false | (() => undefined)>>
+      > = false;
       void _acceptsStringFactory;
+      void _rejectsUndefinedOnlyFactory;
     });
 
     it('loadShareSync', () => {
@@ -68,7 +81,11 @@ describe('global', () => {
       type LoadShareSyncReturn = ReturnType<typeof typedLoadShareSync>;
       const _acceptsStringFactory: () => string | never =
         null as never as LoadShareSyncReturn;
+      const _rejectsNeverOnlyFactory: ExpectFalse<
+        IsAssignable<LoadShareSyncReturn, () => never>
+      > = false;
       void _acceptsStringFactory;
+      void _rejectsNeverOnlyFactory;
     });
   });
 });
