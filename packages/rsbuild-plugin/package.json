@@ -54,8 +54,8 @@
     "@module-federation/node": "workspace:*"
   },
   "devDependencies": {
-    "@rslib/core": "^0.12.4",
-    "@rsbuild/core": "2.0.0-beta.2",
+    "@rslib/core": "^0.23.2",
+    "@rsbuild/core": "2.1.4",
     "@rstest/core": "^0.10.6",
     "typescript": "6.0.3"
   },

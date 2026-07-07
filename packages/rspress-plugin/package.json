@@ -36,7 +36,7 @@
     "pre-release": "pnpm exec turbo run build --filter=@module-federation/webpack-bundler-runtime"
   },
   "devDependencies": {
-    "@rslib/core": "^0.9.2",
+    "@rslib/core": "^0.23.2",
     "@rspress/core": "2.0.14",
     "@types/html-to-text": "^9.0.4",
     "@types/lodash-es": "^4.17.12",

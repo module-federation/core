@@ -63,7 +63,7 @@
     "npmlog": "7.0.1"
   },
   "devDependencies": {
-    "@rslib/core": "^0.12.4",
+    "@rslib/core": "^0.23.2",
     "typescript": "6.0.3"
   },
   "scripts": {

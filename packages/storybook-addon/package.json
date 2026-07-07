@@ -55,7 +55,7 @@
   "devDependencies": {
     "@module-federation/utilities": "workspace:*",
     "@nx/module-federation": ">= 16.0.0",
-    "@rsbuild/core": "2.0.0-beta.2",
+    "@rsbuild/core": "2.1.4",
     "@storybook/core": "^8.4.6",
     "@storybook/node-logger": "7.6.20",
     "jest-fixed-jsdom": "^0.0.9",
