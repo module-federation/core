@@ -1,0 +1,172 @@
+import { Steps, Badge } from '@theme';
+
+# Usando Nx CLI for React
+
+Este guia explains como para integrate Module Federation for React projetos usando o [Nx CLI](https://nx.dev).
+
+## Instalação
+
+  To começa, crie uma nova Nx workspace ready for aplicação desenvolvimento.
+
+  ```bash
+  npx -y create-nx-workspace@latest myorg --preset=apps
+  cd myorg
+  ```
+
+  Next, nós want para adicionar o `@nx/react` plugin para forneça React capabilities para our Nx workspace.
+
+  ```bash
+  npx nx add @nx/react
+  ```
+
+## Generate Shell (Host) com Remotes
+
+O Shell (Host) é crucial for Module Federation integração. Nx offers [generators](https://nx.dev/features/generate-code#generate-code) para simplify o process de setting up uma aplicação com Module Federation habilitado.
+Esses são o [`host`](https://nx.dev/nx-api/react/generators/host) e [`remote`](https://nx.dev/nx-api/react/generators/remote) generators.
+O `host` generator actually allows você para specify uma `--remotes` opção, wherein você pode generate remotes esse você know você'll need all em one comando.
+
+_<Badge text="Note:" type="info" /> <small>Nx currently uses `@module-federation/enhanced/rspack` to provide Module Federation capabilities using Rspack for React.</small>_
+
+<Steps>
+  ### Scaffold o Shell (Host) aplicação
+
+  Let's crie uma shell chamada `shop` no `apps/` diretório com remotes chamada `products`, `cart` e `checkout`.
+
+  ```bash
+  npx nx g @nx/react:host apps/shop --remotes=products,cart,checkout
+  ```
+
+  Você'll notice four aplicações have been generated no `apps/` diretório.
+  At este point, everything é generated e configured correctly.
+
+  _<Badge text="Note:" type="info" /> <small>Nx will configure the routing between the shell and the remote applications, as well as attaching each remote aplicação to the shell in the `module-federation.config.ts` file to inform Module Federation of the remotes.</small>_
+
+  ### Serving your Module Federation configuração
+
+  Nx employs several techniques quando working com Module Federation para garantir uma great developer experience (DX), performance e scalability.
+  Once such technique involves apenas serving remotes esse você're actively working com arquivo watching attached. In Nx, these são chamada `dev remotes`.
+  O other projetos são built by Nx e served statically via `http-server`. Esses são chamada `static remotes`.
+
+  _<Badge text="Note:" type="info" /> <small>A bonus benefit of using Nx with Static Remotes comes from [Nx Caching](https://nx.dev/features/cache-task-results). Any remote that you have not changed, will be restored from cache and served, reducing compute overhead.</small>_
+
+  To serve your shell com all remotes treated as Static Remotes, run:
+
+  ```bash
+  npx nx serve shop
+  ```
+
+  Você'll now ser able para acessar `shop` on `localhost:4200` e você pode navigate entre a aplicação remotes usando o links at o top do page.
+
+  Quando você're actively working on uma aplicação remote (uma Dev Remote), você pode pass o `--devRemotes` flag para inform Nx para usar `@rspack/dev-server` para serve a aplicação remote, allowing for HMR e arquivo watching.
+
+  ```bash
+  npx nx serve shop --devRemotes=products
+  ```
+
+  Now, se você make changes para your `products` aplicação, they vai ser reflected no shell aplicação no navegador.
+
+  _<Badge text="Note:" type="info" /> <small>To learn more about why Nx recommends serving everything, read [here](https://nx.dev/concepts/module-federation/module-federation-and-nx#develop-as-a-user).</small>_
+
+  ### Building your Module Federation configuração
+
+  Nx cares uma lot about performance e DX, especialmente em monorepos. It offers você uma comando esse vai let você build everything at once. Helpful for full redeployments de all projetos no Module Federation system.
+
+  ```bash
+  npx nx run-many -t build
+  ```
+
+  Quando running este comando, se Nx detects uma projeto did não change, it vai restore o cached build artifact for esse projeto instead de rebuilding it. However, sometimes este é still overkill.
+  Portanto, para apenas rebuild o projetos esse have actually been changed, e cut down any additional time spent restoring cached build artifacts, Nx offers uma comando para apenas recompute affected projetos.
+
+  ```bash
+  npx nx affected -t build
+  ```
+
+  Você pode view o build artifacts at `dist/apps`.
+
+</Steps>
+
+## Adding Additional Remotes
+
+As nós develop our aplicação, nós often precisa add mais aplicação remotes. Este é quando Nx's `remote` generator becomes extremely useful.
+Not apenas vai it scaffold um Angular projeto com Module Federation configured, it também allows us para tell it que `host` aplicação it belongs para e it vai update o `host` para configure o novo remote.
+
+<Steps>
+  ### Scaffold novo Remote aplicação
+
+  Let's add uma nova remote chamada `login` e attach it para our `shop` shell.
+
+  ```bash
+  npx nx g @nx/react:remote apps/login --host=shop
+  ```
+
+  It's esse simple. Se nós run `npx nx serve shop --devRemotes`, nós pode now continue desenvolvimento no `login` remote e see it reflected no navegador.
+</Steps>
+
+## Understanding Nx's Module Federation Abstractions
+
+Nx aims para make working com Module Federation as simplistic as possible enquanto também providing uma mechanism wherein o Nx team pode ship optimizations, novo features e fixes as seamlessly as possible.
+To achieve este, it usa some abstractions over o underlying `ModuleFederationPlugin`.
+
+### Nx's ModuleFederationConfig
+
+Nx fornece it's own `ModuleFederationConfig` interface que é uma streamlined versão do que é needed para o `ModuleFederationPlugin`.
+Você pode view it em-depth [here](https://github.com/nrwl/nx/blob/master/packages/webpack/src/utils/module-federation/models/index.ts#L41).
+
+Let's focus no mais important aspects
+
+<Steps>
+  #### Remotes
+
+  O `remotes` opção gives você two opções for defining aplicação remotes usado pelo shell (host).
+
+  Você pode forneça um array de Nx projeto names, ou uma tuple, defining o Nx projeto name, e o entry location para o remote.
+
+  ```js
+  remotes: ["products", ["cart", "http://my-live-cart.myapp.com/mf-manifest.json"]]
+  ```
+
+  Under o hood, Nx vai parse it's [Project Graph](https://nx.dev/features/explore-graph) para discover information around o entry location do remote projeto e configure o `ModuleFederationPlugin` accordingly.
+  Este é também usado para serve o Module Federation configuração quando você run `npx nx serve shop`.
+
+  #### Expõe
+
+  O `exposes` opção matches o exposes opção no `ModuleFederationPlugin` e fornece você o ability para specify que módulos deve ser federated por uma aplicação remote.
+
+  #### Shared
+
+  Nx vai use its projeto graph para determine all o dependências (npm e local) esse são usado pelo projetos no Module Federation configuração. It vai then compartilhe all these dependências at o detected versão as singletons. Este é great for getting up e running quickly, but sometimes, você precisa control este behaviour.
+  O `shared` opção allows você para pass uma função onde você pode write custom logic para determine como uma dependência deve ser shared.
+
+  ```js
+  // do not share lodash to allow better tree-shaking
+  shared: function(libraryName, shareConfig) {
+    if(libraryName === 'lodash') {
+      return false
+    }
+  }
+  ```
+</Steps>
+
+### Nx's withModuleFederation
+
+O `withModuleFederation` helper resides no `rspack.config.ts` arquivo.
+It's primary purpose é para definir up o `ModuleFederationPlugin` based no `config` fornecido by `module-federation.config.ts`
+
+However, it também allows você para further configure other propriedades de `ModuleFederationConfig`.
+
+```js
+withModuleFederation(config, {
+  dts: false,
+  runtimePlugins: []
+});
+```
+
+## Learn More
+
+O links below são useful para learn mais about Nx's suporte for Module Federation.
+
+- [Module Federation and Nx](https://nx.dev/concepts/module-federation/module-federation-and-nx)
+- [Micro Frontend Architecture](https://nx.dev/concepts/module-federation/micro-frontend-architecture)
+- [Nx Module Federation Technical Overview](https://nx.dev/concepts/module-federation/nx-module-federation-technical-overview)
+- [Nx Module Federation Recipes](https://nx.dev/recipes/module-federation)

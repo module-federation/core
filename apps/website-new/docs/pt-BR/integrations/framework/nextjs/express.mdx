@@ -1,0 +1,77 @@
+import {Steps} from '@theme'
+
+# Working com Express.js
+
+Se usando express, hot servidor hot módulo reloading may não work depois [these steps](/integrations/framework/nextjs/basic-example.html#step-3-implementing-ssr)
+
+Express has its own rota stack, so reloading require cache vai não ser enough para reload o rotas inside express.
+
+<Steps>
+### Add global callback em express
+For hot módulo reloading com Express e Next.js, setting up uma global callback para clear o Express rota cache é obrigatório.
+Este allows rota updates para ser recognized sem servidor restarts.
+
+```javascript title="server/express.js"
+import express from 'express';
+import next from 'next';
+
+const dev = process.env.NODE_ENV !== 'production';
+const hostname = 'localhost';
+const port = 3000;
+const app = next({ dev, hostname, port });
+const handle = app.getRequestHandler();
+
+global.clearRoutes = () => {
+  server._router.stack = server._router.stack.filter((k) => !(k && k.route && k.route.path));
+};
+
+app.prepare().then(() => {
+  const server = express();
+
+  server.all('*', (req, res) => {
+    const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
+    const { pathname, query } = parsedUrl;
+
+    handle(req, res, parsedUrl);
+  });
+
+  server.listen(port, () => {
+    console.log(`> Ready on http://${hostname}:${port}`);
+  });
+});
+```
+
+### Trigger callback em revalidation
+
+add uma global callback em `_document.js` para clear o Express rota cache during revalidation, allowing updated rotas para ser served sem servidor restarts.
+```jsx title="pages/_document.js"
+class MyDocument extends Document {
+  static async getInitialProps(ctx) {
+    if (ctx?.pathname && !ctx?.pathname?.endsWith('_error')) {
+      await revalidate().then((shouldUpdate) => {
+        if (shouldUpdate) {
+          global.clearRoutes();
+        }
+      });
+    }
+
+    const initialProps = await Document.getInitialProps(ctx);
+    return initialProps;
+  }
+
+  render() {
+    return (
+      <Html>
+        <Head />
+        <body>
+          <Main />
+          <NextScript />
+        </body>
+      </Html>
+    );
+  }
+}
+```
+
+</Steps>
+

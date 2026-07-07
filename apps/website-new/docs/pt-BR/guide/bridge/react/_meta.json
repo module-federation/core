@@ -1,0 +1,22 @@
+[
+  {
+    "type": "file",
+    "name": "getting-started",
+    "label": "Primeiros passos"
+  },
+  {
+    "type": "file",
+    "name": "export-app",
+    "label": "Export Application"
+  },
+  {
+    "type": "file",
+    "name": "load-app",
+    "label": "Load Application"
+  },
+  {
+    "type": "file",
+    "name": "load-component",
+    "label": "Lazy Load and Prefetch Components"
+  }
+]

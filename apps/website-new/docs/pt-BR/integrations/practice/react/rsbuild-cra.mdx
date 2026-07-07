@@ -1,0 +1,313 @@
+---
+title: "Básico CRA com Rsbuild"
+---
+
+# Básico CRA com Rsbuild
+
+:::tip Demo Reference
+Check out o exemplo projeto list here: [Rsbuild CRA](https://github.com/module-federation/module-federation-examples/tree/master/cra)
+:::
+
+## Configuração Environment
+
+Antes getting started, você vai precisa instale [Node.js](https://nodejs.org/), e ensure esse seu Node.js versão >= 16. **We recommend usando o LTS versão de Node.js 20.**
+
+Você pode check o currently usado Node.js versão com o seguintes comando:
+
+```bash
+node -v
+```
+
+Se você não have Node.js installed em your current environment, ou o installed versão é too low, você pode use [nvm](https://github.com/nvm-sh/nvm) ou [fnm](https://github.com/Schniz/fnm) para instalar o obrigatório versão.
+
+Here é um exemplo de como para instalar o Node.js 20 LTS versão via nvm:
+
+```bash
+# Install the long-term support version of Node.js 20
+nvm install 20 --lts
+
+# Make the newly installed Node.js 20 as the default version
+nvm alias default 20
+
+# Switch to the newly installed Node.js 20
+nvm use 20
+```
+
+## Step 1: Configuração React Aplicações
+
+### Crie React Project
+
+Você pode use `create-rsbuild` para criar um projeto com Rsbuild + React. Just execute o seguintes comando:
+
+import { PackageManagerTabs } from '@theme';
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm create rsbuild@latest',
+    yarn: 'yarn create rsbuild',
+    pnpm: 'pnpm create rsbuild@latest',
+    bun: 'bun create rsbuild@latest',
+  }}
+/>
+
+
+#
+
+import { Steps } from '@theme';
+
+<Steps>
+### Crie App 1
+```bash
+create rsbuild@latest
+
+"Input target folder":
+> mfe1
+
+"Select framework":
+> React
+
+"Select language":
+> TypeScript
+```
+
+### Crie App 2
+
+```bash
+create rsbuild@latest
+
+"Input target folder":
+> mfe2
+
+"Select framework":
+> React
+
+"Select language":
+> TypeScript
+```
+
+### Instale
+```bash
+cd mfe1
+pnpm i
+```
+```bash
+cd mfe2
+pnpm i
+ ````
+
+</Steps>
+
+### Use React em um existente projeto
+
+To compile React, você precisa registrar o Rsbuild [React Plugin](https://rsbuild.dev/plugins/list/plugin-react). O plugin vai automatically adicione o necessário configuração for React builds.
+
+Por exemplo, register em `rsbuild.config.ts`:
+
+```ts title="rsbuild.config.ts"
+import { defineConfig } from '@rsbuild/core';
+import { pluginReact } from '@rsbuild/plugin-react';
+
+export default defineConfig({
+  plugins: [pluginReact()],
+});
+```
+
+:::tip
+For projetos usando Create React App, você pode refer para o [CRA Migration Guia](https://rsbuild.dev/guide/migration/cra).
+:::
+
+Ensure esse Webpack versão 5 ou above é installed by checking o instalação report fornecido by Yarn.
+
+## Step 2: Installing Module Federation Plugin de build
+
+```bash
+pnpm add @module-federation/enhanced
+pnpm add @module-federation/rsbuild-plugin --save-dev
+```
+
+## Step 3: Update Entry Arquivos
+
+In both aplicações, rename o `index.js` arquivo para `bootstrap.js`. Essa mudança allows `bootstrap.js` para carregar asynchronously, que é essential for Module Federation para função correctly entre o two aplicações.
+
+```bash
+mv src/index.tsx src/bootstrap.tsx
+```
+
+Update o contents de bootstrap.tsx para o seguintes:
+
+```typescript
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+
+const root = ReactDOM.createRoot(document.getElementById('root')!);
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+);
+```
+
+Now, crie uma nova `index.tsx` arquivo em both aplicações com o seguintes content para importe `bootstrap.tsx`:
+
+```typescript
+import('./bootstrap');
+```
+
+## Step 4: Crie e Exponha
+
+Now, crie um componente para exponha de `MFE2`
+
+<Steps>
+
+### 4.1 Crie Button Componente
+
+In `MFE2`, crie uma nova arquivo chamado `Button.tsx` no src diretório com o seguintes content:
+
+```typescript
+const Button = () => (
+  <button>MFE2 Button</button>
+);
+
+export default Button;
+```
+
+### 4.2 Update App.tsx
+
+Update `App.tsx` em `MFE2` para importe e render o Button componente:
+
+```typescript
+import './App.css';
+import Button from './Button';
+
+const App = () => {
+  return (
+    <div className="content">
+      <h1>MFE2</h1>
+      <Button />
+    </div>
+  );
+};
+
+export default App;
+```
+</Steps>
+
+## Step 5: Configure Rsbuild em MFE2
+
+First crie `module-federation.config.ts` em arquivo no root diretório de `MFE2` com o seguintes configuração:
+
+```ts title="module-federation.config.ts"
+import { createModuleFederationConfig } from '@module-federation/rsbuild-plugin';
+
+export default createModuleFederationConfig({
+  name: 'remote',
+  exposes: {
+    './Button': './src/Button',
+  },
+  filename: 'remoteEntry.js',
+  shared: {
+    ...dependencies,
+    react: {
+      singleton: true,
+    },
+    'react-dom': {
+      singleton: true,
+    },
+  },
+});
+
+```
+
+E then modify o `rsbuild.config.ts` arquivo no root diretório de `MFE2` com o seguintes configuração:
+
+```diff title="rsbuild.config.ts"
+import { defineConfig } from '@rsbuild/core';
+import { pluginReact } from '@rsbuild/plugin-react';
++ import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
++ import mfConfig from './module-federation.config';
+
+export default defineConfig({
+  server: {
+    port: 3002
+  },
+  plugins: [
+    pluginReact()
++   pluginModuleFederation(mfConfig)
+  ]
+});
+```
+
+## Step 6: Consuma Remote Módulo
+
+Consuma o módulo exposto de `MFE2` em `MFE1`
+
+<Steps>
+### 6.1 Update App.tsx
+
+Update `App.tsx` em `MFE1` para importe e render o `MFE2` Button componente:
+
+```typescript
+import React from 'react';
+import Button from 'remote/Button'; // federated import
+
+function App() {
+  return (
+    <div>
+      <h1>MFE1</h1>
+      <Button />
+    </div>
+  );
+}
+
+export default App;
+```
+
+### Step 6.2: Configure Rsbuild em MFE1
+
+First crie `module-federation.config.ts` em arquivo no root diretório de `MFE1` com o seguintes configuração:
+
+```ts title="module-federation.config.ts"
+import { createModuleFederationConfig } from '@module-federation/rsbuild-plugin';
+
+export default createModuleFederationConfig({
+  name: 'host',
+  remotes: {
+    remote: 'remote@http://localhost:3002/remoteEntry.js',
+  },
+  shared: {
+    react: {
+      singleton: true,
+    },
+    'react-dom': {
+      singleton: true,
+    },
+  },
+});
+
+```
+
+E then modify o `rsbuild.config.ts` arquivo no root diretório de `MFE1` com o seguintes configuração:
+
+```diff title="rsbuild.config.ts"
+import { defineConfig } from '@rsbuild/core';
+import { pluginReact } from '@rsbuild/plugin-react';
++ import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
++ import mfConfig from './module-federation.config';
+
+export default defineConfig({
+  server: {
+    port: 3001
+  },
+  plugins: [
+    pluginReact(),
++   pluginModuleFederation(mfConfig)
+  ]
+});
+```
+</Steps>
+
+
+Este configuração initiates Module Federation within `MFE1`, e upon initiating o desenvolvimento servidor, it é accessible at `http://localhost:3001`.
+
+Similarly, o configuração activates Module Federation for `MFE2`, thereby exposing o `Button` componente at `http://localhost:3002/remoteEntry.js`. Com o desenvolvimento servidor operational, it becomes accessible at `http://localhost:3002`.
