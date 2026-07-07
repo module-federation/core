@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, rs } from '@rstest/core';
 import { createRouter, createWebHistory } from 'vue-router';
 import { processRoutes, type RouteProcessingOptions } from '../src/routeUtils';
 
@@ -961,7 +961,7 @@ describe('routeUtils', () => {
         routes: result.routes,
       });
 
-      const pushSpy = vi.fn();
+      const pushSpy = rs.fn();
       targetRouter.push = pushSpy;
       const originalPush = targetRouter.push;
 
@@ -990,7 +990,7 @@ describe('routeUtils', () => {
         routes: result.routes,
       });
 
-      const pushSpy = vi.fn();
+      const pushSpy = rs.fn();
       targetRouter.push = pushSpy;
       result.patchRouter!(targetRouter);
 
@@ -1020,7 +1020,7 @@ describe('routeUtils', () => {
         routes: result.routes,
       });
 
-      const pushSpy = vi.fn();
+      const pushSpy = rs.fn();
       targetRouter.push = pushSpy;
       result.patchRouter!(targetRouter);
 
@@ -1047,7 +1047,7 @@ describe('routeUtils', () => {
         routes: result.routes,
       });
 
-      const replaceSpy = vi.fn();
+      const replaceSpy = rs.fn();
       targetRouter.replace = replaceSpy;
       result.patchRouter!(targetRouter);
 
@@ -1074,7 +1074,7 @@ describe('routeUtils', () => {
         routes: result.routes,
       });
 
-      const resolveSpy = vi.fn().mockReturnValue({});
+      const resolveSpy = rs.fn().mockReturnValue({});
       targetRouter.resolve = resolveSpy;
       result.patchRouter!(targetRouter);
 
@@ -1101,7 +1101,7 @@ describe('routeUtils', () => {
         routes: result.routes,
       });
 
-      const pushSpy = vi.fn();
+      const pushSpy = rs.fn();
       targetRouter.push = pushSpy;
       result.patchRouter!(targetRouter);
 
@@ -1128,7 +1128,7 @@ describe('routeUtils', () => {
         routes: result.routes,
       });
 
-      const pushSpy = vi.fn();
+      const pushSpy = rs.fn();
       targetRouter.push = pushSpy;
       result.patchRouter!(targetRouter);
 
@@ -1155,7 +1155,7 @@ describe('routeUtils', () => {
         routes: result.routes,
       });
 
-      const pushSpy = vi.fn();
+      const pushSpy = rs.fn();
       targetRouter.push = pushSpy;
       result.patchRouter!(targetRouter);
 
@@ -1182,7 +1182,7 @@ describe('routeUtils', () => {
         routes: result.routes,
       });
 
-      const pushSpy = vi.fn();
+      const pushSpy = rs.fn();
       targetRouter.push = pushSpy;
       result.patchRouter!(targetRouter);
 
@@ -1210,7 +1210,7 @@ describe('routeUtils', () => {
         routes: result.routes,
       });
 
-      const pushSpy = vi.fn();
+      const pushSpy = rs.fn();
       targetRouter.push = pushSpy;
       result.patchRouter!(targetRouter);
 
@@ -1237,7 +1237,7 @@ describe('routeUtils', () => {
         routes: result.routes,
       });
 
-      const pushSpy = vi.fn();
+      const pushSpy = rs.fn();
       targetRouter.push = pushSpy;
       result.patchRouter!(targetRouter);
 
@@ -1264,7 +1264,7 @@ describe('routeUtils', () => {
         routes: result.routes,
       });
 
-      const replaceSpy = vi.fn();
+      const replaceSpy = rs.fn();
       targetRouter.replace = replaceSpy;
       result.patchRouter!(targetRouter);
 
@@ -1291,7 +1291,7 @@ describe('routeUtils', () => {
         routes: result.routes,
       });
 
-      const pushSpy = vi.fn();
+      const pushSpy = rs.fn();
       targetRouter.push = pushSpy;
       result.patchRouter!(targetRouter);
 

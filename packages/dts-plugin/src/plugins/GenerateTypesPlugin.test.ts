@@ -1,5 +1,5 @@
 import path from 'path';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, rs, beforeEach } from '@rstest/core';
 import {
   callAfterGenerateHook,
   isSafeRelativePath,
@@ -8,11 +8,11 @@ import {
   GenerateTypesPlugin,
 } from './GenerateTypesPlugin';
 
-vi.mock('../core/index', () => ({
-  validateOptions: vi.fn(),
-  generateTypes: vi.fn().mockResolvedValue(undefined),
-  generateTypesInChildProcess: vi.fn().mockResolvedValue(undefined),
-  retrieveTypesAssetsInfo: vi.fn().mockReturnValue({
+rs.mock('../core/index', () => ({
+  validateOptions: rs.fn(),
+  generateTypes: rs.fn().mockResolvedValue(undefined),
+  generateTypesInChildProcess: rs.fn().mockResolvedValue(undefined),
+  retrieveTypesAssetsInfo: rs.fn().mockReturnValue({
     zipTypesPath: undefined,
     apiTypesPath: undefined,
     zipName: '@mf-types.zip',
@@ -20,10 +20,10 @@ vi.mock('../core/index', () => ({
   }),
 }));
 
-const { mockIsDev } = vi.hoisted(() => ({ mockIsDev: vi.fn() }));
-vi.mock('./utils', () => ({
+const { mockIsDev } = rs.hoisted(() => ({ mockIsDev: rs.fn() }));
+rs.mock('./utils', () => ({
   isDev: mockIsDev,
-  getCompilerOutputDir: vi.fn().mockReturnValue('dist'),
+  getCompilerOutputDir: rs.fn().mockReturnValue('dist'),
 }));
 
 function createMockCompiler() {
@@ -32,13 +32,13 @@ function createMockCompiler() {
   const compilation = {
     hooks: {
       processAssets: {
-        tapPromise: vi.fn((_opts: unknown, fn: () => Promise<void>) => {
+        tapPromise: rs.fn((_opts: unknown, fn: () => Promise<void>) => {
           processAssetsCallbacks.push(fn);
         }),
       },
     },
-    getAsset: vi.fn().mockReturnValue(undefined),
-    emitAsset: vi.fn(),
+    getAsset: rs.fn().mockReturnValue(undefined),
+    emitAsset: rs.fn(),
     constructor: { PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER: 10000 },
   };
 
@@ -47,7 +47,7 @@ function createMockCompiler() {
     outputPath: '/project/dist',
     hooks: {
       thisCompilation: {
-        tap: vi.fn((_name: string, fn: (c: typeof compilation) => void) => {
+        tap: rs.fn((_name: string, fn: (c: typeof compilation) => void) => {
           fn(compilation);
         }),
       },
@@ -77,19 +77,19 @@ describe('afterGenerate callback', () => {
   };
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    rs.clearAllMocks();
   });
 
   it('should call afterGenerate after type generation in prod', async () => {
     mockIsDev.mockReturnValue(false);
-    const afterGenerate = vi.fn().mockResolvedValue(undefined);
+    const afterGenerate = rs.fn().mockResolvedValue(undefined);
     const { compiler, triggerProcessAssets } = createMockCompiler();
 
     const plugin = new GenerateTypesPlugin(
       basePluginOptions,
       { generateTypes: { afterGenerate } },
       Promise.resolve(undefined),
-      vi.fn(),
+      rs.fn(),
     );
     plugin.apply(compiler as any);
     await triggerProcessAssets();
@@ -99,19 +99,19 @@ describe('afterGenerate callback', () => {
 
   it('should call afterGenerate after type generation in dev', async () => {
     mockIsDev.mockReturnValue(true);
-    const afterGenerate = vi.fn().mockResolvedValue(undefined);
+    const afterGenerate = rs.fn().mockResolvedValue(undefined);
     const { compiler, triggerProcessAssets } = createMockCompiler();
 
     const plugin = new GenerateTypesPlugin(
       basePluginOptions,
       { generateTypes: { afterGenerate } },
       Promise.resolve(undefined),
-      vi.fn(),
+      rs.fn(),
     );
     plugin.apply(compiler as any);
     await triggerProcessAssets();
     // In dev mode emitTypesFilesPromise is not awaited, flush microtasks
-    await vi.waitFor(() => expect(afterGenerate).toHaveBeenCalledOnce());
+    await rs.waitFor(() => expect(afterGenerate).toHaveBeenCalledOnce());
   });
 
   it('should not throw when afterGenerate is not provided', async () => {
@@ -122,7 +122,7 @@ describe('afterGenerate callback', () => {
       basePluginOptions,
       { generateTypes: true },
       Promise.resolve(undefined),
-      vi.fn(),
+      rs.fn(),
     );
     plugin.apply(compiler as any);
 
@@ -131,7 +131,7 @@ describe('afterGenerate callback', () => {
 
   it('should not call afterGenerate when asset already exists (early return)', async () => {
     mockIsDev.mockReturnValue(false);
-    const afterGenerate = vi.fn();
+    const afterGenerate = rs.fn();
     const { compiler, compilation, triggerProcessAssets } =
       createMockCompiler();
     compilation.getAsset.mockReturnValue({});
@@ -140,7 +140,7 @@ describe('afterGenerate callback', () => {
       basePluginOptions,
       { generateTypes: { afterGenerate } },
       Promise.resolve(undefined),
-      vi.fn(),
+      rs.fn(),
     );
     plugin.apply(compiler as any);
     await triggerProcessAssets();
@@ -151,7 +151,7 @@ describe('afterGenerate callback', () => {
   it('should await async afterGenerate before continuing', async () => {
     mockIsDev.mockReturnValue(false);
     const order: string[] = [];
-    const afterGenerate = vi.fn(async () => {
+    const afterGenerate = rs.fn(async () => {
       order.push('callback');
     });
     const { compiler, triggerProcessAssets } = createMockCompiler();
@@ -160,7 +160,7 @@ describe('afterGenerate callback', () => {
       basePluginOptions,
       { generateTypes: { afterGenerate } },
       Promise.resolve(undefined),
-      vi.fn(),
+      rs.fn(),
     );
     plugin.apply(compiler as any);
     order.push('before');
@@ -344,7 +344,7 @@ describe('GenerateTypesPlugin', () => {
 
   describe('afterGenerate', () => {
     it('should call afterGenerate with generated asset info', async () => {
-      const afterGenerate = vi.fn();
+      const afterGenerate = rs.fn();
 
       await callAfterGenerateHook({
         dtsManagerOptions: {
@@ -376,7 +376,7 @@ describe('GenerateTypesPlugin', () => {
             remote: {
               moduleFederationConfig: basePluginOptions,
               abortOnError: false,
-              afterGenerate: vi
+              afterGenerate: rs
                 .fn()
                 .mockRejectedValue(new Error('hook failed')),
             },

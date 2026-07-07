@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, rs } from '@rstest/core';
 import {
   pluginModuleFederation,
   RSBUILD_PLUGIN_MODULE_FEDERATION_NAME,
@@ -30,16 +30,16 @@ function createMockApi(
     modifyRsbuildConfig: (callback: (config: Record<string, any>) => void) => {
       callback(rsbuildConfig);
     },
-    modifyEnvironmentConfig: vi.fn(),
-    expose: vi.fn(),
-    processAssets: vi.fn(),
+    modifyEnvironmentConfig: rs.fn(),
+    expose: rs.fn(),
+    processAssets: rs.fn(),
     onBeforeCreateCompiler: (
       callback: (args: { bundlerConfigs?: Rspack.Configuration[] }) => void,
     ) => {
       state.beforeCreateCompiler = callback;
     },
-    onDevCompileDone: vi.fn(),
-    onAfterBuild: vi.fn(),
+    onDevCompileDone: rs.fn(),
+    onAfterBuild: rs.fn(),
   };
 
   return { api, state, rsbuildConfig };
@@ -175,7 +175,7 @@ describe('pluginModuleFederation node target environment behavior', () => {
     expect(ssrBundlerConfig.plugins?.length).toBeGreaterThan(0);
     expect(clientBundlerConfig.target).toBeUndefined();
     expect(clientBundlerConfig.plugins?.length).toBe(0);
-    const exposedApi = (api.expose as ReturnType<typeof vi.fn>).mock.calls.find(
+    const exposedApi = (api.expose as ReturnType<typeof rs.fn>).mock.calls.find(
       ([name]) => name === RSBUILD_PLUGIN_MODULE_FEDERATION_NAME,
     )?.[1] as {
       options: {

@@ -57,8 +57,8 @@
   },
   "scripts": {
     "build": "rslib build",
-    "test": "vitest run --config vitest.config.mts",
-    "test:watch": "vitest --config vitest.config.mts",
+    "test": "rstest",
+    "test:watch": "rstest --watch",
     "typecheck": "tsc --noEmit",
     "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.{ts,tsx,js,jsx}\""
   },

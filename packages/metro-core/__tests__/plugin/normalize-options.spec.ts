@@ -1,8 +1,8 @@
 import path from 'node:path';
 import { vol } from 'memfs';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, rs } from '@rstest/core';
 
-vi.mock('node:fs', () => {
+rs.mock('node:fs', () => {
   const memfs = require('memfs').fs;
   return { ...memfs, default: memfs };
 });
@@ -48,7 +48,7 @@ function getShared() {
 describe('normalizeOptions', () => {
   afterEach(() => {
     vol.reset();
-    vi.restoreAllMocks();
+    rs.restoreAllMocks();
   });
 
   it('defaults dts to false and does not inject type-hints plugin', () => {

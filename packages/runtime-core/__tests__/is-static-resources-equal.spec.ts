@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from '@rstest/core';
 import { isStaticResourcesEqual } from '../src/utils/tool';
 describe('isStaticResourcesEqual', () => {
   it('verify resources when URL does not specify protocol', () => {

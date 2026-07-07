@@ -24,7 +24,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "vitest"
+    "test": "rstest"
   },
   "peerDependencies": {
     "vue": "=3",
@@ -32,10 +32,12 @@
   },
   "dependencies": {
     "@module-federation/bridge-shared": "workspace:*",
-    "@module-federation/sdk": "workspace:*",
-    "@module-federation/runtime": "workspace:*"
+    "@module-federation/runtime": "workspace:*",
+    "@module-federation/sdk": "workspace:*"
   },
   "devDependencies": {
+    "@rsbuild/plugin-babel": "2.0.1",
+    "@rsbuild/plugin-vue-jsx": "2.0.1",
     "@types/react": "^18.3.11",
     "@vitejs/plugin-vue": "^5.0.4",
     "@vitejs/plugin-vue-jsx": "^4.0.0",

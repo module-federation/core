@@ -12,7 +12,7 @@
   "scripts": {
     "build": "rslib build",
     "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\"",
-    "test": "pnpm exec vitest run --passWithNoTests --config vite.config.mts",
+    "test": "pnpm exec rstest --passWithNoTests",
     "pre-release": "pnpm run test && pnpm run build"
   },
   "repository": {
@@ -153,6 +153,7 @@
   },
   "devDependencies": {
     "@rsbuild/plugin-react": "1.4.5",
+    "@rstest/core": "^0.10.6",
     "@module-federation/manifest": "workspace:*",
     "@rslib/core": "0.18.5",
     "@rsbuild/core": "2.0.0-beta.2",
@@ -165,8 +166,7 @@
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.0",
     "react": "~18.3.1",
-    "react-dom": "~18.3.1",
-    "vitest": "1.6.0"
+    "react-dom": "~18.3.1"
   },
   "peerDependencies": {
     "react": ">=17",

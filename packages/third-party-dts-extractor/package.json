@@ -36,16 +36,16 @@
     "exsolve": "1.0.8"
   },
   "devDependencies": {
+    "@rstest/core": "^0.10.6",
     "@types/node": "^20.19.5",
     "@types/react": "^18.3.11",
-    "vitest": "1.6.0",
     "react": "^18",
     "tsup": "7.3.0"
   },
   "scripts": {
     "build": "tsup --config tsup.config.ts --outDir dist && cp package.json dist && cp *.md dist",
     "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\"",
-    "test": "pnpm exec vitest run --passWithNoTests --config vite.config.mts",
+    "test": "pnpm exec rstest --passWithNoTests",
     "pre-release": "pnpm run test && pnpm run build"
   }
 }

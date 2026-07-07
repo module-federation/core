@@ -3,7 +3,7 @@ import axios from 'axios';
 import { existsSync, mkdirSync, mkdtempSync, rmSync } from 'fs';
 import os from 'os';
 import { join } from 'path';
-import { afterAll, describe, expect, it, vi } from 'vitest';
+import { afterAll, describe, expect, it, rs } from '@rstest/core';
 
 import { RemoteOptions } from '../interfaces/RemoteOptions';
 import { createTestsArchive, downloadTypesArchive } from './archiveHandler';
@@ -36,7 +36,9 @@ describe('archiveHandler', () => {
     });
 
     it('throws for unexisting outDir', async () => {
-      expect(createTestsArchive(remoteOptions, '/foo')).rejects.toThrowError();
+      await expect(
+        createTestsArchive(remoteOptions, '/foo'),
+      ).rejects.toThrowError();
     });
   });
 
@@ -53,19 +55,20 @@ describe('archiveHandler', () => {
     };
 
     it('throws for unexisting url', async () => {
-      expect(
-        downloadTypesArchive(hostOptions)([tmpDir, 'https://foo.it']),
+      axios.get = rs.fn().mockRejectedValue(new Error('Rejected value'));
+
+      await expect(() =>
+        downloadTypesArchive(hostOptions)([tmpDir, fileToDownload]),
       ).rejects.toThrowError(
         'Network error: Unable to download federated mocks',
       );
-      // .rejects.toThrowError('getaddrinfo ENOTFOUND foo.it')
     });
 
     it('correctly extract downloaded archive', async () => {
       const zip = new AdmZip();
       zip.addLocalFolder(tmpDir);
 
-      axios.get = vi.fn().mockResolvedValueOnce({ data: zip.toBuffer() });
+      axios.get = rs.fn().mockResolvedValueOnce({ data: zip.toBuffer() });
 
       await downloadTypesArchive(hostOptions)([
         destinationFolder,
@@ -78,7 +81,7 @@ describe('archiveHandler', () => {
       const zip = new AdmZip();
       zip.addLocalFolder(tmpDir);
 
-      axios.get = vi.fn().mockResolvedValue({ data: zip.toBuffer() });
+      axios.get = rs.fn().mockResolvedValue({ data: zip.toBuffer() });
 
       const downloader = downloadTypesArchive(hostOptions);
 

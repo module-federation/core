@@ -30,7 +30,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "vitest run -c vitest.config.ts"
+    "test": "rstest"
   },
   "dependencies": {
     "@module-federation/sdk": "workspace:*",

@@ -2,7 +2,7 @@ import AdmZip from 'adm-zip';
 import dirTree from 'directory-tree';
 import { readFileSync, rmSync } from 'fs';
 import { join } from 'path';
-import { describe, expect, it, vi, beforeAll } from 'vitest';
+import { describe, expect, it, rs, beforeAll } from '@rstest/core';
 import { DTSManager } from './DTSManager';
 import * as utils from './utils';
 const TEST_DIT_DIR = 'dist-test';
@@ -97,7 +97,7 @@ describe('DTSManager advance usage', () => {
       remoteOptions.typesFolder,
     );
     const apiFile = `${apiDistFolder}.d.ts`;
-    vi.spyOn(utils, 'nativeFetch').mockImplementation((url) => {
+    rs.spyOn(utils, 'nativeFetch').mockImplementation((url) => {
       if (url.includes('.d.ts')) {
         return Promise.resolve({
           data: readFileSync(apiFile, 'utf8'),

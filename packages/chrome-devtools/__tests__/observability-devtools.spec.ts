@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, rs } from '@rstest/core';
 
 import {
   getObservabilityReportScopeLabel,
@@ -13,7 +13,7 @@ import {
 
 describe('observability devtools config', () => {
   afterEach(() => {
-    vi.restoreAllMocks();
+    rs.restoreAllMocks();
     Reflect.deleteProperty(globalThis, 'chrome');
     Reflect.deleteProperty(window, '__FEDERATION__');
     Reflect.deleteProperty(window, '__VMOK__');
@@ -131,11 +131,11 @@ describe('observability devtools config', () => {
       },
     } as any;
 
-    const executeScript = vi.fn(async ({ func, args }) => [
+    const executeScript = rs.fn(async ({ func, args }) => [
       { result: func(...args) },
     ]);
 
-    vi.stubGlobal('chrome', {
+    rs.stubGlobal('chrome', {
       scripting: {
         executeScript,
       },
@@ -194,11 +194,11 @@ describe('observability devtools config', () => {
       },
     } as any;
 
-    const executeScript = vi.fn(async ({ func, args }) => [
+    const executeScript = rs.fn(async ({ func, args }) => [
       { result: func(...args) },
     ]);
 
-    vi.stubGlobal('chrome', {
+    rs.stubGlobal('chrome', {
       scripting: {
         executeScript,
       },

@@ -43,7 +43,7 @@
   },
   "scripts": {
     "build": "tsdown --config tsdown.config.ts && cp *.md dist",
-    "test": "vitest run -u -c vitest.config.ts",
+    "test": "rstest -u",
     "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",
     "build-debug": "FEDERATION_DEBUG=true pnpm run build",
     "pre-release": "pnpm run test && pnpm run build"

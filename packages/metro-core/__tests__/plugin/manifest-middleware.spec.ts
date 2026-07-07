@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, rs } from '@rstest/core';
 import { createManifestMiddleware } from '../../src/plugin/manifest-middleware';
 import type { ModuleFederationConfigNormalized } from '../../src/types';
 
@@ -45,11 +45,11 @@ describe('createManifestMiddleware', () => {
     const tmpDirPath = path.join(projectRoot, 'node_modules', '.mf-metro');
     const remoteEntryPath = path.join(tmpDirPath, 'mini.js');
     const sharedEntryPath = path.join(tmpDirPath, 'shared', 'lodash.js');
-    const build = vi.fn(async () => ({ code: '', map: '' }));
-    const middleware = vi.fn();
-    const next = vi.fn();
+    const build = rs.fn(async () => ({ code: '', map: '' }));
+    const middleware = rs.fn();
+    const next = rs.fn();
     const vmManager = {
-      registerVirtualModule: vi.fn(),
+      registerVirtualModule: rs.fn(),
     };
 
     const enhanced = createManifestMiddleware({

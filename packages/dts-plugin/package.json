@@ -77,6 +77,7 @@
   },
   "devDependencies": {
     "@module-federation/runtime": "workspace:*",
+    "@rstest/core": "^0.10.6",
     "@types/node-schedule": "2.1.7",
     "@types/ws": "8.5.12",
     "@vue/tsconfig": "^0.7.0",
@@ -84,7 +85,6 @@
     "vue": "^3.5.13",
     "vue-tsc": "^2.2.10",
     "directory-tree": "3.5.2",
-    "vitest": "1.6.0",
     "webpack": "^5.104.1"
   },
   "peerDependencies": {
@@ -99,7 +99,7 @@
   "scripts": {
     "build": "tsdown --config ./tsdown.config.ts && sleep 1 && cp *.md ./dist",
     "test": "node -e \"require('fs').rmSync('dist-test',{recursive:true,force:true,maxRetries:20,retryDelay:50})\" && pnpm run test-impl",
-    "test-impl": "pnpm exec vitest run --passWithNoTests --config vite.config.mts",
+    "test-impl": "pnpm exec rstest --passWithNoTests",
     "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",
     "build-debug": "FEDERATION_DEBUG=true pnpm run build",
     "pre-release": "pnpm run test && pnpm run build"

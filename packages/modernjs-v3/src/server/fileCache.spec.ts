@@ -1,6 +1,6 @@
-import { it, expect, describe, vi } from 'vitest';
+import { it, expect, describe, rs } from '@rstest/core';
 
-vi.mock('fs/promises', () => ({
+rs.mock('fs/promises', () => ({
   access: () => Promise.resolve(),
   lstat: () =>
     Promise.resolve({

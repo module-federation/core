@@ -1,4 +1,4 @@
-import { it, expect, describe, vi, afterEach } from 'vitest';
+import { it, expect, describe, rs, afterEach } from '@rstest/core';
 import { moduleFederationConfigPlugin, patchMFConfig } from './configPlugin';
 import logger from '../logger';
 
@@ -27,18 +27,18 @@ const getModernJsConfig = async (
   } as any);
 
   await plugin.setup!({
-    config: vi.fn((callback) => {
+    config: rs.fn((callback) => {
       configCallbacks.push(callback);
     }),
-    getConfig: vi.fn(() => modernjsConfig),
-    modifyBundlerChain: vi.fn(),
+    getConfig: rs.fn(() => modernjsConfig),
+    modifyBundlerChain: rs.fn(),
   } as any);
 
   return configCallbacks[0]();
 };
 
 afterEach(() => {
-  vi.restoreAllMocks();
+  rs.restoreAllMocks();
 });
 
 describe('patchMFConfig', async () => {
@@ -112,7 +112,7 @@ describe('patchMFConfig', async () => {
 
 describe('moduleFederationConfigPlugin', async () => {
   it('disables lazyCompilation when the project is a producer', async () => {
-    const warnSpy = vi.spyOn(logger, 'warn').mockImplementation(() => {});
+    const warnSpy = rs.spyOn(logger, 'warn').mockImplementation(() => {});
     const modernJsConfig = await getModernJsConfig(
       {
         name: 'remote',
@@ -141,7 +141,7 @@ describe('moduleFederationConfigPlugin', async () => {
   });
 
   it('keeps lazyCompilation unchanged when the project is not a producer', async () => {
-    const warnSpy = vi.spyOn(logger, 'warn').mockImplementation(() => {});
+    const warnSpy = rs.spyOn(logger, 'warn').mockImplementation(() => {});
     const modernJsConfig = await getModernJsConfig(
       {
         name: 'host',
