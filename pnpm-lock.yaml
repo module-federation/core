@@ -3244,6 +3244,9 @@ importers:
       '@module-federation/runtime':
         specifier: workspace:*
         version: link:../runtime
+      '@rstest/core':
+        specifier: ^0.10.6
+        version: 0.10.6(@module-federation/runtime-tools@2.6.0(node-fetch@3.3.2))(core-js@3.36.1)(jsdom@20.0.3)
       '@types/node-schedule':
         specifier: 2.1.7
         version: 2.1.7
@@ -3624,6 +3627,9 @@ importers:
       '@rsbuild/plugin-react':
         specifier: 1.4.5
         version: 1.4.5(@rsbuild/core@1.3.21)(webpack-hot-middleware@2.26.1)
+      '@rstest/core':
+        specifier: ^0.10.6
+        version: 0.10.6(@module-federation/runtime-tools@2.6.0(node-fetch@3.3.2))(core-js@3.36.1)(jsdom@20.0.3)
       '@rslib/core':
         specifier: 0.18.5
         version: 0.18.5(@microsoft/api-extractor@7.57.7(@types/node@26.1.0))(typescript@5.9.3)
@@ -3709,6 +3715,9 @@ importers:
       '@rsbuild/plugin-react':
         specifier: 1.4.5
         version: 1.4.5(@rsbuild/core@2.0.0-beta.2(@module-federation/runtime-tools@2.6.0(node-fetch@3.3.0))(core-js@3.49.0))(webpack-hot-middleware@2.26.1)
+      '@rstest/core':
+        specifier: ^0.10.6
+        version: 0.10.6(@module-federation/runtime-tools@2.6.0(node-fetch@3.3.2))(core-js@3.36.1)(jsdom@20.0.3)
       '@rslib/core':
         specifier: 0.18.5
         version: 0.18.5(@microsoft/api-extractor@7.57.7(@types/node@26.1.0))(typescript@5.9.3)
@@ -3749,6 +3758,9 @@ importers:
         specifier: ^1.10.1
         version: 1.10.1
     devDependencies:
+      '@rstest/core':
+        specifier: ^0.10.6
+        version: 0.10.6(@module-federation/runtime-tools@2.6.0(node-fetch@3.3.2))(core-js@3.36.1)(jsdom@20.0.3)
       directory-tree:
         specifier: 3.5.2
         version: 3.5.2
@@ -3777,6 +3789,9 @@ importers:
         specifier: ^1.0.24
         version: 1.8.27(typescript@5.9.3)
     devDependencies:
+      '@rstest/core':
+        specifier: ^0.10.6
+        version: 0.10.6(@module-federation/runtime-tools@2.6.0(node-fetch@3.3.2))(core-js@3.36.1)(jsdom@20.0.3)
       directory-tree:
         specifier: 3.5.2
         version: 3.5.2
@@ -3947,6 +3962,9 @@ importers:
       '@rslib/core':
         specifier: ^0.12.4
         version: 0.12.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@microsoft/api-extractor@7.57.7(@types/node@26.1.0))(typescript@5.9.3)
+      '@rstest/core':
+        specifier: ^0.10.6
+        version: 0.10.6(@module-federation/runtime-tools@2.6.0(node-fetch@3.3.2))(core-js@3.36.1)(jsdom@20.0.3)
 
   packages/rspack:
     dependencies:
@@ -4126,6 +4144,9 @@ importers:
         specifier: 1.0.8
         version: 1.0.8
     devDependencies:
+      '@rstest/core':
+        specifier: ^0.10.6
+        version: 0.10.6(@module-federation/runtime-tools@2.6.0(node-fetch@3.3.2))(core-js@3.36.1)(jsdom@20.0.3)
       '@types/node':
         specifier: ^20.19.5
         version: 20.19.5

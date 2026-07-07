@@ -95,6 +95,7 @@
     "unplugin": "^1.10.1"
   },
   "devDependencies": {
+    "@rstest/core": "^0.10.6",
     "directory-tree": "3.5.2"
   },
   "scripts": {

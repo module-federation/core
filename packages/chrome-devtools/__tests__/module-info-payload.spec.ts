@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, rs } from '@rstest/core';
 
 import {
   getGlobalModuleInfo,
@@ -31,9 +31,9 @@ const dispatchRawMessageData = (data: unknown) => {
 
 describe('normalizeModuleInfoPayload', () => {
   afterEach(() => {
-    vi.useRealTimers();
-    vi.resetModules();
-    vi.restoreAllMocks();
+    rs.useRealTimers();
+    rs.resetModules();
+    rs.restoreAllMocks();
     Reflect.deleteProperty(globalThis, 'chrome');
     Reflect.deleteProperty(window, 'moduleHandler');
     Reflect.deleteProperty(window, '__FEDERATION__');
@@ -66,8 +66,8 @@ describe('normalizeModuleInfoPayload', () => {
   });
 
   it('does not relay undefined placeholders from the page message listener', async () => {
-    const sendMessage = vi.fn(() => Promise.resolve());
-    vi.stubGlobal('chrome', {
+    const sendMessage = rs.fn(() => Promise.resolve());
+    rs.stubGlobal('chrome', {
       runtime: {
         sendMessage,
       },
@@ -91,7 +91,7 @@ describe('normalizeModuleInfoPayload', () => {
   });
 
   it('ignores unrelated runtime messages without clearing cached module info', async () => {
-    vi.useFakeTimers();
+    rs.useFakeTimers();
 
     const moduleInfo = {
       'host:http://localhost:3000/mf-manifest.json': {
@@ -106,12 +106,12 @@ describe('normalizeModuleInfoPayload', () => {
     let runtimeListener:
       | ((message: { data?: unknown; type?: string; tabId?: number }) => void)
       | undefined;
-    const addListener = vi.fn((listener) => {
+    const addListener = rs.fn((listener) => {
       runtimeListener = listener;
     });
-    const removeListener = vi.fn();
+    const removeListener = rs.fn();
 
-    vi.stubGlobal('chrome', {
+    rs.stubGlobal('chrome', {
       runtime: {
         getURL: (file: string) => `chrome-extension://id/${file}`,
         onMessage: {
@@ -122,24 +122,24 @@ describe('normalizeModuleInfoPayload', () => {
       devtools: {
         inspectedWindow: {
           tabId: 1,
-          eval: vi.fn((_code: string, callback) => {
+          eval: rs.fn((_code: string, callback) => {
             callback(true, undefined);
           }),
         },
       },
       tabs: {
-        query: vi.fn().mockResolvedValue([{ id: 1 }]),
+        query: rs.fn().mockResolvedValue([{ id: 1 }]),
       },
       scripting: {
-        executeScript: vi.fn().mockResolvedValue([]),
+        executeScript: rs.fn().mockResolvedValue([]),
       },
     });
 
-    const callback = vi.fn();
+    const callback = rs.fn();
     const cleanupPromise = getGlobalModuleInfo(callback);
 
     expect(callback).toHaveBeenCalledWith(moduleInfo);
-    await vi.advanceTimersByTimeAsync(300);
+    await rs.advanceTimersByTimeAsync(300);
     expect(addListener).toHaveBeenCalledTimes(1);
 
     runtimeListener?.({
@@ -185,7 +185,7 @@ describe('normalizeModuleInfoPayload', () => {
     expect(window.__FEDERATION__?.moduleInfo).toEqual(nextModuleInfo);
     expect(callback).toHaveBeenCalledWith(nextModuleInfo);
 
-    await vi.advanceTimersByTimeAsync(50);
+    await rs.advanceTimersByTimeAsync(50);
     const cleanup = await cleanupPromise;
     cleanup();
     expect(removeListener).toHaveBeenCalledWith(runtimeListener);

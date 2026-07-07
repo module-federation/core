@@ -36,6 +36,7 @@
     "exsolve": "1.0.8"
   },
   "devDependencies": {
+    "@rstest/core": "^0.10.6",
     "@types/node": "^20.19.5",
     "@types/react": "^18.3.11",
     "react": "^18",
