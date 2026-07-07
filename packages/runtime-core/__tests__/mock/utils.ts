@@ -3,7 +3,7 @@ import path from 'path';
 import fs from 'fs';
 
 function isAbsolute(url: string) {
-  // Windows drive paths return false here; browser fixtures should use file URLs.
+  // `c:\\` 这种 case 返回 false，在浏览器中使用本地图片，应该用 file 协议
   if (!/^[a-zA-Z]:\\/.test(url)) {
     if (/^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(url)) {
       return true;
@@ -34,8 +34,9 @@ export function mockStaticServer({
       : true;
 
   fetchMocker.enableMocks();
-  fetchMocker.resetMocks();
-  fetchMocker.mockIf(match, async (req) => {
+  fetchMocker.doMock();
+
+  fetchMocker.mockIf(match, (req) => {
     let pathname = req.url;
     if (isAbsolute(req.url)) {
       // eslint-disable-next-line prefer-destructuring
@@ -44,7 +45,7 @@ export function mockStaticServer({
         pathname = pathname.replace(basename, './');
       }
     }
-    const fullDir = path.resolve(baseDir, './' + pathname);
+    const fullDir = path.resolve(baseDir, `./${pathname}`);
     const { ext } = path.parse(fullDir);
     // prettier-ignore
     const mimeType =
@@ -61,26 +62,30 @@ export function mockStaticServer({
       timeConsuming: 0,
     };
 
-    try {
-      const body =
-        responseMatchs[pathname] || fs.readFileSync(fullDir, 'utf-8');
-      if (timeConsuming) {
-        await new Promise((resolve) => setTimeout(resolve, timeConsuming));
+    return new Promise((resolve, reject) => {
+      try {
+        const body =
+          responseMatchs[pathname] || fs.readFileSync(fullDir, 'utf-8');
+        const res = {
+          url: req.url,
+          body,
+          headers: {
+            'Content-Type': mimeType,
+            ...(headers || {}),
+          },
+        };
+        if (timeConsuming) {
+          setTimeout(() => resolve(res), timeConsuming);
+        } else {
+          resolve(res);
+        }
+      } catch (err) {
+        console.error(
+          `mockStaticServer: request ${pathname}, fullDir: ${fullDir}`,
+        );
+        return reject(err);
       }
-      return {
-        url: req.url,
-        body,
-        headers: {
-          'Content-Type': mimeType,
-          ...(headers || {}),
-        },
-      };
-    } catch (err) {
-      console.error(
-        'mockStaticServer: request ' + pathname + ', fullDir: ' + fullDir,
-      );
-      throw err;
-    }
+    });
   });
 }
 
