@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from '@rstest/core';
 import * as sdk from '@module-federation/sdk';
 import { __loadEntryDomForTest } from '../src/utils/load';
 
