@@ -1,5 +1,5 @@
 import { describe, it, expect, rs, beforeEach, afterEach } from '@rstest/core';
-import * as sdk from '@module-federation/sdk';
+import { loadModule } from '@module-federation/sdk';
 import { preloadAssets } from '../src/utils/preload';
 
 // Create a mocked fetch lifecycle loader hook
@@ -30,17 +30,28 @@ const createRemoteInfo = (name: string): any => ({
 });
 
 describe('preloadAssets CSS with fetch lifecycle loader hook', () => {
-  let loadCssWithFetch: ReturnType<typeof rs.spyOn>;
+  let originalFetch: typeof globalThis.fetch;
+  let originalCreateObjectURL: typeof URL.createObjectURL;
+  let fetchMock: ReturnType<typeof rs.fn>;
 
   beforeEach(() => {
     rs.clearAllMocks();
-    loadCssWithFetch = rs
-      .spyOn(sdk, 'loadCssWithFetch')
-      .mockResolvedValue(undefined as any);
+    loadModule.clearCache();
+    originalFetch = globalThis.fetch;
+    originalCreateObjectURL = URL.createObjectURL;
+    fetchMock = rs.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      text: () => Promise.resolve('.a{}'),
+    });
+    globalThis.fetch = fetchMock as any;
+    URL.createObjectURL = rs.fn(() => 'blob:css');
   });
 
   afterEach(() => {
-    loadCssWithFetch.mockRestore();
+    globalThis.fetch = originalFetch;
+    URL.createObjectURL = originalCreateObjectURL;
   });
 
   it('uses the blob loader for manifest CSS when a fetch hook is registered', async () => {
@@ -51,11 +62,14 @@ describe('preloadAssets CSS with fetch lifecycle loader hook', () => {
       entryAssets: [],
     };
     await preloadAssets(createRemoteInfo('a'), host, assets, false);
-    expect(loadCssWithFetch).toHaveBeenCalledWith(
-      expect.objectContaining({
-        href: 'http://x/a.css',
-        customFetch: expect.any(Function),
-      }),
+    expect(fetchMock).toHaveBeenCalledWith('http://x/a.css', expect.anything());
+    // The loader's customFetch forwards remoteInfo and the resource context so
+    // the plugin can add different headers per remote/resource.
+    expect(host.loaderHook.lifecycle.fetch.emit).toHaveBeenCalledWith(
+      'http://x/a.css',
+      { headers: {} },
+      expect.objectContaining({ name: 'a' }),
+      expect.anything(),
     );
   });
 
@@ -70,7 +84,8 @@ describe('preloadAssets CSS with fetch lifecycle loader hook', () => {
     // rel=stylesheet that would apply the remote's CSS before it is loaded, so it
     // must be skipped here rather than overriding host styles.
     await preloadAssets(createRemoteInfo('a'), host, assets);
-    expect(loadCssWithFetch).not.toHaveBeenCalled();
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(host.loaderHook.lifecycle.fetch.emit).not.toHaveBeenCalled();
   });
 
   it('does NOT use the blob loader for manifest CSS when no fetch hook is registered', async () => {
@@ -97,6 +112,7 @@ describe('preloadAssets CSS with fetch lifecycle loader hook', () => {
     } finally {
       observer.disconnect();
     }
-    expect(loadCssWithFetch).not.toHaveBeenCalled();
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(host.loaderHook.lifecycle.fetch.emit).not.toHaveBeenCalled();
   });
 });

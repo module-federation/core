@@ -1,5 +1,5 @@
 import { describe, it, expect, rs, beforeEach, afterEach } from '@rstest/core';
-import * as sdk from '@module-federation/sdk';
+import { loadModule } from '@module-federation/sdk';
 import { __loadEntryDomForTest } from '../src/utils/load';
 
 // Create a mocked fetch lifecycle loader hook
@@ -27,17 +27,30 @@ function createRemoteInfo(name: string, entry: string) {
 }
 
 describe('loadEntryDom ESM with fetch lifecycle loader hook', () => {
-  let loadEsmEntryWithFetch: ReturnType<typeof rs.spyOn>;
+  let originalFetch: typeof globalThis.fetch;
+  let originalCreateObjectURL: typeof URL.createObjectURL;
+  let fetchMock: ReturnType<typeof rs.fn>;
 
   beforeEach(() => {
     rs.clearAllMocks();
-    loadEsmEntryWithFetch = rs
-      .spyOn(sdk, 'loadEsmEntryWithFetch')
-      .mockResolvedValue({ ok: 1 });
+    loadModule.clearCache();
+    originalFetch = globalThis.fetch;
+    originalCreateObjectURL = URL.createObjectURL;
+    fetchMock = rs.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      text: () => Promise.resolve('export const ok = 1;'),
+    });
+    globalThis.fetch = fetchMock as any;
+    URL.createObjectURL = rs.fn(
+      () => 'data:text/javascript,export const ok = 1;',
+    );
   });
 
   afterEach(() => {
-    loadEsmEntryWithFetch.mockRestore();
+    globalThis.fetch = originalFetch;
+    URL.createObjectURL = originalCreateObjectURL;
   });
 
   it('uses the blob loader for module remotes when a fetch hook is registered', async () => {
@@ -47,33 +60,30 @@ describe('loadEntryDom ESM with fetch lifecycle loader hook', () => {
       id: 'a/say',
       resourceType: 'remoteEntry',
     };
-    await __loadEntryDomForTest({
+    const result = await __loadEntryDomForTest({
       remoteInfo: createRemoteInfo('a', 'http://x/e.js'),
       loaderHook,
       resourceContext,
     });
-    expect(loadEsmEntryWithFetch).toHaveBeenCalledWith(
-      expect.objectContaining({
-        entry: 'http://x/e.js',
-        customFetch: expect.any(Function),
-      }),
-    );
-    // The loader's customFetch accepts remoteInfo and resourceContext as
+    expect(fetchMock).toHaveBeenCalledWith('http://x/e.js', expect.anything());
+    // The loader's customFetch forwards remoteInfo and resourceContext as
     // additional arguments so the plugin can add different headers per remote/resource.
-    const { customFetch } = loadEsmEntryWithFetch.mock.calls[0][0] as any;
-    await customFetch('http://x/e.js', { headers: {} });
     expect(loaderHook.lifecycle.fetch.emit).toHaveBeenCalledWith(
       'http://x/e.js',
       { headers: {} },
       expect.objectContaining({ name: 'a' }),
       resourceContext,
     );
+    expect(result).toEqual(expect.objectContaining({ ok: 1 }));
   });
 
   it('wraps blob loader failures as RUNTIME_008 so loadEntryError recovery can fire', async () => {
-    loadEsmEntryWithFetch.mockRejectedValueOnce(
-      new Error('BlobLoaderNetworkError: 401 Unauthorized for http://x/e.js'),
-    );
+    fetchMock.mockResolvedValue({
+      ok: false,
+      status: 401,
+      statusText: 'Unauthorized',
+      text: () => Promise.resolve(''),
+    });
     const err = await __loadEntryDomForTest({
       remoteInfo: createRemoteInfo('a', 'http://x/e.js'),
       loaderHook: createLoaderHook(true),
@@ -89,10 +99,12 @@ describe('loadEntryDom ESM with fetch lifecycle loader hook', () => {
   });
 
   it('does NOT use the blob loader for module remotes when no fetch hook is registered', async () => {
+    const loaderHook = createLoaderHook(false);
     await __loadEntryDomForTest({
       remoteInfo: createRemoteInfo('b', 'http://x/e2.js'),
-      loaderHook: createLoaderHook(false),
+      loaderHook,
     }).catch(() => undefined);
-    expect(loadEsmEntryWithFetch).not.toHaveBeenCalled();
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(loaderHook.lifecycle.fetch.emit).not.toHaveBeenCalled();
   });
 });
