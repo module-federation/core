@@ -44,7 +44,7 @@
   "scripts": {
     "build": "tsup --config tsup.config.ts --outDir dist && cp package.json dist && cp *.md dist",
     "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\"",
-    "test": "pnpm exec rstest --passWithNoTests --config rstest.config.mts",
+    "test": "pnpm exec rstest --passWithNoTests",
     "pre-release": "pnpm run test && pnpm run build"
   }
 }

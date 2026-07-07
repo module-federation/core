@@ -8,7 +8,7 @@
     "lint": "eslint .",
     "preview": "rsbuild preview",
     "e2e:serve": "node scripts/e2e-server.js",
-    "test:e2e": "node ../../scripts/ensure-playwright.js && pnpm exec turbo run build --filter=@module-federation/treeshake-server && pnpm run build && rstest run -c rstest.config.ts",
+    "test:e2e": "node ../../scripts/ensure-playwright.js && pnpm exec turbo run build --filter=@module-federation/treeshake-server && pnpm run build && rstest",
     "test": "pnpm -C . test:e2e",
     "e2e": "pnpm -C . test:e2e"
   },

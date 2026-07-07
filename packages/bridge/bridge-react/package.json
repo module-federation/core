@@ -144,7 +144,7 @@
     "preview": "vite preview",
     "test": "pnpm run test:jest && pnpm run test:rstest",
     "test:jest": "pnpm exec jest --config jest.config.ts --passWithNoTests",
-    "test:rstest": "pnpm exec rstest --passWithNoTests --config rstest.config.ts"
+    "test:rstest": "pnpm exec rstest --passWithNoTests"
   },
   "dependencies": {
     "@module-federation/sdk": "workspace:*",
