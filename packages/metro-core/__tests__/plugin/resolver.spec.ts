@@ -1,6 +1,6 @@
 import path from 'node:path';
 import type { CustomResolutionContext, CustomResolver } from 'metro-resolver';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, rs } from '@rstest/core';
 import { createResolveRequest } from '../../src/plugin/resolver';
 import type { ModuleFederationConfigNormalized } from '../../src/types';
 import type { VirtualModuleManager } from '../../src/utils';
@@ -86,7 +86,7 @@ function createSharedResolverFixture({
   const projectDir = '/project';
   const tmpDir = path.join(projectDir, 'node_modules', '.mf-metro');
   const config = createConfig(sharedName, importName);
-  const fallbackResolver = vi.fn<CustomResolver>(() => ({
+  const fallbackResolver = rs.fn<CustomResolver>(() => ({
     type: 'sourceFile',
     filePath: '/fallback.js',
   }));
@@ -95,7 +95,7 @@ function createSharedResolverFixture({
     fallbackResolver,
   );
   const vmManager: Pick<VirtualModuleManager, 'registerVirtualModule'> = {
-    registerVirtualModule: vi.fn(),
+    registerVirtualModule: rs.fn(),
   };
 
   const resolveRequest = createResolveRequest({
@@ -158,7 +158,7 @@ describe('createResolveRequest', () => {
       // The resolver also registers the virtual module it returns. The path
       // must stay keyed by sharedName, while the generated code loads the
       // actual package import that Metro resolved.
-      const [[registeredPath, registeredModule]] = vi.mocked(
+      const [[registeredPath, registeredModule]] = rs.mocked(
         vmManager.registerVirtualModule,
       ).mock.calls;
       expect(registeredPath).toBe(expectedPath);

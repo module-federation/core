@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import os from 'os';
 import { join, resolve, sep } from 'path';
 import util from 'util';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, rs } from '@rstest/core';
 import type { TsConfigJson } from '../interfaces/TsConfigJson';
 
 import { RemoteOptions } from '../interfaces/RemoteOptions';
@@ -95,7 +95,7 @@ describe('typeScriptCompiler', () => {
     };
 
     afterEach(() => {
-      vi.restoreAllMocks();
+      rs.restoreAllMocks();
       rmSync(tmpDir, { recursive: true, force: true });
       mkdirSync(join(tmpDir, 'typesRemoteFolder'), { recursive: true });
     });
@@ -124,8 +124,8 @@ describe('typeScriptCompiler', () => {
     });
 
     it('use shell option on windows when invoking compiler', async () => {
-      const execPromise = vi.fn().mockResolvedValue({});
-      vi.spyOn(util, 'promisify').mockReturnValue(
+      const execPromise = rs.fn().mockResolvedValue({});
+      rs.spyOn(util, 'promisify').mockReturnValue(
         execPromise as unknown as ReturnType<typeof util.promisify>,
       );
       const restorePlatform = withProcessPlatform('win32');
@@ -152,8 +152,8 @@ describe('typeScriptCompiler', () => {
     });
 
     it('disable shell option on non-windows platforms', async () => {
-      const execPromise = vi.fn().mockResolvedValue({});
-      vi.spyOn(util, 'promisify').mockReturnValue(
+      const execPromise = rs.fn().mockResolvedValue({});
+      rs.spyOn(util, 'promisify').mockReturnValue(
         execPromise as unknown as ReturnType<typeof util.promisify>,
       );
       const restorePlatform = withProcessPlatform('linux');
@@ -180,8 +180,8 @@ describe('typeScriptCompiler', () => {
     });
 
     it('splits compilerInstance arguments for execFile', async () => {
-      const execPromise = vi.fn().mockResolvedValue({});
-      vi.spyOn(util, 'promisify').mockReturnValue(
+      const execPromise = rs.fn().mockResolvedValue({});
+      rs.spyOn(util, 'promisify').mockReturnValue(
         execPromise as unknown as ReturnType<typeof util.promisify>,
       );
       const restorePlatform = withProcessPlatform('linux');
@@ -207,8 +207,8 @@ describe('typeScriptCompiler', () => {
     });
 
     it('does not wrap project path in single quotes on Windows (#4133)', async () => {
-      const execPromise = vi.fn().mockRejectedValue(new Error('tsc error'));
-      vi.spyOn(util, 'promisify').mockReturnValue(
+      const execPromise = rs.fn().mockRejectedValue(new Error('tsc error'));
+      rs.spyOn(util, 'promisify').mockReturnValue(
         execPromise as unknown as ReturnType<typeof util.promisify>,
       );
       const restorePlatform = withProcessPlatform('win32');
@@ -253,10 +253,11 @@ describe('typeScriptCompiler', () => {
             compilerOptions: {
               target: 'es2017',
               module: 'esnext',
-              moduleResolution: 'node',
+              moduleResolution: 'node10',
               declaration: true,
               emitDeclarationOnly: true,
               declarationDir: 'decl-dist',
+              ignoreDeprecations: '6.0',
             },
             include: ['src'],
           },
@@ -278,7 +279,7 @@ describe('typeScriptCompiler', () => {
           compilerOptions: {
             target: 'es2017',
             module: 'esnext',
-            moduleResolution: 'node',
+            moduleResolution: 'node10',
             strict: true,
             esModuleInterop: true,
             emitDeclarationOnly: true,
@@ -287,6 +288,7 @@ describe('typeScriptCompiler', () => {
             outDir,
             declarationDir: outDir,
             rootDir: projectDir,
+            ignoreDeprecations: '6.0',
           },
           files: [entryFile],
           include: [],
@@ -387,12 +389,13 @@ describe('typeScriptCompiler', () => {
             compilerOptions: {
               target: 'es2017',
               module: 'esnext',
-              moduleResolution: 'node',
+              moduleResolution: 'node10',
               strict: true,
               esModuleInterop: true,
               declaration: true,
               emitDeclarationOnly: true,
               rootDir: projectDir,
+              ignoreDeprecations: '6.0',
             },
             include: ['src'],
           },
@@ -414,7 +417,7 @@ describe('typeScriptCompiler', () => {
           compilerOptions: {
             target: 'es2017',
             module: 'esnext',
-            moduleResolution: 'node',
+            moduleResolution: 'node10',
             strict: true,
             esModuleInterop: true,
             emitDeclarationOnly: true,
@@ -423,6 +426,7 @@ describe('typeScriptCompiler', () => {
             outDir,
             declarationDir: outDir,
             rootDir: projectDir,
+            ignoreDeprecations: '6.0',
           },
           files: [entryFile],
           include: [],

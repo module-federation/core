@@ -17,7 +17,7 @@
     "build:debug": "DEBUG=true modern-app build && node postpack.js",
     "build:lib": "rm -rf dist && modern-module build -c modern.lib.config.ts",
     "release": "npm publish --tag canary",
-    "test": "vitest run",
+    "test": "rstest",
     "test:e2e": "node ../../scripts/ensure-playwright.js && E2ETEST=true pnpm build:devtool && playwright test",
     "test:e2e:ui": "node ../../scripts/ensure-playwright.js && E2ETEST=true pnpm build:devtool && playwright test --ui",
     "start": "modern-app start",
@@ -96,13 +96,12 @@
     "@playwright/test": "1.57.0",
     "@types/chrome": "^0.0.272",
     "@types/dagre": "^0.7.52",
-    "@types/jest": "~29.2.4",
     "@types/node": "^20.19.5",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "lint-staged": "~13.1.0",
     "prettier": "~3.3.3",
-    "typescript": "5.9.3",
+    "typescript": "6.0.3",
     "rimraf": "~6.0.1",
     "vitest": "1.2.2"
   }

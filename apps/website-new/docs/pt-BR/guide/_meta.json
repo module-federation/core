@@ -1,0 +1,47 @@
+[
+  {
+    "type": "dir-section-header",
+    "name": "start",
+    "label": "Primeiros passos"
+  },
+  {
+    "type": "dir-section-header",
+    "name": "basic",
+    "label": "Básico"
+  },
+  {
+    "type": "dir-section-header",
+    "name": "runtime",
+    "label": "Runtime"
+  },
+  {
+    "type": "dir-section-header",
+    "name": "bridge",
+    "label": "Bridge"
+  },
+  {
+    "type": "dir-section-header",
+    "name": "data",
+    "label": "Data Management"
+  },
+  {
+    "type": "dir-section-header",
+    "name": "advanced",
+    "label": "Avançado"
+  },
+  {
+    "type": "dir-section-header",
+    "name": "debug",
+    "label": "Depuração"
+  },
+  {
+    "type": "dir-section-header",
+    "name": "deployment",
+    "label": "Implantação"
+  },
+  {
+    "type": "dir-section-header",
+    "name": "troubleshooting",
+    "label": "Solução de problemas"
+  }
+]

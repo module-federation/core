@@ -29,7 +29,8 @@
     "jiti": "2.4.2"
   },
   "devDependencies": {
-    "@types/node": "^20.19.5"
+    "@types/node": "^20.19.5",
+    "typescript": "6.0.3"
   },
   "engines": {
     "node": ">=16.0.0"
@@ -41,7 +42,7 @@
   "scripts": {
     "build": "rslib build",
     "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",
-    "test": "rstest run -c rstest.config.ts",
+    "test": "rstest",
     "pre-release": "pnpm run test && pnpm run build"
   }
 }

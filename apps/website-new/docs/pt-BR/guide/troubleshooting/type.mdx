@@ -1,0 +1,89 @@
+import ErrorCodeTitle from '@components/ErrorCodeTitle';
+
+# Tipos
+
+Tipo erros são divided em two tipos: fixed erro code erros e scenario-related erros.
+
+## Fixed erro code erros
+
+Este tipo de erro pode ser clearly captured no code, e uma fixed erro code é assigned para each erro. O erro code consists do erro tipo e ID, such as `TYPE-001`.
+
+### Erro code list
+
+- [TYPE-001](#type-001)
+
+## TIPO-001
+
+<ErrorCodeTitle code='TYPE-001'/>
+
+### Reasons
+
+Quando compiling TS tipos for exposto (`exposes`) arquivos, o projeto atual's `tsconfig.json` é usado. Missing compiler opções may cause o tipo build para fail.
+
+### Solutions
+
+1. Remove tsconfig.json `incremental` e `tsBuildInfoFile` do `cmd` comando.
+2. Run o `cmd` do erro message em terminal e fix o arquivo ou `tsconfig` based no output.
+
+Se você quiser ignore TS tipo checking erros, definir [`compilerOptions.noCheck`](https://www.typescriptlang.org/tsconfig/#noCheck) para `true` em `tsconfig.json` (requires TS 5.5+).
+
+Se o `cmd` runs sem erro but você still get uma TS compile falha, check o `exposes` field em `ModuleFederationPlugin`:
+
+```ts title="[modern|rspack|rsbuild|webpack].config.[js,ts]"
+new ModuleFederationPlugin({
+    ...
+    // Make sure both key and value start with "./"
+    exposes: { './Foo': './src/<path-to-file>/Foo.tsx' },
+    ...
+  })
+```
+
+## Scenario-related erros
+
+Este tipo de erro é generated based no user's specific scenario e has no fixed erro code. O erro message e handling método vai vary depending no scenario.
+
+### Generated tipo contains aliases
+
+**Phenomenon description**
+
+O tipo generated pelo producer contains aliases e cannot ser processed normally no consumer.
+
+**How ​​para solve**
+
+1. Instale [typescript-transform-paths](https://www.npmjs.com/package/typescript-transform-paths) e [ts-patch](https://www.npmjs.com/package/ts-patch)
+2. Apply `typescript-transform-paths` em `tsconfig.json`
+
+```diff
+{
+"compilerOptions": {
++ "plugins": [
++ { "transform": "typescript-transform-paths" },
++ {
++ "transform": "typescript-transform-paths",
++ "afterDeclarations": true
++ }
++ ],
+},
+}
+```
+
+3. Set [dts.generateTypes.compilerInstance](/configure/dts.html#compilerinstance) para `tspc`(`ts-patch` cli)
+4. Regenerate tipos
+
+### Generated tipos não updating quando working behind uma local proxy
+
+**Phenomenon description**
+
+O tipos generated pelo producer são successfully generated, o consumer log shows esse o tipos são successfully processed, but o `@mf-types` diretório does não update.
+O issue pode ser uma proxy configuração problem não allowing o recurso para ser baixadas.
+
+**How ​​para solve**
+
+1. Check se o `@mf-types` diretório é generated no `dist` diretório do producer.
+2. Check your proxy log for any erros related para `TLS` ou `SSL`.
+3. Adapt your proxy configuração para adicionar `TLS` certification for your local environment.
+4. In some scenarios este é não working. Um alternative é, para define o environment variable `NODE_TLS_REJECT_UNAUTHORIZED=0` para ignore o `TLS` ou `SSL` erros. Este vai allow o `@mf-types.zip` para ser properly handled.
+
+:::danger Important note
+Only definir NODE_TLS_REJECT_UNAUTHORIZED=0 em your local ambiente de desenvolvimento. It é não meant for production use. Se você go este rota, please garanta para commit o generated tipos para your repository.
+:::

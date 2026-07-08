@@ -1,7 +1,7 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'fs';
 import os from 'os';
 import { dirname, join, resolve } from 'path';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from '@rstest/core';
 
 import { retrieveRemoteConfig } from './remotePlugin';
 
@@ -85,7 +85,7 @@ describe('hostPlugin', () => {
             target: 'es2017',
             module: 'esnext',
             lib: ['esnext'],
-            moduleResolution: 'node',
+            moduleResolution: 'node10',
             esModuleInterop: true,
             strict: true,
             strictNullChecks: true,
@@ -107,6 +107,7 @@ describe('hostPlugin', () => {
               remoteOptions.context,
               'node_modules/.cache/mf-types/.tsbuildinfo',
             ),
+            ignoreDeprecations: '6.0',
           },
           files: ['./src/components/button', './src/components/anotherButton'],
           include: [],
@@ -162,7 +163,7 @@ describe('hostPlugin', () => {
             strictNullChecks: true,
             target: 'es2017',
             lib: ['esnext'],
-            moduleResolution: 'node',
+            moduleResolution: 'node10',
             esModuleInterop: true,
             emitDeclarationOnly: true,
             noEmit: false,
@@ -181,6 +182,7 @@ describe('hostPlugin', () => {
               remoteOptions.context,
               'node_modules/.cache/mf-types/.tsbuildinfo',
             ),
+            ignoreDeprecations: '6.0',
           },
           exclude: [],
           include: [],

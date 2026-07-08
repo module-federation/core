@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, rs, beforeEach, afterEach } from '@rstest/core';
 import { getRemoteEntry, getRemoteInfo } from '../src/utils/load';
 import { ModuleFederation } from '../src/core';
 import { resetFederationGlobalInfo } from '../src/global';

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, rs } from '@rstest/core';
 
 const createPluginHarness = async () => {
   const { moduleFederationSSRPlugin } = await import('./ssrPlugin');
@@ -19,26 +19,26 @@ const createPluginHarness = async () => {
 
   let rsbuildPlugin: any;
   const api = {
-    _internalRuntimePlugins: vi.fn(),
-    _internalServerPlugins: vi.fn(),
-    config: vi.fn((callback) => {
+    _internalRuntimePlugins: rs.fn(),
+    _internalServerPlugins: rs.fn(),
+    config: rs.fn((callback) => {
       const config = callback();
       rsbuildPlugin = config.builderPlugins[0];
     }),
-    getAppContext: vi.fn(() => ({ bundlerType: 'rspack' })),
-    getConfig: vi.fn(() => ({ server: { ssr: true } })),
-    modifyBundlerChain: vi.fn(),
-    onAfterBuild: vi.fn(),
-    onDevCompileDone: vi.fn(),
+    getAppContext: rs.fn(() => ({ bundlerType: 'rspack' })),
+    getConfig: rs.fn(() => ({ server: { ssr: true } })),
+    modifyBundlerChain: rs.fn(),
+    onAfterBuild: rs.fn(),
+    onDevCompileDone: rs.fn(),
   };
 
   await moduleFederationSSRPlugin(pluginOptions).setup!(api as any);
 
   const rsbuildApi = {
-    modifyEnvironmentConfig: vi.fn(),
-    modifyRspackConfig: vi.fn(),
-    modifyWebpackConfig: vi.fn(),
-    processAssets: vi.fn(),
+    modifyEnvironmentConfig: rs.fn(),
+    modifyRspackConfig: rs.fn(),
+    modifyWebpackConfig: rs.fn(),
+    processAssets: rs.fn(),
   };
 
   rsbuildPlugin.setup(rsbuildApi);

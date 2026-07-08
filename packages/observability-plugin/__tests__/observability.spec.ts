@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, rs } from '@rstest/core';
 import { createObservability, ObservabilityPlugin } from '../src';
 import {
   ObservabilityBuildPlugin,
@@ -573,7 +573,7 @@ const createLoadedBeforeFederationFixture = () => {
             name: 'provider',
             entryGlobalName: 'provider_global',
           },
-          remoteEntryExports: { get: vi.fn() },
+          remoteEntryExports: { get: rs.fn() },
           inited: true,
         },
       ],
@@ -592,7 +592,7 @@ const createLoadedBeforeFederationFixture = () => {
             name: 'provider',
             entryGlobalName: 'provider_global',
           },
-          remoteEntryExports: { get: vi.fn() },
+          remoteEntryExports: { get: rs.fn() },
           inited: true,
         },
       ],
@@ -651,7 +651,7 @@ const createBuildCompilerFixture = (
 ) => {
   const processAssetsCallbacks: Array<() => Promise<void>> = [];
   const emittedAssets: Record<string, { source(): string }> = {};
-  const warn = vi.fn();
+  const warn = rs.fn();
   const compilation = {
     constructor: {
       PROCESS_ASSETS_STAGE_REPORT: 5000,
@@ -1017,7 +1017,7 @@ describe('ObservabilityPlugin', () => {
 
   it('does not wrap a remote React function component unless callback injection is explicitly enabled', async () => {
     const react = {
-      createElement: vi.fn((type: unknown, props?: unknown) => ({
+      createElement: rs.fn((type: unknown, props?: unknown) => ({
         type,
         props,
       })),
@@ -1064,7 +1064,7 @@ describe('ObservabilityPlugin', () => {
 
   it('injects the producer loaded callback when explicitly enabled', async () => {
     const react = {
-      createElement: vi.fn((type: unknown, props?: unknown) => ({
+      createElement: rs.fn((type: unknown, props?: unknown) => ({
         type,
         props,
       })),
@@ -1195,7 +1195,7 @@ describe('ObservabilityPlugin', () => {
 
   it('injects the producer loaded callback for build-time remote factories', async () => {
     const react = {
-      createElement: vi.fn((type: unknown, props?: unknown) => ({
+      createElement: rs.fn((type: unknown, props?: unknown) => ({
         type,
         props,
       })),
@@ -1325,7 +1325,7 @@ describe('ObservabilityPlugin', () => {
 
   it('wraps explicitly matched React remotes even when the compiled component name is not capitalized', async () => {
     const react = {
-      createElement: vi.fn((type: unknown, props?: unknown) => ({
+      createElement: rs.fn((type: unknown, props?: unknown) => ({
         type,
         props,
       })),
@@ -1394,7 +1394,7 @@ describe('ObservabilityPlugin', () => {
 
   it('matches React callback injection by remote alias and expose', async () => {
     const react = {
-      createElement: vi.fn((type: unknown, props?: unknown) => ({
+      createElement: rs.fn((type: unknown, props?: unknown) => ({
         type,
         props,
       })),
@@ -1572,7 +1572,7 @@ describe('ObservabilityPlugin', () => {
   it('posts events to the local collector outside debug mode', () => {
     const originalFetch = globalThis.fetch;
     const originalDebug = process.env['FEDERATION_DEBUG'];
-    const fetchMock = vi.fn(() => Promise.resolve({ ok: true }));
+    const fetchMock = rs.fn(() => Promise.resolve({ ok: true }));
     Object.defineProperty(globalThis, 'fetch', {
       value: fetchMock,
       configurable: true,
@@ -1640,7 +1640,7 @@ describe('ObservabilityPlugin', () => {
   it('posts events to the local collector in debug mode', () => {
     const originalFetch = globalThis.fetch;
     const originalDebug = process.env['FEDERATION_DEBUG'];
-    const fetchMock = vi.fn(() => Promise.resolve({ ok: true }));
+    const fetchMock = rs.fn(() => Promise.resolve({ ok: true }));
     Object.defineProperty(globalThis, 'fetch', {
       value: fetchMock,
       configurable: true,
@@ -1708,11 +1708,11 @@ describe('ObservabilityPlugin', () => {
   it('logs local collector connection failures in debug mode', async () => {
     const originalFetch = globalThis.fetch;
     const originalDebug = process.env['FEDERATION_DEBUG'];
-    const consoleDebug = vi
+    const consoleDebug = rs
       .spyOn(console, 'debug')
       .mockImplementation(() => undefined);
     const fetchError = new Error('collector unavailable');
-    const fetchMock = vi.fn(() => Promise.reject(fetchError));
+    const fetchMock = rs.fn(() => Promise.reject(fetchError));
     Object.defineProperty(globalThis, 'fetch', {
       value: fetchMock,
       configurable: true,
@@ -1759,11 +1759,11 @@ describe('ObservabilityPlugin', () => {
   it('hides local collector connection failures outside debug mode', async () => {
     const originalFetch = globalThis.fetch;
     const originalDebug = process.env['FEDERATION_DEBUG'];
-    const consoleDebug = vi
+    const consoleDebug = rs
       .spyOn(console, 'debug')
       .mockImplementation(() => undefined);
     const fetchError = new Error('collector unavailable');
-    const fetchMock = vi.fn(() => Promise.reject(fetchError));
+    const fetchMock = rs.fn(() => Promise.reject(fetchError));
     Object.defineProperty(globalThis, 'fetch', {
       value: fetchMock,
       configurable: true,
@@ -1806,7 +1806,7 @@ describe('ObservabilityPlugin', () => {
   it('posts events to the browser devtools channel when enabled', () => {
     const originalPostMessage = (globalThis as { postMessage?: unknown })
       .postMessage;
-    const postMessageMock = vi.fn();
+    const postMessageMock = rs.fn();
     Object.defineProperty(globalThis, 'postMessage', {
       value: postMessageMock,
       configurable: true,
@@ -1862,8 +1862,8 @@ describe('ObservabilityPlugin', () => {
     const originalNodeEnv = process.env['NODE_ENV'];
     const originalPostMessage = (globalThis as { postMessage?: unknown })
       .postMessage;
-    const fetchMock = vi.fn(() => Promise.resolve({ ok: true }));
-    const postMessageMock = vi.fn();
+    const fetchMock = rs.fn(() => Promise.resolve({ ok: true }));
+    const postMessageMock = rs.fn();
 
     Object.defineProperty(globalThis, 'fetch', {
       value: fetchMock,
@@ -3230,13 +3230,13 @@ describe('ObservabilityPlugin', () => {
       console: false,
     });
 
-    vi.useFakeTimers();
+    rs.useFakeTimers();
     try {
-      vi.setSystemTime(1000);
+      rs.setSystemTime(1000);
       await emitRemoteLoaded(observability);
       const buttonTraceId = observability.getLatestReport()?.traceId || '';
 
-      vi.setSystemTime(2000);
+      rs.setSystemTime(2000);
       await emitRemoteLoaded(observability, {
         id: 'catalog/Card',
         expose: './Card',
@@ -3248,7 +3248,7 @@ describe('ObservabilityPlugin', () => {
       });
       const cardTraceId = observability.getLatestReport()?.traceId || '';
 
-      vi.setSystemTime(3000);
+      rs.setSystemTime(3000);
       observability.plugin.errorLoadShare?.({
         pkgName: 'react',
         shareInfo: createShared({
@@ -3303,7 +3303,7 @@ describe('ObservabilityPlugin', () => {
         observability.getLatestReport()?.traceId,
       );
     } finally {
-      vi.useRealTimers();
+      rs.useRealTimers();
     }
   });
 
@@ -3839,7 +3839,7 @@ describe('ObservabilityPlugin', () => {
 
   it('prints a minimal console hint with traceId on error', () => {
     const observability = createObservability({ level: 'verbose' });
-    const error = vi
+    const error = rs
       .spyOn(console, 'error')
       .mockImplementation(() => undefined);
 
@@ -3882,7 +3882,7 @@ describe('ObservabilityPlugin', () => {
         scope: 'runtime_host',
       },
     });
-    const error = vi
+    const error = rs
       .spyOn(console, 'error')
       .mockImplementation(() => undefined);
 
@@ -3917,7 +3917,7 @@ describe('ObservabilityPlugin', () => {
         __FEDERATION__?: Record<string, unknown>;
       }
     ).__FEDERATION__;
-    const info = vi.spyOn(console, 'info').mockImplementation(() => undefined);
+    const info = rs.spyOn(console, 'info').mockImplementation(() => undefined);
 
     try {
       (
@@ -3981,7 +3981,7 @@ describe('ObservabilityPlugin', () => {
         __FEDERATION__?: Record<string, unknown>;
       }
     ).__FEDERATION__;
-    const info = vi.spyOn(console, 'info').mockImplementation(() => undefined);
+    const info = rs.spyOn(console, 'info').mockImplementation(() => undefined);
 
     try {
       (
@@ -4076,7 +4076,7 @@ describe('ObservabilityPlugin', () => {
       level: 'verbose',
       printRawStack: true,
     });
-    const errorSpy = vi
+    const errorSpy = rs
       .spyOn(console, 'error')
       .mockImplementation(() => undefined);
     const error = new Error('raw stack enabled');
@@ -4098,7 +4098,7 @@ describe('ObservabilityPlugin', () => {
 
   it('passes raw errors to explicit callbacks without affecting loading', () => {
     const rawError = new Error('raw callback');
-    const onRawError = vi.fn(() => {
+    const onRawError = rs.fn(() => {
       throw new Error('ignored callback failure');
     });
     const observability = createObservability({
@@ -4306,7 +4306,7 @@ describe('ObservabilityPlugin', () => {
       level: 'verbose',
       printRawStack: true,
     });
-    const errorSpy = vi
+    const errorSpy = rs
       .spyOn(console, 'error')
       .mockImplementation(() => undefined);
     const error = new Error('node raw stack enabled');
@@ -4446,10 +4446,10 @@ describe('ObservabilityPlugin', () => {
   it('does not let observability callbacks affect loading', async () => {
     const observability = createObservability({
       level: 'verbose',
-      onEvent: vi.fn(() => {
+      onEvent: rs.fn(() => {
         throw new Error('onEvent failed');
       }),
-      onReport: vi.fn(() => {
+      onReport: rs.fn(() => {
         throw new Error('onReport failed');
       }),
     });
@@ -4463,13 +4463,13 @@ describe('ObservabilityPlugin', () => {
     const observability = createObservability({
       level: 'verbose',
       console: false,
-      onEvent: vi.fn(() => {
+      onEvent: rs.fn(() => {
         throw new Error('onEvent failed');
       }),
-      onReport: vi.fn(() => {
+      onReport: rs.fn(() => {
         throw new Error('onReport failed');
       }),
-      onRawError: vi.fn(() => {
+      onRawError: rs.fn(() => {
         throw new Error('onRawError failed');
       }),
     });

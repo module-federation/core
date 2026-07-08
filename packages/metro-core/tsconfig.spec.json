@@ -4,10 +4,10 @@
     "outDir": "../../dist/out-tsc",
     "module": "commonjs",
     "moduleResolution": "node10",
-    "types": ["vitest/globals", "node"]
+    "types": ["@rstest/core/globals", "node"]
   },
   "include": [
-    "vitest.config.mts",
+    "rstest.config.mts",
     "__tests__/**/*.test.ts",
     "__tests__/**/*.spec.ts",
     "src/**/*.d.ts"

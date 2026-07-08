@@ -8,7 +8,7 @@
   },
   "include": ["**/*.ts"],
   "exclude": [
-    "jest.config.ts",
+    "rstest.config.mts",
     "**/*.spec.ts",
     "**/*.test.ts",
     "tsdown.config.ts"

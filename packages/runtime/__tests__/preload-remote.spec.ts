@@ -1,4 +1,4 @@
-import { describe, it } from 'vitest';
+import { describe, it } from '@rstest/core';
 import { init } from '../src/index';
 import { mockStaticServer } from './mock/utils';
 import { Global, addGlobalSnapshot } from '@module-federation/runtime-core';

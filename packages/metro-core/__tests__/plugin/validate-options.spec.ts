@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, rs } from '@rstest/core';
 import { validateOptions } from '../../src/plugin/validate-options';
 
 function getValidConfig() {
@@ -25,11 +25,11 @@ function getValidConfig() {
 
 describe('validateOptions', () => {
   afterEach(() => {
-    vi.restoreAllMocks();
+    rs.restoreAllMocks();
   });
 
   it('warns when unsupported options are configured', () => {
-    const warnSpy = vi
+    const warnSpy = rs
       .spyOn(console, 'warn')
       .mockImplementation(() => undefined);
 
@@ -44,7 +44,7 @@ describe('validateOptions', () => {
   });
 
   it('warns that runtime plugin params are not supported', () => {
-    const warnSpy = vi
+    const warnSpy = rs
       .spyOn(console, 'warn')
       .mockImplementation(() => undefined);
 
@@ -59,7 +59,7 @@ describe('validateOptions', () => {
   });
 
   it('does not warn for runtime plugin tuple without params', () => {
-    const warnSpy = vi
+    const warnSpy = rs
       .spyOn(console, 'warn')
       .mockImplementation(() => undefined);
 
@@ -72,7 +72,7 @@ describe('validateOptions', () => {
   });
 
   it('warns when deprecated plugins is used', () => {
-    const warnSpy = vi
+    const warnSpy = rs
       .spyOn(console, 'warn')
       .mockImplementation(() => undefined);
 

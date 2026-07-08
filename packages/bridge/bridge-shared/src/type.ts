@@ -1,9 +1,11 @@
+import type { CSSProperties } from 'react';
+
 export interface ProviderParams {
   moduleName?: string;
   basename?: string;
   memoryRoute?: { entryPath: string };
   hashRoute?: boolean;
-  style?: React.CSSProperties;
+  style?: CSSProperties;
   className?: string;
 }
 

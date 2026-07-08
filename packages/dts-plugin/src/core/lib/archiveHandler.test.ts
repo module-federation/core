@@ -19,9 +19,9 @@ import {
   describe,
   expect,
   it,
-  vi,
+  rs,
   MockInstance,
-} from 'vitest';
+} from '@rstest/core';
 
 import {
   createTypesArchive,
@@ -46,7 +46,7 @@ describe('archiveHandler', () => {
   };
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    rs.clearAllMocks();
     // Clean up and recreate the output directory
     rmSync(tsConfig.compilerOptions.outDir, { recursive: true, force: true });
     mkdirSync(tsConfig.compilerOptions.outDir, { recursive: true });
@@ -283,7 +283,7 @@ describe('archiveHandler', () => {
         Buffer.from('export declare const bar: number;'),
       );
 
-      const nativeFetchMock = vi
+      const nativeFetchMock = rs
         .spyOn(utils, 'nativeFetch')
         .mockResolvedValueOnce({
           data: zip.toBuffer(),
@@ -306,7 +306,7 @@ describe('archiveHandler', () => {
 
     it('should retry on network failure up to maxRetries', async () => {
       const error = new Error('Network error');
-      const nativeFetchMock = vi
+      const nativeFetchMock = rs
         .spyOn(utils, 'nativeFetch')
         .mockRejectedValue(error);
 
@@ -322,7 +322,7 @@ describe('archiveHandler', () => {
       const zip = new AdmZip();
       // Add an empty directory to the archive
       zip.addFile('.keep', Buffer.from(''));
-      vi.spyOn(utils, 'nativeFetch').mockResolvedValueOnce({
+      rs.spyOn(utils, 'nativeFetch').mockResolvedValueOnce({
         data: zip.toBuffer(),
         status: 200,
         headers: {},
@@ -344,7 +344,7 @@ describe('archiveHandler', () => {
 
       const zip = new AdmZip();
       zip.addFile('new.d.ts', Buffer.from('new content'));
-      vi.spyOn(utils, 'nativeFetch').mockResolvedValueOnce({
+      rs.spyOn(utils, 'nativeFetch').mockResolvedValueOnce({
         data: zip.toBuffer(),
         status: 200,
         headers: {},
@@ -369,7 +369,7 @@ describe('archiveHandler', () => {
 
       const zip = new AdmZip();
       zip.addFile('new.d.ts', Buffer.from('new content'));
-      vi.spyOn(utils, 'nativeFetch').mockResolvedValueOnce({
+      rs.spyOn(utils, 'nativeFetch').mockResolvedValueOnce({
         data: zip.toBuffer(),
         status: 200,
         headers: {},
@@ -386,7 +386,7 @@ describe('archiveHandler', () => {
         ...hostOptions,
         abortOnError: false,
       };
-      const nativeFetchMock = vi
+      const nativeFetchMock = rs
         .spyOn(utils, 'nativeFetch')
         .mockRejectedValue(new Error('Network error'));
 
@@ -400,7 +400,7 @@ describe('archiveHandler', () => {
     });
 
     it('should handle malformed zip data', async () => {
-      vi.spyOn(utils, 'nativeFetch').mockResolvedValueOnce({
+      rs.spyOn(utils, 'nativeFetch').mockResolvedValueOnce({
         data: Buffer.from('not a valid zip file'),
         status: 200,
         headers: {},

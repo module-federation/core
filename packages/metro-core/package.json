@@ -57,8 +57,8 @@
   },
   "scripts": {
     "build": "rslib build",
-    "test": "vitest run --config vitest.config.mts",
-    "test:watch": "vitest --config vitest.config.mts",
+    "test": "rstest",
+    "test:watch": "rstest --watch",
     "typecheck": "tsc --noEmit",
     "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.{ts,tsx,js,jsx}\""
   },
@@ -87,7 +87,7 @@
     }
   },
   "devDependencies": {
-    "@rslib/core": "^0.10.0",
+    "@rslib/core": "^0.23.2",
     "@typescript-eslint/eslint-plugin": "8.54.0",
     "@typescript-eslint/parser": "8.54.0",
     "@types/node": "^20.19.5",
@@ -101,6 +101,6 @@
     "react": "19.1.0",
     "react-native": "0.80.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.3"
+    "typescript": "^6.0.3"
   }
 }

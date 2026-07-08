@@ -30,12 +30,6 @@ function importNodeModule<T>(name: string): Promise<T> {
   return promise;
 }
 
-const loadNodeFetch = async (): Promise<typeof fetch> => {
-  const fetchModule =
-    await importNodeModule<typeof import('node-fetch')>('node-fetch');
-  return (fetchModule.default || fetchModule) as unknown as typeof fetch;
-};
-
 const lazyLoaderHookFetch = async (
   input: RequestInfo | URL,
   init?: RequestInit,
@@ -47,9 +41,7 @@ const lazyLoaderHookFetch = async (
 
   const res = await hook(input, init || {});
   if (!res || !(res instanceof Response)) {
-    const fetchFunction =
-      typeof fetch === 'undefined' ? await loadNodeFetch() : fetch;
-    return fetchFunction(input, init || {});
+    return fetch(input, init || {});
   }
 
   return res;
@@ -92,7 +84,7 @@ export const createScriptNode =
               lazyLoaderHookFetch(input, init, loaderHook);
           }
 
-          return typeof fetch === 'undefined' ? loadNodeFetch() : fetch;
+          return fetch;
         };
 
         const handleScriptFetch = async (f: typeof fetch, urlObj: URL) => {

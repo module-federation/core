@@ -18,7 +18,7 @@
   "type": "module",
   "main": "./dist/index.umd.js",
   "module": "./dist/index.es.js",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/src/index.d.ts",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -29,7 +29,7 @@
     "@types/react": "^18.3.11",
     "@vitejs/plugin-vue": "^5.0.4",
     "@vitejs/plugin-vue-jsx": "^4.0.0",
-    "typescript": "^5.2.2",
+    "typescript": "^6.0.3",
     "vite": "^5.4.21",
     "vite-plugin-dts": "^4.3.0",
     "vue-tsc": "^2.0.6"

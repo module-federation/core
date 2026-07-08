@@ -95,6 +95,6 @@
     "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",
     "build-debug": "RUNTIME_TSDOWN_MODE=debug tsdown --config tsdown.config.ts",
     "pre-release": "pnpm run test && pnpm run build",
-    "test": "vitest run -u -c vitest.config.ts"
+    "test": "rstest -u"
   }
 }
