@@ -44,7 +44,7 @@
   "devDependencies": {
     "@types/glob": "7.2.0",
     "@types/minimist": "^1.2.5",
-    "@rslib/core": "^0.9.0",
+    "@rslib/core": "^0.23.2",
     "rsbuild-plugin-publint": "^0.2.1"
   }
 }

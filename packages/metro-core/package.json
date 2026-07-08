@@ -87,7 +87,7 @@
     }
   },
   "devDependencies": {
-    "@rslib/core": "^0.10.0",
+    "@rslib/core": "^0.23.2",
     "@typescript-eslint/eslint-plugin": "8.54.0",
     "@typescript-eslint/parser": "8.54.0",
     "@types/node": "^20.19.5",
