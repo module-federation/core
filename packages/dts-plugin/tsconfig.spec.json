@@ -10,5 +10,5 @@
   },
   "files": [],
   "include": [],
-  "exclude": ["jest.config.ts", "src/**/*.spec.ts", "src/**/*.test.ts"]
+  "exclude": ["rstest.config.mts", "src/**/*.spec.ts", "src/**/*.test.ts"]
 }
