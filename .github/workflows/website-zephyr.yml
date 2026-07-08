@@ -11,15 +11,8 @@ on:
       - 'pnpm-lock.yaml'
       - 'turbo.json'
       - '.github/workflows/website-zephyr.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'apps/website-new/**'
-      - 'packages/rspress-plugin/**'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - 'turbo.json'
-      - '.github/workflows/website-zephyr.yml'
+  release:
+    types: [released]
   workflow_dispatch:
 
 permissions:
@@ -66,6 +59,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-${{ github.ref_name }}-
             ${{ runner.os }}-turbo-
+
+      - name: Use production Zephyr environment
+        if: ${{ github.event_name == 'release' }}
+        run: echo "ZE_ENV=production" >> "$GITHUB_ENV"
 
       - name: Build and deploy website with Zephyr
         if: ${{ env.ZE_SECRET_TOKEN != '' && github.event.action != 'closed' }}
