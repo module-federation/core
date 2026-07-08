@@ -14,6 +14,7 @@ const siteOrigin = (
 const siteIcon = '/svg.svg';
 const socialImageUrl = `${siteOrigin}/module-federation-social.svg`;
 const socialImageAlt = 'Module Federation icon';
+const googleAnalyticsMeasurementId = 'G-DRPXW0EEVT';
 
 export default defineConfig({
   root: path.join(__dirname, 'docs'),
@@ -88,6 +89,28 @@ export default defineConfig({
     pluginModuleFederation(mfConfig),
   ],
   builderConfig: {
+    html: {
+      tags: [
+        {
+          tag: 'script',
+          attrs: {
+            async: true,
+            src: `https://www.googletagmanager.com/gtag/js?id=${googleAnalyticsMeasurementId}`,
+          },
+          append: false,
+        },
+        {
+          tag: 'script',
+          children: `
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '${googleAnalyticsMeasurementId}');
+`,
+          append: false,
+        },
+      ],
+    },
     plugins: [moduleFederationPluginOverview, pluginSass()],
     output: {
       assetPrefix:
