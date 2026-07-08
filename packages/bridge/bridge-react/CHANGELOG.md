@@ -1,5 +1,13 @@
 # @module-federation/bridge-react
 
+## 2.7.0
+
+### Patch Changes
+
+- Updated dependencies [dcc640b]
+- Updated dependencies [9958086]
+  - @module-federation/sdk@2.7.0
+
 ## 2.6.0
 
 ### Patch Changes

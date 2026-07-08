@@ -1,5 +1,13 @@
 # @module-federation/third-party-dts-extractor
 
+## 2.7.0
+
+### Patch Changes
+
+- 2add9ef: chore(third-party-dts-extractor): replace `resolve` with `exsolve` (0 transitive deps, ~100KB smaller) for the single `package.json` lookup.
+- a5f123a: chore: replace `find-pkg` with `empathic` (per [e18e replacements](https://e18e.dev/docs/replacements/find-pkg.html)). Removes unused `find-pkg` dependency from `@module-federation/manifest`.
+- 8ec950c: Bump runtime dependencies: echarts 6.1.0 (devtools), hono 4.12.26 and @hono/node-server 1.19.13 (treeshake-server), lodash-es 4.18.1 (rspress-plugin), handlebars 4.7.9 (create-module-federation), resolve 1.22.12 (third-party-dts-extractor).
+
 ## 2.6.0
 
 ## 2.5.1

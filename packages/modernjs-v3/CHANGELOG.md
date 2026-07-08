@@ -1,5 +1,21 @@
 # @module-federation/modern-js-v3
 
+## 2.7.0
+
+### Patch Changes
+
+- d13cafa: Disable lazy compilation for Modern.js v3 producer apps.
+- Updated dependencies [dcc640b]
+- Updated dependencies [9958086]
+- Updated dependencies [61fe85d]
+  - @module-federation/sdk@2.7.0
+  - @module-federation/rsbuild-plugin@2.7.0
+  - @module-federation/cli@2.7.0
+  - @module-federation/enhanced@2.7.0
+  - @module-federation/bridge-react@2.7.0
+  - @module-federation/node@2.7.46
+  - @module-federation/runtime@2.7.0
+
 ## 2.6.0
 
 ### Patch Changes
