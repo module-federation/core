@@ -1,5 +1,13 @@
 # @module-federation/observability-plugin
 
+## 2.5.3
+
+### Patch Changes
+
+- Updated dependencies [dcc640b]
+- Updated dependencies [9958086]
+  - @module-federation/sdk@2.7.0
+
 ## 2.5.2
 
 ### Patch Changes
