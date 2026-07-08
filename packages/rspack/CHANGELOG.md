@@ -1,5 +1,21 @@
 # @module-federation/rspack
 
+## 2.7.0
+
+### Patch Changes
+
+- Updated dependencies [a7351f3]
+- Updated dependencies [dcc640b]
+- Updated dependencies [9958086]
+- Updated dependencies [a5f123a]
+  - @module-federation/dts-plugin@2.7.0
+  - @module-federation/sdk@2.7.0
+  - @module-federation/managers@2.7.0
+  - @module-federation/manifest@2.7.0
+  - @module-federation/bridge-react-webpack-plugin@2.7.0
+  - @module-federation/runtime-tools@2.7.0
+  - @module-federation/inject-external-runtime-core-plugin@2.7.0
+
 ## 2.6.0
 
 ### Patch Changes

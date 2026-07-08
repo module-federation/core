@@ -1,5 +1,20 @@
 # @module-federation/dts-plugin
 
+## 2.7.0
+
+### Patch Changes
+
+- a7351f3: chore(dts-plugin): drop `ansi-colors` dependency in favor of inline ANSI escape for the single red error message.
+- Updated dependencies [dcc640b]
+- Updated dependencies [2add9ef]
+- Updated dependencies [9958086]
+- Updated dependencies [a5f123a]
+- Updated dependencies [8ec950c]
+  - @module-federation/sdk@2.7.0
+  - @module-federation/third-party-dts-extractor@2.7.0
+  - @module-federation/managers@2.7.0
+  - @module-federation/error-codes@2.7.0
+
 ## 2.6.0
 
 ### Patch Changes

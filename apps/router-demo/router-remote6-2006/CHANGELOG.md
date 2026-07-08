@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.15
+
+### Patch Changes
+
+- Updated dependencies [61fe85d]
+  - @module-federation/rsbuild-plugin@2.7.0
+  - @module-federation/bridge-react@2.7.0
+
 ## 2.0.14
 
 ### Patch Changes

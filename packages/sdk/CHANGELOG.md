@@ -1,5 +1,15 @@
 # @module-federation/sdk
 
+## 2.7.0
+
+### Minor Changes
+
+- dcc640b: chore(sdk): drop the `node-fetch` fallback and optional peer dependency. Native `fetch` was already preferred everywhere it exists (Node 18+); the fallback only fired on EOL Node versions, where the loader-hook path was broken anyway. Removes up to ~9MB of optional install weight (`web-streams-polyfill` et al).
+
+### Patch Changes
+
+- 9958086: Handle Node.js built-in imports in the Node ESM remote loader.
+
 ## 2.6.0
 
 ## 2.5.1

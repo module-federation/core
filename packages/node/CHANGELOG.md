@@ -1,5 +1,15 @@
 # @module-federation/node
 
+## 2.7.46
+
+### Patch Changes
+
+- Updated dependencies [dcc640b]
+- Updated dependencies [9958086]
+  - @module-federation/sdk@2.7.0
+  - @module-federation/enhanced@2.7.0
+  - @module-federation/runtime@2.7.0
+
 ## 2.7.45
 
 ### Patch Changes

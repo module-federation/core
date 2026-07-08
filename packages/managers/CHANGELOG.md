@@ -1,5 +1,14 @@
 # @module-federation/managers
 
+## 2.7.0
+
+### Patch Changes
+
+- a5f123a: chore: replace `find-pkg` with `empathic` (per [e18e replacements](https://e18e.dev/docs/replacements/find-pkg.html)). Removes unused `find-pkg` dependency from `@module-federation/manifest`.
+- Updated dependencies [dcc640b]
+- Updated dependencies [9958086]
+  - @module-federation/sdk@2.7.0
+
 ## 2.6.0
 
 ### Patch Changes

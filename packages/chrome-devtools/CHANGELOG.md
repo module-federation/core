@@ -1,5 +1,17 @@
 # @module-federation/devtools
 
+## 2.7.0
+
+### Patch Changes
+
+- 8e3d5cb: Fix dependency graph cards for remotes that are only known by their manifest URL.
+- 538e38b: Guard Chrome DevTools module info sync against invalid undefined placeholder payloads.
+- 8ec950c: Bump runtime dependencies: echarts 6.1.0 (devtools), hono 4.12.26 and @hono/node-server 1.19.13 (treeshake-server), lodash-es 4.18.1 (rspress-plugin), handlebars 4.7.9 (create-module-federation), resolve 1.22.12 (third-party-dts-extractor).
+- Updated dependencies [dcc640b]
+- Updated dependencies [9958086]
+  - @module-federation/sdk@2.7.0
+  - @module-federation/observability-plugin@2.5.3
+
 ## 2.6.0
 
 ### Patch Changes
