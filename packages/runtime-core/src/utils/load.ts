@@ -29,18 +29,14 @@ const esmRemoteEntryLoadErrorMessages = [
   'Importing a module script failed',
   'error loading dynamically imported module',
 ];
-const safariEsmRemoteEntryLoadErrorMessage = 'Load failed';
 
 function isEsmRemoteEntryLoadError(err: unknown): boolean {
   if (!(err instanceof TypeError)) {
     return false;
   }
 
-  return (
-    err.message === safariEsmRemoteEntryLoadErrorMessage ||
-    esmRemoteEntryLoadErrorMessages.some((loadErrorMessage) =>
-      err.message.includes(loadErrorMessage),
-    )
+  return esmRemoteEntryLoadErrorMessages.some((loadErrorMessage) =>
+    err.message.includes(loadErrorMessage),
   );
 }
 

@@ -185,6 +185,26 @@ describe('getRemoteEntry - script load error discrimination', () => {
     expect(loadEntryError).not.toHaveBeenCalled();
   });
 
+  it('module entry TypeError execution errors are not reported as RUNTIME_008', async () => {
+    const entry = createDataUrlEntry(`throw new TypeError('Load failed');`);
+    const origin = createMF();
+    const remoteInfo = getRemoteInfo({ name: 'remote', entry, type: 'module' });
+    const loadEntryError = rs.fn();
+
+    origin.registerPlugins([
+      {
+        name: 'module-entry-type-error-test',
+        loadEntryError,
+      },
+    ]);
+
+    const err = await getRemoteEntry({ origin, remoteInfo }).catch((e) => e);
+
+    expect(err.message).toContain('Load failed');
+    expect(err.message).not.toContain(RUNTIME_008);
+    expect(loadEntryError).not.toHaveBeenCalled();
+  });
+
   it('remote container init failure is reported as RUNTIME_015 with the original error', async () => {
     const entry = `${BASE}/init-error.js`;
     const mf = new ModuleFederation({
