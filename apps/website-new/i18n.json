@@ -66,6 +66,8 @@
     "pt-BR": "Copiar código"
   },
   "codeButtonGroupWrapButtonText": {
+    "en": "Toggle line wrap",
+    "zh": "切换自动换行",
     "pt-BR": "Alternar quebra de linha"
   },
   "notFoundText": {
@@ -75,15 +77,23 @@
     "pt-BR": "Voltar para a página inicial"
   },
   "promptCopyText": {
+    "en": "Copy prompt",
+    "zh": "复制提示词",
     "pt-BR": "Copiar prompt"
   },
   "promptCopiedText": {
+    "en": "Copied",
+    "zh": "已复制",
     "pt-BR": "Copiado"
   },
   "promptExpandText": {
+    "en": "Expand",
+    "zh": "展开",
     "pt-BR": "Expandir"
   },
   "promptCollapseText": {
+    "en": "Collapse",
+    "zh": "收起",
     "pt-BR": "Recolher"
   }
 }

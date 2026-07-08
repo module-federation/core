@@ -9,7 +9,7 @@
     "moduleResolution": "node10",
     "allowJs": false,
     "strict": true,
-    "types": ["jest", "node"],
+    "types": ["node"],
     "experimentalDecorators": true,
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,

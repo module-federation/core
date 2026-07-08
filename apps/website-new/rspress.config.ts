@@ -1,4 +1,5 @@
 import * as path from 'path';
+import { withZephyr } from 'zephyr-rspress-plugin';
 import { defineConfig } from '@rspress/core';
 import { moduleFederationPluginOverview } from './src/moduleFederationPluginOverview';
 // import { pluginAnnotationWords } from 'rspress-plugin-annotation-words';
@@ -7,13 +8,12 @@ import { pluginModuleFederation } from '@module-federation/rspress-plugin';
 import mfConfig from './module-federation.config';
 
 const siteOrigin = (
-  process.env.CONTEXT === 'deploy-preview' && process.env.DEPLOY_PRIME_URL
-    ? process.env.DEPLOY_PRIME_URL
-    : 'https://module-federation.io'
+  process.env.SITE_ORIGIN || 'https://module-federation.io'
 ).replace(/\/$/, '');
 const siteIcon = '/svg.svg';
 const socialImageUrl = `${siteOrigin}/module-federation-social.svg`;
 const socialImageAlt = 'Module Federation icon';
+const googleAnalyticsMeasurementId = 'G-DRPXW0EEVT';
 
 export default defineConfig({
   root: path.join(__dirname, 'docs'),
@@ -86,14 +86,34 @@ export default defineConfig({
     //   wordsMapPath: 'words-map.json',
     // }),
     pluginModuleFederation(mfConfig),
+    withZephyr(),
   ],
   builderConfig: {
+    html: {
+      tags: [
+        {
+          tag: 'script',
+          attrs: {
+            async: true,
+            src: `https://www.googletagmanager.com/gtag/js?id=${googleAnalyticsMeasurementId}`,
+          },
+          append: false,
+        },
+        {
+          tag: 'script',
+          children: `
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '${googleAnalyticsMeasurementId}');
+`,
+          append: false,
+        },
+      ],
+    },
     plugins: [moduleFederationPluginOverview, pluginSass()],
     output: {
-      assetPrefix:
-        process.env.CONTEXT === 'deploy-preview'
-          ? process.env.DEPLOY_PRIME_URL
-          : 'https://module-federation.io/',
+      assetPrefix: `${siteOrigin}/`,
     },
     dev: {
       assetPrefix: true,
