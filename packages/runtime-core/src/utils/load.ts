@@ -24,32 +24,80 @@ import {
 declare const ENV_TARGET: 'web' | 'node';
 const importCallback = '.then(callbacks[0]).catch(callbacks[1])';
 
+const esmRemoteEntryLoadErrorMessages = [
+  'Failed to fetch dynamically imported module',
+  'Importing a module script failed',
+  'error loading dynamically imported module',
+];
+const safariEsmRemoteEntryLoadErrorMessage = 'Load failed';
+
+function isEsmRemoteEntryLoadError(err: unknown): boolean {
+  if (!(err instanceof TypeError)) {
+    return false;
+  }
+
+  return (
+    err.message === safariEsmRemoteEntryLoadErrorMessage ||
+    esmRemoteEntryLoadErrorMessages.some((loadErrorMessage) =>
+      err.message.includes(loadErrorMessage),
+    )
+  );
+}
+
 async function loadEsmEntry({
   entry,
   remoteEntryExports,
+  name,
+  getEntryUrl,
 }: {
   entry: string;
   remoteEntryExports: RemoteEntryExports | undefined;
+  name: string;
+  getEntryUrl?: (url: string) => string;
 }): Promise<RemoteEntryExports> {
   return new Promise<RemoteEntryExports>((resolve, reject) => {
+    const rejectEntry = (loadError: unknown) => {
+      if (isEsmRemoteEntryLoadError(loadError)) {
+        const originalMsg =
+          loadError instanceof Error ? loadError.message : String(loadError);
+        try {
+          error(
+            RUNTIME_008,
+            runtimeDescMap,
+            {
+              remoteName: name,
+              resourceUrl: url,
+            },
+            originalMsg,
+          );
+        } catch (runtimeError) {
+          reject(runtimeError);
+          return;
+        }
+      }
+
+      reject(loadError);
+    };
+
+    const url = getEntryUrl ? getEntryUrl(entry) : entry;
     try {
       if (!remoteEntryExports) {
         if (typeof FEDERATION_ALLOW_NEW_FUNCTION !== 'undefined') {
-          new Function('callbacks', `import("${entry}")${importCallback}`)([
+          new Function('callbacks', `import("${url}")${importCallback}`)([
             resolve,
-            reject,
+            rejectEntry,
           ]);
         } else {
-          import(/* webpackIgnore: true */ /* @vite-ignore */ entry)
+          import(/* webpackIgnore: true */ /* @vite-ignore */ url)
             .then(resolve)
-            .catch(reject);
+            .catch(rejectEntry);
         }
       } else {
         resolve(remoteEntryExports);
       }
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
-      error(`Failed to load ESM entry from "${entry}". ${msg}`);
+      error(`Failed to load ESM entry from "${url}". ${msg}`);
     }
   });
 }
@@ -203,7 +251,7 @@ async function loadEntryDom({
   switch (type) {
     case 'esm':
     case 'module':
-      return loadEsmEntry({ entry, remoteEntryExports });
+      return loadEsmEntry({ entry, remoteEntryExports, name, getEntryUrl });
     case 'system':
       return loadSystemJsEntry({ entry, remoteEntryExports });
     default:
