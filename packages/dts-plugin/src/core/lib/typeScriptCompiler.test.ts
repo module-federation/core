@@ -1,11 +1,20 @@
 import dirTree from 'directory-tree';
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'fs';
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from 'fs';
+import { createRequire } from 'module';
 import os from 'os';
-import { join, resolve, sep } from 'path';
+import { dirname, join, resolve, sep } from 'path';
 import util from 'util';
 import { afterEach, describe, expect, it, rs } from '@rstest/core';
 import type { TsConfigJson } from '../interfaces/TsConfigJson';
 
+import { retrieveRemoteConfig } from '../configurations/remotePlugin';
 import { RemoteOptions } from '../interfaces/RemoteOptions';
 import {
   compileTs,
@@ -14,6 +23,7 @@ import {
 } from './typeScriptCompiler';
 
 describe('typeScriptCompiler', () => {
+  const requireFromTest = createRequire(__filename);
   const tmpDir = join(os.tmpdir(), 'typeScriptCompiler');
 
   const readJSONSync = (filePath: string) =>
@@ -145,9 +155,9 @@ describe('typeScriptCompiler', () => {
       }
 
       expect(execPromise).toHaveBeenCalledWith(
-        'npx',
+        process.execPath,
         expect.any(Array),
-        expect.objectContaining({ shell: true }),
+        expect.objectContaining({ cwd: projectRoot, shell: true }),
       );
     });
 
@@ -173,9 +183,9 @@ describe('typeScriptCompiler', () => {
       }
 
       expect(execPromise).toHaveBeenCalledWith(
-        'npx',
+        process.execPath,
         expect.any(Array),
-        expect.objectContaining({ shell: false }),
+        expect.objectContaining({ cwd: projectRoot, shell: false }),
       );
     });
 
@@ -201,7 +211,43 @@ describe('typeScriptCompiler', () => {
       }
 
       const args = execPromise.mock.calls[0]?.[1] as string[];
-      expect(args.slice(0, 3)).toEqual(['tsc', '--pretty', 'false']);
+      expect(args[0]).toMatch(/typescript[/\\]bin[/\\]tsc$/);
+      expect(args.slice(1, 3)).toEqual(['--pretty', 'false']);
+      expect(args[3]).toBe('--project');
+      expect(args[4]).toEqual(expect.any(String));
+    });
+
+    it('keeps custom compilerInstance invocations through the package manager', async () => {
+      const execPromise = rs.fn().mockResolvedValue({});
+      rs.spyOn(util, 'promisify').mockReturnValue(
+        execPromise as unknown as ReturnType<typeof util.promisify>,
+      );
+      const restorePlatform = withProcessPlatform('linux');
+      const filepath = join(__dirname, './typeScriptCompiler.ts');
+      const mapToExpose = {
+        tsCompiler: filepath,
+      };
+
+      try {
+        await compileTs(
+          mapToExpose,
+          { ...tsConfig, files: [filepath] },
+          {
+            ...remoteOptions,
+            compilerInstance: 'vue-tsc --declaration false',
+          },
+        );
+      } finally {
+        restorePlatform();
+      }
+
+      const args = execPromise.mock.calls[0]?.[1] as string[];
+      expect(execPromise).toHaveBeenCalledWith(
+        'npx',
+        expect.any(Array),
+        expect.objectContaining({ cwd: projectRoot, shell: false }),
+      );
+      expect(args.slice(0, 3)).toEqual(['vue-tsc', '--declaration', 'false']);
       expect(args[3]).toBe('--project');
       expect(args[4]).toEqual(expect.any(String));
     });
@@ -351,6 +397,9 @@ describe('typeScriptCompiler', () => {
                           {
                             name: 'typeScriptCompiler.d.ts',
                           },
+                          {
+                            name: 'typeScriptResolver.d.ts',
+                          },
                         ],
                         name: 'lib',
                       },
@@ -458,6 +507,88 @@ describe('typeScriptCompiler', () => {
       );
     });
 
+    it('generates declarations with TypeScript 7', async () => {
+      const projectDir = join(tmpDir, 'typescript7Project');
+      const srcDir = join(projectDir, 'src');
+      mkdirSync(srcDir, { recursive: true });
+
+      const typeScript7Root = dirname(
+        requireFromTest.resolve('typescript-7/package.json'),
+      );
+      mkdirSync(join(projectDir, 'node_modules'), { recursive: true });
+      symlinkSync(
+        typeScript7Root,
+        join(projectDir, 'node_modules/typescript'),
+        'junction',
+      );
+
+      const entryFile = join(srcDir, 'button.ts');
+      const dependencyFile = join(srcDir, 'dependency.ts');
+      writeFileSync(entryFile, "export { dependency } from './dependency';\n");
+      writeFileSync(dependencyFile, 'export const dependency = 1;\n');
+
+      writeFileSync(
+        join(projectDir, 'tsconfig.json'),
+        JSON.stringify(
+          {
+            compilerOptions: {
+              target: 'es2017',
+              module: 'esnext',
+              moduleResolution: 'node10',
+              rootDir: './src',
+              outDir: './dist',
+              strict: true,
+            },
+            include: ['src'],
+          },
+          null,
+          2,
+        ),
+      );
+
+      const { tsConfig, mapComponentsToExpose, remoteOptions } =
+        retrieveRemoteConfig({
+          context: projectDir,
+          tsConfigPath: './tsconfig.json',
+          typesFolder: 'typesRemoteFolder',
+          compiledTypesFolder: 'compiledTypesFolder',
+          moduleFederationConfig: {
+            name: 'typescript7Remote',
+            filename: 'remoteEntry.js',
+            exposes: {
+              './button': './src/button.ts',
+            },
+            dts: {
+              cwd: projectDir,
+            },
+          },
+        });
+
+      expect(tsConfig.compilerOptions.moduleResolution).toBe('bundler');
+
+      await compileTs(mapComponentsToExpose, tsConfig, remoteOptions);
+
+      expect(
+        existsSync(
+          join(
+            projectDir,
+            'dist/typesRemoteFolder/compiledTypesFolder/button.d.ts',
+          ),
+        ),
+      ).toBe(true);
+      expect(
+        existsSync(
+          join(
+            projectDir,
+            'dist/typesRemoteFolder/compiledTypesFolder/dependency.d.ts',
+          ),
+        ),
+      ).toBe(true);
+      expect(
+        existsSync(join(projectDir, 'dist/typesRemoteFolder/button.d.ts')),
+      ).toBe(true);
+    });
+
     it('with additionalFilesToCompile', async () => {
       const filepath = join(__dirname, './typeScriptCompiler.ts');
 
@@ -545,6 +676,9 @@ describe('typeScriptCompiler', () => {
                           },
                           {
                             name: 'typeScriptCompiler.d.ts',
+                          },
+                          {
+                            name: 'typeScriptResolver.d.ts',
                           },
                           {
                             name: 'utils.d.ts',
