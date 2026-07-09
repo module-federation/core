@@ -302,20 +302,20 @@ const writeListFilesTsConfig = (
     `tsconfig.list-files.${hash}.json`,
   );
   mkdirSync(dirname(tempTsConfigJsonPath), { recursive: true });
-  writeFileSync(
-    tempTsConfigJsonPath,
-    JSON.stringify(
-      {
-        extends: resolvedTsConfigPath,
-        ...(compilerOptions ? { compilerOptions } : {}),
+  const listFilesConfig: TsConfigJson = compilerOptions
+    ? {
+        compilerOptions,
         files: rootFiles.map((file) =>
           isAbsolute(file) ? file : resolve(context, file),
         ),
-      },
-      null,
-      2,
-    ),
-  );
+      }
+    : {
+        extends: resolvedTsConfigPath,
+        files: rootFiles.map((file) =>
+          isAbsolute(file) ? file : resolve(context, file),
+        ),
+      };
+  writeFileSync(tempTsConfigJsonPath, JSON.stringify(listFilesConfig, null, 2));
   return tempTsConfigJsonPath;
 };
 

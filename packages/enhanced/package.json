@@ -80,7 +80,7 @@
     "fast-glob": "3.3.3",
     "memfs": "4.46.0",
     "terser": "^5.37.0",
-    "typescript": "6.0.3"
+    "typescript": "7.0.2"
   },
   "dependencies": {
     "@module-federation/webpack-bundler-runtime": "workspace:*",

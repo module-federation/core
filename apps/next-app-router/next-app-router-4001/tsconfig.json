@@ -9,14 +9,13 @@
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
-    "moduleResolution": "node10",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "baseUrl": ".",
     "paths": {
-      "#/*": ["./*"]
+      "#/*": ["./*"],
+      "*": ["./*"]
     },
     "plugins": [
       {

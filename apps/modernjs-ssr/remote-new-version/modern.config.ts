@@ -1,6 +1,8 @@
 import { appTools, defineConfig } from '@modern-js/app-tools';
 import { moduleFederationPlugin } from '@module-federation/modern-js-v3';
 
+const typeCheckerTypeScriptPath = require.resolve('typescript-compiler');
+
 // https://modernjs.dev/en/configure/app/usage
 export default defineConfig({
   server: {
@@ -11,6 +13,11 @@ export default defineConfig({
   },
 
   tools: {
+    tsChecker: {
+      typescript: {
+        typescriptPath: typeCheckerTypeScriptPath,
+      },
+    },
     rspack: (config) => {
       config.output!.uniqueName = 'modernjs-ssr-remote-new-version';
       config.output!.chunkLoadingGlobal =
