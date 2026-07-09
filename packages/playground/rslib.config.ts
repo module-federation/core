@@ -1,7 +1,6 @@
 import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import { pluginReact } from '@rsbuild/plugin-react';
 import { defineConfig } from '@rslib/core';
-import { pluginPublint } from 'rsbuild-plugin-publint';
 import mfConfig from './module-federation.config';
 import pkg from './package.json';
 
@@ -33,9 +32,7 @@ function isTypescriptDynamicRequireWarning(warning: unknown) {
 }
 
 const shared = {
-  dts: {
-    bundle: true,
-  },
+  dts: false,
   source: {
     entry: {
       index: './src/component.ts',
@@ -97,6 +94,5 @@ export default defineConfig({
   plugins: [
     pluginReact(),
     pluginModuleFederation(mfConfig, { target: 'dual' }),
-    pluginPublint(),
   ],
 });

@@ -30,7 +30,7 @@
     "prebuild": "pnpm run sync:bridge-runtime",
     "dev": "rslib mf-dev",
     "start": "rsbuild dev",
-    "build": "rslib build",
+    "build": "rslib build && tsc -p tsconfig.build.json && node scripts/write-dts-entry.mjs",
     "pre-release": "pnpm run build"
   },
   "dependencies": {
@@ -38,7 +38,8 @@
     "@module-federation/runtime": "workspace:*",
     "@monaco-editor/react": "4.7.0",
     "monaco-editor": "0.52.2",
-    "typescript": "6.0.3"
+    "typescript": "7.0.2",
+    "typescript-compiler": "npm:typescript@6.0.3"
   },
   "devDependencies": {
     "@module-federation/rsbuild-plugin": "workspace:*",

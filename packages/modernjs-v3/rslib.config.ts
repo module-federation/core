@@ -58,9 +58,7 @@ export default defineConfig({
       define: {
         'process.env.IS_ESM_BUILD': JSON.stringify('true'),
       },
-      dts: {
-        distPath: './dist/types',
-      },
+      dts: false,
       output: {
         distPath: {
           root: './dist/esm-node',

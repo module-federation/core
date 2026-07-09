@@ -4,14 +4,14 @@
   "version": "1.0.15",
   "scripts": {
     "reset": "npx rimraf ./**/node_modules",
-    "dev": "modern dev",
-    "build": "modern build",
-    "build:shake": "SHAKE=true modern build",
-    "start": "modern start",
+    "dev": "TS_NODE_COMPILER=typescript-compiler modern dev",
+    "build": "TS_NODE_COMPILER=typescript-compiler modern build",
+    "build:shake": "SHAKE=true TS_NODE_COMPILER=typescript-compiler modern build",
+    "start": "TS_NODE_COMPILER=typescript-compiler modern start",
     "serve": "serve dist -C -p 3002",
-    "new": "modern new",
-    "lint": "modern lint",
-    "upgrade": "modern upgrade"
+    "new": "TS_NODE_COMPILER=typescript-compiler modern new",
+    "lint": "TS_NODE_COMPILER=typescript-compiler modern lint",
+    "upgrade": "TS_NODE_COMPILER=typescript-compiler modern upgrade"
   },
   "engines": {
     "node": ">=16.18.1"
@@ -27,7 +27,7 @@
   ],
   "dependencies": {
     "@babel/runtime": "7.28.2",
-    "@modern-js/runtime": "3.0.1",
+    "@modern-js/runtime": "3.5.0",
     "@module-federation/enhanced": "workspace:*",
     "antd": "6.0.1",
     "react": "~18.3.1",
@@ -36,7 +36,7 @@
   "devDependencies": {
     "serve": "14.2.5",
     "@modern-js-app/eslint-config": "2.59.0",
-    "@modern-js/app-tools": "3.0.1",
+    "@modern-js/app-tools": "3.5.0",
     "@modern-js/eslint-config": "2.59.0",
     "@modern-js/tsconfig": "3.0.1",
     "@modern-js/plugin-server": "2.68.0",
@@ -46,6 +46,8 @@
     "lint-staged": "~13.1.0",
     "prettier": "~3.3.3",
     "rimraf": "~3.0.2",
-    "typescript": "~5.0.4"
+    "ts-node": "10.9.2",
+    "typescript": "7.0.2",
+    "typescript-compiler": "npm:typescript@6.0.3"
   }
 }

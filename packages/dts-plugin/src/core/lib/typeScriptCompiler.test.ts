@@ -25,6 +25,17 @@ import {
 describe('typeScriptCompiler', () => {
   const requireFromTest = createRequire(__filename);
   const tmpDir = join(os.tmpdir(), 'typeScriptCompiler');
+  const linkTypeScriptPackage = (projectDir: string, packageName: string) => {
+    const typeScriptRoot = dirname(
+      requireFromTest.resolve(`${packageName}/package.json`),
+    );
+    mkdirSync(join(projectDir, 'node_modules'), { recursive: true });
+    symlinkSync(
+      typeScriptRoot,
+      join(projectDir, 'node_modules/typescript'),
+      'junction',
+    );
+  };
 
   const readJSONSync = (filePath: string) =>
     JSON.parse(readFileSync(filePath, 'utf-8'));
@@ -287,6 +298,7 @@ describe('typeScriptCompiler', () => {
       const projectDir = join(tmpDir, 'declarationDirProject');
       const srcDir = join(projectDir, 'src');
       mkdirSync(srcDir, { recursive: true });
+      linkTypeScriptPackage(projectDir, 'typescript-6');
 
       const entryFile = join(srcDir, 'hello.ts');
       writeFileSync(entryFile, 'export const hello = 1;\n');
@@ -426,6 +438,7 @@ describe('typeScriptCompiler', () => {
       const projectDir = join(tmpDir, 'multiDotExposeProject');
       const srcDir = join(projectDir, 'src', 'components');
       mkdirSync(srcDir, { recursive: true });
+      linkTypeScriptPackage(projectDir, 'typescript-6');
 
       const entryFile = join(srcDir, 'foo.generated.ts');
       writeFileSync(entryFile, 'export const foo = 1;\n');
@@ -512,20 +525,14 @@ describe('typeScriptCompiler', () => {
       const srcDir = join(projectDir, 'src');
       mkdirSync(srcDir, { recursive: true });
 
-      const typeScript7Root = dirname(
-        requireFromTest.resolve('typescript-7/package.json'),
-      );
-      mkdirSync(join(projectDir, 'node_modules'), { recursive: true });
-      symlinkSync(
-        typeScript7Root,
-        join(projectDir, 'node_modules/typescript'),
-        'junction',
-      );
+      linkTypeScriptPackage(projectDir, 'typescript');
 
       const entryFile = join(srcDir, 'button.ts');
       const dependencyFile = join(srcDir, 'dependency.ts');
+      const unusedFile = join(srcDir, 'unused.ts');
       writeFileSync(entryFile, "export { dependency } from './dependency';\n");
       writeFileSync(dependencyFile, 'export const dependency = 1;\n');
+      writeFileSync(unusedFile, 'export const unused = 1;\n');
 
       writeFileSync(
         join(projectDir, 'tsconfig.json'),
@@ -587,6 +594,14 @@ describe('typeScriptCompiler', () => {
       expect(
         existsSync(join(projectDir, 'dist/typesRemoteFolder/button.d.ts')),
       ).toBe(true);
+      expect(
+        existsSync(
+          join(
+            projectDir,
+            'dist/typesRemoteFolder/compiledTypesFolder/unused.d.ts',
+          ),
+        ),
+      ).toBe(false);
     });
 
     it('with additionalFilesToCompile', async () => {

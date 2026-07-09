@@ -3,11 +3,11 @@
   "compilerOptions": {
     "declaration": false,
     "jsx": "preserve",
-    "baseUrl": "./",
     "rootDir": "./src",
-    "paths": {},
+    "paths": {
+      "*": ["./*"]
+    },
     "noImplicitAny": false,
-    "moduleResolution": "node10",
     "ignoreDeprecations": "6.0"
   },
   "include": ["src", "types", "global.d.ts"]
