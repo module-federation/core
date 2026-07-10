@@ -95,6 +95,18 @@ async function loadRslib() {
   return rslibPromise;
 }
 
+async function runRslibBuild(config) {
+  const rslib = await loadRslib();
+  if (typeof rslib.build === 'function') {
+    return rslib.build(config);
+  }
+  if (typeof rslib.createRslib === 'function') {
+    const instance = await rslib.createRslib({ config });
+    return instance.build();
+  }
+  throw new Error('Unsupported @rslib/core API: no build function available');
+}
+
 async function loadWebpack() {
   if (!webpackPromise) {
     webpackPromise = Promise.resolve(require('webpack'));
@@ -291,14 +303,13 @@ async function bundleEntry(entryPath, options) {
   }
 
   try {
-    const { build } = await loadRslib();
     const entryName = options.entryName || 'bundle';
     const distRoot = createTempDir(
       options.packageName || 'pkg',
       options.target,
     );
 
-    await build(
+    await runRslibBuild(
       {
         lib: [
           {
@@ -667,6 +678,17 @@ async function measure(packagesDir) {
       bundleErrors: rootMetrics.bundleErrors,
       entrypoints,
     };
+  }
+
+  const hasSuccessfulBundle = Object.values(results).some((pkg) =>
+    Object.values(pkg.entrypoints).some(
+      (entry) =>
+        typeof entry.webBundleGzip === 'number' ||
+        typeof entry.nodeBundleGzip === 'number',
+    ),
+  );
+  if (packages.length > 0 && !hasSuccessfulBundle) {
+    throw new Error('Bundle size measurement failed for every package');
   }
 
   return {
