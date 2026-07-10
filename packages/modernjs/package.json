@@ -10,7 +10,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "rslib build && tsc -p tsconfig.build.json",
+    "build": "tsc -p tsconfig.build.json && rslib build",
     "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\"",
     "test": "pnpm exec rstest --passWithNoTests",
     "pre-release": "pnpm run test && pnpm run build"

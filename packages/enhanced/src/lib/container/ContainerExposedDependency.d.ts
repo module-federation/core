@@ -1,4 +1,4 @@
-declare const dependencies: typeof import('node_modules/webpack/types').dependencies;
+declare const dependencies: typeof import('webpack').dependencies;
 import type {
   ObjectDeserializerContext,
   ObjectSerializerContext,

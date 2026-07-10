@@ -525,7 +525,7 @@ describe('typeScriptCompiler', () => {
       const srcDir = join(projectDir, 'src');
       mkdirSync(srcDir, { recursive: true });
 
-      linkTypeScriptPackage(projectDir, 'typescript');
+      linkTypeScriptPackage(projectDir, 'typescript-7');
 
       const entryFile = join(srcDir, 'button.ts');
       const dependencyFile = join(srcDir, 'dependency.ts');

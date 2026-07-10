@@ -3,6 +3,7 @@
 "@module-federation/enhanced": patch
 "@module-federation/modern-js": patch
 "@module-federation/modern-js-v3": patch
+"@module-federation/playground": patch
 "@module-federation/rspack": patch
 ---
 
