@@ -298,7 +298,7 @@ describe('typeScriptCompiler', () => {
       const projectDir = join(tmpDir, 'declarationDirProject');
       const srcDir = join(projectDir, 'src');
       mkdirSync(srcDir, { recursive: true });
-      linkTypeScriptPackage(projectDir, 'typescript-6');
+      linkTypeScriptPackage(projectDir, 'typescript');
 
       const entryFile = join(srcDir, 'hello.ts');
       writeFileSync(entryFile, 'export const hello = 1;\n');
@@ -438,7 +438,7 @@ describe('typeScriptCompiler', () => {
       const projectDir = join(tmpDir, 'multiDotExposeProject');
       const srcDir = join(projectDir, 'src', 'components');
       mkdirSync(srcDir, { recursive: true });
-      linkTypeScriptPackage(projectDir, 'typescript-6');
+      linkTypeScriptPackage(projectDir, 'typescript');
 
       const entryFile = join(srcDir, 'foo.generated.ts');
       writeFileSync(entryFile, 'export const foo = 1;\n');
