@@ -57,6 +57,18 @@ export function patchNodeConfig(
   config.output.module = false;
   config.output.chunkFormat = 'commonjs';
   config.output.chunkLoading = 'async-node';
+  const prevLibrary = config.output.library;
+  if (
+    prevLibrary &&
+    typeof prevLibrary === 'object' &&
+    !Array.isArray(prevLibrary)
+  ) {
+    config.output.library = { ...prevLibrary, type: 'commonjs-module' };
+  } else if (typeof prevLibrary === 'string' || Array.isArray(prevLibrary)) {
+    config.output.library = { name: prevLibrary, type: 'commonjs-module' };
+  } else {
+    config.output.library = { type: 'commonjs-module' };
+  }
   delete config.output.chunkLoadingGlobal;
   const UniverseEntryChunkTrackerPluginModule = safeRequire<{
     default?: new () => Rspack.RspackPluginInstance;
