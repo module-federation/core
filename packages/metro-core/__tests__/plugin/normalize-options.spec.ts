@@ -113,8 +113,8 @@ describe('normalizeOptions', () => {
     const metroCorePluginPath =
       require.resolve('../../src/modules/metroCorePlugin.ts');
     expect(normalized.plugins).toEqual([
-      path.relative(tmpDirPath, metroCorePluginPath),
-      path.relative(tmpDirPath, runtimePluginPath),
+      toPosixPath(path.relative(tmpDirPath, metroCorePluginPath)),
+      toPosixPath(path.relative(tmpDirPath, runtimePluginPath)),
     ]);
   });
 
@@ -139,8 +139,8 @@ describe('normalizeOptions', () => {
     const metroCorePluginPath =
       require.resolve('../../src/modules/metroCorePlugin.ts');
     expect(normalized.plugins).toEqual([
-      path.relative(tmpDirPath, metroCorePluginPath),
-      path.relative(tmpDirPath, runtimePluginPath),
+      toPosixPath(path.relative(tmpDirPath, metroCorePluginPath)),
+      toPosixPath(path.relative(tmpDirPath, runtimePluginPath)),
     ]);
   });
 
@@ -161,7 +161,7 @@ describe('normalizeOptions', () => {
     const metroCorePluginPath =
       require.resolve('../../src/modules/metroCorePlugin.ts');
     expect(normalized.plugins).toEqual([
-      path.relative(tmpDirPath, metroCorePluginPath),
+      toPosixPath(path.relative(tmpDirPath, metroCorePluginPath)),
       '@scope/pkg/plugin',
       'pkg-name',
     ]);
