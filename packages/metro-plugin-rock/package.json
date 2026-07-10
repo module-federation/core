@@ -47,7 +47,7 @@
     "@rslib/core": "^0.23.2",
     "@typescript-eslint/eslint-plugin": "8.54.0",
     "@typescript-eslint/parser": "8.54.0",
-    "@types/node": "^20.0.0",
+    "@types/node": "^22.0.0",
     "typescript": "^6.0.3"
   }
 }

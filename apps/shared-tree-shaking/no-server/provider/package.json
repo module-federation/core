@@ -40,7 +40,7 @@
     "@modern-js/eslint-config": "2.59.0",
     "@modern-js/tsconfig": "3.0.1",
     "@modern-js/plugin-server": "2.68.0",
-    "@types/node": "^20.19.5",
+    "@types/node": "^22.19.5",
     "@types/react": "~18.2.0",
     "@types/react-dom": "~18.3.0",
     "lint-staged": "~13.1.0",

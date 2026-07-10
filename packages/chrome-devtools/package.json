@@ -96,7 +96,7 @@
     "@playwright/test": "1.57.0",
     "@types/chrome": "^0.0.272",
     "@types/dagre": "^0.7.52",
-    "@types/node": "^20.19.5",
+    "@types/node": "^22.19.5",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "lint-staged": "~13.1.0",
