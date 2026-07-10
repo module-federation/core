@@ -23,7 +23,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Install dependencies
         run: npm ci
@@ -43,7 +43,7 @@ jobs:
 
 - uses: actions/setup-node@v4
   with:
-    node-version: 20
+    node-version: 22
     cache: "pnpm"
 
 - run: pnpm install --frozen-lockfile
@@ -54,7 +54,7 @@ jobs:
 ```yaml
 - uses: actions/setup-node@v4
   with:
-    node-version: 20
+    node-version: 22
     cache: "yarn"
 
 - run: yarn install --frozen-lockfile
@@ -145,7 +145,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: "pnpm"
 
       - name: Install dependencies
