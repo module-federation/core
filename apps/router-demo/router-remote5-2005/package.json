@@ -1,7 +1,7 @@
 {
   "name": "remote5",
   "private": true,
-  "version": "2.0.14",
+  "version": "2.0.15",
   "scripts": {
     "dev": "rsbuild dev",
     "build": "rsbuild build",
@@ -18,8 +18,8 @@
     "react-router-dom": "6.30.3"
   },
   "devDependencies": {
-    "@rsbuild/core": "1.7.3",
-    "@rsbuild/plugin-react": "^1.4.5",
+    "@rsbuild/core": "2.1.4",
+    "@rsbuild/plugin-react": "^2.1.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "typescript": "^5.4.5"

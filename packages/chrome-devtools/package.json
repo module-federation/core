@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/devtools",
-  "version": "2.6.0",
+  "version": "2.7.0",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -96,7 +96,6 @@
     "@playwright/test": "1.57.0",
     "@types/chrome": "^0.0.272",
     "@types/dagre": "^0.7.52",
-    "@types/jest": "~29.2.4",
     "@types/node": "^20.19.5",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",

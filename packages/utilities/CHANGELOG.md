@@ -1,5 +1,13 @@
 # @module-federation/utilities
 
+## 3.1.98
+
+### Patch Changes
+
+- Updated dependencies [dcc640b]
+- Updated dependencies [9958086]
+  - @module-federation/sdk@2.7.0
+
 ## 3.1.97
 
 ### Patch Changes
