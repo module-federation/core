@@ -102,7 +102,9 @@ async function runRslibBuild(config) {
   }
   if (typeof rslib.createRslib === 'function') {
     const instance = await rslib.createRslib({ config });
-    return instance.build();
+    const result = await instance.build();
+    await result.close();
+    return result;
   }
   throw new Error('Unsupported @rslib/core API: no build function available');
 }
