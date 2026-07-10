@@ -95,6 +95,20 @@ async function loadRslib() {
   return rslibPromise;
 }
 
+async function runRslibBuild(config) {
+  const rslib = await loadRslib();
+  if (typeof rslib.build === 'function') {
+    return rslib.build(config);
+  }
+  if (typeof rslib.createRslib === 'function') {
+    const instance = await rslib.createRslib({ config });
+    const result = await instance.build();
+    await result.close();
+    return result;
+  }
+  throw new Error('Unsupported @rslib/core API: no build function available');
+}
+
 async function loadWebpack() {
   if (!webpackPromise) {
     webpackPromise = Promise.resolve(require('webpack'));
@@ -291,14 +305,13 @@ async function bundleEntry(entryPath, options) {
   }
 
   try {
-    const { build } = await loadRslib();
     const entryName = options.entryName || 'bundle';
     const distRoot = createTempDir(
       options.packageName || 'pkg',
       options.target,
     );
 
-    await build(
+    await runRslibBuild(
       {
         lib: [
           {
@@ -669,6 +682,17 @@ async function measure(packagesDir) {
     };
   }
 
+  const hasSuccessfulBundle = Object.values(results).some((pkg) =>
+    Object.values(pkg.entrypoints).some(
+      (entry) =>
+        typeof entry.webBundleGzip === 'number' ||
+        typeof entry.nodeBundleGzip === 'number',
+    ),
+  );
+  if (packages.length > 0 && !hasSuccessfulBundle) {
+    throw new Error('Bundle size measurement failed for every package');
+  }
+
   return {
     packages: results,
     scenarios: await measureScenarios(packagesDir, packages),
@@ -852,7 +876,10 @@ function compare(baseData, currentData) {
   );
 
   const buildTable = (title, metrics, rowsData) => {
-    if (rowsData.length === 0) return [];
+    const changedRows = rowsData.filter(({ base, current }) =>
+      hasMetricChange(base, current, metrics),
+    );
+    if (changedRows.length === 0) return [];
     const rows = [];
     rows.push(`### ${title}`);
     rows.push('');
@@ -864,7 +891,7 @@ function compare(baseData, currentData) {
     rows.push(`| ${headers.join(' | ')} |`);
     rows.push(`| ${headers.map(() => '---').join(' | ')} |`);
 
-    for (const { name, base, current } of rowsData) {
+    for (const { name, base, current } of changedRows) {
       const cells = [`\`${name}\``];
       for (const metric of metrics) {
         const currentValue = current[metric.key];
