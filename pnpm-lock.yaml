@@ -2068,8 +2068,8 @@ importers:
         specifier: ^3.4.3
         version: 3.4.13(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@26.1.0)(typescript@7.0.2))
       typescript:
-        specifier: 7.0.2
-        version: 7.0.2
+        specifier: ^5.4.5
+        version: 5.9.3
 
   apps/router-demo/router-host-v5-2200:
     dependencies:
