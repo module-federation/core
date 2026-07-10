@@ -876,7 +876,10 @@ function compare(baseData, currentData) {
   );
 
   const buildTable = (title, metrics, rowsData) => {
-    if (rowsData.length === 0) return [];
+    const changedRows = rowsData.filter(({ base, current }) =>
+      hasMetricChange(base, current, metrics),
+    );
+    if (changedRows.length === 0) return [];
     const rows = [];
     rows.push(`### ${title}`);
     rows.push('');
@@ -888,7 +891,7 @@ function compare(baseData, currentData) {
     rows.push(`| ${headers.join(' | ')} |`);
     rows.push(`| ${headers.map(() => '---').join(' | ')} |`);
 
-    for (const { name, base, current } of rowsData) {
+    for (const { name, base, current } of changedRows) {
       const cells = [`\`${name}\``];
       for (const metric of metrics) {
         const currentValue = current[metric.key];
