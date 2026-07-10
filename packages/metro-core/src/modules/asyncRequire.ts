@@ -27,8 +27,8 @@ function getBundleId(bundlePath: string, publicPath: string) {
   if (path.startsWith('/')) {
     path = path.slice(1);
   }
-  // remove the query params
-  path = path.split('?')[0];
+  // remove the query params and normalize Windows separators
+  path = path.split('?')[0].replaceAll('\\', '/');
   // remove the bundle extension
   return path.replace('.bundle', '');
 }

@@ -13,8 +13,18 @@ export function isUsingMFBundleCommand(command = process.argv[2]) {
 }
 
 export function replaceExtension(filepath: string, extension: string) {
-  const { dir, name } = path.parse(filepath);
-  return path.format({ dir, name, ext: extension });
+  // Only treat dots after the last path separator as file extensions.
+  const separatorIndex = Math.max(
+    filepath.lastIndexOf('/'),
+    filepath.lastIndexOf('\\'),
+  );
+  const dotIndex = filepath.lastIndexOf('.');
+
+  // Dotfiles and directory names with dots should not be truncated.
+  const extensionStart =
+    dotIndex > separatorIndex + 1 ? dotIndex : filepath.length;
+
+  return `${filepath.slice(0, extensionStart)}${extension}`;
 }
 
 export function removeExtension(filepath: string) {

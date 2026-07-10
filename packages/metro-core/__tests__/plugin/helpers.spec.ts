@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@rstest/core';
-import { toPosixPath } from '../../src/plugin/helpers';
+import { replaceExtension, toPosixPath } from '../../src/plugin/helpers';
 
 describe('toPosixPath', () => {
   it('converts backslashes to forward slashes', () => {
@@ -10,5 +10,14 @@ describe('toPosixPath', () => {
 
   it('leaves posix paths unchanged', () => {
     expect(toPosixPath('/usr/local/bin')).toBe('/usr/local/bin');
+  });
+});
+
+describe('replaceExtension', () => {
+  it('preserves existing path separators', () => {
+    expect(replaceExtension('src/info.tsx', '.bundle')).toBe('src/info.bundle');
+    expect(replaceExtension('src\\info.tsx', '.bundle')).toBe(
+      'src\\info.bundle',
+    );
   });
 });

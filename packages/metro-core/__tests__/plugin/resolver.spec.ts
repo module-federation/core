@@ -117,6 +117,19 @@ function createSharedResolverFixture({
   };
 }
 
+function createBaseConfig(): ModuleFederationConfigNormalized {
+  return {
+    name: 'mini',
+    filename: 'mini.bundle',
+    remotes: {},
+    exposes: {},
+    shared: {},
+    shareStrategy: 'loaded-first',
+    plugins: [],
+    dts: false,
+  };
+}
+
 describe('createResolveRequest', () => {
   it.each([
     {
@@ -168,4 +181,40 @@ describe('createResolveRequest', () => {
       expect(fallbackResolver).not.toHaveBeenCalled();
     },
   );
+
+  it('patches HMRClient when Metro resolves it with Windows separators', () => {
+    const projectDir = '/project';
+    const tmpDir = path.join(projectDir, 'node_modules', '.mf-metro');
+    const fallbackResolver = rs.fn<CustomResolver>(() => ({
+      type: 'sourceFile',
+      filePath:
+        'C:\\project\\node_modules\\react-native\\Libraries\\Utilities\\HMRClient.js',
+    }));
+    const context = createResolverContext(
+      path.join(projectDir, 'src', 'App.tsx'),
+      fallbackResolver,
+    );
+    const vmManager: Pick<VirtualModuleManager, 'registerVirtualModule'> = {
+      registerVirtualModule: rs.fn(),
+    };
+
+    const resolveRequest = createResolveRequest({
+      isRemote: false,
+      hacks: {
+        patchHMRClient: true,
+        patchInitializeCore: false,
+      },
+      options: createBaseConfig(),
+      paths: createPaths(projectDir, tmpDir),
+      vmManager,
+      customResolver: fallbackResolver,
+    });
+
+    const resolved = resolveRequest(context, 'HMRClient', 'android');
+
+    expect(resolved).toEqual({
+      type: 'sourceFile',
+      filePath: expect.stringContaining(path.join('modules', 'HMRClient.ts')),
+    });
+  });
 });
