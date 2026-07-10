@@ -49,10 +49,14 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
 
-      # Update npm to the latest version to enable OIDC
+      # Pin npm to 11.x to enable OIDC trusted publishing. npm 12.0.0 ships a
+      # broken bundled sigstore that crashes provenance generation during OIDC
+      # publish (Cannot find module 'sigstore', npm/cli#9722). npm 11.x supports
+      # Node 22 and OIDC (>=11.5.1) without the bug. Revert to npm@latest once
+      # npm 12.0.1 (the fix) is released.
       - name: Update npm
         run: |
-          npm install -g npm@latest
+          npm install -g npm@^11
           npm --version
 
       - name: Install deps
