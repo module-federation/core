@@ -3279,7 +3279,7 @@ importers:
         version: 8.5.12
       '@vue/tsconfig':
         specifier: ^0.7.0
-        version: 0.7.0(typescript@7.0.2)(vue@3.5.30(typescript@7.0.2))
+        version: 0.7.0(typescript@6.0.3)(vue@3.5.30(typescript@6.0.3))
       directory-tree:
         specifier: 3.5.2
         version: 3.5.2
@@ -3287,17 +3287,17 @@ importers:
         specifier: ~6.0.1
         version: 6.0.1
       typescript:
-        specifier: 7.0.2
-        version: 7.0.2
-      typescript-6:
-        specifier: npm:typescript@6.0.3
-        version: typescript@6.0.3
+        specifier: 6.0.3
+        version: 6.0.3
+      typescript-7:
+        specifier: npm:typescript@7.0.2
+        version: typescript@7.0.2
       vue:
         specifier: ^3.5.13
-        version: 3.5.30(typescript@7.0.2)
+        version: 3.5.30(typescript@6.0.3)
       vue-tsc:
         specifier: ^2.2.10
-        version: 2.2.12(typescript@7.0.2)
+        version: 2.2.12(typescript@6.0.3)
       webpack:
         specifier: ^5.104.1
         version: 5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4)
@@ -44785,6 +44785,12 @@ snapshots:
       '@vue/shared': 3.5.30
       csstype: 3.2.3
 
+  '@vue/server-renderer@3.5.30(vue@3.5.30(typescript@6.0.3))':
+    dependencies:
+      '@vue/compiler-ssr': 3.5.30
+      '@vue/shared': 3.5.30
+      vue: 3.5.30(typescript@6.0.3)
+
   '@vue/server-renderer@3.5.30(vue@3.5.30(typescript@7.0.2))':
     dependencies:
       '@vue/compiler-ssr': 3.5.30
@@ -44794,6 +44800,11 @@ snapshots:
   '@vue/shared@3.5.30': {}
 
   '@vue/tsconfig@0.5.1': {}
+
+  '@vue/tsconfig@0.7.0(typescript@6.0.3)(vue@3.5.30(typescript@6.0.3))':
+    optionalDependencies:
+      typescript: 6.0.3
+      vue: 3.5.30(typescript@6.0.3)
 
   '@vue/tsconfig@0.7.0(typescript@7.0.2)(vue@3.5.30(typescript@7.0.2))':
     optionalDependencies:
@@ -63018,6 +63029,16 @@ snapshots:
       '@volar/typescript': 2.4.15
       '@vue/language-core': 2.2.12(typescript@7.0.2)
       typescript: 7.0.2
+
+  vue@3.5.30(typescript@6.0.3):
+    dependencies:
+      '@vue/compiler-dom': 3.5.30
+      '@vue/compiler-sfc': 3.5.30
+      '@vue/runtime-dom': 3.5.30
+      '@vue/server-renderer': 3.5.30(vue@3.5.30(typescript@6.0.3))
+      '@vue/shared': 3.5.30
+    optionalDependencies:
+      typescript: 6.0.3
 
   vue@3.5.30(typescript@7.0.2):
     dependencies:

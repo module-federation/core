@@ -10,7 +10,7 @@ import type {
   WebpackOptions,
 } from 'webpack/lib/Module';
 import type WebpackError from 'webpack/lib/WebpackError';
-declare const Module: typeof import('node_modules/webpack/types').Module;
+declare const Module: typeof import('webpack').Module;
 export type ExposeOptions = {
   /**
    * requests to exposed modules (last one is exported)

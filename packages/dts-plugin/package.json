@@ -83,8 +83,8 @@
     "@vue/tsconfig": "^0.7.0",
     "directory-tree": "3.5.2",
     "rimraf": "~6.0.1",
-    "typescript": "7.0.2",
-    "typescript-6": "npm:typescript@6.0.3",
+    "typescript": "6.0.3",
+    "typescript-7": "npm:typescript@7.0.2",
     "vue": "^3.5.13",
     "vue-tsc": "^2.2.10",
     "webpack": "^5.104.1"

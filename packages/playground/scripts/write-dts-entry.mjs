@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 
-await mkdir('dist/cjs', { recursive: true });
+await mkdir('dist/types', { recursive: true });
 await writeFile(
-  'dist/cjs/index.d.ts',
+  'dist/types/index.d.ts',
   "export * from './component';\nexport { default } from './component';\n",
 );

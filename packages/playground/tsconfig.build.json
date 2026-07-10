@@ -4,7 +4,7 @@
     "declaration": true,
     "emitDeclarationOnly": true,
     "noEmit": false,
-    "outDir": "./dist/cjs",
+    "outDir": "./dist/types",
     "rootDir": "./src"
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts"],
