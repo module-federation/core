@@ -3,9 +3,9 @@ set -e
 
 source /etc/profile
 
-nvm install 22
+nvm install 24
 
-nvm use 22
+nvm use 24
 
 echo 'node version is ' && node -v
 

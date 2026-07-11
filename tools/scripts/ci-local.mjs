@@ -9,7 +9,7 @@ process.env.CI = process.env.CI ?? 'true';
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(SCRIPT_DIR, '../..');
 process.chdir(ROOT);
-const DEFAULT_EXPECTED_NODE_MAJOR = 20;
+const DEFAULT_EXPECTED_NODE_MAJOR = 24;
 const ROOT_PACKAGE_JSON = readRootPackageJson();
 const EXPECTED_NODE_MAJOR = resolveExpectedNodeMajor(ROOT_PACKAGE_JSON);
 const EXPECTED_PNPM_VERSION = resolveExpectedPnpmVersion(ROOT_PACKAGE_JSON);

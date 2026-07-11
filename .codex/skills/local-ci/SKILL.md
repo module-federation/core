@@ -99,5 +99,5 @@ Use the local CI job if one exists for the workflow's behavior. For workflow syn
 
 - `ci:local` sets `CI=true` and mirrors the repo workflow order.
 - Some jobs intentionally skip GitHub-only actions such as `actionlint` and `bundle-size-comment`.
-- The repo uses `pnpm`, Node 20, and Turbo as the standard execution path.
+- The repo uses `pnpm`, Node 24, and Turbo as the standard execution path.
 - In worktrees, still use Turbo/package scripts directly as documented by the repo instructions.

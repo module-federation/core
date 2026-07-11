@@ -2,7 +2,7 @@
   "name": "module-federation",
   "version": "0.0.0",
   "engines": {
-    "node": "^20",
+    "node": "^24",
     "pnpm": "^10"
   },
   "packageManager": "pnpm@10.28.0",

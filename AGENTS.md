@@ -21,7 +21,7 @@ If prose docs conflict with workflows (for example `README.md` or `CONTRIBUTING.
 
 ## Environment Parity
 
-- Node.js: `20` (from `.nvmrc` and workflow setup)
+- Node.js: `24` (from `.nvmrc` and workflow setup)
 - pnpm: `10.28.0` (from `package.json` `packageManager`)
 - Package manager: pnpm only
 

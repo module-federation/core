@@ -45,14 +45,16 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
-          node-version: 20
+          node-version: 24
           cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
 
-      # Update npm to the latest version to enable OIDC
+      # npm 12.0.0 omits its bundled sigstore dependency and breaks OIDC
+      # provenance publishing. Keep npm 11 until the upstream fix ships.
+      # https://github.com/npm/cli/issues/9722
       - name: Update npm
         run: |
-          npm install -g npm@latest
+          npm install -g npm@^11
           npm --version
 
       - name: Install deps
