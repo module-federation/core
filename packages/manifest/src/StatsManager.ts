@@ -598,6 +598,13 @@ class StatsManager {
 
   updateStats(stats: Stats, compiler: Compiler): Stats {
     const { metaData } = stats;
+    const configuredRemoteEntryType = this._options.library?.type;
+    if (configuredRemoteEntryType && metaData.remoteEntry) {
+      // Rspack may pre-emit stats with the default `global` type even when
+      // the configured container library and emitted remote entry are ESM.
+      // The configured library is authoritative for runtime loader selection.
+      metaData.remoteEntry.type = configuredRemoteEntryType;
+    }
     if (!metaData.types) {
       metaData.types = getTypesMetaInfo(this._options, compiler.context);
     }
