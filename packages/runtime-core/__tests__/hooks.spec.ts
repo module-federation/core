@@ -103,6 +103,69 @@ describe('hooks', () => {
     expect(module(1, 2, 3, 4, 5)).toBe(15);
   });
 
+  it('registers typed application pause and resume hooks', async () => {
+    const calls: string[] = [];
+    const instance = new ModuleFederation({
+      name: '@federation/application-lifecycle-hooks',
+      plugins: [
+        {
+          name: 'application-lifecycle-test-plugin',
+          async prePause(context) {
+            calls.push(`prePause:${context.transitionId}`);
+            return { delayMs: 25 };
+          },
+          pause(event) {
+            calls.push(`pause:${event.committedAt}`);
+          },
+          async preResume(context) {
+            calls.push(`preResume:${context.transitionId}`);
+          },
+          resume(event) {
+            calls.push(`resume:${event.committedAt}`);
+          },
+          lifecycleError(event) {
+            calls.push(`error:${event.phase}`);
+          },
+        },
+      ],
+    });
+    const transition = {
+      transitionId: 'transition-1',
+      lifecycleEpoch: 7,
+      scope: 'realm' as const,
+      reason: 'host-suspend',
+      force: false,
+      origin: instance,
+    };
+
+    const decision =
+      await instance.applicationHook.lifecycle.prePause.emit(transition);
+    expect(decision).toEqual({ delayMs: 25 });
+
+    await instance.applicationHook.lifecycle.pause.emit({
+      ...transition,
+      committedAt: 100,
+    });
+    await instance.applicationHook.lifecycle.preResume.emit(transition);
+    await instance.applicationHook.lifecycle.resume.emit({
+      ...transition,
+      committedAt: 200,
+    });
+    await instance.applicationHook.lifecycle.lifecycleError.emit({
+      phase: 'resume',
+      transition,
+      error: new Error('resume failed'),
+    });
+
+    expect(calls).toEqual([
+      'prePause:transition-1',
+      'pause:100',
+      'preResume:transition-1',
+      'resume:200',
+      'error:resume',
+    ]);
+  });
+
   it('loader hooks', async () => {
     const testRemoteEntry =
       'http://localhost:1111/resources/hooks/app2/federation-remote-entry.js';

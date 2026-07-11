@@ -15,7 +15,19 @@ export {
   getGlobalSnapshot,
   getInfoWithoutType,
 } from './global';
-export type { UserOptions, ModuleFederationRuntimePlugin } from './type';
+export type {
+  ApplicationLifecyclePhase,
+  ApplicationLifecycleScope,
+  ApplicationLifecycleTransition,
+  LifecycleDecision,
+  LifecycleTransitionError,
+  ModuleFederationRuntimePlugin,
+  PauseCommittedEvent,
+  PauseTransitionContext,
+  ResumeCommittedEvent,
+  ResumeTransitionContext,
+  UserOptions,
+} from './type';
 export { assert, error } from './utils/logger';
 export { registerGlobalPlugins } from './global';
 export {

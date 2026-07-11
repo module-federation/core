@@ -36,12 +36,71 @@ type RemoteLifeCycleCyclePartial = Partial<{
   [k in keyof RemoteLifeCycle]: Parameters<RemoteLifeCycle[k]['on']>[0];
 }>;
 
+export type ApplicationLifecycleScope =
+  | 'installation'
+  | 'realm'
+  | 'contribution'
+  | 'mount';
+
+export interface ApplicationLifecycleTransition {
+  transitionId: string;
+  lifecycleEpoch: number;
+  scope: ApplicationLifecycleScope;
+  reason: string;
+  force: boolean;
+  deadline?: number;
+  signal?: AbortSignal;
+  context?: Readonly<Record<string, unknown>>;
+  origin: ModuleFederation;
+}
+
+export interface PauseTransitionContext extends ApplicationLifecycleTransition {
+  checkpointReference?: string;
+}
+
+export interface ResumeTransitionContext extends ApplicationLifecycleTransition {
+  checkpointReference?: string;
+}
+
+export interface LifecycleDecision {
+  delayMs?: number;
+}
+
+export interface PauseCommittedEvent extends ApplicationLifecycleTransition {
+  committedAt: number;
+  checkpointReference?: string;
+}
+
+export interface ResumeCommittedEvent extends ApplicationLifecycleTransition {
+  committedAt: number;
+}
+
+export type ApplicationLifecyclePhase =
+  | 'prePause'
+  | 'pause'
+  | 'preResume'
+  | 'resume';
+
+export interface LifecycleTransitionError {
+  phase: ApplicationLifecyclePhase;
+  transition: ApplicationLifecycleTransition;
+  error: unknown;
+}
+
+type ApplicationLifeCycle = ModuleFederation['applicationHook']['lifecycle'];
+type ApplicationLifeCyclePartial = Partial<{
+  [k in keyof ApplicationLifeCycle]: Parameters<
+    ApplicationLifeCycle[k]['on']
+  >[0];
+}>;
+
 export type ModuleFederationRuntimePlugin = CoreLifeCyclePartial &
   SnapshotLifeCycleCyclePartial &
   SharedLifeCycleCyclePartial &
   RemoteLifeCycleCyclePartial &
   ModuleLifeCycleCyclePartial &
-  ModuleBridgeLifeCycleCyclePartial & {
+  ModuleBridgeLifeCycleCyclePartial &
+  ApplicationLifeCyclePartial & {
     name: string;
     version?: string;
     apply?: (instance: ModuleFederation) => void;

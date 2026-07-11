@@ -19,6 +19,12 @@ import {
   RemoteEntryInitOptions,
   CallFrom,
   ResourceLoadContext,
+  LifecycleDecision,
+  LifecycleTransitionError,
+  PauseCommittedEvent,
+  PauseTransitionContext,
+  ResumeCommittedEvent,
+  ResumeTransitionContext,
 } from './type';
 import { getBuilderId, registerPlugins, getRemoteEntry, error } from './utils';
 import {
@@ -280,6 +286,34 @@ export class ModuleFederation {
       [Record<string, any>],
       void | Record<string, any>
     >(),
+  });
+  applicationHook = new PluginSystem({
+    prePause: new AsyncHook<
+      [PauseTransitionContext],
+      | LifecycleDecision
+      | void
+      | false
+      | Promise<LifecycleDecision | void | false>
+    >('prePause'),
+    pause: new AsyncHook<
+      [PauseCommittedEvent],
+      void | false | Promise<void | false>
+    >('pause'),
+    preResume: new AsyncHook<
+      [ResumeTransitionContext],
+      | LifecycleDecision
+      | void
+      | false
+      | Promise<LifecycleDecision | void | false>
+    >('preResume'),
+    resume: new AsyncHook<
+      [ResumeCommittedEvent],
+      void | false | Promise<void | false>
+    >('resume'),
+    lifecycleError: new AsyncHook<
+      [LifecycleTransitionError],
+      void | false | Promise<void | false>
+    >('lifecycleError'),
   });
   moduleInfo?: GlobalModuleInfo[string];
 

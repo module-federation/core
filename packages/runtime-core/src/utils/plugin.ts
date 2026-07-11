@@ -14,6 +14,7 @@ export function registerPlugins(
     instance.snapshotHandler.hooks,
     instance.loaderHook,
     instance.bridgeHook,
+    instance.applicationHook,
   ];
   // Incorporate global plugins
   if (globalPlugins.length > 0) {

@@ -18,6 +18,15 @@ export {
   getRemoteInfo,
   registerGlobalPlugins,
   type ModuleFederationRuntimePlugin,
+  type ApplicationLifecyclePhase,
+  type ApplicationLifecycleScope,
+  type ApplicationLifecycleTransition,
+  type LifecycleDecision,
+  type LifecycleTransitionError,
+  type PauseCommittedEvent,
+  type PauseTransitionContext,
+  type ResumeCommittedEvent,
+  type ResumeTransitionContext,
   type Federation,
 } from '@module-federation/runtime-core';
 
