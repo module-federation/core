@@ -323,10 +323,26 @@ export function preloadAssets(
           }),
         );
       });
+    } else if (remoteInfo.type === 'module' || remoteInfo.type === 'esm') {
+      const defaultAttrs = {
+        rel: 'modulepreload',
+        fetchpriority: 'high',
+      };
+      jsAssetsWithoutEntry.forEach((jsUrl) => {
+        results.push(
+          waitForLinkPreload({
+            host,
+            remoteInfo,
+            url: jsUrl,
+            attrs: defaultAttrs,
+            context: createResourceContext(baseContext, 'js'),
+          }),
+        );
+      });
     } else {
       const defaultAttrs = {
         fetchpriority: 'high',
-        type: remoteInfo?.type === 'module' ? 'module' : 'text/javascript',
+        type: 'text/javascript',
       };
       jsAssetsWithoutEntry.forEach((jsUrl) => {
         results.push(
