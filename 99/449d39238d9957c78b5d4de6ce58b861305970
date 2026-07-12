@@ -1,0 +1,27 @@
+.github/workflows/build-and-test.yml
+  s_a14ffa1f6071be::t_65fef952205824 88-98,111-132
+tools/fixtures/node20-compat/smoke-cjs.cjs
+  s_a14ffa1f6071be::t_dec3dbcf2bfb7d 1-16
+tools/fixtures/node20-compat/smoke-esm.mjs
+  s_a14ffa1f6071be::t_ebdd57da2d1bb1 1-16
+tools/scripts/prepare-node20-compat-packages.mjs
+  s_a14ffa1f6071be::t_2c48f13bf1dbec 1-56
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "99449d39238d9957c78b5d4de6ce58b861305970",
+  "prompts": {},
+  "sessions": {
+    "s_a14ffa1f6071be": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5500-f2c0-7781-90f7-b453b3b805d1",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    }
+  },
+  "attestation_metadata": {},
+  "remote_transcripts": {}
+}
