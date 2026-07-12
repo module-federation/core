@@ -1,0 +1,25 @@
+.changeset/tidy-rspack-manifests.md
+  s_bfe941ee86d9fe::t_e41879c8bd53c1 1-5
+packages/manifest/__tests__/StatsPlugin.spec.ts
+  s_bfe941ee86d9fe::t_01d32af4d325a7 1-182
+packages/manifest/src/StatsPlugin.ts
+  s_bfe941ee86d9fe::t_a9de19bc8c75be 11-40,75-89,107,147-153
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "1d30d96a1b993602ac2c448e5b72065ba1f13335",
+  "prompts": {},
+  "sessions": {
+    "s_bfe941ee86d9fe": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f4b46-d157-70a3-8475-ab70d1ee6f45",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    }
+  },
+  "attestation_metadata": {},
+  "remote_transcripts": {}
+}
