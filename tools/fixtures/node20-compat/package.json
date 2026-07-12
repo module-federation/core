@@ -1,0 +1,12 @@
+{
+  "name": "module-federation-node20-compat-consumer",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:rspack": "rspack build --config rspack.config.cjs",
+    "build:webpack": "webpack --config webpack.config.cjs",
+    "typecheck": "tsc --project tsconfig.json"
+  },
+  "dependencies": {}
+}

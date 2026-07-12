@@ -48,6 +48,24 @@ Come and chat with us on [Discussions](https://github.com/module-federation/univ
 
 Please read the [Contributing Guide](https://github.com/module-federation/core/blob/main/CONTRIBUTING.md).
 
+### Node.js support
+
+Working on this repository requires Node.js 24 and pnpm 10.28.0. The repository's
+development, test, build, and release workflows run on Node.js 24.
+
+Published packages that execute in Node.js, including build plugins, command-line
+tools, type generation, workers, and server-side runtime code, remain compatible
+with Node.js 20.19.5. CI builds the packages on Node.js 24, installs the resulting
+package tarballs in a clean Node.js 20.19.5 project, and verifies their CommonJS,
+ES module, command-line, and type entry points. The clean TypeScript project is
+also built with both Webpack and Rspack, and the resulting Node.js bundles are
+executed on Node.js 20.19.5.
+
+Browser runtime compatibility is defined by the browser build targets rather than
+the Node.js version used to maintain this repository. Node.js 20 compatibility is
+provided for legacy consumers even though Node.js 20 no longer receives upstream
+maintenance.
+
 ![Alt](https://repobeats.axiom.co/api/embed/856dc1d4a6965d225232b1bd2da5d54549dc169e.svg 'Repobeats analytics image')
 
 ## 🙌 Code of Conduct
