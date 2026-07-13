@@ -30,8 +30,6 @@ import { fileLog, logger } from '../../server';
 import { nativeFetch, cloneDeepOptions, isDebugMode } from './utils';
 import { UpdateMode } from '../../server/constant';
 
-export const MODULE_DTS_MANAGER_IDENTIFIER = 'MF DTS Manager';
-
 interface UpdateTypesOptions {
   updateMode: UpdateMode;
   remoteName?: string;

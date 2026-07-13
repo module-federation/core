@@ -1,7 +1,6 @@
 import net from 'net';
 import { SEPARATOR } from '@module-federation/sdk';
 
-export * from './logTransform';
 export * from './log';
 export * from './getIPV4';
 
