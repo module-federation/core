@@ -144,7 +144,7 @@ describe('typeScriptCompiler', () => {
       // no files generate if empty mapToExpose
     });
 
-    it('use shell option on windows when invoking compiler', async () => {
+    it('does not use shell option on windows when invoking direct TypeScript compiler', async () => {
       const execPromise = rs.fn().mockResolvedValue({});
       rs.spyOn(util, 'promisify').mockReturnValue(
         execPromise as unknown as ReturnType<typeof util.promisify>,
@@ -168,7 +168,7 @@ describe('typeScriptCompiler', () => {
       expect(execPromise).toHaveBeenCalledWith(
         process.execPath,
         expect.any(Array),
-        expect.objectContaining({ cwd: projectRoot, shell: true }),
+        expect.objectContaining({ cwd: projectRoot, shell: false }),
       );
     });
 
@@ -261,6 +261,37 @@ describe('typeScriptCompiler', () => {
       expect(args.slice(0, 3)).toEqual(['vue-tsc', '--declaration', 'false']);
       expect(args[3]).toBe('--project');
       expect(args[4]).toEqual(expect.any(String));
+    });
+
+    it('uses shell option on windows for custom compilerInstance invocations', async () => {
+      const execPromise = rs.fn().mockResolvedValue({});
+      rs.spyOn(util, 'promisify').mockReturnValue(
+        execPromise as unknown as ReturnType<typeof util.promisify>,
+      );
+      const restorePlatform = withProcessPlatform('win32');
+      const filepath = join(__dirname, './typeScriptCompiler.ts');
+      const mapToExpose = {
+        tsCompiler: filepath,
+      };
+
+      try {
+        await compileTs(
+          mapToExpose,
+          { ...tsConfig, files: [filepath] },
+          {
+            ...remoteOptions,
+            compilerInstance: 'vue-tsc --declaration false',
+          },
+        );
+      } finally {
+        restorePlatform();
+      }
+
+      expect(execPromise).toHaveBeenCalledWith(
+        'npx',
+        expect.any(Array),
+        expect.objectContaining({ cwd: projectRoot, shell: true }),
+      );
     });
 
     it('does not wrap project path in single quotes on Windows (#4133)', async () => {
@@ -540,7 +571,7 @@ describe('typeScriptCompiler', () => {
           {
             compilerOptions: {
               target: 'es2017',
-              module: 'esnext',
+              module: 'commonjs',
               moduleResolution: 'node10',
               rootDir: './src',
               outDir: './dist',

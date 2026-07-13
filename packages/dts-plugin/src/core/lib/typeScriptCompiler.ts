@@ -269,6 +269,7 @@ const resolveCompilerCommand = (
       executable: process.execPath,
       args,
       displayCommand: formatCommandForDisplay(process.execPath, args),
+      shell: false,
     };
   }
 
@@ -278,6 +279,7 @@ const resolveCompilerCommand = (
     executable,
     args,
     displayCommand: formatCommandForDisplay(executable, args),
+    shell: process.platform === 'win32',
   };
 };
 
@@ -317,7 +319,7 @@ export const compileTs = async (
     try {
       await execPromise(compilerCommand.executable, compilerCommand.args, {
         cwd: getTypeScriptContext(remoteOptions),
-        shell: process.platform === 'win32',
+        shell: compilerCommand.shell,
       });
     } catch (err) {
       if (compilerOptions.tsBuildInfoFile) {

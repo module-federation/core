@@ -24,6 +24,7 @@ import {
   getTypeScriptPackageInfo,
   requireTypeScript,
 } from '../lib/typeScriptResolver';
+import { logger } from '../../server';
 
 interface ProjectReference {
   path: string;
@@ -319,6 +320,36 @@ const writeListFilesTsConfig = (
   return tempTsConfigJsonPath;
 };
 
+const formatCompilerError = (error: unknown) => {
+  const readOutput = (value: unknown) => {
+    if (Buffer.isBuffer(value)) {
+      return value.toString('utf8');
+    }
+    return typeof value === 'string' ? value : '';
+  };
+
+  if (typeof error === 'object' && error !== null) {
+    const processError = error as {
+      stderr?: unknown;
+      stdout?: unknown;
+      message?: unknown;
+    };
+    const stderr = readOutput(processError.stderr).trim();
+    if (stderr) {
+      return stderr.split(/\r?\n/)[0];
+    }
+    const stdout = readOutput(processError.stdout).trim();
+    if (stdout) {
+      return stdout.split(/\r?\n/)[0];
+    }
+    if (typeof processError.message === 'string') {
+      return processError.message;
+    }
+  }
+
+  return String(error);
+};
+
 const getDependentFilesWithTsc = (
   rootFiles: string[],
   rootDir: string,
@@ -363,7 +394,12 @@ const getDependentFilesWithTsc = (
       )
       .map((file) => normalizeFileToRootDir(file, rootDir));
     return dependentFiles.length ? dependentFiles : rootFiles;
-  } catch {
+  } catch (error) {
+    logger.warn(
+      `Failed to collect TypeScript dependency files with "tsc --listFilesOnly"; falling back to exposed files only. ${formatCompilerError(
+        error,
+      )}`,
+    );
     return rootFiles;
   } finally {
     rmSync(listFilesTsConfigPath, { force: true });

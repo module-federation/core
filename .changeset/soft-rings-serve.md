@@ -1,5 +1,5 @@
 ---
-"@module-federation/dts-plugin": patch
+"@module-federation/dts-plugin": minor
 "@module-federation/enhanced": patch
 "@module-federation/modern-js": patch
 "@module-federation/modern-js-v3": patch
