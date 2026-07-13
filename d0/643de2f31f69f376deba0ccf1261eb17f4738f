@@ -1,0 +1,23 @@
+packages/dts-plugin/src/core/configurations/remotePlugin.ts
+  s_34facb6e3b8a3f::t_527052bd929aa3 27,323-352,397-402
+packages/dts-plugin/src/core/lib/typeScriptCompiler.ts
+  s_34facb6e3b8a3f::t_19b6e79b30c77d 272,282,322
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "d0643de2f31f69f376deba0ccf1261eb17f4738f",
+  "prompts": {},
+  "sessions": {
+    "s_34facb6e3b8a3f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3617-a917-7310-9eb2-e9deb621fecb",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    }
+  },
+  "attestation_metadata": {},
+  "remote_transcripts": {}
+}
