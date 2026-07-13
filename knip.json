@@ -1,6 +1,7 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "workspaces": {
+    "packages/sdk": {},
     "packages/dts-plugin": {
       "entry": [
         "src/core/index.ts",
