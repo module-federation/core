@@ -1,0 +1,18 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "workspaces": {
+    "packages/dts-plugin": {
+      "entry": [
+        "src/core/index.ts",
+        "src/dev-worker/forkDevWorker.ts",
+        "src/server/broker/startBroker.ts",
+        "src/core/lib/forkGenerateDts.ts",
+        "src/runtime-plugins/dynamic-remote-type-hints-plugin.ts",
+        "tests/setup.ts"
+      ],
+      "ignore": ["tests/vue-tsc2/**"],
+      "ignoreDependencies": ["vue", "vue-tsc", "@vue/tsconfig"],
+      "ignoreBinaries": ["ps"]
+    }
+  }
+}
