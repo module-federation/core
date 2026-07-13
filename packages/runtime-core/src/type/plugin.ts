@@ -42,6 +42,13 @@ export type ApplicationLifecycleScope =
   | 'contribution'
   | 'mount';
 
+/**
+ * A host-owned application transition supplied to trusted runtime plugins.
+ *
+ * The runtime exposes these hooks as coordination primitives; the host owns
+ * transaction serialization, deadline enforcement, cancellation policy, and
+ * any durable lifecycle state.
+ */
 export interface ApplicationLifecycleTransition {
   transitionId: string;
   lifecycleEpoch: number;
@@ -62,6 +69,10 @@ export interface ResumeTransitionContext extends ApplicationLifecycleTransition 
   checkpointReference?: string;
 }
 
+/**
+ * A non-binding pre-transition hint for the host. Hosts decide whether a
+ * delay is permitted, including how forced transitions are handled.
+ */
 export interface LifecycleDecision {
   delayMs?: number;
 }

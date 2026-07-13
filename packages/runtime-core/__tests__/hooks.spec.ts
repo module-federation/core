@@ -166,6 +166,53 @@ describe('hooks', () => {
     ]);
   });
 
+  it('runs application lifecycle hooks serially without coupling bridge renders to transitions', async () => {
+    const calls: string[] = [];
+    const instance = new ModuleFederation({
+      name: '@federation/application-lifecycle-ordering',
+      plugins: [
+        {
+          name: 'first-application-lifecycle-plugin',
+          async prePause() {
+            calls.push('first:start');
+            await Promise.resolve();
+            calls.push('first:end');
+          },
+          beforeBridgeRender() {
+            calls.push('bridge');
+          },
+        },
+        {
+          name: 'second-application-lifecycle-plugin',
+          prePause() {
+            calls.push('second');
+          },
+        },
+      ],
+    });
+    const transition = {
+      transitionId: 'transition-2',
+      lifecycleEpoch: 8,
+      scope: 'mount' as const,
+      reason: 'visibility-change',
+      force: false,
+      origin: instance,
+    };
+
+    await instance.bridgeHook.lifecycle.beforeBridgeRender.emit({});
+    await instance.bridgeHook.lifecycle.beforeBridgeRender.emit({});
+    expect(calls).toEqual(['bridge', 'bridge']);
+
+    await instance.applicationHook.lifecycle.prePause.emit(transition);
+    expect(calls).toEqual([
+      'bridge',
+      'bridge',
+      'first:start',
+      'first:end',
+      'second',
+    ]);
+  });
+
   it('loader hooks', async () => {
     const testRemoteEntry =
       'http://localhost:1111/resources/hooks/app2/federation-remote-entry.js';
