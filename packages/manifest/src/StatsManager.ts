@@ -173,7 +173,7 @@ class StatsManager {
       remoteEntry: {
         name: getRemoteEntryName(),
         path: '',
-        // same as the types supported by runtime, currently only global/var/script is supported
+        // The runtime loader type follows the configured container library type.
         type:
           (this._options?.library?.type as RemoteEntryType | undefined) ||
           'global',

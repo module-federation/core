@@ -32,12 +32,27 @@ jest.mock(
 import { StatsManager } from '../src/StatsManager';
 
 describe('StatsManager', () => {
-  it('reconciles pre-emitted Rspack metadata to the configured ESM library type', () => {
+  it.each([
+    {
+      description:
+        'reconciles pre-emitted Rspack metadata to the configured ESM library type',
+      library: { type: 'module' },
+      emittedType: 'global',
+      expectedType: 'module',
+    },
+    {
+      description:
+        'preserves pre-emitted Rspack metadata without a configured library type',
+      library: undefined,
+      emittedType: 'system',
+      expectedType: 'system',
+    },
+  ] as const)('$description', ({ library, emittedType, expectedType }) => {
     const manager = new StatsManager();
     manager.init(
       {
         name: 'esm_remote',
-        library: { type: 'module' },
+        library,
         exposes: { './App': './src/App' },
       } as moduleFederationPlugin.ModuleFederationPluginOptions,
       { pluginVersion: 'test', bundler: 'rspack' },
@@ -52,7 +67,7 @@ describe('StatsManager', () => {
         remoteEntry: {
           name: 'remoteEntry.mjs',
           path: '',
-          type: 'global',
+          type: emittedType,
         },
         types: { path: '', name: '', api: '', zip: '' },
         pluginVersion: 'test',
@@ -68,6 +83,6 @@ describe('StatsManager', () => {
 
     const updated = manager.updateStats(stats, compiler);
 
-    expect(updated.metaData.remoteEntry.type).toBe('module');
+    expect(updated.metaData.remoteEntry.type).toBe(expectedType);
   });
 });
