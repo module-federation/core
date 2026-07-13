@@ -43,7 +43,7 @@
     "e2e:devtools:prod": "npx kill-port 3009 3010 3011 3012 3013 4001 && npx kill-port 3009 3010 3011 3012 3013 4001 && pnpm run app:manifest:prod & echo \"done\" && npx wait-on tcp:3009 tcp:3010 tcp:3011 tcp:3012 tcp:3013 && sleep 30 && pnpm exec turbo run test:e2e --filter=@module-federation/devtools",
     "enhanced:rstest": "pnpm --filter @module-federation/enhanced run build && NODE_OPTIONS=--experimental-vm-modules npx rstest -c packages/enhanced/rstest.config.ts",
     "lint": "pnpm run lint:packages",
-    "knip": "knip --workspace packages/dts-plugin && knip --workspace packages/sdk",
+    "knip": "knip --workspace packages/dts-plugin && knip --workspace packages/sdk && knip --workspace packages/runtime",
     "test": "pnpm exec turbo run test",
     "test:affected": "node tools/scripts/run-affected-package-tests.mjs",
     "build": "pnpm run build:packages",

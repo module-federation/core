@@ -89,7 +89,7 @@ export function mockStaticServer({
   });
 }
 
-import { ModuleFederationRuntimePlugin } from '../../src/type';
+import { ModuleFederationRuntimePlugin } from '@module-federation/runtime-core';
 import { ProviderModuleInfo } from '@module-federation/sdk';
 
 export const mockRemoteSnapshot: (
