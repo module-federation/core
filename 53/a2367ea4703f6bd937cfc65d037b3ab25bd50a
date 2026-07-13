@@ -1,0 +1,23 @@
+tools/fixtures/node20-compat/tsconfig.json
+  s_a14ffa1f6071be::t_121bc83118fee7 6,8-9
+tools/scripts/verify-node20-compat.mjs
+  s_a14ffa1f6071be::t_12a4f8d0026749 49
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "53a2367ea4703f6bd937cfc65d037b3ab25bd50a",
+  "prompts": {},
+  "sessions": {
+    "s_a14ffa1f6071be": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5500-f2c0-7781-90f7-b453b3b805d1",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    }
+  },
+  "attestation_metadata": {},
+  "remote_transcripts": {}
+}
