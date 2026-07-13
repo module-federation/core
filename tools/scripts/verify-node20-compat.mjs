@@ -46,6 +46,7 @@ try {
     '@rspack/cli': rootPackageJson.devDependencies['@rspack/cli'],
     '@rspack/core': rootPackageJson.devDependencies['@rspack/core'],
     '@swc/core': rootPackageJson.devDependencies['@swc/core'],
+    '@types/node': rootPackageJson.devDependencies['@types/node'],
     'swc-loader': rootPackageJson.devDependencies['swc-loader'],
     typescript: rootPackageJson.devDependencies.typescript,
     webpack: rootPackageJson.devDependencies.webpack,
