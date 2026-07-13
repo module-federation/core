@@ -55,7 +55,7 @@ export function isObject(val: any): boolean {
   return val && typeof val === 'object';
 }
 
-export const objectToString = Object.prototype.toString;
+const objectToString = Object.prototype.toString;
 
 export function isPlainObject(val: any): val is object {
   return objectToString.call(val) === '[object Object]';
