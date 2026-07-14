@@ -1,4 +1,5 @@
-import { describe, it } from '@rstest/core';
+import type { ModuleInfo } from '@module-federation/sdk';
+import { describe, it, rs } from '@rstest/core';
 import { ModuleFederation } from '../src/core';
 import type { RemoteInfo } from '../src/type';
 import type {
@@ -14,6 +15,15 @@ type ResourceCall = {
   remoteInfo: RemoteInfo;
   resourceContext?: ResourceLoadContext;
 };
+
+type ResourceCalls = {
+  links: ResourceCall[];
+  scripts: ResourceCall[];
+};
+
+function createResourceCalls(): ResourceCalls {
+  return { links: [], scripts: [] };
+}
 
 function completeLoadWhenHandlerIsAttached(element: HTMLElement): void {
   let onload: GlobalEventHandlers['onload'] | null = null;
@@ -40,11 +50,10 @@ function applyAttrs(
   });
 }
 
-function createHost(calls: {
-  links: ResourceCall[];
-  scripts: ResourceCall[];
-}): ModuleFederation {
-  const captureResourcesPlugin: ModuleFederationRuntimePlugin = {
+function createResourceCapturePlugin(
+  calls: ResourceCalls,
+): ModuleFederationRuntimePlugin {
+  return {
     name: 'capture-preload-resources',
     beforeInit(args) {
       args.options.inBrowser = true;
@@ -67,10 +76,12 @@ function createHost(calls: {
       return script;
     },
   };
+}
 
+function createHost(calls: ResourceCalls): ModuleFederation {
   return new ModuleFederation({
     name: 'preload-assets-host',
-    plugins: [captureResourcesPlugin],
+    plugins: [createResourceCapturePlugin(calls)],
   });
 }
 
@@ -96,8 +107,8 @@ async function runPreload({
   jsAssetsWithoutEntry?: string[];
   useLinkPreload?: boolean;
   initiator?: ResourceLoadInitiator;
-}): Promise<{ links: ResourceCall[]; scripts: ResourceCall[] }> {
-  const calls = { links: [] as ResourceCall[], scripts: [] as ResourceCall[] };
+}): Promise<ResourceCalls> {
+  const calls = createResourceCalls();
   const host = createHost(calls);
 
   await preloadAssets(
@@ -119,13 +130,101 @@ async function runPreload({
 }
 
 describe('preloadAssets', () => {
-  it('preloads module chunks without executing them during loadRemote', async () => {
+  it.each(['module', 'esm'] as const)(
+    'preloads %s chunks without executing them during loadRemote',
+    async (type) => {
+      const moduleUrl = 'https://remote.test/expose.js';
+      const calls = await runPreload({
+        type,
+        jsAssetsWithoutEntry: [moduleUrl],
+      });
+
+      expect(calls.scripts).toHaveLength(0);
+      expect(calls.links).toHaveLength(1);
+      expect(calls.links[0]).toMatchObject({
+        url: moduleUrl,
+        attrs: {
+          rel: 'modulepreload',
+          fetchpriority: 'high',
+        },
+        remoteInfo: {
+          name: 'preload-assets-remote',
+          type,
+        },
+        resourceContext: {
+          initiator: 'loadRemote',
+          id: 'preload-assets-remote/Expose',
+          resourceType: 'js',
+          url: moduleUrl,
+        },
+      });
+    },
+  );
+
+  it('keeps module chunks non-executing through loadRemote initialization', async () => {
+    const remoteName = 'preload-assets-integration-remote';
     const moduleUrl = 'https://remote.test/expose.js';
-    const calls = await runPreload({
-      type: 'module',
-      jsAssetsWithoutEntry: [moduleUrl],
+    const calls = createResourceCalls();
+    const lifecycle: string[] = [];
+    const remoteSnapshot: ModuleInfo = {
+      version: '1.0.0',
+      buildVersion: '',
+      remoteEntry: 'https://remote.test/remoteEntry.js',
+      remoteEntryType: 'module',
+      remoteTypes: '',
+      remoteTypesZip: '',
+      globalName: remoteName,
+      publicPath: 'https://remote.test/',
+      remotesInfo: {},
+      shared: [],
+      modules: [],
+    };
+
+    const host = new ModuleFederation({
+      name: 'preload-assets-integration-host',
+      remotes: [
+        {
+          name: remoteName,
+          entry: 'https://remote.test/mf-manifest.json',
+        },
+      ],
+      plugins: [
+        createResourceCapturePlugin(calls),
+        {
+          name: 'capture-container-initialization',
+          loadEntry() {
+            return {
+              init() {
+                lifecycle.push('init');
+              },
+              get() {
+                lifecycle.push('get');
+                return () => Promise.resolve('loaded');
+              },
+            };
+          },
+        },
+      ],
     });
 
+    rs.spyOn(host.snapshotHandler, 'loadRemoteSnapshotInfo').mockResolvedValue({
+      remoteSnapshot,
+      globalSnapshot: {},
+    });
+    rs.spyOn(
+      host.remoteHandler.hooks.lifecycle.generatePreloadAssets,
+      'emit',
+    ).mockResolvedValue({
+      cssAssets: [],
+      jsAssetsWithoutEntry: [moduleUrl],
+      entryAssets: [],
+    });
+
+    await expect(host.loadRemote<string>(`${remoteName}/Expose`)).resolves.toBe(
+      'loaded',
+    );
+
+    expect(lifecycle).toEqual(['init', 'get']);
     expect(calls.scripts).toHaveLength(0);
     expect(calls.links).toHaveLength(1);
     expect(calls.links[0]).toMatchObject({
@@ -135,36 +234,14 @@ describe('preloadAssets', () => {
         fetchpriority: 'high',
       },
       remoteInfo: {
-        name: 'preload-assets-remote',
+        name: remoteName,
         type: 'module',
       },
       resourceContext: {
         initiator: 'loadRemote',
-        id: 'preload-assets-remote/Expose',
+        id: `${remoteName}/Expose`,
         resourceType: 'js',
         url: moduleUrl,
-      },
-    });
-  });
-
-  it('preloads esm chunks without executing them during loadRemote', async () => {
-    const moduleUrl = 'https://remote.test/expose.js';
-    const calls = await runPreload({
-      type: 'esm',
-      jsAssetsWithoutEntry: [moduleUrl],
-    });
-
-    expect(calls.scripts).toHaveLength(0);
-    expect(calls.links).toHaveLength(1);
-    expect(calls.links[0]).toMatchObject({
-      url: moduleUrl,
-      attrs: {
-        rel: 'modulepreload',
-        fetchpriority: 'high',
-      },
-      remoteInfo: {
-        name: 'preload-assets-remote',
-        type: 'esm',
       },
     });
   });
