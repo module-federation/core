@@ -1,0 +1,43 @@
+packages/bridge/bridge-react/package.json
+  s_e9714c83b2ddc2::t_c351d72f9c713f 93-97,143-145
+packages/bridge/bridge-react/scripts/write-dts-entrypoints.mjs
+  s_e9714c83b2ddc2::t_e994cf40769290 22-24
+packages/bridge/bridge-react/src/lazy/data-fetch/cache.ts
+  s_e9714c83b2ddc2::t_67c56f7bf2931a 1
+packages/bridge/bridge-react/src/lazy/types.ts
+  s_e9714c83b2ddc2::t_9971e3e1c9a7bd 2
+packages/bridge/bridge-react/src/shared/size-limited-cache.spec.ts
+  s_9e00c9e5df3a5b::t_2c13eb1846350e 1-2
+packages/bridge/bridge-react/vite.config.ts
+  s_e9714c83b2ddc2::t_47142c06db8281 34-37
+packages/modernjs-v3/src/server/fileCache.ts
+  s_e9714c83b2ddc2::t_4c4be969ec4130 2
+packages/modernjs/src/server/fileCache.ts
+  s_e9714c83b2ddc2::t_06eeb34c1268fc 2
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "0b49496b1a9c941e2587bc126a9c90b7aa5dd1e7",
+  "prompts": {},
+  "sessions": {
+    "s_9e00c9e5df3a5b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5fa1-a9cb-75c3-88d2-7e81b50cb1b8",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    },
+    "s_e9714c83b2ddc2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5e99-687b-7181-8bbc-1e485e2e9c1d",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    }
+  },
+  "attestation_metadata": {},
+  "remote_transcripts": {}
+}
