@@ -1,5 +1,4 @@
 ---
-'@module-federation/sdk': patch
 '@module-federation/bridge-react': patch
 '@module-federation/modern-js': patch
 '@module-federation/modern-js-v3': patch

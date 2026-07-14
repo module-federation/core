@@ -1,5 +1,5 @@
 import { MF_DATA_FETCH_TYPE, MF_DATA_FETCH_STATUS } from './constant';
-import type { SizeLimitedCache } from '@module-federation/sdk/size-limited-cache';
+import type { SizeLimitedCache } from '../shared/size-limited-cache';
 
 export type dataFetchFunctionOptions = [
   id?: string,

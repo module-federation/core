@@ -90,6 +90,11 @@
       "import": "./dist/lazy-load-component-plugin.es.js",
       "require": "./dist/lazy-load-component-plugin.cjs.js"
     },
+    "./size-limited-cache": {
+      "types": "./dist/size-limited-cache.d.ts",
+      "import": "./dist/size-limited-cache.es.js",
+      "require": "./dist/size-limited-cache.cjs.js"
+    },
     "./*": "./*"
   },
   "typesVersions": {
@@ -135,6 +140,9 @@
       ],
       "data-fetch-server-middleware": [
         "./dist/data-fetch-server-middleware.d.ts"
+      ],
+      "size-limited-cache": [
+        "./dist/size-limited-cache.d.ts"
       ]
     }
   },

@@ -1,5 +1,5 @@
 import { access, lstat, readFile } from 'fs/promises';
-import { SizeLimitedCache } from '@module-federation/sdk/size-limited-cache';
+import { SizeLimitedCache } from '@module-federation/bridge-react/size-limited-cache';
 
 const pathExists = async (filepath: string): Promise<boolean> => {
   try {

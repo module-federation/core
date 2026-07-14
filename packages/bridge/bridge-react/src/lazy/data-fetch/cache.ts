@@ -1,4 +1,4 @@
-import { SizeLimitedCache } from '@module-federation/sdk/size-limited-cache';
+import { SizeLimitedCache } from '../../shared/size-limited-cache';
 import { getDataFetchCache } from '../utils';
 
 import type {

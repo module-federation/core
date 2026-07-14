@@ -1,4 +1,5 @@
-import { SizeLimitedCache } from '../src/size-limited-cache';
+import { describe, expect, it } from '@rstest/core';
+import { SizeLimitedCache } from './size-limited-cache';
 
 describe('SizeLimitedCache', () => {
   it('evicts the least recently used entries by total size', () => {

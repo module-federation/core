@@ -49,16 +49,6 @@
         "types": "./dist/normalize-webpack-path.d.ts",
         "default": "./dist/normalize-webpack-path.cjs"
       }
-    },
-    "./size-limited-cache": {
-      "import": {
-        "types": "./dist/size-limited-cache.d.ts",
-        "default": "./dist/size-limited-cache.js"
-      },
-      "require": {
-        "types": "./dist/size-limited-cache.d.ts",
-        "default": "./dist/size-limited-cache.cjs"
-      }
     }
   },
   "typesVersions": {
@@ -68,9 +58,6 @@
       ],
       "normalize-webpack-path": [
         "./dist/normalize-webpack-path.d.ts"
-      ],
-      "size-limited-cache": [
-        "./dist/size-limited-cache.d.ts"
       ]
     }
   },
