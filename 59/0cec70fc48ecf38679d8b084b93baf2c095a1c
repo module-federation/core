@@ -1,0 +1,73 @@
+.changeset/quiet-runtime-capabilities.md
+  s_9e00c9e5df3a5b::t_f128de91de19d9 1-8
+apps/website-new/docs/en/configure/experiments.mdx
+  s_9e00c9e5df3a5b::t_bc4626ff5257ae 69-82
+apps/website-new/docs/pt-BR/configure/experiments.mdx
+  s_9e00c9e5df3a5b::t_5ccde617f6c6d0 69-82
+apps/website-new/docs/zh/configure/experiments.mdx
+  s_9e00c9e5df3a5b::t_453645f21e5533 70-83
+apps/website-new/docs/zh/configure/index.mdx
+  s_9e00c9e5df3a5b::t_b22d5beea2b6e1 42-44
+apps/website-new/docs/zh/guide/advanced/_meta.json
+  s_9e00c9e5df3a5b::t_583e0984d23a1d 2-6
+apps/website-new/docs/zh/guide/advanced/runtime-size-optimization.mdx
+  s_9e00c9e5df3a5b::t_d269397a68692c 1-182
+packages/enhanced/src/lib/container/ModuleFederationPlugin.ts
+  s_9e00c9e5df3a5b::t_f07bd032622a34 106-111
+packages/enhanced/src/schemas/container/ModuleFederationPlugin.json
+  s_9e00c9e5df3a5b::t_daa1f550b63f10 892-903
+packages/enhanced/test/configCases/container/experiments-optimization/index.js
+  s_9e00c9e5df3a5b::t_88124173db2007 15-18,40-45,71-82
+packages/enhanced/test/configCases/container/experiments-optimization/webpack.config.js
+  s_9e00c9e5df3a5b::t_f8230bbd3d07a7 28-30,67-69,113-151
+packages/rspack/__tests__/ModuleFederationPlugin.spec.ts
+  s_9e00c9e5df3a5b::t_beb2967dd3e805 2,7-34,99-122
+packages/rspack/src/ModuleFederationPlugin.ts
+  s_9e00c9e5df3a5b::t_d958c1ad544546 113-118
+packages/runtime-core/src/core.ts
+  s_9e00c9e5df3a5b::t_22544d00abb513 29,41,43,45-47,54-56,61-72,121,307-310,324-335,397,423-425
+packages/runtime-core/src/expose/disabled.ts
+  s_f00a2d93775e92::t_7ea902dac9c2ed 1-7
+packages/runtime-core/src/expose/index.ts
+  s_9e00c9e5df3a5b::t_507429d3e77679 1-173
+packages/runtime-core/src/module/index.ts
+  s_9e00c9e5df3a5b::t_47cddbe6148d38 270-271,274-275
+packages/runtime-core/src/plugins/snapshot/disabled.ts
+  s_9e00c9e5df3a5b::t_26e996945ec162 1-5
+packages/runtime-core/src/remote/disabled.ts
+  s_f00a2d93775e92::t_2545b0d2103a67 1-39
+packages/runtime-core/src/remote/index.ts
+  s_9e00c9e5df3a5b::t_798d4ddee586db 512-526
+packages/runtime-core/src/shared/disabled.ts
+  s_f00a2d93775e92::t_25b4f2325646ee 1-40
+packages/runtime-core/src/shared/index.ts
+  s_9e00c9e5df3a5b::t_022b15f924c810 45
+packages/runtime-core/src/type/plugin.ts
+  s_9e00c9e5df3a5b::t_e6e52e04343cf9 1-5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "590cec70fc48ecf38679d8b084b93baf2c095a1c",
+  "prompts": {},
+  "sessions": {
+    "s_9e00c9e5df3a5b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5fa1-a9cb-75c3-88d2-7e81b50cb1b8",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    },
+    "s_f00a2d93775e92": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5fa6-b8ea-7c32-b52f-a6a383f6f42d",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    }
+  },
+  "attestation_metadata": {},
+  "remote_transcripts": {}
+}
