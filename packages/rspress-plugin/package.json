@@ -41,7 +41,7 @@
     "@types/html-to-text": "^9.0.4",
     "@types/lodash-es": "^4.17.12",
     "@types/react": "^18.3.11",
-    "typescript": "6.0.3"
+    "typescript": "7.0.2"
   },
   "dependencies": {
     "cheerio": "1.0.0-rc.12",

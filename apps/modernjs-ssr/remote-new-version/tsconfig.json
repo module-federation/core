@@ -3,11 +3,14 @@
   "compilerOptions": {
     "declaration": false,
     "jsx": "preserve",
-    "baseUrl": "./",
     "paths": {
       "@/*": ["./src/*"],
-      "@shared/*": ["./shared/*"]
+      "@shared/*": ["./shared/*"],
+      "*": ["./*"]
     }
+  },
+  "ts-node": {
+    "compiler": "typescript-compiler"
   },
   "include": ["src", "shared", "config", "modern.config.ts"],
   "exclude": ["**/node_modules"]

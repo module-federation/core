@@ -40,10 +40,11 @@
     "@types/node": "^20.19.5",
     "@types/react": "^18.3.11",
     "react": "^18",
+    "typescript": "7.0.2",
     "tsup": "7.3.0"
   },
   "scripts": {
-    "build": "tsup --config tsup.config.ts --outDir dist && cp package.json dist && cp *.md dist",
+    "build": "tsup --config tsup.config.ts --outDir dist && tsc -p tsconfig.lib.json && cp package.json dist && cp *.md dist",
     "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\"",
     "test": "pnpm exec rstest --passWithNoTests",
     "pre-release": "pnpm run test && pnpm run build"

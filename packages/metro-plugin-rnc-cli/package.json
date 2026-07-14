@@ -35,7 +35,8 @@
   "devDependencies": {
     "@module-federation/metro": "workspace:*",
     "@typescript-eslint/eslint-plugin": "8.54.0",
-    "@typescript-eslint/parser": "8.54.0"
+    "@typescript-eslint/parser": "8.54.0",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "echo 'No build needed for metro-plugin-rnc-cli - pure JavaScript package'",

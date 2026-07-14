@@ -5,7 +5,6 @@
     "sourceMap": true,
     "esModuleInterop": true,
     "declaration": false,
-    "moduleResolution": "node10",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "importHelpers": false,
@@ -15,7 +14,9 @@
     "lib": ["es2021", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
-    "baseUrl": ".",
+    "paths": {
+      "*": ["./*"]
+    },
     "strict": false,
     "ignoreDeprecations": "6.0"
   },

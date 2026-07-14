@@ -22,7 +22,7 @@
   ],
   "scripts": {
     "postinstall": "echo \"Deprecation Notice: We intend to deprecate 'nextjs-mf'. Please see https://github.com/module-federation/core/issues/3153 for more details.\"",
-    "build": "tsdown --config tsdown.config.mts",
+    "build": "tsdown --config tsdown.config.mts && tsc -p tsconfig.lib.json && node ../../tools/scripts/copy-dts-to-dmts.mjs dist",
     "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.js\" \"**/*.ts\"",
     "test": "pnpm exec jest --config jest.config.js --passWithNoTests",
     "pre-release": "pnpm run test && pnpm run build && rm -f ./dist/package.json"
@@ -77,7 +77,7 @@
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.1",
     "tsdown": "0.20.3",
-    "typescript": "6.0.3"
+    "typescript": "7.0.2"
   },
   "peerDependencies": {
     "webpack": "^5.40.0",

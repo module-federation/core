@@ -219,6 +219,11 @@ export class NextFederationPlugin {
     const defaultShared = this._extraOptions.skipSharingNextInternals
       ? {}
       : retrieveDefaultShared(isServer);
+    const manifestOptions =
+      typeof this._options.manifest === 'object' &&
+      this._options.manifest !== null
+        ? this._options.manifest
+        : {};
 
     return {
       ...this._options,
@@ -241,10 +246,10 @@ export class NextFederationPlugin {
       },
       shared: {
         ...defaultShared,
-        ...this._options.shared,
+        ...(this._options.shared as Record<string, unknown>),
       },
       manifest: {
-        ...(this._options.manifest ?? {}),
+        ...manifestOptions,
         filePath: isServer ? '' : '/static/chunks',
       },
       // nextjs project needs to add config.watchOptions = ['**/node_modules/**', '**/@mf-types/**'] to prevent loop types update

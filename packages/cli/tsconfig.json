@@ -1,12 +1,10 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
     "rootDir": "./",
     "sourceMap": false,
     "module": "commonjs",
     "target": "ES2015",
     "skipLibCheck": true,
-    "moduleResolution": "node10",
     "allowJs": false,
     "strict": true,
     "types": ["node"],
@@ -18,7 +16,8 @@
     "declaration": true,
     "paths": {
       "@/*": ["./*"],
-      "@src/*": ["./src/*"]
+      "@src/*": ["./src/*"],
+      "*": ["./*"]
     },
     "ignoreDeprecations": "6.0"
   },

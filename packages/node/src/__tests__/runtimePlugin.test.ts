@@ -18,7 +18,6 @@ import type {
   ModuleFederation,
   Federation,
 } from '@module-federation/runtime';
-import * as runtimePluginModule from '../runtimePlugin';
 
 declare global {
   interface Global {
@@ -275,9 +274,9 @@ describe('runtimePlugin', () => {
         runInThisContext: mockRunInThisContext,
       };
 
-      require('vm').Script.mockImplementation(() => mockScript);
+      require('vm').Script.mockImplementationOnce(() => mockScript);
 
-      require('fs').readFile.mockImplementation(
+      require('fs').readFile.mockImplementationOnce(
         (
           path: string,
           encoding: string,
@@ -303,7 +302,7 @@ describe('runtimePlugin', () => {
     it('should handle readFile errors', () => {
       require('fs').existsSync.mockReturnValue(true);
       const readError = new Error('Read error');
-      require('fs').readFile.mockImplementation(
+      require('fs').readFile.mockImplementationOnce(
         (
           path: string,
           encoding: string,
@@ -321,7 +320,7 @@ describe('runtimePlugin', () => {
 
     it('should handle script evaluation errors', () => {
       require('fs').existsSync.mockReturnValue(true);
-      require('fs').readFile.mockImplementation(
+      require('fs').readFile.mockImplementationOnce(
         (
           path: string,
           encoding: string,
@@ -333,7 +332,7 @@ describe('runtimePlugin', () => {
 
       // Mock Script to throw an error when constructed
       const evalError = new Error('Evaluation failed');
-      require('vm').Script.mockImplementation(() => {
+      require('vm').Script.mockImplementationOnce(() => {
         throw evalError;
       });
 
@@ -427,12 +426,8 @@ describe('runtimePlugin', () => {
     });
 
     it('should attach remote chunk context when execution fails', async () => {
-      const syntaxError = new SyntaxError('Unexpected token :');
       (global.fetch as jest.Mock).mockResolvedValue({
         text: jest.fn().mockResolvedValue('const broken = { foo: };'),
-      });
-      require('vm').Script.mockImplementationOnce(() => {
-        throw syntaxError;
       });
 
       const url = Object.assign(new URL('http://example.com/chunk.js'), {
@@ -542,13 +537,14 @@ describe('runtimePlugin', () => {
           return new originalURL(args[0], args[1]);
         }) as any;
 
-      // Mock a complex remote entry URL with a path
+      // Use a complex remote entry URL with a path
       const mockEntryUrl = 'http://example.com/static/js/remoteEntry.js';
-      jest
-        .spyOn(runtimePluginModule, 'returnFromCache')
-        .mockReturnValue(mockEntryUrl);
+      const originalEntry = mockModule.remoteInfo.entry;
+      mockModule.remoteInfo.entry = mockEntryUrl;
 
       // Set a rootDir for testing combined paths
+      const originalRootOutputDir = (global as any).__webpack_require__
+        .federation.rootOutputDir;
       (global as any).__webpack_require__.federation.rootOutputDir = 'dist';
 
       const result = resolveUrl('test-remote', 'chunk123.js');
@@ -560,6 +556,9 @@ describe('runtimePlugin', () => {
 
       // Restore the original URL constructor
       global.URL = originalURL;
+      mockModule.remoteInfo.entry = originalEntry;
+      (global as any).__webpack_require__.federation.rootOutputDir =
+        originalRootOutputDir;
     });
 
     it('should return null when URL cannot be resolved', () => {
@@ -569,13 +568,8 @@ describe('runtimePlugin', () => {
         throw new Error('Invalid URL');
       }) as any;
 
-      // Mock returnFromCache and returnFromGlobalInstances to return null
-      const spyReturnFromCache = jest
-        .spyOn(runtimePluginModule, 'returnFromCache')
-        .mockReturnValue(null);
-      const spyReturnFromGlobalInstances = jest
-        .spyOn(runtimePluginModule, 'returnFromGlobalInstances')
-        .mockReturnValue(null);
+      const originalInstances = (global as any).__FEDERATION__.__INSTANCES__;
+      (global as any).__FEDERATION__.__INSTANCES__ = [];
 
       const result = resolveUrl('non-existent-remote', 'chunk.js');
 
@@ -583,8 +577,7 @@ describe('runtimePlugin', () => {
 
       // Clean up mocks
       global.URL = originalURL;
-      spyReturnFromCache.mockRestore();
-      spyReturnFromGlobalInstances.mockRestore();
+      (global as any).__FEDERATION__.__INSTANCES__ = originalInstances;
     });
 
     it('should attach fallback resolution metadata to resolved urls', () => {
@@ -624,7 +617,6 @@ describe('runtimePlugin', () => {
     });
 
     it('should load a chunk from the filesystem', () => {
-      // Create a spy that will resolve successfully
       const mockCallback = jest.fn();
       const mockChunk = {
         modules: { 'test-module': {} },
@@ -632,63 +624,76 @@ describe('runtimePlugin', () => {
         runtime: jest.fn(),
       };
 
-      // Create a manual spy for loadFromFs that calls the callback with a successful result
-      jest
-        .spyOn(runtimePluginModule, 'loadFromFs')
-        .mockImplementation((path, callback) => callback(null, mockChunk));
+      require('fs').existsSync.mockReturnValueOnce(true);
+      require('fs').readFile.mockImplementationOnce(
+        (
+          path: string,
+          encoding: string,
+          callback: (error: Error | null, content?: string) => void,
+        ) => callback(null, '// mock chunk'),
+      );
+      require('vm').Script.mockImplementationOnce(() => ({
+        runInThisContext: jest.fn().mockReturnValue((exports: any) => {
+          Object.assign(exports, mockChunk);
+        }),
+      }));
 
       loadChunk('filesystem', 'test-chunk', '/dist', mockCallback, {});
 
-      expect(runtimePluginModule.loadFromFs).toHaveBeenCalledWith(
-        expect.stringContaining('test-chunk'),
-        expect.any(Function),
-      );
-
+      expect(require('fs').readFile).toHaveBeenCalled();
       expect(mockCallback).toHaveBeenCalledWith(null, mockChunk);
     });
 
-    it('should fetch a chunk from a URL', () => {
-      const mockCallback = jest.fn();
+    it('should fetch a chunk from a URL', async () => {
       const mockChunk = {
         modules: { 'test-module': {} },
         ids: ['test-chunk'],
-        runtime: jest.fn(),
+        runtime: null,
+      };
+      const originalPublicPath = (global as any).__webpack_require__.p;
+      (global as any).__webpack_require__.p = 'http://example.com/';
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        text: jest
+          .fn()
+          .mockResolvedValue(
+            "exports.modules = {'test-module': {}}; exports.ids = ['test-chunk']; exports.runtime = null;",
+          ),
+      });
+      const args = {
+        origin: {
+          options: { name: 'test-host' },
+          loaderHook: {
+            lifecycle: {
+              fetch: { emit: jest.fn().mockResolvedValue(null) },
+            },
+          },
+        },
       };
 
-      const mockFetchAndRun = jest
-        .spyOn(runtimePluginModule, 'fetchAndRun')
-        .mockImplementation((url, chunkId, callback, args) =>
-          callback(null, mockChunk),
+      const result = await new Promise<any>((resolve, reject) => {
+        loadChunk(
+          'url',
+          'test-chunk',
+          '/dist',
+          (error, chunk) => {
+            if (error) reject(error);
+            else resolve(chunk);
+          },
+          args,
         );
+      });
 
-      // Create a proper URL object
-      const testUrl = new URL('http://example.com/chunk.js');
-      const resolveUrlSpy = jest
-        .spyOn(runtimePluginModule, 'resolveUrl')
-        .mockReturnValue(testUrl);
-
-      loadChunk('url', 'test-chunk', '/dist', mockCallback, {});
-
-      // Fix the parameter order to match the implementation: (remoteName, chunkName)
-      expect(resolveUrlSpy).toHaveBeenCalledWith('/dist', 'test-chunk');
-      expect(mockFetchAndRun).toHaveBeenCalledWith(
-        testUrl,
-        'test-chunk',
-        mockCallback,
-        {},
-      );
-      expect(mockCallback).toHaveBeenCalledWith(null, mockChunk);
-
-      // Restore mocks
-      mockFetchAndRun.mockRestore();
-      resolveUrlSpy.mockRestore();
+      expect(result).toEqual(mockChunk);
+      (global as any).__webpack_require__.p = originalPublicPath;
     });
 
     it('should handle unknown strategies', () => {
       const mockCallback = jest.fn();
 
-      // Mock resolveUrl to return a URL to ensure we test the strategy branch
-      jest.spyOn(runtimePluginModule, 'resolveUrl').mockReturnValue(null);
+      const originalPublicPath = (global as any).__webpack_require__.p;
+      const originalInstances = (global as any).__FEDERATION__.__INSTANCES__;
+      (global as any).__webpack_require__.p = 'invalid';
+      (global as any).__FEDERATION__.__INSTANCES__ = [];
 
       // The strategy 'unknown' isn't in the implementation, so it will default to the URL path
       // which requires resolveUrl to work, which we've mocked to return null
@@ -700,6 +705,8 @@ describe('runtimePlugin', () => {
         ids: [],
         runtime: null,
       });
+      (global as any).__webpack_require__.p = originalPublicPath;
+      (global as any).__FEDERATION__.__INSTANCES__ = originalInstances;
     });
   });
 
@@ -820,25 +827,8 @@ describe('runtimePlugin', () => {
     });
 
     it('should return a handler for chunk loading and reuse existing promises', () => {
-      // Setup mock for loadChunk
-      const mockChunk = {
-        modules: { 'test-module': {} },
-        ids: ['test-chunk'],
-        runtime: jest.fn(),
-      };
-
-      jest
-        .spyOn(runtimePluginModule, 'loadChunk')
-        .mockImplementation((strategy, chunkId, root, callback, args) => {
-          callback(null, mockChunk);
-        });
-
-      jest
-        .spyOn(runtimePluginModule, 'installChunk')
-        .mockImplementation((chunk, installedChunks) => {
-          // Mock implementation that doesn't rely on iterating chunk.ids
-          installedChunks['test-chunk'] = 0;
-        });
+      require('fs').existsSync.mockReturnValue(true);
+      require('fs').readFile.mockImplementationOnce(() => undefined);
 
       // Create a test environment
       const installedChunks: Record<string, any> = {};

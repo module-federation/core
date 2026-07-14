@@ -140,10 +140,10 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && tsc -p tsconfig.json && node scripts/write-dts-entrypoints.mjs",
     "preview": "vite preview",
     "test": "pnpm run test:jest && pnpm run test:rstest",
-    "test:jest": "pnpm exec jest --config jest.config.ts --passWithNoTests",
+    "test:jest": "pnpm exec jest --config jest.config.js --passWithNoTests",
     "test:rstest": "pnpm exec rstest --passWithNoTests"
   },
   "dependencies": {
@@ -179,9 +179,8 @@
     "react-dom": "18.3.1",
     "react-router-dom": "6.30.3",
     "react-router": "7.16.0",
-    "typescript": "^6.0.3",
+    "typescript": "7.0.2",
     "vite": "^5.4.21",
-    "vite-plugin-dts": "^4.3.0",
     "@module-federation/runtime": "workspace:*",
     "@module-federation/runtime-core": "workspace:*",
     "hono": "4.12.26"
