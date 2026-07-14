@@ -155,6 +155,14 @@ describe('setDefaultOptimizationTarget', () => {
 
     expect(config.experiments.optimization.target).toBe('web');
   });
+
+  it('does not set a target when autoOptimization is disabled', () => {
+    const config = { name: 'host' };
+
+    setDefaultOptimizationTarget(config, true, true, false);
+
+    expect(config).toStrictEqual({ name: 'host' });
+  });
 });
 
 describe('moduleFederationConfigPlugin', async () => {

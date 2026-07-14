@@ -3,4 +3,5 @@
 "@module-federation/modern-js-v3": patch
 ---
 
-Default federation optimizations to the active Modern.js browser or SSR target.
+Automatically select federation optimization targets for Modern.js browser and
+SSR builds, with an option to disable this behavior.

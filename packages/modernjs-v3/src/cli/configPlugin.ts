@@ -236,7 +236,12 @@ export const setDefaultOptimizationTarget = (
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
   enableSSR: boolean,
   isServer: boolean,
+  autoOptimization = true,
 ) => {
+  if (!autoOptimization) {
+    return;
+  }
+
   mfConfig.experiments ||= {};
   mfConfig.experiments.optimization ||= {};
   mfConfig.experiments.optimization.target ??=
@@ -415,7 +420,12 @@ export const moduleFederationConfigPlugin = (
       addMyTypes2Ignored(chain, !isWeb ? ssrConfig : csrConfig);
 
       const targetMFConfig = !isWeb ? ssrConfig : csrConfig;
-      setDefaultOptimizationTarget(targetMFConfig, enableSSR, !isWeb);
+      setDefaultOptimizationTarget(
+        targetMFConfig,
+        enableSSR,
+        !isWeb,
+        userConfig.originPluginOptions.autoOptimization,
+      );
       patchMFConfig(targetMFConfig, !isWeb);
 
       if (
