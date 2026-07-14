@@ -645,7 +645,7 @@ export class RemoteHandler {
           typeof window !== 'undefined' &&
           !remote.entry.startsWith('http')
         ) {
-          remote.entry = new URL(remote.entry, window.location.origin).href;
+          remote.entry = new URL(remote.entry, window.location).href;
         }
       }
       if (!remote.shareScope) {
