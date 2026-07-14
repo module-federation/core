@@ -1,9 +1,9 @@
 import {
   assert,
   error,
+  processModuleAlias,
   optionsToMFContext,
   composeRemoteRequestId,
-  processModuleAlias,
 } from '../utils';
 import { safeToString, ModuleInfo } from '@module-federation/sdk';
 import {
@@ -24,8 +24,6 @@ import {
 export type ModuleOptions = ConstructorParameters<typeof Module>[0];
 export type RemoteModuleFactory = () => unknown | Promise<unknown>;
 
-declare const FEDERATION_OPTIMIZE_NO_REMOTE: boolean;
-
 function getAvailableExposeNames(
   remoteSnapshot?: ModuleInfo,
 ): string | undefined {
@@ -42,36 +40,6 @@ function getAvailableExposeNames(
     .filter(Boolean);
 
   return exposes.length ? exposes.join(',') : undefined;
-}
-
-function wrapModuleFactory(moduleFactory: RemoteModuleFactory, id: string) {
-  function defineModuleId(res: unknown, id: string) {
-    if (
-      res &&
-      typeof res === 'object' &&
-      Object.isExtensible(res) &&
-      !Object.getOwnPropertyDescriptor(res, Symbol.for('mf_module_id'))
-    ) {
-      Object.defineProperty(res, Symbol.for('mf_module_id'), {
-        value: id,
-        enumerable: false,
-      });
-    }
-  }
-
-  return () => {
-    const res = moduleFactory();
-
-    if (res instanceof Promise) {
-      return res.then((asyncRes) => {
-        defineModuleId(asyncRes, id);
-        return asyncRes;
-      });
-    }
-
-    defineModuleId(res, id);
-    return res;
-  };
 }
 
 export function createRemoteEntryInitOptions(
@@ -319,17 +287,7 @@ class Module {
     options?: { loadFactory?: boolean },
     remoteSnapshot?: ModuleInfo,
   ) {
-    if (
-      typeof FEDERATION_OPTIMIZE_NO_REMOTE === 'boolean' &&
-      FEDERATION_OPTIMIZE_NO_REMOTE
-    ) {
-      throw new Error(
-        'Remote loading is disabled by experiments.optimization.disableRemote.',
-      );
-    }
-
     const { loadFactory = true } = options || { loadFactory: true };
-    const { host, remoteInfo } = this;
 
     const remoteEntryExports = await this.init(
       id,
@@ -339,25 +297,26 @@ class Module {
     );
     this.lib = remoteEntryExports;
 
-    await host.loaderHook.lifecycle.beforeGetExpose.emit({
+    await this.host.loaderHook.lifecycle.beforeGetExpose.emit({
       id,
       expose,
-      moduleInfo: remoteInfo,
+      moduleInfo: this.remoteInfo,
       remoteEntryExports,
-      origin: host,
+      origin: this.host,
     });
 
     let moduleFactory: RemoteModuleFactory | undefined;
     try {
       const hookModuleFactory =
-        await host.loaderHook.lifecycle.getModuleFactory.emit({
+        await this.host.loaderHook.lifecycle.getModuleFactory.emit({
           remoteEntryExports,
           expose,
-          moduleInfo: remoteInfo,
+          moduleInfo: this.remoteInfo,
         });
       moduleFactory =
         typeof hookModuleFactory === 'function' ? hookModuleFactory : undefined;
 
+      // get exposeGetter
       if (!moduleFactory) {
         moduleFactory = await remoteEntryExports.get(expose);
       }
@@ -367,77 +326,110 @@ class Module {
           RUNTIME_014,
           runtimeDescMap,
           {
-            hostName: host.name,
-            remoteName: remoteInfo.name,
-            remoteEntryUrl: remoteInfo.entry,
+            hostName: this.host.name,
+            remoteName: this.remoteInfo.name,
+            remoteEntryUrl: this.remoteInfo.entry,
             expose,
             requestId: id,
             availableExposes: getAvailableExposeNames(remoteSnapshot),
           },
           undefined,
-          optionsToMFContext(host.options),
+          optionsToMFContext(this.host.options),
         );
       }
 
-      await host.loaderHook.lifecycle.afterGetExpose.emit({
+      await this.host.loaderHook.lifecycle.afterGetExpose.emit({
         id,
         expose,
-        moduleInfo: remoteInfo,
+        moduleInfo: this.remoteInfo,
         remoteEntryExports,
         moduleFactory,
-        origin: host,
+        origin: this.host,
       });
     } catch (getExposeError) {
-      await host.loaderHook.lifecycle.afterGetExpose.emit({
+      await this.host.loaderHook.lifecycle.afterGetExpose.emit({
         id,
         expose,
-        moduleInfo: remoteInfo,
+        moduleInfo: this.remoteInfo,
         remoteEntryExports,
         error: getExposeError,
-        origin: host,
+        origin: this.host,
       });
       throw getExposeError;
     }
 
-    const symbolName = processModuleAlias(remoteInfo.name, expose);
-    const wrappedModuleFactory = wrapModuleFactory(moduleFactory, symbolName);
+    // keep symbol for module name always one format
+    const symbolName = processModuleAlias(this.remoteInfo.name, expose);
+    const wrapModuleFactory = this.wraperFactory(moduleFactory, symbolName);
 
     if (!loadFactory) {
-      return wrappedModuleFactory;
+      return wrapModuleFactory;
     }
 
-    await host.loaderHook.lifecycle.beforeExecuteFactory.emit({
+    await this.host.loaderHook.lifecycle.beforeExecuteFactory.emit({
       id,
       expose,
-      moduleInfo: remoteInfo,
+      moduleInfo: this.remoteInfo,
       loadFactory,
-      origin: host,
+      origin: this.host,
     });
 
     try {
-      const exposeContent = await wrappedModuleFactory();
+      const exposeContent = await wrapModuleFactory();
 
-      await host.loaderHook.lifecycle.afterExecuteFactory.emit({
+      await this.host.loaderHook.lifecycle.afterExecuteFactory.emit({
         id,
         expose,
-        moduleInfo: remoteInfo,
+        moduleInfo: this.remoteInfo,
         loadFactory,
         exposeModule: exposeContent,
-        origin: host,
+        origin: this.host,
       });
 
       return exposeContent;
     } catch (executeFactoryError) {
-      await host.loaderHook.lifecycle.afterExecuteFactory.emit({
+      await this.host.loaderHook.lifecycle.afterExecuteFactory.emit({
         id,
         expose,
-        moduleInfo: remoteInfo,
+        moduleInfo: this.remoteInfo,
         loadFactory,
         error: executeFactoryError,
-        origin: host,
+        origin: this.host,
       });
       throw executeFactoryError;
     }
+  }
+
+  private wraperFactory(moduleFactory: RemoteModuleFactory, id: string) {
+    function defineModuleId(res: unknown, id: string) {
+      if (
+        res &&
+        typeof res === 'object' &&
+        Object.isExtensible(res) &&
+        !Object.getOwnPropertyDescriptor(res, Symbol.for('mf_module_id'))
+      ) {
+        Object.defineProperty(res, Symbol.for('mf_module_id'), {
+          value: id,
+          enumerable: false,
+        });
+      }
+    }
+
+    return () => {
+      const res = moduleFactory();
+
+      if (res instanceof Promise) {
+        return res.then((asyncRes) => {
+          // This parameter is used for bridge debugging
+          defineModuleId(asyncRes, id);
+          return asyncRes;
+        });
+      }
+
+      // This parameter is used for bridge debugging
+      defineModuleId(res, id);
+      return res;
+    };
   }
 }
 

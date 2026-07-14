@@ -1,5 +1,14 @@
 import { PluginSystem } from '../utils/hooks';
 
+const REMOTE_DISABLED_MESSAGE =
+  'Remote loading is disabled by experiments.optimization.disableRemote.';
+
+export class DisabledModule {
+  constructor() {
+    throw new Error(REMOTE_DISABLED_MESSAGE);
+  }
+}
+
 export class DisabledRemoteHandler {
   hooks = new PluginSystem({});
 
@@ -8,32 +17,22 @@ export class DisabledRemoteHandler {
   }
 
   loadRemote(): never {
-    throw new Error(
-      'Remote loading is disabled by experiments.optimization.disableRemote.',
-    );
+    throw new Error(REMOTE_DISABLED_MESSAGE);
   }
 
   preloadRemote(): never {
-    throw new Error(
-      'Remote loading is disabled by experiments.optimization.disableRemote.',
-    );
+    throw new Error(REMOTE_DISABLED_MESSAGE);
   }
 
   registerRemotes(): never {
-    throw new Error(
-      'Remote loading is disabled by experiments.optimization.disableRemote.',
-    );
+    throw new Error(REMOTE_DISABLED_MESSAGE);
   }
 
   getRemoteModuleAndOptions(): never {
-    throw new Error(
-      'Remote loading is disabled by experiments.optimization.disableRemote.',
-    );
+    throw new Error(REMOTE_DISABLED_MESSAGE);
   }
 
   initRawContainer(): never {
-    throw new Error(
-      'Remote loading is disabled by experiments.optimization.disableRemote.',
-    );
+    throw new Error(REMOTE_DISABLED_MESSAGE);
   }
 }
