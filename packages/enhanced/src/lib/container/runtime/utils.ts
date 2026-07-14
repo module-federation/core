@@ -3,8 +3,6 @@
 	Author Zackary Jackson @ScriptedAlchemy
 */
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import upath from 'upath';
-import path from 'path';
 import crypto from 'crypto';
 import { parseOptions } from '../options';
 import type webpack from 'webpack';
@@ -140,5 +138,4 @@ export function createHash(contents: string): string {
   return crypto.createHash('md5').update(contents).digest('hex');
 }
 
-export const normalizeToPosixPath = (p: string) =>
-  upath.normalizeSafe(path.normalize(p || ''));
+export { normalizeToPosixPath } from './normalizeToPosixPath';

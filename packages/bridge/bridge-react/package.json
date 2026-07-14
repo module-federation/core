@@ -147,8 +147,7 @@
     "test:rstest": "pnpm exec rstest --passWithNoTests"
   },
   "dependencies": {
-    "@module-federation/sdk": "workspace:*",
-    "lru-cache": "10.4.3"
+    "@module-federation/sdk": "workspace:*"
   },
   "peerDependencies": {
     "react": ">=16.9.0",

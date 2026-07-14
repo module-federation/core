@@ -14,6 +14,7 @@ export default defineConfig([
       entry: {
         index: 'src/index.ts',
         'normalize-webpack-path': 'src/normalize-webpack-path.ts',
+        'size-limited-cache': 'src/size-limited-cache.ts',
       },
       external: ['@module-federation/*', 'isomorphic-rslog', 'webpack'],
       define: {},

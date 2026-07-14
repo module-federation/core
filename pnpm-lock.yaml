@@ -2925,9 +2925,6 @@ importers:
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../../sdk
-      lru-cache:
-        specifier: 10.4.3
-        version: 10.4.3
     devDependencies:
       '@module-federation/bridge-shared':
         specifier: workspace:*
@@ -3343,9 +3340,6 @@ importers:
       tapable:
         specifier: 2.3.0
         version: 2.3.0
-      upath:
-        specifier: 2.0.1
-        version: 2.0.1
       vue-tsc:
         specifier: '>=1.0.24'
         version: 2.2.12(typescript@7.0.2)
@@ -3614,9 +3608,6 @@ importers:
       jiti:
         specifier: 2.4.2
         version: 2.4.2
-      lru-cache:
-        specifier: 10.4.3
-        version: 10.4.3
       node-fetch:
         specifier: 3.3.0
         version: 3.3.0
@@ -3705,9 +3696,6 @@ importers:
       jiti:
         specifier: 2.4.2
         version: 2.4.2
-      lru-cache:
-        specifier: 10.4.3
-        version: 10.4.3
       node-fetch:
         specifier: 3.3.0
         version: 3.3.0
