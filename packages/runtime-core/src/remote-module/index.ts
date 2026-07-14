@@ -51,7 +51,7 @@ function wrapModuleFactory(moduleFactory: RemoteModuleFactory, id: string) {
   };
 }
 
-export class ExposeHandler {
+export class RemoteModuleHandler {
   async get(
     module: Module,
     id: string,

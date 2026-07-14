@@ -267,7 +267,7 @@ class Module {
     options?: { loadFactory?: boolean },
     remoteSnapshot?: ModuleInfo,
   ) {
-    return this.host.exposeHandler.get(
+    return this.host.remoteModuleHandler.get(
       this,
       id,
       expose,

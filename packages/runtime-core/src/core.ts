@@ -43,8 +43,8 @@ import { SharedHandler } from './shared';
 import { DisabledSharedHandler } from './shared/disabled';
 import { RemoteHandler } from './remote';
 import { DisabledRemoteHandler } from './remote/disabled';
-import { ExposeHandler } from './expose';
-import { DisabledExposeHandler } from './expose/disabled';
+import { RemoteModuleHandler } from './remote-module';
+import { DisabledRemoteModuleHandler } from './remote-module/disabled';
 import { formatShareConfigs } from './utils/share';
 
 // Declare the global constant that will be defined by DefinePlugin
@@ -119,7 +119,7 @@ export class ModuleFederation {
   snapshotHandler: SnapshotHandler;
   sharedHandler: SharedHandler;
   remoteHandler: RemoteHandler;
-  exposeHandler: ExposeHandler;
+  remoteModuleHandler: RemoteModuleHandler;
   shareScopeMap: ShareScopeMap;
   loaderHook = new PluginSystem({
     // FIXME: may not be suitable , not open to the public yet
@@ -331,9 +331,11 @@ export class ModuleFederation {
     this.remoteHandler = (
       USE_REMOTE ? new RemoteHandler(this) : new DisabledRemoteHandler()
     ) as RemoteHandler;
-    this.exposeHandler = (
-      USE_REMOTE_MODULE ? new ExposeHandler() : new DisabledExposeHandler()
-    ) as ExposeHandler;
+    this.remoteModuleHandler = (
+      USE_REMOTE_MODULE
+        ? new RemoteModuleHandler()
+        : new DisabledRemoteModuleHandler()
+    ) as RemoteModuleHandler;
     this.shareScopeMap = this.sharedHandler.shareScopeMap;
     this.registerPlugins([
       ...defaultOptions.plugins,
