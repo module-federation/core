@@ -1,0 +1,35 @@
+.changeset/quiet-runtime-capabilities.md
+  s_9e00c9e5df3a5b::t_5217493eeeabaf 8
+apps/website-new/docs/en/configure/experiments.mdx
+  s_9e00c9e5df3a5b::t_2352da92863f48 59-64,70,78,92-98,106-113,116
+apps/website-new/docs/pt-BR/configure/experiments.mdx
+  s_9e00c9e5df3a5b::t_e7911555a91fc3 59-64,70,78,92-98,106-113,116
+apps/website-new/docs/zh/configure/experiments.mdx
+  s_9e00c9e5df3a5b::t_b1c20f944ceffc 11,59-64,70,76,78,81,92-98,106-113,116
+apps/website-new/docs/zh/guide/advanced/runtime-size-optimization.mdx
+  s_9e00c9e5df3a5b::t_99d9272c9a7e48 3,19,23,61,104,124,128,142,144-148
+packages/enhanced/test/configCases/container/experiments-optimization/index.js
+  s_9e00c9e5df3a5b::t_f46ddb6f6efefa 40,70,72-75
+packages/runtime-core/src/core.ts
+  s_9e00c9e5df3a5b::t_bb90e9a7cd55df 64-68,335
+packages/runtime-core/src/expose/disabled.ts
+  s_9e00c9e5df3a5b::t_9bb23f3dfde84d 4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "09a306fdaf962036d766ed49b6a4f91fc25fcea6",
+  "prompts": {},
+  "sessions": {
+    "s_9e00c9e5df3a5b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5fa1-a9cb-75c3-88d2-7e81b50cb1b8",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    }
+  },
+  "attestation_metadata": {},
+  "remote_transcripts": {}
+}
