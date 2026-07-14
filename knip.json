@@ -17,7 +17,7 @@
         "tests/setup.ts"
       ],
       "ignore": ["tests/vue-tsc2/**"],
-      "ignoreDependencies": ["vue", "vue-tsc", "@vue/tsconfig"],
+      "ignoreDependencies": ["vue", "vue-tsc", "@vue/tsconfig", "typescript-7"],
       "ignoreBinaries": ["ps"]
     }
   }
