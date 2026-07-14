@@ -1,0 +1,33 @@
+.changeset/tidy-cats-optimize.md
+  s_ccfd157e343f84::t_13c336cce69084 6-7
+packages/modernjs-v3/src/cli/configPlugin.spec.ts
+  s_ccfd157e343f84::t_6c1276a081eeb2 158-165
+packages/modernjs-v3/src/cli/configPlugin.ts
+  s_ccfd157e343f84::t_2214bc591494d5 239,241-244,423-428
+packages/modernjs-v3/src/types/index.ts
+  s_ccfd157e343f84::t_50ca7f6166f5f4 7-12
+packages/modernjs/src/cli/configPlugin.spec.ts
+  s_ccfd157e343f84::t_29f1dce7e099ca 125-132
+packages/modernjs/src/cli/configPlugin.ts
+  s_ccfd157e343f84::t_f25e2862b6cb32 245,247-250,433-438
+packages/modernjs/src/types/index.ts
+  s_ccfd157e343f84::t_86b5d975c44660 7-12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "1302a1827a029f9e3253e9cc6337085eeeb053ae",
+  "prompts": {},
+  "sessions": {
+    "s_ccfd157e343f84": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5fa1-9a7c-7201-9b1d-2f313a0b63e3",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    }
+  },
+  "attestation_metadata": {},
+  "remote_transcripts": {}
+}
