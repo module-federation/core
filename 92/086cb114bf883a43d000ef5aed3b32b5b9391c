@@ -1,0 +1,21 @@
+packages/modernjs/src/cli/configPlugin.spec.ts
+  s_e9714c83b2ddc2::t_1b94213c04cab4 2,83-125
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "92086cb114bf883a43d000ef5aed3b32b5b9391c",
+  "prompts": {},
+  "sessions": {
+    "s_e9714c83b2ddc2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5e99-687b-7181-8bbc-1e485e2e9c1d",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    }
+  },
+  "attestation_metadata": {},
+  "remote_transcripts": {}
+}
