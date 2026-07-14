@@ -52,7 +52,6 @@ import { formatShareConfigs } from './utils/share';
 // so that snapshot functionality is included by default.
 declare const FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN: boolean;
 declare const FEDERATION_OPTIMIZE_NO_REMOTE: boolean;
-declare const FEDERATION_OPTIMIZE_NO_EXPOSE: boolean;
 declare const FEDERATION_OPTIMIZE_NO_SHARED: boolean;
 const USE_SNAPSHOT =
   typeof FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN === 'boolean'
@@ -62,9 +61,11 @@ const USE_REMOTE =
   typeof FEDERATION_OPTIMIZE_NO_REMOTE === 'boolean'
     ? !FEDERATION_OPTIMIZE_NO_REMOTE
     : true;
-const USE_EXPOSE =
-  typeof FEDERATION_OPTIMIZE_NO_EXPOSE === 'boolean'
-    ? !FEDERATION_OPTIMIZE_NO_EXPOSE
+// Keep this condition single-use so bundlers can eliminate the exposed-module
+// consumption path together with the rest of remote loading.
+const USE_REMOTE_MODULE =
+  typeof FEDERATION_OPTIMIZE_NO_REMOTE === 'boolean'
+    ? !FEDERATION_OPTIMIZE_NO_REMOTE
     : true;
 const USE_SHARED =
   typeof FEDERATION_OPTIMIZE_NO_SHARED === 'boolean'
@@ -331,7 +332,7 @@ export class ModuleFederation {
       USE_REMOTE ? new RemoteHandler(this) : new DisabledRemoteHandler()
     ) as RemoteHandler;
     this.exposeHandler = (
-      USE_EXPOSE ? new ExposeHandler() : new DisabledExposeHandler()
+      USE_REMOTE_MODULE ? new ExposeHandler() : new DisabledExposeHandler()
     ) as ExposeHandler;
     this.shareScopeMap = this.sharedHandler.shareScopeMap;
     this.registerPlugins([

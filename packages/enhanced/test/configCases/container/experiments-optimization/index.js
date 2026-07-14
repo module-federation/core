@@ -14,7 +14,6 @@ if (!globalThis.__EXPERIMENTS_OPTIMIZATION_CASE__) {
   const nodeRemoteEntryEsm = readOutput('module/remoteEntry-node.mjs');
   const fullCapabilities = readOutput('remoteEntry-capabilities-full.js');
   const noRemote = readOutput('remoteEntry-capabilities-no-remote.js');
-  const noExpose = readOutput('remoteEntry-capabilities-no-expose.js');
   const noShared = readOutput('remoteEntry-capabilities-no-shared.js');
 
   it('should replace optimization define flags with static values', () => {
@@ -38,9 +37,8 @@ if (!globalThis.__EXPERIMENTS_OPTIMIZATION_CASE__) {
       'FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN',
     );
 
-    [fullCapabilities, noRemote, noExpose, noShared].forEach((source) => {
+    [fullCapabilities, noRemote, noShared].forEach((source) => {
       expect(source).not.toContain('FEDERATION_OPTIMIZE_NO_REMOTE');
-      expect(source).not.toContain('FEDERATION_OPTIMIZE_NO_EXPOSE');
       expect(source).not.toContain('FEDERATION_OPTIMIZE_NO_SHARED');
     });
   });
@@ -69,12 +67,12 @@ if (!globalThis.__EXPERIMENTS_OPTIMIZATION_CASE__) {
     expect(nodeRemoteEntryEsm).toContain('attrs:{name');
   });
 
-  it('should reduce bundle size when remote loading is disabled', () => {
+  it('should eliminate the complete remote consumption path', () => {
     expect(noRemote.length).toBeLessThan(fullCapabilities.length);
-  });
-
-  it('should reduce bundle size when expose loading is disabled', () => {
-    expect(noExpose.length).toBeLessThan(fullCapabilities.length);
+    expect(fullCapabilities).toContain('availableExposes');
+    expect(fullCapabilities).toContain('mf_module_id');
+    expect(noRemote).not.toContain('availableExposes');
+    expect(noRemote).not.toContain('mf_module_id');
   });
 
   it('should reduce bundle size when shared loading is disabled', () => {

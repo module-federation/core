@@ -470,7 +470,6 @@ const t = {
             properties: {
               disableSnapshot: { type: 'boolean' },
               disableRemote: { type: 'boolean' },
-              disableExpose: { type: 'boolean' },
               disableShared: { type: 'boolean' },
               target: { enum: ['web', 'node'] },
             },
@@ -3731,9 +3730,9 @@ function D(
                                                     : u.push(e),
                                                     c++);
                                                 }
-                                                var E = r === c;
-                                              } else E = !0;
-                                              if (E) {
+                                                var T = r === c;
+                                              } else T = !0;
+                                              if (T) {
                                                 if (void 0 !== e.consumeTypes) {
                                                   let r = e.consumeTypes;
                                                   const n = c,
@@ -3751,8 +3750,8 @@ function D(
                                                       : u.push(e),
                                                       c++);
                                                   }
-                                                  var T = i === c;
-                                                  if (((o = o || T), !o)) {
+                                                  var L = i === c;
+                                                  if (((o = o || L), !o)) {
                                                     const e = c;
                                                     if (c === e)
                                                       if (
@@ -3779,9 +3778,9 @@ function D(
                                                               : u.push(e),
                                                               c++);
                                                           }
-                                                          var L = e === c;
-                                                        } else L = !0;
-                                                        if (L) {
+                                                          var E = e === c;
+                                                        } else E = !0;
+                                                        if (E) {
                                                           if (
                                                             void 0 !==
                                                             r.abortOnError
@@ -3801,9 +3800,9 @@ function D(
                                                                 : u.push(e),
                                                                 c++);
                                                             }
-                                                            L = e === c;
-                                                          } else L = !0;
-                                                          if (L) {
+                                                            E = e === c;
+                                                          } else E = !0;
+                                                          if (E) {
                                                             if (
                                                               void 0 !==
                                                               r.remoteTypesFolder
@@ -3823,9 +3822,9 @@ function D(
                                                                   : u.push(e),
                                                                   c++);
                                                               }
-                                                              L = e === c;
-                                                            } else L = !0;
-                                                            if (L) {
+                                                              E = e === c;
+                                                            } else E = !0;
+                                                            if (E) {
                                                               if (
                                                                 void 0 !==
                                                                 r.deleteTypesFolder
@@ -3845,9 +3844,9 @@ function D(
                                                                     : u.push(e),
                                                                     c++);
                                                                 }
-                                                                L = e === c;
-                                                              } else L = !0;
-                                                              if (L) {
+                                                                E = e === c;
+                                                              } else E = !0;
+                                                              if (E) {
                                                                 if (
                                                                   void 0 !==
                                                                   r.maxRetries
@@ -3871,9 +3870,9 @@ function D(
                                                                         ),
                                                                       c++);
                                                                   }
-                                                                  L = e === c;
-                                                                } else L = !0;
-                                                                if (L) {
+                                                                  E = e === c;
+                                                                } else E = !0;
+                                                                if (E) {
                                                                   if (
                                                                     void 0 !==
                                                                     r.consumeAPITypes
@@ -3900,9 +3899,9 @@ function D(
                                                                           ),
                                                                         c++);
                                                                     }
-                                                                    L = e === c;
-                                                                  } else L = !0;
-                                                                  if (L) {
+                                                                    E = e === c;
+                                                                  } else E = !0;
+                                                                  if (E) {
                                                                     if (
                                                                       void 0 !==
                                                                       r.runtimePkgs
@@ -3978,11 +3977,11 @@ function D(
                                                                               ),
                                                                             c++);
                                                                         }
-                                                                      L =
+                                                                      E =
                                                                         t === c;
                                                                     } else
-                                                                      L = !0;
-                                                                    if (L) {
+                                                                      E = !0;
+                                                                    if (E) {
                                                                       if (
                                                                         void 0 !==
                                                                         r.remoteTypeUrls
@@ -4314,12 +4313,12 @@ function D(
                                                                               ),
                                                                             c++);
                                                                         }
-                                                                        L =
+                                                                        E =
                                                                           t ===
                                                                           c;
                                                                       } else
-                                                                        L = !0;
-                                                                      if (L) {
+                                                                        E = !0;
+                                                                      if (E) {
                                                                         if (
                                                                           void 0 !==
                                                                           r.timeout
@@ -4348,13 +4347,13 @@ function D(
                                                                                 ),
                                                                               c++);
                                                                           }
-                                                                          L =
+                                                                          E =
                                                                             e ===
                                                                             c;
                                                                         } else
-                                                                          L =
+                                                                          E =
                                                                             !0;
-                                                                        if (L) {
+                                                                        if (E) {
                                                                           if (
                                                                             void 0 !==
                                                                             r.family
@@ -4397,13 +4396,13 @@ function D(
                                                                                   ),
                                                                                 c++);
                                                                             }
-                                                                            L =
+                                                                            E =
                                                                               n ===
                                                                               c;
                                                                           } else
-                                                                            L =
+                                                                            E =
                                                                               !0;
-                                                                          if (L)
+                                                                          if (E)
                                                                             if (
                                                                               void 0 !==
                                                                               r.typesOnBuild
@@ -4432,11 +4431,11 @@ function D(
                                                                                     ),
                                                                                   c++);
                                                                               }
-                                                                              L =
+                                                                              E =
                                                                                 e ===
                                                                                 c;
                                                                             } else
-                                                                              L =
+                                                                              E =
                                                                                 !0;
                                                                         }
                                                                       }
@@ -4458,8 +4457,8 @@ function D(
                                                           : u.push(e),
                                                           c++);
                                                       }
-                                                    ((T = e === c),
-                                                      (o = o || T));
+                                                    ((L = e === c),
+                                                      (o = o || L));
                                                   }
                                                   if (o)
                                                     ((c = s),
@@ -4474,9 +4473,9 @@ function D(
                                                       : u.push(e),
                                                       c++);
                                                   }
-                                                  E = n === c;
-                                                } else E = !0;
-                                                if (E) {
+                                                  T = n === c;
+                                                } else T = !0;
+                                                if (T) {
                                                   if (
                                                     void 0 !== e.tsConfigPath
                                                   ) {
@@ -4495,9 +4494,9 @@ function D(
                                                         : u.push(e),
                                                         c++);
                                                     }
-                                                    E = t === c;
-                                                  } else E = !0;
-                                                  if (E) {
+                                                    T = t === c;
+                                                  } else T = !0;
+                                                  if (T) {
                                                     if (
                                                       void 0 !== e.extraOptions
                                                     ) {
@@ -4518,9 +4517,9 @@ function D(
                                                           : u.push(e),
                                                           c++);
                                                       }
-                                                      E = r === c;
-                                                    } else E = !0;
-                                                    if (E) {
+                                                      T = r === c;
+                                                    } else T = !0;
+                                                    if (T) {
                                                       if (
                                                         void 0 !==
                                                         e.implementation
@@ -4540,9 +4539,9 @@ function D(
                                                             : u.push(e),
                                                             c++);
                                                         }
-                                                        E = t === c;
-                                                      } else E = !0;
-                                                      if (E) {
+                                                        T = t === c;
+                                                      } else T = !0;
+                                                      if (T) {
                                                         if (void 0 !== e.cwd) {
                                                           const t = c;
                                                           if (
@@ -4559,9 +4558,9 @@ function D(
                                                               : u.push(e),
                                                               c++);
                                                           }
-                                                          E = t === c;
-                                                        } else E = !0;
-                                                        if (E)
+                                                          T = t === c;
+                                                        } else T = !0;
+                                                        if (T)
                                                           if (
                                                             void 0 !==
                                                             e.displayErrorInTerminal
@@ -4581,8 +4580,8 @@ function D(
                                                                 : u.push(e),
                                                                 c++);
                                                             }
-                                                            E = t === c;
-                                                          } else E = !0;
+                                                            T = t === c;
+                                                          } else T = !0;
                                                       }
                                                     }
                                                   }
@@ -4722,8 +4721,6 @@ function D(
                                                               e &&
                                                             'disableRemote' !==
                                                               e &&
-                                                            'disableExpose' !==
-                                                              e &&
                                                             'disableShared' !==
                                                               e &&
                                                             'target' !== e
@@ -4786,12 +4783,12 @@ function D(
                                                             if (I) {
                                                               if (
                                                                 void 0 !==
-                                                                r.disableExpose
+                                                                r.disableShared
                                                               ) {
                                                                 const e = c;
                                                                 if (
                                                                   'boolean' !=
-                                                                  typeof r.disableExpose
+                                                                  typeof r.disableShared
                                                                 )
                                                                   return (
                                                                     (D.errors =
@@ -4807,15 +4804,18 @@ function D(
                                                                   );
                                                                 I = e === c;
                                                               } else I = !0;
-                                                              if (I) {
+                                                              if (I)
                                                                 if (
                                                                   void 0 !==
-                                                                  r.disableShared
+                                                                  r.target
                                                                 ) {
-                                                                  const e = c;
+                                                                  let e =
+                                                                    r.target;
+                                                                  const n = c;
                                                                   if (
-                                                                    'boolean' !=
-                                                                    typeof r.disableShared
+                                                                    'web' !==
+                                                                      e &&
+                                                                    'node' !== e
                                                                   )
                                                                     return (
                                                                       (D.errors =
@@ -4823,51 +4823,22 @@ function D(
                                                                           {
                                                                             params:
                                                                               {
-                                                                                type: 'boolean',
+                                                                                allowedValues:
+                                                                                  t
+                                                                                    .properties
+                                                                                    .experiments
+                                                                                    .properties
+                                                                                    .optimization
+                                                                                    .properties
+                                                                                    .target
+                                                                                    .enum,
                                                                               },
                                                                           },
                                                                         ]),
                                                                       !1
                                                                     );
-                                                                  I = e === c;
+                                                                  I = n === c;
                                                                 } else I = !0;
-                                                                if (I)
-                                                                  if (
-                                                                    void 0 !==
-                                                                    r.target
-                                                                  ) {
-                                                                    let e =
-                                                                      r.target;
-                                                                    const n = c;
-                                                                    if (
-                                                                      'web' !==
-                                                                        e &&
-                                                                      'node' !==
-                                                                        e
-                                                                    )
-                                                                      return (
-                                                                        (D.errors =
-                                                                          [
-                                                                            {
-                                                                              params:
-                                                                                {
-                                                                                  allowedValues:
-                                                                                    t
-                                                                                      .properties
-                                                                                      .experiments
-                                                                                      .properties
-                                                                                      .optimization
-                                                                                      .properties
-                                                                                      .target
-                                                                                      .enum,
-                                                                                },
-                                                                            },
-                                                                          ]),
-                                                                        !1
-                                                                      );
-                                                                    I = n === c;
-                                                                  } else I = !0;
-                                                              }
                                                             }
                                                           }
                                                         }

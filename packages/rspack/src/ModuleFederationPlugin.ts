@@ -112,8 +112,6 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       disableSnapshot;
     definePluginOptions['FEDERATION_OPTIMIZE_NO_REMOTE'] =
       experiments?.optimization?.disableRemote ?? false;
-    definePluginOptions['FEDERATION_OPTIMIZE_NO_EXPOSE'] =
-      experiments?.optimization?.disableExpose ?? false;
     definePluginOptions['FEDERATION_OPTIMIZE_NO_SHARED'] =
       experiments?.optimization?.disableShared ?? false;
 

@@ -5,4 +5,4 @@
 '@module-federation/sdk': patch
 ---
 
-Allow builds to exclude unused remote, expose, and shared runtime capabilities for smaller bundles.
+Allow builds to exclude unused remote consumption and shared runtime capabilities for smaller bundles.

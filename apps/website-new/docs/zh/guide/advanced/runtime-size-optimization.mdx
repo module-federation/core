@@ -1,6 +1,6 @@
 # 优化运行时体积
 
-{props.name || 'Module Federation'} 的运行时默认包含远程模块、暴露模块、共享依赖和 Manifest / Snapshot 等能力。这样可以直接覆盖大多数使用方式，但如果某个构建只使用其中一部分能力，未使用的代码仍可能进入最终产物。
+{props.name || 'Module Federation'} 的运行时默认包含远程模块消费、共享依赖和 Manifest / Snapshot 等能力。这样可以直接覆盖大多数使用方式，但如果某个构建只使用其中一部分能力，未使用的代码仍可能进入最终产物。
 
 你可以通过 `experiments.optimization` 在**构建时**移除确定不会使用的能力，从而减小运行时体积。
 
@@ -16,12 +16,11 @@
 
 | 能力                | 什么时候必须保留                                                                    | 确认不会使用时可开启 |
 | ------------------- | ----------------------------------------------------------------------------------- | -------------------- |
-| 远程模块            | 配置了 `remotes`，或会调用 `loadRemote`、`registerRemotes`、`preloadRemote`         | `disableRemote`      |
-| 暴露模块读取        | 当前运行时会从已加载的远程入口读取并执行暴露模块                                    | `disableExpose`      |
+| 远程模块消费        | 配置了 `remotes`，或会调用 `loadRemote`、`registerRemotes`、`preloadRemote`         | `disableRemote`      |
 | 共享依赖            | 配置了 `shared`，或会调用共享依赖注册、初始化、加载接口                             | `disableShared`      |
 | Manifest / Snapshot | 使用 Manifest 远程、预加载、类型同步、热更新、DevTools 或依赖 Snapshot 的运行时插件 | `disableSnapshot`    |
 
-`disableExpose` 只移除当前运行时“读取其他 Remote 暴露模块”的能力，不会删除构建工具为当前生产者生成的 `container.get`。因此，一个只向外提供模块、自己不消费其他 Remote 的生产者，仍然可以考虑开启它。
+`disableRemote` 关闭的是当前构建消费其他 Remote 的完整流程，不会删除构建工具为当前生产者生成的 `exposes` 或 `container.get`。因此，一个只向外提供模块、自己不消费其他 Remote 的生产者，仍然可以开启它。
 
 ## 配置方式
 
@@ -42,7 +41,6 @@ export default {
         optimization: {
           target: 'web',
           disableRemote: true,
-          disableExpose: true,
           disableShared: true,
           disableSnapshot: true,
         },
@@ -60,7 +58,7 @@ export default {
 
 ### disableRemote
 
-移除远程模块的注册、加载和预加载能力，同时移除只服务于远程加载的 Snapshot 处理。
+移除远程模块的注册、入口加载、预加载、暴露模块读取和执行能力，同时移除只服务于远程加载的 Snapshot 处理。
 
 适合：
 
@@ -72,17 +70,6 @@ export default {
 - 配置了 `remotes` 的 Host
 - 会调用 `loadRemote`、`registerRemotes` 或 `preloadRemote` 的应用
 - 依靠 Manifest 动态发现或加载 Remote 的应用
-
-### disableExpose
-
-移除从远程入口读取模块工厂并执行暴露模块的能力。远程入口仍可为了共享依赖协商而初始化。
-
-适合：
-
-- 只向外提供模块、自己不读取其他 Remote 暴露模块的生产者
-- 只需要初始化远程共享依赖，但不会执行远程暴露模块的特殊场景
-
-不要用于任何会真正消费 `remoteName/exposeName` 的构建。
 
 ### disableShared
 
@@ -107,7 +94,6 @@ export default {
 ```ts
 optimization: {
   disableRemote: true,
-  disableExpose: true,
 }
 ```
 
@@ -115,7 +101,7 @@ optimization: {
 
 ### 不使用共享依赖的 Host
 
-Host 仍然需要加载远程模块和读取暴露模块，只关闭共享能力：
+Host 仍然需要消费远程模块，只关闭共享能力：
 
 ```ts
 optimization: {
@@ -135,11 +121,11 @@ optimization: {
 }
 ```
 
-这里必须保留远程加载和暴露模块读取能力。
+这里必须保留远程消费能力。
 
 ## 与 externalRuntime 的区别
 
-`externalRuntime` 会把运行时代码从各个 `remoteEntry.js` 中抽离，让多个构建复用同一份外部运行时。它主要减少重复下载；`disableRemote`、`disableExpose`、`disableShared` 和 `disableSnapshot` 则会直接删除确定不用的能力。
+`externalRuntime` 会把运行时代码从各个 `remoteEntry.js` 中抽离，让多个构建复用同一份外部运行时。它主要减少重复下载；`disableRemote`、`disableShared` 和 `disableSnapshot` 则会直接删除确定不用的能力。
 
 两类优化可以组合：先删除不用的能力，再考虑用 `externalRuntime` 减少多个产物之间的重复代码。使用外部运行时时，必须确保页面会提前提供兼容的运行时，具体配置见 [experiments.externalRuntime](/configure/experiments.html#externalruntime)。
 
@@ -153,14 +139,13 @@ optimization: {
 
 逐项构建并记录 `remoteEntry.js` 或实际承载运行时的文件大小。确认收益后再组合开关，这样更容易判断哪项优化有效，也更容易定位功能损失。
 
-仓库中的测试样例得到以下结果。为单独比较这三个开关，四次构建都使用 Web 目标并关闭了 Snapshot。数据仅用于说明相对收益，实际数值会随配置和版本变化：
+仓库中的测试样例得到以下结果。为单独比较这两个开关，三次构建都使用 Web 目标并关闭了 Snapshot。数据仅用于说明相对收益，实际数值会随配置和版本变化：
 
-| 配置                             | 原始大小 |      减少 |
-| -------------------------------- | -------: | --------: |
-| 保留远程、暴露模块读取和共享能力 | 72,962 B |         - |
-| `disableRemote: true`            | 60,199 B | 约 17.49% |
-| `disableExpose: true`            | 71,289 B |  约 2.29% |
-| `disableShared: true`            | 64,744 B | 约 11.26% |
+| 配置                  | 原始大小 |      减少 |
+| --------------------- | -------: | --------: |
+| 保留远程和共享能力    | 72,953 B |         - |
+| `disableRemote: true` | 58,486 B | 约 19.83% |
+| `disableShared: true` | 64,744 B | 约 11.25% |
 
 ### 3. 跑真实业务流程
 

@@ -993,11 +993,6 @@ export default {
               description: 'Disable remote loading code in runtime-core',
               type: 'boolean',
             },
-            disableExpose: {
-              description:
-                'Disable exposed module loading code in runtime-core',
-              type: 'boolean',
-            },
             disableShared: {
               description: 'Disable shared dependency code in runtime-core',
               type: 'boolean',

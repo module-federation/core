@@ -101,7 +101,6 @@ describe('runtime capability optimization defines', () => {
   it('keeps all runtime capabilities enabled by default', () => {
     expect(getOptimizationDefines()).toMatchObject({
       FEDERATION_OPTIMIZE_NO_REMOTE: false,
-      FEDERATION_OPTIMIZE_NO_EXPOSE: false,
       FEDERATION_OPTIMIZE_NO_SHARED: false,
     });
   });
@@ -110,12 +109,10 @@ describe('runtime capability optimization defines', () => {
     expect(
       getOptimizationDefines({
         disableRemote: true,
-        disableExpose: false,
         disableShared: true,
       }),
     ).toMatchObject({
       FEDERATION_OPTIMIZE_NO_REMOTE: true,
-      FEDERATION_OPTIMIZE_NO_EXPOSE: false,
       FEDERATION_OPTIMIZE_NO_SHARED: true,
     });
   });

@@ -500,10 +500,6 @@ export interface ModuleFederationPluginOptions {
        */
       disableRemote?: boolean;
       /**
-       * Disable exposed module loading code in runtime-core.
-       */
-      disableExpose?: boolean;
-      /**
        * Disable shared dependency code in runtime-core.
        */
       disableShared?: boolean;
