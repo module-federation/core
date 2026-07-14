@@ -1,0 +1,53 @@
+packages/bridge/bridge-react/package.json
+  s_42f4302c46a905::t_e3a385d09bc93a 150
+packages/bridge/bridge-react/src/lazy/data-fetch/cache.spec.ts
+  s_42f4302c46a905::t_ceb978d9b95a8e 1-48
+packages/bridge/bridge-react/src/lazy/data-fetch/cache.ts
+  s_42f4302c46a905::t_417e7ff5698e6d 1,82,87-90,187,277,280,286,289
+packages/bridge/bridge-react/src/lazy/types.ts
+  s_42f4302c46a905::t_b0176afc8dfb78 2,72
+packages/enhanced/src/lib/container/runtime/normalizeToPosixPath.ts
+  s_42f4302c46a905::t_8979e92f6df158 1-22
+packages/enhanced/src/lib/container/runtime/utils.ts
+  s_e9714c83b2ddc2::t_3810cd4315b00d 141
+packages/enhanced/test/unit/container/runtime/normalizeToPosixPath.test.ts
+  s_42f4302c46a905::t_c52651c3642251 1-20
+packages/modernjs-v3/src/server/fileCache.spec.ts
+  s_42f4302c46a905::t_b6359946fcd1c0 1,7,10,13,17-20,25-37
+packages/modernjs-v3/src/server/fileCache.ts
+  s_42f4302c46a905::t_f15410e750abea 2,19-23
+packages/modernjs/src/server/fileCache.spec.ts
+  s_42f4302c46a905::t_3dd5b1f302edf4 1,7,10,13,17-20,25-37
+packages/modernjs/src/server/fileCache.ts
+  s_42f4302c46a905::t_d724c0bc8b216e 2,19-23
+packages/sdk/package.json
+  s_e9714c83b2ddc2::t_fc150f49a177f9 52-61,71-73
+packages/sdk/tsdown.config.ts
+  s_42f4302c46a905::t_91bf90efaa1be1 17
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "5c02bf3d2f02f4c7e2de90281b71bfa9ec672646",
+  "prompts": {},
+  "sessions": {
+    "s_42f4302c46a905": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5eac-5fdc-79b1-883f-3ac2eef96094",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    },
+    "s_e9714c83b2ddc2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5e99-687b-7181-8bbc-1e485e2e9c1d",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    }
+  },
+  "attestation_metadata": {},
+  "remote_transcripts": {}
+}
