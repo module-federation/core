@@ -238,6 +238,17 @@ export const patchMFConfig = (
   return mfConfig;
 };
 
+export const setDefaultOptimizationTarget = (
+  mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
+  enableSSR: boolean,
+  isServer: boolean,
+) => {
+  mfConfig.experiments ||= {};
+  mfConfig.experiments.optimization ||= {};
+  mfConfig.experiments.optimization.target ??=
+    enableSSR && isServer ? 'node' : 'web';
+};
+
 function patchIgnoreWarning(chain: BundlerChainConfig) {
   const ignoreWarnings = chain.get('ignoreWarnings') || [];
   const ignoredMsgs = [
@@ -414,6 +425,7 @@ export const moduleFederationConfigPlugin = (
       addMyTypes2Ignored(chain, !isWeb ? ssrConfig : csrConfig);
 
       const targetMFConfig = !isWeb ? ssrConfig : csrConfig;
+      setDefaultOptimizationTarget(targetMFConfig, enableSSR, !isWeb);
       patchMFConfig(targetMFConfig, !isWeb);
 
       if (
