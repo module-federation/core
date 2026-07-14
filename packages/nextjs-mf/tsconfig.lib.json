@@ -1,7 +1,17 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "dist"
+    "outDir": "dist",
+    "rootDir": ".",
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "noEmit": false,
+    "strict": false,
+    "noPropertyAccessFromIndexSignature": false,
+    "paths": {
+      "@module-federation/enhanced/src/*": ["../enhanced/src/*"],
+      "*": ["./*"]
+    }
   },
   "include": ["src/**/*.ts", "utils/**/*.ts", "*.ts"],
   "exclude": ["jest.config.ts", "src/**/*.spec.ts", "src/**/*.test.ts"]

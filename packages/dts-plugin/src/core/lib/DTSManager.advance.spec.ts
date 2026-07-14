@@ -198,6 +198,9 @@ describe('DTSManager advance usage', () => {
                                       name: 'typeScriptCompiler.d.ts',
                                     },
                                     {
+                                      name: 'typeScriptResolver.d.ts',
+                                    },
+                                    {
                                       name: 'utils.d.ts',
                                     },
                                   ],

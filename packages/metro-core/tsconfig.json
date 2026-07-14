@@ -5,7 +5,7 @@
     "rootDir": "src",
     "jsx": "react-jsx",
     "paths": {
-      "metro/private/*": ["metro/src/*"]
+      "metro/private/*": ["./node_modules/metro/src/*"]
     }
   }
 }

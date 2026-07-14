@@ -1,13 +1,24 @@
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import type ContainerEntryModule from '@module-federation/enhanced/src/lib/container/ContainerEntryModule';
 const { RuntimeModule, Template, RuntimeGlobals } = require(
   normalizeWebpackPath('webpack'),
-) as typeof import('webpack');
+) as typeof import('webpack') & {
+  RuntimeGlobals: Record<string, string>;
+};
 
 interface InvertedContainerRuntimeModuleOptions {
   name?: string;
   containers: Set<any>; // Adjust the type as necessary
 }
+
+type ContainerEntryModule = NonNullable<
+  ReturnType<CompilationModuleGraph['getModule']>
+> & {
+  _name?: string;
+};
+
+type CompilationModuleGraph = {
+  getModule: (dependency: unknown) => unknown;
+};
 
 class InvertedContainerRuntimeModule extends RuntimeModule {
   private options: InvertedContainerRuntimeModuleOptions;

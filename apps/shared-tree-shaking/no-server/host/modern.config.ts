@@ -8,6 +8,8 @@ import mfConfig from './module-federation.config';
 
 const publicPath = 'http://localhost:3001/';
 
+const typeCheckerTypeScriptPath = require.resolve('typescript-compiler');
+
 // https://modernjs.dev/en/configure/app/usage
 export default defineConfig({
   dev: {
@@ -30,6 +32,11 @@ export default defineConfig({
     enableAsyncEntry: true,
   },
   tools: {
+    tsChecker: {
+      typescript: {
+        typescriptPath: typeCheckerTypeScriptPath,
+      },
+    },
     bundlerChain(chain) {
       chain.optimization.runtimeChunk(false);
       chain.plugin('MF').use(ModuleFederationPlugin, [mfConfig]);
