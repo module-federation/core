@@ -25,8 +25,7 @@
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "dependencies": {
-    "@module-federation/sdk": "workspace:*",
-    "empathic": "2.0.0"
+    "@module-federation/sdk": "workspace:*"
   },
   "devDependencies": {
     "webpack": "5.104.1"

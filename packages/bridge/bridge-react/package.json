@@ -164,7 +164,6 @@
     }
   },
   "devDependencies": {
-    "react-error-boundary": "^4.1.2",
     "@module-federation/bridge-shared": "workspace:*",
     "@rsbuild/plugin-react": "2.1.0",
     "@testing-library/react": "15.0.7",

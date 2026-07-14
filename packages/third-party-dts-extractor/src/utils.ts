@@ -15,13 +15,16 @@ function getTypedName(name: string) {
  * 5. Otherwise, return the fallback directory (if it contains a package.json).
  * 6. If all else fails, throw an error.
  */
-function getPackageRootDir(packageName: string | undefined): string {
+function getPackageRootDir(
+  packageName: string | undefined,
+  context = process.cwd(),
+): string {
   if (!packageName) {
     throw new Error('No package name provided.');
   }
 
   // 1) Resolve the entry file
-  const entryFile = require.resolve(packageName);
+  const entryFile = require.resolve(packageName, { paths: [context] });
   const entryDir = path.dirname(entryFile);
 
   // 2) Fallback: check if there's a package.json in entryDir
@@ -81,4 +84,31 @@ function getPackageRootDir(packageName: string | undefined): string {
   );
 }
 
-export { getTypedName, getPackageRootDir };
+function resolvePackageJson(packageName: string, context: string): string {
+  try {
+    return require.resolve(`${packageName}/package.json`, {
+      paths: [context],
+    });
+  } catch {
+    let currentPath = path.resolve(context);
+    while (true) {
+      const candidate = path.join(
+        currentPath,
+        'node_modules',
+        packageName,
+        'package.json',
+      );
+      if (fs.existsSync(candidate)) {
+        return candidate;
+      }
+
+      const parentPath = path.dirname(currentPath);
+      if (parentPath === currentPath) {
+        throw new Error(`Could not resolve package.json for "${packageName}".`);
+      }
+      currentPath = parentPath;
+    }
+  }
+}
+
+export { getTypedName, getPackageRootDir, resolvePackageJson };
