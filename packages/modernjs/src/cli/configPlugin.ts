@@ -377,7 +377,10 @@ export function patchBundlerConfig(options: {
     modernjsConfig.deploy?.microFrontend &&
     Object.keys(mfConfig.exposes || {}).length
   ) {
-    chain.optimization.usedExports(false);
+    logger.info(
+      'optimization.usedExports is set to "global" to avoid tree shaking issues in micro frontend mode.',
+    );
+    chain.optimization.usedExports('global');
   }
 }
 
