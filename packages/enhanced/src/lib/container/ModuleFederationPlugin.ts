@@ -103,6 +103,12 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     const disableSnapshot = experiments?.optimization?.disableSnapshot ?? false;
     definePluginOptions['FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN'] =
       disableSnapshot;
+    definePluginOptions['FEDERATION_OPTIMIZE_NO_REMOTE'] =
+      experiments?.optimization?.disableRemote ?? false;
+    definePluginOptions['FEDERATION_OPTIMIZE_NO_EXPOSE'] =
+      experiments?.optimization?.disableExpose ?? false;
+    definePluginOptions['FEDERATION_OPTIMIZE_NO_SHARED'] =
+      experiments?.optimization?.disableShared ?? false;
 
     // Determine ENV_TARGET: only if manually specified in experiments.optimization.target
     if (

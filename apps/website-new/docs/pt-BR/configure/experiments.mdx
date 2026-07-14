@@ -66,6 +66,20 @@ Quando definir para `true`, este opção defines o `FEDERATION_OPTIMIZE_NO_SNAPS
 **Caution:** Setting `disableSnapshot: true` vai disable o mf-manifest protocol. Este means você vai lose TypeScript syncing suporte e hot módulo replacement (HMR) for módulos federados. Se você são apenas usando `.js` remotes (não manifest-based remotes), você vai não lose any functionality as o `js` remotes não suporte these capabilities anyways.
 :::
 
+### disableRemote, disableExpose e disableShared
+
+- Tipo: `boolean`
+- Obrigatório: Não
+- Padrão: `false`
+
+Estas opções removem capacidades independentes do runtime-core durante o build:
+
+- `disableRemote` remove registro, carregamento, pré-carregamento e o processamento de snapshots de remotes. Use apenas quando o build nunca consumir ou registrar remotes dinamicamente.
+- `disableExpose` remove o código que lê e executa módulos expostos por um remote carregado. O remote ainda pode ser inicializado para negociar dependências compartilhadas.
+- `disableShared` remove o registro, a resolução e o carregamento de dependências compartilhadas. Um escopo compartilhado vazio e mínimo é mantido para permitir a inicialização de remotes sem dependências compartilhadas.
+
+As opções podem ser combinadas. Chamar uma API de uma capacidade desabilitada gera um erro explícito. Mantenha o valor padrão sempre que o build ainda puder usar a capacidade correspondente.
+
 ### target
 
 - Tipo: `'web' | 'node'`

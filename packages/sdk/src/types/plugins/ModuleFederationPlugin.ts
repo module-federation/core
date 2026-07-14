@@ -496,6 +496,18 @@ export interface ModuleFederationPluginOptions {
        */
       disableSnapshot?: boolean;
       /**
+       * Disable remote loading code in runtime-core.
+       */
+      disableRemote?: boolean;
+      /**
+       * Disable exposed module loading code in runtime-core.
+       */
+      disableExpose?: boolean;
+      /**
+       * Disable shared dependency code in runtime-core.
+       */
+      disableShared?: boolean;
+      /**
        * Target environment for the build
        */
       target?: 'web' | 'node';

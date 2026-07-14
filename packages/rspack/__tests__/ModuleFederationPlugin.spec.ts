@@ -1,7 +1,36 @@
 import {
+  ModuleFederationPlugin,
   resolveRspackRuntimeAlias,
   resolveRspackRuntimeImplementation,
 } from '../src/ModuleFederationPlugin';
+
+function getOptimizationDefines(
+  optimization?: NonNullable<
+    NonNullable<
+      ConstructorParameters<typeof ModuleFederationPlugin>[0]['experiments']
+    >['optimization']
+  >,
+) {
+  let definitions: Record<string, string | boolean> = {};
+  class DefinePlugin {
+    constructor(options: Record<string, string | boolean>) {
+      definitions = options;
+    }
+
+    apply() {}
+  }
+
+  const plugin = new ModuleFederationPlugin({
+    name: 'test',
+    experiments: { optimization },
+  });
+
+  (plugin as any)._patchBundlerConfig({
+    webpack: { DefinePlugin },
+  });
+
+  return definitions;
+}
 
 describe('runtime resolution compatibility', () => {
   it('prefers the bundler implementation when available', () => {
@@ -65,5 +94,29 @@ describe('runtime resolution compatibility', () => {
     expect(resolveRspackRuntimeAlias('/legacy/runtime-tools', resolve)).toBe(
       '/legacy/runtime/dist/index.cjs',
     );
+  });
+});
+
+describe('runtime capability optimization defines', () => {
+  it('keeps all runtime capabilities enabled by default', () => {
+    expect(getOptimizationDefines()).toMatchObject({
+      FEDERATION_OPTIMIZE_NO_REMOTE: false,
+      FEDERATION_OPTIMIZE_NO_EXPOSE: false,
+      FEDERATION_OPTIMIZE_NO_SHARED: false,
+    });
+  });
+
+  it('defines each disabled runtime capability independently', () => {
+    expect(
+      getOptimizationDefines({
+        disableRemote: true,
+        disableExpose: false,
+        disableShared: true,
+      }),
+    ).toMatchObject({
+      FEDERATION_OPTIMIZE_NO_REMOTE: true,
+      FEDERATION_OPTIMIZE_NO_EXPOSE: false,
+      FEDERATION_OPTIMIZE_NO_SHARED: true,
+    });
   });
 });
