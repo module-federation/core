@@ -1,5 +1,5 @@
 import { MF_DATA_FETCH_TYPE, MF_DATA_FETCH_STATUS } from './constant';
-import type { LRUCache } from 'lru-cache';
+import type { SizeLimitedCache } from '../shared/size-limited-cache';
 
 export type dataFetchFunctionOptions = [
   id?: string,
@@ -69,7 +69,7 @@ export interface CacheConfig {
 
 // key is the id, default is the same with dataFetchMapId, but it can be custom by passing dataFetchParams.id
 export type MF_DATA_FETCH_CACHE = {
-  cacheStore?: LRUCache<string, Map<string, CacheItem<any>>>;
+  cacheStore?: SizeLimitedCache<string, Map<string, CacheItem<any>>>;
   tagKeyMap?: Map<string, Set<string>>;
   cacheConfig?: CacheConfig;
 };

@@ -1,7 +1,7 @@
 import path from 'path';
-import { up as findPkgUp } from 'empathic/package';
 import fs from 'fs';
 import { MFModuleType, logger } from '@module-federation/sdk';
+import { findPackageJson } from './findPackageJson';
 
 export class PKGJsonManager {
   private _pkg?: Record<string, any>;
@@ -23,7 +23,7 @@ export class PKGJsonManager {
       return pkg;
     } catch (_err) {
       try {
-        const pkgPath = findPkgUp({ cwd: root });
+        const pkgPath = findPackageJson(root);
         if (!pkgPath) {
           return {};
         }

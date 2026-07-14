@@ -1,7 +1,6 @@
 import { IncomingMessage, createServer } from 'http';
 import { UpdateMode } from '../constant';
 import WebSocket from 'isomorphic-ws';
-import schedule from 'node-schedule';
 import { parse } from 'url';
 import { Publisher } from '../Publisher';
 import { getIdentifier, fileLog, error } from '../utils';
@@ -32,6 +31,59 @@ import {
   DEFAULT_WEB_SOCKET_PORT,
   WEB_SOCKET_CONNECT_MAGIC_ID as DEFAULT_WEB_SOCKET_CONNECT_MAGIC_ID,
 } from '../constant';
+
+const CLEANUP_HOURS = [0, 3, 6, 9, 12, 15, 18];
+
+interface ScheduledTask {
+  cancel(): void;
+}
+
+export function getNextCleanupDelay(now = new Date()): number {
+  for (const hour of CLEANUP_HOURS) {
+    const candidate = new Date(now);
+    candidate.setHours(hour, 0, 0, 0);
+    if (candidate.getTime() > now.getTime()) {
+      return candidate.getTime() - now.getTime();
+    }
+  }
+
+  const nextDay = new Date(now);
+  nextDay.setDate(nextDay.getDate() + 1);
+  nextDay.setHours(CLEANUP_HOURS[0], 0, 0, 0);
+  return nextDay.getTime() - now.getTime();
+}
+
+export function scheduleCleanup(
+  callback: () => void,
+  testIntervalMs = 0,
+): ScheduledTask {
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  let cancelled = false;
+
+  const scheduleNext = () => {
+    const delay = testIntervalMs > 0 ? testIntervalMs : getNextCleanupDelay();
+    timeout = setTimeout(() => {
+      if (cancelled) {
+        return;
+      }
+      callback();
+      scheduleNext();
+    }, delay);
+  };
+
+  scheduleNext();
+
+  return {
+    cancel() {
+      cancelled = true;
+      if (timeout) {
+        clearTimeout(timeout);
+        timeout = undefined;
+      }
+    },
+  };
+}
+
 export class Broker {
   static readonly WEB_SOCKET_CONNECT_MAGIC_ID =
     DEFAULT_WEB_SOCKET_CONNECT_MAGIC_ID;
@@ -44,7 +96,7 @@ export class Broker {
   private _webSocketServer?: WebSocket.Server;
   private _secureWebSocketServer?: WebSocket.Server;
   private _tmpSubscriberShelter: TmpSubscriberShelter = new Map();
-  private _scheduleJob: schedule.Job | null = null;
+  private _scheduleJob: ScheduledTask | null = null;
 
   constructor() {
     this._setSchedule();
@@ -680,24 +732,11 @@ export class Broker {
     });
   }
 
-  // Every day on 0/6/9/12/15//18, Publishers that have not been connected within 1.5 hours will be cleared regularly.
+  // Every day at 0/3/6/9/12/15/18, publishers that have not been connected within 1.5 hours will be cleared.
   // If process.env.FEDERATION_SERVER_TEST is set, it will be read at a specified time.
   private _setSchedule(): void {
-    const rule = new schedule.RecurrenceRule();
-    if (Number(process.env['FEDERATION_SERVER_TEST'])) {
-      const interval = Number(process.env['FEDERATION_SERVER_TEST']) / 1000;
-      const second = [];
-      for (let i = 0; i < 60; i = i + interval) {
-        second.push(i);
-      }
-      rule.second = second;
-    } else {
-      rule.second = 0;
-      rule.hour = [0, 3, 6, 9, 12, 15, 18];
-      rule.minute = 0;
-    }
     const serverTest = Number(process.env['FEDERATION_SERVER_TEST']);
-    this._scheduleJob = schedule.scheduleJob(rule, () => {
+    this._scheduleJob = scheduleCleanup(() => {
       this._tmpSubscriberShelter.forEach((tmpSubscriber, identifier) => {
         fileLog(
           ` _clearTmpSubScriberRelation ${identifier},  ${
@@ -718,7 +757,7 @@ export class Broker {
           this._clearTmpSubScriberRelation(identifier);
         }
       });
-    });
+    }, serverTest);
   }
 
   private _clearSchedule(): void {

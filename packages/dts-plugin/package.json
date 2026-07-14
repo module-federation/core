@@ -72,13 +72,11 @@
     "adm-zip": "0.5.10",
     "isomorphic-ws": "5.0.0",
     "undici": "7.28.0",
-    "node-schedule": "2.1.1",
     "ws": "8.21.0"
   },
   "devDependencies": {
     "@module-federation/runtime": "workspace:*",
     "@rstest/core": "^0.10.6",
-    "@types/node-schedule": "2.1.7",
     "@types/ws": "8.5.12",
     "@vue/tsconfig": "^0.7.0",
     "directory-tree": "3.5.2",

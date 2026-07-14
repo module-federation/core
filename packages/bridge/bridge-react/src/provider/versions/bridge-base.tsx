@@ -10,8 +10,9 @@ import type {
   DestroyParams,
   RenderParams,
   CreateRootOptions,
+  ErrorFallbackProps,
 } from '../../types';
-import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
+import { ErrorBoundary } from '../../error-boundary';
 import { RouterContext } from '../context';
 import { LoggerInstance } from '../../utils';
 import { federationRuntime } from '../plugin';
@@ -43,15 +44,14 @@ export function createBaseBridgeComponent<T>({
       );
     };
 
-    const DefaultFallback = ({ error }: FallbackProps) => (
+    const DefaultFallback = ({ error }: ErrorFallbackProps) => (
       <div role="alert">
         <p>Something went wrong:</p>
-        <pre style={{ color: 'red' }}>{error.message}</pre>
+        <pre style={{ color: 'red' }}>
+          {error instanceof Error ? error.message : String(error)}
+        </pre>
       </div>
     );
-
-    const ErrorBoundaryComponent =
-      ErrorBoundary as unknown as React.ComponentType<any>;
 
     const omitHostFallback = <P extends Record<string, unknown>>(props: P) => {
       const nextProps = { ...props };
@@ -70,7 +70,7 @@ export function createBaseBridgeComponent<T>({
       memoryRoute?: any;
       propsInfo: T;
     }) => (
-      <ErrorBoundaryComponent FallbackComponent={DefaultFallback}>
+      <ErrorBoundary FallbackComponent={DefaultFallback}>
         <RawComponent
           appInfo={{
             moduleName,
@@ -79,7 +79,7 @@ export function createBaseBridgeComponent<T>({
           }}
           propsInfo={propsInfo}
         />
-      </ErrorBoundaryComponent>
+      </ErrorBoundary>
     );
 
     return {

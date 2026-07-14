@@ -1,7 +1,8 @@
 import { existsSync, readFileSync, readdirSync } from 'fs';
-import { join } from 'path';
+import { dirname, join } from 'path';
 import { describe, expect, it } from '@rstest/core';
 import { ThirdPartyExtractor } from './ThirdPartyExtractor';
+import { resolvePackageJson } from './utils';
 
 const readJSONSync = (filePath: string) =>
   JSON.parse(readFileSync(filePath, 'utf-8'));
@@ -34,6 +35,13 @@ describe('ThirdPartyExtractor', () => {
     const pkgJson = readJSONSync(`${typedReactDir}/package.json`);
 
     expect(pkgJson.name).toBe('@types/react');
+  });
+
+  it('should resolve package.json even when the package does not export it', () => {
+    const pkgJsonPath = resolvePackageJson('@types/react', packageRoot);
+
+    expect(readJSONSync(pkgJsonPath).name).toBe('@types/react');
+    expect(dirname(pkgJsonPath)).toContain('@types');
   });
 
   it('should correctly collect third party pkg types dir while passing dts file', () => {

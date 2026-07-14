@@ -19,6 +19,9 @@ const entrypoints = {
   'dist/data-fetch-server-middleware.d.ts': [
     "export { default } from './lazy/data-fetch/data-fetch-server-middleware';",
   ],
+  'dist/size-limited-cache.d.ts': [
+    "export * from './shared/size-limited-cache';",
+  ],
 };
 
 for (const [file, lines] of Object.entries(entrypoints)) {

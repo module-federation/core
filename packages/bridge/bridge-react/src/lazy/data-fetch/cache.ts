@@ -1,4 +1,4 @@
-import { LRUCache } from 'lru-cache';
+import { SizeLimitedCache } from '../../shared/size-limited-cache';
 import { getDataFetchCache } from '../utils';
 
 import type {
@@ -79,12 +79,15 @@ export function configureCache(config: CacheConfig): void {
   Object.assign(cacheConfig, config);
 }
 
-function getLRUCache() {
+function getSizeLimitedCache() {
   const dataFetchCache = getDataFetchCache();
   const cacheConfig = getCacheConfig();
 
   if (!dataFetchCache || !dataFetchCache.cacheStore) {
-    const cacheStore = new LRUCache<string, Map<string, CacheItem<any>>>({
+    const cacheStore = new SizeLimitedCache<
+      string,
+      Map<string, CacheItem<any>>
+    >({
       maxSize: cacheConfig.maxSize ?? CacheSize.GB,
       sizeCalculation: (value: Map<string, CacheItem<any>>): number => {
         if (!value.size) {
@@ -99,8 +102,6 @@ function getLRUCache() {
         }
         return size;
       },
-      updateAgeOnGet: true,
-      updateAgeOnHas: true,
     });
     globalThis.__MF_DATA_FETCH_CACHE__ ||= {};
     globalThis.__MF_DATA_FETCH_CACHE__.cacheStore = cacheStore;
@@ -183,7 +184,7 @@ export function cache<T>(
     if (dataFetchOptions.isDowngrade || !dataFetchOptions._id) {
       return fn(dataFetchOptions);
     }
-    const store = getLRUCache();
+    const store = getSizeLimitedCache();
 
     const now = Date.now();
     const storeKey = dataFetchOptions._id;
@@ -273,19 +274,19 @@ export function cache<T>(
 export function revalidateTag(tag: string): void {
   const tagKeyMap = getTagKeyMap();
   const keys = tagKeyMap.get(tag);
-  const lruCache = getLRUCache();
+  const cacheStore = getSizeLimitedCache();
   if (keys) {
     keys.forEach((key) => {
-      lruCache?.delete(key);
+      cacheStore?.delete(key);
     });
   }
 }
 
 export function clearStore(): void {
-  const lruCache = getLRUCache();
+  const cacheStore = getSizeLimitedCache();
   const tagKeyMap = getTagKeyMap();
 
-  lruCache?.clear();
+  cacheStore?.clear();
   delete globalThis.__MF_DATA_FETCH_CACHE__?.cacheStore;
   tagKeyMap.clear();
 }

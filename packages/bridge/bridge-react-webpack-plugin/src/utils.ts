@@ -1,26 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import semver from 'semver';
 
 export const checkVersion = (version: string) => {
-  // Extract the version number starting from the first digit
-  const versionMatch = version.match(/\d.*/);
-  if (!versionMatch) return 0;
-
-  const cleanVersion = versionMatch[0];
-
-  if (semver.gte(cleanVersion, '5.0.0') && semver.lt(cleanVersion, '6.0.0')) {
-    return 5;
-  } else if (
-    semver.gte(cleanVersion, '6.0.0') &&
-    semver.lt(cleanVersion, '7.0.0')
-  ) {
-    return 6;
-  } else if (semver.gte(cleanVersion, '7.0.0')) {
-    return 7;
-  }
-
-  return 0;
+  const major = Number(version.match(/\d+/)?.[0]);
+  return major === 5 || major === 6 ? major : major >= 7 ? 7 : 0;
 };
 
 export const findPackageJson = (startPath: string): string | null => {
