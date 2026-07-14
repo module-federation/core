@@ -10,7 +10,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json && rslib build",
+    "build": "rslib build",
     "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\"",
     "test": "pnpm exec rstest --passWithNoTests",
     "pre-release": "pnpm run test && pnpm run build"
@@ -162,7 +162,6 @@
     "@modern-js/server-runtime": "3.5.0",
     "@modern-js/module-tools": "2.70.5",
     "@modern-js/runtime": "3.5.0",
-    "@modern-js/tsconfig": "3.5.0",
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.0",
     "react": "~18.3.1",
