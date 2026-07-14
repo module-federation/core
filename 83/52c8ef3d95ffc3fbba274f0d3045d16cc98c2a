@@ -1,0 +1,65 @@
+.changeset/slim-cache-path-dependencies.md
+  s_e9714c83b2ddc2::t_c3f8d5b53c1ba7 7-10,13
+packages/bridge/bridge-react-webpack-plugin/__tests__/utils.spec.ts
+  s_e9714c83b2ddc2::t_0fe044f08d7ea6 62-70
+packages/bridge/bridge-react-webpack-plugin/package.json
+  s_e9714c83b2ddc2::t_35be3351a219d7 36
+packages/bridge/bridge-react-webpack-plugin/src/utils.ts
+  s_e9714c83b2ddc2::t_f6cd9f2b982d0f 5-6
+packages/bridge/bridge-react/src/error-boundary.spec.tsx
+  s_e9714c83b2ddc2::t_5385fed1330220 1-41
+packages/bridge/bridge-react/src/error-boundary.tsx
+  s_e9714c83b2ddc2::t_bf2d6ae11a74e5 1-44
+packages/bridge/bridge-react/src/provider/versions/bridge-base.tsx
+  s_e9714c83b2ddc2::t_b28fcd6b5d93b0 13,15,47,50-52,73,82
+packages/bridge/bridge-react/src/remote/createHelpers.tsx
+  s_e9714c83b2ddc2::t_2b34ffa3fc3fc0 2,5,104,106,112
+packages/dts-plugin/src/server/broker/Broker.ts
+  s_e9714c83b2ddc2::t_28773279a8684c 34-86,99,735,739,760
+packages/dts-plugin/src/server/broker/schedule.spec.ts
+  s_e9714c83b2ddc2::t_d7ef31bf03e690 1-37
+packages/managers/__tests__/findPackageJson.spec.ts
+  s_e9714c83b2ddc2::t_b0ecddb69ebd24 1-23
+packages/managers/package.json
+  s_e9714c83b2ddc2::t_e65780b43dfbe7 28
+packages/managers/src/PKGJsonManager.ts
+  s_e9714c83b2ddc2::t_17edbe7bfd85fc 4,26
+packages/managers/src/SharedManager.ts
+  s_e9714c83b2ddc2::t_65d32dfb77d211 11,72-75
+packages/managers/src/findPackageJson.ts
+  s_e9714c83b2ddc2::t_6847863a033368 1-19
+packages/modernjs-v3/package.json
+  s_e9714c83b2ddc2::t_c1b2a7e46c1aa5 140-142,152
+packages/modernjs-v3/src/cli/mfRuntimePlugins/inject-node-fetch.ts
+  s_e9714c83b2ddc2::t_c24ef37a15b68e 7-9
+packages/modernjs/package.json
+  s_e9714c83b2ddc2::t_8acfb259c2d924 140-142,152
+packages/modernjs/src/cli/mfRuntimePlugins/inject-node-fetch.ts
+  s_e9714c83b2ddc2::t_c505537b800391 7-9
+packages/third-party-dts-extractor/src/ThirdPartyExtractor.spec.ts
+  s_e9714c83b2ddc2::t_0a3db5f1988807 2,5,40-46
+packages/third-party-dts-extractor/src/ThirdPartyExtractor.ts
+  s_e9714c83b2ddc2::t_ace4ae8c35fd6f 4,76,98
+packages/third-party-dts-extractor/src/utils.ts
+  s_e9714c83b2ddc2::t_948836300fe2d0 18-21,27,87-114
+packages/third-party-dts-extractor/tsup.config.ts
+  s_e9714c83b2ddc2::t_1981421f5ae12c 13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "8352c8ef3d95ffc3fbba274f0d3045d16cc98c2a",
+  "prompts": {},
+  "sessions": {
+    "s_e9714c83b2ddc2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5e99-687b-7181-8bbc-1e485e2e9c1d",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    }
+  },
+  "attestation_metadata": {},
+  "remote_transcripts": {}
+}
