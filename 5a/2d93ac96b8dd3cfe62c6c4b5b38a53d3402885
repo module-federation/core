@@ -1,0 +1,27 @@
+apps/website-new/docs/zh/guide/advanced/runtime-size-optimization.mdx
+  s_9e00c9e5df3a5b::t_37d6c145d9e686 146-148
+packages/runtime-core/src/index.ts
+  s_9e00c9e5df3a5b::t_30dcdf19242e47 2-5,8-13,40
+packages/runtime-core/src/module/index.ts
+  s_9e00c9e5df3a5b::t_608ceb4b8a03de 4,300,303,305,311,314,319,329-331,337,341,344,347,350,353,356,361-363,366,369,372,374,378,380,383,386,391,394,397,402-433
+packages/runtime-core/src/remote/disabled.ts
+  s_9e00c9e5df3a5b::t_7ce2bb8726a6ae 3-11,20,24,28,32,36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "5a2d93ac96b8dd3cfe62c6c4b5b38a53d3402885",
+  "prompts": {},
+  "sessions": {
+    "s_9e00c9e5df3a5b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5fa1-a9cb-75c3-88d2-7e81b50cb1b8",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    }
+  },
+  "attestation_metadata": {},
+  "remote_transcripts": {}
+}
