@@ -1,0 +1,21 @@
+packages/runtime-core/src/module/index.ts
+  s_9e00c9e5df3a5b::t_f0a5129f34c7c6 6,11,27-76,322-334,337-338,340-440
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "315aad4a9e013d2e7752ddb4766528a464f1792d",
+  "prompts": {},
+  "sessions": {
+    "s_9e00c9e5df3a5b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5fa1-a9cb-75c3-88d2-7e81b50cb1b8",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    }
+  },
+  "attestation_metadata": {},
+  "remote_transcripts": {}
+}
