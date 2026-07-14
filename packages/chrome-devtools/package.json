@@ -15,7 +15,7 @@
     "build:devtool": "modern-app build && node postpack.js",
     "build": "npm run build:lib",
     "build:debug": "DEBUG=true modern-app build && node postpack.js",
-    "build:lib": "rm -rf dist && modern-module build -c modern.lib.config.ts",
+    "build:lib": "rm -rf dist && modern-module build -c modern.lib.config.ts && tsc -p tsconfig.lib.json",
     "release": "npm publish --tag canary",
     "test": "rstest",
     "test:e2e": "node ../../scripts/ensure-playwright.js && E2ETEST=true pnpm build:devtool && playwright test",
@@ -101,7 +101,7 @@
     "@types/react-dom": "^19.2.2",
     "lint-staged": "~13.1.0",
     "prettier": "~3.3.3",
-    "typescript": "6.0.3",
+    "typescript": "7.0.2",
     "rimraf": "~6.0.1",
     "vitest": "1.2.2"
   }

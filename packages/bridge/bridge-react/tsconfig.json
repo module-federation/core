@@ -1,17 +1,11 @@
 {
   "compilerOptions": {
     "useDefineForClassFields": true,
-
-    /* Bundler mode */
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
-
-    "declarationDir": "./dist/types",
     "rootDir": "./src",
     "module": "commonjs",
     "target": "es2015",
-
-    /* Linting */
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
@@ -20,15 +14,14 @@
     "outDir": "dist",
     "skipLibCheck": true,
     "strict": true,
-    "moduleResolution": "node10",
     "lib": ["esnext", "dom"],
     "jsx": "preserve",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"],
+      "*": ["./*"]
     },
     "ignoreDeprecations": "6.0"
   },
@@ -39,5 +32,9 @@
     "src/remoteApp.tsx",
     "src/create.ts"
   ],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ]
 }
