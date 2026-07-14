@@ -88,8 +88,8 @@
   },
   "devDependencies": {
     "@rslib/core": "^0.23.2",
-    "@typescript-eslint/eslint-plugin": "8.54.0",
-    "@typescript-eslint/parser": "8.54.0",
+    "@typescript-eslint/eslint-plugin": "8.56.1",
+    "@typescript-eslint/parser": "8.56.1",
     "@types/node": "^20.19.5",
     "@types/react": "^19.1.0",
     "memfs": "4.46.0",

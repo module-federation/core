@@ -31,5 +31,15 @@ target 'MFExampleHost' do
       :mac_catalyst_enabled => false,
       # :ccache_enabled => true
     )
+
+    # fmt 11.0.2 fails as C++20 with Apple Clang 21 (Xcode 26.4+).
+    # Remove after React Native upgrades to fmt 12.1.0 or newer.
+    installer.pods_project.targets.each do |target|
+      next unless target.name == 'fmt'
+
+      target.build_configurations.each do |build_config|
+        build_config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
+      end
+    end
   end
 end
