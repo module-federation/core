@@ -34,8 +34,8 @@
   },
   "devDependencies": {
     "@module-federation/metro": "workspace:*",
-    "@typescript-eslint/eslint-plugin": "8.54.0",
-    "@typescript-eslint/parser": "8.54.0",
+    "@typescript-eslint/eslint-plugin": "8.56.1",
+    "@typescript-eslint/parser": "8.56.1",
     "typescript": "^6.0.3"
   },
   "scripts": {

@@ -1,9 +1,7 @@
-import { up as findPkgUp } from 'empathic/package';
 import { copyFile, lstat, mkdir, readdir } from 'fs/promises';
 import { existsSync, readFileSync } from 'fs';
 import path from 'path';
-import { resolveModulePath } from 'exsolve';
-import { getTypedName, getPackageRootDir } from './utils';
+import { getTypedName, getPackageRootDir, resolvePackageJson } from './utils';
 
 const ignoredPkgs = ['typescript'];
 
@@ -75,7 +73,7 @@ class ThirdPartyExtractor {
       if (isNodeUtils(importEntry, importPath)) {
         return;
       }
-      const packageDir = getPackageRootDir(importPath);
+      const packageDir = getPackageRootDir(importPath, this.context);
       const pkgJsonPath = path.join(packageDir, 'package.json');
 
       const dir = path.dirname(pkgJsonPath);
@@ -97,13 +95,7 @@ class ThirdPartyExtractor {
         return dir;
       } else {
         const typedPkgName = getTypedName(pkg.name);
-        const typedPkgJsonPath = findPkgUp({
-          cwd: path.dirname(
-            resolveModulePath(`${typedPkgName}/package.json`, {
-              from: this.context,
-            }),
-          ),
-        }) as string;
+        const typedPkgJsonPath = resolvePackageJson(typedPkgName, this.context);
         const typedDir = path.dirname(typedPkgJsonPath);
         readFileSync(typedPkgJsonPath, 'utf-8');
         this.addPkgs(typedPkgName, typedDir);
