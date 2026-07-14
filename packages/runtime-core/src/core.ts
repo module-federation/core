@@ -43,8 +43,6 @@ import { SharedHandler } from './shared';
 import { DisabledSharedHandler } from './shared/disabled';
 import { RemoteHandler } from './remote';
 import { DisabledRemoteHandler } from './remote/disabled';
-import { RemoteModuleHandler } from './remote-module';
-import { DisabledRemoteModuleHandler } from './remote-module/disabled';
 import { formatShareConfigs } from './utils/share';
 
 // Declare the global constant that will be defined by DefinePlugin
@@ -58,12 +56,6 @@ const USE_SNAPSHOT =
     ? !FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN
     : true; // Default to true (use snapshot) when not explicitly defined
 const USE_REMOTE =
-  typeof FEDERATION_OPTIMIZE_NO_REMOTE === 'boolean'
-    ? !FEDERATION_OPTIMIZE_NO_REMOTE
-    : true;
-// Keep this condition single-use so bundlers can eliminate the exposed-module
-// consumption path together with the rest of remote loading.
-const USE_REMOTE_MODULE =
   typeof FEDERATION_OPTIMIZE_NO_REMOTE === 'boolean'
     ? !FEDERATION_OPTIMIZE_NO_REMOTE
     : true;
@@ -119,7 +111,6 @@ export class ModuleFederation {
   snapshotHandler: SnapshotHandler;
   sharedHandler: SharedHandler;
   remoteHandler: RemoteHandler;
-  remoteModuleHandler: RemoteModuleHandler;
   shareScopeMap: ShareScopeMap;
   loaderHook = new PluginSystem({
     // FIXME: may not be suitable , not open to the public yet
@@ -331,11 +322,6 @@ export class ModuleFederation {
     this.remoteHandler = (
       USE_REMOTE ? new RemoteHandler(this) : new DisabledRemoteHandler()
     ) as RemoteHandler;
-    this.remoteModuleHandler = (
-      USE_REMOTE_MODULE
-        ? new RemoteModuleHandler()
-        : new DisabledRemoteModuleHandler()
-    ) as RemoteModuleHandler;
     this.shareScopeMap = this.sharedHandler.shareScopeMap;
     this.registerPlugins([
       ...defaultOptions.plugins,
