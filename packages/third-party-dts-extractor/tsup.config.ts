@@ -10,6 +10,6 @@ const shared = {
 };
 
 export default defineConfig([
-  { ...shared, format: 'cjs' as const, clean: true, noExternal: ['exsolve'] },
+  { ...shared, format: 'cjs' as const, clean: true },
   { ...shared, format: 'esm' as const },
 ]);

@@ -90,6 +90,11 @@
       "import": "./dist/lazy-load-component-plugin.es.js",
       "require": "./dist/lazy-load-component-plugin.cjs.js"
     },
+    "./size-limited-cache": {
+      "types": "./dist/size-limited-cache.d.ts",
+      "import": "./dist/size-limited-cache.es.js",
+      "require": "./dist/size-limited-cache.cjs.js"
+    },
     "./*": "./*"
   },
   "typesVersions": {
@@ -135,6 +140,9 @@
       ],
       "data-fetch-server-middleware": [
         "./dist/data-fetch-server-middleware.d.ts"
+      ],
+      "size-limited-cache": [
+        "./dist/size-limited-cache.d.ts"
       ]
     }
   },
@@ -147,8 +155,7 @@
     "test:rstest": "pnpm exec rstest --passWithNoTests"
   },
   "dependencies": {
-    "@module-federation/sdk": "workspace:*",
-    "lru-cache": "10.4.3"
+    "@module-federation/sdk": "workspace:*"
   },
   "peerDependencies": {
     "react": ">=16.9.0",
@@ -165,7 +172,6 @@
     }
   },
   "devDependencies": {
-    "react-error-boundary": "^4.1.2",
     "@module-federation/bridge-shared": "workspace:*",
     "@rsbuild/plugin-react": "2.1.0",
     "@testing-library/react": "15.0.7",
