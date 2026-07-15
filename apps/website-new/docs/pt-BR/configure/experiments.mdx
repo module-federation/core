@@ -56,15 +56,29 @@ Este objeto contains flags related para build-time optimizations esse pode affec
 Quando definir para `true`, este opção defines o `FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN` global constant as `true` during o build. No `@module-federation/runtime-core`, este prevents o `snapshotPlugin()` e `generatePreloadAssetsPlugin()` de being included e initialized within o Module Federation instance.
 
 **Impact:**
-*   **Benefit:** Can reduce o overall bundle size do Module Federation runtime by excluding o code for these two plugins.
-*   **Cost:** Disables o functionality fornecido by these plugins. O `snapshotPlugin` é crucial para o "mf-manifest protocol" – it's responsible for generating ou providing runtime access para uma build manifest (e.g., `mf-manifest.json`) containing metadata about módulo expostos, dependências compartilhadas, versões, e remotes. Disabling it means:
-    *   O runtime loses access para este build manifest dados.
-    *   Features relying no manifest, such as dynamic remote discovery, manifest-based versão compatibility checks, advanced asset preloading (também handled pelo removed `generatePreloadAssetsPlugin`), e potentially runtime debugging/introspection tools, vai não função correctly ou vai ser unavailable.
-    *   Use este opção apenas se você não rely on these manifest-driven features e prioritize uma minimal runtime footprint.
+
+- **Benefit:** Can reduce o overall bundle size do Module Federation runtime by excluding o code for these two plugins.
+- **Cost:** Disables o functionality fornecido by these plugins. O `snapshotPlugin` é crucial para o "mf-manifest protocol" – it's responsible for generating ou providing runtime access para uma build manifest (e.g., `mf-manifest.json`) containing metadata about módulo expostos, dependências compartilhadas, versões, e remotes. Disabling it means:
+  - O runtime loses access para este build manifest dados.
+  - Features relying no manifest, such as dynamic remote discovery, manifest-based versão compatibility checks, advanced asset preloading (também handled pelo removed `generatePreloadAssetsPlugin`), e potentially runtime debugging/introspection tools, vai não função correctly ou vai ser unavailable.
+  - Use este opção apenas se você não rely on these manifest-driven features e prioritize uma minimal runtime footprint.
 
 :::warning
 **Caution:** Setting `disableSnapshot: true` vai disable o mf-manifest protocol. Este means você vai lose TypeScript syncing suporte e hot módulo replacement (HMR) for módulos federados. Se você são apenas usando `.js` remotes (não manifest-based remotes), você vai não lose any functionality as o `js` remotes não suporte these capabilities anyways.
 :::
+
+### disableRemote e disableShared
+
+- Tipo: `boolean`
+- Obrigatório: Não
+- Padrão: `false`
+
+Estas opções removem capacidades independentes do runtime-core durante o build:
+
+- `disableRemote` remove todo o fluxo de consumo de remotes, incluindo registro, carregamento da entrada, pré-carregamento, leitura e execução de módulos expostos e processamento de snapshots relacionado. Ele não remove os `exposes` nem o `container.get` gerados para o produtor atual. Use apenas quando o build nunca consumir ou registrar remotes dinamicamente.
+- `disableShared` remove o registro, a resolução e o carregamento de dependências compartilhadas. Um escopo compartilhado vazio e mínimo é mantido para permitir a inicialização de remotes sem dependências compartilhadas.
+
+As opções podem ser combinadas. Chamar uma API de uma capacidade desabilitada gera um erro explícito. Mantenha o valor padrão sempre que o build ainda puder usar a capacidade correspondente.
 
 ### target
 
@@ -75,12 +89,13 @@ Quando definir para `true`, este opção defines o `FEDERATION_OPTIMIZE_NO_SNAPS
 Este opção defines o `ENV_TARGET` global constant during o build, specifying o intended execution environment.
 
 **Impact:**
-*   **`target: 'web'`**: Optimizes o build for navegador environments.
-    *   Ensures navegador-specific remote entry carregamento mechanisms são usado (`loadEntryDom`).
-    *   Crucially, enables tree-shaking/dead-code elimination for Node.js-specific code within o `@module-federation/sdk`. Funções like `createScriptNode` e `loadScriptNode`, along com their obrigatório Node.js built-em módulos (e.g., `vm`, `path`, `http`), são completamente removed do bundle, significantly reducing its size.
-*   **`target: 'node'`**: Optimizes o build for Node.js environments.
-    *   Ensures Node.js-specific remote entry carregamento mechanisms são usado (`loadEntryNode`).
-    *   Includes o necessário Node.js-specific funções do SDK (`createScriptNode`, `loadScriptNode`) no bundle, allowing o federated aplicação para função correctly em Node.js.
+
+- **`target: 'web'`**: Optimizes o build for navegador environments.
+  - Ensures navegador-specific remote entry carregamento mechanisms são usado (`loadEntryDom`).
+  - Crucially, enables tree-shaking/dead-code elimination for Node.js-specific code within o `@module-federation/sdk`. Funções like `createScriptNode` e `loadScriptNode`, along com their obrigatório Node.js built-em módulos (e.g., `vm`, `path`, `http`), são completamente removed do bundle, significantly reducing its size.
+- **`target: 'node'`**: Optimizes o build for Node.js environments.
+  - Ensures Node.js-specific remote entry carregamento mechanisms são usado (`loadEntryNode`).
+  - Includes o necessário Node.js-specific funções do SDK (`createScriptNode`, `loadScriptNode`) no bundle, allowing o federated aplicação para função correctly em Node.js.
 
 Explicitly setting este valor é recomendado para garantir o intended optimizations são applied, especialmente em universal ou do lado do servidor renderização scenarios.
 
@@ -88,16 +103,17 @@ Explicitly setting este valor é recomendado para garantir o intended optimizati
 
 O seguinte table demonstrates como diferente combinations do `disableSnapshot`, `target: 'web'`, e `externalRuntime` optimization flags affect o size do generated `remoteEntry.js` arquivo. Esses measurements pode help você choose o right trade-off entre runtime features e bundle size for your use case.
 
-| Optimization Flags                          | remoteEntry.js | Gzip Size | Brotli Size |
-|---------------------------------------------|:--------------:|:---------:|:-----------:|
-| No optimization flags habilitado               | 69K            | 21437 B   | 19024 B     |
-| `disableSnapshot: true`                     | 65K            | 20096 B   | 17860 B     |
-| `target: 'web'`                             | 60K            | 19314 B   | 17105 B     |
-| Both habilitado                                | 56K            | 17998 B   | 15982 B     |
-| Both habilitado + `externalRuntime: true`      | 14K            | 5381 B    | 4703 B      |
-| Both disabled + `externalRuntime: true`     | 22K            | 8222 B    | 7269 B      |
+| Optimization Flags                        | remoteEntry.js | Gzip Size | Brotli Size |
+| ----------------------------------------- | :------------: | :-------: | :---------: |
+| No optimization flags habilitado          |      69K       |  21437 B  |   19024 B   |
+| `disableSnapshot: true`                   |      65K       |  20096 B  |   17860 B   |
+| `target: 'web'`                           |      60K       |  19314 B  |   17105 B   |
+| Both habilitado                           |      56K       |  17998 B  |   15982 B   |
+| Both habilitado + `externalRuntime: true` |      14K       |  5381 B   |   4703 B    |
+| Both disabled + `externalRuntime: true`   |      22K       |  8222 B   |   7269 B    |
 
 **Notes:**
+
 - Enabling both `disableSnapshot` e `target: 'web'` fornece uma ferramenta greatest reduction em bundle size, especialmente quando combined com `externalRuntime: true`.
 - Usando o external runtime (`externalRuntime: true`) pode dramatically reduce o size de your remote entry, but requires esse o consumer fornece uma ferramenta runtime.
 - Smaller bundle sizes pode lead para faster carregue times e improved performance, but may disable certain features (see above for details no que each flag does).

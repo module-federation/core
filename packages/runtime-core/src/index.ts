@@ -1,6 +1,16 @@
 import helpersDefault, { type IGlobalUtils, type IShareUtils } from './helpers';
+import { Module as RemoteModule } from './module';
+import { UnavailableRemoteModule } from './remote/disabled';
+
+declare const FEDERATION_OPTIMIZE_NO_REMOTE: boolean;
 
 const helpers = helpersDefault;
+const Module = (
+  typeof FEDERATION_OPTIMIZE_NO_REMOTE === 'boolean' &&
+  FEDERATION_OPTIMIZE_NO_REMOTE
+    ? UnavailableRemoteModule
+    : RemoteModule
+) as typeof RemoteModule;
 
 export { ModuleFederation } from './core';
 export {
@@ -27,7 +37,7 @@ export {
 } from './utils';
 export { getRegisteredShare } from '../src/utils/share';
 export { loadScript, loadScriptNode } from '@module-federation/sdk';
-export { Module } from './module';
+export { Module };
 export * as types from './type';
 export { helpers };
 export { satisfy } from '../src/utils/semver';

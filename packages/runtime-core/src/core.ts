@@ -26,7 +26,7 @@ import {
   RUNTIME_010,
   runtimeDescMap,
 } from '@module-federation/error-codes';
-import { Module, type RemoteModuleFactory } from './module';
+import type { Module, RemoteModuleFactory } from './module';
 import {
   AsyncHook,
   AsyncWaterfallHook,
@@ -36,21 +36,33 @@ import {
 } from './utils/hooks';
 import { generatePreloadAssetsPlugin } from './plugins/generate-preload-assets';
 import { snapshotPlugin } from './plugins/snapshot';
-import { getRemoteInfo } from './utils/load';
 import { DEFAULT_SCOPE } from './constant';
 import { SnapshotHandler } from './plugins/snapshot/SnapshotHandler';
+import { DisabledSnapshotHandler } from './plugins/snapshot/disabled';
 import { SharedHandler } from './shared';
+import { DisabledSharedHandler } from './shared/disabled';
 import { RemoteHandler } from './remote';
+import { DisabledRemoteHandler } from './remote/disabled';
 import { formatShareConfigs } from './utils/share';
 
 // Declare the global constant that will be defined by DefinePlugin
 // Default to true if not defined (e.g., when runtime-core is used outside of webpack)
 // so that snapshot functionality is included by default.
 declare const FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN: boolean;
+declare const FEDERATION_OPTIMIZE_NO_REMOTE: boolean;
+declare const FEDERATION_OPTIMIZE_NO_SHARED: boolean;
 const USE_SNAPSHOT =
   typeof FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN === 'boolean'
     ? !FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN
     : true; // Default to true (use snapshot) when not explicitly defined
+const USE_REMOTE =
+  typeof FEDERATION_OPTIMIZE_NO_REMOTE === 'boolean'
+    ? !FEDERATION_OPTIMIZE_NO_REMOTE
+    : true;
+const USE_SHARED =
+  typeof FEDERATION_OPTIMIZE_NO_SHARED === 'boolean'
+    ? !FEDERATION_OPTIMIZE_NO_SHARED
+    : true;
 
 export class ModuleFederation {
   options: Options;
@@ -284,9 +296,10 @@ export class ModuleFederation {
   moduleInfo?: GlobalModuleInfo[string];
 
   constructor(userOptions: UserOptions) {
-    const plugins = USE_SNAPSHOT
-      ? [snapshotPlugin(), generatePreloadAssetsPlugin()]
-      : [];
+    const plugins =
+      USE_REMOTE && USE_SNAPSHOT
+        ? [snapshotPlugin(), generatePreloadAssetsPlugin()]
+        : [];
     // TODO: Validate the details of the options
     // Initialize options with default values
     const defaultOptions: Options = {
@@ -300,9 +313,15 @@ export class ModuleFederation {
 
     this.name = userOptions.name;
     this.options = defaultOptions;
-    this.snapshotHandler = new SnapshotHandler(this);
-    this.sharedHandler = new SharedHandler(this);
-    this.remoteHandler = new RemoteHandler(this);
+    this.snapshotHandler = (
+      USE_REMOTE ? new SnapshotHandler(this) : new DisabledSnapshotHandler()
+    ) as SnapshotHandler;
+    this.sharedHandler = (
+      USE_SHARED ? new SharedHandler(this) : new DisabledSharedHandler()
+    ) as SharedHandler;
+    this.remoteHandler = (
+      USE_REMOTE ? new RemoteHandler(this) : new DisabledRemoteHandler()
+    ) as RemoteHandler;
     this.shareScopeMap = this.sharedHandler.shareScopeMap;
     this.registerPlugins([
       ...defaultOptions.plugins,
@@ -364,13 +383,7 @@ export class ModuleFederation {
     url: string,
     container: RemoteEntryExports,
   ): Module {
-    const remoteInfo = getRemoteInfo({ name, entry: url });
-    const module = new Module({ host: this, remoteInfo });
-
-    module.remoteEntryExports = container;
-    this.moduleCache.set(name, module);
-
-    return module;
+    return this.remoteHandler.initRawContainer(name, url, container);
   }
 
   // eslint-disable-next-line max-lines-per-function
@@ -396,10 +409,9 @@ export class ModuleFederation {
   }
 
   formatOptions(globalOptions: Options, userOptions: UserOptions): Options {
-    const { allShareInfos: shared } = formatShareConfigs(
-      globalOptions,
-      userOptions,
-    );
+    const shared = USE_SHARED
+      ? formatShareConfigs(globalOptions, userOptions).allShareInfos
+      : {};
     const { userOptions: userOptionsRes, options: globalOptionsRes } =
       this.hooks.lifecycle.beforeInit.emit({
         origin: this,

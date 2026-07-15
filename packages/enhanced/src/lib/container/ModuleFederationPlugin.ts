@@ -47,6 +47,17 @@ const validate = createSchemaValidation(
   },
 );
 
+function hasExposes(
+  exposes: moduleFederationPlugin.ModuleFederationPluginOptions['exposes'],
+): boolean {
+  return Boolean(
+    exposes &&
+    (Array.isArray(exposes)
+      ? exposes.length > 0
+      : Object.keys(exposes).length > 0),
+  );
+}
+
 function getEnhancedPackageVersion(): string {
   let currentDir = __dirname;
 
@@ -86,7 +97,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
   }
 
   private _patchBundlerConfig(compiler: Compiler): void {
-    const { name, experiments } = this._options;
+    const { name, experiments, exposes } = this._options;
     const definePluginOptions: Record<string, string | boolean> = {};
 
     const MFPluginNum = compiler.options.plugins.filter(
@@ -103,6 +114,27 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     const disableSnapshot = experiments?.optimization?.disableSnapshot ?? false;
     definePluginOptions['FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN'] =
       disableSnapshot;
+    definePluginOptions['FEDERATION_OPTIMIZE_NO_REMOTE'] =
+      experiments?.optimization?.disableRemote ?? false;
+    definePluginOptions['FEDERATION_OPTIMIZE_NO_SHARED'] =
+      experiments?.optimization?.disableShared ?? false;
+    definePluginOptions['FEDERATION_HAS_EXPOSES'] =
+      hasExposes(exposes) ||
+      compiler.options.plugins.some((plugin) => {
+        if (!plugin || typeof plugin !== 'object') {
+          return false;
+        }
+
+        const namedPlugin = plugin as WebpackPluginInstance & {
+          name?: string;
+          _options?: moduleFederationPlugin.ModuleFederationPluginOptions;
+        };
+        if (namedPlugin.name !== 'ModuleFederationPlugin') {
+          return false;
+        }
+
+        return hasExposes(namedPlugin._options?.exposes);
+      });
 
     // Determine ENV_TARGET: only if manually specified in experiments.optimization.target
     if (
@@ -146,11 +178,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     (new RemoteEntryPlugin(options) as unknown as WebpackPluginInstance).apply(
       compiler,
     );
-    const useContainerPlugin =
-      options.exposes &&
-      (Array.isArray(options.exposes)
-        ? options.exposes.length > 0
-        : Object.keys(options.exposes).length > 0);
+    const useContainerPlugin = hasExposes(options.exposes);
 
     if (experiments?.provideExternalRuntime) {
       if (useContainerPlugin) {

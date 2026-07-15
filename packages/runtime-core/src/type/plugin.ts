@@ -1,8 +1,8 @@
-import { ModuleFederation } from '../core';
-import { Module } from '../module';
-import { SnapshotHandler } from '../plugins/snapshot/SnapshotHandler';
-import { SharedHandler } from '../shared';
-import { RemoteHandler } from '../remote';
+import type { ModuleFederation } from '../core';
+import type { Module } from '../module';
+import type { SnapshotHandler } from '../plugins/snapshot/SnapshotHandler';
+import type { SharedHandler } from '../shared';
+import type { RemoteHandler } from '../remote';
 
 type CoreLifeCycle = ModuleFederation['hooks']['lifecycle'];
 type CoreLifeCyclePartial = Partial<{

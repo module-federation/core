@@ -42,7 +42,7 @@ import {
   warn,
 } from '../utils';
 import { DEFAULT_SCOPE } from '../constant';
-import { LoadRemoteMatch } from '../remote';
+import type { LoadRemoteMatch } from '../remote';
 import { createRemoteEntryInitOptions } from '../module';
 
 export class SharedHandler {
