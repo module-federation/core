@@ -86,9 +86,11 @@ jobs:
         run: node tools/scripts/run-affected-package-tests.mjs
 
       - name: Pack Node.js 20 compatibility artifacts
+        if: ${{ !startsWith(github.head_ref, 'release-v') }}
         run: node tools/scripts/prepare-node20-compat-packages.mjs
 
       - name: Upload Node.js 20 compatibility artifacts
+        if: ${{ !startsWith(github.head_ref, 'release-v') }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: node20-compat-packages
@@ -109,6 +111,7 @@ jobs:
     secrets: inherit
 
   node20-compat:
+    if: ${{ !startsWith(github.head_ref, 'release-v') }}
     needs: checkout-install
     runs-on: ubuntu-latest
     timeout-minutes: 15
