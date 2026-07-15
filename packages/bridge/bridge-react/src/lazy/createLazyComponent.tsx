@@ -62,17 +62,26 @@ function normalizeHref(href: string) {
 }
 
 function isStylesheetLink(link: HTMLLinkElement) {
+  const rel = link.rel.toLowerCase().split(/\s+/u);
+  const media = link.media.trim().toLowerCase();
   return (
-    link.relList.contains('stylesheet') ||
-    link.rel.toLowerCase().split(/\s+/u).includes('stylesheet')
+    rel.includes('stylesheet') &&
+    !rel.includes('alternate') &&
+    !link.disabled &&
+    !link.hasAttribute('disabled') &&
+    (!media || media === 'all')
   );
 }
 
-function hasStylesheetLinkInHead(
+function shouldSuppressStylesheetAsset(
   href: string,
-  ignoredLink?: HTMLLinkElement | null,
+  currentLink?: HTMLLinkElement | null,
 ) {
   if (typeof document === 'undefined' || !document.head) {
+    return false;
+  }
+
+  if (currentLink && document.head.contains(currentLink)) {
     return false;
   }
 
@@ -81,9 +90,7 @@ function hasStylesheetLinkInHead(
     document.head.querySelectorAll<HTMLLinkElement>('link[href]'),
   ).some(
     (link) =>
-      link !== ignoredLink &&
-      isStylesheetLink(link) &&
-      normalizeHref(link.href) === normalizedHref,
+      isStylesheetLink(link) && normalizeHref(link.href) === normalizedHref,
   );
 }
 
@@ -92,7 +99,7 @@ function StylesheetAsset({ href }: { href: string }) {
   const linkRef = useRef<HTMLLinkElement | null>(null);
 
   useEffect(() => {
-    setShouldRender(!hasStylesheetLinkInHead(href, linkRef.current));
+    setShouldRender(!shouldSuppressStylesheetAsset(href, linkRef.current));
   }, [href]);
 
   if (!shouldRender) {

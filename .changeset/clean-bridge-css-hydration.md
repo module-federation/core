@@ -2,4 +2,4 @@
 "@module-federation/bridge-react": patch
 ---
 
-Avoid rendering duplicate SSR stylesheet links during hydration when the same stylesheet href has already been emitted into the document head.
+Remove hydrated bridge stylesheet links after mount when the same stylesheet is already present in the document head, while preserving SSR hydration markup.
