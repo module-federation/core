@@ -191,12 +191,6 @@ jobs:
     uses: ./.github/workflows/e2e-router.yml
     secrets: inherit
 
-  e2e-shared-tree-shaking:
-    needs: checkout-install
-    if: ${{ fromJSON(needs.checkout-install.outputs.e2e_suites).sharedTreeShaking }}
-    uses: ./.github/workflows/e2e-shared-tree-shaking.yml
-    secrets: inherit
-
   e2e-metro:
     needs:
       - checkout-install

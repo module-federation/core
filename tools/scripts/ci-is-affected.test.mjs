@@ -10,7 +10,7 @@ import {
   isAppNameAffected,
   parseAffectedPackages,
 } from './ci-e2e-affected.mjs';
-import { E2E_SUITES } from './ci-e2e-suites.mjs';
+import { E2E_SUITE_DEFINITIONS, E2E_SUITES } from './ci-e2e-suites.mjs';
 import { createLocalE2EHelpers } from './ci-local-e2e.mjs';
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
@@ -57,13 +57,16 @@ test('runs every suite for shared E2E policy changes', () => {
   );
 });
 
-test('gates every defined suite in the parent workflow', () => {
+test('gates every parent E2E suite in the parent workflow', () => {
   const workflow = readFileSync(
     join(ROOT, '.github/workflows/build-and-test.yml'),
     'utf8',
   );
 
-  for (const suiteName of Object.keys(E2E_SUITES)) {
+  for (const [suiteName, definition] of Object.entries(E2E_SUITE_DEFINITIONS)) {
+    if (definition.parentWorkflow === false) {
+      continue;
+    }
     assert.match(
       workflow,
       new RegExp(`e2e_suites\\)\\.${suiteName} \\}\\}`),

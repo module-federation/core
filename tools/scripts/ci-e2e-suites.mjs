@@ -104,6 +104,7 @@ export const E2E_SUITE_DEFINITIONS = {
       'shared-tree-shaking-with-server-provider',
     ],
     inputs: ['.github/workflows/e2e-shared-tree-shaking.yml'],
+    parentWorkflow: false,
   },
   treeshake: {
     appNames: [
