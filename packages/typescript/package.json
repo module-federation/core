@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/typescript",
-  "version": "3.1.8",
+  "version": "3.1.9",
   "description": "Webpack plugin to stream typescript for module federation apps/components",
   "license": "MIT",
   "type": "commonjs",
@@ -46,6 +46,9 @@
     "axios": "1.16.1",
     "node-fetch": "2.7.0",
     "tapable": "2.3.0"
+  },
+  "devDependencies": {
+    "typescript": "6.0.3"
   },
   "peerDependenciesMeta": {
     "react": {

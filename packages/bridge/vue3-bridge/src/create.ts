@@ -14,6 +14,7 @@ export function createRemoteAppComponent(info: {
   hashRoute?: boolean;
 }) {
   return defineAsyncComponent({
+    // @ts-ignore
     __APP_VERSION__,
     ...info.asyncComponentOptions,
     //@ts-ignore

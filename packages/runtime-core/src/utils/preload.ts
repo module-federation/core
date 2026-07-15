@@ -14,7 +14,7 @@ import {
 import { matchRemote } from './manifest';
 import { assert } from './logger';
 import { ModuleFederation } from '../core';
-import { getRemoteEntry } from './load';
+import { getRemoteEntry, isEsmRemoteType } from './load';
 
 export function defaultPreloadArgs(
   preloadConfig: PreloadRemoteArgs | depsPreloadArg,
@@ -307,39 +307,37 @@ export function preloadAssets(
       });
     }
 
+    let preloadJsAsset = waitForScriptPreload;
+    let defaultAttrs: Record<string, string> = {
+      fetchpriority: 'high',
+      type: 'text/javascript',
+    };
+
     if (useLinkPreload) {
-      const defaultAttrs = {
+      preloadJsAsset = waitForLinkPreload;
+      defaultAttrs = {
         rel: 'preload',
         as: 'script',
       };
-      jsAssetsWithoutEntry.forEach((jsUrl) => {
-        results.push(
-          waitForLinkPreload({
-            host,
-            remoteInfo,
-            url: jsUrl,
-            attrs: defaultAttrs,
-            context: createResourceContext(baseContext, 'js'),
-          }),
-        );
-      });
-    } else {
-      const defaultAttrs = {
+    } else if (isEsmRemoteType(remoteInfo.type)) {
+      preloadJsAsset = waitForLinkPreload;
+      defaultAttrs = {
+        rel: 'modulepreload',
         fetchpriority: 'high',
-        type: remoteInfo?.type === 'module' ? 'module' : 'text/javascript',
       };
-      jsAssetsWithoutEntry.forEach((jsUrl) => {
-        results.push(
-          waitForScriptPreload({
-            host,
-            remoteInfo,
-            url: jsUrl,
-            attrs: defaultAttrs,
-            context: createResourceContext(baseContext, 'js'),
-          }),
-        );
-      });
     }
+
+    jsAssetsWithoutEntry.forEach((jsUrl) => {
+      results.push(
+        preloadJsAsset({
+          host,
+          remoteInfo,
+          url: jsUrl,
+          attrs: defaultAttrs,
+          context: createResourceContext(baseContext, 'js'),
+        }),
+      );
+    });
   }
 
   return Promise.all(results);

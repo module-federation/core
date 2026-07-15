@@ -238,6 +238,22 @@ export const patchMFConfig = (
   return mfConfig;
 };
 
+export const setDefaultOptimizationTarget = (
+  mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
+  enableSSR: boolean,
+  isServer: boolean,
+  autoOptimization = true,
+) => {
+  if (!autoOptimization) {
+    return;
+  }
+
+  mfConfig.experiments ||= {};
+  mfConfig.experiments.optimization ||= {};
+  mfConfig.experiments.optimization.target ??=
+    enableSSR && isServer ? 'node' : 'web';
+};
+
 function patchIgnoreWarning(chain: BundlerChainConfig) {
   const ignoreWarnings = chain.get('ignoreWarnings') || [];
   const ignoredMsgs = [
@@ -377,7 +393,10 @@ export function patchBundlerConfig(options: {
     modernjsConfig.deploy?.microFrontend &&
     Object.keys(mfConfig.exposes || {}).length
   ) {
-    chain.optimization.usedExports(false);
+    logger.info(
+      'optimization.usedExports is set to "global" to avoid tree shaking issues in micro frontend mode.',
+    );
+    chain.optimization.usedExports('global');
   }
 }
 
@@ -411,6 +430,12 @@ export const moduleFederationConfigPlugin = (
       addMyTypes2Ignored(chain, !isWeb ? ssrConfig : csrConfig);
 
       const targetMFConfig = !isWeb ? ssrConfig : csrConfig;
+      setDefaultOptimizationTarget(
+        targetMFConfig,
+        enableSSR,
+        !isWeb,
+        userConfig.originPluginOptions.autoOptimization,
+      );
       patchMFConfig(targetMFConfig, !isWeb);
 
       if (

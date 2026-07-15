@@ -1,0 +1,151 @@
+# Chrome Devtool
+
+O `Micro-frontend` architecture differs do traditional monolithic aplicação desenvolvimento model. Its characteristics de separate desenvolvimento, implantação, e debugging require uma nova definir de debugging tools para meet novo uso scenarios. Por exemplo: como para verify o effect de módulos em actual projetos durante o desenvolvimento, whether uma producer's dependências são reused com o host environment, que módulos são carregado no current page, e o que o dependência relationships e dados flow entre módulos look like.
+
+`Chrome Devtool` fornece uma ferramenta seguintes capabilities:
+
+- Suporta proxying módulos remotos de um online page para uma local one.
+- Switch online módulo remoto versões for quick functional verification.
+- Suporte viewing módulo dependência information.
+- Suporte filtering specified módulo dependência information.
+- Suporte Carregamento Trace for remote, shared, componente-ready signals, e falha reports.
+
+::: tip Limitations of Chrome Devtool
+
+Você deve use `mf-manifest.json` para usar o visualization e proxy capabilities fornecido by `Chrome devtool`.
+
+:::
+
+## Uso Scenarios
+
+DevTools fornece multiple functional panels suitable for diferente debugging needs em desenvolvimento e ambiente de produçãos:
+
+- **Proxy**: Usado para proxy módulos de online ou test environments para o local ambiente de desenvolvimento.
+  - Suporta local service port numbers, e.g., key: appA -> valor: `http://localhost:3000/mf-manifest.json`, o page vai diretamente carregue `Module Federation` content de port 3000.
+  - Suporta usando `mf-manifest.json` arquivo address format, e.g., key: appA -> valor: `https://xxx/static/mf-manifest.json`, o page vai diretamente carregue `Module Federation` content do specified address.
+
+- **Módulo Info**: Usado para view detailed information de all Federation módulos carregado no current page, including versão, entry address, etc.
+
+- **Dependência Graph**: Visually displays o dependência reference relationships entre módulos, helping para clarify complex micro-frontend architectures.
+
+- **Shared**: In-depth analysis de Shared Dependências uso.
+  - View carregado e unloaded dependências compartilhadas.
+  - Analyze versão reuse de dependências compartilhadas (Carregado / Reused).
+  - Check o effective status de configurações such as Singleton e Strict Versão.
+
+- **Carregamento Trace**: Records Module Federation carregamento no current page.
+  - Inspect `loadRemote` e `loadShare` começa, success, falha, e recovery states.
+  - See que consumer carregado que remote e exponha, e que shared provider/versão was selected.
+  - Se o page já usa o [Observability Plugin](/plugin/plugins/observability-plugin.html), o panel reads those reports e shows `CUSTOM`.
+  - Se o page does não use o plugin, click `Observe now` para temporarily inject o Chrome collection plugin para o current tab.
+
+![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/shared-overview.png)
+
+## How para Instale
+
+1. Open o [Module Federation Plugin Details Page](https://chromewebstore.google.com/detail/module-federation/aeoilchhomapofiopejjlecddfldpeom), click o `Add to Chrome` button.
+
+![](@public/guide/chrome-devtools/chrome-store-add-devtool.png)
+
+## How para Use
+
+O plugin fornece uma Devtools panel.
+
+- F12 open developer tools, select click `Module Federation` tab, enter o proxy page, e você pode debug o dependent módulos.
+![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/launch-devtool.jpg)
+
+## Overall Interaction
+
+As shown below, o proxy page fornece opções such as `add new proxy module`, `producer selector`, `version or local port or custom entry`, etc.
+
+- Select um módulo esse o target page precisa proxy by selecting `producer selector`;
+- Select ou enter o specified address (including port number e address ending com `mf-manifest.json`) por meio de `version or local port` for proxy operation;
+- Se você precisa proxy multiple módulos at o mesmo time, click o `add new proxy module` area para adicionar o corresponding proxy módulo.
+- **Suporte Multi-Tab Isolation**: Quando opening pages usando Module Federation em multiple tabs simultaneously, o proxy rules e módulo information de each tab são independent. Proxy rules definir em Tab Uma vai não affect Tab B, e vice versa. Este allows você para depurar multiple environments ou aplicação states simultaneously.
+
+![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/proxy.png)
+
+## Carregamento Trace
+
+O `Loading Trace` tab answers o que actually happened during Module Federation carregamento. Use it quando o page é blank, um componente stays em carregamento, shared versões são unclear, ou uma producer fails intermittently.
+
+![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/loading-trace-overview-en.png)
+
+O top status means:
+
+- `OFF`: no readable carregamento report has been encontrada no current page.
+- `ON`: Chrome collection é habilitado para o current tab.
+- `CUSTOM`: o inspected page já registered its own observability plugin, e DevTools é reading those reports.
+
+Common fluxo de trabalho:
+
+1. Open o target page.
+2. Open Chrome DevTools e choose o `Module Federation` panel.
+3. Open `Loading Trace`.
+4. Se o status é `OFF`, click `Observe now`. O page reloads once.
+5. Reproduce o issue ou trigger o remote componente carregue você quiser inspect.
+6. Select uma report e inspect current carregamento, previous carregamento records, o event timeline, e solução de problemas suggestions.
+7. Click `Export` para save o full report.
+
+Report states:
+
+- `Success`: o MF chain completed. Remote reports show o remote result; shared reports show o selected provider e versão.
+- `Failed`: o chain falhou. Start do falhou phase, erro code, e suggested actions.
+- `Pending`: uma começa event was recorded, but no completion, falha, ou recovery event was seen yet.
+- `Recovered`: carregamento hit uma problem primeiro, then continued por meio de fallback ou recovery.
+- `Basic observability`: o runtime versão é too low ou cannot ser detected, so detailed phases may ser missing.
+
+### Analyze um exported report
+
+O exported JSON contains `config`, `scopes`, e `reports`. For each report, comece por:
+
+![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/loading-trace-shared-report-en.png)
+
+- `diagnosis`: o solução de problemas conclusion, facts, e next actions.
+- `summary`: o final estado, such as `runtime-loaded`, `component-loaded`, `shared-resolved`, `failed`, `recovered`, ou `pending`.
+- `remote` / `shared`: o que was carregado. For shared reports, inspect provider, obrigatório versão, selected versão, e disponível versões.
+- `loadedBefore`: whether o mesmo producer had já been carregado by another consumer.
+- `events`: o ordered timeline, useful for finding o phase esse got stuck.
+
+Você pode forneça o exported report diretamente para um AI coding agente:
+
+```text
+/mf obs
+
+I have an MF Loading Trace report exported from Chrome DevTools.
+Please tell me whether the load succeeded, where it failed, who likely owns the issue, and how to fix it.
+
+<paste the exported JSON>
+```
+
+
+## How para Proxy Locally Developed Módulos para Online
+
+- First, você precisa começa o producer locally.
+
+![](@public/guide/chrome-devtools/dev-to-proxy.png)
+
+- Then enter o successful manifest address no versão selection input box no proxy page.
+- Afterward, adjust o local producer code, e o consumer page vai automatically Reload.
+
+![](@public/guide/chrome-devtools/proxy-to-local.png)
+
+## FAQ
+
+### Does it suporte multi-tab isolation debugging?
+
+Yes, quando você debug com multiple tabs open simultaneously, o Chrome DevTool plugin automatically identifies o current active tab e stores o proxy rules for each tab em isolation.
+
+- **Independent Storage**: Proxy configuração for Tab Uma apenas affects Tab Uma. Depois switching para Tab B, o panel automatically carrega Tab B's configuração.
+- **Estado Persistence**: Even se multiple tabs carregue o mesmo URL, their proxy states são physically isolated e não interfere com each other.
+- **Automatic Switching**: Clicking o "Focus Tab" tag em DevTools confirms o target page currently being debugged.
+
+### Quando does o configuração take effect?
+
+- ✅ Matches verification rules
+- ✅ Configuração rule é checked
+- ✅ Configuração filled em correctly, page displays: Proxy configuração has taken effect, módulo remoto obtained successfully, corresponding page has been automatically refreshed.
+
+### Partial configuração matches rules
+
+O plugin vai filter out **módulos esse correspondência o configuração rules** for proxying.

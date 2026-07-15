@@ -1,5 +1,5 @@
 // Test cases for semver ranges taken from https://devhints.io/semver
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test } from '@rstest/core';
 import { satisfy } from '../src/utils/semver';
 
 const version = '1.2.3';

@@ -1,14 +1,14 @@
 import path from 'node:path';
 import { vol } from 'memfs';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, rs } from '@rstest/core';
 
-vi.mock('node:fs', () => {
+rs.mock('node:fs', () => {
   const memfs = require('memfs').fs;
   return { ...memfs, default: memfs };
 });
 
-vi.mock('../../src/plugin/babel-transformer', () => ({
-  createBabelTransformer: vi.fn(
+rs.mock('../../src/plugin/babel-transformer', () => ({
+  createBabelTransformer: rs.fn(
     ({ tmpDirPath }: { tmpDirPath: string }) =>
       `${tmpDirPath}/babel-transformer.js`,
   ),
@@ -60,8 +60,8 @@ function createMetroConfig(projectRoot: string) {
   return {
     projectRoot,
     serializer: {
-      getModulesRunBeforeMainModule: vi.fn(() => []),
-      getPolyfills: vi.fn(() => []),
+      getModulesRunBeforeMainModule: rs.fn(() => []),
+      getPolyfills: rs.fn(() => []),
     },
     transformer: {
       babelTransformerPath: path.join(projectRoot, 'babel-transformer.js'),
@@ -85,7 +85,7 @@ describe('withModuleFederation', () => {
     delete (global as any).__METRO_FEDERATION_REMOTE_ENTRY_PATH;
     delete (global as any).__METRO_FEDERATION_MANIFEST_PATH;
     vol.reset();
-    vi.restoreAllMocks();
+    rs.restoreAllMocks();
   });
 
   it('uses runtimePlugins in normalized federation config', () => {
@@ -111,7 +111,7 @@ describe('withModuleFederation', () => {
     const metroConfig = createMetroConfig(projectRoot);
     const runtimePluginPath = path.join(projectRoot, 'runtime-plugin.js');
     vol.writeFileSync(runtimePluginPath, 'module.exports = () => ({})');
-    const warnSpy = vi
+    const warnSpy = rs
       .spyOn(console, 'warn')
       .mockImplementation(() => undefined);
 
@@ -129,7 +129,7 @@ describe('withModuleFederation', () => {
     const metroConfig = createMetroConfig(projectRoot);
     const runtimePluginPath = path.join(projectRoot, 'runtime-plugin.js');
     vol.writeFileSync(runtimePluginPath, 'module.exports = () => ({})');
-    const warnSpy = vi
+    const warnSpy = rs
       .spyOn(console, 'warn')
       .mockImplementation(() => undefined);
 

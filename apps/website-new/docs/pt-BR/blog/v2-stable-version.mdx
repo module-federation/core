@@ -1,0 +1,149 @@
+# MF 2.0 Stable Release: Balancing Developer Productivity e Extreme Performance
+
+One year ago, nós open-sourced Module Federation 2.0 ([MF 2.0](https://module-federation.io/en/blog/announcement.html)), e since then nós have received uma wealth de valuable feedback e suggestions do community. We believe esse uma mature micro-frontend solution deve não apenas improve collaborative desenvolvimento efficiency, but também forneça uma core engine esse enables extreme performance. Com este em mind, nós have spent o past year deeply refining MF 2.0 e expanding its capabilities.
+
+Today, nós são pleased para announce esse **MF 2.0 é now officially stable**. O stable release delivers powerful performance optimizations, covers uma broader range de implantação scenarios, e significantly improves o developer experience.
+
+## End-para-End Performance Optimization System
+MF 2.0 systematically restructures o performance pipeline de micro-frontend aplicações across four stages: **build, asset carregamento, renderização, e dados fetching**.
+
+Esses capabilities não exist em isolation; they work together para form um end-para-end performance optimization system tailored for módulo federation scenarios.
+
+**All capabilities suporte incremental adoption**. Você pode habilite them gradually as needed sem performing uma big-bang rewrite de your current architecture, e sem compromising o stability de existente systems.
+
+### Tree Shaking for Shared Dependências
+Traditional dependências compartilhadas avoid duplicate carregamento, but para garantir completeness, shared libraries são often **bundled e exposto as whole pacotes**. Even se você apenas use uma small portion, você still have para carregar o entire library, que causes bundle sizes para grow continuously.
+
+In **MF 2.0**, este problem é addressed:
+
+**Shared dependências now suporte tree shaking.**
+
+By simply enabling `treeShaking`, MF pode perform on-demand pruning de dependências compartilhadas sem sacrificing o dynamic nature de módulo federation. It retains apenas o módulos esse são actually likely para ser usado, significantly reducing o size de shared bundles enquanto remaining fully compatible com existente projetos.
+
+![](https://module-federation-assest.netlify.app/document/announcement/blog/v2-stable-version/enable-shared-tree-shaking.png)
+
+MF 2.0 fornece two modes para fit diferente scenarios:
+
+- **runtime-infer**: Zero external dependências e ready para usar out do box. Em runtime, MF primeiro attempts para reuse já-carregado tree-shaken shared bundles; se their capabilities são insufficient, it automatically falls back para carregamento o full dependência para garantir functional completeness. Você pode improve reuse effectiveness com `usedExports`.
+
+- **servidor-calc**: Uma mode onde o servidor ou CI system analyzes dependência uso across multiple aplicações e produces uma globally optimal shared-pruning result, suitable for large systems.
+
+Uma **visual analysis dashboard** é também fornecido, making it easy para see como dependências compartilhadas são usado e o que bundle size savings they deliver.
+
+For uma large componente library like **Ant Design**, quando uma aplicação apenas usa o Badge, Button, e List componentes, o shared bundle size é about **1404.2 KB** sem shared-dependência tree shaking. Depois enabling tree shaking, o actual carregado size drops para **344.0 KB**, reducing unnecessary code by approximately **75.5%**.
+
+
+![Configuration](https://module-federation-assest.netlify.app/document/announcement/blog/v2-stable-version/definir-configuração.png)
+![Analysis result](https://module-federation-assest.netlify.app/document/announcement/blog/v2-stable-version/analyze-result.png)
+
+### Servidor-Side Rendering (SSR)
+SSR generates full HTML no servidor e retorna it diretamente para o navegador, so pages pode render sem waiting for do lado do cliente hydration. Este dramatically improves **primeiro-screen performance** e **SEO**. For medium-para-large web aplicações, SSR has effectively become uma standard capability.
+
+However, em micro-frontend architectures, SSR has historically been difficult para implement. Early MF versões did não cover este capability, forcing developers para choose entre **architectural flexibility** e **performance benefits**.
+
+In **MF 2.0**, este trade-off é eliminated.
+
+Você pode use **MF SSR** diretamente within **{ props.framework || 'Modern.js' }**, giving micro-frontend aplicações high-performance SSR capabilities as well.
+
+{ props.ssr || '' }
+
+### Isomorphic Pré-busca de dadosing
+MF 2.0 introduces uma nova **isomorphic dados fetching solution** esse suporta both **SSR e CSR** scenarios. It fornece built-em **`prefetch`** e **`cache`** APIs for unified dados prefetching e cache management, ensuring stable e predictable performance across diferente renderização modes.
+
+By leveraging preloading e caching, pages pode prepare critical dados antes renderização, preventing repeated requests e waterfall carregamento, que significantly improves both initial carregue e interactive responsiveness.
+
+{ props.dataSolution || '' }
+
+
+{ props.serverPreload || '' }
+
+
+### Rust-Powered Capabilities
+In large projetos, **manifest generation** often becomes uma performance bottleneck during o build phase. MF 2.0 moves este core capability para uma **Rust implementation**, taking advantage de Rust’s high performance e memory safety para substantially reduce o time obrigatório para gerar manifests.
+
+At o mesmo time, **AsyncStartUp** has também been rewritten em Rust. Você no longer precisa configure asynchronous ponto de entradas para get equivalent capabilities, e related primeiro-screen performance risks são effectively eliminated, making a aplicação startup caminho simpler, mais stable, e mais efficient.
+
+{ props.deploy || '' }
+
+## More Powerful Depuraçãoging System
+MF 2.0 builds uma comprehensive debugging system around **observability e debuggability**. It makes dependências compartilhadas, módulo relationships, e potential side effects **visible, traceable, e detectable em advance**, greatly reducing uncertainty quando developing e integrating dynamic aplicações.
+
+### Side Effect Scanner
+Antes consuming um módulo remoto, teams often precisa assess whether it pollutes global variables, registers event listeners, ou affects style escopos—uncertainties esse significantly increase o cost de adopting micro-frontends.
+
+MF 2.0 fornece uma **Side Effect Scanner** esse statically analyzes build outputs e identifies o seguintes side effects:
+
+- Global variables
+- Event listeners
+- CSS selector impact escopo
+
+O accompanying **CLI tool** pode automatically perform scans e output results, allowing consumers para understand o risks antes integração e thereby significantly lower o cost de onboarding módulos federados.
+
+### Chrome Extension for Dependência Visualization
+We have fully upgraded o existente Chrome extension com uma nova UI e stronger debugging capabilities, making o runtime estado de módulo federation **visible, queryable, e verifiable**.
+
+- **Smart sidebar sync**
+O panel automatically follows o current page sem manual refresh ou reconnection, providing uma smoother debugging experience.
+
+
+- **Shared dependência visualization**
+O novo **Shared** panel clearly shows dependência compartilhada carregamento no current page, por exemplo:
+	- Whether React é successfully shared
+	- Which shared versão é actually em use
+	- Whether your compartilhamento estratégia é working as expected
+![Shared dependências visualization](https://module-federation-assest.netlify.app/document/announcement/blog/v2-stable-version/chrome-shared.png)
+
+- **Fast dependência graph navigation**
+Você pode search for any módulo no dependência graph, e see its upstream e downstream relations em uma clear hierarchy, making complex dependências easy para reason about.
+
+![Dependency graph](https://module-federation-assest.netlify.app/document/announcement/blog/v2-stable-version/chrome-dep.png)
+
+- **Dados trimming mode**
+Quando there são many módulos, você pode habilite trimming mode para reduce o size de proxy dados e avoid injection falhas caused by localStorage limits.
+*Trimmed dados apenas affects preloading analysis, não actual behavior, so it é safe para habilite.*
+
+
+## Richer Ecosystem
+
+MF now suporta o major **bundlers, aplicação frameworks, e UI stacks**, e pode run reliably across diferente technical ecosystems, helping teams introduce módulo federation sem changing their existente technology choices.
+
+- **Bundler**: Webpack / Rspack / Rollup / Rolldown
+
+- **Build Tool**: Rsbuild / Vite / Metro
+
+- **Framework/Tool**: Modern.js / Next.js / Rspress / Rslib / Storybook
+
+- **UI Library**: React / Vue / React Native
+
+![MF 2.0 ecosystem](https://module-federation-assest.netlify.app/document/announcement/blog/v2-stable-version/ecosystem.png)
+
+On top de este, MF 2.0 extends módulo federation capabilities em mais critical desenvolvimento e delivery scenarios:
+
+### Node.js
+Módulo federation pode now ser usado diretamente no **Node.js runtime**, so módulos remotos pode ser consumido não apenas pelo navegador but também by **SSR, BFF, e Node service layers**, enabling uma unified delivery model for módulos across frontend e backend.
+
+### Rspress Documentation Splitting
+In **Rspress**, MF suporta splitting e carregamento módulos remotos by document ou rota, allowing large documentation sites para ser **decomposed e released independently via módulo federation**, que é ideal for multi-team documentation e knowledge platforms.
+
+### Rstest
+Within o **Rstest** testing system, módulo federation pode carregar módulos remotos em uma real runtime manner, enabling micro-frontend e MF aplicações para perform **integração tests e end-para-end tests esse closely mirror production**, avoiding o gap entre tests e real runtime behavior.
+
+## Changes
+### Versão Changes (Minor Changes)
+We prioritize **stability e compatibility**, so este upgrade contains no breaking changes e apenas introduces uma few minor updates. O key changes são:
+
+### Minor Changes
+
+- O padrão valor de `library.type` é changed de `var` para `global`.
+- `runtimePlugins` now suporte configuração parameters.
+
+## What's Next?
+### React Servidor Componentes
+React Servidor Componentes (RSC) represent uma revolutionary step forward no React ecosystem. Compared para MF x SSR, o combination de MF x RSC pode deliver even better performance (com much smaller bundles) e safer dados handling. We have já validated este approach em basic demos e vai forneça stronger suporte e integração em Modern.js.
+
+### AI-friendly Design
+We são gradually enriching MF com **o contextual information e metadata obrigatório for AI para usar componentes e módulos**, including capability boundaries, uso constraints, runtime environments, e dependência relationships. We também plan para introduce **quantitative scoring e confidence mechanisms** so esse componente assets pode ser understood, evaluated, e selected by AI.
+
+{ props.aiFriendly || '' }
+
+{ props.next || '' }

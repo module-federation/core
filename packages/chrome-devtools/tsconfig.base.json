@@ -3,12 +3,15 @@
   "compilerOptions": {
     "declaration": false,
     "jsx": "preserve",
-    "baseUrl": "./",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "paths": {
       "@/*": ["./src/*"],
-      "@shared/*": ["./shared/*"]
+      "@shared/*": ["./shared/*"],
+      "*": ["./*"]
     },
-    "allowJs": false
+    "allowJs": false,
+    "ignoreDeprecations": "6.0"
   },
   "exclude": ["**/node_modules"]
 }

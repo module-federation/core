@@ -1,21 +1,21 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, rs } from '@rstest/core';
 
 import { getCurrentTabId, syncActiveTab, TabInfo } from '../src/utils/chrome';
 
 describe('chrome tab helpers', () => {
   afterEach(() => {
-    vi.restoreAllMocks();
+    rs.restoreAllMocks();
     Reflect.deleteProperty(globalThis, 'chrome');
     window.targetTab = undefined as any;
     TabInfo.currentTabId = 0;
   });
 
   it('does not warn when active tab query returns no array', async () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const warn = rs.spyOn(console, 'warn').mockImplementation(() => {});
 
-    vi.stubGlobal('chrome', {
+    rs.stubGlobal('chrome', {
       tabs: {
-        query: vi.fn().mockResolvedValue(undefined),
+        query: rs.fn().mockResolvedValue(undefined),
       },
     });
 
@@ -27,9 +27,9 @@ describe('chrome tab helpers', () => {
   it('syncs the queried active tab when chrome returns a tab array', async () => {
     const activeTab = { id: 8080 };
 
-    vi.stubGlobal('chrome', {
+    rs.stubGlobal('chrome', {
       tabs: {
-        query: vi.fn().mockResolvedValue([activeTab]),
+        query: rs.fn().mockResolvedValue([activeTab]),
       },
     });
 

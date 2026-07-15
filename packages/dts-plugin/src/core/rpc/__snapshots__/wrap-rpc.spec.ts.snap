@@ -1,43 +1,4 @@
-// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
-
-exports[`wrapRpc > once > rejects on process close with %p { code: -1, signal: undefined, message: 'Process 1234 exited with code -1' } 1`] = `
-[
-  Any<Function>,
-]
-`;
-
-exports[`wrapRpc > once > rejects on process close with %p { code: -1, signal: undefined, message: 'Process 1234 exited with code -1' } 2`] = `
-{
-  "close": [],
-  "message": [],
-}
-`;
-
-exports[`wrapRpc > once > rejects on process close with %p { code: 100, signal: 'SIGINT', message: 'Process 1234 exited with code 100 [SIGINT]' } 1`] = `
-[
-  Any<Function>,
-]
-`;
-
-exports[`wrapRpc > once > rejects on process close with %p { code: 100, signal: 'SIGINT', message: 'Process 1234 exited with code 100 [SIGINT]' } 2`] = `
-{
-  "close": [],
-  "message": [],
-}
-`;
-
-exports[`wrapRpc > once > rejects on process close with %p { code: undefined, signal: undefined, message: 'Process 1234 exited' } 1`] = `
-[
-  Any<Function>,
-]
-`;
-
-exports[`wrapRpc > once > rejects on process close with %p { code: undefined, signal: undefined, message: 'Process 1234 exited' } 2`] = `
-{
-  "close": [],
-  "message": [],
-}
-`;
+// Rstest Snapshot v1
 
 exports[`wrapRpc > once > rejects on valid reject message 1`] = `
 [
@@ -65,45 +26,6 @@ exports[`wrapRpc > resident process > ignores invalid message 2`] = `
   "message": [
     Any<Function>,
   ],
-}
-`;
-
-exports[`wrapRpc > resident process > rejects on process close with %p { code: -1, signal: undefined, message: 'Process 1234 exited with code -1' } 1`] = `
-[
-  Any<Function>,
-]
-`;
-
-exports[`wrapRpc > resident process > rejects on process close with %p { code: -1, signal: undefined, message: 'Process 1234 exited with code -1' } 2`] = `
-{
-  "close": [],
-  "message": [],
-}
-`;
-
-exports[`wrapRpc > resident process > rejects on process close with %p { code: 100, signal: 'SIGINT', message: 'Process 1234 exited with code 100 [SIGINT]' } 1`] = `
-[
-  Any<Function>,
-]
-`;
-
-exports[`wrapRpc > resident process > rejects on process close with %p { code: 100, signal: 'SIGINT', message: 'Process 1234 exited with code 100 [SIGINT]' } 2`] = `
-{
-  "close": [],
-  "message": [],
-}
-`;
-
-exports[`wrapRpc > resident process > rejects on process close with %p { code: undefined, signal: undefined, message: 'Process 1234 exited' } 1`] = `
-[
-  Any<Function>,
-]
-`;
-
-exports[`wrapRpc > resident process > rejects on process close with %p { code: undefined, signal: undefined, message: 'Process 1234 exited' } 2`] = `
-{
-  "close": [],
-  "message": [],
 }
 `;
 

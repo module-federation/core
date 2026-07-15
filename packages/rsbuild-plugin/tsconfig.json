@@ -1,7 +1,6 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "rootDir": "./",
     "outDir": "dist",
     "sourceMap": false,
@@ -11,7 +10,7 @@
     "moduleResolution": "bundler",
     "allowJs": false,
     "strict": true,
-    "types": ["jest", "node"],
+    "types": ["node"],
     "experimentalDecorators": true,
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
@@ -20,7 +19,8 @@
     "declaration": true,
     "paths": {
       "@/*": ["./*"],
-      "@src/*": ["./src/*"]
+      "@src/*": ["./src/*"],
+      "*": ["./*"]
     }
   },
   "include": ["src", "../../global.d.ts", "__tests__/**/*"],

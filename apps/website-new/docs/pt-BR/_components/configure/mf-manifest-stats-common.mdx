@@ -1,0 +1,68 @@
+## metaData (Both Arquivos)
+
+`metaData` describes como este build é consumido em runtime e o build context. Both `mf-stats.json` e `mf-manifest.json` include it.
+
+### StatsMetaData
+
+`StatsMetaData` has two mutually exclusive shapes:
+
+- **Função form**: `getPublicPath: string`
+- **String form**: `publicPath: string` (opcional `ssrPublicPath: string`)
+
+Shared fields:
+
+| Field            | Tipo             | Obrigatório | Description                     |
+| ---------------- | ---------------- | -------- | ------------------------------- |
+| `name`           | `string`         | Yes      | Current remote/host name        |
+| `globalName`     | `string`         | Yes      | Global name for o remoteEntry |
+| `buildInfo`      | `StatsBuildInfo` | Yes      | Build information               |
+| `remoteEntry`    | `ResourceInfo`   | Yes      | Remote entry resource           |
+| `ssrRemoteEntry` | `ResourceInfo`   | No       | SSR remote entry (se any)       |
+| `types`          | `MetaDataTypes`  | No       | Tipos bundle info (se any)      |
+| `type`           | `string`         | Yes      | APP, NPM                        |
+| `pluginVersion`  | `string`         | No       | MF Plugin versão               |
+
+### ResourceInfo
+
+| Field  | Tipo              | Obrigatório | Description                                |
+| ------ | ----------------- | -------- | ------------------------------------------ |
+| `path` | `string`          | Yes      | Relative caminho em build output              |
+| `name` | `string`          | Yes      | Arquivo name                                  |
+| `type` | `RemoteEntryType` | Yes      | Remote entry format (`var/umd/system/...`) |
+
+### StatsBuildInfo
+
+| Field            | Tipo       | Obrigatório | Description                  |
+| ---------------- | ---------- | -------- | ---------------------------- |
+| `buildVersion`   | `string`   | Yes      | Build versão                |
+| `buildName`      | `string`   | Yes      | Build name                   |
+| `target`         | `string[]` | No       | Build targets                |
+| `plugins`        | `string[]` | No       | Tree-shaking plugins         |
+| `excludePlugins` | `string[]` | No       | Tree-shaking exclude plugins |
+
+### MetaDataTypes
+
+| Field  | Tipo     | Obrigatório | Description                                               |
+| ------ | -------- | -------- | --------------------------------------------------------- |
+| `path` | `string` | Yes      | Output caminho                                               |
+| `name` | `string` | Yes      | Arquivo name (obrigatório for legacy tipos, vai ser deprecated) |
+| `api`  | `string` | Yes      | API entry                                                 |
+| `zip`  | `string` | Yes      | Zip caminho                                                  |
+
+## assets (Both Arquivos)
+
+`StatsAssets` describes sync/async assets para uma shared ou módulo exposto. Both arquivos use it.
+
+### StatsAssets
+
+| Field | Tipo              | Obrigatório | Description       |
+| ----- | ----------------- | -------- | ----------------- |
+| `js`  | `StatsAssetsInfo` | Yes      | JavaScript assets |
+| `css` | `StatsAssetsInfo` | Yes      | CSS assets        |
+
+### StatsAssetsInfo
+
+| Field   | Tipo       | Obrigatório | Description    |
+| ------- | ---------- | -------- | -------------- |
+| `sync`  | `string[]` | Yes      | Initial assets |
+| `async` | `string[]` | Yes      | Async assets   |

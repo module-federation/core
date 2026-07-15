@@ -1,5 +1,24 @@
 # @module-federation/runtime
 
+## 2.8.0
+
+### Patch Changes
+
+- Updated dependencies [ea490ae]
+  - @module-federation/runtime-core@2.8.0
+  - @module-federation/sdk@2.8.0
+  - @module-federation/error-codes@2.8.0
+
+## 2.7.0
+
+### Patch Changes
+
+- Updated dependencies [dcc640b]
+- Updated dependencies [9958086]
+  - @module-federation/sdk@2.7.0
+  - @module-federation/runtime-core@2.7.0
+  - @module-federation/error-codes@2.7.0
+
 ## 2.6.0
 
 ### Patch Changes

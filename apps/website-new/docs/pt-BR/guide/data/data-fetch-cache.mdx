@@ -1,0 +1,322 @@
+# Dados Caching
+
+O `cache` função allows você para cache o results de dados fetching ou computations. It fornece fine-grained control over dados e é suitable for scenarios such as Cliente-Side Rendering (CSR) e Servidor-Side Rendering (SSR).
+
+## Básico Uso
+
+```ts
+import { cache } from '@module-federation/bridge-react/data-fetch';
+
+export type Data = {
+  data: string;
+};
+
+export const fetchData = cache(async (): Promise<Data> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        data: `[ provider ] fetched data: ${new Date()}`,
+      });
+    }, 1000);
+  });
+});
+```
+
+### Parameters
+
+- `fetchData`: O `fetchData` função em uma DataLoader.
+- `options` (opcional): Cache configuração.
+  - `tag`: Uma tag para identify o cache, que pode ser usado para invalidate it.
+  - `maxAge`: O cache's validity period (em milliseconds).
+  - `revalidate`: Uma time window for revalidating o cache (em milliseconds), semelhante a o `stale-while-revalidate` feature de HTTP Cache-Control.
+  - `getKey`: Uma simplified cache key generation função esse cria uma key based no função's arguments.
+  - `onCache`: Uma callback função for quando dados é cached, usado for custom handling de cached dados.
+
+O tipo para o `options` parameter é as follows:
+
+```ts
+interface CacheOptions {
+  tag?: string | string[];
+  maxAge?: number;
+  revalidate?: number;
+  getKey?: <Args extends any[]>(...args: Args) => string;
+  onCache?: (info: CacheStatsInfo) => boolean;
+}
+```
+
+### Return Valor
+
+O `cache` função retorna uma nova `fetchData` função com caching capabilities. Calling este novo função multiple times vai não result em repeated execution.
+
+## Escopo de Use
+
+Este função é apenas compatível for use within uma DataLoader.
+
+## Detailed Uso
+
+### `maxAge`
+
+Depois each computation, o framework records o time o dados was written para o cache. Quando o função é chamada again, it checks se o cache has expired based no `maxAge` parameter. Se it has, o `fn` função é re-executed; caso contrário, o cached dados é retornado.
+
+```ts
+import { cache, CacheTime } from '@module-federation/bridge-react/data-fetch';
+
+const getDashboardStats = cache(
+  async () => {
+    return await fetchComplexStatistics();
+  },
+  {
+    maxAge: CacheTime.MINUTE * 2,  // Calling this function within 2 minutes will return cached data.
+  }
+);
+```
+
+#### `revalidate`
+
+O `revalidate` parameter sets uma time window for revalidating o cache depois it has expired. Ele pode ser usado com o `maxAge` parameter, semelhante a o `stale-while-revalidate` model de HTTP Cache-Control.
+
+No seguintes exemplo, se `getDashboardStats` é chamada within o 2-minute non-expired window, ele retorna cached dados. Se o cache é expired (entre 2 e 3 minutes), incoming requests vai primeiro receive o old dados, e then uma nova request vai ser made no background para atualizar o cache.
+
+```ts
+import { cache, CacheTime } from '@module-federation/bridge-react/data-fetch';
+
+const getDashboardStats = cache(
+  async () => {
+    return await fetchComplexStatistics();
+  },
+  {
+    maxAge: CacheTime.MINUTE * 2,
+    revalidate: CacheTime.MINUTE * 1,
+  }
+);
+```
+
+#### `tag`
+
+O `tag` parameter é usado para identify uma cache com uma label, que pode ser uma string ou um array de strings. Este tag pode ser usado para invalidate o cache, e multiple cache funções pode compartilhe o mesmo tag.
+
+```ts
+import { cache, revalidateTag } from '@module-federation/bridge-react/data-fetch';
+
+const getDashboardStats = cache(
+  async () => {
+    return await fetchDashboardStats();
+  },
+  {
+    tag: 'dashboard',
+  }
+);
+
+const getComplexStatistics = cache(
+  async () => {
+    return await fetchComplexStatistics();
+  },
+  {
+    tag: 'dashboard',
+  }
+);
+
+revalidateTag('dashboard-stats'); // This will invalidate the caches for both getDashboardStats and getComplexStatistics.
+```
+
+#### `getKey`
+
+O `getKey` parameter allows você para customize como cache keys são generated. Por exemplo, você might apenas precisa rely on uma subset do função's parameters para differentiate caches. It é uma função esse receives o mesmo arguments as o original função e retorna uma string as o cache key:
+
+```ts
+import { cache, CacheTime } from '@module-federation/bridge-react/data-fetch';
+import { fetchUserData } from './api';
+
+const getUser = cache(
+  async (userId, options) => {
+    // Here, options might contain many configurations, but we only want to cache based on userId.
+    return await fetchUserData(userId, options);
+  },
+  {
+    maxAge: CacheTime.MINUTE * 5,
+    // Only use the first parameter (userId) as the cache key.
+    getKey: (userId, options) => userId,
+  }
+);
+
+// The following two calls will share the cache because getKey only uses userId.
+await getUser(123, { language: 'zh' });
+await getUser(123, { language: 'en' }); // Hits the cache, no new request.
+
+// Different userIds will use different caches.
+await getUser(456, { language: 'zh' }); // Does not hit the cache, new request.
+```
+
+Você pode também use o `generateKey` função com `getKey` para gerar cache keys:
+
+:::info
+
+O `generateKey` função ensures esse uma consistent, unique key é generated even se o order de objeto propriedades changes, guaranteeing stable caching.
+
+:::
+
+```ts
+import { cache, CacheTime, generateKey } from '@module-federation/bridge-react/data-fetch';
+import { fetchUserData } from './api';
+
+const getUser = cache(
+  async (userId, options) => {
+    return await fetchUserData(userId, options);
+  },
+  {
+    maxAge: CacheTime.MINUTE * 5,
+    getKey: (userId, options) => generateKey(userId),
+  }
+);
+```
+
+#### `customKey`
+
+Both `customKey` e `getKey` let você customize cache keys; o difference é **escopo**:
+
+- **`getKey`** apenas overrides o "arguments" portion do key — **o função itself still participates no cache-key computation**. Two diferente funções whose `getKey` retorna o mesmo valor vai não compartilhe o cache.
+- **`customKey`** retorna o **entire final cache key**, replacing o framework's padrão "função + arguments" key. Ele pode therefore let **diferente funções compartilhe o mesmo cache**.
+
+:::tip Quando to use
+Se você apenas want para derive o cache key de some arguments, use `getKey`. Use `customKey` apenas quando você precisa compartilhe caches across funções ou similar advanced cases.
+:::
+
+`customKey` receives um objeto com o seguintes propriedades e deve retornar uma string ou Symbol — esse valor é usado diretamente as o final cache key:
+
+- `params`: O arguments passed para o cached função.
+- `fn`: O original cached função.
+- `generatedKey`: O original cache key automatically generated pelo framework based no input parameters.
+
+O exemplo below demonstrates como `customKey` enables cache compartilhamento across funções:
+
+```ts
+import { cache } from '@module-federation/bridge-react/data-fetch';
+import { fetchUserData } from './api';
+
+// Different functions, but they can share a cache via customKey.
+const getUserA = cache(
+  fetchUserData,
+  {
+    maxAge: CacheTime.MINUTE * 5,
+    customKey: ({ params }) => {
+      // Return a stable string as the cache key.
+      return `user-${params[0]}`;
+    },
+  }
+);
+
+// Even if the function changes, it will hit the cache as long as customKey returns the same value.
+const getUserB = cache(
+  (...args) => fetchUserData(...args), // New function.
+  {
+    maxAge: CacheTime.MINUTE * 5,
+    customKey: ({ params }) => {
+      // Return the same key as getUserA.
+      return `user-${params[0]}`;
+    },
+  }
+);
+
+// Even though getUserA and getUserB are different functions, because their customKey returns the same value,
+// they will share the cache when called with the same parameters.
+const dataA = await getUserA(1);
+const dataB = await getUserB(1); // This will hit the cache and not make a new request.
+
+// You can also use a Symbol as the cache key (usually for sharing a cache within the same application).
+const USER_CACHE_KEY = Symbol('user-cache');
+const getUserC = cache(
+  fetchUserData,
+  {
+    maxAge: CacheTime.MINUTE * 5,
+    customKey: () => USER_CACHE_KEY,
+  }
+);
+
+// You can also use the generatedKey parameter to modify the default key.
+const getUserD = cache(
+  fetchUserData,
+  {
+    customKey: ({ generatedKey }) => `prefix-${generatedKey}`,
+  }
+);
+```
+
+#### `onCache`
+
+O `onCache` parameter allows você para track cache statistics, such as hit rates. It é uma callback função esse receives information about each cache operation, including its status, key, parameters, e result. Você pode retornar `false` de `onCache` para prevent uma cache hit.
+
+```ts
+import { cache, CacheTime } from '@module-federation/bridge-react/data-fetch';
+
+// Track cache statistics.
+const stats = {
+  total: 0,
+  hits: 0,
+  misses: 0,
+  stales: 0,
+  hitRate: () => stats.hits / stats.total
+};
+
+const getUser = cache(
+  fetchUserData,
+  {
+    maxAge: CacheTime.MINUTE * 5,
+    onCache({ status, key, params, result }) {
+      // status can be 'hit', 'miss', or 'stale'.
+      stats.total++;
+
+      if (status === 'hit') {
+        stats.hits++;
+      } else if (status === 'miss') {
+        stats.misses++;
+      } else if (status === 'stale') {
+        stats.stales++;
+      }
+
+      console.log(`Cache ${status === 'hit' ? 'hit' : status === 'miss' ? 'miss' : 'stale'}, key: ${String(key)}`);
+      console.log(`Current hit rate: ${stats.hitRate() * 100}%`);
+    }
+  }
+);
+
+// Example usage:
+await getUser(1); // Cache miss.
+await getUser(1); // Cache hit.
+await getUser(2); // Cache miss.
+```
+
+O `onCache` callback receives um objeto com o seguintes propriedades:
+
+- `status`: O status do cache operation, que pode ser:
+  - `hit`: Cache hit, retorna cached content.
+  - `miss`: Cache miss, executes o função e caches o result.
+  - `stale`: Cache hit but o dados é stale, retorna cached content e revalidates no background.
+- `key`: O cache key, que may ser o result de `customKey` ou o padrão generated key.
+- `params`: O arguments passed para o cached função.
+- `result`: O result dados (either do cache ou newly computed).
+
+Este callback é apenas chamada quando o `options` parameter é fornecido. Ao usar uma cache função sem opções, o `onCache` callback é não invoked.
+
+O `onCache` callback é very useful for:
+- Monitoring cache performance.
+- Calculating hit rates.
+- Logging cache operations.
+- Implementing custom metrics.
+
+### Storage
+
+Atualmente, whether no cliente ou servidor, o cache é stored em memory. Por padrão, o shared storage limit for all cache funções é 1GB. Quando este limit é reached, o LRU (Least Recently Usado) algorithm é usado para remove old caches.
+
+:::info
+Considering esse o content cached pelo `cache` função é não expected para ser very large, it é currently stored em memory por padrão.
+:::
+
+Você pode specify o cache storage limit usando o `configureCache` função:
+
+```ts
+import { configureCache, CacheSize } from '@module-federation/bridge-react/data-fetch';
+
+configureCache({
+  maxSize: CacheSize.MB * 10, // 10MB
+});
+```

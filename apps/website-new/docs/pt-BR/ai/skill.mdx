@@ -1,0 +1,135 @@
+---
+pageType: doc-wide
+sidebar: false
+---
+
+# Skills
+
+Module Federation agora expõe uma **skill `mf`** unificada.
+
+Você não precisa escolher uma lista longa de skills separadas nem ler a documentação primeiro para depois repassá-la ao agente. A abordagem mais simples é instalar esta única skill e deixar o agente decidir se deve ler documentação, inspecionar configuração ou solucionar um problema.
+
+Se ainda não leu, comece pelo [início rápido com AI](/ai/index.html).
+
+## Instalação
+
+```bash
+npx skills add module-federation/agent-skills --skill mf -y
+```
+
+Depois disso, a entrada principal é:
+
+```text
+/mf <sub-command or question>
+```
+
+Se você não puder usar a CLI, também pode copiar manualmente o diretório do GitHub:
+
+```text
+https://github.com/module-federation/agent-skills/tree/main/skills/mf
+```
+
+## Como usar
+
+`mf` tem um único ponto de entrada, mas contém várias capacidades. Você pode informar um subcomando explícito ou simplesmente pedir em linguagem natural.
+
+Com subcomandos explícitos:
+
+```text
+/mf docs How do I use Module Federation in Modern.js?
+/mf integrate
+/mf type-check
+/mf runtime-error RUNTIME-008
+/mf observability
+```
+
+Com linguagem natural:
+
+```text
+/mf What's the difference between singleton and requiredVersion in shared?
+/mf Help me figure out why this project is not pulling remote types
+/mf Add Module Federation to the current project
+/mf I saw a Module Federation console error with traceId mf-...
+```
+
+## O que `mf` oferece
+
+| Subcomando | Use para |
+| --- | --- |
+| `docs` | Ler a documentação mais recente antes de responder perguntas sobre configuração, APIs e conceitos |
+| `context` | Inspecionar a configuração de MF do projeto atual |
+| `module-info` | Inspecionar URLs de módulos remotos, módulos expostos e metadados relacionados |
+| `integrate` | Adicionar Module Federation a um projeto existente |
+| `type-check` | Solucionar problemas relacionados a tipos |
+| `shared-deps` | Solucionar conflitos de dependências compartilhadas e bundling duplicado |
+| `perf` | Solucionar lentidão no desenvolvimento local e no HMR |
+| `config-check` | Solucionar erros de configuração, arquivos ausentes e incompatibilidades de plugin |
+| `bridge-check` | Solucionar problemas de integração com Bridge |
+| `runtime-error` | Solucionar códigos explícitos de erro em runtime, especialmente `RUNTIME-001` e `RUNTIME-008` |
+| `observability` | Ler relatórios de observabilidade, rastrear fases de carregamento e depurar falhas de carregamento em runtime/build |
+
+## Fluxos de trabalho mais comuns
+
+### 1. Leia a documentação antes de responder
+
+Esse é o caso de uso mais comum e o melhor lugar para começar:
+
+```text
+/mf docs What's the difference between singleton and requiredVersion in shared?
+```
+
+Isso faz o agente ler a documentação mais recente primeiro, em vez de tentar adivinhar com base em memória desatualizada.
+
+### 2. Deixe o agente integrar por você
+
+Se quiser adicionar Module Federation a um projeto existente:
+
+```text
+/mf integrate
+```
+
+O agente vai inspecionar seu projeto atual e decidir o que fazer em seguida.
+
+### 3. Deixe o agente depurar diretamente
+
+Se você já tem um problema concreto:
+
+```text
+/mf type-check
+/mf shared-deps
+/mf config-check
+/mf runtime-error RUNTIME-008
+/mf observability
+```
+
+Nesse ponto, o objetivo não é você investigar manualmente primeiro. O objetivo é deixar o agente começar o diagnóstico imediatamente.
+
+### 4. Deixe o agente ler a observabilidade do MF
+
+Para observabilidade completa do carregamento, instale o [Observability Plugin](/plugin/plugins/observability-plugin.html)
+na sua aplicação. Quando um erro no console do navegador imprimir uma `traceId` e um
+comando `read:`, passe isso para a skill:
+
+```text
+/mf observability
+I saw this Module Federation console error:
+
+[Module Federation] Observability report generated
+traceId: mf-...
+read: window.__FEDERATION__.__OBSERVABILITY__["runtime_host"].getReport("mf-...")
+
+Please read the report and fix the issue.
+```
+
+Para Node, SSR ou uploads de produção:
+
+```text
+/mf observability
+Read .mf/observability/latest.json and explain the likely owner and fix.
+```
+
+## A única coisa que você realmente precisa lembrar
+
+Você não precisa ler a documentação primeiro e depois dizer ao agente o que fazer.
+
+Instale `mf`; depois deixe o agente ler, inspecionar, decidir e agir.
