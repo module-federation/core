@@ -1,0 +1,21 @@
+.github/workflows/build-and-test.yml
+  s_f67acf76ffdd33::t_cc185e438bd118 89,93,114
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "3305858113648bdd571c35ba3e97da6684b40b67",
+  "prompts": {},
+  "sessions": {
+    "s_f67acf76ffdd33": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f64e6-ba86-7471-8917-ef620e4f9df5",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    }
+  },
+  "attestation_metadata": {},
+  "remote_transcripts": {}
+}
