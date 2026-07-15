@@ -1,0 +1,23 @@
+packages/enhanced/test/configCases/container/experiments-optimization/index.js
+  s_9e00c9e5df3a5b::t_6d7f5bb32b4d18 19-20,43-49,105-112
+packages/enhanced/test/configCases/container/experiments-optimization/webpack.config.js
+  s_9e00c9e5df3a5b::t_fc67346e6cc8aa 147-148
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "b78aada46f68f23843a4eeaedf693ba2945537a0",
+  "prompts": {},
+  "sessions": {
+    "s_9e00c9e5df3a5b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5fa1-a9cb-75c3-88d2-7e81b50cb1b8",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    }
+  },
+  "attestation_metadata": {},
+  "remote_transcripts": {}
+}
