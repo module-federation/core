@@ -45,6 +45,20 @@ test('treats a suite workflow as input to only that suite', () => {
   );
 });
 
+test('treats the Metro workflow as input to only the Metro suite', () => {
+  const decisions = computeE2ESuiteDecisions({
+    affectedPackageNames: new Set(),
+    changedFiles: ['.github/workflows/e2e-metro.yml'],
+  });
+
+  assert.deepEqual(
+    Object.entries(decisions)
+      .filter(([, shouldRun]) => shouldRun)
+      .map(([suiteName]) => suiteName),
+    ['metro'],
+  );
+});
+
 test('runs every suite for shared E2E policy changes', () => {
   const decisions = computeE2ESuiteDecisions({
     affectedPackageNames: new Set(),
@@ -166,6 +180,34 @@ test('uses suite-aware selection for local E2E jobs', async () => {
 
   assert.deepEqual(calls, [
     ['node', ['tools/scripts/ci-is-affected.mjs', '--e2eSuite=router']],
+  ]);
+});
+
+test('combines a Metro suite selector with its app override', async () => {
+  const calls = [];
+  const helpers = createLocalE2EHelpers({
+    formatExit: ({ code }) => `code ${code}`,
+    runCommand: async (command, args) => {
+      calls.push([command, args]);
+      return { code: 0 };
+    },
+    runPackagesBuild: async () => {},
+    step: (label, run) => ({ label, run }),
+  });
+
+  await helpers
+    .checkAffectedStep(['custom-metro-app'], 'metro')
+    .run({ env: {}, state: {} });
+
+  assert.deepEqual(calls, [
+    [
+      'node',
+      [
+        'tools/scripts/ci-is-affected.mjs',
+        '--appName=custom-metro-app',
+        '--e2eSuite=metro',
+      ],
+    ],
   ]);
 });
 

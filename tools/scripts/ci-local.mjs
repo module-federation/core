@@ -321,7 +321,7 @@ const jobs = [
     env: METRO_E2E_ENV,
     steps: [
       installDependenciesStep(),
-      checkAffectedStep((ctx) => ctx.env.METRO_APP_NAME),
+      checkAffectedStep((ctx) => ctx.env.METRO_APP_NAME, 'metro'),
       step('Print Metro affected result', (ctx) => {
         if (ctx.state.shouldRun) {
           console.log(
@@ -341,7 +341,7 @@ const jobs = [
     env: METRO_E2E_ENV,
     steps: [
       installDependenciesStep(),
-      checkAffectedStep((ctx) => ctx.env.METRO_APP_NAME),
+      checkAffectedStep((ctx) => ctx.env.METRO_APP_NAME, 'metro'),
       setupAffectedE2E({ cypress: false }),
       step('Run Metro Android E2E tests', async (ctx) => {
         await runWhenAffected(ctx, () =>
@@ -370,7 +370,7 @@ const jobs = [
     env: METRO_E2E_ENV,
     steps: [
       installDependenciesStep(),
-      checkAffectedStep((ctx) => ctx.env.METRO_APP_NAME),
+      checkAffectedStep((ctx) => ctx.env.METRO_APP_NAME, 'metro'),
       step('Check Metro iOS compatibility', (ctx) => {
         if (!ctx.state.shouldRun) {
           logStepSkip(ctx, 'Not affected by current changes.');

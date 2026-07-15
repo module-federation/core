@@ -57,12 +57,17 @@ export function createLocalE2EHelpers({
   }
 
   async function ciIsAffected(appNames, suiteName, ctx) {
-    const selector = suiteName
-      ? `--e2eSuite=${suiteName}`
-      : `--appName=${serializeAppNames(appNames)}`;
+    const selectors = [];
+    const serializedAppNames = serializeAppNames(appNames);
+    if (serializedAppNames) {
+      selectors.push(`--appName=${serializedAppNames}`);
+    }
+    if (suiteName) {
+      selectors.push(`--e2eSuite=${suiteName}`);
+    }
     const result = await runCommand(
       'node',
-      ['tools/scripts/ci-is-affected.mjs', selector],
+      ['tools/scripts/ci-is-affected.mjs', ...selectors],
       { ...ctx, allowFailure: true },
     );
     if (result.code === 0) {
