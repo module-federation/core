@@ -6,6 +6,13 @@ import {
 import { ShareArgs } from '@module-federation/runtime/types';
 import helpers from '@module-federation/runtime/helpers';
 
+declare const FEDERATION_OPTIMIZE_NO_SHARED: boolean;
+
+const USE_SHARED =
+  typeof FEDERATION_OPTIMIZE_NO_SHARED === 'boolean'
+    ? !FEDERATION_OPTIMIZE_NO_SHARED
+    : true;
+
 export function init({ webpackRequire }: { webpackRequire: WebpackRequire }) {
   const { initOptions, runtime, sharedFallback, bundlerRuntime, libraryType } =
     webpackRequire.federation;
@@ -14,117 +21,119 @@ export function init({ webpackRequire }: { webpackRequire: WebpackRequire }) {
     throw new Error('initOptions is required!');
   }
 
-  const treeShakingSharePlugin: () => ModuleFederationRuntimePlugin =
-    function () {
-      return {
-        name: 'tree-shake-plugin',
-        beforeInit(args) {
-          const { userOptions, origin, options: registeredOptions } = args;
-          const version = userOptions.version || registeredOptions.version;
-          if (!sharedFallback) {
-            return args;
-          }
+  if (USE_SHARED) {
+    const treeShakingSharePlugin: () => ModuleFederationRuntimePlugin =
+      function () {
+        return {
+          name: 'tree-shake-plugin',
+          beforeInit(args) {
+            const { userOptions, origin, options: registeredOptions } = args;
+            const version = userOptions.version || registeredOptions.version;
+            if (!sharedFallback) {
+              return args;
+            }
 
-          const currentShared = userOptions.shared || {};
-          const shared: Array<[pkgName: string, ShareArgs]> = [];
+            const currentShared = userOptions.shared || {};
+            const shared: Array<[pkgName: string, ShareArgs]> = [];
 
-          Object.keys(currentShared).forEach((sharedName) => {
-            const sharedArgs = Array.isArray(currentShared[sharedName])
-              ? currentShared[sharedName]
-              : [currentShared[sharedName]];
-            sharedArgs.forEach((sharedArg) => {
-              shared.push([sharedName, sharedArg]);
-              if ('get' in sharedArg) {
-                sharedArg.treeShaking ||= {};
-                sharedArg.treeShaking.get = sharedArg.get;
-                sharedArg.get = bundlerRuntime!.getSharedFallbackGetter({
-                  shareKey: sharedName,
-                  factory: sharedArg.get,
-                  webpackRequire,
-                  libraryType,
-                  version: sharedArg.version,
-                });
+            Object.keys(currentShared).forEach((sharedName) => {
+              const sharedArgs = Array.isArray(currentShared[sharedName])
+                ? currentShared[sharedName]
+                : [currentShared[sharedName]];
+              sharedArgs.forEach((sharedArg) => {
+                shared.push([sharedName, sharedArg]);
+                if ('get' in sharedArg) {
+                  sharedArg.treeShaking ||= {};
+                  sharedArg.treeShaking.get = sharedArg.get;
+                  sharedArg.get = bundlerRuntime!.getSharedFallbackGetter({
+                    shareKey: sharedName,
+                    factory: sharedArg.get,
+                    webpackRequire,
+                    libraryType,
+                    version: sharedArg.version,
+                  });
+                }
+              });
+            });
+
+            // read snapshot to override re-shake getter
+            const hostGlobalSnapshot =
+              helpers.global.getGlobalSnapshotInfoByModuleInfo({
+                name: origin.name,
+                version: version,
+              });
+            if (!hostGlobalSnapshot || !('shared' in hostGlobalSnapshot)) {
+              return args;
+            }
+
+            Object.keys(registeredOptions.shared || {}).forEach((pkgName) => {
+              const sharedInfo = registeredOptions.shared[pkgName];
+              sharedInfo.forEach((sharedArg) => {
+                shared.push([pkgName, sharedArg]);
+              });
+            });
+
+            const patchShared = (pkgName: string, shared: ShareArgs) => {
+              const shareSnapshot = hostGlobalSnapshot.shared.find(
+                (item) => item.sharedName === pkgName,
+              );
+              if (!shareSnapshot) {
+                return;
               }
-            });
-          });
-
-          // read snapshot to override re-shake getter
-          const hostGlobalSnapshot =
-            helpers.global.getGlobalSnapshotInfoByModuleInfo({
-              name: origin.name,
-              version: version,
-            });
-          if (!hostGlobalSnapshot || !('shared' in hostGlobalSnapshot)) {
-            return args;
-          }
-
-          Object.keys(registeredOptions.shared || {}).forEach((pkgName) => {
-            const sharedInfo = registeredOptions.shared[pkgName];
-            sharedInfo.forEach((sharedArg) => {
-              shared.push([pkgName, sharedArg]);
-            });
-          });
-
-          const patchShared = (pkgName: string, shared: ShareArgs) => {
-            const shareSnapshot = hostGlobalSnapshot.shared.find(
-              (item) => item.sharedName === pkgName,
-            );
-            if (!shareSnapshot) {
-              return;
-            }
-            const { treeShaking } = shared;
-            if (!treeShaking) {
-              return;
-            }
-            const {
-              secondarySharedTreeShakingName,
-              secondarySharedTreeShakingEntry,
-              treeShakingStatus,
-            } = shareSnapshot;
-            if (treeShaking.status === treeShakingStatus) {
-              return;
-            }
-            treeShaking.status = treeShakingStatus;
-            if (
-              secondarySharedTreeShakingEntry &&
-              libraryType &&
-              secondarySharedTreeShakingName
-            ) {
-              treeShaking.get = async () => {
-                const shareEntry = await getRemoteEntry({
-                  origin,
-                  remoteInfo: {
-                    name: secondarySharedTreeShakingName,
-                    entry: secondarySharedTreeShakingEntry,
-                    type: libraryType,
-                    entryGlobalName: secondarySharedTreeShakingName,
-                    // current not used
-                    shareScope: 'default',
-                  },
-                });
-                // TODO: add errorLoad hook ?
-                // @ts-ignore
-                await shareEntry.init(
-                  origin,
+              const { treeShaking } = shared;
+              if (!treeShaking) {
+                return;
+              }
+              const {
+                secondarySharedTreeShakingName,
+                secondarySharedTreeShakingEntry,
+                treeShakingStatus,
+              } = shareSnapshot;
+              if (treeShaking.status === treeShakingStatus) {
+                return;
+              }
+              treeShaking.status = treeShakingStatus;
+              if (
+                secondarySharedTreeShakingEntry &&
+                libraryType &&
+                secondarySharedTreeShakingName
+              ) {
+                treeShaking.get = async () => {
+                  const shareEntry = await getRemoteEntry({
+                    origin,
+                    remoteInfo: {
+                      name: secondarySharedTreeShakingName,
+                      entry: secondarySharedTreeShakingEntry,
+                      type: libraryType,
+                      entryGlobalName: secondarySharedTreeShakingName,
+                      // current not used
+                      shareScope: 'default',
+                    },
+                  });
+                  // TODO: add errorLoad hook ?
                   // @ts-ignore
-                  __webpack_require__.federation.bundlerRuntime,
-                );
-                // @ts-ignore
-                const getter = shareEntry.get();
-                return getter;
-              };
-            }
-          };
-          shared.forEach(([pkgName, sharedArg]) => {
-            patchShared(pkgName, sharedArg);
-          });
+                  await shareEntry.init(
+                    origin,
+                    // @ts-ignore
+                    __webpack_require__.federation.bundlerRuntime,
+                  );
+                  // @ts-ignore
+                  const getter = shareEntry.get();
+                  return getter;
+                };
+              }
+            };
+            shared.forEach(([pkgName, sharedArg]) => {
+              patchShared(pkgName, sharedArg);
+            });
 
-          return args;
-        },
+            return args;
+          },
+        };
       };
-    };
 
-  initOptions.plugins ||= [];
-  initOptions.plugins.push(treeShakingSharePlugin());
+    initOptions.plugins ||= [];
+    initOptions.plugins.push(treeShakingSharePlugin());
+  }
   return runtime!.init(initOptions);
 }

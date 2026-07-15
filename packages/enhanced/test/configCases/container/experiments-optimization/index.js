@@ -71,11 +71,24 @@ if (!globalThis.__EXPERIMENTS_OPTIMIZATION_CASE__) {
     expect(noRemote.length).toBeLessThan(fullCapabilities.length);
     expect(fullCapabilities).toContain('availableExposes');
     expect(fullCapabilities).toContain('mf_module_id');
+    expect(fullCapabilities).toContain('Container missing');
     expect(noRemote).not.toContain('availableExposes');
     expect(noRemote).not.toContain('mf_module_id');
+    expect(noRemote).not.toContain('Container missing');
   });
 
-  it('should reduce bundle size when shared loading is disabled', () => {
+  it('should eliminate the complete shared consumption path', () => {
+    const sharedRuntimeMarkers = [
+      'Initialization of sharing external failed',
+      'Shared module is not available for eager consumption',
+      'No fallback item found for shareKey',
+      'tree-shake-plugin',
+    ];
+
     expect(noShared.length).toBeLessThan(fullCapabilities.length);
+    sharedRuntimeMarkers.forEach((marker) => {
+      expect(fullCapabilities).toContain(marker);
+      expect(noShared).not.toContain(marker);
+    });
   });
 }
