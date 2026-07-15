@@ -37,6 +37,17 @@ type RuntimeEntrySpec = {
   cjs: string;
 };
 
+function hasExposes(
+  exposes: moduleFederationPlugin.ModuleFederationPluginOptions['exposes'],
+): boolean {
+  return Boolean(
+    exposes &&
+    (Array.isArray(exposes)
+      ? exposes.length > 0
+      : Object.keys(exposes).length > 0),
+  );
+}
+
 function resolveRuntimeEntry(
   spec: RuntimeEntrySpec,
   implementation: string | undefined,
@@ -99,7 +110,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
   }
 
   private _patchBundlerConfig(compiler: Compiler): void {
-    const { name, experiments } = this._options;
+    const { name, experiments, exposes } = this._options;
     const definePluginOptions: Record<string, string | boolean> = {};
     if (name) {
       definePluginOptions['FEDERATION_BUILD_IDENTIFIER'] = JSON.stringify(
@@ -114,6 +125,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       experiments?.optimization?.disableRemote ?? false;
     definePluginOptions['FEDERATION_OPTIMIZE_NO_SHARED'] =
       experiments?.optimization?.disableShared ?? false;
+    definePluginOptions['FEDERATION_HAS_EXPOSES'] = hasExposes(exposes);
 
     // Determine ENV_TARGET: only if manually specified in experiments.optimization.target
     if (

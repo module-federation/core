@@ -7,6 +7,7 @@ if (!globalThis.__EXPERIMENTS_OPTIMIZATION_CASE__) {
 
   const readOutput = (filename) =>
     fs.readFileSync(path.join(__dirname, filename), 'utf-8');
+  const countOccurrences = (source, marker) => source.split(marker).length - 1;
 
   const webRemoteEntry = readOutput('remoteEntry-web.js');
   const nodeRemoteEntry = readOutput('remoteEntry-node.js');
@@ -15,6 +16,7 @@ if (!globalThis.__EXPERIMENTS_OPTIMIZATION_CASE__) {
   const fullCapabilities = readOutput('remoteEntry-capabilities-full.js');
   const noRemote = readOutput('remoteEntry-capabilities-no-remote.js');
   const noShared = readOutput('remoteEntry-capabilities-no-shared.js');
+  const noExposes = readOutput('bundle7.js');
 
   it('should replace optimization define flags with static values', () => {
     expect(webRemoteEntry).not.toContain('ENV_TARGET');
@@ -37,9 +39,10 @@ if (!globalThis.__EXPERIMENTS_OPTIMIZATION_CASE__) {
       'FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN',
     );
 
-    [fullCapabilities, noRemote, noShared].forEach((source) => {
+    [fullCapabilities, noRemote, noShared, noExposes].forEach((source) => {
       expect(source).not.toContain('FEDERATION_OPTIMIZE_NO_REMOTE');
       expect(source).not.toContain('FEDERATION_OPTIMIZE_NO_SHARED');
+      expect(source).not.toContain('FEDERATION_HAS_EXPOSES');
     });
   });
 
@@ -90,5 +93,12 @@ if (!globalThis.__EXPERIMENTS_OPTIMIZATION_CASE__) {
       expect(fullCapabilities).toContain(marker);
       expect(noShared).not.toContain(marker);
     });
+  });
+
+  it('should eliminate container initialization without exposes', () => {
+    expect(noExposes.length).toBeLessThan(fullCapabilities.length);
+    expect(countOccurrences(noExposes, 'remoteEntryInitOptions')).toBeLessThan(
+      countOccurrences(fullCapabilities, 'remoteEntryInitOptions'),
+    );
   });
 }

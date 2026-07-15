@@ -11,6 +11,7 @@ import { getSharedFallbackGetter } from './getSharedFallbackGetter';
 
 declare const FEDERATION_OPTIMIZE_NO_REMOTE: boolean;
 declare const FEDERATION_OPTIMIZE_NO_SHARED: boolean;
+declare const FEDERATION_HAS_EXPOSES: boolean;
 
 export * from './types';
 
@@ -22,6 +23,8 @@ const USE_SHARED =
   typeof FEDERATION_OPTIMIZE_NO_SHARED === 'boolean'
     ? !FEDERATION_OPTIMIZE_NO_SHARED
     : true;
+const USE_EXPOSES =
+  typeof FEDERATION_HAS_EXPOSES === 'boolean' ? FEDERATION_HAS_EXPOSES : true;
 
 const bundlerRuntime = {
   remotes: USE_REMOTE ? remotes : undefined,
@@ -29,7 +32,7 @@ const bundlerRuntime = {
   I: USE_SHARED ? initializeSharing : undefined,
   S: {},
   installInitialConsumes: USE_SHARED ? installInitialConsumes : undefined,
-  initContainerEntry,
+  initContainerEntry: USE_EXPOSES ? initContainerEntry : undefined,
   init,
   getSharedFallbackGetter: USE_SHARED ? getSharedFallbackGetter : undefined,
 } as NonNullable<Federation['bundlerRuntime']>;

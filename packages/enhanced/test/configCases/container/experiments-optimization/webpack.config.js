@@ -27,6 +27,7 @@ const createConfig = ({
   disableSnapshot,
   disableRemote,
   disableShared,
+  exposes = commonConfig.exposes,
   uniqueName,
   containerName,
   filename,
@@ -57,7 +58,7 @@ const createConfig = ({
             type: 'commonjs-module',
             name: containerName,
           },
-      exposes: commonConfig.exposes,
+      exposes,
       remotes: commonConfig.remotes,
       experiments: {
         optimization: {
@@ -136,5 +137,14 @@ module.exports = [
     uniqueName: 'experiments-optimization-capabilities-no-shared',
     containerName: 'capabilities_no_shared',
     filename: 'remoteEntry-capabilities-no-shared.js',
+  }),
+  createConfig({
+    entry: './noop.js',
+    outputModule: false,
+    optimizationTarget: 'web',
+    disableSnapshot: true,
+    exposes: {},
+    uniqueName: 'experiments-optimization-capabilities-no-exposes',
+    containerName: 'capabilities_no_exposes',
   }),
 ];

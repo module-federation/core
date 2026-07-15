@@ -22,6 +22,8 @@
 
 `disableRemote` 关闭的是当前构建消费其他 Remote 的完整流程，不会删除构建工具为当前生产者生成的 `exposes` 或 `container.get`。因此，一个只向外提供模块、自己不消费其他 Remote 的生产者，仍然可以开启它。
 
+如果当前构建没有配置 `exposes`，Webpack 和 Rspack 插件还会自动移除容器入口初始化代码，不需要增加 `disableExpose` 开关。
+
 ## 配置方式
 
 Webpack 和 Rspack 都可以在 `ModuleFederationPlugin` 中使用相同配置：
@@ -53,6 +55,49 @@ export default {
 使用 Webpack 时，只需要把导入地址改为 `@module-federation/enhanced/webpack`。
 
 上面的组合适用于一个非常精简的纯生产者：它只对外提供模块，不消费其他 Remote、不使用共享依赖，也不依赖 Manifest / Snapshot。实际项目应从默认值开始，只打开已经确认安全的选项。
+
+### 纯 Runtime 项目通过环境变量配置
+
+如果项目直接打包 `@module-federation/runtime` 或 `@module-federation/runtime-core`，没有使用上面的 `ModuleFederationPlugin`，可以用环境变量控制构建，并在打包配置中把环境变量替换为编译期布尔值。
+
+例如，一个不消费 Remote、不使用共享依赖和 Snapshot，也不包含 `exposes` 的项目可以这样构建：
+
+```bash
+FEDERATION_OPTIMIZE_NO_REMOTE=true \
+FEDERATION_OPTIMIZE_NO_SHARED=true \
+FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN=true \
+FEDERATION_HAS_EXPOSES=false \
+pnpm build
+```
+
+Webpack 配置需要显式完成替换：
+
+```ts title="webpack.config.ts"
+import webpack from 'webpack';
+
+const federationDefines = {
+  FEDERATION_OPTIMIZE_NO_REMOTE: JSON.stringify(
+    process.env.FEDERATION_OPTIMIZE_NO_REMOTE === 'true',
+  ),
+  FEDERATION_OPTIMIZE_NO_SHARED: JSON.stringify(
+    process.env.FEDERATION_OPTIMIZE_NO_SHARED === 'true',
+  ),
+  FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN: JSON.stringify(
+    process.env.FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN === 'true',
+  ),
+  FEDERATION_HAS_EXPOSES: JSON.stringify(
+    process.env.FEDERATION_HAS_EXPOSES !== 'false',
+  ),
+};
+
+export default {
+  plugins: [new webpack.DefinePlugin(federationDefines)],
+};
+```
+
+Rspack 使用 `rspack.DefinePlugin` 传入同一份 `federationDefines`。Vite 可以把它传给顶层 `define` 配置。
+
+环境变量不能直接作为字符串留在运行时代码中，必须在构建时替换成 `true` 或 `false`，压缩工具才能删除对应代码。没有显式配置时，上述能力都会保持开启，兼容现有行为。
 
 ## 每个开关会移除什么
 

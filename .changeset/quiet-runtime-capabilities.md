@@ -6,4 +6,4 @@
 '@module-federation/webpack-bundler-runtime': patch
 ---
 
-Allow builds to exclude unused remote consumption and shared capabilities from the core and Webpack runtimes for smaller bundles.
+Allow builds to exclude unused remote consumption and shared capabilities, and automatically omit Webpack container initialization when no exposes are configured.

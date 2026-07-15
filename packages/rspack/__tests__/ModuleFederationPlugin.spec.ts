@@ -10,6 +10,7 @@ function getOptimizationDefines(
       ConstructorParameters<typeof ModuleFederationPlugin>[0]['experiments']
     >['optimization']
   >,
+  exposes?: ConstructorParameters<typeof ModuleFederationPlugin>[0]['exposes'],
 ) {
   let definitions: Record<string, string | boolean> = {};
   class DefinePlugin {
@@ -22,6 +23,7 @@ function getOptimizationDefines(
 
   const plugin = new ModuleFederationPlugin({
     name: 'test',
+    exposes,
     experiments: { optimization },
   });
 
@@ -102,6 +104,20 @@ describe('runtime capability optimization defines', () => {
     expect(getOptimizationDefines()).toMatchObject({
       FEDERATION_OPTIMIZE_NO_REMOTE: false,
       FEDERATION_OPTIMIZE_NO_SHARED: false,
+      FEDERATION_HAS_EXPOSES: false,
+    });
+  });
+
+  it('derives expose capability from the container configuration', () => {
+    expect(getOptimizationDefines(undefined, {})).toMatchObject({
+      FEDERATION_HAS_EXPOSES: false,
+    });
+    expect(
+      getOptimizationDefines(undefined, {
+        './Button': './src/Button',
+      }),
+    ).toMatchObject({
+      FEDERATION_HAS_EXPOSES: true,
     });
   });
 
