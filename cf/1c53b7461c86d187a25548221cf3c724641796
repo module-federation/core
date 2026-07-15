@@ -1,0 +1,35 @@
+.changeset/quiet-runtime-capabilities.md
+  s_9e00c9e5df3a5b::t_7d1789393eeeac 9
+apps/website-new/docs/zh/guide/advanced/runtime-size-optimization.mdx
+  s_9e00c9e5df3a5b::t_176e7874c3bde2 25-26,59-101
+packages/enhanced/src/lib/container/ModuleFederationPlugin.ts
+  s_9e00c9e5df3a5b::t_7797cfb6b16a43 50-60,100,121-137,181
+packages/enhanced/test/configCases/container/experiments-optimization/index.js
+  s_9e00c9e5df3a5b::t_44ba26b3fc7faa 10,19,42,45,97-103
+packages/enhanced/test/configCases/container/experiments-optimization/webpack.config.js
+  s_9e00c9e5df3a5b::t_9293feb1046baf 30,61,141-149
+packages/rspack/__tests__/ModuleFederationPlugin.spec.ts
+  s_9e00c9e5df3a5b::t_8a0b38c7eaa166 13,26,107-120
+packages/rspack/src/ModuleFederationPlugin.ts
+  s_9e00c9e5df3a5b::t_0a095598a8982a 40-50,113,128
+packages/webpack-bundler-runtime/src/index.ts
+  s_9e00c9e5df3a5b::t_bc8cb3694d4ed8 14,26-27,35
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "cf1c53b7461c86d187a25548221cf3c724641796",
+  "prompts": {},
+  "sessions": {
+    "s_9e00c9e5df3a5b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5fa1-a9cb-75c3-88d2-7e81b50cb1b8",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    }
+  },
+  "attestation_metadata": {},
+  "remote_transcripts": {}
+}
