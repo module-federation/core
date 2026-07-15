@@ -1,0 +1,33 @@
+apps/website-new/docs/en/guide/advanced/_meta.json
+  s_9e00c9e5df3a5b::t_196ffd05952faf 2-6
+apps/website-new/docs/en/guide/advanced/runtime-size-optimization.mdx
+  s_9e00c9e5df3a5b::t_09eb15e7b581fe 1-219
+apps/website-new/docs/pt-BR/guide/advanced/_meta.json
+  s_9e00c9e5df3a5b::t_57c8c4a3970f49 2-6
+apps/website-new/docs/pt-BR/guide/advanced/runtime-size-optimization.mdx
+  s_9e00c9e5df3a5b::t_8c97781bb0c426 1-219
+apps/website-new/docs/zh/guide/advanced/runtime-size-optimization.mdx
+  s_9e00c9e5df3a5b::t_20bd9920c97dce 25,195-201
+packages/runtime-core/src/index.ts
+  s_9e00c9e5df3a5b::t_66a00fd2b6c2ff 3,11
+packages/runtime-core/src/remote/disabled.ts
+  s_9e00c9e5df3a5b::t_bea86a26d2ea94 6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "bca1ecae6b4a6be35e2232494af98e73dde803e1",
+  "prompts": {},
+  "sessions": {
+    "s_9e00c9e5df3a5b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5fa1-a9cb-75c3-88d2-7e81b50cb1b8",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    }
+  },
+  "attestation_metadata": {},
+  "remote_transcripts": {}
+}
