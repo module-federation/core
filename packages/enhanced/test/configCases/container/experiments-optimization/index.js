@@ -16,7 +16,8 @@ if (!globalThis.__EXPERIMENTS_OPTIMIZATION_CASE__) {
   const fullCapabilities = readOutput('remoteEntry-capabilities-full.js');
   const noRemote = readOutput('remoteEntry-capabilities-no-remote.js');
   const noShared = readOutput('remoteEntry-capabilities-no-shared.js');
-  const noExposes = readOutput('bundle7.js');
+  const fullConsumerEntry = readOutput('bundle4.js');
+  const noExposesConsumerEntry = readOutput('bundle7.js');
 
   it('should replace optimization define flags with static values', () => {
     expect(webRemoteEntry).not.toContain('ENV_TARGET');
@@ -39,7 +40,13 @@ if (!globalThis.__EXPERIMENTS_OPTIMIZATION_CASE__) {
       'FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN',
     );
 
-    [fullCapabilities, noRemote, noShared, noExposes].forEach((source) => {
+    [
+      fullCapabilities,
+      noRemote,
+      noShared,
+      fullConsumerEntry,
+      noExposesConsumerEntry,
+    ].forEach((source) => {
       expect(source).not.toContain('FEDERATION_OPTIMIZE_NO_REMOTE');
       expect(source).not.toContain('FEDERATION_OPTIMIZE_NO_SHARED');
       expect(source).not.toContain('FEDERATION_HAS_EXPOSES');
@@ -95,10 +102,14 @@ if (!globalThis.__EXPERIMENTS_OPTIMIZATION_CASE__) {
     });
   });
 
-  it('should eliminate container initialization without exposes', () => {
-    expect(noExposes.length).toBeLessThan(fullCapabilities.length);
-    expect(countOccurrences(noExposes, 'remoteEntryInitOptions')).toBeLessThan(
-      countOccurrences(fullCapabilities, 'remoteEntryInitOptions'),
+  it('should eliminate container initialization from the consumer entry without exposes', () => {
+    expect(noExposesConsumerEntry.length).toBeLessThan(
+      fullConsumerEntry.length,
+    );
+    expect(
+      countOccurrences(noExposesConsumerEntry, 'remoteEntryInitOptions'),
+    ).toBeLessThan(
+      countOccurrences(fullConsumerEntry, 'remoteEntryInitOptions'),
     );
   });
 }

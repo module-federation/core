@@ -144,7 +144,7 @@ module.exports = [
     optimizationTarget: 'web',
     disableSnapshot: true,
     exposes: {},
-    uniqueName: 'experiments-optimization-capabilities-no-exposes',
-    containerName: 'capabilities_no_exposes',
+    uniqueName: 'experiments-optimization-capabilities-full',
+    containerName: 'capabilities_full',
   }),
 ];
