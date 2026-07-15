@@ -18,6 +18,8 @@ jobs:
   checkout-install:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    outputs:
+      e2e_suites: ${{ steps.e2e-affected.outputs.e2e_suites }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
@@ -37,6 +39,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Evaluate E2E affected suites
+        id: e2e-affected
+        run: node tools/scripts/ci-is-affected.mjs --githubOutputAll=e2e_suites
+
       - name: Restore Turborepo cache
         id: turbo-cache
         uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
@@ -52,6 +58,9 @@ jobs:
 
       - name: Check code format
         run: node tools/scripts/check-format-changed.mjs
+
+      - name: Test CI affected policy
+        run: node --test tools/scripts/ci-is-affected.test.mjs
 
       - name: Verify Rslib Template Publint Wiring
         run: node packages/create-module-federation/scripts/verify-rslib-templates.mjs
@@ -107,6 +116,7 @@ jobs:
 
   e2e-modern:
     needs: checkout-install
+    if: ${{ fromJSON(needs.checkout-install.outputs.e2e_suites).modern }}
     uses: ./.github/workflows/e2e-modern.yml
     secrets: inherit
 
@@ -135,47 +145,56 @@ jobs:
 
   e2e-runtime:
     needs: checkout-install
+    if: ${{ fromJSON(needs.checkout-install.outputs.e2e_suites).runtime }}
     uses: ./.github/workflows/e2e-runtime.yml
     secrets: inherit
 
   e2e-manifest:
     needs: checkout-install
+    if: ${{ fromJSON(needs.checkout-install.outputs.e2e_suites).manifest }}
     uses: ./.github/workflows/e2e-manifest.yml
     secrets: inherit
 
   e2e-node:
     needs: checkout-install
+    if: ${{ fromJSON(needs.checkout-install.outputs.e2e_suites).node }}
     uses: ./.github/workflows/e2e-node.yml
     secrets: inherit
 
   e2e-next-dev:
     needs: checkout-install
+    if: ${{ fromJSON(needs.checkout-install.outputs.e2e_suites).next }}
     uses: ./.github/workflows/e2e-next-dev.yml
     secrets: inherit
 
   e2e-next-prod:
     needs: checkout-install
+    if: ${{ fromJSON(needs.checkout-install.outputs.e2e_suites).next }}
     uses: ./.github/workflows/e2e-next-prod.yml
     secrets: inherit
 
   e2e-treeshake:
     needs: checkout-install
+    if: ${{ fromJSON(needs.checkout-install.outputs.e2e_suites).treeshake }}
     uses: ./.github/workflows/e2e-treeshake.yml
     secrets: inherit
 
   e2e-modern-ssr:
     needs: checkout-install
+    if: ${{ fromJSON(needs.checkout-install.outputs.e2e_suites).modernSsr }}
     uses: ./.github/workflows/e2e-modern-ssr.yml
     secrets: inherit
 
   e2e-router:
     needs: checkout-install
+    if: ${{ fromJSON(needs.checkout-install.outputs.e2e_suites).router }}
     uses: ./.github/workflows/e2e-router.yml
     secrets: inherit
 
   e2e-metro:
     needs:
       - checkout-install
+    if: ${{ fromJSON(needs.checkout-install.outputs.e2e_suites).metro }}
     uses: ./.github/workflows/e2e-metro.yml
     secrets: inherit
 
