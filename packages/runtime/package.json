@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/runtime",
-  "version": "2.7.0",
+  "version": "2.8.0",
   "type": "module",
   "author": "zhouxiao <codingzx@gmail.com>",
   "main": "./dist/index.cjs",
