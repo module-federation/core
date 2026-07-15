@@ -1,5 +1,19 @@
 # @module-federation/metro
 
+## 2.8.0
+
+### Patch Changes
+
+- 2dc9a40: chore: bump Rock dependencies to 0.14.1
+- d4da7fb: fix: normalize Metro paths on Windows
+- 7c4ac9f: Support TypeScript 7 in Metro projects.
+- Updated dependencies [ea490ae]
+- Updated dependencies [6ee67dc]
+- Updated dependencies [681e5d2]
+  - @module-federation/sdk@2.8.0
+  - @module-federation/dts-plugin@2.8.0
+  - @module-federation/runtime@2.8.0
+
 ## 2.7.0
 
 ### Patch Changes

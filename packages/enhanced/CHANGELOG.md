@@ -1,5 +1,29 @@
 # @module-federation/enhanced
 
+## 2.8.0
+
+### Patch Changes
+
+- ea490ae: Allow builds to exclude unused remote consumption and shared capabilities, and automatically omit Webpack container initialization when no exposes are configured.
+- 6ee67dc: Reduce installed and bundled size by replacing general-purpose cache, path, version, package lookup, scheduling, fetch, and error fallback dependencies with focused built-in utilities.
+- 681e5d2: feat(dts-plugin): support ts 7 for federated type generation while keeping existing ts versions supported
+- Updated dependencies [d6a76d8]
+- Updated dependencies [ea490ae]
+- Updated dependencies [6ee67dc]
+- Updated dependencies [681e5d2]
+- Updated dependencies [a5633f8]
+  - @module-federation/manifest@2.8.0
+  - @module-federation/rspack@2.8.0
+  - @module-federation/sdk@2.8.0
+  - @module-federation/webpack-bundler-runtime@2.8.0
+  - @module-federation/bridge-react-webpack-plugin@2.8.0
+  - @module-federation/dts-plugin@2.8.0
+  - @module-federation/managers@2.8.0
+  - @module-federation/cli@2.8.0
+  - @module-federation/runtime-tools@2.8.0
+  - @module-federation/inject-external-runtime-core-plugin@2.8.0
+  - @module-federation/error-codes@2.8.0
+
 ## 2.7.0
 
 ### Patch Changes
