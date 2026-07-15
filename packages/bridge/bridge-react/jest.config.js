@@ -1,12 +1,25 @@
-export default {
+module.exports = {
   displayName: 'bridge-react',
   preset: '../../../jest.preset.js',
   transform: {
     '^.+\\.[tj]sx?$': [
-      'ts-jest',
+      '@swc/jest',
       {
-        tsconfig: '<rootDir>/tsconfig.spec.json',
-        isolatedModules: true,
+        jsc: {
+          parser: {
+            syntax: 'typescript',
+            tsx: true,
+          },
+          transform: {
+            react: {
+              runtime: 'automatic',
+            },
+          },
+          target: 'es2022',
+        },
+        module: {
+          type: 'commonjs',
+        },
       },
     ],
   },

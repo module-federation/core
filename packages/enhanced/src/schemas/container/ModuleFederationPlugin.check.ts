@@ -444,7 +444,7 @@ const t = {
                         ],
                       },
                       timeout: { type: 'number' },
-                      family: { enum: [0, 4, 6] },
+                      family: { enum: [4, 6] },
                       typesOnBuild: { type: 'boolean' },
                     },
                   },
@@ -469,6 +469,8 @@ const t = {
             type: 'object',
             properties: {
               disableSnapshot: { type: 'boolean' },
+              disableRemote: { type: 'boolean' },
+              disableShared: { type: 'boolean' },
               target: { enum: ['web', 'node'] },
             },
             additionalProperties: !1,
@@ -4361,8 +4363,6 @@ function D(
                                                                             const n =
                                                                               c;
                                                                             if (
-                                                                              0 !==
-                                                                                e &&
                                                                               4 !==
                                                                                 e &&
                                                                               6 !==
@@ -4719,6 +4719,10 @@ function D(
                                                           if (
                                                             'disableSnapshot' !==
                                                               e &&
+                                                            'disableRemote' !==
+                                                              e &&
+                                                            'disableShared' !==
+                                                              e &&
                                                             'target' !== e
                                                           )
                                                             return (
@@ -4754,37 +4758,89 @@ function D(
                                                               );
                                                             var I = e === c;
                                                           } else I = !0;
-                                                          if (I)
+                                                          if (I) {
                                                             if (
                                                               void 0 !==
-                                                              r.target
+                                                              r.disableRemote
                                                             ) {
-                                                              let e = r.target;
-                                                              const n = c;
+                                                              const e = c;
                                                               if (
-                                                                'web' !== e &&
-                                                                'node' !== e
+                                                                'boolean' !=
+                                                                typeof r.disableRemote
                                                               )
                                                                 return (
                                                                   (D.errors = [
                                                                     {
                                                                       params: {
-                                                                        allowedValues:
-                                                                          t
-                                                                            .properties
-                                                                            .experiments
-                                                                            .properties
-                                                                            .optimization
-                                                                            .properties
-                                                                            .target
-                                                                            .enum,
+                                                                        type: 'boolean',
                                                                       },
                                                                     },
                                                                   ]),
                                                                   !1
                                                                 );
-                                                              I = n === c;
+                                                              I = e === c;
                                                             } else I = !0;
+                                                            if (I) {
+                                                              if (
+                                                                void 0 !==
+                                                                r.disableShared
+                                                              ) {
+                                                                const e = c;
+                                                                if (
+                                                                  'boolean' !=
+                                                                  typeof r.disableShared
+                                                                )
+                                                                  return (
+                                                                    (D.errors =
+                                                                      [
+                                                                        {
+                                                                          params:
+                                                                            {
+                                                                              type: 'boolean',
+                                                                            },
+                                                                        },
+                                                                      ]),
+                                                                    !1
+                                                                  );
+                                                                I = e === c;
+                                                              } else I = !0;
+                                                              if (I)
+                                                                if (
+                                                                  void 0 !==
+                                                                  r.target
+                                                                ) {
+                                                                  let e =
+                                                                    r.target;
+                                                                  const n = c;
+                                                                  if (
+                                                                    'web' !==
+                                                                      e &&
+                                                                    'node' !== e
+                                                                  )
+                                                                    return (
+                                                                      (D.errors =
+                                                                        [
+                                                                          {
+                                                                            params:
+                                                                              {
+                                                                                allowedValues:
+                                                                                  t
+                                                                                    .properties
+                                                                                    .experiments
+                                                                                    .properties
+                                                                                    .optimization
+                                                                                    .properties
+                                                                                    .target
+                                                                                    .enum,
+                                                                              },
+                                                                          },
+                                                                        ]),
+                                                                      !1
+                                                                    );
+                                                                  I = n === c;
+                                                                } else I = !0;
+                                                            }
+                                                          }
                                                         }
                                                       }
                                                     }

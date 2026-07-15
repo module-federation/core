@@ -1,4 +1,4 @@
-import ts from 'typescript';
+import * as ts from 'typescript-compiler';
 import { BRIDGE_RUNTIME_FILES } from './generated/bridgeRuntimeFiles';
 
 export type CompilePlaygroundParams = {

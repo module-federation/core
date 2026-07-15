@@ -1,10 +1,9 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "baseUrl": "./",
     "outDir": "../../dist/out-tsc",
     "paths": {
-      "*": ["./@mf-types/*"]
+      "*": ["./@mf-types/*", "./*"]
     }
   },
   "exclude": ["dist/**"]
