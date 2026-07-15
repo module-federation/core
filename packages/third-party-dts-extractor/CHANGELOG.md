@@ -1,5 +1,11 @@
 # @module-federation/third-party-dts-extractor
 
+## 2.8.0
+
+### Patch Changes
+
+- 6ee67dc: Reduce installed and bundled size by replacing general-purpose cache, path, version, package lookup, scheduling, fetch, and error fallback dependencies with focused built-in utilities.
+
 ## 2.7.0
 
 ### Patch Changes

@@ -1,7 +1,7 @@
 {
   "name": "shared-tree-shaking-no-server-host",
   "private": true,
-  "version": "1.0.15",
+  "version": "1.0.16",
   "scripts": {
     "reset": "npx rimraf ./**/node_modules",
     "dev": "TS_NODE_COMPILER=typescript-compiler modern dev",

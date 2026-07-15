@@ -1,5 +1,11 @@
 # @module-federation/sdk
 
+## 2.8.0
+
+### Patch Changes
+
+- ea490ae: Allow builds to exclude unused remote consumption and shared capabilities, and automatically omit Webpack container initialization when no exposes are configured.
+
 ## 2.7.0
 
 ### Minor Changes

@@ -1,5 +1,26 @@
 # @module-federation/modern-js
 
+## 2.8.0
+
+### Patch Changes
+
+- dcc96d1: fix(modernjs-v3): set optimization.usedExports to "global" to prevent tree shaking issues in micro frontend mode
+- 6ee67dc: Reduce installed and bundled size by replacing general-purpose cache, path, version, package lookup, scheduling, fetch, and error fallback dependencies with focused built-in utilities.
+- 681e5d2: feat(dts-plugin): support ts 7 for federated type generation while keeping existing ts versions supported
+- f796458: Automatically select federation optimization targets for Modern.js browser and
+  SSR builds, with an option to disable this behavior.
+- Updated dependencies [cef63f9]
+- Updated dependencies [ea490ae]
+- Updated dependencies [6ee67dc]
+- Updated dependencies [681e5d2]
+  - @module-federation/rsbuild-plugin@2.8.0
+  - @module-federation/enhanced@2.8.0
+  - @module-federation/sdk@2.8.0
+  - @module-federation/bridge-react@2.8.0
+  - @module-federation/node@2.7.47
+  - @module-federation/runtime@2.8.0
+  - @module-federation/cli@2.8.0
+
 ## 2.7.0
 
 ### Patch Changes

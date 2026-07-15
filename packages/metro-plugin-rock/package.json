@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/metro-plugin-rock",
-  "version": "2.7.0",
+  "version": "2.8.0",
   "description": "Metro Module Federation plugin for Rock",
   "keywords": [
     "rock",

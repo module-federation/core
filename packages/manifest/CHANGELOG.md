@@ -1,5 +1,19 @@
 # @module-federation/manifest
 
+## 2.8.0
+
+### Patch Changes
+
+- d6a76d8: Preserve the configured Module Federation library type when reconciling
+  Rspack-pre-emitted stats and manifests, including ESM `module` remote entries.
+- a5633f8: Support Rspack container reference identifiers when collecting remote and delegate modules.
+- Updated dependencies [ea490ae]
+- Updated dependencies [6ee67dc]
+- Updated dependencies [681e5d2]
+  - @module-federation/sdk@2.8.0
+  - @module-federation/dts-plugin@2.8.0
+  - @module-federation/managers@2.8.0
+
 ## 2.7.0
 
 ### Patch Changes
