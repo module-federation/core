@@ -1,0 +1,29 @@
+.changeset/quiet-runtime-capabilities.md
+  s_9e00c9e5df3a5b::t_2eaebaa23b6a7d 6,9
+apps/website-new/docs/zh/guide/advanced/runtime-size-optimization.mdx
+  s_9e00c9e5df3a5b::t_34c3a70b19eaec 61,76,146-148
+packages/enhanced/test/configCases/container/experiments-optimization/index.js
+  s_9e00c9e5df3a5b::t_f965b6a4086c0e 74,77,80-87,89-92
+packages/webpack-bundler-runtime/src/index.ts
+  s_9e00c9e5df3a5b::t_82643c3ee20ccd 12-14,17-36,41,50
+packages/webpack-bundler-runtime/src/init.ts
+  s_9e00c9e5df3a5b::t_3f7356859a0184 9-15,24-34,36-37,39-56,59-67,69-73,76-113,115-128,130-132,135-137
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "79167883add9bd4e57b00f0cdf53427c284d875d",
+  "prompts": {},
+  "sessions": {
+    "s_9e00c9e5df3a5b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5fa1-a9cb-75c3-88d2-7e81b50cb1b8",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    }
+  },
+  "attestation_metadata": {},
+  "remote_transcripts": {}
+}
