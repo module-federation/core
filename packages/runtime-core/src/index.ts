@@ -1,6 +1,6 @@
 import helpersDefault, { type IGlobalUtils, type IShareUtils } from './helpers';
 import { Module as RemoteModule } from './module';
-import { DisabledModule } from './remote/disabled';
+import { UnavailableRemoteModule } from './remote/disabled';
 
 declare const FEDERATION_OPTIMIZE_NO_REMOTE: boolean;
 
@@ -8,7 +8,7 @@ const helpers = helpersDefault;
 const Module = (
   typeof FEDERATION_OPTIMIZE_NO_REMOTE === 'boolean' &&
   FEDERATION_OPTIMIZE_NO_REMOTE
-    ? DisabledModule
+    ? UnavailableRemoteModule
     : RemoteModule
 ) as typeof RemoteModule;
 
