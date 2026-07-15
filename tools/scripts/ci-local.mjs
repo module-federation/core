@@ -66,6 +66,13 @@ const jobs = [
       step('Check code format', (ctx) =>
         runCommand('node', ['tools/scripts/check-format-changed.mjs'], ctx),
       ),
+      step('Test CI affected policy', (ctx) =>
+        runCommand(
+          'node',
+          ['--test', 'tools/scripts/ci-is-affected.test.mjs'],
+          ctx,
+        ),
+      ),
       step('Verify Rslib Template Publint Wiring', (ctx) =>
         runCommand(
           'node',
@@ -192,7 +199,7 @@ const jobs = [
     name: 'e2e-modern',
     env: SKIP_DEVTOOLS_POSTINSTALL_ENV,
     steps: [
-      ...e2eSetupSteps(E2E_SUITES.modern),
+      ...e2eSetupSteps('modern'),
       step('E2E Test for ModernJS', (ctx) =>
         runWhenAffected(ctx, () =>
           runCommand('pnpm', ['run', 'e2e:modern'], ctx),
@@ -204,7 +211,7 @@ const jobs = [
     name: 'e2e-runtime',
     env: SKIP_DEVTOOLS_POSTINSTALL_ENV,
     steps: [
-      ...e2eSetupSteps(E2E_SUITES.runtime),
+      ...e2eSetupSteps('runtime'),
       step('E2E Test for Runtime Demo', (ctx) =>
         runWhenAffected(ctx, () =>
           runCommand('pnpm', ['run', 'e2e:runtime'], ctx),
@@ -216,7 +223,7 @@ const jobs = [
     name: 'e2e-manifest',
     env: SKIP_DEVTOOLS_POSTINSTALL_ENV,
     steps: [
-      ...e2eSetupSteps(E2E_SUITES.manifest),
+      ...e2eSetupSteps('manifest'),
       step('E2E Test for Manifest Demo (dev)', (ctx) =>
         runWhenAffected(ctx, () =>
           runCommand('pnpm', ['run', 'e2e:manifest:dev'], ctx),
@@ -233,7 +240,7 @@ const jobs = [
     name: 'e2e-node',
     env: SKIP_DEVTOOLS_POSTINSTALL_ENV,
     steps: [
-      ...e2eSetupSteps(E2E_SUITES.node),
+      ...e2eSetupSteps('node'),
       step('E2E Node Federation', (ctx) =>
         runWhenAffected(ctx, () =>
           runCommand('pnpm', ['run', 'e2e:node'], ctx),
@@ -248,7 +255,7 @@ const jobs = [
       NEXT_PRIVATE_LOCAL_WEBPACK: 'true',
     },
     steps: [
-      ...e2eSetupSteps(E2E_SUITES.next),
+      ...e2eSetupSteps('next'),
       step('E2E Test for Next.js Dev', (ctx) =>
         runWhenAffected(ctx, () =>
           runCommand('pnpm', ['run', 'e2e:next:dev'], ctx),
@@ -260,7 +267,7 @@ const jobs = [
     name: 'e2e-next-prod',
     env: SKIP_DEVTOOLS_POSTINSTALL_ENV,
     steps: [
-      ...e2eSetupSteps(E2E_SUITES.next),
+      ...e2eSetupSteps('next'),
       step('E2E Test for Next.js Prod', (ctx) =>
         runWhenAffected(ctx, () =>
           runCommand('pnpm', ['run', 'e2e:next:prod'], ctx),
@@ -272,7 +279,7 @@ const jobs = [
     name: 'e2e-treeshake',
     env: SKIP_DEVTOOLS_POSTINSTALL_ENV,
     steps: [
-      ...e2eSetupSteps(E2E_SUITES.treeshake, { cypress: false }),
+      ...e2eSetupSteps('treeshake', { cypress: false }),
       step('E2E Treeshake Server', (ctx) =>
         runWhenAffected(ctx, () =>
           runCommand('pnpm', ['run', 'e2e:treeshake:server'], ctx),
@@ -289,7 +296,7 @@ const jobs = [
     name: 'e2e-modern-ssr',
     env: SKIP_DEVTOOLS_POSTINSTALL_ENV,
     steps: [
-      ...e2eSetupSteps(E2E_SUITES.modernSsr),
+      ...e2eSetupSteps('modernSsr'),
       step('E2E Test for ModernJS SSR', (ctx) =>
         runWhenAffected(ctx, () =>
           runCommand('pnpm', ['run', 'e2e:modern:ssr'], ctx),
@@ -301,7 +308,7 @@ const jobs = [
     name: 'e2e-router',
     env: SKIP_DEVTOOLS_POSTINSTALL_ENV,
     steps: [
-      ...e2eSetupSteps(E2E_SUITES.router),
+      ...e2eSetupSteps('router'),
       step('E2E Test for Router', (ctx) =>
         runWhenAffected(ctx, () =>
           runCommand('pnpm', ['run', 'e2e:router'], ctx),
@@ -402,7 +409,7 @@ const jobs = [
     name: 'e2e-shared-tree-shaking',
     env: SKIP_DEVTOOLS_POSTINSTALL_ENV,
     steps: [
-      ...e2eSetupSteps(E2E_SUITES.sharedTreeShaking),
+      ...e2eSetupSteps('sharedTreeShaking'),
       step('E2E Shared Tree Shaking (runtime-infer)', (ctx) =>
         runWhenAffected(ctx, () =>
           runCommand(

@@ -30,12 +30,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Check CI conditions
-        id: check-ci
-        run: node tools/scripts/ci-is-affected.mjs --e2eSuite=modern --githubOutput=run-e2e
-
       - name: Restore Turborepo cache
-        if: steps.check-ci.outputs.run-e2e == 'true'
         uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
         with:
           path: .turbo/cache
@@ -45,13 +40,10 @@ jobs:
             ${{ runner.os }}-turbo-
 
       - name: Install Cypress
-        if: steps.check-ci.outputs.run-e2e == 'true'
         run: npx cypress install
 
       - name: Build shared packages
-        if: steps.check-ci.outputs.run-e2e == 'true'
         run: pnpm run build:packages
 
       - name: Run Modern package test suite
-        if: steps.check-ci.outputs.run-e2e == 'true'
         run: pnpm exec turbo run test --filter=@module-federation/modern-js --filter=@module-federation/modern-js-v3 --concurrency=20

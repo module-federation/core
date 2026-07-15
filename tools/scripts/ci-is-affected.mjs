@@ -3,10 +3,14 @@ import { appendFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import yargs from 'yargs';
+import { hasGitRef as hasGitRefInRepo } from './turbo-script-utils.mjs';
 import {
-  hasGitRef as hasGitRefInRepo,
-  parseJsonFromTurboOutput,
-} from './turbo-script-utils.mjs';
+  computeE2ESuiteDecisions,
+  isAppNameAffected,
+  isE2ESuiteInput,
+  isGlobalE2EInput,
+  parseAffectedPackages,
+} from './ci-e2e-affected.mjs';
 import {
   E2E_SUITES,
   normalizeAppNames,
@@ -15,24 +19,6 @@ import {
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(SCRIPT_DIR, '../..');
-const GLOBAL_E2E_INPUT_PATTERNS = [
-  '.github/workflows/build-and-test.yml',
-  '.github/workflows/devtools.yml',
-  'package.json',
-  'tools/scripts/ci-e2e-suites.mjs',
-  'tools/scripts/ci-is-affected.mjs',
-  'tools/scripts/e2e-process-utils.mjs',
-  'tools/scripts/run-manifest-e2e.mjs',
-  'tools/scripts/run-modern-e2e.mjs',
-  'tools/scripts/run-metro-e2e.mjs',
-  'tools/scripts/run-next-e2e.mjs',
-  'tools/scripts/run-node-e2e.mjs',
-  'tools/scripts/run-router-e2e.mjs',
-  'tools/scripts/run-runtime-e2e.mjs',
-  'scripts/ensure-playwright.js',
-];
-const GLOBAL_E2E_INPUT_PREFIXES = ['.github/workflows/e2e-'];
-
 const argv = yargs(process.argv.slice(2))
   .option('appName', {
     type: 'string',
@@ -54,6 +40,11 @@ const argv = yargs(process.argv.slice(2))
     type: 'string',
     describe:
       'Write the decision to $GITHUB_OUTPUT under this key (as true/false) and exit 0, instead of signaling via exit code.',
+  })
+  .option('githubOutputAll', {
+    type: 'string',
+    describe:
+      'Write all named suite decisions as one JSON object to $GITHUB_OUTPUT under this key.',
   })
   .strict(false)
   .parseSync();
@@ -78,9 +69,35 @@ function decide(runE2E) {
   process.exit(runE2E ? 0 : 1);
 }
 
-const rawAppNames = argv.appName
-  ? normalizeAppNames(argv.appName)
-  : (E2E_SUITES[argv.e2eSuite] ?? null);
+function decideAll(decisions) {
+  if (!argv.githubOutputAll) {
+    console.error('--githubOutputAll requires an output key.');
+    process.exit(2);
+  }
+  if (!process.env.GITHUB_OUTPUT) {
+    console.error('--githubOutputAll was passed but GITHUB_OUTPUT is not set.');
+    process.exit(2);
+  }
+  appendFileSync(
+    process.env.GITHUB_OUTPUT,
+    `${argv.githubOutputAll}=${JSON.stringify(decisions)}\n`,
+  );
+  process.exit(0);
+}
+
+const allSuitesMode = Boolean(argv.githubOutputAll);
+if (allSuitesMode && (argv.appName || argv.e2eSuite || argv.githubOutput)) {
+  console.error(
+    '--githubOutputAll cannot be combined with --appName, --e2eSuite, or --githubOutput.',
+  );
+  process.exit(2);
+}
+
+const rawAppNames = allSuitesMode
+  ? []
+  : argv.appName
+    ? normalizeAppNames(argv.appName)
+    : (E2E_SUITES[argv.e2eSuite] ?? null);
 if (argv.e2eSuite && !rawAppNames) {
   console.error(`Unknown e2e suite: ${argv.e2eSuite}`);
   process.exit(2);
@@ -88,7 +105,7 @@ if (argv.e2eSuite && !rawAppNames) {
 
 const appNames = normalizeAppNames(rawAppNames);
 
-if (appNames.length === 0) {
+if (!allSuitesMode && appNames.length === 0) {
   console.error('No valid app names were provided.');
   process.exit(2);
 }
@@ -100,14 +117,14 @@ if (!base || !head) {
   console.warn(
     `Unable to resolve a valid base/head commit (base=${base}, head=${head}). Running e2e by default.`,
   );
-  decide(true);
+  decideFailOpen();
 }
 
 if (base === head) {
   console.warn(
     `Resolved base and head are identical (${base}). Running e2e by default.`,
   );
-  decide(true);
+  decideFailOpen();
 }
 
 const changedFiles = listChangedFiles(base, head);
@@ -116,7 +133,7 @@ if (!changedFiles) {
   console.warn(
     `Unable to resolve changed files for base=${base} head=${head}. Running e2e by default.`,
   );
-  decide(true);
+  decideFailOpen();
 }
 
 const changedGlobalE2EInputs = changedFiles.filter(isGlobalE2EInput);
@@ -125,7 +142,7 @@ if (changedGlobalE2EInputs.length > 0) {
   console.log(
     `Detected shared e2e harness changes (${changedGlobalE2EInputs.join(', ')}). Running e2e CI.`,
   );
-  decide(true);
+  decideFailOpen();
 }
 
 const turboResult = spawnSync(
@@ -153,7 +170,7 @@ if (turboResult.status !== 0) {
   } else if (turboResult.stdout?.trim()) {
     console.warn(turboResult.stdout.trim());
   }
-  decide(true);
+  decideFailOpen();
 }
 
 let affectedPackageNames;
@@ -168,20 +185,23 @@ try {
     console.warn(
       `Unable to parse Turbo affected output for base=${base} head=${head}. Running e2e by default.`,
     );
-    decide(true);
+    decideFailOpen();
   }
 }
 
-const matchableAffectedNames = new Set();
-for (const packageName of affectedPackageNames) {
-  matchableAffectedNames.add(packageName);
-  const unscoped = toUnscopedName(packageName);
-  if (unscoped) {
-    matchableAffectedNames.add(unscoped);
-  }
+if (allSuitesMode) {
+  const decisions = computeE2ESuiteDecisions({
+    affectedPackageNames,
+    changedFiles,
+  });
+  console.log(`E2E suite decisions: ${JSON.stringify(decisions)}`);
+  decideAll(decisions);
 }
 
-const isAffected = appNames.some((name) => matchableAffectedNames.has(name));
+const isAffected =
+  (argv.e2eSuite &&
+    changedFiles.some((file) => isE2ESuiteInput(argv.e2eSuite, file))) ||
+  isAppNameAffected(appNames, affectedPackageNames);
 
 if (isAffected) {
   console.log(
@@ -194,6 +214,15 @@ console.log(
   `appNames: ${serializeAppNames(appNames)} , base=${base} head=${head}, conditions not met, skipping e2e CI.`,
 );
 decide(false);
+
+function decideFailOpen() {
+  if (allSuitesMode) {
+    decideAll(
+      Object.fromEntries(Object.keys(E2E_SUITES).map((suite) => [suite, true])),
+    );
+  }
+  decide(true);
+}
 
 function hasGitRef(ref) {
   return hasGitRefInRepo(ROOT, ref);
@@ -258,13 +287,6 @@ function listChangedFiles(baseRef, headRef) {
     .filter(Boolean);
 }
 
-function isGlobalE2EInput(relativePath) {
-  return (
-    GLOBAL_E2E_INPUT_PATTERNS.includes(relativePath) ||
-    GLOBAL_E2E_INPUT_PREFIXES.some((prefix) => relativePath.startsWith(prefix))
-  );
-}
-
 function expandRefCandidates(ref) {
   if (!ref || !ref.trim()) {
     return [];
@@ -289,130 +311,4 @@ function expandRefCandidates(ref) {
   }
 
   return Array.from(candidates);
-}
-
-function parseAffectedPackages(outputText) {
-  const payload = parseJsonFromTurboOutput(outputText);
-  const packageNames = new Set();
-
-  if (Array.isArray(payload)) {
-    collectPackageNamesFromList(payload, packageNames);
-    return packageNames;
-  }
-
-  if (!payload || typeof payload !== 'object') {
-    return packageNames;
-  }
-
-  if (Array.isArray(payload.items)) {
-    collectPackageNamesFromList(payload.items, packageNames);
-  }
-
-  if ('packages' in payload) {
-    collectPackageNamesFromContainer(payload.packages, packageNames);
-  }
-
-  if (packageNames.size === 0 && typeof payload.name === 'string') {
-    addPackageName(payload.name, packageNames);
-  }
-
-  return packageNames;
-}
-
-function collectPackageNamesFromContainer(container, packageNames) {
-  if (!container) {
-    return;
-  }
-
-  if (Array.isArray(container)) {
-    collectPackageNamesFromList(container, packageNames);
-    return;
-  }
-
-  if (typeof container !== 'object') {
-    return;
-  }
-
-  if (typeof container.name === 'string') {
-    addPackageName(container.name, packageNames);
-  }
-
-  if (Array.isArray(container.items)) {
-    collectPackageNamesFromList(container.items, packageNames);
-  }
-
-  if (Array.isArray(container.packages)) {
-    collectPackageNamesFromList(container.packages, packageNames);
-  }
-
-  for (const [key, value] of Object.entries(container)) {
-    const valueLooksLikePackageEntry =
-      value &&
-      typeof value === 'object' &&
-      !Array.isArray(value) &&
-      ('path' in value || 'name' in value || 'package' in value);
-
-    if (valueLooksLikePackageEntry && isPackageNameCandidate(key)) {
-      packageNames.add(key);
-    }
-    if (value && typeof value === 'object' && typeof value.name === 'string') {
-      addPackageName(value.name, packageNames);
-    }
-  }
-}
-
-function collectPackageNamesFromList(list, packageNames) {
-  for (const entry of list) {
-    if (typeof entry === 'string') {
-      addPackageName(entry, packageNames);
-      continue;
-    }
-    if (!entry || typeof entry !== 'object') {
-      continue;
-    }
-
-    if (typeof entry.name === 'string') {
-      addPackageName(entry.name, packageNames);
-      continue;
-    }
-
-    if (typeof entry.package === 'string') {
-      addPackageName(entry.package, packageNames);
-      continue;
-    }
-
-    if (Array.isArray(entry.items)) {
-      collectPackageNamesFromList(entry.items, packageNames);
-    }
-  }
-}
-
-function addPackageName(name, packageNames) {
-  if (isPackageNameCandidate(name)) {
-    packageNames.add(name);
-  }
-}
-
-function isPackageNameCandidate(value) {
-  if (typeof value !== 'string') {
-    return false;
-  }
-  if (!value || value === '//') {
-    return false;
-  }
-  if (value.includes('#') || value.includes('\\') || value.includes(' ')) {
-    return false;
-  }
-  if (value.startsWith('@')) {
-    return /^@[^/]+\/[^/]+$/.test(value);
-  }
-  return !value.includes('/');
-}
-
-function toUnscopedName(value) {
-  if (typeof value !== 'string' || !value.startsWith('@')) {
-    return null;
-  }
-  const [, unscoped] = value.split('/');
-  return unscoped || null;
 }

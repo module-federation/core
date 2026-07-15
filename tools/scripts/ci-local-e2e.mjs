@@ -12,11 +12,15 @@ export function createLocalE2EHelpers({
     );
   }
 
-  function checkAffectedStep(appNames) {
+  function checkAffectedStep(appNames, suiteName) {
     return step('Check CI conditions', async (ctx) => {
       const resolvedAppNames =
         typeof appNames === 'function' ? appNames(ctx) : appNames;
-      ctx.state.shouldRun = await ciIsAffected(resolvedAppNames, ctx);
+      ctx.state.shouldRun = await ciIsAffected(
+        resolvedAppNames,
+        suiteName,
+        ctx,
+      );
       ctx.state.skipReason = ctx.state.shouldRun
         ? null
         : 'Not affected by current changes.';
@@ -36,10 +40,10 @@ export function createLocalE2EHelpers({
     });
   }
 
-  function e2eSetupSteps(appNames, options) {
+  function e2eSetupSteps(suiteName, options) {
     return [
       installDependenciesStep(),
-      checkAffectedStep(appNames),
+      checkAffectedStep(null, suiteName),
       setupAffectedE2E(options),
     ];
   }
@@ -52,13 +56,13 @@ export function createLocalE2EHelpers({
     await run();
   }
 
-  async function ciIsAffected(appNames, ctx) {
+  async function ciIsAffected(appNames, suiteName, ctx) {
+    const selector = suiteName
+      ? `--e2eSuite=${suiteName}`
+      : `--appName=${serializeAppNames(appNames)}`;
     const result = await runCommand(
       'node',
-      [
-        'tools/scripts/ci-is-affected.mjs',
-        `--appName=${serializeAppNames(appNames)}`,
-      ],
+      ['tools/scripts/ci-is-affected.mjs', selector],
       { ...ctx, allowFailure: true },
     );
     if (result.code === 0) {

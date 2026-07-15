@@ -30,12 +30,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Check CI conditions
-        id: check-ci
-        run: node tools/scripts/ci-is-affected.mjs --e2eSuite=manifest --githubOutput=run-e2e
-
       - name: Restore Turborepo cache
-        if: steps.check-ci.outputs.run-e2e == 'true'
         uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
         with:
           path: .turbo/cache
@@ -45,17 +40,13 @@ jobs:
             ${{ runner.os }}-turbo-
 
       - name: Install Cypress
-        if: steps.check-ci.outputs.run-e2e == 'true'
         run: npx cypress install
 
       - name: Build shared packages
-        if: steps.check-ci.outputs.run-e2e == 'true'
         run: pnpm run build:packages
 
       - name: E2E Test for Manifest Demo (dev)
-        if: steps.check-ci.outputs.run-e2e == 'true'
         run: pnpm exec turbo run test:e2e --filter=3008-webpack-host
 
       - name: E2E Test for Manifest Demo (prod)
-        if: steps.check-ci.outputs.run-e2e == 'true'
         run: pnpm exec turbo run test:e2e:production --filter=3008-webpack-host
