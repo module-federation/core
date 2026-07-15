@@ -1,4 +1,5 @@
 name: Release
+run-name: Release ${{ inputs.version }} from ${{ inputs.branch }}
 on:
   workflow_dispatch:
     inputs:
@@ -20,7 +21,7 @@ permissions:
 
 jobs:
   release:
-    name: Release
+    name: Release ${{ inputs.version }} from ${{ inputs.branch }}
     if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'push' }}
     runs-on: ubuntu-latest
     environment: npm

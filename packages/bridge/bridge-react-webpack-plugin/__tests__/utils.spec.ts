@@ -59,6 +59,15 @@ describe('test checkVersion: should return the correct major version for react-r
   it('should return 7', () => {
     expect(checkVersion('^7.0.0')).toBe(7);
   });
+
+  it('should normalize newer major versions to 7', () => {
+    expect(checkVersion('^10.2.1')).toBe(7);
+  });
+
+  it('should return 0 for missing or unsupported versions', () => {
+    expect(checkVersion('latest')).toBe(0);
+    expect(checkVersion('^4.9.0')).toBe(0);
+  });
 });
 
 describe('test findPackageJson: should return the correct package.json path for react-router-dom v5, v6 and react-router v7', () => {

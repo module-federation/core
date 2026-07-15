@@ -2925,9 +2925,6 @@ importers:
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../../sdk
-      lru-cache:
-        specifier: 10.4.3
-        version: 10.4.3
     devDependencies:
       '@module-federation/bridge-shared':
         specifier: workspace:*
@@ -2971,9 +2968,6 @@ importers:
       react-dom:
         specifier: 18.3.1
         version: 18.3.1(react@18.3.1)
-      react-error-boundary:
-        specifier: ^4.1.2
-        version: 4.1.2(react@18.3.1)
       react-router:
         specifier: 7.16.0
         version: 7.16.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -2992,12 +2986,6 @@ importers:
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../../sdk
-      '@types/semver':
-        specifier: 7.5.8
-        version: 7.5.8
-      semver:
-        specifier: 7.6.3
-        version: 7.6.3
     devDependencies:
       typescript:
         specifier: 7.0.2
@@ -3255,9 +3243,6 @@ importers:
       isomorphic-ws:
         specifier: 5.0.0
         version: 5.0.0(ws@8.21.0)
-      node-schedule:
-        specifier: 2.1.1
-        version: 2.1.1
       undici:
         specifier: 7.28.0
         version: 7.28.0
@@ -3271,9 +3256,6 @@ importers:
       '@rstest/core':
         specifier: ^0.10.6
         version: 0.10.6(@module-federation/runtime-tools@2.7.0)(core-js@3.49.0)(jsdom@20.0.3)
-      '@types/node-schedule':
-        specifier: 2.1.7
-        version: 2.1.7
       '@types/ws':
         specifier: 8.5.12
         version: 8.5.12
@@ -3343,9 +3325,6 @@ importers:
       tapable:
         specifier: 2.3.0
         version: 2.3.0
-      upath:
-        specifier: 2.0.1
-        version: 2.0.1
       vue-tsc:
         specifier: '>=1.0.24'
         version: 2.2.12(typescript@7.0.2)
@@ -3422,9 +3401,6 @@ importers:
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../sdk
-      empathic:
-        specifier: 2.0.0
-        version: 2.0.0
     devDependencies:
       webpack:
         specifier: 5.104.1
@@ -3584,9 +3560,6 @@ importers:
 
   packages/modernjs:
     dependencies:
-      '@modern-js/utils':
-        specifier: 2.70.5
-        version: 2.70.5
       '@module-federation/bridge-react':
         specifier: workspace:*
         version: link:../bridge/bridge-react
@@ -3614,21 +3587,12 @@ importers:
       jiti:
         specifier: 2.4.2
         version: 2.4.2
-      lru-cache:
-        specifier: 10.4.3
-        version: 10.4.3
-      node-fetch:
-        specifier: 3.3.0
-        version: 3.3.0
       react:
         specifier: '>=17'
         version: 19.2.7
       react-dom:
         specifier: '>=17'
         version: 19.2.7(react@19.2.7)
-      react-error-boundary:
-        specifier: 4.1.2
-        version: 4.1.2(react@19.2.7)
       react-router:
         specifier: ^7
         version: 7.12.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -3705,15 +3669,6 @@ importers:
       jiti:
         specifier: 2.4.2
         version: 2.4.2
-      lru-cache:
-        specifier: 10.4.3
-        version: 10.4.3
-      node-fetch:
-        specifier: 3.3.0
-        version: 3.3.0
-      react-error-boundary:
-        specifier: 4.1.2
-        version: 4.1.2(react@18.3.1)
       react-router:
         specifier: ^7
         version: 7.12.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -4187,13 +4142,6 @@ importers:
         version: 0.6.2
 
   packages/third-party-dts-extractor:
-    dependencies:
-      empathic:
-        specifier: 2.0.0
-        version: 2.0.0
-      exsolve:
-        specifier: 1.0.8
-        version: 1.0.8
     devDependencies:
       '@rstest/core':
         specifier: ^0.10.6

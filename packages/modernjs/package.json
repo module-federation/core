@@ -137,20 +137,19 @@
   "types": "./dist/types/cli/index.d.ts",
   "author": "hanric <hanric.zhang@gmail.com>",
   "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
-    "@modern-js/utils": "2.70.5",
     "@module-federation/rsbuild-plugin": "workspace:*",
     "@module-federation/bridge-react": "workspace:*",
-    "lru-cache": "10.4.3",
     "@module-federation/enhanced": "workspace:*",
     "@module-federation/runtime": "workspace:*",
     "@module-federation/node": "workspace:*",
     "@module-federation/sdk": "workspace:*",
     "@module-federation/cli": "workspace:*",
     "@swc/helpers": "0.5.17",
-    "node-fetch": "3.3.0",
-    "jiti": "2.4.2",
-    "react-error-boundary": "4.1.2"
+    "jiti": "2.4.2"
   },
   "devDependencies": {
     "@rsbuild/plugin-react": "1.4.5",
