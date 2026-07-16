@@ -149,6 +149,7 @@ const normalizeSharedValue = (
   defaultLayer: string,
   isolateShareScope = false,
   layers?: ExposedLayers,
+  activeRealmLayers?: readonly string[],
 ): SharedConfig => {
   const config: LynxSharedConfig =
     typeof value === 'string'
@@ -179,6 +180,22 @@ const normalizeSharedValue = (
   }
   const layer = sharedConfig.layer ?? realmLayer ?? defaultLayer;
   const issuerLayer = sharedConfig.issuerLayer ?? realmLayer ?? defaultLayer;
+  const shareScopeLayer =
+    realmLayer ??
+    (issuerLayer === layers?.MAIN_THREAD
+      ? layers.MAIN_THREAD
+      : issuerLayer === layers?.BACKGROUND
+        ? layers.BACKGROUND
+        : (layers?.BACKGROUND ?? issuerLayer));
+  if (
+    isolateShareScope &&
+    activeRealmLayers &&
+    !activeRealmLayers.includes(shareScopeLayer)
+  ) {
+    throw new Error(
+      `@module-federation/lynx shared module "${key}" uses inactive realm layer "${shareScopeLayer}". Enable its Lynx realm or choose one of: ${activeRealmLayers.join(', ')}.`,
+    );
+  }
 
   return {
     ...sharedConfig,
@@ -189,7 +206,7 @@ const normalizeSharedValue = (
           shareScope: (Array.isArray(config.shareScope)
             ? config.shareScope
             : [config.shareScope ?? 'default']
-          ).map((scope) => `${scope}:${issuerLayer}`),
+          ).map((scope) => `${scope}:${shareScopeLayer}`),
         }
       : {}),
   };
@@ -200,6 +217,7 @@ const normalizeSharedItem = (
   defaultLayer: string,
   isolateShareScope = false,
   layers?: ExposedLayers,
+  activeRealmLayers?: readonly string[],
 ): Record<string, SharedConfig> => {
   if (typeof item === 'string') {
     return {
@@ -209,6 +227,7 @@ const normalizeSharedItem = (
         defaultLayer,
         isolateShareScope,
         layers,
+        activeRealmLayers,
       ),
     };
   }
@@ -216,7 +235,14 @@ const normalizeSharedItem = (
   return Object.fromEntries(
     Object.entries(item).map(([key, value]) => [
       key,
-      normalizeSharedValue(key, value, defaultLayer, isolateShareScope, layers),
+      normalizeSharedValue(
+        key,
+        value,
+        defaultLayer,
+        isolateShareScope,
+        layers,
+        activeRealmLayers,
+      ),
     ]),
   );
 };
@@ -237,9 +263,14 @@ export const normalizeLynxShared = (
     : normalizeSharedItem(shared, defaultLayer, false, layers);
 };
 
-export const normalizeSharedForBothLayers = (
+export const normalizeRealmScopedShared = (
   shared: LynxShared | undefined,
   layers: ExposedLayers,
+  defaultLayer = layers.BACKGROUND,
+  activeRealmLayers: readonly string[] = [
+    layers.BACKGROUND,
+    layers.MAIN_THREAD,
+  ],
 ): Shared | undefined => {
   if (!shared) {
     return undefined;
@@ -247,19 +278,20 @@ export const normalizeSharedForBothLayers = (
 
   const items = Array.isArray(shared) ? shared : [shared];
   return items.map((item) =>
-    normalizeSharedItem(item, layers.BACKGROUND, true, layers),
+    normalizeSharedItem(item, defaultLayer, true, layers, activeRealmLayers),
   );
 };
 
 export const getLynxShareScopes = (
   shareScope: ModuleFederationPluginOptions['shareScope'],
   layers: ExposedLayers,
+  activeRealmLayers: readonly string[] = [
+    layers.BACKGROUND,
+    layers.MAIN_THREAD,
+  ],
 ): string[] =>
   (Array.isArray(shareScope) ? shareScope : [shareScope ?? 'default']).flatMap(
-    (scope) => [
-      `${scope}:${layers.BACKGROUND}`,
-      `${scope}:${layers.MAIN_THREAD}`,
-    ],
+    (scope) => activeRealmLayers.map((layer) => `${scope}:${layer}`),
   );
 
 export const injectRuntimePlugin = (

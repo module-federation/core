@@ -18,7 +18,7 @@ import {
   getRemoteBundleOptions,
   normalizeLynxExposes,
   normalizeLynxShared,
-  normalizeSharedForBothLayers,
+  normalizeRealmScopedShared,
   shouldApplyToEnvironment,
   validateLayers,
   type ExposedLayers,
@@ -149,6 +149,9 @@ export const pluginLynxModuleFederation = (
         const remoteBundle = getRemoteBundleOptions(adapterOptions);
         const mainThreadEnabled =
           Boolean(adapterOptions.mainThread) || remoteBundle?.target === 'web';
+        const activeRealmLayers = mainThreadEnabled
+          ? [layers.BACKGROUND, layers.MAIN_THREAD]
+          : [layers.BACKGROUND];
 
         config.output ||= {};
         config.output.chunkLoading ??= 'lynx';
@@ -178,16 +181,21 @@ export const pluginLynxModuleFederation = (
         }
 
         const federationOptions = createFederationOptions(
-          mainThreadEnabled
-            ? {
-                ...options,
-                shareScope: getLynxShareScopes(options.shareScope, layers),
-              }
-            : options,
+          {
+            ...options,
+            shareScope: getLynxShareScopes(
+              options.shareScope,
+              layers,
+              activeRealmLayers,
+            ),
+          },
           normalizeLynxExposes(options.exposes, defaultLayer),
-          mainThreadEnabled
-            ? normalizeSharedForBothLayers(options.shared, layers)
-            : normalizeLynxShared(options.shared, defaultLayer, layers),
+          normalizeRealmScopedShared(
+            options.shared,
+            layers,
+            defaultLayer,
+            activeRealmLayers,
+          ),
           runtimePlugin,
           adapterOptions.runtimePluginOptions,
         );

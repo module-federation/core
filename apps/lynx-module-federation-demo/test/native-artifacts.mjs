@@ -63,11 +63,24 @@ for (const implementationText of [
 }
 
 const hostSource = JSON.stringify(hostTemplate);
+const hostBackgroundSource = hostTemplate['background-thread-script']
+  .map(({ content }) => content ?? '')
+  .join('\n');
 assert.match(
   hostSource,
   /http:\/\/127\.0\.0\.1:3000\/remote-native\/mf-manifest\.json/,
 );
 assert.match(hostSource, /lynx-federation-runtime-plugin/);
+assert.ok(
+  hostBackgroundSource.includes(
+    'scopeToSharingDataMapping:{"default:react:background":',
+  ) && hostBackgroundSource.includes('name:"orbit-shared-state"'),
+  'native host does not provide orbit-shared-state in the background realm share scope',
+);
+assert.ok(
+  !hostBackgroundSource.includes('"default:react:main-thread"'),
+  'background-only native host initializes the main-thread share scope',
+);
 for (const request of [
   'catalog/ActivityFeed',
   'catalog/Card',

@@ -186,7 +186,6 @@ describe('pluginLynxModuleFederation', () => {
         runtimePlugins: ['custom-runtime-plugin'],
       },
       {
-        mainThread: true,
         runtimePluginOptions: { timeout: 2_000 },
       },
     );
@@ -195,10 +194,7 @@ describe('pluginLynxModuleFederation', () => {
     expect(config.plugins).toHaveLength(2);
     expect(federationOptions(config.plugins[0])).toMatchObject({
       name: 'lynx_host',
-      shareScope: [
-        `default:${LAYERS.BACKGROUND}`,
-        `default:${LAYERS.MAIN_THREAD}`,
-      ],
+      shareScope: [`default:${LAYERS.BACKGROUND}`],
       runtimePlugins: [
         ['custom-runtime-plugin', {}],
         [LYNX_RUNTIME_PLUGIN, { timeout: 2_000 }],
@@ -223,6 +219,73 @@ describe('pluginLynxModuleFederation', () => {
         },
       ],
     });
+  });
+
+  it('adds the main-thread share scope only when that realm is enabled', async () => {
+    const { modifyRspackConfig } = setupPlugin(
+      {
+        name: 'lynx_host',
+        shared: { react: { singleton: true } },
+      },
+      { mainThread: true },
+    );
+    const config = await modifyRspackConfig({ plugins: [] });
+
+    expect(federationOptions(config.plugins[0])).toMatchObject({
+      shareScope: [
+        `default:${LAYERS.BACKGROUND}`,
+        `default:${LAYERS.MAIN_THREAD}`,
+      ],
+      shared: [
+        {
+          react: {
+            singleton: true,
+            layer: LAYERS.BACKGROUND,
+            issuerLayer: LAYERS.BACKGROUND,
+            shareScope: [`default:${LAYERS.BACKGROUND}`],
+          },
+        },
+      ],
+    });
+  });
+
+  it('keeps custom compiler layers separate from runtime share scopes', async () => {
+    const customLayer = 'custom-layer';
+    const { modifyRspackConfig } = setupPlugin(
+      {
+        name: 'lynx_host',
+        shared: { state: { singleton: true } },
+      },
+      { layer: customLayer },
+    );
+    const config = await modifyRspackConfig({ plugins: [] });
+
+    expect(federationOptions(config.plugins[0])).toMatchObject({
+      shareScope: [`default:${LAYERS.BACKGROUND}`],
+      shared: [
+        {
+          state: {
+            singleton: true,
+            layer: customLayer,
+            issuerLayer: customLayer,
+            shareScope: [`default:${LAYERS.BACKGROUND}`],
+          },
+        },
+      ],
+    });
+  });
+
+  it('rejects shared modules assigned to a disabled host realm', async () => {
+    const { modifyRspackConfig } = setupPlugin({
+      name: 'lynx_host',
+      shared: {
+        state: { realm: 'main-thread', singleton: true },
+      },
+    });
+
+    await expect(modifyRspackConfig({ plugins: [] })).rejects.toThrow(
+      `shared module "state" uses inactive realm layer "${LAYERS.MAIN_THREAD}"`,
+    );
   });
 
   it('maps semantic shared realms to exposed Lynx layers', async () => {
@@ -707,6 +770,7 @@ describe('pluginLynxModuleFederation', () => {
     const remoteOptions = federationOptions(config.plugins[0]);
 
     expect(config.plugins).toHaveLength(4);
+    expect(remoteOptions.shareScope).toEqual([`default:${LAYERS.BACKGROUND}`]);
     expect(remoteOptions.exposes).toEqual({
       './data': {
         import: './src/data',
@@ -714,13 +778,33 @@ describe('pluginLynxModuleFederation', () => {
         name: 'catalog__background_data',
       },
     });
-    expect(remoteOptions.shared).toEqual({
-      state: {
-        singleton: true,
-        layer: LAYERS.BACKGROUND,
-        issuerLayer: LAYERS.BACKGROUND,
+    expect(remoteOptions.shared).toEqual([
+      {
+        state: {
+          singleton: true,
+          layer: LAYERS.BACKGROUND,
+          issuerLayer: LAYERS.BACKGROUND,
+          shareScope: [`default:${LAYERS.BACKGROUND}`],
+        },
       },
-    });
+    ]);
+  });
+
+  it('rejects main-thread shares in native single bundles', async () => {
+    const { modifyRspackConfig } = setupPlugin(
+      {
+        name: 'catalog',
+        exposes: { './data': './src/data' },
+        shared: {
+          state: { realm: 'main-thread', singleton: true },
+        },
+      },
+      { remoteBundle: { target: 'lynx', chunking: 'single' } },
+    );
+
+    await expect(modifyRspackConfig({ plugins: [] })).rejects.toThrow(
+      `shared module "state" uses inactive realm layer "${LAYERS.MAIN_THREAD}"`,
+    );
   });
 
   it('preserves manifest file customization', async () => {

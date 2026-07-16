@@ -16,8 +16,7 @@ import {
   createFederationOptions,
   getLynxShareScopes,
   normalizeLynxExposes,
-  normalizeLynxShared,
-  normalizeSharedForBothLayers,
+  normalizeRealmScopedShared,
   type ExposedLayers,
   type LynxModuleFederationAdapterOptions,
   type LynxModuleFederationOptions,
@@ -449,17 +448,25 @@ export const configureRemoteBundle = async (
         layers.BACKGROUND,
         plan.backgroundChunkPrefix,
       );
-  const remoteShared = pairedPlan
-    ? normalizeSharedForBothLayers(options.shared, layers)
-    : normalizeLynxShared(options.shared, layers.BACKGROUND, layers);
+  const activeRealmLayers = pairedPlan
+    ? [layers.BACKGROUND, layers.MAIN_THREAD]
+    : [layers.BACKGROUND];
+  const remoteShared = normalizeRealmScopedShared(
+    options.shared,
+    layers,
+    layers.BACKGROUND,
+    activeRealmLayers,
+  );
   const federationOptions = {
     ...createFederationOptions(
-      pairedPlan
-        ? {
-            ...options,
-            shareScope: getLynxShareScopes(options.shareScope, layers),
-          }
-        : options,
+      {
+        ...options,
+        shareScope: getLynxShareScopes(
+          options.shareScope,
+          layers,
+          activeRealmLayers,
+        ),
+      },
       remoteExposes,
       remoteShared,
       runtimePlugin,
