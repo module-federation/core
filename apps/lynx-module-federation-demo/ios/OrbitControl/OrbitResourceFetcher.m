@@ -7,18 +7,47 @@
 #import <Lynx/LynxViewBuilder.h>
 
 static NSString *const OrbitResourceErrorDomain = @"org.modulefederation.lynx.resources";
+static NSUInteger const OrbitResourcePathCacheLimit = 64;
 
 @interface OrbitResourceFetcher ()
+
+@property(nonatomic, strong) NSMutableDictionary<NSString *, NSString *> *resourcePathCache;
+@property(nonatomic, strong) NSMutableArray<NSString *> *resourcePathCacheOrder;
+@property(nonatomic, strong) NSURL *resourceCacheDirectory;
 
 - (dispatch_block_t)loadDataForURLString:(NSString *)urlString
                               completion:(void (^)(NSData *_Nullable,
                                                    NSError *_Nullable))completion;
 - (NSURL *_Nullable)localURLForString:(NSString *)urlString;
+- (BOOL)isAllowedLocalURL:(NSURL *)url;
+- (NSString *_Nullable)cachedResourcePathForURLString:(NSString *)urlString;
+- (NSString *_Nullable)storeResourceData:(NSData *)data
+                             forURLString:(NSString *)urlString
+                                    error:(NSError **)error;
 - (NSError *)errorWithMessage:(NSString *)message;
 
 @end
 
 @implementation OrbitResourceFetcher
+
+- (instancetype)init {
+  self = [super init];
+  if (self) {
+    _resourcePathCache = [NSMutableDictionary dictionary];
+    _resourcePathCacheOrder = [NSMutableArray array];
+    _resourceCacheDirectory = [[[NSURL fileURLWithPath:NSTemporaryDirectory()
+                                           isDirectory:YES]
+      URLByAppendingPathComponent:@"OrbitResources"
+                       isDirectory:YES]
+      URLByAppendingPathComponent:NSUUID.UUID.UUIDString
+                       isDirectory:YES];
+  }
+  return self;
+}
+
+- (void)dealloc {
+  [[NSFileManager defaultManager] removeItemAtURL:self.resourceCacheDirectory error:nil];
+}
 
 - (void)configureBuilder:(LynxViewBuilder *)builder {
   builder.enableGenericResourceFetcher = LynxBooleanOptionTrue;
@@ -61,6 +90,12 @@ static NSString *const OrbitResourceErrorDomain = @"org.modulefederation.lynx.re
     return ^{};
   }
 
+  NSString *cachedPath = [self cachedResourcePathForURLString:request.url];
+  if (cachedPath) {
+    callback(cachedPath, nil);
+    return ^{};
+  }
+
   return [self loadDataForURLString:request.url
                          completion:^(NSData *data, NSError *error) {
                            if (!data) {
@@ -68,24 +103,58 @@ static NSString *const OrbitResourceErrorDomain = @"org.modulefederation.lynx.re
                              return;
                            }
 
-                           NSURL *directory = [NSURL fileURLWithPath:NSTemporaryDirectory()
-                                                         isDirectory:YES];
-                           directory = [directory URLByAppendingPathComponent:@"OrbitResources"
-                                                                   isDirectory:YES];
                            NSError *writeError = nil;
-                           [[NSFileManager defaultManager] createDirectoryAtURL:directory
-                                                   withIntermediateDirectories:YES
-                                                                    attributes:nil
-                                                                         error:&writeError];
-                           NSURL *fileURL = [directory URLByAppendingPathComponent:
-                             [NSUUID UUID].UUIDString];
-                           if (!writeError && [data writeToURL:fileURL options:NSDataWritingAtomic
-                                                        error:&writeError]) {
-                             callback(fileURL.path, nil);
-                           } else {
-                             callback(nil, writeError);
-                           }
+                           NSString *path = [self storeResourceData:data
+                                                       forURLString:request.url
+                                                              error:&writeError];
+                           callback(path, writeError);
                          }];
+}
+
+- (NSString *_Nullable)cachedResourcePathForURLString:(NSString *)urlString {
+  @synchronized(self) {
+    return self.resourcePathCache[urlString];
+  }
+}
+
+- (NSString *_Nullable)storeResourceData:(NSData *)data
+                             forURLString:(NSString *)urlString
+                                    error:(NSError **)error {
+  NSString *cachedPath = [self cachedResourcePathForURLString:urlString];
+  if (cachedPath) return cachedPath;
+
+  [[NSFileManager defaultManager] createDirectoryAtURL:self.resourceCacheDirectory
+                            withIntermediateDirectories:YES
+                                             attributes:nil
+                                                  error:error];
+  if (*error) return nil;
+
+  NSString *extension = [NSURL URLWithString:urlString].pathExtension;
+  NSString *filename = NSUUID.UUID.UUIDString;
+  if (extension.length > 0) {
+    filename = [filename stringByAppendingPathExtension:extension];
+  }
+  NSURL *fileURL = [self.resourceCacheDirectory URLByAppendingPathComponent:filename];
+  if (![data writeToURL:fileURL options:NSDataWritingAtomic error:error]) return nil;
+
+  @synchronized(self) {
+    NSString *existingPath = self.resourcePathCache[urlString];
+    if (existingPath) {
+      [[NSFileManager defaultManager] removeItemAtURL:fileURL error:nil];
+      return existingPath;
+    }
+
+    self.resourcePathCache[urlString] = fileURL.path;
+    [self.resourcePathCacheOrder addObject:urlString];
+    if (self.resourcePathCacheOrder.count > OrbitResourcePathCacheLimit) {
+      NSString *expiredURL = self.resourcePathCacheOrder.firstObject;
+      NSString *expiredPath = self.resourcePathCache[expiredURL];
+      [self.resourcePathCacheOrder removeObjectAtIndex:0];
+      [self.resourcePathCache removeObjectForKey:expiredURL];
+      [[NSFileManager defaultManager] removeItemAtPath:expiredPath error:nil];
+    }
+  }
+  return fileURL.path;
 }
 
 - (dispatch_block_t)loadDataForURLString:(NSString *)urlString
@@ -139,23 +208,47 @@ static NSString *const OrbitResourceErrorDomain = @"org.modulefederation.lynx.re
 - (NSURL *_Nullable)localURLForString:(NSString *)urlString {
   NSURL *url = [NSURL URLWithString:urlString];
   if ([url.scheme isEqualToString:@"file"]) {
-    return url;
+    return [self isAllowedLocalURL:url] ? url : nil;
   }
   if ([url.scheme isEqualToString:@"http"] ||
       [url.scheme isEqualToString:@"https"]) {
     return nil;
   }
   if ([urlString isAbsolutePath]) {
-    return [NSURL fileURLWithPath:urlString];
+    NSURL *fileURL = [NSURL fileURLWithPath:urlString];
+    return [self isAllowedLocalURL:fileURL] ? fileURL : nil;
   }
 
-  NSString *filename = urlString.lastPathComponent;
+  NSString *relativePath = url.path.length > 0 ? url.path : urlString;
+  relativePath = relativePath.stringByStandardizingPath;
+  if (relativePath.length == 0 || [relativePath isEqualToString:@"."] ||
+      [relativePath isEqualToString:@".."] ||
+      [relativePath hasPrefix:@"../"]) {
+    return nil;
+  }
+  NSString *filename = relativePath.lastPathComponent;
+  NSString *subdirectory = relativePath.stringByDeletingLastPathComponent;
   NSString *extension = filename.pathExtension;
   NSString *name = extension.length > 0
     ? [filename stringByDeletingPathExtension]
     : filename;
   return [[NSBundle mainBundle] URLForResource:name
-                                  withExtension:extension.length > 0 ? extension : nil];
+                                  withExtension:extension.length > 0 ? extension : nil
+                                   subdirectory:[subdirectory isEqualToString:@"."]
+                                     ? nil
+                                     : subdirectory];
+}
+
+- (BOOL)isAllowedLocalURL:(NSURL *)url {
+  NSString *path = url.URLByStandardizingPath.URLByResolvingSymlinksInPath.path;
+  for (NSURL *directory in @[[NSBundle mainBundle].bundleURL,
+                             self.resourceCacheDirectory]) {
+    NSString *directoryPath =
+      directory.URLByStandardizingPath.URLByResolvingSymlinksInPath.path;
+    NSString *prefix = [directoryPath stringByAppendingString:@"/"];
+    if ([path hasPrefix:prefix]) return YES;
+  }
+  return NO;
 }
 
 - (NSError *)errorWithMessage:(NSString *)message {

@@ -23,10 +23,15 @@ const artifactsRoot = path.join(iosRoot, 'build');
 const requestLogPath = path.join(artifactsRoot, 'requests.json');
 const screenshotPath = path.join(artifactsRoot, 'orbit-control.png');
 const resultBundlePath = path.join(artifactsRoot, 'OrbitControl.xcresult');
+const releaseResultBundlePath = path.join(
+  artifactsRoot,
+  'OrbitControl-Release.xcresult',
+);
 const requestedPaths = [];
 
 await mkdir(artifactsRoot, { recursive: true });
 await rm(resultBundlePath, { force: true, recursive: true });
+await rm(releaseResultBundlePath, { force: true, recursive: true });
 await stat(path.join(distRoot, 'host-native/main.lynx.bundle'));
 await stat(path.join(distRoot, 'remote-native/mf-manifest.json'));
 const manifest = JSON.parse(
@@ -97,23 +102,43 @@ const devices = Object.entries(JSON.parse(simulatorList.stdout).devices)
   )
   .filter((device) => device.isAvailable && device.name.startsWith('iPhone'));
 assert.ok(devices.length > 0, 'No available iPhone simulator was found.');
-const device =
+const templateDevice =
   devices.find(({ name }) => name.includes('16 Pro')) ?? devices[0];
+assert.ok(
+  templateDevice.deviceTypeIdentifier,
+  `Simulator ${templateDevice.name} did not report a device type.`,
+);
 
 await new Promise((resolve, reject) => {
   server.once('error', reject);
   server.listen(serverPort, '127.0.0.1', resolve);
 });
 
+let deviceUDID;
 try {
-  const boot = spawnSync('xcrun', ['simctl', 'boot', device.udid], {
+  const created = spawnSync(
+    'xcrun',
+    [
+      'simctl',
+      'create',
+      `OrbitControl E2E ${process.pid}`,
+      templateDevice.deviceTypeIdentifier,
+      templateDevice.runtime,
+    ],
+    { encoding: 'utf8' },
+  );
+  assert.equal(created.status, 0, created.stderr);
+  deviceUDID = created.stdout.trim();
+  assert.ok(deviceUDID, 'simctl create did not return a device identifier.');
+
+  const boot = spawnSync('xcrun', ['simctl', 'boot', deviceUDID], {
     encoding: 'utf8',
   });
   assert.ok(
     boot.status === 0 || /current state: Booted/.test(boot.stderr),
     boot.stderr,
   );
-  await run('xcrun', ['simctl', 'bootstatus', device.udid, '-b']);
+  await run('xcrun', ['simctl', 'bootstatus', deviceUDID, '-b']);
   await run(
     'xcodebuild',
     [
@@ -123,7 +148,7 @@ try {
       '-scheme',
       'OrbitControl',
       '-destination',
-      `platform=iOS Simulator,id=${device.udid}`,
+      `platform=iOS Simulator,id=${deviceUDID}`,
       '-derivedDataPath',
       'build/DerivedData',
       '-resultBundlePath',
@@ -135,6 +160,33 @@ try {
       env: {
         ...process.env,
         LYNX_BUNDLE_URL: `${serverURL.origin}/host-native/main.lynx.bundle`,
+      },
+    },
+  );
+  await run(
+    'xcodebuild',
+    [
+      'test',
+      '-workspace',
+      'OrbitControl.xcworkspace',
+      '-scheme',
+      'OrbitControl',
+      '-configuration',
+      'Release',
+      '-destination',
+      `platform=iOS Simulator,id=${deviceUDID}`,
+      '-derivedDataPath',
+      'build/DerivedData',
+      '-resultBundlePath',
+      'build/OrbitControl-Release.xcresult',
+      '-parallel-testing-enabled',
+      'NO',
+      '-only-testing:OrbitControlUITests/OrbitControlUITests/testEmbeddedReleaseHostLaunches',
+    ],
+    {
+      env: {
+        ...process.env,
+        ORBIT_RELEASE_SMOKE: '1',
       },
     },
   );
@@ -164,13 +216,20 @@ try {
   );
 } finally {
   await writeFile(requestLogPath, JSON.stringify(requestedPaths, null, 2));
-  spawnSync(
-    'xcrun',
-    ['simctl', 'io', device.udid, 'screenshot', screenshotPath],
-    {
+  if (deviceUDID) {
+    spawnSync(
+      'xcrun',
+      ['simctl', 'io', deviceUDID, 'screenshot', screenshotPath],
+      {
+        encoding: 'utf8',
+      },
+    );
+    spawnSync('xcrun', ['simctl', 'shutdown', deviceUDID], {
       encoding: 'utf8',
-    },
-  );
-  spawnSync('xcrun', ['simctl', 'shutdown', device.udid], { encoding: 'utf8' });
+    });
+    spawnSync('xcrun', ['simctl', 'delete', deviceUDID], {
+      encoding: 'utf8',
+    });
+  }
   await new Promise((resolve) => server.close(resolve));
 }

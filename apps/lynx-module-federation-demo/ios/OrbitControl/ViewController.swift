@@ -12,15 +12,14 @@ final class ViewController: UIViewController {
 
     let lynxView = LynxView { builder in
       builder.config = LynxConfig(provider: self.resourceFetcher)
-      builder.screenSize = self.view.bounds.size
+      builder.screenSize = self.contentFrame.size
       builder.fontScale = 1.0
       self.resourceFetcher.configure(builder)
     }
 
-    lynxView.frame = view.bounds
-    lynxView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-    lynxView.preferredLayoutWidth = view.bounds.width
-    lynxView.preferredLayoutHeight = view.bounds.height
+    lynxView.frame = contentFrame
+    lynxView.preferredLayoutWidth = contentFrame.width
+    lynxView.preferredLayoutHeight = contentFrame.height
     lynxView.layoutWidthMode = .exact
     lynxView.layoutHeightMode = .exact
     view.addSubview(lynxView)
@@ -44,8 +43,15 @@ final class ViewController: UIViewController {
 
   override func viewDidLayoutSubviews() {
     super.viewDidLayoutSubviews()
-    lynxView?.preferredLayoutWidth = view.bounds.width
-    lynxView?.preferredLayoutHeight = view.bounds.height
+    guard let lynxView else { return }
+    let frame = contentFrame
+    lynxView.frame = frame
+    lynxView.updateScreenMetrics(withWidth: frame.width, height: frame.height)
+    lynxView.updateViewport(
+      withPreferredLayoutWidth: frame.width,
+      preferredLayoutHeight: frame.height,
+      needLayout: true
+    )
   }
 
   deinit {
@@ -71,5 +77,10 @@ final class ViewController: UIViewController {
 #else
     return "main.lynx.bundle"
 #endif
+  }
+
+  private var contentFrame: CGRect {
+    let frame = view.safeAreaLayoutGuide.layoutFrame
+    return frame.isEmpty ? view.bounds : frame
   }
 }

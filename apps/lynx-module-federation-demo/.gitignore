@@ -1,4 +1,5 @@
 dist/
+.lynx-e2e-*/
 .turbo/
 test/real-web/artifacts/
 ios/.bundle/

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { readdir, rm } from 'node:fs/promises';
+import { mkdtemp, readdir, rename, rm } from 'node:fs/promises';
 import { createServer } from 'node:net';
 import { spawn, spawnSync } from 'node:child_process';
 import path from 'node:path';
@@ -29,32 +29,12 @@ const devEnvironment = {
   LYNX_DEV_PORT: String(port),
   LYNX_REMOTE_ORIGIN: origin,
 };
-await rm(path.join(appRoot, 'dist/remote-native'), {
-  force: true,
-  recursive: true,
-});
-const remoteBuild = spawnSync(
-  process.execPath,
-  ['rspack-canary-rspeedy.mjs', 'build', '-c', 'lynx.remote.native.config.mjs'],
-  { cwd: appRoot, encoding: 'utf8', env: devEnvironment },
-);
-assert.equal(
-  remoteBuild.status,
-  0,
-  `Native remote rebuild failed:\n${remoteBuild.stdout}\n${remoteBuild.stderr}`,
-);
 const output = [];
-const child = spawn(
-  process.execPath,
-  ['rspack-canary-rspeedy.mjs', 'dev', '-c', 'lynx.config.mjs'],
-  {
-    cwd: appRoot,
-    env: devEnvironment,
-    stdio: ['ignore', 'pipe', 'pipe'],
-  },
-);
-child.stdout.on('data', (chunk) => output.push(chunk.toString()));
-child.stderr.on('data', (chunk) => output.push(chunk.toString()));
+const distRoot = path.join(appRoot, 'dist');
+const backupRoot = await mkdtemp(path.join(appRoot, '.lynx-e2e-'));
+const preservedDist = path.join(backupRoot, 'dist');
+await rename(distRoot, preservedDist);
+let child;
 
 const fetchReady = async (url, timeout = 30_000) => {
   const deadline = Date.now() + timeout;
@@ -75,6 +55,33 @@ const fetchReady = async (url, timeout = 30_000) => {
 };
 
 try {
+  const remoteBuild = spawnSync(
+    process.execPath,
+    [
+      'rspack-canary-rspeedy.mjs',
+      'build',
+      '-c',
+      'lynx.remote.native.config.mjs',
+    ],
+    { cwd: appRoot, encoding: 'utf8', env: devEnvironment },
+  );
+  assert.equal(
+    remoteBuild.status,
+    0,
+    `Native remote rebuild failed:\n${remoteBuild.stdout}\n${remoteBuild.stderr}`,
+  );
+  child = spawn(
+    process.execPath,
+    ['rspack-canary-rspeedy.mjs', 'dev', '-c', 'lynx.config.mjs'],
+    {
+      cwd: appRoot,
+      env: devEnvironment,
+      stdio: ['ignore', 'pipe', 'pipe'],
+    },
+  );
+  child.stdout.on('data', (chunk) => output.push(chunk.toString()));
+  child.stderr.on('data', (chunk) => output.push(chunk.toString()));
+
   await fetchReady(`${origin}/main.lynx.bundle`);
   const manifestResponse = await fetchReady(
     `${origin}/remote-native/mf-manifest.json`,
@@ -103,10 +110,15 @@ try {
     `Native Rspeedy dev server served host, manifest, container, and ${lazyBundles.length} lazy bundles.\n`,
   );
 } finally {
-  child.kill('SIGTERM');
-  await Promise.race([
-    new Promise((resolve) => child.once('exit', resolve)),
-    new Promise((resolve) => setTimeout(resolve, 5_000)),
-  ]);
-  if (child.exitCode === null) child.kill('SIGKILL');
+  if (child) {
+    child.kill('SIGTERM');
+    await Promise.race([
+      new Promise((resolve) => child.once('exit', resolve)),
+      new Promise((resolve) => setTimeout(resolve, 5_000)),
+    ]);
+    if (child.exitCode === null) child.kill('SIGKILL');
+  }
+  await rm(distRoot, { force: true, recursive: true });
+  await rename(preservedDist, distRoot);
+  await rm(backupRoot, { force: true, recursive: true });
 }

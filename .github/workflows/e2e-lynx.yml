@@ -74,12 +74,6 @@ jobs:
         if: steps.check-ci.outputs.run-e2e == 'true'
         run: pnpm --filter lynx-module-federation-demo run test:ios-project
 
-      - name: Prepare iOS native artifacts
-        if: steps.check-ci.outputs.run-e2e == 'true'
-        env:
-          LYNX_REMOTE_ORIGIN: http://127.0.0.1:3000
-        run: pnpm --filter lynx-module-federation-demo run build:native
-
       - name: Upload native artifacts for iOS
         if: steps.check-ci.outputs.run-e2e == 'true'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -160,6 +154,7 @@ jobs:
           name: lynx-ios-e2e
           path: |
             apps/lynx-module-federation-demo/ios/build/OrbitControl.xcresult/
+            apps/lynx-module-federation-demo/ios/build/OrbitControl-Release.xcresult/
             apps/lynx-module-federation-demo/ios/build/orbit-control.png
             apps/lynx-module-federation-demo/ios/build/requests.json
           if-no-files-found: ignore

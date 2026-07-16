@@ -1,6 +1,21 @@
 import XCTest
 
 final class OrbitControlUITests: XCTestCase {
+  func testEmbeddedReleaseHostLaunches() throws {
+    try XCTSkipUnless(
+      ProcessInfo.processInfo.environment["ORBIT_RELEASE_SMOKE"] == "1"
+    )
+
+    let app = XCUIApplication()
+    app.launchEnvironment["LYNX_BUNDLE_URL"] = ""
+    app.launch()
+
+    let loadButton = app.descendants(matching: .any)
+      .matching(NSPredicate(format: "label == %@", "Load remote catalog"))
+      .firstMatch
+    XCTAssertTrue(loadButton.waitForExistence(timeout: 30))
+  }
+
   func testFederatedImportsRuntimeLoadingAndSingleton() {
     addUIInterruptionMonitor(withDescription: "Local network permission") { alert in
       guard alert.buttons["Allow"].exists else { return false }

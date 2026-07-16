@@ -49,6 +49,20 @@ environment variable to a LAN-reachable URL for a physical device. The shell
 injects both Lynx template and generic resource fetchers, so the root Bundle,
 federated container, and Lazy Bundles can arrive over HTTP(S).
 
+For a physical device, use the same LAN origin for both the host bundle and
+the manifest URL compiled into it:
+
+```sh
+export LYNX_REMOTE_ORIGIN=http://<your-lan-ip>:3000
+pnpm ios:prepare
+pnpm ios:device
+```
+
+Set the Xcode scheme's `LYNX_BUNDLE_URL` to
+`http://<your-lan-ip>:3000/main.lynx.bundle`. `ios:device` rejects loopback
+origins and binds Rspeedy to `0.0.0.0`, so the phone can fetch the host,
+manifest, container, and lazy bundles from the same server.
+
 Release builds embed `ios/Resources/main.lynx.bundle` and retain strict ATS
 defaults. Build the host with the production manifest origin before syncing it:
 
@@ -61,7 +75,8 @@ Only the host bundle is embedded. The manifest, container, and lazy expose
 bundles remain separately deployable HTTP(S) artifacts. The iOS simulator E2E
 launches the app, taps **Load remote catalog**, verifies compiled imports,
 runtime `loadRemote()`, and shared singleton identity, then checks every native
-bundle request observed by the test server.
+bundle request observed by the test server. It also launches the Release app
+without a root URL override to prove the embedded host and strict ATS branch.
 
 ## Run with Lynx Explorer
 

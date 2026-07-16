@@ -27,6 +27,8 @@ const [
   debugInfo,
   project,
   uiTest,
+  packageJson,
+  deviceServer,
 ] = await Promise.all([
   read('ios/Podfile'),
   read('ios/Podfile.lock'),
@@ -36,6 +38,8 @@ const [
   read('ios/OrbitControl/Info.Debug.plist'),
   read('ios/OrbitControl.xcodeproj/project.pbxproj'),
   read('ios/OrbitControlUITests/OrbitControlUITests.swift'),
+  read('package.json'),
+  read('scripts/dev-ios-device.mjs'),
 ]);
 
 for (const pod of ['Lynx', 'LynxService', 'XElement']) {
@@ -49,6 +53,9 @@ assert.match(provenance, /f8230ca6aa1c9e629e30272971d0c03450b13e8e/);
 assert.match(fetcher, /LynxBooleanOptionTrue/);
 assert.match(fetcher, /builder\.templateResourceFetcher = self/);
 assert.match(fetcher, /builder\.genericResourceFetcher = self/);
+assert.match(fetcher, /isAllowedLocalURL/);
+assert.match(fetcher, /resourcePathCache/);
+assert.match(fetcher, /URLByResolvingSymlinksInPath/);
 assert.doesNotMatch(releaseInfo, /NSAllowsArbitraryLoads/);
 assert.doesNotMatch(releaseInfo, /NSExceptionAllowsInsecureHTTPLoads/);
 assert.match(debugInfo, /NSAllowsLocalNetworking/);
@@ -58,6 +65,10 @@ assert.doesNotMatch(debugInfo, /NSAllowsArbitraryLoads/);
 assert.doesNotMatch(project, /DEVELOPMENT_TEAM/);
 assert.match(project, /OrbitControlUITests/);
 assert.match(uiTest, /Shared singleton verified/);
+assert.match(uiTest, /testEmbeddedReleaseHostLaunches/);
+assert.match(packageJson, /"ios:device": "node scripts\/dev-ios-device\.mjs"/);
+assert.match(deviceServer, /LYNX_DEV_HOST: '0\.0\.0\.0'/);
+assert.match(deviceServer, /not a loopback address/);
 process.stdout.write(
   'Standalone official Lynx iOS project policy validated.\n',
 );
