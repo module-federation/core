@@ -1,5 +1,28 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
+import { isIP } from 'node:net';
+
+const isPhoneReachableHostname = (hostname) => {
+  const normalized = hostname.replace(/^\[|\]$/g, '').toLowerCase();
+  if (normalized === 'localhost' || normalized.endsWith('.localhost')) {
+    return false;
+  }
+  if (isIP(normalized) === 4) {
+    const firstOctet = Number(normalized.split('.')[0]);
+    return firstOctet !== 0 && firstOctet !== 127;
+  }
+  if (isIP(normalized) === 6) {
+    if (normalized.startsWith('::ffff:')) {
+      const mapped = normalized.slice('::ffff:'.length);
+      const firstOctet = mapped.includes('.')
+        ? Number(mapped.split('.')[0])
+        : Number.parseInt(mapped.split(':')[0], 16) >> 8;
+      if (firstOctet === 0 || firstOctet === 127) return false;
+    }
+    return normalized !== '::' && normalized !== '::1';
+  }
+  return true;
+};
 
 const origin = process.env.LYNX_REMOTE_ORIGIN;
 assert.ok(
@@ -12,9 +35,11 @@ assert.ok(
   'LYNX_REMOTE_ORIGIN must use HTTP(S).',
 );
 assert.ok(
-  !['localhost', '127.0.0.1', '::1'].includes(url.hostname),
-  'LYNX_REMOTE_ORIGIN must be reachable from the phone, not a loopback address.',
+  isPhoneReachableHostname(url.hostname),
+  'LYNX_REMOTE_ORIGIN must be reachable from the phone, not a loopback or unspecified address.',
 );
+
+if (process.argv.includes('--check-origin')) process.exit(0);
 
 const child = spawn('pnpm', ['run', 'dev'], {
   env: {

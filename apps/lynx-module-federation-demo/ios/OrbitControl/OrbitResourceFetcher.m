@@ -12,7 +12,6 @@ static NSUInteger const OrbitResourcePathCacheLimit = 64;
 @interface OrbitResourceFetcher ()
 
 @property(nonatomic, strong) NSMutableDictionary<NSString *, NSString *> *resourcePathCache;
-@property(nonatomic, strong) NSMutableArray<NSString *> *resourcePathCacheOrder;
 @property(nonatomic, strong) NSURL *resourceCacheDirectory;
 
 - (dispatch_block_t)loadDataForURLString:(NSString *)urlString
@@ -34,7 +33,6 @@ static NSUInteger const OrbitResourcePathCacheLimit = 64;
   self = [super init];
   if (self) {
     _resourcePathCache = [NSMutableDictionary dictionary];
-    _resourcePathCacheOrder = [NSMutableArray array];
     _resourceCacheDirectory = [[[NSURL fileURLWithPath:NSTemporaryDirectory()
                                            isDirectory:YES]
       URLByAppendingPathComponent:@"OrbitResources"
@@ -143,16 +141,13 @@ static NSUInteger const OrbitResourcePathCacheLimit = 64;
       [[NSFileManager defaultManager] removeItemAtURL:fileURL error:nil];
       return existingPath;
     }
+    if (self.resourcePathCache.count >= OrbitResourcePathCacheLimit) {
+      [[NSFileManager defaultManager] removeItemAtURL:fileURL error:nil];
+      *error = [self errorWithMessage:@"Lynx resource path cache is full"];
+      return nil;
+    }
 
     self.resourcePathCache[urlString] = fileURL.path;
-    [self.resourcePathCacheOrder addObject:urlString];
-    if (self.resourcePathCacheOrder.count > OrbitResourcePathCacheLimit) {
-      NSString *expiredURL = self.resourcePathCacheOrder.firstObject;
-      NSString *expiredPath = self.resourcePathCache[expiredURL];
-      [self.resourcePathCacheOrder removeObjectAtIndex:0];
-      [self.resourcePathCache removeObjectForKey:expiredURL];
-      [[NSFileManager defaultManager] removeItemAtPath:expiredPath error:nil];
-    }
   }
   return fileURL.path;
 }

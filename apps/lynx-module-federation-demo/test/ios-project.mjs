@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { access, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -68,7 +69,25 @@ assert.match(uiTest, /Shared singleton verified/);
 assert.match(uiTest, /testEmbeddedReleaseHostLaunches/);
 assert.match(packageJson, /"ios:device": "node scripts\/dev-ios-device\.mjs"/);
 assert.match(deviceServer, /LYNX_DEV_HOST: '0\.0\.0\.0'/);
-assert.match(deviceServer, /not a loopback address/);
+assert.match(deviceServer, /not a loopback or unspecified address/);
+const deviceServerPath = path.join(appRoot, 'scripts/dev-ios-device.mjs');
+const validateDeviceOrigin = (origin) =>
+  spawnSync(process.execPath, [deviceServerPath, '--check-origin'], {
+    encoding: 'utf8',
+    env: { ...process.env, LYNX_REMOTE_ORIGIN: origin },
+  }).status;
+assert.equal(validateDeviceOrigin('http://192.168.1.20:3000'), 0);
+for (const origin of [
+  'http://localhost:3000',
+  'http://dev.localhost:3000',
+  'http://127.42.0.1:3000',
+  'http://0.0.0.0:3000',
+  'http://[::1]:3000',
+  'http://[::]:3000',
+  'http://[::ffff:7f00:1]:3000',
+]) {
+  assert.notEqual(validateDeviceOrigin(origin), 0, origin);
+}
 process.stdout.write(
   'Standalone official Lynx iOS project policy validated.\n',
 );

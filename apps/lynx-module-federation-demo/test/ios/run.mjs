@@ -155,6 +155,7 @@ try {
       'build/OrbitControl.xcresult',
       '-parallel-testing-enabled',
       'NO',
+      '-only-testing:OrbitControlUITests/OrbitControlUITests/testFederatedImportsRuntimeLoadingAndSingleton',
     ],
     {
       env: {
@@ -163,33 +164,24 @@ try {
       },
     },
   );
-  await run(
-    'xcodebuild',
-    [
-      'test',
-      '-workspace',
-      'OrbitControl.xcworkspace',
-      '-scheme',
-      'OrbitControl',
-      '-configuration',
-      'Release',
-      '-destination',
-      `platform=iOS Simulator,id=${deviceUDID}`,
-      '-derivedDataPath',
-      'build/DerivedData',
-      '-resultBundlePath',
-      'build/OrbitControl-Release.xcresult',
-      '-parallel-testing-enabled',
-      'NO',
-      '-only-testing:OrbitControlUITests/OrbitControlUITests/testEmbeddedReleaseHostLaunches',
-    ],
-    {
-      env: {
-        ...process.env,
-        ORBIT_RELEASE_SMOKE: '1',
-      },
-    },
-  );
+  await run('xcodebuild', [
+    'test',
+    '-workspace',
+    'OrbitControl.xcworkspace',
+    '-scheme',
+    'OrbitControl',
+    '-configuration',
+    'Release',
+    '-destination',
+    `platform=iOS Simulator,id=${deviceUDID}`,
+    '-derivedDataPath',
+    'build/DerivedData',
+    '-resultBundlePath',
+    'build/OrbitControl-Release.xcresult',
+    '-parallel-testing-enabled',
+    'NO',
+    '-only-testing:OrbitControlUITests/OrbitControlUITests/testEmbeddedReleaseHostLaunches',
+  ]);
 
   const remoteEntry = manifest.metaData.remoteEntry;
   const expected = [

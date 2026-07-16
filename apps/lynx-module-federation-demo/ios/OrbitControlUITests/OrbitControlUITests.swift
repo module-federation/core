@@ -1,11 +1,7 @@
 import XCTest
 
 final class OrbitControlUITests: XCTestCase {
-  func testEmbeddedReleaseHostLaunches() throws {
-    try XCTSkipUnless(
-      ProcessInfo.processInfo.environment["ORBIT_RELEASE_SMOKE"] == "1"
-    )
-
+  func testEmbeddedReleaseHostLaunches() {
     let app = XCUIApplication()
     app.launchEnvironment["LYNX_BUNDLE_URL"] = ""
     app.launch()
