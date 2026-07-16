@@ -151,6 +151,7 @@ jobs:
 
   e2e-lynx:
     needs: checkout-install
+    if: ${{ fromJSON(needs.checkout-install.outputs.e2e_suites).lynx }}
     uses: ./.github/workflows/e2e-lynx.yml
     secrets: inherit
 
