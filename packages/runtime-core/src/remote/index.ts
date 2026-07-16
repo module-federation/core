@@ -509,6 +509,21 @@ export class RemoteHandler {
     });
   }
 
+  initRawContainer(
+    name: string,
+    url: string,
+    container: RemoteEntryExports,
+  ): Module {
+    const { host } = this;
+    const remoteInfo = getRemoteInfo({ name, entry: url });
+    const module = new Module({ host, remoteInfo });
+
+    module.remoteEntryExports = container;
+    host.moduleCache.set(name, module);
+
+    return module;
+  }
+
   async getRemoteModuleAndOptions(options: { id: string }): Promise<{
     module: Module;
     moduleOptions: ModuleOptions;

@@ -1,5 +1,21 @@
 # @module-federation/dts-plugin
 
+## 2.8.0
+
+### Minor Changes
+
+- 681e5d2: feat(dts-plugin): support ts 7 for federated type generation while keeping existing ts versions supported
+
+### Patch Changes
+
+- 6ee67dc: Reduce installed and bundled size by replacing general-purpose cache, path, version, package lookup, scheduling, fetch, and error fallback dependencies with focused built-in utilities.
+- Updated dependencies [ea490ae]
+- Updated dependencies [6ee67dc]
+  - @module-federation/sdk@2.8.0
+  - @module-federation/managers@2.8.0
+  - @module-federation/third-party-dts-extractor@2.8.0
+  - @module-federation/error-codes@2.8.0
+
 ## 2.7.0
 
 ### Patch Changes

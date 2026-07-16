@@ -1,0 +1,219 @@
+# Otimizar o tamanho do runtime
+
+O runtime do {props.name || 'Module Federation'} inclui, por padrão, consumo de módulos remotos, dependências compartilhadas e recursos de Manifest / Snapshot. Isso atende à maioria dos cenários sem configuração adicional, mas o código de recursos não utilizados ainda pode entrar no resultado final.
+
+Use `experiments.optimization` para remover, durante o build, recursos que uma aplicação certamente não utilizará e reduzir o tamanho do runtime.
+
+:::warning Antes de habilitar estas opções
+
+Estas opções removem código durante o build. Elas não são flags que podem ser reativadas depois que a página inicia. Chamar uma API cujo recurso foi removido gera um erro. Depois de alterar uma opção, faça um novo build e uma nova publicação.
+
+:::
+
+## Decida do que este build precisa
+
+Não decida apenas pelo nome Host ou Remote. Um Remote também pode consumir outros Remotes, enquanto um Host pode não usar dependências compartilhadas. Considere o que este build realmente faz.
+
+| Recurso | Quando deve ser mantido | Habilite quando não for utilizado |
+| --- | --- | --- |
+| Consumo de módulos remotos | `remotes` está configurado, ou o build chama `loadRemote`, `registerRemotes` ou `preloadRemote` | `disableRemote` |
+| Dependências compartilhadas | `shared` está configurado, ou o build registra, inicializa ou carrega dependências compartilhadas | `disableShared` |
+| Manifest / Snapshot | O build usa Remotes por Manifest, preloading, sincronização de tipos, atualizações a quente, DevTools ou plugins de runtime que dependem de Snapshot | `disableSnapshot` |
+
+`disableRemote` remove a capacidade do build atual de consumir outros Remotes. Ele não remove o `exposes` nem o `container.get` gerados pelo bundler para o produtor. Um produtor que apenas expõe módulos e nunca consome outro Remote pode habilitar essa opção.
+
+Quando um build não tem `exposes`, os plugins de Webpack e Rspack também removem automaticamente a inicialização do container do `main.js` do consumidor. Não é necessária uma opção `disableExpose`. Isso não altera o `remoteEntry.js` do produtor.
+
+## Configuração
+
+Webpack e Rspack aceitam as mesmas opções em `ModuleFederationPlugin`:
+
+```ts title="rspack.config.ts"
+import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
+
+export default {
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'app_remote',
+      filename: 'remoteEntry.js',
+      exposes: {
+        './Button': './src/Button',
+      },
+      experiments: {
+        optimization: {
+          target: 'web',
+          disableRemote: true,
+          disableShared: true,
+          disableSnapshot: true,
+        },
+      },
+    }),
+  ],
+};
+```
+
+Para Webpack, altere o import para `@module-federation/enhanced/webpack`.
+
+Essa combinação é adequada para um produtor mínimo que apenas expõe módulos, não consome outros Remotes, não usa dependências compartilhadas e não depende de Manifest / Snapshot. Comece com os valores padrão e habilite somente opções que sejam seguras para o seu build.
+
+### Configurar um projeto que usa apenas o runtime com variáveis de ambiente
+
+Se o projeto empacota `@module-federation/runtime` ou `@module-federation/runtime-core` diretamente, sem `ModuleFederationPlugin`, use variáveis de ambiente e substitua-as por valores booleanos durante o build na configuração do bundler.
+
+Por exemplo, um projeto que não consome Remotes, não usa dependências compartilhadas nem Snapshot e não tem `exposes` pode usar:
+
+```bash
+FEDERATION_OPTIMIZE_NO_REMOTE=true \
+FEDERATION_OPTIMIZE_NO_SHARED=true \
+FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN=true \
+FEDERATION_HAS_EXPOSES=false \
+pnpm build
+```
+
+No Webpack, os valores devem ser substituídos explicitamente:
+
+```ts title="webpack.config.ts"
+import webpack from 'webpack';
+
+const federationDefines = {
+  FEDERATION_OPTIMIZE_NO_REMOTE: JSON.stringify(
+    process.env.FEDERATION_OPTIMIZE_NO_REMOTE === 'true',
+  ),
+  FEDERATION_OPTIMIZE_NO_SHARED: JSON.stringify(
+    process.env.FEDERATION_OPTIMIZE_NO_SHARED === 'true',
+  ),
+  FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN: JSON.stringify(
+    process.env.FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN === 'true',
+  ),
+  FEDERATION_HAS_EXPOSES: JSON.stringify(
+    process.env.FEDERATION_HAS_EXPOSES !== 'false',
+  ),
+};
+
+export default {
+  plugins: [new webpack.DefinePlugin(federationDefines)],
+};
+```
+
+No Rspack, passe o mesmo objeto `federationDefines` para `rspack.DefinePlugin`. No Vite, passe-o para a opção `define` no nível principal.
+
+Não basta deixar as variáveis de ambiente como strings no código executado. O bundler deve substituí-las por `true` ou `false` durante o build para que o minificador remova o código correspondente. Quando nenhum valor é fornecido, todos os recursos continuam habilitados, preservando o comportamento existente.
+
+## O que cada opção remove
+
+### disableRemote
+
+Remove o registro de Remotes, o carregamento de entradas, o preloading, a obtenção e a execução de módulos expostos. Também remove o tratamento de Snapshot usado apenas pelo carregamento remoto e a função de carregamento remoto gerada pelo Webpack.
+
+É adequado para:
+
+- produtores que apenas expõem módulos e nunca consomem outro Remote;
+- builds independentes sem `remotes` que nunca registram um Remote em runtime.
+
+Não use em:
+
+- Hosts com `remotes` configurados;
+- aplicações que chamam `loadRemote`, `registerRemotes` ou `preloadRemote`;
+- aplicações que dependem de Manifest para descobrir ou carregar Remotes dinamicamente.
+
+### disableShared
+
+Remove o registro, a seleção e o carregamento de dependências compartilhadas, além do consumo compartilhado, da inicialização compartilhada, da instalação compartilhada inicial, do fallback e do plugin de tree shaking compartilhado do Webpack. Um escopo compartilhado vazio e mínimo permanece para que uma entrada remota sem dependências compartilhadas ainda possa ser inicializada.
+
+Use apenas quando o build não tiver configuração `shared` e nunca registrar ou carregar uma dependência compartilhada pelas APIs de runtime.
+
+Mantenha esse recurso quando React, Vue, uma biblioteca de componentes ou outra dependência precisar ser reutilizada entre aplicações, permanecer singleton ou participar da seleção de versões.
+
+### disableSnapshot
+
+Remove Manifest / Snapshot e os recursos relacionados de preloading. Isso pode reduzir ainda mais o resultado, mas o impacto é mais amplo que o das outras opções.
+
+Habilite apenas ao usar Remotes JavaScript comuns, sem sincronização de tipos, atualizações a quente, preloading, DevTools, descoberta dinâmica ou outro recurso que dependa de Snapshot. Consulte o [guia de Manifest / Snapshot](/guide/basic/manifest-snapshot.html#impact-de-disablesnapshot) para ver o impacto completo.
+
+## Combinações comuns
+
+### Produtor que apenas expõe módulos
+
+Se ele não consome outros Remotes, habilite:
+
+```ts
+optimization: {
+  disableRemote: true,
+}
+```
+
+Habilite também `disableShared` ou `disableSnapshot` somente se o produtor não usar esses recursos.
+
+### Host sem dependências compartilhadas
+
+O Host ainda precisa consumir módulos remotos, portanto desabilite apenas o tratamento compartilhado:
+
+```ts
+optimization: {
+  disableShared: true,
+}
+```
+
+### Host leve usando Remotes JavaScript comuns
+
+Se ele não usa dependências compartilhadas nem Manifest / Snapshot:
+
+```ts
+optimization: {
+  target: 'web',
+  disableShared: true,
+  disableSnapshot: true,
+}
+```
+
+O consumo de módulos remotos deve permanecer habilitado.
+
+## Diferença em relação a externalRuntime
+
+`externalRuntime` extrai o código de runtime de cada `remoteEntry.js` para que vários builds reutilizem um único runtime externo. Ele reduz principalmente downloads duplicados. `disableRemote`, `disableShared` e `disableSnapshot` removem recursos de que o build não precisa.
+
+As duas abordagens podem ser combinadas: primeiro remova os recursos não utilizados e depois use `externalRuntime` para reduzir código duplicado entre os resultados. Ao usar um runtime externo, a página deve fornecer antecipadamente um runtime compatível. Consulte [experiments.externalRuntime](/configure/experiments.html#externalruntime) para ver os detalhes de configuração.
+
+## Verifique se a otimização funciona
+
+### 1. Estabeleça uma referência comparável
+
+Registre o tamanho do resultado antes da otimização usando o mesmo modo de build, as mesmas opções de minificação e as mesmas versões de dependências. Não compare um build de desenvolvimento com um build de produção.
+
+### 2. Habilite uma opção de cada vez
+
+Faça o build e registre o tamanho do `remoteEntry.js` ou do arquivo que realmente contém o runtime. Confirme cada redução antes de combinar opções. Isso facilita identificar tanto o benefício quanto a perda de algum comportamento necessário.
+
+O caso de teste do repositório produziu os resultados abaixo. Os três builds usam o alvo web e desabilitam Snapshot para isolar as duas opções. Os valores demonstram a redução relativa; os resultados reais variam conforme o projeto e a versão.
+
+| Configuração | Tamanho minificado | Redução |
+| --- | ---: | ---: |
+| Recursos remotos e compartilhados habilitados | 73.154 B | - |
+| `disableRemote: true` | 52.916 B | cerca de 27,66% |
+| `disableShared: true` | 50.008 B | cerca de 31,64% |
+
+Quando `exposes` não está configurado, a redução afeta o `main.js` do consumidor, não o `remoteEntry.js` do produtor. Os builds abaixo usam a mesma entrada, dependências e opções de produção; apenas a inicialização da entrada do container muda.
+
+| `main.js` do consumidor | Minificado | Gzip | Redução |
+| --- | ---: | ---: | ---: |
+| Inicialização da entrada do container incluída | 79.328 B | 23.897 B | - |
+| Sem `exposes` | 78.344 B | 23.689 B | 984 B (1,24%), 208 B com gzip (0,87%) |
+
+### 3. Teste os fluxos reais da aplicação
+
+Verifique, no mínimo:
+
+- carregamento inicial e atualização da página;
+- todas as entradas de módulos remotos;
+- caminhos de registro dinâmico e preloading;
+- comportamento de singleton e versão das dependências compartilhadas;
+- atualizações a quente e sincronização de tipos no desenvolvimento;
+- DevTools, plugins de runtime e monitoramento.
+
+Se aparecer um erro explícito informando que um recurso foi desabilitado, o build ainda precisa desse recurso. Restaure a opção correspondente para `false` e faça um novo build.
+
+## Leitura adicional
+
+- [Configuração completa de experiments](/configure/experiments.html)
+- [Manifest / Snapshot](/guide/basic/manifest-snapshot.html)
+- [Tree shaking de dependências compartilhadas](/guide/advanced/shared-tree-shaking.html)

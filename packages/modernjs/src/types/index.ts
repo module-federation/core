@@ -4,6 +4,12 @@ import type { StatsAssetResource } from '@module-federation/rsbuild-plugin/utils
 export interface PluginOptions {
   config?: moduleFederationPlugin.ModuleFederationPluginOptions;
   configPath?: string;
+  /**
+   * Automatically set the federation optimization target from the Modern.js
+   * SSR and bundler target configuration.
+   * @default true
+   */
+  autoOptimization?: boolean;
   ssr?:
     | {
         distOutputDir?: string;

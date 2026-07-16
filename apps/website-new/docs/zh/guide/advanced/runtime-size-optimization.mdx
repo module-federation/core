@@ -1,0 +1,219 @@
+# 优化运行时体积
+
+{props.name || 'Module Federation'} 的运行时默认包含远程模块消费、共享依赖和 Manifest / Snapshot 等能力。这样可以直接覆盖大多数使用方式，但如果某个构建只使用其中一部分能力，未使用的代码仍可能进入最终产物。
+
+你可以通过 `experiments.optimization` 在**构建时**移除确定不会使用的能力，从而减小运行时体积。
+
+:::warning 使用前提
+
+这些开关会真正移除代码，不是可以在页面运行后重新打开的功能开关。关闭某项能力后，如果代码仍然调用对应接口，运行时会直接报错。修改开关后必须重新构建和发布。
+
+:::
+
+## 先判断当前构建需要什么
+
+不要只根据应用被称为 Host 或 Remote 来决定开关。一个 Remote 也可能继续消费其他 Remote，一个 Host 也可能完全不使用共享依赖。应当根据这个构建实际执行的行为判断。
+
+| 能力                | 什么时候必须保留                                                                    | 确认不会使用时可开启 |
+| ------------------- | ----------------------------------------------------------------------------------- | -------------------- |
+| 远程模块消费        | 配置了 `remotes`，或会调用 `loadRemote`、`registerRemotes`、`preloadRemote`         | `disableRemote`      |
+| 共享依赖            | 配置了 `shared`，或会调用共享依赖注册、初始化、加载接口                             | `disableShared`      |
+| Manifest / Snapshot | 使用 Manifest 远程、预加载、类型同步、热更新、DevTools 或依赖 Snapshot 的运行时插件 | `disableSnapshot`    |
+
+`disableRemote` 关闭的是当前构建消费其他 Remote 的完整流程，不会删除构建工具为当前生产者生成的 `exposes` 或 `container.get`。因此，一个只向外提供模块、自己不消费其他 Remote 的生产者，仍然可以开启它。
+
+如果当前构建没有配置 `exposes`，Webpack 和 Rspack 插件还会自动从消费者入口 `main.js` 中移除容器入口初始化代码，不需要增加 `disableExpose` 开关。这不会改变生产者的 `remoteEntry.js`。
+
+## 配置方式
+
+Webpack 和 Rspack 都可以在 `ModuleFederationPlugin` 中使用相同配置：
+
+```ts title="rspack.config.ts"
+import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
+
+export default {
+  plugins: [
+    new ModuleFederationPlugin({
+      name: 'app_remote',
+      filename: 'remoteEntry.js',
+      exposes: {
+        './Button': './src/Button',
+      },
+      experiments: {
+        optimization: {
+          target: 'web',
+          disableRemote: true,
+          disableShared: true,
+          disableSnapshot: true,
+        },
+      },
+    }),
+  ],
+};
+```
+
+使用 Webpack 时，只需要把导入地址改为 `@module-federation/enhanced/webpack`。
+
+上面的组合适用于一个非常精简的纯生产者：它只对外提供模块，不消费其他 Remote、不使用共享依赖，也不依赖 Manifest / Snapshot。实际项目应从默认值开始，只打开已经确认安全的选项。
+
+### 纯 Runtime 项目通过环境变量配置
+
+如果项目直接打包 `@module-federation/runtime` 或 `@module-federation/runtime-core`，没有使用上面的 `ModuleFederationPlugin`，可以用环境变量控制构建，并在打包配置中把环境变量替换为编译期布尔值。
+
+例如，一个不消费 Remote、不使用共享依赖和 Snapshot，也不包含 `exposes` 的项目可以这样构建：
+
+```bash
+FEDERATION_OPTIMIZE_NO_REMOTE=true \
+FEDERATION_OPTIMIZE_NO_SHARED=true \
+FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN=true \
+FEDERATION_HAS_EXPOSES=false \
+pnpm build
+```
+
+Webpack 配置需要显式完成替换：
+
+```ts title="webpack.config.ts"
+import webpack from 'webpack';
+
+const federationDefines = {
+  FEDERATION_OPTIMIZE_NO_REMOTE: JSON.stringify(
+    process.env.FEDERATION_OPTIMIZE_NO_REMOTE === 'true',
+  ),
+  FEDERATION_OPTIMIZE_NO_SHARED: JSON.stringify(
+    process.env.FEDERATION_OPTIMIZE_NO_SHARED === 'true',
+  ),
+  FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN: JSON.stringify(
+    process.env.FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN === 'true',
+  ),
+  FEDERATION_HAS_EXPOSES: JSON.stringify(
+    process.env.FEDERATION_HAS_EXPOSES !== 'false',
+  ),
+};
+
+export default {
+  plugins: [new webpack.DefinePlugin(federationDefines)],
+};
+```
+
+Rspack 使用 `rspack.DefinePlugin` 传入同一份 `federationDefines`。Vite 可以把它传给顶层 `define` 配置。
+
+环境变量不能直接作为字符串留在运行时代码中，必须在构建时替换成 `true` 或 `false`，压缩工具才能删除对应代码。没有显式配置时，上述能力都会保持开启，兼容现有行为。
+
+## 每个开关会移除什么
+
+### disableRemote
+
+移除远程模块的注册、入口加载、预加载、暴露模块读取和执行能力，同时移除只服务于远程加载的 Snapshot 处理以及 Webpack 生成的远程模块装载函数。
+
+适合：
+
+- 只向外提供模块、不会消费其他 Remote 的生产者
+- 没有 `remotes`，也不会在运行时动态注册 Remote 的独立构建
+
+不要用于：
+
+- 配置了 `remotes` 的 Host
+- 会调用 `loadRemote`、`registerRemotes` 或 `preloadRemote` 的应用
+- 依靠 Manifest 动态发现或加载 Remote 的应用
+
+### disableShared
+
+移除共享依赖的注册、选择和加载能力，以及 Webpack 的共享消费、共享初始化、初始共享安装、共享回退和共享 Tree Shaking 插件。运行时会保留一个最小的空共享池，使完全不使用共享依赖的远程入口仍能初始化。
+
+适合没有 `shared` 配置，也不会通过运行时接口注册或加载共享依赖的构建。
+
+如果 React、Vue、组件库或其他依赖需要在多个应用之间复用、保持单例或进行版本选择，就必须保留该能力。
+
+### disableSnapshot
+
+移除 Manifest / Snapshot 与相关预加载能力。它通常能继续缩小体积，但影响范围比前三个开关更广。
+
+只有在使用普通 JavaScript Remote，并且不依赖类型同步、热更新、预加载、DevTools、动态发现或其他 Snapshot 能力时才建议开启。完整影响见 [Manifest / Snapshot 指南](/guide/basic/manifest-snapshot.html#disablesnapshot-的影响)。
+
+## 常见组合
+
+### 只提供模块的生产者
+
+如果它不消费其他 Remote，可以开启：
+
+```ts
+optimization: {
+  disableRemote: true,
+}
+```
+
+是否继续开启 `disableShared` 和 `disableSnapshot`，取决于它是否使用共享依赖与 Manifest。
+
+### 不使用共享依赖的 Host
+
+Host 仍然需要消费远程模块，只关闭共享能力：
+
+```ts
+optimization: {
+  disableShared: true,
+}
+```
+
+### 使用普通 JavaScript Remote 的轻量 Host
+
+如果它不使用共享依赖，也不依赖 Manifest / Snapshot：
+
+```ts
+optimization: {
+  target: 'web',
+  disableShared: true,
+  disableSnapshot: true,
+}
+```
+
+这里必须保留远程消费能力。
+
+## 与 externalRuntime 的区别
+
+`externalRuntime` 会把运行时代码从各个 `remoteEntry.js` 中抽离，让多个构建复用同一份外部运行时。它主要减少重复下载；`disableRemote`、`disableShared` 和 `disableSnapshot` 则会直接删除确定不用的能力。
+
+两类优化可以组合：先删除不用的能力，再考虑用 `externalRuntime` 减少多个产物之间的重复代码。使用外部运行时时，必须确保页面会提前提供兼容的运行时，具体配置见 [experiments.externalRuntime](/configure/experiments.html#externalruntime)。
+
+## 如何验证优化有效
+
+### 1. 建立可比较的基线
+
+先在相同构建模式、相同压缩设置和相同依赖版本下记录优化前的产物体积。不要把开发构建与生产构建直接比较。
+
+### 2. 每次只打开一个开关
+
+逐项构建并记录 `remoteEntry.js` 或实际承载运行时的文件大小。确认收益后再组合开关，这样更容易判断哪项优化有效，也更容易定位功能损失。
+
+仓库中的测试样例得到以下结果。为单独比较这两个开关，三次构建都使用 Web 目标并关闭了 Snapshot。数据仅用于说明相对收益，实际数值会随配置和版本变化：
+
+| 配置                  | 原始大小 |      减少 |
+| --------------------- | -------: | --------: |
+| 保留远程和共享能力    | 73,154 B |         - |
+| `disableRemote: true` | 52,916 B | 约 27.66% |
+| `disableShared: true` | 50,008 B | 约 31.64% |
+
+未配置 `exposes` 时，减少的是消费者入口 `main.js`，不是生产者的 `remoteEntry.js`。下面的数据使用完全相同的入口、依赖和生产构建设置，只改变是否保留容器入口初始化：
+
+| 消费者 `main.js`        | 压缩后大小 | Gzip 大小 | 减少                         |
+| ----------------------- | ---------: | --------: | ---------------------------- |
+| 保留容器入口初始化      |   79,328 B |  23,897 B | -                            |
+| 不包含 `exposes`        |   78,344 B |  23,689 B | 984 B（1.24%），Gzip 208 B（0.87%） |
+
+### 3. 跑真实业务流程
+
+至少检查以下流程：
+
+- 页面首次加载和刷新
+- 所有远程模块入口
+- 动态注册与预加载路径
+- 共享依赖是否保持预期的单例和版本
+- 开发环境的热更新与类型同步
+- DevTools、运行时插件和监控能力
+
+如果关闭某项能力后出现明确的禁用错误，说明当前构建仍然需要它。将对应选项恢复为 `false`，重新构建即可回退。
+
+## 延伸阅读
+
+- [experiments 完整配置](/configure/experiments.html)
+- [Manifest / Snapshot](/guide/basic/manifest-snapshot.html)
+- [共享依赖 Tree Shaking](/guide/advanced/shared-tree-shaking.html)

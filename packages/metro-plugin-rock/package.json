@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/metro-plugin-rock",
-  "version": "2.7.0",
+  "version": "2.8.0",
   "description": "Metro Module Federation plugin for Rock",
   "keywords": [
     "rock",
@@ -45,8 +45,8 @@
     "@rock-js/config": "^0.13.0",
     "@rock-js/tools": "^0.13.0",
     "@rslib/core": "^0.23.2",
-    "@typescript-eslint/eslint-plugin": "8.54.0",
-    "@typescript-eslint/parser": "8.54.0",
+    "@typescript-eslint/eslint-plugin": "8.56.1",
+    "@typescript-eslint/parser": "8.56.1",
     "@types/node": "^20.0.0",
     "typescript": "^6.0.3"
   }

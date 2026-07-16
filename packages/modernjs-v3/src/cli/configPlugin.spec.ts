@@ -1,5 +1,9 @@
 import { it, expect, describe, rs, afterEach } from '@rstest/core';
-import { moduleFederationConfigPlugin, patchMFConfig } from './configPlugin';
+import {
+  moduleFederationConfigPlugin,
+  patchMFConfig,
+  setDefaultOptimizationTarget,
+} from './configPlugin';
 import logger from '../logger';
 
 const mfConfig = {
@@ -107,6 +111,57 @@ describe('patchMFConfig', async () => {
         },
       },
     });
+  });
+});
+
+describe('setDefaultOptimizationTarget', () => {
+  it('defaults to web when SSR is disabled', () => {
+    const config = { name: 'host' };
+
+    setDefaultOptimizationTarget(config, false, false);
+
+    expect(config).toMatchObject({
+      experiments: { optimization: { target: 'web' } },
+    });
+  });
+
+  it('defaults to web for the browser target when SSR is enabled', () => {
+    const config = { name: 'host' };
+
+    setDefaultOptimizationTarget(config, true, false);
+
+    expect(config).toMatchObject({
+      experiments: { optimization: { target: 'web' } },
+    });
+  });
+
+  it('defaults to node for the server target when SSR is enabled', () => {
+    const config = { name: 'host' };
+
+    setDefaultOptimizationTarget(config, true, true);
+
+    expect(config).toMatchObject({
+      experiments: { optimization: { target: 'node' } },
+    });
+  });
+
+  it('preserves an explicitly configured target', () => {
+    const config = {
+      name: 'host',
+      experiments: { optimization: { target: 'web' as const } },
+    };
+
+    setDefaultOptimizationTarget(config, true, true);
+
+    expect(config.experiments.optimization.target).toBe('web');
+  });
+
+  it('does not set a target when autoOptimization is disabled', () => {
+    const config = { name: 'host' };
+
+    setDefaultOptimizationTarget(config, true, true, false);
+
+    expect(config).toStrictEqual({ name: 'host' });
   });
 });
 

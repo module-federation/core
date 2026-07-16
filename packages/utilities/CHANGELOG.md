@@ -1,5 +1,13 @@
 # @module-federation/utilities
 
+## 3.1.99
+
+### Patch Changes
+
+- a5633f8: Support Rspack container reference identifiers when collecting remote and delegate modules.
+- Updated dependencies [ea490ae]
+  - @module-federation/sdk@2.8.0
+
 ## 3.1.98
 
 ### Patch Changes
