@@ -85,6 +85,10 @@ for (const origin of [
   'http://[::1]:3000',
   'http://[::]:3000',
   'http://[::ffff:7f00:1]:3000',
+  'https://192.168.1.20:3000',
+  'http://192.168.1.20:3000/prefix',
+  'http://192.168.1.20:3000?query=yes',
+  'http://user:pass@192.168.1.20:3000',
 ]) {
   assert.notEqual(validateDeviceOrigin(origin), 0, origin);
 }

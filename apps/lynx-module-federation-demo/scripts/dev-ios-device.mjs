@@ -30,9 +30,18 @@ assert.ok(
   'Set LYNX_REMOTE_ORIGIN to the phone-reachable LAN origin, for example http://192.168.1.10:3000.',
 );
 const url = new URL(origin);
+assert.equal(
+  url.protocol,
+  'http:',
+  'LYNX_REMOTE_ORIGIN must use HTTP because the Rspeedy development server does not terminate TLS.',
+);
 assert.ok(
-  url.protocol === 'http:' || url.protocol === 'https:',
-  'LYNX_REMOTE_ORIGIN must use HTTP(S).',
+  url.pathname === '/' &&
+    !url.search &&
+    !url.hash &&
+    !url.username &&
+    !url.password,
+  'LYNX_REMOTE_ORIGIN must be an HTTP origin without a path, credentials, query, or fragment.',
 );
 assert.ok(
   isPhoneReachableHostname(url.hostname),

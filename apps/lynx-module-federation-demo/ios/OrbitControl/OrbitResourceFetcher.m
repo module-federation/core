@@ -7,7 +7,6 @@
 #import <Lynx/LynxViewBuilder.h>
 
 static NSString *const OrbitResourceErrorDomain = @"org.modulefederation.lynx.resources";
-static NSUInteger const OrbitResourcePathCacheLimit = 64;
 
 @interface OrbitResourceFetcher ()
 
@@ -141,12 +140,6 @@ static NSUInteger const OrbitResourcePathCacheLimit = 64;
       [[NSFileManager defaultManager] removeItemAtURL:fileURL error:nil];
       return existingPath;
     }
-    if (self.resourcePathCache.count >= OrbitResourcePathCacheLimit) {
-      [[NSFileManager defaultManager] removeItemAtURL:fileURL error:nil];
-      *error = [self errorWithMessage:@"Lynx resource path cache is full"];
-      return nil;
-    }
-
     self.resourcePathCache[urlString] = fileURL.path;
   }
   return fileURL.path;
