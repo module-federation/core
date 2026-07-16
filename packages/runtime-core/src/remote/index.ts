@@ -177,7 +177,7 @@ export class RemoteHandler {
           globalSnapshot: GlobalModuleInfo;
         },
       ],
-      Promise<PreloadAssets>
+      Promise<PreloadAssets | undefined>
     >('generatePreloadAssets'),
     afterPreloadRemote: new AsyncHook<
       [

@@ -15,7 +15,7 @@ export interface ExposedLayers {
 }
 
 interface LynxRemoteBundleBaseOptions {
-  /** Output name ending in `.lynx.bundle`. Defaults to `<federation-name>.lynx.bundle`. */
+  /** Output basename ending in `.lynx.bundle`. Defaults to `<federation-name>.lynx.bundle`. */
   filename?: string;
   /** Lynx engine version passed to the external bundle encoder. Defaults to `3.7`. */
   engineVersion?: string;

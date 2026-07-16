@@ -22,6 +22,12 @@ describe('Lynx chunk-loading matcher', () => {
       ids: [802],
       name: 'remote-react__background',
     };
+    const mainThreadAssetlessChunk = {
+      files: new Set(),
+      getAllAsyncChunks: () => new Set(),
+      ids: [803],
+      name: 'catalog__main-thread__Empty-react__main-thread',
+    };
     const localChunk = {
       files: new Set(['local.js']),
       getAllAsyncChunks: () => new Set(),
@@ -34,7 +40,13 @@ describe('Lynx chunk-loading matcher', () => {
       ids: [456],
       name: 'styles',
     };
-    const chunks = new Set([entryChunk, remoteChunk, localChunk, cssChunk]);
+    const chunks = new Set([
+      entryChunk,
+      remoteChunk,
+      mainThreadAssetlessChunk,
+      localChunk,
+      cssChunk,
+    ]);
     const chunkGraph = {
       getNumberOfEntryModules(chunk: unknown) {
         return chunk === entryChunk ? 1 : 0;
@@ -49,8 +61,8 @@ describe('Lynx chunk-loading matcher', () => {
     let beforeEncode: ((args: any) => any) | undefined;
     let beforeEmit: ((args: any) => any) | undefined;
     const addRuntimeModule = rs.fn();
-    const discardedTemplateAssets = new Set<string>();
-    const lazyBundleAssets = new Set<string>();
+    const discardedTemplateAssets = new Set(['stale-template.bundle']);
+    const lazyBundleAssets = new Set(['stale-lazy.bundle']);
 
     class RuntimeModule {
       static STAGE_TRIGGER = 20;
@@ -148,6 +160,8 @@ describe('Lynx chunk-loading matcher', () => {
       },
     ).apply(compiler as any);
     onCompilation!(compilation);
+    expect(discardedTemplateAssets.size).toBe(0);
+    expect(lazyBundleAssets.size).toBe(0);
     addMatcher!(entryChunk);
 
     const cardArgs = {
@@ -220,8 +234,11 @@ describe('Lynx chunk-loading matcher', () => {
     expect(renameAsyncChunk!('catalog__background_Card')).toBe(
       'catalog__background_Card',
     );
-    expect(renameAsyncChunk!('catalog__main-thread__Card')).toBe(
-      'catalog__background_Card',
-    );
+    expect(
+      renameAsyncChunk!('catalog__main-thread__Card-react__main-thread'),
+    ).toBe('catalog__background_Card');
+    expect(
+      renameAsyncChunk!('catalog__main-thread__Empty-react__main-thread'),
+    ).toBe('');
   });
 });

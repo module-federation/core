@@ -68,7 +68,7 @@ export const loadJavaScriptEntry = (
     );
   }
 
-  return loadWithTimeout(
+  return loadWithTimeout<RemoteEntryExports>(
     timeout,
     `Timed out loading Lynx remote entry "${entryGlobalName}" from "${entry}" after ${timeout}ms.`,
     (resolve, reject, isSettled) => {
@@ -124,15 +124,9 @@ const adaptContainerToRealm = (
       (value): value is string => typeof value === 'string',
     );
     const realmSuffix = realm === 'background' ? ':background' : ':main-thread';
-    const suffixedKeys = shareScopeKeys.filter((key) =>
+    const realmShareScopeKeys = shareScopeKeys.filter((key) =>
       key.endsWith(realmSuffix),
     );
-    const realmShareScopeKeys =
-      suffixedKeys.length > 0
-        ? suffixedKeys
-        : shareScopeKeys.filter(
-            (_key, index) => index % 2 === (realm === 'background' ? 0 : 1),
-          );
     const primaryShareScopeKey = realmShareScopeKeys[0];
     if (!primaryShareScopeKey) {
       return container.init(shareScope, initScope, options);
@@ -178,7 +172,8 @@ export const loadBundleEntry = (
     );
   }
 
-  return loadWithTimeout(
+  let rollbackRegistry: (() => void) | undefined;
+  return loadWithTimeout<RemoteEntryExports>(
     timeout,
     `Timed out loading Lynx remote bundle "${entryGlobalName}" from "${entry}" after ${timeout}ms.`,
     (resolve, reject, isSettled) => {
@@ -202,12 +197,32 @@ export const loadBundleEntry = (
           }
 
           const registry = getBundleRegistry(globalObject);
-          registry.set(entryGlobalName, response.url);
-          registry.set(getRemoteOriginKey(entryGlobalName), entry);
-          registry.set(
-            getRegistryKey(entryGlobalName, 'main-thread'),
-            response.url,
-          );
+          const updates = [
+            [entryGlobalName, response.url],
+            [getRemoteOriginKey(entryGlobalName), entry],
+            [getRegistryKey(entryGlobalName, 'main-thread'), response.url],
+          ] as const;
+          const previous = updates.map(([key, nextValue]) => ({
+            hadValue: registry.has(key),
+            key,
+            nextValue,
+            previousValue: registry.get(key),
+          }));
+          for (const [key, value] of updates) {
+            registry.set(key, value);
+          }
+          rollbackRegistry = () => {
+            for (const state of previous) {
+              if (registry.get(state.key) !== state.nextValue) {
+                continue;
+              }
+              if (state.hadValue) {
+                registry.set(state.key, state.previousValue!);
+              } else {
+                registry.delete(state.key);
+              }
+            }
+          };
 
           const sectionPath =
             realm === 'background'
@@ -218,6 +233,9 @@ export const loadBundleEntry = (
             const value = loadScript(sectionPath, { bundleName: response.url });
             Promise.resolve(value).then(
               (loadedValue) => {
+                if (isSettled()) {
+                  return;
+                }
                 const exports = findRemoteEntryExports(
                   loadedValue,
                   entryGlobalName,
@@ -232,6 +250,7 @@ export const loadBundleEntry = (
                   );
                   return;
                 }
+                rollbackRegistry = undefined;
                 resolve(adaptContainerToRealm(exports, realm));
               },
               (error) =>
@@ -260,5 +279,8 @@ export const loadBundleEntry = (
         },
       );
     },
-  );
+  ).catch((error) => {
+    rollbackRegistry?.();
+    throw error;
+  });
 };

@@ -97,9 +97,10 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-    "build": "tsdown --config tsdown.config.mts",
+    "build": "tsdown --config tsdown.config.mts && pnpm run test:cjs",
     "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",
     "test": "pnpm exec rstest --passWithNoTests",
+    "test:cjs": "node ./scripts/cjs-require-smoke.cjs",
     "typecheck": "tsc -p tsconfig.lib.json --noEmit",
     "pre-release": "pnpm run test && pnpm run build"
   }

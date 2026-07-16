@@ -309,7 +309,8 @@ export async function getRemoteEntry(params: {
     const loadEntryHook = origin.remoteHandler.hooks.lifecycle.loadEntry;
     const loaderHook = origin.loaderHook;
 
-    globalLoading[uniqueKey] = loadEntryHook
+    let loadingPromise: Promise<RemoteEntryExports | false | void>;
+    loadingPromise = loadEntryHook
       .emit({
         origin,
         loaderHook,
@@ -388,7 +389,14 @@ export async function getRemoteEntry(params: {
           error: err,
         });
         throw err;
+      })
+      .catch((err) => {
+        if (globalLoading[uniqueKey] === loadingPromise) {
+          delete globalLoading[uniqueKey];
+        }
+        throw err;
       });
+    globalLoading[uniqueKey] = loadingPromise;
   }
 
   return globalLoading[uniqueKey];

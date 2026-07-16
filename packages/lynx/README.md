@@ -76,6 +76,11 @@ URL. The adapter rewrites `metaData.remoteEntry` to the public
 Native split remotes keep the Module Federation runtime in the background realm
 while compiling each ReactLynx exposure for both official issuer layers:
 
+Configure the remote's ReactLynx plugin with
+`pluginReactLynx({ experimental_isLazyBundle: true })`. Split federation uses
+those DynamicComponent artifacts as independently transported exposures and
+fails the build when the option is missing.
+
 ```ts
 pluginLynxModuleFederation(
   {

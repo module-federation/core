@@ -27,7 +27,99 @@ import { createLynxRemoteManifestPlugin } from './remoteManifest';
 import { MAIN_THREAD_EXPOSE_SUFFIX } from './runtimeCore';
 import { getLynxWebEncodeMode } from './webEncode';
 
-const hasExposes = (exposes: Exposes | undefined): boolean => {
+interface RemoteBundlePlanBase {
+  backgroundChunkPrefix: string;
+  backgroundEntry: string;
+  bundleFileName: string;
+  entryAssets: string[];
+  includedChunkPrefixes: string[];
+}
+
+type RemoteBundlePlan = RemoteBundlePlanBase &
+  (
+    | {
+        chunking: 'single';
+        mainThreadChunkPrefix: undefined;
+        mainThreadEntry: undefined;
+        mode: 'native-single';
+      }
+    | {
+        chunking: 'split';
+        mainThreadChunkPrefix: string;
+        mainThreadEntry: undefined;
+        mode: 'native-split';
+      }
+    | {
+        chunking: 'split';
+        mainThreadChunkPrefix: string;
+        mainThreadEntry: string;
+        mode: 'web-split';
+      }
+  );
+
+const normalizeRemoteBundlePlan = (
+  name: string,
+  remoteBundle: LynxRemoteBundleOptions,
+): RemoteBundlePlan => {
+  if (remoteBundle.target !== 'lynx' && remoteBundle.target !== 'web') {
+    throw new Error(
+      '@module-federation/lynx `remoteBundle.target` must be either `"lynx"` or `"web"`.',
+    );
+  }
+
+  const chunking = remoteBundle.chunking ?? 'split';
+  if (remoteBundle.target === 'web' && chunking === 'single') {
+    throw new Error(
+      '@module-federation/lynx web remotes require `chunking: "split"`; one external bundle has only one main-thread root and cannot activate independently scoped ReactLynx exposure roots.',
+    );
+  }
+
+  const backgroundEntry = `${name}.js`;
+  const backgroundChunkPrefix = `${name}__background_`;
+  const bundleFileName = remoteBundle.filename ?? `${name}.lynx.bundle`;
+  const basePlan = {
+    backgroundChunkPrefix,
+    backgroundEntry,
+    bundleFileName,
+  };
+  if (chunking === 'single') {
+    return {
+      ...basePlan,
+      chunking,
+      entryAssets: [backgroundEntry],
+      includedChunkPrefixes: [backgroundChunkPrefix],
+      mainThreadChunkPrefix: undefined,
+      mainThreadEntry: undefined,
+      mode: 'native-single',
+    };
+  }
+
+  const mainThreadChunkPrefix = `${name}__main-thread__`;
+  const splitPlan = {
+    ...basePlan,
+    chunking,
+    includedChunkPrefixes: [backgroundChunkPrefix, mainThreadChunkPrefix],
+    mainThreadChunkPrefix,
+  };
+  if (remoteBundle.target === 'web') {
+    const mainThreadEntry = `${name}__main-thread.js`;
+    return {
+      ...splitPlan,
+      entryAssets: [backgroundEntry, mainThreadEntry],
+      mainThreadEntry,
+      mode: 'web-split',
+    };
+  }
+
+  return {
+    ...splitPlan,
+    entryAssets: [backgroundEntry],
+    mainThreadEntry: undefined,
+    mode: 'native-split',
+  };
+};
+
+const hasExposes = (exposes: Exposes | undefined): exposes is Exposes => {
   if (!exposes) {
     return false;
   }
@@ -107,6 +199,7 @@ const createRemoteExposes = (
   layer: string,
   prefix: string,
   keySuffix = '',
+  chunkNameSuffix = '',
 ): Record<string, ExposesConfig> => {
   const normalized = normalizeLynxExposes(exposes, layer) as Record<
     string,
@@ -119,7 +212,7 @@ const createRemoteExposes = (
       {
         ...value,
         layer,
-        name: `${prefix}${toChunkName(key)}`,
+        name: `${prefix}${toChunkName(key)}${chunkNameSuffix}`,
       },
     ]),
   );
@@ -220,30 +313,24 @@ export const configureRemoteBundle = async (
   runtimePlugin: string,
   lynxTemplatePlugin?: LynxTemplatePluginApi,
 ): Promise<void> => {
-  if (!hasExposes(options.exposes)) {
+  const exposes = options.exposes;
+  if (!hasExposes(exposes)) {
     throw new Error(
       '@module-federation/lynx `remoteBundle` requires at least one expose.',
     );
   }
-  if (remoteBundle.target !== 'lynx' && remoteBundle.target !== 'web') {
-    throw new Error(
-      '@module-federation/lynx `remoteBundle.target` must be either `"lynx"` or `"web"`.',
-    );
-  }
-  if (
-    remoteBundle.target === 'web' &&
-    (remoteBundle as { chunking?: string }).chunking === 'single'
-  ) {
-    throw new Error(
-      '@module-federation/lynx web remotes require `chunking: "split"`; one external bundle has only one main-thread root and cannot activate independently scoped ReactLynx exposure roots.',
-    );
-  }
+  const plan = normalizeRemoteBundlePlan(options.name, remoteBundle);
   if (
     remoteBundle.filename !== undefined &&
     !remoteBundle.filename.endsWith('.lynx.bundle')
   ) {
     throw new Error(
       '@module-federation/lynx `remoteBundle.filename` must end with `.lynx.bundle`.',
+    );
+  }
+  if (remoteBundle.filename && /[\\/]/.test(remoteBundle.filename)) {
+    throw new Error(
+      '@module-federation/lynx `remoteBundle.filename` must be a basename without path separators so split lazy bundles resolve from the same output root.',
     );
   }
   if (options.filename !== undefined) {
@@ -273,7 +360,7 @@ export const configureRemoteBundle = async (
   }
 
   const conflictingLayer = findConflictingExposeLayer(
-    options.exposes!,
+    exposes,
     layers.BACKGROUND,
   );
   if (conflictingLayer) {
@@ -281,10 +368,10 @@ export const configureRemoteBundle = async (
       `@module-federation/lynx \`remoteBundle\` owns expose layers; remove the explicit \`${conflictingLayer}\` expose layer.`,
     );
   }
-  assertUniqueChunkNames(options.exposes!);
+  assertUniqueChunkNames(exposes);
 
   const reservedExposeKey = findReservedExposeKey(
-    options.exposes!,
+    exposes,
     MAIN_THREAD_EXPOSE_SUFFIX,
   );
   if (reservedExposeKey) {
@@ -293,38 +380,34 @@ export const configureRemoteBundle = async (
     );
   }
 
-  const bundleFileName = remoteBundle.filename ?? `${options.name}.lynx.bundle`;
-  const backgroundEntry = `${options.name}.js`;
-  const mainThreadEntry = `${options.name}__main-thread.js`;
-  const backgroundChunkPrefix = `${options.name}__background_`;
-  const mainThreadChunkPrefix = `${options.name}__main-thread__`;
-  const webTarget = remoteBundle.target === 'web';
-  const pairedRealmTarget = remoteBundle.chunking !== 'single';
-  const remoteExposes = pairedRealmTarget
+  const pairedPlan = plan.mode === 'native-single' ? undefined : plan;
+  const mainThreadChunkSuffix = `-${layers.MAIN_THREAD.replace(/:/g, '__')}`;
+  const remoteExposes = pairedPlan
     ? {
         ...createRemoteExposes(
-          options.exposes!,
+          exposes,
           layers.BACKGROUND,
-          backgroundChunkPrefix,
+          plan.backgroundChunkPrefix,
         ),
         ...createRemoteExposes(
-          options.exposes!,
+          exposes,
           layers.MAIN_THREAD,
-          mainThreadChunkPrefix,
+          pairedPlan.mainThreadChunkPrefix,
           MAIN_THREAD_EXPOSE_SUFFIX,
+          mainThreadChunkSuffix,
         ),
       }
     : createRemoteExposes(
-        options.exposes!,
+        exposes,
         layers.BACKGROUND,
-        backgroundChunkPrefix,
+        plan.backgroundChunkPrefix,
       );
-  const remoteShared = pairedRealmTarget
+  const remoteShared = pairedPlan
     ? normalizeSharedForBothLayers(options.shared, layers)
     : normalizeLynxShared(options.shared, layers.BACKGROUND, layers);
   const federationOptions = {
     ...createFederationOptions(
-      pairedRealmTarget
+      pairedPlan
         ? {
             ...options,
             shareScope: getLynxShareScopes(options.shareScope, layers),
@@ -336,7 +419,7 @@ export const configureRemoteBundle = async (
       adapterOptions.runtimePluginOptions,
     ),
     manifest: options.manifest ?? true,
-    filename: backgroundEntry,
+    filename: plan.backgroundEntry,
     runtime: false as const,
   };
   const mainThreadChunks: string[] = [];
@@ -345,31 +428,29 @@ export const configureRemoteBundle = async (
   const { manifestFileName, statsFileName } = getManifestFileName(
     federationOptions.manifest,
   );
-  const encode = webTarget
-    ? getLynxWebEncodeMode()
-    : ((await import('@lynx-js/tasm')).getEncodeMode() as (
-        value: unknown,
-      ) => Promise<{ buffer: Buffer }>);
+  const encode =
+    plan.mode === 'web-split'
+      ? getLynxWebEncodeMode()
+      : ((await import('@lynx-js/tasm')).getEncodeMode() as (
+          value: unknown,
+        ) => Promise<{ buffer: Buffer }>);
   config.plugins ||= [];
   config.plugins.push(
     createCompilerModuleFederationPlugin(federationOptions),
     createLynxChunkLoadingMatcherPlugin(lynxTemplatePlugin, {
-      backgroundOnlyRemote: !pairedRealmTarget,
-      chunking: remoteBundle.chunking ?? 'split',
+      backgroundOnlyRemote: !pairedPlan,
+      chunking: plan.chunking,
       discardSourceEntryBundles:
         remoteBundle.preserveSourceEntryBundles === false,
       discardedTemplateAssets,
-      includedChunkPrefixes: [
-        backgroundChunkPrefix,
-        ...(pairedRealmTarget ? [mainThreadChunkPrefix] : []),
-      ],
+      includedChunkPrefixes: plan.includedChunkPrefixes,
       lazyBundleAssets,
       remoteEntryName: options.name,
-      ...(pairedRealmTarget
+      ...(pairedPlan
         ? {
             pairedRealmChunkPrefixes: {
-              background: backgroundChunkPrefix,
-              mainThread: mainThreadChunkPrefix,
+              background: plan.backgroundChunkPrefix,
+              mainThread: pairedPlan.mainThreadChunkPrefix,
             },
             pairedRealmChunkSuffixes: {
               background: `-${layers.BACKGROUND.replace(/:/g, '__')}`,
@@ -379,34 +460,34 @@ export const configureRemoteBundle = async (
         : {}),
     }),
   );
-  if (pairedRealmTarget) {
+  if (pairedPlan) {
     config.plugins.push(
       createRemoteAssetsPlugin(
         mainThreadChunks,
-        backgroundEntry,
-        webTarget ? mainThreadEntry : undefined,
-        backgroundChunkPrefix,
+        plan.backgroundEntry,
+        plan.mainThreadEntry,
+        plan.backgroundChunkPrefix,
         layers.MAIN_THREAD,
       ),
     );
   }
   config.plugins.push(
     createLynxExternalBundlePlugin({
-      bundleFileName,
-      chunking: remoteBundle.chunking ?? 'split',
+      bundleFileName: plan.bundleFileName,
+      chunking: plan.chunking,
       discardedTemplateAssets,
       encode,
       engineVersion: remoteBundle.engineVersion,
-      entryAssets: [backgroundEntry, ...(webTarget ? [mainThreadEntry] : [])],
+      entryAssets: plan.entryAssets,
       entryName: options.name,
-      includedChunkPrefixes: [
-        backgroundChunkPrefix,
-        ...(pairedRealmTarget ? [mainThreadChunkPrefix] : []),
-      ],
+      includedChunkPrefixes: plan.includedChunkPrefixes,
       lazyBundleAssets,
       mainThreadChunks,
       preservedAssets: [manifestFileName, statsFileName],
     }),
-    createLynxRemoteManifestPlugin(federationOptions.manifest, bundleFileName),
+    createLynxRemoteManifestPlugin(
+      federationOptions.manifest,
+      plan.bundleFileName,
+    ),
   );
 };

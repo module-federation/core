@@ -117,6 +117,22 @@ for (const exposed of manifest.exposes) {
     lazyTemplate['main-thread-script']?.lepus_code_len > 100,
     `${lazyName} has no main-thread snapshot bytecode`,
   );
+  const mainThreadBytecode = Buffer.from(
+    lazyTemplate['main-thread-script'].lepus_code,
+  );
+  assert.ok(
+    mainThreadBytecode.includes(Buffer.from('react__main-thread')),
+    `${lazyName} does not use the ReactLynx main-thread chunk contract`,
+  );
+  for (const backgroundWrapperMarker of [
+    'bundleSupportLoadScript',
+    '__bundle__holder',
+  ]) {
+    assert.ok(
+      !mainThreadBytecode.includes(Buffer.from(backgroundWrapperMarker)),
+      `${lazyName} main-thread bytecode contains the background runtime wrapper marker ${backgroundWrapperMarker}`,
+    );
+  }
   assert.ok(
     lazyTemplate['background-thread-script'].some(({ content }) =>
       content?.includes('__lynx_dynamic_component_entry__'),

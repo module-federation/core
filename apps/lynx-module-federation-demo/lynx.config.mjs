@@ -8,7 +8,8 @@ import {
 } from './federation.config.mjs';
 
 const nativeRemoteOrigin =
-  process.env.LYNX_REMOTE_ORIGIN ?? 'http://127.0.0.1:3000';
+  process.env.LYNX_REMOTE_ORIGIN?.replace(/\/+$/, '') ??
+  'http://127.0.0.1:3000';
 const devHost = process.env.LYNX_DEV_HOST ?? '127.0.0.1';
 const devPort = Number(process.env.LYNX_DEV_PORT ?? 3000);
 const nativeManifestUrl =

@@ -8,8 +8,6 @@ jobs:
   e2e-lynx:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    outputs:
-      run-e2e: ${{ steps.check-ci.outputs.run-e2e }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
@@ -44,38 +42,19 @@ jobs:
       - name: Build shared packages
         run: pnpm run build:packages
 
-      - name: Check CI conditions
-        id: check-ci
-        run: |
-          ci_status=0
-          node tools/scripts/ci-is-affected.mjs --e2eSuite=lynx || ci_status=$?
-          if [ "$ci_status" -eq 0 ]; then
-            echo "run-e2e=true" >> "$GITHUB_OUTPUT"
-          elif [ "$ci_status" -eq 1 ]; then
-            echo "run-e2e=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "ci-is-affected failed with unexpected exit code: $ci_status" >&2
-            exit "$ci_status"
-          fi
-
       - name: Install Playwright Chromium
-        if: steps.check-ci.outputs.run-e2e == 'true'
         run: pnpm --filter lynx-module-federation-demo exec playwright install --with-deps chromium
 
       - name: Test Lynx federation compiler and transport
-        if: steps.check-ci.outputs.run-e2e == 'true'
         run: pnpm --filter @module-federation/lynx test
 
       - name: Build and validate native Lynx artifacts
-        if: steps.check-ci.outputs.run-e2e == 'true'
         run: pnpm --filter lynx-module-federation-demo run e2e:native
 
       - name: Validate standalone iOS project policy
-        if: steps.check-ci.outputs.run-e2e == 'true'
         run: pnpm --filter lynx-module-federation-demo run test:ios-project
 
       - name: Upload native artifacts for iOS
-        if: steps.check-ci.outputs.run-e2e == 'true'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: lynx-native-ios-input
@@ -86,11 +65,10 @@ jobs:
           retention-days: 1
 
       - name: Run real Lynx for Web E2E
-        if: steps.check-ci.outputs.run-e2e == 'true'
         run: pnpm --filter lynx-module-federation-demo run e2e:web
 
       - name: Upload Lynx E2E failure artifacts
-        if: failure() && steps.check-ci.outputs.run-e2e == 'true'
+        if: failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: lynx-module-federation-e2e-failure
@@ -105,7 +83,6 @@ jobs:
 
   e2e-lynx-ios:
     needs: e2e-lynx
-    if: needs.e2e-lynx.outputs.run-e2e == 'true'
     runs-on: macos-15
     timeout-minutes: 120
     env:

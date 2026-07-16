@@ -8,12 +8,95 @@
 
 static NSString *const OrbitResourceErrorDomain = @"org.modulefederation.lynx.resources";
 static NSUInteger const OrbitResourcePathCacheByteLimit = 64 * 1024 * 1024;
+static NSUInteger const OrbitResourceResponseByteLimit = 64 * 1024 * 1024;
+
+typedef void (^OrbitResourceDownloadCompletion)(NSURL *_Nullable,
+                                                NSURLResponse *_Nullable,
+                                                NSError *_Nullable);
+
+@interface OrbitResourceSessionDelegate : NSObject <NSURLSessionDownloadDelegate>
+
+@property(nonatomic, strong) NSMutableDictionary<NSNumber *, id> *completions;
+
+- (NSURLSessionDownloadTask *)downloadURL:(NSURL *)url
+                                  session:(NSURLSession *)session
+                               completion:(OrbitResourceDownloadCompletion)completion;
+
+@end
+
+@implementation OrbitResourceSessionDelegate
+
+- (instancetype)init {
+  self = [super init];
+  if (self) {
+    _completions = [NSMutableDictionary dictionary];
+  }
+  return self;
+}
+
+- (NSURLSessionDownloadTask *)downloadURL:(NSURL *)url
+                                  session:(NSURLSession *)session
+                               completion:(OrbitResourceDownloadCompletion)completion {
+  NSURLSessionDownloadTask *task = [session downloadTaskWithURL:url];
+  @synchronized(self) {
+    self.completions[@(task.taskIdentifier)] = [completion copy];
+  }
+  [task resume];
+  return task;
+}
+
+- (OrbitResourceDownloadCompletion)takeCompletionForTask:(NSURLSessionTask *)task {
+  @synchronized(self) {
+    NSNumber *key = @(task.taskIdentifier);
+    OrbitResourceDownloadCompletion completion = self.completions[key];
+    [self.completions removeObjectForKey:key];
+    return completion;
+  }
+}
+
+- (void)URLSession:(NSURLSession *)session
+      downloadTask:(NSURLSessionDownloadTask *)downloadTask
+      didWriteData:(int64_t)bytesWritten
+ totalBytesWritten:(int64_t)totalBytesWritten
+totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite {
+  (void)session;
+  (void)bytesWritten;
+  if (totalBytesWritten > (int64_t)OrbitResourceResponseByteLimit ||
+      totalBytesExpectedToWrite > (int64_t)OrbitResourceResponseByteLimit) {
+    [downloadTask cancel];
+  }
+}
+
+- (void)URLSession:(NSURLSession *)session
+      downloadTask:(NSURLSessionDownloadTask *)downloadTask
+didFinishDownloadingToURL:(NSURL *)location {
+  OrbitResourceDownloadCompletion completion =
+    [self takeCompletionForTask:downloadTask];
+  if (completion) {
+    completion(location, downloadTask.response, nil);
+  }
+}
+
+- (void)URLSession:(NSURLSession *)session
+              task:(NSURLSessionTask *)task
+didCompleteWithError:(NSError *)error {
+  (void)session;
+  if (!error) return;
+  OrbitResourceDownloadCompletion completion = [self takeCompletionForTask:task];
+  if (completion) {
+    completion(nil, task.response, error);
+  }
+}
+
+@end
 
 @interface OrbitResourceFetcher ()
 
 @property(nonatomic, strong) NSMutableDictionary<NSString *, NSString *> *resourcePathCache;
 @property(nonatomic, strong) NSURL *resourceCacheDirectory;
 @property(nonatomic, assign) NSUInteger resourcePathCacheBytes;
+@property(nonatomic, strong) NSURLSession *session;
+@property(nonatomic, strong) OrbitResourceSessionDelegate *sessionDelegate;
 
 - (dispatch_block_t)loadDataForURLString:(NSString *)urlString
                               completion:(void (^)(NSData *_Nullable,
@@ -34,6 +117,15 @@ static NSUInteger const OrbitResourcePathCacheByteLimit = 64 * 1024 * 1024;
   self = [super init];
   if (self) {
     _resourcePathCache = [NSMutableDictionary dictionary];
+    NSURLSessionConfiguration *sessionConfiguration =
+      [NSURLSessionConfiguration ephemeralSessionConfiguration];
+    sessionConfiguration.timeoutIntervalForRequest = 30;
+    sessionConfiguration.timeoutIntervalForResource = 60;
+    sessionConfiguration.requestCachePolicy = NSURLRequestReloadIgnoringLocalCacheData;
+    _sessionDelegate = [[OrbitResourceSessionDelegate alloc] init];
+    _session = [NSURLSession sessionWithConfiguration:sessionConfiguration
+                                             delegate:_sessionDelegate
+                                        delegateQueue:nil];
     _resourceCacheDirectory = [[[NSURL fileURLWithPath:NSTemporaryDirectory()
                                            isDirectory:YES]
       URLByAppendingPathComponent:@"OrbitResources"
@@ -45,6 +137,7 @@ static NSUInteger const OrbitResourcePathCacheByteLimit = 64 * 1024 * 1024;
 }
 
 - (void)dealloc {
+  [self.session invalidateAndCancel];
   [[NSFileManager defaultManager] removeItemAtURL:self.resourceCacheDirectory error:nil];
 }
 
@@ -167,9 +260,10 @@ static NSUInteger const OrbitResourcePathCacheByteLimit = 64 * 1024 * 1024;
     return ^{};
   }
 
-  NSURLSessionDataTask *task = [[NSURLSession sharedSession]
-    dataTaskWithURL:url
-  completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+  NSURLSessionDownloadTask *task = [self.sessionDelegate
+    downloadURL:url
+         session:self.session
+      completion:^(NSURL *location, NSURLResponse *response, NSError *error) {
     if (error) {
       completion(nil, error);
       return;
@@ -185,14 +279,43 @@ static NSUInteger const OrbitResourcePathCacheByteLimit = 64 * 1024 * 1024;
       }
     }
 
-    if (!data) {
+    long long expectedLength = response.expectedContentLength;
+    if (expectedLength > (long long)OrbitResourceResponseByteLimit) {
       completion(nil, [self errorWithMessage:[NSString stringWithFormat:
+        @"Lynx resource exceeds 64 MiB: %@", urlString]]);
+      return;
+    }
+
+    if (!location) {
+      completion(nil, [self errorWithMessage:[NSString stringWithFormat:
+        @"Lynx resource request returned no data: %@", urlString]]);
+      return;
+    }
+
+    NSError *readError = nil;
+    NSNumber *fileSize = nil;
+    if (![location getResourceValue:&fileSize
+                             forKey:NSURLFileSizeKey
+                              error:&readError]) {
+      completion(nil, readError);
+      return;
+    }
+    if (fileSize.unsignedLongLongValue > OrbitResourceResponseByteLimit) {
+      completion(nil, [self errorWithMessage:[NSString stringWithFormat:
+        @"Lynx resource exceeds 64 MiB: %@", urlString]]);
+      return;
+    }
+
+    NSData *data = [NSData dataWithContentsOfURL:location
+                                         options:NSDataReadingMappedIfSafe
+                                           error:&readError];
+    if (!data) {
+      completion(nil, readError ?: [self errorWithMessage:[NSString stringWithFormat:
         @"Lynx resource request returned no data: %@", urlString]]);
       return;
     }
     completion(data, nil);
   }];
-  [task resume];
   return ^{ [task cancel]; };
 }
 

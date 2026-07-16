@@ -19,14 +19,20 @@ const LAYERS = {
 
 type ModifyRspackConfig = (config: any, context: any) => any;
 type ModifyEnvironmentConfig = (config: any, context: any) => any;
+type ModifyBundlerChain = (chain: any, context: any) => any;
+type ReactResolver = {
+  resolve(request: string): Promise<string>;
+};
 
 const setupPlugin = (
   options: LynxModuleFederationOptions,
   adapterOptions?: LynxModuleFederationAdapterOptions,
   layers: unknown = LAYERS,
+  reactResolver?: ReactResolver,
 ) => {
   let modifyRspackConfig: ModifyRspackConfig | undefined;
   let modifyEnvironmentConfigCallback: ModifyEnvironmentConfig | undefined;
+  let modifyBundlerChainCallback: ModifyBundlerChain | undefined;
   const modifyEnvironmentConfig = rs.fn((callback: ModifyEnvironmentConfig) => {
     modifyEnvironmentConfigCallback = callback;
   });
@@ -34,11 +40,20 @@ const setupPlugin = (
 
   plugin.setup!({
     modifyEnvironmentConfig,
+    modifyBundlerChain(callback: ModifyBundlerChain) {
+      modifyBundlerChainCallback = callback;
+    },
     modifyRspackConfig(callback: ModifyRspackConfig) {
       modifyRspackConfig = callback;
     },
     useExposed(symbol: symbol) {
-      return symbol === Symbol.for('LAYERS') ? layers : undefined;
+      if (symbol === Symbol.for('LAYERS')) {
+        return layers;
+      }
+      if (symbol === Symbol.for('@lynx-js/react/internal:resolve')) {
+        return reactResolver;
+      }
+      return undefined;
     },
   } as any);
 
@@ -46,6 +61,8 @@ const setupPlugin = (
     modifyEnvironmentConfig,
     applyEnvironmentConfig: (config: any, environment = 'lynx') =>
       modifyEnvironmentConfigCallback!(config, { name: environment }),
+    modifyBundlerChain: (environment = 'lynx') =>
+      modifyBundlerChainCallback!({}, { environment: { name: environment } }),
     modifyRspackConfig: (config: any, environment = 'lynx') =>
       modifyRspackConfig!(config, { environment: { name: environment } }),
   };
@@ -294,6 +311,81 @@ describe('pluginLynxModuleFederation', () => {
     ]);
   });
 
+  it('requires the ReactLynx lazy export condition for split remotes', async () => {
+    const resolve = rs.fn(async (request: string) =>
+      request === '@lynx-js/react'
+        ? '/virtual/react/runtime/lib/index.js'
+        : '/virtual/react/runtime/lazy/import.js',
+    );
+    const { modifyBundlerChain } = setupPlugin(
+      { name: 'catalog', exposes: { './Card': './src/Card' } },
+      { remoteBundle: { target: 'lynx' } },
+      LAYERS,
+      { resolve },
+    );
+
+    await expect(modifyBundlerChain()).rejects.toThrow(
+      'pluginReactLynx({ experimental_isLazyBundle: true })',
+    );
+    expect(resolve).toHaveBeenCalledTimes(2);
+  });
+
+  it('accepts host-backed ReactLynx lazy exports for split remotes', async () => {
+    const resolve = rs.fn(async (request: string) =>
+      request === '@lynx-js/react'
+        ? '/virtual/react/runtime/lazy/react.js'
+        : '/virtual/react/runtime/lazy/import.js',
+    );
+    const { modifyBundlerChain } = setupPlugin(
+      { name: 'catalog', exposes: { './Card': './src/Card' } },
+      { remoteBundle: { target: 'web' } },
+      LAYERS,
+      { resolve },
+    );
+
+    await expect(modifyBundlerChain('web')).resolves.toBeUndefined();
+    expect(resolve).toHaveBeenCalledTimes(2);
+  });
+
+  it('allows split remotes from non-React Lynx DSL plugins', async () => {
+    const { modifyBundlerChain } = setupPlugin(
+      { name: 'catalog', exposes: { './Card': './src/Card' } },
+      { remoteBundle: { target: 'lynx' } },
+    );
+
+    await expect(modifyBundlerChain()).resolves.toBeUndefined();
+  });
+
+  it.each([
+    ['host builds', undefined, 'lynx'],
+    [
+      'native single remotes',
+      { remoteBundle: { target: 'lynx', chunking: 'single' } },
+      'lynx',
+    ],
+    [
+      'unselected environments',
+      { environment: 'web', remoteBundle: { target: 'web' } },
+      'lynx',
+    ],
+  ] as const)(
+    'skips ReactLynx lazy-export validation for %s',
+    async (_name, adapterOptions, environment) => {
+      const resolve = rs.fn(async () => {
+        throw new Error('unexpected ReactLynx resolver call');
+      });
+      const { modifyBundlerChain } = setupPlugin(
+        { name: 'catalog', exposes: { './Card': './src/Card' } },
+        adapterOptions as LynxModuleFederationAdapterOptions | undefined,
+        LAYERS,
+        { resolve },
+      );
+
+      await expect(modifyBundlerChain(environment)).resolves.toBeUndefined();
+      expect(resolve).not.toHaveBeenCalled();
+    },
+  );
+
   it('builds background and main-thread containers into one external bundle', async () => {
     const { modifyRspackConfig } = setupPlugin(
       {
@@ -331,7 +423,7 @@ describe('pluginLynxModuleFederation', () => {
         './Card__main_thread': {
           import: './src/Card',
           layer: LAYERS.MAIN_THREAD,
-          name: 'catalog__main-thread__Card',
+          name: 'catalog__main-thread__Card-main-thread',
         },
       },
       shared: [
@@ -380,7 +472,10 @@ describe('pluginLynxModuleFederation', () => {
           layers: [LAYERS.BACKGROUND, LAYERS.MAIN_THREAD],
         },
         {
-          files: new Set(['catalog__main-thread__Card.js', 'styles.css']),
+          files: new Set([
+            'catalog__main-thread__Card-main-thread.js',
+            'styles.css',
+          ]),
           layers: [LAYERS.MAIN_THREAD],
         },
         {
@@ -413,7 +508,7 @@ describe('pluginLynxModuleFederation', () => {
     expect(processAssetsStage).toBe(402);
     expect(encoder.options.mainThreadChunks).toEqual([
       'catalog__main-thread.js',
-      'catalog__main-thread__Card.js',
+      'catalog__main-thread__Card-main-thread.js',
     ]);
     expect(emitAsset).toHaveBeenCalledWith(
       'catalog__main-thread.js',
@@ -484,7 +579,7 @@ describe('pluginLynxModuleFederation', () => {
         './Card__main_thread': {
           import: './src/Card',
           layer: LAYERS.MAIN_THREAD,
-          name: 'catalog__main-thread__Card',
+          name: 'catalog__main-thread__Card-main-thread',
         },
       },
       shared: [
@@ -522,6 +617,33 @@ describe('pluginLynxModuleFederation', () => {
     });
     expect(Buffer.isBuffer(buffer)).toBe(true);
     expect(buffer.byteLength).toBeGreaterThan(100);
+  });
+
+  it('derives paired chunk suffixes from custom DSL layers', async () => {
+    const customLayers = {
+      BACKGROUND: 'worker:realm',
+      MAIN_THREAD: 'ui:realm',
+    };
+    const { modifyRspackConfig } = setupPlugin(
+      {
+        name: 'catalog',
+        exposes: { './Card': './src/Card' },
+      },
+      { remoteBundle: { target: 'lynx' } },
+      customLayers,
+    );
+
+    const config = await modifyRspackConfig({ plugins: [] });
+    expect(federationOptions(config.plugins[0]).exposes).toMatchObject({
+      './Card': {
+        layer: customLayers.BACKGROUND,
+        name: 'catalog__background_Card',
+      },
+      './Card__main_thread': {
+        layer: customLayers.MAIN_THREAD,
+        name: 'catalog__main-thread__Card-ui__realm',
+      },
+    });
   });
 
   it('keeps native single bundles background-only', async () => {
@@ -565,7 +687,7 @@ describe('pluginLynxModuleFederation', () => {
       {
         remoteBundle: {
           target: 'web',
-          filename: 'remotes/catalog.lynx.bundle',
+          filename: 'catalog.lynx.bundle',
         },
       },
     );
@@ -575,6 +697,22 @@ describe('pluginLynxModuleFederation', () => {
       fileName: 'catalog-manifest.json',
     });
     expect(config.plugins).toHaveLength(5);
+  });
+
+  it('rejects nested remote bundle filenames', async () => {
+    const { modifyRspackConfig } = setupPlugin(
+      { name: 'catalog', exposes: { './Card': './src/Card' } },
+      {
+        remoteBundle: {
+          target: 'web',
+          filename: 'remotes/catalog.lynx.bundle',
+        },
+      },
+    );
+
+    await expect(modifyRspackConfig({ plugins: [] })).rejects.toThrow(
+      'must be a basename without path separators',
+    );
   });
 
   it.each([

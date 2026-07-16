@@ -1,6 +1,8 @@
-import {
-  LynxCacheEventsPlugin,
-  type LynxCacheEventsPluginOptions,
+import { dirname } from 'node:path';
+
+import type {
+  LynxCacheEventsPlugin as LynxCacheEventsPluginType,
+  LynxCacheEventsPluginOptions,
 } from '@lynx-js/cache-events-webpack-plugin';
 import type { Configuration } from '@rspack/core';
 import type { RsbuildPlugin } from '@rsbuild/core';
@@ -28,22 +30,30 @@ import type { LynxRuntimePluginOptions } from './runtimeCore';
 
 export const LYNX_RUNTIME_PLUGIN = '@module-federation/lynx/runtimePlugin';
 
-const disableRemoteEntryEventCaching = (config: Configuration): void => {
-  const index = config.plugins?.findIndex(
+const disableRemoteEntryEventCaching = async (
+  config: Configuration,
+): Promise<void> => {
+  const plugins = config.plugins;
+  if (!plugins) {
+    return;
+  }
+  const { LynxCacheEventsPlugin } =
+    await import('@lynx-js/cache-events-webpack-plugin');
+  const index = plugins.findIndex(
     (plugin) =>
       plugin !== false &&
       plugin !== null &&
       plugin !== undefined &&
       plugin instanceof LynxCacheEventsPlugin,
   );
-  if (index === undefined || index < 0) {
+  if (index < 0) {
     return;
   }
 
-  const current = config.plugins![index] as LynxCacheEventsPlugin & {
+  const current = plugins[index] as LynxCacheEventsPluginType & {
     options?: LynxCacheEventsPluginOptions;
   };
-  config.plugins![index] = new LynxCacheEventsPlugin({
+  plugins[index] = new LynxCacheEventsPlugin({
     ...current.options,
     setupListTransformer: () => [],
   });
@@ -86,6 +96,37 @@ export const pluginLynxModuleFederation = (
         return config;
       });
 
+      api.modifyBundlerChain(async (_chain, { environment }) => {
+        const remoteBundle = getRemoteBundleOptions(adapterOptions);
+        if (
+          !remoteBundle ||
+          remoteBundle.chunking === 'single' ||
+          !shouldApplyToEnvironment(
+            adapterOptions.environment,
+            environment.name,
+          )
+        ) {
+          return;
+        }
+
+        const reactResolver = api.useExposed<{
+          resolve(request: string): Promise<string>;
+        }>(Symbol.for('@lynx-js/react/internal:resolve'));
+        if (!reactResolver) {
+          return;
+        }
+
+        const [reactEntry, lazyImportEntry] = await Promise.all([
+          reactResolver.resolve('@lynx-js/react'),
+          reactResolver.resolve('@lynx-js/react/experimental/lazy/import'),
+        ]);
+        if (dirname(reactEntry) !== dirname(lazyImportEntry)) {
+          throw new Error(
+            '@module-federation/lynx split ReactLynx remote bundles require `pluginReactLynx({ experimental_isLazyBundle: true })` so exposed components use the host-backed ReactLynx lazy runtime.',
+          );
+        }
+      });
+
       api.modifyRspackConfig(async (config, { environment }) => {
         if (
           !shouldApplyToEnvironment(
@@ -121,7 +162,9 @@ export const pluginLynxModuleFederation = (
         experiments.layers ??= true;
 
         if (remoteBundle) {
-          disableRemoteEntryEventCaching(config as unknown as Configuration);
+          await disableRemoteEntryEventCaching(
+            config as unknown as Configuration,
+          );
           await configureRemoteBundle(
             config as unknown as Configuration,
             options,

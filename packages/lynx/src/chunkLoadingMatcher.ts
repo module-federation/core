@@ -129,11 +129,20 @@ export const createLynxChunkLoadingMatcherPlugin = (
     const { RuntimeGlobals, RuntimeModule, Template } = compiler.webpack;
 
     compiler.hooks.thisCompilation.tap(pluginName, (compilation) => {
+      options.lazyBundleAssets?.clear();
+      options.discardedTemplateAssets?.clear();
       let remoteChunkNames: Set<string> | undefined;
       const templateHooks =
         lynxTemplatePlugin?.getLynxTemplatePluginHooks(compilation);
       templateHooks?.asyncChunkName.tap(pluginName, (chunkName) => {
         const layerSuffixes = options.pairedRealmChunkSuffixes;
+        const normalizedChunkName = layerSuffixes
+          ? [layerSuffixes.background, layerSuffixes.mainThread].reduce(
+              (name, suffix) =>
+                name.endsWith(suffix) ? name.slice(0, -suffix.length) : name,
+              chunkName,
+            )
+          : chunkName;
         const hasAssetlessChunk = Array.from(compilation.chunks).some(
           (chunk) => {
             if (
@@ -149,7 +158,7 @@ export const createLynxChunkLoadingMatcherPlugin = (
               : undefined;
             return (
               (suffix ? chunk.name.slice(0, -suffix.length) : chunk.name) ===
-              chunkName
+              normalizedChunkName
             );
           },
         );
@@ -157,9 +166,9 @@ export const createLynxChunkLoadingMatcherPlugin = (
           return '';
         }
         const prefixes = options.pairedRealmChunkPrefixes;
-        return prefixes && chunkName.startsWith(prefixes.mainThread)
-          ? `${prefixes.background}${chunkName.slice(prefixes.mainThread.length)}`
-          : chunkName;
+        return prefixes && normalizedChunkName.startsWith(prefixes.mainThread)
+          ? `${prefixes.background}${normalizedChunkName.slice(prefixes.mainThread.length)}`
+          : normalizedChunkName;
       });
       if (options.backgroundOnlyRemote) {
         templateHooks?.beforeEncode?.tap(pluginName, (args) => {

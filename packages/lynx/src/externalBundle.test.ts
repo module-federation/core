@@ -12,7 +12,13 @@ const createAsset = (name: string, content = name): TestAsset => ({
   source: { source: () => content },
 });
 
-const setupPlugin = (chunking: 'split' | 'single') => {
+const setupPlugin = (
+  chunking: 'split' | 'single',
+  lazyBundleAssets = new Set([
+    'async/Card.hash.bundle',
+    'async/Nested.hash.bundle',
+  ]),
+) => {
   const encode = rs.fn(async () => ({ buffer: Buffer.from('external') }));
   const discardedTemplateAssets = new Set(['bootstrap.bundle']);
   if (chunking === 'single') {
@@ -27,10 +33,7 @@ const setupPlugin = (chunking: 'split' | 'single') => {
     entryAssets: ['catalog.js'],
     entryName: 'catalog',
     includedChunkPrefixes: ['catalog__background_', 'catalog__main-thread__'],
-    lazyBundleAssets: new Set([
-      'async/Card.hash.bundle',
-      'async/Nested.hash.bundle',
-    ]),
+    lazyBundleAssets,
     mainThreadChunks: ['catalog__main-thread.js'],
     preservedAssets: ['mf-manifest.json', 'mf-stats.json'],
   });
@@ -171,6 +174,17 @@ describe('Lynx external bundle', () => {
       'mf-stats.json',
       'unrelated-app.js',
     ]);
+  });
+
+  it('rejects split builds without ReactLynx lazy bundles', async () => {
+    const { onCompilation, onEmit } = setupPlugin('split', new Set());
+    const harness = createCompilation(sourceAssets);
+    onCompilation()(harness.compilation);
+    harness.snapshot();
+
+    await expect(onEmit()(harness.compilation)).rejects.toThrow(
+      'no matching lazy bundle assets were produced',
+    );
   });
 
   it('snapshots every JS and CSS chunk into one atomic bundle', async () => {

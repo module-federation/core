@@ -97,6 +97,42 @@ describe('getRemoteEntry - script load error discrimination', () => {
     );
   });
 
+  it('evicts failed remote entry loads so a later request can retry', async () => {
+    let attempts = 0;
+    const container = {
+      get: rs.fn(),
+      init: rs.fn(),
+    };
+    const origin = new ModuleFederation({
+      name: 'retry-host',
+      remotes: [],
+      plugins: [
+        {
+          name: 'retry-entry-loader',
+          loadEntry() {
+            attempts += 1;
+            if (attempts === 1) {
+              throw new Error('transient entry failure');
+            }
+            return container;
+          },
+        },
+      ],
+    });
+    const remoteInfo = getRemoteInfo({
+      name: 'retry-remote',
+      entry: 'https://remote.test/entry.js',
+    });
+
+    await expect(getRemoteEntry({ origin, remoteInfo })).rejects.toThrow(
+      'transient entry failure',
+    );
+    await expect(getRemoteEntry({ origin, remoteInfo })).resolves.toBe(
+      container,
+    );
+    expect(attempts).toBe(2);
+  });
+
   it('remote container init failure is reported as RUNTIME_015 with the original error', async () => {
     const entry = `${BASE}/init-error.js`;
     const mf = new ModuleFederation({

@@ -86,6 +86,7 @@ const installChunk = (
       typeof factory !== 'function' || !entryName
         ? factory
         : function wrappedFactory(
+            this: unknown,
             module: unknown,
             exports: unknown,
             runtimeRequire: LynxWebpackRequire,
@@ -97,7 +98,7 @@ const installChunk = (
             const previousEntryName = globalObject.globDynamicComponentEntry;
             globalObject.globDynamicComponentEntry = entryName;
             try {
-              return factory(module, exports, runtimeRequire);
+              return factory.call(this, module, exports, runtimeRequire);
             } finally {
               if (hadEntryName) {
                 globalObject.globDynamicComponentEntry = previousEntryName;
@@ -303,8 +304,9 @@ const loadLazyChunk = (
   const immediate: { current: ImmediateLazyLoad } = {
     current: { kind: 'pending' },
   };
-  const loaded = loadQueryComponent(request, lynx, globalObject).then(
-    (value) => {
+  let loaded: ChunkPromise;
+  try {
+    loaded = loadQueryComponent(request, lynx, globalObject).then((value) => {
       if (!active) {
         return value;
       }
@@ -336,8 +338,14 @@ const loadLazyChunk = (
         return value;
       }
       return consumes.then(() => value);
-    },
-  );
+    });
+  } catch (error) {
+    active = false;
+    if (installedChunks[chunkKey] === loading) {
+      delete installedChunks[chunkKey];
+    }
+    return Promise.reject(error);
+  }
   insideLoader = false;
   const outcome = immediate.current;
 
@@ -404,6 +412,9 @@ export const patchLynxChunkLoading = (
   if (!bundleName) {
     return false;
   }
+  const baseName = originName.replace(/__main_thread$/, '');
+  const remoteOrigin =
+    registry?.get(getRemoteOriginKey(baseName)) ?? bundleName;
 
   const installedChunks: Record<string, InstalledChunk | undefined> = {};
 
@@ -425,9 +436,6 @@ export const patchLynxChunkLoading = (
         ? undefined
         : webpackRequire.lynx_aci?.[key];
     if (lazyBundlePath) {
-      const baseName = originName.replace(/__main_thread$/, '');
-      const remoteOrigin =
-        registry?.get(getRemoteOriginKey(baseName)) ?? bundleName;
       const request = joinRemoteUrl(
         remoteOrigin,
         webpackRequire.p,

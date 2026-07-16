@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, rs } from '@rstest/core';
+import { ModuleFederation } from '@module-federation/runtime-core';
 import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime-core/types';
 
 import lynxRuntimePlugin, { LYNX_BUNDLE_REGISTRY } from './runtimePlugin';
@@ -14,6 +15,9 @@ interface TestLynx {
 
 type LoadEntryArgs = Parameters<
   NonNullable<ModuleFederationRuntimePlugin['loadEntry']>
+>[0];
+type GeneratePreloadAssetsArgs = Parameters<
+  NonNullable<ModuleFederationRuntimePlugin['generatePreloadAssets']>
 >[0];
 
 const remoteInfo = {
@@ -46,6 +50,14 @@ afterEach(() => {
   delete globalRecord.lynx;
   delete globalRecord.remote;
   delete globalRecord[LYNX_BUNDLE_REGISTRY];
+  const globalLoading = globalRecord.__GLOBAL_LOADING_REMOTE_ENTRY__ as
+    | Record<string, Promise<unknown> | undefined>
+    | undefined;
+  if (globalLoading) {
+    for (const key of Object.keys(globalLoading)) {
+      delete globalLoading[key];
+    }
+  }
   rs.restoreAllMocks();
 });
 
@@ -208,17 +220,58 @@ describe('lynxRuntimePlugin entry loading', () => {
     expect(loadScript).not.toHaveBeenCalled();
   });
 
+  it('rolls back bundle registry mappings after evaluation fails', async () => {
+    const registry = new Map([
+      ['remote', 'lynx-cache://previous'],
+      ['remote:remote-origin', 'https://previous.test/remote.lynx.bundle'],
+      ['remote__main_thread', 'lynx-cache://previous'],
+    ]);
+    (
+      globalThis as unknown as Record<
+        PropertyKey,
+        Map<string, string> | undefined
+      >
+    )[LYNX_BUNDLE_REGISTRY] = registry;
+    setLynx({
+      fetchBundle: async () => ({ code: 0, url: 'lynx-cache://failed' }),
+      loadScript: async () => {
+        expect(registry.get('remote')).toBe('lynx-cache://failed');
+        throw new Error('evaluation failed');
+      },
+    });
+
+    await expect(
+      loadEntry(lynxRuntimePlugin(), bundleRemoteInfo),
+    ).rejects.toThrow('evaluation failed');
+    expect(Object.fromEntries(registry)).toEqual({
+      remote: 'lynx-cache://previous',
+      'remote:remote-origin': 'https://previous.test/remote.lynx.bundle',
+      remote__main_thread: 'lynx-cache://previous',
+    });
+  });
+
   it('evicts timed-out entry loads so they can be retried', async () => {
-    const container = createContainer();
+    const container = {
+      get: rs.fn(async () => () => ({ default: 'loaded' })),
+      init: rs.fn(),
+    };
     const requireModuleAsync = rs
       .fn<(entry: string, callback: NativeCallback) => void>()
       .mockImplementationOnce(() => undefined)
       .mockImplementationOnce((_entry, callback) => callback(null, container));
     setLynx({ requireModuleAsync });
 
-    const plugin = lynxRuntimePlugin({ timeout: 5 });
-    await expect(loadEntry(plugin)).rejects.toThrow('Timed out');
-    await expect(loadEntry(plugin)).resolves.toBe(container);
+    const federation = new ModuleFederation({
+      name: 'lynx-retry-host',
+      plugins: [lynxRuntimePlugin({ timeout: 5 })],
+      remotes: [remoteInfo],
+    });
+    await expect(federation.loadRemote('remote/Card')).rejects.toThrow(
+      'Timed out',
+    );
+    await expect(federation.loadRemote('remote/Card')).resolves.toEqual({
+      default: 'loaded',
+    });
     expect(requireModuleAsync).toHaveBeenCalledTimes(2);
   });
 
@@ -296,6 +349,28 @@ describe('lynxRuntimePlugin entry loading', () => {
     );
   });
 
+  it('does not infer realm share scopes from array positions', async () => {
+    const container = createContainer();
+    setLynx({
+      fetchBundle: async () => ({ code: 0, url: 'lynx-cache://remote' }),
+      loadScript: () => container,
+    });
+    const loaded = await loadEntry(lynxRuntimePlugin(), bundleRemoteInfo);
+    const shareScope = { shared: true };
+    const options = {
+      version: 'test',
+      shareScopeKeys: ['default', 'custom'],
+      shareScopeMap: {
+        default: { defaultScope: true },
+        custom: { customScope: true },
+      },
+    };
+
+    loaded.init(shareScope as never, [], options as never);
+
+    expect(container.init).toHaveBeenCalledWith(shareScope, [], options);
+  });
+
   it('leaves non-Lynx remote types to the runtime-core loaders', () => {
     expect(
       loadEntry(lynxRuntimePlugin(), {
@@ -303,6 +378,24 @@ describe('lynxRuntimePlugin entry loading', () => {
         type: 'module',
       }),
     ).toBeUndefined();
+  });
+
+  it('leaves preload assets for non-Lynx remotes to other runtime plugins', async () => {
+    const generatePreloadAssets = lynxRuntimePlugin().generatePreloadAssets!;
+    await expect(
+      generatePreloadAssets({
+        remoteInfo: { ...remoteInfo, type: 'module' },
+      } as GeneratePreloadAssetsArgs),
+    ).resolves.toBeUndefined();
+    await expect(
+      generatePreloadAssets({
+        remoteInfo: bundleRemoteInfo,
+      } as GeneratePreloadAssetsArgs),
+    ).resolves.toEqual({
+      cssAssets: [],
+      entryAssets: [],
+      jsAssetsWithoutEntry: [],
+    });
   });
 
   it('loads type lynx even when the bundle URL has an opaque suffix', async () => {

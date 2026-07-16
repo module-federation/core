@@ -1,4 +1,3 @@
-import { cssChunksToMap } from '@lynx-js/css-serializer';
 import type { Chunk, Compiler, WebpackPluginInstance } from '@rspack/core';
 
 interface ExternalBundleOptions {
@@ -95,6 +94,15 @@ export const createLynxExternalBundlePlugin = (
         stage: 10_000,
       },
       async (compilation) => {
+        if (
+          options.chunking === 'split' &&
+          options.lazyBundleAssets.size === 0
+        ) {
+          throw new Error(
+            '@module-federation/lynx split remote bundles require each expose to emit a DynamicComponent lazy bundle; no matching lazy bundle assets were produced.',
+          );
+        }
+        const { cssChunksToMap } = await import('@lynx-js/css-serializer');
         const entryAssets = new Set(options.entryAssets);
         for (const asset of compilation.entrypoints
           .get(options.entryName)

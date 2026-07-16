@@ -1,6 +1,7 @@
 import type {
   ModuleFederationRuntimePlugin,
   RemoteEntryExports,
+  RemoteInfo,
 } from '@module-federation/runtime-core/types';
 
 import {
@@ -26,6 +27,12 @@ export type { LynxRuntimePluginOptions, LynxWebpackRequire };
 
 declare const __webpack_require__: LynxWebpackRequire;
 
+const handlesLynxRemote = ({
+  entry,
+  type,
+}: Pick<RemoteInfo, 'entry' | 'type'>): boolean =>
+  type === 'lynx' || type === 'lynx-js' || isBundleEntry(entry);
+
 export default function lynxRuntimePlugin(
   options: LynxRuntimePluginOptions = {},
 ): ModuleFederationRuntimePlugin {
@@ -48,8 +55,7 @@ export default function lynxRuntimePlugin(
     loadEntry({ remoteInfo }) {
       const { entry, entryGlobalName, type } = remoteInfo;
       const isBundle = type === 'lynx' || isBundleEntry(entry);
-      const isJavaScript = type === 'lynx-js';
-      if (!isBundle && !isJavaScript) {
+      if (!handlesLynxRemote(remoteInfo)) {
         return undefined;
       }
 
@@ -94,7 +100,10 @@ export default function lynxRuntimePlugin(
       entryCache.set(cacheKey, cachedPromise);
       return cachedPromise;
     },
-    async generatePreloadAssets() {
+    async generatePreloadAssets({ remoteInfo }) {
+      if (!handlesLynxRemote(remoteInfo)) {
+        return undefined;
+      }
       return {
         cssAssets: [],
         jsAssetsWithoutEntry: [],

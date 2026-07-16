@@ -110,6 +110,59 @@ describe('patchLynxChunkLoading', () => {
     expect(observed).toBe(true);
   });
 
+  it('evicts synchronous lazy-bundle failures so they can be retried', async () => {
+    const webpackRequire = createWebpackRequire();
+    webpackRequire.lynx_aci = { feature: 'async/Card.bundle' };
+    const factory = rs.fn();
+    let attempt = 0;
+    const globalObject = createGlobalObject(() => {
+      if (attempt++ === 0) {
+        throw new Error('synchronous decode failed');
+      }
+      return makeSynchronousThenable({
+        ids: ['feature'],
+        modules: { factory },
+      });
+    });
+
+    patchLynxChunkLoading(webpackRequire, 'remote', globalObject);
+    const failed: PromiseLike<unknown>[] = [];
+    webpackRequire.f.j!('feature', failed);
+    await expect(failed[0]).rejects.toThrow('synchronous decode failed');
+
+    const retried: PromiseLike<unknown>[] = [];
+    webpackRequire.f.j!('feature', retried);
+    await expect(retried[0]).resolves.toBeDefined();
+    expect(webpackRequire.m.factory).toBe(factory);
+  });
+
+  it('captures the remote origin when the container runtime is patched', async () => {
+    const webpackRequire = createWebpackRequire();
+    webpackRequire.lynx_aci = { feature: 'async/Card.bundle' };
+    const loadLazyBundle = rs.fn(async () => ({
+      ids: ['feature'],
+      modules: {},
+    }));
+    const registry = remoteRegistry();
+    const globalObject = {
+      lynx: { loadLazyBundle, loadScript: rs.fn() },
+      [LYNX_BUNDLE_REGISTRY]: registry,
+    };
+
+    patchLynxChunkLoading(webpackRequire, 'remote', globalObject);
+    registry.set(
+      'remote:remote-origin',
+      'https://other.example/remotes/catalog.lynx.bundle',
+    );
+    const promises: PromiseLike<unknown>[] = [];
+    webpackRequire.f.j!('feature', promises);
+    await Promise.all(promises);
+
+    expect(loadLazyBundle).toHaveBeenCalledWith(
+      'https://cdn.example/remotes/async/Card.bundle',
+    );
+  });
+
   it('waits for shared consumes from a synchronous lazy bundle', async () => {
     const webpackRequire = createWebpackRequire();
     webpackRequire.lynx_aci = { feature: 'async/Card.bundle' };
@@ -372,6 +425,42 @@ describe('patchLynxChunkLoading', () => {
 
     expect(observedEntries).toEqual(['https://cdn.example/Card.bundle']);
     expect(globalObject.globDynamicComponentEntry).toBe('__Card__');
+  });
+
+  it('preserves CommonJS factory this while restoring bundle identity', async () => {
+    const webpackRequire = createWebpackRequire();
+    webpackRequire.lynx_aci = { feature: 'async/Card.bundle' };
+    const observedThis: unknown[] = [];
+    const factory = function (this: unknown) {
+      observedThis.push(this);
+    };
+    const globalObject = {
+      lynx: {
+        loadLazyBundle: async () => ({
+          __lynx_dynamic_component_entry__: 'https://cdn.example/Card.bundle',
+          ids: ['feature'],
+          modules: { factory },
+        }),
+        loadScript: rs.fn(),
+      },
+      [LYNX_BUNDLE_REGISTRY]: remoteRegistry(),
+    };
+
+    patchLynxChunkLoading(webpackRequire, 'remote', globalObject);
+    const promises: PromiseLike<unknown>[] = [];
+    webpackRequire.f.j!('feature', promises);
+    await Promise.all(promises);
+    const module = { exports: {} };
+    (
+      webpackRequire.m.factory as (
+        this: unknown,
+        module: unknown,
+        exports: unknown,
+        runtimeRequire: LynxWebpackRequire,
+      ) => unknown
+    ).call(module.exports, module, module.exports, webpackRequire);
+
+    expect(observedThis).toEqual([module.exports]);
   });
 
   it('loads atomic chunks from sections in the already-fetched container', async () => {
