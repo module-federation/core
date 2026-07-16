@@ -53,12 +53,14 @@ export function applyClientPlugins(
   };
 
   // Apply the ChunkCorrelationPlugin to collect metadata on chunks
-  new ChunkCorrelationPlugin({
-    filename: [
-      'static/chunks/federated-stats.json',
-      'server/federated-stats.json',
-    ],
-  }).apply(compiler);
+  if (!extraOptions.skipFederatedStats) {
+    new ChunkCorrelationPlugin({
+      filename: [
+        'static/chunks/federated-stats.json',
+        'server/federated-stats.json',
+      ],
+    }).apply(compiler);
+  }
 
   // Apply the InvertedContainerPlugin to add custom runtime modules to the container runtime
   new InvertedContainerPlugin().apply(compiler);

@@ -1,18 +1,8 @@
 import type { moduleFederationPlugin } from '@module-federation/sdk';
-
-export interface NextFederationPluginExtraOptions {
-  enableImageLoaderFix?: boolean;
-  enableUrlLoaderFix?: boolean;
-  exposePages?: boolean;
-  skipSharingNextInternals?: boolean;
-  automaticPageStitching?: boolean;
-  debug?: boolean;
-}
-
-export interface NextFederationPluginOptions
-  extends moduleFederationPlugin.ModuleFederationPluginOptions {
-  extraOptions: NextFederationPluginExtraOptions;
-}
+import type {
+  NextFederationPluginExtraOptions,
+  NextFederationPluginOptions,
+} from './next-fragments';
 
 export function setOptions(options: NextFederationPluginOptions): {
   mainOptions: moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -30,6 +20,7 @@ export function setOptions(options: NextFederationPluginOptions): {
     enableUrlLoaderFix: false,
     skipSharingNextInternals: false,
     debug: false,
+    skipFederatedStats: false,
   };
 
   return {
