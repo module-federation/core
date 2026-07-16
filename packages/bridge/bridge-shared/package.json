@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/bridge-shared",
-  "version": "2.7.0",
+  "version": "2.8.0",
   "publishConfig": {
     "access": "public"
   },
@@ -21,7 +21,7 @@
   "types": "./dist/src/index.d.ts",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && tsc -p tsconfig.json",
     "preview": "vite preview"
   },
   "devDependencies": {
@@ -29,9 +29,8 @@
     "@types/react": "^18.3.11",
     "@vitejs/plugin-vue": "^5.0.4",
     "@vitejs/plugin-vue-jsx": "^4.0.0",
-    "typescript": "^6.0.3",
+    "typescript": "7.0.2",
     "vite": "^5.4.21",
-    "vite-plugin-dts": "^4.3.0",
     "vue-tsc": "^2.0.6"
   }
 }

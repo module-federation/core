@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/bridge-react",
-  "version": "2.7.0",
+  "version": "2.8.0",
   "sideEffects": false,
   "publishConfig": {
     "access": "public"
@@ -90,6 +90,11 @@
       "import": "./dist/lazy-load-component-plugin.es.js",
       "require": "./dist/lazy-load-component-plugin.cjs.js"
     },
+    "./size-limited-cache": {
+      "types": "./dist/size-limited-cache.d.ts",
+      "import": "./dist/size-limited-cache.es.js",
+      "require": "./dist/size-limited-cache.cjs.js"
+    },
     "./*": "./*"
   },
   "typesVersions": {
@@ -135,20 +140,22 @@
       ],
       "data-fetch-server-middleware": [
         "./dist/data-fetch-server-middleware.d.ts"
+      ],
+      "size-limited-cache": [
+        "./dist/size-limited-cache.d.ts"
       ]
     }
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && tsc -p tsconfig.json && node scripts/write-dts-entrypoints.mjs",
     "preview": "vite preview",
     "test": "pnpm run test:jest && pnpm run test:rstest",
-    "test:jest": "pnpm exec jest --config jest.config.ts --passWithNoTests",
+    "test:jest": "pnpm exec jest --config jest.config.js --passWithNoTests",
     "test:rstest": "pnpm exec rstest --passWithNoTests"
   },
   "dependencies": {
-    "@module-federation/sdk": "workspace:*",
-    "lru-cache": "10.4.3"
+    "@module-federation/sdk": "workspace:*"
   },
   "peerDependencies": {
     "react": ">=16.9.0",
@@ -165,7 +172,6 @@
     }
   },
   "devDependencies": {
-    "react-error-boundary": "^4.1.2",
     "@module-federation/bridge-shared": "workspace:*",
     "@rsbuild/plugin-react": "2.1.0",
     "@testing-library/react": "15.0.7",
@@ -179,9 +185,8 @@
     "react-dom": "18.3.1",
     "react-router-dom": "6.30.3",
     "react-router": "7.16.0",
-    "typescript": "^6.0.3",
+    "typescript": "7.0.2",
     "vite": "^5.4.21",
-    "vite-plugin-dts": "^4.3.0",
     "@module-federation/runtime": "workspace:*",
     "@module-federation/runtime-core": "workspace:*",
     "hono": "4.12.26"

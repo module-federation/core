@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/managers",
-  "version": "2.7.0",
+  "version": "2.8.0",
   "license": "MIT",
   "description": "Provide managers for helping handle mf data .",
   "keywords": [
@@ -25,8 +25,7 @@
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "dependencies": {
-    "@module-federation/sdk": "workspace:*",
-    "empathic": "2.0.0"
+    "@module-federation/sdk": "workspace:*"
   },
   "devDependencies": {
     "webpack": "5.104.1"

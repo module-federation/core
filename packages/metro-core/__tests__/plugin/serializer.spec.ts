@@ -14,7 +14,10 @@ rs.mock('../../src/utils/metro-compat', () => {
 import { getModuleFederationSerializer } from '../../src/plugin/serializer';
 import { baseJSBundle } from '../../src/utils/metro-compat';
 
-function createSerializer(exposes: Record<string, string>) {
+function createSerializer(
+  exposes: Record<string, string>,
+  isUsingMFBundleCommand = true,
+) {
   return getModuleFederationSerializer(
     {
       name: 'MFExampleMini',
@@ -25,7 +28,7 @@ function createSerializer(exposes: Record<string, string>) {
       shareStrategy: 'loaded-first',
       plugins: [],
     },
-    true,
+    isUsingMFBundleCommand,
   );
 }
 
@@ -60,6 +63,27 @@ describe('getModuleFederationSerializer', () => {
       ),
     ).resolves.toBe('serialized-output');
     expect(baseJSBundle).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses POSIX dependency keys for Windows split bundle entry paths', async () => {
+    const serializer = createSerializer({}, false);
+
+    await expect(
+      serializer(
+        '/projectRoot/src\\info.tsx',
+        [],
+        createGraph(),
+        createSerializerOptions(),
+      ),
+    ).resolves.toBe('serialized-output');
+
+    const preModules = rs.mocked(baseJSBundle).mock.calls[0][1] as any[];
+    expect(preModules[0].output[0].data.code).toContain(
+      'deps.shared["src/info"]',
+    );
+    expect(preModules[1].output[0].data.code).toContain(
+      'deps.remotes["src/info"]',
+    );
   });
 
   it('matches expose paths without extension against resolved entry files', async () => {

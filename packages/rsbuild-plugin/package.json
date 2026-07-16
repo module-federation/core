@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/rsbuild-plugin",
-  "version": "2.7.0",
+  "version": "2.8.0",
   "description": "Module Federation plugin for Rsbuild",
   "homepage": "https://module-federation.io",
   "bugs": {
@@ -57,7 +57,7 @@
     "@rslib/core": "^0.23.2",
     "@rsbuild/core": "2.1.4",
     "@rstest/core": "^0.10.6",
-    "typescript": "6.0.3"
+    "typescript": "7.0.2"
   },
   "peerDependencies": {
     "@rsbuild/core": "^1.3.21 || ^2.0.0-0"

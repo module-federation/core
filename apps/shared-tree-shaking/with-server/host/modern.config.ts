@@ -19,6 +19,8 @@ if (isSecondarySharedTreeShaking) {
 
 const publicPath = 'http://localhost:3001/';
 
+const typeCheckerTypeScriptPath = require.resolve('typescript-compiler');
+
 // https://modernjs.dev/en/configure/app/usage
 export default defineConfig({
   dev: {
@@ -43,6 +45,11 @@ export default defineConfig({
     serverPlugin(),
   ],
   tools: {
+    tsChecker: {
+      typescript: {
+        typescriptPath: typeCheckerTypeScriptPath,
+      },
+    },
     webpack: webpackConfig,
   },
 });

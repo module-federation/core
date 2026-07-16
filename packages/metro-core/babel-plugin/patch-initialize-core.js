@@ -45,9 +45,9 @@ function metroPatchInitializeCorePlugin() {
       Program: {
         enter(_, state) {
           state.hasInjected = false;
-          state.shouldTransform = state.file.opts.filename.includes(
-            'react-native/Libraries/Core/InitializeCore.js',
-          );
+          state.shouldTransform = state.file.opts.filename
+            .replaceAll('\\', '/')
+            .includes('react-native/Libraries/Core/InitializeCore.js');
         },
         exit(path, state) {
           if (!state.shouldTransform) return;

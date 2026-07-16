@@ -140,9 +140,9 @@ function metroPatchRequireBabelPlugin() {
       Program: {
         enter(_, state) {
           // Transform only require.js from metro-runtime
-          state.shouldTransform = state.file.opts.filename.includes(
-            'metro-runtime/src/polyfills/require.js',
-          );
+          state.shouldTransform = state.file.opts.filename
+            .replaceAll('\\', '/')
+            .includes('metro-runtime/src/polyfills/require.js');
           // Perform refreshSymbols transformation only once
           // Because it is referenced in multiple places
           state.hasTransformed = {

@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/cli",
-  "version": "2.7.0",
+  "version": "2.8.0",
   "type": "commonjs",
   "description": "Module Federation CLI",
   "homepage": "https://module-federation.io",
@@ -30,7 +30,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.19.5",
-    "typescript": "6.0.3"
+    "typescript": "7.0.2"
   },
   "engines": {
     "node": ">=16.0.0"
