@@ -133,11 +133,17 @@ for (const exposed of manifest.exposes) {
       `${lazyName} main-thread bytecode contains the background runtime wrapper marker ${backgroundWrapperMarker}`,
     );
   }
+  const entryScript = lazyTemplate['background-thread-script'].find(
+    ({ content }) => content?.includes('__lynx_dynamic_component_entry__'),
+  );
   assert.ok(
-    lazyTemplate['background-thread-script'].some(({ content }) =>
-      content?.includes('__lynx_dynamic_component_entry__'),
-    ),
+    entryScript,
     `${lazyName} does not preserve its DynamicComponent entry identity`,
+  );
+  assert.ok(
+    entryScript.content.lastIndexOf('__lynx_dynamic_component_entry__') <
+      entryScript.content.lastIndexOf('.require('),
+    `${lazyName} writes its DynamicComponent entry identity outside the Lynx module wrapper`,
   );
   assert.ok(
     !JSON.stringify(exposed).includes('__main_thread'),

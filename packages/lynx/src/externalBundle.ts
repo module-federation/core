@@ -10,7 +10,7 @@ interface ExternalBundleOptions {
   entryName: string;
   includedChunkPrefixes: string[];
   lazyBundleAssets: Set<string>;
-  mainThreadChunks: string[];
+  pairedBundleChunks: string[];
   preservedAssets: string[];
 }
 
@@ -117,7 +117,7 @@ export const createLynxExternalBundlePlugin = (
           (sections, asset) => {
             if (asset.name.endsWith('.js')) {
               sections[asset.name.replace(/\.js$/, '')] = {
-                ...(options.mainThreadChunks.includes(asset.name)
+                ...(options.pairedBundleChunks.includes(asset.name)
                   ? { encoding: 'JsBytecode' }
                   : {}),
                 content: asset.content,

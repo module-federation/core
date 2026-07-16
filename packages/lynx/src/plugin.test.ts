@@ -448,13 +448,33 @@ describe('pluginLynxModuleFederation', () => {
       engineVersion: '3.6',
     });
 
-    let collectAssets: (() => void) | undefined;
-    let processAssetsStage: number | undefined;
+    const PROCESS_ASSETS_STAGE_ADDITIONS = -100;
+    const PROCESS_ASSETS_STAGE_OPTIMIZE_SIZE = 400;
+    const processAssets = new Map<number, () => void>();
     let onCompilation: ((compilation: any) => void) | undefined;
     collector.apply({
       webpack: {
-        Compilation: { PROCESS_ASSETS_STAGE_OPTIMIZE_SIZE: 400 },
-        sources: { ConcatSource: class {} },
+        Compilation: {
+          PROCESS_ASSETS_STAGE_ADDITIONS,
+          PROCESS_ASSETS_STAGE_OPTIMIZE_SIZE,
+        },
+        sources: {
+          ConcatSource: class {
+            private readonly parts: Array<string | { source(): string }>;
+
+            constructor(...parts: Array<string | { source(): string }>) {
+              this.parts = parts;
+            }
+
+            source() {
+              return this.parts
+                .map((part) =>
+                  typeof part === 'string' ? part : part.source(),
+                )
+                .join('');
+            }
+          },
+        },
       },
       hooks: {
         thisCompilation: {
@@ -465,13 +485,16 @@ describe('pluginLynxModuleFederation', () => {
       },
     } as any);
     const emitAsset = rs.fn();
+    const updateAsset = rs.fn();
     onCompilation!({
       chunks: [
         {
+          name: 'catalog',
           files: new Set(['catalog.js']),
           layers: [LAYERS.BACKGROUND, LAYERS.MAIN_THREAD],
         },
         {
+          name: 'catalog__main-thread__Card',
           files: new Set([
             'catalog__main-thread__Card-main-thread.js',
             'styles.css',
@@ -479,6 +502,7 @@ describe('pluginLynxModuleFederation', () => {
           layers: [LAYERS.MAIN_THREAD],
         },
         {
+          name: 'catalog__background_Card',
           files: new Set(['catalog__background_Card.js']),
           layers: [LAYERS.BACKGROUND],
         },
@@ -489,26 +513,50 @@ describe('pluginLynxModuleFederation', () => {
         },
       },
       emitAsset,
+      updateAsset,
       getAsset(name: string) {
-        return name === 'catalog.js'
-          ? { source: { source: () => 'container' }, info: {} }
-          : undefined;
+        if (name === 'catalog.js') {
+          return { source: { source: () => 'container' }, info: {} };
+        }
+        if (name === 'catalog__background_Card.js') {
+          return {
+            source: { source: () => 'exports.ids = ["card"];' },
+            info: { minimized: true },
+          };
+        }
+        return undefined;
       },
       hooks: {
         processAssets: {
           tap(options: { stage: number }, callback: () => void) {
-            processAssetsStage = options.stage;
-            collectAssets = callback;
+            processAssets.set(options.stage, callback);
           },
         },
       },
     });
-    collectAssets!();
+    const backgroundIdentityStage = PROCESS_ASSETS_STAGE_ADDITIONS + 1;
+    const pairedBundleChunksStage = PROCESS_ASSETS_STAGE_OPTIMIZE_SIZE + 2;
+    processAssets.get(backgroundIdentityStage)!();
+    processAssets.get(pairedBundleChunksStage)!();
 
-    expect(processAssetsStage).toBe(402);
-    expect(encoder.options.mainThreadChunks).toEqual([
+    expect([...processAssets.keys()]).toEqual([
+      backgroundIdentityStage,
+      pairedBundleChunksStage,
+    ]);
+    expect(updateAsset).toHaveBeenCalled();
+    const backgroundSource = updateAsset.mock.calls[0][1].source();
+    expect(backgroundSource).toContain(
+      'exports.__lynx_dynamic_component_entry__ = globDynamicComponentEntry;',
+    );
+    expect(updateAsset).toHaveBeenCalledWith(
+      'catalog__background_Card.js',
+      expect.any(Object),
+      { minimized: true },
+    );
+    expect(encoder.options.pairedBundleChunks).toEqual([
       'catalog__main-thread.js',
       'catalog__main-thread__Card-main-thread.js',
+      'catalog__background_Card.js',
     ]);
     expect(emitAsset).toHaveBeenCalledWith(
       'catalog__main-thread.js',
@@ -597,7 +645,7 @@ describe('pluginLynxModuleFederation', () => {
       bundleFileName: 'catalog-native.lynx.bundle',
       engineVersion: '3.6',
       entryAssets: ['catalog.js'],
-      mainThreadChunks: [],
+      pairedBundleChunks: [],
     });
     expect(encoder.options.encode).toBeTypeOf('function');
     const { buffer } = await encoder.options.encode({

@@ -222,16 +222,70 @@ const isModuleInLayer = (module: unknown, layer: string): boolean => {
   return (module as { layer?: string }).layer === layer;
 };
 
+const classifyRemoteChunk = (
+  modules: Iterable<unknown>,
+  name: string | undefined,
+  backgroundChunkPrefix: string,
+  mainThreadLayer: string,
+) => ({
+  containsBackgroundExpose:
+    typeof name === 'string' && name.startsWith(backgroundChunkPrefix),
+  containsMainThreadModule: Array.from(modules).some((module) =>
+    isModuleInLayer(module, mainThreadLayer),
+  ),
+});
+
 const createRemoteAssetsPlugin = (
-  mainThreadChunks: string[],
+  pairedBundleChunks: string[],
   backgroundEntry: string,
   mainThreadEntry: string | undefined,
   backgroundChunkPrefix: string,
   mainThreadLayer: string,
 ) => ({
   apply(compiler: Compiler) {
-    const pluginName = 'LynxModuleFederationMainThreadChunks';
+    const pluginName = 'LynxModuleFederationPairedBundleChunks';
     compiler.hooks.thisCompilation.tap(pluginName, (compilation) => {
+      compilation.hooks.processAssets.tap(
+        {
+          name: `${pluginName}BackgroundIdentity`,
+          // ReactLynx adds debug metadata during ADDITIONS, then RuntimeWrapper
+          // closes over `exports` at stage NONE. Inject the identity between them.
+          stage:
+            compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONS + 1,
+        },
+        () => {
+          for (const chunk of compilation.chunks) {
+            const { containsBackgroundExpose, containsMainThreadModule } =
+              classifyRemoteChunk(
+                compilation.chunkGraph.getChunkModulesIterable(chunk),
+                chunk.name,
+                backgroundChunkPrefix,
+                mainThreadLayer,
+              );
+            if (!containsBackgroundExpose || containsMainThreadModule) {
+              continue;
+            }
+
+            for (const filename of chunk.files) {
+              if (filename.endsWith('.js') && filename !== backgroundEntry) {
+                const asset = compilation.getAsset(filename);
+                if (asset) {
+                  compilation.updateAsset(
+                    filename,
+                    new compiler.webpack.sources.ConcatSource(
+                      asset.source,
+                      "\nif (typeof globDynamicComponentEntry !== 'string') { throw new Error('Lynx DynamicComponent entry identity is unavailable.'); }\n",
+                      'exports.__lynx_dynamic_component_entry__ = globDynamicComponentEntry;\n',
+                    ),
+                    asset.info,
+                  );
+                }
+              }
+            }
+          }
+        },
+      );
+
       compilation.hooks.processAssets.tap(
         {
           name: pluginName,
@@ -239,7 +293,7 @@ const createRemoteAssetsPlugin = (
             compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_OPTIMIZE_SIZE + 2,
         },
         () => {
-          mainThreadChunks.length = 0;
+          pairedBundleChunks.length = 0;
           if (mainThreadEntry) {
             const entryAsset = compilation.getAsset(backgroundEntry);
             if (!entryAsset) {
@@ -252,46 +306,39 @@ const createRemoteAssetsPlugin = (
               entryAsset.source,
               entryAsset.info,
             );
-            mainThreadChunks.push(mainThreadEntry);
+            pairedBundleChunks.push(mainThreadEntry);
           }
 
           for (const chunk of compilation.chunks) {
-            const containsMainThreadModule = Array.from(
-              compilation.chunkGraph.getChunkModulesIterable(chunk),
-            ).some((module) => isModuleInLayer(module, mainThreadLayer));
-            const containsBackgroundExpose =
-              typeof chunk.name === 'string' &&
-              chunk.name.startsWith(backgroundChunkPrefix);
+            const { containsBackgroundExpose, containsMainThreadModule } =
+              classifyRemoteChunk(
+                compilation.chunkGraph.getChunkModulesIterable(chunk),
+                chunk.name,
+                backgroundChunkPrefix,
+                mainThreadLayer,
+              );
             if (!containsMainThreadModule && !containsBackgroundExpose) {
               continue;
             }
 
             for (const filename of chunk.files) {
               if (filename.endsWith('.js') && filename !== backgroundEntry) {
-                mainThreadChunks.push(filename);
+                pairedBundleChunks.push(filename);
                 const asset = compilation.getAsset(filename);
-                if (asset) {
+                if (asset && containsMainThreadModule) {
                   compilation.updateAsset(
                     filename,
-                    containsMainThreadModule
-                      ? new compiler.webpack.sources.ConcatSource(
-                          '(function (globDynamicComponentEntry) {\n',
-                          '  const module = { exports: {} };\n',
-                          '  const exports = module.exports;\n',
-                          asset.source,
-                          '\n  module.exports.__lynx_dynamic_component_entry__ = globDynamicComponentEntry;\n',
-                          '  return module.exports;\n})',
-                        )
-                      : new compiler.webpack.sources.ConcatSource(
-                          asset.source,
-                          "\nif (typeof globDynamicComponentEntry !== 'string') { throw new Error('Lynx DynamicComponent entry identity is unavailable.'); }\n",
-                          'exports.__lynx_dynamic_component_entry__ = globDynamicComponentEntry;\n',
-                        ),
+                    new compiler.webpack.sources.ConcatSource(
+                      '(function (globDynamicComponentEntry) {\n',
+                      '  const module = { exports: {} };\n',
+                      '  const exports = module.exports;\n',
+                      asset.source,
+                      '\n  module.exports.__lynx_dynamic_component_entry__ = globDynamicComponentEntry;\n',
+                      '  return module.exports;\n})',
+                    ),
                     {
                       ...asset.info,
-                      ...(containsMainThreadModule
-                        ? { 'lynx:main-thread': true }
-                        : {}),
+                      'lynx:main-thread': true,
                     },
                   );
                 }
@@ -422,7 +469,7 @@ export const configureRemoteBundle = async (
     filename: plan.backgroundEntry,
     runtime: false as const,
   };
-  const mainThreadChunks: string[] = [];
+  const pairedBundleChunks: string[] = [];
   const lazyBundleAssets = new Set<string>();
   const discardedTemplateAssets = new Set<string>();
   const { manifestFileName, statsFileName } = getManifestFileName(
@@ -463,7 +510,7 @@ export const configureRemoteBundle = async (
   if (pairedPlan) {
     config.plugins.push(
       createRemoteAssetsPlugin(
-        mainThreadChunks,
+        pairedBundleChunks,
         plan.backgroundEntry,
         plan.mainThreadEntry,
         plan.backgroundChunkPrefix,
@@ -482,7 +529,7 @@ export const configureRemoteBundle = async (
       entryName: options.name,
       includedChunkPrefixes: plan.includedChunkPrefixes,
       lazyBundleAssets,
-      mainThreadChunks,
+      pairedBundleChunks,
       preservedAssets: [manifestFileName, statsFileName],
     }),
     createLynxRemoteManifestPlugin(

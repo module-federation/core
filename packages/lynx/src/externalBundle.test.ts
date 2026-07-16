@@ -34,7 +34,7 @@ const setupPlugin = (
     entryName: 'catalog',
     includedChunkPrefixes: ['catalog__background_', 'catalog__main-thread__'],
     lazyBundleAssets,
-    mainThreadChunks: ['catalog__main-thread.js'],
+    pairedBundleChunks: ['catalog__main-thread.js'],
     preservedAssets: ['mf-manifest.json', 'mf-stats.json'],
   });
   let onCompilation: ((compilation: any) => void) | undefined;
