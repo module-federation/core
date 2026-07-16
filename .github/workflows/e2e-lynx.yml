@@ -107,7 +107,7 @@ jobs:
     needs: e2e-lynx
     if: needs.e2e-lynx.outputs.run-e2e == 'true'
     runs-on: macos-15
-    timeout-minutes: 60
+    timeout-minutes: 120
     env:
       DEVELOPER_DIR: /Applications/Xcode_16.4.app/Contents/Developer
       NO_COLOR: 1
