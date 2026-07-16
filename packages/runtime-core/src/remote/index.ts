@@ -655,8 +655,16 @@ export class RemoteHandler {
       }
       // Set the remote entry to a complete path
       if ('entry' in remote) {
-        if (isBrowserEnvValue && typeof window !== 'undefined') {
-          remote.entry = new URL(remote.entry, window.document.baseURI).href;
+        if (
+          isBrowserEnvValue &&
+          typeof window !== 'undefined' &&
+          !remote.entry.startsWith('http')
+        ) {
+          const baseUrl =
+            remote.entry.startsWith('./') || remote.entry.startsWith('../')
+              ? window.document.baseURI
+              : window.location.origin;
+          remote.entry = new URL(remote.entry, baseUrl).href;
         }
       }
       if (!remote.shareScope) {

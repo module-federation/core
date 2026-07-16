@@ -37,14 +37,9 @@ describe('relative remote entry resolution', () => {
       ({ body: manifest }) => {
         cy.intercept(
           'GET',
-          'http://127.0.0.1:3005/catalog/item/current-mf-manifest.json',
+          'http://127.0.0.1:3005/catalog/item/mf-manifest.json',
           withRemoteName(manifest, 'browser_current_remote'),
         ).as('currentManifest');
-        cy.intercept(
-          'GET',
-          'http://127.0.0.1:3005/catalog/item/mf-manifest.json',
-          withRemoteName(manifest, 'browser_bare_remote'),
-        ).as('bareManifest');
 
         cy.visit('/');
         cy.window().then((win) => {
@@ -56,10 +51,7 @@ describe('relative remote entry resolution', () => {
 
           const instance = getRuntimeInstance(win);
           instance.registerRemotes([
-            {
-              name: 'browser_current_remote',
-              entry: './current-mf-manifest.json',
-            },
+            { name: 'browser_current_remote', entry: './mf-manifest.json' },
             { name: 'browser_parent_remote', entry: '../mf-manifest.json' },
             { name: 'browser_root_remote', entry: '/mf-manifest.json' },
             { name: 'browser_bare_remote', entry: 'mf-manifest.json' },
@@ -76,7 +68,7 @@ describe('relative remote entry resolution', () => {
           ]);
 
           expect(getRemoteEntry(instance, 'browser_current_remote')).to.equal(
-            'http://127.0.0.1:3005/catalog/item/current-mf-manifest.json',
+            'http://127.0.0.1:3005/catalog/item/mf-manifest.json',
           );
           expect(getRemoteEntry(instance, 'browser_parent_remote')).to.equal(
             'http://127.0.0.1:3005/catalog/mf-manifest.json',
@@ -85,7 +77,7 @@ describe('relative remote entry resolution', () => {
             'http://127.0.0.1:3005/mf-manifest.json',
           );
           expect(getRemoteEntry(instance, 'browser_bare_remote')).to.equal(
-            'http://127.0.0.1:3005/catalog/item/mf-manifest.json',
+            'http://127.0.0.1:3005/mf-manifest.json',
           );
           expect(
             getRemoteEntry(instance, 'browser_protocol_relative_remote'),
@@ -94,22 +86,20 @@ describe('relative remote entry resolution', () => {
             'https://cdn.example/remoteEntry.js?version=1#entry',
           );
           expect(getRemoteEntry(instance, 'browser_query_remote')).to.equal(
-            'http://127.0.0.1:3005/catalog/item/1?manifest=1',
+            'http://127.0.0.1:3005/?manifest=1',
           );
           expect(getRemoteEntry(instance, 'browser_hash_remote')).to.equal(
-            'http://127.0.0.1:3005/catalog/item/1?tab=details#manifest',
+            'http://127.0.0.1:3005/#manifest',
           );
 
-          return Promise.all([
-            instance.loadRemote('browser_current_remote/useCustomRemoteHook'),
-            instance.loadRemote('browser_bare_remote/useCustomRemoteHook'),
-          ]);
+          return instance.loadRemote(
+            'browser_current_remote/useCustomRemoteHook',
+          );
         });
 
         cy.wait('@currentManifest')
           .its('response.statusCode')
           .should('eq', 200);
-        cy.wait('@bareManifest').its('response.statusCode').should('eq', 200);
       },
     );
   });
@@ -120,7 +110,7 @@ describe('relative remote entry resolution', () => {
         cy.intercept(
           'GET',
           'http://127.0.0.1:3005/nested/application/mf-manifest.json',
-          withRemoteName(manifest, 'browser_base_bare_remote'),
+          withRemoteName(manifest, 'browser_base_current_remote'),
         ).as('baseManifest');
 
         cy.visit('/');
@@ -159,12 +149,6 @@ describe('relative remote entry resolution', () => {
               name: 'browser_base_parent_remote',
               entry: '../mf-manifest.json',
             },
-            {
-              name: 'browser_base_bare_remote',
-              entry: 'mf-manifest.json',
-            },
-            { name: 'browser_base_query_remote', entry: '?manifest=1' },
-            { name: 'browser_base_hash_remote', entry: '#manifest' },
           ]);
 
           expect(
@@ -175,18 +159,9 @@ describe('relative remote entry resolution', () => {
           expect(
             getRemoteEntry(instance, 'browser_base_parent_remote'),
           ).to.equal('http://127.0.0.1:3005/nested/mf-manifest.json');
-          expect(getRemoteEntry(instance, 'browser_base_bare_remote')).to.equal(
-            'http://127.0.0.1:3005/nested/application/mf-manifest.json',
-          );
-          expect(
-            getRemoteEntry(instance, 'browser_base_query_remote'),
-          ).to.equal('http://127.0.0.1:3005/nested/application/?manifest=1');
-          expect(getRemoteEntry(instance, 'browser_base_hash_remote')).to.equal(
-            'http://127.0.0.1:3005/nested/application/#manifest',
-          );
 
           return instance.loadRemote(
-            'browser_base_bare_remote/useCustomRemoteHook',
+            'browser_base_current_remote/useCustomRemoteHook',
           );
         });
 

@@ -1,5 +1,5 @@
 ---
-"@module-federation/runtime-core": major
+"@module-federation/runtime-core": patch
 ---
 
-Resolve browser remote entries uniformly as URL references against the document base URL. Bare entries are now document-relative; use a leading `/` to keep origin-root behavior.
+Resolve explicit `./` and `../` remote entries against the document base URL while preserving existing bare and root-relative entry behavior.

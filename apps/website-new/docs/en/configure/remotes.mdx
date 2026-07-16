@@ -53,16 +53,15 @@ module.exports = {
 
 ## Relative entry URLs
 
-In browsers, remote entries are URL references resolved against the document
-base URL (`document.baseURI`). This honors an HTML `<base href>` when one is
-present; otherwise, the browser uses the current document URL and standard URL
-trailing-slash semantics. This applies uniformly to bare paths such as
-`mf-manifest.json`, explicit relative paths such as `./mf-manifest.json`, and
-query or fragment references. Root-relative, protocol-relative, and absolute
-URLs preserve their standard URL semantics.
+In browsers, remote entries beginning with `./` or `../` are resolved against
+the document base URL (`document.baseURI`). This honors an HTML `<base href>`
+when one is present; otherwise, the browser uses the current document URL and
+standard URL trailing-slash semantics.
 
-To load an entry from the host origin regardless of the current document path,
-use a root-relative URL such as `/mf-manifest.json`.
+For backward compatibility, a bare entry such as `mf-manifest.json` continues
+to resolve from the host origin. An entry beginning with `/` also resolves from
+the origin, while protocol-relative and absolute URLs preserve their normal URL
+semantics.
 
 Use a [runtime plugin](/guide/runtime/runtime-plugins.html) when the entry needs
 a custom base or environment-specific rewrite. `publicPath` and

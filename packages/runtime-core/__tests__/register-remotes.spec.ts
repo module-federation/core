@@ -2,7 +2,7 @@ import { assert, describe, it, expect, rs } from '@rstest/core';
 import { ModuleFederation } from '../src/index';
 
 describe('ModuleFederation', () => {
-  it('resolves remote entry URL references against the document URL', () => {
+  it('resolves remote entry URL references without changing bare entry semantics', () => {
     const originalUrl = `${location.pathname}${location.search}${location.hash}`;
     window.history.replaceState({}, '', '/catalog/item/1?tab=details#summary');
 
@@ -32,11 +32,11 @@ describe('ModuleFederation', () => {
         `${location.origin}/catalog/item/mf-manifest.json`,
         `${location.origin}/catalog/mf-manifest.json`,
         `${location.origin}/mf-manifest.json`,
-        `${location.origin}/catalog/item/mf-manifest.json`,
+        `${location.origin}/mf-manifest.json`,
         `${location.protocol}//cdn.example/remoteEntry.js`,
         'https://cdn.example/remoteEntry.js?version=1#entry',
-        `${location.origin}/catalog/item/1?manifest=1`,
-        `${location.origin}/catalog/item/1?tab=details#manifest`,
+        `${location.origin}/?manifest=1`,
+        `${location.origin}/#manifest`,
       ]);
     } finally {
       window.history.replaceState({}, '', originalUrl);
@@ -54,9 +54,6 @@ describe('ModuleFederation', () => {
         remotes: [
           { name: 'current', entry: './mf-manifest.json' },
           { name: 'parent', entry: '../mf-manifest.json' },
-          { name: 'bare', entry: 'mf-manifest.json' },
-          { name: 'query', entry: '?manifest=1' },
-          { name: 'hash', entry: '#manifest' },
         ],
       });
 
@@ -67,9 +64,6 @@ describe('ModuleFederation', () => {
       ).toEqual([
         `${location.origin}/nested/application/mf-manifest.json`,
         `${location.origin}/nested/mf-manifest.json`,
-        `${location.origin}/nested/application/mf-manifest.json`,
-        `${location.origin}/nested/application/?manifest=1`,
-        `${location.origin}/nested/application/#manifest`,
       ]);
     } finally {
       base.remove();
