@@ -114,6 +114,16 @@ for (const exposed of manifest.exposes) {
     `${lazyName} has no background script`,
   );
   assert.ok(
+    lazyTemplate['main-thread-script']?.lepus_code_len > 100,
+    `${lazyName} has no main-thread snapshot bytecode`,
+  );
+  assert.ok(
+    lazyTemplate['background-thread-script'].some(({ content }) =>
+      content?.includes('__lynx_dynamic_component_entry__'),
+    ),
+    `${lazyName} does not preserve its DynamicComponent entry identity`,
+  );
+  assert.ok(
     !JSON.stringify(exposed).includes('__main_thread'),
     `${exposed.name} contains a main-thread alias`,
   );
@@ -126,7 +136,7 @@ assert.deepEqual(
 );
 for (const shared of manifest.shared) {
   assert.equal(shared.layer, 'react:background', shared.name);
-  assert.equal(shared.shareScope, undefined);
+  assert.deepEqual(shared.shareScope, ['default:react:background']);
   assert.equal(shared.singleton, true, shared.name);
 }
 assert.deepEqual(

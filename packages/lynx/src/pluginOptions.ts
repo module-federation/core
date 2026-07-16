@@ -29,10 +29,10 @@ interface LynxRemoteBundleBaseOptions {
 }
 
 export interface LynxNativeRemoteBundleOptions extends LynxRemoteBundleBaseOptions {
-  /** Emit a native Lynx background-runtime bundle using `@lynx-js/tasm`. */
+  /** Emit native Lynx bundles using `@lynx-js/tasm`. */
   target: 'lynx';
   /**
-   * Keep lazy bundles separate (`split`) or embed background-only module
+   * Keep paired UI bundles separate (`split`) or embed background-only module
    * chunks in the container (`single`). ReactLynx UI exposures require split.
    *
    * @defaultValue `'split'`

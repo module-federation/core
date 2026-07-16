@@ -73,7 +73,8 @@ URL. The adapter rewrites `metaData.remoteEntry` to the public
 
 ## Remote bundles
 
-Native remotes are background-only:
+Native split remotes keep the Module Federation runtime in the background realm
+while compiling each ReactLynx exposure for both official issuer layers:
 
 ```ts
 pluginLynxModuleFederation(
@@ -122,9 +123,10 @@ pluginLynxModuleFederation(federationOptions, {
 `split` is the federation-safe default. It avoids placing every expose and
 shared fallback in the entry bundle. Keep all emitted lazy `.bundle` files
 beside the remote entry (or under its manifest `publicPath`) when publishing.
-Each ReactLynx exposure needs its own paired background/main-thread lazy root,
-so Web remotes reject `single`. Native `single` is limited to background-only
-modules; ReactLynx UI exposures must remain split.
+Each ReactLynx exposure needs its own paired background/main-thread lazy root.
+Split native bundles encode both programs into one DynamicComponent artifact;
+Web remotes use the equivalent paired external bundle. Web remotes reject
+`single`, and native `single` is limited to background-only non-UI modules.
 
 Ordinary Rspeedy entry bundles are preserved by default. A dedicated remote
 environment may set `preserveSourceEntryBundles: false` to publish only its
@@ -155,12 +157,12 @@ may use `type: 'lynx-js'` and `lynx.requireModuleAsync`.
 
 ## Layers and singletons
 
-With `mainThread: true`, exposes are compiled for both Lynx issuer layers and
-shared declarations are registered in a realm-qualified scope. Unqualified
-shares default to the background realm; use `realm: 'main-thread'` only for a
-module authored for that runtime. The semantic realm is resolved against the
-DSL's exposed layer constants, so application configs do not hard-code layer
-names.
+Split remote bundles and hosts with `mainThread: true` compile exposes for both
+Lynx issuer layers and register shared declarations in realm-qualified scopes.
+Unqualified shares default to the background realm; use
+`realm: 'main-thread'` only for a module authored for that runtime. The semantic
+realm is resolved against the DSL's exposed layer constants, so application
+configs do not hard-code layer names.
 
 A singleton is unique within one JavaScript realm, share scope, and share key.
 The host, compiled imports, runtime API consumers, and remotes can therefore
@@ -187,9 +189,10 @@ flowchart TB
   TS --> TI["main-thread singleton instance"]
 ```
 
-Native TASM/MTS main-thread output is currently rejected because the enhanced
-federation runtime is not TASM-compatible. Native federation supports the
-background realm; dual-realm federation targets Lynx for Web.
+The enhanced federation runtime itself executes in the native background
+realm. Native split UI bundles still include their paired TASM/MTS main-thread
+snapshot program; this is compiled component output, not a second runtime or a
+second remote container. JavaScript object identity remains realm-local.
 
 See `apps/lynx-module-federation-demo` for an official Rspeedy native app,
 native artifact checks, and a real Lynx for Web browser E2E.

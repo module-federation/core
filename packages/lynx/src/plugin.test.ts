@@ -444,7 +444,7 @@ describe('pluginLynxModuleFederation', () => {
     ).toEqual([]);
   });
 
-  it('builds a native background-only remote with the official TASM encoder', async () => {
+  it('builds a paired native remote with the official TASM encoder', async () => {
     const { modifyRspackConfig } = setupPlugin(
       {
         name: 'catalog',
@@ -465,9 +465,13 @@ describe('pluginLynxModuleFederation', () => {
       (plugin: any) => plugin.options?.bundleFileName,
     ) as any;
 
-    expect(config.plugins).toHaveLength(4);
+    expect(config.plugins).toHaveLength(5);
     expect(remoteOptions).toMatchObject({
       name: 'catalog',
+      shareScope: [
+        `default:${LAYERS.BACKGROUND}`,
+        `default:${LAYERS.MAIN_THREAD}`,
+      ],
       filename: 'catalog.js',
       manifest: true,
       runtime: false,
@@ -477,19 +481,27 @@ describe('pluginLynxModuleFederation', () => {
           layer: LAYERS.BACKGROUND,
           name: 'catalog__background_Card',
         },
-      },
-      shared: {
-        '@lynx-js/react': {
-          singleton: true,
-          layer: LAYERS.BACKGROUND,
-          issuerLayer: LAYERS.BACKGROUND,
+        './Card__main_thread': {
+          import: './src/Card',
+          layer: LAYERS.MAIN_THREAD,
+          name: 'catalog__main-thread__Card',
         },
       },
+      shared: [
+        {
+          '@lynx-js/react': {
+            singleton: true,
+            layer: LAYERS.BACKGROUND,
+            issuerLayer: LAYERS.BACKGROUND,
+            shareScope: [`default:${LAYERS.BACKGROUND}`],
+          },
+        },
+      ],
     });
-    expect(remoteOptions.exposes).not.toHaveProperty('./Card__main_thread');
     expect(encoder.options).toMatchObject({
       bundleFileName: 'catalog-native.lynx.bundle',
       engineVersion: '3.6',
+      entryAssets: ['catalog.js'],
       mainThreadChunks: [],
     });
     expect(encoder.options.encode).toBeTypeOf('function');
@@ -510,6 +522,35 @@ describe('pluginLynxModuleFederation', () => {
     });
     expect(Buffer.isBuffer(buffer)).toBe(true);
     expect(buffer.byteLength).toBeGreaterThan(100);
+  });
+
+  it('keeps native single bundles background-only', async () => {
+    const { modifyRspackConfig } = setupPlugin(
+      {
+        name: 'catalog',
+        exposes: { './data': './src/data' },
+        shared: { state: { singleton: true } },
+      },
+      { remoteBundle: { target: 'lynx', chunking: 'single' } },
+    );
+    const config = await modifyRspackConfig({ plugins: [] });
+    const remoteOptions = federationOptions(config.plugins[0]);
+
+    expect(config.plugins).toHaveLength(4);
+    expect(remoteOptions.exposes).toEqual({
+      './data': {
+        import: './src/data',
+        layer: LAYERS.BACKGROUND,
+        name: 'catalog__background_data',
+      },
+    });
+    expect(remoteOptions.shared).toEqual({
+      state: {
+        singleton: true,
+        layer: LAYERS.BACKGROUND,
+        issuerLayer: LAYERS.BACKGROUND,
+      },
+    });
   });
 
   it('preserves manifest file customization', async () => {

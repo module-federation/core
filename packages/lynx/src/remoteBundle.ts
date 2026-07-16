@@ -129,10 +129,10 @@ const isModuleInLayer = (module: unknown, layer: string): boolean => {
   return (module as { layer?: string }).layer === layer;
 };
 
-const createWebRemoteAssetsPlugin = (
+const createRemoteAssetsPlugin = (
   mainThreadChunks: string[],
   backgroundEntry: string,
-  mainThreadEntry: string,
+  mainThreadEntry: string | undefined,
   backgroundChunkPrefix: string,
   mainThreadLayer: string,
 ) => ({
@@ -147,18 +147,20 @@ const createWebRemoteAssetsPlugin = (
         },
         () => {
           mainThreadChunks.length = 0;
-          const entryAsset = compilation.getAsset(backgroundEntry);
-          if (!entryAsset) {
-            throw new Error(
-              `@module-federation/lynx could not find generated container asset "${backgroundEntry}".`,
+          if (mainThreadEntry) {
+            const entryAsset = compilation.getAsset(backgroundEntry);
+            if (!entryAsset) {
+              throw new Error(
+                `@module-federation/lynx could not find generated container asset "${backgroundEntry}".`,
+              );
+            }
+            compilation.emitAsset(
+              mainThreadEntry,
+              entryAsset.source,
+              entryAsset.info,
             );
+            mainThreadChunks.push(mainThreadEntry);
           }
-          compilation.emitAsset(
-            mainThreadEntry,
-            entryAsset.source,
-            entryAsset.info,
-          );
-          mainThreadChunks.push(mainThreadEntry);
 
           for (const chunk of compilation.chunks) {
             const containsMainThreadModule = Array.from(
@@ -297,7 +299,8 @@ export const configureRemoteBundle = async (
   const backgroundChunkPrefix = `${options.name}__background_`;
   const mainThreadChunkPrefix = `${options.name}__main-thread__`;
   const webTarget = remoteBundle.target === 'web';
-  const remoteExposes = webTarget
+  const pairedRealmTarget = remoteBundle.chunking !== 'single';
+  const remoteExposes = pairedRealmTarget
     ? {
         ...createRemoteExposes(
           options.exposes!,
@@ -316,12 +319,12 @@ export const configureRemoteBundle = async (
         layers.BACKGROUND,
         backgroundChunkPrefix,
       );
-  const remoteShared = webTarget
+  const remoteShared = pairedRealmTarget
     ? normalizeSharedForBothLayers(options.shared, layers)
     : normalizeLynxShared(options.shared, layers.BACKGROUND, layers);
   const federationOptions = {
     ...createFederationOptions(
-      webTarget
+      pairedRealmTarget
         ? {
             ...options,
             shareScope: getLynxShareScopes(options.shareScope, layers),
@@ -351,18 +354,18 @@ export const configureRemoteBundle = async (
   config.plugins.push(
     createCompilerModuleFederationPlugin(federationOptions),
     createLynxChunkLoadingMatcherPlugin(lynxTemplatePlugin, {
-      backgroundOnlyRemote: !webTarget,
+      backgroundOnlyRemote: !pairedRealmTarget,
       chunking: remoteBundle.chunking ?? 'split',
       discardSourceEntryBundles:
         remoteBundle.preserveSourceEntryBundles === false,
       discardedTemplateAssets,
       includedChunkPrefixes: [
         backgroundChunkPrefix,
-        ...(webTarget ? [mainThreadChunkPrefix] : []),
+        ...(pairedRealmTarget ? [mainThreadChunkPrefix] : []),
       ],
       lazyBundleAssets,
       remoteEntryName: options.name,
-      ...(webTarget
+      ...(pairedRealmTarget
         ? {
             pairedRealmChunkPrefixes: {
               background: backgroundChunkPrefix,
@@ -376,12 +379,12 @@ export const configureRemoteBundle = async (
         : {}),
     }),
   );
-  if (webTarget) {
+  if (pairedRealmTarget) {
     config.plugins.push(
-      createWebRemoteAssetsPlugin(
+      createRemoteAssetsPlugin(
         mainThreadChunks,
         backgroundEntry,
-        mainThreadEntry,
+        webTarget ? mainThreadEntry : undefined,
         backgroundChunkPrefix,
         layers.MAIN_THREAD,
       ),
@@ -398,7 +401,7 @@ export const configureRemoteBundle = async (
       entryName: options.name,
       includedChunkPrefixes: [
         backgroundChunkPrefix,
-        ...(webTarget ? [mainThreadChunkPrefix] : []),
+        ...(pairedRealmTarget ? [mainThreadChunkPrefix] : []),
       ],
       lazyBundleAssets,
       mainThreadChunks,

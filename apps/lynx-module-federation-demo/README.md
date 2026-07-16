@@ -5,7 +5,8 @@ simulation. It includes:
 
 - a standalone UIKit iOS application derived from Lynx's official
   `HelloLynxSwift` starter;
-- a native background host and remote built as `.lynx.bundle` artifacts;
+- a native background host with paired ReactLynx remote UI built as
+  `.lynx.bundle` artifacts;
 - a Lynx for Web host mounted in the official `<lynx-view>` custom element;
 - ordinary `import('catalog/Card')` and runtime `loadRemote()` consumers;
 - three lazy remote screens loaded over HTTP from `mf-manifest.json`;
@@ -101,10 +102,11 @@ Explorer on the device and scan it. The phone must be able to reach
 Set `CATALOG_NATIVE_MANIFEST_URL` when the remote manifest is hosted elsewhere.
 
 `e2e:native` is artifact and transport validation. It compiles the real Rspeedy
-host and remote, verifies both binary bundles, checks the manifest's background
-expose/share layer metadata, then launches the dev server and fetches the host,
-manifest, container, and every lazy bundle over HTTP. The macOS CI job adds a
-real iOS Simulator runtime test of those artifacts.
+host and remote, verifies the background container plus paired main-thread
+snapshot bytecode in every lazy UI bundle, checks the manifest's public
+background expose/share metadata, then fetches the host, manifest, container,
+and every lazy bundle over HTTP. The macOS CI job adds a real iOS Simulator
+runtime test of those artifacts.
 
 ## Run the real Lynx Web E2E
 
