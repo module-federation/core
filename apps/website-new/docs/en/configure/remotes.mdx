@@ -51,6 +51,24 @@ module.exports = {
 };
 ```
 
+## Relative entry URLs
+
+In browsers, remote entries beginning with `./` or `../` are resolved against
+the document base URL (`document.baseURI`). This honors an HTML `<base href>`
+when one is present; otherwise, the browser uses the current document URL and
+standard URL trailing-slash semantics.
+
+For backward compatibility, a bare entry such as `mf-manifest.json` continues
+to resolve from the host origin. An entry beginning with `/` also resolves from
+the origin, while protocol-relative and absolute URLs preserve their normal URL
+semantics.
+
+Use a [runtime plugin](/guide/runtime/runtime-plugins.html) when the entry needs
+a custom base or environment-specific rewrite. `publicPath` and
+[`getPublicPath`](/configure/getpublicpath.html) control the producer's static
+assets after its entry is discovered; they do not choose the initial remote
+entry URL.
+
 ## shareScope
 
 - Type: `string | string[]`

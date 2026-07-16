@@ -2,6 +2,74 @@ import { assert, describe, it, expect, rs } from '@rstest/core';
 import { ModuleFederation } from '../src/index';
 
 describe('ModuleFederation', () => {
+  it('resolves remote entry URL references without changing bare entry semantics', () => {
+    const originalUrl = `${location.pathname}${location.search}${location.hash}`;
+    window.history.replaceState({}, '', '/catalog/item/1?tab=details#summary');
+
+    try {
+      const FM = new ModuleFederation({
+        name: '@federation/relative-entry-instance',
+        remotes: [
+          { name: 'current', entry: './mf-manifest.json' },
+          { name: 'parent', entry: '../mf-manifest.json' },
+          { name: 'root', entry: '/mf-manifest.json' },
+          { name: 'bare', entry: 'mf-manifest.json' },
+          { name: 'protocol-relative', entry: '//cdn.example/remoteEntry.js' },
+          {
+            name: 'absolute',
+            entry: 'https://cdn.example/remoteEntry.js?version=1#entry',
+          },
+          { name: 'query', entry: '?manifest=1' },
+          { name: 'hash', entry: '#manifest' },
+        ],
+      });
+
+      expect(
+        FM.options.remotes.map((remote) =>
+          'entry' in remote ? remote.entry : undefined,
+        ),
+      ).toEqual([
+        `${location.origin}/catalog/item/mf-manifest.json`,
+        `${location.origin}/catalog/mf-manifest.json`,
+        `${location.origin}/mf-manifest.json`,
+        `${location.origin}/mf-manifest.json`,
+        `${location.protocol}//cdn.example/remoteEntry.js`,
+        'https://cdn.example/remoteEntry.js?version=1#entry',
+        `${location.origin}/?manifest=1`,
+        `${location.origin}/#manifest`,
+      ]);
+    } finally {
+      window.history.replaceState({}, '', originalUrl);
+    }
+  });
+
+  it('resolves explicit relative entries against the document base URL', () => {
+    const base = document.createElement('base');
+    base.href = '/nested/application/';
+    document.head.appendChild(base);
+
+    try {
+      const FM = new ModuleFederation({
+        name: '@federation/document-base-instance',
+        remotes: [
+          { name: 'current', entry: './mf-manifest.json' },
+          { name: 'parent', entry: '../mf-manifest.json' },
+        ],
+      });
+
+      expect(
+        FM.options.remotes.map((remote) =>
+          'entry' in remote ? remote.entry : undefined,
+        ),
+      ).toEqual([
+        `${location.origin}/nested/application/mf-manifest.json`,
+        `${location.origin}/nested/mf-manifest.json`,
+      ]);
+    } finally {
+      base.remove();
+    }
+  });
+
   it('registers new remotes and loads them correctly', async () => {
     const FM = new ModuleFederation({
       name: '@federation/instance',

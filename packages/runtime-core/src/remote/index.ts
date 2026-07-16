@@ -660,7 +660,11 @@ export class RemoteHandler {
           typeof window !== 'undefined' &&
           !remote.entry.startsWith('http')
         ) {
-          remote.entry = new URL(remote.entry, window.location).href;
+          const baseUrl =
+            remote.entry.startsWith('./') || remote.entry.startsWith('../')
+              ? window.document.baseURI
+              : window.location.origin;
+          remote.entry = new URL(remote.entry, baseUrl).href;
         }
       }
       if (!remote.shareScope) {
