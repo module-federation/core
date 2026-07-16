@@ -70,6 +70,53 @@ describe('ModuleFederation', () => {
     }
   });
 
+  it('preserves relative entries outside the browser', () => {
+    const FM = new ModuleFederation({
+      name: '@federation/non-browser-entry-instance',
+      remotes: [],
+    });
+
+    rs.stubGlobal('window', undefined);
+    try {
+      FM.registerRemotes([
+        { name: 'server-relative', entry: './mf-manifest.json' },
+      ]);
+
+      expect(FM.options.remotes[0]).toMatchObject({
+        name: 'server-relative',
+        entry: './mf-manifest.json',
+      });
+    } finally {
+      rs.unstubAllGlobals();
+    }
+  });
+
+  it('resolves a forced re-registration against the current document base URL', () => {
+    const base = document.createElement('base');
+    base.href = '/first/deployment/';
+    document.head.appendChild(base);
+
+    try {
+      const FM = new ModuleFederation({
+        name: '@federation/re-registered-entry-instance',
+        remotes: [{ name: 'relative', entry: './mf-manifest.json' }],
+      });
+
+      base.href = '/second/deployment/';
+      FM.registerRemotes([{ name: 'relative', entry: './mf-manifest.json' }], {
+        force: true,
+      });
+
+      expect(FM.options.remotes).toHaveLength(1);
+      expect(FM.options.remotes[0]).toMatchObject({
+        name: 'relative',
+        entry: `${location.origin}/second/deployment/mf-manifest.json`,
+      });
+    } finally {
+      base.remove();
+    }
+  });
+
   it('registers new remotes and loads them correctly', async () => {
     const FM = new ModuleFederation({
       name: '@federation/instance',
