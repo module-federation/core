@@ -146,9 +146,11 @@ The runtime fetches and registers the container with `lynx.fetchBundle`, then
 evaluates its section with `lynx.loadScript`. In split mode, the generated
 Lynx async-chunk map supplies the lazy `.bundle` URL; `lynx.loadLazyBundle`
 fetches it, and the returned `ids`, `modules`, and `runtime` install into the
-calling webpack runtime. Failed and timed-out entry loads are evicted so a
-later request can retry. The default timeout is 30 seconds and can be changed
-with `runtimePluginOptions.timeout`.
+calling webpack runtime. Cached lazy bundles retain ReactLynx's synchronous
+thenable so a first render can resolve in the same turn; asynchronous shared
+consumes and network loads remain promise- and timeout-bound. Failed and
+timed-out entry loads are evicted so a later request can retry. The default
+timeout is 30 seconds and can be changed with `runtimePluginOptions.timeout`.
 
 The manifest declares `remoteEntry.type: 'lynx'`. The runtime plugin handles
 only that type (or a `.lynx.bundle` URL), leaving `script`, `module`, and other
