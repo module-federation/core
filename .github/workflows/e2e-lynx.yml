@@ -8,6 +8,8 @@ jobs:
   e2e-lynx:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    outputs:
+      run-e2e: ${{ steps.check-ci.outputs.run-e2e }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
@@ -68,6 +70,27 @@ jobs:
         if: steps.check-ci.outputs.run-e2e == 'true'
         run: pnpm --filter lynx-module-federation-demo run e2e:native
 
+      - name: Validate standalone iOS project policy
+        if: steps.check-ci.outputs.run-e2e == 'true'
+        run: pnpm --filter lynx-module-federation-demo run test:ios-project
+
+      - name: Prepare iOS native artifacts
+        if: steps.check-ci.outputs.run-e2e == 'true'
+        env:
+          LYNX_REMOTE_ORIGIN: http://127.0.0.1:3000
+        run: pnpm --filter lynx-module-federation-demo run build:native
+
+      - name: Upload native artifacts for iOS
+        if: steps.check-ci.outputs.run-e2e == 'true'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: lynx-native-ios-input
+          path: |
+            apps/lynx-module-federation-demo/dist/host-native/
+            apps/lynx-module-federation-demo/dist/remote-native/
+          if-no-files-found: error
+          retention-days: 1
+
       - name: Run real Lynx for Web E2E
         if: steps.check-ci.outputs.run-e2e == 'true'
         run: pnpm --filter lynx-module-federation-demo run e2e:web
@@ -83,5 +106,61 @@ jobs:
             apps/lynx-module-federation-demo/dist/remote-native/
             apps/lynx-module-federation-demo/dist/host-web/
             apps/lynx-module-federation-demo/dist/remote-web/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  e2e-lynx-ios:
+    needs: e2e-lynx
+    if: needs.e2e-lynx.outputs.run-e2e == 'true'
+    runs-on: macos-15
+    timeout-minutes: 60
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_16.4.app/Contents/Developer
+      NO_COLOR: 1
+      RUBY_VERSION: 3.4.9
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: '24'
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@97ecb7b512899eb71ab1bf2310a624c6f1589ac6 # v1
+        with:
+          ruby-version: ${{ env.RUBY_VERSION }}
+
+      - name: Download native artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: lynx-native-ios-input
+          path: apps/lynx-module-federation-demo/dist
+
+      - name: Embed native host bundle
+        run: node apps/lynx-module-federation-demo/scripts/sync-ios-bundle.mjs
+
+      - name: Install iOS dependencies
+        working-directory: apps/lynx-module-federation-demo/ios
+        run: |
+          bundle config set path vendor/bundle
+          bundle install --jobs 4 --retry 3
+          bundle exec pod install --deployment --repo-update
+
+      - name: Run standalone iOS federation E2E
+        run: node apps/lynx-module-federation-demo/test/ios/run.mjs
+
+      - name: Upload iOS E2E artifacts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: lynx-ios-e2e
+          path: |
+            apps/lynx-module-federation-demo/ios/build/OrbitControl.xcresult/
+            apps/lynx-module-federation-demo/ios/build/orbit-control.png
+            apps/lynx-module-federation-demo/ios/build/requests.json
           if-no-files-found: ignore
           retention-days: 7

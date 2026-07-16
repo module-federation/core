@@ -1,3 +1,9 @@
 dist/
 .turbo/
 test/real-web/artifacts/
+ios/.bundle/
+ios/Pods/
+ios/OrbitControl.xcworkspace/
+ios/Resources/main.lynx.bundle
+ios/build/
+ios/vendor/bundle/

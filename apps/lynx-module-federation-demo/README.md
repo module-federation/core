@@ -3,6 +3,8 @@
 This is an official Rspeedy + ReactLynx application, not a browser-only
 simulation. It includes:
 
+- a standalone UIKit iOS application derived from Lynx's official
+  `HelloLynxSwift` starter;
 - a native background host and remote built as `.lynx.bundle` artifacts;
 - a Lynx for Web host mounted in the official `<lynx-view>` custom element;
 - ordinary `import('catalog/Card')` and runtime `loadRemote()` consumers;
@@ -26,7 +28,42 @@ The host never addresses a generated `remoteEntry.js` directly. Both import
 styles resolve the manifest, whose `metaData.remoteEntry` names the public
 `.lynx.bundle` container. Lazy expose bundles are fetched separately.
 
-## Run the native app
+## Run the standalone iOS app
+
+The app under `ios/` is a real iPhone/iPad application embedding `LynxView`.
+It does not require Lynx Explorer. Its exact official starter source and commit
+are recorded in `ios/UPSTREAM.md`.
+
+On macOS:
+
+```sh
+pnpm ios:prepare
+pnpm ios:pods
+pnpm ios:open
+pnpm dev
+```
+
+Run the `OrbitControl` scheme in Xcode. The Debug app loads
+`http://localhost:3000/main.lynx.bundle`; set the `LYNX_BUNDLE_URL` scheme
+environment variable to a LAN-reachable URL for a physical device. The shell
+injects both Lynx template and generic resource fetchers, so the root Bundle,
+federated container, and Lazy Bundles can arrive over HTTP(S).
+
+Release builds embed `ios/Resources/main.lynx.bundle` and retain strict ATS
+defaults. Build the host with the production manifest origin before syncing it:
+
+```sh
+LYNX_REMOTE_ORIGIN=https://cdn.example.com/catalog/ pnpm build:native
+pnpm ios:sync
+```
+
+Only the host bundle is embedded. The manifest, container, and lazy expose
+bundles remain separately deployable HTTP(S) artifacts. The iOS simulator E2E
+launches the app, taps **Load remote catalog**, verifies compiled imports,
+runtime `loadRemote()`, and shared singleton identity, then checks every native
+bundle request observed by the test server.
+
+## Run with Lynx Explorer
 
 Build the official native host and remote and validate their manifests:
 
@@ -48,12 +85,11 @@ Explorer on the device and scan it. The phone must be able to reach
 `<your-lan-ip>:3000`; `127.0.0.1` refers to the phone itself and will not work.
 Set `CATALOG_NATIVE_MANIFEST_URL` when the remote manifest is hosted elsewhere.
 
-`e2e:native` is intentionally named artifact validation: CI has no iOS or
-Android Lynx runtime. It compiles the real Rspeedy host and remote, verifies
-both binary bundles, checks the manifest's background expose/share layer
-metadata, then launches the dev server and fetches the host, manifest,
-container, and every lazy bundle over HTTP. Scanning the QR runs those same
-served artifacts in the native runtime.
+`e2e:native` is artifact and transport validation. It compiles the real Rspeedy
+host and remote, verifies both binary bundles, checks the manifest's background
+expose/share layer metadata, then launches the dev server and fetches the host,
+manifest, container, and every lazy bundle over HTTP. The macOS CI job adds a
+real iOS Simulator runtime test of those artifacts.
 
 ## Run the real Lynx Web E2E
 
@@ -81,11 +117,13 @@ paths with `LYNX_HOST_WEB_BUNDLE`, `LYNX_REMOTE_MANIFEST`,
 
 ## Test matrix
 
-| Command           | Evidence                                                   |
-| ----------------- | ---------------------------------------------------------- |
-| `pnpm e2e:native` | Real native Rspeedy builds plus binary/manifest validation |
-| `pnpm e2e:web`    | Real official `<lynx-view>` browser runtime E2E            |
-| `pnpm test`       | Both official Rspeedy checks                               |
+| Command                 | Evidence                                                         |
+| ----------------------- | ---------------------------------------------------------------- |
+| `pnpm e2e:native`       | Real native Rspeedy builds plus binary/manifest validation       |
+| `pnpm e2e:ios`          | Standalone UIKit app + iOS Simulator federation/runtime E2E      |
+| `pnpm e2e:web`          | Real official `<lynx-view>` browser runtime E2E                  |
+| `pnpm test:ios-project` | Cross-platform iOS project, provenance, pod, and ATS policy gate |
+| `pnpm test`             | Cross-platform native artifact and Lynx Web checks               |
 
 The web remote enables `mainThread: true`, so each exposure has background and
 main-thread variants. The demo deliberately scopes `orbit-shared-state` to

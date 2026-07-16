@@ -38,7 +38,14 @@ function LoadButton({ state, onTap }: { state: LoadState; onTap: () => void }) {
           : 'PrimaryAction';
 
   return (
-    <view className={stateClass} bindtap={onTap} data-testid="load-remotes">
+    <view
+      accessibility-element
+      accessibility-label={label}
+      accessibility-traits="button"
+      className={stateClass}
+      bindtap={onTap}
+      data-testid="load-remotes"
+    >
       <text className="PrimaryActionText">{label}</text>
       <text className="PrimaryActionMeta">MF MANIFEST · HTTP</text>
     </view>
@@ -121,6 +128,14 @@ function SingletonProof({
               : 'SingletonProofStatus'
           }
           data-testid="singleton-status"
+          accessibility-element
+          accessibility-label={
+            ready
+              ? shared
+                ? 'Shared singleton verified'
+                : 'Singleton identity mismatch'
+              : 'Waiting for remote observers'
+          }
         >
           {ready
             ? shared
