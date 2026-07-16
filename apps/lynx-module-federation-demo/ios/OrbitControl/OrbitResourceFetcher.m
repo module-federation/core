@@ -7,11 +7,13 @@
 #import <Lynx/LynxViewBuilder.h>
 
 static NSString *const OrbitResourceErrorDomain = @"org.modulefederation.lynx.resources";
+static NSUInteger const OrbitResourcePathCacheByteLimit = 64 * 1024 * 1024;
 
 @interface OrbitResourceFetcher ()
 
 @property(nonatomic, strong) NSMutableDictionary<NSString *, NSString *> *resourcePathCache;
 @property(nonatomic, strong) NSURL *resourceCacheDirectory;
+@property(nonatomic, assign) NSUInteger resourcePathCacheBytes;
 
 - (dispatch_block_t)loadDataForURLString:(NSString *)urlString
                               completion:(void (^)(NSData *_Nullable,
@@ -117,32 +119,33 @@ static NSString *const OrbitResourceErrorDomain = @"org.modulefederation.lynx.re
 - (NSString *_Nullable)storeResourceData:(NSData *)data
                              forURLString:(NSString *)urlString
                                     error:(NSError **)error {
-  NSString *cachedPath = [self cachedResourcePathForURLString:urlString];
-  if (cachedPath) return cachedPath;
-
-  [[NSFileManager defaultManager] createDirectoryAtURL:self.resourceCacheDirectory
-                            withIntermediateDirectories:YES
-                                             attributes:nil
-                                                  error:error];
-  if (*error) return nil;
-
-  NSString *extension = [NSURL URLWithString:urlString].pathExtension;
-  NSString *filename = NSUUID.UUID.UUIDString;
-  if (extension.length > 0) {
-    filename = [filename stringByAppendingPathExtension:extension];
-  }
-  NSURL *fileURL = [self.resourceCacheDirectory URLByAppendingPathComponent:filename];
-  if (![data writeToURL:fileURL options:NSDataWritingAtomic error:error]) return nil;
-
   @synchronized(self) {
     NSString *existingPath = self.resourcePathCache[urlString];
-    if (existingPath) {
-      [[NSFileManager defaultManager] removeItemAtURL:fileURL error:nil];
-      return existingPath;
+    if (existingPath) return existingPath;
+    if (data.length >
+        OrbitResourcePathCacheByteLimit - self.resourcePathCacheBytes) {
+      *error = [self errorWithMessage:@"Lynx resource path cache exceeded 64 MiB"];
+      return nil;
     }
+
+    [[NSFileManager defaultManager] createDirectoryAtURL:self.resourceCacheDirectory
+                              withIntermediateDirectories:YES
+                                               attributes:nil
+                                                    error:error];
+    if (*error) return nil;
+
+    NSString *extension = [NSURL URLWithString:urlString].pathExtension;
+    NSString *filename = NSUUID.UUID.UUIDString;
+    if (extension.length > 0) {
+      filename = [filename stringByAppendingPathExtension:extension];
+    }
+    NSURL *fileURL = [self.resourceCacheDirectory URLByAppendingPathComponent:filename];
+    if (![data writeToURL:fileURL options:NSDataWritingAtomic error:error]) return nil;
+
     self.resourcePathCache[urlString] = fileURL.path;
+    self.resourcePathCacheBytes += data.length;
+    return fileURL.path;
   }
-  return fileURL.path;
 }
 
 - (dispatch_block_t)loadDataForURLString:(NSString *)urlString

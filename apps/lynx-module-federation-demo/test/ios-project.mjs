@@ -56,6 +56,7 @@ assert.match(fetcher, /builder\.templateResourceFetcher = self/);
 assert.match(fetcher, /builder\.genericResourceFetcher = self/);
 assert.match(fetcher, /isAllowedLocalURL/);
 assert.match(fetcher, /resourcePathCache/);
+assert.match(fetcher, /OrbitResourcePathCacheByteLimit/);
 assert.match(fetcher, /URLByResolvingSymlinksInPath/);
 assert.doesNotMatch(releaseInfo, /NSAllowsArbitraryLoads/);
 assert.doesNotMatch(releaseInfo, /NSExceptionAllowsInsecureHTTPLoads/);
