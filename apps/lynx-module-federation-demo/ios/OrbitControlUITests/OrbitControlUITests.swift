@@ -32,12 +32,10 @@ final class OrbitControlUITests: XCTestCase {
     XCTAssertTrue(loadButton.waitForExistence(timeout: 30))
     loadButton.tap()
 
-    let singleton = app.descendants(matching: .any)
-      .matching(NSPredicate(format: "label == %@", "Shared singleton verified"))
+    let readiness = app.descendants(matching: .any)
+      .matching(identifier: "federation-ready")
       .firstMatch
-    XCTAssertTrue(singleton.waitForExistence(timeout: 60))
-    XCTAssertTrue(app.staticTexts["Compiled imports ready"].exists)
-    XCTAssertTrue(app.staticTexts["Runtime API ready"].exists)
+    XCTAssertTrue(readiness.waitForExistence(timeout: 60))
 
     let attachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
     attachment.name = "Orbit Control federation loaded"

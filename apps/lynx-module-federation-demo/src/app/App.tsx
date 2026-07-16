@@ -111,6 +111,31 @@ function SingletonProof({
   shared: boolean;
   state: SharedStateView;
 }) {
+  const status = !ready
+    ? {
+        accessibilityId: undefined,
+        accessibilityLabel: 'Waiting for remote observers',
+        className: 'SingletonProofStatus',
+        key: 'waiting',
+        text: 'Waiting for remote observers',
+      }
+    : shared
+      ? {
+          accessibilityId: 'federation-ready',
+          accessibilityLabel:
+            'Federation ready: compiled imports, runtime API, shared singleton',
+          className: 'SingletonProofStatus SingletonProofStatusReady',
+          key: 'ready',
+          text: 'Shared singleton verified',
+        }
+      : {
+          accessibilityId: undefined,
+          accessibilityLabel: 'Singleton identity mismatch',
+          className: 'SingletonProofStatus',
+          key: 'mismatch',
+          text: 'Singleton identity mismatch',
+        };
+
   return (
     <view className="SingletonProof" data-testid="singleton-proof">
       <view className="SingletonProofCopy">
@@ -122,26 +147,14 @@ function SingletonProof({
       <view className="SingletonProofCopy SingletonProofCopyWide">
         <text className="SingletonProofLabel">REALM-LOCAL IDENTITY</text>
         <text
-          className={
-            ready && shared
-              ? 'SingletonProofStatus SingletonProofStatusReady'
-              : 'SingletonProofStatus'
-          }
+          key={status.key}
+          className={status.className}
           data-testid="singleton-status"
           accessibility-element
-          accessibility-label={
-            ready
-              ? shared
-                ? 'Shared singleton verified'
-                : 'Singleton identity mismatch'
-              : 'Waiting for remote observers'
-          }
+          accessibility-label={status.accessibilityLabel}
+          ios-platform-accessibility-id={status.accessibilityId}
         >
-          {ready
-            ? shared
-              ? 'Shared singleton verified'
-              : 'Singleton identity mismatch'
-            : 'Waiting for remote observers'}
+          {status.text}
         </text>
       </view>
     </view>

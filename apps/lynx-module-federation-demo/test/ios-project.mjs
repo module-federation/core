@@ -28,6 +28,7 @@ const [
   debugInfo,
   project,
   uiTest,
+  appSource,
   packageJson,
   deviceServer,
 ] = await Promise.all([
@@ -39,6 +40,7 @@ const [
   read('ios/OrbitControl/Info.Debug.plist'),
   read('ios/OrbitControl.xcodeproj/project.pbxproj'),
   read('ios/OrbitControlUITests/OrbitControlUITests.swift'),
+  read('src/app/App.tsx'),
   read('package.json'),
   read('scripts/dev-ios-device.mjs'),
 ]);
@@ -66,7 +68,12 @@ assert.match(debugInfo, /<key>localhost<\/key>/);
 assert.doesNotMatch(debugInfo, /NSAllowsArbitraryLoads/);
 assert.doesNotMatch(project, /DEVELOPMENT_TEAM/);
 assert.match(project, /OrbitControlUITests/);
-assert.match(uiTest, /Shared singleton verified/);
+assert.match(uiTest, /matching\(identifier: "federation-ready"\)/);
+assert.match(appSource, /accessibilityId: 'federation-ready'/);
+assert.match(
+  appSource,
+  /ios-platform-accessibility-id=\{status\.accessibilityId\}/,
+);
 assert.match(uiTest, /testEmbeddedReleaseHostLaunches/);
 assert.match(packageJson, /"ios:device": "node scripts\/dev-ios-device\.mjs"/);
 assert.match(deviceServer, /LYNX_DEV_HOST: '0\.0\.0\.0'/);
