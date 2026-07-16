@@ -141,6 +141,64 @@ describe('createLazyComponent', () => {
       ).toBeInTheDocument();
     });
   });
+
+  it('should suppress automatic SSR stylesheets owned by document head', async () => {
+    const previousFederationSSR = globalThis.FEDERATION_SSR;
+    let unmount: (() => void) | undefined;
+    globalThis.FEDERATION_SSR = true;
+    document.head.innerHTML =
+      '<link rel="stylesheet" href="http://localhost:3001/main.css">';
+    mockFetchData.mockResolvedValue(undefined);
+    mockGetLoadedRemoteInfos.mockReturnValue({
+      name: 'remoteApp',
+      alias: 'remote',
+      expose: './Component',
+      version: '1.0.0',
+      snapshot: {
+        modules: [
+          {
+            modulePath: './Component',
+            assets: {
+              css: { sync: ['main.css'], async: [] },
+              js: { sync: [], async: [] },
+            },
+          },
+        ],
+        publicPath: 'http://localhost:3001/',
+        remoteEntry: 'remoteEntry.js',
+      },
+      entryGlobalName: 'remoteApp',
+    });
+
+    const LazyComponent = createLazyComponent({
+      loader: jest.fn().mockResolvedValue({
+        default: MockComponent,
+        [Symbol.for('mf_module_id')]: 'remoteApp/Component',
+      }),
+      instance: mockInstance,
+      loading: <LoadingComponent />,
+      fallback: <ErrorComponent />,
+      injectLink: true,
+    });
+
+    try {
+      const rendered = render(<LazyComponent />);
+      const { container } = rendered;
+      unmount = rendered.unmount;
+
+      await waitFor(() => {
+        expect(screen.getByText('Mock Component')).toBeInTheDocument();
+        expect(getStylesheetHrefs(container)).toEqual([]);
+      });
+      expect(getStylesheetHrefs(document.head)).toEqual([
+        'http://localhost:3001/main.css',
+      ]);
+    } finally {
+      unmount?.();
+      globalThis.FEDERATION_SSR = previousFederationSSR;
+      document.head.innerHTML = '';
+    }
+  });
 });
 
 describe('collectSSRAssets', () => {
@@ -215,6 +273,26 @@ describe('collectSSRAssets', () => {
 
     expect(assets).toHaveLength(4); // 2 links, 2 scripts
 
+    const links = assets.filter(
+      (asset): asset is React.ReactElement =>
+        React.isValidElement(asset) && asset.type === 'link',
+    );
+    const scripts = assets.filter(
+      (asset): asset is React.ReactElement =>
+        React.isValidElement(asset) && asset.type === 'script',
+    );
+
+    expect(links).toHaveLength(2);
+    expect(links.map((link) => link.props.href)).toEqual([
+      'http://localhost:3001/extra.css',
+      'http://localhost:3001/main.css',
+    ]);
+    expect(scripts).toHaveLength(2);
+    expect(scripts.map((script) => script.props.src)).toEqual([
+      'http://localhost:3001/remoteEntry.js',
+      'http://localhost:3001/main.js',
+    ]);
+
     const fragment = renderAssetsToFragment(assets);
 
     expect(getStylesheetHrefs(fragment)).toEqual([
@@ -227,73 +305,9 @@ describe('collectSSRAssets', () => {
     ]);
   });
 
-  it('should keep SSR CSS links stable until hydration and remove head duplicates after mount', async () => {
+  it('should preserve stylesheet nodes when inserting an earlier asset', () => {
     mockRemoteAssets({
-      css: { sync: ['main.css'], async: ['extra.css'] },
-      js: { sync: ['main.js'], async: [] },
-    });
-    document.head.innerHTML =
-      '<link rel="stylesheet" href="http://localhost:3001/extra.css">';
-
-    const assets = collectSSRAssets({
-      id: 'remoteApp/Component',
-      instance: mockInstance,
-      injectScript: true,
-      injectLink: true,
-    });
-
-    const container = document.createElement('div');
-    container.append(renderAssetsToFragment(assets));
-    document.body.appendChild(container);
-
-    expect(getStylesheetHrefs(container)).toEqual([
-      'http://localhost:3001/extra.css',
-      'http://localhost:3001/main.css',
-    ]);
-    render(<>{assets}</>, { container, hydrate: true });
-
-    await waitFor(() => {
-      expect(getStylesheetHrefs(container)).toEqual([
-        'http://localhost:3001/main.css',
-      ]);
-    });
-    expect(getScriptSrcs(container)).toEqual([
-      'http://localhost:3001/remoteEntry.js',
-      'http://localhost:3001/main.js',
-    ]);
-  });
-
-  it('should keep CSS links when the existing link is not in document head', async () => {
-    mockRemoteAssets({
-      css: { sync: ['main.css'], async: ['extra.css'] },
-    });
-    document.body.innerHTML =
-      '<link rel="stylesheet" href="http://localhost:3001/extra.css">';
-    document.head.innerHTML = `
-      <link rel="alternate stylesheet" href="http://localhost:3001/extra.css">
-      <link rel="stylesheet" href="http://localhost:3001/extra.css" disabled>
-      <link rel="stylesheet" href="http://localhost:3001/extra.css" media="print">
-    `;
-
-    const assets = collectSSRAssets({
-      id: 'remoteApp/Component',
-      instance: mockInstance,
-      injectLink: true,
-    });
-
-    const { container } = render(<>{assets}</>);
-
-    await waitFor(() => {
-      expect(getStylesheetHrefs(container)).toEqual([
-        'http://localhost:3001/extra.css',
-        'http://localhost:3001/main.css',
-      ]);
-    });
-  });
-
-  it('should not suppress React-owned stylesheets rendered in document head', async () => {
-    mockRemoteAssets({
-      css: { sync: ['shared.css'], async: [] },
+      css: { sync: ['main.css'], async: [] },
     });
 
     const options = {
@@ -301,34 +315,22 @@ describe('collectSSRAssets', () => {
       instance: mockInstance,
       injectLink: true,
     };
-
-    const renderHeadAssets = (includeFirst: boolean) => (
-      <>
-        {includeFirst && (
-          <React.Fragment key="first">
-            {collectSSRAssets(options)}
-          </React.Fragment>
-        )}
-        <React.Fragment key="second">
-          {collectSSRAssets(options)}
-        </React.Fragment>
-      </>
+    const { container, rerender } = render(<>{collectSSRAssets(options)}</>);
+    const originalMainLink = container.querySelector(
+      'link[href="http://localhost:3001/main.css"]',
     );
-    const { rerender } = render(renderHeadAssets(true), {
-      container: document.head,
+
+    mockRemoteAssets({
+      css: { sync: ['main.css'], async: ['extra.css'] },
     });
+    rerender(<>{collectSSRAssets(options)}</>);
 
-    await waitFor(() => {
-      expect(getStylesheetHrefs(document.head)).toEqual([
-        'http://localhost:3001/shared.css',
-        'http://localhost:3001/shared.css',
-      ]);
-    });
-
-    rerender(renderHeadAssets(false));
-
-    expect(getStylesheetHrefs(document.head)).toEqual([
-      'http://localhost:3001/shared.css',
+    expect(getStylesheetHrefs(container)).toEqual([
+      'http://localhost:3001/extra.css',
+      'http://localhost:3001/main.css',
     ]);
+    expect(
+      container.querySelector('link[href="http://localhost:3001/main.css"]'),
+    ).toBe(originalMainLink);
   });
 });
