@@ -1,0 +1,227 @@
+import { describe, expect, it, rs } from '@rstest/core';
+
+import { createLynxChunkLoadingMatcherPlugin } from './chunkLoadingMatcher';
+
+describe('Lynx chunk-loading matcher', () => {
+  it('guards chunks without JavaScript while preserving local JavaScript chunks', () => {
+    const entryChunk = {
+      files: new Set(['host.js']),
+      getAllAsyncChunks: () => new Set(),
+      ids: ['host'],
+      name: 'host',
+    };
+    const nestedChunk = {
+      files: new Set(['nested.js']),
+      getAllAsyncChunks: () => new Set(),
+      ids: ['nested'],
+      name: 'nested-feature',
+    };
+    const remoteChunk = {
+      files: new Set(),
+      getAllAsyncChunks: () => new Set([nestedChunk]),
+      ids: [802],
+      name: 'remote-react__background',
+    };
+    const localChunk = {
+      files: new Set(['local.js']),
+      getAllAsyncChunks: () => new Set(),
+      ids: [123],
+      name: 'local',
+    };
+    const cssChunk = {
+      files: new Set(['styles.css']),
+      getAllAsyncChunks: () => new Set(),
+      ids: [456],
+      name: 'styles',
+    };
+    const chunks = new Set([entryChunk, remoteChunk, localChunk, cssChunk]);
+    const chunkGraph = {
+      getNumberOfEntryModules(chunk: unknown) {
+        return chunk === entryChunk ? 1 : 0;
+      },
+      getChunkModulesIterableBySourceType(chunk: unknown) {
+        return chunk === localChunk ? [{}] : [];
+      },
+    };
+    let onCompilation: ((compilation: any) => void) | undefined;
+    let addMatcher: ((chunk: unknown) => void) | undefined;
+    let renameAsyncChunk: ((chunkName: string) => string) | undefined;
+    let beforeEncode: ((args: any) => any) | undefined;
+    let beforeEmit: ((args: any) => any) | undefined;
+    const addRuntimeModule = rs.fn();
+    const discardedTemplateAssets = new Set<string>();
+    const lazyBundleAssets = new Set<string>();
+
+    class RuntimeModule {
+      static STAGE_TRIGGER = 20;
+      protected compilation: any;
+      protected chunkGraph: any;
+
+      constructor(
+        readonly name: string,
+        readonly stage: number,
+      ) {}
+
+      attach(compilation: any, _chunk: unknown, graph: any) {
+        this.compilation = compilation;
+        this.chunkGraph = graph;
+      }
+    }
+
+    const compiler = {
+      webpack: {
+        RuntimeGlobals: { ensureChunkHandlers: 'ensureChunkHandlers' },
+        RuntimeModule,
+        Template: {
+          asString: (lines: string[]) => lines.flat().join('\n'),
+          indent: (lines: string | string[]) =>
+            (Array.isArray(lines) ? lines : [lines])
+              .flat()
+              .map((line) => `  ${line}`)
+              .join('\n'),
+        },
+      },
+      hooks: {
+        thisCompilation: {
+          tap(_name: string, callback: (compilation: any) => void) {
+            onCompilation = callback;
+          },
+        },
+      },
+    };
+    const compilation = {
+      addRuntimeModule,
+      chunkGraph,
+      chunks,
+      entrypoints: new Map([['remote', { chunks: [remoteChunk] }]]),
+      hooks: {
+        runtimeRequirementInTree: {
+          for() {
+            return {
+              tap(_name: string, callback: (chunk: unknown) => void) {
+                addMatcher = callback;
+              },
+            };
+          },
+        },
+      },
+    };
+
+    createLynxChunkLoadingMatcherPlugin(
+      {
+        getLynxTemplatePluginHooks() {
+          return {
+            asyncChunkName: {
+              tap(_name, callback) {
+                renameAsyncChunk = callback;
+              },
+            },
+            beforeEncode: {
+              tap(_name, callback) {
+                beforeEncode = callback;
+              },
+            },
+            beforeEmit: {
+              tap(_name, callback) {
+                beforeEmit = callback;
+              },
+            },
+          };
+        },
+      },
+      {
+        backgroundOnlyRemote: true,
+        chunking: 'split',
+        discardSourceEntryBundles: true,
+        discardedTemplateAssets,
+        includedChunkPrefixes: ['catalog__background_'],
+        lazyBundleAssets,
+        remoteEntryName: 'remote',
+        pairedRealmChunkPrefixes: {
+          background: 'catalog__background_',
+          mainThread: 'catalog__main-thread__',
+        },
+        pairedRealmChunkSuffixes: {
+          background: '-react__background',
+          mainThread: '-react__main-thread',
+        },
+      },
+    ).apply(compiler as any);
+    onCompilation!(compilation);
+    addMatcher!(entryChunk);
+
+    const cardArgs = {
+      encodeData: {
+        lepusCode: { root: { source: 'main-thread runtime' } },
+        sourceContent: { appType: 'card' },
+      },
+    };
+    expect(beforeEncode!(cardArgs)).toBe(cardArgs);
+    expect(cardArgs.encodeData.lepusCode.root).toBeUndefined();
+    const lazyRoot = { source: 'component main thread' };
+    beforeEncode!({
+      encodeData: {
+        lepusCode: { root: lazyRoot },
+        sourceContent: { appType: 'DynamicComponent' },
+      },
+    });
+    expect(lazyRoot).toEqual({ source: 'component main thread' });
+
+    const lazyArgs = {
+      finalEncodeOptions: {
+        sourceContent: { appType: 'DynamicComponent' },
+      },
+      entryNames: ['remote-react__background'],
+      outputName: 'async/catalog__background_Card.hash.bundle',
+    };
+    expect(beforeEmit!(lazyArgs)).toBe(lazyArgs);
+    beforeEmit!({
+      entryNames: ['remote-react__background'],
+      finalEncodeOptions: { sourceContent: { appType: 'card' } },
+      outputName: 'bootstrap.lynx.bundle',
+    });
+    beforeEmit!({
+      entryNames: ['nested-feature'],
+      finalEncodeOptions: {
+        sourceContent: { appType: 'DynamicComponent' },
+      },
+      outputName: 'async/nested-feature.bundle',
+    });
+    expect(lazyBundleAssets).toEqual(
+      new Set([
+        'async/catalog__background_Card.hash.bundle',
+        'async/nested-feature.bundle',
+      ]),
+    );
+    expect(discardedTemplateAssets).toEqual(new Set(['bootstrap.lynx.bundle']));
+
+    expect(addRuntimeModule).toHaveBeenCalledTimes(2);
+    const runtimeModule = addRuntimeModule.mock.calls.find(
+      ([, module]) => module.name === 'lynx chunk loading matcher',
+    )![1];
+    runtimeModule.attach(compilation, entryChunk, chunkGraph);
+    const source = runtimeModule.generate();
+
+    expect(source).toContain('"802":1');
+    expect(source).toContain('__webpack_require__.lynx_chunking = "split"');
+    expect(source).toContain('"456":1');
+    expect(source).not.toContain('"123":1');
+    expect(source).not.toContain('"host":1');
+    expect(source).toContain('__webpack_require__.f.require = function');
+    const startupModule = addRuntimeModule.mock.calls.find(
+      ([, module]) => module.name === 'lynx federation startup promise',
+    )![1];
+    startupModule.attach(compilation, entryChunk, chunkGraph);
+    expect(startupModule.generate()).toContain(
+      'Promise.resolve(lynxFederationStartup.apply(this, arguments))',
+    );
+    expect(renameAsyncChunk!('remote')).toBe('');
+    expect(renameAsyncChunk!('local')).toBe('local');
+    expect(renameAsyncChunk!('catalog__background_Card')).toBe(
+      'catalog__background_Card',
+    );
+    expect(renameAsyncChunk!('catalog__main-thread__Card')).toBe(
+      'catalog__background_Card',
+    );
+  });
+});

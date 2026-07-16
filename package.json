@@ -28,6 +28,7 @@
     "verify:turbo": "node tools/scripts/verify-turbo-conventions.mjs",
     "e2e:modern": "pnpm exec turbo run test --filter=@module-federation/modern-js --filter=@module-federation/modern-js-v3 --concurrency=20",
     "e2e:runtime": "pnpm exec turbo run test:e2e --filter=runtime-host",
+    "e2e:lynx": "pnpm exec turbo run test --filter=lynx-module-federation-demo",
     "e2e:manifest:dev": "pnpm exec turbo run test:e2e --filter=3008-webpack-host",
     "e2e:manifest:prod": "pnpm exec turbo run test:e2e:production --filter=3008-webpack-host",
     "e2e:node": "node tools/scripts/run-node-e2e.mjs",

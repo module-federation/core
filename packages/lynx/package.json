@@ -1,0 +1,106 @@
+{
+  "name": "@module-federation/lynx",
+  "version": "0.0.0",
+  "description": "Module Federation adapter for native Lynx and Lynx for Web runtimes",
+  "keywords": [
+    "module-federation",
+    "lynx",
+    "rspeedy",
+    "rspack"
+  ],
+  "type": "commonjs",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/module-federation/core.git",
+    "directory": "packages/lynx"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./runtimePlugin": {
+      "import": {
+        "types": "./dist/runtimePlugin.d.mts",
+        "default": "./dist/runtimePlugin.mjs"
+      },
+      "require": {
+        "types": "./dist/runtimePlugin.d.ts",
+        "default": "./dist/runtimePlugin.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/index.d.ts"
+      ],
+      "runtimePlugin": [
+        "./dist/runtimePlugin.d.ts"
+      ]
+    }
+  },
+  "dependencies": {
+    "@module-federation/runtime-core": "workspace:*",
+    "@module-federation/runtime-tools": "workspace:*",
+    "@module-federation/sdk": "workspace:*"
+  },
+  "peerDependencies": {
+    "@lynx-js/cache-events-webpack-plugin": "^0.1.0",
+    "@lynx-js/css-serializer": "^0.1.6",
+    "@lynx-js/tasm": "^0.0.39",
+    "@lynx-js/web-core": "^0.22.1",
+    "@rsbuild/core": "^2.0.0",
+    "@rspack/core": ">=2.1.5-canary-54a0d8f3-20260715194831 <3"
+  },
+  "peerDependenciesMeta": {
+    "@lynx-js/tasm": {
+      "optional": true
+    },
+    "@lynx-js/web-core": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@lynx-js/cache-events-webpack-plugin": "0.1.0",
+    "@lynx-js/css-serializer": "0.1.6",
+    "@lynx-js/chunk-loading-webpack-plugin": "0.4.0",
+    "@lynx-js/tasm": "0.0.39",
+    "@lynx-js/web-core": "0.22.1",
+    "@rsbuild/core": "2.1.4",
+    "@rspack/core": "npm:@rspack-canary/core@2.1.5-canary-54a0d8f3-20260715194831",
+    "@rstest/core": "^0.10.6",
+    "typescript": "7.0.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "tsdown --config tsdown.config.mts",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",
+    "test": "pnpm exec rstest --passWithNoTests",
+    "typecheck": "tsc -p tsconfig.lib.json --noEmit",
+    "pre-release": "pnpm run test && pnpm run build"
+  }
+}

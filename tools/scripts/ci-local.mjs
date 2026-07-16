@@ -220,6 +220,18 @@ const jobs = [
     ],
   },
   {
+    name: 'e2e-lynx',
+    env: SKIP_DEVTOOLS_POSTINSTALL_ENV,
+    steps: [
+      ...e2eSetupSteps('lynx', { cypress: false }),
+      step('E2E Test for Lynx Module Federation Demo', (ctx) =>
+        runWhenAffected(ctx, () =>
+          runCommand('pnpm', ['run', 'e2e:lynx'], ctx),
+        ),
+      ),
+    ],
+  },
+  {
     name: 'e2e-manifest',
     env: SKIP_DEVTOOLS_POSTINSTALL_ENV,
     steps: [

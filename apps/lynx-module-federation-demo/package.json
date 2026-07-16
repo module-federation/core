@@ -1,0 +1,49 @@
+{
+  "name": "lynx-module-federation-demo",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:adapter": "pnpm --dir ../../packages/lynx run build",
+    "build:host:native": "node rspack-canary-rspeedy.mjs build -c lynx.config.mjs",
+    "build:host:web": "node rspack-canary-rspeedy.mjs build -c lynx.web.config.mjs",
+    "build:remote:native": "node rspack-canary-rspeedy.mjs build -c lynx.remote.native.config.mjs",
+    "build:remote:web": "node rspack-canary-rspeedy.mjs build -c lynx.remote.web.config.mjs",
+    "clean:dist": "node --eval \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
+    "build:native": "pnpm run clean:dist && pnpm run build:adapter && pnpm run build:remote:native && pnpm run build:host:native",
+    "build:web": "pnpm run clean:dist && pnpm run build:adapter && pnpm run build:remote:web && pnpm run build:host:web",
+    "build": "pnpm run clean:dist && pnpm run build:adapter && pnpm run build:remote:native && pnpm run build:remote:web && pnpm run build:host:native && pnpm run build:host:web",
+    "dev": "pnpm run clean:dist && pnpm run build:adapter && pnpm run build:remote:native && node rspack-canary-rspeedy.mjs dev -c lynx.config.mjs",
+    "dev:web": "pnpm run clean:dist && pnpm run build:adapter && pnpm run build:remote:web && node rspack-canary-rspeedy.mjs dev -c lynx.web.config.mjs",
+    "e2e:native": "pnpm run build:native && pnpm run test:native-artifacts && pnpm run test:native-dev-server",
+    "e2e:web": "pnpm run build:web && node test/real-web/run.mjs",
+    "preview": "node rspack-canary-rspeedy.mjs preview -c lynx.config.mjs",
+    "preview:web": "node rspack-canary-rspeedy.mjs preview -c lynx.web.config.mjs",
+    "test": "pnpm run e2e:native && pnpm run e2e:web",
+    "test:native-artifacts": "node test/native-artifacts.mjs",
+    "test:native-dev-server": "node test/native-dev-server.mjs"
+  },
+  "dependencies": {
+    "@lynx-js/react": "0.122.1",
+    "@module-federation/runtime": "workspace:*"
+  },
+  "devDependencies": {
+    "@lynx-js/lynx-bundle-rslib-config": "0.5.1",
+    "@lynx-js/qrcode-rsbuild-plugin": "0.5.0",
+    "@lynx-js/react-rsbuild-plugin": "0.17.2",
+    "@lynx-js/rspeedy": "0.15.0",
+    "@lynx-js/types": "4.0.0",
+    "@lynx-js/web-core": "0.22.1",
+    "@lynx-js/web-elements": "0.12.5",
+    "@module-federation/lynx": "workspace:*",
+    "@module-federation/runtime-tools": "workspace:*",
+    "@playwright/test": "1.57.0",
+    "@rsbuild/core": "2.1.4",
+    "@rspack-canary/core": "2.1.5-canary-54a0d8f3-20260715194831",
+    "@rspack/core": "npm:@rspack-canary/core@2.1.5-canary-54a0d8f3-20260715194831",
+    "@types/react": "18.3.28"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}
