@@ -59,22 +59,20 @@ export function applyClientPlugins(
   };
 
   // Preserve the legacy asset for hosts that have not migrated to manifests.
-  if (!extraOptions.skipFederatedStats) {
-    const manifestHasAssets =
-      options.manifest !== false &&
-      (typeof options.manifest !== 'object' ||
-        !options.manifest.disableAssetsAnalyze);
+  const manifestHasAssets =
+    options.manifest !== false &&
+    (typeof options.manifest !== 'object' ||
+      !options.manifest.disableAssetsAnalyze);
 
-    if (!manifestHasAssets) {
-      new ChunkCorrelationPlugin({
-        filename: FEDERATED_STATS_FILENAMES,
-      }).apply(compiler);
-    } else {
-      new FederatedStatsCompatibilityPlugin({
-        filenames: FEDERATED_STATS_FILENAMES,
-        manifest: options.manifest,
-      }).apply(compiler);
-    }
+  if (!manifestHasAssets) {
+    new ChunkCorrelationPlugin({
+      filename: FEDERATED_STATS_FILENAMES,
+    }).apply(compiler);
+  } else {
+    new FederatedStatsCompatibilityPlugin({
+      filenames: FEDERATED_STATS_FILENAMES,
+      manifest: options.manifest,
+    }).apply(compiler);
   }
 
   // Apply the InvertedContainerPlugin to add custom runtime modules to the container runtime

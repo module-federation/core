@@ -1,6 +1,5 @@
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import type { Compiler } from 'webpack';
-import type { NextFederationPluginExtraOptions } from './next-fragments';
 
 jest.mock(
   '@module-federation/node',
@@ -61,38 +60,28 @@ describe('applyClientPlugins', () => {
     jest.clearAllMocks();
   });
 
-  it.each([undefined, false])(
-    'emits compatibility stats when skipFederatedStats is %s',
-    (skipFederatedStats) => {
-      const compiler = createCompiler();
-      const extraOptions: NextFederationPluginExtraOptions = {
-        skipFederatedStats,
-      };
+  it('emits compatibility stats from the manifest', () => {
+    const compiler = createCompiler();
 
-      applyClientPlugins(compiler, { ...options }, extraOptions);
+    applyClientPlugins(compiler, { ...options }, {});
 
-      expect(FederatedStatsCompatibilityPlugin).toHaveBeenCalledWith({
-        filenames: [
-          'static/chunks/federated-stats.json',
-          'server/federated-stats.json',
-        ],
-        manifest: undefined,
-      });
-      expect(ChunkCorrelationPlugin).not.toHaveBeenCalled();
-      expect(InvertedContainerPlugin).toHaveBeenCalledTimes(1);
-    },
-  );
+    expect(FederatedStatsCompatibilityPlugin).toHaveBeenCalledWith({
+      filenames: [
+        'static/chunks/federated-stats.json',
+        'server/federated-stats.json',
+      ],
+      manifest: undefined,
+    });
+    expect(ChunkCorrelationPlugin).not.toHaveBeenCalled();
+    expect(InvertedContainerPlugin).toHaveBeenCalledTimes(1);
+  });
 
   it.each([{ manifest: false }, { manifest: { disableAssetsAnalyze: true } }])(
     'uses full chunk correlation for $manifest',
     (manifestOptions) => {
       const compiler = createCompiler();
 
-      applyClientPlugins(
-        compiler,
-        { ...options, ...manifestOptions },
-        { skipFederatedStats: false },
-      );
+      applyClientPlugins(compiler, { ...options, ...manifestOptions }, {});
 
       expect(ChunkCorrelationPlugin).toHaveBeenCalledWith({
         filename: [
@@ -103,14 +92,4 @@ describe('applyClientPlugins', () => {
       expect(FederatedStatsCompatibilityPlugin).not.toHaveBeenCalled();
     },
   );
-
-  it('omits chunk correlation without affecting other client plugins', () => {
-    const compiler = createCompiler();
-
-    applyClientPlugins(compiler, { ...options }, { skipFederatedStats: true });
-
-    expect(ChunkCorrelationPlugin).not.toHaveBeenCalled();
-    expect(FederatedStatsCompatibilityPlugin).not.toHaveBeenCalled();
-    expect(InvertedContainerPlugin).toHaveBeenCalledTimes(1);
-  });
 });
