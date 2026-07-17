@@ -8,7 +8,10 @@ interface ExternalBundleOptions {
   engineVersion?: string;
   entryAssets: string[];
   entryName: string;
+  entrySectionNames: ReadonlyMap<string, string>;
+  exposeByExpectedLazyBundleChunk: ReadonlyMap<string, string>;
   includedChunkPrefixes: string[];
+  lazyBundleAssetByExpose: Map<string, string>;
   lazyBundleAssets: Set<string>;
   pairedBundleChunks: string[];
   preservedAssets: string[];
@@ -94,13 +97,21 @@ export const createLynxExternalBundlePlugin = (
         stage: 10_000,
       },
       async (compilation) => {
-        if (
-          options.chunking === 'split' &&
-          options.lazyBundleAssets.size === 0
-        ) {
-          throw new Error(
-            '@module-federation/lynx split remote bundles require each expose to emit a DynamicComponent lazy bundle; no matching lazy bundle assets were produced.',
+        if (options.chunking === 'split') {
+          const expectedExposes = new Set(
+            options.exposeByExpectedLazyBundleChunk.values(),
           );
+          const missingExposes = Array.from(expectedExposes).filter(
+            (expose) => {
+              const asset = options.lazyBundleAssetByExpose.get(expose);
+              return !asset || !compilation.getAsset(asset);
+            },
+          );
+          if (missingExposes.length > 0) {
+            throw new Error(
+              `@module-federation/lynx split remote bundles require every expose to emit a DynamicComponent lazy bundle; missing bundles for ${missingExposes.map((expose) => `"${expose}"`).join(', ')}.`,
+            );
+          }
         }
         const { cssChunksToMap } = await import('@lynx-js/css-serializer');
         const entryAssets = new Set(options.entryAssets);
@@ -116,7 +127,10 @@ export const createLynxExternalBundlePlugin = (
         const customSections = encodedAssets.reduce<Record<string, unknown>>(
           (sections, asset) => {
             if (asset.name.endsWith('.js')) {
-              sections[asset.name.replace(/\.js$/, '')] = {
+              const sectionName =
+                options.entrySectionNames.get(asset.name) ??
+                asset.name.replace(/\.js$/, '');
+              sections[sectionName] = {
                 ...(options.pairedBundleChunks.includes(asset.name)
                   ? { encoding: 'JsBytecode' }
                   : {}),

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { access, mkdir, readFile, stat } from 'node:fs/promises';
+import { access, mkdir, readFile, readdir, stat } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import { createRequire } from 'node:module';
 import path from 'node:path';
@@ -27,6 +27,10 @@ const hostBundlePath = fromAppRoot(
   process.env.LYNX_HOST_WEB_BUNDLE,
   'dist/host-web/main.web.bundle',
 );
+const standaloneBundlePath = fromAppRoot(
+  process.env.LYNX_CATALOG_WEB_BUNDLE,
+  'dist/catalog-web/main.web.bundle',
+);
 const remoteManifestPath = fromAppRoot(
   process.env.LYNX_REMOTE_MANIFEST,
   'dist/remote-web/mf-manifest.json',
@@ -37,6 +41,8 @@ const remoteBundlePath = fromAppRoot(
 );
 const hostOutputRoot = path.dirname(hostBundlePath);
 const remoteOutputRoot = path.dirname(remoteManifestPath);
+const standaloneOutputRoot = path.dirname(standaloneBundlePath);
+const hostStartupRoot = path.join(hostOutputRoot, 'static/js/async');
 const screenshotPath = fromAppRoot(
   process.env.LYNX_WEB_E2E_SCREENSHOT,
   'test/real-web/artifacts/failure.png',
@@ -45,6 +51,7 @@ const readinessTimeout = Number(process.env.LYNX_WEB_E2E_TIMEOUT ?? 60_000);
 
 const requiredArtifacts = [
   ['Rspeedy host web bundle', hostBundlePath],
+  ['standalone Catalog web bundle', standaloneBundlePath],
   ['federation manifest', remoteManifestPath],
   ['federated Lynx web bundle', remoteBundlePath],
 ];
@@ -75,7 +82,9 @@ const inside = (root, pathname) => {
 };
 
 const routes = [
+  ['/static/', path.join(hostOutputRoot, 'static')],
   ['/dist/host-web/', hostOutputRoot],
+  ['/dist/catalog-web/', standaloneOutputRoot],
   ['/dist/remote-web/', remoteOutputRoot],
   ['/remote-web/', remoteOutputRoot],
   ['/node_modules/@lynx-js/web-core/', webCoreRoot],
@@ -106,13 +115,7 @@ const server = createServer(async (request, response) => {
       return;
     }
 
-    let body = await readFile(file);
-    if (path.resolve(file) === path.resolve(remoteManifestPath)) {
-      const manifest = JSON.parse(body.toString('utf8'));
-      manifest.metaData ??= {};
-      manifest.metaData.publicPath = `${baseUrl}/dist/remote-web/`;
-      body = Buffer.from(JSON.stringify(manifest));
-    }
+    const body = await readFile(file);
 
     response.writeHead(200, {
       'access-control-allow-origin': '*',
@@ -147,7 +150,7 @@ const playwrightEntry = requireFromRepo.resolve('@playwright/test');
 const playwrightModule = await import(pathToFileURL(playwrightEntry));
 const { chromium } = playwrightModule.default ?? playwrightModule;
 let browser;
-let page;
+let failurePage;
 
 const closeServer = () =>
   new Promise((resolve, reject) => {
@@ -201,6 +204,16 @@ const tap = async (locator) => {
 
 const pageErrors = [];
 const consoleErrors = [];
+const observePage = (candidate, label) => {
+  candidate.on('pageerror', (error) =>
+    pageErrors.push(`${label}: ${error.stack ?? error.message}`),
+  );
+  candidate.on('console', (message) => {
+    if (message.type() === 'error') {
+      consoleErrors.push(`${label}: ${message.text()}`);
+    }
+  });
+};
 
 try {
   browser = await chromium.launch({
@@ -213,20 +226,16 @@ try {
     isMobile: true,
     viewport: { width: 430, height: 932 },
   });
-  page = await context.newPage();
-  page.on('pageerror', (error) =>
-    pageErrors.push(error.stack ?? error.message),
-  );
-  page.on('console', (message) => {
-    if (message.type() === 'error') consoleErrors.push(message.text());
-  });
+  const hostPage = await context.newPage();
+  failurePage = hostPage;
+  observePage(hostPage, 'Orbit');
 
-  await page.goto(`${baseUrl}/`, {
+  await hostPage.goto(`${baseUrl}/`, {
     timeout: 60_000,
     waitUntil: 'domcontentloaded',
   });
 
-  const activePage = page.locator(
+  const activePage = hostPage.locator(
     '#orbit-lynx-view [part="page"]:not([l-disposed])',
   );
   await poll(
@@ -359,10 +368,99 @@ try {
     3,
     `split mode must fetch one lazy bundle per expose: ${JSON.stringify(lazyBundleRequests)}`,
   );
+  const hostStartupFiles = (await readdir(hostStartupRoot)).filter((file) =>
+    file.endsWith('.js'),
+  );
+  assert.ok(
+    hostStartupFiles.length > 0,
+    'non-eager sharing did not emit async host startup chunks',
+  );
+  for (const file of hostStartupFiles) {
+    assert.ok(
+      requests.includes(`/static/js/async/${file}`),
+      `async host startup chunk was not requested: ${file}`,
+    );
+  }
 
-  const lynxErrors = await page.evaluate(
+  const hostLynxErrors = await hostPage.evaluate(
     () => globalThis.__LYNX_WEB_E2E__?.errors ?? [],
   );
+  await hostPage.close();
+  const standaloneRequestStart = requests.length;
+  const catalogBrowserPage = await context.newPage();
+  failurePage = catalogBrowserPage;
+  observePage(catalogBrowserPage, 'Catalog');
+  await catalogBrowserPage.goto(
+    `${baseUrl}/?bundle=${encodeURIComponent('/dist/catalog-web/main.web.bundle')}`,
+    { timeout: 60_000, waitUntil: 'domcontentloaded' },
+  );
+
+  const catalogPage = catalogBrowserPage.locator(
+    '#orbit-lynx-view [part="page"]:not([l-disposed])',
+  );
+  await poll(
+    () => catalogPage.count(),
+    (count) => count === 1,
+    'single active standalone Catalog page',
+  );
+  const catalog = catalogPage.getByTestId('catalog-standalone-app');
+  await catalog.waitFor({ state: 'visible', timeout: readinessTimeout });
+  await catalogPage
+    .getByTestId('catalog-standalone-ready')
+    .waitFor({ state: 'visible', timeout: readinessTimeout });
+  for (const testId of [
+    'remote-card',
+    'remote-details',
+    'remote-activity-feed',
+  ]) {
+    await catalogPage
+      .getByTestId(testId)
+      .waitFor({ state: 'visible', timeout: readinessTimeout });
+  }
+
+  const catalogCounts = [
+    catalogPage.getByTestId('catalog-local-count'),
+    catalogPage.getByTestId('shared-card-count'),
+    catalogPage.getByTestId('shared-details-count'),
+    catalogPage.getByTestId('shared-activity-count'),
+  ];
+  const catalogBaseline = await poll(
+    () => readCounts(catalogCounts),
+    allEqual,
+    'standalone Catalog shared counts',
+  );
+  await tap(catalogPage.getByTestId('increment-shared'));
+  await poll(
+    () => readCounts(catalogCounts),
+    (values) => allEqual(values) && values[0] > catalogBaseline[0],
+    'standalone Catalog shared increment',
+  );
+  await poll(
+    () => text(catalogPage.getByTestId('shared-last-source')),
+    (value) => value?.trim() === 'catalog/Card',
+    'standalone Catalog mutation source',
+  );
+
+  const standaloneRequests = requests.slice(standaloneRequestStart);
+  assert.ok(
+    standaloneRequests.includes('/dist/catalog-web/main.web.bundle'),
+    `standalone Catalog entry was not requested: ${JSON.stringify(standaloneRequests)}`,
+  );
+  assert.ok(
+    !standaloneRequests.some(
+      (value) =>
+        value.includes('mf-manifest.json') ||
+        value.includes('/dist/remote-web/async/') ||
+        value.includes('/remote-web/async/') ||
+        value.endsWith(`/${path.basename(remoteBundlePath)}`),
+    ),
+    `standalone direct imports unexpectedly used federation transport: ${JSON.stringify(standaloneRequests)}`,
+  );
+
+  const catalogLynxErrors = await catalogBrowserPage.evaluate(
+    () => globalThis.__LYNX_WEB_E2E__?.errors ?? [],
+  );
+  const lynxErrors = [...hostLynxErrors, ...catalogLynxErrors];
   assert.deepEqual(
     lynxErrors,
     [],
@@ -376,12 +474,12 @@ try {
   );
 
   process.stdout.write(
-    `Real Lynx Web E2E passed at ${baseUrl} (${requests.length} requests)\n`,
+    `Real Lynx Web E2E passed for Orbit and standalone Catalog at ${baseUrl} (${requests.length} requests)\n`,
   );
 } catch (error) {
-  if (page) {
+  if (failurePage) {
     await mkdir(path.dirname(screenshotPath), { recursive: true });
-    await page.screenshot({ path: screenshotPath, fullPage: true });
+    await failurePage.screenshot({ path: screenshotPath, fullPage: true });
   }
   throw new Error(
     [

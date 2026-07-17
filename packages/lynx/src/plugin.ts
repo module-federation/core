@@ -18,7 +18,9 @@ import {
   getRemoteBundleOptions,
   normalizeLynxExposes,
   normalizeLynxShared,
+  normalizeRealmScopedRemotes,
   normalizeRealmScopedShared,
+  resolveRuntimePluginOptions,
   shouldApplyToEnvironment,
   validateLayers,
   type ExposedLayers,
@@ -183,6 +185,11 @@ export const pluginLynxModuleFederation = (
         const federationOptions = createFederationOptions(
           {
             ...options,
+            remotes: normalizeRealmScopedRemotes(
+              options.remotes,
+              layers,
+              activeRealmLayers,
+            ),
             shareScope: getLynxShareScopes(
               options.shareScope,
               layers,
@@ -195,9 +202,13 @@ export const pluginLynxModuleFederation = (
             layers,
             defaultLayer,
             activeRealmLayers,
+            options.shareScope,
           ),
           runtimePlugin,
-          adapterOptions.runtimePluginOptions,
+          resolveRuntimePluginOptions(
+            adapterOptions.runtimePluginOptions,
+            layers,
+          ),
         );
 
         config.plugins ||= [];

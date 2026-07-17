@@ -16,7 +16,9 @@ import {
   createFederationOptions,
   getLynxShareScopes,
   normalizeLynxExposes,
+  normalizeRealmScopedRemotes,
   normalizeRealmScopedShared,
+  resolveRuntimePluginOptions,
   type ExposedLayers,
   type LynxModuleFederationAdapterOptions,
   type LynxModuleFederationOptions,
@@ -56,6 +58,14 @@ type RemoteBundlePlan = RemoteBundlePlanBase &
       }
   );
 
+const toSafeOutputName = (name: string): string => {
+  const outputName =
+    name.replace(/[^A-Za-z0-9@_-]+/g, '_').replace(/^_+|_+$/g, '') || 'remote';
+  return /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])$/i.test(outputName)
+    ? `_${outputName}`
+    : outputName;
+};
+
 const normalizeRemoteBundlePlan = (
   name: string,
   remoteBundle: LynxRemoteBundleOptions,
@@ -73,9 +83,10 @@ const normalizeRemoteBundlePlan = (
     );
   }
 
-  const backgroundEntry = `${name}.js`;
-  const backgroundChunkPrefix = `${name}__background_`;
-  const bundleFileName = remoteBundle.filename ?? `${name}.lynx.bundle`;
+  const outputName = toSafeOutputName(name);
+  const backgroundEntry = `${outputName}.js`;
+  const backgroundChunkPrefix = `${outputName}__background_`;
+  const bundleFileName = remoteBundle.filename ?? `${outputName}.lynx.bundle`;
   const basePlan = {
     backgroundChunkPrefix,
     backgroundEntry,
@@ -93,7 +104,7 @@ const normalizeRemoteBundlePlan = (
     };
   }
 
-  const mainThreadChunkPrefix = `${name}__main-thread__`;
+  const mainThreadChunkPrefix = `${outputName}__main-thread__`;
   const splitPlan = {
     ...basePlan,
     chunking,
@@ -101,7 +112,7 @@ const normalizeRemoteBundlePlan = (
     mainThreadChunkPrefix,
   };
   if (remoteBundle.target === 'web') {
-    const mainThreadEntry = `${name}__main-thread.js`;
+    const mainThreadEntry = `${outputName}__main-thread.js`;
     return {
       ...splitPlan,
       entryAssets: [backgroundEntry, mainThreadEntry],
@@ -175,12 +186,13 @@ const toChunkName = (key: string): string => {
   return name || 'expose';
 };
 
-const assertUniqueChunkNames = (exposes: Exposes): void => {
+const assertUniqueChunkNames = (exposes: Exposes): Map<string, string> => {
   const normalized = normalizeLynxExposes(exposes, '') as Record<
     string,
     ExposesConfig
   >;
   const keysByChunkName = new Map<string, string>();
+  const chunkNamesByExpose = new Map<string, string>();
   for (const key of Object.keys(normalized)) {
     const chunkName = toChunkName(key);
     const previousKey = keysByChunkName.get(chunkName);
@@ -190,7 +202,9 @@ const assertUniqueChunkNames = (exposes: Exposes): void => {
       );
     }
     keysByChunkName.set(chunkName, key);
+    chunkNamesByExpose.set(key, chunkName);
   }
+  return chunkNamesByExpose;
 };
 
 const createRemoteExposes = (
@@ -414,7 +428,7 @@ export const configureRemoteBundle = async (
       `@module-federation/lynx \`remoteBundle\` owns expose layers; remove the explicit \`${conflictingLayer}\` expose layer.`,
     );
   }
-  assertUniqueChunkNames(exposes);
+  const chunkNamesByExpose = assertUniqueChunkNames(exposes);
 
   const reservedExposeKey = findReservedExposeKey(
     exposes,
@@ -456,11 +470,17 @@ export const configureRemoteBundle = async (
     layers,
     layers.BACKGROUND,
     activeRealmLayers,
+    options.shareScope,
   );
   const federationOptions = {
     ...createFederationOptions(
       {
         ...options,
+        remotes: normalizeRealmScopedRemotes(
+          options.remotes,
+          layers,
+          activeRealmLayers,
+        ),
         shareScope: getLynxShareScopes(
           options.shareScope,
           layers,
@@ -470,14 +490,32 @@ export const configureRemoteBundle = async (
       remoteExposes,
       remoteShared,
       runtimePlugin,
-      adapterOptions.runtimePluginOptions,
+      resolveRuntimePluginOptions(adapterOptions.runtimePluginOptions, layers),
     ),
     manifest: options.manifest ?? true,
     filename: plan.backgroundEntry,
     runtime: false as const,
   };
+  const entryGlobalName =
+    typeof federationOptions.library?.name === 'string'
+      ? federationOptions.library.name
+      : options.name;
+  const entrySectionNames = new Map([[plan.backgroundEntry, entryGlobalName]]);
+  if (plan.mainThreadEntry) {
+    entrySectionNames.set(
+      plan.mainThreadEntry,
+      `${entryGlobalName}__main-thread`,
+    );
+  }
   const pairedBundleChunks: string[] = [];
   const lazyBundleAssets = new Set<string>();
+  const lazyBundleAssetByExpose = new Map<string, string>();
+  const exposeByExpectedLazyBundleChunk = new Map(
+    Array.from(chunkNamesByExpose, ([expose, chunkName]) => [
+      `${plan.backgroundChunkPrefix}${chunkName}`,
+      expose,
+    ]),
+  );
   const discardedTemplateAssets = new Set<string>();
   const { manifestFileName, statsFileName } = getManifestFileName(
     federationOptions.manifest,
@@ -492,6 +530,7 @@ export const configureRemoteBundle = async (
   config.plugins.push(
     createCompilerModuleFederationPlugin(federationOptions),
     createLynxChunkLoadingMatcherPlugin(lynxTemplatePlugin, {
+      autoPublicPath: config.output?.publicPath === 'auto',
       backgroundOnlyRemote: !pairedPlan,
       chunking: plan.chunking,
       discardSourceEntryBundles:
@@ -499,6 +538,8 @@ export const configureRemoteBundle = async (
       discardedTemplateAssets,
       includedChunkPrefixes: plan.includedChunkPrefixes,
       lazyBundleAssets,
+      lazyBundleAssetByExpose,
+      exposeByExpectedLazyBundleChunk,
       remoteEntryName: options.name,
       ...(pairedPlan
         ? {
@@ -534,8 +575,11 @@ export const configureRemoteBundle = async (
       engineVersion: remoteBundle.engineVersion,
       entryAssets: plan.entryAssets,
       entryName: options.name,
+      entrySectionNames,
       includedChunkPrefixes: plan.includedChunkPrefixes,
       lazyBundleAssets,
+      lazyBundleAssetByExpose,
+      exposeByExpectedLazyBundleChunk,
       pairedBundleChunks,
       preservedAssets: [manifestFileName, statsFileName],
     }),

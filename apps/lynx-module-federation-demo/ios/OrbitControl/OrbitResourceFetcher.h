@@ -13,6 +13,9 @@ NS_ASSUME_NONNULL_BEGIN
                                              LynxTemplateResourceFetcher,
                                              LynxGenericResourceFetcher>
 
+- (instancetype)initWithRootBundleURL:(NSString *)rootBundleURL
+  NS_DESIGNATED_INITIALIZER NS_SWIFT_NAME(init(rootBundleURL:));
+- (instancetype)init NS_UNAVAILABLE;
 - (void)configureBuilder:(LynxViewBuilder *)builder NS_SWIFT_NAME(configure(_:));
 
 @end

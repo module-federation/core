@@ -133,6 +133,16 @@ Split native bundles encode both programs into one DynamicComponent artifact;
 Web remotes use the equivalent paired external bundle. Web remotes reject
 `single`, and native `single` is limited to background-only non-UI modules.
 
+`publicPath: 'auto'` is supported and recommended for colocated split assets.
+Module Federation still resolves the public remote entry through manifest
+inference or `getPublicPath`. Browser and browser-like transports infer a
+root-relative manifest's origin from the fetched `Response.url`; Node hosts
+should provide an absolute manifest URL (or a custom fetch response with an
+absolute URL). The Lynx runtime plugin then resolves lazy bundles relative to
+that actual entry URL, because native and Lynx for Web evaluation do not provide
+the DOM `currentScript` signal used by Webpack's browser auto-public-path
+runtime. Explicit public paths remain unchanged.
+
 Ordinary Rspeedy entry bundles are preserved by default. A dedicated remote
 environment may set `preserveSourceEntryBundles: false` to publish only its
 manifest, federation container, and split exposure bundles.

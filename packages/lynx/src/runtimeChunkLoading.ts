@@ -20,6 +20,7 @@ export interface LynxWebpackRequire {
   f: Record<string, ChunkHandler | undefined>;
   lynx_aci?: Record<string, string | undefined>;
   lynx_chunking?: 'single' | 'split';
+  lynx_public_path_auto?: boolean;
   m: Record<string, unknown>;
   p?: string;
   u(chunkId: ChunkId): string;
@@ -59,9 +60,9 @@ const joinRemoteUrl = (
   }
 
   const entry = entryUrl.split(/[?#]/, 1)[0];
-  const origin = entry.match(/^([a-z][a-z\d+.-]*:\/\/[^/]+)/i)?.[1] ?? '';
+  const origin = entry.match(/^(?:[a-z][a-z\d+.-]*:)?\/\/[^/]+/i)?.[0] ?? '';
   const base =
-    publicPath && publicPath !== 'auto' && publicPath !== '/'
+    publicPath && publicPath !== 'auto'
       ? publicPath
       : entry.slice(0, entry.lastIndexOf('/') + 1);
   if (/^(?:[a-z][a-z\d+.-]*:)?\/\//i.test(base)) {
@@ -438,7 +439,7 @@ export const patchLynxChunkLoading = (
     if (lazyBundlePath) {
       const request = joinRemoteUrl(
         remoteOrigin,
-        webpackRequire.p,
+        webpackRequire.lynx_public_path_auto ? undefined : webpackRequire.p,
         lazyBundlePath,
       );
       promises.push(

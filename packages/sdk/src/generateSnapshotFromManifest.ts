@@ -13,6 +13,7 @@ interface IOptions {
   remotes?: Record<string, string>;
   overrides?: Record<string, string>;
   version?: string;
+  manifestUrl?: string;
 }
 
 export const simpleJoinRemoteEntry = (rPath: string, rName: string): string => {
@@ -62,7 +63,7 @@ export function generateSnapshotFromManifest(
   manifest: Manifest,
   options: IOptions = {},
 ): ProviderModuleInfo {
-  const { remotes = {}, overrides = {}, version } = options;
+  const { remotes = {}, overrides = {}, version, manifestUrl } = options;
   let remoteSnapshot: ProviderModuleInfo;
 
   const getPublicPath = (): string => {
@@ -70,10 +71,10 @@ export function generateSnapshotFromManifest(
       if (
         (manifest.metaData.publicPath === 'auto' ||
           manifest.metaData.publicPath === '') &&
-        version
+        (manifestUrl || version)
       ) {
         // use same implementation as publicPath auto runtime module implements
-        return inferAutoPublicPath(version);
+        return inferAutoPublicPath(manifestUrl || version!);
       }
       return manifest.metaData.publicPath;
     } else {

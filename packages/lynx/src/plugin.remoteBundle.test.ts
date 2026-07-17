@@ -1,379 +1,10 @@
-import { describe, expect, it, rs } from '@rstest/core';
 import { LynxCacheEventsPlugin } from '@lynx-js/cache-events-webpack-plugin';
+import { describe, expect, it, rs } from '@rstest/core';
 
-import {
-  LYNX_RUNTIME_PLUGIN,
-  normalizeLynxExposes,
-  normalizeLynxShared,
-  pluginLynxModuleFederation,
-} from './plugin';
-import type {
-  LynxModuleFederationAdapterOptions,
-  LynxModuleFederationOptions,
-} from './plugin';
+import type { LynxModuleFederationAdapterOptions } from './plugin';
+import { federationOptions, LAYERS, setupPlugin } from './plugin.testUtils';
 
-const LAYERS = {
-  BACKGROUND: 'background',
-  MAIN_THREAD: 'main-thread',
-};
-
-type ModifyRspackConfig = (config: any, context: any) => any;
-type ModifyEnvironmentConfig = (config: any, context: any) => any;
-type ModifyBundlerChain = (chain: any, context: any) => any;
-type ReactResolver = {
-  resolve(request: string): Promise<string>;
-};
-
-const setupPlugin = (
-  options: LynxModuleFederationOptions,
-  adapterOptions?: LynxModuleFederationAdapterOptions,
-  layers: unknown = LAYERS,
-  reactResolver?: ReactResolver,
-) => {
-  let modifyRspackConfig: ModifyRspackConfig | undefined;
-  let modifyEnvironmentConfigCallback: ModifyEnvironmentConfig | undefined;
-  let modifyBundlerChainCallback: ModifyBundlerChain | undefined;
-  const modifyEnvironmentConfig = rs.fn((callback: ModifyEnvironmentConfig) => {
-    modifyEnvironmentConfigCallback = callback;
-  });
-  const plugin = pluginLynxModuleFederation(options, adapterOptions);
-
-  plugin.setup!({
-    modifyEnvironmentConfig,
-    modifyBundlerChain(callback: ModifyBundlerChain) {
-      modifyBundlerChainCallback = callback;
-    },
-    modifyRspackConfig(callback: ModifyRspackConfig) {
-      modifyRspackConfig = callback;
-    },
-    useExposed(symbol: symbol) {
-      if (symbol === Symbol.for('LAYERS')) {
-        return layers;
-      }
-      if (symbol === Symbol.for('@lynx-js/react/internal:resolve')) {
-        return reactResolver;
-      }
-      return undefined;
-    },
-  } as any);
-
-  return {
-    modifyEnvironmentConfig,
-    applyEnvironmentConfig: (config: any, environment = 'lynx') =>
-      modifyEnvironmentConfigCallback!(config, { name: environment }),
-    modifyBundlerChain: (environment = 'lynx') =>
-      modifyBundlerChainCallback!({}, { environment: { name: environment } }),
-    modifyRspackConfig: (config: any, environment = 'lynx') =>
-      modifyRspackConfig!(config, { environment: { name: environment } }),
-  };
-};
-
-const federationOptions = (plugin: unknown) => (plugin as any)._options;
-
-describe('pluginLynxModuleFederation', () => {
-  it('defaults exposes and shared modules to the background layer', () => {
-    expect(
-      normalizeLynxExposes(
-        {
-          './Button': './src/Button',
-          './Card': {
-            import: './src/Card',
-            layer: 'custom-layer',
-          },
-        },
-        LAYERS.BACKGROUND,
-      ),
-    ).toEqual({
-      './Button': { import: './src/Button', layer: LAYERS.BACKGROUND },
-      './Card': { import: './src/Card', layer: 'custom-layer' },
-    });
-
-    expect(
-      normalizeLynxShared(
-        {
-          react: '^19.0.0',
-          '@lynx-js/react': {
-            singleton: true,
-            layer: 'custom-layer',
-          },
-        },
-        LAYERS.BACKGROUND,
-      ),
-    ).toEqual({
-      react: {
-        import: 'react',
-        requiredVersion: '^19.0.0',
-        layer: LAYERS.BACKGROUND,
-        issuerLayer: LAYERS.BACKGROUND,
-      },
-      '@lynx-js/react': {
-        singleton: true,
-        layer: 'custom-layer',
-        issuerLayer: LAYERS.BACKGROUND,
-      },
-    });
-  });
-
-  it('preserves duplicate shared array entries and explicit layers', () => {
-    expect(
-      normalizeLynxShared(
-        [
-          { react: '^19.0.0' },
-          {
-            react: {
-              singleton: true,
-              layer: 'provided-layer',
-              issuerLayer: 'consumer-layer',
-            },
-          },
-        ],
-        LAYERS.BACKGROUND,
-      ),
-    ).toEqual([
-      {
-        react: {
-          import: 'react',
-          requiredVersion: '^19.0.0',
-          layer: LAYERS.BACKGROUND,
-          issuerLayer: LAYERS.BACKGROUND,
-        },
-      },
-      {
-        react: {
-          singleton: true,
-          layer: 'provided-layer',
-          issuerLayer: 'consumer-layer',
-        },
-      },
-    ]);
-  });
-
-  it('installs the Rspack plugin with Lynx output and layer defaults', async () => {
-    const { modifyEnvironmentConfig, modifyRspackConfig } = setupPlugin({
-      name: 'lynx_host',
-      exposes: { './App': './src/App' },
-      runtimePlugins: ['custom-runtime-plugin'],
-    });
-    const config = await modifyRspackConfig({ plugins: [] });
-    const federationPlugin = config.plugins[0];
-
-    expect(config.output).toEqual({
-      chunkLoading: 'lynx',
-      chunkFormat: 'commonjs',
-      iife: false,
-      uniqueName: 'lynx_host',
-    });
-    expect(config.experiments.layers).toBe(true);
-    expect(federationOptions(federationPlugin)).toMatchObject({
-      name: 'lynx_host',
-      filename: 'remoteEntry.js',
-      library: { type: 'commonjs-module' },
-      remoteType: 'script',
-      runtimePlugins: ['custom-runtime-plugin', LYNX_RUNTIME_PLUGIN],
-      exposes: {
-        './App': { import: './src/App', layer: LAYERS.BACKGROUND },
-      },
-    });
-    expect(modifyEnvironmentConfig).toHaveBeenCalledTimes(1);
-  });
-
-  it('keeps unqualified host shares in the background realm', async () => {
-    const { modifyRspackConfig } = setupPlugin(
-      {
-        name: 'lynx_host',
-        remotes: { catalog: 'catalog@catalog.lynx.bundle' },
-        shared: [{ react: '^19.0.0' }, { react: { singleton: true } }],
-        runtimePlugins: ['custom-runtime-plugin'],
-      },
-      {
-        runtimePluginOptions: { timeout: 2_000 },
-      },
-    );
-    const config = await modifyRspackConfig({ plugins: [] });
-
-    expect(config.plugins).toHaveLength(2);
-    expect(federationOptions(config.plugins[0])).toMatchObject({
-      name: 'lynx_host',
-      shareScope: [`default:${LAYERS.BACKGROUND}`],
-      runtimePlugins: [
-        ['custom-runtime-plugin', {}],
-        [LYNX_RUNTIME_PLUGIN, { timeout: 2_000 }],
-      ],
-      shared: [
-        {
-          react: {
-            import: 'react',
-            requiredVersion: '^19.0.0',
-            layer: LAYERS.BACKGROUND,
-            issuerLayer: LAYERS.BACKGROUND,
-            shareScope: [`default:${LAYERS.BACKGROUND}`],
-          },
-        },
-        {
-          react: {
-            singleton: true,
-            layer: LAYERS.BACKGROUND,
-            issuerLayer: LAYERS.BACKGROUND,
-            shareScope: [`default:${LAYERS.BACKGROUND}`],
-          },
-        },
-      ],
-    });
-  });
-
-  it('adds the main-thread share scope only when that realm is enabled', async () => {
-    const { modifyRspackConfig } = setupPlugin(
-      {
-        name: 'lynx_host',
-        shared: { react: { singleton: true } },
-      },
-      { mainThread: true },
-    );
-    const config = await modifyRspackConfig({ plugins: [] });
-
-    expect(federationOptions(config.plugins[0])).toMatchObject({
-      shareScope: [
-        `default:${LAYERS.BACKGROUND}`,
-        `default:${LAYERS.MAIN_THREAD}`,
-      ],
-      shared: [
-        {
-          react: {
-            singleton: true,
-            layer: LAYERS.BACKGROUND,
-            issuerLayer: LAYERS.BACKGROUND,
-            shareScope: [`default:${LAYERS.BACKGROUND}`],
-          },
-        },
-      ],
-    });
-  });
-
-  it('keeps custom compiler layers separate from runtime share scopes', async () => {
-    const customLayer = 'custom-layer';
-    const { modifyRspackConfig } = setupPlugin(
-      {
-        name: 'lynx_host',
-        shared: { state: { singleton: true } },
-      },
-      { layer: customLayer },
-    );
-    const config = await modifyRspackConfig({ plugins: [] });
-
-    expect(federationOptions(config.plugins[0])).toMatchObject({
-      shareScope: [`default:${LAYERS.BACKGROUND}`],
-      shared: [
-        {
-          state: {
-            singleton: true,
-            layer: customLayer,
-            issuerLayer: customLayer,
-            shareScope: [`default:${LAYERS.BACKGROUND}`],
-          },
-        },
-      ],
-    });
-  });
-
-  it('rejects shared modules assigned to a disabled host realm', async () => {
-    const { modifyRspackConfig } = setupPlugin({
-      name: 'lynx_host',
-      shared: {
-        state: { realm: 'main-thread', singleton: true },
-      },
-    });
-
-    await expect(modifyRspackConfig({ plugins: [] })).rejects.toThrow(
-      `shared module "state" uses inactive realm layer "${LAYERS.MAIN_THREAD}"`,
-    );
-  });
-
-  it('maps semantic shared realms to exposed Lynx layers', async () => {
-    const { modifyRspackConfig } = setupPlugin(
-      {
-        name: 'lynx_host',
-        shared: {
-          'main-thread-state': {
-            realm: 'main-thread',
-            singleton: true,
-          },
-        },
-      },
-      { mainThread: true },
-    );
-    const config = await modifyRspackConfig({ plugins: [] });
-
-    expect(federationOptions(config.plugins[0]).shared).toEqual([
-      {
-        'main-thread-state': {
-          singleton: true,
-          layer: LAYERS.MAIN_THREAD,
-          issuerLayer: LAYERS.MAIN_THREAD,
-          shareScope: [`default:${LAYERS.MAIN_THREAD}`],
-        },
-      },
-    ]);
-  });
-
-  it('does not duplicate an explicitly issuer-layered shared entry', async () => {
-    const { modifyRspackConfig } = setupPlugin(
-      {
-        name: 'lynx_host',
-        shared: {
-          react: {
-            layer: LAYERS.MAIN_THREAD,
-            issuerLayer: LAYERS.MAIN_THREAD,
-          },
-        },
-      },
-      { mainThread: true },
-    );
-    const config = await modifyRspackConfig({ plugins: [] });
-
-    expect(federationOptions(config.plugins[0]).shared).toEqual([
-      {
-        react: {
-          layer: LAYERS.MAIN_THREAD,
-          issuerLayer: LAYERS.MAIN_THREAD,
-          shareScope: [`default:${LAYERS.MAIN_THREAD}`],
-        },
-      },
-    ]);
-  });
-
-  it('does not duplicate an explicit entry beside a default shared entry', async () => {
-    const { modifyRspackConfig } = setupPlugin(
-      {
-        name: 'lynx_host',
-        shared: {
-          react: {
-            layer: LAYERS.MAIN_THREAD,
-            issuerLayer: LAYERS.MAIN_THREAD,
-          },
-          lodash: { singleton: true },
-        },
-      },
-      { mainThread: true },
-    );
-    const config = await modifyRspackConfig({ plugins: [] });
-
-    expect(federationOptions(config.plugins[0]).shared).toEqual([
-      {
-        react: {
-          layer: LAYERS.MAIN_THREAD,
-          issuerLayer: LAYERS.MAIN_THREAD,
-          shareScope: [`default:${LAYERS.MAIN_THREAD}`],
-        },
-        lodash: {
-          singleton: true,
-          layer: LAYERS.BACKGROUND,
-          issuerLayer: LAYERS.BACKGROUND,
-          shareScope: [`default:${LAYERS.BACKGROUND}`],
-        },
-      },
-    ]);
-  });
-
+describe('pluginLynxModuleFederation remote bundles', () => {
   it('requires the ReactLynx lazy export condition for split remotes', async () => {
     const resolve = rs.fn(async (request: string) =>
       request === '@lynx-js/react'
@@ -757,6 +388,34 @@ describe('pluginLynxModuleFederation', () => {
     });
   });
 
+  it('inherits a custom top-level share scope for remote bundle shares', async () => {
+    const { modifyRspackConfig } = setupPlugin(
+      {
+        name: 'catalog',
+        exposes: { './data': './src/data' },
+        shareScope: 'application',
+        shared: { state: { singleton: true } },
+      },
+      { remoteBundle: { target: 'lynx', chunking: 'single' } },
+    );
+    const config = await modifyRspackConfig({ plugins: [] });
+    const remoteOptions = federationOptions(config.plugins[0]);
+
+    expect(remoteOptions.shareScope).toEqual([
+      `application:${LAYERS.BACKGROUND}`,
+    ]);
+    expect(remoteOptions.shared).toEqual([
+      {
+        state: {
+          singleton: true,
+          layer: LAYERS.BACKGROUND,
+          issuerLayer: LAYERS.BACKGROUND,
+          shareScope: [`application:${LAYERS.BACKGROUND}`],
+        },
+      },
+    ]);
+  });
+
   it('keeps native single bundles background-only', async () => {
     const { modifyRspackConfig } = setupPlugin(
       {
@@ -830,6 +489,42 @@ describe('pluginLynxModuleFederation', () => {
     });
     expect(config.plugins).toHaveLength(5);
   });
+
+  it.each([
+    ['catalog', 'catalog'],
+    ['@scope/catalog', '@scope_catalog'],
+    ['teams\\catalog', 'teams_catalog'],
+    ['catalog?blue', 'catalog_blue'],
+    ['catalog#blue', 'catalog_blue'],
+    ['teams:catalog', 'teams_catalog'],
+    ['CON', '_CON'],
+  ])(
+    'derives safe remote bundle artifacts from federation name %s',
+    async (name, outputName) => {
+      const { modifyRspackConfig } = setupPlugin(
+        { name, exposes: { './Card': './src/Card' } },
+        { remoteBundle: { target: 'web' } },
+      );
+      const config = await modifyRspackConfig({ plugins: [] });
+      const remoteOptions = federationOptions(config.plugins[0]);
+      const encoder = config.plugins.find(
+        (plugin: any) => plugin.options?.bundleFileName,
+      ) as any;
+
+      expect(remoteOptions).toMatchObject({
+        name,
+        filename: `${outputName}.js`,
+      });
+      expect(encoder.options).toMatchObject({
+        bundleFileName: `${outputName}.lynx.bundle`,
+        entryAssets: [`${outputName}.js`, `${outputName}__main-thread.js`],
+        includedChunkPrefixes: [
+          `${outputName}__background_`,
+          `${outputName}__main-thread__`,
+        ],
+      });
+    },
+  );
 
   it('rejects nested remote bundle filenames', async () => {
     const { modifyRspackConfig } = setupPlugin(
@@ -987,34 +682,6 @@ describe('pluginLynxModuleFederation', () => {
 
     await expect(modifyRspackConfig({ plugins: [] })).rejects.toThrow(
       'requires `library.type: "commonjs-module"`',
-    );
-  });
-
-  it('only applies to configured environments', async () => {
-    const { applyEnvironmentConfig, modifyRspackConfig } = setupPlugin(
-      { name: 'lynx_host' },
-      { environment: 'lynx' },
-    );
-    const config = { plugins: [] };
-    const environmentConfig = { source: { include: [] } };
-
-    expect(await modifyRspackConfig(config, 'web')).toBe(config);
-    expect(config.plugins).toHaveLength(0);
-    expect(applyEnvironmentConfig(environmentConfig, 'web')).toBe(
-      environmentConfig,
-    );
-    expect(environmentConfig.source.include).toEqual([]);
-  });
-
-  it('fails clearly when the Lynx DSL exposes invalid layers', async () => {
-    const { modifyRspackConfig } = setupPlugin(
-      { name: 'lynx_host' },
-      undefined,
-      { BACKGROUND: 'background' },
-    );
-
-    await expect(modifyRspackConfig({})).rejects.toThrow(
-      'distinct string `BACKGROUND` and `MAIN_THREAD` values',
     );
   });
 });

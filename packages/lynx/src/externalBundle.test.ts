@@ -18,6 +18,10 @@ const setupPlugin = (
     'async/Card.hash.bundle',
     'async/Nested.hash.bundle',
   ]),
+  lazyBundleAssetByExpose = new Map([
+    ['./Card', 'async/Card.hash.bundle'],
+    ['./Nested', 'async/Nested.hash.bundle'],
+  ]),
 ) => {
   const encode = rs.fn(async () => ({ buffer: Buffer.from('external') }));
   const discardedTemplateAssets = new Set(['bootstrap.bundle']);
@@ -32,7 +36,13 @@ const setupPlugin = (
     encode,
     entryAssets: ['catalog.js'],
     entryName: 'catalog',
+    entrySectionNames: new Map([['catalog.js', 'catalog_global']]),
+    exposeByExpectedLazyBundleChunk: new Map([
+      ['catalog__background_Card', './Card'],
+      ['catalog__background_Nested', './Nested'],
+    ]),
     includedChunkPrefixes: ['catalog__background_', 'catalog__main-thread__'],
+    lazyBundleAssetByExpose,
     lazyBundleAssets,
     pairedBundleChunks: ['catalog__main-thread.js'],
     preservedAssets: ['mf-manifest.json', 'mf-stats.json'],
@@ -108,6 +118,7 @@ const createCompilation = (sourceAssets: TestAsset[]) => {
     ]),
     chunks: [remoteChunk, nestedChunk],
     getAssets: () => assets,
+    getAsset: (name: string) => assets.find((asset) => asset.name === name),
     deleteAsset,
     emitAsset,
     hooks: {
@@ -162,7 +173,7 @@ describe('Lynx external bundle', () => {
     const encodeOptions = encode.mock.calls[0][0] as any;
     expect(encodeOptions.compilerOptions.targetSdkVersion).toBe('3.7');
     expect(Object.keys(encodeOptions.customSections).sort()).toEqual([
-      'catalog',
+      'catalog_global',
       'runtime',
     ]);
     expect(harness.names()).toEqual([
@@ -176,14 +187,31 @@ describe('Lynx external bundle', () => {
     ]);
   });
 
-  it('rejects split builds without ReactLynx lazy bundles', async () => {
-    const { onCompilation, onEmit } = setupPlugin('split', new Set());
+  it('rejects split builds when any expose lacks a ReactLynx lazy bundle', async () => {
+    const { onCompilation, onEmit } = setupPlugin(
+      'split',
+      new Set(['async/Card.hash.bundle']),
+      new Map([['./Card', 'async/Card.hash.bundle']]),
+    );
     const harness = createCompilation(sourceAssets);
     onCompilation()(harness.compilation);
     harness.snapshot();
+    harness.replaceAssets([createAsset('async/Card.hash.bundle')]);
 
     await expect(onEmit()(harness.compilation)).rejects.toThrow(
-      'no matching lazy bundle assets were produced',
+      'missing bundles for "./Nested"',
+    );
+  });
+
+  it('rejects tracked lazy bundles that are missing from the compilation', async () => {
+    const { onCompilation, onEmit } = setupPlugin('split');
+    const harness = createCompilation(sourceAssets);
+    onCompilation()(harness.compilation);
+    harness.snapshot();
+    harness.replaceAssets([createAsset('async/Card.hash.bundle')]);
+
+    await expect(onEmit()(harness.compilation)).rejects.toThrow(
+      'missing bundles for "./Nested"',
     );
   });
 
@@ -209,7 +237,7 @@ describe('Lynx external bundle', () => {
       'async/catalog__background_Card:CSS',
       'async/nested-feature',
       'async/nested-feature:CSS',
-      'catalog',
+      'catalog_global',
       'runtime',
     ]);
     expect(

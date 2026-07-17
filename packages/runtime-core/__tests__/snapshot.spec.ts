@@ -46,4 +46,56 @@ describe('snapshot', () => {
       },
     });
   });
+
+  it('infers an auto public path from the fetched manifest URL', async () => {
+    const manifestUrl = '/remote-web/mf-manifest.json';
+    const resolvedManifestUrl =
+      'https://example.test/remote-web/mf-manifest.json';
+    const response = new Response(
+      JSON.stringify({
+        id: 'catalog',
+        name: 'catalog',
+        metaData: {
+          name: 'catalog',
+          publicPath: 'auto',
+          type: 'app',
+          buildInfo: { buildVersion: '1.0.0' },
+          remoteEntry: {
+            name: 'catalog.web.lynx.bundle',
+            path: '',
+            type: 'global',
+          },
+          types: { name: '', path: '' },
+          globalName: 'catalog',
+        },
+        remotes: [],
+        shared: [],
+        exposes: [],
+      }),
+      { headers: { 'Content-Type': 'application/json' } },
+    );
+    Object.defineProperty(response, 'url', { value: resolvedManifestUrl });
+
+    const instance = new ModuleFederation({
+      name: 'host',
+      remotes: [{ name: 'catalog', entry: manifestUrl }],
+      plugins: [
+        {
+          name: 'resolved-manifest-fetch',
+          fetch: async () => response,
+        },
+      ],
+    });
+
+    const { remoteSnapshot } =
+      await instance.snapshotHandler.loadRemoteSnapshotInfo({
+        moduleInfo: { name: 'catalog', entry: manifestUrl },
+      });
+
+    expect(remoteSnapshot).toMatchObject({
+      version: manifestUrl,
+      publicPath: 'https://example.test/remote-web/',
+      remoteEntry: 'catalog.web.lynx.bundle',
+    });
+  });
 });

@@ -59,6 +59,7 @@ jobs:
         with:
           name: lynx-native-ios-input
           path: |
+            apps/lynx-module-federation-demo/dist/catalog-native/
             apps/lynx-module-federation-demo/dist/host-native/
             apps/lynx-module-federation-demo/dist/remote-native/
           if-no-files-found: error
@@ -74,6 +75,8 @@ jobs:
           name: lynx-module-federation-e2e-failure
           path: |
             apps/lynx-module-federation-demo/test/real-web/artifacts/
+            apps/lynx-module-federation-demo/dist/catalog-native/
+            apps/lynx-module-federation-demo/dist/catalog-web/
             apps/lynx-module-federation-demo/dist/host-native/
             apps/lynx-module-federation-demo/dist/remote-native/
             apps/lynx-module-federation-demo/dist/host-web/

@@ -45,6 +45,23 @@ describe('generateSnapshotFromManifest', () => {
     expect(remoteSnapshot.publicPath).toBe('http://localhost:2006/ssr/');
   });
 
+  it('infers publicPath from a resolved manifest url without changing version', () => {
+    const manifestWithAutoPublicPath = JSON.parse(
+      JSON.stringify(manifest.devAppManifest),
+    );
+    manifestWithAutoPublicPath.metaData.publicPath = 'auto';
+    const remoteSnapshot = generateSnapshotFromManifest(
+      manifestWithAutoPublicPath,
+      {
+        version: '/remote-web/mf-manifest.json',
+        manifestUrl: 'https://example.test/remote-web/mf-manifest.json',
+      },
+    );
+
+    expect(remoteSnapshot.version).toBe('/remote-web/mf-manifest.json');
+    expect(remoteSnapshot.publicPath).toBe('https://example.test/remote-web/');
+  });
+
   it('return basic app snapshot with only manifest params in dev with getPublicPath', () => {
     const remoteSnapshot = generateSnapshotFromManifest(
       manifest.devAppManifestWithGetPublicPath,

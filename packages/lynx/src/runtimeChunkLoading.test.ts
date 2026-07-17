@@ -686,7 +686,7 @@ describe('patchLynxChunkLoading', () => {
       'async/Card.bundle',
       'https://cdn.example/remotes/async/Card.bundle',
     ],
-    ['/', 'async/Card.bundle', 'https://cdn.example/remotes/async/Card.bundle'],
+    ['/', 'async/Card.bundle', 'https://cdn.example/async/Card.bundle'],
     [
       'assets/',
       'async/Card.bundle',
@@ -699,9 +699,19 @@ describe('patchLynxChunkLoading', () => {
       'https://assets.example/v3/async/Card.bundle',
     ],
     [
+      'http://assets.example/v4/',
+      'async/Card.bundle',
+      'http://assets.example/v4/async/Card.bundle',
+    ],
+    [
       '/ignored/',
       'https://assets.example/Card.bundle',
       'https://assets.example/Card.bundle',
+    ],
+    [
+      '/ignored/',
+      'http://assets.example/Card.bundle',
+      'http://assets.example/Card.bundle',
     ],
   ])(
     'resolves split public path %s against the manifest entry',
@@ -732,6 +742,63 @@ describe('patchLynxChunkLoading', () => {
       expect(loadLazyBundle).toHaveBeenCalledWith(expected);
     },
   );
+
+  it('uses the manifest entry directory when Webpack auto-detects the Lynx Web client path', async () => {
+    const webpackRequire = createWebpackRequire();
+    webpackRequire.lynx_aci = { feature: 'async/Card.bundle' };
+    webpackRequire.lynx_public_path_auto = true;
+    webpackRequire.p =
+      'http://host.example/node_modules/@lynx-js/web-core/dist/client_prod/static/js/';
+    const loadLazyBundle = rs.fn(async () => ({
+      ids: ['feature'],
+      modules: {},
+    }));
+    const globalObject = {
+      lynx: { loadLazyBundle, loadScript: rs.fn() },
+      [LYNX_BUNDLE_REGISTRY]: new Map([
+        ['remote', 'lynx-cache://catalog'],
+        [
+          'remote:remote-origin',
+          'https://cdn.example/remotes/catalog.lynx.bundle',
+        ],
+      ]),
+    };
+
+    patchLynxChunkLoading(webpackRequire, 'remote', globalObject);
+    const promises: Promise<unknown>[] = [];
+    webpackRequire.f.j!('feature', promises);
+    await Promise.all(promises);
+
+    expect(loadLazyBundle).toHaveBeenCalledWith(
+      'https://cdn.example/remotes/async/Card.bundle',
+    );
+  });
+
+  it('preserves a protocol-relative remote origin for root public paths', async () => {
+    const webpackRequire = createWebpackRequire();
+    webpackRequire.lynx_aci = { feature: 'async/Card.bundle' };
+    webpackRequire.p = '/';
+    const loadLazyBundle = rs.fn(async () => ({
+      ids: ['feature'],
+      modules: {},
+    }));
+    const globalObject = {
+      lynx: { loadLazyBundle, loadScript: rs.fn() },
+      [LYNX_BUNDLE_REGISTRY]: new Map([
+        ['remote', 'lynx-cache://catalog'],
+        ['remote:remote-origin', '//cdn.example/remotes/catalog.lynx.bundle'],
+      ]),
+    };
+
+    patchLynxChunkLoading(webpackRequire, 'remote', globalObject);
+    const promises: Promise<unknown>[] = [];
+    webpackRequire.f.j!('feature', promises);
+    await Promise.all(promises);
+
+    expect(loadLazyBundle).toHaveBeenCalledWith(
+      '//cdn.example/async/Card.bundle',
+    );
+  });
 
   it('preserves the original chunk handler without a registered bundle', () => {
     const originalHandler = rs.fn();

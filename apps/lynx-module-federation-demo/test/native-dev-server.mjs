@@ -54,22 +54,22 @@ const fetchReady = async (url, timeout = 30_000) => {
   );
 };
 
-try {
-  const remoteBuild = spawnSync(
+const build = (config, label) => {
+  const result = spawnSync(
     process.execPath,
-    [
-      'rspack-canary-rspeedy.mjs',
-      'build',
-      '-c',
-      'lynx.remote.native.config.mjs',
-    ],
+    ['rspack-canary-rspeedy.mjs', 'build', '-c', config],
     { cwd: appRoot, encoding: 'utf8', env: devEnvironment },
   );
   assert.equal(
-    remoteBuild.status,
+    result.status,
     0,
-    `Native remote rebuild failed:\n${remoteBuild.stdout}\n${remoteBuild.stderr}`,
+    `${label} failed:\n${result.stdout}\n${result.stderr}`,
   );
+};
+
+try {
+  build('lynx.remote.native.config.mjs', 'Native remote rebuild');
+  build('lynx.catalog.native.config.mjs', 'Native Catalog rebuild');
   child = spawn(
     process.execPath,
     ['rspack-canary-rspeedy.mjs', 'dev', '-c', 'lynx.config.mjs'],
@@ -83,17 +83,26 @@ try {
   child.stderr.on('data', (chunk) => output.push(chunk.toString()));
 
   await fetchReady(`${origin}/main.lynx.bundle`);
+  await fetchReady(`${origin}/catalog-native/main.lynx.bundle`);
+  const startupFiles = (
+    await readdir(path.join(appRoot, 'dist/host-native/static/js/async'))
+  ).filter((name) => name.endsWith('.js'));
+  assert.ok(startupFiles.length > 0);
+  await Promise.all(
+    startupFiles.map((name) => fetchReady(`${origin}/static/js/async/${name}`)),
+  );
   const manifestResponse = await fetchReady(
     `${origin}/remote-native/mf-manifest.json`,
   );
   const manifest = await manifestResponse.json();
-  assert.equal(manifest.metaData.publicPath, `${origin}/remote-native/`);
+  assert.equal(manifest.metaData.publicPath, 'auto');
   const remoteEntry = manifest.metaData.remoteEntry;
+  const remoteBase =
+    manifest.metaData.publicPath === 'auto'
+      ? new URL('.', manifestResponse.url)
+      : new URL(manifest.metaData.publicPath, manifestResponse.url);
   await fetchReady(
-    new URL(
-      `${remoteEntry.path}${remoteEntry.name}`,
-      manifest.metaData.publicPath,
-    ),
+    new URL(`${remoteEntry.path}${remoteEntry.name}`, remoteBase),
   );
 
   const lazyFiles = await readdir(
@@ -107,7 +116,7 @@ try {
     ),
   );
   process.stdout.write(
-    `Native Rspeedy dev server served host, manifest, container, and ${lazyBundles.length} lazy bundles.\n`,
+    `Native Rspeedy dev server served host, async startup, standalone Catalog, manifest, container, and ${lazyBundles.length} lazy bundles.\n`,
   );
 } finally {
   if (child) {

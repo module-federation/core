@@ -1,34 +1,27 @@
 import { pluginReactLynx } from '@lynx-js/react-rsbuild-plugin';
 import { defineConfig } from '@lynx-js/rspeedy';
 
-import {
-  createWebRemoteFederationPlugin,
-  resolveAliases,
-} from './federation.config.mjs';
+import { resolveAliases } from './federation.config.mjs';
 
 export default defineConfig({
-  plugins: [
-    pluginReactLynx({
-      defaultDisplayLinear: false,
-      experimental_isLazyBundle: true,
-    }),
-    createWebRemoteFederationPlugin(),
-  ],
+  plugins: [pluginReactLynx({ defaultDisplayLinear: false })],
   source: {
     entry: {
-      bootstrap: './src/remote-ui/bootstrap.ts',
+      main: './src/catalog-app/index.tsx',
     },
   },
   environments: {
     web: {},
   },
   output: {
-    assetPrefix: 'auto',
     cleanDistPath: false,
     distPath: {
-      root: 'dist/remote-web',
+      root: 'dist/catalog-web',
     },
     minify: false,
+  },
+  server: {
+    port: Number(process.env.CATALOG_DEV_PORT ?? 3001),
   },
   resolve: {
     alias: resolveAliases,

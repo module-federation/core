@@ -63,6 +63,7 @@ describe('Lynx chunk-loading matcher', () => {
     const addRuntimeModule = rs.fn();
     const discardedTemplateAssets = new Set(['stale-template.bundle']);
     const lazyBundleAssets = new Set(['stale-lazy.bundle']);
+    const lazyBundleAssetByExpose = new Map([['./stale', 'stale-lazy.bundle']]);
 
     class RuntimeModule {
       static STAGE_TRIGGER = 20;
@@ -142,11 +143,17 @@ describe('Lynx chunk-loading matcher', () => {
         },
       },
       {
+        autoPublicPath: true,
         backgroundOnlyRemote: true,
         chunking: 'split',
         discardSourceEntryBundles: true,
         discardedTemplateAssets,
+        exposeByExpectedLazyBundleChunk: new Map([
+          ['catalog__background_Card', './Card'],
+          ['catalog__background_Details', './Details'],
+        ]),
         includedChunkPrefixes: ['catalog__background_'],
+        lazyBundleAssetByExpose,
         lazyBundleAssets,
         remoteEntryName: 'remote',
         pairedRealmChunkPrefixes: {
@@ -162,6 +169,7 @@ describe('Lynx chunk-loading matcher', () => {
     onCompilation!(compilation);
     expect(discardedTemplateAssets.size).toBe(0);
     expect(lazyBundleAssets.size).toBe(0);
+    expect(lazyBundleAssetByExpose.size).toBe(0);
     addMatcher!(entryChunk);
 
     const cardArgs = {
@@ -185,7 +193,10 @@ describe('Lynx chunk-loading matcher', () => {
       finalEncodeOptions: {
         sourceContent: { appType: 'DynamicComponent' },
       },
-      entryNames: ['remote-react__background'],
+      entryNames: [
+        'catalog__background_Card-react__background',
+        'catalog__main-thread__Card-react__main-thread',
+      ],
       outputName: 'async/catalog__background_Card.hash.bundle',
     };
     expect(beforeEmit!(lazyArgs)).toBe(lazyArgs);
@@ -207,6 +218,9 @@ describe('Lynx chunk-loading matcher', () => {
         'async/nested-feature.bundle',
       ]),
     );
+    expect(lazyBundleAssetByExpose).toEqual(
+      new Map([['./Card', 'async/catalog__background_Card.hash.bundle']]),
+    );
     expect(discardedTemplateAssets).toEqual(new Set(['bootstrap.lynx.bundle']));
 
     expect(addRuntimeModule).toHaveBeenCalledTimes(2);
@@ -218,6 +232,9 @@ describe('Lynx chunk-loading matcher', () => {
 
     expect(source).toContain('"802":1');
     expect(source).toContain('__webpack_require__.lynx_chunking = "split"');
+    expect(source).toContain(
+      '__webpack_require__.lynx_public_path_auto = true',
+    );
     expect(source).toContain('"456":1');
     expect(source).not.toContain('"123":1');
     expect(source).not.toContain('"host":1');

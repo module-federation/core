@@ -24,6 +24,8 @@ const [
   podfileLock,
   provenance,
   fetcher,
+  fetcherHeader,
+  viewController,
   releaseInfo,
   debugInfo,
   project,
@@ -31,11 +33,14 @@ const [
   appSource,
   packageJson,
   deviceServer,
+  syncScript,
 ] = await Promise.all([
   read('ios/Podfile'),
   read('ios/Podfile.lock'),
   read('ios/UPSTREAM.md'),
   read('ios/OrbitControl/OrbitResourceFetcher.m'),
+  read('ios/OrbitControl/OrbitResourceFetcher.h'),
+  read('ios/OrbitControl/ViewController.swift'),
   read('ios/OrbitControl/Info.plist'),
   read('ios/OrbitControl/Info.Debug.plist'),
   read('ios/OrbitControl.xcodeproj/project.pbxproj'),
@@ -43,6 +48,7 @@ const [
   read('src/app/App.tsx'),
   read('package.json'),
   read('scripts/dev-ios-device.mjs'),
+  read('scripts/sync-ios-bundle.mjs'),
 ]);
 
 for (const pod of ['Lynx', 'LynxService', 'XElement']) {
@@ -65,6 +71,10 @@ assert.match(fetcher, /totalBytesWritten > .*OrbitResourceResponseByteLimit/);
 assert.match(fetcher, /\[downloadTask cancel\]/);
 assert.match(fetcher, /timeoutIntervalForResource = 60/);
 assert.match(fetcher, /URLByResolvingSymlinksInPath/);
+assert.match(fetcher, /resolvedURLString/);
+assert.match(fetcher, /relativeToURL:self\.rootBundleURL/);
+assert.match(fetcher, /hasPrefix:@"\/static\/"/);
+assert.match(fetcher, /relativePath = \[urlString substringFromIndex:1\]/);
 assert.doesNotMatch(releaseInfo, /NSAllowsArbitraryLoads/);
 assert.doesNotMatch(releaseInfo, /NSExceptionAllowsInsecureHTTPLoads/);
 assert.match(debugInfo, /NSAllowsLocalNetworking/);
@@ -73,8 +83,14 @@ assert.match(debugInfo, /<key>localhost<\/key>/);
 assert.doesNotMatch(debugInfo, /NSAllowsArbitraryLoads/);
 assert.doesNotMatch(project, /DEVELOPMENT_TEAM/);
 assert.match(project, /OrbitControlUITests/);
+assert.match(project, /static in Resources/);
 assert.match(uiTest, /matching\(identifier: "federation-ready"\)/);
 assert.match(appSource, /accessibilityId: 'federation-ready'/);
+assert.match(fetcherHeader, /initWithRootBundleURL/);
+assert.match(
+  viewController,
+  /OrbitResourceFetcher\(\s*rootBundleURL: rootBundleURL\s*\)/,
+);
 assert.match(
   appSource,
   /ios-platform-accessibility-id=\{status\.accessibilityId\}/,
@@ -83,6 +99,9 @@ assert.match(uiTest, /testEmbeddedReleaseHostLaunches/);
 assert.match(packageJson, /"ios:device": "node scripts\/dev-ios-device\.mjs"/);
 assert.match(deviceServer, /LYNX_DEV_HOST: '0\.0\.0\.0'/);
 assert.match(deviceServer, /not a loopback or unspecified address/);
+assert.match(syncScript, /dist\/host-native\/main\.lynx\.bundle/);
+assert.match(syncScript, /sourceStatic/);
+assert.match(syncScript, /cp\(sourceStatic, destinationStatic/);
 const deviceServerPath = path.join(appRoot, 'scripts/dev-ios-device.mjs');
 const validateDeviceOrigin = (origin) =>
   spawnSync(process.execPath, [deviceServerPath, '--check-origin'], {

@@ -711,7 +711,7 @@ export class RemoteHandler {
       delete CurrentGlobal.__FEDERATION__.moduleInfo[globalSnapshotKey];
 
       if ('entry' in remote) {
-        host.snapshotHandler.manifestCache.delete(remote.entry);
+        host.snapshotHandler.clearManifestCache(remote.entry);
         delete Global.__FEDERATION__.__MANIFEST_LOADING__[remote.entry];
       }
 

@@ -6,7 +6,11 @@ export const LYNX_BUNDLE_REGISTRY = Symbol.for(
 
 export const LYNX_REMOTE_ORIGIN_SUFFIX = ':remote-origin';
 
+export type LynxRealm = 'background' | 'main-thread';
+
 export interface LynxRuntimePluginOptions {
+  /** Resolved DSL layer names injected by the build adapter. */
+  realmLayers?: Record<LynxRealm, string>;
   timeout?: number;
 }
 
@@ -56,8 +60,6 @@ export const getLynxRuntime = (
 ): LynxRuntime | undefined =>
   globalObject.lynx ?? (typeof lynx === 'undefined' ? undefined : lynx);
 
-export type LynxRealm = 'background' | 'main-thread';
-
 export const MAIN_THREAD_EXPOSE_SUFFIX = '__main_thread';
 
 export const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -71,25 +73,59 @@ const isRemoteEntryExports = (value: unknown): value is RemoteEntryExports =>
 const getDefaultExport = (value: unknown): unknown =>
   isRecord(value) ? value.default : undefined;
 
-export const findRemoteEntryExports = (
-  value: unknown,
+const getRemoteEntryGlobalCandidates = (
   entryGlobalName: string,
   globalObject: LynxGlobal,
   alternateGlobalName?: string,
-): RemoteEntryExports | undefined => {
+): unknown[] => {
   const globalValue = globalObject[entryGlobalName];
   const alternateGlobalValue = alternateGlobalName
     ? globalObject[alternateGlobalName]
     : undefined;
 
   return [
-    value,
-    getDefaultExport(value),
     globalValue,
     getDefaultExport(globalValue),
     alternateGlobalValue,
     getDefaultExport(alternateGlobalValue),
-  ].find(isRemoteEntryExports);
+  ];
+};
+
+export const snapshotRemoteEntryGlobals = (
+  entryGlobalName: string,
+  globalObject: LynxGlobal,
+  alternateGlobalName?: string,
+): ReadonlySet<RemoteEntryExports> =>
+  new Set(
+    getRemoteEntryGlobalCandidates(
+      entryGlobalName,
+      globalObject,
+      alternateGlobalName,
+    ).filter(isRemoteEntryExports),
+  );
+
+export const findRemoteEntryExports = (
+  value: unknown,
+  entryGlobalName: string,
+  globalObject: LynxGlobal,
+  alternateGlobalName?: string,
+  previousGlobalExports: ReadonlySet<RemoteEntryExports> = new Set(),
+): RemoteEntryExports | undefined => {
+  const loadedExports = [value, getDefaultExport(value)].find(
+    isRemoteEntryExports,
+  );
+  if (loadedExports) {
+    return loadedExports;
+  }
+
+  return getRemoteEntryGlobalCandidates(
+    entryGlobalName,
+    globalObject,
+    alternateGlobalName,
+  ).find(
+    (candidate): candidate is RemoteEntryExports =>
+      isRemoteEntryExports(candidate) && !previousGlobalExports.has(candidate),
+  );
 };
 
 export const getLynxRealm = (lynx: LynxRuntime): LynxRealm =>

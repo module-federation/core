@@ -23,4 +23,7 @@ lynxView.addEventListener('timing', (event) => {
 });
 
 document.body.append(lynxView);
-lynxView.setAttribute('url', '/dist/host-web/main.web.bundle');
+const bundleUrl =
+  new URL(location.href).searchParams.get('bundle') ??
+  '/dist/host-web/main.web.bundle';
+lynxView.setAttribute('url', bundleUrl);

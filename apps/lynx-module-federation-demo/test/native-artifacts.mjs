@@ -10,6 +10,10 @@ const requireFromAdapter = createRequire(
 );
 const { decode_napi: decodeTemplate } = requireFromAdapter('@lynx-js/tasm');
 const hostBundlePath = path.join(appRoot, 'dist/host-native/main.lynx.bundle');
+const standaloneBundlePath = path.join(
+  appRoot,
+  'dist/catalog-native/main.lynx.bundle',
+);
 const remoteBundlePath = path.join(
   appRoot,
   'dist/remote-native/catalog.native.lynx.bundle',
@@ -22,34 +26,67 @@ const remoteStatsPath = path.join(appRoot, 'dist/remote-native/mf-stats.json');
 
 const [
   hostBundle,
+  standaloneBundle,
   remoteBundle,
   manifestSource,
   statsSource,
   remoteFiles,
   lazyFiles,
+  startupFiles,
 ] = await Promise.all([
   stat(hostBundlePath),
+  stat(standaloneBundlePath),
   stat(remoteBundlePath),
   readFile(remoteManifestPath, 'utf8'),
   readFile(remoteStatsPath, 'utf8'),
   readdir(path.join(appRoot, 'dist/remote-native')),
   readdir(path.join(appRoot, 'dist/remote-native/async')),
+  readdir(path.join(appRoot, 'dist/host-native/static/js/async')),
 ]);
 
 assert.ok(hostBundle.isFile() && hostBundle.size > 1_000, hostBundlePath);
+assert.ok(
+  standaloneBundle.isFile() && standaloneBundle.size > 1_000,
+  standaloneBundlePath,
+);
 assert.ok(remoteBundle.isFile() && remoteBundle.size > 1_000, remoteBundlePath);
 assert.ok(!remoteFiles.includes('bootstrap.lynx.bundle'));
+assert.ok(!remoteFiles.includes('main.lynx.bundle'));
 assert.equal(lazyFiles.filter((name) => name.endsWith('.bundle')).length, 3);
+const startupScripts = startupFiles.filter((name) => name.endsWith('.js'));
+assert.ok(startupScripts.length > 0);
+const startupSources = await Promise.all(
+  startupScripts.map((name) =>
+    readFile(
+      path.join(appRoot, 'dist/host-native/static/js/async', name),
+      'utf8',
+    ),
+  ),
+);
+assert.ok(
+  startupSources.some(
+    (source) => /orbit-.*Date\.now/.test(source) && /increment/.test(source),
+  ),
+  'async startup assets do not contain the host shared-state provider',
+);
 
-const [hostTemplate, remoteTemplate] = await Promise.all([
-  readFile(hostBundlePath).then(decodeTemplate),
-  readFile(remoteBundlePath).then(decodeTemplate),
-]);
+const [hostBundleSource, standaloneSource, remoteBundleSource] =
+  await Promise.all([
+    readFile(hostBundlePath),
+    readFile(standaloneBundlePath),
+    readFile(remoteBundlePath),
+  ]);
+const hostTemplate = decodeTemplate(hostBundleSource);
+const standaloneTemplate = decodeTemplate(standaloneSource);
+const remoteTemplate = decodeTemplate(remoteBundleSource);
+assert.equal(standaloneTemplate['app-type'], 'card');
+assert.ok(standaloneSource.includes(Buffer.from('catalog-standalone-app')));
 assert.equal(remoteTemplate['app-type'], 'DynamicComponent');
 assert.equal(remoteTemplate['engine-version'], '3.7');
 assert.deepEqual(Object.keys(remoteTemplate['custom-sections']), ['catalog']);
 const containerSource = remoteTemplate['custom-sections'].catalog;
 assert.match(containerSource, /lynx_chunking/);
+assert.match(containerSource, /lynx_public_path_auto/);
 assert.match(containerSource, /split/);
 for (const implementationText of [
   'Increment from remote',
@@ -81,6 +118,8 @@ assert.ok(
   !hostBackgroundSource.includes('"default:react:main-thread"'),
   'background-only native host initializes the main-thread share scope',
 );
+assert.match(hostBackgroundSource, /mfAsyncStartup/);
+assert.match(hostBackgroundSource, /static\/js\/async\//);
 for (const request of [
   'catalog/ActivityFeed',
   'catalog/Card',
@@ -92,6 +131,7 @@ for (const request of [
 const manifest = JSON.parse(manifestSource);
 const stats = JSON.parse(statsSource);
 assert.equal(manifest.metaData?.name, 'catalog');
+assert.equal(manifest.metaData?.publicPath, 'auto');
 assert.deepEqual(manifest.metaData?.remoteEntry, {
   name: 'catalog.native.lynx.bundle',
   path: '',
@@ -173,6 +213,7 @@ for (const shared of manifest.shared) {
   assert.equal(shared.layer, 'react:background', shared.name);
   assert.deepEqual(shared.shareScope, ['default:react:background']);
   assert.equal(shared.singleton, true, shared.name);
+  assert.notEqual(shared.eager, true, shared.name);
 }
 assert.deepEqual(
   stats.shared.map(({ name }) => name),
@@ -187,4 +228,6 @@ assert.ok(
   'no expose records its shared-state dependency',
 );
 
-console.log('Native Lynx host and federation remote artifacts verified.');
+console.log(
+  'Native Lynx host, standalone Catalog, and federation artifacts verified.',
+);

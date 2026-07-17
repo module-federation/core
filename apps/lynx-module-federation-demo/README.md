@@ -5,6 +5,7 @@ simulation. It includes:
 
 - a standalone UIKit iOS application derived from Lynx's official
   `HelloLynxSwift` starter;
+- a runnable Orbit Catalog product for native Lynx and Lynx Web;
 - a native background host with paired ReactLynx remote UI built as
   `.lynx.bundle` artifacts;
 - a Lynx for Web host mounted in the official `<lynx-view>` custom element;
@@ -17,17 +18,58 @@ The remote uses the default split transport:
 
 ```mermaid
 flowchart LR
-  A["Orbit Control host"] -->|"GET"| M["mf-manifest.json"]
+  S["Catalog product source"] --> A["Standalone Catalog app"]
+  S --> E["Federation exposes"]
+  A -->|"direct imports"| X["Card + Details + ActivityFeed"]
+  E --> X
+  H["Orbit Control host"] -->|"GET"| M["mf-manifest.json"]
+  H -->|"asyncStartup"| T["shared-state startup .js"]
   M -->|"remoteEntry"| C["catalog.*.lynx.bundle"]
-  C --> E["container only"]
-  E -->|"on demand"| F["ActivityFeed .bundle"]
-  E -->|"on demand"| G["Card .bundle"]
-  E -->|"on demand"| H["Details .bundle"]
+  C --> R["container only"]
+  R -->|"on demand"| F["ActivityFeed .bundle"]
+  R -->|"on demand"| G["Card .bundle"]
+  R -->|"on demand"| D["Details .bundle"]
 ```
 
 The host never addresses a generated `remoteEntry.js` directly. Both import
 styles resolve the manifest, whose `metaData.remoteEntry` names the public
 `.lynx.bundle` container. Lazy expose bundles are fetched separately.
+Both remote builds use `publicPath: 'auto'`. Module Federation resolves the
+container URL from the manifest; the Lynx runtime plugin uses that resolved URL
+as the base for split lazy bundles instead of relying on a browser
+`document.currentScript`, which points at Lynx Web's internal client.
+
+## Run the standalone Catalog product
+
+The Catalog directly renders `Card`, `Details`, and `ActivityFeed` from the
+same source files published by `federation.config.mjs`. It is a complete app,
+not an artifact placeholder:
+
+```sh
+pnpm dev:catalog:native
+pnpm dev:catalog:web
+```
+
+The native command prints a QR code for Lynx Explorer on port 3001. Production
+builds emit regular root apps at `dist/catalog-native/main.lynx.bundle` and
+`dist/catalog-web/main.web.bundle`.
+
+Catalog app and federation transport are separate Rspeedy builds by design.
+ReactLynx's `experimental_isLazyBundle` mode applies to the whole compilation
+and emits `DynamicComponent` bundles, so the provider build contains only the
+manifest, container, and three lazy exposes. The regular Catalog build bundles
+its local shared-state implementation; the provider marks that implementation
+`import: false`, so Orbit supplies the negotiated singleton and does not
+download Catalog's standalone app or duplicate shared state.
+
+The federation configs explicitly enable `experiments.asyncStartup`. Shared
+modules do not use `eager: true`: the host waits for share-scope initialization
+and loads its singleton provider from `static/js/async/*.js` before application
+startup. The remote's `import: false` consumer then reuses that initialized
+background-realm singleton.
+
+On iOS, root-relative startup paths resolve against an HTTP root bundle's
+origin in Debug and against the signed app bundle for an embedded Release root.
 
 ## Run the standalone iOS app
 
@@ -49,6 +91,11 @@ Run the `OrbitControl` scheme in Xcode. The Debug app loads
 environment variable to a LAN-reachable URL for a physical device. The shell
 injects both Lynx template and generic resource fetchers, so the root Bundle,
 federated container, and Lazy Bundles can arrive over HTTP(S).
+
+The same shell can launch Catalog as an independent native product by setting
+`LYNX_BUNDLE_URL` to `http://localhost:3000/catalog-native/main.lynx.bundle`.
+The iOS E2E launches both root apps, interacts with Catalog locally, then proves
+that Orbit loads those component sources through federation.
 
 For a physical device, use the same LAN origin for both the host bundle and
 the manifest URL compiled into it:
@@ -72,8 +119,9 @@ LYNX_REMOTE_ORIGIN=https://cdn.example.com/catalog/ pnpm build:native
 pnpm ios:sync
 ```
 
-Only the host bundle is embedded. The manifest, container, and lazy expose
-bundles remain separately deployable HTTP(S) artifacts. The iOS simulator E2E
+The host bundle and its non-eager async-startup JS are embedded. The manifest,
+container, and lazy expose bundles remain separately deployable HTTP(S)
+artifacts. The iOS simulator E2E
 launches the app, taps **Load remote catalog**, verifies compiled imports,
 runtime `loadRemote()`, and shared singleton identity, then checks every native
 bundle request observed by the test server. It also launches the Release app
@@ -102,7 +150,9 @@ Explorer on the device and scan it. The phone must be able to reach
 Set `CATALOG_NATIVE_MANIFEST_URL` when the remote manifest is hosted elsewhere.
 
 `e2e:native` is artifact and transport validation. It compiles the real Rspeedy
-host and remote, verifies the background container plus paired main-thread
+host, Catalog app, and remote, verifies the regular standalone root bundle,
+the separately transported async-startup singleton, the background container,
+and paired main-thread
 snapshot bytecode in every lazy UI bundle, checks the manifest's public
 background expose/share metadata, then fetches the host, manifest, container,
 and every lazy bundle over HTTP. The macOS CI job adds a real iOS Simulator
@@ -117,28 +167,33 @@ pnpm exec playwright install chromium
 pnpm e2e:web
 ```
 
-The test builds the official Rspeedy web host and remote, starts an ephemeral
-HTTP server, and mounts `dist/host-web/main.web.bundle` through
+The test builds the official Rspeedy web host, Catalog app, and remote; starts
+an ephemeral HTTP server; and mounts both `dist/host-web/main.web.bundle` and
+`dist/catalog-web/main.web.bundle` through
 `@lynx-js/web-core`'s public `<lynx-view>`. Playwright uses a mobile viewport
 and touch input. It verifies:
 
 - manifest, container, and lazy expose requests over HTTP;
+- async-startup share initialization over its independent JS request;
 - compiled `import()` and runtime `loadRemote()` results;
 - rendering and navigation through the ReactLynx UI;
 - shared-state identity and mutations across host and remote consumers;
+- direct local composition and shared state in the standalone Catalog;
+- no federation requests while Catalog runs through direct imports;
 - no Lynx, page, or console errors.
 
 A failed run writes `test/real-web/artifacts/failure.png`. Override artifact
 paths with `LYNX_HOST_WEB_BUNDLE`, `LYNX_REMOTE_MANIFEST`,
-`LYNX_REMOTE_WEB_BUNDLE`, and `LYNX_WEB_E2E_SCREENSHOT`.
+`LYNX_REMOTE_WEB_BUNDLE`, `LYNX_CATALOG_WEB_BUNDLE`, and
+`LYNX_WEB_E2E_SCREENSHOT`.
 
 ## Test matrix
 
 | Command                 | Evidence                                                         |
 | ----------------------- | ---------------------------------------------------------------- |
-| `pnpm e2e:native`       | Real native Rspeedy builds plus binary/manifest validation       |
-| `pnpm e2e:ios`          | Standalone UIKit app + iOS Simulator federation/runtime E2E      |
-| `pnpm e2e:web`          | Real official `<lynx-view>` browser runtime E2E                  |
+| `pnpm e2e:native`       | Native Catalog + host/provider binary and transport validation   |
+| `pnpm e2e:ios`          | iOS Catalog launch plus Orbit federation/runtime E2E             |
+| `pnpm e2e:web`          | Standalone Catalog and federated Orbit in official `<lynx-view>` |
 | `pnpm test:ios-project` | Cross-platform iOS project, provenance, pod, and ATS policy gate |
 | `pnpm test`             | Cross-platform native artifact and Lynx Web checks               |
 

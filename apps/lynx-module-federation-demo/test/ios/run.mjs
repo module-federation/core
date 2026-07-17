@@ -33,11 +33,20 @@ await mkdir(artifactsRoot, { recursive: true });
 await rm(resultBundlePath, { force: true, recursive: true });
 await rm(releaseResultBundlePath, { force: true, recursive: true });
 await stat(path.join(distRoot, 'host-native/main.lynx.bundle'));
+await stat(path.join(distRoot, 'catalog-native/main.lynx.bundle'));
 await stat(path.join(distRoot, 'remote-native/mf-manifest.json'));
+const startupFiles = (
+  await readdir(path.join(distRoot, 'host-native/static/js/async'))
+).filter((file) => file.endsWith('.js'));
+assert.ok(startupFiles.length > 0);
 const manifest = JSON.parse(
   await readFile(path.join(distRoot, 'remote-native/mf-manifest.json'), 'utf8'),
 );
-const serverURL = new URL(manifest.metaData.publicPath);
+const serverURL = new URL(
+  manifest.metaData.publicPath === 'auto'
+    ? 'http://127.0.0.1:3000/remote-native/'
+    : manifest.metaData.publicPath,
+);
 assert.ok(
   serverURL.hostname === 'localhost' || serverURL.hostname === '127.0.0.1',
   `iOS E2E only serves local artifacts, received ${serverURL.origin}`,
@@ -55,8 +64,11 @@ const server = createServer(async (request, response) => {
       new URL(request.url, 'http://localhost').pathname,
     );
     requestedPaths.push(pathname);
-    const filePath = path.resolve(distRoot, `.${pathname}`);
-    if (!filePath.startsWith(`${distRoot}${path.sep}`)) {
+    const artifactRoot = pathname.startsWith('/static/')
+      ? path.join(distRoot, 'host-native')
+      : distRoot;
+    const filePath = path.resolve(artifactRoot, `.${pathname}`);
+    if (!filePath.startsWith(`${artifactRoot}${path.sep}`)) {
       response.writeHead(403).end('Forbidden');
       return;
     }
@@ -156,10 +168,12 @@ try {
       '-parallel-testing-enabled',
       'NO',
       '-only-testing:OrbitControlUITests/OrbitControlUITests/testFederatedImportsRuntimeLoadingAndSingleton',
+      '-only-testing:OrbitControlUITests/OrbitControlUITests/testStandaloneCatalogRemoteBuildLaunches',
     ],
     {
       env: {
         ...process.env,
+        CATALOG_BUNDLE_URL: `${serverURL.origin}/catalog-native/main.lynx.bundle`,
         LYNX_BUNDLE_URL: `${serverURL.origin}/host-native/main.lynx.bundle`,
       },
     },
@@ -186,11 +200,10 @@ try {
   const remoteEntry = manifest.metaData.remoteEntry;
   const expected = [
     '/host-native/main.lynx.bundle',
+    '/catalog-native/main.lynx.bundle',
+    ...startupFiles.map((file) => `/static/js/async/${file}`),
     '/remote-native/mf-manifest.json',
-    new URL(
-      `${remoteEntry.path}${remoteEntry.name}`,
-      manifest.metaData.publicPath,
-    ).pathname,
+    new URL(`${remoteEntry.path}${remoteEntry.name}`, serverURL).pathname,
   ];
   const lazyFiles = (await readdir(path.join(distRoot, 'remote-native/async')))
     .filter((file) => file.endsWith('.bundle'))
@@ -204,7 +217,7 @@ try {
     );
   }
   process.stdout.write(
-    `Native iOS app loaded the host, manifest, container, and ${lazyFiles.length} lazy bundles.\n`,
+    `Native iOS app launched Orbit and standalone Catalog, then loaded async startup, the manifest, container, and ${lazyFiles.length} lazy bundles.\n`,
   );
 } finally {
   await writeFile(requestLogPath, JSON.stringify(requestedPaths, null, 2));

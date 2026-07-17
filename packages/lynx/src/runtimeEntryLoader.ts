@@ -10,6 +10,7 @@ import {
   getRegistryKey,
   isRecord,
   MAIN_THREAD_EXPOSE_SUFFIX,
+  snapshotRemoteEntryGlobals,
   toErrorMessage,
   type LynxGlobal,
   type LynxRealm,
@@ -68,6 +69,11 @@ export const loadJavaScriptEntry = (
     );
   }
 
+  const previousGlobalExports = snapshotRemoteEntryGlobals(
+    entryGlobalName,
+    globalObject,
+  );
+
   return loadWithTimeout<RemoteEntryExports>(
     timeout,
     `Timed out loading Lynx remote entry "${entryGlobalName}" from "${entry}" after ${timeout}ms.`,
@@ -89,6 +95,8 @@ export const loadJavaScriptEntry = (
           value,
           entryGlobalName,
           globalObject,
+          undefined,
+          previousGlobalExports,
         );
         if (!exports) {
           reject(
@@ -108,6 +116,7 @@ export const loadJavaScriptEntry = (
 const adaptContainerToRealm = (
   container: RemoteEntryExports,
   realm: LynxRealm,
+  realmLayer: string,
 ): RemoteEntryExports => ({
   get: (request) =>
     container.get(
@@ -123,7 +132,7 @@ const adaptContainerToRealm = (
     const shareScopeKeys = options.shareScopeKeys.filter(
       (value): value is string => typeof value === 'string',
     );
-    const realmSuffix = realm === 'background' ? ':background' : ':main-thread';
+    const realmSuffix = `:${realmLayer}`;
     const realmShareScopeKeys = shareScopeKeys.filter((key) =>
       key.endsWith(realmSuffix),
     );
@@ -162,6 +171,7 @@ export const loadBundleEntry = (
   entry: string,
   entryGlobalName: string,
   realm: LynxRealm,
+  realmLayer: string,
   globalObject: LynxGlobal,
   timeout: number,
 ): Promise<RemoteEntryExports> => {
@@ -228,6 +238,12 @@ export const loadBundleEntry = (
             realm === 'background'
               ? entryGlobalName
               : `${entryGlobalName}__main-thread`;
+          const alternateGlobalName = getRegistryKey(entryGlobalName, realm);
+          const previousGlobalExports = snapshotRemoteEntryGlobals(
+            entryGlobalName,
+            globalObject,
+            alternateGlobalName,
+          );
 
           try {
             const value = loadScript(sectionPath, { bundleName: response.url });
@@ -240,7 +256,8 @@ export const loadBundleEntry = (
                   loadedValue,
                   entryGlobalName,
                   globalObject,
-                  getRegistryKey(entryGlobalName, realm),
+                  alternateGlobalName,
+                  previousGlobalExports,
                 );
                 if (!exports) {
                   reject(
@@ -251,7 +268,7 @@ export const loadBundleEntry = (
                   return;
                 }
                 rollbackRegistry = undefined;
-                resolve(adaptContainerToRealm(exports, realm));
+                resolve(adaptContainerToRealm(exports, realm, realmLayer));
               },
               (error) =>
                 reject(

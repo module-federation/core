@@ -87,13 +87,28 @@ describe('lynxRuntimePlugin entry loading', () => {
     );
 
     const globalContainer = createContainer();
-    (globalThis as unknown as Record<string, unknown>).remote = {
-      default: globalContainer,
-    };
     setLynx({
-      requireModuleAsync: (_entry, callback) => callback(null, undefined),
+      requireModuleAsync: (_entry, callback) => {
+        (globalThis as unknown as Record<string, unknown>).remote = {
+          default: globalContainer,
+        };
+        callback(null, undefined);
+      },
     });
     await expect(loadEntry(lynxRuntimePlugin())).resolves.toBe(globalContainer);
+  });
+
+  it('rejects a pre-existing container global for a newly loaded URL', async () => {
+    const staleContainer = createContainer();
+    (globalThis as unknown as Record<string, unknown>).remote = staleContainer;
+    setLynx({
+      fetchBundle: async () => ({ code: 0, url: 'lynx-cache://new-remote' }),
+      loadScript: () => undefined,
+    });
+
+    await expect(
+      loadEntry(lynxRuntimePlugin(), bundleRemoteInfo),
+    ).rejects.toThrow('did not export a Module Federation container');
   });
 
   it('deduplicates concurrent entry loads', async () => {
@@ -345,6 +360,59 @@ describe('lynxRuntimePlugin entry loading', () => {
           'default:react:main-thread',
           'custom:react:main-thread',
         ],
+      }),
+    );
+  });
+
+  it('filters custom DSL share-scope layers for each runtime realm', async () => {
+    const backgroundContainer = createContainer();
+    const mainContainer = createContainer();
+    const plugin = lynxRuntimePlugin({
+      realmLayers: {
+        background: 'worker:realm',
+        'main-thread': 'ui:realm',
+      },
+    });
+    const scopes = {
+      'default:react:worker:realm': { worker: true },
+      'default:react:ui:realm': { ui: true },
+    };
+    const initOptions = {
+      version: 'test',
+      shareScopeKeys: Object.keys(scopes),
+      shareScopeMap: scopes as never,
+    };
+
+    setLynx({
+      fetchBundle: async () => ({ code: 0, url: 'lynx-cache://worker' }),
+      getNativeApp: () => ({}),
+      loadScript: () => backgroundContainer,
+    });
+    const background = await loadEntry(plugin, bundleRemoteInfo);
+    background.init(scopes['default:react:worker:realm'] as never, [], {
+      ...initOptions,
+    });
+    expect(backgroundContainer.init).toHaveBeenCalledWith(
+      scopes['default:react:worker:realm'],
+      [],
+      expect.objectContaining({
+        shareScopeKeys: 'default:react:worker:realm',
+      }),
+    );
+
+    setLynx({
+      fetchBundle: async () => ({ code: 0, url: 'lynx-cache://ui' }),
+      loadScript: () => mainContainer,
+    });
+    const main = await loadEntry(plugin, bundleRemoteInfo);
+    main.init(scopes['default:react:ui:realm'] as never, [], {
+      ...initOptions,
+    });
+    expect(mainContainer.init).toHaveBeenCalledWith(
+      scopes['default:react:ui:realm'],
+      [],
+      expect.objectContaining({
+        shareScopeKeys: 'default:react:ui:realm',
       }),
     );
   });

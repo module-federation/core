@@ -36,11 +36,14 @@ export interface LynxTemplatePluginApi {
 }
 
 interface ChunkLoadingMatcherOptions {
+  autoPublicPath?: boolean;
   backgroundOnlyRemote?: boolean;
   chunking?: 'single' | 'split';
   discardSourceEntryBundles?: boolean;
   discardedTemplateAssets?: Set<string>;
+  exposeByExpectedLazyBundleChunk?: ReadonlyMap<string, string>;
   includedChunkPrefixes?: string[];
+  lazyBundleAssetByExpose?: Map<string, string>;
   lazyBundleAssets?: Set<string>;
   remoteEntryName?: string;
   pairedRealmChunkPrefixes?: {
@@ -120,6 +123,32 @@ const getRemoteChunkNames = (
   );
 };
 
+const stripPairedRealmChunkSuffix = (
+  chunkName: string,
+  suffixes: ChunkLoadingMatcherOptions['pairedRealmChunkSuffixes'],
+): string =>
+  suffixes
+    ? [suffixes.background, suffixes.mainThread].reduce(
+        (name, suffix) =>
+          name.endsWith(suffix) ? name.slice(0, -suffix.length) : name,
+        chunkName,
+      )
+    : chunkName;
+
+const normalizeLazyBundleChunkName = (
+  chunkName: string,
+  options: ChunkLoadingMatcherOptions,
+): string => {
+  const normalizedChunkName = stripPairedRealmChunkSuffix(
+    chunkName,
+    options.pairedRealmChunkSuffixes,
+  );
+  const prefixes = options.pairedRealmChunkPrefixes;
+  return prefixes && normalizedChunkName.startsWith(prefixes.mainThread)
+    ? `${prefixes.background}${normalizedChunkName.slice(prefixes.mainThread.length)}`
+    : normalizedChunkName;
+};
+
 export const createLynxChunkLoadingMatcherPlugin = (
   lynxTemplatePlugin?: LynxTemplatePluginApi,
   options: ChunkLoadingMatcherOptions = {},
@@ -130,19 +159,17 @@ export const createLynxChunkLoadingMatcherPlugin = (
 
     compiler.hooks.thisCompilation.tap(pluginName, (compilation) => {
       options.lazyBundleAssets?.clear();
+      options.lazyBundleAssetByExpose?.clear();
       options.discardedTemplateAssets?.clear();
       let remoteChunkNames: Set<string> | undefined;
       const templateHooks =
         lynxTemplatePlugin?.getLynxTemplatePluginHooks(compilation);
       templateHooks?.asyncChunkName.tap(pluginName, (chunkName) => {
         const layerSuffixes = options.pairedRealmChunkSuffixes;
-        const normalizedChunkName = layerSuffixes
-          ? [layerSuffixes.background, layerSuffixes.mainThread].reduce(
-              (name, suffix) =>
-                name.endsWith(suffix) ? name.slice(0, -suffix.length) : name,
-              chunkName,
-            )
-          : chunkName;
+        const normalizedChunkName = stripPairedRealmChunkSuffix(
+          chunkName,
+          layerSuffixes,
+        );
         const hasAssetlessChunk = Array.from(compilation.chunks).some(
           (chunk) => {
             if (
@@ -165,10 +192,7 @@ export const createLynxChunkLoadingMatcherPlugin = (
         if (hasAssetlessChunk) {
           return '';
         }
-        const prefixes = options.pairedRealmChunkPrefixes;
-        return prefixes && normalizedChunkName.startsWith(prefixes.mainThread)
-          ? `${prefixes.background}${normalizedChunkName.slice(prefixes.mainThread.length)}`
-          : normalizedChunkName;
+        return normalizeLazyBundleChunkName(chunkName, options);
       });
       if (options.backgroundOnlyRemote) {
         templateHooks?.beforeEncode?.tap(pluginName, (args) => {
@@ -184,18 +208,32 @@ export const createLynxChunkLoadingMatcherPlugin = (
           chunkNames = getRemoteChunkNames(compilation, options);
           remoteChunkNames = chunkNames;
         }
-        const outputBaseName = args.outputName.split('/').pop() ?? '';
         const isDynamicComponent =
           args.finalEncodeOptions.sourceContent.appType === 'DynamicComponent';
         const isRemoteOutput = args.entryNames.some((name) =>
           chunkNames.has(name),
         );
-        const hasRemotePrefix = options.includedChunkPrefixes?.some((prefix) =>
-          outputBaseName.startsWith(prefix),
+        const exposedKeys = new Set(
+          args.entryNames.flatMap((name) => {
+            const exposedKey = options.exposeByExpectedLazyBundleChunk?.get(
+              normalizeLazyBundleChunkName(name, options),
+            );
+            return exposedKey === undefined ? [] : [exposedKey];
+          }),
         );
 
-        if (isDynamicComponent && (isRemoteOutput || hasRemotePrefix)) {
+        if (isDynamicComponent && (isRemoteOutput || exposedKeys.size > 0)) {
           options.lazyBundleAssets?.add(args.outputName);
+          for (const exposedKey of exposedKeys) {
+            const previousAsset =
+              options.lazyBundleAssetByExpose?.get(exposedKey);
+            if (previousAsset && previousAsset !== args.outputName) {
+              throw new Error(
+                `@module-federation/lynx expose "${exposedKey}" emitted multiple DynamicComponent lazy bundles: "${previousAsset}" and "${args.outputName}".`,
+              );
+            }
+            options.lazyBundleAssetByExpose?.set(exposedKey, args.outputName);
+          }
           if (options.chunking === 'split') {
             options.discardedTemplateAssets?.delete(args.outputName);
           } else {
@@ -213,6 +251,9 @@ export const createLynxChunkLoadingMatcherPlugin = (
         }
 
         override generate(): string {
+          const autoPublicPath = options.autoPublicPath
+            ? '__webpack_require__.lynx_public_path_auto = true;'
+            : '';
           const chunking = options.chunking
             ? `__webpack_require__.lynx_chunking = ${JSON.stringify(options.chunking)};`
             : '';
@@ -221,13 +262,14 @@ export const createLynxChunkLoadingMatcherPlugin = (
             this.chunkGraph!,
           );
           if (chunkIds.length === 0) {
-            return chunking;
+            return Template.asString([autoPublicPath, chunking]);
           }
 
           const matcher = Object.fromEntries(
             chunkIds.map((id) => [String(id), 1]),
           );
           return Template.asString([
+            autoPublicPath,
             chunking,
             'var lynxChunkLoader = __webpack_require__.f.require;',
             'if (lynxChunkLoader) {',

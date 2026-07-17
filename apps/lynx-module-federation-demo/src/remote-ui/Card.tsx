@@ -27,7 +27,11 @@ export function Card({ loadPath, onStateChange }: RemoteCardProps) {
       </view>
 
       <view className="CountHero">
-        <text className="CountValue" data-testid="shared-card-count">
+        <text
+          className="CountValue"
+          data-testid="shared-card-count"
+          ios-platform-accessibility-id="shared-card-count"
+        >
           {sharedState.count}
         </text>
         <text className="CountLabel">read by catalog/Card</text>

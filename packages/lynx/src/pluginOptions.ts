@@ -143,13 +143,44 @@ export const normalizeLynxExposes = (
   return normalized;
 };
 
+type SharedNormalizationContext =
+  | {
+      defaultLayer: string;
+      isolateShareScope: false;
+      layers?: ExposedLayers;
+    }
+  | {
+      activeRealmLayers: readonly string[];
+      defaultLayer: string;
+      isolateShareScope: true;
+      layers: ExposedLayers;
+      shareScope: ModuleFederationPluginOptions['shareScope'];
+    };
+
+const getRealmLayer = (
+  realm: LynxSharedConfig['realm'],
+  layers: ExposedLayers | undefined,
+): string | undefined => {
+  if (realm === 'background') return layers?.BACKGROUND;
+  if (realm === 'main-thread') return layers?.MAIN_THREAD;
+  return undefined;
+};
+
+const getShareScopeLayer = (
+  realmLayer: string | undefined,
+  issuerLayer: string,
+  layers: ExposedLayers,
+): string => {
+  if (realmLayer) return realmLayer;
+  if (issuerLayer === layers.MAIN_THREAD) return layers.MAIN_THREAD;
+  if (issuerLayer === layers.BACKGROUND) return layers.BACKGROUND;
+  return layers.BACKGROUND;
+};
+
 const normalizeSharedValue = (
   key: string,
   value: string | LynxSharedConfig,
-  defaultLayer: string,
-  isolateShareScope = false,
-  layers?: ExposedLayers,
-  activeRealmLayers?: readonly string[],
+  context: SharedNormalizationContext,
 ): SharedConfig => {
   const config: LynxSharedConfig =
     typeof value === 'string'
@@ -158,12 +189,7 @@ const normalizeSharedValue = (
         : { import: key, requiredVersion: value }
       : value;
   const { realm, ...sharedConfig } = config;
-  const realmLayer =
-    realm === 'background'
-      ? layers?.BACKGROUND
-      : realm === 'main-thread'
-        ? layers?.MAIN_THREAD
-        : undefined;
+  const realmLayer = getRealmLayer(realm, context.layers);
   if (realm && !realmLayer) {
     throw new Error(
       `@module-federation/lynx cannot resolve shared realm "${realm}" without exposed Lynx layers.`,
@@ -178,71 +204,49 @@ const normalizeSharedValue = (
       `@module-federation/lynx shared module "${key}" cannot combine realm "${realm}" with a different layer or issuerLayer.`,
     );
   }
-  const layer = sharedConfig.layer ?? realmLayer ?? defaultLayer;
-  const issuerLayer = sharedConfig.issuerLayer ?? realmLayer ?? defaultLayer;
-  const shareScopeLayer =
-    realmLayer ??
-    (issuerLayer === layers?.MAIN_THREAD
-      ? layers.MAIN_THREAD
-      : issuerLayer === layers?.BACKGROUND
-        ? layers.BACKGROUND
-        : (layers?.BACKGROUND ?? issuerLayer));
-  if (
-    isolateShareScope &&
-    activeRealmLayers &&
-    !activeRealmLayers.includes(shareScopeLayer)
-  ) {
-    throw new Error(
-      `@module-federation/lynx shared module "${key}" uses inactive realm layer "${shareScopeLayer}". Enable its Lynx realm or choose one of: ${activeRealmLayers.join(', ')}.`,
+  const layer = sharedConfig.layer ?? realmLayer ?? context.defaultLayer;
+  const issuerLayer =
+    sharedConfig.issuerLayer ?? realmLayer ?? context.defaultLayer;
+  let scopedShareScopes: string[] | undefined;
+  if (context.isolateShareScope) {
+    const shareScopeLayer = getShareScopeLayer(
+      realmLayer,
+      issuerLayer,
+      context.layers,
     );
+    if (!context.activeRealmLayers.includes(shareScopeLayer)) {
+      throw new Error(
+        `@module-federation/lynx shared module "${key}" uses inactive realm layer "${shareScopeLayer}". Enable its Lynx realm or choose one of: ${context.activeRealmLayers.join(', ')}.`,
+      );
+    }
+    const shareScope = config.shareScope ?? context.shareScope ?? 'default';
+    scopedShareScopes = (
+      Array.isArray(shareScope) ? shareScope : [shareScope]
+    ).map((scope) => `${scope}:${shareScopeLayer}`);
   }
 
   return {
     ...sharedConfig,
     layer,
     issuerLayer,
-    ...(isolateShareScope
-      ? {
-          shareScope: (Array.isArray(config.shareScope)
-            ? config.shareScope
-            : [config.shareScope ?? 'default']
-          ).map((scope) => `${scope}:${shareScopeLayer}`),
-        }
-      : {}),
+    ...(scopedShareScopes ? { shareScope: scopedShareScopes } : {}),
   };
 };
 
 const normalizeSharedItem = (
   item: string | Record<string, string | LynxSharedConfig>,
-  defaultLayer: string,
-  isolateShareScope = false,
-  layers?: ExposedLayers,
-  activeRealmLayers?: readonly string[],
+  context: SharedNormalizationContext,
 ): Record<string, SharedConfig> => {
   if (typeof item === 'string') {
     return {
-      [item]: normalizeSharedValue(
-        item,
-        item,
-        defaultLayer,
-        isolateShareScope,
-        layers,
-        activeRealmLayers,
-      ),
+      [item]: normalizeSharedValue(item, item, context),
     };
   }
 
   return Object.fromEntries(
     Object.entries(item).map(([key, value]) => [
       key,
-      normalizeSharedValue(
-        key,
-        value,
-        defaultLayer,
-        isolateShareScope,
-        layers,
-        activeRealmLayers,
-      ),
+      normalizeSharedValue(key, value, context),
     ]),
   );
 };
@@ -256,11 +260,14 @@ export const normalizeLynxShared = (
     return undefined;
   }
 
+  const context: SharedNormalizationContext = {
+    defaultLayer,
+    isolateShareScope: false,
+    layers,
+  };
   return Array.isArray(shared)
-    ? shared.map((item) =>
-        normalizeSharedItem(item, defaultLayer, false, layers),
-      )
-    : normalizeSharedItem(shared, defaultLayer, false, layers);
+    ? shared.map((item) => normalizeSharedItem(item, context))
+    : normalizeSharedItem(shared, context);
 };
 
 export const normalizeRealmScopedShared = (
@@ -271,15 +278,21 @@ export const normalizeRealmScopedShared = (
     layers.BACKGROUND,
     layers.MAIN_THREAD,
   ],
+  shareScope?: ModuleFederationPluginOptions['shareScope'],
 ): Shared | undefined => {
   if (!shared) {
     return undefined;
   }
 
   const items = Array.isArray(shared) ? shared : [shared];
-  return items.map((item) =>
-    normalizeSharedItem(item, defaultLayer, true, layers, activeRealmLayers),
-  );
+  const context: SharedNormalizationContext = {
+    activeRealmLayers,
+    defaultLayer,
+    isolateShareScope: true,
+    layers,
+    shareScope,
+  };
+  return items.map((item) => normalizeSharedItem(item, context));
 };
 
 export const getLynxShareScopes = (
@@ -294,29 +307,92 @@ export const getLynxShareScopes = (
     (scope) => activeRealmLayers.map((layer) => `${scope}:${layer}`),
   );
 
+type Remotes = NonNullable<ModuleFederationPluginOptions['remotes']>;
+type RemotesObject = Exclude<Remotes, unknown[]>;
+
+const normalizeRemotesObject = (
+  remotes: RemotesObject,
+  layers: ExposedLayers,
+  activeRealmLayers: readonly string[],
+): RemotesObject =>
+  Object.fromEntries(
+    Object.entries(remotes).map(([alias, value]) => {
+      if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+        return [alias, value];
+      }
+      const config = value as { shareScope?: string | string[] };
+      return [
+        alias,
+        config.shareScope === undefined
+          ? config
+          : {
+              ...config,
+              shareScope: getLynxShareScopes(
+                config.shareScope,
+                layers,
+                activeRealmLayers,
+              ),
+            },
+      ];
+    }),
+  ) as RemotesObject;
+
+export const normalizeRealmScopedRemotes = (
+  remotes: ModuleFederationPluginOptions['remotes'],
+  layers: ExposedLayers,
+  activeRealmLayers: readonly string[],
+): ModuleFederationPluginOptions['remotes'] => {
+  if (!remotes) return remotes;
+  if (Array.isArray(remotes)) {
+    return remotes.map((remote) =>
+      typeof remote === 'string'
+        ? remote
+        : normalizeRemotesObject(remote, layers, activeRealmLayers),
+    );
+  }
+  return normalizeRemotesObject(remotes, layers, activeRealmLayers);
+};
+
+export const resolveRuntimePluginOptions = (
+  options: LynxRuntimePluginOptions | undefined,
+  layers: ExposedLayers,
+): LynxRuntimePluginOptions => ({
+  ...options,
+  realmLayers: {
+    background: layers.BACKGROUND,
+    'main-thread': layers.MAIN_THREAD,
+  },
+});
+
 export const injectRuntimePlugin = (
   runtimePlugins: ModuleFederationPluginOptions['runtimePlugins'],
   runtimePlugin: string,
   runtimePluginOptions: LynxRuntimePluginOptions | undefined,
 ): NonNullable<ModuleFederationPluginOptions['runtimePlugins']> => {
   const plugins = runtimePlugins ?? [];
-  if (
-    plugins.some((plugin) =>
-      Array.isArray(plugin)
-        ? plugin[0] === runtimePlugin
-        : plugin === runtimePlugin,
-    )
-  ) {
-    return plugins;
-  }
-
   const useTuples =
     runtimePluginOptions !== undefined || plugins.some(Array.isArray);
+  let hasRuntimePlugin = false;
+  const normalizedPlugins = plugins.map((plugin) => {
+    const pluginPath = Array.isArray(plugin) ? plugin[0] : plugin;
+    if (pluginPath !== runtimePlugin) {
+      return useTuples && !Array.isArray(plugin) ? [plugin, {}] : plugin;
+    }
+
+    hasRuntimePlugin = true;
+    if (!useTuples) return plugin;
+    const existingOptions = Array.isArray(plugin) ? plugin[1] : undefined;
+    return [runtimePlugin, { ...existingOptions, ...runtimePluginOptions }];
+  });
+
+  if (hasRuntimePlugin) {
+    return normalizedPlugins as NonNullable<
+      ModuleFederationPluginOptions['runtimePlugins']
+    >;
+  }
   if (useTuples) {
     return [
-      ...plugins.map((plugin) =>
-        Array.isArray(plugin) ? plugin : [plugin, {}],
-      ),
+      ...normalizedPlugins,
       [runtimePlugin, runtimePluginOptions ?? {}],
     ] as [string, Record<string, unknown>][];
   }

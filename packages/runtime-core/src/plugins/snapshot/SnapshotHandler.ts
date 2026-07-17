@@ -75,6 +75,7 @@ export class SnapshotHandler {
   loadingHostSnapshot: Promise<GlobalModuleInfo | void> | null = null;
   HostInstance: ModuleFederation;
   manifestCache: Map<string, Manifest> = new Map();
+  private manifestResolvedUrlCache: Map<string, string> = new Map();
   hooks = new PluginSystem({
     beforeLoadRemoteSnapshot: new AsyncHook<
       [
@@ -116,6 +117,11 @@ export class SnapshotHandler {
   constructor(HostInstance: ModuleFederation) {
     this.HostInstance = HostInstance;
     this.loaderHook = HostInstance.loaderHook;
+  }
+
+  clearManifestCache(manifestUrl: string): void {
+    this.manifestCache.delete(manifestUrl);
+    this.manifestResolvedUrlCache.delete(manifestUrl);
   }
 
   // eslint-disable-next-line max-lines-per-function
@@ -319,6 +325,9 @@ export class SnapshotHandler {
         if (!res || !(res instanceof Response)) {
           res = await fetch(manifestUrl, {});
         }
+        if (res.url) {
+          this.manifestResolvedUrlCache.set(manifestUrl, res.url);
+        }
         manifestJson = (await res.json()) as Manifest;
       } catch (err) {
         manifestJson =
@@ -408,6 +417,8 @@ export class SnapshotHandler {
       );
       const remoteSnapshot = generateSnapshotFromManifest(manifestJson, {
         version: manifestUrl,
+        manifestUrl:
+          this.manifestResolvedUrlCache.get(manifestUrl) ?? manifestUrl,
       });
 
       const { remoteSnapshot: remoteSnapshotRes } =

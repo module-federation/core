@@ -6,10 +6,6 @@ import {
   resolveAliases,
 } from './federation.config.mjs';
 
-const nativeRemoteOrigin =
-  process.env.LYNX_REMOTE_ORIGIN?.replace(/\/+$/, '') ??
-  'http://127.0.0.1:3000';
-
 export default defineConfig({
   plugins: [
     pluginReactLynx({
@@ -27,7 +23,7 @@ export default defineConfig({
     lynx: {},
   },
   output: {
-    assetPrefix: `${nativeRemoteOrigin}/remote-native/`,
+    assetPrefix: 'auto',
     cleanDistPath: false,
     distPath: {
       root: 'dist/remote-native',

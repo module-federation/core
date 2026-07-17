@@ -19,7 +19,6 @@ export const resolveAliases = {
 
 const singleton = {
   singleton: true,
-  eager: true,
   requiredVersion: false,
 };
 
@@ -42,6 +41,7 @@ const createFederationOptions = (remotes) => ({
   name: 'orbit_control',
   implementation,
   remotes,
+  experiments: { asyncStartup: true },
   shareStrategy: 'loaded-first',
   shared: createAppSharedConfig(),
 });
@@ -68,6 +68,7 @@ export const createNativeHostFederationPlugin = (manifestUrl) =>
 const createRemoteOptions = () => ({
   name: 'catalog',
   implementation,
+  experiments: { asyncStartup: true },
   shareStrategy: 'loaded-first',
   exposes: {
     './ActivityFeed': './src/remote-ui/ActivityFeed.tsx',

@@ -95,6 +95,7 @@ didCompleteWithError:(NSError *)error {
 @property(nonatomic, strong) NSMutableDictionary<NSString *, NSString *> *resourcePathCache;
 @property(nonatomic, strong) NSURL *resourceCacheDirectory;
 @property(nonatomic, assign) NSUInteger resourcePathCacheBytes;
+@property(nonatomic, strong, nullable) NSURL *rootBundleURL;
 @property(nonatomic, strong) NSURLSession *session;
 @property(nonatomic, strong) OrbitResourceSessionDelegate *sessionDelegate;
 
@@ -102,6 +103,7 @@ didCompleteWithError:(NSError *)error {
                               completion:(void (^)(NSData *_Nullable,
                                                    NSError *_Nullable))completion;
 - (NSURL *_Nullable)localURLForString:(NSString *)urlString;
+- (NSString *)resolvedURLString:(NSString *)urlString;
 - (BOOL)isAllowedLocalURL:(NSURL *)url;
 - (NSString *_Nullable)cachedResourcePathForURLString:(NSString *)urlString;
 - (NSString *_Nullable)storeResourceData:(NSData *)data
@@ -113,9 +115,14 @@ didCompleteWithError:(NSError *)error {
 
 @implementation OrbitResourceFetcher
 
-- (instancetype)init {
+- (instancetype)initWithRootBundleURL:(NSString *)rootBundleURL {
   self = [super init];
   if (self) {
+    NSURL *rootURL = [NSURL URLWithString:rootBundleURL];
+    if ([rootURL.scheme isEqualToString:@"http"] ||
+        [rootURL.scheme isEqualToString:@"https"]) {
+      _rootBundleURL = rootURL;
+    }
     _resourcePathCache = [NSMutableDictionary dictionary];
     NSURLSessionConfiguration *sessionConfiguration =
       [NSURLSessionConfiguration ephemeralSessionConfiguration];
@@ -176,19 +183,20 @@ didCompleteWithError:(NSError *)error {
 
 - (dispatch_block_t)fetchResourcePath:(LynxResourceRequest *)request
                            onComplete:(LynxGenericResourcePathCompletionBlock)callback {
-  NSURL *localURL = [self localURLForString:request.url];
+  NSString *urlString = [self resolvedURLString:request.url];
+  NSURL *localURL = [self localURLForString:urlString];
   if (localURL) {
     callback(localURL.path, nil);
     return ^{};
   }
 
-  NSString *cachedPath = [self cachedResourcePathForURLString:request.url];
+  NSString *cachedPath = [self cachedResourcePathForURLString:urlString];
   if (cachedPath) {
     callback(cachedPath, nil);
     return ^{};
   }
 
-  return [self loadDataForURLString:request.url
+  return [self loadDataForURLString:urlString
                          completion:^(NSData *data, NSError *error) {
                            if (!data) {
                              callback(nil, error);
@@ -197,7 +205,7 @@ didCompleteWithError:(NSError *)error {
 
                            NSError *writeError = nil;
                            NSString *path = [self storeResourceData:data
-                                                       forURLString:request.url
+                                                       forURLString:urlString
                                                               error:&writeError];
                            callback(path, writeError);
                          }];
@@ -244,6 +252,7 @@ didCompleteWithError:(NSError *)error {
 - (dispatch_block_t)loadDataForURLString:(NSString *)urlString
                               completion:(void (^)(NSData *_Nullable,
                                                    NSError *_Nullable))completion {
+  urlString = [self resolvedURLString:urlString];
   NSURL *localURL = [self localURLForString:urlString];
   if (localURL) {
     NSError *error = nil;
@@ -319,6 +328,15 @@ didCompleteWithError:(NSError *)error {
   return ^{ [task cancel]; };
 }
 
+- (NSString *)resolvedURLString:(NSString *)urlString {
+  if (!self.rootBundleURL || ![urlString hasPrefix:@"/static/"]) {
+    return urlString;
+  }
+  return [NSURL URLWithString:urlString
+                relativeToURL:self.rootBundleURL].absoluteURL.absoluteString
+    ?: urlString;
+}
+
 - (NSURL *_Nullable)localURLForString:(NSString *)urlString {
   NSURL *url = [NSURL URLWithString:urlString];
   if ([url.scheme isEqualToString:@"file"]) {
@@ -328,12 +346,16 @@ didCompleteWithError:(NSError *)error {
       [url.scheme isEqualToString:@"https"]) {
     return nil;
   }
+  NSString *relativePath;
   if ([urlString isAbsolutePath]) {
     NSURL *fileURL = [NSURL fileURLWithPath:urlString];
-    return [self isAllowedLocalURL:fileURL] ? fileURL : nil;
+    if ([self isAllowedLocalURL:fileURL]) return fileURL;
+    if (![urlString hasPrefix:@"/static/"]) return nil;
+    relativePath = [urlString substringFromIndex:1];
+  } else {
+    relativePath = url.path.length > 0 ? url.path : urlString;
   }
 
-  NSString *relativePath = url.path.length > 0 ? url.path : urlString;
   relativePath = relativePath.stringByStandardizingPath;
   if (relativePath.length == 0 || [relativePath isEqualToString:@"."] ||
       [relativePath isEqualToString:@".."] ||

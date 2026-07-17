@@ -3,7 +3,9 @@
 import UIKit
 
 final class ViewController: UIViewController {
-  private let resourceFetcher = OrbitResourceFetcher()
+  private lazy var resourceFetcher = OrbitResourceFetcher(
+    rootBundleURL: rootBundleURL
+  )
   private var lynxView: LynxView?
 
   override func viewDidLoad() {

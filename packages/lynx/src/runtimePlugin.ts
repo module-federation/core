@@ -38,6 +38,10 @@ export default function lynxRuntimePlugin(
 ): ModuleFederationRuntimePlugin {
   const entryCache = new Map<string, Promise<RemoteEntryExports>>();
   const timeout = getTimeout(options.timeout);
+  const realmLayers = options.realmLayers ?? {
+    background: 'background',
+    'main-thread': 'main-thread',
+  };
 
   return {
     name: 'lynx-federation-runtime-plugin',
@@ -79,6 +83,7 @@ export default function lynxRuntimePlugin(
             entry,
             entryGlobalName,
             realm,
+            realmLayers[realm],
             globalObject,
             timeout,
           )

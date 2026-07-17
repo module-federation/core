@@ -15,6 +15,7 @@
 		100000000000000000000005 /* main.lynx.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000019 /* main.lynx.bundle */; };
 		100000000000000000000006 /* OrbitControlUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000000000000000000001A /* OrbitControlUITests.swift */; };
 		100000000000000000000007 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 10000000000000000000001C /* Assets.xcassets */; };
+		100000000000000000000008 /* static in Resources */ = {isa = PBXBuildFile; fileRef = 10000000000000000000001D /* static */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -41,6 +42,7 @@
 		10000000000000000000001A /* OrbitControlUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrbitControlUITests.swift; sourceTree = "<group>"; };
 		10000000000000000000001B /* OrbitControlUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OrbitControlUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		10000000000000000000001C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		10000000000000000000001D /* static */ = {isa = PBXFileReference; lastKnownFileType = folder; path = static; sourceTree = "<group>"; };
 		2A53B1B55000D34C4A561687 /* libPods-OrbitControl.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-OrbitControl.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4CA6D515EC78DF0FF9866EA0 /* Pods-OrbitControl.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OrbitControl.debug.xcconfig"; path = "Target Support Files/Pods-OrbitControl/Pods-OrbitControl.debug.xcconfig"; sourceTree = "<group>"; };
 		89120448DFA86FDA0491C6AB /* Pods-OrbitControl.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OrbitControl.release.xcconfig"; path = "Target Support Files/Pods-OrbitControl/Pods-OrbitControl.release.xcconfig"; sourceTree = "<group>"; };
@@ -97,6 +99,7 @@
 			isa = PBXGroup;
 			children = (
 				100000000000000000000019 /* main.lynx.bundle */,
+				10000000000000000000001D /* static */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -222,6 +225,7 @@
 				100000000000000000000004 /* LaunchScreen.storyboard in Resources */,
 				100000000000000000000005 /* main.lynx.bundle in Resources */,
 				100000000000000000000007 /* Assets.xcassets in Resources */,
+				100000000000000000000008 /* static in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
