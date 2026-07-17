@@ -177,7 +177,16 @@ const generateShareFilename = (pkgName: string, withExt: boolean): string => {
   return encodeName(pkgName, '__federation_shared_', withExt);
 };
 
-const getResourceUrl = (module: ModuleInfo, sourceUrl: string): string => {
+type ResourceUrlInfo =
+  | { getPublicPath: string }
+  | { publicPath: string; ssrPublicPath?: string };
+
+function getResourceUrl(module: ModuleInfo, sourceUrl: string): string;
+function getResourceUrl(module: ResourceUrlInfo, sourceUrl: string): string;
+function getResourceUrl(
+  module: ModuleInfo | ResourceUrlInfo,
+  sourceUrl: string,
+): string {
   if ('getPublicPath' in module) {
     let publicPath;
 
@@ -206,7 +215,7 @@ const getResourceUrl = (module: ModuleInfo, sourceUrl: string): string => {
     );
     return '';
   }
-};
+}
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const assert = (condition: any, msg: string): asserts condition => {

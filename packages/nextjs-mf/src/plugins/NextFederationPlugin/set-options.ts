@@ -20,7 +20,6 @@ export function setOptions(options: NextFederationPluginOptions): {
     enableUrlLoaderFix: false,
     skipSharingNextInternals: false,
     debug: false,
-    skipFederatedStats: false,
   };
 
   return {
