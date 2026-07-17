@@ -59,8 +59,16 @@ type RemoteBundlePlan = RemoteBundlePlanBase &
   );
 
 const toSafeOutputName = (name: string): string => {
-  const outputName =
-    name.replace(/[^A-Za-z0-9@_-]+/g, '_').replace(/^_+|_+$/g, '') || 'remote';
+  const sanitizedName = name.replace(/[^A-Za-z0-9@_-]+/g, '_');
+  let start = 0;
+  let end = sanitizedName.length;
+  while (start < end && sanitizedName[start] === '_') {
+    start += 1;
+  }
+  while (end > start && sanitizedName[end - 1] === '_') {
+    end -= 1;
+  }
+  const outputName = sanitizedName.slice(start, end) || 'remote';
   return /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])$/i.test(outputName)
     ? `_${outputName}`
     : outputName;

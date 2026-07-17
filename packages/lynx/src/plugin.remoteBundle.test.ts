@@ -497,6 +497,8 @@ describe('pluginLynxModuleFederation remote bundles', () => {
     ['catalog?blue', 'catalog_blue'],
     ['catalog#blue', 'catalog_blue'],
     ['teams:catalog', 'teams_catalog'],
+    ['___catalog___', 'catalog'],
+    ['___', 'remote'],
     ['CON', '_CON'],
   ])(
     'derives safe remote bundle artifacts from federation name %s',
