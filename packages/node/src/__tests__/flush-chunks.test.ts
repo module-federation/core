@@ -125,6 +125,32 @@ describe('flushChunks', () => {
     ]);
   });
 
+  it('uses the server public path during SSR', async () => {
+    (global.fetch as jest.Mock).mockResolvedValue(
+      jsonResponse({
+        metaData: {
+          publicPath: 'auto',
+          ssrPublicPath: 'https://server.example.com',
+        },
+        exposes: [
+          {
+            name: 'Button',
+            path: './Button',
+            assets: {
+              js: { sync: ['button.js'], async: [] },
+              css: { sync: [], async: [] },
+            },
+          },
+        ],
+      }),
+    );
+    usedChunks.add('shop/Button');
+
+    await expect(flushChunks()).resolves.toEqual([
+      'https://server.example.com/button.js',
+    ]);
+  });
+
   it('uses the configured manifest URL retained by the runtime', async () => {
     const manifestUrl =
       'https://cdn.example.com/custom/remote-metadata.json?token=test';
@@ -132,8 +158,7 @@ describe('flushChunks', () => {
     (global.fetch as jest.Mock).mockResolvedValue(
       jsonResponse({
         metaData: {
-          getPublicPath:
-            "function () { return 'https://assets.example.com/'; }",
+          getPublicPath: "function () { return 'https://assets.example.com'; }",
         },
         exposes: [
           {
@@ -155,8 +180,8 @@ describe('flushChunks', () => {
     expect(global.fetch).toHaveBeenCalledWith(manifestUrl);
   });
 
-  it('resolves chunks recorded with a remote alias', async () => {
-    setKnownRemote({ alias: 'store' });
+  it('groups canonical and nested alias requests for the same remote', async () => {
+    setKnownRemote({ alias: 'store/catalog' });
     (global.fetch as jest.Mock).mockResolvedValue(
       jsonResponse({
         metaData: { publicPath: 'auto' },
@@ -169,14 +194,25 @@ describe('flushChunks', () => {
               css: { sync: [], async: [] },
             },
           },
+          {
+            name: 'Card',
+            path: './Card',
+            assets: {
+              js: { sync: ['static/chunks/card.js'], async: [] },
+              css: { sync: [], async: [] },
+            },
+          },
         ],
       }),
     );
-    usedChunks.add('store/Button');
+    usedChunks.add('store/catalog/Button');
+    usedChunks.add('shop/Card');
 
     await expect(flushChunks()).resolves.toEqual([
       'https://cdn.example.com/_next/static/chunks/button.js',
+      'https://cdn.example.com/_next/static/chunks/card.js',
     ]);
+    expect(global.fetch).toHaveBeenCalledTimes(1);
   });
 
   it('uses legacy stats for requests missing from the manifest', async () => {

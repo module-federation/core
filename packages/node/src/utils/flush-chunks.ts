@@ -9,6 +9,12 @@ type LegacyFederatedStats = {
   }>;
 };
 
+type RemoteRequests = {
+  remoteInfo: RemoteInfo;
+  manifestUrl?: string;
+  requests: Set<string>;
+};
+
 // @ts-ignore
 if (!globalThis.usedChunks) {
   // @ts-ignore
@@ -24,19 +30,14 @@ const getFederationController = () =>
   new Function('return globalThis')().__FEDERATION__;
 
 export const getAllKnownRemotes = function (): Record<string, RemoteInfo> {
-  // Attempt to access the global federation controller safely
   const federationController = getFederationController();
   if (!federationController || !federationController.__INSTANCES__) {
-    // If the federation controller or instances are not defined, return an empty object
     return {};
   }
 
   const collected: Record<string, RemoteInfo> = {};
-  // Use a for...of loop to iterate over all federation instances
   for (const instance of federationController.__INSTANCES__) {
-    // Use another for...of loop to iterate over the module cache Map entries
     for (const [, cacheModule] of instance.moduleCache) {
-      // Check if the cacheModule has remoteInfo and use it to collect remote names
       if (cacheModule.remoteInfo) {
         const remoteInfo = cacheModule.remoteInfo as RemoteInfo;
         collected[remoteInfo.name] = remoteInfo;
@@ -71,20 +72,18 @@ const getConfiguredManifestUrls = (): Map<string, string> => {
   return manifestUrls;
 };
 
-const parseUsedChunk = (chunk: string): [remote: string, request: string] => {
-  const normalizedChunk = chunk.includes('->')
-    ? chunk.replace('->', '/')
-    : chunk;
-  const remoteSeparatorIndex = normalizedChunk.indexOf('/');
+const parseUsedChunk = (
+  chunk: string,
+  remoteNames: string[],
+): [remote: string, request: string] => {
+  const normalizedChunk = chunk.replace('->', '/');
   const remote =
-    remoteSeparatorIndex === -1
-      ? normalizedChunk
-      : normalizedChunk.slice(0, remoteSeparatorIndex);
-  const req =
-    remoteSeparatorIndex === -1
-      ? ''
-      : normalizedChunk.slice(remoteSeparatorIndex + 1);
-  return [remote, req.startsWith('./') ? req : `./${req}`];
+    remoteNames.find(
+      (name) =>
+        normalizedChunk === name || normalizedChunk.startsWith(`${name}/`),
+    ) || normalizedChunk.split('/', 1)[0];
+  const request = normalizedChunk.slice(remote.length).replace(/^\//, '');
+  return [remote, request.startsWith('./') ? request : `./${request}`];
 };
 
 const getMetadataUrl = (entry: string, filename: string): string => {
@@ -102,14 +101,7 @@ const getManifestUrl = (
   return getMetadataUrl(remoteInfo.entry, 'mf-manifest.json');
 };
 
-const getAssetBaseUrl = (metadataUrl: string, publicPath?: string): URL => {
-  if (publicPath && publicPath !== 'auto') {
-    const normalizedPublicPath = publicPath.endsWith('/')
-      ? publicPath
-      : `${publicPath}/`;
-    return new URL(normalizedPublicPath, metadataUrl);
-  }
-
+const getAssetBaseUrl = (metadataUrl: string): URL => {
   const baseUrl = new URL(metadataUrl);
   const staticPathIndex = baseUrl.pathname.indexOf('/static/');
   baseUrl.pathname =
@@ -136,15 +128,18 @@ const collectManifestAssets = (
 ): { chunks: string[]; missingRequests: Set<string> } => {
   const chunks = new Set<string>();
   const missingRequests = new Set(requests);
-  const publicPath =
-    'publicPath' in manifest.metaData
-      ? manifest.metaData.publicPath
-      : undefined;
-  const assetBaseUrl = getAssetBaseUrl(manifestUrl, publicPath);
-  const resolveAssetUrl =
-    'getPublicPath' in manifest.metaData
-      ? (file: string) => getResourceUrl(manifest.metaData, file)
-      : (file: string) => new URL(file, assetBaseUrl).href;
+  let assetBaseUrl = getAssetBaseUrl(manifestUrl);
+  const resourceBasePath = getResourceUrl(manifest.metaData, '');
+
+  if (resourceBasePath !== 'auto') {
+    const normalizedBasePath =
+      resourceBasePath && !resourceBasePath.endsWith('/')
+        ? `${resourceBasePath}/`
+        : resourceBasePath || './';
+    assetBaseUrl = new URL(normalizedBasePath, manifestUrl);
+  }
+
+  const resolveAssetUrl = (file: string) => new URL(file, assetBaseUrl).href;
 
   for (const expose of manifest.exposes) {
     const request = expose.path || `./${expose.name}`;
@@ -227,33 +222,41 @@ const processRemote = async (
  * @returns {Promise<Array>} A promise that resolves to an array of deduplicated chunks.
  */
 export const flushChunks = async (): Promise<string[]> => {
-  const requestsByRemote = new Map<string, Set<string>>();
   const knownRemotes = getAllKnownRemotes();
   const configuredManifestUrls = getConfiguredManifestUrls();
+  const remoteNames = Object.keys(knownRemotes).sort(
+    (left, right) => right.length - left.length,
+  );
+  const requestsByRemote = new Map<string, RemoteRequests>();
 
   for (const chunk of usedChunks) {
-    const [remote, request] = parseUsedChunk(chunk);
-    const requests = requestsByRemote.get(remote) || new Set<string>();
-    requests.add(request);
-    requestsByRemote.set(remote, requests);
+    const [remote, request] = parseUsedChunk(chunk, remoteNames);
+    const remoteInfo = knownRemotes[remote];
+    if (!remoteInfo) {
+      console.error(
+        `flush chunks: Remote ${remote} is not defined in the global config`,
+      );
+      continue;
+    }
+
+    const remoteRequests = requestsByRemote.get(remoteInfo.name) || {
+      remoteInfo,
+      manifestUrl:
+        configuredManifestUrls.get(remote) ||
+        configuredManifestUrls.get(remoteInfo.name),
+      requests: new Set<string>(),
+    };
+    remoteRequests.requests.add(request);
+    requestsByRemote.set(remoteInfo.name, remoteRequests);
   }
   usedChunks.clear();
 
   const allFlushed = await Promise.all(
-    Array.from(requestsByRemote, ([remote, requests]) => {
-      const remoteInfo = knownRemotes[remote];
-      if (!remoteInfo) {
-        console.error(
-          `flush chunks: Remote ${remote} is not defined in the global config`,
-        );
-        return [];
-      }
-      return processRemote(
-        remoteInfo,
-        requests,
-        configuredManifestUrls.get(remote),
-      );
-    }),
+    Array.from(
+      requestsByRemote.values(),
+      ({ remoteInfo, requests, manifestUrl }) =>
+        processRemote(remoteInfo, requests, manifestUrl),
+    ),
   );
 
   return Array.from(new Set(allFlushed.flat()));

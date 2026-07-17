@@ -60,8 +60,10 @@ describe('FederatedStatsCompatibilityPlugin', () => {
     let processAssetsOptions: Record<string, unknown> | undefined;
     const emitted = new Map<string, { source: () => string }>();
     const rawManifest = JSON.stringify(manifest);
+    emitted.set('server/federated-stats.json', {
+      source: () => 'stale',
+    });
     const compilation = {
-      constructor: { PROCESS_ASSETS_STAGE_REPORT: 5000 },
       hooks: {
         processAssets: {
           tap: (options: Record<string, unknown>, handler: () => void) => {
@@ -79,7 +81,10 @@ describe('FederatedStatsCompatibilityPlugin', () => {
       emitAsset: jest.fn((filename: string, source: { source: () => string }) =>
         emitted.set(filename, source),
       ),
-      updateAsset: jest.fn(),
+      updateAsset: jest.fn(
+        (filename: string, source: { source: () => string }) =>
+          emitted.set(filename, source),
+      ),
     };
     const compiler = {
       hooks: {
@@ -117,6 +122,8 @@ describe('FederatedStatsCompatibilityPlugin', () => {
       stage: 5000,
     });
     expect(compilation.getAsset).toHaveBeenCalledWith('meta/custom.json');
+    expect(compilation.emitAsset).toHaveBeenCalledTimes(1);
+    expect(compilation.updateAsset).toHaveBeenCalledTimes(1);
     expect(Array.from(emitted)).toHaveLength(2);
     expect(
       JSON.parse(emitted.get('server/federated-stats.json')!.source()),

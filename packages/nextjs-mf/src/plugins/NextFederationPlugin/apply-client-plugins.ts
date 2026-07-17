@@ -62,10 +62,8 @@ export function applyClientPlugins(
   if (!extraOptions.skipFederatedStats) {
     const manifestHasAssets =
       options.manifest !== false &&
-      !(
-        typeof options.manifest === 'object' &&
-        options.manifest.disableAssetsAnalyze
-      );
+      (typeof options.manifest !== 'object' ||
+        !options.manifest.disableAssetsAnalyze);
 
     if (!manifestHasAssets) {
       new ChunkCorrelationPlugin({
