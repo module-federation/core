@@ -33,11 +33,11 @@ flowchart LR
 
 The host never addresses a generated `remoteEntry.js` directly. Both import
 styles resolve the manifest, whose `metaData.remoteEntry` names the public
-`.lynx.bundle` container. Lazy expose bundles are fetched separately.
-Both remote builds use `publicPath: 'auto'`. Module Federation resolves the
-container URL from the manifest; the Lynx runtime plugin uses that resolved URL
-as the base for split lazy bundles instead of relying on a browser
-`document.currentScript`, which points at Lynx Web's internal client.
+`.lynx.bundle` container. Lazy expose bundles are fetched separately. The Web
+remote uses `publicPath: 'auto'`; Module Federation resolves its container and
+split assets from the fetched manifest URL instead of Lynx Web's internal
+`document.currentScript`. The native remote uses the absolute
+`LYNX_REMOTE_ORIGIN` required by Rspeedy/Lynx's native lazy-bundle loader.
 
 ## Run the standalone Catalog product
 

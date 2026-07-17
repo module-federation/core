@@ -52,7 +52,12 @@ final class OrbitControlUITests: XCTestCase {
     let readiness = app.descendants(matching: .any)
       .matching(identifier: "federation-ready")
       .firstMatch
-    XCTAssertTrue(readiness.waitForExistence(timeout: 60))
+    let isReady = readiness.waitForExistence(timeout: 60)
+    let error = app.descendants(matching: .any)
+      .matching(identifier: "federation-error")
+      .firstMatch
+    let failure = error.exists ? error.label : "No federation error was rendered."
+    XCTAssertTrue(isReady, failure)
 
     attachScreenshot(named: "Orbit Control federation loaded")
   }

@@ -95,7 +95,7 @@ try {
     `${origin}/remote-native/mf-manifest.json`,
   );
   const manifest = await manifestResponse.json();
-  assert.equal(manifest.metaData.publicPath, 'auto');
+  assert.equal(manifest.metaData.publicPath, `${origin}/remote-native/`);
   const remoteEntry = manifest.metaData.remoteEntry;
   const remoteBase =
     manifest.metaData.publicPath === 'auto'

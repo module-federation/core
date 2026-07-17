@@ -8,6 +8,9 @@ const appRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const requireFromAdapter = createRequire(
   path.join(appRoot, '../../packages/lynx/package.json'),
 );
+const nativeRemoteOrigin =
+  process.env.LYNX_REMOTE_ORIGIN?.replace(/\/+$/, '') ??
+  'http://127.0.0.1:3000';
 const { decode_napi: decodeTemplate } = requireFromAdapter('@lynx-js/tasm');
 const hostBundlePath = path.join(appRoot, 'dist/host-native/main.lynx.bundle');
 const standaloneBundlePath = path.join(
@@ -131,7 +134,10 @@ for (const request of [
 const manifest = JSON.parse(manifestSource);
 const stats = JSON.parse(statsSource);
 assert.equal(manifest.metaData?.name, 'catalog');
-assert.equal(manifest.metaData?.publicPath, 'auto');
+assert.equal(
+  manifest.metaData?.publicPath,
+  `${nativeRemoteOrigin}/remote-native/`,
+);
 assert.deepEqual(manifest.metaData?.remoteEntry, {
   name: 'catalog.native.lynx.bundle',
   path: '',

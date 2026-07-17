@@ -250,7 +250,11 @@ export function App() {
             </text>
           </view>
           {loadError ? (
-            <text className="LoadError" data-testid="load-error">
+            <text
+              accessibilityId="federation-error"
+              className="LoadError"
+              data-testid="load-error"
+            >
               {loadError}
             </text>
           ) : null}
