@@ -108,6 +108,18 @@ jobs:
         with:
           ruby-version: ${{ env.RUBY_VERSION }}
 
+      - name: Cache iOS dependencies
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
+        with:
+          path: |
+            ~/.cocoapods/repos/trunk
+            ~/Library/Caches/CocoaPods
+            apps/lynx-module-federation-demo/ios/Pods
+            apps/lynx-module-federation-demo/ios/vendor/bundle
+          key: ${{ runner.os }}-${{ runner.arch }}-lynx-ios-xcode-16.4-${{ hashFiles('apps/lynx-module-federation-demo/ios/Gemfile.lock', 'apps/lynx-module-federation-demo/ios/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-lynx-ios-xcode-16.4-
+
       - name: Download native artifacts
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
@@ -122,16 +134,27 @@ jobs:
         run: |
           bundle config set path vendor/bundle
           bundle install --jobs 4 --retry 3
-          bundle exec pod install --deployment --repo-update
+          bundle exec pod install --deployment
 
       - name: Run standalone iOS federation E2E
         run: node apps/lynx-module-federation-demo/test/ios/run.mjs
 
-      - name: Upload iOS E2E artifacts
-        if: always()
+      - name: Upload iOS E2E evidence
+        if: success()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: lynx-ios-e2e
+          path: |
+            apps/lynx-module-federation-demo/ios/build/orbit-control.png
+            apps/lynx-module-federation-demo/ios/build/requests.json
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload iOS E2E failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: lynx-ios-e2e-failure
           path: |
             apps/lynx-module-federation-demo/ios/build/OrbitControl.xcresult/
             apps/lynx-module-federation-demo/ios/build/OrbitControl-Release.xcresult/
