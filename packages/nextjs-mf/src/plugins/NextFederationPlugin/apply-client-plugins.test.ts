@@ -1,8 +1,5 @@
 import type { moduleFederationPlugin } from '@module-federation/sdk';
-import { ChunkCorrelationPlugin } from '@module-federation/node';
 import type { Compiler } from 'webpack';
-import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
-import { applyClientPlugins } from './apply-client-plugins';
 import type { NextFederationPluginExtraOptions } from './next-fragments';
 
 jest.mock(
@@ -22,6 +19,12 @@ jest.mock('../container/InvertedContainerPlugin', () => ({
   })),
 }));
 
+jest.mock('./FederatedStatsCompatibilityPlugin', () => ({
+  FederatedStatsCompatibilityPlugin: jest.fn().mockImplementation(() => ({
+    apply: jest.fn(),
+  })),
+}));
+
 jest.mock('../../logger', () => ({
   __esModule: true,
   default: {
@@ -29,6 +32,16 @@ jest.mock('../../logger', () => ({
     warn: jest.fn(),
   },
 }));
+
+const { ChunkCorrelationPlugin } = jest.requireMock('@module-federation/node');
+const InvertedContainerPlugin = jest.requireMock(
+  '../container/InvertedContainerPlugin',
+).default;
+const { FederatedStatsCompatibilityPlugin } = jest.requireMock(
+  './FederatedStatsCompatibilityPlugin',
+);
+const { applyClientPlugins } =
+  require('./apply-client-plugins') as typeof import('./apply-client-plugins');
 
 const options: moduleFederationPlugin.ModuleFederationPluginOptions = {
   name: 'host',
@@ -49,7 +62,7 @@ describe('applyClientPlugins', () => {
   });
 
   it.each([undefined, false])(
-    'applies chunk correlation when skipFederatedStats is %s',
+    'emits compatibility stats when skipFederatedStats is %s',
     (skipFederatedStats) => {
       const compiler = createCompiler();
       const extraOptions: NextFederationPluginExtraOptions = {
@@ -58,13 +71,36 @@ describe('applyClientPlugins', () => {
 
       applyClientPlugins(compiler, { ...options }, extraOptions);
 
+      expect(FederatedStatsCompatibilityPlugin).toHaveBeenCalledWith({
+        filenames: [
+          'static/chunks/federated-stats.json',
+          'server/federated-stats.json',
+        ],
+        manifest: undefined,
+      });
+      expect(ChunkCorrelationPlugin).not.toHaveBeenCalled();
+      expect(InvertedContainerPlugin).toHaveBeenCalledTimes(1);
+    },
+  );
+
+  it.each([{ manifest: false }, { manifest: { disableAssetsAnalyze: true } }])(
+    'uses full chunk correlation for $manifest',
+    (manifestOptions) => {
+      const compiler = createCompiler();
+
+      applyClientPlugins(
+        compiler,
+        { ...options, ...manifestOptions },
+        { skipFederatedStats: false },
+      );
+
       expect(ChunkCorrelationPlugin).toHaveBeenCalledWith({
         filename: [
           'static/chunks/federated-stats.json',
           'server/federated-stats.json',
         ],
       });
-      expect(InvertedContainerPlugin).toHaveBeenCalledTimes(1);
+      expect(FederatedStatsCompatibilityPlugin).not.toHaveBeenCalled();
     },
   );
 
@@ -74,6 +110,7 @@ describe('applyClientPlugins', () => {
     applyClientPlugins(compiler, { ...options }, { skipFederatedStats: true });
 
     expect(ChunkCorrelationPlugin).not.toHaveBeenCalled();
+    expect(FederatedStatsCompatibilityPlugin).not.toHaveBeenCalled();
     expect(InvertedContainerPlugin).toHaveBeenCalledTimes(1);
   });
 });
