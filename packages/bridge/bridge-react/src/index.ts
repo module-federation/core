@@ -28,6 +28,8 @@ export {
 
 export { lazyLoadComponentPlugin } from './plugins/lazy-load-component-plugin';
 
+export { BridgeHydrationProvider } from './hydration';
+
 export type { CreateRootOptions, Root } from './provider/versions/legacy';
 export type {
   ProviderParams,
@@ -38,6 +40,7 @@ export type {
   RemoteComponentParams,
   RenderFnParams,
   RemoteComponentProps,
+  RemoteAppSSRProps,
   RemoteModule,
 } from './types';
 export type {

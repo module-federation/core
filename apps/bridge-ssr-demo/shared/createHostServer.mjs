@@ -39,7 +39,9 @@ function registerSSRRoute(app, getBundle, getTemplate, label) {
         .status(200)
         .type('html')
         .set('Cache-Control', 'no-store')
-        .send(assembleDocument(template, rendered.html, rendered.ssrContext));
+        .send(
+          assembleDocument(template, rendered.html, rendered.hydrationContext),
+        );
     } catch (error) {
       if (!controller.signal.aborted) {
         console.error(`[${label}] SSR request failed`, error, error?.cause);

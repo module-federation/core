@@ -2,6 +2,7 @@ import { createSSRApp } from 'vue';
 import { renderToString } from '@vue/server-renderer';
 import { createMemoryHistory, createRouter } from 'vue-router';
 import App from './App.vue';
+import { toHostHydrationContext } from './ssrContext';
 import {
   prepareSSRContext,
   type PrepareSSRContextOptions,
@@ -25,5 +26,9 @@ export async function render(
   options: PrepareSSRContextOptions = {},
 ) {
   const { app, ssrContext } = await createHostApp(url, options);
-  return { html: await renderToString(app), ssrContext };
+  return {
+    html: await renderToString(app),
+    ssrContext,
+    hydrationContext: toHostHydrationContext(ssrContext),
+  };
 }

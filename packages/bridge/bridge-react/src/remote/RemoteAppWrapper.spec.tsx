@@ -24,6 +24,8 @@ describe('RemoteAppWrapper SSR payload boundary', () => {
     );
     expect(html).toContain('data-mf-bridge-instance="remote-1"');
     expect(html).toContain('<p>server remote</p>');
+    expect(html.match(/server remote/g)).toHaveLength(1);
+    expect(html).toContain('data-mf-bridge-state="true"');
 
     const mismatch = renderToStaticMarkup(
       <RemoteAppWrapper

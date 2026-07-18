@@ -2,6 +2,7 @@ import * as React from 'react';
 import type {
   BridgeJSONValue,
   BridgeSSRConfig,
+  BridgeSSRReference,
   BridgeSSRResult,
   BridgeServerRenderContext,
 } from '@module-federation/bridge-shared';
@@ -132,7 +133,9 @@ export interface ProviderFnParams<T> {
 /**
  * Parameters for the remote component
  */
-export interface RemoteComponentProps<T = Record<string, unknown>> {
+export interface RemoteComponentProps<
+  T = Record<string, unknown>,
+> extends RemoteAppSSRProps {
   props?: T;
   fallback?: React.ComponentType<{ error: Error }>;
   loading?: React.ReactNode;
@@ -167,7 +170,7 @@ export interface RemoteModule {
 }
 
 export type RemoteAppSSRProps = {
-  ssr?: BridgeSSRResult;
+  ssr?: BridgeSSRResult | BridgeSSRReference;
   instanceId?: string;
 };
 

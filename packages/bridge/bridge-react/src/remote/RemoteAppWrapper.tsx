@@ -8,9 +8,11 @@ import { federationRuntime } from '../provider/plugin';
 import { RemoteComponentProps, RemoteAppParams } from '../types';
 import type { RemoteAppSSRProps } from '../types';
 import {
-  getBridgeSSRContainerAttrs,
-  getMatchingBridgeSSRResult,
+  getMatchingBridgeSSRPayload,
+  type BridgeSSRReference,
+  type BridgeSSRResult,
 } from '@module-federation/bridge-shared';
+import { BridgeRemoteSlot, useBridgeHydrationRegistry } from '../hydration';
 
 export const RemoteAppWrapper = forwardRef(function (
   props: RemoteAppParams & RemoteComponentProps & RemoteAppSSRProps,
@@ -29,12 +31,25 @@ export const RemoteAppWrapper = forwardRef(function (
     instanceId: suppliedInstanceId,
     ...resProps
   } = props;
-  const ssrPayload = getMatchingBridgeSSRResult(ssr, {
+  const ssrPayload = getMatchingBridgeSSRPayload(ssr, {
     moduleName,
     instanceId: suppliedInstanceId,
   });
   const instanceId = suppliedInstanceId || ssrPayload?.instanceId;
-  const hasSSRPayload = Boolean(ssrPayload && instanceId);
+  const serverPayload =
+    ssrPayload && 'html' in ssrPayload
+      ? (ssrPayload as BridgeSSRResult)
+      : undefined;
+  const reference =
+    ssrPayload && !('html' in ssrPayload)
+      ? (ssrPayload as BridgeSSRReference)
+      : undefined;
+  const registry = useBridgeHydrationRegistry();
+  const snapshot =
+    reference && instanceId
+      ? registry?.peek(reference.moduleName, instanceId)
+      : undefined;
+  const hasSSRPayload = Boolean((serverPayload || snapshot) && instanceId);
 
   const instance = federationRuntime.instance;
   const rootRef: React.MutableRefObject<HTMLDivElement | null> =
@@ -99,7 +114,7 @@ export const RemoteAppWrapper = forwardRef(function (
       memoryRoute,
       fallback,
       instanceId,
-      ssrState: ssrPayload?.dehydratedState,
+      ssrState: serverPayload?.dehydratedState ?? snapshot?.state,
       ...resProps,
     };
     renderDom.current = rootRef.current;
@@ -109,28 +124,36 @@ export const RemoteAppWrapper = forwardRef(function (
       {};
     // @ts-ignore
     renderProps = { ...renderProps, ...beforeBridgeRenderRes.extraProps };
-    providerInfoRef.current.render(renderProps);
-    instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(renderProps);
+    void Promise.resolve(providerInfoRef.current.render(renderProps))
+      .then(() => {
+        if (snapshot && instanceId) {
+          registry?.consume(moduleName, instanceId);
+        }
+        instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(renderProps);
+      })
+      .catch(() => {
+        if (snapshot && instanceId) registry?.fail(moduleName, instanceId);
+      });
   }, [initialized, ...Object.values(props)]);
 
   // bridge-remote-root
   const rootComponentClassName = `${getRootDomDefaultClassName(moduleName)} ${className || ''}`;
-  return (
-    <div
-      className={rootComponentClassName}
-      style={style}
-      ref={rootRef}
-      {...(hasSSRPayload && instanceId
-        ? getBridgeSSRContainerAttrs({ moduleName, instanceId })
-        : {})}
-      {...(hasSSRPayload
-        ? {
-            dangerouslySetInnerHTML: { __html: ssrPayload!.html },
-            suppressHydrationWarning: true,
-          }
-        : {})}
-    >
+  const mount = (
+    <div className={rootComponentClassName} style={style} ref={rootRef}>
       {hasSSRPayload ? null : loading}
     </div>
+  );
+
+  if (!hasSSRPayload || !instanceId) return mount;
+  return (
+    <BridgeRemoteSlot
+      moduleName={moduleName}
+      instanceId={instanceId}
+      payload={serverPayload}
+      snapshot={snapshot}
+      className={className}
+      style={style}
+      mountRef={rootRef}
+    />
   );
 });

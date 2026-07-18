@@ -3,9 +3,12 @@ import {
   BRIDGE_SSR_PROTOCOL_VERSION,
   BridgeSSRError,
   assertBridgeJSONValue,
+  getMatchingBridgeSSRPayload,
   getMatchingBridgeSSRResult,
   renderRemoteBridge,
   serializeBridgeJSON,
+  serializeBridgeSSRStateEnvelope,
+  toBridgeSSRReference,
 } from './index';
 
 describe('Bridge SSR V1 contract', () => {
@@ -47,6 +50,53 @@ describe('Bridge SSR V1 contract', () => {
         { moduleName: 'remote/app' },
       ),
     ).toThrow(/incompatible result/);
+  });
+
+  it('creates an identity-only client reference', () => {
+    const result = {
+      protocolVersion: BRIDGE_SSR_PROTOCOL_VERSION,
+      moduleName: 'remote/app',
+      instanceId: 'remote-1',
+      html: '<p>remote</p>',
+      dehydratedState: { ready: true },
+    } as const;
+    const reference = toBridgeSSRReference(result);
+
+    expect(reference).toEqual({
+      protocolVersion: BRIDGE_SSR_PROTOCOL_VERSION,
+      moduleName: 'remote/app',
+      instanceId: 'remote-1',
+    });
+    expect(reference).not.toHaveProperty('html');
+    expect(reference).not.toHaveProperty('dehydratedState');
+    expect(Object.isFrozen(reference)).toBe(true);
+    expect(
+      getMatchingBridgeSSRPayload(reference, {
+        moduleName: 'remote/app',
+        instanceId: 'remote-1',
+      }),
+    ).toBe(reference);
+  });
+
+  it('serializes state separately from remote HTML', () => {
+    expect(
+      serializeBridgeSSRStateEnvelope({
+        protocolVersion: BRIDGE_SSR_PROTOCOL_VERSION,
+        moduleName: 'remote/app',
+        instanceId: 'remote-1',
+        state: { value: '</script>\u2028\u2029' },
+      }),
+    ).toBe(
+      '{"protocolVersion":1,"moduleName":"remote/app","instanceId":"remote-1","state":{"value":"\\u003c/script>\\u2028\\u2029"}}',
+    );
+    expect(() =>
+      serializeBridgeSSRStateEnvelope({
+        protocolVersion: BRIDGE_SSR_PROTOCOL_VERSION,
+        moduleName: 'remote/app',
+        instanceId: 'remote-1',
+        html: '<p>must not be serialized</p>',
+      } as any),
+    ).toThrow(/state envelope is incompatible/);
   });
 
   it('loads, renders, and validates a remote provider', async () => {

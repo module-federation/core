@@ -2,6 +2,7 @@ import React from 'react';
 import { renderToString } from 'react-dom/server';
 import { StaticRouter } from 'react-router-dom/server';
 import App from './App';
+import { toHostHydrationContext } from './lib/ssrContext';
 import {
   prepareSSRContext,
   type PrepareSSRContextOptions,
@@ -29,5 +30,6 @@ export async function render(
   return {
     html: renderToString(createHostTree(url, ssrContext)),
     ssrContext,
+    hydrationContext: toHostHydrationContext(ssrContext),
   };
 }
