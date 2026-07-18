@@ -3,6 +3,7 @@ import React, { useContext } from 'react';
 import * as ReactRouterDom from 'react-router-dom/dist/index.js';
 import { RouterContext } from '../provider/context';
 import { LoggerInstance } from '../utils';
+import { BridgeStaticRouter } from './static';
 
 function WraperRouter(
   props:
@@ -18,6 +19,17 @@ function WraperRouter(
     WraperRouterProps: props,
   });
 
+  if (routerContextProps?.ssrLocation) {
+    return (
+      <BridgeStaticRouter
+        Router={ReactRouterDom.Router}
+        basename={routerContextProps.basename || basename}
+        location={routerContextProps.ssrLocation}
+      >
+        {props.children}
+      </BridgeStaticRouter>
+    );
+  }
   if (routerContextProps?.memoryRoute) {
     return (
       <ReactRouterDom.MemoryRouter

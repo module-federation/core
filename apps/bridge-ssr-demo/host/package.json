@@ -1,0 +1,35 @@
+{
+  "name": "bridge-ssr-host",
+  "private": true,
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "NODE_OPTIONS=--experimental-vm-modules node ./server.mjs",
+    "build": "rsbuild build",
+    "preview": "rsbuild preview",
+    "serve": "pnpm run dev",
+    "serve:production": "NODE_OPTIONS=--experimental-vm-modules BRIDGE_SSR_MODE=production node ./server.mjs",
+    "e2e:ssr": "node ../../../scripts/ensure-playwright.js && playwright test",
+    "e2e:ssr:ci": "node ../../../scripts/ensure-playwright.js && playwright test --reporter=line"
+  },
+  "dependencies": {
+    "@module-federation/bridge-react": "workspace:*",
+    "@module-federation/bridge-shared": "workspace:*",
+    "@module-federation/enhanced": "workspace:*",
+    "express": "^4.21.2",
+    "react": "~18.3.1",
+    "react-dom": "~18.3.1",
+    "react-router-dom": "6.30.2",
+    "vue": "^3.5.30",
+    "vue-router": "4.4.5"
+  },
+  "devDependencies": {
+    "@module-federation/rsbuild-plugin": "workspace:*",
+    "@rsbuild/core": "1.7.3",
+    "@rsbuild/plugin-react": "^1.4.5",
+    "@types/express": "^4.17.21",
+    "@types/react": "~18.2.0",
+    "@types/react-dom": "~18.3.0",
+    "@playwright/test": "1.57.0",
+    "typescript": "~5.0.4"
+  }
+}

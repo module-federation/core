@@ -6,9 +6,11 @@ import React, { useEffect, useRef, useState, forwardRef } from 'react';
 import { LoggerInstance, getRootDomDefaultClassName } from '../utils';
 import { federationRuntime } from '../provider/plugin';
 import { RemoteComponentProps, RemoteAppParams } from '../types';
+import type { RemoteAppSSRProps } from '../types';
+import { getBridgeSSRContainerAttrs } from '@module-federation/bridge-shared';
 
 export const RemoteAppWrapper = forwardRef(function (
-  props: RemoteAppParams & RemoteComponentProps,
+  props: RemoteAppParams & RemoteComponentProps & RemoteAppSSRProps,
   ref,
 ) {
   const {
@@ -20,8 +22,12 @@ export const RemoteAppWrapper = forwardRef(function (
     style,
     fallback,
     loading,
+    ssr,
+    instanceId: suppliedInstanceId,
     ...resProps
   } = props;
+  const instanceId = suppliedInstanceId || ssr?.instanceId;
+  const hasSSRPayload = Boolean(ssr && instanceId);
 
   const instance = federationRuntime.instance;
   const rootRef: React.MutableRefObject<HTMLDivElement | null> =
@@ -85,6 +91,8 @@ export const RemoteAppWrapper = forwardRef(function (
       basename,
       memoryRoute,
       fallback,
+      instanceId,
+      ssrState: ssr?.dehydratedState,
       ...resProps,
     };
     renderDom.current = rootRef.current;
@@ -101,8 +109,21 @@ export const RemoteAppWrapper = forwardRef(function (
   // bridge-remote-root
   const rootComponentClassName = `${getRootDomDefaultClassName(moduleName)} ${className || ''}`;
   return (
-    <div className={rootComponentClassName} style={style} ref={rootRef}>
-      {loading}
+    <div
+      className={rootComponentClassName}
+      style={style}
+      ref={rootRef}
+      {...(hasSSRPayload && instanceId
+        ? getBridgeSSRContainerAttrs({ moduleName, instanceId })
+        : {})}
+      {...(hasSSRPayload
+        ? {
+            dangerouslySetInnerHTML: { __html: ssr!.html },
+            suppressHydrationWarning: true,
+          }
+        : {})}
+    >
+      {hasSSRPayload ? null : loading}
     </div>
   );
 });

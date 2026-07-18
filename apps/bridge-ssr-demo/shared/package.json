@@ -1,0 +1,11 @@
+{
+  "name": "bridge-ssr-demo-shared",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "dependencies": {
+    "@module-federation/bridge-shared": "workspace:*",
+    "@rsbuild/core": "1.7.3",
+    "express": "^4.21.2"
+  }
+}

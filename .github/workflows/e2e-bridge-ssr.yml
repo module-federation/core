@@ -1,0 +1,45 @@
+name: E2E Test for Bridge SSR
+
+on:
+  pull_request:
+    paths:
+      - 'packages/bridge/**'
+      - 'apps/bridge-ssr-demo/**'
+      - 'tools/scripts/*bridge-ssr*'
+      - '.github/workflows/e2e-bridge-ssr.yml'
+      - 'pnpm-lock.yaml'
+
+concurrency:
+  group: e2e-bridge-ssr-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rsbuild:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: '20'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build:packages
+      - run: pnpm run e2e:bridge:ssr
+      - run: pnpm run e2e:bridge:ssr:production
+
+  vite-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: '20'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build:packages
+      - run: pnpm run e2e:bridge:ssr:vite-smoke

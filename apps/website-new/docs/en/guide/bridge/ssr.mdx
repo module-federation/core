@@ -1,0 +1,55 @@
+# Server rendering Bridge applications
+
+Bridge SSR V1 lets a federated application provider return a buffered HTML island on the server and hydrate that same island through the existing client lifecycle.
+
+## Supported scope
+
+- React 18 with declarative React Router v6
+- Vue 3 with Vue Router 4
+- Full host-passed `{ html, dehydratedState, moduleName, instanceId, protocolVersion }` payloads
+- Multiple instances of the same remote through document-unique instance IDs
+
+React data routers and other React or Router versions keep their existing client-rendering support but are not supported for SSR in V1.
+
+## Remote provider
+
+Set `ssr: true` when no request preparation is needed. If preparation is required, map the same federated export key to separate browser and Node source files. The browser file supplies `hydrate`; the Node file supplies `prepare`. This keeps server renderers and request-only code out of browser chunks.
+
+```ts
+// export-app.server.ts
+export default createBridgeComponent({
+  rootComponent: App,
+  ssr: {
+    prepare({ props }) {
+      return {
+        props,
+        dehydratedState: { initialValue: props.initialValue },
+      };
+    },
+  },
+});
+```
+
+The React Node entry owns `react-dom/server`; the Vue Node entry owns `@vue/server-renderer`. Framework elements, routers, application instances, and renderers never cross `@module-federation/bridge-shared`.
+
+## Host rendering
+
+Use `renderRemoteBridge` with an intentional, sanitized standard `Request`, stable module name, document-unique instance ID, and explicit props:
+
+```ts
+const result = await renderRemoteBridge({
+  loader: () => federationInstance.loadRemote('catalog/export-app'),
+  moduleName: 'catalog',
+  instanceId: 'catalog-sidebar',
+  request,
+  props: { basename: '/catalog' },
+});
+```
+
+Carry the complete result in the host application's normal SSR payload and pass it to `createRemoteAppComponent` as `ssr`. Serialize payloads with `serializeBridgeJSON`, which validates JSON-only data and escapes executable HTML sequences. The adapters hydrate only when the payload identity matches the instance-scoped SSR mount marker; otherwise they use the unchanged CSR path. V1 does not scan the document or use a hydration registry.
+
+`renderRemoteBridge` rejects provider-load, unsupported-contract, identity, and rendering failures with contextual errors. Response policy remains host-owned.
+
+## Not included in V1
+
+Assets/CSP/head management, status and header conflict policy, timeouts and fallbacks, DOM-reference payload recovery, React data routers, additional React/Router versions, Nuxt or Modern.js adapters, portals/Teleports, streaming, backpressure, and benchmarks are follow-up work.
