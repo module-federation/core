@@ -52,9 +52,12 @@ async function setupBridgeApp(
   mode: 'ssr' | 'hydrate' | 'csr',
 ) {
   if (info.signal?.aborted) throw info.signal.reason;
+  const ReactiveBridgeRoot = Vue.defineComponent({
+    name: 'BridgeReactiveRoot',
+    setup: () => () => Vue.h(bridgeInfo.rootComponent, props),
+  });
   const app = (mode === 'csr' ? Vue.createApp : Vue.createSSRApp)(
-    bridgeInfo.rootComponent,
-    props,
+    ReactiveBridgeRoot,
   );
   const options = bridgeInfo.appOptions({
     ...props,
@@ -107,7 +110,14 @@ export function createBridgeComponentWithServerRenderer(
   bridgeInfo: ProviderFnParams,
   serverRenderer?: BridgeVueServerRenderer,
 ) {
-  const roots = new Map<HTMLElement, Vue.App>();
+  const roots = new Map<
+    HTMLElement,
+    {
+      app: Vue.App;
+      props: Record<string, unknown>;
+      routeKey: string;
+    }
+  >();
   const runtime = getInstance();
 
   return () => {
@@ -143,27 +153,47 @@ export function createBridgeComponentWithServerRenderer(
           beforeBridgeRenderRes.extraProps
             ? beforeBridgeRenderRes.extraProps
             : {};
-        const previousApp = roots.get(dom);
-        if (previousApp) {
-          previousApp.unmount();
-          roots.delete(dom);
-        }
-        const shouldHydrate = hasBridgeSSRMarkup(dom, {
-          moduleName,
-          instanceId,
-        });
+        const routeKey = JSON.stringify([
+          basename ?? null,
+          memoryRoute?.entryPath ?? null,
+          hashRoute ?? false,
+        ]);
+        const mounted = roots.get(dom);
+        const shouldHydrate =
+          !mounted &&
+          hasBridgeSSRMarkup(dom, {
+            moduleName,
+            instanceId,
+          });
         const hydrated =
           shouldHydrate && config?.hydrate ? config.hydrate(ssrState) : {};
         const nextProps = { ...hydrated, ...applicationProps, ...extraProps };
+        if (mounted?.routeKey === routeKey) {
+          for (const key of Object.keys(mounted.props)) {
+            if (!(key in nextProps)) delete mounted.props[key];
+          }
+          Object.assign(mounted.props, nextProps);
+          runtime?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info);
+          return;
+        }
+        if (mounted) {
+          mounted.app.unmount();
+          roots.delete(dom);
+        }
+        const reactiveProps = Vue.shallowReactive(nextProps);
         const { app } = await setupBridgeApp(
           bridgeInfo,
           { basename, memoryRoute, hashRoute, instanceId, signal },
-          nextProps,
+          reactiveProps,
           shouldHydrate ? 'hydrate' : 'csr',
         );
         if (signal?.aborted) return;
         app.mount(dom, shouldHydrate);
-        roots.set(dom, app);
+        if (signal?.aborted || !dom.isConnected) {
+          app.unmount();
+          return;
+        }
+        roots.set(dom, { app, props: reactiveProps, routeKey });
         runtime?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info);
         LoggerInstance.debug('createBridgeComponent rendered', { moduleName });
       },
@@ -171,7 +201,7 @@ export function createBridgeComponentWithServerRenderer(
         const info = { dom };
         LoggerInstance.debug('createBridgeComponent destroy Info', info);
         runtime?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit(info);
-        roots.get(dom)?.unmount();
+        roots.get(dom)?.app.unmount();
         roots.delete(dom);
         runtime?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(info);
       },

@@ -2,7 +2,13 @@
  * Shared RemoteAppWrapper component used by both base and router versions
  * This component handles the lifecycle of remote Module Federation apps
  */
-import React, { useEffect, useRef, useState, forwardRef } from 'react';
+import React, {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react';
 import { LoggerInstance, getRootDomDefaultClassName } from '../utils';
 import { federationRuntime } from '../provider/plugin';
 import { RemoteComponentProps, RemoteAppParams } from '../types';
@@ -14,7 +20,22 @@ import {
 } from '@module-federation/bridge-shared';
 import { BridgeRemoteSlot, useBridgeHydrationRegistry } from '../hydration';
 
-export const RemoteAppWrapper = forwardRef(function (
+function areRenderInputsEqual(
+  previous: readonly unknown[] | undefined,
+  next: readonly unknown[],
+) {
+  return (
+    previous?.length === next.length &&
+    next.every((value, index) => Object.is(value, previous[index]))
+  );
+}
+
+function scheduleBridgeDestroy(destroy: () => void) {
+  if (typeof queueMicrotask === 'function') queueMicrotask(destroy);
+  else void Promise.resolve().then(destroy);
+}
+
+export const RemoteAppWrapper = forwardRef<HTMLDivElement, any>(function (
   props: RemoteAppParams & RemoteComponentProps & RemoteAppSSRProps,
   ref,
 ) {
@@ -45,96 +66,158 @@ export const RemoteAppWrapper = forwardRef(function (
       ? (ssrPayload as BridgeSSRReference)
       : undefined;
   const registry = useBridgeHydrationRegistry();
-  const snapshot =
-    reference && instanceId
-      ? registry?.peek(reference.moduleName, instanceId)
-      : undefined;
+  const hydrationSnapshotRef = useRef<{
+    identity: string;
+    snapshot: ReturnType<NonNullable<typeof registry>['peek']>;
+  }>();
+  const hydrationIdentity =
+    reference && instanceId ? `${reference.moduleName}\0${instanceId}` : '';
+  if (
+    hydrationIdentity &&
+    hydrationSnapshotRef.current?.identity !== hydrationIdentity
+  ) {
+    hydrationSnapshotRef.current = {
+      identity: hydrationIdentity,
+      snapshot: registry?.peek(reference!.moduleName, instanceId!),
+    };
+  }
+  const snapshot = hydrationIdentity
+    ? hydrationSnapshotRef.current?.snapshot
+    : undefined;
   const hasSSRPayload = Boolean((serverPayload || snapshot) && instanceId);
 
   const instance = federationRuntime.instance;
-  const rootRef: React.MutableRefObject<HTMLDivElement | null> =
-    ref && 'current' in ref
-      ? (ref as React.MutableRefObject<HTMLDivElement | null>)
-      : useRef(null);
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const renderDom = useRef<HTMLElement | null>(null);
+  const providerInfoRef = useRef<ReturnType<typeof providerInfo> | null>(null);
+  const mountControllerRef = useRef<AbortController | null>(null);
+  const renderQueueRef = useRef<Promise<void>>(Promise.resolve());
+  const lastRenderInputsRef = useRef<readonly unknown[]>();
+  const consumedIdentityRef = useRef('');
+  const destroyedRef = useRef(false);
+  const [providerReady, setProviderReady] = useState(false);
+  const [renderError, setRenderError] = useState<unknown>();
 
-  const renderDom: React.MutableRefObject<HTMLElement | null> = useRef(null);
-  const providerInfoRef = useRef<any>(null);
-  const [initialized, setInitialized] = useState(false);
+  useImperativeHandle(ref, () => rootRef.current as HTMLDivElement, []);
+  if (renderError) throw renderError;
 
   LoggerInstance.debug(`RemoteAppWrapper instance from props >>>`, instance);
 
-  // 初始化远程组件
   useEffect(() => {
-    if (initialized) return;
-    const providerReturn = providerInfo();
-    providerInfoRef.current = providerReturn;
-    setInitialized(true);
+    destroyedRef.current = false;
+    lastRenderInputsRef.current = undefined;
+    try {
+      providerInfoRef.current = providerInfo();
+      mountControllerRef.current = new AbortController();
+      setProviderReady(true);
+    } catch (error) {
+      if (snapshot && instanceId) registry?.fail(moduleName, instanceId);
+      setRenderError(error);
+    }
 
     return () => {
-      if (providerInfoRef.current?.destroy) {
-        LoggerInstance.debug(
-          `createRemoteAppComponent LazyComponent destroy >>>`,
-          { moduleName, basename, dom: renderDom.current },
-        );
-
-        instance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit({
-          moduleName,
-          dom: renderDom.current,
-          basename,
-          memoryRoute,
-          fallback,
-          ...resProps,
-        });
-
-        providerInfoRef.current?.destroy({
-          moduleName,
-          dom: renderDom.current,
-        });
-
-        instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit({
-          moduleName,
-          dom: renderDom.current,
-          basename,
-          memoryRoute,
-          fallback,
-          ...resProps,
-        });
-      }
+      const provider = providerInfoRef.current;
+      const dom = renderDom.current;
+      mountControllerRef.current?.abort();
+      providerInfoRef.current = null;
+      mountControllerRef.current = null;
+      if (!provider?.destroy || !dom || destroyedRef.current) return;
+      destroyedRef.current = true;
+      const destroyInfo = {
+        moduleName,
+        dom,
+        basename,
+        memoryRoute,
+        fallback,
+        ...resProps,
+      };
+      scheduleBridgeDestroy(() => {
+        try {
+          instance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit(
+            destroyInfo,
+          );
+          provider.destroy({ dom });
+          instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(
+            destroyInfo,
+          );
+        } catch (error) {
+          LoggerInstance.error('Bridge remote destroy failed', error);
+        }
+      });
     };
-  }, [moduleName]);
+  }, [moduleName, providerInfo]);
 
-  // trigger render after props updated
   useEffect(() => {
-    if (!initialized || !providerInfoRef.current) return;
+    const provider = providerInfoRef.current;
+    const dom = rootRef.current;
+    const signal = mountControllerRef.current?.signal;
+    if (!providerReady || !provider || !dom || !signal || signal.aborted)
+      return;
 
-    let renderProps = {
+    const applicationPropEntries = Object.entries(resProps).sort(
+      ([left], [right]) => left.localeCompare(right),
+    );
+    const renderInputs = [
+      providerInfo,
       moduleName,
-      dom: rootRef.current,
+      basename,
+      memoryRoute,
+      fallback,
+      instanceId,
+      serverPayload?.dehydratedState,
+      snapshot?.state,
+      ...applicationPropEntries.flat(),
+    ];
+    if (areRenderInputsEqual(lastRenderInputsRef.current, renderInputs)) return;
+    lastRenderInputsRef.current = renderInputs;
+
+    const renderProps = {
+      moduleName,
+      dom,
       basename,
       memoryRoute,
       fallback,
       instanceId,
       ssrState: serverPayload?.dehydratedState ?? snapshot?.state,
+      signal,
       ...resProps,
     };
-    renderDom.current = rootRef.current;
+    renderDom.current = dom;
 
-    const beforeBridgeRenderRes =
-      instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(renderProps) ||
-      {};
-    // @ts-ignore
-    renderProps = { ...renderProps, ...beforeBridgeRenderRes.extraProps };
-    void Promise.resolve(providerInfoRef.current.render(renderProps))
-      .then(() => {
-        if (snapshot && instanceId) {
+    renderQueueRef.current = renderQueueRef.current
+      .then(async () => {
+        if (signal.aborted || !dom.isConnected) return;
+        const beforeBridgeRenderRes = (await Promise.resolve(
+          instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(
+            renderProps,
+          ) || {},
+        )) as { extraProps?: Record<string, unknown> };
+        const currentRenderProps = {
+          ...renderProps,
+          ...beforeBridgeRenderRes.extraProps,
+        };
+        await provider.render(currentRenderProps);
+        if (signal.aborted || !dom.isConnected) return;
+        if (
+          snapshot &&
+          instanceId &&
+          consumedIdentityRef.current !== hydrationIdentity
+        ) {
           registry?.consume(moduleName, instanceId);
+          consumedIdentityRef.current = hydrationIdentity;
         }
-        instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(renderProps);
+        instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(
+          currentRenderProps,
+        );
       })
-      .catch(() => {
-        if (snapshot && instanceId) registry?.fail(moduleName, instanceId);
+      .catch((error) => {
+        if (signal.aborted) return;
+        if (snapshot && instanceId) {
+          registry?.fail(moduleName, instanceId);
+        }
+        setRenderError(error);
       });
-  }, [initialized, ...Object.values(props)]);
+  });
 
   // bridge-remote-root
   const rootComponentClassName = `${getRootDomDefaultClassName(moduleName)} ${className || ''}`;

@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { createRef } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { describe, expect, it } from '@rstest/core';
+import { act, render, waitFor } from '@testing-library/react';
+import { afterEach, describe, expect, it, rs } from '@rstest/core';
 import { RemoteAppWrapper } from './RemoteAppWrapper';
+import { ErrorBoundary } from '../error-boundary';
 
 const baseProps = {
   moduleName: 'remote/app',
@@ -54,5 +56,101 @@ describe('RemoteAppWrapper SSR payload boundary', () => {
         />,
       ),
     ).toThrow(/incompatible result/);
+  });
+});
+
+describe('RemoteAppWrapper lifecycle', () => {
+  afterEach(() => {
+    rs.restoreAllMocks();
+  });
+
+  it('supports changing between object, callback, and absent forwarded refs', async () => {
+    const provider = { render: rs.fn(), destroy: rs.fn() };
+    const providerInfo = () => provider;
+    const objectRef = createRef<HTMLDivElement>();
+    const callbackRef = rs.fn();
+    const view = render(
+      <RemoteAppWrapper
+        {...baseProps}
+        providerInfo={providerInfo}
+        ref={objectRef}
+      />,
+    );
+    await waitFor(() => expect(provider.render).toHaveBeenCalledOnce());
+    expect(objectRef.current).toBeInstanceOf(HTMLDivElement);
+
+    view.rerender(
+      <RemoteAppWrapper
+        {...baseProps}
+        providerInfo={providerInfo}
+        ref={callbackRef}
+      />,
+    );
+    expect(callbackRef).toHaveBeenCalledWith(expect.any(HTMLDivElement));
+    view.rerender(
+      <RemoteAppWrapper {...baseProps} providerInfo={providerInfo} />,
+    );
+  });
+
+  it('passes replacement callback props to the existing provider', async () => {
+    const provider = { render: rs.fn(), destroy: rs.fn() };
+    const providerInfo = () => provider;
+    const first = rs.fn();
+    const second = rs.fn();
+    const view = render(
+      <RemoteAppWrapper
+        {...baseProps}
+        providerInfo={providerInfo}
+        onAction={first}
+      />,
+    );
+    await waitFor(() => expect(provider.render).toHaveBeenCalledOnce());
+
+    view.rerender(
+      <RemoteAppWrapper
+        {...baseProps}
+        providerInfo={providerInfo}
+        onAction={second}
+      />,
+    );
+    await waitFor(() => expect(provider.render).toHaveBeenCalledTimes(2));
+    expect(provider.render.mock.calls[1][0].onAction).toBe(second);
+  });
+
+  it('routes asynchronous provider failures through the error boundary', async () => {
+    const failure = new Error('remote render failed');
+    const providerInfo = () => ({
+      render: rs.fn(async () => {
+        throw failure;
+      }),
+      destroy: rs.fn(),
+    });
+    const Fallback = ({ error }: { error: Error }) => <p>{error.message}</p>;
+
+    const view = render(
+      <ErrorBoundary FallbackComponent={Fallback as any}>
+        <RemoteAppWrapper {...baseProps} providerInfo={providerInfo} />
+      </ErrorBoundary>,
+    );
+    await expect(view.findByText('remote render failed')).resolves.toBeTruthy();
+  });
+
+  it('defers and deduplicates destructive cleanup', async () => {
+    const queued: Array<() => void> = [];
+    rs.spyOn(globalThis, 'queueMicrotask').mockImplementation((callback) => {
+      queued.push(callback as () => void);
+    });
+    const provider = { render: rs.fn(), destroy: rs.fn() };
+    const providerInfo = () => provider;
+    const view = render(
+      <RemoteAppWrapper {...baseProps} providerInfo={providerInfo} />,
+    );
+    await waitFor(() => expect(provider.render).toHaveBeenCalledOnce());
+
+    view.unmount();
+    expect(provider.destroy).not.toHaveBeenCalled();
+    expect(queued).toHaveLength(1);
+    await act(async () => queued[0]());
+    expect(provider.destroy).toHaveBeenCalledOnce();
   });
 });

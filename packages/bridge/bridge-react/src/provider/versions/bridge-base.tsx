@@ -96,9 +96,16 @@ export function createBaseBridgeComponent<T>({
               'A custom Bridge renderer must provide hydrate when SSR is enabled',
             );
           }
-          await Promise.resolve(
+          const renderedRoot = await Promise.resolve(
             renderer(rootComponentWithErrorBoundary, dom),
-          ).then((root: RootType) => rootMap.set(dom, root));
+          );
+          if (info.signal?.aborted || !dom.isConnected) {
+            if (renderedRoot && 'unmount' in renderedRoot) {
+              renderedRoot.unmount();
+            }
+            return;
+          }
+          rootMap.set(dom, renderedRoot);
         } else {
           let root = rootMap.get(dom);
           let didHydrate = false;
