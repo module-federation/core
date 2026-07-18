@@ -25,6 +25,29 @@ describe('Bridge SSR V1 contract', () => {
     expect(() => assertBridgeJSONValue({ value: Number.NaN })).toThrow(
       /finite/,
     );
+    expect(() =>
+      assertBridgeJSONValue(JSON.parse('{"__proto__":{"polluted":true}}')),
+    ).toThrow(/__proto__/);
+  });
+
+  it('treats empty SSR markup as hydration-eligible when markers match', async () => {
+    const { hasBridgeSSRMarkup, getBridgeSSRContainerAttrs } =
+      await import('./ssr');
+    const attrs = getBridgeSSRContainerAttrs({
+      moduleName: 'remote/app',
+      instanceId: 'remote-1',
+    });
+    const dom = {
+      getAttribute(name: string) {
+        return attrs[name] ?? null;
+      },
+    } as HTMLElement;
+    expect(
+      hasBridgeSSRMarkup(dom, {
+        moduleName: 'remote/app',
+        instanceId: 'remote-1',
+      }),
+    ).toBe(true);
   });
 
   it('validates host-carried results before matching their identity', () => {

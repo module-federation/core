@@ -82,12 +82,12 @@ describe('Bridge hydration registry', () => {
     document.body.innerHTML = original + original;
     expect(() =>
       createBridgeHydrationRegistry(document).peek('remote/app', 'remote-1'),
-    ).toThrow(/Duplicate Bridge SSR instanceId/);
+    ).toThrow(/Duplicate Bridge SSR identity/);
 
     document.body.innerHTML = original;
-    expect(() =>
+    expect(
       createBridgeHydrationRegistry(document).peek('other/app', 'remote-1'),
-    ).toThrow(/belongs to remote\/app/);
+    ).toBeUndefined();
 
     document.body.innerHTML = original.replace(
       '</script></div>',
@@ -104,5 +104,35 @@ describe('Bridge hydration registry', () => {
     expect(() =>
       createBridgeHydrationRegistry(document).peek('remote/app', 'remote-1'),
     ).toThrow(/incompatible state envelope/);
+  });
+
+  it('allows the same instanceId across different module names', () => {
+    const second = {
+      ...result,
+      moduleName: 'other/app',
+      html: '<p>other remote</p>',
+    };
+    document.body.innerHTML =
+      renderToStaticMarkup(
+        <BridgeRemoteSlot
+          moduleName={result.moduleName}
+          instanceId={result.instanceId}
+          payload={result}
+        />,
+      ) +
+      renderToStaticMarkup(
+        <BridgeRemoteSlot
+          moduleName={second.moduleName}
+          instanceId={second.instanceId}
+          payload={second}
+        />,
+      );
+    const registry = createBridgeHydrationRegistry(document);
+    expect(registry.peek('remote/app', 'remote-1')?.html).toBe(
+      '<p>server remote</p>',
+    );
+    expect(registry.peek('other/app', 'remote-1')?.html).toBe(
+      '<p>other remote</p>',
+    );
   });
 });
