@@ -41,6 +41,7 @@ export type BridgeSSRResult = {
   protocolVersion: typeof BRIDGE_SSR_PROTOCOL_VERSION;
   moduleName: string;
   instanceId: string;
+  /** Trusted remote HTML. Remotes are treated as trusted HTML producers. */
   html: string;
   dehydratedState?: BridgeJSONValue;
 };

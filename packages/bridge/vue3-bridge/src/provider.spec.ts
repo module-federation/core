@@ -149,4 +149,38 @@ describe('Vue Bridge server provider', () => {
     expect(dom.textContent).toBe('updated');
     provider.destroy({ dom });
   });
+
+  it('ignores apps created before an aborted client mount', async () => {
+    const controller = new AbortController();
+    const provider = createBridgeComponentWithServerRenderer({
+      rootComponent: defineComponent(() => () => h('p', 'remote')),
+      appOptions: () => {
+        queueMicrotask(() => controller.abort(new Error('cancelled')));
+        return {
+          router: createRouter({
+            history: createMemoryHistory(),
+            routes: [
+              {
+                path: '/',
+                component: defineComponent(() => () => h('p')),
+              },
+            ],
+          }),
+        };
+      },
+    })();
+    const dom = document.createElement('div');
+    document.body.appendChild(dom);
+    await expect(
+      provider.render({
+        dom,
+        moduleName: 'vue/remote',
+        memoryRoute: { entryPath: '/' },
+        signal: controller.signal,
+      }),
+    ).resolves.toBeUndefined();
+    expect(
+      (dom as HTMLElement & { __vue_app__?: any }).__vue_app__,
+    ).toBeUndefined();
+  });
 });

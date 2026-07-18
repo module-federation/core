@@ -181,13 +181,22 @@ export function createBridgeComponentWithServerRenderer(
           roots.delete(dom);
         }
         const reactiveProps = Vue.shallowReactive(nextProps);
-        const { app } = await setupBridgeApp(
-          bridgeInfo,
-          { basename, memoryRoute, hashRoute, instanceId, signal },
-          reactiveProps,
-          shouldHydrate ? 'hydrate' : 'csr',
-        );
-        if (signal?.aborted) return;
+        let app: Vue.App | undefined;
+        try {
+          ({ app } = await setupBridgeApp(
+            bridgeInfo,
+            { basename, memoryRoute, hashRoute, instanceId, signal },
+            reactiveProps,
+            shouldHydrate ? 'hydrate' : 'csr',
+          ));
+        } catch (error) {
+          if (signal?.aborted) return;
+          throw error;
+        }
+        if (signal?.aborted) {
+          // Never mounted: drop the request-local app without unmount warnings.
+          return;
+        }
         app.mount(dom, shouldHydrate);
         if (signal?.aborted || !dom.isConnected) {
           app.unmount();
@@ -211,6 +220,7 @@ export function createBridgeComponentWithServerRenderer(
       provider.renderServer = async (context) => {
         if (context.signal.aborted) throw context.signal.reason;
         const preparedValue = await config?.prepare?.(context);
+        if (context.signal.aborted) throw context.signal.reason;
         const prepared = (preparedValue || {}) as BridgeSSRPrepareResult<
           Record<string, unknown>
         >;
@@ -235,6 +245,7 @@ export function createBridgeComponentWithServerRenderer(
           applicationProps,
           'ssr',
         );
+        if (context.signal.aborted) throw context.signal.reason;
         const ssrContext: Record<string, unknown> = {};
         const html = await serverRenderer(app, ssrContext);
         if (context.signal.aborted) throw context.signal.reason;

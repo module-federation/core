@@ -43,6 +43,13 @@ export async function renderRemoteBridge<P = Record<string, unknown>>(
     );
   }
 
+  if (options.request.signal.aborted) {
+    throw new BridgeSSRError(
+      `Bridge SSR request for ${options.moduleName} was aborted`,
+      options.request.signal.reason,
+    );
+  }
+
   const exportName = options.export ?? 'default';
   const factory = remoteModule[exportName];
   if (typeof factory !== 'function') {

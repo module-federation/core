@@ -77,6 +77,11 @@ function validateJSON(
     for (const [key, descriptor] of Object.entries(
       Object.getOwnPropertyDescriptors(value),
     )) {
+      if (key === '__proto__' || key === 'prototype' || key === 'constructor') {
+        throw new BridgeSSRError(
+          `Bridge SSR value at ${path} must not contain ${key}`,
+        );
+      }
       if (
         !descriptor.enumerable ||
         !Object.prototype.hasOwnProperty.call(descriptor, 'value')
@@ -287,6 +292,8 @@ export function hasBridgeSSRMarkup(
   dom: HTMLElement,
   value?: { moduleName?: string; instanceId?: string },
 ) {
+  // Empty SSR output is still hydration-eligible: trust markers/identity, not
+  // child presence. Remotes may render null/empty fragments with state only.
   return (
     dom.getAttribute(MF_BRIDGE_SSR_ATTR) === 'true' &&
     dom.getAttribute(MF_BRIDGE_VERSION_ATTR) ===
@@ -294,8 +301,7 @@ export function hasBridgeSSRMarkup(
     (!value?.moduleName ||
       dom.getAttribute(MF_BRIDGE_MODULE_ATTR) === value.moduleName) &&
     (!value?.instanceId ||
-      dom.getAttribute(MF_BRIDGE_INSTANCE_ATTR) === value.instanceId) &&
-    dom.hasChildNodes()
+      dom.getAttribute(MF_BRIDGE_INSTANCE_ATTR) === value.instanceId)
   );
 }
 
@@ -324,16 +330,21 @@ function hydrationError(message: string, cause?: unknown) {
   return new BridgeSSRError(message, cause);
 }
 
+function hydrationIdentityKey(moduleName: string, instanceId: string) {
+  return `${moduleName}\0${instanceId}`;
+}
+
 function readSlotSnapshot(slot: HTMLElement): BridgeHydrationSnapshot {
-  const protocolVersion = Number(slot.getAttribute(MF_BRIDGE_VERSION_ATTR));
+  const versionAttr = slot.getAttribute(MF_BRIDGE_VERSION_ATTR);
   const moduleName = slot.getAttribute(MF_BRIDGE_MODULE_ATTR) || '';
   const instanceId = slot.getAttribute(MF_BRIDGE_INSTANCE_ATTR) || '';
   assertBridgeSSRIdentity({ moduleName, instanceId });
-  if (protocolVersion !== BRIDGE_SSR_PROTOCOL_VERSION) {
+  if (versionAttr !== String(BRIDGE_SSR_PROTOCOL_VERSION)) {
     throw hydrationError(
-      `Bridge SSR slot ${instanceId} uses unsupported protocol version ${protocolVersion}`,
+      `Bridge SSR slot ${moduleName}:${instanceId} uses unsupported protocol version ${versionAttr}`,
     );
   }
+  const protocolVersion = BRIDGE_SSR_PROTOCOL_VERSION;
 
   const mounts = directChildrenWithAttribute<HTMLElement>(
     slot,
@@ -429,7 +440,7 @@ export function createBridgeHydrationRegistry(
     root ?? (typeof document === 'undefined' ? undefined : document);
   if (!hydrationRoot) {
     throw hydrationError(
-      'createBridgeHydrationRegistry requires a document root on the server',
+      'createBridgeHydrationRegistry requires a document root',
     );
   }
   const snapshots = new Map<string, BridgeHydrationSnapshot>();
@@ -440,55 +451,58 @@ export function createBridgeHydrationRegistry(
       `[${MF_BRIDGE_SLOT_ATTR}="true"]`,
     ),
   )) {
+    const moduleName = slot.getAttribute(MF_BRIDGE_MODULE_ATTR) || '';
     const instanceId = slot.getAttribute(MF_BRIDGE_INSTANCE_ATTR) || '';
-    if (snapshots.has(instanceId) || errors.has(instanceId)) {
-      snapshots.delete(instanceId);
+    const key = hydrationIdentityKey(moduleName, instanceId);
+    if (snapshots.has(key) || errors.has(key)) {
+      snapshots.delete(key);
       errors.set(
-        instanceId,
-        hydrationError(`Duplicate Bridge SSR instanceId ${instanceId}`),
+        key,
+        hydrationError(
+          `Duplicate Bridge SSR identity ${moduleName}:${instanceId}`,
+        ),
       );
       continue;
     }
     try {
       const snapshot = readSlotSnapshot(slot);
-      snapshots.set(snapshot.instanceId, snapshot);
+      snapshots.set(
+        hydrationIdentityKey(snapshot.moduleName, snapshot.instanceId),
+        snapshot,
+      );
     } catch (error) {
       errors.set(
-        instanceId,
+        key,
         error instanceof BridgeSSRError
           ? error
           : hydrationError(
-              `Unable to read Bridge SSR slot ${instanceId}`,
+              `Unable to read Bridge SSR slot ${moduleName}:${instanceId}`,
               error,
             ),
       );
     }
   }
 
+  const peek = (moduleName: string, instanceId: string) => {
+    const key = hydrationIdentityKey(moduleName, instanceId);
+    const error = errors.get(key);
+    if (error) throw error;
+    return snapshots.get(key);
+  };
+
   return {
-    peek(moduleName, instanceId) {
-      const error = errors.get(instanceId);
-      if (error) throw error;
-      const snapshot = snapshots.get(instanceId);
-      if (!snapshot) return undefined;
-      if (snapshot.moduleName !== moduleName) {
-        throw hydrationError(
-          `Bridge SSR instance ${instanceId} belongs to ${snapshot.moduleName}, not ${moduleName}`,
-        );
-      }
-      return snapshot;
-    },
+    peek,
     consume(moduleName, instanceId) {
-      const snapshot = this.peek(moduleName, instanceId);
-      snapshots.delete(instanceId);
-      errors.delete(instanceId);
+      const key = hydrationIdentityKey(moduleName, instanceId);
+      const snapshot = peek(moduleName, instanceId);
+      snapshots.delete(key);
+      errors.delete(key);
       return snapshot;
     },
     fail(moduleName, instanceId) {
-      const snapshot = snapshots.get(instanceId);
-      if (snapshot && snapshot.moduleName !== moduleName) return;
-      snapshots.delete(instanceId);
-      errors.delete(instanceId);
+      const key = hydrationIdentityKey(moduleName, instanceId);
+      snapshots.delete(key);
+      errors.delete(key);
     },
   };
 }

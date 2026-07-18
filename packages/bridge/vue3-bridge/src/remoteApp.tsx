@@ -69,14 +69,19 @@ export default defineComponent({
         ? (ssrPayload as BridgeSSRReference)
         : undefined;
     const registry = useBridgeHydrationRegistry();
+    if (reference && !registry) {
+      throw new Error(
+        'Bridge SSR references require provideBridgeHydrationRegistry before mount',
+      );
+    }
     const snapshot =
       reference && instanceId
-        ? registry?.peek(reference.moduleName, instanceId)
+        ? registry!.peek(reference.moduleName, instanceId)
         : undefined;
     const hasSSRPayload = Boolean((serverPayload || snapshot) && instanceId);
 
     const getBridgeRenderProps = () => ({
-      name: props.moduleName,
+      moduleName: props.moduleName,
       dom: rootRef.value,
       basename: props.basename,
       memoryRoute: props.memoryRoute,
@@ -128,9 +133,12 @@ export default defineComponent({
           wasDeactivated.value ||
           !dom.isConnected
         ) {
-          providerReturn.destroy?.({ dom });
+          // Only destroy if this provider is still the active one. A newer
+          // providerInfo watch may already have destroyed and replaced it.
           if (providerInfoRef.value === providerReturn) {
+            providerReturn.destroy?.({ dom });
             providerInfoRef.value = null;
+            isRendered.value = false;
           }
           return;
         }
@@ -158,7 +166,9 @@ export default defineComponent({
 
     const destroyComponent = () => {
       const providerReturn = providerInfoRef.value as any;
-      if (!providerReturn || !isRendered.value) {
+      // Destroy whenever a provider was obtained. A failed/aborted render may
+      // still have mounted an app before rejecting, so do not gate on isRendered.
+      if (!providerReturn) {
         return;
       }
       LoggerInstance.debug(

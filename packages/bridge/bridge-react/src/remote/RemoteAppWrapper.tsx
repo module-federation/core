@@ -14,6 +14,7 @@ import { federationRuntime } from '../provider/plugin';
 import { RemoteComponentProps, RemoteAppParams } from '../types';
 import type { RemoteAppSSRProps } from '../types';
 import {
+  BridgeSSRError,
   getMatchingBridgeSSRPayload,
   type BridgeSSRReference,
   type BridgeSSRResult,
@@ -33,6 +34,25 @@ function areRenderInputsEqual(
 function scheduleBridgeDestroy(destroy: () => void) {
   if (typeof queueMicrotask === 'function') queueMicrotask(destroy);
   else void Promise.resolve().then(destroy);
+}
+
+function destroyProviderRoot(
+  provider: { destroy?: (info: { dom: HTMLElement }) => void } | null,
+  dom: HTMLElement | null,
+  destroyInfo: Record<string, unknown>,
+) {
+  if (!provider?.destroy || !dom) return;
+  try {
+    federationRuntime.instance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit(
+      destroyInfo,
+    );
+    provider.destroy({ dom });
+    federationRuntime.instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(
+      destroyInfo,
+    );
+  } catch (error) {
+    LoggerInstance.error('Bridge remote destroy failed', error);
+  }
 }
 
 export const RemoteAppWrapper = forwardRef<HTMLDivElement, any>(function (
@@ -66,6 +86,11 @@ export const RemoteAppWrapper = forwardRef<HTMLDivElement, any>(function (
       ? (ssrPayload as BridgeSSRReference)
       : undefined;
   const registry = useBridgeHydrationRegistry();
+  if (reference && !registry) {
+    throw new BridgeSSRError(
+      'Bridge SSR references require BridgeHydrationProvider before hydrateRoot',
+    );
+  }
   const hydrationSnapshotRef = useRef<{
     identity: string;
     snapshot: ReturnType<NonNullable<typeof registry>['peek']>;
@@ -78,7 +103,7 @@ export const RemoteAppWrapper = forwardRef<HTMLDivElement, any>(function (
   ) {
     hydrationSnapshotRef.current = {
       identity: hydrationIdentity,
-      snapshot: registry?.peek(reference!.moduleName, instanceId!),
+      snapshot: registry!.peek(reference!.moduleName, instanceId!),
     };
   }
   const snapshot = hydrationIdentity
@@ -132,17 +157,7 @@ export const RemoteAppWrapper = forwardRef<HTMLDivElement, any>(function (
         ...resProps,
       };
       scheduleBridgeDestroy(() => {
-        try {
-          instance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit(
-            destroyInfo,
-          );
-          provider.destroy({ dom });
-          instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(
-            destroyInfo,
-          );
-        } catch (error) {
-          LoggerInstance.error('Bridge remote destroy failed', error);
-        }
+        destroyProviderRoot(provider, dom, destroyInfo);
       });
     };
   }, [moduleName, providerInfo]);
@@ -171,6 +186,21 @@ export const RemoteAppWrapper = forwardRef<HTMLDivElement, any>(function (
     if (areRenderInputsEqual(lastRenderInputsRef.current, renderInputs)) return;
     lastRenderInputsRef.current = renderInputs;
 
+    const previousDom = renderDom.current;
+    if (previousDom && previousDom !== dom) {
+      // SSR slot <-> CSR mount transitions replace the ref target. Destroy the
+      // previous provider root before rendering into the new DOM node.
+      destroyProviderRoot(provider, previousDom, {
+        moduleName,
+        dom: previousDom,
+        basename,
+        memoryRoute,
+        fallback,
+        ...resProps,
+      });
+    }
+    renderDom.current = dom;
+
     const renderProps = {
       moduleName,
       dom,
@@ -182,7 +212,6 @@ export const RemoteAppWrapper = forwardRef<HTMLDivElement, any>(function (
       signal,
       ...resProps,
     };
-    renderDom.current = dom;
 
     renderQueueRef.current = renderQueueRef.current
       .then(async () => {
@@ -192,12 +221,16 @@ export const RemoteAppWrapper = forwardRef<HTMLDivElement, any>(function (
             renderProps,
           ) || {},
         )) as { extraProps?: Record<string, unknown> };
+        if (signal.aborted || !dom.isConnected) return;
         const currentRenderProps = {
           ...renderProps,
           ...beforeBridgeRenderRes.extraProps,
         };
         await provider.render(currentRenderProps);
-        if (signal.aborted || !dom.isConnected) return;
+        if (signal.aborted || !dom.isConnected) {
+          provider.destroy?.({ dom });
+          return;
+        }
         if (
           snapshot &&
           instanceId &&

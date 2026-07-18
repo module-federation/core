@@ -34,6 +34,7 @@ export function createServerBridgeComponent<T>(
       const config =
         typeof bridgeInfo.ssr === 'object' ? bridgeInfo.ssr : undefined;
       const preparedValue = await config?.prepare?.(context);
+      if (context.signal.aborted) throw context.signal.reason;
       const prepared = (preparedValue || {}) as BridgeSSRPrepareResult<T>;
       const renderInfo = (prepared.props ?? context.props) as T &
         ProviderParams;
