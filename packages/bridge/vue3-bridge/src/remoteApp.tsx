@@ -9,7 +9,11 @@ import {
   useAttrs,
   nextTick,
 } from 'vue';
-import { dispatchPopstateEnv } from '@module-federation/bridge-shared';
+import {
+  dispatchPopstateEnv,
+  getBridgeSSRContainerAttrs,
+  type BridgeSSRResult,
+} from '@module-federation/bridge-shared';
 import { useRoute } from 'vue-router';
 import { LoggerInstance } from './utils';
 import { getInstance } from '@module-federation/runtime';
@@ -23,6 +27,8 @@ export default defineComponent({
     hashRoute: Boolean,
     providerInfo: Function,
     rootAttrs: Object,
+    ssr: Object,
+    instanceId: String,
   },
   inheritAttrs: false,
   setup(props) {
@@ -35,6 +41,8 @@ export default defineComponent({
     const route = useRoute();
     const hostInstance = getInstance();
     const componentAttrs = useAttrs();
+    const ssrPayload = props.ssr as BridgeSSRResult | undefined;
+    const instanceId = props.instanceId || ssrPayload?.instanceId;
 
     const getBridgeRenderProps = () => ({
       name: props.moduleName,
@@ -58,6 +66,8 @@ export default defineComponent({
         basename: props.basename,
         memoryRoute: props.memoryRoute,
         hashRoute: props.hashRoute,
+        instanceId,
+        ssrState: ssrPayload?.dehydratedState,
       };
       LoggerInstance.debug(
         `createRemoteAppComponent LazyComponent render >>>`,
@@ -149,6 +159,18 @@ export default defineComponent({
       destroyComponent();
     });
 
-    return () => <div {...(props.rootAttrs || {})} ref={rootRef}></div>;
+    return () => (
+      <div
+        {...(props.rootAttrs || {})}
+        {...(ssrPayload && instanceId
+          ? getBridgeSSRContainerAttrs({
+              moduleName: props.moduleName || ssrPayload.moduleName,
+              instanceId,
+            })
+          : {})}
+        ref={rootRef}
+        innerHTML={ssrPayload?.html}
+      ></div>
+    );
   },
 });

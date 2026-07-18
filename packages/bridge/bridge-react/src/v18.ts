@@ -6,4 +6,5 @@ export type {
   RootType,
   DestroyParams,
   RenderParams,
+  RemoteAppSSRProps,
 } from './types';

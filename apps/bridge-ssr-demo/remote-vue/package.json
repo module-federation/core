@@ -1,0 +1,29 @@
+{
+  "name": "bridge-ssr-remote-vue",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "rsbuild dev",
+    "build": "rsbuild build",
+    "build:vite": "pnpm run build:vite:web && pnpm run build:vite:ssr",
+    "build:vite:web": "vite build --config vite.config.mts",
+    "build:vite:ssr": "BRIDGE_VITE_SSR=true vite build --config vite.config.mts && cp dist-vite/ssr/remoteEntry.js dist-vite/ssr/remoteEntry.ssr.js",
+    "preview": "rsbuild preview"
+  },
+  "dependencies": {
+    "@module-federation/bridge-vue3": "workspace:*",
+    "@vue/server-renderer": "^3.5.30",
+    "vue": "^3.5.30",
+    "vue-router": "4.4.5"
+  },
+  "devDependencies": {
+    "@module-federation/rsbuild-plugin": "workspace:*",
+    "@module-federation/vite": "1.16.16",
+    "@rsbuild/core": "1.7.3",
+    "@rsbuild/plugin-vue": "^1.2.6",
+    "@vitejs/plugin-vue": "^5.0.4",
+    "typescript": "~5.0.4",
+    "vite": "^5.4.21"
+  }
+}

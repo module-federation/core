@@ -2,23 +2,24 @@
  * Base bridge component implementation
  * This file contains bridge component logic shared across all React versions
  */
-import * as React from 'react';
 import type {
-  ProviderParams,
   ProviderFnParams,
   RootType,
   DestroyParams,
   RenderParams,
   CreateRootOptions,
-  ErrorFallbackProps,
 } from '../../types';
-import { ErrorBoundary } from '../../error-boundary';
-import { RouterContext } from '../context';
 import { LoggerInstance } from '../../utils';
 import { federationRuntime } from '../plugin';
+import {
+  hasBridgeSSRMarkup,
+  type BridgeJSONValue,
+} from '@module-federation/bridge-shared';
+import { createBridgeReactElement, omitHostFallback } from './bridge-render';
 
 export function createBaseBridgeComponent<T>({
   createRoot,
+  hydrateRoot,
   defaultRootOptions,
   ...bridgeInfo
 }: ProviderFnParams<T>) {
@@ -30,60 +31,14 @@ export function createBaseBridgeComponent<T>({
       instance,
     );
 
-    const RawComponent = (info: { propsInfo: T; appInfo: ProviderParams }) => {
-      const { appInfo, propsInfo, ...restProps } = info;
-      const { moduleName, memoryRoute, basename = '/' } = appInfo;
-      return (
-        <RouterContext.Provider value={{ moduleName, basename, memoryRoute }}>
-          <bridgeInfo.rootComponent
-            {...propsInfo}
-            basename={basename}
-            {...restProps}
-          />
-        </RouterContext.Provider>
-      );
-    };
-
-    const DefaultFallback = ({ error }: ErrorFallbackProps) => (
-      <div role="alert">
-        <p>Something went wrong:</p>
-        <pre style={{ color: 'red' }}>
-          {error instanceof Error ? error.message : String(error)}
-        </pre>
-      </div>
-    );
-
-    const omitHostFallback = <P extends Record<string, unknown>>(props: P) => {
-      const nextProps = { ...props };
-      delete nextProps.fallback;
-      return nextProps;
-    };
-
-    const BridgeWrapper = ({
-      basename,
-      moduleName,
-      memoryRoute,
-      propsInfo,
-    }: {
-      basename?: string;
-      moduleName?: string;
-      memoryRoute?: any;
-      propsInfo: T;
-    }) => (
-      <ErrorBoundary FallbackComponent={DefaultFallback}>
-        <RawComponent
-          appInfo={{
-            moduleName,
-            basename,
-            memoryRoute,
-          }}
-          propsInfo={propsInfo}
-        />
-      </ErrorBoundary>
-    );
+    const hydrateState =
+      bridgeInfo.ssr && typeof bridgeInfo.ssr === 'object'
+        ? bridgeInfo.ssr.hydrate
+        : undefined;
 
     return {
       async render(info: RenderParams) {
+        if (info.signal?.aborted) return;
         LoggerInstance.debug(`createBridgeComponent render Info`, info);
         const {
           moduleName,
@@ -91,38 +46,71 @@ export function createBaseBridgeComponent<T>({
           basename,
           memoryRoute,
           rootOptions,
+          instanceId,
+          ssrState,
           ...propsInfo
         } = info;
 
         const mergedRootOptions: CreateRootOptions | undefined = {
           ...defaultRootOptions,
           ...(rootOptions as CreateRootOptions),
+          ...(instanceId
+            ? { identifierPrefix: `mf-${encodeURIComponent(instanceId)}-` }
+            : {}),
         };
+
+        const isFirstRender = !rootMap.has(dom);
+        const shouldHydrate =
+          isFirstRender &&
+          hasBridgeSSRMarkup(dom, {
+            moduleName,
+            instanceId,
+          });
+        const hydratedProps =
+          shouldHydrate && hydrateState
+            ? hydrateState(ssrState as BridgeJSONValue | undefined)
+            : {};
 
         const beforeBridgeRenderRes =
           instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(info) || {};
 
-        const rootComponentWithErrorBoundary = (
-          <BridgeWrapper
-            basename={basename}
-            moduleName={moduleName}
-            memoryRoute={memoryRoute}
-            propsInfo={
-              {
-                ...omitHostFallback(propsInfo as Record<string, unknown>),
-                basename,
-                ...(beforeBridgeRenderRes as any)?.extraProps,
-              } as T
-            }
-          />
-        );
+        const rootComponentWithErrorBoundary = createBridgeReactElement({
+          rootComponent: bridgeInfo.rootComponent,
+          basename,
+          moduleName,
+          memoryRoute,
+          propsInfo: {
+            ...hydratedProps,
+            ...omitHostFallback(propsInfo as Record<string, unknown>),
+            basename,
+            ...(beforeBridgeRenderRes as any)?.extraProps,
+          } as T,
+        });
 
         if (bridgeInfo.render) {
+          const renderer = shouldHydrate
+            ? bridgeInfo.hydrate
+            : bridgeInfo.render;
+          if (!renderer) {
+            throw new Error(
+              'A custom Bridge renderer must provide hydrate when SSR is enabled',
+            );
+          }
           await Promise.resolve(
-            bridgeInfo.render(rootComponentWithErrorBoundary, dom),
+            renderer(rootComponentWithErrorBoundary, dom),
           ).then((root: RootType) => rootMap.set(dom, root));
         } else {
           let root = rootMap.get(dom);
+          let didHydrate = false;
+          if (shouldHydrate && hydrateRoot) {
+            root = hydrateRoot!(
+              dom,
+              rootComponentWithErrorBoundary,
+              mergedRootOptions,
+            );
+            rootMap.set(dom, root as RootType);
+            didHydrate = true;
+          }
           // Do not call createRoot multiple times
           if (!root && createRoot) {
             root = createRoot(dom, mergedRootOptions);
@@ -130,7 +118,7 @@ export function createBaseBridgeComponent<T>({
           }
 
           if (root && 'render' in root) {
-            root.render(rootComponentWithErrorBoundary);
+            if (!didHydrate) root.render(rootComponentWithErrorBoundary);
           }
         }
         instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info) || {};

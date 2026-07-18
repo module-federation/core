@@ -1,0 +1,26 @@
+{
+  "name": "bridge-ssr-remote-react",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "rsbuild dev",
+    "build": "rsbuild build",
+    "preview": "rsbuild preview",
+    "serve": "pnpm run dev"
+  },
+  "dependencies": {
+    "@module-federation/bridge-react": "workspace:*",
+    "react": "~18.3.1",
+    "react-dom": "~18.3.1",
+    "react-router-dom": "6.30.2"
+  },
+  "devDependencies": {
+    "@module-federation/rsbuild-plugin": "workspace:*",
+    "@rsbuild/core": "1.7.3",
+    "@rsbuild/plugin-react": "^1.4.5",
+    "@types/react": "~18.2.0",
+    "@types/react-dom": "~18.3.0",
+    "typescript": "~5.0.4"
+  }
+}

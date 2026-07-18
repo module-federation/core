@@ -1,0 +1,31 @@
+{
+  "name": "bridge-ssr-host-vue",
+  "private": true,
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "NODE_OPTIONS=--experimental-vm-modules node ./server.mjs",
+    "build": "rsbuild build",
+    "serve:production": "NODE_OPTIONS=--experimental-vm-modules BRIDGE_SSR_MODE=production node ./server.mjs",
+    "e2e:ssr:ci": "node ../../../scripts/ensure-playwright.js && playwright test --config playwright.config.ts --reporter=line"
+  },
+  "dependencies": {
+    "@module-federation/bridge-react": "workspace:*",
+    "@module-federation/bridge-shared": "workspace:*",
+    "@module-federation/bridge-vue3": "workspace:*",
+    "@module-federation/enhanced": "workspace:*",
+    "@module-federation/runtime": "workspace:*",
+    "@vue/server-renderer": "^3.5.30",
+    "express": "^4.21.2",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "vue": "^3.5.30",
+    "vue-router": "4.4.5"
+  },
+  "devDependencies": {
+    "@module-federation/rsbuild-plugin": "workspace:*",
+    "@playwright/test": "1.57.0",
+    "@rsbuild/core": "1.7.3",
+    "@rsbuild/plugin-vue": "^1.2.6",
+    "typescript": "~5.0.4"
+  }
+}

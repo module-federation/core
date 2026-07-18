@@ -8,6 +8,9 @@
 pnpm-lock.yaml
 **/dist/**
 **/dist-rslib/**
+**/dist-vite/**
+**/playwright-report/**
+**/test-results/**
 apps/website-new/docs
 packages/treeshake-server/template/**
 

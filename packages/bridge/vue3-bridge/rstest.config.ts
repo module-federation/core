@@ -4,6 +4,11 @@ import { pluginVueJsx } from '@rsbuild/plugin-vue-jsx';
 import { resolve } from 'path';
 
 export default defineConfig({
+  source: {
+    define: {
+      __APP_VERSION__: '"unknown"',
+    },
+  },
   plugins: [
     pluginBabel({
       include: /\.(?:jsx|tsx)$/,

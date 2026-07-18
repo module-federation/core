@@ -8,12 +8,22 @@ export default defineConfig({
   plugins: [vue(), vueJsx()],
   build: {
     lib: {
-      entry: path.resolve(__dirname, 'src/index.ts'),
+      entry: {
+        index: path.resolve(__dirname, 'src/index.ts'),
+        'index.server': path.resolve(__dirname, 'src/index.server.ts'),
+      },
       formats: ['cjs', 'es'],
-      fileName: 'index',
+      fileName: (format, entryName) =>
+        entryName === 'index'
+          ? format === 'es'
+            ? 'index.js'
+            : 'index.cjs'
+          : format === 'es'
+            ? `${entryName}.js`
+            : `${entryName}.cjs`,
     },
     rollupOptions: {
-      external: ['vue', 'vue-router'],
+      external: ['vue', 'vue-router', '@vue/server-renderer'],
     },
   },
   define: {
