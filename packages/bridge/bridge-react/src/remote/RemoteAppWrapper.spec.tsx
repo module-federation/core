@@ -2,8 +2,13 @@ import React, { createRef } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { act, render, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, rs } from '@rstest/core';
+import {
+  createBridgeHydrationRegistry,
+  toBridgeSSRReference,
+} from '@module-federation/bridge-shared';
 import { RemoteAppWrapper } from './RemoteAppWrapper';
 import { ErrorBoundary } from '../error-boundary';
+import { BridgeHydrationProvider, BridgeRemoteSlot } from '../hydration';
 
 const baseProps = {
   moduleName: 'remote/app',
@@ -62,6 +67,7 @@ describe('RemoteAppWrapper SSR payload boundary', () => {
 describe('RemoteAppWrapper lifecycle', () => {
   afterEach(() => {
     rs.restoreAllMocks();
+    document.body.innerHTML = '';
   });
 
   it('supports changing between object, callback, and absent forwarded refs', async () => {
@@ -152,5 +158,119 @@ describe('RemoteAppWrapper lifecycle', () => {
     expect(queued).toHaveLength(1);
     await act(async () => queued[0]());
     expect(provider.destroy).toHaveBeenCalledOnce();
+  });
+
+  it('claims the registry snapshot before render and clears it on cancel', async () => {
+    const queued: Array<() => void> = [];
+    rs.spyOn(globalThis, 'queueMicrotask').mockImplementation((callback) => {
+      queued.push(callback as () => void);
+    });
+
+    const result = {
+      protocolVersion: 1 as const,
+      moduleName: 'remote/app',
+      instanceId: 'remote-1',
+      html: '<p>server remote</p>',
+      dehydratedState: { ready: true },
+    };
+    document.body.innerHTML = renderToStaticMarkup(
+      <BridgeRemoteSlot
+        moduleName={result.moduleName}
+        instanceId={result.instanceId}
+        payload={result}
+      />,
+    );
+    const registry = createBridgeHydrationRegistry(document);
+    let finishRender!: () => void;
+    const provider = {
+      render: rs.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            finishRender = resolve;
+          }),
+      ),
+      destroy: rs.fn(),
+    };
+
+    const view = render(
+      <BridgeHydrationProvider registry={registry}>
+        <RemoteAppWrapper
+          {...baseProps}
+          instanceId="remote-1"
+          ssr={toBridgeSSRReference(result)}
+          providerInfo={() => provider}
+        />
+      </BridgeHydrationProvider>,
+    );
+
+    await waitFor(() => expect(provider.render).toHaveBeenCalledOnce());
+    expect(registry.peek('remote/app', 'remote-1')).toBeUndefined();
+    expect(
+      (provider.render.mock.calls[0] as unknown as [{ ssrState?: unknown }])[0]
+        .ssrState,
+    ).toEqual({ ready: true });
+
+    view.unmount();
+    finishRender();
+    for (const task of queued.splice(0)) {
+      await act(async () => task());
+    }
+    expect(registry.peek('remote/app', 'remote-1')).toBeUndefined();
+  });
+
+  it('forces CSR when a second consumer loses the snapshot claim', async () => {
+    const result = {
+      protocolVersion: 1 as const,
+      moduleName: 'remote/app',
+      instanceId: 'remote-1',
+      html: '<p>server remote</p>',
+      dehydratedState: { ready: true },
+    };
+    document.body.innerHTML = renderToStaticMarkup(
+      <BridgeRemoteSlot
+        moduleName={result.moduleName}
+        instanceId={result.instanceId}
+        payload={result}
+      />,
+    );
+    const registry = createBridgeHydrationRegistry(document);
+    const first = {
+      render: rs.fn((info: { ssrState?: unknown }) => info),
+      destroy: rs.fn(),
+    };
+    const second = {
+      render: rs.fn((info: { ssrState?: unknown }) => info),
+      destroy: rs.fn(),
+    };
+
+    render(
+      <BridgeHydrationProvider registry={registry}>
+        <RemoteAppWrapper
+          {...baseProps}
+          instanceId="remote-1"
+          ssr={toBridgeSSRReference(result)}
+          providerInfo={() => first}
+        />
+        <RemoteAppWrapper
+          {...baseProps}
+          moduleName="remote/app"
+          instanceId="remote-1"
+          ssr={toBridgeSSRReference(result)}
+          providerInfo={() => second}
+        />
+      </BridgeHydrationProvider>,
+    );
+
+    await waitFor(() => expect(first.render).toHaveBeenCalledOnce());
+    await waitFor(() => expect(second.render).toHaveBeenCalledOnce());
+
+    const states = [first, second].map((provider) => {
+      const call = provider.render.mock.calls[0] as unknown as [
+        { ssrState?: { ready?: boolean } },
+      ];
+      return call[0].ssrState;
+    });
+    expect(states.filter((state) => state?.ready === true)).toHaveLength(1);
+    expect(states.filter((state) => state === undefined)).toHaveLength(1);
   });
 });

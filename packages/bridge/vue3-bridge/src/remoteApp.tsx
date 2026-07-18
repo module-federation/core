@@ -17,6 +17,11 @@ import {
   getBridgeSSRContainerAttrs,
   getBridgeSSRSlotAttrs,
   getMatchingBridgeSSRPayload,
+  MF_BRIDGE_INSTANCE_ATTR,
+  MF_BRIDGE_MODULE_ATTR,
+  MF_BRIDGE_MOUNT_ATTR,
+  MF_BRIDGE_SSR_ATTR,
+  MF_BRIDGE_VERSION_ATTR,
   serializeBridgeSSRStateEnvelope,
   type BridgeSSRReference,
   type BridgeSSRResult,
@@ -25,6 +30,14 @@ import { useRoute } from 'vue-router';
 import { LoggerInstance } from './utils';
 import { getInstance } from '@module-federation/runtime';
 import { useBridgeHydrationRegistry } from './hydration';
+
+function clearBridgeSSRMountAttrs(dom: HTMLElement) {
+  dom.removeAttribute(MF_BRIDGE_SSR_ATTR);
+  dom.removeAttribute(MF_BRIDGE_MOUNT_ATTR);
+  dom.removeAttribute(MF_BRIDGE_VERSION_ATTR);
+  dom.removeAttribute(MF_BRIDGE_MODULE_ATTR);
+  dom.removeAttribute(MF_BRIDGE_INSTANCE_ATTR);
+}
 
 export default defineComponent({
   name: 'RemoteApp',
@@ -50,6 +63,8 @@ export default defineComponent({
     const controller = new AbortController();
     let renderQueue = Promise.resolve();
     let consumedSnapshot = false;
+    let hydratedOnce = false;
+    let csrOnly = false;
     let providerGeneration = 0;
     const route = useRoute();
     const hostInstance = getInstance();
@@ -79,6 +94,14 @@ export default defineComponent({
         ? registry!.peek(reference.moduleName, instanceId)
         : undefined;
     const hasSSRPayload = Boolean((serverPayload || snapshot) && instanceId);
+    const registryModuleName =
+      props.moduleName || reference?.moduleName || ssrPayload?.moduleName || '';
+
+    const releaseUnclaimedSnapshot = () => {
+      if (!snapshot || !instanceId || consumedSnapshot || !registry) return;
+      registry.fail(registryModuleName, instanceId);
+      consumedSnapshot = true;
+    };
 
     const getBridgeRenderProps = () => ({
       moduleName: props.moduleName,
@@ -103,6 +126,33 @@ export default defineComponent({
         const providerReturn = providerInfoRef.value || props.providerInfo?.();
         providerInfoRef.value = providerReturn;
         const wasRendered = isRendered.value;
+
+        // Claim before any await so cancel cannot leave a peekable snapshot.
+        // After a claim (even if render aborts), never hydrate again — CSR only.
+        let ssrState =
+          wasRendered || hydratedOnce || consumedSnapshot
+            ? undefined
+            : serverPayload?.dehydratedState;
+        if (
+          !wasRendered &&
+          !hydratedOnce &&
+          !consumedSnapshot &&
+          snapshot &&
+          instanceId &&
+          registry
+        ) {
+          const claimed = registry.consume(registryModuleName, instanceId);
+          if (Object.is(claimed, snapshot)) {
+            consumedSnapshot = true;
+            ssrState = snapshot.state;
+          } else {
+            consumedSnapshot = true;
+            hydratedOnce = true;
+            ssrState = undefined;
+            clearBridgeSSRMountAttrs(dom);
+          }
+        }
+
         let renderProps = {
           ...componentAttrs,
           moduleName: props.moduleName,
@@ -111,9 +161,7 @@ export default defineComponent({
           memoryRoute: props.memoryRoute,
           hashRoute: props.hashRoute,
           instanceId,
-          ssrState: wasRendered
-            ? undefined
-            : (serverPayload?.dehydratedState ?? snapshot?.state),
+          ssrState,
           signal: controller.signal,
         };
         LoggerInstance.debug(
@@ -143,12 +191,10 @@ export default defineComponent({
           return;
         }
         isRendered.value = true;
-        if (!consumedSnapshot && snapshot && instanceId) {
-          registry?.consume(
-            props.moduleName || reference!.moduleName,
-            instanceId,
-          );
-          consumedSnapshot = true;
+        // One-shot hydrate for this instance. Keep SSR markers in the DOM so
+        // hosts/tests can observe them; strip only on KeepAlive deactivate.
+        if (snapshot || serverPayload) {
+          hydratedOnce = true;
         }
         hostInstance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(
           renderProps,
@@ -156,8 +202,9 @@ export default defineComponent({
       });
       renderQueue = pending.catch((error) => {
         if (controller.signal.aborted || wasDeactivated.value) return;
-        if (snapshot && instanceId) {
-          registry?.fail(props.moduleName || reference!.moduleName, instanceId);
+        if (snapshot && instanceId && !consumedSnapshot) {
+          registry?.fail(registryModuleName, instanceId);
+          consumedSnapshot = true;
         }
         renderError.value = error;
       });
@@ -264,12 +311,18 @@ export default defineComponent({
     onDeactivated(() => {
       isActive.value = false;
       wasDeactivated.value = true;
+      releaseUnclaimedSnapshot();
+      if (consumedSnapshot) hydratedOnce = true;
+      csrOnly = true;
+      const dom = rootRef.value as HTMLElement | null;
+      if (dom) clearBridgeSSRMountAttrs(dom);
       destroyComponent();
     });
 
     onBeforeUnmount(() => {
       controller.abort();
       watchStopHandle();
+      releaseUnclaimedSnapshot();
       destroyComponent();
     });
 
@@ -278,17 +331,19 @@ export default defineComponent({
       const mount = (
         <div
           {...(props.rootAttrs || {})}
-          {...(hasSSRPayload && instanceId
+          {...(hasSSRPayload && instanceId && !csrOnly
             ? getBridgeSSRContainerAttrs({
                 moduleName: props.moduleName || ssrPayload!.moduleName,
                 instanceId,
               })
             : {})}
           ref={rootRef}
-          innerHTML={serverPayload?.html ?? snapshot?.html}
+          innerHTML={
+            csrOnly ? undefined : (serverPayload?.html ?? snapshot?.html)
+          }
         />
       );
-      if (!hasSSRPayload || !instanceId) return mount;
+      if (!hasSSRPayload || !instanceId || csrOnly) return mount;
       const moduleName = props.moduleName || ssrPayload!.moduleName;
       return (
         <div {...getBridgeSSRSlotAttrs({ moduleName, instanceId })}>
