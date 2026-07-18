@@ -13,6 +13,18 @@ import { RouterContext } from '../src/provider/context';
 import { getHtml, getWindowImpl } from './util';
 
 describe('react router proxy', () => {
+  it('fails clearly when the generic router adapter is used for SSR', () => {
+    expect(() =>
+      render(
+        <RouterContext.Provider value={{ ssrLocation: '/detail' }}>
+          <BrowserRouter>
+            <div />
+          </BrowserRouter>
+        </RouterContext.Provider>,
+      ),
+    ).toThrow(/router-v6 alias/);
+  });
+
   it('BrowserRouter not wraper context', async () => {
     let { container } = render(
       <RouterContext.Provider value={{ basename: '/test' } as any}>

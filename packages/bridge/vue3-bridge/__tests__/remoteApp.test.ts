@@ -9,6 +9,7 @@ const { dispatchPopstateEnv } = rs.hoisted(() => ({
 
 rs.mock('@module-federation/bridge-shared', () => ({
   dispatchPopstateEnv,
+  getMatchingBridgeSSRResult: () => undefined,
 }));
 
 rs.mock('@module-federation/runtime', () => ({

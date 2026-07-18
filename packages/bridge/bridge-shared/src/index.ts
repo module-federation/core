@@ -17,6 +17,7 @@ export {
   assertBridgeJSONValue,
   assertBridgeSSRIdentity,
   assertBridgeSSRResult,
+  getMatchingBridgeSSRResult,
   getBridgeSSRContainerAttrs,
   hasBridgeSSRMarkup,
   serializeBridgeJSON,

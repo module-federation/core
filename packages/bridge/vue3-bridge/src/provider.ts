@@ -143,6 +143,11 @@ export function createBridgeComponentWithServerRenderer(
           beforeBridgeRenderRes.extraProps
             ? beforeBridgeRenderRes.extraProps
             : {};
+        const previousApp = roots.get(dom);
+        if (previousApp) {
+          previousApp.unmount();
+          roots.delete(dom);
+        }
         const shouldHydrate = hasBridgeSSRMarkup(dom, {
           moduleName,
           instanceId,
@@ -157,8 +162,8 @@ export function createBridgeComponentWithServerRenderer(
           shouldHydrate ? 'hydrate' : 'csr',
         );
         if (signal?.aborted) return;
-        roots.set(dom, app);
         app.mount(dom, shouldHydrate);
+        roots.set(dom, app);
         runtime?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info);
         LoggerInstance.debug('createBridgeComponent rendered', { moduleName });
       },

@@ -64,6 +64,12 @@ function WraperRouterProvider(
     'create' + 'BrowserRouter'
   ];
 
+  if (routerContextProps.ssrLocation) {
+    throw new Error(
+      'Bridge SSR V1 does not support React Router data routers or RouterProvider',
+    );
+  }
+
   if (routerContextProps.memoryRoute) {
     const MemeoryRouterInstance = createMemoryRouter(routers, {
       initialEntries: [routerContextProps?.memoryRoute.entryPath],
