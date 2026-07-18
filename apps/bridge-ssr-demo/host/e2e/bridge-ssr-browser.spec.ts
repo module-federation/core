@@ -40,7 +40,10 @@ test('server-renders a deep route and remote navigation updates the URL', async 
   page,
 }, testInfo) => {
   const remote = direction(testInfo.project.name);
-  await page.goto(remote.detail);
+  await page.goto(`${remote.detail}?source=e2e#bridge-state`);
+  await expect(page).toHaveURL(
+    new RegExp(`${remote.detail}\\?source=e2e#bridge-state$`),
+  );
   await expect(
     page.getByRole('heading', { name: remote.detailHeading }),
   ).toBeVisible();
@@ -75,6 +78,24 @@ test('host navigation enters, leaves, and returns through CSR without reload', a
   await expect
     .poll(() => page.evaluate(() => (window as any).__navigationSentinel))
     .toBe('alive');
+});
+
+test('consumes direct-visit SSR once and revisits through CSR', async ({
+  page,
+}, testInfo) => {
+  const remote = direction(testInfo.project.name);
+  await page.goto(remote.route);
+  await expect(page.locator('[data-mf-bridge-ssr="true"]')).toHaveCount(1);
+  await expect(
+    page.getByRole('heading', { name: remote.homeHeading }),
+  ).toBeVisible();
+
+  await page.getByRole('link', { name: 'Home' }).first().click();
+  await page.locator(remote.hostLink).first().click();
+  await expect(
+    page.getByRole('heading', { name: remote.homeHeading }),
+  ).toBeVisible();
+  await expect(page.locator('[data-mf-bridge-ssr="true"]')).toHaveCount(0);
 });
 
 test('two instances of one React remote hydrate independently', async ({

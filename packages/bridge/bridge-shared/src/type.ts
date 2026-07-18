@@ -45,6 +45,33 @@ export type BridgeSSRResult = {
   dehydratedState?: BridgeJSONValue;
 };
 
+/** Identity-only payload safe to serialize into a host hydration context. */
+export type BridgeSSRReference = Pick<
+  BridgeSSRResult,
+  'protocolVersion' | 'moduleName' | 'instanceId'
+>;
+
+export type BridgeSSRStateEnvelope = BridgeSSRReference & {
+  state?: BridgeJSONValue;
+};
+
+export type BridgeHydrationSnapshot = BridgeSSRReference & {
+  html: string;
+  state?: BridgeJSONValue;
+};
+
+export interface BridgeHydrationRegistry {
+  peek(
+    moduleName: string,
+    instanceId: string,
+  ): BridgeHydrationSnapshot | undefined;
+  consume(
+    moduleName: string,
+    instanceId: string,
+  ): BridgeHydrationSnapshot | undefined;
+  fail(moduleName: string, instanceId: string): void;
+}
+
 export class BridgeSSRError extends Error {
   override readonly cause?: unknown;
 

@@ -1,9 +1,11 @@
-import type { HostSSRContext } from './ssrContext';
+import type { HostHydrationContext } from './ssrContext';
 
 // Kept in sync with server.mjs, which injects the script server-side.
 export const HOST_SSR_CONTEXT_SCRIPT_ID = 'bridge-ssr-host-context';
 
-export function readHostSSRContextFromDocument(): HostSSRContext | undefined {
+export function readHostSSRContextFromDocument():
+  | HostHydrationContext
+  | undefined {
   if (typeof document === 'undefined') {
     return undefined;
   }
@@ -14,7 +16,7 @@ export function readHostSSRContextFromDocument(): HostSSRContext | undefined {
   }
 
   try {
-    return JSON.parse(script.textContent) as HostSSRContext;
+    return JSON.parse(script.textContent) as HostHydrationContext;
   } catch {
     return undefined;
   }
