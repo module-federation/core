@@ -107,6 +107,7 @@ assert.match(syncScript, /sourceStatic/);
 assert.match(syncScript, /cp\(sourceStatic, destinationStatic/);
 assert.equal(iosRunner.match(/await run\(\s*'xcodebuild'/g)?.length, 1);
 assert.match(iosRunner, /'-configuration',\s*'Release'/);
+assert.match(iosRunner, /build\/OrbitControl-Release\.xcresult/);
 for (const testName of [
   'testFederatedImportsRuntimeLoadingAndSingleton',
   'testStandaloneCatalogRemoteBuildLaunches',

@@ -164,7 +164,7 @@ try {
       '-derivedDataPath',
       'build/DerivedData',
       '-resultBundlePath',
-      'build/OrbitControl.xcresult',
+      'build/OrbitControl-Release.xcresult',
       'COMPILER_INDEX_STORE_ENABLE=NO',
       '-parallel-testing-enabled',
       'NO',
