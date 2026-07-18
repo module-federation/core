@@ -89,6 +89,12 @@ alias: {
 The default `router.es.js` adapter remains the multi-version CSR adapter. React
 data routers and `RouterProvider` are not supported for Bridge SSR V1.
 
+For hydration, serialize only `toBridgeSSRReference(result)` in host JSON. Create
+`createBridgeHydrationRegistry(document)` and wrap the host with
+`BridgeHydrationProvider` before calling `hydrateRoot`. The full server result is
+rendered once into its document slot; the client reference consumes that slot's
+validated snapshot once. Missing slots use CSR, while malformed slots throw.
+
 # 3. Load the module with routing
 
 ```js
