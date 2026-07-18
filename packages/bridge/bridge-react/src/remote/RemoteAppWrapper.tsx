@@ -16,6 +16,11 @@ import type { RemoteAppSSRProps } from '../types';
 import {
   BridgeSSRError,
   getMatchingBridgeSSRPayload,
+  MF_BRIDGE_INSTANCE_ATTR,
+  MF_BRIDGE_MODULE_ATTR,
+  MF_BRIDGE_MOUNT_ATTR,
+  MF_BRIDGE_SSR_ATTR,
+  MF_BRIDGE_VERSION_ATTR,
   type BridgeSSRReference,
   type BridgeSSRResult,
 } from '@module-federation/bridge-shared';
@@ -34,6 +39,14 @@ function areRenderInputsEqual(
 function scheduleBridgeDestroy(destroy: () => void) {
   if (typeof queueMicrotask === 'function') queueMicrotask(destroy);
   else void Promise.resolve().then(destroy);
+}
+
+function clearBridgeSSRMountAttrs(dom: HTMLElement) {
+  dom.removeAttribute(MF_BRIDGE_SSR_ATTR);
+  dom.removeAttribute(MF_BRIDGE_MOUNT_ATTR);
+  dom.removeAttribute(MF_BRIDGE_VERSION_ATTR);
+  dom.removeAttribute(MF_BRIDGE_MODULE_ATTR);
+  dom.removeAttribute(MF_BRIDGE_INSTANCE_ATTR);
 }
 
 function destroyProviderRoot(
@@ -136,16 +149,26 @@ export const RemoteAppWrapper = forwardRef<HTMLDivElement, any>(function (
       mountControllerRef.current = new AbortController();
       setProviderReady(true);
     } catch (error) {
-      if (snapshot && instanceId) registry?.fail(moduleName, instanceId);
+      if (snapshot && instanceId)
+        registry?.fail(reference?.moduleName || moduleName, instanceId);
       setRenderError(error);
     }
 
     return () => {
       const provider = providerInfoRef.current;
       const dom = renderDom.current;
+      const releaseUnclaimedSnapshot =
+        Boolean(snapshot && instanceId) &&
+        consumedIdentityRef.current !== hydrationIdentity;
       mountControllerRef.current?.abort();
       providerInfoRef.current = null;
       mountControllerRef.current = null;
+      // Drop unclaimed snapshots synchronously so a fast SPA remount cannot
+      // peek the same identity. StrictMode remounts keep the peeked snapshot in
+      // this instance's ref and can still hydrate after a lost registry claim.
+      if (releaseUnclaimedSnapshot) {
+        registry?.fail(reference?.moduleName || moduleName, instanceId!);
+      }
       if (!provider?.destroy || !dom || destroyedRef.current) return;
       destroyedRef.current = true;
       const destroyInfo = {
@@ -201,6 +224,30 @@ export const RemoteAppWrapper = forwardRef<HTMLDivElement, any>(function (
     }
     renderDom.current = dom;
 
+    // Claim the registry snapshot before any await so a cancelled mount cannot
+    // leave it peekable for a later SPA visit. This instance may still hydrate
+    // from the peeked snapshot object after a StrictMode remount.
+    let ssrState = serverPayload?.dehydratedState;
+    if (snapshot && instanceId && registry) {
+      if (consumedIdentityRef.current !== hydrationIdentity) {
+        const claimed = registry.consume(
+          reference?.moduleName || moduleName,
+          instanceId,
+        );
+        if (Object.is(claimed, snapshot)) {
+          consumedIdentityRef.current = hydrationIdentity;
+          ssrState = snapshot.state;
+        } else {
+          // Another consumer already claimed this identity — force CSR.
+          consumedIdentityRef.current = hydrationIdentity;
+          ssrState = undefined;
+          clearBridgeSSRMountAttrs(dom);
+        }
+      } else {
+        ssrState = snapshot.state;
+      }
+    }
+
     const renderProps = {
       moduleName,
       dom,
@@ -208,7 +255,7 @@ export const RemoteAppWrapper = forwardRef<HTMLDivElement, any>(function (
       memoryRoute,
       fallback,
       instanceId,
-      ssrState: serverPayload?.dehydratedState ?? snapshot?.state,
+      ssrState,
       signal,
       ...resProps,
     };
@@ -231,22 +278,18 @@ export const RemoteAppWrapper = forwardRef<HTMLDivElement, any>(function (
           provider.destroy?.({ dom });
           return;
         }
-        if (
-          snapshot &&
-          instanceId &&
-          consumedIdentityRef.current !== hydrationIdentity
-        ) {
-          registry?.consume(moduleName, instanceId);
-          consumedIdentityRef.current = hydrationIdentity;
-        }
         instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(
           currentRenderProps,
         );
       })
       .catch((error) => {
         if (signal.aborted) return;
-        if (snapshot && instanceId) {
-          registry?.fail(moduleName, instanceId);
+        if (
+          snapshot &&
+          instanceId &&
+          consumedIdentityRef.current !== hydrationIdentity
+        ) {
+          registry?.fail(reference?.moduleName || moduleName, instanceId);
         }
         setRenderError(error);
       });

@@ -135,4 +135,13 @@ describe('Bridge hydration registry', () => {
       '<p>other remote</p>',
     );
   });
+
+  it('fail clears a peeked snapshot so later peeks miss', () => {
+    installSlot();
+    const registry = createBridgeHydrationRegistry(document);
+    expect(registry.peek('remote/app', 'remote-1')).toBeDefined();
+    registry.fail('remote/app', 'remote-1');
+    expect(registry.peek('remote/app', 'remote-1')).toBeUndefined();
+    expect(registry.consume('remote/app', 'remote-1')).toBeUndefined();
+  });
 });

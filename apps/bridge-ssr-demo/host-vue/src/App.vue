@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 import { RemoteReactApp } from './remoteApps';
 import type { HostSSRContext } from './ssrContext';
@@ -10,8 +10,19 @@ const locationUrl = computed(
   () =>
     `${route.path}${route.fullPath.includes('?') ? `?${route.fullPath.split('?')[1]}` : ''}`,
 );
+const seedPath = props.ssrContext?.url.split('?')[0].split('#')[0];
+const seedConsumed = ref(false);
+
+watch(
+  () => route.path,
+  (path) => {
+    if (seedPath && path !== seedPath) seedConsumed.value = true;
+  },
+  { immediate: true },
+);
+
 const activeContext = computed(() => {
-  const seedPath = props.ssrContext?.url.split('?')[0].split('#')[0];
+  if (seedConsumed.value) return undefined;
   return seedPath === route.path ? props.ssrContext : undefined;
 });
 </script>
