@@ -111,8 +111,10 @@ Set the Xcode scheme's `LYNX_BUNDLE_URL` to
 origins and binds Rspeedy to `0.0.0.0`, so the phone can fetch the host,
 manifest, container, and lazy bundles from the same server.
 
-Release builds embed `ios/Resources/main.lynx.bundle` and retain strict ATS
-defaults. Build the host with the production manifest origin before syncing it:
+Release builds embed `ios/Resources/main.lynx.bundle`. ATS permits only local
+networking for the simulator/LAN demo; arbitrary and public insecure HTTP loads
+remain disabled. Build the host with the production manifest origin before
+syncing it:
 
 ```sh
 LYNX_REMOTE_ORIGIN=https://cdn.example.com/catalog/ pnpm build:native
@@ -121,11 +123,11 @@ pnpm ios:sync
 
 The host bundle and its non-eager async-startup JS are embedded. The manifest,
 container, and lazy expose bundles remain separately deployable HTTP(S)
-artifacts. The iOS simulator E2E
+artifacts. One Release simulator build runs all three UI scenarios: it
 launches the app, taps **Load remote catalog**, verifies compiled imports,
 runtime `loadRemote()`, and shared singleton identity, then checks every native
-bundle request observed by the test server. It also launches the Release app
-without a root URL override to prove the embedded host and strict ATS branch.
+bundle request observed by the test server; launches Catalog as a standalone
+root; and launches without a root URL override to prove the embedded host.
 
 ## Run with Lynx Explorer
 

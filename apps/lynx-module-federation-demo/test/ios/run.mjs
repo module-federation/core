@@ -22,8 +22,7 @@ const iosRoot = path.join(appRoot, 'ios');
 const artifactsRoot = path.join(iosRoot, 'build');
 const requestLogPath = path.join(artifactsRoot, 'requests.json');
 const screenshotPath = path.join(artifactsRoot, 'orbit-control.png');
-const resultBundlePath = path.join(artifactsRoot, 'OrbitControl.xcresult');
-const releaseResultBundlePath = path.join(
+const resultBundlePath = path.join(
   artifactsRoot,
   'OrbitControl-Release.xcresult',
 );
@@ -31,7 +30,6 @@ const requestedPaths = [];
 
 await mkdir(artifactsRoot, { recursive: true });
 await rm(resultBundlePath, { force: true, recursive: true });
-await rm(releaseResultBundlePath, { force: true, recursive: true });
 await stat(path.join(distRoot, 'host-native/main.lynx.bundle'));
 await stat(path.join(distRoot, 'catalog-native/main.lynx.bundle'));
 await stat(path.join(distRoot, 'remote-native/mf-manifest.json'));
@@ -159,6 +157,8 @@ try {
       'OrbitControl.xcworkspace',
       '-scheme',
       'OrbitControl',
+      '-configuration',
+      'Release',
       '-destination',
       `platform=iOS Simulator,id=${deviceUDID}`,
       '-derivedDataPath',
@@ -170,6 +170,7 @@ try {
       'NO',
       '-only-testing:OrbitControlUITests/OrbitControlUITests/testFederatedImportsRuntimeLoadingAndSingleton',
       '-only-testing:OrbitControlUITests/OrbitControlUITests/testStandaloneCatalogRemoteBuildLaunches',
+      '-only-testing:OrbitControlUITests/OrbitControlUITests/testEmbeddedReleaseHostLaunches',
     ],
     {
       env: {
@@ -179,25 +180,6 @@ try {
       },
     },
   );
-  await run('xcodebuild', [
-    'test',
-    '-workspace',
-    'OrbitControl.xcworkspace',
-    '-scheme',
-    'OrbitControl',
-    '-configuration',
-    'Release',
-    '-destination',
-    `platform=iOS Simulator,id=${deviceUDID}`,
-    '-derivedDataPath',
-    'build/DerivedData',
-    '-resultBundlePath',
-    'build/OrbitControl-Release.xcresult',
-    'COMPILER_INDEX_STORE_ENABLE=NO',
-    '-parallel-testing-enabled',
-    'NO',
-    '-only-testing:OrbitControlUITests/OrbitControlUITests/testEmbeddedReleaseHostLaunches',
-  ]);
 
   const remoteEntry = manifest.metaData.remoteEntry;
   const expected = [

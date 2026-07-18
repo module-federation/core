@@ -156,7 +156,6 @@ jobs:
         with:
           name: lynx-ios-e2e-failure
           path: |
-            apps/lynx-module-federation-demo/ios/build/OrbitControl.xcresult/
             apps/lynx-module-federation-demo/ios/build/OrbitControl-Release.xcresult/
             apps/lynx-module-federation-demo/ios/build/orbit-control.png
             apps/lynx-module-federation-demo/ios/build/requests.json

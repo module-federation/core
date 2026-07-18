@@ -34,6 +34,7 @@ const [
   packageJson,
   deviceServer,
   syncScript,
+  iosRunner,
 ] = await Promise.all([
   read('ios/Podfile'),
   read('ios/Podfile.lock'),
@@ -49,6 +50,7 @@ const [
   read('package.json'),
   read('scripts/dev-ios-device.mjs'),
   read('scripts/sync-ios-bundle.mjs'),
+  read('test/ios/run.mjs'),
 ]);
 
 for (const pod of ['Lynx', 'LynxService', 'XElement']) {
@@ -77,6 +79,7 @@ assert.match(fetcher, /hasPrefix:@"\/static\/"/);
 assert.match(fetcher, /relativePath = \[urlString substringFromIndex:1\]/);
 assert.doesNotMatch(releaseInfo, /NSAllowsArbitraryLoads/);
 assert.doesNotMatch(releaseInfo, /NSExceptionAllowsInsecureHTTPLoads/);
+assert.match(releaseInfo, /NSAllowsLocalNetworking/);
 assert.match(debugInfo, /NSAllowsLocalNetworking/);
 assert.match(debugInfo, /<key>127\.0\.0\.1<\/key>/);
 assert.match(debugInfo, /<key>localhost<\/key>/);
@@ -102,6 +105,15 @@ assert.match(deviceServer, /not a loopback or unspecified address/);
 assert.match(syncScript, /dist\/host-native\/main\.lynx\.bundle/);
 assert.match(syncScript, /sourceStatic/);
 assert.match(syncScript, /cp\(sourceStatic, destinationStatic/);
+assert.equal(iosRunner.match(/await run\(\s*'xcodebuild'/g)?.length, 1);
+assert.match(iosRunner, /'-configuration',\s*'Release'/);
+for (const testName of [
+  'testFederatedImportsRuntimeLoadingAndSingleton',
+  'testStandaloneCatalogRemoteBuildLaunches',
+  'testEmbeddedReleaseHostLaunches',
+]) {
+  assert.match(iosRunner, new RegExp(`-only-testing:.*${testName}`));
+}
 const deviceServerPath = path.join(appRoot, 'scripts/dev-ios-device.mjs');
 const validateDeviceOrigin = (origin) =>
   spawnSync(process.execPath, [deviceServerPath, '--check-origin'], {
