@@ -44,4 +44,36 @@ describe('React Bridge hydration selection', () => {
     expect(root.render).toHaveBeenCalledOnce();
     expect(hydrate).not.toHaveBeenCalled();
   });
+
+  it('unmounts a custom renderer that resolves after cancellation', async () => {
+    const root = { render: rs.fn(), unmount: rs.fn() };
+    let finishRender!: (renderedRoot: typeof root) => void;
+    const render = rs.fn(
+      () =>
+        new Promise<typeof root>((resolve) => {
+          finishRender = resolve;
+        }),
+    );
+    const provider = createBaseBridgeComponent({
+      rootComponent: Root,
+      render,
+    })();
+    const dom = document.createElement('div');
+    document.body.append(dom);
+    const controller = new AbortController();
+
+    const pending = provider.render({
+      dom,
+      moduleName: 'remote',
+      signal: controller.signal,
+    });
+    controller.abort();
+    finishRender(root);
+    await pending;
+
+    expect(root.unmount).toHaveBeenCalledOnce();
+    provider.destroy({ dom, moduleName: 'remote' });
+    expect(root.unmount).toHaveBeenCalledOnce();
+    dom.remove();
+  });
 });

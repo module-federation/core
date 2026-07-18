@@ -4,10 +4,12 @@ import {
   onBeforeUnmount,
   onActivated,
   onDeactivated,
+  onUpdated,
   watch,
   defineComponent,
   useAttrs,
   nextTick,
+  type PropType,
 } from 'vue';
 import {
   BRIDGE_SSR_PROTOCOL_VERSION,
@@ -33,7 +35,7 @@ export default defineComponent({
     hashRoute: Boolean,
     providerInfo: Function,
     rootAttrs: Object,
-    ssr: Object,
+    ssr: Object as PropType<BridgeSSRResult | BridgeSSRReference>,
     instanceId: String,
   },
   inheritAttrs: false,
@@ -44,9 +46,15 @@ export default defineComponent({
     const isRendered = ref(false);
     const isActive = ref(false);
     const wasDeactivated = ref(false);
+    const renderError = ref<unknown>();
+    const controller = new AbortController();
+    let renderQueue = Promise.resolve();
+    let consumedSnapshot = false;
+    let providerGeneration = 0;
     const route = useRoute();
     const hostInstance = getInstance();
     const componentAttrs = useAttrs();
+    let lastComponentAttrs = { ...componentAttrs };
     const ssrPayload = getMatchingBridgeSSRPayload(props.ssr, {
       moduleName: props.moduleName,
       instanceId: props.instanceId,
@@ -75,43 +83,77 @@ export default defineComponent({
       hashRoute: props.hashRoute,
     });
 
-    const renderComponent = async () => {
-      if (!rootRef.value || isRendered.value) {
-        return;
-      }
-      const providerReturn = props.providerInfo?.();
-      providerInfoRef.value = providerReturn;
-
-      let renderProps = {
-        ...componentAttrs,
-        moduleName: props.moduleName,
-        dom: rootRef.value,
-        basename: props.basename,
-        memoryRoute: props.memoryRoute,
-        hashRoute: props.hashRoute,
-        instanceId,
-        ssrState: serverPayload?.dehydratedState ?? snapshot?.state,
-      };
-      LoggerInstance.debug(
-        `createRemoteAppComponent LazyComponent render >>>`,
-        renderProps,
-      );
-
-      const beforeBridgeRenderRes =
-        (await hostInstance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(
-          renderProps,
-        )) || {};
-
-      renderProps = { ...renderProps, ...beforeBridgeRenderRes.extraProps };
-      await providerReturn.render(renderProps);
-      isRendered.value = true;
-      if (snapshot && instanceId) {
-        registry?.consume(
-          props.moduleName || reference!.moduleName,
+    const renderComponent = () => {
+      const pending = renderQueue.then(async () => {
+        const generation = providerGeneration;
+        const dom = rootRef.value as HTMLElement | null;
+        if (
+          !dom ||
+          !dom.isConnected ||
+          !props.providerInfo ||
+          controller.signal.aborted
+        ) {
+          return;
+        }
+        const providerReturn = providerInfoRef.value || props.providerInfo?.();
+        providerInfoRef.value = providerReturn;
+        const wasRendered = isRendered.value;
+        let renderProps = {
+          ...componentAttrs,
+          moduleName: props.moduleName,
+          dom,
+          basename: props.basename,
+          memoryRoute: props.memoryRoute,
+          hashRoute: props.hashRoute,
           instanceId,
+          ssrState: wasRendered
+            ? undefined
+            : (serverPayload?.dehydratedState ?? snapshot?.state),
+          signal: controller.signal,
+        };
+        LoggerInstance.debug(
+          `createRemoteAppComponent LazyComponent render >>>`,
+          renderProps,
         );
-      }
-      hostInstance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(renderProps);
+
+        const beforeBridgeRenderRes =
+          (await hostInstance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(
+            renderProps,
+          )) || {};
+        renderProps = { ...renderProps, ...beforeBridgeRenderRes.extraProps };
+        await providerReturn.render(renderProps);
+        if (
+          generation !== providerGeneration ||
+          controller.signal.aborted ||
+          wasDeactivated.value ||
+          !dom.isConnected
+        ) {
+          providerReturn.destroy?.({ dom });
+          if (providerInfoRef.value === providerReturn) {
+            providerInfoRef.value = null;
+          }
+          return;
+        }
+        isRendered.value = true;
+        if (!consumedSnapshot && snapshot && instanceId) {
+          registry?.consume(
+            props.moduleName || reference!.moduleName,
+            instanceId,
+          );
+          consumedSnapshot = true;
+        }
+        hostInstance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(
+          renderProps,
+        );
+      });
+      renderQueue = pending.catch((error) => {
+        if (controller.signal.aborted || wasDeactivated.value) return;
+        if (snapshot && instanceId) {
+          registry?.fail(props.moduleName || reference!.moduleName, instanceId);
+        }
+        renderError.value = error;
+      });
+      return renderQueue;
     };
 
     const destroyComponent = () => {
@@ -164,7 +206,39 @@ export default defineComponent({
 
     onMounted(() => {
       isActive.value = true;
-      renderComponent();
+      void renderComponent();
+    });
+
+    watch(
+      () => props.providerInfo,
+      () => {
+        providerGeneration += 1;
+        destroyComponent();
+        providerInfoRef.value = null;
+        void renderComponent();
+      },
+      { flush: 'post' },
+    );
+
+    watch(
+      () => [props.basename, props.memoryRoute, props.hashRoute],
+      () => {
+        if (isRendered.value) void renderComponent();
+      },
+      { deep: true, flush: 'post' },
+    );
+
+    onUpdated(() => {
+      const nextComponentAttrs = { ...componentAttrs };
+      const keys = Object.keys(nextComponentAttrs);
+      const attrsChanged =
+        keys.length !== Object.keys(lastComponentAttrs).length ||
+        keys.some(
+          (key) => !Object.is(nextComponentAttrs[key], lastComponentAttrs[key]),
+        );
+      if (!attrsChanged) return;
+      lastComponentAttrs = nextComponentAttrs;
+      if (isRendered.value) void renderComponent();
     });
 
     onActivated(async () => {
@@ -174,7 +248,7 @@ export default defineComponent({
       }
       wasDeactivated.value = false;
       await nextTick();
-      renderComponent();
+      await renderComponent();
     });
 
     onDeactivated(() => {
@@ -184,11 +258,13 @@ export default defineComponent({
     });
 
     onBeforeUnmount(() => {
+      controller.abort();
       watchStopHandle();
       destroyComponent();
     });
 
     return () => {
+      if (renderError.value) throw renderError.value;
       const mount = (
         <div
           {...(props.rootAttrs || {})}

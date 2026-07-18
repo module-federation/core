@@ -1,5 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, rs } from '@rstest/core';
-import { createApp, defineComponent, h, KeepAlive, nextTick } from 'vue';
+import {
+  createApp,
+  defineComponent,
+  h,
+  KeepAlive,
+  nextTick,
+  ref as vueRef,
+} from 'vue';
 import { createMemoryHistory, createRouter, RouterView } from 'vue-router';
 import RemoteApp from '../src/remoteApp';
 
@@ -95,6 +102,74 @@ describe('RemoteApp', () => {
     await flushBridgeRender();
     expect(providerReturn.render).toHaveBeenCalledTimes(2);
 
+    app.unmount();
+  });
+
+  it('forwards updated application props to the mounted provider', async () => {
+    const providerReturn = {
+      render: rs.fn(),
+      destroy: rs.fn(),
+    };
+    const providerInfo = () => providerReturn;
+    const label = vueRef('first');
+    const App = defineComponent({
+      setup: () => () =>
+        h(RemoteApp, {
+          moduleName: 'ecApp',
+          providerInfo,
+          label: label.value,
+        }),
+    });
+    const app = createApp(App);
+    app.mount(root);
+    await flushBridgeRender();
+    expect(providerReturn.render).toHaveBeenCalledTimes(1);
+    expect(providerReturn.render.mock.calls[0][0].label).toBe('first');
+
+    label.value = 'second';
+    await flushBridgeRender();
+    expect(providerReturn.render).toHaveBeenCalledTimes(2);
+    expect(providerReturn.render.mock.calls[1][0].label).toBe('second');
+    app.unmount();
+  });
+
+  it('replaces a provider that changes during an asynchronous mount', async () => {
+    let finishFirstRender!: () => void;
+    const firstProvider = {
+      render: rs.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            finishFirstRender = resolve;
+          }),
+      ),
+      destroy: rs.fn(),
+    };
+    const secondProvider = {
+      render: rs.fn(),
+      destroy: rs.fn(),
+    };
+    const providerInfo = vueRef(() => firstProvider);
+    const App = defineComponent({
+      setup: () => () =>
+        h(RemoteApp, {
+          moduleName: 'ecApp',
+          providerInfo: providerInfo.value,
+        }),
+    });
+    const app = createApp(App);
+    app.mount(root);
+    await nextTick();
+    await Promise.resolve();
+    expect(firstProvider.render).toHaveBeenCalledOnce();
+
+    providerInfo.value = () => secondProvider;
+    await nextTick();
+    finishFirstRender();
+    await flushBridgeRender();
+    await flushBridgeRender();
+
+    expect(firstProvider.destroy).toHaveBeenCalledOnce();
+    expect(secondProvider.render).toHaveBeenCalledOnce();
     app.unmount();
   });
 });
