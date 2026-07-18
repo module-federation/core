@@ -11,6 +11,8 @@ Bridge SSR V1 lets a federated application provider return a buffered HTML islan
 
 React data routers and other React or Router versions keep their existing client-rendering support but are not supported for SSR in V1.
 
+React Router v6 remotes must alias `react-router-dom$` to `@module-federation/bridge-react/dist/router-v6.es.js` in both their browser and Node builds. The default `router.es.js` adapter is CSR-only. Attempting to use the default adapter or `RouterProvider` during SSR throws a configuration error.
+
 ## Remote provider
 
 Set `ssr: true` when no request preparation is needed. If preparation is required, map the same federated export key to separate browser and Node source files. The browser file supplies `hydrate`; the Node file supplies `prepare`. This keeps server renderers and request-only code out of browser chunks.

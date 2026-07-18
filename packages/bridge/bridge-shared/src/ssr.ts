@@ -145,6 +145,23 @@ export function assertBridgeSSRResult(
   }
 }
 
+export function getMatchingBridgeSSRResult(
+  value: unknown,
+  expected: { moduleName?: string; instanceId?: string },
+): BridgeSSRResult | undefined {
+  if (value === undefined) return undefined;
+  assertBridgeSSRResult(value);
+  if (
+    (expected.moduleName !== undefined &&
+      value.moduleName !== expected.moduleName) ||
+    (expected.instanceId !== undefined &&
+      value.instanceId !== expected.instanceId)
+  ) {
+    return undefined;
+  }
+  return value;
+}
+
 export function getBridgeSSRContainerAttrs(value: {
   moduleName: string;
   instanceId: string;

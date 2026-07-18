@@ -3,6 +3,7 @@ import {
   BRIDGE_SSR_PROTOCOL_VERSION,
   BridgeSSRError,
   assertBridgeJSONValue,
+  getMatchingBridgeSSRResult,
   renderRemoteBridge,
   serializeBridgeJSON,
 } from './index';
@@ -21,6 +22,31 @@ describe('Bridge SSR V1 contract', () => {
     expect(() => assertBridgeJSONValue({ value: Number.NaN })).toThrow(
       /finite/,
     );
+  });
+
+  it('validates host-carried results before matching their identity', () => {
+    const result = {
+      protocolVersion: BRIDGE_SSR_PROTOCOL_VERSION,
+      moduleName: 'remote/app',
+      instanceId: 'remote-1',
+      html: '<p>remote</p>',
+    } as const;
+
+    expect(
+      getMatchingBridgeSSRResult(result, {
+        moduleName: 'remote/app',
+        instanceId: 'remote-1',
+      }),
+    ).toBe(result);
+    expect(
+      getMatchingBridgeSSRResult(result, { moduleName: 'other/app' }),
+    ).toBeUndefined();
+    expect(() =>
+      getMatchingBridgeSSRResult(
+        { ...result, protocolVersion: 2 },
+        { moduleName: 'remote/app' },
+      ),
+    ).toThrow(/incompatible result/);
   });
 
   it('loads, renders, and validates a remote provider', async () => {

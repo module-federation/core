@@ -43,4 +43,36 @@ describe('Vue Bridge server provider', () => {
     });
     expect(serverRenderer).toHaveBeenCalledOnce();
   });
+
+  it('unmounts the previous app before rendering again into the same DOM node', async () => {
+    const provider = createBridgeComponentWithServerRenderer({
+      rootComponent: defineComponent({
+        props: { label: String },
+        setup: (props) => () => h('p', props.label),
+      }),
+      appOptions: () => undefined,
+    })();
+    const dom = document.createElement('div');
+
+    await provider.render({
+      dom,
+      moduleName: 'vue/remote',
+      label: 'first',
+    } as any);
+    const firstApp = (dom as HTMLElement & { __vue_app__?: any }).__vue_app__;
+    const unmount = rs.spyOn(firstApp, 'unmount');
+
+    await provider.render({
+      dom,
+      moduleName: 'vue/remote',
+      label: 'second',
+    } as any);
+    expect(unmount).toHaveBeenCalledOnce();
+    expect(dom.textContent).toBe('second');
+    expect((dom as HTMLElement & { __vue_app__?: any }).__vue_app__).not.toBe(
+      firstApp,
+    );
+
+    provider.destroy({ dom });
+  });
 });

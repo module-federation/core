@@ -12,6 +12,7 @@ import {
 import {
   dispatchPopstateEnv,
   getBridgeSSRContainerAttrs,
+  getMatchingBridgeSSRResult,
   type BridgeSSRResult,
 } from '@module-federation/bridge-shared';
 import { useRoute } from 'vue-router';
@@ -41,7 +42,10 @@ export default defineComponent({
     const route = useRoute();
     const hostInstance = getInstance();
     const componentAttrs = useAttrs();
-    const ssrPayload = props.ssr as BridgeSSRResult | undefined;
+    const ssrPayload = getMatchingBridgeSSRResult(props.ssr, {
+      moduleName: props.moduleName,
+      instanceId: props.instanceId,
+    }) as BridgeSSRResult | undefined;
     const instanceId = props.instanceId || ssrPayload?.instanceId;
 
     const getBridgeRenderProps = () => ({

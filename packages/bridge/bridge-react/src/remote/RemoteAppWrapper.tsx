@@ -7,7 +7,10 @@ import { LoggerInstance, getRootDomDefaultClassName } from '../utils';
 import { federationRuntime } from '../provider/plugin';
 import { RemoteComponentProps, RemoteAppParams } from '../types';
 import type { RemoteAppSSRProps } from '../types';
-import { getBridgeSSRContainerAttrs } from '@module-federation/bridge-shared';
+import {
+  getBridgeSSRContainerAttrs,
+  getMatchingBridgeSSRResult,
+} from '@module-federation/bridge-shared';
 
 export const RemoteAppWrapper = forwardRef(function (
   props: RemoteAppParams & RemoteComponentProps & RemoteAppSSRProps,
@@ -26,8 +29,12 @@ export const RemoteAppWrapper = forwardRef(function (
     instanceId: suppliedInstanceId,
     ...resProps
   } = props;
-  const instanceId = suppliedInstanceId || ssr?.instanceId;
-  const hasSSRPayload = Boolean(ssr && instanceId);
+  const ssrPayload = getMatchingBridgeSSRResult(ssr, {
+    moduleName,
+    instanceId: suppliedInstanceId,
+  });
+  const instanceId = suppliedInstanceId || ssrPayload?.instanceId;
+  const hasSSRPayload = Boolean(ssrPayload && instanceId);
 
   const instance = federationRuntime.instance;
   const rootRef: React.MutableRefObject<HTMLDivElement | null> =
@@ -92,7 +99,7 @@ export const RemoteAppWrapper = forwardRef(function (
       memoryRoute,
       fallback,
       instanceId,
-      ssrState: ssr?.dehydratedState,
+      ssrState: ssrPayload?.dehydratedState,
       ...resProps,
     };
     renderDom.current = rootRef.current;
@@ -118,7 +125,7 @@ export const RemoteAppWrapper = forwardRef(function (
         : {})}
       {...(hasSSRPayload
         ? {
-            dangerouslySetInnerHTML: { __html: ssr!.html },
+            dangerouslySetInnerHTML: { __html: ssrPayload!.html },
             suppressHydrationWarning: true,
           }
         : {})}

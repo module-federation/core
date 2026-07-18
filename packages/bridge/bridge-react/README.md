@@ -74,6 +74,21 @@ export default defineConfig({
 });
 ```
 
+For Bridge SSR V1 with declarative React Router v6, both the browser and Node
+builds must alias `react-router-dom$` to the version-specific adapter instead:
+
+```js
+alias: {
+  'react-router-dom$': path.resolve(
+    __dirname,
+    'node_modules/@module-federation/bridge-react/dist/router-v6.es.js',
+  ),
+}
+```
+
+The default `router.es.js` adapter remains the multi-version CSR adapter. React
+data routers and `RouterProvider` are not supported for Bridge SSR V1.
+
 # 3. Load the module with routing
 
 ```js
