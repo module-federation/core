@@ -145,7 +145,7 @@ export function shouldUseTreeShaking(
 /**
  * compare version a and b, return true if a is less than b
  */
-export function versionLt(a: string, b: string): boolean {
+function versionLt(a: string, b: string): boolean {
   const transformInvalidVersion = (version: string) => {
     const isNumberVersion = !Number.isNaN(Number(version));
     if (isNumberVersion) {
@@ -165,7 +165,7 @@ export function versionLt(a: string, b: string): boolean {
   }
 }
 
-export const findVersion = (
+const findVersion = (
   shareVersionMap: ShareScopeMap[string][string],
   cb?: (prev: string, cur: string) => boolean,
 ): string => {
@@ -192,7 +192,7 @@ export const findVersion = (
   }, 0) as string;
 };
 
-export const isLoaded = (shared: {
+const isLoaded = (shared: {
   loading?: null | Promise<any>;
   loaded?: boolean;
   lib?: () => unknown;

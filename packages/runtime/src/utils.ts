@@ -2,7 +2,7 @@ import type { ModuleFederation } from '@module-federation/runtime-core';
 import { CurrentGlobal } from '@module-federation/runtime-core';
 
 // injected by bundler, so it can not use runtime-core stuff
-export function getBuilderId(): string {
+function getBuilderId(): string {
   //@ts-ignore
   return typeof FEDERATION_BUILD_IDENTIFIER !== 'undefined'
     ? //@ts-ignore

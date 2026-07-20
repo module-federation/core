@@ -206,9 +206,3 @@ export function satisfy(version: string, range: string): boolean {
   // If none of the OR sub-ranges were satisfied
   return false;
 }
-
-export function isLegallyVersion(version: string): boolean {
-  const semverRegex =
-    /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?(\+[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$/;
-  return semverRegex.test(version);
-}

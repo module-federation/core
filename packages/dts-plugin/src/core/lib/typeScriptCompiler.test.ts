@@ -898,9 +898,6 @@ describe('typeScriptCompiler', () => {
                                 name: 'Log.d.ts',
                               },
                               {
-                                name: 'PublisherRegisteredLog.d.ts',
-                              },
-                              {
                                 name: 'index.d.ts',
                               },
                             ],
@@ -936,9 +933,6 @@ describe('typeScriptCompiler', () => {
                           },
                           {
                             name: 'log.d.ts',
-                          },
-                          {
-                            name: 'logTransform.d.ts',
                           },
                         ],
                         name: 'utils',

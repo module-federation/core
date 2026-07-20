@@ -1,5 +1,4 @@
 import { GlobalModuleInfo } from '@module-federation/sdk';
-import '../../src/global';
 
 export function setMockModuleInfos(modules: GlobalModuleInfo): () => void {
   globalThis.__FEDERATION__.moduleInfo = {

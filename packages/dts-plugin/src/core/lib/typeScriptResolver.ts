@@ -86,12 +86,6 @@ export const getTypeScriptPackageInfo = (
   };
 };
 
-export const getTypeScriptMajorVersion = (context = process.cwd()) =>
-  getTypeScriptPackageInfo(context).majorVersion;
-
-export const isTypeScript7 = (context = process.cwd()) =>
-  getTypeScriptMajorVersion(context) === 7;
-
 export const requireTypeScript = <T = unknown>(context = process.cwd()): T => {
   const { requireFromContext } = resolveTypeScriptPackage(context);
   return requireFromContext('typescript') as T;

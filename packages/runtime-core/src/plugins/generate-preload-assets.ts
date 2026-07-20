@@ -109,7 +109,7 @@ const isExisted = (type: 'link' | 'script', url: string) => {
 };
 
 // eslint-disable-next-line max-lines-per-function
-export function generatePreloadAssets(
+function generatePreloadAssets(
   origin: ModuleFederation,
   preloadOptions: PreloadOptions[number],
   remote: RemoteInfoOptionalVersion,

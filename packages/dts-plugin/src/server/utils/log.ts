@@ -6,10 +6,6 @@ import { ActionKind } from '../message/Action';
 
 const logger = createLogger(`[ ${MF_SERVER_IDENTIFIER} ]`);
 
-function log(msg: string): void {
-  logger.info(msg);
-}
-
 function fileLog(msg: string, module: string, level: string) {
   if (!process?.env?.['FEDERATION_DEBUG']) {
     return;
@@ -36,4 +32,4 @@ function error(error: unknown, action: ActionKind, from: string): string {
   return err.toString();
 }
 
-export { log, fileLog, error, logger };
+export { fileLog, error, logger };
