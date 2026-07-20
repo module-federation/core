@@ -18,6 +18,12 @@ function WrapperRouter(
     WrapperRouterProps: props,
   });
 
+  if (routerContextProps?.ssrLocation) {
+    throw new Error(
+      'Bridge SSR V1 with React Router v6 requires the @module-federation/bridge-react/router-v6 alias',
+    );
+  }
+
   if (routerContextProps?.memoryRoute) {
     return (
       <ReactRouterDom.MemoryRouter
@@ -51,6 +57,12 @@ function WrapperRouterProvider(
   const createBrowserRouter = (ReactRouterDom as any)[
     'create' + 'BrowserRouter'
   ];
+
+  if (routerContextProps.ssrLocation) {
+    throw new Error(
+      'Bridge SSR V1 does not support React Router data routers or RouterProvider',
+    );
+  }
 
   if (routerContextProps.memoryRoute) {
     const MemeoryRouterInstance = createMemoryRouter(routers, {

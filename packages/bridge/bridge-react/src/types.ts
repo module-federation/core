@@ -1,4 +1,11 @@
 import * as React from 'react';
+import type {
+  BridgeJSONValue,
+  BridgeSSRConfig,
+  BridgeSSRReference,
+  BridgeSSRResult,
+  BridgeServerRenderContext,
+} from '@module-federation/bridge-shared';
 
 export type ErrorFallbackProps = {
   error: unknown;
@@ -47,6 +54,9 @@ export interface RenderParams {
    * }
    */
   rootOptions?: CreateRootOptions;
+  instanceId?: string;
+  ssrState?: BridgeJSONValue;
+  signal?: AbortSignal;
   [key: string]: unknown;
 }
 
@@ -70,6 +80,7 @@ export interface ProviderParams {
   };
   style?: React.CSSProperties;
   className?: string;
+  ssrLocation?: string;
 }
 
 /**
@@ -78,6 +89,9 @@ export interface ProviderParams {
 export interface RenderFnParams extends ProviderParams {
   dom: HTMLElement;
   fallback?: React.ComponentType<{ error: Error }>;
+  instanceId?: string;
+  ssrState?: BridgeJSONValue;
+  signal?: AbortSignal;
   [key: string]: unknown;
 }
 
@@ -90,8 +104,17 @@ export interface ProviderFnParams<T> {
     App: React.ReactElement,
     id?: HTMLElement | string,
   ) => RootType | Promise<RootType>;
+  hydrate?: (
+    App: React.ReactElement,
+    id?: HTMLElement | string,
+  ) => RootType | Promise<RootType>;
   createRoot?: (
     container: Element | DocumentFragment,
+    options?: CreateRootOptions,
+  ) => Root;
+  hydrateRoot?: (
+    container: Element | DocumentFragment,
+    initialChildren: React.ReactNode,
     options?: CreateRootOptions,
   ) => Root;
   /**
@@ -104,12 +127,15 @@ export interface ProviderFnParams<T> {
    * }
    */
   defaultRootOptions?: CreateRootOptions;
+  ssr?: BridgeSSRConfig<T>;
 }
 
 /**
  * Parameters for the remote component
  */
-export interface RemoteComponentProps<T = Record<string, unknown>> {
+export interface RemoteComponentProps<
+  T = Record<string, unknown>,
+> extends RemoteAppSSRProps {
   props?: T;
   fallback?: React.ComponentType<{ error: Error }>;
   loading?: React.ReactNode;
@@ -135,10 +161,18 @@ export interface RemoteComponentParams<
  */
 export interface RemoteModule {
   provider: () => {
-    render: (info: RenderFnParams) => void;
+    render: (info: RenderFnParams) => void | Promise<void>;
     destroy: (info: { dom: any }) => void;
+    renderServer?: (
+      context: BridgeServerRenderContext,
+    ) => Promise<BridgeSSRResult>;
   };
 }
+
+export type RemoteAppSSRProps = {
+  ssr?: BridgeSSRResult | BridgeSSRReference;
+  instanceId?: string;
+};
 
 /**
  * Parameters for a remote app component

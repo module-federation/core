@@ -12,6 +12,7 @@ packages:
   - 'apps/manifest-demo/*'
   - 'apps/esbuild'
   - 'apps/*'
+  - 'apps/bridge-ssr-demo/*'
   - 'webpack'
   - 'assemble-release-plan'
   - 'packages/runtime-plugins/*'

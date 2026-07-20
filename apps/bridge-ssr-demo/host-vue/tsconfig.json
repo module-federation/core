@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "allowJs": true,
+    "types": ["node"]
+  },
+  "include": ["src", "rsbuild.config.ts", "playwright.config.ts"]
+}

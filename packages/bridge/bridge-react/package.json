@@ -32,6 +32,14 @@
     },
     "./v18": {
       "types": "./dist/v18.d.ts",
+      "browser": {
+        "import": "./dist/v18.es.js",
+        "require": "./dist/v18.cjs.js"
+      },
+      "node": {
+        "import": "./dist/v18.server.es.js",
+        "require": "./dist/v18.server.cjs.js"
+      },
       "import": "./dist/v18.es.js",
       "require": "./dist/v18.cjs.js"
     },
@@ -189,6 +197,7 @@
     "vite": "^5.4.21",
     "@module-federation/runtime": "workspace:*",
     "@module-federation/runtime-core": "workspace:*",
-    "hono": "4.12.26"
+    "hono": "4.12.26",
+    "jsdom": "20.0.3"
   }
 }
