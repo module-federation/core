@@ -71,11 +71,15 @@ export function getGlobalRemoteInfo(
   };
 }
 
+interface ManifestCacheRecord {
+  manifest: Manifest;
+  resolvedUrl: string;
+}
+
 export class SnapshotHandler {
   loadingHostSnapshot: Promise<GlobalModuleInfo | void> | null = null;
   HostInstance: ModuleFederation;
-  manifestCache: Map<string, Manifest> = new Map();
-  private manifestResolvedUrlCache: Map<string, string> = new Map();
+  manifestCache: Map<string, ManifestCacheRecord> = new Map();
   hooks = new PluginSystem({
     beforeLoadRemoteSnapshot: new AsyncHook<
       [
@@ -121,7 +125,7 @@ export class SnapshotHandler {
 
   clearManifestCache(manifestUrl: string): void {
     this.manifestCache.delete(manifestUrl);
-    this.manifestResolvedUrlCache.delete(manifestUrl);
+    delete this.manifestLoading[manifestUrl];
   }
 
   // eslint-disable-next-line max-lines-per-function
@@ -304,11 +308,12 @@ export class SnapshotHandler {
   ): Promise<Manifest> {
     const getManifest = async (): Promise<Manifest> => {
       const remoteInfo = getRemoteInfo(moduleInfo);
-      let manifestJson: Manifest | undefined =
-        this.manifestCache.get(manifestUrl);
-      if (manifestJson) {
-        return manifestJson;
+      const cachedManifest = this.manifestCache.get(manifestUrl);
+      if (cachedManifest) {
+        return cachedManifest.manifest;
       }
+      let manifestJson: Manifest | undefined;
+      let resolvedUrl = manifestUrl;
       try {
         let res = await this.loaderHook.lifecycle.fetch.emit(
           manifestUrl,
@@ -325,10 +330,8 @@ export class SnapshotHandler {
         if (!res || !(res instanceof Response)) {
           res = await fetch(manifestUrl, {});
         }
-        if (res.url) {
-          this.manifestResolvedUrlCache.set(manifestUrl, res.url);
-        }
         manifestJson = (await res.json()) as Manifest;
+        resolvedUrl = res.url || manifestUrl;
       } catch (err) {
         manifestJson =
           (await this.HostInstance.remoteHandler.hooks.lifecycle.errorLoadRemote.emit(
@@ -392,7 +395,10 @@ export class SnapshotHandler {
           optionsToMFContext(this.HostInstance.options),
         );
       }
-      this.manifestCache.set(manifestUrl, manifestJson);
+      this.manifestCache.set(manifestUrl, {
+        manifest: manifestJson,
+        resolvedUrl,
+      });
       return manifestJson;
     };
 
@@ -417,8 +423,8 @@ export class SnapshotHandler {
       );
       const remoteSnapshot = generateSnapshotFromManifest(manifestJson, {
         version: manifestUrl,
-        manifestUrl:
-          this.manifestResolvedUrlCache.get(manifestUrl) ?? manifestUrl,
+        resolvedManifestUrl:
+          this.manifestCache.get(manifestUrl)?.resolvedUrl ?? manifestUrl,
       });
 
       const { remoteSnapshot: remoteSnapshotRes } =

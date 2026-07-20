@@ -98,4 +98,62 @@ describe('snapshot', () => {
       remoteEntry: 'catalog.web.lynx.bundle',
     });
   });
+
+  it('uses the requested manifest URL after parse recovery', async () => {
+    const manifestUrl = 'https://requested.example/mf-manifest.json';
+    const resolvedManifestUrl =
+      'https://redirected.example/v2/mf-manifest.json';
+    const recoveredManifest = {
+      id: 'catalog',
+      name: 'catalog',
+      metaData: {
+        name: 'catalog',
+        publicPath: 'auto',
+        type: 'app',
+        buildInfo: { buildVersion: '1.0.0' },
+        remoteEntry: {
+          name: 'catalog.web.lynx.bundle',
+          path: 'https://requested.example/',
+          type: 'global',
+        },
+        types: { name: '', path: '' },
+        globalName: 'catalog',
+      },
+      remotes: [],
+      shared: [],
+      exposes: [],
+    };
+    const response = new Response('invalid manifest');
+    Object.defineProperty(response, 'url', { value: resolvedManifestUrl });
+    Object.defineProperty(response, 'json', {
+      value: async () => {
+        throw new Error('invalid manifest');
+      },
+    });
+
+    const instance = new ModuleFederation({
+      name: 'host',
+      remotes: [{ name: 'catalog', entry: manifestUrl }],
+      plugins: [
+        {
+          name: 'failed-manifest-fetch',
+          fetch: async () => response,
+        },
+        {
+          name: 'manifest-recovery',
+          errorLoadRemote: () => recoveredManifest,
+        },
+      ],
+    });
+
+    const { remoteSnapshot } =
+      await instance.snapshotHandler.loadRemoteSnapshotInfo({
+        moduleInfo: { name: 'catalog', entry: manifestUrl },
+      });
+
+    expect(remoteSnapshot).toMatchObject({
+      publicPath: 'https://requested.example/',
+    });
+    expect(remoteSnapshot?.remoteEntry).toContain('requested.example');
+  });
 });

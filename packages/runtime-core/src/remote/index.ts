@@ -6,12 +6,7 @@ import {
   GlobalModuleInfo,
 } from '@module-federation/sdk';
 import { RUNTIME_004, runtimeDescMap } from '@module-federation/error-codes';
-import {
-  Global,
-  getInfoWithoutType,
-  globalLoading,
-  CurrentGlobal,
-} from '../global';
+import { getInfoWithoutType, globalLoading, CurrentGlobal } from '../global';
 import {
   Options,
   UserOptions,
@@ -712,7 +707,6 @@ export class RemoteHandler {
 
       if ('entry' in remote) {
         host.snapshotHandler.clearManifestCache(remote.entry);
-        delete Global.__FEDERATION__.__MANIFEST_LOADING__[remote.entry];
       }
 
       const { hostGlobalSnapshot } = getGlobalRemoteInfo(remote, host);

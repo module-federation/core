@@ -53,13 +53,15 @@ describe('generateSnapshotFromManifest', () => {
     const remoteSnapshot = generateSnapshotFromManifest(
       manifestWithAutoPublicPath,
       {
-        version: '/remote-web/mf-manifest.json',
-        manifestUrl: 'https://example.test/remote-web/mf-manifest.json',
+        version: 'https://requested.example/mf-manifest.json',
+        resolvedManifestUrl: 'https://redirected.example/v2/mf-manifest.json',
       },
     );
 
-    expect(remoteSnapshot.version).toBe('/remote-web/mf-manifest.json');
-    expect(remoteSnapshot.publicPath).toBe('https://example.test/remote-web/');
+    expect(remoteSnapshot.version).toBe(
+      'https://requested.example/mf-manifest.json',
+    );
+    expect(remoteSnapshot.publicPath).toBe('https://redirected.example/v2/');
   });
 
   it('return basic app snapshot with only manifest params in dev with getPublicPath', () => {
