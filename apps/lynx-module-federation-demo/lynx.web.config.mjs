@@ -4,6 +4,7 @@ import { defineConfig } from '@lynx-js/rspeedy';
 import {
   createWebHostFederationPlugin,
   resolveAliases,
+  resolveOutputRoot,
 } from './federation.config.mjs';
 
 const manifestUrl =
@@ -25,7 +26,7 @@ export default defineConfig({
   output: {
     cleanDistPath: false,
     distPath: {
-      root: 'dist/host-web',
+      root: resolveOutputRoot('host-web'),
     },
     minify: false,
   },

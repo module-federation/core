@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict';
 import { spawn, spawnSync } from 'node:child_process';
-import { createReadStream } from 'node:fs';
 import {
   mkdir,
   readFile,
@@ -9,9 +8,10 @@ import {
   stat,
   writeFile,
 } from 'node:fs/promises';
-import { createServer } from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import { createArtifactServer } from '../support/artifact-server.mjs';
 
 const appRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -26,7 +26,6 @@ const resultBundlePath = path.join(
   artifactsRoot,
   'OrbitControl-Release.xcresult',
 );
-const requestedPaths = [];
 
 await mkdir(artifactsRoot, { recursive: true });
 await rm(resultBundlePath, { force: true, recursive: true });
@@ -50,39 +49,6 @@ assert.ok(
   `iOS E2E only serves local artifacts, received ${serverURL.origin}`,
 );
 const serverPort = Number(serverURL.port || 80);
-
-const contentTypes = new Map([
-  ['.bundle', 'application/octet-stream'],
-  ['.json', 'application/json; charset=utf-8'],
-  ['.js', 'text/javascript; charset=utf-8'],
-]);
-const server = createServer(async (request, response) => {
-  try {
-    const pathname = decodeURIComponent(
-      new URL(request.url, 'http://localhost').pathname,
-    );
-    requestedPaths.push(pathname);
-    const artifactRoot = pathname.startsWith('/static/')
-      ? path.join(distRoot, 'host-native')
-      : distRoot;
-    const filePath = path.resolve(artifactRoot, `.${pathname}`);
-    if (!filePath.startsWith(`${artifactRoot}${path.sep}`)) {
-      response.writeHead(403).end('Forbidden');
-      return;
-    }
-    const fileStat = await stat(filePath);
-    if (!fileStat.isFile()) throw new Error('Not a file');
-    response.writeHead(200, {
-      'Access-Control-Allow-Origin': '*',
-      'Content-Length': fileStat.size,
-      'Content-Type':
-        contentTypes.get(path.extname(filePath)) ?? 'application/octet-stream',
-    });
-    createReadStream(filePath).pipe(response);
-  } catch {
-    response.writeHead(404).end('Not found');
-  }
-});
 
 const run = (command, args, options = {}) =>
   new Promise((resolve, reject) => {
@@ -119,10 +85,16 @@ assert.ok(
   `Simulator ${templateDevice.name} did not report a device type.`,
 );
 
-await new Promise((resolve, reject) => {
-  server.once('error', reject);
-  server.listen(serverPort, '127.0.0.1', resolve);
+const artifactServer = await createArtifactServer({
+  port: serverPort,
+  root: distRoot,
+  routes: {
+    '/static/': path.join(distRoot, 'host-native/static'),
+  },
 });
+const { requests } = artifactServer;
+const requestedPaths = () =>
+  requests.map(({ path: requestPath }) => requestPath);
 
 let deviceUDID;
 try {
@@ -196,7 +168,7 @@ try {
   expected.push(...lazyFiles);
   for (const pathname of expected) {
     assert.ok(
-      requestedPaths.includes(pathname),
+      requestedPaths().includes(pathname),
       `iOS app did not request ${pathname}`,
     );
   }
@@ -204,7 +176,7 @@ try {
     `Native iOS app launched Orbit and standalone Catalog, then loaded async startup, the manifest, container, and ${lazyFiles.length} lazy bundles.\n`,
   );
 } finally {
-  await writeFile(requestLogPath, JSON.stringify(requestedPaths, null, 2));
+  await writeFile(requestLogPath, JSON.stringify(requests, null, 2));
   if (deviceUDID) {
     spawnSync(
       'xcrun',
@@ -220,5 +192,5 @@ try {
       encoding: 'utf8',
     });
   }
-  await new Promise((resolve) => server.close(resolve));
+  await artifactServer.close();
 }

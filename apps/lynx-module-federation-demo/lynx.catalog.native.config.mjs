@@ -2,7 +2,7 @@ import { pluginQRCode } from '@lynx-js/qrcode-rsbuild-plugin';
 import { pluginReactLynx } from '@lynx-js/react-rsbuild-plugin';
 import { defineConfig } from '@lynx-js/rspeedy';
 
-import { resolveAliases } from './federation.config.mjs';
+import { resolveAliases, resolveOutputRoot } from './federation.config.mjs';
 
 const catalogDevHost = process.env.CATALOG_DEV_HOST ?? '127.0.0.1';
 const catalogDevPort = Number(process.env.CATALOG_DEV_PORT ?? 3001);
@@ -23,7 +23,7 @@ export default defineConfig({
   output: {
     cleanDistPath: false,
     distPath: {
-      root: 'dist/catalog-native',
+      root: resolveOutputRoot('catalog-native'),
     },
     minify: true,
   },

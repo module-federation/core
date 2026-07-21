@@ -5,6 +5,7 @@ import { defineConfig } from '@lynx-js/rspeedy';
 import {
   createNativeHostFederationPlugin,
   resolveAliases,
+  resolveOutputRoot,
 } from './federation.config.mjs';
 
 const nativeRemoteOrigin =
@@ -23,7 +24,7 @@ const pluginNativeRemoteAssets = {
         server: {
           publicDir: {
             copyOnBuild: false,
-            name: 'dist',
+            name: process.env.LYNX_OUTPUT_ROOT ?? 'dist',
             watch: false,
           },
         },
@@ -50,7 +51,7 @@ export default defineConfig({
   output: {
     cleanDistPath: false,
     distPath: {
-      root: 'dist/host-native',
+      root: resolveOutputRoot('host-native'),
     },
     minify: true,
   },

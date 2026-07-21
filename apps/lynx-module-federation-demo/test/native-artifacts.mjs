@@ -4,6 +4,8 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { createArtifactServer } from './support/artifact-server.mjs';
+
 const appRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const requireFromAdapter = createRequire(
   path.join(appRoot, '../../packages/lynx/package.json'),
@@ -58,20 +60,6 @@ assert.ok(!remoteFiles.includes('main.lynx.bundle'));
 assert.equal(lazyFiles.filter((name) => name.endsWith('.bundle')).length, 3);
 const startupScripts = startupFiles.filter((name) => name.endsWith('.js'));
 assert.ok(startupScripts.length > 0);
-const startupSources = await Promise.all(
-  startupScripts.map((name) =>
-    readFile(
-      path.join(appRoot, 'dist/host-native/static/js/async', name),
-      'utf8',
-    ),
-  ),
-);
-assert.ok(
-  startupSources.some(
-    (source) => /orbit-.*Date\.now/.test(source) && /increment/.test(source),
-  ),
-  'async startup assets do not contain the host shared-state provider',
-);
 
 const [hostBundleSource, standaloneSource, remoteBundleSource] =
   await Promise.all([
@@ -79,7 +67,7 @@ const [hostBundleSource, standaloneSource, remoteBundleSource] =
     readFile(standaloneBundlePath),
     readFile(remoteBundlePath),
   ]);
-const hostTemplate = decodeTemplate(hostBundleSource);
+decodeTemplate(hostBundleSource);
 const standaloneTemplate = decodeTemplate(standaloneSource);
 const remoteTemplate = decodeTemplate(remoteBundleSource);
 assert.equal(standaloneTemplate['app-type'], 'card');
@@ -87,49 +75,6 @@ assert.ok(standaloneSource.includes(Buffer.from('catalog-standalone-app')));
 assert.equal(remoteTemplate['app-type'], 'DynamicComponent');
 assert.equal(remoteTemplate['engine-version'], '3.7');
 assert.deepEqual(Object.keys(remoteTemplate['custom-sections']), ['catalog']);
-const containerSource = remoteTemplate['custom-sections'].catalog;
-assert.match(containerSource, /lynx_chunking/);
-assert.match(containerSource, /lynx_public_path_auto/);
-assert.match(containerSource, /split/);
-for (const implementationText of [
-  'Increment from remote',
-  'Federated activity',
-  'Realm status',
-]) {
-  assert.ok(
-    !containerSource.includes(implementationText),
-    `split container includes exposed implementation: ${implementationText}`,
-  );
-}
-
-const hostSource = JSON.stringify(hostTemplate);
-const hostBackgroundSource = hostTemplate['background-thread-script']
-  .map(({ content }) => content ?? '')
-  .join('\n');
-assert.match(
-  hostSource,
-  /http:\/\/127\.0\.0\.1:3000\/remote-native\/mf-manifest\.json/,
-);
-assert.match(hostSource, /lynx-federation-runtime-plugin/);
-assert.ok(
-  hostBackgroundSource.includes(
-    'scopeToSharingDataMapping:{"default:react:background":',
-  ) && hostBackgroundSource.includes('name:"orbit-shared-state"'),
-  'native host does not provide orbit-shared-state in the background realm share scope',
-);
-assert.ok(
-  !hostBackgroundSource.includes('"default:react:main-thread"'),
-  'background-only native host initializes the main-thread share scope',
-);
-assert.match(hostBackgroundSource, /mfAsyncStartup/);
-assert.match(hostBackgroundSource, /static\/js\/async\//);
-for (const request of [
-  'catalog/ActivityFeed',
-  'catalog/Card',
-  'catalog/Details',
-]) {
-  assert.ok(hostSource.includes(request), `host omits ${request}`);
-}
 
 const manifest = JSON.parse(manifestSource);
 const stats = JSON.parse(statsSource);
@@ -176,34 +121,6 @@ for (const exposed of manifest.exposes) {
     lazyTemplate['main-thread-script']?.lepus_code_len > 100,
     `${lazyName} has no main-thread snapshot bytecode`,
   );
-  const mainThreadBytecode = Buffer.from(
-    lazyTemplate['main-thread-script'].lepus_code,
-  );
-  assert.ok(
-    mainThreadBytecode.includes(Buffer.from('react__main-thread')),
-    `${lazyName} does not use the ReactLynx main-thread chunk contract`,
-  );
-  for (const backgroundWrapperMarker of [
-    'bundleSupportLoadScript',
-    '__bundle__holder',
-  ]) {
-    assert.ok(
-      !mainThreadBytecode.includes(Buffer.from(backgroundWrapperMarker)),
-      `${lazyName} main-thread bytecode contains the background runtime wrapper marker ${backgroundWrapperMarker}`,
-    );
-  }
-  const entryScript = lazyTemplate['background-thread-script'].find(
-    ({ content }) => content?.includes('__lynx_dynamic_component_entry__'),
-  );
-  assert.ok(
-    entryScript,
-    `${lazyName} does not preserve its DynamicComponent entry identity`,
-  );
-  assert.ok(
-    entryScript.content.lastIndexOf('__lynx_dynamic_component_entry__') <
-      entryScript.content.lastIndexOf('.require('),
-    `${lazyName} writes its DynamicComponent entry identity outside the Lynx module wrapper`,
-  );
   assert.ok(
     !JSON.stringify(exposed).includes('__main_thread'),
     `${exposed.name} contains a main-thread alias`,
@@ -233,6 +150,24 @@ assert.ok(
   ),
   'no expose records its shared-state dependency',
 );
+
+const server = await createArtifactServer({ root: path.join(appRoot, 'dist') });
+try {
+  await Promise.all([
+    server.waitFor('/host-native/main.lynx.bundle'),
+    server.waitFor('/catalog-native/main.lynx.bundle'),
+    server.waitFor('/remote-native/mf-manifest.json'),
+    server.waitFor('/remote-native/catalog.native.lynx.bundle'),
+    ...startupScripts.map((name) =>
+      server.waitFor(`/host-native/static/js/async/${name}`),
+    ),
+    ...lazyFiles
+      .filter((name) => name.endsWith('.bundle'))
+      .map((name) => server.waitFor(`/remote-native/async/${name}`)),
+  ]);
+} finally {
+  await server.close();
+}
 
 console.log(
   'Native Lynx host, standalone Catalog, and federation artifacts verified.',

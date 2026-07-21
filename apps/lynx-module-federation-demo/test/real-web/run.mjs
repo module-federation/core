@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
-import { access, mkdir, readFile, readdir, stat } from 'node:fs/promises';
-import { createServer } from 'node:http';
+import { access, mkdir, readdir } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+
+import { createArtifactServer } from '../support/artifact-server.mjs';
 
 const testRoot = path.dirname(fileURLToPath(import.meta.url));
 const appRoot = path.resolve(testRoot, '../..');
@@ -62,89 +63,22 @@ for (const [name, file] of requiredArtifacts) {
   );
 }
 
-const contentTypes = new Map([
-  ['.bundle', 'application/octet-stream'],
-  ['.css', 'text/css; charset=utf-8'],
-  ['.html', 'text/html; charset=utf-8'],
-  ['.js', 'text/javascript; charset=utf-8'],
-  ['.json', 'application/json; charset=utf-8'],
-  ['.map', 'application/json; charset=utf-8'],
-  ['.wasm', 'application/wasm'],
-]);
-
-const inside = (root, pathname) => {
-  const relative = decodeURIComponent(pathname).replace(/^\/+/, '');
-  const file = path.resolve(root, relative);
-  const back = path.relative(root, file);
-  return back === '' || (!back.startsWith('..') && !path.isAbsolute(back))
-    ? file
-    : undefined;
-};
-
-const routes = [
-  ['/static/', path.join(hostOutputRoot, 'static')],
-  ['/dist/host-web/', hostOutputRoot],
-  ['/dist/catalog-web/', standaloneOutputRoot],
-  ['/dist/remote-web/', remoteOutputRoot],
-  ['/remote-web/', remoteOutputRoot],
-  ['/node_modules/@lynx-js/web-core/', webCoreRoot],
-  ['/node_modules/@lynx-js/web-elements/', webElementsRoot],
-  ['/test/real-web/', testRoot],
-];
-
-const requests = [];
-let baseUrl;
-
-const resolveAsset = (pathname) => {
-  if (pathname === '/') return path.join(testRoot, 'index.html');
-  for (const [prefix, root] of routes) {
-    if (pathname.startsWith(prefix)) {
-      return inside(root, pathname.slice(prefix.length));
-    }
-  }
-  return undefined;
-};
-
-const server = createServer(async (request, response) => {
-  const pathname = new URL(request.url ?? '/', 'http://127.0.0.1').pathname;
-  requests.push(pathname);
-  try {
-    const file = resolveAsset(pathname);
-    if (!file || !(await stat(file)).isFile()) {
-      response.writeHead(404).end('Not found');
-      return;
-    }
-
-    const body = await readFile(file);
-
-    response.writeHead(200, {
-      'access-control-allow-origin': '*',
-      'cache-control': 'no-store',
-      'content-length': body.byteLength,
-      'content-type':
-        contentTypes.get(path.extname(file)) ?? 'application/octet-stream',
-      'cross-origin-embedder-policy': 'require-corp',
-      'cross-origin-opener-policy': 'same-origin',
-    });
-    if (request.method === 'HEAD') response.end();
-    else response.end(body);
-  } catch (error) {
-    if (error?.code === 'ENOENT' || error?.code === 'ENOTDIR') {
-      response.writeHead(404).end('Not found');
-      return;
-    }
-    response.writeHead(500).end(String(error));
-  }
+const artifactServer = await createArtifactServer({
+  root: testRoot,
+  routes: {
+    '/dist/catalog-web/': standaloneOutputRoot,
+    '/dist/host-web/': hostOutputRoot,
+    '/dist/remote-web/': remoteOutputRoot,
+    '/node_modules/@lynx-js/web-core/': webCoreRoot,
+    '/node_modules/@lynx-js/web-elements/': webElementsRoot,
+    '/remote-web/': remoteOutputRoot,
+    '/static/': path.join(hostOutputRoot, 'static'),
+    '/test/real-web/': testRoot,
+  },
 });
-
-await new Promise((resolve, reject) => {
-  server.once('error', reject);
-  server.listen(0, '127.0.0.1', resolve);
-});
-
-const address = server.address();
-assert.ok(address && typeof address === 'object');
-baseUrl = `http://127.0.0.1:${address.port}`;
+const { origin: baseUrl, requests } = artifactServer;
+const requestedPaths = () =>
+  requests.map(({ path: requestPath }) => requestPath);
 
 const playwrightEntry = requireFromRepo.resolve('@playwright/test');
 const playwrightModule = await import(pathToFileURL(playwrightEntry));
@@ -152,14 +86,9 @@ const { chromium } = playwrightModule.default ?? playwrightModule;
 let browser;
 let failurePage;
 
-const closeServer = () =>
-  new Promise((resolve, reject) => {
-    server.close((error) => (error ? reject(error) : resolve()));
-  });
-
 const close = async () => {
   await browser?.close();
-  await closeServer();
+  await artifactServer.close();
 };
 
 const onSignal = () => {
@@ -343,19 +272,19 @@ try {
   );
 
   await poll(
-    () => Promise.resolve(requests),
+    () => Promise.resolve(requestedPaths()),
     (values) =>
       values.includes('/dist/remote-web/mf-manifest.json') ||
       values.includes('/remote-web/mf-manifest.json'),
     'manifest HTTP request',
   );
   assert.ok(
-    requests.some((value) =>
+    requestedPaths().some((value) =>
       value.endsWith(`/${path.basename(remoteBundlePath)}`),
     ),
     `Remote bundle was not requested: ${JSON.stringify(requests)}`,
   );
-  const lazyBundleRequests = requests.filter(
+  const lazyBundleRequests = requestedPaths().filter(
     (value) => value.includes('/async/') && value.endsWith('.bundle'),
   );
   assert.equal(
@@ -377,7 +306,7 @@ try {
   );
   for (const file of hostStartupFiles) {
     assert.ok(
-      requests.includes(`/static/js/async/${file}`),
+      requestedPaths().includes(`/static/js/async/${file}`),
       `async host startup chunk was not requested: ${file}`,
     );
   }
@@ -441,7 +370,7 @@ try {
     'standalone Catalog mutation source',
   );
 
-  const standaloneRequests = requests.slice(standaloneRequestStart);
+  const standaloneRequests = requestedPaths().slice(standaloneRequestStart);
   assert.ok(
     standaloneRequests.includes('/dist/catalog-web/main.web.bundle'),
     `standalone Catalog entry was not requested: ${JSON.stringify(standaloneRequests)}`,

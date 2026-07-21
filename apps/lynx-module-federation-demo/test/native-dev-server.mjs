@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readdir, rename, rm } from 'node:fs/promises';
+import { mkdtemp, readdir, rm } from 'node:fs/promises';
 import { createServer } from 'node:net';
 import { spawn, spawnSync } from 'node:child_process';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -23,17 +24,15 @@ const reservePort = () =>
 
 const port = await reservePort();
 const origin = `http://127.0.0.1:${port}`;
+const outputRoot = await mkdtemp(path.join(os.tmpdir(), 'lynx-e2e-'));
 const devEnvironment = {
   ...process.env,
   LYNX_DEV_HOST: '127.0.0.1',
   LYNX_DEV_PORT: String(port),
+  LYNX_OUTPUT_ROOT: outputRoot,
   LYNX_REMOTE_ORIGIN: origin,
 };
 const output = [];
-const distRoot = path.join(appRoot, 'dist');
-const backupRoot = await mkdtemp(path.join(appRoot, '.lynx-e2e-'));
-const preservedDist = path.join(backupRoot, 'dist');
-await rename(distRoot, preservedDist);
 let child;
 
 const fetchReady = async (url, timeout = 30_000) => {
@@ -85,7 +84,7 @@ try {
   await fetchReady(`${origin}/main.lynx.bundle`);
   await fetchReady(`${origin}/catalog-native/main.lynx.bundle`);
   const startupFiles = (
-    await readdir(path.join(appRoot, 'dist/host-native/static/js/async'))
+    await readdir(path.join(outputRoot, 'host-native/static/js/async'))
   ).filter((name) => name.endsWith('.js'));
   assert.ok(startupFiles.length > 0);
   await Promise.all(
@@ -105,9 +104,7 @@ try {
     new URL(`${remoteEntry.path}${remoteEntry.name}`, remoteBase),
   );
 
-  const lazyFiles = await readdir(
-    path.join(appRoot, 'dist/remote-native/async'),
-  );
+  const lazyFiles = await readdir(path.join(outputRoot, 'remote-native/async'));
   const lazyBundles = lazyFiles.filter((name) => name.endsWith('.bundle'));
   assert.equal(lazyBundles.length, 3);
   await Promise.all(
@@ -127,7 +124,5 @@ try {
     ]);
     if (child.exitCode === null) child.kill('SIGKILL');
   }
-  await rm(distRoot, { force: true, recursive: true });
-  await rename(preservedDist, distRoot);
-  await rm(backupRoot, { force: true, recursive: true });
+  await rm(outputRoot, { force: true, recursive: true });
 }

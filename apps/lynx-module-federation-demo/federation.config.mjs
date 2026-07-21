@@ -10,6 +10,11 @@ const implementation = require.resolve('@module-federation/runtime-tools');
 
 export const sharedStateRequest = 'orbit-shared-state';
 
+export const resolveOutputRoot = (name) =>
+  process.env.LYNX_OUTPUT_ROOT
+    ? path.resolve(process.env.LYNX_OUTPUT_ROOT, name)
+    : `dist/${name}`;
+
 export const resolveAliases = {
   [sharedStateRequest]: path.resolve(
     appRoot,

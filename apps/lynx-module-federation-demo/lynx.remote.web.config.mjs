@@ -4,6 +4,7 @@ import { defineConfig } from '@lynx-js/rspeedy';
 import {
   createWebRemoteFederationPlugin,
   resolveAliases,
+  resolveOutputRoot,
 } from './federation.config.mjs';
 
 export default defineConfig({
@@ -26,7 +27,7 @@ export default defineConfig({
     assetPrefix: 'auto',
     cleanDistPath: false,
     distPath: {
-      root: 'dist/remote-web',
+      root: resolveOutputRoot('remote-web'),
     },
     minify: false,
   },

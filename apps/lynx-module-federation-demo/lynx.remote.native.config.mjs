@@ -4,6 +4,7 @@ import { defineConfig } from '@lynx-js/rspeedy';
 import {
   createNativeRemoteFederationPlugin,
   resolveAliases,
+  resolveOutputRoot,
 } from './federation.config.mjs';
 
 const nativeRemoteOrigin =
@@ -30,7 +31,7 @@ export default defineConfig({
     assetPrefix: `${nativeRemoteOrigin}/remote-native/`,
     cleanDistPath: false,
     distPath: {
-      root: 'dist/remote-native',
+      root: resolveOutputRoot('remote-native'),
     },
     minify: true,
   },

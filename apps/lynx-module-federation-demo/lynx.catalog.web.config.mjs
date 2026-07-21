@@ -1,7 +1,7 @@
 import { pluginReactLynx } from '@lynx-js/react-rsbuild-plugin';
 import { defineConfig } from '@lynx-js/rspeedy';
 
-import { resolveAliases } from './federation.config.mjs';
+import { resolveAliases, resolveOutputRoot } from './federation.config.mjs';
 
 export default defineConfig({
   plugins: [pluginReactLynx({ defaultDisplayLinear: false })],
@@ -16,7 +16,7 @@ export default defineConfig({
   output: {
     cleanDistPath: false,
     distPath: {
-      root: 'dist/catalog-web',
+      root: resolveOutputRoot('catalog-web'),
     },
     minify: false,
   },
