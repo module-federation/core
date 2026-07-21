@@ -186,7 +186,9 @@ The test builds the official Rspeedy web host, Catalog app, and remote; starts
 an ephemeral HTTP server; and mounts both `dist/host-web/main.web.bundle` and
 `dist/catalog-web/main.web.bundle` through
 `@lynx-js/web-core`'s public `<lynx-view>`. Playwright uses a mobile viewport
-and touch input. It verifies:
+and touch input. The server indexes realpath-contained artifacts before it
+listens, so URL input never becomes a filesystem path and internal errors are
+not returned to clients. The test verifies:
 
 - manifest, container, and lazy expose requests over HTTP;
 - async-startup share initialization over its independent JS request;
