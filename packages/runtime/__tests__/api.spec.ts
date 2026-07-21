@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from '@rstest/core';
 import { createInstance, getInstance, init } from '../src';
 
 // eslint-disable-next-line max-lines-per-function

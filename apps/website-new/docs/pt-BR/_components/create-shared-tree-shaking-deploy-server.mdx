@@ -1,0 +1,44 @@
+## Deploy Servidor (reference implementation)
+
+Se você plan para build your own Deploy Servidor, o seguintes high-level flow pode ser usado para implement `server-calc`.
+
+### 1. Aggregate `usedExports` during implantação
+
+In your CI/CD implantação pipeline, your service deve:
+
+- collect build metadata for all aplicações about para ser released (typically `mf-stats.json` ou similar arquivos);
+- para o mesmo dependência compartilhada (e.g. `antd@6.1.0`), aggregate o `usedExports` declared by each aplicação.
+
+### 2. Compute o global minimum union
+
+Merge e deduplicate all collected `usedExports` lists para get o minimal global definir (o union) obrigatório pelo system.
+
+### 3. Run uma secondary build para produce o optimized shared bundle
+
+Invoke your ferramenta de build (e.g. Rspack CLI) as um isolated build e pass:
+
+- o target dependência compartilhada name e versão (e.g. `antd@6.1.0`);
+- o global `usedExports` union do previous step.
+  O output é uma standalone shared bundle containing apenas o obrigatório módulos.
+
+### 4. Update e publish o Snapshot
+
+Upload o optimized bundle para your static asset host (CDN). Then update o Module Federation Snapshot arquivo (typically o remote versão de `mf-manifest.json`) com fields such as:
+
+- `secondarySharedTreeShakingEntry`: URL do optimized bundle,
+- `secondarySharedTreeShakingName`: unique bundle name,
+- `treeShakingStatus`: mark as disponível.
+
+Finally, distribute o updated Snapshot para all consumers.
+
+### 5. Runtime on-demand carregamento
+
+Quando uma user visits a aplicação, o MF Runtime reads o Snapshot. Se `treeShakingStatus` é disponível e o environment meets o carregamento conditions, it carrega o optimized bundle via `secondarySharedTreeShakingEntry` instead do full bundle.
+
+:::tip Versioning, caching, and compatibility
+
+- **Strict versioning** é o foundation. Ensure secondary builds e carregamento em runtime são based no exact mesmo versão (e.g. `antd@6.1.0`) para avoid mismatches.
+- Use uma **reasonable caching estratégia** for secondary build artifacts. Since content changes com o global `usedExports`, prefer content-hash-based filenames for long-term caching.
+- Este flow é **forward compatible**: quando não habilitado ou conditions aren't met, consumers fall back para o full bundle sem impacting existente functionality.
+
+:::

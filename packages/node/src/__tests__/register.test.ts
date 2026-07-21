@@ -2,7 +2,7 @@ const mockRegister = jest.fn();
 
 jest.mock('node:module', () => ({
   ...jest.requireActual('node:module'),
-  register: mockRegister,
+  register: (...args: Parameters<typeof mockRegister>) => mockRegister(...args),
 }));
 
 import {

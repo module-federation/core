@@ -1,0 +1,282 @@
+# Metro
+
+Metro Module Federation brings o power de distributed architecture para React Native mobile desenvolvimento.
+
+## Visão geral
+
+O Module Federation implementation for React Native usa uma custom Metro bundler integração esse enables:
+
+- **Micro-frontend architecture** for React Native apps
+- **Code compartilhamento** entre multiple React Native aplicações  
+- **Independent implantação** de aplicação módulos
+- **Runtime módulo carregamento** for dynamic updates
+
+> **Note**: Module Federation suporte for Metro bundler é still experimental e may lack some functionality ou certain integrações. Projects ou libraries esse rely on custom Metro configurações aren't compatível yet e might não work.
+
+## Pacotes
+
+O React Native Module Federation ecosystem consists de several pacotes:
+
+- `@module-federation/metro` - Core integração com Metro para habilite Module Federation
+- `@module-federation/metro-plugin-rnc-cli` - React Native CLI integração  
+- `@module-federation/metro-plugin-rock` - [Rock](https://www.rockjs.dev/) integração
+- `@module-federation/metro-plugin-rnef` - RNEF integração (deprecated, use `metro-plugin-rock` instead)
+
+## Instalação
+
+Instale o obrigatório pacotes para your React Native projeto usando your preferred pacote manager:
+
+```shell
+# Core package (required)
+pnpm add @module-federation/metro
+
+# If your project is using React Native CLI
+pnpm add @module-federation/metro-plugin-rnc-cli
+
+# If your project is using Rock (formerly RNEF)
+pnpm add @module-federation/metro-plugin-rock
+```
+
+## Configuração
+
+Wrap your Metro configuração com o `withModuleFederation` função para habilite Module Federation. Você deve ser wrapping all o módulos federados' Metro configuração em este hook: aplicação host e mini aplicações.
+
+```javascript
+const { withModuleFederation } = require('@module-federation/metro');
+const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
+
+const config = {};
+
+module.exports = withModuleFederation(
+  mergeConfig(getDefaultConfig(__dirname), config),
+  {
+    // Module Federation configuration follows the same format as documented at:
+    // https://module-federation.io/configure/index.html
+    // Note: Some features might not be available in React Native environment
+    name: 'YourAppName',
+    remotes: {
+      // Define remote applications (for host apps)
+      // remoteName: 'remoteName@http://localhost:8082/mf-manifest.json',
+    },
+    exposes: {
+      // Expose modules (for remote apps)
+      // './Component': './src/Component.tsx',
+    },
+    shared: {
+      // Host applications should set eager: true for all the shared dependencies
+      react: {
+        singleton: true,
+        eager: true,
+        requiredVersion: '19.1.0',
+        version: '19.1.0',
+      },
+      'react-native': {
+        singleton: true,
+        eager: true,
+        requiredVersion: '0.80.0',
+        version: '0.80.0',
+      },
+    },
+  },
+  {
+    // These experimental flags have to be enabled in order to patch older packages
+    // Can be omitted if your project is using supported React Native and Metro versions
+    flags: {
+      // Enable patching HMR Client from React Native
+      unstable_patchHMRClient: true,
+      // Enable patching React Native CLI
+      unstable_patchInitializeCore: true,
+      // Enable patching runtime require from Metro
+      unstable_patchRuntimeRequire: true,
+    },
+  }
+);
+```
+
+### App Async Boundary Configuração
+
+Wrap your principal App componente com `withAsyncStartup` para habilite Module Federation runtime. Este cria um async boundary esse ensures o Module Federation runtime é properly initialized antes your app componente renders.
+
+```javascript
+import { withAsyncStartup } from '@module-federation/runtime';
+import { AppRegistry } from 'react-native';
+
+// Create async boundary through withAsyncStartup helper
+// Pass the getter function for the app component
+// Optionally pass a getter function for the fallback component
+const WrappedApp = withAsyncStartup(
+  () => require('./App'),
+  () => require('./Fallback') // Optional fallback component
+);
+
+AppRegistry.registerComponent('YourAppName', WrappedApp);
+```
+
+O `withAsyncStartup` função:
+
+- Waits for Module Federation runtime initialization antes renderização your app
+- Usa React Suspense para tratar o async carregamento
+- Accepts um opcional componente de fallback para show during initialization
+
+## Uso Patterns
+
+### Host Aplicação
+
+Uma aplicação host consome módulos remotos de other aplicações:
+
+```javascript
+// metro.config.js for host app
+module.exports = withModuleFederation(
+  mergeConfig(getDefaultConfig(__dirname), config),
+  {
+    name: 'HostApp',
+    remotes: {
+      'mini-app': 'miniApp@http://localhost:8082/mf-manifest.json',
+      'another-app': 'anotherApp@http://192.168.1.100:8083/mf-manifest.json',
+    },
+    shared: {
+      react: { singleton: true, eager: true },
+      'react-native': { singleton: true, eager: true },
+    },
+  }
+);
+```
+
+### Remote Aplicação (Mini App)
+
+Uma aplicação remote exposes módulos esse pode ser consumido by aplicação hosts:
+
+```javascript
+// metro.config.js for remote app
+module.exports = withModuleFederation(
+  mergeConfig(getDefaultConfig(__dirname), config),
+  {
+    name: 'MiniApp',
+    // Optional: enable federated type generation for TS projects
+    // Generates `@mf-types.zip` (and `@mf-types.d.ts` when enabled) during `bundle-mf-remote`
+    // and writes filenames into `mf-manifest.json` under `metaData.types`.
+    dts: true,
+    exposes: {
+      './Screen': './src/Screen.tsx',
+      './Component': './src/Component.tsx',
+    },
+    shared: {
+      react: { singleton: true, eager: true },
+      'react-native': { singleton: true, eager: true },
+    },
+  }
+);
+```
+
+## CLI Comandos
+
+O React Native CLI integração fornece additional comandos for bundling federated aplicações:
+
+### Bundle Module Federation Host
+
+Bundle uma aplicação host esse consome módulos remotos:
+
+```shell
+# Bundle for iOS
+react-native bundle-mf-host --entry-file index.js --platform ios
+
+# Bundle for Android
+react-native bundle-mf-host --entry-file index.js --platform android
+```
+
+### Bundle Module Federation Remote
+
+Bundle uma aplicação remote (mini app) esse exposes módulos:
+
+```shell
+# Bundle for iOS
+react-native bundle-mf-remote --platform ios
+
+# Bundle for Android
+react-native bundle-mf-remote --platform android
+```
+
+Both comandos suporte all o mesmo opções as o standard `react-native bundle` comando.
+
+> **Note**: Esses comandos são fornecido pelo `@module-federation/metro-plugin-rnc-cli` pacote.
+
+## Rock Integração
+
+For projetos usando [Rock](https://www.rockjs.dev/) (formerly RNEF), adicione o Module Federation plugin para your `rock.config.mjs`:
+
+```javascript
+import { pluginMetroModuleFederation } from '@module-federation/metro-plugin-rock';
+import { platformAndroid } from '@rock-js/platform-android';
+import { platformIOS } from '@rock-js/platform-ios';
+import { pluginMetro } from '@rock-js/plugin-metro';
+
+/** @type {import('rock').Config} */
+export default {
+  bundler: pluginMetro(),
+  platforms: {
+    ios: platformIOS(),
+    android: platformAndroid(),
+  },
+  plugins: [pluginMetroModuleFederation()],
+};
+```
+
+> **Note**: Se você são migrating de RNEF, replace `@module-federation/metro-plugin-rnef` com `@module-federation/metro-plugin-rock` e rename `rnef.config.mjs` para `rock.config.mjs`. See o [metro-plugin-rock README](https://www.npmjs.com/package/@module-federation/metro-plugin-rock) for full migration details.
+
+## API Reference
+
+### `withModuleFederation(metroConfig, federationConfig, options?)`
+
+Wraps your Metro configuração para habilite Module Federation.
+
+#### Parameters
+
+- `metroConfig` (MetroConfig) - Your existente Metro configuração
+- `federationConfig` (FederationConfig) - Module Federation configuração  
+- `options` (Opções) - Opcional configuração for experimental features
+
+#### FederationConfig Interface
+
+```typescript
+export interface ModuleFederationConfig {
+  name: string;
+  filename?: string;
+  remotes?: Record<string, string>;
+  exposes?: Record<string, string>;
+  shared?: Shared;
+  shareStrategy?: 'loaded-first' | 'version-first';
+  runtimePlugins?: string[];
+  /**
+   * @deprecated Use runtimePlugins instead.
+   * Scheduled for removal in the next major version.
+   */
+  plugins?: string[];
+  dts?: boolean | PluginDtsOptions;
+}
+```
+
+#### SharedConfig Interface
+
+```typescript
+export interface SharedConfig {
+  singleton: boolean;
+  eager: boolean;
+  version: string;
+  requiredVersion: string;
+  import?: false;
+}
+```
+
+#### Unsupported Opção Avisos
+
+Metro currently suporta apenas uma subset do shared Module Federation configuração opções.
+Quando unsupported opções são fornecido, Metro emits avisos during validation esse those opções são **não compatível e vai have no effect**.
+
+Use `runtimePlugins` for runtime plugin caminhos.
+`plugins` é deprecated e vai ser removed no next major versão.
+
+## Exemplos e Best Practices
+
+O configuração follows o standard [Module Federation configuração format](https://module-federation.io/configure/). For comprehensive information about Module Federation concepts, configuração opções, e uso patterns, please refer para o official [Module Federation documentation](https://module-federation.io/).
+
+For working exemplos e detailed implementation guias, check out o [Module Federation Metro repository](https://github.com/module-federation/metro) que includes several exemplo aplicações demonstrating diferente uso patterns e integrações.

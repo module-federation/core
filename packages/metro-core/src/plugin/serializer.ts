@@ -200,8 +200,7 @@ function getBundlePath(
   const relativeEntryPath = path.relative(projectRoot, entryPoint);
   const normalizedRelativeEntryPath = normalizeEntryPath(relativeEntryPath);
   if (!isUsingMFBundleCommand) {
-    const { dir, name } = path.parse(relativeEntryPath);
-    return path.format({ dir, name, ext: '' });
+    return removePathExtension(normalizedRelativeEntryPath);
   }
 
   // try to match with an exposed module first

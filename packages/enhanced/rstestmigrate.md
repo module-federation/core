@@ -24,11 +24,11 @@ Rstest docs listed in the references section.
 
 ### 1) Update scripts and Nx targets
 - Switch `packages/enhanced/project.json` `test` target to Rstest:
-  `rstest run -c packages/enhanced/rstest.config.ts` (match CLI usage).
+  `rstest -c packages/enhanced/rstest.config.ts` (match CLI usage).
 - Replace or remove `test:jest` and `test:experiments` targets, or rewrite
   them as Rstest equivalents (for example, separate includes/projects).
 - Keep `enhanced:rstest` in the root `package.json` as the user-facing entry
-  point and ensure it uses `rstest run` (or `rstest`) consistently.
+  point and ensure it uses `rstest` consistently.
 
 ### 2) Expand `rstest.config.ts` coverage
 - Include unit and compiler tests (not just ConfigTestCases):

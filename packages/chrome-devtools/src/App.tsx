@@ -16,6 +16,7 @@ import LanguageSwitch from './component/LanguageSwitch';
 import ThemeToggle from './component/ThemeToggle';
 import {
   getGlobalModuleInfo,
+  normalizeModuleInfoPayload,
   refreshModuleInfo,
   RootComponentProps,
   separateType,
@@ -31,10 +32,10 @@ import btnStyles from './component/ThemeToggle.module.scss';
 
 const cloneModuleInfo = (info?: GlobalModuleInfo | null): GlobalModuleInfo => {
   try {
-    return JSON.parse(JSON.stringify(info || {}));
+    return normalizeModuleInfoPayload(info);
   } catch (error) {
     console.warn('[MF Devtools] cloneModuleInfo failed', error);
-    return info || {};
+    return {};
   }
 };
 

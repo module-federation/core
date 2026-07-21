@@ -1,0 +1,107 @@
+[
+  {
+    "type": "file",
+    "name": "index",
+    "label": "Visão geral"
+  },
+  {
+    "type": "file",
+    "name": "name",
+    "label": "name"
+  },
+  {
+    "type": "file",
+    "name": "filename",
+    "label": "filename"
+  },
+  {
+    "type": "file",
+    "name": "library",
+    "label": "library"
+  },
+  {
+    "type": "file",
+    "name": "remotes",
+    "label": "remotes"
+  },
+  {
+    "type": "file",
+    "name": "remotetype",
+    "label": "remoteType"
+  },
+  {
+    "type": "file",
+    "name": "shareScope",
+    "label": "shareScope"
+  },
+  {
+    "type": "file",
+    "name": "exposes",
+    "label": "exposes"
+  },
+  {
+    "type": "file",
+    "name": "shared",
+    "label": "shared"
+  },
+  {
+    "type": "file",
+    "name": "runtimeplugins",
+    "label": "runtimePlugins"
+  },
+  {
+    "type": "file",
+    "name": "getpublicpath",
+    "label": "getPublicPath"
+  },
+  {
+    "type": "file",
+    "name": "implementation",
+    "label": "implementation"
+  },
+  {
+    "type": "file",
+    "name": "dts",
+    "label": "dts"
+  },
+  {
+    "type": "file",
+    "name": "dev",
+    "label": "dev"
+  },
+  {
+    "type": "file",
+    "name": "manifest",
+    "label": "manifest"
+  },
+  {
+    "type": "file",
+    "name": "shareStrategy",
+    "label": "shareStrategy"
+  },
+  {
+    "type": "file",
+    "name": "experiments",
+    "label": "experiments"
+  },
+  {
+    "type": "file",
+    "name": "injectTreeShakingUsedExports",
+    "label": "injectTreeShakingUsedExports"
+  },
+  {
+    "type": "file",
+    "name": "treeShakingDir",
+    "label": "treeShakingDir"
+  },
+  {
+    "type": "file",
+    "name": "treeShakingSharedExcludePlugins",
+    "label": "treeShakingSharedExcludePlugins"
+  },
+  {
+    "type": "file",
+    "name": "treeShakingSharedPlugins",
+    "label": "treeShakingSharedPlugins"
+  }
+]

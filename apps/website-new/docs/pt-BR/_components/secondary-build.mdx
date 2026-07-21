@@ -1,0 +1,70 @@
+## Producing uma secondary tree-shaken shared artifact
+
+:::warning Note
+Se your goal é “tree-shake uma dependência compartilhada para uma single aplicação”, [usedExports](/configure/shared.html#usedexports) é geralmente enough.
+
+Este section é about generating uma standalone secondary artifact esse pode ser carregado em runtime on demand, e pode ser distributed ou reused do implantação side.
+:::
+
+Este process builds apenas dependências compartilhadas; remotes vai não take effect. O original projeto entry é automatically ignored during o build, e apenas módulos shared são bundled.
+
+### Non-Modern.js projetos
+
+Use `TreeShakingSharedPlugin` em your build configuração, definir `secondary: true`, e reuse your existente `mfConfig`.
+
+import { Tab, Tabs } from '@theme';
+
+<Tabs>
+  <Tab label="@module-federation/enhanced">
+  ```ts
+  import { TreeShakingSharedPlugin } from '@module-federation/enhanced';
+  // import { TreeShakingSharedPlugin } from '@module-federation/enhanced/rspack';
+  // ...
+  plugins: [
+    new TreeShakingSharedPlugin({
+      secondary: true,
+      mfConfig,
+    }),
+  ];
+  ```
+  </Tab>
+  <Tab label="@module-federation/rsbuild-plugin">
+  ```ts
+  import { TreeShakingSharedPlugin } from '@module-federation/rsbuild-plugin';
+  // ...
+  plugins: [
+    new TreeShakingSharedPlugin({
+      secondary: true,
+      mfConfig,
+    }),
+  ];
+  ```
+  </Tab>
+  <Tab label="Rspack built-in">
+  ```ts
+  import { sharing } from '@rspack/core';
+  const { TreeShakingSharedPlugin } = sharing;
+  // ...
+  plugins: [
+    new TreeShakingSharedPlugin({
+      secondary: true,
+      mfConfig,
+    }),
+  ];
+  ```
+</Tab>
+</Tabs>
+
+### Modern.js projetos
+
+Ao usar `@module-federation/modern-js-v3`, habilite `secondarySharedTreeShaking: true` no plugin opções para gerar o secondary artifact.
+
+```ts title="modern.config.ts"
+import mfPlugin from '@module-federation/modern-js-v3';
+// ...
+plugins: [
+  mfPlugin({
+    secondarySharedTreeShaking: true,
+  }),
+];
+```

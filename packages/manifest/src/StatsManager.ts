@@ -173,7 +173,7 @@ class StatsManager {
       remoteEntry: {
         name: getRemoteEntryName(),
         path: '',
-        // same as the types supported by runtime, currently only global/var/script is supported
+        // The runtime loader type follows the configured container library type.
         type:
           (this._options?.library?.type as RemoteEntryType | undefined) ||
           'global',
@@ -598,6 +598,13 @@ class StatsManager {
 
   updateStats(stats: Stats, compiler: Compiler): Stats {
     const { metaData } = stats;
+    const configuredRemoteEntryType = this._options.library?.type;
+    if (configuredRemoteEntryType && metaData.remoteEntry) {
+      // Rspack may pre-emit stats with the default `global` type even when
+      // the configured container library and emitted remote entry are ESM.
+      // The configured library is authoritative for runtime loader selection.
+      metaData.remoteEntry.type = configuredRemoteEntryType;
+    }
     if (!metaData.types) {
       metaData.types = getTypesMetaInfo(this._options, compiler.context);
     }
