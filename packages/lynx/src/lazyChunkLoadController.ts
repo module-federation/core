@@ -12,15 +12,14 @@ export type {
 } from './runtimeChunkLoading';
 
 type LazyChunkLoadState =
-  | { generation: symbol; kind: 'loading'; phase: 'invoking' | 'pending' }
+  | { kind: 'loading'; phase: 'invoking' | 'pending' }
   | {
       chunk: LynxChunk;
       consumes: Promise<void>;
-      generation: symbol;
       kind: 'waiting-consumes';
     }
-  | { chunk: LynxChunk; generation: symbol; kind: 'installed' }
-  | { error: unknown; generation: symbol; kind: 'failed' };
+  | { chunk: LynxChunk; kind: 'installed' }
+  | { kind: 'failed' };
 
 interface LazyChunkLoadControllerArgs {
   chunkKey: string;
@@ -45,32 +44,32 @@ export const createLazyChunkLoadController = ({
   isChunk,
   loadQueryComponent,
 }: LazyChunkLoadControllerArgs) => {
-  const generation = Symbol(chunkKey);
-  const loading: Exclude<InstalledChunk, 0> = [undefined, undefined, undefined];
+  const loadTuple: Exclude<InstalledChunk, 0> = [
+    undefined,
+    undefined,
+    undefined,
+  ];
   let state: LazyChunkLoadState = {
-    generation,
     kind: 'loading',
     phase: 'invoking',
   };
 
   const isCurrent = (): boolean =>
-    state.generation === generation &&
-    state.kind !== 'failed' &&
-    installedChunks[chunkKey] === loading;
+    state.kind !== 'failed' && installedChunks[chunkKey] === loadTuple;
 
-  const fail = (error: unknown): void => {
-    if (state.generation !== generation || state.kind === 'failed') {
+  const fail = (): void => {
+    if (state.kind === 'failed') {
       return;
     }
-    state = { error, generation, kind: 'failed' };
-    if (installedChunks[chunkKey] === loading) {
+    state = { kind: 'failed' };
+    if (installedChunks[chunkKey] === loadTuple) {
       delete installedChunks[chunkKey];
     }
   };
 
   return {
     load(request: string): ChunkPromise {
-      installedChunks[chunkKey] = loading;
+      installedChunks[chunkKey] = loadTuple;
       let loaded: ChunkPromise;
       try {
         loaded = loadQueryComponent(request).then((value) => {
@@ -93,51 +92,55 @@ export const createLazyChunkLoadController = ({
               state.kind === 'loading' && state.phase === 'invoking';
             const consumes = installChunkAfterConsumes(value, isCurrent);
             if (!consumes) {
-              state = { chunk: value, generation, kind: 'installed' };
+              state = { chunk: value, kind: 'installed' };
               return value;
             }
 
             state = {
               chunk: value,
               consumes,
-              generation,
               kind: 'waiting-consumes',
             };
             return invokedSynchronously ? value : consumes.then(() => value);
           } catch (error) {
-            fail(error);
+            fail();
             throw error;
           }
         });
       } catch (error) {
-        fail(error);
+        fail();
         return Promise.reject(error);
       }
 
       if (state.kind === 'loading' && state.phase === 'invoking') {
-        state = { generation, kind: 'loading', phase: 'pending' };
+        state = { kind: 'loading', phase: 'pending' };
       }
       const initialState = state;
-      const primary =
-        initialState.kind === 'installed' || initialState.kind === 'failed'
-          ? loaded
-          : initialState.kind === 'waiting-consumes'
-            ? loadWithTimeout(
-                timeout,
-                timeoutMessage(request, timeout),
-                (resolve, reject) => {
-                  initialState.consumes
-                    .then(() => initialState.chunk)
-                    .then(resolve, reject);
-                },
-              )
-            : loadWithTimeout(
-                timeout,
-                timeoutMessage(request, timeout),
-                (resolve, reject) => {
-                  loaded.then(resolve, reject);
-                },
-              );
+      let primary: ChunkPromise;
+      if (initialState.kind === 'waiting-consumes') {
+        primary = loadWithTimeout(
+          timeout,
+          timeoutMessage(request, timeout),
+          (resolve, reject) => {
+            initialState.consumes
+              .then(() => initialState.chunk)
+              .then(resolve, reject);
+          },
+        );
+      } else if (
+        initialState.kind === 'installed' ||
+        initialState.kind === 'failed'
+      ) {
+        primary = loaded;
+      } else {
+        primary = loadWithTimeout(
+          timeout,
+          timeoutMessage(request, timeout),
+          (resolve, reject) => {
+            loaded.then(resolve, reject);
+          },
+        );
+      }
 
       let tracked = primary;
       if (
@@ -146,18 +149,17 @@ export const createLazyChunkLoadController = ({
         isCurrent()
       ) {
         const installedElsewhere = new Promise<unknown>((resolve, reject) => {
-          loading[0] = (value) => {
+          loadTuple[0] = (value) => {
             if (state.kind !== 'failed') {
               state = {
                 chunk: value as LynxChunk,
-                generation,
                 kind: 'installed',
               };
             }
             resolve(value);
           };
-          loading[1] = (error) => {
-            fail(error);
+          loadTuple[1] = (error) => {
+            fail();
             reject(error);
           };
         });
@@ -167,11 +169,11 @@ export const createLazyChunkLoadController = ({
       const promise = tracked.then(
         (value) => value,
         (error) => {
-          fail(error);
+          fail();
           throw error;
         },
       );
-      loading[2] = promise;
+      loadTuple[2] = promise;
       return promise;
     },
   };
