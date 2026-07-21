@@ -1,12 +1,72 @@
 import { ModuleFederation } from '../core';
-import { UserOptions } from '../type';
+import {
+  ModuleFederationRuntimePlugin,
+  RuntimePluginHooks,
+  UserOptions,
+} from '../type';
 import { getGlobalHostPlugins } from '../global';
+import { assert } from './logger';
+import { isPlainObject } from './tool';
+
+const registeredPluginsByInstance = new WeakMap<
+  ModuleFederation,
+  Map<string, ModuleFederationRuntimePlugin>
+>();
+
+function getRegisteredPlugins(
+  instance: ModuleFederation,
+): Map<string, ModuleFederationRuntimePlugin> {
+  let registeredPlugins = registeredPluginsByInstance.get(instance);
+
+  if (!registeredPlugins) {
+    registeredPlugins = new Map();
+    registeredPluginsByInstance.set(instance, registeredPlugins);
+  }
+
+  return registeredPlugins;
+}
+
+function getPluginsToRegister(
+  plugins: UserOptions['plugins'],
+): Array<ModuleFederationRuntimePlugin> {
+  const pluginsByName = new Map<string, ModuleFederationRuntimePlugin>();
+
+  [...(plugins || []), ...getGlobalHostPlugins()].forEach((plugin) => {
+    if (!plugin) {
+      return;
+    }
+
+    assert(isPlainObject(plugin), 'Plugin configuration is invalid.');
+    assert(plugin.name, 'A name must be provided by the plugin.');
+
+    if (!pluginsByName.has(plugin.name)) {
+      pluginsByName.set(plugin.name, plugin);
+    }
+  });
+
+  return Array.from(pluginsByName.values());
+}
+
+function getInstancePlugin(
+  plugin: ModuleFederationRuntimePlugin,
+  instanceHooks: void | RuntimePluginHooks,
+): ModuleFederationRuntimePlugin {
+  if (instanceHooks === undefined) {
+    return plugin;
+  }
+
+  return {
+    ...instanceHooks,
+    name: plugin.name,
+    version: plugin.version,
+  };
+}
 
 export function registerPlugins(
   plugins: UserOptions['plugins'],
   instance: ModuleFederation,
 ) {
-  const globalPlugins = getGlobalHostPlugins();
+  const registeredPlugins = getRegisteredPlugins(instance);
   const hookInstances = [
     instance.hooks,
     instance.remoteHandler.hooks,
@@ -15,21 +75,28 @@ export function registerPlugins(
     instance.loaderHook,
     instance.bridgeHook,
   ];
-  // Incorporate global plugins
-  if (globalPlugins.length > 0) {
-    globalPlugins.forEach((plugin) => {
-      if (plugins?.find((item) => item.name !== plugin.name)) {
-        plugins.push(plugin);
-      }
-    });
-  }
 
-  if (plugins && plugins.length > 0) {
-    plugins.forEach((plugin) => {
+  getPluginsToRegister(plugins).forEach((plugin) => {
+    if (registeredPlugins.has(plugin.name)) {
+      return;
+    }
+
+    registeredPlugins.set(plugin.name, plugin);
+
+    try {
+      const instancePlugin = getInstancePlugin(
+        plugin,
+        plugin.apply?.(instance),
+      );
+
       hookInstances.forEach((hookInstance) => {
-        hookInstance.applyPlugin(plugin, instance);
+        hookInstance.applyPlugin(instancePlugin);
       });
-    });
-  }
-  return plugins;
+    } catch (error) {
+      registeredPlugins.delete(plugin.name);
+      throw error;
+    }
+  });
+
+  return Array.from(registeredPlugins.values());
 }
