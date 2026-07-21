@@ -63,7 +63,6 @@
   },
   "dependencies": {
     "@module-federation/runtime-core": "workspace:*",
-    "@module-federation/runtime-tools": "workspace:*",
     "@module-federation/sdk": "workspace:*"
   },
   "peerDependencies": {
@@ -88,6 +87,7 @@
     "@lynx-js/chunk-loading-webpack-plugin": "0.4.0",
     "@lynx-js/tasm": "0.0.39",
     "@lynx-js/web-core": "0.22.1",
+    "@module-federation/runtime-tools": "workspace:*",
     "@rsbuild/core": "2.1.4",
     "@rspack/core": "npm:@rspack-canary/core@2.1.5-canary-54a0d8f3-20260715194831",
     "@rstest/core": "^0.10.6",

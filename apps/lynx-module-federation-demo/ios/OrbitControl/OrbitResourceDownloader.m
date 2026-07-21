@@ -70,6 +70,15 @@ static NSString *const OrbitResourceDownloadErrorDomain =
                          }];
 }
 
+- (BOOL)takeOversizedFlagForTask:(NSURLSessionTask *)task {
+  @synchronized(self) {
+    NSNumber *key = @(task.taskIdentifier);
+    BOOL oversized = [self.oversizedTasks containsObject:key];
+    [self.oversizedTasks removeObject:key];
+    return oversized;
+  }
+}
+
 - (void)URLSession:(NSURLSession *)session
       downloadTask:(NSURLSessionDownloadTask *)downloadTask
       didWriteData:(int64_t)bytesWritten
@@ -90,6 +99,7 @@ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite {
       downloadTask:(NSURLSessionDownloadTask *)downloadTask
 didFinishDownloadingToURL:(NSURL *)location {
   (void)session;
+  BOOL oversized = [self takeOversizedFlagForTask:downloadTask];
   OrbitResourceDownloadCompletion completion =
     [self takeCompletionForTask:downloadTask];
   if (!completion) {
@@ -100,7 +110,11 @@ didFinishDownloadingToURL:(NSURL *)location {
   NSError *resultError = nil;
   NSData *data = nil;
   NSURLResponse *response = downloadTask.response;
-  if ([response isKindOfClass:NSHTTPURLResponse.class]) {
+  if (oversized) {
+    resultError = [self errorForURL:downloadTask.originalRequest.URL
+                             prefix:@"Lynx resource exceeds 64 MiB"];
+  }
+  if (!resultError && [response isKindOfClass:NSHTTPURLResponse.class]) {
     NSInteger statusCode = ((NSHTTPURLResponse *)response).statusCode;
     if (statusCode < 200 || statusCode >= 300) {
       resultError = [NSError errorWithDomain:OrbitResourceDownloadErrorDomain
@@ -147,12 +161,7 @@ didCompleteWithError:(NSError *)error {
   (void)session;
   if (!error) return;
 
-  BOOL oversized;
-  @synchronized(self) {
-    NSNumber *key = @(task.taskIdentifier);
-    oversized = [self.oversizedTasks containsObject:key];
-    [self.oversizedTasks removeObject:key];
-  }
+  BOOL oversized = [self takeOversizedFlagForTask:task];
   OrbitResourceDownloadCompletion completion = [self takeCompletionForTask:task];
   if (!completion) return;
   completion(nil,

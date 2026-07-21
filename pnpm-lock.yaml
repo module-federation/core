@@ -3453,9 +3453,6 @@ importers:
       '@module-federation/runtime-core':
         specifier: workspace:*
         version: link:../runtime-core
-      '@module-federation/runtime-tools':
-        specifier: workspace:*
-        version: link:../runtime-tools
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../sdk
@@ -3475,6 +3472,9 @@ importers:
       '@lynx-js/web-core':
         specifier: 0.22.1
         version: 0.22.1(@lynx-js/css-serializer@0.1.6)(tslib@2.8.1)
+      '@module-federation/runtime-tools':
+        specifier: workspace:*
+        version: link:../runtime-tools
       '@rsbuild/core':
         specifier: 2.1.4
         version: 2.1.4(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0)

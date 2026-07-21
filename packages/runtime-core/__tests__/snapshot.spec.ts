@@ -156,4 +156,65 @@ describe('snapshot', () => {
     });
     expect(remoteSnapshot?.remoteEntry).toContain('requested.example');
   });
+
+  it('retries a manifest after a failed load', async () => {
+    const manifestUrl = 'https://retry.example/mf-manifest.json';
+    const manifest = {
+      id: 'catalog',
+      name: 'catalog',
+      metaData: {
+        name: 'catalog',
+        publicPath: 'https://retry.example/',
+        type: 'app',
+        buildInfo: { buildVersion: '1.0.0' },
+        remoteEntry: {
+          name: 'catalog.web.lynx.bundle',
+          path: '',
+          type: 'global',
+        },
+        types: { name: '', path: '' },
+        globalName: 'catalog',
+      },
+      remotes: [],
+      shared: [],
+      exposes: [],
+    };
+    let fetchCount = 0;
+    const instance = new ModuleFederation({
+      name: 'host',
+      remotes: [{ name: 'catalog', entry: manifestUrl }],
+      plugins: [
+        {
+          name: 'manifest-fetch',
+          fetch: async () => {
+            fetchCount += 1;
+            if (fetchCount === 1) {
+              throw new Error('temporary failure');
+            }
+            return new Response(JSON.stringify(manifest), {
+              headers: { 'Content-Type': 'application/json' },
+            });
+          },
+        },
+      ],
+    });
+
+    await expect(
+      instance.snapshotHandler.loadRemoteSnapshotInfo({
+        moduleInfo: { name: 'catalog', entry: manifestUrl },
+      }),
+    ).rejects.toThrow('temporary failure');
+    expect(
+      instance.snapshotHandler.manifestLoading[manifestUrl],
+    ).toBeUndefined();
+
+    await expect(
+      instance.snapshotHandler.loadRemoteSnapshotInfo({
+        moduleInfo: { name: 'catalog', entry: manifestUrl },
+      }),
+    ).resolves.toMatchObject({
+      remoteSnapshot: { globalName: 'catalog' },
+    });
+    expect(fetchCount).toBe(2);
+  });
 });

@@ -80,7 +80,7 @@ export class SnapshotHandler {
   loadingHostSnapshot: Promise<GlobalModuleInfo | void> | null = null;
   HostInstance: ModuleFederation;
   manifestCache: Map<string, ManifestCacheRecord> = new Map();
-  private manifestCacheGeneration: Map<string, number> = new Map();
+  private manifestCacheRequests: Map<string, object> = new Map();
   hooks = new PluginSystem({
     beforeLoadRemoteSnapshot: new AsyncHook<
       [
@@ -125,12 +125,19 @@ export class SnapshotHandler {
   }
 
   clearManifestCache(manifestUrl: string): void {
-    this.manifestCacheGeneration.set(
-      manifestUrl,
-      (this.manifestCacheGeneration.get(manifestUrl) ?? 0) + 1,
-    );
+    this.manifestCacheRequests.delete(manifestUrl);
     this.manifestCache.delete(manifestUrl);
     delete this.manifestLoading[manifestUrl];
+  }
+
+  private clearManifestRequest(
+    manifestUrl: string,
+    manifestCacheRequest: object,
+  ): void {
+    if (this.manifestCacheRequests.get(manifestUrl) === manifestCacheRequest) {
+      this.manifestCacheRequests.delete(manifestUrl);
+      delete this.manifestLoading[manifestUrl];
+    }
   }
 
   // eslint-disable-next-line max-lines-per-function
@@ -306,7 +313,7 @@ export class SnapshotHandler {
     manifestUrl: string,
     moduleInfo: Remote,
     extraOptions: Record<string, any>,
-    manifestCacheGeneration: number,
+    manifestCacheRequest: object,
     resourceOptions?: {
       initiator: ResourceLoadInitiator;
       id: string;
@@ -352,12 +359,6 @@ export class SnapshotHandler {
           )) as Manifest | undefined;
 
         if (!manifestJson) {
-          if (
-            manifestCacheGeneration ===
-            (this.manifestCacheGeneration.get(manifestUrl) ?? 0)
-          ) {
-            delete this.manifestLoading[manifestUrl];
-          }
           error(
             RUNTIME_003,
             runtimeDescMap,
@@ -407,8 +408,7 @@ export class SnapshotHandler {
         );
       }
       if (
-        manifestCacheGeneration ===
-        (this.manifestCacheGeneration.get(manifestUrl) ?? 0)
+        manifestCacheRequest === this.manifestCacheRequests.get(manifestUrl)
       ) {
         this.manifestCache.set(manifestUrl, {
           manifest: manifestJson,
@@ -432,14 +432,12 @@ export class SnapshotHandler {
       id: string;
     },
   ): Promise<ModuleInfo> {
-    const manifestCacheGeneration =
-      this.manifestCacheGeneration.get(manifestUrl) ?? 0;
-    const asyncLoadProcess = async () => {
+    const asyncLoadProcess = async (manifestCacheRequest: object) => {
       const manifestJson = await this.getManifestJson(
         manifestUrl,
         moduleInfo,
         extraOptions,
-        manifestCacheGeneration,
+        manifestCacheRequest,
         resourceOptions,
       );
       const remoteSnapshot = generateSnapshotFromManifest(manifestJson, {
@@ -461,7 +459,14 @@ export class SnapshotHandler {
     };
 
     if (!this.manifestLoading[manifestUrl]) {
-      this.manifestLoading[manifestUrl] = asyncLoadProcess().then((res) => res);
+      const manifestCacheRequest = {};
+      this.manifestCacheRequests.set(manifestUrl, manifestCacheRequest);
+      this.manifestLoading[manifestUrl] = asyncLoadProcess(
+        manifestCacheRequest,
+      ).catch((loadError) => {
+        this.clearManifestRequest(manifestUrl, manifestCacheRequest);
+        throw loadError;
+      });
     }
     return this.manifestLoading[manifestUrl];
   }

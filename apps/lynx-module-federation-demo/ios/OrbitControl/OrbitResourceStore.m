@@ -9,7 +9,6 @@ static NSString *const OrbitResourceStoreErrorDomain =
 
 @property(nonatomic, strong, readwrite) NSURL *cacheDirectoryURL;
 @property(nonatomic, strong) NSMutableDictionary<NSString *, NSString *> *paths;
-@property(nonatomic, strong) NSMutableDictionary<NSString *, NSNumber *> *sizes;
 @property(nonatomic, assign) NSUInteger storedBytes;
 
 @end
@@ -31,7 +30,6 @@ static NSString *const OrbitResourceStoreErrorDomain =
   if (self) {
     _cacheDirectoryURL = cacheDirectoryURL;
     _paths = [NSMutableDictionary dictionary];
-    _sizes = [NSMutableDictionary dictionary];
   }
   return self;
 }
@@ -50,9 +48,7 @@ static NSString *const OrbitResourceStoreErrorDomain =
                      forURLString:(NSString *)urlString
                             error:(NSError **)error {
   @synchronized(self) {
-    NSUInteger previousSize = self.sizes[urlString].unsignedIntegerValue;
-    NSUInteger nextSize = self.storedBytes - previousSize + data.length;
-    if (nextSize > OrbitResourceStoreByteLimit) {
+    if (data.length > OrbitResourceStoreByteLimit - self.storedBytes) {
       if (error) {
         *error = [NSError errorWithDomain:OrbitResourceStoreErrorDomain
                                      code:1
@@ -63,6 +59,7 @@ static NSString *const OrbitResourceStoreErrorDomain =
       }
       return nil;
     }
+    NSUInteger nextSize = self.storedBytes + data.length;
 
     NSError *writeError = nil;
     [NSFileManager.defaultManager
@@ -87,17 +84,8 @@ static NSString *const OrbitResourceStoreErrorDomain =
       return nil;
     }
 
-    NSString *previousPath = self.paths[urlString];
-    if (previousPath &&
-        ![NSFileManager.defaultManager removeItemAtPath:previousPath
-                                                  error:&writeError]) {
-      [NSFileManager.defaultManager removeItemAtURL:fileURL error:nil];
-      if (error) *error = writeError;
-      return nil;
-    }
-
+    // Lynx may still be reading an earlier path for this URL.
     self.paths[urlString] = fileURL.path;
-    self.sizes[urlString] = @(data.length);
     self.storedBytes = nextSize;
     return fileURL.path;
   }

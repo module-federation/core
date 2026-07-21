@@ -66,7 +66,7 @@ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite;
   [files removeItemAtURL:parent error:nil];
 }
 
-- (void)testReplacesCachedDataWithinLimitAndCleansUp {
+- (void)testRetainsReplacedCachedPathsUntilCleanup {
   NSFileManager *files = NSFileManager.defaultManager;
   NSURL *directory = [[NSURL fileURLWithPath:NSTemporaryDirectory()
                                 isDirectory:YES]
@@ -87,7 +87,9 @@ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite;
       forURLString:@"https://example.test/chunk.bundle"
       error:&error];
     XCTAssertNotEqualObjects(first, replacement);
-    XCTAssertFalse([files fileExistsAtPath:first]);
+    XCTAssertTrue([files fileExistsAtPath:first]);
+    XCTAssertEqualObjects([NSData dataWithContentsOfFile:first],
+                          [@"first" dataUsingEncoding:NSUTF8StringEncoding]);
     XCTAssertEqualObjects([NSData dataWithContentsOfFile:replacement],
                           [@"replacement" dataUsingEncoding:NSUTF8StringEncoding]);
 

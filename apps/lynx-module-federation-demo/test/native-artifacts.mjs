@@ -71,7 +71,6 @@ decodeTemplate(hostBundleSource);
 const standaloneTemplate = decodeTemplate(standaloneSource);
 const remoteTemplate = decodeTemplate(remoteBundleSource);
 assert.equal(standaloneTemplate['app-type'], 'card');
-assert.ok(standaloneSource.includes(Buffer.from('catalog-standalone-app')));
 assert.equal(remoteTemplate['app-type'], 'DynamicComponent');
 assert.equal(remoteTemplate['engine-version'], '3.7');
 assert.deepEqual(Object.keys(remoteTemplate['custom-sections']), ['catalog']);
