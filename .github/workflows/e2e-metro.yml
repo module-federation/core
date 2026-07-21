@@ -23,7 +23,7 @@ jobs:
       ANDROID_EMULATOR_API_LEVEL: 28
       ANDROID_EMULATOR_TARGET: default
       ANDROID_EMULATOR_ARCH: x86_64
-      ANDROID_EMULATOR_DISK_SPACE: 1024M
+      ANDROID_EMULATOR_PARTITION_SIZE_MB: 1024
       ANDROID_EMULATOR_RAM_SIZE: 256M
       ANDROID_EMULATOR_HEAP_SIZE: 256M
       ANDROID_EMULATOR_BOOT_TIMEOUT: 2700
@@ -110,12 +110,12 @@ jobs:
           arch: ${{ env.ANDROID_EMULATOR_ARCH }}
           ram-size: ${{ env.ANDROID_EMULATOR_RAM_SIZE }}
           heap-size: ${{ env.ANDROID_EMULATOR_HEAP_SIZE }}
-          disk-size: ${{ env.ANDROID_EMULATOR_DISK_SPACE }}
+          disk-size: ${{ env.ANDROID_EMULATOR_PARTITION_SIZE_MB }}M
           emulator-boot-timeout: ${{ env.ANDROID_EMULATOR_BOOT_TIMEOUT }}
           force-avd-creation: false
           disable-animations: true
           # Emulator 36.6 can ignore the AVD disk-size config unless this is explicit.
-          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -partition-size 1024
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -partition-size ${{ env.ANDROID_EMULATOR_PARTITION_SIZE_MB }}
           script: |
             node tools/scripts/run-metro-e2e.mjs --platform=android --appName=${{ env.METRO_APP_NAME }} --skip-rock-cache-auth
 

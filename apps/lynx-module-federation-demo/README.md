@@ -39,6 +39,21 @@ split assets from the fetched manifest URL instead of Lynx Web's internal
 `document.currentScript`. The native remote uses the absolute
 `LYNX_REMOTE_ORIGIN` required by Rspeedy/Lynx's native lazy-bundle loader.
 
+## Rspeedy compatibility boundary
+
+Rspeedy 0.15 resolves its own `@rspack/core`, while this repository needs
+`@rspack-canary/core` 2.1.5-canary-54a0d8f3-20260715194831 for the Lynx layer
+and chunk behavior under test. `rspack-canary-rspeedy.mjs` is the single
+compatibility boundary: it starts Rspeedy with Node resolution hooks that map
+`@rspack/core` to the pinned canary and `@rsbuild/core` to the workspace's
+matching package.
+
+Every demo build, development, and preview script in `package.json` invokes
+that wrapper. Application and federation source import neither the wrapper nor
+the canary package. Remove the wrapper when Rspeedy supports the repository's
+Rspack package directly; then point those package scripts back to the public
+Rspeedy CLI and remove the canary alias together.
+
 ## Run the standalone Catalog product
 
 The Catalog directly renders `Card`, `Details`, and `ActivityFeed` from the
@@ -154,11 +169,9 @@ Set `CATALOG_NATIVE_MANIFEST_URL` when the remote manifest is hosted elsewhere.
 `e2e:native` is artifact and transport validation. It compiles the real Rspeedy
 host, Catalog app, and remote, verifies the regular standalone root bundle,
 the separately transported async-startup singleton, the background container,
-and paired main-thread
-snapshot bytecode in every lazy UI bundle, checks the manifest's public
-background expose/share metadata, then fetches the host, manifest, container,
-and every lazy bundle over HTTP. The macOS CI job adds a real iOS Simulator
-runtime test of those artifacts.
+and three independently loadable lazy UI bundles, checks the manifest's public
+background expose/share metadata, then fetches every artifact over HTTP. The
+macOS CI job adds a real iOS Simulator runtime test of those artifacts.
 
 ## Run the real Lynx Web E2E
 
@@ -197,6 +210,7 @@ paths with `LYNX_HOST_WEB_BUNDLE`, `LYNX_REMOTE_MANIFEST`,
 | `pnpm e2e:ios`          | iOS Catalog launch plus Orbit federation/runtime E2E             |
 | `pnpm e2e:web`          | Standalone Catalog and federated Orbit in official `<lynx-view>` |
 | `pnpm test:ios-project` | Cross-platform iOS project, provenance, pod, and ATS policy gate |
+| `pnpm test:ci-policy`   | Wrapper ownership and Android emulator partition policy          |
 | `pnpm test`             | Cross-platform native artifact and Lynx Web checks               |
 
 The web remote enables `mainThread: true`, so each exposure has background and

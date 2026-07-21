@@ -32,6 +32,7 @@
     "preview:catalog:web": "node rspack-canary-rspeedy.mjs preview -c lynx.catalog.web.config.mjs",
     "preview:web": "node rspack-canary-rspeedy.mjs preview -c lynx.web.config.mjs",
     "test": "pnpm run test:ios-project && pnpm run e2e:native && pnpm run e2e:web",
+    "test:ci-policy": "node test/ci-policy.mjs",
     "test:ios-project": "node test/ios-project.mjs",
     "test:native-artifacts": "node test/native-artifacts.mjs",
     "test:native-dev-server": "node test/native-dev-server.mjs"

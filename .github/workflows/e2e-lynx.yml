@@ -30,6 +30,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Validate Lynx and Android CI policy
+        run: pnpm --filter lynx-module-federation-demo run test:ci-policy
+
       - name: Restore Turborepo cache
         uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
         with:
