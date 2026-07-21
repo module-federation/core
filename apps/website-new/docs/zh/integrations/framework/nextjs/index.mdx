@@ -149,12 +149,11 @@ new NextFederationPlugin({
   exposes: {},
   shared: {},
   extraOptions: {
-    debug: boolean, // `false` by default
-    exposePages: boolean, // `false` by default
-    enableImageLoaderFix: boolean, // `false` by default
-    enableUrlLoaderFix: boolean, // `false` by default
-    skipSharingNextInternals: boolean, // `false` by default
-    skipFederatedStats: boolean // `false` by default
+    debug: boolean, // 默认为 `false`
+    exposePages: boolean, // 默认为 `false`
+    enableImageLoaderFix: boolean, // 默认为 `false`
+    enableUrlLoaderFix: boolean, // 默认为 `false`
+    skipSharingNextInternals: boolean // 默认为 `false`
   },
 });
 ```
@@ -164,7 +163,8 @@ new NextFederationPlugin({
 - `enableImageLoaderFix` – 给所有由 `nextjs-image-loader` 打包的资产添加公共主机名。例如，如果你从 `http://example.com` 提供 remoteEntry，则所有打包资产将在运行时获取此主机名。这类似于 HTML 中的 Base URL，但用于联合模块。
 - `enableUrlLoaderFix` – 给所有由 `url-loader` 打包的资产添加公共主机名。
 - `skipSharingNextInternals` – 禁用共享 Next 内部。如果你想自己共享 Next 内部或在非 next 应用中使用此插件，则可以使用它。
-- `skipFederatedStats` – 跳过 `federated-stats.json` 的生成以减少构建时间。仅当纯 CSR 应用本身、下游宿主和自定义工具都不使用 `flushChunks()` 或读取该资源时才启用此选项。
+
+Next.js 会直接从 `mf-manifest.json` 派生旧版 `flushChunks()` 使用的 expose 资源字段，无需额外遍历 Webpack stats，因此滚动升级期间旧版本应用仍可继续工作。读取其他旧版 stats 字段的自定义工具应迁移到 `mf-manifest.json`；设置 `manifest: false` 可保留完整的旧版输出。
 
 ## 演示
 

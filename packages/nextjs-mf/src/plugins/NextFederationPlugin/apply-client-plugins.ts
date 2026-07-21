@@ -4,6 +4,12 @@ import InvertedContainerPlugin from '../container/InvertedContainerPlugin';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 import type { NextFederationPluginExtraOptions } from './next-fragments';
 import logger from '../../logger';
+import { FederatedStatsCompatibilityPlugin } from './FederatedStatsCompatibilityPlugin';
+
+const FEDERATED_STATS_FILENAMES = [
+  'static/chunks/federated-stats.json',
+  'server/federated-stats.json',
+];
 
 /**
  * Applies client-specific plugins.
@@ -52,13 +58,20 @@ export function applyClientPlugins(
     name,
   };
 
-  // Apply the ChunkCorrelationPlugin to collect metadata on chunks
-  if (!extraOptions.skipFederatedStats) {
+  // Preserve the legacy asset for hosts that have not migrated to manifests.
+  const manifestHasAssets =
+    options.manifest !== false &&
+    (typeof options.manifest !== 'object' ||
+      !options.manifest.disableAssetsAnalyze);
+
+  if (!manifestHasAssets) {
     new ChunkCorrelationPlugin({
-      filename: [
-        'static/chunks/federated-stats.json',
-        'server/federated-stats.json',
-      ],
+      filename: FEDERATED_STATS_FILENAMES,
+    }).apply(compiler);
+  } else {
+    new FederatedStatsCompatibilityPlugin({
+      filenames: FEDERATED_STATS_FILENAMES,
+      manifest: options.manifest,
     }).apply(compiler);
   }
 

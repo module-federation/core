@@ -69,8 +69,7 @@ new NextFederationPlugin({
     exposePages: boolean, // `false` by default
     enableImageLoaderFix: boolean, // `false` by default
     enableUrlLoaderFix: boolean, // `false` by default
-    skipSharingNextInternals: boolean, // `false` by default
-    skipFederatedStats: boolean // `false` by default
+    skipSharingNextInternals: boolean // `false` by default
   },
 });
 ```
@@ -80,7 +79,8 @@ new NextFederationPlugin({
 - `enableImageLoaderFix` – adds public hostname to all assets bundled by `nextjs-image-loader`. So if you serve remoteEntry from `http://example.com` then all bundled assets will get this hostname in runtime. It's something like Base URL in HTML but for federated modules.
 - `enableUrlLoaderFix` – adds public hostname to all assets bundled by `url-loader`.
 - `skipSharingNextInternals` – disables sharing of next internals. You can use it if you want to share next internals yourself or want to use this plugin on non next applications
-- `skipFederatedStats` – skips generation of `federated-stats.json` to reduce build time. Enable it only for CSR-only applications when neither `flushChunks()` nor any downstream host or custom tooling consumes that asset.
+
+Next.js derives the expose asset fields used by legacy `flushChunks()` from `mf-manifest.json` without an additional Webpack stats traversal, so applications on older versions continue to work during rolling upgrades. Custom tooling that reads other legacy stats fields should migrate to `mf-manifest.json`; setting `manifest: false` retains the complete legacy output.
 
 ## Demo
 

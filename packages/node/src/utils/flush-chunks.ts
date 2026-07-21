@@ -1,5 +1,20 @@
 /* eslint-disable no-undef */
 
+import { getResourceUrl, type Manifest } from '@module-federation/sdk';
+import type { RemoteInfo } from '@module-federation/runtime/types';
+
+type LegacyFederatedStats = {
+  federatedModules?: Array<{
+    exposes?: Record<string, string[]>;
+  }>;
+};
+
+type RemoteRequests = {
+  remoteInfo: RemoteInfo;
+  manifestUrl?: string;
+  requests: Set<string>;
+};
+
 // @ts-ignore
 if (!globalThis.usedChunks) {
   // @ts-ignore
@@ -11,176 +26,194 @@ if (!globalThis.usedChunks) {
  */
 // @ts-ignore
 export const { usedChunks } = globalThis;
-/**
- * Load hostStats from the JSON file.
- * @returns {object} hostStats - An object containing host stats data.
- */
-const loadHostStats = () => {
-  try {
-    //@ts-ignore
-    return __non_webpack_require__('../federated-stats.json');
-  } catch (e) {
-    return {};
-  }
-};
+const getFederationController = () =>
+  new Function('return globalThis')().__FEDERATION__;
 
-export const getAllKnownRemotes = function () {
-  // Attempt to access the global federation controller safely
-  const federationController = new Function('return globalThis')()
-    .__FEDERATION__;
+export const getAllKnownRemotes = function (): Record<string, RemoteInfo> {
+  const federationController = getFederationController();
   if (!federationController || !federationController.__INSTANCES__) {
-    // If the federation controller or instances are not defined, return an empty object
     return {};
   }
 
-  var collected = {};
-  // Use a for...of loop to iterate over all federation instances
+  const collected: Record<string, RemoteInfo> = {};
   for (const instance of federationController.__INSTANCES__) {
-    // Use another for...of loop to iterate over the module cache Map entries
-    for (const [key, cacheModule] of instance.moduleCache) {
-      // Check if the cacheModule has remoteInfo and use it to collect remote names
+    for (const [, cacheModule] of instance.moduleCache) {
       if (cacheModule.remoteInfo) {
-        //@ts-ignore
-        collected[cacheModule.remoteInfo.name] = cacheModule.remoteInfo;
+        const remoteInfo = cacheModule.remoteInfo as RemoteInfo;
+        collected[remoteInfo.name] = remoteInfo;
+        if (remoteInfo.alias) collected[remoteInfo.alias] = remoteInfo;
       }
     }
   }
   return collected;
 };
 
-/**
- * Create a shareMap based on the loaded modules.
- * @returns {object} shareMap - An object containing the shareMap data.
- */
-const createShareMap = () => {
-  // Check if __webpack_share_scopes__ is defined and has a default property
-  // @ts-ignore
-  if (__webpack_share_scopes__?.default) {
-    // Reduce the keys of the default property to create the share map
-    // @ts-ignore
-    return Object.keys(__webpack_share_scopes__.default).reduce((acc, key) => {
-      // @ts-ignore
-      const shareMap = __webpack_share_scopes__.default[key];
-      // shareScope may equal undefined or null if it has unexpected value
-      if (!shareMap || typeof shareMap !== 'object') {
-        return acc;
-      }
-      // Get the loaded modules for the current key
-      const loadedModules = Object.values(shareMap)
-        // Filter out the modules that are not loaded
-        // @ts-ignore
-        .filter((sharedModule) => sharedModule.loaded)
-        // Map the filtered modules to their 'from' properties
-        // @ts-ignore
-        .map((sharedModule) => sharedModule.from);
+const getConfiguredManifestUrls = (): Map<string, string> => {
+  const manifestUrls = new Map<string, string>();
+  const federationController = getFederationController();
 
-      // If there are any loaded modules, add them to the accumulator object
-      if (loadedModules.length > 0) {
-        // @ts-ignore
-        acc[key] = loadedModules;
+  for (const instance of federationController?.__INSTANCES__ || []) {
+    for (const configuredRemote of instance.options?.remotes || []) {
+      if (!('entry' in configuredRemote)) continue;
+      try {
+        if (!new URL(configuredRemote.entry).pathname.endsWith('.json')) {
+          continue;
+        }
+      } catch {
+        continue;
       }
-      // Return the accumulator object for the next iteration
-      return acc;
-    }, {});
+      manifestUrls.set(configuredRemote.name, configuredRemote.entry);
+      if (configuredRemote.alias) {
+        manifestUrls.set(configuredRemote.alias, configuredRemote.entry);
+      }
+    }
   }
-  // If __webpack_share_scopes__ is not defined or doesn't have a default property, return an empty object
-  return {};
+
+  return manifestUrls;
 };
 
-/**
- * Process a single chunk and return an array of updated chunks.
- * @param {string} chunk - A chunk string containing remote and request data.
- * @param {object} shareMap - An object containing the shareMap data.
- * @param {object} hostStats - An object containing host stats data.
- * @returns {Promise<Array>} A promise that resolves to an array of updated chunks.
- */
-// @ts-ignore
-const processChunk = async (chunk, shareMap, hostStats) => {
-  const chunks = new Set();
-  const normalizedChunk = chunk.includes('->')
-    ? chunk.replace('->', '/')
-    : chunk;
-  const remoteSeparatorIndex = normalizedChunk.indexOf('/');
+const parseUsedChunk = (
+  chunk: string,
+  remoteNames: string[],
+): [remote: string, request: string] => {
+  const normalizedChunk = chunk.replace('->', '/');
   const remote =
-    remoteSeparatorIndex === -1
-      ? normalizedChunk
-      : normalizedChunk.slice(0, remoteSeparatorIndex);
-  const req =
-    remoteSeparatorIndex === -1
-      ? ''
-      : normalizedChunk.slice(remoteSeparatorIndex + 1);
-  const request = req?.startsWith('./') ? req : './' + req;
-  const knownRemotes = getAllKnownRemotes();
-  //@ts-ignore
-  if (!knownRemotes[remote]) {
-    console.error(
-      `flush chunks: Remote ${remote} is not defined in the global config`,
-    );
-    return;
+    remoteNames.find(
+      (name) =>
+        normalizedChunk === name || normalizedChunk.startsWith(`${name}/`),
+    ) || normalizedChunk.split('/', 1)[0];
+  const request = normalizedChunk.slice(remote.length).replace(/^\//, '');
+  return [remote, request.startsWith('./') ? request : `./${request}`];
+};
+
+const getMetadataUrl = (entry: string, filename: string): string => {
+  const url = new URL(entry);
+  url.pathname = `${url.pathname.slice(0, url.pathname.lastIndexOf('/') + 1)}${filename}`;
+  url.pathname = url.pathname.replace('/ssr/', '/chunks/');
+  return url.href;
+};
+
+const getManifestUrl = (
+  remoteInfo: RemoteInfo,
+  configuredManifestUrl?: string,
+): string => {
+  if (configuredManifestUrl) return configuredManifestUrl;
+  return getMetadataUrl(remoteInfo.entry, 'mf-manifest.json');
+};
+
+const getAssetBaseUrl = (metadataUrl: string): URL => {
+  const baseUrl = new URL(metadataUrl);
+  const staticPathIndex = baseUrl.pathname.indexOf('/static/');
+  baseUrl.pathname =
+    staticPathIndex === -1
+      ? baseUrl.pathname.slice(0, baseUrl.pathname.lastIndexOf('/') + 1)
+      : baseUrl.pathname.slice(0, staticPathIndex + 1);
+  baseUrl.search = '';
+  baseUrl.hash = '';
+  return baseUrl;
+};
+
+const fetchJson = async <T>(url: string): Promise<T> => {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Request failed with status ${response.status}`);
+  }
+  return response.json() as Promise<T>;
+};
+
+const collectManifestAssets = (
+  manifest: Manifest,
+  manifestUrl: string,
+  requests: Set<string>,
+): { chunks: string[]; missingRequests: Set<string> } => {
+  const chunks = new Set<string>();
+  const missingRequests = new Set(requests);
+  let assetBaseUrl = getAssetBaseUrl(manifestUrl);
+  const resourceBasePath = getResourceUrl(manifest.metaData, '');
+
+  if (resourceBasePath !== 'auto') {
+    const normalizedBasePath =
+      resourceBasePath && !resourceBasePath.endsWith('/')
+        ? `${resourceBasePath}/`
+        : resourceBasePath || './';
+    assetBaseUrl = new URL(normalizedBasePath, manifestUrl);
   }
 
+  const resolveAssetUrl = (file: string) => new URL(file, assetBaseUrl).href;
+
+  for (const expose of manifest.exposes) {
+    const request = expose.path || `./${expose.name}`;
+    if (!requests.has(request)) continue;
+
+    const hasSyncAssets =
+      expose.assets.js.sync.length > 0 || expose.assets.css.sync.length > 0;
+    if (hasSyncAssets) missingRequests.delete(request);
+
+    for (const file of expose.assets.js.sync) {
+      chunks.add(resolveAssetUrl(file));
+    }
+    for (const file of expose.assets.css.sync) {
+      chunks.add(resolveAssetUrl(file));
+    }
+  }
+
+  return { chunks: Array.from(chunks), missingRequests };
+};
+
+const collectLegacyAssets = (
+  stats: LegacyFederatedStats,
+  statsUrl: string,
+  requests: Set<string>,
+): string[] => {
+  const chunks = new Set<string>();
+  const assetBaseUrl = getAssetBaseUrl(statsUrl);
+
+  for (const federatedModule of stats.federatedModules || []) {
+    for (const request of requests) {
+      for (const file of federatedModule.exposes?.[request] || []) {
+        chunks.add(new URL(file, assetBaseUrl).href);
+      }
+    }
+  }
+
+  return Array.from(chunks);
+};
+
+const processRemote = async (
+  remoteInfo: RemoteInfo,
+  requests: Set<string>,
+  configuredManifestUrl?: string,
+): Promise<string[]> => {
+  const manifestUrl = getManifestUrl(remoteInfo, configuredManifestUrl);
+  let manifestChunks: string[] = [];
+  let legacyRequests = requests;
+
   try {
-    //@ts-ignore
-    const remoteName = new URL(knownRemotes[remote].entry).pathname
-      .split('/')
-      .pop();
-    //@ts-ignore
+    const manifest = await fetchJson<Manifest>(manifestUrl);
+    const { chunks, missingRequests } = collectManifestAssets(
+      manifest,
+      manifestUrl,
+      requests,
+    );
+    manifestChunks = chunks;
+    if (!missingRequests.size) return chunks;
+    legacyRequests = missingRequests;
+  } catch {
+    // Older remotes may only expose federated-stats.json.
+  }
 
-    const statsFile = knownRemotes[remote].entry
-      .replace(remoteName, 'federated-stats.json')
-      .replace('ssr', 'chunks');
-    let stats = {};
-
-    try {
-      stats = await fetch(statsFile).then((res) => res.json());
-    } catch (e) {
-      console.error('flush error', e);
-    }
-    //@ts-ignore
-
-    const [prefix] = knownRemotes[remote].entry.split('static/');
-    //@ts-ignore
-
-    if (stats.federatedModules) {
-      //@ts-ignore
-
-      stats.federatedModules.forEach((modules) => {
-        if (modules.exposes?.[request]) {
-          //@ts-ignore
-
-          modules.exposes[request].forEach((chunk) => {
-            chunks.add([prefix, chunk].join(''));
-
-            Object.values(chunk).forEach((chunk) => {
-              //@ts-ignore
-
-              if (chunk.files) {
-                //@ts-ignore
-
-                chunk.files.forEach((file) => {
-                  chunks.add(prefix + file);
-                });
-              }
-              //@ts-ignore
-
-              if (chunk.requiredModules) {
-                //@ts-ignore
-
-                chunk.requiredModules.forEach((module) => {
-                  if (shareMap[module]) {
-                    // If the module is from the host, log the host stats
-                  }
-                });
-              }
-            });
-          });
-        }
-      });
-    }
-
-    return Array.from(chunks);
-  } catch (e) {
-    console.error('flush error:', e);
+  const statsUrl = getMetadataUrl(remoteInfo.entry, 'federated-stats.json');
+  try {
+    const stats = await fetchJson<LegacyFederatedStats>(statsUrl);
+    return Array.from(
+      new Set([
+        ...manifestChunks,
+        ...collectLegacyAssets(stats, statsUrl, legacyRequests),
+      ]),
+    );
+  } catch (error) {
+    if (!manifestChunks.length) console.error('flush error:', error);
+    return manifestChunks;
   }
 };
 
@@ -188,21 +221,43 @@ const processChunk = async (chunk, shareMap, hostStats) => {
  * Flush the chunks and return a deduplicated array of chunks.
  * @returns {Promise<Array>} A promise that resolves to an array of deduplicated chunks.
  */
-export const flushChunks = async () => {
-  const hostStats = loadHostStats();
-  const shareMap = createShareMap();
+export const flushChunks = async (): Promise<string[]> => {
+  const knownRemotes = getAllKnownRemotes();
+  const configuredManifestUrls = getConfiguredManifestUrls();
+  const remoteNames = Object.keys(knownRemotes).sort(
+    (left, right) => right.length - left.length,
+  );
+  const requestsByRemote = new Map<string, RemoteRequests>();
+
+  for (const chunk of usedChunks) {
+    const [remote, request] = parseUsedChunk(chunk, remoteNames);
+    const remoteInfo = knownRemotes[remote];
+    if (!remoteInfo) {
+      console.error(
+        `flush chunks: Remote ${remote} is not defined in the global config`,
+      );
+      continue;
+    }
+
+    const remoteRequests = requestsByRemote.get(remoteInfo.name) || {
+      remoteInfo,
+      manifestUrl:
+        configuredManifestUrls.get(remote) ||
+        configuredManifestUrls.get(remoteInfo.name),
+      requests: new Set<string>(),
+    };
+    remoteRequests.requests.add(request);
+    requestsByRemote.set(remoteInfo.name, remoteRequests);
+  }
+  usedChunks.clear();
 
   const allFlushed = await Promise.all(
-    Array.from(usedChunks).map(async (chunk) =>
-      processChunk(chunk, shareMap, hostStats),
+    Array.from(
+      requestsByRemote.values(),
+      ({ remoteInfo, requests, manifestUrl }) =>
+        processRemote(remoteInfo, requests, manifestUrl),
     ),
   );
 
-  // Deduplicate the chunks array
-  const dedupe = Array.from(new Set([...allFlushed.flat()]));
-
-  // Clear usedChunks
-  usedChunks.clear();
-  // Filter out any undefined or null values
-  return dedupe.filter(Boolean);
+  return Array.from(new Set(allFlushed.flat()));
 };
