@@ -1,4 +1,4 @@
-import { readFile, realpath, stat } from 'node:fs/promises';
+import { readFile, readdir, realpath, stat } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import path from 'node:path';
 
@@ -22,36 +22,52 @@ const isInside = (root, file) => {
   );
 };
 
-const resolveFile = async (root, relativePath) => {
-  const candidate = path.resolve(root, relativePath);
-  if (!isInside(root, candidate)) return { status: 403 };
+const indexFiles = async (root) => {
+  const resolvedRoot = await realpath(path.resolve(root));
+  const files = new Map();
+  const visited = new Set();
 
-  try {
-    const resolved = await realpath(candidate);
-    if (!isInside(root, resolved)) return { status: 403 };
-    const fileStat = await stat(resolved);
-    return fileStat.isFile()
-      ? { file: resolved, status: 200 }
-      : { status: 404 };
-  } catch (error) {
-    if (error?.code === 'ENOENT' || error?.code === 'ENOTDIR') {
-      return { status: 404 };
+  const visit = async (directory) => {
+    const resolvedDirectory = await realpath(directory);
+    if (
+      visited.has(resolvedDirectory) ||
+      !isInside(resolvedRoot, resolvedDirectory)
+    ) {
+      return;
     }
-    throw error;
-  }
+    visited.add(resolvedDirectory);
+
+    for (const entry of await readdir(resolvedDirectory, {
+      withFileTypes: true,
+    })) {
+      const resolved = await realpath(path.join(resolvedDirectory, entry.name));
+      if (!isInside(resolvedRoot, resolved)) continue;
+
+      const fileStat = await stat(resolved);
+      if (fileStat.isDirectory()) {
+        await visit(resolved);
+      } else if (fileStat.isFile()) {
+        const relative = path.relative(resolvedRoot, resolved);
+        files.set(`/${relative.split(path.sep).join('/')}`, resolved);
+      }
+    }
+  };
+
+  await visit(resolvedRoot);
+  return files;
 };
 
 const delay = (duration) =>
   new Promise((resolve) => setTimeout(resolve, duration));
 
 export const createArtifactServer = async ({ port = 0, root, routes = {} }) => {
-  const artifactRoot = await realpath(path.resolve(root));
+  const artifactFiles = await indexFiles(root);
   const routeEntries = await Promise.all(
     Object.entries(routes).map(async ([route, target]) => [
       route,
       typeof target === 'string'
-        ? await realpath(path.resolve(target))
-        : target,
+        ? { files: await indexFiles(target) }
+        : { handler: target },
     ]),
   );
   routeEntries.sort(([left], [right]) => right.length - left.length);
@@ -79,31 +95,28 @@ export const createArtifactServer = async ({ port = 0, root, routes = {} }) => {
       }
 
       for (const [route, target] of routeEntries) {
-        if (typeof target === 'function' && pathname === route) {
-          await target(request, response);
+        if (target.handler && pathname === route) {
+          await target.handler(request, response);
           return;
         }
-        if (typeof target !== 'string') continue;
+        if (!target.files) continue;
 
         const matchesPrefix = route.endsWith('/') && pathname.startsWith(route);
         if (matchesPrefix) {
-          const resolved = await resolveFile(
-            target,
-            pathname.slice(route.length),
-          );
-          await serveFile(request, response, resolved);
+          const relativePath = `/${pathname.slice(route.length)}`;
+          await serveFile(request, response, target.files.get(relativePath));
           return;
         }
       }
 
-      const resolved = await resolveFile(
-        artifactRoot,
-        pathname === '/' ? 'index.html' : pathname.replace(/^\/+/, ''),
+      await serveFile(
+        request,
+        response,
+        artifactFiles.get(pathname === '/' ? '/index.html' : pathname),
       );
-      await serveFile(request, response, resolved);
-    } catch (error) {
+    } catch {
       if (!response.headersSent) response.writeHead(500);
-      response.end(String(error));
+      response.end('Internal server error');
     }
   });
 
@@ -149,22 +162,19 @@ export const createArtifactServer = async ({ port = 0, root, routes = {} }) => {
   };
 };
 
-const serveFile = async (request, response, resolved) => {
-  if (!resolved.file) {
-    response
-      .writeHead(resolved.status)
-      .end(resolved.status === 403 ? 'Forbidden' : 'Not found');
+const serveFile = async (request, response, file) => {
+  if (!file) {
+    response.writeHead(404).end('Not found');
     return;
   }
 
-  const body = await readFile(resolved.file);
+  const body = await readFile(file);
   response.writeHead(200, {
     'access-control-allow-origin': '*',
     'cache-control': 'no-store',
     'content-length': body.byteLength,
     'content-type':
-      contentTypes.get(path.extname(resolved.file)) ??
-      'application/octet-stream',
+      contentTypes.get(path.extname(file)) ?? 'application/octet-stream',
     'cross-origin-embedder-policy': 'require-corp',
     'cross-origin-opener-policy': 'same-origin',
   });
