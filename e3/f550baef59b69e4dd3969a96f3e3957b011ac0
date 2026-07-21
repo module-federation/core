@@ -1,0 +1,39 @@
+.changeset/runtime-plugin-instance-binding.md
+  s_7ef544bcd92707::t_4ba07219b84082 1-5
+packages/runtime-core/__tests__/plugin.spec.ts
+  s_7ef544bcd92707::t_98e36e427eaf74 1-280
+packages/runtime-core/src/core.ts
+  s_7ef544bcd92707::t_39db4e0e1c7f0f 460
+packages/runtime-core/src/global.ts
+  s_7ef544bcd92707::t_e18f7f227ea2f6 276,281,286-296
+packages/runtime-core/src/index.ts
+  s_7ef544bcd92707::t_b449ae5385c29b 28-32
+packages/runtime-core/src/type/plugin.ts
+  s_7ef544bcd92707::t_52ad3315cbfc76 39,44-50
+packages/runtime-core/src/utils/hooks/pluginSystem.ts
+  s_7ef544bcd92707::t_bb0702313c5eaa 20,29-30,43-46,49
+packages/runtime-core/src/utils/plugin.ts
+  s_7ef544bcd92707::t_514d15491f5402 2-6,8-63,69,79-91,93,95-101
+packages/runtime/__tests__/global.spec.ts
+  s_7ef544bcd92707::t_96193ee9870a32 2-10,62-91
+packages/runtime/src/index.ts
+  s_7ef544bcd92707::t_ee5b8bfcc872f0 21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "e3f550baef59b69e4dd3969a96f3e3957b011ac0",
+  "prompts": {},
+  "sessions": {
+    "s_7ef544bcd92707": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f84aa-ee9a-7e61-a138-f01e7b3ad008",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    }
+  },
+  "attestation_metadata": {},
+  "remote_transcripts": {}
+}
