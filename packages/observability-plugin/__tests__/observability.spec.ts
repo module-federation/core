@@ -4,6 +4,7 @@ import path from 'node:path';
 import { describe, expect, it, rs } from '@rstest/core';
 import { createOpenRuntime } from '@openruntime/core';
 import type { OpenRuntimeWindowHost } from '@openruntime/core';
+import { ModuleFederation } from '@module-federation/runtime';
 import { createObservability, ObservabilityPlugin } from '../src';
 import {
   ObservabilityBuildPlugin,
@@ -18,6 +19,22 @@ const enabledOrigin = {
     name: 'host',
   },
 };
+
+const createRuntimeInstance = (overrides: Record<string, unknown> = {}) => ({
+  version: '2.5.0',
+  name: 'host',
+  options: {
+    id: 'same-id',
+    name: 'host',
+    version: '1.0.0',
+    remotes: [],
+    shared: {},
+    plugins: [],
+  },
+  moduleCache: new Map<string, unknown>(),
+  shareScopeMap: {},
+  ...overrides,
+});
 
 const createShared = (overrides: Record<string, unknown> = {}) => ({
   version: '18.3.1',
@@ -849,6 +866,411 @@ describe('ObservabilityPlugin', () => {
     expect(plugin.generatePreloadAssets).toBeUndefined();
   });
 
+  it('binds independent handlers and stable refs to same-named instances', () => {
+    const observability = createObservability({
+      level: 'verbose',
+      console: false,
+    });
+    const first = createRuntimeInstance();
+    const second = createRuntimeInstance();
+    const firstHooks = observability.plugin.apply?.(first as any) as any;
+    const secondHooks = observability.plugin.apply?.(second as any) as any;
+
+    expect(firstHooks).not.toBe(secondHooks);
+    firstHooks.beforeRequest({
+      id: 'remote/Button',
+      options: {},
+      origin: second,
+    });
+    secondHooks.beforeRequest({
+      id: 'remote/Button',
+      options: {},
+      origin: first,
+    });
+
+    const reports = observability.getReports();
+    expect(reports).toHaveLength(2);
+    expect(reports.map((report) => report.instanceRef).sort()).toEqual([
+      'mf-1',
+      'mf-2',
+    ]);
+    expect(observability.findReports({ instanceRef: 'mf-1' })).toHaveLength(1);
+    expect(observability.findReports({ instanceRef: 'mf-2' })).toHaveLength(1);
+    expect(first).not.toHaveProperty('instanceRef');
+    expect(second).not.toHaveProperty('instanceRef');
+
+    const firstState = observability.getRuntimeState();
+    observability.plugin.apply?.(first as any);
+    observability.clear();
+    const clearedState = observability.getRuntimeState();
+    expect(
+      firstState.instances.map((instance) => instance.instanceRef),
+    ).toEqual(clearedState.instances.map((instance) => instance.instanceRef));
+  });
+
+  it('keeps the same ref when initOptions registers the plugin again', () => {
+    const globalObject = globalThis as any;
+    const previousFederation = globalObject.__FEDERATION__;
+    try {
+      const observability = createObservability({ console: false });
+      const instance = new ModuleFederation({
+        name: 'repeat-host',
+        plugins: [observability.plugin],
+      });
+      const initialRef =
+        observability.getRuntimeState().instances[0].instanceRef;
+
+      instance.initOptions({
+        name: 'repeat-host',
+        plugins: [observability.plugin],
+      });
+
+      expect(observability.getRuntimeState().instances).toHaveLength(1);
+      expect(observability.getRuntimeState().instances[0].instanceRef).toBe(
+        initialRef,
+      );
+    } finally {
+      globalObject.__FEDERATION__ = previousFederation;
+    }
+  });
+
+  it('derives roles and finite resolved, shared, cyclic, and ambiguous relationships', () => {
+    const observability = createObservability({ console: false });
+    const producerA = createRuntimeInstance({
+      name: 'producer-a',
+      options: {
+        name: 'producer-a',
+        version: '1.0.0',
+        remotes: [],
+        shared: {},
+        plugins: [],
+      },
+    });
+    const producerB = createRuntimeInstance({
+      name: 'producer-b',
+      options: {
+        name: 'producer-b',
+        version: '1.0.0',
+        remotes: [],
+        shared: {},
+        plugins: [],
+      },
+    });
+    const duplicateA = createRuntimeInstance({
+      name: 'duplicate',
+      options: {
+        name: 'duplicate',
+        version: '1.0.0',
+        remotes: [],
+        shared: {},
+        plugins: [],
+      },
+    });
+    const duplicateB = createRuntimeInstance({
+      name: 'duplicate',
+      options: {
+        name: 'duplicate',
+        version: '1.0.0',
+        remotes: [],
+        shared: {},
+        plugins: [],
+      },
+    });
+    const consumerA = createRuntimeInstance({
+      name: 'consumer-a',
+      options: {
+        name: 'consumer-a',
+        remotes: [{ name: 'producer-a' }, { name: 'producer-b' }],
+        shared: {},
+        plugins: [],
+      },
+      moduleCache: new Map([
+        ['a', { remoteInfo: { name: 'producer-a', version: '1.0.0' } }],
+        ['b', { remoteInfo: { name: 'producer-b', version: '1.0.0' } }],
+        ['duplicate', { remoteInfo: { name: 'duplicate' } }],
+        ['missing', { remoteInfo: { name: 'missing-producer' } }],
+      ]),
+    });
+    const consumerB = createRuntimeInstance({
+      name: 'consumer-b',
+      moduleCache: new Map([
+        ['a', { remoteInfo: { name: 'producer-a', version: '1.0.0' } }],
+      ]),
+    });
+    const unknown = createRuntimeInstance({
+      name: 'unknown',
+      options: {
+        name: 'unknown',
+        remotes: [],
+        shared: {},
+        plugins: [],
+      },
+    });
+    (producerA.moduleCache as Map<string, unknown>).set('cycle', {
+      remoteInfo: { name: 'consumer-a' },
+    });
+
+    [
+      producerA,
+      producerB,
+      duplicateA,
+      duplicateB,
+      consumerA,
+      consumerB,
+      unknown,
+    ].forEach((instance) => observability.plugin.apply?.(instance as any));
+
+    const initialState = observability.getRuntimeState();
+    expect(
+      initialState.instances.find((instance) => instance.name === 'consumer-a')
+        ?.role,
+    ).toBe('mixed');
+    expect(
+      initialState.instances.find((instance) => instance.name === 'producer-b')
+        ?.role,
+    ).toBe('producer');
+    expect(
+      initialState.instances.find((instance) => instance.name === 'consumer-b')
+        ?.role,
+    ).toBe('consumer');
+    expect(
+      initialState.instances.find((instance) => instance.name === 'unknown')
+        ?.role,
+    ).toBe('unknown');
+    expect(initialState.relationships).toHaveLength(6);
+    expect(
+      initialState.relationships.filter(
+        (relationship) => relationship.remote.name === 'producer-a',
+      ),
+    ).toHaveLength(2);
+    expect(
+      initialState.relationships.find(
+        (relationship) => relationship.remote.name === 'duplicate',
+      ),
+    ).toMatchObject({
+      status: 'ambiguous',
+      candidateProducerInstanceRefs: expect.arrayContaining(['mf-3', 'mf-4']),
+    });
+    expect(
+      initialState.relationships.find(
+        (relationship) => relationship.remote.name === 'missing-producer',
+      ),
+    ).toMatchObject({
+      status: 'unresolved',
+      consumerInstanceRef: 'mf-5',
+    });
+
+    const producerRef = initialState.instances.find(
+      (instance) => instance.name === 'producer-a',
+    )?.instanceRef;
+    (producerA.options as Record<string, unknown>).version = '2.0.0';
+    const updatedProducer = observability
+      .getRuntimeState()
+      .instances.find((instance) => instance.name === 'producer-a');
+    expect(updatedProducer).toMatchObject({
+      instanceRef: producerRef,
+      optionsVersion: '2.0.0',
+    });
+  });
+
+  it('marks late binding and returns a safe browser state copy', () => {
+    const globalObject = globalThis as any;
+    const previousFederation = globalObject.__FEDERATION__;
+    const instance = createRuntimeInstance({
+      options: {
+        name: 'late-host',
+        remotes: [
+          {
+            name: 'remote',
+            entry: 'https://example.com/remote.js?token=secret#private',
+          },
+        ],
+        shared: {},
+        plugins: [() => 'private'],
+      },
+    });
+    globalObject.__FEDERATION__ = {
+      __INSTANCES__: [instance],
+      moduleInfo: {
+        remote: {
+          name: 'remote',
+          remoteEntry: 'https://example.com/remote.js?token=secret#private',
+          factory: () => 'private',
+        },
+      },
+    };
+
+    try {
+      const observability = createObservability({
+        console: false,
+        browser: { enabled: true, scope: 'multi-instance' },
+      });
+      observability.plugin.apply?.(instance as any);
+      const reader =
+        globalObject.__FEDERATION__.__OBSERVABILITY__['multi-instance'];
+      const state = reader.getRuntimeState();
+      expect(state.completeness).toMatchObject({
+        history: 'partial',
+        lateBoundInstanceRefs: ['mf-1'],
+        recommendation: expect.any(String),
+      });
+      expect(JSON.stringify(state)).not.toContain('token=secret');
+      expect(JSON.stringify(state)).not.toContain('private');
+      state.instances[0].name = 'mutated';
+      expect(reader.getRuntimeState().instances[0].name).not.toBe('mutated');
+    } finally {
+      globalObject.__FEDERATION__ = previousFederation;
+    }
+  });
+
+  it('keeps instance APIs, bound events, and OpenRuntime targets scoped', async () => {
+    const runtime = createOpenRuntime();
+    const observability = createObservability({
+      level: 'verbose',
+      console: false,
+      openRuntime: { runtime, source: 'mf-test' },
+    });
+    const first = createRuntimeInstance();
+    const second = createRuntimeInstance();
+    const firstHooks = observability.plugin.apply?.(first as any) as any;
+    const secondHooks = observability.plugin.apply?.(second as any) as any;
+    const startArgs = {
+      id: 'remote/Button',
+      options: {},
+      origin: undefined,
+    };
+    firstHooks.beforeRequest(startArgs);
+    secondHooks.beforeRequest(startArgs);
+    firstHooks.beforeLoadShare({
+      pkgName: 'react',
+      shareInfo: createShared(),
+      shared: {},
+      origin: undefined,
+    });
+    secondHooks.beforeLoadShare({
+      pkgName: 'react',
+      shareInfo: createShared(),
+      shared: {},
+      origin: undefined,
+    });
+    await firstHooks.onLoad({
+      ...startArgs,
+      expose: './Button',
+      remote: { name: 'remote' },
+      exposeModule: {},
+    });
+    await secondHooks.onLoad({
+      ...startArgs,
+      expose: './Button',
+      remote: { name: 'remote' },
+      exposeModule: {},
+    });
+    (first as any).markComponentLoaded({ requestId: 'remote/Button' });
+    (second as any).markComponentLoaded({ requestId: 'remote/Button' });
+
+    expect(
+      observability.findReports({ instanceRef: 'mf-1' })[0].summary
+        .componentLoaded,
+    ).toBe(true);
+    expect(
+      observability.findReports({ instanceRef: 'mf-2' })[0].summary
+        .componentLoaded,
+    ).toBe(true);
+    expect(
+      observability.findReports({ instanceRef: 'mf-1', shared: 'react' }),
+    ).toHaveLength(1);
+    expect(
+      observability.findReports({ instanceRef: 'mf-2', shared: 'react' }),
+    ).toHaveLength(1);
+    expect(
+      runtime.getSnapshot().targets['mf:instance:mf-1:remote:remote'],
+    ).toBeDefined();
+    expect(
+      runtime.getSnapshot().targets['mf:instance:mf-2:remote:remote'],
+    ).toBeDefined();
+  });
+
+  it('reports conservative trace capabilities for late and old runtimes', () => {
+    const globalObject = globalThis as any;
+    const previousFederation = globalObject.__FEDERATION__;
+    const oldRuntime = createRuntimeInstance({ version: '2.4.9' });
+    globalObject.__FEDERATION__ = { __INSTANCES__: [oldRuntime] };
+
+    try {
+      const observability = createObservability({ console: false });
+      observability.plugin.apply?.(oldRuntime as any);
+      const state = observability.getRuntimeState();
+      expect(state.capabilities.instanceState).toMatchObject({
+        available: true,
+        completeness: 'complete',
+      });
+      expect(state.capabilities.remoteTrace.completeness).toBe('partial');
+      expect(state.capabilities.sharedTrace).toMatchObject({
+        available: false,
+        completeness: 'unavailable',
+        reason: expect.stringContaining('2.5.0'),
+      });
+    } finally {
+      globalObject.__FEDERATION__ = previousFederation;
+    }
+  });
+
+  it('keeps legacy handlers and resolves duplicate action names by instanceRef', async () => {
+    const globalObject = globalThis as any;
+    const previousFederation = globalObject.__FEDERATION__;
+    const first = createRuntimeInstance();
+    const second = createRuntimeInstance();
+    globalObject.__FEDERATION__ = { __INSTANCES__: [first, second] };
+
+    try {
+      const runtime = createOpenRuntime();
+      const observability = createObservability({
+        level: 'verbose',
+        console: false,
+        openRuntime: { runtime, source: 'mf-test' },
+      });
+      observability.plugin.apply?.(first as any);
+      observability.plugin.apply?.(second as any);
+      const runtimeStateResult = await runtime.runAction(
+        'mf:get-runtime-state',
+      );
+      expect(runtimeStateResult.result).toMatchObject({
+        instances: [
+          expect.objectContaining({ instanceRef: 'mf-1' }),
+          expect.objectContaining({ instanceRef: 'mf-2' }),
+        ],
+      });
+      observability.plugin.beforeRequest?.({
+        id: 'remote/Button',
+        options: {},
+        origin: first,
+      } as any);
+
+      expect(observability.getLatestReport()?.instanceRef).toBe('mf-1');
+      const duplicateNameResult = await runtime.runAction(
+        'mf:get-federation-instance-config',
+        { name: 'host' },
+      );
+      expect(duplicateNameResult.result).toMatchObject({
+        found: false,
+        candidates: [
+          expect.objectContaining({ instanceRef: 'mf-1' }),
+          expect.objectContaining({ instanceRef: 'mf-2' }),
+        ],
+      });
+      const byRefResult = await runtime.runAction(
+        'mf:get-federation-instance-config',
+        { instanceRef: 'mf-2' },
+      );
+      expect(byRefResult.result).toMatchObject({
+        found: true,
+        instance: expect.objectContaining({ instanceRef: 'mf-2' }),
+      });
+    } finally {
+      globalObject.__FEDERATION__ = previousFederation;
+    }
+  });
+
   it('exposes chrome reports under the fixed browser scope', () => {
     const previousFederation = (globalThis as any).__FEDERATION__;
 
@@ -1647,7 +2069,9 @@ describe('ObservabilityPlugin', () => {
       },
     });
 
-    expect(runtime.getSnapshot().targets['mf:remote:remote']).toMatchObject({
+    expect(
+      runtime.getSnapshot().targets['mf:instance:mf-1:remote:remote'],
+    ).toMatchObject({
       status: 'loading',
       type: 'mf.remote',
       source: 'mf-test',
@@ -1658,7 +2082,7 @@ describe('ObservabilityPlugin', () => {
         hostName: ['host'],
         exposes: [
           {
-            targetId: 'mf:remote:remote:expose:Button',
+            targetId: 'mf:instance:mf-1:remote:remote:expose:Button',
           },
         ],
       }),
@@ -1667,14 +2091,14 @@ describe('ObservabilityPlugin', () => {
     await emitRemoteLoaded(observability);
 
     const waitResult = await runtime.waitFor({
-      id: 'mf:remote:remote',
+      id: 'mf:instance:mf-1:remote:remote',
       status: 'ready',
     });
     expect(waitResult.success).toBe(true);
 
     const snapshot = runtime.getSnapshot();
     expect(snapshot.targets['mf:consumer:host']).toBeUndefined();
-    expect(snapshot.targets['mf:remote:remote']).toMatchObject({
+    expect(snapshot.targets['mf:instance:mf-1:remote:remote']).toMatchObject({
       status: 'ready',
       data: expect.objectContaining({
         remote: expect.objectContaining({
@@ -1683,28 +2107,30 @@ describe('ObservabilityPlugin', () => {
         hostName: ['host'],
         exposes: [
           {
-            targetId: 'mf:remote:remote:expose:Button',
+            targetId: 'mf:instance:mf-1:remote:remote:expose:Button',
           },
         ],
       }),
     });
-    expect(snapshot.targets['mf:remote:remote'].data).not.toHaveProperty(
-      'state',
-    );
-    expect(snapshot.targets['mf:remote:remote'].data).not.toHaveProperty(
-      'latestReport',
-    );
-    expect(snapshot.targets['mf:remote:remote'].data).not.toHaveProperty(
-      'currentPhase',
-    );
-    expect(snapshot.targets['mf:remote:remote'].data).not.toHaveProperty(
-      'exposeCount',
-    );
+    expect(
+      snapshot.targets['mf:instance:mf-1:remote:remote'].data,
+    ).not.toHaveProperty('state');
+    expect(
+      snapshot.targets['mf:instance:mf-1:remote:remote'].data,
+    ).not.toHaveProperty('latestReport');
+    expect(
+      snapshot.targets['mf:instance:mf-1:remote:remote'].data,
+    ).not.toHaveProperty('currentPhase');
+    expect(
+      snapshot.targets['mf:instance:mf-1:remote:remote'].data,
+    ).not.toHaveProperty('exposeCount');
     expect(snapshot.targets['mf:manifest:remote']).toBeUndefined();
     expect(snapshot.targets['mf:remote-entry:remote']).toBeUndefined();
-    expect(snapshot.targets['mf:remote:remote:expose:Button']).toMatchObject({
+    expect(
+      snapshot.targets['mf:instance:mf-1:remote:remote:expose:Button'],
+    ).toMatchObject({
       status: 'ready',
-      dependsOn: ['mf:remote:remote'],
+      dependsOn: ['mf:instance:mf-1:remote:remote'],
       type: 'mf.remote.expose',
       data: expect.objectContaining({
         requestId: 'remote/Button',
@@ -1717,22 +2143,22 @@ describe('ObservabilityPlugin', () => {
       }),
     });
     expect(
-      snapshot.targets['mf:remote:remote:expose:Button'].data,
+      snapshot.targets['mf:instance:mf-1:remote:remote:expose:Button'].data,
     ).not.toHaveProperty('remote');
     expect(
-      snapshot.targets['mf:remote:remote:expose:Button'].data,
+      snapshot.targets['mf:instance:mf-1:remote:remote:expose:Button'].data,
     ).not.toHaveProperty('expose');
     expect(
-      snapshot.targets['mf:remote:remote:expose:Button'].data,
+      snapshot.targets['mf:instance:mf-1:remote:remote:expose:Button'].data,
     ).not.toHaveProperty('outcome');
     expect(
-      snapshot.targets['mf:remote:remote:expose:Button'].data,
+      snapshot.targets['mf:instance:mf-1:remote:remote:expose:Button'].data,
     ).not.toHaveProperty('currentPhase');
     expect(
-      snapshot.targets['mf:remote:remote:expose:Button'].data,
+      snapshot.targets['mf:instance:mf-1:remote:remote:expose:Button'].data,
     ).not.toHaveProperty('status');
     expect(
-      snapshot.targets['mf:remote:remote:expose:Button'].data,
+      snapshot.targets['mf:instance:mf-1:remote:remote:expose:Button'].data,
     ).not.toHaveProperty('state');
 
     expect(
@@ -1814,7 +2240,7 @@ describe('ObservabilityPlugin', () => {
     });
   });
 
-  it('keeps remote target data aggregated when a remote loads multiple exposes', async () => {
+  it('keeps remote target data scoped when instances load different exposes', async () => {
     const runtime = createOpenRuntime();
     const observability = createObservability({
       level: 'verbose',
@@ -1825,91 +2251,96 @@ describe('ObservabilityPlugin', () => {
       },
     });
 
+    const consumerA = {
+      version: '2.5.0',
+      options: {
+        name: 'consumer_a',
+      },
+    };
+    const consumerB = {
+      version: '2.5.0',
+      options: {
+        name: 'consumer_b',
+      },
+    };
+
     emitRemoteStart(observability, {
       id: 'remote/Button',
-      origin: {
-        version: '2.5.0',
-        options: {
-          name: 'consumer_a',
-        },
-      },
+      origin: consumerA,
     });
     await emitRemoteLoaded(observability, {
       id: 'remote/Button',
       expose: './Button',
-      origin: {
-        version: '2.5.0',
-        options: {
-          name: 'consumer_a',
-        },
-      },
+      origin: consumerA,
     });
     emitRemoteStart(observability, {
       id: 'remote/Panel',
-      origin: {
-        version: '2.5.0',
-        options: {
-          name: 'consumer_b',
-        },
-      },
+      origin: consumerB,
     });
     await emitRemoteLoaded(observability, {
       id: 'remote/Panel',
       expose: './Panel',
-      origin: {
-        version: '2.5.0',
-        options: {
-          name: 'consumer_b',
-        },
-      },
+      origin: consumerB,
     });
 
     const snapshot = runtime.getSnapshot();
-    expect(snapshot.targets['mf:remote:remote']).toMatchObject({
+    expect(snapshot.targets['mf:instance:mf-1:remote:remote']).toMatchObject({
       status: 'ready',
       data: expect.objectContaining({
         remote: expect.objectContaining({
           name: 'remote',
         }),
-        hostName: expect.arrayContaining(['consumer_a', 'consumer_b']),
+        hostName: ['consumer_a'],
         exposes: [
           {
-            targetId: 'mf:remote:remote:expose:Button',
-          },
-          {
-            targetId: 'mf:remote:remote:expose:Panel',
+            targetId: 'mf:instance:mf-1:remote:remote:expose:Button',
           },
         ],
       }),
     });
-    expect(snapshot.targets['mf:remote:remote'].data).not.toHaveProperty(
-      'requestId',
-    );
-    expect(snapshot.targets['mf:remote:remote'].data).not.toHaveProperty(
-      'expose',
-    );
-    expect(snapshot.targets['mf:remote:remote'].data).not.toHaveProperty(
-      'state',
-    );
-    expect(snapshot.targets['mf:remote:remote'].data).not.toHaveProperty(
-      'exposeCount',
-    );
-    expect(snapshot.targets['mf:remote:remote'].data).not.toHaveProperty(
-      'latestReport',
-    );
-    expect(snapshot.targets['mf:remote:remote'].data).not.toHaveProperty(
-      'currentPhase',
-    );
+    expect(
+      snapshot.targets['mf:instance:mf-1:remote:remote'].data,
+    ).not.toHaveProperty('requestId');
+    expect(
+      snapshot.targets['mf:instance:mf-1:remote:remote'].data,
+    ).not.toHaveProperty('expose');
+    expect(
+      snapshot.targets['mf:instance:mf-1:remote:remote'].data,
+    ).not.toHaveProperty('state');
+    expect(
+      snapshot.targets['mf:instance:mf-1:remote:remote'].data,
+    ).not.toHaveProperty('exposeCount');
+    expect(
+      snapshot.targets['mf:instance:mf-1:remote:remote'].data,
+    ).not.toHaveProperty('latestReport');
+    expect(
+      snapshot.targets['mf:instance:mf-1:remote:remote'].data,
+    ).not.toHaveProperty('currentPhase');
     expect(snapshot.targets['mf:manifest:remote']).toBeUndefined();
     expect(snapshot.targets['mf:remote-entry:remote']).toBeUndefined();
-    expect(snapshot.targets['mf:remote:remote:expose:Button']).toMatchObject({
+    expect(
+      snapshot.targets['mf:instance:mf-1:remote:remote:expose:Button'],
+    ).toMatchObject({
       status: 'ready',
       data: expect.objectContaining({
         hostName: ['consumer_a'],
         consumers: ['consumer_a'],
       }),
     });
-    expect(snapshot.targets['mf:remote:remote:expose:Panel']).toMatchObject({
+    expect(snapshot.targets['mf:instance:mf-2:remote:remote']).toMatchObject({
+      status: 'ready',
+      data: expect.objectContaining({
+        hostName: ['consumer_b'],
+        exposes: [
+          {
+            targetId: 'mf:instance:mf-2:remote:remote:expose:Panel',
+          },
+        ],
+      }),
+    });
+    expect(
+      snapshot.targets['mf:instance:mf-2:remote:remote:expose:Panel'],
+    ).toMatchObject({
       status: 'ready',
       data: expect.objectContaining({
         hostName: ['consumer_b'],
@@ -1917,10 +2348,10 @@ describe('ObservabilityPlugin', () => {
       }),
     });
     expect(
-      snapshot.targets['mf:remote:remote:expose:Button'].data,
+      snapshot.targets['mf:instance:mf-1:remote:remote:expose:Button'].data,
     ).not.toHaveProperty('expose');
     expect(
-      snapshot.targets['mf:remote:remote:expose:Panel'].data,
+      snapshot.targets['mf:instance:mf-2:remote:remote:expose:Panel'].data,
     ).not.toHaveProperty('expose');
   });
 
@@ -1975,7 +2406,9 @@ describe('ObservabilityPlugin', () => {
         },
       });
 
-      emitRemoteStart(observability);
+      emitRemoteStart(observability, {
+        origin: (globalObject.__FEDERATION__ as any).__INSTANCES__[0],
+      });
 
       const globalSummary = await runtime.runAction('mf:get-federation-global');
       expect(globalSummary.success).toBe(true);
@@ -1996,7 +2429,7 @@ describe('ObservabilityPlugin', () => {
         found: true,
         moduleInfo: expect.objectContaining({
           name: 'remote',
-          remoteEntry: 'http://localhost:3001/remoteEntry.js',
+          entry: 'http://localhost:3001/remoteEntry.js',
         }),
       });
 
@@ -2008,9 +2441,9 @@ describe('ObservabilityPlugin', () => {
         count: 1,
         instances: [
           expect.objectContaining({
-            index: 0,
             name: 'host',
-            remoteCount: 1,
+            instanceRef: 'mf-1',
+            remotes: [expect.objectContaining({ name: 'remote' })],
           }),
         ],
       });
@@ -2019,7 +2452,7 @@ describe('ObservabilityPlugin', () => {
       ).resolves.toEqual([
         expect.objectContaining({
           value: 'host',
-          description: 'host',
+          description: 'host (mf-1)',
         }),
       ]);
 
@@ -2034,14 +2467,8 @@ describe('ObservabilityPlugin', () => {
         found: true,
         instance: expect.objectContaining({
           name: 'host',
-          config: expect.objectContaining({
-            remotes: [
-              expect.objectContaining({
-                name: 'remote',
-              }),
-            ],
-            plugins: ['[function anonymous]'],
-          }),
+          instanceRef: 'mf-1',
+          remotes: [expect.objectContaining({ name: 'remote' })],
         }),
       });
     } finally {
@@ -2076,7 +2503,9 @@ describe('ObservabilityPlugin', () => {
 
     expect(host.__OPEN_RUNTIME__).toBeDefined();
     expect(
-      host.__OPEN_RUNTIME__?.getSnapshot().targets['mf:remote:remote'],
+      host.__OPEN_RUNTIME__?.getSnapshot().targets[
+        'mf:instance:mf-1:remote:remote'
+      ],
     ).toMatchObject({
       status: 'loading',
       type: 'mf.remote',
@@ -2347,7 +2776,7 @@ describe('ObservabilityPlugin', () => {
         schemaVersion: 1,
         source: 'module-federation/observability',
         kind: 'event',
-        scope: 'host',
+        scope: 'runtime_host',
         event: {
           phase: 'loadRemote',
           status: 'start',
@@ -4112,7 +4541,7 @@ describe('ObservabilityPlugin', () => {
 
   it('syncs shared reports to OpenRuntime targets', async () => {
     const runtime = createOpenRuntime();
-    const sharedTargetId = 'mf:shared:react:18.3.1:default';
+    const sharedTargetId = 'mf:instance:mf-1:shared:react:18.3.1:default';
     const observability = createObservability({
       level: 'verbose',
       console: false,
@@ -4192,7 +4621,7 @@ describe('ObservabilityPlugin', () => {
 
   it('reports singleton shared version conflicts to OpenRuntime', async () => {
     const runtime = createOpenRuntime();
-    const conflictTargetId = 'mf:shared-conflict:react:default';
+    const conflictTargetId = 'mf:instance:mf-1:shared-conflict:react:default';
     const observability = createObservability({
       level: 'verbose',
       console: false,
@@ -4469,7 +4898,7 @@ describe('ObservabilityPlugin', () => {
 
   it('marks recovered shared reports as recovered OpenRuntime targets', async () => {
     const runtime = createOpenRuntime();
-    const sharedTargetId = 'mf:shared:react:99.0.0:default';
+    const sharedTargetId = 'mf:instance:mf-1:shared:react:99.0.0:default';
     const observability = createObservability({
       level: 'verbose',
       console: false,
@@ -4528,7 +4957,8 @@ describe('ObservabilityPlugin', () => {
 
   it('marks failed shared reports as error OpenRuntime targets', async () => {
     const runtime = createOpenRuntime();
-    const sharedTargetId = 'mf:shared:observability-async-shared:1.0.0:default';
+    const sharedTargetId =
+      'mf:instance:mf-1:shared:observability-async-shared:1.0.0:default';
     const observability = createObservability({
       level: 'verbose',
       console: false,
