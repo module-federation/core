@@ -16,6 +16,14 @@
 		100000000000000000000006 /* OrbitControlUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000000000000000000001A /* OrbitControlUITests.swift */; };
 		100000000000000000000007 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 10000000000000000000001C /* Assets.xcassets */; };
 		100000000000000000000008 /* static in Resources */ = {isa = PBXBuildFile; fileRef = 10000000000000000000001D /* static */; };
+		200000000000000000000001 /* OrbitResourceURLResolver.m in Sources */ = {isa = PBXBuildFile; fileRef = 210000000000000000000002 /* OrbitResourceURLResolver.m */; };
+		200000000000000000000002 /* OrbitResourceStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 210000000000000000000004 /* OrbitResourceStore.m */; };
+		200000000000000000000003 /* OrbitResourceDownloader.m in Sources */ = {isa = PBXBuildFile; fileRef = 210000000000000000000006 /* OrbitResourceDownloader.m */; };
+		200000000000000000000004 /* OrbitResourceTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 210000000000000000000007 /* OrbitResourceTests.m */; };
+		200000000000000000000005 /* OrbitResourceURLResolver.m in Sources */ = {isa = PBXBuildFile; fileRef = 210000000000000000000002 /* OrbitResourceURLResolver.m */; };
+		200000000000000000000006 /* OrbitResourceStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 210000000000000000000004 /* OrbitResourceStore.m */; };
+		200000000000000000000007 /* OrbitResourceDownloader.m in Sources */ = {isa = PBXBuildFile; fileRef = 210000000000000000000006 /* OrbitResourceDownloader.m */; };
+		200000000000000000000008 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 210000000000000000000009 /* XCTest.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -43,6 +51,15 @@
 		10000000000000000000001B /* OrbitControlUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OrbitControlUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		10000000000000000000001C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		10000000000000000000001D /* static */ = {isa = PBXFileReference; lastKnownFileType = folder; path = static; sourceTree = "<group>"; };
+		210000000000000000000001 /* OrbitResourceURLResolver.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OrbitResourceURLResolver.h; sourceTree = "<group>"; };
+		210000000000000000000002 /* OrbitResourceURLResolver.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OrbitResourceURLResolver.m; sourceTree = "<group>"; };
+		210000000000000000000003 /* OrbitResourceStore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OrbitResourceStore.h; sourceTree = "<group>"; };
+		210000000000000000000004 /* OrbitResourceStore.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OrbitResourceStore.m; sourceTree = "<group>"; };
+		210000000000000000000005 /* OrbitResourceDownloader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OrbitResourceDownloader.h; sourceTree = "<group>"; };
+		210000000000000000000006 /* OrbitResourceDownloader.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OrbitResourceDownloader.m; sourceTree = "<group>"; };
+		210000000000000000000007 /* OrbitResourceTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OrbitResourceTests.m; sourceTree = "<group>"; };
+		210000000000000000000008 /* OrbitControlTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OrbitControlTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		210000000000000000000009 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = System/Library/Frameworks/XCTest.framework; sourceTree = SDKROOT; };
 		2A53B1B55000D34C4A561687 /* libPods-OrbitControl.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-OrbitControl.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4CA6D515EC78DF0FF9866EA0 /* Pods-OrbitControl.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OrbitControl.debug.xcconfig"; path = "Target Support Files/Pods-OrbitControl/Pods-OrbitControl.debug.xcconfig"; sourceTree = "<group>"; };
 		89120448DFA86FDA0491C6AB /* Pods-OrbitControl.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OrbitControl.release.xcconfig"; path = "Target Support Files/Pods-OrbitControl/Pods-OrbitControl.release.xcconfig"; sourceTree = "<group>"; };
@@ -64,6 +81,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		250000000000000000000002 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				200000000000000000000008 /* XCTest.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -73,6 +98,7 @@
 				100000000000000000000061 /* OrbitControl */,
 				100000000000000000000062 /* Resources */,
 				100000000000000000000063 /* OrbitControlUITests */,
+				260000000000000000000005 /* OrbitControlTests */,
 				100000000000000000000064 /* Products */,
 				E38B361A9360FB49B8107C77 /* Pods */,
 				637A738AE6E27E006103F4CC /* Frameworks */,
@@ -86,6 +112,12 @@
 				100000000000000000000012 /* ViewController.swift */,
 				100000000000000000000013 /* OrbitResourceFetcher.h */,
 				100000000000000000000014 /* OrbitResourceFetcher.m */,
+				210000000000000000000001 /* OrbitResourceURLResolver.h */,
+				210000000000000000000002 /* OrbitResourceURLResolver.m */,
+				210000000000000000000003 /* OrbitResourceStore.h */,
+				210000000000000000000004 /* OrbitResourceStore.m */,
+				210000000000000000000005 /* OrbitResourceDownloader.h */,
+				210000000000000000000006 /* OrbitResourceDownloader.m */,
 				100000000000000000000015 /* OrbitControl-Bridging-Header.h */,
 				100000000000000000000016 /* Info.plist */,
 				100000000000000000000017 /* Info.Debug.plist */,
@@ -117,13 +149,23 @@
 			children = (
 				100000000000000000000010 /* OrbitControl.app */,
 				10000000000000000000001B /* OrbitControlUITests.xctest */,
+				210000000000000000000008 /* OrbitControlTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		260000000000000000000005 /* OrbitControlTests */ = {
+			isa = PBXGroup;
+			children = (
+				210000000000000000000007 /* OrbitResourceTests.m */,
+			);
+			path = OrbitControlTests;
 			sourceTree = "<group>";
 		};
 		637A738AE6E27E006103F4CC /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				210000000000000000000009 /* XCTest.framework */,
 				2A53B1B55000D34C4A561687 /* libPods-OrbitControl.a */,
 			);
 			name = Frameworks;
@@ -179,6 +221,23 @@
 			productReference = 10000000000000000000001B /* OrbitControlUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		240000000000000000000002 /* OrbitControlTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 270000000000000000000003 /* Build configuration list for PBXNativeTarget "OrbitControlTests" */;
+			buildPhases = (
+				280000000000000000000004 /* Sources */,
+				250000000000000000000002 /* Frameworks */,
+				280000000000000000000005 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = OrbitControlTests;
+			productName = OrbitControlTests;
+			productReference = 210000000000000000000008 /* OrbitControlTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -195,6 +254,9 @@
 					100000000000000000000041 = {
 						CreatedOnToolsVersion = 16.4;
 						TestTargetID = 100000000000000000000040;
+					};
+					240000000000000000000002 = {
+						CreatedOnToolsVersion = 16.4;
 					};
 				};
 			};
@@ -213,6 +275,7 @@
 			targets = (
 				100000000000000000000040 /* OrbitControl */,
 				100000000000000000000041 /* OrbitControlUITests */,
+				240000000000000000000002 /* OrbitControlTests */,
 			);
 		};
 /* End PBXProject section */
@@ -230,6 +293,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		100000000000000000000083 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		280000000000000000000005 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -288,6 +358,9 @@
 				100000000000000000000001 /* AppDelegate.swift in Sources */,
 				100000000000000000000002 /* ViewController.swift in Sources */,
 				100000000000000000000003 /* OrbitResourceFetcher.m in Sources */,
+				200000000000000000000001 /* OrbitResourceURLResolver.m in Sources */,
+				200000000000000000000002 /* OrbitResourceStore.m in Sources */,
+				200000000000000000000003 /* OrbitResourceDownloader.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -296,6 +369,17 @@
 			buildActionMask = 2147483647;
 			files = (
 				100000000000000000000006 /* OrbitControlUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		280000000000000000000004 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				200000000000000000000004 /* OrbitResourceTests.m in Sources */,
+				200000000000000000000005 /* OrbitResourceURLResolver.m in Sources */,
+				200000000000000000000006 /* OrbitResourceStore.m in Sources */,
+				200000000000000000000007 /* OrbitResourceDownloader.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -450,6 +534,42 @@
 			};
 			name = Release;
 		};
+		2200000000000000000000A6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = org.modulefederation.lynx.demo.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		2200000000000000000000A7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = org.modulefederation.lynx.demo.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -476,6 +596,15 @@
 			buildConfigurations = (
 				1000000000000000000000A0 /* Debug */,
 				1000000000000000000000A1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		270000000000000000000003 /* Build configuration list for PBXNativeTarget "OrbitControlTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2200000000000000000000A6 /* Debug */,
+				2200000000000000000000A7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

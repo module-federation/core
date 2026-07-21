@@ -140,6 +140,7 @@ try {
       'COMPILER_INDEX_STORE_ENABLE=NO',
       '-parallel-testing-enabled',
       'NO',
+      '-only-testing:OrbitControlTests',
       '-only-testing:OrbitControlUITests/OrbitControlUITests/testFederatedImportsRuntimeLoadingAndSingleton',
       '-only-testing:OrbitControlUITests/OrbitControlUITests/testStandaloneCatalogRemoteBuildLaunches',
       '-only-testing:OrbitControlUITests/OrbitControlUITests/testEmbeddedReleaseHostLaunches',

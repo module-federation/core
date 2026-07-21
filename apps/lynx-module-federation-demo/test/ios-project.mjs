@@ -17,14 +17,21 @@ await Promise.all([
   access(
     path.join(appRoot, 'ios/OrbitControlUITests/OrbitControlUITests.swift'),
   ),
+  ...[
+    'OrbitResourceDownloader.h',
+    'OrbitResourceDownloader.m',
+    'OrbitResourceStore.h',
+    'OrbitResourceStore.m',
+    'OrbitResourceURLResolver.h',
+    'OrbitResourceURLResolver.m',
+  ].map((file) => access(path.join(appRoot, 'ios/OrbitControl', file))),
+  access(path.join(appRoot, 'ios/OrbitControlTests/OrbitResourceTests.m')),
 ]);
 
 const [
   podfile,
   podfileLock,
   provenance,
-  fetcher,
-  fetcherHeader,
   viewController,
   releaseInfo,
   debugInfo,
@@ -35,12 +42,11 @@ const [
   deviceServer,
   syncScript,
   iosRunner,
+  scheme,
 ] = await Promise.all([
   read('ios/Podfile'),
   read('ios/Podfile.lock'),
   read('ios/UPSTREAM.md'),
-  read('ios/OrbitControl/OrbitResourceFetcher.m'),
-  read('ios/OrbitControl/OrbitResourceFetcher.h'),
   read('ios/OrbitControl/ViewController.swift'),
   read('ios/OrbitControl/Info.plist'),
   read('ios/OrbitControl/Info.Debug.plist'),
@@ -51,6 +57,9 @@ const [
   read('scripts/dev-ios-device.mjs'),
   read('scripts/sync-ios-bundle.mjs'),
   read('test/ios/run.mjs'),
+  read(
+    'ios/OrbitControl.xcodeproj/xcshareddata/xcschemes/OrbitControl.xcscheme',
+  ),
 ]);
 
 for (const pod of ['Lynx', 'LynxService', 'XElement']) {
@@ -61,22 +70,6 @@ assert.match(podfileLock, /Lynx \(3\.9\.0\)/);
 assert.match(podfileLock, /PrimJS\/quickjs \(3\.8\.0-alpha\.6\)/);
 assert.match(provenance, /integrating-lynx-demo-projects/);
 assert.match(provenance, /f8230ca6aa1c9e629e30272971d0c03450b13e8e/);
-assert.match(fetcher, /LynxBooleanOptionTrue/);
-assert.match(fetcher, /builder\.templateResourceFetcher = self/);
-assert.match(fetcher, /builder\.genericResourceFetcher = self/);
-assert.match(fetcher, /isAllowedLocalURL/);
-assert.match(fetcher, /resourcePathCache/);
-assert.match(fetcher, /OrbitResourcePathCacheByteLimit/);
-assert.match(fetcher, /OrbitResourceResponseByteLimit/);
-assert.match(fetcher, /downloadTaskWithURL/);
-assert.match(fetcher, /totalBytesWritten > .*OrbitResourceResponseByteLimit/);
-assert.match(fetcher, /\[downloadTask cancel\]/);
-assert.match(fetcher, /timeoutIntervalForResource = 60/);
-assert.match(fetcher, /URLByResolvingSymlinksInPath/);
-assert.match(fetcher, /resolvedURLString/);
-assert.match(fetcher, /relativeToURL:self\.rootBundleURL/);
-assert.match(fetcher, /hasPrefix:@"\/static\/"/);
-assert.match(fetcher, /relativePath = \[urlString substringFromIndex:1\]/);
 assert.doesNotMatch(releaseInfo, /NSAllowsArbitraryLoads/);
 assert.doesNotMatch(releaseInfo, /NSExceptionAllowsInsecureHTTPLoads/);
 assert.match(releaseInfo, /NSAllowsLocalNetworking/);
@@ -86,10 +79,19 @@ assert.match(debugInfo, /<key>localhost<\/key>/);
 assert.doesNotMatch(debugInfo, /NSAllowsArbitraryLoads/);
 assert.doesNotMatch(project, /DEVELOPMENT_TEAM/);
 assert.match(project, /OrbitControlUITests/);
+assert.match(project, /OrbitControlTests\.xctest/);
+for (const file of [
+  'OrbitResourceDownloader.m',
+  'OrbitResourceStore.m',
+  'OrbitResourceURLResolver.m',
+  'OrbitResourceTests.m',
+]) {
+  assert.match(project, new RegExp(`${file.replace('.', '\\.')} in Sources`));
+}
+assert.match(scheme, /BlueprintName="OrbitControlTests"/);
 assert.match(project, /static in Resources/);
 assert.match(uiTest, /matching\(identifier: "federation-ready"\)/);
 assert.match(appSource, /accessibilityId: 'federation-ready'/);
-assert.match(fetcherHeader, /initWithRootBundleURL/);
 assert.match(
   viewController,
   /OrbitResourceFetcher\(\s*rootBundleURL: rootBundleURL\s*\)/,
@@ -108,6 +110,7 @@ assert.match(syncScript, /cp\(sourceStatic, destinationStatic/);
 assert.equal(iosRunner.match(/await run\(\s*'xcodebuild'/g)?.length, 1);
 assert.match(iosRunner, /'-configuration',\s*'Release'/);
 assert.match(iosRunner, /build\/OrbitControl-Release\.xcresult/);
+assert.match(iosRunner, /-only-testing:OrbitControlTests/);
 for (const testName of [
   'testFederatedImportsRuntimeLoadingAndSingleton',
   'testStandaloneCatalogRemoteBuildLaunches',

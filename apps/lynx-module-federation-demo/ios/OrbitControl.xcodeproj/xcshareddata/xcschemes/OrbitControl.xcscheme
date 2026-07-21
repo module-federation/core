@@ -8,12 +8,18 @@
          <BuildActionEntry buildForTesting="YES" buildForRunning="NO" buildForProfiling="NO" buildForArchiving="NO" buildForAnalyzing="NO">
             <BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="100000000000000000000041" BuildableName="OrbitControlUITests.xctest" BlueprintName="OrbitControlUITests" ReferencedContainer="container:OrbitControl.xcodeproj"/>
          </BuildActionEntry>
+         <BuildActionEntry buildForTesting="YES" buildForRunning="NO" buildForProfiling="NO" buildForArchiving="NO" buildForAnalyzing="NO">
+            <BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="240000000000000000000002" BuildableName="OrbitControlTests.xctest" BlueprintName="OrbitControlTests" ReferencedContainer="container:OrbitControl.xcodeproj"/>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction buildConfiguration="Debug" selectedDebuggerIdentifier="Xcode.DebuggerFoundation.Debugger.LLDB" selectedLauncherIdentifier="Xcode.DebuggerFoundation.Launcher.LLDB" shouldUseLaunchSchemeArgsEnv="YES">
       <Testables>
          <TestableReference skipped="NO">
             <BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="100000000000000000000041" BuildableName="OrbitControlUITests.xctest" BlueprintName="OrbitControlUITests" ReferencedContainer="container:OrbitControl.xcodeproj"/>
+         </TestableReference>
+         <TestableReference skipped="NO">
+            <BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="240000000000000000000002" BuildableName="OrbitControlTests.xctest" BlueprintName="OrbitControlTests" ReferencedContainer="container:OrbitControl.xcodeproj"/>
          </TestableReference>
       </Testables>
    </TestAction>
