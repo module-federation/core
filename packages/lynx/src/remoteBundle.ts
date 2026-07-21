@@ -1,4 +1,5 @@
 import type {
+  Compilation,
   Compiler,
   Configuration,
   Exposes,
@@ -25,6 +26,7 @@ import {
   type LynxRemoteBundleOptions,
 } from './pluginOptions';
 import { createLynxRemoteManifestPlugin } from './remoteManifest';
+import { createRemoteBundleCompilationStateStore } from './remoteBundleCompilationState';
 import { MAIN_THREAD_EXPOSE_SUFFIX } from './runtimeCore';
 import { getLynxWebEncodeMode } from './webEncode';
 
@@ -257,7 +259,7 @@ const classifyRemoteChunk = (
 });
 
 const createRemoteAssetsPlugin = (
-  pairedBundleChunks: string[],
+  stateStore: ReturnType<typeof createRemoteBundleCompilationStateStore>,
   backgroundEntry: string,
   mainThreadEntry: string | undefined,
   backgroundChunkPrefix: string,
@@ -266,6 +268,7 @@ const createRemoteAssetsPlugin = (
   apply(compiler: Compiler) {
     const pluginName = 'LynxModuleFederationPairedBundleChunks';
     compiler.hooks.thisCompilation.tap(pluginName, (compilation) => {
+      const state = stateStore.for(compilation as Compilation);
       compilation.hooks.processAssets.tap(
         {
           name: `${pluginName}BackgroundIdentity`,
@@ -314,7 +317,6 @@ const createRemoteAssetsPlugin = (
             compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_OPTIMIZE_SIZE + 2,
         },
         () => {
-          pairedBundleChunks.length = 0;
           if (mainThreadEntry) {
             const entryAsset = compilation.getAsset(backgroundEntry);
             if (!entryAsset) {
@@ -327,7 +329,7 @@ const createRemoteAssetsPlugin = (
               entryAsset.source,
               entryAsset.info,
             );
-            pairedBundleChunks.push(mainThreadEntry);
+            state.pairedBundleChunks.add(mainThreadEntry);
           }
 
           for (const chunk of compilation.chunks) {
@@ -344,7 +346,7 @@ const createRemoteAssetsPlugin = (
 
             for (const filename of chunk.files) {
               if (filename.endsWith('.js') && filename !== backgroundEntry) {
-                pairedBundleChunks.push(filename);
+                state.pairedBundleChunks.add(filename);
                 const asset = compilation.getAsset(filename);
                 if (asset && containsMainThreadModule) {
                   compilation.updateAsset(
@@ -515,16 +517,13 @@ export const configureRemoteBundle = async (
       `${entryGlobalName}__main-thread`,
     );
   }
-  const pairedBundleChunks: string[] = [];
-  const lazyBundleAssets = new Set<string>();
-  const lazyBundleAssetByExpose = new Map<string, string>();
   const exposeByExpectedLazyBundleChunk = new Map(
     Array.from(chunkNamesByExpose, ([expose, chunkName]) => [
       `${plan.backgroundChunkPrefix}${chunkName}`,
       expose,
     ]),
   );
-  const discardedTemplateAssets = new Set<string>();
+  const stateStore = createRemoteBundleCompilationStateStore();
   const { manifestFileName, statsFileName } = getManifestFileName(
     federationOptions.manifest,
   );
@@ -543,10 +542,7 @@ export const configureRemoteBundle = async (
       chunking: plan.chunking,
       discardSourceEntryBundles:
         remoteBundle.preserveSourceEntryBundles === false,
-      discardedTemplateAssets,
       includedChunkPrefixes: plan.includedChunkPrefixes,
-      lazyBundleAssets,
-      lazyBundleAssetByExpose,
       exposeByExpectedLazyBundleChunk,
       remoteEntryName: options.name,
       ...(pairedPlan
@@ -561,12 +557,13 @@ export const configureRemoteBundle = async (
             },
           }
         : {}),
+      stateStore,
     }),
   );
   if (pairedPlan) {
     config.plugins.push(
       createRemoteAssetsPlugin(
-        pairedBundleChunks,
+        stateStore,
         plan.backgroundEntry,
         plan.mainThreadEntry,
         plan.backgroundChunkPrefix,
@@ -578,18 +575,15 @@ export const configureRemoteBundle = async (
     createLynxExternalBundlePlugin({
       bundleFileName: plan.bundleFileName,
       chunking: plan.chunking,
-      discardedTemplateAssets,
       encode,
       engineVersion: remoteBundle.engineVersion,
       entryAssets: plan.entryAssets,
       entryName: options.name,
       entrySectionNames,
       includedChunkPrefixes: plan.includedChunkPrefixes,
-      lazyBundleAssets,
-      lazyBundleAssetByExpose,
       exposeByExpectedLazyBundleChunk,
-      pairedBundleChunks,
       preservedAssets: [manifestFileName, statsFileName],
+      stateStore,
     }),
     createLynxRemoteManifestPlugin(
       federationOptions.manifest,

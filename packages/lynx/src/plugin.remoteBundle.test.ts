@@ -180,7 +180,7 @@ describe('pluginLynxModuleFederation remote bundles', () => {
     } as any);
     const emitAsset = rs.fn();
     const updateAsset = rs.fn();
-    onCompilation!({
+    const compilation = {
       chunks: [
         {
           name: 'catalog',
@@ -227,7 +227,8 @@ describe('pluginLynxModuleFederation remote bundles', () => {
           },
         },
       },
-    });
+    };
+    onCompilation!(compilation);
     const backgroundIdentityStage = PROCESS_ASSETS_STAGE_ADDITIONS + 1;
     const pairedBundleChunksStage = PROCESS_ASSETS_STAGE_OPTIMIZE_SIZE + 2;
     processAssets.get(backgroundIdentityStage)!();
@@ -247,11 +248,15 @@ describe('pluginLynxModuleFederation remote bundles', () => {
       expect.any(Object),
       { minimized: true },
     );
-    expect(encoder.options.pairedBundleChunks).toEqual([
-      'catalog__main-thread.js',
-      'catalog__main-thread__Card-main-thread.js',
-      'catalog__background_Card.js',
-    ]);
+    expect(
+      encoder.options.stateStore.for(compilation).pairedBundleChunks,
+    ).toEqual(
+      new Set([
+        'catalog__main-thread.js',
+        'catalog__main-thread__Card-main-thread.js',
+        'catalog__background_Card.js',
+      ]),
+    );
     expect(emitAsset).toHaveBeenCalledWith(
       'catalog__main-thread.js',
       expect.any(Object),
@@ -344,7 +349,7 @@ describe('pluginLynxModuleFederation remote bundles', () => {
       bundleFileName: 'catalog-native.lynx.bundle',
       engineVersion: '3.6',
       entryAssets: ['catalog.js'],
-      pairedBundleChunks: [],
+      stateStore: { for: expect.any(Function) },
     });
     expect(encoder.options.encode).toBeTypeOf('function');
     const { buffer } = await encoder.options.encode({

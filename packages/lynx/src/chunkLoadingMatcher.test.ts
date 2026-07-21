@@ -1,8 +1,184 @@
 import { describe, expect, it, rs } from '@rstest/core';
 
 import { createLynxChunkLoadingMatcherPlugin } from './chunkLoadingMatcher';
+import { createRemoteBundleCompilationStateStore } from './remoteBundleCompilationState';
 
 describe('Lynx chunk-loading matcher', () => {
+  it('keeps lazy bundle state isolated between compilations', () => {
+    type Compilation = {
+      chunks: Set<unknown>;
+      entrypoints: Map<string, unknown>;
+      hooks: {
+        runtimeRequirementInTree: {
+          for: () => { tap: () => void };
+        };
+      };
+    };
+    const stateStore = createRemoteBundleCompilationStateStore();
+    let onCompilation: ((compilation: Compilation) => void) | undefined;
+    const beforeEmitByCompilation = new Map<Compilation, (args: any) => any>();
+    class RuntimeModule {
+      static STAGE_TRIGGER = 20;
+
+      constructor(
+        readonly name: string,
+        readonly stage: number,
+      ) {}
+    }
+    const compiler = {
+      webpack: {
+        RuntimeGlobals: { ensureChunkHandlers: 'ensureChunkHandlers' },
+        RuntimeModule,
+        Template: {
+          asString: (lines: string[]) => lines.flat().join('\n'),
+          indent: (lines: string | string[]) =>
+            (Array.isArray(lines) ? lines : [lines])
+              .flat()
+              .map((line) => `  ${line}`)
+              .join('\n'),
+        },
+      },
+      hooks: {
+        thisCompilation: {
+          tap(_name: string, callback: (compilation: Compilation) => void) {
+            onCompilation = callback;
+          },
+        },
+      },
+    };
+    createLynxChunkLoadingMatcherPlugin(
+      {
+        getLynxTemplatePluginHooks(compilation) {
+          return {
+            asyncChunkName: {
+              tap() {},
+            },
+            beforeEmit: {
+              tap(_name, callback) {
+                beforeEmitByCompilation.set(
+                  compilation as Compilation,
+                  callback,
+                );
+              },
+            },
+          };
+        },
+      },
+      {
+        chunking: 'split',
+        exposeByExpectedLazyBundleChunk: new Map([
+          ['catalog__background_Card', './Card'],
+        ]),
+        stateStore,
+      } as any,
+    ).apply(compiler as any);
+    const firstCompilation: Compilation = {
+      chunks: new Set(),
+      entrypoints: new Map(),
+      hooks: { runtimeRequirementInTree: { for: () => ({ tap: () => {} }) } },
+    };
+    const secondCompilation: Compilation = {
+      chunks: new Set(),
+      entrypoints: new Map(),
+      hooks: { runtimeRequirementInTree: { for: () => ({ tap: () => {} }) } },
+    };
+
+    onCompilation!(firstCompilation);
+    beforeEmitByCompilation.get(firstCompilation)!({
+      entryNames: ['catalog__background_Card'],
+      finalEncodeOptions: { sourceContent: { appType: 'DynamicComponent' } },
+      outputName: 'first.bundle',
+    });
+    onCompilation!(secondCompilation);
+
+    expect(stateStore.for(firstCompilation as any).lazyBundleAssets).toEqual(
+      new Set(['first.bundle']),
+    );
+    expect(
+      stateStore.for(firstCompilation as any).lazyBundleAssetByExpose,
+    ).toEqual(new Map([['./Card', 'first.bundle']]));
+    expect(
+      stateStore.for(secondCompilation as any).discardedTemplateAssets,
+    ).toEqual(new Set());
+    expect(stateStore.for(secondCompilation as any).lazyBundleAssets).toEqual(
+      new Set(),
+    );
+    expect(
+      stateStore.for(secondCompilation as any).lazyBundleAssetByExpose,
+    ).toEqual(new Map());
+  });
+
+  it('creates fresh state for non-remote matcher use', () => {
+    let onCompilation: ((compilation: any) => void) | undefined;
+    const beforeEmitByCompilation = new Map<any, (args: any) => any>();
+    class RuntimeModule {
+      static STAGE_TRIGGER = 20;
+
+      constructor() {}
+    }
+    createLynxChunkLoadingMatcherPlugin(
+      {
+        getLynxTemplatePluginHooks(compilation) {
+          return {
+            asyncChunkName: { tap() {} },
+            beforeEmit: {
+              tap(_name, callback) {
+                beforeEmitByCompilation.set(compilation, callback);
+              },
+            },
+          };
+        },
+      },
+      {
+        chunking: 'split',
+        exposeByExpectedLazyBundleChunk: new Map([
+          ['catalog__background_Card', './Card'],
+        ]),
+        pairedRealmChunkSuffixes: {
+          background: '-react__background',
+          mainThread: '-react__main-thread',
+        },
+      },
+    ).apply({
+      webpack: {
+        RuntimeGlobals: { ensureChunkHandlers: 'ensureChunkHandlers' },
+        RuntimeModule,
+        Template: {},
+      },
+      hooks: {
+        thisCompilation: {
+          tap(_name: string, callback: (compilation: any) => void) {
+            onCompilation = callback;
+          },
+        },
+      },
+    } as any);
+    const createCompilation = () => ({
+      chunks: new Set(),
+      entrypoints: new Map(),
+      hooks: { runtimeRequirementInTree: { for: () => ({ tap: () => {} }) } },
+    });
+    const firstCompilation = createCompilation();
+    const secondCompilation = createCompilation();
+    const lazyBundleArgs = (outputName: string) => ({
+      entryNames: ['catalog__background_Card'],
+      finalEncodeOptions: { sourceContent: { appType: 'DynamicComponent' } },
+      outputName,
+    });
+
+    onCompilation!(firstCompilation);
+    beforeEmitByCompilation.get(firstCompilation)!(
+      lazyBundleArgs('first.bundle'),
+    );
+    onCompilation!(secondCompilation);
+
+    expect(() =>
+      beforeEmitByCompilation.get(secondCompilation)!(
+        lazyBundleArgs('second.bundle'),
+      ),
+    ).not.toThrow();
+  });
+
   it('guards chunks without JavaScript while preserving local JavaScript chunks', () => {
     const entryChunk = {
       files: new Set(['host.js']),
@@ -61,9 +237,7 @@ describe('Lynx chunk-loading matcher', () => {
     let beforeEncode: ((args: any) => any) | undefined;
     let beforeEmit: ((args: any) => any) | undefined;
     const addRuntimeModule = rs.fn();
-    const discardedTemplateAssets = new Set(['stale-template.bundle']);
-    const lazyBundleAssets = new Set(['stale-lazy.bundle']);
-    const lazyBundleAssetByExpose = new Map([['./stale', 'stale-lazy.bundle']]);
+    const stateStore = createRemoteBundleCompilationStateStore();
 
     class RuntimeModule {
       static STAGE_TRIGGER = 20;
@@ -147,14 +321,11 @@ describe('Lynx chunk-loading matcher', () => {
         backgroundOnlyRemote: true,
         chunking: 'split',
         discardSourceEntryBundles: true,
-        discardedTemplateAssets,
         exposeByExpectedLazyBundleChunk: new Map([
           ['catalog__background_Card', './Card'],
           ['catalog__background_Details', './Details'],
         ]),
         includedChunkPrefixes: ['catalog__background_'],
-        lazyBundleAssetByExpose,
-        lazyBundleAssets,
         remoteEntryName: 'remote',
         pairedRealmChunkPrefixes: {
           background: 'catalog__background_',
@@ -164,12 +335,14 @@ describe('Lynx chunk-loading matcher', () => {
           background: '-react__background',
           mainThread: '-react__main-thread',
         },
+        stateStore,
       },
     ).apply(compiler as any);
     onCompilation!(compilation);
-    expect(discardedTemplateAssets.size).toBe(0);
-    expect(lazyBundleAssets.size).toBe(0);
-    expect(lazyBundleAssetByExpose.size).toBe(0);
+    const state = stateStore.for(compilation as any);
+    expect(state.discardedTemplateAssets.size).toBe(0);
+    expect(state.lazyBundleAssets.size).toBe(0);
+    expect(state.lazyBundleAssetByExpose.size).toBe(0);
     addMatcher!(entryChunk);
 
     const cardArgs = {
@@ -212,16 +385,18 @@ describe('Lynx chunk-loading matcher', () => {
       },
       outputName: 'async/nested-feature.bundle',
     });
-    expect(lazyBundleAssets).toEqual(
+    expect(state.lazyBundleAssets).toEqual(
       new Set([
         'async/catalog__background_Card.hash.bundle',
         'async/nested-feature.bundle',
       ]),
     );
-    expect(lazyBundleAssetByExpose).toEqual(
+    expect(state.lazyBundleAssetByExpose).toEqual(
       new Map([['./Card', 'async/catalog__background_Card.hash.bundle']]),
     );
-    expect(discardedTemplateAssets).toEqual(new Set(['bootstrap.lynx.bundle']));
+    expect(state.discardedTemplateAssets).toEqual(
+      new Set(['bootstrap.lynx.bundle']),
+    );
 
     expect(addRuntimeModule).toHaveBeenCalledTimes(2);
     const runtimeModule = addRuntimeModule.mock.calls.find(

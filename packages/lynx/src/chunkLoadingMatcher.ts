@@ -1,4 +1,14 @@
-import type { Chunk, Compiler, WebpackPluginInstance } from '@rspack/core';
+import type {
+  Chunk,
+  Compilation,
+  Compiler,
+  WebpackPluginInstance,
+} from '@rspack/core';
+
+import {
+  createRemoteBundleCompilationStateStore,
+  type RemoteBundleCompilationStateStore,
+} from './remoteBundleCompilationState';
 
 interface TemplateEncodeArgs {
   encodeData: {
@@ -40,11 +50,8 @@ interface ChunkLoadingMatcherOptions {
   backgroundOnlyRemote?: boolean;
   chunking?: 'single' | 'split';
   discardSourceEntryBundles?: boolean;
-  discardedTemplateAssets?: Set<string>;
   exposeByExpectedLazyBundleChunk?: ReadonlyMap<string, string>;
   includedChunkPrefixes?: string[];
-  lazyBundleAssetByExpose?: Map<string, string>;
-  lazyBundleAssets?: Set<string>;
   remoteEntryName?: string;
   pairedRealmChunkPrefixes?: {
     background: string;
@@ -54,6 +61,7 @@ interface ChunkLoadingMatcherOptions {
     background: string;
     mainThread: string;
   };
+  stateStore?: RemoteBundleCompilationStateStore;
 }
 
 interface ChunkGraph {
@@ -150,17 +158,17 @@ const normalizeLazyBundleChunkName = (
 };
 
 export const createLynxChunkLoadingMatcherPlugin = (
-  lynxTemplatePlugin?: LynxTemplatePluginApi,
-  options: ChunkLoadingMatcherOptions = {},
+  lynxTemplatePlugin: LynxTemplatePluginApi | undefined,
+  options: ChunkLoadingMatcherOptions,
 ): WebpackPluginInstance => ({
   apply(compiler: Compiler) {
+    const stateStore =
+      options.stateStore ?? createRemoteBundleCompilationStateStore();
     const pluginName = 'LynxModuleFederationChunkLoadingMatcher';
     const { RuntimeGlobals, RuntimeModule, Template } = compiler.webpack;
 
     compiler.hooks.thisCompilation.tap(pluginName, (compilation) => {
-      options.lazyBundleAssets?.clear();
-      options.lazyBundleAssetByExpose?.clear();
-      options.discardedTemplateAssets?.clear();
+      const state = stateStore.for(compilation as Compilation);
       let remoteChunkNames: Set<string> | undefined;
       const templateHooks =
         lynxTemplatePlugin?.getLynxTemplatePluginHooks(compilation);
@@ -223,24 +231,23 @@ export const createLynxChunkLoadingMatcherPlugin = (
         );
 
         if (isDynamicComponent && (isRemoteOutput || exposedKeys.size > 0)) {
-          options.lazyBundleAssets?.add(args.outputName);
+          state.lazyBundleAssets.add(args.outputName);
           for (const exposedKey of exposedKeys) {
-            const previousAsset =
-              options.lazyBundleAssetByExpose?.get(exposedKey);
+            const previousAsset = state.lazyBundleAssetByExpose.get(exposedKey);
             if (previousAsset && previousAsset !== args.outputName) {
               throw new Error(
                 `@module-federation/lynx expose "${exposedKey}" emitted multiple DynamicComponent lazy bundles: "${previousAsset}" and "${args.outputName}".`,
               );
             }
-            options.lazyBundleAssetByExpose?.set(exposedKey, args.outputName);
+            state.lazyBundleAssetByExpose.set(exposedKey, args.outputName);
           }
           if (options.chunking === 'split') {
-            options.discardedTemplateAssets?.delete(args.outputName);
+            state.discardedTemplateAssets.delete(args.outputName);
           } else {
-            options.discardedTemplateAssets?.add(args.outputName);
+            state.discardedTemplateAssets.add(args.outputName);
           }
         } else if (options.discardSourceEntryBundles) {
-          options.discardedTemplateAssets?.add(args.outputName);
+          state.discardedTemplateAssets.add(args.outputName);
         }
         return args;
       });

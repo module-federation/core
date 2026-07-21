@@ -1,9 +1,15 @@
-import type { Chunk, Compiler, WebpackPluginInstance } from '@rspack/core';
+import type {
+  Chunk,
+  Compilation,
+  Compiler,
+  WebpackPluginInstance,
+} from '@rspack/core';
+
+import type { RemoteBundleCompilationStateStore } from './remoteBundleCompilationState';
 
 interface ExternalBundleOptions {
   bundleFileName: string;
   chunking: 'split' | 'single';
-  discardedTemplateAssets: Set<string>;
   encode: (value: unknown) => Promise<{ buffer: Buffer }>;
   engineVersion?: string;
   entryAssets: string[];
@@ -11,10 +17,8 @@ interface ExternalBundleOptions {
   entrySectionNames: ReadonlyMap<string, string>;
   exposeByExpectedLazyBundleChunk: ReadonlyMap<string, string>;
   includedChunkPrefixes: string[];
-  lazyBundleAssetByExpose: Map<string, string>;
-  lazyBundleAssets: Set<string>;
-  pairedBundleChunks: string[];
   preservedAssets: string[];
+  stateStore: RemoteBundleCompilationStateStore;
 }
 
 interface LynxExternalBundlePlugin extends WebpackPluginInstance {
@@ -26,15 +30,10 @@ export const createLynxExternalBundlePlugin = (
 ): LynxExternalBundlePlugin => ({
   options,
   apply(compiler: Compiler) {
-    type AssetSnapshot = {
-      content: string;
-      name: string;
-    };
-
-    let sourceAssets: AssetSnapshot[] = [];
     compiler.hooks.thisCompilation.tap(
       'LynxModuleFederationExternalBundleSources',
       (compilation) => {
+        const state = options.stateStore.for(compilation as Compilation);
         compilation.hooks.processAssets.tap(
           {
             name: 'LynxModuleFederationExternalBundleSources',
@@ -75,7 +74,7 @@ export const createLynxExternalBundlePlugin = (
                 includedAssets.add(asset);
               }
             }
-            sourceAssets = compilation
+            state.sourceAssets = compilation
               .getAssets()
               .filter(
                 ({ name }) =>
@@ -97,13 +96,14 @@ export const createLynxExternalBundlePlugin = (
         stage: 10_000,
       },
       async (compilation) => {
+        const state = options.stateStore.for(compilation);
         if (options.chunking === 'split') {
           const expectedExposes = new Set(
             options.exposeByExpectedLazyBundleChunk.values(),
           );
           const missingExposes = Array.from(expectedExposes).filter(
             (expose) => {
-              const asset = options.lazyBundleAssetByExpose.get(expose);
+              const asset = state.lazyBundleAssetByExpose.get(expose);
               return !asset || !compilation.getAsset(asset);
             },
           );
@@ -122,8 +122,8 @@ export const createLynxExternalBundlePlugin = (
         }
         const encodedAssets =
           options.chunking === 'single'
-            ? sourceAssets
-            : sourceAssets.filter(({ name }) => entryAssets.has(name));
+            ? state.sourceAssets
+            : state.sourceAssets.filter(({ name }) => entryAssets.has(name));
         const customSections = encodedAssets.reduce<Record<string, unknown>>(
           (sections, asset) => {
             if (asset.name.endsWith('.js')) {
@@ -131,7 +131,7 @@ export const createLynxExternalBundlePlugin = (
                 options.entrySectionNames.get(asset.name) ??
                 asset.name.replace(/\.js$/, '');
               sections[sectionName] = {
-                ...(options.pairedBundleChunks.includes(asset.name)
+                ...(state.pairedBundleChunks.has(asset.name)
                   ? { encoding: 'JsBytecode' }
                   : {}),
                 content: asset.content,
@@ -163,16 +163,16 @@ export const createLynxExternalBundlePlugin = (
         const { buffer } = await options.encode(encodeOptions);
         const preservedAssets = new Set(options.preservedAssets);
         if (options.chunking === 'split') {
-          for (const name of options.lazyBundleAssets) {
+          for (const name of state.lazyBundleAssets) {
             preservedAssets.add(name);
           }
         }
-        for (const { name } of sourceAssets) {
+        for (const { name } of state.sourceAssets) {
           if (!preservedAssets.has(name)) {
             compilation.deleteAsset(name);
           }
         }
-        for (const name of options.discardedTemplateAssets) {
+        for (const name of state.discardedTemplateAssets) {
           if (!preservedAssets.has(name)) {
             compilation.deleteAsset(name);
           }

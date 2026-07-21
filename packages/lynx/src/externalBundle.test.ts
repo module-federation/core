@@ -1,6 +1,7 @@
 import { describe, expect, it, rs } from '@rstest/core';
 
 import { createLynxExternalBundlePlugin } from './externalBundle';
+import { createRemoteBundleCompilationStateStore } from './remoteBundleCompilationState';
 
 interface TestAsset {
   name: string;
@@ -25,6 +26,7 @@ const setupPlugin = (
 ) => {
   const encode = rs.fn(async () => ({ buffer: Buffer.from('external') }));
   const discardedTemplateAssets = new Set(['bootstrap.bundle']);
+  const stateStore = createRemoteBundleCompilationStateStore();
   if (chunking === 'single') {
     discardedTemplateAssets.add('async/Card.hash.bundle');
     discardedTemplateAssets.add('async/Nested.hash.bundle');
@@ -32,7 +34,6 @@ const setupPlugin = (
   const plugin = createLynxExternalBundlePlugin({
     bundleFileName: 'catalog.lynx.bundle',
     chunking,
-    discardedTemplateAssets,
     encode,
     entryAssets: ['catalog.js'],
     entryName: 'catalog',
@@ -42,10 +43,8 @@ const setupPlugin = (
       ['catalog__background_Nested', './Nested'],
     ]),
     includedChunkPrefixes: ['catalog__background_', 'catalog__main-thread__'],
-    lazyBundleAssetByExpose,
-    lazyBundleAssets,
-    pairedBundleChunks: ['catalog__main-thread.js'],
     preservedAssets: ['mf-manifest.json', 'mf-stats.json'],
+    stateStore,
   });
   let onCompilation: ((compilation: any) => void) | undefined;
   let onEmit: ((compilation: any) => Promise<void>) | undefined;
@@ -76,7 +75,18 @@ const setupPlugin = (
   };
   plugin.apply(compiler as any);
 
-  return { encode, onCompilation: () => onCompilation!, onEmit: () => onEmit! };
+  return {
+    encode,
+    onCompilation: () => (compilation: any) => {
+      const state = stateStore.for(compilation);
+      state.discardedTemplateAssets = new Set(discardedTemplateAssets);
+      state.lazyBundleAssets = new Set(lazyBundleAssets);
+      state.lazyBundleAssetByExpose = new Map(lazyBundleAssetByExpose);
+      state.pairedBundleChunks.add('catalog__main-thread.js');
+      onCompilation!(compilation);
+    },
+    onEmit: () => onEmit!,
+  };
 };
 
 const createCompilation = (sourceAssets: TestAsset[]) => {
@@ -185,6 +195,22 @@ describe('Lynx external bundle', () => {
       'mf-stats.json',
       'unrelated-app.js',
     ]);
+  });
+
+  it('keeps REPORT asset snapshots with their compilation', async () => {
+    const { encode, onCompilation, onEmit } = setupPlugin('single');
+    const first = createCompilation([createAsset('catalog.js', 'first')]);
+    const second = createCompilation([createAsset('catalog.js', 'second')]);
+
+    onCompilation()(first.compilation);
+    first.snapshot();
+    onCompilation()(second.compilation);
+    second.snapshot();
+
+    await onEmit()(first.compilation);
+
+    const encodeOptions = encode.mock.calls[0][0] as any;
+    expect(encodeOptions.customSections.catalog_global.content).toBe('first');
   });
 
   it('rejects split builds when any expose lacks a ReactLynx lazy bundle', async () => {
