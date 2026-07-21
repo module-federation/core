@@ -1,6 +1,6 @@
 import { IncomingMessage, createServer } from 'http';
 import { UpdateMode } from '../constant';
-import WebSocket from 'isomorphic-ws';
+import WebSocket from 'ws';
 import { parse } from 'url';
 import { Publisher } from '../Publisher';
 import { getIdentifier, fileLog, error } from '../utils';
