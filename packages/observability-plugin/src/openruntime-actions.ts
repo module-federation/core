@@ -6,6 +6,8 @@ import type {
   ObservabilityReportOutcome,
   ObservabilityReportQuery,
   ObservabilityReportStatus,
+  ObservabilityRuntimeState,
+  ObservabilityRuntimeStateInstance,
 } from './core';
 
 export interface OpenRuntimeReportReader {
@@ -14,17 +16,8 @@ export interface OpenRuntimeReportReader {
   getLatestReport(): ObservabilityReport | undefined;
   getReport(traceId: string): ObservabilityReport | undefined;
   exportReport(traceId?: string): ObservabilityReport | undefined;
+  getRuntimeState(): ObservabilityRuntimeState;
 }
-
-type FederationGlobalLike = {
-  __GLOBAL_PLUGIN__?: unknown[];
-  __DEBUG_CONSTRUCTOR_VERSION__?: string;
-  moduleInfo?: Record<string, unknown>;
-  __INSTANCES__?: unknown[];
-  __SHARE__?: Record<string, unknown>;
-  __MANIFEST_LOADING__?: Record<string, unknown>;
-  __PRELOADED_MAP__?: Map<unknown, unknown>;
-};
 
 const reportStatuses: ObservabilityReportStatus[] = [
   'pending',
@@ -53,6 +46,13 @@ export function registerOpenRuntimeActions(
 
   if (reportReader) {
     runtime.registerAction({
+      name: 'mf:get-runtime-state',
+      source,
+      risk: 'safe',
+      description: 'Get the current safe Module Federation runtime state.',
+      handler: () => reportReader.getRuntimeState(),
+    });
+    runtime.registerAction({
       name: 'mf:list-reports',
       source,
       risk: 'safe',
@@ -68,6 +68,10 @@ export function registerOpenRuntimeActions(
           traceId: {
             type: 'string',
             description: 'Exact report trace id.',
+          },
+          instanceRef: {
+            type: 'string',
+            description: 'Stable observability instance reference.',
           },
           remote: {
             type: 'string',
@@ -168,12 +172,17 @@ export function registerOpenRuntimeActions(
     });
   }
 
+  if (!reportReader) {
+    registeredActionRuntimes.add(runtime);
+    return;
+  }
+
   runtime.registerAction({
     name: 'mf:get-federation-global',
     source,
     risk: 'safe',
     description: 'Get a summary of the current global MF runtime state.',
-    handler: () => getFederationGlobalSummary(),
+    handler: () => getFederationGlobalSummary(reportReader.getRuntimeState()),
   });
   runtime.registerAction({
     name: 'mf:get-federation-module-info',
@@ -192,20 +201,35 @@ export function registerOpenRuntimeActions(
           type: 'string',
           description: 'moduleInfo name. Used when key is omitted.',
         },
+        instanceRef: {
+          type: 'string',
+          description: 'Consumer observability instance reference.',
+        },
       },
     },
-    getInputOptions: getFederationModuleInfoInputOptions,
-    handler: getFederationModuleInfoActionResult,
+    getInputOptions: (inputName) =>
+      getFederationModuleInfoInputOptions(
+        inputName,
+        reportReader.getRuntimeState(),
+      ),
+    handler: (payload) =>
+      getFederationModuleInfoActionResult(
+        payload,
+        reportReader.getRuntimeState(),
+      ),
   });
   runtime.registerAction({
     name: 'mf:list-federation-instances',
     source,
     risk: 'safe',
     description: 'List current __FEDERATION__.__INSTANCES__ entries.',
-    handler: () => ({
-      count: getFederationInstances().length,
-      instances: getFederationInstanceSummaries(),
-    }),
+    handler: () => {
+      const instances = reportReader.getRuntimeState().instances;
+      return {
+        count: instances.length,
+        instances,
+      };
+    },
   });
   runtime.registerAction({
     name: 'mf:get-federation-instance-config',
@@ -220,14 +244,26 @@ export function registerOpenRuntimeActions(
           type: 'string',
           description: 'Instance name.',
         },
+        instanceRef: {
+          type: 'string',
+          description: 'Stable observability instance reference.',
+        },
         index: {
           type: 'number',
-          description: 'Instance index in __INSTANCES__.',
+          description: 'Unstable compatibility index in __INSTANCES__.',
         },
       },
     },
-    getInputOptions: getFederationInstanceInputOptions,
-    handler: getFederationInstanceConfigActionResult,
+    getInputOptions: (inputName) =>
+      getFederationInstanceInputOptions(
+        inputName,
+        reportReader.getRuntimeState(),
+      ),
+    handler: (payload) =>
+      getFederationInstanceConfigActionResult(
+        payload,
+        reportReader.getRuntimeState(),
+      ),
   });
 
   registeredActionRuntimes.add(runtime);
@@ -252,6 +288,7 @@ function getReportQuery(payload: unknown): ObservabilityReportQuery {
   const query: ObservabilityReportQuery = {};
   const limit = getPayloadNumber(payload, 'limit');
   const traceId = getPayloadString(payload, 'traceId');
+  const instanceRef = getPayloadString(payload, 'instanceRef');
   const remote = getPayloadString(payload, 'remote');
   const expose = getPayloadString(payload, 'expose');
   const shared = getPayloadString(payload, 'shared');
@@ -263,6 +300,9 @@ function getReportQuery(payload: unknown): ObservabilityReportQuery {
   }
   if (traceId !== undefined) {
     query.traceId = traceId;
+  }
+  if (instanceRef !== undefined) {
+    query.instanceRef = instanceRef;
   }
   if (remote !== undefined) {
     query.remote = remote;
@@ -286,6 +326,7 @@ function getReportQuery(payload: unknown): ObservabilityReportQuery {
 function hasReportQueryFilter(query: ObservabilityReportQuery): boolean {
   return (
     query.traceId !== undefined ||
+    query.instanceRef !== undefined ||
     query.remote !== undefined ||
     query.expose !== undefined ||
     query.shared !== undefined ||
@@ -299,6 +340,7 @@ function createReportSummary(
 ): Record<string, unknown> {
   return compactObject({
     traceId: report.traceId,
+    instanceRef: report.instanceRef,
     status: report.status,
     requestId: report.requestId,
     requestAlias: report.requestAlias,
@@ -338,204 +380,181 @@ function getReportInputOptions(
   }));
 }
 
-function getFederationGlobalSummary(): Record<string, unknown> {
-  const federation = getFederationGlobal();
-  if (!federation) {
-    return {
-      available: false,
-    };
-  }
-
-  const moduleInfoKeys = Object.keys(federation.moduleInfo || {});
-  const shareScopeKeys = Object.keys(federation.__SHARE__ || {});
-  const manifestLoadingKeys = Object.keys(
-    federation.__MANIFEST_LOADING__ || {},
-  );
-  const preloadedMap = federation.__PRELOADED_MAP__;
-
-  return compactObject({
+function getFederationGlobalSummary(
+  runtimeState: ObservabilityRuntimeState,
+): Record<string, unknown> {
+  return {
     available: true,
-    debugConstructorVersion: federation.__DEBUG_CONSTRUCTOR_VERSION__,
-    globalPluginCount: federation.__GLOBAL_PLUGIN__?.length || 0,
-    moduleInfoCount: moduleInfoKeys.length,
-    moduleInfoKeys,
-    instanceCount: federation.__INSTANCES__?.length || 0,
-    instances: getFederationInstanceSummaries(),
-    shareScopeKeys,
-    manifestLoadingKeys,
-    preloadedKeys: preloadedMap
-      ? toJsonSafeValue(Array.from(preloadedMap.keys()))
-      : undefined,
-  });
+    schemaVersion: runtimeState.schemaVersion,
+    observedAt: runtimeState.observedAt,
+    scope: runtimeState.scope,
+    completeness: runtimeState.completeness,
+    capabilities: runtimeState.capabilities,
+    moduleInfoCount: runtimeState.moduleInfo.length,
+    moduleInfoKeys: runtimeState.moduleInfo.map((entry) => entry.key),
+    instanceCount: runtimeState.instances.length,
+    instances: runtimeState.instances,
+    relationshipCount: runtimeState.relationships.length,
+  };
 }
 
 function getFederationModuleInfoActionResult(
   payload: unknown,
+  runtimeState: ObservabilityRuntimeState,
 ): Record<string, unknown> {
-  const moduleInfo = getFederationGlobal()?.moduleInfo;
-  if (!moduleInfo) {
-    return {
-      available: false,
-    };
-  }
-
   const key =
     getPayloadString(payload, 'key') || getPayloadString(payload, 'name');
-  if (key) {
+  const instanceRef = getPayloadString(payload, 'instanceRef');
+  const instance = instanceRef
+    ? runtimeState.instances.find(
+        (candidate) => candidate.instanceRef === instanceRef,
+      )
+    : undefined;
+  if (instanceRef && !instance) {
     return {
       available: true,
-      found: Object.hasOwnProperty.call(moduleInfo, key),
-      key,
-      moduleInfo: toJsonSafeValue(moduleInfo[key], {
-        depth: 5,
-        maxArrayLength: 50,
-        maxObjectKeys: 80,
-      }),
+      found: false,
+      instanceRef,
+      instances: runtimeState.instances.map(createInstanceCandidate),
     };
   }
-
-  return {
-    available: true,
-    keys: Object.keys(moduleInfo),
-    moduleInfo: toJsonSafeValue(moduleInfo, {
-      depth: 5,
-      maxArrayLength: 50,
-      maxObjectKeys: 80,
-    }),
-  };
+  const matched = key
+    ? runtimeState.moduleInfo.find(
+        (entry) => entry.key === key || entry.name === key,
+      )
+    : undefined;
+  return key
+    ? compactObject({
+        available: true,
+        found: matched !== undefined,
+        key,
+        instance: instance ? createInstanceCandidate(instance) : undefined,
+        relationships: instance
+          ? runtimeState.relationships.filter(
+              (relationship) =>
+                relationship.consumerInstanceRef === instance.instanceRef,
+            )
+          : undefined,
+        moduleInfo: matched,
+      })
+    : compactObject({
+        available: true,
+        keys: runtimeState.moduleInfo.map((entry) => entry.key),
+        instance: instance ? createInstanceCandidate(instance) : undefined,
+        relationships: instance
+          ? runtimeState.relationships.filter(
+              (relationship) =>
+                relationship.consumerInstanceRef === instance.instanceRef,
+            )
+          : undefined,
+        moduleInfo: runtimeState.moduleInfo,
+      });
 }
 
 function getFederationModuleInfoInputOptions(
   inputName: string,
+  runtimeState: ObservabilityRuntimeState,
 ): RuntimeInputOption[] {
-  if (inputName !== 'key' && inputName !== 'name') {
+  if (
+    inputName !== 'key' &&
+    inputName !== 'name' &&
+    inputName !== 'instanceRef'
+  ) {
     return [];
   }
 
-  return Object.keys(getFederationGlobal()?.moduleInfo || {}).map((key) => ({
-    value: key,
+  if (inputName === 'instanceRef') {
+    return runtimeState.instances.map((instance) => ({
+      value: instance.instanceRef,
+      description:
+        instance.optionsName || instance.name || instance.instanceRef,
+    }));
+  }
+
+  return runtimeState.moduleInfo.map((entry) => ({
+    value: entry.key,
   }));
 }
 
 function getFederationInstanceConfigActionResult(
   payload: unknown,
+  runtimeState: ObservabilityRuntimeState,
 ): Record<string, unknown> {
-  const instances = getFederationInstances();
-  const index = getPayloadNumber(payload, 'index');
+  const instanceRef = getPayloadString(payload, 'instanceRef');
   const name = getPayloadString(payload, 'name');
-  const matchedIndex =
-    index !== undefined
-      ? index
-      : instances.findIndex(
-          (instance, instanceIndex) =>
-            getFederationInstanceName(instance, instanceIndex) === name,
-        );
-  const instance =
-    matchedIndex >= 0 && matchedIndex < instances.length
-      ? instances[matchedIndex]
-      : undefined;
+  const index = getPayloadNumber(payload, 'index');
+  const nameMatches = name
+    ? runtimeState.instances.filter(
+        (instance) => instance.name === name || instance.optionsName === name,
+      )
+    : [];
+  const instance = instanceRef
+    ? runtimeState.instances.find(
+        (candidate) => candidate.instanceRef === instanceRef,
+      )
+    : nameMatches.length === 1
+      ? nameMatches[0]
+      : index !== undefined
+        ? runtimeState.instances[index]
+        : undefined;
 
   if (!instance) {
     return {
       found: false,
+      instanceRef,
       name,
       index,
-      instances: getFederationInstanceSummaries(),
+      unstableIndex: index !== undefined || undefined,
+      candidates:
+        nameMatches.length > 1
+          ? nameMatches.map(createInstanceCandidate)
+          : undefined,
+      instances: runtimeState.instances.map(createInstanceCandidate),
     };
   }
 
   return {
     found: true,
-    instance: getFederationInstanceDetail(instance, matchedIndex),
+    unstableIndex: index !== undefined || undefined,
+    instance,
   };
 }
 
 function getFederationInstanceInputOptions(
   inputName: string,
+  runtimeState: ObservabilityRuntimeState,
 ): RuntimeInputOption[] {
-  if (inputName !== 'name' && inputName !== 'index') {
+  if (
+    inputName !== 'name' &&
+    inputName !== 'index' &&
+    inputName !== 'instanceRef'
+  ) {
     return [];
   }
 
-  return getFederationInstanceSummaries().map((summary) => {
-    const value = inputName === 'index' ? summary.index : summary.name;
-    return {
-      value,
-      description: String(summary.name),
-    };
-  });
+  return runtimeState.instances.map((instance, index) => ({
+    value:
+      inputName === 'instanceRef'
+        ? instance.instanceRef
+        : inputName === 'index'
+          ? index
+          : instance.optionsName || instance.name || instance.instanceRef,
+    description: `${instance.optionsName || instance.name || 'unnamed'} (${instance.instanceRef})`,
+  }));
 }
 
-function getFederationInstanceSummaries(): Array<{
-  index: number;
-  name: string;
-  remoteCount?: number;
-  sharedCount?: number;
-  pluginCount?: number;
-}> {
-  return getFederationInstances().map((instance, index) => {
-    const options = asRecord(getRecordProperty(asRecord(instance), 'options'));
-    const remotes = getRecordProperty(options, 'remotes');
-    const shared = getRecordProperty(options, 'shared');
-    const plugins = getRecordProperty(options, 'plugins');
-
-    return compactObject({
-      index,
-      name: getFederationInstanceName(instance, index),
-      remoteCount: getCollectionSize(remotes),
-      sharedCount: getCollectionSize(shared),
-      pluginCount: getCollectionSize(plugins),
-    }) as {
-      index: number;
-      name: string;
-      remoteCount?: number;
-      sharedCount?: number;
-      pluginCount?: number;
-    };
-  });
-}
-
-function getFederationInstanceDetail(
-  instance: unknown,
-  index: number,
+function createInstanceCandidate(
+  instance: ObservabilityRuntimeStateInstance,
 ): Record<string, unknown> {
-  const instanceRecord = asRecord(instance);
-  const options = asRecord(getRecordProperty(instanceRecord, 'options'));
-
   return compactObject({
-    index,
-    name: getFederationInstanceName(instance, index),
-    version: getRecordString(instanceRecord, 'version'),
-    config: toJsonSafeValue(options, {
-      depth: 6,
-      maxArrayLength: 80,
-      maxObjectKeys: 120,
-    }),
+    instanceRef: instance.instanceRef,
+    name: instance.name,
+    optionsName: instance.optionsName,
+    optionsVersion: instance.optionsVersion,
+    runtimeVersion: instance.runtimeVersion,
+    role: instance.role,
+    active: instance.active,
   });
-}
-
-function getFederationInstanceName(instance: unknown, index: number): string {
-  const instanceRecord = asRecord(instance);
-  const options = asRecord(getRecordProperty(instanceRecord, 'options'));
-
-  return (
-    getRecordString(instanceRecord, 'name') ||
-    getRecordString(options, 'name') ||
-    `#${index}`
-  );
-}
-
-function getFederationInstances(): unknown[] {
-  return getFederationGlobal()?.__INSTANCES__ || [];
-}
-
-function getFederationGlobal(): FederationGlobalLike | undefined {
-  const currentGlobal = globalThis as typeof globalThis & {
-    __FEDERATION__?: FederationGlobalLike;
-    __VMOK__?: FederationGlobalLike;
-  };
-
-  return currentGlobal.__FEDERATION__ || currentGlobal.__VMOK__;
 }
 
 function getPayloadString(payload: unknown, key: string): string | undefined {
@@ -587,128 +606,6 @@ function getRecordProperty(
   key: string,
 ): unknown {
   return record ? record[key] : undefined;
-}
-
-function getRecordString(
-  record: Record<string, unknown> | undefined,
-  key: string,
-): string | undefined {
-  const value = getRecordProperty(record, key);
-  return typeof value === 'string' && value ? value : undefined;
-}
-
-function getCollectionSize(value: unknown): number | undefined {
-  if (Array.isArray(value)) {
-    return value.length;
-  }
-  if (value instanceof Map || value instanceof Set) {
-    return value.size;
-  }
-  if (value && typeof value === 'object') {
-    return Object.keys(value).length;
-  }
-
-  return undefined;
-}
-
-function toJsonSafeValue(
-  value: unknown,
-  options: {
-    depth?: number;
-    maxArrayLength?: number;
-    maxObjectKeys?: number;
-    seen?: WeakSet<object>;
-  } = {},
-): unknown {
-  const depth = options.depth ?? 4;
-  const maxArrayLength = options.maxArrayLength ?? 40;
-  const maxObjectKeys = options.maxObjectKeys ?? 60;
-  const seen = options.seen || new WeakSet<object>();
-
-  if (
-    value === null ||
-    typeof value === 'string' ||
-    typeof value === 'number' ||
-    typeof value === 'boolean'
-  ) {
-    return value;
-  }
-  if (typeof value === 'bigint') {
-    return value.toString();
-  }
-  if (typeof value === 'undefined') {
-    return undefined;
-  }
-  if (typeof value === 'function') {
-    return `[function ${value.name || 'anonymous'}]`;
-  }
-  if (typeof value === 'symbol') {
-    return value.toString();
-  }
-  if (typeof value !== 'object') {
-    return String(value);
-  }
-  if (depth <= 0) {
-    return '[max-depth]';
-  }
-  if (seen.has(value)) {
-    return '[circular]';
-  }
-
-  seen.add(value);
-  const nextOptions = {
-    depth: depth - 1,
-    maxArrayLength,
-    maxObjectKeys,
-    seen,
-  };
-
-  if (Array.isArray(value)) {
-    const items = value
-      .slice(0, maxArrayLength)
-      .map((item) => toJsonSafeValue(item, nextOptions));
-    if (value.length > maxArrayLength) {
-      items.push(`[truncated ${value.length - maxArrayLength} items]`);
-    }
-    return items;
-  }
-
-  if (value instanceof Map) {
-    const entries = Array.from(value.entries()).slice(0, maxArrayLength);
-    return {
-      type: 'Map',
-      size: value.size,
-      entries: entries.map(([entryKey, entryValue]) => [
-        toJsonSafeValue(entryKey, nextOptions),
-        toJsonSafeValue(entryValue, nextOptions),
-      ]),
-    };
-  }
-
-  if (value instanceof Set) {
-    return {
-      type: 'Set',
-      size: value.size,
-      values: Array.from(value.values())
-        .slice(0, maxArrayLength)
-        .map((item) => toJsonSafeValue(item, nextOptions)),
-    };
-  }
-
-  const record = value as Record<string, unknown>;
-  const keys = Object.keys(record);
-  const output: Record<string, unknown> = {};
-  keys.slice(0, maxObjectKeys).forEach((key) => {
-    const nextValue = toJsonSafeValue(record[key], nextOptions);
-    if (nextValue !== undefined) {
-      output[key] = nextValue;
-    }
-  });
-  if (keys.length > maxObjectKeys) {
-    output['__truncatedKeys'] = keys.length - maxObjectKeys;
-  }
-
-  return output;
 }
 
 function compactObject(

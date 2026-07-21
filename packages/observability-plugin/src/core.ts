@@ -1,6 +1,7 @@
 import type {
   ModuleFederation,
   ModuleFederationRuntimePlugin,
+  RuntimePluginHooks,
 } from '@module-federation/runtime';
 import { createLogger, isDebugMode } from '@module-federation/sdk';
 
@@ -35,6 +36,110 @@ export type ObservabilityOwnerHint =
   | 'unknown';
 export type ObservabilityMetadataValue = string | number | boolean;
 export type ObservabilityMetadata = Record<string, ObservabilityMetadataValue>;
+export type ObservabilityInstanceRole =
+  | 'consumer'
+  | 'producer'
+  | 'mixed'
+  | 'unknown';
+export type ObservabilityRelationshipStatus =
+  | 'resolved'
+  | 'ambiguous'
+  | 'unresolved';
+export type ObservabilityCapabilityName =
+  | 'instanceState'
+  | 'remoteTrace'
+  | 'sharedState'
+  | 'sharedTrace'
+  | 'bridgeTrace';
+
+export interface ObservabilityCapability {
+  available: boolean;
+  completeness: 'complete' | 'partial' | 'unavailable';
+  reason?: string;
+}
+
+export interface ObservabilityRuntimeStateRemote {
+  name: string;
+  alias?: string;
+  version?: string;
+  entry?: string;
+  entryGlobalName?: string;
+  type?: string;
+}
+
+export interface ObservabilityRuntimeStateInstance {
+  instanceRef: string;
+  name?: string;
+  optionsName?: string;
+  optionsVersion?: string;
+  runtimeVersion?: string;
+  role: ObservabilityInstanceRole;
+  roleEvidence: {
+    consumer: string[];
+    producer: string[];
+  };
+  remotes: ObservabilityRuntimeStateRemote[];
+  loadedProducers: ObservabilityRuntimeStateRemote[];
+  shareScopes: Array<{
+    name: string;
+    sharedCount: number;
+    sharedNames: string[];
+    shared: Array<{
+      name: string;
+      versions: Array<{
+        version: string;
+        provider?: string;
+        loaded?: boolean;
+        singleton?: boolean;
+        eager?: boolean;
+      }>;
+    }>;
+  }>;
+  bridge?: {
+    available: boolean;
+    lifecycleCount?: number;
+  };
+  active: boolean;
+}
+
+export interface ObservabilityRuntimeRelationship {
+  consumerInstanceRef: string;
+  producerInstanceRef?: string;
+  candidateProducerInstanceRefs?: string[];
+  remote: ObservabilityRuntimeStateRemote;
+  evidence: string[];
+  status: ObservabilityRelationshipStatus;
+}
+
+export interface ObservabilityRuntimeModuleInfo {
+  key: string;
+  name?: string;
+  version?: string;
+  entry?: string;
+  tag?: string;
+  remotes?: ObservabilityRuntimeStateRemote[];
+}
+
+export interface ObservabilityRuntimeState {
+  schemaVersion: 1;
+  observedAt: number;
+  scope: {
+    name: string;
+    realm: 'current';
+    frame?: string;
+  };
+  completeness: {
+    currentState: 'complete';
+    history: 'complete' | 'partial';
+    historyCleared: boolean;
+    lateBoundInstanceRefs: string[];
+    recommendation?: string;
+  };
+  capabilities: Record<ObservabilityCapabilityName, ObservabilityCapability>;
+  instances: ObservabilityRuntimeStateInstance[];
+  relationships: ObservabilityRuntimeRelationship[];
+  moduleInfo: ObservabilityRuntimeModuleInfo[];
+}
 
 export interface ObservabilityModuleInfoEntry {
   name: string;
@@ -187,6 +292,7 @@ export interface ObservabilitySharedConflictInfo {
 
 export interface ObservabilityEvent {
   traceId: string;
+  instanceRef?: string;
   timestamp: number;
   phase: string;
   status: ObservabilityEventStatus;
@@ -219,6 +325,7 @@ export interface ObservabilityEvent {
 
 export interface ObservabilityReport {
   traceId: string;
+  instanceRef?: string;
   status: ObservabilityReportStatus;
   requestId?: string;
   requestAlias?: string;
@@ -316,6 +423,7 @@ export interface ObservabilityReportListOptions {
 
 export interface ObservabilityReportQuery extends ObservabilityReportListOptions {
   traceId?: string;
+  instanceRef?: string;
   remote?: string;
   expose?: string;
   shared?: string;
@@ -346,6 +454,7 @@ export interface ObservabilityController {
   getLatestReport(): ObservabilityReport | undefined;
   getReport(traceId: string): ObservabilityReport | undefined;
   exportReport(traceId?: string): ObservabilityReport | undefined;
+  getRuntimeState(): ObservabilityRuntimeState;
   clear(): void;
   markComponentLoaded(
     options?: MarkComponentLoadedOptions,
@@ -375,6 +484,7 @@ type ObservableModuleFederation = ModuleFederation & ObservabilityInstanceAPI;
 export interface ObservabilityRuntimeEventInput {
   phase: string;
   status: ObservabilityEventStatus;
+  instanceRef?: string;
   requestId?: string;
   requestAlias?: string;
   hostName?: string;
@@ -404,7 +514,14 @@ export interface ObservabilityRuntimeOrigin {
   options?: {
     id?: string;
     name?: string;
+    version?: string;
+    remotes?: unknown;
+    shared?: unknown;
+    plugins?: unknown;
   };
+  moduleCache?: ObservabilityRuntimeInstanceLike['moduleCache'];
+  remoteHandler?: ObservabilityRuntimeRemoteHandlerLike;
+  bridgeHook?: unknown;
   shareScopeMap?: ObservabilityRuntimeShareScopeMap;
   sharedHandler?: {
     shareScopeMap?: ObservabilityRuntimeShareScopeMap;
@@ -415,6 +532,7 @@ export interface ObservabilityRuntimeOrigin {
 
 export interface ObservabilityEventContext {
   origin?: ObservabilityRuntimeOrigin;
+  instanceRef?: string;
 }
 
 export interface ObservabilityRawErrorContext extends ObservabilityEventContext {
@@ -640,6 +758,7 @@ export interface ObservabilityBrowserReader {
   getLatestReport(): ObservabilityReport | undefined;
   getReport(traceId: string): ObservabilityReport | undefined;
   exportReport(traceId?: string): ObservabilityReport | undefined;
+  getRuntimeState(): ObservabilityRuntimeState;
 }
 
 interface FederationObservabilityGlobal {
@@ -2400,8 +2519,14 @@ export function createObservability(
   );
   const events: ObservabilityEvent[] = [];
   const reports = new Map<string, ObservabilityReport>();
+  const latestTraceByInstance = new Map<string, string>();
   const traceByRequest = new Map<string, string>();
   const traceByRemote = new Map<string, string>();
+  const instanceRefs = new WeakMap<object, string>();
+  const instancesByRef = new Map<string, ObservabilityRuntimeOrigin>();
+  const lateBoundInstanceRefs = new Set<string>();
+  const boundInstanceRefs = new Set<string>();
+  const attachedInstanceApis = new WeakMap<object, ObservabilityInstanceAPI>();
   const phaseStartTimes = new Map<string, number>();
   const reportedSharedConflictKeys = new Set<string>();
   const collectorOptions = normalizeCollectorOptions(options.collector);
@@ -2418,6 +2543,43 @@ export function createObservability(
   let browserGlobalScope: string | undefined;
   let lastRuntimeOrigin: ObservabilityRuntimeOrigin | undefined;
   let appliedRuntimeVersion: string | undefined;
+  let instanceRefCounter = 0;
+  let historyCleared = false;
+
+  const getActiveRuntimeInstances = () => {
+    const federation = getFederationGlobal();
+    return Array.isArray(federation?.__INSTANCES__)
+      ? federation.__INSTANCES__
+      : [];
+  };
+
+  const registerRuntimeInstance = (
+    origin: ObservabilityRuntimeOrigin,
+    lateBound?: boolean,
+  ) => {
+    const existingRef = instanceRefs.get(origin);
+    if (existingRef) {
+      return existingRef;
+    }
+
+    instanceRefCounter += 1;
+    const instanceRef = `mf-${instanceRefCounter}`;
+    instanceRefs.set(origin, instanceRef);
+    instancesByRef.set(instanceRef, origin);
+    if (
+      lateBound ??
+      getActiveRuntimeInstances().some((instance) => instance === origin)
+    ) {
+      lateBoundInstanceRefs.add(instanceRef);
+    }
+    return instanceRef;
+  };
+
+  const getInstanceRef = (origin?: ObservabilityRuntimeOrigin) =>
+    origin ? registerRuntimeInstance(origin) : undefined;
+
+  const getTraceMapKey = (instanceRef: string | undefined, value: string) =>
+    `${instanceRef || 'legacy'}\u0000${value}`;
 
   const isEnabled = () => {
     if (options.enabled === false) {
@@ -2430,6 +2592,7 @@ export function createObservability(
 
   const resolveTraceId = (event: ObservabilityRuntimeEventInput) => {
     const sanitizedRequestId = sanitizeRequestId(event.requestId);
+    const instanceRef = sanitizeText(event.instanceRef, 80);
 
     if (event.traceId && reports.has(event.traceId)) {
       return event.traceId;
@@ -2438,23 +2601,33 @@ export function createObservability(
     if (event.status === 'start' && event.phase === 'loadRemote') {
       const traceId = event.traceId || createTraceId(event);
       if (sanitizedRequestId) {
-        traceByRequest.set(sanitizedRequestId, traceId);
+        traceByRequest.set(
+          getTraceMapKey(instanceRef, sanitizedRequestId),
+          traceId,
+        );
       }
       if (event.remote?.name) {
-        traceByRemote.set(event.remote.name, traceId);
+        traceByRemote.set(
+          getTraceMapKey(instanceRef, event.remote.name),
+          traceId,
+        );
       }
       return traceId;
     }
 
     if (sanitizedRequestId) {
-      const traceId = traceByRequest.get(sanitizedRequestId);
+      const traceId = traceByRequest.get(
+        getTraceMapKey(instanceRef, sanitizedRequestId),
+      );
       if (traceId) {
         return traceId;
       }
     }
 
     if (event.remote?.name) {
-      const traceId = traceByRemote.get(event.remote.name);
+      const traceId = traceByRemote.get(
+        getTraceMapKey(instanceRef, event.remote.name),
+      );
       if (traceId) {
         return traceId;
       }
@@ -2483,6 +2656,7 @@ export function createObservability(
 
     const normalizedEvent: ObservabilityEvent = {
       traceId,
+      instanceRef: event.instanceRef || getInstanceRef(origin),
       timestamp: event.timestamp || Date.now(),
       phase: sanitizeText(event.phase, 120) || 'runtime',
       status: event.status,
@@ -2563,11 +2737,17 @@ export function createObservability(
 
   const updateTraceMaps = (event: ObservabilityEvent) => {
     if (event.requestId) {
-      traceByRequest.set(event.requestId, event.traceId);
+      traceByRequest.set(
+        getTraceMapKey(event.instanceRef, event.requestId),
+        event.traceId,
+      );
     }
 
     if (event.remote?.name) {
-      traceByRemote.set(event.remote.name, event.traceId);
+      traceByRemote.set(
+        getTraceMapKey(event.instanceRef, event.remote.name),
+        event.traceId,
+      );
     }
   };
 
@@ -3305,6 +3485,7 @@ export function createObservability(
     if (!report) {
       report = {
         traceId: event.traceId,
+        instanceRef: event.instanceRef,
         status: event.status === 'error' ? 'error' : 'pending',
         requestId: event.requestId,
         requestAlias: event.requestAlias,
@@ -3346,6 +3527,10 @@ export function createObservability(
         },
       };
       reports.set(event.traceId, report);
+    }
+
+    if (event.instanceRef) {
+      report.instanceRef = event.instanceRef;
     }
 
     if (event.requestId) {
@@ -3417,6 +3602,9 @@ export function createObservability(
     refreshReportDerivedFields(report);
 
     latestTraceId = event.traceId;
+    if (event.instanceRef) {
+      latestTraceByInstance.set(event.instanceRef, event.traceId);
+    }
     trimEvents(report);
     return report;
   };
@@ -3427,7 +3615,10 @@ export function createObservability(
     origin?: ObservabilityRuntimeOrigin,
   ) => {
     try {
-      options.onEvent?.(copyEvent(event), copyReport(report), { origin });
+      options.onEvent?.(copyEvent(event), copyReport(report), {
+        origin,
+        instanceRef: event.instanceRef,
+      });
     } catch {
       // Observability callbacks must not affect Module Federation loading.
     }
@@ -3442,7 +3633,10 @@ export function createObservability(
     }
 
     try {
-      options.onReport?.(copyReport(report), { origin });
+      options.onReport?.(copyReport(report), {
+        origin,
+        instanceRef: report.instanceRef,
+      });
     } catch {
       // Observability callbacks must not affect Module Federation loading.
     }
@@ -3461,6 +3655,7 @@ export function createObservability(
     try {
       options.onRawError(errorValue, {
         origin,
+        instanceRef: event.instanceRef,
         event: copyEvent(event),
         report: copyReport(report),
       });
@@ -3543,6 +3738,382 @@ export function createObservability(
     }
   };
 
+  const createStateRemote = (
+    value: unknown,
+    fallbackName?: string,
+  ): ObservabilityRuntimeStateRemote | undefined => {
+    if (typeof value === 'string') {
+      return {
+        name: fallbackName || sanitizeText(value, 120) || 'unknown',
+        entry: sanitizeUrl(value),
+      };
+    }
+    if (!isRecord(value)) {
+      return fallbackName ? { name: fallbackName } : undefined;
+    }
+
+    const name =
+      sanitizeText(getObjectValue(value, 'name'), 120) ||
+      sanitizeText(fallbackName, 120);
+    if (!name) {
+      return undefined;
+    }
+
+    return omitUndefinedFields({
+      name,
+      alias: sanitizeText(getObjectValue(value, 'alias'), 120),
+      version: sanitizeText(getObjectValue(value, 'version'), 120),
+      entry: sanitizeUrl(
+        sanitizeText(
+          getObjectValue(value, 'entry') ||
+            getObjectValue(value, 'remoteEntry') ||
+            getObjectValue(value, 'manifestUrl'),
+          320,
+        ),
+      ),
+      entryGlobalName: sanitizeText(
+        getObjectValue(value, 'entryGlobalName') ||
+          getObjectValue(value, 'globalName'),
+        120,
+      ),
+      type: sanitizeText(getObjectValue(value, 'type'), 80),
+    });
+  };
+
+  const getDeclaredRemotes = (origin: ObservabilityRuntimeOrigin) => {
+    const remotes = origin.options?.remotes;
+    const values = Array.isArray(remotes)
+      ? remotes.map((value) => [undefined, value] as const)
+      : isRecord(remotes)
+        ? Object.entries(remotes)
+        : [];
+
+    return values
+      .map(([name, value]) => createStateRemote(value, name))
+      .filter(
+        (remote): remote is ObservabilityRuntimeStateRemote =>
+          remote !== undefined,
+      );
+  };
+
+  const getLoadedProducerRemotes = (origin: ObservabilityRuntimeOrigin) =>
+    getModuleCacheEntries(origin.moduleCache)
+      .map((module) =>
+        createStateRemote(
+          isRecord(module) ? getObjectValue(module, 'remoteInfo') : undefined,
+        ),
+      )
+      .filter(
+        (remote): remote is ObservabilityRuntimeStateRemote =>
+          remote !== undefined,
+      );
+
+  const getShareScopeSummaries = (origin: ObservabilityRuntimeOrigin) =>
+    Object.entries(getOriginShareScopeMap(origin)).map(([name, scope]) => {
+      const sharedNames = Object.keys(scope || {}).sort();
+      return {
+        name: sanitizeText(name, 120) || 'default',
+        sharedCount: sharedNames.length,
+        sharedNames,
+        shared: sharedNames.map((sharedName) => ({
+          name: sharedName,
+          versions: Object.entries(scope?.[sharedName] || {}).map(
+            ([version, shared]) =>
+              omitUndefinedFields({
+                version: sanitizeText(version, 120) || version,
+                provider: sanitizeText(shared.from, 160),
+                loaded: shared.loaded === true || undefined,
+                singleton: shared.shareConfig?.singleton || undefined,
+                eager: shared.shareConfig?.eager || undefined,
+              }),
+          ),
+        })),
+      };
+    });
+
+  const getBridgeSummary = (
+    origin: ObservabilityRuntimeOrigin,
+  ): ObservabilityRuntimeStateInstance['bridge'] => {
+    if (!isRecord(origin.bridgeHook)) {
+      return undefined;
+    }
+    const lifecycle = getObjectValue(origin.bridgeHook, 'lifecycle');
+    return {
+      available: true,
+      lifecycleCount: isRecord(lifecycle)
+        ? Object.keys(lifecycle).length
+        : undefined,
+    };
+  };
+
+  const getRuntimeModuleInfo = (): ObservabilityRuntimeModuleInfo[] => {
+    const moduleInfo = getFederationGlobal()?.moduleInfo || {};
+    return Object.entries(moduleInfo)
+      .map(([key, value]) => {
+        const record = isRecord(value) ? value : {};
+        const rawRemotes = getObjectValue(record, 'remotes');
+        const remoteValues = Array.isArray(rawRemotes)
+          ? rawRemotes.map((remote) => [undefined, remote] as const)
+          : isRecord(rawRemotes)
+            ? Object.entries(rawRemotes)
+            : [];
+        const remotes = remoteValues
+          .map(([name, remote]) => createStateRemote(remote, name))
+          .filter(
+            (remote): remote is ObservabilityRuntimeStateRemote =>
+              remote !== undefined,
+          );
+        return omitUndefinedFields({
+          key: sanitizeText(key, 160) || key,
+          name: sanitizeText(getObjectValue(record, 'name'), 120),
+          version: sanitizeText(
+            getObjectValue(record, 'version') ||
+              getObjectValue(record, 'buildVersion'),
+            120,
+          ),
+          entry: sanitizeUrl(
+            sanitizeText(
+              getObjectValue(record, 'entry') ||
+                getObjectValue(record, 'remoteEntry') ||
+                getObjectValue(record, 'manifestUrl'),
+              320,
+            ),
+          ),
+          tag: sanitizeText(getObjectValue(record, 'tag'), 120),
+          remotes: remotes.length ? remotes : undefined,
+        });
+      })
+      .slice(0, MAX_MODULE_INFO_ENTRIES);
+  };
+
+  const getRuntimeFrame = () => {
+    try {
+      return typeof window === 'undefined'
+        ? undefined
+        : window === window.top
+          ? 'top'
+          : 'child';
+    } catch {
+      return 'child';
+    }
+  };
+
+  const getRuntimeStateSnapshot = (): ObservabilityRuntimeState => {
+    const activeInstances = getActiveRuntimeInstances();
+    activeInstances.forEach((instance) => registerRuntimeInstance(instance));
+    const moduleInfo = getRuntimeModuleInfo();
+    const instanceOrigins = Array.from(instancesByRef.entries());
+    const instanceDrafts = instanceOrigins.map(([instanceRef, origin]) => ({
+      instanceRef,
+      origin,
+      name:
+        sanitizeText(origin.name, 120) ||
+        sanitizeText(origin.options?.name, 120),
+      optionsName: sanitizeText(origin.options?.name, 120),
+      optionsVersion: sanitizeText(origin.options?.version, 120),
+      runtimeVersion: sanitizeText(origin.version, 80),
+      remotes: getDeclaredRemotes(origin),
+      loadedProducers: getLoadedProducerRemotes(origin),
+      consumerEvidence: [] as string[],
+      producerEvidence: [] as string[],
+    }));
+
+    instanceDrafts.forEach((draft) => {
+      const matchingModuleInfo = moduleInfo.filter((info) => {
+        const names = [draft.name, draft.optionsName].filter(
+          (name): name is string => Boolean(name),
+        );
+        return names.some(
+          (name) =>
+            info.name === name ||
+            info.key === name ||
+            (info.key.includes(name) &&
+              (!draft.optionsVersion ||
+                info.version === draft.optionsVersion ||
+                info.key.includes(draft.optionsVersion))),
+        );
+      });
+      if (draft.remotes.length) {
+        draft.consumerEvidence.push('options.remotes');
+      }
+      if (draft.loadedProducers.length) {
+        draft.consumerEvidence.push('moduleCache.remoteInfo');
+      }
+      if (matchingModuleInfo.some((info) => info.remotes?.length)) {
+        draft.consumerEvidence.push('moduleInfo.remotes');
+      }
+      if (matchingModuleInfo.length) {
+        draft.producerEvidence.push('moduleInfo');
+      }
+    });
+
+    const relationships: ObservabilityRuntimeRelationship[] = [];
+    instanceDrafts.forEach((consumer) => {
+      consumer.loadedProducers.forEach((remote) => {
+        const matchingModuleInfo = moduleInfo.filter(
+          (info) =>
+            info.name === remote.name ||
+            info.key === remote.name ||
+            Boolean(remote.entry && info.entry === remote.entry) ||
+            Boolean(remote.version && info.version === remote.version),
+        );
+        const candidates = instanceDrafts.filter((producer) => {
+          if (producer.instanceRef === consumer.instanceRef) {
+            return false;
+          }
+          const names = new Set(
+            [producer.name, producer.optionsName].filter(
+              (name): name is string => Boolean(name),
+            ),
+          );
+          const directNameMatches =
+            names.has(remote.name) ||
+            Boolean(remote.alias && names.has(remote.alias));
+          const moduleInfoMatches = matchingModuleInfo.some(
+            (info) =>
+              Boolean(info.name && names.has(info.name)) ||
+              names.has(info.key) ||
+              Boolean(info.version && producer.optionsVersion === info.version),
+          );
+          const versionMatches =
+            !remote.version ||
+            !producer.optionsVersion ||
+            producer.optionsVersion === remote.version;
+          return (directNameMatches || moduleInfoMatches) && versionMatches;
+        });
+        const status: ObservabilityRelationshipStatus =
+          candidates.length === 1
+            ? 'resolved'
+            : candidates.length > 1
+              ? 'ambiguous'
+              : 'unresolved';
+        candidates.forEach((candidate) => {
+          if (!candidate.producerEvidence.includes('consumer.moduleCache')) {
+            candidate.producerEvidence.push('consumer.moduleCache');
+          }
+        });
+        relationships.push(
+          omitUndefinedFields({
+            consumerInstanceRef: consumer.instanceRef,
+            producerInstanceRef:
+              candidates.length === 1 ? candidates[0].instanceRef : undefined,
+            candidateProducerInstanceRefs:
+              candidates.length > 1
+                ? candidates.map((candidate) => candidate.instanceRef)
+                : undefined,
+            remote,
+            evidence: ['moduleCache.remoteInfo'],
+            status,
+          }),
+        );
+      });
+    });
+
+    const instances = instanceDrafts.map(
+      (draft): ObservabilityRuntimeStateInstance => {
+        const isConsumer = draft.consumerEvidence.length > 0;
+        const isProducer = draft.producerEvidence.length > 0;
+        const role: ObservabilityInstanceRole =
+          isConsumer && isProducer
+            ? 'mixed'
+            : isConsumer
+              ? 'consumer'
+              : isProducer
+                ? 'producer'
+                : 'unknown';
+        return omitUndefinedFields({
+          instanceRef: draft.instanceRef,
+          name: draft.name,
+          optionsName: draft.optionsName,
+          optionsVersion: draft.optionsVersion,
+          runtimeVersion: draft.runtimeVersion,
+          role,
+          roleEvidence: {
+            consumer: [...draft.consumerEvidence],
+            producer: [...draft.producerEvidence],
+          },
+          remotes: draft.remotes,
+          loadedProducers: draft.loadedProducers,
+          shareScopes: getShareScopeSummaries(draft.origin),
+          bridge: getBridgeSummary(draft.origin),
+          active: activeInstances.includes(
+            draft.origin as ObservabilityRuntimeInstanceLike,
+          ),
+        });
+      },
+    );
+    const hasLateBinding = lateBoundInstanceRefs.size > 0;
+    const hasIncompleteHistory = hasLateBinding || historyCleared;
+    const hasStableSharedRuntime = instanceDrafts.some((draft) =>
+      supportsRuntimeObservability(draft.origin),
+    );
+    const hasSharedState = instances.some(
+      (instance) => instance.shareScopes.length > 0,
+    );
+    const hasRemoteSignals = events.some((event) => Boolean(event.remote));
+    const hasSharedSignals = events.some((event) => Boolean(event.shared));
+    const hasBridge = instances.some((instance) => instance.bridge?.available);
+    const traceCompleteness = hasIncompleteHistory ? 'partial' : 'complete';
+
+    return omitUndefinedFields({
+      schemaVersion: 1,
+      observedAt: Date.now(),
+      scope: {
+        name: browserGlobalScope || normalizeScope(options.browser?.scope),
+        realm: 'current',
+        frame: getRuntimeFrame(),
+      },
+      completeness: {
+        currentState: 'complete',
+        history: hasIncompleteHistory ? 'partial' : 'complete',
+        historyCleared,
+        lateBoundInstanceRefs: Array.from(lateBoundInstanceRefs),
+        recommendation: hasIncompleteHistory
+          ? 'Reload or reopen the page to capture complete runtime history.'
+          : undefined,
+      },
+      capabilities: {
+        instanceState: {
+          available: true,
+          completeness: 'complete',
+        },
+        remoteTrace: {
+          available: hasRemoteSignals || boundInstanceRefs.size > 0,
+          completeness: traceCompleteness,
+          reason: hasRemoteSignals
+            ? undefined
+            : 'No remote lifecycle signal has been observed yet.',
+        },
+        sharedState: {
+          available: hasSharedState,
+          completeness: hasSharedState ? 'complete' : 'unavailable',
+        },
+        sharedTrace: {
+          available: hasStableSharedRuntime && hasSharedSignals,
+          completeness:
+            hasStableSharedRuntime && hasSharedSignals
+              ? traceCompleteness
+              : 'unavailable',
+          reason: hasStableSharedRuntime
+            ? hasSharedSignals
+              ? undefined
+              : 'No shared lifecycle signal has been observed yet.'
+            : 'Shared tracing requires a stable runtime version of 2.5.0 or newer.',
+        },
+        bridgeTrace: {
+          available: false,
+          completeness: 'unavailable',
+          reason: hasBridge
+            ? 'Bridge is present, but no complete Bridge trace signal is available.'
+            : 'Bridge is not present on an observed instance.',
+        },
+      },
+      instances,
+      relationships,
+      moduleInfo,
+    });
+  };
+
   const getEventsSnapshot = () => events.map(copyEvent);
 
   const getTraceIdsSnapshot = () => Array.from(reports.keys());
@@ -3578,6 +4149,9 @@ export function createObservability(
     query: ObservabilityReportQuery,
   ) => {
     if (query.traceId && report.traceId !== query.traceId) {
+      return false;
+    }
+    if (query.instanceRef && report.instanceRef !== query.instanceRef) {
       return false;
     }
     if (query.status && report.status !== query.status) {
@@ -3662,6 +4236,7 @@ export function createObservability(
       getLatestReport: getLatestReportSnapshot,
       getReport: getReportSnapshot,
       exportReport: exportReportSnapshot,
+      getRuntimeState: getRuntimeStateSnapshot,
     },
   );
 
@@ -3673,6 +4248,7 @@ export function createObservability(
     getLatestReport: getLatestReportSnapshot,
     getReport: getReportSnapshot,
     exportReport: exportReportSnapshot,
+    getRuntimeState: getRuntimeStateSnapshot,
   });
 
   const shouldExposeBrowserGlobal = () => options.browser?.enabled === true;
@@ -3900,6 +4476,7 @@ export function createObservability(
     }
 
     lastRuntimeOrigin = origin;
+    registerRuntimeInstance(origin);
     prepareOutputChannels(origin);
     return true;
   };
@@ -3912,18 +4489,28 @@ export function createObservability(
       return undefined;
     }
 
-    const traceId = resolveTraceId(input);
-    const event = normalizeEvent(input, traceId, origin);
+    const effectiveInput = {
+      ...input,
+      instanceRef: input.instanceRef || getInstanceRef(origin),
+    };
+    const traceId = resolveTraceId(effectiveInput);
+    const event = normalizeEvent(effectiveInput, traceId, origin);
     applyPhaseDuration(event);
     updateTraceMaps(event);
 
-    if (!shouldRecordEvent(level, input) && !shouldRecordStartTrace(input)) {
+    if (
+      !shouldRecordEvent(level, effectiveInput) &&
+      !shouldRecordStartTrace(effectiveInput)
+    ) {
       return undefined;
     }
 
     events.push(event);
     const report = updateReport(event);
-    openRuntimeAdapter?.syncReport(report, { origin });
+    openRuntimeAdapter?.syncReport(report, {
+      origin,
+      instanceRef: event.instanceRef,
+    });
     emitStartConsoleHint(event, report);
     emitConsoleHint(event, report, input.error);
     if (shouldNotifyCollector()) {
@@ -3932,25 +4519,32 @@ export function createObservability(
     if (shouldNotifyDevtools()) {
       notifyDevtools(event, report);
     }
-    notifyRawError(input.error, event, report, origin);
+    notifyRawError(effectiveInput.error, event, report, origin);
     notifyEvent(event, report, origin);
     notifyReport(report, origin);
     return event;
   };
 
-  const markComponentLoaded = (
+  const markComponentLoadedFor = (
     markOptions: MarkComponentLoadedOptions = {},
+    origin?: ObservabilityRuntimeOrigin,
   ) => {
     if (options.enabled === false || !runtimeObservabilityEnabled) {
       return undefined;
     }
 
+    const instanceRef = getInstanceRef(origin);
     const traceId =
       markOptions.traceId ||
       (markOptions.requestId
-        ? traceByRequest.get(sanitizeRequestId(markOptions.requestId) || '')
+        ? traceByRequest.get(
+            getTraceMapKey(
+              instanceRef,
+              sanitizeRequestId(markOptions.requestId) || '',
+            ),
+          )
         : undefined) ||
-      latestTraceId ||
+      (instanceRef ? latestTraceByInstance.get(instanceRef) : latestTraceId) ||
       createTraceId({
         phase: 'component',
         status: 'success',
@@ -3960,6 +4554,7 @@ export function createObservability(
     return recordEvent(
       {
         traceId,
+        instanceRef,
         phase: 'component',
         status: 'success',
         requestId: markOptions.requestId,
@@ -3969,9 +4564,12 @@ export function createObservability(
         message: COMPONENT_BUSINESS_LOADED_EVENT,
         source: 'business',
       },
-      lastRuntimeOrigin,
+      origin,
     );
   };
+
+  const markComponentLoaded = (markOptions: MarkComponentLoadedOptions = {}) =>
+    markComponentLoadedFor(markOptions, lastRuntimeOrigin);
 
   const getReactForOrigin = async (
     origin: ObservabilityRuntimeOrigin,
@@ -4086,11 +4684,14 @@ export function createObservability(
         ON_MF_REMOTE_LOADED_PROP,
       );
       const onMFRemoteLoaded: OnMFRemoteLoaded = (loadedOptions = {}) => {
-        markComponentLoaded({
-          requestId: loadArgs.id,
-          componentName: loadedOptions.componentName || componentName,
-          metadata: loadedOptions.metadata,
-        });
+        markComponentLoadedFor(
+          {
+            requestId: loadArgs.id,
+            componentName: loadedOptions.componentName || componentName,
+            metadata: loadedOptions.metadata,
+          },
+          loadArgs.origin,
+        );
 
         if (typeof originalLoadedCallback === 'function') {
           (originalLoadedCallback as OnMFRemoteLoaded)(loadedOptions);
@@ -4174,16 +4775,7 @@ export function createObservability(
     };
   };
 
-  const plugin: ObservabilityRuntimePlugin = {
-    name: pluginName,
-    apply(instance: ModuleFederation) {
-      appliedRuntimeVersion =
-        sanitizeText(instance.version, 80) || appliedRuntimeVersion;
-      if (shouldAttachInstanceApi) {
-        (instance as ObservableModuleFederation).markComponentLoaded =
-          markComponentLoaded;
-      }
-    },
+  const legacyHooks: RuntimePluginHooks = {
     beforeRequest(args) {
       const requestArgs = args as ObservabilityRemoteBeforeRequestArgs;
       if (!prepareRuntimeOrigin(requestArgs.origin)) {
@@ -4843,10 +5435,10 @@ export function createObservability(
 
       return returnHookArgs(args);
     },
-  } as ObservabilityRuntimePlugin;
+  };
 
   if (!shouldDisablePreloadHooks) {
-    plugin.generatePreloadAssets = async (args) => {
+    legacyHooks.generatePreloadAssets = async (args) => {
       const preloadArgs = args as ObservabilityPreloadAssetsArgs;
       if (!prepareRuntimeOrigin(preloadArgs.origin)) {
         return continuePreloadAssetsGeneration();
@@ -4881,7 +5473,7 @@ export function createObservability(
       return continuePreloadAssetsGeneration();
     };
 
-    plugin.afterPreloadRemote = (args) => {
+    legacyHooks.afterPreloadRemote = (args) => {
       const preloadArgs = args as ObservabilityAfterPreloadRemoteArgs;
       if (!prepareRuntimeOrigin(preloadArgs.origin)) {
         return undefined;
@@ -4951,6 +5543,72 @@ export function createObservability(
     };
   }
 
+  const createRuntimeHooks = (
+    boundInstance?: ModuleFederation,
+  ): RuntimePluginHooks => {
+    if (!boundInstance) {
+      return legacyHooks;
+    }
+
+    const boundHooks: Record<string, unknown> = {};
+    Object.entries(legacyHooks as Record<string, unknown>).forEach(
+      ([lifecycle, handler]) => {
+        if (typeof handler !== 'function') {
+          return;
+        }
+        boundHooks[lifecycle] = (...handlerArgs: unknown[]) => {
+          const origin = boundInstance as ObservabilityRuntimeOrigin;
+          prepareRuntimeOrigin(origin);
+          const [firstArg, ...remainingArgs] = handlerArgs;
+          const boundFirstArg = isRecord(firstArg)
+            ? {
+                ...firstArg,
+                origin,
+              }
+            : firstArg;
+          return (handler as (...args: unknown[]) => unknown)(
+            boundFirstArg,
+            ...remainingArgs,
+          );
+        };
+      },
+    );
+    return boundHooks as RuntimePluginHooks;
+  };
+
+  const plugin: ObservabilityRuntimePlugin = {
+    name: pluginName,
+    apply(instance: ModuleFederation) {
+      const origin = instance as ObservabilityRuntimeOrigin;
+      registerRuntimeInstance(
+        origin,
+        getActiveRuntimeInstances().some((item) => item === instance),
+      );
+      const instanceRef = getInstanceRef(origin);
+      if (instanceRef) {
+        boundInstanceRefs.add(instanceRef);
+      }
+      appliedRuntimeVersion =
+        sanitizeText(instance.version, 80) || appliedRuntimeVersion;
+      if (shouldAttachInstanceApi) {
+        let instanceApi = attachedInstanceApis.get(instance);
+        if (!instanceApi) {
+          instanceApi = {
+            markComponentLoaded: (markOptions) =>
+              markComponentLoadedFor(markOptions, origin),
+          };
+          attachedInstanceApis.set(instance, instanceApi);
+        }
+        (instance as ObservableModuleFederation).markComponentLoaded =
+          instanceApi.markComponentLoaded;
+      }
+      prepareOutputChannels(origin);
+      openRuntimeAdapter?.register();
+      return createRuntimeHooks(instance);
+    },
+    ...legacyHooks,
+  };
+
   return {
     plugin,
     getEvents() {
@@ -4974,11 +5632,15 @@ export function createObservability(
     exportReport(traceId?: string) {
       return exportReportSnapshot(traceId);
     },
+    getRuntimeState() {
+      return getRuntimeStateSnapshot();
+    },
     clear() {
       events.length = 0;
       reports.clear();
       traceByRequest.clear();
       traceByRemote.clear();
+      latestTraceByInstance.clear();
       phaseStartTimes.clear();
       seenManifestUrls.clear();
       seenRemoteEntryKeys.clear();
@@ -4989,6 +5651,7 @@ export function createObservability(
       effectiveMaxEvents = configuredMaxEvents;
       browserGlobalScope = undefined;
       lastRuntimeOrigin = undefined;
+      historyCleared = true;
     },
     markComponentLoaded,
   };

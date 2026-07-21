@@ -2,4 +2,4 @@
 '@module-federation/observability-plugin': minor
 ---
 
-Add optional OpenRuntime target synchronization for Module Federation observability reports.
+Add OpenRuntime synchronization and safe multi-instance runtime state with stable report and relationship association.
