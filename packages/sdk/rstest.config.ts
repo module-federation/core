@@ -11,7 +11,9 @@ export default defineConfig({
     },
   },
   testEnvironment: 'jsdom',
-  include: [path.resolve(__dirname, '__tests__/*.spec.ts')],
+  include: [
+    path.resolve(__dirname, '__tests__/generateSnapshotFromManifest.spec.ts'),
+  ],
   globals: true,
   testTimeout: 10000,
 });

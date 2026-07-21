@@ -260,4 +260,123 @@ describe('ModuleFederation', () => {
     expect(handler.manifestCache.has(manifestUrl)).toBe(false);
     expect(handler.manifestLoading[manifestUrl]).toBeUndefined();
   });
+
+  it('keeps the newer manifest snapshot when a stale fetch resolves after force re-registration', async () => {
+    const manifestUrl = 'https://requested.example/mf-manifest.json';
+    const manifests = {
+      first: {
+        id: 'catalog',
+        name: 'catalog',
+        metaData: {
+          name: 'catalog',
+          publicPath: 'https://first.example/',
+          type: 'app',
+          buildInfo: { buildVersion: 'first' },
+          remoteEntry: {
+            name: 'catalog.web.lynx.bundle',
+            path: '',
+            type: 'global',
+          },
+          types: { name: '', path: '' },
+          globalName: 'catalog-first',
+        },
+        remotes: [],
+        shared: [],
+        exposes: [],
+      },
+      second: {
+        id: 'catalog',
+        name: 'catalog',
+        metaData: {
+          name: 'catalog',
+          publicPath: 'https://second.example/',
+          type: 'app',
+          buildInfo: { buildVersion: 'second' },
+          remoteEntry: {
+            name: 'catalog.web.lynx.bundle',
+            path: '',
+            type: 'global',
+          },
+          types: { name: '', path: '' },
+          globalName: 'catalog-second',
+        },
+        remotes: [],
+        shared: [],
+        exposes: [],
+      },
+    };
+    let resolveFirstResponse!: (response: Response) => void;
+    const firstResponse = new Promise<Response>((resolve) => {
+      resolveFirstResponse = resolve;
+    });
+    let resolveSecondResponse!: (response: Response) => void;
+    const secondResponse = new Promise<Response>((resolve) => {
+      resolveSecondResponse = resolve;
+    });
+    let resolveFirstFetchStarted!: () => void;
+    const firstFetchStarted = new Promise<void>((resolve) => {
+      resolveFirstFetchStarted = resolve;
+    });
+    let resolveSecondFetchStarted!: () => void;
+    const secondFetchStarted = new Promise<void>((resolve) => {
+      resolveSecondFetchStarted = resolve;
+    });
+    let fetchCount = 0;
+    const manifestFetch = rs.fn(() => {
+      fetchCount += 1;
+      if (fetchCount === 1) {
+        resolveFirstFetchStarted();
+        return firstResponse;
+      }
+      resolveSecondFetchStarted();
+      return secondResponse;
+    });
+    const instance = new ModuleFederation({
+      name: 'host',
+      remotes: [{ name: 'catalog', entry: manifestUrl }],
+      plugins: [
+        {
+          name: 'manifest-fetch',
+          fetch: manifestFetch,
+        },
+      ],
+    });
+    const handler = instance.snapshotHandler;
+
+    const staleSnapshot = handler.loadRemoteSnapshotInfo({
+      moduleInfo: { name: 'catalog', entry: manifestUrl },
+    });
+    await firstFetchStarted;
+
+    instance.registerRemotes([{ name: 'catalog', entry: manifestUrl }], {
+      force: true,
+    });
+    const newerSnapshot = handler.loadRemoteSnapshotInfo({
+      moduleInfo: { name: 'catalog', entry: manifestUrl },
+    });
+    await secondFetchStarted;
+    resolveSecondResponse(
+      new Response(JSON.stringify(manifests.second), {
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    );
+
+    expect(await newerSnapshot).toMatchObject({
+      remoteSnapshot: { globalName: 'catalog-second' },
+    });
+
+    resolveFirstResponse(
+      new Response(JSON.stringify(manifests.first), {
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    );
+
+    expect(await staleSnapshot).toMatchObject({
+      remoteSnapshot: { globalName: 'catalog-second' },
+    });
+    expect(
+      handler.manifestCache.get(manifestUrl)?.manifest.metaData.buildInfo
+        .buildVersion,
+    ).toBe('second');
+  });
 });
