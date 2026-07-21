@@ -4,41 +4,12 @@
 #import "../OrbitControl/OrbitResourceStore.h"
 #import "../OrbitControl/OrbitResourceURLResolver.h"
 
-static BOOL OrbitOversizeProtocolStopped = NO;
-
-@interface OrbitOversizeProtocol : NSURLProtocol
-@end
-
-@implementation OrbitOversizeProtocol
-
-+ (BOOL)canInitWithRequest:(NSURLRequest *)request {
-  return [request.URL.host isEqualToString:@"oversize.test"];
-}
-
-+ (NSURLRequest *)canonicalRequestForRequest:(NSURLRequest *)request {
-  return request;
-}
-
-- (void)startLoading {
-  NSDictionary *headers = @{
-    @"Content-Length": [NSString stringWithFormat:@"%llu",
-      (unsigned long long)OrbitResourceDownloadByteLimit + 1]
-  };
-  NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
-    initWithURL:self.request.URL
-    statusCode:200
-    HTTPVersion:@"HTTP/1.1"
-    headerFields:headers];
-  [self.client URLProtocol:self
-        didReceiveResponse:response
-        cacheStoragePolicy:NSURLCacheStorageNotAllowed];
-  [self.client URLProtocol:self didLoadData:[@"x" dataUsingEncoding:NSUTF8StringEncoding]];
-}
-
-- (void)stopLoading {
-  OrbitOversizeProtocolStopped = YES;
-}
-
+@interface OrbitResourceDownloader (Testing)
+- (void)URLSession:(NSURLSession *)session
+      downloadTask:(NSURLSessionDownloadTask *)downloadTask
+      didWriteData:(int64_t)bytesWritten
+ totalBytesWritten:(int64_t)totalBytesWritten
+totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite;
 @end
 
 @interface OrbitResourceTests : XCTestCase
@@ -79,6 +50,10 @@ static BOOL OrbitOversizeProtocolStopped = NO;
   XCTAssertTrue([files createSymbolicLinkAtURL:escape
                           withDestinationURL:outside
                                        error:nil]);
+  NSURL *outsideFile = [outside URLByAppendingPathComponent:@"secret.bundle"];
+  XCTAssertTrue([[@"secret" dataUsingEncoding:NSUTF8StringEncoding]
+    writeToURL:outsideFile
+    atomically:YES]);
   OrbitResourceURLResolver *resolver = [[OrbitResourceURLResolver alloc]
     initWithRootBundleURL:@""
     allowedLocalDirectories:@[root]];
@@ -127,24 +102,20 @@ static BOOL OrbitOversizeProtocolStopped = NO;
 }
 
 - (void)testCancelsOversizedDownloads {
-  OrbitOversizeProtocolStopped = NO;
-  NSURLSessionConfiguration *configuration =
-    NSURLSessionConfiguration.ephemeralSessionConfiguration;
-  configuration.protocolClasses = @[[OrbitOversizeProtocol class]];
-  OrbitResourceDownloader *downloader = [[OrbitResourceDownloader alloc]
-    initWithSessionConfiguration:configuration];
-  XCTestExpectation *completed = [self expectationWithDescription:@"download completed"];
+  OrbitResourceDownloader *downloader = [[OrbitResourceDownloader alloc] init];
+  NSURLSession *session = [NSURLSession sessionWithConfiguration:
+    NSURLSessionConfiguration.ephemeralSessionConfiguration];
+  NSURLSessionDownloadTask *task = [session
+    downloadTaskWithURL:[NSURL URLWithString:@"https://oversize.test/chunk.bundle"]];
 
-  [downloader downloadURL:[NSURL URLWithString:@"https://oversize.test/chunk.bundle"]
-                completion:^(NSData *data, NSURLResponse *response, NSError *error) {
-    (void)response;
-    XCTAssertNil(data);
-    XCTAssertTrue([error.localizedDescription containsString:@"exceeds 64 MiB"]);
-    [completed fulfill];
-  }];
+  [downloader URLSession:session
+            downloadTask:task
+            didWriteData:1
+       totalBytesWritten:1
+  totalBytesExpectedToWrite:(int64_t)OrbitResourceDownloadByteLimit + 1];
 
-  [self waitForExpectationsWithTimeout:2 handler:nil];
-  XCTAssertTrue(OrbitOversizeProtocolStopped);
+  XCTAssertEqual(task.state, NSURLSessionTaskStateCanceling);
+  [session invalidateAndCancel];
 }
 
 @end
