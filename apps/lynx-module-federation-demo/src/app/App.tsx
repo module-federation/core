@@ -20,6 +20,7 @@ const MODULES = [
 ];
 
 function LoadButton({ state, onTap }: { state: LoadState; onTap: () => void }) {
+  const disabled = state === 'loading' || state === 'ready';
   const label =
     state === 'loading'
       ? 'Loading catalog…'
@@ -43,7 +44,7 @@ function LoadButton({ state, onTap }: { state: LoadState; onTap: () => void }) {
       accessibility-label={label}
       accessibility-traits="button"
       className={stateClass}
-      bindtap={onTap}
+      bindtap={disabled ? undefined : onTap}
       data-testid="load-remotes"
     >
       <text className="PrimaryActionText">{label}</text>

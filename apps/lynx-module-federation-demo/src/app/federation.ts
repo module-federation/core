@@ -5,16 +5,17 @@ import type {
   ActivityFeedProps,
   RemoteCardProps,
   RemoteDetailsProps,
+  SharedStateView,
 } from '../remote-ui/contracts';
 
 export interface SharedObserverExports {
   sharedInstance: () => string;
-  sharedSnapshot: () => { count: number; instanceId: string };
+  sharedSnapshot: () => SharedStateView;
   sharedToken: () => object;
 }
 
 export interface SharedRemoteExports extends SharedObserverExports {
-  touchSharedState: () => { count: number; instanceId: string };
+  touchSharedState: () => SharedStateView;
 }
 
 export interface CardRemoteModule extends SharedRemoteExports {
