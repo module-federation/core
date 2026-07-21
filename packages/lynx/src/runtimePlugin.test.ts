@@ -201,39 +201,28 @@ describe('lynxRuntimePlugin entry loading', () => {
     ).toBe('lynx-cache://remote');
   });
 
-  it('reports unsuccessful bundle fetches', async () => {
-    const loadScript = rs.fn();
-    setLynx({
-      fetchBundle: async () => ({
-        code: -1,
-        url: 'https://example.test/remote.lynx.bundle',
-        errorMsg: 'not found',
-      }),
-      loadScript,
-    });
+  it.each([
+    ['camel-case', { errorMsg: 'not found' }, -1, 'not found'],
+    ['native snake-case', { error_msg: 'decode failed' }, -2, 'decode failed'],
+  ] as const)(
+    'reports %s bundle errors',
+    async (_name, error, code, message) => {
+      const loadScript = rs.fn();
+      setLynx({
+        fetchBundle: async () => ({
+          code,
+          url: 'https://example.test/remote.lynx.bundle',
+          ...error,
+        }),
+        loadScript,
+      });
 
-    await expect(
-      loadEntry(lynxRuntimePlugin(), bundleRemoteInfo),
-    ).rejects.toThrow('code -1: not found');
-    expect(loadScript).not.toHaveBeenCalled();
-  });
-
-  it('reports native snake-case bundle errors', async () => {
-    const loadScript = rs.fn();
-    setLynx({
-      fetchBundle: async () => ({
-        code: -2,
-        url: 'https://example.test/remote.lynx.bundle',
-        error_msg: 'decode failed',
-      }),
-      loadScript,
-    });
-
-    await expect(
-      loadEntry(lynxRuntimePlugin(), bundleRemoteInfo),
-    ).rejects.toThrow('code -2: decode failed');
-    expect(loadScript).not.toHaveBeenCalled();
-  });
+      await expect(
+        loadEntry(lynxRuntimePlugin(), bundleRemoteInfo),
+      ).rejects.toThrow(`code ${code}: ${message}`);
+      expect(loadScript).not.toHaveBeenCalled();
+    },
+  );
 
   it('rolls back bundle registry mappings after evaluation fails', async () => {
     const registry = new Map([
