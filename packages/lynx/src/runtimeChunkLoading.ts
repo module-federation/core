@@ -7,10 +7,10 @@ import {
   LYNX_BUNDLE_REGISTRY,
   type LynxGlobal,
 } from './runtimeCore';
-import { loadWithTimeout } from './runtimeTimeout';
+import { createLazyChunkLoadController } from './lazyChunkLoadController';
 
 type ChunkId = string | number;
-type ChunkPromise = PromiseLike<unknown>;
+export type ChunkPromise = PromiseLike<unknown>;
 type ChunkHandler = (chunkId: ChunkId, promises: ChunkPromise[]) => void;
 
 export interface LynxWebpackRequire {
@@ -26,14 +26,14 @@ export interface LynxWebpackRequire {
   u(chunkId: ChunkId): string;
 }
 
-interface LynxChunk {
+export interface LynxChunk {
   __lynx_dynamic_component_entry__?: string;
   ids: ChunkId[];
   modules: Record<string, unknown>;
   runtime?: (webpackRequire: LynxWebpackRequire) => void;
 }
 
-type InstalledChunk =
+export type InstalledChunk =
   | 0
   | [
       ((value?: unknown) => void) | undefined,
@@ -207,19 +207,6 @@ const queryError = (request: string, result: unknown): Error => {
   return error;
 };
 
-const withLazyBundleTimeout = (
-  request: string,
-  timeout: number,
-  load: PromiseLike<unknown>,
-): Promise<unknown> =>
-  loadWithTimeout(
-    timeout,
-    `Timed out loading Lynx lazy bundle "${request}" after ${timeout}ms.`,
-    (resolve, reject) => {
-      load.then(resolve, reject);
-    },
-  );
-
 const loadQueryComponent = (
   request: string,
   lynx: NonNullable<ReturnType<typeof getLynxRuntime>>,
@@ -284,116 +271,6 @@ const loadQueryComponent = (
   return resolver.promise;
 };
 
-type ImmediateLazyLoad =
-  | { kind: 'pending' }
-  | { kind: 'installed' }
-  | { consumes: Promise<void>; kind: 'waiting-consumes'; value: LynxChunk };
-
-const loadLazyChunk = (
-  request: string,
-  chunkKey: string,
-  timeout: number,
-  lynx: NonNullable<ReturnType<typeof getLynxRuntime>>,
-  webpackRequire: LynxWebpackRequire,
-  installedChunks: Record<string, InstalledChunk | undefined>,
-  globalObject: LynxGlobal,
-): ChunkPromise => {
-  const loading: Exclude<InstalledChunk, 0> = [undefined, undefined, undefined];
-  installedChunks[chunkKey] = loading;
-  let active = true;
-  let insideLoader = true;
-  const immediate: { current: ImmediateLazyLoad } = {
-    current: { kind: 'pending' },
-  };
-  let loaded: ChunkPromise;
-  try {
-    loaded = loadQueryComponent(request, lynx, globalObject).then((value) => {
-      if (!active) {
-        return value;
-      }
-      if (!isChunk(value)) {
-        throw new Error(
-          `Lynx lazy bundle "${request}" did not export a valid webpack chunk.`,
-        );
-      }
-      if (!value.ids.some((id) => String(id) === chunkKey)) {
-        throw new Error(
-          `Lynx lazy bundle "${request}" did not include requested chunk "${chunkKey}".`,
-        );
-      }
-      const consumes = installChunkAfterConsumes(
-        value,
-        webpackRequire,
-        installedChunks,
-        globalObject,
-        () => active,
-      );
-      if (!consumes) {
-        if (insideLoader) {
-          immediate.current = { kind: 'installed' };
-        }
-        return value;
-      }
-      if (insideLoader) {
-        immediate.current = { consumes, kind: 'waiting-consumes', value };
-        return value;
-      }
-      return consumes.then(() => value);
-    });
-  } catch (error) {
-    active = false;
-    if (installedChunks[chunkKey] === loading) {
-      delete installedChunks[chunkKey];
-    }
-    return Promise.reject(error);
-  }
-  insideLoader = false;
-  const outcome = immediate.current;
-
-  let primary: ChunkPromise;
-  switch (outcome.kind) {
-    case 'installed':
-      primary = loaded;
-      break;
-    case 'waiting-consumes':
-      primary = withLazyBundleTimeout(
-        request,
-        timeout,
-        outcome.consumes.then(() => outcome.value),
-      );
-      break;
-    default:
-      primary = withLazyBundleTimeout(request, timeout, loaded);
-  }
-
-  let tracked = primary;
-  if (outcome.kind !== 'installed') {
-    const installedElsewhere = new Promise<unknown>((resolve, reject) => {
-      loading[0] = (value) => {
-        active = false;
-        resolve(value);
-      };
-      loading[1] = (error) => {
-        active = false;
-        reject(error);
-      };
-    });
-    tracked = Promise.race([primary, installedElsewhere]);
-  }
-  const promise = tracked.then(
-    (value) => value,
-    (error) => {
-      active = false;
-      if (installedChunks[chunkKey] === loading) {
-        delete installedChunks[chunkKey];
-      }
-      throw error;
-    },
-  );
-  loading[2] = promise;
-  return promise;
-};
-
 export const patchLynxChunkLoading = (
   webpackRequire: LynxWebpackRequire,
   originName: string,
@@ -442,17 +319,23 @@ export const patchLynxChunkLoading = (
         webpackRequire.lynx_public_path_auto ? undefined : webpackRequire.p,
         lazyBundlePath,
       );
-      promises.push(
-        loadLazyChunk(
-          request,
-          key,
-          timeout,
-          lynx,
-          webpackRequire,
-          installedChunks,
-          globalObject,
-        ),
-      );
+      const controller = createLazyChunkLoadController({
+        chunkKey: key,
+        installedChunks,
+        timeout,
+        loadQueryComponent: (lazyRequest) =>
+          loadQueryComponent(lazyRequest, lynx, globalObject),
+        isChunk,
+        installChunkAfterConsumes: (chunk, isCurrent) =>
+          installChunkAfterConsumes(
+            chunk,
+            webpackRequire,
+            installedChunks,
+            globalObject,
+            isCurrent,
+          ),
+      });
+      promises.push(controller.load(request));
       return;
     }
 
