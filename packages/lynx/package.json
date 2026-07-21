@@ -74,6 +74,12 @@
     "@rspack/core": ">=2.1.5-canary-54a0d8f3-20260715194831 <3"
   },
   "peerDependenciesMeta": {
+    "@lynx-js/cache-events-webpack-plugin": {
+      "optional": true
+    },
+    "@lynx-js/css-serializer": {
+      "optional": true
+    },
     "@lynx-js/tasm": {
       "optional": true
     },
