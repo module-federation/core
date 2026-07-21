@@ -1,5 +1,11 @@
 # @module-federation/typescript
 
+## 3.1.9
+
+### Patch Changes
+
+- 6b22938: chore(typescript): drop `lodash.get` dependency in favor of optional chaining in `normalizeOptions`.
+
 ## 3.1.8
 
 ### Patch Changes

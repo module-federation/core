@@ -1,3 +1,6 @@
+// This file is injected as a self-contained Metro runtime module. Keep all
+// runtime logic in this file and do not add imports.
+
 // join two paths
 // e.g. /a/b/ + /c/d -> /a/b/c/d
 function joinComponents(prefix: string, suffix: string) {
@@ -14,6 +17,13 @@ function isUrl(url: string) {
   return url.match(/^https?:\/\//);
 }
 
+// normalize Windows separators and encode parent segments to prevent URL sanitization
+// macOS: /../../node_modules -> /..%2F..%2Fnode_modules
+// Windows: /..\..\node_modules -> /..%2F..%2Fnode_modules
+function encodeBundlePath(bundlePath: string) {
+  return bundlePath.replaceAll('\\', '/').replaceAll('../', '..%2F');
+}
+
 // get bundle id from the bundle path
 // e.g. /a/b.bundle?platform=ios -> a/b
 // e.g. http://host:8081/a/b.bundle -> a/b
@@ -27,8 +37,8 @@ function getBundleId(bundlePath: string, publicPath: string) {
   if (path.startsWith('/')) {
     path = path.slice(1);
   }
-  // remove the query params
-  path = path.split('?')[0];
+  // remove the query params and normalize Windows separators
+  path = path.split('?')[0].replaceAll('\\', '/');
   // remove the bundle extension
   return path.replace('.bundle', '');
 }
@@ -99,8 +109,7 @@ function buildLoadBundleAsyncWrapper() {
       bundlePath = joinComponents(publicPath, bundlePath);
     }
 
-    // ../../node_modules/ -> ..%2F..%2Fnode_modules/ so that it's not automatically sanitized
-    const encodedBundlePath = bundlePath.replaceAll('../', '..%2F');
+    const encodedBundlePath = encodeBundlePath(bundlePath);
 
     let result;
     if (cacheHandler) {

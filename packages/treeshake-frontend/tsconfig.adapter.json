@@ -2,7 +2,6 @@
   "compilerOptions": {
     "target": "ES2020",
     "module": "CommonJS",
-    "moduleResolution": "node10",
     "lib": ["ES2020", "DOM"],
     "declaration": true,
     "outDir": "dist/adapter",

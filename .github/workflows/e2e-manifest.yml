@@ -1,4 +1,4 @@
-# .github/workflows/e2e-webpack-host.yml
+# .github/workflows/e2e-manifest.yml
 name: E2E Test for Manifest
 
 on:
@@ -17,10 +17,10 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
 
-      - name: Setup Node.js 20
+      - name: Setup Node.js 24
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
 
@@ -45,24 +45,8 @@ jobs:
       - name: Build shared packages
         run: pnpm run build:packages
 
-      - name: Check CI conditions
-        id: check-ci
-        run: |
-          ci_status=0
-          node tools/scripts/ci-is-affected.mjs --appName=3008-webpack-host,3009-webpack-provider,3010-rspack-provider,3011-rspack-manifest-provider,3012-rspack-js-entry-provider || ci_status=$?
-          if [ "$ci_status" -eq 0 ]; then
-            echo "run-e2e=true" >> "$GITHUB_OUTPUT"
-          elif [ "$ci_status" -eq 1 ]; then
-            echo "run-e2e=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "ci-is-affected failed with unexpected exit code: $ci_status" >&2
-            exit "$ci_status"
-          fi
-
       - name: E2E Test for Manifest Demo (dev)
-        if: steps.check-ci.outputs.run-e2e == 'true'
         run: pnpm exec turbo run test:e2e --filter=3008-webpack-host
 
       - name: E2E Test for Manifest Demo (prod)
-        if: steps.check-ci.outputs.run-e2e == 'true'
         run: pnpm exec turbo run test:e2e:production --filter=3008-webpack-host

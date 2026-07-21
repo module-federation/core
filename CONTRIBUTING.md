@@ -23,15 +23,15 @@ Thank you for your interest in contributing to Module Federation! Before startin
 
 ### Install Node.js
 
-We recommend using Node.js 20 LTS. Check your Node.js version with `node -v`.
+We recommend using Node.js 24 LTS. Check your Node.js version with `node -v`.
 
 To install Node.js, use [nvm](https://github.com/nvm-sh/nvm) or [fnm](https://github.com/Schniz/fnm):
 
 ```bash
-# Install Node.js 20 LTS
-nvm install 20 --lts
-nvm alias default 20
-nvm use 20
+# Install Node.js 24 LTS
+nvm install 24 --lts
+nvm alias default 24
+nvm use 24
 ```
 
 ### Install Dependencies

@@ -1,5 +1,22 @@
 # modernjs-ssr-nested-remote
 
+## 1.0.16
+
+### Patch Changes
+
+- Updated dependencies [dcc96d1]
+- Updated dependencies [6ee67dc]
+- Updated dependencies [681e5d2]
+- Updated dependencies [f796458]
+  - @module-federation/modern-js-v3@2.8.0
+
+## 1.0.15
+
+### Patch Changes
+
+- Updated dependencies [d13cafa]
+  - @module-federation/modern-js-v3@2.7.0
+
 ## 1.0.14
 
 ### Patch Changes

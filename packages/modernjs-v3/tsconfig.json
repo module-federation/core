@@ -1,14 +1,27 @@
 {
-  "extends": "@modern-js/tsconfig/base",
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Module Federation Modern.js",
   "compilerOptions": {
+    "target": "ES2015",
+    "lib": ["DOM", "ESNext"],
+    "allowJs": true,
+    "module": "ESNext",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
     "declaration": false,
     "jsx": "preserve",
-    "baseUrl": "./",
+    "experimentalDecorators": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "bundler",
     "rootDir": "./src",
-    "paths": {},
+    "paths": {
+      "*": ["./*"]
+    },
     "noImplicitAny": false,
-    "moduleResolution": "node10",
     "ignoreDeprecations": "6.0"
   },
-  "include": ["src", "types", "global.d.ts"]
+  "include": ["src", "types", "global.d.ts"],
+  "exclude": ["src/**/*.spec.ts", "src/**/*.test.ts"]
 }

@@ -1,5 +1,20 @@
 # @module-federation/runtime-tools
 
+## 2.8.0
+
+### Patch Changes
+
+- Updated dependencies [ea490ae]
+  - @module-federation/webpack-bundler-runtime@2.8.0
+  - @module-federation/runtime@2.8.0
+
+## 2.7.0
+
+### Patch Changes
+
+- @module-federation/runtime@2.7.0
+- @module-federation/webpack-bundler-runtime@2.7.0
+
 ## 2.6.0
 
 ### Patch Changes
