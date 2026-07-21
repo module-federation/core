@@ -259,26 +259,31 @@ describe('pluginLynxModuleFederation remote bundles', () => {
     );
   });
 
-  it('disables app event caching in external remote entry runtimes', async () => {
-    const original = new LynxCacheEventsPlugin({ existing: true });
-    const { modifyRspackConfig } = setupPlugin(
+  it('configures cache events through the public chain slot for remote bundles', async () => {
+    const { bundlerPluginUses, modifyBundlerChain } = setupPlugin(
       { name: 'catalog', exposes: { './Card': './src/Card' } },
       { remoteBundle: { target: 'web' } },
     );
-    const config = await modifyRspackConfig({ plugins: [original] }, 'web');
-    const replacement = config.plugins[0] as LynxCacheEventsPlugin & {
-      options: Record<string, unknown>;
-    };
 
-    expect(replacement).toBeInstanceOf(LynxCacheEventsPlugin);
-    expect(replacement).not.toBe(original);
-    expect(replacement.options.existing).toBe(true);
-    expect(replacement.options.setupListTransformer).toEqual(
-      expect.any(Function),
-    );
-    expect(
-      (replacement.options.setupListTransformer as () => unknown[])(),
-    ).toEqual([]);
+    await modifyBundlerChain('web');
+
+    const cacheEventsUse = bundlerPluginUses.get('lynx:cache-events')!;
+    expect(cacheEventsUse).toEqual([
+      LynxCacheEventsPlugin,
+      [{ setupListTransformer: expect.any(Function) }],
+    ]);
+    expect(cacheEventsUse[1][0].setupListTransformer(['event'])).toEqual([]);
+  });
+
+  it('does not override cache events for hosts', async () => {
+    const { bundlerPluginUses, modifyBundlerChain } = setupPlugin({
+      name: 'host',
+      exposes: { './Card': './src/Card' },
+    });
+
+    await modifyBundlerChain('web');
+
+    expect(bundlerPluginUses.has('lynx:cache-events')).toBe(false);
   });
 
   it('builds a paired native remote with the official TASM encoder', async () => {

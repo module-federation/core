@@ -1,9 +1,5 @@
 import { dirname } from 'node:path';
 
-import type {
-  LynxCacheEventsPlugin as LynxCacheEventsPluginType,
-  LynxCacheEventsPluginOptions,
-} from '@lynx-js/cache-events-webpack-plugin';
 import type { Configuration } from '@rspack/core';
 import type { RsbuildPlugin } from '@rsbuild/core';
 
@@ -31,35 +27,6 @@ import { configureRemoteBundle } from './remoteBundle';
 import type { LynxRuntimePluginOptions } from './runtimeCore';
 
 export const LYNX_RUNTIME_PLUGIN = '@module-federation/lynx/runtimePlugin';
-
-const disableRemoteEntryEventCaching = async (
-  config: Configuration,
-): Promise<void> => {
-  const plugins = config.plugins;
-  if (!plugins) {
-    return;
-  }
-  const { LynxCacheEventsPlugin } =
-    await import('@lynx-js/cache-events-webpack-plugin');
-  const index = plugins.findIndex(
-    (plugin) =>
-      plugin !== false &&
-      plugin !== null &&
-      plugin !== undefined &&
-      plugin instanceof LynxCacheEventsPlugin,
-  );
-  if (index < 0) {
-    return;
-  }
-
-  const current = plugins[index] as LynxCacheEventsPluginType & {
-    options?: LynxCacheEventsPluginOptions;
-  };
-  plugins[index] = new LynxCacheEventsPlugin({
-    ...current.options,
-    setupListTransformer: () => [],
-  });
-};
 
 export { normalizeLynxExposes, normalizeLynxShared };
 export type {
@@ -98,16 +65,25 @@ export const pluginLynxModuleFederation = (
         return config;
       });
 
-      api.modifyBundlerChain(async (_chain, { environment }) => {
+      api.modifyBundlerChain(async (chain, { environment }) => {
         const remoteBundle = getRemoteBundleOptions(adapterOptions);
         if (
           !remoteBundle ||
-          remoteBundle.chunking === 'single' ||
           !shouldApplyToEnvironment(
             adapterOptions.environment,
             environment.name,
           )
         ) {
+          return;
+        }
+
+        const { LynxCacheEventsPlugin } =
+          await import('@lynx-js/cache-events-webpack-plugin');
+        chain
+          .plugin('lynx:cache-events')
+          .use(LynxCacheEventsPlugin, [{ setupListTransformer: () => [] }]);
+
+        if (remoteBundle.chunking === 'single') {
           return;
         }
 
@@ -167,9 +143,6 @@ export const pluginLynxModuleFederation = (
         experiments.layers ??= true;
 
         if (remoteBundle) {
-          await disableRemoteEntryEventCaching(
-            config as unknown as Configuration,
-          );
           await configureRemoteBundle(
             config as unknown as Configuration,
             options,

@@ -14,6 +14,12 @@ export const LAYERS = {
 type ModifyRspackConfig = (config: any, context: any) => any;
 type ModifyEnvironmentConfig = (config: any, context: any) => any;
 type ModifyBundlerChain = (chain: any, context: any) => any;
+type BundlerChainPluginUse = [
+  unknown,
+  Array<{
+    setupListTransformer: (setupList: unknown[]) => unknown;
+  }>,
+];
 type ReactResolver = {
   resolve(request: string): Promise<string>;
 };
@@ -27,6 +33,16 @@ export const setupPlugin = (
   let modifyRspackConfig: ModifyRspackConfig | undefined;
   let modifyEnvironmentConfigCallback: ModifyEnvironmentConfig | undefined;
   let modifyBundlerChainCallback: ModifyBundlerChain | undefined;
+  const bundlerPluginUses = new Map<string, BundlerChainPluginUse>();
+  const chain = {
+    plugin(name: string) {
+      return {
+        use(Plugin: unknown, args: BundlerChainPluginUse[1]) {
+          bundlerPluginUses.set(name, [Plugin, args]);
+        },
+      };
+    },
+  };
   const modifyEnvironmentConfig = rs.fn((callback: ModifyEnvironmentConfig) => {
     modifyEnvironmentConfigCallback = callback;
   });
@@ -53,10 +69,13 @@ export const setupPlugin = (
 
   return {
     modifyEnvironmentConfig,
+    bundlerPluginUses,
     applyEnvironmentConfig: (config: any, environment = 'lynx') =>
       modifyEnvironmentConfigCallback!(config, { name: environment }),
     modifyBundlerChain: (environment = 'lynx') =>
-      modifyBundlerChainCallback!({}, { environment: { name: environment } }),
+      modifyBundlerChainCallback!(chain, {
+        environment: { name: environment },
+      }),
     modifyRspackConfig: (config: any, environment = 'lynx') =>
       modifyRspackConfig!(config, { environment: { name: environment } }),
   };
