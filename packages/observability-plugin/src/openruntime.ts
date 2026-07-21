@@ -33,6 +33,7 @@ export interface OpenRuntimeObservabilityOptions {
 }
 
 interface OpenRuntimeObservabilityAdapter {
+  register(): void;
   syncReport(
     report: ObservabilityReport,
     context?: ObservabilityEventContext,
@@ -123,18 +124,30 @@ export function createOpenRuntimeObservabilityAdapter(
     return createdRuntime;
   };
 
+  const prepareRuntime = () => {
+    const runtime = getRuntime();
+    const source = options.source || openRuntimeSource;
+    registerOpenRuntimeActions(
+      runtime,
+      source,
+      reportReader,
+      registeredActionRuntimes,
+    );
+    connectRuntimeBridge(runtime, options.bridge, connectedRuntimes);
+    return { runtime, source };
+  };
+
   return {
+    register() {
+      try {
+        prepareRuntime();
+      } catch {
+        // OpenRuntime output is diagnostic-only and must not affect MF loading.
+      }
+    },
     syncReport(report) {
       try {
-        const runtime = getRuntime();
-        const source = options.source || openRuntimeSource;
-        registerOpenRuntimeActions(
-          runtime,
-          source,
-          reportReader,
-          registeredActionRuntimes,
-        );
-        connectRuntimeBridge(runtime, options.bridge, connectedRuntimes);
+        const { runtime, source } = prepareRuntime();
         syncReportToOpenRuntime(runtime, source, report, reportReader);
       } catch {
         // OpenRuntime output is diagnostic-only and must not affect MF loading.
@@ -188,7 +201,7 @@ function syncRemote(
     return;
   }
 
-  const targetId = targetIds.remote(remote.name);
+  const targetId = targetIds.remote(report.instanceRef, remote.name);
   const remoteReports = getRemoteReports(report, remote, reportReader);
   const remoteStatus = getRemoteStatus(remoteReports);
   const remoteData = getRemoteTargetData(remote, remoteReports);
@@ -221,7 +234,11 @@ function syncRemoteModule(
     return;
   }
 
-  const targetId = targetIds.remoteModule(remote.name, report.expose);
+  const targetId = targetIds.remoteModule(
+    report.instanceRef,
+    remote.name,
+    report.expose,
+  );
   const remoteModuleReports = getRemoteModuleReports(
     report,
     remote,
@@ -248,7 +265,7 @@ function syncRemoteModule(
     source,
     data: remoteModuleData,
     error: getReportError(latestReport),
-    dependsOn: getRemoteModuleDependsOn(remote.name),
+    dependsOn: getRemoteModuleDependsOn(report.instanceRef, remote.name),
   });
 }
 
@@ -262,7 +279,7 @@ function syncShared(
     return;
   }
 
-  const targetId = targetIds.shared(shared);
+  const targetId = targetIds.shared(report.instanceRef, shared);
   runtime.registerTarget({
     id: targetId,
     type: targetTypes.shared,
@@ -291,7 +308,7 @@ function syncSharedConflict(
     return;
   }
 
-  const targetId = targetIds.sharedConflict(shared);
+  const targetId = targetIds.sharedConflict(report.instanceRef, shared);
   const data = getSharedConflictTargetData(report, shared);
   runtime.registerTarget({
     id: targetId,
@@ -318,6 +335,7 @@ function getRemoteTargetData(
   const latestReport = reports[0];
   const exposes = getRemoteExposeData(remote.name, reports);
   return compactObject({
+    instanceRef: latestReport?.instanceRef,
     hostName: getReportHostNames(reports),
     runtimeVersion: latestReport?.runtimeVersion,
     remote: getLatestRemoteInfo(remote, reports),
@@ -332,6 +350,7 @@ function getRemoteModuleTargetData(
 ): Record<string, unknown> {
   const hostNames = getReportHostNames(reports, report.expose);
   return compactObject({
+    instanceRef: report.instanceRef,
     traceId: report.traceId,
     requestId: report.requestId,
     requestAlias: report.requestAlias,
@@ -349,6 +368,7 @@ function getSharedTargetData(
   shared: ObservabilitySharedInfo,
 ): Record<string, unknown> {
   return compactObject({
+    instanceRef: report.instanceRef,
     traceId: report.traceId,
     requestId: report.requestId,
     hostName: report.hostName,
@@ -366,6 +386,7 @@ function getSharedConflictTargetData(
   const conflict = shared.conflict;
 
   return compactObject({
+    instanceRef: report.instanceRef,
     traceId: report.traceId,
     requestId: report.requestId,
     hostName: report.hostName,
@@ -446,6 +467,7 @@ function getRemoteExposeData(
     .map((report) =>
       compactObject({
         targetId: targetIds.remoteModule(
+          report.instanceRef,
           remoteName,
           getReportExpose(report) || '',
         ),
@@ -590,8 +612,11 @@ function getRemoteError(
   return failedReport ? getReportError(failedReport) : undefined;
 }
 
-function getRemoteModuleDependsOn(remoteName: string): string[] {
-  return [targetIds.remote(remoteName)];
+function getRemoteModuleDependsOn(
+  instanceRef: string | undefined,
+  remoteName: string,
+): string[] {
+  return [targetIds.remote(instanceRef, remoteName)];
 }
 
 function getRemoteReports(
@@ -602,7 +627,11 @@ function getRemoteReports(
   const reports = reportReader
     ? reportReader
         .getReports()
-        .filter((report) => isSameRemoteReport(report, remote))
+        .filter(
+          (report) =>
+            report.instanceRef === currentReport.instanceRef &&
+            isSameRemoteReport(report, remote),
+        )
     : [];
 
   if (!reports.some((report) => report.traceId === currentReport.traceId)) {
@@ -810,21 +839,35 @@ const targetTypes = {
 } as const;
 
 const targetIds = {
-  remote(remoteName: string): string {
-    return `mf:remote:${normalizeSegment(remoteName)}`;
+  remote(instanceRef: string | undefined, remoteName: string): string {
+    return `mf:instance:${normalizeSegment(
+      instanceRef || 'legacy',
+    )}:remote:${normalizeSegment(remoteName)}`;
   },
-  remoteModule(remoteName: string, expose: string): string {
-    return `mf:remote:${normalizeSegment(remoteName)}:expose:${normalizeExpose(
-      expose,
-    )}`;
+  remoteModule(
+    instanceRef: string | undefined,
+    remoteName: string,
+    expose: string,
+  ): string {
+    return `${targetIds.remote(instanceRef, remoteName)}:expose:${normalizeExpose(expose)}`;
   },
-  shared(shared: ObservabilitySharedInfo): string {
-    return `mf:shared:${normalizeSegment(shared.name)}:${normalizeSegment(
+  shared(
+    instanceRef: string | undefined,
+    shared: ObservabilitySharedInfo,
+  ): string {
+    return `mf:instance:${normalizeSegment(
+      instanceRef || 'legacy',
+    )}:shared:${normalizeSegment(shared.name)}:${normalizeSegment(
       getSharedTargetVersion(shared),
     )}:${normalizeSegment(getSharedTargetScope(shared))}`;
   },
-  sharedConflict(shared: ObservabilitySharedInfo): string {
-    return `mf:shared-conflict:${normalizeSegment(
+  sharedConflict(
+    instanceRef: string | undefined,
+    shared: ObservabilitySharedInfo,
+  ): string {
+    return `mf:instance:${normalizeSegment(
+      instanceRef || 'legacy',
+    )}:shared-conflict:${normalizeSegment(
       shared.name,
     )}:${normalizeSegment(getSharedTargetScope(shared))}`;
   },
