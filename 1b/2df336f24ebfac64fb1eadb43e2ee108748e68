@@ -1,0 +1,87 @@
+.changeset/calm-bridges-observe.md
+  s_7a6789202ab839::t_9c229f5388493a 1-10
+packages/bridge/bridge-react/__tests__/bridge-lifecycle.spec.tsx
+  s_7a6789202ab839::t_735d5f0939febb 1-262
+packages/bridge/bridge-react/src/provider/versions/bridge-base.tsx
+  s_7a6789202ab839::t_4d2ddd39121623 19-43,52,114-138,153-172,174-230,233-235,237-249,251-256,264-291,293-305
+packages/bridge/bridge-react/src/remote/RemoteAppWrapper.tsx
+  s_f11d86de93ae60::t_652cad1e07bfc9 9-15,41-42,61,68-73,75,77-82,84-125,143-152,154-197
+packages/bridge/bridge-react/src/remote/router-component/component.tsx
+  s_7a6789202ab839::t_202f63c82b8c63 3-9,12,24,98-131
+packages/bridge/bridge-react/src/types.ts
+  s_7a6789202ab839::t_a29f0ab0511aa7 138-139
+packages/bridge/bridge-shared/src/index.ts
+  s_4142b789669f26::t_a66b7e5d8402a8 1-11,13-21
+packages/bridge/bridge-shared/src/lifecycle.ts
+  s_7a6789202ab839::t_366ffcab78efe9 1-176
+packages/bridge/bridge-shared/src/type.ts
+  s_7a6789202ab839::t_7ca92b75ab82b4 15-66
+packages/bridge/vue3-bridge/__tests__/bridgeLifecycle.test.ts
+  s_7a6789202ab839::t_ca33bd3e50b781 1-178
+packages/bridge/vue3-bridge/__tests__/remoteApp.test.ts
+  s_7a6789202ab839::t_d748c7c1ebfda0 6-29,34,51,100-107,112-118,123-129
+packages/bridge/vue3-bridge/src/provider.ts
+  s_7a6789202ab839::t_f257c84c02c113 6-15,39-40,47-69,78-81,83-86,88-91,93-98,100-106,108-133,135-143,145-246,249-266,268-274,276-281,288-330
+packages/bridge/vue3-bridge/src/remoteApp.tsx
+  s_8bafb3b6f3ad29::t_a29c5689a37422 12-19,42-43,56-58,77-90,92-96,98-124,127-129,142-154,156-159,161-163,165-199,218-251,259,269,275,280
+packages/observability-plugin/__tests__/observability.spec.ts
+  s_7a6789202ab839::t_a33de461f3181d 56-76,1101,1130-1152,1163-1167,1242-1476
+packages/observability-plugin/src/core.ts
+  s_7a6789202ab839::t_a038c528f6e95d 5-6,103-111,116-167,387,415,574,651-657,1176-1219,1869-1883,2001,2658,2661-2664,2670,2766-2774,2835,2900-2905,3666,3739-3741,3992-4050,4053,4059-4067,4073-4081,4274,4292-4299,4348-4366,5036-5136,5138-5149,6014,6019
+packages/runtime-core/__tests__/plugin.spec.ts
+  s_7a6789202ab839::t_8b89beec2b207a 200-249
+packages/runtime-core/__tests__/share-format.spec.ts
+  s_7a6789202ab839::t_04bb4b1e549e32 1
+packages/runtime-core/src/core.ts
+  s_7a6789202ab839::t_701f97b61e0134 22-23,297-300
+packages/runtime-core/src/index.ts
+  s_7a6789202ab839::t_e6d0e28ad77035 30-31
+packages/runtime-core/src/type/bridge.ts
+  s_7a6789202ab839::t_9f2a2470586747 1-51
+packages/runtime-core/src/type/index.ts
+  s_4142b789669f26::t_eb42c14aef8483 2
+packages/runtime/src/index.ts
+  s_7a6789202ab839::t_70650f000a675a 22-23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "1b2df336f24ebfac64fb1eadb43e2ee108748e68",
+  "prompts": {},
+  "sessions": {
+    "s_4142b789669f26": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f87d5-fcc1-7de2-9d46-f002e5cff9d7",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    },
+    "s_7a6789202ab839": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f87d5-4873-74a1-a617-046e3a1fd548",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    },
+    "s_8bafb3b6f3ad29": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f87d5-fc71-7d01-9a32-b998b8417ffc",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    },
+    "s_f11d86de93ae60": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f87d4-683c-7dd0-b930-0ac187fc5605",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    }
+  },
+  "attestation_metadata": {},
+  "remote_transcripts": {}
+}
