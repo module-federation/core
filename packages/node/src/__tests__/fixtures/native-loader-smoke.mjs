@@ -58,8 +58,9 @@ if (!isMainThread) {
     const factory = await container.get('./hello');
     assert.strictEqual(factory(), 'hello-from-chunk');
 
+    const blockedUrl = 'http://127.0.0.1:1/blocked.js';
     await assert.rejects(
-      import('http://127.0.0.1:1/blocked.js'),
+      import(blockedUrl),
       /allowlist/,
       'unallowed origin should be rejected',
     );
