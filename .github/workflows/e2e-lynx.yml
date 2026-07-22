@@ -158,8 +158,9 @@ jobs:
         with:
           ruby-version: ${{ env.RUBY_VERSION }}
 
-      - name: Cache iOS dependencies
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
+      - name: Restore iOS dependencies
+        id: ios-dependency-cache
+        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
         with:
           path: |
             ~/.cocoapods/repos/trunk
@@ -197,6 +198,17 @@ jobs:
           bundle config set path vendor/bundle
           bundle install --jobs 4 --retry 3
           bundle exec pod install --deployment
+
+      - name: Save iOS dependencies
+        if: steps.ios-dependency-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
+        with:
+          path: |
+            ~/.cocoapods/repos/trunk
+            ~/Library/Caches/CocoaPods
+            apps/lynx-module-federation-demo/ios/Pods
+            apps/lynx-module-federation-demo/ios/vendor/bundle
+          key: ${{ runner.os }}-${{ runner.arch }}-lynx-ios-xcode-16.4-ruby-${{ env.RUBY_VERSION }}-${{ hashFiles('apps/lynx-module-federation-demo/ios/Gemfile', 'apps/lynx-module-federation-demo/ios/Gemfile.lock', 'apps/lynx-module-federation-demo/ios/Podfile', 'apps/lynx-module-federation-demo/ios/Podfile.lock') }}
 
       - name: Run standalone iOS federation E2E
         run: node apps/lynx-module-federation-demo/test/ios/run.mjs

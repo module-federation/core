@@ -31,6 +31,14 @@ assert.match(
 assert.doesNotMatch(metroWorkflow, /ANDROID_EMULATOR_DISK_SPACE/);
 assert.doesNotMatch(metroWorkflow, /-partition-size\s+\d+/);
 assert.match(lynxWorkflow, /run test:ci-policy/);
+assert.match(
+  lynxWorkflow,
+  /name: Restore iOS dependencies\s+id: ios-dependency-cache\s+uses: actions\/cache\/restore@/,
+);
+assert.match(
+  lynxWorkflow,
+  /name: Save iOS dependencies\s+if: steps\.ios-dependency-cache\.outputs\.cache-hit != 'true'\s+uses: actions\/cache\/save@/,
+);
 for (const script of ['e2e:native:ci', 'e2e:web:ci']) {
   assert.match(lynxWorkflow, new RegExp(`run ${script}`));
   assert.match(localCi, new RegExp(`'${script}'`));
