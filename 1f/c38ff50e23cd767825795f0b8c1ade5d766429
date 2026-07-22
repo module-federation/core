@@ -1,0 +1,77 @@
+.changeset/trace-real-remote-resources.md
+  s_7a6789202ab839::t_3cbb9817965a23 1-6
+packages/observability-plugin/__tests__/observability.spec.ts
+  s_f087ee50f55ffc::t_f079640fb3d26c 2976-3208
+packages/observability-plugin/src/core.ts
+  s_581a7c5e0326e7::t_8e6852fae866bc 257-271,319,508,541-546,729-751,1149-1190,1793-1801,1834,2409,2412-2414,2450,2455-2467,2505,2510-2516,2768,2778-2786,2799,2802-2804,2808-2809,2851-2858,4199-4203,4229-4234,4928-5038,5101-5103,5176-5178,5335,5359,5775-5807
+packages/runtime-core/__tests__/hooks.spec.ts
+  s_581a7c5e0326e7::t_81088d7a006acf 611,634-644,656-665,740-810
+packages/runtime-core/__tests__/load-remote-diagnostics.spec.ts
+  s_7a6789202ab839::t_45683f7d9fe719 93,103-111,162-179
+packages/runtime-core/__tests__/load.spec.ts
+  s_581a7c5e0326e7::t_f828f7be72ae7b 11-15,32-53,140-418
+packages/runtime-core/__tests__/preload-assets.spec.ts
+  s_f087ee50f55ffc::t_b79334d292a00e 7,9,24-25,29,66-71,338-521
+packages/runtime-core/__tests__/resources/load/node-success.js
+  s_581a7c5e0326e7::t_e15205ccb78493 1-6
+packages/runtime-core/__tests__/share-format.spec.ts
+  s_4142b789669f26::t_e808fa7aadbd0e 1
+packages/runtime-core/src/core.ts
+  s_f087ee50f55ffc::t_3ff4611615d7b8 22-23,118-123
+packages/runtime-core/src/module/index.ts
+  s_f087ee50f55ffc::t_f149cb5419d4e5 7,113-125,137
+packages/runtime-core/src/plugins/snapshot/SnapshotHandler.ts
+  s_f087ee50f55ffc::t_6dbecbef7c1fb7 17-18,23,304-309,313-318,321-337,339-397,399-409,412,418-424,426,428,434,436,440-465,504-518,520-521
+packages/runtime-core/src/type/preload.ts
+  s_f087ee50f55ffc::t_6a73b7c8e7372e 30,33-88,96-100
+packages/runtime-core/src/utils/index.ts
+  s_f087ee50f55ffc::t_5d2aad8d4cfbe7 4
+packages/runtime-core/src/utils/load.ts
+  s_581a7c5e0326e7::t_888f93bb5b6714 22-26,309-314,316-321,325-338,342-345,347-386,389-403
+packages/runtime-core/src/utils/preload.ts
+  s_581a7c5e0326e7::t_154c84d3f8b4c6 11-12,20-24,88,96-101,114-123,165-167,169-201,203-222,224-225,227-229,245-247,249-281,283-302,304-305,307-312
+packages/runtime-core/src/utils/resource.ts
+  s_f087ee50f55ffc::t_8583edd2e5b7ea 1-189
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "1fc38ff50e23cd767825795f0b8c1ade5d766429",
+  "prompts": {},
+  "sessions": {
+    "s_4142b789669f26": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f87d5-fcc1-7de2-9d46-f002e5cff9d7",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    },
+    "s_581a7c5e0326e7": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f87d4-411d-7700-b13c-34122040e310",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    },
+    "s_7a6789202ab839": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f87d5-4873-74a1-a617-046e3a1fd548",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    },
+    "s_f087ee50f55ffc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f87d3-f3c4-77a2-b5e9-ed9486417454",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    }
+  },
+  "attestation_metadata": {},
+  "remote_transcripts": {}
+}
