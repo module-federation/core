@@ -29,10 +29,20 @@ function handleInitialConsumes(options: HandleInitialConsumesOptions) {
     if (asyncLoad) {
       return federationInstance.loadShare(shareKey, {
         customShareInfo,
+        from: 'build',
+        context: {
+          trigger: 'build',
+          moduleId,
+        },
       });
     }
     return federationInstance.loadShareSync(shareKey, {
       customShareInfo,
+      from: 'build',
+      context: {
+        trigger: 'build',
+        moduleId,
+      },
     });
   } catch (err) {
     console.error(

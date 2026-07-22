@@ -13,6 +13,8 @@ import {
   ShareStrategy,
   TreeShakingArgs,
   SharedGetter,
+  SharedCandidateInfo,
+  SharedSelectionDecision,
 } from '../type';
 import { warn, error } from './logger';
 import { satisfy } from './semver';
@@ -208,6 +210,65 @@ const isLoading = (shared: {
   return Boolean(shared.loading);
 };
 
+const isVersionCompatible = (
+  version: string,
+  requiredVersion?: string | false,
+): boolean | undefined => {
+  if (requiredVersion === undefined) {
+    return undefined;
+  }
+  if (requiredVersion === false || requiredVersion === '*') {
+    return true;
+  }
+  try {
+    return satisfy(version, requiredVersion);
+  } catch {
+    return false;
+  }
+};
+
+export function getSharedCandidateInfo(
+  scope: string,
+  version: string,
+  shared: Shared,
+  requiredVersion?: string | false,
+): SharedCandidateInfo {
+  const compatible = isVersionCompatible(version, requiredVersion);
+  const treeShakingShared = shared.treeShaking;
+  const loaded =
+    isLoaded(shared) ||
+    Boolean(treeShakingShared && isLoaded(treeShakingShared));
+  const loading =
+    !loaded &&
+    (isLoading(shared) ||
+      Boolean(treeShakingShared && isLoading(treeShakingShared)));
+
+  return {
+    scope,
+    version,
+    provider: shared.from,
+    loaded,
+    loading,
+    singleton: Boolean(shared.shareConfig?.singleton),
+    eager: Boolean(shared.shareConfig?.eager ?? shared.eager),
+    strategy: shared.strategy || 'version-first',
+    compatible,
+    rejectionReason: compatible === false ? 'version-mismatch' : undefined,
+  };
+}
+
+function getSharedCandidates(
+  shareScopeMap: ShareScopeMap,
+  scope: string,
+  pkgName: string,
+  requiredVersion?: string | false,
+): SharedCandidateInfo[] {
+  return Object.entries(shareScopeMap[scope]?.[pkgName] || {}).map(
+    ([version, shared]) =>
+      getSharedCandidateInfo(scope, version, shared, requiredVersion),
+  );
+}
+
 const isMatchUsedExports = (
   treeShaking?: TreeShakingArgs,
   usedExports?: string[],
@@ -364,6 +425,7 @@ export function getRegisteredShare(
     GlobalFederation: Federation;
     resolver: () => { shared: Shared; useTreesShaking: boolean } | undefined;
   }>,
+  onSelection?: (selection: SharedSelectionDecision) => void,
 ): { shared: Shared; useTreesShaking: boolean } | void {
   if (!localShareScopeMap) {
     return;
@@ -375,6 +437,62 @@ export function getRegisteredShare(
     treeShaking,
   } = shareInfo;
   const scopes = Array.isArray(scope) ? scope : [scope];
+  const createDecision = (
+    sc: string | undefined,
+    candidates: SharedCandidateInfo[],
+    reason: SharedSelectionDecision['reason'],
+    selected?: SharedCandidateInfo,
+    failureReason?: SharedSelectionDecision['failureReason'],
+  ): SharedSelectionDecision => {
+    const selectedCandidate = selected
+      ? { ...selected, rejectionReason: undefined }
+      : undefined;
+    const candidatesWithReasons = candidates.map((candidate) => {
+      const isSelected = Boolean(
+        selectedCandidate &&
+        candidate.scope === selectedCandidate.scope &&
+        candidate.version === selectedCandidate.version &&
+        candidate.provider === selectedCandidate.provider,
+      );
+      if (isSelected) {
+        return selectedCandidate!;
+      }
+      if (candidate.rejectionReason) {
+        return candidate;
+      }
+
+      let rejectionReason: string | undefined;
+      if (reason === 'custom-resolver') {
+        rejectionReason = 'custom-resolver';
+      } else if (reason === 'singleton-existing') {
+        rejectionReason = 'singleton-existing';
+      } else if (
+        reason === 'loaded-first' &&
+        !candidate.loaded &&
+        !candidate.loading
+      ) {
+        rejectionReason = 'not-loaded';
+      } else if (selectedCandidate) {
+        rejectionReason = 'lower-priority-version';
+      }
+      return rejectionReason ? { ...candidate, rejectionReason } : candidate;
+    });
+
+    return {
+      scope: sc,
+      requestedVersion: shareInfo.version,
+      requiredVersion: shareConfig?.requiredVersion,
+      singleton: Boolean(shareConfig?.singleton),
+      strictVersion: Boolean(shareConfig?.strictVersion),
+      eager: Boolean(shareConfig?.eager),
+      strategy: strategy || 'version-first',
+      candidates: candidatesWithReasons,
+      selected: selectedCandidate,
+      reason,
+      failureReason,
+    };
+  };
+
   for (const sc of scopes) {
     if (
       shareConfig &&
@@ -382,6 +500,12 @@ export function getRegisteredShare(
       localShareScopeMap[sc][pkgName]
     ) {
       const { requiredVersion } = shareConfig;
+      const candidates = getSharedCandidates(
+        localShareScopeMap,
+        sc,
+        pkgName,
+        requiredVersion,
+      );
       const findShareFunction = getFindShareFunction(strategy);
       const { version: maxOrSingletonVersion, useTreesShaking } =
         findShareFunction(localShareScopeMap, sc, pkgName, treeShaking);
@@ -468,9 +592,91 @@ export function getRegisteredShare(
         resolver: defaultResolver,
       };
       const resolveShared = resolveShare.emit(params) || params;
-      return resolveShared.resolver();
+      const usedCustomResolver = resolveShared.resolver !== defaultResolver;
+      try {
+        const resolved = resolveShared.resolver();
+        if (!resolved) {
+          onSelection?.(
+            createDecision(
+              sc,
+              candidates,
+              'version-mismatch',
+              undefined,
+              'version-mismatch',
+            ),
+          );
+          return;
+        }
+
+        const selected = getSharedCandidateInfo(
+          sc,
+          resolved.shared.version,
+          resolved.shared,
+          requiredVersion,
+        );
+        let reason: SharedSelectionDecision['reason'];
+        if (usedCustomResolver) {
+          reason = 'custom-resolver';
+        } else if (shareConfig.singleton) {
+          reason = 'singleton-existing';
+        } else if (
+          strategy === 'loaded-first' &&
+          isLoadingOrLoaded(resolved.shared)
+        ) {
+          reason = 'loaded-first';
+        } else if (resolved.shared.version === shareInfo.version) {
+          reason = 'exact-match';
+        } else if (requiredVersion === false || requiredVersion === '*') {
+          reason =
+            strategy === 'loaded-first' ? 'loaded-first' : 'version-first';
+        } else if (resolved.shared.version === maxOrSingletonVersion) {
+          reason = 'compatible-highest-version';
+        } else {
+          reason = 'compatible-version';
+        }
+        onSelection?.(createDecision(sc, candidates, reason, selected));
+        return resolved;
+      } catch (selectionError) {
+        const strictVersionRejected =
+          !usedCustomResolver &&
+          Boolean(shareConfig.singleton && shareConfig.strictVersion) &&
+          typeof requiredVersion === 'string' &&
+          isVersionCompatible(maxOrSingletonVersion, requiredVersion) === false;
+        const failureReason = strictVersionRejected
+          ? 'strict-version-rejected'
+          : 'load-error';
+        onSelection?.(
+          createDecision(
+            sc,
+            candidates,
+            failureReason,
+            undefined,
+            failureReason,
+          ),
+        );
+        throw selectionError;
+      }
     }
   }
+
+  const candidates = scopes.flatMap((sc) =>
+    getSharedCandidates(
+      localShareScopeMap,
+      sc,
+      pkgName,
+      shareConfig?.requiredVersion,
+    ),
+  );
+  const failureReason = shareConfig ? 'missing-provider' : 'missing-config';
+  onSelection?.(
+    createDecision(
+      scopes[0],
+      candidates,
+      failureReason,
+      undefined,
+      failureReason,
+    ),
+  );
 }
 
 export function getGlobalShareScope(): GlobalShareScopeMap {
