@@ -1,4 +1,4 @@
-import { useCallback, useState } from '@lynx-js/react';
+import { useCallback, useEffect, useState } from '@lynx-js/react';
 
 import type { SharedStateView } from '../remote-ui/contracts';
 import { type LoadState, useFederatedCatalog } from './useFederatedCatalog';
@@ -19,10 +19,19 @@ const MODULES = [
   { name: 'ActivityFeed', path: "loadRemote('catalog/ActivityFeed')" },
 ];
 
-function LoadButton({ state, onTap }: { state: LoadState; onTap: () => void }) {
-  const disabled = state === 'loading' || state === 'ready';
-  const label =
-    state === 'loading'
+function LoadButton({
+  interactive,
+  state,
+  onTap,
+}: {
+  interactive: boolean;
+  state: LoadState;
+  onTap: () => void;
+}) {
+  const disabled = !interactive || state === 'loading' || state === 'ready';
+  const label = !interactive
+    ? 'Starting host…'
+    : state === 'loading'
       ? 'Loading catalog…'
       : state === 'ready'
         ? 'Catalog connected'
@@ -30,7 +39,7 @@ function LoadButton({ state, onTap }: { state: LoadState; onTap: () => void }) {
           ? 'Retry catalog'
           : 'Load remote catalog';
   const stateClass =
-    state === 'loading'
+    !interactive || state === 'loading'
       ? 'PrimaryAction PrimaryActionLoading'
       : state === 'ready'
         ? 'PrimaryAction PrimaryActionReady'
@@ -164,6 +173,7 @@ function SingletonProof({
 
 export function App() {
   const [screen, setScreen] = useState<Screen>('overview');
+  const [backgroundReady, setBackgroundReady] = useState(false);
   const {
     ActivityFeedComponent,
     CardComponent,
@@ -180,6 +190,11 @@ export function App() {
     sharedState,
     singletonShared,
   } = useFederatedCatalog();
+
+  useEffect(() => {
+    'background-only';
+    setBackgroundReady(true);
+  }, []);
 
   const selectScreen = useCallback((nextScreen: Screen) => {
     'background-only';
@@ -227,7 +242,11 @@ export function App() {
             </text>
           </view>
 
-          <LoadButton state={loadState} onTap={loadFederatedSurface} />
+          <LoadButton
+            interactive={backgroundReady}
+            state={loadState}
+            onTap={loadFederatedSurface}
+          />
           <view className="LoadEvidence">
             <text
               className={

@@ -95,6 +95,15 @@ assert.match(project, /host-native in Resources/);
 assert.match(uiTest, /matching\(identifier: "federation-ready"\)/);
 assert.match(appSource, /accessibilityId: 'federation-ready'/);
 assert.match(
+  appSource,
+  /const \[backgroundReady, setBackgroundReady\] = useState\(false\)/,
+);
+assert.match(
+  appSource,
+  /useEffect\(\(\) => \{\s*'background-only';\s*setBackgroundReady\(true\);/,
+);
+assert.match(appSource, /interactive=\{backgroundReady\}/);
+assert.match(
   viewController,
   /OrbitResourceFetcher\(\s*rootBundleURL: rootBundleURL\s*\)/,
 );
