@@ -19,6 +19,8 @@ export {
   registerGlobalPlugins,
   type ModuleFederationRuntimePlugin,
   type RuntimePluginHooks,
+  type BridgeOperationContext,
+  type BridgeOperationResult,
   type Federation,
 } from '@module-federation/runtime-core';
 

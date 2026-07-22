@@ -1,8 +1,15 @@
 import React, { useContext, useEffect, useState, forwardRef } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
-import { dispatchPopstateEnv } from '@module-federation/bridge-shared';
+import {
+  completeBridgeOperation,
+  createBridgeId,
+  createBridgeOperationContext,
+  dispatchPopstateEnv,
+  emitBridgeLifecycle,
+} from '@module-federation/bridge-shared';
 import { LoggerInstance, pathJoin } from '../../utils';
 import { RemoteAppWrapper } from '../RemoteAppWrapper';
+import { federationRuntime } from '../../provider/plugin';
 
 interface ExtraDataProps {
   basename?: string;
@@ -14,6 +21,7 @@ export function withRouterData<
   WrappedComponent: React.ComponentType<P & ExtraDataProps>,
 ): React.FC<Omit<P, keyof ExtraDataProps>> {
   const Component = forwardRef(function (props: any, ref) {
+    const [routeBridgeId] = useState(createBridgeId);
     if (props?.basename) {
       return (
         <WrappedComponent {...props} basename={props.basename} ref={ref} />
@@ -87,7 +95,40 @@ export function withRouterData<
               pathname: location.pathname,
             },
           );
-          dispatchPopstateEnv();
+          const operationContext = createBridgeOperationContext({
+            side: 'consumer',
+            framework: 'react',
+            operation: 'route-sync',
+            bridgeId: routeBridgeId,
+            moduleName: props.moduleName,
+            route: {
+              action: 'host-to-remote',
+              mechanism: 'popstate',
+              from: pathname,
+              to: location.pathname,
+              basename,
+            },
+          });
+          emitBridgeLifecycle(
+            federationRuntime.instance,
+            'beforeBridgeOperation',
+            operationContext,
+          );
+          try {
+            dispatchPopstateEnv();
+            emitBridgeLifecycle(
+              federationRuntime.instance,
+              'afterBridgeOperation',
+              completeBridgeOperation(operationContext, 'success'),
+            );
+          } catch (error) {
+            emitBridgeLifecycle(
+              federationRuntime.instance,
+              'afterBridgeOperation',
+              completeBridgeOperation(operationContext, 'error', error),
+            );
+            throw error;
+          }
         }
         setPathname(location.pathname);
       }, [location]);

@@ -2,6 +2,8 @@ import type {
   ModuleFederation,
   ModuleFederationRuntimePlugin,
   RuntimePluginHooks,
+  BridgeOperationContext,
+  BridgeOperationResult,
 } from '@module-federation/runtime';
 import { createLogger, isDebugMode } from '@module-federation/sdk';
 
@@ -100,8 +102,69 @@ export interface ObservabilityRuntimeStateInstance {
   bridge?: {
     available: boolean;
     lifecycleCount?: number;
+    framework?: 'react' | 'vue';
+    moduleName?: string;
+    remote?: string;
+    expose?: string;
+    status?: ObservabilityBridgeStatus;
+    lastOperationAt?: number;
+    commitObserved?: boolean;
+    routeSyncObserved?: boolean;
+    states: ObservabilityBridgeState[];
   };
   active: boolean;
+}
+
+export type ObservabilityBridgeStatus =
+  | 'idle'
+  | 'rendering'
+  | 'rendered'
+  | 'destroying'
+  | 'destroyed'
+  | 'error';
+
+export interface ObservabilityBridgeRouteSummary {
+  action: string;
+  from?: string;
+  to?: string;
+  basename?: string;
+  mechanism?: 'popstate';
+}
+
+export interface ObservabilityBridgeInfo {
+  operationId: string;
+  bridgeId: string;
+  side: 'consumer' | 'producer';
+  framework: 'react' | 'vue';
+  operation: 'render' | 'update' | 'destroy' | 'route-sync';
+  moduleName?: string;
+  remote?: string;
+  expose?: string;
+  route?: ObservabilityBridgeRouteSummary;
+  reason?: string;
+  startedAt: number;
+  endedAt?: number;
+  duration?: number;
+  outcome?: 'success' | 'error' | 'skipped';
+  error?: {
+    name?: string;
+    message?: string;
+  };
+}
+
+export interface ObservabilityBridgeState {
+  bridgeId: string;
+  side: 'consumer' | 'producer';
+  framework: 'react' | 'vue';
+  moduleName?: string;
+  remote?: string;
+  expose?: string;
+  status: ObservabilityBridgeStatus;
+  lastOperation?: ObservabilityBridgeInfo['operation'];
+  lastOperationId?: string;
+  lastOperationAt?: number;
+  commitObserved: boolean;
+  routeSyncObserved: boolean;
 }
 
 export interface ObservabilityRuntimeRelationship {
@@ -360,6 +423,7 @@ export interface ObservabilityEvent {
   componentName?: string;
   metadata?: ObservabilityMetadata;
   loadedBefore?: ObservabilityLoadedBeforeInfo;
+  bridge?: ObservabilityBridgeInfo;
 }
 
 export interface ObservabilityReport {
@@ -387,6 +451,7 @@ export interface ObservabilityReport {
   errorContext?: ObservabilityMetadata;
   moduleInfo?: ObservabilityModuleInfoSummary;
   loadedBefore?: ObservabilityLoadedBeforeInfo;
+  bridge?: ObservabilityBridgeInfo;
   events: ObservabilityEvent[];
   summary: {
     eventCount: number;
@@ -546,6 +611,7 @@ export interface ObservabilityRuntimeEventInput {
   componentName?: string;
   metadata?: Record<string, unknown>;
   loadedBefore?: ObservabilityLoadedBeforeInfo;
+  bridge?: ObservabilityBridgeInfo;
 }
 
 export interface ObservabilityRuntimeOrigin {
@@ -665,6 +731,13 @@ interface ObservabilityRemoteLoadArgs {
   exposeModule?: unknown;
   exposeModuleFactory?: unknown;
 }
+
+type ObservabilityBridgeHookArgs = (
+  | BridgeOperationContext
+  | BridgeOperationResult
+) & {
+  origin?: ObservabilityRuntimeOrigin;
+};
 
 interface ObservabilityRemoteBeforeRequestArgs {
   id: string;
@@ -1199,6 +1272,50 @@ function sanitizeRemote(
     entryGlobalName: sanitizeText(remote.entryGlobalName, 120),
     type: sanitizeText(remote.type, 80),
   };
+}
+
+function normalizeBridgeInfo(
+  bridge: BridgeOperationContext | BridgeOperationResult | undefined,
+): ObservabilityBridgeInfo | undefined {
+  if (!bridge?.operationId || !bridge.bridgeId) {
+    return undefined;
+  }
+
+  const result = bridge as BridgeOperationResult;
+  return omitUndefinedFields({
+    operationId: sanitizeText(bridge.operationId, 120) || bridge.operationId,
+    bridgeId: sanitizeText(bridge.bridgeId, 120) || bridge.bridgeId,
+    side: bridge.side,
+    framework: bridge.framework,
+    operation: bridge.operation,
+    moduleName: sanitizeText(bridge.moduleName, 160),
+    remote: sanitizeText(bridge.remote, 120),
+    expose: sanitizeText(bridge.expose, 240),
+    route: bridge.route
+      ? {
+          action: sanitizeText(bridge.route.action, 80) || 'route-update',
+          from: sanitizeUrl(bridge.route.from),
+          to: sanitizeUrl(bridge.route.to),
+          basename: sanitizeUrl(bridge.route.basename),
+          mechanism: bridge.route.mechanism,
+        }
+      : undefined,
+    reason: sanitizeText(bridge.reason, 80),
+    startedAt: Number.isFinite(bridge.startedAt)
+      ? bridge.startedAt
+      : Date.now(),
+    endedAt: Number.isFinite(result.endedAt) ? result.endedAt : undefined,
+    duration: Number.isFinite(result.duration)
+      ? Math.max(0, result.duration)
+      : undefined,
+    outcome: result.outcome,
+    error: result.error
+      ? {
+          name: sanitizeText(result.error.name, 80),
+          message: sanitizeText(result.error.message, 240),
+        }
+      : undefined,
+  });
 }
 
 function createRemoteInfo(
@@ -2014,6 +2131,21 @@ function copyEvent(event: ObservabilityEvent): ObservabilityEvent {
     errorContext: event.errorContext ? { ...event.errorContext } : undefined,
     metadata: event.metadata ? { ...event.metadata } : undefined,
     loadedBefore: copyLoadedBeforeInfo(event.loadedBefore),
+    bridge: copyBridgeInfo(event.bridge),
+  });
+}
+
+function copyBridgeInfo(
+  bridge: ObservabilityBridgeInfo | undefined,
+): ObservabilityBridgeInfo | undefined {
+  if (!bridge) {
+    return undefined;
+  }
+
+  return omitUndefinedFields({
+    ...bridge,
+    route: bridge.route ? { ...bridge.route } : undefined,
+    error: bridge.error ? { ...bridge.error } : undefined,
   });
 }
 
@@ -2131,6 +2263,7 @@ function copyReport(report: ObservabilityReport): ObservabilityReport {
     errorContext: report.errorContext ? { ...report.errorContext } : undefined,
     moduleInfo: copyModuleInfoSummary(report.moduleInfo),
     loadedBefore: copyLoadedBeforeInfo(report.loadedBefore),
+    bridge: copyBridgeInfo(report.bridge),
     events: report.events.map(copyEvent),
     summary: copySummary(report.summary),
     diagnosis: copyFactReport(report.diagnosis),
@@ -2787,13 +2920,19 @@ export function createObservability(
   const latestTraceByInstance = new Map<string, string>();
   const traceByRequest = new Map<string, string>();
   const traceByRemote = new Map<string, string>();
+  const traceByBridgeOperation = new Map<string, string>();
   const instanceRefs = new WeakMap<object, string>();
   const instancesByRef = new Map<string, ObservabilityRuntimeOrigin>();
+  const bridgeStatesByInstance = new Map<
+    string,
+    Map<string, ObservabilityBridgeState>
+  >();
   const lateBoundInstanceRefs = new Set<string>();
   const boundInstanceRefs = new Set<string>();
   const attachedInstanceApis = new WeakMap<object, ObservabilityInstanceAPI>();
   const phaseStartTimes = new Map<string, number>();
   const reportedSharedConflictKeys = new Set<string>();
+  const reportedBridgeProviderKeys = new Set<string>();
   const collectorOptions = normalizeCollectorOptions(options.collector);
   const devtoolsOptions = normalizeDevtoolsOptions(options.devtools);
   const seenManifestUrls = new Set<string>();
@@ -2889,6 +3028,15 @@ export function createObservability(
       }
     }
 
+    if (event.bridge?.operationId) {
+      const traceId = traceByBridgeOperation.get(
+        getTraceMapKey(instanceRef, event.bridge.operationId),
+      );
+      if (traceId) {
+        return traceId;
+      }
+    }
+
     if (event.remote?.name) {
       const traceId = traceByRemote.get(
         getTraceMapKey(instanceRef, event.remote.name),
@@ -2897,7 +3045,6 @@ export function createObservability(
         return traceId;
       }
     }
-
     return event.traceId || createTraceId(event);
   };
 
@@ -2950,6 +3097,7 @@ export function createObservability(
       componentName: sanitizeText(event.componentName, 160),
       metadata: clipObservabilityMetadata(event.metadata),
       loadedBefore: copyLoadedBeforeInfo(event.loadedBefore),
+      bridge: copyBridgeInfo(event.bridge),
     };
 
     if (normalizedEvent.status === 'error' || event.error) {
@@ -3011,6 +3159,12 @@ export function createObservability(
     if (event.remote?.name) {
       traceByRemote.set(
         getTraceMapKey(event.instanceRef, event.remote.name),
+        event.traceId,
+      );
+    }
+    if (event.bridge?.operationId) {
+      traceByBridgeOperation.set(
+        getTraceMapKey(event.instanceRef, event.bridge.operationId),
         event.traceId,
       );
     }
@@ -3784,6 +3938,7 @@ export function createObservability(
           ? { ...event.errorContext }
           : undefined,
         loadedBefore: copyLoadedBeforeInfo(event.loadedBefore),
+        bridge: copyBridgeInfo(event.bridge),
         events: [],
         summary: {
           eventCount: 0,
@@ -3856,6 +4011,9 @@ export function createObservability(
     }
     if (event.loadedBefore) {
       report.loadedBefore = copyLoadedBeforeInfo(event.loadedBefore);
+    }
+    if (event.bridge) {
+      report.bridge = copyBridgeInfo(event.bridge);
     }
 
     report.events.push(event);
@@ -4113,18 +4271,96 @@ export function createObservability(
       };
     });
 
+  const updateBridgeState = (
+    origin: ObservabilityRuntimeOrigin,
+    bridge: ObservabilityBridgeInfo,
+    signal: 'start' | 'invoked' | 'result' | 'commit',
+  ) => {
+    const instanceRef = getInstanceRef(origin);
+    if (!instanceRef) {
+      return;
+    }
+    let states = bridgeStatesByInstance.get(instanceRef);
+    if (!states) {
+      states = new Map();
+      bridgeStatesByInstance.set(instanceRef, states);
+    }
+    const key = `${bridge.bridgeId}\u0000${bridge.side}`;
+    const previous = states.get(key);
+    let status = previous?.status || 'idle';
+    if (signal === 'start') {
+      if (bridge.operation === 'destroy') {
+        status = 'destroying';
+      } else if (
+        bridge.operation === 'render' ||
+        bridge.operation === 'update'
+      ) {
+        status = 'rendering';
+      }
+    } else if (signal === 'result') {
+      if (bridge.outcome === 'error') {
+        status = 'error';
+      } else if (bridge.operation === 'destroy') {
+        status = 'destroyed';
+      } else if (
+        bridge.operation === 'render' ||
+        bridge.operation === 'update'
+      ) {
+        status = 'rendered';
+      }
+    } else if (signal === 'commit') {
+      status = 'rendered';
+    }
+
+    states.set(key, {
+      bridgeId: bridge.bridgeId,
+      side: bridge.side,
+      framework: bridge.framework,
+      moduleName: bridge.moduleName || previous?.moduleName,
+      remote: bridge.remote || previous?.remote,
+      expose: bridge.expose || previous?.expose,
+      status,
+      lastOperation: bridge.operation,
+      lastOperationId: bridge.operationId,
+      lastOperationAt: bridge.endedAt || bridge.startedAt,
+      commitObserved: signal === 'commit' || previous?.commitObserved === true,
+      routeSyncObserved:
+        bridge.operation === 'route-sync' ||
+        previous?.routeSyncObserved === true,
+    });
+  };
+
   const getBridgeSummary = (
     origin: ObservabilityRuntimeOrigin,
+    instanceRef: string,
   ): ObservabilityRuntimeStateInstance['bridge'] => {
     if (!isRecord(origin.bridgeHook)) {
       return undefined;
     }
     const lifecycle = getObjectValue(origin.bridgeHook, 'lifecycle');
+    const states = Array.from(
+      bridgeStatesByInstance.get(instanceRef)?.values() || [],
+    )
+      .sort(
+        (left, right) =>
+          (right.lastOperationAt || 0) - (left.lastOperationAt || 0),
+      )
+      .map((state) => ({ ...state }));
+    const latest = states[0];
     return {
       available: true,
       lifecycleCount: isRecord(lifecycle)
         ? Object.keys(lifecycle).length
         : undefined,
+      framework: latest?.framework,
+      moduleName: latest?.moduleName,
+      remote: latest?.remote,
+      expose: latest?.expose,
+      status: latest?.status || 'idle',
+      lastOperationAt: latest?.lastOperationAt,
+      commitObserved: states.some((state) => state.commitObserved),
+      routeSyncObserved: states.some((state) => state.routeSyncObserved),
+      states,
     };
   };
 
@@ -4317,7 +4553,7 @@ export function createObservability(
           remotes: draft.remotes,
           loadedProducers: draft.loadedProducers,
           shareScopes: getShareScopeSummaries(draft.origin),
-          bridge: getBridgeSummary(draft.origin),
+          bridge: getBridgeSummary(draft.origin, draft.instanceRef),
           active: activeInstances.includes(
             draft.origin as ObservabilityRuntimeInstanceLike,
           ),
@@ -4345,6 +4581,14 @@ export function createObservability(
       ),
     );
     const hasBridge = instances.some((instance) => instance.bridge?.available);
+    const bridgeEvents = events.filter((event) => Boolean(event.bridge));
+    const hasBridgeSignals = bridgeEvents.length > 0;
+    const hasBridgeCommit = bridgeEvents.some(
+      (event) => event.phase === 'bridge-commit',
+    );
+    const hasBridgeRoute = bridgeEvents.some(
+      (event) => event.bridge?.operation === 'route-sync',
+    );
     const traceCompleteness = hasIncompleteHistory ? 'partial' : 'complete';
 
     return omitUndefinedFields({
@@ -4397,11 +4641,25 @@ export function createObservability(
             : 'Shared tracing requires a stable runtime version of 2.5.0 or newer.',
         },
         bridgeTrace: {
-          available: false,
-          completeness: 'unavailable',
-          reason: hasBridge
-            ? 'Bridge is present, but no complete Bridge trace signal is available.'
-            : 'Bridge is not present on an observed instance.',
+          available: hasBridgeSignals,
+          completeness: !hasBridgeSignals
+            ? 'unavailable'
+            : hasIncompleteHistory || !hasBridgeCommit || !hasBridgeRoute
+              ? 'partial'
+              : 'complete',
+          reason: !hasBridgeSignals
+            ? hasBridge
+              ? 'Bridge is present, but no Bridge lifecycle signal has been observed.'
+              : 'Bridge is not present on an observed instance.'
+            : [
+                hasIncompleteHistory ? 'runtime history is incomplete' : '',
+                !hasBridgeCommit
+                  ? 'no framework commit signal was observed'
+                  : '',
+                !hasBridgeRoute ? 'no route sync signal was observed' : '',
+              ]
+                .filter(Boolean)
+                .join('; ') || undefined,
         },
       },
       instances,
@@ -5071,7 +5329,120 @@ export function createObservability(
     };
   };
 
+  const recordBridgeSignal = (
+    args: ObservabilityBridgeHookArgs,
+    signal: 'start' | 'invoked' | 'result' | 'commit',
+  ) => {
+    const origin = args.origin || lastRuntimeOrigin;
+    if (!origin || !prepareRuntimeOrigin(origin)) {
+      return;
+    }
+    const bridge = normalizeBridgeInfo(args);
+    if (!bridge) {
+      return;
+    }
+    updateBridgeState(origin, bridge, signal);
+    const remote = bridge.remote ? { name: bridge.remote } : undefined;
+    const status: ObservabilityEventStatus =
+      signal === 'start'
+        ? 'start'
+        : bridge.outcome === 'error'
+          ? 'error'
+          : bridge.outcome === 'skipped'
+            ? 'complete'
+            : 'success';
+    const phase =
+      signal === 'commit'
+        ? 'bridge-commit'
+        : bridge.operation === 'destroy'
+          ? 'bridge-destroy'
+          : bridge.operation === 'route-sync'
+            ? 'bridge-route'
+            : 'bridge-render';
+    const operationLabel =
+      bridge.operation === 'update' ? 'update' : bridge.operation;
+    const message =
+      signal === 'start'
+        ? `bridge:${operationLabel}-start`
+        : signal === 'invoked'
+          ? `bridge:${operationLabel}-invoked`
+          : signal === 'commit'
+            ? 'bridge:render-committed'
+            : `bridge:${operationLabel}-${bridge.outcome || 'success'}`;
+    const instanceRef = getInstanceRef(origin);
+
+    if (
+      signal === 'start' &&
+      bridge.side === 'consumer' &&
+      bridge.operation === 'render' &&
+      instanceRef
+    ) {
+      const providerKey = `${instanceRef}\u0000${bridge.bridgeId}`;
+      if (!reportedBridgeProviderKeys.has(providerKey)) {
+        reportedBridgeProviderKeys.add(providerKey);
+        recordEvent(
+          {
+            phase: 'bridge-provider',
+            status: 'success',
+            remote,
+            expose: bridge.expose,
+            bridge,
+            lifecycle: 'beforeBridgeOperation',
+            message: 'bridge:provider-acquired',
+            source: 'runtime',
+          },
+          origin,
+        );
+      }
+    }
+
+    recordEvent(
+      {
+        phase,
+        status,
+        remote,
+        expose: bridge.expose,
+        bridge,
+        duration: bridge.duration,
+        lifecycle:
+          signal === 'start'
+            ? 'beforeBridgeOperation'
+            : signal === 'invoked'
+              ? 'bridgeRenderInvoked'
+              : signal === 'commit'
+                ? 'afterBridgeCommit'
+                : 'afterBridgeOperation',
+        message,
+        error: bridge.outcome === 'error' ? bridge.error?.message : undefined,
+        errorContext:
+          bridge.outcome === 'error'
+            ? {
+                operationId: bridge.operationId,
+                bridgeId: bridge.bridgeId,
+                side: bridge.side,
+                framework: bridge.framework,
+                errorName: bridge.error?.name,
+              }
+            : undefined,
+        source: 'runtime',
+      },
+      origin,
+    );
+  };
+
   const legacyHooks: RuntimePluginHooks = {
+    beforeBridgeOperation(args) {
+      recordBridgeSignal(args as ObservabilityBridgeHookArgs, 'start');
+    },
+    bridgeRenderInvoked(args) {
+      recordBridgeSignal(args as ObservabilityBridgeHookArgs, 'invoked');
+    },
+    afterBridgeOperation(args) {
+      recordBridgeSignal(args as ObservabilityBridgeHookArgs, 'result');
+    },
+    afterBridgeCommit(args) {
+      recordBridgeSignal(args as ObservabilityBridgeHookArgs, 'commit');
+    },
     beforeRequest(args) {
       const requestArgs = args as ObservabilityRemoteBeforeRequestArgs;
       if (!prepareRuntimeOrigin(requestArgs.origin)) {
@@ -5969,10 +6340,12 @@ export function createObservability(
       reports.clear();
       traceByRequest.clear();
       traceByRemote.clear();
+      traceByBridgeOperation.clear();
       latestTraceByInstance.clear();
       phaseStartTimes.clear();
       seenManifestUrls.clear();
       seenRemoteEntryKeys.clear();
+      reportedBridgeProviderKeys.clear();
       consoleReportedTraceIds.clear();
       consoleReportedStartKeys.clear();
       latestTraceId = undefined;
