@@ -3,23 +3,35 @@ import { createApp, defineComponent, h, KeepAlive, nextTick } from 'vue';
 import { createMemoryHistory, createRouter, RouterView } from 'vue-router';
 import RemoteApp from '../src/remoteApp';
 
-const { dispatchPopstateEnv } = rs.hoisted(() => ({
-  dispatchPopstateEnv: rs.fn(),
-}));
-
-rs.mock('@module-federation/bridge-shared', () => ({
-  dispatchPopstateEnv,
-}));
+const { lifecycleEvents, bridgeLifecycle } = rs.hoisted(() => {
+  const lifecycleEvents: Array<{
+    lifecycle: string;
+    payload: Record<string, any>;
+  }> = [];
+  const eventHook = (lifecycle: string) => ({
+    emit: rs.fn((payload: Record<string, any>) => {
+      lifecycleEvents.push({ lifecycle, payload });
+    }),
+  });
+  return {
+    lifecycleEvents,
+    bridgeLifecycle: {
+      beforeBridgeRender: { emit: rs.fn(async () => ({})) },
+      afterBridgeRender: { emit: rs.fn() },
+      beforeBridgeDestroy: { emit: rs.fn() },
+      afterBridgeDestroy: { emit: rs.fn() },
+      beforeBridgeOperation: eventHook('beforeBridgeOperation'),
+      bridgeRenderInvoked: eventHook('bridgeRenderInvoked'),
+      afterBridgeOperation: eventHook('afterBridgeOperation'),
+      afterBridgeCommit: eventHook('afterBridgeCommit'),
+    },
+  };
+});
 
 rs.mock('@module-federation/runtime', () => ({
   getInstance: () => ({
     bridgeHook: {
-      lifecycle: {
-        beforeBridgeRender: { emit: rs.fn(async () => ({})) },
-        afterBridgeRender: { emit: rs.fn() },
-        beforeBridgeDestroy: { emit: rs.fn() },
-        afterBridgeDestroy: { emit: rs.fn() },
-      },
+      lifecycle: bridgeLifecycle,
     },
   }),
 }));
@@ -36,7 +48,7 @@ describe('RemoteApp', () => {
   beforeEach(() => {
     root = document.createElement('div');
     document.body.appendChild(root);
-    dispatchPopstateEnv.mockClear();
+    lifecycleEvents.length = 0;
   });
 
   afterEach(() => {
@@ -85,14 +97,36 @@ describe('RemoteApp', () => {
     app.mount(root);
     await flushBridgeRender();
     expect(providerReturn.render).toHaveBeenCalledTimes(1);
+    expect(
+      lifecycleEvents.some(
+        (event) =>
+          event.lifecycle === 'beforeBridgeOperation' &&
+          event.payload.operation === 'render' &&
+          event.payload.reason === 'mount',
+      ),
+    ).toBe(true);
 
     await router.push('/');
     await flushBridgeRender();
     expect(providerReturn.destroy).toHaveBeenCalledTimes(1);
+    expect(
+      lifecycleEvents.some(
+        (event) =>
+          event.payload.operation === 'destroy' &&
+          event.payload.reason === 'keep-alive-deactivate',
+      ),
+    ).toBe(true);
 
     await router.push('/ec');
     await flushBridgeRender();
     expect(providerReturn.render).toHaveBeenCalledTimes(2);
+    expect(
+      lifecycleEvents.some(
+        (event) =>
+          event.payload.operation === 'update' &&
+          event.payload.reason === 'keep-alive-activate',
+      ),
+    ).toBe(true);
 
     app.unmount();
   });

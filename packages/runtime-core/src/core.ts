@@ -21,6 +21,8 @@ import {
   ResourceLoadContext,
   LoadShareExtraOptions,
   SharedLoadContext,
+  BridgeOperationContext,
+  BridgeOperationResult,
 } from './type';
 import { getBuilderId, registerPlugins, getRemoteEntry, error } from './utils';
 import {
@@ -294,6 +296,10 @@ export class ModuleFederation {
       [Record<string, any>],
       void | Record<string, any>
     >(),
+    beforeBridgeOperation: new SyncHook<[BridgeOperationContext], void>(),
+    bridgeRenderInvoked: new SyncHook<[BridgeOperationContext], void>(),
+    afterBridgeOperation: new SyncHook<[BridgeOperationResult], void>(),
+    afterBridgeCommit: new SyncHook<[BridgeOperationResult], void>(),
   });
   moduleInfo?: GlobalModuleInfo[string];
 

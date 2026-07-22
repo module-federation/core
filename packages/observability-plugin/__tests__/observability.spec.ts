@@ -53,6 +53,27 @@ const createShared = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
+const createBridgeOperation = (overrides: Record<string, unknown> = {}) => ({
+  operationId: 'bridge-op-1',
+  bridgeId: 'bridge-1',
+  side: 'consumer',
+  framework: 'react',
+  operation: 'render',
+  moduleName: 'remote/App',
+  remote: 'remote',
+  expose: './App',
+  reason: 'mount',
+  startedAt: 1,
+  ...overrides,
+});
+
+const bridgeLifecycleFixture = {
+  beforeBridgeOperation: {},
+  bridgeRenderInvoked: {},
+  afterBridgeOperation: {},
+  afterBridgeCommit: {},
+};
+
 type SharedFixture = ReturnType<typeof createShared>;
 type ShareScopeMapFixture = Record<
   string,
@@ -1085,6 +1106,7 @@ describe('ObservabilityPlugin', () => {
     const globalObject = globalThis as any;
     const previousFederation = globalObject.__FEDERATION__;
     const instance = createRuntimeInstance({
+      bridgeHook: { lifecycle: bridgeLifecycleFixture },
       options: {
         name: 'late-host',
         remotes: [
@@ -1113,7 +1135,29 @@ describe('ObservabilityPlugin', () => {
         console: false,
         browser: { enabled: true, scope: 'multi-instance' },
       });
-      observability.plugin.apply?.(instance as any);
+      const hooks = observability.plugin.apply?.(instance as any) as any;
+      const commit = createBridgeOperation({
+        endedAt: 2,
+        duration: 1,
+        outcome: 'success',
+      });
+      hooks.beforeBridgeOperation(createBridgeOperation());
+      hooks.afterBridgeOperation(commit);
+      hooks.afterBridgeCommit(commit);
+      hooks.afterBridgeOperation(
+        createBridgeOperation({
+          operationId: 'bridge-op-route',
+          operation: 'route-sync',
+          route: {
+            action: 'host-to-remote',
+            to: '/safe?token=secret#private',
+            mechanism: 'popstate',
+          },
+          endedAt: 3,
+          duration: 1,
+          outcome: 'success',
+        }),
+      );
       const reader =
         globalObject.__FEDERATION__.__OBSERVABILITY__['multi-instance'];
       const state = reader.getRuntimeState();
@@ -1124,6 +1168,11 @@ describe('ObservabilityPlugin', () => {
       });
       expect(JSON.stringify(state)).not.toContain('token=secret');
       expect(JSON.stringify(state)).not.toContain('private');
+      expect(state.capabilities.bridgeTrace).toMatchObject({
+        available: true,
+        completeness: 'partial',
+        reason: expect.stringContaining('runtime history is incomplete'),
+      });
       state.instances[0].name = 'mutated';
       expect(reader.getRuntimeState().instances[0].name).not.toBe('mutated');
     } finally {
@@ -1196,6 +1245,241 @@ describe('ObservabilityPlugin', () => {
     expect(
       runtime.getSnapshot().targets['mf:instance:mf-2:remote:remote'],
     ).toBeDefined();
+  });
+
+  it('correlates Bridge render, commit, route, and destroy signals without treating commit as business readiness', async () => {
+    const observability = createObservability({
+      level: 'verbose',
+      console: false,
+    });
+    const instance = createRuntimeInstance({
+      bridgeHook: { lifecycle: bridgeLifecycleFixture },
+    });
+    const hooks = observability.plugin.apply?.(instance as any) as any;
+
+    hooks.beforeRequest({
+      id: 'remote/App',
+      options: {},
+      origin: undefined,
+    });
+    await hooks.onLoad({
+      id: 'remote/App',
+      expose: './App',
+      remote: { name: 'remote' },
+      exposeModule: {},
+      origin: undefined,
+    });
+
+    const consumerRender = createBridgeOperation({
+      unsafeDom: { secret: 'must-not-leak' },
+      props: { password: 'must-not-leak' },
+    });
+    const consumerRenderResult = {
+      ...consumerRender,
+      endedAt: 2,
+      duration: 1,
+      outcome: 'success',
+    };
+    hooks.beforeBridgeOperation(consumerRender);
+    hooks.bridgeRenderInvoked(consumerRender);
+    hooks.afterBridgeOperation(consumerRenderResult);
+    hooks.afterBridgeCommit(consumerRenderResult);
+
+    const producerRender = createBridgeOperation({ side: 'producer' });
+    const producerRenderResult = {
+      ...producerRender,
+      endedAt: 2,
+      duration: 1,
+      outcome: 'success',
+    };
+    hooks.beforeBridgeOperation(producerRender);
+    hooks.bridgeRenderInvoked(producerRender);
+    hooks.afterBridgeOperation(producerRenderResult);
+    hooks.afterBridgeCommit(producerRenderResult);
+
+    const route = createBridgeOperation({
+      operationId: 'bridge-op-route',
+      operation: 'route-sync',
+      route: {
+        action: 'host-to-remote',
+        from: '/before?token=secret#private',
+        to: '/after?token=secret#private',
+        mechanism: 'popstate',
+      },
+    });
+    hooks.beforeBridgeOperation(route);
+    hooks.afterBridgeOperation({
+      ...route,
+      endedAt: 3,
+      duration: 1,
+      outcome: 'success',
+    });
+
+    const destroy = createBridgeOperation({
+      operationId: 'bridge-op-destroy',
+      side: 'producer',
+      operation: 'destroy',
+      reason: 'unmount',
+    });
+    hooks.beforeBridgeOperation(destroy);
+    hooks.afterBridgeOperation({
+      ...destroy,
+      endedAt: 4,
+      duration: 1,
+      outcome: 'success',
+    });
+
+    const report = observability.getLatestReport();
+    expect(report?.events.map((event) => event.message)).toEqual(
+      expect.arrayContaining([
+        'bridge:provider-acquired',
+        'bridge:render-start',
+        'bridge:render-invoked',
+        'bridge:render-success',
+        'bridge:render-committed',
+        'bridge:route-sync-success',
+        'bridge:destroy-success',
+      ]),
+    );
+    expect(report?.summary.componentLoaded).toBe(false);
+    expect(
+      new Set(
+        report?.events
+          .filter((event) => event.bridge?.operationId === 'bridge-op-1')
+          .map((event) => event.traceId),
+      ).size,
+    ).toBe(1);
+    expect(observability.getRuntimeState()).toMatchObject({
+      capabilities: {
+        bridgeTrace: {
+          available: true,
+          completeness: 'complete',
+        },
+      },
+      instances: [
+        expect.objectContaining({
+          bridge: expect.objectContaining({
+            status: 'destroyed',
+            commitObserved: true,
+            routeSyncObserved: true,
+            states: expect.arrayContaining([
+              expect.objectContaining({ side: 'consumer' }),
+              expect.objectContaining({
+                side: 'producer',
+                status: 'destroyed',
+              }),
+            ]),
+          }),
+        }),
+      ],
+    });
+    expect(JSON.stringify(report)).not.toContain('must-not-leak');
+    expect(JSON.stringify(report)).not.toContain('token=secret');
+    expect(JSON.stringify(report)).not.toContain('#private');
+  });
+
+  it('keeps identical Bridge identifiers isolated between runtime instances', () => {
+    const observability = createObservability({
+      level: 'verbose',
+      console: false,
+    });
+    const first = createRuntimeInstance({
+      bridgeHook: { lifecycle: bridgeLifecycleFixture },
+    });
+    const second = createRuntimeInstance({
+      bridgeHook: { lifecycle: bridgeLifecycleFixture },
+    });
+    const firstHooks = observability.plugin.apply?.(first as any) as any;
+    const secondHooks = observability.plugin.apply?.(second as any) as any;
+    const start = createBridgeOperation();
+    const result = {
+      ...start,
+      endedAt: 2,
+      duration: 1,
+      outcome: 'success',
+    };
+
+    firstHooks.beforeBridgeOperation(start);
+    firstHooks.afterBridgeOperation(result);
+    secondHooks.beforeBridgeOperation(start);
+    secondHooks.afterBridgeOperation(result);
+
+    const firstReports = observability.findReports({ instanceRef: 'mf-1' });
+    const secondReports = observability.findReports({ instanceRef: 'mf-2' });
+    expect(firstReports).toHaveLength(1);
+    expect(secondReports).toHaveLength(1);
+    expect(firstReports[0].traceId).not.toBe(secondReports[0].traceId);
+    expect(
+      firstReports[0].events.every((event) => event.instanceRef === 'mf-1'),
+    ).toBe(true);
+    expect(
+      secondReports[0].events.every((event) => event.instanceRef === 'mf-2'),
+    ).toBe(true);
+    expect(
+      observability
+        .getRuntimeState()
+        .instances.map((item) => item.bridge?.states),
+    ).toEqual([
+      [expect.objectContaining({ bridgeId: 'bridge-1' })],
+      [expect.objectContaining({ bridgeId: 'bridge-1' })],
+    ]);
+  });
+
+  it('keeps concurrent Bridge states isolated and records safe failures', () => {
+    const observability = createObservability({
+      level: 'verbose',
+      console: false,
+    });
+    const instance = createRuntimeInstance({
+      bridgeHook: { lifecycle: bridgeLifecycleFixture },
+    });
+    const hooks = observability.plugin.apply?.(instance as any) as any;
+    const first = createBridgeOperation({
+      operationId: 'bridge-op-first',
+      bridgeId: 'bridge-first',
+      remote: undefined,
+    });
+    const second = createBridgeOperation({
+      operationId: 'bridge-op-second',
+      bridgeId: 'bridge-second',
+      remote: undefined,
+    });
+
+    hooks.beforeBridgeOperation(first);
+    hooks.beforeBridgeOperation(second);
+    hooks.afterBridgeOperation({
+      ...first,
+      endedAt: 2,
+      duration: 1,
+      outcome: 'success',
+    });
+    hooks.afterBridgeOperation({
+      ...second,
+      endedAt: 3,
+      duration: 2,
+      outcome: 'error',
+      error: {
+        name: 'Error',
+        message: 'render failed token=must-not-leak',
+      },
+    });
+
+    expect(observability.findReports()).toHaveLength(2);
+    expect(observability.getRuntimeState().instances[0].bridge?.states).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          bridgeId: 'bridge-first',
+          status: 'rendered',
+        }),
+        expect.objectContaining({
+          bridgeId: 'bridge-second',
+          status: 'error',
+        }),
+      ]),
+    );
+    expect(JSON.stringify(observability.findReports())).not.toContain(
+      'must-not-leak',
+    );
   });
 
   it('reports conservative trace capabilities for late and old runtimes', () => {
