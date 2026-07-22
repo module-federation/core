@@ -70,11 +70,17 @@ type SharedHookFixturePlugin = {
     shared: SharedFixture;
     origin: EnabledOriginFixture;
   }) => unknown;
+  afterRegisterShare?: (args: {
+    pkgName: string;
+    registration: any;
+    origin: EnabledOriginFixture;
+  }) => unknown;
   beforeLoadShare?: (args: {
     pkgName: string;
     shareInfo?: SharedFixture;
     shared: Record<string, unknown>;
     origin: EnabledOriginFixture;
+    loadContext?: any;
   }) => unknown;
   afterLoadShare?: (args: {
     pkgName: string;
@@ -83,6 +89,7 @@ type SharedHookFixturePlugin = {
     shared: Record<string, unknown>;
     origin: EnabledOriginFixture;
     lifecycle: 'loadShare' | 'loadShareSync';
+    selectionResult?: any;
   }) => void;
   errorLoadShare?: (args: {
     pkgName: string;
@@ -93,6 +100,7 @@ type SharedHookFixturePlugin = {
     lifecycle: 'loadShare' | 'loadShareSync';
     error?: Error;
     recovered?: boolean;
+    selectionResult?: any;
   }) => unknown;
 };
 
@@ -5867,6 +5875,369 @@ describe('ObservabilityPlugin', () => {
     expect(JSON.stringify(report)).toContain('component:business-loaded');
     expect(JSON.stringify(report)).toContain('demo-secret');
     expect(JSON.stringify(report)).toContain('token=');
+  });
+
+  it('reports runtime-produced shared selection details without unsafe values', () => {
+    const observability = createObservability({
+      level: 'verbose',
+      console: false,
+    });
+    const plugin = observability.plugin as SharedHookFixturePlugin;
+    const shared = createShared({
+      get: () => () => ({ secretFactoryValue: 'must-not-leak' }),
+    });
+    const loadContext = {
+      trigger: 'build',
+      moduleId: 42,
+      chunkId: 'shared-chunk',
+      requestId: 'consume-request',
+      operationId: 'loadShare-42',
+    };
+    const selectionResult = {
+      scope: 'default',
+      requestedVersion: '18.0.0',
+      requiredVersion: '^18.0.0',
+      singleton: true,
+      strictVersion: false,
+      eager: false,
+      strategy: 'loaded-first',
+      candidates: [
+        {
+          scope: 'default',
+          version: '17.0.2',
+          provider: 'legacy-provider',
+          loaded: false,
+          loading: false,
+          singleton: true,
+          eager: false,
+          strategy: 'loaded-first',
+          compatible: false,
+          rejectionReason: 'version-mismatch',
+        },
+        {
+          scope: 'default',
+          version: '18.3.1',
+          provider: 'host',
+          loaded: true,
+          loading: false,
+          singleton: true,
+          eager: false,
+          strategy: 'loaded-first',
+          compatible: true,
+        },
+      ],
+      selected: {
+        scope: 'default',
+        version: '18.3.1',
+        provider: 'host',
+        loaded: true,
+        loading: false,
+        singleton: true,
+        eager: false,
+        strategy: 'loaded-first',
+        compatible: true,
+      },
+      reason: 'singleton-existing',
+      loadType: 'async',
+      context: loadContext,
+    };
+
+    plugin.beforeLoadShare?.({
+      pkgName: 'react',
+      shareInfo: shared,
+      shared: {},
+      origin: enabledOrigin,
+      loadContext,
+    });
+    plugin.afterLoadShare?.({
+      pkgName: 'react',
+      shareInfo: shared,
+      selectedShared: shared,
+      shared: {},
+      lifecycle: 'loadShare',
+      origin: enabledOrigin,
+      selectionResult,
+    });
+
+    const report = observability.getLatestReport();
+    expect(report?.requestId).toBe('loadShare-42');
+    expect(report?.shared).toMatchObject({
+      name: 'react',
+      selectedVersion: '18.3.1',
+      provider: 'host',
+      selectionReason: 'singleton-existing',
+      loadType: 'async',
+      trigger: 'build',
+      moduleId: 42,
+      chunkId: 'shared-chunk',
+      requestId: 'consume-request',
+      operationId: 'loadShare-42',
+      candidates: [
+        expect.objectContaining({
+          version: '17.0.2',
+          provider: 'legacy-provider',
+          rejectionReason: 'version-mismatch',
+        }),
+        expect.objectContaining({
+          version: '18.3.1',
+          provider: 'host',
+          loaded: true,
+        }),
+      ],
+    });
+    expect(JSON.stringify(report)).not.toContain('secretFactoryValue');
+    expect(report?.shared).not.toHaveProperty('get');
+    expect(report?.shared).not.toHaveProperty('lib');
+    expect(report?.shared).not.toHaveProperty('loadingPromise');
+  });
+
+  it('uses real runtime local-fallback facts in the shared report', async () => {
+    const observability = createObservability({
+      level: 'verbose',
+      console: false,
+    });
+    const localFactory = () => ({ source: 'local' });
+    const instance = new ModuleFederation({
+      name: 'fallback-observability-host',
+      remotes: [],
+      plugins: [observability.plugin],
+      shared: {
+        fallbackPackage: {
+          version: '1.0.0',
+          scope: 'local',
+          lib: localFactory,
+        },
+      },
+    });
+
+    const result = await instance.loadShare('fallbackPackage', {
+      resolver: (options) => ({ ...options[0], scope: ['missing'] }),
+    });
+
+    expect(result).toBe(localFactory);
+    expect(observability.getLatestReport()).toMatchObject({
+      status: 'success',
+      summary: {
+        outcome: 'shared-resolved',
+        flags: { fallback: true },
+      },
+      shared: {
+        name: 'fallbackPackage',
+        selectionReason: 'local-fallback',
+        fallback: true,
+        selectedVersion: '1.0.0',
+        provider: 'fallback-observability-host',
+      },
+    });
+  });
+
+  it('records safe registration history and current shared strategy', () => {
+    const observability = createObservability({
+      level: 'verbose',
+      console: false,
+    });
+    const plugin = observability.plugin as SharedHookFixturePlugin;
+    const shared = createShared({ loaded: true });
+    const origin = {
+      ...enabledOrigin,
+      shareScopeMap: {
+        default: { react: { '18.3.1': shared } },
+      },
+      sharedHandler: {
+        shareScopeMap: {
+          default: { react: { '18.3.1': shared } },
+        },
+        hooks: { lifecycle: { afterRegisterShare: {} } },
+      },
+    };
+    const candidate = {
+      scope: 'default',
+      version: '18.3.1',
+      provider: 'host',
+      loaded: true,
+      loading: false,
+      singleton: false,
+      eager: false,
+      strategy: 'loaded-first',
+      compatible: true,
+    };
+
+    plugin.afterRegisterShare?.({
+      pkgName: 'react',
+      registration: {
+        registrationId: 'shared-register-1',
+        scope: 'default',
+        trigger: 'container-init',
+        candidate,
+        candidates: [candidate],
+        action: 'registered',
+        effective: candidate,
+        reason: 'container-share-registered',
+      },
+      origin,
+    });
+
+    expect(observability.getLatestReport()).toMatchObject({
+      status: 'success',
+      summary: {
+        outcome: 'shared-registered',
+        sharedRegistered: true,
+      },
+      shared: {
+        name: 'react',
+        candidates: [expect.objectContaining({ version: '18.3.1' })],
+        registration: {
+          registrationId: 'shared-register-1',
+          action: 'registered',
+          reason: 'container-share-registered',
+          trigger: 'container-init',
+        },
+      },
+    });
+    const state = observability.getRuntimeState();
+    expect(state.instances[0].shareScopes[0].shared[0].versions[0]).toEqual({
+      version: '18.3.1',
+      provider: 'host',
+      loaded: true,
+      strategy: 'loaded-first',
+    });
+    expect(JSON.stringify(state)).not.toContain('get');
+    expect(JSON.stringify(state)).not.toContain('secret');
+    expect(state.capabilities.sharedTrace).toMatchObject({
+      available: true,
+      completeness: 'complete',
+    });
+  });
+
+  it('keeps concurrent shared traces and instances independently correlated', () => {
+    const observability = createObservability({
+      level: 'verbose',
+      console: false,
+    });
+    const plugin = observability.plugin as SharedHookFixturePlugin;
+    const firstOrigin = { ...enabledOrigin, options: { name: 'first-host' } };
+    const secondOrigin = { ...enabledOrigin, options: { name: 'second-host' } };
+    const shared = createShared();
+    const emitSelection = (
+      origin: EnabledOriginFixture,
+      operationId: string,
+      provider: string,
+    ) => {
+      const loadContext = { trigger: 'runtime', operationId };
+      plugin.beforeLoadShare?.({
+        pkgName: 'react',
+        shareInfo: shared,
+        shared: {},
+        origin,
+        loadContext,
+      });
+      return () =>
+        plugin.afterLoadShare?.({
+          pkgName: 'react',
+          shareInfo: shared,
+          selectedShared: shared,
+          shared: {},
+          lifecycle: 'loadShare',
+          origin,
+          selectionResult: {
+            scope: 'default',
+            requestedVersion: '18.3.1',
+            requiredVersion: '^18.0.0',
+            singleton: false,
+            strictVersion: false,
+            eager: false,
+            strategy: 'loaded-first',
+            candidates: [],
+            selected: {
+              scope: 'default',
+              version: '18.3.1',
+              provider,
+              loaded: true,
+              loading: false,
+              singleton: false,
+              eager: false,
+              strategy: 'loaded-first',
+            },
+            reason: 'loaded-first',
+            loadType: 'async',
+            context: loadContext,
+          },
+        });
+    };
+
+    const finishFirst = emitSelection(firstOrigin, 'same-operation', 'first');
+    const finishSecond = emitSelection(
+      secondOrigin,
+      'same-operation',
+      'second',
+    );
+    finishSecond();
+    finishFirst();
+
+    const reports = observability.findReports({ shared: 'react', limit: 10 });
+    expect(reports).toHaveLength(2);
+    expect(new Set(reports.map((report) => report.traceId)).size).toBe(2);
+    expect(new Set(reports.map((report) => report.instanceRef)).size).toBe(2);
+    expect(reports.map((report) => report.shared?.provider).sort()).toEqual([
+      'first',
+      'second',
+    ]);
+    reports.forEach((report) => {
+      expect(report.events).toHaveLength(2);
+      expect(
+        report.events.every((event) => event.requestId === 'same-operation'),
+      ).toBe(true);
+    });
+  });
+
+  it('degrades shared trace capability for old or incomplete runtimes', () => {
+    const oldRuntime = createObservability({
+      level: 'verbose',
+      console: false,
+    });
+    const oldPlugin = oldRuntime.plugin as SharedHookFixturePlugin;
+    const shared = createShared();
+    const oldOrigin = {
+      ...enabledOrigin,
+      version: '2.4.9',
+      shareScopeMap: { default: { react: { '18.3.1': shared } } },
+    };
+    oldPlugin.beforeLoadShare?.({
+      pkgName: 'react',
+      shareInfo: shared,
+      shared: {},
+      origin: oldOrigin,
+    });
+    expect(oldRuntime.getRuntimeState().capabilities).toMatchObject({
+      sharedState: { available: true, completeness: 'complete' },
+      sharedTrace: { available: false, completeness: 'unavailable' },
+    });
+
+    const partialRuntime = createObservability({
+      level: 'verbose',
+      console: false,
+    });
+    const partialPlugin = partialRuntime.plugin as SharedHookFixturePlugin;
+    partialPlugin.beforeLoadShare?.({
+      pkgName: 'react',
+      shareInfo: shared,
+      shared: {},
+      origin: enabledOrigin,
+    });
+    partialPlugin.afterLoadShare?.({
+      pkgName: 'react',
+      shareInfo: shared,
+      selectedShared: shared,
+      shared: {},
+      lifecycle: 'loadShare',
+      origin: enabledOrigin,
+    });
+    expect(
+      partialRuntime.getRuntimeState().capabilities.sharedTrace,
+    ).toMatchObject({
+      available: true,
+      completeness: 'partial',
+    });
   });
 
   it('does not let observability callbacks affect loading', async () => {
