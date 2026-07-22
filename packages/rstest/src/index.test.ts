@@ -304,6 +304,29 @@ describe('federation()', () => {
     expect(callExternal(bypass, 'react')).toBe(undefined);
   });
 
+  it('discovers federation remotes registered after rspack config patching', () => {
+    const { rspackConfig } = applyFederationPlugin(federation(), {
+      rspackConfig: {
+        output: {},
+        externals: ['react'],
+        plugins: [],
+      },
+    });
+
+    rspackConfig.plugins?.push({
+      constructor: { name: 'ModuleFederationPlugin' },
+      _options: {
+        remotes: {
+          'component-app': 'component_app@http://localhost:3001/remoteEntry.js',
+        },
+      },
+    });
+
+    const bypass = getExternalBypass(rspackConfig);
+    expect(callExternal(bypass, 'component-app/Button')).toBe(false);
+    expect(callExternal(bypass, 'react')).toBe(undefined);
+  });
+
   it('auto-applies ModuleFederationPlugin with node defaults', () => {
     const { rspackConfig } = applyFederationPlugin(
       federation({

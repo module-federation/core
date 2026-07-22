@@ -52,12 +52,18 @@ const createRspackPatcher = (
       rspackConfig.plugins.push(new ModuleFederationPlugin(effectiveOptions));
     }
 
-    const remoteNames = collectRemoteNames(
-      moduleFederationOptions?.remotes,
-      rspackConfig.plugins as unknown[] | undefined,
-    );
+    // The Rsbuild federation plugin registers ModuleFederationPlugin in
+    // onBeforeCreateCompiler, after tools.rspack hooks have run. External
+    // functions run during compilation, so collect once on first use.
+    let remoteNames: Set<string> | undefined;
     rspackConfig.externals = [
-      createFederationExternalBypass(remoteNames),
+      createFederationExternalBypass(() => {
+        remoteNames ??= collectRemoteNames(
+          moduleFederationOptions?.remotes,
+          rspackConfig.plugins as unknown[] | undefined,
+        );
+        return remoteNames;
+      }),
       ...toArray(rspackConfig.externals),
     ];
   };

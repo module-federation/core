@@ -54,7 +54,7 @@ export const shouldKeepBundledForFederation = (
 };
 
 export const createFederationExternalBypass = (
-  remoteNames: Set<string>,
+  getRemoteNames: () => Set<string>,
 ): ((
   data: Rspack.ExternalItemFunctionData,
   callback: (
@@ -64,7 +64,10 @@ export const createFederationExternalBypass = (
   ) => void,
 ) => void) => {
   return function federationExternalBypass({ request }, callback) {
-    if (!request || !shouldKeepBundledForFederation(request, remoteNames)) {
+    if (
+      !request ||
+      !shouldKeepBundledForFederation(request, getRemoteNames())
+    ) {
       return callback();
     }
 
