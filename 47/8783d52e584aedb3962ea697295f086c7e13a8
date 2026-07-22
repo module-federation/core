@@ -1,0 +1,61 @@
+.changeset/calm-shares-report.md
+  s_4142b789669f26::t_ce59bcbf6f2694 1-7
+packages/observability-plugin/__tests__/observability.spec.ts
+  s_4142b789669f26::t_277f42239d7acc 73-77,83,92,103,5880-6242
+packages/observability-plugin/src/core.ts
+  s_581a7c5e0326e7::t_aafe3b349edd41 26,96,277-313,397,568-570,605-645,830-846,1480-1496,1502-1504,1506-1507,1511-1523,1525-1528,1532,1534-1546,1551-1644,1679-1707,3064-3066,3140-3142,3195,3212-3213,3226,3794,4089-4093,4096-4102,4109,4111,4337-4346,4387-4389,4393-4395,5646-5678,5695,5721,5755
+packages/runtime-core/__tests__/share-format.spec.ts
+  s_4142b789669f26::t_865b1f30306960 1
+packages/runtime-core/__tests__/shared-diagnostics.spec.ts
+  s_4142b789669f26::t_a7938f587a1f16 5-10,172-692
+packages/runtime-core/src/core.ts
+  s_4142b789669f26::t_f7f7519cd48aa4 22-23,349,360,371
+packages/runtime-core/src/shared/index.ts
+  s_581a7c5e0326e7::t_b07ee433a77a72 19-24,42,64-73,80,93,110,134-135,143-220,226,232,242,256,263,275,300-302,312-324,326-360,373,376,388,397-398,410,428-430,433-466,476,491,520,531-541,588-608,618-632,650,656-657,682,684,690,696-703,705-720,722-753,813,816-817,829-830,840-842,845-878,893,913,929-949,986-1006,1027-1035,1047,1049-1090
+packages/runtime-core/src/type/config.ts
+  s_f11d86de93ae60::t_24c3b68d388452 30,33,36-47,123-191
+packages/runtime-core/src/utils/share.ts
+  s_581a7c5e0326e7::t_26d4628d31f71b 16-17,213-271,428,440-495,503-508,595-658,661-679
+packages/webpack-bundler-runtime/__tests__/consumes.spec.ts
+  s_4142b789669f26::t_409e585a80e9d3 164-172
+packages/webpack-bundler-runtime/__tests__/installInitialConsumes.spec.ts
+  s_4142b789669f26::t_43720406ea6df0 186-230
+packages/webpack-bundler-runtime/src/consumes.ts
+  s_4142b789669f26::t_2d9dda08c9a2a6 85-90
+packages/webpack-bundler-runtime/src/installInitialConsumes.ts
+  s_4142b789669f26::t_a4b0e9120220be 32-36,41-45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "478783d52e584aedb3962ea697295f086c7e13a8",
+  "prompts": {},
+  "sessions": {
+    "s_4142b789669f26": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f87d5-fcc1-7de2-9d46-f002e5cff9d7",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    },
+    "s_581a7c5e0326e7": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f87d4-411d-7700-b13c-34122040e310",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    },
+    "s_f11d86de93ae60": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f87d4-683c-7dd0-b930-0ac187fc5605",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    }
+  },
+  "attestation_metadata": {},
+  "remote_transcripts": {}
+}
