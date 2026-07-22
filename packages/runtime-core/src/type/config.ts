@@ -27,9 +27,23 @@ export type RemoteInfoOptionalVersion = {
 export type Remote = (RemoteWithEntry | RemoteWithVersion) & RemoteInfoCommon;
 
 export type LoadShareExtraOptions = {
+  from?: CallFrom;
   customShareInfo?: Partial<Shared>;
   resolver?: (sharedOptions: ShareInfos[string]) => Shared;
+  context?: SharedLoadContext;
 };
+
+export type SharedLoadTrigger = CallFrom | 'container-init' | 'remote-load';
+
+export interface SharedLoadContext {
+  trigger?: SharedLoadTrigger;
+  moduleId?: string | number;
+  chunkId?: string | number;
+  remote?: string;
+  expose?: string;
+  requestId?: string;
+  operationId?: string;
+}
 
 export interface RemoteInfo {
   alias?: string;
@@ -105,6 +119,75 @@ export type Shared = {
   treeShaking?: TreeShakingArgs;
   // _noMatchedUsedExports?: NoMatchedUsedExportsItem[];
 };
+
+export interface SharedCandidateInfo {
+  scope: string;
+  version: string;
+  provider?: string;
+  loaded: boolean;
+  loading: boolean;
+  singleton: boolean;
+  eager: boolean;
+  strategy: ShareStrategy;
+  compatible?: boolean;
+  rejectionReason?: string;
+}
+
+export type SharedSelectionReason =
+  | 'exact-match'
+  | 'compatible-highest-version'
+  | 'compatible-version'
+  | 'loaded-first'
+  | 'version-first'
+  | 'singleton-existing'
+  | 'custom-resolver'
+  | 'local-fallback'
+  | 'version-mismatch'
+  | 'strict-version-rejected'
+  | 'missing-provider'
+  | 'missing-config'
+  | 'load-error';
+
+export interface SharedSelectionDecision {
+  scope?: string;
+  requestedVersion?: string;
+  requiredVersion?: string | false;
+  singleton: boolean;
+  strictVersion: boolean;
+  eager: boolean;
+  strategy: ShareStrategy;
+  candidates: SharedCandidateInfo[];
+  selected?: SharedCandidateInfo;
+  reason: SharedSelectionReason;
+  failureReason?: SharedSelectionReason;
+  fallback?: boolean;
+  recovered?: boolean;
+}
+
+export interface SharedSelectionResult extends SharedSelectionDecision {
+  loadType: 'sync' | 'async';
+  context: SharedLoadContext & {
+    operationId: string;
+    trigger: SharedLoadTrigger;
+  };
+}
+
+export type SharedRegistrationAction =
+  | 'registered'
+  | 'replaced'
+  | 'reused'
+  | 'ignored';
+
+export interface SharedRegistrationResult {
+  registrationId: string;
+  scope: string;
+  trigger: SharedLoadTrigger;
+  candidate: SharedCandidateInfo;
+  candidates: SharedCandidateInfo[];
+  action: SharedRegistrationAction;
+  effective?: SharedCandidateInfo;
+  reason: string;
+}
 
 export type ShareScopeMap = {
   [scope: string]: {
