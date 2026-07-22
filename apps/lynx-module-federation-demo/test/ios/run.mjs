@@ -146,6 +146,7 @@ try {
       '-resultBundlePath',
       'build/OrbitControl-Release.xcresult',
       'COMPILER_INDEX_STORE_ENABLE=NO',
+      '-showBuildTimingSummary',
       '-parallel-testing-enabled',
       'NO',
       '-only-testing:OrbitControlTests',

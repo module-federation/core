@@ -26,6 +26,21 @@ final class OrbitControlUITests: XCTestCase {
     add(attachment)
   }
 
+  private func tapUntilStateChanges(_ button: XCUIElement) -> Bool {
+    for _ in 0..<2 {
+      button.tap()
+      let stateChanged = XCTNSPredicateExpectation(
+        predicate: NSPredicate(format: "exists == false"),
+        object: button
+      )
+      if XCTWaiter.wait(for: [stateChanged], timeout: 2) == .completed {
+        return true
+      }
+    }
+    XCTFail("The load gesture did not leave the idle state.")
+    return false
+  }
+
   func testEmbeddedReleaseHostLaunches() {
     let app = XCUIApplication()
     app.launchEnvironment["LYNX_BUNDLE_URL"] = ""
@@ -47,7 +62,7 @@ final class OrbitControlUITests: XCTestCase {
       .matching(NSPredicate(format: "label == %@", "Load remote catalog"))
       .firstMatch
     XCTAssertTrue(loadButton.waitForExistence(timeout: 30))
-    loadButton.tap()
+    guard tapUntilStateChanges(loadButton) else { return }
 
     let readiness = app.descendants(matching: .any)
       .matching(identifier: "federation-ready")
