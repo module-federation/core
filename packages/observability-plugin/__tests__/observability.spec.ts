@@ -3265,6 +3265,239 @@ describe('ObservabilityPlugin', () => {
     );
   });
 
+  it('records safe resource results in the remote timeline without duplicate legacy phases', () => {
+    const observability = createObservability({
+      level: 'verbose',
+      console: false,
+    });
+    const origin = {
+      ...enabledOrigin,
+      loaderHook: {
+        lifecycle: {
+          beforeLoadResource: {},
+          afterLoadResource: {},
+        },
+      },
+    };
+    const remote = {
+      name: 'remote',
+      entry: 'http://localhost:3001/mf-manifest.json',
+    };
+
+    emitRemoteStart(observability, { origin });
+    emitRemoteMatch(observability, { origin, remoteInfo: remote });
+    observability.plugin.beforeLoadResource?.({
+      id: 'remote/Button',
+      initiator: 'loadRemote',
+      resourceType: 'manifest',
+      url: 'http://localhost:3001/mf-manifest.json?token=secret',
+      remote,
+      expose: './Button',
+      startedAt: 100,
+      origin,
+    } as any);
+    observability.plugin.afterLoadResource?.({
+      id: 'remote/Button',
+      initiator: 'loadRemote',
+      resourceType: 'manifest',
+      url: 'http://localhost:3001/mf-manifest.json?token=secret',
+      remote,
+      expose: './Button',
+      startedAt: 100,
+      endedAt: 125,
+      duration: 25,
+      outcome: 'success',
+      httpStatus: 200,
+      mimeType: 'application/json',
+      redirected: false,
+      origin,
+    } as any);
+
+    const report = observability.getLatestReport();
+    const manifestEvents = report?.events.filter(
+      (event) => event.phase === 'manifest',
+    );
+
+    expect(manifestEvents).toHaveLength(2);
+    expect(manifestEvents?.[1]).toMatchObject({
+      status: 'success',
+      lifecycle: 'afterLoadResource',
+      sanitizedUrl: 'http://localhost:3001/mf-manifest.json',
+      duration: 25,
+      resource: {
+        type: 'manifest',
+        initiator: 'loadRemote',
+        outcome: 'success',
+        url: 'http://localhost:3001/mf-manifest.json',
+        startedAt: 100,
+        endedAt: 125,
+        duration: 25,
+        httpStatus: 200,
+        mimeType: 'application/json',
+        redirected: false,
+      },
+    });
+    expect(JSON.stringify(manifestEvents)).not.toContain('token=secret');
+    expect(manifestEvents?.[1].resource).not.toHaveProperty('cacheSource');
+  });
+
+  it('keeps original resource failure evidence after recovery succeeds', () => {
+    const observability = createObservability({
+      level: 'verbose',
+      console: false,
+    });
+    const origin = {
+      ...enabledOrigin,
+      loaderHook: {
+        lifecycle: {
+          beforeLoadResource: {},
+          afterLoadResource: {},
+        },
+      },
+    };
+    const remoteInfo = {
+      name: 'remote',
+      entry: 'http://localhost:3001/remoteEntry.js',
+    };
+    const resourceBase = {
+      id: 'remote/Button',
+      initiator: 'loadRemote',
+      resourceType: 'remoteEntry',
+      url: remoteInfo.entry,
+      remote: remoteInfo,
+      expose: './Button',
+      origin,
+    };
+
+    emitRemoteStart(observability, { origin });
+    observability.plugin.beforeLoadResource?.({
+      ...resourceBase,
+      startedAt: 200,
+    } as any);
+    observability.plugin.afterLoadResource?.({
+      ...resourceBase,
+      startedAt: 200,
+      endedAt: 210,
+      duration: 10,
+      outcome: 'error',
+      errorType: 'execution',
+      error: new Error('token=secret ScriptExecutionError: boom'),
+    } as any);
+    observability.plugin.beforeLoadResource?.({
+      ...resourceBase,
+      startedAt: 211,
+    } as any);
+    observability.plugin.afterLoadResource?.({
+      ...resourceBase,
+      startedAt: 211,
+      endedAt: 220,
+      duration: 9,
+      outcome: 'success',
+    } as any);
+    observability.plugin.afterLoadEntry?.({
+      remoteInfo,
+      origin,
+      recovered: true,
+    } as any);
+    emitRemoteComplete(observability, {
+      origin,
+      error: new Error('original execution failed'),
+      recovered: true,
+    });
+
+    const report = observability.getLatestReport();
+    const resourceResults = report?.events.filter(
+      (event) => event.lifecycle === 'afterLoadResource',
+    );
+
+    expect(resourceResults?.map((event) => event.resource?.outcome)).toEqual([
+      'error',
+      'success',
+    ]);
+    expect(resourceResults?.[0]).toMatchObject({
+      status: 'error',
+      errorName: 'Error',
+      errorMessage: '[redacted] ScriptExecutionError: boom',
+      ownerHint: 'remote',
+      retryable: false,
+      resource: {
+        errorType: 'execution',
+      },
+    });
+    expect(report?.status).toBe('success');
+    expect(report?.summary.outcome).toBe('recovered');
+    expect(report?.summary.error).toMatchObject({
+      failedPhase: 'remoteEntry',
+      errorName: 'Error',
+    });
+  });
+
+  it('attributes same-name resource events to their bound MF instances', async () => {
+    const observability = createObservability({
+      level: 'verbose',
+      console: false,
+    });
+    const first = new ModuleFederation({
+      name: 'same-resource-host',
+      plugins: [observability.plugin],
+    });
+    const second = new ModuleFederation({
+      name: 'same-resource-host',
+      plugins: [observability.plugin],
+    });
+
+    const emitFor = async (instance: ModuleFederation, id: string) => {
+      const startedAt = Date.now();
+      await instance.loaderHook.lifecycle.beforeLoadResource.emit({
+        id,
+        initiator: 'preloadRemote',
+        resourceType: 'css',
+        url: `https://remote.test/${id}.css`,
+        remote: {
+          name: 'same-remote',
+          entry: 'https://remote.test/remoteEntry.js',
+          entryGlobalName: 'same_remote',
+          type: 'global',
+          shareScope: 'default',
+        },
+        startedAt,
+      });
+      await instance.loaderHook.lifecycle.afterLoadResource.emit({
+        id,
+        initiator: 'preloadRemote',
+        resourceType: 'css',
+        url: `https://remote.test/${id}.css`,
+        remote: {
+          name: 'same-remote',
+          entry: 'https://remote.test/remoteEntry.js',
+          entryGlobalName: 'same_remote',
+          type: 'global',
+          shareScope: 'default',
+        },
+        startedAt,
+        endedAt: startedAt + 1,
+        duration: 1,
+        outcome: 'success',
+      });
+    };
+
+    await emitFor(first, 'first/resource');
+    await emitFor(second, 'second/resource');
+
+    const reports = observability.getReports();
+    expect(reports).toHaveLength(2);
+    expect(reports.map((report) => report.instanceRef).sort()).toEqual([
+      'mf-1',
+      'mf-2',
+    ]);
+    expect(
+      observability.getRuntimeState().capabilities.remoteTrace,
+    ).toMatchObject({
+      available: true,
+      completeness: 'complete',
+    });
+  });
+
   it('records repeated manifest snapshot loads as cached success', () => {
     const observability = createObservability({
       level: 'verbose',

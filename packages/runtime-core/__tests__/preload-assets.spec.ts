@@ -4,7 +4,9 @@ import { ModuleFederation } from '../src/core';
 import type { RemoteInfo } from '../src/type';
 import type {
   ResourceLoadContext,
+  ResourceLoadEvent,
   ResourceLoadInitiator,
+  ResourceLoadResult,
 } from '../src/type/preload';
 import type { ModuleFederationRuntimePlugin } from '../src/type/plugin';
 import { preloadAssets } from '../src/utils/preload';
@@ -19,10 +21,12 @@ type ResourceCall = {
 type ResourceCalls = {
   links: ResourceCall[];
   scripts: ResourceCall[];
+  starts: ResourceLoadEvent[];
+  results: ResourceLoadResult[];
 };
 
 function createResourceCalls(): ResourceCalls {
-  return { links: [], scripts: [] };
+  return { links: [], scripts: [], starts: [], results: [] };
 }
 
 function completeLoadWhenHandlerIsAttached(element: HTMLElement): void {
@@ -58,6 +62,12 @@ function createResourceCapturePlugin(
     beforeInit(args) {
       args.options.inBrowser = true;
       return args;
+    },
+    beforeLoadResource(args) {
+      calls.starts.push(args);
+    },
+    afterLoadResource(args) {
+      calls.results.push(args);
     },
     createLink({ url, attrs = {}, remoteInfo, resourceContext }) {
       calls.links.push({ url, attrs, remoteInfo, resourceContext });
@@ -323,6 +333,190 @@ describe('preloadAssets', () => {
         resourceType: 'js',
         url: scriptUrl,
       },
+    });
+  });
+
+  it('records successful JS and CSS completion exactly once', async () => {
+    const calls = await runPreload({
+      type: 'global',
+      cssAssets: ['https://remote.test/styles.css'],
+      jsAssetsWithoutEntry: ['https://remote.test/chunk.js'],
+    });
+
+    expect(calls.starts).toHaveLength(2);
+    expect(calls.results).toHaveLength(2);
+    expect(calls.results).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          resourceType: 'css',
+          outcome: 'success',
+        }),
+        expect.objectContaining({
+          resourceType: 'js',
+          outcome: 'success',
+        }),
+      ]),
+    );
+    calls.results.forEach((result) => {
+      expect(result.endedAt).toBeGreaterThanOrEqual(result.startedAt);
+      expect(result.duration).toBeGreaterThanOrEqual(0);
+      expect(result).not.toHaveProperty('httpStatus');
+      expect(result).not.toHaveProperty('mimeType');
+    });
+  });
+
+  it('keeps partial preload failures visible without dropping successes', async () => {
+    const calls = createResourceCalls();
+    const host = new ModuleFederation({
+      name: 'partial-preload-host',
+      plugins: [
+        {
+          name: 'partial-preload-loader',
+          beforeInit(args) {
+            args.options.inBrowser = true;
+            return args;
+          },
+          beforeLoadResource(args) {
+            calls.starts.push(args);
+          },
+          afterLoadResource(args) {
+            calls.results.push(args);
+          },
+          createLink({ url }) {
+            const link = document.createElement('link');
+            link.href = url;
+            let onload: GlobalEventHandlers['onload'] | null = null;
+            let onerror: OnErrorEventHandler | null = null;
+            Object.defineProperties(link, {
+              onload: {
+                configurable: true,
+                get: () => onload,
+                set(handler: GlobalEventHandlers['onload'] | null) {
+                  onload = handler;
+                  if (handler && url.includes('success')) {
+                    queueMicrotask(() => handler.call(link, new Event('load')));
+                  }
+                },
+              },
+              onerror: {
+                configurable: true,
+                get: () => onerror,
+                set(handler: OnErrorEventHandler | null) {
+                  onerror = handler;
+                  if (handler && url.includes('failure')) {
+                    queueMicrotask(() =>
+                      handler.call(link, new Event('error'), '', 0, 0, null),
+                    );
+                  }
+                },
+              },
+            });
+            return link;
+          },
+        },
+      ],
+    });
+
+    const results = await preloadAssets(
+      createRemoteInfo('global'),
+      host,
+      {
+        cssAssets: [
+          'https://remote.test/success.css',
+          'https://remote.test/failure.css',
+        ],
+        jsAssetsWithoutEntry: [],
+        entryAssets: [],
+      },
+      true,
+    );
+
+    expect(results.map((result) => result.status)).toEqual([
+      'success',
+      'error',
+    ]);
+    expect(calls.results.map((result) => result.outcome)).toEqual([
+      'success',
+      'error',
+    ]);
+    expect(calls.results[1]).toMatchObject({
+      errorType: 'network',
+      error: {
+        name: 'LinkNetworkError',
+        message: expect.stringContaining('failure.css'),
+      },
+    });
+  });
+
+  it('reports an existing preload element as a browser cache reuse', async () => {
+    const url = 'https://remote.test/cached.css';
+    const existingLink = document.createElement('link');
+    existingLink.href = url;
+    existingLink.rel = 'preload';
+    document.head.appendChild(existingLink);
+
+    try {
+      const calls = await runPreload({
+        type: 'global',
+        cssAssets: [url],
+        useLinkPreload: true,
+        initiator: 'preloadRemote',
+      });
+
+      expect(calls.results).toHaveLength(1);
+      expect(calls.results[0]).toMatchObject({
+        outcome: 'cached',
+        cacheSource: 'browser',
+      });
+    } finally {
+      existingLink.remove();
+    }
+  });
+
+  it('reports preload timeout as a timeout result', async () => {
+    const calls = createResourceCalls();
+    const host = new ModuleFederation({
+      name: 'timeout-preload-host',
+      plugins: [
+        {
+          name: 'timeout-preload-loader',
+          beforeInit(args) {
+            args.options.inBrowser = true;
+            return args;
+          },
+          beforeLoadResource(args) {
+            calls.starts.push(args);
+          },
+          afterLoadResource(args) {
+            calls.results.push(args);
+          },
+          createLink({ url }) {
+            const link = document.createElement('link');
+            link.href = url;
+            return { link, timeout: 5 };
+          },
+        },
+      ],
+    });
+
+    const results = await preloadAssets(
+      createRemoteInfo('global'),
+      host,
+      {
+        cssAssets: ['https://remote.test/timeout.css'],
+        jsAssetsWithoutEntry: [],
+        entryAssets: [],
+      },
+      true,
+    );
+
+    expect(results[0]).toMatchObject({
+      status: 'timeout',
+      errorType: 'timeout',
+    });
+    expect(calls.results[0]).toMatchObject({
+      outcome: 'timeout',
+      errorType: 'timeout',
     });
   });
 });

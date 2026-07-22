@@ -319,6 +319,21 @@ export interface ObservabilityRemoteInfo {
   type?: string;
 }
 
+export interface ObservabilityResourceInfo {
+  type: string;
+  initiator: 'loadRemote' | 'preloadRemote';
+  outcome?: 'success' | 'error' | 'timeout' | 'cached' | 'recovered';
+  url?: string;
+  startedAt: number;
+  endedAt?: number;
+  duration?: number;
+  httpStatus?: number;
+  mimeType?: string;
+  redirected?: boolean;
+  cacheSource?: string;
+  errorType?: string;
+}
+
 export interface ObservabilitySharedInfo {
   name: string;
   shareScope?: string[];
@@ -403,6 +418,7 @@ export interface ObservabilityEvent {
   hostName?: string;
   runtimeVersion?: string;
   remote?: ObservabilityRemoteInfo;
+  resource?: ObservabilityResourceInfo;
   shared?: ObservabilitySharedInfo;
   expose?: string;
   sanitizedUrl?: string;
@@ -594,6 +610,7 @@ export interface ObservabilityRuntimeEventInput {
   requestAlias?: string;
   hostName?: string;
   remote?: ObservabilityRemoteInfo;
+  resource?: ObservabilityResourceInfo;
   shared?: ObservabilitySharedInfo;
   expose?: string;
   url?: string;
@@ -627,6 +644,12 @@ export interface ObservabilityRuntimeOrigin {
   };
   moduleCache?: ObservabilityRuntimeInstanceLike['moduleCache'];
   remoteHandler?: ObservabilityRuntimeRemoteHandlerLike;
+  loaderHook?: {
+    lifecycle?: {
+      beforeLoadResource?: unknown;
+      afterLoadResource?: unknown;
+    };
+  };
   bridgeHook?: unknown;
   shareScopeMap?: ObservabilityRuntimeShareScopeMap;
   sharedHandler?: {
@@ -858,6 +881,29 @@ interface ObservabilityRemoteEntryAfterLoadArgs {
   error?: unknown;
   recovered?: boolean;
   cached?: boolean;
+}
+
+interface ObservabilityResourceLoadArgs {
+  origin: ObservabilityRuntimeOrigin;
+  id: string;
+  initiator: 'loadRemote' | 'preloadRemote';
+  resourceType: string;
+  url: string;
+  remote?: ObservabilityRuntimeRemoteSource;
+  expose?: string;
+  startedAt: number;
+}
+
+interface ObservabilityResourceLoadResultArgs extends ObservabilityResourceLoadArgs {
+  endedAt: number;
+  duration: number;
+  outcome: 'success' | 'error' | 'timeout' | 'cached' | 'recovered';
+  httpStatus?: number;
+  mimeType?: string;
+  redirected?: boolean;
+  cacheSource?: string;
+  errorType?: string;
+  error?: unknown;
 }
 
 interface ObservabilityRemoteInitArgs {
@@ -1315,6 +1361,48 @@ function normalizeBridgeInfo(
           message: sanitizeText(result.error.message, 240),
         }
       : undefined,
+  });
+}
+
+function sanitizeResource(
+  resource: ObservabilityResourceInfo | undefined,
+): ObservabilityResourceInfo | undefined {
+  if (!resource) {
+    return undefined;
+  }
+
+  const type = sanitizeText(resource.type, 80);
+  if (!type) {
+    return undefined;
+  }
+
+  return omitUndefinedFields({
+    type,
+    initiator: resource.initiator,
+    outcome: resource.outcome,
+    url: sanitizeUrl(resource.url),
+    startedAt: Number.isFinite(resource.startedAt)
+      ? resource.startedAt
+      : Date.now(),
+    endedAt:
+      resource.endedAt !== undefined && Number.isFinite(resource.endedAt)
+        ? resource.endedAt
+        : undefined,
+    duration:
+      resource.duration !== undefined && Number.isFinite(resource.duration)
+        ? Math.max(0, resource.duration)
+        : undefined,
+    httpStatus:
+      resource.httpStatus !== undefined && Number.isFinite(resource.httpStatus)
+        ? resource.httpStatus
+        : undefined,
+    mimeType: sanitizeText(resource.mimeType, 160),
+    redirected:
+      typeof resource.redirected === 'boolean'
+        ? resource.redirected
+        : undefined,
+    cacheSource: sanitizeText(resource.cacheSource, 80),
+    errorType: sanitizeText(resource.errorType, 80),
   });
 }
 
@@ -2084,6 +2172,15 @@ function getErrorInfo(
     };
   }
 
+  if (isRecord(error) && typeof error.message === 'string') {
+    return {
+      errorCode: extractErrorCode(error.message),
+      errorName:
+        typeof error.name === 'string' ? getRawText(error.name) : undefined,
+      errorMessage: getRawText(error.message),
+    };
+  }
+
   return {
     errorCode: extractErrorCode(error),
     errorMessage: getRawText(error),
@@ -2116,6 +2213,7 @@ function copyEvent(event: ObservabilityEvent): ObservabilityEvent {
   return omitUndefinedFields({
     ...event,
     remote: event.remote ? { ...event.remote } : undefined,
+    resource: event.resource ? { ...event.resource } : undefined,
     shared: event.shared
       ? {
           ...event.shared,
@@ -2706,9 +2804,12 @@ function createModuleInfoSummary(
 function getResourceErrorType(
   event: Pick<
     ObservabilityEvent,
-    'errorCode' | 'errorMessage' | 'message' | 'lifecycle'
+    'errorCode' | 'errorMessage' | 'message' | 'lifecycle' | 'resource'
   >,
 ): string | undefined {
+  if (event.resource?.errorType) {
+    return event.resource.errorType;
+  }
   const text = `${event.errorMessage || ''}\n${event.message || ''}`;
 
   if (!event.errorCode && !text) {
@@ -2744,9 +2845,23 @@ function getOwnerHint(
     | 'errorMessage'
     | 'message'
     | 'lifecycle'
+    | 'resource'
   >,
 ): ObservabilityOwnerHint | undefined {
   const resourceErrorType = getResourceErrorType(event);
+
+  if (event.resource?.errorType) {
+    if (
+      resourceErrorType === 'network' ||
+      resourceErrorType === 'timeout' ||
+      resourceErrorType === 'http'
+    ) {
+      return 'network';
+    }
+    if (resourceErrorType === 'execution' || resourceErrorType === 'content') {
+      return 'remote';
+    }
+  }
 
   switch (event.errorCode) {
     case 'RUNTIME-001':
@@ -2785,10 +2900,17 @@ function getOwnerHint(
 function getRetryable(
   event: Pick<
     ObservabilityEvent,
-    'errorCode' | 'errorMessage' | 'message' | 'lifecycle'
+    'errorCode' | 'errorMessage' | 'message' | 'lifecycle' | 'resource'
   >,
 ): boolean | undefined {
   const resourceErrorType = getResourceErrorType(event);
+
+  if (resourceErrorType === 'network' || resourceErrorType === 'timeout') {
+    return true;
+  }
+  if (resourceErrorType === 'execution' || resourceErrorType === 'content') {
+    return false;
+  }
 
   if (event.errorCode === 'RUNTIME-008') {
     return resourceErrorType === 'network' || resourceErrorType === 'timeout';
@@ -3055,6 +3177,7 @@ export function createObservability(
   ): ObservabilityEvent => {
     const errorInfo = getErrorInfo(event.error, options.stackTrace);
     const sanitizedRemote = sanitizeRemote(event.remote);
+    const sanitizedResource = sanitizeResource(event.resource);
     const sanitizedShared = sanitizeShared(event.shared);
     const requestAlias =
       sanitizeRequestId(event.requestAlias) ||
@@ -3064,7 +3187,15 @@ export function createObservability(
       sanitizeText(origin?.options?.name, 120);
     const runtimeVersion =
       sanitizeText(origin?.version, 80) || appliedRuntimeVersion;
-    const message = getRawText(event.message) || errorInfo.errorMessage;
+    const message = sanitizedResource
+      ? sanitizeText(event.message) || sanitizeText(errorInfo.errorMessage)
+      : getRawText(event.message) || errorInfo.errorMessage;
+    const normalizedErrorMessage = sanitizedResource
+      ? sanitizeText(errorInfo.errorMessage)
+      : errorInfo.errorMessage;
+    const normalizedErrorStack = sanitizedResource
+      ? sanitizeText(errorInfo.errorStack, 4000)
+      : errorInfo.errorStack;
 
     const normalizedEvent: ObservabilityEvent = {
       traceId,
@@ -3077,14 +3208,17 @@ export function createObservability(
       hostName,
       runtimeVersion,
       remote: sanitizedRemote,
+      resource: sanitizedResource,
       shared: sanitizedShared,
       expose: sanitizeText(event.expose, 240),
-      sanitizedUrl: clipText(event.url || event.remote?.entry, 320),
+      sanitizedUrl:
+        sanitizedResource?.url ||
+        clipText(event.url || event.remote?.entry, 320),
       message,
       errorCode: errorInfo.errorCode,
       errorName: errorInfo.errorName,
-      errorMessage: errorInfo.errorMessage,
-      errorStack: errorInfo.errorStack,
+      errorMessage: normalizedErrorMessage,
+      errorStack: normalizedErrorStack,
       duration:
         typeof event.duration === 'number' && Number.isFinite(event.duration)
           ? Math.max(0, event.duration)
@@ -3126,6 +3260,14 @@ export function createObservability(
   const shouldSkipRuntimeHook = (origin?: ObservabilityRuntimeOrigin) =>
     shouldGuardRuntimeHooksByRuntimeVersion &&
     !supportsRuntimeHookObservability(origin);
+
+  const supportsResourceLifecycle = (
+    origin?: ObservabilityRuntimeOrigin,
+  ): boolean =>
+    Boolean(
+      origin?.loaderHook?.lifecycle?.beforeLoadResource &&
+      origin.loaderHook.lifecycle.afterLoadResource,
+    );
 
   const applyPhaseDuration = (event: ObservabilityEvent) => {
     const key = getPhaseDurationKey(event);
@@ -4590,6 +4732,11 @@ export function createObservability(
       (event) => event.bridge?.operation === 'route-sync',
     );
     const traceCompleteness = hasIncompleteHistory ? 'partial' : 'complete';
+    const hasResourceLifecycle = instanceDrafts.some((draft) =>
+      supportsResourceLifecycle(draft.origin),
+    );
+    const remoteTraceCompleteness =
+      hasIncompleteHistory || !hasResourceLifecycle ? 'partial' : 'complete';
 
     return omitUndefinedFields({
       schemaVersion: 1,
@@ -4615,10 +4762,12 @@ export function createObservability(
         },
         remoteTrace: {
           available: hasRemoteSignals || boundInstanceRefs.size > 0,
-          completeness: traceCompleteness,
-          reason: hasRemoteSignals
-            ? undefined
-            : 'No remote lifecycle signal has been observed yet.',
+          completeness: remoteTraceCompleteness,
+          reason: !hasResourceLifecycle
+            ? 'Runtime resource completion hooks are unavailable; remote resource history may be incomplete.'
+            : hasRemoteSignals
+              ? undefined
+              : 'No remote lifecycle signal has been observed yet.',
         },
         sharedState: {
           available: hasSharedState,
@@ -5443,6 +5592,117 @@ export function createObservability(
     afterBridgeCommit(args) {
       recordBridgeSignal(args as ObservabilityBridgeHookArgs, 'commit');
     },
+    beforeLoadResource(args) {
+      const resourceArgs = args as ObservabilityResourceLoadArgs;
+      if (!prepareRuntimeOrigin(resourceArgs.origin)) {
+        return;
+      }
+
+      const remote = createRemoteInfo(resourceArgs.remote);
+      const phase =
+        resourceArgs.resourceType === 'manifest' ||
+        resourceArgs.resourceType === 'remoteEntry'
+          ? resourceArgs.resourceType
+          : 'preload';
+      recordEvent(
+        {
+          phase,
+          status: 'start',
+          requestId: resourceArgs.id,
+          remote,
+          expose: resourceArgs.expose,
+          url: resourceArgs.url,
+          timestamp: resourceArgs.startedAt,
+          lifecycle: 'beforeLoadResource',
+          message: `resource:${resourceArgs.resourceType}:load-start`,
+          resource: {
+            type: resourceArgs.resourceType,
+            initiator: resourceArgs.initiator,
+            url: resourceArgs.url,
+            startedAt: resourceArgs.startedAt,
+          },
+        },
+        resourceArgs.origin,
+      );
+    },
+    afterLoadResource(args) {
+      const resourceArgs = args as ObservabilityResourceLoadResultArgs;
+      if (!prepareRuntimeOrigin(resourceArgs.origin)) {
+        return;
+      }
+
+      const remote = createRemoteInfo(resourceArgs.remote);
+      const phase =
+        resourceArgs.resourceType === 'manifest' ||
+        resourceArgs.resourceType === 'remoteEntry'
+          ? resourceArgs.resourceType
+          : 'preload';
+      const isError =
+        resourceArgs.outcome === 'error' || resourceArgs.outcome === 'timeout';
+      const status: ObservabilityEventStatus =
+        resourceArgs.outcome === 'recovered'
+          ? 'complete'
+          : isError
+            ? 'error'
+            : 'success';
+      const resource: ObservabilityResourceInfo = {
+        type: resourceArgs.resourceType,
+        initiator: resourceArgs.initiator,
+        outcome: resourceArgs.outcome,
+        url: resourceArgs.url,
+        startedAt: resourceArgs.startedAt,
+        endedAt: resourceArgs.endedAt,
+        duration: resourceArgs.duration,
+        httpStatus: resourceArgs.httpStatus,
+        mimeType: resourceArgs.mimeType,
+        redirected: resourceArgs.redirected,
+        cacheSource: resourceArgs.cacheSource,
+        errorType: resourceArgs.errorType,
+      };
+
+      recordEvent(
+        {
+          phase,
+          status,
+          requestId: resourceArgs.id,
+          remote,
+          expose: resourceArgs.expose,
+          url: resourceArgs.url,
+          timestamp: resourceArgs.endedAt,
+          duration: resourceArgs.duration,
+          lifecycle: 'afterLoadResource',
+          message: `resource:${resourceArgs.resourceType}:${resourceArgs.outcome}`,
+          error:
+            isError || resourceArgs.outcome === 'recovered'
+              ? resourceArgs.error
+              : undefined,
+          recovered: resourceArgs.outcome === 'recovered',
+          cached: resourceArgs.outcome === 'cached',
+          resource,
+          errorContext:
+            isError || resourceArgs.outcome === 'recovered'
+              ? {
+                  resourceType: resourceArgs.resourceType,
+                  initiator: resourceArgs.initiator,
+                  outcome: resourceArgs.outcome,
+                  errorType: resourceArgs.errorType,
+                  httpStatus: resourceArgs.httpStatus,
+                }
+              : undefined,
+          metadata: clipObservabilityMetadata({
+            resourceType: resourceArgs.resourceType,
+            initiator: resourceArgs.initiator,
+            outcome: resourceArgs.outcome,
+            httpStatus: resourceArgs.httpStatus,
+            mimeType: resourceArgs.mimeType,
+            redirected: resourceArgs.redirected,
+            cacheSource: resourceArgs.cacheSource,
+            errorType: resourceArgs.errorType,
+          }),
+        },
+        resourceArgs.origin,
+      );
+    },
     beforeRequest(args) {
       const requestArgs = args as ObservabilityRemoteBeforeRequestArgs;
       if (!prepareRuntimeOrigin(requestArgs.origin)) {
@@ -5505,6 +5765,9 @@ export function createObservability(
       }
 
       const snapshotArgs = args as ObservabilitySnapshotLoadArgs;
+      if (supportsResourceLifecycle(lastRuntimeOrigin)) {
+        return returnHookArgs(args);
+      }
       const moduleRemote = createRemoteInfo(snapshotArgs.moduleInfo);
       const snapshotRemoteEntry =
         snapshotArgs.remoteSnapshot?.remoteEntry ||
@@ -5577,6 +5840,9 @@ export function createObservability(
       }
 
       const snapshotArgs = args as ObservabilityRemoteSnapshotLoadArgs;
+      if (supportsResourceLifecycle(lastRuntimeOrigin)) {
+        return returnHookArgs(args);
+      }
       if (snapshotArgs.from !== 'manifest') {
         return returnHookArgs(args);
       }
@@ -5733,6 +5999,7 @@ export function createObservability(
     loadEntry(args) {
       const entryArgs = args as ObservabilityRemoteEntryLoadArgs;
       if (
+        supportsResourceLifecycle(entryArgs.origin) ||
         shouldSkipRuntimeHook(entryArgs.origin) ||
         !prepareRuntimeOrigin(entryArgs.origin)
       ) {
@@ -5756,6 +6023,7 @@ export function createObservability(
     afterLoadEntry(args) {
       const entryArgs = args as ObservabilityRemoteEntryAfterLoadArgs;
       if (
+        (supportsResourceLifecycle(entryArgs.origin) && !entryArgs.recovered) ||
         shouldSkipRuntimeHook(entryArgs.origin) ||
         !prepareRuntimeOrigin(entryArgs.origin)
       ) {
@@ -6203,6 +6471,39 @@ export function createObservability(
           sanitizeRequestId(preloadResult.id) ||
           remote?.name ||
           sanitizeText(preloadResult.preloadConfig?.nameOrAlias, 160);
+
+        if (supportsResourceLifecycle(preloadArgs.origin)) {
+          const failedResource = preloadResult.results?.find(
+            (assetResult) =>
+              assetResult.status === 'error' ||
+              assetResult.status === 'timeout',
+          );
+          recordEvent(
+            {
+              phase: 'preload',
+              status: 'complete',
+              requestId,
+              remote,
+              lifecycle: 'afterPreloadRemote',
+              message: failedResource
+                ? 'preload:completed-with-errors'
+                : 'preload:complete',
+              error: failedResource?.error,
+              metadata: clipObservabilityMetadata({
+                resourceCount: preloadResult.results?.length || 0,
+                failedResourceCount:
+                  preloadResult.results?.filter(
+                    (assetResult) =>
+                      assetResult.status === 'error' ||
+                      assetResult.status === 'timeout',
+                  ).length || 0,
+                preloadNameOrAlias: preloadResult.preloadConfig?.nameOrAlias,
+              }),
+            },
+            preloadArgs.origin,
+          );
+          return;
+        }
 
         preloadResult.results?.forEach((assetResult) => {
           const isError =

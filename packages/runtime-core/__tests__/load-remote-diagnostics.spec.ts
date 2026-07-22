@@ -90,6 +90,7 @@ describe('loadRemote diagnostics', () => {
 
   it('emits an afterLoadRemote hook after a successful remote load', async () => {
     const events: Array<Record<string, unknown>> = [];
+    const resourceResults: Array<Record<string, unknown>> = [];
     const mf = new ModuleFederation({
       name: 'load-remote-diagnostics-host',
       remotes: [
@@ -99,7 +100,15 @@ describe('loadRemote diagnostics', () => {
             'http://localhost:1111/resources/main/federation-manifest.json',
         },
       ],
-      plugins: [createDiagnosticsRecorder(events)],
+      plugins: [
+        createDiagnosticsRecorder(events),
+        {
+          name: 'resource-diagnostics-test-plugin',
+          afterLoadResource(args) {
+            resourceResults.push(args);
+          },
+        },
+      ],
     });
 
     const say = await mf.loadRemote<() => string>('@demo/main/say');
@@ -150,6 +159,24 @@ describe('loadRemote diagnostics', () => {
         }),
       ]),
     );
+    expect(resourceResults).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          resourceType: 'manifest',
+          outcome: 'success',
+          httpStatus: 200,
+        }),
+        expect.objectContaining({
+          resourceType: 'remoteEntry',
+          outcome: 'success',
+        }),
+      ]),
+    );
+    const remoteEntryResult = resourceResults.find(
+      (result) => result.resourceType === 'remoteEntry',
+    );
+    expect(remoteEntryResult).not.toHaveProperty('httpStatus');
+    expect(remoteEntryResult).not.toHaveProperty('mimeType');
   });
 
   it('emits the expose phase before a missing expose bubbles to loadRemote', async () => {
