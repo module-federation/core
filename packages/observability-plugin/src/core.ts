@@ -23,6 +23,7 @@ export type ObservabilityReportOutcome =
   | 'pending'
   | 'runtime-loaded'
   | 'shared-resolved'
+  | 'shared-registered'
   | 'preloaded'
   | 'component-loaded'
   | 'failed'
@@ -92,6 +93,7 @@ export interface ObservabilityRuntimeStateInstance {
         loaded?: boolean;
         singleton?: boolean;
         eager?: boolean;
+        strategy?: string;
       }>;
     }>;
   }>;
@@ -272,6 +274,43 @@ export interface ObservabilitySharedInfo {
   reason?: string;
   definedBy?: 'bundler-runtime';
   conflict?: ObservabilitySharedConflictInfo;
+  candidates?: ObservabilitySharedCandidate[];
+  selectionReason?: string;
+  failureReason?: string;
+  loadType?: 'sync' | 'async';
+  trigger?: string;
+  moduleId?: string | number;
+  chunkId?: string | number;
+  remote?: string;
+  expose?: string;
+  requestId?: string;
+  operationId?: string;
+  fallback?: boolean;
+  recovered?: boolean;
+  registration?: ObservabilitySharedRegistration;
+}
+
+export interface ObservabilitySharedCandidate {
+  scope: string;
+  version: string;
+  provider?: string;
+  loaded: boolean;
+  loading: boolean;
+  singleton: boolean;
+  eager: boolean;
+  strategy?: string;
+  compatible?: boolean;
+  rejectionReason?: string;
+}
+
+export interface ObservabilitySharedRegistration {
+  registrationId: string;
+  action: 'registered' | 'replaced' | 'reused' | 'ignored';
+  reason: string;
+  trigger: string;
+  scope: string;
+  candidate: ObservabilitySharedCandidate;
+  effective?: ObservabilitySharedCandidate;
 }
 
 export interface ObservabilitySharedConflictVersion {
@@ -355,6 +394,7 @@ export interface ObservabilityReport {
     loadCompleted: boolean;
     runtimeLoaded: boolean;
     sharedResolved: boolean;
+    sharedRegistered: boolean;
     preloaded: boolean;
     componentLoaded: boolean;
     outcome: ObservabilityReportOutcome;
@@ -525,6 +565,9 @@ export interface ObservabilityRuntimeOrigin {
   shareScopeMap?: ObservabilityRuntimeShareScopeMap;
   sharedHandler?: {
     shareScopeMap?: ObservabilityRuntimeShareScopeMap;
+    hooks?: {
+      lifecycle?: Record<string, unknown>;
+    };
   };
   loadShare?: (pkgName: string) => Promise<false | (() => unknown)>;
   loadShareSync?: (pkgName: string) => false | (() => unknown);
@@ -557,6 +600,47 @@ interface ObservabilityRuntimeSharedSource {
   strategy?: string;
   shareConfig?: ObservabilityRuntimeSharedConfig;
   get?: unknown;
+}
+
+interface ObservabilityRuntimeSharedCandidate {
+  scope: string;
+  version: string;
+  provider?: string;
+  loaded: boolean;
+  loading: boolean;
+  singleton: boolean;
+  eager: boolean;
+  strategy?: string;
+  compatible?: boolean;
+  rejectionReason?: string;
+}
+
+interface ObservabilityRuntimeSharedLoadContext {
+  trigger?: string;
+  moduleId?: string | number;
+  chunkId?: string | number;
+  remote?: string;
+  expose?: string;
+  requestId?: string;
+  operationId?: string;
+}
+
+interface ObservabilityRuntimeSharedSelectionResult {
+  scope?: string;
+  requestedVersion?: string;
+  requiredVersion?: string | false;
+  singleton?: boolean;
+  strictVersion?: boolean;
+  eager?: boolean;
+  strategy?: string;
+  candidates?: ObservabilityRuntimeSharedCandidate[];
+  selected?: ObservabilityRuntimeSharedCandidate;
+  reason?: string;
+  failureReason?: string;
+  fallback?: boolean;
+  recovered?: boolean;
+  loadType?: 'sync' | 'async';
+  context?: ObservabilityRuntimeSharedLoadContext;
 }
 
 interface ObservabilityRuntimeRemoteSource {
@@ -743,6 +827,23 @@ interface ObservabilitySharedLifecycleArgs {
   origin: ObservabilityRuntimeOrigin;
   error?: unknown;
   recovered?: boolean;
+  loadContext?: ObservabilityRuntimeSharedLoadContext;
+  selectionResult?: ObservabilityRuntimeSharedSelectionResult;
+}
+
+interface ObservabilitySharedRegistrationArgs {
+  pkgName: string;
+  registration: {
+    registrationId: string;
+    scope: string;
+    trigger: string;
+    candidate: ObservabilityRuntimeSharedCandidate;
+    candidates: ObservabilityRuntimeSharedCandidate[];
+    action: ObservabilitySharedRegistration['action'];
+    effective?: ObservabilityRuntimeSharedCandidate;
+    reason: string;
+  };
+  origin: ObservabilityRuntimeOrigin;
 }
 
 export type ObservabilityRuntimePlugin = ModuleFederationRuntimePlugin;
@@ -1376,33 +1477,168 @@ function supportsRuntimeObservability(origin?: ObservabilityRuntimeOrigin) {
   });
 }
 
+function createSharedCandidate(
+  candidate: ObservabilityRuntimeSharedCandidate,
+): ObservabilitySharedCandidate {
+  return {
+    scope: candidate.scope,
+    version: candidate.version,
+    provider: candidate.provider,
+    loaded: candidate.loaded === true,
+    loading: candidate.loading === true,
+    singleton: candidate.singleton === true,
+    eager: candidate.eager === true,
+    strategy: candidate.strategy,
+    compatible: candidate.compatible,
+    rejectionReason: candidate.rejectionReason,
+  };
+}
+
 function createSharedInfo(
   args: ObservabilitySharedLifecycleArgs,
   reason?: string,
 ): ObservabilitySharedInfo {
   const shareConfig = args.shareInfo?.shareConfig;
+  const selection = args.selectionResult;
+  const selected = selection?.selected;
+  const context = selection?.context || args.loadContext;
   const handledBundlerRuntimeShared = reason === 'custom-share-info-unmatched';
-  const loaded = args.selectedShared?.loaded;
+  const loaded = selected?.loaded ?? args.selectedShared?.loaded;
+  const candidates = selection?.candidates?.map(createSharedCandidate);
 
   return {
     name: args.pkgName,
-    shareScope: getSharedScopes(args.shareInfo),
-    version: args.selectedShared?.version || args.shareInfo?.version,
-    requiredVersion: shareConfig?.requiredVersion,
-    selectedVersion: args.selectedShared?.version,
-    availableVersions: getAvailableSharedVersions(args),
-    provider: args.selectedShared?.from,
+    shareScope: selection?.scope
+      ? [selection.scope]
+      : getSharedScopes(args.shareInfo),
+    version:
+      selection?.requestedVersion ||
+      args.selectedShared?.version ||
+      args.shareInfo?.version,
+    requiredVersion: selection?.requiredVersion ?? shareConfig?.requiredVersion,
+    selectedVersion: selected?.version || args.selectedShared?.version,
+    availableVersions: candidates?.length
+      ? Array.from(new Set(candidates.map((candidate) => candidate.version)))
+      : getAvailableSharedVersions(args),
+    provider: selected?.provider || args.selectedShared?.from,
     useIn: getSharedUseIn(args),
-    singleton: shareConfig?.singleton,
-    strictVersion: shareConfig?.strictVersion,
-    eager: shareConfig?.eager,
-    strategy: args.shareInfo?.strategy,
+    singleton: selection?.singleton ?? shareConfig?.singleton,
+    strictVersion: selection?.strictVersion ?? shareConfig?.strictVersion,
+    eager: selection?.eager ?? shareConfig?.eager,
+    strategy: selection?.strategy || args.shareInfo?.strategy,
     loaded,
     loading: loaded
       ? undefined
-      : Boolean(args.selectedShared?.loading) || undefined,
+      : selected?.loading || Boolean(args.selectedShared?.loading) || undefined,
     reason,
+    selectionReason: selection?.reason,
+    failureReason: selection?.failureReason,
+    candidates,
+    loadType: selection?.loadType,
+    trigger: context?.trigger,
+    moduleId: context?.moduleId,
+    chunkId: context?.chunkId,
+    remote: context?.remote,
+    expose: context?.expose,
+    requestId: context?.requestId,
+    operationId: context?.operationId,
+    fallback: selection?.fallback,
+    recovered: selection?.recovered ?? args.recovered,
     definedBy: handledBundlerRuntimeShared ? 'bundler-runtime' : undefined,
+  };
+}
+
+function createSharedRegistrationInfo(
+  args: ObservabilitySharedRegistrationArgs,
+): ObservabilitySharedInfo {
+  const registration = args.registration;
+  const candidate = createSharedCandidate(registration.candidate);
+  const effective = registration.effective
+    ? createSharedCandidate(registration.effective)
+    : undefined;
+  return {
+    name: args.pkgName,
+    shareScope: [registration.scope],
+    version: candidate.version,
+    selectedVersion: effective?.version,
+    availableVersions: Array.from(
+      new Set(registration.candidates.map((item) => item.version)),
+    ),
+    provider: effective?.provider,
+    singleton: candidate.singleton,
+    eager: candidate.eager,
+    strategy: candidate.strategy,
+    loaded: effective?.loaded,
+    loading: effective?.loading || undefined,
+    candidates: registration.candidates.map(createSharedCandidate),
+    trigger: registration.trigger,
+    registration: {
+      registrationId: registration.registrationId,
+      action: registration.action,
+      reason: registration.reason,
+      trigger: registration.trigger,
+      scope: registration.scope,
+      candidate,
+      effective,
+    },
+  };
+}
+
+function getSharedOperationId(args: ObservabilitySharedLifecycleArgs) {
+  return (
+    args.selectionResult?.context?.operationId ||
+    args.loadContext?.operationId ||
+    `shared:${args.pkgName}`
+  );
+}
+
+function sanitizeSharedCandidate(
+  candidate: ObservabilitySharedCandidate,
+): ObservabilitySharedCandidate | undefined {
+  const scope = sanitizeText(candidate.scope, 120);
+  const version = sanitizeText(candidate.version, 120);
+  if (!scope || !version) {
+    return undefined;
+  }
+  return {
+    scope,
+    version,
+    provider: sanitizeText(candidate.provider, 160),
+    loaded: candidate.loaded === true,
+    loading: candidate.loading === true,
+    singleton: candidate.singleton === true,
+    eager: candidate.eager === true,
+    strategy: sanitizeText(candidate.strategy, 80),
+    compatible: candidate.compatible,
+    rejectionReason: sanitizeText(candidate.rejectionReason, 120),
+  };
+}
+
+function sanitizeSharedRegistration(
+  registration: ObservabilitySharedRegistration | undefined,
+): ObservabilitySharedRegistration | undefined {
+  if (!registration) {
+    return undefined;
+  }
+  const candidate = sanitizeSharedCandidate(registration.candidate);
+  const effective = registration.effective
+    ? sanitizeSharedCandidate(registration.effective)
+    : undefined;
+  const registrationId = sanitizeText(registration.registrationId, 120);
+  const scope = sanitizeText(registration.scope, 120);
+  const trigger = sanitizeText(registration.trigger, 80);
+  const reason = sanitizeText(registration.reason, 120);
+  if (!candidate || !registrationId || !scope || !trigger || !reason) {
+    return undefined;
+  }
+  return {
+    registrationId,
+    action: registration.action,
+    reason,
+    trigger,
+    scope,
+    candidate,
+    effective,
   };
 }
 
@@ -1440,6 +1676,35 @@ function sanitizeShared(
     definedBy:
       shared.definedBy === 'bundler-runtime' ? 'bundler-runtime' : undefined,
     conflict: sanitizeSharedConflict(shared.conflict),
+    candidates: (shared.candidates || [])
+      .map(sanitizeSharedCandidate)
+      .filter(
+        (candidate): candidate is ObservabilitySharedCandidate =>
+          candidate !== undefined,
+      )
+      .slice(0, 20),
+    selectionReason: sanitizeText(shared.selectionReason, 120),
+    failureReason: sanitizeText(shared.failureReason, 120),
+    loadType:
+      shared.loadType === 'sync' || shared.loadType === 'async'
+        ? shared.loadType
+        : undefined,
+    trigger: sanitizeText(shared.trigger, 80),
+    moduleId:
+      typeof shared.moduleId === 'number'
+        ? shared.moduleId
+        : sanitizeText(shared.moduleId, 160),
+    chunkId:
+      typeof shared.chunkId === 'number'
+        ? shared.chunkId
+        : sanitizeText(shared.chunkId, 160),
+    remote: sanitizeText(shared.remote, 160),
+    expose: sanitizeText(shared.expose, 240),
+    requestId: sanitizeText(shared.requestId, 240),
+    operationId: sanitizeText(shared.operationId, 160),
+    fallback: shared.fallback === true || undefined,
+    recovered: shared.recovered === true || undefined,
+    registration: sanitizeSharedRegistration(shared.registration),
   };
 }
 
@@ -2796,6 +3061,9 @@ export function createObservability(
     (event.status === 'success' ||
       (event.status === 'complete' && event.recovered));
 
+  const isSharedRegisteredEvent = (event: ObservabilityEvent) =>
+    event.phase === 'shared-registration' && event.status === 'success';
+
   const isPreloadedEvent = (event: ObservabilityEvent) =>
     event.phase === 'preload' && event.status === 'success';
 
@@ -2869,6 +3137,9 @@ export function createObservability(
       ) {
         collection.flags.fallback = true;
       }
+      if (event.shared?.fallback) {
+        collection.flags.fallback = true;
+      }
       if (event.shared?.selectedVersion || event.shared?.provider) {
         collection.shared = {
           name: event.shared.name,
@@ -2921,6 +3192,7 @@ export function createObservability(
     const loadCompleted = report.events.some(isLoadRemoteCompleteEvent);
     const runtimeLoaded = report.events.some(isRuntimeLoadedEvent);
     const sharedResolved = report.events.some(isSharedResolvedEvent);
+    const sharedRegistered = report.events.some(isSharedRegisteredEvent);
     const preloaded = report.events.some(isPreloadedEvent);
     const recovered = report.events.some((item) => item.recovered);
     const componentLoaded = report.events.some(isComponentLoadedEvent);
@@ -2937,6 +3209,8 @@ export function createObservability(
       outcome = 'runtime-loaded';
     } else if (sharedResolved) {
       outcome = 'shared-resolved';
+    } else if (sharedRegistered) {
+      outcome = 'shared-registered';
     } else if (preloaded) {
       outcome = 'preloaded';
     }
@@ -2949,6 +3223,7 @@ export function createObservability(
       loadCompleted,
       runtimeLoaded,
       sharedResolved,
+      sharedRegistered,
       preloaded,
       componentLoaded,
       outcome,
@@ -3516,6 +3791,7 @@ export function createObservability(
           loadCompleted: false,
           runtimeLoaded: false,
           sharedResolved: false,
+          sharedRegistered: false,
           preloaded: false,
           componentLoaded: false,
           outcome: 'pending',
@@ -3810,23 +4086,29 @@ export function createObservability(
 
   const getShareScopeSummaries = (origin: ObservabilityRuntimeOrigin) =>
     Object.entries(getOriginShareScopeMap(origin)).map(([name, scope]) => {
-      const sharedNames = Object.keys(scope || {}).sort();
+      const rawSharedNames = Object.keys(scope || {}).sort();
+      const sharedEntries = rawSharedNames.slice(0, 100).map((rawName) => ({
+        rawName,
+        name: sanitizeText(rawName, 160) || 'unknown',
+      }));
       return {
         name: sanitizeText(name, 120) || 'default',
-        sharedCount: sharedNames.length,
-        sharedNames,
-        shared: sharedNames.map((sharedName) => ({
-          name: sharedName,
-          versions: Object.entries(scope?.[sharedName] || {}).map(
-            ([version, shared]) =>
+        sharedCount: rawSharedNames.length,
+        sharedNames: sharedEntries.map((entry) => entry.name),
+        shared: sharedEntries.map((entry) => ({
+          name: entry.name,
+          versions: Object.entries(scope?.[entry.rawName] || {})
+            .slice(0, 20)
+            .map(([version, shared]) =>
               omitUndefinedFields({
                 version: sanitizeText(version, 120) || version,
                 provider: sanitizeText(shared.from, 160),
                 loaded: shared.loaded === true || undefined,
                 singleton: shared.shareConfig?.singleton || undefined,
                 eager: shared.shareConfig?.eager || undefined,
+                strategy: sanitizeText(shared.strategy, 80),
               }),
-          ),
+            ),
         })),
       };
     });
@@ -4052,6 +4334,16 @@ export function createObservability(
     );
     const hasRemoteSignals = events.some((event) => Boolean(event.remote));
     const hasSharedSignals = events.some((event) => Boolean(event.shared));
+    const hasDetailedSharedSignals = events.some(
+      (event) =>
+        Boolean(event.shared?.selectionReason) ||
+        Boolean(event.shared?.registration),
+    );
+    const hasDetailedSharedHooks = instanceDrafts.some((draft) =>
+      Boolean(
+        draft.origin.sharedHandler?.hooks?.lifecycle?.['afterRegisterShare'],
+      ),
+    );
     const hasBridge = instances.some((instance) => instance.bridge?.available);
     const traceCompleteness = hasIncompleteHistory ? 'partial' : 'complete';
 
@@ -4092,11 +4384,15 @@ export function createObservability(
           available: hasStableSharedRuntime && hasSharedSignals,
           completeness:
             hasStableSharedRuntime && hasSharedSignals
-              ? traceCompleteness
+              ? hasDetailedSharedHooks && hasDetailedSharedSignals
+                ? traceCompleteness
+                : 'partial'
               : 'unavailable',
           reason: hasStableSharedRuntime
             ? hasSharedSignals
-              ? undefined
+              ? hasDetailedSharedHooks && hasDetailedSharedSignals
+                ? undefined
+                : 'Shared history is available, but detailed registration or selection results are missing.'
               : 'No shared lifecycle signal has been observed yet.'
             : 'Shared tracing requires a stable runtime version of 2.5.0 or newer.',
         },
@@ -5347,6 +5643,39 @@ export function createObservability(
 
       return returnHookArgs(args);
     },
+    afterRegisterShare(args) {
+      const registrationArgs = args as ObservabilitySharedRegistrationArgs;
+      if (
+        shouldGuardSharedHooksByRuntimeVersion &&
+        !supportsRuntimeHookObservability(registrationArgs.origin)
+      ) {
+        return returnHookArgs(args);
+      }
+
+      if (!prepareRuntimeOrigin(registrationArgs.origin)) {
+        return returnHookArgs(args);
+      }
+
+      recordEvent(
+        {
+          phase: 'shared-registration',
+          status: 'success',
+          requestId: registrationArgs.registration.registrationId,
+          lifecycle: 'afterRegisterShare',
+          shared: createSharedRegistrationInfo(registrationArgs),
+          message: `shared:registration-${registrationArgs.registration.action}`,
+          metadata: {
+            scope: registrationArgs.registration.scope,
+            action: registrationArgs.registration.action,
+            reason: registrationArgs.registration.reason,
+            trigger: registrationArgs.registration.trigger,
+          },
+        },
+        registrationArgs.origin,
+      );
+
+      return returnHookArgs(args);
+    },
     beforeLoadShare(args) {
       if (
         shouldGuardSharedHooksByRuntimeVersion &&
@@ -5363,7 +5692,7 @@ export function createObservability(
         {
           phase: 'shared',
           status: 'start',
-          requestId: `shared:${args.pkgName}`,
+          requestId: getSharedOperationId(args),
           lifecycle: 'loadShare',
           shared: createSharedInfo(args),
           message: 'shared:load-start',
@@ -5389,7 +5718,7 @@ export function createObservability(
         {
           phase: 'shared',
           status: 'success',
-          requestId: `shared:${args.pkgName}`,
+          requestId: getSharedOperationId(args),
           lifecycle: args.lifecycle,
           shared: createSharedInfo(args),
           message:
@@ -5423,7 +5752,7 @@ export function createObservability(
         {
           phase: 'shared',
           status: handledCustomShareMiss ? 'complete' : 'error',
-          requestId: `shared:${args.pkgName}`,
+          requestId: getSharedOperationId(args),
           lifecycle: args.lifecycle,
           shared: createSharedInfo(args, reason),
           message: reason ? `shared:${reason}` : undefined,

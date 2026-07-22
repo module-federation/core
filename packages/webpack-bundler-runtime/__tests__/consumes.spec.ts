@@ -161,7 +161,15 @@ describe('consumes', () => {
     expect(mockPromises.length).toBe(1);
     expect(mockFederationInstance.loadShare).toHaveBeenCalledWith(
       mockShareKey,
-      { customShareInfo: mockShareInfo },
+      {
+        customShareInfo: mockShareInfo,
+        from: 'build',
+        context: {
+          trigger: 'build',
+          moduleId: mockModuleId,
+          chunkId: 'testChunkId',
+        },
+      },
     );
 
     // Wait for promise to resolve

@@ -19,6 +19,8 @@ import {
   RemoteEntryInitOptions,
   CallFrom,
   ResourceLoadContext,
+  LoadShareExtraOptions,
+  SharedLoadContext,
 } from './type';
 import { getBuilderId, registerPlugins, getRemoteEntry, error } from './utils';
 import {
@@ -344,10 +346,7 @@ export class ModuleFederation {
 
   async loadShare<T>(
     pkgName: string,
-    extraOptions?: {
-      customShareInfo?: Partial<Shared>;
-      resolver?: (sharedOptions: ShareInfos[string]) => Shared;
-    },
+    extraOptions?: LoadShareExtraOptions,
   ): Promise<false | (() => T | undefined)> {
     return this.sharedHandler.loadShare(pkgName, extraOptions);
   }
@@ -358,11 +357,7 @@ export class ModuleFederation {
   // 3. If the local get returns something other than Promise, then it will be used directly
   loadShareSync<T>(
     pkgName: string,
-    extraOptions?: {
-      customShareInfo?: Partial<Shared>;
-      from?: 'build' | 'runtime';
-      resolver?: (sharedOptions: ShareInfos[string]) => Shared;
-    },
+    extraOptions?: LoadShareExtraOptions,
   ): () => T | never {
     return this.sharedHandler.loadShareSync(pkgName, extraOptions);
   }
@@ -373,6 +368,7 @@ export class ModuleFederation {
       initScope?: InitScope;
       from?: CallFrom;
       strategy?: Shared['strategy'];
+      context?: SharedLoadContext;
     },
   ): Array<Promise<void>> {
     return this.sharedHandler.initializeSharing(shareScopeName, extraOptions);
