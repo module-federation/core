@@ -608,6 +608,7 @@ describe('hooks', () => {
       headers: { 'Content-Type': 'application/json' },
     });
     let lastFetchRemoteInfo: any;
+    const manifestResults: Array<Record<string, unknown>> = [];
     const fetchPlugin: () => ModuleFederationRuntimePlugin = () => ({
       name: 'fetch-plugin',
       fetch(url, options, remoteInfo, resourceContext) {
@@ -630,7 +631,17 @@ describe('hooks', () => {
           entry: 'http://mockxxx.com/loader-fetch-hooks-mf-manifest.json',
         },
       ],
-      plugins: [fetchPlugin()],
+      plugins: [
+        fetchPlugin(),
+        {
+          name: 'manifest-resource-recorder',
+          afterLoadResource(args) {
+            if (args.resourceType === 'manifest') {
+              manifestResults.push(args);
+            }
+          },
+        },
+      ],
     });
 
     const res = await INSTANCE.loadRemote<() => string>(
@@ -641,6 +652,16 @@ describe('hooks', () => {
     expect(lastFetchRemoteInfo).toMatchObject({
       name: '@loader-hooks/app2',
       entry: 'http://mockxxx.com/loader-fetch-hooks-mf-manifest.json',
+    });
+    expect(manifestResults).toHaveLength(1);
+    expect(manifestResults[0]).toMatchObject({
+      id: '@loader-hooks/app2/say',
+      initiator: 'loadRemote',
+      resourceType: 'manifest',
+      outcome: 'success',
+      httpStatus: 200,
+      mimeType: 'application/json',
+      redirected: false,
     });
   });
 
@@ -714,6 +735,77 @@ describe('hooks', () => {
     assert(res);
     expect(res()).toBe('hello app2');
     expect(snapshotEvents).toEqual(['loadSnapshot', 'manifest']);
+  });
+
+  it('reports a concurrent manifest waiter as cache reuse without refetching', async () => {
+    const manifestUrl = 'http://mockxxx.com/concurrent-hooks-mf-manifest.json';
+    const data = {
+      id: '@loader-hooks/concurrent',
+      name: '@loader-hooks/concurrent',
+      metaData: {
+        name: '@loader-hooks/concurrent',
+        publicPath: 'http://localhost:1111/',
+        type: 'app',
+        buildInfo: { buildVersion: 'custom' },
+        remoteEntry: {
+          name: 'federation-remote-entry.js',
+          path: 'resources/hooks/app2/',
+        },
+        types: { name: 'index.d.ts', path: './' },
+        globalName: '@loader-hooks/app2',
+      },
+      remotes: [],
+      shared: [],
+      exposes: [],
+    };
+    let fetchCount = 0;
+    const results: Array<Record<string, any>> = [];
+    const instance = new ModuleFederation({
+      name: '@loader-hooks/concurrent-host',
+      remotes: [],
+      plugins: [
+        {
+          name: 'delayed-manifest-fetch',
+          async fetch(url) {
+            if (url !== manifestUrl) {
+              return undefined;
+            }
+            fetchCount += 1;
+            await Promise.resolve();
+            return new Response(JSON.stringify(data), {
+              status: 200,
+              headers: { 'Content-Type': 'application/json' },
+            });
+          },
+        },
+        {
+          name: 'concurrent-manifest-recorder',
+          afterLoadResource(args) {
+            if (args.resourceType === 'manifest') {
+              results.push(args);
+            }
+          },
+        },
+      ],
+    });
+    const moduleInfo = {
+      name: '@loader-hooks/concurrent',
+      entry: manifestUrl,
+    } as const;
+
+    await Promise.all([
+      instance.snapshotHandler.loadRemoteSnapshotInfo({ moduleInfo }),
+      instance.snapshotHandler.loadRemoteSnapshotInfo({ moduleInfo }),
+    ]);
+
+    expect(fetchCount).toBe(1);
+    expect(results.map((item) => item.outcome).sort()).toEqual([
+      'cached',
+      'success',
+    ]);
+    expect(results.find((item) => item.outcome === 'cached')?.cacheSource).toBe(
+      'mf-memory',
+    );
   });
 
   it('loaderEntry hooks', async () => {

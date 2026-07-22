@@ -14,10 +14,13 @@ import {
 } from '@module-federation/error-codes';
 import { Options, Remote, ResourceLoadInitiator } from '../../type';
 import {
+  classifyResourceLoadError,
+  emitCachedResourceLoad,
   isRemoteInfoWithEntry,
   error,
   optionsToMFContext,
   getRemoteInfo,
+  startResourceLoad,
 } from '../../utils';
 import {
   getGlobalSnapshot,
@@ -298,93 +301,169 @@ export class SnapshotHandler {
   ): Promise<Manifest> {
     const getManifest = async (): Promise<Manifest> => {
       const remoteInfo = getRemoteInfo(moduleInfo);
+      const resourceContext = {
+        initiator: resourceOptions?.initiator || ('loadRemote' as const),
+        id: resourceOptions?.id || moduleInfo.name,
+        url: manifestUrl,
+        resourceType: 'manifest' as const,
+      };
       let manifestJson: Manifest | undefined =
         this.manifestCache.get(manifestUrl);
       if (manifestJson) {
+        await emitCachedResourceLoad(this.HostInstance, {
+          context: resourceContext,
+          url: manifestUrl,
+          remoteInfo,
+          cacheSource: 'mf-memory',
+        });
         return manifestJson;
       }
+
+      const attempt = await startResourceLoad(this.HostInstance, {
+        context: resourceContext,
+        url: manifestUrl,
+        remoteInfo,
+      });
+      let responseInfo:
+        | {
+            httpStatus?: number;
+            mimeType?: string;
+            redirected?: boolean;
+          }
+        | undefined;
+      let originalError: unknown;
+      let recovered = false;
+      let httpError: Error | undefined;
+
       try {
-        let res = await this.loaderHook.lifecycle.fetch.emit(
-          manifestUrl,
-          {},
-          remoteInfo,
-          resourceOptions
-            ? {
-                ...resourceOptions,
-                url: manifestUrl,
-                resourceType: 'manifest',
-              }
-            : undefined,
-        );
-        if (!res || !(res instanceof Response)) {
-          res = await fetch(manifestUrl, {});
+        try {
+          let res = await this.loaderHook.lifecycle.fetch.emit(
+            manifestUrl,
+            {},
+            remoteInfo,
+            resourceContext,
+          );
+          if (!res || !(res instanceof Response)) {
+            res = await fetch(manifestUrl, {});
+          }
+          responseInfo = {
+            httpStatus: res.status,
+            mimeType: res.headers.get('content-type') || undefined,
+            redirected: res.redirected,
+          };
+          if (!res.ok) {
+            httpError = new Error(
+              `Manifest request failed with HTTP status ${res.status}.`,
+            );
+          }
+          manifestJson = (await res.json()) as Manifest;
+        } catch (err) {
+          originalError = err;
+          manifestJson =
+            (await this.HostInstance.remoteHandler.hooks.lifecycle.errorLoadRemote.emit(
+              {
+                id: manifestUrl,
+                error: err,
+                from: 'runtime',
+                lifecycle: 'afterResolve',
+                remote: remoteInfo,
+                origin: this.HostInstance,
+              },
+            )) as Manifest | undefined;
+
+          if (!manifestJson) {
+            delete this.manifestLoading[manifestUrl];
+            const errorType = classifyResourceLoadError(err, 'network');
+            await attempt.finish(
+              errorType === 'timeout' ? 'timeout' : 'error',
+              {
+                ...responseInfo,
+                error: err,
+                errorType,
+              },
+            );
+            error(
+              RUNTIME_003,
+              runtimeDescMap,
+              {
+                manifestUrl,
+                moduleName: moduleInfo.name,
+                hostName: this.HostInstance.options.name,
+              },
+              `${err}`,
+              optionsToMFContext(this.HostInstance.options),
+            );
+          }
+          recovered = true;
         }
-        manifestJson = (await res.json()) as Manifest;
-      } catch (err) {
-        manifestJson =
-          (await this.HostInstance.remoteHandler.hooks.lifecycle.errorLoadRemote.emit(
+
+        const missingRequiredFields = [
+          !manifestJson.metaData && 'metaData',
+          !manifestJson.exposes && 'exposes',
+          !manifestJson.shared && 'shared',
+        ].filter(Boolean);
+        if (missingRequiredFields.length > 0) {
+          const contentError = new Error(
+            `"${manifestUrl}" is not a valid federation manifest for remote "${moduleInfo.name}". Missing required fields: ${missingRequiredFields.join(', ')}.`,
+          );
+          await this.HostInstance.remoteHandler.hooks.lifecycle.errorLoadRemote.emit(
             {
               id: manifestUrl,
-              error: err,
+              error: contentError,
               from: 'runtime',
               lifecycle: 'afterResolve',
               remote: remoteInfo,
               origin: this.HostInstance,
             },
-          )) as Manifest | undefined;
+          );
+          await attempt.finish('error', {
+            ...responseInfo,
+            error: contentError,
+            errorType: 'content',
+          });
+        }
 
-        if (!manifestJson) {
-          delete this.manifestLoading[manifestUrl];
+        if (missingRequiredFields.length > 0) {
           error(
-            RUNTIME_003,
+            RUNTIME_013,
             runtimeDescMap,
             {
               manifestUrl,
               moduleName: moduleInfo.name,
               hostName: this.HostInstance.options.name,
+              missingFields: missingRequiredFields.join(','),
             },
-            `${err}`,
+            undefined,
             optionsToMFContext(this.HostInstance.options),
           );
         }
+        this.manifestCache.set(manifestUrl, manifestJson);
+        if (httpError) {
+          await attempt.finish('error', {
+            ...responseInfo,
+            error: httpError,
+            errorType: 'http',
+          });
+        } else {
+          await attempt.finish(recovered ? 'recovered' : 'success', {
+            ...responseInfo,
+            error: recovered ? originalError : undefined,
+            errorType: recovered
+              ? classifyResourceLoadError(originalError, 'network')
+              : undefined,
+          });
+        }
+        return manifestJson;
+      } catch (manifestError) {
+        delete this.manifestLoading[manifestUrl];
+        const errorType = classifyResourceLoadError(manifestError, 'content');
+        await attempt.finish(errorType === 'timeout' ? 'timeout' : 'error', {
+          ...responseInfo,
+          error: manifestError,
+          errorType,
+        });
+        throw manifestError;
       }
-
-      const missingRequiredFields = [
-        !manifestJson.metaData && 'metaData',
-        !manifestJson.exposes && 'exposes',
-        !manifestJson.shared && 'shared',
-      ].filter(Boolean);
-      if (missingRequiredFields.length > 0) {
-        await this.HostInstance.remoteHandler.hooks.lifecycle.errorLoadRemote.emit(
-          {
-            id: manifestUrl,
-            error: new Error(
-              `"${manifestUrl}" is not a valid federation manifest for remote "${moduleInfo.name}". Missing required fields: ${missingRequiredFields.join(', ')}.`,
-            ),
-            from: 'runtime',
-            lifecycle: 'afterResolve',
-            remote: remoteInfo,
-            origin: this.HostInstance,
-          },
-        );
-      }
-
-      if (missingRequiredFields.length > 0) {
-        error(
-          RUNTIME_013,
-          runtimeDescMap,
-          {
-            manifestUrl,
-            moduleName: moduleInfo.name,
-            hostName: this.HostInstance.options.name,
-            missingFields: missingRequiredFields.join(','),
-          },
-          undefined,
-          optionsToMFContext(this.HostInstance.options),
-        );
-      }
-      this.manifestCache.set(manifestUrl, manifestJson);
-      return manifestJson;
     };
 
     return getManifest();
@@ -422,9 +501,24 @@ export class SnapshotHandler {
       return remoteSnapshotRes;
     };
 
-    if (!this.manifestLoading[manifestUrl]) {
-      this.manifestLoading[manifestUrl] = asyncLoadProcess().then((res) => res);
+    const existingLoading = this.manifestLoading[manifestUrl];
+    if (existingLoading) {
+      const remoteSnapshot = await existingLoading;
+      await emitCachedResourceLoad(this.HostInstance, {
+        context: {
+          initiator: resourceOptions?.initiator || 'loadRemote',
+          id: resourceOptions?.id || moduleInfo.name,
+          resourceType: 'manifest',
+          url: manifestUrl,
+        },
+        url: manifestUrl,
+        remoteInfo: getRemoteInfo(moduleInfo),
+        cacheSource: 'mf-memory',
+      });
+      return remoteSnapshot;
     }
+
+    this.manifestLoading[manifestUrl] = asyncLoadProcess().then((res) => res);
     return this.manifestLoading[manifestUrl];
   }
 }
