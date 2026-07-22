@@ -135,8 +135,8 @@ export interface RemoteComponentParams<
  */
 export interface RemoteModule {
   provider: () => {
-    render: (info: RenderFnParams) => void;
-    destroy: (info: { dom: any }) => void;
+    render: (info: RenderFnParams) => unknown | Promise<unknown>;
+    destroy: (info: { dom: any }) => unknown | Promise<unknown>;
   };
 }
 
