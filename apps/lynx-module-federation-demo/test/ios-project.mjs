@@ -114,6 +114,8 @@ assert.match(urlResolver, /hasPrefix:@"\/catalog-native\/"/);
 assert.equal(iosRunner.match(/await run\(\s*'xcodebuild'/g)?.length, 1);
 assert.match(iosRunner, /'-configuration',\s*'Release'/);
 assert.match(iosRunner, /build\/OrbitControl-Release\.xcresult/);
+assert.match(iosRunner, /'-test-iterations',\s*'2'/);
+assert.match(iosRunner, /'-retry-tests-on-failure'/);
 assert.match(iosRunner, /-only-testing:OrbitControlTests/);
 for (const testName of [
   'testFederatedImportsRuntimeLoadingAndSingleton',

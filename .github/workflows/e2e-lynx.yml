@@ -171,7 +171,8 @@ jobs:
             ${{ runner.os }}-${{ runner.arch }}-lynx-ios-xcode-16.4-ruby-${{ env.RUBY_VERSION }}-
 
       - name: Cache iOS build products
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
+        id: ios-build-cache
+        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
         with:
           path: |
             apps/lynx-module-federation-demo/ios/build/DerivedData/Build
@@ -199,6 +200,19 @@ jobs:
 
       - name: Run standalone iOS federation E2E
         run: node apps/lynx-module-federation-demo/test/ios/run.mjs
+
+      - name: Save iOS build products
+        if: >-
+          always() &&
+          steps.ios-build-cache.outputs.cache-hit != 'true' &&
+          hashFiles('apps/lynx-module-federation-demo/ios/build/DerivedData/Build/Products/Release-iphonesimulator/OrbitControl.app/OrbitControl') != ''
+        uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
+        with:
+          path: |
+            apps/lynx-module-federation-demo/ios/build/DerivedData/Build
+            apps/lynx-module-federation-demo/ios/build/DerivedData/ModuleCache.noindex
+            apps/lynx-module-federation-demo/ios/build/DerivedData/SDKStatCaches.noindex
+          key: ${{ runner.os }}-${{ runner.arch }}-lynx-ios-derived-data-xcode-16.4-${{ hashFiles('apps/lynx-module-federation-demo/ios/Podfile', 'apps/lynx-module-federation-demo/ios/Podfile.lock') }}-${{ hashFiles('apps/lynx-module-federation-demo/ios/OrbitControl.xcodeproj/project.pbxproj') }}
 
       - name: Upload iOS E2E evidence
         if: success()
