@@ -43,6 +43,7 @@ const [
   syncScript,
   iosRunner,
   scheme,
+  urlResolver,
 ] = await Promise.all([
   read('ios/Podfile'),
   read('ios/Podfile.lock'),
@@ -60,6 +61,7 @@ const [
   read(
     'ios/OrbitControl.xcodeproj/xcshareddata/xcschemes/OrbitControl.xcscheme',
   ),
+  read('ios/OrbitControl/OrbitResourceURLResolver.m'),
 ]);
 
 for (const pod of ['Lynx', 'LynxService', 'XElement']) {
@@ -89,7 +91,7 @@ for (const file of [
   assert.match(project, new RegExp(`${file.replace('.', '\\.')} in Sources`));
 }
 assert.match(scheme, /BlueprintName="OrbitControlTests"/);
-assert.match(project, /static in Resources/);
+assert.match(project, /host-native in Resources/);
 assert.match(uiTest, /matching\(identifier: "federation-ready"\)/);
 assert.match(appSource, /accessibilityId: 'federation-ready'/);
 assert.match(
@@ -105,8 +107,10 @@ assert.match(packageJson, /"ios:device": "node scripts\/dev-ios-device\.mjs"/);
 assert.match(deviceServer, /LYNX_DEV_HOST: '0\.0\.0\.0'/);
 assert.match(deviceServer, /not a loopback or unspecified address/);
 assert.match(syncScript, /dist\/host-native\/main\.lynx\.bundle/);
-assert.match(syncScript, /sourceStatic/);
-assert.match(syncScript, /cp\(sourceStatic, destinationStatic/);
+assert.match(syncScript, /sourceLazyBundles/);
+assert.match(syncScript, /cp\(sourceLazyBundles, destinationLazyBundles/);
+assert.match(urlResolver, /hasPrefix:@"\/host-native\/"/);
+assert.match(urlResolver, /hasPrefix:@"\/catalog-native\/"/);
 assert.equal(iosRunner.match(/await run\(\s*'xcodebuild'/g)?.length, 1);
 assert.match(iosRunner, /'-configuration',\s*'Release'/);
 assert.match(iosRunner, /build\/OrbitControl-Release\.xcresult/);

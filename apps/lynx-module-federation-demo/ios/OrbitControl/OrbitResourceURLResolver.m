@@ -7,6 +7,10 @@
 
 @end
 
+static BOOL IsNetworkBundleAssetPath(NSString *urlString) {
+  return [urlString hasPrefix:@"/host-native/"] ||
+         [urlString hasPrefix:@"/catalog-native/"];
+}
 
 @implementation OrbitResourceURLResolver
 
@@ -34,7 +38,7 @@
   NSString *unresolvedPath = url.path.length > 0 ? url.path : urlString;
   if ([unresolvedPath.pathComponents containsObject:@".."]) return nil;
 
-  if (self.rootBundleURL && [urlString hasPrefix:@"/static/"]) {
+  if (self.rootBundleURL && IsNetworkBundleAssetPath(urlString)) {
     return [NSURL URLWithString:urlString relativeToURL:self.rootBundleURL].absoluteURL;
   }
 
@@ -50,7 +54,7 @@
   if (urlString.isAbsolutePath) {
     NSURL *fileURL = [NSURL fileURLWithPath:urlString];
     if ([self isAllowedLocalURL:fileURL]) return fileURL;
-    if (![urlString hasPrefix:@"/static/"]) return nil;
+    if (![urlString hasPrefix:@"/host-native/"]) return nil;
     relativePath = [urlString substringFromIndex:1];
   } else {
     relativePath = unresolvedPath;

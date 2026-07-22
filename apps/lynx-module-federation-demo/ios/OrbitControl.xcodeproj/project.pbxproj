@@ -15,7 +15,7 @@
 		100000000000000000000005 /* main.lynx.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000019 /* main.lynx.bundle */; };
 		100000000000000000000006 /* OrbitControlUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000000000000000000001A /* OrbitControlUITests.swift */; };
 		100000000000000000000007 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 10000000000000000000001C /* Assets.xcassets */; };
-		100000000000000000000008 /* static in Resources */ = {isa = PBXBuildFile; fileRef = 10000000000000000000001D /* static */; };
+		100000000000000000000008 /* host-native in Resources */ = {isa = PBXBuildFile; fileRef = 10000000000000000000001D /* host-native */; };
 		200000000000000000000001 /* OrbitResourceURLResolver.m in Sources */ = {isa = PBXBuildFile; fileRef = 210000000000000000000002 /* OrbitResourceURLResolver.m */; };
 		200000000000000000000002 /* OrbitResourceStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 210000000000000000000004 /* OrbitResourceStore.m */; };
 		200000000000000000000003 /* OrbitResourceDownloader.m in Sources */ = {isa = PBXBuildFile; fileRef = 210000000000000000000006 /* OrbitResourceDownloader.m */; };
@@ -50,7 +50,7 @@
 		10000000000000000000001A /* OrbitControlUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrbitControlUITests.swift; sourceTree = "<group>"; };
 		10000000000000000000001B /* OrbitControlUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OrbitControlUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		10000000000000000000001C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		10000000000000000000001D /* static */ = {isa = PBXFileReference; lastKnownFileType = folder; path = static; sourceTree = "<group>"; };
+		10000000000000000000001D /* host-native */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "host-native"; sourceTree = "<group>"; };
 		210000000000000000000001 /* OrbitResourceURLResolver.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OrbitResourceURLResolver.h; sourceTree = "<group>"; };
 		210000000000000000000002 /* OrbitResourceURLResolver.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OrbitResourceURLResolver.m; sourceTree = "<group>"; };
 		210000000000000000000003 /* OrbitResourceStore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OrbitResourceStore.h; sourceTree = "<group>"; };
@@ -131,7 +131,7 @@
 			isa = PBXGroup;
 			children = (
 				100000000000000000000019 /* main.lynx.bundle */,
-				10000000000000000000001D /* static */,
+				10000000000000000000001D /* host-native */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -288,7 +288,7 @@
 				100000000000000000000004 /* LaunchScreen.storyboard in Resources */,
 				100000000000000000000005 /* main.lynx.bundle in Resources */,
 				100000000000000000000007 /* Assets.xcassets in Resources */,
-				100000000000000000000008 /* static in Resources */,
+				100000000000000000000008 /* host-native in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

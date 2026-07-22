@@ -21,10 +21,23 @@ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite;
   OrbitResourceURLResolver *resolver = [[OrbitResourceURLResolver alloc]
     initWithRootBundleURL:@"http://127.0.0.1:3000/host-native/main.lynx.bundle"];
 
-  NSURL *resolved = [resolver resolvedURLForString:@"/static/js/async/shared.js"];
+  NSURL *resolved = [resolver
+    resolvedURLForString:@"/host-native/lazy-bundle/shared.bundle"];
 
   XCTAssertEqualObjects(resolved.absoluteString,
-                        @"http://127.0.0.1:3000/static/js/async/shared.js");
+                        @"http://127.0.0.1:3000/host-native/lazy-bundle/shared.bundle");
+}
+
+- (void)testResolvesStandaloneCatalogRootRelativeURLs {
+  OrbitResourceURLResolver *resolver = [[OrbitResourceURLResolver alloc]
+    initWithRootBundleURL:@"http://127.0.0.1:3000/catalog-native/main.lynx.bundle"];
+
+  NSURL *resolved = [resolver
+    resolvedURLForString:@"/catalog-native/lazy-bundle/activity-metadata.bundle"];
+
+  XCTAssertEqualObjects(
+    resolved.absoluteString,
+    @"http://127.0.0.1:3000/catalog-native/lazy-bundle/activity-metadata.bundle");
 }
 
 - (void)testRejectsTraversalAndSymlinkEscapes {
@@ -62,7 +75,8 @@ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite;
   XCTAssertFalse([resolver isAllowedLocalURL:
     [escape URLByAppendingPathComponent:@"secret.bundle"]]);
   XCTAssertNil([resolver resolvedURLForString:@"../secret.bundle"]);
-  XCTAssertNil([resolver resolvedURLForString:@"/static/../secret.bundle"]);
+  XCTAssertNil(
+    [resolver resolvedURLForString:@"/host-native/../secret.bundle"]);
   [files removeItemAtURL:parent error:nil];
 }
 

@@ -31,8 +31,9 @@ export interface ActivityFeedRemoteModule extends SharedObserverExports {
 }
 
 export async function loadCompiledImportRemotes() {
-  const [card, details] = await Promise.all([
-    import('catalog/Card'),
+  'background-only';
+  const [{ card }, details] = await Promise.all([
+    import('./staticCard'),
     import('catalog/Details'),
   ]);
 

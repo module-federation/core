@@ -347,6 +347,40 @@ describe('patchLynxChunkLoading lazy bundle loading', () => {
     expect(webpackRequire.m.factory).toBe(factory);
   });
 
+  it('uses the Web native Lynx lazy-bundle API before React starts', async () => {
+    const webpackRequire = createWebpackRequire();
+    webpackRequire.lynx_aci = { feature: 'lazy-bundle/Feature.bundle' };
+    const factory = rs.fn();
+    const loadLazyBundle = rs.fn(async () => ({
+      ids: ['feature'],
+      modules: { factory },
+    }));
+    const globalObject = {
+      lynx: {
+        getNativeLynx: () => ({ loadLazyBundle }),
+        loadScript: rs.fn(),
+        requireModuleAsync: rs.fn(),
+      },
+      [LYNX_BUNDLE_REGISTRY]: new Map([
+        ['remote', 'lynx-cache://catalog'],
+        [
+          'remote:remote-origin',
+          'https://cdn.example/remotes/catalog.lynx.bundle',
+        ],
+      ]),
+    };
+
+    patchLynxChunkLoading(webpackRequire, 'remote', globalObject);
+    const promises: PromiseLike<unknown>[] = [];
+    webpackRequire.f.j!('feature', promises);
+    await Promise.all(promises);
+
+    expect(loadLazyBundle).toHaveBeenCalledWith(
+      'https://cdn.example/remotes/lazy-bundle/Feature.bundle',
+    );
+    expect(webpackRequire.m.factory).toBe(factory);
+  });
+
   it('times out split chunks and permits retry', async () => {
     const webpackRequire = createWebpackRequire();
     webpackRequire.lynx_aci = { feature: 'async/Card.bundle' };
@@ -396,14 +430,14 @@ describe('patchLynxChunkLoading lazy bundle loading', () => {
     const promises: PromiseLike<unknown>[] = [];
     webpackRequire.f.j!('feature', promises);
     await expect(Promise.all(promises)).rejects.toThrow(
-      'requires QueryComponent and getDynamicComponentExports',
+      'requires QueryComponent',
     );
 
     expect(fetchBundle).not.toHaveBeenCalled();
     expect(loadScript).not.toHaveBeenCalled();
   });
 
-  it('loads split chunks through QueryComponent when loadLazyBundle is unavailable', async () => {
+  it('loads split chunks through QueryComponent when loadLazyBundle is not callable', async () => {
     const webpackRequire = createWebpackRequire();
     webpackRequire.lynx_aci = {
       feature: 'async/Card.123.bundle',
@@ -418,13 +452,14 @@ describe('patchLynxChunkLoading lazy bundle loading', () => {
     );
     const loadScript = rs.fn();
     const globalObject = {
-      lynx: {
-        loadScript,
-        QueryComponent,
-        requireModuleAsync: rs.fn(),
-      },
       lynxCoreInject: {
         tt: { getDynamicComponentExports: () => chunk },
+      },
+      lynx: {
+        loadScript,
+        loadLazyBundle: true as never,
+        QueryComponent,
+        requireModuleAsync: rs.fn(),
       },
       [LYNX_BUNDLE_REGISTRY]: new Map([
         ['remote', 'lynx-cache://catalog'],
@@ -446,6 +481,46 @@ describe('patchLynxChunkLoading lazy bundle loading', () => {
     );
     expect(loadScript).not.toHaveBeenCalled();
     expect(webpackRequire.m.factory).toBe(factory);
+  });
+
+  it('rejects direct chunk exports from background QueryComponent', async () => {
+    const webpackRequire = createWebpackRequire();
+    webpackRequire.lynx_aci = {
+      feature: 'lazy-bundle/Feature.bundle',
+    };
+    const factory = rs.fn();
+    const chunk = {
+      ids: ['feature'],
+      modules: { factory },
+    };
+    const QueryComponent = rs.fn((_source, callback) => callback(chunk));
+    const globalObject = {
+      lynx: {
+        loadScript: rs.fn(),
+        QueryComponent,
+        requireModuleAsync: rs.fn(),
+      },
+      [LYNX_BUNDLE_REGISTRY]: new Map([
+        ['remote', 'lynx-cache://catalog'],
+        [
+          'remote:remote-origin',
+          'https://cdn.example/remotes/catalog.lynx.bundle',
+        ],
+      ]),
+    };
+
+    patchLynxChunkLoading(webpackRequire, 'remote', globalObject);
+    const promises: PromiseLike<unknown>[] = [];
+    webpackRequire.f.j!('feature', promises);
+    await expect(Promise.all(promises)).rejects.toThrow(
+      'Failed to load Lynx lazy bundle',
+    );
+
+    expect(QueryComponent).toHaveBeenCalledWith(
+      'https://cdn.example/remotes/lazy-bundle/Feature.bundle',
+      expect.any(Function),
+    );
+    expect(webpackRequire.m.factory).toBeUndefined();
   });
 
   it('loads main-thread split chunks through the asynchronous Web QueryComponent API', async () => {

@@ -32,10 +32,21 @@ await rm(resultBundlePath, { force: true, recursive: true });
 await stat(path.join(distRoot, 'host-native/main.lynx.bundle'));
 await stat(path.join(distRoot, 'catalog-native/main.lynx.bundle'));
 await stat(path.join(distRoot, 'remote-native/mf-manifest.json'));
-const startupFiles = (
-  await readdir(path.join(distRoot, 'host-native/static/js/async'))
-).filter((file) => file.endsWith('.js'));
-assert.ok(startupFiles.length > 0);
+const hostLazyFiles = (
+  await readdir(path.join(distRoot, 'host-native/lazy-bundle'), {
+    recursive: true,
+  })
+)
+  .filter((file) => file.endsWith('.bundle'))
+  .map((file) => file.split(path.sep).join('/'));
+assert.equal(hostLazyFiles.length, 2);
+const catalogLazyFiles = (
+  await readdir(path.join(distRoot, 'catalog-native/lazy-bundle'))
+)
+  .filter((file) => file.endsWith('.bundle'))
+  .map((file) => `/catalog-native/lazy-bundle/${file}`);
+assert.equal(catalogLazyFiles.length, 1);
+assert.ok(catalogLazyFiles[0].includes('activity-metadata'));
 const manifest = JSON.parse(
   await readFile(path.join(distRoot, 'remote-native/mf-manifest.json'), 'utf8'),
 );
@@ -88,9 +99,6 @@ assert.ok(
 const artifactServer = await createArtifactServer({
   port: serverPort,
   root: distRoot,
-  routes: {
-    '/static/': path.join(distRoot, 'host-native/static'),
-  },
 });
 const { requests } = artifactServer;
 const requestedPaths = () =>
@@ -158,14 +166,18 @@ try {
   const expected = [
     '/host-native/main.lynx.bundle',
     '/catalog-native/main.lynx.bundle',
-    ...startupFiles.map((file) => `/static/js/async/${file}`),
+    ...catalogLazyFiles,
+    ...hostLazyFiles.map((file) => `/host-native/lazy-bundle/${file}`),
     '/remote-native/mf-manifest.json',
     new URL(`${remoteEntry.path}${remoteEntry.name}`, serverURL).pathname,
   ];
-  const lazyFiles = (await readdir(path.join(distRoot, 'remote-native/async')))
+  const lazyFiles = (
+    await readdir(path.join(distRoot, 'remote-native/lazy-bundle'))
+  )
     .filter((file) => file.endsWith('.bundle'))
-    .map((file) => `/remote-native/async/${file}`);
-  assert.equal(lazyFiles.length, 3);
+    .map((file) => `/remote-native/lazy-bundle/${file}`);
+  assert.equal(lazyFiles.length, 4);
+  assert.ok(lazyFiles.some((file) => file.includes('activity-metadata')));
   expected.push(...lazyFiles);
   for (const pathname of expected) {
     assert.ok(
@@ -174,7 +186,7 @@ try {
     );
   }
   process.stdout.write(
-    `Native iOS app launched Orbit and standalone Catalog, then loaded async startup, the manifest, container, and ${lazyFiles.length} lazy bundles.\n`,
+    `Native iOS app launched Orbit and standalone Catalog, then loaded ${hostLazyFiles.length} host lazy bundles, the manifest, container, and ${lazyFiles.length} remote lazy bundles.\n`,
   );
 } finally {
   await writeFile(requestLogPath, JSON.stringify(requests, null, 2));

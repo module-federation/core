@@ -12,24 +12,26 @@ const source = path.resolve(
   process.env.LYNX_IOS_HOST_BUNDLE ?? 'dist/host-native/main.lynx.bundle',
 );
 const destination = path.join(appRoot, 'ios/Resources/main.lynx.bundle');
-const sourceStatic = path.join(path.dirname(source), 'static');
-const destinationStatic = path.join(appRoot, 'ios/Resources/static');
+const sourceLazyBundles = path.join(path.dirname(source), 'lazy-bundle');
+const destinationHost = path.join(appRoot, 'ios/Resources/host-native');
+const destinationLazyBundles = path.join(destinationHost, 'lazy-bundle');
 
-const [sourceStat, sourceStaticStat] = await Promise.all([
+const [sourceStat, sourceLazyBundlesStat] = await Promise.all([
   stat(source),
-  stat(sourceStatic),
+  stat(sourceLazyBundles),
 ]);
 assert.ok(sourceStat.size > 0, `Native host bundle is empty: ${source}`);
 assert.ok(
-  sourceStaticStat.isDirectory(),
-  `Native host startup assets are missing: ${sourceStatic}`,
+  sourceLazyBundlesStat.isDirectory(),
+  `Native host lazy bundles are missing: ${sourceLazyBundles}`,
 );
 await mkdir(path.dirname(destination), { recursive: true });
-await rm(destinationStatic, { force: true, recursive: true });
+await rm(destinationHost, { force: true, recursive: true });
+await mkdir(destinationHost, { recursive: true });
 await Promise.all([
   copyFile(source, destination),
-  cp(sourceStatic, destinationStatic, { recursive: true }),
+  cp(sourceLazyBundles, destinationLazyBundles, { recursive: true }),
 ]);
 process.stdout.write(
-  `Copied ${source} and ${sourceStatic} to iOS Resources.\n`,
+  `Copied ${source} and ${sourceLazyBundles} to iOS Resources.\n`,
 );

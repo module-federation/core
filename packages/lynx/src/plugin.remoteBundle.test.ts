@@ -180,12 +180,19 @@ describe('pluginLynxModuleFederation remote bundles', () => {
     } as any);
     const emitAsset = rs.fn();
     const updateAsset = rs.fn();
+    const nestedBackgroundChunk = {
+      name: 'nested-activity-metadata',
+      files: new Set(['nested-activity-metadata.js']),
+      layers: [LAYERS.BACKGROUND],
+      getAllAsyncChunks: () => new Set(),
+    };
     const compilation = {
       chunks: [
         {
           name: 'catalog',
           files: new Set(['catalog.js']),
           layers: [LAYERS.BACKGROUND, LAYERS.MAIN_THREAD],
+          getAllAsyncChunks: () => new Set(),
         },
         {
           name: 'catalog__main-thread__Card',
@@ -194,12 +201,15 @@ describe('pluginLynxModuleFederation remote bundles', () => {
             'styles.css',
           ]),
           layers: [LAYERS.MAIN_THREAD],
+          getAllAsyncChunks: () => new Set(),
         },
         {
           name: 'catalog__background_Card',
           files: new Set(['catalog__background_Card.js']),
           layers: [LAYERS.BACKGROUND],
+          getAllAsyncChunks: () => new Set([nestedBackgroundChunk]),
         },
+        nestedBackgroundChunk,
       ],
       chunkGraph: {
         getChunkModulesIterable(chunk: { layers: string[] }) {
@@ -215,6 +225,12 @@ describe('pluginLynxModuleFederation remote bundles', () => {
         if (name === 'catalog__background_Card.js') {
           return {
             source: { source: () => 'exports.ids = ["card"];' },
+            info: { minimized: true },
+          };
+        }
+        if (name === 'nested-activity-metadata.js') {
+          return {
+            source: { source: () => 'exports.ids = ["metadata"];' },
             info: { minimized: true },
           };
         }
@@ -248,6 +264,11 @@ describe('pluginLynxModuleFederation remote bundles', () => {
       expect.any(Object),
       { minimized: true },
     );
+    expect(updateAsset).toHaveBeenCalledWith(
+      'nested-activity-metadata.js',
+      expect.any(Object),
+      { minimized: true },
+    );
     expect(
       encoder.options.stateStore.for(compilation).pairedBundleChunks,
     ).toEqual(
@@ -255,6 +276,7 @@ describe('pluginLynxModuleFederation remote bundles', () => {
         'catalog__main-thread.js',
         'catalog__main-thread__Card-main-thread.js',
         'catalog__background_Card.js',
+        'nested-activity-metadata.js',
       ]),
     );
     expect(emitAsset).toHaveBeenCalledWith(

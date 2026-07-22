@@ -22,7 +22,8 @@ interface TemplateEncodeArgs {
 }
 
 interface TemplateEmitArgs {
-  entryNames: string[];
+  chunkGroups?: Array<{ name?: string | null }>;
+  entryNames?: string[];
   finalEncodeOptions: {
     sourceContent: {
       appType: string;
@@ -218,11 +219,17 @@ export const createLynxChunkLoadingMatcherPlugin = (
         }
         const isDynamicComponent =
           args.finalEncodeOptions.sourceContent.appType === 'DynamicComponent';
-        const isRemoteOutput = args.entryNames.some((name) =>
+        const templateChunkNames = [
+          ...(args.entryNames ?? []),
+          ...(args.chunkGroups ?? []).flatMap(({ name }) =>
+            typeof name === 'string' ? [name] : [],
+          ),
+        ];
+        const isRemoteOutput = templateChunkNames.some((name) =>
           chunkNames.has(name),
         );
         const exposedKeys = new Set(
-          args.entryNames.flatMap((name) => {
+          templateChunkNames.flatMap((name) => {
             const exposedKey = options.exposeByExpectedLazyBundleChunk?.get(
               normalizeLazyBundleChunkName(name, options),
             );

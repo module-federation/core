@@ -14,6 +14,7 @@ export default defineConfig({
     web: {},
   },
   output: {
+    assetPrefix: 'auto',
     cleanDistPath: false,
     distPath: {
       root: resolveOutputRoot('catalog-web'),

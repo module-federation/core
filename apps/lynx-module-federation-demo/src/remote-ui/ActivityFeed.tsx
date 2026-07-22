@@ -1,4 +1,4 @@
-import { useCallback } from '@lynx-js/react';
+import { useCallback, useEffect, useState } from '@lynx-js/react';
 import { instanceId, snapshot, token } from 'orbit-shared-state';
 
 import type { ActivityFeedProps, ActivityFilter } from './contracts';
@@ -10,12 +10,20 @@ const FILTERS: Array<{ id: ActivityFilter; label: string }> = [
   { id: 'state', label: 'Shared state' },
 ];
 
+const loadActivityMetadata = () => {
+  'background-only';
+  return import(
+    /* webpackChunkName: 'activity-metadata' */ './activityMetadata'
+  );
+};
+
 export function ActivityFeed({
   entries,
   filter,
   onFilterChange,
 }: ActivityFeedProps) {
   const sharedState = snapshot();
+  const [metadata, setMetadata] = useState('Loading nested module');
   const selectFilter = useCallback(
     (nextFilter: ActivityFilter) => {
       'background-only';
@@ -23,6 +31,21 @@ export function ActivityFeed({
     },
     [onFilterChange],
   );
+  useEffect(() => {
+    'background-only';
+    let mounted = true;
+    void loadActivityMetadata().then(
+      (module) => {
+        if (mounted) setMetadata(module.activityMetadata);
+      },
+      () => {
+        if (mounted) setMetadata('Nested federated module failed');
+      },
+    );
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const visibleEntries =
     filter === 'all'
@@ -35,6 +58,15 @@ export function ActivityFeed({
         <text className="RemotePanelTitle">Federated activity</text>
         <text className="RemoteStatusText" data-testid="shared-activity-count">
           SHARED COUNT {sharedState.count}
+        </text>
+        <text
+          className="RemoteStatusText"
+          data-testid="activity-metadata"
+          accessibility-element
+          accessibility-label={metadata}
+          ios-platform-accessibility-id="activity-metadata"
+        >
+          {metadata}
         </text>
       </view>
       <view className="FilterRow">

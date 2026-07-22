@@ -11,6 +11,7 @@ import {
 const nativeRemoteOrigin =
   process.env.LYNX_REMOTE_ORIGIN?.replace(/\/+$/, '') ??
   'http://127.0.0.1:3000';
+const nativeHostOrigin = process.env.LYNX_HOST_ORIGIN?.replace(/\/+$/, '');
 const devHost = process.env.LYNX_DEV_HOST ?? '127.0.0.1';
 const devPort = Number(process.env.LYNX_DEV_PORT ?? 3000);
 const nativeManifestUrl =
@@ -49,6 +50,9 @@ export default defineConfig({
     lynx: {},
   },
   output: {
+    assetPrefix: nativeHostOrigin
+      ? `${nativeHostOrigin}/host-native/`
+      : '/host-native/',
     cleanDistPath: false,
     distPath: {
       root: resolveOutputRoot('host-native'),

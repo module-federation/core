@@ -59,6 +59,12 @@ final class OrbitControlUITests: XCTestCase {
     let failure = error.exists ? error.label : "No federation error was rendered."
     XCTAssertTrue(isReady, failure)
 
+    let metadata = app.descendants(matching: .any)
+      .matching(identifier: "activity-metadata")
+      .firstMatch
+    XCTAssertTrue(metadata.waitForExistence(timeout: 30))
+    XCTAssertEqual(metadata.label, "Nested federated module ready")
+
     attachScreenshot(named: "Orbit Control federation loaded")
   }
 
@@ -79,6 +85,12 @@ final class OrbitControlUITests: XCTestCase {
         .firstMatch
       XCTAssertTrue(component.waitForExistence(timeout: 30), "Missing \(label)")
     }
+
+    let metadata = app.descendants(matching: .any)
+      .matching(identifier: "activity-metadata")
+      .firstMatch
+    XCTAssertTrue(metadata.waitForExistence(timeout: 30))
+    XCTAssertEqual(metadata.label, "Nested federated module ready")
 
     let count = app.descendants(matching: .any)
       .matching(identifier: "shared-card-count")

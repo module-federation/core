@@ -1,4 +1,5 @@
 import type {
+  Chunk,
   Compilation,
   Compiler,
   Configuration,
@@ -247,16 +248,34 @@ const isModuleInLayer = (module: unknown, layer: string): boolean => {
 
 const classifyRemoteChunk = (
   modules: Iterable<unknown>,
-  name: string | undefined,
-  backgroundChunkPrefix: string,
+  containsBackgroundExpose: boolean,
   mainThreadLayer: string,
 ) => ({
-  containsBackgroundExpose:
-    typeof name === 'string' && name.startsWith(backgroundChunkPrefix),
+  containsBackgroundExpose,
   containsMainThreadModule: Array.from(modules).some((module) =>
     isModuleInLayer(module, mainThreadLayer),
   ),
 });
+
+const getBackgroundRemoteChunks = (
+  chunks: Iterable<Chunk>,
+  backgroundChunkPrefix: string,
+): ReadonlySet<Chunk> => {
+  const included = new Set<Chunk>();
+  for (const chunk of chunks) {
+    if (
+      typeof chunk.name !== 'string' ||
+      !chunk.name.startsWith(backgroundChunkPrefix)
+    ) {
+      continue;
+    }
+    included.add(chunk);
+    for (const asyncChunk of chunk.getAllAsyncChunks()) {
+      included.add(asyncChunk);
+    }
+  }
+  return included;
+};
 
 const createRemoteAssetsPlugin = (
   stateStore: ReturnType<typeof createRemoteBundleCompilationStateStore>,
@@ -278,12 +297,15 @@ const createRemoteAssetsPlugin = (
             compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONS + 1,
         },
         () => {
+          const backgroundRemoteChunks = getBackgroundRemoteChunks(
+            compilation.chunks,
+            backgroundChunkPrefix,
+          );
           for (const chunk of compilation.chunks) {
             const { containsBackgroundExpose, containsMainThreadModule } =
               classifyRemoteChunk(
                 compilation.chunkGraph.getChunkModulesIterable(chunk),
-                chunk.name,
-                backgroundChunkPrefix,
+                backgroundRemoteChunks.has(chunk),
                 mainThreadLayer,
               );
             if (!containsBackgroundExpose || containsMainThreadModule) {
@@ -332,12 +354,15 @@ const createRemoteAssetsPlugin = (
             state.pairedBundleChunks.add(mainThreadEntry);
           }
 
+          const backgroundRemoteChunks = getBackgroundRemoteChunks(
+            compilation.chunks,
+            backgroundChunkPrefix,
+          );
           for (const chunk of compilation.chunks) {
             const { containsBackgroundExpose, containsMainThreadModule } =
               classifyRemoteChunk(
                 compilation.chunkGraph.getChunkModulesIterable(chunk),
-                chunk.name,
-                backgroundChunkPrefix,
+                backgroundRemoteChunks.has(chunk),
                 mainThreadLayer,
               );
             if (!containsMainThreadModule && !containsBackgroundExpose) {

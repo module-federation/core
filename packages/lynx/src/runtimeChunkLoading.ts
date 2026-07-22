@@ -212,8 +212,12 @@ const loadQueryComponent = (
   lynx: NonNullable<ReturnType<typeof getLynxRuntime>>,
   globalObject: LynxGlobal,
 ): PromiseLike<unknown> => {
-  if (lynx.loadLazyBundle) {
+  if (typeof lynx.loadLazyBundle === 'function') {
     return lynx.loadLazyBundle(request);
+  }
+  const nativeLynx = lynx.getNativeLynx?.();
+  if (typeof nativeLynx?.loadLazyBundle === 'function') {
+    return nativeLynx.loadLazyBundle(request);
   }
 
   if (getLynxRealm(lynx) === 'main-thread') {
@@ -245,23 +249,33 @@ const loadQueryComponent = (
     return resolver.promise;
   }
 
-  const queryComponent =
-    lynx.QueryComponent ?? lynx.getNativeLynx?.().QueryComponent;
+  const queryComponent = lynx.QueryComponent ?? nativeLynx?.QueryComponent;
   const getExports =
     globalObject.lynxCoreInject?.tt?.getDynamicComponentExports;
-  if (!queryComponent || !getExports) {
+  if (!queryComponent) {
     return Promise.reject(
-      new Error(
-        'Lynx background split chunk loading requires QueryComponent and getDynamicComponentExports.',
-      ),
+      new Error('Lynx background split chunk loading requires QueryComponent.'),
     );
   }
 
   const resolver = createQueryResolver();
   queryComponent(request, (result) => {
-    const schema = result.detail?.schema;
+    const schema =
+      isRecord(result) && isRecord(result.detail)
+        ? result.detail.schema
+        : undefined;
+    if (typeof schema === 'string' && !getExports) {
+      resolver.reject(
+        new Error(
+          'Lynx background split chunk loading requires getDynamicComponentExports.',
+        ),
+      );
+      return;
+    }
     const exports =
-      result.code === 0 && schema ? getExports(schema) : undefined;
+      isRecord(result) && result.code === 0 && typeof schema === 'string'
+        ? getExports!(schema)
+        : undefined;
     if (exports !== undefined) {
       resolver.resolve(exports);
       return;
@@ -284,15 +298,20 @@ export const patchLynxChunkLoading = (
   const { loadScript } = lynx;
 
   const registry = globalObject[LYNX_BUNDLE_REGISTRY];
-  const bundleName =
+  const registeredBundleName =
     registry?.get(originName) ??
     registry?.get(getRegistryKey(originName, getLynxRealm(lynx)));
-  if (!bundleName) {
+  if (!registeredBundleName && !webpackRequire.lynx_aci) {
     return false;
   }
   const baseName = originName.replace(/__main_thread$/, '');
-  const remoteOrigin =
-    registry?.get(getRemoteOriginKey(baseName)) ?? bundleName;
+  const registeredRemoteOrigin = registry?.get(getRemoteOriginKey(baseName));
+  const getBundleName = (): string | undefined =>
+    registeredBundleName ??
+    globalObject[LYNX_BUNDLE_REGISTRY]?.get(originName) ??
+    globalObject[LYNX_BUNDLE_REGISTRY]?.get(
+      getRegistryKey(originName, getLynxRealm(lynx)),
+    );
 
   const installedChunks: Record<string, InstalledChunk | undefined> = {};
 
@@ -314,6 +333,13 @@ export const patchLynxChunkLoading = (
         ? undefined
         : webpackRequire.lynx_aci?.[key];
     if (lazyBundlePath) {
+      const currentRegistry = globalObject[LYNX_BUNDLE_REGISTRY];
+      const remoteOrigin =
+        registeredRemoteOrigin ??
+        currentRegistry?.get(getRemoteOriginKey(baseName)) ??
+        getBundleName() ??
+        webpackRequire.p ??
+        '';
       const request = joinRemoteUrl(
         remoteOrigin,
         webpackRequire.lynx_public_path_auto ? undefined : webpackRequire.p,
@@ -339,6 +365,10 @@ export const patchLynxChunkLoading = (
       return;
     }
 
+    if (webpackRequire.lynx_aci && !getBundleName()) {
+      return;
+    }
+
     let resolveChunk!: (value?: unknown) => void;
     let rejectChunk!: (error: unknown) => void;
     const promise = new Promise<unknown>((resolve, reject) => {
@@ -349,6 +379,12 @@ export const patchLynxChunkLoading = (
     promises.push(promise);
 
     try {
+      const bundleName = getBundleName();
+      if (!bundleName) {
+        throw new Error(
+          `Lynx section loading requires a registered bundle for "${originName}".`,
+        );
+      }
       const sectionPath = getChunkSectionPath(webpackRequire.u(chunkId));
       const value = loadScript(sectionPath, { bundleName });
       if (!isChunk(value)) {

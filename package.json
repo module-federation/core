@@ -143,6 +143,7 @@
     },
     "overrides": {
       "@changesets/assemble-release-plan": "workspace:*",
+      "@lynx-js/template-webpack-plugin": "https://pkg.pr.new/@lynx-js/template-webpack-plugin@4cc0608b488a9bf35093936fd9d0e6589a1c161c",
       "ajv": "8.18.0",
       "eslint>ajv": "6.14.0",
       "@eslint/eslintrc>ajv": "6.14.0",

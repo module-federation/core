@@ -15,19 +15,12 @@ export interface LynxRuntimePluginOptions {
 }
 
 export interface LynxRuntime {
-  QueryComponent?(
-    source: string,
-    callback: (result: {
-      code: number;
-      data?: { evalResult?: unknown; url?: string };
-      detail?: { schema?: string };
-    }) => void,
-  ): void;
+  QueryComponent?(source: string, callback: (result: unknown) => void): void;
   fetchBundle?(bundleUrl: string): PromiseLike<unknown>;
   loadScript?(sectionPath: string, options: { bundleName: string }): unknown;
   loadLazyBundle?(bundleUrl: string): PromiseLike<unknown>;
   getNativeApp?(): unknown;
-  getNativeLynx?(): Pick<LynxRuntime, 'QueryComponent'>;
+  getNativeLynx?(): Pick<LynxRuntime, 'QueryComponent' | 'loadLazyBundle'>;
   requireModuleAsync?(
     moduleUrl: string,
     callback: (error: unknown, value: unknown) => void,

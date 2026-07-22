@@ -366,20 +366,20 @@ describe('Lynx chunk-loading matcher', () => {
       finalEncodeOptions: {
         sourceContent: { appType: 'DynamicComponent' },
       },
-      entryNames: [
-        'catalog__background_Card-react__background',
-        'catalog__main-thread__Card-react__main-thread',
+      chunkGroups: [
+        { name: 'catalog__background_Card-react__background' },
+        { name: 'catalog__main-thread__Card-react__main-thread' },
       ],
       outputName: 'async/catalog__background_Card.hash.bundle',
     };
     expect(beforeEmit!(lazyArgs)).toBe(lazyArgs);
     beforeEmit!({
-      entryNames: ['remote-react__background'],
+      chunkGroups: [{ name: 'remote-react__background' }],
       finalEncodeOptions: { sourceContent: { appType: 'card' } },
       outputName: 'bootstrap.lynx.bundle',
     });
     beforeEmit!({
-      entryNames: ['nested-feature'],
+      chunkGroups: [{ name: 'nested-feature' }],
       finalEncodeOptions: {
         sourceContent: { appType: 'DynamicComponent' },
       },

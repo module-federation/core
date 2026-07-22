@@ -83,12 +83,30 @@ try {
 
   await fetchReady(`${origin}/main.lynx.bundle`);
   await fetchReady(`${origin}/catalog-native/main.lynx.bundle`);
-  const startupFiles = (
-    await readdir(path.join(outputRoot, 'host-native/static/js/async'))
-  ).filter((name) => name.endsWith('.js'));
-  assert.ok(startupFiles.length > 0);
+  const catalogLazyBundles = await readdir(
+    path.join(outputRoot, 'catalog-native/lazy-bundle'),
+  );
+  assert.equal(catalogLazyBundles.length, 1);
+  assert.ok(catalogLazyBundles[0].includes('activity-metadata'));
+  await fetchReady(
+    `${origin}/catalog-native/lazy-bundle/${catalogLazyBundles[0]}`,
+  );
+  const hostLazyBundles = (
+    await readdir(path.join(outputRoot, 'host-native/lazy-bundle'), {
+      recursive: true,
+    })
+  )
+    .filter((name) => name.endsWith('.bundle'))
+    .map((name) => name.split(path.sep).join('/'));
+  assert.ok(hostLazyBundles.length >= 2, JSON.stringify(hostLazyBundles));
+  assert.ok(hostLazyBundles.some((name) => name.includes('staticCard.ts.')));
+  assert.ok(
+    hostLazyBundles.some((name) => name.includes('federationState.ts.')),
+  );
   await Promise.all(
-    startupFiles.map((name) => fetchReady(`${origin}/static/js/async/${name}`)),
+    hostLazyBundles.map((name) =>
+      fetchReady(`${origin}/host-native/lazy-bundle/${name}`),
+    ),
   );
   const manifestResponse = await fetchReady(
     `${origin}/remote-native/mf-manifest.json`,
@@ -104,16 +122,19 @@ try {
     new URL(`${remoteEntry.path}${remoteEntry.name}`, remoteBase),
   );
 
-  const lazyFiles = await readdir(path.join(outputRoot, 'remote-native/async'));
+  const lazyFiles = await readdir(
+    path.join(outputRoot, 'remote-native/lazy-bundle'),
+  );
   const lazyBundles = lazyFiles.filter((name) => name.endsWith('.bundle'));
-  assert.equal(lazyBundles.length, 3);
+  assert.equal(lazyBundles.length, 4);
+  assert.ok(lazyBundles.some((name) => name.includes('activity-metadata')));
   await Promise.all(
     lazyBundles.map((name) =>
-      fetchReady(`${origin}/remote-native/async/${name}`),
+      fetchReady(`${origin}/remote-native/lazy-bundle/${name}`),
     ),
   );
   process.stdout.write(
-    `Native Rspeedy dev server served host, async startup, standalone Catalog, manifest, container, and ${lazyBundles.length} lazy bundles.\n`,
+    `Native Rspeedy dev server served host, ${hostLazyBundles.length} host lazy bundles, standalone Catalog with its nested bundle, manifest, container, and ${lazyBundles.length} remote lazy bundles.\n`,
   );
 } finally {
   if (child) {

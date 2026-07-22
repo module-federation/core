@@ -224,9 +224,45 @@ const jobs = [
     env: SKIP_DEVTOOLS_POSTINSTALL_ENV,
     steps: [
       ...e2eSetupSteps('lynx', { cypress: false }),
-      step('E2E Test for Lynx Module Federation Demo', (ctx) =>
+      step('Test Lynx federation compiler and transport', (ctx) =>
         runWhenAffected(ctx, () =>
-          runCommand('pnpm', ['run', 'e2e:lynx'], ctx),
+          runCommand(
+            'pnpm',
+            ['--filter', '@module-federation/lynx', 'test'],
+            ctx,
+          ),
+        ),
+      ),
+      step('Build and validate native Lynx artifacts', (ctx) =>
+        runWhenAffected(ctx, () =>
+          runCommand(
+            'pnpm',
+            ['--filter', 'lynx-module-federation-demo', 'run', 'e2e:native:ci'],
+            ctx,
+          ),
+        ),
+      ),
+      step('Validate standalone iOS project policy', (ctx) =>
+        runWhenAffected(ctx, () =>
+          runCommand(
+            'pnpm',
+            [
+              '--filter',
+              'lynx-module-federation-demo',
+              'run',
+              'test:ios-project',
+            ],
+            ctx,
+          ),
+        ),
+      ),
+      step('Run real Lynx for Web E2E', (ctx) =>
+        runWhenAffected(ctx, () =>
+          runCommand(
+            'pnpm',
+            ['--filter', 'lynx-module-federation-demo', 'run', 'e2e:web:ci'],
+            ctx,
+          ),
         ),
       ),
     ],

@@ -66,10 +66,11 @@
     "@module-federation/sdk": "workspace:*"
   },
   "peerDependencies": {
-    "@lynx-js/cache-events-webpack-plugin": "^0.1.0",
+    "@lynx-js/cache-events-webpack-plugin": "^0.1.0 || ^0.2.0",
     "@lynx-js/css-serializer": "^0.1.6",
     "@lynx-js/tasm": "^0.0.39",
-    "@lynx-js/web-core": "^0.22.1",
+    "@lynx-js/template-webpack-plugin": "^0.13.1",
+    "@lynx-js/web-core": "^0.22.3",
     "@rsbuild/core": "^2.0.0",
     "@rspack/core": ">=2.1.5-canary-54a0d8f3-20260715194831 <3"
   },
@@ -83,12 +84,15 @@
     "@lynx-js/tasm": {
       "optional": true
     },
+    "@lynx-js/template-webpack-plugin": {
+      "optional": true
+    },
     "@lynx-js/web-core": {
       "optional": true
     }
   },
   "devDependencies": {
-    "@lynx-js/cache-events-webpack-plugin": "0.1.0",
+    "@lynx-js/cache-events-webpack-plugin": "0.2.0",
     "@lynx-js/css-serializer": "0.1.6",
     "@lynx-js/chunk-loading-webpack-plugin": "0.4.0",
     "@lynx-js/tasm": "0.0.39",

@@ -13,6 +13,10 @@ const requireFromAdapter = createRequire(
 const nativeRemoteOrigin =
   process.env.LYNX_REMOTE_ORIGIN?.replace(/\/+$/, '') ??
   'http://127.0.0.1:3000';
+const nativeHostOrigin = process.env.LYNX_HOST_ORIGIN?.replace(/\/+$/, '');
+const nativeHostAssetPrefix = nativeHostOrigin
+  ? `${nativeHostOrigin}/host-native/`
+  : '/host-native/';
 const { decode_napi: decodeTemplate } = requireFromAdapter('@lynx-js/tasm');
 const hostBundlePath = path.join(appRoot, 'dist/host-native/main.lynx.bundle');
 const standaloneBundlePath = path.join(
@@ -37,7 +41,8 @@ const [
   statsSource,
   remoteFiles,
   lazyFiles,
-  startupFiles,
+  catalogLazyFiles,
+  hostLazyFiles,
 ] = await Promise.all([
   stat(hostBundlePath),
   stat(standaloneBundlePath),
@@ -45,8 +50,11 @@ const [
   readFile(remoteManifestPath, 'utf8'),
   readFile(remoteStatsPath, 'utf8'),
   readdir(path.join(appRoot, 'dist/remote-native')),
-  readdir(path.join(appRoot, 'dist/remote-native/async')),
-  readdir(path.join(appRoot, 'dist/host-native/static/js/async')),
+  readdir(path.join(appRoot, 'dist/remote-native/lazy-bundle')),
+  readdir(path.join(appRoot, 'dist/catalog-native/lazy-bundle')),
+  readdir(path.join(appRoot, 'dist/host-native/lazy-bundle'), {
+    recursive: true,
+  }),
 ]);
 
 assert.ok(hostBundle.isFile() && hostBundle.size > 1_000, hostBundlePath);
@@ -57,9 +65,20 @@ assert.ok(
 assert.ok(remoteBundle.isFile() && remoteBundle.size > 1_000, remoteBundlePath);
 assert.ok(!remoteFiles.includes('bootstrap.lynx.bundle'));
 assert.ok(!remoteFiles.includes('main.lynx.bundle'));
-assert.equal(lazyFiles.filter((name) => name.endsWith('.bundle')).length, 3);
-const startupScripts = startupFiles.filter((name) => name.endsWith('.js'));
-assert.ok(startupScripts.length > 0);
+assert.equal(catalogLazyFiles.length, 1);
+assert.ok(catalogLazyFiles[0].includes('activity-metadata'));
+const remoteLazyBundles = lazyFiles.filter((name) => name.endsWith('.bundle'));
+assert.equal(remoteLazyBundles.length, 4);
+const nestedLazyBundle = remoteLazyBundles.find((name) =>
+  name.includes('activity-metadata'),
+);
+assert.ok(nestedLazyBundle, 'nested activity lazy bundle is missing');
+const hostLazyBundles = hostLazyFiles
+  .filter((name) => name.endsWith('.bundle'))
+  .map((name) => name.split(path.sep).join('/'));
+assert.equal(hostLazyBundles.length, 2);
+assert.ok(hostLazyBundles.some((name) => name.includes('staticCard.ts.')));
+assert.ok(hostLazyBundles.some((name) => name.includes('federationState.ts.')));
 
 const [hostBundleSource, standaloneSource, remoteBundleSource] =
   await Promise.all([
@@ -67,13 +86,27 @@ const [hostBundleSource, standaloneSource, remoteBundleSource] =
     readFile(standaloneBundlePath),
     readFile(remoteBundlePath),
   ]);
-decodeTemplate(hostBundleSource);
+const hostTemplate = decodeTemplate(hostBundleSource);
 const standaloneTemplate = decodeTemplate(standaloneSource);
 const remoteTemplate = decodeTemplate(remoteBundleSource);
 assert.equal(standaloneTemplate['app-type'], 'card');
 assert.equal(remoteTemplate['app-type'], 'DynamicComponent');
 assert.equal(remoteTemplate['engine-version'], '3.7');
 assert.deepEqual(Object.keys(remoteTemplate['custom-sections']), ['catalog']);
+const hostBackgroundSource = hostTemplate['background-thread-script']
+  .map(({ content }) => content)
+  .join('\n');
+assert.ok(hostBackgroundSource.includes('mfAsyncStartup'));
+assert.ok(hostBackgroundSource.includes('lynx_aci'));
+assert.ok(hostBackgroundSource.includes(nativeHostAssetPrefix));
+
+for (const name of hostLazyBundles) {
+  const lazyTemplate = decodeTemplate(
+    await readFile(path.join(appRoot, 'dist/host-native/lazy-bundle', name)),
+  );
+  assert.equal(lazyTemplate['app-type'], 'DynamicComponent', name);
+  assert.ok(lazyTemplate['background-thread-script']?.length > 0, name);
+}
 
 const manifest = JSON.parse(manifestSource);
 const stats = JSON.parse(statsSource);
@@ -107,7 +140,11 @@ for (const exposed of manifest.exposes) {
     name.startsWith(`catalog__background_${exposed.name}.`),
   );
   assert.ok(lazyName, `${exposed.name} lazy bundle is missing`);
-  const lazyPath = path.join(appRoot, 'dist/remote-native/async', lazyName);
+  const lazyPath = path.join(
+    appRoot,
+    'dist/remote-native/lazy-bundle',
+    lazyName,
+  );
   const lazyStat = await stat(lazyPath);
   assert.ok(lazyStat.isFile() && lazyStat.size > 1_000, lazyPath);
   const lazyTemplate = decodeTemplate(await readFile(lazyPath));
@@ -125,6 +162,20 @@ for (const exposed of manifest.exposes) {
     `${exposed.name} contains a main-thread alias`,
   );
 }
+
+const nestedTemplate = decodeTemplate(
+  await readFile(
+    path.join(appRoot, 'dist/remote-native/lazy-bundle', nestedLazyBundle),
+  ),
+);
+assert.equal(nestedTemplate['app-type'], 'DynamicComponent');
+assert.ok(
+  nestedTemplate['background-thread-script']
+    ?.map(({ content }) => content)
+    .join('\n')
+    .includes('Nested federated module ready'),
+  `${nestedLazyBundle} does not contain the nested module`,
+);
 
 assert.ok(Array.isArray(manifest.shared));
 assert.deepEqual(
@@ -155,14 +206,15 @@ try {
   await Promise.all([
     server.waitFor('/host-native/main.lynx.bundle'),
     server.waitFor('/catalog-native/main.lynx.bundle'),
+    server.waitFor(`/catalog-native/lazy-bundle/${catalogLazyFiles[0]}`),
     server.waitFor('/remote-native/mf-manifest.json'),
     server.waitFor('/remote-native/catalog.native.lynx.bundle'),
-    ...startupScripts.map((name) =>
-      server.waitFor(`/host-native/static/js/async/${name}`),
+    ...hostLazyBundles.map((name) =>
+      server.waitFor(`/host-native/lazy-bundle/${name}`),
     ),
     ...lazyFiles
       .filter((name) => name.endsWith('.bundle'))
-      .map((name) => server.waitFor(`/remote-native/async/${name}`)),
+      .map((name) => server.waitFor(`/remote-native/lazy-bundle/${name}`)),
   ]);
 } finally {
   await server.close();

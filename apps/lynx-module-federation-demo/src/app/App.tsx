@@ -14,7 +14,7 @@ const NAVIGATION: Array<{ id: Screen; label: string }> = [
 ];
 
 const MODULES = [
-  { name: 'Card', path: "import('catalog/Card')" },
+  { name: 'Card', path: "import * as card from 'catalog/Card'" },
   { name: 'Details', path: "import('catalog/Details')" },
   { name: 'ActivityFeed', path: "loadRemote('catalog/ActivityFeed')" },
 ];
@@ -270,7 +270,7 @@ export function App() {
               <DeliveryHealth ready={loadState === 'ready'} />
               {CardComponent ? (
                 <CardComponent
-                  loadPath="import('catalog/Card')"
+                  loadPath="import * as card from 'catalog/Card'"
                   onStateChange={handleRemoteStateChange}
                 />
               ) : (

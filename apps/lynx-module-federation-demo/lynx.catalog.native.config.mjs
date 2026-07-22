@@ -21,6 +21,7 @@ export default defineConfig({
     lynx: {},
   },
   output: {
+    assetPrefix: '/catalog-native/',
     cleanDistPath: false,
     distPath: {
       root: resolveOutputRoot('catalog-native'),

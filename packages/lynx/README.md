@@ -10,6 +10,11 @@ repository is `2.1.5-canary-54a0d8f3-20260715194831`. The bundle transport uses
 `lynx.loadScript`, available in Lynx SDK 3.7 and later; `remoteBundle.engineVersion`
 therefore defaults to `3.7`.
 
+Split federation also requires `@lynx-js/web-core >= 0.22.3` and
+`@lynx-js/template-webpack-plugin >= 0.13.1`. Those releases provide the public
+lazy-bundle loader, bundle-relative Web execution URLs, valid empty
+main-thread chunks, and assetless remote-chunk filtering used by this adapter.
+
 ## Host
 
 Register the adapter after the Lynx DSL plugin so it can use the official
@@ -155,6 +160,7 @@ flowchart LR
   M --> C["container.lynx.bundle"]
   C --> R["Module Federation container"]
   R --> A["ActivityFeed lazy .bundle"]
+  A --> N["nested lazy .bundle"]
   R --> D["Details lazy .bundle"]
   R --> S["host-provided shared modules"]
 ```

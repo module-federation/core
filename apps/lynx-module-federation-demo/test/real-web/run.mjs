@@ -43,7 +43,6 @@ const remoteBundlePath = fromAppRoot(
 const hostOutputRoot = path.dirname(hostBundlePath);
 const remoteOutputRoot = path.dirname(remoteManifestPath);
 const standaloneOutputRoot = path.dirname(standaloneBundlePath);
-const hostStartupRoot = path.join(hostOutputRoot, 'static/js/async');
 const screenshotPath = fromAppRoot(
   process.env.LYNX_WEB_E2E_SCREENSHOT,
   'test/real-web/artifacts/failure.png',
@@ -72,7 +71,6 @@ const artifactServer = await createArtifactServer({
     '/node_modules/@lynx-js/web-core/': webCoreRoot,
     '/node_modules/@lynx-js/web-elements/': webElementsRoot,
     '/remote-web/': remoteOutputRoot,
-    '/static/': path.join(hostOutputRoot, 'static'),
     '/test/real-web/': testRoot,
   },
 });
@@ -133,9 +131,22 @@ const tap = async (locator) => {
 
 const pageErrors = [];
 const consoleErrors = [];
+const describePageError = (error) => {
+  const details = {
+    name: error?.name,
+    message: error?.message,
+    stack: error?.stack,
+    cause: error?.cause,
+  };
+  return JSON.stringify(details, (_key, value) =>
+    value instanceof Error
+      ? { name: value.name, message: value.message, stack: value.stack }
+      : value,
+  );
+};
 const observePage = (candidate, label) => {
   candidate.on('pageerror', (error) =>
-    pageErrors.push(`${label}: ${error.stack ?? error.message}`),
+    pageErrors.push(`${label}: ${describePageError(error)}`),
   );
   candidate.on('console', (message) => {
     if (message.type() === 'error') {
@@ -176,6 +187,16 @@ try {
   await app.waitFor({ state: 'visible', timeout: readinessTimeout });
   assert.equal(await app.count(), 1, 'the app must render exactly once');
 
+  const initialRemoteLazyBundleRequests = requestedPaths().filter(
+    (value) =>
+      value.includes('/remote-web/lazy-bundle/') && value.endsWith('.bundle'),
+  );
+  assert.deepEqual(
+    initialRemoteLazyBundleRequests,
+    [],
+    `remote UI loaded before Lynx initialized its DynamicComponent runtime: ${JSON.stringify(initialRemoteLazyBundleRequests)}`,
+  );
+
   await tap(activePage.getByTestId('load-remotes'));
   const ready = /ready|loaded|passed|success/i;
   for (const testId of ['import-status', 'runtime-status']) {
@@ -210,6 +231,11 @@ try {
     ),
     'rgb(23, 33, 43)',
     'Details must retain its dark remote style',
+  );
+  await poll(
+    () => text(activePage.getByTestId('activity-metadata')),
+    (value) => value?.trim() === 'Nested federated module ready',
+    'nested federated module render',
   );
   assert.equal(
     await app.evaluate((element) => getComputedStyle(element).backgroundColor),
@@ -285,29 +311,36 @@ try {
     `Remote bundle was not requested: ${JSON.stringify(requests)}`,
   );
   const lazyBundleRequests = requestedPaths().filter(
-    (value) => value.includes('/async/') && value.endsWith('.bundle'),
+    (value) =>
+      value.includes('/remote-web/lazy-bundle/') && value.endsWith('.bundle'),
   );
   assert.equal(
     lazyBundleRequests.length,
-    3,
-    `each lazy exposure should be fetched once: ${JSON.stringify(lazyBundleRequests)}`,
+    4,
+    `each lazy exposure and its nested chunk should be fetched once: ${JSON.stringify(lazyBundleRequests)}`,
   );
   assert.equal(
     new Set(lazyBundleRequests).size,
-    3,
-    `split mode must fetch one lazy bundle per expose: ${JSON.stringify(lazyBundleRequests)}`,
-  );
-  const hostStartupFiles = (await readdir(hostStartupRoot)).filter((file) =>
-    file.endsWith('.js'),
+    4,
+    `split mode must fetch each exposure and nested chunk once: ${JSON.stringify(lazyBundleRequests)}`,
   );
   assert.ok(
-    hostStartupFiles.length > 0,
-    'non-eager sharing did not emit async host startup chunks',
+    lazyBundleRequests.some((value) => value.includes('activity-metadata')),
+    `nested activity bundle was not requested: ${JSON.stringify(lazyBundleRequests)}`,
   );
-  for (const file of hostStartupFiles) {
-    assert.ok(
-      requestedPaths().includes(`/static/js/async/${file}`),
-      `async host startup chunk was not requested: ${file}`,
+  const hostLazyBundleRequests = requestedPaths().filter(
+    (value) =>
+      value.includes('/dist/host-web/lazy-bundle/') &&
+      value.endsWith('.bundle'),
+  );
+  for (const moduleName of ['federationState', 'staticCard']) {
+    const moduleRequests = hostLazyBundleRequests.filter((value) =>
+      value.includes(moduleName),
+    );
+    assert.equal(
+      moduleRequests.length,
+      1,
+      `${moduleName} lazy bundle must be requested exactly once: ${JSON.stringify(hostLazyBundleRequests)}`,
     );
   }
 
@@ -346,6 +379,11 @@ try {
       .getByTestId(testId)
       .waitFor({ state: 'visible', timeout: readinessTimeout });
   }
+  await poll(
+    () => text(catalogPage.getByTestId('activity-metadata')),
+    (value) => value?.trim() === 'Nested federated module ready',
+    'standalone nested module render',
+  );
 
   const catalogCounts = [
     catalogPage.getByTestId('catalog-local-count'),
@@ -379,8 +417,7 @@ try {
     !standaloneRequests.some(
       (value) =>
         value.includes('mf-manifest.json') ||
-        value.includes('/dist/remote-web/async/') ||
-        value.includes('/remote-web/async/') ||
+        value.includes('/remote-web/lazy-bundle/') ||
         value.endsWith(`/${path.basename(remoteBundlePath)}`),
     ),
     `standalone direct imports unexpectedly used federation transport: ${JSON.stringify(standaloneRequests)}`,

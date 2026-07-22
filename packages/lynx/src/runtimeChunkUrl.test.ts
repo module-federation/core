@@ -7,6 +7,48 @@ import {
 } from './runtimeChunkLoading.testUtils';
 
 describe('patchLynxChunkLoading chunk URLs', () => {
+  it('loads host lazy bundles before a bundle registry exists', async () => {
+    const webpackRequire = createWebpackRequire();
+    webpackRequire.lynx_aci = { feature: 'lazy-bundle/Feature.bundle' };
+    webpackRequire.p = 'https://app.example/dist/host-web/';
+    const loadLazyBundle = rs.fn(async () => ({
+      ids: ['feature'],
+      modules: {},
+    }));
+    const globalObject = {
+      lynx: { loadLazyBundle, loadScript: rs.fn() },
+    };
+
+    expect(patchLynxChunkLoading(webpackRequire, 'host', globalObject)).toBe(
+      true,
+    );
+    const promises: PromiseLike<unknown>[] = [];
+    webpackRequire.f.j!('feature', promises);
+    await Promise.all(promises);
+
+    expect(loadLazyBundle).toHaveBeenCalledWith(
+      'https://app.example/dist/host-web/lazy-bundle/Feature.bundle',
+    );
+  });
+
+  it('leaves assetless host chunks to other webpack handlers', () => {
+    const webpackRequire = createWebpackRequire();
+    webpackRequire.lynx_aci = {
+      local: 'lazy-bundle/Local.bundle',
+    };
+    const loadLazyBundle = rs.fn();
+    const globalObject = {
+      lynx: { loadLazyBundle, loadScript: rs.fn() },
+    };
+
+    patchLynxChunkLoading(webpackRequire, 'host', globalObject);
+    const promises: PromiseLike<unknown>[] = [];
+    webpackRequire.f.j!('remote-only', promises);
+
+    expect(promises).toEqual([]);
+    expect(loadLazyBundle).not.toHaveBeenCalled();
+  });
+
   it('captures the remote origin when the container runtime is patched', async () => {
     const webpackRequire = createWebpackRequire();
     webpackRequire.lynx_aci = { feature: 'async/Card.bundle' };
