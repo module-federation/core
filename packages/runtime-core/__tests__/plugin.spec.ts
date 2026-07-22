@@ -197,6 +197,56 @@ describe('runtime plugins', () => {
     expect(instanceBeforeInit).toHaveBeenCalledTimes(1);
     expect(sharedBeforeInit).not.toHaveBeenCalled();
   });
+
+  it('registers safe Bridge lifecycle handlers on each runtime instance', () => {
+    const beforeBridgeOperation = rs.fn();
+    const bridgeRenderInvoked = rs.fn();
+    const afterBridgeOperation = rs.fn();
+    const afterBridgeCommit = rs.fn();
+    const instance = new ModuleFederation({
+      name: 'bridge-lifecycle-host',
+      plugins: [
+        {
+          name: 'bridge-lifecycle-plugin',
+          apply: () => ({
+            beforeBridgeOperation,
+            bridgeRenderInvoked,
+            afterBridgeOperation,
+            afterBridgeCommit,
+          }),
+        },
+      ],
+    });
+    const context = {
+      operationId: 'bridge-op-1',
+      bridgeId: 'bridge-1',
+      side: 'consumer' as const,
+      framework: 'react' as const,
+      operation: 'render' as const,
+      moduleName: 'remote/App',
+      remote: 'remote',
+      expose: './App',
+      reason: 'mount' as const,
+      startedAt: 1,
+    };
+    const result = {
+      ...context,
+      endedAt: 2,
+      duration: 1,
+      outcome: 'success' as const,
+    };
+
+    instance.bridgeHook.lifecycle.beforeBridgeOperation.emit(context);
+    instance.bridgeHook.lifecycle.bridgeRenderInvoked.emit(context);
+    instance.bridgeHook.lifecycle.afterBridgeOperation.emit(result);
+    instance.bridgeHook.lifecycle.afterBridgeCommit.emit(result);
+
+    expect(beforeBridgeOperation).toHaveBeenCalledWith(context);
+    expect(bridgeRenderInvoked).toHaveBeenCalledWith(context);
+    expect(afterBridgeOperation).toHaveBeenCalledWith(result);
+    expect(afterBridgeCommit).toHaveBeenCalledWith(result);
+    expect(JSON.stringify(context)).not.toMatch(/dom|props|router|component/);
+  });
 });
 
 describe('global runtime plugins', () => {
