@@ -23,6 +23,8 @@ import {
   SharedLoadContext,
   BridgeOperationContext,
   BridgeOperationResult,
+  ResourceLoadEvent,
+  ResourceLoadResult,
 } from './type';
 import { getBuilderId, registerPlugins, getRemoteEntry, error } from './utils';
 import {
@@ -117,6 +119,12 @@ export class ModuleFederation {
   remoteHandler: RemoteHandler;
   shareScopeMap: ShareScopeMap;
   loaderHook = new PluginSystem({
+    beforeLoadResource: new AsyncHook<[ResourceLoadEvent], void>(
+      'beforeLoadResource',
+    ),
+    afterLoadResource: new AsyncHook<[ResourceLoadResult], void>(
+      'afterLoadResource',
+    ),
     // FIXME: may not be suitable , not open to the public yet
     getModuleInfo: new SyncHook<
       [

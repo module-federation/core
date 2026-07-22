@@ -4,6 +4,7 @@ import {
   processModuleAlias,
   optionsToMFContext,
   composeRemoteRequestId,
+  emitCachedResourceLoad,
 } from '../utils';
 import { safeToString, ModuleInfo } from '@module-federation/sdk';
 import {
@@ -109,6 +110,19 @@ class Module {
 
   async getEntry(expose?: string): Promise<RemoteEntryExports> {
     if (this.remoteEntryExports) {
+      await emitCachedResourceLoad(this.host, {
+        context: {
+          initiator: 'loadRemote',
+          id: composeRemoteRequestId(this.remoteInfo.name, expose),
+          resourceType: 'remoteEntry',
+          url: this.remoteInfo.entry,
+          expose,
+        },
+        url: this.remoteInfo.entry,
+        remoteInfo: this.remoteInfo,
+        expose,
+        cacheSource: 'mf-memory',
+      });
       return this.remoteEntryExports;
     }
 
@@ -120,6 +134,7 @@ class Module {
         initiator: 'loadRemote',
         id: composeRemoteRequestId(this.remoteInfo.name, expose),
         resourceType: 'remoteEntry',
+        expose,
       },
     });
 
