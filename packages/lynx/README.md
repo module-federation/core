@@ -16,7 +16,9 @@ bundle-relative Web execution URLs, valid empty main-thread chunks, and
 assetless remote-chunk filtering used by this adapter. ReactLynx hosts require
 `@lynx-js/react >= 0.123.1`; the adapter registers that release's public
 lazy-bundle loader before federation async startup so non-eager shared chunks
-use FetchBundle in native and Web builds.
+use FetchBundle in native and Web builds. ReactLynx detection and bootstrap are
+automatic; applications should not register the runtime plugin themselves, and
+non-React Lynx builds do not receive it.
 
 ## Host
 
