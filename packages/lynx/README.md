@@ -139,9 +139,11 @@ pluginLynxModuleFederation(federationOptions, {
 shared fallback in the entry bundle. Keep all emitted lazy `.bundle` files
 beside the remote entry (or under its manifest `publicPath`) when publishing.
 Each ReactLynx exposure needs its own paired background/main-thread lazy root.
-Split native bundles encode both programs into one DynamicComponent artifact;
-Web remotes use the equivalent paired external bundle. Web remotes reject
-`single`, and native `single` is limited to background-only non-UI modules.
+Split native remote entries embed background and main-thread container sections,
+and each lazy bundle encodes both component programs into one DynamicComponent
+artifact. Web remotes use the equivalent paired external bundle. Web remotes
+reject `single`, and native `single` is limited to background-only non-UI
+modules.
 
 `publicPath: 'auto'` is supported and recommended for colocated Web split
 assets. Module Federation still resolves the public remote entry through
@@ -220,9 +222,10 @@ flowchart TB
 ```
 
 The enhanced federation runtime itself executes in the native background
-realm. Native split UI bundles still include their paired TASM/MTS main-thread
-snapshot program; this is compiled component output, not a second runtime or a
-second remote container. JavaScript object identity remains realm-local.
+realm. A native split remote also embeds a paired main-thread container runtime
+section so fetched TASM/MTS snapshot chunks install into that realm's registry.
+Both sections ship in the same external `.lynx.bundle`; there is no second
+network-deployed remote entry. JavaScript object identity remains realm-local.
 
 See `apps/lynx-module-federation-demo` for an official Rspeedy native app,
 native artifact checks, and a real Lynx for Web browser E2E.
