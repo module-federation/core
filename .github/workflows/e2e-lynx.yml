@@ -228,6 +228,7 @@ jobs:
           path: |
             apps/lynx-module-federation-demo/ios/build/orbit-control.png
             apps/lynx-module-federation-demo/ios/build/requests.json
+            apps/lynx-module-federation-demo/ios/build/simulator.log
           if-no-files-found: error
           retention-days: 7
 
@@ -240,5 +241,6 @@ jobs:
             apps/lynx-module-federation-demo/ios/build/OrbitControl-Release.xcresult/
             apps/lynx-module-federation-demo/ios/build/orbit-control.png
             apps/lynx-module-federation-demo/ios/build/requests.json
+            apps/lynx-module-federation-demo/ios/build/simulator.log
           if-no-files-found: ignore
           retention-days: 7

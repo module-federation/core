@@ -22,6 +22,7 @@ const iosRoot = path.join(appRoot, 'ios');
 const artifactsRoot = path.join(iosRoot, 'build');
 const requestLogPath = path.join(artifactsRoot, 'requests.json');
 const screenshotPath = path.join(artifactsRoot, 'orbit-control.png');
+const simulatorLogPath = path.join(artifactsRoot, 'simulator.log');
 const resultBundlePath = path.join(
   artifactsRoot,
   'OrbitControl-Release.xcresult',
@@ -195,6 +196,41 @@ try {
 } finally {
   await writeFile(requestLogPath, JSON.stringify(requests, null, 2));
   if (deviceUDID) {
+    const simulatorLog = spawnSync(
+      'xcrun',
+      [
+        'simctl',
+        'spawn',
+        deviceUDID,
+        'log',
+        'show',
+        '--last',
+        '15m',
+        '--style',
+        'compact',
+        '--predicate',
+        'process == "OrbitControl" OR process == "Orbit Control"',
+      ],
+      {
+        encoding: 'utf8',
+        maxBuffer: 32 * 1024 * 1024,
+      },
+    );
+    const simulatorLogOutput = [simulatorLog.stdout, simulatorLog.stderr]
+      .filter(Boolean)
+      .join('\n');
+    await writeFile(simulatorLogPath, simulatorLogOutput);
+    const diagnosticLines = simulatorLogOutput
+      .split('\n')
+      .filter((line) =>
+        /bundle|error|exception|federation|lazy|lynx/i.test(line),
+      )
+      .slice(-200);
+    if (diagnosticLines.length > 0) {
+      process.stderr.write(
+        `iOS simulator diagnostics:\n${diagnosticLines.join('\n')}\n`,
+      );
+    }
     spawnSync(
       'xcrun',
       ['simctl', 'io', deviceUDID, 'screenshot', screenshotPath],
