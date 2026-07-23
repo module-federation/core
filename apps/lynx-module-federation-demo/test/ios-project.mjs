@@ -108,12 +108,14 @@ assert.match(
 );
 assert.match(
   appSource,
-  /useEffect\(\(\) => \{\s*'background-only';\s*setBackgroundReady\(true\);\s*markFirstScreenSyncReady\(\);\s*\}, \[\]\);/,
+  /useEffect\(\(\) => \{\s*'background-only';\s*setBackgroundReady\(true\);\s*\}, \[\]\);/,
 );
-assert.doesNotMatch(appSource, /\}, \[backgroundReady\]\);/);
-assert.doesNotMatch(appSource, /setTimeout|queueMicrotask/);
+assert.doesNotMatch(
+  appSource,
+  /markFirstScreenSyncReady|setTimeout|queueMicrotask/,
+);
 for (const hostConfig of [nativeHostConfig, webHostConfig]) {
-  assert.match(hostConfig, /firstScreenSyncTiming: 'manual'/);
+  assert.match(hostConfig, /firstScreenSyncTiming: 'jsReady'/);
 }
 assert.match(appSource, /interactive=\{backgroundReady\}/);
 assert.match(
