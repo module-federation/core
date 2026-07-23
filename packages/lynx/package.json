@@ -49,6 +49,16 @@
         "default": "./dist/runtimePlugin.js"
       }
     },
+    "./reactRuntimePlugin": {
+      "import": {
+        "types": "./dist/reactRuntimePlugin.d.mts",
+        "default": "./dist/reactRuntimePlugin.mjs"
+      },
+      "require": {
+        "types": "./dist/reactRuntimePlugin.d.ts",
+        "default": "./dist/reactRuntimePlugin.js"
+      }
+    },
     "./package.json": "./package.json"
   },
   "typesVersions": {
@@ -58,6 +68,9 @@
       ],
       "runtimePlugin": [
         "./dist/runtimePlugin.d.ts"
+      ],
+      "reactRuntimePlugin": [
+        "./dist/reactRuntimePlugin.d.ts"
       ]
     }
   },
@@ -69,6 +82,7 @@
     "@lynx-js/cache-events-webpack-plugin": "^0.1.0 || ^0.2.0",
     "@lynx-js/css-serializer": "^0.1.6",
     "@lynx-js/tasm": "^0.0.39",
+    "@lynx-js/react": ">=0.123.1",
     "@lynx-js/template-webpack-plugin": "^0.13.1",
     "@lynx-js/web-core": "^0.22.3",
     "@rsbuild/core": "^2.0.0",
@@ -89,12 +103,16 @@
     },
     "@lynx-js/web-core": {
       "optional": true
+    },
+    "@lynx-js/react": {
+      "optional": true
     }
   },
   "devDependencies": {
     "@lynx-js/cache-events-webpack-plugin": "0.2.0",
     "@lynx-js/css-serializer": "0.1.6",
     "@lynx-js/chunk-loading-webpack-plugin": "0.4.0",
+    "@lynx-js/react": "0.123.0",
     "@lynx-js/tasm": "0.0.39",
     "@lynx-js/web-core": "0.22.1",
     "@module-federation/runtime-tools": "workspace:*",

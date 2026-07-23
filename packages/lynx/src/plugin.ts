@@ -12,6 +12,7 @@ import {
   createFederationOptions,
   getLynxShareScopes,
   getRemoteBundleOptions,
+  injectRuntimePlugin,
   normalizeLynxExposes,
   normalizeLynxShared,
   normalizeRealmScopedRemotes,
@@ -27,6 +28,8 @@ import { configureRemoteBundle } from './remoteBundle';
 import type { LynxRuntimePluginOptions } from './runtimeCore';
 
 export const LYNX_RUNTIME_PLUGIN = '@module-federation/lynx/runtimePlugin';
+export const LYNX_REACT_RUNTIME_PLUGIN =
+  '@module-federation/lynx/reactRuntimePlugin';
 
 export { normalizeLynxExposes, normalizeLynxShared };
 export type {
@@ -121,6 +124,20 @@ export const pluginLynxModuleFederation = (
         const defaultLayer = adapterOptions.layer ?? layers.BACKGROUND;
         const runtimePlugin =
           adapterOptions.runtimePlugin ?? LYNX_RUNTIME_PLUGIN;
+        const hasReactLynx = Boolean(
+          api.useExposed(Symbol.for('@lynx-js/react/internal:resolve')),
+        );
+        const federationOptions = hasReactLynx
+          ? {
+              ...options,
+              runtimePlugins: injectRuntimePlugin(
+                options.runtimePlugins,
+                LYNX_REACT_RUNTIME_PLUGIN,
+                undefined,
+                'prepend',
+              ),
+            }
+          : options;
         const lynxTemplatePlugin = api.useExposed<{
           LynxTemplatePlugin: LynxTemplatePluginApi;
         }>(Symbol.for('LynxTemplatePlugin'))?.LynxTemplatePlugin;
@@ -154,7 +171,7 @@ export const pluginLynxModuleFederation = (
           );
           await configureRemoteBundle(
             config as unknown as Configuration,
-            options,
+            federationOptions,
             adapterOptions,
             layers,
             remoteBundle,
@@ -164,16 +181,16 @@ export const pluginLynxModuleFederation = (
           return config;
         }
 
-        const federationOptions = createFederationOptions(
+        const normalizedFederationOptions = createFederationOptions(
           {
-            ...options,
+            ...federationOptions,
             remotes: normalizeRealmScopedRemotes(
-              options.remotes,
+              federationOptions.remotes,
               layers,
               activeRealmLayers,
             ),
             shareScope: getLynxShareScopes(
-              options.shareScope,
+              federationOptions.shareScope,
               layers,
               activeRealmLayers,
             ),
@@ -195,7 +212,7 @@ export const pluginLynxModuleFederation = (
 
         config.plugins ||= [];
         config.plugins.push(
-          createCompilerModuleFederationPlugin(federationOptions),
+          createCompilerModuleFederationPlugin(normalizedFederationOptions),
           createLynxChunkLoadingMatcherPlugin(lynxTemplatePlugin, {
             pairedRealmChunkSuffixes: {
               background: `-${layers.BACKGROUND.replace(/:/g, '__')}`,

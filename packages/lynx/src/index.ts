@@ -1,4 +1,8 @@
-export { LYNX_RUNTIME_PLUGIN, pluginLynxModuleFederation } from './plugin';
+export {
+  LYNX_REACT_RUNTIME_PLUGIN,
+  LYNX_RUNTIME_PLUGIN,
+  pluginLynxModuleFederation,
+} from './plugin';
 export type {
   LynxModuleFederationAdapterOptions,
   LynxModuleFederationOptions,

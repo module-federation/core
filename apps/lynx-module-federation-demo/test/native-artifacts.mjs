@@ -102,6 +102,18 @@ assert.ok(hostBackgroundSource.includes('mfAsyncStartup'));
 assert.ok(hostBackgroundSource.includes('lynx_aci'));
 assert.ok(hostBackgroundSource.includes('fetchBundle'));
 assert.ok(hostBackgroundSource.includes(nativeHostAssetPrefix));
+const reactLazyLoaderIndex = hostBackgroundSource.indexOf(
+  'react-lynx-lazy-bundle-runtime-plugin',
+);
+const asyncStartupIndex = hostBackgroundSource.indexOf('mfAsyncStartup');
+assert.ok(
+  reactLazyLoaderIndex >= 0,
+  'ReactLynx lazy loader is not bootstrapped',
+);
+assert.ok(
+  reactLazyLoaderIndex < asyncStartupIndex,
+  'ReactLynx lazy loader starts after federation async startup',
+);
 
 for (const name of hostLazyBundles) {
   const lazyTemplate = decodeTemplate(

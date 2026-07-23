@@ -368,6 +368,7 @@ export const injectRuntimePlugin = (
   runtimePlugins: ModuleFederationPluginOptions['runtimePlugins'],
   runtimePlugin: string,
   runtimePluginOptions: LynxRuntimePluginOptions | undefined,
+  placement: 'append' | 'prepend' = 'append',
 ): NonNullable<ModuleFederationPluginOptions['runtimePlugins']> => {
   const plugins = runtimePlugins ?? [];
   const useTuples =
@@ -391,13 +392,23 @@ export const injectRuntimePlugin = (
     >;
   }
   if (useTuples) {
-    return [
-      ...normalizedPlugins,
-      [runtimePlugin, runtimePluginOptions ?? {}],
-    ] as [string, Record<string, unknown>][];
+    const runtimePluginEntry: [string, Record<string, unknown>] = [
+      runtimePlugin,
+      { ...runtimePluginOptions },
+    ];
+    const normalizedTuplePlugins = normalizedPlugins as [
+      string,
+      Record<string, unknown>,
+    ][];
+    return placement === 'prepend'
+      ? [runtimePluginEntry, ...normalizedTuplePlugins]
+      : [...normalizedTuplePlugins, runtimePluginEntry];
   }
 
-  return [...plugins, runtimePlugin] as string[];
+  const normalizedStringPlugins = normalizedPlugins as string[];
+  return placement === 'prepend'
+    ? [runtimePlugin, ...normalizedStringPlugins]
+    : [...normalizedStringPlugins, runtimePlugin];
 };
 
 export const getRemoteBundleOptions = (

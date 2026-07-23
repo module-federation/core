@@ -1,6 +1,6 @@
 import { describe, expect, it, rs } from '@rstest/core';
 
-import { LYNX_RUNTIME_PLUGIN } from './plugin';
+import { LYNX_REACT_RUNTIME_PLUGIN, LYNX_RUNTIME_PLUGIN } from './plugin';
 import type { LynxModuleFederationAdapterOptions } from './plugin';
 import { federationOptions, LAYERS, setupPlugin } from './plugin.testUtils';
 
@@ -68,6 +68,33 @@ describe('pluginLynxModuleFederation host adapter', () => {
           realmLayers: {
             background: customLayers.BACKGROUND,
             'main-thread': customLayers.MAIN_THREAD,
+          },
+        },
+      ],
+    ]);
+  });
+
+  it('bootstraps the ReactLynx lazy-bundle loader before federation startup', async () => {
+    const { modifyRspackConfig } = setupPlugin(
+      {
+        name: 'lynx_host',
+        runtimePlugins: ['custom-runtime-plugin'],
+      },
+      undefined,
+      LAYERS,
+      { resolve: async (request) => request },
+    );
+    const config = await modifyRspackConfig({ plugins: [] });
+
+    expect(federationOptions(config.plugins[0]).runtimePlugins).toEqual([
+      [LYNX_REACT_RUNTIME_PLUGIN, {}],
+      ['custom-runtime-plugin', {}],
+      [
+        LYNX_RUNTIME_PLUGIN,
+        {
+          realmLayers: {
+            background: LAYERS.BACKGROUND,
+            'main-thread': LAYERS.MAIN_THREAD,
           },
         },
       ],
