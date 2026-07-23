@@ -12,7 +12,10 @@ const manifestUrl =
 
 export default defineConfig({
   plugins: [
-    pluginReactLynx({ defaultDisplayLinear: false }),
+    pluginReactLynx({
+      defaultDisplayLinear: false,
+      firstScreenSyncTiming: 'manual',
+    }),
     createWebHostFederationPlugin(manifestUrl),
   ],
   source: {

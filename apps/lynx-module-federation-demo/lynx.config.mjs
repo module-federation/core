@@ -36,7 +36,10 @@ const pluginNativeRemoteAssets = {
 
 export default defineConfig({
   plugins: [
-    pluginReactLynx({ defaultDisplayLinear: false }),
+    pluginReactLynx({
+      defaultDisplayLinear: false,
+      firstScreenSyncTiming: 'manual',
+    }),
     createNativeHostFederationPlugin(nativeManifestUrl),
     pluginNativeRemoteAssets,
     pluginQRCode({ fullscreen: true }),

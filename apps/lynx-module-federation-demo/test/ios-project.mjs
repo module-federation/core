@@ -44,6 +44,8 @@ const [
   iosRunner,
   scheme,
   urlResolver,
+  nativeHostConfig,
+  webHostConfig,
 ] = await Promise.all([
   read('ios/Podfile'),
   read('ios/Podfile.lock'),
@@ -62,6 +64,8 @@ const [
     'ios/OrbitControl.xcodeproj/xcshareddata/xcschemes/OrbitControl.xcscheme',
   ),
   read('ios/OrbitControl/OrbitResourceURLResolver.m'),
+  read('lynx.config.mjs'),
+  read('lynx.web.config.mjs'),
 ]);
 
 for (const pod of ['Lynx', 'LynxService', 'XElement']) {
@@ -102,6 +106,14 @@ assert.match(
   appSource,
   /useEffect\(\(\) => \{\s*'background-only';\s*setBackgroundReady\(true\);/,
 );
+assert.match(
+  appSource,
+  /useEffect\(\(\) => \{\s*'background-only';\s*if \(backgroundReady\) \{\s*markFirstScreenSyncReady\(\);\s*\}\s*\}, \[backgroundReady\]\);/,
+);
+assert.doesNotMatch(appSource, /setTimeout|queueMicrotask/);
+for (const hostConfig of [nativeHostConfig, webHostConfig]) {
+  assert.match(hostConfig, /firstScreenSyncTiming: 'manual'/);
+}
 assert.match(appSource, /interactive=\{backgroundReady\}/);
 assert.match(
   viewController,

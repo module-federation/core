@@ -1,4 +1,9 @@
-import { useCallback, useEffect, useState } from '@lynx-js/react';
+import {
+  markFirstScreenSyncReady,
+  useCallback,
+  useEffect,
+  useState,
+} from '@lynx-js/react';
 
 import type { SharedStateView } from '../remote-ui/contracts';
 import { type LoadState, useFederatedCatalog } from './useFederatedCatalog';
@@ -195,6 +200,13 @@ export function App() {
     'background-only';
     setBackgroundReady(true);
   }, []);
+
+  useEffect(() => {
+    'background-only';
+    if (backgroundReady) {
+      markFirstScreenSyncReady();
+    }
+  }, [backgroundReady]);
 
   const selectScreen = useCallback((nextScreen: Screen) => {
     'background-only';
