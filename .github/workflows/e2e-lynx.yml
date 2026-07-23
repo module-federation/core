@@ -166,11 +166,12 @@ jobs:
             ~/.cocoapods/repos/trunk
             ~/Library/Caches/CocoaPods
             apps/lynx-module-federation-demo/ios/Pods
+            apps/lynx-module-federation-demo/ios/OrbitControl.xcworkspace
             apps/lynx-module-federation-demo/ios/vendor/bundle
             apps/lynx-module-federation-demo/ios/build/DerivedData/Build
             apps/lynx-module-federation-demo/ios/build/DerivedData/ModuleCache.noindex
             apps/lynx-module-federation-demo/ios/build/DerivedData/SDKStatCaches.noindex
-          key: ${{ runner.os }}-${{ runner.arch }}-lynx-ios-build-v2-xcode-16.4-ruby-${{ env.RUBY_VERSION }}-${{ hashFiles('apps/lynx-module-federation-demo/ios/Gemfile', 'apps/lynx-module-federation-demo/ios/Gemfile.lock', 'apps/lynx-module-federation-demo/ios/Podfile', 'apps/lynx-module-federation-demo/ios/Podfile.lock') }}-${{ hashFiles('apps/lynx-module-federation-demo/ios/OrbitControl.xcodeproj/project.pbxproj') }}
+          key: ${{ runner.os }}-${{ runner.arch }}-lynx-ios-build-v3-xcode-16.4-ruby-${{ env.RUBY_VERSION }}-${{ hashFiles('apps/lynx-module-federation-demo/ios/Gemfile', 'apps/lynx-module-federation-demo/ios/Gemfile.lock', 'apps/lynx-module-federation-demo/ios/Podfile', 'apps/lynx-module-federation-demo/ios/Podfile.lock') }}-${{ hashFiles('apps/lynx-module-federation-demo/ios/OrbitControl.xcodeproj/project.pbxproj') }}
 
       - name: Download native artifacts
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
@@ -196,6 +197,7 @@ jobs:
           bundle config set path vendor/bundle
           bundle check
           cmp Podfile.lock Pods/Manifest.lock
+          test -f OrbitControl.xcworkspace/contents.xcworkspacedata
 
       - name: Run standalone iOS federation E2E
         run: node apps/lynx-module-federation-demo/test/ios/run.mjs
@@ -211,11 +213,12 @@ jobs:
             ~/.cocoapods/repos/trunk
             ~/Library/Caches/CocoaPods
             apps/lynx-module-federation-demo/ios/Pods
+            apps/lynx-module-federation-demo/ios/OrbitControl.xcworkspace
             apps/lynx-module-federation-demo/ios/vendor/bundle
             apps/lynx-module-federation-demo/ios/build/DerivedData/Build
             apps/lynx-module-federation-demo/ios/build/DerivedData/ModuleCache.noindex
             apps/lynx-module-federation-demo/ios/build/DerivedData/SDKStatCaches.noindex
-          key: ${{ runner.os }}-${{ runner.arch }}-lynx-ios-build-v2-xcode-16.4-ruby-${{ env.RUBY_VERSION }}-${{ hashFiles('apps/lynx-module-federation-demo/ios/Gemfile', 'apps/lynx-module-federation-demo/ios/Gemfile.lock', 'apps/lynx-module-federation-demo/ios/Podfile', 'apps/lynx-module-federation-demo/ios/Podfile.lock') }}-${{ hashFiles('apps/lynx-module-federation-demo/ios/OrbitControl.xcodeproj/project.pbxproj') }}
+          key: ${{ runner.os }}-${{ runner.arch }}-lynx-ios-build-v3-xcode-16.4-ruby-${{ env.RUBY_VERSION }}-${{ hashFiles('apps/lynx-module-federation-demo/ios/Gemfile', 'apps/lynx-module-federation-demo/ios/Gemfile.lock', 'apps/lynx-module-federation-demo/ios/Podfile', 'apps/lynx-module-federation-demo/ios/Podfile.lock') }}-${{ hashFiles('apps/lynx-module-federation-demo/ios/OrbitControl.xcodeproj/project.pbxproj') }}
 
       - name: Upload iOS E2E evidence
         if: success()

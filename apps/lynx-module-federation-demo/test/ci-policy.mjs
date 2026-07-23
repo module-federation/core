@@ -48,8 +48,19 @@ assert.match(
   lynxIosJob,
   /name: Save iOS build cache[\s\S]*?uses: actions\/cache\/save@/,
 );
-assert.match(lynxIosJob, /lynx-ios-build-v2-/);
-assert.match(lynxIosJob, /ios\/Pods[\s\S]*?ios\/build\/DerivedData\/Build/);
+assert.match(lynxIosJob, /lynx-ios-build-v3-/);
+for (const action of ['Restore', 'Save']) {
+  assert.match(
+    lynxIosJob,
+    new RegExp(
+      `name: ${action} iOS build cache[\\s\\S]*?path: \\|[\\s\\S]*?ios/Pods[\\s\\S]*?ios/OrbitControl\\.xcworkspace[\\s\\S]*?ios/build/DerivedData/Build`,
+    ),
+  );
+}
+assert.match(
+  lynxIosJob,
+  /cmp Podfile\.lock Pods\/Manifest\.lock\s+test -f OrbitControl\.xcworkspace\/contents\.xcworkspacedata/,
+);
 assert.doesNotMatch(lynxIosJob, /restore-keys:/);
 for (const script of ['e2e:native:ci', 'e2e:web:ci']) {
   assert.match(lynxWorkflow, new RegExp(`run ${script}`));
