@@ -182,6 +182,8 @@ describe('Lynx external bundle', () => {
 
     const encodeOptions = encode.mock.calls[0][0] as any;
     expect(encodeOptions.compilerOptions.targetSdkVersion).toBe('3.7');
+    expect(encodeOptions.compilerOptions.isExternalBundle).toBe(true);
+    expect(encodeOptions.compilerOptions.isLazy).toBe(false);
     expect(Object.keys(encodeOptions.customSections).sort()).toEqual([
       'catalog_global',
       'runtime',

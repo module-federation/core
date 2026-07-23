@@ -140,7 +140,7 @@ index 7d4856e6cf399cf4484eab94a300ba6b943b2e6e..83770a674bd3641af947a1abad843238
          if (nativeGlobal && loadDynamicComponent) {
              nativeGlobal.loadDynamicComponent = loadDynamicComponent;
 diff --git a/dist/client/decodeWorker/decode.worker.js b/dist/client/decodeWorker/decode.worker.js
-index 06fef1025bf0c5e3753c8ce33a1cd0c67be48ff3..78ea24b8dda021270cb90f5a06a27ef1223b1702 100644
+index 06fef1025bf0c5e3753c8ce33a1cd0c67be48ff3..00c37e5db3b2c2cd04d70a33b105d82b08dbe332 100644
 --- a/dist/client/decodeWorker/decode.worker.js
 +++ b/dist/client/decodeWorker/decode.worker.js
 @@ -5,6 +5,8 @@ const wasmModuleLoadedPromise = new Promise((resolve) => {
@@ -152,7 +152,36 @@ index 06fef1025bf0c5e3753c8ce33a1cd0c67be48ff3..78ea24b8dda021270cb90f5a06a27ef1
  import { decodeBinaryMap } from '../../common/decodeUtils.js';
  const HEARTBREAK_INTERVAL_MS = 1000;
  let heartbreakTimer;
-@@ -178,7 +180,7 @@ async function handleStream(url, reader, transformVW, transformVH, transformREM,
+@@ -87,6 +89,19 @@ function scheduleHeartbreak() {
+     }, HEARTBREAK_INTERVAL_MS);
+     unrefTimer(heartbreakTimer);
+ }
++function mergeConfigWithRuntimeFallback(config, overrideConfig) {
++    if (!overrideConfig) {
++        return config;
++    }
++    const merged = { ...config, ...overrideConfig };
++    if (config.isExternalBundle !== undefined) {
++        merged.isExternalBundle = config.isExternalBundle;
++        if (config.isLazy !== undefined) {
++            merged.isLazy = config.isLazy;
++        }
++    }
++    return merged;
++}
+ self.onmessage = async (event) => {
+     const data = event.data;
+     if (data.type === 'init') {
+@@ -170,15 +185,13 @@ async function handleStream(url, reader, transformVW, transformVH, transformREM,
+         }
+         switch (label) {
+             case TemplateSectionLabel.Configurations: {
+-                config = overrideConfig
+-                    ? { ...decodeJSONMap(content), ...overrideConfig }
+-                    : decodeJSONMap(content);
++                config = mergeConfigWithRuntimeFallback(decodeJSONMap(content), overrideConfig);
+                 postMessage({ type: 'section', label, url, data: config });
+                 break;
              }
              case TemplateSectionLabel.StyleInfo: {
                  await wasmModuleLoadedPromise;
@@ -161,7 +190,7 @@ index 06fef1025bf0c5e3753c8ce33a1cd0c67be48ff3..78ea24b8dda021270cb90f5a06a27ef1
                  postMessage({
                      type: 'section',
                      label,
-@@ -193,29 +195,10 @@ async function handleStream(url, reader, transformVW, transformVH, transformREM,
+@@ -193,29 +206,10 @@ async function handleStream(url, reader, transformVW, transformVH, transformREM,
              case TemplateSectionLabel.LepusCode: {
                  const codeMap = decodeBinaryMap(content);
                  const isLazy = config['isLazy'] === 'true';
@@ -193,7 +222,7 @@ index 06fef1025bf0c5e3753c8ce33a1cd0c67be48ff3..78ea24b8dda021270cb90f5a06a27ef1
                      blobMap[key] = URL.createObjectURL(blob);
                  }
                  postMessage({ type: 'section', label, url, data: blobMap, config });
-@@ -246,7 +229,7 @@ async function handleStream(url, reader, transformVW, transformVH, transformREM,
+@@ -246,7 +240,7 @@ async function handleStream(url, reader, transformVW, transformVH, transformREM,
                      });
                      blobMap[key] = URL.createObjectURL(blob);
                  }
@@ -202,7 +231,18 @@ index 06fef1025bf0c5e3753c8ce33a1cd0c67be48ff3..78ea24b8dda021270cb90f5a06a27ef1
                  break;
              }
              default:
-@@ -282,7 +265,7 @@ async function handleJSON(json, url, transformVW, transformVH, transformREM, ove
+@@ -269,9 +263,7 @@ async function handleJSON(json, url, transformVW, transformVH, transformREM, ove
+         config.appType = config.appType ?? appType;
+         config.isLazy = (appType === 'card') ? 'false' : 'true';
+     }
+-    if (overrideConfig) {
+-        config = { ...config, ...overrideConfig };
+-    }
++    config = mergeConfigWithRuntimeFallback(config, overrideConfig);
+     config = Object.fromEntries(Object.entries(config).map(([key, value]) => [key, value.toString()]));
+     postMessage({
+         type: 'section',
+@@ -282,7 +274,7 @@ async function handleJSON(json, url, transformVW, transformVH, transformREM, ove
      // StyleInfo
      if (json.styleInfo) {
          await wasmModuleLoadedPromise;
@@ -211,7 +251,7 @@ index 06fef1025bf0c5e3753c8ce33a1cd0c67be48ff3..78ea24b8dda021270cb90f5a06a27ef1
          postMessage({
              type: 'section',
              label: TemplateSectionLabel.StyleInfo,
-@@ -301,11 +284,7 @@ async function handleJSON(json, url, transformVW, transformVH, transformREM, ove
+@@ -301,11 +293,7 @@ async function handleJSON(json, url, transformVW, transformVH, transformREM, ove
          for (const [key, code] of Object.entries(json.lepusCode)) {
              if (typeof code !== 'string')
                  continue;
@@ -224,7 +264,7 @@ index 06fef1025bf0c5e3753c8ce33a1cd0c67be48ff3..78ea24b8dda021270cb90f5a06a27ef1
              blobMap[key] = URL.createObjectURL(blob);
          }
          postMessage({
-@@ -332,6 +311,7 @@ async function handleJSON(json, url, transformVW, transformVH, transformREM, ove
+@@ -332,6 +320,7 @@ async function handleJSON(json, url, transformVW, transformVH, transformREM, ove
              label: TemplateSectionLabel.Manifest,
              url,
              data: blobMap,
@@ -697,3 +737,22 @@ index 43439844f1e053585afcfddc26a58a561d69c79f..7e67c2332bb7bf0a6b91a1fbaa757b7b
      getCustomSectionSync(key: string): CloneableObject;
      getCustomSection(key: string): Promise<CloneableObject>;
  };
+diff --git a/dist/types/PageConfig.d.ts b/dist/types/PageConfig.d.ts
+index 00a9fd12036972f85b8e2e0dcc4b88a5d195c451..576623c9c9cb9e3ea5746b022f2d57d1726e9165 100644
+--- a/dist/types/PageConfig.d.ts
++++ b/dist/types/PageConfig.d.ts
+@@ -8,10 +8,10 @@ export interface PageConfig {
+     appType?: string;
+     cardType: string;
+     /**
+-     * Internal flag set (via `fetchBundle`'s override config) for an external
+-     * bundle loaded with `lynx.fetchBundle`. It tells the decode worker to wrap
+-     * the bundle's mts (`lepusCode`) chunks with a CommonJS `module`/`exports`
+-     * env. Not part of a real bundle's encoded config.
++     * Internal flag encoded by external bundle producers, with a runtime fallback
++     * for older bundles loaded via `lynx.fetchBundle`. It tells the decode worker
++     * to wrap the bundle's mts (`lepusCode`) chunks with a CommonJS
++     * `module`/`exports` env.
+      */
+     isExternalBundle?: 'true' | 'false';
+ }

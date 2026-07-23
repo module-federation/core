@@ -153,6 +153,8 @@ export const createLynxExternalBundlePlugin = (
           compilerOptions: {
             enableFiberArch: true,
             useLepusNG: true,
+            isExternalBundle: true,
+            isLazy: false,
             targetSdkVersion: options.engineVersion ?? '3.7',
             enableCSSInvalidation: true,
             enableCSSSelector: true,

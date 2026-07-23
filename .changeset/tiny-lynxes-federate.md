@@ -25,3 +25,6 @@ Accept the cache-events plugin 0.2 line used by Rspeedy 0.16.
 
 Resolve manifest `publicPath: 'auto'` from the fetched response URL so
 root-relative manifest entries remain portable in browser-like runtimes.
+Self-label generated Lynx external bundles as external/non-lazy in encoded
+bundle config so Web Core can prefer producer metadata over runtime caller
+fallbacks.
