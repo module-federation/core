@@ -180,6 +180,10 @@ describe('pluginLynxModuleFederation remote bundles', () => {
     } as any);
     const emitAsset = rs.fn();
     const updateAsset = rs.fn();
+    let containerAsset = {
+      source: { source: () => 'container' },
+      info: {},
+    };
     const nestedBackgroundChunk = {
       name: 'nested-activity-metadata',
       files: new Set(['nested-activity-metadata.js']),
@@ -220,7 +224,7 @@ describe('pluginLynxModuleFederation remote bundles', () => {
       updateAsset,
       getAsset(name: string) {
         if (name === 'catalog.js') {
-          return { source: { source: () => 'container' }, info: {} };
+          return containerAsset;
         }
         if (name === 'catalog__background_Card.js') {
           return {
@@ -248,6 +252,10 @@ describe('pluginLynxModuleFederation remote bundles', () => {
     const backgroundIdentityStage = PROCESS_ASSETS_STAGE_ADDITIONS + 1;
     const pairedBundleChunksStage = PROCESS_ASSETS_STAGE_OPTIMIZE_SIZE + 2;
     processAssets.get(backgroundIdentityStage)!();
+    containerAsset = {
+      source: { source: () => 'tt.define("catalog.js", container);' },
+      info: {},
+    };
     processAssets.get(pairedBundleChunksStage)!();
 
     expect([...processAssets.keys()]).toEqual([
