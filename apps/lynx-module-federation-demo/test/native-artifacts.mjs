@@ -113,6 +113,12 @@ for (const name of hostLazyBundles) {
     'string',
     name,
   );
+  assert.ok(
+    !lazyTemplate['custom-sections'].background.includes(
+      "tt.define('/app-service.js'",
+    ),
+    `${name} contains the app-service dispatcher instead of its executable chunk`,
+  );
 }
 
 const manifest = JSON.parse(manifestSource);
@@ -162,6 +168,12 @@ for (const exposed of manifest.exposes) {
     `${lazyName} has no background section`,
   );
   assert.ok(
+    !lazyTemplate['custom-sections'].background.includes(
+      "tt.define('/app-service.js'",
+    ),
+    `${lazyName} contains the app-service dispatcher instead of its executable chunk`,
+  );
+  assert.ok(
     lazyTemplate['custom-sections']?.['main-thread']?.length > 100,
     `${lazyName} has no main-thread snapshot section`,
   );
@@ -177,9 +189,8 @@ const nestedTemplate = decodeTemplate(
   ),
 );
 assert.equal(nestedTemplate['app-type'], 'DynamicComponent');
-const nestedBackgroundSource = nestedTemplate['background-thread-script']
-  .map(({ content }) => content)
-  .join('\n');
+const nestedBackgroundSource =
+  nestedTemplate['custom-sections']?.background ?? '';
 assert.ok(
   nestedBackgroundSource.includes('Nested federated module ready'),
   `${nestedLazyBundle} does not contain the nested module`,

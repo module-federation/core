@@ -142,13 +142,15 @@ index 0b6c07d7971129a5e0147e3f924dcb273d8dccd5..54654a6d9c52902596caf81eff48c9b7
                      syncXElementRegistry: true,
                      enableA11y,
                      enableAccessibilityElement,
-@@ -608,9 +641,6 @@ class LynxTemplatePluginImpl {
+@@ -608,9 +641,10 @@ class LynxTemplatePluginImpl {
          const remainingManifest = {};
          let entryChunk;
          for (const [name, content] of Object.entries(manifest)) {
 -            if (name === '/app-service.js') {
--                continue;
--            }
++            if (name === '/app-service.js'
++                && content.includes("tt.define('/app-service.js'")) {
+                 continue;
+             }
              if (!entryChunk) {
                  entryChunk = [name, content];
                  continue;
