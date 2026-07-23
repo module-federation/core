@@ -108,8 +108,9 @@ assert.match(
 );
 assert.match(
   appSource,
-  /useEffect\(\(\) => \{\s*'background-only';\s*if \(backgroundReady\) \{\s*markFirstScreenSyncReady\(\);\s*\}\s*\}, \[backgroundReady\]\);/,
+  /useEffect\(\(\) => \{\s*'background-only';\s*setBackgroundReady\(true\);\s*markFirstScreenSyncReady\(\);\s*\}, \[\]\);/,
 );
+assert.doesNotMatch(appSource, /\}, \[backgroundReady\]\);/);
 assert.doesNotMatch(appSource, /setTimeout|queueMicrotask/);
 for (const hostConfig of [nativeHostConfig, webHostConfig]) {
   assert.match(hostConfig, /firstScreenSyncTiming: 'manual'/);

@@ -199,14 +199,8 @@ export function App() {
   useEffect(() => {
     'background-only';
     setBackgroundReady(true);
+    markFirstScreenSyncReady();
   }, []);
-
-  useEffect(() => {
-    'background-only';
-    if (backgroundReady) {
-      markFirstScreenSyncReady();
-    }
-  }, [backgroundReady]);
 
   const selectScreen = useCallback((nextScreen: Screen) => {
     'background-only';
