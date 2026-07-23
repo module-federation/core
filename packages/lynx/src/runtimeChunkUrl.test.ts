@@ -176,9 +176,25 @@ describe('patchLynxChunkLoading chunk URLs', () => {
       'async/Card.bundle',
       'https://cdn.example/remotes/assets/async/Card.bundle',
     ],
+    [
+      'assets',
+      'async/Card.bundle',
+      'https://cdn.example/remotes/assets/async/Card.bundle',
+    ],
+    [
+      'assets/',
+      '/async/Card.bundle',
+      'https://cdn.example/remotes/assets/async/Card.bundle',
+    ],
     ['/v2/', 'async/Card.bundle', 'https://cdn.example/v2/async/Card.bundle'],
+    ['/v2', '/async/Card.bundle', 'https://cdn.example/v2/async/Card.bundle'],
     [
       'https://assets.example/v3/',
+      'async/Card.bundle',
+      'https://assets.example/v3/async/Card.bundle',
+    ],
+    [
+      'https://assets.example/v3',
       'async/Card.bundle',
       'https://assets.example/v3/async/Card.bundle',
     ],
@@ -186,6 +202,11 @@ describe('patchLynxChunkLoading chunk URLs', () => {
       'http://assets.example/v4/',
       'async/Card.bundle',
       'http://assets.example/v4/async/Card.bundle',
+    ],
+    [
+      '//assets.example/v5',
+      'async/Card.bundle',
+      '//assets.example/v5/async/Card.bundle',
     ],
     [
       '/ignored/',

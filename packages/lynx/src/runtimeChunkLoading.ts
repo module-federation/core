@@ -71,7 +71,7 @@ const joinRemoteUrl = (
   if (base.startsWith('/')) {
     return `${origin}${base.replace(/\/$/, '')}/${assetPath.replace(/^\//, '')}`;
   }
-  return `${entry.slice(0, entry.lastIndexOf('/') + 1)}${base}${assetPath}`;
+  return `${entry.slice(0, entry.lastIndexOf('/') + 1)}${base.replace(/\/$/, '')}/${assetPath.replace(/^\//, '')}`;
 };
 
 const installChunk = (
