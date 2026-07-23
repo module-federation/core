@@ -16,6 +16,8 @@ describe('patchLynxChunkLoading chunk URLs', () => {
       modules: {},
     }));
     const globalObject = {
+      globDynamicComponentEntry:
+        'https://app.example/dist/host-web/main.lynx.bundle',
       lynx: { loadLazyBundle, loadScript: rs.fn() },
     };
 
@@ -28,6 +30,8 @@ describe('patchLynxChunkLoading chunk URLs', () => {
 
     expect(loadLazyBundle).toHaveBeenCalledWith(
       'https://app.example/dist/host-web/lazy-bundle/Feature.bundle',
+      undefined,
+      'https://app.example/dist/host-web/main.lynx.bundle',
     );
   });
 
