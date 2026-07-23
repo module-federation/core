@@ -236,6 +236,32 @@ describe('lynxRuntimePlugin entry loading', () => {
     expect(registry.size).toBe(0);
   });
 
+  it('rejects a remote whose paired main-thread entry is missing', async () => {
+    const registry = new Map<string, string>();
+    (
+      globalThis as unknown as Record<
+        PropertyKey,
+        Map<string, string> | undefined
+      >
+    )[LYNX_BUNDLE_REGISTRY] = registry;
+    setLynx({
+      fetchBundle: async () => ({ code: 0, url: 'lynx-cache://remote' }),
+      getNativeApp: () => ({
+        callLepusMethod: (
+          _name: string,
+          _payload: unknown,
+          callback: (result: boolean) => void,
+        ) => callback(false),
+      }),
+      loadScript: () => createContainer(),
+    });
+
+    await expect(
+      loadEntry(lynxRuntimePlugin(), bundleRemoteInfo),
+    ).rejects.toThrow('did not expose its paired main-thread entry');
+    expect(registry.size).toBe(0);
+  });
+
   it('loads bundle entries from the main-thread section', async () => {
     const container = createContainer();
     const globalRecord = globalThis as unknown as Record<string, unknown>;

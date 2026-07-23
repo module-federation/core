@@ -393,7 +393,7 @@ describe('pluginLynxModuleFederation remote bundles', () => {
     expect(encoder.options).toMatchObject({
       bundleFileName: 'catalog-native.lynx.bundle',
       engineVersion: '3.6',
-      entryAssets: ['catalog.js'],
+      entryAssets: ['catalog.js', 'catalog__main-thread.js'],
       stateStore: { for: expect.any(Function) },
     });
     expect(encoder.options.encode).toBeTypeOf('function');

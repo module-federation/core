@@ -94,7 +94,17 @@ assert.equal(standaloneTemplate['app-type'], 'card');
 assert.equal(standaloneTemplate['engine-version'], '3.9');
 assert.equal(remoteTemplate['app-type'], 'DynamicComponent');
 assert.equal(remoteTemplate['engine-version'], '3.9');
-assert.deepEqual(Object.keys(remoteTemplate['custom-sections']), ['catalog']);
+assert.deepEqual(Object.keys(remoteTemplate['custom-sections']).sort(), [
+  'catalog',
+  'catalog__main-thread',
+]);
+const remoteMainThreadEntry = Buffer.from(
+  remoteTemplate['custom-sections']['catalog__main-thread'],
+);
+assert.ok(
+  remoteMainThreadEntry.includes(Buffer.from('processEvalResultByHost')),
+  'native remote has no main-thread chunk installer',
+);
 const hostBackgroundSource = hostTemplate['background-thread-script']
   .map(({ content }) => content)
   .join('\n');

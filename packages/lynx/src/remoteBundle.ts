@@ -50,7 +50,7 @@ type RemoteBundlePlan = RemoteBundlePlanBase &
     | {
         chunking: 'split';
         mainThreadChunkPrefix: string;
-        mainThreadEntry: undefined;
+        mainThreadEntry: string;
         mode: 'native-split';
       }
     | {
@@ -122,8 +122,8 @@ const normalizeRemoteBundlePlan = (
     includedChunkPrefixes: [backgroundChunkPrefix, mainThreadChunkPrefix],
     mainThreadChunkPrefix,
   };
+  const mainThreadEntry = `${outputName}__main-thread.js`;
   if (remoteBundle.target === 'web') {
-    const mainThreadEntry = `${outputName}__main-thread.js`;
     return {
       ...splitPlan,
       entryAssets: [backgroundEntry, mainThreadEntry],
@@ -134,8 +134,8 @@ const normalizeRemoteBundlePlan = (
 
   return {
     ...splitPlan,
-    entryAssets: [backgroundEntry],
-    mainThreadEntry: undefined,
+    entryAssets: [backgroundEntry, mainThreadEntry],
+    mainThreadEntry,
     mode: 'native-split',
   };
 };

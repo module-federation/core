@@ -71,7 +71,17 @@ const preparePairedMainThreadEntry = (
           entry,
           sectionPath: `${entryGlobalName}__main-thread`,
         },
-        () => resolve(),
+        (result: unknown) => {
+          if (result === false) {
+            reject(
+              new Error(
+                `Lynx remote bundle "${entryGlobalName}" did not expose its paired main-thread entry.`,
+              ),
+            );
+            return;
+          }
+          resolve();
+        },
       );
     } catch (error) {
       reject(error);
