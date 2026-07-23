@@ -59,6 +59,14 @@ the canary package. Remove the wrapper when Rspeedy supports the repository's
 Rspack package directly; then point those package scripts back to the public
 Rspeedy CLI and remove the canary alias together.
 
+The repository also applies version-scoped pnpm patches to the published
+ReactLynx, template plugin, and Web Core packages. They contain the fixes from
+[lynx-family/lynx-stack#3043](https://github.com/lynx-family/lynx-stack/pull/3043)
+needed by the public `FetchBundle` transport. The Web Core patch is built from
+the matching `0.22.2` source baseline, so its JavaScript keeps the WASM asset
+names shipped by that package. Remove all three patches together after those
+upstream fixes are released.
+
 ## Run the standalone Catalog product
 
 The Catalog directly renders `Card`, `Details`, and `ActivityFeed` from the
@@ -88,6 +96,12 @@ modules do not use `eager: true`: the host waits for share-scope initialization
 and loads its singleton provider from a host `lazy-bundle/*.bundle` before
 application startup. The remote's `import: false` consumer then reuses that
 initialized background-realm singleton.
+
+Every ReactLynx build targets engine 3.9. That selects ReactLynx's public
+`FetchBundle` and `loadScript` lazy-bundle transport, which can resolve the
+host's non-eager startup share before the first render. Both host builds use
+the built-in `jsReady` first-screen handoff; no private or manual readiness API
+is involved.
 
 `src/app/staticCard.ts` is the standard asynchronous bootstrap boundary. It
 contains a module-scope static `import * as card from 'catalog/Card'`; importing

@@ -211,13 +211,23 @@ const loadQueryComponent = (
   request: string,
   lynx: NonNullable<ReturnType<typeof getLynxRuntime>>,
   globalObject: LynxGlobal,
+  hostOverride?: string,
 ): PromiseLike<unknown> => {
+  const host =
+    hostOverride ??
+    (typeof globalObject.globDynamicComponentEntry === 'string'
+      ? globalObject.globDynamicComponentEntry
+      : undefined);
   if (typeof lynx.loadLazyBundle === 'function') {
-    return lynx.loadLazyBundle(request);
+    return host === undefined
+      ? lynx.loadLazyBundle(request)
+      : lynx.loadLazyBundle(request, undefined, host);
   }
   const nativeLynx = lynx.getNativeLynx?.();
   if (typeof nativeLynx?.loadLazyBundle === 'function') {
-    return nativeLynx.loadLazyBundle(request);
+    return host === undefined
+      ? nativeLynx.loadLazyBundle(request)
+      : nativeLynx.loadLazyBundle(request, undefined, host);
   }
 
   if (getLynxRealm(lynx) === 'main-thread') {
@@ -334,12 +344,11 @@ export const patchLynxChunkLoading = (
         : webpackRequire.lynx_aci?.[key];
     if (lazyBundlePath) {
       const currentRegistry = globalObject[LYNX_BUNDLE_REGISTRY];
-      const remoteOrigin =
+      const loadingHost =
         registeredRemoteOrigin ??
-        currentRegistry?.get(getRemoteOriginKey(baseName)) ??
-        getBundleName() ??
-        webpackRequire.p ??
-        '';
+        currentRegistry?.get(getRemoteOriginKey(baseName));
+      const remoteOrigin =
+        loadingHost ?? getBundleName() ?? webpackRequire.p ?? '';
       const request = joinRemoteUrl(
         remoteOrigin,
         webpackRequire.lynx_public_path_auto ? undefined : webpackRequire.p,
@@ -350,7 +359,7 @@ export const patchLynxChunkLoading = (
         installedChunks,
         timeout,
         loadQueryComponent: (lazyRequest) =>
-          loadQueryComponent(lazyRequest, lynx, globalObject),
+          loadQueryComponent(lazyRequest, lynx, globalObject, loadingHost),
         isChunk,
         installChunkAfterConsumes: (chunk, isCurrent) =>
           installChunkAfterConsumes(

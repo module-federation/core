@@ -277,6 +277,19 @@ const getBackgroundRemoteChunks = (
   return included;
 };
 
+const mainThreadChunkInstaller = `
+globalThis.processEvalResult = (globalThis.processEvalResultByHost || (globalThis.processEvalResultByHost = {}))[globDynamicComponentEntry] = function (result, schema) {
+  var chunk = result && result(schema);
+  if (chunk && chunk.ids && chunk.modules) {
+    __webpack_require__.C(chunk);
+    for (var moduleId in chunk.modules) {
+      __webpack_require__(moduleId);
+    }
+  }
+  return chunk;
+};
+`;
+
 const createRemoteAssetsPlugin = (
   stateStore: ReturnType<typeof createRemoteBundleCompilationStateStore>,
   backgroundEntry: string,
@@ -348,7 +361,10 @@ const createRemoteAssetsPlugin = (
             }
             compilation.emitAsset(
               mainThreadEntry,
-              entryAsset.source,
+              new compiler.webpack.sources.ConcatSource(
+                entryAsset.source,
+                mainThreadChunkInstaller,
+              ),
               entryAsset.info,
             );
             state.pairedBundleChunks.add(mainThreadEntry);

@@ -443,6 +443,28 @@ try {
     `Real Lynx Web E2E passed for Orbit and standalone Catalog at ${baseUrl} (${requests.length} requests)\n`,
   );
 } catch (error) {
+  const frameDiagnostics = failurePage
+    ? await Promise.all(
+        failurePage.frames().map(async (frame) => {
+          try {
+            return await frame.evaluate(() => ({
+              processEvalResultHosts: Object.keys(
+                globalThis.processEvalResultByHost ?? {},
+              ),
+              url: location.href,
+            }));
+          } catch (frameError) {
+            return {
+              error:
+                frameError instanceof Error
+                  ? frameError.message
+                  : String(frameError),
+              url: frame.url(),
+            };
+          }
+        }),
+      )
+    : [];
   if (failurePage) {
     await mkdir(path.dirname(screenshotPath), { recursive: true });
     await failurePage.screenshot({ path: screenshotPath, fullPage: true });
@@ -453,6 +475,7 @@ try {
       `Failure screenshot: ${screenshotPath}`,
       `Page errors: ${JSON.stringify(pageErrors)}`,
       `Console errors: ${JSON.stringify(consoleErrors)}`,
+      `Frame diagnostics: ${JSON.stringify(frameDiagnostics)}`,
       `Requests: ${JSON.stringify(requests)}`,
     ].join('\n'),
     { cause: error },

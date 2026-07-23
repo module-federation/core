@@ -19,6 +19,65 @@ import {
 import { loadWithTimeout } from './runtimeTimeout';
 
 const DEFAULT_TIMEOUT = 30_000;
+export const PREPARE_REMOTE_ENTRY_MTS =
+  'rModuleFederationPrepareRemoteEntryMTS';
+
+export const loadScriptForEntry = (
+  lynx: LynxRuntime,
+  sectionPath: string,
+  bundleName: string,
+  entry: string,
+  globalObject: LynxGlobal,
+): unknown => {
+  const hadEntry = Object.prototype.hasOwnProperty.call(
+    globalObject,
+    'globDynamicComponentEntry',
+  );
+  const previousEntry = globalObject.globDynamicComponentEntry;
+  globalObject.globDynamicComponentEntry = entry;
+  try {
+    return lynx.loadScript!(sectionPath, { bundleName });
+  } finally {
+    if (hadEntry) {
+      globalObject.globDynamicComponentEntry = previousEntry;
+    } else {
+      delete globalObject.globDynamicComponentEntry;
+    }
+  }
+};
+
+const preparePairedMainThreadEntry = (
+  lynx: LynxRuntime,
+  entry: string,
+  entryGlobalName: string,
+  bundleName: string,
+): Promise<void> => {
+  const nativeApp = lynx.getNativeApp?.();
+  if (!isRecord(nativeApp)) {
+    return Promise.resolve();
+  }
+  const callLepusMethod = nativeApp.callLepusMethod;
+  if (typeof callLepusMethod !== 'function') {
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve, reject) => {
+    try {
+      callLepusMethod.call(
+        nativeApp,
+        PREPARE_REMOTE_ENTRY_MTS,
+        {
+          bundleName,
+          entry,
+          sectionPath: `${entryGlobalName}__main-thread`,
+        },
+        () => resolve(),
+      );
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
 
 interface LynxBundleResponse {
   code: number;
@@ -246,9 +305,15 @@ export const loadBundleEntry = (
           );
 
           try {
-            const value = loadScript(sectionPath, { bundleName: response.url });
+            const value = loadScriptForEntry(
+              lynx,
+              sectionPath,
+              response.url,
+              entry,
+              globalObject,
+            );
             Promise.resolve(value).then(
-              (loadedValue) => {
+              async (loadedValue) => {
                 if (isSettled()) {
                   return;
                 }
@@ -265,6 +330,26 @@ export const loadBundleEntry = (
                       `Lynx remote bundle "${entryGlobalName}" loaded from "${entry}" but did not export a Module Federation container.`,
                     ),
                   );
+                  return;
+                }
+                try {
+                  if (realm === 'background') {
+                    await preparePairedMainThreadEntry(
+                      lynx,
+                      entry,
+                      entryGlobalName,
+                      response.url,
+                    );
+                  }
+                } catch (error) {
+                  reject(
+                    new Error(
+                      `Failed to prepare Lynx remote bundle "${entryGlobalName}" from "${entry}" on the main thread: ${toErrorMessage(error)}`,
+                    ),
+                  );
+                  return;
+                }
+                if (isSettled()) {
                   return;
                 }
                 rollbackRegistry = undefined;

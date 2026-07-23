@@ -89,15 +89,18 @@ const [hostBundleSource, standaloneSource, remoteBundleSource] =
 const hostTemplate = decodeTemplate(hostBundleSource);
 const standaloneTemplate = decodeTemplate(standaloneSource);
 const remoteTemplate = decodeTemplate(remoteBundleSource);
+assert.equal(hostTemplate['engine-version'], '3.9');
 assert.equal(standaloneTemplate['app-type'], 'card');
+assert.equal(standaloneTemplate['engine-version'], '3.9');
 assert.equal(remoteTemplate['app-type'], 'DynamicComponent');
-assert.equal(remoteTemplate['engine-version'], '3.7');
+assert.equal(remoteTemplate['engine-version'], '3.9');
 assert.deepEqual(Object.keys(remoteTemplate['custom-sections']), ['catalog']);
 const hostBackgroundSource = hostTemplate['background-thread-script']
   .map(({ content }) => content)
   .join('\n');
 assert.ok(hostBackgroundSource.includes('mfAsyncStartup'));
 assert.ok(hostBackgroundSource.includes('lynx_aci'));
+assert.ok(hostBackgroundSource.includes('fetchBundle'));
 assert.ok(hostBackgroundSource.includes(nativeHostAssetPrefix));
 
 for (const name of hostLazyBundles) {
@@ -105,7 +108,11 @@ for (const name of hostLazyBundles) {
     await readFile(path.join(appRoot, 'dist/host-native/lazy-bundle', name)),
   );
   assert.equal(lazyTemplate['app-type'], 'DynamicComponent', name);
-  assert.ok(lazyTemplate['background-thread-script']?.length > 0, name);
+  assert.equal(
+    typeof lazyTemplate['custom-sections']?.background,
+    'string',
+    name,
+  );
 }
 
 const manifest = JSON.parse(manifestSource);
@@ -149,13 +156,14 @@ for (const exposed of manifest.exposes) {
   assert.ok(lazyStat.isFile() && lazyStat.size > 1_000, lazyPath);
   const lazyTemplate = decodeTemplate(await readFile(lazyPath));
   assert.equal(lazyTemplate['app-type'], 'DynamicComponent', lazyName);
-  assert.ok(
-    lazyTemplate['background-thread-script']?.length > 0,
-    `${lazyName} has no background script`,
+  assert.equal(
+    typeof lazyTemplate['custom-sections']?.background,
+    'string',
+    `${lazyName} has no background section`,
   );
   assert.ok(
-    lazyTemplate['main-thread-script']?.lepus_code_len > 100,
-    `${lazyName} has no main-thread snapshot bytecode`,
+    lazyTemplate['custom-sections']?.['main-thread']?.length > 100,
+    `${lazyName} has no main-thread snapshot section`,
   );
   assert.ok(
     !JSON.stringify(exposed).includes('__main_thread'),
@@ -169,11 +177,11 @@ const nestedTemplate = decodeTemplate(
   ),
 );
 assert.equal(nestedTemplate['app-type'], 'DynamicComponent');
+const nestedBackgroundSource = nestedTemplate['background-thread-script']
+  .map(({ content }) => content)
+  .join('\n');
 assert.ok(
-  nestedTemplate['background-thread-script']
-    ?.map(({ content }) => content)
-    .join('\n')
-    .includes('Nested federated module ready'),
+  nestedBackgroundSource.includes('Nested federated module ready'),
   `${nestedLazyBundle} does not contain the nested module`,
 );
 

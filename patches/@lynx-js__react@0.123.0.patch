@@ -1,0 +1,84 @@
+diff --git a/runtime/lib/core/lynx/lazy-bundle.js b/runtime/lib/core/lynx/lazy-bundle.js
+index e21f90611d27e086440ed8b1be6b9e0b458a1f99..f084dbd77e6acdb582b54babd6859282828524bf 100644
+--- a/runtime/lib/core/lynx/lazy-bundle.js
++++ b/runtime/lib/core/lynx/lazy-bundle.js
+@@ -174,14 +174,14 @@ export const loadLazyBundle = /*#__PURE__*/ (() => {
+                 // and warms the native bundle cache; the background `async` path then
+                 // waits less. The main thread renders nothing here.
+                 try {
+-                    lynx.fetchBundle(source, {});
++                    lynx.fetchBundle(source, { isLazyBundle: true });
+                 }
+                 catch { }
+                 return new Promise(() => { });
+             }
+             let response;
+             try {
+-                response = lynx.fetchBundle(source, {}).wait(LYNX_LAZY_SYNC_TIMEOUT_SECONDS);
++                response = lynx.fetchBundle(source, { isLazyBundle: true }).wait(LYNX_LAZY_SYNC_TIMEOUT_SECONDS);
+             }
+             catch {
+                 return new Promise(() => { });
+@@ -194,9 +194,12 @@ export const loadLazyBundle = /*#__PURE__*/ (() => {
+                 result = lynx.loadScript(SECTION_MAIN_THREAD, {
+                     bundleName: response.url,
+                 })(source);
+-                const styleSheet = __LoadStyleSheet(SECTION_CSS, response.url);
+-                if (styleSheet !== null) {
+-                    __AdoptStyleSheet(styleSheet);
++                if (typeof __LoadStyleSheet === 'function'
++                    && typeof __AdoptStyleSheet === 'function') {
++                    const styleSheet = __LoadStyleSheet(SECTION_CSS, response.url);
++                    if (styleSheet !== null) {
++                        __AdoptStyleSheet(styleSheet);
++                    }
+                 }
+             }
+             catch {
+@@ -216,7 +219,7 @@ export const loadLazyBundle = /*#__PURE__*/ (() => {
+             if (mode === 'sync') {
+                 let response;
+                 try {
+-                    response = lynx.fetchBundle(source, {}).wait(LYNX_LAZY_SYNC_TIMEOUT_SECONDS);
++                    response = lynx.fetchBundle(source, { isLazyBundle: true }).wait(LYNX_LAZY_SYNC_TIMEOUT_SECONDS);
+                 }
+                 catch (e) {
+                     return Promise.reject(e instanceof Error ? e : new Error(String(e)));
+@@ -255,7 +258,7 @@ export const loadLazyBundle = /*#__PURE__*/ (() => {
+             return new Promise((resolve, reject) => {
+                 let handler;
+                 try {
+-                    handler = lynx.fetchBundle(source, {});
++                    handler = lynx.fetchBundle(source, { isLazyBundle: true });
+                 }
+                 catch (e) {
+                     reject(e instanceof Error ? e : new Error(String(e)));
+diff --git a/runtime/lib/snapshot/lynx/prepareLazyBundleMTS.js b/runtime/lib/snapshot/lynx/prepareLazyBundleMTS.js
+index 151971e1f4257f121a5ae6ef659446ceb840ff52..134c55b2eabfcaf35de54ecc6ef4c1fb1e368229 100644
+--- a/runtime/lib/snapshot/lynx/prepareLazyBundleMTS.js
++++ b/runtime/lib/snapshot/lynx/prepareLazyBundleMTS.js
+@@ -10,7 +10,7 @@ function prepareLazyBundleMTS(payload) {
+         return;
+     let handler;
+     try {
+-        handler = lynx.fetchBundle(url, {});
++        handler = lynx.fetchBundle(url, { isLazyBundle: true });
+     }
+     catch {
+         // fetchBundle threw — the bundle never loaded. Leave `url` out of the
+@@ -46,9 +46,12 @@ function prepareLazyBundleMTS(payload) {
+         if (typeof processEvalResult === 'function') {
+             processEvalResult(() => loaded, url);
+         }
+-        const styleSheet = __LoadStyleSheet(SECTION_CSS, response.url);
+-        if (styleSheet !== null)
+-            __AdoptStyleSheet(styleSheet);
++        if (typeof __LoadStyleSheet === 'function'
++            && typeof __AdoptStyleSheet === 'function') {
++            const styleSheet = __LoadStyleSheet(SECTION_CSS, response.url);
++            if (styleSheet !== null)
++                __AdoptStyleSheet(styleSheet);
++        }
+     });
+ }
+ /** @internal */

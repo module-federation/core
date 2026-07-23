@@ -11,6 +11,7 @@ export default defineConfig({
   plugins: [
     pluginReactLynx({
       defaultDisplayLinear: false,
+      engineVersion: '3.9',
       experimental_isLazyBundle: true,
     }),
     createWebRemoteFederationPlugin(),

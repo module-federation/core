@@ -341,6 +341,8 @@ describe('patchLynxChunkLoading lazy bundle loading', () => {
 
     expect(loadLazyBundle).toHaveBeenCalledWith(
       'https://cdn.example/remotes/async/Card.bundle',
+      undefined,
+      'https://cdn.example/remotes/catalog.lynx.bundle',
     );
     expect(fetchBundle).not.toHaveBeenCalled();
     expect(loadScript).not.toHaveBeenCalled();
@@ -377,6 +379,8 @@ describe('patchLynxChunkLoading lazy bundle loading', () => {
 
     expect(loadLazyBundle).toHaveBeenCalledWith(
       'https://cdn.example/remotes/lazy-bundle/Feature.bundle',
+      undefined,
+      'https://cdn.example/remotes/catalog.lynx.bundle',
     );
     expect(webpackRequire.m.factory).toBe(factory);
   });

@@ -14,6 +14,7 @@ export default defineConfig({
   plugins: [
     pluginReactLynx({
       defaultDisplayLinear: false,
+      engineVersion: '3.9',
       firstScreenSyncTiming: 'jsReady',
     }),
     createWebHostFederationPlugin(manifestUrl),

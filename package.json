@@ -143,7 +143,7 @@
     },
     "overrides": {
       "@changesets/assemble-release-plan": "workspace:*",
-      "@lynx-js/template-webpack-plugin": "https://pkg.pr.new/@lynx-js/template-webpack-plugin@4cc0608b488a9bf35093936fd9d0e6589a1c161c",
+      "@lynx-js/template-webpack-plugin": "0.13.0",
       "ajv": "8.18.0",
       "eslint>ajv": "6.14.0",
       "@eslint/eslintrc>ajv": "6.14.0",
@@ -164,7 +164,12 @@
       "msw",
       "sharp",
       "unrs-resolver"
-    ]
+    ],
+    "patchedDependencies": {
+      "@lynx-js/react@0.123.0": "patches/@lynx-js__react@0.123.0.patch",
+      "@lynx-js/template-webpack-plugin@0.13.0": "patches/@lynx-js__template-webpack-plugin@0.13.0.patch",
+      "@lynx-js/web-core@0.22.2": "patches/@lynx-js__web-core@0.22.2.patch"
+    }
   },
   "dependencies": {
     "adm-zip": "0.6.0",

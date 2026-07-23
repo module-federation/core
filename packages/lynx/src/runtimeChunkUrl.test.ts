@@ -58,6 +58,7 @@ describe('patchLynxChunkLoading chunk URLs', () => {
     }));
     const registry = remoteRegistry();
     const globalObject = {
+      globDynamicComponentEntry: '__Card__',
       lynx: { loadLazyBundle, loadScript: rs.fn() },
       [LYNX_BUNDLE_REGISTRY]: registry,
     };
@@ -73,6 +74,8 @@ describe('patchLynxChunkLoading chunk URLs', () => {
 
     expect(loadLazyBundle).toHaveBeenCalledWith(
       'https://cdn.example/remotes/async/Card.bundle',
+      undefined,
+      'https://cdn.example/remotes/catalog.lynx.bundle',
     );
   });
 
@@ -89,6 +92,8 @@ describe('patchLynxChunkLoading chunk URLs', () => {
       modules: { factory },
     }));
     const globalObject = {
+      globDynamicComponentEntry:
+        'https://cdn.example/remotes/catalog.lynx.bundle',
       lynx: { loadLazyBundle, loadScript },
       [LYNX_BUNDLE_REGISTRY]: new Map([
         ['remote', 'https://cdn.example/cache/catalog.lynx.bundle'],
@@ -106,6 +111,8 @@ describe('patchLynxChunkLoading chunk URLs', () => {
     await expect(Promise.all(promises)).resolves.toBeDefined();
     expect(loadLazyBundle).toHaveBeenCalledWith(
       'https://cdn.example/remote-assets/async/catalog__background_Card.123.bundle',
+      undefined,
+      'https://cdn.example/remotes/catalog.lynx.bundle',
     );
     expect(loadScript).not.toHaveBeenCalled();
     expect(webpackRequire.m.factory).toBe(factory);
@@ -140,12 +147,10 @@ describe('patchLynxChunkLoading chunk URLs', () => {
     assetRequire.f.j!('feature', assetPromises);
     await Promise.all(assetPromises);
 
-    expect(loadLazyBundle).toHaveBeenNthCalledWith(
-      1,
+    expect(loadLazyBundle.mock.calls[0]?.[0]).toBe(
       '//cdn.example/assets/async/Card.bundle',
     );
-    expect(loadLazyBundle).toHaveBeenNthCalledWith(
-      2,
+    expect(loadLazyBundle.mock.calls[1]?.[0]).toBe(
       '//assets.example/chunks/Card.bundle',
     );
   });
@@ -214,7 +219,7 @@ describe('patchLynxChunkLoading chunk URLs', () => {
       webpackRequire.f.j!('feature', promises);
       await Promise.all(promises);
 
-      expect(loadLazyBundle).toHaveBeenCalledWith(expected);
+      expect(loadLazyBundle.mock.calls[0]?.[0]).toBe(expected);
     },
   );
 
@@ -244,7 +249,7 @@ describe('patchLynxChunkLoading chunk URLs', () => {
     webpackRequire.f.j!('feature', promises);
     await Promise.all(promises);
 
-    expect(loadLazyBundle).toHaveBeenCalledWith(
+    expect(loadLazyBundle.mock.calls[0]?.[0]).toBe(
       'https://cdn.example/remotes/async/Card.bundle',
     );
   });
@@ -270,7 +275,7 @@ describe('patchLynxChunkLoading chunk URLs', () => {
     webpackRequire.f.j!('feature', promises);
     await Promise.all(promises);
 
-    expect(loadLazyBundle).toHaveBeenCalledWith(
+    expect(loadLazyBundle.mock.calls[0]?.[0]).toBe(
       '//cdn.example/async/Card.bundle',
     );
   });

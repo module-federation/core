@@ -97,6 +97,7 @@ export const createNativeRemoteFederationPlugin = () =>
   pluginLynxModuleFederation(createRemoteOptions(), {
     environment: 'lynx',
     remoteBundle: {
+      engineVersion: '3.9',
       target: 'lynx',
       filename: 'catalog.native.lynx.bundle',
       preserveSourceEntryBundles: false,

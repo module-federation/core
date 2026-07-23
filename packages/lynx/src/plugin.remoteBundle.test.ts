@@ -284,6 +284,11 @@ describe('pluginLynxModuleFederation remote bundles', () => {
       expect.any(Object),
       {},
     );
+    const mainThreadContainerSource = emitAsset.mock.calls[0][1].source();
+    expect(mainThreadContainerSource).toContain(
+      'globalThis.processEvalResultByHost',
+    );
+    expect(mainThreadContainerSource).toContain('__webpack_require__.C(chunk)');
   });
 
   it('configures cache events through the public chain slot for remote bundles', async () => {
@@ -300,6 +305,24 @@ describe('pluginLynxModuleFederation remote bundles', () => {
       [{ setupListTransformer: expect.any(Function) }],
     ]);
     expect(cacheEventsUse[1][0].setupListTransformer(['event'])).toEqual([]);
+  });
+
+  it('replaces the late Rspeedy cache-events plugin for remote bundles', async () => {
+    const { modifyRspackConfig } = setupPlugin(
+      { name: 'catalog', exposes: { './Card': './src/Card' } },
+      { remoteBundle: { target: 'web' } },
+    );
+    const original = new LynxCacheEventsPlugin();
+
+    const config = await modifyRspackConfig({ plugins: [original] }, 'web');
+    const configured = config.plugins.find(
+      (plugin: unknown) => plugin instanceof LynxCacheEventsPlugin,
+    ) as unknown as {
+      options: { setupListTransformer(setups: string[]): string[] };
+    };
+
+    expect(configured).not.toBe(original);
+    expect(configured.options.setupListTransformer(['event'])).toEqual([]);
   });
 
   it('does not override cache events for hosts', async () => {

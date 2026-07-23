@@ -143,6 +143,15 @@ export const pluginLynxModuleFederation = (
         experiments.layers ??= true;
 
         if (remoteBundle) {
+          const { LynxCacheEventsPlugin } =
+            await import('@lynx-js/cache-events-webpack-plugin');
+          config.plugins = config.plugins?.map((plugin) =>
+            plugin &&
+            typeof plugin === 'object' &&
+            plugin.constructor.name === LynxCacheEventsPlugin.name
+              ? new LynxCacheEventsPlugin({ setupListTransformer: () => [] })
+              : plugin,
+          );
           await configureRemoteBundle(
             config as unknown as Configuration,
             options,

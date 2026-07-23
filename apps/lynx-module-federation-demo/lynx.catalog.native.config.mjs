@@ -9,7 +9,10 @@ const catalogDevPort = Number(process.env.CATALOG_DEV_PORT ?? 3001);
 
 export default defineConfig({
   plugins: [
-    pluginReactLynx({ defaultDisplayLinear: false }),
+    pluginReactLynx({
+      defaultDisplayLinear: false,
+      engineVersion: '3.9',
+    }),
     pluginQRCode({ fullscreen: true }),
   ],
   source: {

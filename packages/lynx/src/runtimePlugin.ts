@@ -9,10 +9,13 @@ import {
   getTimeout,
   loadBundleEntry,
   loadJavaScriptEntry,
+  loadScriptForEntry,
+  PREPARE_REMOTE_ENTRY_MTS,
 } from './runtimeEntryLoader';
 import {
   getLynxRealm,
   getLynxRuntime,
+  isRecord,
   LYNX_BUNDLE_REGISTRY,
   type LynxGlobal,
   type LynxRuntimePluginOptions,
@@ -42,6 +45,36 @@ export default function lynxRuntimePlugin(
     background: 'background',
     'main-thread': 'main-thread',
   };
+  const globalObject = globalThis as LynxGlobal;
+  const lynx = getLynxRuntime(globalObject);
+  if (
+    lynx?.loadScript &&
+    getLynxRealm(lynx) === 'main-thread' &&
+    typeof globalObject[PREPARE_REMOTE_ENTRY_MTS] !== 'function'
+  ) {
+    globalObject[PREPARE_REMOTE_ENTRY_MTS] = (payload: unknown): boolean => {
+      if (
+        !isRecord(payload) ||
+        typeof payload.bundleName !== 'string' ||
+        typeof payload.entry !== 'string' ||
+        typeof payload.sectionPath !== 'string'
+      ) {
+        return false;
+      }
+      try {
+        loadScriptForEntry(
+          lynx,
+          payload.sectionPath,
+          payload.bundleName,
+          payload.entry,
+          globalObject,
+        );
+        return true;
+      } catch {
+        return false;
+      }
+    };
+  }
 
   return {
     name: 'lynx-federation-runtime-plugin',

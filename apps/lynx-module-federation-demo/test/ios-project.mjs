@@ -46,6 +46,10 @@ const [
   urlResolver,
   nativeHostConfig,
   webHostConfig,
+  nativeCatalogConfig,
+  webCatalogConfig,
+  nativeRemoteConfig,
+  webRemoteConfig,
 ] = await Promise.all([
   read('ios/Podfile'),
   read('ios/Podfile.lock'),
@@ -66,6 +70,10 @@ const [
   read('ios/OrbitControl/OrbitResourceURLResolver.m'),
   read('lynx.config.mjs'),
   read('lynx.web.config.mjs'),
+  read('lynx.catalog.native.config.mjs'),
+  read('lynx.catalog.web.config.mjs'),
+  read('lynx.remote.native.config.mjs'),
+  read('lynx.remote.web.config.mjs'),
 ]);
 
 for (const pod of ['Lynx', 'LynxService', 'XElement']) {
@@ -116,6 +124,16 @@ assert.doesNotMatch(
 );
 for (const hostConfig of [nativeHostConfig, webHostConfig]) {
   assert.match(hostConfig, /firstScreenSyncTiming: 'jsReady'/);
+}
+for (const config of [
+  nativeHostConfig,
+  webHostConfig,
+  nativeCatalogConfig,
+  webCatalogConfig,
+  nativeRemoteConfig,
+  webRemoteConfig,
+]) {
+  assert.match(config, /engineVersion: '3\.9'/);
 }
 assert.match(appSource, /interactive=\{backgroundReady\}/);
 assert.match(

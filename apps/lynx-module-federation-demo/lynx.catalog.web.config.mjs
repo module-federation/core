@@ -4,7 +4,12 @@ import { defineConfig } from '@lynx-js/rspeedy';
 import { resolveAliases, resolveOutputRoot } from './federation.config.mjs';
 
 export default defineConfig({
-  plugins: [pluginReactLynx({ defaultDisplayLinear: false })],
+  plugins: [
+    pluginReactLynx({
+      defaultDisplayLinear: false,
+      engineVersion: '3.9',
+    }),
+  ],
   source: {
     entry: {
       main: './src/catalog-app/index.tsx',

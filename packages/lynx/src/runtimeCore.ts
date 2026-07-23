@@ -18,7 +18,11 @@ export interface LynxRuntime {
   QueryComponent?(source: string, callback: (result: unknown) => void): void;
   fetchBundle?(bundleUrl: string): PromiseLike<unknown>;
   loadScript?(sectionPath: string, options: { bundleName: string }): unknown;
-  loadLazyBundle?(bundleUrl: string): PromiseLike<unknown>;
+  loadLazyBundle?(
+    bundleUrl: string,
+    mode?: 'sync' | 'async',
+    host?: string,
+  ): PromiseLike<unknown>;
   getNativeApp?(): unknown;
   getNativeLynx?(): Pick<LynxRuntime, 'QueryComponent' | 'loadLazyBundle'>;
   requireModuleAsync?(

@@ -13,6 +13,8 @@ interface TestLynx {
   requireModuleAsync?(entry: string, callback: NativeCallback): void;
 }
 
+const PREPARE_REMOTE_ENTRY_MTS = 'rModuleFederationPrepareRemoteEntryMTS';
+
 type LoadEntryArgs = Parameters<
   NonNullable<ModuleFederationRuntimePlugin['loadEntry']>
 >[0];
@@ -49,6 +51,8 @@ afterEach(() => {
   const globalRecord = globalThis as unknown as Record<PropertyKey, unknown>;
   delete globalRecord.lynx;
   delete globalRecord.remote;
+  delete globalRecord.globDynamicComponentEntry;
+  delete globalRecord[PREPARE_REMOTE_ENTRY_MTS];
   delete globalRecord[LYNX_BUNDLE_REGISTRY];
   const globalLoading = globalRecord.__GLOBAL_LOADING_REMOTE_ENTRY__ as
     | Record<string, Promise<unknown> | undefined>
@@ -133,6 +137,9 @@ describe('lynxRuntimePlugin entry loading', () => {
 
   it('loads bundle entries from the background section', async () => {
     const container = createContainer();
+    const callLepusMethod = rs.fn(
+      (_name: string, _payload: unknown, callback: () => void) => callback(),
+    );
     const fetchBundle = rs.fn(async () => ({
       code: 0,
       url: 'lynx-cache://remote',
@@ -140,7 +147,7 @@ describe('lynxRuntimePlugin entry loading', () => {
     const loadScript = rs.fn(async () => container);
     setLynx({
       fetchBundle,
-      getNativeApp: () => ({}),
+      getNativeApp: () => ({ callLepusMethod }),
       loadScript,
     });
 
@@ -155,6 +162,15 @@ describe('lynxRuntimePlugin entry loading', () => {
     expect(loadScript).toHaveBeenCalledWith('remote', {
       bundleName: 'lynx-cache://remote',
     });
+    expect(callLepusMethod).toHaveBeenCalledWith(
+      PREPARE_REMOTE_ENTRY_MTS,
+      {
+        bundleName: 'lynx-cache://remote',
+        entry: bundleRemoteInfo.entry,
+        sectionPath: 'remote__main-thread',
+      },
+      expect.any(Function),
+    );
     expect(
       (
         globalThis as unknown as Record<
@@ -165,9 +181,71 @@ describe('lynxRuntimePlugin entry loading', () => {
     ).toBe('lynx-cache://remote');
   });
 
+  it('prepares paired remote containers in the main-thread realm', () => {
+    const container = createContainer();
+    const globalRecord = globalThis as unknown as Record<string, unknown>;
+    globalRecord.globDynamicComponentEntry = '__Card__';
+    const loadScript = rs.fn(() => {
+      expect(globalRecord.globDynamicComponentEntry).toBe(
+        bundleRemoteInfo.entry,
+      );
+      return container;
+    });
+    setLynx({ loadScript });
+
+    lynxRuntimePlugin();
+    const prepare = globalRecord[PREPARE_REMOTE_ENTRY_MTS] as (
+      payload: Record<string, string>,
+    ) => unknown;
+
+    expect(prepare).toBeTypeOf('function');
+    expect(
+      prepare({
+        bundleName: 'lynx-cache://remote',
+        entry: bundleRemoteInfo.entry,
+        sectionPath: 'remote__main-thread',
+      }),
+    ).toBe(true);
+    expect(loadScript).toHaveBeenCalledWith('remote__main-thread', {
+      bundleName: 'lynx-cache://remote',
+    });
+    expect(globalRecord.globDynamicComponentEntry).toBe('__Card__');
+  });
+
+  it('reports paired main-thread preparation failures immediately', async () => {
+    const registry = new Map<string, string>();
+    (
+      globalThis as unknown as Record<
+        PropertyKey,
+        Map<string, string> | undefined
+      >
+    )[LYNX_BUNDLE_REGISTRY] = registry;
+    setLynx({
+      fetchBundle: async () => ({ code: 0, url: 'lynx-cache://remote' }),
+      getNativeApp: () => ({
+        callLepusMethod: () => {
+          throw new Error('main-thread preparation failed');
+        },
+      }),
+      loadScript: () => createContainer(),
+    });
+
+    await expect(
+      loadEntry(lynxRuntimePlugin(), bundleRemoteInfo),
+    ).rejects.toThrow('main-thread preparation failed');
+    expect(registry.size).toBe(0);
+  });
+
   it('loads bundle entries from the main-thread section', async () => {
     const container = createContainer();
-    const loadScript = rs.fn(() => ({ default: container }));
+    const globalRecord = globalThis as unknown as Record<string, unknown>;
+    globalRecord.globDynamicComponentEntry = '__Card__';
+    const loadScript = rs.fn(() => {
+      expect(globalRecord.globDynamicComponentEntry).toBe(
+        bundleRemoteInfo.entry,
+      );
+      return { default: container };
+    });
     setLynx({
       fetchBundle: async () => ({ code: 0, url: 'lynx-cache://remote' }),
       loadScript,
@@ -183,6 +261,7 @@ describe('lynxRuntimePlugin entry loading', () => {
     expect(loadScript).toHaveBeenCalledWith('remote__main-thread', {
       bundleName: 'lynx-cache://remote',
     });
+    expect(globalRecord.globDynamicComponentEntry).toBe('__Card__');
     expect(
       (
         globalThis as unknown as Record<
