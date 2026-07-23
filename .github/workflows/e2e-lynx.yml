@@ -158,8 +158,8 @@ jobs:
         with:
           ruby-version: ${{ env.RUBY_VERSION }}
 
-      - name: Restore iOS dependencies
-        id: ios-dependency-cache
+      - name: Restore iOS build cache
+        id: ios-build-cache
         uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
         with:
           path: |
@@ -167,21 +167,10 @@ jobs:
             ~/Library/Caches/CocoaPods
             apps/lynx-module-federation-demo/ios/Pods
             apps/lynx-module-federation-demo/ios/vendor/bundle
-          key: ${{ runner.os }}-${{ runner.arch }}-lynx-ios-xcode-16.4-ruby-${{ env.RUBY_VERSION }}-${{ hashFiles('apps/lynx-module-federation-demo/ios/Gemfile', 'apps/lynx-module-federation-demo/ios/Gemfile.lock', 'apps/lynx-module-federation-demo/ios/Podfile', 'apps/lynx-module-federation-demo/ios/Podfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ runner.arch }}-lynx-ios-xcode-16.4-ruby-${{ env.RUBY_VERSION }}-
-
-      - name: Cache iOS build products
-        id: ios-build-cache
-        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
-        with:
-          path: |
             apps/lynx-module-federation-demo/ios/build/DerivedData/Build
             apps/lynx-module-federation-demo/ios/build/DerivedData/ModuleCache.noindex
             apps/lynx-module-federation-demo/ios/build/DerivedData/SDKStatCaches.noindex
-          key: ${{ runner.os }}-${{ runner.arch }}-lynx-ios-derived-data-xcode-16.4-${{ hashFiles('apps/lynx-module-federation-demo/ios/Podfile', 'apps/lynx-module-federation-demo/ios/Podfile.lock') }}-${{ hashFiles('apps/lynx-module-federation-demo/ios/OrbitControl.xcodeproj/project.pbxproj') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ runner.arch }}-lynx-ios-derived-data-xcode-16.4-${{ hashFiles('apps/lynx-module-federation-demo/ios/Podfile', 'apps/lynx-module-federation-demo/ios/Podfile.lock') }}-
+          key: ${{ runner.os }}-${{ runner.arch }}-lynx-ios-build-v2-xcode-16.4-ruby-${{ env.RUBY_VERSION }}-${{ hashFiles('apps/lynx-module-federation-demo/ios/Gemfile', 'apps/lynx-module-federation-demo/ios/Gemfile.lock', 'apps/lynx-module-federation-demo/ios/Podfile', 'apps/lynx-module-federation-demo/ios/Podfile.lock') }}-${{ hashFiles('apps/lynx-module-federation-demo/ios/OrbitControl.xcodeproj/project.pbxproj') }}
 
       - name: Download native artifacts
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
@@ -193,27 +182,25 @@ jobs:
         run: node apps/lynx-module-federation-demo/scripts/sync-ios-bundle.mjs
 
       - name: Install iOS dependencies
+        if: steps.ios-build-cache.outputs.cache-hit != 'true'
         working-directory: apps/lynx-module-federation-demo/ios
         run: |
           bundle config set path vendor/bundle
           bundle install --jobs 4 --retry 3
           bundle exec pod install --deployment
 
-      - name: Save iOS dependencies
-        if: steps.ios-dependency-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
-        with:
-          path: |
-            ~/.cocoapods/repos/trunk
-            ~/Library/Caches/CocoaPods
-            apps/lynx-module-federation-demo/ios/Pods
-            apps/lynx-module-federation-demo/ios/vendor/bundle
-          key: ${{ runner.os }}-${{ runner.arch }}-lynx-ios-xcode-16.4-ruby-${{ env.RUBY_VERSION }}-${{ hashFiles('apps/lynx-module-federation-demo/ios/Gemfile', 'apps/lynx-module-federation-demo/ios/Gemfile.lock', 'apps/lynx-module-federation-demo/ios/Podfile', 'apps/lynx-module-federation-demo/ios/Podfile.lock') }}
+      - name: Validate cached iOS dependencies
+        if: steps.ios-build-cache.outputs.cache-hit == 'true'
+        working-directory: apps/lynx-module-federation-demo/ios
+        run: |
+          bundle config set path vendor/bundle
+          bundle check
+          cmp Podfile.lock Pods/Manifest.lock
 
       - name: Run standalone iOS federation E2E
         run: node apps/lynx-module-federation-demo/test/ios/run.mjs
 
-      - name: Save iOS build products
+      - name: Save iOS build cache
         if: >-
           always() &&
           steps.ios-build-cache.outputs.cache-hit != 'true' &&
@@ -221,10 +208,14 @@ jobs:
         uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
         with:
           path: |
+            ~/.cocoapods/repos/trunk
+            ~/Library/Caches/CocoaPods
+            apps/lynx-module-federation-demo/ios/Pods
+            apps/lynx-module-federation-demo/ios/vendor/bundle
             apps/lynx-module-federation-demo/ios/build/DerivedData/Build
             apps/lynx-module-federation-demo/ios/build/DerivedData/ModuleCache.noindex
             apps/lynx-module-federation-demo/ios/build/DerivedData/SDKStatCaches.noindex
-          key: ${{ runner.os }}-${{ runner.arch }}-lynx-ios-derived-data-xcode-16.4-${{ hashFiles('apps/lynx-module-federation-demo/ios/Podfile', 'apps/lynx-module-federation-demo/ios/Podfile.lock') }}-${{ hashFiles('apps/lynx-module-federation-demo/ios/OrbitControl.xcodeproj/project.pbxproj') }}
+          key: ${{ runner.os }}-${{ runner.arch }}-lynx-ios-build-v2-xcode-16.4-ruby-${{ env.RUBY_VERSION }}-${{ hashFiles('apps/lynx-module-federation-demo/ios/Gemfile', 'apps/lynx-module-federation-demo/ios/Gemfile.lock', 'apps/lynx-module-federation-demo/ios/Podfile', 'apps/lynx-module-federation-demo/ios/Podfile.lock') }}-${{ hashFiles('apps/lynx-module-federation-demo/ios/OrbitControl.xcodeproj/project.pbxproj') }}
 
       - name: Upload iOS E2E evidence
         if: success()
