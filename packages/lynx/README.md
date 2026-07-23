@@ -11,9 +11,12 @@ repository is `2.1.5-canary-54a0d8f3-20260715194831`. The bundle transport uses
 therefore defaults to `3.7`.
 
 Split federation also requires `@lynx-js/web-core >= 0.22.3` and
-`@lynx-js/template-webpack-plugin >= 0.13.1`. Those releases provide the public
-lazy-bundle loader, bundle-relative Web execution URLs, valid empty
-main-thread chunks, and assetless remote-chunk filtering used by this adapter.
+`@lynx-js/template-webpack-plugin >= 0.13.1`. Those releases provide
+bundle-relative Web execution URLs, valid empty main-thread chunks, and
+assetless remote-chunk filtering used by this adapter. ReactLynx hosts require
+`@lynx-js/react >= 0.123.1`; the adapter registers that release's public
+lazy-bundle loader before federation async startup so non-eager shared chunks
+use FetchBundle in native and Web builds.
 
 ## Host
 
