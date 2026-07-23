@@ -282,9 +282,13 @@ describe('pluginLynxModuleFederation remote bundles', () => {
     expect(emitAsset).toHaveBeenCalledWith(
       'catalog__main-thread.js',
       expect.any(Object),
-      {},
+      { 'lynx:main-thread': true },
     );
     const mainThreadContainerSource = emitAsset.mock.calls[0][1].source();
+    expect(mainThreadContainerSource).toContain(
+      'var module = { exports: {} };',
+    );
+    expect(mainThreadContainerSource).not.toContain('tt.define(');
     expect(mainThreadContainerSource).toContain(
       'globalThis.processEvalResultByHost',
     );

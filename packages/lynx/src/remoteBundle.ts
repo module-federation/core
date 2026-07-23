@@ -310,6 +310,32 @@ const createRemoteAssetsPlugin = (
             compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONS + 1,
         },
         () => {
+          if (mainThreadEntry) {
+            const entryAsset = compilation.getAsset(backgroundEntry);
+            if (!entryAsset) {
+              throw new Error(
+                `@module-federation/lynx could not find generated container asset "${backgroundEntry}".`,
+              );
+            }
+            compilation.emitAsset(
+              mainThreadEntry,
+              new compiler.webpack.sources.ConcatSource(
+                '(function () {\n',
+                '  var module = { exports: {} };\n',
+                '  var exports = module.exports;\n',
+                entryAsset.source,
+                mainThreadChunkInstaller,
+                '\n  return module.exports;\n',
+                '})()',
+              ),
+              {
+                ...entryAsset.info,
+                'lynx:main-thread': true,
+              },
+            );
+            state.pairedBundleChunks.add(mainThreadEntry);
+          }
+
           const backgroundRemoteChunks = getBackgroundRemoteChunks(
             compilation.chunks,
             backgroundChunkPrefix,
@@ -352,24 +378,6 @@ const createRemoteAssetsPlugin = (
             compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_OPTIMIZE_SIZE + 2,
         },
         () => {
-          if (mainThreadEntry) {
-            const entryAsset = compilation.getAsset(backgroundEntry);
-            if (!entryAsset) {
-              throw new Error(
-                `@module-federation/lynx could not find generated container asset "${backgroundEntry}".`,
-              );
-            }
-            compilation.emitAsset(
-              mainThreadEntry,
-              new compiler.webpack.sources.ConcatSource(
-                entryAsset.source,
-                mainThreadChunkInstaller,
-              ),
-              entryAsset.info,
-            );
-            state.pairedBundleChunks.add(mainThreadEntry);
-          }
-
           const backgroundRemoteChunks = getBackgroundRemoteChunks(
             compilation.chunks,
             backgroundChunkPrefix,

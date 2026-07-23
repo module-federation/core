@@ -105,6 +105,10 @@ assert.ok(
   remoteMainThreadEntry.includes(Buffer.from('processEvalResultByHost')),
   'native remote has no main-thread chunk installer',
 );
+assert.ok(
+  !remoteMainThreadEntry.includes(Buffer.from('bundleSupportLoadScript')),
+  'native main-thread container retained the background runtime wrapper',
+);
 const hostBackgroundSource = hostTemplate['background-thread-script']
   .map(({ content }) => content)
   .join('\n');

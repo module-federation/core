@@ -18,7 +18,9 @@ Bootstrap the ReactLynx lazy-bundle loader before federation async startup so
 initial shared chunks use FetchBundle instead of the legacy component loader.
 Embed the paired container entry in native split remotes so fetched main-thread
 chunks install their snapshot factories before React commits them, and reject
-remote entries that omit the paired section.
+remote entries that omit the paired section. Emit that entry before the
+background runtime wrapper so native main-thread evaluation does not require
+the background-only `tt` module loader.
 Accept the cache-events plugin 0.2 line used by Rspeedy 0.16.
 
 Resolve manifest `publicPath: 'auto'` from the fetched response URL so
