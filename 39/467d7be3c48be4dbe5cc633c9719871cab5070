@@ -1,0 +1,59 @@
+.changeset/transform-rspress-code-blocks.md
+  s_2188fa5dca82c2::t_23ba4c26ae6ff2 1-5
+packages/rspress-plugin/README.md
+  s_36a90ee30dc33a::t_c2099a56bafec5 1,3,5,7,9-12,15-16,18-19,21-24,26-27,29-31,33-36,38-40,43-50
+packages/rspress-plugin/package.json
+  s_2188fa5dca82c2::t_d8cc5a9c986af8 28-31,40,44,47,51-53,57,68-69
+packages/rspress-plugin/rslib.config.ts
+  s_2188fa5dca82c2::t_628b602d52c05c 15,17
+packages/rspress-plugin/rstest.config.ts
+  s_65972f5d3df231::t_5df4932ac89955 1-5
+packages/rspress-plugin/src/plugin.ts
+  s_2188fa5dca82c2::t_4ed9d9a4bf39de 11,13,17-23,36,78-82
+packages/rspress-plugin/src/remarkCodeBlockTransform.test.ts
+  s_2188fa5dca82c2::t_a2bf2da08ac754 1-85
+packages/rspress-plugin/src/remarkCodeBlockTransform.ts
+  s_2188fa5dca82c2::t_78774f7eb2a923 1-111
+packages/rspress-plugin/src/runtime/index.test.tsx
+  s_65972f5d3df231::t_e6a7eb8df6dc6f 1-102
+packages/rspress-plugin/src/runtime/index.tsx
+  s_2188fa5dca82c2::t_4e71a78fd71745 1-321
+packages/rspress-plugin/tsconfig.lib.json
+  s_2188fa5dca82c2::t_f11dd10bbb1c29 1-12
+pnpm-lock.yaml
+  s_65972f5d3df231::t_2ba7bab70e29b5 4009-4011,4037-4039,4046-4048,4058-4066
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "39467d7be3c48be4dbe5cc633c9719871cab5070",
+  "prompts": {},
+  "sessions": {
+    "s_2188fa5dca82c2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f9360-f108-7fc1-9eb4-471c7274eb07",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    },
+    "s_36a90ee30dc33a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f933b-7864-70b1-9f95-d1602bc9ff05",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    },
+    "s_65972f5d3df231": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f92d6-dd9f-7b41-9af8-f10df0a05109",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    }
+  },
+  "attestation_metadata": {},
+  "remote_transcripts": {}
+}
