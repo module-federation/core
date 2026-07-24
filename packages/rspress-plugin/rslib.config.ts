@@ -12,7 +12,9 @@ export default defineConfig({
   source: {
     entry: {
       index: 'src/plugin.ts',
+      runtime: 'src/runtime/index.tsx',
     },
+    tsconfigPath: './tsconfig.lib.json',
   },
   lib: [
     {

@@ -4006,6 +4006,9 @@ importers:
 
   packages/rspress-plugin:
     dependencies:
+      '@mdx-js/react':
+        specifier: ^3.1.1
+        version: 3.1.1(@types/react@18.3.28)(react@19.2.7)
       '@module-federation/enhanced':
         specifier: workspace:*
         version: link:../enhanced
@@ -4031,12 +4034,18 @@ importers:
         specifier: 4.18.1
         version: 4.18.1
     devDependencies:
+      '@mdx-js/mdx':
+        specifier: ^3.1.1
+        version: 3.1.1
       '@rslib/core':
         specifier: ^0.23.2
         version: 0.23.2(@microsoft/api-extractor@7.57.7(@types/node@26.1.1))(@module-federation/runtime-tools@2.8.0)(core-js@3.49.0)(typescript@7.0.2)
       '@rspress/core':
         specifier: 2.0.14
         version: 2.0.14(@module-federation/runtime-tools@2.8.0)(@rspack/core@2.1.2(@module-federation/runtime-tools@2.8.0)(@swc/helpers@0.5.23))(@types/mdast@4.0.4)(@types/react@18.3.28)(core-js@3.49.0)(micromark-util-types@2.0.2)(micromark@4.0.2)
+      '@rstest/core':
+        specifier: ^0.10.6
+        version: 0.10.6(@module-federation/runtime-tools@2.8.0)(core-js@3.49.0)(jsdom@20.0.3)
       '@types/html-to-text':
         specifier: ^9.0.4
         version: 9.0.4
@@ -4046,6 +4055,15 @@ importers:
       '@types/react':
         specifier: ^18.3.11
         version: 18.3.28
+      '@types/react-dom':
+        specifier: ^18.3.1
+        version: 18.3.7(@types/react@18.3.28)
+      react:
+        specifier: ^19.2.6
+        version: 19.2.7
+      react-dom:
+        specifier: ^19.2.6
+        version: 19.2.7(react@19.2.7)
       typescript:
         specifier: 7.0.2
         version: 7.0.2

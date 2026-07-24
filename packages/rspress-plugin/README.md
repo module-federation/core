@@ -1,33 +1,50 @@
-# @examples/mf-react-component
+# @module-federation/rspress-plugin
 
-This example demonstrates how to use Rslib to build a simple Module Federation React component.
+Module Federation integration for Rspress.
 
-### Command
+## Transform remote code blocks
 
-Build package
+Enable the capability on the Rspress producer:
 
-```
-nx build rslib-module
-```
-
-Serve package
-
-```
-nx serve rslib-module
+```ts
+pluginModuleFederation(mfConfig, {
+  transformCodeBlocks: true,
+});
 ```
 
-Dev package
+The producer keeps authoring regular Markdown. It does not need to add an id or
+create a code-block component:
 
-1.
+````md
+## View all commands
 
+```bash
+npx mf -h
 ```
-nx dev rslib-module
+````
+
+The consumer creates a transformer with the browser-safe runtime entry and
+passes it to the remote MDX document:
+
+```tsx
+import Cli from 'mf-doc/cli-en';
+import { transformCodeBlock } from '@module-federation/rspress-plugin/runtime';
+
+export const replaceCliName = transformCodeBlock({
+  replace: [[/\bmf\b/g, 'vmok']],
+  filter: ({ lang }) => lang === 'bash' || lang === 'text',
+});
+
+export default function Page() {
+  return <Cli name="Vmok" cmd="vmok" transformCodeBlock={replaceCliName} />;
+}
 ```
 
-2.
+Replacement rules run in order. Without `filter`, they are considered for every
+fenced code block in the remote document; blocks with no matching content keep
+their original highlighting. A transformer can also return a different
+language when the replacement changes the code type.
 
-```
-nx storybook rslib-module
-```
-
-visit http://localhost:6006
+The transformation runs while rendering the remote MDX document, so the same
+result is used by browser rendering and SSG. Existing HTML-based llms/Markdown
+rebuilds also read the transformed output.
