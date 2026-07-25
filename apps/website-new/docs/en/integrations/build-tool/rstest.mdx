@@ -1,17 +1,32 @@
 # Rstest
 
-`@module-federation/rstest` lets Rstest run tests against real Module
-Federation remotes instead of mocked module boundaries. It is intended for
-Rstest projects that use Node or JSDOM test environments, and it can also be
-used with Rstest browser mode.
+`@module-federation/rstest` enables Module Federation inside
+[Rstest](https://rstest.rs/) test builds. Use it when your tests should load
+real federated remotes instead of replacing the federation boundary with mocks.
+
+## Supports
+
+- Rstest Node and JSDOM test environments.
+- Rstest browser mode.
+- URL remotes such as `remote@http://localhost:3001/remoteEntry.js`.
+- `commonjs ...` path remotes for Node-based integration tests.
+- Automatic Rstest federation compatibility mode for Node-targeted test builds.
 
 ## Requirements
 
-Use `@rstest/core@0.11.4` or newer. Rstest's federation support shipped in
-`0.11.4`, so older Rstest versions do not expose the configuration API this
-plugin uses for Node test builds.
+:::tip
 
-## Installation
+Use `@rstest/core@0.11.4` or newer. Rstest's federation support shipped in
+`0.11.4`.
+
+:::
+
+Older Rstest versions do not expose the configuration API this plugin uses for
+Node test builds.
+
+## Quick Start
+
+### Installation
 
 import { PackageManagerTabs } from '@theme';
 
@@ -24,7 +39,7 @@ import { PackageManagerTabs } from '@theme';
   }}
 />
 
-## Register Plugin
+### Register Plugin
 
 ```ts title='rstest.config.ts'
 import { federation } from '@module-federation/rstest';
@@ -46,11 +61,23 @@ export default defineConfig({
 });
 ```
 
-Do not set `federation: true` in `rstest.config.ts`. For Node and JSDOM test
-environments, `@module-federation/rstest` enables Rstest's federation
-compatibility mode automatically.
+:::warning
 
-## Node Test Defaults
+Do not set `federation: true` in `rstest.config.ts` when using this plugin. For
+Node and JSDOM test environments, `@module-federation/rstest` enables Rstest's
+federation compatibility mode automatically.
+
+:::
+
+Run your tests with Rstest as usual:
+
+```bash
+npx rstest run
+```
+
+## How It Works
+
+### Node Test Defaults
 
 For Node-targeted Rstest builds, the plugin applies Module Federation defaults
 that match the Node runtime:
@@ -65,7 +92,7 @@ that match the Node runtime:
 Standard URL remotes and `commonjs ...` path remotes work without setting
 `remoteType`.
 
-## Browser Mode
+### Browser Mode
 
 Pass `{ target: 'browser' }` as the second argument when using the plugin for
 Rstest browser mode:
@@ -92,8 +119,32 @@ export default defineConfig({
 Browser mode keeps browser build defaults and only enables
 `experiments.asyncStartup`.
 
+## Configuration
+
+`federation(options, rstestOptions)` accepts the standard
+[Module Federation configuration](/configure/index.html) as the first argument.
+
+```ts
+federation(moduleFederationOptions, {
+  target: 'node', // or 'browser'
+});
+```
+
+### moduleFederationOptions
+
+[Module Federation Configuration](/configure/index.html)
+
+### rstestOptions
+
+- Type: `{ target?: 'node' | 'browser' }`
+- Default: auto-detected from Rstest's build caller. Browser-mode builds default
+  to `'browser'`; other Rstest builds default to `'node'`.
+
 ## Producer Builds
 
 Use `@module-federation/rsbuild-plugin` or another Module Federation build
 plugin to build the remote application. Use `@module-federation/rstest` only in
 the Rstest test project that consumes those remotes.
+
+For Rsbuild producers, continue with the
+[Rsbuild plugin guide](/integrations/build-tool/rsbuild.html).
