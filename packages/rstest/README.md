@@ -9,19 +9,14 @@ owned and versioned alongside the rest of the Module Federation tooling.
 
 ## Required @rstest/core version
 
-Node test environments require Rstest's federation support
+Use `@rstest/core@0.11.4` or newer. That release includes Rstest's federation
+support
 ([web-infra-dev/rstest#1407](https://github.com/web-infra-dev/rstest/pull/1407)).
-Until that release, pair this plugin with a pkg.pr.new canary build from that
-PR, for example:
 
-```bash
-npm install https://pkg.pr.new/@rstest/core@647b5d0
-```
-
-When supported, this plugin automatically enables Rstest's federation
-compatibility mode for Node test environments. Older Rstest versions do not
-expose that configuration API, so the plugin leaves their configuration
-unchanged.
+For Node test environments, this plugin automatically enables Rstest's
+federation compatibility mode. Do not set `federation: true` in
+`rstest.config.*`; the plugin applies it through Rstest's exposed configuration
+API when the test build targets Node.
 
 ## Stable plugin name
 
@@ -54,7 +49,8 @@ export default defineConfig({
 });
 ```
 
-By default, `federation()` applies Node-safe Module Federation settings:
+By default, `federation()` applies Node-safe Module Federation settings and
+enables Rstest federation mode automatically:
 
 - `target: async-node`
 - `experiments.asyncStartup = true`
@@ -63,6 +59,9 @@ By default, `federation()` applies Node-safe Module Federation settings:
 - `experiments.optimization.target = 'node'`
 - Remote transport is inferred from each remote declaration, so standard URL
   remotes and `commonjs ...` path remotes work without setting `remoteType`
+
+Keep `federation: true` out of `rstest.config.*`. Setting it manually is only
+needed when using Module Federation without this plugin.
 
 ### Browser mode
 

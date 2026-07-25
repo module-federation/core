@@ -1,0 +1,99 @@
+# Rstest
+
+`@module-federation/rstest` lets Rstest run tests against real Module
+Federation remotes instead of mocked module boundaries. It is intended for
+Rstest projects that use Node or JSDOM test environments, and it can also be
+used with Rstest browser mode.
+
+## Requirements
+
+Use `@rstest/core@0.11.4` or newer. Rstest's federation support shipped in
+`0.11.4`, so older Rstest versions do not expose the configuration API this
+plugin uses for Node test builds.
+
+## Installation
+
+import { PackageManagerTabs } from '@theme';
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm add @module-federation/rstest @rstest/core --save-dev',
+    yarn: 'yarn add @module-federation/rstest @rstest/core --dev',
+    pnpm: 'pnpm add @module-federation/rstest @rstest/core --save-dev',
+    bun: 'bun add @module-federation/rstest @rstest/core --dev',
+  }}
+/>
+
+## Register Plugin
+
+```ts title='rstest.config.ts'
+import { federation } from '@module-federation/rstest';
+import { defineConfig } from '@rstest/core';
+
+export default defineConfig({
+  plugins: [
+    federation({
+      name: 'host',
+      remotes: {
+        remote: 'remote@http://localhost:3001/remoteEntry.js',
+      },
+      shared: {
+        react: { singleton: true },
+        'react-dom': { singleton: true },
+      },
+    }),
+  ],
+});
+```
+
+Do not set `federation: true` in `rstest.config.ts`. For Node and JSDOM test
+environments, `@module-federation/rstest` enables Rstest's federation
+compatibility mode automatically.
+
+## Node Test Defaults
+
+For Node-targeted Rstest builds, the plugin applies Module Federation defaults
+that match the Node runtime:
+
+- `target: async-node`
+- `experiments.asyncStartup = true`
+- CommonJS container output
+- `@module-federation/node/runtimePlugin`
+- Node-targeted federation optimization
+- Remote transport inferred from each remote declaration
+
+Standard URL remotes and `commonjs ...` path remotes work without setting
+`remoteType`.
+
+## Browser Mode
+
+Pass `{ target: 'browser' }` as the second argument when using the plugin for
+Rstest browser mode:
+
+```ts title='rstest.config.ts'
+import { federation } from '@module-federation/rstest';
+import { defineConfig } from '@rstest/core';
+
+export default defineConfig({
+  plugins: [
+    federation(
+      {
+        name: 'browser_host',
+        remotes: {
+          app2: 'app2@http://localhost:3001/remoteEntry.js',
+        },
+      },
+      { target: 'browser' },
+    ),
+  ],
+});
+```
+
+Browser mode keeps browser build defaults and only enables
+`experiments.asyncStartup`.
+
+## Producer Builds
+
+Use `@module-federation/rsbuild-plugin` or another Module Federation build
+plugin to build the remote application. Use `@module-federation/rstest` only in
+the Rstest test project that consumes those remotes.

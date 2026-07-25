@@ -73,9 +73,9 @@ const createRspackPatcher = (
  * Enable Rstest's Module Federation compatibility mode for the current Rsbuild
  * environment.
  *
- * Node test environments require the upcoming Rstest federation support
- * (web-infra-dev/rstest PR #1407). When available, this plugin automatically
- * enables Rstest's compatibility mode through its exposed configuration API.
+ * Node test environments require Rstest's federation support, available in
+ * @rstest/core 0.11.4 and newer. This plugin automatically enables Rstest's
+ * compatibility mode through its exposed configuration API.
  *
  * Add this to your `rstest.config.*`:
  *
