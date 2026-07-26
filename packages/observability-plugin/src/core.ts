@@ -1019,6 +1019,12 @@ interface ObservabilitySharedRegistrationArgs {
   origin: ObservabilityRuntimeOrigin;
 }
 
+interface ObservabilitySharedScopeInitArgs {
+  shareScope: ObservabilityRuntimeShareScopeMap[string];
+  scopeName: string;
+  origin: ObservabilityRuntimeOrigin;
+}
+
 interface ObservabilitySharedResolveArgs {
   shareScopeMap: ObservabilityRuntimeShareScopeMap;
   scope: string;
@@ -6393,6 +6399,35 @@ export function createObservability(
     );
   };
 
+  const recordSharedRegistration = (
+    registrationArgs: ObservabilitySharedRegistrationArgs,
+    lifecycle: 'afterRegisterShare' | 'initContainerShareScopeMap',
+  ): void => {
+    sharedRegistrationCounter += 1;
+    const sharedInfo = createSharedRegistrationInfo(
+      registrationArgs,
+      `shared-register-${sharedRegistrationCounter}`,
+    );
+    const registration = sharedInfo.registration;
+    recordEvent(
+      {
+        phase: 'shared-registration',
+        status: 'success',
+        requestId: registration?.registrationId,
+        lifecycle,
+        shared: sharedInfo,
+        message: `shared:registration-${registration?.action || 'unknown'}`,
+        metadata: {
+          scope: registration?.scope || registrationArgs.scope,
+          action: registration?.action || 'unknown',
+          reason: registration?.reason || 'unknown',
+          trigger: registration?.trigger || registrationArgs.trigger,
+        },
+      },
+      registrationArgs.origin,
+    );
+  };
+
   const legacyHooks: RuntimePluginHooks = {
     beforeBridgeRender(args, context) {
       if (context) {
@@ -7107,6 +7142,42 @@ export function createObservability(
 
       return returnHookArgs(args);
     },
+    initContainerShareScopeMap(args) {
+      const scopeArgs = args as ObservabilitySharedScopeInitArgs;
+      if (
+        shouldGuardSharedHooksByRuntimeVersion &&
+        !supportsRuntimeHookObservability(scopeArgs.origin)
+      ) {
+        return returnHookArgs(args);
+      }
+
+      if (!prepareRuntimeOrigin(scopeArgs.origin)) {
+        return returnHookArgs(args);
+      }
+
+      const shareScopeMap = getOriginShareScopeMap(scopeArgs.origin);
+      Object.entries(scopeArgs.shareScope).forEach(([pkgName, versions]) => {
+        Object.values(versions).forEach((shared) => {
+          if (!shared) {
+            return;
+          }
+          recordSharedRegistration(
+            {
+              pkgName,
+              scope: scopeArgs.scopeName,
+              shared,
+              registeredShared: shared,
+              shareScopeMap,
+              trigger: 'container-init',
+              origin: scopeArgs.origin,
+            },
+            'initContainerShareScopeMap',
+          );
+        });
+      });
+
+      return returnHookArgs(args);
+    },
     afterRegisterShare(args) {
       const registrationArgs = args as ObservabilitySharedRegistrationArgs;
       if (
@@ -7120,29 +7191,7 @@ export function createObservability(
         return returnHookArgs(args);
       }
 
-      sharedRegistrationCounter += 1;
-      const sharedInfo = createSharedRegistrationInfo(
-        registrationArgs,
-        `shared-register-${sharedRegistrationCounter}`,
-      );
-      const registration = sharedInfo.registration;
-      recordEvent(
-        {
-          phase: 'shared-registration',
-          status: 'success',
-          requestId: registration?.registrationId,
-          lifecycle: 'afterRegisterShare',
-          shared: sharedInfo,
-          message: `shared:registration-${registration?.action || 'unknown'}`,
-          metadata: {
-            scope: registration?.scope || registrationArgs.scope,
-            action: registration?.action || 'unknown',
-            reason: registration?.reason || 'unknown',
-            trigger: registration?.trigger || registrationArgs.trigger,
-          },
-        },
-        registrationArgs.origin,
-      );
+      recordSharedRegistration(registrationArgs, 'afterRegisterShare');
 
       return returnHookArgs(args);
     },

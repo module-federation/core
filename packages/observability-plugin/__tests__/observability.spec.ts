@@ -84,6 +84,11 @@ type EnabledOriginFixture = typeof enabledOrigin & {
   };
 };
 type SharedHookFixturePlugin = {
+  initContainerShareScopeMap?: (args: {
+    shareScope: ShareScopeMapFixture[string];
+    scopeName: string;
+    origin: EnabledOriginFixture;
+  }) => unknown;
   beforeRegisterShare?: (args: {
     pkgName: string;
     shared: SharedFixture;
@@ -6741,13 +6746,9 @@ describe('ObservabilityPlugin', () => {
         hooks: { lifecycle: { afterRegisterShare: {} } },
       },
     };
-    plugin.afterRegisterShare?.({
-      pkgName: 'react',
-      scope: 'default',
-      trigger: 'container-init',
-      shared,
-      registeredShared: shared,
-      shareScopeMap: origin.shareScopeMap,
+    plugin.initContainerShareScopeMap?.({
+      shareScope: origin.shareScopeMap.default,
+      scopeName: 'default',
       origin,
     });
 

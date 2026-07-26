@@ -180,6 +180,11 @@ type RawSharedEvent =
       trigger: string;
     }
   | {
+      type: 'scope-init';
+      scope: string;
+      shareScope: ShareScopeMap[string];
+    }
+  | {
       type: 'selection';
       pkgName: string;
       selectedShared?: Shared;
@@ -214,6 +219,14 @@ const createRawSharedObserver = (
 
   return {
     name: 'raw-shared-observer',
+    initContainerShareScopeMap(args) {
+      events.push({
+        type: 'scope-init',
+        scope: args.scopeName,
+        shareScope: args.shareScope,
+      });
+      return args;
+    },
     afterRegisterShare(args) {
       events.push({
         type: 'registration',
@@ -476,12 +489,11 @@ describe('raw shared observation hooks', () => {
     expect(events).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          type: 'registration',
-          pkgName: 'remotePackage',
+          type: 'scope-init',
           scope: 'remote-scope',
-          shared: remoteShared,
-          registeredShared: remoteShared,
-          trigger: 'container-init',
+          shareScope: {
+            remotePackage: { '3.0.0': remoteShared },
+          },
         }),
         expect.objectContaining({
           type: 'selection',
