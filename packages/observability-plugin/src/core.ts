@@ -647,8 +647,14 @@ export interface ObservabilityRuntimeOrigin {
   remoteHandler?: ObservabilityRuntimeRemoteHandlerLike;
   loaderHook?: {
     lifecycle?: {
-      afterLoadManifest?: unknown;
       afterLoadEntry?: unknown;
+    };
+  };
+  snapshotHandler?: {
+    hooks?: {
+      lifecycle?: {
+        afterLoadManifest?: unknown;
+      };
     };
   };
   bridgeHook?: unknown;
@@ -3650,14 +3656,15 @@ export function createObservability(
 
   const supportsManifestResultLifecycle = (
     origin?: ObservabilityRuntimeOrigin,
-  ): boolean => Boolean(origin?.loaderHook?.lifecycle?.afterLoadManifest);
+  ): boolean =>
+    Boolean(origin?.snapshotHandler?.hooks?.lifecycle?.afterLoadManifest);
 
   const supportsSemanticResourceLifecycle = (
     origin?: ObservabilityRuntimeOrigin,
   ): boolean =>
     Boolean(
-      origin?.loaderHook?.lifecycle?.afterLoadManifest &&
-      origin.loaderHook.lifecycle.afterLoadEntry,
+      supportsManifestResultLifecycle(origin) &&
+      origin?.loaderHook?.lifecycle?.afterLoadEntry,
     );
 
   const applyPhaseDuration = (event: ObservabilityEvent) => {
