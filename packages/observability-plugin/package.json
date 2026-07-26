@@ -65,11 +65,13 @@
     }
   },
   "devDependencies": {
-    "@module-federation/runtime": "workspace:*"
+    "@module-federation/runtime": "workspace:*",
+    "@types/semver": "^7.5.8"
   },
   "dependencies": {
     "@module-federation/sdk": "workspace:*",
-    "@openruntime/core": "https://pkg.pr.new/2heal1/openruntime/@openruntime/core@a13b382"
+    "@openruntime/core": "https://pkg.pr.new/2heal1/openruntime/@openruntime/core@a13b382",
+    "semver": "^7.7.4"
   },
   "scripts": {
     "build": "tsdown --config tsdown.config.ts && cp *.md dist",

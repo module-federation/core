@@ -25,8 +25,6 @@ import {
   SharedLoadContext,
   BridgeOperationContext,
   BridgeOperationResult,
-  ResourceLoadEvent,
-  ResourceLoadResult,
 } from './type';
 import { getBuilderId, registerPlugins, getRemoteEntry, error } from './utils';
 import {
@@ -121,12 +119,6 @@ export class ModuleFederation {
   remoteHandler: RemoteHandler;
   shareScopeMap: ShareScopeMap;
   loaderHook = new PluginSystem({
-    beforeLoadResource: new AsyncHook<[ResourceLoadEvent], void>(
-      'beforeLoadResource',
-    ),
-    afterLoadResource: new AsyncHook<[ResourceLoadResult], void>(
-      'afterLoadResource',
-    ),
     // FIXME: may not be suitable , not open to the public yet
     getModuleInfo: new SyncHook<
       [
@@ -170,7 +162,13 @@ export class ModuleFederation {
       CreateLinkHookReturnDom
     >(),
     fetch: new AsyncHook<
-      [string, RequestInit, RemoteInfo?, ResourceLoadContext?],
+      [
+        string,
+        RequestInit,
+        RemoteInfo?,
+        ResourceLoadContext?,
+        ModuleFederation?,
+      ],
       Promise<Response> | void | false
     >(),
     afterLoadManifest: new AsyncHook<
@@ -214,6 +212,15 @@ export class ModuleFederation {
           origin: ModuleFederation;
           remoteInfo: RemoteInfo;
           remoteEntryExports?: RemoteEntryExports | false | void;
+          resourceContext?: ResourceLoadContext;
+          cached?: boolean;
+          loadSource?:
+            | 'remote-entry-exports'
+            | 'global-loading'
+            | 'global-entry'
+            | 'load-entry-hook'
+            | 'runtime-loader'
+            | 'error-handler';
           error?: unknown;
           recovered?: boolean;
         },
@@ -310,25 +317,23 @@ export class ModuleFederation {
   });
   bridgeHook = new PluginSystem({
     beforeBridgeRender: new SyncHook<
-      [Record<string, any>],
+      [Record<string, any>, BridgeOperationContext?],
       void | Record<string, any>
     >(),
     afterBridgeRender: new SyncHook<
-      [Record<string, any>],
+      [Record<string, any>, BridgeOperationResult?],
       void | Record<string, any>
     >(),
     beforeBridgeDestroy: new SyncHook<
-      [Record<string, any>],
+      [Record<string, any>, BridgeOperationContext?],
       void | Record<string, any>
     >(),
     afterBridgeDestroy: new SyncHook<
-      [Record<string, any>],
+      [Record<string, any>, BridgeOperationResult?],
       void | Record<string, any>
     >(),
-    beforeBridgeOperation: new SyncHook<[BridgeOperationContext], void>(),
-    bridgeRenderInvoked: new SyncHook<[BridgeOperationContext], void>(),
-    afterBridgeOperation: new SyncHook<[BridgeOperationResult], void>(),
     afterBridgeCommit: new SyncHook<[BridgeOperationContext], void>(),
+    afterBridgeRouteSync: new SyncHook<[BridgeOperationResult], void>(),
   });
   moduleInfo?: GlobalModuleInfo[string];
 

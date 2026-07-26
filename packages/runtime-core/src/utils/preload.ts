@@ -8,8 +8,6 @@ import {
   Remote,
   RemoteInfo,
   ResourceLoadContext,
-  ResourceLoadOutcome,
-  ResourceLoadResult,
   ResourceLoadType,
   depsPreloadArg,
 } from '../type';
@@ -17,7 +15,6 @@ import { matchRemote } from './manifest';
 import { assert } from './logger';
 import { ModuleFederation } from '../core';
 import { getRemoteEntry, isEsmRemoteType } from './load';
-import { emitCachedResourceLoad, startResourceLoad } from './resource';
 
 export function defaultPreloadArgs(
   preloadConfig: PreloadRemoteArgs | depsPreloadArg,
@@ -81,7 +78,6 @@ function createAssetResult(
   url: string,
   status: PreloadAssetResult['status'],
   error?: unknown,
-  resourceResult?: ResourceLoadResult,
 ): PreloadAssetResult {
   return {
     url,
@@ -89,8 +85,7 @@ function createAssetResult(
     resourceType: context.resourceType,
     initiator: context.initiator,
     id: context.id,
-    cacheSource: resourceResult?.cacheSource,
-    error: resourceResult?.error || error,
+    error,
   };
 }
 
@@ -103,16 +98,7 @@ async function waitForRemoteEntryPreload(
   const cachedRemote = host.moduleCache.get(entryRemoteInfo.name);
   const url = entryRemoteInfo.entry;
   if (cachedRemote?.remoteEntryExports) {
-    const resourceResult = await emitCachedResourceLoad(host, {
-      context: {
-        ...context,
-        url,
-      },
-      url,
-      remoteInfo: entryRemoteInfo,
-      cacheSource: 'mf-memory',
-    });
-    return createAssetResult(context, url, 'cached', undefined, resourceResult);
+    return createAssetResult(context, url, 'cached');
   }
 
   try {
@@ -154,67 +140,45 @@ function waitForLinkPreload({
   context: ResourceLoadContext;
   needDeleteLink?: boolean;
 }): Promise<PreloadAssetResult> {
-  return startResourceLoad(host, {
-    context: {
-      ...context,
+  return new Promise((resolve) => {
+    const { link, needAttach } = createLink({
       url,
-    },
-    url,
-    remoteInfo,
-  }).then(
-    (attempt) =>
-      new Promise((resolve) => {
-        let needAttach = true;
-        const settle = (outcome: ResourceLoadOutcome, error?: unknown) => {
-          void attempt
-            .finish(outcome, {
-              cacheSource: outcome === 'cached' ? 'browser' : undefined,
-              error,
-            })
-            .then((resourceResult) => {
-              resolve(
-                createAssetResult(
-                  context,
-                  url,
-                  resourceResult.outcome,
-                  resourceResult.error,
-                  resourceResult,
-                ),
-              );
-            });
-        };
-        const createdLink = createLink({
-          url,
-          cb: () => {
-            settle(needAttach ? 'success' : 'cached');
+      cb: () => {
+        resolve(
+          createAssetResult(context, url, needAttach ? 'success' : 'cached'),
+        );
+      },
+      onErrorCallback: (error) => {
+        resolve(
+          createAssetResult(
+            context,
+            url,
+            isTimeoutError(error) ? 'timeout' : 'error',
+            error,
+          ),
+        );
+      },
+      attrs,
+      createLinkHook: (hookUrl, hookAttrs) => {
+        const res = host.loaderHook.lifecycle.createLink.emit({
+          url: hookUrl,
+          attrs: hookAttrs,
+          remoteInfo,
+          resourceContext: {
+            ...context,
+            url: hookUrl,
           },
-          onErrorCallback: (error) => {
-            settle(isTimeoutError(error) ? 'timeout' : 'error', error);
-          },
-          attrs,
-          createLinkHook: (hookUrl, hookAttrs) => {
-            const res = host.loaderHook.lifecycle.createLink.emit({
-              url: hookUrl,
-              attrs: hookAttrs,
-              remoteInfo,
-              resourceContext: {
-                ...context,
-                url: hookUrl,
-              },
-            });
-            if (res instanceof HTMLLinkElement) {
-              return res;
-            }
-            return res;
-          },
-          needDeleteLink,
         });
-        const { link } = createdLink;
-        needAttach = createdLink.needAttach;
+        if (res instanceof HTMLLinkElement) {
+          return res;
+        }
+        return res;
+      },
+      needDeleteLink,
+    });
 
-        needAttach && document.head.appendChild(link);
-      }),
-  );
+    needAttach && document.head.appendChild(link);
+  });
 }
 
 function waitForScriptPreload({
@@ -230,70 +194,49 @@ function waitForScriptPreload({
   attrs: Record<string, string>;
   context: ResourceLoadContext;
 }): Promise<PreloadAssetResult> {
-  return startResourceLoad(host, {
-    context: {
-      ...context,
+  return new Promise((resolve) => {
+    const { script, needAttach } = createScript({
       url,
-    },
-    url,
-    remoteInfo,
-  }).then(
-    (attempt) =>
-      new Promise((resolve) => {
-        let needAttach = true;
-        const settle = (outcome: ResourceLoadOutcome, error?: unknown) => {
-          void attempt
-            .finish(outcome, {
-              cacheSource: outcome === 'cached' ? 'browser' : undefined,
-              error,
-            })
-            .then((resourceResult) => {
-              resolve(
-                createAssetResult(
-                  context,
-                  url,
-                  resourceResult.outcome,
-                  resourceResult.error,
-                  resourceResult,
-                ),
-              );
-            });
-        };
-        const createdScript = createScript({
-          url,
-          cb: () => {
-            settle(needAttach ? 'success' : 'cached');
+      cb: () => {
+        resolve(
+          createAssetResult(context, url, needAttach ? 'success' : 'cached'),
+        );
+      },
+      onErrorCallback: (error) => {
+        resolve(
+          createAssetResult(
+            context,
+            url,
+            isTimeoutError(error) ? 'timeout' : 'error',
+            error,
+          ),
+        );
+      },
+      attrs,
+      createScriptHook: (hookUrl: string, hookAttrs: any) => {
+        const res = host.loaderHook.lifecycle.createScript.emit({
+          url: hookUrl,
+          attrs: hookAttrs,
+          remoteInfo,
+          resourceContext: {
+            ...context,
+            url: hookUrl,
           },
-          onErrorCallback: (error) => {
-            settle(isTimeoutError(error) ? 'timeout' : 'error', error);
-          },
-          attrs,
-          createScriptHook: (hookUrl: string, hookAttrs: any) => {
-            const res = host.loaderHook.lifecycle.createScript.emit({
-              url: hookUrl,
-              attrs: hookAttrs,
-              remoteInfo,
-              resourceContext: {
-                ...context,
-                url: hookUrl,
-              },
-            });
-            if (res instanceof HTMLScriptElement) {
-              return res;
-            }
-            return res;
-          },
-          needDeleteScript: true,
         });
-        const { script } = createdScript;
-        needAttach = createdScript.needAttach;
-
-        needAttach && document.head.appendChild(script);
-        if (!needAttach) {
-          queueMicrotask(() => settle('cached'));
+        if (res instanceof HTMLScriptElement) {
+          return res;
         }
-      }),
-  );
+        return res;
+      },
+      needDeleteScript: true,
+    });
+
+    if (needAttach) {
+      document.head.appendChild(script);
+    } else {
+      queueMicrotask(() => resolve(createAssetResult(context, url, 'cached')));
+    }
+  });
 }
 
 function createResourceContext(

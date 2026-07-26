@@ -8,22 +8,26 @@ const { lifecycleEvents, bridgeLifecycle } = rs.hoisted(() => {
     lifecycle: string;
     payload: Record<string, any>;
   }> = [];
-  const eventHook = (lifecycle: string) => ({
-    emit: rs.fn((payload: Record<string, any>) => {
-      lifecycleEvents.push({ lifecycle, payload });
-    }),
+  const eventHook = (lifecycle: string, result?: Record<string, any>) => ({
+    emit: rs.fn(
+      (
+        payload: Record<string, any>,
+        detail?: Record<string, any>,
+      ): Record<string, any> | undefined => {
+        lifecycleEvents.push({ lifecycle, payload: detail || payload });
+        return result;
+      },
+    ),
   });
   return {
     lifecycleEvents,
     bridgeLifecycle: {
-      beforeBridgeRender: { emit: rs.fn(async () => ({})) },
-      afterBridgeRender: { emit: rs.fn() },
-      beforeBridgeDestroy: { emit: rs.fn() },
-      afterBridgeDestroy: { emit: rs.fn() },
-      beforeBridgeOperation: eventHook('beforeBridgeOperation'),
-      bridgeRenderInvoked: eventHook('bridgeRenderInvoked'),
-      afterBridgeOperation: eventHook('afterBridgeOperation'),
+      beforeBridgeRender: eventHook('beforeBridgeRender', {}),
+      afterBridgeRender: eventHook('afterBridgeRender'),
+      beforeBridgeDestroy: eventHook('beforeBridgeDestroy'),
+      afterBridgeDestroy: eventHook('afterBridgeDestroy'),
       afterBridgeCommit: eventHook('afterBridgeCommit'),
+      afterBridgeRouteSync: eventHook('afterBridgeRouteSync'),
     },
   };
 });
@@ -62,9 +66,8 @@ describe('Vue Bridge operation lifecycle', () => {
     );
     expect(renderEvents.map((event) => event.lifecycle)).toEqual(
       expect.arrayContaining([
-        'beforeBridgeOperation',
-        'bridgeRenderInvoked',
-        'afterBridgeOperation',
+        'beforeBridgeRender',
+        'afterBridgeRender',
         'afterBridgeCommit',
       ]),
     );
@@ -77,7 +80,7 @@ describe('Vue Bridge operation lifecycle', () => {
       lifecycleEvents
         .filter(
           (event) =>
-            event.lifecycle === 'afterBridgeOperation' &&
+            event.lifecycle === 'afterBridgeDestroy' &&
             getContext(event).operation === 'destroy',
         )
         .map((event) => event.payload.result),
@@ -98,7 +101,7 @@ describe('Vue Bridge operation lifecycle', () => {
     expect(
       lifecycleEvents.find(
         (event) =>
-          event.lifecycle === 'afterBridgeOperation' &&
+          event.lifecycle === 'afterBridgeRender' &&
           getContext(event).operation === 'render',
       )?.payload,
     ).toMatchObject({ error: expect.any(Error) });
@@ -123,7 +126,7 @@ describe('Vue Bridge operation lifecycle', () => {
     expect(
       lifecycleEvents.find(
         (event) =>
-          event.lifecycle === 'afterBridgeOperation' &&
+          event.lifecycle === 'afterBridgeDestroy' &&
           getContext(event).operation === 'destroy',
       )?.payload.error,
     ).toBeInstanceOf(Error);
@@ -159,7 +162,7 @@ describe('Vue Bridge operation lifecycle', () => {
 
     const routeResults = lifecycleEvents.filter(
       (event) =>
-        event.lifecycle === 'afterBridgeOperation' &&
+        event.lifecycle === 'afterBridgeRouteSync' &&
         getContext(event).operation === 'route-sync',
     );
     expect(routeResults.map((event) => getContext(event).route.action)).toEqual(

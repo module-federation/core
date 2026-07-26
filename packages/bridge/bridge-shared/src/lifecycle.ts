@@ -1,10 +1,8 @@
 import type { BridgeOperationContext, BridgeOperationResult } from './type';
 
 type BridgeLifecyclePayloads = {
-  beforeBridgeOperation: BridgeOperationContext;
-  bridgeRenderInvoked: BridgeOperationContext;
-  afterBridgeOperation: BridgeOperationResult;
   afterBridgeCommit: BridgeOperationContext;
+  afterBridgeRouteSync: BridgeOperationResult;
 };
 
 type BridgeLifecycle = {
@@ -26,67 +24,4 @@ export function emitBridgeLifecycle<Lifecycle extends keyof BridgeLifecycle>(
   } catch {
     // Observability signals must not affect Bridge behavior.
   }
-}
-
-export function startBridgeOperation(
-  instance: { bridgeHook?: { lifecycle?: BridgeLifecycle } } | null | undefined,
-  options: Omit<BridgeOperationContext, 'operationKey'>,
-) {
-  const context: BridgeOperationContext = {
-    ...options,
-    operationKey: {},
-  };
-  emitBridgeLifecycle(instance, 'beforeBridgeOperation', context);
-  let finished = false;
-
-  return {
-    invoked() {
-      emitBridgeLifecycle(instance, 'bridgeRenderInvoked', context);
-    },
-    commit() {
-      emitBridgeLifecycle(instance, 'afterBridgeCommit', context);
-    },
-    finish<T>(result: T): T {
-      if (
-        result &&
-        typeof (result as unknown as PromiseLike<unknown>).then === 'function'
-      ) {
-        return Promise.resolve(result).then(
-          (value) => {
-            finished = true;
-            emitBridgeLifecycle(instance, 'afterBridgeOperation', {
-              context,
-              result: value,
-            });
-            return value;
-          },
-          (error) => {
-            finished = true;
-            emitBridgeLifecycle(instance, 'afterBridgeOperation', {
-              context,
-              error,
-            });
-            throw error;
-          },
-        ) as T;
-      }
-
-      finished = true;
-      emitBridgeLifecycle(instance, 'afterBridgeOperation', {
-        context,
-        result,
-      });
-      return result;
-    },
-    fail(error: unknown) {
-      if (finished) {
-        return;
-      }
-      finished = true;
-      emitBridgeLifecycle(instance, 'afterBridgeOperation', {
-        context,
-        error,
-      });
-    },
-  };
 }

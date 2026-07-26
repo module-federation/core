@@ -539,8 +539,14 @@ export class SharedHandler {
         id: key,
       });
       let remoteEntryExports: RemoteEntryExports | undefined = undefined;
+      const resourceContext = {
+        initiator: 'loadShare' as const,
+        id: key,
+        resourceType: 'remoteEntry' as const,
+        url: module.remoteInfo.entry,
+      };
       try {
-        remoteEntryExports = await module.getEntry();
+        remoteEntryExports = await module.getEntry(undefined, resourceContext);
       } catch (error) {
         remoteEntryExports =
           (await host.remoteHandler.hooks.lifecycle.errorLoadRemote.emit({
@@ -558,7 +564,13 @@ export class SharedHandler {
         // prevent self load loop: when host load self , the initTokens is not the same
         if (remoteEntryExports?.init && !module.initing) {
           module.remoteEntryExports = remoteEntryExports;
-          await module.init(undefined, undefined, initScope);
+          await module.init(
+            undefined,
+            undefined,
+            initScope,
+            undefined,
+            resourceContext,
+          );
         }
       }
     };

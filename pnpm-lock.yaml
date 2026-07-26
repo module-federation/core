@@ -3884,10 +3884,16 @@ importers:
       '@openruntime/core':
         specifier: https://pkg.pr.new/2heal1/openruntime/@openruntime/core@a13b382
         version: https://pkg.pr.new/2heal1/openruntime/@openruntime/core@a13b382
+      semver:
+        specifier: ^7.7.4
+        version: 7.7.4
     devDependencies:
       '@module-federation/runtime':
         specifier: workspace:*
         version: link:../runtime
+      '@types/semver':
+        specifier: ^7.5.8
+        version: 7.5.8
 
   packages/playground:
     dependencies:

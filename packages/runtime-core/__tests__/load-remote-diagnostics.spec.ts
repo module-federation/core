@@ -105,7 +105,7 @@ describe('loadRemote diagnostics', () => {
         createDiagnosticsRecorder(events),
         {
           name: 'resource-diagnostics-test-plugin',
-          afterLoadResource(args) {
+          afterLoadEntry(args) {
             resourceResults.push(args);
           },
           afterLoadManifest(args) {
@@ -166,8 +166,9 @@ describe('loadRemote diagnostics', () => {
     expect(resourceResults).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          resourceType: 'remoteEntry',
-          outcome: 'success',
+          resourceContext: expect.objectContaining({
+            resourceType: 'remoteEntry',
+          }),
         }),
       ]),
     );
@@ -182,7 +183,9 @@ describe('loadRemote diagnostics', () => {
       }),
     ]);
     const remoteEntryResult = resourceResults.find(
-      (result) => result.resourceType === 'remoteEntry',
+      (result) =>
+        (result.resourceContext as Record<string, unknown> | undefined)
+          ?.resourceType === 'remoteEntry',
     );
     expect(manifestResults[0]).not.toHaveProperty('httpStatus');
     expect(manifestResults[0]).not.toHaveProperty('mimeType');

@@ -8,22 +8,26 @@ const { lifecycleEvents, bridgeLifecycle } = rs.hoisted(() => {
     lifecycle: string;
     payload: Record<string, any>;
   }> = [];
-  const eventHook = (lifecycle: string) => ({
-    emit: rs.fn((payload: Record<string, any>) => {
-      lifecycleEvents.push({ lifecycle, payload });
-    }),
+  const eventHook = (lifecycle: string, result?: Record<string, any>) => ({
+    emit: rs.fn(
+      (
+        payload: Record<string, any>,
+        detail?: Record<string, any>,
+      ): Record<string, any> | undefined => {
+        lifecycleEvents.push({ lifecycle, payload: detail || payload });
+        return result;
+      },
+    ),
   });
   return {
     lifecycleEvents,
     bridgeLifecycle: {
-      beforeBridgeRender: { emit: rs.fn(async () => ({})) },
-      afterBridgeRender: { emit: rs.fn() },
-      beforeBridgeDestroy: { emit: rs.fn() },
-      afterBridgeDestroy: { emit: rs.fn() },
-      beforeBridgeOperation: eventHook('beforeBridgeOperation'),
-      bridgeRenderInvoked: eventHook('bridgeRenderInvoked'),
-      afterBridgeOperation: eventHook('afterBridgeOperation'),
+      beforeBridgeRender: eventHook('beforeBridgeRender', {}),
+      afterBridgeRender: eventHook('afterBridgeRender'),
+      beforeBridgeDestroy: eventHook('beforeBridgeDestroy'),
+      afterBridgeDestroy: eventHook('afterBridgeDestroy'),
       afterBridgeCommit: eventHook('afterBridgeCommit'),
+      afterBridgeRouteSync: eventHook('afterBridgeRouteSync'),
     },
   };
 });
@@ -103,7 +107,7 @@ describe('RemoteApp', () => {
     expect(
       lifecycleEvents.some(
         (event) =>
-          event.lifecycle === 'beforeBridgeOperation' &&
+          event.lifecycle === 'beforeBridgeRender' &&
           getContext(event).operation === 'render' &&
           getContext(event).reason === 'mount',
       ),

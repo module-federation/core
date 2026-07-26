@@ -7,4 +7,4 @@
 '@module-federation/observability-plugin': patch
 ---
 
-Add raw Bridge render, commit, failure, destroy, and route synchronization signals for React and Vue applications, with timing, sanitization, and correlation handled by the observability plugin.
+Extend the existing Bridge render and destroy hooks with semantic results, add commit and route synchronization hooks, and keep timing, sanitization, and correlation in the observability plugin.

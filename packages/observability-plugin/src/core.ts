@@ -5,8 +5,8 @@ import type {
   BridgeOperationContext,
   BridgeOperationResult,
 } from '@module-federation/runtime';
-import { satisfy } from '@module-federation/runtime';
 import { createLogger, isDebugMode } from '@module-federation/sdk';
+import { satisfies } from 'semver';
 
 import {
   createOpenRuntimeObservabilityAdapter,
@@ -322,7 +322,7 @@ export interface ObservabilityRemoteInfo {
 
 export interface ObservabilityResourceInfo {
   type: string;
-  initiator: 'loadRemote' | 'preloadRemote';
+  initiator: 'loadRemote' | 'preloadRemote' | 'loadShare';
   outcome?: 'success' | 'error' | 'timeout' | 'cached' | 'recovered';
   url?: string;
   startedAt: number;
@@ -647,8 +647,8 @@ export interface ObservabilityRuntimeOrigin {
   remoteHandler?: ObservabilityRuntimeRemoteHandlerLike;
   loaderHook?: {
     lifecycle?: {
-      beforeLoadResource?: unknown;
-      afterLoadResource?: unknown;
+      afterLoadManifest?: unknown;
+      afterLoadEntry?: unknown;
     };
   };
   bridgeHook?: unknown;
@@ -900,24 +900,33 @@ interface ObservabilityRemoteErrorArgs {
 interface ObservabilityRemoteEntryLoadArgs {
   origin: ObservabilityRuntimeOrigin;
   remoteInfo: ObservabilityRuntimeRemoteSource;
+  resourceContext?: ObservabilityResourceLoadContext;
 }
 
 interface ObservabilityRemoteEntryAfterLoadArgs {
   origin: ObservabilityRuntimeOrigin;
   remoteInfo: ObservabilityRuntimeRemoteSource;
+  remoteEntryExports?: unknown;
+  resourceContext?: ObservabilityResourceLoadContext;
   error?: unknown;
   recovered?: boolean;
   cached?: boolean;
+  loadSource?: string;
 }
 
-interface ObservabilityResourceLoadArgs {
-  origin: ObservabilityRuntimeOrigin;
+interface ObservabilityResourceLoadContext {
   id: string;
-  initiator: 'loadRemote' | 'preloadRemote';
+  initiator: 'loadRemote' | 'preloadRemote' | 'loadShare';
   resourceType: string;
+  url?: string;
+  expose?: string;
+}
+
+interface ObservabilityResourceLoadArgs extends ObservabilityResourceLoadContext {
+  origin: ObservabilityRuntimeOrigin;
   url: string;
   remote?: ObservabilityRuntimeRemoteSource;
-  expose?: string;
+  lifecycle?: string;
 }
 
 interface ObservabilityResourceLoadResultArgs extends ObservabilityResourceLoadArgs {
@@ -943,6 +952,7 @@ interface ObservabilityManifestLoadArgs {
   resourceOptions?: {
     initiator?: 'loadRemote' | 'preloadRemote';
     id?: string;
+    expose?: string;
   };
 }
 
@@ -1778,7 +1788,9 @@ function getRuntimeSharedCompatibility(
     return true;
   }
   try {
-    return satisfy(version, requiredVersion);
+    return satisfies(version, requiredVersion, {
+      includePrerelease: true,
+    });
   } catch {
     return false;
   }
@@ -2082,10 +2094,6 @@ function createSharedRegistrationInfo(
       effective,
     },
   };
-}
-
-function getSharedOperationId(args: ObservabilitySharedLifecycleArgs) {
-  return args.loadContext?.operationId || `shared:${args.pkgName}`;
 }
 
 function sanitizeSharedCandidate(
@@ -3333,7 +3341,10 @@ function createErrorContext(
 
   const resourceErrorType = getResourceErrorType(event);
   if (resourceErrorType) {
-    context['resourceErrorType'] = resourceErrorType;
+    context['resourceErrorType'] =
+      resourceErrorType === 'execution'
+        ? 'script-execution'
+        : resourceErrorType;
   }
 
   return clipObservabilityMetadata(context);
@@ -3390,11 +3401,16 @@ export function createObservability(
   >();
   const bridgeIdsByTarget = new WeakMap<object, string>();
   const bridgeIdsByFallback = new Map<string, string>();
+  const latestBridgeOperations = new Map<
+    string,
+    { operationId: string; bridgeId: string }
+  >();
   const resourceStartTimes = new Map<string, number[]>();
   const sharedSelections = new Map<
     string,
     ObservabilityRuntimeSharedSelectionResult
   >();
+  let sharedOperationIdsByContext = new WeakMap<object, string>();
   const instanceRefs = new WeakMap<object, string>();
   const instancesByRef = new Map<string, ObservabilityRuntimeOrigin>();
   const bridgeStatesByInstance = new Map<
@@ -3426,6 +3442,7 @@ export function createObservability(
   let sharedRegistrationCounter = 0;
   let bridgeOperationCounter = 0;
   let bridgeCounter = 0;
+  let bridgeObservedAt = 0;
   let historyCleared = false;
 
   const getActiveRuntimeInstances = () => {
@@ -3631,12 +3648,16 @@ export function createObservability(
     shouldGuardRuntimeHooksByRuntimeVersion &&
     !supportsRuntimeHookObservability(origin);
 
-  const supportsResourceLifecycle = (
+  const supportsManifestResultLifecycle = (
+    origin?: ObservabilityRuntimeOrigin,
+  ): boolean => Boolean(origin?.loaderHook?.lifecycle?.afterLoadManifest);
+
+  const supportsSemanticResourceLifecycle = (
     origin?: ObservabilityRuntimeOrigin,
   ): boolean =>
     Boolean(
-      origin?.loaderHook?.lifecycle?.beforeLoadResource &&
-      origin.loaderHook.lifecycle.afterLoadResource,
+      origin?.loaderHook?.lifecycle?.afterLoadManifest &&
+      origin.loaderHook.lifecycle.afterLoadEntry,
     );
 
   const applyPhaseDuration = (event: ObservabilityEvent) => {
@@ -4792,7 +4813,7 @@ export function createObservability(
   const updateBridgeState = (
     origin: ObservabilityRuntimeOrigin,
     bridge: ObservabilityBridgeInfo,
-    signal: 'start' | 'invoked' | 'result' | 'commit',
+    signal: 'start' | 'result' | 'commit',
   ) => {
     const instanceRef = getInstanceRef(origin);
     if (!instanceRef) {
@@ -5109,7 +5130,7 @@ export function createObservability(
     );
     const traceCompleteness = hasIncompleteHistory ? 'partial' : 'complete';
     const hasResourceLifecycle = instanceDrafts.some((draft) =>
-      supportsResourceLifecycle(draft.origin),
+      supportsSemanticResourceLifecycle(draft.origin),
     );
     const remoteTraceCompleteness =
       hasIncompleteHistory || !hasResourceLifecycle ? 'partial' : 'complete';
@@ -5856,7 +5877,7 @@ export function createObservability(
 
   const resolveBridgeHookArgs = (
     args: ObservabilityBridgeHookArgs,
-    signal: 'start' | 'invoked' | 'result' | 'commit',
+    signal: 'start' | 'result' | 'commit',
     origin: ObservabilityRuntimeOrigin,
   ): LegacyObservabilityBridgeHookArgs | undefined => {
     const hookArgs = args as unknown as Record<string, unknown>;
@@ -5870,23 +5891,14 @@ export function createObservability(
     const context = (isRecord(hookArgs.context)
       ? hookArgs.context
       : hookArgs) as unknown as BridgeOperationContext;
-    if (
-      !context ||
-      !isRecord(context.args) ||
-      !context.side ||
-      !context.framework ||
-      !context.operation
-    ) {
+    if (!context || !context.side || !context.framework || !context.operation) {
       return undefined;
     }
 
-    const operationKey = isRecord(context.operationKey)
-      ? context.operationKey
-      : context.args;
+    const operationKey = context;
     const target =
-      (typeof context.args.dom === 'object' && context.args.dom !== null) ||
-      typeof context.args.dom === 'function'
-        ? (context.args.dom as object)
+      typeof context.target === 'object' && context.target !== null
+        ? context.target
         : undefined;
     const fallbackKey = [
       getInstanceRef(origin) || '',
@@ -5906,7 +5918,17 @@ export function createObservability(
     }
     bridgeIdsByFallback.set(fallbackKey, bridgeId);
 
-    let operation = bridgeOperations.get(operationKey);
+    const operationLookupKey = [
+      getInstanceRef(origin) || '',
+      bridgeId,
+      context.side,
+      context.operation,
+    ].join('\u0000');
+    let operation =
+      bridgeOperations.get(operationKey) ||
+      (signal === 'start'
+        ? undefined
+        : latestBridgeOperations.get(operationLookupKey));
     if (!operation || signal === 'start') {
       bridgeOperationCounter += 1;
       operation = {
@@ -5914,6 +5936,7 @@ export function createObservability(
         bridgeId,
       };
       bridgeOperations.set(operationKey, operation);
+      latestBridgeOperations.set(operationLookupKey, operation);
     }
 
     const error = signal === 'result' ? hookArgs.error : undefined;
@@ -5950,7 +5973,7 @@ export function createObservability(
 
   const recordBridgeSignal = (
     args: ObservabilityBridgeHookArgs,
-    signal: 'start' | 'invoked' | 'result' | 'commit',
+    signal: 'start' | 'result' | 'commit',
   ) => {
     const origin = args.origin || lastRuntimeOrigin;
     if (!origin || !prepareRuntimeOrigin(origin)) {
@@ -5966,6 +5989,8 @@ export function createObservability(
       bridgeArgs.side,
       bridgeArgs.operation,
     ].join('\u0000');
+    const observedAt = Math.max(Date.now(), bridgeObservedAt + 1);
+    bridgeObservedAt = observedAt;
     const legacyStartedAt = bridgeArgs.startedAt;
     const legacyEndedAt = bridgeArgs.endedAt;
     const startedAt =
@@ -5973,12 +5998,12 @@ export function createObservability(
         ? typeof legacyStartedAt === 'number' &&
           Number.isFinite(legacyStartedAt)
           ? legacyStartedAt
-          : Date.now()
+          : observedAt
         : bridgeStartTimes.get(timingKey) ||
           (typeof legacyStartedAt === 'number' &&
           Number.isFinite(legacyStartedAt)
             ? legacyStartedAt
-            : Date.now());
+            : observedAt);
     if (signal === 'start') {
       bridgeStartTimes.set(timingKey, startedAt);
     }
@@ -5986,7 +6011,7 @@ export function createObservability(
       signal === 'result' || signal === 'commit'
         ? typeof legacyEndedAt === 'number' && Number.isFinite(legacyEndedAt)
           ? legacyEndedAt
-          : Date.now()
+          : observedAt
         : undefined;
     const bridge = normalizeBridgeInfo(bridgeArgs, {
       startedAt,
@@ -6026,11 +6051,9 @@ export function createObservability(
     const message =
       signal === 'start'
         ? `bridge:${operationLabel}-start`
-        : signal === 'invoked'
-          ? `bridge:${operationLabel}-invoked`
-          : signal === 'commit'
-            ? 'bridge:render-committed'
-            : `bridge:${operationLabel}-${bridge.outcome || 'success'}`;
+        : signal === 'commit'
+          ? 'bridge:render-committed'
+          : `bridge:${operationLabel}-${bridge.outcome || 'success'}`;
     const instanceRef = getInstanceRef(origin);
 
     if (
@@ -6049,7 +6072,7 @@ export function createObservability(
             remote,
             expose: bridge.expose,
             bridge,
-            lifecycle: 'beforeBridgeOperation',
+            lifecycle: 'beforeBridgeRender',
             message: 'bridge:provider-acquired',
             source: 'runtime',
           },
@@ -6068,12 +6091,16 @@ export function createObservability(
         duration: bridge.duration,
         lifecycle:
           signal === 'start'
-            ? 'beforeBridgeOperation'
-            : signal === 'invoked'
-              ? 'bridgeRenderInvoked'
-              : signal === 'commit'
-                ? 'afterBridgeCommit'
-                : 'afterBridgeOperation',
+            ? bridge.operation === 'destroy'
+              ? 'beforeBridgeDestroy'
+              : 'beforeBridgeRender'
+            : signal === 'commit'
+              ? 'afterBridgeCommit'
+              : bridge.operation === 'destroy'
+                ? 'afterBridgeDestroy'
+                : bridge.operation === 'route-sync'
+                  ? 'afterBridgeRouteSync'
+                  : 'afterBridgeRender',
         message,
         error: bridge.outcome === 'error' ? bridge.error?.message : undefined,
         errorContext:
@@ -6092,17 +6119,57 @@ export function createObservability(
     );
   };
 
+  const recordBridgeResult = (args: ObservabilityBridgeHookArgs) => {
+    const hookArgs = args as unknown as Record<string, unknown>;
+    const result = hookArgs.result;
+    if (
+      hookArgs.error === undefined &&
+      result &&
+      typeof (result as PromiseLike<unknown>).then === 'function'
+    ) {
+      void Promise.resolve(result).then(
+        (value) =>
+          recordBridgeSignal(
+            {
+              ...hookArgs,
+              result: value,
+            } as ObservabilityBridgeHookArgs,
+            'result',
+          ),
+        (error) =>
+          recordBridgeSignal(
+            {
+              ...hookArgs,
+              error,
+            } as ObservabilityBridgeHookArgs,
+            'result',
+          ),
+      );
+      return;
+    }
+    recordBridgeSignal(args, 'result');
+  };
+
   const ensureSharedLoadContext = (
     args: ObservabilitySharedLifecycleArgs | ObservabilitySharedResolveArgs,
   ) => {
     const context = args.loadContext || {};
-    if (!context.operationId) {
-      sharedOperationCounter += 1;
-      context.operationId = `shared-op-${sharedOperationCounter}`;
-    }
     args.loadContext = context;
-    return context;
+    let operationId = sharedOperationIdsByContext.get(context);
+    if (!operationId) {
+      sharedOperationCounter += 1;
+      operationId = `shared-op-${sharedOperationCounter}`;
+      sharedOperationIdsByContext.set(context, operationId);
+    }
+    return {
+      ...context,
+      operationId,
+    };
   };
+
+  const getSharedOperationId = (
+    args: ObservabilitySharedLifecycleArgs | ObservabilitySharedResolveArgs,
+  ) => ensureSharedLoadContext(args).operationId!;
 
   const getCompletedSharedSelection = (
     args: ObservabilitySharedLifecycleArgs,
@@ -6180,18 +6247,224 @@ export function createObservability(
     return selection;
   };
 
+  const recordResourceStart = (resourceArgs: ObservabilityResourceLoadArgs) => {
+    if (!prepareRuntimeOrigin(resourceArgs.origin)) {
+      return;
+    }
+
+    const timingKey = [
+      getInstanceRef(resourceArgs.origin) || '',
+      resourceArgs.id,
+      resourceArgs.initiator,
+      resourceArgs.resourceType,
+      resourceArgs.url,
+    ].join('\u0000');
+    const startedAt = Date.now();
+    const pendingStarts = resourceStartTimes.get(timingKey) || [];
+    pendingStarts.push(startedAt);
+    resourceStartTimes.set(timingKey, pendingStarts);
+    const remote = createRemoteInfo(resourceArgs.remote);
+    const phase =
+      resourceArgs.resourceType === 'manifest' ||
+      resourceArgs.resourceType === 'remoteEntry'
+        ? resourceArgs.resourceType
+        : 'preload';
+    recordEvent(
+      {
+        phase,
+        status: 'start',
+        requestId: resourceArgs.id,
+        remote,
+        expose: resourceArgs.expose,
+        url: resourceArgs.url,
+        timestamp: startedAt,
+        lifecycle: resourceArgs.lifecycle,
+        message: `resource:${resourceArgs.resourceType}:load-start`,
+        resource: {
+          type: resourceArgs.resourceType,
+          initiator: resourceArgs.initiator,
+          url: resourceArgs.url,
+          startedAt,
+        },
+      },
+      resourceArgs.origin,
+    );
+  };
+
+  const recordResourceResult = (
+    resourceArgs: ObservabilityResourceLoadResultArgs,
+  ) => {
+    if (!prepareRuntimeOrigin(resourceArgs.origin)) {
+      return;
+    }
+
+    const timingKey = [
+      getInstanceRef(resourceArgs.origin) || '',
+      resourceArgs.id,
+      resourceArgs.initiator,
+      resourceArgs.resourceType,
+      resourceArgs.url,
+    ].join('\u0000');
+    const startedAt = resourceStartTimes.get(timingKey)?.shift() || Date.now();
+    const endedAt = Date.now();
+    if (resourceStartTimes.get(timingKey)?.length === 0) {
+      resourceStartTimes.delete(timingKey);
+    }
+    const remote = createRemoteInfo(resourceArgs.remote);
+    const phase =
+      resourceArgs.resourceType === 'manifest' ||
+      resourceArgs.resourceType === 'remoteEntry'
+        ? resourceArgs.resourceType
+        : 'preload';
+    const response = resourceArgs.response;
+    const httpStatus =
+      resourceArgs.httpStatus ??
+      (typeof response?.status === 'number' ? response.status : undefined);
+    let mimeType = resourceArgs.mimeType;
+    if (!mimeType && typeof response?.headers?.get === 'function') {
+      try {
+        mimeType = response.headers.get('content-type') || undefined;
+      } catch {
+        // Ignore custom response header access failures.
+      }
+    }
+    const redirected =
+      resourceArgs.redirected ??
+      (typeof response?.redirected === 'boolean'
+        ? response.redirected
+        : undefined);
+    const rawOutcome =
+      resourceArgs.outcome === 'success' &&
+      typeof httpStatus === 'number' &&
+      httpStatus >= 400
+        ? 'error'
+        : resourceArgs.outcome;
+    const resourceError =
+      resourceArgs.error ||
+      (rawOutcome === 'error' && typeof httpStatus === 'number'
+        ? new Error(`Resource request failed with HTTP status ${httpStatus}.`)
+        : undefined);
+    const normalizedResourceArgs = {
+      ...resourceArgs,
+      outcome: rawOutcome,
+      httpStatus,
+      mimeType,
+      redirected,
+      error: resourceError,
+    };
+    const errorType = classifyResourceLoadError(normalizedResourceArgs);
+    const outcome =
+      rawOutcome === 'error' && errorType === 'timeout'
+        ? 'timeout'
+        : rawOutcome;
+    const isError = outcome === 'error' || outcome === 'timeout';
+    const status: ObservabilityEventStatus =
+      outcome === 'recovered' ? 'complete' : isError ? 'error' : 'success';
+    const duration = Math.max(0, endedAt - startedAt);
+    const resource: ObservabilityResourceInfo = {
+      type: resourceArgs.resourceType,
+      initiator: resourceArgs.initiator,
+      outcome,
+      url: resourceArgs.url,
+      startedAt,
+      endedAt,
+      duration,
+      httpStatus,
+      mimeType,
+      redirected,
+      cacheSource: resourceArgs.cacheSource,
+      errorType,
+    };
+
+    recordEvent(
+      {
+        phase,
+        status,
+        requestId: resourceArgs.id,
+        remote,
+        expose: resourceArgs.expose,
+        url: resourceArgs.url,
+        timestamp: endedAt,
+        duration,
+        lifecycle: resourceArgs.lifecycle,
+        message: `resource:${resourceArgs.resourceType}:${outcome}`,
+        error: isError || outcome === 'recovered' ? resourceError : undefined,
+        recovered: outcome === 'recovered',
+        cached: outcome === 'cached',
+        resource,
+        errorContext:
+          isError || outcome === 'recovered'
+            ? {
+                resourceType: resourceArgs.resourceType,
+                initiator: resourceArgs.initiator,
+                outcome,
+                errorType,
+                httpStatus,
+              }
+            : undefined,
+        metadata: clipObservabilityMetadata({
+          resourceType: resourceArgs.resourceType,
+          initiator: resourceArgs.initiator,
+          outcome,
+          httpStatus,
+          mimeType,
+          redirected,
+          cacheSource: resourceArgs.cacheSource,
+          errorType,
+        }),
+      },
+      resourceArgs.origin,
+    );
+  };
+
   const legacyHooks: RuntimePluginHooks = {
-    beforeBridgeOperation(args) {
-      recordBridgeSignal(args as ObservabilityBridgeHookArgs, 'start');
+    beforeBridgeRender(args, context) {
+      if (context) {
+        recordBridgeSignal(
+          {
+            context,
+            origin: (args as unknown as ObservabilityBridgeHookArgs).origin,
+          } as ObservabilityBridgeHookArgs,
+          'start',
+        );
+      }
+      return returnHookArgs(args);
     },
-    bridgeRenderInvoked(args) {
-      recordBridgeSignal(args as ObservabilityBridgeHookArgs, 'invoked');
+    afterBridgeRender(args, result) {
+      if (result) {
+        recordBridgeResult({
+          ...result,
+          origin: (args as unknown as ObservabilityBridgeHookArgs).origin,
+        } as ObservabilityBridgeHookArgs);
+      }
+      return returnHookArgs(args);
     },
-    afterBridgeOperation(args) {
-      recordBridgeSignal(args as ObservabilityBridgeHookArgs, 'result');
+    beforeBridgeDestroy(args, context) {
+      if (context) {
+        recordBridgeSignal(
+          {
+            context,
+            origin: (args as unknown as ObservabilityBridgeHookArgs).origin,
+          } as ObservabilityBridgeHookArgs,
+          'start',
+        );
+      }
+      return returnHookArgs(args);
+    },
+    afterBridgeDestroy(args, result) {
+      if (result) {
+        recordBridgeResult({
+          ...result,
+          origin: (args as unknown as ObservabilityBridgeHookArgs).origin,
+        } as ObservabilityBridgeHookArgs);
+      }
+      return returnHookArgs(args);
     },
     afterBridgeCommit(args) {
       recordBridgeSignal(args as ObservabilityBridgeHookArgs, 'commit');
+    },
+    afterBridgeRouteSync(args) {
+      recordBridgeResult(args as ObservabilityBridgeHookArgs);
     },
     afterLoadManifest(args) {
       const manifestArgs = args as ObservabilityManifestLoadResultArgs;
@@ -6206,7 +6479,7 @@ export function createObservability(
       if (outcome !== 'error') {
         seenManifestUrls.add(manifestArgs.manifestUrl);
       }
-      return legacyHooks.afterLoadResource?.({
+      recordResourceResult({
         origin: manifestArgs.origin,
         id:
           manifestArgs.resourceOptions?.id ||
@@ -6217,198 +6490,32 @@ export function createObservability(
         resourceType: 'manifest',
         url: manifestArgs.manifestUrl,
         remote: manifestArgs.moduleInfo,
+        expose: manifestArgs.resourceOptions?.expose,
         outcome,
         response: manifestArgs.response,
         cacheSource: manifestArgs.cached ? 'mf-memory' : undefined,
         error: manifestArgs.error,
+        lifecycle: 'afterLoadManifest',
       });
     },
-    beforeLoadResource(args) {
-      const resourceArgs = args as ObservabilityResourceLoadArgs;
-      if (!prepareRuntimeOrigin(resourceArgs.origin)) {
+    fetch(url, _options, remoteInfo, resourceContext, origin) {
+      if (
+        !origin ||
+        !resourceContext ||
+        resourceContext.resourceType !== 'manifest'
+      ) {
         return;
       }
-
-      const timingKey = [
-        getInstanceRef(resourceArgs.origin) || '',
-        resourceArgs.id,
-        resourceArgs.initiator,
-        resourceArgs.resourceType,
-        resourceArgs.url,
-      ].join('\u0000');
-      const legacyStartedAt = isRecord(resourceArgs)
-        ? resourceArgs['startedAt']
-        : undefined;
-      const startedAt =
-        typeof legacyStartedAt === 'number' && Number.isFinite(legacyStartedAt)
-          ? legacyStartedAt
-          : Date.now();
-      const pendingStarts = resourceStartTimes.get(timingKey) || [];
-      pendingStarts.push(startedAt);
-      resourceStartTimes.set(timingKey, pendingStarts);
-      const remote = createRemoteInfo(resourceArgs.remote);
-      const phase =
-        resourceArgs.resourceType === 'manifest' ||
-        resourceArgs.resourceType === 'remoteEntry'
-          ? resourceArgs.resourceType
-          : 'preload';
-      recordEvent(
-        {
-          phase,
-          status: 'start',
-          requestId: resourceArgs.id,
-          remote,
-          expose: resourceArgs.expose,
-          url: resourceArgs.url,
-          timestamp: startedAt,
-          lifecycle: 'beforeLoadResource',
-          message: `resource:${resourceArgs.resourceType}:load-start`,
-          resource: {
-            type: resourceArgs.resourceType,
-            initiator: resourceArgs.initiator,
-            url: resourceArgs.url,
-            startedAt,
-          },
-        },
-        resourceArgs.origin,
-      );
-    },
-    afterLoadResource(args) {
-      const resourceArgs = args as ObservabilityResourceLoadResultArgs;
-      if (!prepareRuntimeOrigin(resourceArgs.origin)) {
-        return;
-      }
-
-      const timingKey = [
-        getInstanceRef(resourceArgs.origin) || '',
-        resourceArgs.id,
-        resourceArgs.initiator,
-        resourceArgs.resourceType,
-        resourceArgs.url,
-      ].join('\u0000');
-      const legacyStartedAt = isRecord(resourceArgs)
-        ? resourceArgs['startedAt']
-        : undefined;
-      const legacyEndedAt = isRecord(resourceArgs)
-        ? resourceArgs['endedAt']
-        : undefined;
-      const startedAt =
-        resourceStartTimes.get(timingKey)?.shift() ||
-        (typeof legacyStartedAt === 'number' && Number.isFinite(legacyStartedAt)
-          ? legacyStartedAt
-          : Date.now());
-      const endedAt =
-        typeof legacyEndedAt === 'number' && Number.isFinite(legacyEndedAt)
-          ? legacyEndedAt
-          : Date.now();
-      if (resourceStartTimes.get(timingKey)?.length === 0) {
-        resourceStartTimes.delete(timingKey);
-      }
-      const remote = createRemoteInfo(resourceArgs.remote);
-      const phase =
-        resourceArgs.resourceType === 'manifest' ||
-        resourceArgs.resourceType === 'remoteEntry'
-          ? resourceArgs.resourceType
-          : 'preload';
-      const response = resourceArgs.response;
-      const httpStatus =
-        resourceArgs.httpStatus ??
-        (typeof response?.status === 'number' ? response.status : undefined);
-      let mimeType = resourceArgs.mimeType;
-      if (!mimeType && typeof response?.headers?.get === 'function') {
-        try {
-          mimeType = response.headers.get('content-type') || undefined;
-        } catch {
-          // Ignore custom response header access failures.
-        }
-      }
-      const redirected =
-        resourceArgs.redirected ??
-        (typeof response?.redirected === 'boolean'
-          ? response.redirected
-          : undefined);
-      const rawOutcome =
-        resourceArgs.outcome === 'success' &&
-        typeof httpStatus === 'number' &&
-        httpStatus >= 400
-          ? 'error'
-          : resourceArgs.outcome;
-      const resourceError =
-        resourceArgs.error ||
-        (rawOutcome === 'error' && typeof httpStatus === 'number'
-          ? new Error(`Resource request failed with HTTP status ${httpStatus}.`)
-          : undefined);
-      const normalizedResourceArgs = {
-        ...resourceArgs,
-        outcome: rawOutcome,
-        httpStatus,
-        mimeType,
-        redirected,
-        error: resourceError,
-      };
-      const errorType = classifyResourceLoadError(normalizedResourceArgs);
-      const outcome =
-        rawOutcome === 'error' && errorType === 'timeout'
-          ? 'timeout'
-          : rawOutcome;
-      const isError = outcome === 'error' || outcome === 'timeout';
-      const status: ObservabilityEventStatus =
-        outcome === 'recovered' ? 'complete' : isError ? 'error' : 'success';
-      const duration = Math.max(0, endedAt - startedAt);
-      const resource: ObservabilityResourceInfo = {
-        type: resourceArgs.resourceType,
-        initiator: resourceArgs.initiator,
-        outcome,
-        url: resourceArgs.url,
-        startedAt,
-        endedAt,
-        duration,
-        httpStatus,
-        mimeType,
-        redirected,
-        cacheSource: resourceArgs.cacheSource,
-        errorType,
-      };
-
-      recordEvent(
-        {
-          phase,
-          status,
-          requestId: resourceArgs.id,
-          remote,
-          expose: resourceArgs.expose,
-          url: resourceArgs.url,
-          timestamp: endedAt,
-          duration,
-          lifecycle: 'afterLoadResource',
-          message: `resource:${resourceArgs.resourceType}:${outcome}`,
-          error: isError || outcome === 'recovered' ? resourceError : undefined,
-          recovered: outcome === 'recovered',
-          cached: outcome === 'cached',
-          resource,
-          errorContext:
-            isError || outcome === 'recovered'
-              ? {
-                  resourceType: resourceArgs.resourceType,
-                  initiator: resourceArgs.initiator,
-                  outcome,
-                  errorType,
-                  httpStatus,
-                }
-              : undefined,
-          metadata: clipObservabilityMetadata({
-            resourceType: resourceArgs.resourceType,
-            initiator: resourceArgs.initiator,
-            outcome,
-            httpStatus,
-            mimeType,
-            redirected,
-            cacheSource: resourceArgs.cacheSource,
-            errorType,
-          }),
-        },
-        resourceArgs.origin,
-      );
+      recordResourceStart({
+        origin: origin as ObservabilityRuntimeOrigin,
+        id: resourceContext.id,
+        initiator: resourceContext.initiator,
+        resourceType: resourceContext.resourceType,
+        url,
+        remote: remoteInfo,
+        expose: resourceContext.expose,
+        lifecycle: 'fetch',
+      });
     },
     beforeRequest(args) {
       const requestArgs = args as ObservabilityRemoteBeforeRequestArgs;
@@ -6472,7 +6579,9 @@ export function createObservability(
       }
 
       const snapshotArgs = args as ObservabilitySnapshotLoadArgs;
-      const supportsResources = supportsResourceLifecycle(snapshotArgs.origin);
+      const supportsManifestResult = supportsManifestResultLifecycle(
+        snapshotArgs.origin,
+      );
       const moduleRemote = createRemoteInfo(snapshotArgs.moduleInfo);
       const snapshotRemoteEntry =
         snapshotArgs.remoteSnapshot?.remoteEntry ||
@@ -6501,7 +6610,7 @@ export function createObservability(
       });
 
       if (seenManifestUrls.has(manifestUrl)) {
-        if (supportsResources) {
+        if (supportsManifestResult) {
           return returnHookArgs(args);
         }
         recordEvent(
@@ -6527,15 +6636,7 @@ export function createObservability(
 
       loadingManifestUrls.add(manifestUrl);
 
-      if (supportsResources) {
-        legacyHooks.beforeLoadResource?.({
-          origin: snapshotArgs.origin,
-          id: snapshotArgs.id || moduleRemote?.name || manifestUrl,
-          initiator: snapshotArgs.initiator || 'loadRemote',
-          resourceType: 'manifest',
-          url: manifestUrl,
-          remote,
-        });
+      if (supportsManifestResult) {
         return returnHookArgs(args);
       }
 
@@ -6560,7 +6661,7 @@ export function createObservability(
       }
 
       const snapshotArgs = args as ObservabilityRemoteSnapshotLoadArgs;
-      if (supportsResourceLifecycle(lastRuntimeOrigin)) {
+      if (supportsManifestResultLifecycle(lastRuntimeOrigin)) {
         return returnHookArgs(args);
       }
       if (snapshotArgs.from !== 'manifest') {
@@ -6719,7 +6820,6 @@ export function createObservability(
     loadEntry(args) {
       const entryArgs = args as ObservabilityRemoteEntryLoadArgs;
       if (
-        supportsResourceLifecycle(entryArgs.origin) ||
         shouldSkipRuntimeHook(entryArgs.origin) ||
         !prepareRuntimeOrigin(entryArgs.origin)
       ) {
@@ -6727,23 +6827,21 @@ export function createObservability(
       }
 
       const remote = createRemoteInfo(entryArgs.remoteInfo);
-      recordEvent(
-        {
-          phase: 'remoteEntry',
-          status: 'start',
-          requestId: remote?.name,
-          remote,
-          url: remote?.entry,
-          lifecycle: 'loadEntry',
-          message: 'remoteEntry:load-start',
-        },
-        entryArgs.origin,
-      );
+      const resourceContext = entryArgs.resourceContext;
+      recordResourceStart({
+        origin: entryArgs.origin,
+        id: resourceContext?.id || remote?.name || 'remoteEntry',
+        initiator: resourceContext?.initiator || 'loadRemote',
+        resourceType: 'remoteEntry',
+        url: resourceContext?.url || remote?.entry || '',
+        remote,
+        expose: resourceContext?.expose,
+        lifecycle: 'loadEntry',
+      });
     },
     afterLoadEntry(args) {
       const entryArgs = args as ObservabilityRemoteEntryAfterLoadArgs;
       if (
-        (supportsResourceLifecycle(entryArgs.origin) && !entryArgs.recovered) ||
         shouldSkipRuntimeHook(entryArgs.origin) ||
         !prepareRuntimeOrigin(entryArgs.origin)
       ) {
@@ -6755,25 +6853,32 @@ export function createObservability(
       const cached =
         entryArgs.cached === true ||
         Boolean(remoteEntryKey && seenRemoteEntryKeys.has(remoteEntryKey));
-      recordEvent(
-        {
-          phase: 'remoteEntry',
-          status: entryArgs.error ? 'error' : 'success',
-          requestId: remote?.name,
-          remote,
-          url: remote?.entry,
-          lifecycle: 'afterLoadEntry',
-          message: entryArgs.error
-            ? 'remoteEntry:load-failed'
-            : entryArgs.recovered
-              ? 'remoteEntry:load-recovered'
-              : 'remoteEntry:loaded',
-          error: entryArgs.error,
-          recovered: entryArgs.recovered,
-          cached,
-        },
-        entryArgs.origin,
-      );
+      const resourceContext = entryArgs.resourceContext;
+      const outcome = entryArgs.recovered
+        ? 'recovered'
+        : entryArgs.error
+          ? 'error'
+          : cached
+            ? 'cached'
+            : 'success';
+      recordResourceResult({
+        origin: entryArgs.origin,
+        id: resourceContext?.id || remote?.name || 'remoteEntry',
+        initiator: resourceContext?.initiator || 'loadRemote',
+        resourceType: 'remoteEntry',
+        url: resourceContext?.url || remote?.entry || '',
+        remote,
+        expose: resourceContext?.expose,
+        outcome,
+        cacheSource:
+          outcome === 'cached'
+            ? entryArgs.loadSource === 'global-loading'
+              ? 'inflight'
+              : 'mf-memory'
+            : undefined,
+        error: entryArgs.error,
+        lifecycle: 'afterLoadEntry',
+      });
       if (!entryArgs.error && remoteEntryKey) {
         seenRemoteEntryKeys.add(remoteEntryKey);
       }
@@ -7233,39 +7338,6 @@ export function createObservability(
           remote?.name ||
           sanitizeText(preloadResult.preloadConfig?.nameOrAlias, 160);
 
-        if (supportsResourceLifecycle(preloadArgs.origin)) {
-          const failedResource = preloadResult.results?.find(
-            (assetResult) =>
-              assetResult.status === 'error' ||
-              assetResult.status === 'timeout',
-          );
-          recordEvent(
-            {
-              phase: 'preload',
-              status: 'complete',
-              requestId,
-              remote,
-              lifecycle: 'afterPreloadRemote',
-              message: failedResource
-                ? 'preload:completed-with-errors'
-                : 'preload:complete',
-              error: failedResource?.error,
-              metadata: clipObservabilityMetadata({
-                resourceCount: preloadResult.results?.length || 0,
-                failedResourceCount:
-                  preloadResult.results?.filter(
-                    (assetResult) =>
-                      assetResult.status === 'error' ||
-                      assetResult.status === 'timeout',
-                  ).length || 0,
-                preloadNameOrAlias: preloadResult.preloadConfig?.nameOrAlias,
-              }),
-            },
-            preloadArgs.origin,
-          );
-          return;
-        }
-
         preloadResult.results?.forEach((assetResult) => {
           const isError =
             assetResult.status === 'error' || assetResult.status === 'timeout';
@@ -7404,16 +7476,19 @@ export function createObservability(
       traceByRemote.clear();
       traceByBridgeOperation.clear();
       traceByBridgeId.clear();
+      latestBridgeOperations.clear();
       latestTraceByInstance.clear();
       phaseStartTimes.clear();
       bridgeStartTimes.clear();
       resourceStartTimes.clear();
+      sharedOperationIdsByContext = new WeakMap<object, string>();
       seenManifestUrls.clear();
       seenRemoteEntryKeys.clear();
       reportedBridgeProviderKeys.clear();
       consoleReportedTraceIds.clear();
       consoleReportedStartKeys.clear();
       latestTraceId = undefined;
+      bridgeObservedAt = 0;
       runtimeObservabilityEnabled = false;
       effectiveMaxEvents = configuredMaxEvents;
       browserGlobalScope = undefined;

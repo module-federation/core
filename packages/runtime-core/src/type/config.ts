@@ -42,7 +42,6 @@ export interface SharedLoadContext {
   remote?: string;
   expose?: string;
   requestId?: string;
-  operationId?: string;
   customResolver?: boolean;
 }
 

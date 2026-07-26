@@ -198,31 +198,34 @@ describe('runtime plugins', () => {
     expect(sharedBeforeInit).not.toHaveBeenCalled();
   });
 
-  it('registers raw Bridge lifecycle handlers on each runtime instance', () => {
-    const beforeBridgeOperation = rs.fn();
-    const bridgeRenderInvoked = rs.fn();
-    const afterBridgeOperation = rs.fn();
+  it('registers semantic Bridge lifecycle handlers on each runtime instance', () => {
+    const beforeBridgeRender = rs.fn();
+    const afterBridgeRender = rs.fn();
+    const beforeBridgeDestroy = rs.fn();
+    const afterBridgeDestroy = rs.fn();
     const afterBridgeCommit = rs.fn();
+    const afterBridgeRouteSync = rs.fn();
     const instance = new ModuleFederation({
       name: 'bridge-lifecycle-host',
       plugins: [
         {
           name: 'bridge-lifecycle-plugin',
           apply: () => ({
-            beforeBridgeOperation,
-            bridgeRenderInvoked,
-            afterBridgeOperation,
+            beforeBridgeRender,
+            afterBridgeRender,
+            beforeBridgeDestroy,
+            afterBridgeDestroy,
             afterBridgeCommit,
+            afterBridgeRouteSync,
           }),
         },
       ],
     });
     const context = {
-      operationKey: {},
       side: 'consumer' as const,
       framework: 'react' as const,
       operation: 'render' as const,
-      args: { dom: {} },
+      target: {},
       moduleName: 'remote/App',
       reason: 'mount' as const,
     };
@@ -230,16 +233,21 @@ describe('runtime plugins', () => {
       context,
       result: undefined,
     };
+    const args = { dom: context.target };
 
-    instance.bridgeHook.lifecycle.beforeBridgeOperation.emit(context);
-    instance.bridgeHook.lifecycle.bridgeRenderInvoked.emit(context);
-    instance.bridgeHook.lifecycle.afterBridgeOperation.emit(result);
+    instance.bridgeHook.lifecycle.beforeBridgeRender.emit(args, context);
+    instance.bridgeHook.lifecycle.afterBridgeRender.emit(args, result);
+    instance.bridgeHook.lifecycle.beforeBridgeDestroy.emit(args, context);
+    instance.bridgeHook.lifecycle.afterBridgeDestroy.emit(args, result);
     instance.bridgeHook.lifecycle.afterBridgeCommit.emit(context);
+    instance.bridgeHook.lifecycle.afterBridgeRouteSync.emit(result);
 
-    expect(beforeBridgeOperation).toHaveBeenCalledWith(context);
-    expect(bridgeRenderInvoked).toHaveBeenCalledWith(context);
-    expect(afterBridgeOperation).toHaveBeenCalledWith(result);
+    expect(beforeBridgeRender).toHaveBeenCalledWith(args, context);
+    expect(afterBridgeRender).toHaveBeenCalledWith(args, result);
+    expect(beforeBridgeDestroy).toHaveBeenCalledWith(args, context);
+    expect(afterBridgeDestroy).toHaveBeenCalledWith(args, result);
     expect(afterBridgeCommit).toHaveBeenCalledWith(context);
+    expect(afterBridgeRouteSync).toHaveBeenCalledWith(result);
   });
 });
 
