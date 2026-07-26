@@ -3,7 +3,6 @@ import type {
   CreateLinkHookReturnDom,
   CreateScriptHookReturn,
   GlobalModuleInfo,
-  Manifest,
   ModuleInfo,
 } from '@module-federation/sdk';
 import {
@@ -20,7 +19,6 @@ import {
   RemoteEntryInitOptions,
   CallFrom,
   ResourceLoadContext,
-  ResourceLoadInitiator,
   LoadShareExtraOptions,
   SharedLoadContext,
   BridgeOperationContext,
@@ -171,25 +169,6 @@ export class ModuleFederation {
       ],
       Promise<Response> | void | false
     >(),
-    afterLoadManifest: new AsyncHook<
-      [
-        {
-          manifestUrl: string;
-          moduleInfo: Remote;
-          resourceOptions?: {
-            initiator: ResourceLoadInitiator;
-            id: string;
-          };
-          manifestJson?: Manifest;
-          response?: Response;
-          error?: unknown;
-          cached?: boolean;
-          recovered?: boolean;
-          origin: ModuleFederation;
-        },
-      ],
-      void
-    >('afterLoadManifest'),
     loadEntryError: new AsyncHook<
       [
         {

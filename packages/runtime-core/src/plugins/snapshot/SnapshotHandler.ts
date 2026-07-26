@@ -108,6 +108,25 @@ export class SnapshotHandler {
       moduleInfo: Remote;
       remoteSnapshot: ModuleInfo;
     }>('afterLoadSnapshot'),
+    afterLoadManifest: new AsyncHook<
+      [
+        {
+          manifestUrl: string;
+          moduleInfo: Remote;
+          resourceOptions?: {
+            initiator: ResourceLoadInitiator;
+            id: string;
+          };
+          manifestJson?: Manifest;
+          response?: Response;
+          error?: unknown;
+          cached?: boolean;
+          recovered?: boolean;
+          origin: ModuleFederation;
+        },
+      ],
+      void
+    >('afterLoadManifest'),
   });
   loaderHook: ModuleFederation['loaderHook'];
   manifestLoading: Record<string, Promise<ModuleInfo>> =
@@ -301,7 +320,7 @@ export class SnapshotHandler {
       let manifestJson: Manifest | undefined =
         this.manifestCache.get(manifestUrl);
       if (manifestJson) {
-        await this.loaderHook.lifecycle.afterLoadManifest.emit({
+        await this.hooks.lifecycle.afterLoadManifest.emit({
           manifestUrl,
           moduleInfo,
           resourceOptions,
@@ -351,7 +370,7 @@ export class SnapshotHandler {
 
         if (!manifestJson) {
           delete this.manifestLoading[manifestUrl];
-          await this.loaderHook.lifecycle.afterLoadManifest.emit({
+          await this.hooks.lifecycle.afterLoadManifest.emit({
             manifestUrl,
             moduleInfo,
             resourceOptions,
@@ -398,7 +417,7 @@ export class SnapshotHandler {
         );
       }
 
-      await this.loaderHook.lifecycle.afterLoadManifest.emit({
+      await this.hooks.lifecycle.afterLoadManifest.emit({
         manifestUrl,
         moduleInfo,
         resourceOptions,
@@ -466,7 +485,7 @@ export class SnapshotHandler {
     const existingLoading = this.manifestLoading[manifestUrl];
     if (existingLoading) {
       const remoteSnapshot = await existingLoading;
-      await this.loaderHook.lifecycle.afterLoadManifest.emit({
+      await this.hooks.lifecycle.afterLoadManifest.emit({
         manifestUrl,
         moduleInfo,
         resourceOptions,

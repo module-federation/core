@@ -3309,9 +3309,15 @@ describe('ObservabilityPlugin', () => {
     });
     const origin = {
       ...enabledOrigin,
+      snapshotHandler: {
+        hooks: {
+          lifecycle: {
+            afterLoadManifest: {},
+          },
+        },
+      },
       loaderHook: {
         lifecycle: {
-          afterLoadManifest: {},
           afterLoadEntry: {},
         },
       },
@@ -3389,9 +3395,15 @@ describe('ObservabilityPlugin', () => {
     });
     const origin = {
       ...enabledOrigin,
+      snapshotHandler: {
+        hooks: {
+          lifecycle: {
+            afterLoadManifest: {},
+          },
+        },
+      },
       loaderHook: {
         lifecycle: {
-          afterLoadManifest: {},
           afterLoadEntry: {},
         },
       },
@@ -3456,9 +3468,15 @@ describe('ObservabilityPlugin', () => {
     });
     const origin = {
       ...enabledOrigin,
+      snapshotHandler: {
+        hooks: {
+          lifecycle: {
+            afterLoadManifest: {},
+          },
+        },
+      },
       loaderHook: {
         lifecycle: {
-          afterLoadManifest: {},
           afterLoadEntry: {},
         },
       },
@@ -3525,9 +3543,15 @@ describe('ObservabilityPlugin', () => {
     });
     const origin = {
       ...enabledOrigin,
+      snapshotHandler: {
+        hooks: {
+          lifecycle: {
+            afterLoadManifest: {},
+          },
+        },
+      },
       loaderHook: {
         lifecycle: {
-          afterLoadManifest: {},
           afterLoadEntry: {},
         },
       },
@@ -3642,7 +3666,7 @@ describe('ObservabilityPlugin', () => {
         resourceContext,
         instance,
       );
-      await instance.loaderHook.lifecycle.afterLoadManifest.emit({
+      await instance.snapshotHandler.hooks.lifecycle.afterLoadManifest.emit({
         manifestUrl,
         moduleInfo: remote,
         resourceOptions: resourceContext,
