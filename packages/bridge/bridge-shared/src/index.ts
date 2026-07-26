@@ -9,4 +9,4 @@ export type {
   BridgeRouteSummary,
 } from './type';
 export { dispatchPopstateEnv } from './env';
-export { emitBridgeLifecycle, startBridgeOperation } from './lifecycle';
+export { emitBridgeLifecycle } from './lifecycle';

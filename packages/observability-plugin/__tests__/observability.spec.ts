@@ -54,21 +54,22 @@ const createShared = (overrides: Record<string, unknown> = {}) => ({
 });
 
 const createBridgeOperation = (overrides: Record<string, unknown> = {}) => ({
-  operationId: 'bridge-op-1',
-  bridgeId: 'bridge-1',
   side: 'consumer',
   framework: 'react',
   operation: 'render',
+  target: {},
   moduleName: 'remote/App',
   reason: 'mount',
   ...overrides,
 });
 
 const bridgeLifecycleFixture = {
-  beforeBridgeOperation: {},
-  bridgeRenderInvoked: {},
-  afterBridgeOperation: {},
+  beforeBridgeRender: {},
+  afterBridgeRender: {},
+  beforeBridgeDestroy: {},
+  afterBridgeDestroy: {},
   afterBridgeCommit: {},
+  afterBridgeRouteSync: {},
 };
 
 type SharedFixture = ReturnType<typeof createShared>;
@@ -1152,28 +1153,25 @@ describe('ObservabilityPlugin', () => {
         browser: { enabled: true, scope: 'multi-instance' },
       });
       const hooks = observability.plugin.apply?.(instance as any) as any;
-      const commit = createBridgeOperation({
-        endedAt: 2,
-        duration: 1,
-        outcome: 'success',
-      });
-      hooks.beforeBridgeOperation(createBridgeOperation());
-      hooks.afterBridgeOperation(commit);
-      hooks.afterBridgeCommit(commit);
-      hooks.afterBridgeOperation(
-        createBridgeOperation({
-          operationId: 'bridge-op-route',
-          operation: 'route-sync',
-          route: {
-            action: 'host-to-remote',
-            to: '/safe?token=secret#private',
-            mechanism: 'popstate',
-          },
-          endedAt: 3,
-          duration: 1,
-          outcome: 'success',
-        }),
+      const renderContext = createBridgeOperation();
+      hooks.beforeBridgeRender({}, renderContext);
+      hooks.afterBridgeRender(
+        {},
+        { context: renderContext, result: undefined },
       );
+      hooks.afterBridgeCommit(renderContext);
+      const routeContext = createBridgeOperation({
+        operation: 'route-sync',
+        route: {
+          action: 'host-to-remote',
+          to: '/safe?token=secret#private',
+          mechanism: 'popstate',
+        },
+      });
+      hooks.afterBridgeRouteSync({
+        context: routeContext,
+        result: undefined,
+      });
       const reader =
         globalObject.__FEDERATION__.__OBSERVABILITY__['multi-instance'];
       const state = reader.getRuntimeState();
@@ -1290,31 +1288,16 @@ describe('ObservabilityPlugin', () => {
       unsafeDom: { secret: 'must-not-leak' },
       props: { password: 'must-not-leak' },
     });
-    const consumerRenderResult = {
-      ...consumerRender,
-      endedAt: 2,
-      duration: 1,
-      outcome: 'success',
-    };
-    hooks.beforeBridgeOperation(consumerRender);
-    hooks.bridgeRenderInvoked(consumerRender);
-    hooks.afterBridgeOperation(consumerRenderResult);
-    hooks.afterBridgeCommit(consumerRenderResult);
+    hooks.beforeBridgeRender({}, consumerRender);
+    hooks.afterBridgeRender({}, { context: consumerRender, result: undefined });
+    hooks.afterBridgeCommit(consumerRender);
 
     const producerRender = createBridgeOperation({ side: 'producer' });
-    const producerRenderResult = {
-      ...producerRender,
-      endedAt: 2,
-      duration: 1,
-      outcome: 'success',
-    };
-    hooks.beforeBridgeOperation(producerRender);
-    hooks.bridgeRenderInvoked(producerRender);
-    hooks.afterBridgeOperation(producerRenderResult);
-    hooks.afterBridgeCommit(producerRenderResult);
+    hooks.beforeBridgeRender({}, producerRender);
+    hooks.afterBridgeRender({}, { context: producerRender, result: undefined });
+    hooks.afterBridgeCommit(producerRender);
 
     const route = createBridgeOperation({
-      operationId: 'bridge-op-route',
       operation: 'route-sync',
       route: {
         action: 'host-to-remote',
@@ -1323,45 +1306,52 @@ describe('ObservabilityPlugin', () => {
         mechanism: 'popstate',
       },
     });
-    hooks.beforeBridgeOperation(route);
-    hooks.afterBridgeOperation({
-      ...route,
-      endedAt: 3,
-      duration: 1,
-      outcome: 'success',
+    hooks.afterBridgeRouteSync({
+      context: route,
+      result: undefined,
     });
 
     const destroy = createBridgeOperation({
-      operationId: 'bridge-op-destroy',
       side: 'producer',
       operation: 'destroy',
       reason: 'unmount',
     });
-    hooks.beforeBridgeOperation(destroy);
-    hooks.afterBridgeOperation({
-      ...destroy,
-      endedAt: 4,
-      duration: 1,
-      outcome: 'success',
-    });
+    hooks.beforeBridgeDestroy({}, destroy);
+    hooks.afterBridgeDestroy(
+      {},
+      {
+        context: destroy,
+        result: true,
+      },
+    );
 
-    const report = observability.getLatestReport();
-    expect(report?.events.map((event) => event.message)).toEqual(
+    const reports = observability.findReports();
+    const bridgeEvents = reports.flatMap((report) =>
+      report.events.filter((event) => event.phase.startsWith('bridge-')),
+    );
+    expect(bridgeEvents.map((event) => event.message)).toEqual(
       expect.arrayContaining([
         'bridge:provider-acquired',
         'bridge:render-start',
-        'bridge:render-invoked',
         'bridge:render-success',
         'bridge:render-committed',
         'bridge:route-sync-success',
         'bridge:destroy-success',
       ]),
     );
-    expect(report?.summary.componentLoaded).toBe(false);
+    expect(reports.every((report) => !report.summary.componentLoaded)).toBe(
+      true,
+    );
+    const consumerOperationId = bridgeEvents.find(
+      (event) =>
+        event.bridge?.side === 'consumer' &&
+        event.bridge.operation === 'render',
+    )?.bridge?.operationId;
+    expect(consumerOperationId).toBeDefined();
     expect(
       new Set(
-        report?.events
-          .filter((event) => event.bridge?.operationId === 'bridge-op-1')
+        bridgeEvents
+          .filter((event) => event.bridge?.operationId === consumerOperationId)
           .map((event) => event.traceId),
       ).size,
     ).toBe(1);
@@ -1389,9 +1379,9 @@ describe('ObservabilityPlugin', () => {
         }),
       ],
     });
-    expect(JSON.stringify(report)).not.toContain('must-not-leak');
-    expect(JSON.stringify(report)).not.toContain('token=secret');
-    expect(JSON.stringify(report)).not.toContain('#private');
+    expect(JSON.stringify(reports)).not.toContain('must-not-leak');
+    expect(JSON.stringify(reports)).not.toContain('token=secret');
+    expect(JSON.stringify(reports)).not.toContain('#private');
   });
 
   it('derives Bridge identifiers and outcomes from raw lifecycle hooks', () => {
@@ -1405,18 +1395,16 @@ describe('ObservabilityPlugin', () => {
     const hooks = observability.plugin.apply?.(instance as any) as any;
     const dom = { secret: 'must-not-leak' };
     const context = {
-      operationKey: {},
       side: 'consumer',
       framework: 'react',
       operation: 'render',
-      args: { dom, props: { password: 'must-not-leak' } },
+      target: dom,
       moduleName: 'remote/App',
       reason: 'mount',
     };
 
-    hooks.beforeBridgeOperation(context);
-    hooks.bridgeRenderInvoked(context);
-    hooks.afterBridgeOperation({ context, result: undefined });
+    hooks.beforeBridgeRender({ props: { password: 'must-not-leak' } }, context);
+    hooks.afterBridgeRender({}, { context, result: undefined });
     hooks.afterBridgeCommit(context);
 
     const report = observability.getLatestReport();
@@ -1425,7 +1413,6 @@ describe('ObservabilityPlugin', () => {
     expect(events.map((event) => event.message)).toEqual(
       expect.arrayContaining([
         'bridge:render-start',
-        'bridge:render-invoked',
         'bridge:render-success',
         'bridge:render-committed',
       ]),
@@ -1448,18 +1435,13 @@ describe('ObservabilityPlugin', () => {
     });
     const firstHooks = observability.plugin.apply?.(first as any) as any;
     const secondHooks = observability.plugin.apply?.(second as any) as any;
-    const start = createBridgeOperation();
-    const result = {
-      ...start,
-      endedAt: 2,
-      duration: 1,
-      outcome: 'success',
-    };
+    const context = createBridgeOperation();
+    const result = { context, result: undefined };
 
-    firstHooks.beforeBridgeOperation(start);
-    firstHooks.afterBridgeOperation(result);
-    secondHooks.beforeBridgeOperation(start);
-    secondHooks.afterBridgeOperation(result);
+    firstHooks.beforeBridgeRender({}, context);
+    firstHooks.afterBridgeRender({}, result);
+    secondHooks.beforeBridgeRender({}, context);
+    secondHooks.afterBridgeRender({}, result);
 
     const firstReports = observability.findReports({ instanceRef: 'mf-1' });
     const secondReports = observability.findReports({ instanceRef: 'mf-2' });
@@ -1492,48 +1474,46 @@ describe('ObservabilityPlugin', () => {
     });
     const hooks = observability.plugin.apply?.(instance as any) as any;
     const first = createBridgeOperation({
-      operationId: 'bridge-op-first',
-      bridgeId: 'bridge-first',
+      target: {},
       remote: undefined,
     });
     const second = createBridgeOperation({
-      operationId: 'bridge-op-second',
-      bridgeId: 'bridge-second',
+      target: {},
       remote: undefined,
     });
 
-    hooks.beforeBridgeOperation(first);
-    hooks.beforeBridgeOperation(second);
-    hooks.afterBridgeOperation({
-      ...first,
-      endedAt: 2,
-      duration: 1,
-      outcome: 'success',
-    });
-    hooks.afterBridgeOperation({
-      ...second,
-      endedAt: 3,
-      duration: 2,
-      outcome: 'error',
-      error: {
-        name: 'Error',
-        message: 'render failed token=must-not-leak',
+    hooks.beforeBridgeRender({}, first);
+    hooks.beforeBridgeRender({}, second);
+    hooks.afterBridgeRender({}, { context: first, result: undefined });
+    hooks.afterBridgeRender(
+      {},
+      {
+        context: second,
+        error: {
+          name: 'Error',
+          message: 'render failed token=must-not-leak',
+        },
       },
-    });
+    );
 
     expect(observability.findReports()).toHaveLength(2);
     expect(observability.getRuntimeState().instances[0].bridge?.states).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          bridgeId: 'bridge-first',
           status: 'rendered',
         }),
         expect.objectContaining({
-          bridgeId: 'bridge-second',
           status: 'error',
         }),
       ]),
     );
+    expect(
+      new Set(
+        observability
+          .getRuntimeState()
+          .instances[0].bridge?.states.map((state) => state.bridgeId),
+      ).size,
+    ).toBe(2);
     expect(JSON.stringify(observability.findReports())).not.toContain(
       'must-not-leak',
     );
@@ -3322,7 +3302,7 @@ describe('ObservabilityPlugin', () => {
     );
   });
 
-  it('records safe resource results in the remote timeline without duplicate legacy phases', () => {
+  it('records safe manifest results from semantic hooks without duplicate phases', () => {
     const observability = createObservability({
       level: 'verbose',
       console: false,
@@ -3331,8 +3311,8 @@ describe('ObservabilityPlugin', () => {
       ...enabledOrigin,
       loaderHook: {
         lifecycle: {
-          beforeLoadResource: {},
-          afterLoadResource: {},
+          afterLoadManifest: {},
+          afterLoadEntry: {},
         },
       },
     };
@@ -3343,27 +3323,25 @@ describe('ObservabilityPlugin', () => {
 
     emitRemoteStart(observability, { origin });
     emitRemoteMatch(observability, { origin, remoteInfo: remote });
-    observability.plugin.beforeLoadResource?.({
-      id: 'remote/Button',
-      initiator: 'loadRemote',
-      resourceType: 'manifest',
-      url: 'http://localhost:3001/mf-manifest.json?token=secret',
+    observability.plugin.fetch?.(
+      'http://localhost:3001/mf-manifest.json?token=secret',
+      {},
       remote,
-      expose: './Button',
-      startedAt: 100,
-      origin,
-    } as any);
-    observability.plugin.afterLoadResource?.({
-      id: 'remote/Button',
-      initiator: 'loadRemote',
-      resourceType: 'manifest',
-      url: 'http://localhost:3001/mf-manifest.json?token=secret',
-      remote,
-      expose: './Button',
-      startedAt: 100,
-      endedAt: 125,
-      duration: 25,
-      outcome: 'success',
+      {
+        id: 'remote/Button',
+        initiator: 'loadRemote',
+        resourceType: 'manifest',
+        expose: './Button',
+      },
+      origin as any,
+    );
+    observability.plugin.afterLoadManifest?.({
+      manifestUrl: 'http://localhost:3001/mf-manifest.json?token=secret',
+      moduleInfo: remote,
+      resourceOptions: {
+        id: 'remote/Button',
+        initiator: 'loadRemote',
+      },
       response: {
         status: 200,
         redirected: false,
@@ -3384,17 +3362,17 @@ describe('ObservabilityPlugin', () => {
     expect(manifestEvents).toHaveLength(2);
     expect(manifestEvents?.[1]).toMatchObject({
       status: 'success',
-      lifecycle: 'afterLoadResource',
+      lifecycle: 'afterLoadManifest',
       sanitizedUrl: 'http://localhost:3001/mf-manifest.json',
-      duration: 25,
+      duration: expect.any(Number),
       resource: {
         type: 'manifest',
         initiator: 'loadRemote',
         outcome: 'success',
         url: 'http://localhost:3001/mf-manifest.json',
-        startedAt: 100,
-        endedAt: 125,
-        duration: 25,
+        startedAt: expect.any(Number),
+        endedAt: expect.any(Number),
+        duration: expect.any(Number),
         httpStatus: 200,
         mimeType: 'application/json',
         redirected: false,
@@ -3404,7 +3382,7 @@ describe('ObservabilityPlugin', () => {
     expect(manifestEvents?.[1].resource).not.toHaveProperty('cacheSource');
   });
 
-  it('derives manifest resource events from raw snapshot hooks', () => {
+  it('derives manifest resource events from semantic hooks', () => {
     const observability = createObservability({
       level: 'verbose',
       console: false,
@@ -3413,8 +3391,8 @@ describe('ObservabilityPlugin', () => {
       ...enabledOrigin,
       loaderHook: {
         lifecycle: {
-          beforeLoadResource: {},
-          afterLoadResource: {},
+          afterLoadManifest: {},
+          afterLoadEntry: {},
         },
       },
     };
@@ -3423,13 +3401,17 @@ describe('ObservabilityPlugin', () => {
       entry: 'http://localhost:3001/mf-manifest.json',
     };
 
-    observability.plugin.loadSnapshot?.({
-      origin,
+    observability.plugin.fetch?.(
+      moduleInfo.entry,
+      {},
       moduleInfo,
-      id: 'remote/Button',
-      initiator: 'loadRemote',
-      remoteSnapshot: undefined,
-    } as any);
+      {
+        id: 'remote/Button',
+        initiator: 'loadRemote',
+        resourceType: 'manifest',
+      },
+      origin as any,
+    );
     observability.plugin.afterLoadManifest?.({
       origin,
       manifestUrl: moduleInfo.entry,
@@ -3452,12 +3434,12 @@ describe('ObservabilityPlugin', () => {
     ).toEqual([
       expect.objectContaining({
         status: 'start',
-        lifecycle: 'beforeLoadResource',
+        lifecycle: 'fetch',
         requestId: 'remote/Button',
       }),
       expect.objectContaining({
         status: 'success',
-        lifecycle: 'afterLoadResource',
+        lifecycle: 'afterLoadManifest',
         requestId: 'remote/Button',
         resource: expect.objectContaining({
           httpStatus: 200,
@@ -3476,8 +3458,8 @@ describe('ObservabilityPlugin', () => {
       ...enabledOrigin,
       loaderHook: {
         lifecycle: {
-          beforeLoadResource: {},
-          afterLoadResource: {},
+          afterLoadManifest: {},
+          afterLoadEntry: {},
         },
       },
     };
@@ -3490,10 +3472,27 @@ describe('ObservabilityPlugin', () => {
     } as const;
 
     emitRemoteStart(observability, { origin });
-    observability.plugin.beforeLoadResource?.(resource as any);
-    observability.plugin.afterLoadResource?.({
-      ...resource,
-      outcome: 'success',
+    observability.plugin.fetch?.(
+      resource.url,
+      {},
+      {
+        name: 'remote',
+        entry: resource.url,
+      },
+      resource,
+      origin as any,
+    );
+    observability.plugin.afterLoadManifest?.({
+      origin,
+      manifestUrl: resource.url,
+      moduleInfo: {
+        name: 'remote',
+        entry: resource.url,
+      },
+      resourceOptions: {
+        id: resource.id,
+        initiator: resource.initiator,
+      },
       response: {
         status: 503,
         redirected: false,
@@ -3505,7 +3504,7 @@ describe('ObservabilityPlugin', () => {
 
     const event = observability
       .getLatestReport()
-      ?.events.find((item) => item.lifecycle === 'afterLoadResource');
+      ?.events.find((item) => item.lifecycle === 'afterLoadManifest');
     expect(event).toMatchObject({
       status: 'error',
       errorMessage: 'Resource request failed with HTTP status 503.',
@@ -3528,8 +3527,8 @@ describe('ObservabilityPlugin', () => {
       ...enabledOrigin,
       loaderHook: {
         lifecycle: {
-          beforeLoadResource: {},
-          afterLoadResource: {},
+          afterLoadManifest: {},
+          afterLoadEntry: {},
         },
       },
     };
@@ -3548,31 +3547,29 @@ describe('ObservabilityPlugin', () => {
     };
 
     emitRemoteStart(observability, { origin });
-    observability.plugin.beforeLoadResource?.({
-      ...resourceBase,
-      startedAt: 200,
+    observability.plugin.loadEntry?.({
+      origin,
+      remoteInfo,
+      resourceContext: resourceBase,
     } as any);
-    observability.plugin.afterLoadResource?.({
-      ...resourceBase,
-      startedAt: 200,
-      endedAt: 210,
-      outcome: 'error',
-      error: new Error('token=secret ScriptExecutionError: boom'),
-    } as any);
-    observability.plugin.beforeLoadResource?.({
-      ...resourceBase,
-      startedAt: 211,
-    } as any);
-    observability.plugin.afterLoadResource?.({
-      ...resourceBase,
-      startedAt: 211,
-      endedAt: 220,
-      outcome: 'success',
+    observability.plugin.loadEntry?.({
+      origin,
+      remoteInfo,
+      resourceContext: resourceBase,
     } as any);
     observability.plugin.afterLoadEntry?.({
+      origin,
+      remoteInfo,
+      resourceContext: resourceBase,
+      loadSource: 'runtime-loader',
+    } as any);
+    observability.plugin.afterLoadEntry?.({
+      resourceContext: resourceBase,
       remoteInfo,
       origin,
+      error: new Error('token=secret ScriptExecutionError: boom'),
       recovered: true,
+      loadSource: 'error-handler',
     } as any);
     emitRemoteComplete(observability, {
       origin,
@@ -3582,15 +3579,15 @@ describe('ObservabilityPlugin', () => {
 
     const report = observability.getLatestReport();
     const resourceResults = report?.events.filter(
-      (event) => event.lifecycle === 'afterLoadResource',
+      (event) => event.lifecycle === 'afterLoadEntry',
     );
 
     expect(resourceResults?.map((event) => event.resource?.outcome)).toEqual([
-      'error',
       'success',
+      'recovered',
     ]);
-    expect(resourceResults?.[0]).toMatchObject({
-      status: 'error',
+    expect(resourceResults?.[1]).toMatchObject({
+      status: 'complete',
       errorName: 'Error',
       errorMessage: '[redacted] ScriptExecutionError: boom',
       ownerHint: 'remote',
@@ -3622,23 +3619,34 @@ describe('ObservabilityPlugin', () => {
     });
 
     const emitFor = async (instance: ModuleFederation, id: string) => {
-      const event = {
+      const manifestUrl = `https://remote.test/${id}.json`;
+      const remote = {
+        name: 'same-remote',
+        entry: manifestUrl,
+      };
+      const resourceContext = {
         id,
-        initiator: 'preloadRemote',
-        resourceType: 'css',
-        url: `https://remote.test/${id}.css`,
-        remote: {
-          name: 'same-remote',
-          entry: 'https://remote.test/remoteEntry.js',
+        initiator: 'preloadRemote' as const,
+        resourceType: 'manifest' as const,
+        url: manifestUrl,
+      };
+      await instance.loaderHook.lifecycle.fetch.emit(
+        manifestUrl,
+        {},
+        {
+          ...remote,
           entryGlobalName: 'same_remote',
           type: 'global',
           shareScope: 'default',
         },
-      } as const;
-      await instance.loaderHook.lifecycle.beforeLoadResource.emit(event);
-      await instance.loaderHook.lifecycle.afterLoadResource.emit({
-        ...event,
-        outcome: 'success' as const,
+        resourceContext,
+        instance,
+      );
+      await instance.loaderHook.lifecycle.afterLoadManifest.emit({
+        manifestUrl,
+        moduleInfo: remote,
+        resourceOptions: resourceContext,
+        origin: instance,
       });
     };
 
@@ -4649,7 +4657,7 @@ describe('ObservabilityPlugin', () => {
       errorContext: expect.objectContaining({
         remoteName: 'remote',
         entryGlobalName: 'remote_global',
-        url: 'http://localhost:3001/remoteEntry.js?token=demo-secret',
+        url: 'http://localhost:3001/remoteEntry.js',
       }),
       diagnosis: {
         title: 'Remote entry global was not registered',
@@ -4987,7 +4995,7 @@ describe('ObservabilityPlugin', () => {
       duration: expect.any(Number),
     });
     expect(report?.summary.phases.remoteEntry).toMatchObject({
-      status: 'success',
+      status: 'complete',
       duration: expect.any(Number),
       recovered: true,
     });
@@ -6598,7 +6606,6 @@ describe('ObservabilityPlugin', () => {
       moduleId: 42,
       chunkId: 'shared-chunk',
       requestId: 'consume-request',
-      operationId: 'loadShare-42',
     };
     plugin.beforeLoadShare?.({
       pkgName: 'react',
@@ -6633,7 +6640,7 @@ describe('ObservabilityPlugin', () => {
     });
 
     const report = observability.getLatestReport();
-    expect(report?.requestId).toBe('loadShare-42');
+    expect(report?.requestId).toBe('shared-op-1');
     expect(report?.shared).toMatchObject({
       name: 'react',
       selectedVersion: '18.3.1',
@@ -6644,7 +6651,7 @@ describe('ObservabilityPlugin', () => {
       moduleId: 42,
       chunkId: 'shared-chunk',
       requestId: 'consume-request',
-      operationId: 'loadShare-42',
+      operationId: 'shared-op-1',
       candidates: [
         expect.objectContaining({
           version: '17.0.2',
@@ -6774,12 +6781,8 @@ describe('ObservabilityPlugin', () => {
     const firstOrigin = { ...enabledOrigin, options: { name: 'first-host' } };
     const secondOrigin = { ...enabledOrigin, options: { name: 'second-host' } };
     const shared = createShared();
-    const emitSelection = (
-      origin: EnabledOriginFixture,
-      operationId: string,
-      provider: string,
-    ) => {
-      const loadContext = { trigger: 'runtime', operationId };
+    const emitSelection = (origin: EnabledOriginFixture, provider: string) => {
+      const loadContext = { trigger: 'runtime' };
       const selectedShared = createShared({ from: provider, loaded: true });
       const shareScopeMap = {
         default: { react: { '18.3.1': selectedShared } },
@@ -6818,12 +6821,8 @@ describe('ObservabilityPlugin', () => {
         });
     };
 
-    const finishFirst = emitSelection(firstOrigin, 'same-operation', 'first');
-    const finishSecond = emitSelection(
-      secondOrigin,
-      'same-operation',
-      'second',
-    );
+    const finishFirst = emitSelection(firstOrigin, 'first');
+    const finishSecond = emitSelection(secondOrigin, 'second');
     finishSecond();
     finishFirst();
 
@@ -6837,9 +6836,10 @@ describe('ObservabilityPlugin', () => {
     ]);
     reports.forEach((report) => {
       expect(report.events).toHaveLength(2);
-      expect(
-        report.events.every((event) => event.requestId === 'same-operation'),
-      ).toBe(true);
+      expect(new Set(report.events.map((event) => event.requestId)).size).toBe(
+        1,
+      );
+      expect(report.requestId).toMatch(/^shared-op-/);
     });
   });
 

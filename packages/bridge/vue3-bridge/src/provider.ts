@@ -2,7 +2,8 @@ import * as Vue from 'vue';
 import * as VueRouter from 'vue-router';
 import {
   RenderFnParams,
-  startBridgeOperation,
+  emitBridgeLifecycle,
+  type BridgeOperationContext,
 } from '@module-federation/bridge-shared';
 import { LoggerInstance } from './utils';
 import { getInstance } from '@module-federation/runtime';
@@ -44,14 +45,14 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
           hashRoute,
           ...propsInfo
         } = info;
-        const operation = startBridgeOperation(instance, {
+        const operationContext: BridgeOperationContext = {
           side: 'producer',
           framework: 'vue',
           operation: rootMap.has(dom) ? 'update' : 'render',
-          args: info,
+          target: dom,
           moduleName,
           reason: 'direct',
-        });
+        };
 
         try {
           const app = Vue.createApp(bridgeInfo.rootComponent, propsInfo);
@@ -60,6 +61,7 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
           const beforeBridgeRenderRes =
             await instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(
               info,
+              operationContext,
             );
 
           const extraProps =
@@ -113,49 +115,86 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
                 to: memoryRoute.entryPath,
                 basename,
               };
-              const routeOperation = startBridgeOperation(instance, {
+              const routeContext: BridgeOperationContext = {
                 side: 'producer',
                 framework: 'vue',
                 operation: 'route-sync',
-                args: route,
                 moduleName,
                 route,
-              });
-              await routeOperation.finish(router.push(memoryRoute.entryPath));
+              };
+              try {
+                const result = await router.push(memoryRoute.entryPath);
+                emitBridgeLifecycle(instance, 'afterBridgeRouteSync', {
+                  context: routeContext,
+                  result,
+                });
+              } catch (error) {
+                emitBridgeLifecycle(instance, 'afterBridgeRouteSync', {
+                  context: routeContext,
+                  error,
+                });
+                throw error;
+              }
             }
 
             app.use(router);
           }
 
-          operation.invoked();
-          app.mount(dom);
-          instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info);
-          operation.finish(undefined);
-          void Vue.nextTick().then(operation.commit);
+          const result = app.mount(dom);
+          instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info, {
+            context: operationContext,
+            result,
+          });
+          void Vue.nextTick().then(() =>
+            emitBridgeLifecycle(
+              instance,
+              'afterBridgeCommit',
+              operationContext,
+            ),
+          );
         } catch (error) {
-          operation.fail(error);
+          try {
+            instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info, {
+              context: operationContext,
+              error,
+            });
+          } catch {
+            // Preserve the original Bridge render error.
+          }
           throw error;
         }
       },
       destroy(info: { dom: HTMLElement; moduleName?: string }) {
         LoggerInstance.debug(`createBridgeComponent destroy Info`, info);
         const root = rootMap.get(info?.dom);
-        const operation = startBridgeOperation(instance, {
+        const operationContext: BridgeOperationContext = {
           side: 'producer',
           framework: 'vue',
           operation: 'destroy',
-          args: info,
+          target: info.dom,
           moduleName: info.moduleName,
           reason: 'direct',
-        });
+        };
 
         try {
-          instance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit(info);
+          instance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit(
+            info,
+            operationContext,
+          );
           root?.unmount();
-          instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(info);
-          operation.finish(Boolean(root));
+          instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(info, {
+            context: operationContext,
+            result: Boolean(root),
+          });
         } catch (error) {
-          operation.fail(error);
+          try {
+            instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(info, {
+              context: operationContext,
+              error,
+            });
+          } catch {
+            // Preserve the original Bridge destroy error.
+          }
           throw error;
         }
       },

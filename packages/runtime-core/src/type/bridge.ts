@@ -19,11 +19,10 @@ export interface BridgeRouteSummary {
 }
 
 export interface BridgeOperationContext {
-  operationKey: object;
   side: BridgeOperationSide;
   framework: BridgeFramework;
   operation: BridgeOperation;
-  args: Record<string, any>;
+  target?: object;
   moduleName?: string;
   route?: BridgeRouteSummary;
   reason?:

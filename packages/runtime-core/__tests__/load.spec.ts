@@ -8,10 +8,6 @@ import {
   RUNTIME_015,
 } from '@module-federation/error-codes';
 import { mockStaticServer, removeScriptTags } from './mock/utils';
-import type {
-  ResourceLoadEvent,
-  ResourceLoadResult,
-} from '../src/type/preload';
 import type { ModuleFederationRuntimePlugin } from '../src/type/plugin';
 
 // All fixture URLs are served via two complementary mechanisms both pointing to __tests__/:
@@ -33,20 +29,20 @@ const createDataUrlEntry = (code: string) =>
 
 function createResourceRecorder(): {
   plugin: ModuleFederationRuntimePlugin;
-  starts: ResourceLoadEvent[];
-  results: ResourceLoadResult[];
+  starts: Array<Record<string, any>>;
+  results: Array<Record<string, any>>;
 } {
-  const starts: ResourceLoadEvent[] = [];
-  const results: ResourceLoadResult[] = [];
+  const starts: Array<Record<string, any>> = [];
+  const results: Array<Record<string, any>> = [];
   return {
     starts,
     results,
     plugin: {
       name: 'resource-recorder',
-      beforeLoadResource(args) {
+      loadEntry(args) {
         starts.push(args);
       },
-      afterLoadResource(args) {
+      afterLoadEntry(args) {
         results.push(args);
       },
     },
@@ -247,13 +243,13 @@ describe('getRemoteEntry - script load error discrimination', () => {
   });
 
   it.each([
-    ['success.js', 'success'],
-    ['missing.js', 'error'],
-    ['exec-error.js', 'error'],
-    ['no-global.js', 'error'],
+    ['success.js', false],
+    ['missing.js', true],
+    ['exec-error.js', true],
+    ['no-global.js', true],
   ] as const)(
-    'emits one real resource result for %s',
-    async (fixture, outcome) => {
+    'emits one remote-entry result for %s',
+    async (fixture, hasError) => {
       const recorder = createResourceRecorder();
       const origin = new ModuleFederation({
         name: `resource-${fixture}`,
@@ -269,24 +265,18 @@ describe('getRemoteEntry - script load error discrimination', () => {
 
       expect(recorder.starts).toHaveLength(1);
       expect(recorder.results).toHaveLength(1);
-      expect(recorder.starts[0]).not.toHaveProperty('outcome');
       expect(recorder.results[0]).toMatchObject({
-        initiator: 'loadRemote',
-        resourceType: 'remoteEntry',
-        url: `${BASE}/${fixture}`,
-        outcome,
+        resourceContext: {
+          initiator: 'loadRemote',
+          resourceType: 'remoteEntry',
+          url: `${BASE}/${fixture}`,
+        },
       });
-      if (outcome === 'error') {
+      if (hasError) {
         expect(recorder.results[0].error).toBeInstanceOf(Error);
       } else {
         expect(recorder.results[0]).not.toHaveProperty('error');
       }
-      expect(recorder.results[0]).not.toHaveProperty('startedAt');
-      expect(recorder.results[0]).not.toHaveProperty('endedAt');
-      expect(recorder.results[0]).not.toHaveProperty('duration');
-      expect(recorder.results[0]).not.toHaveProperty('errorType');
-      expect(recorder.results[0]).not.toHaveProperty('httpStatus');
-      expect(recorder.results[0]).not.toHaveProperty('mimeType');
     },
   );
 
@@ -319,15 +309,15 @@ describe('getRemoteEntry - script load error discrimination', () => {
 
     expect(first).toBe(container);
     expect(second).toBe(container);
-    expect(recorder.starts).toHaveLength(2);
+    expect(recorder.starts).toHaveLength(1);
     expect(recorder.results).toHaveLength(2);
-    expect(recorder.results.map((item) => item.outcome).sort()).toEqual([
-      'cached',
-      'success',
+    expect(recorder.results.map((item) => item.loadSource).sort()).toEqual([
+      'global-loading',
+      'load-entry-hook',
     ]);
     expect(
-      recorder.results.find((item) => item.outcome === 'cached')?.cacheSource,
-    ).toBe('mf-memory');
+      recorder.results.find((item) => item.loadSource === 'global-loading'),
+    ).toMatchObject({ cached: true });
   });
 
   it('reports explicit remote exports reuse as an MF memory cache hit', async () => {
@@ -349,11 +339,11 @@ describe('getRemoteEntry - script load error discrimination', () => {
       remoteEntryExports: container,
     });
 
-    expect(recorder.starts).toHaveLength(1);
+    expect(recorder.starts).toHaveLength(0);
     expect(recorder.results).toHaveLength(1);
     expect(recorder.results[0]).toMatchObject({
-      outcome: 'cached',
-      cacheSource: 'mf-memory',
+      cached: true,
+      loadSource: 'remote-entry-exports',
     });
   });
 
@@ -393,12 +383,9 @@ describe('getRemoteEntry - script load error discrimination', () => {
 
     expect(recorder.results).toHaveLength(1);
     expect(recorder.results[0]).toMatchObject({
-      outcome: 'error',
       error: expect.any(Error),
+      loadSource: 'runtime-loader',
     });
-    expect(recorder.results[0]).not.toHaveProperty('errorType');
-    expect(recorder.results[0]).not.toHaveProperty('httpStatus');
-    expect(recorder.results[0]).not.toHaveProperty('mimeType');
   });
 
   it('records a real Node remote entry completion', async () => {
@@ -423,11 +410,11 @@ describe('getRemoteEntry - script load error discrimination', () => {
 
     expect(recorder.results).toHaveLength(1);
     expect(recorder.results[0]).toMatchObject({
-      resourceType: 'remoteEntry',
-      outcome: 'success',
+      resourceContext: {
+        resourceType: 'remoteEntry',
+      },
+      loadSource: 'runtime-loader',
     });
-    expect(recorder.results[0]).not.toHaveProperty('httpStatus');
-    expect(recorder.results[0]).not.toHaveProperty('mimeType');
   });
 
   it('keeps the original failure and the recovered resource attempt', async () => {
@@ -472,17 +459,17 @@ describe('getRemoteEntry - script load error discrimination', () => {
       container,
     );
 
-    expect(recorder.results.map((result) => result.outcome)).toEqual([
-      'error',
-      'success',
+    expect(recorder.results.map((result) => result.loadSource)).toEqual([
+      'load-entry-hook',
+      'error-handler',
     ]);
-    expect(recorder.results[0]).toMatchObject({
+    expect(recorder.results[1]).toMatchObject({
+      recovered: true,
       error: {
         name: 'ScriptNetworkError',
         message: expect.stringContaining('network failed'),
       },
     });
-    expect(recorder.results[0]).not.toHaveProperty('errorType');
   });
 
   it('covers ESM and SystemJS remote entry completion', async () => {
@@ -521,9 +508,10 @@ describe('getRemoteEntry - script load error discrimination', () => {
       (globalThis as any).System = previousSystem;
     }
 
-    expect(recorder.results.map((result) => result.outcome)).toEqual([
-      'success',
-      'success',
+    expect(recorder.results.map((result) => result.loadSource)).toEqual([
+      'runtime-loader',
+      'runtime-loader',
     ]);
+    expect(recorder.results.every((result) => !result.error)).toBe(true);
   });
 });

@@ -18,7 +18,10 @@ export type PreloadOptions = Array<{
   preloadConfig: PreloadConfig;
 }>;
 
-export type ResourceLoadInitiator = 'loadRemote' | 'preloadRemote';
+export type ResourceLoadInitiator =
+  | 'loadRemote'
+  | 'preloadRemote'
+  | 'loadShare';
 
 export type ResourceLoadType = 'manifest' | 'remoteEntry' | 'js' | 'css';
 
@@ -30,36 +33,7 @@ export interface ResourceLoadContext {
   expose?: string;
 }
 
-export type ResourceLoadOutcome =
-  | 'success'
-  | 'error'
-  | 'timeout'
-  | 'cached'
-  | 'recovered';
-
-export type ResourceLoadCacheSource =
-  | 'network'
-  | 'browser'
-  | 'service-worker'
-  | 'mf-memory'
-  | 'unknown';
-
-export interface ResourceLoadEvent extends ResourceLoadContext {
-  url: string;
-  remote?: RemoteInfo;
-}
-
-export interface ResourceLoadResult extends ResourceLoadEvent {
-  outcome: ResourceLoadOutcome;
-  response?: Response;
-  httpStatus?: number;
-  mimeType?: string;
-  redirected?: boolean;
-  cacheSource?: ResourceLoadCacheSource;
-  error?: unknown;
-}
-
-export type PreloadAssetStatus = ResourceLoadOutcome;
+export type PreloadAssetStatus = 'success' | 'error' | 'timeout' | 'cached';
 
 export interface PreloadAssetResult {
   url: string;
@@ -67,7 +41,6 @@ export interface PreloadAssetResult {
   resourceType: ResourceLoadType;
   initiator: ResourceLoadInitiator;
   id: string;
-  cacheSource?: ResourceLoadCacheSource;
   error?: unknown;
 }
 

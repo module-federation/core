@@ -12,20 +12,24 @@ import { createContainer } from './util';
 
 const createLifecycleFixture = () => {
   const events: Array<{ lifecycle: string; payload: Record<string, any> }> = [];
-  const eventHook = (lifecycle: string) => ({
-    emit: jest.fn((payload: Record<string, any>) => {
-      events.push({ lifecycle, payload });
-    }),
+  const eventHook = (lifecycle: string, result?: Record<string, any>) => ({
+    emit: jest.fn(
+      (
+        payload: Record<string, any>,
+        detail?: Record<string, any>,
+      ): Record<string, any> | undefined => {
+        events.push({ lifecycle, payload: detail || payload });
+        return result;
+      },
+    ),
   });
   const lifecycle = {
-    beforeBridgeRender: { emit: jest.fn(() => ({})) },
-    afterBridgeRender: { emit: jest.fn() },
-    beforeBridgeDestroy: { emit: jest.fn() },
-    afterBridgeDestroy: { emit: jest.fn() },
-    beforeBridgeOperation: eventHook('beforeBridgeOperation'),
-    bridgeRenderInvoked: eventHook('bridgeRenderInvoked'),
-    afterBridgeOperation: eventHook('afterBridgeOperation'),
+    beforeBridgeRender: eventHook('beforeBridgeRender', {}),
+    afterBridgeRender: eventHook('afterBridgeRender'),
+    beforeBridgeDestroy: eventHook('beforeBridgeDestroy'),
+    afterBridgeDestroy: eventHook('afterBridgeDestroy'),
     afterBridgeCommit: eventHook('afterBridgeCommit'),
+    afterBridgeRouteSync: eventHook('afterBridgeRouteSync'),
   };
   federationRuntime.instance = { bridgeHook: { lifecycle } } as any;
   return { events, lifecycle };
@@ -69,9 +73,8 @@ describe('React Bridge operation lifecycle', () => {
     );
     expect(renderEvents.map((event) => event.lifecycle)).toEqual(
       expect.arrayContaining([
-        'beforeBridgeOperation',
-        'bridgeRenderInvoked',
-        'afterBridgeOperation',
+        'beforeBridgeRender',
+        'afterBridgeRender',
         'afterBridgeCommit',
       ]),
     );
@@ -83,7 +86,7 @@ describe('React Bridge operation lifecycle', () => {
     bridge.destroy({ dom: containerInfo.container, moduleName: 'remote/App' });
     const destroyResults = events.filter(
       (event) =>
-        event.lifecycle === 'afterBridgeOperation' &&
+        event.lifecycle === 'afterBridgeDestroy' &&
         getContext(event).operation === 'destroy',
     );
     expect(destroyResults.map((event) => event.payload.result)).toEqual([
@@ -114,7 +117,7 @@ describe('React Bridge operation lifecycle', () => {
     );
     const firstStarts = events.filter(
       (event) =>
-        event.lifecycle === 'beforeBridgeOperation' &&
+        event.lifecycle === 'beforeBridgeRender' &&
         getContext(event).operation === 'render',
     );
     expect(firstStarts.map((event) => getContext(event).side).sort()).toEqual([
@@ -129,7 +132,7 @@ describe('React Bridge operation lifecycle', () => {
     expect(
       events.some(
         (event) =>
-          event.lifecycle === 'beforeBridgeOperation' &&
+          event.lifecycle === 'beforeBridgeRender' &&
           getContext(event).operation === 'update' &&
           getContext(event).reason === 'props-update',
       ),
@@ -166,7 +169,7 @@ describe('React Bridge operation lifecycle', () => {
       ).rejects.toThrow('render failed');
       const result = events.find(
         (event) =>
-          event.lifecycle === 'afterBridgeOperation' &&
+          event.lifecycle === 'afterBridgeRender' &&
           getContext(event).operation === 'render',
       );
       expect(result?.payload.error).toBeInstanceOf(Error);
@@ -206,7 +209,7 @@ describe('React Bridge operation lifecycle', () => {
     expect(
       events.find(
         (event) =>
-          event.lifecycle === 'afterBridgeOperation' &&
+          event.lifecycle === 'afterBridgeDestroy' &&
           getContext(event).operation === 'destroy',
       )?.payload.error,
     ).toBeInstanceOf(Error);
@@ -246,7 +249,7 @@ describe('React Bridge operation lifecycle', () => {
       expect(
         events.some(
           (event) =>
-            event.lifecycle === 'afterBridgeOperation' &&
+            event.lifecycle === 'afterBridgeRouteSync' &&
             getContext(event).operation === 'route-sync' &&
             getContext(event).side === 'consumer' &&
             getContext(event).route.action === 'host-to-remote' &&
