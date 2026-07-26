@@ -1,0 +1,25 @@
+packages/observability-plugin/__tests__/observability.spec.ts
+  s_36a90ee30dc33a::t_cb71d397870082 87-91,6749-6751
+packages/observability-plugin/src/core.ts
+  s_36a90ee30dc33a::t_cc6ace2648a027 1022-1027,6402-6430,7145-7180,7194
+packages/runtime-core/__tests__/shared-diagnostics.spec.ts
+  s_36a90ee30dc33a::t_f91033cffeb7b7 182-186,222-229,492,494-496
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "2cc12821895d6cb033999f847f0aba6854a849ee",
+  "prompts": {},
+  "sessions": {
+    "s_36a90ee30dc33a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f933b-7864-70b1-9f95-d1602bc9ff05",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    }
+  },
+  "attestation_metadata": {},
+  "remote_transcripts": {}
+}
