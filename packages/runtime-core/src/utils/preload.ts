@@ -231,11 +231,7 @@ function waitForScriptPreload({
       needDeleteScript: true,
     });
 
-    if (needAttach) {
-      document.head.appendChild(script);
-    } else {
-      queueMicrotask(() => resolve(createAssetResult(context, url, 'cached')));
-    }
+    needAttach && document.head.appendChild(script);
   });
 }
 

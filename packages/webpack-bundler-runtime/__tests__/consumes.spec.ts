@@ -163,7 +163,6 @@ describe('consumes', () => {
       mockShareKey,
       {
         customShareInfo: mockShareInfo,
-        from: 'build',
         context: {
           trigger: 'build',
           moduleId: mockModuleId,

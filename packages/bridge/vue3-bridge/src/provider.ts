@@ -2,7 +2,6 @@ import * as Vue from 'vue';
 import * as VueRouter from 'vue-router';
 import {
   RenderFnParams,
-  emitBridgeLifecycle,
   type BridgeOperationContext,
 } from '@module-federation/bridge-shared';
 import { LoggerInstance } from './utils';
@@ -54,115 +53,85 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
           reason: 'direct',
         };
 
-        try {
-          const app = Vue.createApp(bridgeInfo.rootComponent, propsInfo);
-          rootMap.set(dom, app);
+        const app = Vue.createApp(bridgeInfo.rootComponent, propsInfo);
+        rootMap.set(dom, app);
 
-          const beforeBridgeRenderRes =
-            await instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(
-              info,
-              operationContext,
-            );
-
-          const extraProps =
-            beforeBridgeRenderRes &&
-            typeof beforeBridgeRenderRes === 'object' &&
-            beforeBridgeRenderRes?.extraProps
-              ? beforeBridgeRenderRes?.extraProps
-              : {};
-
-          const bridgeOptions = bridgeInfo.appOptions({
-            app,
-            basename,
-            memoryRoute,
-            hashRoute,
-            ...propsInfo,
-            ...extraProps,
-          });
-          if (bridgeOptions?.router) {
-            const { history, routes, patchRouter } = processRoutes({
-              router: bridgeOptions.router,
-              basename: info.basename,
-              memoryRoute: info.memoryRoute,
-              hashRoute: info.hashRoute,
-            });
-
-            const router = VueRouter.createRouter({
-              ...bridgeOptions.router.options,
-              history,
-              routes,
-            });
-
-            if (patchRouter) {
-              patchRouter(router);
-            }
-
-            if (bridgeOptions.afterRouterCreate) {
-              bridgeOptions.afterRouterCreate(router);
-            }
-
-            LoggerInstance.debug(
-              `createBridgeComponent render router info>>>`,
-              {
-                moduleName,
-                router,
-              },
-            );
-            // memory route Initializes the route
-            if (memoryRoute) {
-              const route = {
-                action: 'memory-route-init' as const,
-                to: memoryRoute.entryPath,
-                basename,
-              };
-              const routeContext: BridgeOperationContext = {
-                side: 'producer',
-                framework: 'vue',
-                operation: 'route-sync',
-                moduleName,
-                route,
-              };
-              try {
-                const result = await router.push(memoryRoute.entryPath);
-                emitBridgeLifecycle(instance, 'afterBridgeRouteSync', {
-                  context: routeContext,
-                  result,
-                });
-              } catch (error) {
-                emitBridgeLifecycle(instance, 'afterBridgeRouteSync', {
-                  context: routeContext,
-                  error,
-                });
-                throw error;
-              }
-            }
-
-            app.use(router);
-          }
-
-          const result = app.mount(dom);
-          instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info, {
-            context: operationContext,
-            result,
-          });
-          void Vue.nextTick().then(() =>
-            emitBridgeLifecycle(
-              instance,
-              'afterBridgeCommit',
-              operationContext,
-            ),
+        const beforeBridgeRenderRes =
+          await instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(
+            info,
+            operationContext,
           );
-        } catch (error) {
-          try {
-            instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info, {
-              context: operationContext,
-              error,
-            });
-          } catch {
-            // Preserve the original Bridge render error.
+
+        const extraProps =
+          beforeBridgeRenderRes &&
+          typeof beforeBridgeRenderRes === 'object' &&
+          beforeBridgeRenderRes?.extraProps
+            ? beforeBridgeRenderRes?.extraProps
+            : {};
+
+        const bridgeOptions = bridgeInfo.appOptions({
+          app,
+          basename,
+          memoryRoute,
+          hashRoute,
+          ...propsInfo,
+          ...extraProps,
+        });
+        if (bridgeOptions?.router) {
+          const { history, routes, patchRouter } = processRoutes({
+            router: bridgeOptions.router,
+            basename: info.basename,
+            memoryRoute: info.memoryRoute,
+            hashRoute: info.hashRoute,
+          });
+
+          const router = VueRouter.createRouter({
+            ...bridgeOptions.router.options,
+            history,
+            routes,
+          });
+
+          if (patchRouter) {
+            patchRouter(router);
           }
-          throw error;
+
+          if (bridgeOptions.afterRouterCreate) {
+            bridgeOptions.afterRouterCreate(router);
+          }
+
+          LoggerInstance.debug(`createBridgeComponent render router info>>>`, {
+            moduleName,
+            router,
+          });
+          // memory route Initializes the route
+          if (memoryRoute) {
+            const route = {
+              action: 'memory-route-init' as const,
+              to: memoryRoute.entryPath,
+              basename,
+            };
+            const routeContext: BridgeOperationContext = {
+              side: 'producer',
+              framework: 'vue',
+              operation: 'route-sync',
+              moduleName,
+              route,
+            };
+            const result = await router.push(memoryRoute.entryPath);
+            instance?.bridgeHook?.lifecycle?.afterBridgeRouteSync?.emit({
+              context: routeContext,
+              result,
+            });
+          }
+
+          app.use(router);
         }
+
+        const result = app.mount(dom);
+        instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info, {
+          context: operationContext,
+          result,
+        });
       },
       destroy(info: { dom: HTMLElement; moduleName?: string }) {
         LoggerInstance.debug(`createBridgeComponent destroy Info`, info);
@@ -176,27 +145,14 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
           reason: 'direct',
         };
 
-        try {
-          instance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit(
-            info,
-            operationContext,
-          );
-          root?.unmount();
-          instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(info, {
-            context: operationContext,
-            result: Boolean(root),
-          });
-        } catch (error) {
-          try {
-            instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(info, {
-              context: operationContext,
-              error,
-            });
-          } catch {
-            // Preserve the original Bridge destroy error.
-          }
-          throw error;
-        }
+        instance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit(
+          info,
+          operationContext,
+        );
+        root?.unmount();
+        instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(info, {
+          context: operationContext,
+        });
       },
     };
   };

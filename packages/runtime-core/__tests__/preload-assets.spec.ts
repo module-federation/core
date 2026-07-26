@@ -3,7 +3,6 @@ import { describe, it, rs } from '@rstest/core';
 import { ModuleFederation } from '../src/core';
 import type { RemoteInfo } from '../src/type';
 import type {
-  PreloadAssetResult,
   ResourceLoadContext,
   ResourceLoadInitiator,
 } from '../src/type/preload';
@@ -20,11 +19,10 @@ type ResourceCall = {
 type ResourceCalls = {
   links: ResourceCall[];
   scripts: ResourceCall[];
-  results: PreloadAssetResult[];
 };
 
 function createResourceCalls(): ResourceCalls {
-  return { links: [], scripts: [], results: [] };
+  return { links: [], scripts: [] };
 }
 
 function completeLoadWhenHandlerIsAttached(element: HTMLElement): void {
@@ -113,21 +111,19 @@ async function runPreload({
   const calls = createResourceCalls();
   const host = createHost(calls);
 
-  calls.results.push(
-    ...(await preloadAssets(
-      createRemoteInfo(type),
-      host,
-      {
-        cssAssets,
-        jsAssetsWithoutEntry,
-        entryAssets: [],
-      },
-      useLinkPreload,
-      {
-        initiator,
-        id: 'preload-assets-remote/Expose',
-      },
-    )),
+  await preloadAssets(
+    createRemoteInfo(type),
+    host,
+    {
+      cssAssets,
+      jsAssetsWithoutEntry,
+      entryAssets: [],
+    },
+    useLinkPreload,
+    {
+      initiator,
+      id: 'preload-assets-remote/Expose',
+    },
   );
 
   return calls;
@@ -328,159 +324,5 @@ describe('preloadAssets', () => {
         url: scriptUrl,
       },
     });
-  });
-
-  it('records successful JS and CSS completion exactly once', async () => {
-    const calls = await runPreload({
-      type: 'global',
-      cssAssets: ['https://remote.test/styles.css'],
-      jsAssetsWithoutEntry: ['https://remote.test/chunk.js'],
-    });
-
-    expect(calls.results).toHaveLength(2);
-    expect(calls.results).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          resourceType: 'css',
-          status: 'success',
-        }),
-        expect.objectContaining({
-          resourceType: 'js',
-          status: 'success',
-        }),
-      ]),
-    );
-  });
-
-  it('keeps partial preload failures visible without dropping successes', async () => {
-    const host = new ModuleFederation({
-      name: 'partial-preload-host',
-      plugins: [
-        {
-          name: 'partial-preload-loader',
-          beforeInit(args) {
-            args.options.inBrowser = true;
-            return args;
-          },
-          createLink({ url }) {
-            const link = document.createElement('link');
-            link.href = url;
-            let onload: GlobalEventHandlers['onload'] | null = null;
-            let onerror: OnErrorEventHandler | null = null;
-            Object.defineProperties(link, {
-              onload: {
-                configurable: true,
-                get: () => onload,
-                set(handler: GlobalEventHandlers['onload'] | null) {
-                  onload = handler;
-                  if (handler && url.includes('success')) {
-                    queueMicrotask(() => handler.call(link, new Event('load')));
-                  }
-                },
-              },
-              onerror: {
-                configurable: true,
-                get: () => onerror,
-                set(handler: OnErrorEventHandler | null) {
-                  onerror = handler;
-                  if (handler && url.includes('failure')) {
-                    queueMicrotask(() =>
-                      handler.call(link, new Event('error'), '', 0, 0, null),
-                    );
-                  }
-                },
-              },
-            });
-            return link;
-          },
-        },
-      ],
-    });
-
-    const results = await preloadAssets(
-      createRemoteInfo('global'),
-      host,
-      {
-        cssAssets: [
-          'https://remote.test/success.css',
-          'https://remote.test/failure.css',
-        ],
-        jsAssetsWithoutEntry: [],
-        entryAssets: [],
-      },
-      true,
-    );
-
-    expect(results.map((result) => result.status)).toEqual([
-      'success',
-      'error',
-    ]);
-    expect(results[1]).toMatchObject({
-      error: {
-        name: 'LinkNetworkError',
-        message: expect.stringContaining('failure.css'),
-      },
-    });
-  });
-
-  it('reports an existing preload element as a browser cache reuse', async () => {
-    const url = 'https://remote.test/cached.css';
-    const existingLink = document.createElement('link');
-    existingLink.href = url;
-    existingLink.rel = 'preload';
-    document.head.appendChild(existingLink);
-
-    try {
-      const calls = await runPreload({
-        type: 'global',
-        cssAssets: [url],
-        useLinkPreload: true,
-        initiator: 'preloadRemote',
-      });
-
-      expect(calls.results).toHaveLength(1);
-      expect(calls.results[0]).toMatchObject({
-        status: 'cached',
-      });
-    } finally {
-      existingLink.remove();
-    }
-  });
-
-  it('reports preload timeout as a timeout result', async () => {
-    const host = new ModuleFederation({
-      name: 'timeout-preload-host',
-      plugins: [
-        {
-          name: 'timeout-preload-loader',
-          beforeInit(args) {
-            args.options.inBrowser = true;
-            return args;
-          },
-          createLink({ url }) {
-            const link = document.createElement('link');
-            link.href = url;
-            return { link, timeout: 5 };
-          },
-        },
-      ],
-    });
-
-    const results = await preloadAssets(
-      createRemoteInfo('global'),
-      host,
-      {
-        cssAssets: ['https://remote.test/timeout.css'],
-        jsAssetsWithoutEntry: [],
-        entryAssets: [],
-      },
-      true,
-    );
-
-    expect(results[0]).toMatchObject({
-      status: 'timeout',
-      error: expect.any(Error),
-    });
-    expect(results[0]).not.toHaveProperty('errorType');
   });
 });

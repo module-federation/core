@@ -26,7 +26,6 @@ const { lifecycleEvents, bridgeLifecycle } = rs.hoisted(() => {
       afterBridgeRender: eventHook('afterBridgeRender'),
       beforeBridgeDestroy: eventHook('beforeBridgeDestroy'),
       afterBridgeDestroy: eventHook('afterBridgeDestroy'),
-      afterBridgeCommit: eventHook('afterBridgeCommit'),
       afterBridgeRouteSync: eventHook('afterBridgeRouteSync'),
     },
   };
@@ -108,8 +107,7 @@ describe('RemoteApp', () => {
       lifecycleEvents.some(
         (event) =>
           event.lifecycle === 'beforeBridgeRender' &&
-          getContext(event).operation === 'render' &&
-          getContext(event).reason === 'mount',
+          getContext(event).operation === 'render',
       ),
     ).toBe(true);
 
@@ -119,8 +117,8 @@ describe('RemoteApp', () => {
     expect(
       lifecycleEvents.some(
         (event) =>
-          getContext(event).operation === 'destroy' &&
-          getContext(event).reason === 'keep-alive-deactivate',
+          event.lifecycle === 'beforeBridgeDestroy' &&
+          getContext(event).operation === 'destroy',
       ),
     ).toBe(true);
 
@@ -128,12 +126,12 @@ describe('RemoteApp', () => {
     await flushBridgeRender();
     expect(providerReturn.render).toHaveBeenCalledTimes(2);
     expect(
-      lifecycleEvents.some(
+      lifecycleEvents.filter(
         (event) =>
-          getContext(event).operation === 'update' &&
-          getContext(event).reason === 'keep-alive-activate',
+          event.lifecycle === 'beforeBridgeRender' &&
+          getContext(event).operation === 'render',
       ),
-    ).toBe(true);
+    ).toHaveLength(2);
 
     app.unmount();
   });

@@ -11,7 +11,6 @@ import {
 } from 'vue';
 import {
   dispatchPopstateEnv,
-  emitBridgeLifecycle,
   type BridgeOperationContext,
 } from '@module-federation/bridge-shared';
 import { useRoute } from 'vue-router';
@@ -34,7 +33,6 @@ export default defineComponent({
     const providerInfoRef = ref(null);
     const pathname = ref('');
     const isRendered = ref(false);
-    const hasEverRendered = ref(false);
     const isActive = ref(false);
     const wasDeactivated = ref(false);
     const route = useRoute();
@@ -49,9 +47,7 @@ export default defineComponent({
       hashRoute: props.hashRoute,
     });
 
-    const renderComponent = async (
-      reason: 'mount' | 'keep-alive-activate' = 'mount',
-    ) => {
+    const renderComponent = async () => {
       if (!rootRef.value || isRendered.value) {
         return;
       }
@@ -73,54 +69,29 @@ export default defineComponent({
       const operationContext: BridgeOperationContext = {
         side: 'consumer',
         framework: 'vue',
-        operation: hasEverRendered.value ? 'update' : 'render',
+        operation: 'render',
         target: rootRef.value,
         moduleName: props.moduleName,
-        reason,
       };
 
-      let resultReported = false;
-      try {
-        const beforeBridgeRenderRes =
-          (await hostInstance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(
-            renderProps,
-            operationContext,
-          )) || {};
-
-        renderProps = { ...renderProps, ...beforeBridgeRenderRes.extraProps };
-        const result = providerReturn.render(renderProps);
-        isRendered.value = true;
-        hasEverRendered.value = true;
-        resultReported = true;
-        hostInstance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(
+      const beforeBridgeRenderRes =
+        (await hostInstance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(
           renderProps,
-          {
-            context: operationContext,
-            result,
-          },
-        );
-        await result;
-      } catch (error) {
-        if (!resultReported) {
-          try {
-            hostInstance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(
-              renderProps,
-              {
-                context: operationContext,
-                error,
-              },
-            );
-          } catch {
-            // Preserve the original Bridge render error.
-          }
-        }
-        throw error;
-      }
+          operationContext,
+        )) || {};
+
+      renderProps = { ...renderProps, ...beforeBridgeRenderRes.extraProps };
+      providerReturn.render(renderProps);
+      isRendered.value = true;
+      hostInstance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(
+        renderProps,
+        {
+          context: operationContext,
+        },
+      );
     };
 
-    const destroyComponent = (
-      reason: 'keep-alive-deactivate' | 'unmount' = 'unmount',
-    ) => {
+    const destroyComponent = () => {
       const providerReturn = providerInfoRef.value as any;
       if (!providerReturn || !isRendered.value) {
         return;
@@ -139,39 +110,22 @@ export default defineComponent({
         operation: 'destroy',
         target: rootRef.value || undefined,
         moduleName: props.moduleName,
-        reason,
       };
-      try {
-        hostInstance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit(
-          bridgeRenderProps,
-          operationContext,
-        );
+      hostInstance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit(
+        bridgeRenderProps,
+        operationContext,
+      );
 
-        const result = providerReturn.destroy({ dom: rootRef.value });
-        providerInfoRef.value = null;
-        isRendered.value = false;
+      providerReturn.destroy({ dom: rootRef.value });
+      providerInfoRef.value = null;
+      isRendered.value = false;
 
-        hostInstance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(
-          bridgeRenderProps,
-          {
-            context: operationContext,
-            result,
-          },
-        );
-      } catch (error) {
-        try {
-          hostInstance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(
-            bridgeRenderProps,
-            {
-              context: operationContext,
-              error,
-            },
-          );
-        } catch {
-          // Preserve the original Bridge destroy error.
-        }
-        throw error;
-      }
+      hostInstance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(
+        bridgeRenderProps,
+        {
+          context: operationContext,
+        },
+      );
     };
 
     const watchStopHandle = watch(
@@ -204,19 +158,11 @@ export default defineComponent({
             moduleName: props.moduleName,
             route: routeInfo,
           };
-          try {
-            const result = dispatchPopstateEnv();
-            emitBridgeLifecycle(hostInstance, 'afterBridgeRouteSync', {
-              context: operationContext,
-              result,
-            });
-          } catch (error) {
-            emitBridgeLifecycle(hostInstance, 'afterBridgeRouteSync', {
-              context: operationContext,
-              error,
-            });
-            throw error;
-          }
+          const result = dispatchPopstateEnv();
+          hostInstance?.bridgeHook?.lifecycle?.afterBridgeRouteSync?.emit({
+            context: operationContext,
+            result,
+          });
         }
         pathname.value = newPath;
       },
@@ -224,7 +170,7 @@ export default defineComponent({
 
     onMounted(() => {
       isActive.value = true;
-      void renderComponent('mount');
+      void renderComponent();
     });
 
     onActivated(async () => {
@@ -234,18 +180,18 @@ export default defineComponent({
       }
       wasDeactivated.value = false;
       await nextTick();
-      void renderComponent('keep-alive-activate');
+      void renderComponent();
     });
 
     onDeactivated(() => {
       isActive.value = false;
       wasDeactivated.value = true;
-      destroyComponent('keep-alive-deactivate');
+      destroyComponent();
     });
 
     onBeforeUnmount(() => {
       watchStopHandle();
-      destroyComponent('unmount');
+      destroyComponent();
     });
 
     return () => <div {...(props.rootAttrs || {})} ref={rootRef}></div>;

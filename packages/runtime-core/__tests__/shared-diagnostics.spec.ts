@@ -431,7 +431,6 @@ describe('raw shared observation hooks', () => {
     expect(afterEvents.map((event) => event.context)).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          trigger: 'build',
           moduleId: 10,
           chunkId: 'chunk-a',
         }),
@@ -488,7 +487,6 @@ describe('raw shared observation hooks', () => {
           type: 'selection',
           pkgName: 'eagerShared',
           context: expect.objectContaining({
-            trigger: 'build',
             moduleId: 'sync-module',
           }),
         }),

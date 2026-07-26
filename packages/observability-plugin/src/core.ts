@@ -109,7 +109,6 @@ export interface ObservabilityRuntimeStateInstance {
     expose?: string;
     status?: ObservabilityBridgeStatus;
     lastOperationAt?: number;
-    commitObserved?: boolean;
     routeSyncObserved?: boolean;
     states: ObservabilityBridgeState[];
   };
@@ -164,7 +163,6 @@ export interface ObservabilityBridgeState {
   lastOperation?: ObservabilityBridgeInfo['operation'];
   lastOperationId?: string;
   lastOperationAt?: number;
-  commitObserved: boolean;
   routeSyncObserved: boolean;
 }
 
@@ -723,7 +721,6 @@ interface ObservabilityRuntimeSharedLoadContext {
   expose?: string;
   requestId?: string;
   operationId?: string;
-  customResolver?: boolean;
 }
 
 interface ObservabilityRuntimeSharedSelectionResult {
@@ -917,7 +914,6 @@ interface ObservabilityRemoteEntryAfterLoadArgs {
   error?: unknown;
   recovered?: boolean;
   cached?: boolean;
-  loadSource?: string;
 }
 
 interface ObservabilityResourceLoadContext {
@@ -1880,8 +1876,6 @@ function createRuntimeSharedSelection(
   } else if (!selected) {
     reason = candidates.length ? 'version-mismatch' : 'missing-provider';
     failureReason = reason;
-  } else if (args.loadContext?.customResolver) {
-    reason = 'custom-resolver';
   } else if (args.shareInfo.shareConfig?.singleton) {
     reason = 'singleton-existing';
   } else if (
@@ -4820,7 +4814,7 @@ export function createObservability(
   const updateBridgeState = (
     origin: ObservabilityRuntimeOrigin,
     bridge: ObservabilityBridgeInfo,
-    signal: 'start' | 'result' | 'commit',
+    signal: 'start' | 'result',
   ) => {
     const instanceRef = getInstanceRef(origin);
     if (!instanceRef) {
@@ -4854,8 +4848,6 @@ export function createObservability(
       ) {
         status = 'rendered';
       }
-    } else if (signal === 'commit') {
-      status = 'rendered';
     }
 
     states.set(key, {
@@ -4869,7 +4861,6 @@ export function createObservability(
       lastOperation: bridge.operation,
       lastOperationId: bridge.operationId,
       lastOperationAt: bridge.endedAt || bridge.startedAt,
-      commitObserved: signal === 'commit' || previous?.commitObserved === true,
       routeSyncObserved:
         bridge.operation === 'route-sync' ||
         previous?.routeSyncObserved === true,
@@ -4904,7 +4895,6 @@ export function createObservability(
       expose: latest?.expose,
       status: latest?.status || 'idle',
       lastOperationAt: latest?.lastOperationAt,
-      commitObserved: states.some((state) => state.commitObserved),
       routeSyncObserved: states.some((state) => state.routeSyncObserved),
       states,
     };
@@ -5129,12 +5119,6 @@ export function createObservability(
     const hasBridge = instances.some((instance) => instance.bridge?.available);
     const bridgeEvents = events.filter((event) => Boolean(event.bridge));
     const hasBridgeSignals = bridgeEvents.length > 0;
-    const hasBridgeCommit = bridgeEvents.some(
-      (event) => event.phase === 'bridge-commit',
-    );
-    const hasBridgeRoute = bridgeEvents.some(
-      (event) => event.bridge?.operation === 'route-sync',
-    );
     const traceCompleteness = hasIncompleteHistory ? 'partial' : 'complete';
     const hasResourceLifecycle = instanceDrafts.some((draft) =>
       supportsSemanticResourceLifecycle(draft.origin),
@@ -5197,22 +5181,16 @@ export function createObservability(
           available: hasBridgeSignals,
           completeness: !hasBridgeSignals
             ? 'unavailable'
-            : hasIncompleteHistory || !hasBridgeCommit || !hasBridgeRoute
+            : hasIncompleteHistory
               ? 'partial'
               : 'complete',
           reason: !hasBridgeSignals
             ? hasBridge
               ? 'Bridge is present, but no Bridge lifecycle signal has been observed.'
               : 'Bridge is not present on an observed instance.'
-            : [
-                hasIncompleteHistory ? 'runtime history is incomplete' : '',
-                !hasBridgeCommit
-                  ? 'no framework commit signal was observed'
-                  : '',
-                !hasBridgeRoute ? 'no route sync signal was observed' : '',
-              ]
-                .filter(Boolean)
-                .join('; ') || undefined,
+            : hasIncompleteHistory
+              ? 'runtime history is incomplete'
+              : undefined,
         },
       },
       instances,
@@ -5884,7 +5862,7 @@ export function createObservability(
 
   const resolveBridgeHookArgs = (
     args: ObservabilityBridgeHookArgs,
-    signal: 'start' | 'result' | 'commit',
+    signal: 'start' | 'result',
     origin: ObservabilityRuntimeOrigin,
   ): LegacyObservabilityBridgeHookArgs | undefined => {
     const hookArgs = args as unknown as Record<string, unknown>;
@@ -5980,7 +5958,7 @@ export function createObservability(
 
   const recordBridgeSignal = (
     args: ObservabilityBridgeHookArgs,
-    signal: 'start' | 'result' | 'commit',
+    signal: 'start' | 'result',
   ) => {
     const origin = args.origin || lastRuntimeOrigin;
     if (!origin || !prepareRuntimeOrigin(origin)) {
@@ -6015,7 +5993,7 @@ export function createObservability(
       bridgeStartTimes.set(timingKey, startedAt);
     }
     const endedAt =
-      signal === 'result' || signal === 'commit'
+      signal === 'result'
         ? typeof legacyEndedAt === 'number' && Number.isFinite(legacyEndedAt)
           ? legacyEndedAt
           : observedAt
@@ -6029,10 +6007,7 @@ export function createObservability(
     if (!bridge) {
       return;
     }
-    if (
-      (signal === 'result' && bridge.operation !== 'render') ||
-      signal === 'commit'
-    ) {
+    if (signal === 'result') {
       bridgeStartTimes.delete(timingKey);
     }
     updateBridgeState(origin, bridge, signal);
@@ -6046,21 +6021,17 @@ export function createObservability(
             ? 'complete'
             : 'success';
     const phase =
-      signal === 'commit'
-        ? 'bridge-commit'
-        : bridge.operation === 'destroy'
-          ? 'bridge-destroy'
-          : bridge.operation === 'route-sync'
-            ? 'bridge-route'
-            : 'bridge-render';
+      bridge.operation === 'destroy'
+        ? 'bridge-destroy'
+        : bridge.operation === 'route-sync'
+          ? 'bridge-route'
+          : 'bridge-render';
     const operationLabel =
       bridge.operation === 'update' ? 'update' : bridge.operation;
     const message =
       signal === 'start'
         ? `bridge:${operationLabel}-start`
-        : signal === 'commit'
-          ? 'bridge:render-committed'
-          : `bridge:${operationLabel}-${bridge.outcome || 'success'}`;
+        : `bridge:${operationLabel}-${bridge.outcome || 'success'}`;
     const instanceRef = getInstanceRef(origin);
 
     if (
@@ -6101,13 +6072,11 @@ export function createObservability(
             ? bridge.operation === 'destroy'
               ? 'beforeBridgeDestroy'
               : 'beforeBridgeRender'
-            : signal === 'commit'
-              ? 'afterBridgeCommit'
-              : bridge.operation === 'destroy'
-                ? 'afterBridgeDestroy'
-                : bridge.operation === 'route-sync'
-                  ? 'afterBridgeRouteSync'
-                  : 'afterBridgeRender',
+            : bridge.operation === 'destroy'
+              ? 'afterBridgeDestroy'
+              : bridge.operation === 'route-sync'
+                ? 'afterBridgeRouteSync'
+                : 'afterBridgeRender',
         message,
         error: bridge.outcome === 'error' ? bridge.error?.message : undefined,
         errorContext:
@@ -6466,9 +6435,6 @@ export function createObservability(
         } as ObservabilityBridgeHookArgs);
       }
       return returnHookArgs(args);
-    },
-    afterBridgeCommit(args) {
-      recordBridgeSignal(args as ObservabilityBridgeHookArgs, 'commit');
     },
     afterBridgeRouteSync(args) {
       recordBridgeResult(args as ObservabilityBridgeHookArgs);
@@ -6877,12 +6843,7 @@ export function createObservability(
         remote,
         expose: resourceContext?.expose,
         outcome,
-        cacheSource:
-          outcome === 'cached'
-            ? entryArgs.loadSource === 'global-loading'
-              ? 'inflight'
-              : 'mf-memory'
-            : undefined,
+        cacheSource: outcome === 'cached' ? 'mf-memory' : undefined,
         error: entryArgs.error,
         lifecycle: 'afterLoadEntry',
       });

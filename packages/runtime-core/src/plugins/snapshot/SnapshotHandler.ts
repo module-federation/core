@@ -482,20 +482,9 @@ export class SnapshotHandler {
       return remoteSnapshotRes;
     };
 
-    const existingLoading = this.manifestLoading[manifestUrl];
-    if (existingLoading) {
-      const remoteSnapshot = await existingLoading;
-      await this.hooks.lifecycle.afterLoadManifest.emit({
-        manifestUrl,
-        moduleInfo,
-        resourceOptions,
-        cached: true,
-        origin: this.HostInstance,
-      });
-      return remoteSnapshot;
+    if (!this.manifestLoading[manifestUrl]) {
+      this.manifestLoading[manifestUrl] = asyncLoadProcess().then((res) => res);
     }
-
-    this.manifestLoading[manifestUrl] = asyncLoadProcess().then((res) => res);
     return this.manifestLoading[manifestUrl];
   }
 }

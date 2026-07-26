@@ -3,10 +3,7 @@
  * This file contains bridge component logic shared across all React versions
  */
 import * as React from 'react';
-import {
-  emitBridgeLifecycle,
-  type BridgeOperationContext,
-} from '@module-federation/bridge-shared';
+import type { BridgeOperationContext } from '@module-federation/bridge-shared';
 import type {
   ProviderParams,
   ProviderFnParams,
@@ -20,23 +17,6 @@ import { ErrorBoundary } from '../../error-boundary';
 import { RouterContext } from '../context';
 import { LoggerInstance } from '../../utils';
 import { federationRuntime } from '../plugin';
-
-class BridgeCommitObserver extends React.Component<{
-  children: React.ReactNode;
-  onCommit: () => void;
-}> {
-  componentDidMount() {
-    this.props.onCommit();
-  }
-
-  componentDidUpdate() {
-    this.props.onCommit();
-  }
-
-  render() {
-    return this.props.children;
-  }
-}
 
 export function createBaseBridgeComponent<T>({
   createRoot,
@@ -123,77 +103,55 @@ export function createBaseBridgeComponent<T>({
           reason: 'direct',
         };
 
-        try {
-          const mergedRootOptions: CreateRootOptions | undefined = {
-            ...defaultRootOptions,
-            ...(rootOptions as CreateRootOptions),
-          };
+        const mergedRootOptions: CreateRootOptions | undefined = {
+          ...defaultRootOptions,
+          ...(rootOptions as CreateRootOptions),
+        };
 
-          const beforeBridgeRenderRes =
-            instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(
-              info,
-              operationContext,
-            ) || {};
+        const beforeBridgeRenderRes =
+          instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(
+            info,
+            operationContext,
+          ) || {};
 
-          const rootComponentWithErrorBoundary = (
-            <BridgeCommitObserver
-              onCommit={() =>
-                emitBridgeLifecycle(
-                  instance,
-                  'afterBridgeCommit',
-                  operationContext,
-                )
-              }
-            >
-              <BridgeWrapper
-                basename={basename}
-                moduleName={moduleName}
-                memoryRoute={memoryRoute}
-                propsInfo={
-                  {
-                    ...omitHostFallback(propsInfo as Record<string, unknown>),
-                    basename,
-                    ...(beforeBridgeRenderRes as any)?.extraProps,
-                  } as T
-                }
-              />
-            </BridgeCommitObserver>
+        const rootComponentWithErrorBoundary = (
+          <BridgeWrapper
+            basename={basename}
+            moduleName={moduleName}
+            memoryRoute={memoryRoute}
+            propsInfo={
+              {
+                ...omitHostFallback(propsInfo as Record<string, unknown>),
+                basename,
+                ...(beforeBridgeRenderRes as any)?.extraProps,
+              } as T
+            }
+          />
+        );
+
+        let renderResult: unknown;
+        if (bridgeInfo.render) {
+          renderResult = await Promise.resolve(
+            bridgeInfo.render(rootComponentWithErrorBoundary, dom),
           );
-
-          let renderResult: unknown;
-          if (bridgeInfo.render) {
-            renderResult = await Promise.resolve(
-              bridgeInfo.render(rootComponentWithErrorBoundary, dom),
-            );
-            rootMap.set(dom, renderResult as RootType);
-          } else {
-            let root = rootMap.get(dom);
-            // Do not call createRoot multiple times
-            if (!root && createRoot) {
-              root = createRoot(dom, mergedRootOptions);
-              rootMap.set(dom, root as any);
-            }
-
-            if (root && 'render' in root) {
-              root.render(rootComponentWithErrorBoundary);
-            }
-            renderResult = root;
+          rootMap.set(dom, renderResult as RootType);
+        } else {
+          let root = rootMap.get(dom);
+          // Do not call createRoot multiple times
+          if (!root && createRoot) {
+            root = createRoot(dom, mergedRootOptions);
+            rootMap.set(dom, root as any);
           }
-          instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info, {
-            context: operationContext,
-            result: renderResult,
-          }) || {};
-        } catch (error) {
-          try {
-            instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info, {
-              context: operationContext,
-              error,
-            });
-          } catch {
-            // Preserve the original Bridge render error.
+
+          if (root && 'render' in root) {
+            root.render(rootComponentWithErrorBoundary);
           }
-          throw error;
+          renderResult = root;
         }
+        instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info, {
+          context: operationContext,
+          result: renderResult,
+        }) || {};
       },
 
       destroy(info: DestroyParams) {
@@ -209,36 +167,21 @@ export function createBaseBridgeComponent<T>({
           reason: 'direct',
         };
 
-        try {
-          instance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit(
-            info,
-            operationContext,
-          );
-          let destroyed = false;
-          if (root) {
-            if ('unmount' in root) {
-              root.unmount();
-              destroyed = true;
-            } else {
-              LoggerInstance.warn('Root does not have unmount method');
-            }
-            rootMap.delete(dom);
+        instance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit(
+          info,
+          operationContext,
+        );
+        if (root) {
+          if ('unmount' in root) {
+            root.unmount();
+          } else {
+            LoggerInstance.warn('Root does not have unmount method');
           }
-          instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(info, {
-            context: operationContext,
-            result: destroyed,
-          });
-        } catch (error) {
-          try {
-            instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(info, {
-              context: operationContext,
-              error,
-            });
-          } catch {
-            // Preserve the original Bridge destroy error.
-          }
-          throw error;
+          rootMap.delete(dom);
         }
+        instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(info, {
+          context: operationContext,
+        });
       },
     };
   };

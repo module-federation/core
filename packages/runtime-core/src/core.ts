@@ -193,13 +193,6 @@ export class ModuleFederation {
           remoteEntryExports?: RemoteEntryExports | false | void;
           resourceContext?: ResourceLoadContext;
           cached?: boolean;
-          loadSource?:
-            | 'remote-entry-exports'
-            | 'global-loading'
-            | 'global-entry'
-            | 'load-entry-hook'
-            | 'runtime-loader'
-            | 'error-handler';
           error?: unknown;
           recovered?: boolean;
         },
@@ -311,7 +304,6 @@ export class ModuleFederation {
       [Record<string, any>, BridgeOperationResult?],
       void | Record<string, any>
     >(),
-    afterBridgeCommit: new SyncHook<[BridgeOperationContext], void>(),
     afterBridgeRouteSync: new SyncHook<[BridgeOperationResult], void>(),
   });
   moduleInfo?: GlobalModuleInfo[string];

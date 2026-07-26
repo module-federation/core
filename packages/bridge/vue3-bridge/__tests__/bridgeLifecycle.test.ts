@@ -26,7 +26,6 @@ const { lifecycleEvents, bridgeLifecycle } = rs.hoisted(() => {
       afterBridgeRender: eventHook('afterBridgeRender'),
       beforeBridgeDestroy: eventHook('beforeBridgeDestroy'),
       afterBridgeDestroy: eventHook('afterBridgeDestroy'),
-      afterBridgeCommit: eventHook('afterBridgeCommit'),
       afterBridgeRouteSync: eventHook('afterBridgeRouteSync'),
     },
   };
@@ -46,7 +45,7 @@ describe('Vue Bridge operation lifecycle', () => {
     document.body.innerHTML = '';
   });
 
-  it('records render invocation, real commit, and destroy', async () => {
+  it('records render and destroy', async () => {
     const dom = document.createElement('div');
     document.body.appendChild(dom);
     const bridge = createBridgeComponent({
@@ -64,30 +63,25 @@ describe('Vue Bridge operation lifecycle', () => {
     const renderEvents = lifecycleEvents.filter(
       (event) => getContext(event).operation === 'render',
     );
-    expect(renderEvents.map((event) => event.lifecycle)).toEqual(
-      expect.arrayContaining([
-        'beforeBridgeRender',
-        'afterBridgeRender',
-        'afterBridgeCommit',
-      ]),
-    );
+    expect(renderEvents.map((event) => event.lifecycle)).toEqual([
+      'beforeBridgeRender',
+      'afterBridgeRender',
+    ]);
     expect(new Set(renderEvents.map((event) => getContext(event))).size).toBe(
       1,
     );
 
     bridge.destroy({ dom });
     expect(
-      lifecycleEvents
-        .filter(
-          (event) =>
-            event.lifecycle === 'afterBridgeDestroy' &&
-            getContext(event).operation === 'destroy',
-        )
-        .map((event) => event.payload.result),
-    ).toEqual([true]);
+      lifecycleEvents.filter(
+        (event) =>
+          event.lifecycle === 'afterBridgeDestroy' &&
+          getContext(event).operation === 'destroy',
+      ).length,
+    ).toBe(1);
   });
 
-  it('records render and destroy errors without swallowing them', async () => {
+  it('preserves render and destroy errors without reporting completion', async () => {
     const renderDom = document.createElement('div');
     const renderBridge = createBridgeComponent({
       rootComponent: { render: () => h('div') },
@@ -99,12 +93,12 @@ describe('Vue Bridge operation lifecycle', () => {
       renderBridge.render({ dom: renderDom, moduleName: 'remote/App' }),
     ).rejects.toThrow('vue render failed');
     expect(
-      lifecycleEvents.find(
+      lifecycleEvents.some(
         (event) =>
           event.lifecycle === 'afterBridgeRender' &&
           getContext(event).operation === 'render',
-      )?.payload,
-    ).toMatchObject({ error: expect.any(Error) });
+      ),
+    ).toBe(false);
 
     lifecycleEvents.length = 0;
     const destroyDom = document.createElement('div');
@@ -124,12 +118,12 @@ describe('Vue Bridge operation lifecycle', () => {
       'vue destroy failed',
     );
     expect(
-      lifecycleEvents.find(
+      lifecycleEvents.some(
         (event) =>
           event.lifecycle === 'afterBridgeDestroy' &&
           getContext(event).operation === 'destroy',
-      )?.payload.error,
-    ).toBeInstanceOf(Error);
+      ),
+    ).toBe(false);
   });
 
   it('records the Bridge-managed memory-route navigation', async () => {

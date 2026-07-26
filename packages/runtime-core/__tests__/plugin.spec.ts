@@ -1,9 +1,6 @@
 import { describe, expect, it, rs } from '@rstest/core';
 import { ModuleFederation } from '../src/core';
-import {
-  registerGlobalPlugins,
-  setGlobalFederationInstance,
-} from '../src/global';
+import { registerGlobalPlugins } from '../src/global';
 import type {
   ModuleFederationRuntimePlugin,
   RuntimePluginHooks,
@@ -203,7 +200,6 @@ describe('runtime plugins', () => {
     const afterBridgeRender = rs.fn();
     const beforeBridgeDestroy = rs.fn();
     const afterBridgeDestroy = rs.fn();
-    const afterBridgeCommit = rs.fn();
     const afterBridgeRouteSync = rs.fn();
     const instance = new ModuleFederation({
       name: 'bridge-lifecycle-host',
@@ -215,7 +211,6 @@ describe('runtime plugins', () => {
             afterBridgeRender,
             beforeBridgeDestroy,
             afterBridgeDestroy,
-            afterBridgeCommit,
             afterBridgeRouteSync,
           }),
         },
@@ -239,14 +234,12 @@ describe('runtime plugins', () => {
     instance.bridgeHook.lifecycle.afterBridgeRender.emit(args, result);
     instance.bridgeHook.lifecycle.beforeBridgeDestroy.emit(args, context);
     instance.bridgeHook.lifecycle.afterBridgeDestroy.emit(args, result);
-    instance.bridgeHook.lifecycle.afterBridgeCommit.emit(context);
     instance.bridgeHook.lifecycle.afterBridgeRouteSync.emit(result);
 
     expect(beforeBridgeRender).toHaveBeenCalledWith(args, context);
     expect(afterBridgeRender).toHaveBeenCalledWith(args, result);
     expect(beforeBridgeDestroy).toHaveBeenCalledWith(args, context);
     expect(afterBridgeDestroy).toHaveBeenCalledWith(args, result);
-    expect(afterBridgeCommit).toHaveBeenCalledWith(context);
     expect(afterBridgeRouteSync).toHaveBeenCalledWith(result);
   });
 });
@@ -271,38 +264,6 @@ describe('global runtime plugins', () => {
     expect(apply).toHaveBeenCalledTimes(1);
     expect(apply).toHaveBeenCalledWith(instance);
     expect(beforeInit).toHaveBeenCalledTimes(1);
-  });
-
-  it('applies newly registered global plugins to existing and later instances', () => {
-    const boundInstances: Array<ModuleFederation> = [];
-    const initializedInstances: Array<ModuleFederation> = [];
-    const plugin: ModuleFederationRuntimePlugin = {
-      name: 'late-global-plugin',
-      apply(instance) {
-        boundInstances.push(instance);
-        return {
-          beforeInit(args) {
-            initializedInstances.push(instance);
-            return args;
-          },
-        };
-      },
-    };
-    const existing = new ModuleFederation({
-      name: 'late-global-existing-host',
-    });
-    setGlobalFederationInstance(existing);
-
-    registerGlobalPlugins([plugin]);
-    registerGlobalPlugins([plugin]);
-    existing.initOptions({ name: 'late-global-existing-host' });
-
-    const future = new ModuleFederation({
-      name: 'late-global-future-host',
-    });
-
-    expect(boundInstances).toEqual([existing, future]);
-    expect(initializedInstances).toEqual([existing, future]);
   });
 
   it('prefers an explicitly configured plugin over a global plugin with the same name', () => {

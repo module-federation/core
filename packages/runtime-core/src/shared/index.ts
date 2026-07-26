@@ -150,16 +150,12 @@ export class SharedHandler {
       trigger: SharedLoadTrigger;
     },
   ): void {
-    try {
-      this.hooks.lifecycle.afterRegisterShare.emit({
-        pkgName,
-        ...input,
-        shareScopeMap: this.shareScopeMap,
-        origin: this.host,
-      });
-    } catch (hookError) {
-      warn(hookError);
-    }
+    this.hooks.lifecycle.afterRegisterShare.emit({
+      pkgName,
+      ...input,
+      shareScopeMap: this.shareScopeMap,
+      origin: this.host,
+    });
   }
 
   private emitAfterLoadShare({
@@ -275,11 +271,7 @@ export class SharedHandler {
     extraOptions?: LoadShareExtraOptions,
   ): Promise<false | (() => T | undefined)> {
     const { host } = this;
-    let loadContext: SharedLoadContext = {
-      ...extraOptions?.context,
-      trigger: extraOptions?.context?.trigger || extraOptions?.from,
-      customResolver: Boolean(extraOptions?.resolver) || undefined,
-    };
+    let loadContext = extraOptions?.context;
     // This function performs the following steps:
     // 1. Checks if the currently loaded share already exists, if not, it throws an error
     // 2. Searches globally for a matching share, if found, it uses it directly
@@ -299,7 +291,6 @@ export class SharedHandler {
             await Promise.all(
               this.initializeSharing(shareScope, {
                 strategy: shareOptions.strategy,
-                from: extraOptions?.from,
                 context: loadContext,
               }),
             );
@@ -606,11 +597,7 @@ export class SharedHandler {
     extraOptions?: LoadShareExtraOptions,
   ): () => T | never {
     const { host } = this;
-    const loadContext: SharedLoadContext = {
-      ...extraOptions?.context,
-      trigger: extraOptions?.context?.trigger || extraOptions?.from,
-      customResolver: Boolean(extraOptions?.resolver) || undefined,
-    };
+    const loadContext = extraOptions?.context;
     const shareOptions = getTargetSharedOptions({
       pkgName,
       extraOptions,

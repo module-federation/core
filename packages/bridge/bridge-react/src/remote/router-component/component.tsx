@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useState, forwardRef } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
 import {
   dispatchPopstateEnv,
-  emitBridgeLifecycle,
   type BridgeOperationContext,
 } from '@module-federation/bridge-shared';
 import { LoggerInstance, pathJoin } from '../../utils';
@@ -106,27 +105,13 @@ export function withRouterData<
             moduleName: props.moduleName,
             route,
           };
-          try {
-            const result = dispatchPopstateEnv();
-            emitBridgeLifecycle(
-              federationRuntime.instance,
-              'afterBridgeRouteSync',
-              {
-                context: operationContext,
-                result,
-              },
-            );
-          } catch (error) {
-            emitBridgeLifecycle(
-              federationRuntime.instance,
-              'afterBridgeRouteSync',
-              {
-                context: operationContext,
-                error,
-              },
-            );
-            throw error;
-          }
+          const result = dispatchPopstateEnv();
+          federationRuntime.instance?.bridgeHook.lifecycle.afterBridgeRouteSync.emit(
+            {
+              context: operationContext,
+              result,
+            },
+          );
         }
         setPathname(location.pathname);
       }, [location]);

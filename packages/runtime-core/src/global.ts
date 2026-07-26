@@ -273,27 +273,14 @@ export const registerGlobalPlugins = (
   plugins: Array<ModuleFederationRuntimePlugin>,
 ): void => {
   const { __GLOBAL_PLUGIN__ } = nativeGlobal.__FEDERATION__;
-  const registeredPlugins: Array<ModuleFederationRuntimePlugin> = [];
 
   plugins.forEach((plugin) => {
     if (__GLOBAL_PLUGIN__.findIndex((p) => p.name === plugin.name) === -1) {
       __GLOBAL_PLUGIN__.push(plugin);
-      registeredPlugins.push(plugin);
     } else {
       warn(`The plugin ${plugin.name} has been registered.`);
     }
   });
-
-  if (registeredPlugins.length > 0) {
-    const instances = new Set([
-      ...CurrentGlobal.__FEDERATION__.__INSTANCES__,
-      ...nativeGlobal.__FEDERATION__.__INSTANCES__,
-    ]);
-
-    instances.forEach((instance) => {
-      instance.registerPlugins(registeredPlugins);
-    });
-  }
 };
 
 export const getGlobalHostPlugins = (): Array<ModuleFederationRuntimePlugin> =>
