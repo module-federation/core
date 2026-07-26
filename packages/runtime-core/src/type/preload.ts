@@ -44,45 +44,19 @@ export type ResourceLoadCacheSource =
   | 'mf-memory'
   | 'unknown';
 
-export type ResourceLoadErrorType =
-  | 'network'
-  | 'http'
-  | 'content'
-  | 'execution'
-  | 'initialization'
-  | 'timeout'
-  | 'unknown';
-
-export interface ResourceLoadRemote {
-  name: string;
-  alias?: string;
-  version?: string;
-  buildVersion?: string;
-  type?: string;
-  entryGlobalName?: string;
-}
-
-export interface ResourceLoadErrorSummary {
-  name?: string;
-  message: string;
-}
-
 export interface ResourceLoadEvent extends ResourceLoadContext {
   url: string;
-  remote?: ResourceLoadRemote;
-  startedAt: number;
+  remote?: RemoteInfo;
 }
 
 export interface ResourceLoadResult extends ResourceLoadEvent {
-  endedAt: number;
-  duration: number;
   outcome: ResourceLoadOutcome;
+  response?: Response;
   httpStatus?: number;
   mimeType?: string;
   redirected?: boolean;
   cacheSource?: ResourceLoadCacheSource;
-  errorType?: ResourceLoadErrorType;
-  error?: ResourceLoadErrorSummary;
+  error?: unknown;
 }
 
 export type PreloadAssetStatus = ResourceLoadOutcome;
@@ -93,11 +67,7 @@ export interface PreloadAssetResult {
   resourceType: ResourceLoadType;
   initiator: ResourceLoadInitiator;
   id: string;
-  startedAt?: number;
-  endedAt?: number;
-  duration?: number;
   cacheSource?: ResourceLoadCacheSource;
-  errorType?: ResourceLoadErrorType;
   error?: unknown;
 }
 

@@ -31,6 +31,9 @@ const createLifecycleFixture = () => {
   return { events, lifecycle };
 };
 
+const getContext = (event: { payload: Record<string, any> }) =>
+  event.payload.context || event.payload;
+
 describe('React Bridge operation lifecycle', () => {
   afterEach(() => {
     federationRuntime.instance = null;
@@ -53,7 +56,6 @@ describe('React Bridge operation lifecycle', () => {
         dom: containerInfo.container,
         moduleName: 'remote/App',
         basename: '/safe?token=private#hash',
-        businessValue: 'must-not-leak',
       });
     });
 
@@ -63,7 +65,7 @@ describe('React Bridge operation lifecycle', () => {
       ).toBe(true);
     });
     const renderEvents = events.filter(
-      (event) => event.payload.operation === 'render',
+      (event) => getContext(event).operation === 'render',
     );
     expect(renderEvents.map((event) => event.lifecycle)).toEqual(
       expect.arrayContaining([
@@ -73,23 +75,20 @@ describe('React Bridge operation lifecycle', () => {
         'afterBridgeCommit',
       ]),
     );
-    expect(
-      new Set(renderEvents.map((event) => event.payload.operationId)).size,
-    ).toBe(1);
-    expect(JSON.stringify(events)).not.toContain('must-not-leak');
-    expect(JSON.stringify(events)).not.toContain('token=private');
-    expect(JSON.stringify(events)).not.toContain('HTMLDivElement');
+    expect(new Set(renderEvents.map((event) => getContext(event))).size).toBe(
+      1,
+    );
 
     bridge.destroy({ dom: containerInfo.container, moduleName: 'remote/App' });
     bridge.destroy({ dom: containerInfo.container, moduleName: 'remote/App' });
     const destroyResults = events.filter(
       (event) =>
         event.lifecycle === 'afterBridgeOperation' &&
-        event.payload.operation === 'destroy',
+        getContext(event).operation === 'destroy',
     );
-    expect(destroyResults.map((event) => event.payload.outcome)).toEqual([
-      'success',
-      'skipped',
+    expect(destroyResults.map((event) => event.payload.result)).toEqual([
+      true,
+      false,
     ]);
     containerInfo.clean();
   });
@@ -116,15 +115,12 @@ describe('React Bridge operation lifecycle', () => {
     const firstStarts = events.filter(
       (event) =>
         event.lifecycle === 'beforeBridgeOperation' &&
-        event.payload.operation === 'render',
+        getContext(event).operation === 'render',
     );
-    expect(firstStarts.map((event) => event.payload.side).sort()).toEqual([
+    expect(firstStarts.map((event) => getContext(event).side).sort()).toEqual([
       'consumer',
       'producer',
     ]);
-    expect(
-      new Set(firstStarts.map((event) => event.payload.operationId)).size,
-    ).toBe(1);
 
     result.rerender(<RemoteComponent value="second" />);
     await waitFor(() =>
@@ -134,8 +130,8 @@ describe('React Bridge operation lifecycle', () => {
       events.some(
         (event) =>
           event.lifecycle === 'beforeBridgeOperation' &&
-          event.payload.operation === 'update' &&
-          event.payload.reason === 'props-update',
+          getContext(event).operation === 'update' &&
+          getContext(event).reason === 'props-update',
       ),
     ).toBe(true);
     result.unmount();
@@ -171,10 +167,12 @@ describe('React Bridge operation lifecycle', () => {
       const result = events.find(
         (event) =>
           event.lifecycle === 'afterBridgeOperation' &&
-          event.payload.operation === 'render',
+          getContext(event).operation === 'render',
       );
-      expect(result?.payload.outcome).toBe('error');
-      expect(result?.payload.error.message).not.toContain('token=secret');
+      expect(result?.payload.error).toBeInstanceOf(Error);
+      expect((result?.payload.error as Error).message).toContain(
+        'token=secret',
+      );
       containerInfo.clean();
     },
   );
@@ -209,9 +207,9 @@ describe('React Bridge operation lifecycle', () => {
       events.find(
         (event) =>
           event.lifecycle === 'afterBridgeOperation' &&
-          event.payload.operation === 'destroy',
-      )?.payload.outcome,
-    ).toBe('error');
+          getContext(event).operation === 'destroy',
+      )?.payload.error,
+    ).toBeInstanceOf(Error);
     containerInfo.clean();
   });
 
@@ -249,11 +247,11 @@ describe('React Bridge operation lifecycle', () => {
         events.some(
           (event) =>
             event.lifecycle === 'afterBridgeOperation' &&
-            event.payload.operation === 'route-sync' &&
-            event.payload.side === 'consumer' &&
-            event.payload.route.action === 'host-to-remote' &&
-            event.payload.route.mechanism === 'popstate' &&
-            event.payload.outcome === 'success',
+            getContext(event).operation === 'route-sync' &&
+            getContext(event).side === 'consumer' &&
+            getContext(event).route.action === 'host-to-remote' &&
+            getContext(event).route.mechanism === 'popstate' &&
+            event.payload.error === undefined,
         ),
       ).toBe(true);
     });

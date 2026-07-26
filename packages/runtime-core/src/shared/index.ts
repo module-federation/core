@@ -19,9 +19,6 @@ import {
   LoadShareExtraOptions,
   SharedLoadContext,
   SharedLoadTrigger,
-  SharedRegistrationResult,
-  SharedSelectionDecision,
-  SharedSelectionResult,
 } from '../type';
 import { ModuleFederation } from '../core';
 import {
@@ -39,7 +36,6 @@ import {
   directShare,
   shouldUseTreeShaking,
   addUseIn,
-  getSharedCandidateInfo,
 } from '../utils/share';
 import {
   assert,
@@ -65,7 +61,12 @@ export class SharedHandler {
       [
         {
           pkgName: string;
-          registration: SharedRegistrationResult;
+          scope: string;
+          shared: Shared;
+          previousShared?: Shared;
+          registeredShared?: Shared;
+          shareScopeMap: ShareScopeMap;
+          trigger: SharedLoadTrigger;
           origin: ModuleFederation;
         },
       ],
@@ -77,7 +78,7 @@ export class SharedHandler {
       shareInfo?: Shared;
       shared: Options['shared'];
       origin: ModuleFederation;
-      loadContext: SharedSelectionResult['context'];
+      loadContext?: SharedLoadContext;
     }>('beforeLoadShare'),
     // not used yet
     loadShare: new AsyncHook<[ModuleFederation, string, ShareInfos]>(),
@@ -90,7 +91,7 @@ export class SharedHandler {
           shared: Options['shared'];
           shareScopeMap: ShareScopeMap;
           lifecycle: 'loadShare' | 'loadShareSync';
-          selectionResult?: SharedSelectionResult;
+          loadContext?: SharedLoadContext;
           origin: ModuleFederation;
         },
       ],
@@ -107,7 +108,7 @@ export class SharedHandler {
           origin: ModuleFederation;
           error?: unknown;
           recovered?: boolean;
-          selectionResult?: SharedSelectionResult;
+          loadContext?: SharedLoadContext;
         },
       ],
       void
@@ -120,6 +121,7 @@ export class SharedHandler {
       shareInfo: Shared;
       GlobalFederation: Federation;
       resolver: () => { shared: Shared; useTreesShaking: boolean } | undefined;
+      loadContext?: SharedLoadContext;
     }>('resolveShare'),
     // maybe will change, temporarily for internal use only
     initContainerShareScopeMap: new SyncWaterfallHook<{
@@ -131,8 +133,6 @@ export class SharedHandler {
     }>('initContainerShareScopeMap'),
   });
   initTokens: InitTokens;
-  private operationCounter = 0;
-  private registrationCounter = 0;
   constructor(host: ModuleFederation) {
     this.host = host;
     this.shareScopeMap = {};
@@ -140,77 +140,21 @@ export class SharedHandler {
     this._setGlobalShareScopeMap(host.options);
   }
 
-  private createLoadContext(
-    lifecycle: 'loadShare' | 'loadShareSync',
-    extraOptions?: LoadShareExtraOptions,
-  ): SharedSelectionResult['context'] {
-    this.operationCounter += 1;
-    const context = extraOptions?.context || {};
-    return {
-      ...context,
-      operationId:
-        context.operationId || `${lifecycle}-${this.operationCounter}`,
-      trigger: context.trigger || extraOptions?.from || 'runtime',
-    };
-  }
-
-  private createSelectionResult(
-    decision: SharedSelectionDecision,
-    loadType: SharedSelectionResult['loadType'],
-    context: SharedSelectionResult['context'],
-    overrides: Partial<SharedSelectionDecision> = {},
-  ): SharedSelectionResult {
-    return {
-      ...decision,
-      ...overrides,
-      loadType,
-      context,
-    };
-  }
-
-  private createSelectionDecision(
-    pkgName: string,
-    shareInfo: Partial<Shared> | undefined,
-    reason: SharedSelectionDecision['reason'],
-  ): SharedSelectionDecision {
-    const scopes = shareInfo?.scope?.length ? shareInfo.scope : [DEFAULT_SCOPE];
-    const candidates = scopes.flatMap((scope) =>
-      Object.entries(this.shareScopeMap[scope]?.[pkgName] || {}).map(
-        ([version, shared]) =>
-          getSharedCandidateInfo(
-            scope,
-            version,
-            shared,
-            shareInfo?.shareConfig?.requiredVersion,
-          ),
-      ),
-    );
-    return {
-      scope: scopes[0],
-      requestedVersion: shareInfo?.version,
-      requiredVersion: shareInfo?.shareConfig?.requiredVersion,
-      singleton: Boolean(shareInfo?.shareConfig?.singleton),
-      strictVersion: Boolean(shareInfo?.shareConfig?.strictVersion),
-      eager: Boolean(shareInfo?.shareConfig?.eager),
-      strategy: shareInfo?.strategy || 'version-first',
-      candidates,
-      reason,
-      failureReason: reason,
-    };
-  }
-
   private emitAfterRegisterShare(
     pkgName: string,
-    registration: Omit<SharedRegistrationResult, 'registrationId'>,
+    input: {
+      scope: string;
+      shared: Shared;
+      previousShared?: Shared;
+      registeredShared?: Shared;
+      trigger: SharedLoadTrigger;
+    },
   ): void {
-    this.registrationCounter += 1;
     try {
       this.hooks.lifecycle.afterRegisterShare.emit({
         pkgName,
-        registration: {
-          ...registration,
-          registrationId: `shared-register-${this.registrationCounter}`,
-        },
+        ...input,
+        shareScopeMap: this.shareScopeMap,
         origin: this.host,
       });
     } catch (hookError) {
@@ -223,13 +167,13 @@ export class SharedHandler {
     pkgName,
     shareInfo,
     selectedShared,
-    selectionResult,
+    loadContext,
   }: {
     lifecycle: 'loadShare' | 'loadShareSync';
     pkgName: string;
     shareInfo?: Partial<Shared>;
     selectedShared?: Partial<Shared>;
-    selectionResult?: SharedSelectionResult;
+    loadContext?: SharedLoadContext;
   }): void {
     try {
       this.hooks.lifecycle.afterLoadShare.emit({
@@ -239,7 +183,7 @@ export class SharedHandler {
         shared: this.host.options.shared,
         shareScopeMap: this.shareScopeMap,
         lifecycle,
-        selectionResult,
+        loadContext,
         origin: this.host,
       });
     } catch (error) {
@@ -253,14 +197,14 @@ export class SharedHandler {
     shareInfo,
     error,
     recovered,
-    selectionResult,
+    loadContext,
   }: {
     lifecycle: 'loadShare' | 'loadShareSync';
     pkgName: string;
     shareInfo?: Partial<Shared>;
     error?: unknown;
     recovered?: boolean;
-    selectionResult?: SharedSelectionResult;
+    loadContext?: SharedLoadContext;
   }): void {
     try {
       this.hooks.lifecycle.errorLoadShare.emit({
@@ -272,7 +216,7 @@ export class SharedHandler {
         origin: this.host,
         error,
         recovered,
-        selectionResult,
+        loadContext,
       });
     } catch (hookError) {
       warn(hookError);
@@ -298,8 +242,6 @@ export class SharedHandler {
           });
           const registeredShared = this.shareScopeMap[sc]?.[sharedKey];
           const previousAtVersion = registeredShared?.[sharedVal.version];
-          let action: SharedRegistrationResult['action'];
-          let reason: string;
           if (!registeredShared) {
             this.setShared({
               pkgName: sharedKey,
@@ -309,54 +251,14 @@ export class SharedHandler {
               shared: sharedVal,
               from: userOptions.name,
             });
-            action = 'registered';
-            reason = 'first-registration';
-          } else if (
-            previousAtVersion === sharedVal ||
-            previousAtVersion?.from === sharedVal.from
-          ) {
-            action = 'reused';
-            reason = 'same-version-same-provider';
-          } else {
-            action = 'ignored';
-            reason = previousAtVersion
-              ? 'existing-version-preserved'
-              : 'scope-already-registered';
           }
-
-          const candidates = Object.entries(
-            this.shareScopeMap[sc]?.[sharedKey] || {},
-          ).map(([version, shared]) =>
-            getSharedCandidateInfo(
-              sc,
-              version,
-              shared,
-              sharedVal.shareConfig?.requiredVersion,
-            ),
-          );
-          const effectiveShared =
-            this.shareScopeMap[sc]?.[sharedKey]?.[sharedVal.version] ||
-            Object.values(this.shareScopeMap[sc]?.[sharedKey] || {})[0];
           this.emitAfterRegisterShare(sharedKey, {
             scope: sc,
+            shared: sharedVal,
+            previousShared: previousAtVersion,
+            registeredShared:
+              this.shareScopeMap[sc]?.[sharedKey]?.[sharedVal.version],
             trigger: 'runtime',
-            candidate: getSharedCandidateInfo(
-              sc,
-              sharedVal.version,
-              sharedVal,
-              sharedVal.shareConfig?.requiredVersion,
-            ),
-            candidates,
-            action,
-            effective: effectiveShared
-              ? getSharedCandidateInfo(
-                  sc,
-                  effectiveShared.version,
-                  effectiveShared,
-                  sharedVal.shareConfig?.requiredVersion,
-                )
-              : undefined,
-            reason,
           });
         });
       });
@@ -373,7 +275,11 @@ export class SharedHandler {
     extraOptions?: LoadShareExtraOptions,
   ): Promise<false | (() => T | undefined)> {
     const { host } = this;
-    const loadContext = this.createLoadContext('loadShare', extraOptions);
+    let loadContext: SharedLoadContext = {
+      ...extraOptions?.context,
+      trigger: extraOptions?.context?.trigger || extraOptions?.from,
+      customResolver: Boolean(extraOptions?.resolver) || undefined,
+    };
     // This function performs the following steps:
     // 1. Checks if the currently loaded share already exists, if not, it throws an error
     // 2. Searches globally for a matching share, if found, it uses it directly
@@ -385,7 +291,6 @@ export class SharedHandler {
       shareInfos: host.options.shared,
     });
     let shareOptionsRes: Shared | undefined = shareOptions;
-    let selectionDecision: SharedSelectionDecision | undefined;
 
     try {
       if (shareOptions?.scope) {
@@ -411,6 +316,7 @@ export class SharedHandler {
       });
 
       shareOptionsRes = loadShareRes.shareInfo;
+      loadContext = loadShareRes.loadContext || loadContext;
 
       // Assert that shareInfoRes exists, if not, throw an error
       assert(
@@ -425,44 +331,8 @@ export class SharedHandler {
           pkgName,
           shareOptionsRes,
           this.hooks.lifecycle.resolveShare,
-          (decision) => {
-            selectionDecision = decision;
-          },
+          loadContext,
         ) || {};
-
-      if (selectionDecision && extraOptions?.resolver && registeredShared) {
-        selectionDecision = {
-          ...selectionDecision,
-          reason: 'custom-resolver',
-          failureReason: undefined,
-        };
-      }
-
-      const registeredSelectionResult = registeredShared
-        ? this.createSelectionResult(
-            selectionDecision ||
-              this.createSelectionDecision(
-                pkgName,
-                resolvedShareOptions,
-                'exact-match',
-              ),
-            'async',
-            loadContext,
-            {
-              selected:
-                selectionDecision?.selected ||
-                getSharedCandidateInfo(
-                  selectionDecision?.scope ||
-                    resolvedShareOptions.scope?.[0] ||
-                    DEFAULT_SCOPE,
-                  registeredShared.version,
-                  registeredShared,
-                  resolvedShareOptions.shareConfig?.requiredVersion,
-                ),
-              failureReason: undefined,
-            },
-          )
-        : undefined;
 
       if (registeredShared) {
         const targetShared = directShare(registeredShared, useTreesShaking);
@@ -473,7 +343,7 @@ export class SharedHandler {
             pkgName,
             shareInfo: resolvedShareOptions,
             selectedShared: registeredShared,
-            selectionResult: registeredSelectionResult,
+            loadContext,
           });
           return targetShared.lib as () => T;
         } else if (targetShared.loading && !targetShared.loaded) {
@@ -488,7 +358,7 @@ export class SharedHandler {
             pkgName,
             shareInfo: resolvedShareOptions,
             selectedShared: registeredShared,
-            selectionResult: registeredSelectionResult,
+            loadContext,
           });
           return factory;
         } else {
@@ -517,7 +387,7 @@ export class SharedHandler {
             pkgName,
             shareInfo: resolvedShareOptions,
             selectedShared: registeredShared,
-            selectionResult: registeredSelectionResult,
+            loadContext,
           });
           return factory;
         }
@@ -528,17 +398,7 @@ export class SharedHandler {
             pkgName,
             shareInfo: resolvedShareOptions,
             recovered: true,
-            selectionResult: this.createSelectionResult(
-              selectionDecision ||
-                this.createSelectionDecision(
-                  pkgName,
-                  resolvedShareOptions,
-                  'version-mismatch',
-                ),
-              'async',
-              loadContext,
-              { recovered: true },
-            ),
+            loadContext,
           });
           return false;
         }
@@ -558,6 +418,7 @@ export class SharedHandler {
               pkgName,
               resolvedShareOptions,
               this.hooks.lifecycle.resolveShare,
+              loadContext,
             ) || {};
           if (gShared) {
             const targetGShared = directShare(gShared, gUseTreeShaking);
@@ -585,27 +446,7 @@ export class SharedHandler {
           pkgName,
           shareInfo: resolvedShareOptions,
           selectedShared: resolvedShareOptions,
-          selectionResult: this.createSelectionResult(
-            selectionDecision ||
-              this.createSelectionDecision(
-                pkgName,
-                resolvedShareOptions,
-                'local-fallback',
-              ),
-            'async',
-            loadContext,
-            {
-              reason: 'local-fallback',
-              failureReason: undefined,
-              fallback: true,
-              selected: getSharedCandidateInfo(
-                resolvedShareOptions.scope?.[0] || DEFAULT_SCOPE,
-                resolvedShareOptions.version,
-                resolvedShareOptions,
-                resolvedShareOptions.shareConfig?.requiredVersion,
-              ),
-            },
-          ),
+          loadContext,
         });
         return factory;
       }
@@ -615,21 +456,7 @@ export class SharedHandler {
         pkgName,
         shareInfo: shareOptionsRes,
         error: shareError,
-        selectionResult: this.createSelectionResult(
-          selectionDecision ||
-            this.createSelectionDecision(
-              pkgName,
-              shareOptionsRes,
-              shareOptionsRes ? 'load-error' : 'missing-config',
-            ),
-          'async',
-          loadContext,
-          {
-            failureReason:
-              selectionDecision?.failureReason ||
-              (shareOptionsRes ? 'load-error' : 'missing-config'),
-          },
-        ),
+        loadContext,
       });
       throw shareError;
     }
@@ -695,61 +522,15 @@ export class SharedHandler {
             ? eager
             : hostName > versions[version].from)),
       );
-      let action: SharedRegistrationResult['action'];
-      let reason: string;
-      if (existingShared === shared) {
-        action = 'reused';
-        reason = 'same-registration-reused';
-      } else if (shouldReplace) {
+      if (shouldReplace) {
         versions[version] = shared;
-        action = activeVersion ? 'replaced' : 'registered';
-        reason = !activeVersion
-          ? 'first-registration'
-          : eager && !activeVersionEager
-            ? 'eager-preferred'
-            : 'provider-name-preferred';
-      } else {
-        action = 'ignored';
-        reason =
-          activeVersion.strategy === 'loaded-first'
-            ? 'loaded-first-preserved'
-            : activeVersion.loaded
-              ? 'loaded-version-preserved'
-              : activeVersionEager && !eager
-                ? 'eager-provider-preserved'
-                : 'provider-name-preserved';
       }
-
-      const candidate = getSharedCandidateInfo(
-        shareScopeName,
-        version,
-        shared,
-        shared.shareConfig?.requiredVersion,
-      );
-      const effectiveShared = versions[version];
       this.emitAfterRegisterShare(name, {
         scope: shareScopeName,
+        shared,
+        previousShared: existingShared,
+        registeredShared: versions[version],
         trigger,
-        candidate,
-        candidates: Object.entries(versions).map(
-          ([candidateVersion, candidateShared]) =>
-            getSharedCandidateInfo(
-              shareScopeName,
-              candidateVersion,
-              candidateShared,
-              shared.shareConfig?.requiredVersion,
-            ),
-        ),
-        action,
-        effective: effectiveShared
-          ? getSharedCandidateInfo(
-              shareScopeName,
-              effectiveShared.version,
-              effectiveShared,
-              shared.shareConfig?.requiredVersion,
-            )
-          : undefined,
-        reason,
       });
     };
 
@@ -813,8 +594,11 @@ export class SharedHandler {
     extraOptions?: LoadShareExtraOptions,
   ): () => T | never {
     const { host } = this;
-    const loadContext = this.createLoadContext('loadShareSync', extraOptions);
-    let selectionDecision: SharedSelectionDecision | undefined;
+    const loadContext: SharedLoadContext = {
+      ...extraOptions?.context,
+      trigger: extraOptions?.context?.trigger || extraOptions?.from,
+      customResolver: Boolean(extraOptions?.resolver) || undefined,
+    };
     const shareOptions = getTargetSharedOptions({
       pkgName,
       extraOptions,
@@ -837,44 +621,8 @@ export class SharedHandler {
           pkgName,
           shareOptions,
           this.hooks.lifecycle.resolveShare,
-          (decision) => {
-            selectionDecision = decision;
-          },
+          loadContext,
         ) || {};
-
-      if (selectionDecision && extraOptions?.resolver && registeredShared) {
-        selectionDecision = {
-          ...selectionDecision,
-          reason: 'custom-resolver',
-          failureReason: undefined,
-        };
-      }
-
-      const registeredSelectionResult = registeredShared
-        ? this.createSelectionResult(
-            selectionDecision ||
-              this.createSelectionDecision(
-                pkgName,
-                shareOptions,
-                'exact-match',
-              ),
-            'sync',
-            loadContext,
-            {
-              selected:
-                selectionDecision?.selected ||
-                getSharedCandidateInfo(
-                  selectionDecision?.scope ||
-                    shareOptions.scope?.[0] ||
-                    DEFAULT_SCOPE,
-                  registeredShared.version,
-                  registeredShared,
-                  shareOptions.shareConfig?.requiredVersion,
-                ),
-              failureReason: undefined,
-            },
-          )
-        : undefined;
 
       if (registeredShared) {
         if (typeof registeredShared.lib === 'function') {
@@ -890,7 +638,7 @@ export class SharedHandler {
             pkgName,
             shareInfo: shareOptions,
             selectedShared: registeredShared,
-            selectionResult: registeredSelectionResult,
+            loadContext,
           });
           return registeredShared.lib as () => T;
         }
@@ -910,7 +658,7 @@ export class SharedHandler {
               pkgName,
               shareInfo: shareOptions,
               selectedShared: registeredShared,
-              selectionResult: registeredSelectionResult,
+              loadContext,
             });
             return module;
           }
@@ -926,27 +674,7 @@ export class SharedHandler {
           pkgName,
           shareInfo: shareOptions,
           selectedShared: shareOptions,
-          selectionResult: this.createSelectionResult(
-            selectionDecision ||
-              this.createSelectionDecision(
-                pkgName,
-                shareOptions,
-                'local-fallback',
-              ),
-            'sync',
-            loadContext,
-            {
-              reason: 'local-fallback',
-              failureReason: undefined,
-              fallback: true,
-              selected: getSharedCandidateInfo(
-                shareOptions.scope?.[0] || DEFAULT_SCOPE,
-                shareOptions.version,
-                shareOptions,
-                shareOptions.shareConfig?.requiredVersion,
-              ),
-            },
-          ),
+          loadContext,
         });
         return shareOptions.lib as () => T;
       }
@@ -983,27 +711,7 @@ export class SharedHandler {
           pkgName,
           shareInfo: shareOptions,
           selectedShared: shareOptions,
-          selectionResult: this.createSelectionResult(
-            selectionDecision ||
-              this.createSelectionDecision(
-                pkgName,
-                shareOptions,
-                'local-fallback',
-              ),
-            'sync',
-            loadContext,
-            {
-              reason: 'local-fallback',
-              failureReason: undefined,
-              fallback: true,
-              selected: getSharedCandidateInfo(
-                shareOptions.scope?.[0] || DEFAULT_SCOPE,
-                shareOptions.version,
-                shareOptions,
-                shareOptions.shareConfig?.requiredVersion,
-              ),
-            },
-          ),
+          loadContext,
         });
         return shareOptions.lib as () => T;
       }
@@ -1024,15 +732,7 @@ export class SharedHandler {
         pkgName,
         shareInfo: shareOptions,
         error: shareError,
-        selectionResult: this.createSelectionResult(
-          selectionDecision ||
-            this.createSelectionDecision(pkgName, shareOptions, 'load-error'),
-          'sync',
-          loadContext,
-          {
-            failureReason: selectionDecision?.failureReason || 'load-error',
-          },
-        ),
+        loadContext,
       });
       throw shareError;
     }
@@ -1049,42 +749,12 @@ export class SharedHandler {
     Object.entries(shareScope).forEach(([pkgName, versions]) => {
       Object.entries(versions).forEach(([version, shared]) => {
         const previousShared = previousScope?.[pkgName]?.[version];
-        const action: SharedRegistrationResult['action'] = !previousShared
-          ? 'registered'
-          : previousShared === shared
-            ? 'reused'
-            : 'replaced';
         this.emitAfterRegisterShare(pkgName, {
           scope: scopeName,
+          shared,
+          previousShared,
+          registeredShared: versions[version],
           trigger: 'container-init',
-          candidate: getSharedCandidateInfo(
-            scopeName,
-            version,
-            shared,
-            shared.shareConfig?.requiredVersion,
-          ),
-          candidates: Object.entries(versions).map(
-            ([candidateVersion, candidateShared]) =>
-              getSharedCandidateInfo(
-                scopeName,
-                candidateVersion,
-                candidateShared,
-                shared.shareConfig?.requiredVersion,
-              ),
-          ),
-          action,
-          effective: getSharedCandidateInfo(
-            scopeName,
-            version,
-            shared,
-            shared.shareConfig?.requiredVersion,
-          ),
-          reason:
-            action === 'registered'
-              ? 'container-share-registered'
-              : action === 'reused'
-                ? 'container-share-reused'
-                : 'container-share-replaced',
         });
       });
     });

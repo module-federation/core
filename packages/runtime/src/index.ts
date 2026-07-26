@@ -16,6 +16,7 @@ export {
   Module,
   getRemoteEntry,
   getRemoteInfo,
+  satisfy,
   registerGlobalPlugins,
   type ModuleFederationRuntimePlugin,
   type RuntimePluginHooks,

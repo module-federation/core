@@ -1,15 +1,12 @@
 import React, { useContext, useEffect, useState, forwardRef } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
 import {
-  completeBridgeOperation,
-  createBridgeId,
-  createBridgeOperationContext,
   dispatchPopstateEnv,
-  emitBridgeLifecycle,
+  startBridgeOperation,
 } from '@module-federation/bridge-shared';
 import { LoggerInstance, pathJoin } from '../../utils';
-import { RemoteAppWrapper } from '../RemoteAppWrapper';
 import { federationRuntime } from '../../provider/plugin';
+import { RemoteAppWrapper } from '../RemoteAppWrapper';
 
 interface ExtraDataProps {
   basename?: string;
@@ -21,7 +18,6 @@ export function withRouterData<
   WrappedComponent: React.ComponentType<P & ExtraDataProps>,
 ): React.FC<Omit<P, keyof ExtraDataProps>> {
   const Component = forwardRef(function (props: any, ref) {
-    const [routeBridgeId] = useState(createBridgeId);
     if (props?.basename) {
       return (
         <WrappedComponent {...props} basename={props.basename} ref={ref} />
@@ -95,38 +91,25 @@ export function withRouterData<
               pathname: location.pathname,
             },
           );
-          const operationContext = createBridgeOperationContext({
+          const route = {
+            action: 'host-to-remote' as const,
+            mechanism: 'popstate' as const,
+            from: pathname,
+            to: location.pathname,
+            basename,
+          };
+          const operation = startBridgeOperation(federationRuntime.instance, {
             side: 'consumer',
             framework: 'react',
             operation: 'route-sync',
-            bridgeId: routeBridgeId,
+            args: route,
             moduleName: props.moduleName,
-            route: {
-              action: 'host-to-remote',
-              mechanism: 'popstate',
-              from: pathname,
-              to: location.pathname,
-              basename,
-            },
+            route,
           });
-          emitBridgeLifecycle(
-            federationRuntime.instance,
-            'beforeBridgeOperation',
-            operationContext,
-          );
           try {
-            dispatchPopstateEnv();
-            emitBridgeLifecycle(
-              federationRuntime.instance,
-              'afterBridgeOperation',
-              completeBridgeOperation(operationContext, 'success'),
-            );
+            operation.finish(dispatchPopstateEnv());
           } catch (error) {
-            emitBridgeLifecycle(
-              federationRuntime.instance,
-              'afterBridgeOperation',
-              completeBridgeOperation(operationContext, 'error', error),
-            );
+            operation.fail(error);
             throw error;
           }
         }

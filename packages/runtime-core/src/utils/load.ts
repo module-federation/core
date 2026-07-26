@@ -19,11 +19,7 @@ import {
   RUNTIME_008,
   runtimeDescMap,
 } from '@module-federation/error-codes';
-import {
-  classifyResourceLoadError,
-  emitCachedResourceLoad,
-  startResourceLoad,
-} from './resource';
+import { emitCachedResourceLoad, startResourceLoad } from './resource';
 
 // Declare the ENV_TARGET constant that will be defined by DefinePlugin
 declare const ENV_TARGET: 'web' | 'node';
@@ -391,10 +387,8 @@ export async function getRemoteEntry(params: {
         });
         return res;
       } catch (loadError) {
-        const errorType = classifyResourceLoadError(loadError, 'execution');
-        await attempt.finish(errorType === 'timeout' ? 'timeout' : 'error', {
+        await attempt.finish('error', {
           error: loadError,
-          errorType,
         });
         throw loadError;
       }

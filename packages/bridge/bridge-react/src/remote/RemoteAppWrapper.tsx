@@ -3,16 +3,10 @@
  * This component handles the lifecycle of remote Module Federation apps
  */
 import React, { useEffect, useRef, useState, forwardRef } from 'react';
+import { startBridgeOperation } from '@module-federation/bridge-shared';
 import { LoggerInstance, getRootDomDefaultClassName } from '../utils';
 import { federationRuntime } from '../provider/plugin';
 import { RemoteComponentProps, RemoteAppParams } from '../types';
-import {
-  attachBridgeOperationContext,
-  completeBridgeOperation,
-  createBridgeId,
-  createBridgeOperationContext,
-  emitBridgeLifecycle,
-} from '@module-federation/bridge-shared';
 
 export const RemoteAppWrapper = forwardRef(function (
   props: RemoteAppParams & RemoteComponentProps,
@@ -38,7 +32,6 @@ export const RemoteAppWrapper = forwardRef(function (
 
   const renderDom: React.MutableRefObject<HTMLElement | null> = useRef(null);
   const providerInfoRef = useRef<any>(null);
-  const [bridgeId] = useState(createBridgeId);
   const hasRenderedRef = useRef(false);
   const [initialized, setInitialized] = useState(false);
 
@@ -66,62 +59,31 @@ export const RemoteAppWrapper = forwardRef(function (
           fallback,
           ...resProps,
         };
-        const operationContext = createBridgeOperationContext({
+        const operation = startBridgeOperation(instance, {
           side: 'consumer',
           framework: 'react',
           operation: 'destroy',
-          bridgeId,
+          args: destroyInfo,
           moduleName,
           reason: 'unmount',
         });
-        attachBridgeOperationContext(destroyInfo, operationContext);
-        emitBridgeLifecycle(
-          instance,
-          'beforeBridgeOperation',
-          operationContext,
-        );
 
         try {
           instance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit(
             destroyInfo,
           );
-          const result = providerInfoRef.current?.destroy(destroyInfo);
+          const result = providerInfoRef.current.destroy({
+            moduleName,
+            dom: renderDom.current,
+          });
           instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(
             destroyInfo,
           );
-          if (result && typeof result.then === 'function') {
-            void result.then(
-              () =>
-                emitBridgeLifecycle(
-                  instance,
-                  'afterBridgeOperation',
-                  completeBridgeOperation(operationContext, 'success'),
-                ),
-              (error: unknown) => {
-                emitBridgeLifecycle(
-                  instance,
-                  'afterBridgeOperation',
-                  completeBridgeOperation(operationContext, 'error', error),
-                );
-                throw error;
-              },
-            );
-          } else {
-            emitBridgeLifecycle(
-              instance,
-              'afterBridgeOperation',
-              completeBridgeOperation(operationContext, 'success'),
-            );
-          }
+          void operation.finish(result);
         } catch (error) {
-          emitBridgeLifecycle(
-            instance,
-            'afterBridgeOperation',
-            completeBridgeOperation(operationContext, 'error', error),
-          );
+          operation.fail(error);
           throw error;
         }
-
         hasRenderedRef.current = false;
       }
     };
@@ -140,16 +102,14 @@ export const RemoteAppWrapper = forwardRef(function (
       ...resProps,
     };
     renderDom.current = rootRef.current;
-    const operationContext = createBridgeOperationContext({
+    const operation = startBridgeOperation(instance, {
       side: 'consumer',
       framework: 'react',
       operation: hasRenderedRef.current ? 'update' : 'render',
-      bridgeId,
+      args: renderProps,
       moduleName,
       reason: hasRenderedRef.current ? 'props-update' : 'mount',
     });
-    attachBridgeOperationContext(renderProps, operationContext);
-    emitBridgeLifecycle(instance, 'beforeBridgeOperation', operationContext);
 
     try {
       const beforeBridgeRenderRes =
@@ -158,41 +118,13 @@ export const RemoteAppWrapper = forwardRef(function (
         ) || {};
       // @ts-ignore
       renderProps = { ...renderProps, ...beforeBridgeRenderRes.extraProps };
-      attachBridgeOperationContext(renderProps, operationContext);
-      emitBridgeLifecycle(instance, 'bridgeRenderInvoked', operationContext);
+      operation.invoked();
       const result = providerInfoRef.current.render(renderProps);
       hasRenderedRef.current = true;
       instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(renderProps);
-      if (result && typeof result.then === 'function') {
-        void result.then(
-          () =>
-            emitBridgeLifecycle(
-              instance,
-              'afterBridgeOperation',
-              completeBridgeOperation(operationContext, 'success'),
-            ),
-          (error: unknown) => {
-            emitBridgeLifecycle(
-              instance,
-              'afterBridgeOperation',
-              completeBridgeOperation(operationContext, 'error', error),
-            );
-            throw error;
-          },
-        );
-      } else {
-        emitBridgeLifecycle(
-          instance,
-          'afterBridgeOperation',
-          completeBridgeOperation(operationContext, 'success'),
-        );
-      }
+      void operation.finish(result);
     } catch (error) {
-      emitBridgeLifecycle(
-        instance,
-        'afterBridgeOperation',
-        completeBridgeOperation(operationContext, 'error', error),
-      );
+      operation.fail(error);
       throw error;
     }
   }, [initialized, ...Object.values(props)]);

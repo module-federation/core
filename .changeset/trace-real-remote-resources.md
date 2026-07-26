@@ -3,4 +3,4 @@
 '@module-federation/observability-plugin': patch
 ---
 
-Report real manifest, remote entry, and preload resource outcomes, including cache reuse, timeouts, failures, and recovery.
+Add raw manifest, remote entry, and preload resource lifecycle hooks, and derive cache, timing, timeout, failure, and recovery diagnostics in the observability plugin.

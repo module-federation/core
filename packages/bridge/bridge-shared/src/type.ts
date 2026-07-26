@@ -19,8 +19,6 @@ export type BridgeFramework = 'react' | 'vue';
 
 export type BridgeOperation = 'render' | 'update' | 'destroy' | 'route-sync';
 
-export type BridgeOperationOutcome = 'success' | 'error' | 'skipped';
-
 export interface BridgeRouteSummary {
   action:
     | 'basename-init'
@@ -36,14 +34,12 @@ export interface BridgeRouteSummary {
 }
 
 export interface BridgeOperationContext {
-  operationId: string;
-  bridgeId: string;
+  operationKey: object;
   side: BridgeOperationSide;
   framework: BridgeFramework;
   operation: BridgeOperation;
+  args: Record<string, any>;
   moduleName?: string;
-  remote?: string;
-  expose?: string;
   route?: BridgeRouteSummary;
   reason?:
     | 'mount'
@@ -52,15 +48,10 @@ export interface BridgeOperationContext {
     | 'keep-alive-deactivate'
     | 'unmount'
     | 'direct';
-  startedAt: number;
 }
 
-export interface BridgeOperationResult extends BridgeOperationContext {
-  endedAt: number;
-  duration: number;
-  outcome: BridgeOperationOutcome;
-  error?: {
-    name?: string;
-    message?: string;
-  };
+export interface BridgeOperationResult {
+  context: BridgeOperationContext;
+  result?: unknown;
+  error?: unknown;
 }

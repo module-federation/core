@@ -358,10 +358,15 @@ describe('preloadAssets', () => {
       ]),
     );
     calls.results.forEach((result) => {
-      expect(result.endedAt).toBeGreaterThanOrEqual(result.startedAt);
-      expect(result.duration).toBeGreaterThanOrEqual(0);
+      expect(result).not.toHaveProperty('startedAt');
+      expect(result).not.toHaveProperty('endedAt');
+      expect(result).not.toHaveProperty('duration');
+      expect(result).not.toHaveProperty('errorType');
       expect(result).not.toHaveProperty('httpStatus');
       expect(result).not.toHaveProperty('mimeType');
+    });
+    calls.starts.forEach((start) => {
+      expect(start).not.toHaveProperty('outcome');
     });
   });
 
@@ -440,12 +445,12 @@ describe('preloadAssets', () => {
       'error',
     ]);
     expect(calls.results[1]).toMatchObject({
-      errorType: 'network',
       error: {
         name: 'LinkNetworkError',
         message: expect.stringContaining('failure.css'),
       },
     });
+    expect(calls.results[1]).not.toHaveProperty('errorType');
   });
 
   it('reports an existing preload element as a browser cache reuse', async () => {
@@ -512,11 +517,13 @@ describe('preloadAssets', () => {
 
     expect(results[0]).toMatchObject({
       status: 'timeout',
-      errorType: 'timeout',
+      error: expect.any(Error),
     });
     expect(calls.results[0]).toMatchObject({
       outcome: 'timeout',
-      errorType: 'timeout',
+      error: expect.any(Error),
     });
+    expect(results[0]).not.toHaveProperty('errorType');
+    expect(calls.results[0]).not.toHaveProperty('errorType');
   });
 });
