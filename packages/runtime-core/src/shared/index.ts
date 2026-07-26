@@ -743,20 +743,7 @@ export class SharedHandler {
     extraOptions: { hostShareScopeMap?: ShareScopeMap } = {},
   ): void {
     const { host } = this;
-    const previousScope = this.shareScopeMap[scopeName];
     this.shareScopeMap[scopeName] = shareScope;
-    Object.entries(shareScope).forEach(([pkgName, versions]) => {
-      Object.entries(versions).forEach(([version, shared]) => {
-        const previousShared = previousScope?.[pkgName]?.[version];
-        this.emitAfterRegisterShare(pkgName, {
-          scope: scopeName,
-          shared,
-          previousShared,
-          registeredShared: versions[version],
-          trigger: 'container-init',
-        });
-      });
-    });
     this.hooks.lifecycle.initContainerShareScopeMap.emit({
       shareScope,
       options: host.options,
