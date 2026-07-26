@@ -6783,6 +6783,71 @@ describe('ObservabilityPlugin', () => {
     });
   });
 
+  it('ignores legacy share scope metadata and records shared dependencies', () => {
+    const observability = createObservability({
+      level: 'verbose',
+      console: false,
+    });
+    const instance = new ModuleFederation({
+      name: 'legacy-check',
+      remotes: [],
+      plugins: [observability.plugin],
+    });
+    const legacyShareScope = {
+      react: {
+        '18.3.1': {
+          version: '18.3.1',
+          from: 'legacy-host',
+          loaded: true,
+        },
+      },
+      region: undefined,
+      version: 'https://module-federation.io/mf-manifest.json',
+      environment: null,
+      metadata: { region: 'legacy-region' },
+    };
+
+    expect(() =>
+      instance.initShareScopeMap(
+        'default',
+        legacyShareScope as unknown as Parameters<
+          ModuleFederation['initShareScopeMap']
+        >[1],
+      ),
+    ).not.toThrow();
+    expect(observability.getLatestReport()).toMatchObject({
+      status: 'success',
+      summary: {
+        outcome: 'shared-registered',
+        sharedRegistered: true,
+      },
+      shared: {
+        name: 'react',
+        candidates: [
+          expect.objectContaining({
+            version: '18.3.1',
+            provider: 'legacy-host',
+            loaded: true,
+          }),
+        ],
+      },
+    });
+    expect(
+      observability.getRuntimeState().instances[0].shareScopes[0].shared,
+    ).toEqual([
+      expect.objectContaining({
+        name: 'react',
+        versions: [
+          expect.objectContaining({
+            version: '18.3.1',
+            provider: 'legacy-host',
+            loaded: true,
+          }),
+        ],
+      }),
+    ]);
+  });
+
   it('keeps concurrent shared traces and instances independently correlated', () => {
     const observability = createObservability({
       level: 'verbose',

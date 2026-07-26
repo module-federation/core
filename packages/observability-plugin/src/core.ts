@@ -1034,7 +1034,7 @@ interface ObservabilitySharedRegistrationArgs {
 }
 
 interface ObservabilitySharedScopeInitArgs {
-  shareScope: ObservabilityRuntimeShareScopeMap[string];
+  shareScope: Record<string, unknown>;
   scopeName: string;
   origin: ObservabilityRuntimeOrigin;
 }
@@ -1158,6 +1158,19 @@ let traceCounter = 0;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
+}
+
+function getRuntimeSharedVersionEntries(
+  value: unknown,
+): Array<[string, ObservabilityRuntimeSharedSource]> {
+  if (!isRecord(value) || Array.isArray(value)) {
+    return [];
+  }
+
+  return Object.entries(value).filter(
+    (entry): entry is [string, ObservabilityRuntimeSharedSource] =>
+      isRecord(entry[1]) && !Array.isArray(entry[1]),
+  );
 }
 
 function normalizeMaxEvents(value: number | undefined, fallback: number) {
@@ -4808,29 +4821,31 @@ export function createObservability(
 
   const getShareScopeSummaries = (origin: ObservabilityRuntimeOrigin) =>
     Object.entries(getOriginShareScopeMap(origin)).map(([name, scope]) => {
-      const rawSharedNames = Object.keys(scope || {}).sort();
-      const sharedEntries = rawSharedNames.slice(0, 100).map((rawName) => ({
-        rawName,
-        name: sanitizeText(rawName, 160) || 'unknown',
-      }));
+      const sharedEntries = Object.entries(scope || {})
+        .map(([rawName, versions]) => ({
+          rawName,
+          name: sanitizeText(rawName, 160) || 'unknown',
+          versions: getRuntimeSharedVersionEntries(versions),
+        }))
+        .filter((entry) => entry.versions.length > 0)
+        .sort((left, right) => left.rawName.localeCompare(right.rawName))
+        .slice(0, 100);
       return {
         name: sanitizeText(name, 120) || 'default',
-        sharedCount: rawSharedNames.length,
+        sharedCount: sharedEntries.length,
         sharedNames: sharedEntries.map((entry) => entry.name),
         shared: sharedEntries.map((entry) => ({
           name: entry.name,
-          versions: Object.entries(scope?.[entry.rawName] || {})
-            .slice(0, 20)
-            .map(([version, shared]) =>
-              omitUndefinedFields({
-                version: sanitizeText(version, 120) || version,
-                provider: sanitizeText(shared.from, 160),
-                loaded: shared.loaded === true || undefined,
-                singleton: shared.shareConfig?.singleton || undefined,
-                eager: shared.shareConfig?.eager || undefined,
-                strategy: sanitizeText(shared.strategy, 80),
-              }),
-            ),
+          versions: entry.versions.slice(0, 20).map(([version, shared]) =>
+            omitUndefinedFields({
+              version: sanitizeText(version, 120) || version,
+              provider: sanitizeText(shared.from, 160),
+              loaded: shared.loaded === true || undefined,
+              singleton: shared.shareConfig?.singleton || undefined,
+              eager: shared.shareConfig?.eager || undefined,
+              strategy: sanitizeText(shared.strategy, 80),
+            }),
+          ),
         })),
       };
     });
@@ -7197,10 +7212,7 @@ export function createObservability(
 
       const shareScopeMap = getOriginShareScopeMap(scopeArgs.origin);
       Object.entries(scopeArgs.shareScope).forEach(([pkgName, versions]) => {
-        Object.values(versions).forEach((shared) => {
-          if (!shared) {
-            return;
-          }
+        getRuntimeSharedVersionEntries(versions).forEach(([, shared]) => {
           recordSharedRegistration(
             {
               pkgName,
