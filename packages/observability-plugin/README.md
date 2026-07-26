@@ -84,6 +84,13 @@ main flow started, succeeded, or failed. This plugin listens to those hooks,
 derives detailed reasons like shared version mismatch or eager boundary issues,
 and exposes the final loading state through a small `summary` object:
 
+Runtime Core deliberately keeps this boundary narrow. It registers and invokes
+the lifecycle hooks with raw facts from the real execution path. Candidate
+lists, shared selection and registration reasons, resource and Bridge timing,
+error classification, correlation, and sanitization are all derived here in
+the observability plugin. Applications that do not install this plugin do not
+pay for report construction or keep observability state in Runtime Core.
+
 - `runtime-loaded`: Module Federation finished loading the remote module.
 - `component-loaded`: business code called `markComponentLoaded`, or a producer
   called the injected `onMFRemoteLoaded` callback.

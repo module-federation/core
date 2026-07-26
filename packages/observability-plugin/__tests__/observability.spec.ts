@@ -60,10 +60,7 @@ const createBridgeOperation = (overrides: Record<string, unknown> = {}) => ({
   framework: 'react',
   operation: 'render',
   moduleName: 'remote/App',
-  remote: 'remote',
-  expose: './App',
   reason: 'mount',
-  startedAt: 1,
   ...overrides,
 });
 
@@ -83,6 +80,7 @@ type EnabledOriginFixture = typeof enabledOrigin & {
   shareScopeMap?: ShareScopeMapFixture;
   sharedHandler?: {
     shareScopeMap?: ShareScopeMapFixture;
+    hooks?: { lifecycle?: Record<string, unknown> };
   };
 };
 type SharedHookFixturePlugin = {
@@ -93,7 +91,12 @@ type SharedHookFixturePlugin = {
   }) => unknown;
   afterRegisterShare?: (args: {
     pkgName: string;
-    registration: any;
+    scope: string;
+    shared: SharedFixture;
+    previousShared?: SharedFixture;
+    registeredShared?: SharedFixture;
+    shareScopeMap: ShareScopeMapFixture;
+    trigger: string;
     origin: EnabledOriginFixture;
   }) => unknown;
   beforeLoadShare?: (args: {
@@ -103,14 +106,27 @@ type SharedHookFixturePlugin = {
     origin: EnabledOriginFixture;
     loadContext?: any;
   }) => unknown;
+  resolveShare?: (args: {
+    shareScopeMap: ShareScopeMapFixture;
+    scope: string;
+    pkgName: string;
+    version: string;
+    shareInfo: SharedFixture;
+    resolver: () =>
+      | { shared: SharedFixture; useTreesShaking: boolean }
+      | undefined;
+    loadContext?: any;
+    origin: EnabledOriginFixture;
+  }) => any;
   afterLoadShare?: (args: {
     pkgName: string;
     shareInfo?: SharedFixture;
     selectedShared?: Partial<SharedFixture>;
     shared: Record<string, unknown>;
+    shareScopeMap?: ShareScopeMapFixture;
     origin: EnabledOriginFixture;
     lifecycle: 'loadShare' | 'loadShareSync';
-    selectionResult?: any;
+    loadContext?: any;
   }) => void;
   errorLoadShare?: (args: {
     pkgName: string;
@@ -121,7 +137,7 @@ type SharedHookFixturePlugin = {
     lifecycle: 'loadShare' | 'loadShareSync';
     error?: Error;
     recovered?: boolean;
-    selectionResult?: any;
+    loadContext?: any;
   }) => unknown;
 };
 
@@ -1376,6 +1392,47 @@ describe('ObservabilityPlugin', () => {
     expect(JSON.stringify(report)).not.toContain('must-not-leak');
     expect(JSON.stringify(report)).not.toContain('token=secret');
     expect(JSON.stringify(report)).not.toContain('#private');
+  });
+
+  it('derives Bridge identifiers and outcomes from raw lifecycle hooks', () => {
+    const observability = createObservability({
+      level: 'verbose',
+      console: false,
+    });
+    const instance = createRuntimeInstance({
+      bridgeHook: { lifecycle: bridgeLifecycleFixture },
+    });
+    const hooks = observability.plugin.apply?.(instance as any) as any;
+    const dom = { secret: 'must-not-leak' };
+    const context = {
+      operationKey: {},
+      side: 'consumer',
+      framework: 'react',
+      operation: 'render',
+      args: { dom, props: { password: 'must-not-leak' } },
+      moduleName: 'remote/App',
+      reason: 'mount',
+    };
+
+    hooks.beforeBridgeOperation(context);
+    hooks.bridgeRenderInvoked(context);
+    hooks.afterBridgeOperation({ context, result: undefined });
+    hooks.afterBridgeCommit(context);
+
+    const report = observability.getLatestReport();
+    const events =
+      report?.events.filter((event) => event.phase.startsWith('bridge-')) || [];
+    expect(events.map((event) => event.message)).toEqual(
+      expect.arrayContaining([
+        'bridge:render-start',
+        'bridge:render-invoked',
+        'bridge:render-success',
+        'bridge:render-committed',
+      ]),
+    );
+    expect(events[0]?.bridge?.operationId).toMatch(/^bridge-op-/);
+    expect(events[0]?.bridge?.bridgeId).toMatch(/^bridge-/);
+    expect(JSON.stringify(events)).not.toContain('must-not-leak');
   });
 
   it('keeps identical Bridge identifiers isolated between runtime instances', () => {
@@ -3307,9 +3364,15 @@ describe('ObservabilityPlugin', () => {
       endedAt: 125,
       duration: 25,
       outcome: 'success',
-      httpStatus: 200,
-      mimeType: 'application/json',
-      redirected: false,
+      response: {
+        status: 200,
+        redirected: false,
+        headers: {
+          get(name: string) {
+            return name === 'content-type' ? 'application/json' : null;
+          },
+        },
+      },
       origin,
     } as any);
 
@@ -3339,6 +3402,121 @@ describe('ObservabilityPlugin', () => {
     });
     expect(JSON.stringify(manifestEvents)).not.toContain('token=secret');
     expect(manifestEvents?.[1].resource).not.toHaveProperty('cacheSource');
+  });
+
+  it('derives manifest resource events from raw snapshot hooks', () => {
+    const observability = createObservability({
+      level: 'verbose',
+      console: false,
+    });
+    const origin = {
+      ...enabledOrigin,
+      loaderHook: {
+        lifecycle: {
+          beforeLoadResource: {},
+          afterLoadResource: {},
+        },
+      },
+    };
+    const moduleInfo = {
+      name: 'remote',
+      entry: 'http://localhost:3001/mf-manifest.json',
+    };
+
+    observability.plugin.loadSnapshot?.({
+      origin,
+      moduleInfo,
+      id: 'remote/Button',
+      initiator: 'loadRemote',
+      remoteSnapshot: undefined,
+    } as any);
+    observability.plugin.afterLoadManifest?.({
+      origin,
+      manifestUrl: moduleInfo.entry,
+      moduleInfo,
+      resourceOptions: {
+        id: 'remote/Button',
+        initiator: 'loadRemote',
+      },
+      response: {
+        status: 200,
+        redirected: false,
+        headers: {
+          get: () => 'application/json',
+        },
+      },
+    } as any);
+
+    expect(
+      observability.getEvents().filter((event) => event.phase === 'manifest'),
+    ).toEqual([
+      expect.objectContaining({
+        status: 'start',
+        lifecycle: 'beforeLoadResource',
+        requestId: 'remote/Button',
+      }),
+      expect.objectContaining({
+        status: 'success',
+        lifecycle: 'afterLoadResource',
+        requestId: 'remote/Button',
+        resource: expect.objectContaining({
+          httpStatus: 200,
+          mimeType: 'application/json',
+        }),
+      }),
+    ]);
+  });
+
+  it('derives HTTP failures from the raw resource response', () => {
+    const observability = createObservability({
+      level: 'verbose',
+      console: false,
+    });
+    const origin = {
+      ...enabledOrigin,
+      loaderHook: {
+        lifecycle: {
+          beforeLoadResource: {},
+          afterLoadResource: {},
+        },
+      },
+    };
+    const resource = {
+      id: 'remote/Button',
+      initiator: 'loadRemote',
+      resourceType: 'manifest',
+      url: 'http://localhost:3001/mf-manifest.json',
+      origin,
+    } as const;
+
+    emitRemoteStart(observability, { origin });
+    observability.plugin.beforeLoadResource?.(resource as any);
+    observability.plugin.afterLoadResource?.({
+      ...resource,
+      outcome: 'success',
+      response: {
+        status: 503,
+        redirected: false,
+        headers: {
+          get: () => 'application/json',
+        },
+      },
+    } as any);
+
+    const event = observability
+      .getLatestReport()
+      ?.events.find((item) => item.lifecycle === 'afterLoadResource');
+    expect(event).toMatchObject({
+      status: 'error',
+      errorMessage: 'Resource request failed with HTTP status 503.',
+      resource: {
+        outcome: 'error',
+        httpStatus: 503,
+        mimeType: 'application/json',
+        redirected: false,
+        errorType: 'http',
+      },
+    });
   });
 
   it('keeps original resource failure evidence after recovery succeeds', () => {
@@ -3378,9 +3556,7 @@ describe('ObservabilityPlugin', () => {
       ...resourceBase,
       startedAt: 200,
       endedAt: 210,
-      duration: 10,
       outcome: 'error',
-      errorType: 'execution',
       error: new Error('token=secret ScriptExecutionError: boom'),
     } as any);
     observability.plugin.beforeLoadResource?.({
@@ -3391,7 +3567,6 @@ describe('ObservabilityPlugin', () => {
       ...resourceBase,
       startedAt: 211,
       endedAt: 220,
-      duration: 9,
       outcome: 'success',
     } as any);
     observability.plugin.afterLoadEntry?.({
@@ -3447,8 +3622,7 @@ describe('ObservabilityPlugin', () => {
     });
 
     const emitFor = async (instance: ModuleFederation, id: string) => {
-      const startedAt = Date.now();
-      await instance.loaderHook.lifecycle.beforeLoadResource.emit({
+      const event = {
         id,
         initiator: 'preloadRemote',
         resourceType: 'css',
@@ -3460,24 +3634,11 @@ describe('ObservabilityPlugin', () => {
           type: 'global',
           shareScope: 'default',
         },
-        startedAt,
-      });
+      } as const;
+      await instance.loaderHook.lifecycle.beforeLoadResource.emit(event);
       await instance.loaderHook.lifecycle.afterLoadResource.emit({
-        id,
-        initiator: 'preloadRemote',
-        resourceType: 'css',
-        url: `https://remote.test/${id}.css`,
-        remote: {
-          name: 'same-remote',
-          entry: 'https://remote.test/remoteEntry.js',
-          entryGlobalName: 'same_remote',
-          type: 'global',
-          shareScope: 'default',
-        },
-        startedAt,
-        endedAt: startedAt + 1,
-        duration: 1,
-        outcome: 'success',
+        ...event,
+        outcome: 'success' as const,
       });
     };
 
@@ -5906,7 +6067,7 @@ describe('ObservabilityPlugin', () => {
       );
 
       expect(sharedOutput).toContain('phase: shared');
-      expect(sharedOutput).toContain('requestId: shared:react');
+      expect(sharedOutput).toContain('requestId: shared-op-1');
       expect(sharedOutput).toContain('shared: react');
       expect(sharedOutput).toContain('lifecycle: loadShare');
 
@@ -6394,15 +6555,44 @@ describe('ObservabilityPlugin', () => {
     expect(JSON.stringify(report)).toContain('token=');
   });
 
-  it('reports runtime-produced shared selection details without unsafe values', () => {
+  it('derives shared selection details from raw hooks without unsafe values', () => {
     const observability = createObservability({
       level: 'verbose',
       console: false,
     });
     const plugin = observability.plugin as SharedHookFixturePlugin;
-    const shared = createShared({
+    const selectedShared = createShared({
+      loaded: true,
       get: () => () => ({ secretFactoryValue: 'must-not-leak' }),
     });
+    const requestedShared = createShared({
+      version: '18.0.0',
+      shareConfig: {
+        requiredVersion: '^18.0.0',
+        singleton: true,
+        strictVersion: false,
+        eager: false,
+      },
+    });
+    const legacyShared = createShared({
+      version: '17.0.2',
+      from: 'legacy-provider',
+      loaded: false,
+      shareConfig: {
+        requiredVersion: '^18.0.0',
+        singleton: true,
+        strictVersion: false,
+        eager: false,
+      },
+    });
+    const shareScopeMap = {
+      default: {
+        react: {
+          '17.0.2': legacyShared,
+          '18.3.1': selectedShared,
+        },
+      },
+    };
     const loadContext = {
       trigger: 'build',
       moduleId: 42,
@@ -6410,70 +6600,36 @@ describe('ObservabilityPlugin', () => {
       requestId: 'consume-request',
       operationId: 'loadShare-42',
     };
-    const selectionResult = {
-      scope: 'default',
-      requestedVersion: '18.0.0',
-      requiredVersion: '^18.0.0',
-      singleton: true,
-      strictVersion: false,
-      eager: false,
-      strategy: 'loaded-first',
-      candidates: [
-        {
-          scope: 'default',
-          version: '17.0.2',
-          provider: 'legacy-provider',
-          loaded: false,
-          loading: false,
-          singleton: true,
-          eager: false,
-          strategy: 'loaded-first',
-          compatible: false,
-          rejectionReason: 'version-mismatch',
-        },
-        {
-          scope: 'default',
-          version: '18.3.1',
-          provider: 'host',
-          loaded: true,
-          loading: false,
-          singleton: true,
-          eager: false,
-          strategy: 'loaded-first',
-          compatible: true,
-        },
-      ],
-      selected: {
-        scope: 'default',
-        version: '18.3.1',
-        provider: 'host',
-        loaded: true,
-        loading: false,
-        singleton: true,
-        eager: false,
-        strategy: 'loaded-first',
-        compatible: true,
-      },
-      reason: 'singleton-existing',
-      loadType: 'async',
-      context: loadContext,
-    };
-
     plugin.beforeLoadShare?.({
       pkgName: 'react',
-      shareInfo: shared,
+      shareInfo: requestedShared,
       shared: {},
       origin: enabledOrigin,
       loadContext,
     });
+    const resolveArgs = plugin.resolveShare?.({
+      shareScopeMap,
+      scope: 'default',
+      pkgName: 'react',
+      version: '18.3.1',
+      shareInfo: requestedShared,
+      resolver: () => ({
+        shared: selectedShared,
+        useTreesShaking: false,
+      }),
+      loadContext,
+      origin: enabledOrigin,
+    });
+    resolveArgs?.resolver();
     plugin.afterLoadShare?.({
       pkgName: 'react',
-      shareInfo: shared,
-      selectedShared: shared,
+      shareInfo: requestedShared,
+      selectedShared,
       shared: {},
+      shareScopeMap,
       lifecycle: 'loadShare',
       origin: enabledOrigin,
-      selectionResult,
+      loadContext,
     });
 
     const report = observability.getLatestReport();
@@ -6567,30 +6723,13 @@ describe('ObservabilityPlugin', () => {
         hooks: { lifecycle: { afterRegisterShare: {} } },
       },
     };
-    const candidate = {
-      scope: 'default',
-      version: '18.3.1',
-      provider: 'host',
-      loaded: true,
-      loading: false,
-      singleton: false,
-      eager: false,
-      strategy: 'loaded-first',
-      compatible: true,
-    };
-
     plugin.afterRegisterShare?.({
       pkgName: 'react',
-      registration: {
-        registrationId: 'shared-register-1',
-        scope: 'default',
-        trigger: 'container-init',
-        candidate,
-        candidates: [candidate],
-        action: 'registered',
-        effective: candidate,
-        reason: 'container-share-registered',
-      },
+      scope: 'default',
+      trigger: 'container-init',
+      shared,
+      registeredShared: shared,
+      shareScopeMap: origin.shareScopeMap,
       origin,
     });
 
@@ -6606,7 +6745,7 @@ describe('ObservabilityPlugin', () => {
         registration: {
           registrationId: 'shared-register-1',
           action: 'registered',
-          reason: 'container-share-registered',
+          reason: 'first-registration',
           trigger: 'container-init',
         },
       },
@@ -6641,6 +6780,10 @@ describe('ObservabilityPlugin', () => {
       provider: string,
     ) => {
       const loadContext = { trigger: 'runtime', operationId };
+      const selectedShared = createShared({ from: provider, loaded: true });
+      const shareScopeMap = {
+        default: { react: { '18.3.1': selectedShared } },
+      };
       plugin.beforeLoadShare?.({
         pkgName: 'react',
         shareInfo: shared,
@@ -6648,37 +6791,30 @@ describe('ObservabilityPlugin', () => {
         origin,
         loadContext,
       });
+      const resolveArgs = plugin.resolveShare?.({
+        shareScopeMap,
+        scope: 'default',
+        pkgName: 'react',
+        version: '18.3.1',
+        shareInfo: shared,
+        resolver: () => ({
+          shared: selectedShared,
+          useTreesShaking: false,
+        }),
+        loadContext,
+        origin,
+      });
+      resolveArgs?.resolver();
       return () =>
         plugin.afterLoadShare?.({
           pkgName: 'react',
           shareInfo: shared,
-          selectedShared: shared,
+          selectedShared,
           shared: {},
+          shareScopeMap,
           lifecycle: 'loadShare',
           origin,
-          selectionResult: {
-            scope: 'default',
-            requestedVersion: '18.3.1',
-            requiredVersion: '^18.0.0',
-            singleton: false,
-            strictVersion: false,
-            eager: false,
-            strategy: 'loaded-first',
-            candidates: [],
-            selected: {
-              scope: 'default',
-              version: '18.3.1',
-              provider,
-              loaded: true,
-              loading: false,
-              singleton: false,
-              eager: false,
-              strategy: 'loaded-first',
-            },
-            reason: 'loaded-first',
-            loadType: 'async',
-            context: loadContext,
-          },
+          loadContext,
         });
     };
 

@@ -10,12 +10,8 @@ import {
   nextTick,
 } from 'vue';
 import {
-  attachBridgeOperationContext,
-  completeBridgeOperation,
-  createBridgeId,
-  createBridgeOperationContext,
   dispatchPopstateEnv,
-  emitBridgeLifecycle,
+  startBridgeOperation,
 } from '@module-federation/bridge-shared';
 import { useRoute } from 'vue-router';
 import { LoggerInstance } from './utils';
@@ -37,10 +33,9 @@ export default defineComponent({
     const providerInfoRef = ref(null);
     const pathname = ref('');
     const isRendered = ref(false);
+    const hasEverRendered = ref(false);
     const isActive = ref(false);
     const wasDeactivated = ref(false);
-    const hasEverRendered = ref(false);
-    const bridgeId = createBridgeId();
     const route = useRoute();
     const hostInstance = getInstance();
     const componentAttrs = useAttrs();
@@ -74,20 +69,14 @@ export default defineComponent({
         `createRemoteAppComponent LazyComponent render >>>`,
         renderProps,
       );
-      const operationContext = createBridgeOperationContext({
+      const operation = startBridgeOperation(hostInstance, {
         side: 'consumer',
         framework: 'vue',
         operation: hasEverRendered.value ? 'update' : 'render',
-        bridgeId,
+        args: renderProps,
         moduleName: props.moduleName,
         reason,
       });
-      attachBridgeOperationContext(renderProps, operationContext);
-      emitBridgeLifecycle(
-        hostInstance,
-        'beforeBridgeOperation',
-        operationContext,
-      );
 
       try {
         const beforeBridgeRenderRes =
@@ -96,30 +85,16 @@ export default defineComponent({
           )) || {};
 
         renderProps = { ...renderProps, ...beforeBridgeRenderRes.extraProps };
-        attachBridgeOperationContext(renderProps, operationContext);
-        emitBridgeLifecycle(
-          hostInstance,
-          'bridgeRenderInvoked',
-          operationContext,
-        );
+        operation.invoked();
         const result = providerReturn.render(renderProps);
         isRendered.value = true;
         hasEverRendered.value = true;
         hostInstance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(
           renderProps,
         );
-        await result;
-        emitBridgeLifecycle(
-          hostInstance,
-          'afterBridgeOperation',
-          completeBridgeOperation(operationContext, 'success'),
-        );
+        await operation.finish(result);
       } catch (error) {
-        emitBridgeLifecycle(
-          hostInstance,
-          'afterBridgeOperation',
-          completeBridgeOperation(operationContext, 'error', error),
-        );
+        operation.fail(error);
         throw error;
       }
     };
@@ -139,62 +114,29 @@ export default defineComponent({
       );
 
       const bridgeRenderProps = getBridgeRenderProps();
-      const operationContext = createBridgeOperationContext({
+      const operation = startBridgeOperation(hostInstance, {
         side: 'consumer',
         framework: 'vue',
         operation: 'destroy',
-        bridgeId,
+        args: bridgeRenderProps,
         moduleName: props.moduleName,
         reason,
       });
-      attachBridgeOperationContext(bridgeRenderProps, operationContext);
-      emitBridgeLifecycle(
-        hostInstance,
-        'beforeBridgeOperation',
-        operationContext,
-      );
       try {
         hostInstance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit(
           bridgeRenderProps,
         );
 
-        const result = providerReturn.destroy(bridgeRenderProps);
+        const result = providerReturn.destroy({ dom: rootRef.value });
         providerInfoRef.value = null;
         isRendered.value = false;
 
         hostInstance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(
           bridgeRenderProps,
         );
-        if (result && typeof result.then === 'function') {
-          void result.then(
-            () =>
-              emitBridgeLifecycle(
-                hostInstance,
-                'afterBridgeOperation',
-                completeBridgeOperation(operationContext, 'success'),
-              ),
-            (error: unknown) => {
-              emitBridgeLifecycle(
-                hostInstance,
-                'afterBridgeOperation',
-                completeBridgeOperation(operationContext, 'error', error),
-              );
-              throw error;
-            },
-          );
-        } else {
-          emitBridgeLifecycle(
-            hostInstance,
-            'afterBridgeOperation',
-            completeBridgeOperation(operationContext, 'success'),
-          );
-        }
+        void operation.finish(result);
       } catch (error) {
-        emitBridgeLifecycle(
-          hostInstance,
-          'afterBridgeOperation',
-          completeBridgeOperation(operationContext, 'error', error),
-        );
+        operation.fail(error);
         throw error;
       }
     };
@@ -215,38 +157,25 @@ export default defineComponent({
               pathname: route.path,
             },
           );
-          const operationContext = createBridgeOperationContext({
+          const routeInfo = {
+            action: 'host-to-remote' as const,
+            mechanism: 'popstate' as const,
+            from: pathname.value,
+            to: newPath,
+            basename: props.basename,
+          };
+          const operation = startBridgeOperation(hostInstance, {
             side: 'consumer',
             framework: 'vue',
             operation: 'route-sync',
-            bridgeId,
+            args: routeInfo,
             moduleName: props.moduleName,
-            route: {
-              action: 'host-to-remote',
-              mechanism: 'popstate',
-              from: pathname.value,
-              to: newPath,
-              basename: props.basename,
-            },
+            route: routeInfo,
           });
-          emitBridgeLifecycle(
-            hostInstance,
-            'beforeBridgeOperation',
-            operationContext,
-          );
           try {
-            dispatchPopstateEnv();
-            emitBridgeLifecycle(
-              hostInstance,
-              'afterBridgeOperation',
-              completeBridgeOperation(operationContext, 'success'),
-            );
+            operation.finish(dispatchPopstateEnv());
           } catch (error) {
-            emitBridgeLifecycle(
-              hostInstance,
-              'afterBridgeOperation',
-              completeBridgeOperation(operationContext, 'error', error),
-            );
+            operation.fail(error);
             throw error;
           }
         }

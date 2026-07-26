@@ -17,11 +17,7 @@ import { matchRemote } from './manifest';
 import { assert } from './logger';
 import { ModuleFederation } from '../core';
 import { getRemoteEntry, isEsmRemoteType } from './load';
-import {
-  classifyResourceLoadError,
-  emitCachedResourceLoad,
-  startResourceLoad,
-} from './resource';
+import { emitCachedResourceLoad, startResourceLoad } from './resource';
 
 export function defaultPreloadArgs(
   preloadConfig: PreloadRemoteArgs | depsPreloadArg,
@@ -93,11 +89,7 @@ function createAssetResult(
     resourceType: context.resourceType,
     initiator: context.initiator,
     id: context.id,
-    startedAt: resourceResult?.startedAt,
-    endedAt: resourceResult?.endedAt,
-    duration: resourceResult?.duration,
     cacheSource: resourceResult?.cacheSource,
-    errorType: resourceResult?.errorType,
     error: resourceResult?.error || error,
   };
 }
@@ -174,14 +166,10 @@ function waitForLinkPreload({
       new Promise((resolve) => {
         let needAttach = true;
         const settle = (outcome: ResourceLoadOutcome, error?: unknown) => {
-          const errorType = error
-            ? classifyResourceLoadError(error, 'network')
-            : undefined;
           void attempt
             .finish(outcome, {
               cacheSource: outcome === 'cached' ? 'browser' : undefined,
               error,
-              errorType,
             })
             .then((resourceResult) => {
               resolve(
@@ -254,14 +242,10 @@ function waitForScriptPreload({
       new Promise((resolve) => {
         let needAttach = true;
         const settle = (outcome: ResourceLoadOutcome, error?: unknown) => {
-          const errorType = error
-            ? classifyResourceLoadError(error, 'network')
-            : undefined;
           void attempt
             .finish(outcome, {
               cacheSource: outcome === 'cached' ? 'browser' : undefined,
               error,
-              errorType,
             })
             .then((resourceResult) => {
               resolve(

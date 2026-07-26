@@ -635,10 +635,8 @@ describe('hooks', () => {
         fetchPlugin(),
         {
           name: 'manifest-resource-recorder',
-          afterLoadResource(args) {
-            if (args.resourceType === 'manifest') {
-              manifestResults.push(args);
-            }
+          afterLoadManifest(args) {
+            manifestResults.push(args);
           },
         },
       ],
@@ -655,14 +653,18 @@ describe('hooks', () => {
     });
     expect(manifestResults).toHaveLength(1);
     expect(manifestResults[0]).toMatchObject({
-      id: '@loader-hooks/app2/say',
-      initiator: 'loadRemote',
-      resourceType: 'manifest',
-      outcome: 'success',
-      httpStatus: 200,
-      mimeType: 'application/json',
-      redirected: false,
+      manifestUrl: 'http://mockxxx.com/loader-fetch-hooks-mf-manifest.json',
+      moduleInfo: {
+        name: '@loader-hooks/app2',
+      },
+      resourceOptions: {
+        id: '@loader-hooks/app2/say',
+        initiator: 'loadRemote',
+      },
     });
+    expect(manifestResults[0].response).toBe(responseBody);
+    expect(manifestResults[0]).not.toHaveProperty('cached');
+    expect(manifestResults[0].recovered).toBeUndefined();
   });
 
   it('emits manifest snapshot lifecycle once when loading a manifest remote', async () => {
@@ -780,10 +782,8 @@ describe('hooks', () => {
         },
         {
           name: 'concurrent-manifest-recorder',
-          afterLoadResource(args) {
-            if (args.resourceType === 'manifest') {
-              results.push(args);
-            }
+          afterLoadManifest(args) {
+            results.push(args);
           },
         },
       ],
@@ -799,13 +799,11 @@ describe('hooks', () => {
     ]);
 
     expect(fetchCount).toBe(1);
-    expect(results.map((item) => item.outcome).sort()).toEqual([
-      'cached',
-      'success',
-    ]);
-    expect(results.find((item) => item.outcome === 'cached')?.cacheSource).toBe(
-      'mf-memory',
-    );
+    expect(results).toHaveLength(2);
+    expect(results.filter((item) => item.cached)).toHaveLength(1);
+    expect(
+      results.filter((item) => item.response instanceof Response),
+    ).toHaveLength(1);
   });
 
   it('loaderEntry hooks', async () => {

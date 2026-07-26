@@ -5,6 +5,7 @@ import type {
   BridgeOperationContext,
   BridgeOperationResult,
 } from '@module-federation/runtime';
+import { satisfy } from '@module-federation/runtime';
 import { createLogger, isDebugMode } from '@module-federation/sdk';
 
 import {
@@ -689,6 +690,10 @@ interface ObservabilityRuntimeSharedSource {
   strategy?: string;
   shareConfig?: ObservabilityRuntimeSharedConfig;
   get?: unknown;
+  treeShaking?: {
+    loaded?: boolean;
+    loading?: unknown;
+  };
 }
 
 interface ObservabilityRuntimeSharedCandidate {
@@ -712,6 +717,7 @@ interface ObservabilityRuntimeSharedLoadContext {
   expose?: string;
   requestId?: string;
   operationId?: string;
+  customResolver?: boolean;
 }
 
 interface ObservabilityRuntimeSharedSelectionResult {
@@ -755,9 +761,27 @@ interface ObservabilityRemoteLoadArgs {
   exposeModuleFactory?: unknown;
 }
 
+interface LegacyObservabilityBridgeHookArgs {
+  operationId: string;
+  bridgeId: string;
+  side: BridgeOperationContext['side'];
+  framework: BridgeOperationContext['framework'];
+  operation: BridgeOperationContext['operation'];
+  moduleName?: string;
+  remote?: string;
+  expose?: string;
+  route?: BridgeOperationContext['route'];
+  reason?: BridgeOperationContext['reason'];
+  outcome?: 'success' | 'error' | 'skipped';
+  error?: unknown;
+  startedAt?: number;
+  endedAt?: number;
+}
+
 type ObservabilityBridgeHookArgs = (
   | BridgeOperationContext
   | BridgeOperationResult
+  | LegacyObservabilityBridgeHookArgs
 ) & {
   origin?: ObservabilityRuntimeOrigin;
 };
@@ -841,8 +865,11 @@ type ObservabilitySnapshotRemoteSource = ObservabilityRuntimeRemoteSource & {
 };
 
 interface ObservabilitySnapshotLoadArgs {
+  origin: ObservabilityRuntimeOrigin;
   moduleInfo?: ObservabilityRuntimeRemoteSource;
   remoteSnapshot?: ObservabilitySnapshotRemoteSource;
+  id?: string;
+  initiator?: 'loadRemote' | 'preloadRemote';
 }
 
 interface ObservabilityRemoteSnapshotLoadArgs {
@@ -891,19 +918,39 @@ interface ObservabilityResourceLoadArgs {
   url: string;
   remote?: ObservabilityRuntimeRemoteSource;
   expose?: string;
-  startedAt: number;
 }
 
 interface ObservabilityResourceLoadResultArgs extends ObservabilityResourceLoadArgs {
-  endedAt: number;
-  duration: number;
   outcome: 'success' | 'error' | 'timeout' | 'cached' | 'recovered';
+  response?: {
+    status?: number;
+    redirected?: boolean;
+    headers?: {
+      get?(name: string): string | null;
+    };
+  };
   httpStatus?: number;
   mimeType?: string;
   redirected?: boolean;
   cacheSource?: string;
-  errorType?: string;
   error?: unknown;
+}
+
+interface ObservabilityManifestLoadArgs {
+  origin: ObservabilityRuntimeOrigin;
+  manifestUrl: string;
+  moduleInfo: ObservabilityRuntimeRemoteSource;
+  resourceOptions?: {
+    initiator?: 'loadRemote' | 'preloadRemote';
+    id?: string;
+  };
+}
+
+interface ObservabilityManifestLoadResultArgs extends ObservabilityManifestLoadArgs {
+  response?: ObservabilityResourceLoadResultArgs['response'];
+  error?: unknown;
+  cached?: boolean;
+  recovered?: boolean;
 }
 
 interface ObservabilityRemoteInitArgs {
@@ -947,22 +994,30 @@ interface ObservabilitySharedLifecycleArgs {
   error?: unknown;
   recovered?: boolean;
   loadContext?: ObservabilityRuntimeSharedLoadContext;
-  selectionResult?: ObservabilityRuntimeSharedSelectionResult;
 }
 
 interface ObservabilitySharedRegistrationArgs {
   pkgName: string;
-  registration: {
-    registrationId: string;
-    scope: string;
-    trigger: string;
-    candidate: ObservabilityRuntimeSharedCandidate;
-    candidates: ObservabilityRuntimeSharedCandidate[];
-    action: ObservabilitySharedRegistration['action'];
-    effective?: ObservabilityRuntimeSharedCandidate;
-    reason: string;
-  };
+  scope: string;
+  shared: ObservabilityRuntimeSharedSource;
+  previousShared?: ObservabilityRuntimeSharedSource;
+  registeredShared?: ObservabilityRuntimeSharedSource;
+  shareScopeMap: ObservabilityRuntimeShareScopeMap;
+  trigger: string;
   origin: ObservabilityRuntimeOrigin;
+}
+
+interface ObservabilitySharedResolveArgs {
+  shareScopeMap: ObservabilityRuntimeShareScopeMap;
+  scope: string;
+  pkgName: string;
+  version: string;
+  shareInfo: ObservabilityRuntimeSharedSource;
+  resolver: () =>
+    | { shared: ObservabilityRuntimeSharedSource; useTreesShaking: boolean }
+    | undefined;
+  loadContext?: ObservabilityRuntimeSharedLoadContext;
+  origin?: ObservabilityRuntimeOrigin;
 }
 
 export type ObservabilityRuntimePlugin = ModuleFederationRuntimePlugin;
@@ -1321,22 +1376,41 @@ function sanitizeRemote(
 }
 
 function normalizeBridgeInfo(
-  bridge: BridgeOperationContext | BridgeOperationResult | undefined,
+  bridge: LegacyObservabilityBridgeHookArgs | undefined,
+  timing: {
+    startedAt: number;
+    endedAt?: number;
+    duration?: number;
+  },
 ): ObservabilityBridgeInfo | undefined {
   if (!bridge?.operationId || !bridge.bridgeId) {
     return undefined;
   }
 
-  const result = bridge as BridgeOperationResult;
+  const moduleName = sanitizeText(bridge.moduleName, 160);
+  const slashIndex = moduleName?.indexOf('/') ?? -1;
+  const remote =
+    sanitizeText(bridge.remote, 120) ||
+    (moduleName
+      ? slashIndex > 0
+        ? moduleName.slice(0, slashIndex)
+        : moduleName
+      : undefined);
+  const expose =
+    sanitizeText(bridge.expose, 240) ||
+    (moduleName && slashIndex > 0
+      ? `./${moduleName.slice(slashIndex + 1).replace(/^\.\//, '')}`
+      : undefined);
+  const errorInfo = getErrorInfo(bridge.error);
   return omitUndefinedFields({
     operationId: sanitizeText(bridge.operationId, 120) || bridge.operationId,
     bridgeId: sanitizeText(bridge.bridgeId, 120) || bridge.bridgeId,
     side: bridge.side,
     framework: bridge.framework,
     operation: bridge.operation,
-    moduleName: sanitizeText(bridge.moduleName, 160),
-    remote: sanitizeText(bridge.remote, 120),
-    expose: sanitizeText(bridge.expose, 240),
+    moduleName,
+    remote,
+    expose,
     route: bridge.route
       ? {
           action: sanitizeText(bridge.route.action, 80) || 'route-update',
@@ -1347,18 +1421,14 @@ function normalizeBridgeInfo(
         }
       : undefined,
     reason: sanitizeText(bridge.reason, 80),
-    startedAt: Number.isFinite(bridge.startedAt)
-      ? bridge.startedAt
-      : Date.now(),
-    endedAt: Number.isFinite(result.endedAt) ? result.endedAt : undefined,
-    duration: Number.isFinite(result.duration)
-      ? Math.max(0, result.duration)
-      : undefined,
-    outcome: result.outcome,
-    error: result.error
+    startedAt: timing.startedAt,
+    endedAt: timing.endedAt,
+    duration: timing.duration,
+    outcome: bridge.outcome,
+    error: bridge.error
       ? {
-          name: sanitizeText(result.error.name, 80),
-          message: sanitizeText(result.error.message, 240),
+          name: sanitizeText(errorInfo.errorName, 80),
+          message: sanitizeText(errorInfo.errorMessage, 240),
         }
       : undefined,
   });
@@ -1682,6 +1752,181 @@ function supportsRuntimeObservability(origin?: ObservabilityRuntimeOrigin) {
   });
 }
 
+function isRuntimeSharedLoaded(shared?: ObservabilityRuntimeSharedSource) {
+  return (
+    shared?.loaded === true ||
+    shared?.treeShaking?.loaded === true ||
+    (typeof shared?.get === 'function' && shared.loaded === true)
+  );
+}
+
+function isRuntimeSharedLoading(shared?: ObservabilityRuntimeSharedSource) {
+  return (
+    !isRuntimeSharedLoaded(shared) &&
+    Boolean(shared?.loading || shared?.treeShaking?.loading)
+  );
+}
+
+function getRuntimeSharedCompatibility(
+  version: string,
+  requiredVersion?: string | false,
+) {
+  if (requiredVersion === undefined) {
+    return undefined;
+  }
+  if (requiredVersion === false || requiredVersion === '*') {
+    return true;
+  }
+  try {
+    return satisfy(version, requiredVersion);
+  } catch {
+    return false;
+  }
+}
+
+function createRuntimeSharedCandidate(
+  scope: string,
+  version: string,
+  shared: ObservabilityRuntimeSharedSource,
+  requiredVersion?: string | false,
+): ObservabilityRuntimeSharedCandidate {
+  const compatible = getRuntimeSharedCompatibility(version, requiredVersion);
+  return {
+    scope,
+    version,
+    provider: shared.from,
+    loaded: isRuntimeSharedLoaded(shared),
+    loading: isRuntimeSharedLoading(shared),
+    singleton: shared.shareConfig?.singleton === true,
+    eager: shared.shareConfig?.eager === true,
+    strategy: shared.strategy,
+    compatible,
+    rejectionReason: compatible === false ? 'version-mismatch' : undefined,
+  };
+}
+
+function getRuntimeSharedCandidates(args: {
+  shareScopeMap?: ObservabilityRuntimeShareScopeMap;
+  scope: string;
+  pkgName: string;
+  requiredVersion?: string | false;
+}) {
+  return Object.entries(args.shareScopeMap?.[args.scope]?.[args.pkgName] || {})
+    .filter(
+      (entry): entry is [string, ObservabilityRuntimeSharedSource] =>
+        entry[1] !== undefined,
+    )
+    .map(([version, shared]) =>
+      createRuntimeSharedCandidate(
+        args.scope,
+        version,
+        shared,
+        args.requiredVersion,
+      ),
+    );
+}
+
+function createRuntimeSharedSelection(
+  args: ObservabilitySharedResolveArgs,
+  selectedShared: ObservabilityRuntimeSharedSource | undefined,
+  selectionError?: unknown,
+): ObservabilityRuntimeSharedSelectionResult {
+  const requiredVersion = args.shareInfo.shareConfig?.requiredVersion;
+  const candidates = getRuntimeSharedCandidates({
+    shareScopeMap: args.shareScopeMap,
+    scope: args.scope,
+    pkgName: args.pkgName,
+    requiredVersion,
+  });
+  const selectedVersion = selectedShared?.version;
+  const selected =
+    selectedShared && selectedVersion
+      ? createRuntimeSharedCandidate(
+          args.scope,
+          selectedVersion,
+          selectedShared,
+          requiredVersion,
+        )
+      : undefined;
+
+  let reason: string;
+  let failureReason: string | undefined;
+  if (selectionError) {
+    const strictVersionRejected =
+      args.shareInfo.shareConfig?.singleton === true &&
+      args.shareInfo.shareConfig?.strictVersion === true &&
+      typeof requiredVersion === 'string' &&
+      getRuntimeSharedCompatibility(args.version, requiredVersion) === false;
+    reason = strictVersionRejected ? 'strict-version-rejected' : 'load-error';
+    failureReason = reason;
+  } else if (!selected) {
+    reason = candidates.length ? 'version-mismatch' : 'missing-provider';
+    failureReason = reason;
+  } else if (args.loadContext?.customResolver) {
+    reason = 'custom-resolver';
+  } else if (args.shareInfo.shareConfig?.singleton) {
+    reason = 'singleton-existing';
+  } else if (
+    args.shareInfo.strategy === 'loaded-first' &&
+    (selected.loaded || selected.loading)
+  ) {
+    reason = 'loaded-first';
+  } else if (selected.version === args.shareInfo.version) {
+    reason = 'exact-match';
+  } else if (requiredVersion === false || requiredVersion === '*') {
+    reason =
+      args.shareInfo.strategy === 'loaded-first'
+        ? 'loaded-first'
+        : 'version-first';
+  } else if (selected.version === args.version) {
+    reason = 'compatible-highest-version';
+  } else {
+    reason = 'compatible-version';
+  }
+
+  const candidatesWithReasons = candidates.map((candidate) => {
+    if (
+      selected &&
+      candidate.scope === selected.scope &&
+      candidate.version === selected.version &&
+      candidate.provider === selected.provider
+    ) {
+      return { ...candidate, rejectionReason: undefined };
+    }
+    if (candidate.rejectionReason) {
+      return candidate;
+    }
+    if (!selected) {
+      return candidate;
+    }
+    if (reason === 'custom-resolver') {
+      return { ...candidate, rejectionReason: 'custom-resolver' };
+    }
+    if (reason === 'singleton-existing') {
+      return { ...candidate, rejectionReason: 'singleton-existing' };
+    }
+    if (reason === 'loaded-first' && !candidate.loaded && !candidate.loading) {
+      return { ...candidate, rejectionReason: 'not-loaded' };
+    }
+    return { ...candidate, rejectionReason: 'lower-priority-version' };
+  });
+
+  return {
+    scope: args.scope,
+    requestedVersion: args.shareInfo.version,
+    requiredVersion,
+    singleton: args.shareInfo.shareConfig?.singleton,
+    strictVersion: args.shareInfo.shareConfig?.strictVersion,
+    eager: args.shareInfo.shareConfig?.eager,
+    strategy: args.shareInfo.strategy,
+    candidates: candidatesWithReasons,
+    selected,
+    reason,
+    failureReason,
+    context: args.loadContext,
+  };
+}
+
 function createSharedCandidate(
   candidate: ObservabilityRuntimeSharedCandidate,
 ): ObservabilitySharedCandidate {
@@ -1702,9 +1947,9 @@ function createSharedCandidate(
 function createSharedInfo(
   args: ObservabilitySharedLifecycleArgs,
   reason?: string,
+  selection?: ObservabilityRuntimeSharedSelectionResult,
 ): ObservabilitySharedInfo {
   const shareConfig = args.shareInfo?.shareConfig;
-  const selection = args.selectionResult;
   const selected = selection?.selected;
   const context = selection?.context || args.loadContext;
   const handledBundlerRuntimeShared = reason === 'custom-share-info-unmatched';
@@ -1755,19 +2000,69 @@ function createSharedInfo(
 
 function createSharedRegistrationInfo(
   args: ObservabilitySharedRegistrationArgs,
+  registrationId: string,
 ): ObservabilitySharedInfo {
-  const registration = args.registration;
-  const candidate = createSharedCandidate(registration.candidate);
-  const effective = registration.effective
-    ? createSharedCandidate(registration.effective)
+  const candidateSource = args.shared;
+  const effectiveSource = args.registeredShared;
+  const requiredVersion = candidateSource.shareConfig?.requiredVersion;
+  const candidate = createSharedCandidate(
+    createRuntimeSharedCandidate(
+      args.scope,
+      candidateSource.version || '0',
+      candidateSource,
+      requiredVersion,
+    ),
+  );
+  const effective = effectiveSource
+    ? createSharedCandidate(
+        createRuntimeSharedCandidate(
+          args.scope,
+          effectiveSource.version || '0',
+          effectiveSource,
+          requiredVersion,
+        ),
+      )
     : undefined;
+  const candidates = getRuntimeSharedCandidates({
+    shareScopeMap: args.shareScopeMap,
+    scope: args.scope,
+    pkgName: args.pkgName,
+    requiredVersion,
+  });
+  const previous = args.previousShared;
+  let action: ObservabilitySharedRegistration['action'];
+  let reason: string;
+  if (previous === candidateSource) {
+    action = 'reused';
+    reason = 'same-registration-reused';
+  } else if (!previous && effectiveSource) {
+    action = 'registered';
+    reason = 'first-registration';
+  } else if (previous && effectiveSource !== previous) {
+    action = 'replaced';
+    reason =
+      candidate.eager && previous.shareConfig?.eager !== true
+        ? 'eager-preferred'
+        : 'provider-name-preferred';
+  } else {
+    action = 'ignored';
+    reason =
+      previous?.strategy === 'loaded-first'
+        ? 'loaded-first-preserved'
+        : previous?.loaded
+          ? 'loaded-version-preserved'
+          : previous?.shareConfig?.eager && !candidate.eager
+            ? 'eager-provider-preserved'
+            : 'provider-name-preserved';
+  }
+
   return {
     name: args.pkgName,
-    shareScope: [registration.scope],
+    shareScope: [args.scope],
     version: candidate.version,
     selectedVersion: effective?.version,
     availableVersions: Array.from(
-      new Set(registration.candidates.map((item) => item.version)),
+      new Set(candidates.map((item) => item.version)),
     ),
     provider: effective?.provider,
     singleton: candidate.singleton,
@@ -1775,14 +2070,14 @@ function createSharedRegistrationInfo(
     strategy: candidate.strategy,
     loaded: effective?.loaded,
     loading: effective?.loading || undefined,
-    candidates: registration.candidates.map(createSharedCandidate),
-    trigger: registration.trigger,
+    candidates: candidates.map(createSharedCandidate),
+    trigger: args.trigger,
     registration: {
-      registrationId: registration.registrationId,
-      action: registration.action,
-      reason: registration.reason,
-      trigger: registration.trigger,
-      scope: registration.scope,
+      registrationId,
+      action,
+      reason,
+      trigger: args.trigger,
+      scope: args.scope,
       candidate,
       effective,
     },
@@ -1790,11 +2085,7 @@ function createSharedRegistrationInfo(
 }
 
 function getSharedOperationId(args: ObservabilitySharedLifecycleArgs) {
-  return (
-    args.selectionResult?.context?.operationId ||
-    args.loadContext?.operationId ||
-    `shared:${args.pkgName}`
-  );
+  return args.loadContext?.operationId || `shared:${args.pkgName}`;
 }
 
 function sanitizeSharedCandidate(
@@ -2185,6 +2476,54 @@ function getErrorInfo(
     errorCode: extractErrorCode(error),
     errorMessage: getRawText(error),
   };
+}
+
+function classifyResourceLoadError(
+  resource: ObservabilityResourceLoadResultArgs,
+): string | undefined {
+  if (resource.outcome === 'timeout') {
+    return 'timeout';
+  }
+
+  if (typeof resource.httpStatus === 'number' && resource.httpStatus >= 400) {
+    return 'http';
+  }
+
+  const errorInfo = getErrorInfo(resource.error);
+  const value =
+    `${errorInfo.errorName || ''} ${errorInfo.errorMessage || ''}`.trim();
+  if (!value) {
+    return resource.outcome === 'error' ? 'unknown' : undefined;
+  }
+
+  if (/timeout|timed out/i.test(value)) {
+    return 'timeout';
+  }
+
+  if (/ScriptExecutionError/i.test(value)) {
+    return 'execution';
+  }
+
+  if (
+    /ScriptNetworkError|LinkNetworkError|NetworkError|Failed to fetch|Request failed|ERR_|CORS|ENOENT|unreachable/i.test(
+      value,
+    )
+  ) {
+    return 'network';
+  }
+
+  if (/RUNTIME-001|global.+not found|not found.+global/i.test(value)) {
+    return 'initialization';
+  }
+
+  if (
+    errorInfo.errorName === 'SyntaxError' ||
+    /valid federation manifest|JSON|Unexpected token/i.test(value)
+  ) {
+    return 'content';
+  }
+
+  return resource.outcome === 'error' ? 'unknown' : undefined;
 }
 
 function omitUndefinedFields<T>(value: T): T {
@@ -3043,6 +3382,19 @@ export function createObservability(
   const traceByRequest = new Map<string, string>();
   const traceByRemote = new Map<string, string>();
   const traceByBridgeOperation = new Map<string, string>();
+  const traceByBridgeId = new Map<string, string>();
+  const bridgeStartTimes = new Map<string, number>();
+  const bridgeOperations = new WeakMap<
+    object,
+    { operationId: string; bridgeId: string }
+  >();
+  const bridgeIdsByTarget = new WeakMap<object, string>();
+  const bridgeIdsByFallback = new Map<string, string>();
+  const resourceStartTimes = new Map<string, number[]>();
+  const sharedSelections = new Map<
+    string,
+    ObservabilityRuntimeSharedSelectionResult
+  >();
   const instanceRefs = new WeakMap<object, string>();
   const instancesByRef = new Map<string, ObservabilityRuntimeOrigin>();
   const bridgeStatesByInstance = new Map<
@@ -3070,6 +3422,10 @@ export function createObservability(
   let lastRuntimeOrigin: ObservabilityRuntimeOrigin | undefined;
   let appliedRuntimeVersion: string | undefined;
   let instanceRefCounter = 0;
+  let sharedOperationCounter = 0;
+  let sharedRegistrationCounter = 0;
+  let bridgeOperationCounter = 0;
+  let bridgeCounter = 0;
   let historyCleared = false;
 
   const getActiveRuntimeInstances = () => {
@@ -3157,6 +3513,20 @@ export function createObservability(
       if (traceId) {
         return traceId;
       }
+    }
+    if (event.bridge?.bridgeId) {
+      const traceId = traceByBridgeId.get(
+        getTraceMapKey(instanceRef, event.bridge.bridgeId),
+      );
+      if (traceId) {
+        return traceId;
+      }
+    }
+    if (
+      event.bridge?.operationId &&
+      (event.status === 'start' || event.phase === 'bridge-provider')
+    ) {
+      return event.traceId || createTraceId(event);
     }
 
     if (event.remote?.name) {
@@ -3307,6 +3677,12 @@ export function createObservability(
     if (event.bridge?.operationId) {
       traceByBridgeOperation.set(
         getTraceMapKey(event.instanceRef, event.bridge.operationId),
+        event.traceId,
+      );
+    }
+    if (event.bridge?.bridgeId) {
+      traceByBridgeId.set(
+        getTraceMapKey(event.instanceRef, event.bridge.bridgeId),
         event.traceId,
       );
     }
@@ -5478,6 +5854,100 @@ export function createObservability(
     };
   };
 
+  const resolveBridgeHookArgs = (
+    args: ObservabilityBridgeHookArgs,
+    signal: 'start' | 'invoked' | 'result' | 'commit',
+    origin: ObservabilityRuntimeOrigin,
+  ): LegacyObservabilityBridgeHookArgs | undefined => {
+    const hookArgs = args as unknown as Record<string, unknown>;
+    if (
+      typeof hookArgs.operationId === 'string' &&
+      typeof hookArgs.bridgeId === 'string'
+    ) {
+      return args as LegacyObservabilityBridgeHookArgs;
+    }
+
+    const context = (isRecord(hookArgs.context)
+      ? hookArgs.context
+      : hookArgs) as unknown as BridgeOperationContext;
+    if (
+      !context ||
+      !isRecord(context.args) ||
+      !context.side ||
+      !context.framework ||
+      !context.operation
+    ) {
+      return undefined;
+    }
+
+    const operationKey = isRecord(context.operationKey)
+      ? context.operationKey
+      : context.args;
+    const target =
+      (typeof context.args.dom === 'object' && context.args.dom !== null) ||
+      typeof context.args.dom === 'function'
+        ? (context.args.dom as object)
+        : undefined;
+    const fallbackKey = [
+      getInstanceRef(origin) || '',
+      context.side,
+      context.framework,
+      context.moduleName || '',
+    ].join('\u0000');
+    let bridgeId = target
+      ? bridgeIdsByTarget.get(target)
+      : bridgeIdsByFallback.get(fallbackKey);
+    if (!bridgeId) {
+      bridgeCounter += 1;
+      bridgeId = `bridge-${bridgeCounter}`;
+    }
+    if (target) {
+      bridgeIdsByTarget.set(target, bridgeId);
+    }
+    bridgeIdsByFallback.set(fallbackKey, bridgeId);
+
+    let operation = bridgeOperations.get(operationKey);
+    if (!operation || signal === 'start') {
+      bridgeOperationCounter += 1;
+      operation = {
+        operationId: `bridge-op-${bridgeOperationCounter}`,
+        bridgeId,
+      };
+      bridgeOperations.set(operationKey, operation);
+    }
+
+    const error = signal === 'result' ? hookArgs.error : undefined;
+    const result = signal === 'result' ? hookArgs.result : undefined;
+    const isSkippedNavigation =
+      context.operation === 'route-sync' &&
+      isRecord(result) &&
+      typeof result.type === 'number' &&
+      isRecord(result.to) &&
+      isRecord(result.from);
+    const outcome =
+      signal !== 'result'
+        ? undefined
+        : error !== undefined
+          ? 'error'
+          : (context.operation === 'destroy' && result === false) ||
+              isSkippedNavigation
+            ? 'skipped'
+            : 'success';
+
+    return {
+      operationId: operation.operationId,
+      bridgeId: operation.bridgeId,
+      side: context.side,
+      framework: context.framework,
+      operation: context.operation,
+      moduleName: context.moduleName,
+      route: context.route,
+      reason: context.reason,
+      outcome,
+      error,
+    };
+  };
+
   const recordBridgeSignal = (
     args: ObservabilityBridgeHookArgs,
     signal: 'start' | 'invoked' | 'result' | 'commit',
@@ -5486,9 +5956,52 @@ export function createObservability(
     if (!origin || !prepareRuntimeOrigin(origin)) {
       return;
     }
-    const bridge = normalizeBridgeInfo(args);
+    const bridgeArgs = resolveBridgeHookArgs(args, signal, origin);
+    if (!bridgeArgs) {
+      return;
+    }
+    const timingKey = [
+      getInstanceRef(origin) || '',
+      bridgeArgs.operationId,
+      bridgeArgs.side,
+      bridgeArgs.operation,
+    ].join('\u0000');
+    const legacyStartedAt = bridgeArgs.startedAt;
+    const legacyEndedAt = bridgeArgs.endedAt;
+    const startedAt =
+      signal === 'start'
+        ? typeof legacyStartedAt === 'number' &&
+          Number.isFinite(legacyStartedAt)
+          ? legacyStartedAt
+          : Date.now()
+        : bridgeStartTimes.get(timingKey) ||
+          (typeof legacyStartedAt === 'number' &&
+          Number.isFinite(legacyStartedAt)
+            ? legacyStartedAt
+            : Date.now());
+    if (signal === 'start') {
+      bridgeStartTimes.set(timingKey, startedAt);
+    }
+    const endedAt =
+      signal === 'result' || signal === 'commit'
+        ? typeof legacyEndedAt === 'number' && Number.isFinite(legacyEndedAt)
+          ? legacyEndedAt
+          : Date.now()
+        : undefined;
+    const bridge = normalizeBridgeInfo(bridgeArgs, {
+      startedAt,
+      endedAt,
+      duration:
+        endedAt === undefined ? undefined : Math.max(0, endedAt - startedAt),
+    });
     if (!bridge) {
       return;
+    }
+    if (
+      (signal === 'result' && bridge.operation !== 'render') ||
+      signal === 'commit'
+    ) {
+      bridgeStartTimes.delete(timingKey);
     }
     updateBridgeState(origin, bridge, signal);
     const remote = bridge.remote ? { name: bridge.remote } : undefined;
@@ -5579,6 +6092,94 @@ export function createObservability(
     );
   };
 
+  const ensureSharedLoadContext = (
+    args: ObservabilitySharedLifecycleArgs | ObservabilitySharedResolveArgs,
+  ) => {
+    const context = args.loadContext || {};
+    if (!context.operationId) {
+      sharedOperationCounter += 1;
+      context.operationId = `shared-op-${sharedOperationCounter}`;
+    }
+    args.loadContext = context;
+    return context;
+  };
+
+  const getCompletedSharedSelection = (
+    args: ObservabilitySharedLifecycleArgs,
+  ) => {
+    const context = ensureSharedLoadContext(args);
+    let selection = sharedSelections.get(context.operationId!);
+    const scope =
+      selection?.scope || getSharedScopes(args.shareInfo)[0] || 'default';
+    const requiredVersion = args.shareInfo?.shareConfig?.requiredVersion;
+
+    if (
+      args.selectedShared &&
+      (!selection?.selected || args.selectedShared === args.shareInfo)
+    ) {
+      const selectedVersion = args.selectedShared.version || '0';
+      const selected = createRuntimeSharedCandidate(
+        scope,
+        selectedVersion,
+        args.selectedShared,
+        requiredVersion,
+      );
+      selection = {
+        ...selection,
+        scope,
+        requestedVersion: args.shareInfo?.version,
+        requiredVersion,
+        singleton: args.shareInfo?.shareConfig?.singleton,
+        strictVersion: args.shareInfo?.shareConfig?.strictVersion,
+        eager: args.shareInfo?.shareConfig?.eager,
+        strategy: args.shareInfo?.strategy,
+        candidates: getRuntimeSharedCandidates({
+          shareScopeMap: args.shareScopeMap,
+          scope,
+          pkgName: args.pkgName,
+          requiredVersion,
+        }),
+        selected,
+        reason: 'local-fallback',
+        failureReason: undefined,
+        fallback: true,
+      };
+    }
+
+    if (!selection) {
+      const candidates = getRuntimeSharedCandidates({
+        shareScopeMap: args.shareScopeMap,
+        scope,
+        pkgName: args.pkgName,
+        requiredVersion,
+      });
+      const failureReason = getSharedErrorReason(args);
+      selection = {
+        scope,
+        requestedVersion: args.shareInfo?.version,
+        requiredVersion,
+        singleton: args.shareInfo?.shareConfig?.singleton,
+        strictVersion: args.shareInfo?.shareConfig?.strictVersion,
+        eager: args.shareInfo?.shareConfig?.eager,
+        strategy: args.shareInfo?.strategy,
+        candidates,
+        reason:
+          failureReason ||
+          (args.selectedShared ? 'exact-match' : 'missing-provider'),
+        failureReason,
+      };
+    }
+
+    selection = {
+      ...selection,
+      loadType: args.lifecycle === 'loadShareSync' ? 'sync' : 'async',
+      context,
+      recovered: args.recovered || selection.recovered,
+    };
+    sharedSelections.delete(context.operationId!);
+    return selection;
+  };
+
   const legacyHooks: RuntimePluginHooks = {
     beforeBridgeOperation(args) {
       recordBridgeSignal(args as ObservabilityBridgeHookArgs, 'start');
@@ -5592,12 +6193,59 @@ export function createObservability(
     afterBridgeCommit(args) {
       recordBridgeSignal(args as ObservabilityBridgeHookArgs, 'commit');
     },
+    afterLoadManifest(args) {
+      const manifestArgs = args as ObservabilityManifestLoadResultArgs;
+      const outcome = manifestArgs.cached
+        ? 'cached'
+        : manifestArgs.error
+          ? manifestArgs.recovered
+            ? 'recovered'
+            : 'error'
+          : 'success';
+      loadingManifestUrls.delete(manifestArgs.manifestUrl);
+      if (outcome !== 'error') {
+        seenManifestUrls.add(manifestArgs.manifestUrl);
+      }
+      return legacyHooks.afterLoadResource?.({
+        origin: manifestArgs.origin,
+        id:
+          manifestArgs.resourceOptions?.id ||
+          manifestArgs.moduleInfo.name ||
+          manifestArgs.manifestUrl,
+        initiator:
+          manifestArgs.resourceOptions?.initiator || ('loadRemote' as const),
+        resourceType: 'manifest',
+        url: manifestArgs.manifestUrl,
+        remote: manifestArgs.moduleInfo,
+        outcome,
+        response: manifestArgs.response,
+        cacheSource: manifestArgs.cached ? 'mf-memory' : undefined,
+        error: manifestArgs.error,
+      });
+    },
     beforeLoadResource(args) {
       const resourceArgs = args as ObservabilityResourceLoadArgs;
       if (!prepareRuntimeOrigin(resourceArgs.origin)) {
         return;
       }
 
+      const timingKey = [
+        getInstanceRef(resourceArgs.origin) || '',
+        resourceArgs.id,
+        resourceArgs.initiator,
+        resourceArgs.resourceType,
+        resourceArgs.url,
+      ].join('\u0000');
+      const legacyStartedAt = isRecord(resourceArgs)
+        ? resourceArgs['startedAt']
+        : undefined;
+      const startedAt =
+        typeof legacyStartedAt === 'number' && Number.isFinite(legacyStartedAt)
+          ? legacyStartedAt
+          : Date.now();
+      const pendingStarts = resourceStartTimes.get(timingKey) || [];
+      pendingStarts.push(startedAt);
+      resourceStartTimes.set(timingKey, pendingStarts);
       const remote = createRemoteInfo(resourceArgs.remote);
       const phase =
         resourceArgs.resourceType === 'manifest' ||
@@ -5612,14 +6260,14 @@ export function createObservability(
           remote,
           expose: resourceArgs.expose,
           url: resourceArgs.url,
-          timestamp: resourceArgs.startedAt,
+          timestamp: startedAt,
           lifecycle: 'beforeLoadResource',
           message: `resource:${resourceArgs.resourceType}:load-start`,
           resource: {
             type: resourceArgs.resourceType,
             initiator: resourceArgs.initiator,
             url: resourceArgs.url,
-            startedAt: resourceArgs.startedAt,
+            startedAt,
           },
         },
         resourceArgs.origin,
@@ -5631,33 +6279,95 @@ export function createObservability(
         return;
       }
 
+      const timingKey = [
+        getInstanceRef(resourceArgs.origin) || '',
+        resourceArgs.id,
+        resourceArgs.initiator,
+        resourceArgs.resourceType,
+        resourceArgs.url,
+      ].join('\u0000');
+      const legacyStartedAt = isRecord(resourceArgs)
+        ? resourceArgs['startedAt']
+        : undefined;
+      const legacyEndedAt = isRecord(resourceArgs)
+        ? resourceArgs['endedAt']
+        : undefined;
+      const startedAt =
+        resourceStartTimes.get(timingKey)?.shift() ||
+        (typeof legacyStartedAt === 'number' && Number.isFinite(legacyStartedAt)
+          ? legacyStartedAt
+          : Date.now());
+      const endedAt =
+        typeof legacyEndedAt === 'number' && Number.isFinite(legacyEndedAt)
+          ? legacyEndedAt
+          : Date.now();
+      if (resourceStartTimes.get(timingKey)?.length === 0) {
+        resourceStartTimes.delete(timingKey);
+      }
       const remote = createRemoteInfo(resourceArgs.remote);
       const phase =
         resourceArgs.resourceType === 'manifest' ||
         resourceArgs.resourceType === 'remoteEntry'
           ? resourceArgs.resourceType
           : 'preload';
-      const isError =
-        resourceArgs.outcome === 'error' || resourceArgs.outcome === 'timeout';
+      const response = resourceArgs.response;
+      const httpStatus =
+        resourceArgs.httpStatus ??
+        (typeof response?.status === 'number' ? response.status : undefined);
+      let mimeType = resourceArgs.mimeType;
+      if (!mimeType && typeof response?.headers?.get === 'function') {
+        try {
+          mimeType = response.headers.get('content-type') || undefined;
+        } catch {
+          // Ignore custom response header access failures.
+        }
+      }
+      const redirected =
+        resourceArgs.redirected ??
+        (typeof response?.redirected === 'boolean'
+          ? response.redirected
+          : undefined);
+      const rawOutcome =
+        resourceArgs.outcome === 'success' &&
+        typeof httpStatus === 'number' &&
+        httpStatus >= 400
+          ? 'error'
+          : resourceArgs.outcome;
+      const resourceError =
+        resourceArgs.error ||
+        (rawOutcome === 'error' && typeof httpStatus === 'number'
+          ? new Error(`Resource request failed with HTTP status ${httpStatus}.`)
+          : undefined);
+      const normalizedResourceArgs = {
+        ...resourceArgs,
+        outcome: rawOutcome,
+        httpStatus,
+        mimeType,
+        redirected,
+        error: resourceError,
+      };
+      const errorType = classifyResourceLoadError(normalizedResourceArgs);
+      const outcome =
+        rawOutcome === 'error' && errorType === 'timeout'
+          ? 'timeout'
+          : rawOutcome;
+      const isError = outcome === 'error' || outcome === 'timeout';
       const status: ObservabilityEventStatus =
-        resourceArgs.outcome === 'recovered'
-          ? 'complete'
-          : isError
-            ? 'error'
-            : 'success';
+        outcome === 'recovered' ? 'complete' : isError ? 'error' : 'success';
+      const duration = Math.max(0, endedAt - startedAt);
       const resource: ObservabilityResourceInfo = {
         type: resourceArgs.resourceType,
         initiator: resourceArgs.initiator,
-        outcome: resourceArgs.outcome,
+        outcome,
         url: resourceArgs.url,
-        startedAt: resourceArgs.startedAt,
-        endedAt: resourceArgs.endedAt,
-        duration: resourceArgs.duration,
-        httpStatus: resourceArgs.httpStatus,
-        mimeType: resourceArgs.mimeType,
-        redirected: resourceArgs.redirected,
+        startedAt,
+        endedAt,
+        duration,
+        httpStatus,
+        mimeType,
+        redirected,
         cacheSource: resourceArgs.cacheSource,
-        errorType: resourceArgs.errorType,
+        errorType,
       };
 
       recordEvent(
@@ -5668,36 +6378,33 @@ export function createObservability(
           remote,
           expose: resourceArgs.expose,
           url: resourceArgs.url,
-          timestamp: resourceArgs.endedAt,
-          duration: resourceArgs.duration,
+          timestamp: endedAt,
+          duration,
           lifecycle: 'afterLoadResource',
-          message: `resource:${resourceArgs.resourceType}:${resourceArgs.outcome}`,
-          error:
-            isError || resourceArgs.outcome === 'recovered'
-              ? resourceArgs.error
-              : undefined,
-          recovered: resourceArgs.outcome === 'recovered',
-          cached: resourceArgs.outcome === 'cached',
+          message: `resource:${resourceArgs.resourceType}:${outcome}`,
+          error: isError || outcome === 'recovered' ? resourceError : undefined,
+          recovered: outcome === 'recovered',
+          cached: outcome === 'cached',
           resource,
           errorContext:
-            isError || resourceArgs.outcome === 'recovered'
+            isError || outcome === 'recovered'
               ? {
                   resourceType: resourceArgs.resourceType,
                   initiator: resourceArgs.initiator,
-                  outcome: resourceArgs.outcome,
-                  errorType: resourceArgs.errorType,
-                  httpStatus: resourceArgs.httpStatus,
+                  outcome,
+                  errorType,
+                  httpStatus,
                 }
               : undefined,
           metadata: clipObservabilityMetadata({
             resourceType: resourceArgs.resourceType,
             initiator: resourceArgs.initiator,
-            outcome: resourceArgs.outcome,
-            httpStatus: resourceArgs.httpStatus,
-            mimeType: resourceArgs.mimeType,
-            redirected: resourceArgs.redirected,
+            outcome,
+            httpStatus,
+            mimeType,
+            redirected,
             cacheSource: resourceArgs.cacheSource,
-            errorType: resourceArgs.errorType,
+            errorType,
           }),
         },
         resourceArgs.origin,
@@ -5765,9 +6472,7 @@ export function createObservability(
       }
 
       const snapshotArgs = args as ObservabilitySnapshotLoadArgs;
-      if (supportsResourceLifecycle(lastRuntimeOrigin)) {
-        return returnHookArgs(args);
-      }
+      const supportsResources = supportsResourceLifecycle(snapshotArgs.origin);
       const moduleRemote = createRemoteInfo(snapshotArgs.moduleInfo);
       const snapshotRemoteEntry =
         snapshotArgs.remoteSnapshot?.remoteEntry ||
@@ -5796,6 +6501,9 @@ export function createObservability(
       });
 
       if (seenManifestUrls.has(manifestUrl)) {
+        if (supportsResources) {
+          return returnHookArgs(args);
+        }
         recordEvent(
           {
             phase: 'manifest',
@@ -5818,6 +6526,18 @@ export function createObservability(
       }
 
       loadingManifestUrls.add(manifestUrl);
+
+      if (supportsResources) {
+        legacyHooks.beforeLoadResource?.({
+          origin: snapshotArgs.origin,
+          id: snapshotArgs.id || moduleRemote?.name || manifestUrl,
+          initiator: snapshotArgs.initiator || 'loadRemote',
+          resourceType: 'manifest',
+          url: manifestUrl,
+          remote,
+        });
+        return returnHookArgs(args);
+      }
 
       recordEvent(
         {
@@ -6216,6 +6936,38 @@ export function createObservability(
         factoryArgs.origin,
       );
     },
+    resolveShare(args) {
+      const resolveArgs = args as ObservabilitySharedResolveArgs;
+      if (
+        (shouldGuardSharedHooksByRuntimeVersion &&
+          !supportsRuntimeHookObservability(resolveArgs.origin)) ||
+        !resolveArgs.origin ||
+        !prepareRuntimeOrigin(resolveArgs.origin)
+      ) {
+        return args;
+      }
+
+      const context = ensureSharedLoadContext(resolveArgs);
+      const resolver = resolveArgs.resolver;
+      resolveArgs.resolver = () => {
+        try {
+          const result = resolver();
+          sharedSelections.set(
+            context.operationId!,
+            createRuntimeSharedSelection(resolveArgs, result?.shared),
+          );
+          return result;
+        } catch (error) {
+          sharedSelections.set(
+            context.operationId!,
+            createRuntimeSharedSelection(resolveArgs, undefined, error),
+          );
+          throw error;
+        }
+      };
+
+      return resolveArgs as typeof args;
+    },
     beforeRegisterShare(args) {
       if (
         shouldGuardSharedHooksByRuntimeVersion &&
@@ -6295,19 +7047,25 @@ export function createObservability(
         return returnHookArgs(args);
       }
 
+      sharedRegistrationCounter += 1;
+      const sharedInfo = createSharedRegistrationInfo(
+        registrationArgs,
+        `shared-register-${sharedRegistrationCounter}`,
+      );
+      const registration = sharedInfo.registration;
       recordEvent(
         {
           phase: 'shared-registration',
           status: 'success',
-          requestId: registrationArgs.registration.registrationId,
+          requestId: registration?.registrationId,
           lifecycle: 'afterRegisterShare',
-          shared: createSharedRegistrationInfo(registrationArgs),
-          message: `shared:registration-${registrationArgs.registration.action}`,
+          shared: sharedInfo,
+          message: `shared:registration-${registration?.action || 'unknown'}`,
           metadata: {
-            scope: registrationArgs.registration.scope,
-            action: registrationArgs.registration.action,
-            reason: registrationArgs.registration.reason,
-            trigger: registrationArgs.registration.trigger,
+            scope: registration?.scope || registrationArgs.scope,
+            action: registration?.action || 'unknown',
+            reason: registration?.reason || 'unknown',
+            trigger: registration?.trigger || registrationArgs.trigger,
           },
         },
         registrationArgs.origin,
@@ -6327,6 +7085,7 @@ export function createObservability(
         return returnHookArgs(args);
       }
 
+      ensureSharedLoadContext(args);
       recordEvent(
         {
           phase: 'shared',
@@ -6353,13 +7112,14 @@ export function createObservability(
         return returnHookArgs(args);
       }
 
+      const selection = getCompletedSharedSelection(args);
       recordEvent(
         {
           phase: 'shared',
           status: 'success',
           requestId: getSharedOperationId(args),
           lifecycle: args.lifecycle,
-          shared: createSharedInfo(args),
+          shared: createSharedInfo(args, undefined, selection),
           message:
             args.lifecycle === 'loadShareSync'
               ? 'shared:resolved-sync'
@@ -6386,6 +7146,7 @@ export function createObservability(
       const reason = handledCustomShareMiss
         ? 'custom-share-info-unmatched'
         : getSharedErrorReason(args);
+      const selection = getCompletedSharedSelection(args);
 
       recordEvent(
         {
@@ -6393,7 +7154,7 @@ export function createObservability(
           status: handledCustomShareMiss ? 'complete' : 'error',
           requestId: getSharedOperationId(args),
           lifecycle: args.lifecycle,
-          shared: createSharedInfo(args, reason),
+          shared: createSharedInfo(args, reason, selection),
           message: reason ? `shared:${reason}` : undefined,
           error: handledCustomShareMiss ? undefined : args.error,
           recovered: args.recovered,
@@ -6642,8 +7403,11 @@ export function createObservability(
       traceByRequest.clear();
       traceByRemote.clear();
       traceByBridgeOperation.clear();
+      traceByBridgeId.clear();
       latestTraceByInstance.clear();
       phaseStartTimes.clear();
+      bridgeStartTimes.clear();
+      resourceStartTimes.clear();
       seenManifestUrls.clear();
       seenRemoteEntryKeys.clear();
       reportedBridgeProviderKeys.clear();

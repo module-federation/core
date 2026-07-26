@@ -247,13 +247,13 @@ describe('getRemoteEntry - script load error discrimination', () => {
   });
 
   it.each([
-    ['success.js', 'success', undefined],
-    ['missing.js', 'error', 'network'],
-    ['exec-error.js', 'error', 'execution'],
-    ['no-global.js', 'error', 'initialization'],
+    ['success.js', 'success'],
+    ['missing.js', 'error'],
+    ['exec-error.js', 'error'],
+    ['no-global.js', 'error'],
   ] as const)(
     'emits one real resource result for %s',
-    async (fixture, outcome, errorType) => {
+    async (fixture, outcome) => {
       const recorder = createResourceRecorder();
       const origin = new ModuleFederation({
         name: `resource-${fixture}`,
@@ -269,21 +269,22 @@ describe('getRemoteEntry - script load error discrimination', () => {
 
       expect(recorder.starts).toHaveLength(1);
       expect(recorder.results).toHaveLength(1);
+      expect(recorder.starts[0]).not.toHaveProperty('outcome');
       expect(recorder.results[0]).toMatchObject({
         initiator: 'loadRemote',
         resourceType: 'remoteEntry',
         url: `${BASE}/${fixture}`,
         outcome,
       });
-      if (errorType) {
-        expect(recorder.results[0].errorType).toBe(errorType);
+      if (outcome === 'error') {
+        expect(recorder.results[0].error).toBeInstanceOf(Error);
       } else {
-        expect(recorder.results[0]).not.toHaveProperty('errorType');
+        expect(recorder.results[0]).not.toHaveProperty('error');
       }
-      expect(recorder.results[0].endedAt).toBeGreaterThanOrEqual(
-        recorder.results[0].startedAt,
-      );
-      expect(recorder.results[0].duration).toBeGreaterThanOrEqual(0);
+      expect(recorder.results[0]).not.toHaveProperty('startedAt');
+      expect(recorder.results[0]).not.toHaveProperty('endedAt');
+      expect(recorder.results[0]).not.toHaveProperty('duration');
+      expect(recorder.results[0]).not.toHaveProperty('errorType');
       expect(recorder.results[0]).not.toHaveProperty('httpStatus');
       expect(recorder.results[0]).not.toHaveProperty('mimeType');
     },
@@ -392,9 +393,10 @@ describe('getRemoteEntry - script load error discrimination', () => {
 
     expect(recorder.results).toHaveLength(1);
     expect(recorder.results[0]).toMatchObject({
-      outcome: 'timeout',
-      errorType: 'timeout',
+      outcome: 'error',
+      error: expect.any(Error),
     });
+    expect(recorder.results[0]).not.toHaveProperty('errorType');
     expect(recorder.results[0]).not.toHaveProperty('httpStatus');
     expect(recorder.results[0]).not.toHaveProperty('mimeType');
   });
@@ -475,12 +477,12 @@ describe('getRemoteEntry - script load error discrimination', () => {
       'success',
     ]);
     expect(recorder.results[0]).toMatchObject({
-      errorType: 'network',
       error: {
         name: 'ScriptNetworkError',
         message: expect.stringContaining('network failed'),
       },
     });
+    expect(recorder.results[0]).not.toHaveProperty('errorType');
   });
 
   it('covers ESM and SystemJS remote entry completion', async () => {

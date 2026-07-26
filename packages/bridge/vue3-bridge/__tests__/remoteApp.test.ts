@@ -42,6 +42,9 @@ const flushBridgeRender = async () => {
   await nextTick();
 };
 
+const getContext = (event: { payload: Record<string, any> }) =>
+  event.payload.context || event.payload;
+
 describe('RemoteApp', () => {
   let root: HTMLDivElement;
 
@@ -101,8 +104,8 @@ describe('RemoteApp', () => {
       lifecycleEvents.some(
         (event) =>
           event.lifecycle === 'beforeBridgeOperation' &&
-          event.payload.operation === 'render' &&
-          event.payload.reason === 'mount',
+          getContext(event).operation === 'render' &&
+          getContext(event).reason === 'mount',
       ),
     ).toBe(true);
 
@@ -112,8 +115,8 @@ describe('RemoteApp', () => {
     expect(
       lifecycleEvents.some(
         (event) =>
-          event.payload.operation === 'destroy' &&
-          event.payload.reason === 'keep-alive-deactivate',
+          getContext(event).operation === 'destroy' &&
+          getContext(event).reason === 'keep-alive-deactivate',
       ),
     ).toBe(true);
 
@@ -123,8 +126,8 @@ describe('RemoteApp', () => {
     expect(
       lifecycleEvents.some(
         (event) =>
-          event.payload.operation === 'update' &&
-          event.payload.reason === 'keep-alive-activate',
+          getContext(event).operation === 'update' &&
+          getContext(event).reason === 'keep-alive-activate',
       ),
     ).toBe(true);
 

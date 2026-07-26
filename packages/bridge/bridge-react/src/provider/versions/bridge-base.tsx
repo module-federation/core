@@ -3,6 +3,7 @@
  * This file contains bridge component logic shared across all React versions
  */
 import * as React from 'react';
+import { startBridgeOperation } from '@module-federation/bridge-shared';
 import type {
   ProviderParams,
   ProviderFnParams,
@@ -16,14 +17,6 @@ import { ErrorBoundary } from '../../error-boundary';
 import { RouterContext } from '../context';
 import { LoggerInstance } from '../../utils';
 import { federationRuntime } from '../plugin';
-import {
-  completeBridgeOperation,
-  attachBridgeOperationContext,
-  createBridgeId,
-  createBridgeOperationContext,
-  emitBridgeLifecycle,
-  getAttachedBridgeOperationContext,
-} from '@module-federation/bridge-shared';
 
 class BridgeCommitObserver extends React.Component<{
   children: React.ReactNode;
@@ -49,7 +42,6 @@ export function createBaseBridgeComponent<T>({
 }: ProviderFnParams<T>) {
   return () => {
     const rootMap = new Map<any, RootType>();
-    const bridgeIds = new WeakMap<object, string>();
     const instance = federationRuntime.instance;
     LoggerInstance.debug(
       `createBridgeComponent instance from props >>>`,
@@ -111,31 +103,6 @@ export function createBaseBridgeComponent<T>({
     return {
       async render(info: RenderParams) {
         LoggerInstance.debug(`createBridgeComponent render Info`, info);
-        const parentContext = getAttachedBridgeOperationContext(info);
-        const bridgeId =
-          parentContext?.bridgeId ||
-          bridgeIds.get(info.dom) ||
-          createBridgeId();
-        bridgeIds.set(info.dom, bridgeId);
-        const operation =
-          parentContext?.operation ||
-          (rootMap.has(info.dom) ? 'update' : 'render');
-        const operationContext = createBridgeOperationContext({
-          side: 'producer',
-          framework: 'react',
-          operation,
-          bridgeId,
-          moduleName: info.moduleName,
-          parent: parentContext,
-          reason: parentContext?.reason || 'direct',
-        });
-        emitBridgeLifecycle(
-          instance,
-          'beforeBridgeOperation',
-          operationContext,
-        );
-        attachBridgeOperationContext(info, operationContext);
-
         const {
           moduleName,
           dom,
@@ -144,60 +111,27 @@ export function createBaseBridgeComponent<T>({
           rootOptions,
           ...propsInfo
         } = info;
-
-        const mergedRootOptions: CreateRootOptions | undefined = {
-          ...defaultRootOptions,
-          ...(rootOptions as CreateRootOptions),
-        };
-
-        let routeContext:
-          | ReturnType<typeof createBridgeOperationContext>
-          | undefined;
-        if (memoryRoute?.entryPath || basename) {
-          routeContext = createBridgeOperationContext({
-            side: 'producer',
-            framework: 'react',
-            operation: 'route-sync',
-            bridgeId,
-            moduleName,
-            route: memoryRoute?.entryPath
-              ? {
-                  action: 'memory-route-init',
-                  to: memoryRoute.entryPath,
-                  basename,
-                }
-              : { action: 'basename-init', to: basename, basename },
-          });
-          emitBridgeLifecycle(instance, 'beforeBridgeOperation', routeContext);
-        }
-
-        let commitEmitted = false;
-        const emitCommit = () => {
-          if (commitEmitted) {
-            return;
-          }
-          commitEmitted = true;
-          emitBridgeLifecycle(
-            instance,
-            'afterBridgeCommit',
-            completeBridgeOperation(operationContext, 'success'),
-          );
-          if (routeContext) {
-            emitBridgeLifecycle(
-              instance,
-              'afterBridgeOperation',
-              completeBridgeOperation(routeContext, 'success'),
-            );
-          }
-        };
+        const operation = startBridgeOperation(instance, {
+          side: 'producer',
+          framework: 'react',
+          operation: rootMap.has(dom) ? 'update' : 'render',
+          args: info,
+          moduleName,
+          reason: 'direct',
+        });
 
         try {
+          const mergedRootOptions: CreateRootOptions | undefined = {
+            ...defaultRootOptions,
+            ...(rootOptions as CreateRootOptions),
+          };
+
           const beforeBridgeRenderRes =
             instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(info) ||
             {};
 
           const rootComponentWithErrorBoundary = (
-            <BridgeCommitObserver onCommit={emitCommit}>
+            <BridgeCommitObserver onCommit={operation.commit}>
               <BridgeWrapper
                 basename={basename}
                 moduleName={moduleName}
@@ -213,11 +147,7 @@ export function createBaseBridgeComponent<T>({
             </BridgeCommitObserver>
           );
 
-          emitBridgeLifecycle(
-            instance,
-            'bridgeRenderInvoked',
-            operationContext,
-          );
+          operation.invoked();
           if (bridgeInfo.render) {
             await Promise.resolve(
               bridgeInfo.render(rootComponentWithErrorBoundary, dom),
@@ -235,24 +165,9 @@ export function createBaseBridgeComponent<T>({
             }
           }
           instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info) || {};
-          emitBridgeLifecycle(
-            instance,
-            'afterBridgeOperation',
-            completeBridgeOperation(operationContext, 'success'),
-          );
+          operation.finish(undefined);
         } catch (error) {
-          if (routeContext) {
-            emitBridgeLifecycle(
-              instance,
-              'afterBridgeOperation',
-              completeBridgeOperation(routeContext, 'error', error),
-            );
-          }
-          emitBridgeLifecycle(
-            instance,
-            'afterBridgeOperation',
-            completeBridgeOperation(operationContext, 'error', error),
-          );
+          operation.fail(error);
           throw error;
         }
       },
@@ -261,47 +176,31 @@ export function createBaseBridgeComponent<T>({
         const { dom } = info;
         LoggerInstance.debug(`createBridgeComponent destroy Info`, info);
         const root = rootMap.get(dom);
-        const parentContext = getAttachedBridgeOperationContext(info);
-        const operationContext = createBridgeOperationContext({
+        const operation = startBridgeOperation(instance, {
           side: 'producer',
           framework: 'react',
           operation: 'destroy',
-          bridgeId:
-            parentContext?.bridgeId || bridgeIds.get(dom) || createBridgeId(),
+          args: info,
           moduleName: info.moduleName,
-          parent: parentContext,
-          reason: parentContext?.reason || 'direct',
+          reason: 'direct',
         });
-        emitBridgeLifecycle(
-          instance,
-          'beforeBridgeOperation',
-          operationContext,
-        );
-        attachBridgeOperationContext(info, operationContext);
+
         try {
           instance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit(info);
-          let outcome: 'success' | 'skipped' = 'skipped';
+          let destroyed = false;
           if (root) {
             if ('unmount' in root) {
               root.unmount();
-              outcome = 'success';
+              destroyed = true;
             } else {
               LoggerInstance.warn('Root does not have unmount method');
             }
             rootMap.delete(dom);
           }
           instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(info);
-          emitBridgeLifecycle(
-            instance,
-            'afterBridgeOperation',
-            completeBridgeOperation(operationContext, outcome),
-          );
+          operation.finish(destroyed);
         } catch (error) {
-          emitBridgeLifecycle(
-            instance,
-            'afterBridgeOperation',
-            completeBridgeOperation(operationContext, 'error', error),
-          );
+          operation.fail(error);
           throw error;
         }
       },
