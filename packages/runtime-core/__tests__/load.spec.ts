@@ -260,8 +260,18 @@ describe('getRemoteEntry - script load error discrimination', () => {
         name: 'remote',
         entry: `${BASE}/${fixture}`,
       });
+      const resourceContext = {
+        initiator: 'loadRemote' as const,
+        id: `remote/${fixture}`,
+        resourceType: 'remoteEntry' as const,
+        url: `${BASE}/${fixture}`,
+      };
 
-      await getRemoteEntry({ origin, remoteInfo }).catch(() => undefined);
+      await getRemoteEntry({
+        origin,
+        remoteInfo,
+        resourceContext,
+      }).catch(() => undefined);
 
       expect(recorder.starts).toHaveLength(1);
       expect(recorder.results).toHaveLength(1);
@@ -280,7 +290,7 @@ describe('getRemoteEntry - script load error discrimination', () => {
     },
   );
 
-  it('reports one real attempt plus a cache hit for a concurrent waiter', async () => {
+  it('shares one real remote-entry result across concurrent callers', async () => {
     const recorder = createResourceRecorder();
     const container = { get: rs.fn(), init: rs.fn() };
     const origin = new ModuleFederation({
@@ -310,14 +320,11 @@ describe('getRemoteEntry - script load error discrimination', () => {
     expect(first).toBe(container);
     expect(second).toBe(container);
     expect(recorder.starts).toHaveLength(1);
-    expect(recorder.results).toHaveLength(2);
-    expect(recorder.results.map((item) => item.loadSource).sort()).toEqual([
-      'global-loading',
-      'load-entry-hook',
-    ]);
-    expect(
-      recorder.results.find((item) => item.loadSource === 'global-loading'),
-    ).toMatchObject({ cached: true });
+    expect(recorder.results).toHaveLength(1);
+    expect(recorder.results[0]).toMatchObject({
+      remoteEntryExports: container,
+    });
+    expect(recorder.results[0]).not.toHaveProperty('cached');
   });
 
   it('reports explicit remote exports reuse as an MF memory cache hit', async () => {
@@ -343,77 +350,6 @@ describe('getRemoteEntry - script load error discrimination', () => {
     expect(recorder.results).toHaveLength(1);
     expect(recorder.results[0]).toMatchObject({
       cached: true,
-      loadSource: 'remote-entry-exports',
-    });
-  });
-
-  it('reports a remote entry timeout without inventing a network response', async () => {
-    const recorder = createResourceRecorder();
-    const appendSpy = rs
-      .spyOn(document.head, 'appendChild')
-      .mockImplementation((node) => node);
-    const origin = new ModuleFederation({
-      name: 'resource-timeout',
-      remotes: [],
-      plugins: [
-        recorder.plugin,
-        {
-          name: 'short-entry-timeout',
-          createScript() {
-            return {
-              script: document.createElement('script'),
-              timeout: 5,
-            };
-          },
-        },
-      ],
-    });
-    const remoteInfo = getRemoteInfo({
-      name: 'timeout-remote',
-      entry: 'https://remote.test/timeout.js',
-    });
-
-    try {
-      await expect(getRemoteEntry({ origin, remoteInfo })).rejects.toThrow(
-        RUNTIME_008,
-      );
-    } finally {
-      appendSpy.mockRestore();
-    }
-
-    expect(recorder.results).toHaveLength(1);
-    expect(recorder.results[0]).toMatchObject({
-      error: expect.any(Error),
-      loadSource: 'runtime-loader',
-    });
-  });
-
-  it('records a real Node remote entry completion', async () => {
-    const recorder = createResourceRecorder();
-    const origin = new ModuleFederation({
-      name: 'resource-node',
-      remotes: [],
-      plugins: [recorder.plugin],
-    });
-    origin.options.inBrowser = false;
-    const remoteInfo = getRemoteInfo({
-      name: 'nodeRemote',
-      entry: `${BASE}/node-success.js`,
-    });
-
-    await expect(getRemoteEntry({ origin, remoteInfo })).resolves.toEqual(
-      expect.objectContaining({
-        get: expect.any(Function),
-        init: expect.any(Function),
-      }),
-    );
-
-    expect(recorder.results).toHaveLength(1);
-    expect(recorder.results[0]).toMatchObject({
-      resourceContext: {
-        resourceType: 'remoteEntry',
-      },
-      loadSource: 'runtime-loader',
     });
   });
 
@@ -459,10 +395,8 @@ describe('getRemoteEntry - script load error discrimination', () => {
       container,
     );
 
-    expect(recorder.results.map((result) => result.loadSource)).toEqual([
-      'load-entry-hook',
-      'error-handler',
-    ]);
+    expect(recorder.results).toHaveLength(2);
+    expect(recorder.results[0]).not.toHaveProperty('error');
     expect(recorder.results[1]).toMatchObject({
       recovered: true,
       error: {
@@ -470,48 +404,5 @@ describe('getRemoteEntry - script load error discrimination', () => {
         message: expect.stringContaining('network failed'),
       },
     });
-  });
-
-  it('covers ESM and SystemJS remote entry completion', async () => {
-    const recorder = createResourceRecorder();
-    const origin = new ModuleFederation({
-      name: 'resource-module-types',
-      remotes: [],
-      plugins: [recorder.plugin],
-    });
-    const esmRemote = getRemoteInfo({
-      name: 'esm-remote',
-      entry: 'data:text/javascript,export%20const%20value%3D1',
-      type: 'module',
-    });
-    const systemContainer = { get: rs.fn(), init: rs.fn() };
-    const previousSystem = (globalThis as any).System;
-    (globalThis as any).System = {
-      import: rs.fn().mockResolvedValue(systemContainer),
-    };
-
-    try {
-      await expect(
-        getRemoteEntry({ origin, remoteInfo: esmRemote }),
-      ).resolves.toBeDefined();
-      await expect(
-        getRemoteEntry({
-          origin,
-          remoteInfo: getRemoteInfo({
-            name: 'system-remote',
-            entry: 'https://remote.test/system.js',
-            type: 'system',
-          }),
-        }),
-      ).resolves.toBe(systemContainer);
-    } finally {
-      (globalThis as any).System = previousSystem;
-    }
-
-    expect(recorder.results.map((result) => result.loadSource)).toEqual([
-      'runtime-loader',
-      'runtime-loader',
-    ]);
-    expect(recorder.results.every((result) => !result.error)).toBe(true);
   });
 });

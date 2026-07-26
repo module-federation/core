@@ -8,24 +8,6 @@ import { getGlobalHostPlugins } from '../global';
 import { assert } from './logger';
 import { isPlainObject } from './tool';
 
-const registeredPluginsByInstance = new WeakMap<
-  ModuleFederation,
-  Map<string, ModuleFederationRuntimePlugin>
->();
-
-function getRegisteredPlugins(
-  instance: ModuleFederation,
-): Map<string, ModuleFederationRuntimePlugin> {
-  let registeredPlugins = registeredPluginsByInstance.get(instance);
-
-  if (!registeredPlugins) {
-    registeredPlugins = new Map();
-    registeredPluginsByInstance.set(instance, registeredPlugins);
-  }
-
-  return registeredPlugins;
-}
-
 function getPluginsToRegister(
   plugins: UserOptions['plugins'],
 ): Array<ModuleFederationRuntimePlugin> {
@@ -66,7 +48,12 @@ export function registerPlugins(
   plugins: UserOptions['plugins'],
   instance: ModuleFederation,
 ) {
-  const registeredPlugins = getRegisteredPlugins(instance);
+  const registeredPlugins = new Map<string, ModuleFederationRuntimePlugin>();
+  instance.options.plugins.forEach((plugin) => {
+    if (plugin) {
+      registeredPlugins.set(plugin.name, plugin);
+    }
+  });
   const hookInstances = [
     instance.hooks,
     instance.remoteHandler.hooks,
@@ -77,25 +64,16 @@ export function registerPlugins(
   ];
 
   getPluginsToRegister(plugins).forEach((plugin) => {
-    if (registeredPlugins.has(plugin.name)) {
+    registeredPlugins.set(plugin.name, plugin);
+
+    if (instance.hooks.registerPlugins[plugin.name]) {
       return;
     }
 
-    registeredPlugins.set(plugin.name, plugin);
-
-    try {
-      const instancePlugin = getInstancePlugin(
-        plugin,
-        plugin.apply?.(instance),
-      );
-
-      hookInstances.forEach((hookInstance) => {
-        hookInstance.applyPlugin(instancePlugin);
-      });
-    } catch (error) {
-      registeredPlugins.delete(plugin.name);
-      throw error;
-    }
+    const instancePlugin = getInstancePlugin(plugin, plugin.apply?.(instance));
+    hookInstances.forEach((hookInstance) => {
+      hookInstance.applyPlugin(instancePlugin);
+    });
   });
 
   return Array.from(registeredPlugins.values());

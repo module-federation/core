@@ -68,7 +68,6 @@ const bridgeLifecycleFixture = {
   afterBridgeRender: {},
   beforeBridgeDestroy: {},
   afterBridgeDestroy: {},
-  afterBridgeCommit: {},
   afterBridgeRouteSync: {},
 };
 
@@ -1159,7 +1158,6 @@ describe('ObservabilityPlugin', () => {
         {},
         { context: renderContext, result: undefined },
       );
-      hooks.afterBridgeCommit(renderContext);
       const routeContext = createBridgeOperation({
         operation: 'route-sync',
         route: {
@@ -1261,7 +1259,7 @@ describe('ObservabilityPlugin', () => {
     ).toBeDefined();
   });
 
-  it('correlates Bridge render, commit, route, and destroy signals without treating commit as business readiness', async () => {
+  it('correlates Bridge render, route, and destroy signals without treating render as business readiness', async () => {
     const observability = createObservability({
       level: 'verbose',
       console: false,
@@ -1290,12 +1288,10 @@ describe('ObservabilityPlugin', () => {
     });
     hooks.beforeBridgeRender({}, consumerRender);
     hooks.afterBridgeRender({}, { context: consumerRender, result: undefined });
-    hooks.afterBridgeCommit(consumerRender);
 
     const producerRender = createBridgeOperation({ side: 'producer' });
     hooks.beforeBridgeRender({}, producerRender);
     hooks.afterBridgeRender({}, { context: producerRender, result: undefined });
-    hooks.afterBridgeCommit(producerRender);
 
     const route = createBridgeOperation({
       operation: 'route-sync',
@@ -1334,7 +1330,6 @@ describe('ObservabilityPlugin', () => {
         'bridge:provider-acquired',
         'bridge:render-start',
         'bridge:render-success',
-        'bridge:render-committed',
         'bridge:route-sync-success',
         'bridge:destroy-success',
       ]),
@@ -1366,7 +1361,6 @@ describe('ObservabilityPlugin', () => {
         expect.objectContaining({
           bridge: expect.objectContaining({
             status: 'destroyed',
-            commitObserved: true,
             routeSyncObserved: true,
             states: expect.arrayContaining([
               expect.objectContaining({ side: 'consumer' }),
@@ -1405,17 +1399,12 @@ describe('ObservabilityPlugin', () => {
 
     hooks.beforeBridgeRender({ props: { password: 'must-not-leak' } }, context);
     hooks.afterBridgeRender({}, { context, result: undefined });
-    hooks.afterBridgeCommit(context);
 
     const report = observability.getLatestReport();
     const events =
       report?.events.filter((event) => event.phase.startsWith('bridge-')) || [];
     expect(events.map((event) => event.message)).toEqual(
-      expect.arrayContaining([
-        'bridge:render-start',
-        'bridge:render-success',
-        'bridge:render-committed',
-      ]),
+      expect.arrayContaining(['bridge:render-start', 'bridge:render-success']),
     );
     expect(events[0]?.bridge?.operationId).toMatch(/^bridge-op-/);
     expect(events[0]?.bridge?.bridgeId).toMatch(/^bridge-/);
@@ -3585,7 +3574,6 @@ describe('ObservabilityPlugin', () => {
       origin,
       remoteInfo,
       resourceContext: resourceBase,
-      loadSource: 'runtime-loader',
     } as any);
     observability.plugin.afterLoadEntry?.({
       resourceContext: resourceBase,
@@ -3593,7 +3581,6 @@ describe('ObservabilityPlugin', () => {
       origin,
       error: new Error('token=secret ScriptExecutionError: boom'),
       recovered: true,
-      loadSource: 'error-handler',
     } as any);
     emitRemoteComplete(observability, {
       origin,

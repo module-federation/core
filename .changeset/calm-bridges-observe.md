@@ -7,4 +7,4 @@
 '@module-federation/observability-plugin': patch
 ---
 
-Extend the existing Bridge render and destroy hooks with semantic results, add commit and route synchronization hooks, and keep timing, sanitization, and correlation in the observability plugin.
+Extend the existing Bridge render and destroy hooks with semantic context, add a route synchronization hook, and keep timing, sanitization, and correlation in the observability plugin.

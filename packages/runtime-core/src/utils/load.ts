@@ -345,107 +345,58 @@ export async function getRemoteEntry(params: {
     _inErrorHandling = false,
   } = params;
   const uniqueKey = getRemoteEntryUniqueKey(remoteInfo);
-  const effectiveResourceContext: ResourceLoadContext = resourceContext || {
-    initiator: 'loadRemote',
-    id: remoteInfo.name,
-    resourceType: 'remoteEntry',
-    url: remoteInfo.entry,
-  };
-  const emitAfterLoadEntry = (
-    args: Omit<
-      Parameters<typeof origin.loaderHook.lifecycle.afterLoadEntry.emit>[0],
-      'origin' | 'remoteInfo' | 'resourceContext'
-    >,
-  ) =>
-    origin.loaderHook.lifecycle.afterLoadEntry.emit({
-      origin,
-      remoteInfo,
-      resourceContext: effectiveResourceContext,
-      ...args,
-    });
 
   if (remoteEntryExports) {
-    await emitAfterLoadEntry({
+    await origin.loaderHook.lifecycle.afterLoadEntry.emit({
+      origin,
+      remoteInfo,
       remoteEntryExports,
+      resourceContext,
       cached: true,
-      loadSource: 'remote-entry-exports',
     });
     return remoteEntryExports;
-  }
-
-  const existingLoading = globalLoading[uniqueKey];
-  if (existingLoading) {
-    try {
-      const result = await existingLoading;
-      await emitAfterLoadEntry({
-        remoteEntryExports: result,
-        cached: true,
-        loadSource: 'global-loading',
-      });
-      return result;
-    } catch (error) {
-      await emitAfterLoadEntry({
-        error,
-        loadSource: 'global-loading',
-      });
-      throw error;
-    }
   }
 
   if (!globalLoading[uniqueKey]) {
     const loadEntryHook = origin.remoteHandler.hooks.lifecycle.loadEntry;
     const loaderHook = origin.loaderHook;
-    const loadAndHandleEntry = async () => {
-      let loadSource: 'global-entry' | 'load-entry-hook' | 'runtime-loader' =
-        'runtime-loader';
-      let cached = false;
-      let res: RemoteEntryExports | void;
-
-      try {
-        res = await loadEntryHook.emit({
-          origin,
-          loaderHook,
-          remoteInfo,
-          remoteEntryExports,
-          resourceContext: effectiveResourceContext,
-        });
+    globalLoading[uniqueKey] = loadEntryHook
+      .emit({
+        origin,
+        loaderHook,
+        remoteInfo,
+        remoteEntryExports,
+        resourceContext,
+      })
+      .then((res) => {
         if (res) {
-          loadSource = 'load-entry-hook';
+          return res;
         }
+        const isWebEnvironment =
+          typeof ENV_TARGET !== 'undefined'
+            ? ENV_TARGET === 'web'
+            : isBrowserEnvValue;
 
-        if (!res) {
-          const existingRemoteEntryExports = getRemoteEntryExports(
-            remoteInfo.name,
-            remoteInfo.entryGlobalName,
-          ).entryExports;
-          if (existingRemoteEntryExports) {
-            res = existingRemoteEntryExports;
-            cached = true;
-            loadSource = 'global-entry';
-          }
-        }
-
-        if (!res) {
-          const isWebEnvironment =
-            typeof ENV_TARGET !== 'undefined'
-              ? ENV_TARGET === 'web'
-              : (origin.options.inBrowser ?? isBrowserEnvValue);
-
-          res = isWebEnvironment
-            ? await loadEntryDom({
-                remoteInfo,
-                remoteEntryExports,
-                loaderHook,
-                getEntryUrl,
-                resourceContext: effectiveResourceContext,
-              })
-            : await loadEntryNode({
-                remoteInfo,
-                loaderHook,
-                resourceContext: effectiveResourceContext,
-              });
-        }
-      } catch (loadError) {
+        return isWebEnvironment
+          ? loadEntryDom({
+              remoteInfo,
+              remoteEntryExports,
+              loaderHook,
+              getEntryUrl,
+              resourceContext,
+            })
+          : loadEntryNode({ remoteInfo, loaderHook, resourceContext });
+      })
+      .then(async (res) => {
+        await origin.loaderHook.lifecycle.afterLoadEntry.emit({
+          origin,
+          remoteInfo,
+          remoteEntryExports: res,
+          resourceContext,
+        });
+        return res;
+      })
+      .catch(async (loadError) => {
         const isScriptExecutionError =
           loadError instanceof Error &&
           loadError.message.includes('ScriptExecutionError');
@@ -472,32 +423,26 @@ export async function getRemoteEntry(params: {
             });
 
           if (recoveredRemoteEntryExports) {
-            await emitAfterLoadEntry({
+            await origin.loaderHook.lifecycle.afterLoadEntry.emit({
+              origin,
+              remoteInfo,
               remoteEntryExports: recoveredRemoteEntryExports,
+              resourceContext,
               error: loadError,
               recovered: true,
-              loadSource: 'error-handler',
             });
             return recoveredRemoteEntryExports;
           }
         }
 
-        await emitAfterLoadEntry({
+        await origin.loaderHook.lifecycle.afterLoadEntry.emit({
+          origin,
+          remoteInfo,
+          resourceContext,
           error: loadError,
-          loadSource,
         });
         throw loadError;
-      }
-
-      await emitAfterLoadEntry({
-        remoteEntryExports: res,
-        cached,
-        loadSource,
       });
-      return res;
-    };
-
-    globalLoading[uniqueKey] = loadAndHandleEntry();
   }
 
   return globalLoading[uniqueKey];

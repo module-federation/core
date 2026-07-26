@@ -29,7 +29,6 @@ function handleInitialConsumes(options: HandleInitialConsumesOptions) {
     if (asyncLoad) {
       return federationInstance.loadShare(shareKey, {
         customShareInfo,
-        from: 'build',
         context: {
           trigger: 'build',
           moduleId,
@@ -38,7 +37,6 @@ function handleInitialConsumes(options: HandleInitialConsumesOptions) {
     }
     return federationInstance.loadShareSync(shareKey, {
       customShareInfo,
-      from: 'build',
       context: {
         trigger: 'build',
         moduleId,

@@ -28,7 +28,6 @@ const createLifecycleFixture = () => {
     afterBridgeRender: eventHook('afterBridgeRender'),
     beforeBridgeDestroy: eventHook('beforeBridgeDestroy'),
     afterBridgeDestroy: eventHook('afterBridgeDestroy'),
-    afterBridgeCommit: eventHook('afterBridgeCommit'),
     afterBridgeRouteSync: eventHook('afterBridgeRouteSync'),
   };
   federationRuntime.instance = { bridgeHook: { lifecycle } } as any;
@@ -48,53 +47,51 @@ describe('React Bridge operation lifecycle', () => {
     ['legacy', createLegacyBridgeComponent],
     ['react18', createReact18BridgeComponent],
     ['react19', createReact19BridgeComponent],
-  ])('confirms a real commit for the %s provider path', async (_, factory) => {
-    const { events } = createLifecycleFixture();
-    const containerInfo = createContainer();
-    const bridge = factory({
-      rootComponent: () => <div>committed</div>,
-    })();
+  ])(
+    'records render and destroy for the %s provider path',
+    async (_, factory) => {
+      const { events } = createLifecycleFixture();
+      const containerInfo = createContainer();
+      const bridge = factory({
+        rootComponent: () => <div>committed</div>,
+      })();
 
-    await act(async () => {
-      await bridge.render({
-        dom: containerInfo.container,
-        moduleName: 'remote/App',
-        basename: '/safe?token=private#hash',
+      await act(async () => {
+        await bridge.render({
+          dom: containerInfo.container,
+          moduleName: 'remote/App',
+          basename: '/safe?token=private#hash',
+        });
       });
-    });
 
-    await waitFor(() => {
-      expect(
-        events.some((event) => event.lifecycle === 'afterBridgeCommit'),
-      ).toBe(true);
-    });
-    const renderEvents = events.filter(
-      (event) => getContext(event).operation === 'render',
-    );
-    expect(renderEvents.map((event) => event.lifecycle)).toEqual(
-      expect.arrayContaining([
+      const renderEvents = events.filter(
+        (event) => getContext(event).operation === 'render',
+      );
+      expect(renderEvents.map((event) => event.lifecycle)).toEqual([
         'beforeBridgeRender',
         'afterBridgeRender',
-        'afterBridgeCommit',
-      ]),
-    );
-    expect(new Set(renderEvents.map((event) => getContext(event))).size).toBe(
-      1,
-    );
+      ]);
+      expect(new Set(renderEvents.map((event) => getContext(event))).size).toBe(
+        1,
+      );
 
-    bridge.destroy({ dom: containerInfo.container, moduleName: 'remote/App' });
-    bridge.destroy({ dom: containerInfo.container, moduleName: 'remote/App' });
-    const destroyResults = events.filter(
-      (event) =>
-        event.lifecycle === 'afterBridgeDestroy' &&
-        getContext(event).operation === 'destroy',
-    );
-    expect(destroyResults.map((event) => event.payload.result)).toEqual([
-      true,
-      false,
-    ]);
-    containerInfo.clean();
-  });
+      bridge.destroy({
+        dom: containerInfo.container,
+        moduleName: 'remote/App',
+      });
+      bridge.destroy({
+        dom: containerInfo.container,
+        moduleName: 'remote/App',
+      });
+      const destroyResults = events.filter(
+        (event) =>
+          event.lifecycle === 'afterBridgeDestroy' &&
+          getContext(event).operation === 'destroy',
+      );
+      expect(destroyResults).toHaveLength(2);
+      containerInfo.clean();
+    },
+  );
 
   it('distinguishes updates and correlates consumer and producer operations', async () => {
     const { events } = createLifecycleFixture();
@@ -134,7 +131,8 @@ describe('React Bridge operation lifecycle', () => {
         (event) =>
           event.lifecycle === 'beforeBridgeRender' &&
           getContext(event).operation === 'update' &&
-          getContext(event).reason === 'props-update',
+          getContext(event).side === 'producer' &&
+          getContext(event).reason === 'direct',
       ),
     ).toBe(true);
     result.unmount();
@@ -152,7 +150,7 @@ describe('React Bridge operation lifecycle', () => {
       () => Promise.reject(new Error('async render failed token=secret')),
     ],
   ])(
-    'records a custom render %s and preserves the error',
+    'preserves a custom render %s without reporting a completion',
     async (_, customRender) => {
       const { events } = createLifecycleFixture();
       const containerInfo = createContainer();
@@ -167,20 +165,18 @@ describe('React Bridge operation lifecycle', () => {
           moduleName: 'remote/App',
         }),
       ).rejects.toThrow('render failed');
-      const result = events.find(
-        (event) =>
-          event.lifecycle === 'afterBridgeRender' &&
-          getContext(event).operation === 'render',
-      );
-      expect(result?.payload.error).toBeInstanceOf(Error);
-      expect((result?.payload.error as Error).message).toContain(
-        'token=secret',
-      );
+      expect(
+        events.some(
+          (event) =>
+            event.lifecycle === 'afterBridgeRender' &&
+            getContext(event).operation === 'render',
+        ),
+      ).toBe(false);
       containerInfo.clean();
     },
   );
 
-  it('records destroy errors without swallowing them', async () => {
+  it('preserves destroy errors without reporting a completion', async () => {
     const { events } = createLifecycleFixture();
     const containerInfo = createContainer();
     const bridge = createLegacyBridgeComponent({
@@ -196,10 +192,6 @@ describe('React Bridge operation lifecycle', () => {
       dom: containerInfo.container,
       moduleName: 'remote/App',
     });
-    expect(
-      events.some((event) => event.lifecycle === 'afterBridgeCommit'),
-    ).toBe(false);
-
     expect(() =>
       bridge.destroy({
         dom: containerInfo.container,
@@ -207,12 +199,12 @@ describe('React Bridge operation lifecycle', () => {
       }),
     ).toThrow('destroy failed');
     expect(
-      events.find(
+      events.some(
         (event) =>
           event.lifecycle === 'afterBridgeDestroy' &&
           getContext(event).operation === 'destroy',
-      )?.payload.error,
-    ).toBeInstanceOf(Error);
+      ),
+    ).toBe(false);
     containerInfo.clean();
   });
 

@@ -220,7 +220,6 @@ describe('installInitialConsumes', () => {
 
     expect(loadShareSync).toHaveBeenCalledWith('context-share', {
       customShareInfo: options.moduleToHandlerMapping[moduleId].shareInfo,
-      from: 'build',
       context: {
         trigger: 'build',
         moduleId,

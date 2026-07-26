@@ -1,13 +1,5 @@
 import { describe, it, rs, expect } from '@rstest/core';
-import {
-  createInstance,
-  init,
-  loadRemote,
-  loadShare,
-  loadShareSync,
-  registerGlobalPlugins,
-  type RuntimePluginHooks,
-} from '../src/index';
+import { init, loadRemote, loadShare, loadShareSync } from '../src/index';
 import { getInfoWithoutType } from '@module-federation/runtime-core';
 
 type IsAssignable<Actual, Expected> = [Actual] extends [Expected]
@@ -57,36 +49,6 @@ describe('global', () => {
       key: 'npm:@federation/app4',
       value: 4,
     });
-  });
-
-  it('binds a late global plugin through the public runtime API', () => {
-    const events: Array<string> = [];
-    globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__ = undefined;
-    const instance = createInstance({
-      name: '@federation/late-global-plugin',
-      plugins: [],
-    });
-
-    registerGlobalPlugins([
-      {
-        name: 'late-global-plugin',
-        apply(currentInstance): RuntimePluginHooks {
-          events.push(`apply:${currentInstance.name}`);
-          return {
-            beforeInit(args) {
-              events.push(`beforeInit:${currentInstance.name}`);
-              return args;
-            },
-          };
-        },
-      },
-    ]);
-    instance.initOptions({ name: '@federation/late-global-plugin' });
-
-    expect(events).toEqual([
-      'apply:@federation/late-global-plugin',
-      'beforeInit:@federation/late-global-plugin',
-    ]);
   });
 
   describe('global types (generic)', () => {
