@@ -608,6 +608,7 @@ describe('hooks', () => {
       headers: { 'Content-Type': 'application/json' },
     });
     let lastFetchRemoteInfo: any;
+    const manifestStarts: Array<Record<string, unknown>> = [];
     const manifestResults: Array<Record<string, unknown>> = [];
     const fetchPlugin: () => ModuleFederationRuntimePlugin = () => ({
       name: 'fetch-plugin',
@@ -635,6 +636,9 @@ describe('hooks', () => {
         fetchPlugin(),
         {
           name: 'manifest-resource-recorder',
+          beforeLoadManifest(args) {
+            manifestStarts.push(args);
+          },
           afterLoadManifest(args) {
             manifestResults.push(args);
           },
@@ -650,6 +654,17 @@ describe('hooks', () => {
     expect(lastFetchRemoteInfo).toMatchObject({
       name: '@loader-hooks/app2',
       entry: 'http://mockxxx.com/loader-fetch-hooks-mf-manifest.json',
+    });
+    expect(manifestStarts).toHaveLength(1);
+    expect(manifestStarts[0]).toMatchObject({
+      manifestUrl: 'http://mockxxx.com/loader-fetch-hooks-mf-manifest.json',
+      moduleInfo: {
+        name: '@loader-hooks/app2',
+      },
+      resourceOptions: {
+        id: '@loader-hooks/app2/say',
+        initiator: 'loadRemote',
+      },
     });
     expect(manifestResults).toHaveLength(1);
     expect(manifestResults[0]).toMatchObject({

@@ -70,8 +70,6 @@ export default defineComponent({
         side: 'consumer',
         framework: 'vue',
         operation: 'render',
-        target: rootRef.value,
-        moduleName: props.moduleName,
       };
 
       const beforeBridgeRenderRes =
@@ -108,15 +106,16 @@ export default defineComponent({
         side: 'consumer',
         framework: 'vue',
         operation: 'destroy',
-        target: rootRef.value || undefined,
-        moduleName: props.moduleName,
       };
       hostInstance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit(
         bridgeRenderProps,
         operationContext,
       );
 
-      providerReturn.destroy({ dom: rootRef.value });
+      providerReturn.destroy({
+        dom: rootRef.value,
+        moduleName: props.moduleName,
+      });
       providerInfoRef.value = null;
       isRendered.value = false;
 
@@ -158,10 +157,9 @@ export default defineComponent({
             moduleName: props.moduleName,
             route: routeInfo,
           };
-          const result = dispatchPopstateEnv();
+          dispatchPopstateEnv();
           hostInstance?.bridgeHook?.lifecycle?.afterBridgeRouteSync?.emit({
             context: operationContext,
-            result,
           });
         }
         pathname.value = newPath;

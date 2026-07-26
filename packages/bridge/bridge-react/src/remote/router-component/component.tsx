@@ -105,11 +105,10 @@ export function withRouterData<
             moduleName: props.moduleName,
             route,
           };
-          const result = dispatchPopstateEnv();
+          dispatchPopstateEnv();
           federationRuntime.instance?.bridgeHook.lifecycle.afterBridgeRouteSync.emit(
             {
               context: operationContext,
-              result,
             },
           );
         }

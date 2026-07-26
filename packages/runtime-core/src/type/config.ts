@@ -33,15 +33,12 @@ export type LoadShareExtraOptions = {
   context?: SharedLoadContext;
 };
 
-export type SharedLoadTrigger = CallFrom | 'container-init' | 'remote-load';
+export type SharedLoadTrigger = CallFrom | 'container-init';
 
 export interface SharedLoadContext {
   trigger?: SharedLoadTrigger;
   moduleId?: string | number;
   chunkId?: string | number;
-  remote?: string;
-  expose?: string;
-  requestId?: string;
 }
 
 export interface RemoteInfo {

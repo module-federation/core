@@ -98,8 +98,6 @@ export function createBaseBridgeComponent<T>({
           side: 'producer',
           framework: 'react',
           operation: rootMap.has(dom) ? 'update' : 'render',
-          target: dom,
-          moduleName,
           reason: 'direct',
         };
 
@@ -129,12 +127,11 @@ export function createBaseBridgeComponent<T>({
           />
         );
 
-        let renderResult: unknown;
         if (bridgeInfo.render) {
-          renderResult = await Promise.resolve(
+          const root = await Promise.resolve(
             bridgeInfo.render(rootComponentWithErrorBoundary, dom),
           );
-          rootMap.set(dom, renderResult as RootType);
+          rootMap.set(dom, root as RootType);
         } else {
           let root = rootMap.get(dom);
           // Do not call createRoot multiple times
@@ -146,11 +143,9 @@ export function createBaseBridgeComponent<T>({
           if (root && 'render' in root) {
             root.render(rootComponentWithErrorBoundary);
           }
-          renderResult = root;
         }
         instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info, {
           context: operationContext,
-          result: renderResult,
         }) || {};
       },
 
@@ -162,8 +157,6 @@ export function createBaseBridgeComponent<T>({
           side: 'producer',
           framework: 'react',
           operation: 'destroy',
-          target: dom,
-          moduleName: info.moduleName,
           reason: 'direct',
         };
 

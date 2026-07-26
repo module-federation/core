@@ -208,8 +208,9 @@ const createRawSharedObserver = (
   events: RawSharedEvent[],
 ): ModuleFederationRuntimePlugin => {
   let operationCounter = 0;
-  const ensureContext = (context?: SharedLoadContext) => {
-    const nextContext = context || {};
+  type ObserverLoadContext = SharedLoadContext & { operationId?: string };
+  const ensureContext = (context?: SharedLoadContext): ObserverLoadContext => {
+    const nextContext = (context || {}) as ObserverLoadContext;
     if (!nextContext.operationId) {
       operationCounter += 1;
       nextContext.operationId = `observer-shared-${operationCounter}`;
@@ -390,7 +391,7 @@ describe('raw shared observation hooks', () => {
           eager: false,
         },
       },
-      context: { requestId: 'request-1' },
+      context: { moduleId: 'request-1' },
     });
 
     expect(factory?.()).toEqual({ version: '2.0.0' });
@@ -403,7 +404,7 @@ describe('raw shared observation hooks', () => {
       },
       availableVersions: ['1.0.0', '2.0.0'],
       context: {
-        requestId: 'request-1',
+        moduleId: 'request-1',
         operationId: 'observer-shared-1',
       },
     });
@@ -432,7 +433,7 @@ describe('raw shared observation hooks', () => {
         context: { moduleId: 10, chunkId: 'chunk-a' },
       }),
       mf.loadShare('slow', {
-        context: { requestId: 'runtime-request' },
+        context: { trigger: 'runtime' },
       }),
     ]);
 
@@ -448,7 +449,7 @@ describe('raw shared observation hooks', () => {
           chunkId: 'chunk-a',
         }),
         expect.objectContaining({
-          requestId: 'runtime-request',
+          trigger: 'runtime',
         }),
       ]),
     );

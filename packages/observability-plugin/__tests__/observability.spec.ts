@@ -1397,13 +1397,16 @@ describe('ObservabilityPlugin', () => {
       side: 'consumer',
       framework: 'react',
       operation: 'render',
-      target: dom,
+      reason: 'direct',
+    };
+    const bridgeArgs = {
+      dom,
       moduleName: 'remote/App',
-      reason: 'mount',
+      props: { password: 'must-not-leak' },
     };
 
-    hooks.beforeBridgeRender({ props: { password: 'must-not-leak' } }, context);
-    hooks.afterBridgeRender({}, { context, result: undefined });
+    hooks.beforeBridgeRender(bridgeArgs, context);
+    hooks.afterBridgeRender(bridgeArgs, { context });
 
     const report = observability.getLatestReport();
     const events =
@@ -1413,6 +1416,7 @@ describe('ObservabilityPlugin', () => {
     );
     expect(events[0]?.bridge?.operationId).toMatch(/^bridge-op-/);
     expect(events[0]?.bridge?.bridgeId).toMatch(/^bridge-/);
+    expect(events[0]?.bridge?.moduleName).toBe('remote/App');
     expect(JSON.stringify(events)).not.toContain('must-not-leak');
   });
 
@@ -3306,6 +3310,7 @@ describe('ObservabilityPlugin', () => {
       snapshotHandler: {
         hooks: {
           lifecycle: {
+            beforeLoadManifest: {},
             afterLoadManifest: {},
           },
         },
@@ -3323,18 +3328,16 @@ describe('ObservabilityPlugin', () => {
 
     emitRemoteStart(observability, { origin });
     emitRemoteMatch(observability, { origin, remoteInfo: remote });
-    observability.plugin.fetch?.(
-      'http://localhost:3001/mf-manifest.json?token=secret',
-      {},
-      remote,
-      {
+    observability.plugin.beforeLoadManifest?.({
+      manifestUrl: 'http://localhost:3001/mf-manifest.json?token=secret',
+      moduleInfo: remote,
+      resourceOptions: {
         id: 'remote/Button',
         initiator: 'loadRemote',
-        resourceType: 'manifest',
         expose: './Button',
       },
-      origin as any,
-    );
+      origin,
+    } as any);
     observability.plugin.afterLoadManifest?.({
       manifestUrl: 'http://localhost:3001/mf-manifest.json?token=secret',
       moduleInfo: remote,
@@ -3392,6 +3395,7 @@ describe('ObservabilityPlugin', () => {
       snapshotHandler: {
         hooks: {
           lifecycle: {
+            beforeLoadManifest: {},
             afterLoadManifest: {},
           },
         },
@@ -3407,17 +3411,15 @@ describe('ObservabilityPlugin', () => {
       entry: 'http://localhost:3001/mf-manifest.json',
     };
 
-    observability.plugin.fetch?.(
-      moduleInfo.entry,
-      {},
+    observability.plugin.beforeLoadManifest?.({
+      origin,
+      manifestUrl: moduleInfo.entry,
       moduleInfo,
-      {
+      resourceOptions: {
         id: 'remote/Button',
         initiator: 'loadRemote',
-        resourceType: 'manifest',
       },
-      origin as any,
-    );
+    } as any);
     observability.plugin.afterLoadManifest?.({
       origin,
       manifestUrl: moduleInfo.entry,
@@ -3440,7 +3442,7 @@ describe('ObservabilityPlugin', () => {
     ).toEqual([
       expect.objectContaining({
         status: 'start',
-        lifecycle: 'fetch',
+        lifecycle: 'beforeLoadManifest',
         requestId: 'remote/Button',
       }),
       expect.objectContaining({
@@ -3465,6 +3467,7 @@ describe('ObservabilityPlugin', () => {
       snapshotHandler: {
         hooks: {
           lifecycle: {
+            beforeLoadManifest: {},
             afterLoadManifest: {},
           },
         },
@@ -3484,16 +3487,18 @@ describe('ObservabilityPlugin', () => {
     } as const;
 
     emitRemoteStart(observability, { origin });
-    observability.plugin.fetch?.(
-      resource.url,
-      {},
-      {
+    observability.plugin.beforeLoadManifest?.({
+      origin,
+      manifestUrl: resource.url,
+      moduleInfo: {
         name: 'remote',
         entry: resource.url,
       },
-      resource,
-      origin as any,
-    );
+      resourceOptions: {
+        id: resource.id,
+        initiator: resource.initiator,
+      },
+    } as any);
     observability.plugin.afterLoadManifest?.({
       origin,
       manifestUrl: resource.url,
@@ -3646,24 +3651,18 @@ describe('ObservabilityPlugin', () => {
         resourceType: 'manifest' as const,
         url: manifestUrl,
       };
-      await instance.loaderHook.lifecycle.fetch.emit(
-        manifestUrl,
-        {},
-        {
-          ...remote,
-          entryGlobalName: 'same_remote',
-          type: 'global',
-          shareScope: 'default',
-        },
-        resourceContext,
-        instance,
-      );
-      await instance.snapshotHandler.hooks.lifecycle.afterLoadManifest.emit({
+      observability.plugin.beforeLoadManifest?.({
         manifestUrl,
         moduleInfo: remote,
         resourceOptions: resourceContext,
         origin: instance,
-      });
+      } as any);
+      observability.plugin.afterLoadManifest?.({
+        manifestUrl,
+        moduleInfo: remote,
+        resourceOptions: resourceContext,
+        origin: instance,
+      } as any);
     };
 
     await emitFor(first, 'first/resource');
