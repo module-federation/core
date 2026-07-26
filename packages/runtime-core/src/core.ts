@@ -21,8 +21,6 @@ import {
   ResourceLoadContext,
   LoadShareExtraOptions,
   SharedLoadContext,
-  BridgeOperationContext,
-  BridgeOperationResult,
 } from './type';
 import { getBuilderId, registerPlugins, getRemoteEntry, error } from './utils';
 import {
@@ -55,6 +53,12 @@ import { formatShareConfigs } from './utils/share';
 declare const FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN: boolean;
 declare const FEDERATION_OPTIMIZE_NO_REMOTE: boolean;
 declare const FEDERATION_OPTIMIZE_NO_SHARED: boolean;
+
+type BridgeHookContext = object;
+type BridgeHookResult = {
+  context: BridgeHookContext;
+  result?: unknown;
+};
 const USE_SNAPSHOT =
   typeof FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN === 'boolean'
     ? !FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN
@@ -160,13 +164,7 @@ export class ModuleFederation {
       CreateLinkHookReturnDom
     >(),
     fetch: new AsyncHook<
-      [
-        string,
-        RequestInit,
-        RemoteInfo?,
-        ResourceLoadContext?,
-        ModuleFederation?,
-      ],
+      [string, RequestInit, RemoteInfo?, ResourceLoadContext?],
       Promise<Response> | void | false
     >(),
     loadEntryError: new AsyncHook<
@@ -289,22 +287,22 @@ export class ModuleFederation {
   });
   bridgeHook = new PluginSystem({
     beforeBridgeRender: new SyncHook<
-      [Record<string, any>, BridgeOperationContext?],
+      [Record<string, any>, BridgeHookContext?],
       void | Record<string, any>
     >(),
     afterBridgeRender: new SyncHook<
-      [Record<string, any>, BridgeOperationResult?],
+      [Record<string, any>, BridgeHookResult?],
       void | Record<string, any>
     >(),
     beforeBridgeDestroy: new SyncHook<
-      [Record<string, any>, BridgeOperationContext?],
+      [Record<string, any>, BridgeHookContext?],
       void | Record<string, any>
     >(),
     afterBridgeDestroy: new SyncHook<
-      [Record<string, any>, BridgeOperationResult?],
+      [Record<string, any>, BridgeHookResult?],
       void | Record<string, any>
     >(),
-    afterBridgeRouteSync: new SyncHook<[BridgeOperationResult], void>(),
+    afterBridgeRouteSync: new SyncHook<[BridgeHookResult], void>(),
   });
   moduleInfo?: GlobalModuleInfo[string];
 

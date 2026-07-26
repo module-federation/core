@@ -62,8 +62,6 @@ export const RemoteAppWrapper = forwardRef(function (
           side: 'consumer',
           framework: 'react',
           operation: 'destroy',
-          target: renderDom.current || undefined,
-          moduleName,
           reason: 'unmount',
         };
 
@@ -99,8 +97,6 @@ export const RemoteAppWrapper = forwardRef(function (
       side: 'consumer',
       framework: 'react',
       operation: 'render',
-      target: renderDom.current || undefined,
-      moduleName,
     };
 
     const beforeBridgeRenderRes =

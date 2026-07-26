@@ -108,6 +108,20 @@ export class SnapshotHandler {
       moduleInfo: Remote;
       remoteSnapshot: ModuleInfo;
     }>('afterLoadSnapshot'),
+    beforeLoadManifest: new AsyncHook<
+      [
+        {
+          manifestUrl: string;
+          moduleInfo: Remote;
+          resourceOptions?: {
+            initiator: ResourceLoadInitiator;
+            id: string;
+          };
+          origin: ModuleFederation;
+        },
+      ],
+      void
+    >('beforeLoadManifest'),
     afterLoadManifest: new AsyncHook<
       [
         {
@@ -331,6 +345,13 @@ export class SnapshotHandler {
         return manifestJson;
       }
 
+      await this.hooks.lifecycle.beforeLoadManifest.emit({
+        manifestUrl,
+        moduleInfo,
+        resourceOptions,
+        origin: this.HostInstance,
+      });
+
       let response: Response | undefined;
       let loadError: unknown;
       let recovered = false;
@@ -347,7 +368,6 @@ export class SnapshotHandler {
                 resourceType: 'manifest',
               }
             : undefined,
-          this.HostInstance,
         );
         if (!res || !(res instanceof Response)) {
           res = await fetch(manifestUrl, {});

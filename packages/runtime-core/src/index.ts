@@ -27,8 +27,6 @@ export {
 } from './global';
 export type {
   UserOptions,
-  BridgeOperationContext,
-  BridgeOperationResult,
   ModuleFederationRuntimePlugin,
   RuntimePluginHooks,
 } from './type';

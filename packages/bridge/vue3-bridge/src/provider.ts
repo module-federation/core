@@ -48,8 +48,6 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
           side: 'producer',
           framework: 'vue',
           operation: rootMap.has(dom) ? 'update' : 'render',
-          target: dom,
-          moduleName,
           reason: 'direct',
         };
 
@@ -127,10 +125,9 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
           app.use(router);
         }
 
-        const result = app.mount(dom);
+        app.mount(dom);
         instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info, {
           context: operationContext,
-          result,
         });
       },
       destroy(info: { dom: HTMLElement; moduleName?: string }) {
@@ -140,8 +137,6 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
           side: 'producer',
           framework: 'vue',
           operation: 'destroy',
-          target: info.dom,
-          moduleName: info.moduleName,
           reason: 'direct',
         };
 

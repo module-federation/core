@@ -2,8 +2,6 @@ import type {
   ModuleFederation,
   ModuleFederationRuntimePlugin,
   RuntimePluginHooks,
-  BridgeOperationContext,
-  BridgeOperationResult,
 } from '@module-federation/runtime';
 import { createLogger, isDebugMode } from '@module-federation/sdk';
 import { satisfies } from 'semver';
@@ -764,17 +762,33 @@ interface ObservabilityRemoteLoadArgs {
   exposeModuleFactory?: unknown;
 }
 
+interface ObservabilityBridgeOperationContext {
+  side: 'consumer' | 'producer';
+  framework: 'react' | 'vue';
+  operation: 'render' | 'update' | 'destroy' | 'route-sync';
+  target?: object;
+  moduleName?: string;
+  route?: ObservabilityBridgeRouteSummary;
+  reason?: string;
+}
+
+interface ObservabilityBridgeOperationResult {
+  context: ObservabilityBridgeOperationContext;
+  result?: unknown;
+  error?: unknown;
+}
+
 interface LegacyObservabilityBridgeHookArgs {
   operationId: string;
   bridgeId: string;
-  side: BridgeOperationContext['side'];
-  framework: BridgeOperationContext['framework'];
-  operation: BridgeOperationContext['operation'];
+  side: ObservabilityBridgeOperationContext['side'];
+  framework: ObservabilityBridgeOperationContext['framework'];
+  operation: ObservabilityBridgeOperationContext['operation'];
   moduleName?: string;
   remote?: string;
   expose?: string;
-  route?: BridgeOperationContext['route'];
-  reason?: BridgeOperationContext['reason'];
+  route?: ObservabilityBridgeOperationContext['route'];
+  reason?: ObservabilityBridgeOperationContext['reason'];
   outcome?: 'success' | 'error' | 'skipped';
   error?: unknown;
   startedAt?: number;
@@ -782,8 +796,8 @@ interface LegacyObservabilityBridgeHookArgs {
 }
 
 type ObservabilityBridgeHookArgs = (
-  | BridgeOperationContext
-  | BridgeOperationResult
+  | ObservabilityBridgeOperationContext
+  | ObservabilityBridgeOperationResult
   | LegacyObservabilityBridgeHookArgs
 ) & {
   origin?: ObservabilityRuntimeOrigin;
@@ -3405,6 +3419,10 @@ export function createObservability(
     object,
     { operationId: string; bridgeId: string }
   >();
+  const bridgeContexts = new WeakMap<
+    object,
+    ObservabilityBridgeOperationContext
+  >();
   const bridgeIdsByTarget = new WeakMap<object, string>();
   const bridgeIdsByFallback = new Map<string, string>();
   const latestBridgeOperations = new Map<
@@ -5881,7 +5899,7 @@ export function createObservability(
 
     const context = (isRecord(hookArgs.context)
       ? hookArgs.context
-      : hookArgs) as unknown as BridgeOperationContext;
+      : hookArgs) as unknown as ObservabilityBridgeOperationContext;
     if (!context || !context.side || !context.framework || !context.operation) {
       return undefined;
     }
@@ -5960,6 +5978,28 @@ export function createObservability(
       outcome,
       error,
     };
+  };
+
+  const completeBridgeContext = (
+    rawContext: object,
+    args: Record<string, unknown>,
+  ): ObservabilityBridgeOperationContext => {
+    const context =
+      bridgeContexts.get(rawContext) ||
+      ({
+        ...(rawContext as ObservabilityBridgeOperationContext),
+      } as ObservabilityBridgeOperationContext);
+    const target = args.dom;
+    const moduleName = args.moduleName || args.name;
+
+    if (!context.target && typeof target === 'object' && target !== null) {
+      context.target = target;
+    }
+    if (!context.moduleName && typeof moduleName === 'string') {
+      context.moduleName = moduleName;
+    }
+    bridgeContexts.set(rawContext, context);
+    return context;
   };
 
   const recordBridgeSignal = (
@@ -6433,7 +6473,7 @@ export function createObservability(
       if (context) {
         recordBridgeSignal(
           {
-            context,
+            context: completeBridgeContext(context, args),
             origin: (args as unknown as ObservabilityBridgeHookArgs).origin,
           } as ObservabilityBridgeHookArgs,
           'start',
@@ -6445,6 +6485,7 @@ export function createObservability(
       if (result) {
         recordBridgeResult({
           ...result,
+          context: completeBridgeContext(result.context, args),
           origin: (args as unknown as ObservabilityBridgeHookArgs).origin,
         } as ObservabilityBridgeHookArgs);
       }
@@ -6454,7 +6495,7 @@ export function createObservability(
       if (context) {
         recordBridgeSignal(
           {
-            context,
+            context: completeBridgeContext(context, args),
             origin: (args as unknown as ObservabilityBridgeHookArgs).origin,
           } as ObservabilityBridgeHookArgs,
           'start',
@@ -6466,6 +6507,7 @@ export function createObservability(
       if (result) {
         recordBridgeResult({
           ...result,
+          context: completeBridgeContext(result.context, args),
           origin: (args as unknown as ObservabilityBridgeHookArgs).origin,
         } as ObservabilityBridgeHookArgs);
       }
@@ -6473,6 +6515,23 @@ export function createObservability(
     },
     afterBridgeRouteSync(args) {
       recordBridgeResult(args as ObservabilityBridgeHookArgs);
+    },
+    beforeLoadManifest(args) {
+      const manifestArgs = args as ObservabilityManifestLoadArgs;
+      recordResourceStart({
+        origin: manifestArgs.origin,
+        id:
+          manifestArgs.resourceOptions?.id ||
+          manifestArgs.moduleInfo.name ||
+          manifestArgs.manifestUrl,
+        initiator:
+          manifestArgs.resourceOptions?.initiator || ('loadRemote' as const),
+        resourceType: 'manifest',
+        url: manifestArgs.manifestUrl,
+        remote: manifestArgs.moduleInfo,
+        expose: manifestArgs.resourceOptions?.expose,
+        lifecycle: 'beforeLoadManifest',
+      });
     },
     afterLoadManifest(args) {
       const manifestArgs = args as ObservabilityManifestLoadResultArgs;
@@ -6504,25 +6563,6 @@ export function createObservability(
         cacheSource: manifestArgs.cached ? 'mf-memory' : undefined,
         error: manifestArgs.error,
         lifecycle: 'afterLoadManifest',
-      });
-    },
-    fetch(url, _options, remoteInfo, resourceContext, origin) {
-      if (
-        !origin ||
-        !resourceContext ||
-        resourceContext.resourceType !== 'manifest'
-      ) {
-        return;
-      }
-      recordResourceStart({
-        origin: origin as ObservabilityRuntimeOrigin,
-        id: resourceContext.id,
-        initiator: resourceContext.initiator,
-        resourceType: resourceContext.resourceType,
-        url,
-        remote: remoteInfo,
-        expose: resourceContext.expose,
-        lifecycle: 'fetch',
       });
     },
     beforeRequest(args) {
