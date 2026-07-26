@@ -1,0 +1,83 @@
+.changeset/calm-bridges-observe.md
+  s_65972f5d3df231::t_80ed61773a15cd 10
+.changeset/calm-shares-report.md
+  s_65972f5d3df231::t_c65ed28a63b3e1 3,8
+.changeset/trace-real-remote-resources.md
+  s_65972f5d3df231::t_f1d2ef3aabf111 6
+packages/bridge/bridge-react/__tests__/bridge-lifecycle.spec.tsx
+  s_36a90ee30dc33a::t_f2d70dd70b93e2 34-36,68,78-80,87,89-91,118,120,133-134,170-174,210-212,250-254
+packages/bridge/bridge-react/src/provider/versions/bridge-base.tsx
+  s_36a90ee30dc33a::t_211392223159db 6,114-121,124-128,134,150,168,170,179,183,185,187,190,194,201,203
+packages/bridge/bridge-react/src/remote/RemoteAppWrapper.tsx
+  s_36a90ee30dc33a::t_cac9481243db8f 6,62,66,75-78,82,84,105,109,121,125,127
+packages/bridge/bridge-react/src/remote/router-component/component.tsx
+  s_36a90ee30dc33a::t_f6381ff5ae36fb 5,9,94-101,105,107,110,112
+packages/bridge/bridge-shared/src/index.ts
+  s_36a90ee30dc33a::t_127102c9a45d2c 12
+packages/bridge/bridge-shared/src/lifecycle.ts
+  s_36a90ee30dc33a::t_7fc2812e7a47fc 1,3-7,10-12,16,18-19,22-25,30-92
+packages/bridge/bridge-shared/src/type.ts
+  s_36a90ee30dc33a::t_f9e5bd9782dc4a 37,41,53-56
+packages/bridge/vue3-bridge/__tests__/bridgeLifecycle.test.ts
+  s_36a90ee30dc33a::t_d3c5fb0b29a89a 35-37,45,61,71-73,81,83-84,102,104,127-129,132,163,165-166,168-169
+packages/bridge/vue3-bridge/__tests__/remoteApp.test.ts
+  s_36a90ee30dc33a::t_0f02b9c062b671 45-47,107-108,118-119,129-130
+packages/bridge/vue3-bridge/src/provider.ts
+  s_36a90ee30dc33a::t_68c1e3c9d4d0ab 3-6,47-54,111-124,130,133-134,136,140,143,147-149,151,154,156,158
+packages/bridge/vue3-bridge/src/remoteApp.tsx
+  s_36a90ee30dc33a::t_12d39361e2d3d6 14,36,72,76,88,95,97,117,121,130,137,139,160-167,171,173,176,178
+packages/observability-plugin/README.md
+  s_36a90ee30dc33a::t_23c1f916a9c023 87-93
+packages/runtime-core/__tests__/load.spec.ts
+  s_36a90ee30dc33a::t_c9a541a3a5fd1c 142-145,148,164,171-172,174,176-179,288-289,291,377
+packages/runtime-core/__tests__/plugin.spec.ts
+  s_36a90ee30dc33a::t_a52863e7fe6edb 201,221,225,230-231,237,242
+packages/runtime-core/__tests__/preload-assets.spec.ts
+  s_36a90ee30dc33a::t_65cc8a61c00594 361-364,368-370,453,520,524,526-527
+packages/runtime-core/__tests__/shared-diagnostics.spec.ts
+  s_36a90ee30dc33a::t_599d5749985f9f 8,172-200,202-272,291,296-297,299,301,310-311,313-316,318,320-322,326-327,329,331-333,338-342,346-347,349,351,357-363,368,370,372,374-376,380,383-384,386-389,391-394,399-400,404,426-428,430-441,443-445,448-449,452,454,471-474,476-481,483-503
+packages/runtime-core/src/shared/index.ts
+  s_36a90ee30dc33a::t_c109737d06b06e 64-69,81,94,111,124,145-151,156-157,170,176,186,200,207,219,257-260,278-282,319,334,346,361,390,401,421,449,459,525,530-532,597-601,624,641,661,677,714,735,754-756
+packages/runtime-core/src/type/bridge.ts
+  s_36a90ee30dc33a::t_67f564bda39ae9 22,26,38-41
+packages/runtime-core/src/type/config.ts
+  s_36a90ee30dc33a::t_f26eba6988030e 46
+packages/runtime-core/src/type/preload.ts
+  s_36a90ee30dc33a::t_1e714a472b7dd7 49,54,59
+packages/runtime-core/src/utils/load.ts
+  s_36a90ee30dc33a::t_e4bc518fda3144 22,390
+packages/runtime-core/src/utils/preload.ts
+  s_36a90ee30dc33a::t_ef364318ad8195 20
+packages/runtime-core/src/utils/resource.ts
+  s_36a90ee30dc33a::t_745d9981d1be29 16,38,47-53
+packages/runtime-core/src/utils/share.ts
+  s_36a90ee30dc33a::t_d80533933ff551 16,367,369,473,476
+packages/runtime/src/index.ts
+  s_36a90ee30dc33a::t_9713018cb513cd 19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "a911e2d3c911bc812da300162442cd43d58c80df",
+  "prompts": {},
+  "sessions": {
+    "s_36a90ee30dc33a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f933b-7864-70b1-9f95-d1602bc9ff05",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    },
+    "s_65972f5d3df231": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f92d6-dd9f-7b41-9af8-f10df0a05109",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    }
+  },
+  "attestation_metadata": {},
+  "remote_transcripts": {}
+}
