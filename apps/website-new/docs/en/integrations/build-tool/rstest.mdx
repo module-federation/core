@@ -137,8 +137,9 @@ federation(moduleFederationOptions, {
 ### rstestOptions
 
 - Type: `{ target?: 'node' | 'browser' }`
-- Default: auto-detected from Rstest's build caller. Browser-mode builds default
-  to `'browser'`; other Rstest builds default to `'node'`.
+- Default: auto-detected from Rstest's resolved `browser.enabled`
+  configuration. Browser Mode defaults to `'browser'`; other builds default to
+  `'node'`.
 
 ## Producer Builds
 

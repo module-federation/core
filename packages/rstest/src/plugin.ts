@@ -1,5 +1,6 @@
 import type { EnvironmentConfig, RsbuildPlugin, Rspack } from '@rsbuild/core';
 import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
+import type { RstestExposeAPI } from '@rstest/core';
 
 import { createFederationExternalBypass } from './externals-bypass';
 import { logger } from './logger';
@@ -14,15 +15,7 @@ import type { ModuleFederationOptions, RstestFederationOptions } from './types';
  */
 export const FEDERATION_PLUGIN_NAME = 'rstest:federation';
 
-// `callerName` values rstest sets on the Rsbuild instances it creates.
-const RSTEST_NODE_CALLER = 'rstest';
-const RSTEST_BROWSER_CALLER = 'rstest-browser';
-
-type RstestExposeAPI = {
-  modifyRstestConfig: (
-    callback: (config: { federation?: boolean }) => void,
-  ) => void;
-};
+const RSTEST_CALLER = 'rstest';
 
 const toArray = <T>(value: T | T[] | undefined): T[] => {
   if (value == null) {
@@ -101,28 +94,26 @@ export const federation = (
   name: FEDERATION_PLUGIN_NAME,
   setup: (api) => {
     const { callerName } = api.context;
-    if (
-      callerName !== RSTEST_NODE_CALLER &&
-      callerName !== RSTEST_BROWSER_CALLER
-    ) {
+    if (callerName !== RSTEST_CALLER) {
       logger.warn(
         `This plugin is designed to run under rstest, but the current caller is "${callerName}". Federation test defaults may not fit this environment.`,
       );
     }
 
-    // Browser-mode rstest builds identify themselves via callerName; use it
-    // to pick the default target. An explicit rstestOptions.target wins.
+    const rstestApi = api.useExposed<RstestExposeAPI>('rstest');
+    const isBrowserMode =
+      rstestApi?.getRstestConfig().browser?.enabled === true;
+
+    // Rstest exposes the resolved config for both Node Mode and Browser Mode.
+    // An explicit rstestOptions.target wins over the detected mode.
     const target =
-      rstestOptions?.target ??
-      (callerName === RSTEST_BROWSER_CALLER ? 'browser' : 'node');
+      rstestOptions?.target ?? (isBrowserMode ? 'browser' : 'node');
     const isNodeTarget = target === 'node';
 
     if (isNodeTarget) {
-      api
-        .useExposed<RstestExposeAPI>('rstest')
-        ?.modifyRstestConfig((config) => {
-          config.federation = true;
-        });
+      rstestApi?.modifyRstestConfig((config) => {
+        config.federation = true;
+      });
     }
 
     api.modifyEnvironmentConfig({

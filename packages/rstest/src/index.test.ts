@@ -17,6 +17,9 @@ const NODE_RUNTIME_PLUGIN = require.resolve(NODE_RUNTIME_PLUGIN_REQUEST);
 type FederationPlugin = ReturnType<typeof federation>;
 
 type TestRstestConfig = {
+  browser?: {
+    enabled?: boolean;
+  };
   federation?: boolean;
 };
 
@@ -91,21 +94,21 @@ const getFederationPluginOptions = (
   return options!;
 };
 
-// Minimal Rsbuild API surface used by the plugin. rstest sets callerName to
-// 'rstest' (node) or 'rstest-browser' (browser) on its Rsbuild instances.
+// Minimal Rsbuild API surface used by the plugin.
 const setupFederationPlugin = (
   plugin: FederationPlugin,
   callerName = 'rstest',
+  rstestConfig: TestRstestConfig = {},
 ): { envHook: EnvHook; order: unknown; rstestConfig: TestRstestConfig } => {
   let envHook: EnvHook | undefined;
   let order: unknown;
-  const rstestConfig: TestRstestConfig = {};
 
   const fakeApi = {
     context: { callerName },
     useExposed: (name: string) =>
       name === 'rstest'
         ? {
+            getRstestConfig: () => rstestConfig,
             modifyRstestConfig: (
               callback: (config: TestRstestConfig) => void,
             ) => callback(rstestConfig),
@@ -152,14 +155,16 @@ const applyFederationPlugin = (
     config = {},
     mergeEnvironmentConfig = shallowMergeEnvironmentConfig,
     rspackConfig = { output: {}, plugins: [] },
+    rstestConfig = {},
   }: {
     callerName?: string;
     config?: EnvironmentConfig;
     mergeEnvironmentConfig?: MergeEnvironmentConfig;
     rspackConfig?: TestRspackConfig;
+    rstestConfig?: TestRstestConfig;
   } = {},
 ) => {
-  const { envHook } = setupFederationPlugin(plugin, callerName);
+  const { envHook } = setupFederationPlugin(plugin, callerName, rstestConfig);
   const merged = envHook(config, { mergeEnvironmentConfig });
 
   runRspackHooks(merged, rspackConfig);
@@ -257,10 +262,10 @@ describe('federation()', () => {
     expect(rstestConfig.federation).toBe(true);
   });
 
-  it('does not enable Rstest federation compatibility for browser targets', () => {
-    const { rstestConfig } = setupFederationPlugin(
-      federation(undefined, { target: 'browser' }),
-    );
+  it('does not enable Rstest federation compatibility in Browser Mode', () => {
+    const { rstestConfig } = setupFederationPlugin(federation(), 'rstest', {
+      browser: { enabled: true },
+    });
 
     expect(rstestConfig.federation).toBeUndefined();
   });
@@ -506,20 +511,18 @@ describe('federation()', () => {
     );
   });
 
-  it('does not warn about the caller under rstest runners', () => {
-    for (const callerName of ['rstest', 'rstest-browser']) {
-      const warnings = captureWarnings(() => {
-        setupFederationPlugin(federation(), callerName);
-      });
+  it('does not warn about the caller under rstest', () => {
+    const warnings = captureWarnings(() => {
+      setupFederationPlugin(federation());
+    });
 
-      expect(warnings.join('\n')).not.toContain('designed to run under rstest');
-    }
+    expect(warnings.join('\n')).not.toContain('designed to run under rstest');
   });
 
-  it('defaults to browser target when called from rstest-browser', () => {
+  it('defaults to browser target when Browser Mode is enabled', () => {
     const { merged, rspackConfig } = applyFederationPlugin(
       federation({ name: 'browser_caller_app' }),
-      { callerName: 'rstest-browser' },
+      { rstestConfig: { browser: { enabled: true } } },
     );
 
     expect(merged.output?.target).not.toBe('node');
@@ -531,10 +534,10 @@ describe('federation()', () => {
     expect(options!.runtimePlugins).toBe(undefined);
   });
 
-  it('lets an explicit node target win over the rstest-browser caller', () => {
+  it('lets an explicit node target win over detected Browser Mode', () => {
     const { merged, rspackConfig } = applyFederationPlugin(
       federation({ name: 'forced_node_app' }, { target: 'node' }),
-      { callerName: 'rstest-browser' },
+      { rstestConfig: { browser: { enabled: true } } },
     );
 
     expect(merged.output?.target).toBe('node');
