@@ -3,7 +3,6 @@ import type {
   OpenRuntimeCore,
   OpenRuntimeWindowHost,
   RuntimeError,
-  RuntimeStatus,
 } from '@openruntime/core';
 import {
   createOpenRuntime,
@@ -14,23 +13,18 @@ import {
 import type {
   ObservabilityEvent,
   ObservabilityEventContext,
+  OpenRuntimeObservabilityOptions,
   ObservabilityPhaseSummary,
   ObservabilityRemoteInfo,
   ObservabilityReport,
   ObservabilitySharedInfo,
-} from './core';
+} from './type';
 import {
   registerOpenRuntimeActions,
   type OpenRuntimeReportReader,
 } from './openruntime-actions';
 
-export interface OpenRuntimeObservabilityOptions {
-  enabled?: boolean;
-  runtime?: OpenRuntimeCore;
-  host?: OpenRuntimeWindowHost;
-  bridge?: false | BridgeConnectOptions;
-  source?: string;
-}
+export type { OpenRuntimeObservabilityOptions } from './type';
 
 interface OpenRuntimeObservabilityAdapter {
   register(): void;
