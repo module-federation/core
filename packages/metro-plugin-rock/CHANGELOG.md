@@ -1,5 +1,12 @@
 # @module-federation/metro-plugin-rock
 
+## 2.8.1
+
+### Patch Changes
+
+- Updated dependencies [1ed404a]
+  - @module-federation/metro@2.8.1
+
 ## 2.8.0
 
 ### Patch Changes

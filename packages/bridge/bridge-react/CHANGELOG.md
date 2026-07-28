@@ -1,5 +1,12 @@
 # @module-federation/bridge-react
 
+## 2.8.1
+
+### Patch Changes
+
+- Updated dependencies [d901e2c]
+  - @module-federation/sdk@2.8.1
+
 ## 2.8.0
 
 ### Patch Changes

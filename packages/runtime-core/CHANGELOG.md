@@ -1,5 +1,16 @@
 # @module-federation/runtime
 
+## 2.8.1
+
+### Patch Changes
+
+- 65cdf34: fix(runtime): preload ESM remote chunks with `modulepreload` links instead of
+  executable module scripts before container initialization. Loader plugins now
+  observe these implicit ESM preloads through `createLink`.
+- Updated dependencies [d901e2c]
+  - @module-federation/sdk@2.8.1
+  - @module-federation/error-codes@2.8.1
+
 ## 2.8.0
 
 ### Patch Changes
