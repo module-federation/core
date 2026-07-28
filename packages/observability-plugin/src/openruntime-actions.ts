@@ -8,7 +8,7 @@ import type {
   ObservabilityReportStatus,
   ObservabilityRuntimeState,
   ObservabilityRuntimeStateInstance,
-} from './core';
+} from './type';
 
 export interface OpenRuntimeReportReader {
   getReports(options?: ObservabilityReportListOptions): ObservabilityReport[];
