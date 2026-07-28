@@ -851,6 +851,12 @@ describe('3005-runtime-host/', () => {
         const analyticsSharedReports = reader.findReports({
           shared: 'observability-analytics-sdk',
         });
+        const checkoutSharedReport = (
+          checkoutSharedReports as ObservabilityTestReport[]
+        ).find((report) => report.shared?.provider);
+        const analyticsSharedReport = (
+          analyticsSharedReports as ObservabilityTestReport[]
+        ).find((report) => report.shared?.provider);
         const cachedRemoteReport = (
           profileReports as ObservabilityTestReport[]
         ).find((report) => report.summary.flags.cached === true);
@@ -867,14 +873,12 @@ describe('3005-runtime-host/', () => {
         expect(reports.length).to.be.greaterThan(4);
         expect(profileReports.length).to.be.greaterThan(1);
         expect(analyticsReports.length).to.equal(1);
-        expect(
-          (checkoutSharedReports[0] as ObservabilityTestReport).shared
-            ?.provider,
-        ).to.equal('observability_consumer_checkout');
-        expect(
-          (analyticsSharedReports[0] as ObservabilityTestReport).shared
-            ?.provider,
-        ).to.equal('observability_consumer_analytics');
+        expect(checkoutSharedReport?.shared?.provider).to.equal(
+          'observability_consumer_checkout',
+        );
+        expect(analyticsSharedReport?.shared?.provider).to.equal(
+          'observability_consumer_analytics',
+        );
         expect(cachedRemoteReport?.summary.flags.cached).to.equal(true);
         expect(
           (checkoutSharedReports as ObservabilityTestReport[]).some(
