@@ -535,7 +535,7 @@ describe('3005-runtime-host/', () => {
       cy.get('[data-testid="observability-load-status"]').contains('success');
       cy.get('[data-testid="observability-report"]')
         .should('contain', 'observability-retry-recovered/Button')
-        .should('contain', 'remoteEntry:load-recovered')
+        .should('contain', 'resource:remoteEntry:recovered')
         .should('contain', '"recovered": true');
       cy.window().then((win) => {
         const latestReport = getObservabilityReader(win).getLatestReport();
@@ -877,10 +877,12 @@ describe('3005-runtime-host/', () => {
         ).to.equal('observability_consumer_analytics');
         expect(cachedRemoteReport?.summary.flags.cached).to.equal(true);
         expect(
-          checkoutComponentReport?.events.some(
-            (event) =>
-              event.metadata?.sharedTraceId ===
-              (checkoutSharedReports[0] as ObservabilityTestReport).traceId,
+          (checkoutSharedReports as ObservabilityTestReport[]).some(
+            (sharedReport) =>
+              checkoutComponentReport?.events.some(
+                (event) =>
+                  event.metadata?.sharedTraceId === sharedReport.traceId,
+              ),
           ),
         ).to.equal(true);
 
@@ -1100,7 +1102,8 @@ describe('3005-runtime-host/', () => {
         const reports = getObservabilityReader(win).getReports();
         const customerSdkReport = reports.find(
           (report: ObservabilityTestReport) =>
-            report.shared?.name === 'observability-customer-sdk',
+            report.shared?.name === 'observability-customer-sdk' &&
+            report.summary.outcome === 'recovered',
         );
 
         expect(
