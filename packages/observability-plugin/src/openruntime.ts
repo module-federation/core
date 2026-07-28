@@ -195,7 +195,7 @@ function syncRemote(
     return;
   }
 
-  const targetId = targetIds.remote(report.instanceRef, remote.name);
+  const targetId = targetIds.remote(remote.name);
   const remoteReports = getRemoteReports(report, remote, reportReader);
   const remoteStatus = getRemoteStatus(remoteReports);
   const remoteData = getRemoteTargetData(remote, remoteReports);
@@ -228,11 +228,7 @@ function syncRemoteModule(
     return;
   }
 
-  const targetId = targetIds.remoteModule(
-    report.instanceRef,
-    remote.name,
-    report.expose,
-  );
+  const targetId = targetIds.remoteModule(remote.name, report.expose);
   const remoteModuleReports = getRemoteModuleReports(
     report,
     remote,
@@ -259,7 +255,7 @@ function syncRemoteModule(
     source,
     data: remoteModuleData,
     error: getReportError(latestReport),
-    dependsOn: getRemoteModuleDependsOn(report.instanceRef, remote.name),
+    dependsOn: getRemoteModuleDependsOn(remote.name),
   });
 }
 
@@ -273,7 +269,7 @@ function syncShared(
     return;
   }
 
-  const targetId = targetIds.shared(report.instanceRef, shared);
+  const targetId = targetIds.shared(shared);
   runtime.registerTarget({
     id: targetId,
     type: targetTypes.shared,
@@ -302,7 +298,7 @@ function syncSharedConflict(
     return;
   }
 
-  const targetId = targetIds.sharedConflict(report.instanceRef, shared);
+  const targetId = targetIds.sharedConflict(shared);
   const data = getSharedConflictTargetData(report, shared);
   runtime.registerTarget({
     id: targetId,
@@ -461,7 +457,6 @@ function getRemoteExposeData(
     .map((report) =>
       compactObject({
         targetId: targetIds.remoteModule(
-          report.instanceRef,
           remoteName,
           getReportExpose(report) || '',
         ),
@@ -606,11 +601,8 @@ function getRemoteError(
   return failedReport ? getReportError(failedReport) : undefined;
 }
 
-function getRemoteModuleDependsOn(
-  instanceRef: string | undefined,
-  remoteName: string,
-): string[] {
-  return [targetIds.remote(instanceRef, remoteName)];
+function getRemoteModuleDependsOn(remoteName: string): string[] {
+  return [targetIds.remote(remoteName)];
 }
 
 function getRemoteReports(
@@ -621,11 +613,7 @@ function getRemoteReports(
   const reports = reportReader
     ? reportReader
         .getReports()
-        .filter(
-          (report) =>
-            report.instanceRef === currentReport.instanceRef &&
-            isSameRemoteReport(report, remote),
-        )
+        .filter((report) => isSameRemoteReport(report, remote))
     : [];
 
   if (!reports.some((report) => report.traceId === currentReport.traceId)) {
@@ -833,35 +821,19 @@ const targetTypes = {
 } as const;
 
 const targetIds = {
-  remote(instanceRef: string | undefined, remoteName: string): string {
-    return `mf:instance:${normalizeSegment(
-      instanceRef || 'legacy',
-    )}:remote:${normalizeSegment(remoteName)}`;
+  remote(remoteName: string): string {
+    return `mf:remote:${normalizeSegment(remoteName)}`;
   },
-  remoteModule(
-    instanceRef: string | undefined,
-    remoteName: string,
-    expose: string,
-  ): string {
-    return `${targetIds.remote(instanceRef, remoteName)}:expose:${normalizeExpose(expose)}`;
+  remoteModule(remoteName: string, expose: string): string {
+    return `${targetIds.remote(remoteName)}:expose:${normalizeExpose(expose)}`;
   },
-  shared(
-    instanceRef: string | undefined,
-    shared: ObservabilitySharedInfo,
-  ): string {
-    return `mf:instance:${normalizeSegment(
-      instanceRef || 'legacy',
-    )}:shared:${normalizeSegment(shared.name)}:${normalizeSegment(
+  shared(shared: ObservabilitySharedInfo): string {
+    return `mf:shared:${normalizeSegment(shared.name)}:${normalizeSegment(
       getSharedTargetVersion(shared),
     )}:${normalizeSegment(getSharedTargetScope(shared))}`;
   },
-  sharedConflict(
-    instanceRef: string | undefined,
-    shared: ObservabilitySharedInfo,
-  ): string {
-    return `mf:instance:${normalizeSegment(
-      instanceRef || 'legacy',
-    )}:shared-conflict:${normalizeSegment(
+  sharedConflict(shared: ObservabilitySharedInfo): string {
+    return `mf:shared-conflict:${normalizeSegment(
       shared.name,
     )}:${normalizeSegment(getSharedTargetScope(shared))}`;
   },

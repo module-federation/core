@@ -219,6 +219,52 @@ describe('getRemoteEntry - script load error discrimination', () => {
     expect(recorder.results[0]).not.toHaveProperty('cached');
   });
 
+  it('emits the shared remote-entry result to each runtime instance', async () => {
+    const firstRecorder = createResourceRecorder();
+    const secondRecorder = createResourceRecorder();
+    const container = { get: rs.fn(), init: rs.fn() };
+    const firstOrigin = new ModuleFederation({
+      name: 'resource-concurrent-first',
+      remotes: [],
+      plugins: [
+        firstRecorder.plugin,
+        {
+          name: 'delayed-entry',
+          async loadEntry() {
+            await Promise.resolve();
+            return container;
+          },
+        },
+      ],
+    });
+    const secondOrigin = new ModuleFederation({
+      name: 'resource-concurrent-second',
+      remotes: [],
+      plugins: [secondRecorder.plugin],
+    });
+    const remoteInfo = getRemoteInfo({
+      name: 'shared-concurrent-remote',
+      entry: 'https://remote.test/shared-concurrent.js',
+    });
+
+    const [first, second] = await Promise.all([
+      getRemoteEntry({ origin: firstOrigin, remoteInfo }),
+      getRemoteEntry({ origin: secondOrigin, remoteInfo }),
+    ]);
+
+    expect(first).toBe(container);
+    expect(second).toBe(container);
+    expect(firstRecorder.starts).toHaveLength(1);
+    expect(firstRecorder.results).toHaveLength(1);
+    expect(secondRecorder.starts).toHaveLength(0);
+    expect(secondRecorder.results).toHaveLength(1);
+    expect(secondRecorder.results[0]).toMatchObject({
+      origin: secondOrigin,
+      remoteEntryExports: container,
+    });
+    expect(secondRecorder.results[0]).not.toHaveProperty('cached');
+  });
+
   it('reports explicit remote exports reuse as an MF memory cache hit', async () => {
     const recorder = createResourceRecorder();
     const container = { get: rs.fn(), init: rs.fn() };

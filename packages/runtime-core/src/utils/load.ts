@@ -23,6 +23,10 @@ import {
 // Declare the ENV_TARGET constant that will be defined by DefinePlugin
 declare const ENV_TARGET: 'web' | 'node';
 const importCallback = '.then(callbacks[0]).catch(callbacks[1])';
+const remoteEntryLoadingOrigins = new WeakMap<
+  Promise<RemoteEntryExports | void>,
+  ModuleFederation
+>();
 
 export function isEsmRemoteType(type: RemoteInfo['type']): boolean {
   return type === 'esm' || type === 'module';
@@ -399,9 +403,32 @@ export async function getRemoteEntry(params: {
         });
         throw loadError;
       });
+    remoteEntryLoadingOrigins.set(globalLoading[uniqueKey], origin);
   }
 
-  return globalLoading[uniqueKey];
+  const remoteEntryLoading = globalLoading[uniqueKey];
+  if (remoteEntryLoadingOrigins.get(remoteEntryLoading) !== origin) {
+    try {
+      const result = await remoteEntryLoading;
+      await origin.loaderHook.lifecycle.afterLoadEntry.emit({
+        origin,
+        remoteInfo,
+        remoteEntryExports: result,
+        resourceContext,
+      });
+      return result;
+    } catch (loadError) {
+      await origin.loaderHook.lifecycle.afterLoadEntry.emit({
+        origin,
+        remoteInfo,
+        resourceContext,
+        error: loadError,
+      });
+      throw loadError;
+    }
+  }
+
+  return remoteEntryLoading;
 }
 
 export function getRemoteInfo(remote: Remote): RemoteInfo {
