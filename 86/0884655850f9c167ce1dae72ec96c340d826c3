@@ -1,0 +1,59 @@
+packages/observability-plugin/src/browser.ts
+  s_36a90ee30dc33a::t_21545e490977e2 1-5,7
+packages/observability-plugin/src/chrome-devtool.ts
+  s_36a90ee30dc33a::t_893a189e9de536 1-5,7
+packages/observability-plugin/src/constant.ts
+  s_36a90ee30dc33a::t_20bd68ac325437 1-48
+packages/observability-plugin/src/core.ts
+  s_36a90ee30dc33a::t_511a095e574c76 6-177,179-188,190-195,197,199-277,280-283,285-286,288,290,293-294,296-317,319-321,324-326,328-337,339-341,343-346,348-354,356-369,808-812,2683
+packages/observability-plugin/src/node.ts
+  s_36a90ee30dc33a::t_a0b05d97e0f91d 1-9
+packages/observability-plugin/src/openruntime-actions.ts
+  s_36a90ee30dc33a::t_0773272b84a37b 11
+packages/observability-plugin/src/openruntime.ts
+  s_36a90ee30dc33a::t_cd4331a0d57cdf 16,21,27
+packages/observability-plugin/src/report/copy.ts
+  s_36a90ee30dc33a::t_9ac0256ce64453 1-170
+packages/observability-plugin/src/report/diagnosis.ts
+  s_36a90ee30dc33a::t_838d095f0f602f 1-522
+packages/observability-plugin/src/report/error.ts
+  s_36a90ee30dc33a::t_d1090683dafb55 1-107
+packages/observability-plugin/src/report/manager.ts
+  s_36a90ee30dc33a::t_d723ff2ec6867c 1-1305
+packages/observability-plugin/src/runtime/bridge.ts
+  s_36a90ee30dc33a::t_1e8dcf318dc40d 1-65
+packages/observability-plugin/src/runtime/global.ts
+  s_36a90ee30dc33a::t_4e8c5f69fede86 1-162
+packages/observability-plugin/src/runtime/preload.ts
+  s_36a90ee30dc33a::t_d11fdd7cf4ce0a 1-5
+packages/observability-plugin/src/runtime/react.ts
+  s_36a90ee30dc33a::t_5f0a95291adf98 1-187
+packages/observability-plugin/src/runtime/remote.ts
+  s_36a90ee30dc33a::t_d75770834754a8 1-91
+packages/observability-plugin/src/runtime/shared.ts
+  s_36a90ee30dc33a::t_3b2ada4674567b 1-781
+packages/observability-plugin/src/runtime/state.ts
+  s_36a90ee30dc33a::t_8b173fec4d63cc 1-560
+packages/observability-plugin/src/type/index.ts
+  s_36a90ee30dc33a::t_456df6f361adf8 1-1144
+packages/observability-plugin/src/utils/index.ts
+  s_36a90ee30dc33a::t_4507aae01f53c5 1-287
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "860884655850f9c167ce1dae72ec96c340d826c3",
+  "prompts": {},
+  "sessions": {
+    "s_36a90ee30dc33a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f933b-7864-70b1-9f95-d1602bc9ff05",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    }
+  },
+  "attestation_metadata": {},
+  "remote_transcripts": {}
+}
