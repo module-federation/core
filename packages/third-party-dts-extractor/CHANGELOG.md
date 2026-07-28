@@ -1,5 +1,7 @@
 # @module-federation/third-party-dts-extractor
 
+## 2.8.1
+
 ## 2.8.0
 
 ### Patch Changes
