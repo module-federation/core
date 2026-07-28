@@ -1,0 +1,29 @@
+apps/runtime-demo/3005-runtime-host/cypress/e2e/app.cy.ts
+  s_36a90ee30dc33a::t_97fc18dc67c590 519,861-866,1086-1087
+packages/observability-plugin/__tests__/observability.spec.ts
+  s_36a90ee30dc33a::t_c7913df894c1b0 1200,1259,1262,1265,2400,2411,2420,2427,2436,2441-2452,2455,2457,2470,2473,2476,2479,2482,2485,2567,2611,2617-2618,2620,2622-2625,2628-2645,2648,2655,2663,2666,2818,5236,5316,5593,5652
+packages/observability-plugin/src/openruntime.ts
+  s_36a90ee30dc33a::t_eec8a859eb608d 198,231,258,272,301,604-605,616,824-825,827-828,830-831,835-836
+packages/runtime-core/__tests__/load.spec.ts
+  s_36a90ee30dc33a::t_ce65c51dc50057 222-267
+packages/runtime-core/src/utils/load.ts
+  s_36a90ee30dc33a::t_ae4707bec3f65b 26-29,406,409-431
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "52b5341afae468deac0141dd0b2333bbc5e77510",
+  "prompts": {},
+  "sessions": {
+    "s_36a90ee30dc33a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f933b-7864-70b1-9f95-d1602bc9ff05",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    }
+  },
+  "attestation_metadata": {},
+  "remote_transcripts": {}
+}
