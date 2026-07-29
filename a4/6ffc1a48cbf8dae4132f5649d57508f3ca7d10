@@ -1,0 +1,31 @@
+.changeset/divebell-playground.md
+  s_36a90ee30dc33a::t_6f6b739a3e25e6 1-5
+packages/playground/package.json
+  s_36a90ee30dc33a::t_82cf411dbe3bdd 37
+packages/playground/src/App.module.css
+  s_36a90ee30dc33a::t_9eac54d745f1b6 308-314
+packages/playground/src/App.tsx
+  s_36a90ee30dc33a::t_53629857b4b61f 15-21,42-47,58,64,74,82,84,128-129,201-202,208,210-212,216,277,282-286,300-304,306-310,312-314,370,386,406,438,683,1102-1140,1161-1162,1231-1232,1234-1237,1379-1408,1487-1489,1520-1521,1533-1548,1663,1667-1680,1686-1687,1691-1694,1816-1817,1822,1850,1854-1857,1860,1877,1879-1880,1908-1912,1915-1916,1926-1930,1933-1934,1957-1959,2019,2023,2030,2037-2123,2334,2400,2433,2510-2527
+packages/playground/src/divebell.ts
+  s_36a90ee30dc33a::t_5d42645eee6a98 1-151
+pnpm-lock.yaml
+  s_36a90ee30dc33a::t_0b06bf161523f1 3900-3902
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "a46ffc1a48cbf8dae4132f5649d57508f3ca7d10",
+  "prompts": {},
+  "sessions": {
+    "s_36a90ee30dc33a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f933b-7864-70b1-9f95-d1602bc9ff05",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    }
+  },
+  "attestation_metadata": {},
+  "remote_transcripts": {}
+}
