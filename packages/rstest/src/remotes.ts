@@ -1,20 +1,11 @@
 import { parseEntry } from '@module-federation/sdk';
+import { PLUGIN_NAME } from '@module-federation/enhanced/rspack';
 
 import type { ModuleFederationOptions } from './types';
 
-type ModuleFederationPluginLikeOptions = {
-  name?: unknown;
-  remotes?: unknown;
-  exposes?: unknown;
-  shared?: unknown;
-};
-
 type ModuleFederationPluginLike = {
-  constructor?: {
-    name?: unknown;
-  };
-  _options?: ModuleFederationPluginLikeOptions;
-  options?: ModuleFederationPluginLikeOptions;
+  name?: unknown;
+  _options: ModuleFederationOptions;
 };
 
 const addRemoteNameFromString = (entry: string, target: Set<string>): void => {
@@ -24,28 +15,6 @@ const addRemoteNameFromString = (entry: string, target: Set<string>): void => {
   }
 
   target.add(parseEntry(normalized, undefined, '@').name);
-};
-
-const addRemoteNameFromObject = (
-  remote: Record<string, unknown>,
-  target: Set<string>,
-): void => {
-  const maybeName = remote.name;
-  const maybeAlias = remote.alias;
-
-  if (typeof maybeName === 'string') {
-    target.add(maybeName);
-    return;
-  }
-
-  if (typeof maybeAlias === 'string') {
-    target.add(maybeAlias);
-    return;
-  }
-
-  for (const key of Object.keys(remote)) {
-    target.add(key);
-  }
 };
 
 const addRemoteNames = (remotes: unknown, target: Set<string>): void => {
@@ -60,26 +29,7 @@ const addRemoteNames = (remotes: unknown, target: Set<string>): void => {
 
   if (Array.isArray(remotes)) {
     for (const remote of remotes) {
-      if (!remote) {
-        continue;
-      }
-
-      if (typeof remote === 'string') {
-        addRemoteNameFromString(remote, target);
-        continue;
-      }
-
-      if (Array.isArray(remote)) {
-        const [name] = remote;
-        if (typeof name === 'string') {
-          target.add(name);
-        }
-        continue;
-      }
-
-      if (typeof remote === 'object') {
-        addRemoteNameFromObject(remote as Record<string, unknown>, target);
-      }
+      addRemoteNames(remote, target);
     }
     return;
   }
@@ -96,41 +46,46 @@ const addRemoteNames = (remotes: unknown, target: Set<string>): void => {
  * rstest adapters (whose rsbuild config registers ModuleFederationPlugin via
  * `@module-federation/rsbuild-plugin`) do not have to redeclare remotes.
  *
- * `_options` is a private field of the ModuleFederationPlugin classes in
- * `packages/enhanced` and `packages/rspack` (no public accessor exists).
- * Scraping it is tolerated only because both packages live in this monorepo:
- * if that field is renamed, update this reader in the same change. The
- * duck-type fallback below guards against false positives from unrelated
- * plugins.
+ * `_options` is a private field of Rspack's ModuleFederationPlugin (no public
+ * accessor exists). Access is restricted by the plugin's stable public name.
+ * Both packages live in this monorepo, so a private-field rename must update
+ * this adapter in the same change.
  */
-const getModuleFederationPluginOptions = (
+const getModuleFederationPlugin = (
   plugin: unknown,
-): ModuleFederationPluginLikeOptions | undefined => {
+): ModuleFederationPluginLike | undefined => {
   if (!plugin || typeof plugin !== 'object') {
     return undefined;
   }
 
-  const mf = plugin as ModuleFederationPluginLike;
-  const options = mf._options ?? mf.options;
-  if (!options || typeof options !== 'object') {
+  const federationPlugin = plugin as ModuleFederationPluginLike;
+  if (
+    federationPlugin.name !== PLUGIN_NAME ||
+    !federationPlugin._options ||
+    typeof federationPlugin._options !== 'object'
+  ) {
     return undefined;
   }
 
-  if (mf.constructor?.name === 'ModuleFederationPlugin') {
-    return options;
+  return federationPlugin;
+};
+
+export const applyDefaultsToFederationPlugins = (
+  plugins: unknown[] | undefined,
+  getDefaults: (options: ModuleFederationOptions) => ModuleFederationOptions,
+): void => {
+  if (!plugins) {
+    return;
   }
 
-  // Duck-type fallback for wrapped or re-exported federation plugins whose
-  // constructor name differs: MF options carry a container name plus at
-  // least one federation-specific field.
-  if (
-    typeof options.name === 'string' &&
-    ('remotes' in options || 'exposes' in options || 'shared' in options)
-  ) {
-    return options;
-  }
+  for (const plugin of plugins) {
+    const federationPlugin = getModuleFederationPlugin(plugin);
+    if (!federationPlugin) {
+      continue;
+    }
 
-  return undefined;
+    federationPlugin._options = getDefaults(federationPlugin._options);
+  }
 };
 
 const addFallbackRemoteNamesFromPlugins = (
@@ -142,9 +97,9 @@ const addFallbackRemoteNamesFromPlugins = (
   }
 
   for (const plugin of plugins) {
-    const options = getModuleFederationPluginOptions(plugin);
-    if (options) {
-      addRemoteNames(options.remotes, target);
+    const federationPlugin = getModuleFederationPlugin(plugin);
+    if (federationPlugin) {
+      addRemoteNames(federationPlugin._options.remotes, target);
     }
   }
 };

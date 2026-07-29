@@ -12,6 +12,11 @@ export default defineConfig({
         autoExtension: true,
         distPath: './dist',
       },
+      redirect: {
+        dts: {
+          extension: true,
+        },
+      },
     },
     {
       format: 'cjs',
@@ -20,6 +25,11 @@ export default defineConfig({
       dts: {
         autoExtension: true,
         distPath: './dist',
+      },
+      redirect: {
+        dts: {
+          extension: true,
+        },
       },
     },
   ],

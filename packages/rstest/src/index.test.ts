@@ -1,4 +1,8 @@
 import { createRequire } from 'node:module';
+import {
+  ModuleFederationPlugin,
+  PLUGIN_NAME,
+} from '@module-federation/enhanced/rspack';
 import { describe, expect, it } from '@rstest/core';
 import type {
   EnvironmentConfig,
@@ -36,6 +40,17 @@ type EnvHookDescriptor =
   | EnvHook
   | { handler: EnvHook; order?: 'pre' | 'post' | 'default' };
 
+type BeforeCreateCompilerHook = (args: {
+  bundlerConfigs?: Rspack.Configuration[];
+}) => void;
+
+type BeforeCreateCompilerHookDescriptor =
+  | BeforeCreateCompilerHook
+  | {
+      handler: BeforeCreateCompilerHook;
+      order?: 'pre' | 'post' | 'default';
+    };
+
 // Loose rspack-config shape for tests: real Rspack.Configuration rejects the
 // fake plugin objects the tests construct, so the cast to the real type
 // happens once, at the hook boundary in runRspackHooks.
@@ -72,9 +87,8 @@ const callExternal = (fn: ExternalFunction, request: string): unknown => {
 // plugin. `_options` is the private field of ModuleFederationPlugin; the
 // tests read it the same way `remotes.ts` does.
 type ModuleFederationPluginInstance = {
-  constructor?: { name?: string };
+  name?: string;
   _options?: ModuleFederationOptions;
-  options?: ModuleFederationOptions;
 };
 
 const shallowMergeEnvironmentConfig: MergeEnvironmentConfig = (...configs) =>
@@ -85,11 +99,11 @@ const getFederationPluginOptions = (
 ): ModuleFederationOptions => {
   const plugin = (plugins ?? []).find(
     (item): item is ModuleFederationPluginInstance =>
-      (item as ModuleFederationPluginInstance | undefined)?.constructor
-        ?.name === 'ModuleFederationPlugin',
+      (item as ModuleFederationPluginInstance | undefined)?.name ===
+      PLUGIN_NAME,
   );
   expect(plugin).toBeTruthy();
-  const options = plugin!._options ?? plugin!.options;
+  const options = plugin!._options;
   expect(options).toBeTruthy();
   return options!;
 };
@@ -99,7 +113,15 @@ const setupFederationPlugin = (
   plugin: FederationPlugin,
   callerName = 'rstest',
   rstestConfig: TestRstestConfig = {},
-): { envHook: EnvHook; order: unknown; rstestConfig: TestRstestConfig } => {
+): {
+  beforeCreateCompilerHook: BeforeCreateCompilerHook | undefined;
+  beforeCreateCompilerOrder: unknown;
+  envHook: EnvHook;
+  order: unknown;
+  rstestConfig: TestRstestConfig;
+} => {
+  let beforeCreateCompilerHook: BeforeCreateCompilerHook | undefined;
+  let beforeCreateCompilerOrder: unknown;
   let envHook: EnvHook | undefined;
   let order: unknown;
 
@@ -122,12 +144,26 @@ const setupFederationPlugin = (
         order = hook.order;
       }
     },
+    onBeforeCreateCompiler: (hook: BeforeCreateCompilerHookDescriptor) => {
+      if (typeof hook === 'function') {
+        beforeCreateCompilerHook = hook;
+      } else {
+        beforeCreateCompilerHook = hook.handler;
+        beforeCreateCompilerOrder = hook.order;
+      }
+    },
   };
 
   plugin.setup(fakeApi as unknown as RsbuildPluginAPI);
 
   expect(typeof envHook).toBe('function');
-  return { envHook: envHook!, order, rstestConfig };
+  return {
+    beforeCreateCompilerHook,
+    beforeCreateCompilerOrder,
+    envHook: envHook!,
+    order,
+    rstestConfig,
+  };
 };
 
 const runRspackHooks = (
@@ -154,20 +190,30 @@ const applyFederationPlugin = (
     callerName = 'rstest',
     config = {},
     mergeEnvironmentConfig = shallowMergeEnvironmentConfig,
+    latePlugins = [],
     rspackConfig = { output: {}, plugins: [] },
     rstestConfig = {},
   }: {
     callerName?: string;
     config?: EnvironmentConfig;
+    latePlugins?: unknown[];
     mergeEnvironmentConfig?: MergeEnvironmentConfig;
     rspackConfig?: TestRspackConfig;
     rstestConfig?: TestRstestConfig;
   } = {},
 ) => {
-  const { envHook } = setupFederationPlugin(plugin, callerName, rstestConfig);
+  const { beforeCreateCompilerHook, envHook } = setupFederationPlugin(
+    plugin,
+    callerName,
+    rstestConfig,
+  );
   const merged = envHook(config, { mergeEnvironmentConfig });
 
   runRspackHooks(merged, rspackConfig);
+  rspackConfig.plugins?.push(...latePlugins);
+  beforeCreateCompilerHook?.({
+    bundlerConfigs: [rspackConfig as Rspack.Configuration],
+  });
 
   return { merged, rspackConfig };
 };
@@ -256,6 +302,11 @@ describe('federation()', () => {
     expect(order).toBe('post');
   });
 
+  it('normalizes existing federation plugins after compiler setup hooks', () => {
+    const { beforeCreateCompilerOrder } = setupFederationPlugin(federation());
+    expect(beforeCreateCompilerOrder).toBe('post');
+  });
+
   it('enables Rstest federation compatibility for node targets', () => {
     const { rstestConfig } = setupFederationPlugin(federation());
 
@@ -286,20 +337,18 @@ describe('federation()', () => {
         output: {},
         externals: ['react'],
         plugins: [
-          {
-            constructor: { name: 'ModuleFederationPlugin' },
-            _options: {
-              remotes: {
-                'component-app':
-                  'component_app@http://localhost:3001/remoteEntry.js',
-              },
-              experiments: {
-                optimization: {
-                  target: 'node',
-                },
+          new ModuleFederationPlugin({
+            name: 'existing_host',
+            remotes: {
+              'component-app':
+                'component_app@http://localhost:3001/remoteEntry.js',
+            },
+            experiments: {
+              optimization: {
+                target: 'node',
               },
             },
-          },
+          }),
         ],
       },
     });
@@ -310,26 +359,108 @@ describe('federation()', () => {
   });
 
   it('discovers federation remotes registered after rspack config patching', () => {
+    const originalOptions: ModuleFederationOptions = {
+      name: 'existing_host',
+      remotes: {
+        'component-app': 'component_app@http://localhost:3001/remoteEntry.js',
+      },
+    };
+    const existingPlugin = new ModuleFederationPlugin(originalOptions);
     const { rspackConfig } = applyFederationPlugin(federation(), {
       rspackConfig: {
         output: {},
         externals: ['react'],
         plugins: [],
       },
+      latePlugins: [existingPlugin],
     });
 
-    rspackConfig.plugins?.push({
-      constructor: { name: 'ModuleFederationPlugin' },
-      _options: {
-        remotes: {
-          'component-app': 'component_app@http://localhost:3001/remoteEntry.js',
-        },
-      },
-    });
+    expect(rspackConfig.plugins).toContain(existingPlugin);
+    expect(originalOptions.remoteType).toBeUndefined();
 
     const bypass = getExternalBypass(rspackConfig);
     expect(callExternal(bypass, 'component-app/Button')).toBe(false);
     expect(callExternal(bypass, 'react')).toBe(undefined);
+
+    const options = getFederationPluginOptions(rspackConfig.plugins);
+    expect(options.remoteType).toBe('script');
+    expect(options.library).toEqual({
+      name: 'existing_host',
+      type: 'commonjs-module',
+    });
+    expect(options.runtimePlugins).toEqual([NODE_RUNTIME_PLUGIN]);
+    expect(options.experiments?.asyncStartup).toBe(true);
+    expect(options.experiments?.optimization?.target).toBe('node');
+  });
+
+  it('does not normalize federation plugins from unpatched environments', () => {
+    const { beforeCreateCompilerHook, envHook } =
+      setupFederationPlugin(federation());
+    const merged = envHook(
+      {},
+      { mergeEnvironmentConfig: shallowMergeEnvironmentConfig },
+    );
+    const patchedConfig: TestRspackConfig = { output: {}, plugins: [] };
+    runRspackHooks(merged, patchedConfig);
+
+    const unpatchedConfig: TestRspackConfig = {
+      plugins: [new ModuleFederationPlugin({ name: 'other_environment' })],
+    };
+    beforeCreateCompilerHook?.({
+      bundlerConfigs: [
+        patchedConfig as Rspack.Configuration,
+        unpatchedConfig as Rspack.Configuration,
+      ],
+    });
+
+    const options = getFederationPluginOptions(unpatchedConfig.plugins);
+    expect(options.remoteType).toBeUndefined();
+    expect(options.library).toBeUndefined();
+  });
+
+  it('applies browser defaults to an existing federation plugin', () => {
+    const { rspackConfig } = applyFederationPlugin(federation(), {
+      latePlugins: [
+        new ModuleFederationPlugin({ name: 'existing_browser_host' }),
+      ],
+      rstestConfig: {
+        browser: { enabled: true },
+      },
+    });
+
+    const options = getFederationPluginOptions(rspackConfig.plugins);
+    expect(options.dts).toBe(false);
+    expect(options.manifest).toBe(false);
+    expect(options.dev).toBe(false);
+    expect(options.experiments?.asyncStartup).toBe(true);
+    expect(options.remoteType).toBeUndefined();
+    expect(options.library).toBeUndefined();
+    expect(options.runtimePlugins).toBeUndefined();
+  });
+
+  it('does not register late normalization for direct options', () => {
+    const { beforeCreateCompilerHook } = setupFederationPlugin(
+      federation({ name: 'direct_host' }),
+    );
+
+    expect(beforeCreateCompilerHook).toBeUndefined();
+  });
+
+  it('does not treat an existing runtime plugin as manual configuration', () => {
+    const warnings = captureWarnings(() => {
+      applyFederationPlugin(federation(), {
+        latePlugins: [
+          new ModuleFederationPlugin({
+            name: 'existing_node_host',
+            runtimePlugins: [NODE_RUNTIME_PLUGIN],
+          }),
+        ],
+      });
+    });
+
+    expect(warnings.join('\n')).not.toContain(
+      'manual configuration is unnecessary',
+    );
   });
 
   it('auto-applies ModuleFederationPlugin with node defaults', () => {
@@ -351,13 +482,13 @@ describe('federation()', () => {
     expect(rspackConfig.output?.module).toBe(false);
 
     const options = getFederationPluginOptions(rspackConfig.plugins);
-    expect(options!.name).toBe('main_app_web');
-    expect(options!.library?.type).toBe('commonjs-module');
-    expect(options!.library?.name).toBe('main_app_web');
-    expect(options!.remoteType).toBe(undefined);
-    expect(options!.runtimePlugins).toEqual([NODE_RUNTIME_PLUGIN]);
-    expect(options!.experiments?.asyncStartup).toBe(true);
-    expect(options!.experiments?.optimization?.target).toBe('node');
+    expect(options.name).toBe('main_app_web');
+    expect(options.library?.type).toBe('commonjs-module');
+    expect(options.library?.name).toBe('main_app_web');
+    expect(options.remoteType).toBe('script');
+    expect(options.runtimePlugins).toEqual([NODE_RUNTIME_PLUGIN]);
+    expect(options.experiments?.asyncStartup).toBe(true);
+    expect(options.experiments?.optimization?.target).toBe('node');
   });
 
   it('disables dts, manifest, and dev machinery by default', () => {
@@ -366,9 +497,9 @@ describe('federation()', () => {
     );
 
     const options = getFederationPluginOptions(rspackConfig.plugins);
-    expect(options!.dts).toBe(false);
-    expect(options!.manifest).toBe(false);
-    expect(options!.dev).toBe(false);
+    expect(options.dts).toBe(false);
+    expect(options.manifest).toBe(false);
+    expect(options.dev).toBe(false);
   });
 
   it('disables dts, manifest, and dev by default for browser target too', () => {
@@ -377,9 +508,9 @@ describe('federation()', () => {
     );
 
     const options = getFederationPluginOptions(rspackConfig.plugins);
-    expect(options!.dts).toBe(false);
-    expect(options!.manifest).toBe(false);
-    expect(options!.dev).toBe(false);
+    expect(options.dts).toBe(false);
+    expect(options.manifest).toBe(false);
+    expect(options.dev).toBe(false);
   });
 
   it('preserves explicit dts, manifest, and dev values', () => {
@@ -393,9 +524,9 @@ describe('federation()', () => {
     );
 
     const options = getFederationPluginOptions(rspackConfig.plugins);
-    expect(options!.dts).toBe(true);
-    expect(options!.manifest).toEqual({ filePath: 'custom' });
-    expect(options!.dev).toBe(true);
+    expect(options.dts).toBe(true);
+    expect(options.manifest).toEqual({ filePath: 'custom' });
+    expect(options.dev).toBe(true);
   });
 
   it('preserves user overrides while still injecting node runtime plugin', () => {
@@ -530,8 +661,8 @@ describe('federation()', () => {
     expect(rspackConfig.output?.module).toBe(undefined);
 
     const options = getFederationPluginOptions(rspackConfig.plugins);
-    expect(options!.library).toBe(undefined);
-    expect(options!.runtimePlugins).toBe(undefined);
+    expect(options.library).toBe(undefined);
+    expect(options.runtimePlugins).toBe(undefined);
   });
 
   it('lets an explicit node target win over detected Browser Mode', () => {
@@ -567,13 +698,13 @@ describe('federation()', () => {
     expect(rspackConfig.output?.module).toBe(undefined);
 
     const options = getFederationPluginOptions(rspackConfig.plugins);
-    expect(options!.remoteType).toBe(undefined);
-    expect(options!.library).toBe(undefined);
-    expect(options!.runtimePlugins).toBe(undefined);
-    expect(options!.experiments?.asyncStartup).toBe(true);
+    expect(options.remoteType).toBe(undefined);
+    expect(options.library).toBe(undefined);
+    expect(options.runtimePlugins).toBe(undefined);
+    expect(options.experiments?.asyncStartup).toBe(true);
   });
 
-  it('does not force remoteType when remotes are configured', () => {
+  it('defaults node remote transport to script', () => {
     const { rspackConfig } = applyFederationPlugin(
       federation({
         name: 'prefixed_commonjs_remote',
@@ -584,10 +715,10 @@ describe('federation()', () => {
     );
 
     const options = getFederationPluginOptions(rspackConfig.plugins);
-    expect(options!.remoteType).toBe(undefined);
+    expect(options.remoteType).toBe('script');
   });
 
-  it('does not force remoteType when no remotes are configured', () => {
+  it('sets the node remote transport default without configured remotes', () => {
     const { rspackConfig } = applyFederationPlugin(
       federation({
         name: 'no_remotes',
@@ -598,7 +729,7 @@ describe('federation()', () => {
     );
 
     const options = getFederationPluginOptions(rspackConfig.plugins);
-    expect(options!.remoteType).toBe(undefined);
+    expect(options.remoteType).toBe('script');
   });
 
   it('collects remote names from string remotes (mf-manifest) and bypasses externals', () => {
@@ -607,17 +738,15 @@ describe('federation()', () => {
         output: {},
         externals: [],
         plugins: [
-          {
-            constructor: { name: 'ModuleFederationPlugin' },
-            _options: {
-              remotes: ['component-app@http://localhost:3001/mf-manifest.json'],
-              experiments: {
-                optimization: {
-                  target: 'node',
-                },
+          new ModuleFederationPlugin({
+            name: 'manifest_host',
+            remotes: ['component-app@http://localhost:3001/mf-manifest.json'],
+            experiments: {
+              optimization: {
+                target: 'node',
               },
             },
-          },
+          }),
         ],
       },
     });

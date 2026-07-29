@@ -5,7 +5,10 @@ import type { RstestExposeAPI } from '@rstest/core';
 import { createFederationExternalBypass } from './externals-bypass';
 import { logger } from './logger';
 import { withNodeDefaults, withRstestDefaults } from './node-defaults';
-import { collectRemoteNames } from './remotes';
+import {
+  applyDefaultsToFederationPlugins,
+  collectRemoteNames,
+} from './remotes';
 import { appendRspackHook, applyNodeRspackDefaults } from './rspack-hook';
 import type { ModuleFederationOptions, RstestFederationOptions } from './types';
 
@@ -22,14 +25,16 @@ const toArray = <T>(value: T | T[] | undefined): T[] => {
     return [];
   }
 
-  return Array.isArray(value) ? [...value] : [value];
+  return Array.isArray(value) ? value : [value];
 };
 
 const createRspackPatcher = (
   moduleFederationOptions: ModuleFederationOptions | undefined,
   isNodeTarget: boolean,
+  patchedRspackConfigs: WeakSet<Rspack.Configuration>,
 ) => {
   return (rspackConfig: Rspack.Configuration): void => {
+    patchedRspackConfigs.add(rspackConfig);
     rspackConfig.output ||= {};
     rspackConfig.plugins ||= [];
 
@@ -109,10 +114,36 @@ export const federation = (
     const target =
       rstestOptions?.target ?? (isBrowserMode ? 'browser' : 'node');
     const isNodeTarget = target === 'node';
+    const patchedRspackConfigs = new WeakSet<Rspack.Configuration>();
 
     if (isNodeTarget) {
       rstestApi?.modifyRstestConfig((config) => {
         config.federation = true;
+      });
+    }
+
+    if (!moduleFederationOptions) {
+      const normalizeOptions = isNodeTarget
+        ? (options: ModuleFederationOptions) =>
+            withNodeDefaults(options, {
+              warnOnConfiguredRuntimePlugin: false,
+            })
+        : withRstestDefaults;
+
+      api.onBeforeCreateCompiler({
+        order: 'post',
+        handler: ({ bundlerConfigs }) => {
+          for (const rspackConfig of bundlerConfigs ?? []) {
+            if (!patchedRspackConfigs.has(rspackConfig)) {
+              continue;
+            }
+
+            applyDefaultsToFederationPlugins(
+              rspackConfig.plugins,
+              normalizeOptions,
+            );
+          }
+        },
       });
     }
 
@@ -131,7 +162,11 @@ export const federation = (
 
         appendRspackHook(
           merged,
-          createRspackPatcher(moduleFederationOptions, isNodeTarget),
+          createRspackPatcher(
+            moduleFederationOptions,
+            isNodeTarget,
+            patchedRspackConfigs,
+          ),
         );
 
         return merged;

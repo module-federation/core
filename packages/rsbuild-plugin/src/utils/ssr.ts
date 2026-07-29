@@ -188,13 +188,10 @@ export function createSSRREnvConfig(
  * Node-target MF defaults for Rsbuild SSR builds.
  *
  * `@module-federation/rstest` has a sibling helper (`withNodeDefaults` in
- * packages/rstest/src/node-defaults.ts) with deliberately different policy:
- * SSR bundles run behind a real server, so remotes are fetched as scripts
- * (`remoteType: 'script'`) and the container keeps whatever library name the
- * bundler derives. Rstest executes containers inside Node test workers, so it
- * infers the transport from each remote declaration instead of forcing
- * `remoteType`, and forces `library.name` to the container name so the worker
- * can resolve it. Keep divergence between the two intentional and documented.
+ * packages/rstest/src/node-defaults.ts). Both default remotes to script
+ * transport and container output to CommonJS. Rstest additionally forces
+ * `library.name` to the container name so test workers can resolve it; Rsbuild
+ * keeps the bundler-derived name.
  */
 export function patchNodeMFConfig(
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,

@@ -48,10 +48,13 @@ The plugin applies these Node defaults:
 - CommonJS library output (`library.type = 'commonjs-module'`)
 - Node runtime plugin (`@module-federation/node/runtimePlugin`)
 - `experiments.optimization.target = 'node'`
-- Remote transport is inferred from each remote declaration, so standard URL
-  remotes and `commonjs ...` path remotes work without setting `remoteType`
+- Script remote transport (`remoteType = 'script'`); inline prefixes such as
+  `commonjs ...` still override the default
 
 ### Browser Mode
+
+Install `@rstest/browser` and a Playwright browser before enabling Browser
+Mode. See [Rstest's Browser Mode setup](https://rstest.rs/guide/browser-testing/getting-started).
 
 ```ts
 import { federation } from '@module-federation/rstest';
@@ -60,6 +63,7 @@ import { defineConfig } from '@rstest/core';
 export default defineConfig({
   browser: {
     enabled: true,
+    provider: 'playwright',
   },
   plugins: [
     federation({
@@ -78,6 +82,13 @@ configuration. In browser target mode, node-only defaults are not applied.
 
 The plugin name is `rstest:federation`, exported as
 `FEDERATION_PLUGIN_NAME`.
+
+## Real-world Example
+
+Rstest's
+[federation example](https://github.com/web-infra-dev/rstest/tree/v0.11.4/examples/federation)
+tests an HTTP component remote and a locally built CommonJS remote from Node
+and JSDOM projects. It covers both static and dynamic remote imports.
 
 ## Documentation
 

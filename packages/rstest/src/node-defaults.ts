@@ -31,21 +31,23 @@ export const withRstestDefaults = (
  *
  * `@module-federation/rsbuild-plugin` has a sibling helper
  * (`patchNodeMFConfig` in packages/rsbuild-plugin/src/utils/ssr.ts) with
- * deliberately different policy: SSR bundles fetch remotes as scripts
- * (`remoteType: 'script'`) and keep the bundler-derived library name. Test
- * workers instead infer the transport from each remote declaration (so
- * `remoteType` is never forced) and require `library.name` to equal the
- * container name so the container is resolvable inside the worker. Keep
- * divergence between the two intentional and documented.
+ * the same script transport default. Test workers additionally require
+ * `library.name` to equal the container name so the container is resolvable
+ * inside the worker.
  */
 export const withNodeDefaults = (
   options: ModuleFederationOptions,
+  {
+    warnOnConfiguredRuntimePlugin = true,
+  }: {
+    warnOnConfiguredRuntimePlugin?: boolean;
+  } = {},
 ): ModuleFederationOptions => {
   const merged = withRstestDefaults(options);
   const { runtimePlugins, hasConfiguredNodeRuntimePlugin } =
     normalizeRuntimePlugins(merged.runtimePlugins);
 
-  if (hasConfiguredNodeRuntimePlugin) {
+  if (hasConfiguredNodeRuntimePlugin && warnOnConfiguredRuntimePlugin) {
     logger.warn(
       'The node runtime plugin is injected automatically; manual configuration is unnecessary.',
     );
@@ -66,6 +68,7 @@ export const withNodeDefaults = (
 
   return {
     ...merged,
+    remoteType: merged.remoteType ?? 'script',
     library: {
       ...merged.library,
       name: merged.name,

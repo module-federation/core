@@ -1,3 +1,4 @@
+import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
 import { describe, expect, it } from '@rstest/core';
 
 import { collectRemoteNames } from './remotes';
@@ -17,15 +18,17 @@ describe('collectRemoteNames', () => {
       collectRemoteNames([
         'stringRemote@http://localhost:3002/mf-manifest.json',
         {
-          name: 'namedRemote',
-          external: 'namedRemote@http://localhost:3003/remoteEntry.js',
+          name: 'namedRemote@http://localhost:3003/remoteEntry.js',
         },
         {
-          alias: 'aliasedRemote',
-          external: 'aliasedContainer@http://localhost:3004/remoteEntry.js',
+          alias: 'aliasedContainer@http://localhost:3004/remoteEntry.js',
+        },
+        {
+          first: 'firstContainer@http://localhost:3005/remoteEntry.js',
+          second: 'secondContainer@http://localhost:3006/remoteEntry.js',
         },
       ]),
-    ).toEqual(new Set(['stringRemote', 'namedRemote', 'aliasedRemote']));
+    ).toEqual(new Set(['stringRemote', 'name', 'alias', 'first', 'second']));
   });
 
   it('parses scoped string remotes as name@entry', () => {
@@ -40,37 +43,34 @@ describe('collectRemoteNames', () => {
   it('collects fallback remote names from plugin options only when provided', () => {
     expect(
       collectRemoteNames(undefined, [
-        {
-          constructor: { name: 'ModuleFederationPlugin' },
-          _options: {
-            remotes: {
-              fallbackRemote:
-                'fallbackRemote@http://localhost:3005/remoteEntry.js',
-            },
+        new ModuleFederationPlugin({
+          name: 'fallback_host',
+          remotes: {
+            fallbackRemote:
+              'fallbackRemote@http://localhost:3005/remoteEntry.js',
           },
-        },
+        }),
       ]),
     ).toEqual(new Set(['fallbackRemote']));
   });
 
-  it('duck-types federation plugins whose constructor name differs', () => {
+  it('ignores similarly shaped non-federation plugins', () => {
     expect(
       collectRemoteNames(undefined, [
         {
-          constructor: { name: 'WrappedFederationPlugin' },
-          options: {
+          name: 'WrappedFederationPlugin',
+          _options: {
             name: 'wrapped_host',
             remotes: {
               duckRemote: 'duckRemote@http://localhost:3006/remoteEntry.js',
             },
           },
         },
-        // Not federation-shaped: must be ignored.
         {
-          constructor: { name: 'SomeOtherPlugin' },
-          options: { name: 'not_federation' },
+          name: 'SomeOtherPlugin',
+          _options: { name: 'not_federation' },
         },
       ]),
-    ).toEqual(new Set(['duckRemote']));
+    ).toEqual(new Set());
   });
 });

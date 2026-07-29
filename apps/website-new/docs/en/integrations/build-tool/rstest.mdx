@@ -75,6 +75,30 @@ Run your tests with Rstest as usual:
 npx rstest run
 ```
 
+## Test a Federated Remote
+
+Build or start the remote in Rstest's `globalSetup`, then import exposed modules
+the same way application code does:
+
+```ts title='remote.test.ts'
+import { expect, it } from '@rstest/core';
+import Button from 'component-app/Button';
+
+it('loads a remote through a static import', () => {
+  expect(Button).toBeDefined();
+});
+
+it('loads a remote through a dynamic import', async () => {
+  const remote = await import('component-app/Button');
+  expect(remote.default).toBeDefined();
+});
+```
+
+The official
+[Rstest federation example](https://github.com/web-infra-dev/rstest/tree/v0.11.4/examples/federation)
+combines an HTTP component remote with a locally built `commonjs ...` remote
+and runs both Node and JSDOM projects.
+
 ## How It Works
 
 ### Node Test Defaults
@@ -87,15 +111,18 @@ that match the Node runtime:
 - CommonJS container output
 - `@module-federation/node/runtimePlugin`
 - Node-targeted federation optimization
-- Remote transport inferred from each remote declaration
+- Script remote transport by default
 
-Standard URL remotes and `commonjs ...` path remotes work without setting
-`remoteType`.
+Standard URL remotes use `remoteType: 'script'`. Inline transport prefixes such
+as `commonjs ...` override that default.
 
 ### Browser Mode
 
 Rstest browser mode is detected automatically from its resolved
 `browser.enabled` configuration:
+
+Install `@rstest/browser` and a Playwright browser first. See
+[Rstest's Browser Mode setup](https://rstest.rs/guide/browser-testing/getting-started).
 
 ```ts title='rstest.config.ts'
 import { federation } from '@module-federation/rstest';
@@ -104,6 +131,7 @@ import { defineConfig } from '@rstest/core';
 export default defineConfig({
   browser: {
     enabled: true,
+    provider: 'playwright',
   },
   plugins: [
     federation({

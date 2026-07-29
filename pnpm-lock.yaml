@@ -4065,6 +4065,9 @@ importers:
         specifier: workspace:*
         version: link:../sdk
     devDependencies:
+      '@module-federation/rsbuild-plugin':
+        specifier: workspace:*
+        version: link:../rsbuild-plugin
       '@rsbuild/core':
         specifier: 2.1.4
         version: 2.1.4(@module-federation/runtime-tools@2.8.0)(core-js@3.49.0)
