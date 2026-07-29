@@ -25,7 +25,6 @@ import {
   requireTypeScript,
 } from '../lib/typeScriptResolver';
 import {
-  formatCommandForDisplay,
   formatCompilerOutput,
   preserveTypeScriptDiagnostic,
 } from '../lib/typeScriptDiagnostics';
@@ -374,10 +373,10 @@ const getDependentFilesWithTsc = (
     '--project',
     listFilesTsConfigPath,
   ];
-  const compilerCommand = formatCommandForDisplay(
-    process.execPath,
-    compilerArgs,
-  );
+  const compilerCommand = {
+    executable: process.execPath,
+    args: compilerArgs,
+  };
   let retainTemporaryConfig = false;
   try {
     const stdout = execFileSync(process.execPath, compilerArgs, {

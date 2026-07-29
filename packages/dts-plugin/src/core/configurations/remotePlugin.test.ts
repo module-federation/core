@@ -12,6 +12,7 @@ import os from 'os';
 import { dirname, join, resolve } from 'path';
 import { afterEach, describe, expect, it } from '@rstest/core';
 
+import { formatCommandForDisplay } from '../lib/typeScriptDiagnostics';
 import { retrieveRemoteConfig } from './remotePlugin';
 
 describe('hostPlugin', () => {
@@ -611,10 +612,15 @@ describe('hostPlugin', () => {
             expect(readFileSync(diagnosticLogPath, 'utf8')).toContain(
               'TypeScript version: 7.0.2',
             );
-            expect(readFileSync(diagnosticLogPath, 'utf8')).toContain(
-              '--listFilesOnly',
+            const diagnosticLog = readFileSync(diagnosticLogPath, 'utf8');
+            expect(diagnosticLog).toContain('--listFilesOnly');
+            expect(diagnosticLog).toContain('TS6504');
+            const diagnosticCommand = diagnosticLog
+              .split(/\r?\n/)
+              .find((line) => line.startsWith('Command:'));
+            expect(diagnosticCommand).toContain(
+              formatCommandForDisplay('', [diagnosticConfigPath]).trim(),
             );
-            expect(readFileSync(diagnosticLogPath, 'utf8')).toContain('TS6504');
           });
         }
       });

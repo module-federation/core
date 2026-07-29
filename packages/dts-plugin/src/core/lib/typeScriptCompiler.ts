@@ -23,7 +23,6 @@ import { TsConfigJson } from '../interfaces/TsConfigJson';
 import { logger } from '../../server';
 import { getTypeScriptPackageInfo } from './typeScriptResolver';
 import {
-  formatCommandForDisplay,
   formatCompilerOutput,
   preserveTypeScriptDiagnostic,
 } from './typeScriptDiagnostics';
@@ -263,7 +262,6 @@ const resolveCompilerCommand = (
     return {
       executable: process.execPath,
       args,
-      displayCommand: formatCommandForDisplay(process.execPath, args),
       shell: false,
     };
   }
@@ -273,7 +271,6 @@ const resolveCompilerCommand = (
   return {
     executable,
     args,
-    displayCommand: formatCommandForDisplay(executable, args),
     shell: process.platform === 'win32',
   };
 };
@@ -330,7 +327,7 @@ export const compileTs = async (
       );
       const compilerOutput = formatCompilerOutput(err);
       const diagnostics = preserveTypeScriptDiagnostic({
-        command: compilerCommand.displayCommand,
+        command: compilerCommand,
         compilerOutput,
         context: remoteOptions.context,
         stage: 'generate-types',
@@ -342,7 +339,7 @@ export const compileTs = async (
         TYPE_001,
         typeDescMap,
         {
-          cmd: compilerCommand.displayCommand,
+          cmd: diagnostics.command,
           diagnosticConfig: diagnostics.diagnosticConfigPath,
           diagnosticLog: diagnostics.diagnosticLogPath,
           typeScriptVersion: typeScriptPackageInfo.version,

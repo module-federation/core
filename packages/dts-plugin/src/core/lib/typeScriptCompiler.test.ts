@@ -22,6 +22,7 @@ import {
   retrieveMfTypesPath,
   retrieveOriginalOutDir,
 } from './typeScriptCompiler';
+import { formatCommandForDisplay } from './typeScriptDiagnostics';
 
 describe('typeScriptCompiler', () => {
   const requireFromTest = createRequire(__filename);
@@ -368,15 +369,20 @@ describe('typeScriptCompiler', () => {
         },
       };
 
-      await expect(
-        compileTs(
+      let compilationError: unknown;
+      try {
+        await compileTs(
           {
             './button': entryFile,
           },
           failedConfig,
           failedOptions,
-        ),
-      ).rejects.toThrow('Original Error Message');
+        );
+      } catch (error) {
+        compilationError = error;
+      }
+      expect(compilationError).toBeInstanceOf(Error);
+      expect(String(compilationError)).toContain('Original Error Message');
 
       const diagnosticDir = join(
         projectDir,
@@ -393,6 +399,15 @@ describe('typeScriptCompiler', () => {
       expect(diagnosticLog).toContain('Command:');
       expect(diagnosticLog).toContain('Fatal compiler diagnostic:');
       expect(diagnosticLog).toContain('TS1005');
+      const diagnosticCommand = diagnosticLog
+        .split(/\r?\n/)
+        .find((line) => line.startsWith('Command:'));
+      expect(diagnosticCommand).toContain(
+        formatCommandForDisplay('', [diagnosticConfigPath]).trim(),
+      );
+      expect(String(compilationError)).toContain(
+        formatCommandForDisplay('', [diagnosticConfigPath]).trim(),
+      );
 
       const temporaryConfigs = readdirSync(
         join(projectDir, 'node_modules/.federation'),
