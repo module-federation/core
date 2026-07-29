@@ -155,28 +155,26 @@ For agent-led debugging, use the repository's single `mf` skill entry with the
 `observability` sub-command. The skill is the maintained guide for reading
 reports and deciding the next debugging step.
 
-## OpenRuntime targets
+## Divebell targets
 
-When `openRuntime` is enabled, the observability plugin syncs Module Federation
-loading state into OpenRuntime targets. The host application does not need to
-import OpenRuntime directly.
+When `divebell` is enabled, the observability plugin syncs Module Federation
+loading state into Divebell targets. The host application does not need to
+import Divebell directly.
 
 ```ts
 ObservabilityPlugin({
   level: 'verbose',
-  openRuntime: {
-    bridge: {
-      port: 17321,
-    },
+  divebell: {
+    source: 'module-federation',
   },
 });
 ```
 
-Use the OpenRuntime CLI to inspect the page:
+Use the Divebell CLI to inspect the page:
 
 ```bash
-pnpm exec openruntime targets --url "http://127.0.0.1:3005/observability?openruntimeBridge=1"
-pnpm exec openruntime snapshot --url "http://127.0.0.1:3005/observability?openruntimeBridge=1"
+divebell targets --url "http://127.0.0.1:3005/observability"
+divebell snapshot --url "http://127.0.0.1:3005/observability"
 ```
 
 ### `mf:remote:<remoteName>`
@@ -215,7 +213,7 @@ the remote or expose data.
 Common wait:
 
 ```bash
-pnpm exec openruntime wait-for mf:remote:runtime_remote2 ready --url "http://127.0.0.1:3005/observability?openruntimeBridge=1"
+divebell wait-for mf:remote:runtime_remote2 ready --url "http://127.0.0.1:3005/observability"
 ```
 
 ### `mf:remote:<remoteName>:expose:<exposeName>`
@@ -255,7 +253,7 @@ status already carry that information.
 Common wait:
 
 ```bash
-pnpm exec openruntime wait-for mf:remote:runtime_remote2:expose:ButtonOldAnt ready --url "http://127.0.0.1:3005/observability?openruntimeBridge=1"
+divebell wait-for mf:remote:runtime_remote2:expose:ButtonOldAnt ready --url "http://127.0.0.1:3005/observability"
 ```
 
 ### `mf:shared:<sharedName>:<version>:<shareScope>`
@@ -302,18 +300,18 @@ Snapshot data:
 
 The shared snapshot intentionally omits `selectedVersion`,
 `availableVersions`, `get`, `useIn`, and `from`. If a user needs broader
-runtime global state, use the OpenRuntime actions below.
+runtime global state, use the Divebell actions below.
 
 Common waits:
 
 ```bash
-pnpm exec openruntime wait-for mf:shared:observability-provider-choice:2.0.0:observability-provider-scope loaded --url "http://127.0.0.1:3005/observability?openruntimeBridge=1"
-pnpm exec openruntime wait-for mf:shared:observability-async-shared:1.0.0:default error --url "http://127.0.0.1:3005/observability?openruntimeBridge=1"
+divebell wait-for mf:shared:observability-provider-choice:2.0.0:observability-provider-scope loaded --url "http://127.0.0.1:3005/observability"
+divebell wait-for mf:shared:observability-async-shared:1.0.0:default error --url "http://127.0.0.1:3005/observability"
 ```
 
 ### Actions
 
-The plugin also registers safe OpenRuntime actions for deeper inspection:
+The plugin also registers safe Divebell actions for deeper inspection:
 
 - `mf:list-reports`: list report summaries. Supports filters such as `remote`,
   `expose`, `shared`, `traceId`, `status`, and `outcome`.
@@ -329,7 +327,7 @@ The plugin also registers safe OpenRuntime actions for deeper inspection:
 Example:
 
 ```bash
-pnpm exec openruntime run-action --url "http://127.0.0.1:3005/observability?openruntimeBridge=1" mf:list-reports --payload '{"remote":"runtime_remote2"}'
+divebell run-action mf:list-reports --url "http://127.0.0.1:3005/observability" --payload '{"remote":"runtime_remote2"}'
 ```
 
 `errorLoadShare` is used only for observation. Shared dependency miss, version

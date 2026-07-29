@@ -3,7 +3,7 @@ import type {
   RuntimePluginHooks,
 } from '@module-federation/runtime';
 
-import { createOpenRuntimeObservabilityAdapter } from './openruntime';
+import { createDivebellObservabilityAdapter } from './divebell';
 import { createReportManager } from './report/manager';
 import type {
   LegacyObservabilityBridgeHookArgs,
@@ -497,17 +497,14 @@ export function createObservability(
     }
   };
 
-  const openRuntimeAdapter = createOpenRuntimeObservabilityAdapter(
-    options.openRuntime,
-    {
-      getReports: getReportsSnapshot,
-      findReports: findReportsSnapshot,
-      getLatestReport: getLatestReportSnapshot,
-      getReport: getReportSnapshot,
-      exportReport: exportReportSnapshot,
-      getRuntimeState: getRuntimeStateSnapshot,
-    },
-  );
+  const divebellAdapter = createDivebellObservabilityAdapter(options.divebell, {
+    getReports: getReportsSnapshot,
+    findReports: findReportsSnapshot,
+    getLatestReport: getLatestReportSnapshot,
+    getReport: getReportSnapshot,
+    exportReport: exportReportSnapshot,
+    getRuntimeState: getRuntimeStateSnapshot,
+  });
 
   const createBrowserReader = (): ObservabilityBrowserReader => ({
     getEvents: getEventsSnapshot,
@@ -776,7 +773,7 @@ export function createObservability(
 
     events.push(event);
     const report = updateReport(event);
-    openRuntimeAdapter?.syncReport(report, {
+    divebellAdapter?.syncReport(report, {
       origin,
       instanceRef: event.instanceRef,
     });
@@ -2647,7 +2644,7 @@ export function createObservability(
           instanceApi.markComponentLoaded;
       }
       prepareOutputChannels(origin);
-      openRuntimeAdapter?.register();
+      divebellAdapter?.register();
       return createRuntimeHooks(instance);
     },
     ...legacyHooks,

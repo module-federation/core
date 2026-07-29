@@ -3878,12 +3878,12 @@ importers:
 
   packages/observability-plugin:
     dependencies:
+      '@divebell/core':
+        specifier: 0.0.2
+        version: 0.0.2
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../sdk
-      '@openruntime/core':
-        specifier: https://pkg.pr.new/2heal1/openruntime/@openruntime/core@a13b382
-        version: https://pkg.pr.new/2heal1/openruntime/@openruntime/core@a13b382
       semver:
         specifier: ^7.7.4
         version: 7.7.4
@@ -5996,6 +5996,9 @@ packages:
   '@discoveryjs/json-ext@0.5.7':
     resolution: {integrity: sha512-dBVuXR082gk3jsFp7Rd/JI4kytwGHecnCoTtXFb7DB6CNHp4rg5k1bhg0nWdLGLnOV71lmDzGQaLMy8iPLY0pw==}
     engines: {node: '>=10.0.0'}
+
+  '@divebell/core@0.0.2':
+    resolution: {integrity: sha512-TKerDC3L0iz70PaIUcwGrnbYgB1Y7n/z6mCQZdi5PupQNlQun4fDBRXCea7MOmNoH0KlnJaChDfWBxLh4zLDQw==}
 
   '@edge-runtime/format@2.2.1':
     resolution: {integrity: sha512-JQTRVuiusQLNNLe2W9tnzBlV/GvSVcozLl4XZHk5swnRZ/v6jp8TqR8P7sqmJsQqblDZ3EztcWmLDbhRje/+8g==}
@@ -9237,10 +9240,6 @@ packages:
 
   '@open-draft/until@1.0.3':
     resolution: {integrity: sha512-Aq58f5HiWdyDlFffbbSjAlv596h/cOnt2DO1w3DOC7OJ5EHs0hd/nycJfiu9RJbT6Yk6F1knnRRXNSpxoIVZ9Q==}
-
-  '@openruntime/core@https://pkg.pr.new/2heal1/openruntime/@openruntime/core@a13b382':
-    resolution: {integrity: sha512-vXItIt69IUrBMd5ZY2ZW8VfqR1kMo0cg+hgmCys8UFr3BPWopEKXa7w93lECpxPvFVGPs4eaRTFJPJOOl+9BAg==, tarball: https://pkg.pr.new/2heal1/openruntime/@openruntime/core@a13b382}
-    version: 0.0.0
 
   '@oxc-project/types@0.112.0':
     resolution: {integrity: sha512-m6RebKHIRsax2iCwVpYW2ErQwa4ywHJrE4sCK3/8JK8ZZAWOKXaRJFl/uP51gaVyyXlaS4+chU1nSCdzYf6QqQ==}
@@ -31066,6 +31065,8 @@ snapshots:
 
   '@discoveryjs/json-ext@0.5.7': {}
 
+  '@divebell/core@0.0.2': {}
+
   '@edge-runtime/format@2.2.1': {}
 
   '@edge-runtime/node-utils@2.3.0': {}
@@ -36166,8 +36167,6 @@ snapshots:
       - supports-color
 
   '@open-draft/until@1.0.3': {}
-
-  '@openruntime/core@https://pkg.pr.new/2heal1/openruntime/@openruntime/core@a13b382': {}
 
   '@oxc-project/types@0.112.0': {}
 

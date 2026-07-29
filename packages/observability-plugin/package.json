@@ -70,7 +70,7 @@
   },
   "dependencies": {
     "@module-federation/sdk": "workspace:*",
-    "@openruntime/core": "https://pkg.pr.new/2heal1/openruntime/@openruntime/core@a13b382",
+    "@divebell/core": "0.0.2",
     "semver": "^7.7.4"
   },
   "scripts": {

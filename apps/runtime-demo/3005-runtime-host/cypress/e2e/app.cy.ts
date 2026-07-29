@@ -3,7 +3,7 @@ import { getH1, getH3 } from '../support/app.po';
 const getObservabilityReader = (win: Cypress.AUTWindow) =>
   (win as any).__FEDERATION__?.__OBSERVABILITY__?.runtime_host;
 
-type OpenRuntimeTestTarget = {
+type DivebellTestTarget = {
   id: string;
   type: string;
   status: string;
@@ -14,12 +14,12 @@ type OpenRuntimeTestTarget = {
     message?: string;
   };
 };
-type OpenRuntimeTestWaitResult = {
+type DivebellTestWaitResult = {
   success: boolean;
-  target?: OpenRuntimeTestTarget;
+  target?: DivebellTestTarget;
   reason?: string;
 };
-type OpenRuntimeTestRuntime = {
+type DivebellTestRuntime = {
   waitFor(
     condition: {
       id: string;
@@ -27,15 +27,14 @@ type OpenRuntimeTestRuntime = {
       where?: Array<{ path: string; equals: unknown }>;
     },
     options?: { timeout?: number },
-  ): Promise<OpenRuntimeTestWaitResult>;
+  ): Promise<DivebellTestWaitResult>;
   getSnapshot(): {
-    targets: Record<string, OpenRuntimeTestTarget>;
+    targets: Record<string, DivebellTestTarget>;
   };
 };
 
-const getOpenRuntime = (win: Cypress.AUTWindow) =>
-  (win as unknown as { __OPEN_RUNTIME__?: OpenRuntimeTestRuntime })
-    .__OPEN_RUNTIME__;
+const getDivebell = (win: Cypress.AUTWindow) =>
+  (win as unknown as { __DIVEBELL__?: DivebellTestRuntime }).__DIVEBELL__;
 
 type ObservabilityTestReport = {
   traceId: string;
@@ -244,12 +243,12 @@ describe('3005-runtime-host/', () => {
       });
     });
 
-    it('should sync remote loading state to OpenRuntime targets', () => {
+    it('should sync remote loading state to Divebell targets', () => {
       cy.get('[data-testid="observability-load-success"]').click();
 
       cy.window()
         .then((win) =>
-          getOpenRuntime(win)!.waitFor(
+          getDivebell(win)!.waitFor(
             {
               id: 'mf:remote:runtime_remote2',
               status: 'ready',
@@ -261,7 +260,7 @@ describe('3005-runtime-host/', () => {
         .should('equal', true);
       cy.window()
         .then((win) =>
-          getOpenRuntime(win)!.waitFor(
+          getDivebell(win)!.waitFor(
             {
               id: 'mf:remote:runtime_remote2:expose:ButtonOldAnt',
               status: 'ready',
@@ -274,7 +273,7 @@ describe('3005-runtime-host/', () => {
       cy.get('[data-testid="observability-load-status"]').contains('success');
 
       cy.window().then((win) => {
-        const snapshot = getOpenRuntime(win)!.getSnapshot();
+        const snapshot = getDivebell(win)!.getSnapshot();
         expect(snapshot.targets['mf:remote:runtime_remote2']).to.include({
           type: 'mf.remote',
           status: 'ready',
@@ -372,7 +371,7 @@ describe('3005-runtime-host/', () => {
 
       cy.window()
         .then((win) =>
-          getOpenRuntime(win)!.waitFor(
+          getDivebell(win)!.waitFor(
             {
               id: 'mf:remote:runtime_remote2:expose:ButtonOldAnt',
               status: 'ready',
@@ -718,7 +717,7 @@ describe('3005-runtime-host/', () => {
       });
     });
 
-    it('should sync shared loading state to OpenRuntime targets', () => {
+    it('should sync shared loading state to Divebell targets', () => {
       const sharedTargetId =
         'mf:shared:observability-provider-choice:2.0.0:observability-provider-scope';
       cy.get(
@@ -727,7 +726,7 @@ describe('3005-runtime-host/', () => {
 
       cy.window()
         .then((win) =>
-          getOpenRuntime(win)!.waitFor(
+          getDivebell(win)!.waitFor(
             {
               id: sharedTargetId,
               status: 'loaded',
@@ -740,7 +739,7 @@ describe('3005-runtime-host/', () => {
       cy.get('[data-testid="observability-load-status"]').contains('success');
 
       cy.window().then((win) => {
-        const snapshot = getOpenRuntime(win)!.getSnapshot();
+        const snapshot = getDivebell(win)!.getSnapshot();
         expect(snapshot.targets[sharedTargetId]).to.include({
           type: 'mf.shared',
           status: 'loaded',
@@ -871,7 +870,7 @@ describe('3005-runtime-host/', () => {
           ),
         ).to.equal(true);
 
-        const snapshot = getOpenRuntime(win)!.getSnapshot();
+        const snapshot = getDivebell(win)!.getSnapshot();
         expect(
           snapshot.targets['mf:remote:runtime_remote2'].data?.hostName,
         ).to.include('observability_consumer_checkout');
@@ -924,7 +923,7 @@ describe('3005-runtime-host/', () => {
           ),
         ).to.equal(true);
 
-        const snapshot = getOpenRuntime(win)!.getSnapshot();
+        const snapshot = getDivebell(win)!.getSnapshot();
         expect(snapshot.targets[sharedTargetId]).to.include({
           type: 'mf.shared',
           status: 'error',
