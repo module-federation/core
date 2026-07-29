@@ -37,9 +37,10 @@ const compileRemote = async (remote: string): Promise<string[]> => {
   tempDirectories.push(context);
 
   await mkdir(path.join(context, 'src'));
+  const remoteRequest = 'remote/Button';
   await writeFile(
     path.join(context, 'src/index.js'),
-    "import('remote/Button');\n",
+    `import(${JSON.stringify(remoteRequest)});\n`,
   );
 
   const rspackConfig: Rspack.Configuration = {
