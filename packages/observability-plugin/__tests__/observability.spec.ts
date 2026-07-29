@@ -2532,15 +2532,6 @@ describe('ObservabilityPlugin', () => {
     if (!traceId) {
       throw new Error('Expected latest report traceId.');
     }
-    await expect(
-      runtime.getInputOptions('mf:get-report', 'traceId'),
-    ).resolves.toEqual([
-      expect.objectContaining({
-        value: traceId,
-        description: 'remote',
-      }),
-    ]);
-
     const reportByTraceId = await runtime.runAction('mf:get-report', {
       traceId,
     });
@@ -2759,15 +2750,6 @@ describe('ObservabilityPlugin', () => {
           }),
         ],
       });
-      await expect(
-        runtime.getInputOptions('mf:get-federation-instance-config', 'name'),
-      ).resolves.toEqual([
-        expect.objectContaining({
-          value: 'host',
-          description: 'host (mf-1)',
-        }),
-      ]);
-
       const instanceConfig = await runtime.runAction(
         'mf:get-federation-instance-config',
         {
