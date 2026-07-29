@@ -9,31 +9,31 @@ const require = createRequire(import.meta.url);
 const remoteDirectory = path.dirname(fileURLToPath(import.meta.url));
 const outputDirectory = path.resolve(remoteDirectory, 'dist');
 
-const closeCompiler = async (compiler: Rspack.Compiler): Promise<void> => {
-  await new Promise<void>((resolve, reject) => {
-    compiler.close((error) => (error ? reject(error) : resolve()));
-  });
-};
-
 const runCompiler = async (compiler: Rspack.Compiler): Promise<void> => {
-  await new Promise<void>((resolve, reject) => {
-    compiler.run((error, stats) => {
-      if (error) {
-        reject(error);
-        return;
-      }
-      if (!stats || stats.hasErrors()) {
-        reject(
-          new Error(
-            stats?.toString({ all: false, errors: true }) ??
-              'Rspack completed without stats.',
-          ),
-        );
-        return;
-      }
-      resolve();
+  try {
+    await new Promise<void>((resolve, reject) => {
+      compiler.run((error, stats) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        if (!stats || stats.hasErrors()) {
+          reject(
+            new Error(
+              stats?.toString({ all: false, errors: true }) ??
+                'Rspack completed without stats.',
+            ),
+          );
+          return;
+        }
+        resolve();
+      });
     });
-  });
+  } finally {
+    await new Promise<void>((resolve, reject) => {
+      compiler.close((error) => (error ? reject(error) : resolve()));
+    });
+  }
 };
 
 export const setup = async (): Promise<void> => {
@@ -76,11 +76,7 @@ export const setup = async (): Promise<void> => {
   });
 
   try {
-    try {
-      await runCompiler(compiler);
-    } finally {
-      await closeCompiler(compiler);
-    }
+    await runCompiler(compiler);
   } catch (error) {
     await rm(outputDirectory, { force: true, recursive: true });
     throw error;

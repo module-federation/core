@@ -218,7 +218,9 @@ const applyFederationPlugin = (
   return { merged, rspackConfig };
 };
 
-const captureWarnings = (run: () => void): string[] => {
+const captureWarnings = <T>(
+  run: () => T,
+): { result: T; warnings: string[] } => {
   const consoleWithWarn = console as typeof console & {
     warn: (...args: unknown[]) => void;
   };
@@ -230,12 +232,13 @@ const captureWarnings = (run: () => void): string[] => {
   };
 
   try {
-    run();
+    return {
+      result: run(),
+      warnings,
+    };
   } finally {
     consoleWithWarn.warn = originalWarn;
   }
-
-  return warnings;
 };
 
 describe('shouldKeepBundledForFederation', () => {
@@ -447,7 +450,7 @@ describe('federation()', () => {
   });
 
   it('does not treat an existing runtime plugin as manual configuration', () => {
-    const warnings = captureWarnings(() => {
+    const { warnings } = captureWarnings(() => {
       applyFederationPlugin(federation(), {
         latePlugins: [
           new ModuleFederationPlugin({
@@ -530,8 +533,7 @@ describe('federation()', () => {
   });
 
   it('preserves user overrides while still injecting node runtime plugin', () => {
-    let options: ModuleFederationOptions | undefined;
-    const warnings = captureWarnings(() => {
+    const { result: options, warnings } = captureWarnings(() => {
       const { rspackConfig } = applyFederationPlugin(
         federation({
           name: 'component_app',
@@ -551,14 +553,14 @@ describe('federation()', () => {
           },
         }),
       );
-      options = getFederationPluginOptions(rspackConfig.plugins);
+      return getFederationPluginOptions(rspackConfig.plugins);
     });
 
-    expect(options!.remoteType).toBe('commonjs');
-    expect(options!.library?.type).toBe('var');
-    expect(options!.library?.name).toBe('component_app');
-    expect(options!.experiments?.asyncStartup).toBe(true);
-    expect(options!.runtimePlugins).toEqual([
+    expect(options.remoteType).toBe('commonjs');
+    expect(options.library?.type).toBe('var');
+    expect(options.library?.name).toBe('component_app');
+    expect(options.experiments?.asyncStartup).toBe(true);
+    expect(options.runtimePlugins).toEqual([
       NODE_RUNTIME_PLUGIN,
       'custom/runtimePlugin',
     ]);
@@ -568,8 +570,7 @@ describe('federation()', () => {
   });
 
   it('forces node optimization target even when configured otherwise', () => {
-    let options: ModuleFederationOptions | undefined;
-    const warnings = captureWarnings(() => {
+    const { result: options, warnings } = captureWarnings(() => {
       const { rspackConfig } = applyFederationPlugin(
         federation({
           name: 'component_app',
@@ -580,18 +581,17 @@ describe('federation()', () => {
           },
         }),
       );
-      options = getFederationPluginOptions(rspackConfig.plugins);
+      return getFederationPluginOptions(rspackConfig.plugins);
     });
 
-    expect(options!.experiments?.optimization?.target).toBe('node');
+    expect(options.experiments?.optimization?.target).toBe('node');
     expect(warnings.join('\n')).toContain(
       'experiments.optimization.target "web" is overridden with "node"',
     );
   });
 
   it('forces async startup and warns when disabled manually', () => {
-    let options: ModuleFederationOptions | undefined;
-    const warnings = captureWarnings(() => {
+    const { result: options, warnings } = captureWarnings(() => {
       const { rspackConfig } = applyFederationPlugin(
         federation({
           name: 'legacy_component_app',
@@ -600,18 +600,17 @@ describe('federation()', () => {
           },
         }),
       );
-      options = getFederationPluginOptions(rspackConfig.plugins);
+      return getFederationPluginOptions(rspackConfig.plugins);
     });
 
-    expect(options!.experiments?.asyncStartup).toBe(true);
+    expect(options.experiments?.asyncStartup).toBe(true);
     expect(warnings.join('\n')).toContain(
       'experiments.asyncStartup was set to false but is forced to true',
     );
   });
 
   it('warns when the node runtime plugin is configured manually', () => {
-    let options: ModuleFederationOptions | undefined;
-    const warnings = captureWarnings(() => {
+    const { result: options, warnings } = captureWarnings(() => {
       const { rspackConfig } = applyFederationPlugin(
         federation({
           name: 'legacy_component_app',
@@ -623,17 +622,17 @@ describe('federation()', () => {
           },
         }),
       );
-      options = getFederationPluginOptions(rspackConfig.plugins);
+      return getFederationPluginOptions(rspackConfig.plugins);
     });
 
-    expect(options!.runtimePlugins).toEqual([NODE_RUNTIME_PLUGIN]);
+    expect(options.runtimePlugins).toEqual([NODE_RUNTIME_PLUGIN]);
     expect(warnings.join('\n')).toContain(
       'manual configuration is unnecessary',
     );
   });
 
   it('warns when running outside rstest', () => {
-    const warnings = captureWarnings(() => {
+    const { warnings } = captureWarnings(() => {
       setupFederationPlugin(federation(), 'rsbuild');
     });
 
@@ -643,7 +642,7 @@ describe('federation()', () => {
   });
 
   it('does not warn about the caller under rstest', () => {
-    const warnings = captureWarnings(() => {
+    const { warnings } = captureWarnings(() => {
       setupFederationPlugin(federation());
     });
 

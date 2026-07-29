@@ -50,7 +50,7 @@ export default defineConfig({
     federation({
       name: 'host',
       remotes: {
-        remote: 'remote@http://localhost:3001/remoteEntry.js',
+        'component-app': 'component_app@http://localhost:3001/remoteEntry.js',
       },
       shared: {
         react: { singleton: true },

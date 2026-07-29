@@ -1,7 +1,7 @@
 {
   "name": "@module-federation/rstest",
   "version": "2.8.0",
-  "description": "Companion Rsbuild plugin for Rstest's Module Federation mode.",
+  "description": "Module Federation plugin for Rstest.",
   "homepage": "https://module-federation.io",
   "bugs": {
     "url": "https://github.com/module-federation/core/issues"

@@ -8,10 +8,6 @@ const isFederationRemoteRequest = (
   request: string,
   remoteNames: Set<string>,
 ): boolean => {
-  if (!remoteNames.size) {
-    return false;
-  }
-
   for (const remoteName of remoteNames) {
     if (request === remoteName) {
       return true;
