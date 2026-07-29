@@ -4017,6 +4017,9 @@ importers:
 
   packages/playground:
     dependencies:
+      '@divebell/core':
+        specifier: 0.0.2
+        version: 0.0.2
       '@module-federation/bridge-react':
         specifier: workspace:*
         version: link:../bridge/bridge-react
