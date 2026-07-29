@@ -12,6 +12,13 @@ import {
   normalizeExpose,
 } from './sandbox';
 import type { RemoteManifest } from './sandbox';
+import {
+  getPlaygroundDivebell,
+  PLAYGROUND_TARGET_ID,
+  registerPlaygroundDivebell,
+  updatePlaygroundDivebellSnapshot,
+} from './divebell';
+import type { PlaygroundRemoteStatus } from './divebell';
 
 import styles from './App.module.css';
 
@@ -32,6 +39,12 @@ loader.config({
 
 const DEFAULT_MANIFEST_URL =
   'https://unpkg.com/module-federation-rslib-provider@latest/dist/mf/mf-manifest.json';
+const DIVEBELL_QUICKSTART_MANIFEST_URL =
+  'https://unpkg.com/@divebell/mf-playground-remote@0.1.0/dist/mf/mf-manifest.json';
+const DIVEBELL_QUICKSTART_PRESET = 'divebell-quickstart';
+const DIVEBELL_QUICKSTART_PROPS = {
+  title: 'Divebell',
+};
 const DEFAULT_RUNTIME_MODULE_URL =
   'https://esm.sh/@module-federation/runtime@2.6.0?bundle';
 const DEFAULT_REACT_VERSION = '19.1.1';
@@ -42,11 +55,13 @@ const MANIFEST_QUERY_KEYS = ['url', 'manifestUrl', 'manifest', 'm'];
 const EXPOSE_QUERY_KEYS = ['expose', 'e'];
 const EXPORT_QUERY_KEYS = ['export', 'exportName'];
 const PREVIEW_ROUTE_QUERY_KEYS = ['route', 'previewRoute'];
+const PRESET_QUERY_KEYS = ['preset'];
 const AUTO_RUN_QUERY_KEYS = [
   ...MANIFEST_QUERY_KEYS,
   ...EXPOSE_QUERY_KEYS,
   ...EXPORT_QUERY_KEYS,
   ...PREVIEW_ROUTE_QUERY_KEYS,
+  ...PRESET_QUERY_KEYS,
   'run',
 ];
 
@@ -56,6 +71,7 @@ type PlaygroundQueryConfig = {
   exportName: string;
   manifestUrl: string;
   previewRoute: string;
+  remoteProps: Record<string, unknown>;
 };
 
 export type PlaygroundProps = {
@@ -63,7 +79,9 @@ export type PlaygroundProps = {
   defaultExpose?: string;
   defaultExportName?: string;
   defaultManifestUrl?: string;
+  defaultPreset?: typeof DIVEBELL_QUICKSTART_PRESET;
   defaultPreviewRoute?: string;
+  defaultRemoteProps?: Record<string, unknown>;
   monacoVsUrl?: string;
   reactRuntimeUrls?: {
     react?: string;
@@ -107,6 +125,8 @@ type PlaygroundDefaults = Required<
     | 'runtimeModuleUrl'
   >
 > & {
+  defaultPreset: '' | typeof DIVEBELL_QUICKSTART_PRESET;
+  defaultRemoteProps: Record<string, unknown>;
   reactRuntimeUrls: NonNullable<PlaygroundProps['reactRuntimeUrls']>;
   template: PlaygroundTemplate;
 };
@@ -178,16 +198,22 @@ function getPlaygroundTemplate(props: PlaygroundProps): PlaygroundTemplate {
 }
 
 function getPlaygroundDefaults(props: PlaygroundProps): PlaygroundDefaults {
+  const template = getPlaygroundTemplate(props);
+
   return {
     autoRun: props.autoRun ?? false,
     defaultExpose: props.defaultExpose ?? '',
     defaultExportName: props.defaultExportName ?? 'default',
     defaultManifestUrl: props.defaultManifestUrl ?? DEFAULT_MANIFEST_URL,
+    defaultPreset: props.defaultPreset ?? '',
     defaultPreviewRoute: props.defaultPreviewRoute ?? '/',
+    defaultRemoteProps: props.defaultRemoteProps ?? {
+      title: template.playgroundTitle,
+    },
     monacoVsUrl: props.monacoVsUrl ?? MONACO_CDN_VS_URL,
     reactRuntimeUrls: props.reactRuntimeUrls ?? {},
     runtimeModuleUrl: props.runtimeModuleUrl ?? DEFAULT_RUNTIME_MODULE_URL,
-    template: getPlaygroundTemplate(props),
+    template,
   };
 }
 
@@ -248,10 +274,16 @@ function getInitialQueryConfig(
       exportName: defaults.defaultExportName,
       manifestUrl: defaults.defaultManifestUrl,
       previewRoute: defaults.defaultPreviewRoute,
+      remoteProps: defaults.defaultRemoteProps,
     };
   }
 
   const searchParams = new URLSearchParams(window.location.search);
+  const preset =
+    getFirstSearchParam(searchParams, PRESET_QUERY_KEYS) ||
+    defaults.defaultPreset;
+  const isDivebellQuickstart =
+    preset === DIVEBELL_QUICKSTART_PRESET || preset === 'divebell';
   const manifestFromQuery = getFirstSearchParam(
     searchParams,
     MANIFEST_QUERY_KEYS,
@@ -265,11 +297,21 @@ function getInitialQueryConfig(
 
   return {
     autoRun:
-      hasSearchParam(searchParams, AUTO_RUN_QUERY_KEYS) || defaults.autoRun,
-    expose: exposeFromQuery || defaults.defaultExpose,
+      isDivebellQuickstart ||
+      hasSearchParam(searchParams, AUTO_RUN_QUERY_KEYS) ||
+      defaults.autoRun,
+    expose:
+      exposeFromQuery || (isDivebellQuickstart ? '.' : defaults.defaultExpose),
     exportName: exportFromQuery || defaults.defaultExportName,
-    manifestUrl: manifestFromQuery || defaults.defaultManifestUrl,
+    manifestUrl:
+      manifestFromQuery ||
+      (isDivebellQuickstart
+        ? DIVEBELL_QUICKSTART_MANIFEST_URL
+        : defaults.defaultManifestUrl),
     previewRoute: previewRouteFromQuery || defaults.defaultPreviewRoute,
+    remoteProps: isDivebellQuickstart
+      ? DIVEBELL_QUICKSTART_PROPS
+      : defaults.defaultRemoteProps,
   };
 }
 
@@ -325,6 +367,7 @@ function buildDefaultComponentAppCode(
 import { ${template.runtimeImportName} } from './${template.runtimeFileBaseName}';
 
 const loadedTargetLabel = ${JSON.stringify(safeLoadedTarget)};
+const remoteProps = window[${JSON.stringify(template.playgroundPropsGlobalName)}]?.remoteProps || {};
 
 export default function App() {
   const RemoteComponent = React.useMemo(
@@ -340,9 +383,7 @@ export default function App() {
   return (
     <div style={{ display: 'grid', gap: 16 }}>
       <React.Suspense fallback={<div>Loading remote module...</div>}>
-        <RemoteComponent
-          title=${JSON.stringify(template.playgroundTitle)}
-        />
+        <RemoteComponent {...remoteProps} />
       </React.Suspense>
     </div>
   );
@@ -362,6 +403,7 @@ function buildDefaultBridgeAppCode(
 import { createRemoteAppComponent, ${template.runtimeImportName} } from './${template.runtimeFileBaseName}';
 
 const loadedTargetLabel = ${JSON.stringify(safeLoadedTarget)};
+const remoteProps = window[${JSON.stringify(template.playgroundPropsGlobalName)}]?.remoteProps || {};
 
 const RemoteApp = createRemoteAppComponent({
   loader: async () => {
@@ -393,7 +435,7 @@ const RemoteApp = createRemoteAppComponent({
 export default function App() {
   return (
     <div style={{ display: 'grid', gap: 16 }}>
-      <RemoteApp basename="/" />
+      <RemoteApp {...remoteProps} basename="/" />
     </div>
   );
 }
@@ -638,6 +680,7 @@ type PreviewState = null | {
   manifestUrl: string;
   expose: string;
   previewRoute: string;
+  remoteProps: Record<string, unknown>;
   runtimeModuleUrl: string;
   runId: number;
 };
@@ -1056,6 +1099,45 @@ function formatErrorForTerminal(error: unknown): string {
   return error instanceof Error ? error.stack || error.message : String(error);
 }
 
+function formatRemoteProps(props: Record<string, unknown>): string {
+  return JSON.stringify(props, null, 2);
+}
+
+function parseRemoteProps(value: string): Record<string, unknown> {
+  const parsed = JSON.parse(value) as unknown;
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new Error('Remote Props must be a JSON object.');
+  }
+
+  return parsed as Record<string, unknown>;
+}
+
+function getRemotePropsSnapshot(value: string): unknown {
+  try {
+    return parseRemoteProps(value);
+  } catch {
+    return value;
+  }
+}
+
+function getLatestTerminalError(lines: TerminalLine[]): string | undefined {
+  let fallback: string | undefined;
+
+  for (let index = lines.length - 1; index >= 0; index -= 1) {
+    if (lines[index].level === 'error') {
+      fallback ??= lines[index].message;
+      if (
+        lines[index].message !== 'Script error.' &&
+        !lines[index].message.startsWith('The above error occurred in the <')
+      ) {
+        return lines[index].message;
+      }
+    }
+  }
+
+  return fallback;
+}
+
 function buildPreviewDocument(
   previewState: Exclude<PreviewState, null>,
   defaults: PlaygroundDefaults,
@@ -1076,6 +1158,8 @@ function buildPreviewDocument(
     manifest: previewState.manifest,
     manifestUrl: previewState.manifestUrl,
     previewRoute,
+    remoteProps: previewState.remoteProps,
+    runId: previewState.runId,
   });
   const bundle = escapeInlineScript(previewState.bundle);
   const dependencyInjection =
@@ -1144,7 +1228,13 @@ function buildPreviewDocument(
         document.documentElement.style.setProperty('--mf-preview-bg', parentStyles.background);
         document.documentElement.style.setProperty('--mf-preview-text', parentStyles.color);
       }
+      let hasTerminalError = false;
+      let readyTimer;
       const postTerminal = (level, message) => {
+        if (level === 'error') {
+          hasTerminalError = true;
+          window.clearTimeout(readyTimer);
+        }
         window.parent?.postMessage({
           type: 'mf-playground-terminal',
           runId: ${previewState.runId},
@@ -1286,6 +1376,36 @@ function buildPreviewDocument(
         const reason = event.reason;
         showError(reason?.stack || reason?.message || String(reason));
       });
+      const previewRoot = document.getElementById('root');
+      const readyObserver = new MutationObserver(() => {
+        const text = previewRoot?.textContent?.trim() || '';
+        const isLoading =
+          text === 'Loading remote module...' ||
+          text === 'Loading remote app...';
+
+        if (!previewRoot?.firstElementChild || isLoading || hasTerminalError) {
+          return;
+        }
+
+        window.clearTimeout(readyTimer);
+        readyTimer = window.setTimeout(() => {
+          if (hasTerminalError) {
+            return;
+          }
+          window.parent?.postMessage({
+            type: 'mf-playground-status',
+            runId: ${previewState.runId},
+            status: 'ready',
+          }, '*');
+          readyObserver.disconnect();
+        }, 100);
+      });
+      if (previewRoot) {
+        readyObserver.observe(previewRoot, {
+          childList: true,
+          subtree: true,
+        });
+      }
     </script>
     <script>${bundle}</script>
   </body>
@@ -1364,6 +1484,9 @@ function AppInner(props: { defaults: PlaygroundDefaults }) {
   const [previewRoute, setPreviewRoute] = useState(
     initialQueryConfig.previewRoute,
   );
+  const [remotePropsText, setRemotePropsText] = useState(() =>
+    formatRemoteProps(initialQueryConfig.remoteProps),
+  );
   const [entryCode, setEntryCode] = useState(DEFAULT_ENTRY_CODE);
   const [appCode, setAppCode] = useState(initialGeneratedAppCode);
   const [lastGeneratedAppCode, setLastGeneratedAppCode] = useState(
@@ -1394,6 +1517,8 @@ function AppInner(props: { defaults: PlaygroundDefaults }) {
     useState<RemoteManifest | null>(null);
   const [previewState, setPreviewState] = useState<PreviewState>(null);
   const [renderError, setRenderError] = useState<RenderError | null>(null);
+  const [remoteStatus, setRemoteStatus] =
+    useState<PlaygroundRemoteStatus>('idle');
   const [terminalLines, setTerminalLines] = useState<TerminalLine[]>([
     {
       id: 0,
@@ -1405,7 +1530,22 @@ function AppInner(props: { defaults: PlaygroundDefaults }) {
   const [runId, setRunId] = useState(0);
   const runIdRef = useRef(runId);
   const autoRunStartedRef = useRef(false);
-  const onRunRef = useRef<(() => Promise<void>) | null>(null);
+  const onRunRef = useRef<
+    | ((overrides?: {
+        expose?: string;
+        manifestUrl?: string;
+        remoteProps?: Record<string, unknown>;
+      }) => Promise<void>)
+    | null
+  >(null);
+  const divebellRuntimeRef = useRef<ReturnType<
+    typeof getPlaygroundDivebell
+  > | null>(null);
+  const divebellActionsRef = useRef<{
+    updateManifest(url: string): Promise<unknown>;
+    updateProps(props: Record<string, unknown>): Promise<unknown>;
+    reloadRemote(): Promise<unknown>;
+  } | null>(null);
   const monacoRef = useRef<Monaco | null>(null);
   const resizeStateRef = useRef<{
     startWidth: number;
@@ -1520,24 +1660,38 @@ function AppInner(props: { defaults: PlaygroundDefaults }) {
   useEffect(() => {
     const onMessage = (event: MessageEvent) => {
       const data = event.data;
-      if (
-        !data ||
-        data.type !== 'mf-playground-terminal' ||
-        data.runId !== runIdRef.current
-      ) {
+      if (!data || data.runId !== runIdRef.current) {
         return;
       }
 
+      if (data.type === 'mf-playground-status' && data.status === 'ready') {
+        setRemoteStatus((currentStatus) =>
+          currentStatus === 'error' ? currentStatus : 'ready',
+        );
+        setStatus('Ready');
+        return;
+      }
+
+      if (data.type !== 'mf-playground-terminal') {
+        return;
+      }
+
+      const level = normalizeTerminalLevel(data.level);
+      const message = String(data.message || '');
       setTerminalLines((currentLines) =>
         [
           ...currentLines,
           {
             id: Date.now() + Math.random(),
-            level: normalizeTerminalLevel(data.level),
-            message: String(data.message || ''),
+            level,
+            message,
           },
         ].slice(-120),
       );
+      if (level === 'error') {
+        setRemoteStatus('error');
+        setStatus(message);
+      }
     };
 
     window.addEventListener('message', onMessage);
@@ -1659,11 +1813,13 @@ function AppInner(props: { defaults: PlaygroundDefaults }) {
 
   const onManifestReady = async (options?: {
     appendTerminal?: boolean;
+    expose?: string;
+    manifestUrl?: string;
     silentStatus?: boolean;
   }) => {
     const appendTerminal = options?.appendTerminal ?? true;
     const silentStatus = options?.silentStatus ?? false;
-    const nextManifestUrl = manifestUrl.trim();
+    const nextManifestUrl = (options?.manifestUrl ?? manifestUrl).trim();
     if (!nextManifestUrl) {
       setResolvedManifest(null);
       setExposeOptions([]);
@@ -1691,14 +1847,17 @@ function AppInner(props: { defaults: PlaygroundDefaults }) {
 
     try {
       const manifest = await fetchManifest(nextManifestUrl);
-      const options =
+      const exposeEntries =
         manifest.exposes
           ?.map((item) => item?.name?.trim())
           .filter((item): item is string => Boolean(item)) || [];
-      const effectiveExpose = resolveExposeFromOptions(options, expose);
+      const effectiveExpose = resolveExposeFromOptions(
+        exposeEntries,
+        options?.expose ?? expose,
+      );
 
       setResolvedManifest(manifest);
-      setExposeOptions(options);
+      setExposeOptions(exposeEntries);
       const reactDependencyVersions = extractReactDependencyVersions(manifest);
       const dependencyVersions = {
         ...reactDependencyVersions,
@@ -1715,10 +1874,10 @@ function AppInner(props: { defaults: PlaygroundDefaults }) {
       }));
       if (!silentStatus) {
         setStatus(
-          options.length > 0
+          exposeEntries.length > 0
             ? isEn
-              ? `Loaded ${options.length} expose entries`
-              : `已加载 ${options.length} 个 expose`
+              ? `Loaded ${exposeEntries.length} expose entries`
+              : `已加载 ${exposeEntries.length} 个 expose`
             : isEn
               ? 'No exposes found in manifest'
               : 'Manifest 未提供 expose',
@@ -1746,10 +1905,15 @@ function AppInner(props: { defaults: PlaygroundDefaults }) {
     }
   };
 
-  const onRun = async () => {
+  const onRun = async (overrides?: {
+    expose?: string;
+    manifestUrl?: string;
+    remoteProps?: Record<string, unknown>;
+  }) => {
     setPreviewState(null);
     setRenderError(null);
-    setStatus('编译中...');
+    setRemoteStatus('loading');
+    setStatus('Loading remote...');
     setTerminalLines([
       {
         id: Date.now(),
@@ -1759,9 +1923,15 @@ function AppInner(props: { defaults: PlaygroundDefaults }) {
     ]);
 
     try {
-      const normalizedManifestUrl = manifestUrl.trim();
+      const normalizedManifestUrl = (
+        overrides?.manifestUrl ?? manifestUrl
+      ).trim();
+      const remotePropsForRun =
+        overrides?.remoteProps ?? parseRemoteProps(remotePropsText);
       const manifestForRun = await onManifestReady({
         appendTerminal: false,
+        expose: overrides?.expose,
+        manifestUrl: normalizedManifestUrl,
         silentStatus: true,
       });
 
@@ -1784,7 +1954,9 @@ function AppInner(props: { defaults: PlaygroundDefaults }) {
         ? guessRemoteName(manifestForRun)
         : manifestName || normalizedManifestUrl || 'remote';
       const nextExposeForRun = normalizeExpose(
-        expose || manifestForRun?.exposes?.[0]?.name || '',
+        (overrides?.expose ?? expose) ||
+          manifestForRun?.exposes?.[0]?.name ||
+          '',
       );
       const nextGeneratedAppCode = buildDefaultAppCode(
         formatLoadedTarget(remoteNameForRun, nextExposeForRun),
@@ -1844,22 +2016,111 @@ function AppInner(props: { defaults: PlaygroundDefaults }) {
         manifestUrl: normalizedManifestUrl,
         expose: normalizedCurrentExpose,
         previewRoute: normalizePreviewRoute(previewRoute),
+        remoteProps: remotePropsForRun,
         runtimeModuleUrl: defaults.runtimeModuleUrl,
         runId: nextRunId,
       });
-      setStatus('完成');
+      setStatus('Waiting for remote...');
       appendTerminalLine(
         'info',
         'Sandbox bundle compiled. Preview is running.',
       );
     } catch (error) {
       const message = formatErrorForTerminal(error);
+      setRemoteStatus('error');
       setStatus(error instanceof Error ? error.message : String(error));
       appendTerminalLine('error', `Run Sandbox failed:\n${message}`);
     }
   };
 
   onRunRef.current = onRun;
+  divebellActionsRef.current = {
+    async updateManifest(url) {
+      const nextManifestUrl = url.trim();
+      setManifestUrl(nextManifestUrl);
+      setResolvedManifest(null);
+      setExposeOptions([]);
+      setExpose('');
+      setOpenPanels((current) => ({
+        ...current,
+        code: false,
+      }));
+      syncGeneratedAppCode(null, '', exportName);
+      syncGeneratedMfPlaceholder();
+      await onRunRef.current?.({
+        expose: '',
+        manifestUrl: nextManifestUrl,
+      });
+      return {
+        targetId: PLAYGROUND_TARGET_ID,
+        waitFor: ['error', 'ready'],
+      };
+    },
+    async updateProps(nextProps) {
+      setRemotePropsText(formatRemoteProps(nextProps));
+      await onRunRef.current?.({
+        remoteProps: nextProps,
+      });
+      return {
+        targetId: PLAYGROUND_TARGET_ID,
+        waitFor: ['error', 'ready'],
+      };
+    },
+    async reloadRemote() {
+      await onRunRef.current?.();
+      return {
+        targetId: PLAYGROUND_TARGET_ID,
+        waitFor: ['error', 'ready'],
+      };
+    },
+  };
+
+  const latestTerminalError = useMemo(
+    () => getLatestTerminalError(terminalLines),
+    [terminalLines],
+  );
+  const currentRemoteProps = useMemo(
+    () => getRemotePropsSnapshot(remotePropsText),
+    [remotePropsText],
+  );
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const runtime = getPlaygroundDivebell(window);
+    divebellRuntimeRef.current = runtime;
+    return registerPlaygroundDivebell(runtime, {
+      updateManifest: (url) => divebellActionsRef.current!.updateManifest(url),
+      updateProps: (nextProps) =>
+        divebellActionsRef.current!.updateProps(nextProps),
+      reloadRemote: () => divebellActionsRef.current!.reloadRemote(),
+    });
+  }, []);
+
+  useEffect(() => {
+    const runtime = divebellRuntimeRef.current;
+    if (!runtime) {
+      return;
+    }
+
+    updatePlaygroundDivebellSnapshot(runtime, {
+      manifestUrl,
+      remoteName: manifestName,
+      expose,
+      props: currentRemoteProps,
+      status: remoteStatus,
+      terminalError: latestTerminalError,
+    });
+  }, [
+    currentRemoteProps,
+    expose,
+    latestTerminalError,
+    manifestName,
+    manifestUrl,
+    remoteStatus,
+  ]);
 
   useEffect(() => {
     if (!initialQueryConfig.autoRun || autoRunStartedRef.current) {
@@ -2070,7 +2331,7 @@ function AppInner(props: { defaults: PlaygroundDefaults }) {
                 <button
                   type="button"
                   className={cx('vp-button', 'vp-buttonPrimary')}
-                  onClick={onRun}
+                  onClick={() => void onRun()}
                   title="Run Sandbox"
                 >
                   <span>Run Sandbox</span>
@@ -2136,6 +2397,7 @@ function AppInner(props: { defaults: PlaygroundDefaults }) {
                             value={manifestUrl}
                             onChange={(event) => {
                               setManifestUrl(event.target.value);
+                              setRemoteStatus('idle');
                               setResolvedManifest(null);
                               setExposeOptions([]);
                               setExpose('');
@@ -2168,6 +2430,7 @@ function AppInner(props: { defaults: PlaygroundDefaults }) {
                               onChange={(event) => {
                                 const nextExpose = event.target.value;
                                 setExpose(nextExpose);
+                                setRemoteStatus('idle');
                                 syncGeneratedAppCode(
                                   resolvedManifest,
                                   nextExpose,
@@ -2242,6 +2505,24 @@ function AppInner(props: { defaults: PlaygroundDefaults }) {
                               setPreviewRoute(event.target.value);
                             }}
                             placeholder="/"
+                          />
+                        </div>
+
+                        <div className={cx('vp-field')}>
+                          <div className={cx('vp-labelRow')}>
+                            <div className={cx('vp-label')}>Remote Props</div>
+                            <div className={cx('vp-hint')}>JSON object</div>
+                          </div>
+                          <textarea
+                            aria-label="Remote Props"
+                            className={cx('vp-input', 'vp-textarea')}
+                            value={remotePropsText}
+                            onChange={(event) => {
+                              setRemotePropsText(event.target.value);
+                              setRemoteStatus('idle');
+                            }}
+                            rows={6}
+                            spellCheck={false}
                           />
                         </div>
                       </div>
