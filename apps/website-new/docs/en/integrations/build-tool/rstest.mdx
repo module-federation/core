@@ -94,30 +94,31 @@ Standard URL remotes and `commonjs ...` path remotes work without setting
 
 ### Browser Mode
 
-Pass `{ target: 'browser' }` as the second argument when using the plugin for
-Rstest browser mode:
+Rstest browser mode is detected automatically from its resolved
+`browser.enabled` configuration:
 
 ```ts title='rstest.config.ts'
 import { federation } from '@module-federation/rstest';
 import { defineConfig } from '@rstest/core';
 
 export default defineConfig({
+  browser: {
+    enabled: true,
+  },
   plugins: [
-    federation(
-      {
-        name: 'browser_host',
-        remotes: {
-          app2: 'app2@http://localhost:3001/remoteEntry.js',
-        },
+    federation({
+      name: 'browser_host',
+      remotes: {
+        app2: 'app2@http://localhost:3001/remoteEntry.js',
       },
-      { target: 'browser' },
-    ),
+    }),
   ],
 });
 ```
 
 Browser mode keeps browser build defaults and only enables
-`experiments.asyncStartup`.
+`experiments.asyncStartup`. Pass an explicit `target` only to override the
+detected mode.
 
 ## Configuration
 
