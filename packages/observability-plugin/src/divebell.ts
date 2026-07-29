@@ -1,32 +1,31 @@
 import type {
-  BridgeConnectOptions,
-  OpenRuntimeCore,
-  OpenRuntimeWindowHost,
+  DivebellCore,
+  DivebellWindowHost,
   RuntimeError,
-} from '@openruntime/core';
+} from '@divebell/core';
 import {
-  createOpenRuntime,
-  getOpenRuntimeFromWindow,
-  installOpenRuntimeOnWindow,
-} from '@openruntime/core';
+  createDivebell,
+  getDivebellFromWindow,
+  installDivebellOnWindow,
+} from '@divebell/core';
 
 import type {
   ObservabilityEvent,
   ObservabilityEventContext,
-  OpenRuntimeObservabilityOptions,
+  DivebellObservabilityOptions,
   ObservabilityPhaseSummary,
   ObservabilityRemoteInfo,
   ObservabilityReport,
   ObservabilitySharedInfo,
 } from './type';
 import {
-  registerOpenRuntimeActions,
-  type OpenRuntimeReportReader,
-} from './openruntime-actions';
+  registerDivebellActions,
+  type DivebellReportReader,
+} from './divebell-actions';
 
-export type { OpenRuntimeObservabilityOptions } from './type';
+export type { DivebellObservabilityOptions } from './type';
 
-interface OpenRuntimeObservabilityAdapter {
+interface DivebellObservabilityAdapter {
   register(): void;
   syncReport(
     report: ObservabilityReport,
@@ -48,7 +47,7 @@ type SharedTargetStatus =
   | 'error';
 type SharedConflictTargetStatus = 'warning';
 
-const openRuntimeSource = 'module-federation';
+const divebellSource = 'module-federation';
 const loadingStatuses: LoadingTargetStatus[] = [
   'registered',
   'loading',
@@ -80,22 +79,21 @@ const remoteFailurePhases = new Set([
   'loadRemote',
 ]);
 
-export function createOpenRuntimeObservabilityAdapter(
-  input: boolean | OpenRuntimeObservabilityOptions | undefined,
-  reportReader?: OpenRuntimeReportReader,
-): OpenRuntimeObservabilityAdapter | undefined {
+export function createDivebellObservabilityAdapter(
+  input: boolean | DivebellObservabilityOptions | undefined,
+  reportReader?: DivebellReportReader,
+): DivebellObservabilityAdapter | undefined {
   if (!input) {
     return undefined;
   }
 
-  const options: OpenRuntimeObservabilityOptions = input === true ? {} : input;
+  const options: DivebellObservabilityOptions = input === true ? {} : input;
   if (options.enabled === false) {
     return undefined;
   }
 
-  const connectedRuntimes = new WeakSet<OpenRuntimeCore>();
-  const registeredActionRuntimes = new WeakSet<OpenRuntimeCore>();
-  let createdRuntime: OpenRuntimeCore | undefined;
+  const registeredActionRuntimes = new WeakSet<DivebellCore>();
+  let createdRuntime: DivebellCore | undefined;
 
   const getRuntime = () => {
     if (options.runtime) {
@@ -103,15 +101,15 @@ export function createOpenRuntimeObservabilityAdapter(
     }
 
     const host = options.host || getDefaultHost();
-    const runtime = getOpenRuntimeFromWindow(host);
+    const runtime = getDivebellFromWindow(host);
     if (runtime) {
       return runtime;
     }
 
     if (!createdRuntime) {
-      const nextRuntime = createOpenRuntime();
+      const nextRuntime = createDivebell();
       createdRuntime = host
-        ? installOpenRuntimeOnWindow(nextRuntime, host)
+        ? installDivebellOnWindow(nextRuntime, host)
         : nextRuntime;
     }
 
@@ -120,14 +118,13 @@ export function createOpenRuntimeObservabilityAdapter(
 
   const prepareRuntime = () => {
     const runtime = getRuntime();
-    const source = options.source || openRuntimeSource;
-    registerOpenRuntimeActions(
+    const source = options.source || divebellSource;
+    registerDivebellActions(
       runtime,
       source,
       reportReader,
       registeredActionRuntimes,
     );
-    connectRuntimeBridge(runtime, options.bridge, connectedRuntimes);
     return { runtime, source };
   };
 
@@ -136,42 +133,25 @@ export function createOpenRuntimeObservabilityAdapter(
       try {
         prepareRuntime();
       } catch {
-        // OpenRuntime output is diagnostic-only and must not affect MF loading.
+        // Divebell output is diagnostic-only and must not affect MF loading.
       }
     },
     syncReport(report) {
       try {
         const { runtime, source } = prepareRuntime();
-        syncReportToOpenRuntime(runtime, source, report, reportReader);
+        syncReportToDivebell(runtime, source, report, reportReader);
       } catch {
-        // OpenRuntime output is diagnostic-only and must not affect MF loading.
+        // Divebell output is diagnostic-only and must not affect MF loading.
       }
     },
   };
 }
 
-function connectRuntimeBridge(
-  runtime: OpenRuntimeCore,
-  bridge: false | BridgeConnectOptions | undefined,
-  connectedRuntimes: WeakSet<OpenRuntimeCore>,
-): void {
-  if (
-    bridge === undefined ||
-    bridge === false ||
-    connectedRuntimes.has(runtime)
-  ) {
-    return;
-  }
-
-  runtime.connectBridge(bridge);
-  connectedRuntimes.add(runtime);
-}
-
-function syncReportToOpenRuntime(
-  runtime: OpenRuntimeCore,
+function syncReportToDivebell(
+  runtime: DivebellCore,
   source: string,
   report: ObservabilityReport,
-  reportReader: OpenRuntimeReportReader | undefined,
+  reportReader: DivebellReportReader | undefined,
 ): void {
   if (report.remote) {
     syncRemote(runtime, source, report, reportReader);
@@ -185,10 +165,10 @@ function syncReportToOpenRuntime(
 }
 
 function syncRemote(
-  runtime: OpenRuntimeCore,
+  runtime: DivebellCore,
   source: string,
   report: ObservabilityReport,
-  reportReader: OpenRuntimeReportReader | undefined,
+  reportReader: DivebellReportReader | undefined,
 ): void {
   const remote = report.remote;
   if (!remote?.name) {
@@ -218,10 +198,10 @@ function syncRemote(
 }
 
 function syncRemoteModule(
-  runtime: OpenRuntimeCore,
+  runtime: DivebellCore,
   source: string,
   report: ObservabilityReport,
-  reportReader: OpenRuntimeReportReader | undefined,
+  reportReader: DivebellReportReader | undefined,
 ): void {
   const remote = report.remote;
   if (!remote?.name || !report.expose) {
@@ -260,7 +240,7 @@ function syncRemoteModule(
 }
 
 function syncShared(
-  runtime: OpenRuntimeCore,
+  runtime: DivebellCore,
   source: string,
   report: ObservabilityReport,
 ): void {
@@ -289,7 +269,7 @@ function syncShared(
 }
 
 function syncSharedConflict(
-  runtime: OpenRuntimeCore,
+  runtime: DivebellCore,
   source: string,
   report: ObservabilityReport,
 ): void {
@@ -608,7 +588,7 @@ function getRemoteModuleDependsOn(remoteName: string): string[] {
 function getRemoteReports(
   currentReport: ObservabilityReport,
   remote: ObservabilityRemoteInfo,
-  reportReader: OpenRuntimeReportReader | undefined,
+  reportReader: DivebellReportReader | undefined,
 ): ObservabilityReport[] {
   const reports = reportReader
     ? reportReader
@@ -629,7 +609,7 @@ function getRemoteModuleReports(
   currentReport: ObservabilityReport,
   remote: ObservabilityRemoteInfo,
   expose: string,
-  reportReader: OpenRuntimeReportReader | undefined,
+  reportReader: DivebellReportReader | undefined,
 ): ObservabilityReport[] {
   const reports = getRemoteReports(currentReport, remote, reportReader).filter(
     (report) => isSameExposeReport(report, expose),
@@ -796,7 +776,7 @@ function isNonEmptyString(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0;
 }
 
-function getDefaultHost(): OpenRuntimeWindowHost | undefined {
+function getDefaultHost(): DivebellWindowHost | undefined {
   if (typeof window === 'undefined') {
     return undefined;
   }

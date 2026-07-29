@@ -1,11 +1,5 @@
 import { createObservability } from '@module-federation/observability-plugin';
 
-const openRuntimeBridge = shouldConnectBridge()
-  ? {
-      autoReconnect: true,
-    }
-  : false;
-
 export const observability = createObservability({
   level: 'verbose',
   maxEvents: 100,
@@ -24,16 +18,7 @@ export const observability = createObservability({
     ],
     defaultExportMode: 'component',
   },
-  openRuntime: {
-    bridge: openRuntimeBridge,
+  divebell: {
     source: 'mf-runtime-demo',
   },
 });
-
-function shouldConnectBridge(): boolean {
-  if (typeof window === 'undefined') {
-    return false;
-  }
-
-  return new URLSearchParams(window.location.search).has('openruntimeBridge');
-}

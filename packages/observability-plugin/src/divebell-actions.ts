@@ -1,4 +1,4 @@
-import type { OpenRuntimeCore, RuntimeInputOption } from '@openruntime/core';
+import type { DivebellCore, RuntimeInputOption } from '@divebell/core';
 
 import type {
   ObservabilityReport,
@@ -10,7 +10,7 @@ import type {
   ObservabilityRuntimeStateInstance,
 } from './type';
 
-export interface OpenRuntimeReportReader {
+export interface DivebellReportReader {
   getReports(options?: ObservabilityReportListOptions): ObservabilityReport[];
   findReports(query?: ObservabilityReportQuery): ObservabilityReport[];
   getLatestReport(): ObservabilityReport | undefined;
@@ -34,11 +34,11 @@ const reportOutcomes: ObservabilityReportOutcome[] = [
   'recovered',
 ];
 
-export function registerOpenRuntimeActions(
-  runtime: OpenRuntimeCore,
+export function registerDivebellActions(
+  runtime: DivebellCore,
   source: string,
-  reportReader: OpenRuntimeReportReader | undefined,
-  registeredActionRuntimes: WeakSet<OpenRuntimeCore>,
+  reportReader: DivebellReportReader | undefined,
+  registeredActionRuntimes: WeakSet<DivebellCore>,
 ): void {
   if (registeredActionRuntimes.has(runtime)) {
     return;
@@ -270,7 +270,7 @@ export function registerOpenRuntimeActions(
 }
 
 function listReports(
-  reportReader: OpenRuntimeReportReader,
+  reportReader: DivebellReportReader,
   payload: unknown,
 ): Record<string, unknown> {
   const query = getReportQuery(payload);
@@ -363,7 +363,7 @@ function createReportSummary(
 
 function getReportInputOptions(
   inputName: string,
-  reportReader: OpenRuntimeReportReader,
+  reportReader: DivebellReportReader,
 ): RuntimeInputOption[] {
   if (inputName !== 'traceId') {
     return [];

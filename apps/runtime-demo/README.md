@@ -25,9 +25,9 @@ The host also installs `ObservabilityBuildPlugin`, so each build writes a
 build summary to `.mf/observability/build-info.json`. If a host build fails
 after the plugin runs, the build-side report is written to
 `.mf/observability/build-report.json`.
-The observability plugin also creates `window.__OPEN_RUNTIME__` for this demo,
-so MF remote, expose, and shared states are synced into OpenRuntime targets
-without the host app importing OpenRuntime directly.
+The observability plugin also creates `window.__DIVEBELL__` for this demo,
+so MF remote, expose, and shared states are synced into Divebell targets
+without the host app importing Divebell directly.
 
 - observability fixture page:
   [localhost:3005/observability](http://localhost:3005/observability)
@@ -139,9 +139,9 @@ Then open the observability fixture page and use these controls:
   `observability-runtime-async-shared`, `RUNTIME-006`, and
   `sync-async-boundary`, with the same eager config check.
 
-### OpenRuntime check
+### Divebell check
 
-The OpenRuntime check reuses the existing `3005-runtime-host` observability
+The Divebell check reuses the existing `3005-runtime-host` observability
 fixture. No separate demo app is needed.
 
 Automated coverage is included in the runtime host e2e suite:
@@ -150,7 +150,7 @@ Automated coverage is included in the runtime host e2e suite:
 pnpm run ci:local --only=e2e-runtime
 ```
 
-The OpenRuntime assertions open `/observability`, click the real MF controls,
+The Divebell assertions open `/observability`, click the real MF controls,
 verify that MF targets can be waited for, and then run a business action after
 the exposed module is ready. The covered flow is:
 
@@ -165,19 +165,18 @@ The suite waits for these targets:
 - `mf:remote:runtime_remote2:expose:ButtonOldAnt`
 - `mf:shared:observability-provider-choice:2.0.0:observability-provider-scope`
 
-Manifest and remoteEntry are not exposed as separate OpenRuntime targets. The
+Manifest and remoteEntry are not exposed as separate Divebell targets. The
 remote target stays centered on the remote instance and lists attempted expose
 target ids only. Specific exposed modules stay available as
 `mf:remote:*:expose:*` targets so they can be waited for and inspected without
 bloating the remote target.
 
-For a manual CLI check, start the OpenRuntime Bridge from the local
-OpenRuntime repo, then start the runtime demo:
+For a manual CLI check, build Divebell from the local repo, then start the
+runtime demo:
 
 ```bash
 cd /Users/bytedance/ai/openruntime
 pnpm build
-pnpm exec openruntime bridge start
 ```
 
 ```bash
@@ -185,10 +184,11 @@ cd /Users/bytedance/outter/core
 pnpm run app:runtime:dev
 ```
 
-Open the bridge-enabled fixture page:
+Open the fixture page through Divebell:
 
-```text
-http://127.0.0.1:3005/observability?openruntimeBridge=1
+```bash
+cd /Users/bytedance/ai/openruntime
+pnpm exec divebell open "http://127.0.0.1:3005/observability"
 ```
 
 After the page is open, click `Load success remote` and verify the exposed
@@ -196,7 +196,7 @@ module target:
 
 ```bash
 cd /Users/bytedance/ai/openruntime
-pnpm exec openruntime wait-for mf:remote:runtime_remote2:expose:ButtonOldAnt ready --url "http://127.0.0.1:3005/observability?openruntimeBridge=1"
+pnpm exec divebell wait-for mf:remote:runtime_remote2:expose:ButtonOldAnt ready --url "http://127.0.0.1:3005/observability"
 ```
 
 After the wait succeeds, click `Mark business loaded` on the page and verify
@@ -206,7 +206,7 @@ Then click `Shared unexpected provider` and verify the shared target:
 
 ```bash
 cd /Users/bytedance/ai/openruntime
-pnpm exec openruntime wait-for mf:shared:observability-provider-choice:2.0.0:observability-provider-scope loaded --url "http://127.0.0.1:3005/observability?openruntimeBridge=1"
+pnpm exec divebell wait-for mf:shared:observability-provider-choice:2.0.0:observability-provider-scope loaded --url "http://127.0.0.1:3005/observability"
 ```
 
 Run the automated verification:

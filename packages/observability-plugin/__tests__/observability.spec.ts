@@ -2,8 +2,8 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { describe, expect, it, rs } from '@rstest/core';
-import { createOpenRuntime } from '@openruntime/core';
-import type { OpenRuntimeWindowHost } from '@openruntime/core';
+import { createDivebell } from '@divebell/core';
+import type { DivebellWindowHost } from '@divebell/core';
 import { ModuleFederation } from '@module-federation/runtime';
 import { createObservability, ObservabilityPlugin } from '../src';
 import {
@@ -1197,12 +1197,12 @@ describe('ObservabilityPlugin', () => {
     }
   });
 
-  it('keeps instance APIs scoped while sharing stable OpenRuntime targets', async () => {
-    const runtime = createOpenRuntime();
+  it('keeps instance APIs scoped while sharing stable Divebell targets', async () => {
+    const runtime = createDivebell();
     const observability = createObservability({
       level: 'verbose',
       console: false,
-      openRuntime: { runtime, source: 'mf-test' },
+      divebell: { runtime, source: 'mf-test' },
     });
     const first = createRuntimeInstance();
     const second = createRuntimeInstance();
@@ -1551,11 +1551,11 @@ describe('ObservabilityPlugin', () => {
     globalObject.__FEDERATION__ = { __INSTANCES__: [first, second] };
 
     try {
-      const runtime = createOpenRuntime();
+      const runtime = createDivebell();
       const observability = createObservability({
         level: 'verbose',
         console: false,
-        openRuntime: { runtime, source: 'mf-test' },
+        divebell: { runtime, source: 'mf-test' },
       });
       observability.plugin.apply?.(first as any);
       observability.plugin.apply?.(second as any);
@@ -2374,12 +2374,12 @@ describe('ObservabilityPlugin', () => {
     expect(report?.events).toHaveLength(2);
   });
 
-  it('syncs remote loading reports to OpenRuntime targets', async () => {
-    const runtime = createOpenRuntime();
+  it('syncs remote loading reports to Divebell targets', async () => {
+    const runtime = createDivebell();
     const observability = createObservability({
       level: 'verbose',
       console: false,
-      openRuntime: {
+      divebell: {
         runtime,
         source: 'mf-test',
       },
@@ -2565,11 +2565,11 @@ describe('ObservabilityPlugin', () => {
   });
 
   it('aggregates remote target data when instances load different exposes', async () => {
-    const runtime = createOpenRuntime();
+    const runtime = createDivebell();
     const observability = createObservability({
       level: 'verbose',
       console: false,
-      openRuntime: {
+      divebell: {
         runtime,
         source: 'mf-test',
       },
@@ -2667,7 +2667,7 @@ describe('ObservabilityPlugin', () => {
     ).not.toHaveProperty('expose');
   });
 
-  it('exposes federation global queries as OpenRuntime actions', async () => {
+  it('exposes federation global queries as Divebell actions', async () => {
     const globalObject = globalThis as typeof globalThis & {
       __FEDERATION__?: unknown;
     };
@@ -2708,11 +2708,11 @@ describe('ObservabilityPlugin', () => {
       __PRELOADED_MAP__: new Map([['remote', true]]),
     };
     try {
-      const runtime = createOpenRuntime();
+      const runtime = createDivebell();
       const observability = createObservability({
         level: 'verbose',
         console: false,
-        openRuntime: {
+        divebell: {
           runtime,
           source: 'mf-test',
         },
@@ -2788,18 +2788,18 @@ describe('ObservabilityPlugin', () => {
     }
   });
 
-  it('creates an OpenRuntime instance when syncing is enabled without a runtime', async () => {
-    const host: OpenRuntimeWindowHost = {};
+  it('creates a Divebell instance when syncing is enabled without a runtime', async () => {
+    const host: DivebellWindowHost = {};
     const observability = createObservability({
       level: 'verbose',
       console: false,
-      openRuntime: {
+      divebell: {
         host,
         source: 'mf-test',
       },
     });
 
-    expect(host.__OPEN_RUNTIME__).toBeUndefined();
+    expect(host.__DIVEBELL__).toBeUndefined();
 
     emitRemoteStart(observability, {
       options: {
@@ -2813,9 +2813,9 @@ describe('ObservabilityPlugin', () => {
       },
     });
 
-    expect(host.__OPEN_RUNTIME__).toBeDefined();
+    expect(host.__DIVEBELL__).toBeDefined();
     expect(
-      host.__OPEN_RUNTIME__?.getSnapshot().targets['mf:remote:remote'],
+      host.__DIVEBELL__?.getSnapshot().targets['mf:remote:remote'],
     ).toMatchObject({
       status: 'loading',
       type: 'mf.remote',
@@ -5231,13 +5231,13 @@ describe('ObservabilityPlugin', () => {
     });
   });
 
-  it('syncs shared reports to OpenRuntime targets', async () => {
-    const runtime = createOpenRuntime();
+  it('syncs shared reports to Divebell targets', async () => {
+    const runtime = createDivebell();
     const sharedTargetId = 'mf:shared:react:18.3.1:default';
     const observability = createObservability({
       level: 'verbose',
       console: false,
-      openRuntime: {
+      divebell: {
         runtime,
         source: 'mf-test',
       },
@@ -5311,13 +5311,13 @@ describe('ObservabilityPlugin', () => {
     expect(sharedSnapshot).not.toHaveProperty('loading');
   });
 
-  it('reports singleton shared version conflicts to OpenRuntime', async () => {
-    const runtime = createOpenRuntime();
+  it('reports singleton shared version conflicts to Divebell', async () => {
+    const runtime = createDivebell();
     const conflictTargetId = 'mf:shared-conflict:react:default';
     const observability = createObservability({
       level: 'verbose',
       console: false,
-      openRuntime: {
+      divebell: {
         runtime,
         source: 'mf-test',
       },
@@ -5588,13 +5588,13 @@ describe('ObservabilityPlugin', () => {
     });
   });
 
-  it('marks recovered shared reports as recovered OpenRuntime targets', async () => {
-    const runtime = createOpenRuntime();
+  it('marks recovered shared reports as recovered Divebell targets', async () => {
+    const runtime = createDivebell();
     const sharedTargetId = 'mf:shared:react:99.0.0:default';
     const observability = createObservability({
       level: 'verbose',
       console: false,
-      openRuntime: {
+      divebell: {
         runtime,
         source: 'mf-test',
       },
@@ -5647,13 +5647,13 @@ describe('ObservabilityPlugin', () => {
     });
   });
 
-  it('marks failed shared reports as error OpenRuntime targets', async () => {
-    const runtime = createOpenRuntime();
+  it('marks failed shared reports as error Divebell targets', async () => {
+    const runtime = createDivebell();
     const sharedTargetId = 'mf:shared:observability-async-shared:1.0.0:default';
     const observability = createObservability({
       level: 'verbose',
       console: false,
-      openRuntime: {
+      divebell: {
         runtime,
         source: 'mf-test',
       },

@@ -1,18 +1,13 @@
-import type {
-  BridgeConnectOptions,
-  OpenRuntimeCore,
-  OpenRuntimeWindowHost,
-} from '@openruntime/core';
+import type { DivebellCore, DivebellWindowHost } from '@divebell/core';
 import type {
   ModuleFederation,
   ModuleFederationRuntimePlugin,
 } from '@module-federation/runtime';
 
-export interface OpenRuntimeObservabilityOptions {
+export interface DivebellObservabilityOptions {
   enabled?: boolean;
-  runtime?: OpenRuntimeCore;
-  host?: OpenRuntimeWindowHost;
-  bridge?: false | BridgeConnectOptions;
+  runtime?: DivebellCore;
+  host?: DivebellWindowHost;
   source?: string;
 }
 
@@ -547,7 +542,7 @@ export interface ObservabilityPluginOptions {
     report: ObservabilityReport,
     context?: ObservabilityEventContext,
   ) => void;
-  openRuntime?: boolean | OpenRuntimeObservabilityOptions;
+  divebell?: boolean | DivebellObservabilityOptions;
   onRawError?: (error: unknown, context: ObservabilityRawErrorContext) => void;
 }
 
