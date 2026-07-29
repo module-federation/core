@@ -1,4 +1,12 @@
-import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from 'fs';
 import { createRequire } from 'module';
 import os from 'os';
 import { dirname, join, resolve } from 'path';
@@ -44,15 +52,19 @@ describe('hostPlugin', () => {
     return context;
   };
 
-  const installTypeScript7 = (context: string) => {
-    const typeScript7PackageJsonPath = requireFromTest.resolve(
-      'typescript-7/package.json',
+  const installTypeScript = (context: string, packageName: string) => {
+    const typeScriptPackageJsonPath = requireFromTest.resolve(
+      `${packageName}/package.json`,
     );
-    const typeScript7Root = dirname(typeScript7PackageJsonPath);
-    const typeScriptRoot = join(context, 'node_modules', 'typescript');
-    mkdirSync(dirname(typeScriptRoot), { recursive: true });
-    symlinkSync(typeScript7Root, typeScriptRoot, 'junction');
+    const installedTypeScriptRoot = dirname(typeScriptPackageJsonPath);
+    const projectTypeScriptRoot = join(context, 'node_modules', 'typescript');
+    mkdirSync(dirname(projectTypeScriptRoot), { recursive: true });
+    symlinkSync(installedTypeScriptRoot, projectTypeScriptRoot, 'junction');
   };
+  const installTypeScript5 = (context: string) =>
+    installTypeScript(context, 'typescript-5');
+  const installTypeScript7 = (context: string) =>
+    installTypeScript(context, 'typescript-7');
 
   afterEach(() => {
     for (const tempDir of tempDirs.splice(0)) {
@@ -74,6 +86,11 @@ describe('hostPlugin', () => {
   };
 
   const typeScriptScenarios = [
+    {
+      name: 'TypeScript 5',
+      setup: installTypeScript5,
+      expectedModuleResolution: 'node10',
+    },
     {
       name: 'TypeScript 6',
       setup: undefined,
@@ -368,6 +385,50 @@ describe('hostPlugin', () => {
           expect(tsConfig.references).toBeUndefined();
         });
 
+        it('includes exposed workspace sources when rootDir is inferred', () => {
+          const context = createTemporaryProject({
+            'src/index.ts': 'export const local = 1;\n',
+            'shared/button.ts': "export { dependency } from './dependency';\n",
+            'shared/dependency.ts': 'export const dependency = 1;\n',
+          });
+          writeFileSync(
+            join(context, 'tsconfig.json'),
+            JSON.stringify(
+              {
+                compilerOptions: {
+                  target: 'es2017',
+                  module: 'esnext',
+                  moduleResolution: 'node10',
+                  strict: true,
+                },
+                include: ['src'],
+              },
+              null,
+              2,
+            ),
+          );
+
+          const { tsConfig } = retrieveRemoteConfig({
+            context,
+            tsConfigPath: './tsconfig.json',
+            moduleFederationConfig: withTypeScriptScenario(scenario, context, {
+              name: 'remotePluginTestHost',
+              filename: 'remoteEntry.js',
+              exposes: {
+                './button': './shared/button.ts',
+              },
+            }),
+          });
+
+          expect(tsConfig.compilerOptions.rootDir).toBe(context);
+          expect(tsConfig.files).toEqual(
+            expect.arrayContaining([
+              resolve(context, 'shared/button.ts'),
+              resolve(context, 'shared/dependency.ts'),
+            ]),
+          );
+        });
+
         it('applies custom output folders', () => {
           const context = createProjectWithDependencies();
           const { tsConfig, remoteOptions } = retrieveRemoteConfig({
@@ -521,6 +582,41 @@ describe('hostPlugin', () => {
             resolve(context, 'src/components/foo/index.ts'),
           );
         });
+
+        if (scenario.name === 'TypeScript 7') {
+          it('preserves diagnostics when dependency scanning fails', () => {
+            const { context } = resolveExpose(
+              './src/components/foo.generated.jsx',
+              {
+                'src/components/foo.generated.jsx':
+                  'export const Foo = () => null;\n',
+              },
+            );
+            const diagnosticDir = join(
+              context,
+              '.mf/diagnostics/dts/list-files',
+            );
+            const diagnosticConfigPath = join(diagnosticDir, 'tsconfig.json');
+            const diagnosticLogPath = join(diagnosticDir, 'compiler.log');
+
+            expect(existsSync(diagnosticConfigPath)).toBe(true);
+            expect(existsSync(diagnosticLogPath)).toBe(true);
+            const diagnosticConfig = JSON.parse(
+              readFileSync(diagnosticConfigPath, 'utf8'),
+            );
+            expect(diagnosticConfig.compilerOptions.rootDir).toBe(context);
+            expect(diagnosticConfig.files).toContain(
+              resolve(context, 'src/components/foo.generated.jsx'),
+            );
+            expect(readFileSync(diagnosticLogPath, 'utf8')).toContain(
+              'TypeScript version: 7.0.2',
+            );
+            expect(readFileSync(diagnosticLogPath, 'utf8')).toContain(
+              '--listFilesOnly',
+            );
+            expect(readFileSync(diagnosticLogPath, 'utf8')).toContain('TS6504');
+          });
+        }
       });
     }
   });
@@ -546,6 +642,7 @@ describe('hostPlugin', () => {
           const tsConfigPath = join(__dirname, tsConfigFile);
           const typeScriptContext = createTemporaryProject({});
           const { tsConfig } = retrieveRemoteConfig({
+            context: typeScriptContext,
             moduleFederationConfig: withTypeScriptScenario(
               scenario,
               typeScriptContext,
