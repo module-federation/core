@@ -1,4 +1,4 @@
-import type { DivebellCore, RuntimeInputOption } from '@divebell/core';
+import type { DivebellCore } from '@divebell/core';
 
 import type {
   ObservabilityReport,
@@ -97,8 +97,6 @@ export function registerDivebellActions(
           },
         },
       },
-      getInputOptions: (inputName) =>
-        getReportInputOptions(inputName, reportReader),
       handler: (payload) => listReports(reportReader, payload),
     });
     runtime.registerAction({
@@ -130,8 +128,6 @@ export function registerDivebellActions(
           },
         },
       },
-      getInputOptions: (inputName) =>
-        getReportInputOptions(inputName, reportReader),
       handler: (payload) => {
         const traceId = getPayloadString(payload, 'traceId');
         const report = traceId ? reportReader.getReport(traceId) : undefined;
@@ -158,8 +154,6 @@ export function registerDivebellActions(
           },
         },
       },
-      getInputOptions: (inputName) =>
-        getReportInputOptions(inputName, reportReader),
       handler: (payload) => {
         const traceId = getPayloadString(payload, 'traceId');
         const report = reportReader.exportReport(traceId);
@@ -207,11 +201,6 @@ export function registerDivebellActions(
         },
       },
     },
-    getInputOptions: (inputName) =>
-      getFederationModuleInfoInputOptions(
-        inputName,
-        reportReader.getRuntimeState(),
-      ),
     handler: (payload) =>
       getFederationModuleInfoActionResult(
         payload,
@@ -254,11 +243,6 @@ export function registerDivebellActions(
         },
       },
     },
-    getInputOptions: (inputName) =>
-      getFederationInstanceInputOptions(
-        inputName,
-        reportReader.getRuntimeState(),
-      ),
     handler: (payload) =>
       getFederationInstanceConfigActionResult(
         payload,
@@ -361,25 +345,6 @@ function createReportSummary(
   });
 }
 
-function getReportInputOptions(
-  inputName: string,
-  reportReader: DivebellReportReader,
-): RuntimeInputOption[] {
-  if (inputName !== 'traceId') {
-    return [];
-  }
-
-  return reportReader.getReports({ limit: 20 }).map((report) => ({
-    value: report.traceId,
-    description:
-      report.remote?.name ||
-      report.shared?.name ||
-      report.requestAlias ||
-      report.requestId ||
-      report.summary.outcome,
-  }));
-}
-
 function getFederationGlobalSummary(
   runtimeState: ObservabilityRuntimeState,
 ): Record<string, unknown> {
@@ -451,31 +416,6 @@ function getFederationModuleInfoActionResult(
       });
 }
 
-function getFederationModuleInfoInputOptions(
-  inputName: string,
-  runtimeState: ObservabilityRuntimeState,
-): RuntimeInputOption[] {
-  if (
-    inputName !== 'key' &&
-    inputName !== 'name' &&
-    inputName !== 'instanceRef'
-  ) {
-    return [];
-  }
-
-  if (inputName === 'instanceRef') {
-    return runtimeState.instances.map((instance) => ({
-      value: instance.instanceRef,
-      description:
-        instance.optionsName || instance.name || instance.instanceRef,
-    }));
-  }
-
-  return runtimeState.moduleInfo.map((entry) => ({
-    value: entry.key,
-  }));
-}
-
 function getFederationInstanceConfigActionResult(
   payload: unknown,
   runtimeState: ObservabilityRuntimeState,
@@ -518,29 +458,6 @@ function getFederationInstanceConfigActionResult(
     unstableIndex: index !== undefined || undefined,
     instance,
   };
-}
-
-function getFederationInstanceInputOptions(
-  inputName: string,
-  runtimeState: ObservabilityRuntimeState,
-): RuntimeInputOption[] {
-  if (
-    inputName !== 'name' &&
-    inputName !== 'index' &&
-    inputName !== 'instanceRef'
-  ) {
-    return [];
-  }
-
-  return runtimeState.instances.map((instance, index) => ({
-    value:
-      inputName === 'instanceRef'
-        ? instance.instanceRef
-        : inputName === 'index'
-          ? index
-          : instance.optionsName || instance.name || instance.instanceRef,
-    description: `${instance.optionsName || instance.name || 'unnamed'} (${instance.instanceRef})`,
-  }));
 }
 
 function createInstanceCandidate(
