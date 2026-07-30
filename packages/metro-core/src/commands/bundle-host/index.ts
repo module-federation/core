@@ -5,9 +5,9 @@ import { CLIError } from '../../utils/errors';
 import type { RequestOptions } from '../../utils/metro-compat';
 import { Server } from '../../utils/metro-compat';
 import type { Config } from '../types';
+import { resolveMetroConfigForCommand } from '../utils/command-metro-config';
 import { createResolver } from '../utils/create-resolver';
 import { getCommunityCliPlugin } from '../utils/get-community-plugin';
-import loadMetroConfig from '../utils/load-metro-config';
 import { saveBundleAndMap } from '../utils/save-bundle-and-map';
 import { toPosixPath } from '../../plugin/helpers';
 import type { BundleFederatedHostArgs } from './types';
@@ -36,11 +36,7 @@ async function bundleFederatedHost(
   // TODO: pass this without globals
   global.__METRO_FEDERATION_ORIGINAL_ENTRY_PATH = args.entryFile;
 
-  const config = await loadMetroConfig(cfg, {
-    maxWorkers: args.maxWorkers,
-    resetCache: args.resetCache,
-    config: args.config,
-  });
+  const config = await resolveMetroConfigForCommand(cfg, args);
 
   // TODO: pass this without globals
   const hostEntryFilepath = global.__METRO_FEDERATION_HOST_ENTRY_PATH;

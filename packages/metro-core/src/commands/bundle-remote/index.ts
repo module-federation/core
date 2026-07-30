@@ -11,9 +11,9 @@ import {
 import type { OutputOptions, RequestOptions } from '../../utils/metro-compat';
 import { Server } from '../../utils/metro-compat';
 import type { Config } from '../types';
+import { resolveMetroConfigForCommand } from '../utils/command-metro-config';
 import { createModulePathRemapper } from '../utils/create-module-path-remapper';
 import { createResolver } from '../utils/create-resolver';
-import loadMetroConfig from '../utils/load-metro-config';
 import {
   normalizeOutputRelativePath,
   toFileSourceUrl,
@@ -109,11 +109,7 @@ async function bundleFederatedRemote(
   cfg: Config,
   args: BundleFederatedRemoteArgs,
 ): Promise<void> {
-  const rawConfig = await loadMetroConfig(cfg, {
-    maxWorkers: args.maxWorkers,
-    resetCache: args.resetCache,
-    config: args.config,
-  });
+  const rawConfig = await resolveMetroConfigForCommand(cfg, args);
 
   const logger = cfg.logger ?? console;
 

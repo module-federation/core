@@ -2,7 +2,7 @@ import bundleFederatedHost, { bundleFederatedHostOptions } from './bundle-host';
 import bundleFederatedRemote, {
   bundleFederatedRemoteOptions,
 } from './bundle-remote';
-import loadMetroConfig from './utils/load-metro-config';
+import { preloadMetroConfigForCommand as loadMetroConfig } from './utils/command-metro-config';
 
 export {
   bundleFederatedHost,
