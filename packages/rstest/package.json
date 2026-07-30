@@ -46,7 +46,8 @@
     "@module-federation/rsbuild-plugin": "workspace:*",
     "@rslib/core": "^0.23.2",
     "@rsbuild/core": "2.1.4",
-    "@rstest/core": "^0.11.4"
+    "@rstest/core": "^0.11.4",
+    "typescript": "6.0.3"
   },
   "peerDependencies": {
     "@rstest/core": ">=0.11.4",
@@ -63,7 +64,6 @@
   "dependencies": {
     "@module-federation/enhanced": "workspace:*",
     "@module-federation/node": "workspace:*",
-    "@module-federation/rspack": "workspace:*",
     "@module-federation/sdk": "workspace:*"
   },
   "engines": {

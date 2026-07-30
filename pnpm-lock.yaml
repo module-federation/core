@@ -4058,9 +4058,6 @@ importers:
       '@module-federation/node':
         specifier: workspace:*
         version: link:../node
-      '@module-federation/rspack':
-        specifier: workspace:*
-        version: link:../rspack
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../sdk
@@ -4077,6 +4074,9 @@ importers:
       '@rstest/core':
         specifier: ^0.11.4
         version: 0.11.4(@module-federation/runtime-tools@2.8.0)(core-js@3.49.0)(jsdom@20.0.3)
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
 
   packages/runtime:
     dependencies:
