@@ -40,6 +40,10 @@ function isEsmRemoteEntryLoadError(err: unknown): boolean {
   );
 }
 
+export function isEsmRemoteType(type: RemoteInfo['type']): boolean {
+  return type === 'esm' || type === 'module';
+}
+
 async function loadEsmEntry({
   entry,
   remoteEntryExports,
@@ -244,23 +248,23 @@ async function loadEntryDom({
   resourceContext?: ResourceLoadContext;
 }) {
   const { entry, entryGlobalName: globalName, name, type } = remoteInfo;
-  switch (type) {
-    case 'esm':
-    case 'module':
-      return loadEsmEntry({ entry, remoteEntryExports, name, getEntryUrl });
-    case 'system':
-      return loadSystemJsEntry({ entry, remoteEntryExports });
-    default:
-      return loadEntryScript({
-        entry,
-        globalName,
-        name,
-        remoteInfo,
-        loaderHook,
-        getEntryUrl,
-        resourceContext,
-      });
+  if (isEsmRemoteType(type)) {
+    return loadEsmEntry({ entry, remoteEntryExports, name, getEntryUrl });
   }
+
+  if (type === 'system') {
+    return loadSystemJsEntry({ entry, remoteEntryExports });
+  }
+
+  return loadEntryScript({
+    entry,
+    globalName,
+    name,
+    remoteInfo,
+    loaderHook,
+    getEntryUrl,
+    resourceContext,
+  });
 }
 
 async function loadEntryNode({

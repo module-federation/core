@@ -1,5 +1,26 @@
 # @module-federation/rsbuild-plugin
 
+## 2.8.1
+
+### Patch Changes
+
+- Updated dependencies [d901e2c]
+  - @module-federation/node@2.7.48
+  - @module-federation/sdk@2.8.1
+  - @module-federation/enhanced@2.8.1
+
+## 2.8.0
+
+### Patch Changes
+
+- cef63f9: fix(rsbuild-plugin): force `output.library.type` to `commonjs-module` in `patchNodeConfig` so the `mf-ssr` bundle stops emitting module-scope `export {}` and passes rspack 2.1.x minification.
+- Updated dependencies [ea490ae]
+- Updated dependencies [6ee67dc]
+- Updated dependencies [681e5d2]
+  - @module-federation/enhanced@2.8.0
+  - @module-federation/sdk@2.8.0
+  - @module-federation/node@2.7.47
+
 ## 2.7.0
 
 ### Patch Changes

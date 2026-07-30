@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/bridge-react-webpack-plugin",
-  "version": "2.7.0",
+  "version": "2.8.1",
   "publishConfig": {
     "access": "public"
   },
@@ -33,9 +33,7 @@
     "test": "rstest"
   },
   "dependencies": {
-    "@module-federation/sdk": "workspace:*",
-    "semver": "7.6.3",
-    "@types/semver": "7.5.8"
+    "@module-federation/sdk": "workspace:*"
   },
   "devDependencies": {
     "typescript": "7.0.2",

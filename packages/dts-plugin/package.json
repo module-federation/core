@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/dts-plugin",
-  "version": "2.7.0",
+  "version": "2.8.1",
   "author": "hanric <hanric.zhang@gmail.com>",
   "main": "./dist/index.js",
   "module": "./dist/esm/index.mjs",
@@ -69,16 +69,14 @@
     "@module-federation/managers": "workspace:*",
     "@module-federation/sdk": "workspace:*",
     "@module-federation/third-party-dts-extractor": "workspace:*",
-    "adm-zip": "0.5.10",
+    "adm-zip": "0.6.0",
     "isomorphic-ws": "5.0.0",
     "undici": "7.28.0",
-    "node-schedule": "2.1.1",
     "ws": "8.21.0"
   },
   "devDependencies": {
     "@module-federation/runtime": "workspace:*",
     "@rstest/core": "^0.10.6",
-    "@types/node-schedule": "2.1.7",
     "@types/ws": "8.5.12",
     "@vue/tsconfig": "^0.7.0",
     "directory-tree": "3.5.2",

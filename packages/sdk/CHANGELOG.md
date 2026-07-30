@@ -1,5 +1,17 @@
 # @module-federation/sdk
 
+## 2.8.1
+
+### Patch Changes
+
+- d901e2c: Use manifest expose assets for Next.js chunk flushing, including aliased remotes, and derive legacy federated stats compatibility assets without an extra Webpack stats traversal.
+
+## 2.8.0
+
+### Patch Changes
+
+- ea490ae: Allow builds to exclude unused remote consumption and shared capabilities, and automatically omit Webpack container initialization when no exposes are configured.
+
 ## 2.7.0
 
 ### Minor Changes

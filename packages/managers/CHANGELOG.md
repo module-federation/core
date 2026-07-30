@@ -1,5 +1,20 @@
 # @module-federation/managers
 
+## 2.8.1
+
+### Patch Changes
+
+- Updated dependencies [d901e2c]
+  - @module-federation/sdk@2.8.1
+
+## 2.8.0
+
+### Patch Changes
+
+- 6ee67dc: Reduce installed and bundled size by replacing general-purpose cache, path, version, package lookup, scheduling, fetch, and error fallback dependencies with focused built-in utilities.
+- Updated dependencies [ea490ae]
+  - @module-federation/sdk@2.8.0
+
 ## 2.7.0
 
 ### Patch Changes

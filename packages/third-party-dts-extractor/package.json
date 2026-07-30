@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/third-party-dts-extractor",
-  "version": "2.7.0",
+  "version": "2.8.1",
   "files": [
     "dist/",
     "README.md"
@@ -31,10 +31,6 @@
   "types": "./dist/index.d.ts",
   "author": "hanric <hanric.zhang@gmail.com>",
   "license": "MIT",
-  "dependencies": {
-    "empathic": "2.0.0",
-    "exsolve": "1.0.8"
-  },
   "devDependencies": {
     "@rstest/core": "^0.10.6",
     "@types/node": "^20.19.5",
