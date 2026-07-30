@@ -1,0 +1,21 @@
+apps/website-new/rspress.config.ts
+  s_172541b7d630e6::t_17e941194684e9 10,14,116-126
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "0821a33e54fc5c6c19d881d576ef7fe59d97f0ad",
+  "prompts": {},
+  "sessions": {
+    "s_172541b7d630e6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fa7ce-047b-76c0-bc2b-36fa2a55e061",
+        "model": "unknown"
+      },
+      "human_author": "2heal1 <TwoHeal@163.com>"
+    }
+  },
+  "attestation_metadata": {},
+  "remote_transcripts": {}
+}
