@@ -1,23 +1,4 @@
-import type { EnvironmentConfig, Rspack } from '@rsbuild/core';
-
-export type RspackConfigPatcher = (rspackConfig: Rspack.Configuration) => void;
-
-export const appendRspackHook = (
-  config: EnvironmentConfig,
-  patchRspackConfig: RspackConfigPatcher,
-): void => {
-  config.tools ||= {};
-
-  const existing = config.tools.rspack;
-  if (!existing) {
-    config.tools.rspack = patchRspackConfig;
-    return;
-  }
-
-  config.tools.rspack = Array.isArray(existing)
-    ? [...existing, patchRspackConfig]
-    : [existing, patchRspackConfig];
-};
+import type { Rspack } from '@rsbuild/core';
 
 export const applyNodeRspackDefaults = (
   rspackConfig: Rspack.Configuration,

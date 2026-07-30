@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
@@ -7,6 +7,7 @@ import { rspack, type Rspack } from '@rsbuild/core';
 
 import { withNodeDefaults } from './node-defaults';
 import { applyNodeRspackDefaults } from './rspack-hook';
+import type { ModuleFederationOptions } from './types';
 
 type StatsModule = {
   identifier?: string;
@@ -32,20 +33,22 @@ const collectModuleIdentifiers = (modules: StatsModule[]): string[] =>
     ...collectModuleIdentifiers(module.modules ?? []),
   ]);
 
-const compileRemote = async (remote: string): Promise<string[]> => {
+const compileRemote = async (
+  remote: string,
+  libraryType?: NonNullable<ModuleFederationOptions['library']>['type'],
+): Promise<string[]> => {
   const context = await mkdtemp(path.join(tmpdir(), 'rstest-federation-'));
   tempDirectories.push(context);
 
-  await mkdir(path.join(context, 'src'));
   const remoteRequest = 'remote/Button';
   await writeFile(
-    path.join(context, 'src/index.js'),
+    path.join(context, 'index.js'),
     `import(${JSON.stringify(remoteRequest)});\n`,
   );
 
   const rspackConfig: Rspack.Configuration = {
     context,
-    entry: './src/index.js',
+    entry: './index.js',
     mode: 'development',
     output: {
       filename: 'main.js',
@@ -56,6 +59,7 @@ const compileRemote = async (remote: string): Promise<string[]> => {
         withNodeDefaults({
           name: 'host',
           remotes: { remote },
+          library: libraryType ? { type: libraryType } : undefined,
         }),
       ),
     ],
@@ -111,4 +115,14 @@ describe('node remote transport', () => {
 
     expect(identifiers).toContain(`external commonjs "${remotePath}"`);
   });
+
+  it.each(['module', 'modern-module'] as const)(
+    'normalizes incompatible %s library output before compilation',
+    async (libraryType) => {
+      const remote = 'remote@http://localhost:3001/remoteEntry.js';
+      const identifiers = await compileRemote(remote, libraryType);
+
+      expect(identifiers).toContain(`external script "${remote}"`);
+    },
+  );
 });

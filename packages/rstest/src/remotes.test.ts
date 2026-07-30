@@ -4,59 +4,84 @@ import { describe, expect, it } from '@rstest/core';
 import { collectRemoteNames } from './remotes';
 
 describe('collectRemoteNames', () => {
-  it('collects remote names from object keys and string entries', () => {
-    expect(
-      collectRemoteNames({
-        objectRemote: 'remote@http://localhost:3001/remoteEntry.js',
-        stringlessObjectRemote: {
-          external: 'commonjs /tmp/remoteEntry.js',
-        },
-      }),
-    ).toEqual(new Set(['objectRemote', 'stringlessObjectRemote']));
-
+  it('collects remote names from every federation plugin shape', () => {
     expect(
       collectRemoteNames([
-        'stringRemote@http://localhost:3002/mf-manifest.json',
-        {
-          name: 'namedRemote@http://localhost:3003/remoteEntry.js',
-        },
-        {
-          alias: 'aliasedContainer@http://localhost:3004/remoteEntry.js',
-        },
-        {
-          first: 'firstContainer@http://localhost:3005/remoteEntry.js',
-          second: 'secondContainer@http://localhost:3006/remoteEntry.js',
-        },
+        new ModuleFederationPlugin({
+          name: 'object_host',
+          remotes: {
+            objectRemote: 'remote@http://localhost:3001/remoteEntry.js',
+            stringlessObjectRemote: {
+              external: 'commonjs /tmp/remoteEntry.js',
+            },
+          },
+        }),
+        new ModuleFederationPlugin({
+          name: 'string_host',
+          remotes: [
+            'stringRemote@http://localhost:3002/mf-manifest.json',
+            {
+              name: 'namedRemote@http://localhost:3003/remoteEntry.js',
+            },
+            {
+              alias: 'aliasedContainer@http://localhost:3004/remoteEntry.js',
+            },
+            {
+              first: 'firstContainer@http://localhost:3005/remoteEntry.js',
+              second: 'secondContainer@http://localhost:3006/remoteEntry.js',
+            },
+          ],
+        }),
       ]),
-    ).toEqual(new Set(['stringRemote', 'name', 'alias', 'first', 'second']));
+    ).toEqual(
+      new Set([
+        'objectRemote',
+        'stringlessObjectRemote',
+        'stringRemote',
+        'name',
+        'alias',
+        'first',
+        'second',
+      ]),
+    );
   });
 
   it('parses scoped string remotes as name@entry', () => {
     expect(
       collectRemoteNames([
-        '@scope/remote@http://localhost:3001/remoteEntry.js',
-        '@scope/manifest-remote@http://localhost:3002/mf-manifest.json',
+        new ModuleFederationPlugin({
+          name: 'scoped_host',
+          remotes: [
+            '@scope/remote@http://localhost:3001/remoteEntry.js',
+            '@scope/manifest-remote@http://localhost:3002/mf-manifest.json',
+          ],
+        }),
       ]),
     ).toEqual(new Set(['@scope/remote', '@scope/manifest-remote']));
   });
 
-  it('collects fallback remote names from plugin options only when provided', () => {
+  it('collects remote names from multiple federation plugins', () => {
     expect(
-      collectRemoteNames(undefined, [
+      collectRemoteNames([
         new ModuleFederationPlugin({
-          name: 'fallback_host',
+          name: 'first_host',
           remotes: {
-            fallbackRemote:
-              'fallbackRemote@http://localhost:3005/remoteEntry.js',
+            firstRemote: 'firstRemote@http://localhost:3005/remoteEntry.js',
+          },
+        }),
+        new ModuleFederationPlugin({
+          name: 'second_host',
+          remotes: {
+            secondRemote: 'secondRemote@http://localhost:3006/remoteEntry.js',
           },
         }),
       ]),
-    ).toEqual(new Set(['fallbackRemote']));
+    ).toEqual(new Set(['firstRemote', 'secondRemote']));
   });
 
   it('ignores similarly shaped non-federation plugins', () => {
     expect(
-      collectRemoteNames(undefined, [
+      collectRemoteNames([
         {
           name: 'WrappedFederationPlugin',
           _options: {
@@ -65,10 +90,6 @@ describe('collectRemoteNames', () => {
               duckRemote: 'duckRemote@http://localhost:3006/remoteEntry.js',
             },
           },
-        },
-        {
-          name: 'SomeOtherPlugin',
-          _options: { name: 'not_federation' },
         },
       ]),
     ).toEqual(new Set());

@@ -3,36 +3,20 @@ import { pluginPublint } from 'rsbuild-plugin-publint';
 
 export default defineConfig({
   plugins: [pluginPublint()],
-  lib: [
-    {
-      format: 'esm',
-      syntax: 'es2021',
-      bundle: true,
+  lib: (['esm', 'cjs'] as const).map((format) => ({
+    format,
+    syntax: 'es2021',
+    bundle: true,
+    dts: {
+      autoExtension: true,
+      distPath: './dist',
+    },
+    redirect: {
       dts: {
-        autoExtension: true,
-        distPath: './dist',
-      },
-      redirect: {
-        dts: {
-          extension: true,
-        },
+        extension: true,
       },
     },
-    {
-      format: 'cjs',
-      syntax: 'es2021',
-      bundle: true,
-      dts: {
-        autoExtension: true,
-        distPath: './dist',
-      },
-      redirect: {
-        dts: {
-          extension: true,
-        },
-      },
-    },
-  ],
+  })),
   source: {
     entry: {
       index: './src/index.ts',
@@ -46,11 +30,5 @@ export default defineConfig({
     },
     // Keep workspace packages external; everything else is bundled for portability.
     externals: [/@module-federation\//, 'pnpapi'],
-    copy: [
-      {
-        from: './LICENSE',
-        to: '.',
-      },
-    ],
   },
 });

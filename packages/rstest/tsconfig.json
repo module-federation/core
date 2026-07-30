@@ -9,7 +9,7 @@
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "declaration": true,
-    "types": ["@rstest/core/globals", "node"]
+    "types": ["node"]
   },
   "include": ["src", "rstest.config.ts"],
   "references": [

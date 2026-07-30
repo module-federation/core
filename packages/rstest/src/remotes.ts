@@ -72,7 +72,9 @@ const getModuleFederationPlugin = (
 
 export const applyDefaultsToFederationPlugins = (
   plugins: unknown[] | undefined,
-  getDefaults: (options: ModuleFederationOptions) => ModuleFederationOptions,
+  normalizeOptions: (
+    options: ModuleFederationOptions,
+  ) => ModuleFederationOptions,
 ): void => {
   if (!plugins) {
     return;
@@ -84,35 +86,20 @@ export const applyDefaultsToFederationPlugins = (
       continue;
     }
 
-    federationPlugin._options = getDefaults(federationPlugin._options);
-  }
-};
-
-const addFallbackRemoteNamesFromPlugins = (
-  plugins: unknown[] | undefined,
-  target: Set<string>,
-): void => {
-  if (!plugins) {
-    return;
-  }
-
-  for (const plugin of plugins) {
-    const federationPlugin = getModuleFederationPlugin(plugin);
-    if (federationPlugin) {
-      addRemoteNames(federationPlugin._options.remotes, target);
-    }
+    federationPlugin._options = normalizeOptions(federationPlugin._options);
   }
 };
 
 export const collectRemoteNames = (
-  remotes: ModuleFederationOptions['remotes'] | undefined,
-  fallbackPlugins?: unknown[],
+  plugins: unknown[] | undefined,
 ): Set<string> => {
   const remoteNames = new Set<string>();
-  addRemoteNames(remotes, remoteNames);
 
-  if (!remoteNames.size) {
-    addFallbackRemoteNamesFromPlugins(fallbackPlugins, remoteNames);
+  for (const plugin of plugins ?? []) {
+    const federationPlugin = getModuleFederationPlugin(plugin);
+    if (federationPlugin) {
+      addRemoteNames(federationPlugin._options.remotes, remoteNames);
+    }
   }
 
   return remoteNames;

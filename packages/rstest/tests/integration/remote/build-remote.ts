@@ -1,12 +1,11 @@
 import { rm } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
 import { rspack, type Rspack } from '@rsbuild/core';
 
 const require = createRequire(import.meta.url);
-const remoteDirectory = path.dirname(fileURLToPath(import.meta.url));
+const remoteDirectory = import.meta.dirname;
 const outputDirectory = path.resolve(remoteDirectory, 'dist');
 
 const runCompiler = async (compiler: Rspack.Compiler): Promise<void> => {

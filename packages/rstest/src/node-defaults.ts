@@ -33,7 +33,8 @@ export const withRstestDefaults = (
  * (`patchNodeMFConfig` in packages/rsbuild-plugin/src/utils/ssr.ts) with
  * the same script transport default. Test workers additionally require
  * `library.name` to equal the container name so the container is resolvable
- * inside the worker.
+ * inside the worker. ESM library types are normalized because Rstest runs
+ * Node test bundles with module output disabled.
  */
 export const withNodeDefaults = (
   options: ModuleFederationOptions,
@@ -66,13 +67,26 @@ export const withNodeDefaults = (
     );
   }
 
+  const userLibraryType = merged.library?.type;
+  const usesEsmLibrary =
+    userLibraryType === 'module' || userLibraryType === 'modern-module';
+  const libraryType = usesEsmLibrary
+    ? 'commonjs-module'
+    : (userLibraryType ?? 'commonjs-module');
+
+  if (usesEsmLibrary) {
+    logger.warn(
+      `library.type "${userLibraryType}" is overridden with "commonjs-module": rstest disables module output in Node test workers.`,
+    );
+  }
+
   return {
     ...merged,
     remoteType: merged.remoteType ?? 'script',
     library: {
       ...merged.library,
       name: merged.name,
-      type: merged.library?.type ?? 'commonjs-module',
+      type: libraryType,
     },
     runtimePlugins,
     experiments: {

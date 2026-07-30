@@ -21,8 +21,8 @@ Use `@rstest/core@0.11.4` or newer. Rstest's federation support shipped in
 
 :::
 
-Older Rstest versions do not expose the configuration API this plugin uses for
-Node test builds.
+Rstest versions before `0.11.4` do not include the `federation` compatibility
+mode this plugin enables for Node test builds.
 
 ## Quick Start
 
@@ -101,6 +101,9 @@ and runs both Node and JSDOM projects.
 
 ## How It Works
 
+For both Node and browser targets, `dts`, `manifest`, and `dev` default to
+`false`; explicit values are preserved.
+
 ### Node Test Defaults
 
 For Node-targeted Rstest builds, the plugin applies Module Federation defaults
@@ -108,7 +111,8 @@ that match the Node runtime:
 
 - `target: async-node`
 - `experiments.asyncStartup = true`
-- CommonJS container output
+- CommonJS container output; `module` and `modern-module` library types are
+  normalized
 - `@module-federation/node/runtimePlugin`
 - Node-targeted federation optimization
 - Script remote transport by default
@@ -144,9 +148,9 @@ export default defineConfig({
 });
 ```
 
-Browser mode keeps browser build defaults and only enables
-`experiments.asyncStartup`. Pass an explicit `target` only to override the
-detected mode.
+Browser mode avoids node-only defaults while enabling
+`experiments.asyncStartup` and applying the shared defaults above. Pass an
+explicit `target` only to override the detected mode.
 
 ## Configuration
 

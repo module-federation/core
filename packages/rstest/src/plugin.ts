@@ -9,7 +9,7 @@ import {
   applyDefaultsToFederationPlugins,
   collectRemoteNames,
 } from './remotes';
-import { appendRspackHook, applyNodeRspackDefaults } from './rspack-hook';
+import { applyNodeRspackDefaults } from './rspack-hook';
 import type { ModuleFederationOptions, RstestFederationOptions } from './types';
 
 /**
@@ -56,10 +56,7 @@ const createRspackPatcher = (
     let remoteNames: Set<string> | undefined;
     rspackConfig.externals = [
       createFederationExternalBypass(() => {
-        remoteNames ??= collectRemoteNames(
-          moduleFederationOptions?.remotes,
-          rspackConfig.plugins,
-        );
+        remoteNames ??= collectRemoteNames(rspackConfig.plugins);
         return remoteNames;
       }),
       ...toArray(rspackConfig.externals),
@@ -152,24 +149,23 @@ export const federation = (
       // the rspack patcher stays ahead of externals added by other plugins.
       order: 'post',
       handler: (config, { mergeEnvironmentConfig }) => {
-        const merged = isNodeTarget
-          ? mergeEnvironmentConfig(config, {
-              output: {
-                target: 'node',
-              },
-            } satisfies EnvironmentConfig)
-          : mergeEnvironmentConfig(config);
+        const pluginConfig: EnvironmentConfig = {
+          tools: {
+            rspack: createRspackPatcher(
+              moduleFederationOptions,
+              isNodeTarget,
+              patchedRspackConfigs,
+            ),
+          },
+        };
 
-        appendRspackHook(
-          merged,
-          createRspackPatcher(
-            moduleFederationOptions,
-            isNodeTarget,
-            patchedRspackConfigs,
-          ),
-        );
+        if (isNodeTarget) {
+          pluginConfig.output = {
+            target: 'node',
+          };
+        }
 
-        return merged;
+        return mergeEnvironmentConfig(config, pluginConfig);
       },
     });
   },

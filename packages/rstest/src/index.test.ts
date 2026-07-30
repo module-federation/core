@@ -3,11 +3,12 @@ import {
   ModuleFederationPlugin,
   PLUGIN_NAME,
 } from '@module-federation/enhanced/rspack';
-import { describe, expect, it } from '@rstest/core';
-import type {
-  EnvironmentConfig,
-  RsbuildPluginAPI,
-  Rspack,
+import { describe, expect, it, rs } from '@rstest/core';
+import {
+  mergeRsbuildConfig,
+  type EnvironmentConfig,
+  type RsbuildPluginAPI,
+  type Rspack,
 } from '@rsbuild/core';
 
 import { shouldKeepBundledForFederation } from './externals-bypass';
@@ -221,23 +222,19 @@ const applyFederationPlugin = (
 const captureWarnings = <T>(
   run: () => T,
 ): { result: T; warnings: string[] } => {
-  const consoleWithWarn = console as typeof console & {
-    warn: (...args: unknown[]) => void;
-  };
-  const originalWarn = consoleWithWarn.warn;
-  const warnings: string[] = [];
-
-  consoleWithWarn.warn = (...args: unknown[]) => {
-    warnings.push(args.map((arg) => String(arg)).join(' '));
-  };
+  const warningSpy = rs
+    .spyOn(console, 'warn')
+    .mockImplementation(() => undefined);
 
   try {
     return {
       result: run(),
-      warnings,
+      warnings: warningSpy.mock.calls.map((args) =>
+        args.map((arg) => String(arg)).join(' '),
+      ),
     };
   } finally {
-    consoleWithWarn.warn = originalWarn;
+    warningSpy.mockRestore();
   }
 };
 
@@ -359,6 +356,35 @@ describe('federation()', () => {
     const bypass = getExternalBypass(rspackConfig);
     expect(callExternal(bypass, 'component-app/Button')).toBe(false);
     expect(callExternal(bypass, 'react')).toBe(undefined);
+  });
+
+  it('keeps remotes from every federation plugin bundled', () => {
+    const { rspackConfig } = applyFederationPlugin(
+      federation({
+        name: 'direct_host',
+        remotes: {
+          directRemote: 'directRemote@http://localhost:3001/remoteEntry.js',
+        },
+      }),
+      {
+        rspackConfig: {
+          output: {},
+          plugins: [
+            new ModuleFederationPlugin({
+              name: 'existing_host',
+              remotes: {
+                existingRemote:
+                  'existingRemote@http://localhost:3002/remoteEntry.js',
+              },
+            }),
+          ],
+        },
+      },
+    );
+
+    const bypass = getExternalBypass(rspackConfig);
+    expect(callExternal(bypass, 'directRemote/Button')).toBe(false);
+    expect(callExternal(bypass, 'existingRemote/Button')).toBe(false);
   });
 
   it('discovers federation remotes registered after rspack config patching', () => {
@@ -590,6 +616,31 @@ describe('federation()', () => {
     );
   });
 
+  it.each(['module', 'modern-module'] as const)(
+    'normalizes incompatible %s library output',
+    (libraryType) => {
+      const { result: options, warnings } = captureWarnings(() => {
+        const { rspackConfig } = applyFederationPlugin(
+          federation({
+            name: 'component_app',
+            library: {
+              type: libraryType,
+            },
+          }),
+        );
+        return getFederationPluginOptions(rspackConfig.plugins);
+      });
+
+      expect(options.library).toEqual({
+        name: 'component_app',
+        type: 'commonjs-module',
+      });
+      expect(warnings.join('\n')).toContain(
+        `library.type "${libraryType}" is overridden with "commonjs-module"`,
+      );
+    },
+  );
+
   it('forces async startup and warns when disabled manually', () => {
     const { result: options, warnings } = captureWarnings(() => {
       const { rspackConfig } = applyFederationPlugin(
@@ -629,6 +680,26 @@ describe('federation()', () => {
     expect(warnings.join('\n')).toContain(
       'manual configuration is unnecessary',
     );
+  });
+
+  it('deduplicates configured node runtime plugin aliases', () => {
+    const runtimePluginOptions = { enabled: true };
+    const { rspackConfig } = applyFederationPlugin(
+      federation({
+        name: 'legacy_component_app',
+        runtimePlugins: [
+          [NODE_RUNTIME_PLUGIN_REQUEST, runtimePluginOptions],
+          NODE_RUNTIME_PLUGIN,
+          'custom/runtimePlugin',
+        ],
+      }),
+    );
+
+    const options = getFederationPluginOptions(rspackConfig.plugins);
+    expect(options.runtimePlugins).toEqual([
+      [NODE_RUNTIME_PLUGIN, runtimePluginOptions],
+      'custom/runtimePlugin',
+    ]);
   });
 
   it('warns when running outside rstest', () => {
@@ -755,37 +826,23 @@ describe('federation()', () => {
   });
 
   it('composes with existing tools.rspack hook instead of overwriting it', () => {
-    const mergeEnvironmentConfig: MergeEnvironmentConfig = (...configs) => {
-      // Basic merge that preserves nested objects we care about for this test.
-      const out: EnvironmentConfig = {};
-      for (const c of configs) {
-        if (!c) continue;
-        if (c.output) out.output = { ...out.output, ...c.output };
-        if (c.tools) out.tools = { ...out.tools, ...c.tools };
-      }
-      return out;
-    };
-
     const existingHook = (cfg: Rspack.Configuration) => {
       (
         cfg as TestRspackConfig & { __existingHookRan?: boolean }
       ).__existingHookRan = true;
     };
 
-    const { envHook } = setupFederationPlugin(federation());
-    const merged = envHook(
-      { tools: { rspack: existingHook } },
-      { mergeEnvironmentConfig },
-    );
-
-    expect(Array.isArray(merged.tools?.rspack)).toBe(true);
-
     const rspackConfig: TestRspackConfig & { __existingHookRan?: boolean } = {
       output: {},
       plugins: [],
     };
-    runRspackHooks(merged, rspackConfig);
+    const { merged } = applyFederationPlugin(federation(), {
+      config: { tools: { rspack: existingHook } },
+      mergeEnvironmentConfig: mergeRsbuildConfig,
+      rspackConfig,
+    });
 
+    expect(Array.isArray(merged.tools?.rspack)).toBe(true);
     expect(rspackConfig.__existingHookRan).toBe(true);
     expect(rspackConfig.experiments?.outputModule).toBe(false);
     expect(rspackConfig.output?.module).toBe(false);

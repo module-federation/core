@@ -4,11 +4,10 @@ import type { RuntimePlugin } from './types';
 
 const require = createRequire(import.meta.url);
 
-export const NODE_RUNTIME_PLUGIN_REQUEST =
-  '@module-federation/node/runtimePlugin';
+const NODE_RUNTIME_PLUGIN_REQUEST = '@module-federation/node/runtimePlugin';
 export const NODE_RUNTIME_PLUGIN = require.resolve(NODE_RUNTIME_PLUGIN_REQUEST);
 
-export const getRuntimePluginName = (runtimePlugin: RuntimePlugin): string => {
+const getRuntimePluginName = (runtimePlugin: RuntimePlugin): string => {
   return typeof runtimePlugin === 'string' ? runtimePlugin : runtimePlugin[0];
 };
 
@@ -36,11 +35,21 @@ export const normalizeRuntimePlugins = (
   runtimePlugins: RuntimePlugin[];
   hasConfiguredNodeRuntimePlugin: boolean;
 } => {
-  const normalized = (runtimePlugins ?? []).map(normalizeRuntimePlugin);
-  const hasConfiguredNodeRuntimePlugin = normalized.some(
-    (runtimePlugin) =>
-      getRuntimePluginName(runtimePlugin) === NODE_RUNTIME_PLUGIN,
-  );
+  const normalized: RuntimePlugin[] = [];
+  let hasConfiguredNodeRuntimePlugin = false;
+
+  for (const runtimePlugin of runtimePlugins ?? []) {
+    const normalizedPlugin = normalizeRuntimePlugin(runtimePlugin);
+    const isNodeRuntimePlugin =
+      getRuntimePluginName(normalizedPlugin) === NODE_RUNTIME_PLUGIN;
+
+    if (isNodeRuntimePlugin && hasConfiguredNodeRuntimePlugin) {
+      continue;
+    }
+
+    normalized.push(normalizedPlugin);
+    hasConfiguredNodeRuntimePlugin ||= isNodeRuntimePlugin;
+  }
 
   return {
     runtimePlugins: hasConfiguredNodeRuntimePlugin

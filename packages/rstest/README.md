@@ -41,11 +41,15 @@ For Node test environments, the plugin enables Rstest's federation
 compatibility mode automatically. Do not also set `federation: true` in
 `rstest.config.*`.
 
+For both Node and browser targets, `dts`, `manifest`, and `dev` default to
+`false`; explicit values are preserved.
+
 The plugin applies these Node defaults:
 
 - `target: async-node`
 - `experiments.asyncStartup = true`
-- CommonJS library output (`library.type = 'commonjs-module'`)
+- CommonJS library output (`library.type = 'commonjs-module'`); `module` and
+  `modern-module` library types are normalized
 - Node runtime plugin (`@module-federation/node/runtimePlugin`)
 - `experiments.optimization.target = 'node'`
 - Script remote transport (`remoteType = 'script'`); inline prefixes such as

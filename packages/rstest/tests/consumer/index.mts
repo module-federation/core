@@ -3,8 +3,6 @@ import {
   type ModuleFederationOptions,
 } from '@module-federation/rstest';
 
-const options: ModuleFederationOptions = {
+federation({
   name: 'esm_consumer',
-};
-
-federation(options);
+} satisfies ModuleFederationOptions);

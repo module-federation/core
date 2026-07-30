@@ -1,10 +1,9 @@
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import { federation } from '@module-federation/rstest';
 import { defineConfig } from '@rstest/core';
 
-const fixtureDirectory = path.dirname(fileURLToPath(import.meta.url));
+const fixtureDirectory = import.meta.dirname;
 
 export default defineConfig({
   globalSetup: [path.resolve(fixtureDirectory, 'remote/build-remote.ts')],
