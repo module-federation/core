@@ -6,11 +6,10 @@ const LANGUAGES = ['zh', 'en'];
 const MF_DOC_PUBLIC_PATH_KEY = '__MF_DOC_PUBLIC_PATH__';
 const PLAYGROUND_REMOTE_NAME = 'mf_playground';
 const PLAYGROUND_REMOTE_MANIFEST_URL =
-  process.env.PLAYGROUND_REMOTE_MANIFEST_URL ||
-  process.env.PLAYGROUND_MANIFEST_URL ||
-  (process.env.NODE_ENV === 'development'
+  process.env.NODE_ENV === 'development'
     ? 'http://localhost:3006/mf-manifest.json'
-    : 'https://unpkg.com/@module-federation/playground@latest/dist/mf/mf-manifest.json');
+    : // : 'https://unpkg.com/@module-federation/playground@latest/dist/mf/mf-manifest.json';
+      'https://unpkg.com/@module-federation/playground@next/dist/mf/mf-manifest.json';
 
 const exposes = {
   // basic
