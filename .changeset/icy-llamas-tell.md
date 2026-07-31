@@ -1,5 +1,6 @@
 ---
 '@module-federation/runtime-core': patch
+'@module-federation/retry-plugin': patch
 ---
 
-fix: fix retry-plugin recovery for ESM and module remote entry load failures.
+Fix retry-plugin recovery for ESM and module remote entry load failures, including default cache-busting retries.
