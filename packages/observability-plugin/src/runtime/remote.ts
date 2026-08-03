@@ -2,6 +2,7 @@ import type {
   ObservabilityRemoteInfo,
   ObservabilityResourceInfo,
   ObservabilityRuntimeRemoteSource,
+  ObservabilityRuntimeOrigin,
 } from '../type';
 import {
   clipText,
@@ -9,6 +10,33 @@ import {
   sanitizeText,
   sanitizeUrl,
 } from '../utils';
+import { supportsRuntimeObservability } from './shared';
+
+const REMOTE_LIFECYCLE_HOOKS = [
+  'afterLoadEntry',
+  'beforeInitRemote',
+  'afterInitRemote',
+  'beforeGetExpose',
+  'afterGetExpose',
+  'beforeExecuteFactory',
+  'afterExecuteFactory',
+] as const;
+
+export function supportsRemoteLifecycleObservability(
+  origin?: ObservabilityRuntimeOrigin,
+): boolean {
+  if (supportsRuntimeObservability(origin)) {
+    return true;
+  }
+
+  const lifecycle = origin?.loaderHook?.lifecycle;
+  return Boolean(
+    lifecycle &&
+    REMOTE_LIFECYCLE_HOOKS.every(
+      (hookName) => lifecycle[hookName] !== undefined,
+    ),
+  );
+}
 
 export function sanitizeRemote(
   remote: ObservabilityRemoteInfo | undefined,
