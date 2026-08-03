@@ -656,6 +656,12 @@ export interface ObservabilityRuntimeOrigin {
   loaderHook?: {
     lifecycle?: {
       afterLoadEntry?: unknown;
+      beforeInitRemote?: unknown;
+      afterInitRemote?: unknown;
+      beforeGetExpose?: unknown;
+      afterGetExpose?: unknown;
+      beforeExecuteFactory?: unknown;
+      afterExecuteFactory?: unknown;
     };
   };
   snapshotHandler?: {

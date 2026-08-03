@@ -84,6 +84,7 @@ import {
   createRemoteInfo,
   isManifestUrl,
   sanitizeRemote,
+  supportsRemoteLifecycleObservability,
 } from './runtime/remote';
 import { createRuntimeStateManager } from './runtime/state';
 import {
@@ -328,7 +329,7 @@ export function createObservability(
   const supportsRuntimeHookObservability = (
     origin?: ObservabilityRuntimeOrigin,
   ) =>
-    supportsRuntimeObservability({
+    supportsRemoteLifecycleObservability({
       ...origin,
       version:
         sanitizeText(origin?.version, 80) ||

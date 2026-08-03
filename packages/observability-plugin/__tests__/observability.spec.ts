@@ -1783,6 +1783,55 @@ describe('ObservabilityPlugin', () => {
     );
   });
 
+  it('records runtime lifecycle hooks for capability-complete preview runtimes', () => {
+    const observability = createObservability(
+      {
+        level: 'verbose',
+        console: false,
+      },
+      {
+        guardRuntimeHooksByRuntimeVersion: true,
+        returnHookArgs: true,
+      },
+    );
+    const lifecycle = Object.fromEntries(
+      [
+        'afterLoadEntry',
+        'beforeInitRemote',
+        'afterInitRemote',
+        'beforeGetExpose',
+        'afterGetExpose',
+        'beforeExecuteFactory',
+        'afterExecuteFactory',
+      ].map((hookName) => [hookName, {}]),
+    );
+
+    (observability.plugin.beforeGetExpose as any)({
+      id: 'preview-remote/Button',
+      expose: './Button',
+      moduleInfo: {
+        name: 'preview-remote',
+        entry: 'http://localhost:3001/remoteEntry.js',
+      },
+      origin: {
+        version: '0.0.0-feat-operate-openruntime-20260729120109',
+        options: {
+          name: 'preview-host',
+        },
+        loaderHook: { lifecycle },
+      },
+    });
+
+    expect(observability.getEvents()).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          phase: 'expose',
+          status: 'start',
+        }),
+      ]),
+    );
+  });
+
   it('treats missing runtime version as unsupported for guarded runtime hooks', () => {
     const observability = createObservability(
       {
