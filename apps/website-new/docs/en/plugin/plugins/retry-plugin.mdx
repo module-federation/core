@@ -133,7 +133,9 @@ const mf = createInstance({
 **addQuery**
 - Type: `boolean | ((context: { times: number; originalQuery: string }) => string)`
 - Optional
-- Whether to append a query parameter when retrying, default is false
+- Whether to append a query parameter when retrying
+- Defaults to cache-busting for `esm` and `module` remote entry retries because browsers cache failed dynamic imports by URL. Other retry paths do not add a query parameter by default
+- Set `addQuery: false` to opt out of the default ESM/module remote entry cache-busting
 - If a function is provided, it receives retry count and the original query string, and should return the new query string
 
 **fetchOptions**
@@ -198,6 +200,16 @@ Order of attempts:
 ### Cache-busting
 
 Use `addQuery` to add query parameters during retries to avoid cache interference:
+
+For remote entries with type `esm` or `module`, the plugin adds `retryCount` by default so each dynamic import retry uses a new URL. This default does not affect manifest, fetch, or classic script retries. Disable it explicitly if needed:
+
+```javascript
+const retryPlugin = RetryPlugin({
+  addQuery: false,
+});
+```
+
+To enable cache-busting for every retry path:
 
 ```javascript
 const retryPlugin = RetryPlugin({
