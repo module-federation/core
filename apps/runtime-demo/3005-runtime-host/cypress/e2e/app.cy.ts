@@ -123,6 +123,25 @@ describe('3005-runtime-host/', () => {
     });
   });
 
+  describe('ESM remote retry', () => {
+    it('re-requests a failed module entry with the default retry config', () => {
+      const requestUrls: string[] = [];
+      cy.intercept('GET', '**/esm-retry-fixture/remoteEntry.js*', (request) => {
+        requestUrls.push(request.url);
+      });
+      cy.visit('/esm-retry');
+
+      cy.get('[data-testid="esm-retry-load"]').click();
+      cy.get('[data-testid="esm-retry-status"]')
+        .should('contain', 'ESM retry recovered')
+        .then(() => {
+          expect(requestUrls).to.have.length(2);
+          expect(requestUrls[0]).not.to.contain('retryCount');
+          expect(requestUrls[1]).to.contain('retryCount=1');
+        });
+    });
+  });
+
   describe('observability demo fixture', () => {
     beforeEach(() => {
       cy.visit('/observability');

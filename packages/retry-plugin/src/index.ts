@@ -63,6 +63,11 @@ const RetryPlugin = (
       globalLoading,
       uniqueKey,
     }: LoadEntryErrorArgs) {
+      const retryAddQuery =
+        addQuery === undefined &&
+        (remoteInfo.type === 'esm' || remoteInfo.type === 'module')
+          ? true
+          : addQuery;
       const beforeExecuteRetry = () => {
         delete globalLoading[uniqueKey];
       };
@@ -72,7 +77,7 @@ const RetryPlugin = (
           retryTimes,
           retryDelay,
           domains,
-          addQuery,
+          addQuery: retryAddQuery,
           onRetry,
           onSuccess,
           onError,
