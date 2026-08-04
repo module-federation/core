@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, rs } from '@rstest/core';
 import { fetchRetry } from '../src/fetch-retry';
+import { RetryPlugin } from '../src';
 import { scriptRetry } from '../src/script-retry';
 import { ERROR_ABANDONED, RUNTIME_008 } from '../src/constant';
 
@@ -19,6 +20,77 @@ describe('Retry Plugin', () => {
     rs.clearAllMocks();
     mockFetch.mockClear();
     rs.useRealTimers();
+  });
+
+  describe('RetryPlugin', () => {
+    const createLoadEntryErrorArgs = (
+      type: 'global' | 'esm' | 'module',
+      getRemoteEntry: ReturnType<typeof rs.fn>,
+    ) =>
+      ({
+        getRemoteEntry,
+        origin: {},
+        remoteInfo: {
+          name: 'remote',
+          entry: 'https://example.com/remoteEntry.js',
+          type,
+        },
+        remoteEntryExports: undefined,
+        globalLoading: {},
+        uniqueKey: 'remote',
+      }) as any;
+
+    it.each(['esm', 'module'] as const)(
+      'adds a retry query by default for %s remote entries',
+      async (type) => {
+        const getRemoteEntry = rs.fn(async ({ getEntryUrl }) => ({
+          url: getEntryUrl('https://example.com/remoteEntry.js'),
+        }));
+        const plugin = RetryPlugin({ retryTimes: 1, retryDelay: 0 });
+
+        const result = await plugin.loadEntryError!(
+          createLoadEntryErrorArgs(type, getRemoteEntry),
+        );
+
+        expect(result).toEqual({
+          url: 'https://example.com/remoteEntry.js?retryCount=1',
+        });
+      },
+    );
+
+    it('does not add a retry query by default for global remote entries', async () => {
+      const getRemoteEntry = rs.fn(async ({ getEntryUrl }) => ({
+        url: getEntryUrl('https://example.com/remoteEntry.js'),
+      }));
+      const plugin = RetryPlugin({ retryTimes: 1, retryDelay: 0 });
+
+      const result = await plugin.loadEntryError!(
+        createLoadEntryErrorArgs('global', getRemoteEntry),
+      );
+
+      expect(result).toEqual({
+        url: 'https://example.com/remoteEntry.js',
+      });
+    });
+
+    it('respects addQuery false for module remote entries', async () => {
+      const getRemoteEntry = rs.fn(async ({ getEntryUrl }) => ({
+        url: getEntryUrl('https://example.com/remoteEntry.js'),
+      }));
+      const plugin = RetryPlugin({
+        retryTimes: 1,
+        retryDelay: 0,
+        addQuery: false,
+      });
+
+      const result = await plugin.loadEntryError!(
+        createLoadEntryErrorArgs('module', getRemoteEntry),
+      );
+
+      expect(result).toEqual({
+        url: 'https://example.com/remoteEntry.js',
+      });
+    });
   });
 
   describe('fetchRetry', () => {
