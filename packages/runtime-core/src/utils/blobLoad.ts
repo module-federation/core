@@ -1,3 +1,7 @@
+import { RUNTIME_008, runtimeDescMap } from '@module-federation/error-codes';
+import { RemoteEntryExports } from '../type';
+import { error } from './logger';
+
 export interface BlobDep {
   original: string;
   spec: string;
@@ -229,16 +233,28 @@ function installMFDynImportShim(): void {
 
 export async function loadEsmEntryWithFetch({
   entry,
+  name,
   fetchOptions,
   customFetch,
 }: {
   entry: string;
+  name: string;
   fetchOptions?: RequestInit;
   customFetch?: BlobFetcher;
-}): Promise<Record<string, unknown>> {
+}): Promise<RemoteEntryExports> {
   installMFDynImportShim();
-  const blobUrl = await loadModule(entry, { fetchOptions, customFetch });
-  return import(/* webpackIgnore: true */ /* @vite-ignore */ blobUrl);
+  try {
+    const blobUrl = await loadModule(entry, { fetchOptions, customFetch });
+    return await import(/* webpackIgnore: true */ /* @vite-ignore */ blobUrl);
+  } catch (loadError) {
+    // Wrap blob load import failures as RUNTIME_008 so the retry recovery can be run
+    error(
+      RUNTIME_008,
+      runtimeDescMap,
+      { remoteName: name, resourceUrl: entry },
+      loadError instanceof Error ? loadError.message : String(loadError),
+    );
+  }
 }
 
 export function loadCssWithFetch({

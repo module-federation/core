@@ -1,5 +1,5 @@
 import { describe, it, expect, rs, beforeEach, afterEach } from '@rstest/core';
-import { loadModule } from '@module-federation/sdk';
+import { loadModule } from '../src/utils/blobLoad';
 import { __loadEntryDomForTest } from '../src/utils/load';
 
 // Create a mocked fetch lifecycle loader hook

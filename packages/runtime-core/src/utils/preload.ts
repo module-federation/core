@@ -1,9 +1,5 @@
-import {
-  createLink,
-  createScript,
-  loadCssWithFetch,
-  safeToString,
-} from '@module-federation/sdk';
+import { createLink, createScript, safeToString } from '@module-federation/sdk';
+import { loadCssWithFetch } from './blobLoad';
 import {
   PreloadAssets,
   PreloadAssetResult,

@@ -1,4 +1,14 @@
-import { resolveSpec, rewriteModuleCode } from '../src/blobLoad';
+import { describe, it, expect, rs, beforeEach } from '@rstest/core';
+import {
+  fetchText,
+  loadModule,
+  loadEsmEntryWithFetch,
+  loadCssWithFetch,
+  resolveSpec,
+  rewriteModuleCode,
+} from '../src/utils/blobLoad';
+
+const fetchMock = () => globalThis.fetch as ReturnType<typeof rs.fn>;
 
 describe('resolveSpec', () => {
   it('returns absolute urls untouched', () => {
@@ -59,20 +69,13 @@ describe('rewriteModuleCode', () => {
   });
 });
 
-import {
-  fetchText,
-  loadModule,
-  loadEsmEntryWithFetch,
-  loadCssWithFetch,
-} from '../src/blobLoad';
-
 describe('fetchText', () => {
   beforeEach(() => {
-    (global as any).fetch = jest.fn();
+    globalThis.fetch = rs.fn() as any;
   });
 
   it('merges fetchOptions headers and returns response text', async () => {
-    (global.fetch as jest.Mock).mockResolvedValue({
+    fetchMock().mockResolvedValue({
       ok: true,
       text: () => Promise.resolve('CODE'),
     });
@@ -80,23 +83,23 @@ describe('fetchText', () => {
       fetchOptions: { headers: { Authorization: 'Bearer t' } },
     });
     expect(text).toBe('CODE');
-    const requestInit = (global.fetch as jest.Mock).mock.calls[0][1];
+    const requestInit = fetchMock().mock.calls[0][1];
     expect(requestInit.headers).toEqual({ Authorization: 'Bearer t' });
   });
 
   it('prefers customFetch when it returns a Response', async () => {
-    const customFetch = jest.fn().mockResolvedValue({
+    const customFetch = rs.fn().mockResolvedValue({
       ok: true,
       text: () => Promise.resolve('HOOKED'),
     } as any);
     const text = await fetchText('https://b.com/e.js', { customFetch });
     expect(customFetch).toHaveBeenCalled();
     expect(text).toBe('HOOKED');
-    expect(global.fetch as jest.Mock).not.toHaveBeenCalled();
+    expect(fetchMock()).not.toHaveBeenCalled();
   });
 
   it('throws a descriptive error on non-ok responses', async () => {
-    (global.fetch as jest.Mock).mockResolvedValue({
+    fetchMock().mockResolvedValue({
       ok: false,
       status: 401,
       statusText: 'Unauthorized',
@@ -108,22 +111,22 @@ describe('fetchText', () => {
   });
 
   it('normalizes a Headers instance into the request init', async () => {
-    (global.fetch as jest.Mock).mockResolvedValue({
+    fetchMock().mockResolvedValue({
       ok: true,
       text: () => Promise.resolve('CODE'),
     });
     await fetchText('https://b.com/e.js', {
       fetchOptions: { headers: new Headers({ Authorization: 'Bearer t' }) },
     });
-    const init = (global.fetch as jest.Mock).mock.calls[0][1];
+    const init = fetchMock().mock.calls[0][1];
     expect(init.headers).toEqual({ authorization: 'Bearer t' });
   });
 });
 
 describe('loadModule', () => {
   beforeEach(() => {
-    (global as any).fetch = jest.fn();
-    (global.URL as any).createObjectURL = jest.fn(() => `blob:`);
+    globalThis.fetch = rs.fn() as any;
+    URL.createObjectURL = rs.fn(() => `blob:`) as any;
     loadModule.clearCache();
   });
 
@@ -132,22 +135,24 @@ describe('loadModule', () => {
       'https://b.com/entry.js': `import dep from "./dep.js";`,
       'https://b.com/dep.js': `export default 1;`,
     };
-    (global.fetch as jest.Mock).mockImplementation((url: string) =>
+    fetchMock().mockImplementation((url: string) =>
       Promise.resolve({ ok: true, text: () => Promise.resolve(files[url]) }),
     );
     const blobUrl = await loadModule('https://b.com/entry.js', {});
     expect(blobUrl).toMatch(/^blob:/);
     // recursively loads all dependencies
     expect(
-      (global.fetch as jest.Mock).mock.calls.map((c) => c[0]).sort(),
+      fetchMock()
+        .mock.calls.map((c) => c[0])
+        .sort(),
     ).toEqual(['https://b.com/dep.js', 'https://b.com/entry.js']);
     // only fetches once and caches them, reload does not invoke more fetches
     await loadModule('https://b.com/entry.js', {});
-    expect((global.fetch as jest.Mock).mock.calls.length).toBe(2);
+    expect(fetchMock().mock.calls.length).toBe(2);
   });
 
   it('evicts a failed load from the cache so a later call retries', async () => {
-    (global.fetch as jest.Mock)
+    fetchMock()
       .mockResolvedValueOnce({
         ok: false,
         status: 503,
@@ -163,16 +168,17 @@ describe('loadModule', () => {
     );
     const blobUrl = await loadModule('https://b.com/x.js', {});
     expect(blobUrl).toMatch(/^blob:/);
-    expect((global.fetch as jest.Mock).mock.calls.length).toBe(2);
+    expect(fetchMock().mock.calls.length).toBe(2);
   });
 });
 
 describe('loadCssWithFetch', () => {
   beforeEach(() => {
-    (global as any).fetch = jest
-      .fn()
-      .mockResolvedValue({ ok: true, text: () => Promise.resolve('.a{}') });
-    (global.URL as any).createObjectURL = jest.fn(() => 'blob:css');
+    globalThis.fetch = rs.fn().mockResolvedValue({
+      ok: true,
+      text: () => Promise.resolve('.a{}'),
+    }) as any;
+    URL.createObjectURL = rs.fn(() => 'blob:css') as any;
     loadModule.clearCache();
     document.head.innerHTML = '';
   });
@@ -186,7 +192,7 @@ describe('loadCssWithFetch', () => {
       href: 'https://b.com/a.css',
       fetchOptions: { headers: { Authorization: 'Bearer t' } },
     });
-    expect((global.fetch as jest.Mock).mock.calls.length).toBe(1);
+    expect(fetchMock().mock.calls.length).toBe(1);
     const links = document.head.getElementsByTagName('link');
     expect(links.length).toBe(1);
     expect(links[0].rel).toBe('stylesheet');
@@ -195,38 +201,39 @@ describe('loadCssWithFetch', () => {
 
   it('dedupes concurrent loads of the same href (single fetch, single link)', async () => {
     let resolveFetch: (v: any) => void;
-    (global as any).fetch = jest.fn().mockImplementation(
+    globalThis.fetch = rs.fn().mockImplementation(
       () =>
         new Promise((r) => {
           resolveFetch = r;
         }),
-    );
-    (global.URL as any).createObjectURL = jest.fn(() => 'blob:css');
+    ) as any;
+    URL.createObjectURL = rs.fn(() => 'blob:css') as any;
     loadModule.clearCache();
     document.head.innerHTML = '';
     const p1 = loadCssWithFetch({ href: 'https://b.com/c.css' });
     const p2 = loadCssWithFetch({ href: 'https://b.com/c.css' });
     resolveFetch!({ ok: true, text: () => Promise.resolve('.c{}') });
     await Promise.all([p1, p2]);
-    expect((global.fetch as jest.Mock).mock.calls.length).toBe(1);
+    expect(fetchMock().mock.calls.length).toBe(1);
     expect(document.head.getElementsByTagName('link').length).toBe(1);
   });
 });
 
 describe('cross-instance dynamic-import context', () => {
   beforeEach(() => {
-    (global as any).fetch = jest
-      .fn()
-      .mockResolvedValue({ ok: true, text: () => Promise.resolve('') });
-    (global.URL as any).createObjectURL = jest.fn(() => 'blob:m');
+    globalThis.fetch = rs.fn().mockResolvedValue({
+      ok: true,
+      text: () => Promise.resolve(''),
+    }) as any;
+    URL.createObjectURL = rs.fn(() => 'blob:m') as any;
     loadModule.clearCache();
   });
 
   it('stores load contexts on the shared __mfDynImport shim', async () => {
     const ctx = { fetchOptions: { headers: { Authorization: 'Bearer t' } } };
     await loadModule('https://b.com/entry.js', ctx);
-    // The registry hangs off the single global __mfDynImport function, so a second
-    // bundled copy of the SDK reading the same shim keeps the fetch context
+    // The registry hangs off the single global __mfDynImport function, so a
+    // second bundled copy reading the same shim keeps the fetch context
     // regardless of which copy's shim is installed.
     const shim = (globalThis as Record<string, any>)['__mfDynImport'];
     expect(typeof shim).toBe('function');
@@ -235,13 +242,14 @@ describe('cross-instance dynamic-import context', () => {
   });
 
   it('does not clobber a __mfDynImport shim already installed by another copy', async () => {
-    const existing = jest.fn();
+    const existing = rs.fn();
     (globalThis as Record<string, unknown>)['__mfDynImport'] = existing;
     // The shim installs synchronously before the (jsdom-unsupported) blob
     // import, so swallow the import rejection; we only assert the shim survived.
-    await loadEsmEntryWithFetch({ entry: 'https://b.com/e.js' }).catch(
-      () => undefined,
-    );
+    await loadEsmEntryWithFetch({
+      entry: 'https://b.com/e.js',
+      name: 'a',
+    }).catch(() => undefined);
     expect((globalThis as Record<string, unknown>)['__mfDynImport']).toBe(
       existing,
     );

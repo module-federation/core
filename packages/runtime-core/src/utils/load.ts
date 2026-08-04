@@ -3,8 +3,8 @@ import {
   loadScriptNode,
   composeKeyWithSeparator,
   isBrowserEnvValue,
-  loadEsmEntryWithFetch,
 } from '@module-federation/sdk';
+import { loadEsmEntryWithFetch } from './blobLoad';
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { ModuleFederation } from '../core';
 import { globalLoading, getRemoteEntryExports } from '../global';
@@ -251,8 +251,9 @@ async function loadEntryDom({
   const { entry, entryGlobalName: globalName, name, type } = remoteInfo;
   if (isEsmRemoteType(type)) {
     return loaderHook.lifecycle.fetch.listeners.size > 0
-      ? (loadEsmEntryWithFetch({
+      ? loadEsmEntryWithFetch({
           entry,
+          name,
           customFetch: async (url, init) =>
             loaderHook.lifecycle.fetch.emit(
               url,
@@ -260,23 +261,7 @@ async function loadEntryDom({
               remoteInfo,
               resourceContext,
             ),
-        }).catch((loadError: unknown) => {
-          // Mirror loadEntryScript: surface blob-loader fetch/exec failures
-          // (e.g. BlobLoaderNetworkError on a 401) as RUNTIME_008 so
-          // getRemoteEntry's loadEntryError recovery — token refresh,
-          // failover — still fires for authenticated ESM remotes.
-          const originalMsg =
-            loadError instanceof Error ? loadError.message : String(loadError);
-          error(
-            RUNTIME_008,
-            runtimeDescMap,
-            {
-              remoteName: name,
-              resourceUrl: entry,
-            },
-            originalMsg,
-          );
-        }) as Promise<RemoteEntryExports>)
+        })
       : loadEsmEntry({ entry, remoteEntryExports, name, getEntryUrl });
   }
 

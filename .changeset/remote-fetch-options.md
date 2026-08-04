@@ -1,6 +1,5 @@
 ---
 '@module-federation/runtime-core': minor
-'@module-federation/sdk': minor
 ---
 
 Support loading remote assets in the manifest with custom headers through the existing runtime `fetch` hook.
