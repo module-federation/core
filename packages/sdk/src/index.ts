@@ -18,7 +18,6 @@ export {
 export type { Logger, InfrastructureLogger } from './logger';
 export * from './env';
 export * from './dom';
-export * from './blobLoad';
 export * from './node';
 export * from './normalizeOptions';
 export { createModuleFederationConfig } from './createModuleFederationConfig';
