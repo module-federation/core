@@ -1,0 +1,16 @@
+{
+  "name": "node-esm-host",
+  "private": true,
+  "description": "Federation example: Node.js ESM host that loads a remote over http(s) through Node's native module loader hooks",
+  "dependencies": {
+    "@module-federation/node": "workspace:*",
+    "@module-federation/runtime": "workspace:*"
+  },
+  "scripts": {
+    "build": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config webpack.config.js --output-path dist --mode production",
+    "build:development": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config webpack.config.js --output-path dist --mode development",
+    "build:production": "NODE_OPTIONS=--max_old_space_size=4096 pnpm exec webpack-cli --config webpack.config.js --output-path dist --mode production",
+    "start": "node --import @module-federation/node/register dist/main.mjs",
+    "demo": "pnpm run build && pnpm run start"
+  }
+}

@@ -48,6 +48,26 @@
         "default": "./dist/src/utils/index.js"
       }
     },
+    "./register": {
+      "import": {
+        "types": "./dist/src/register.d.mts",
+        "default": "./dist/src/register.mjs"
+      },
+      "require": {
+        "types": "./dist/src/register.d.cts",
+        "default": "./dist/src/register.cjs"
+      }
+    },
+    "./loader-hooks": {
+      "import": {
+        "types": "./dist/src/loader-hooks/index.d.mts",
+        "default": "./dist/src/loader-hooks/index.mjs"
+      },
+      "require": {
+        "types": "./dist/src/loader-hooks/index.d.ts",
+        "default": "./dist/src/loader-hooks/index.js"
+      }
+    },
     "./src/plugins/NodeFederationPlugin.js": {
       "import": "./dist/src/plugins/NodeFederationPlugin.mjs",
       "require": "./dist/src/plugins/NodeFederationPlugin.js"
@@ -78,6 +98,12 @@
       ],
       "record-dynamic-remote-entry-hash-plugin": [
         "./dist/src/recordDynamicRemoteEntryHashPlugin.d.ts"
+      ],
+      "register": [
+        "./dist/src/register.d.cts"
+      ],
+      "loader-hooks": [
+        "./dist/src/loader-hooks/index.d.ts"
       ],
       "universe-entry-chunk-tracker-plugin": [
         "./dist/src/plugins/UniverseEntryChunkTrackerPlugin.d.ts"
