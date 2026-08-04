@@ -1,5 +1,6 @@
 import { describe, it, expect } from '@rstest/core';
 import { assert, getRegisteredShare } from '@module-federation/runtime-core';
+import { TreeShakingStatus } from '@module-federation/sdk';
 
 describe('get expected shared', () => {
   it('get loading shared if sharedStrategy is "loaded-first"', () => {
@@ -253,5 +254,69 @@ describe('get expected shared', () => {
       ) || {};
     assert(registeredShared, 'must get registeredShared');
     expect(registeredShared.from).toEqual('remote');
+  });
+
+  it('gets the highest compatible non-singleton shared version regardless of registration order', () => {
+    const createShared = (version: string, treeShaking = false) => ({
+      deps: [],
+      useIn: [],
+      from: `v${version}`,
+      get: () => {
+        //noop
+      },
+      loaded: false,
+      loading: null,
+      version,
+      scope: ['default'],
+      shareConfig: {
+        requiredVersion: '^1.0.0',
+        singleton: false,
+        eager: false,
+        strictVersion: false,
+      },
+      strategy: 'version-first' as const,
+      ...(treeShaking
+        ? {
+            treeShaking: {
+              status: TreeShakingStatus.CALCULATED,
+            },
+          }
+        : {}),
+    });
+
+    const getSelectedVersion = (versions: string[], treeShaking = false) => {
+      const { shared } =
+        getRegisteredShare(
+          // @ts-ignore
+          {
+            default: {
+              example: Object.fromEntries(
+                versions.map((version) => [
+                  version,
+                  createShared(version, treeShaking),
+                ]),
+              ),
+            },
+          },
+          'example',
+          createShared('consumer', treeShaking),
+          {
+            emit: () => undefined,
+          },
+        ) || {};
+
+      assert(shared, 'must get registered shared');
+      return shared.version;
+    };
+
+    const orders = [
+      ['1.0.0', '1.9.0', '2.0.0'],
+      ['1.9.0', '1.0.0', '2.0.0'],
+    ];
+
+    orders.forEach((versions) => {
+      expect(getSelectedVersion(versions)).toEqual('1.9.0');
+      expect(getSelectedVersion(versions, true)).toEqual('1.9.0');
+    });
   });
 });

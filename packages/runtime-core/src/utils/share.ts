@@ -168,6 +168,7 @@ export function versionLt(a: string, b: string): boolean {
 export const findVersion = (
   shareVersionMap: ShareScopeMap[string][string],
   cb?: (prev: string, cur: string) => boolean,
+  versionFilter?: (version: string) => boolean,
 ): string => {
   const callback =
     cb ||
@@ -176,6 +177,10 @@ export const findVersion = (
     };
 
   return Object.keys(shareVersionMap).reduce((prev: number | string, cur) => {
+    if (versionFilter && !versionFilter(cur)) {
+      return prev;
+    }
+
     if (!prev) {
       return cur;
     }
@@ -425,35 +430,35 @@ export function getRegisteredShare(
 
           const _usedTreeShaking = shouldUseTreeShaking(treeShaking);
           if (_usedTreeShaking) {
-            for (const [versionKey, versionValue] of Object.entries(
+            const treeShakingVersion = findVersion(
               localShareScopeMap[sc][pkgName],
-            )) {
-              if (
-                !shouldUseTreeShaking(
-                  versionValue.treeShaking,
+              undefined,
+              (version) =>
+                satisfy(version, requiredVersion) &&
+                shouldUseTreeShaking(
+                  localShareScopeMap[sc][pkgName][version].treeShaking,
                   treeShaking?.usedExports,
-                )
-              ) {
-                continue;
-              }
+                ),
+            );
 
-              if (satisfy(versionKey, requiredVersion)) {
-                return {
-                  shared: versionValue,
-                  useTreesShaking: _usedTreeShaking,
-                };
-              }
-            }
-          }
-          for (const [versionKey, versionValue] of Object.entries(
-            localShareScopeMap[sc][pkgName],
-          )) {
-            if (satisfy(versionKey, requiredVersion)) {
+            if (treeShakingVersion) {
               return {
-                shared: versionValue,
-                useTreesShaking: false,
+                shared: localShareScopeMap[sc][pkgName][treeShakingVersion],
+                useTreesShaking: _usedTreeShaking,
               };
             }
+          }
+
+          const compatibleVersion = findVersion(
+            localShareScopeMap[sc][pkgName],
+            undefined,
+            (version) => satisfy(version, requiredVersion),
+          );
+          if (compatibleVersion) {
+            return {
+              shared: localShareScopeMap[sc][pkgName][compatibleVersion],
+              useTreesShaking: false,
+            };
           }
         }
         return;
