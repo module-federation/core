@@ -1,0 +1,15 @@
+{
+  "name": "rstest-federation-remote",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Rsbuild remote for Rstest federation E2E.",
+  "scripts": {
+    "build": "rsbuild build --environment node"
+  },
+  "devDependencies": {
+    "@module-federation/node": "workspace:*",
+    "@module-federation/rsbuild-plugin": "workspace:*",
+    "@rsbuild/core": "2.1.4",
+    "typescript": "6.0.3"
+  }
+}

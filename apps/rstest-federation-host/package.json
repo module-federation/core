@@ -1,0 +1,18 @@
+{
+  "name": "rstest-federation-host",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Rsbuild host tested through Rstest federation E2E.",
+  "scripts": {
+    "build": "rsbuild build --environment node",
+    "e2e": "pnpm exec rstest run -c rstest.config.ts"
+  },
+  "devDependencies": {
+    "@module-federation/rsbuild-plugin": "workspace:*",
+    "@module-federation/rstest": "workspace:*",
+    "@rsbuild/core": "2.1.4",
+    "@rstest/core": "^0.11.4",
+    "rstest-federation-remote": "workspace:*",
+    "typescript": "6.0.3"
+  }
+}
