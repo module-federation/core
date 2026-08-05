@@ -25,6 +25,10 @@
     ".": {
       "types": "./dist/plugin.d.ts",
       "import": "./dist/index.js"
+    },
+    "./runtime": {
+      "types": "./dist/runtime/index.d.ts",
+      "import": "./dist/runtime.js"
     }
   },
   "module": "./dist/index.js",
@@ -33,17 +37,24 @@
     "build": "rslib build",
     "build:watch": "rslib build --watch",
     "dev": "pnpm run build:watch",
+    "test": "rstest",
     "pre-release": "pnpm exec turbo run build --filter=@module-federation/webpack-bundler-runtime"
   },
   "devDependencies": {
+    "@mdx-js/mdx": "^3.1.1",
     "@rslib/core": "^0.23.2",
     "@rspress/core": "2.0.14",
+    "@rstest/core": "^0.10.6",
     "@types/html-to-text": "^9.0.4",
     "@types/lodash-es": "^4.17.12",
     "@types/react": "^18.3.11",
+    "@types/react-dom": "^18.3.1",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
     "typescript": "7.0.2"
   },
   "dependencies": {
+    "@mdx-js/react": "^3.1.1",
     "cheerio": "1.0.0-rc.12",
     "@module-federation/sdk": "workspace:*",
     "html-to-text": "9.0.5",
@@ -54,6 +65,7 @@
     "@rspress/shared": "2.0.14"
   },
   "peerDependencies": {
-    "@rspress/core": "2.0.14"
+    "@rspress/core": "2.0.14",
+    "react": ">=18.0.0"
   }
 }

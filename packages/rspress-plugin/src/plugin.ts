@@ -8,11 +8,19 @@ import type { moduleFederationPlugin } from '@module-federation/sdk';
 import type { RspressPlugin, RouteMeta } from '@rspress/core';
 import { rebuildLlmsByHtml } from './rebuildLlmsByHtml';
 import { rebuildSearchIndexByHtml } from './rebuildSearchIndexByHtml';
+import { remarkCodeBlockTransform } from './remarkCodeBlockTransform';
 
-type RspressPluginOptions = {
+export type RspressPluginOptions = {
   autoShared?: boolean;
   rebuildSearchIndex?: boolean;
   rebuildLlms?: boolean;
+  /**
+   * Allow exposed MDX documents to transform fenced code blocks through a
+   * `transformCodeBlock` prop.
+   *
+   * @default false
+   */
+  transformCodeBlocks?: boolean;
 };
 
 const isDev = () => process.env.NODE_ENV === 'development';
@@ -25,6 +33,7 @@ export function pluginModuleFederation(
     autoShared = true,
     rebuildSearchIndex = true,
     rebuildLlms = true,
+    transformCodeBlocks = false,
   } = rspressOptions || {};
 
   if (autoShared) {
@@ -66,6 +75,11 @@ export function pluginModuleFederation(
 
   return {
     name: 'plugin-module-federation',
+    markdown: transformCodeBlocks
+      ? {
+          remarkPlugins: [remarkCodeBlockTransform],
+        }
+      : undefined,
     async config(config) {
       if (!isDev() && config.ssg !== false) {
         enableSSG = true;
