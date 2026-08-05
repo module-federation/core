@@ -1,10 +1,15 @@
 import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import { defineConfig } from '@rsbuild/core';
-import federationOptions from './module-federation.config';
+import { pluginReact } from '@rsbuild/plugin-react';
+import browserEsmFederationOptions from './module-federation-browser-esm.config';
+import browserFederationOptions from './module-federation-browser.config';
+import httpFederationOptions from './module-federation-http.config';
+import localFederationOptions from './module-federation.config';
 
 export default defineConfig({
+  mode: 'development',
   environments: {
-    node: {
+    local: {
       source: {
         entry: {
           index: './src/index.ts',
@@ -13,16 +18,87 @@ export default defineConfig({
       output: {
         cleanDistPath: true,
         distPath: {
-          root: 'dist',
+          root: 'dist/local',
         },
         target: 'node',
       },
     },
+    node: {
+      dev: {
+        assetPrefix: 'http://127.0.0.1:3301/node/',
+      },
+      source: {
+        entry: {
+          index: './src/index.ts',
+        },
+      },
+      output: {
+        assetPrefix: 'http://127.0.0.1:3301/node/',
+        cleanDistPath: true,
+        distPath: {
+          root: 'dist/node',
+        },
+        filenameHash: false,
+        target: 'node',
+      },
+    },
+    browser: {
+      dev: {
+        assetPrefix: 'http://127.0.0.1:3301/browser/',
+      },
+      source: {
+        entry: {
+          index: './src/index.ts',
+        },
+      },
+      output: {
+        assetPrefix: 'http://127.0.0.1:3301/browser/',
+        cleanDistPath: true,
+        distPath: {
+          root: 'dist/browser',
+        },
+        filenameHash: false,
+        target: 'web',
+      },
+    },
+    browserEsm: {
+      dev: {
+        assetPrefix: 'http://127.0.0.1:3301/browser-esm/',
+      },
+      source: {
+        entry: {
+          index: './src/index.ts',
+        },
+      },
+      output: {
+        assetPrefix: 'http://127.0.0.1:3301/browser-esm/',
+        cleanDistPath: true,
+        distPath: {
+          root: 'dist/browser-esm',
+        },
+        filenameHash: false,
+        module: true,
+        target: 'web',
+      },
+    },
   },
   plugins: [
-    pluginModuleFederation(federationOptions, {
+    pluginReact({ fastRefresh: false }),
+    pluginModuleFederation(localFederationOptions, {
+      environment: 'local',
+      target: 'node',
+    }),
+    pluginModuleFederation(httpFederationOptions, {
       environment: 'node',
       target: 'node',
+    }),
+    pluginModuleFederation(browserFederationOptions, {
+      environment: 'browser',
+      target: 'web',
+    }),
+    pluginModuleFederation(browserEsmFederationOptions, {
+      environment: 'browserEsm',
+      target: 'web',
     }),
   ],
 });
