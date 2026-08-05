@@ -66,6 +66,8 @@ export const E2E_SUITE_DEFINITIONS = {
       'node-dynamic-remote-new-version',
       'node-dynamic-remote',
       'node-host-e2e',
+      'rstest-federation-host',
+      'rstest-federation-remote',
     ],
     inputs: [
       '.github/workflows/e2e-node.yml',

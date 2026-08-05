@@ -52,7 +52,20 @@ const E2E_CMD = [
   '--only',
 ];
 
+const RSTEST_E2E_CMD = [
+  'pnpm',
+  'exec',
+  'turbo',
+  'run',
+  'e2e',
+  '--filter=rstest-federation-host',
+  '--force',
+];
+
 async function main() {
+  console.log('\n[node-e2e] Running Rstest federation app E2E');
+  await spawnWithPromise(RSTEST_E2E_CMD[0], RSTEST_E2E_CMD.slice(1)).promise;
+
   console.log('\n[node-e2e] Starting Node federation topology');
 
   await runKillPort();

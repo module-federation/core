@@ -31,6 +31,25 @@ test('maps affected packages to their E2E suites', () => {
   assert.equal(decisions.router, false);
 });
 
+test('maps the Rstest federation apps only to the Node E2E suite', () => {
+  for (const appName of [
+    'rstest-federation-host',
+    'rstest-federation-remote',
+  ]) {
+    const decisions = computeE2ESuiteDecisions({
+      affectedPackageNames: new Set([appName]),
+      changedFiles: [`apps/${appName}/package.json`],
+    });
+
+    assert.deepEqual(
+      Object.entries(decisions)
+        .filter(([, shouldRun]) => shouldRun)
+        .map(([suiteName]) => suiteName),
+      ['node'],
+    );
+  }
+});
+
 test('treats a suite workflow as input to only that suite', () => {
   const decisions = computeE2ESuiteDecisions({
     affectedPackageNames: new Set(),
