@@ -10,15 +10,20 @@ declare const FEDERATION_IPV4: string | undefined;
 const PLUGIN_NAME = 'dynamic-remote-type-hints-plugin';
 
 function dynamicRemoteTypeHintsPlugin(): ModuleFederationRuntimePlugin {
-  let ws = createWebsocket();
+  // `createWebsocket` relies on the global `WebSocket`, which only exists in
+  // browsers and Node >= 22. In a Node/SSR host on older Node it is undefined,
+  // so guard construction to degrade gracefully instead of throwing at init.
+  let ws = typeof WebSocket !== 'undefined' ? createWebsocket() : undefined;
   let isConnected = false;
-  ws.onopen = () => {
-    isConnected = true;
-  };
+  if (ws) {
+    ws.onopen = () => {
+      isConnected = true;
+    };
 
-  ws.onerror = (err) => {
-    console.error(`[ ${PLUGIN_NAME} ] err: ${err}`);
-  };
+    ws.onerror = (err) => {
+      console.error(`[ ${PLUGIN_NAME} ] err: ${err}`);
+    };
+  }
 
   return {
     name: 'dynamic-remote-type-hints-plugin',
@@ -40,7 +45,7 @@ function dynamicRemoteTypeHintsPlugin(): ModuleFederationRuntimePlugin {
           alias: remote.alias || remote.name,
         };
         if (remoteIp) {
-          ws.send(
+          ws?.send(
             JSON.stringify(
               new AddDynamicRemoteAction({
                 remoteIp,
@@ -52,7 +57,7 @@ function dynamicRemoteTypeHintsPlugin(): ModuleFederationRuntimePlugin {
           );
         }
         // fetch types
-        ws.send(
+        ws?.send(
           JSON.stringify(
             new FetchTypesAction({
               name: origin.name,

@@ -70,7 +70,6 @@
     "@module-federation/sdk": "workspace:*",
     "@module-federation/third-party-dts-extractor": "workspace:*",
     "adm-zip": "0.6.0",
-    "isomorphic-ws": "5.0.0",
     "undici": "7.28.0",
     "ws": "8.21.0"
   },

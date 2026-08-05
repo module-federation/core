@@ -3243,9 +3243,6 @@ importers:
       adm-zip:
         specifier: 0.6.0
         version: 0.6.0
-      isomorphic-ws:
-        specifier: 5.0.0
-        version: 5.0.0(ws@8.21.0)
       undici:
         specifier: 7.28.0
         version: 7.28.0
@@ -51362,10 +51359,6 @@ snapshots:
   isomorphic-ws@5.0.0(ws@8.18.0):
     dependencies:
       ws: 8.18.0
-
-  isomorphic-ws@5.0.0(ws@8.21.0):
-    dependencies:
-      ws: 8.21.0
 
   isstream@0.1.2: {}
 

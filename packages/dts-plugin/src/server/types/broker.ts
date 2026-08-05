@@ -1,4 +1,4 @@
-import WebSocket from 'isomorphic-ws';
+import type WebSocket from 'ws';
 import { Subscriber } from './message';
 
 type SubscriberIdentifier = string;
