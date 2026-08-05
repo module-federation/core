@@ -7,13 +7,11 @@ const require = createRequire(import.meta.url);
 const NODE_RUNTIME_PLUGIN_REQUEST = '@module-federation/node/runtimePlugin';
 export const NODE_RUNTIME_PLUGIN = require.resolve(NODE_RUNTIME_PLUGIN_REQUEST);
 
-const getRuntimePluginName = (runtimePlugin: RuntimePlugin): string => {
-  return typeof runtimePlugin === 'string' ? runtimePlugin : runtimePlugin[0];
-};
+const getRuntimePluginName = (runtimePlugin: RuntimePlugin): string =>
+  typeof runtimePlugin === 'string' ? runtimePlugin : runtimePlugin[0];
 
-const isNodeRuntimePluginName = (name: string): boolean => {
-  return name === NODE_RUNTIME_PLUGIN_REQUEST || name === NODE_RUNTIME_PLUGIN;
-};
+const isNodeRuntimePluginName = (name: string): boolean =>
+  name === NODE_RUNTIME_PLUGIN_REQUEST || name === NODE_RUNTIME_PLUGIN;
 
 const normalizeRuntimePlugin = (
   runtimePlugin: RuntimePlugin,
