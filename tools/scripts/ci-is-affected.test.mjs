@@ -31,9 +31,10 @@ test('maps affected packages to their E2E suites', () => {
   assert.equal(decisions.router, false);
 });
 
-test('maps the Rstest federation apps only to the Node E2E suite', () => {
+test('maps the Rstest federation apps only to the Rstest E2E suite', () => {
   for (const appName of [
     'rstest-federation-host',
+    'rstest-federation-profile-remote',
     'rstest-federation-remote',
   ]) {
     const decisions = computeE2ESuiteDecisions({
@@ -45,7 +46,7 @@ test('maps the Rstest federation apps only to the Node E2E suite', () => {
       Object.entries(decisions)
         .filter(([, shouldRun]) => shouldRun)
         .map(([suiteName]) => suiteName),
-      ['node'],
+      ['rstest'],
     );
   }
 });

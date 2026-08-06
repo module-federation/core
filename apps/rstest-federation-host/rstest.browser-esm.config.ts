@@ -1,10 +1,8 @@
-import path from 'node:path';
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import { pluginReact } from '@rsbuild/plugin-react';
 import { federation } from '@module-federation/rstest';
 import { defineConfig } from '@rstest/core';
 import federationOptions from './browser-esm-module-federation.config';
-
-const appDirectory = import.meta.dirname;
 
 export default defineConfig({
   browser: {
@@ -12,8 +10,14 @@ export default defineConfig({
     provider: 'playwright',
     headless: true,
   },
-  globalSetup: [path.resolve(appDirectory, 'http-global-setup.ts')],
-  include: [path.resolve(appDirectory, 'tests/browser-esm/*.test.tsx')],
+  include: ['./tests/browser-esm/*.test.tsx'],
   testTimeout: 30_000,
-  plugins: [pluginReact(), federation(federationOptions)],
+  plugins: [
+    pluginReact(),
+    pluginModuleFederation(federationOptions, {
+      environment: 'rstest',
+      target: 'web',
+    }),
+    federation(undefined, { target: 'browser' }),
+  ],
 });

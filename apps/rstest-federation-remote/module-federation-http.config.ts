@@ -1,12 +1,11 @@
 import { createModuleFederationConfig } from '@module-federation/rsbuild-plugin';
 
 export default createModuleFederationConfig({
-  name: 'rstest_federation_http_remote',
+  name: 'rstest_federation_catalog_node',
   filename: 'remoteEntry.cjs',
   exposes: {
-    './button': './src/button.tsx',
-    './dynamic-value': './src/dynamic-value.ts',
-    './static-value': './src/static-value.ts',
+    './ProductPanel': './src/ProductPanel.tsx',
+    './product-details': './src/product-details.ts',
   },
   shared: {
     react: {

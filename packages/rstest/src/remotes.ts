@@ -1,12 +1,6 @@
 import { parseEntry } from '@module-federation/sdk';
-import { PLUGIN_NAME } from '@module-federation/enhanced/rspack';
 
 import type { ModuleFederationOptions } from './types';
-
-type ModuleFederationPluginLike = {
-  name?: unknown;
-  _options: ModuleFederationOptions;
-};
 
 const addRemoteNameFromString = (entry: string, target: Set<string>): void => {
   const normalized = entry.trim();
@@ -41,66 +35,10 @@ const addRemoteNames = (remotes: unknown, target: Set<string>): void => {
   }
 };
 
-/**
- * Reads MF options off an already-registered plugin instance so users of the
- * rstest adapters (whose rsbuild config registers ModuleFederationPlugin via
- * `@module-federation/rsbuild-plugin`) do not have to redeclare remotes.
- *
- * `_options` is a private field of Rspack's ModuleFederationPlugin (no public
- * accessor exists). Access is restricted by the plugin's stable public name.
- * Both packages live in this monorepo, so a private-field rename must update
- * this adapter in the same change.
- */
-const getModuleFederationPlugin = (
-  plugin: unknown,
-): ModuleFederationPluginLike | undefined => {
-  if (!plugin || typeof plugin !== 'object') {
-    return undefined;
-  }
-
-  const federationPlugin = plugin as ModuleFederationPluginLike;
-  if (
-    federationPlugin.name !== PLUGIN_NAME ||
-    !federationPlugin._options ||
-    typeof federationPlugin._options !== 'object'
-  ) {
-    return undefined;
-  }
-
-  return federationPlugin;
-};
-
-export const applyDefaultsToFederationPlugins = (
-  plugins: unknown[] | undefined,
-  normalizeOptions: (
-    options: ModuleFederationOptions,
-  ) => ModuleFederationOptions,
-): void => {
-  if (!plugins) {
-    return;
-  }
-
-  for (const plugin of plugins) {
-    const federationPlugin = getModuleFederationPlugin(plugin);
-    if (!federationPlugin) {
-      continue;
-    }
-
-    federationPlugin._options = normalizeOptions(federationPlugin._options);
-  }
-};
-
 export const collectRemoteNames = (
-  plugins: unknown[] | undefined,
+  remotes: ModuleFederationOptions['remotes'],
 ): Set<string> => {
   const remoteNames = new Set<string>();
-
-  for (const plugin of plugins ?? []) {
-    const federationPlugin = getModuleFederationPlugin(plugin);
-    if (federationPlugin) {
-      addRemoteNames(federationPlugin._options.remotes, remoteNames);
-    }
-  }
-
+  addRemoteNames(remotes, remoteNames);
   return remoteNames;
 };

@@ -1,14 +1,15 @@
 import type { EnvironmentConfig, RsbuildPlugin, Rspack } from '@rsbuild/core';
-import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
+import {
+  ModuleFederationPlugin,
+  PLUGIN_NAME,
+} from '@module-federation/enhanced/rspack';
 import type { RstestExposeAPI } from '@rstest/core';
+import type { ExposedAPIType as RsbuildFederationExposeAPI } from '@module-federation/rsbuild-plugin';
 
 import { createFederationExternalBypass } from './externals-bypass';
 import { logger } from './logger';
 import { withNodeDefaults, withRstestDefaults } from './node-defaults';
-import {
-  applyDefaultsToFederationPlugins,
-  collectRemoteNames,
-} from './remotes';
+import { collectRemoteNames } from './remotes';
 import { applyNodeRspackDefaults } from './rspack-hook';
 import type { ModuleFederationOptions, RstestFederationOptions } from './types';
 
@@ -19,6 +20,7 @@ import type { ModuleFederationOptions, RstestFederationOptions } from './types';
 export const FEDERATION_PLUGIN_NAME = 'rstest:federation';
 
 const RSTEST_CALLER = 'rstest';
+const RSBUILD_FEDERATION_PLUGIN_NAME = 'rsbuild:module-federation-enhanced';
 
 const toArray = <T>(value: T | T[] | undefined): T[] => {
   if (value == null) {
@@ -29,12 +31,10 @@ const toArray = <T>(value: T | T[] | undefined): T[] => {
 };
 
 const createRspackPatcher = (
-  moduleFederationOptions: ModuleFederationOptions | undefined,
+  getModuleFederationOptions: () => ModuleFederationOptions,
   isNodeTarget: boolean,
-  patchedRspackConfigs: WeakSet<Rspack.Configuration>,
 ) => {
   return (rspackConfig: Rspack.Configuration): void => {
-    patchedRspackConfigs.add(rspackConfig);
     rspackConfig.output ||= {};
     rspackConfig.plugins ||= [];
 
@@ -42,21 +42,29 @@ const createRspackPatcher = (
       applyNodeRspackDefaults(rspackConfig);
     }
 
-    if (moduleFederationOptions) {
-      const effectiveOptions = isNodeTarget
-        ? withNodeDefaults(moduleFederationOptions)
-        : withRstestDefaults(moduleFederationOptions);
-
-      rspackConfig.plugins.push(new ModuleFederationPlugin(effectiveOptions));
+    if (
+      rspackConfig.plugins.some(
+        (plugin) =>
+          plugin !== null &&
+          typeof plugin === 'object' &&
+          'name' in plugin &&
+          plugin.name === PLUGIN_NAME,
+      )
+    ) {
+      throw new Error(
+        'Federation is configured by both @module-federation/rsbuild-plugin and federation(options). Use a single federation configuration owner.',
+      );
     }
 
-    // The Rsbuild federation plugin registers ModuleFederationPlugin in
-    // onBeforeCreateCompiler, after tools.rspack hooks have run. External
-    // functions run during compilation, so collect once on first use.
+    const moduleFederationOptions = getModuleFederationOptions();
+    rspackConfig.plugins.push(
+      new ModuleFederationPlugin(moduleFederationOptions),
+    );
+
     let remoteNames: Set<string> | undefined;
     rspackConfig.externals = [
       createFederationExternalBypass(() => {
-        remoteNames ??= collectRemoteNames(rspackConfig.plugins);
+        remoteNames ??= collectRemoteNames(moduleFederationOptions.remotes);
         return remoteNames;
       }),
       ...toArray(rspackConfig.externals),
@@ -111,7 +119,12 @@ export const federation = (
     const target =
       rstestOptions?.target ?? (isBrowserMode ? 'browser' : 'node');
     const isNodeTarget = target === 'node';
-    const patchedRspackConfigs = new WeakSet<Rspack.Configuration>();
+
+    if (callerName === RSTEST_CALLER && isNodeTarget && !rstestApi) {
+      throw new Error(
+        '@module-federation/rstest requires @rstest/core 0.11.4 or newer so it can enable federation compatibility.',
+      );
+    }
 
     if (isNodeTarget) {
       rstestApi?.modifyRstestConfig((config) => {
@@ -119,43 +132,44 @@ export const federation = (
       });
     }
 
-    if (!moduleFederationOptions) {
-      const normalizeOptions = isNodeTarget
-        ? (options: ModuleFederationOptions) =>
-            withNodeDefaults(options, {
-              warnOnConfiguredRuntimePlugin: false,
-            })
-        : withRstestDefaults;
+    const rsbuildFederationApi = api.useExposed<RsbuildFederationExposeAPI>(
+      RSBUILD_FEDERATION_PLUGIN_NAME,
+    );
+    const normalizeOptions = isNodeTarget
+      ? (options: ModuleFederationOptions) =>
+          withNodeDefaults(options, {
+            warnOnConfiguredRuntimePlugin:
+              moduleFederationOptions !== undefined,
+          })
+      : withRstestDefaults;
+    let getEffectiveOptions: () => ModuleFederationOptions;
 
-      api.onBeforeCreateCompiler({
-        order: 'post',
-        handler: ({ bundlerConfigs }) => {
-          for (const rspackConfig of bundlerConfigs ?? []) {
-            if (!patchedRspackConfigs.has(rspackConfig)) {
-              continue;
-            }
+    if (moduleFederationOptions) {
+      if (rsbuildFederationApi) {
+        throw new Error(
+          'Federation is configured by both @module-federation/rsbuild-plugin and federation(options). Pass no options to federation() when using the Rsbuild plugin.',
+        );
+      }
 
-            applyDefaultsToFederationPlugins(
-              rspackConfig.plugins,
-              normalizeOptions,
-            );
-          }
-        },
-      });
+      const directOptions = normalizeOptions(moduleFederationOptions);
+      getEffectiveOptions = () => directOptions;
+    } else {
+      if (!rsbuildFederationApi) {
+        throw new Error(
+          'federation() without options requires @module-federation/rsbuild-plugin to be registered first.',
+        );
+      }
+
+      rsbuildFederationApi.registerOptionsTransformer(normalizeOptions);
+      getEffectiveOptions = rsbuildFederationApi.getOptions;
     }
 
     api.modifyEnvironmentConfig({
-      // Run after other plugins' hooks so the externals bypass prepended by
-      // the rspack patcher stays ahead of externals added by other plugins.
       order: 'post',
       handler: (config, { mergeEnvironmentConfig }) => {
         const pluginConfig: EnvironmentConfig = {
           tools: {
-            rspack: createRspackPatcher(
-              moduleFederationOptions,
-              isNodeTarget,
-              patchedRspackConfigs,
-            ),
+            rspack: createRspackPatcher(getEffectiveOptions, isNodeTarget),
           },
         };
 

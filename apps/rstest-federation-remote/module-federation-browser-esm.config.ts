@@ -1,13 +1,13 @@
 import { createModuleFederationConfig } from '@module-federation/rsbuild-plugin';
 
 export default createModuleFederationConfig({
-  name: 'rstest_federation_browser_esm_remote',
+  name: 'rstest_federation_catalog_browser_esm',
   filename: 'remoteEntry.mjs',
   library: {
     type: 'module',
   },
   exposes: {
-    './button': './src/button.tsx',
+    './ProductPanel': './src/ProductPanel.tsx',
   },
   shared: {
     react: {

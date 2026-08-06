@@ -2,4 +2,4 @@
 '@module-federation/rsbuild-plugin': patch
 ---
 
-Preserve bundler-derived library names in Node SSR builds so CommonJS containers expose the expected interface.
+Expose typed federation options to integrations, preserve Rstest-owned Node compiler settings, and keep bundler-derived library names in SSR builds.

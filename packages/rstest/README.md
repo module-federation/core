@@ -41,6 +41,35 @@ For Node test environments, the plugin enables Rstest's federation
 compatibility mode automatically. Do not also set `federation: true` in
 `rstest.config.*`.
 
+If the test project already uses `@module-federation/rsbuild-plugin`, reuse
+that configuration instead of declaring the options twice:
+
+```ts
+import { createModuleFederationConfig, pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+import { federation } from '@module-federation/rstest';
+import { defineConfig } from '@rstest/core';
+
+const options = createModuleFederationConfig({
+  name: 'main_app_web',
+  remotes: {
+    'component-app': 'component_app@http://localhost:3001/remoteEntry.js',
+  },
+});
+
+export default defineConfig({
+  plugins: [
+    pluginModuleFederation(options, {
+      environment: 'rstest',
+      target: 'node',
+    }),
+    federation(),
+  ],
+});
+```
+
+Register the Rsbuild plugin first. `federation()` then applies the Rstest
+defaults to the same typed options and creates a single compiler plugin.
+
 For both Node and browser targets, `dts`, `manifest`, and `dev` default to
 `false`; explicit values are preserved.
 

@@ -10,6 +10,10 @@ import {
   type RsbuildPluginAPI,
   type Rspack,
 } from '@rsbuild/core';
+import {
+  RSBUILD_PLUGIN_MODULE_FEDERATION_NAME,
+  type ExposedAPIType as RsbuildFederationExposeAPI,
+} from '@module-federation/rsbuild-plugin';
 
 import { shouldKeepBundledForFederation } from './externals-bypass';
 import { FEDERATION_PLUGIN_NAME, federation } from './index';
@@ -84,9 +88,8 @@ const callExternal = (fn: ExternalFunction, request: string): unknown => {
   return result;
 };
 
-// The plugin instances pushed into rspackConfig.plugins by the federation
-// plugin. `_options` is the private field of ModuleFederationPlugin; the
-// tests read it the same way `remotes.ts` does.
+// Test-only view of the options captured by ModuleFederationPlugin. Production
+// code does not inspect this private field.
 type ModuleFederationPluginInstance = {
   name?: string;
   _options?: ModuleFederationOptions;
@@ -109,11 +112,32 @@ const getFederationPluginOptions = (
   return options!;
 };
 
+const createRsbuildFederationExposeAPI = (
+  initialOptions: ModuleFederationOptions,
+): RsbuildFederationExposeAPI => {
+  let options = initialOptions;
+
+  return {
+    options: {},
+    assetResources: {},
+    getOptions: () => options,
+    registerOptionsTransformer: (transformer) => {
+      options = transformer(options);
+    },
+    isSSRConfig: () => false,
+    isRspressSSGConfig: () => false,
+  };
+};
+
 // Minimal Rsbuild API surface used by the plugin.
 const setupFederationPlugin = (
   plugin: FederationPlugin,
   callerName = 'rstest',
   rstestConfig: TestRstestConfig = {},
+  exposedApis: {
+    rsbuildFederation?: RsbuildFederationExposeAPI;
+    rstest?: boolean;
+  } = {},
 ): {
   beforeCreateCompilerHook: BeforeCreateCompilerHook | undefined;
   beforeCreateCompilerOrder: unknown;
@@ -128,15 +152,21 @@ const setupFederationPlugin = (
 
   const fakeApi = {
     context: { callerName },
-    useExposed: (name: string) =>
-      name === 'rstest'
-        ? {
-            getRstestConfig: () => rstestConfig,
-            modifyRstestConfig: (
-              callback: (config: TestRstestConfig) => void,
-            ) => callback(rstestConfig),
-          }
-        : undefined,
+    useExposed: (name: string) => {
+      if (name === 'rstest' && exposedApis.rstest !== false) {
+        return {
+          getRstestConfig: () => rstestConfig,
+          modifyRstestConfig: (callback: (config: TestRstestConfig) => void) =>
+            callback(rstestConfig),
+        };
+      }
+
+      if (name === RSBUILD_PLUGIN_MODULE_FEDERATION_NAME) {
+        return exposedApis.rsbuildFederation;
+      }
+
+      return undefined;
+    },
     modifyEnvironmentConfig: (hook: EnvHookDescriptor) => {
       if (typeof hook === 'function') {
         envHook = hook;
@@ -191,30 +221,24 @@ const applyFederationPlugin = (
     callerName = 'rstest',
     config = {},
     mergeEnvironmentConfig = shallowMergeEnvironmentConfig,
-    latePlugins = [],
     rspackConfig = { output: {}, plugins: [] },
+    rsbuildFederation,
     rstestConfig = {},
   }: {
     callerName?: string;
     config?: EnvironmentConfig;
-    latePlugins?: unknown[];
     mergeEnvironmentConfig?: MergeEnvironmentConfig;
     rspackConfig?: TestRspackConfig;
+    rsbuildFederation?: RsbuildFederationExposeAPI;
     rstestConfig?: TestRstestConfig;
   } = {},
 ) => {
-  const { beforeCreateCompilerHook, envHook } = setupFederationPlugin(
-    plugin,
-    callerName,
-    rstestConfig,
-  );
+  const { envHook } = setupFederationPlugin(plugin, callerName, rstestConfig, {
+    rsbuildFederation,
+  });
   const merged = envHook(config, { mergeEnvironmentConfig });
 
   runRspackHooks(merged, rspackConfig);
-  rspackConfig.plugins?.push(...latePlugins);
-  beforeCreateCompilerHook?.({
-    bundlerConfigs: [rspackConfig as Rspack.Configuration],
-  });
 
   return { merged, rspackConfig };
 };
@@ -298,31 +322,158 @@ describe('federation()', () => {
   });
 
   it('registers modifyEnvironmentConfig with post order', () => {
-    const { order } = setupFederationPlugin(federation());
+    const rsbuildFederation = createRsbuildFederationExposeAPI({
+      name: 'host',
+    });
+    const { order } = setupFederationPlugin(
+      federation(),
+      'rstest',
+      {},
+      {
+        rsbuildFederation,
+      },
+    );
     expect(order).toBe('post');
   });
 
-  it('normalizes existing federation plugins after compiler setup hooks', () => {
-    const { beforeCreateCompilerOrder } = setupFederationPlugin(federation());
-    expect(beforeCreateCompilerOrder).toBe('post');
+  it('does not register a late compiler mutation hook', () => {
+    const rsbuildFederation = createRsbuildFederationExposeAPI({
+      name: 'host',
+    });
+    const { beforeCreateCompilerHook } = setupFederationPlugin(
+      federation(),
+      'rstest',
+      {},
+      { rsbuildFederation },
+    );
+    expect(beforeCreateCompilerHook).toBeUndefined();
   });
 
   it('enables Rstest federation compatibility for node targets', () => {
-    const { rstestConfig } = setupFederationPlugin(federation());
+    const rsbuildFederation = createRsbuildFederationExposeAPI({
+      name: 'host',
+    });
+    const { rstestConfig } = setupFederationPlugin(
+      federation(),
+      'rstest',
+      {},
+      { rsbuildFederation },
+    );
 
     expect(rstestConfig.federation).toBe(true);
   });
 
-  it('does not enable Rstest federation compatibility in Browser Mode', () => {
-    const { rstestConfig } = setupFederationPlugin(federation(), 'rstest', {
-      browser: { enabled: true },
+  it('fails clearly when the required Rstest exposed API is unavailable', () => {
+    expect(() =>
+      setupFederationPlugin(
+        federation({ name: 'missing_rstest_api' }),
+        'rstest',
+        {},
+        {
+          rstest: false,
+        },
+      ),
+    ).toThrow(
+      '@module-federation/rstest requires @rstest/core 0.11.4 or newer',
+    );
+  });
+
+  it('allows an explicit browser target without the Node compatibility API', () => {
+    expect(() =>
+      setupFederationPlugin(
+        federation(
+          { name: 'browser_without_rstest_api' },
+          { target: 'browser' },
+        ),
+        'rstest',
+        {},
+        { rstest: false },
+      ),
+    ).not.toThrow();
+  });
+
+  it('rejects duplicate direct and Rsbuild-owned federation configuration', () => {
+    const rsbuildFederation = createRsbuildFederationExposeAPI({
+      name: 'rsbuild_owned_host',
     });
+
+    expect(() =>
+      setupFederationPlugin(
+        federation({ name: 'direct_host' }),
+        'rstest',
+        {},
+        { rsbuildFederation },
+      ),
+    ).toThrow('Federation is configured by both');
+  });
+
+  it('normalizes Rsbuild-owned options through the exposed integration API', () => {
+    const rsbuildFederation = createRsbuildFederationExposeAPI({
+      name: 'rsbuild_owned_host',
+      remotes: {
+        component: 'component@http://localhost:3001/remoteEntry.js',
+      },
+    });
+
+    setupFederationPlugin(federation(), 'rstest', {}, { rsbuildFederation });
+
+    expect(rsbuildFederation.getOptions()).toMatchObject({
+      name: 'rsbuild_owned_host',
+      remoteType: 'script',
+      library: {
+        name: 'rsbuild_owned_host',
+        type: 'commonjs-module',
+      },
+      experiments: {
+        asyncStartup: true,
+        optimization: {
+          target: 'node',
+        },
+      },
+    });
+  });
+
+  it('creates one compiler plugin from Rsbuild-owned options', () => {
+    const rsbuildFederation = createRsbuildFederationExposeAPI({
+      name: 'rsbuild_owned_host',
+    });
+
+    const { rspackConfig } = applyFederationPlugin(federation(), {
+      rsbuildFederation,
+    });
+
+    expect(
+      rspackConfig.plugins?.filter(
+        (plugin) =>
+          (plugin as ModuleFederationPluginInstance | undefined)?.name ===
+          PLUGIN_NAME,
+      ),
+    ).toHaveLength(1);
+    expect(getFederationPluginOptions(rspackConfig.plugins).name).toBe(
+      'rsbuild_owned_host',
+    );
+  });
+
+  it('does not enable Rstest federation compatibility in Browser Mode', () => {
+    const rsbuildFederation = createRsbuildFederationExposeAPI({
+      name: 'host',
+    });
+    const { rstestConfig } = setupFederationPlugin(
+      federation(),
+      'rstest',
+      {
+        browser: { enabled: true },
+      },
+      { rsbuildFederation },
+    );
 
     expect(rstestConfig.federation).toBeUndefined();
   });
 
   it('patches rspack config to force CJS output in node/jsdom workers', () => {
-    const { merged, rspackConfig } = applyFederationPlugin(federation());
+    const { merged, rspackConfig } = applyFederationPlugin(federation(), {
+      rsbuildFederation: createRsbuildFederationExposeAPI({ name: 'host' }),
+    });
 
     expect(merged.output?.target).toBe('node');
     expect(rspackConfig.target).toBe('async-node');
@@ -332,24 +483,18 @@ describe('federation()', () => {
   });
 
   it('keeps federation remote requests bundled via externals bypass', () => {
+    const rsbuildFederation = createRsbuildFederationExposeAPI({
+      name: 'existing_host',
+      remotes: {
+        'component-app': 'component_app@http://localhost:3001/remoteEntry.js',
+      },
+    });
     const { rspackConfig } = applyFederationPlugin(federation(), {
+      rsbuildFederation,
       rspackConfig: {
         output: {},
         externals: ['react'],
-        plugins: [
-          new ModuleFederationPlugin({
-            name: 'existing_host',
-            remotes: {
-              'component-app':
-                'component_app@http://localhost:3001/remoteEntry.js',
-            },
-            experiments: {
-              optimization: {
-                target: 'node',
-              },
-            },
-          }),
-        ],
+        plugins: [],
       },
     });
 
@@ -358,60 +503,57 @@ describe('federation()', () => {
     expect(callExternal(bypass, 'react')).toBe(undefined);
   });
 
-  it('keeps remotes from every federation plugin bundled', () => {
-    const { rspackConfig } = applyFederationPlugin(
-      federation({
-        name: 'direct_host',
-        remotes: {
-          directRemote: 'directRemote@http://localhost:3001/remoteEntry.js',
+  it('rejects an existing compiler plugin when direct options are used', () => {
+    expect(() =>
+      applyFederationPlugin(
+        federation({
+          name: 'direct_host',
+          remotes: {
+            directRemote: 'directRemote@http://localhost:3001/remoteEntry.js',
+          },
+        }),
+        {
+          rspackConfig: {
+            output: {},
+            plugins: [
+              new ModuleFederationPlugin({
+                name: 'existing_host',
+                remotes: {
+                  existingRemote:
+                    'existingRemote@http://localhost:3002/remoteEntry.js',
+                },
+              }),
+            ],
+          },
         },
-      }),
-      {
-        rspackConfig: {
-          output: {},
-          plugins: [
-            new ModuleFederationPlugin({
-              name: 'existing_host',
-              remotes: {
-                existingRemote:
-                  'existingRemote@http://localhost:3002/remoteEntry.js',
-              },
-            }),
-          ],
-        },
-      },
-    );
-
-    const bypass = getExternalBypass(rspackConfig);
-    expect(callExternal(bypass, 'directRemote/Button')).toBe(false);
-    expect(callExternal(bypass, 'existingRemote/Button')).toBe(false);
+      ),
+    ).toThrow('Federation is configured by both');
   });
 
-  it('discovers federation remotes registered after rspack config patching', () => {
+  it('reads normalized remotes from the Rsbuild-owned integration API', () => {
     const originalOptions: ModuleFederationOptions = {
       name: 'existing_host',
       remotes: {
         'component-app': 'component_app@http://localhost:3001/remoteEntry.js',
       },
     };
-    const existingPlugin = new ModuleFederationPlugin(originalOptions);
+    const rsbuildFederation = createRsbuildFederationExposeAPI(originalOptions);
     const { rspackConfig } = applyFederationPlugin(federation(), {
+      rsbuildFederation,
       rspackConfig: {
         output: {},
         externals: ['react'],
         plugins: [],
       },
-      latePlugins: [existingPlugin],
     });
 
-    expect(rspackConfig.plugins).toContain(existingPlugin);
     expect(originalOptions.remoteType).toBeUndefined();
 
     const bypass = getExternalBypass(rspackConfig);
     expect(callExternal(bypass, 'component-app/Button')).toBe(false);
     expect(callExternal(bypass, 'react')).toBe(undefined);
 
-    const options = getFederationPluginOptions(rspackConfig.plugins);
+    const options = rsbuildFederation.getOptions();
     expect(options.remoteType).toBe('script');
     expect(options.library).toEqual({
       name: 'existing_host',
@@ -422,42 +564,18 @@ describe('federation()', () => {
     expect(options.experiments?.optimization?.target).toBe('node');
   });
 
-  it('does not normalize federation plugins from unpatched environments', () => {
-    const { beforeCreateCompilerHook, envHook } =
-      setupFederationPlugin(federation());
-    const merged = envHook(
-      {},
-      { mergeEnvironmentConfig: shallowMergeEnvironmentConfig },
-    );
-    const patchedConfig: TestRspackConfig = { output: {}, plugins: [] };
-    runRspackHooks(merged, patchedConfig);
-
-    const unpatchedConfig: TestRspackConfig = {
-      plugins: [new ModuleFederationPlugin({ name: 'other_environment' })],
-    };
-    beforeCreateCompilerHook?.({
-      bundlerConfigs: [
-        patchedConfig as Rspack.Configuration,
-        unpatchedConfig as Rspack.Configuration,
-      ],
+  it('applies browser defaults through the Rsbuild-owned integration API', () => {
+    const rsbuildFederation = createRsbuildFederationExposeAPI({
+      name: 'existing_browser_host',
     });
-
-    const options = getFederationPluginOptions(unpatchedConfig.plugins);
-    expect(options.remoteType).toBeUndefined();
-    expect(options.library).toBeUndefined();
-  });
-
-  it('applies browser defaults to an existing federation plugin', () => {
-    const { rspackConfig } = applyFederationPlugin(federation(), {
-      latePlugins: [
-        new ModuleFederationPlugin({ name: 'existing_browser_host' }),
-      ],
+    applyFederationPlugin(federation(), {
+      rsbuildFederation,
       rstestConfig: {
         browser: { enabled: true },
       },
     });
 
-    const options = getFederationPluginOptions(rspackConfig.plugins);
+    const options = rsbuildFederation.getOptions();
     expect(options.dts).toBe(false);
     expect(options.manifest).toBe(false);
     expect(options.dev).toBe(false);
@@ -477,13 +595,12 @@ describe('federation()', () => {
 
   it('does not treat an existing runtime plugin as manual configuration', () => {
     const { warnings } = captureWarnings(() => {
+      const rsbuildFederation = createRsbuildFederationExposeAPI({
+        name: 'existing_node_host',
+        runtimePlugins: [NODE_RUNTIME_PLUGIN],
+      });
       applyFederationPlugin(federation(), {
-        latePlugins: [
-          new ModuleFederationPlugin({
-            name: 'existing_node_host',
-            runtimePlugins: [NODE_RUNTIME_PLUGIN],
-          }),
-        ],
+        rsbuildFederation,
       });
     });
 
@@ -704,7 +821,17 @@ describe('federation()', () => {
 
   it('warns when running outside rstest', () => {
     const { warnings } = captureWarnings(() => {
-      setupFederationPlugin(federation(), 'rsbuild');
+      const rsbuildFederation = createRsbuildFederationExposeAPI({
+        name: 'host',
+      });
+      setupFederationPlugin(
+        federation(),
+        'rsbuild',
+        {},
+        {
+          rsbuildFederation,
+        },
+      );
     });
 
     expect(warnings.join('\n')).toContain(
@@ -714,7 +841,17 @@ describe('federation()', () => {
 
   it('does not warn about the caller under rstest', () => {
     const { warnings } = captureWarnings(() => {
-      setupFederationPlugin(federation());
+      const rsbuildFederation = createRsbuildFederationExposeAPI({
+        name: 'host',
+      });
+      setupFederationPlugin(
+        federation(),
+        'rstest',
+        {},
+        {
+          rsbuildFederation,
+        },
+      );
     });
 
     expect(warnings.join('\n')).not.toContain('designed to run under rstest');
@@ -803,21 +940,16 @@ describe('federation()', () => {
   });
 
   it('collects remote names from string remotes (mf-manifest) and bypasses externals', () => {
+    const rsbuildFederation = createRsbuildFederationExposeAPI({
+      name: 'manifest_host',
+      remotes: ['component-app@http://localhost:3001/mf-manifest.json'],
+    });
     const { rspackConfig } = applyFederationPlugin(federation(), {
+      rsbuildFederation,
       rspackConfig: {
         output: {},
         externals: [],
-        plugins: [
-          new ModuleFederationPlugin({
-            name: 'manifest_host',
-            remotes: ['component-app@http://localhost:3001/mf-manifest.json'],
-            experiments: {
-              optimization: {
-                target: 'node',
-              },
-            },
-          }),
-        ],
+        plugins: [],
       },
     });
 
@@ -839,6 +971,7 @@ describe('federation()', () => {
     const { merged } = applyFederationPlugin(federation(), {
       config: { tools: { rspack: existingHook } },
       mergeEnvironmentConfig: mergeRsbuildConfig,
+      rsbuildFederation: createRsbuildFederationExposeAPI({ name: 'host' }),
       rspackConfig,
     });
 

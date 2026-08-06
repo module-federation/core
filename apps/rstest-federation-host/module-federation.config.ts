@@ -3,15 +3,15 @@ import { createModuleFederationConfig } from '@module-federation/rsbuild-plugin'
 
 const localRemoteEntryPath = path.resolve(
   import.meta.dirname,
-  '../rstest-federation-remote/dist/local/remoteEntry.cjs',
+  '../rstest-federation-profile-remote/dist/local/remoteEntry.cjs',
 );
 
 export default createModuleFederationConfig({
   name: 'rstest_federation_host',
   remotes: {
-    rstestRemote: `commonjs ${localRemoteEntryPath}`,
-    rstestHttpRemote:
-      'rstest_federation_http_remote@http://127.0.0.1:3301/node/remoteEntry.cjs',
+    catalogRemote:
+      'rstest_federation_catalog_node@http://127.0.0.1:3301/node/remoteEntry.cjs',
+    profileRemote: `commonjs ${localRemoteEntryPath}`,
   },
   shared: {
     react: { singleton: true },

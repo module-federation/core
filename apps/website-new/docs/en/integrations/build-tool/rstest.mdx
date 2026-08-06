@@ -75,6 +75,41 @@ Run your tests with Rstest as usual:
 npx rstest run
 ```
 
+### Reuse an Rsbuild Federation Configuration
+
+When the test project already registers `@module-federation/rsbuild-plugin`,
+pass no options to `federation()`:
+
+```ts title='rstest.config.ts'
+import {
+  createModuleFederationConfig,
+  pluginModuleFederation,
+} from '@module-federation/rsbuild-plugin';
+import { federation } from '@module-federation/rstest';
+import { defineConfig } from '@rstest/core';
+
+const options = createModuleFederationConfig({
+  name: 'host',
+  remotes: {
+    'component-app': 'component_app@http://localhost:3001/remoteEntry.js',
+  },
+});
+
+export default defineConfig({
+  plugins: [
+    pluginModuleFederation(options, {
+      environment: 'rstest',
+      target: 'node',
+    }),
+    federation(),
+  ],
+});
+```
+
+The plugin order is significant: register `pluginModuleFederation` first so
+`federation()` can normalize the same typed options. This creates one
+`ModuleFederationPlugin` and avoids duplicating the remote configuration.
+
 ## Test a Federated Remote
 
 Build or start the remote in Rstest's `globalSetup`, then import exposed modules

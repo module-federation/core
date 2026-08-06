@@ -1,12 +1,13 @@
 import { createModuleFederationConfig } from '@module-federation/rsbuild-plugin';
 
 export default createModuleFederationConfig({
-  name: 'rstest_federation_browser_host',
-  remotes: {
-    catalogRemote:
-      'rstest_federation_catalog_browser@http://127.0.0.1:3301/browser/remoteEntry.js',
-    profileRemote:
-      'rstest_federation_profile_browser@http://127.0.0.1:3302/browser/remoteEntry.js',
+  name: 'rstest_federation_profile_browser_esm',
+  filename: 'remoteEntry.mjs',
+  library: {
+    type: 'module',
+  },
+  exposes: {
+    './ProfileCard': './src/ProfileCard.tsx',
   },
   shared: {
     react: { eager: true, singleton: true },

@@ -3,33 +3,28 @@ import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
 import browserEsmFederationOptions from './module-federation-browser-esm.config';
 import browserFederationOptions from './module-federation-browser.config';
-import httpFederationOptions from './module-federation-http.config';
+import localFederationOptions from './module-federation.config';
 
 export default defineConfig({
   mode: 'development',
   environments: {
-    node: {
-      dev: {
-        assetPrefix: 'http://127.0.0.1:3301/node/',
-      },
+    local: {
       source: {
         entry: {
           index: './src/index.ts',
         },
       },
       output: {
-        assetPrefix: 'http://127.0.0.1:3301/node/',
         cleanDistPath: true,
         distPath: {
-          root: 'dist/node',
+          root: 'dist/local',
         },
-        filenameHash: false,
         target: 'node',
       },
     },
     browser: {
       dev: {
-        assetPrefix: 'http://127.0.0.1:3301/browser/',
+        assetPrefix: 'http://127.0.0.1:3302/browser/',
       },
       source: {
         entry: {
@@ -37,7 +32,7 @@ export default defineConfig({
         },
       },
       output: {
-        assetPrefix: 'http://127.0.0.1:3301/browser/',
+        assetPrefix: 'http://127.0.0.1:3302/browser/',
         cleanDistPath: true,
         distPath: {
           root: 'dist/browser',
@@ -48,7 +43,7 @@ export default defineConfig({
     },
     browserEsm: {
       dev: {
-        assetPrefix: 'http://127.0.0.1:3301/browser-esm/',
+        assetPrefix: 'http://127.0.0.1:3302/browser-esm/',
       },
       source: {
         entry: {
@@ -56,7 +51,7 @@ export default defineConfig({
         },
       },
       output: {
-        assetPrefix: 'http://127.0.0.1:3301/browser-esm/',
+        assetPrefix: 'http://127.0.0.1:3302/browser-esm/',
         cleanDistPath: true,
         distPath: {
           root: 'dist/browser-esm',
@@ -69,8 +64,8 @@ export default defineConfig({
   },
   plugins: [
     pluginReact({ fastRefresh: false }),
-    pluginModuleFederation(httpFederationOptions, {
-      environment: 'node',
+    pluginModuleFederation(localFederationOptions, {
+      environment: 'local',
       target: 'node',
     }),
     pluginModuleFederation(browserFederationOptions, {

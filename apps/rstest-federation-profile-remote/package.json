@@ -1,9 +1,9 @@
 {
-  "name": "rstest-federation-remote",
+  "name": "rstest-federation-profile-remote",
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Rsbuild catalog remote for Rstest federation E2E.",
+  "description": "Rsbuild profile remote for Rstest federation E2E.",
   "scripts": {
     "build": "rsbuild build"
   },
