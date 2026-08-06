@@ -2,9 +2,9 @@
 
 Este chapter introduces como para usar `createLazyComponent` para carregar remote React componentes on demand em uma aplicação host.
 
-`createLazyComponent` é uma higher-level carregamento API for React componente scenarios. Compared com diretamente carregamento um módulo e wiring up `React.lazy`, `Suspense`, e erro boundaries yourself, it builds those pieces no API e additionally fornece:
+`createLazyComponent` é uma API de carregamento de alto nível para cenários com componentes React. Em comparação com carregar um módulo diretamente e configurar `React.lazy` e `Suspense` manualmente, ela incorpora esses recursos à API e também oferece:
 
-- **Declarative carregamento e fallback**: no precisa manually wrap `React.Suspense` e erro boundaries
+- **Carregamento declarativo e fallback de erro**: gerencia o estado de carregamento com `React.Suspense` e fornece um fallback para falhas ao carregar o módulo remoto ou buscar dados
 - **Dados prefetching**: use `prefetch` para começa dependência requests antes o componente carrega, avoiding request waterfalls onde dados é requested apenas depois o componente é ready
 - **SSR control**: precisely control whether remote componentes render no servidor, helping avoid CSS flickering issues
 
@@ -181,7 +181,9 @@ Sets o delay time for displaying estado de carregamento em milliseconds. Se o ca
 - Obrigatório: Yes
 - Padrão: `undefined`
 
-O erro componente rendered quando componente **carregamento** ou **renderização** fails.
+O componente de erro renderizado quando o carregamento do módulo remoto ou a busca de dados falha.
+
+Ele não captura erros lançados durante a renderização React do componente carregado ou de seus descendentes. Para tratar erros de renderização no cliente, envolva o componente lazy em um Error Boundary no aplicativo host. Erros de renderização no servidor devem ser tratados pelo pipeline de renderização do servidor, pois Error Boundaries do React não os capturam.
 
 #### exporte
 

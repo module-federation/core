@@ -2,9 +2,9 @@
 
 This chapter introduces how to use `createLazyComponent` to load remote React components on demand in a host application.
 
-`createLazyComponent` is a higher-level loading API for React component scenarios. Compared with directly loading a module and wiring up `React.lazy`, `Suspense`, and error boundaries yourself, it builds those pieces into the API and additionally provides:
+`createLazyComponent` is a higher-level loading API for React component scenarios. Compared with directly loading a module and wiring up `React.lazy` and `Suspense` yourself, it builds those pieces into the API and additionally provides:
 
-- **Declarative loading and fallback**: no need to manually wrap `React.Suspense` and error boundaries
+- **Declarative loading and failure fallback**: handles the loading state with `React.Suspense` and provides fallback UI for remote module loading or data-fetch failures
 - **Data prefetching**: use `prefetch` to start dependency requests before the component loads, avoiding request waterfalls where data is requested only after the component is ready
 - **SSR control**: precisely control whether remote components render on the server, helping avoid CSS flickering issues
 
@@ -181,7 +181,9 @@ Sets the delay time for displaying loading state in milliseconds. If the loading
 - Required: Yes
 - Default: `undefined`
 
-The error component rendered when component **loading** or **rendering** fails.
+The error component rendered when remote module loading or data fetching fails.
+
+It does not catch errors thrown while React renders the loaded component or its descendants. To handle client-side render errors, wrap the lazy component in an Error Boundary in the host application. Server-rendering errors must be handled by the server rendering pipeline because React Error Boundaries do not catch them.
 
 #### export
 
