@@ -948,4 +948,68 @@ describe('load share while shared has multiple versions', () => {
     assert(sharedRes, "sharedRes can't be null");
     expect(sharedRes.version).toEqual('16.0.0');
   });
+
+  it('should preserve existing shared packages on repeated initShareScopeMap with partial scope', () => {
+    const FM1 = new ModuleFederation({
+      name: '@shared/init-scope-merge',
+      shared: {
+        react: { singleton: true, version: '18.2.0' },
+        '@tanstack/react-query': { singleton: true, version: '5.0.0' },
+      },
+    });
+    FM1.registerPlugins();
+
+    FM1.initShareScopeMap('default', {
+      react: {
+        '18.2.0': {
+          scope: ['default'],
+          version: '18.2.0',
+          from: '@shared/init-scope-merge',
+          loaded: true,
+        },
+      },
+    });
+
+    expect(FM1.shareScopeMap['default']['react']).toBeDefined();
+
+    FM1.initShareScopeMap('default', {
+      '@tanstack/react-query': {
+        '5.0.0': {
+          scope: ['default'],
+          version: '5.0.0',
+          from: '@shared/init-scope-merge',
+          loaded: true,
+        },
+      },
+    });
+
+    // Both packages should exist after merge
+    expect(FM1.shareScopeMap['default']['react']).toBeDefined();
+    expect(FM1.shareScopeMap['default']['@tanstack/react-query']).toBeDefined();
+  });
+
+  it('should preserve existing shared packages on repeated initShareScopeMap with empty scope', () => {
+    const FM1 = new ModuleFederation({
+      name: '@shared/init-scope-merge-empty',
+      shared: {
+        react: { singleton: true, version: '18.2.0' },
+      },
+    });
+    FM1.registerPlugins();
+
+    FM1.initShareScopeMap('default', {
+      react: {
+        '18.2.0': {
+          scope: ['default'],
+          version: '18.2.0',
+          from: '@shared/init-scope-merge-empty',
+          loaded: true,
+        },
+      },
+    });
+
+    FM1.initShareScopeMap('default', {});
+
+    expect(FM1.shareScopeMap['default']['react']).toBeDefined();
+  });
 });
