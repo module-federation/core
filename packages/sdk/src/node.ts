@@ -62,6 +62,14 @@ const createScriptNetworkError = (url: string, error: unknown): Error =>
     `Failed to load Node.js script "${url}"`,
   );
 
+const createScriptHttpError = (url: string, response: Response): Error =>
+  createScriptNetworkError(
+    url,
+    new Error(
+      `HTTP ${response.status}${response.statusText ? ` ${response.statusText}` : ''}`,
+    ),
+  );
+
 const createScriptExecutionError = (error: unknown): Error =>
   createNodeScriptError('ScriptExecutionError', error);
 
@@ -126,6 +134,10 @@ export const createScriptNode =
           let data: string;
           try {
             const res = await f(urlObj.href);
+            if (!res.ok) {
+              cb(createScriptHttpError(urlObj.href, res));
+              return;
+            }
             data = await res.text();
           } catch (error) {
             cb(createScriptNetworkError(urlObj.href, error));
@@ -466,6 +478,10 @@ async function loadModule(url: string, options: LoadModuleOptions) {
     response = await fetch(url);
   } catch (error) {
     throw createScriptNetworkError(url, error);
+  }
+
+  if (!response.ok) {
+    throw createScriptHttpError(url, response);
   }
 
   let code: string;

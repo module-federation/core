@@ -4,7 +4,14 @@ import { pathToFileURL } from 'node:url';
 
 const DEFAULT_REMOTE_ENTRY_URL = 'http://example.com/remoteEntry.js';
 
-const createResponse = (body: string) => ({
+const createResponse = (
+  body: string,
+  init: { ok?: boolean; status?: number; statusText?: string } = {},
+) => ({
+  ok: true,
+  status: 200,
+  statusText: 'OK',
+  ...init,
   text: async () => body,
 });
 
@@ -237,6 +244,40 @@ describe('Node ESM builtin loading', () => {
     await expect(loadNodeScript()).rejects.toMatchObject({
       name: 'ScriptNetworkError',
     });
+  });
+
+  it('marks non-success Node script responses as ScriptNetworkError', async () => {
+    const response = createResponse('<html>Not Found</html>', {
+      ok: false,
+      status: 404,
+      statusText: 'Not Found',
+    });
+    const textMock = jest.spyOn(response, 'text');
+    const fetchMock = setFetchMock(() => response);
+
+    await expect(loadNodeScript()).rejects.toMatchObject({
+      name: 'ScriptNetworkError',
+      message: expect.stringContaining('HTTP 404 Not Found'),
+    });
+    expect(fetchMock).toHaveBeenCalledWith(DEFAULT_REMOTE_ENTRY_URL);
+    expect(textMock).not.toHaveBeenCalled();
+  });
+
+  it('marks non-success ESM responses as ScriptNetworkError', async () => {
+    const response = createResponse('<html>Server Error</html>', {
+      ok: false,
+      status: 500,
+      statusText: 'Internal Server Error',
+    });
+    const textMock = jest.spyOn(response, 'text');
+    const fetchMock = setFetchMock(() => response);
+
+    await expect(loadNodeEsmScript()).rejects.toMatchObject({
+      name: 'ScriptNetworkError',
+      message: expect.stringContaining('HTTP 500 Internal Server Error'),
+    });
+    expect(fetchMock).toHaveBeenCalledWith(DEFAULT_REMOTE_ENTRY_URL);
+    expect(textMock).not.toHaveBeenCalled();
   });
 
   it('marks Node script execution failures as ScriptExecutionError', async () => {

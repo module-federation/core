@@ -17,7 +17,14 @@ const REMOTE_ENTRY_SOURCE = `
   };
 `;
 
-const createResponse = (body: string) => ({
+const createResponse = (
+  body: string,
+  init: { ok?: boolean; status?: number; statusText?: string } = {},
+) => ({
+  ok: true,
+  status: 200,
+  statusText: 'OK',
+  ...init,
   text: async () => body,
 });
 
@@ -64,6 +71,58 @@ describe('getRemoteEntry - Node.js entry loading', () => {
     origin.registerPlugins([
       {
         name: 'node-entry-retry-test',
+        loadEntryError,
+      },
+    ]);
+
+    const result = await getRemoteEntry({ origin, remoteInfo });
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        get: expect.any(Function),
+        init: expect.any(Function),
+      }),
+    );
+    expect(loadEntryError).toHaveBeenCalledTimes(1);
+    expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual([
+      ENTRY,
+      FALLBACK_ENTRY,
+    ]);
+  });
+
+  it('recovers an HTTP entry failure through loadEntryError and uses the rewritten entry URL', async () => {
+    const fetchMock = rs.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url === ENTRY) {
+        return createResponse('<html>Service Unavailable</html>', {
+          ok: false,
+          status: 503,
+          statusText: 'Service Unavailable',
+        });
+      }
+      if (url === FALLBACK_ENTRY) {
+        return createResponse(REMOTE_ENTRY_SOURCE);
+      }
+      throw new Error(`Unexpected URL: ${url}`);
+    });
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+
+    const origin = new ModuleFederation({ name: 'test-host', remotes: [] });
+    const remoteInfo = getRemoteInfo({ name: 'remote', entry: ENTRY });
+    const loadEntryError = rs.fn(
+      async ({ getRemoteEntry, globalLoading, uniqueKey }: any) => {
+        delete globalLoading[uniqueKey];
+        return getRemoteEntry({
+          origin,
+          remoteInfo,
+          getEntryUrl: () => FALLBACK_ENTRY,
+        });
+      },
+    );
+
+    origin.registerPlugins([
+      {
+        name: 'node-entry-http-error-retry-test',
         loadEntryError,
       },
     ]);
