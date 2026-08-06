@@ -1,5 +1,13 @@
 # @module-federation/playground
 
+## 0.0.5
+
+### Patch Changes
+
+- Updated dependencies [179caf4]
+  - @module-federation/bridge-react@2.8.2
+  - @module-federation/runtime@2.8.2
+
 ## 0.0.4
 
 ### Patch Changes

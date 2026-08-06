@@ -1,5 +1,13 @@
 # @module-federation/runtime
 
+## 2.8.2
+
+### Patch Changes
+
+- db13cf6: Fix retry-plugin recovery for ESM and module remote entry load failures, including default cache-busting retries.
+  - @module-federation/sdk@2.8.2
+  - @module-federation/error-codes@2.8.2
+
 ## 2.8.1
 
 ### Patch Changes
