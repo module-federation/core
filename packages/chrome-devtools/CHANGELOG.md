@@ -1,5 +1,12 @@
 # @module-federation/devtools
 
+## 2.8.2
+
+### Patch Changes
+
+- @module-federation/observability-plugin@2.5.6
+- @module-federation/sdk@2.8.2
+
 ## 2.8.1
 
 ### Patch Changes

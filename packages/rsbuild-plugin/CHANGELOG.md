@@ -1,5 +1,13 @@
 # @module-federation/rsbuild-plugin
 
+## 2.8.2
+
+### Patch Changes
+
+- @module-federation/node@2.7.49
+- @module-federation/enhanced@2.8.2
+- @module-federation/sdk@2.8.2
+
 ## 2.8.1
 
 ### Patch Changes

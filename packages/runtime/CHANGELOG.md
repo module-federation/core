@@ -1,5 +1,14 @@
 # @module-federation/runtime
 
+## 2.8.2
+
+### Patch Changes
+
+- Updated dependencies [db13cf6]
+  - @module-federation/runtime-core@2.8.2
+  - @module-federation/sdk@2.8.2
+  - @module-federation/error-codes@2.8.2
+
 ## 2.8.1
 
 ### Patch Changes
