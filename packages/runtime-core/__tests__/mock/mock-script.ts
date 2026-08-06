@@ -105,7 +105,9 @@ const rewrite = (methods: Array<string>, builder: typeof injector) => {
   }
 };
 
-rewrite(mountElementMethods, injector);
+if (typeof window !== 'undefined') {
+  rewrite(mountElementMethods, injector);
+}
 
 /**
  * vite 无法让 jsdom 和当前环境处于同一个执行环境

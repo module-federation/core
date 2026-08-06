@@ -50,6 +50,27 @@ const loadNodeEsmScript = async <T = unknown>(
   });
 };
 
+const loadNodeScript = async <T = unknown>(
+  url = DEFAULT_REMOTE_ENTRY_URL,
+): Promise<T> => {
+  const { createScriptNode } = await import('../src/node');
+
+  return new Promise<T>((resolve, reject) => {
+    createScriptNode(
+      url,
+      (error, scriptContext) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+
+        resolve(scriptContext as T);
+      },
+      {},
+    );
+  });
+};
+
 describe('Node ESM builtin loading', () => {
   const originalFetch = globalThis.fetch;
 
@@ -205,5 +226,27 @@ describe('Node ESM builtin loading', () => {
     );
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenCalledWith(remoteEntryUrl);
+  });
+
+  it('marks Node script fetch failures as ScriptNetworkError', async () => {
+    const fetchMock = jest
+      .fn()
+      .mockRejectedValue(new TypeError('fetch failed'));
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+
+    await expect(loadNodeScript()).rejects.toMatchObject({
+      name: 'ScriptNetworkError',
+    });
+  });
+
+  it('marks Node script execution failures as ScriptExecutionError', async () => {
+    setRemoteEntryFetchMock(
+      DEFAULT_REMOTE_ENTRY_URL,
+      `throw new TypeError('execution failed');`,
+    );
+
+    await expect(loadNodeScript()).rejects.toMatchObject({
+      name: 'ScriptExecutionError',
+    });
   });
 });

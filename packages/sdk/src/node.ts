@@ -30,6 +30,41 @@ function importNodeModule<T>(name: string): Promise<T> {
   return promise;
 }
 
+type NodeScriptErrorType = 'ScriptNetworkError' | 'ScriptExecutionError';
+
+const isNodeScriptError = (
+  error: unknown,
+  type: NodeScriptErrorType,
+): error is Error =>
+  error instanceof Error &&
+  (error.name === type || error.message.startsWith(`${type}:`));
+
+const createNodeScriptError = (
+  type: NodeScriptErrorType,
+  error: unknown,
+  context?: string,
+): Error => {
+  if (isNodeScriptError(error, type) && !context) {
+    return error;
+  }
+
+  const message = error instanceof Error ? error.message : String(error);
+  const fullMessage = `${type}: ${context ? `${context} - ` : ''}${message}`;
+  const scriptError = new Error(fullMessage);
+  scriptError.name = type;
+  return scriptError;
+};
+
+const createScriptNetworkError = (url: string, error: unknown): Error =>
+  createNodeScriptError(
+    'ScriptNetworkError',
+    error,
+    `Failed to load Node.js script "${url}"`,
+  );
+
+const createScriptExecutionError = (error: unknown): Error =>
+  createNodeScriptError('ScriptExecutionError', error);
+
 const lazyLoaderHookFetch = async (
   input: RequestInfo | URL,
   init?: RequestInit,
@@ -74,7 +109,7 @@ export const createScriptNode =
           urlObj = new URL(url);
         } catch (e) {
           console.error('Error constructing URL:', e);
-          cb(new Error(`Invalid URL: ${e}`));
+          cb(createScriptNetworkError(url, e));
           return;
         }
 
@@ -88,9 +123,16 @@ export const createScriptNode =
         };
 
         const handleScriptFetch = async (f: typeof fetch, urlObj: URL) => {
+          let data: string;
           try {
             const res = await f(urlObj.href);
-            const data = await res.text();
+            data = await res.text();
+          } catch (error) {
+            cb(createScriptNetworkError(urlObj.href, error));
+            return;
+          }
+
+          try {
             const [path, vm] = await Promise.all([
               importNodeModule<typeof import('path')>('path'),
               importNodeModule<typeof import('vm')>('vm'),
@@ -153,38 +195,39 @@ export const createScriptNode =
               undefined,
               exportedInterface as keyof typeof scriptContext.module.exports,
             );
-          } catch (e) {
-            cb(
-              e instanceof Error
-                ? e
-                : new Error(`Script execution error: ${e}`),
-            );
+          } catch (error) {
+            cb(createScriptExecutionError(error));
           }
         };
 
         getFetch()
           .then(async (f) => {
             if (attrs?.['type'] === 'esm' || attrs?.['type'] === 'module') {
-              return loadModule(urlObj.href, {
-                fetch: f,
-                vm: await importNodeModule<typeof import('vm')>('vm'),
-              })
+              let vm: typeof import('vm');
+              try {
+                vm = await importNodeModule<typeof import('vm')>('vm');
+              } catch (error) {
+                cb(createScriptExecutionError(error));
+                return;
+              }
+
+              return loadModule(urlObj.href, { fetch: f, vm })
                 .then(async (module) => {
                   await module.evaluate();
                   cb(undefined, module.namespace);
                 })
-                .catch((e) => {
+                .catch((error) => {
                   cb(
-                    e instanceof Error
-                      ? e
-                      : new Error(`Script execution error: ${e}`),
+                    isNodeScriptError(error, 'ScriptNetworkError')
+                      ? error
+                      : createScriptExecutionError(error),
                   );
                 });
             }
             handleScriptFetch(f, urlObj);
           })
-          .catch((err) => {
-            cb(err);
+          .catch((error) => {
+            cb(createScriptNetworkError(urlObj.href, error));
           });
       }
     : (
@@ -418,8 +461,19 @@ async function loadModule(url: string, options: LoadModuleOptions) {
     );
   }
 
-  const response = await fetch(url);
-  const code = await response.text();
+  let response: Response;
+  try {
+    response = await fetch(url);
+  } catch (error) {
+    throw createScriptNetworkError(url, error);
+  }
+
+  let code: string;
+  try {
+    code = await response.text();
+  } catch (error) {
+    throw createScriptNetworkError(url, error);
+  }
   const nodeUrl = await importNodeModule<typeof import('node:url')>('node:url');
   const cwdFileUrl = nodeUrl.pathToFileURL(process.cwd()).href;
 
