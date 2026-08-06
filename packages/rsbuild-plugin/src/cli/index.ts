@@ -314,7 +314,7 @@ export const pluginModuleFederation = (
       return config;
     });
 
-    const generateMergedStatsAndManifestOptions: ExposedAPIType = {
+    const exposedFederationApi: ExposedAPIType = {
       options: {
         nodePlugin: undefined,
         browserPlugin: undefined,
@@ -331,10 +331,7 @@ export const pluginModuleFederation = (
       isSSRConfig,
       isRspressSSGConfig,
     };
-    api.expose(
-      RSBUILD_PLUGIN_MODULE_FEDERATION_NAME,
-      generateMergedStatsAndManifestOptions,
-    );
+    api.expose(RSBUILD_PLUGIN_MODULE_FEDERATION_NAME, exposedFederationApi);
 
     const defaultBrowserEnvironmentName = environment;
     api.processAssets(
@@ -350,19 +347,17 @@ export const pluginModuleFederation = (
           moduleFederationOptions.manifest,
         );
         const expectedBrowserEnv =
-          generateMergedStatsAndManifestOptions.options
-            .browserEnvironmentName ?? defaultBrowserEnvironmentName;
+          exposedFederationApi.options.browserEnvironmentName ??
+          defaultBrowserEnvironmentName;
         const expectedNodeEnv =
-          generateMergedStatsAndManifestOptions.options.nodeEnvironmentName ??
-          SSR_ENV_NAME;
+          exposedFederationApi.options.nodeEnvironmentName ?? SSR_ENV_NAME;
         const envName = envContext.name;
 
         if (envName !== expectedBrowserEnv && envName !== expectedNodeEnv) {
           return;
         }
 
-        const assetResources =
-          generateMergedStatsAndManifestOptions.assetResources;
+        const assetResources = exposedFederationApi.assetResources;
         const targetResources =
           assetResources[envName] || (assetResources[envName] = {});
 
@@ -577,12 +572,12 @@ export const pluginModuleFederation = (
                 (isRstest
                   ? moduleFederationOptions
                   : createSSRMFConfig(moduleFederationOptions));
-              generateMergedStatsAndManifestOptions.options.nodePlugin =
+              exposedFederationApi.options.nodePlugin =
                 new ModuleFederationPlugin(ssrMFConfig);
-              generateMergedStatsAndManifestOptions.options.nodeEnvironmentName =
+              exposedFederationApi.options.nodeEnvironmentName =
                 bundlerConfig.name || SSR_ENV_NAME;
               bundlerConfig.plugins!.push(
-                generateMergedStatsAndManifestOptions.options.nodePlugin,
+                exposedFederationApi.options.nodePlugin,
               );
               return;
             } else if (isActiveRspressSSGEnvironmentConfig) {
@@ -607,21 +602,20 @@ export const pluginModuleFederation = (
               bundlerConfig.output.asyncChunks = undefined;
               const p = new ModuleFederationPlugin(mfConfig);
               if (bundlerConfig.name === RSPRESS_BUNDLER_CONFIG_NAME) {
-                generateMergedStatsAndManifestOptions.options.rspressSSGPlugin =
-                  p;
+                exposedFederationApi.options.rspressSSGPlugin = p;
               }
               bundlerConfig.plugins!.push(p);
               return;
             }
 
-            generateMergedStatsAndManifestOptions.options.browserPlugin =
+            exposedFederationApi.options.browserPlugin =
               new ModuleFederationPlugin(moduleFederationOptions);
-            generateMergedStatsAndManifestOptions.options.distOutputDir =
+            exposedFederationApi.options.distOutputDir =
               bundlerConfig.output?.path || '';
-            generateMergedStatsAndManifestOptions.options.browserEnvironmentName =
+            exposedFederationApi.options.browserEnvironmentName =
               bundlerConfig.name || defaultBrowserEnvironmentName;
             bundlerConfig.plugins!.push(
-              generateMergedStatsAndManifestOptions.options.browserPlugin,
+              exposedFederationApi.options.browserPlugin,
             );
           }
         }
@@ -630,14 +624,13 @@ export const pluginModuleFederation = (
 
     const generateMergedStatsAndManifest = () => {
       const { distOutputDir, browserEnvironmentName, nodeEnvironmentName } =
-        generateMergedStatsAndManifestOptions.options;
+        exposedFederationApi.options;
 
       if (!distOutputDir || !browserEnvironmentName || !nodeEnvironmentName) {
         return;
       }
 
-      const assetResources =
-        generateMergedStatsAndManifestOptions.assetResources;
+      const assetResources = exposedFederationApi.assetResources;
       const browserAssets = assetResources[browserEnvironmentName];
       const nodeAssets = assetResources[nodeEnvironmentName];
 
@@ -652,13 +645,8 @@ export const pluginModuleFederation = (
       }
     };
 
-    api.onDevCompileDone(() => {
-      generateMergedStatsAndManifest();
-    });
-
-    api.onAfterBuild(() => {
-      generateMergedStatsAndManifest();
-    });
+    api.onDevCompileDone(generateMergedStatsAndManifest);
+    api.onAfterBuild(generateMergedStatsAndManifest);
   },
 });
 

@@ -18,6 +18,6 @@ export default defineConfig({
       environment: 'rstest',
       target: 'web',
     }),
-    federation(undefined, { target: 'browser' }),
+    federation(),
   ],
 });
