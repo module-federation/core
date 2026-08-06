@@ -1,5 +1,11 @@
 # @module-federation/metro-plugin-rnc-cli
 
+## 2.8.2
+
+### Patch Changes
+
+- @module-federation/metro@2.8.2
+
 ## 2.8.1
 
 ### Patch Changes

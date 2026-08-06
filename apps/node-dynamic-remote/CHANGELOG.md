@@ -1,5 +1,11 @@
 # node-dynamic-remote
 
+## 1.0.16
+
+### Patch Changes
+
+- @module-federation/node@2.7.49
+
 ## 1.0.15
 
 ### Patch Changes
