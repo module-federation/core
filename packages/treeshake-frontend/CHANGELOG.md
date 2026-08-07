@@ -1,5 +1,7 @@
 # @module-federation/treeshake-frontend
 
+## 2.8.2
+
 ## 2.8.1
 
 ## 2.8.0
