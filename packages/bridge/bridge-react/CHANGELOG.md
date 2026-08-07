@@ -1,5 +1,19 @@
 # @module-federation/bridge-react
 
+## 2.8.2
+
+### Patch Changes
+
+- 179caf4: Prevent duplicate bridge React stylesheets during hydration while preserving public SSR asset output and stylesheet ownership across document and shadow roots.
+  - @module-federation/sdk@2.8.2
+
+## 2.8.1
+
+### Patch Changes
+
+- Updated dependencies [d901e2c]
+  - @module-federation/sdk@2.8.1
+
 ## 2.8.0
 
 ### Patch Changes

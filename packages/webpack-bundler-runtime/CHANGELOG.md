@@ -1,5 +1,22 @@
 # @module-federation/webpack-bundler-runtime
 
+## 2.8.2
+
+### Patch Changes
+
+- @module-federation/runtime@2.8.2
+- @module-federation/sdk@2.8.2
+- @module-federation/error-codes@2.8.2
+
+## 2.8.1
+
+### Patch Changes
+
+- Updated dependencies [d901e2c]
+  - @module-federation/sdk@2.8.1
+  - @module-federation/runtime@2.8.1
+  - @module-federation/error-codes@2.8.1
+
 ## 2.8.0
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/dts-plugin",
-  "version": "2.8.0",
+  "version": "2.8.2",
   "author": "hanric <hanric.zhang@gmail.com>",
   "main": "./dist/index.js",
   "module": "./dist/esm/index.mjs",
@@ -71,7 +71,7 @@
     "@module-federation/third-party-dts-extractor": "workspace:*",
     "adm-zip": "0.6.0",
     "isomorphic-ws": "5.0.0",
-    "undici": "7.28.0",
+    "undici": "7.29.0",
     "ws": "8.21.0"
   },
   "devDependencies": {

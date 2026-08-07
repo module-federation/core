@@ -1,5 +1,31 @@
 # @module-federation/modern-js
 
+## 2.8.2
+
+### Patch Changes
+
+- Updated dependencies [179caf4]
+  - @module-federation/bridge-react@2.8.2
+  - @module-federation/runtime@2.8.2
+  - @module-federation/node@2.7.49
+  - @module-federation/rsbuild-plugin@2.8.2
+  - @module-federation/enhanced@2.8.2
+  - @module-federation/sdk@2.8.2
+  - @module-federation/cli@2.8.2
+
+## 2.8.1
+
+### Patch Changes
+
+- Updated dependencies [d901e2c]
+  - @module-federation/node@2.7.48
+  - @module-federation/sdk@2.8.1
+  - @module-federation/rsbuild-plugin@2.8.1
+  - @module-federation/bridge-react@2.8.1
+  - @module-federation/cli@2.8.1
+  - @module-federation/enhanced@2.8.1
+  - @module-federation/runtime@2.8.1
+
 ## 2.8.0
 
 ### Patch Changes

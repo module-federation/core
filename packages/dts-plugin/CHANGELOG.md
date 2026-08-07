@@ -1,5 +1,25 @@
 # @module-federation/dts-plugin
 
+## 2.8.2
+
+### Patch Changes
+
+- @module-federation/sdk@2.8.2
+- @module-federation/managers@2.8.2
+- @module-federation/third-party-dts-extractor@2.8.2
+- @module-federation/error-codes@2.8.2
+
+## 2.8.1
+
+### Patch Changes
+
+- 641a0b6: chore(dts-plugin): upgrade adm-zip to 0.6.0 to prevent crafted remote type archives from exhausting process memory during extraction.
+- Updated dependencies [d901e2c]
+  - @module-federation/sdk@2.8.1
+  - @module-federation/managers@2.8.1
+  - @module-federation/third-party-dts-extractor@2.8.1
+  - @module-federation/error-codes@2.8.1
+
 ## 2.8.0
 
 ### Minor Changes

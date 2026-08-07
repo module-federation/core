@@ -1,5 +1,24 @@
 # @module-federation/metro
 
+## 2.8.2
+
+### Patch Changes
+
+- @module-federation/runtime@2.8.2
+- @module-federation/dts-plugin@2.8.2
+- @module-federation/sdk@2.8.2
+
+## 2.8.1
+
+### Patch Changes
+
+- 1ed404a: fix(metro): normalize Windows separators before encoding parent directory segments in split-bundle URLs.
+- Updated dependencies [d901e2c]
+- Updated dependencies [641a0b6]
+  - @module-federation/sdk@2.8.1
+  - @module-federation/dts-plugin@2.8.1
+  - @module-federation/runtime@2.8.1
+
 ## 2.8.0
 
 ### Patch Changes
