@@ -276,9 +276,13 @@ By default, `@module-federation/bridge-react` includes `react-router-dom` in you
 - Router context passing
 - Nested routing support
 
-If you don't need React Router integration (or you use a different router), disable `enableBridgeRouter` to reduce bundle size (about ~3KB gzipped) and avoid unnecessary router integration.
+If you don't need React Router integration (or you use a different router), you can drop it to reduce bundle size (about ~3KB gzipped) and avoid unnecessary router integration.
 
-### How to Disable Router Dependency
+How you do that depends on how your host is built.
+
+### With webpack or Rspack: `enableBridgeRouter: false`
+
+`@module-federation/enhanced` (webpack) and `@module-federation/rspack` accept a `bridge` option:
 
 ```ts title="rsbuild.config.ts"
 import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
@@ -303,5 +307,33 @@ By default, Bridge enables router support to provide the best development experi
 :::info How It Works
 
 The plugin automatically resolves imports of `@module-federation/bridge-react` to `@module-federation/bridge-react/base`. That entry does not bundle `react-router-dom`, so no code changes are required.
+
+:::
+
+### Everywhere else: import from `/base`
+
+The `bridge` option is implemented by the webpack and Rspack plugins only. If your host does not run one of them there is no plugin to rewrite the import, so point at the router-free entry yourself:
+
+```ts
+// Router-enabled entry (default):
+// import { createRemoteAppComponent } from '@module-federation/bridge-react';
+
+// Router-free entry:
+import { createRemoteAppComponent } from '@module-federation/bridge-react/base';
+```
+
+Use this when:
+
+- you build with [`@module-federation/vite`](/integrations/build-tool/vite.html), which has no `bridge` option
+- your host is a **pure runtime host** — it calls `init()` from `@module-federation/runtime` and `registerRemotes()` directly, with no Module Federation build plugin in the pipeline
+- you use a router other than React Router, such as `@tanstack/react-router`
+
+`/base` exposes the same API as the package root — `createBridgeComponent`, `createRemoteComponent`, `createRemoteAppComponent`, `createLazyComponent`, `lazyLoadComponentPlugin` and the data-fetch helpers — without the React Router integration.
+
+The one behavioural difference is basename handling. The default entry derives a remote's `basename` from the surrounding React Router context; `/base` does not, so pass `basename` to the remote explicitly and let the remote's own router consume it.
+
+:::tip Peer dependency
+
+`react-router-dom` is declared in the package's `peerDependencies`, but it is only required by the router-enabled entry. A host that imports exclusively from `/base` can leave it uninstalled and ignore the unmet-peer warning.
 
 :::
