@@ -6,12 +6,7 @@ import {
   GlobalModuleInfo,
 } from '@module-federation/sdk';
 import { RUNTIME_004, runtimeDescMap } from '@module-federation/error-codes';
-import {
-  Global,
-  getInfoWithoutType,
-  globalLoading,
-  CurrentGlobal,
-} from '../global';
+import { getInfoWithoutType, globalLoading, CurrentGlobal } from '../global';
 import {
   Options,
   UserOptions,
@@ -177,7 +172,7 @@ export class RemoteHandler {
           globalSnapshot: GlobalModuleInfo;
         },
       ],
-      Promise<PreloadAssets>
+      Promise<PreloadAssets | undefined>
     >('generatePreloadAssets'),
     afterPreloadRemote: new AsyncHook<
       [
@@ -711,8 +706,7 @@ export class RemoteHandler {
       delete CurrentGlobal.__FEDERATION__.moduleInfo[globalSnapshotKey];
 
       if ('entry' in remote) {
-        host.snapshotHandler.manifestCache.delete(remote.entry);
-        delete Global.__FEDERATION__.__MANIFEST_LOADING__[remote.entry];
+        host.snapshotHandler.clearManifestCache(remote.entry);
       }
 
       const { hostGlobalSnapshot } = getGlobalRemoteInfo(remote, host);
