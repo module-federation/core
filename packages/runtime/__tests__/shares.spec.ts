@@ -948,4 +948,50 @@ describe('load share while shared has multiple versions', () => {
     assert(sharedRes, "sharedRes can't be null");
     expect(sharedRes.version).toEqual('16.0.0');
   });
+
+  // Regression test for https://github.com/module-federation/core/issues/2497
+  // When the host's share scope contains a dep the remote doesn't declare,
+  // the scope entry has no get() factory. loadShare must not crash.
+  it('loadShare does not crash when share scope entry has no get factory', async () => {
+    const host = init({
+      name: '@federation/host-extra-dep',
+      remotes: [],
+      shared: {
+        react: {
+          version: '18.0.0',
+          scope: ['default'],
+          get: () =>
+            Promise.resolve(() => ({
+              default: 'react',
+              version: '18.0.0',
+              from: '@federation/host-extra-dep',
+            })),
+          shareConfig: {
+            singleton: true,
+            requiredVersion: '^18.0.0',
+          },
+        },
+      },
+    });
+
+    // Inject a share scope entry without a get() factory, simulating what
+    // happens when the host registers a shared dep the remote doesn't declare.
+    const scope = host.shareScopeMap['default'] || {};
+    host.shareScopeMap['default'] = scope;
+    scope['moment'] = {
+      '2.30.0': {
+        version: '2.30.0',
+        from: 'remote-without-moment',
+        scope: ['default'],
+        shareConfig: {
+          singleton: false,
+          requiredVersion: '^2.30.0',
+        },
+      } as any,
+    };
+
+    // Should return false (miss sentinel) instead of crashing
+    const result = await host.loadShare<any>('moment');
+    expect(result).toBe(false);
+  });
 });
