@@ -8,6 +8,7 @@ import {
   RUNTIME_015,
 } from '@module-federation/error-codes';
 import { mockStaticServer, removeScriptTags } from './mock/utils';
+import type { ModuleFederationRuntimePlugin } from '../src/type/plugin';
 
 // All fixture URLs are served via two complementary mechanisms both pointing to __tests__/:
 //   1. mockScriptDomResponse (setup.ts) — patches Element.prototype.appendChild, executes
@@ -25,6 +26,28 @@ mockStaticServer({
 const createMF = () => new ModuleFederation({ name: 'test-host', remotes: [] });
 const createDataUrlEntry = (code: string) =>
   `data:text/javascript;charset=utf-8,${encodeURIComponent(code)}`;
+
+function createResourceRecorder(): {
+  plugin: ModuleFederationRuntimePlugin;
+  starts: Array<Record<string, any>>;
+  results: Array<Record<string, any>>;
+} {
+  const starts: Array<Record<string, any>> = [];
+  const results: Array<Record<string, any>> = [];
+  return {
+    starts,
+    results,
+    plugin: {
+      name: 'resource-recorder',
+      loadEntry(args) {
+        starts.push(args);
+      },
+      afterLoadEntry(args) {
+        results.push(args);
+      },
+    },
+  };
+}
 
 describe('getRemoteEntry - script load error discrimination', () => {
   beforeEach(() => {
@@ -217,5 +240,215 @@ describe('getRemoteEntry - script load error discrimination', () => {
     expect(err.message).toContain(RUNTIME_015);
     expect(err.message).toContain('remote init failed');
     expect(err.message).toContain('remoteEntryUrl');
+  });
+
+  it.each([
+    ['success.js', false],
+    ['missing.js', true],
+    ['exec-error.js', true],
+    ['no-global.js', true],
+  ] as const)(
+    'emits one remote-entry result for %s',
+    async (fixture, hasError) => {
+      const recorder = createResourceRecorder();
+      const origin = new ModuleFederation({
+        name: `resource-${fixture}`,
+        remotes: [],
+        plugins: [recorder.plugin],
+      });
+      const remoteInfo = getRemoteInfo({
+        name: 'remote',
+        entry: `${BASE}/${fixture}`,
+      });
+      const resourceContext = {
+        initiator: 'loadRemote' as const,
+        id: `remote/${fixture}`,
+        resourceType: 'remoteEntry' as const,
+        url: `${BASE}/${fixture}`,
+      };
+
+      await getRemoteEntry({
+        origin,
+        remoteInfo,
+        resourceContext,
+      }).catch(() => undefined);
+
+      expect(recorder.starts).toHaveLength(1);
+      expect(recorder.results).toHaveLength(1);
+      expect(recorder.results[0]).toMatchObject({
+        resourceContext: {
+          initiator: 'loadRemote',
+          resourceType: 'remoteEntry',
+          url: `${BASE}/${fixture}`,
+        },
+      });
+      if (hasError) {
+        expect(recorder.results[0].error).toBeInstanceOf(Error);
+      } else {
+        expect(recorder.results[0]).not.toHaveProperty('error');
+      }
+    },
+  );
+
+  it('shares one real remote-entry result across concurrent callers', async () => {
+    const recorder = createResourceRecorder();
+    const container = { get: rs.fn(), init: rs.fn() };
+    const origin = new ModuleFederation({
+      name: 'resource-concurrent',
+      remotes: [],
+      plugins: [
+        recorder.plugin,
+        {
+          name: 'delayed-entry',
+          async loadEntry() {
+            await Promise.resolve();
+            return container;
+          },
+        },
+      ],
+    });
+    const remoteInfo = getRemoteInfo({
+      name: 'concurrent-remote',
+      entry: 'https://remote.test/concurrent.js',
+    });
+
+    const [first, second] = await Promise.all([
+      getRemoteEntry({ origin, remoteInfo }),
+      getRemoteEntry({ origin, remoteInfo }),
+    ]);
+
+    expect(first).toBe(container);
+    expect(second).toBe(container);
+    expect(recorder.starts).toHaveLength(1);
+    expect(recorder.results).toHaveLength(1);
+    expect(recorder.results[0]).toMatchObject({
+      remoteEntryExports: container,
+    });
+    expect(recorder.results[0]).not.toHaveProperty('cached');
+  });
+
+  it('emits the shared remote-entry result to each runtime instance', async () => {
+    const firstRecorder = createResourceRecorder();
+    const secondRecorder = createResourceRecorder();
+    const container = { get: rs.fn(), init: rs.fn() };
+    const firstOrigin = new ModuleFederation({
+      name: 'resource-concurrent-first',
+      remotes: [],
+      plugins: [
+        firstRecorder.plugin,
+        {
+          name: 'delayed-entry',
+          async loadEntry() {
+            await Promise.resolve();
+            return container;
+          },
+        },
+      ],
+    });
+    const secondOrigin = new ModuleFederation({
+      name: 'resource-concurrent-second',
+      remotes: [],
+      plugins: [secondRecorder.plugin],
+    });
+    const remoteInfo = getRemoteInfo({
+      name: 'shared-concurrent-remote',
+      entry: 'https://remote.test/shared-concurrent.js',
+    });
+
+    const [first, second] = await Promise.all([
+      getRemoteEntry({ origin: firstOrigin, remoteInfo }),
+      getRemoteEntry({ origin: secondOrigin, remoteInfo }),
+    ]);
+
+    expect(first).toBe(container);
+    expect(second).toBe(container);
+    expect(firstRecorder.starts).toHaveLength(1);
+    expect(firstRecorder.results).toHaveLength(1);
+    expect(secondRecorder.starts).toHaveLength(0);
+    expect(secondRecorder.results).toHaveLength(1);
+    expect(secondRecorder.results[0]).toMatchObject({
+      origin: secondOrigin,
+      remoteEntryExports: container,
+    });
+    expect(secondRecorder.results[0]).not.toHaveProperty('cached');
+  });
+
+  it('reports explicit remote exports reuse as an MF memory cache hit', async () => {
+    const recorder = createResourceRecorder();
+    const container = { get: rs.fn(), init: rs.fn() };
+    const origin = new ModuleFederation({
+      name: 'resource-cache',
+      remotes: [],
+      plugins: [recorder.plugin],
+    });
+    const remoteInfo = getRemoteInfo({
+      name: 'cached-remote',
+      entry: 'https://remote.test/cached.js',
+    });
+
+    await getRemoteEntry({
+      origin,
+      remoteInfo,
+      remoteEntryExports: container,
+    });
+
+    expect(recorder.starts).toHaveLength(0);
+    expect(recorder.results).toHaveLength(1);
+    expect(recorder.results[0]).toMatchObject({
+      cached: true,
+    });
+  });
+
+  it('keeps the original failure and the recovered resource attempt', async () => {
+    const recorder = createResourceRecorder();
+    const container = { get: rs.fn(), init: rs.fn() };
+    let attempts = 0;
+    const origin = new ModuleFederation({
+      name: 'resource-recovery',
+      remotes: [],
+      plugins: [
+        recorder.plugin,
+        {
+          name: 'recover-entry',
+          loadEntry() {
+            attempts += 1;
+            if (attempts === 1) {
+              const loadError = new Error(
+                '#RUNTIME-008 ScriptNetworkError: network failed',
+              );
+              loadError.name = 'ScriptNetworkError';
+              throw loadError;
+            }
+            return container;
+          },
+          async loadEntryError(args) {
+            delete args.globalLoading[args.uniqueKey];
+            return args.getRemoteEntry({
+              origin: args.origin,
+              remoteInfo: args.remoteInfo,
+              remoteEntryExports: args.remoteEntryExports,
+            });
+          },
+        },
+      ],
+    });
+    const remoteInfo = getRemoteInfo({
+      name: 'recovered-remote',
+      entry: 'https://remote.test/recovered.js',
+    });
+
+    await expect(getRemoteEntry({ origin, remoteInfo })).resolves.toBe(
+      container,
+    );
+
+    expect(recorder.results).toHaveLength(2);
+    expect(recorder.results[0]).not.toHaveProperty('error');
+    expect(recorder.results[1]).toMatchObject({
+      recovered: true,
+      error: {
+        name: 'ScriptNetworkError',
+        message: expect.stringContaining('network failed'),
+      },
+    });
   });
 });

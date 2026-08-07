@@ -608,6 +608,8 @@ describe('hooks', () => {
       headers: { 'Content-Type': 'application/json' },
     });
     let lastFetchRemoteInfo: any;
+    const manifestStarts: Array<Record<string, unknown>> = [];
+    const manifestResults: Array<Record<string, unknown>> = [];
     const fetchPlugin: () => ModuleFederationRuntimePlugin = () => ({
       name: 'fetch-plugin',
       fetch(url, options, remoteInfo, resourceContext) {
@@ -630,7 +632,18 @@ describe('hooks', () => {
           entry: 'http://mockxxx.com/loader-fetch-hooks-mf-manifest.json',
         },
       ],
-      plugins: [fetchPlugin()],
+      plugins: [
+        fetchPlugin(),
+        {
+          name: 'manifest-resource-recorder',
+          beforeLoadManifest(args) {
+            manifestStarts.push(args);
+          },
+          afterLoadManifest(args) {
+            manifestResults.push(args);
+          },
+        },
+      ],
     });
 
     const res = await INSTANCE.loadRemote<() => string>(
@@ -642,6 +655,31 @@ describe('hooks', () => {
       name: '@loader-hooks/app2',
       entry: 'http://mockxxx.com/loader-fetch-hooks-mf-manifest.json',
     });
+    expect(manifestStarts).toHaveLength(1);
+    expect(manifestStarts[0]).toMatchObject({
+      manifestUrl: 'http://mockxxx.com/loader-fetch-hooks-mf-manifest.json',
+      moduleInfo: {
+        name: '@loader-hooks/app2',
+      },
+      resourceOptions: {
+        id: '@loader-hooks/app2/say',
+        initiator: 'loadRemote',
+      },
+    });
+    expect(manifestResults).toHaveLength(1);
+    expect(manifestResults[0]).toMatchObject({
+      manifestUrl: 'http://mockxxx.com/loader-fetch-hooks-mf-manifest.json',
+      moduleInfo: {
+        name: '@loader-hooks/app2',
+      },
+      resourceOptions: {
+        id: '@loader-hooks/app2/say',
+        initiator: 'loadRemote',
+      },
+    });
+    expect(manifestResults[0].response).toBe(responseBody);
+    expect(manifestResults[0]).not.toHaveProperty('cached');
+    expect(manifestResults[0].recovered).toBeUndefined();
   });
 
   it('emits manifest snapshot lifecycle once when loading a manifest remote', async () => {

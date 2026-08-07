@@ -336,6 +336,37 @@ mf.loadRemote('app1/un-existed-module').then(mod=>{
 });
 ```
 
+## afterRegisterShare
+
+`SyncHook`
+
+Called after the runtime attempts to register one version of a shared dependency
+in a share scope. This hook reports both the candidate and the record that
+actually remains registered, so it can also observe conflicts where an existing
+provider wins.
+
+```ts
+function afterRegisterShare(args: AfterRegisterShareOptions): void;
+
+type AfterRegisterShareOptions = {
+  pkgName: string;
+  scope: string;
+  shared: Shared;
+  previousShared?: Shared;
+  registeredShared?: Shared;
+  shareScopeMap: ShareScopeMap;
+  trigger: 'build' | 'runtime' | 'container-init';
+  origin: ModuleFederation;
+};
+```
+
+- `shared` is the candidate the runtime tried to register.
+- `previousShared` is the record at the same scope, package, and version before
+  this attempt.
+- `registeredShared` is the record that remains after conflict resolution.
+- `trigger` identifies whether registration came from build-generated runtime
+  code, a runtime API call, or remote container initialization.
+
 ## beforeLoadShare
 
 `AsyncWaterfallHook`
@@ -352,8 +383,24 @@ type BeforeLoadShareOptions = {
   shareInfo?: Shared;
   shared: Options['shared'];
   origin: ModuleFederation;
+  loadContext?: SharedLoadContext;
 };
 ```
+
+`loadContext` carries the consumer that triggered shared resolution when that
+information is available:
+
+```ts
+type SharedLoadContext = {
+  trigger?: 'build' | 'runtime' | 'container-init';
+  moduleId?: string | number;
+  chunkId?: string | number;
+};
+```
+
+Because `beforeLoadShare` is a waterfall hook, a plugin can return an updated
+`loadContext`; the same value is then forwarded to `resolveShare`,
+`afterLoadShare`, and `errorLoadShare`.
 
 ## afterLoadShare
 
@@ -371,6 +418,7 @@ type AfterLoadShareOptions = {
   shared: Options['shared'];
   shareScopeMap: ShareScopeMap;
   lifecycle: 'loadShare' | 'loadShareSync';
+  loadContext?: SharedLoadContext;
   origin: ModuleFederation;
 };
 ```
@@ -393,6 +441,7 @@ type ErrorLoadShareOptions = {
   origin: ModuleFederation;
   error?: unknown;
   recovered?: boolean;
+  loadContext?: SharedLoadContext;
 };
 ```
 
@@ -440,6 +489,7 @@ type ResolveShareOptions = {
         useTreesShaking: boolean;
       }
     | undefined;
+  loadContext?: SharedLoadContext;
 };
 ```
 
@@ -542,6 +592,61 @@ interface PreloadAssets {
   entryAssets: Array<EntryAssets>;
 }
 ```
+
+## beforeLoadManifest
+
+`AsyncHook`
+
+Called immediately before the runtime requests and parses a remote manifest.
+It is not called when the manifest is already in the runtime cache.
+
+```ts
+async function beforeLoadManifest(
+  args: BeforeLoadManifestOptions,
+): Promise<void>;
+
+type BeforeLoadManifestOptions = {
+  manifestUrl: string;
+  moduleInfo: Remote;
+  resourceOptions?: {
+    initiator: 'loadRemote' | 'preloadRemote' | 'loadShare';
+    id: string;
+  };
+  origin: ModuleFederation;
+};
+```
+
+## afterLoadManifest
+
+`AsyncHook`
+
+Called after manifest loading finishes. It runs for network success, cache
+hits, validation failures, and values recovered through `errorLoadRemote`.
+
+```ts
+async function afterLoadManifest(
+  args: AfterLoadManifestOptions,
+): Promise<void>;
+
+type AfterLoadManifestOptions = {
+  manifestUrl: string;
+  moduleInfo: Remote;
+  resourceOptions?: {
+    initiator: 'loadRemote' | 'preloadRemote' | 'loadShare';
+    id: string;
+  };
+  manifestJson?: Manifest;
+  response?: Response;
+  error?: unknown;
+  cached?: boolean;
+  recovered?: boolean;
+  origin: ModuleFederation;
+};
+```
+
+- `cached` is `true` when no network request was needed.
+- `error` preserves the original loading or validation error.
+- `recovered` is `true` when `errorLoadRemote` supplied a usable manifest.
 
 ## loaderHook
 
@@ -686,16 +791,18 @@ type CreateScriptHookReturn =
   | void;
 
 type ResourceLoadContext = {
-  initiator: 'loadRemote' | 'preloadRemote';
+  initiator: 'loadRemote' | 'preloadRemote' | 'loadShare';
   id: string;
   resourceType: 'manifest' | 'remoteEntry' | 'js' | 'css';
   url?: string;
+  expose?: string;
 };
 ```
 
 `timeout` is measured in milliseconds and controls the script loading timeout. The default value is `20000`.
-`resourceContext` tells whether this resource load came from `loadRemote` or
-`preloadRemote`, plus the resource type and id.
+`resourceContext` tells whether this resource load came from `loadRemote`,
+`preloadRemote`, or shared initialization, plus the resource type, id, and
+exposed module when applicable.
 You can combine `timeout` and `resourceContext` to set different timeouts for
 remoteEntry loads and preload loads.
 
@@ -737,8 +844,8 @@ function fetch(
 ): Promise<Response> | void | false;
 ```
 
-`resourceContext` can tell whether this manifest request came from `loadRemote`
-or `preloadRemote`.
+`resourceContext` can tell whether this manifest request came from
+`loadRemote`, `preloadRemote`, or shared initialization.
 
 - Example for including the credentials when fetching the manifest JSON:
 
@@ -848,10 +955,16 @@ type AfterLoadEntryOptions = {
   origin: ModuleFederation;
   remoteInfo: RemoteInfo;
   remoteEntryExports?: RemoteEntryExports | false | void;
+  resourceContext?: ResourceLoadContext;
+  cached?: boolean;
   error?: unknown;
   recovered?: boolean;
 };
 ```
+
+`resourceContext` identifies the request that needed the remoteEntry. `cached`
+is `true` when the exports were already available, while `recovered` means
+`loadEntryError` returned replacement exports after a loading error.
 
 ## getModuleFactory
 
@@ -878,12 +991,16 @@ type GetModuleFactoryOptions = {
 The `loadEntry` function allows for full customization of remotes, enabling you to extend and create new remote types. The following two simple examples demonstrate loading JSON data and module delegation.
 
 ```typescript
-function loadEntry(args: LoadEntryOptions): RemoteEntryExports | void;
+function loadEntry(
+  args: LoadEntryOptions,
+): Promise<RemoteEntryExports | void> | RemoteEntryExports | void;
 
 type LoadEntryOptions = {
-  createScriptHook: SyncHook;
+  origin: ModuleFederation;
+  loaderHook: ModuleFederation['loaderHook'];
   remoteEntryExports?: RemoteEntryExports;
   remoteInfo: RemoteInfo;
+  resourceContext?: ResourceLoadContext;
 };
 interface RemoteInfo {
   name: string;
@@ -1015,17 +1132,49 @@ test2; // "test2 value"
 
 ## bridgeHook
 
-`bridgeHook` is used to extend context across bridge render/destroy stages (for example, React/Vue bridge).
+`bridgeHook` observes React and Vue Bridge render, destroy, and route
+synchronization operations. Bridge packages pass a semantic operation context
+as a second argument while keeping the first `info` argument compatible with
+existing plugins.
+
+```ts
+import type {
+  BridgeOperationContext,
+  BridgeOperationResult,
+} from '@module-federation/bridge-shared';
+
+type BridgeOperationContext = {
+  side: 'consumer' | 'producer';
+  framework: 'react' | 'vue';
+  operation: 'render' | 'update' | 'destroy' | 'route-sync';
+  moduleName?: string;
+  route?: {
+    action: 'memory-route-init' | 'host-to-remote';
+    from?: string;
+    to?: string;
+    basename?: string;
+    mechanism?: 'popstate';
+  };
+  reason?: 'unmount' | 'direct';
+};
+
+type BridgeOperationResult = {
+  context: BridgeOperationContext;
+  result?: unknown;
+};
+```
 
 ## beforeBridgeRender
 
 `SyncHook`
 
-Triggered before bridge rendering. You can return an object to augment render arguments (for example, `extraProps`).
+Triggered before a Bridge producer or consumer renders or updates. You can
+return an object to augment render arguments (for example, `extraProps`).
 
 ```ts
 function beforeBridgeRender(
-  args: Record<string, any>,
+  info: Record<string, any>,
+  context?: BridgeOperationContext,
 ): void | Record<string, any>;
 ```
 
@@ -1037,7 +1186,8 @@ Triggered after bridge rendering.
 
 ```ts
 function afterBridgeRender(
-  args: Record<string, any>,
+  info: Record<string, any>,
+  operation?: BridgeOperationResult,
 ): void | Record<string, any>;
 ```
 
@@ -1049,7 +1199,8 @@ Triggered before bridge teardown.
 
 ```ts
 function beforeBridgeDestroy(
-  args: Record<string, any>,
+  info: Record<string, any>,
+  context?: BridgeOperationContext,
 ): void | Record<string, any>;
 ```
 
@@ -1061,6 +1212,34 @@ Triggered after bridge teardown.
 
 ```ts
 function afterBridgeDestroy(
-  args: Record<string, any>,
+  info: Record<string, any>,
+  operation?: BridgeOperationResult,
 ): void | Record<string, any>;
+```
+
+## afterBridgeRouteSync
+
+`SyncHook`
+
+Triggered after Bridge synchronizes a route. React and Vue consumers report
+host-to-remote `popstate` synchronization, while a Vue producer also reports
+initial memory-route navigation. `operation.result` contains the router result
+when the framework provides one.
+
+```ts
+function afterBridgeRouteSync(operation: BridgeOperationResult): void;
+```
+
+```ts
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+const bridgeTracePlugin = (): ModuleFederationRuntimePlugin => ({
+  name: 'bridge-trace-plugin',
+  afterBridgeRender(_info, operation) {
+    console.log('bridge render', operation?.context);
+  },
+  afterBridgeRouteSync(operation) {
+    console.log('bridge route', operation.context.route);
+  },
+});
 ```
