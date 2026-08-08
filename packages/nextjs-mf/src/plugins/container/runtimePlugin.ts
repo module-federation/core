@@ -113,7 +113,7 @@ export default function (): ModuleFederationRuntimePlugin {
     afterResolve: function (args: any) {
       return args;
     },
-    onLoad: function (args: any) {
+    onLoad: async function (args: any) {
       const exposeModuleFactory = args.exposeModuleFactory;
       const exposeModule = args.exposeModule;
       const id = args.id;
@@ -127,6 +127,8 @@ export default function (): ModuleFederationRuntimePlugin {
         } catch (e) {
           exposedModuleExports = moduleOrFactory;
         }
+
+        exposedModuleExports = await exposedModuleExports;
 
         const handler: ProxyHandler<any> = {
           get: function (target, prop, receiver) {
@@ -180,8 +182,15 @@ export default function (): ModuleFederationRuntimePlugin {
           return function () {
             return exposedModuleExports;
           };
-        } else {
-          exposedModuleExports = new Proxy(exposedModuleExports, handler);
+        }
+
+        exposedModuleExports = new Proxy(exposedModuleExports, handler);
+
+        if (exposeModuleFactory) {
+          const wrappedExports = exposedModuleExports;
+          return function () {
+            return wrappedExports;
+          };
         }
 
         return exposedModuleExports;
