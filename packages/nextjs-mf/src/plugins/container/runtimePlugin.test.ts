@@ -193,3 +193,111 @@ describe('next-internal-plugin beforeRequest', () => {
     );
   });
 });
+
+describe('next-internal-plugin onLoad', () => {
+  const plugin = createRuntimePlugin();
+  const onLoad = plugin.onLoad!;
+  const originalWindow = global.window;
+
+  describe('server', () => {
+    beforeEach(() => {
+      // @ts-expect-error simulate server/SSR environment
+      delete global.window;
+      // @ts-expect-error used by onLoad chunk tracking
+      globalThis.usedChunks = new Set();
+    });
+
+    afterEach(() => {
+      global.window = originalWindow;
+    });
+
+    it('awaits async exposeModuleFactory on server before proxy-wrapping', async () => {
+      const moduleExports = { __esModule: true, default: null };
+      const asyncFactory = async () => moduleExports;
+
+      const result = await onLoad({
+        id: 'remote/expose',
+        exposeModuleFactory: asyncFactory,
+        exposeModule: undefined,
+      });
+
+      expect(typeof result).toBe('function');
+      expect(result()).toEqual(
+        expect.objectContaining({ __esModule: true, default: null }),
+      );
+    });
+
+    it('returns a wrapper factory for async namespace exports on server', async () => {
+      const result = await onLoad({
+        id: 'remote/expose',
+        exposeModuleFactory: async () => ({ __esModule: true, default: null }),
+        exposeModule: undefined,
+      });
+
+      expect(typeof result).toBe('function');
+      expect(result()).toEqual(
+        expect.objectContaining({ __esModule: true, default: null }),
+      );
+    });
+
+    it('does not break Promise.prototype.then when async factory resolves on server', async () => {
+      const asyncFactory = async () => ({ __esModule: true, default: null });
+
+      const result = await onLoad({
+        id: 'remote/expose',
+        exposeModuleFactory: asyncFactory,
+        exposeModule: undefined,
+      });
+
+      expect(typeof result).toBe('function');
+      expect(() =>
+        Promise.resolve(result()).then(() => undefined),
+      ).not.toThrow();
+    });
+
+    it('handles sync exposeModuleFactory on server', async () => {
+      const result = await onLoad({
+        id: 'remote/expose',
+        exposeModuleFactory: () => ({ __esModule: true, default: null }),
+        exposeModule: undefined,
+      });
+
+      expect(typeof result).toBe('function');
+      expect(result()).toEqual(
+        expect.objectContaining({ __esModule: true, default: null }),
+      );
+    });
+
+    it('propagates rejected async factory on server', async () => {
+      await expect(
+        onLoad({
+          id: 'remote/expose',
+          exposeModuleFactory: async () => {
+            throw new Error('factory failed');
+          },
+          exposeModule: undefined,
+        }),
+      ).rejects.toThrow('factory failed');
+    });
+  });
+
+  describe('client', () => {
+    afterEach(() => {
+      global.window = originalWindow;
+    });
+
+    it('returns args unchanged on the client', async () => {
+      global.window = originalWindow ?? ({} as Window & typeof globalThis);
+
+      const input = {
+        id: 'remote/expose',
+        exposeModuleFactory: async () => ({ __esModule: true, default: null }),
+        exposeModule: undefined,
+      };
+
+      const result = await onLoad(input);
+
+      expect(result).toBe(input);
+    });
+  });
+});
