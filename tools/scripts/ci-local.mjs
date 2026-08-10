@@ -249,6 +249,22 @@ const jobs = [
     ],
   },
   {
+    name: 'e2e-rstest',
+    env: SKIP_DEVTOOLS_POSTINSTALL_ENV,
+    steps: [
+      ...e2eSetupSteps('rstest'),
+      step('E2E Rstest Federation', (ctx) =>
+        runWhenAffected(ctx, () =>
+          runCommand(
+            'pnpm',
+            ['exec', 'turbo', 'run', 'e2e', '--filter=rstest-federation-host'],
+            ctx,
+          ),
+        ),
+      ),
+    ],
+  },
+  {
     name: 'e2e-next-dev',
     env: {
       ...SKIP_DEVTOOLS_POSTINSTALL_ENV,

@@ -14,6 +14,7 @@ const siteIcon = '/svg.svg';
 const socialImageUrl = `${siteOrigin}/module-federation-social.svg`;
 const socialImageAlt = 'Module Federation icon';
 const googleAnalyticsMeasurementId = 'G-DRPXW0EEVT';
+const enableZephyr = Boolean(process.env.CI || process.env.ZE_SECRET_TOKEN);
 
 export default defineConfig({
   root: path.join(__dirname, 'docs'),
@@ -86,7 +87,7 @@ export default defineConfig({
     //   wordsMapPath: 'words-map.json',
     // }),
     pluginModuleFederation(mfConfig),
-    withZephyr(),
+    ...(enableZephyr ? [withZephyr()] : []),
   ],
   builderConfig: {
     html: {

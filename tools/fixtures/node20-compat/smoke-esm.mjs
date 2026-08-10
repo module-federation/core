@@ -7,6 +7,7 @@ const modules = [
   '@module-federation/enhanced/webpack',
   '@module-federation/node',
   '@module-federation/cli',
+  '@module-federation/rstest',
 ];
 
 for (const moduleName of modules) {
