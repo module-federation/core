@@ -20,5 +20,6 @@
     "sourceMap": true,
     "ignoreDeprecations": "6.0"
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts"]
+  "include": ["src/**/*.ts", "src/**/*.d.ts"],
+  "exclude": ["**/*.spec.ts", "**/__tests__/**"]
 }

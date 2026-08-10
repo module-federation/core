@@ -75,10 +75,13 @@
     "@module-federation/sdk": "workspace:*"
   },
   "peerDependencies": {
-    "@module-federation/runtime": "*",
+    "@module-federation/runtime": "workspace:*",
     "hono": ">=3"
   },
   "peerDependenciesMeta": {
+    "@module-federation/runtime": {
+      "optional": true
+    },
     "hono": {
       "optional": true
     }

@@ -16,6 +16,12 @@ const entrypoints = {
   ],
   'dist/lazy-utils.d.ts': ["export * from './lazy/utils';"],
   'dist/data-fetch-utils.d.ts': ["export * from './lazy/data-fetch';"],
+  'dist/data-fetch.d.ts': [
+    "import '@module-federation/data-fetch';",
+    "export type { DataFetchParams, NoSSRRemoteInfo, CollectSSRAssetsOptions, CreateLazyComponentOptions, CacheStatus, CacheStatsInfo, PrefetchOptions, } from './lazy';",
+    "export { ERROR_TYPE, createLazyComponent, collectSSRAssets, callDataFetch, setSSREnv, autoFetchDataPlugin, CacheSize, CacheTime, configureCache, generateKey, cache, revalidateTag, clearStore, prefetch, flushDataFetch, } from './lazy';",
+    "export { lazyLoadComponentPlugin } from './plugins/lazy-load-component-plugin';",
+  ],
   'dist/data-fetch-server-middleware.d.ts': [
     "export { default } from './lazy/data-fetch/data-fetch-server-middleware';",
   ],
