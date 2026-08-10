@@ -135,6 +135,9 @@ describe('pluginModuleFederation node target environment behavior', () => {
   });
 
   it('preserves legacy Node defaults when the Rstest companion is absent', () => {
+    const warningSpy = rs
+      .spyOn(console, 'warn')
+      .mockImplementation(() => undefined);
     const plugin = pluginModuleFederation(createMfOptions(), {
       target: 'node',
       environment: 'rstest',
@@ -173,9 +176,63 @@ describe('pluginModuleFederation node target environment behavior', () => {
     });
     expect(bundlerConfig.optimization?.runtimeChunk).toBeUndefined();
     expect(bundlerConfig.plugins).toHaveLength(1);
+    expect(warningSpy.mock.calls.flat().map(String).join('\n')).toContain(
+      'optimization.runtimeChunk',
+    );
+    warningSpy.mockRestore();
   });
 
   it('lets the Rstest companion own Node test-worker defaults', () => {
+    const plugin = pluginModuleFederation(createMfOptions(), {
+      target: 'node',
+      environment: 'rstest',
+    });
+    const { api, state, rsbuildConfig } = createMockApi(
+      {
+        environments: {
+          rstest: {},
+        },
+      },
+      'rstest',
+      true,
+    );
+    const bundlerConfig: Rspack.Configuration = {
+      name: 'rstest',
+      output: {
+        path: '/tmp/rstest',
+      },
+      optimization: {
+        runtimeChunk: {
+          name: 'rstest-runtime',
+        },
+      },
+      plugins: [],
+    };
+
+    plugin.setup(api as any);
+    const exposedApi = (api.expose as ReturnType<typeof rs.fn>).mock.calls.find(
+      ([name]) => name === RSBUILD_PLUGIN_MODULE_FEDERATION_NAME,
+    )?.[1] as ExposedAPIType;
+    exposedApi.registerNodeTargetConfigOwner!();
+    exposedApi.registerOptionsTransformer((options) => options);
+    state.modifyRsbuildConfig!(rsbuildConfig);
+    state.beforeCreateCompiler!({
+      bundlerConfigs: [bundlerConfig],
+    });
+
+    expect(rsbuildConfig.environments.rstest.tools?.rspack).toBeUndefined();
+    expect(bundlerConfig.target).toBeUndefined();
+    expect(bundlerConfig.output?.chunkLoading).toBeUndefined();
+    expect(bundlerConfig.optimization?.runtimeChunk).toEqual({
+      name: 'rstest-runtime',
+    });
+    expect(bundlerConfig.plugins).toHaveLength(1);
+  });
+
+  it('does not treat a generic options transformer as a Node config owner', () => {
+    const warningSpy = rs
+      .spyOn(console, 'warn')
+      .mockImplementation(() => undefined);
     const plugin = pluginModuleFederation(createMfOptions(), {
       target: 'node',
       environment: 'rstest',
@@ -212,13 +269,10 @@ describe('pluginModuleFederation node target environment behavior', () => {
       bundlerConfigs: [bundlerConfig],
     });
 
-    expect(rsbuildConfig.environments.rstest.tools?.rspack).toBeUndefined();
-    expect(bundlerConfig.target).toBeUndefined();
-    expect(bundlerConfig.output?.chunkLoading).toBeUndefined();
-    expect(bundlerConfig.optimization?.runtimeChunk).toEqual({
-      name: 'rstest-runtime',
-    });
-    expect(bundlerConfig.plugins).toHaveLength(1);
+    expect(rsbuildConfig.environments.rstest.tools?.rspack).toBeDefined();
+    expect(bundlerConfig.target).toBe('async-node');
+    expect(bundlerConfig.optimization?.runtimeChunk).toBeUndefined();
+    warningSpy.mockRestore();
   });
 
   it('still applies MF to the selected node environment when output is commonjs-like', () => {

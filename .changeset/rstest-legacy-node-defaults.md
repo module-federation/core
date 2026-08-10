@@ -1,5 +1,6 @@
 ---
 '@module-federation/rsbuild-plugin': patch
+'@module-federation/rstest': patch
 ---
 
-Preserve existing Node federation defaults when Rstest is used without the Rstest federation companion plugin.
+Coordinate Node configuration ownership between the Rsbuild and Rstest federation plugins while preserving Rstest's runtime chunk and split-chunk behavior.

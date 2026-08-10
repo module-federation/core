@@ -61,8 +61,8 @@ type BeforeCreateCompilerHookDescriptor =
 // happens once, at the hook boundary in runRspackHooks.
 type TestRspackConfig = {
   target?: unknown;
-  output?: { module?: boolean };
-  optimization?: { splitChunks?: unknown };
+  output?: { chunkLoading?: unknown; module?: boolean };
+  optimization?: { runtimeChunk?: unknown; splitChunks?: unknown };
   experiments?: { outputModule?: boolean };
   externals?: unknown[];
   plugins?: unknown[];
@@ -114,19 +114,26 @@ const getFederationPluginOptions = (
 
 const createRsbuildFederationExposeAPI = (
   initialOptions: ModuleFederationOptions,
-): RsbuildFederationExposeAPI => {
+): RsbuildFederationExposeAPI & { ownsNodeTargetConfig: boolean } => {
   let options = initialOptions;
-
-  return {
+  const exposedApi: RsbuildFederationExposeAPI & {
+    ownsNodeTargetConfig: boolean;
+  } = {
     options: {},
     assetResources: {},
+    ownsNodeTargetConfig: false,
     getOptions: () => options,
+    registerNodeTargetConfigOwner: () => {
+      exposedApi.ownsNodeTargetConfig = true;
+    },
     registerOptionsTransformer: (transformer) => {
       options = transformer(options);
     },
     isSSRConfig: () => false,
     isRspressSSGConfig: () => false,
   };
+
+  return exposedApi;
 };
 
 // Minimal Rsbuild API surface used by the plugin.
@@ -417,6 +424,7 @@ describe('federation()', () => {
 
     setupFederationPlugin(federation(), 'rstest', {}, { rsbuildFederation });
 
+    expect(rsbuildFederation.ownsNodeTargetConfig).toBe(true);
     expect(rsbuildFederation.getOptions()).toMatchObject({
       name: 'rsbuild_owned_host',
       remoteType: 'script',
@@ -431,6 +439,21 @@ describe('federation()', () => {
         },
       },
     });
+  });
+
+  it('remains compatible with an older Rsbuild exposed API', () => {
+    const rsbuildFederation = createRsbuildFederationExposeAPI({
+      name: 'legacy_rsbuild_host',
+    });
+    delete (rsbuildFederation as Partial<RsbuildFederationExposeAPI>)
+      .registerNodeTargetConfigOwner;
+
+    expect(() =>
+      setupFederationPlugin(federation(), 'rstest', {}, { rsbuildFederation }),
+    ).not.toThrow();
+    expect(
+      rsbuildFederation.getOptions().experiments?.optimization?.target,
+    ).toBe('node');
   });
 
   it('creates one compiler plugin from Rsbuild-owned options', () => {
@@ -470,16 +493,53 @@ describe('federation()', () => {
     expect(rstestConfig.federation).toBeUndefined();
   });
 
-  it('patches rspack config to force CJS output in node/jsdom workers', () => {
+  it('preserves Rstest chunk defaults while supplying a missing Node target', () => {
+    const splitChunks = { chunks: 'all' };
+    const runtimeChunk = { name: 'rstest-runtime' };
     const { merged, rspackConfig } = applyFederationPlugin(federation(), {
       rsbuildFederation: createRsbuildFederationExposeAPI({ name: 'host' }),
+      rspackConfig: {
+        output: {},
+        optimization: { runtimeChunk, splitChunks },
+        plugins: [],
+      },
     });
 
     expect(merged.output?.target).toBe('node');
     expect(rspackConfig.target).toBe('async-node');
-    expect(rspackConfig.optimization?.splitChunks).toBe(false);
+    expect(rspackConfig.optimization?.splitChunks).toBe(splitChunks);
+    expect(rspackConfig.optimization?.runtimeChunk).toBe(runtimeChunk);
     expect(rspackConfig.experiments?.outputModule).toBe(false);
     expect(rspackConfig.output?.module).toBe(false);
+  });
+
+  it('normalizes incompatible compiler settings without changing Rstest chunk policy', () => {
+    const splitChunks = { chunks: 'async' };
+    const runtimeChunk = { name: 'custom-runtime' };
+    const { result, warnings } = captureWarnings(() =>
+      applyFederationPlugin(federation(), {
+        rsbuildFederation: createRsbuildFederationExposeAPI({ name: 'host' }),
+        rspackConfig: {
+          target: 'web',
+          output: { chunkLoading: 'jsonp', module: true },
+          optimization: { runtimeChunk, splitChunks },
+          plugins: [],
+        },
+      }),
+    );
+
+    expect(result.rspackConfig.target).toBe('async-node');
+    expect(result.rspackConfig.output).toEqual({
+      chunkLoading: 'async-node',
+      module: false,
+    });
+    expect(result.rspackConfig.optimization).toEqual({
+      runtimeChunk,
+      splitChunks,
+    });
+    expect(warnings.join('\n')).toContain('target "web"');
+    expect(warnings.join('\n')).toContain('output.module');
+    expect(warnings.join('\n')).toContain('output.chunkLoading "jsonp"');
   });
 
   it('keeps federation remote requests bundled via externals bypass', () => {
@@ -609,7 +669,7 @@ describe('federation()', () => {
     );
   });
 
-  it('auto-applies ModuleFederationPlugin with node defaults', () => {
+  it('auto-applies ModuleFederationPlugin with federation-specific Node defaults', () => {
     const { rspackConfig } = applyFederationPlugin(
       federation({
         name: 'main_app_web',
@@ -623,7 +683,7 @@ describe('federation()', () => {
     );
 
     expect(rspackConfig.target).toBe('async-node');
-    expect(rspackConfig.optimization?.splitChunks).toBe(false);
+    expect(rspackConfig.optimization?.splitChunks).toBeUndefined();
     expect(rspackConfig.experiments?.outputModule).toBe(false);
     expect(rspackConfig.output?.module).toBe(false);
 
@@ -675,7 +735,7 @@ describe('federation()', () => {
     expect(options.dev).toBe(true);
   });
 
-  it('preserves user overrides while still injecting node runtime plugin', () => {
+  it('preserves compatible overrides while enforcing the container identity', () => {
     const { result: options, warnings } = captureWarnings(() => {
       const { rspackConfig } = applyFederationPlugin(
         federation({
@@ -708,11 +768,11 @@ describe('federation()', () => {
       'custom/runtimePlugin',
     ]);
     expect(warnings.join('\n')).toContain(
-      'library.name "custom_library_name" is overridden with the container name "component_app"',
+      'library.name "custom_library_name" is incompatible with the container name "component_app"',
     );
   });
 
-  it('forces node optimization target even when configured otherwise', () => {
+  it('enforces the Node optimization target and warns on incompatible input', () => {
     const { result: options, warnings } = captureWarnings(() => {
       const { rspackConfig } = applyFederationPlugin(
         federation({
@@ -729,12 +789,12 @@ describe('federation()', () => {
 
     expect(options.experiments?.optimization?.target).toBe('node');
     expect(warnings.join('\n')).toContain(
-      'experiments.optimization.target "web" is overridden with "node"',
+      'experiments.optimization.target "web" is incompatible with Node test workers',
     );
   });
 
   it.each(['module', 'modern-module'] as const)(
-    'normalizes incompatible %s library output',
+    'normalizes incompatible %s library output with a warning',
     (libraryType) => {
       const { result: options, warnings } = captureWarnings(() => {
         const { rspackConfig } = applyFederationPlugin(
@@ -753,12 +813,12 @@ describe('federation()', () => {
         type: 'commonjs-module',
       });
       expect(warnings.join('\n')).toContain(
-        `library.type "${libraryType}" is overridden with "commonjs-module"`,
+        `library.type "${libraryType}" is incompatible with Rstest's CommonJS federation worker`,
       );
     },
   );
 
-  it('forces async startup and warns when disabled manually', () => {
+  it('enforces async startup and warns when explicitly disabled', () => {
     const { result: options, warnings } = captureWarnings(() => {
       const { rspackConfig } = applyFederationPlugin(
         federation({
@@ -773,7 +833,7 @@ describe('federation()', () => {
 
     expect(options.experiments?.asyncStartup).toBe(true);
     expect(warnings.join('\n')).toContain(
-      'experiments.asyncStartup was set to false but is forced to true',
+      'experiments.asyncStartup is false and incompatible with Rstest federation startup',
     );
   });
 

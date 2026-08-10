@@ -60,6 +60,7 @@ type ExposedAPIType = {
   };
   assetResources: Record<string, StatsAssetResource>;
   getOptions: () => ModuleFederationOptions;
+  registerNodeTargetConfigOwner?: () => void;
   registerOptionsTransformer: (
     transformer: ModuleFederationOptionsTransformer,
   ) => void;
@@ -152,7 +153,7 @@ export const pluginModuleFederation = (
   name: RSBUILD_PLUGIN_MODULE_FEDERATION_NAME,
   setup: (api) => {
     let moduleFederationOptions = initialModuleFederationOptions;
-    let hasOptionsTransformer = false;
+    let hasNodeTargetConfigOwner = false;
 
     if (!moduleFederationOptions?.name) {
       throw new Error(
@@ -181,7 +182,7 @@ export const pluginModuleFederation = (
     const isRslib = callerName === CALL_NAME_MAP.RSLIB;
     const isRspress = callerName === CALL_NAME_MAP.RSPRESS;
     const isRstest = callerName === 'rstest';
-    const isRstestCompanionActive = () => isRstest && hasOptionsTransformer;
+    const isRstestCompanionActive = () => isRstest && hasNodeTargetConfigOwner;
     const isSSR = target === 'dual';
     const environment =
       configuredEnvironment ??
@@ -327,8 +328,10 @@ export const pluginModuleFederation = (
       },
       assetResources: {},
       getOptions: () => moduleFederationOptions,
+      registerNodeTargetConfigOwner: () => {
+        hasNodeTargetConfigOwner = true;
+      },
       registerOptionsTransformer: (transformer) => {
-        hasOptionsTransformer = true;
         moduleFederationOptions = transformer(moduleFederationOptions);
       },
       isSSRConfig,
@@ -484,6 +487,11 @@ export const pluginModuleFederation = (
             : undefined;
 
           if (!isRstestCompanionActive()) {
+            if (bundlerConfig.optimization?.runtimeChunk) {
+              logger.warn(
+                '`optimization.runtimeChunk` is disabled because Module Federation requires its runtime to remain with each entry. The Rstest federation companion is the supported exception because its worker loads the shared runtime explicitly.',
+              );
+            }
             delete bundlerConfig.optimization?.runtimeChunk;
           }
           const externals = bundlerConfig.externals;
