@@ -32,6 +32,7 @@
   },
   "dependencies": {
     "@module-federation/bridge-shared": "workspace:*",
+    "@module-federation/data-fetch": "workspace:*",
     "@module-federation/runtime": "workspace:*",
     "@module-federation/sdk": "workspace:*"
   },
