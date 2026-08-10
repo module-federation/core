@@ -1,3 +1,6 @@
+// Side-effect type import so data-fetch global augmentations apply to consumers.
+import type {} from '@module-federation/data-fetch';
+
 export type {
   DataFetchParams,
   NoSSRRemoteInfo,
