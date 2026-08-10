@@ -25,5 +25,6 @@ export type {
   CacheStatus,
   CacheStatsInfo,
   DataFetchParams,
+  NoSSRRemoteInfo,
   PrefetchOptions,
 } from '@module-federation/data-fetch';
