@@ -1,5 +1,5 @@
 ---
-"@module-federation/data-fetch": minor
+"@module-federation/data-fetch": patch
 "@module-federation/bridge-react": patch
 "@module-federation/bridge-vue3": patch
 ---
