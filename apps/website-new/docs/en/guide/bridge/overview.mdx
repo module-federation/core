@@ -143,6 +143,8 @@ In addition to application-level modularity, Bridge also supports component-leve
 
 #### Core Features
 
+Core data-fetch utilities (`cache`, `prefetch`, loader types, and related helpers) live in `@module-federation/data-fetch`. `@module-federation/bridge-react/data-fetch` re-exports them and adds React-specific lazy-loading APIs such as `lazyLoadComponentPlugin` and `createLazyComponent`.
+
 - **Data Prefetching**: Support component-level data prefetching, ensuring data is ready when components load
 - **Error Boundaries**: Built-in error handling mechanisms, component loading failures don't affect the main application
 - **Loading States**: Rich loading state management with support for custom loading indicators

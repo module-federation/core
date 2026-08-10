@@ -20,6 +20,12 @@ The capability described in this document targets the former — "component-leve
 
 ## How to Use
 
+:::info Package layout
+
+Core data-fetch APIs (`cache`, `prefetch`, types such as `DataFetchParams`, and related utilities) live in the framework-agnostic `@module-federation/data-fetch` package. `@module-federation/bridge-react/data-fetch` and `@module-federation/bridge-vue3` re-export these APIs for convenience. React's `createLazyComponent` remains the React UI adapter for loading component remotes (see [Lazy Load and Prefetch Components](/guide/bridge/react/load-component.html)).
+
+:::
+
 Data fetching supports both SSR and CSR scenarios. The sections below cover producer and consumer separately:
 
 ### Producer
@@ -49,7 +55,7 @@ Example file layout:
 The convention file must export a function named `fetchData`, which runs before the remote component renders:
 
 ```ts title="List.data.ts"
-import type { DataFetchParams } from '@module-federation/bridge-react/data-fetch';
+import type { DataFetchParams } from '@module-federation/data-fetch';
 export type Data = {
   data: string;
 };

@@ -145,6 +145,8 @@ Bridge 解决了现代前端开发中的几个关键挑战：
 
 #### 核心特性
 
+核心 data-fetch 工具（`cache`、`prefetch`、loader 类型及相关辅助函数）位于 `@module-federation/data-fetch`。`@module-federation/bridge-react/data-fetch` 会重新导出它们，并提供 `lazyLoadComponentPlugin`、`createLazyComponent` 等 React 懒加载 API。
+
 - **数据预取**：支持组件级别的数据预取，确保组件加载时数据已就绪
 - **错误边界**：内置错误处理机制，组件加载失败不影响主应用
 - **加载状态**：提供丰富的加载状态管理，支持自定义加载指示器
