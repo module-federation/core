@@ -2,7 +2,14 @@
 
 O `cache` função allows você para cache o results de dados fetching ou computations. It fornece fine-grained control over dados e é suitable for scenarios such as Cliente-Side Rendering (CSR) e Servidor-Side Rendering (SSR).
 
-Examples import from `@module-federation/data-fetch`. Bridge packages (`@module-federation/bridge-react/data-fetch`, `@module-federation/bridge-vue3`) still re-export `cache` and related helpers for backward compatibility.
+Os exemplos abaixo importam de `@module-federation/data-fetch`. Os pacotes bridge (`@module-federation/bridge-react/data-fetch`, `@module-federation/bridge-vue3`) ainda reexportam `cache` e utilitários relacionados para compatibilidade com versões anteriores.
+
+```bash
+npm install @module-federation/data-fetch
+# ou: pnpm add @module-federation/data-fetch
+```
+
+Se você importar apenas dos pacotes bridge, as reexportações continuam funcionando sem dependência direta em `@module-federation/data-fetch`.
 
 ## Básico Uso
 

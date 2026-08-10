@@ -4,6 +4,13 @@
 
 下文示例从 `@module-federation/data-fetch` 导入。Bridge 包（`@module-federation/bridge-react/data-fetch`、`@module-federation/bridge-vue3`）仍会重新导出 `cache` 及相关工具以保持向后兼容。
 
+```bash
+npm install @module-federation/data-fetch
+# 或：pnpm add @module-federation/data-fetch
+```
+
+若仅从 bridge 包导入，仍可依赖其重新导出，无需直接安装 `@module-federation/data-fetch`。
+
 ## 基本用法
 
 ```ts

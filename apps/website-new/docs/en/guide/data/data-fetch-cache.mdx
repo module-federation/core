@@ -4,6 +4,13 @@ The `cache` function allows you to cache the results of data fetching or computa
 
 Examples import from `@module-federation/data-fetch`. Bridge packages (`@module-federation/bridge-react/data-fetch`, `@module-federation/bridge-vue3`) still re-export `cache` and related helpers for backward compatibility.
 
+```bash
+npm install @module-federation/data-fetch
+# or: pnpm add @module-federation/data-fetch
+```
+
+If you only import from bridge packages, the re-exports still work without a direct dependency on `@module-federation/data-fetch`.
+
 ## Basic Usage
 
 ```ts
