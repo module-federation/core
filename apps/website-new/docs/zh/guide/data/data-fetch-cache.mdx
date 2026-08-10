@@ -2,10 +2,12 @@
 
 `cache` 函数可以让你缓存数据获取或计算的结果，它提供了更精细的数据粒度控制，并且适用于客户端渲染（CSR）、服务端渲染（SSR）等场景。
 
+下文示例从 `@module-federation/data-fetch` 导入。Bridge 包（`@module-federation/bridge-react/data-fetch`、`@module-federation/bridge-vue3`）仍会重新导出 `cache` 及相关工具以保持向后兼容。
+
 ## 基本用法
 
 ```ts
-import { cache } from '@module-federation/bridge-react/data-fetch';
+import { cache } from '@module-federation/data-fetch';
 
 export type Data = {
   data: string;
@@ -58,7 +60,7 @@ interface CacheOptions {
 每次计算完成后，框架会记录写入缓存的时间，当再次调用该函数时，会根据 `maxAge` 参数判断缓存是否过期，如果过期，则重新执行 `fn` 函数，否则返回缓存的数据。
 
 ```ts
-import { cache, CacheTime } from '@module-federation/bridge-react/data-fetch';
+import { cache, CacheTime } from '@module-federation/data-fetch';
 
 const getDashboardStats = cache(
   async () => {
@@ -78,7 +80,7 @@ const getDashboardStats = cache(
 如以下示例，在缓存未过期的 2分钟内，如果调用 `getDashboardStats` 函数，会返回缓存的数据，如果缓存过期，2分到3分钟内，收到的请求会先返回旧数据，然后后台会重新请求数据，并更新缓存。
 
 ```ts
-import { cache, CacheTime } from '@module-federation/bridge-react/data-fetch';
+import { cache, CacheTime } from '@module-federation/data-fetch';
 
 const getDashboardStats = cache(
   async () => {
@@ -96,7 +98,7 @@ const getDashboardStats = cache(
 `tag` 参数用于标识缓存的标签，可以传入一个字符串或字符串数组，可以基于这个标签使缓存失效，多个缓存函数可以使用一个标签。
 
 ```ts
-import { cache, revalidateTag } from '@module-federation/bridge-react/data-fetch';
+import { cache, revalidateTag } from '@module-federation/data-fetch';
 
 const getDashboardStats = cache(
   async () => {
@@ -124,7 +126,7 @@ revalidateTag('dashboard-stats'); // 会使 getDashboardStats 函数和 getCompl
 `getKey` 参数用于自定义缓存键的生成方式，例如你可能只需要依赖函数参数的一部分来区分缓存。它是一个函数，接收与原始函数相同的参数，返回一个字符串作为缓存键：
 
 ```ts
-import { cache, CacheTime } from '@module-federation/bridge-react/data-fetch';
+import { cache, CacheTime } from '@module-federation/data-fetch';
 import { fetchUserData } from './api';
 
 const getUser = cache(
@@ -156,7 +158,7 @@ await getUser(456, { language: 'zh' }); // 不会命中缓存，会重新请求
 :::
 
 ```ts
-import { cache, CacheTime, generateKey } from '@module-federation/bridge-react/data-fetch';
+import { cache, CacheTime, generateKey } from '@module-federation/data-fetch';
 import { fetchUserData } from './api';
 
 const getUser = cache(
@@ -191,7 +193,7 @@ const getUser = cache(
 下面的示例展示了 `customKey` 跨函数共享缓存的能力：
 
 ```ts
-import { cache } from '@module-federation/bridge-react/data-fetch';
+import { cache } from '@module-federation/data-fetch';
 import { fetchUserData } from './api';
 
 // 不同的函数，但是通过 customKey 可以使它们共享一个缓存
@@ -247,7 +249,7 @@ const getUserD = cache(
 `onCache` 参数允许你跟踪缓存统计信息，例如命中率。这是一个回调函数，接收有关每次缓存操作的信息，包括状态、键、参数和结果。你可以在 onCache 返回 `false` 来阻止命中缓存。
 
 ```ts
-import { cache, CacheTime } from '@module-federation/bridge-react/data-fetch';
+import { cache, CacheTime } from '@module-federation/data-fetch';
 
 // 跟踪缓存统计
 const stats = {
@@ -315,7 +317,7 @@ await getUser(2); // 缓存未命中
 可以通过 `configureCache` 函数指定缓存的存储上限：
 
 ```ts
-import { configureCache, CacheSize } from '@module-federation/bridge-react/data-fetch';
+import { configureCache, CacheSize } from '@module-federation/data-fetch';
 
 configureCache({
   maxSize: CacheSize.MB * 10, // 10MB
