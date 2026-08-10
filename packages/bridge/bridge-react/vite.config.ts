@@ -42,6 +42,11 @@ export default defineConfig({
     rollupOptions: {
       external: [
         ...perDepsKeys,
+        '@module-federation/data-fetch',
+        '@module-federation/data-fetch/data-fetch-utils',
+        '@module-federation/data-fetch/server-middleware',
+        '@module-federation/data-fetch/size-limited-cache',
+        '@module-federation/data-fetch/utils',
         '@remix-run/router',
         /react-dom\/.*/,
         'react-router',

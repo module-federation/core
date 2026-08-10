@@ -1,4 +1,4 @@
-import { DATA_FETCH_FUNCTION } from '../constant';
+import { DATA_FETCH_FUNCTION } from './constant';
 import { dataFetchFunction } from './inject-data-fetch';
 
 export async function callDataFetch() {
