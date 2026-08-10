@@ -34,4 +34,5 @@ Existing bridge entry points remain available:
 
 ```ts
 import { callDataFetch, prefetch } from '@module-federation/bridge-react/data-fetch';
+import { callDataFetch, prefetch } from '@module-federation/bridge-vue3';
 ```
