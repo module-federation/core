@@ -257,6 +257,8 @@ Guidance:
   - validation that was run
   - any failed or skipped checks, with cause
 - If a PR is docs-only, say that explicitly and keep the body brief.
+- When changing user-facing Module Federation APIs or packages (especially publishable packages under `packages/`), update matching documentation in `apps/website-new/docs/` in the same PR, or explain in the PR why docs are deferred.
+- Website docs in `apps/website-new/docs/` are the public documentation source of truth and must stay current with published package surfaces.
 
 ## Webpack Internal Access
 
