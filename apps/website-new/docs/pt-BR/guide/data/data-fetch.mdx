@@ -20,9 +20,18 @@ O capability described em este document targets o former — "componente-level" 
 
 ## How para Use
 
-:::info Package layout
+:::info Estrutura dos pacotes
 
-Core data-fetch APIs (`cache`, `prefetch`, types such as `DataFetchParams`, and related utilities) live in the framework-agnostic `@module-federation/data-fetch` package. `@module-federation/bridge-react/data-fetch` and `@module-federation/bridge-vue3` re-export these APIs for convenience. React's `createLazyComponent` remains the React UI adapter for loading component remotes (see [Lazy Carregue e Pré-busca Componentes](/guide/bridge/react/load-component.html)).
+As APIs principais de data-fetch (`cache`, `prefetch`, tipos como `DataFetchParams` e utilitários relacionados) ficam no pacote agnóstico de framework `@module-federation/data-fetch`. `@module-federation/bridge-react/data-fetch` e `@module-federation/bridge-vue3` reexportam essas APIs por conveniência. O `createLazyComponent` do React continua sendo o adaptador de UI React para carregar componentes remotos (veja [Carregamento lazy e prefetch de componentes](/guide/bridge/react/load-component.html)).
+
+Instale `@module-federation/data-fetch` ao importar diretamente dele:
+
+```bash
+npm install @module-federation/data-fetch
+# ou: pnpm add @module-federation/data-fetch
+```
+
+Se você importar apenas dos pacotes bridge (`@module-federation/bridge-react/data-fetch`, `@module-federation/bridge-vue3`), as reexportações continuam funcionando sem dependência direta em `@module-federation/data-fetch`.
 
 :::
 

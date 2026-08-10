@@ -258,6 +258,7 @@ Guidance:
   - any failed or skipped checks, with cause
 - If a PR is docs-only, say that explicitly and keep the body brief.
 - When changing user-facing Module Federation APIs or packages (especially publishable packages under `packages/`), update matching documentation in `apps/website-new/docs/` in the same PR, or explain in the PR why docs are deferred.
+- When updating website docs, keep all published locales for that page (currently `en`, `zh`, and `pt-BR` under `apps/website-new/docs/`) consistent for the same conceptual change; do not leave one locale with untranslated English paste-ins.
 - Website docs in `apps/website-new/docs/` are the public documentation source of truth and must stay current with published package surfaces.
 
 ## Webpack Internal Access
