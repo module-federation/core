@@ -1,4 +1,6 @@
 import { test, expect } from '@rstest/core';
+import { flushDataFetch, initDataFetchMap } from '../src/index';
+import { DATA_FETCH_MAP_KEY } from '../src/constant';
 import type { MF_DATA_FETCH_MAP } from '../src/types';
 
 type Assert<T extends true> = T;
@@ -20,5 +22,13 @@ type _GlobalsDeclared = Assert<
 
 test('declares data-fetch globals for TypeScript consumers', () => {
   void (0 as unknown as _GlobalsDeclared);
-  expect(true).toBe(true);
+
+  delete (globalThis as { __MF_DATA_FETCH_MAP__?: MF_DATA_FETCH_MAP })
+    .__MF_DATA_FETCH_MAP__;
+  initDataFetchMap();
+  expect(globalThis.__MF_DATA_FETCH_MAP__).toEqual({});
+  expect(DATA_FETCH_MAP_KEY).toBe('__MF_DATA_FETCH_MAP__');
+
+  flushDataFetch();
+  expect(globalThis.__MF_DATA_FETCH_MAP__).toEqual({});
 });
