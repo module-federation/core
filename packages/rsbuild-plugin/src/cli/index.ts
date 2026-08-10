@@ -152,6 +152,7 @@ export const pluginModuleFederation = (
   name: RSBUILD_PLUGIN_MODULE_FEDERATION_NAME,
   setup: (api) => {
     let moduleFederationOptions = initialModuleFederationOptions;
+    let hasOptionsTransformer = false;
 
     if (!moduleFederationOptions?.name) {
       throw new Error(
@@ -180,6 +181,7 @@ export const pluginModuleFederation = (
     const isRslib = callerName === CALL_NAME_MAP.RSLIB;
     const isRspress = callerName === CALL_NAME_MAP.RSPRESS;
     const isRstest = callerName === 'rstest';
+    const isRstestCompanionActive = () => isRstest && hasOptionsTransformer;
     const isSSR = target === 'dual';
     const environment =
       configuredEnvironment ??
@@ -295,7 +297,7 @@ export const pluginModuleFederation = (
             `Can not find environment '${environment}' when using target: 'node'. Available environments: ${availableEnvironmentsLabel}.`,
           );
         }
-        if (!isRstest) {
+        if (!isRstestCompanionActive()) {
           patchToolsTspack(nodeTargetEnv, (config) => {
             config.target = 'async-node';
           });
@@ -326,6 +328,7 @@ export const pluginModuleFederation = (
       assetResources: {},
       getOptions: () => moduleFederationOptions,
       registerOptionsTransformer: (transformer) => {
+        hasOptionsTransformer = true;
         moduleFederationOptions = transformer(moduleFederationOptions);
       },
       isSSRConfig,
@@ -435,7 +438,7 @@ export const pluginModuleFederation = (
           isRspress && isRspressSSGEnvironmentConfig;
         const shouldUseSSRPluginConfig =
           isSSRConfig(bundlerConfig.name) ||
-          (isNodeTargetEnvironmentConfig && !isRstest);
+          (isNodeTargetEnvironmentConfig && !isRstestCompanionActive());
 
         if (
           target === 'node' &&
@@ -480,7 +483,7 @@ export const pluginModuleFederation = (
             ? createSSRMFConfig(moduleFederationOptions)
             : undefined;
 
-          if (!isRstest) {
+          if (!isRstestCompanionActive()) {
             delete bundlerConfig.optimization?.runtimeChunk;
           }
           const externals = bundlerConfig.externals;
@@ -541,7 +544,7 @@ export const pluginModuleFederation = (
             bundlerConfig.output!.chunkLoadingGlobal = `chunk_${moduleFederationOptions.name}`;
           }
 
-          if (isNodeTargetEnvironmentConfig && !isRstest) {
+          if (isNodeTargetEnvironmentConfig && !isRstestCompanionActive()) {
             patchNodeConfig(
               bundlerConfig,
               ssrModuleFederationOptions ?? moduleFederationOptions,
@@ -569,7 +572,7 @@ export const pluginModuleFederation = (
             if (shouldUseSSRPluginConfig || isNodeTargetEnvironmentConfig) {
               const ssrMFConfig =
                 ssrModuleFederationOptions ??
-                (isRstest
+                (isRstestCompanionActive()
                   ? moduleFederationOptions
                   : createSSRMFConfig(moduleFederationOptions));
               exposedFederationApi.options.nodePlugin =
