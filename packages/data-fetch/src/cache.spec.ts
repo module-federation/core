@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, rs } from '@rstest/core';
-import { cache, clearStore, configureCache } from './cache';
+import { cache, clearStore, configureCache } from '../src/cache';
 
 describe('data fetch size-limited cache', () => {
   beforeEach(() => {
