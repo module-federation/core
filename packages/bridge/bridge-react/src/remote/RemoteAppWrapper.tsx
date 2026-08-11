@@ -205,7 +205,7 @@ export const RemoteAppWrapper = forwardRef<HTMLDivElement, any>(function (
     flushBridgeDestroys();
     const provider = providerInfoRef.current;
     const dom = rootRef.current;
-    const signal = mountControllerRef.current?.signal;
+    let signal = mountControllerRef.current?.signal;
     if (!providerReady || !provider || !dom || !signal || signal.aborted)
       return;
 
@@ -238,6 +238,12 @@ export const RemoteAppWrapper = forwardRef<HTMLDivElement, any>(function (
         fallback,
         ...resProps,
       });
+      // Invalidate in-flight work for the old node so it cannot mark the
+      // wrapper destroyed and skip cleanup for the new CSR mount.
+      mountControllerRef.current?.abort();
+      mountControllerRef.current = new AbortController();
+      signal = mountControllerRef.current.signal;
+      destroyedRef.current = false;
     }
     renderDom.current = dom;
 
@@ -292,6 +298,9 @@ export const RemoteAppWrapper = forwardRef<HTMLDivElement, any>(function (
         };
         await provider.render(currentRenderProps);
         if (signal.aborted || !dom.isConnected) {
+          // Stale jobs after an SSR→CSR DOM swap must not suppress destroy for
+          // the live mount node.
+          if (renderDom.current !== dom) return;
           if (!destroyedRef.current) {
             destroyedRef.current = true;
             provider.destroy?.({ dom });

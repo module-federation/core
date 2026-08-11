@@ -342,4 +342,61 @@ describe('RemoteAppWrapper lifecycle', () => {
     expect(render2).toBeGreaterThan(destroy1);
     second.unmount();
   });
+
+  it('destroys the final CSR mount after an in-place SSR clear', async () => {
+    let finishRender!: () => void;
+    const provider = {
+      render: rs.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            finishRender = resolve;
+          }),
+      ),
+      destroy: rs.fn(),
+    };
+    const result = {
+      protocolVersion: 1 as const,
+      moduleName: 'remote/app',
+      instanceId: 'remote-1',
+      html: '<p>server remote</p>',
+      dehydratedState: { ready: true },
+    };
+
+    const view = render(
+      <RemoteAppWrapper
+        {...baseProps}
+        instanceId="remote-1"
+        ssr={result}
+        providerInfo={() => provider}
+      />,
+    );
+
+    await waitFor(() => expect(provider.render).toHaveBeenCalledOnce());
+    expect(
+      view.container.querySelector('[data-mf-bridge-slot="true"]'),
+    ).not.toBeNull();
+
+    view.rerender(
+      <RemoteAppWrapper
+        {...baseProps}
+        instanceId="remote-1"
+        ssr={undefined}
+        providerInfo={() => provider}
+      />,
+    );
+    await act(async () => {
+      finishRender();
+      await Promise.resolve();
+    });
+    await waitFor(() => expect(provider.render).toHaveBeenCalledTimes(2));
+    expect(
+      view.container.querySelector('[data-mf-bridge-slot="true"]'),
+    ).toBeNull();
+
+    view.unmount();
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(provider.destroy).toHaveBeenCalled();
+  });
 });
