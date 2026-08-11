@@ -15,7 +15,8 @@ import { FileCache } from './fileCache';
 
 describe('modern serve static file cache', async () => {
   beforeEach(() => {
-    rs.mocked(readFile).mockClear();
+    rs.mocked(readFile).mockReset();
+    rs.mocked(readFile).mockResolvedValue('test');
   });
 
   it('should cache file', async () => {
@@ -35,5 +36,29 @@ describe('modern serve static file cache', async () => {
     await cache.getFile('first.txt');
 
     expect(readFile).toHaveBeenCalledTimes(3);
+  });
+
+  it('accounts for UTF-8 bytes when evicting files', async () => {
+    rs.mocked(readFile).mockImplementation((filepath) =>
+      Promise.resolve(filepath === 'unicode.txt' ? '你' : 'a'),
+    );
+    const cache = new FileCache(3);
+
+    await cache.getFile('unicode.txt');
+    await cache.getFile('ascii.txt');
+    await cache.getFile('unicode.txt');
+
+    expect(readFile).toHaveBeenCalledTimes(3);
+  });
+
+  it('caches empty files without rejecting their cache entry', async () => {
+    rs.mocked(readFile).mockResolvedValue('');
+    const cache = new FileCache(1);
+
+    const result = await cache.getFile('empty.txt');
+    await cache.getFile('empty.txt');
+
+    expect(result?.content).toBe('');
+    expect(readFile).toHaveBeenCalledTimes(1);
   });
 });

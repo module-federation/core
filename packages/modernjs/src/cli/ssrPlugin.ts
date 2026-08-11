@@ -379,7 +379,8 @@ export const moduleFederationSSRPlugin = (
                     const filepath = path.resolve(distRoot, relativePath);
                     const relativeToDist = path.relative(distRoot, filepath);
                     if (
-                      relativeToDist.startsWith('..') ||
+                      relativeToDist === '..' ||
+                      relativeToDist.startsWith(`..${path.sep}`) ||
                       path.isAbsolute(relativeToDist)
                     ) {
                       next();

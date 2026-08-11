@@ -119,6 +119,28 @@ describe('staticMiddleware', () => {
       expect(nextSpy).toHaveBeenCalledOnce();
       expect(fileCache.getFile).not.toHaveBeenCalled();
     });
+
+    it('should allow a file whose name starts with two dots', async () => {
+      mockContext.req.path = '/bundles/..chunk.js';
+
+      await middleware(mockContext, nextSpy);
+
+      expect(fileCache.getFile).toHaveBeenCalledWith(
+        path.resolve(bundlesRoot, '..chunk.js'),
+      );
+      expect(nextSpy).toHaveBeenCalledOnce();
+    });
+
+    it('should allow nested files whose name starts with two dots', async () => {
+      mockContext.req.path = '/bundles/..generated/app.js';
+
+      await middleware(mockContext, nextSpy);
+
+      expect(fileCache.getFile).toHaveBeenCalledWith(
+        path.resolve(bundlesRoot, '..generated/app.js'),
+      );
+      expect(nextSpy).toHaveBeenCalledOnce();
+    });
   });
 
   describe('file existence check', () => {
