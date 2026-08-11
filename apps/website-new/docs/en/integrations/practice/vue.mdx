@@ -159,7 +159,7 @@ const RemoteApp = createRemoteAppComponent({
 
 ### React / Next / Modern.js host tips
 
-Load the **same Vue Bridge remote** with the React consumer. Basename comes from the host route (or an explicit `basename` prop on the React wrapper):
+Load the **same Vue Bridge remote** with the React consumer:
 
 ```tsx
 import { createRemoteAppComponent } from '@module-federation/bridge-react';
@@ -173,8 +173,15 @@ const RemoteVueApp = createRemoteAppComponent({
   fallback: BridgeFallback,
   loading: <div>loading</div>,
 });
+```
 
-// route: { path: '/bridge/*', element: <RemoteVueApp /> }
+- **React Router / Modern.js**: a host route like `/bridge/*` can supply basename via router context.
+- **Next.js** (no React Router context): pass `basename` explicitly on the wrapper, e.g. under `app/bridge/[[...path]]/page.tsx`:
+
+```tsx
+export default function BridgePage() {
+  return <RemoteVueApp basename="/bridge" />;
+}
 ```
 
 Modern.js re-exports React Bridge APIs from `@module-federation/modern-js-v3/react` — use the same `createRemoteAppComponent` pattern.
