@@ -162,7 +162,10 @@
       "msw",
       "sharp",
       "unrs-resolver"
-    ]
+    ],
+    "patchedDependencies": {
+      "zephyr-rspress-plugin@1.2.1": "patches/zephyr-rspress-plugin@1.2.1.patch"
+    }
   },
   "dependencies": {
     "adm-zip": "0.6.0",

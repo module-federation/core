@@ -1,0 +1,64 @@
+diff --git a/dist/internal/assets/moduleFederationPublicPathPlugin.js b/dist/internal/assets/moduleFederationPublicPathPlugin.js
+index fbca6f331c2d2dec1bdc53f87f1153a15287ffb9..10291a76e0e5f3a57384842c031ca4b07b446864 100644
+--- a/dist/internal/assets/moduleFederationPublicPathPlugin.js
++++ b/dist/internal/assets/moduleFederationPublicPathPlugin.js
+@@ -40,7 +40,7 @@ function moduleFederationPublicPathPlugin(options = {}) {
+                 order: 'post',
+                 handler ({ bundlerConfigs }) {
+                     const configs = bundlerConfigs ?? [];
+-                    options.onModuleFederationPlugins?.(configs.flatMap((config)=>(config.plugins ?? []).filter((plugin)=>(0, external_zephyr_xpack_internal_namespaceObject.isModuleFederationPlugin)(plugin))));
++                    options.onModuleFederationPlugins?.(configs.filter((config)=>!isNodeTarget(config.target)).flatMap((config)=>(config.plugins ?? []).filter((plugin)=>(0, external_zephyr_xpack_internal_namespaceObject.isModuleFederationPlugin)(plugin))));
+                     if ('tap-app' !== options.target) for (const config of configs)setPortableModuleFederationPublicPath(config);
+                 }
+             });
+@@ -48,12 +48,17 @@ function moduleFederationPublicPathPlugin(options = {}) {
+     };
+ }
+ function setPortableModuleFederationPublicPath(config) {
+-    if ('node' === config.name || !hasExposedModuleFederationRemote(config.plugins)) return;
++    if (isNodeTarget(config.target) || !hasExposedModuleFederationRemote(config.plugins)) return;
+     if (isHttpPublicPath(config.output?.publicPath)) config.output = {
+         ...config.output,
+         publicPath: 'auto'
+     };
+ }
++function isNodeTarget(target) {
++    return (Array.isArray(target) ? target : [
++        target
++    ]).some((value)=>'string' == typeof value && value.includes('node'));
++}
+ function hasExposedModuleFederationRemote(plugins = []) {
+     return plugins.some((plugin)=>{
+         const options = getModuleFederationOptions(plugin);
+diff --git a/dist/internal/assets/moduleFederationPublicPathPlugin.mjs b/dist/internal/assets/moduleFederationPublicPathPlugin.mjs
+index d6845ecaccec2cfa6e7bf3fcfbcb55b3e503a947..06597a1f44410f1f23302ce53c23f5670bc4011e 100644
+--- a/dist/internal/assets/moduleFederationPublicPathPlugin.mjs
++++ b/dist/internal/assets/moduleFederationPublicPathPlugin.mjs
+@@ -8,7 +8,7 @@ function moduleFederationPublicPathPlugin(options = {}) {
+                 order: 'post',
+                 handler ({ bundlerConfigs }) {
+                     const configs = bundlerConfigs ?? [];
+-                    options.onModuleFederationPlugins?.(configs.flatMap((config)=>(config.plugins ?? []).filter((plugin)=>isModuleFederationPlugin(plugin))));
++                    options.onModuleFederationPlugins?.(configs.filter((config)=>!isNodeTarget(config.target)).flatMap((config)=>(config.plugins ?? []).filter((plugin)=>isModuleFederationPlugin(plugin))));
+                     if ('tap-app' !== options.target) for (const config of configs)setPortableModuleFederationPublicPath(config);
+                 }
+             });
+@@ -16,12 +16,17 @@ function moduleFederationPublicPathPlugin(options = {}) {
+     };
+ }
+ function setPortableModuleFederationPublicPath(config) {
+-    if ('node' === config.name || !hasExposedModuleFederationRemote(config.plugins)) return;
++    if (isNodeTarget(config.target) || !hasExposedModuleFederationRemote(config.plugins)) return;
+     if (isHttpPublicPath(config.output?.publicPath)) config.output = {
+         ...config.output,
+         publicPath: 'auto'
+     };
+ }
++function isNodeTarget(target) {
++    return (Array.isArray(target) ? target : [
++        target
++    ]).some((value)=>'string' == typeof value && value.includes('node'));
++}
+ function hasExposedModuleFederationRemote(plugins = []) {
+     return plugins.some((plugin)=>{
+         const options = getModuleFederationOptions(plugin);
