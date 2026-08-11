@@ -1,11 +1,13 @@
 import {
   ref,
+  computed,
   onMounted,
   onBeforeUnmount,
   onActivated,
   onDeactivated,
   onUpdated,
   watch,
+  watchEffect,
   defineComponent,
   useAttrs,
   nextTick,
@@ -70,36 +72,65 @@ export default defineComponent({
     const hostInstance = getInstance();
     const componentAttrs = useAttrs();
     let lastComponentAttrs = { ...componentAttrs };
-    const ssrPayload = getMatchingBridgeSSRPayload(props.ssr, {
-      moduleName: props.moduleName,
-      instanceId: props.instanceId,
+    const ssrPayload = computed(() =>
+      getMatchingBridgeSSRPayload(props.ssr, {
+        moduleName: props.moduleName,
+        instanceId: props.instanceId,
+      }),
+    );
+    const instanceId = computed(
+      () => props.instanceId || ssrPayload.value?.instanceId,
+    );
+    const serverPayload = computed(() => {
+      const payload = ssrPayload.value;
+      return payload && 'html' in payload
+        ? (payload as BridgeSSRResult)
+        : undefined;
     });
-    const instanceId = props.instanceId || ssrPayload?.instanceId;
-    const serverPayload =
-      ssrPayload && 'html' in ssrPayload
-        ? (ssrPayload as BridgeSSRResult)
+    const reference = computed(() => {
+      const payload = ssrPayload.value;
+      return payload && !('html' in payload)
+        ? (payload as BridgeSSRReference)
         : undefined;
-    const reference =
-      ssrPayload && !('html' in ssrPayload)
-        ? (ssrPayload as BridgeSSRReference)
-        : undefined;
+    });
     const registry = useBridgeHydrationRegistry();
-    if (reference && !registry) {
-      throw new Error(
-        'Bridge SSR references require provideBridgeHydrationRegistry before mount',
-      );
-    }
-    const snapshot =
-      reference && instanceId
-        ? registry!.peek(reference.moduleName, instanceId)
+    watchEffect(() => {
+      if (reference.value && !registry) {
+        throw new Error(
+          'Bridge SSR references require provideBridgeHydrationRegistry before mount',
+        );
+      }
+    });
+    const snapshot = computed(() => {
+      const currentReference = reference.value;
+      const currentInstanceId = instanceId.value;
+      return currentReference && currentInstanceId
+        ? registry?.peek(currentReference.moduleName, currentInstanceId)
         : undefined;
-    const hasSSRPayload = Boolean((serverPayload || snapshot) && instanceId);
-    const registryModuleName =
-      props.moduleName || reference?.moduleName || ssrPayload?.moduleName || '';
+    });
+    const hasSSRPayload = computed(() =>
+      Boolean((serverPayload.value || snapshot.value) && instanceId.value),
+    );
+    const registryModuleName = computed(
+      () =>
+        props.moduleName ||
+        reference.value?.moduleName ||
+        ssrPayload.value?.moduleName ||
+        '',
+    );
 
     const releaseUnclaimedSnapshot = () => {
-      if (!snapshot || !instanceId || consumedSnapshot || !registry) return;
-      registry.fail(registryModuleName, instanceId);
+      const currentSnapshot = snapshot.value;
+      const currentInstanceId = instanceId.value;
+      if (
+        !currentSnapshot ||
+        !currentInstanceId ||
+        consumedSnapshot ||
+        !registry
+      ) {
+        return;
+      }
+      registry.fail(registryModuleName.value, currentInstanceId);
       consumedSnapshot = true;
     };
 
@@ -129,22 +160,27 @@ export default defineComponent({
 
         // Claim before any await so cancel cannot leave a peekable snapshot.
         // After a claim (even if render aborts), never hydrate again — CSR only.
+        const currentSnapshot = snapshot.value;
+        const currentInstanceId = instanceId.value;
         let ssrState =
           wasRendered || hydratedOnce || consumedSnapshot
             ? undefined
-            : serverPayload?.dehydratedState;
+            : serverPayload.value?.dehydratedState;
         if (
           !wasRendered &&
           !hydratedOnce &&
           !consumedSnapshot &&
-          snapshot &&
-          instanceId &&
+          currentSnapshot &&
+          currentInstanceId &&
           registry
         ) {
-          const claimed = registry.consume(registryModuleName, instanceId);
-          if (Object.is(claimed, snapshot)) {
+          const claimed = registry.consume(
+            registryModuleName.value,
+            currentInstanceId,
+          );
+          if (Object.is(claimed, currentSnapshot)) {
             consumedSnapshot = true;
-            ssrState = snapshot.state;
+            ssrState = currentSnapshot.state;
           } else {
             consumedSnapshot = true;
             hydratedOnce = true;
@@ -160,7 +196,7 @@ export default defineComponent({
           basename: props.basename,
           memoryRoute: props.memoryRoute,
           hashRoute: props.hashRoute,
-          instanceId,
+          instanceId: currentInstanceId,
           ssrState,
           signal: controller.signal,
         };
@@ -193,7 +229,7 @@ export default defineComponent({
         isRendered.value = true;
         // One-shot hydrate for this instance. Keep SSR markers in the DOM so
         // hosts/tests can observe them; strip only on KeepAlive deactivate.
-        if (snapshot || serverPayload) {
+        if (snapshot.value || serverPayload.value) {
           hydratedOnce = true;
         }
         hostInstance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(
@@ -202,8 +238,10 @@ export default defineComponent({
       });
       renderQueue = pending.catch((error) => {
         if (controller.signal.aborted || wasDeactivated.value) return;
-        if (snapshot && instanceId && !consumedSnapshot) {
-          registry?.fail(registryModuleName, instanceId);
+        const failedSnapshot = snapshot.value;
+        const failedInstanceId = instanceId.value;
+        if (failedSnapshot && failedInstanceId && !consumedSnapshot) {
+          registry?.fail(registryModuleName.value, failedInstanceId);
           consumedSnapshot = true;
         }
         renderError.value = error;
@@ -328,25 +366,38 @@ export default defineComponent({
 
     return () => {
       if (renderError.value) throw renderError.value;
+      const currentInstanceId = instanceId.value;
+      const currentServerPayload = serverPayload.value;
+      const currentSnapshot = snapshot.value;
+      const currentSsrPayload = ssrPayload.value;
+      const showSSRMarkup =
+        hasSSRPayload.value && currentInstanceId && !csrOnly;
       const mount = (
         <div
           {...(props.rootAttrs || {})}
-          {...(hasSSRPayload && instanceId && !csrOnly
+          {...(showSSRMarkup
             ? getBridgeSSRContainerAttrs({
-                moduleName: props.moduleName || ssrPayload!.moduleName,
-                instanceId,
+                moduleName: props.moduleName || currentSsrPayload!.moduleName,
+                instanceId: currentInstanceId,
               })
             : {})}
           ref={rootRef}
           innerHTML={
-            csrOnly ? undefined : (serverPayload?.html ?? snapshot?.html)
+            csrOnly
+              ? undefined
+              : (currentServerPayload?.html ?? currentSnapshot?.html)
           }
         />
       );
-      if (!hasSSRPayload || !instanceId || csrOnly) return mount;
-      const moduleName = props.moduleName || ssrPayload!.moduleName;
+      if (!showSSRMarkup) return mount;
+      const moduleName = props.moduleName || currentSsrPayload!.moduleName;
       return (
-        <div {...getBridgeSSRSlotAttrs({ moduleName, instanceId })}>
+        <div
+          {...getBridgeSSRSlotAttrs({
+            moduleName,
+            instanceId: currentInstanceId,
+          })}
+        >
           {mount}
           <script
             type="application/json"
@@ -354,12 +405,14 @@ export default defineComponent({
             innerHTML={serializeBridgeSSRStateEnvelope({
               protocolVersion: BRIDGE_SSR_PROTOCOL_VERSION,
               moduleName,
-              instanceId,
-              ...((serverPayload?.dehydratedState ?? snapshot?.state) ===
-              undefined
+              instanceId: currentInstanceId,
+              ...((currentServerPayload?.dehydratedState ??
+                currentSnapshot?.state) === undefined
                 ? {}
                 : {
-                    state: serverPayload?.dehydratedState ?? snapshot?.state,
+                    state:
+                      currentServerPayload?.dehydratedState ??
+                      currentSnapshot?.state,
                   }),
             })}
           />

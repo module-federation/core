@@ -1,5 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, rs } from '@rstest/core';
-import { createApp, defineComponent, h, KeepAlive, nextTick } from 'vue';
+import {
+  createApp,
+  defineComponent,
+  h,
+  KeepAlive,
+  nextTick,
+  reactive,
+} from 'vue';
 import { createMemoryHistory, createRouter, RouterView } from 'vue-router';
 import {
   BRIDGE_SSR_PROTOCOL_VERSION,
@@ -217,5 +224,51 @@ describe('RemoteApp SSR lifecycle', () => {
     app.unmount();
     await flushBridgeRender();
     expect(registry.peek('ecApp', 'ec:1')).toBeUndefined();
+  });
+
+  it('drops SSR slot markup when ssr props clear without remount', async () => {
+    const result = {
+      protocolVersion: BRIDGE_SSR_PROTOCOL_VERSION,
+      moduleName: 'ecApp',
+      instanceId: 'ec:1',
+      html: '<p>server remote</p>',
+      dehydratedState: { ready: true },
+    };
+    const providerReturn = {
+      render: rs.fn(async () => undefined),
+      destroy: rs.fn(),
+    };
+    const state = reactive<{
+      ssr: typeof result | undefined;
+    }>({ ssr: result });
+    const App = defineComponent({
+      setup: () => () =>
+        h(RemoteApp, {
+          moduleName: 'ecApp',
+          instanceId: 'ec:1',
+          ssr: state.ssr,
+          providerInfo: () => providerReturn,
+        }),
+    });
+    const app = createApp(App);
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [{ path: '/', component: { template: '<div />' } }],
+    });
+    app.use(router);
+    await router.isReady();
+    mountApp(app);
+    await flushBridgeRender();
+
+    expect(root.querySelector('[data-mf-bridge-slot="true"]')).not.toBeNull();
+    expect(root.innerHTML).toContain('server remote');
+
+    state.ssr = undefined;
+    await nextTick();
+    await flushBridgeRender();
+
+    expect(root.querySelector('[data-mf-bridge-slot="true"]')).toBeNull();
+    expect(root.querySelector(`[${MF_BRIDGE_SSR_ATTR}="true"]`)).toBeNull();
+    app.unmount();
   });
 });
