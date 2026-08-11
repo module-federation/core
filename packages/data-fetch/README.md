@@ -10,9 +10,10 @@ Framework-agnostic data fetching utilities for Module Federation: SSR data loade
 pnpm add @module-federation/data-fetch
 ```
 
-Optional peers:
+`@module-federation/runtime` is a hard dependency (needed by the root entry for `prefetch` / runtime plugin wiring).
 
-- `@module-federation/runtime` — required only when registering `autoFetchDataPlugin`
+Optional peer:
+
 - `hono` — required only for the server middleware entry
 
 ## Main imports

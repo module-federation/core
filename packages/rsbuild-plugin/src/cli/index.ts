@@ -45,6 +45,10 @@ type RSBUILD_PLUGIN_OPTIONS = {
   environment?: string;
 };
 
+type ModuleFederationOptionsTransformer = (
+  options: ModuleFederationOptions,
+) => ModuleFederationOptions;
+
 type ExposedAPIType = {
   options: {
     nodePlugin?: ModuleFederationPlugin;
@@ -55,10 +59,18 @@ type ExposedAPIType = {
     nodeEnvironmentName?: string;
   };
   assetResources: Record<string, StatsAssetResource>;
+  getOptions: () => ModuleFederationOptions;
+  registerOptionsTransformer: (
+    transformer: ModuleFederationOptionsTransformer,
+  ) => void;
   isSSRConfig: typeof isSSRConfig;
   isRspressSSGConfig: typeof isRspressSSGConfig;
 };
-export type { ModuleFederationOptions, ExposedAPIType };
+export type {
+  ModuleFederationOptions,
+  ModuleFederationOptionsTransformer,
+  ExposedAPIType,
+};
 
 const RSBUILD_PLUGIN_MODULE_FEDERATION_NAME =
   'rsbuild:module-federation-enhanced';
@@ -134,11 +146,13 @@ const isRspressSSGConfig = (bundlerConfigName?: string) => {
 };
 
 export const pluginModuleFederation = (
-  moduleFederationOptions: ModuleFederationOptions,
+  initialModuleFederationOptions: ModuleFederationOptions,
   rsbuildOptions?: RSBUILD_PLUGIN_OPTIONS,
 ): RsbuildPlugin => ({
   name: RSBUILD_PLUGIN_MODULE_FEDERATION_NAME,
   setup: (api) => {
+    let moduleFederationOptions = initialModuleFederationOptions;
+
     if (!moduleFederationOptions?.name) {
       throw new Error(
         'The module federation option "name" is required in @module-federation/rsbuild-plugin.',
@@ -165,6 +179,7 @@ export const pluginModuleFederation = (
     }
     const isRslib = callerName === CALL_NAME_MAP.RSLIB;
     const isRspress = callerName === CALL_NAME_MAP.RSPRESS;
+    const isRstest = callerName === 'rstest';
     const isSSR = target === 'dual';
     const environment =
       configuredEnvironment ??
@@ -193,30 +208,6 @@ export const pluginModuleFederation = (
 
       setSSREnv();
     }
-
-    const sharedOptions: [string, moduleFederationPlugin.SharedConfig][] =
-      parseOptions(
-        moduleFederationOptions.shared || [],
-        (item: string | string[], key: string) => {
-          if (typeof item !== 'string')
-            throw new Error('Unexpected array in shared');
-          const config: moduleFederationPlugin.SharedConfig =
-            item === key || !isRequiredVersion(item)
-              ? {
-                  import: item,
-                }
-              : {
-                  import: key,
-                  requiredVersion: item,
-                };
-          return config;
-        },
-        (item: any) => item,
-      );
-    // shared[0] is the shared name
-    const shared = sharedOptions.map((shared) =>
-      shared[0].endsWith('/') ? shared[0].slice(0, -1) : shared[0],
-    );
 
     api.modifyRsbuildConfig((config) => {
       // skip storybook
@@ -304,9 +295,11 @@ export const pluginModuleFederation = (
             `Can not find environment '${environment}' when using target: 'node'. Available environments: ${availableEnvironmentsLabel}.`,
           );
         }
-        patchToolsTspack(nodeTargetEnv, (config, { environment }) => {
-          config.target = 'async-node';
-        });
+        if (!isRstest) {
+          patchToolsTspack(nodeTargetEnv, (config) => {
+            config.target = 'async-node';
+          });
+        }
       }
     });
 
@@ -321,7 +314,7 @@ export const pluginModuleFederation = (
       return config;
     });
 
-    const generateMergedStatsAndManifestOptions: ExposedAPIType = {
+    const exposedFederationApi: ExposedAPIType = {
       options: {
         nodePlugin: undefined,
         browserPlugin: undefined,
@@ -331,82 +324,105 @@ export const pluginModuleFederation = (
         nodeEnvironmentName: undefined,
       },
       assetResources: {},
+      getOptions: () => moduleFederationOptions,
+      registerOptionsTransformer: (transformer) => {
+        moduleFederationOptions = transformer(moduleFederationOptions);
+      },
       isSSRConfig,
       isRspressSSGConfig,
     };
-    api.expose(
-      RSBUILD_PLUGIN_MODULE_FEDERATION_NAME,
-      generateMergedStatsAndManifestOptions,
-    );
+    api.expose(RSBUILD_PLUGIN_MODULE_FEDERATION_NAME, exposedFederationApi);
 
     const defaultBrowserEnvironmentName = environment;
-    const assetFileNames = getManifestFileName(
-      moduleFederationOptions.manifest,
+    api.processAssets(
+      {
+        stage: 'report',
+      },
+      ({ assets, environment: envContext }) => {
+        if (moduleFederationOptions.manifest === false) {
+          return;
+        }
+
+        const assetFileNames = getManifestFileName(
+          moduleFederationOptions.manifest,
+        );
+        const expectedBrowserEnv =
+          exposedFederationApi.options.browserEnvironmentName ??
+          defaultBrowserEnvironmentName;
+        const expectedNodeEnv =
+          exposedFederationApi.options.nodeEnvironmentName ?? SSR_ENV_NAME;
+        const envName = envContext.name;
+
+        if (envName !== expectedBrowserEnv && envName !== expectedNodeEnv) {
+          return;
+        }
+
+        const assetResources = exposedFederationApi.assetResources;
+        const targetResources =
+          assetResources[envName] || (assetResources[envName] = {});
+
+        const statsAsset = assets[assetFileNames.statsFileName];
+        if (statsAsset) {
+          try {
+            const raw = statsAsset.source();
+            const content = typeof raw === 'string' ? raw : raw.toString();
+            targetResources.stats = {
+              data: JSON.parse(content),
+              filename: assetFileNames.statsFileName,
+            };
+          } catch (err) {
+            const message = err instanceof Error ? err.message : String(err);
+            logger.error(
+              `Failed to parse stats asset "${assetFileNames.statsFileName}" for environment "${envName}": ${message} `,
+            );
+          }
+        }
+
+        const manifestAsset = assets[assetFileNames.manifestFileName];
+        if (manifestAsset) {
+          try {
+            const raw = manifestAsset.source();
+            const content = typeof raw === 'string' ? raw : raw.toString();
+            targetResources.manifest = {
+              data: JSON.parse(content),
+              filename: assetFileNames.manifestFileName,
+            };
+          } catch (err) {
+            const message = err instanceof Error ? err.message : String(err);
+            logger.error(
+              `Failed to parse manifest asset "${assetFileNames.manifestFileName}" for environment "${envName}": ${message} `,
+            );
+          }
+        }
+      },
     );
-
-    if (moduleFederationOptions.manifest !== false) {
-      api.processAssets(
-        {
-          stage: 'report',
-        },
-        ({ assets, environment: envContext }) => {
-          const expectedBrowserEnv =
-            generateMergedStatsAndManifestOptions.options
-              .browserEnvironmentName ?? defaultBrowserEnvironmentName;
-          const expectedNodeEnv =
-            generateMergedStatsAndManifestOptions.options.nodeEnvironmentName ??
-            SSR_ENV_NAME;
-          const envName = envContext.name;
-
-          if (envName !== expectedBrowserEnv && envName !== expectedNodeEnv) {
-            return;
-          }
-
-          const assetResources =
-            generateMergedStatsAndManifestOptions.assetResources;
-          const targetResources =
-            assetResources[envName] || (assetResources[envName] = {});
-
-          const statsAsset = assets[assetFileNames.statsFileName];
-          if (statsAsset) {
-            try {
-              const raw = statsAsset.source();
-              const content = typeof raw === 'string' ? raw : raw.toString();
-              targetResources.stats = {
-                data: JSON.parse(content),
-                filename: assetFileNames.statsFileName,
-              };
-            } catch (err) {
-              const message = err instanceof Error ? err.message : String(err);
-              logger.error(
-                `Failed to parse stats asset "${assetFileNames.statsFileName}" for environment "${envName}": ${message} `,
-              );
-            }
-          }
-
-          const manifestAsset = assets[assetFileNames.manifestFileName];
-          if (manifestAsset) {
-            try {
-              const raw = manifestAsset.source();
-              const content = typeof raw === 'string' ? raw : raw.toString();
-              targetResources.manifest = {
-                data: JSON.parse(content),
-                filename: assetFileNames.manifestFileName,
-              };
-            } catch (err) {
-              const message = err instanceof Error ? err.message : String(err);
-              logger.error(
-                `Failed to parse manifest asset "${assetFileNames.manifestFileName}" for environment "${envName}": ${message} `,
-              );
-            }
-          }
-        },
-      );
-    }
     api.onBeforeCreateCompiler(({ bundlerConfigs }) => {
       if (!bundlerConfigs) {
         throw new Error('Can not get bundlerConfigs!');
       }
+      const sharedOptions: [string, moduleFederationPlugin.SharedConfig][] =
+        parseOptions(
+          moduleFederationOptions.shared || [],
+          (item: string | string[], key: string) => {
+            if (typeof item !== 'string')
+              throw new Error('Unexpected array in shared');
+            const config: moduleFederationPlugin.SharedConfig =
+              item === key || !isRequiredVersion(item)
+                ? {
+                    import: item,
+                  }
+                : {
+                    import: key,
+                    requiredVersion: item,
+                  };
+            return config;
+          },
+          (item: any) => item,
+        );
+      const shared = sharedOptions.map(([name]) =>
+        name.endsWith('/') ? name.slice(0, -1) : name,
+      );
+
       bundlerConfigs.forEach((bundlerConfig) => {
         const bundlerConfigName = bundlerConfig.name || '';
         const isConfiguredEnvironmentConfig = bundlerConfigName === environment;
@@ -418,7 +434,8 @@ export const pluginModuleFederation = (
         const isActiveRspressSSGEnvironmentConfig =
           isRspress && isRspressSSGEnvironmentConfig;
         const shouldUseSSRPluginConfig =
-          isSSRConfig(bundlerConfig.name) || isNodeTargetEnvironmentConfig;
+          isSSRConfig(bundlerConfig.name) ||
+          (isNodeTargetEnvironmentConfig && !isRstest);
 
         if (
           target === 'node' &&
@@ -463,7 +480,9 @@ export const pluginModuleFederation = (
             ? createSSRMFConfig(moduleFederationOptions)
             : undefined;
 
-          delete bundlerConfig.optimization?.runtimeChunk;
+          if (!isRstest) {
+            delete bundlerConfig.optimization?.runtimeChunk;
+          }
           const externals = bundlerConfig.externals;
           if (Array.isArray(externals)) {
             const sharedModules = new Set<string>();
@@ -522,7 +541,7 @@ export const pluginModuleFederation = (
             bundlerConfig.output!.chunkLoadingGlobal = `chunk_${moduleFederationOptions.name}`;
           }
 
-          if (isNodeTargetEnvironmentConfig) {
+          if (isNodeTargetEnvironmentConfig && !isRstest) {
             patchNodeConfig(
               bundlerConfig,
               ssrModuleFederationOptions ?? moduleFederationOptions,
@@ -547,16 +566,18 @@ export const pluginModuleFederation = (
           if (
             !bundlerConfig.plugins!.find((p) => p && p.name === PLUGIN_NAME)
           ) {
-            if (shouldUseSSRPluginConfig) {
+            if (shouldUseSSRPluginConfig || isNodeTargetEnvironmentConfig) {
               const ssrMFConfig =
                 ssrModuleFederationOptions ??
-                createSSRMFConfig(moduleFederationOptions);
-              generateMergedStatsAndManifestOptions.options.nodePlugin =
+                (isRstest
+                  ? moduleFederationOptions
+                  : createSSRMFConfig(moduleFederationOptions));
+              exposedFederationApi.options.nodePlugin =
                 new ModuleFederationPlugin(ssrMFConfig);
-              generateMergedStatsAndManifestOptions.options.nodeEnvironmentName =
+              exposedFederationApi.options.nodeEnvironmentName =
                 bundlerConfig.name || SSR_ENV_NAME;
               bundlerConfig.plugins!.push(
-                generateMergedStatsAndManifestOptions.options.nodePlugin,
+                exposedFederationApi.options.nodePlugin,
               );
               return;
             } else if (isActiveRspressSSGEnvironmentConfig) {
@@ -581,21 +602,20 @@ export const pluginModuleFederation = (
               bundlerConfig.output.asyncChunks = undefined;
               const p = new ModuleFederationPlugin(mfConfig);
               if (bundlerConfig.name === RSPRESS_BUNDLER_CONFIG_NAME) {
-                generateMergedStatsAndManifestOptions.options.rspressSSGPlugin =
-                  p;
+                exposedFederationApi.options.rspressSSGPlugin = p;
               }
               bundlerConfig.plugins!.push(p);
               return;
             }
 
-            generateMergedStatsAndManifestOptions.options.browserPlugin =
+            exposedFederationApi.options.browserPlugin =
               new ModuleFederationPlugin(moduleFederationOptions);
-            generateMergedStatsAndManifestOptions.options.distOutputDir =
+            exposedFederationApi.options.distOutputDir =
               bundlerConfig.output?.path || '';
-            generateMergedStatsAndManifestOptions.options.browserEnvironmentName =
+            exposedFederationApi.options.browserEnvironmentName =
               bundlerConfig.name || defaultBrowserEnvironmentName;
             bundlerConfig.plugins!.push(
-              generateMergedStatsAndManifestOptions.options.browserPlugin,
+              exposedFederationApi.options.browserPlugin,
             );
           }
         }
@@ -604,14 +624,13 @@ export const pluginModuleFederation = (
 
     const generateMergedStatsAndManifest = () => {
       const { distOutputDir, browserEnvironmentName, nodeEnvironmentName } =
-        generateMergedStatsAndManifestOptions.options;
+        exposedFederationApi.options;
 
       if (!distOutputDir || !browserEnvironmentName || !nodeEnvironmentName) {
         return;
       }
 
-      const assetResources =
-        generateMergedStatsAndManifestOptions.assetResources;
+      const assetResources = exposedFederationApi.assetResources;
       const browserAssets = assetResources[browserEnvironmentName];
       const nodeAssets = assetResources[nodeEnvironmentName];
 
@@ -626,13 +645,8 @@ export const pluginModuleFederation = (
       }
     };
 
-    api.onDevCompileDone(() => {
-      generateMergedStatsAndManifest();
-    });
-
-    api.onAfterBuild(() => {
-      generateMergedStatsAndManifest();
-    });
+    api.onDevCompileDone(generateMergedStatsAndManifest);
+    api.onAfterBuild(generateMergedStatsAndManifest);
   },
 });
 

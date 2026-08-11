@@ -3,6 +3,7 @@ import path from 'path';
 import packageJson from './package.json';
 
 const peerDepsKeys = Object.keys(packageJson.peerDependencies ?? {});
+const dependencyKeys = Object.keys(packageJson.dependencies ?? {});
 
 export default defineConfig({
   build: {
@@ -26,8 +27,8 @@ export default defineConfig({
     rollupOptions: {
       external: [
         ...peerDepsKeys,
+        ...dependencyKeys,
         '@module-federation/runtime/helpers',
-        '@module-federation/sdk',
       ],
     },
     minify: false,

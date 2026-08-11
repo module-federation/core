@@ -72,22 +72,18 @@
     "test": "rstest"
   },
   "dependencies": {
+    "@module-federation/runtime": "workspace:*",
     "@module-federation/sdk": "workspace:*"
   },
   "peerDependencies": {
-    "@module-federation/runtime": "workspace:*",
     "hono": ">=3"
   },
   "peerDependenciesMeta": {
-    "@module-federation/runtime": {
-      "optional": true
-    },
     "hono": {
       "optional": true
     }
   },
   "devDependencies": {
-    "@module-federation/runtime": "workspace:*",
     "hono": "4.12.26",
     "typescript": "7.0.2",
     "vite": "^5.4.21"

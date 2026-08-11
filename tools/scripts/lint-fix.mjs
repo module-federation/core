@@ -220,6 +220,20 @@ function findNearestPackageJson(relativeFilePath) {
 }
 
 function runTurboLint(packageNames) {
+  // Turbo hashes the workspace with parallel `git status` calls. During
+  // `git commit` / merge hooks those calls can hang on Windows worktrees.
+  // Run package lint scripts directly in hook contexts instead.
+  if (process.env.HUSKY || isGitMergeOrCommitInProgress()) {
+    const lintablePackages = packageNames.filter(packageHasLintScript);
+    console.log(
+      `[lint-fix] Running package lint (hook-safe) for ${lintablePackages.length}/${packageNames.length} changed package(s)...`,
+    );
+    for (const packageName of lintablePackages) {
+      runCommand('pnpm', ['--filter', packageName, 'run', 'lint']);
+    }
+    return;
+  }
+
   console.log(
     `[lint-fix] Running turbo lint for ${packageNames.length} changed package(s)...`,
   );
@@ -230,11 +244,47 @@ function runTurboLint(packageNames) {
   runCommand('pnpm', args);
 }
 
-function runCommand(command, args) {
+function packageHasLintScript(packageName) {
+  const result = spawnSync(
+    'pnpm',
+    ['--filter', packageName, 'pkg', 'get', 'scripts.lint'],
+    {
+      cwd: ROOT,
+      stdio: 'pipe',
+      encoding: 'utf-8',
+      env: process.env,
+    },
+  );
+  if (result.status !== 0) {
+    return false;
+  }
+  const value = (result.stdout || '').trim();
+  return Boolean(value) && value !== 'undefined' && value !== 'null';
+}
+
+function isGitMergeOrCommitInProgress() {
+  try {
+    const gitDir = execSync('git rev-parse --git-dir', {
+      cwd: ROOT,
+      encoding: 'utf-8',
+    }).trim();
+    const absoluteGitDir = resolve(ROOT, gitDir);
+    return (
+      existsSync(resolve(absoluteGitDir, 'MERGE_HEAD')) ||
+      existsSync(resolve(absoluteGitDir, 'CHERRY_PICK_HEAD')) ||
+      existsSync(resolve(absoluteGitDir, 'REBASE_HEAD')) ||
+      existsSync(resolve(absoluteGitDir, 'index.lock'))
+    );
+  } catch {
+    return false;
+  }
+}
+
+function runCommand(command, args, env = process.env) {
   const result = spawnSync(command, args, {
     cwd: ROOT,
     stdio: 'inherit',
-    env: process.env,
+    env,
   });
 
   if (result.status !== 0) {
