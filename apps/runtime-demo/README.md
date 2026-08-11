@@ -171,32 +171,30 @@ target ids only. Specific exposed modules stay available as
 `mf:remote:*:expose:*` targets so they can be waited for and inspected without
 bloating the remote target.
 
-For a manual CLI check, build Divebell from the local repo, then start the
-runtime demo:
+For a manual CLI check, build Divebell from a local checkout, then start the
+runtime demo from this repository. Replace `/path/to/divebell` with the local
+Divebell checkout path:
 
 ```bash
-cd /Users/bytedance/ai/openruntime
+cd /path/to/divebell
 pnpm build
 ```
 
 ```bash
-cd /Users/bytedance/outter/core
 pnpm run app:runtime:dev
 ```
 
 Open the fixture page through Divebell:
 
 ```bash
-cd /Users/bytedance/ai/openruntime
-pnpm exec divebell open "http://127.0.0.1:3005/observability"
+pnpm --dir /path/to/divebell exec divebell open "http://127.0.0.1:3005/observability"
 ```
 
 After the page is open, click `Load success remote` and verify the exposed
 module target:
 
 ```bash
-cd /Users/bytedance/ai/openruntime
-pnpm exec divebell wait-for mf:remote:runtime_remote2:expose:ButtonOldAnt ready --url "http://127.0.0.1:3005/observability"
+pnpm --dir /path/to/divebell exec divebell wait-for mf:remote:runtime_remote2:expose:ButtonOldAnt ready --url "http://127.0.0.1:3005/observability"
 ```
 
 After the wait succeeds, click `Mark business loaded` on the page and verify
@@ -205,8 +203,7 @@ the latest report includes `component:business-loaded`.
 Then click `Shared unexpected provider` and verify the shared target:
 
 ```bash
-cd /Users/bytedance/ai/openruntime
-pnpm exec divebell wait-for mf:shared:observability-provider-choice:2.0.0:observability-provider-scope loaded --url "http://127.0.0.1:3005/observability"
+pnpm --dir /path/to/divebell exec divebell wait-for mf:shared:observability-provider-choice:2.0.0:observability-provider-scope loaded --url "http://127.0.0.1:3005/observability"
 ```
 
 Run the automated verification:

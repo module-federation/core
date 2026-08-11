@@ -132,9 +132,9 @@ arrays.
 
 Runtime resource hooks also receive a `resourceContext` object on manifest,
 remoteEntry, preload JS, and preload CSS resource loads. It contains
-`initiator`, `id`, `resourceType`, and `url`, so custom loaders can tell whether
-the resource was requested by `loadRemote` or `preloadRemote` without parsing
-the URL.
+`initiator`, `id`, `resourceType`, `url`, and `expose` when available, so custom
+loaders can tell whether the resource was requested by `loadRemote`,
+`preloadRemote`, or `loadShare` without parsing the URL.
 
 The report also keeps compact loading state under `summary`. It contains the
 final outcome, per-phase status and duration under `summary.phases`, safe
@@ -170,6 +170,11 @@ ObservabilityPlugin({
 });
 ```
 
+`divebell: true` uses the Divebell runtime found on `window`, or creates and
+installs one when needed. The object form also accepts `enabled`, `source`, a
+custom `runtime`, or a custom browser `host`. Set `enabled: false` to keep a
+shared configuration object while disabling synchronization.
+
 Use the Divebell CLI to inspect the page:
 
 ```bash
@@ -198,6 +203,7 @@ Statuses:
 
 Snapshot data:
 
+- `instanceRef`: stable observability reference for the latest MF instance.
 - `hostName`: array of host or consumer names observed for this remote.
 - `runtimeVersion`: Module Federation runtime version from the latest report.
 - `remote`: remote definition fields such as `name`, `alias`, `entry`,
@@ -233,6 +239,7 @@ Statuses are the same as `mf.remote`:
 
 Snapshot data:
 
+- `instanceRef`: stable observability reference for the MF instance.
 - `traceId`: report id for the latest matching trace.
 - `requestId`: requested remote module id, for example
   `runtime_remote2/ButtonOldAnt`.
@@ -277,6 +284,7 @@ Statuses:
 
 Snapshot data:
 
+- `instanceRef`: stable observability reference for the MF instance.
 - `traceId`: report id for the latest matching trace.
 - `requestId`: shared request id.
 - `hostName`: Module Federation host name that resolved the shared dependency.
@@ -309,12 +317,24 @@ divebell wait-for mf:shared:observability-provider-choice:2.0.0:observability-pr
 divebell wait-for mf:shared:observability-async-shared:1.0.0:default error --url "http://127.0.0.1:3005/observability"
 ```
 
+### `mf:shared-conflict:<sharedName>:<shareScope>`
+
+Type: `mf.shared.conflict`
+
+This target is created when the plugin observes multiple versions of a
+singleton shared dependency. Its status is `warning`. Snapshot data includes
+the stable `instanceRef`, `traceId`, shared name and scope, current provider and
+version, all observed versions, and the compact shared snapshot. Use the normal
+`mf:shared:*` target to inspect loading state; use this conflict target to
+diagnose singleton version drift.
+
 ### Actions
 
 The plugin also registers safe Divebell actions for deeper inspection:
 
 - `mf:list-reports`: list report summaries. Supports filters such as `remote`,
-  `expose`, `shared`, `traceId`, `status`, and `outcome`.
+  `expose`, `shared`, `traceId`, `instanceRef`, `status`, and `outcome`.
+- `mf:get-runtime-state`: read the current safe multi-instance runtime state.
 - `mf:get-latest-report`: read the latest report.
 - `mf:get-report`: read one report by `traceId`.
 - `mf:export-report`: export a report, defaulting to the latest report.
@@ -329,6 +349,21 @@ Example:
 ```bash
 divebell run-action mf:list-reports --url "http://127.0.0.1:3005/observability" --payload '{"remote":"runtime_remote2"}'
 ```
+
+### Multi-instance runtime state
+
+The browser reader and `mf:get-runtime-state` action return the same safe state
+model:
+
+```ts
+window.__FEDERATION__.__OBSERVABILITY__.host.getRuntimeState();
+```
+
+The result includes stable `instanceRef` values, instance roles and evidence,
+known remotes and loaded producers, share-scope summaries, Bridge state,
+consumer-to-producer relationships, deployment `moduleInfo`, and capability
+completeness. Use `instanceRef` when filtering reports or selecting an instance;
+array indexes are only a compatibility fallback and are not stable identifiers.
 
 `errorLoadShare` is used only for observation. Shared dependency miss, version
 mismatch, and eager boundary errors are not retried by the retry plugin by

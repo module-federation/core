@@ -133,6 +133,7 @@ window.__FEDERATION__.__OBSERVABILITY__.runtime_host.findReports({
   remote: 'remote1',
 });
 window.__FEDERATION__.__OBSERVABILITY__.runtime_host.exportReport('mf-...');
+window.__FEDERATION__.__OBSERVABILITY__.runtime_host.getRuntimeState();
 ```
 
 如果只是想在开发环境观察加载链路，或者页面一直停在 loading 状态但还没有报错，开启浏览器读取入口后，开发模式默认会打印开始日志：
@@ -264,6 +265,65 @@ ObservabilityPlugin({
 <粘贴报告 JSON>
 ```
 
+## 接入 Divebell
+
+当 Agent 或浏览器工具需要稳定 target、可等待状态和安全 action，而不是直接读取原始
+报告时，可以开启 Divebell 同步：
+
+```ts
+ObservabilityPlugin({
+  level: 'verbose',
+  divebell: {
+    source: 'module-federation',
+  },
+});
+```
+
+`divebell: true` 会复用 `window` 上已经安装的 Divebell runtime；不存在时自动创建。
+对象写法还可以传入自定义 `runtime` 或浏览器 `host`。Divebell 只用于诊断，即使注册或
+同步失败，也不会改变 Module Federation 的加载结果。
+
+插件会注册以下 target：
+
+| Target | 类型 | 状态 | 用途 |
+| --- | --- | --- | --- |
+| `mf:remote:<remoteName>` | `mf.remote` | `registered`、`loading`、`ready`、`error`、`recovered` | 查看整个 remote 的状态。 |
+| `mf:remote:<remoteName>:expose:<exposeName>` | `mf.remote.expose` | `registered`、`loading`、`ready`、`error`、`recovered` | 等待某个 exposed module 可用。 |
+| `mf:shared:<sharedName>:<version>:<shareScope>` | `mf.shared` | `unloaded`、`loading`、`loaded`、`recovered`、`error` | 查看某条已观测到的 shared 依赖记录。 |
+| `mf:shared-conflict:<sharedName>:<shareScope>` | `mf.shared.conflict` | `warning` | 诊断 singleton shared 同时出现多个版本。 |
+
+remote、expose 和 shared snapshot 都带有稳定的 `instanceRef`，页面存在多个 Module
+Federation 实例时应使用它区分报告和 runtime state。manifest 和 remoteEntry 信息作为
+phase 保留在 remote/expose 数据中，插件不会为它们创建独立 target。
+
+常用命令：
+
+```bash
+divebell targets --url "http://127.0.0.1:3005/observability"
+divebell wait-for mf:remote:runtime_remote2:expose:ButtonOldAnt ready --url "http://127.0.0.1:3005/observability"
+divebell run-action mf:get-runtime-state --url "http://127.0.0.1:3005/observability"
+```
+
+插件注册的安全 action：
+
+- `mf:get-runtime-state`
+- `mf:list-reports`
+- `mf:get-latest-report`
+- `mf:get-report`
+- `mf:export-report`
+- `mf:get-federation-global`
+- `mf:get-federation-module-info`
+- `mf:list-federation-instances`
+- `mf:get-federation-instance-config`
+
+`mf:list-reports` 支持按 `traceId`、`instanceRef`、`remote`、`expose`、
+`shared`、`status`、`outcome` 和 `limit` 过滤。
+
+浏览器 reader 的 `getRuntimeState()` 和 `mf:get-runtime-state` action 返回同一套安全
+状态模型，包括稳定的实例引用、角色与证据、remotes、已加载生产者、share scope
+摘要、Bridge 状态、消费者到生产者的关系、部署 `moduleInfo` 和能力完整度。选择实例时
+应优先使用 `instanceRef`，不要依赖可能变化的数组下标。
+
 ## Browser 参数
 
 `ObservabilityPlugin(options)` 支持以下参数：
@@ -287,6 +347,11 @@ ObservabilityPlugin({
 | `react.injectLoadedCallback` | `boolean` | `false` | 显式包装匹配到的远程 React 组件，并注入 `onMFRemoteLoaded`。这个能力会改变组件引用，只建议作为临时调试开关，问题修复后需要及时关闭。 |
 | `react.remoteIds` | `string[]` | `[]` | 只对指定远程请求注入回调，例如 `remote/Button` 或 `./Button`。为空时不按远程请求过滤。 |
 | `react.defaultExportMode` | `'preserve' \| 'component'` | 自动选择 | 远程模块是 `{ default: Component }` 时，是否直接把包装后的组件作为返回值。通常保持默认即可。 |
+| `divebell` | `boolean \| DivebellObservabilityOptions` | `false` | 是否把报告同步成 Divebell target 并注册安全 action。`true` 使用默认浏览器 host/runtime。 |
+| `divebell.enabled` | `boolean` | `true` | 保留共享 Divebell 配置对象但关闭同步。 |
+| `divebell.source` | `string` | `'module-federation'` | Divebell target、snapshot 和 action 使用的 source。 |
+| `divebell.runtime` | `DivebellCore` | 自动解析 | 直接使用已有 Divebell runtime，不再自动查找或创建。 |
+| `divebell.host` | `DivebellWindowHost` | `window` | 用于查找或安装 Divebell runtime 的浏览器 host。 |
 | `onEvent` | `(event, report, context) => void` | `undefined` | 每次记录观测事件时触发，适合接入自定义日志系统。 |
 | `onReport` | `(report, context) => void` | `undefined` | 报告更新时触发，生产环境常用它上传失败或恢复报告。 |
 | `onRawError` | `(error, context) => void` | `undefined` | 捕获原始错误对象时触发，适合接入业务自己的错误系统。 |

@@ -114,6 +114,7 @@ window.__FEDERATION__.__OBSERVABILITY__.runtime_host.findReports({
   remote: 'remote1',
 });
 window.__FEDERATION__.__OBSERVABILITY__.runtime_host.exportReport('mf-...');
+window.__FEDERATION__.__OBSERVABILITY__.runtime_host.getRuntimeState();
 ```
 
 If you want to observe loading chains in development, or if the page stays in a
@@ -256,6 +257,71 @@ Please tell me whether the load succeeded, where it failed, who likely owns the 
 <paste report JSON>
 ```
 
+## Divebell Integration
+
+Enable Divebell synchronization when an agent or browser tool needs stable
+targets, waitable statuses, and safe actions instead of reading raw reports
+directly:
+
+```ts
+ObservabilityPlugin({
+  level: 'verbose',
+  divebell: {
+    source: 'module-federation',
+  },
+});
+```
+
+`divebell: true` reuses the Divebell runtime installed on `window`, or creates
+one when needed. The object form can also provide a custom `runtime` or browser
+`host`. Divebell output is diagnostic-only: registration or synchronization
+errors do not change Module Federation loading results.
+
+The plugin registers these targets:
+
+| Target | Type | Statuses | Purpose |
+| --- | --- | --- | --- |
+| `mf:remote:<remoteName>` | `mf.remote` | `registered`, `loading`, `ready`, `error`, `recovered` | Overall state of one remote. |
+| `mf:remote:<remoteName>:expose:<exposeName>` | `mf.remote.expose` | `registered`, `loading`, `ready`, `error`, `recovered` | Wait for one exposed module to become usable. |
+| `mf:shared:<sharedName>:<version>:<shareScope>` | `mf.shared` | `unloaded`, `loading`, `loaded`, `recovered`, `error` | Inspect one observed shared dependency entry. |
+| `mf:shared-conflict:<sharedName>:<shareScope>` | `mf.shared.conflict` | `warning` | Diagnose multiple versions of a singleton shared dependency. |
+
+Remote, expose, and shared snapshots include a stable `instanceRef`. Use it to
+separate reports and runtime state when more than one Module Federation instance
+exists on the page. Manifest and remoteEntry details remain phases on the
+remote/expose data; the plugin does not create separate manifest or remoteEntry
+targets.
+
+Common commands:
+
+```bash
+divebell targets --url "http://127.0.0.1:3005/observability"
+divebell wait-for mf:remote:runtime_remote2:expose:ButtonOldAnt ready --url "http://127.0.0.1:3005/observability"
+divebell run-action mf:get-runtime-state --url "http://127.0.0.1:3005/observability"
+```
+
+Safe actions registered by the plugin:
+
+- `mf:get-runtime-state`
+- `mf:list-reports`
+- `mf:get-latest-report`
+- `mf:get-report`
+- `mf:export-report`
+- `mf:get-federation-global`
+- `mf:get-federation-module-info`
+- `mf:list-federation-instances`
+- `mf:get-federation-instance-config`
+
+`mf:list-reports` accepts `traceId`, `instanceRef`, `remote`, `expose`,
+`shared`, `status`, `outcome`, and `limit` filters.
+
+The browser reader's `getRuntimeState()` method and the
+`mf:get-runtime-state` action return the same safe state model. It includes
+stable instance references, roles and evidence, remotes, loaded producers,
+share-scope summaries, Bridge state, consumer-to-producer relationships,
+deployment `moduleInfo`, and capability completeness. Prefer `instanceRef`
+over array indexes when selecting an instance.
+
 ## Runtime Options
 
 `ObservabilityPlugin(options)` supports these runtime options:
@@ -279,6 +345,11 @@ Please tell me whether the load succeeded, where it failed, who likely owns the 
 | `react.injectLoadedCallback` | `boolean` | `false` | Explicitly wrap matched remote React components and inject `onMFRemoteLoaded`. This changes the component reference; use it as a temporary debugging option and remove it after the issue is fixed. |
 | `react.remoteIds` | `string[]` | `[]` | Limit callback injection to specific remote requests, such as `remote/Button` or `./Button`. Empty means no remote filter. |
 | `react.defaultExportMode` | `'preserve' \| 'component'` | auto | Controls whether `{ default: Component }` remotes return the wrapped component directly. Usually keep the default. |
+| `divebell` | `boolean \| DivebellObservabilityOptions` | `false` | Synchronize reports into Divebell targets and register safe actions. `true` uses the default browser host/runtime. |
+| `divebell.enabled` | `boolean` | `true` | Disable synchronization while retaining a shared Divebell options object. |
+| `divebell.source` | `string` | `'module-federation'` | Source attached to registered Divebell targets, snapshots, and actions. |
+| `divebell.runtime` | `DivebellCore` | auto | Use an existing Divebell runtime instead of resolving or creating one. |
+| `divebell.host` | `DivebellWindowHost` | `window` | Browser host used to resolve or install the Divebell runtime. |
 | `onEvent` | `(event, report, context) => void` | `undefined` | Called whenever an observability event is recorded. |
 | `onReport` | `(report, context) => void` | `undefined` | Called whenever a report is updated. Production apps commonly upload reports here. |
 | `onRawError` | `(error, context) => void` | `undefined` | Called with the original error object for integration with your own error system. |
