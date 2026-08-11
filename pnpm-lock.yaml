@@ -3012,8 +3012,8 @@ importers:
         specifier: ^19.1.5
         version: 19.2.3(@types/react@19.2.14)
       zephyr-rspress-plugin:
-        specifier: ^1.1.2
-        version: 1.1.2(@rsbuild/core@2.1.10(@module-federation/runtime-tools@2.8.2)(core-js@3.49.0))(@rspack/core@2.1.8(@module-federation/runtime-tools@2.8.2)(@swc/helpers@0.5.23))(@rspress/core@2.0.14(@module-federation/runtime-tools@2.8.2)(@rspack/core@2.1.8(@module-federation/runtime-tools@2.8.2)(@swc/helpers@0.5.23))(@types/mdast@4.0.4)(@types/react@19.2.14)(core-js@3.49.0)(micromark-util-types@2.0.2)(micromark@4.0.2))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4))
+        specifier: ^1.2.2
+        version: 1.2.2(@rsbuild/core@2.1.10(@module-federation/runtime-tools@2.8.2)(core-js@3.36.1))(@rspack/core@1.3.9(@swc/helpers@0.5.23))(@rspress/core@2.0.14(@module-federation/runtime-tools@2.8.2)(@rspack/core@1.3.9(@swc/helpers@0.5.23))(@types/mdast@4.0.4)(@types/react@19.2.14)(core-js@3.36.1)(micromark-util-types@2.0.2)(micromark@4.0.2))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4))
 
   packages/assemble-release-plan:
     dependencies:
@@ -16330,6 +16330,9 @@ packages:
   axios@1.18.0:
     resolution: {integrity: sha512-E32NzpYKp++W7XRe52rHiXV2ehxmh3wbdgO7MHeFM+vqxLBYHzt0ElkiImtOBxtOmyp0yoC8C6uESVV84Y2/hw==}
 
+  axios@1.19.0:
+    resolution: {integrity: sha512-ht/iuYZXEjFxLH/Hkezgd7m6JKlHHXEUSneaDz8uZe1Gj5QZtCnpyDsckvAiEnT89OEbCLmnte4R4sn7P0EKFw==}
+
   axobject-query@4.1.0:
     resolution: {integrity: sha512-qIj0G9wZbMGNLjLmg1PT6v2mE9AH2zlnADJD/2tC6E00hgmhUOfEB6greHPAfLRSufHqROIUTkw6E+M3lH0PTQ==}
     engines: {node: '>= 0.4'}
@@ -19900,8 +19903,14 @@ packages:
   git-up@7.0.0:
     resolution: {integrity: sha512-ONdIrbBCFusq1Oy0sC71F5azx8bVkvtZtMJAsv+a6lz5YAmbNnLD6HAB4gptHZVLPR8S2/kVN6Gab7lryq5+lQ==}
 
+  git-up@8.1.1:
+    resolution: {integrity: sha512-FDenSF3fVqBYSaJoYy1KSc2wosx0gCvKP+c+PRBht7cAaiCeQlBtfBDX9vgnNOHmdePlSFITVcn4pFfcgNvx3g==}
+
   git-url-parse@15.0.0:
     resolution: {integrity: sha512-5reeBufLi+i4QD3ZFftcJs9jC26aULFLBU23FeKM/b1rI0K6ofIeAblmDVO7Ht22zTDE9+CkJ3ZVb0CgJmz3UQ==}
+
+  git-url-parse@16.1.0:
+    resolution: {integrity: sha512-cPLz4HuK86wClEW7iDdeAKcCVlWXmrLpb2L+G9goW0Z1dtpNS6BXXSOckUTlJT/LDQViE1QZKstNORzHsLnobw==}
 
   github-slugger@1.5.0:
     resolution: {integrity: sha512-wIh+gKBI9Nshz2o46B0B3f5k/W+WI9ZAv6y5Dn5WJ5SK1t0TnDimB4WE5rmTD05ZAIn8HALCZVmCsvj0w0v0lw==}
@@ -21295,6 +21304,10 @@ packages:
 
   jiti@2.6.1:
     resolution: {integrity: sha512-ekilCSN1jwRvIbgeg/57YFh8qQDNbwDb9xT/qu2DAHbFFZUicIl4ygVaAvzveMhMVr3LnpSKTNnwt8PoOfmKhQ==}
+    hasBin: true
+
+  jiti@2.7.0:
+    resolution: {integrity: sha512-AC/7JofJvZGrrneWNaEnJeOLUx+JlGt7tNa0wZiRPT4MY1wmfKjt2+6O2p2uz2+skll8OZZmJMNqeke7kKbNgQ==}
     hasBin: true
 
   jju@1.4.0:
@@ -23211,6 +23224,10 @@ packages:
 
   parse-url@8.1.0:
     resolution: {integrity: sha512-xDvOoLU5XRrcOZvnI6b8zA6n9O9ejNk/GExuz1yBuWUGn9KA97GI6HTs6u02wKara1CeVmZhH+0TZFdWScR89w==}
+
+  parse-url@9.2.0:
+    resolution: {integrity: sha512-bCgsFI+GeGWPAvAiUv63ZorMeif3/U0zaXABGJbOWt5OH2KCaPHF6S+0ok4aqM9RuIPGyZdx9tR9l13PsW4AYQ==}
+    engines: {node: '>=14.13.0'}
 
   parse5-htmlparser2-tree-adapter@7.1.0:
     resolution: {integrity: sha512-ruw5xyKs6lrpo9x9rCZqZZnIUntICjQAd0Wsmp396Ul9lN/h+ifgVV1x1gZHi8euej6wTfpqX8j+BFQxF0NS/g==}
@@ -28762,29 +28779,29 @@ packages:
     resolution: {integrity: sha512-xYqdZFUK/VYazNl/oCDYN+3WloWQwMfZxBoiNt6qNyk+xfOdi598muWE42rNZFp1kNOiqW936q5RhUdnpqElSg==}
     engines: {node: '>=18'}
 
-  zephyr-agent@1.1.2:
-    resolution: {integrity: sha512-mJlj9VL2P+wzaLge5sF27LrYBP+wVj+5BiNaQIPTsLSiU9Om3CXHXWTR6ss0w4FIdYazrJyAq2KFw3PgKsBDgA==}
+  zephyr-agent@1.2.2:
+    resolution: {integrity: sha512-lN/QvWcNj/+5amGqp+FbvpOXGF1yFUptpl8kWSkTMbYiMJGX6qL/5E7QRT9wtD9bgPsqq8HsSG+MkZMPNG3jlw==}
 
-  zephyr-edge-contract@1.1.2:
-    resolution: {integrity: sha512-ZeHYPIrDifKutPzTsjPjHP9JIdPqTpyBESeHHZzG8VSzo6UT58tpwUnDDgJtF/ONwresnD/0ypEYxfBxtcrV6Q==}
+  zephyr-edge-contract@1.2.2:
+    resolution: {integrity: sha512-2/PdLJ8CBFL7t9L047ejL/adhxv7oVC9kTgvckOuk6EauU9Y1CQ88JsnPB4EkKb/fYjZmurtp43E79MhRU5Rjw==}
 
-  zephyr-rsbuild-plugin@1.1.2:
-    resolution: {integrity: sha512-MhXfQ9oCP76LBDDc8Yl21ridsXFMobvTIjjyYbi+4LpOIof8ap+ZLyVtE14S1w4VyDerZNIzenOEJGbvJ5I/9g==}
+  zephyr-rsbuild-plugin@1.2.2:
+    resolution: {integrity: sha512-jeKcM16VHCUutttPgXuj6wPeJ9mT/OVEE/vlHPGOqkmu/vEow8Zf1pVKvurgxP63knoS1lFN8XKzuVZ09Ul9KA==}
     peerDependencies:
       '@rsbuild/core': ^1.0.0 || ^2.0.0-0
 
-  zephyr-rspack-plugin@1.1.2:
-    resolution: {integrity: sha512-OFIghyy2GXaLB/RLJCEWmRoXQf0FNvNB2VQJL3mWofk8oNRu1PxYCxCJ3ThAGN2tRJv0sCjMpzqpuHU+h3Kv/A==}
+  zephyr-rspack-plugin@1.2.2:
+    resolution: {integrity: sha512-W2Mj9LSLL3HPDdP1WzNnSAp4fnQufSBDzsCPDQy+s9fLZm0kLZMxcS29f06E78t05YyvOg+ZrWqB1y/d7VENYw==}
     peerDependencies:
       '@rspack/core': ^1.0.0 || ^2.0.0-0
 
-  zephyr-rspress-plugin@1.1.2:
-    resolution: {integrity: sha512-Leu8MDGzJrzUneP4fnLN1YGO6vHqLuSQ5LtIBbnmZP2IzGoEniiqRaj33oqNGK9cyWZfj8F5TvwHbbJ4vemYdA==}
+  zephyr-rspress-plugin@1.2.2:
+    resolution: {integrity: sha512-zjpHRN7h2lJ9ssV6h5tfviijsxp+tH4Ipm6Q/aTEULxCrWgFzvT9jPowXuQAJb5XT6DwPJT5QkixJjJ62gVWmA==}
     peerDependencies:
       '@rspress/core': ^2.0.0
 
-  zephyr-xpack-internal@1.1.2:
-    resolution: {integrity: sha512-IYs5aMOxGXH3YGv7Z9uW5pH9/r15UNNEg4CdSuWDDTJ7MskMVmHjSYwM57AYxHvMw/loVXOY1PQDVaUxklOUfQ==}
+  zephyr-xpack-internal@1.2.2:
+    resolution: {integrity: sha512-SejAjAhoYX2lSTlFVybeZzbcDeVbk299XIQ458qIx57Vy9u01/CIWeBo14qZam1pEcZT2j/3Xio/6wZfIdk3bg==}
 
   zod-to-json-schema@3.25.1:
     resolution: {integrity: sha512-pM/SU9d3YAggzi6MtR4h7ruuQlqKtad8e9S0fmxcMi+ueAK5Korys/aWcV9LIIHTVbj01NdzxcnXSN+O74ZIVA==}
@@ -46045,7 +46062,22 @@ snapshots:
       axios: 1.18.0(debug@4.4.3)
       is-retry-allowed: 2.2.0
 
+  axios-retry@4.5.0(axios@1.19.0):
+    dependencies:
+      axios: 1.19.0(debug@4.4.3)
+      is-retry-allowed: 2.2.0
+
   axios@1.18.0(debug@4.4.3):
+    dependencies:
+      follow-redirects: 1.16.0(debug@4.4.3)
+      form-data: 4.0.6
+      https-proxy-agent: 5.0.1
+      proxy-from-env: 2.1.0
+    transitivePeerDependencies:
+      - debug
+      - supports-color
+
+  axios@1.19.0(debug@4.4.3):
     dependencies:
       follow-redirects: 1.16.0(debug@4.4.3)
       form-data: 4.0.6
@@ -50775,9 +50807,18 @@ snapshots:
       is-ssh: 1.4.1
       parse-url: 8.1.0
 
+  git-up@8.1.1:
+    dependencies:
+      is-ssh: 1.4.1
+      parse-url: 9.2.0
+
   git-url-parse@15.0.0:
     dependencies:
       git-up: 7.0.0
+
+  git-url-parse@16.1.0:
+    dependencies:
+      git-up: 8.1.1
 
   github-slugger@1.5.0: {}
 
@@ -52726,6 +52767,8 @@ snapshots:
   jiti@2.4.2: {}
 
   jiti@2.6.1: {}
+
+  jiti@2.7.0: {}
 
   jju@1.4.0:
     optional: true
@@ -55467,6 +55510,11 @@ snapshots:
 
   parse-url@8.1.0:
     dependencies:
+      parse-path: 7.1.0
+
+  parse-url@9.2.0:
+    dependencies:
+      '@types/parse-path': 7.1.0
       parse-path: 7.1.0
 
   parse5-htmlparser2-tree-adapter@7.1.0:
@@ -64124,68 +64172,65 @@ snapshots:
 
   yoctocolors@2.2.0: {}
 
-  zephyr-agent@1.1.2:
+  zephyr-agent@1.2.2:
     dependencies:
       '@toon-format/toon': 0.9.0
-      axios: 1.18.0(debug@4.4.3)
-      axios-retry: 4.5.0(axios@1.18.0)
+      axios: 1.19.0(debug@4.4.3)
+      axios-retry: 4.5.0(axios@1.19.0)
       debug: 4.4.3(supports-color@8.1.1)
       eventsource: 4.1.0
-      git-url-parse: 15.0.0
+      git-url-parse: 16.1.0
       https-proxy-agent: 7.0.6
       is-ci: 4.1.0
+      jiti: 2.7.0
       jose: 5.10.0
       node-persist: 4.0.4
       open: 10.2.0
       proper-lockfile: 4.1.2
-      tslib: 2.8.1
-      zephyr-edge-contract: 1.1.2
+      zephyr-edge-contract: 1.2.2
     transitivePeerDependencies:
       - supports-color
 
-  zephyr-edge-contract@1.1.2:
-    dependencies:
-      tslib: 2.8.1
+  zephyr-edge-contract@1.2.2: {}
 
-  zephyr-rsbuild-plugin@1.1.2(@rsbuild/core@2.1.10(@module-federation/runtime-tools@2.8.2)(core-js@3.49.0))(@rspack/core@2.1.8(@module-federation/runtime-tools@2.8.2)(@swc/helpers@0.5.23))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4)):
+  zephyr-rsbuild-plugin@1.2.2(@rsbuild/core@2.1.10(@module-federation/runtime-tools@2.8.2)(core-js@3.36.1))(@rspack/core@1.3.9(@swc/helpers@0.5.23))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4)):
     dependencies:
-      '@rsbuild/core': 2.1.10(@module-federation/runtime-tools@2.8.2)(core-js@3.49.0)
-      zephyr-rspack-plugin: 1.1.2(@rspack/core@2.1.8(@module-federation/runtime-tools@2.8.2)(@swc/helpers@0.5.23))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4))
+      '@rsbuild/core': 2.1.10(@module-federation/runtime-tools@2.8.2)(core-js@3.36.1)
+      zephyr-agent: 1.2.2
+      zephyr-rspack-plugin: 1.2.2(@rspack/core@1.3.9(@swc/helpers@0.5.23))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4))
+      zephyr-xpack-internal: 1.2.2(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4))
     transitivePeerDependencies:
       - '@rspack/core'
       - supports-color
       - webpack
 
-  zephyr-rspack-plugin@1.1.2(@rspack/core@2.1.8(@module-federation/runtime-tools@2.8.2)(@swc/helpers@0.5.23))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4)):
+  zephyr-rspack-plugin@1.2.2(@rspack/core@1.3.9(@swc/helpers@0.5.23))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4)):
     dependencies:
-      '@rspack/core': 2.1.8(@module-federation/runtime-tools@2.8.2)(@swc/helpers@0.5.23)
-      tslib: 2.8.1
-      zephyr-agent: 1.1.2
-      zephyr-xpack-internal: 1.1.2(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4))
+      '@rspack/core': 1.3.9(@swc/helpers@0.5.23)
+      zephyr-agent: 1.2.2
+      zephyr-xpack-internal: 1.2.2(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4))
     transitivePeerDependencies:
       - supports-color
       - webpack
 
-  zephyr-rspress-plugin@1.1.2(@rsbuild/core@2.1.10(@module-federation/runtime-tools@2.8.2)(core-js@3.49.0))(@rspack/core@2.1.8(@module-federation/runtime-tools@2.8.2)(@swc/helpers@0.5.23))(@rspress/core@2.0.14(@module-federation/runtime-tools@2.8.2)(@rspack/core@2.1.8(@module-federation/runtime-tools@2.8.2)(@swc/helpers@0.5.23))(@types/mdast@4.0.4)(@types/react@19.2.14)(core-js@3.49.0)(micromark-util-types@2.0.2)(micromark@4.0.2))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4)):
+  zephyr-rspress-plugin@1.2.2(@rsbuild/core@2.1.10(@module-federation/runtime-tools@2.8.2)(core-js@3.36.1))(@rspack/core@1.3.9(@swc/helpers@0.5.23))(@rspress/core@2.0.14(@module-federation/runtime-tools@2.8.2)(@rspack/core@1.3.9(@swc/helpers@0.5.23))(@types/mdast@4.0.4)(@types/react@19.2.14)(core-js@3.36.1)(micromark-util-types@2.0.2)(micromark@4.0.2))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4)):
     dependencies:
-      '@rspress/core': 2.0.14(@module-federation/runtime-tools@2.8.2)(@rspack/core@2.1.8(@module-federation/runtime-tools@2.8.2)(@swc/helpers@0.5.23))(@types/mdast@4.0.4)(@types/react@19.2.14)(core-js@3.49.0)(micromark-util-types@2.0.2)(micromark@4.0.2)
-      tslib: 2.8.1
-      zephyr-agent: 1.1.2
-      zephyr-edge-contract: 1.1.2
-      zephyr-rsbuild-plugin: 1.1.2(@rsbuild/core@2.1.10(@module-federation/runtime-tools@2.8.2)(core-js@3.49.0))(@rspack/core@2.1.8(@module-federation/runtime-tools@2.8.2)(@swc/helpers@0.5.23))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4))
-      zephyr-xpack-internal: 1.1.2(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4))
+      '@rspress/core': 2.0.14(@module-federation/runtime-tools@2.8.2)(@rspack/core@1.3.9(@swc/helpers@0.5.23))(@types/mdast@4.0.4)(@types/react@19.2.14)(core-js@3.36.1)(micromark-util-types@2.0.2)(micromark@4.0.2)
+      zephyr-agent: 1.2.2
+      zephyr-edge-contract: 1.2.2
+      zephyr-rsbuild-plugin: 1.2.2(@rsbuild/core@2.1.10(@module-federation/runtime-tools@2.8.2)(core-js@3.36.1))(@rspack/core@1.3.9(@swc/helpers@0.5.23))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4))
+      zephyr-xpack-internal: 1.2.2(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4))
     transitivePeerDependencies:
       - '@rsbuild/core'
       - '@rspack/core'
       - supports-color
       - webpack
 
-  zephyr-xpack-internal@1.1.2(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4)):
+  zephyr-xpack-internal@1.2.2(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4)):
     dependencies:
       '@module-federation/automatic-vendor-federation': 1.2.1(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4))
-      tslib: 2.8.1
-      zephyr-agent: 1.1.2
-      zephyr-edge-contract: 1.1.2
+      zephyr-agent: 1.2.2
+      zephyr-edge-contract: 1.2.2
     transitivePeerDependencies:
       - supports-color
       - webpack
