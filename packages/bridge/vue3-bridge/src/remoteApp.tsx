@@ -305,6 +305,27 @@ export default defineComponent({
     });
 
     watch(
+      hasSSRPayload,
+      (next, prev) => {
+        if (!prev || next) return;
+        // Host cleared SSR without remounting (SPA after seedConsumed). Destroy
+        // the provider on the current mount node before Vue drops the slot tree,
+        // then CSR-render into the replacement mount.
+        csrOnly = true;
+        hydratedOnce = true;
+        const dom = rootRef.value as HTMLElement | null;
+        destroyComponent();
+        if (dom) clearBridgeSSRMountAttrs(dom);
+        void nextTick(() => {
+          if (isActive.value && !controller.signal.aborted) {
+            void renderComponent();
+          }
+        });
+      },
+      { flush: 'pre' },
+    );
+
+    watch(
       () => props.providerInfo,
       () => {
         providerGeneration += 1;

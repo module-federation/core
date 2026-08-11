@@ -36,9 +36,22 @@ function areRenderInputsEqual(
   );
 }
 
+const pendingBridgeDestroys: Array<() => void> = [];
+
 function scheduleBridgeDestroy(destroy: () => void) {
-  if (typeof queueMicrotask === 'function') queueMicrotask(destroy);
-  else void Promise.resolve().then(destroy);
+  pendingBridgeDestroys.push(destroy);
+  if (typeof queueMicrotask === 'function') {
+    queueMicrotask(flushBridgeDestroys);
+  } else {
+    void Promise.resolve().then(flushBridgeDestroys);
+  }
+}
+
+function flushBridgeDestroys() {
+  while (pendingBridgeDestroys.length > 0) {
+    const destroy = pendingBridgeDestroys.shift();
+    destroy?.();
+  }
 }
 
 function clearBridgeSSRMountAttrs(dom: HTMLElement) {
@@ -142,6 +155,9 @@ export const RemoteAppWrapper = forwardRef<HTMLDivElement, any>(function (
   LoggerInstance.debug(`RemoteAppWrapper instance from props >>>`, instance);
 
   useEffect(() => {
+    // StrictMode remounts schedule destroy on a microtask; flush first so the
+    // new provider never createRoots on a DOM that still owns the prior root.
+    flushBridgeDestroys();
     destroyedRef.current = false;
     lastRenderInputsRef.current = undefined;
     try {
@@ -186,6 +202,7 @@ export const RemoteAppWrapper = forwardRef<HTMLDivElement, any>(function (
   }, [moduleName, providerInfo]);
 
   useEffect(() => {
+    flushBridgeDestroys();
     const provider = providerInfoRef.current;
     const dom = rootRef.current;
     const signal = mountControllerRef.current?.signal;

@@ -302,4 +302,33 @@ describe('RemoteAppWrapper lifecycle', () => {
     expect(states.filter((state) => state?.ready === true)).toHaveLength(1);
     expect(states.filter((state) => state === undefined)).toHaveLength(1);
   });
+
+  it('flushes deferred destroy before a remount renders on the same DOM', async () => {
+    const order: string[] = [];
+    let providerCount = 0;
+    const providerInfo = () => {
+      const id = ++providerCount;
+      return {
+        render: rs.fn(() => {
+          order.push(`render-${id}`);
+        }),
+        destroy: rs.fn(() => {
+          order.push(`destroy-${id}`);
+        }),
+      };
+    };
+
+    const view = render(
+      <React.StrictMode>
+        <RemoteAppWrapper {...baseProps} providerInfo={providerInfo} />
+      </React.StrictMode>,
+    );
+
+    await waitFor(() => expect(order.includes('render-2')).toBe(true));
+    const destroy1 = order.indexOf('destroy-1');
+    const render2 = order.indexOf('render-2');
+    expect(destroy1).toBeGreaterThanOrEqual(0);
+    expect(render2).toBeGreaterThan(destroy1);
+    view.unmount();
+  });
 });

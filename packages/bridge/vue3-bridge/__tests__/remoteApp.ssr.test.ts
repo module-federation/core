@@ -262,6 +262,8 @@ describe('RemoteApp SSR lifecycle', () => {
 
     expect(root.querySelector('[data-mf-bridge-slot="true"]')).not.toBeNull();
     expect(root.innerHTML).toContain('server remote');
+    expect(providerReturn.render).toHaveBeenCalledTimes(1);
+    expect(providerReturn.destroy).not.toHaveBeenCalled();
 
     state.ssr = undefined;
     await nextTick();
@@ -269,6 +271,10 @@ describe('RemoteApp SSR lifecycle', () => {
 
     expect(root.querySelector('[data-mf-bridge-slot="true"]')).toBeNull();
     expect(root.querySelector(`[${MF_BRIDGE_SSR_ATTR}="true"]`)).toBeNull();
+    expect(providerReturn.destroy).toHaveBeenCalledTimes(1);
+    expect(providerReturn.render).toHaveBeenCalledTimes(2);
+    expect(providerReturn.render.mock.calls[1][0].ssrState).toBeUndefined();
+    expect(providerReturn.render.mock.calls[1][0].dom?.isConnected).toBe(true);
     app.unmount();
   });
 });
