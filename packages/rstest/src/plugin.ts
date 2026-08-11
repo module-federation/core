@@ -160,6 +160,9 @@ export const federation = (
         );
       }
 
+      if (isNodeTarget) {
+        rsbuildFederationApi.registerNodeTargetConfigOwner?.();
+      }
       rsbuildFederationApi.registerOptionsTransformer(normalizeOptions);
       getEffectiveOptions = rsbuildFederationApi.getOptions;
     }
