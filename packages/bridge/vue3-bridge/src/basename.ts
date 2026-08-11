@@ -23,8 +23,10 @@ function isCatchAllPath(path: string): boolean {
 /**
  * Derive the Bridge remote basename from the host route.
  *
- * Prefers the last matched record that looks like a catch-all (nested layouts),
- * otherwise the last matched path. Compatible with Vue Router and Nuxt catch-alls.
+ * Prefers the last matched catch-all record (nested layouts / issue #4212).
+ * If no catch-all is present, keeps the historical `matched[0]` fallback so a
+ * remote mounted under a parent layout (e.g. `/apps`) is not rebased onto a
+ * leaf child path (e.g. `/apps/settings`).
  */
 export function deriveBasenameFromRoute(
   route: Pick<RouteLocationNormalizedLoaded, 'matched'> | null | undefined,
@@ -41,8 +43,8 @@ export function deriveBasenameFromRoute(
     }
   }
 
-  const lastPath = matched[matched.length - 1]?.path;
-  return lastPath ? stripCatchAllPath(lastPath) : '/';
+  const firstPath = matched[0]?.path;
+  return firstPath ? stripCatchAllPath(firstPath) : '/';
 }
 
 /**

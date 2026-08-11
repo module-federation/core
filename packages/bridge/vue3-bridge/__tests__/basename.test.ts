@@ -71,15 +71,15 @@ describe('deriveBasenameFromRoute', () => {
     ).toBe('/apps/remote1');
   });
 
-  it('falls back to last matched path when no catch-all', () => {
+  it('falls back to first matched path when no catch-all', () => {
     expect(
       deriveBasenameFromRoute({
         matched: [{ path: '/apps' } as any, { path: '/apps/settings' } as any],
       }),
-    ).toBe('/apps/settings');
+    ).toBe('/apps');
   });
 
-  it('keeps nested dynamic params that are not catch-alls', () => {
+  it('keeps nested dynamic params that are not catch-alls on matched[0]', () => {
     expect(
       deriveBasenameFromRoute({
         matched: [
@@ -87,7 +87,7 @@ describe('deriveBasenameFromRoute', () => {
           { path: '/tenant/:tenantId/admin' } as any,
         ],
       }),
-    ).toBe('/tenant/:tenantId/admin');
+    ).toBe('/tenant/:tenantId');
   });
 });
 
