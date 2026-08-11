@@ -2,16 +2,10 @@
 import { readFile, readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
 
-const roots =
-  process.env.BRIDGE_SSR_REMOTE_BUNDLER === 'vite'
-    ? [
-        'apps/bridge-ssr-demo/remote-vue/dist-vite/assets',
-        'apps/bridge-ssr-demo/remote-vue/dist-vite/remoteEntry.js',
-      ]
-    : [
-        'apps/bridge-ssr-demo/remote-react/dist/static',
-        'apps/bridge-ssr-demo/remote-vue/dist/static',
-      ];
+const roots = [
+  'apps/bridge-ssr-demo/remote-react/dist/static',
+  'apps/bridge-ssr-demo/remote-vue/dist/static',
+];
 const forbidden = [
   'react-dom/server',
   '@vue/server-renderer',

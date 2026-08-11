@@ -115,14 +115,6 @@ export function serializeBridgeJSON(value: BridgeJSONValue): string {
     .replace(/\u2029/g, '\\u2029');
 }
 
-export function serializeBridgeSSRResult(result: BridgeSSRResult): string {
-  assertBridgeSSRResult(result);
-  return JSON.stringify(result)
-    .replace(/</g, '\\u003c')
-    .replace(/\u2028/g, '\\u2028')
-    .replace(/\u2029/g, '\\u2029');
-}
-
 export function toBridgeSSRReference(
   result: BridgeSSRResult,
 ): BridgeSSRReference {

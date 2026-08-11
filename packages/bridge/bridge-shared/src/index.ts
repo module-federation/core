@@ -33,7 +33,6 @@ export {
   hasBridgeSSRMarkup,
   serializeBridgeJSON,
   serializeBridgeSSRStateEnvelope,
-  serializeBridgeSSRResult,
   toBridgeSSRReference,
 } from './ssr';
 export { renderRemoteBridge } from './renderRemoteBridge';

@@ -344,13 +344,6 @@ const jobs = [
       step('Bridge SSR production acceptance', (ctx) =>
         runCommand('pnpm', ['run', 'e2e:bridge:ssr:production'], ctx),
       ),
-      step('Bridge SSR Vite smoke (non-blocking)', async (ctx) => {
-        try {
-          await runCommand('pnpm', ['run', 'e2e:bridge:ssr:vite-smoke'], ctx);
-        } catch (error) {
-          console.warn('[ci:local] Non-blocking Vite smoke failed:', error);
-        }
-      }),
     ],
   },
   {

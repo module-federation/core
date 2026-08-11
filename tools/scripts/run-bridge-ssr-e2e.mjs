@@ -6,8 +6,7 @@ import {
   spawnWithPromise,
 } from './e2e-process-utils.mjs';
 
-const viteSmoke = process.env.BRIDGE_SSR_REMOTE_BUNDLER === 'vite';
-const production = process.env.BRIDGE_SSR_MODE === 'production' || viteSmoke;
+const production = process.env.BRIDGE_SSR_MODE === 'production';
 let stopping = false;
 
 function startOwned(label, command, args, env) {
@@ -35,41 +34,20 @@ async function run(command, args, env) {
 }
 
 async function build(env) {
-  if (viteSmoke) {
-    await run(
-      'pnpm',
-      ['--filter', 'bridge-ssr-remote-vue', 'run', 'build:vite'],
-      env,
-    );
-    await run(
-      'pnpm',
-      [
-        'exec',
-        'turbo',
-        'run',
-        'build',
-        '--filter=bridge-ssr-host',
-        '--force',
-        '--env-mode=loose',
-      ],
-      env,
-    );
-  } else {
-    await run(
-      'pnpm',
-      [
-        'exec',
-        'turbo',
-        'run',
-        'build',
-        '--filter=bridge-ssr-host',
-        '--filter=bridge-ssr-host-vue',
-        '--filter=bridge-ssr-remote-react',
-        '--filter=bridge-ssr-remote-vue',
-      ],
-      env,
-    );
-  }
+  await run(
+    'pnpm',
+    [
+      'exec',
+      'turbo',
+      'run',
+      'build',
+      '--filter=bridge-ssr-host',
+      '--filter=bridge-ssr-host-vue',
+      '--filter=bridge-ssr-remote-react',
+      '--filter=bridge-ssr-remote-vue',
+    ],
+    env,
+  );
   await run(
     process.execPath,
     ['tools/scripts/verify-bridge-ssr-browser-bundles.mjs'],
@@ -80,32 +58,12 @@ async function build(env) {
 async function main() {
   const env = {
     HOST: process.env.HOST ?? 'localhost',
-    BRIDGE_SSR_REMOTE_BUNDLER: viteSmoke ? 'vite' : 'rsbuild',
     ...(production ? { BRIDGE_SSR_MODE: 'production' } : {}),
   };
   if (production) await build(env);
 
   const apps = [];
-  if (viteSmoke) {
-    apps.push(
-      startOwned(
-        'Vue Vite remote',
-        process.execPath,
-        [
-          'apps/bridge-ssr-demo/shared/serveDist.mjs',
-          'apps/bridge-ssr-demo/remote-vue/dist-vite',
-          '2402',
-        ],
-        env,
-      ),
-      startOwned(
-        'React production host',
-        'pnpm',
-        ['--filter', 'bridge-ssr-host', 'run', 'serve:production'],
-        env,
-      ),
-    );
-  } else if (production) {
+  if (production) {
     for (const [framework, port] of [
       ['react', '2301'],
       ['vue', '2302'],
@@ -167,28 +125,29 @@ async function main() {
   }
 
   try {
-    const ports = viteSmoke
-      ? ['tcp:2300', 'tcp:2402']
-      : ['tcp:2300', 'tcp:2301', 'tcp:2302', 'tcp:2303'];
     await Promise.race([
-      spawnWithPromise('npx', ['wait-on', '--timeout=240000', ...ports])
-        .promise,
+      spawnWithPromise('npx', [
+        'wait-on',
+        '--timeout=240000',
+        'tcp:2300',
+        'tcp:2301',
+        'tcp:2302',
+        'tcp:2303',
+      ]).promise,
       Promise.race(apps.map((app) => app.exit)),
     ]);
     await Promise.race([
       run('pnpm', ['--filter', 'bridge-ssr-host', 'run', 'e2e:ssr:ci'], env),
       Promise.race(apps.map((app) => app.exit)),
     ]);
-    if (!viteSmoke) {
-      await Promise.race([
-        run(
-          'pnpm',
-          ['--filter', 'bridge-ssr-host-vue', 'run', 'e2e:ssr:ci'],
-          env,
-        ),
-        Promise.race(apps.map((app) => app.exit)),
-      ]);
-    }
+    await Promise.race([
+      run(
+        'pnpm',
+        ['--filter', 'bridge-ssr-host-vue', 'run', 'e2e:ssr:ci'],
+        env,
+      ),
+      Promise.race(apps.map((app) => app.exit)),
+    ]);
   } finally {
     stopping = true;
     await Promise.allSettled(

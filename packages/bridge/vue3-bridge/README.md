@@ -8,11 +8,6 @@ This template should help get you started developing with Vue 3 and TypeScript i
 
 - Use [vue-tsc](https://github.com/vuejs/language-tools/tree/master/packages/tsc) for performing the same type checking from the command line, or for generating d.ts files for SFCs.
 
-## Bridge SSR V1 hydration
+## Bridge SSR
 
-Serialize only `toBridgeSSRReference(result)` in host JSON. On the client, create
-`createBridgeHydrationRegistry(document)` and call
-`provideBridgeHydrationRegistry(app, registry)` before `app.mount(...)`. The full
-server result is rendered once into its document slot; the client reference
-consumes that slot's validated snapshot once. Missing slots use CSR, while
-malformed slots throw. Vue Router 4 is the supported V1 router.
+See the [Bridge SSR guide](https://module-federation.io/guide/bridge/ssr) for hydration setup with Vue 3.
