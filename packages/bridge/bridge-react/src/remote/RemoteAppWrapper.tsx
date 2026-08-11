@@ -275,7 +275,10 @@ export const RemoteAppWrapper = forwardRef<HTMLDivElement, any>(function (
         };
         await provider.render(currentRenderProps);
         if (signal.aborted || !dom.isConnected) {
-          provider.destroy?.({ dom });
+          if (!destroyedRef.current) {
+            destroyedRef.current = true;
+            provider.destroy?.({ dom });
+          }
           return;
         }
         instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(

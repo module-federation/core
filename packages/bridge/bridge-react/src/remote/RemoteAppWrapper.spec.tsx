@@ -218,6 +218,35 @@ describe('RemoteAppWrapper lifecycle', () => {
     expect(registry.peek('remote/app', 'remote-1')).toBeUndefined();
   });
 
+  it('destroys provider only once when render settles after unmount', async () => {
+    const queued: Array<() => void> = [];
+    rs.spyOn(globalThis, 'queueMicrotask').mockImplementation((callback) => {
+      queued.push(callback as () => void);
+    });
+    let finishRender!: () => void;
+    const provider = {
+      render: rs.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            finishRender = resolve;
+          }),
+      ),
+      destroy: rs.fn(),
+    };
+
+    const view = render(
+      <RemoteAppWrapper {...baseProps} providerInfo={() => provider} />,
+    );
+    await waitFor(() => expect(provider.render).toHaveBeenCalledOnce());
+
+    view.unmount();
+    finishRender();
+    for (const task of queued.splice(0)) {
+      await act(async () => task());
+    }
+    expect(provider.destroy).toHaveBeenCalledOnce();
+  });
+
   it('forces CSR when a second consumer loses the snapshot claim', async () => {
     const result = {
       protocolVersion: 1 as const,
