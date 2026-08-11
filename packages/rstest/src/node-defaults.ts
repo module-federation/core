@@ -7,7 +7,7 @@ export const withRstestDefaults = (
 ): ModuleFederationOptions => {
   if (options.experiments?.asyncStartup === false) {
     logger.warn(
-      'experiments.asyncStartup was set to false but is forced to true: rstest bootstraps federation containers inside test workers, which requires async startup.',
+      'experiments.asyncStartup is false and incompatible with Rstest federation startup; it is overridden with true.',
     );
   }
 
@@ -56,14 +56,14 @@ export const withNodeDefaults = (
 
   if (merged.library?.name != null && merged.library.name !== merged.name) {
     logger.warn(
-      `library.name "${String(merged.library.name)}" is overridden with the container name "${String(merged.name)}" so the container can be resolved in Node test workers.`,
+      `library.name "${String(merged.library.name)}" is incompatible with the container name "${String(merged.name)}" required by Node test workers; it is overridden.`,
     );
   }
 
   const userOptimizationTarget = merged.experiments?.optimization?.target;
   if (userOptimizationTarget != null && userOptimizationTarget !== 'node') {
     logger.warn(
-      `experiments.optimization.target "${String(userOptimizationTarget)}" is overridden with "node": rstest executes federation builds in Node test workers.`,
+      `experiments.optimization.target "${String(userOptimizationTarget)}" is incompatible with Node test workers; it is overridden with "node".`,
     );
   }
 
@@ -76,7 +76,7 @@ export const withNodeDefaults = (
 
   if (usesEsmLibrary) {
     logger.warn(
-      `library.type "${userLibraryType}" is overridden with "commonjs-module": rstest disables module output in Node test workers.`,
+      `library.type "${userLibraryType}" is incompatible with Rstest's CommonJS federation worker; it is overridden with "commonjs-module".`,
     );
   }
 
