@@ -100,15 +100,28 @@ export function createRemoteAppComponentFactory(
   >(info: LazyRemoteComponentInfo<T, E>) {
     const LazyComponent = createLazyRemoteComponent(info);
     return forwardRef<HTMLDivElement, RemoteComponentProps>((props, ref) => {
+      const ssrResult = (props as any).ssr;
+      const content =
+        typeof window === 'undefined' && ssrResult ? (
+          <RemoteApp
+            {...props}
+            moduleName={(props as any).moduleName || ssrResult.moduleName}
+            providerInfo={() => ({ render() {}, destroy() {} })}
+            exportName={info.export || 'default'}
+            fallback={info.fallback}
+            loading={info.loading}
+            ref={ref}
+          />
+        ) : (
+          <LazyComponent {...props} ref={ref} />
+        );
       return (
         <ErrorBoundary
           FallbackComponent={
             info.fallback as React.ComponentType<ErrorFallbackProps>
           }
         >
-          <React.Suspense fallback={info.loading}>
-            <LazyComponent {...props} ref={ref} />
-          </React.Suspense>
+          <React.Suspense fallback={info.loading}>{content}</React.Suspense>
         </ErrorBoundary>
       );
     });

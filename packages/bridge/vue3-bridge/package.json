@@ -15,6 +15,22 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "browser": {
+        "import": "./dist/index.js",
+        "require": "./dist/index.cjs"
+      },
+      "node": {
+        "import": "./dist/index.server.js",
+        "require": "./dist/index.server.cjs"
+      },
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./*": "./*"
+  },
   "files": [
     "dist/",
     "package.json",
@@ -28,7 +44,13 @@
   },
   "peerDependencies": {
     "vue": "=3",
-    "vue-router": "=4"
+    "vue-router": "=4",
+    "@vue/server-renderer": "^3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@vue/server-renderer": {
+      "optional": true
+    }
   },
   "dependencies": {
     "@module-federation/bridge-shared": "workspace:*",
@@ -45,6 +67,7 @@
     "vite": "^5.4.21",
     "vue": "^3.5.30",
     "vue-router": "4.4.5",
+    "@vue/server-renderer": "^3.5.30",
     "vue-tsc": "^2.2.12"
   }
 }

@@ -17,10 +17,7 @@ export default defineConfig({
     extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json'],
   },
   testEnvironment: 'jsdom',
-  include: [
-    path.resolve(__dirname, 'src/**/*.spec.ts'),
-    path.resolve(__dirname, 'src/**/*.spec.tsx'),
-  ],
+  include: ['src/**/*.spec.ts', 'src/**/*.spec.tsx'],
   globals: true,
   testTimeout: 10000,
   setupFiles: [path.resolve(__dirname, '__tests__/setupTests.ts')],

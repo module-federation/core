@@ -333,6 +333,20 @@ const jobs = [
     ],
   },
   {
+    name: 'e2e-bridge-ssr',
+    env: SKIP_DEVTOOLS_POSTINSTALL_ENV,
+    steps: [
+      installDependenciesStep(),
+      step('Build packages', (ctx) => runPackagesBuild(ctx)),
+      step('Bridge SSR development acceptance', (ctx) =>
+        runCommand('pnpm', ['run', 'e2e:bridge:ssr'], ctx),
+      ),
+      step('Bridge SSR production acceptance', (ctx) =>
+        runCommand('pnpm', ['run', 'e2e:bridge:ssr:production'], ctx),
+      ),
+    ],
+  },
+  {
     name: 'metro-affected-check',
     env: METRO_E2E_ENV,
     steps: [

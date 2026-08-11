@@ -36,10 +36,11 @@ export function hydrateReact18Root(
 }
 
 export function createBridgeComponent<T = any>(
-  bridgeInfo: Omit<ProviderFnParams<T>, 'createRoot'>,
+  bridgeInfo: Omit<ProviderFnParams<T>, 'createRoot' | 'hydrateRoot'>,
 ) {
   const fullBridgeInfo = {
     createRoot: createReact18Root,
+    hydrateRoot: hydrateReact18Root,
     ...bridgeInfo,
   } as unknown as ProviderFnParams<T>;
 

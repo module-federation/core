@@ -10,5 +10,10 @@
     "label": "React",
     "collapsible": true,
     "collapsed": true
+  },
+  {
+    "type": "file",
+    "name": "ssr",
+    "label": "Server rendering"
   }
 ]

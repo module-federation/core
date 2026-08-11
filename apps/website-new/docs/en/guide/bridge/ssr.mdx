@@ -1,0 +1,84 @@
+# Server rendering Bridge applications
+
+Bridge SSR V1 lets a federated application provider return a buffered HTML island on the server and hydrate that same island through the existing client lifecycle.
+
+## Supported scope
+
+- React 18 with declarative React Router v6
+- Vue 3 with Vue Router 4
+- Full server-side results and identity-only client hydration references
+- Multiple instances of the same remote through document-unique instance IDs
+
+React data routers and other React or Router versions keep their existing client-rendering support but are not supported for SSR in V1.
+
+React Router v6 remotes must alias `react-router-dom$` to `@module-federation/bridge-react/dist/router-v6.es.js` in both their browser and Node builds. The default `router.es.js` adapter is CSR-only. Attempting to use the default adapter or `RouterProvider` during SSR throws a configuration error.
+
+## Remote provider
+
+Set `ssr: true` when no request preparation is needed. If preparation is required, map the same federated export key to separate browser and Node source files. The browser file supplies `hydrate`; the Node file supplies `prepare`. This keeps server renderers and request-only code out of browser chunks.
+
+```ts
+// export-app.server.ts
+export default createBridgeComponent({
+  rootComponent: App,
+  ssr: {
+    prepare({ props }) {
+      return {
+        props,
+        dehydratedState: { initialValue: props.initialValue },
+      };
+    },
+  },
+});
+```
+
+The React Node entry owns `react-dom/server`; the Vue Node entry owns `@vue/server-renderer`. Framework elements, routers, application instances, and renderers never cross `@module-federation/bridge-shared`.
+
+## Host rendering
+
+Use `renderRemoteBridge` with an intentional, sanitized standard `Request`, stable module name, document-unique instance ID, and explicit props:
+
+```ts
+const result = await renderRemoteBridge({
+  loader: () => federationInstance.loadRemote('catalog/export-app'),
+  moduleName: 'catalog',
+  instanceId: 'catalog-sidebar',
+  request,
+  props: { basename: '/catalog' },
+});
+```
+
+Pass the complete result to `createRemoteAppComponent` as `ssr` during server rendering. The adapter emits one instance-scoped slot containing exactly one marked mount child with the remote HTML and one adjacent `application/json` state child. The state child contains the versioned identity and optional dehydrated state, serialized with `serializeBridgeJSON` so executable HTML sequences are escaped.
+
+Only serialize an identity reference into the host hydration context:
+
+```ts
+import { toBridgeSSRReference } from '@module-federation/bridge-shared';
+
+const hydrationContext = {
+  catalog: toBridgeSSRReference(result),
+};
+```
+
+On the client, create the registry from the server-rendered document and install it before React `hydrateRoot` or the Vue host application mount. Pass the identity reference, not the full result, as `ssr`.
+
+```tsx
+const registry = createBridgeHydrationRegistry(document);
+
+hydrateRoot(
+  document.getElementById('root')!,
+  <BridgeHydrationProvider registry={registry}>
+    <Host hydrationContext={hydrationContext} />
+  </BridgeHydrationProvider>,
+);
+```
+
+Vue hosts call `provideBridgeHydrationRegistry(app, registry)` before `app.mount(...)`. A referenced slot is single-use: successful hydration consumes its snapshot, so navigating away and returning through the SPA takes the normal CSR path instead of rehydrating stale markup. A missing referenced slot also takes the CSR path. Malformed, duplicated, or identity-conflicting slots throw a contextual hydration error instead of silently mounting over invalid server markup.
+
+`renderRemoteBridge` rejects provider-load, unsupported-contract, identity, and rendering failures with contextual errors. Response policy remains host-owned.
+
+Bridge SSR V1 does not provide a shared load/render timeout or CSR fallback for server failures. A slow or broken remote can delay or fail the host response; hosts that need another policy must apply it around `renderRemoteBridge`.
+
+## Not included in V1
+
+Assets/CSP/head management, status and header conflict policy, shared timeouts and server fallbacks, React data routers, additional React/Router versions, Nuxt or Modern.js adapters, portals/Teleports, streaming, backpressure, and benchmarks are follow-up work.

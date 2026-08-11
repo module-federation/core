@@ -2,8 +2,17 @@ import { type AsyncComponentOptions, defineAsyncComponent, h } from 'vue';
 import { useRoute } from 'vue-router';
 import RemoteApp from './remoteApp.jsx';
 import { LoggerInstance } from './utils.js';
+import type {
+  BridgeSSRReference,
+  BridgeSSRResult,
+} from '@module-federation/bridge-shared';
 
 declare const __APP_VERSION__: string;
+
+export type RemoteAppSSRProps = {
+  ssr?: BridgeSSRResult | BridgeSSRReference;
+  instanceId?: string;
+};
 
 export function createRemoteAppComponent(info: {
   loader: () => Promise<any>;
