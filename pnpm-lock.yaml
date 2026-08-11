@@ -4504,7 +4504,7 @@ importers:
         version: 18.3.7(@types/react@18.3.28)
       autoprefixer:
         specifier: 10.4.20
-        version: 10.4.20(postcss@8.5.23)
+        version: 10.4.20(postcss@8.5.24)
       canvas-confetti:
         specifier: ^1.9.4
         version: 1.9.4
@@ -4521,8 +4521,8 @@ importers:
         specifier: ^15.12.0
         version: 15.15.0
       postcss:
-        specifier: 8.5.23
-        version: 8.5.23
+        specifier: 8.5.24
+        version: 8.5.24
       tailwindcss:
         specifier: v3.4.16
         version: 3.4.16(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.17))(@types/node@22.19.15)(typescript@6.0.3))
@@ -24140,6 +24140,10 @@ packages:
 
   postcss@8.5.23:
     resolution: {integrity: sha512-g50586zr4bZmwFiTlflMu8E0bDTb5I5gertgwAKmsdUlTQIhZtunzUlD1WSzwcVWPoAVpsrA6vlfCD7oXvRwgg==}
+    engines: {node: ^10 || ^12 || >=14}
+
+  postcss@8.5.24:
+    resolution: {integrity: sha512-8RyVklq0owXUTa4xlpzu4l9AaVKIdQvAcOHZWaMh98HgySsUtxRVf/chRe3dsSLqb6i40BzGRzEUddRaI+9TSw==}
     engines: {node: ^10 || ^12 || >=14}
 
   postcss@8.5.26:
@@ -46333,6 +46337,16 @@ snapshots:
       postcss: 8.5.23
       postcss-value-parser: 4.2.0
 
+  autoprefixer@10.4.20(postcss@8.5.24):
+    dependencies:
+      browserslist: 4.28.1
+      caniuse-lite: 1.0.30001780
+      fraction.js: 4.3.7
+      normalize-range: 0.1.2
+      picocolors: 1.1.1
+      postcss: 8.5.24
+      postcss-value-parser: 4.2.0
+
   autoprefixer@10.4.20(postcss@8.5.26):
     dependencies:
       browserslist: 4.28.1
@@ -56648,6 +56662,12 @@ snapshots:
       source-map-js: 1.2.1
 
   postcss@8.5.23:
+    dependencies:
+      nanoid: 3.3.18
+      picocolors: 1.1.1
+      source-map-js: 1.2.1
+
+  postcss@8.5.24:
     dependencies:
       nanoid: 3.3.18
       picocolors: 1.1.1
