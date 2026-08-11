@@ -15,6 +15,7 @@
       "@module-federation/dts-plugin",
       "@module-federation/third-party-dts-extractor",
       "@module-federation/devtools",
+      "@module-federation/data-fetch",
       "@module-federation/bridge-react",
       "@module-federation/bridge-vue3",
       "@module-federation/bridge-shared",

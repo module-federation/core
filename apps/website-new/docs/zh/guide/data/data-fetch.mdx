@@ -24,6 +24,21 @@ import Consumer from '@docs/zh/_components/data-fetch/consumer';
 
 ## 如何使用
 
+:::info 包结构
+
+核心 data-fetch API（`cache`、`prefetch`、`DataFetchParams` 等类型及相关工具）位于框架无关的 `@module-federation/data-fetch` 包中。`@module-federation/bridge-react/data-fetch` 与 `@module-federation/bridge-vue3` 为方便使用会重新导出这些 API。React 的 `createLazyComponent` 仍是用于加载组件远程模块的 React UI 适配器（见[懒加载与预取组件](/guide/bridge/react/load-component.html)）。
+
+直接从 `@module-federation/data-fetch` 导入时，请先安装：
+
+```bash
+npm install @module-federation/data-fetch
+# 或：pnpm add @module-federation/data-fetch
+```
+
+若仅从 bridge 包（`@module-federation/bridge-react/data-fetch`、`@module-federation/bridge-vue3`）导入，仍可依赖其重新导出，无需直接安装 `@module-federation/data-fetch`。
+
+:::
+
 数据获取能力同时支持 SSR 和 CSR 两种场景，下面分为生产者和消费者两部分来介绍：
 
 ### 生产者
@@ -50,7 +65,7 @@ import Consumer from '@docs/zh/_components/data-fetch/consumer';
 约定文件中需要导出名为 `fetchData` 的函数，该函数将会在远程组件渲染前执行：
 
 ```ts title="List.data.ts"
-import type { DataFetchParams } from '@module-federation/bridge-react/data-fetch';
+import type { DataFetchParams } from '@module-federation/data-fetch';
 export type Data = {
   data: string;
 };

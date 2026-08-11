@@ -155,6 +155,7 @@
     "test:rstest": "pnpm exec rstest --passWithNoTests"
   },
   "dependencies": {
+    "@module-federation/data-fetch": "workspace:*",
     "@module-federation/sdk": "workspace:*"
   },
   "peerDependencies": {

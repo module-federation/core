@@ -8,6 +8,12 @@ This chapter introduces how to use `createLazyComponent` to load remote React co
 - **Data prefetching**: use `prefetch` to start dependency requests before the component loads, avoiding request waterfalls where data is requested only after the component is ready
 - **SSR control**: precisely control whether remote components render on the server, helping avoid CSS flickering issues
 
+:::info
+
+Component-level data-fetch utilities (`cache`, `prefetch`, `DataFetchParams`, and related types) are provided by `@module-federation/data-fetch`. `@module-federation/bridge-react/data-fetch` re-exports them for backward compatibility and adds React-specific APIs such as `lazyLoadComponentPlugin` and `createLazyComponent`.
+
+:::
+
 ## Installation
 
 import { PackageManagerTabs } from '@theme';

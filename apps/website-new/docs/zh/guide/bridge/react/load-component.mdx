@@ -8,6 +8,12 @@
 - **数据预取**：配合 `prefetch` 在组件加载前发起依赖请求，避免组件就绪后才串行请求数据带来的瀑布
 - **SSR 控制**：可精细控制远程组件是否在服务端渲染，避免出现 CSS 闪烁问题
 
+:::info
+
+组件级 data-fetch 工具（`cache`、`prefetch`、`DataFetchParams` 及相关类型）由 `@module-federation/data-fetch` 提供。`@module-federation/bridge-react/data-fetch` 会重新导出它们以保持向后兼容，并提供 `lazyLoadComponentPlugin`、`createLazyComponent` 等 React 专用 API。
+
+:::
+
 ## 安装
 
 import { PackageManagerTabs } from '@theme';
