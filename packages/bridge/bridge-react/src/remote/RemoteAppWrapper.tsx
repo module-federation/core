@@ -4,8 +4,8 @@
  */
 import React, {
   forwardRef,
+  useCallback,
   useEffect,
-  useImperativeHandle,
   useRef,
   useState,
 } from 'react';
@@ -149,7 +149,21 @@ export const RemoteAppWrapper = forwardRef<HTMLDivElement, any>(function (
   const [providerReady, setProviderReady] = useState(false);
   const [renderError, setRenderError] = useState<unknown>();
 
-  useImperativeHandle(ref, () => rootRef.current as HTMLDivElement, []);
+  const setRootRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      rootRef.current = node;
+      if (typeof ref === 'function') {
+        const cleanup = ref(node) as unknown as (() => void) | undefined;
+        if (node === null || typeof cleanup !== 'function') return;
+        return () => {
+          if (rootRef.current === node) rootRef.current = null;
+          cleanup();
+        };
+      }
+      if (ref) ref.current = node;
+    },
+    [ref],
+  );
   if (renderError) throw renderError;
 
   LoggerInstance.debug(`RemoteAppWrapper instance from props >>>`, instance);
@@ -328,7 +342,7 @@ export const RemoteAppWrapper = forwardRef<HTMLDivElement, any>(function (
   // bridge-remote-root
   const rootComponentClassName = `${getRootDomDefaultClassName(moduleName)} ${className || ''}`;
   const mount = (
-    <div className={rootComponentClassName} style={style} ref={rootRef}>
+    <div className={rootComponentClassName} style={style} ref={setRootRef}>
       {hasSSRPayload ? null : loading}
     </div>
   );
@@ -342,7 +356,7 @@ export const RemoteAppWrapper = forwardRef<HTMLDivElement, any>(function (
       snapshot={snapshot}
       className={className}
       style={style}
-      mountRef={rootRef}
+      mountRef={setRootRef}
     />
   );
 });

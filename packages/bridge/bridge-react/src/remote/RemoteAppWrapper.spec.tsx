@@ -409,6 +409,44 @@ describe('RemoteAppWrapper lifecycle', () => {
     );
   });
 
+  it('refreshes a forwarded ref when an SSR slot becomes a CSR mount', async () => {
+    const provider = { render: rs.fn(), destroy: rs.fn() };
+    const objectRef = createRef<HTMLDivElement>();
+    const result = {
+      protocolVersion: 1 as const,
+      moduleName: 'remote/app',
+      instanceId: 'remote-1',
+      html: '<p>server remote</p>',
+    };
+
+    const view = render(
+      <RemoteAppWrapper
+        {...baseProps}
+        instanceId="remote-1"
+        ssr={result}
+        providerInfo={() => provider}
+        ref={objectRef}
+      />,
+    );
+
+    await waitFor(() => expect(provider.render).toHaveBeenCalledOnce());
+    const ssrMount = objectRef.current;
+    expect(ssrMount).not.toBeNull();
+
+    view.rerender(
+      <RemoteAppWrapper
+        {...baseProps}
+        instanceId="remote-1"
+        providerInfo={() => provider}
+        ref={objectRef}
+      />,
+    );
+
+    await waitFor(() => expect(provider.render).toHaveBeenCalledTimes(2));
+    expect(objectRef.current).not.toBe(ssrMount);
+    expect(objectRef.current).toBeInstanceOf(HTMLDivElement);
+  });
+
   it('destroys the latest provider after providerInfo changes mid-render', async () => {
     const queued: Array<() => void> = [];
     rs.spyOn(globalThis, 'queueMicrotask').mockImplementation((callback) => {
