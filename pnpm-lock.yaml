@@ -4269,7 +4269,7 @@ importers:
         version: 22.5.4(@babel/traverse@7.29.8)(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23))(@swc/helpers@0.5.23)(esbuild@0.25.5)(nx@22.5.4(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23)))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))(webpack-cli@5.1.4)
       '@rsbuild/core':
         specifier: 2.1.4
-        version: 2.1.4(@module-federation/runtime-tools@0.21.6)(core-js@3.49.0)
+        version: 2.1.4(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(core-js@3.49.0)
       '@storybook/core':
         specifier: ^8.4.6
         version: 8.6.14(prettier@3.8.1)(storybook@8.6.17(prettier@3.8.1))
@@ -39910,9 +39910,9 @@ snapshots:
     transitivePeerDependencies:
       - '@module-federation/runtime-tools'
 
-  '@rsbuild/core@2.1.4(@module-federation/runtime-tools@0.21.6)(core-js@3.49.0)':
+  '@rsbuild/core@2.1.4(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(core-js@3.49.0)':
     dependencies:
-      '@rspack/core': 2.1.2(@module-federation/runtime-tools@0.21.6)(@swc/helpers@0.5.23)
+      '@rspack/core': 2.1.2(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(@swc/helpers@0.5.23)
       '@swc/helpers': 0.5.23
     optionalDependencies:
       core-js: 3.49.0
@@ -41455,11 +41455,11 @@ snapshots:
       '@module-federation/runtime-tools': 2.8.2
       '@swc/helpers': 0.5.23
 
-  '@rspack/core@2.1.2(@module-federation/runtime-tools@0.21.6)(@swc/helpers@0.5.23)':
+  '@rspack/core@2.1.2(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(@swc/helpers@0.5.23)':
     dependencies:
       '@rspack/binding': 2.1.2
     optionalDependencies:
-      '@module-federation/runtime-tools': 0.21.6
+      '@module-federation/runtime-tools': 2.2.2(node-fetch@2.7.0(encoding@0.1.13))
       '@swc/helpers': 0.5.23
 
   '@rspack/core@2.1.2(@module-federation/runtime-tools@2.8.2)(@swc/helpers@0.5.23)':
