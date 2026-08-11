@@ -344,6 +344,10 @@ describe('RemoteAppWrapper lifecycle', () => {
   });
 
   it('destroys the final CSR mount after an in-place SSR clear', async () => {
+    const queued: Array<() => void> = [];
+    rs.spyOn(globalThis, 'queueMicrotask').mockImplementation((callback) => {
+      queued.push(callback as () => void);
+    });
     let finishRender!: () => void;
     const provider = {
       render: rs.fn(
@@ -354,6 +358,7 @@ describe('RemoteAppWrapper lifecycle', () => {
       ),
       destroy: rs.fn(),
     };
+    const providerInfo = () => provider;
     const result = {
       protocolVersion: 1 as const,
       moduleName: 'remote/app',
@@ -367,7 +372,7 @@ describe('RemoteAppWrapper lifecycle', () => {
         {...baseProps}
         instanceId="remote-1"
         ssr={result}
-        providerInfo={() => provider}
+        providerInfo={providerInfo}
       />,
     );
 
@@ -381,7 +386,7 @@ describe('RemoteAppWrapper lifecycle', () => {
         {...baseProps}
         instanceId="remote-1"
         ssr={undefined}
-        providerInfo={() => provider}
+        providerInfo={providerInfo}
       />,
     );
     await act(async () => {
@@ -393,10 +398,63 @@ describe('RemoteAppWrapper lifecycle', () => {
       view.container.querySelector('[data-mf-bridge-slot="true"]'),
     ).toBeNull();
 
+    const destroysAfterSwap = provider.destroy.mock.calls.length;
+    view.unmount();
+    expect(queued.length).toBeGreaterThan(0);
+    await act(async () => {
+      queued.splice(0).forEach((callback) => callback());
+    });
+    expect(provider.destroy.mock.calls.length).toBeGreaterThan(
+      destroysAfterSwap,
+    );
+  });
+
+  it('destroys the latest provider after providerInfo changes mid-render', async () => {
+    const queued: Array<() => void> = [];
+    rs.spyOn(globalThis, 'queueMicrotask').mockImplementation((callback) => {
+      queued.push(callback as () => void);
+    });
+    let finishFirst!: () => void;
+    const first = {
+      render: rs.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            finishFirst = resolve;
+          }),
+      ),
+      destroy: rs.fn(),
+    };
+    const second = {
+      render: rs.fn(async () => undefined),
+      destroy: rs.fn(),
+    };
+    let current = first;
+    const providerInfo = () => current;
+
+    const view = render(
+      <RemoteAppWrapper {...baseProps} providerInfo={providerInfo} />,
+    );
+    await waitFor(() => expect(first.render).toHaveBeenCalledOnce());
+
+    current = second;
+    view.rerender(
+      <RemoteAppWrapper
+        {...baseProps}
+        providerInfo={() => second}
+        moduleName="remote/app-2"
+      />,
+    );
+    await act(async () => {
+      finishFirst();
+      await Promise.resolve();
+      queued.splice(0).forEach((callback) => callback());
+    });
+    await waitFor(() => expect(second.render).toHaveBeenCalledOnce());
+
     view.unmount();
     await act(async () => {
-      await Promise.resolve();
+      queued.splice(0).forEach((callback) => callback());
     });
-    expect(provider.destroy).toHaveBeenCalled();
+    expect(second.destroy).toHaveBeenCalledOnce();
   });
 });

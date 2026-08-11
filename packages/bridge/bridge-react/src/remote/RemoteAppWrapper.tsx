@@ -298,9 +298,10 @@ export const RemoteAppWrapper = forwardRef<HTMLDivElement, any>(function (
         };
         await provider.render(currentRenderProps);
         if (signal.aborted || !dom.isConnected) {
-          // Stale jobs after an SSR→CSR DOM swap must not suppress destroy for
-          // the live mount node.
+          // Stale jobs after an SSR→CSR DOM swap or providerInfo remount must
+          // not suppress destroy for the live mount.
           if (renderDom.current !== dom) return;
+          if (providerInfoRef.current !== provider) return;
           if (!destroyedRef.current) {
             destroyedRef.current = true;
             provider.destroy?.({ dom });
