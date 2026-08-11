@@ -1,10 +1,11 @@
 import type { RouteLocationNormalizedLoaded } from 'vue-router';
 
 /**
- * Trailing catch-all segment used by Vue Router and meta-framework hosts
- * (e.g. Vue `/:pathMatch(.*)*`, Nuxt `/:path(.*)*`, `/*`).
+ * Trailing catch-all segment used by Vue Router and meta-framework hosts.
+ * Named catch-alls must include `(.*)` (e.g. `/:pathMatch(.*)*`, `/:path(.*)*`).
+ * Plain params like `/:id` or `/:id(\\d+)` must not match.
  */
-const CATCH_ALL_SUFFIX = /\/(?::[^/()*]+(?:\([^)]*\))?|\*)\*?$/;
+const CATCH_ALL_SUFFIX = /\/(?::[^/()]+?\(\.\*\)\*?|\*)$/;
 
 /**
  * Strip a trailing catch-all param from a route record path.

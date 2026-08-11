@@ -31,6 +31,11 @@ describe('stripCatchAllPath', () => {
     expect(stripCatchAllPath('/bridge')).toBe('/bridge');
     expect(stripCatchAllPath('/')).toBe('/');
   });
+
+  it('does not strip plain dynamic params', () => {
+    expect(stripCatchAllPath('/users/:id')).toBe('/users/:id');
+    expect(stripCatchAllPath('/users/:id(\\d+)')).toBe('/users/:id(\\d+)');
+  });
 });
 
 describe('deriveBasenameFromRoute', () => {
@@ -72,6 +77,17 @@ describe('deriveBasenameFromRoute', () => {
         matched: [{ path: '/apps' } as any, { path: '/apps/settings' } as any],
       }),
     ).toBe('/apps/settings');
+  });
+
+  it('keeps nested dynamic params that are not catch-alls', () => {
+    expect(
+      deriveBasenameFromRoute({
+        matched: [
+          { path: '/tenant/:tenantId' } as any,
+          { path: '/tenant/:tenantId/admin' } as any,
+        ],
+      }),
+    ).toBe('/tenant/:tenantId/admin');
   });
 });
 
