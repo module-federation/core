@@ -26,6 +26,8 @@ concurrency:
 env:
   SITE_ORIGIN: https://module-federation.io
   ZE_SECRET_TOKEN: ${{ secrets.ZE_SECRET_TOKEN }}
+  # Route pull-request uploads through Zephyr's preview application configuration.
+  ZE_IS_PREVIEW: ${{ github.event_name == 'pull_request' }}
   # Surface deployment failures instead of succeeding without a preview URL.
   ZE_FAIL_BUILD: true
   ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
