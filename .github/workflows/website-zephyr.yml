@@ -26,6 +26,8 @@ concurrency:
 env:
   SITE_ORIGIN: https://module-federation.io
   ZE_SECRET_TOKEN: ${{ secrets.ZE_SECRET_TOKEN }}
+  # Surface deployment failures instead of succeeding without a preview URL.
+  ZE_FAIL_BUILD: true
   ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
 
 jobs:
