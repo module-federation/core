@@ -63,7 +63,10 @@ const createStaticMiddleware = (options: {
     }
 
     c.header('Content-Type', 'application/javascript');
-    c.header('Content-Length', String(fileResult.content.length));
+    // The file is read as a UTF-8 string, so `content.length` is the number of
+    // characters. Content-Length must be the number of bytes, otherwise any
+    // chunk containing non-ASCII characters is truncated by the difference.
+    c.header('Content-Length', String(Buffer.byteLength(fileResult.content)));
     return c.body(fileResult.content, 200);
   };
 };
