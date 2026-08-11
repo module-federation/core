@@ -1,3 +1,30 @@
-# Add files here to ignore them from prettier formatting  /dist /coverage **/*.hbs *.md !README.md pnpm-lock.yaml **/dist/** **/dist-rslib/** apps/website-new/docs packages/treeshake-server/template/**  /.nx/workspace-data /.nx/cache  **/*.handlebars  # Task DSL files contain mustache-like placeholders (e.g. `{{assets...}}`) # that Prettier currently fails to parse in TSX. packages/enhanced/task/**  # Temporarily ignore assemble-release-plan package until build formatting churn is addressed. packages/assemble-release-plan/**  # Generated Chrome DevTools proxy asset packages/chrome-devtools/src/vendor/basic-proxy-core.js 
+# Add files here to ignore them from prettier formatting
+
+/dist
+/coverage
+**/*.hbs
+*.md
+!README.md
+pnpm-lock.yaml
+**/dist/**
+**/dist-rslib/**
+apps/website-new/docs
+packages/treeshake-server/template/**
+
+/.nx/workspace-data
+/.nx/cache
+
+**/*.handlebars
+
+# Task DSL files contain mustache-like placeholders (e.g. `{{assets...}}`)
+# that Prettier currently fails to parse in TSX.
+packages/enhanced/task/**
+
+# Temporarily ignore assemble-release-plan package until build formatting churn is addressed.
+packages/assemble-release-plan/**
+
+# Generated Chrome DevTools proxy asset
+packages/chrome-devtools/src/vendor/basic-proxy-core.js
+
 **/playwright-report/**
-**/test-results/** 
+**/test-results/**

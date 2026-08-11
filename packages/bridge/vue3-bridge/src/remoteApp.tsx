@@ -311,6 +311,7 @@ export default defineComponent({
         // Host cleared SSR without remounting (SPA after seedConsumed). Destroy
         // the provider on the current mount node before Vue drops the slot tree,
         // then CSR-render into the replacement mount.
+        providerGeneration += 1;
         csrOnly = true;
         hydratedOnce = true;
         const dom = rootRef.value as HTMLElement | null;

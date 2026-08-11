@@ -304,6 +304,10 @@ describe('RemoteAppWrapper lifecycle', () => {
   });
 
   it('flushes deferred destroy before a remount renders on the same DOM', async () => {
+    const queued: Array<() => void> = [];
+    rs.spyOn(globalThis, 'queueMicrotask').mockImplementation((callback) => {
+      queued.push(callback as () => void);
+    });
     const order: string[] = [];
     let providerCount = 0;
     const providerInfo = () => {
@@ -318,17 +322,24 @@ describe('RemoteAppWrapper lifecycle', () => {
       };
     };
 
-    const view = render(
-      <React.StrictMode>
-        <RemoteAppWrapper {...baseProps} providerInfo={providerInfo} />
-      </React.StrictMode>,
+    const first = render(
+      <RemoteAppWrapper {...baseProps} providerInfo={providerInfo} />,
     );
+    await waitFor(() => expect(order.includes('render-1')).toBe(true));
 
+    first.unmount();
+    expect(order.includes('destroy-1')).toBe(false);
+    expect(queued.length).toBeGreaterThan(0);
+
+    const second = render(
+      <RemoteAppWrapper {...baseProps} providerInfo={providerInfo} />,
+    );
     await waitFor(() => expect(order.includes('render-2')).toBe(true));
+
     const destroy1 = order.indexOf('destroy-1');
     const render2 = order.indexOf('render-2');
     expect(destroy1).toBeGreaterThanOrEqual(0);
     expect(render2).toBeGreaterThan(destroy1);
-    view.unmount();
+    second.unmount();
   });
 });
