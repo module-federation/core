@@ -1795,7 +1795,7 @@ importers:
         version: 1.0.0
       autoprefixer:
         specifier: 10.4.19
-        version: 10.4.19(postcss@8.5.23)
+        version: 10.4.19(postcss@8.5.24)
       eslint:
         specifier: 9.26.0
         version: 9.26.0(jiti@2.6.1)
@@ -1806,8 +1806,8 @@ importers:
         specifier: 15.2.2
         version: 15.2.2
       postcss:
-        specifier: 8.5.23
-        version: 8.5.23
+        specifier: 8.5.24
+        version: 8.5.24
       prettier:
         specifier: 3.2.5
         version: 3.2.5
@@ -24142,6 +24142,10 @@ packages:
     resolution: {integrity: sha512-g50586zr4bZmwFiTlflMu8E0bDTb5I5gertgwAKmsdUlTQIhZtunzUlD1WSzwcVWPoAVpsrA6vlfCD7oXvRwgg==}
     engines: {node: ^10 || ^12 || >=14}
 
+  postcss@8.5.24:
+    resolution: {integrity: sha512-8RyVklq0owXUTa4xlpzu4l9AaVKIdQvAcOHZWaMh98HgySsUtxRVf/chRe3dsSLqb6i40BzGRzEUddRaI+9TSw==}
+    engines: {node: ^10 || ^12 || >=14}
+
   postcss@8.5.26:
     resolution: {integrity: sha512-u82N74LFzG8ca+dD8puPnplTXoGH4fTPpVGuIbt36G3qvNlkvfD0lEAZSxaly3KX8TS/L1A1gsCEmvKmBcVbkQ==}
     engines: {node: ^10 || ^12 || >=14}
@@ -46313,6 +46317,16 @@ snapshots:
       postcss: 8.5.23
       postcss-value-parser: 4.2.0
 
+  autoprefixer@10.4.19(postcss@8.5.24):
+    dependencies:
+      browserslist: 4.28.1
+      caniuse-lite: 1.0.30001780
+      fraction.js: 4.3.7
+      normalize-range: 0.1.2
+      picocolors: 1.1.1
+      postcss: 8.5.24
+      postcss-value-parser: 4.2.0
+
   autoprefixer@10.4.20(postcss@8.4.49):
     dependencies:
       browserslist: 4.28.1
@@ -56648,6 +56662,12 @@ snapshots:
       source-map-js: 1.2.1
 
   postcss@8.5.23:
+    dependencies:
+      nanoid: 3.3.18
+      picocolors: 1.1.1
+      source-map-js: 1.2.1
+
+  postcss@8.5.24:
     dependencies:
       nanoid: 3.3.18
       picocolors: 1.1.1
