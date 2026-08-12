@@ -1,10 +1,13 @@
-const basicProxyCore = (
-  require('../../vendor/basic-proxy-core.js') as {
-    default: {
-      registerOverridePlugin(globalObject?: typeof globalThis): unknown;
-    };
-  }
-).default;
+import {
+  BasicProxyCore,
+  resolveBasicProxyCore,
+} from './resolve-basic-proxy-core';
+
+const basicProxyCore = resolveBasicProxyCore(
+  require('../../vendor/basic-proxy-core.js') as
+    | BasicProxyCore
+    | { default: BasicProxyCore },
+);
 
 basicProxyCore.registerOverridePlugin(globalThis);
 
