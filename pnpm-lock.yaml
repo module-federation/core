@@ -4536,8 +4536,8 @@ importers:
   packages/treeshake-server:
     dependencies:
       '@hono/node-server':
-        specifier: 2.0.10
-        version: 2.0.10(hono@4.13.1)
+        specifier: 2.0.11
+        version: 2.0.11(hono@4.13.0)
       '@hono/zod-validator':
         specifier: 0.7.4
         version: 0.7.4(hono@4.13.1)(zod@4.1.12)
@@ -7449,8 +7449,8 @@ packages:
     peerDependencies:
       hono: ^4
 
-  '@hono/node-server@2.0.10':
-    resolution: {integrity: sha512-ZcnNVhKTmyDJeg0UlnZjvM73JBsTAuhrH/J4fjwGOw59PwOW51r4J+p6CsKZWXdKSme4MFqU62CZMOsdDrU4CA==}
+  '@hono/node-server@2.0.11':
+    resolution: {integrity: sha512-bjD221KPLoJTWUwso1J6fGKiTXEUFedG/s0visavY4zakFPkeGURMRNly+FhBHs7T8Dz4qHaZIMX9ZoJHSJtKA==}
     engines: {node: '>=20'}
     peerDependencies:
       hono: ^4
@@ -32566,7 +32566,7 @@ snapshots:
     dependencies:
       hono: 4.13.1
 
-  '@hono/node-server@2.0.10(hono@4.13.1)':
+  '@hono/node-server@2.0.11(hono@4.13.0)':
     dependencies:
       hono: 4.13.1
 
