@@ -69,9 +69,13 @@ const config = {
   },
 };
 
-const url = new URL('https://host.example.com/checkout');
-url.searchParams.set('__mf_devtools', JSON.stringify(config));
-console.log(url.href);
+const createDebugUrl = (hostUrl, debugConfig) => {
+  const url = new URL(hostUrl);
+  url.searchParams.set('__mf_devtools', JSON.stringify(debugConfig));
+  return url.href;
+};
+
+console.log(createDebugUrl('https://host.example.com/checkout', config));
 ```
 
 The output is:
@@ -83,7 +87,7 @@ https://host.example.com/checkout?__mf_devtools=%7B%22overrides%22%3A%7B%22check
 The AI agent should then open this complete URL in the browser. After the page refreshes, the `checkout` Remote in the Host uses the local Manifest. Remote names and aliases are both supported as `overrides` keys.
 
 :::tip
-`URLSearchParams` handles URL encoding. When manually building the query string, apply `encodeURIComponent` to `JSON.stringify(config)` exactly once.
+Pass the raw `JSON.stringify` result directly to `searchParams.set`. Do not call `encodeURIComponent`; `URLSearchParams` performs the URL encoding. A correct parameter value starts with `%7B`. `%257B` means the JSON was encoded twice and is invalid.
 :::
 
 ## Proxy Domain Security

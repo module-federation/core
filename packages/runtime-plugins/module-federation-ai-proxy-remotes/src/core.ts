@@ -179,12 +179,15 @@ export const applyAIDebugUrlConfig = (
 
   storage.setItem(AI_DEBUG_CONSOLE_KEY, 'true');
   const value = url.searchParams.get(parameterName);
-  if (!value) {
+  url.searchParams.delete(parameterName);
+  const finishConsumption = () => {
     if (target.history) {
-      url.searchParams.delete(parameterName);
       target.history.replaceState(null, '', url.href);
-      target.location.reload?.();
+      target.location?.reload?.();
     }
+  };
+  if (!value) {
+    finishConsumption();
     return false;
   }
 
@@ -202,17 +205,14 @@ export const applyAIDebugUrlConfig = (
     }
     storage.removeItem(AI_DEBUG_SNAPSHOT_KEY);
     storage.setItem(AI_DEBUG_ENV_KEY, 'true');
-    if (target.history) {
-      url.searchParams.delete(parameterName);
-      target.history.replaceState(null, '', url.href);
-      target.location.reload?.();
-    }
+    finishConsumption();
     return true;
   } catch (error) {
     target.console?.error(
       '[Module Federation AI Debug] Invalid URL proxy config.',
       error,
     );
+    finishConsumption();
     return false;
   }
 };

@@ -151,6 +151,16 @@ describe('module-federation-ai-proxy-remotes', () => {
     expect(document.getElementById(AI_DEBUG_CONSOLE_ELEMENT_ID)).not.toBeNull();
   });
 
+  it('removes the URL parameter when its config is invalid', () => {
+    history.replaceState(null, '', '/host?keep=yes&__mf_devtools=invalid');
+
+    expect(applyAIDebugUrlConfig()).toBe(false);
+
+    const url = new URL(location.href);
+    expect(url.searchParams.has('__mf_devtools')).toBe(false);
+    expect(url.searchParams.get('keep')).toBe('yes');
+  });
+
   it('globally overrides a remote during registration and snapshot loading', () => {
     sessionStorage.setItem(
       AI_DEBUG_STORAGE_KEY,
