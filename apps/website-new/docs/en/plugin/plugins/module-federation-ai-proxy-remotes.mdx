@@ -86,10 +86,6 @@ https://host.example.com/checkout?__mf_devtools=%7B%22overrides%22%3A%7B%22check
 
 The AI agent should then open this complete URL in the browser. After the page refreshes, the `checkout` Remote in the Host uses the local Manifest. Remote names and aliases are both supported as `overrides` keys.
 
-:::tip
-Pass the raw `JSON.stringify` result directly to `searchParams.set`. Do not call `encodeURIComponent`; `URLSearchParams` performs the URL encoding. A correct parameter value starts with `%7B`. `%257B` means the JSON was encoded twice and is invalid.
-:::
-
 ## Proxy Domain Security
 
 By default, the plugin only accepts manifest URLs hosted on `localhost` or `127.0.0.1`. Every override URL must:

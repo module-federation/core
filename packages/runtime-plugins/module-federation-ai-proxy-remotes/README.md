@@ -57,8 +57,6 @@ console.log(createDebugUrl('https://host.example.com/checkout', config));
 
 Open the generated URL to enable debugging and save the rule. Remote names and aliases are both supported.
 
-Pass the raw `JSON.stringify` result directly to `searchParams.set`. Do not call `encodeURIComponent`; `URLSearchParams` performs the URL encoding. A correct encoded value starts with `%7B`, not `%257B`.
-
 ## Proxy domain security
 
 By default, the plugin only accepts manifest URLs hosted on `localhost` or `127.0.0.1`. Every override URL must:
