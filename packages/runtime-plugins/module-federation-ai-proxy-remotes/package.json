@@ -1,0 +1,87 @@
+{
+  "name": "module-federation-ai-proxy-remotes",
+  "version": "0.1.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "A Module Federation runtime plugin for AI-driven local remote debugging",
+  "keywords": [
+    "Module Federation",
+    "runtime plugin",
+    "AI debugging",
+    "remote override"
+  ],
+  "files": [
+    "dist/",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/module-federation/core.git",
+    "directory": "packages/runtime-plugins/module-federation-ai-proxy-remotes"
+  },
+  "author": "Module Federation Team",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./core": {
+      "import": {
+        "types": "./dist/core.d.ts",
+        "default": "./dist/core.js"
+      },
+      "require": {
+        "types": "./dist/core.d.ts",
+        "default": "./dist/core.cjs"
+      }
+    },
+    "./console": {
+      "import": {
+        "types": "./dist/console.d.ts",
+        "default": "./dist/console.js"
+      },
+      "require": {
+        "types": "./dist/console.d.ts",
+        "default": "./dist/console.cjs"
+      }
+    }
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/index.d.ts"
+      ],
+      "core": [
+        "./dist/core.d.ts"
+      ],
+      "console": [
+        "./dist/console.d.ts"
+      ]
+    }
+  },
+  "peerDependencies": {
+    "@module-federation/runtime-tools": "workspace:*"
+  },
+  "devDependencies": {
+    "@module-federation/runtime-tools": "workspace:*"
+  },
+  "scripts": {
+    "build": "tsdown --config tsdown.config.ts --filter ai-proxy-remotes-runtime-plugin-build",
+    "test": "NODE_OPTIONS=--experimental-vm-modules pnpm exec jest --config jest.config.cjs",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",
+    "pre-release": "pnpm run build"
+  }
+}

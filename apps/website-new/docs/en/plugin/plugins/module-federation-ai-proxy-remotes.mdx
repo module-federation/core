@@ -1,0 +1,120 @@
+---
+title: AI Proxy Remotes Plugin
+description: Let AI proxy Module Federation Remotes in any environment without depending on a Chrome extension environment.
+---
+
+# AI Proxy Remotes Plugin
+
+Use `module-federation-ai-proxy-remotes` to let AI debug Module Federation remotes in any environment by switching them to local manifests from a URL or a floating browser console, without depending on a Chrome extension environment.
+
+## Use Cases
+
+- Ask an AI coding agent to start a remote locally and open the host with the correct proxy rule.
+- Debug a host against one or more locally running remotes.
+- Debug H5 environments where installing or using a Chrome extension is inconvenient. Proxy rules work through the URL or in-page floating console without desktop Chrome DevTools.
+- Save and switch proxy rules from the page without opening DevTools.
+
+## Install
+
+```bash
+pnpm add -D module-federation-ai-proxy-remotes
+```
+
+## Add the Runtime Plugin
+
+Install and configure this plugin in the **host** application.
+
+Add the package name to `runtimePlugins` in the Module Federation plugin configuration:
+
+```ts title="module-federation.config.ts"
+export default {
+  name: 'host',
+  runtimePlugins: ['module-federation-ai-proxy-remotes'],
+};
+```
+
+## Enable Debugging
+
+Add `__mf_devtools` to the host URL:
+
+```text
+https://host.example.com/checkout?__mf_devtools
+```
+
+The page refreshes and removes the parameter from the address bar. Debugging remains enabled for the current tab session. Use **Disable debug** in the floating console to turn it off; saved rules are retained until the tab session ends.
+
+## Debug a Remote with AI
+
+Give your AI coding agent a request such as:
+
+```text
+Start the checkout remote locally, find its mf-manifest.json URL, and open
+https://host.example.com/checkout with checkout proxied to that local manifest.
+```
+
+### Complete Debugging URL Example
+
+Given:
+
+- Host page: `https://host.example.com/checkout`;
+- Remote name: `checkout`; and
+- local Manifest: `http://localhost:3001/mf-manifest.json`.
+
+The AI agent can build the complete debugging URL with:
+
+```js
+const config = {
+  overrides: {
+    checkout: 'http://localhost:3001/mf-manifest.json',
+  },
+};
+
+const url = new URL('https://host.example.com/checkout');
+url.searchParams.set('__mf_devtools', JSON.stringify(config));
+console.log(url.href);
+```
+
+The output is:
+
+```text
+https://host.example.com/checkout?__mf_devtools=%7B%22overrides%22%3A%7B%22checkout%22%3A%22http%3A%2F%2Flocalhost%3A3001%2Fmf-manifest.json%22%7D%7D
+```
+
+The AI agent should then open this complete URL in the browser. After the page refreshes, the `checkout` Remote in the Host uses the local Manifest. Remote names and aliases are both supported as `overrides` keys.
+
+:::tip
+`URLSearchParams` handles URL encoding. When manually building the query string, apply `encodeURIComponent` to `JSON.stringify(config)` exactly once.
+:::
+
+## Proxy Domain Security
+
+By default, the plugin only accepts manifest URLs hosted on `localhost` or `127.0.0.1`. Every override URL must:
+
+- use the `http:` or `https:` protocol;
+- point to a path ending in `.json`;
+- not contain a username or password; and
+- use a default host or a hostname explicitly listed in `allowedHosts`.
+
+`allowedHosts` contains exact hostnames without a protocol, port, path, or wildcard. For example, `assets.example.com` allows URLs on that hostname, including URLs with an explicit port, but does not allow `sub.assets.example.com`.
+
+Add only trusted hosts that are required for debugging:
+
+```ts
+import { aiDebugRuntimePlugin } from 'module-federation-ai-proxy-remotes/core';
+
+export default () =>
+  aiDebugRuntimePlugin({
+    allowedHosts: ['assets.example.com', 'mf-dev.internal.example.com'],
+  });
+```
+
+The target server must also allow the host application to request the manifest according to its CORS policy. Remove temporary non-local hosts after debugging.
+
+## Options
+
+| Option | Type | Default | Usage |
+| --- | --- | --- | --- |
+| `allowedHosts` | `string[]` | `[]` | Allow additional trusted manifest hosts. |
+| `parameterName` | `string` | `__mf_devtools` | Use another activation and configuration parameter. |
+| `storageKey` | `string` | `__MF_DEVTOOLS__` | Use another session storage key for saved rules. |
+| `console` | `boolean \| AIDebugConsoleOptions` | URL-controlled | Hide or configure the floating console. |
