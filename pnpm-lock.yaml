@@ -3364,8 +3364,8 @@ importers:
         specifier: 5.0.0
         version: 5.0.0(ws@8.21.0)
       undici:
-        specifier: 7.29.0
-        version: 7.29.0
+        specifier: 8.9.0
+        version: 8.9.0
       ws:
         specifier: 8.21.0
         version: 8.21.0
@@ -27701,6 +27701,10 @@ packages:
   undici@7.29.0:
     resolution: {integrity: sha512-IDxfleLmmbSskfWSUATiN1nfn2rDuvnMOqb5CWR92iIfojA0Ud+ulOAAEQ57LPr9rWmsreUyf5lwyao+7GNNVw==}
     engines: {node: '>=20.18.1'}
+
+  undici@8.9.0:
+    resolution: {integrity: sha512-aWZpUj7XoGonMClx4gdDRfgBjqeA+F473aDmROQQbM9n6PRfK/u1q/a0X4wMTgcHfT8H6fpbt98PFuDUwFg2YA==}
+    engines: {node: '>=22.19.0'}
 
   unhead@2.1.15:
     resolution: {integrity: sha512-MCt5T90mCWyr3Z6pUCdM9lVRXoMoVBlL7z7U4CYVIiaDiuzad/UCfLuMqz5MeNmpZUgoBCQnrucJimU7EZR+XA==}
@@ -62260,6 +62264,8 @@ snapshots:
       '@fastify/busboy': 2.1.1
 
   undici@7.29.0: {}
+
+  undici@8.9.0: {}
 
   unhead@2.1.15:
     dependencies:
