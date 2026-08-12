@@ -3080,8 +3080,8 @@ importers:
         specifier: ^4.0.0
         version: 4.2.0(vite@5.4.21(@types/node@26.2.0)(less@4.6.4)(sass-embedded@1.100.0)(sass@1.100.0)(terser@5.48.0))(vue@3.5.30(typescript@7.0.2))
       hono:
-        specifier: 4.13.0
-        version: 4.13.0
+        specifier: 4.13.1
+        version: 4.13.1
       react:
         specifier: 18.3.1
         version: 18.3.1
