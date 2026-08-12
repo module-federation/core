@@ -6,6 +6,12 @@ import type { ProviderFnParams } from '../../types';
 import { createBaseBridgeComponent } from './bridge-base';
 import ReactDOM from 'react-dom';
 import { LoggerInstance } from '../../utils';
+import {
+  callerKeyFromStack,
+  installHMRHooks,
+  registerLatest,
+  refreshAllBridges,
+} from './hmr-runtime';
 
 export interface CreateRootOptions {
   identifierPrefix?: string;
@@ -75,13 +81,47 @@ export function createReact16Or17Root(
   };
 }
 
-export function createBridgeComponent<T = any>(
+function applyCreateBridge<T = any>(
   bridgeInfo: Omit<ProviderFnParams<T>, 'createRoot'>,
+  createRootImpl: ProviderFnParams<T>['createRoot'],
 ) {
+  const callerKey =
+    bridgeInfo.__callerKey ||
+    callerKeyFromStack('applyCreateBridge') ||
+    Symbol('mf-bridge-anon');
+  registerLatest(
+    callerKey,
+    bridgeInfo.rootComponent,
+    bridgeInfo.rootComponentGetter as any,
+  );
+
+  installHMRHooks(
+    () => refreshAllBridges(),
+    {
+      acceptViaImportMetaHot: () => {
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-implied-eval, no-new-func
+          const runtimeImportMeta: any = new Function('return import.meta')();
+          const wph = runtimeImportMeta && runtimeImportMeta.webpackHot;
+          if (wph && typeof wph.accept === 'function') {
+            wph.accept(() => refreshAllBridges());
+          }
+        } catch {}
+      },
+    },
+  );
+
   const fullBridgeInfo = {
-    createRoot: createReact16Or17Root,
+    createRoot: createRootImpl,
     ...bridgeInfo,
+    __callerKey: callerKey,
   } as unknown as ProviderFnParams<T>;
 
   return createBaseBridgeComponent(fullBridgeInfo);
+}
+
+export function createBridgeComponent<T = any>(
+  bridgeInfo: Omit<ProviderFnParams<T>, 'createRoot'>,
+) {
+  return applyCreateBridge(bridgeInfo, createReact16Or17Root);
 }

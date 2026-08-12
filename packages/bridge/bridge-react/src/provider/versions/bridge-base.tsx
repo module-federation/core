@@ -16,6 +16,11 @@ import { ErrorBoundary } from '../../error-boundary';
 import { RouterContext } from '../context';
 import { LoggerInstance } from '../../utils';
 import { federationRuntime } from '../plugin';
+import {
+  bridgeRegistry,
+  refreshAllBridges as _refreshAllBridges,
+  resolveRootComponent,
+} from './hmr-runtime';
 
 export function createBaseBridgeComponent<T>({
   createRoot,
@@ -30,12 +35,20 @@ export function createBaseBridgeComponent<T>({
       instance,
     );
 
+    const callerKey = bridgeInfo.__callerKey;
+    const fallbackGetter = bridgeInfo.rootComponentGetter;
+
     const RawComponent = (info: { propsInfo: T; appInfo: ProviderParams }) => {
       const { appInfo, propsInfo, ...restProps } = info;
       const { moduleName, memoryRoute, basename = '/' } = appInfo;
+      const CurrentRoot = resolveRootComponent(
+        callerKey,
+        bridgeInfo.rootComponent,
+        fallbackGetter as any,
+      );
       return (
         <RouterContext.Provider value={{ moduleName, basename, memoryRoute }}>
-          <bridgeInfo.rootComponent
+          <CurrentRoot
             {...propsInfo}
             basename={basename}
             {...restProps}
@@ -82,7 +95,22 @@ export function createBaseBridgeComponent<T>({
       </ErrorBoundary>
     );
 
-    return {
+    const ref: {
+      dom: Element | null;
+      info: any;
+      rootRef: any;
+      bridgeInfoKeyRef: { current: string | symbol | undefined };
+      handleRef: { current: any | null };
+    } = {
+      dom: null,
+      info: null,
+      rootRef: rootMap as any,
+      bridgeInfoKeyRef: { current: callerKey },
+      handleRef: { current: null },
+    };
+    bridgeRegistry().add(ref as any);
+
+    const handle = {
       async render(info: RenderParams) {
         LoggerInstance.debug(`createBridgeComponent render Info`, info);
         const {
@@ -93,6 +121,9 @@ export function createBaseBridgeComponent<T>({
           rootOptions,
           ...propsInfo
         } = info;
+
+        ref.dom = dom ?? null;
+        ref.info = { ...info };
 
         const mergedRootOptions: CreateRootOptions | undefined = {
           ...defaultRootOptions,
@@ -148,8 +179,25 @@ export function createBaseBridgeComponent<T>({
           }
           rootMap.delete(dom);
         }
+        bridgeRegistry().delete(ref as any);
+        if (ref.info?.dom === dom) ref.dom = null;
         instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(info);
       },
     };
+
+    ref.handleRef.current = handle;
+
+    return handle;
   };
 }
+
+/**
+ * Force every currently-mounted bridge to re-run its React root reconciliation.
+ * Exposed so external tools / unit tests / custom HMR hooks can trigger updates
+ * without waiting for the built-in global hooks. Returns the number of bridges
+ * that were successfully re-rendered.
+ */
+export function refreshAllBridges(): number {
+  return _refreshAllBridges();
+}
+

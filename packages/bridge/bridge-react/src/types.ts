@@ -85,7 +85,56 @@ export interface RenderFnParams extends ProviderParams {
  * Parameters for the provider function
  */
 export interface ProviderFnParams<T> {
+  /**
+   * The React component rendered inside the Bridge whenever the Host calls `render()`.
+   *
+   * ⚠️ HMR note: `rootComponent` is captured **by value** when `createBridgeComponent`
+   * first runs. If you only change a *child* module (e.g. `./App.tsx`) and your exporter
+   * file itself is never re-evaluated, the Bridge keeps rendering the old closed-over
+   * reference. To fix this without re-writing your exporter, either:
+   *
+   * 1. Provide `rootComponentGetter` alongside (recommended — one-liner, works for all edits).
+   * 2. Use the framework-level loader integration (`@module-federation/bridge-react-webpack-plugin`
+   *    or a custom Modern.js / Rspack plugin) which automatically injects `rootComponentGetter`
+   *    at compile time — see the library README for the "Zero-boilerplate HMR integration" guide.
+   */
   rootComponent: React.ComponentType<T>;
+  /**
+   * Optional getter used by the built-in HMR runtime to always obtain the *latest*
+   * `rootComponent` value — even when the exporter module itself was not re-executed
+   * (which happens when a deep child import is the only file that changed).
+   *
+   * ### When do I need this?
+   *
+   * Only required for **hot-module-replacement** correctness during local development.
+   * Safe to omit entirely in production / if you never rely on HMR for child component
+   * edits (editing the exporter file itself still works without this field).
+   *
+   * ### Recommended patterns
+   *
+   * Default import of the root component:
+   * ```ts
+   * import App from './App';
+   * export default createBridgeComponent({
+   *   rootComponent: App,
+   *   rootComponentGetter: () => (require as any)('./App').default,
+   * });
+   * ```
+   *
+   * Named import:
+   * ```ts
+   * import { RemoteShell } from './components/RemoteShell';
+   * export default createBridgeComponent({
+   *   rootComponent: RemoteShell,
+   *   rootComponentGetter: () => (require as any)('./components/RemoteShell').RemoteShell,
+   * });
+   * ```
+   *
+   * If you use `paths` / tsconfig aliases (e.g. `@/App`) keep the alias string in the
+   * getter as-is — Rspack/Webpack resolve the alias at runtime the same way they do at
+   * the top-level `import`.
+   */
+  rootComponentGetter?: () => React.ComponentType<T>;
   render?: (
     App: React.ReactElement,
     id?: HTMLElement | string,
@@ -104,6 +153,14 @@ export interface ProviderFnParams<T> {
    * }
    */
   defaultRootOptions?: CreateRootOptions;
+  /**
+   * Internal marker: the opaque key identifying "which caller site" created this bridge.
+   * The runtime uses it to map re-executed `createBridgeComponent` calls to the latest
+   * `rootComponent` when HMR replaces the exporter file. Populated automatically by
+   * the version-specific entrypoints (v18 / v19 / legacy) and not expected to be
+   * supplied by end users.
+   */
+  __callerKey?: string | symbol;
 }
 
 /**
