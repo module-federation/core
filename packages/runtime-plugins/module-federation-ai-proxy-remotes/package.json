@@ -1,6 +1,6 @@
 {
   "name": "module-federation-ai-proxy-remotes",
-  "version": "0.1.1",
+  "version": "0.1.3",
   "type": "module",
   "license": "MIT",
   "description": "A Module Federation runtime plugin for AI-driven local remote debugging",
@@ -71,12 +71,6 @@
         "./dist/console.d.ts"
       ]
     }
-  },
-  "peerDependencies": {
-    "@module-federation/runtime-tools": "workspace:*"
-  },
-  "devDependencies": {
-    "@module-federation/runtime-tools": "workspace:*"
   },
   "scripts": {
     "build": "tsdown --config tsdown.config.ts --filter ai-proxy-remotes-runtime-plugin-build",

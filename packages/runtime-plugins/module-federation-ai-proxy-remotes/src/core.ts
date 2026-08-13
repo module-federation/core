@@ -1,5 +1,3 @@
-import type { ModuleFederationRuntimePlugin } from '@module-federation/runtime-tools/runtime-core';
-
 export const AI_DEBUG_URL_PARAM = '__mf_devtools';
 export const AI_DEBUG_STORAGE_KEY = '__MF_DEVTOOLS__';
 export const AI_DEBUG_SNAPSHOT_KEY = '__MF_DEVTOOLS_MODULE_INFO__';
@@ -45,7 +43,7 @@ type AIDebugGlobal = typeof globalThis & {
   sessionStorage?: Storage;
   window?: { sessionStorage?: Storage };
   __FEDERATION__?: {
-    __GLOBAL_PLUGIN__?: ModuleFederationRuntimePlugin[];
+    __GLOBAL_PLUGIN__?: AIDebugRuntimePlugin[];
   };
   __VMOK__?: AIDebugGlobal['__FEDERATION__'];
 };
@@ -58,7 +56,7 @@ const getGlobal = (): AIDebugGlobal => globalThis as AIDebugGlobal;
 const getStorage = (target = getGlobal()): Storage | undefined =>
   target.sessionStorage ?? target.window?.sessionStorage;
 
-const getGlobalPlugins = (): ModuleFederationRuntimePlugin[] => {
+const getGlobalPlugins = (): AIDebugRuntimePlugin[] => {
   const target = getGlobal();
   target.__FEDERATION__ ??= target.__VMOK__ ?? {};
   target.__VMOK__ ??= target.__FEDERATION__;
@@ -248,6 +246,19 @@ type AIDebugRemote = {
   version?: string;
 };
 
+type AIDebugRuntimePlugin = {
+  name: string;
+  beforeRegisterRemote(args: { remote: AIDebugRemote; origin: unknown }): {
+    remote: AIDebugRemote;
+    origin: unknown;
+  };
+  beforeLoadRemoteSnapshot(args: {
+    options: { inBrowser?: boolean };
+    moduleInfo: AIDebugRemote;
+    origin: unknown;
+  }): void;
+};
+
 const applyRemoteOverride = (
   remote: AIDebugRemote,
   storageKey: string,
@@ -272,7 +283,7 @@ const applyRemoteOverride = (
 
 const createGlobalPlugin = (
   options: AIDebugRuntimePluginOptions = {},
-): ModuleFederationRuntimePlugin => {
+): AIDebugRuntimePlugin => {
   const storageKey = options.storageKey ?? AI_DEBUG_STORAGE_KEY;
 
   return {
@@ -292,7 +303,7 @@ const createGlobalPlugin = (
 
 export function aiDebugRuntimePlugin(
   options: AIDebugRuntimePluginOptions = {},
-): ModuleFederationRuntimePlugin {
+): AIDebugRuntimePlugin {
   applyAIDebugUrlConfig(options);
   const plugins = getGlobalPlugins();
   const existing = plugins.find((plugin) => plugin.name === PLUGIN_NAME);

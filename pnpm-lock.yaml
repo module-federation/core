@@ -4219,11 +4219,7 @@ importers:
         specifier: workspace:*
         version: link:../sdk
 
-  packages/runtime-plugins/module-federation-ai-proxy-remotes:
-    devDependencies:
-      '@module-federation/runtime-tools':
-        specifier: workspace:*
-        version: link:../../runtime-tools
+  packages/runtime-plugins/module-federation-ai-proxy-remotes: {}
 
   packages/runtime-plugins/inject-external-runtime-core-plugin:
     devDependencies:
