@@ -24,6 +24,10 @@ import {
   getTypeScriptPackageInfo,
   requireTypeScript,
 } from '../lib/typeScriptResolver';
+import {
+  formatCompilerOutput,
+  preserveTypeScriptDiagnostic,
+} from '../lib/typeScriptDiagnostics';
 import { logger } from '../../server';
 
 interface ProjectReference {
@@ -82,25 +86,46 @@ const defaultOptions = {
   deleteTsConfig: true,
 } satisfies Partial<RemoteOptions>;
 
-function getEffectiveRootDir(parsedCommandLine: ParsedConfigContent): string {
+const getCommonRootDir = (files: string[]): string => {
+  let commonRoot = dirname(normalize(files[0]));
+
+  for (const file of files.slice(1)) {
+    const fileDir = dirname(normalizeFileToRootDir(file, commonRoot));
+    let relativePath = relative(commonRoot, fileDir);
+    while (
+      relativePath === '..' ||
+      relativePath.startsWith(`..${sep}`) ||
+      isAbsolute(relativePath)
+    ) {
+      const parentDir = dirname(commonRoot);
+      if (parentDir === commonRoot) {
+        return commonRoot;
+      }
+      commonRoot = parentDir;
+      relativePath = relative(commonRoot, fileDir);
+    }
+  }
+
+  return commonRoot;
+};
+
+function getEffectiveRootDir(
+  parsedCommandLine: ParsedConfigContent,
+  rootFiles: string[],
+): string {
   const compilerOptions = parsedCommandLine.options;
 
   if (compilerOptions.rootDir) {
     return compilerOptions.rootDir;
   }
 
-  // if no set rootDir , infer the commonRoot
-  const files = parsedCommandLine.fileNames;
+  // Mirror TypeScript's inferred source root, while also accounting for exposed
+  // files that are not selected by the source project's include patterns.
+  const files = [...parsedCommandLine.fileNames, ...rootFiles].filter(
+    (file) => !file.endsWith('.d.ts'),
+  );
   if (files.length > 0) {
-    const commonRoot = files
-      .map((file) => dirname(file))
-      .reduce((commonPath, fileDir) => {
-        while (!fileDir.startsWith(commonPath)) {
-          commonPath = dirname(commonPath);
-        }
-        return commonPath;
-      }, files[0]);
-    return commonRoot;
+    return getCommonRootDir(files);
   }
 
   // if there are project references, infer the commonRoot from references
@@ -320,36 +345,6 @@ const writeListFilesTsConfig = (
   return tempTsConfigJsonPath;
 };
 
-const formatCompilerError = (error: unknown) => {
-  const readOutput = (value: unknown) => {
-    if (Buffer.isBuffer(value)) {
-      return value.toString('utf8');
-    }
-    return typeof value === 'string' ? value : '';
-  };
-
-  if (typeof error === 'object' && error !== null) {
-    const processError = error as {
-      stderr?: unknown;
-      stdout?: unknown;
-      message?: unknown;
-    };
-    const stderr = readOutput(processError.stderr).trim();
-    if (stderr) {
-      return stderr.split(/\r?\n/)[0];
-    }
-    const stdout = readOutput(processError.stdout).trim();
-    if (stdout) {
-      return stdout.split(/\r?\n/)[0];
-    }
-    if (typeof processError.message === 'string') {
-      return processError.message;
-    }
-  }
-
-  return String(error);
-};
-
 const getDependentFilesWithTsc = (
   rootFiles: string[],
   rootDir: string,
@@ -367,23 +362,28 @@ const getDependentFilesWithTsc = (
     rootFiles,
     resolvedTsConfigPath,
     context,
-    compilerOptions,
+    {
+      ...compilerOptions,
+      rootDir,
+    },
   );
+  const compilerArgs = [
+    typeScriptPackageInfo.tscBinPath,
+    '--listFilesOnly',
+    '--project',
+    listFilesTsConfigPath,
+  ];
+  const compilerCommand = {
+    executable: process.execPath,
+    args: compilerArgs,
+  };
+  let retainTemporaryConfig = false;
   try {
-    const stdout = execFileSync(
-      process.execPath,
-      [
-        typeScriptPackageInfo.tscBinPath,
-        '--listFilesOnly',
-        '--project',
-        listFilesTsConfigPath,
-      ],
-      {
-        cwd: typeScriptContext,
-        encoding: 'utf8',
-        stdio: ['ignore', 'pipe', 'pipe'],
-      },
-    );
+    const stdout = execFileSync(process.execPath, compilerArgs, {
+      cwd: typeScriptContext,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
     const dependentFiles = stdout
       .split(/\r?\n/)
       .map((file) => file.trim())
@@ -395,14 +395,28 @@ const getDependentFilesWithTsc = (
       .map((file) => normalizeFileToRootDir(file, rootDir));
     return dependentFiles.length ? dependentFiles : rootFiles;
   } catch (error) {
+    const compilerOutput = formatCompilerOutput(error);
+    const diagnostics = preserveTypeScriptDiagnostic({
+      command: compilerCommand,
+      compilerOutput,
+      context,
+      stage: 'list-files',
+      tempTsConfigPath: listFilesTsConfigPath,
+      typeScriptVersion: typeScriptPackageInfo.version,
+    });
+    retainTemporaryConfig = !diagnostics.copied;
     logger.warn(
-      `Failed to collect TypeScript dependency files with "tsc --listFilesOnly"; falling back to exposed files only. ${formatCompilerError(
-        error,
-      )}`,
+      `Failed to collect TypeScript dependency files with "tsc --listFilesOnly"; falling back to exposed files only. ${compilerOutput.split(/\r?\n/)[0]} Diagnostics: ${diagnostics.diagnosticConfigPath}${
+        diagnostics.diagnosticLogPath
+          ? `, ${diagnostics.diagnosticLogPath}`
+          : ''
+      }`,
     );
     return rootFiles;
   } finally {
-    rmSync(listFilesTsConfigPath, { force: true });
+    if (!retainTemporaryConfig) {
+      rmSync(listFilesTsConfigPath, { force: true });
+    }
   }
 };
 
@@ -450,7 +464,17 @@ const readTsConfig = (
     );
     configContent.projectReferences = configContent.projectReferences || [];
   }
-  const rootDir = getEffectiveRootDir(configContent);
+  const excludeExtensions = ['.mdx', '.md'];
+  const rootFiles = [
+    ...Object.values(mapComponentsToExpose),
+    ...additionalFilesToCompile,
+  ].filter(
+    (filename) => !excludeExtensions.some((ext) => filename.endsWith(ext)),
+  );
+  const existingRootFiles = rootFiles
+    .map((file) => (isAbsolute(file) ? file : resolve(context, file)))
+    .filter((file) => existsSync(file));
+  const rootDir = getEffectiveRootDir(configContent, existingRootFiles);
 
   const outDir = resolve(
     context,
@@ -486,14 +510,6 @@ const readTsConfig = (
   const outDirWithoutTypesFolder = resolve(
     context,
     outputDir || configContent.options.outDir || 'dist',
-  );
-
-  const excludeExtensions = ['.mdx', '.md'];
-  const rootFiles = [
-    ...Object.values(mapComponentsToExpose),
-    ...additionalFilesToCompile,
-  ].filter(
-    (filename) => !excludeExtensions.some((ext) => filename.endsWith(ext)),
   );
 
   const filesToCompile = [
