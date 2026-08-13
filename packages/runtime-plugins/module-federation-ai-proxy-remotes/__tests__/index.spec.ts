@@ -23,6 +23,9 @@ describe('module-federation-ai-proxy-remotes', () => {
     delete (window as typeof window & { __FEDERATION__?: unknown })
       .__FEDERATION__;
     delete (window as typeof window & { __VMOK__?: unknown }).__VMOK__;
+    delete (
+      window as typeof window & { __MF_AI_DEBUG_RUNTIME_PLUGIN__?: unknown }
+    ).__MF_AI_DEBUG_RUNTIME_PLUGIN__;
     document.getElementById(AI_DEBUG_CONSOLE_ELEMENT_ID)?.remove();
   });
 
@@ -167,10 +170,6 @@ describe('module-federation-ai-proxy-remotes', () => {
   });
 
   it('loads the console asynchronously only after URL activation', async () => {
-    aiDebugRuntimePlugin();
-    await Promise.resolve();
-    expect(document.getElementById(AI_DEBUG_CONSOLE_ELEMENT_ID)).toBeNull();
-
     const url = new URL(location.href);
     url.searchParams.set(
       '__mf_devtools',
@@ -218,7 +217,11 @@ describe('module-federation-ai-proxy-remotes', () => {
       }),
     );
     sessionStorage.setItem(AI_DEBUG_CONSOLE_KEY, 'true');
-    const plugin = aiDebugRuntimePlugin({ console: false });
+    aiDebugRuntimePlugin({ console: false });
+    const plugin = window.__FEDERATION__.__GLOBAL_PLUGIN__.find(
+      ({ name }) => name === 'ai-proxy-remotes-runtime-plugin',
+    )!;
+    expect(plugin).toBeDefined();
     const args = {
       remote: { name: 'remote', alias: 'alias', version: '1.0.0' },
       origin: {} as never,
@@ -251,7 +254,11 @@ describe('module-federation-ai-proxy-remotes', () => {
         overrides: { remote: 'http://localhost:3002/mf-manifest.json' },
       }),
     );
-    const plugin = aiDebugRuntimePlugin({ console: false });
+    aiDebugRuntimePlugin({ console: false });
+    const plugin = window.__FEDERATION__.__GLOBAL_PLUGIN__.find(
+      ({ name }) => name === 'ai-proxy-remotes-runtime-plugin',
+    )!;
+    expect(plugin).toBeDefined();
     const args = {
       remote: { name: 'remote', entry: 'https://example.com/remoteEntry.js' },
       origin: {} as never,
@@ -263,10 +270,34 @@ describe('module-federation-ai-proxy-remotes', () => {
   });
 
   it('registers the runtime plugin globally once', () => {
-    const plugin = aiDebugRuntimePlugin({ console: false });
-    expect(plugin.name).toBe('ai-proxy-remotes-runtime-plugin');
-    expect(window.__FEDERATION__.__GLOBAL_PLUGIN__).toEqual([plugin]);
-    expect(aiDebugRuntimePlugin({ console: false })).toBe(plugin);
+    const entryPlugin = aiDebugRuntimePlugin({ console: false });
+    const globalPlugin = window.__FEDERATION__.__GLOBAL_PLUGIN__.find(
+      ({ name }) => name === 'ai-proxy-remotes-runtime-plugin',
+    );
+    expect(entryPlugin).toEqual({
+      name: 'ai-proxy-remotes-runtime-plugin-entry',
+    });
+    expect(globalPlugin).toBeDefined();
+    expect(globalPlugin?.beforeRegisterRemote).toBeDefined();
+    expect(globalPlugin?.beforeLoadRemoteSnapshot).toBeDefined();
+    expect(aiDebugRuntimePlugin({ console: false })).toBe(entryPlugin);
+    expect(window.__FEDERATION__.__GLOBAL_PLUGIN__).toHaveLength(1);
+  });
+
+  it('initializes only once and does not consume URL config again', () => {
+    const entryPlugin = aiDebugRuntimePlugin({ console: false });
+    const url = new URL(location.href);
+    url.searchParams.set(
+      '__mf_devtools',
+      JSON.stringify({
+        overrides: { remote: 'http://localhost:3002/mf-manifest.json' },
+      }),
+    );
+    history.replaceState(null, '', url.href);
+
+    expect(aiDebugRuntimePlugin({ console: false })).toBe(entryPlugin);
+    expect(new URL(location.href).searchParams.has('__mf_devtools')).toBe(true);
+    expect(sessionStorage.getItem(AI_DEBUG_STORAGE_KEY)).toBeNull();
     expect(window.__FEDERATION__.__GLOBAL_PLUGIN__).toHaveLength(1);
   });
 

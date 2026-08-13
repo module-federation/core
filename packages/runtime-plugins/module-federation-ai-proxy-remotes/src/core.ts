@@ -5,6 +5,7 @@ export const AI_DEBUG_ENV_KEY = 'MF_ENV';
 export const AI_DEBUG_CONSOLE_KEY = '__MF_AI_DEBUG_CONSOLE__';
 
 const PLUGIN_NAME = 'ai-proxy-remotes-runtime-plugin';
+const EMPTY_PLUGIN_NAME = 'ai-proxy-remotes-runtime-plugin-entry';
 const LOOPBACK_HOSTS = ['localhost', '127.0.0.1'];
 
 export type AIDebugUrlConfig = {
@@ -46,6 +47,7 @@ type AIDebugGlobal = typeof globalThis & {
     __GLOBAL_PLUGIN__?: AIDebugRuntimePlugin[];
   };
   __VMOK__?: AIDebugGlobal['__FEDERATION__'];
+  __MF_AI_DEBUG_RUNTIME_PLUGIN__?: AIDebugRuntimePlugin;
 };
 
 const isObject = (value: unknown): value is Record<string, unknown> =>
@@ -63,6 +65,20 @@ const getGlobalPlugins = (): AIDebugRuntimePlugin[] => {
   target.__FEDERATION__.__GLOBAL_PLUGIN__ ??= [];
   return target.__FEDERATION__.__GLOBAL_PLUGIN__;
 };
+
+const getExistingGlobalPlugin = (): AIDebugRuntimePlugin | undefined => {
+  const target = getGlobal();
+  const existing =
+    target.__MF_AI_DEBUG_RUNTIME_PLUGIN__ ??
+    getGlobalPlugins().find((plugin) => plugin.name === PLUGIN_NAME);
+  if (existing) {
+    target.__MF_AI_DEBUG_RUNTIME_PLUGIN__ = existing;
+  }
+  return existing;
+};
+
+export const isAIDebugRuntimePluginInitialized = (): boolean =>
+  Boolean(getExistingGlobalPlugin());
 
 const parsePossiblyEncodedJson = (value: string): unknown => {
   let candidate = value;
@@ -275,15 +291,19 @@ type AIDebugRemote = {
 
 type AIDebugRuntimePlugin = {
   name: string;
-  beforeRegisterRemote(args: { remote: AIDebugRemote; origin: unknown }): {
+  beforeRegisterRemote?(args: { remote: AIDebugRemote; origin: unknown }): {
     remote: AIDebugRemote;
     origin: unknown;
   };
-  beforeLoadRemoteSnapshot(args: {
+  beforeLoadRemoteSnapshot?(args: {
     options: { inBrowser?: boolean };
     moduleInfo: AIDebugRemote;
     origin: unknown;
   }): void;
+};
+
+const EMPTY_RUNTIME_PLUGIN: AIDebugRuntimePlugin = {
+  name: EMPTY_PLUGIN_NAME,
 };
 
 const applyRemoteOverride = (
@@ -331,13 +351,15 @@ const createGlobalPlugin = (
 export function aiDebugRuntimePlugin(
   options: AIDebugRuntimePluginOptions = {},
 ): AIDebugRuntimePlugin {
+  const existing = getExistingGlobalPlugin();
+  if (existing) {
+    return EMPTY_RUNTIME_PLUGIN;
+  }
+
   applyAIDebugUrlConfig(options);
   const plugins = getGlobalPlugins();
-  const existing = plugins.find((plugin) => plugin.name === PLUGIN_NAME);
-  if (existing) {
-    return existing;
-  }
   const plugin = createGlobalPlugin(options);
   plugins.push(plugin);
-  return plugin;
+  getGlobal().__MF_AI_DEBUG_RUNTIME_PLUGIN__ = plugin;
+  return EMPTY_RUNTIME_PLUGIN;
 }

@@ -1,5 +1,6 @@
 import {
   aiDebugRuntimePlugin,
+  isAIDebugRuntimePluginInitialized,
   isAIDebugConsoleEnabled,
   type AIDebugRuntimePluginOptions,
 } from './core';
@@ -31,8 +32,9 @@ export const generateAIDebugUrl = (
 export default function aiDebugPlugin(
   options: AIDebugRuntimePluginOptions = {},
 ) {
+  const shouldInitialize = !isAIDebugRuntimePluginInitialized();
   const plugin = aiDebugRuntimePlugin(options);
-  if (isAIDebugConsoleEnabled(options)) {
+  if (shouldInitialize && isAIDebugConsoleEnabled(options)) {
     void import('./console/mount').then(({ mountAIDebugConsole }) =>
       mountAIDebugConsole(
         typeof options.console === 'object' ? options.console : {},
