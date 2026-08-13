@@ -38,7 +38,7 @@ export default {
 在宿主 URL 中加入 `__mf_devtools`：
 
 ```text
-https://host.example.com/checkout?__mf_devtools
+https://host.example.com/remote?__mf_devtools
 ```
 
 页面会刷新并从地址栏移除该参数。调试开关会在当前标签页会话内保留，无需再次添加参数。点击浮动控制台中的 **Disable debug** 可以关闭调试；关闭标签页后，已保存的代理规则会随会话结束而清除。
@@ -48,24 +48,27 @@ https://host.example.com/checkout?__mf_devtools
 可以向 AI 编程 Agent 提出类似下面的请求：
 
 ```text
-在本地启动 checkout remote，找到它的 mf-manifest.json 地址，然后打开
-https://host.example.com/checkout，并把 checkout 代理到这个本地 Manifest。
+在本地启动 remote remote，找到它的 mf-manifest.json 地址，然后打开
+https://host.example.com/remote，并把 remote 代理到这个本地 Manifest。
 ```
 
 ### 完整调试 URL 示例
 
 假设：
 
-- Host 页面是 `https://host.example.com/checkout`；
-- Remote 名称是 `checkout`；
+- Host 页面是 `https://host.example.com/remote`；
+- Remote 名称是 `remote`；
 - 本地 Manifest 是 `http://localhost:3001/mf-manifest.json`。
 
-AI 可以使用下面的代码拼出完整调试 URL：
+AI 可以直接使用下面的代码拼出完整调试 URL：
 
 ```js
-const remoteName = 'checkout';
+const remoteName = 'remote';
 const localManifestUrl = 'http://localhost:3001/mf-manifest.json';
-const debugConfig = encodeURIComponent(
+const hostUrl = new URL('https://host.example.com/remote');
+
+hostUrl.searchParams.set(
+  '__mf_devtools',
   JSON.stringify({
     overrides: {
       [remoteName]: localManifestUrl,
@@ -73,8 +76,17 @@ const debugConfig = encodeURIComponent(
   }),
 );
 
-const debugUrl =
-  `https://host.example.com/checkout?__mf_devtools=${debugConfig}`;
+console.log(hostUrl.href);
+```
+
+也可以使用包提供的辅助函数：
+
+```js
+import { generateAIDebugUrl } from 'module-federation-ai-proxy-remotes';
+
+const debugUrl = generateAIDebugUrl('https://host.example.com/remote', {
+  remote: 'http://localhost:3001/mf-manifest.json',
+});
 
 console.log(debugUrl);
 ```
@@ -82,10 +94,10 @@ console.log(debugUrl);
 输出结果是：
 
 ```text
-https://host.example.com/checkout?__mf_devtools=%7B%22overrides%22%3A%7B%22checkout%22%3A%22http%3A%2F%2Flocalhost%3A3001%2Fmf-manifest.json%22%7D%7D
+https://host.example.com/remote?__mf_devtools=%7B%22overrides%22%3A%7B%22remote%22%3A%22http%3A%2F%2Flocalhost%3A3001%2Fmf-manifest.json%22%7D%7D
 ```
 
-AI 最后需要在浏览器中打开这个完整 URL。页面刷新后，Host 中名为 `checkout` 的 Remote 将使用本地 Manifest。Remote 的 `name` 和 `alias` 均可作为 `overrides` 的键。
+AI 最后需要在浏览器中打开这个完整 URL。页面刷新后，Host 中名为 `remote` 的 Remote 将使用本地 Manifest。Remote 的 `name` 和 `alias` 均可作为 `overrides` 的键。
 
 ## 代理域名安全策略
 

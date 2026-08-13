@@ -64,6 +64,33 @@ const getGlobalPlugins = (): AIDebugRuntimePlugin[] => {
   return target.__FEDERATION__.__GLOBAL_PLUGIN__;
 };
 
+const parsePossiblyEncodedJson = (value: string): unknown => {
+  let candidate = value;
+  let parseError: unknown;
+
+  // URLSearchParams already decodes once. Some dev servers encode the complete
+  // open URL again, so retry a bounded number of times for those extra layers.
+  for (let decodeCount = 0; decodeCount <= 2; decodeCount += 1) {
+    try {
+      return JSON.parse(candidate);
+    } catch (error) {
+      parseError = error;
+    }
+
+    try {
+      const decoded = decodeURIComponent(candidate);
+      if (decoded === candidate) {
+        break;
+      }
+      candidate = decoded;
+    } catch {
+      break;
+    }
+  }
+
+  throw parseError;
+};
+
 export const isAllowedManifestUrl = (
   value: string,
   allowedHosts: string[] = [],
@@ -87,7 +114,7 @@ export const parseAIDebugUrlConfig = (
   value: string,
   options: Pick<AIDebugRuntimePluginOptions, 'allowedHosts'> = {},
 ): AIDebugUrlConfig => {
-  const parsed: unknown = JSON.parse(value);
+  const parsed = parsePossiblyEncodedJson(value);
   if (!isObject(parsed) || !isObject(parsed.overrides)) {
     throw new Error('The overrides field must be an object.');
   }

@@ -1,4 +1,4 @@
-import aiDebugRuntimePlugin from '../src';
+import aiDebugRuntimePlugin, { generateAIDebugUrl } from '../src';
 import {
   AI_DEBUG_ENV_KEY,
   AI_DEBUG_CONSOLE_KEY,
@@ -28,6 +28,38 @@ describe('module-federation-ai-proxy-remotes', () => {
 
   afterEach(() => {
     consoleError.mockRestore();
+  });
+
+  it('generates a debug URL without changing the host URL', () => {
+    const hostUrl = new URL('https://host.example.com/remote?keep=yes');
+
+    const debugUrl = generateAIDebugUrl(hostUrl, {
+      remote: 'http://localhost:3001/mf-manifest.json',
+    });
+
+    expect(hostUrl.searchParams.has('__mf_devtools')).toBe(false);
+    const generated = new URL(debugUrl);
+    expect(generated.searchParams.get('keep')).toBe('yes');
+    expect(
+      JSON.parse(generated.searchParams.get('__mf_devtools') ?? ''),
+    ).toEqual({
+      overrides: { remote: 'http://localhost:3001/mf-manifest.json' },
+    });
+  });
+
+  it('generates a replacement config with a custom parameter name', () => {
+    const debugUrl = new URL(
+      generateAIDebugUrl(
+        'https://host.example.com/remote',
+        { remote: null },
+        { parameterName: 'debug', replace: true },
+      ),
+    );
+
+    expect(JSON.parse(debugUrl.searchParams.get('debug') ?? '')).toEqual({
+      overrides: { remote: null },
+      replace: true,
+    });
   });
 
   it('merges by default, replaces on demand, and deletes null entries', () => {
@@ -78,6 +110,23 @@ describe('module-federation-ai-proxy-remotes', () => {
         { allowedHosts: ['assets.example.com'] },
       ).overrides.remote,
     ).toBe('https://assets.example.com/mf-manifest.json');
+  });
+
+  it.each([
+    ['plain', (value: string) => value],
+    ['URL encoded', (value: string) => encodeURIComponent(value)],
+    [
+      'URL encoded twice',
+      (value: string) => encodeURIComponent(encodeURIComponent(value)),
+    ],
+  ])('parses %s JSON config', (_label, encode) => {
+    const config = JSON.stringify({
+      overrides: { remote: 'http://localhost:3002/mf-manifest.json' },
+    });
+
+    expect(parseAIDebugUrlConfig(encode(config))).toEqual({
+      overrides: { remote: 'http://localhost:3002/mf-manifest.json' },
+    });
   });
 
   it('applies encoded URL config, preserves other settings and cleans the URL', () => {
@@ -226,7 +275,7 @@ describe('module-federation-ai-proxy-remotes', () => {
       moduleInfo: {
         host: {
           remotesInfo: {
-            checkout: {
+            remote: {
               matchedVersion: 'http://localhost:3000/mf-manifest.json',
             },
           },
@@ -247,9 +296,9 @@ describe('module-federation-ai-proxy-remotes', () => {
     const remote = root!.querySelector<HTMLSelectElement>('select');
     expect(Array.from(remote!.options).map((option) => option.value)).toEqual([
       '',
-      'checkout',
+      'remote',
     ]);
-    remote!.value = 'checkout';
+    remote!.value = 'remote';
     remote!.dispatchEvent(new Event('change'));
     const manifest = root!.querySelector<HTMLInputElement>('input[type=text]');
     manifest!.value = 'http://localhost:3001/mf-manifest.json';
@@ -262,7 +311,7 @@ describe('module-federation-ai-proxy-remotes', () => {
       JSON.parse(sessionStorage.getItem(AI_DEBUG_STORAGE_KEY) ?? '{}'),
     ).toEqual({
       overrides: {
-        checkout: 'http://localhost:3001/mf-manifest.json',
+        remote: 'http://localhost:3001/mf-manifest.json',
       },
     });
   });

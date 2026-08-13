@@ -32,17 +32,22 @@ export default {
 Add `__mf_devtools` to the host URL:
 
 ```text
-https://host.example.com/checkout?__mf_devtools
+https://host.example.com/remote?__mf_devtools
 ```
 
 The page refreshes and removes the parameter from the address bar. Debugging remains enabled for the current tab session. Use **Disable debug** in the floating console to turn it off; saved rules are retained until the tab session ends.
 
 ## Configure remotes from the URL
 
+Generate the URL directly:
+
 ```js
-const remoteName = 'checkout';
+const remoteName = 'remote';
 const localManifestUrl = 'http://localhost:3001/mf-manifest.json';
-const debugConfig = encodeURIComponent(
+const hostUrl = new URL('https://host.example.com/remote');
+
+hostUrl.searchParams.set(
+  '__mf_devtools',
   JSON.stringify({
     overrides: {
       [remoteName]: localManifestUrl,
@@ -50,12 +55,22 @@ const debugConfig = encodeURIComponent(
   }),
 );
 
-const debugUrl = `https://host.example.com/checkout?__mf_devtools=${debugConfig}`;
-
-console.log(debugUrl);
+console.log(hostUrl.href);
 ```
 
 Open the generated URL to enable debugging and save the rule. Remote names and aliases are both supported.
+
+Or use the package helper:
+
+```js
+import { generateAIDebugUrl } from 'module-federation-ai-proxy-remotes';
+
+const debugUrl = generateAIDebugUrl('https://host.example.com/remote', {
+  remote: 'http://localhost:3001/mf-manifest.json',
+});
+
+console.log(debugUrl);
+```
 
 ## Proxy domain security
 
