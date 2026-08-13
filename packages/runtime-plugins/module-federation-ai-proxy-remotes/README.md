@@ -40,19 +40,19 @@ The page refreshes and removes the parameter from the address bar. Debugging rem
 ## Configure remotes from the URL
 
 ```js
-const config = {
-  overrides: {
-    checkout: 'http://localhost:3001/mf-manifest.json',
-  },
-};
+const remoteName = 'checkout';
+const localManifestUrl = 'http://localhost:3001/mf-manifest.json';
+const debugConfig = encodeURIComponent(
+  JSON.stringify({
+    overrides: {
+      [remoteName]: localManifestUrl,
+    },
+  }),
+);
 
-const createDebugUrl = (hostUrl, debugConfig) => {
-  const url = new URL(hostUrl);
-  url.searchParams.set('__mf_devtools', JSON.stringify(debugConfig));
-  return url.href;
-};
+const debugUrl = `https://host.example.com/checkout?__mf_devtools=${debugConfig}`;
 
-console.log(createDebugUrl('https://host.example.com/checkout', config));
+console.log(debugUrl);
 ```
 
 Open the generated URL to enable debugging and save the rule. Remote names and aliases are both supported.
