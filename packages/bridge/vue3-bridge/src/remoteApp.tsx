@@ -111,6 +111,13 @@ export default defineComponent({
     const hasSSRPayload = computed(() =>
       Boolean((serverPayload.value || snapshot.value) && instanceId.value),
     );
+    const ssrIdentity = computed(() => {
+      const payload = ssrPayload.value;
+      const currentInstanceId = instanceId.value;
+      return payload && currentInstanceId
+        ? `${payload.moduleName}\0${currentInstanceId}`
+        : '';
+    });
     const registryModuleName = computed(
       () =>
         props.moduleName ||
@@ -317,6 +324,28 @@ export default defineComponent({
         const dom = rootRef.value as HTMLElement | null;
         destroyComponent();
         if (dom) clearBridgeSSRMountAttrs(dom);
+        void nextTick(() => {
+          if (isActive.value && !controller.signal.aborted) {
+            void renderComponent();
+          }
+        });
+      },
+      { flush: 'pre' },
+    );
+
+    watch(
+      ssrIdentity,
+      (next, prev) => {
+        if (!prev || !next || next === prev) return;
+
+        // A new SSR identity is a new remote instance. Tear down the old
+        // provider before Vue patches the slot, then hydrate/render the new
+        // payload after its mount node has been committed.
+        providerGeneration += 1;
+        consumedSnapshot = false;
+        hydratedOnce = false;
+        csrOnly = false;
+        destroyComponent();
         void nextTick(() => {
           if (isActive.value && !controller.signal.aborted) {
             void renderComponent();

@@ -123,10 +123,9 @@ export const RemoteAppWrapper = forwardRef<HTMLDivElement, any>(function (
   }>();
   const hydrationIdentity =
     reference && instanceId ? `${reference.moduleName}\0${instanceId}` : '';
-  if (
-    hydrationIdentity &&
-    hydrationSnapshotRef.current?.identity !== hydrationIdentity
-  ) {
+  if (!hydrationIdentity) {
+    hydrationSnapshotRef.current = undefined;
+  } else if (hydrationSnapshotRef.current?.identity !== hydrationIdentity) {
     hydrationSnapshotRef.current = {
       identity: hydrationIdentity,
       snapshot: registry!.peek(reference!.moduleName, instanceId!),

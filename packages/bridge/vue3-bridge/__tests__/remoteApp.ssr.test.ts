@@ -277,4 +277,65 @@ describe('RemoteApp SSR lifecycle', () => {
     expect(providerReturn.render.mock.calls[1][0].dom?.isConnected).toBe(true);
     app.unmount();
   });
+
+  it('replaces the provider when the SSR identity changes in place', async () => {
+    const first = {
+      protocolVersion: BRIDGE_SSR_PROTOCOL_VERSION,
+      moduleName: 'ecApp',
+      instanceId: 'ec:1',
+      html: '<p>first remote</p>',
+      dehydratedState: { ready: 'first' },
+    };
+    const second = {
+      protocolVersion: BRIDGE_SSR_PROTOCOL_VERSION,
+      moduleName: 'ecApp',
+      instanceId: 'ec:2',
+      html: '<p>second remote</p>',
+      dehydratedState: { ready: 'second' },
+    };
+    const providerReturn = {
+      render: rs.fn(async () => undefined),
+      destroy: rs.fn(),
+    };
+    const state = reactive<{
+      instanceId: string;
+      ssr: typeof first;
+    }>({ instanceId: first.instanceId, ssr: first });
+    const App = defineComponent({
+      setup: () => () =>
+        h(RemoteApp, {
+          moduleName: 'ecApp',
+          instanceId: state.instanceId,
+          ssr: state.ssr,
+          providerInfo: () => providerReturn,
+        }),
+    });
+    const app = createApp(App);
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [{ path: '/', component: { template: '<div />' } }],
+    });
+    app.use(router);
+    await router.isReady();
+    mountApp(app);
+    await flushBridgeRender();
+
+    expect(providerReturn.render).toHaveBeenCalledTimes(1);
+    expect(providerReturn.render.mock.calls[0][0].ssrState).toEqual({
+      ready: 'first',
+    });
+
+    state.instanceId = second.instanceId;
+    state.ssr = second;
+    await nextTick();
+    await flushBridgeRender();
+
+    expect(providerReturn.destroy).toHaveBeenCalledTimes(1);
+    expect(providerReturn.render).toHaveBeenCalledTimes(2);
+    expect(providerReturn.render.mock.calls[1][0].ssrState).toEqual({
+      ready: 'second',
+    });
+    expect(root.innerHTML).toContain('second remote');
+    app.unmount();
+  });
 });

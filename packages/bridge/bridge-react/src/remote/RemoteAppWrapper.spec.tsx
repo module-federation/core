@@ -218,6 +218,70 @@ describe('RemoteAppWrapper lifecycle', () => {
     expect(registry.peek('remote/app', 'remote-1')).toBeUndefined();
   });
 
+  it('does not restore a consumed snapshot when the SSR reference returns', async () => {
+    const result = {
+      protocolVersion: 1 as const,
+      moduleName: 'remote/app',
+      instanceId: 'remote-1',
+      html: '<p>server remote</p>',
+      dehydratedState: { ready: true },
+    };
+    document.body.innerHTML = renderToStaticMarkup(
+      <BridgeRemoteSlot
+        moduleName={result.moduleName}
+        instanceId={result.instanceId}
+        payload={result}
+      />,
+    );
+    const registry = createBridgeHydrationRegistry(document);
+    const provider = { render: rs.fn(), destroy: rs.fn() };
+    const providerInfo = () => provider;
+    const reference = toBridgeSSRReference(result);
+    const view = render(
+      <BridgeHydrationProvider registry={registry}>
+        <RemoteAppWrapper
+          {...baseProps}
+          instanceId={result.instanceId}
+          ssr={reference}
+          providerInfo={providerInfo}
+        />
+      </BridgeHydrationProvider>,
+    );
+
+    await waitFor(() => expect(provider.render).toHaveBeenCalledOnce());
+    expect(provider.render.mock.calls[0][0].ssrState).toEqual({ ready: true });
+
+    view.rerender(
+      <BridgeHydrationProvider registry={registry}>
+        <RemoteAppWrapper
+          {...baseProps}
+          instanceId={result.instanceId}
+          ssr={undefined}
+          providerInfo={providerInfo}
+        />
+      </BridgeHydrationProvider>,
+    );
+    await waitFor(() => expect(provider.render).toHaveBeenCalledTimes(2));
+
+    view.rerender(
+      <BridgeHydrationProvider registry={registry}>
+        <RemoteAppWrapper
+          {...baseProps}
+          instanceId={result.instanceId}
+          ssr={reference}
+          providerInfo={providerInfo}
+        />
+      </BridgeHydrationProvider>,
+    );
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(provider.render).toHaveBeenCalledTimes(2);
+    expect(provider.render.mock.calls[1][0].ssrState).toBeUndefined();
+    view.unmount();
+  });
+
   it('destroys provider only once when render settles after unmount', async () => {
     const queued: Array<() => void> = [];
     rs.spyOn(globalThis, 'queueMicrotask').mockImplementation((callback) => {
