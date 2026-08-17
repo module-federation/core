@@ -15,7 +15,8 @@ If you only need to **register** a plugin path in build config, see [`runtimePlu
 
 ## Mental model
 
-A runtime plugin is a function that returns a `ModuleFederationRuntimePlugin`:
+A runtime plugin is a function that returns a `ModuleFederationRuntimePlugin`.
+New plugins should return their hooks from `apply(instance)`:
 
 ```ts
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
@@ -23,6 +24,11 @@ import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/
 export default function myRuntimePlugin(): ModuleFederationRuntimePlugin {
   return {
     name: 'my-runtime-plugin',
+    apply(instance) {
+      return {
+        // Declare runtime hooks here.
+      };
+    },
   };
 }
 ```
@@ -149,9 +155,25 @@ const instanceTracePlugin: ModuleFederationRuntimePlugin = {
 Use this form when the same global plugin object is shared by multiple runtime
 instances but its counters, caches, or subscriptions must stay isolated. When
 `apply` returns hooks, that returned object is the hook set registered for the
-instance; include every hook that instance needs in the returned object. If
-`apply` returns nothing, the hooks declared directly on the plugin are
-registered as usual.
+instance; include every hook that instance needs in the returned object.
+
+### Legacy syntax and compatibility
+
+Previously, hooks could be declared directly on the plugin object:
+
+```ts
+const legacyPlugin: ModuleFederationRuntimePlugin = {
+  name: 'legacy-plugin',
+  beforeRequest(args) {
+    return args;
+  },
+};
+```
+
+This syntax is still supported, but will be deprecated. To migrate, move the
+existing hooks into the object returned by `apply(instance)`. When `apply`
+returns nothing, the current version still falls back to hooks declared on the
+plugin object.
 
 ## Choose the right hook
 
@@ -194,26 +216,30 @@ export default function rewriteRemoteEntryPlugin(
 ): ModuleFederationRuntimePlugin {
   return {
     name: 'rewrite-remote-entry',
-    async afterResolve(args) {
-      const entry = args.remoteInfo?.entry;
-      if (!entry) {
-        return args;
-      }
+    apply() {
+      return {
+        async afterResolve(args) {
+          const entry = args.remoteInfo?.entry;
+          if (!entry) {
+            return args;
+          }
 
-      try {
-        const currentUrl = new URL(entry);
-        if (currentUrl.hostname !== options.fromHost) {
+          try {
+            const currentUrl = new URL(entry);
+            if (currentUrl.hostname !== options.fromHost) {
+              return args;
+            }
+
+            const nextUrl = new URL(entry);
+            nextUrl.hostname = options.toHost;
+            args.remoteInfo.entry = nextUrl.toString();
+          } catch {
+            // Ignore non-URL entries and keep the original resolution.
+          }
+
           return args;
-        }
-
-        const nextUrl = new URL(entry);
-        nextUrl.hostname = options.toHost;
-        args.remoteInfo.entry = nextUrl.toString();
-      } catch {
-        // Ignore non-URL entries and keep the original resolution.
-      }
-
-      return args;
+        },
+      };
     },
   };
 }
@@ -241,18 +267,22 @@ import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/
 export default function fetchManifestWithCredentials(): ModuleFederationRuntimePlugin {
   return {
     name: 'fetch-manifest-with-credentials',
-    fetch(manifestUrl, requestInit, remoteInfo) {
-      const headers = new Headers(requestInit?.headers);
-      headers.set('x-mf-host', 'host');
-      if (remoteInfo?.name) {
-        headers.set('x-mf-remote', remoteInfo.name);
-      }
+    apply() {
+      return {
+        fetch(manifestUrl, requestInit, remoteInfo) {
+          const headers = new Headers(requestInit?.headers);
+          headers.set('x-mf-host', 'host');
+          if (remoteInfo?.name) {
+            headers.set('x-mf-remote', remoteInfo.name);
+          }
 
-      return fetch(manifestUrl, {
-        ...requestInit,
-        credentials: 'include',
-        headers,
-      });
+          return fetch(manifestUrl, {
+            ...requestInit,
+            credentials: 'include',
+            headers,
+          });
+        },
+      };
     },
   };
 }
@@ -279,28 +309,32 @@ import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/
 export default function preferHostReact(): ModuleFederationRuntimePlugin {
   return {
     name: 'prefer-host-react',
-    resolveShare(args) {
-      if (args.pkgName !== 'react') {
-        return args;
-      }
+    apply() {
+      return {
+        resolveShare(args) {
+          if (args.pkgName !== 'react') {
+            return args;
+          }
 
-      const hostVersionMap = args.shareScopeMap.default?.react;
-      if (!hostVersionMap) {
-        return args;
-      }
+          const hostVersionMap = args.shareScopeMap.default?.react;
+          if (!hostVersionMap) {
+            return args;
+          }
 
-      const preferredShared =
-        hostVersionMap[args.version] ?? Object.values(hostVersionMap)[0];
-      if (!preferredShared) {
-        return args;
-      }
+          const preferredShared =
+            hostVersionMap[args.version] ?? Object.values(hostVersionMap)[0];
+          if (!preferredShared) {
+            return args;
+          }
 
-      args.resolver = () => ({
-        shared: preferredShared,
-        useTreesShaking: false,
-      });
+          args.resolver = () => ({
+            shared: preferredShared,
+            useTreesShaking: false,
+          });
 
-      return args;
+          return args;
+        },
+      };
     },
   };
 }

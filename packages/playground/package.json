@@ -35,7 +35,7 @@
     "pre-release": "pnpm run build"
   },
   "dependencies": {
-    "@divebell/core": "0.0.17",
+    "@divebell/core": "0.0.23",
     "@module-federation/bridge-react": "workspace:*",
     "@module-federation/runtime": "workspace:*",
     "@monaco-editor/react": "4.7.0",

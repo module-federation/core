@@ -70,7 +70,7 @@
   },
   "dependencies": {
     "@module-federation/sdk": "workspace:*",
-    "@divebell/core": "0.0.17",
+    "@divebell/core": "0.0.23",
     "semver": "^7.7.4"
   },
   "scripts": {

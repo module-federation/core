@@ -15,7 +15,8 @@ Runtime 插件用于改写 **运行时行为**，而不是改写 runtime 本身�
 
 ## 心智模型
 
-一个 Runtime 插件本质上是一个返回 `ModuleFederationRuntimePlugin` 的函数：
+一个 Runtime 插件本质上是一个返回 `ModuleFederationRuntimePlugin` 的函数。新插件应通过
+`apply(instance)` 返回需要注册的 hook：
 
 ```ts
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
@@ -23,6 +24,11 @@ import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/
 export default function myRuntimePlugin(): ModuleFederationRuntimePlugin {
   return {
     name: 'my-runtime-plugin',
+    apply(instance) {
+      return {
+        // 在这里声明 runtime hooks
+      };
+    },
   };
 }
 ```
@@ -149,8 +155,23 @@ const instanceTracePlugin: ModuleFederationRuntimePlugin = {
 
 同一个全局插件对象被多个 runtime 实例共用，但计数器、缓存或订阅不能互相影响时，
 可以使用这种写法。`apply` 返回 hook 后，这个返回对象就是该实例最终注册的 hook
-集合，因此要把该实例需要的 hook 都放进返回对象。如果 `apply` 不返回内容，则仍会像
-以前一样注册直接写在插件对象上的 hook。
+集合，因此要把该实例需要的 hook 都放进返回对象。
+
+### 旧写法与兼容性
+
+过去可以直接在插件对象上定义 hook：
+
+```ts
+const legacyPlugin: ModuleFederationRuntimePlugin = {
+  name: 'legacy-plugin',
+  beforeRequest(args) {
+    return args;
+  },
+};
+```
+
+这种写法目前仍然兼容，但后续会废弃。迁移时把原有 hook 移入 `apply(instance)` 的返回
+对象即可；如果 `apply` 没有返回内容，当前版本仍会回退到插件对象上的 hook。
 
 ## 怎么选 hook
 
@@ -193,26 +214,30 @@ export default function rewriteRemoteEntryPlugin(
 ): ModuleFederationRuntimePlugin {
   return {
     name: 'rewrite-remote-entry',
-    async afterResolve(args) {
-      const entry = args.remoteInfo?.entry;
-      if (!entry) {
-        return args;
-      }
+    apply() {
+      return {
+        async afterResolve(args) {
+          const entry = args.remoteInfo?.entry;
+          if (!entry) {
+            return args;
+          }
 
-      try {
-        const currentUrl = new URL(entry);
-        if (currentUrl.hostname !== options.fromHost) {
+          try {
+            const currentUrl = new URL(entry);
+            if (currentUrl.hostname !== options.fromHost) {
+              return args;
+            }
+
+            const nextUrl = new URL(entry);
+            nextUrl.hostname = options.toHost;
+            args.remoteInfo.entry = nextUrl.toString();
+          } catch {
+            // 非 URL 场景直接忽略，保留原始解析结果。
+          }
+
           return args;
-        }
-
-        const nextUrl = new URL(entry);
-        nextUrl.hostname = options.toHost;
-        args.remoteInfo.entry = nextUrl.toString();
-      } catch {
-        // 非 URL 场景直接忽略，保留原始解析结果。
-      }
-
-      return args;
+        },
+      };
     },
   };
 }
@@ -241,18 +266,22 @@ import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/
 export default function fetchManifestWithCredentials(): ModuleFederationRuntimePlugin {
   return {
     name: 'fetch-manifest-with-credentials',
-    fetch(manifestUrl, requestInit, remoteInfo) {
-      const headers = new Headers(requestInit?.headers);
-      headers.set('x-mf-host', 'host');
-      if (remoteInfo?.name) {
-        headers.set('x-mf-remote', remoteInfo.name);
-      }
+    apply() {
+      return {
+        fetch(manifestUrl, requestInit, remoteInfo) {
+          const headers = new Headers(requestInit?.headers);
+          headers.set('x-mf-host', 'host');
+          if (remoteInfo?.name) {
+            headers.set('x-mf-remote', remoteInfo.name);
+          }
 
-      return fetch(manifestUrl, {
-        ...requestInit,
-        credentials: 'include',
-        headers,
-      });
+          return fetch(manifestUrl, {
+            ...requestInit,
+            credentials: 'include',
+            headers,
+          });
+        },
+      };
     },
   };
 }
@@ -279,28 +308,32 @@ import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/
 export default function preferHostReact(): ModuleFederationRuntimePlugin {
   return {
     name: 'prefer-host-react',
-    resolveShare(args) {
-      if (args.pkgName !== 'react') {
-        return args;
-      }
+    apply() {
+      return {
+        resolveShare(args) {
+          if (args.pkgName !== 'react') {
+            return args;
+          }
 
-      const hostVersionMap = args.shareScopeMap.default?.react;
-      if (!hostVersionMap) {
-        return args;
-      }
+          const hostVersionMap = args.shareScopeMap.default?.react;
+          if (!hostVersionMap) {
+            return args;
+          }
 
-      const preferredShared =
-        hostVersionMap[args.version] ?? Object.values(hostVersionMap)[0];
-      if (!preferredShared) {
-        return args;
-      }
+          const preferredShared =
+            hostVersionMap[args.version] ?? Object.values(hostVersionMap)[0];
+          if (!preferredShared) {
+            return args;
+          }
 
-      args.resolver = () => ({
-        shared: preferredShared,
-        useTreesShaking: false,
-      });
+          args.resolver = () => ({
+            shared: preferredShared,
+            useTreesShaking: false,
+          });
 
-      return args;
+          return args;
+        },
+      };
     },
   };
 }

@@ -3999,8 +3999,8 @@ importers:
   packages/observability-plugin:
     dependencies:
       '@divebell/core':
-        specifier: 0.0.17
-        version: 0.0.17
+        specifier: 0.0.23
+        version: 0.0.23
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../sdk
@@ -4018,8 +4018,8 @@ importers:
   packages/playground:
     dependencies:
       '@divebell/core':
-        specifier: 0.0.17
-        version: 0.0.17
+        specifier: 0.0.23
+        version: 0.0.23
       '@module-federation/bridge-react':
         specifier: workspace:*
         version: link:../bridge/bridge-react
@@ -6165,8 +6165,8 @@ packages:
     resolution: {integrity: sha512-dBVuXR082gk3jsFp7Rd/JI4kytwGHecnCoTtXFb7DB6CNHp4rg5k1bhg0nWdLGLnOV71lmDzGQaLMy8iPLY0pw==}
     engines: {node: '>=10.0.0'}
 
-  '@divebell/core@0.0.17':
-    resolution: {integrity: sha512-NqCCSrIvMn+rqLaASJkxdFkOglNDBin/BMg1n79ebHQ5Ps8Baet77E6eNVFCLlGEap7d/x/0tFyl+RG63bnYWA==}
+  '@divebell/core@0.0.23':
+    resolution: {integrity: sha512-BT80nvct1BhDmxhBIsTayTZGsScqQclG+djAKYblJ77mfq6V9XF7U1B9xjKdvqUxopUjzMU40JY6WGxnh3KVLg==}
 
   '@edge-runtime/format@2.2.1':
     resolution: {integrity: sha512-JQTRVuiusQLNNLe2W9tnzBlV/GvSVcozLl4XZHk5swnRZ/v6jp8TqR8P7sqmJsQqblDZ3EztcWmLDbhRje/+8g==}
@@ -31666,7 +31666,7 @@ snapshots:
 
   '@discoveryjs/json-ext@0.5.7': {}
 
-  '@divebell/core@0.0.17': {}
+  '@divebell/core@0.0.23': {}
 
   '@edge-runtime/format@2.2.1': {}
 
