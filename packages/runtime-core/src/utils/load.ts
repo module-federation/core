@@ -4,6 +4,7 @@ import {
   composeKeyWithSeparator,
   isBrowserEnvValue,
 } from '@module-federation/sdk';
+import { loadEsmEntryWithFetch } from './blobLoad';
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { ModuleFederation } from '../core';
 import { globalLoading, getRemoteEntryExports } from '../global';
@@ -249,7 +250,19 @@ async function loadEntryDom({
 }) {
   const { entry, entryGlobalName: globalName, name, type } = remoteInfo;
   if (isEsmRemoteType(type)) {
-    return loadEsmEntry({ entry, remoteEntryExports, name, getEntryUrl });
+    return loaderHook.lifecycle.fetch.listeners.size > 0
+      ? loadEsmEntryWithFetch({
+          entry,
+          name,
+          customFetch: async (url, init) =>
+            loaderHook.lifecycle.fetch.emit(
+              url,
+              init,
+              remoteInfo,
+              resourceContext,
+            ),
+        })
+      : loadEsmEntry({ entry, remoteEntryExports, name, getEntryUrl });
   }
 
   if (type === 'system') {
@@ -447,3 +460,5 @@ export function getRemoteInfo(remote: Remote): RemoteInfo {
     shareScope: remote.shareScope || DEFAULT_SCOPE,
   };
 }
+
+export const __loadEntryDomForTest = loadEntryDom;

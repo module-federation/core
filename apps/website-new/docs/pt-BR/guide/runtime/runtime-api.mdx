@@ -305,6 +305,45 @@ Quando `force: true` é definir, o newly registered módulos vai overwrite já-r
 
 :::
 
+### Carregando remotes com cabeçalhos personalizados via hook `fetch`
+
+Alguns remotes exigem cabeçalhos específicos para serem acessados. Nesse caso, você pode configurar os cabeçalhos através do [hook `fetch`](./runtime-hooks#fetch) do runtime. Você pode lidar com casos dinâmicos, como atualização de token ou lógica de autenticação por requisição, dentro desse hook.
+
+Para remotes do tipo **`module` / `esm`**, quando um hook `fetch` é registrado, o remote entry e o CSS declarado no manifest são carregados através de um carregador `fetch` + blob, de modo que os cabeçalhos que você adiciona alcancem todas as requisições de recursos. Sem um hook `fetch` registrado, os remotes carregam como antes, via `import()` / `<link>` nativos (que não podem carregar cabeçalhos personalizados).
+
+```ts
+import { createInstance } from '@module-federation/enhanced/runtime';
+
+const mf = createInstance({
+  name: 'mf_host',
+  remotes: [
+    {
+      name: 'sub1',
+      entry: 'https://localhost:2001/mf-manifest.json',
+      type: 'module',
+    },
+  ],
+  plugins: [
+    {
+      name: 'auth-fetch',
+      // `remoteInfo` permite usar diferentes opções de requisição para remotes específicos
+      fetch(url, init, remoteInfo) {
+        return fetch(url, {
+          ...init,
+          headers: { ...init.headers, Authorization: `Bearer ${token}` },
+        });
+      },
+    },
+  ],
+});
+```
+
+:::info
+
+As dicas de preload nativas (`<link rel="modulepreload">` / `<link rel="preload">`) não podem carregar cabeçalhos, portanto podem falhar em uma origem autenticada; os carregamentos reais ainda passam pelo hook `fetch` quando o recurso é utilizado. O CSS autenticado é injetado diretamente e não emite o hook `createLink`, então atributos `nonce`/SRI adicionados por plugins não são aplicados a ele.
+
+:::
+
 <Tabs>
   <Tab label="Build Plugin (Use build plugin)">
   ```tsx
