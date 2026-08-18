@@ -472,10 +472,9 @@ export class ModuleFederation {
   }
 
   registerShared(shared: UserOptions['shared']) {
-    const { allShareInfos } = this.sharedHandler.registerShared(this.options, {
+    this.sharedHandler.registerShared(this.options, {
       ...this.options,
       shared,
     });
-    this.options.shared = allShareInfos;
   }
 }

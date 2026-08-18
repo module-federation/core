@@ -67,7 +67,7 @@ describe('ModuleFederation', () => {
     expect((module as any).initPromise).toBeUndefined();
   });
 
-  it('registers dynamic shared modules for loadShare', async () => {
+  it('registers dynamic shared modules without mutating options', async () => {
     const GM = new ModuleFederation({
       name: '@federation/dynamic-shared',
       remotes: [],
@@ -82,16 +82,27 @@ describe('ModuleFederation', () => {
       },
     });
 
-    expect(GM.options.shared['dynamic-shared']).toHaveLength(1);
+    expect(GM.options.shared).toEqual({});
     expect(GM.shareScopeMap.default['dynamic-shared']['1.0.0']).toBeDefined();
 
+    GM.initOptions({
+      name: '@federation/dynamic-shared',
+      remotes: [],
+    });
+
+    expect(GM.options.shared).toEqual({});
+
+    GM.initShareScopeMap('default', {});
+    GM.initializeSharing();
+
+    expect(GM.shareScopeMap.default['dynamic-shared']['1.0.0']).toBeDefined();
     const loadedShared = await GM.loadShare<{ name: string }>('dynamic-shared');
 
     expect(loadedShared).toBe(sharedFactory);
     expect(loadedShared?.()).toEqual({ name: 'dynamic-shared' });
   });
 
-  it('preserves existing and configured shared options when registering dynamically', () => {
+  it('does not mutate configured shared options when registering dynamically', () => {
     const existingFactory = () => ({ name: 'existing-shared' });
     const GM = new ModuleFederation({
       name: '@federation/dynamic-shared-config',
@@ -112,10 +123,10 @@ describe('ModuleFederation', () => {
     });
 
     GM.registerShared({
-      'configured-shared': {
+      'existing-shared': {
         version: '2.0.0',
         scope: ['default', 'custom'],
-        get: () => Promise.resolve(() => ({ name: 'configured-shared' })),
+        get: () => Promise.resolve(() => ({ name: 'existing-shared' })),
         shareConfig: {
           singleton: true,
           requiredVersion: '^2.0.0',
@@ -125,6 +136,7 @@ describe('ModuleFederation', () => {
       },
     });
 
+    expect(GM.options.shared['existing-shared']).toHaveLength(1);
     expect(GM.options.shared['existing-shared'][0]).toMatchObject({
       version: '1.0.0',
       scope: ['default', 'legacy'],
@@ -136,17 +148,7 @@ describe('ModuleFederation', () => {
         strictVersion: true,
       },
     });
-    expect(GM.options.shared['configured-shared'][0]).toMatchObject({
-      version: '2.0.0',
-      scope: ['default', 'custom'],
-      shareConfig: {
-        singleton: true,
-        requiredVersion: '^2.0.0',
-        eager: true,
-        strictVersion: true,
-      },
-    });
-    expect(GM.shareScopeMap.custom['configured-shared']['2.0.0']).toBeDefined();
+    expect(GM.shareScopeMap.custom['existing-shared']['2.0.0']).toBeDefined();
   });
 
   it('preserves array shared options and re-registration semantics', () => {
@@ -169,10 +171,12 @@ describe('ModuleFederation', () => {
     } as const;
 
     GM.registerShared(shared);
-    const registeredArrayShared = GM.options.shared['array-shared'];
+    expect(GM.options.shared).toEqual({});
+    GM.initializeSharing();
     GM.registerShared(shared);
 
-    expect(registeredArrayShared).toHaveLength(2);
-    expect(GM.options.shared['array-shared']).toBe(registeredArrayShared);
+    expect(GM.shareScopeMap.default['array-shared']['1.0.0']).toBeDefined();
+    expect(GM.shareScopeMap.default['array-shared']['2.0.0']).toBeDefined();
+    expect(GM.options.shared).toEqual({});
   });
 });
