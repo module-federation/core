@@ -189,6 +189,6 @@
     "vite": "^5.4.21",
     "@module-federation/runtime": "workspace:*",
     "@module-federation/runtime-core": "workspace:*",
-    "hono": "4.12.34"
+    "hono": "4.13.1"
   }
 }
