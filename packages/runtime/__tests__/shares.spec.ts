@@ -10,7 +10,6 @@ import {
   shareInfoWithoutLibAndGetConsumer,
   shareInfoWithoutLibAndGetProvider,
 } from './share';
-// import { assert } from '../src/utils/logger';
 import { ModuleFederation } from '@module-federation/runtime-core';
 import {
   UserOptions,
@@ -235,50 +234,6 @@ describe('shared', () => {
     assert(sharedRes, "shared can't be null");
     expect(sharedRes.from).toEqual('@federation/runtime-deps2');
   });
-
-  // it('share deps', async () => {
-  //   const GM1 = new ModuleFederation({
-  //     name: '@federation/load-deps',
-  //     remotes: [],
-  //     shared: {
-  //       'deps-react': {
-  //         version: '1.0.0',
-  //         get: () =>
-  //           new Promise(resolve => {
-  //             setTimeout(() => {
-  //               resolve({
-  //                 from: ['deps-react'],
-  //               });
-  //             }, 300);
-  //           }),
-  //       },
-  //       'deps-react-dom': {
-  //         version: '1.0.1',
-  //         deps: ['deps-react'],
-  //         get: () =>
-  //           new Promise(async resolve => {
-  //             const reactDeps =
-  //               GM1.loadShareSync<{ from: Array<string> }>('deps-react');
-
-  //             setTimeout(() => {
-  //               resolve({
-  //                 from: [...reactDeps.from, 'deps-react-dom'],
-  //               });
-  //             }, 200);
-  //           }),
-  //       },
-  //     },
-  //   });
-
-  //   const shareInstance = await GM1.loadShare<{ from: Array<string> }>(
-  //     'deps-react-dom',
-  //   );
-
-  //   assert(shareInstance, "shareInstance can'n be undefined");
-  //   expect(shareInstance.from).toEqual(
-  //     expect.arrayContaining(['deps-react', 'deps-react-dom']),
-  //   );
-  // });
 });
 
 describe('single shared', () => {
