@@ -71,10 +71,16 @@ export function getGlobalRemoteInfo(
   };
 }
 
+interface ManifestCacheRecord {
+  manifest: Manifest;
+  resolvedUrl: string;
+}
+
 export class SnapshotHandler {
   loadingHostSnapshot: Promise<GlobalModuleInfo | void> | null = null;
   HostInstance: ModuleFederation;
-  manifestCache: Map<string, Manifest> = new Map();
+  manifestCache: Map<string, ManifestCacheRecord> = new Map();
+  private manifestCacheRequests: Map<string, object> = new Map();
   hooks = new PluginSystem({
     beforeLoadRemoteSnapshot: new AsyncHook<
       [
@@ -116,6 +122,22 @@ export class SnapshotHandler {
   constructor(HostInstance: ModuleFederation) {
     this.HostInstance = HostInstance;
     this.loaderHook = HostInstance.loaderHook;
+  }
+
+  clearManifestCache(manifestUrl: string): void {
+    this.manifestCacheRequests.delete(manifestUrl);
+    this.manifestCache.delete(manifestUrl);
+    delete this.manifestLoading[manifestUrl];
+  }
+
+  private clearManifestRequest(
+    manifestUrl: string,
+    manifestCacheRequest: object,
+  ): void {
+    if (this.manifestCacheRequests.get(manifestUrl) === manifestCacheRequest) {
+      this.manifestCacheRequests.delete(manifestUrl);
+      delete this.manifestLoading[manifestUrl];
+    }
   }
 
   // eslint-disable-next-line max-lines-per-function
@@ -291,6 +313,7 @@ export class SnapshotHandler {
     manifestUrl: string,
     moduleInfo: Remote,
     extraOptions: Record<string, any>,
+    manifestCacheRequest: object,
     resourceOptions?: {
       initiator: ResourceLoadInitiator;
       id: string;
@@ -298,11 +321,12 @@ export class SnapshotHandler {
   ): Promise<Manifest> {
     const getManifest = async (): Promise<Manifest> => {
       const remoteInfo = getRemoteInfo(moduleInfo);
-      let manifestJson: Manifest | undefined =
-        this.manifestCache.get(manifestUrl);
-      if (manifestJson) {
-        return manifestJson;
+      const cachedManifest = this.manifestCache.get(manifestUrl);
+      if (cachedManifest) {
+        return cachedManifest.manifest;
       }
+      let manifestJson: Manifest | undefined;
+      let resolvedUrl = manifestUrl;
       try {
         let res = await this.loaderHook.lifecycle.fetch.emit(
           manifestUrl,
@@ -320,6 +344,7 @@ export class SnapshotHandler {
           res = await fetch(manifestUrl, {});
         }
         manifestJson = (await res.json()) as Manifest;
+        resolvedUrl = res.url || manifestUrl;
       } catch (err) {
         manifestJson =
           (await this.HostInstance.remoteHandler.hooks.lifecycle.errorLoadRemote.emit(
@@ -334,7 +359,6 @@ export class SnapshotHandler {
           )) as Manifest | undefined;
 
         if (!manifestJson) {
-          delete this.manifestLoading[manifestUrl];
           error(
             RUNTIME_003,
             runtimeDescMap,
@@ -383,7 +407,16 @@ export class SnapshotHandler {
           optionsToMFContext(this.HostInstance.options),
         );
       }
-      this.manifestCache.set(manifestUrl, manifestJson);
+      if (
+        manifestCacheRequest === this.manifestCacheRequests.get(manifestUrl)
+      ) {
+        this.manifestCache.set(manifestUrl, {
+          manifest: manifestJson,
+          resolvedUrl,
+        });
+      } else {
+        return this.manifestCache.get(manifestUrl)?.manifest ?? manifestJson;
+      }
       return manifestJson;
     };
 
@@ -399,15 +432,18 @@ export class SnapshotHandler {
       id: string;
     },
   ): Promise<ModuleInfo> {
-    const asyncLoadProcess = async () => {
+    const asyncLoadProcess = async (manifestCacheRequest: object) => {
       const manifestJson = await this.getManifestJson(
         manifestUrl,
         moduleInfo,
         extraOptions,
+        manifestCacheRequest,
         resourceOptions,
       );
       const remoteSnapshot = generateSnapshotFromManifest(manifestJson, {
         version: manifestUrl,
+        resolvedManifestUrl:
+          this.manifestCache.get(manifestUrl)?.resolvedUrl ?? manifestUrl,
       });
 
       const { remoteSnapshot: remoteSnapshotRes } =
@@ -423,7 +459,14 @@ export class SnapshotHandler {
     };
 
     if (!this.manifestLoading[manifestUrl]) {
-      this.manifestLoading[manifestUrl] = asyncLoadProcess().then((res) => res);
+      const manifestCacheRequest = {};
+      this.manifestCacheRequests.set(manifestUrl, manifestCacheRequest);
+      this.manifestLoading[manifestUrl] = asyncLoadProcess(
+        manifestCacheRequest,
+      ).catch((loadError) => {
+        this.clearManifestRequest(manifestUrl, manifestCacheRequest);
+        throw loadError;
+      });
     }
     return this.manifestLoading[manifestUrl];
   }

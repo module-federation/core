@@ -1,0 +1,24 @@
+source 'https://cdn.cocoapods.org/'
+
+platform :ios, '13.0'
+
+target 'OrbitControl' do
+  pod 'Lynx', '3.9.0', :subspecs => ['Framework']
+  # Lynx 3.9.0 pins this PrimJS engine build in its published podspec.
+  pod 'PrimJS', '3.8.0-alpha.6', :subspecs => ['quickjs', 'napi']
+  pod 'LynxService', '3.9.0', :subspecs => ['Image', 'Log', 'Http']
+  pod 'SDWebImage', '5.15.5'
+  pod 'SDWebImageWebPCoder', '0.11.0'
+  pod 'XElement', '3.9.0'
+end
+
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      config.build_settings['GCC_TREAT_WARNINGS_AS_ERRORS'] = 'NO'
+      config.build_settings['OTHER_CFLAGS'] = '$(inherited) -Wno-error -Wno-c99-designator'
+      config.build_settings['OTHER_CPLUSPLUSFLAGS'] = '$(inherited) -Wno-error -Wno-c99-designator'
+      config.build_settings['OTHER_SWIFT_FLAGS'] = '$(inherited) -Xcc -Wno-deprecated-declarations -Xcc -Wno-deprecated-implementations'
+    end
+  end
+end
