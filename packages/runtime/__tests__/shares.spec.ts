@@ -876,6 +876,99 @@ describe('load share with different strategy', () => {
   });
 });
 
+describe('load share with host and remote version selection', () => {
+  const createHost = (
+    strategy: 'version-first' | 'loaded-first' = 'version-first',
+  ) =>
+    new ModuleFederation({
+      name: '@shared-version-selection/host',
+      // Keep remote initialization enabled so the test can compare the
+      // fallback policy after all host/remote providers are registered.
+      shareStrategy: 'version-first',
+      remotes: [
+        {
+          name: '__FEDERATION_shared-version-selection-1_0__',
+          alias: 'remote-1-0',
+          entry:
+            'http://localhost:1111/resources/shared-version-selection/remote-1-0/federation-remote-entry.js',
+        },
+        {
+          name: '__FEDERATION_shared-version-selection-1_9__',
+          alias: 'remote-1-9',
+          entry:
+            'http://localhost:1111/resources/shared-version-selection/remote-1-9/federation-remote-entry.js',
+        },
+        {
+          name: '__FEDERATION_shared-version-selection-2_0__',
+          alias: 'remote-2-0',
+          entry:
+            'http://localhost:1111/resources/shared-version-selection/remote-2-0/federation-remote-entry.js',
+        },
+      ],
+      shared: {
+        'shared-version-selection': {
+          version: '1.0.0',
+          strategy,
+          shareConfig: {
+            requiredVersion: '^1.0.0',
+            singleton: false,
+          },
+          get: () => () => ({
+            version: '1.0.0',
+            render: () => 'rendered with the 1.0.0 shared implementation',
+          }),
+        },
+      },
+    });
+
+  it('selects the highest compatible version registered by host and remotes', async () => {
+    setGlobalFederationConstructor(ModuleFederation, true);
+
+    const host = createHost();
+
+    const shared = await host.loadShare<{
+      version: string;
+      render: () => string;
+    }>('shared-version-selection');
+
+    assert(shared, 'shared implementation must be available');
+    const sharedImplementation = shared();
+    assert(sharedImplementation, 'shared implementation must return a module');
+
+    // Both 1.0.0 and 1.9.0 satisfy ^1.0.0; version-first should choose the
+    // highest compatible implementation, whose behavior is observable here.
+    expect(
+      Object.keys(host.shareScopeMap.default['shared-version-selection']),
+    ).toEqual(['1.0.0', '1.9.0', '2.0.0']);
+    expect(sharedImplementation.version).toBe('1.9.0');
+    expect(sharedImplementation.render()).toBe(
+      'rendered with the 1.9.0 shared implementation',
+    );
+  });
+
+  it('preserves registration-order fallback for loaded-first', async () => {
+    setGlobalFederationConstructor(ModuleFederation, true);
+
+    const host = createHost('loaded-first');
+    const shared = await host.loadShare<{
+      version: string;
+      render: () => string;
+    }>('shared-version-selection');
+
+    assert(shared, 'shared implementation must be available');
+    const sharedImplementation = shared();
+    assert(sharedImplementation, 'shared implementation must return a module');
+
+    expect(
+      Object.keys(host.shareScopeMap.default['shared-version-selection']),
+    ).toEqual(['1.0.0', '1.9.0', '2.0.0']);
+    expect(sharedImplementation.version).toBe('1.0.0');
+    expect(sharedImplementation.render()).toBe(
+      'rendered with the 1.0.0 shared implementation',
+    );
+  });
+});
+
 describe('load share while shared has multiple versions', () => {
   it('return loaded and has max version shared by default', async () => {
     const federationConfig1: UserOptions = {

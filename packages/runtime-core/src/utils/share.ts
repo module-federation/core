@@ -429,10 +429,26 @@ export function getRegisteredShare(
           }
 
           const _usedTreeShaking = shouldUseTreeShaking(treeShaking);
-          if (_usedTreeShaking) {
-            const treeShakingVersion = findVersion(
+          const findCompatibleVersion = (
+            versionFilter: (version: string) => boolean,
+          ) => {
+            // loaded-first keeps its registration-order fallback after its
+            // initial loaded or loading version selection.
+            if (strategy === 'loaded-first') {
+              return Object.keys(localShareScopeMap[sc][pkgName]).find(
+                versionFilter,
+              );
+            }
+
+            return findVersion(
               localShareScopeMap[sc][pkgName],
               undefined,
+              versionFilter,
+            );
+          };
+
+          if (_usedTreeShaking) {
+            const treeShakingVersion = findCompatibleVersion(
               (version) =>
                 satisfy(version, requiredVersion) &&
                 shouldUseTreeShaking(
@@ -449,10 +465,8 @@ export function getRegisteredShare(
             }
           }
 
-          const compatibleVersion = findVersion(
-            localShareScopeMap[sc][pkgName],
-            undefined,
-            (version) => satisfy(version, requiredVersion),
+          const compatibleVersion = findCompatibleVersion((version) =>
+            satisfy(version, requiredVersion),
           );
           if (compatibleVersion) {
             return {
