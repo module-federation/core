@@ -218,4 +218,29 @@ describe('getRemoteEntry - Node.js entry loading', () => {
     expect(error.message).not.toContain(RUNTIME_008);
     expect(loadEntryError).not.toHaveBeenCalled();
   });
+
+  it('does not retry invalid Node entry URLs', async () => {
+    const origin = new ModuleFederation({ name: 'test-host', remotes: [] });
+    const remoteInfo = getRemoteInfo({
+      name: 'remote',
+      entry: 'not a valid URL',
+    });
+    const loadEntryError = rs.fn();
+
+    origin.registerPlugins([
+      {
+        name: 'node-entry-invalid-url-test',
+        loadEntryError,
+      },
+    ]);
+
+    const error = await getRemoteEntry({ origin, remoteInfo }).catch(
+      (reason) => reason,
+    );
+
+    expect(error.name).toBe('TypeError');
+    expect(error.message).toContain('Invalid URL');
+    expect(error.message).not.toContain(RUNTIME_008);
+    expect(loadEntryError).not.toHaveBeenCalled();
+  });
 });

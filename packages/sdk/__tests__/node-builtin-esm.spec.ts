@@ -197,6 +197,86 @@ describe('Node ESM builtin loading', () => {
     expect(fetchMock).toHaveBeenCalledWith(chunkUrl);
   });
 
+  it('evicts ESM modules from the cache after a transitive link failure', async () => {
+    const remoteEntryUrl = 'http://example.com/server/remoteEntry.mjs';
+    const chunkAUrl = 'http://example.com/server/chunk-a.mjs';
+    const chunkBUrl = 'http://example.com/server/chunk-b.mjs';
+    let chunkBAttempts = 0;
+    const fetchMock = setFetchMock((url) => {
+      if (url === remoteEntryUrl) {
+        return createResponse(
+          moduleSource`
+            import { value } from './chunk-a.mjs';
+
+            export const result = value;
+          `,
+        );
+      }
+
+      if (url === chunkAUrl) {
+        return createResponse(
+          moduleSource`
+            import { value as chunkValue } from './chunk-b.mjs';
+
+            export const value = chunkValue;
+          `,
+        );
+      }
+
+      if (url === chunkBUrl) {
+        chunkBAttempts += 1;
+        if (chunkBAttempts === 1) {
+          throw new TypeError('transient chunk failure');
+        }
+
+        return createResponse(`export const value = 'recovered';`);
+      }
+
+      throw new Error(`${url} should not be fetched`);
+    });
+
+    await expect(loadNodeEsmScript(remoteEntryUrl)).rejects.toThrow(
+      'transient chunk failure',
+    );
+
+    await expect(
+      loadNodeEsmScript<{ result: string }>(remoteEntryUrl),
+    ).resolves.toMatchObject({ result: 'recovered' });
+    expect(chunkBAttempts).toBe(2);
+    expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
+      remoteEntryUrl,
+      chunkAUrl,
+      chunkBUrl,
+      remoteEntryUrl,
+      chunkAUrl,
+      chunkBUrl,
+    ]);
+  });
+
+  it('evicts an ESM module from the cache after an evaluation failure', async () => {
+    const remoteEntryUrl = 'http://example.com/server/evaluation.mjs';
+    let attempts = 0;
+    const fetchMock = setFetchMock((url) => {
+      expect(url).toBe(remoteEntryUrl);
+      attempts += 1;
+
+      return createResponse(
+        attempts === 1
+          ? `throw new Error('transient evaluation failure');`
+          : `export const result = 'recovered';`,
+      );
+    });
+
+    await expect(loadNodeEsmScript(remoteEntryUrl)).rejects.toThrow(
+      'transient evaluation failure',
+    );
+
+    await expect(
+      loadNodeEsmScript<{ result: string }>(remoteEntryUrl),
+    ).resolves.toMatchObject({ result: 'recovered' });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
   it('rejects absolute non-http module URLs without fetching them', async () => {
     const remoteEntryUrl = 'http://example.com/server/remoteEntry.js';
     const fileChunkUrl = 'file:///tmp/chunk.mjs';
@@ -233,6 +313,20 @@ describe('Node ESM builtin loading', () => {
     );
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenCalledWith(remoteEntryUrl);
+  });
+
+  it('preserves invalid Node script URLs as validation errors', async () => {
+    const fetchMock = jest.fn();
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+
+    const error = await loadNodeScript('not a valid URL').catch(
+      (reason) => reason,
+    );
+
+    expect(error.name).toBe('TypeError');
+    expect(error.message).toContain('Invalid URL');
+    expect(error.name).not.toBe('ScriptNetworkError');
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it('marks Node script fetch failures as ScriptNetworkError', async () => {

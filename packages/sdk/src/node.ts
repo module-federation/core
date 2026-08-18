@@ -117,7 +117,7 @@ export const createScriptNode =
           urlObj = new URL(url);
         } catch (e) {
           console.error('Error constructing URL:', e);
-          cb(createScriptNetworkError(url, e));
+          cb(e as Error);
           return;
         }
 
@@ -225,8 +225,13 @@ export const createScriptNode =
 
               return loadModule(urlObj.href, { fetch: f, vm })
                 .then(async (module) => {
-                  await module.evaluate();
-                  cb(undefined, module.namespace);
+                  try {
+                    await module.evaluate();
+                    cb(undefined, module.namespace);
+                  } catch (error) {
+                    evictErroredEsmModules(module);
+                    throw error;
+                  }
                 })
                 .catch((error) => {
                   cb(
@@ -302,6 +307,14 @@ export const loadScriptNode =
       };
 
 const esmModuleCache = new Map<string, any>();
+
+function evictErroredEsmModules(moduleToEvict?: any): void {
+  for (const [url, module] of esmModuleCache) {
+    if (module === moduleToEvict || module?.status === 'errored') {
+      esmModuleCache.delete(url);
+    }
+  }
+}
 
 type LoadModuleOptions = {
   vm: typeof import('vm') & {
@@ -400,12 +413,17 @@ async function createSyntheticModuleFromExports(
   );
 
   esmModuleCache.set(identifier, syntheticModule);
-  await syntheticModule.link(async () => {
-    throw new Error(
-      `Node.js built-in module "${identifier}" should not request child modules.`,
-    );
-  });
-  await syntheticModule.evaluate();
+  try {
+    await syntheticModule.link(async () => {
+      throw new Error(
+        `Node.js built-in module "${identifier}" should not request child modules.`,
+      );
+    });
+    await syntheticModule.evaluate();
+  } catch (error) {
+    evictErroredEsmModules(syntheticModule);
+    throw error;
+  }
 
   return syntheticModule;
 }
@@ -449,15 +467,20 @@ async function loadResolvedModule(
 }
 
 async function evaluateDynamicModule(module: any) {
-  if (module.status === 'linked') {
-    await module.evaluate();
-  }
+  try {
+    if (module.status === 'linked') {
+      await module.evaluate();
+    }
 
-  if (module.status === 'errored') {
-    throw module.error;
-  }
+    if (module.status === 'errored') {
+      throw module.error;
+    }
 
-  return module;
+    return module;
+  } catch (error) {
+    evictErroredEsmModules(module);
+    throw error;
+  }
 }
 
 async function loadModule(url: string, options: LoadModuleOptions) {
@@ -508,9 +531,14 @@ async function loadModule(url: string, options: LoadModuleOptions) {
   // Cache the module before linking to prevent cycles
   esmModuleCache.set(url, sourceTextModule);
 
-  await sourceTextModule.link(async (specifier: string) => {
-    return loadResolvedModule(specifier, url, options);
-  });
+  try {
+    await sourceTextModule.link(async (specifier: string) => {
+      return loadResolvedModule(specifier, url, options);
+    });
+  } catch (error) {
+    evictErroredEsmModules(sourceTextModule);
+    throw error;
+  }
 
   return sourceTextModule;
 }
