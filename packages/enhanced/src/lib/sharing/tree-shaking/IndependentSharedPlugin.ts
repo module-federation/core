@@ -7,11 +7,7 @@ import type {
   WebpackOptionsNormalized,
 } from 'webpack';
 import type { moduleFederationPlugin, Stats } from '@module-federation/sdk';
-import {
-  encodeName,
-  isRequiredVersion,
-  StatsFileName,
-} from '@module-federation/sdk';
+import { encodeName, StatsFileName } from '@module-federation/sdk';
 import CollectSharedEntryPlugin, {
   type ShareRequestsMap,
 } from './CollectSharedEntryPlugin';
@@ -19,10 +15,11 @@ import SharedUsedExportsOptimizerPlugin from './SharedUsedExportsOptimizerPlugin
 import SharedContainerPlugin, {
   SharedContainerPluginOptions,
 } from './SharedContainerPlugin/SharedContainerPlugin';
-import { parseOptions } from '../../container/options';
-type SharedConfig = moduleFederationPlugin.SharedConfig;
 import ConsumeSharedPlugin from '../ConsumeSharedPlugin';
-import { NormalizedSharedOptions } from '../SharePlugin';
+import {
+  normalizeSharedOptions,
+  type NormalizedSharedOptions,
+} from '../SharePlugin';
 import IndependentSharedRuntimeModule from './IndependentSharedRuntimeModule';
 
 const IGNORED_ENTRY = 'ignored-entry';
@@ -105,29 +102,7 @@ export default class IndependentSharedPlugin {
     this.manifest = manifest;
     this.injectTreeShakingUsedExports = injectTreeShakingUsedExports ?? true;
     this.library = library;
-    this.sharedOptions = parseOptions(
-      shared,
-      (item, key) => {
-        if (typeof item !== 'string')
-          throw new Error(
-            `Unexpected array in shared configuration for key "${key}"`,
-          );
-        const config: SharedConfig =
-          item === key || !isRequiredVersion(item)
-            ? {
-                import: item,
-              }
-            : {
-                import: key,
-                requiredVersion: item,
-              };
-
-        return config;
-      },
-      (item) => {
-        return item;
-      },
-    );
+    this.sharedOptions = normalizeSharedOptions(shared);
   }
 
   static IndependentShareBuildAssetsFilename =

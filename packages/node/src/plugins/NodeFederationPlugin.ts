@@ -3,11 +3,8 @@
 import type { Compiler, container } from 'webpack';
 import type { ModuleFederationPluginOptions } from '../types';
 import EntryChunkTrackerPlugin from './EntryChunkTrackerPlugin';
-import {
-  bindLoggerToCompiler,
-  createInfrastructureLogger,
-  createLogger,
-} from '@module-federation/sdk';
+import { bindLoggerToCompiler } from '@module-federation/sdk';
+import { createBundlerLogger } from './createBundlerLogger';
 /**
  * Interface for NodeFederationOptions which extends ModuleFederationPluginOptions
  * @interface
@@ -26,11 +23,6 @@ interface NodeFederationOptions extends ModuleFederationPluginOptions {
 interface Context {
   ModuleFederationPlugin?: typeof container.ModuleFederationPlugin;
 }
-
-const createBundlerLogger: typeof createLogger =
-  typeof createInfrastructureLogger === 'function'
-    ? (createInfrastructureLogger as unknown as typeof createLogger)
-    : createLogger;
 
 function getRuntimePluginPath(): string {
   return require.resolve(
