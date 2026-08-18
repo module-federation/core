@@ -348,10 +348,13 @@ export function patchBundlerConfig(options: {
     typeof splitChunkConfig === 'object' &&
     splitChunkConfig.cacheGroups
   ) {
+    const previousChunks = splitChunkConfig.chunks;
     splitChunkConfig.chunks = 'async';
-    logger.warn(
-      `splitChunks.chunks = async is not allowed with stream SSR mode, it will auto changed to "async"`,
-    );
+    if (previousChunks && previousChunks !== 'async') {
+      logger.warn(
+        `splitChunks.chunks = "${previousChunks}" is not allowed with stream SSR mode; forcing "async"`,
+      );
+    }
   }
 
   if (isDev() && chain.output.get('publicPath') === 'auto') {
