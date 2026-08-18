@@ -181,9 +181,9 @@ Sets the delay time for displaying loading state in milliseconds. If the loading
 - Required: Yes
 - Default: `undefined`
 
-The error component rendered when remote module loading or data fetching fails.
+The fallback component rendered when errors occur in the remote module loading or data-fetch paths, such as `ERROR_TYPE.LOAD_REMOTE` or `ERROR_TYPE.DATA_FETCH`.
 
-It does not catch errors thrown while React renders the loaded component or its descendants. To handle client-side render errors, wrap the lazy component in an Error Boundary in the host application. Server-rendering errors must be handled by the server rendering pipeline because React Error Boundaries do not catch them.
+It does not catch errors thrown while resolving the lazy component, such as when the configured `export` is missing or is not a function, or when the second loader invocation performed by `React.lazy` rejects. It also does not catch errors thrown while React renders the loaded component or its descendants. To handle these client-side errors, wrap the lazy component in an Error Boundary in the host application. Server-rendering errors must be handled by the server rendering pipeline because React Error Boundaries do not catch them.
 
 #### export
 

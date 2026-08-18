@@ -182,9 +182,9 @@ export default App;
 - 是否必填：是
 - 默认值：`undefined`
 
-远程模块加载或数据获取失败时所渲染的容错组件。
+远程模块加载或数据获取失败时所渲染的容错组件，例如 `ERROR_TYPE.LOAD_REMOTE` 或 `ERROR_TYPE.DATA_FETCH`。
 
-它不会捕获已加载组件或其后代在 React 渲染期间抛出的错误。若要处理客户端渲染错误，请在宿主应用中使用 Error Boundary 包裹该懒加载组件。服务端渲染错误需要由服务端渲染流程处理，因为 React Error Boundary 无法捕获这类错误。
+它不会捕获懒加载组件解析期间抛出的错误，例如配置的 `export` 不存在或不是函数，或 `React.lazy` 执行的第二次 loader 调用被拒绝。它也不会捕获已加载组件或其后代在 React 渲染期间抛出的错误。若要处理这些客户端错误，请在宿主应用中使用 Error Boundary 包裹该懒加载组件。服务端渲染错误需要由服务端渲染流程处理，因为 React Error Boundary 无法捕获这类错误。
 
 #### export
 

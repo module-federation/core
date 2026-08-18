@@ -181,9 +181,9 @@ Sets o delay time for displaying estado de carregamento em milliseconds. Se o ca
 - Obrigatório: Yes
 - Padrão: `undefined`
 
-O componente de erro renderizado quando o carregamento do módulo remoto ou a busca de dados falha.
+O componente de fallback renderizado quando ocorrem erros no carregamento do módulo remoto ou na busca de dados, como `ERROR_TYPE.LOAD_REMOTE` ou `ERROR_TYPE.DATA_FETCH`.
 
-Ele não captura erros lançados durante a renderização React do componente carregado ou de seus descendentes. Para tratar erros de renderização no cliente, envolva o componente lazy em um Error Boundary no aplicativo host. Erros de renderização no servidor devem ser tratados pelo pipeline de renderização do servidor, pois Error Boundaries do React não os capturam.
+Ele não captura erros lançados durante a resolução do componente lazy, como quando o `export` configurado não existe ou não é uma função, ou quando a segunda chamada ao loader realizada por `React.lazy` é rejeitada. Ele também não captura erros lançados durante a renderização React do componente carregado ou de seus descendentes. Para tratar esses erros no cliente, envolva o componente lazy em um Error Boundary no aplicativo host. Erros de renderização no servidor devem ser tratados pelo pipeline de renderização do servidor, pois Error Boundaries do React não os capturam.
 
 #### exporte
 
