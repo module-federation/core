@@ -467,6 +467,8 @@ mf.loadShare('react').then((reactFactory) => {
 
 在预加载处理程序执行任何预加载逻辑之前调用
 
+显式调用 `preloadRemote`，以及 `loadRemote` 基于 snapshot 自动预加载时都会触发该 hook。可以原地修改 `args.preloadOps`，调整后续生成预加载资源时使用的配置。
+
 ```ts
 async function beforePreloadRemote(
   args: BeforePreloadRemoteOptions,
