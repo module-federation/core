@@ -1,5 +1,21 @@
 # @module-federation/enhanced
 
+## 2.8.3
+
+### Patch Changes
+
+- @module-federation/dts-plugin@2.8.3
+- @module-federation/runtime-tools@2.8.3
+- @module-federation/webpack-bundler-runtime@2.8.3
+- @module-federation/rspack@2.8.3
+- @module-federation/inject-external-runtime-core-plugin@2.8.3
+- @module-federation/sdk@2.8.3
+- @module-federation/managers@2.8.3
+- @module-federation/manifest@2.8.3
+- @module-federation/bridge-react-webpack-plugin@2.8.3
+- @module-federation/error-codes@2.8.3
+- @module-federation/cli@2.8.3
+
 ## 2.8.2
 
 ### Patch Changes

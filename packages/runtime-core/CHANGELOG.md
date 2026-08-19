@@ -1,5 +1,13 @@
 # @module-federation/runtime
 
+## 2.8.3
+
+### Patch Changes
+
+- a59681f: Allow automatic preload configuration through `beforePreloadRemote` and skip JS or CSS URLs that are already loading or loaded using a bounded, configurable URL cache.
+  - @module-federation/sdk@2.8.3
+  - @module-federation/error-codes@2.8.3
+
 ## 2.8.2
 
 ### Patch Changes

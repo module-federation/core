@@ -1,5 +1,14 @@
 # @module-federation/devtools
 
+## 2.8.3
+
+### Patch Changes
+
+- 403eebc: Fix remote overrides to support both direct and default proxy core exports.
+- af82ae4: Fix the shared dependencies packages badge rendering its count twice. The badge printed `stats.totalPackages` next to the `packagesBadge` translation, which already interpolates the same value, so a single package showed as "11 packages".
+  - @module-federation/observability-plugin@2.5.7
+  - @module-federation/sdk@2.8.3
+
 ## 2.8.2
 
 ### Patch Changes

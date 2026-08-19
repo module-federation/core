@@ -1,5 +1,13 @@
 # @module-federation/node
 
+## 2.7.50
+
+### Patch Changes
+
+- @module-federation/runtime@2.8.3
+- @module-federation/enhanced@2.8.3
+- @module-federation/sdk@2.8.3
+
 ## 2.7.49
 
 ### Patch Changes

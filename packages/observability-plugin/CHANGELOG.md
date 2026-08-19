@@ -1,5 +1,11 @@
 # @module-federation/observability-plugin
 
+## 2.5.7
+
+### Patch Changes
+
+- @module-federation/sdk@2.8.3
+
 ## 2.5.6
 
 ### Patch Changes
