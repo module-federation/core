@@ -650,6 +650,7 @@ export class SharedHandler {
     extraOptions: { hostShareScopeMap?: ShareScopeMap } = {},
   ): void {
     const { host } = this;
+    Object.assign(this.shareScopeMap, extraOptions.hostShareScopeMap);
     this.shareScopeMap[scopeName] = shareScope;
     this.hooks.lifecycle.initContainerShareScopeMap.emit({
       shareScope,
