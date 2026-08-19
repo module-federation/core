@@ -9,6 +9,11 @@ export interface PreloadRemoteArgs {
   share?: boolean;
   depsRemote?: boolean | Array<depsPreloadArg>;
   filter?: (assetUrl: string) => boolean;
+  /**
+   * Record preloaded JS and CSS URLs to skip duplicate resource loading.
+   * @default true
+   */
+  recordPreloadedAssets?: boolean;
 }
 
 export type PreloadConfig = PreloadRemoteArgs;

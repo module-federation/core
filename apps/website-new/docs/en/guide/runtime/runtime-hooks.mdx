@@ -504,6 +504,8 @@ mf.loadShare('react').then((reactFactory) => {
 
 Called before the preload handler executes any preload logic.
 
+It runs for both explicit `preloadRemote` calls and snapshot-driven automatic preloading during `loadRemote`. Mutate `args.preloadOps` in place to adjust the configuration used to generate preload assets.
+
 ```ts
 async function beforePreloadRemote(
   args: BeforePreloadRemoteOptions,
