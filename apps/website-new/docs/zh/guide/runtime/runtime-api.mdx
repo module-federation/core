@@ -789,6 +789,9 @@ type PreloadRemoteArgs = {
   // 未配置时不过滤资源
   // 配置了后将会过滤不需要的资源
   filter?: (assetUrl: string) => boolean;
+  // 是否记录预加载的 JS 和 CSS URL，并跳过重复加载
+  // 默认为 true
+  recordPreloadedAssets?: boolean;
 };
 ```
 
@@ -869,6 +872,8 @@ preloadRemote([
 ```
 
 如果没有指定 `exposes`，本次预加载的资源 id 是 `remoteName/*`。如果指定了 `exposes`，运行时会按 expose 单独生成资源，资源 id 是 `remoteName/expose`。
+
+运行时默认会在开始预加载前记录每个 JS 和 CSS 的 URL。后续如果再次预加载同一个正在加载或已经加载的 URL，会跳过资源加载并将结果标记为 `cached`。URL 记录不会改变所生成 link 或 script 标签原有的生命周期。最多保留 2000 个 URL，超过上限时会删除最早记录的 URL。设置 `recordPreloadedAssets: false` 可以让本次预加载不查询也不记录 URL。
 
 <Tabs>
   <Tab label="Build Plugin（使用构建插件）">
