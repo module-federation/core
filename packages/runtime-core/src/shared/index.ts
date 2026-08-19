@@ -698,6 +698,7 @@ export class SharedHandler {
       merge(targetShared, 'loaded', loaded);
       merge(targetShared, 'loading', loading);
       merge(targetShared, 'get', get);
+      merge(targetShared, 'lib', lib);
     };
     scopes.forEach((sc) => {
       if (!this.shareScopeMap[sc]) {
