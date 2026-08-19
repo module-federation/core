@@ -140,7 +140,7 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
     it('should handle relative paths in runtimePlugins', () => {
       const optionsWithRelativePlugins = {
         ...mockOptions,
-        runtimePlugins: ['relative/path/plugin1.js'],
+        runtimePlugins: ['./relative/path/plugin1.js'],
       };
 
       const template = FederationRuntimePlugin.getTemplate(
@@ -153,6 +153,23 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
       // 验证生成的模板中包含正确路径的插件
       expect(template).toContain(
         "from '/current/working/dir/relative/path/plugin1.js'",
+      );
+    });
+
+    it('should preserve package names for Webpack to resolve exports conditions', () => {
+      const template = FederationRuntimePlugin.getTemplate(
+        compiler as Compiler,
+        {
+          ...mockOptions,
+          runtimePlugins: [
+            '@module-federation/inject-external-runtime-core-plugin',
+          ],
+        },
+        'bundler-runtime.js',
+      );
+
+      expect(template).toContain(
+        "from '@module-federation/inject-external-runtime-core-plugin'",
       );
     });
 
