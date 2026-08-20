@@ -1,0 +1,133 @@
+---
+title: AI 代理远程插件
+description: 让 AI 在任何环境代理 Module Federation Remote，不依赖 Chrome 扩展环境。
+---
+
+# AI 代理远程插件
+
+使用 `module-federation-ai-proxy-remotes`，AI 可以在任何环境中通过 URL 或页面内的浮动控制台，把 Module Federation Remote 切换到本地 Manifest，不依赖 Chrome 扩展环境。
+
+## 使用场景
+
+- 让 AI 编程 Agent 在本地启动 Remote，并使用正确的代理规则打开宿主页面。
+- 使用一个或多个本地 Remote 调试宿主应用。
+- 调试不方便安装或使用 Chrome 扩展的 H5 环境。代理规则通过 URL 或页面内浮动控制台生效，不依赖桌面 Chrome DevTools。
+- 不打开 DevTools，直接在页面中保存和切换 Remote 代理规则。
+
+## 安装
+
+```bash
+pnpm add -D module-federation-ai-proxy-remotes
+```
+
+## 接入 Runtime Plugin
+
+该插件需要安装并配置在 **Host** 应用中。
+
+在 Module Federation 插件配置的 `runtimePlugins` 中填写包名：
+
+```ts title="module-federation.config.ts"
+export default {
+  name: 'host',
+  runtimePlugins: ['module-federation-ai-proxy-remotes'],
+};
+```
+
+## 开启调试
+
+在宿主 URL 中加入 `__mf_devtools`：
+
+```text
+https://host.example.com/remote?__mf_devtools
+```
+
+页面会刷新并从地址栏移除该参数。调试开关会在当前标签页会话内保留，无需再次添加参数。点击浮动控制台中的 **Disable debug** 可以关闭调试；关闭标签页后，已保存的代理规则会随会话结束而清除。
+
+## 使用 AI 调试 Remote
+
+可以向 AI 编程 Agent 提出类似下面的请求：
+
+```text
+在本地启动 remote remote，找到它的 mf-manifest.json 地址，然后打开
+https://host.example.com/remote，并把 remote 代理到这个本地 Manifest。
+```
+
+### 完整调试 URL 示例
+
+假设：
+
+- Host 页面是 `https://host.example.com/remote`；
+- Remote 名称是 `remote`；
+- 本地 Manifest 是 `http://localhost:3001/mf-manifest.json`。
+
+AI 可以直接使用下面的代码拼出完整调试 URL：
+
+```js
+const remoteName = 'remote';
+const localManifestUrl = 'http://localhost:3001/mf-manifest.json';
+const hostUrl = new URL('https://host.example.com/remote');
+
+hostUrl.searchParams.set(
+  '__mf_devtools',
+  JSON.stringify({
+    overrides: {
+      [remoteName]: localManifestUrl,
+    },
+  }),
+);
+
+console.log(hostUrl.href);
+```
+
+也可以使用包提供的辅助函数：
+
+```js
+import { generateAIDebugUrl } from 'module-federation-ai-proxy-remotes';
+
+const debugUrl = generateAIDebugUrl('https://host.example.com/remote', {
+  remote: 'http://localhost:3001/mf-manifest.json',
+});
+
+console.log(debugUrl);
+```
+
+输出结果是：
+
+```text
+https://host.example.com/remote?__mf_devtools=%7B%22overrides%22%3A%7B%22remote%22%3A%22http%3A%2F%2Flocalhost%3A3001%2Fmf-manifest.json%22%7D%7D
+```
+
+AI 最后需要在浏览器中打开这个完整 URL。页面刷新后，Host 中名为 `remote` 的 Remote 将使用本地 Manifest。Remote 的 `name` 和 `alias` 均可作为 `overrides` 的键。
+
+## 代理域名安全策略
+
+默认只允许代理到 `localhost` 或 `127.0.0.1` 上的 Manifest。每个代理地址必须满足以下条件：
+
+- 使用 `http:` 或 `https:` 协议；
+- URL 路径以 `.json` 结尾；
+- URL 不包含用户名或密码；
+- 使用默认允许的主机，或使用 `allowedHosts` 中显式配置的主机名。
+
+`allowedHosts` 使用精确主机名，不要包含协议、端口、路径或通配符。例如，`assets.example.com` 允许该主机名上的 URL，包括带端口的 URL，但不允许 `sub.assets.example.com`。
+
+只添加调试所需且可信的主机：
+
+```ts
+import { aiDebugRuntimePlugin } from 'module-federation-ai-proxy-remotes/core';
+
+export default () =>
+  aiDebugRuntimePlugin({
+    allowedHosts: ['assets.example.com', 'mf-dev.internal.example.com'],
+  });
+```
+
+目标服务器还需要通过 CORS 策略允许 Host 应用请求 Manifest。调试结束后，应删除临时添加的非本地主机。
+
+## 配置项
+
+| 配置项 | 类型 | 默认值 | 用途 |
+| --- | --- | --- | --- |
+| `allowedHosts` | `string[]` | `[]` | 允许额外的可信 Manifest 主机。 |
+| `parameterName` | `string` | `__mf_devtools` | 使用其他 URL 参数开启调试并传入配置。 |
+| `storageKey` | `string` | `__MF_DEVTOOLS__` | 使用其他 sessionStorage key 保存规则。 |
+| `console` | `boolean \| AIDebugConsoleOptions` | 由 URL 控制 | 隐藏或配置浮动控制台。 |
