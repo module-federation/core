@@ -18,7 +18,4 @@ export const observability = createObservability({
     ],
     defaultExportMode: 'component',
   },
-  divebell: {
-    source: 'mf-runtime-demo',
-  },
 });

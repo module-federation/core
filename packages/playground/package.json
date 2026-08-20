@@ -21,8 +21,7 @@
   "module": "./dist/esm/index.mjs",
   "types": "./dist/types/index.d.ts",
   "files": [
-    "dist",
-    "README.md"
+    "dist"
   ],
   "scripts": {
     "sync:bridge-runtime": "node ./scripts/generateBridgeRuntime.mjs",
@@ -35,7 +34,6 @@
     "pre-release": "pnpm run build"
   },
   "dependencies": {
-    "@divebell/core": "0.0.23",
     "@module-federation/bridge-react": "workspace:*",
     "@module-federation/runtime": "workspace:*",
     "@monaco-editor/react": "4.7.0",
