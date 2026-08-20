@@ -305,13 +305,6 @@
   color: var(--vp-placeholder);
 }
 
-.vp-textarea {
-  min-height: 112px;
-  resize: vertical;
-  font-family: var(--vp-mono);
-  line-height: 1.5;
-}
-
 .vp-input:focus-visible,
 .vp-select:focus-visible {
   border-color: rgba(99, 102, 241, 0.55);
