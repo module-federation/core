@@ -295,7 +295,10 @@ export class SharedHandler {
           return factory;
         } else {
           const asyncLoadProcess = async () => {
-            const factory = await targetShared.get!();
+            if (typeof targetShared.get !== 'function') {
+              return false as unknown as () => T;
+            }
+            const factory = await targetShared.get();
             addUseIn(targetShared, host.options.name);
             targetShared.loaded = true;
             targetShared.lib = factory;
@@ -338,7 +341,10 @@ export class SharedHandler {
         const targetShared = directShare(resolvedShareOptions, _useTreeShaking);
 
         const asyncLoadProcess = async () => {
-          const factory = await targetShared.get!();
+          if (typeof targetShared.get !== 'function') {
+            return false as unknown as () => T;
+          }
+          const factory = await targetShared.get();
           targetShared.lib = factory;
           targetShared.loaded = true;
           addUseIn(targetShared, host.options.name);
