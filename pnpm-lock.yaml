@@ -3998,13 +3998,22 @@ importers:
 
   packages/observability-plugin:
     dependencies:
+      '@divebell/core':
+        specifier: 0.0.23
+        version: 0.0.23
       '@module-federation/sdk':
         specifier: workspace:*
         version: link:../sdk
+      semver:
+        specifier: ^7.7.4
+        version: 7.7.4
     devDependencies:
       '@module-federation/runtime':
         specifier: workspace:*
         version: link:../runtime
+      '@types/semver':
+        specifier: ^7.5.8
+        version: 7.5.8
 
   packages/playground:
     dependencies:
@@ -6152,6 +6161,9 @@ packages:
   '@discoveryjs/json-ext@0.5.7':
     resolution: {integrity: sha512-dBVuXR082gk3jsFp7Rd/JI4kytwGHecnCoTtXFb7DB6CNHp4rg5k1bhg0nWdLGLnOV71lmDzGQaLMy8iPLY0pw==}
     engines: {node: '>=10.0.0'}
+
+  '@divebell/core@0.0.23':
+    resolution: {integrity: sha512-BT80nvct1BhDmxhBIsTayTZGsScqQclG+djAKYblJ77mfq6V9XF7U1B9xjKdvqUxopUjzMU40JY6WGxnh3KVLg==}
 
   '@edge-runtime/format@2.2.1':
     resolution: {integrity: sha512-JQTRVuiusQLNNLe2W9tnzBlV/GvSVcozLl4XZHk5swnRZ/v6jp8TqR8P7sqmJsQqblDZ3EztcWmLDbhRje/+8g==}
@@ -31650,6 +31662,8 @@ snapshots:
       - supports-color
 
   '@discoveryjs/json-ext@0.5.7': {}
+
+  '@divebell/core@0.0.23': {}
 
   '@edge-runtime/format@2.2.1': {}
 

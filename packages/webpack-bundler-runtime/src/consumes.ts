@@ -82,6 +82,11 @@ export function consumes(options: ConsumesOptions) {
         const promise = federationInstance
           .loadShare(shareKey, {
             customShareInfo,
+            context: {
+              trigger: 'build',
+              moduleId: id,
+              chunkId,
+            },
           })
           .then((factory: any) => {
             if (factory === false) {
