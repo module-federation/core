@@ -129,11 +129,11 @@ const mf = createInstance({
 
 `registerGlobalPlugins(...)` 会按 `name` 去重。实践里建议在创建或使用 runtime 实例之前调用，这样全局插件会更稳定地并入实例插件链。
 
-## 为每个 runtime 实例创建独立 hook
+## 在插件中获取 runtime 实例
 
-当 hook 处理函数需要保存某个 Module Federation 实例自己的状态时，插件可以实现
-`apply(instance)`。每个实例会按插件名调用一次 `apply`，它可以返回只为这个实例注册的
-hook。
+过去只有少数 hook 会通过参数提供 runtime 实例。如果插件需要在任意 hook 中访问其所属的
+runtime 实例，可以实现 `apply(instance)`。每个实例会按插件名调用一次 `apply`，插件可以
+在这里获取当前实例，并返回为该实例注册的 hook。
 
 ```ts
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
@@ -153,9 +153,10 @@ const instanceTracePlugin: ModuleFederationRuntimePlugin = {
 };
 ```
 
-同一个全局插件对象被多个 runtime 实例共用，但计数器、缓存或订阅不能互相影响时，
-可以使用这种写法。`apply` 返回 hook 后，这个返回对象就是该实例最终注册的 hook
-集合，因此要把该实例需要的 hook 都放进返回对象。
+`apply(instance)` 中的 `instance` 就是当前 runtime 实例，可以用来读取实例信息或调用实例
+方法。由于每个实例都会单独调用一次 `apply`，在其中声明的计数器、缓存或订阅也会相互
+隔离。`apply` 的返回对象是该实例最终注册的 hook 集合，因此要把该实例需要的 hook 都放进
+返回对象。
 
 ### 旧写法与兼容性
 
@@ -190,7 +191,7 @@ const legacyPlugin: ModuleFederationRuntimePlugin = {
 | 加载失败时兜底                     | `errorLoadRemote`                                   | 需要离线兜底、fallback module、分层恢复策略                                                                               |
 | 扩展新的 remote 加载方式           | `loadEntry`                                         | 需要完整接管 remote entry 加载过程，或实现新的 remote 类型                                                                |
 
-## 配方：改写解析后的 remote entry
+## 示例：改写解析后的 remote entry
 
 `afterResolve` 适合“remote 已经解析完成，但真正加载前还要改一下最终 URL”这种场景。
 
@@ -256,7 +257,7 @@ export default function rewriteRemoteEntryPlugin(
 
 :::
 
-## 配方：自定义 manifest fetch
+## 示例：自定义 manifest fetch
 
 当你需要改 manifest 请求本身时，使用 `fetch`。
 
@@ -296,7 +297,7 @@ export default function fetchManifestWithCredentials(): ModuleFederationRuntimeP
 
 如果你想直接复用现成的传输层恢复策略，可以看内置的 retry 插件。
 
-## 配方：优先使用 host 自己的 shared
+## 示例：优先使用 host 自己的 shared
 
 `resolveShare` 用来改写 shared 最终选择结果。
 

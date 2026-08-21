@@ -127,12 +127,12 @@ const mf = createInstance({
 
 `registerGlobalPlugins(...)` deduplicates plugins by `name`. In practice, call it before creating or using runtime instances so the global plugins are incorporated consistently.
 
-## Create hooks for each runtime instance
+## Access the runtime instance in a plugin
 
-A plugin can implement `apply(instance)` when its hook handlers need state that
-belongs to one specific Module Federation instance. `apply` is called once per
-plugin name on each instance and may return the hooks to register for that
-instance.
+Previously, only a few hooks provided the runtime instance as an argument. If a
+plugin needs to access its runtime instance from any hook, implement
+`apply(instance)`. It is called once per plugin name on each instance, where the
+plugin can access the current instance and return the hooks to register for it.
 
 ```ts
 import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
@@ -152,10 +152,11 @@ const instanceTracePlugin: ModuleFederationRuntimePlugin = {
 };
 ```
 
-Use this form when the same global plugin object is shared by multiple runtime
-instances but its counters, caches, or subscriptions must stay isolated. When
-`apply` returns hooks, that returned object is the hook set registered for the
-instance; include every hook that instance needs in the returned object.
+The `instance` passed to `apply(instance)` is the current runtime instance. Use
+it to read instance information or call instance methods. Because each instance
+calls `apply` separately, counters, caches, and subscriptions declared there
+also remain isolated. The returned object is the hook set registered for that
+instance.
 
 ### Legacy syntax and compatibility
 

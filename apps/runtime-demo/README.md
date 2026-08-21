@@ -25,9 +25,6 @@ The host also installs `ObservabilityBuildPlugin`, so each build writes a
 build summary to `.mf/observability/build-info.json`. If a host build fails
 after the plugin runs, the build-side report is written to
 `.mf/observability/build-report.json`.
-The observability plugin also creates `window.__DIVEBELL__` for this demo,
-so MF remote, expose, and shared states are synced into Divebell targets
-without the host app importing Divebell directly.
 
 - observability fixture page:
   [localhost:3005/observability](http://localhost:3005/observability)
@@ -121,7 +118,7 @@ Then open the observability fixture page and use these controls:
 - `Shared unexpected provider`: resolves a shared dependency from a remote-like
   provider even though the host provider is present. The report should be
   successful and include `observability-provider-choice`,
-  `provider: "runtime_remote2"`, and the selected version in the report.
+  `provider: "runtime_remote2"`, and `selectedVersion: "2.0.0"`.
 - `Load multi-consumer chain`: creates two runtime consumers with
   `createInstance`, loads different exposes from the real `runtime_remote2`
   remote on port 3007, and gives each consumer its own shared dependency. It
@@ -138,73 +135,6 @@ Then open the observability fixture page and use these controls:
   dependency from the pure runtime path. The report should include
   `observability-runtime-async-shared`, `RUNTIME-006`, and
   `sync-async-boundary`, with the same eager config check.
-
-### Divebell check
-
-The Divebell check reuses the existing `3005-runtime-host` observability
-fixture. No separate demo app is needed.
-
-Automated coverage is included in the runtime host e2e suite:
-
-```bash
-pnpm run ci:local --only=e2e-runtime
-```
-
-The Divebell assertions open `/observability`, click the real MF controls,
-verify that MF targets can be waited for, and then run a business action after
-the exposed module is ready. The covered flow is:
-
-1. Click `Load success remote`.
-2. Wait for `mf:remote:runtime_remote2:expose:ButtonOldAnt` to become `ready`.
-3. Click `Mark business loaded`.
-4. Verify the latest report becomes `component-loaded`.
-
-The suite waits for these targets:
-
-- `mf:remote:runtime_remote2`
-- `mf:remote:runtime_remote2:expose:ButtonOldAnt`
-- `mf:shared:observability-provider-choice:2.0.0:observability-provider-scope`
-
-Manifest and remoteEntry are not exposed as separate Divebell targets. The
-remote target stays centered on the remote instance and lists attempted expose
-target ids only. Specific exposed modules stay available as
-`mf:remote:*:expose:*` targets so they can be waited for and inspected without
-bloating the remote target.
-
-For a manual CLI check, build Divebell from a local checkout, then start the
-runtime demo from this repository. Replace `/path/to/divebell` with the local
-Divebell checkout path:
-
-```bash
-cd /path/to/divebell
-pnpm build
-```
-
-```bash
-pnpm run app:runtime:dev
-```
-
-Open the fixture page through Divebell:
-
-```bash
-pnpm --dir /path/to/divebell exec divebell open "http://127.0.0.1:3005/observability"
-```
-
-After the page is open, click `Load success remote` and verify the exposed
-module target:
-
-```bash
-pnpm --dir /path/to/divebell exec divebell wait-for mf:remote:runtime_remote2:expose:ButtonOldAnt ready --url "http://127.0.0.1:3005/observability"
-```
-
-After the wait succeeds, click `Mark business loaded` on the page and verify
-the latest report includes `component:business-loaded`.
-
-Then click `Shared unexpected provider` and verify the shared target:
-
-```bash
-pnpm --dir /path/to/divebell exec divebell wait-for mf:shared:observability-provider-choice:2.0.0:observability-provider-scope loaded --url "http://127.0.0.1:3005/observability"
-```
 
 Run the automated verification:
 
