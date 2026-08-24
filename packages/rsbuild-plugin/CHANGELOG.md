@@ -1,5 +1,15 @@
 # @module-federation/rsbuild-plugin
 
+## 2.9.0
+
+### Patch Changes
+
+- 0ebae56: Coordinate Node configuration ownership between the Rsbuild and Rstest federation plugins while preserving Rstest's runtime chunk and split-chunk behavior.
+- 60e6b82: Expose typed federation options to integrations, preserve Rstest-owned Node compiler settings, and keep bundler-derived library names in SSR builds.
+  - @module-federation/node@2.7.50
+  - @module-federation/enhanced@2.9.0
+  - @module-federation/sdk@2.9.0
+
 ## 2.8.2
 
 ### Patch Changes
