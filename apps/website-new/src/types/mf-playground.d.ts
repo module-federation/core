@@ -5,7 +5,9 @@ export type PlaygroundProps = {
   defaultExpose?: string;
   defaultExportName?: string;
   defaultManifestUrl?: string;
+  defaultPreset?: 'divebell-quickstart';
   defaultPreviewRoute?: string;
+  defaultRemoteProps?: Record<string, unknown>;
   monacoVsUrl?: string;
   reactRuntimeUrls?: {
     react?: string;

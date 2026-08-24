@@ -198,6 +198,7 @@ export class RemoteHandler {
           loaderHook: ModuleFederation['loaderHook'];
           remoteInfo: RemoteInfo;
           remoteEntryExports?: RemoteEntryExports;
+          resourceContext?: ResourceLoadContext;
         },
       ],
       Promise<RemoteEntryExports | void> | RemoteEntryExports | void
