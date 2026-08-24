@@ -23,7 +23,10 @@ export type PreloadOptions = Array<{
   preloadConfig: PreloadConfig;
 }>;
 
-export type ResourceLoadInitiator = 'loadRemote' | 'preloadRemote';
+export type ResourceLoadInitiator =
+  | 'loadRemote'
+  | 'preloadRemote'
+  | 'loadShare';
 
 export type ResourceLoadType = 'manifest' | 'remoteEntry' | 'js' | 'css';
 
@@ -32,6 +35,7 @@ export interface ResourceLoadContext {
   id: string;
   resourceType: ResourceLoadType;
   url?: string;
+  expose?: string;
 }
 
 export type PreloadAssetStatus = 'success' | 'error' | 'timeout' | 'cached';

@@ -133,6 +133,7 @@ window.__FEDERATION__.__OBSERVABILITY__.runtime_host.findReports({
   remote: 'remote1',
 });
 window.__FEDERATION__.__OBSERVABILITY__.runtime_host.exportReport('mf-...');
+window.__FEDERATION__.__OBSERVABILITY__.runtime_host.getRuntimeState();
 ```
 
 如果只是想在开发环境观察加载链路，或者页面一直停在 loading 状态但还没有报错，开启浏览器读取入口后，开发模式默认会打印开始日志：
@@ -263,6 +264,21 @@ ObservabilityPlugin({
 
 <粘贴报告 JSON>
 ```
+
+## 使用 Divebell 观测 Module Federation
+
+Divebell 已内置 Observability Plugin。打开页面时加上 `--mf` 即可开启 MF
+观测，你可以执行下列命令查看当前页面的 MF 模块性能加载数据。
+性能：
+
+```bash
+divebell mf module-perf --report --view timeline
+```
+
+[![Divebell Module Federation 性能时间线](https://raw.githubusercontent.com/2heal1/divebell/main/assets/mf-module-perf-timeline.png)](https://github.com/2heal1/divebell#quick-start)
+
+更多命令和使用方式请查看
+[Divebell MF 扩展文档](https://github.com/2heal1/divebell/blob/main/packages/extensions/mf/README.md)。
 
 ## Browser 参数
 

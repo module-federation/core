@@ -114,6 +114,7 @@ window.__FEDERATION__.__OBSERVABILITY__.runtime_host.findReports({
   remote: 'remote1',
 });
 window.__FEDERATION__.__OBSERVABILITY__.runtime_host.exportReport('mf-...');
+window.__FEDERATION__.__OBSERVABILITY__.runtime_host.getRuntimeState();
 ```
 
 If you want to observe loading chains in development, or if the page stays in a
@@ -255,6 +256,22 @@ Please tell me whether the load succeeded, where it failed, who likely owns the 
 
 <paste report JSON>
 ```
+
+## Observe Module Federation with Divebell
+
+Divebell includes the Observability Plugin. Add `--mf` when opening a page with
+Divebell, then run the following command to inspect Module Federation module
+loading performance for the current page:
+
+```bash
+divebell mf module-perf --report --view timeline
+```
+
+[![Divebell Module Federation performance timeline](https://raw.githubusercontent.com/2heal1/divebell/main/assets/mf-module-perf-timeline.png)](https://github.com/2heal1/divebell#quick-start)
+
+See the
+[Divebell MF Extension documentation](https://github.com/2heal1/divebell/blob/main/packages/extensions/mf/README.md)
+for more commands and usage details.
 
 ## Runtime Options
 

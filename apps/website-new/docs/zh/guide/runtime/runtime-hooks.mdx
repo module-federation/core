@@ -299,6 +299,34 @@ mf.loadRemote('app1/un-existed-module').then((mod) => {
 });
 ```
 
+## afterRegisterShare
+
+`SyncHook`
+
+在运行时尝试把某个 shared 版本注册到共享池后触发。这个 hook
+会同时给出候选记录和最终保留下来的记录，因此也能观察“已有提供方胜出”的冲突场景。
+
+```ts
+function afterRegisterShare(args: AfterRegisterShareOptions): void;
+
+type AfterRegisterShareOptions = {
+  pkgName: string;
+  scope: string;
+  shared: Shared;
+  previousShared?: Shared;
+  registeredShared?: Shared;
+  shareScopeMap: ShareScopeMap;
+  trigger: 'build' | 'runtime' | 'container-init';
+  origin: ModuleFederation;
+};
+```
+
+- `shared` 是运行时本次尝试注册的候选记录。
+- `previousShared` 是注册前相同 scope、包名和版本下的记录。
+- `registeredShared` 是冲突处理后最终保留的记录。
+- `trigger` 表示这次注册来自构建生成的运行时代码、运行时 API，还是 remote
+  container 初始化。
+
 ## beforeLoadShare
 
 `AsyncWaterfallHook`
@@ -315,8 +343,23 @@ type BeforeLoadShareOptions = {
   shareInfo?: Shared;
   shared: Options['shared'];
   origin: ModuleFederation;
+  loadContext?: SharedLoadContext;
 };
 ```
+
+`loadContext` 会在信息可用时标明由哪个消费方触发了 shared 解析：
+
+```ts
+type SharedLoadContext = {
+  trigger?: 'build' | 'runtime' | 'container-init';
+  moduleId?: string | number;
+  chunkId?: string | number;
+};
+```
+
+因为 `beforeLoadShare` 是 waterfall hook，插件可以返回更新后的
+`loadContext`；同一个值随后会继续传给 `resolveShare`、`afterLoadShare`
+和 `errorLoadShare`。
 
 ## afterLoadShare
 
@@ -334,6 +377,7 @@ type AfterLoadShareOptions = {
   shared: Options['shared'];
   shareScopeMap: ShareScopeMap;
   lifecycle: 'loadShare' | 'loadShareSync';
+  loadContext?: SharedLoadContext;
   origin: ModuleFederation;
 };
 ```
@@ -356,6 +400,7 @@ type ErrorLoadShareOptions = {
   origin: ModuleFederation;
   error?: unknown;
   recovered?: boolean;
+  loadContext?: SharedLoadContext;
 };
 ```
 
@@ -403,6 +448,7 @@ type ResolveShareOptions = {
         useTreesShaking: boolean;
       }
     | undefined;
+  loadContext?: SharedLoadContext;
 };
 ```
 
@@ -507,6 +553,61 @@ interface PreloadAssets {
   entryAssets: Array<EntryAssets>;
 }
 ```
+
+## beforeLoadManifest
+
+`AsyncHook`
+
+在运行时请求并解析 remote manifest 之前立即触发。manifest
+已经存在于运行时缓存中时不会触发。
+
+```ts
+async function beforeLoadManifest(
+  args: BeforeLoadManifestOptions,
+): Promise<void>;
+
+type BeforeLoadManifestOptions = {
+  manifestUrl: string;
+  moduleInfo: Remote;
+  resourceOptions?: {
+    initiator: 'loadRemote' | 'preloadRemote' | 'loadShare';
+    id: string;
+  };
+  origin: ModuleFederation;
+};
+```
+
+## afterLoadManifest
+
+`AsyncHook`
+
+manifest 加载结束后触发。网络加载成功、命中缓存、校验失败，以及由
+`errorLoadRemote` 恢复的情况都会触发。
+
+```ts
+async function afterLoadManifest(
+  args: AfterLoadManifestOptions,
+): Promise<void>;
+
+type AfterLoadManifestOptions = {
+  manifestUrl: string;
+  moduleInfo: Remote;
+  resourceOptions?: {
+    initiator: 'loadRemote' | 'preloadRemote' | 'loadShare';
+    id: string;
+  };
+  manifestJson?: Manifest;
+  response?: Response;
+  error?: unknown;
+  cached?: boolean;
+  recovered?: boolean;
+  origin: ModuleFederation;
+};
+```
+
+- `cached` 为 `true` 时表示没有发起网络请求。
+- `error` 保留原始的加载错误或校验错误。
+- `recovered` 为 `true` 时表示 `errorLoadRemote` 返回了可用的 manifest。
 
 ## loaderHook
 
@@ -651,15 +752,17 @@ type CreateScriptHookReturn =
   | void;
 
 type ResourceLoadContext = {
-  initiator: 'loadRemote' | 'preloadRemote';
+  initiator: 'loadRemote' | 'preloadRemote' | 'loadShare';
   id: string;
   resourceType: 'manifest' | 'remoteEntry' | 'js' | 'css';
   url?: string;
+  expose?: string;
 };
 ```
 
 `timeout` 单位为毫秒，用于设置脚本加载超时时间。默认值为 `20000`。
-`resourceContext` 用于判断这次资源加载来自 `loadRemote` 还是 `preloadRemote`，以及对应的资源类型和 id。
+`resourceContext` 用于判断这次资源加载来自 `loadRemote`、`preloadRemote`
+还是 shared 初始化，以及对应的资源类型、id 和可用时的 exposed module。
 可以结合 `timeout` 和 `resourceContext`，为实际远程加载和预加载设置不同的超时时间。
 
 ```ts
@@ -700,7 +803,8 @@ function fetch(
 ): Promise<Response> | void | false;
 ```
 
-`resourceContext` 可用于判断这次 manifest 请求来自 `loadRemote` 还是 `preloadRemote`。
+`resourceContext` 可用于判断这次 manifest 请求来自
+`loadRemote`、`preloadRemote` 还是 shared 初始化。
 
 - 示例：在获取清单（manifest）JSON 时包含凭证：
 
@@ -807,10 +911,16 @@ type AfterLoadEntryOptions = {
   origin: ModuleFederation;
   remoteInfo: RemoteInfo;
   remoteEntryExports?: RemoteEntryExports | false | void;
+  resourceContext?: ResourceLoadContext;
+  cached?: boolean;
   error?: unknown;
   recovered?: boolean;
 };
 ```
+
+`resourceContext` 标明是哪次请求需要这个 remoteEntry。`cached` 为 `true`
+时表示 exports 已经存在；`recovered` 表示加载失败后由 `loadEntryError`
+返回了替代 exports。
 
 ## getModuleFactory
 
@@ -837,12 +947,16 @@ type GetModuleFactoryOptions = {
 `loadEntry` 函数允许对 remotes 进行完全自定义，从而可以扩展并创建新的 remote 类型。以下两个简单示例分别演示了如何加载 JSON 数据以及模块代理（module delegation）。
 
 ```typescript
-function loadEntry(args: LoadEntryOptions): RemoteEntryExports | void;
+function loadEntry(
+  args: LoadEntryOptions,
+): Promise<RemoteEntryExports | void> | RemoteEntryExports | void;
 
 type LoadEntryOptions = {
-  createScriptHook: SyncHook;
+  origin: ModuleFederation;
+  loaderHook: ModuleFederation['loaderHook'];
   remoteEntryExports?: RemoteEntryExports;
   remoteInfo: RemoteInfo;
+  resourceContext?: ResourceLoadContext;
 };
 interface RemoteInfo {
   name: string;
@@ -974,17 +1088,48 @@ test2; // "test2 value"
 
 ## bridgeHook
 
-`bridgeHook` 用于桥接渲染/销毁阶段（如 React/Vue bridge）扩展上下文。
+`bridgeHook` 用于观察 React 和 Vue Bridge 的渲染、销毁和路由同步操作。
+Bridge 包会把语义化的操作上下文作为第二个参数传入，同时保留第一个
+`info` 参数，兼容现有插件。
+
+```ts
+import type {
+  BridgeOperationContext,
+  BridgeOperationResult,
+} from '@module-federation/bridge-shared';
+
+type BridgeOperationContext = {
+  side: 'consumer' | 'producer';
+  framework: 'react' | 'vue';
+  operation: 'render' | 'update' | 'destroy' | 'route-sync';
+  moduleName?: string;
+  route?: {
+    action: 'memory-route-init' | 'host-to-remote';
+    from?: string;
+    to?: string;
+    basename?: string;
+    mechanism?: 'popstate';
+  };
+  reason?: 'unmount' | 'direct';
+};
+
+type BridgeOperationResult = {
+  context: BridgeOperationContext;
+  result?: unknown;
+};
+```
 
 ## beforeBridgeRender
 
 `SyncHook`
 
-在桥接渲染前触发，可返回对象扩展渲染参数（例如追加 `extraProps`）。
+Bridge 生产方或消费方渲染、更新前触发。可以返回对象扩展渲染参数（例如追加
+`extraProps`）。
 
 ```ts
 function beforeBridgeRender(
-  args: Record<string, any>,
+  info: Record<string, any>,
+  context?: BridgeOperationContext,
 ): void | Record<string, any>;
 ```
 
@@ -996,7 +1141,8 @@ function beforeBridgeRender(
 
 ```ts
 function afterBridgeRender(
-  args: Record<string, any>,
+  info: Record<string, any>,
+  operation?: BridgeOperationResult,
 ): void | Record<string, any>;
 ```
 
@@ -1008,7 +1154,8 @@ function afterBridgeRender(
 
 ```ts
 function beforeBridgeDestroy(
-  args: Record<string, any>,
+  info: Record<string, any>,
+  context?: BridgeOperationContext,
 ): void | Record<string, any>;
 ```
 
@@ -1020,6 +1167,33 @@ function beforeBridgeDestroy(
 
 ```ts
 function afterBridgeDestroy(
-  args: Record<string, any>,
+  info: Record<string, any>,
+  operation?: BridgeOperationResult,
 ): void | Record<string, any>;
+```
+
+## afterBridgeRouteSync
+
+`SyncHook`
+
+Bridge 完成路由同步后触发。React 和 Vue 消费方会报告 host 到 remote 的
+`popstate` 同步；Vue 生产方还会报告 memory route 的首次跳转。框架提供返回值时，
+可以从 `operation.result` 读取。
+
+```ts
+function afterBridgeRouteSync(operation: BridgeOperationResult): void;
+```
+
+```ts
+import type { ModuleFederationRuntimePlugin } from '@module-federation/enhanced/runtime';
+
+const bridgeTracePlugin = (): ModuleFederationRuntimePlugin => ({
+  name: 'bridge-trace-plugin',
+  afterBridgeRender(_info, operation) {
+    console.log('bridge render', operation?.context);
+  },
+  afterBridgeRouteSync(operation) {
+    console.log('bridge route', operation.context.route);
+  },
+});
 ```
