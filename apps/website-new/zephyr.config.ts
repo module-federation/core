@@ -1,7 +1,5 @@
-import { defineConfig } from 'zephyr-agent';
-
-export default defineConfig({
+export default {
   org: 'module-federation',
   project: 'core',
   appName: 'website-new',
-});
+};
