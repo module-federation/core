@@ -3,6 +3,7 @@
  * This component handles the lifecycle of remote Module Federation apps
  */
 import React, { useEffect, useRef, useState, forwardRef } from 'react';
+import type { BridgeOperationContext } from '@module-federation/bridge-shared';
 import { LoggerInstance, getRootDomDefaultClassName } from '../utils';
 import { federationRuntime } from '../provider/plugin';
 import { RemoteComponentProps, RemoteAppParams } from '../types';
@@ -49,27 +50,31 @@ export const RemoteAppWrapper = forwardRef(function (
           { moduleName, basename, dom: renderDom.current },
         );
 
-        instance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit({
+        const destroyInfo = {
           moduleName,
           dom: renderDom.current,
           basename,
           memoryRoute,
           fallback,
           ...resProps,
-        });
+        };
+        const operationContext: BridgeOperationContext = {
+          side: 'consumer',
+          framework: 'react',
+          operation: 'destroy',
+          reason: 'unmount',
+        };
 
-        providerInfoRef.current?.destroy({
+        instance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit(
+          destroyInfo,
+          operationContext,
+        );
+        providerInfoRef.current.destroy({
           moduleName,
           dom: renderDom.current,
         });
-
-        instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit({
-          moduleName,
-          dom: renderDom.current,
-          basename,
-          memoryRoute,
-          fallback,
-          ...resProps,
+        instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(destroyInfo, {
+          context: operationContext,
         });
       }
     };
@@ -88,14 +93,23 @@ export const RemoteAppWrapper = forwardRef(function (
       ...resProps,
     };
     renderDom.current = rootRef.current;
+    const operationContext: BridgeOperationContext = {
+      side: 'consumer',
+      framework: 'react',
+      operation: 'render',
+    };
 
     const beforeBridgeRenderRes =
-      instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(renderProps) ||
-      {};
+      instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(
+        renderProps,
+        operationContext,
+      ) || {};
     // @ts-ignore
     renderProps = { ...renderProps, ...beforeBridgeRenderRes.extraProps };
     providerInfoRef.current.render(renderProps);
-    instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(renderProps);
+    instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(renderProps, {
+      context: operationContext,
+    });
   }, [initialized, ...Object.values(props)]);
 
   // bridge-remote-root
