@@ -2,6 +2,7 @@ import { describe, expect, it, rs } from '@rstest/core';
 import {
   pluginModuleFederation,
   RSBUILD_PLUGIN_MODULE_FEDERATION_NAME,
+  type ExposedAPIType,
 } from './index';
 import { CALL_NAME_MAP } from '../constant';
 
@@ -12,11 +13,13 @@ type MockApiState = {
   beforeCreateCompiler?: (args: {
     bundlerConfigs?: Rspack.Configuration[];
   }) => void;
+  modifyRsbuildConfig?: (config: Record<string, any>) => void;
 };
 
 function createMockApi(
   rsbuildConfig: Record<string, any>,
   callerName = 'rsbuild',
+  deferRsbuildConfig = false,
 ) {
   const originalConfig = JSON.parse(JSON.stringify(rsbuildConfig));
   const state: MockApiState = {};
@@ -28,7 +31,11 @@ function createMockApi(
     getRsbuildConfig: (kind?: 'original') =>
       kind === 'original' ? originalConfig : rsbuildConfig,
     modifyRsbuildConfig: (callback: (config: Record<string, any>) => void) => {
-      callback(rsbuildConfig);
+      if (deferRsbuildConfig) {
+        state.modifyRsbuildConfig = callback;
+      } else {
+        callback(rsbuildConfig);
+      }
     },
     modifyEnvironmentConfig: rs.fn(),
     expose: rs.fn(),
@@ -125,6 +132,147 @@ describe('pluginModuleFederation node target environment behavior', () => {
 
     expect(rsbuildConfig.environments.node.tools?.rspack).toBeDefined();
     expect(rsbuildConfig.environments.web.tools?.rspack).toBeUndefined();
+  });
+
+  it('preserves legacy Node defaults when the Rstest companion is absent', () => {
+    const warningSpy = rs
+      .spyOn(console, 'warn')
+      .mockImplementation(() => undefined);
+    const plugin = pluginModuleFederation(createMfOptions(), {
+      target: 'node',
+      environment: 'rstest',
+    });
+    const { api, state, rsbuildConfig } = createMockApi(
+      {
+        environments: {
+          rstest: {},
+        },
+      },
+      'rstest',
+    );
+    const bundlerConfig: Rspack.Configuration = {
+      name: 'rstest',
+      output: {
+        path: '/tmp/rstest',
+      },
+      optimization: {
+        runtimeChunk: {
+          name: 'rstest-runtime',
+        },
+      },
+      plugins: [],
+    };
+
+    plugin.setup(api as any);
+    state.beforeCreateCompiler!({
+      bundlerConfigs: [bundlerConfig],
+    });
+
+    expect(rsbuildConfig.environments.rstest.tools?.rspack).toBeDefined();
+    expect(bundlerConfig.target).toBe('async-node');
+    expect(bundlerConfig.output?.chunkLoading).toBe('async-node');
+    expect(bundlerConfig.output?.library).toEqual({
+      type: 'commonjs-module',
+    });
+    expect(bundlerConfig.optimization?.runtimeChunk).toBeUndefined();
+    expect(bundlerConfig.plugins).toHaveLength(1);
+    expect(warningSpy.mock.calls.flat().map(String).join('\n')).toContain(
+      'optimization.runtimeChunk',
+    );
+    warningSpy.mockRestore();
+  });
+
+  it('lets the Rstest companion own Node test-worker defaults', () => {
+    const plugin = pluginModuleFederation(createMfOptions(), {
+      target: 'node',
+      environment: 'rstest',
+    });
+    const { api, state, rsbuildConfig } = createMockApi(
+      {
+        environments: {
+          rstest: {},
+        },
+      },
+      'rstest',
+      true,
+    );
+    const bundlerConfig: Rspack.Configuration = {
+      name: 'rstest',
+      output: {
+        path: '/tmp/rstest',
+      },
+      optimization: {
+        runtimeChunk: {
+          name: 'rstest-runtime',
+        },
+      },
+      plugins: [],
+    };
+
+    plugin.setup(api as any);
+    const exposedApi = (api.expose as ReturnType<typeof rs.fn>).mock.calls.find(
+      ([name]) => name === RSBUILD_PLUGIN_MODULE_FEDERATION_NAME,
+    )?.[1] as ExposedAPIType;
+    exposedApi.registerNodeTargetConfigOwner!();
+    exposedApi.registerOptionsTransformer((options) => options);
+    state.modifyRsbuildConfig!(rsbuildConfig);
+    state.beforeCreateCompiler!({
+      bundlerConfigs: [bundlerConfig],
+    });
+
+    expect(rsbuildConfig.environments.rstest.tools?.rspack).toBeUndefined();
+    expect(bundlerConfig.target).toBeUndefined();
+    expect(bundlerConfig.output?.chunkLoading).toBeUndefined();
+    expect(bundlerConfig.optimization?.runtimeChunk).toEqual({
+      name: 'rstest-runtime',
+    });
+    expect(bundlerConfig.plugins).toHaveLength(1);
+  });
+
+  it('does not treat a generic options transformer as a Node config owner', () => {
+    const warningSpy = rs
+      .spyOn(console, 'warn')
+      .mockImplementation(() => undefined);
+    const plugin = pluginModuleFederation(createMfOptions(), {
+      target: 'node',
+      environment: 'rstest',
+    });
+    const { api, state, rsbuildConfig } = createMockApi(
+      {
+        environments: {
+          rstest: {},
+        },
+      },
+      'rstest',
+      true,
+    );
+    const bundlerConfig: Rspack.Configuration = {
+      name: 'rstest',
+      output: {
+        path: '/tmp/rstest',
+      },
+      optimization: {
+        runtimeChunk: {
+          name: 'rstest-runtime',
+        },
+      },
+      plugins: [],
+    };
+
+    plugin.setup(api as any);
+    const exposedApi = (api.expose as ReturnType<typeof rs.fn>).mock.calls.find(
+      ([name]) => name === RSBUILD_PLUGIN_MODULE_FEDERATION_NAME,
+    )?.[1] as ExposedAPIType;
+    exposedApi.registerOptionsTransformer((options) => options);
+    state.modifyRsbuildConfig!(rsbuildConfig);
+    state.beforeCreateCompiler!({
+      bundlerConfigs: [bundlerConfig],
+    });
+
+    expect(rsbuildConfig.environments.rstest.tools?.rspack).toBeDefined();
+    expect(bundlerConfig.target).toBe('async-node');
+    expect(bundlerConfig.optimization?.runtimeChunk).toBeUndefined();
+    warningSpy.mockRestore();
   });
 
   it('still applies MF to the selected node environment when output is commonjs-like', () => {
@@ -264,6 +412,42 @@ describe('pluginModuleFederation node target environment behavior', () => {
 
     expect(webBundlerConfig.output?.chunkLoadingGlobal).toBe('chunk_host');
     expect(webBundlerConfig.output?.chunkLoadingGlobal).not.toMatch(/\s/);
+  });
+
+  it('applies exposed option transformers before compiler creation', () => {
+    const plugin = pluginModuleFederation(createMfOptions());
+    const { api, state } = createMockApi({
+      environments: {
+        web: {},
+      },
+    });
+    const webBundlerConfig: Rspack.Configuration = {
+      name: 'web',
+      output: {
+        path: '/tmp/web',
+      },
+      optimization: {},
+      plugins: [],
+    };
+
+    plugin.setup(api as any);
+    const exposedApi = (api.expose as ReturnType<typeof rs.fn>).mock.calls.find(
+      ([name]) => name === RSBUILD_PLUGIN_MODULE_FEDERATION_NAME,
+    )?.[1] as ExposedAPIType;
+
+    exposedApi.registerOptionsTransformer((options) => ({
+      ...options,
+      name: 'normalized_host',
+    }));
+    state.beforeCreateCompiler!({
+      bundlerConfigs: [webBundlerConfig],
+    });
+
+    expect(exposedApi.getOptions().name).toBe('normalized_host');
+    expect(webBundlerConfig.output?.chunkLoadingGlobal).toBe(
+      'chunk_normalized_host',
+    );
+    expect(webBundlerConfig.output?.uniqueName).toBe('normalized_host');
   });
 
   it('keeps target=dual restriction for non-rslib/non-rspress callers', () => {

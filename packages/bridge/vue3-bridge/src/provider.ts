@@ -1,6 +1,9 @@
 import * as Vue from 'vue';
 import * as VueRouter from 'vue-router';
-import { RenderFnParams } from '@module-federation/bridge-shared';
+import {
+  RenderFnParams,
+  type BridgeOperationContext,
+} from '@module-federation/bridge-shared';
 import { LoggerInstance } from './utils';
 import { getInstance } from '@module-federation/runtime';
 import { processRoutes } from './routeUtils';
@@ -41,11 +44,21 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
           hashRoute,
           ...propsInfo
         } = info;
+        const operationContext: BridgeOperationContext = {
+          side: 'producer',
+          framework: 'vue',
+          operation: rootMap.has(dom) ? 'update' : 'render',
+          reason: 'direct',
+        };
+
         const app = Vue.createApp(bridgeInfo.rootComponent, propsInfo);
         rootMap.set(dom, app);
 
         const beforeBridgeRenderRes =
-          await instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(info);
+          await instance?.bridgeHook?.lifecycle?.beforeBridgeRender?.emit(
+            info,
+            operationContext,
+          );
 
         const extraProps =
           beforeBridgeRenderRes &&
@@ -90,22 +103,51 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
           });
           // memory route Initializes the route
           if (memoryRoute) {
-            await router.push(memoryRoute.entryPath);
+            const route = {
+              action: 'memory-route-init' as const,
+              to: memoryRoute.entryPath,
+              basename,
+            };
+            const routeContext: BridgeOperationContext = {
+              side: 'producer',
+              framework: 'vue',
+              operation: 'route-sync',
+              moduleName,
+              route,
+            };
+            const result = await router.push(memoryRoute.entryPath);
+            instance?.bridgeHook?.lifecycle?.afterBridgeRouteSync?.emit({
+              context: routeContext,
+              result,
+            });
           }
 
           app.use(router);
         }
 
         app.mount(dom);
-        instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info);
+        instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info, {
+          context: operationContext,
+        });
       },
-      destroy(info: { dom: HTMLElement }) {
+      destroy(info: { dom: HTMLElement; moduleName?: string }) {
         LoggerInstance.debug(`createBridgeComponent destroy Info`, info);
         const root = rootMap.get(info?.dom);
+        const operationContext: BridgeOperationContext = {
+          side: 'producer',
+          framework: 'vue',
+          operation: 'destroy',
+          reason: 'direct',
+        };
 
-        instance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit(info);
+        instance?.bridgeHook?.lifecycle?.beforeBridgeDestroy?.emit(
+          info,
+          operationContext,
+        );
         root?.unmount();
-        instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(info);
+        instance?.bridgeHook?.lifecycle?.afterBridgeDestroy?.emit(info, {
+          context: operationContext,
+        });
       },
     };
   };

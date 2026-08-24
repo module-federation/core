@@ -13,6 +13,7 @@ import {
   ShareStrategy,
   TreeShakingArgs,
   SharedGetter,
+  SharedLoadContext,
 } from '../type';
 import { warn, error } from './logger';
 import { satisfy } from './semver';
@@ -363,7 +364,9 @@ export function getRegisteredShare(
     shareInfo: Shared;
     GlobalFederation: Federation;
     resolver: () => { shared: Shared; useTreesShaking: boolean } | undefined;
+    loadContext?: SharedLoadContext;
   }>,
+  loadContext?: SharedLoadContext,
 ): { shared: Shared; useTreesShaking: boolean } | void {
   if (!localShareScopeMap) {
     return;
@@ -375,6 +378,7 @@ export function getRegisteredShare(
     treeShaking,
   } = shareInfo;
   const scopes = Array.isArray(scope) ? scope : [scope];
+
   for (const sc of scopes) {
     if (
       shareConfig &&
@@ -466,6 +470,7 @@ export function getRegisteredShare(
         GlobalFederation: Global.__FEDERATION__,
         shareInfo,
         resolver: defaultResolver,
+        loadContext,
       };
       const resolveShared = resolveShare.emit(params) || params;
       return resolveShared.resolver();

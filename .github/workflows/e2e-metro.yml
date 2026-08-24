@@ -134,6 +134,10 @@ jobs:
       RUBY_VERSION: 3.4.9
       MAESTRO_VERSION: 1.39.13
       MAESTRO_DRIVER_STARTUP_TIMEOUT: 600000
+      # Last formula revision that installs idb-companion 1.1.8 on Xcode 16.4.
+      IDB_COMPANION_VERSION: 1.1.8
+      IDB_COMPANION_FORMULA_COMMIT: c0386793f59da10c619787f2aa18d938ef1d69c9
+      HOMEBREW_NO_AUTO_UPDATE: 1
     steps:
       - name: Check out repository
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
@@ -181,7 +185,9 @@ jobs:
         run: |
           curl -Ls "https://get.maestro.mobile.dev" | bash
           brew tap facebook/fb
+          git -C "$(brew --repository facebook/fb)" checkout "${IDB_COMPANION_FORMULA_COMMIT}"
           brew install facebook/fb/idb-companion
+          test "$(brew list --versions idb-companion)" = "idb-companion ${IDB_COMPANION_VERSION}"
           echo "${HOME}/.maestro/bin" >> "$GITHUB_PATH"
         shell: bash
 

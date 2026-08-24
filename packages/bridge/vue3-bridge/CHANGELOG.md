@@ -1,5 +1,16 @@
 # @module-federation/bridge-vue3
 
+## 2.9.0
+
+### Patch Changes
+
+- df8b40f: Extend the existing Bridge render and destroy hooks with semantic context, add a route synchronization hook, and keep timing, sanitization, and correlation in the observability plugin.
+- Updated dependencies [df8b40f]
+- Updated dependencies [df8b40f]
+  - @module-federation/runtime@2.9.0
+  - @module-federation/bridge-shared@2.9.0
+  - @module-federation/sdk@2.9.0
+
 ## 2.8.2
 
 ### Patch Changes

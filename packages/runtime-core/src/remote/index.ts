@@ -198,6 +198,7 @@ export class RemoteHandler {
           loaderHook: ModuleFederation['loaderHook'];
           remoteInfo: RemoteInfo;
           remoteEntryExports?: RemoteEntryExports;
+          resourceContext?: ResourceLoadContext;
         },
       ],
       Promise<RemoteEntryExports | void> | RemoteEntryExports | void
@@ -438,10 +439,17 @@ export class RemoteHandler {
           if (!assets) {
             return;
           }
-          const results = await preloadAssets(remoteInfo, host, assets, true, {
-            initiator: 'preloadRemote',
-            id: preloadId,
-          });
+          const results = await preloadAssets(
+            remoteInfo,
+            host,
+            assets,
+            true,
+            {
+              initiator: 'preloadRemote',
+              id: preloadId,
+            },
+            preloadConfig.recordPreloadedAssets,
+          );
           preloadResults.push({
             remote,
             remoteInfo,
