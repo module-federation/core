@@ -1,5 +1,18 @@
 # @module-federation/observability-plugin
 
+## 2.6.0
+
+### Minor Changes
+
+- df8b40f: Add Divebell synchronization on `@divebell/core` 0.0.23 and safe multi-instance runtime state with stable report and relationship association.
+
+### Patch Changes
+
+- df8b40f: Extend the existing Bridge render and destroy hooks with semantic context, add a route synchronization hook, and keep timing, sanitization, and correlation in the observability plugin.
+- df8b40f: Extend the semantic shared registration and resolution hooks with explicit load context, re-export the shared-version `satisfy` helper, and keep provider, candidate, and selection diagnostics in the observability plugin while ignoring legacy share-scope metadata.
+- df8b40f: Extend the semantic manifest, remote entry, and preload hooks with resource context and results, while keeping cache, timing, timeout, failure, and recovery diagnostics in the observability plugin.
+  - @module-federation/sdk@2.9.0
+
 ## 2.5.6
 
 ### Patch Changes

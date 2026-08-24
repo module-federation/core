@@ -1,5 +1,24 @@
 # @module-federation/runtime
 
+## 2.9.0
+
+### Minor Changes
+
+- df8b40f: Extend the semantic shared registration and resolution hooks with explicit load context, re-export the shared-version `satisfy` helper, and keep provider, candidate, and selection diagnostics in the observability plugin while ignoring legacy share-scope metadata.
+
+### Patch Changes
+
+- df8b40f: Extend the existing Bridge render and destroy hooks with semantic context, add a route synchronization hook, and keep timing, sanitization, and correlation in the observability plugin.
+- Updated dependencies [df8b40f]
+- Updated dependencies [df8b40f]
+- Updated dependencies [a59681f]
+- Updated dependencies [df8b40f]
+- Updated dependencies [08fdc4d]
+- Updated dependencies [df8b40f]
+  - @module-federation/runtime-core@2.9.0
+  - @module-federation/sdk@2.9.0
+  - @module-federation/error-codes@2.9.0
+
 ## 2.8.2
 
 ### Patch Changes

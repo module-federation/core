@@ -1,5 +1,11 @@
 # @module-federation/bridge-shared
 
+## 2.9.0
+
+### Patch Changes
+
+- df8b40f: Extend the existing Bridge render and destroy hooks with semantic context, add a route synchronization hook, and keep timing, sanitization, and correlation in the observability plugin.
+
 ## 2.8.2
 
 ## 2.8.1

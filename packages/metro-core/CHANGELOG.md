@@ -1,5 +1,15 @@
 # @module-federation/metro
 
+## 2.9.0
+
+### Patch Changes
+
+- Updated dependencies [df8b40f]
+- Updated dependencies [df8b40f]
+  - @module-federation/runtime@2.9.0
+  - @module-federation/dts-plugin@2.9.0
+  - @module-federation/sdk@2.9.0
+
 ## 2.8.2
 
 ### Patch Changes

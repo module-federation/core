@@ -1,5 +1,22 @@
 # @module-federation/modern-js-v3
 
+## 2.9.0
+
+### Patch Changes
+
+- e68f1b5: Fix misleading splitChunks warning under stream SSR so it only fires when chunks was not already async.
+- Updated dependencies [df8b40f]
+- Updated dependencies [df8b40f]
+- Updated dependencies [0ebae56]
+- Updated dependencies [60e6b82]
+  - @module-federation/runtime@2.9.0
+  - @module-federation/bridge-react@2.9.0
+  - @module-federation/rsbuild-plugin@2.9.0
+  - @module-federation/node@2.7.50
+  - @module-federation/enhanced@2.9.0
+  - @module-federation/sdk@2.9.0
+  - @module-federation/cli@2.9.0
+
 ## 2.8.2
 
 ### Patch Changes
