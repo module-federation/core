@@ -1,0 +1,142 @@
+# 排查运行时问题
+
+Module Federation 的运行时问题排查非常复杂。Remote 解析、Shared 版本选择、
+Bridge 生命周期和模块性能等关键信息只存在于页面运行现场，仅看源码或
+Console 很难还原完整链路。
+
+为此，我们基于 MF 运行时与观测能力开发了 [Divebell](https://github.com/2heal1/divebell)
+MF Extension。它能识别页面中的 MF 实例，追踪 Remote、Shared 和 Bridge
+加载链路，并分析模块、资源请求与页面 Paint 之间的性能关系。
+
+## 安装 CLI 并发现 Divebell Skill
+
+在 Agent 所在机器全局安装 Divebell，不要把它加入被调试应用的依赖：
+
+```bash
+npm install --global @divebell/cli
+```
+
+查看当前安装版本的命令，并打印 CLI 自带 Skill 的路径：
+
+```bash
+divebell --help
+divebell skill
+```
+
+AI Coding Agent 应在执行命令前完整读取返回路径中的 `SKILL.md`。命令和
+参数以本机已安装 CLI 的 `--help` 为准。
+
+## 安装 Module Federation Extension
+
+```bash
+divebell extensions add @divebell/extension-mf
+divebell --help
+divebell mf --help
+divebell mf --skill
+```
+
+`divebell mf --skill` 会打印当前已安装 MF Extension 自带的 Skill 路径。
+Agent 应先完整读取它，再选择 MF 子命令或解释命令输出。
+
+CLI 和 Extension 都是 Agent 侧工具，不是应用依赖，也不会修改被检查项目。
+
+## 打开页面并在导航前启用 MF 诊断
+
+```bash
+divebell setup
+divebell open "https://example.com" --mf
+```
+
+`divebell open` 上不带值的 `--mf` 会在导航前启用 Extension，因此可以
+捕获首次 MF 加载历史。它不同于部分 `divebell mf` 子命令上的
+`--mf <name>`；后者只是在页面打开后选择一个可见的 MF 实例。
+
+使用任务要求的授权账号和环境，不要绕过权限边界。
+
+## 能诊断什么
+
+| 命令 | 用途 |
+| --- | --- |
+| `divebell mf status` | 识别页面中的 MF 实例、角色和已加载 Shared |
+| `divebell mf module-info [remote]` | 查看 Remote 声明和解析后的元数据 |
+| `divebell mf remote status <remote>` | 判断 Remote 当前是否成功、失败或证据不足 |
+| `divebell mf remote trace [remote/expose]` | 定位 manifest、remoteEntry、expose 加载或 preload 链路 |
+| `divebell mf shared status [package]` | 查看当前 Shared Registry 和候选版本 |
+| `divebell mf shared trace [package]` | 追踪 Shared 注册、版本选择、复用和加载历史 |
+| `divebell mf bridge trace [remote]` | 追踪 Bridge 渲染、更新、销毁、提交和路由同步 |
+| `divebell mf module-perf [remote/expose]` | 定位生产者模块、Shared 和资源请求的性能瓶颈及页面 Paint 影响 |
+
+目标未知时先运行 `divebell mf status`。目标明确时直接选择最小的专项命令，
+不要先扫描所有浏览器日志。
+
+只有在需要汇总且适合人阅读的性能时间线时才使用：
+
+```bash
+divebell mf module-perf --report --view timeline
+```
+
+`module-perf --report` 会整理同一份证据，不会重新加载模块。终端时间线用于
+展示 Page Paint、Consumer、Provider、模块、Shared 和资源请求之间的时间关系。
+
+## 使用方法
+
+安装完成后，直接向 Agent 描述页面现象和需要判断的问题。
+
+**排查 MF 运行时错误**
+
+```text
+/mf observability
+访问 https://example.com，checkout Remote 加载失败。请用 Divebell 判断失败
+发生在 manifest、remoteEntry 还是 expose 阶段，并给出证据和责任边界。
+```
+
+**定位性能瓶颈**
+
+```text
+/mf observability
+访问 https://example.com/products，商品 Remote 首次渲染很慢。请分析模块、
+Shared 和资源时间线，说明性能瓶颈以及它对 FP、FCP、LCP 的影响。
+```
+
+**排查 Shared 或 Bridge 链路**
+
+```text
+/mf observability
+访问 https://example.com，检查 react 的 Shared 版本选择，并追踪 cart Remote
+从 Bridge render 到 commit 的链路，指出缺失或异常的阶段。
+```
+
+Agent 应按以下顺序排查：
+
+1. 使用 `divebell open <url> --mf` 在导航前开始采集。
+2. 目标未知时用 `mf status` 定位实例；目标明确时直接运行对应命令。
+3. 只有懒加载由交互触发时，才复现必要的用户操作，然后重新读取专项证据。
+4. 下结论前先读 `warnings`、`recommendedActions`、`selection`、能力声明和
+   完整性；历史不完整时重新用 `--mf` 打开并复现。
+5. 说明证据证明了什么、没有证明什么，以及实际使用的命令。
+
+## 在 MF 启动前代理 Remote
+
+`--mf-proxy` 会在导航前替换 Remote。Key 可以是配置的 Remote 名称或别名：
+
+```bash
+divebell open "https://example.com" \
+  --mf-proxy "checkout=http://localhost:3001/mf-manifest.json" \
+  --mf
+```
+
+代理只对本次 `open` 生效。如果同一次调试还需要结构化诊断，再同时添加
+`--mf`。
+
+## 证据边界
+
+- MF 加载成功只证明 Runtime 完成了这一层，不代表页面已经渲染完成或业务
+  数据已经就绪。
+- 分析 MF 证据后，还要通过 Divebell 验证最终页面结果。
+- MF Extension 返回有边界且可序列化的证据，不读取 Cookie、Token、工厂
+  函数、容器对象或业务响应正文。
+- 不要为了开始一次性排查而给应用接入 Runtime SDK 或观测插件。
+- 只有需要长期保留、上传或持续采集开发/生产报告时，才接入应用侧观测插件。
+
+完整命令请查看
+[Divebell MF Extension 文档](https://github.com/2heal1/divebell/blob/main/packages/extensions/mf/README.md)。
