@@ -79,7 +79,7 @@ export default createModuleFederationConfig({
   filename: 'remoteEntry.js',
   name: 'mf_doc',
   shareStrategy: 'loaded-first',
-  // getPublicPath: `return globalThis.${MF_DOC_PUBLIC_PATH_KEY} || 'https://module-federation.io/';`,
+  getPublicPath: `return typeof window === 'undefined' ? 'https://module-federation.io/mf-ssg/' : 'https://module-federation.io/';`,
   remotes: {
     [PLAYGROUND_REMOTE_NAME]: `${PLAYGROUND_REMOTE_NAME}@${PLAYGROUND_REMOTE_MANIFEST_URL}`,
   },

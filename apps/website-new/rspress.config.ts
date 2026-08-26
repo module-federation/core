@@ -112,7 +112,15 @@ gtag('config', '${googleAnalyticsMeasurementId}');
     },
     plugins: [moduleFederationPluginOverview, pluginSass()],
     output: {
-      assetPrefix: `${canonicalSiteOrigin}/`,
+      assetPrefix: '/',
+    },
+    environments: {
+      node: {
+        output: {
+          // The federated SSG build requires an absolute public path.
+          assetPrefix: `${canonicalSiteOrigin}/`,
+        },
+      },
     },
     dev: {
       assetPrefix: true,
