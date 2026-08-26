@@ -1,4 +1,5 @@
 import path from 'node:path';
+import { afterEach, describe, expect, it, rs } from '@rstest/core';
 import { checkVersion, findPackageJson } from '../src/utils';
 import { getBridgeRouterAlias } from '../src/router-alias';
 
@@ -107,5 +108,35 @@ describe('test getBridgeRouterAlias: should return the correct alias for react-r
       'react-router/dist/production/index.js': resolveRouterV7,
       'react-router-dom/dist/index.js': resolveRouterV7,
     });
+  });
+});
+
+describe('test getBridgeRouterAlias: showBridgeRouterLogs option', () => {
+  afterEach(() => {
+    rs.restoreAllMocks();
+  });
+
+  it('should not log the resolved alias by default', () => {
+    const logSpy = rs.spyOn(console, 'log').mockImplementation(() => undefined);
+    getBridgeRouterAlias(resolveRouterV5);
+    expect(logSpy).not.toHaveBeenCalled();
+  });
+
+  it('should log the resolved alias when showBridgeRouterLogs is true', () => {
+    const logSpy = rs.spyOn(console, 'log').mockImplementation(() => undefined);
+    getBridgeRouterAlias(resolveRouterV5, { showBridgeRouterLogs: true });
+    expect(logSpy).toHaveBeenCalledWith(
+      '<<<<<<<<<<<<< bridgeRouterAlias >>>>>>>>>>>>>',
+      expect.objectContaining({
+        'react-router-dom$':
+          '@module-federation/bridge-react/dist/router-v5.es.js',
+      }),
+    );
+  });
+
+  it('should not log the default alias by default', () => {
+    const logSpy = rs.spyOn(console, 'log').mockImplementation(() => undefined);
+    getBridgeRouterAlias('/nonexistent-mf-bridge-router-alias-test');
+    expect(logSpy).not.toHaveBeenCalled();
   });
 });
