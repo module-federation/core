@@ -1,5 +1,7 @@
 # create-module-federation
 
+## 2.9.0
+
 ## 2.8.2
 
 ## 2.8.1

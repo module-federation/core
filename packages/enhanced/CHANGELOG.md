@@ -1,5 +1,22 @@
 # @module-federation/enhanced
 
+## 2.9.0
+
+### Patch Changes
+
+- Updated dependencies [df8b40f]
+  - @module-federation/webpack-bundler-runtime@2.9.0
+  - @module-federation/dts-plugin@2.9.0
+  - @module-federation/runtime-tools@2.9.0
+  - @module-federation/rspack@2.9.0
+  - @module-federation/inject-external-runtime-core-plugin@2.9.0
+  - @module-federation/sdk@2.9.0
+  - @module-federation/managers@2.9.0
+  - @module-federation/manifest@2.9.0
+  - @module-federation/bridge-react-webpack-plugin@2.9.0
+  - @module-federation/error-codes@2.9.0
+  - @module-federation/cli@2.9.0
+
 ## 2.8.2
 
 ### Patch Changes

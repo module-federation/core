@@ -256,6 +256,12 @@ Please tell me whether the load succeeded, where it failed, who likely owns the 
 <paste report JSON>
 ```
 
+import DivebellObservability from '@docs/pt-BR/_components/divebell-observability.mdx';
+
+## Observe {props.observabilityTargetName || 'Module Federation'} com {props.observabilityToolName || 'Divebell'}
+
+{props.observabilityToolContent || <DivebellObservability />}
+
 ## Runtime Opções
 
 `ObservabilityPlugin(options)` suporta these runtime opções:
