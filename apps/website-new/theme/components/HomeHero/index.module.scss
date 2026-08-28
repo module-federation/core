@@ -1,11 +1,4 @@
 .hero {
-  --paint-x: 0px;
-  --paint-y: 0px;
-  --focus-x: 72%;
-  --focus-y: 46%;
-  --focus-opacity: 0.22;
-  --mist-x: 0px;
-  --mist-y: 0px;
   --mf-abyss: #020713;
   --mf-ocean: #071426;
   --mf-tide: #365a86;
@@ -26,9 +19,8 @@
 }
 
 .paintedBackdrop,
-.focusBackdrop,
-.fogVeil,
-.constellationField,
+.fluidGalaxy,
+.elasticGrid,
 .heroShade {
   position: absolute;
   inset: 0;
@@ -36,15 +28,13 @@
 }
 
 .paintedBackdrop {
-  z-index: -6;
-  inset: -34px;
+  z-index: -5;
+  inset: -36px;
   background-color: var(--mf-ocean);
   background-position: center;
   background-size: cover;
-  filter: blur(11px) saturate(0.58) contrast(0.96) brightness(0.62);
-  transform: translate3d(var(--paint-x), var(--paint-y), 0) scale(1.065);
-  transition: transform 1600ms cubic-bezier(0.16, 0.72, 0.18, 1);
-  will-change: transform;
+  filter: blur(15px) saturate(0.54) contrast(0.94) brightness(0.52);
+  transform: scale(1.07);
 }
 
 .paintedBackdrop::after {
@@ -60,87 +50,86 @@
   content: '';
 }
 
-.focusBackdrop {
-  z-index: -5;
-  inset: -28px;
-  background-color: transparent;
-  background-position: center;
-  background-size: cover;
-  filter: blur(2.4px) saturate(0.76) contrast(0.99) brightness(0.75);
-  opacity: var(--focus-opacity);
-  transform: translate3d(var(--mist-x), var(--mist-y), 0) scale(1.045);
-  transition: opacity 700ms ease;
-  -webkit-mask-image: radial-gradient(
-    circle 230px at calc(var(--focus-x) + 28px) calc(var(--focus-y) + 28px),
-    #000 0%,
-    rgb(0 0 0 / 88%) 34%,
-    rgb(0 0 0 / 36%) 68%,
-    transparent 100%
-  );
-  mask-image: radial-gradient(
-    circle 230px at calc(var(--focus-x) + 28px) calc(var(--focus-y) + 28px),
-    #000 0%,
-    rgb(0 0 0 / 88%) 34%,
-    rgb(0 0 0 / 36%) 68%,
-    transparent 100%
-  );
-  will-change:
-    opacity,
-    transform,
-    -webkit-mask-image,
-    mask-image;
-}
-
-.fogVeil {
+.fluidGalaxy {
   z-index: -4;
-  inset: -10%;
   overflow: hidden;
-  filter: blur(22px);
-  mix-blend-mode: screen;
-  opacity: 0.72;
-  transform: translate3d(var(--mist-x), var(--mist-y), 0) scale(1.04);
-  will-change: transform;
 }
 
-.fogVeil::before,
-.fogVeil::after {
+.fluidGalaxy canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  filter: blur(3.2px) saturate(0.8) contrast(0.97) brightness(0.84);
+  opacity: 0;
+  transform: scale(1.025);
+  transition: opacity 1400ms ease;
+  will-change: filter;
+}
+
+.fluidGalaxy canvas[data-ready='true'] {
+  opacity: 0.98;
+}
+
+.fluidGalaxy::before,
+.fluidGalaxy::after {
   position: absolute;
-  inset: -8%;
+  z-index: 1;
+  inset: -12%;
   content: '';
+  pointer-events: none;
 }
 
-.fogVeil::before {
+.fluidGalaxy::before {
   background:
     radial-gradient(
-      ellipse 28% 19% at 76% 30%,
-      rgb(194 207 216 / 8%),
-      transparent 72%
+      ellipse 28% 22% at 77% 28%,
+      rgb(214 218 207 / 7%),
+      transparent 74%
     ),
     radial-gradient(
-      ellipse 34% 24% at 60% 64%,
-      rgb(82 112 145 / 7%),
+      ellipse 38% 29% at 63% 67%,
+      rgb(57 91 134 / 9%),
+      transparent 76%
+    );
+  filter: blur(28px);
+  mix-blend-mode: screen;
+  opacity: 0.72;
+  animation: galaxy-veil 22s ease-in-out infinite alternate;
+}
+
+.fluidGalaxy::after {
+  background:
+    linear-gradient(180deg, rgb(2 7 17 / 6%), rgb(2 7 16 / 23%)),
+    radial-gradient(
+      ellipse 32% 25% at 88% 58%,
+      rgb(218 208 181 / 5%),
       transparent 74%
     );
-  animation: fog-drift 24s ease-in-out infinite alternate;
+  filter: blur(18px);
 }
 
-.fogVeil::after {
-  background: radial-gradient(
-    ellipse 26% 22% at 88% 56%,
-    rgb(205 200 174 / 5%),
-    transparent 72%
-  );
-  animation: fog-breathe 17s ease-in-out infinite alternate;
-}
-
-.constellationField {
+.elasticGrid {
   z-index: -3;
-  filter: blur(0.4px);
-  opacity: 0.46;
+  filter: blur(0.65px);
+  opacity: 0.36;
   mix-blend-mode: screen;
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgb(0 0 0 / 20%) 29%,
+    #000 58%,
+    rgb(0 0 0 / 86%) 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgb(0 0 0 / 20%) 29%,
+    #000 58%,
+    rgb(0 0 0 / 86%) 100%
+  );
 }
 
-.constellationField canvas {
+.elasticGrid canvas {
   display: block;
   width: 100%;
   height: 100%;
@@ -156,28 +145,18 @@
       rgb(5 18 35 / 34%) 47%,
       transparent 68%
     ),
-    linear-gradient(180deg, transparent 48%, rgb(2 7 15 / 75%) 100%);
+    linear-gradient(180deg, rgb(2 7 15 / 8%), rgb(2 7 15 / 78%) 100%);
 }
 
-@keyframes fog-drift {
+@keyframes galaxy-veil {
   from {
-    transform: translate3d(-1.5%, -1%, 0) scale(1.02) rotate(-1deg);
+    opacity: 0.5;
+    transform: translate3d(-1.8%, -1%, 0) scale(1.02) rotate(-0.8deg);
   }
 
   to {
-    transform: translate3d(2.5%, 1.8%, 0) scale(1.08) rotate(1.2deg);
-  }
-}
-
-@keyframes fog-breathe {
-  from {
-    opacity: 0.46;
-    transform: translate3d(1%, 1%, 0) scale(1);
-  }
-
-  to {
-    opacity: 0.9;
-    transform: translate3d(-2%, -1.5%, 0) scale(1.12);
+    opacity: 0.86;
+    transform: translate3d(2.2%, 1.6%, 0) scale(1.08) rotate(1deg);
   }
 }
 
@@ -395,32 +374,15 @@
 
   .paintedBackdrop {
     background-position: 65% center;
-    filter: blur(8px) saturate(0.56) contrast(0.96) brightness(0.55);
+    filter: blur(14px) saturate(0.54) contrast(0.94) brightness(0.52);
   }
 
-  .focusBackdrop {
-    background-position: 65% center;
-    filter: blur(2.2px) saturate(0.72) contrast(0.98) brightness(0.68);
-    -webkit-mask-image: radial-gradient(
-      circle 160px at calc(var(--focus-x) + 28px) calc(var(--focus-y) + 28px),
-      #000 0%,
-      rgb(0 0 0 / 78%) 36%,
-      transparent 100%
-    );
-    mask-image: radial-gradient(
-      circle 160px at calc(var(--focus-x) + 28px) calc(var(--focus-y) + 28px),
-      #000 0%,
-      rgb(0 0 0 / 78%) 36%,
-      transparent 100%
-    );
+  .fluidGalaxy canvas {
+    filter: blur(3.7px) saturate(0.76) contrast(0.96) brightness(0.78);
   }
 
-  .fogVeil {
-    opacity: 0.56;
-  }
-
-  .constellationField {
-    opacity: 0.4;
+  .elasticGrid {
+    opacity: 0.24;
   }
 
   .heroInner {
@@ -496,21 +458,14 @@
 
 @media (prefers-reduced-motion: reduce) {
   .paintedBackdrop {
-    transform: scale(1.065);
+    transform: scale(1.07);
+  }
+
+  .fluidGalaxy canvas {
     transition: none;
   }
 
-  .focusBackdrop {
-    transform: scale(1.045);
-    transition: none;
-  }
-
-  .fogVeil {
-    transform: scale(1.04);
-  }
-
-  .fogVeil::before,
-  .fogVeil::after {
+  .fluidGalaxy::before {
     animation: none;
   }
 
