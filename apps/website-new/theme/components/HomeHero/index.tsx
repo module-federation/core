@@ -26,7 +26,6 @@ interface Cell {
   depth: number;
   radius: number;
   phase: number;
-  label?: string;
   kind: 'host' | 'remote' | 'ambient';
 }
 
@@ -48,7 +47,6 @@ interface Ripple extends Point {
 }
 
 const TAU = Math.PI * 2;
-const CELL_LABELS = ['commerce-shell', 'catalog', 'checkout', 'account'];
 
 function createRandom(seed = 731) {
   let value = seed;
@@ -82,11 +80,10 @@ function createField(width: number, height: number) {
     depth: index === 0 ? 1 : 0.82 + random() * 0.12,
     radius: index === 0 ? (compact ? 11 : 15) : 7 + random() * 3,
     phase: random() * TAU,
-    label: CELL_LABELS[index],
     kind: index === 0 ? 'host' : 'remote',
   }));
 
-  const count = compact ? 34 : width < 1000 ? 46 : 62;
+  const count = compact ? 29 : width < 1000 ? 38 : 50;
   for (let index = cells.length; index < count; index += 1) {
     const clustered = random() > 0.2;
     const angle = random() * TAU;
@@ -136,6 +133,29 @@ function quadraticPoint(
       2 * inverse * amount * control.y +
       amount * amount * to.y,
   };
+}
+
+function traceOrganicCell(
+  context: CanvasRenderingContext2D,
+  point: Point,
+  radius: number,
+  phase: number,
+  time: number,
+) {
+  const segments = 18;
+  context.beginPath();
+  for (let index = 0; index <= segments; index += 1) {
+    const angle = (index / segments) * TAU;
+    const irregularity =
+      1 +
+      Math.sin(angle * 3 + phase + time * 0.00017) * 0.075 +
+      Math.cos(angle * 5 - phase * 0.7) * 0.045;
+    const x = point.x + Math.cos(angle) * radius * irregularity;
+    const y = point.y + Math.sin(angle) * radius * irregularity * 0.92;
+    if (index === 0) context.moveTo(x, y);
+    else context.lineTo(x, y);
+  }
+  context.closePath();
 }
 
 function NeuralField() {
@@ -206,15 +226,15 @@ function NeuralField() {
       const remote = cell.kind === 'remote';
       const host = cell.kind === 'host';
       const glow = host
-        ? '88, 232, 234'
+        ? '217, 216, 194'
         : remote
-          ? '140, 126, 255'
-          : '121, 221, 226';
+          ? '139, 161, 157'
+          : '105, 151, 151';
 
       context.save();
-      context.globalAlpha = 0.38 + cell.depth * 0.54;
-      context.shadowColor = `rgba(${glow}, ${0.34 + response * 0.42})`;
-      context.shadowBlur = radius * (host ? 4.6 : 3.2) + response * 24;
+      context.globalAlpha = 0.24 + cell.depth * 0.48;
+      context.shadowColor = `rgba(${glow}, ${0.18 + response * 0.28})`;
+      context.shadowBlur = radius * (host ? 5.2 : 3.8) + response * 18;
 
       const membrane = context.createRadialGradient(
         point.x - radius * 0.3,
@@ -224,23 +244,21 @@ function NeuralField() {
         point.y,
         radius * 1.8,
       );
-      membrane.addColorStop(0, `rgba(230, 255, 251, ${host ? 0.94 : 0.7})`);
-      membrane.addColorStop(0.18, `rgba(${glow}, 0.58)`);
-      membrane.addColorStop(0.54, `rgba(${glow}, 0.16)`);
+      membrane.addColorStop(0, `rgba(231, 226, 207, ${host ? 0.78 : 0.48})`);
+      membrane.addColorStop(0.2, `rgba(${glow}, 0.42)`);
+      membrane.addColorStop(0.58, `rgba(${glow}, 0.11)`);
       membrane.addColorStop(1, `rgba(${glow}, 0)`);
       context.fillStyle = membrane;
-      context.beginPath();
-      context.arc(point.x, point.y, radius * 1.8, 0, TAU);
+      traceOrganicCell(context, point, radius * 1.8, cell.phase, time);
       context.fill();
 
       context.shadowBlur = 0;
-      context.strokeStyle = `rgba(${glow}, ${0.28 + cell.depth * 0.35 + response * 0.28})`;
-      context.lineWidth = Math.max(0.55, cell.depth * 1.15);
-      context.beginPath();
-      context.arc(point.x, point.y, radius, 0, TAU);
+      context.strokeStyle = `rgba(${glow}, ${0.18 + cell.depth * 0.24 + response * 0.2})`;
+      context.lineWidth = Math.max(0.45, cell.depth * 0.9);
+      traceOrganicCell(context, point, radius, cell.phase + 0.7, time);
       context.stroke();
 
-      context.fillStyle = `rgba(225, 255, 252, ${0.5 + cell.depth * 0.42})`;
+      context.fillStyle = `rgba(232, 226, 204, ${0.34 + cell.depth * 0.36})`;
       context.beginPath();
       context.arc(
         point.x - radius * 0.17,
@@ -268,13 +286,13 @@ function NeuralField() {
       );
       pointerHalo.addColorStop(
         0,
-        `rgba(80, 223, 229, ${pointerInside ? 0.11 : 0.035})`,
+        `rgba(196, 202, 183, ${pointerInside ? 0.07 : 0.018})`,
       );
       pointerHalo.addColorStop(
         0.42,
-        `rgba(36, 139, 168, ${pointerInside ? 0.055 : 0.018})`,
+        `rgba(78, 125, 127, ${pointerInside ? 0.035 : 0.01})`,
       );
-      pointerHalo.addColorStop(1, 'rgba(7, 44, 63, 0)');
+      pointerHalo.addColorStop(1, 'rgba(5, 28, 35, 0)');
       context.fillStyle = pointerHalo;
       context.fillRect(0, 0, width, height);
 
@@ -286,8 +304,8 @@ function NeuralField() {
           Math.sin(time * 0.00025 * mote.speed + mote.phase) *
             (6 + mote.depth * 12) +
           (pointer.x - width / 2) * 0.012 * mote.depth;
-        const alpha = 0.04 + mote.depth * 0.18;
-        context.fillStyle = `rgba(190, 245, 244, ${alpha})`;
+        const alpha = 0.025 + mote.depth * 0.11;
+        context.fillStyle = `rgba(202, 206, 187, ${alpha})`;
         context.beginPath();
         context.arc(x, y, 0.45 + mote.depth * 1.15, 0, TAU);
         context.fill();
@@ -313,7 +331,7 @@ function NeuralField() {
           .sort((left, right) => left.distance - right.distance);
 
         for (const candidate of candidates) {
-          if (candidate.toIndex <= fromIndex || links >= 3) continue;
+          if (candidate.toIndex <= fromIndex || links >= 2) continue;
           const toCell = cells[candidate.toIndex]!;
           const to = points[candidate.toIndex]!;
           const majorLink =
@@ -341,28 +359,28 @@ function NeuralField() {
           };
 
           context.strokeStyle = majorLink
-            ? `rgba(130, 237, 238, ${0.16 + response * 0.48})`
-            : `rgba(105, 207, 215, ${0.035 + Math.min(fromCell.depth, toCell.depth) * 0.12 + response * 0.28})`;
+            ? `rgba(200, 203, 182, ${0.1 + response * 0.26})`
+            : `rgba(119, 153, 149, ${0.025 + Math.min(fromCell.depth, toCell.depth) * 0.075 + response * 0.16})`;
           context.lineWidth = majorLink
-            ? 1.15 + response * 0.7
-            : 0.45 + response * 0.55;
+            ? 0.9 + response * 0.45
+            : 0.4 + response * 0.32;
           context.beginPath();
           context.moveTo(from.x, from.y);
           context.quadraticCurveTo(control.x, control.y, to.x, to.y);
           context.stroke();
 
-          if (majorLink || response > 0.18) {
+          if (majorLink || response > 0.32) {
             const progress =
               (time * (majorLink ? 0.0001 : 0.000065) +
                 connectionIndex * 0.173) %
               1;
             const pulse = quadraticPoint(from, control, to, progress);
             context.save();
-            context.shadowColor = 'rgba(185, 255, 252, 0.9)';
-            context.shadowBlur = 10 + response * 16;
-            context.fillStyle = `rgba(210, 255, 253, ${0.58 + response * 0.38})`;
+            context.shadowColor = 'rgba(218, 214, 191, 0.72)';
+            context.shadowBlur = 9 + response * 12;
+            context.fillStyle = `rgba(226, 221, 198, ${0.4 + response * 0.3})`;
             context.beginPath();
-            context.arc(pulse.x, pulse.y, 1.1 + response * 1.2, 0, TAU);
+            context.arc(pulse.x, pulse.y, 0.8 + response * 0.8, 0, TAU);
             context.fill();
             context.restore();
           }
@@ -374,29 +392,12 @@ function NeuralField() {
 
       cells.forEach((cell, index) => drawCell(cell, points[index]!, time));
 
-      if (width > 760) {
-        context.font = '500 10px "Roboto Mono", monospace';
-        context.textBaseline = 'middle';
-        cells.slice(0, CELL_LABELS.length).forEach((cell, index) => {
-          const point = points[index]!;
-          context.fillStyle =
-            cell.kind === 'host'
-              ? 'rgba(220, 255, 252, 0.82)'
-              : 'rgba(183, 218, 224, 0.58)';
-          context.fillText(
-            cell.label ?? '',
-            point.x + cell.radius + 12,
-            point.y,
-          );
-        });
-      }
-
       if (ripple) {
         const age = time - ripple.startedAt;
         if (age < 1050) {
           const progress = age / 1050;
-          context.strokeStyle = `rgba(120, 242, 240, ${(1 - progress) * 0.42})`;
-          context.lineWidth = 1.5 - progress;
+          context.strokeStyle = `rgba(215, 211, 189, ${(1 - progress) * 0.28})`;
+          context.lineWidth = 1.2 - progress * 0.8;
           context.beginPath();
           context.arc(ripple.x, ripple.y, 18 + progress * 170, 0, TAU);
           context.stroke();
@@ -419,6 +420,14 @@ function NeuralField() {
       pointerTarget.x = event.clientX - rect.left;
       pointerTarget.y = event.clientY - rect.top;
       pointerInside = true;
+      surface.style.setProperty(
+        '--paint-x',
+        `${((pointerTarget.x / width - 0.5) * -12).toFixed(2)}px`,
+      );
+      surface.style.setProperty(
+        '--paint-y',
+        `${((pointerTarget.y / height - 0.5) * -8).toFixed(2)}px`,
+      );
       if (reduceMotion.matches) draw(performance.now());
     };
 
@@ -426,6 +435,8 @@ function NeuralField() {
       pointerInside = false;
       pointerTarget.x = width * 0.72;
       pointerTarget.y = height * 0.46;
+      surface.style.setProperty('--paint-x', '0px');
+      surface.style.setProperty('--paint-y', '0px');
     };
 
     const onPointerDown = (event: PointerEvent) => {
@@ -461,6 +472,8 @@ function NeuralField() {
       surface.removeEventListener('pointermove', onPointerMove);
       surface.removeEventListener('pointerleave', onPointerLeave);
       surface.removeEventListener('pointerdown', onPointerDown);
+      surface.style.removeProperty('--paint-x');
+      surface.style.removeProperty('--paint-y');
     };
   }, []);
 
@@ -474,8 +487,11 @@ function NeuralField() {
 export function HomeHero({ hero }: { hero: Hero }) {
   return (
     <section className={styles.hero} data-neural-surface>
-      <div className={styles.oceanLight} aria-hidden="true" />
-      <div className={styles.waterGrain} aria-hidden="true" />
+      <div
+        className={styles.paintedBackdrop}
+        style={{ backgroundImage: "url('/home-neural-oil-v1.jpg')" }}
+        aria-hidden="true"
+      />
       <NeuralField />
       <div className={styles.heroShade} aria-hidden="true" />
 
@@ -484,7 +500,6 @@ export function HomeHero({ hero }: { hero: Hero }) {
           <p className={styles.eyebrow}>
             <span className={styles.statusDot} aria-hidden="true" />
             {hero.name}
-            <span className={styles.previewTag}>runtime mesh</span>
           </p>
           <h1>
             <span>{hero.text}</span>
@@ -509,24 +524,8 @@ export function HomeHero({ hero }: { hero: Hero }) {
               </a>
             ))}
           </div>
-          <div className={styles.runtimeState} aria-label="Live runtime state">
-            <span className={styles.runtimePulse} aria-hidden="true" />
-            <span>1 host</span>
-            <i aria-hidden="true" />
-            <span>4 remotes</span>
-            <i aria-hidden="true" />
-            <span>shared scope healthy</span>
-          </div>
         </div>
       </div>
-
-      <div className={styles.fieldCaption} aria-hidden="true">
-        <span>Live topology</span>
-        <strong>runtime / connected</strong>
-      </div>
-      <p className={styles.interactionHint} aria-hidden="true">
-        Move to disturb the field
-      </p>
     </section>
   );
 }
