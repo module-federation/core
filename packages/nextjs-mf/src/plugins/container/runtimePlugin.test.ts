@@ -193,3 +193,181 @@ describe('next-internal-plugin beforeRequest', () => {
     );
   });
 });
+
+describe('next-internal-plugin onLoad', () => {
+  const plugin = createRuntimePlugin();
+  const onLoad = plugin.onLoad!;
+  const originalWindow = global.window;
+
+  describe('server', () => {
+    beforeEach(() => {
+      delete global.window;
+      globalThis.usedChunks = new Set();
+    });
+
+    afterEach(() => {
+      global.window = originalWindow;
+    });
+
+    it('awaits async exposeModuleFactory on server before proxy-wrapping', async () => {
+      const moduleExports = { __esModule: true, default: null };
+      const asyncFactory = async () => moduleExports;
+
+      const result = await onLoad({
+        id: 'remote/expose',
+        exposeModuleFactory: asyncFactory,
+        exposeModule: undefined,
+      });
+
+      expect(typeof result).toBe('function');
+      expect(result()).toEqual(
+        expect.objectContaining({ __esModule: true, default: null }),
+      );
+    });
+
+    it('returns a wrapper factory for async namespace exports on server', async () => {
+      const result = await onLoad({
+        id: 'remote/expose',
+        exposeModuleFactory: async () => ({ __esModule: true, default: null }),
+        exposeModule: undefined,
+      });
+
+      expect(typeof result).toBe('function');
+      expect(result()).toEqual(
+        expect.objectContaining({ __esModule: true, default: null }),
+      );
+    });
+
+    it('does not break Promise.prototype.then when async factory resolves on server', async () => {
+      const asyncFactory = async () => ({ __esModule: true, default: null });
+
+      const result = await onLoad({
+        id: 'remote/expose',
+        exposeModuleFactory: asyncFactory,
+        exposeModule: undefined,
+      });
+
+      expect(typeof result).toBe('function');
+      expect(() =>
+        Promise.resolve(result()).then(() => undefined),
+      ).not.toThrow();
+    });
+
+    it('handles sync exposeModuleFactory on server', async () => {
+      const result = await onLoad({
+        id: 'remote/expose',
+        exposeModuleFactory: () => ({ __esModule: true, default: null }),
+        exposeModule: undefined,
+      });
+
+      expect(typeof result).toBe('function');
+      expect(result()).toEqual(
+        expect.objectContaining({ __esModule: true, default: null }),
+      );
+    });
+
+    it('propagates rejected async factory on server', async () => {
+      await expect(
+        onLoad({
+          id: 'remote/expose',
+          exposeModuleFactory: async () => {
+            throw new Error('factory failed');
+          },
+          exposeModule: undefined,
+        }),
+      ).rejects.toThrow('factory failed');
+    });
+
+    it('keeps class default export constructible after async factory', async () => {
+      class RemoteComponent {
+        tag = 'remote';
+      }
+
+      const result = await onLoad({
+        id: 'remote/expose',
+        exposeModuleFactory: async () => ({
+          __esModule: true,
+          default: RemoteComponent,
+        }),
+        exposeModule: undefined,
+      });
+
+      const exports = result();
+      const instance = new exports.default();
+
+      expect(instance).toBeInstanceOf(RemoteComponent);
+      expect(instance.tag).toBe('remote');
+    });
+
+    it('records usedChunks when class is constructed', async () => {
+      class RemoteComponent {}
+
+      const result = await onLoad({
+        id: 'remote/expose',
+        exposeModuleFactory: async () => ({
+          __esModule: true,
+          default: RemoteComponent,
+        }),
+        exposeModule: undefined,
+      });
+
+      const exports = result();
+      new exports.default();
+
+      expect(globalThis.usedChunks.has('remote/expose')).toBe(true);
+    });
+
+    it('preserves static properties on function exports', async () => {
+      const fn = Object.assign(() => 'ok', {
+        getServerSideProps: () => ({ props: {} }),
+      });
+
+      const result = await onLoad({
+        id: 'remote/expose',
+        exposeModuleFactory: async () => ({
+          __esModule: true,
+          default: fn,
+        }),
+        exposeModule: undefined,
+      });
+
+      const exports = result();
+      expect(exports.default()).toBe('ok');
+      expect(exports.default.getServerSideProps()).toEqual({ props: {} });
+    });
+
+    it('keeps plain function default export callable', async () => {
+      const result = await onLoad({
+        id: 'remote/expose',
+        exposeModuleFactory: async () => ({
+          __esModule: true,
+          default: () => 'plain-fn',
+        }),
+        exposeModule: undefined,
+      });
+
+      const exports = result();
+      expect(exports.default()).toBe('plain-fn');
+    });
+  });
+
+  describe('client', () => {
+    afterEach(() => {
+      global.window = originalWindow;
+    });
+
+    it('returns args unchanged on the client', async () => {
+      global.window = originalWindow ?? ({} as Window & typeof globalThis);
+
+      const input = {
+        id: 'remote/expose',
+        exposeModuleFactory: async () => ({ __esModule: true, default: null }),
+        exposeModule: undefined,
+      };
+
+      const result = await onLoad(input);
+
+      expect(result).toBe(input);
+    });
+  });
+});
