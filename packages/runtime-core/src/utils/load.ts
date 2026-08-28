@@ -364,7 +364,7 @@ export async function getRemoteEntry(params: {
   if (!globalLoading[uniqueKey]) {
     const loadEntryHook = origin.remoteHandler.hooks.lifecycle.loadEntry;
     const loaderHook = origin.loaderHook;
-    globalLoading[uniqueKey] = loadEntryHook
+    const loading = loadEntryHook
       .emit({
         origin,
         loaderHook,
@@ -447,7 +447,17 @@ export async function getRemoteEntry(params: {
         });
         throw loadError;
       });
-    remoteEntryLoadingOrigins.set(globalLoading[uniqueKey], origin);
+
+    globalLoading[uniqueKey] = loading;
+    // Clear rejected entries so a later call can retry. Keep the original
+    // promise identity in the cache (do not replace with a cleanup thenable).
+    // Identity check: an older rejection must not delete a newer in-flight request.
+    loading.then(undefined, () => {
+      if (globalLoading[uniqueKey] === loading) {
+        delete globalLoading[uniqueKey];
+      }
+    });
+    remoteEntryLoadingOrigins.set(loading, origin);
   }
 
   const remoteEntryLoading = globalLoading[uniqueKey];
