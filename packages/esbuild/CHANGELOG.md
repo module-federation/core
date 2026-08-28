@@ -1,5 +1,15 @@
 # @module-federation/esbuild
 
+## 0.0.114
+
+### Patch Changes
+
+- Updated dependencies [df8b40f]
+- Updated dependencies [df8b40f]
+  - @module-federation/runtime@2.9.0
+  - @module-federation/webpack-bundler-runtime@2.9.0
+  - @module-federation/sdk@2.9.0
+
 ## 0.0.113
 
 ### Patch Changes
