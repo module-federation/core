@@ -20,7 +20,7 @@ export interface Hero {
   }[];
 }
 
-interface Cell {
+interface Star {
   x: number;
   y: number;
   depth: number;
@@ -75,45 +75,48 @@ function createField(width: number, height: number) {
         { x: width * 0.88, y: height * 0.67 },
       ];
 
-  const cells: Cell[] = anchors.map((point, index) => ({
+  const stars: Star[] = anchors.map((point, index) => ({
     ...point,
     depth: index === 0 ? 1 : 0.82 + random() * 0.12,
-    radius: index === 0 ? (compact ? 11 : 15) : 7 + random() * 3,
+    radius: index === 0 ? (compact ? 5 : 7) : 3.2 + random() * 1.8,
     phase: random() * TAU,
     kind: index === 0 ? 'host' : 'remote',
   }));
 
-  const count = compact ? 29 : width < 1000 ? 38 : 50;
-  for (let index = cells.length; index < count; index += 1) {
+  const count = compact ? 24 : width < 1000 ? 28 : 34;
+  for (let index = stars.length; index < count; index += 1) {
     const clustered = random() > 0.2;
     const angle = random() * TAU;
     const distance = Math.pow(random(), 0.72) * Math.min(width, height) * 0.52;
-    const x = clustered
+    const rawX = clustered
       ? focusX + Math.cos(angle) * distance * 1.25
       : random() * width;
-    const y = clustered
+    const rawY = clustered
       ? focusY + Math.sin(angle) * distance
       : random() * height;
     const depth = 0.25 + random() * 0.72;
-    cells.push({
-      x,
-      y,
+    stars.push({
+      x: Math.max(width * (compact ? 0.12 : 0.31), Math.min(width, rawX)),
+      y: Math.max(0, Math.min(height, rawY)),
       depth,
-      radius: 1.4 + depth * 4.7 + random() * 2.1,
+      radius: 0.65 + depth * 1.7 + random(),
       phase: random() * TAU,
       kind: 'ambient',
     });
   }
 
-  const motes: Mote[] = Array.from({ length: compact ? 44 : 76 }, () => ({
-    x: random() * width,
-    y: random() * height,
-    depth: 0.18 + random() * 0.82,
-    phase: random() * TAU,
-    speed: 0.35 + random() * 0.85,
-  }));
+  const motes: Mote[] = Array.from({ length: compact ? 36 : 62 }, () => {
+    const start = compact ? 0.08 : 0.3;
+    return {
+      x: width * (start + Math.pow(random(), 0.72) * (1 - start)),
+      y: random() * height,
+      depth: 0.18 + random() * 0.82,
+      phase: random() * TAU,
+      speed: 0.35 + random() * 0.85,
+    };
+  });
 
-  return { cells, motes };
+  return { stars, motes };
 }
 
 function quadraticPoint(
@@ -135,41 +138,20 @@ function quadraticPoint(
   };
 }
 
-function traceOrganicCell(
-  context: CanvasRenderingContext2D,
-  point: Point,
-  radius: number,
-  phase: number,
-  time: number,
-) {
-  const segments = 18;
-  context.beginPath();
-  for (let index = 0; index <= segments; index += 1) {
-    const angle = (index / segments) * TAU;
-    const irregularity =
-      1 +
-      Math.sin(angle * 3 + phase + time * 0.00017) * 0.075 +
-      Math.cos(angle * 5 - phase * 0.7) * 0.045;
-    const x = point.x + Math.cos(angle) * radius * irregularity;
-    const y = point.y + Math.sin(angle) * radius * irregularity * 0.92;
-    if (index === 0) context.moveTo(x, y);
-    else context.lineTo(x, y);
-  }
-  context.closePath();
-}
-
-function NeuralField() {
+function ConstellationField() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    const surface = canvas?.closest<HTMLElement>('[data-neural-surface]');
+    const surface = canvas?.closest<HTMLElement>(
+      '[data-constellation-surface]',
+    );
     const context = canvas?.getContext('2d');
     if (!canvas || !surface || !context) return;
 
     let width = 1;
     let height = 1;
-    let cells: Cell[] = [];
+    let stars: Star[] = [];
     let motes: Mote[] = [];
     let frame = 0;
     let lastFrame = 0;
@@ -190,20 +172,20 @@ function NeuralField() {
       canvas.style.width = `${width}px`;
       canvas.style.height = `${height}px`;
       context.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ({ cells, motes } = createField(width, height));
+      ({ stars, motes } = createField(width, height));
       pointer.x = pointerTarget.x = width * 0.72;
       pointer.y = pointerTarget.y = height * 0.46;
     };
 
-    const locate = (cell: Cell, time: number) => {
-      const parallaxX = (pointer.x - width / 2) * 0.035 * cell.depth;
-      const parallaxY = (pointer.y - height / 2) * 0.026 * cell.depth;
-      const drift = 5 + 9 * cell.depth;
+    const locate = (star: Star, time: number) => {
+      const parallaxX = (pointer.x - width / 2) * 0.035 * star.depth;
+      const parallaxY = (pointer.y - height / 2) * 0.026 * star.depth;
+      const drift = 3 + 6 * star.depth;
       let x =
-        cell.x + Math.cos(time * 0.00018 + cell.phase) * drift + parallaxX;
+        star.x + Math.cos(time * 0.00012 + star.phase) * drift + parallaxX;
       let y =
-        cell.y +
-        Math.sin(time * 0.00014 + cell.phase) * drift * 0.72 +
+        star.y +
+        Math.sin(time * 0.0001 + star.phase) * drift * 0.72 +
         parallaxY;
 
       if (pointerInside) {
@@ -211,63 +193,64 @@ function NeuralField() {
         const dy = pointer.y - y;
         const distance = Math.hypot(dx, dy) || 1;
         const reach = Math.max(0, 1 - distance / 260);
-        x += (dx / distance) * reach * 24 * cell.depth;
-        y += (dy / distance) * reach * 24 * cell.depth;
+        x += (dx / distance) * reach * 19 * star.depth;
+        y += (dy / distance) * reach * 19 * star.depth;
       }
 
       return { x, y };
     };
 
-    const drawCell = (cell: Cell, point: Point, time: number) => {
+    const drawStar = (star: Star, point: Point, time: number) => {
       const distance = Math.hypot(point.x - pointer.x, point.y - pointer.y);
       const response = pointerInside ? Math.max(0, 1 - distance / 240) : 0;
-      const breathe = 1 + Math.sin(time * 0.0011 + cell.phase) * 0.08;
-      const radius = cell.radius * breathe * (1 + response * 0.34);
-      const remote = cell.kind === 'remote';
-      const host = cell.kind === 'host';
+      const breathe = 1 + Math.sin(time * 0.0008 + star.phase) * 0.05;
+      const radius = star.radius * breathe * (1 + response * 0.28);
+      const remote = star.kind === 'remote';
+      const host = star.kind === 'host';
       const glow = host
-        ? '217, 216, 194'
+        ? '224, 216, 187'
         : remote
-          ? '139, 161, 157'
-          : '105, 151, 151';
+          ? '183, 199, 211'
+          : '135, 167, 193';
 
       context.save();
-      context.globalAlpha = 0.24 + cell.depth * 0.48;
-      context.shadowColor = `rgba(${glow}, ${0.18 + response * 0.28})`;
-      context.shadowBlur = radius * (host ? 5.2 : 3.8) + response * 18;
+      context.globalAlpha = 0.16 + star.depth * 0.46;
+      context.shadowColor = `rgba(${glow}, ${0.24 + response * 0.28})`;
+      context.shadowBlur = radius * (host ? 6 : 4.4) + response * 14;
 
-      const membrane = context.createRadialGradient(
-        point.x - radius * 0.3,
-        point.y - radius * 0.36,
-        radius * 0.08,
+      const halo = context.createRadialGradient(
         point.x,
         point.y,
-        radius * 1.8,
+        0,
+        point.x,
+        point.y,
+        radius * 2.8,
       );
-      membrane.addColorStop(0, `rgba(231, 226, 207, ${host ? 0.78 : 0.48})`);
-      membrane.addColorStop(0.2, `rgba(${glow}, 0.42)`);
-      membrane.addColorStop(0.58, `rgba(${glow}, 0.11)`);
-      membrane.addColorStop(1, `rgba(${glow}, 0)`);
-      context.fillStyle = membrane;
-      traceOrganicCell(context, point, radius * 1.8, cell.phase, time);
+      halo.addColorStop(0, `rgba(241, 239, 224, ${host ? 0.92 : 0.68})`);
+      halo.addColorStop(0.16, `rgba(${glow}, 0.54)`);
+      halo.addColorStop(0.5, `rgba(${glow}, 0.14)`);
+      halo.addColorStop(1, `rgba(${glow}, 0)`);
+      context.fillStyle = halo;
+      context.beginPath();
+      context.arc(point.x, point.y, radius * 2.8, 0, TAU);
       context.fill();
 
       context.shadowBlur = 0;
-      context.strokeStyle = `rgba(${glow}, ${0.18 + cell.depth * 0.24 + response * 0.2})`;
-      context.lineWidth = Math.max(0.45, cell.depth * 0.9);
-      traceOrganicCell(context, point, radius, cell.phase + 0.7, time);
-      context.stroke();
-
-      context.fillStyle = `rgba(232, 226, 204, ${0.34 + cell.depth * 0.36})`;
+      context.fillStyle = `rgba(241, 238, 219, ${0.46 + star.depth * 0.42})`;
       context.beginPath();
-      context.arc(
-        point.x - radius * 0.17,
-        point.y - radius * 0.14,
-        Math.max(0.8, radius * 0.24),
-        0,
-        TAU,
-      );
+      context.arc(point.x, point.y, Math.max(0.55, radius * 0.26), 0, TAU);
       context.fill();
+
+      if (star.kind !== 'ambient') {
+        context.strokeStyle = `rgba(${glow}, ${0.24 + response * 0.22})`;
+        context.lineWidth = 0.55;
+        context.beginPath();
+        context.moveTo(point.x - radius * 1.8, point.y);
+        context.lineTo(point.x + radius * 1.8, point.y);
+        context.moveTo(point.x, point.y - radius * 1.25);
+        context.lineTo(point.x, point.y + radius * 1.25);
+        context.stroke();
+      }
       context.restore();
     };
 
@@ -286,38 +269,40 @@ function NeuralField() {
       );
       pointerHalo.addColorStop(
         0,
-        `rgba(196, 202, 183, ${pointerInside ? 0.07 : 0.018})`,
+        `rgba(195, 207, 218, ${pointerInside ? 0.065 : 0.016})`,
       );
       pointerHalo.addColorStop(
         0.42,
-        `rgba(78, 125, 127, ${pointerInside ? 0.035 : 0.01})`,
+        `rgba(66, 102, 139, ${pointerInside ? 0.032 : 0.009})`,
       );
-      pointerHalo.addColorStop(1, 'rgba(5, 28, 35, 0)');
+      pointerHalo.addColorStop(1, 'rgba(4, 11, 24, 0)');
       context.fillStyle = pointerHalo;
       context.fillRect(0, 0, width, height);
 
       for (const mote of motes) {
         const y =
-          (mote.y - time * 0.003 * mote.speed + height * 2) % (height + 80);
+          mote.y +
+          Math.sin(time * 0.00012 * mote.speed + mote.phase) *
+            (3 + mote.depth * 7);
         const x =
           mote.x +
-          Math.sin(time * 0.00025 * mote.speed + mote.phase) *
-            (6 + mote.depth * 12) +
+          Math.cos(time * 0.00009 * mote.speed + mote.phase) *
+            (4 + mote.depth * 9) +
           (pointer.x - width / 2) * 0.012 * mote.depth;
         const alpha = 0.025 + mote.depth * 0.11;
-        context.fillStyle = `rgba(202, 206, 187, ${alpha})`;
+        context.fillStyle = `rgba(205, 214, 220, ${alpha})`;
         context.beginPath();
         context.arc(x, y, 0.45 + mote.depth * 1.15, 0, TAU);
         context.fill();
       }
 
-      const points = cells.map((cell) => locate(cell, time));
+      const points = stars.map((star) => locate(star, time));
       let connectionIndex = 0;
-      for (let fromIndex = 0; fromIndex < cells.length; fromIndex += 1) {
-        const fromCell = cells[fromIndex]!;
+      for (let fromIndex = 0; fromIndex < stars.length; fromIndex += 1) {
+        const fromStar = stars[fromIndex]!;
         const from = points[fromIndex]!;
         let links = 0;
-        const candidates = cells
+        const candidates = stars
           .map((_, toIndex) => ({
             toIndex,
             distance:
@@ -332,13 +317,13 @@ function NeuralField() {
 
         for (const candidate of candidates) {
           if (candidate.toIndex <= fromIndex || links >= 2) continue;
-          const toCell = cells[candidate.toIndex]!;
+          const toStar = stars[candidate.toIndex]!;
           const to = points[candidate.toIndex]!;
           const majorLink =
-            fromCell.kind !== 'ambient' && toCell.kind !== 'ambient';
+            fromStar.kind !== 'ambient' && toStar.kind !== 'ambient';
           const reach = majorLink
             ? 420
-            : 148 + (fromCell.depth + toCell.depth) * 48;
+            : 148 + (fromStar.depth + toStar.depth) * 48;
           if (candidate.distance > reach) continue;
 
           const nearPointer = Math.min(
@@ -351,7 +336,7 @@ function NeuralField() {
           const normalX = -(to.y - from.y) / candidate.distance;
           const normalY = (to.x - from.x) / candidate.distance;
           const bend =
-            Math.sin(fromCell.phase * 1.7 + toCell.phase) *
+            Math.sin(fromStar.phase * 1.7 + toStar.phase) *
             Math.min(34, candidate.distance * 0.13);
           const control = {
             x: (from.x + to.x) / 2 + normalX * bend,
@@ -359,8 +344,8 @@ function NeuralField() {
           };
 
           context.strokeStyle = majorLink
-            ? `rgba(200, 203, 182, ${0.1 + response * 0.26})`
-            : `rgba(119, 153, 149, ${0.025 + Math.min(fromCell.depth, toCell.depth) * 0.075 + response * 0.16})`;
+            ? `rgba(211, 211, 194, ${0.09 + response * 0.24})`
+            : `rgba(126, 157, 184, ${0.022 + Math.min(fromStar.depth, toStar.depth) * 0.068 + response * 0.14})`;
           context.lineWidth = majorLink
             ? 0.9 + response * 0.45
             : 0.4 + response * 0.32;
@@ -376,9 +361,9 @@ function NeuralField() {
               1;
             const pulse = quadraticPoint(from, control, to, progress);
             context.save();
-            context.shadowColor = 'rgba(218, 214, 191, 0.72)';
+            context.shadowColor = 'rgba(218, 220, 208, 0.7)';
             context.shadowBlur = 9 + response * 12;
-            context.fillStyle = `rgba(226, 221, 198, ${0.4 + response * 0.3})`;
+            context.fillStyle = `rgba(230, 227, 207, ${0.38 + response * 0.3})`;
             context.beginPath();
             context.arc(pulse.x, pulse.y, 0.8 + response * 0.8, 0, TAU);
             context.fill();
@@ -390,13 +375,13 @@ function NeuralField() {
         }
       }
 
-      cells.forEach((cell, index) => drawCell(cell, points[index]!, time));
+      stars.forEach((star, index) => drawStar(star, points[index]!, time));
 
       if (ripple) {
         const age = time - ripple.startedAt;
         if (age < 1050) {
           const progress = age / 1050;
-          context.strokeStyle = `rgba(215, 211, 189, ${(1 - progress) * 0.28})`;
+          context.strokeStyle = `rgba(201, 211, 218, ${(1 - progress) * 0.25})`;
           context.lineWidth = 1.2 - progress * 0.8;
           context.beginPath();
           context.arc(ripple.x, ripple.y, 18 + progress * 170, 0, TAU);
@@ -478,7 +463,7 @@ function NeuralField() {
   }, []);
 
   return (
-    <div className={styles.neuralField} aria-hidden="true">
+    <div className={styles.constellationField} aria-hidden="true">
       <canvas ref={canvasRef} />
     </div>
   );
@@ -486,13 +471,13 @@ function NeuralField() {
 
 export function HomeHero({ hero }: { hero: Hero }) {
   return (
-    <section className={styles.hero} data-neural-surface>
+    <section className={styles.hero} data-constellation-surface>
       <div
         className={styles.paintedBackdrop}
-        style={{ backgroundImage: "url('/home-neural-oil-v1.jpg')" }}
+        style={{ backgroundImage: "url('/home-galaxy-oil-v2.jpg')" }}
         aria-hidden="true"
       />
-      <NeuralField />
+      <ConstellationField />
       <div className={styles.heroShade} aria-hidden="true" />
 
       <div className={styles.heroInner}>

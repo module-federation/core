@@ -1,10 +1,10 @@
 .hero {
   --paint-x: 0px;
   --paint-y: 0px;
-  --mf-abyss: #02080d;
-  --mf-ocean: #061521;
-  --mf-tide: #264b62;
-  --mf-sea-glass: #6eaeb0;
+  --mf-abyss: #020713;
+  --mf-ocean: #071426;
+  --mf-tide: #365a86;
+  --mf-sea-glass: #839fb6;
   --mf-bone: #d9d6c6;
   --mf-warm-gray: #9a8f7a;
   --mf-ink: #f1f1eb;
@@ -21,7 +21,7 @@
 }
 
 .paintedBackdrop,
-.neuralField,
+.constellationField,
 .heroShade {
   position: absolute;
   inset: 0;
@@ -34,7 +34,7 @@
   background-color: var(--mf-ocean);
   background-position: center;
   background-size: cover;
-  filter: saturate(0.72) contrast(1.04) brightness(0.74);
+  filter: saturate(0.74) contrast(1.02) brightness(0.7);
   transform: translate3d(var(--paint-x), var(--paint-y), 0) scale(1.035);
   transition: transform 900ms cubic-bezier(0.2, 0.7, 0.2, 1);
   will-change: transform;
@@ -45,21 +45,21 @@
   inset: 0;
   background:
     radial-gradient(
-      circle at 74% 42%,
-      transparent 0 20%,
-      rgb(0 11 17 / 22%) 67%
+      circle at 76% 39%,
+      transparent 0 22%,
+      rgb(1 7 17 / 23%) 68%
     ),
-    linear-gradient(180deg, rgb(2 8 13 / 8%), rgb(2 8 13 / 36%));
+    linear-gradient(180deg, rgb(2 7 16 / 7%), rgb(2 7 15 / 38%));
   content: '';
 }
 
-.neuralField {
+.constellationField {
   z-index: -3;
-  opacity: 0.64;
+  opacity: 0.54;
   mix-blend-mode: screen;
 }
 
-.neuralField canvas {
+.constellationField canvas {
   display: block;
   width: 100%;
   height: 100%;
@@ -70,12 +70,12 @@
   background:
     linear-gradient(
       90deg,
-      rgb(2 8 13 / 94%) 0%,
-      rgb(2 10 16 / 81%) 24%,
-      rgb(3 14 21 / 38%) 47%,
+      rgb(2 7 15 / 94%) 0%,
+      rgb(3 10 22 / 80%) 24%,
+      rgb(5 18 35 / 34%) 47%,
       transparent 68%
     ),
-    linear-gradient(180deg, transparent 48%, rgb(2 8 13 / 74%) 100%);
+    linear-gradient(180deg, transparent 48%, rgb(2 7 15 / 75%) 100%);
 }
 
 .heroInner {
@@ -291,12 +291,12 @@
   }
 
   .paintedBackdrop {
-    background-position: 67% center;
-    filter: saturate(0.68) contrast(1.02) brightness(0.62);
+    background-position: 65% center;
+    filter: saturate(0.7) contrast(1.01) brightness(0.61);
   }
 
-  .neuralField {
-    opacity: 0.56;
+  .constellationField {
+    opacity: 0.48;
   }
 
   .heroInner {
