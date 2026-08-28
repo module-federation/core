@@ -45,6 +45,264 @@ import RegisterPlugin from '@docs/_snippets/vite/register-plugin';
 
 <RegisterPlugin />
 
+## Migrate from OriginJS
+
+This guide helps migrate Vite hosts and remotes from
+[`@originjs/vite-plugin-federation`](https://github.com/originjs/vite-plugin-federation)
+to `@module-federation/vite`.
+
+Both plugins use remote entry files, but their host-remote configuration differs:
+
+- An OriginJS URL-string remote, or a remote object without `format`, is an ESM remote by default.
+- In `@module-federation/vite`, the URL-string shorthand represents a `var` remote. Declare Vite ESM remotes as an object with `type: 'module'`.
+- Replace OriginJS's `virtual:__federation__` API with the Module Federation runtime API when registering remotes dynamically.
+
+Keep remote aliases and expose keys unchanged for the initial migration. Existing imports, such as `import('catalog/Product')`, can then remain unchanged.
+
+### Requirements
+
+Before migrating, verify that every application uses a version supported by `@module-federation/vite`:
+
+- Node.js `^20.19.0` or `>=22.12.0`
+- Vite 5, 6, 7, or 8
+
+Upgrade the application toolchain before migration if it does not meet these requirements.
+
+### 1. Replace the package
+
+Install `@module-federation/vite` in every host and remote that uses build-time federation, then remove OriginJS after its configuration is no longer in use. A host managed entirely through the runtime does not need the Vite plugin; see [migrating dynamic remotes](#4-migrate-dynamic-remotes).
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm add @module-federation/vite --save',
+    yarn: 'yarn add @module-federation/vite --save',
+    pnpm: 'pnpm add @module-federation/vite --save',
+    bun: 'bun add @module-federation/vite --save',
+  }}
+/>
+
+### 2. Migrate a Vite remote
+
+Migrate one remote and validate it with one host before migrating the remaining applications. The `name`, `filename`, and expose keys can remain the same:
+
+#### OriginJS remote
+
+```ts
+import federation from '@originjs/vite-plugin-federation';
+
+export default {
+  plugins: [
+    federation({
+      name: 'catalog',
+      filename: 'remoteEntry.js',
+      exposes: {
+        './Product': './src/Product.tsx',
+      },
+      shared: ['react', 'react-dom'],
+    }),
+  ],
+};
+```
+
+#### `@module-federation/vite` remote
+
+```ts
+import { defineConfig } from 'vite';
+import { federation } from '@module-federation/vite';
+
+export default defineConfig({
+  plugins: [
+    federation({
+      name: 'catalog',
+      filename: 'remoteEntry.js',
+      exposes: {
+        './Product': './src/Product.tsx',
+      },
+      shared: ['react', 'react-dom'],
+    }),
+  ],
+});
+```
+
+`name` and expose keys remain unchanged, so existing consumer imports continue to work.
+
+With Vite's default build settings, the remote entry output path changes:
+
+- OriginJS with `filename: 'remoteEntry.js'`: `dist/assets/remoteEntry.js`
+- `@module-federation/vite` with `filename: 'remoteEntry.js'`: `dist/remoteEntry.js`
+
+To keep the existing `/assets/remoteEntry.js` URL, set `filename: 'assets/remoteEntry.js'`. Otherwise, update the host's `entry` URL to the new location.
+
+If an OriginJS expose uses object form, carry over only its `import` value. The OriginJS `name` and `dontAppendStylesToHead` options have no direct equivalents and cannot be copied unchanged. If you use `dontAppendStylesToHead`, follow the CSS guidance in [Step 5](#5-review-shared-dependencies-and-css).
+
+### 3. Migrate a Vite host
+
+Configure Vite-built ESM remotes with an explicit `type: 'module'`.
+
+#### OriginJS host
+
+```ts
+import federation from '@originjs/vite-plugin-federation';
+
+export default {
+  plugins: [
+    federation({
+      name: 'storefront',
+      remotes: {
+        catalog: 'https://cdn.example.com/catalog/remoteEntry.js',
+      },
+      shared: ['react', 'react-dom'],
+    }),
+  ],
+};
+```
+
+#### `@module-federation/vite` host
+
+```ts
+import { defineConfig } from 'vite';
+import { federation } from '@module-federation/vite';
+
+export default defineConfig({
+  plugins: [
+    federation({
+      name: 'storefront',
+      remotes: {
+        catalog: {
+          name: 'catalog',
+          entry: 'https://cdn.example.com/catalog/remoteEntry.js',
+          type: 'module',
+        },
+      },
+      shared: ['react', 'react-dom'],
+    }),
+  ],
+});
+```
+
+Keep the array-form `shared` configuration for the initial host migration. Introduce singleton policies separately after reviewing [shared dependencies and CSS](#5-review-shared-dependencies-and-css).
+
+Do not use the string shorthand for a Vite ESM remote; it is interpreted as `var`:
+
+```ts
+// Incorrect for a Vite ESM remote
+remotes: {
+  catalog: 'https://cdn.example.com/catalog/remoteEntry.js',
+}
+```
+
+Use an object remote with `type: 'module'` instead:
+
+```ts
+remotes: {
+  catalog: {
+    name: 'catalog',
+    entry: 'https://cdn.example.com/catalog/remoteEntry.js',
+    type: 'module',
+  },
+}
+```
+
+Select `type` from the deployed remote-entry container format, rather than the bundler that produced it. The static consumer import does not change:
+
+```ts
+const Product = await import('catalog/Product');
+```
+
+| OriginJS configuration | Migration action |
+| --- | --- |
+| URL string or `format: 'esm'` | Use `{ name, entry, type: 'module' }` after verifying that the deployed entry is an ESM container. |
+| `format: 'var'` | Use `{ name, entry, type: 'var' }`. Add `entryGlobalName` when the container global differs from the remote alias. |
+| `externalType: 'promise'` | Resolve the URL asynchronously and register it with the runtime API. |
+| `shareScope` | Preserve it as `shareScope` on the remote object. |
+| `from` | Do not map it directly; choose `type` from the deployed remote-entry format. |
+
+`systemjs` remotes require a separate proof of concept before migration.
+
+### 4. Migrate dynamic remotes
+
+This step is required only for hosts that dynamically register or load remotes. Install `@module-federation/enhanced` before replacing `virtual:__federation__` with the runtime API:
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm add @module-federation/enhanced --save',
+    yarn: 'yarn add @module-federation/enhanced --save',
+    pnpm: 'pnpm add @module-federation/enhanced --save',
+    bun: 'bun add @module-federation/enhanced --save',
+  }}
+/>
+
+#### OriginJS dynamic remote
+
+```ts
+import {
+  __federation_method_getRemote as getRemote,
+  __federation_method_setRemote as setRemote,
+  __federation_method_unwrapDefault as unwrapDefault,
+} from 'virtual:__federation__';
+
+setRemote('catalog', {
+  url: () => Promise.resolve(remoteUrl),
+  format: 'esm',
+  from: 'vite',
+});
+
+const module = await getRemote('catalog', './Product');
+const Product = await unwrapDefault(module);
+```
+
+#### Host using the Vite plugin
+
+```ts
+import { loadRemote, registerRemotes } from '@module-federation/enhanced/runtime';
+
+registerRemotes([
+  {
+    name: 'catalog',
+    entry: remoteUrl,
+    type: 'module',
+  },
+]);
+
+const module = await loadRemote('catalog/Product');
+const Product = module?.default ?? module;
+```
+
+#### Host using the pure runtime
+
+Use this path only when the host is intentionally managed entirely through the runtime, rather than a Vite federation plugin. Create an instance, register the shared dependencies the host provides, and then register remotes. Shared registration is application-specific, so use the [Runtime API](/guide/runtime/runtime-api.html) instead of copying a partial configuration.
+
+### 5. Review shared dependencies and CSS
+
+Start by retaining simple shared arrays such as `shared: ['react', 'react-dom']`. Review complex OriginJS settings rather than copying them mechanically:
+
+| OriginJS option | Migration guidance |
+| --- | --- |
+| `requiredVersion`, `shareScope` | Supported by the shared configuration; verify both host and remote settings. |
+| `version: false`, `packagePath`, `generate: false`, `modulePreload` | No direct equivalent; review the behavior manually. |
+| `import: false` | Supported, but the remote has no local fallback. Ensure the host provides a compatible dependency in the same share scope. |
+| `dontAppendStylesToHead` | No direct equivalent. For Shadow DOM, explicitly manage and inject stylesheet URLs or styles into the `ShadowRoot`. |
+
+When host and remote render React in the same boundary, verify compatible versions and configure `react` and `react-dom` as singletons where required. Also check cross-boundary subpath imports such as `react/jsx-runtime` and `react-dom/client`.
+
+### 6. Deploy incrementally
+
+1. Publish the migrated remote at a versioned URL, keeping the OriginJS remote entry and its chunks available.
+2. Point one host to the new URL with an explicit remote `type`.
+3. Verify remote modules, shared dependencies, CSS, and assets in a production-like environment.
+4. Migrate remaining static and dynamic hosts incrementally.
+5. Remove OriginJS only after no host consumes the old remote and the rollback retention period has ended.
+
+Deploy each remote entry together with every chunk it references. Use immutable, content-hashed URLs for child chunks and retain prior chunks long enough for cached remote entries and rollback.
+
+Before removing OriginJS, confirm that:
+
+- [ ] Every consumed remote expose loads successfully.
+- [ ] The deployed remote-entry URL and referenced chunks are available.
+- [ ] Static and dynamic (where used) remote loading works.
+- [ ] Shared-dependency selection, CSS, and other assets behave as intended.
+- [ ] The production build and federation integration tests pass.
+
 ## Configure the Build Plugin
 
 - Type: `ModuleFederationPlugin(options: ModuleFederationOptions)`
