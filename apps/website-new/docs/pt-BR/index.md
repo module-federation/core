@@ -3,9 +3,14 @@ pageType: home
 
 hero:
   name: Module Federation 2.0
-  text: Entregue de forma independente.
-  accent: Execute como um só produto.
+  text: Construa separado.
+  accent: Execute em conjunto.
   tagline: Componha aplicações em tempo de execução com módulos compartilhados, dicas de tipos, manifests e ferramentas que mantêm cada fronteira visível.
+  terminal:
+    install: Instalar
+    trace: Rastrear runtime
+    connected: 3 remotes conectados
+    ready: Runtime inicializado
   actions:
     - theme: brand
       text: Primeiros passos

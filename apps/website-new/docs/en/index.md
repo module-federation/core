@@ -3,9 +3,14 @@ pageType: home
 
 hero:
   name: Module Federation 2.0
-  text: Ship independently.
-  accent: Run as one.
+  text: Build apart.
+  accent: Run together.
   tagline: Compose applications at runtime with shared modules, type hints, manifests, and tooling that keeps every boundary visible.
+  terminal:
+    install: Install
+    trace: Runtime trace
+    connected: 3 remotes connected
+    ready: Runtime initialized
   actions:
     - theme: brand
       text: Quick Start

@@ -3,9 +3,14 @@ pageType: home
 
 hero:
   name: Module Federation 2.0
-  text: 独立交付，
-  accent: 协同运行。
+  text: 独立构建，
+  accent: 联邦运行。
   tagline: 在运行时组合应用，通过共享模块、类型提示、Manifest 与开发工具，让每个边界清晰可控。
+  terminal:
+    install: 一键安装
+    trace: 运行追踪
+    connected: 已连接 3 个 Remote
+    ready: Runtime 初始化完成
   actions:
     - theme: brand
       text: 快速开始

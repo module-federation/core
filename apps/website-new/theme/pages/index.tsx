@@ -8,7 +8,7 @@ export function HomeLayout() {
   const { frontmatter } = page;
 
   return (
-    <div>
+    <div className="mf-home-dark">
       <HomeHero hero={frontmatter.hero as Hero} />
       <HomeFeature
         features={frontmatter.features as Feature[]}
