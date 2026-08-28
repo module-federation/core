@@ -2,33 +2,32 @@
 pageType: home
 
 hero:
-  name: Module Federation
-  text: Arquitetura de Micro-Frontend
-  tagline: Facilite o compartilhamento de código entre aplicações JavaScript e torne a colaboração entre equipes mais eficiente
+  name: Module Federation 2.0
+  text: Entregue de forma independente.
+  accent: Execute como um só produto.
+  tagline: Componha aplicações em tempo de execução com módulos compartilhados, dicas de tipos, manifests e ferramentas que mantêm cada fronteira visível.
   actions:
     - theme: brand
       text: Primeiros passos
-      link: /pt-BR/guide/start/
-  image:
-    src: /svg.svg
-    alt: Logo do Module Federation
+      link: /pt-BR/guide/start/quick-start.html
+    - theme: alt
+      text: Explore o Runtime
+      link: /pt-BR/guide/runtime/index.html
+featureIntro:
+  eyebrow: Fronteiras de produção
+  title: Deixe cada aplicação avançar no seu próprio ritmo.
+  details: Module Federation mantém as equipes independentes sem fazer o produto final parecer fragmentado.
 features:
-  - title: Compartilhamento de código
-    details: Module Federation permite que desenvolvedores compartilhem código entre vários projetos de forma descentralizada, facilitando o gerenciamento de aplicações complexas.
-    icon: ⚡
-  - title: Modularização
-    details: As aplicações podem ser divididas em módulos menores e independentes, que podem ser desenvolvidos, testados e implantados separadamente.
-    icon: 📦
-  - title: Flexibilidade
-    details: Module Federation oferece aos desenvolvedores a liberdade de escolher e implementar a arquitetura que melhor atende às suas necessidades.
-    icon: 🎯
-  - title: Rspack
-    details: Suporta builds com Rspack e Webpack, acelerando os builds da sua aplicação.
-    icon: 🦀
-  - title: Experiência de desenvolvimento
-    details: Module Federation oferece suporte a dicas dinâmicas de tipos e ao Chrome Devtool para melhorar a experiência de desenvolvimento.
-    icon: 🚀
-  - title: Sistema de plugins
-    details: Hooks permitem que você defina rapidamente seus próprios plugins para controlar o comportamento do carregamento de módulos.
-    icon: 🎨
+  - title: Fronteiras independentes
+    details: Crie e implante hosts e remotes em ciclos separados e componha tudo quando a aplicação estiver em execução.
+    icon: boundaries
+  - title: Tipos que atravessam equipes
+    details: Gere e consuma tipos remotos para mudar com rapidez sem transformar a integração em adivinhação.
+    icon: types
+  - title: Controle em runtime
+    details: Descubra remotes por manifests e modele o carregamento com plugins, hooks e APIs de runtime.
+    icon: runtime
+  - title: Sistemas explicáveis
+    details: Rastreie manifests, dependências compartilhadas e falhas de runtime com diagnósticos estáveis e ferramentas dedicadas.
+    icon: debug
 ---

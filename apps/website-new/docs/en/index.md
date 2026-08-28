@@ -2,36 +2,32 @@
 pageType: home
 
 hero:
-  name: Module Federation
-  text: Micro-Frontend Architecture
-  tagline: Make it easier to share code between javascript applications and make team collaboration more efficient
+  name: Module Federation 2.0
+  text: Ship independently.
+  accent: Run as one.
+  tagline: Compose applications at runtime with shared modules, type hints, manifests, and tooling that keeps every boundary visible.
   actions:
     - theme: brand
-      text: 🎉 2.0 Announcement
-      link: /blog/v2-stable-version.html
-    - theme: alt
       text: Quick Start
       link: /guide/start/quick-start.html
-  image:
-    src: /svg.svg
-    alt: module federation Logo
+    - theme: alt
+      text: Explore the Runtime
+      link: /guide/runtime/index.html
+featureIntro:
+  eyebrow: Production boundaries
+  title: Let every application move at its own speed.
+  details: Module Federation keeps teams independent without making the final product feel fragmented.
 features:
-  - title: Code Sharing
-    details: Module Federation allows developers to share code between multiple projects in a decentralized way, making it easier to manage complex applications.
-    icon: ⚡
-  - title: Modularization
-    details: Applications can be split into smaller, self-contained modules that can be independently developed, tested, and deployed.
-    icon: 📦
-  - title: Flexibility
-    details: Module federation offers developers the freedom to choose and implement the architecture that best suits their needs.
-    icon: 🎯
-  - title: Rspack
-    details: Supports Rspack and Webpack builds, accelerating your application builds.
-    icon: 🦀
-  - title: Development Experience
-    details: Module federation supports dynamic type hints and Chrome Devtool to enhance the development experience.
-    icon: 🚀
-  - title: Plugin System
-    details: Hooks allow you to quickly define your own plugins to control the behavior of module loading.
-    icon: 🎨
+  - title: Independent boundaries
+    details: Build and deploy hosts and remotes on separate release cycles, then compose them when the application runs.
+    icon: boundaries
+  - title: Types that travel
+    details: Generate and consume remote types so teams can change quickly without turning integration into guesswork.
+    icon: types
+  - title: Runtime control
+    details: Discover remotes through manifests and shape loading behavior with plugins, hooks, and runtime APIs.
+    icon: runtime
+  - title: Explainable systems
+    details: Trace manifests, shared dependencies, and runtime failures with stable diagnostics and dedicated developer tools.
+    icon: debug
 ---
