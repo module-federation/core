@@ -1,4 +1,9 @@
 .hero {
+  --copy-shift-x: 0px;
+  --copy-shift-y: 0px;
+  --copy-focus-x: 50%;
+  --copy-focus-y: 50%;
+  --copy-focus-opacity: 0;
   --mf-abyss: #020713;
   --mf-ocean: #071426;
   --mf-tide: #365a86;
@@ -21,6 +26,7 @@
 .paintedBackdrop,
 .fluidGalaxy,
 .elasticGrid,
+.asteroidField,
 .heroShade {
   position: absolute;
   inset: 0;
@@ -148,6 +154,19 @@
     linear-gradient(180deg, rgb(2 7 15 / 8%), rgb(2 7 15 / 78%) 100%);
 }
 
+.asteroidField {
+  z-index: 0;
+  filter: blur(0.22px);
+  mix-blend-mode: screen;
+  opacity: 0.76;
+}
+
+.asteroidField canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 @keyframes galaxy-veil {
   from {
     opacity: 0.5;
@@ -173,6 +192,27 @@
   position: relative;
   z-index: 2;
   width: min(535px, 52%);
+  transform: translate3d(var(--copy-shift-x), var(--copy-shift-y), 0);
+  transition: transform 720ms cubic-bezier(0.16, 0.72, 0.18, 1);
+  will-change: transform;
+}
+
+.copy::before {
+  position: absolute;
+  z-index: -1;
+  inset: -90px;
+  background: radial-gradient(
+    circle 180px at calc(var(--copy-focus-x) + 90px)
+      calc(var(--copy-focus-y) + 90px),
+    rgb(110 145 181 / 11%),
+    rgb(48 76 113 / 4%) 42%,
+    transparent 76%
+  );
+  content: '';
+  filter: blur(15px);
+  opacity: var(--copy-focus-opacity);
+  pointer-events: none;
+  transition: opacity 420ms ease;
 }
 
 .eyebrow {
@@ -385,6 +425,10 @@
     opacity: 0.24;
   }
 
+  .asteroidField {
+    opacity: 0.6;
+  }
+
   .heroInner {
     align-items: flex-start;
     width: calc(100% - 36px);
@@ -467,6 +511,15 @@
 
   .fluidGalaxy::before {
     animation: none;
+  }
+
+  .copy {
+    transform: none;
+    transition: none;
+  }
+
+  .copy::before {
+    display: none;
   }
 
   .primaryAction,

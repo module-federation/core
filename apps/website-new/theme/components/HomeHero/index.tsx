@@ -1,4 +1,5 @@
 import { normalizeHrefInRuntime } from '@rspress/core/runtime';
+import { AsteroidField } from './AsteroidField';
 import { ElasticGrid, FluidGalaxy } from './FluidGalaxy';
 import styles from './index.module.scss';
 
@@ -35,9 +36,12 @@ export function HomeHero({ hero }: { hero: Hero }) {
         <ElasticGrid />
       </div>
       <div className={styles.heroShade} aria-hidden="true" />
+      <div className={styles.asteroidField} aria-hidden="true">
+        <AsteroidField />
+      </div>
 
       <div className={styles.heroInner}>
-        <div className={styles.copy}>
+        <div className={styles.copy} data-hero-copy>
           <p className={styles.eyebrow}>
             <span className={styles.statusDot} aria-hidden="true" />
             {hero.name}
