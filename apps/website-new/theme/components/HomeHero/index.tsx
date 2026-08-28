@@ -160,6 +160,7 @@ function ConstellationField() {
     let ripple: Ripple | null = null;
     const pointer = { x: 0, y: 0 };
     const pointerTarget = { x: 0, y: 0 };
+    const mist = { x: 0, y: 0 };
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
     const resize = () => {
@@ -175,6 +176,8 @@ function ConstellationField() {
       ({ stars, motes } = createField(width, height));
       pointer.x = pointerTarget.x = width * 0.72;
       pointer.y = pointerTarget.y = height * 0.46;
+      mist.x = pointer.x;
+      mist.y = pointer.y;
     };
 
     const locate = (star: Star, time: number) => {
@@ -258,6 +261,18 @@ function ConstellationField() {
       context.clearRect(0, 0, width, height);
       pointer.x += (pointerTarget.x - pointer.x) * 0.075;
       pointer.y += (pointerTarget.y - pointer.y) * 0.075;
+      mist.x += (pointerTarget.x - mist.x) * 0.022;
+      mist.y += (pointerTarget.y - mist.y) * 0.022;
+      surface.style.setProperty('--focus-x', `${pointer.x.toFixed(2)}px`);
+      surface.style.setProperty('--focus-y', `${pointer.y.toFixed(2)}px`);
+      surface.style.setProperty(
+        '--mist-x',
+        `${((mist.x / width - 0.5) * -11).toFixed(2)}px`,
+      );
+      surface.style.setProperty(
+        '--mist-y',
+        `${((mist.y / height - 0.5) * -8).toFixed(2)}px`,
+      );
 
       const pointerHalo = context.createRadialGradient(
         pointer.x,
@@ -405,23 +420,34 @@ function ConstellationField() {
       pointerTarget.x = event.clientX - rect.left;
       pointerTarget.y = event.clientY - rect.top;
       pointerInside = true;
+      surface.style.setProperty('--focus-opacity', '0.58');
       surface.style.setProperty(
         '--paint-x',
-        `${((pointerTarget.x / width - 0.5) * -12).toFixed(2)}px`,
+        `${((pointerTarget.x / width - 0.5) * -18).toFixed(2)}px`,
       );
       surface.style.setProperty(
         '--paint-y',
-        `${((pointerTarget.y / height - 0.5) * -8).toFixed(2)}px`,
+        `${((pointerTarget.y / height - 0.5) * -12).toFixed(2)}px`,
       );
-      if (reduceMotion.matches) draw(performance.now());
+      if (reduceMotion.matches) {
+        pointer.x = mist.x = pointerTarget.x;
+        pointer.y = mist.y = pointerTarget.y;
+        draw(performance.now());
+      }
     };
 
     const onPointerLeave = () => {
       pointerInside = false;
       pointerTarget.x = width * 0.72;
       pointerTarget.y = height * 0.46;
+      surface.style.setProperty('--focus-opacity', '0.22');
       surface.style.setProperty('--paint-x', '0px');
       surface.style.setProperty('--paint-y', '0px');
+      if (reduceMotion.matches) {
+        pointer.x = mist.x = pointerTarget.x;
+        pointer.y = mist.y = pointerTarget.y;
+        draw(performance.now());
+      }
     };
 
     const onPointerDown = (event: PointerEvent) => {
@@ -459,6 +485,11 @@ function ConstellationField() {
       surface.removeEventListener('pointerdown', onPointerDown);
       surface.style.removeProperty('--paint-x');
       surface.style.removeProperty('--paint-y');
+      surface.style.removeProperty('--focus-x');
+      surface.style.removeProperty('--focus-y');
+      surface.style.removeProperty('--focus-opacity');
+      surface.style.removeProperty('--mist-x');
+      surface.style.removeProperty('--mist-y');
     };
   }, []);
 
@@ -477,6 +508,12 @@ export function HomeHero({ hero }: { hero: Hero }) {
         style={{ backgroundImage: "url('/home-galaxy-oil-v2.jpg')" }}
         aria-hidden="true"
       />
+      <div
+        className={styles.focusBackdrop}
+        style={{ backgroundImage: "url('/home-galaxy-oil-v2.jpg')" }}
+        aria-hidden="true"
+      />
+      <div className={styles.fogVeil} aria-hidden="true" />
       <ConstellationField />
       <div className={styles.heroShade} aria-hidden="true" />
 
