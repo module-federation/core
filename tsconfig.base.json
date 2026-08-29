@@ -11,7 +11,7 @@
     "target": "es2021",
     "allowJs": true,
     "module": "esnext",
-    "lib": ["es2021", "dom"],
+    "lib": ["es2021", "dom", "dom.iterable"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "paths": {
