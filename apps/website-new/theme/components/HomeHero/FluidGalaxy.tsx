@@ -126,17 +126,22 @@ void main() {
 
   vec2 pointerDelta = uv - u_pointer;
   pointerDelta.x *= u_resolution.x / u_resolution.y;
-  float pointerGlow = exp(-dot(pointerDelta, pointerDelta) / 0.026) * u_pointerActive;
+  float copySide = 1.0 - smoothstep(0.24, 0.58, u_pointer.x);
+  float pointerRadius = mix(0.026, 0.052, copySide);
+  float pointerGlow = exp(-dot(pointerDelta, pointerDelta) / pointerRadius) * u_pointerActive;
 
-  vec2 displaced = uv - flow * (0.052 + pressure * 0.018) + ambient;
+  vec2 displaced = uv - flow * (0.052 + pressure * 0.018 + pointerGlow * copySide * 0.014) + ambient;
   vec2 imageUv = clamp(coverUv(displaced), 0.001, 0.999);
   vec3 color = paintedSample(imageUv);
+  vec3 focusedColor = texture(u_image, imageUv).rgb;
+  color = mix(color, focusedColor, pointerGlow * (0.08 + copySide * 0.24));
 
   float luminance = dot(color, vec3(0.2126, 0.7152, 0.0722));
   color = mix(vec3(luminance), color, 0.74);
   color *= vec3(0.82, 0.91, 1.02);
-  color += vec3(0.22, 0.30, 0.40) * pointerGlow * (0.08 + luminance * 0.17);
+  color += vec3(0.22, 0.30, 0.40) * pointerGlow * (0.1 + luminance * 0.2 + copySide * 0.1);
   color += vec3(0.52, 0.50, 0.39) * pressure * 0.07;
+  color *= 1.0 + pointerGlow * copySide * 0.07;
 
   float vignette = smoothstep(0.9, 0.2, length((uv - 0.5) * vec2(0.84, 1.0)));
   color *= mix(0.48, 1.0, vignette);

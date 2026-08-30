@@ -36,6 +36,14 @@ export function HomeHero({ hero }: { hero: Hero }) {
         <ElasticGrid />
       </div>
       <div className={styles.heroShade} aria-hidden="true" />
+      <div
+        className={styles.logoConstellation}
+        style={{
+          WebkitMaskImage: "url('/svg.svg')",
+          maskImage: "url('/svg.svg')",
+        }}
+        aria-hidden="true"
+      />
       <div className={styles.asteroidField} aria-hidden="true">
         <AsteroidField />
       </div>

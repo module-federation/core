@@ -4,6 +4,12 @@
   --copy-focus-x: 50%;
   --copy-focus-y: 50%;
   --copy-focus-opacity: 0;
+  --copy-line-one-x: 0px;
+  --copy-line-one-y: 0px;
+  --copy-line-two-x: 0px;
+  --copy-line-two-y: 0px;
+  --copy-glow-blur: 16px;
+  --logo-guide-opacity: 0.3;
   --mf-abyss: #020713;
   --mf-ocean: #071426;
   --mf-tide: #365a86;
@@ -26,6 +32,7 @@
 .paintedBackdrop,
 .fluidGalaxy,
 .elasticGrid,
+.logoConstellation,
 .asteroidField,
 .heroShade {
   position: absolute;
@@ -146,16 +153,40 @@
   background:
     linear-gradient(
       90deg,
-      rgb(2 7 15 / 94%) 0%,
-      rgb(3 10 22 / 80%) 24%,
+      rgb(2 7 15 / 78%) 0%,
+      rgb(3 10 22 / 60%) 24%,
       rgb(5 18 35 / 34%) 47%,
       transparent 68%
     ),
     linear-gradient(180deg, rgb(2 7 15 / 8%), rgb(2 7 15 / 78%) 100%);
 }
 
-.asteroidField {
+.logoConstellation {
   z-index: 0;
+  top: 48%;
+  right: auto;
+  bottom: auto;
+  left: 76.5%;
+  width: min(344px, 25.8vw);
+  aspect-ratio: 43 / 40;
+  background: radial-gradient(
+      circle,
+      rgb(182 211 232 / 92%) 0 0.85px,
+      transparent 1.3px
+    )
+    0 0 / 6px 6px;
+  filter: blur(0.2px) drop-shadow(0 0 9px rgb(132 176 209 / 28%));
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+  mix-blend-mode: screen;
+  opacity: var(--logo-guide-opacity);
+  transform: translate(-50%, -50%);
+  transition: opacity 180ms ease-out;
+}
+
+.asteroidField {
+  z-index: 1;
   filter: blur(0.22px);
   mix-blend-mode: screen;
   opacity: 0.76;
@@ -199,20 +230,28 @@
 
 .copy::before {
   position: absolute;
-  z-index: -1;
+  z-index: 0;
   inset: -90px;
   background: radial-gradient(
-    circle 180px at calc(var(--copy-focus-x) + 90px)
+    circle 205px at calc(var(--copy-focus-x) + 90px)
       calc(var(--copy-focus-y) + 90px),
-    rgb(110 145 181 / 11%),
-    rgb(48 76 113 / 4%) 42%,
+    rgb(130 167 201 / 32%),
+    rgb(57 91 130 / 14%) 44%,
     transparent 76%
   );
   content: '';
-  filter: blur(15px);
+  filter: blur(var(--copy-glow-blur));
+  mix-blend-mode: screen;
   opacity: var(--copy-focus-opacity);
   pointer-events: none;
-  transition: opacity 420ms ease;
+  transition:
+    opacity 420ms ease,
+    filter 520ms ease;
+}
+
+.copy > * {
+  position: relative;
+  z-index: 1;
 }
 
 .eyebrow {
@@ -249,11 +288,39 @@
 
 .copy h1 > span {
   display: block;
+  transition:
+    transform 360ms cubic-bezier(0.16, 0.72, 0.18, 1),
+    text-shadow 480ms ease;
+  will-change: transform;
+}
+
+.copy h1 > span:first-child {
+  transform: translate3d(var(--copy-line-one-x), var(--copy-line-one-y), 0);
+  text-shadow: 0 0 var(--copy-glow-blur) rgb(176 203 222 / 9%);
+}
+
+.copy[data-pointer-active='true'] h1 > span:first-child {
+  text-shadow:
+    0 0 28px rgb(176 203 222 / 26%),
+    0 1px 0 rgb(255 255 255 / 9%);
 }
 
 .headlineAccent {
   color: #d9ddd4;
-  text-shadow: 0 0 32px rgb(194 205 194 / 12%);
+  transform: translate3d(var(--copy-line-two-x), var(--copy-line-two-y), 0);
+  text-shadow: 0 0 var(--copy-glow-blur) rgb(194 205 194 / 18%);
+}
+
+.copy[data-pointer-active='true'] .headlineAccent {
+  text-shadow:
+    0 0 34px rgb(194 205 194 / 34%),
+    0 1px 0 rgb(255 255 255 / 11%);
+}
+
+.copy[data-pointer-active='true'] .statusDot {
+  box-shadow:
+    0 0 0 7px rgb(217 214 198 / 8%),
+    0 0 24px rgb(193 207 197 / 72%);
 }
 
 .tagline {
@@ -397,8 +464,8 @@
     background:
       linear-gradient(
         90deg,
-        rgb(2 8 13 / 95%) 0%,
-        rgb(2 10 16 / 83%) 35%,
+        rgb(2 8 13 / 81%) 0%,
+        rgb(2 10 16 / 65%) 35%,
         rgb(3 14 21 / 32%) 67%,
         transparent 87%
       ),
@@ -427,6 +494,12 @@
 
   .asteroidField {
     opacity: 0.6;
+  }
+
+  .logoConstellation {
+    top: 72%;
+    left: 70%;
+    width: min(161px, 45.15vw);
   }
 
   .heroInner {
@@ -520,6 +593,10 @@
 
   .copy::before {
     display: none;
+  }
+
+  .logoConstellation {
+    transition: none;
   }
 
   .primaryAction,
