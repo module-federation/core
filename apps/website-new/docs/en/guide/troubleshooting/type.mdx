@@ -25,6 +25,13 @@ When compiling TS types for exposed (`exposes`) files, the current project's `ts
 1. Remove tsconfig.json `incremental` and `tsBuildInfoFile` from the `cmd` command.
 2. Run the `cmd` from the error message in terminal and fix the file or `tsconfig` based on the output.
 
+When the TypeScript dependency scan or declaration generation fails, Module Federation copies the effective temporary configuration and compiler output to:
+
+- `.mf/diagnostics/dts/list-files/` for dependency-scan warnings
+- `.mf/diagnostics/dts/generate-types/` for fatal `TYPE-001` failures
+
+Each directory contains `tsconfig.json` and `compiler.log`. The log records the exact compiler command and TypeScript version, so the failure can be reproduced even when [`deleteTsConfig`](/configure/dts.html#deletetsconfig) is enabled.
+
 If you want to ignore TS type checking errors, set [`compilerOptions.noCheck`](https://www.typescriptlang.org/tsconfig/#noCheck) to `true` in `tsconfig.json` (requires TS 5.5+).
 
 If the `cmd` runs without error but you still get a TS compile failure, check the `exposes` field in `ModuleFederationPlugin`:
