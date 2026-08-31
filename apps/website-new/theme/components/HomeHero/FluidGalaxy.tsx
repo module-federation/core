@@ -133,6 +133,13 @@ void main() {
   vec2 displaced = uv - flow * (0.052 + pressure * 0.018 + pointerGlow * copySide * 0.014) + ambient;
   vec2 imageUv = clamp(coverUv(displaced), 0.001, 0.999);
   vec3 color = paintedSample(imageUv);
+  float leftEcho = (1.0 - smoothstep(0.06, 0.68, uv.x)) * 0.52;
+  vec2 echoUv = vec2(
+    clamp(0.92 - imageUv.x * 0.78 + (broadNoise - 0.5) * 0.045, 0.001, 0.999),
+    clamp(imageUv.y * 0.94 + 0.03 + (fineNoise - 0.5) * 0.032, 0.001, 0.999)
+  );
+  vec3 echoColor = paintedSample(echoUv);
+  color = 1.0 - (1.0 - color) * (1.0 - echoColor * leftEcho);
   vec3 focusedColor = texture(u_image, imageUv).rgb;
   color = mix(color, focusedColor, pointerGlow * (0.08 + copySide * 0.24));
 
@@ -273,16 +280,9 @@ export function FluidGalaxy({ imageUrl }: { imageUrl: string }) {
     let imageWidth = 1;
     let imageHeight = 1;
     let imageReady = false;
-    let pointerSeen = false;
-    let pointerActive = 0;
-    let targetPointerActive = 0;
-    const pointer = { x: 0.72, y: 0.54 };
-    const pointerTarget = { x: 0.72, y: 0.54 };
+    const pointer = { x: 0.5, y: 0.5 };
     const velocity = { x: 0, y: 0 };
-    const velocityTarget = { x: 0, y: 0 };
-    const lastPointer = { x: pointerTarget.x, y: pointerTarget.y };
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const coarsePointer = window.matchMedia('(hover: none), (pointer: coarse)');
 
     let flowProgram: WebGLProgram;
     let galaxyProgram: WebGLProgram;
@@ -347,14 +347,6 @@ export function FluidGalaxy({ imageUrl }: { imageUrl: string }) {
     const draw = (time: number) => {
       if (!imageReady || !imageTexture || !flowTargets) return;
 
-      pointer.x += (pointerTarget.x - pointer.x) * 0.1;
-      pointer.y += (pointerTarget.y - pointer.y) * 0.1;
-      velocity.x += (velocityTarget.x - velocity.x) * 0.2;
-      velocity.y += (velocityTarget.y - velocity.y) * 0.2;
-      velocityTarget.x *= 0.76;
-      velocityTarget.y *= 0.76;
-      pointerActive += (targetPointerActive - pointerActive) * 0.08;
-
       const read = flowTargets[currentTarget];
       const write = flowTargets[1 - currentTarget];
       gl.useProgram(flowProgram);
@@ -384,7 +376,7 @@ export function FluidGalaxy({ imageUrl }: { imageUrl: string }) {
       gl.uniform2f(galaxyUniforms.resolution, canvas.width, canvas.height);
       gl.uniform2f(galaxyUniforms.imageResolution, imageWidth, imageHeight);
       gl.uniform2f(galaxyUniforms.pointer, pointer.x, pointer.y);
-      gl.uniform1f(galaxyUniforms.pointerActive, pointerActive);
+      gl.uniform1f(galaxyUniforms.pointerActive, 0);
       gl.uniform1f(galaxyUniforms.time, time * 0.001);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
       canvas.dataset.ready = 'true';
@@ -398,37 +390,6 @@ export function FluidGalaxy({ imageUrl }: { imageUrl: string }) {
       frame = requestAnimationFrame(animate);
     };
 
-    const onPointerMove = (event: PointerEvent) => {
-      const rect = surface.getBoundingClientRect();
-      const x = Math.max(0, Math.min(1, (event.clientX - rect.left) / width));
-      const y = Math.max(
-        0,
-        Math.min(1, 1 - (event.clientY - rect.top) / height),
-      );
-      pointerTarget.x = x;
-      pointerTarget.y = y;
-      if (pointerSeen) {
-        velocityTarget.x += (x - lastPointer.x) * 2.2;
-        velocityTarget.y += (y - lastPointer.y) * 2.2;
-      }
-      pointerSeen = true;
-      lastPointer.x = x;
-      lastPointer.y = y;
-      targetPointerActive = 1;
-      if (reducedMotion.matches) {
-        pointer.x = x;
-        pointer.y = y;
-        draw(performance.now());
-      }
-    };
-
-    const onPointerLeave = () => {
-      pointerSeen = false;
-      targetPointerActive = 0;
-      velocityTarget.x = 0;
-      velocityTarget.y = 0;
-    };
-
     const resizeObserver = new ResizeObserver(() => {
       resize();
       if (reducedMotion.matches) draw(performance.now());
@@ -439,13 +400,6 @@ export function FluidGalaxy({ imageUrl }: { imageUrl: string }) {
     resize();
     resizeObserver.observe(surface);
     visibilityObserver.observe(surface);
-
-    if (!coarsePointer.matches && !reducedMotion.matches) {
-      surface.addEventListener('pointermove', onPointerMove, { passive: true });
-      surface.addEventListener('pointerleave', onPointerLeave, {
-        passive: true,
-      });
-    }
 
     const image = new Image();
     image.decoding = 'async';
@@ -480,8 +434,6 @@ export function FluidGalaxy({ imageUrl }: { imageUrl: string }) {
       cancelAnimationFrame(frame);
       resizeObserver.disconnect();
       visibilityObserver.disconnect();
-      surface.removeEventListener('pointermove', onPointerMove);
-      surface.removeEventListener('pointerleave', onPointerLeave);
       destroyTargets();
       if (imageTexture) gl.deleteTexture(imageTexture);
       gl.deleteProgram(flowProgram);

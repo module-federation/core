@@ -50,6 +50,30 @@
   transform: scale(1.07);
 }
 
+.paintedBackdrop::before {
+  position: absolute;
+  inset: 0;
+  background-image: inherit;
+  background-position: center;
+  background-size: cover;
+  content: '';
+  mix-blend-mode: screen;
+  opacity: 0.5;
+  transform: scaleX(-1);
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    #000 0%,
+    rgb(0 0 0 / 82%) 35%,
+    transparent 68%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    #000 0%,
+    rgb(0 0 0 / 82%) 35%,
+    transparent 68%
+  );
+}
+
 .paintedBackdrop::after {
   position: absolute;
   inset: 0;
@@ -153,10 +177,10 @@
   background:
     linear-gradient(
       90deg,
-      rgb(2 7 15 / 78%) 0%,
-      rgb(3 10 22 / 60%) 24%,
-      rgb(5 18 35 / 34%) 47%,
-      transparent 68%
+      rgb(2 7 15 / 60%) 0%,
+      rgb(3 10 22 / 42%) 24%,
+      rgb(5 18 35 / 24%) 47%,
+      transparent 72%
     ),
     linear-gradient(180deg, rgb(2 7 15 / 8%), rgb(2 7 15 / 78%) 100%);
 }
