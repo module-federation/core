@@ -310,6 +310,110 @@ describe('ConsumeSharedPlugin', () => {
         expect(result).toBeDefined();
         // Should attempt to read package.json for version
       });
+
+      describe('protocol specifier requiredVersion fallback', () => {
+        const installedPath = '/resolved/node_modules/react/index.js';
+
+        const mockProtocolThenInstalled = (
+          protocolSpecifier: string,
+          installedVersion: string,
+        ): DescriptionFileResolver => {
+          return (fs, dir, files, callback, satisfies) => {
+            // Installed package lookup (fallback / include-exclude)
+            if (dir.includes('node_modules/react')) {
+              callback(null, {
+                data: { name: 'react', version: installedVersion },
+                path: '/resolved/node_modules/react/package.json',
+              });
+              return;
+            }
+            // Consumer app package.json with protocol dependency
+            const data = {
+              name: 'my-app',
+              dependencies: { react: protocolSpecifier },
+            };
+            if (satisfies && !satisfies({ data, path: '/test/package.json' })) {
+              callback(null, undefined, []);
+              return;
+            }
+            callback(null, {
+              data,
+              path: '/test/package.json',
+            });
+          };
+        };
+
+        it.each([
+          ['catalog:', '19.2.4'],
+          ['workspace:*', '18.3.1'],
+          ['npm:react@^19.0.0', '19.0.0'],
+        ] as const)(
+          'resolves %s to ^%s from the installed package',
+          async (protocolSpecifier, installedVersion) => {
+            const config = createConsumeConfig({
+              requiredVersion: undefined,
+              packageName: 'react',
+              import: 'react',
+              request: 'react',
+              shareKey: 'react',
+            });
+
+            resolveMock.mockImplementation(resolveToPath(installedPath));
+            descriptionFileMock.mockImplementation(
+              mockProtocolThenInstalled(protocolSpecifier, installedVersion),
+            );
+
+            const result = await plugin.createConsumeSharedModule(
+              mockCompilation,
+              '/test/context',
+              'react',
+              config,
+            );
+
+            expect(result).toBeDefined();
+            expect(result.options.requiredVersion).toBe(`^${installedVersion}`);
+            expect(result.options.requiredVersion).not.toBe(protocolSpecifier);
+            expect(result.options.requiredVersion).not.toBe('');
+          },
+        );
+
+        it('keeps existing semver requiredVersion from package.json', async () => {
+          const config = createConsumeConfig({
+            requiredVersion: undefined,
+            packageName: 'react',
+            import: 'react',
+            request: 'react',
+            shareKey: 'react',
+          });
+
+          resolveMock.mockImplementation(resolveToPath(installedPath));
+          descriptionFileMock.mockImplementation((fs, dir, files, callback) => {
+            if (dir.includes('node_modules/react')) {
+              callback(null, {
+                data: { name: 'react', version: '19.2.4' },
+                path: '/resolved/node_modules/react/package.json',
+              });
+              return;
+            }
+            callback(null, {
+              data: {
+                name: 'my-app',
+                dependencies: { react: '^18.2.0' },
+              },
+              path: '/test/package.json',
+            });
+          });
+
+          const result = await plugin.createConsumeSharedModule(
+            mockCompilation,
+            '/test/context',
+            'react',
+            config,
+          );
+
+          expect(result.options.requiredVersion).toBe('^18.2.0');
+        });
+      });
     });
   });
 });
