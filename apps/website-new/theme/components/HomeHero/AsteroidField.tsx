@@ -58,17 +58,37 @@ interface LogoLink {
   homeDistance: number;
 }
 
+interface CursorNode {
+  angle: number;
+  distance: number;
+  size: number;
+  phase: number;
+  drift: number;
+  depth: number;
+}
+
+interface TrailSpark {
+  x: number;
+  y: number;
+  velocityX: number;
+  velocityY: number;
+  size: number;
+  life: number;
+  phase: number;
+}
+
 const DESKTOP_CLUSTERS: ClusterSpec[] = [
-  { x: 0.11, y: 0.25, count: 13, spread: 5, depth: 0.4, warmth: 0.42 },
-  { x: 0.2, y: 0.51, count: 20, spread: 8, depth: 0.62, warmth: 0.68 },
-  { x: 0.34, y: 0.77, count: 17, spread: 9, depth: 0.5, warmth: 0.3 },
-  { x: 0.49, y: 0.27, count: 13, spread: 6, depth: 0.44, warmth: 0.51 },
+  { x: 0.1, y: 0.24, count: 22, spread: 13, depth: 0.42, warmth: 0.42 },
+  { x: 0.19, y: 0.5, count: 34, spread: 20, depth: 0.62, warmth: 0.68 },
+  { x: 0.31, y: 0.76, count: 28, spread: 17, depth: 0.5, warmth: 0.3 },
+  { x: 0.44, y: 0.27, count: 24, spread: 14, depth: 0.44, warmth: 0.51 },
+  { x: 0.48, y: 0.61, count: 30, spread: 19, depth: 0.56, warmth: 0.36 },
 ];
 
 const COMPACT_CLUSTERS: ClusterSpec[] = [
-  { x: 0.14, y: 0.18, count: 11, spread: 5, depth: 0.4, warmth: 0.42 },
-  { x: 0.19, y: 0.5, count: 15, spread: 7, depth: 0.58, warmth: 0.68 },
-  { x: 0.45, y: 0.83, count: 13, spread: 8, depth: 0.48, warmth: 0.32 },
+  { x: 0.14, y: 0.18, count: 16, spread: 10, depth: 0.4, warmth: 0.42 },
+  { x: 0.2, y: 0.5, count: 21, spread: 13, depth: 0.58, warmth: 0.68 },
+  { x: 0.42, y: 0.84, count: 18, spread: 12, depth: 0.48, warmth: 0.32 },
 ];
 
 const LOGO_MASK_WIDTH = 172;
@@ -192,6 +212,24 @@ export function AsteroidField() {
       velocityY: 0,
       speed: 0,
     };
+    const cursorCenter = { x: -1000, y: -1000, presence: 0 };
+    const cursorRandom = createRandom(4319);
+    const cursorNodes: CursorNode[] = Array.from(
+      { length: 17 },
+      (_, index) => ({
+        angle:
+          index === 0
+            ? 0
+            : ((index - 1) / 16) * Math.PI * 2 + (cursorRandom() - 0.5) * 0.28,
+        distance: index === 0 ? 0 : 4 + Math.pow(cursorRandom(), 0.72) * 17,
+        size: index === 0 ? 1.85 : 0.45 + cursorRandom() * 1.05,
+        phase: cursorRandom() * Math.PI * 2,
+        drift: (cursorRandom() > 0.5 ? 1 : -1) * (0.55 + cursorRandom() * 0.7),
+        depth: 0.35 + cursorRandom() * 0.65,
+      }),
+    );
+    const trailRandom = createRandom(8641);
+    let trailSparks: TrailSpark[] = [];
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const coarsePointer = window.matchMedia('(hover: none), (pointer: coarse)');
 
@@ -423,12 +461,33 @@ export function AsteroidField() {
       }
     };
 
+    const updateCursorConstellation = () => {
+      const targetPresence = pointerInside ? 1 : 0;
+      cursorCenter.presence +=
+        (targetPresence - cursorCenter.presence) *
+        (targetPresence > cursorCenter.presence ? 0.22 : 0.075);
+      if (pointerInside) {
+        cursorCenter.x += (pointer.x - cursorCenter.x) * 0.32;
+        cursorCenter.y += (pointer.y - cursorCenter.y) * 0.32;
+      }
+
+      trailSparks = trailSparks.filter((spark) => {
+        spark.life -= 0.038;
+        spark.x += spark.velocityX;
+        spark.y += spark.velocityY;
+        spark.velocityX *= 0.95;
+        spark.velocityY *= 0.95;
+        return spark.life > 0;
+      });
+    };
+
     const update = (time: number) => {
       pointer.velocityX *= 0.82;
       pointer.velocityY *= 0.82;
       pointer.speed *= 0.86;
       updateAmbientParticles(time);
       updateLogoParticles(time);
+      updateCursorConstellation();
     };
 
     const drawAmbientParticles = (time: number) => {
@@ -462,6 +521,39 @@ export function AsteroidField() {
         context.fill();
       }
 
+      context.lineWidth = 0.38;
+      clusters.forEach((cluster, clusterIndex) => {
+        const clusterParticles = ambientParticles.filter(
+          (particle) => particle.clusterIndex === clusterIndex,
+        );
+        clusterParticles.forEach((particle, index) => {
+          let nearest: AmbientParticle | undefined;
+          let nearestDistance = Number.POSITIVE_INFINITY;
+          for (
+            let candidateIndex = index + 1;
+            candidateIndex < clusterParticles.length;
+            candidateIndex += 1
+          ) {
+            const candidate = clusterParticles[candidateIndex];
+            if (!candidate) continue;
+            const distance = Math.hypot(
+              candidate.x - particle.x,
+              candidate.y - particle.y,
+            );
+            if (distance < nearestDistance) {
+              nearest = candidate;
+              nearestDistance = distance;
+            }
+          }
+          if (!nearest || nearestDistance > cluster.spread * 0.72) return;
+          context.strokeStyle = `rgba(151, 184, 207, ${(0.025 + cluster.energy * 0.055).toFixed(3)})`;
+          context.beginPath();
+          context.moveTo(particle.x, particle.y);
+          context.lineTo(nearest.x, nearest.y);
+          context.stroke();
+        });
+      });
+
       context.lineWidth = 0.45;
       for (const particle of ambientParticles) {
         const cluster = clusters[particle.clusterIndex];
@@ -494,6 +586,92 @@ export function AsteroidField() {
       }
     };
 
+    const drawCursorConstellation = (time: number) => {
+      for (const spark of trailSparks) {
+        const life = Math.max(0, spark.life);
+        const flicker = 0.72 + Math.sin(time * 0.004 + spark.phase) * 0.28;
+        const alpha = life * life * flicker * 0.42;
+        context.save();
+        context.shadowColor = `rgba(183, 210, 229, ${(alpha * 0.7).toFixed(3)})`;
+        context.shadowBlur = 3;
+        context.fillStyle = `rgba(202, 220, 230, ${alpha.toFixed(3)})`;
+        context.beginPath();
+        context.arc(spark.x, spark.y, spark.size, 0, Math.PI * 2);
+        context.fill();
+        context.restore();
+      }
+
+      const presence = cursorCenter.presence;
+      if (presence < 0.01) return;
+      const speedEnergy = Math.min(1, pointer.speed / 46);
+      const haloRadius = 28 + speedEnergy * 8;
+      const halo = context.createRadialGradient(
+        cursorCenter.x,
+        cursorCenter.y,
+        0,
+        cursorCenter.x,
+        cursorCenter.y,
+        haloRadius,
+      );
+      halo.addColorStop(
+        0,
+        `rgba(205, 218, 213, ${(presence * 0.105).toFixed(3)})`,
+      );
+      halo.addColorStop(
+        0.35,
+        `rgba(104, 147, 184, ${(presence * 0.07).toFixed(3)})`,
+      );
+      halo.addColorStop(1, 'rgba(55, 88, 125, 0)');
+      context.fillStyle = halo;
+      context.beginPath();
+      context.arc(cursorCenter.x, cursorCenter.y, haloRadius, 0, Math.PI * 2);
+      context.fill();
+
+      const positions = cursorNodes.map((node) => {
+        const orbit = node.angle + time * 0.00012 * node.drift;
+        const radius =
+          node.distance *
+          (1 +
+            Math.sin(time * 0.001 + node.phase) * (0.035 + speedEnergy * 0.06));
+        return {
+          x: cursorCenter.x + Math.cos(orbit) * radius,
+          y: cursorCenter.y + Math.sin(orbit) * radius * 0.78,
+          node,
+        };
+      });
+
+      context.lineWidth = 0.42;
+      context.strokeStyle = `rgba(168, 196, 214, ${(presence * 0.11).toFixed(3)})`;
+      for (let index = 1; index < positions.length; index += 1) {
+        const current = positions[index];
+        const next = positions[index === positions.length - 1 ? 1 : index + 1];
+        if (!current || !next) continue;
+        context.beginPath();
+        context.moveTo(current.x, current.y);
+        context.lineTo(next.x, next.y);
+        context.stroke();
+        if (index % 4 === 1) {
+          context.beginPath();
+          context.moveTo(cursorCenter.x, cursorCenter.y);
+          context.lineTo(current.x, current.y);
+          context.stroke();
+        }
+      }
+
+      for (const { x, y, node } of positions) {
+        const flicker = 0.84 + Math.sin(time * 0.0022 + node.phase) * 0.16;
+        const alpha = presence * (0.35 + node.depth * 0.45) * flicker;
+        context.save();
+        context.shadowColor = `rgba(197, 216, 224, ${(alpha * 0.72).toFixed(3)})`;
+        context.shadowBlur = node.distance === 0 ? 8 : 3.5;
+        context.fillStyle = `rgba(213, 224, 222, ${alpha.toFixed(3)})`;
+        context.beginPath();
+        context.arc(x, y, node.size * (1 + speedEnergy * 0.16), 0, Math.PI * 2);
+        context.fill();
+        context.restore();
+      }
+    };
+
     const drawLogoParticles = (time: number) => {
       for (const link of logoLinks) {
         const from = logoParticles[link.from];
@@ -513,7 +691,7 @@ export function AsteroidField() {
           0,
           1 - Math.abs(stretch - link.homeDistance) / link.homeDistance,
         );
-        context.strokeStyle = `rgba(151, 188, 215, ${((0.14 + response * 0.09) * integrity).toFixed(3)})`;
+        context.strokeStyle = `rgba(151, 188, 215, ${((0.07 + response * 0.075) * integrity).toFixed(3)})`;
         context.beginPath();
         context.moveTo(from.x, from.y);
         context.lineTo(to.x, to.y);
@@ -529,7 +707,8 @@ export function AsteroidField() {
         const response = pointerInside ? Math.max(0, 1 - distance / 150) : 0;
         const speed = Math.hypot(particle.velocityX, particle.velocityY);
         const flicker = 0.84 + Math.sin(time * 0.0012 + particle.phase) * 0.16;
-        const alpha = (0.38 + particle.depth * 0.36 + response * 0.3) * flicker;
+        const alpha =
+          (0.22 + particle.depth * 0.26 + response * 0.24) * flicker;
         const red = Math.round(172 + particle.tone * 32);
         const green = Math.round(194 + particle.tone * 24);
         const blue = Math.round(222 + particle.tone * 18);
@@ -543,8 +722,8 @@ export function AsteroidField() {
         }
 
         context.save();
-        context.shadowColor = `rgba(${red}, ${green}, ${blue}, ${(alpha * 0.76).toFixed(3)})`;
-        context.shadowBlur = 3 + response * 7;
+        context.shadowColor = `rgba(${red}, ${green}, ${blue}, ${(alpha * 0.54).toFixed(3)})`;
+        context.shadowBlur = 2.5 + response * 6;
         context.fillStyle = `rgba(${red}, ${green}, ${blue}, ${alpha.toFixed(3)})`;
         context.beginPath();
         context.arc(
@@ -562,6 +741,7 @@ export function AsteroidField() {
     const draw = (time: number) => {
       context.clearRect(0, 0, width, height);
       drawAmbientParticles(time);
+      drawCursorConstellation(time);
       drawLogoParticles(time);
     };
 
@@ -614,7 +794,7 @@ export function AsteroidField() {
       const logoDisruption = Math.max(0, 1 - logoDistance / 190);
       surface.style.setProperty(
         '--logo-guide-opacity',
-        `${(0.3 * (1 - logoDisruption * 0.94)).toFixed(3)}`,
+        `${(0.18 * (1 - logoDisruption * 0.94)).toFixed(3)}`,
       );
       surface.style.setProperty(
         '--copy-shift-x',
@@ -652,9 +832,31 @@ export function AsteroidField() {
       const nextX = event.clientX - rect.left;
       const nextY = event.clientY - rect.top;
       if (pointerSeen) {
-        pointer.velocityX += nextX - pointer.x;
-        pointer.velocityY += nextY - pointer.y;
+        const movementX = nextX - pointer.x;
+        const movementY = nextY - pointer.y;
+        pointer.velocityX += movementX;
+        pointer.velocityY += movementY;
         pointer.speed = Math.hypot(pointer.velocityX, pointer.velocityY);
+        const movement = Math.hypot(movementX, movementY);
+        const emissions = Math.min(3, Math.max(1, Math.round(movement / 18)));
+        for (let index = 0; index < emissions; index += 1) {
+          const progress = (index + 1) / (emissions + 1);
+          trailSparks.push({
+            x: pointer.x + movementX * progress + (trailRandom() - 0.5) * 3,
+            y: pointer.y + movementY * progress + (trailRandom() - 0.5) * 3,
+            velocityX: -movementX * 0.006 + (trailRandom() - 0.5) * 0.44,
+            velocityY: -movementY * 0.006 + (trailRandom() - 0.5) * 0.44,
+            size: 0.4 + trailRandom() * 0.85,
+            life: 0.68 + trailRandom() * 0.3,
+            phase: trailRandom() * Math.PI * 2,
+          });
+        }
+        if (trailSparks.length > 54) {
+          trailSparks.splice(0, trailSparks.length - 54);
+        }
+      } else {
+        cursorCenter.x = nextX;
+        cursorCenter.y = nextY;
       }
       pointer.x = nextX;
       pointer.y = nextY;
@@ -674,7 +876,7 @@ export function AsteroidField() {
       surface.style.setProperty('--copy-line-two-x', '0px');
       surface.style.setProperty('--copy-line-two-y', '0px');
       surface.style.setProperty('--copy-glow-blur', '16px');
-      surface.style.setProperty('--logo-guide-opacity', '0.3');
+      surface.style.setProperty('--logo-guide-opacity', '0.18');
       delete copy.dataset.pointerActive;
     };
 
