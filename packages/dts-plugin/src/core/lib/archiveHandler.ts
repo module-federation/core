@@ -91,7 +91,12 @@ export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => {
         }
 
         const zip = new AdmZip(Buffer.from(response.data));
-        zip.extractAllTo(destinationPath, true);
+        // Only overwrite when the caller opted out of deleting the types folder.
+        // In the default path the folder was just removed, so every entry is new
+        // and overwrite is redundant. Keeping it off removes the precondition of
+        // CVE-2026-76845 (adm-zip follows symlinks at the destination only when
+        // overwrite is enabled).
+        zip.extractAllTo(destinationPath, !hostOptions.deleteTypesFolder);
         fileLog(
           `zip.extractAllTo success destinationPath: ${destinationPath}; url: ${url}`,
           'downloadTypesArchive',
