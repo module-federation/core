@@ -177,6 +177,38 @@ export const returnFromGlobalInstances = (
   return null;
 };
 
+// V8 keeps every distinct script it compiles in an isolate-wide compilation
+// cache (source text plus compiled code) that is only evicted under heap
+// pressure, and that pressure is measured against V8's own limit rather than a
+// container's. Remote chunks are exactly the code that changes with every
+// deployment, so compiling them with the cache switched off keeps old builds
+// from piling up in the cache after a forced re-registration. The switch is
+// process-wide but only spans the synchronous compile call. Set
+// FEDERATION_KEEP_COMPILATION_CACHE=true to opt out.
+export const withoutCompilationCache = <T>(compile: () => T): T => {
+  if (
+    typeof process === 'undefined' ||
+    process.env['FEDERATION_KEEP_COMPILATION_CACHE'] === 'true'
+  ) {
+    return compile();
+  }
+  let v8: typeof import('v8') | undefined;
+  try {
+    v8 = __non_webpack_require__('v8') as typeof import('v8');
+  } catch {
+    return compile();
+  }
+  if (!v8 || typeof v8.setFlagsFromString !== 'function') {
+    return compile();
+  }
+  v8.setFlagsFromString('--no-compilation-cache');
+  try {
+    return compile();
+  } finally {
+    v8.setFlagsFromString('--compilation-cache');
+  }
+};
+
 const CHUNK_WRAPPER_PARAMS = ['exports', 'require', '__dirname', '__filename'];
 
 type ChunkFunction = (
@@ -198,14 +230,17 @@ export const compileChunk = (
 ): ChunkFunction => {
   if (typeof process !== 'undefined') {
     const vm = __non_webpack_require__('vm') as typeof import('vm');
-    const script = new vm.Script(
-      `(function(${CHUNK_WRAPPER_PARAMS.join(', ')}) {${source}\n})`,
-      {
-        filename,
-        importModuleDynamically:
-          //@ts-ignore
-          vm.constants?.USE_MAIN_CONTEXT_DEFAULT_LOADER ?? importNodeModule,
-      },
+    const script = withoutCompilationCache(
+      () =>
+        new vm.Script(
+          `(function(${CHUNK_WRAPPER_PARAMS.join(', ')}) {${source}\n})`,
+          {
+            filename,
+            importModuleDynamically:
+              //@ts-ignore
+              vm.constants?.USE_MAIN_CONTEXT_DEFAULT_LOADER ?? importNodeModule,
+          },
+        ),
     );
     return script.runInThisContext() as ChunkFunction;
   }
