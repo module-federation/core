@@ -70,10 +70,12 @@ function scheduleCompilationCacheClear(): void {
       ) as typeof import('inspector');
       const session = new inspector.Session();
       session.connect();
-      // The callback runs synchronously inside post(); disconnecting from within
-      // it deadlocks the session, so disconnect once post() has returned.
-      session.post('HeapProfiler.collectGarbage', () => undefined);
-      session.disconnect();
+      // The collection completes asynchronously (~100 ms). Disconnecting before
+      // the callback cancels it; disconnecting inside the callback deadlocks the
+      // session. Disconnect on the next macrotask after completion.
+      session.post('HeapProfiler.collectGarbage', () => {
+        setImmediate(() => session.disconnect());
+      });
     } catch {
       // no inspector in this runtime: nothing else can clear the cache in-process
     }
