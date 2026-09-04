@@ -43,8 +43,14 @@ export function init(options: UserOptions): ModuleFederation {
   const instance = getGlobalFederationInstance(options.name, options.version);
   const normalizedOptions = { ...options, id: options.id || '' };
   if (!instance) {
-    FederationInstance = createInstance(normalizedOptions);
-    return FederationInstance;
+    const createdInstance = createInstance(normalizedOptions);
+    // The top-level API singleton is first-wins: a later init() call (for
+    // example from a remote container that shares this runtime copy) must
+    // not re-point loadRemote/registerRemotes/getInstance to its instance.
+    if (!FederationInstance) {
+      FederationInstance = createdInstance;
+    }
+    return createdInstance;
   } else {
     // Merge options
     instance.initOptions(normalizedOptions);
