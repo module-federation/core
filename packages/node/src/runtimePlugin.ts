@@ -179,34 +179,84 @@ export const returnFromGlobalInstances = (
 
 // V8 keeps every distinct script it compiles in an isolate-wide compilation
 // cache (source text plus compiled code) that is only evicted under heap
-// pressure, and that pressure is measured against V8's own limit rather than a
-// container's. Remote chunks are exactly the code that changes with every
-// deployment, so compiling them with the cache switched off keeps old builds
-// from piling up in the cache after a forced re-registration. The switch is
-// process-wide but only spans the synchronous compile call. Set
-// FEDERATION_KEEP_COMPILATION_CACHE=true to opt out.
+// pressure measured against V8's own limit, not a container's. Remote code is
+// exactly the code that changes with every deployment, so keep it out of the
+// cache. Strategy, selectable with FEDERATION_COMPILATION_CACHE:
+//   flag (default): flip --no-compilation-cache around the synchronous compile
+//                   via v8.setFlagsFromString, no stall, nothing else affected;
+//   gc:             compile normally, then run one full garbage collection
+//                   through the inspector once the compile burst settles. That
+//                   collection clears the whole cache (a snapshot would too, but
+//                   costs seconds on a large heap). For hosts where the flag is
+//                   unavailable or ineffective; also the automatic fallback when
+//                   v8.setFlagsFromString is missing;
+//   off:            leave the cache alone (FEDERATION_KEEP_COMPILATION_CACHE=true
+//                   is the legacy spelling).
+type CompilationCacheStrategy = 'flag' | 'gc' | 'off';
+let compilationCacheGcTimer: ReturnType<typeof setTimeout> | undefined;
+
+function compilationCacheStrategy(): CompilationCacheStrategy {
+  const configured = process.env['FEDERATION_COMPILATION_CACHE'];
+  if (configured === 'flag' || configured === 'gc' || configured === 'off') {
+    return configured;
+  }
+  return process.env['FEDERATION_KEEP_COMPILATION_CACHE'] === 'true'
+    ? 'off'
+    : 'flag';
+}
+
+function scheduleCompilationCacheClear(): void {
+  if (compilationCacheGcTimer) {
+    return;
+  }
+  compilationCacheGcTimer = setTimeout(() => {
+    compilationCacheGcTimer = undefined;
+    try {
+      const inspector = __non_webpack_require__(
+        'inspector',
+      ) as typeof import('inspector');
+      const session = new inspector.Session();
+      session.connect();
+      // The callback runs synchronously inside post(); disconnecting from within
+      // it deadlocks the session, so disconnect once post() has returned.
+      session.post('HeapProfiler.collectGarbage', () => undefined);
+      session.disconnect();
+    } catch {
+      // no inspector in this runtime: nothing else can clear the cache in-process
+    }
+  }, 1000);
+  if (typeof compilationCacheGcTimer.unref === 'function') {
+    compilationCacheGcTimer.unref();
+  }
+}
+
 export const withoutCompilationCache = <T>(compile: () => T): T => {
-  if (
-    typeof process === 'undefined' ||
-    process.env['FEDERATION_KEEP_COMPILATION_CACHE'] === 'true'
-  ) {
+  if (typeof process === 'undefined') {
     return compile();
   }
-  let v8: typeof import('v8') | undefined;
-  try {
-    v8 = __non_webpack_require__('v8') as typeof import('v8');
-  } catch {
+  const strategy = compilationCacheStrategy();
+  if (strategy === 'off') {
     return compile();
   }
-  if (!v8 || typeof v8.setFlagsFromString !== 'function') {
-    return compile();
+  if (strategy === 'flag') {
+    let v8: { setFlagsFromString?: (flags: string) => void } | undefined;
+    try {
+      v8 = __non_webpack_require__('v8');
+    } catch {
+      v8 = undefined;
+    }
+    if (v8 && typeof v8.setFlagsFromString === 'function') {
+      v8.setFlagsFromString('--no-compilation-cache');
+      try {
+        return compile();
+      } finally {
+        v8.setFlagsFromString('--compilation-cache');
+      }
+    }
   }
-  v8.setFlagsFromString('--no-compilation-cache');
-  try {
-    return compile();
-  } finally {
-    v8.setFlagsFromString('--compilation-cache');
-  }
+  const result = compile();
+  scheduleCompilationCacheClear();
+  return result;
 };
 
 const CHUNK_WRAPPER_PARAMS = ['exports', 'require', '__dirname', '__filename'];
