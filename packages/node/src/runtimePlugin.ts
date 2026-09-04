@@ -177,6 +177,41 @@ export const returnFromGlobalInstances = (
   return null;
 };
 
+const CHUNK_WRAPPER_PARAMS = ['exports', 'require', '__dirname', '__filename'];
+
+type ChunkFunction = (
+  exports: any,
+  require: any,
+  dirname: string,
+  filename: string,
+) => void;
+
+// Compiles a chunk body into a callable without direct `eval`. Functions created
+// by direct eval capture the enclosing scope, which pinned the multi-megabyte
+// chunk source string (and everything else in scope) for as long as any function
+// from the chunk stayed alive. On Node this uses `vm.Script`, which also keeps
+// real filenames in stack traces; edge runtimes without `vm` fall back to
+// `new Function`, the eval variant that does not capture scope.
+export const compileChunk = (
+  source: string,
+  filename: string,
+): ChunkFunction => {
+  if (typeof process !== 'undefined') {
+    const vm = __non_webpack_require__('vm') as typeof import('vm');
+    const script = new vm.Script(
+      `(function(${CHUNK_WRAPPER_PARAMS.join(', ')}) {${source}\n})`,
+      {
+        filename,
+        importModuleDynamically:
+          //@ts-ignore
+          vm.constants?.USE_MAIN_CONTEXT_DEFAULT_LOADER ?? importNodeModule,
+      },
+    );
+    return script.runInThisContext() as ChunkFunction;
+  }
+  return new Function(...CHUNK_WRAPPER_PARAMS, source) as ChunkFunction;
+};
+
 // Hoisted utility function to load chunks from filesystem
 export const loadFromFs = (
   filename: string,
@@ -184,23 +219,13 @@ export const loadFromFs = (
 ): void => {
   const fs = __non_webpack_require__('fs') as typeof import('fs');
   const path = __non_webpack_require__('path') as typeof import('path');
-  const vm = __non_webpack_require__('vm') as typeof import('vm');
 
   if (fs.existsSync(filename)) {
     fs.readFile(filename, 'utf-8', (err, content) => {
       if (err) return callback(err, null);
       const chunk = {};
       try {
-        const script = new vm.Script(
-          `(function(exports, require, __dirname, __filename) {${content}\n})`,
-          {
-            filename,
-            importModuleDynamically:
-              //@ts-ignore
-              vm.constants?.USE_MAIN_CONTEXT_DEFAULT_LOADER ?? importNodeModule,
-          },
-        );
-        script.runInThisContext()(
+        compileChunk(content, filename)(
           chunk,
           __non_webpack_require__,
           path.dirname(filename),
@@ -253,7 +278,7 @@ export const fetchAndRun = (
       const resolution = (url as URL & { mfMetadata?: ChunkUrlMetadata })
         .mfMetadata;
       try {
-        eval(`(function(exports, require, __dirname, __filename) {${data}\n})`)(
+        compileChunk(data, url.href)(
           chunk,
           __non_webpack_require__,
           url.pathname.split('/').slice(0, -1).join('/'),

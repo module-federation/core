@@ -438,6 +438,11 @@ describe('runtimePlugin', () => {
         },
       });
       const callback = jest.fn();
+      // compile for real so the broken chunk throws a SyntaxError
+      require('vm').Script.mockImplementationOnce((code: string) => {
+        new Function(`return ${code}`);
+        return { runInThisContext: () => () => undefined };
+      });
       const args = {
         origin: {
           options: {
@@ -659,6 +664,9 @@ describe('runtimePlugin', () => {
             "exports.modules = {'test-module': {}}; exports.ids = ['test-chunk']; exports.runtime = null;",
           ),
       });
+      require('vm').Script.mockImplementationOnce((code: string) => ({
+        runInThisContext: () => new Function(`return ${code}`)(),
+      }));
       const args = {
         origin: {
           options: { name: 'test-host' },
@@ -684,6 +692,14 @@ describe('runtimePlugin', () => {
       });
 
       expect(result).toEqual(mockChunk);
+      // remote chunks are compiled through vm.Script with the chunk URL as the
+      // script filename, never through direct eval
+      expect(require('vm').Script).toHaveBeenCalledWith(
+        expect.stringContaining(
+          '(function(exports, require, __dirname, __filename)',
+        ),
+        expect.objectContaining({ filename: 'http://example.com/test-chunk' }),
+      );
       (global as any).__webpack_require__.p = originalPublicPath;
     });
 
