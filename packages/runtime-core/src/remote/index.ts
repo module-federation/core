@@ -762,17 +762,29 @@ export class RemoteHandler {
         let remoteInsId = remoteInfo.buildVersion
           ? composeKeyWithSeparator(remoteInfo.name, remoteInfo.buildVersion)
           : remoteInfo.name;
-        const remoteInsIndex =
-          CurrentGlobal.__FEDERATION__.__INSTANCES__.findIndex((ins) => {
-            if (remoteInfo.buildVersion) {
-              return ins.options.id === remoteInsId;
-            } else {
-              return ins.name === remoteInsId;
-            }
-          });
+        const instances = CurrentGlobal.__FEDERATION__.__INSTANCES__;
+        let remoteInsIndex = instances.findIndex((ins) => {
+          if (remoteInfo.buildVersion) {
+            return ins.options.id === remoteInsId;
+          } else {
+            return ins.name === remoteInsId;
+          }
+        });
+        // The registered name may differ from the name the remote was built
+        // with. The remote's runtime instance is named after its build name,
+        // which for enhanced/webpack containers equals entryGlobalName.
+        const { entryGlobalName } = remoteInfo;
+        const canMatchByEntryGlobalName =
+          typeof entryGlobalName === 'string' &&
+          entryGlobalName !== '' &&
+          entryGlobalName !== remoteInfo.name;
+        if (remoteInsIndex === -1 && canMatchByEntryGlobalName) {
+          remoteInsIndex = instances.findIndex(
+            (ins) => ins.name === entryGlobalName,
+          );
+        }
         if (remoteInsIndex !== -1) {
-          const remoteIns =
-            CurrentGlobal.__FEDERATION__.__INSTANCES__[remoteInsIndex];
+          const remoteIns = instances[remoteInsIndex];
           remoteInsId = remoteIns.options.id || remoteInsId;
           const globalShareScopeMap = getGlobalShareScope();
 
@@ -834,7 +846,16 @@ export class RemoteHandler {
               ];
             },
           );
-          CurrentGlobal.__FEDERATION__.__INSTANCES__.splice(remoteInsIndex, 1);
+          instances.splice(remoteInsIndex, 1);
+        } else {
+          // Containers built without the federation runtime legitimately have
+          // no instance, so only warn: a stale instance would otherwise stay
+          // in __INSTANCES__ and leak once the remote is loaded again.
+          logger.warn(
+            `No runtime instance named "${remoteInfo.name}"${
+              canMatchByEntryGlobalName ? ` (or "${entryGlobalName}")` : ''
+            } was found in __FEDERATION__.__INSTANCES__ while removing remote "${remote.name}", so its share scope and instance could not be released. Make sure the registered remote name matches the name the remote was built with.`,
+          );
         }
 
         host.moduleCache.delete(remote.name);
