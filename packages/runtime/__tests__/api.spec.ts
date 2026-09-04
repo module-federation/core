@@ -1,4 +1,4 @@
-import { describe, it, expect } from '@rstest/core';
+import { describe, it, expect, rs } from '@rstest/core';
 import { createInstance, getInstance, init } from '../src';
 
 // eslint-disable-next-line max-lines-per-function
@@ -86,10 +86,12 @@ describe('api', () => {
   });
 
   it('returns the default instance when no finder is provided', () => {
-    const defaultInstance = init({
+    init({
       name: '@federation/default-instance',
       remotes: [],
     });
+    const defaultInstance = getInstance();
+    expect(defaultInstance).not.toBeNull();
 
     createInstance({
       name: '@federation/secondary-instance',
@@ -97,6 +99,38 @@ describe('api', () => {
     });
 
     expect(getInstance()).toBe(defaultInstance);
+  });
+
+  it('keeps the first initialized instance as the top-level singleton', async () => {
+    // Load a fresh copy of the runtime so the module-level singleton is unset
+    rs.resetModules();
+    const runtime = await import('../src');
+
+    const host = runtime.init({
+      name: '@federation/singleton-host',
+      remotes: [],
+    });
+    // Simulates a remote container whose bundler runtime calls init() through
+    // the same @module-federation/runtime copy as the host
+    const remote = runtime.init({
+      name: '@federation/singleton-remote',
+      remotes: [],
+    });
+    expect(remote).not.toBe(host);
+
+    expect(runtime.getInstance()).toBe(host);
+
+    runtime.registerRemotes([
+      {
+        name: '@federation/singleton-sub',
+        entry: 'http://localhost:1111/singleton-sub/remoteEntry.js',
+      },
+    ]);
+
+    expect(host.options.remotes.map((remoteInfo) => remoteInfo.name)).toContain(
+      '@federation/singleton-sub',
+    );
+    expect(remote.options.remotes).toHaveLength(0);
   });
 
   it('finds the first matching registered instance', () => {
