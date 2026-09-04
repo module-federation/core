@@ -39,6 +39,8 @@ type ModuleFederationOptions {
       provideExternalRuntime?: boolean;
       optimization?: {
         disableSnapshot?: boolean;
+        disableRemote?: boolean;
+        disableShared?: boolean;
         target?: 'web' | 'node';
       };
     };

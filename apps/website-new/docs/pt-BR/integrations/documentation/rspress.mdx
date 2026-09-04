@@ -1,0 +1,162 @@
+# Rspress
+
+:::info Note
+Requires [Rspress version 2.0.0-beta.16](https://v2.rspress.rs/plugin/system/introduction) ou higher.
+:::
+
+Helps users build e consuma {props.brandName || props.name || 'Module Federation'} products em **Rspress**.
+
+## Início rápido
+
+{props.demo}
+
+### Instalação
+
+Você pode instale o plugin com o seguintes comando:
+
+import InstallKit from '@docs/_snippets/install-kit';
+
+<InstallKit
+  pkgName={props.pkgName || '@module-federation/rspress-plugin'}
+/>
+
+### Crie {props.configName || 'module-federation.configuração.ts'}
+
+Crie o {props.configName || 'module-federation.configuração.ts'} arquivo com o seguintes content:
+
+import CreateConfig from '@docs/_snippets/rspress/create-config';
+
+{props.createConfig || <CreateConfig />}
+
+### Register Plugin
+
+import RegisterPlugin from '@docs/_snippets/rspress/register-plugin';
+import React from 'react';
+
+{props.registerPlugin || React.createElement(RegisterPlugin)}
+
+### Carregamento Document Fragments
+
+Você pode diretamente carregue exported document fragments em your `mdx` arquivos.
+
+```mdx title='docs/en/guide/intro.mdx'
+import Intro from 'mf-doc/intro-zh';
+
+{/* Document fragments support passing parameters, which are consumed as props. */}
+<Intro cmdTools={['a','b']} />
+```
+
+Document fragments suporte passing parameters, que são consumido as props.
+
+Se você precisa use o `cmdTools` variable em uma document fragment, você pode refer para o seguintes:
+
+```mdx title='docs/zh/guide/intro.mdx'
+{(props.cmdTools || ['pkg-a', 'pkg-b']).map(cmdTool=>(<code>{cmdTool}</code>))}
+```
+
+## Configuração
+
+* Tipo:
+
+import ConfigType from '@docs/_snippets/rspress/config-type';
+
+{props.configType || <ConfigType />}
+
+### {props.pluginOptionName || 'moduleFederationOptions'}
+
+[{props.brandName || props.name || 'Module Federation'} Configuration](/configure/index.html)
+
+### rspressOptions
+
+Additional configuração para o Rspress plugin.
+
+#### autoShared
+
+* Tipo: `boolean`
+* Padrão: `true`
+
+Rspress usa `react`, `react-dom`, e `@mdx-js/react` as third-party dependências. Esses three dependências precisa ser singletons, so o `shared` configuração é automatically injected during o build.
+
+Você pode também definir `autoShared: false` para disable este behavior.
+
+Padrão `shared` configuração: as follows:
+
+```json
+  react: {
+    singleton: true,
+    requiredVersion: false,
+  },
+  'react-dom': {
+    singleton: true,
+    requiredVersion: false,
+  },
+  'react/': {
+    singleton: true,
+    requiredVersion: false,
+  },
+  'react-dom/': {
+    singleton: true,
+    requiredVersion: false,
+  },
+  '@mdx-js/react': {
+    singleton: true,
+    requiredVersion: false
+  },
+  '@rspress/core/runtime': {
+    singleton: true,
+    requiredVersion: false
+  }
+```
+
+#### rebuildSearchIndex
+
+* Tipo: `boolean`
+* Padrão: `true`
+
+Rspress automatically generates uma search index during o build, but o generation process apenas suporta `.mdx` ou `.md` arquivos. Portanto, quando uma Module Federation document fragment é carregado, it vai não ser searchable.
+
+To avoid este, o MF Rspress Plugin vai regenerate o search index based no rendered `html` depois SSG é complete para suporte o search função.
+
+Se você são usando remoteSearch ou other search funções, você pode definir `rebuildSearchIndex: false` para disable este behavior.
+
+> Note: Este feature é apenas effective em ssg mode.
+
+#### rebuildLlms
+
+* Tipo: `boolean`
+* Padrão: `true`
+
+Quando Rspress generates `llms.txt` e `llms-full.txt`, federated document fragments may não have title, description, ou page content disponível yet.
+
+To avoid empty llms output, o MF Rspress Plugin rebuilds o llms output do rendered `html` depois SSG é complete.
+
+Você pode definir `rebuildLlms: false` para disable este behavior.
+
+> Note: Este feature é apenas effective em ssg mode e apenas runs quando Rspress `llms` é habilitado.
+
+## FAQ
+
+### Does it suporte local search?
+
+Only `ssg` mode é compatível. For details, refer para [rebuildSearchIndex](#rebuildsearchindex).
+
+### Could não parse expression com swc: Expression expected"
+
+Quando referencing um MDX componente, você may encounter o seguintes erro:
+
+```bash
+File: "/root/docs/zh/guide/basic/mf.mdx"
+Error: "23:8: Could not parse expression with swc: Expression expected"
+```
+
+Este é um issue onde Rspress fails para parse o expression correctly quando parsing o MDX componente. Ele pode ser resolved as follows:
+
+```diff
+import RemoteIntroDoc from 'mf-doc/intro';
+import Head from '@components/Head';
++ import React from 'react';
+
+- <RemoteIntroDoc head={<Head />} />
++ <RemoteIntroDoc head={React.createElement(Head)}/>
+
+```

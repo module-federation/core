@@ -198,6 +198,7 @@ export class RemoteHandler {
           loaderHook: ModuleFederation['loaderHook'];
           remoteInfo: RemoteInfo;
           remoteEntryExports?: RemoteEntryExports;
+          resourceContext?: ResourceLoadContext;
         },
       ],
       Promise<RemoteEntryExports | void> | RemoteEntryExports | void
@@ -438,10 +439,17 @@ export class RemoteHandler {
           if (!assets) {
             return;
           }
-          const results = await preloadAssets(remoteInfo, host, assets, true, {
-            initiator: 'preloadRemote',
-            id: preloadId,
-          });
+          const results = await preloadAssets(
+            remoteInfo,
+            host,
+            assets,
+            true,
+            {
+              initiator: 'preloadRemote',
+              id: preloadId,
+            },
+            preloadConfig.recordPreloadedAssets,
+          );
           preloadResults.push({
             remote,
             remoteInfo,
@@ -507,6 +515,21 @@ export class RemoteHandler {
         force: options?.force,
       });
     });
+  }
+
+  initRawContainer(
+    name: string,
+    url: string,
+    container: RemoteEntryExports,
+  ): Module {
+    const { host } = this;
+    const remoteInfo = getRemoteInfo({ name, entry: url });
+    const module = new Module({ host, remoteInfo });
+
+    module.remoteEntryExports = container;
+    host.moduleCache.set(name, module);
+
+    return module;
   }
 
   async getRemoteModuleAndOptions(options: { id: string }): Promise<{

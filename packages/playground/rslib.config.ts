@@ -33,9 +33,7 @@ function isTypescriptDynamicRequireWarning(warning: unknown) {
 }
 
 const shared = {
-  dts: {
-    bundle: true,
-  },
+  dts: false,
   source: {
     entry: {
       index: './src/component.ts',

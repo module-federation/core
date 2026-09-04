@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/sdk",
-  "version": "2.6.0",
+  "version": "2.9.0",
   "type": "module",
   "license": "MIT",
   "description": "A sdk for support module federation",
@@ -64,14 +64,6 @@
   "devDependencies": {
     "@jest/globals": "29.7.0",
     "webpack": "^5.0.0"
-  },
-  "peerDependencies": {
-    "node-fetch": "^2.7.0 || ^3.3.2"
-  },
-  "peerDependenciesMeta": {
-    "node-fetch": {
-      "optional": true
-    }
   },
   "scripts": {
     "build": "tsdown --config tsdown.config.ts",

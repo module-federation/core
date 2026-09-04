@@ -1,5 +1,53 @@
 # @module-federation/devtools
 
+## 2.9.0
+
+### Patch Changes
+
+- 403eebc: Fix remote overrides to support both direct and default proxy core exports.
+- af82ae4: Fix the shared dependencies packages badge rendering its count twice. The badge printed `stats.totalPackages` next to the `packagesBadge` translation, which already interpolates the same value, so a single package showed as "11 packages".
+- Updated dependencies [df8b40f]
+- Updated dependencies [df8b40f]
+- Updated dependencies [df8b40f]
+- Updated dependencies [df8b40f]
+  - @module-federation/observability-plugin@2.6.0
+  - @module-federation/sdk@2.9.0
+
+## 2.8.2
+
+### Patch Changes
+
+- @module-federation/observability-plugin@2.5.6
+- @module-federation/sdk@2.8.2
+
+## 2.8.1
+
+### Patch Changes
+
+- Updated dependencies [d901e2c]
+  - @module-federation/sdk@2.8.1
+  - @module-federation/observability-plugin@2.5.5
+
+## 2.8.0
+
+### Patch Changes
+
+- Updated dependencies [ea490ae]
+  - @module-federation/sdk@2.8.0
+  - @module-federation/observability-plugin@2.5.4
+
+## 2.7.0
+
+### Patch Changes
+
+- 8e3d5cb: Fix dependency graph cards for remotes that are only known by their manifest URL.
+- 538e38b: Guard Chrome DevTools module info sync against invalid undefined placeholder payloads.
+- 8ec950c: Bump runtime dependencies: echarts 6.1.0 (devtools), hono 4.12.26 and @hono/node-server 1.19.13 (treeshake-server), lodash-es 4.18.1 (rspress-plugin), handlebars 4.7.9 (create-module-federation), resolve 1.22.12 (third-party-dts-extractor).
+- Updated dependencies [dcc640b]
+- Updated dependencies [9958086]
+  - @module-federation/sdk@2.7.0
+  - @module-federation/observability-plugin@2.5.3
+
 ## 2.6.0
 
 ### Patch Changes

@@ -1,5 +1,31 @@
 # @module-federation/sdk
 
+## 2.9.0
+
+## 2.8.2
+
+## 2.8.1
+
+### Patch Changes
+
+- d901e2c: Use manifest expose assets for Next.js chunk flushing, including aliased remotes, and derive legacy federated stats compatibility assets without an extra Webpack stats traversal.
+
+## 2.8.0
+
+### Patch Changes
+
+- ea490ae: Allow builds to exclude unused remote consumption and shared capabilities, and automatically omit Webpack container initialization when no exposes are configured.
+
+## 2.7.0
+
+### Minor Changes
+
+- dcc640b: chore(sdk): drop the `node-fetch` fallback and optional peer dependency. Native `fetch` was already preferred everywhere it exists (Node 18+); the fallback only fired on EOL Node versions, where the loader-hook path was broken anyway. Removes up to ~9MB of optional install weight (`web-streams-polyfill` et al).
+
+### Patch Changes
+
+- 9958086: Handle Node.js built-in imports in the Node ESM remote loader.
+
 ## 2.6.0
 
 ## 2.5.1

@@ -1,5 +1,60 @@
 # @module-federation/metro
 
+## 2.9.0
+
+### Patch Changes
+
+- Updated dependencies [df8b40f]
+- Updated dependencies [df8b40f]
+  - @module-federation/runtime@2.9.0
+  - @module-federation/dts-plugin@2.9.0
+  - @module-federation/sdk@2.9.0
+
+## 2.8.2
+
+### Patch Changes
+
+- @module-federation/runtime@2.8.2
+- @module-federation/dts-plugin@2.8.2
+- @module-federation/sdk@2.8.2
+
+## 2.8.1
+
+### Patch Changes
+
+- 1ed404a: fix(metro): normalize Windows separators before encoding parent directory segments in split-bundle URLs.
+- Updated dependencies [d901e2c]
+- Updated dependencies [641a0b6]
+  - @module-federation/sdk@2.8.1
+  - @module-federation/dts-plugin@2.8.1
+  - @module-federation/runtime@2.8.1
+
+## 2.8.0
+
+### Patch Changes
+
+- 2dc9a40: chore: bump Rock dependencies to 0.14.1
+- d4da7fb: fix: normalize Metro paths on Windows
+- 7c4ac9f: Support TypeScript 7 in Metro projects.
+- Updated dependencies [ea490ae]
+- Updated dependencies [6ee67dc]
+- Updated dependencies [681e5d2]
+  - @module-federation/sdk@2.8.0
+  - @module-federation/dts-plugin@2.8.0
+  - @module-federation/runtime@2.8.0
+
+## 2.7.0
+
+### Patch Changes
+
+- 61fe85d: chore(deps): upgrade `@rslib/core` to 0.23.2, `@rsbuild/core` to 2.1.4, and `@rsbuild/plugin-react`/`plugin-vue`/`plugin-sass` to their 2.x latest across dev dependencies. `create-module-federation` templates are updated so newly scaffolded projects pick up the same versions. `@module-federation/modern-js-v3` is realigned to `@modern-js/* 3.5.0` (which uses `@rsbuild/core 2.1.0`) to resolve a `Rspack` type mismatch between the upgraded `@module-federation/rsbuild-plugin` and modern-js's own rsbuild embedding. Peer dependency ranges are untouched.
+- Updated dependencies [a7351f3]
+- Updated dependencies [dcc640b]
+- Updated dependencies [9958086]
+  - @module-federation/dts-plugin@2.7.0
+  - @module-federation/sdk@2.7.0
+  - @module-federation/runtime@2.7.0
+
 ## 2.6.0
 
 ### Patch Changes

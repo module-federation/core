@@ -1,4 +1,4 @@
-import { expect, describe, it } from 'vitest';
+import { expect, describe, it } from '@rstest/core';
 
 import { getModuleInfo } from '../src/utils';
 

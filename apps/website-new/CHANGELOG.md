@@ -1,5 +1,48 @@
 # website-new
 
+## 1.3.31
+
+### Patch Changes
+
+- Updated dependencies [df8b40f]
+- Updated dependencies [df8b40f]
+  - @module-federation/runtime@2.9.0
+  - @module-federation/rspress-plugin@2.9.0
+  - @module-federation/error-codes@2.9.0
+
+## 1.3.30
+
+### Patch Changes
+
+- @module-federation/runtime@2.8.2
+- @module-federation/rspress-plugin@2.8.2
+- @module-federation/error-codes@2.8.2
+
+## 1.3.29
+
+### Patch Changes
+
+- @module-federation/rspress-plugin@2.8.1
+- @module-federation/runtime@2.8.1
+- @module-federation/error-codes@2.8.1
+
+## 1.3.28
+
+### Patch Changes
+
+- @module-federation/rspress-plugin@2.8.0
+- @module-federation/runtime@2.8.0
+- @module-federation/error-codes@2.8.0
+
+## 1.3.27
+
+### Patch Changes
+
+- Updated dependencies [8ec950c]
+  - @module-federation/rspress-plugin@2.7.0
+  - @module-federation/runtime@2.7.0
+  - @module-federation/error-codes@2.7.0
+
 ## 1.3.26
 
 ### Patch Changes

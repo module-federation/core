@@ -1,6 +1,6 @@
 import dirTree from 'directory-tree';
 import { join } from 'path';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from '@rstest/core';
 import { generateTypes, type RemoteOptions } from '../../src/core';
 
 const TEST_DIT_DIR = 'dist-test';

@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { vol } from 'memfs';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, rs } from '@rstest/core';
 import { createBabelTransformer } from '../../src/plugin/babel-transformer';
 import type { ModuleFederationConfigNormalized } from '../../src/types';
 
@@ -20,19 +20,19 @@ function createConfig(): ModuleFederationConfigNormalized {
 describe('createBabelTransformer', () => {
   afterEach(() => {
     vol.reset();
-    vi.restoreAllMocks();
+    rs.restoreAllMocks();
   });
 
   it('escapes Windows paths for require()', () => {
     const realReadFileSync = fs.readFileSync.bind(fs);
-    vi.spyOn(fs, 'readFileSync').mockImplementation(((filePath, options) => {
+    rs.spyOn(fs, 'readFileSync').mockImplementation(((filePath, options) => {
       const targetPath = filePath.toString();
       if (vol.existsSync(targetPath)) {
         return vol.readFileSync(targetPath, options as never);
       }
       return realReadFileSync(filePath, options as never);
     }) as typeof fs.readFileSync);
-    vi.spyOn(fs, 'writeFileSync').mockImplementation(((
+    rs.spyOn(fs, 'writeFileSync').mockImplementation(((
       filePath,
       data,
       options,

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, rs, beforeEach, afterEach } from '@rstest/core';
 import { error, warn, assert, logger } from '../src/utils/logger';
 
 const LOG_CATEGORY = '[ Federation Runtime ]';
@@ -89,7 +89,7 @@ describe('logger', () => {
 
     beforeEach(() => {
       originalWarn = logger.warn;
-      logger.warn = vi.fn();
+      logger.warn = rs.fn();
     });
 
     afterEach(() => {

@@ -1,5 +1,54 @@
 # @module-federation/node
 
+## 2.7.50
+
+### Patch Changes
+
+- Updated dependencies [df8b40f]
+- Updated dependencies [df8b40f]
+  - @module-federation/runtime@2.9.0
+  - @module-federation/enhanced@2.9.0
+  - @module-federation/sdk@2.9.0
+
+## 2.7.49
+
+### Patch Changes
+
+- @module-federation/runtime@2.8.2
+- @module-federation/enhanced@2.8.2
+- @module-federation/sdk@2.8.2
+
+## 2.7.48
+
+### Patch Changes
+
+- d901e2c: Use manifest expose assets for Next.js chunk flushing, including aliased remotes, and derive legacy federated stats compatibility assets without an extra Webpack stats traversal.
+- Updated dependencies [d901e2c]
+  - @module-federation/sdk@2.8.1
+  - @module-federation/enhanced@2.8.1
+  - @module-federation/runtime@2.8.1
+
+## 2.7.47
+
+### Patch Changes
+
+- Updated dependencies [ea490ae]
+- Updated dependencies [6ee67dc]
+- Updated dependencies [681e5d2]
+  - @module-federation/enhanced@2.8.0
+  - @module-federation/sdk@2.8.0
+  - @module-federation/runtime@2.8.0
+
+## 2.7.46
+
+### Patch Changes
+
+- Updated dependencies [dcc640b]
+- Updated dependencies [9958086]
+  - @module-federation/sdk@2.7.0
+  - @module-federation/enhanced@2.7.0
+  - @module-federation/runtime@2.7.0
+
 ## 2.7.45
 
 ### Patch Changes

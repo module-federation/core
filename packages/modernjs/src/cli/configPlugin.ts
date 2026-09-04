@@ -238,6 +238,22 @@ export const patchMFConfig = (
   return mfConfig;
 };
 
+export const setDefaultOptimizationTarget = (
+  mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
+  enableSSR: boolean,
+  isServer: boolean,
+  autoOptimization = true,
+) => {
+  if (!autoOptimization) {
+    return;
+  }
+
+  mfConfig.experiments ||= {};
+  mfConfig.experiments.optimization ||= {};
+  mfConfig.experiments.optimization.target ??=
+    enableSSR && isServer ? 'node' : 'web';
+};
+
 function patchIgnoreWarning(chain: BundlerChainConfig) {
   const ignoreWarnings = chain.get('ignoreWarnings') || [];
   const ignoredMsgs = [
@@ -340,8 +356,11 @@ export function patchBundlerConfig(options: {
   ) {
     const splitChunksValue = splitChunkConfig.chunks;
     let shouldWarn =
-      typeof splitChunksValue === 'string' && splitChunksValue !== 'async';
-    if (splitChunksValue === undefined || shouldWarn) {
+      splitChunksValue !== undefined && splitChunksValue !== 'async';
+    if (typeof splitChunksValue === 'function') {
+      splitChunkConfig.chunks = (chunk) =>
+        !chunk.canBeInitial() && splitChunksValue(chunk);
+    } else {
       splitChunkConfig.chunks = 'async';
     }
 
@@ -350,32 +369,36 @@ export function patchBundlerConfig(options: {
       typeof splitChunkConfig.cacheGroups === 'object'
     ) {
       for (const cacheGroup of Object.values(splitChunkConfig.cacheGroups)) {
-        if (
-          cacheGroup &&
-          typeof cacheGroup === 'object' &&
-          typeof cacheGroup.chunks === 'string' &&
-          cacheGroup.chunks !== 'async'
-        ) {
-          cacheGroup.chunks = 'async';
-          shouldWarn = true;
+        if (cacheGroup && typeof cacheGroup === 'object') {
+          const { chunks } = cacheGroup;
+          if (typeof chunks === 'function') {
+            cacheGroup.chunks = (chunk) =>
+              !chunk.canBeInitial() && chunks(chunk);
+            shouldWarn = true;
+          } else if (typeof chunks === 'string' && chunks !== 'async') {
+            cacheGroup.chunks = 'async';
+            shouldWarn = true;
+          }
         }
       }
     }
 
     const { fallbackCacheGroup } = splitChunkConfig;
-    if (
-      fallbackCacheGroup &&
-      typeof fallbackCacheGroup === 'object' &&
-      typeof fallbackCacheGroup.chunks === 'string' &&
-      fallbackCacheGroup.chunks !== 'async'
-    ) {
-      fallbackCacheGroup.chunks = 'async';
-      shouldWarn = true;
+    if (fallbackCacheGroup && typeof fallbackCacheGroup === 'object') {
+      const { chunks } = fallbackCacheGroup;
+      if (typeof chunks === 'function') {
+        fallbackCacheGroup.chunks = (chunk) =>
+          !chunk.canBeInitial() && chunks(chunk);
+        shouldWarn = true;
+      } else if (typeof chunks === 'string' && chunks !== 'async') {
+        fallbackCacheGroup.chunks = 'async';
+        shouldWarn = true;
+      }
     }
 
     if (shouldWarn) {
       logger.warn(
-        `splitChunks.chunks = async is not allowed with stream SSR mode, it will auto changed to "async"`,
+        'Stream SSR requires async-only splitChunks; constraining chunk filters to async chunks',
       );
     }
   }
@@ -412,7 +435,10 @@ export function patchBundlerConfig(options: {
     modernjsConfig.deploy?.microFrontend &&
     Object.keys(mfConfig.exposes || {}).length
   ) {
-    chain.optimization.usedExports(false);
+    logger.info(
+      'optimization.usedExports is set to "global" to avoid tree shaking issues in micro frontend mode.',
+    );
+    chain.optimization.usedExports('global');
   }
 }
 
@@ -446,6 +472,12 @@ export const moduleFederationConfigPlugin = (
       addMyTypes2Ignored(chain, !isWeb ? ssrConfig : csrConfig);
 
       const targetMFConfig = !isWeb ? ssrConfig : csrConfig;
+      setDefaultOptimizationTarget(
+        targetMFConfig,
+        enableSSR,
+        !isWeb,
+        userConfig.originPluginOptions.autoOptimization,
+      );
       patchMFConfig(targetMFConfig, !isWeb);
 
       if (

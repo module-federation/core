@@ -3,4 +3,4 @@
 "@module-federation/modern-js-v3": patch
 ---
 
-Avoid duplicate stream SSR splitChunks warnings when `splitChunks.chunks` is already `async`, and normalize explicit cache group and fallback cache group chunk overrides for stream SSR.
+Constrain stream SSR splitChunks filters to async chunks, including explicit cache group and fallback cache group overrides. Wrap function filters to exclude initial chunks while preserving their custom selection of async chunks, and keep already-valid async settings quiet.

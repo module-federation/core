@@ -1,5 +1,5 @@
 import { ChildProcess } from 'child_process';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, rs, beforeEach } from '@rstest/core';
 import { randomUUID } from 'crypto';
 
 import { RpcExitError, wrapRpc, RpcMessage, RpcGMCallTypes } from './index';
@@ -21,8 +21,8 @@ describe('wrapRpc', () => {
     childProcessMock = {
       connected: true,
       pid: 1234,
-      send: vi.spyOn(mockChildProcessFn, 'send'),
-      on: vi
+      send: rs.spyOn(mockChildProcessFn, 'send'),
+      on: rs
         .fn()
         .mockImplementation(
           (name: string, handlerToAdd: (...args: unknown[]) => void) => {
@@ -39,7 +39,7 @@ describe('wrapRpc', () => {
             });
           },
         ),
-      once: vi
+      once: rs
         .fn()
         .mockImplementation(
           (name: string, handlerToAdd: (...args: unknown[]) => void) => {
@@ -52,7 +52,7 @@ describe('wrapRpc', () => {
             });
           },
         ),
-      off: vi
+      off: rs
         .fn()
         .mockImplementation(
           (name: string, handlerToRemove: (...args: unknown[]) => void) => {
@@ -64,7 +64,7 @@ describe('wrapRpc', () => {
             );
           },
         ),
-      kill: vi.fn().mockImplementation((signal?: NodeJS.Signals | number) => {
+      kill: rs.fn().mockImplementation((signal?: NodeJS.Signals | number) => {
         const handlerName = 'close';
         if (!eventHandlers[handlerName]) {
           return;
@@ -155,7 +155,7 @@ describe('wrapRpc', () => {
         value: 41,
       });
 
-      expect(promise).resolves.toEqual(41);
+      await expect(promise).resolves.toEqual(41);
       expect(eventHandlers).toMatchSnapshot({
         message: [expect.any(Function)],
         close: [expect.any(Function)],
@@ -176,7 +176,7 @@ describe('wrapRpc', () => {
         error: 'sad error',
       });
 
-      expect(promise).rejects.toEqual('sad error');
+      await expect(promise).rejects.toEqual('sad error');
       expect(eventHandlers).toMatchSnapshot({
         message: [expect.any(Function)],
         close: [expect.any(Function)],
@@ -184,7 +184,7 @@ describe('wrapRpc', () => {
     });
 
     it('rejects on send error', async () => {
-      childProcessMock.send = vi
+      childProcessMock.send = rs
         .fn()
         .mockImplementation((message, callback) => {
           callback(new Error('cannot send'));
@@ -192,7 +192,7 @@ describe('wrapRpc', () => {
       const wrapped = wrapRpc<() => void>(childProcessMock, {
         id: randomUUID(),
       });
-      expect(wrapped()).rejects.toEqual(new Error('cannot send'));
+      await expect(wrapped()).rejects.toEqual(new Error('cannot send'));
       expect(eventHandlers).toMatchSnapshot({
         message: [expect.any(Function)],
         close: [expect.any(Function)],
@@ -218,15 +218,15 @@ describe('wrapRpc', () => {
           id: randomUUID(),
         });
         const promise = wrapped();
-        expect(eventHandlers['close']).toMatchSnapshot([expect.any(Function)]);
+        expect(eventHandlers['close']).toEqual([expect.any(Function)]);
         const triggerClose = eventHandlers['close'][0];
 
         triggerClose(code, signal);
 
-        expect(promise).rejects.toEqual(
+        await expect(promise).rejects.toEqual(
           new RpcExitError(message, code, signal),
         );
-        expect(eventHandlers).toMatchSnapshot({
+        expect(eventHandlers).toEqual({
           message: [],
           close: [],
         });
@@ -263,7 +263,7 @@ describe('wrapRpc', () => {
         value: 41,
       });
 
-      expect(promise).resolves.toEqual(41);
+      await expect(promise).resolves.toEqual(41);
       expect(eventHandlers).toEqual({
         message: [],
         close: [],
@@ -284,7 +284,7 @@ describe('wrapRpc', () => {
         error: 'sad error',
       });
 
-      expect(promise).rejects.toEqual('sad error');
+      await expect(promise).rejects.toEqual('sad error');
       expect(eventHandlers).toEqual({
         message: [],
         close: [],
@@ -311,15 +311,15 @@ describe('wrapRpc', () => {
           once: true,
         });
         const promise = wrapped();
-        expect(eventHandlers['close']).toMatchSnapshot([expect.any(Function)]);
+        expect(eventHandlers['close']).toEqual([expect.any(Function)]);
         const triggerClose = eventHandlers['close'][0];
 
         triggerClose(code, signal);
 
-        expect(promise).rejects.toEqual(
+        await expect(promise).rejects.toEqual(
           new RpcExitError(message, code, signal),
         );
-        expect(eventHandlers).toMatchSnapshot({
+        expect(eventHandlers).toEqual({
           message: [],
           close: [],
         });

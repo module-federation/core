@@ -1,8 +1,9 @@
-import { it, expect, describe, vi, afterEach } from 'vitest';
+import { it, expect, describe, rs, afterEach } from '@rstest/core';
 import {
   moduleFederationConfigPlugin,
   patchBundlerConfig,
   patchMFConfig,
+  setDefaultOptimizationTarget,
 } from './configPlugin';
 import logger from '../logger';
 
@@ -31,11 +32,11 @@ const getModernJsConfig = async (
   } as any);
 
   await plugin.setup!({
-    config: vi.fn((callback) => {
+    config: rs.fn((callback) => {
       configCallbacks.push(callback);
     }),
-    getConfig: vi.fn(() => modernjsConfig),
-    modifyBundlerChain: vi.fn(),
+    getConfig: rs.fn(() => modernjsConfig),
+    modifyBundlerChain: rs.fn(),
   } as any);
 
   return configCallbacks[0]();
@@ -44,27 +45,27 @@ const getModernJsConfig = async (
 const createBundlerChain = (splitChunkConfig: Record<string, unknown>): any => {
   const outputValues = new Map<string, unknown>();
   const fallback = {
-    set: vi.fn(() => fallback),
+    set: rs.fn(() => fallback),
   };
 
   return {
-    get: vi.fn((key: string) => (key === 'ignoreWarnings' ? [] : undefined)),
-    ignoreWarnings: vi.fn(),
+    get: rs.fn((key: string) => (key === 'ignoreWarnings' ? [] : undefined)),
+    ignoreWarnings: rs.fn(),
     optimization: {
-      delete: vi.fn(),
+      delete: rs.fn(),
       splitChunks: {
-        entries: vi.fn(() => splitChunkConfig),
+        entries: rs.fn(() => splitChunkConfig),
       },
-      usedExports: vi.fn(),
+      usedExports: rs.fn(),
     },
     output: {
-      chunkFilename: vi.fn(),
-      chunkLoadingGlobal: vi.fn((value: string) => {
+      chunkFilename: rs.fn(),
+      chunkLoadingGlobal: rs.fn((value: string) => {
         outputValues.set('chunkLoadingGlobal', value);
       }),
-      get: vi.fn((key: string) => outputValues.get(key)),
-      publicPath: vi.fn(),
-      uniqueName: vi.fn((value: string) => {
+      get: rs.fn((key: string) => outputValues.get(key)),
+      publicPath: rs.fn(),
+      uniqueName: rs.fn((value: string) => {
         outputValues.set('uniqueName', value);
       }),
     },
@@ -89,7 +90,7 @@ const patchClientBundlerConfig = (
 };
 
 afterEach(() => {
-  vi.restoreAllMocks();
+  rs.restoreAllMocks();
 });
 
 describe('patchMFConfig', async () => {
@@ -163,16 +164,17 @@ describe('patchMFConfig', async () => {
 
 describe('patchBundlerConfig', () => {
   const warning =
-    'splitChunks.chunks = async is not allowed with stream SSR mode, it will auto changed to "async"';
+    'Stream SSR requires async-only splitChunks; constraining chunk filters to async chunks';
 
   it.each([
     { chunks: undefined, warns: false },
     { chunks: 'async', warns: false },
     { chunks: 'all', warns: true },
+    { chunks: 'initial', warns: true },
   ])(
     'normalizes stream SSR splitChunks from $chunks and warns: $warns',
     ({ chunks, warns }) => {
-      const warnSpy = vi.spyOn(logger, 'warn').mockImplementation(() => {});
+      const warnSpy = rs.spyOn(logger, 'warn').mockImplementation(() => {});
       const splitChunkConfig = {
         cacheGroups: {
           vendors: {},
@@ -192,7 +194,7 @@ describe('patchBundlerConfig', () => {
   );
 
   it('normalizes stream SSR cache group chunks', () => {
-    const warnSpy = vi.spyOn(logger, 'warn').mockImplementation(() => {});
+    const warnSpy = rs.spyOn(logger, 'warn').mockImplementation(() => {});
     const splitChunkConfig = {
       cacheGroups: {
         vendors: {
@@ -210,7 +212,7 @@ describe('patchBundlerConfig', () => {
   });
 
   it('normalizes stream SSR fallback cache group chunks', () => {
-    const warnSpy = vi.spyOn(logger, 'warn').mockImplementation(() => {});
+    const warnSpy = rs.spyOn(logger, 'warn').mockImplementation(() => {});
     const splitChunkConfig = {
       cacheGroups: {
         vendors: {},
@@ -228,11 +230,17 @@ describe('patchBundlerConfig', () => {
     expect(warnSpy).toHaveBeenCalledWith(warning);
   });
 
-  it('preserves stream SSR function chunk filters', () => {
-    const warnSpy = vi.spyOn(logger, 'warn').mockImplementation(() => {});
-    const splitChunks = vi.fn(() => true);
-    const cacheGroupChunks = vi.fn(() => true);
-    const fallbackCacheGroupChunks = vi.fn(() => true);
+  it('restricts function chunk filters to async chunks while preserving their selection', () => {
+    const warnSpy = rs.spyOn(logger, 'warn').mockImplementation(() => {});
+    const splitChunks = rs.fn(
+      (chunk: { name: string }) => chunk.name === 'selected',
+    );
+    const cacheGroupChunks = rs.fn(
+      (chunk: { name: string }) => chunk.name === 'selected',
+    );
+    const fallbackCacheGroupChunks = rs.fn(
+      (chunk: { name: string }) => chunk.name === 'selected',
+    );
     const splitChunkConfig = {
       cacheGroups: {
         vendors: {
@@ -247,18 +255,129 @@ describe('patchBundlerConfig', () => {
 
     patchClientBundlerConfig(splitChunkConfig);
 
-    expect(splitChunkConfig.chunks).toBe(splitChunks);
-    expect(splitChunkConfig.cacheGroups.vendors.chunks).toBe(cacheGroupChunks);
-    expect(splitChunkConfig.fallbackCacheGroup.chunks).toBe(
-      fallbackCacheGroupChunks,
-    );
-    expect(warnSpy).not.toHaveBeenCalledWith(warning);
+    const initialChunk = {
+      name: 'selected',
+      canBeInitial: () => true,
+      isOnlyInitial: () => true,
+    };
+    const mixedChunk = {
+      name: 'selected',
+      canBeInitial: () => true,
+      isOnlyInitial: () => false,
+    };
+    const selectedAsyncChunk = {
+      name: 'selected',
+      canBeInitial: () => false,
+      isOnlyInitial: () => false,
+    };
+    const unselectedAsyncChunk = {
+      ...selectedAsyncChunk,
+      name: 'unselected',
+    };
+
+    for (const [filter, original] of [
+      [splitChunkConfig.chunks, splitChunks],
+      [splitChunkConfig.cacheGroups.vendors.chunks, cacheGroupChunks],
+      [splitChunkConfig.fallbackCacheGroup.chunks, fallbackCacheGroupChunks],
+    ]) {
+      expect(original).not.toHaveBeenCalled();
+      expect(filter(initialChunk)).toBe(false);
+      expect(filter(mixedChunk)).toBe(false);
+      expect(original).not.toHaveBeenCalled();
+      expect(filter(selectedAsyncChunk)).toBe(true);
+      expect(filter(unselectedAsyncChunk)).toBe(false);
+      expect(original).toHaveBeenCalledTimes(2);
+      expect(original).toHaveBeenNthCalledWith(1, selectedAsyncChunk);
+      expect(original).toHaveBeenNthCalledWith(2, unselectedAsyncChunk);
+    }
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    expect(warnSpy).toHaveBeenCalledWith(warning);
+  });
+
+  it.each([
+    { enableSSR: false, isServer: false },
+    { enableSSR: true, isServer: true },
+  ])(
+    'preserves function filters outside browser SSR: %j',
+    ({ enableSSR, isServer }) => {
+      const warnSpy = rs.spyOn(logger, 'warn').mockImplementation(() => {});
+      const chunks = rs.fn(() => true);
+      const splitChunkConfig = {
+        chunks,
+        cacheGroups: { vendors: { chunks } },
+        fallbackCacheGroup: { chunks },
+      };
+
+      patchBundlerConfig({
+        chain: createBundlerChain(splitChunkConfig),
+        enableSSR,
+        isServer,
+        modernjsConfig: {},
+        mfConfig: { name: 'host' },
+      } as any);
+
+      expect(splitChunkConfig.chunks).toBe(chunks);
+      expect(splitChunkConfig.cacheGroups.vendors.chunks).toBe(chunks);
+      expect(splitChunkConfig.fallbackCacheGroup.chunks).toBe(chunks);
+      expect(warnSpy).not.toHaveBeenCalled();
+    },
+  );
+});
+
+describe('setDefaultOptimizationTarget', () => {
+  it('defaults to web when SSR is disabled', () => {
+    const config = { name: 'host' };
+
+    setDefaultOptimizationTarget(config, false, false);
+
+    expect(config).toMatchObject({
+      experiments: { optimization: { target: 'web' } },
+    });
+  });
+
+  it('defaults to web for the browser target when SSR is enabled', () => {
+    const config = { name: 'host' };
+
+    setDefaultOptimizationTarget(config, true, false);
+
+    expect(config).toMatchObject({
+      experiments: { optimization: { target: 'web' } },
+    });
+  });
+
+  it('defaults to node for the server target when SSR is enabled', () => {
+    const config = { name: 'host' };
+
+    setDefaultOptimizationTarget(config, true, true);
+
+    expect(config).toMatchObject({
+      experiments: { optimization: { target: 'node' } },
+    });
+  });
+
+  it('preserves an explicitly configured target', () => {
+    const config = {
+      name: 'host',
+      experiments: { optimization: { target: 'web' as const } },
+    };
+
+    setDefaultOptimizationTarget(config, true, true);
+
+    expect(config.experiments.optimization.target).toBe('web');
+  });
+
+  it('does not set a target when autoOptimization is disabled', () => {
+    const config = { name: 'host' };
+
+    setDefaultOptimizationTarget(config, true, true, false);
+
+    expect(config).toStrictEqual({ name: 'host' });
   });
 });
 
 describe('moduleFederationConfigPlugin', async () => {
   it('disables lazyCompilation when the project is a producer', async () => {
-    const warnSpy = vi.spyOn(logger, 'warn').mockImplementation(() => {});
+    const warnSpy = rs.spyOn(logger, 'warn').mockImplementation(() => {});
     const modernJsConfig = await getModernJsConfig(
       {
         name: 'remote',
@@ -287,7 +406,7 @@ describe('moduleFederationConfigPlugin', async () => {
   });
 
   it('keeps lazyCompilation unchanged when the project is not a producer', async () => {
-    const warnSpy = vi.spyOn(logger, 'warn').mockImplementation(() => {});
+    const warnSpy = rs.spyOn(logger, 'warn').mockImplementation(() => {});
     const modernJsConfig = await getModernJsConfig(
       {
         name: 'host',

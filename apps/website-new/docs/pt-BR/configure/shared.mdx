@@ -1,0 +1,260 @@
+# shared
+
+O `shared` configuração é usado para compartilhar comum dependências entre consumers e producers, reducing o runtime download volume e thus improving performance. `shared` allows você para configure rules for reusing dependência versões. Você pode learn mais about o scenarios onde `shared` é applicable e como para usar `shared` por meio do [FAQ](#faq).
+
+- Tipo: `PluginSharedOptions`
+- Obrigatório: No
+- Padrão: `undefined`
+
+O `PluginSharedOptions` tipo é as follows:
+
+```tsx
+type PluginSharedOptions = string[] | SharedObject;
+
+interface SharedObject {
+  [sharedName: string]: SharedConfig;
+}
+
+interface SharedConfig {
+  singleton?: boolean;
+  requiredVersion?: string;
+  eager?: boolean;
+  shareScope?: string;
+  import?: string | false;
+  shareKey?: string;
+  request?: string;
+  allowNodeModulesSuffixMatch?: boolean;
+  treeShaking?: TreeShakingConfig;
+}
+
+interface TreeShakingConfig {
+  mode: 'server-calc' | 'runtime-infer';
+  usedExports?: string[];
+}
+
+```
+
+## Exemplo
+
+```ts
+new ModuleFederationPlugin({
+  name: '@demo/host',
+  shared: {
+    react: {
+      singleton: true,
+    },
+    'react-dom': {
+      singleton: true,
+    },
+  },
+  //...
+});
+```
+
+## singleton
+
+- Tipo: `boolean`
+- Obrigatório: No
+- Padrão: `false`
+
+Whether para allow apenas one versão do shared módulo within o shared escopo (singleton mode).
+
+- Se definir para true, singleton mode é habilitado; se definir para false, singleton mode é não habilitado.
+- Se singleton mode é habilitado, o dependências compartilhadas entre o producer componentes e o consumer vai apenas ser carregado once, e uma higher versão vai ser carregado se o versões são inconsistent. Uma aviso vai ser given para o party com o lower versão.
+- Se singleton mode é não habilitado, e o dependências compartilhadas entre o producer e o consumer have diferente versões, each side vai carregue its own dependências.
+
+## requiredVersion
+
+- Tipo: `string`
+- Obrigatório: No
+- Padrão: `require('project/package.json')[devDeps | dep]['depName']`
+
+O obrigatório versão, que pode ser uma versão range. O padrão valor é o current aplicação's dependência versão.
+
+- Ao usar dependências compartilhadas, it vai check whether o dependência versão é greater than ou equal para `requiredVersion`. Se it é, it vai ser usado normally. Se it é menos than `requiredVersion`, uma aviso vai ser given no console, e o smallest versão disponível no dependências compartilhadas vai ser usado.
+- Quando one party sets `requiredVersion` e o other sets `singleton`, o dependência com `requiredVersion` vai ser carregado, e o `singleton` party vai diretamente use o dependência com `requiredVersion`, regardless do versão.
+
+## eager
+
+:::warning
+Setting `eager` para true vai pacote o dependências compartilhadas no arquivo de entrada, que may result em uma large arquivo de entrada size. Use com cautela.
+:::
+
+- Tipo: `boolean`
+- Obrigatório: No
+- Padrão: `false`
+
+Whether para immediately carregue o shared módulo.
+
+Under normal circumstances, você precisa habilite lazy entry, e then asynchronously carregar módulos shared on demand. Se você quiser use shared but não quiser habilite lazy entry, você pode definir `eager` para true.
+
+## shareScope
+
+- Tipo: `string`
+- Obrigatório: No
+- Padrão: `'default'`
+
+compartilhe escopo name, padrão valor é `'default'`.
+
+## importe
+
+- Tipo: `string | false`
+- Obrigatório: No
+- Padrão: `undefined`
+
+Control importe caminho de dependências compartilhadas, padrão valor é `undefined`.
+
+Se definir para `false`, este shared vai não ser packaged no product, e apenas o `shared` fornecido pelo consumer vai ser usado. Portanto, please garanta esse o consumer has fornecido o corresponding `shared` antes setting.
+
+## shareKey
+
+- Tipo: `string`
+- Obrigatório: No
+- Padrão: O propriedade name (`key`) do `shared` entry
+
+O lookup key usado no Compartilhe Escopo em runtime. Both o producer e o consumer deve use o **mesmo** `shareKey` para uma shared módulo para ser negotiated successfully; caso contrário each side bundles its own copy.
+
+O padrão é o propriedade name itself, so mais do time você não precisa definir it. Uma typical custom scenario é mapping um alias para uma diferente real pacote:
+
+```ts
+shared: {
+  'my-alias': {
+    import: 'react',      // actual package to resolve
+    shareKey: 'react',    // negotiate in Share Scope as "react"
+  },
+}
+```
+
+:::warning
+Se `shareKey` é omitted, o negotiation key é o propriedade name itself (`"my-alias"` no exemplo above). Se o other side registers com `"react"`, o two vai never correspondência.
+:::
+
+## request
+
+- Tipo: `string`
+- Obrigatório: No
+- Padrão: O propriedade name (`key`) do `shared` entry
+
+O módulo request caminho esse o bundler intercepts at build time. Quando o code contains um `import` esse matches este valor, o bundler replaces it com uma Compartilhe Escopo consumer instead de bundling o dependência no output.
+
+O padrão é o propriedade name, que é sufficient para mais cases. O difference entre `request` e `shareKey`:
+
+| Field | Stage | Question it answers |
+|---|---|---|
+| `request` | Build-time · módulo graph | Which `import` para intercept |
+| `shareKey` | Runtime · negotiation | Which slot em o Compartilhe Escopo para use |
+
+### Prefix matching com trailing slash
+
+Se `request` ends com `/`, o bundler treats it as uma **prefix correspondência** e intercepts every subpath importe under esse namespace. O final `shareKey` é formed by appending o subpath suffix para o configured `shareKey` (ou o prefix itself se `shareKey` é omitted).
+
+```ts
+shared: {
+  'react-dom/': {
+    request: 'react-dom/',   // intercepts import 'react-dom/client', 'react-dom/server', etc.
+    shareKey: 'react-dom/',  // final shareKey = "react-dom/" + subpath suffix
+  },
+}
+```
+
+O mesmo pattern works for utility libraries such as `lodash`:
+
+```ts
+shared: {
+  'lodash/': {
+    request: 'lodash/',    // intercepts import 'lodash/debounce', 'lodash/get', etc.
+    shareKey: 'lodash/',   // final shareKey = "lodash/" + subpath suffix
+  },
+}
+```
+
+Este é essential for pacotes esse exponha subpath módulos (e.g. `react-dom/client`, `lodash/debounce`, `@scope/package/subpath`). Sem o trailing slash, apenas o exact pacote name é intercepted; subpath importa vai ser bundled locally e vai não participate em shared escopo negotiation.
+
+:::warning Common mistake
+Writing `'react-dom'` (no trailing slash) apenas intercepts `import 'react-dom'`.
+
+Any code esse does `import { createRoot } from 'react-dom/client'` vai carregue uma second copy de React DOM, que breaks React singleton requirements e causes hydration erros. See o [troubleshooting FAQ](/guide/troubleshooting/runtime.html#subpath-imports-are-not-shared-duplicate-dependência-loaded) para mais details.
+:::
+
+## allowNodeModulesSuffixMatch
+
+- Tipo: `boolean`
+- Obrigatório: No
+- Padrão: `false`
+
+Enables uma fallback lookup esse matches módulos shared pelo portion de their resolved caminho esse appears depois `node_modules/`. Turn este on quando your consumer e producer resolve o mesmo pacote por meio de diferente absolute caminhos (por exemplo, due para pnpm hoisting, symlinks, ou custom bundler loaders) but você still want them para ser considered o mesmo shared módulo.
+
+> Previously este opção was chamada `nodeModulesReconstructedLookup`.
+
+
+## treeShaking
+
+- Tipo: `TreeShakingConfig`
+- Obrigatório: No
+- Padrão: `undefined`
+
+Configures tree-shaking behavior for dependências compartilhadas. Enabling tree shaking for dependências compartilhadas pode reduce o size do shared bundle.
+
+> Rspack é o recomendado bundler for este capability, e a documentação/exemplos prioritize Rspack uso.
+
+
+### usedExports
+
+- Tipo: `string[]`
+- Obrigatório: No
+- Padrão: `undefined`
+
+Manually **add** o exporta usado do dependência compartilhada.
+
+### mode
+
+- Tipo: `'server-calc' | 'runtime-infer'`
+- Obrigatório: No
+- Padrão: `undefined`
+
+Configures o carregamento estratégia for tree-shaken dependências compartilhadas.
+
+- `runtime-infer`: infers based no consumer’s `usedExports`. Se o provider’s `usedExports` satisfies o consumer’s `usedExports`, it usa o provider’s `shared`; caso contrário it usa o consumer’s own `shared`. Se neither satisfies o requirement, it falls back para o full bundle.
+- `server-calc`: decides whether para carregar o dependência compartilhada based no Snapshot delivered pelo servidor.
+
+### filename
+
+- Tipo: `string`
+- Obrigatório: No
+- Padrão: `undefined`
+
+Specifies o output filename para o tree-shaken shared módulo.
+
+## FAQ
+
+### Quando usar dependências compartilhadas
+
+Consuming módulos across projetos often encounters issues such as **duplicate dependência carregamento** e **singleton restrictions**. Esses issues pode ser resolved by setting up `shared`.
+
+- (Consumer Consumption) O third-party pacotes usado no módulos fornecido pelo producer são widely usado no consumer, such as `lodash.get`
+- (Consumer Consumption) O third-party pacotes usado no módulos fornecido pelo producer have singleton requirements, such as `react`
+- (Consumer Consumption) O third-party pacotes usado no módulos fornecido pelo producer são usado no consumer, have uma large dependência volume, e não suporte tree shaking, such as `lodash` (não usado on demand)
+- (Consumer Consumption) O third-party pacotes usado no módulos fornecido pelo producer são usado no consumer, have uma large dependência volume, suporte tree shaking, but o módulo expostos são all usado, such as `antd`
+
+At este point, você pode adicione o corresponding dependências para o `shared` configuração.
+
+### How para usar dependências compartilhadas
+
+Depending no use case, {props.brandName || props.name || 'Module Federation'} suporta two forms de dependência compartilhada configuração: array e objeto. O former é suitable para mais scenarios, enquanto o latter é suitable for complex customization needs.
+
+**Array Format (General Scenario)**
+
+Simply adicione o corresponding dependências para o `shared` configuração no {props.brandName || props.name || 'Module Federation'} build configuração, por exemplo:
+
+import ArrayShared from '@docs/_snippets/configure/array-shared';
+import React from 'react';
+
+{props.arrayShared || React.createElement(ArrayShared)}
+
+**Objeto Format (Customized Configuração)**
+
+Add o dependências compartilhadas no `shared` configuração do {props.brandName || props.name || 'Module Federation'}, com o `key` being o dependência name e o `value` being o fornecido configuração.
+
+import ObjectShared from '@docs/_snippets/configure/object-shared'
+
+{props.objectShared || React.createElement(ObjectShared)}

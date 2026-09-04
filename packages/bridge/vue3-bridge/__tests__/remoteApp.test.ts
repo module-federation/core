@@ -1,25 +1,40 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, rs } from '@rstest/core';
 import { createApp, defineComponent, h, KeepAlive, nextTick } from 'vue';
 import { createMemoryHistory, createRouter, RouterView } from 'vue-router';
 import RemoteApp from '../src/remoteApp';
 
-const { dispatchPopstateEnv } = vi.hoisted(() => ({
-  dispatchPopstateEnv: vi.fn(),
-}));
+const { lifecycleEvents, bridgeLifecycle } = rs.hoisted(() => {
+  const lifecycleEvents: Array<{
+    lifecycle: string;
+    payload: Record<string, any>;
+  }> = [];
+  const eventHook = (lifecycle: string, result?: Record<string, any>) => ({
+    emit: rs.fn(
+      (
+        payload: Record<string, any>,
+        detail?: Record<string, any>,
+      ): Record<string, any> | undefined => {
+        lifecycleEvents.push({ lifecycle, payload: detail || payload });
+        return result;
+      },
+    ),
+  });
+  return {
+    lifecycleEvents,
+    bridgeLifecycle: {
+      beforeBridgeRender: eventHook('beforeBridgeRender', {}),
+      afterBridgeRender: eventHook('afterBridgeRender'),
+      beforeBridgeDestroy: eventHook('beforeBridgeDestroy'),
+      afterBridgeDestroy: eventHook('afterBridgeDestroy'),
+      afterBridgeRouteSync: eventHook('afterBridgeRouteSync'),
+    },
+  };
+});
 
-vi.mock('@module-federation/bridge-shared', () => ({
-  dispatchPopstateEnv,
-}));
-
-vi.mock('@module-federation/runtime', () => ({
+rs.mock('@module-federation/runtime', () => ({
   getInstance: () => ({
     bridgeHook: {
-      lifecycle: {
-        beforeBridgeRender: { emit: vi.fn(async () => ({})) },
-        afterBridgeRender: { emit: vi.fn() },
-        beforeBridgeDestroy: { emit: vi.fn() },
-        afterBridgeDestroy: { emit: vi.fn() },
-      },
+      lifecycle: bridgeLifecycle,
     },
   }),
 }));
@@ -30,13 +45,16 @@ const flushBridgeRender = async () => {
   await nextTick();
 };
 
+const getContext = (event: { payload: Record<string, any> }) =>
+  event.payload.context || event.payload;
+
 describe('RemoteApp', () => {
   let root: HTMLDivElement;
 
   beforeEach(() => {
     root = document.createElement('div');
     document.body.appendChild(root);
-    dispatchPopstateEnv.mockClear();
+    lifecycleEvents.length = 0;
   });
 
   afterEach(() => {
@@ -45,8 +63,8 @@ describe('RemoteApp', () => {
 
   it('destroys and re-renders the remote app when used under KeepAlive', async () => {
     const providerReturn = {
-      render: vi.fn(),
-      destroy: vi.fn(),
+      render: rs.fn(),
+      destroy: rs.fn(),
     };
     const RemoteRoute = defineComponent({
       setup() {
@@ -85,14 +103,35 @@ describe('RemoteApp', () => {
     app.mount(root);
     await flushBridgeRender();
     expect(providerReturn.render).toHaveBeenCalledTimes(1);
+    expect(
+      lifecycleEvents.some(
+        (event) =>
+          event.lifecycle === 'beforeBridgeRender' &&
+          getContext(event).operation === 'render',
+      ),
+    ).toBe(true);
 
     await router.push('/');
     await flushBridgeRender();
     expect(providerReturn.destroy).toHaveBeenCalledTimes(1);
+    expect(
+      lifecycleEvents.some(
+        (event) =>
+          event.lifecycle === 'beforeBridgeDestroy' &&
+          getContext(event).operation === 'destroy',
+      ),
+    ).toBe(true);
 
     await router.push('/ec');
     await flushBridgeRender();
     expect(providerReturn.render).toHaveBeenCalledTimes(2);
+    expect(
+      lifecycleEvents.filter(
+        (event) =>
+          event.lifecycle === 'beforeBridgeRender' &&
+          getContext(event).operation === 'render',
+      ),
+    ).toHaveLength(2);
 
     app.unmount();
   });

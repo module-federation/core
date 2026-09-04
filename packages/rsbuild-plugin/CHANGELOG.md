@@ -1,5 +1,55 @@
 # @module-federation/rsbuild-plugin
 
+## 2.9.0
+
+### Patch Changes
+
+- 0ebae56: Coordinate Node configuration ownership between the Rsbuild and Rstest federation plugins while preserving Rstest's runtime chunk and split-chunk behavior.
+- 60e6b82: Expose typed federation options to integrations, preserve Rstest-owned Node compiler settings, and keep bundler-derived library names in SSR builds.
+  - @module-federation/node@2.7.50
+  - @module-federation/enhanced@2.9.0
+  - @module-federation/sdk@2.9.0
+
+## 2.8.2
+
+### Patch Changes
+
+- @module-federation/node@2.7.49
+- @module-federation/enhanced@2.8.2
+- @module-federation/sdk@2.8.2
+
+## 2.8.1
+
+### Patch Changes
+
+- Updated dependencies [d901e2c]
+  - @module-federation/node@2.7.48
+  - @module-federation/sdk@2.8.1
+  - @module-federation/enhanced@2.8.1
+
+## 2.8.0
+
+### Patch Changes
+
+- cef63f9: fix(rsbuild-plugin): force `output.library.type` to `commonjs-module` in `patchNodeConfig` so the `mf-ssr` bundle stops emitting module-scope `export {}` and passes rspack 2.1.x minification.
+- Updated dependencies [ea490ae]
+- Updated dependencies [6ee67dc]
+- Updated dependencies [681e5d2]
+  - @module-federation/enhanced@2.8.0
+  - @module-federation/sdk@2.8.0
+  - @module-federation/node@2.7.47
+
+## 2.7.0
+
+### Patch Changes
+
+- 61fe85d: chore(deps): upgrade `@rslib/core` to 0.23.2, `@rsbuild/core` to 2.1.4, and `@rsbuild/plugin-react`/`plugin-vue`/`plugin-sass` to their 2.x latest across dev dependencies. `create-module-federation` templates are updated so newly scaffolded projects pick up the same versions. `@module-federation/modern-js-v3` is realigned to `@modern-js/* 3.5.0` (which uses `@rsbuild/core 2.1.0`) to resolve a `Rspack` type mismatch between the upgraded `@module-federation/rsbuild-plugin` and modern-js's own rsbuild embedding. Peer dependency ranges are untouched.
+- Updated dependencies [dcc640b]
+- Updated dependencies [9958086]
+  - @module-federation/sdk@2.7.0
+  - @module-federation/enhanced@2.7.0
+  - @module-federation/node@2.7.46
+
 ## 2.6.0
 
 ### Patch Changes

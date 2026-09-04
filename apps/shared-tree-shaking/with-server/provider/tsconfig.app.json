@@ -12,6 +12,6 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true
   },
-  "exclude": ["jest.config.ts", "src/**/*.spec.ts", "src/**/*.test.ts"],
+  "exclude": ["src/**/*.spec.ts", "src/**/*.test.ts"],
   "include": ["src/**/*.ts"]
 }

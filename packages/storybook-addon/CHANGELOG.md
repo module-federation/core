@@ -1,5 +1,47 @@
 # @module-federation/storybook-addon
 
+## 6.0.19
+
+### Patch Changes
+
+- @module-federation/enhanced@2.9.0
+- @module-federation/sdk@2.9.0
+
+## 6.0.18
+
+### Patch Changes
+
+- @module-federation/enhanced@2.8.2
+- @module-federation/sdk@2.8.2
+
+## 6.0.17
+
+### Patch Changes
+
+- Updated dependencies [d901e2c]
+  - @module-federation/sdk@2.8.1
+  - @module-federation/enhanced@2.8.1
+
+## 6.0.16
+
+### Patch Changes
+
+- Updated dependencies [ea490ae]
+- Updated dependencies [6ee67dc]
+- Updated dependencies [681e5d2]
+  - @module-federation/enhanced@2.8.0
+  - @module-federation/sdk@2.8.0
+
+## 6.0.15
+
+### Patch Changes
+
+- 61fe85d: chore(deps): upgrade `@rslib/core` to 0.23.2, `@rsbuild/core` to 2.1.4, and `@rsbuild/plugin-react`/`plugin-vue`/`plugin-sass` to their 2.x latest across dev dependencies. `create-module-federation` templates are updated so newly scaffolded projects pick up the same versions. `@module-federation/modern-js-v3` is realigned to `@modern-js/* 3.5.0` (which uses `@rsbuild/core 2.1.0`) to resolve a `Rspack` type mismatch between the upgraded `@module-federation/rsbuild-plugin` and modern-js's own rsbuild embedding. Peer dependency ranges are untouched.
+- Updated dependencies [dcc640b]
+- Updated dependencies [9958086]
+  - @module-federation/sdk@2.7.0
+  - @module-federation/enhanced@2.7.0
+
 ## 6.0.14
 
 ### Patch Changes

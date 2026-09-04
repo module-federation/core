@@ -1,5 +1,52 @@
 # @module-federation/esbuild
 
+## 0.0.114
+
+### Patch Changes
+
+- Updated dependencies [df8b40f]
+- Updated dependencies [df8b40f]
+  - @module-federation/runtime@2.9.0
+  - @module-federation/webpack-bundler-runtime@2.9.0
+  - @module-federation/sdk@2.9.0
+
+## 0.0.113
+
+### Patch Changes
+
+- @module-federation/runtime@2.8.2
+- @module-federation/webpack-bundler-runtime@2.8.2
+- @module-federation/sdk@2.8.2
+
+## 0.0.112
+
+### Patch Changes
+
+- Updated dependencies [d901e2c]
+  - @module-federation/sdk@2.8.1
+  - @module-federation/runtime@2.8.1
+  - @module-federation/webpack-bundler-runtime@2.8.1
+
+## 0.0.111
+
+### Patch Changes
+
+- Updated dependencies [ea490ae]
+  - @module-federation/sdk@2.8.0
+  - @module-federation/webpack-bundler-runtime@2.8.0
+  - @module-federation/runtime@2.8.0
+
+## 0.0.110
+
+### Patch Changes
+
+- 61fe85d: chore(deps): upgrade `@rslib/core` to 0.23.2, `@rsbuild/core` to 2.1.4, and `@rsbuild/plugin-react`/`plugin-vue`/`plugin-sass` to their 2.x latest across dev dependencies. `create-module-federation` templates are updated so newly scaffolded projects pick up the same versions. `@module-federation/modern-js-v3` is realigned to `@modern-js/* 3.5.0` (which uses `@rsbuild/core 2.1.0`) to resolve a `Rspack` type mismatch between the upgraded `@module-federation/rsbuild-plugin` and modern-js's own rsbuild embedding. Peer dependency ranges are untouched.
+- Updated dependencies [dcc640b]
+- Updated dependencies [9958086]
+  - @module-federation/sdk@2.7.0
+  - @module-federation/runtime@2.7.0
+  - @module-federation/webpack-bundler-runtime@2.7.0
+
 ## 0.0.109
 
 ### Patch Changes

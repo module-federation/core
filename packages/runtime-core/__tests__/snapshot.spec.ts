@@ -1,4 +1,4 @@
-import { assert, describe, it } from 'vitest';
+import { assert, describe, it } from '@rstest/core';
 import { ModuleFederation } from '../src';
 import { getGlobalSnapshot, resetFederationGlobalInfo } from '../src/global';
 

@@ -46,18 +46,37 @@ The `mf` skill does more than answer questions. It can also help your agent:
 - analyze type issues
 - check shared dependency conflicts
 - inspect remote module information
-- read observability reports and debug MF loading failures
+- use the Divebell MF Extension to diagnose runtime failures, loading chains, and performance bottlenecks
+- read application observability reports from local, SSR, or production environments
 
 👉 [View Agent Skills documentation](/ai/skill.html)
 
 ## Observe and Debug MF Loading
 
-If you want an AI coding agent to debug Module Federation loading with concrete
-runtime facts, enable the [Observability Plugin](/plugin/plugins/observability-plugin.html)
-first.
+Remote resolution, Shared selection, Bridge lifecycle, and module performance
+problems often exist only in the live page runtime. For a one-off diagnosis,
+the `mf` skill can use the [Divebell](/guide/debug/divebell.html) MF Extension
+to obtain bounded, structured evidence without adding the Observability Plugin
+to the application. Page interaction is used only to trigger the loading path.
 
-After a loading failure, the browser console will print a `traceId` and,
-in development, a `read:` command. Give that console hint to your agent:
+Ask the agent directly:
+
+```text
+/mf observability
+Open https://example.com with Divebell, reproduce the failing checkout flow,
+and tell me which Remote or Shared phase failed.
+```
+
+When needed, the skill installs Divebell globally on the agent machine, reads
+the CLI Skill returned by `divebell skill`, installs
+`@divebell/extension-mf`, and reads the command Skill returned by
+`divebell mf --skill`. Neither package is added to your application.
+
+For continuous collection, Node/SSR files, production uploads, or reports that
+must be retained, integrate the
+[Observability Plugin](/plugin/plugins/observability-plugin.html). After a
+loading failure, give the generated `traceId`, `read:` command, or uploaded
+report to the agent:
 
 ```text
 /mf observability
@@ -72,7 +91,8 @@ Please read the report and fix the issue.
 
 For Node or SSR, ask the agent to read `.mf/observability/latest.json`. For
 production, upload reports with the plugin's `onReport` callback and give the
-uploaded report or trace ID to your agent.
+stored report to your agent. A trace ID from a closed browser session is not a
+substitute for the stored report.
 
 ## You Can Still Use This Without Installing Anything
 
@@ -112,6 +132,7 @@ If you want to start using this workflow right away:
 
 1. Install `mf`
 2. Ask the question you care about most
-3. Enable the [Observability Plugin](/plugin/plugins/observability-plugin.html) when
-   you need MF loading observability
-4. Open [Skills documentation](/ai/skill.html) to see which sub-commands it supports
+3. Use [Divebell](/guide/debug/divebell.html) for one-off MF runtime, loading-chain, or performance diagnosis
+4. Enable the [Observability Plugin](/plugin/plugins/observability-plugin.html)
+   when loading evidence must be retained or uploaded
+5. Open [Skills documentation](/ai/skill.html) to see which sub-commands it supports

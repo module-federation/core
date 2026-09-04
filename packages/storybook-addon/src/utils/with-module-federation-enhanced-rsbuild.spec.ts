@@ -1,6 +1,6 @@
 import { moduleFederationPlugin } from '@module-federation/sdk';
 
-class MockModuleFederationPlugin {}
+function MockModuleFederationPlugin() {}
 
 jest.mock('@module-federation/enhanced/rspack', () => ({
   ModuleFederationPlugin: MockModuleFederationPlugin,

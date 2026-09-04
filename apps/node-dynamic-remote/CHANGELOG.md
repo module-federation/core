@@ -1,5 +1,36 @@
 # node-dynamic-remote
 
+## 1.0.17
+
+### Patch Changes
+
+- @module-federation/node@2.7.50
+
+## 1.0.16
+
+### Patch Changes
+
+- @module-federation/node@2.7.49
+
+## 1.0.15
+
+### Patch Changes
+
+- Updated dependencies [d901e2c]
+  - @module-federation/node@2.7.48
+
+## 1.0.14
+
+### Patch Changes
+
+- @module-federation/node@2.7.47
+
+## 1.0.13
+
+### Patch Changes
+
+- @module-federation/node@2.7.46
+
 ## 1.0.12
 
 ### Patch Changes

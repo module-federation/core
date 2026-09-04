@@ -1,0 +1,34 @@
+{
+  "name": "rstest-federation-host",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Rsbuild host that composes two remotes in Rstest E2E.",
+  "scripts": {
+    "build": "rsbuild build --environment node",
+    "e2e": "pnpm run e2e:node && node ../../scripts/ensure-playwright.js && pnpm run e2e:browser && pnpm run e2e:browser-esm",
+    "e2e:browser": "node run-browser-tests.mjs rstest.browser.config.ts",
+    "e2e:browser-esm": "node run-browser-tests.mjs rstest.browser-esm.config.ts",
+    "e2e:node": "pnpm exec rstest run -c rstest.config.ts"
+  },
+  "devDependencies": {
+    "@module-federation/rsbuild-plugin": "workspace:*",
+    "@module-federation/rstest": "workspace:*",
+    "@rsbuild/core": "2.1.4",
+    "@rsbuild/plugin-react": "2.1.0",
+    "@rstest/browser": "0.11.6",
+    "@rstest/browser-react": "0.11.6",
+    "@rstest/core": "0.11.6",
+    "@testing-library/dom": "10.4.1",
+    "@testing-library/react": "15.0.7",
+    "@types/react": "18.3.11",
+    "@types/react-dom": "18.3.0",
+    "playwright": "1.57.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "rstest-federation-profile-remote": "workspace:*",
+    "rstest-federation-remote": "workspace:*",
+    "sirv": "3.0.2",
+    "typescript": "6.0.3"
+  }
+}

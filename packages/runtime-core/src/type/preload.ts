@@ -9,6 +9,11 @@ export interface PreloadRemoteArgs {
   share?: boolean;
   depsRemote?: boolean | Array<depsPreloadArg>;
   filter?: (assetUrl: string) => boolean;
+  /**
+   * Record preloaded JS and CSS URLs to skip duplicate resource loading.
+   * @default true
+   */
+  recordPreloadedAssets?: boolean;
 }
 
 export type PreloadConfig = PreloadRemoteArgs;
@@ -18,7 +23,10 @@ export type PreloadOptions = Array<{
   preloadConfig: PreloadConfig;
 }>;
 
-export type ResourceLoadInitiator = 'loadRemote' | 'preloadRemote';
+export type ResourceLoadInitiator =
+  | 'loadRemote'
+  | 'preloadRemote'
+  | 'loadShare';
 
 export type ResourceLoadType = 'manifest' | 'remoteEntry' | 'js' | 'css';
 
@@ -27,6 +35,7 @@ export interface ResourceLoadContext {
   id: string;
   resourceType: ResourceLoadType;
   url?: string;
+  expose?: string;
 }
 
 export type PreloadAssetStatus = 'success' | 'error' | 'timeout' | 'cached';

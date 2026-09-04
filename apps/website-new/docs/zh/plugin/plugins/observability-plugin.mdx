@@ -133,6 +133,7 @@ window.__FEDERATION__.__OBSERVABILITY__.runtime_host.findReports({
   remote: 'remote1',
 });
 window.__FEDERATION__.__OBSERVABILITY__.runtime_host.exportReport('mf-...');
+window.__FEDERATION__.__OBSERVABILITY__.runtime_host.getRuntimeState();
 ```
 
 如果只是想在开发环境观察加载链路，或者页面一直停在 loading 状态但还没有报错，开启浏览器读取入口后，开发模式默认会打印开始日志：
@@ -263,6 +264,13 @@ ObservabilityPlugin({
 
 <粘贴报告 JSON>
 ```
+
+
+import DivebellObservability from '@docs/zh/_components/divebell-observability.mdx';
+
+## 使用 {props.observabilityToolName || 'Divebell'} 观测 {props.observabilityTargetName || 'Module Federation'}
+
+{props.observabilityToolContent || <DivebellObservability />}
 
 ## Browser 参数
 

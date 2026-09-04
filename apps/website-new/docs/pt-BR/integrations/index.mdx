@@ -1,0 +1,27 @@
+# Integrações
+
+Module Federation é powered by MF Runtime. Most projetos deve use um plugin de build. It lets você `import` módulos remotos like npm pacotes e fornece engineering capabilities such as tipo hints. Se seu projeto precisa exponha módulos for other aplicações para consuma, você deve use um plugin de build. Se você não quiser change your build configuração e apenas precisa carregar módulos remotos em runtime, você pode use Runtime diretamente.
+
+Se você não são sure que pacote para instalar, comece por seu projeto tipo:
+
+| Your project | Pacote para instale | Read next |
+| --- | --- | --- |
+| Rsbuild app | `@module-federation/rsbuild-plugin` | [Rsbuild](/integrations/build-tool/rsbuild.html) |
+| Rslib módulo | `@module-federation/rsbuild-plugin` | [Rslib](/integrations/build-tool/rslib.html) |
+| Vite app | `@module-federation/vite` | [Vite](/integrations/build-tool/vite.html) |
+| Rspack app | `@module-federation/enhanced` | [Rspack](/integrations/bundler/rspack.html) |
+| Webpack app | `@module-federation/enhanced` | [Webpack](/integrations/bundler/webpack.html) |
+| React Native / Metro | `@module-federation/metro` e o matching Metro plugin | [Metro](/integrations/bundler/metro.html) |
+| Rspress site | `@module-federation/rspress-plugin` | [Rspress](/integrations/documentation/rspress.html) |
+| Modern.js app | `@module-federation/modern-js-v3` (recomendado for Modern.js v3) ou `@module-federation/modern-js` (Modern.js v2) | [Modern.js](/integrations/framework/modernjs/index.html) |
+| Next.js app | `@module-federation/nextjs-mf` e `webpack` | [Next.js](/integrations/framework/nextjs/index.html) |
+| Angular app | Choose o integração pacote for your Angular build setup | [Angular](/integrations/framework/angular/index.html) |
+| Monorepos | Use o pacote for your app framework e monorepo tooling | [Monorepos](/integrations/framework/monorepos/index.html) |
+
+Você pode também use Runtime apenas para carregar módulos remotos. Different projeto tipos importe Runtime de diferente entries. Continue com [Runtime Installation](/guide/runtime/index.html#installation) para learn como para choose o correct Runtime entry.
+
+## Próximos passos
+
+- Choose o integração esse matches seu projeto primeiro, then complete pacote instalação e plugin configuração.
+- Se você use React, Vue, ou another framework-specific scenario, continue com [Practice](/integrations/practice/index.html).
+- Shared Module Federation capabilities são still introduced no [Guia](/guide/start/index.html). Use o matching integração page for pacote instalação e plugin configuração.
