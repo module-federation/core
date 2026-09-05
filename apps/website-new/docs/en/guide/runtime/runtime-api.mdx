@@ -41,6 +41,12 @@ const mf = createInstance({
 mf.loadRemote('sub1/util').then((m) => m.add(1, 2, 3));
 ```
 
+**Options**
+
+Besides `name`, `remotes`, `shared`, `plugins` and `shareStrategy`, the instance accepts:
+
+- `loadEntryTimeout` — how long (ms) a remote entry script may take to load before the load fails with `RUNTIME-008`. Defaults to `20000`; pass `Infinity` to wait indefinitely. A `createScript` hook that returns `timeout` still takes precedence.
+
 ## init <Badge type='warning'>Use with caution</Badge>
 
 Used to initialize or reuse a `ModuleFederation` runtime instance.
