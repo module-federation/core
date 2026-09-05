@@ -30,6 +30,40 @@ function importNodeModule<T>(name: string): Promise<T> {
   return promise;
 }
 
+// V8 keeps every distinct script it compiles in an isolate-wide compilation
+// cache (source text plus compiled code) that is only evicted under heap
+// pressure measured against V8's own limit, not a container's. Remote code is
+// exactly the code that changes with every deployment, so compile it with the
+// cache switched off: --no-compilation-cache is flipped on for the duration of
+// the synchronous compile call and restored immediately after. The switch is
+// process-wide but spans only that call, so the host's own code and everything
+// compiled outside it keep the cache. (The flag cannot be delivered through
+// NODE_OPTIONS, which is why it is toggled here at runtime.) Set
+// FEDERATION_KEEP_COMPILATION_CACHE=true to opt out.
+export function withoutCompilationCache<T>(compile: () => T): T {
+  if (
+    typeof process === 'undefined' ||
+    process.env['FEDERATION_KEEP_COMPILATION_CACHE'] === 'true'
+  ) {
+    return compile();
+  }
+  let v8: { setFlagsFromString?: (flags: string) => void } | undefined;
+  try {
+    v8 = eval('require')('v8');
+  } catch {
+    return compile();
+  }
+  if (!v8 || typeof v8.setFlagsFromString !== 'function') {
+    return compile();
+  }
+  v8.setFlagsFromString('--no-compilation-cache');
+  try {
+    return compile();
+  } finally {
+    v8.setFlagsFromString('--compilation-cache');
+  }
+}
+
 const lazyLoaderHookFetch = async (
   input: RequestInfo | URL,
   init?: RequestInit,
@@ -103,15 +137,18 @@ export const createScriptNode =
               .join('/');
             const filename = path.basename(urlObj.pathname);
 
-            const script = new vm.Script(
-              `(function(exports, module, require, __dirname, __filename) {${data}\n})`,
-              {
-                filename,
-                importModuleDynamically:
-                  //@ts-ignore
-                  vm.constants?.USE_MAIN_CONTEXT_DEFAULT_LOADER ??
-                  importNodeModule,
-              },
+            const script = withoutCompilationCache(
+              () =>
+                new vm.Script(
+                  `(function(exports, module, require, __dirname, __filename) {${data}\n})`,
+                  {
+                    filename,
+                    importModuleDynamically:
+                      //@ts-ignore
+                      vm.constants?.USE_MAIN_CONTEXT_DEFAULT_LOADER ??
+                      importNodeModule,
+                  },
+                ),
             );
 
             let requireFn: NodeRequire;
