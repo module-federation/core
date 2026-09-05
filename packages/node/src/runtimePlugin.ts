@@ -211,6 +211,9 @@ function scheduleCompilationCacheClear(): void {
   }
   compilationCacheGcTimer = setTimeout(() => {
     compilationCacheGcTimer = undefined;
+    // A full collection through the inspector clears the cache. Under Node's
+    // permission model the inspector is denied; an exposed gc() with V8's
+    // last-resort flavor (NODE_OPTIONS=--expose-gc) clears it too.
     try {
       const inspector = __non_webpack_require__(
         'inspector',
@@ -223,8 +226,17 @@ function scheduleCompilationCacheClear(): void {
       session.post('HeapProfiler.collectGarbage', () => {
         setImmediate(() => session.disconnect());
       });
+      return;
     } catch {
-      // no inspector in this runtime: nothing else can clear the cache in-process
+      // fall through
+    }
+    const exposedGc = (globalThis as { gc?: (options?: object) => void }).gc;
+    if (typeof exposedGc === 'function') {
+      try {
+        exposedGc({ type: 'major', execution: 'sync', flavor: 'last-resort' });
+      } catch {
+        // nothing else can clear the cache in-process
+      }
     }
   }, 1000);
   if (typeof compilationCacheGcTimer.unref === 'function') {
