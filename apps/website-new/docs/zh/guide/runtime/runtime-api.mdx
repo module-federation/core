@@ -41,6 +41,12 @@ const mf = createInstance({
 mf.loadRemote('sub1/util').then((m) => m.add(1, 2, 3));
 ```
 
+**配置项**
+
+除了 `name`、`remotes`、`shared`、`plugins` 和 `shareStrategy`，实例还接受：
+
+- `loadEntryTimeout` — 远程入口脚本的加载超时时间（毫秒），超时后以 `RUNTIME-008` 报错。默认 `20000`；传 `Infinity` 表示不限时。`createScript` 钩子返回的 `timeout` 仍然优先。
+
 ## init <Badge type='warning'>谨慎使用</Badge>
 
 用于初始化或复用 `ModuleFederation` 运行时实例。
