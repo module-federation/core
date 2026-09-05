@@ -86,6 +86,36 @@ describe('createScript', () => {
       expect(setTimeout).toHaveBeenCalledWith(expect.any(Function), 20000);
     });
 
+    it('should use the timeout passed to createScript', () => {
+      const url = 'https://example.com/script.js';
+      const cb = jest.fn();
+      createScript({ url, cb, timeout: 45000 });
+
+      expect(setTimeout).toHaveBeenCalledWith(expect.any(Function), 45000);
+    });
+
+    it('should let the createScriptHook timeout override the passed timeout', () => {
+      const url = 'https://example.com/script.js';
+      const cb = jest.fn();
+      createScript({
+        url,
+        cb,
+        attrs: {},
+        timeout: 45000,
+        createScriptHook: () => ({ timeout: 5000 }),
+      });
+
+      expect(setTimeout).toHaveBeenCalledWith(expect.any(Function), 5000);
+    });
+
+    it('should not start a timer when the timeout is Infinity', () => {
+      const url = 'https://example.com/script.js';
+      const cb = jest.fn();
+      createScript({ url, cb, timeout: Infinity });
+
+      expect(setTimeout).not.toHaveBeenCalled();
+    });
+
     it('should use the timeout specified in the createScriptHook', () => {
       const url = 'https://example.com/script.js';
       const cb = jest.fn();
