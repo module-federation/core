@@ -33,97 +33,35 @@ function importNodeModule<T>(name: string): Promise<T> {
 // V8 keeps every distinct script it compiles in an isolate-wide compilation
 // cache (source text plus compiled code) that is only evicted under heap
 // pressure measured against V8's own limit, not a container's. Remote code is
-// exactly the code that changes with every deployment, so keep it out of the
-// cache. Strategy, selectable with FEDERATION_COMPILATION_CACHE:
-//   flag (default): flip --no-compilation-cache around the synchronous compile
-//                   via v8.setFlagsFromString, no stall, nothing else affected;
-//   gc:             compile normally, then run one full garbage collection
-//                   through the inspector once the compile burst settles. That
-//                   collection clears the whole cache (a snapshot would too, but
-//                   costs seconds on a large heap). For hosts where the flag is
-//                   unavailable or ineffective; also the automatic fallback when
-//                   v8.setFlagsFromString is missing;
-//   off:            leave the cache alone (FEDERATION_KEEP_COMPILATION_CACHE=true
-//                   is the legacy spelling).
-type CompilationCacheStrategy = 'flag' | 'gc' | 'off';
-let compilationCacheGcTimer: ReturnType<typeof setTimeout> | undefined;
-
-function compilationCacheStrategy(): CompilationCacheStrategy {
-  const configured = process.env['FEDERATION_COMPILATION_CACHE'];
-  if (configured === 'flag' || configured === 'gc' || configured === 'off') {
-    return configured;
-  }
-  return process.env['FEDERATION_KEEP_COMPILATION_CACHE'] === 'true'
-    ? 'off'
-    : 'flag';
-}
-
-function scheduleCompilationCacheClear(): void {
-  if (compilationCacheGcTimer) {
-    return;
-  }
-  compilationCacheGcTimer = setTimeout(() => {
-    compilationCacheGcTimer = undefined;
-    // A full collection through the inspector clears the cache. Under Node's
-    // permission model the inspector is denied; an exposed gc() with V8's
-    // last-resort flavor (NODE_OPTIONS=--expose-gc) clears it too.
-    try {
-      const inspector = eval('require')(
-        'inspector',
-      ) as typeof import('inspector');
-      const session = new inspector.Session();
-      session.connect();
-      // The collection completes asynchronously (~100 ms). Disconnecting before
-      // the callback cancels it; disconnecting inside the callback deadlocks the
-      // session. Disconnect on the next macrotask after completion.
-      session.post('HeapProfiler.collectGarbage', () => {
-        setImmediate(() => session.disconnect());
-      });
-      return;
-    } catch {
-      // fall through
-    }
-    const exposedGc = (globalThis as { gc?: (options?: object) => void }).gc;
-    if (typeof exposedGc === 'function') {
-      try {
-        exposedGc({ type: 'major', execution: 'sync', flavor: 'last-resort' });
-      } catch {
-        // nothing else can clear the cache in-process
-      }
-    }
-  }, 1000);
-  if (typeof compilationCacheGcTimer.unref === 'function') {
-    compilationCacheGcTimer.unref();
-  }
-}
-
+// exactly the code that changes with every deployment, so compile it with the
+// cache switched off: --no-compilation-cache is flipped on for the duration of
+// the synchronous compile call and restored immediately after. The switch is
+// process-wide but spans only that call, so the host's own code and everything
+// compiled outside it keep the cache. (The flag cannot be delivered through
+// NODE_OPTIONS, which is why it is toggled here at runtime.) Set
+// FEDERATION_KEEP_COMPILATION_CACHE=true to opt out.
 export function withoutCompilationCache<T>(compile: () => T): T {
-  if (typeof process === 'undefined') {
+  if (
+    typeof process === 'undefined' ||
+    process.env['FEDERATION_KEEP_COMPILATION_CACHE'] === 'true'
+  ) {
     return compile();
   }
-  const strategy = compilationCacheStrategy();
-  if (strategy === 'off') {
+  let v8: { setFlagsFromString?: (flags: string) => void } | undefined;
+  try {
+    v8 = eval('require')('v8');
+  } catch {
     return compile();
   }
-  if (strategy === 'flag') {
-    let v8: { setFlagsFromString?: (flags: string) => void } | undefined;
-    try {
-      v8 = eval('require')('v8');
-    } catch {
-      v8 = undefined;
-    }
-    if (v8 && typeof v8.setFlagsFromString === 'function') {
-      v8.setFlagsFromString('--no-compilation-cache');
-      try {
-        return compile();
-      } finally {
-        v8.setFlagsFromString('--compilation-cache');
-      }
-    }
+  if (!v8 || typeof v8.setFlagsFromString !== 'function') {
+    return compile();
   }
-  const result = compile();
-  scheduleCompilationCacheClear();
-  return result;
+  v8.setFlagsFromString('--no-compilation-cache');
+  try {
+    return compile();
+  } finally {
+    v8.setFlagsFromString('--compilation-cache');
+  }
 }
 
 const lazyLoaderHookFetch = async (
