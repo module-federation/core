@@ -1,4 +1,5 @@
-import { describe, it, expect, rs } from '@rstest/core';
+import { describe, it, expect, rs, beforeEach } from '@rstest/core';
+import { resetFederationGlobalInfo } from '@module-federation/runtime-core';
 import { createInstance, getInstance, init } from '../src';
 
 // eslint-disable-next-line max-lines-per-function
@@ -101,36 +102,154 @@ describe('api', () => {
     expect(getInstance()).toBe(defaultInstance);
   });
 
-  it('keeps the first initialized instance as the top-level singleton', async () => {
-    // Load a fresh copy of the runtime so the module-level singleton is unset
-    rs.resetModules();
-    const runtime = await import('../src');
+  describe('default instance contract', () => {
+    type Runtime = typeof import('../src');
+    let runtime: Runtime;
 
-    const host = runtime.init({
-      name: '@federation/singleton-host',
-      remotes: [],
+    // Fresh module copy (module-level default) and fresh global instance list
+    beforeEach(async () => {
+      resetFederationGlobalInfo();
+      rs.resetModules();
+      runtime = await import('../src');
     });
-    // Simulates a remote container whose bundler runtime calls init() through
-    // the same @module-federation/runtime copy as the host
-    const remote = runtime.init({
-      name: '@federation/singleton-remote',
-      remotes: [],
+
+    const remote = (name: string) => ({
+      name,
+      entry: `http://localhost:1111/${name}/remoteEntry.js`,
     });
-    expect(remote).not.toBe(host);
+    const remoteNames = (instance: {
+      options: { remotes: { name: string }[] };
+    }) => instance.options.remotes.map((remoteInfo) => remoteInfo.name);
 
-    expect(runtime.getInstance()).toBe(host);
+    it('first init() establishes the default', () => {
+      expect(runtime.getInstance()).toBeNull();
+      const host = runtime.init({ name: '@federation/host', remotes: [] });
+      expect(runtime.getInstance()).toBe(host);
+    });
 
-    runtime.registerRemotes([
-      {
-        name: '@federation/singleton-sub',
-        entry: 'http://localhost:1111/singleton-sub/remoteEntry.js',
-      },
-    ]);
+    it('second init() with a different name returns its own instance and keeps the default', () => {
+      const host = runtime.init({ name: '@federation/host', remotes: [] });
+      // Simulates a remote container whose bundler runtime calls init() through
+      // the same @module-federation/runtime copy as the host
+      const remoteInstance = runtime.init({
+        name: '@federation/remote',
+        remotes: [],
+      });
+      expect(remoteInstance).not.toBe(host);
+      expect(remoteInstance.name).toBe('@federation/remote');
+      expect(runtime.getInstance()).toBe(host);
+    });
 
-    expect(host.options.remotes.map((remoteInfo) => remoteInfo.name)).toContain(
-      '@federation/singleton-sub',
-    );
-    expect(remote.options.remotes).toHaveLength(0);
+    it('repeated init() with the same name reuses the instance and merges options', () => {
+      const host = runtime.init({ name: '@federation/host', remotes: [] });
+      const again = runtime.init({
+        name: '@federation/host',
+        remotes: [remote('@federation/sub')],
+      });
+      expect(again).toBe(host);
+      expect(remoteNames(host)).toContain('@federation/sub');
+      expect(runtime.getInstance()).toBe(host);
+    });
+
+    it('createInstance() never establishes the default', () => {
+      runtime.createInstance({ name: '@federation/created', remotes: [] });
+      expect(runtime.getInstance()).toBeNull();
+    });
+
+    it('createInstance() after a default never changes it', () => {
+      const host = runtime.init({ name: '@federation/host', remotes: [] });
+      runtime.createInstance({ name: '@federation/created', remotes: [] });
+      expect(runtime.getInstance()).toBe(host);
+    });
+
+    it('getInstance(finder) searches global instances independently of the default', () => {
+      const host = runtime.init({ name: '@federation/host', remotes: [] });
+      const created = runtime.createInstance({
+        name: '@federation/created',
+        remotes: [],
+      });
+      expect(runtime.getInstance()).toBe(host);
+      expect(
+        runtime.getInstance(
+          (instance) => instance.name === '@federation/created',
+        ),
+      ).toBe(created);
+      expect(
+        runtime.getInstance(
+          (instance) => instance.name === '@federation/missing',
+        ),
+      ).toBeNull();
+    });
+
+    it('routes every top-level API to the default instance', async () => {
+      const host = runtime.init({ name: '@federation/host', remotes: [] });
+      const other = runtime.init({ name: '@federation/other', remotes: [] });
+
+      const methods = [
+        'registerRemotes',
+        'registerShared',
+        'registerPlugins',
+        'preloadRemote',
+        'loadRemote',
+        'loadShare',
+      ] as const;
+      const spy = (instance: typeof host) =>
+        Object.fromEntries(
+          methods.map((method) => [
+            method,
+            rs.spyOn(instance, method).mockImplementation(async () => null),
+          ]),
+        ) as Record<(typeof methods)[number], ReturnType<typeof rs.spyOn>>;
+      const hostSpies = spy(host);
+      const otherSpies = spy(other);
+
+      runtime.registerRemotes([remote('@federation/sub')]);
+      runtime.registerShared({});
+      runtime.registerPlugins([]);
+      await runtime.preloadRemote([{ nameOrAlias: '@federation/sub' }]);
+      await runtime.loadRemote('@federation/sub/Widget');
+      await runtime.loadShare('react');
+
+      for (const method of methods) {
+        expect(hostSpies[method]).toHaveBeenCalledTimes(1);
+        expect(otherSpies[method]).not.toHaveBeenCalled();
+      }
+    });
+
+    it('top-level registerRemotes mutates the default, not a later init() instance', () => {
+      const host = runtime.init({ name: '@federation/host', remotes: [] });
+      const remoteInstance = runtime.init({
+        name: '@federation/remote',
+        remotes: [],
+      });
+      runtime.registerRemotes([remote('@federation/sub')]);
+      expect(remoteNames(host)).toContain('@federation/sub');
+      expect(remoteInstance.options.remotes).toHaveLength(0);
+    });
+
+    it('an instance from createInstance() becomes the default when init() adopts it and none exists', () => {
+      const created = runtime.createInstance({
+        name: '@federation/created',
+        remotes: [],
+      });
+      expect(runtime.getInstance()).toBeNull();
+      expect(runtime.init({ name: '@federation/created', remotes: [] })).toBe(
+        created,
+      );
+      expect(runtime.getInstance()).toBe(created);
+    });
+
+    it('an instance from createInstance() does not become the default via init() when one exists', () => {
+      const host = runtime.init({ name: '@federation/host', remotes: [] });
+      const created = runtime.createInstance({
+        name: '@federation/created',
+        remotes: [],
+      });
+      expect(runtime.init({ name: '@federation/created', remotes: [] })).toBe(
+        created,
+      );
+      expect(runtime.getInstance()).toBe(host);
+    });
   });
 
   it('finds the first matching registered instance', () => {
