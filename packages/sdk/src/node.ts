@@ -30,37 +30,128 @@ function importNodeModule<T>(name: string): Promise<T> {
   return promise;
 }
 
-// V8 keeps every distinct script it compiles in an isolate-wide compilation
-// cache (source text plus compiled code) that is only evicted under heap
-// pressure measured against V8's own limit, not a container's. Remote code is
-// exactly the code that changes with every deployment, so compile it with the
-// cache switched off: --no-compilation-cache is flipped on for the duration of
-// the synchronous compile call and restored immediately after. The switch is
-// process-wide but spans only that call, so the host's own code and everything
-// compiled outside it keep the cache. (The flag cannot be delivered through
-// NODE_OPTIONS, which is why it is toggled here at runtime.) Set
-// FEDERATION_KEEP_COMPILATION_CACHE=true to opt out.
-export function withoutCompilationCache<T>(compile: () => T): T {
+// Synchronous builtin lookup: `require` in the CJS build, `process.getBuiltinModule`
+// (Node >= 20.16) in the ESM build where `require` is not in scope.
+function tryRequireBuiltin<T>(name: string): T | undefined {
+  try {
+    return eval('require')(name);
+  } catch {
+    return (globalThis as any).process?.getBuiltinModule?.(name);
+  }
+}
+
+function tryGetVm(): typeof import('vm') | undefined {
+  return tryRequireBuiltin<typeof import('vm')>('vm');
+}
+
+/** Wrapper shape shared by every CommonJS-style remote compile. */
+export function buildCommonJsWrapper(
+  parameters: string[],
+  source: string,
+): string {
+  return `(function(${parameters.join(', ')}) {${source}\n})`;
+}
+
+export type CompiledCommonJsModule = (...args: any[]) => any;
+
+/**
+ * Compiles `source` into a callable `(...parameters) => any` without direct
+ * `eval` (whose functions capture the enclosing scope and pin the source text).
+ * Uses `vm.Script` when the `vm` module is obtainable, otherwise `new Function`.
+ * Only capability detection selects the backend: a compile error from the chosen
+ * backend propagates as-is and is never retried on the other one.
+ */
+export function compileCommonJsModule({
+  source,
+  filename,
+  parameters,
+  importModuleDynamically,
+  vm = tryGetVm(),
+}: {
+  source: string;
+  filename: string;
+  parameters: string[];
+  importModuleDynamically?: any;
+  vm?: typeof import('vm');
+}): CompiledCommonJsModule {
+  if (vm) {
+    return new vm.Script(buildCommonJsWrapper(parameters, source), {
+      filename,
+      importModuleDynamically:
+        importModuleDynamically ??
+        //@ts-ignore
+        vm.constants?.USE_MAIN_CONTEXT_DEFAULT_LOADER ??
+        importNodeModule,
+    }).runInThisContext();
+  }
+  return new Function(...parameters, source) as CompiledCommonJsModule;
+}
+
+const REMOTE_COMPILATION_POLICY = Symbol.for(
+  '@module-federation/remote-compilation-policy',
+);
+const NO_COMPILATION_CACHE_FLAG = /--no[-_]compilation[-_]cache\b/;
+
+/**
+ * Runs one synchronous remote compile with V8's compilation cache switched off.
+ *
+ * V8 keeps the source and compiled code of every distinct script in an
+ * isolate-wide cache that is only evicted when the heap nears V8's own limit,
+ * so remote code (the code that changes on every deployment) would otherwise
+ * accumulate for the life of the process. `--no-compilation-cache` cannot be
+ * passed through NODE_OPTIONS, which is why it is toggled here at runtime.
+ *
+ * The flag is process-wide. It is off only for the duration of `compile`, so
+ * the host's own code and everything compiled outside that window keep the
+ * cache; a worker thread that compiles during the window misses the cache
+ * once. Nested calls (from any copy of this package in the isolate, via a
+ * shared `globalThis` counter) toggle it exactly once, and it is restored in a
+ * `finally` when `compile` throws.
+ *
+ * Nothing is touched when the process already runs with
+ * `--no-compilation-cache`, when `FEDERATION_REMOTE_COMPILATION_CACHE=default`
+ * (`disable`, the default, is the behaviour described above), or when
+ * `v8.setFlagsFromString` is unavailable or throws.
+ */
+export function withRemoteCompilationPolicy<T>(compile: () => T): T {
+  const proc = (globalThis as any).process;
   if (
-    typeof process === 'undefined' ||
-    process.env['FEDERATION_KEEP_COMPILATION_CACHE'] === 'true'
+    proc?.env?.['FEDERATION_REMOTE_COMPILATION_CACHE'] === 'default' ||
+    proc?.execArgv?.some((arg: string) =>
+      NO_COMPILATION_CACHE_FLAG.test(arg),
+    ) ||
+    NO_COMPILATION_CACHE_FLAG.test(proc?.env?.['NODE_OPTIONS'] ?? '')
   ) {
     return compile();
   }
-  let v8: { setFlagsFromString?: (flags: string) => void } | undefined;
-  try {
-    v8 = eval('require')('v8');
-  } catch {
+  const v8 = tryRequireBuiltin<{
+    setFlagsFromString?: (flags: string) => void;
+  }>('v8');
+  if (typeof v8?.setFlagsFromString !== 'function') {
     return compile();
   }
-  if (!v8 || typeof v8.setFlagsFromString !== 'function') {
-    return compile();
+  const state: { depth: number } = ((globalThis as any)[
+    REMOTE_COMPILATION_POLICY
+  ] ??= { depth: 0 });
+  if (state.depth === 0) {
+    try {
+      v8.setFlagsFromString('--no-compilation-cache');
+    } catch {
+      return compile();
+    }
   }
-  v8.setFlagsFromString('--no-compilation-cache');
+  state.depth++;
   try {
     return compile();
   } finally {
-    v8.setFlagsFromString('--compilation-cache');
+    state.depth--;
+    if (state.depth === 0) {
+      try {
+        v8.setFlagsFromString('--compilation-cache');
+      } catch {
+        // the flag stays off; nothing more can be done
+      }
+    }
   }
 }
 
@@ -137,18 +228,19 @@ export const createScriptNode =
               .join('/');
             const filename = path.basename(urlObj.pathname);
 
-            const script = withoutCompilationCache(
-              () =>
-                new vm.Script(
-                  `(function(exports, module, require, __dirname, __filename) {${data}\n})`,
-                  {
-                    filename,
-                    importModuleDynamically:
-                      //@ts-ignore
-                      vm.constants?.USE_MAIN_CONTEXT_DEFAULT_LOADER ??
-                      importNodeModule,
-                  },
-                ),
+            const run = withRemoteCompilationPolicy(() =>
+              compileCommonJsModule({
+                source: data,
+                filename,
+                parameters: [
+                  'exports',
+                  'module',
+                  'require',
+                  '__dirname',
+                  '__filename',
+                ],
+                vm,
+              }),
             );
 
             let requireFn: NodeRequire;
@@ -166,7 +258,7 @@ export const createScriptNode =
               requireFn = eval('require') as NodeRequire;
             }
 
-            script.runInThisContext()(
+            run(
               scriptContext.exports,
               scriptContext.module,
               requireFn,

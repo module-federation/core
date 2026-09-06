@@ -21,6 +21,13 @@ type WebpackRequire = {
         url: string,
         options: { attrs: { globalName: string } },
       ) => Promise<any>;
+      compileCommonJsModule?: (options: {
+        source: string;
+        filename: string;
+        parameters: string[];
+        importModuleDynamically?: any;
+      }) => (...args: any[]) => any;
+      withRemoteCompilationPolicy?: <T>(compile: () => T) => T;
     };
     instance: ModuleFederation;
     chunkMatcher?: (chunkId: string) => boolean;
@@ -177,41 +184,12 @@ export const returnFromGlobalInstances = (
   return null;
 };
 
-// V8 keeps every distinct script it compiles in an isolate-wide compilation
-// cache (source text plus compiled code) that is only evicted under heap
-// pressure measured against V8's own limit, not a container's. Remote code is
-// exactly the code that changes with every deployment, so compile it with the
-// cache switched off: --no-compilation-cache is flipped on for the duration of
-// the synchronous compile call and restored immediately after. The switch is
-// process-wide but spans only that call, so the host's own code and everything
-// compiled outside it keep the cache. (The flag cannot be delivered through
-// NODE_OPTIONS, which is why it is toggled here at runtime.) Set
-// FEDERATION_KEEP_COMPILATION_CACHE=true to opt out.
-export const withoutCompilationCache = <T>(compile: () => T): T => {
-  if (
-    typeof process === 'undefined' ||
-    process.env['FEDERATION_KEEP_COMPILATION_CACHE'] === 'true'
-  ) {
-    return compile();
-  }
-  let v8: { setFlagsFromString?: (flags: string) => void } | undefined;
-  try {
-    v8 = __non_webpack_require__('v8');
-  } catch {
-    return compile();
-  }
-  if (!v8 || typeof v8.setFlagsFromString !== 'function') {
-    return compile();
-  }
-  v8.setFlagsFromString('--no-compilation-cache');
-  try {
-    return compile();
-  } finally {
-    v8.setFlagsFromString('--compilation-cache');
-  }
-};
-
-const CHUNK_WRAPPER_PARAMS = ['exports', 'require', '__dirname', '__filename'];
+export const CHUNK_WRAPPER_PARAMS = [
+  'exports',
+  'require',
+  '__dirname',
+  '__filename',
+];
 
 type ChunkFunction = (
   exports: any,
@@ -220,32 +198,37 @@ type ChunkFunction = (
   filename: string,
 ) => void;
 
-// Compiles a chunk body into a callable without direct `eval`. Functions created
-// by direct eval capture the enclosing scope, which pinned the multi-megabyte
-// chunk source string (and everything else in scope) for as long as any function
-// from the chunk stayed alive. On Node this uses `vm.Script`, which also keeps
-// real filenames in stack traces; edge runtimes without `vm` fall back to
-// `new Function`, the eval variant that does not capture scope.
+const getVmConstants = ():
+  | { USE_MAIN_CONTEXT_DEFAULT_LOADER?: any }
+  | undefined => {
+  try {
+    return __non_webpack_require__('vm').constants;
+  } catch {
+    return undefined;
+  }
+};
+
+// Compiles a chunk body into a callable without direct `eval` (whose functions
+// capture the enclosing scope and pin the chunk source string). The sdk owns
+// the compile backend and the compilation-cache policy; they are reached
+// through the runtime the host bundled, the same way loadScriptNode is.
 export const compileChunk = (
   source: string,
   filename: string,
 ): ChunkFunction => {
-  if (typeof process !== 'undefined') {
-    const vm = __non_webpack_require__('vm') as typeof import('vm');
-    const script = withoutCompilationCache(
-      () =>
-        new vm.Script(
-          `(function(${CHUNK_WRAPPER_PARAMS.join(', ')}) {${source}\n})`,
-          {
-            filename,
-            importModuleDynamically:
-              //@ts-ignore
-              vm.constants?.USE_MAIN_CONTEXT_DEFAULT_LOADER ?? importNodeModule,
-          },
-        ),
-    );
-    return script.runInThisContext() as ChunkFunction;
+  const rt = __webpack_require__.federation?.runtime;
+  if (rt?.compileCommonJsModule && rt?.withRemoteCompilationPolicy) {
+    return rt.withRemoteCompilationPolicy(() =>
+      rt.compileCommonJsModule!({
+        source,
+        filename,
+        parameters: CHUNK_WRAPPER_PARAMS,
+        importModuleDynamically:
+          getVmConstants()?.USE_MAIN_CONTEXT_DEFAULT_LOADER ?? importNodeModule,
+      }),
+    ) as ChunkFunction;
   }
+  // legacy runtime without the sdk compile helpers: no cache policy applies
   return new Function(...CHUNK_WRAPPER_PARAMS, source) as ChunkFunction;
 };
 

@@ -40,7 +40,13 @@ export {
   safeWrapper,
 } from './utils';
 export { getRegisteredShare } from '../src/utils/share';
-export { loadScript, loadScriptNode } from '@module-federation/sdk';
+export {
+  loadScript,
+  loadScriptNode,
+  buildCommonJsWrapper,
+  compileCommonJsModule,
+  withRemoteCompilationPolicy,
+} from '@module-federation/sdk';
 export { Module };
 export * as types from './type';
 export { helpers };
