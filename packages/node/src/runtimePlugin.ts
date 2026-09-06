@@ -1,3 +1,4 @@
+import { compileRemoteCommonJsModule } from '@module-federation/sdk';
 import type {
   ModuleFederationRuntimePlugin,
   ModuleFederation,
@@ -21,13 +22,6 @@ type WebpackRequire = {
         url: string,
         options: { attrs: { globalName: string } },
       ) => Promise<any>;
-      compileCommonJsModule?: (options: {
-        source: string;
-        filename: string;
-        parameters: string[];
-        importModuleDynamically?: any;
-      }) => (...args: any[]) => any;
-      withRemoteCompilationPolicy?: <T>(compile: () => T) => T;
     };
     instance: ModuleFederation;
     chunkMatcher?: (chunkId: string) => boolean;
@@ -209,28 +203,17 @@ const getVmConstants = ():
 };
 
 // Compiles a chunk body into a callable without direct `eval` (whose functions
-// capture the enclosing scope and pin the chunk source string). The sdk owns
-// the compile backend and the compilation-cache policy; they are reached
-// through the runtime the host bundled, the same way loadScriptNode is.
-export const compileChunk = (
-  source: string,
-  filename: string,
-): ChunkFunction => {
-  const rt = __webpack_require__.federation?.runtime;
-  if (rt?.compileCommonJsModule && rt?.withRemoteCompilationPolicy) {
-    return rt.withRemoteCompilationPolicy(() =>
-      rt.compileCommonJsModule!({
-        source,
-        filename,
-        parameters: CHUNK_WRAPPER_PARAMS,
-        importModuleDynamically:
-          getVmConstants()?.USE_MAIN_CONTEXT_DEFAULT_LOADER ?? importNodeModule,
-      }),
-    ) as ChunkFunction;
-  }
-  // legacy runtime without the sdk compile helpers: no cache policy applies
-  return new Function(...CHUNK_WRAPPER_PARAMS, source) as ChunkFunction;
-};
+// capture the enclosing scope and pin the chunk source string). The compile
+// backend and V8 compilation-cache policy live in the sdk's Node code; this
+// plugin only decides that fetched chunks are remote code that needs them.
+export const compileChunk = (source: string, filename: string): ChunkFunction =>
+  compileRemoteCommonJsModule({
+    source,
+    filename,
+    parameters: CHUNK_WRAPPER_PARAMS,
+    importModuleDynamically:
+      getVmConstants()?.USE_MAIN_CONTEXT_DEFAULT_LOADER ?? importNodeModule,
+  }) as ChunkFunction;
 
 // Hoisted utility function to load chunks from filesystem
 export const loadFromFs = (

@@ -13,9 +13,6 @@ import { getGlobalFederationInstance } from './utils';
 export {
   loadScript,
   loadScriptNode,
-  buildCommonJsWrapper,
-  compileCommonJsModule,
-  withRemoteCompilationPolicy,
   Module,
   getRemoteEntry,
   getRemoteInfo,

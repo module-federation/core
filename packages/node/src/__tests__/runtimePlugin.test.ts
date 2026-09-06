@@ -32,6 +32,28 @@ jest.mock('fs', () => ({
   readFile: jest.fn(),
 }));
 
+jest.mock('@module-federation/sdk', () => ({
+  // the plugin compiles fetched chunks through the sdk's Node entry point;
+  // back it with the vm mock above so individual tests can shape the compile
+  compileRemoteCommonJsModule: jest.fn(
+    ({
+      source,
+      filename,
+      parameters,
+      importModuleDynamically,
+    }: {
+      source: string;
+      filename: string;
+      parameters: string[];
+      importModuleDynamically?: any;
+    }) =>
+      new (require('vm').Script)(
+        `(function(${parameters.join(', ')}) {${source}\n})`,
+        { filename, importModuleDynamically },
+      ).runInThisContext(),
+  ),
+}));
+
 jest.mock('vm', () => ({
   Script: jest.fn().mockImplementation(() => ({
     runInThisContext: jest.fn().mockReturnValue(() => {
@@ -56,26 +78,6 @@ const mockWebpackRequire = {
   federation: {
     runtime: {
       loadScriptNode: jest.fn().mockResolvedValue({}),
-      // sdk compile helpers as exposed by @module-federation/runtime, backed by
-      // the vm mock above so individual tests can shape the compile
-      compileCommonJsModule: jest.fn(
-        ({
-          source,
-          filename,
-          parameters,
-          importModuleDynamically,
-        }: {
-          source: string;
-          filename: string;
-          parameters: string[];
-          importModuleDynamically?: any;
-        }) =>
-          new (require('vm').Script)(
-            `(function(${parameters.join(', ')}) {${source}\n})`,
-            { filename, importModuleDynamically },
-          ).runInThisContext(),
-      ),
-      withRemoteCompilationPolicy: jest.fn(<T>(compile: () => T) => compile()),
     },
     instance: {
       initRawContainer: jest.fn().mockReturnValue({}),
@@ -716,9 +718,8 @@ describe('runtimePlugin', () => {
       expect(result).toEqual(mockChunk);
       // remote chunks go through the sdk compile helper under the cache policy,
       // with the chunk URL as the script filename, never through direct eval
-      const rt = (global as any).__webpack_require__.federation.runtime;
-      expect(rt.withRemoteCompilationPolicy).toHaveBeenCalledTimes(1);
-      expect(rt.compileCommonJsModule).toHaveBeenCalledWith(
+      const { compileRemoteCommonJsModule } = require('@module-federation/sdk');
+      expect(compileRemoteCommonJsModule).toHaveBeenCalledWith(
         expect.objectContaining({
           filename: 'http://example.com/test-chunk',
           parameters: CHUNK_WRAPPER_PARAMS,
@@ -731,55 +732,6 @@ describe('runtimePlugin', () => {
         expect.objectContaining({ filename: 'http://example.com/test-chunk' }),
       );
       (global as any).__webpack_require__.p = originalPublicPath;
-    });
-
-    it('should fall back to new Function when the runtime has no compile helpers', async () => {
-      const rt = (global as any).__webpack_require__.federation.runtime;
-      const { compileCommonJsModule, withRemoteCompilationPolicy } = rt;
-      delete rt.compileCommonJsModule;
-      delete rt.withRemoteCompilationPolicy;
-      const originalPublicPath = (global as any).__webpack_require__.p;
-      (global as any).__webpack_require__.p = 'http://example.com/';
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        text: jest
-          .fn()
-          .mockResolvedValue(
-            "exports.modules = {'legacy-module': __filename}; exports.ids = ['test-chunk']; exports.runtime = null;",
-          ),
-      });
-      const args = {
-        origin: {
-          options: { name: 'test-host' },
-          loaderHook: {
-            lifecycle: {
-              fetch: { emit: jest.fn().mockResolvedValue(null) },
-            },
-          },
-        },
-      };
-
-      try {
-        const result = await new Promise<any>((resolve, reject) => {
-          loadChunk(
-            'url',
-            'test-chunk',
-            '/dist',
-            (error, chunk) => (error ? reject(error) : resolve(chunk)),
-            args,
-          );
-        });
-
-        expect(result).toEqual({
-          modules: { 'legacy-module': 'test-chunk' },
-          ids: ['test-chunk'],
-          runtime: null,
-        });
-        expect(require('vm').Script).not.toHaveBeenCalled();
-      } finally {
-        rt.compileCommonJsModule = compileCommonJsModule;
-        rt.withRemoteCompilationPolicy = withRemoteCompilationPolicy;
-        (global as any).__webpack_require__.p = originalPublicPath;
-      }
     });
 
     it('should handle unknown strategies', () => {

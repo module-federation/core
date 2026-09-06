@@ -181,6 +181,18 @@ export function withRemoteCompilationPolicy<T>(compile: () => T): T {
   }
 }
 
+/**
+ * The one entry point for compiling remote (deployment-varying) CommonJS-style
+ * code on Node: `compileCommonJsModule` under `withRemoteCompilationPolicy`.
+ * Used by `loadScriptNode` for remote entries and by `@module-federation/node`
+ * for fetched chunks.
+ */
+export function compileRemoteCommonJsModule(
+  options: Parameters<typeof compileCommonJsModule>[0],
+): ReturnType<typeof compileCommonJsModule> {
+  return withRemoteCompilationPolicy(() => compileCommonJsModule(options));
+}
+
 const lazyLoaderHookFetch = async (
   input: RequestInfo | URL,
   init?: RequestInit,
