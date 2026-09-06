@@ -2,27 +2,49 @@ import { jest } from '@jest/globals';
 
 type NodeModule = typeof import('../src/node');
 
+// builtin lookups are memoised on a process-wide global (see tryRequireBuiltin);
+// clear it so each test's module mocks are observed
+const BUILTIN_MODULES = Symbol.for('@module-federation/builtin-modules');
+const resetBuiltinMemo = () => {
+  delete (globalThis as any)[BUILTIN_MODULES];
+};
+
 const loadNode = async (): Promise<NodeModule> => {
   jest.resetModules();
+  resetBuiltinMemo();
   return import('../src/node');
+};
+
+// process.getBuiltinModule is preferred over require(); disable it so a
+// jest.doMock of the builtin is what the code under test sees
+const withoutGetBuiltinModule = async <T>(
+  run: () => Promise<T>,
+): Promise<T> => {
+  const getBuiltinModule = (process as any).getBuiltinModule;
+  (process as any).getBuiltinModule = undefined;
+  try {
+    return await run();
+  } finally {
+    (process as any).getBuiltinModule = getBuiltinModule;
+    resetBuiltinMemo();
+  }
 };
 
 const withoutProcessVm = async (
   run: (node: NodeModule) => void | Promise<void>,
 ) => {
-  // capability detection tries `require('vm')` then process.getBuiltinModule;
+  // capability detection tries process.getBuiltinModule then require('vm');
   // block both so the `new Function` backend is selected
-  const getBuiltinModule = (process as any).getBuiltinModule;
-  (process as any).getBuiltinModule = undefined;
-  jest.doMock('vm', () => {
-    throw new Error('vm unavailable');
+  await withoutGetBuiltinModule(async () => {
+    jest.doMock('vm', () => {
+      throw new Error('vm unavailable');
+    });
+    try {
+      await run(await loadNode());
+    } finally {
+      jest.dontMock('vm');
+    }
   });
-  try {
-    await run(await loadNode());
-  } finally {
-    jest.dontMock('vm');
-    (process as any).getBuiltinModule = getBuiltinModule;
-  }
 };
 
 describe('buildCommonJsWrapper', () => {
@@ -79,25 +101,27 @@ describe('compileCommonJsModule', () => {
       }),
     ).toThrow(expect.objectContaining({ name: 'SyntaxError' }));
 
-    jest.doMock('vm', () => ({
-      Script: class {
-        constructor() {
-          throw new Error('vm backend failed');
-        }
-      },
-    }));
-    try {
-      const node = await loadNode();
-      expect(() =>
-        node.compileCommonJsModule({
-          source: 'exports.ok = true;',
-          filename: 'fine.js',
-          parameters: ['exports'],
-        }),
-      ).toThrow('vm backend failed');
-    } finally {
-      jest.dontMock('vm');
-    }
+    await withoutGetBuiltinModule(async () => {
+      jest.doMock('vm', () => ({
+        Script: class {
+          constructor() {
+            throw new Error('vm backend failed');
+          }
+        },
+      }));
+      try {
+        const node = await loadNode();
+        expect(() =>
+          node.compileCommonJsModule({
+            source: 'exports.ok = true;',
+            filename: 'fine.js',
+            parameters: ['exports'],
+          }),
+        ).toThrow('vm backend failed');
+      } finally {
+        jest.dontMock('vm');
+      }
+    });
   });
 });
 
@@ -175,14 +199,16 @@ describe('withRemoteCompilationPolicy', () => {
   });
 
   it('compiles normally when setFlagsFromString is missing', async () => {
-    jest.doMock('v8', () => ({}));
-    try {
-      const { withRemoteCompilationPolicy } = await loadNode();
-      expect(withRemoteCompilationPolicy(() => 'ok')).toBe('ok');
-      expect(setFlags).not.toHaveBeenCalled();
-    } finally {
-      jest.dontMock('v8');
-    }
+    await withoutGetBuiltinModule(async () => {
+      jest.doMock('v8', () => ({}));
+      try {
+        const { withRemoteCompilationPolicy } = await loadNode();
+        expect(withRemoteCompilationPolicy(() => 'ok')).toBe('ok');
+        expect(setFlags).not.toHaveBeenCalled();
+      } finally {
+        jest.dontMock('v8');
+      }
+    });
   });
 
   it('does nothing when FEDERATION_REMOTE_COMPILATION_CACHE=default', async () => {
