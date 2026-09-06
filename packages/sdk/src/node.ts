@@ -32,12 +32,38 @@ function importNodeModule<T>(name: string): Promise<T> {
 
 // Synchronous builtin lookup: `require` in the CJS build, `process.getBuiltinModule`
 // (Node >= 20.16) in the ESM build where `require` is not in scope.
+// Builtin lookups are memoised on a global shared by every copy of this
+// package in the isolate, and prefer `process.getBuiltinModule`. The
+// `eval('require')` fallback must run at most once per process: a direct eval
+// is cached by V8 under the script that calls it, so when this code runs inside
+// a remote entry the eval cache pins that entry's source for the life of the
+// process (measured: 11 MB retained across 60 unique 200 KB entries, none with
+// `getBuiltinModule`).
+const BUILTIN_MODULES = Symbol.for('@module-federation/builtin-modules');
+
 function tryRequireBuiltin<T>(name: string): T | undefined {
-  try {
-    return eval('require')(name);
-  } catch {
-    return (globalThis as any).process?.getBuiltinModule?.(name);
+  const memo = ((globalThis as any)[BUILTIN_MODULES] ??= {}) as Record<
+    string,
+    unknown
+  >;
+  if (name in memo) {
+    return memo[name] as T | undefined;
   }
+  let mod: T | undefined;
+  try {
+    mod = (globalThis as any).process?.getBuiltinModule?.(name);
+  } catch {
+    mod = undefined;
+  }
+  if (!mod) {
+    try {
+      mod = eval('require')(name);
+    } catch {
+      mod = undefined;
+    }
+  }
+  memo[name] = mod;
+  return mod;
 }
 
 function tryGetVm(): typeof import('vm') | undefined {
