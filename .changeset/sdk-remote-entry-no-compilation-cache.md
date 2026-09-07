@@ -1,0 +1,5 @@
+---
+'@module-federation/sdk': patch
+---
+
+Add Node compile primitives for remote code: `buildCommonJsWrapper` (the single wrapper shape), `compileCommonJsModule` (`vm.Script` when `vm` is obtainable, otherwise `new Function`; compile errors propagate, never retried on the other backend), `withRemoteCompilationPolicy` (flips `--no-compilation-cache` around one synchronous compile and restores it, with a process-wide depth counter, respect for a process already started with the flag, and `FEDERATION_REMOTE_COMPILATION_CACHE=disable|default`), and `compileRemoteCommonJsModule`, which composes the two and is what `loadScriptNode` and `@module-federation/node` use. Builtin lookups are memoised per process and prefer `process.getBuiltinModule`, because a direct `eval('require')` executed inside a remote entry pins that entry in V8's eval cache. V8 otherwise keeps every distinct compiled remote build until the heap nears its own limit, which is what made long-running SSR hosts that force-register new builds grow without bound.
