@@ -743,7 +743,16 @@ export class SharedHandler {
     extraOptions: { hostShareScopeMap?: ShareScopeMap } = {},
   ): void {
     const { host } = this;
-    this.shareScopeMap[scopeName] = shareScope;
+    // Merge at scope level: preserves shared packages that were registered
+    // by previous init calls or by setShared() for this scope.  A repeated
+    // container init with an empty or incomplete shareScope will no longer
+    // wipe out shared entries that were already resolved.  When the incoming
+    // scope includes a package already present, the incoming version set
+    // replaces the existing one (the remote's view is authoritative).
+    this.shareScopeMap[scopeName] = {
+      ...this.shareScopeMap[scopeName],
+      ...shareScope,
+    };
     this.hooks.lifecycle.initContainerShareScopeMap.emit({
       shareScope,
       options: host.options,
