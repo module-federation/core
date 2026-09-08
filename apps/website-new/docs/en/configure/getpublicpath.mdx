@@ -6,19 +6,15 @@
 - Effective condition: only effective when `exposes` is set
 
 
-Used to set a dynamic `publicPath`. The value must be a stringified function or a stringified return expression. When other consumers load this provider, the string in `getPublicPath` will be executed via `new Function` to obtain the return value, which will be used as the `publicPath` prefix for the module’s static assets. For example, if your deployed project receives a dynamic `cdn_prefix`, you can configure it as:
+Used to set a dynamic `publicPath`. The value must be a stringified function or a stringified return expression, and the two forms are **not** interchangeable:
 
-- Function form: ``function(){ return window.cdn_prefix }``
-- Return form: ``return "https:" + window.navigator.cdn_host + "/resource/app/"``
+- **Return form** (e.g. ``return "https:" + window.navigator.cdn_host + "/resource/app/"``): the string is executed via `new Function` and its **return value is assigned** to the bundler's public path (`__webpack_require__.p` for webpack/Rspack), so both the Module Federation runtime *and* the bundler's own native chunk loader use it.
+- **Function form** (e.g. ``function(){ __webpack_public_path__ = window.cdn_prefix }``): the string is executed as a function call, but **its return value is discarded**. The Module Federation runtime still picks up the value via the generated manifest, but the bundler's native chunk loader (used for sub-chunks inside an `exposes` entry) does not — it only reads `__webpack_require__.p`. If you need the function form to also affect native chunk loading, the function body must **assign** `__webpack_public_path__` itself, as shown below, rather than `return` a value.
 
-In the example below, `getPublicPath` is set. When other consumers load this provider, the string in `getPublicPath` will be executed using `new Function` to obtain the value, which will be used as the `publicPath` prefix for the module’s static assets.
+If you only need to compute the public path once, prefer the return form — it covers both cases with no extra step.
 
 :::tip NOTE
 `getPublicPath` must be a stringified function or a stringified return expression.
-:::
-
-:::tip NOTE
-If you're using the module federation webpack plugin and want to set a dynamic publicPath, you should set `__webpack_public_path__ = window.cdn_prefix` in the `getPublicPath` function body.
 :::
 
 ```ts title="rspack.config.ts"
@@ -30,7 +26,12 @@ module.exports = {
         './Button': './src/components/Button.tsx',
       },
       // ...
-      getPublicPath: `function() {return "https:" + window.navigator.cdn_host + "/resource/app/"}`,
+      // Return form (recommended): also sets the bundler's native public path.
+      getPublicPath: `return "https:" + window.navigator.cdn_host + "/resource/app/"`,
+      // Function form: must assign __webpack_public_path__ itself to affect
+      // native chunk loading — a bare `return` inside this form only reaches
+      // the Module Federation runtime, not __webpack_require__.p.
+      // getPublicPath: `function() { __webpack_public_path__ = "https:" + window.navigator.cdn_host + "/resource/app/" }`,
     }),
   ],
 };
