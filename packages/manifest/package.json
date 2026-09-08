@@ -51,6 +51,7 @@
     }
   },
   "devDependencies": {
+    "@module-federation/manifest-legacy": "npm:@module-federation/manifest@2.8.2",
     "typescript": "7.0.2",
     "webpack": "^5.0.0"
   },
