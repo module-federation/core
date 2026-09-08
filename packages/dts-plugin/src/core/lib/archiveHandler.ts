@@ -75,12 +75,14 @@ export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => {
           );
         }
 
+        let typesFolderRemoved = false;
         try {
           if (hostOptions.deleteTypesFolder) {
             await rm(destinationPath, {
               recursive: true,
               force: true,
             });
+            typesFolderRemoved = true;
           }
         } catch (error) {
           fileLog(
@@ -91,7 +93,13 @@ export const downloadTypesArchive = (hostOptions: Required<HostOptions>) => {
         }
 
         const zip = new AdmZip(Buffer.from(response.data));
-        zip.extractAllTo(destinationPath, true);
+        // Overwrite is only needed when something may already exist at the
+        // destination: the caller opted out of deleting the types folder, or the
+        // deletion failed. When the folder was just removed every entry is new,
+        // and keeping overwrite off there removes the precondition of
+        // CVE-2026-76845 (adm-zip follows symlinks at the destination only when
+        // overwrite is enabled).
+        zip.extractAllTo(destinationPath, !typesFolderRemoved);
         fileLog(
           `zip.extractAllTo success destinationPath: ${destinationPath}; url: ${url}`,
           'downloadTypesArchive',
