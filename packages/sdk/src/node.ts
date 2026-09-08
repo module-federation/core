@@ -247,6 +247,31 @@ export const loadScriptNode =
       };
 
 const esmModuleCache = new Map<string, any>();
+// Resolves once a cached module has finished linking. The instance itself has
+// to be published to `esmModuleCache` before linking starts, so a cyclic
+// import can still see it - which means a cache hit can hand back a module
+// whose own requests are not resolved yet. Anything that is not part of that
+// cycle has to wait here instead.
+const esmModuleLinking = new Map<string, Promise<unknown>>();
+// child url -> the url whose link() asked for it, for modules currently being
+// linked. This is what tells a genuine cycle (which must receive the unlinked
+// instance, or the graph deadlocks) from a sibling that merely raced it.
+const esmLinkParents = new Map<string, string>();
+
+function isLinkAncestor(candidate: string, from?: string): boolean {
+  const seen = new Set<string>();
+  let current = from;
+
+  while (current && !seen.has(current)) {
+    if (current === candidate) {
+      return true;
+    }
+    seen.add(current);
+    current = esmLinkParents.get(current);
+  }
+
+  return false;
+}
 
 type LoadModuleOptions = {
   vm: typeof import('vm') & {
@@ -390,7 +415,7 @@ async function loadResolvedModule(
     );
   }
 
-  return loadModule(resolvedUrl, options);
+  return loadModule(resolvedUrl, options, parentUrl);
 }
 
 async function evaluateDynamicModule(module: any) {
@@ -405,10 +430,26 @@ async function evaluateDynamicModule(module: any) {
   return module;
 }
 
-async function loadModule(url: string, options: LoadModuleOptions) {
+async function loadModule(
+  url: string,
+  options: LoadModuleOptions,
+  parentUrl?: string,
+) {
   // Check cache to prevent infinite recursion in ESM loading
   if (esmModuleCache.has(url)) {
-    return esmModuleCache.get(url)!;
+    const cachedModule = esmModuleCache.get(url)!;
+    const linking = esmModuleLinking.get(url);
+
+    // Still linking. Returning it now is only correct for a cycle, where the
+    // module is an ancestor of this request and waiting would deadlock. A
+    // sibling that raced it must get the finished module, otherwise Node
+    // reports the child's own imports as unresolved requests on an unlinked
+    // module.
+    if (linking && !isLinkAncestor(url, parentUrl)) {
+      await linking;
+    }
+
+    return cachedModule;
   }
 
   const { fetch, vm } = options;
@@ -437,10 +478,21 @@ async function loadModule(url: string, options: LoadModuleOptions) {
 
   // Cache the module before linking to prevent cycles
   esmModuleCache.set(url, sourceTextModule);
+  if (parentUrl) {
+    esmLinkParents.set(url, parentUrl);
+  }
 
-  await sourceTextModule.link(async (specifier: string) => {
-    return loadResolvedModule(specifier, url, options);
-  });
+  const linking = sourceTextModule
+    .link(async (specifier: string) => {
+      return loadResolvedModule(specifier, url, options);
+    })
+    .finally(() => {
+      esmModuleLinking.delete(url);
+      esmLinkParents.delete(url);
+    });
+  esmModuleLinking.set(url, linking);
+
+  await linking;
 
   return sourceTextModule;
 }
