@@ -1,18 +1,27 @@
-import { access } from 'fs/promises';
 import path from 'node:path';
 import { fileCache } from './fileCache';
 import type { MiddlewareHandler } from '@modern-js/server-runtime';
 
-const pathExists = async (filepath: string): Promise<boolean> => {
-  try {
-    await access(filepath);
-    return true;
-  } catch {
-    return false;
-  }
-};
-
 const bundlesAssetPrefix = '/bundles';
+
+function isPathInsideRoot(root: string, candidate: string): boolean {
+  const relative = path.relative(root, candidate);
+  return (
+    relative === '' ||
+    (relative !== '..' &&
+      !relative.startsWith(`..${path.sep}`) &&
+      !path.isAbsolute(relative))
+  );
+}
+
+function joinUrlPath(...parts: string[]): string {
+  const joined = parts
+    .filter((part) => part != null && part !== '')
+    .join('/')
+    .replace(/\/{2,}/g, '/');
+  return joined.startsWith('/') ? joined : `/${joined}`;
+}
+
 // Remove domain name from assetPrefix if it exists
 // and remove trailing slash if it exists, if the url is a single slash, return it as empty string
 const removeHost = (url: string): string => {
@@ -35,6 +44,7 @@ const createStaticMiddleware = (options: {
   pwd: string;
 }): MiddlewareHandler => {
   const { assetPrefix, pwd } = options;
+  const bundlesRoot = path.resolve(pwd, 'bundles');
 
   return async (c, next) => {
     const pathname = c.req.path;
@@ -44,16 +54,27 @@ const createStaticMiddleware = (options: {
       return next();
     }
 
-    const prefixWithoutHost = removeHost(assetPrefix);
-    const prefixWithBundle = path.join(prefixWithoutHost, bundlesAssetPrefix);
+    const prefixWithoutHost = removeHost(assetPrefix).replace(/\/+$/, '');
+    // URL prefixes must stay POSIX-style; path.join breaks on Windows (`\bundles`).
+    const prefixWithBundle = joinUrlPath(prefixWithoutHost, bundlesAssetPrefix);
     // Skip if the request is not for asset prefix + `/bundles`
     if (!pathname.startsWith(prefixWithBundle)) {
       return next();
     }
 
-    const pathnameWithoutPrefix = pathname.replace(prefixWithBundle, '');
-    const filepath = path.join(pwd, bundlesAssetPrefix, pathnameWithoutPrefix);
-    if (!(await pathExists(filepath))) {
+    const pathnameWithoutPrefix = pathname
+      .slice(prefixWithBundle.length)
+      .replace(/^\/+/, '');
+    if (
+      !pathnameWithoutPrefix ||
+      pathnameWithoutPrefix.includes('\0') ||
+      pathnameWithoutPrefix.split(/[/\\]/).some((segment) => segment === '..')
+    ) {
+      return next();
+    }
+
+    const filepath = path.resolve(bundlesRoot, pathnameWithoutPrefix);
+    if (!isPathInsideRoot(bundlesRoot, filepath)) {
       return next();
     }
 
@@ -63,7 +84,9 @@ const createStaticMiddleware = (options: {
     }
 
     c.header('Content-Type', 'application/javascript');
-    c.header('Content-Length', String(fileResult.content.length));
+    // File content is a UTF-8 string; Content-Length must be byte length or
+    // non-ASCII chunks are truncated by clients that honor the header.
+    c.header('Content-Length', String(Buffer.byteLength(fileResult.content)));
     return c.body(fileResult.content, 200);
   };
 };
