@@ -101,6 +101,32 @@ describe('Node ESM graphs that reach one module twice', () => {
     expect(namespace?.a).toBe('abcc');
   });
 
+  // Two modules that import each other are both reachable from the entry, so
+  // neither is the other's creation parent. Waiting on a module whose own
+  // linking is blocked on the waiter has to be refused by reachability through
+  // the wait graph, not by a parent chain, or both sides wait forever.
+  it('reports an error rather than hanging when two siblings of the entry import each other', async () => {
+    setModuleFetchMock({
+      [`${ORIGIN}/a.js`]: `
+        import { b } from './b.js'
+        import { c } from './c.js'
+        export const a = 'a' + b + c
+      `,
+      [`${ORIGIN}/b.js`]: `
+        import { c } from './c.js'
+        export const b = 'b' + c
+      `,
+      [`${ORIGIN}/c.js`]: `
+        import { b } from './b.js'
+        export const c = 'c' + b
+      `,
+    });
+
+    const { error } = await loadNodeEsmScript(`${ORIGIN}/a.js`);
+
+    expect(error).toBeInstanceOf(Error);
+  }, 15000);
+
   // A module in a cycle has to keep receiving the unlinked instance from the
   // cache: waiting for it to finish linking would wait on the request it is
   // already serving. This loader does not support cyclic entry graphs, and

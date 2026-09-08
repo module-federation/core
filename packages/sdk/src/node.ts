@@ -253,21 +253,57 @@ const esmModuleCache = new Map<string, any>();
 // whose own requests are not resolved yet. Anything that is not part of that
 // cycle has to wait here instead.
 const esmModuleLinking = new Map<string, Promise<unknown>>();
-// child url -> the url whose link() asked for it, for modules currently being
-// linked. This is what tells a genuine cycle (which must receive the unlinked
-// instance, or the graph deadlocks) from a sibling that merely raced it.
-const esmLinkParents = new Map<string, string>();
+// url -> the urls whose linking that url's own link() is currently blocked on,
+// because its linker asked for them or because it is waiting for one below.
+// Reachability through this map is what identifies a cycle: waiting on a module
+// that is already blocked on the waiter, directly or through other modules,
+// would deadlock. A module-creation parent chain is not enough, because two
+// modules that import each other can both be reached from the same importer.
+const esmLinkBlockedOn = new Map<string, Set<string>>();
 
-function isLinkAncestor(candidate: string, from?: string): boolean {
+function blockLinkOn(waiter: string, awaited: string): void {
+  const blocked = esmLinkBlockedOn.get(waiter);
+
+  if (blocked) {
+    blocked.add(awaited);
+    return;
+  }
+
+  esmLinkBlockedOn.set(waiter, new Set([awaited]));
+}
+
+function unblockLinkOn(waiter: string, awaited: string): void {
+  const blocked = esmLinkBlockedOn.get(waiter);
+  if (!blocked) {
+    return;
+  }
+
+  blocked.delete(awaited);
+  if (blocked.size === 0) {
+    esmLinkBlockedOn.delete(waiter);
+  }
+}
+
+function linkOfBlocksOn(start: string, target: string): boolean {
+  const pending = [start];
   const seen = new Set<string>();
-  let current = from;
 
-  while (current && !seen.has(current)) {
-    if (current === candidate) {
+  while (pending.length > 0) {
+    const current = pending.pop()!;
+
+    if (current === target) {
       return true;
     }
+
+    if (seen.has(current)) {
+      continue;
+    }
     seen.add(current);
-    current = esmLinkParents.get(current);
+
+    const blocked = esmLinkBlockedOn.get(current);
+    if (blocked) {
+      pending.push(...blocked);
+    }
   }
 
   return false;
@@ -440,13 +476,22 @@ async function loadModule(
     const cachedModule = esmModuleCache.get(url)!;
     const linking = esmModuleLinking.get(url);
 
-    // Still linking. Returning it now is only correct for a cycle, where the
-    // module is an ancestor of this request and waiting would deadlock. A
-    // sibling that raced it must get the finished module, otherwise Node
-    // reports the child's own imports as unresolved requests on an unlinked
-    // module.
-    if (linking && !isLinkAncestor(url, parentUrl)) {
-      await linking;
+    // Still linking. A sibling that merely raced it must get the finished
+    // module, otherwise Node reports the child's own imports as unresolved
+    // requests on an unlinked module. Waiting is only wrong when this module's
+    // linking is itself blocked on the requester - that is a cycle, and it has
+    // to keep receiving the in-progress instance rather than hang.
+    if (linking) {
+      if (!parentUrl) {
+        await linking;
+      } else if (!linkOfBlocksOn(url, parentUrl)) {
+        blockLinkOn(parentUrl, url);
+        try {
+          await linking;
+        } finally {
+          unblockLinkOn(parentUrl, url);
+        }
+      }
     }
 
     return cachedModule;
@@ -479,7 +524,8 @@ async function loadModule(
   // Cache the module before linking to prevent cycles
   esmModuleCache.set(url, sourceTextModule);
   if (parentUrl) {
-    esmLinkParents.set(url, parentUrl);
+    // The requester's own link() cannot finish until this one does.
+    blockLinkOn(parentUrl, url);
   }
 
   const linking = sourceTextModule
@@ -488,7 +534,10 @@ async function loadModule(
     })
     .finally(() => {
       esmModuleLinking.delete(url);
-      esmLinkParents.delete(url);
+      esmLinkBlockedOn.delete(url);
+      if (parentUrl) {
+        unblockLinkOn(parentUrl, url);
+      }
     });
   esmModuleLinking.set(url, linking);
 
