@@ -22,13 +22,162 @@ type RemotesConsumerMap = { [remoteKey: string]: StatsRemote };
 
 type ContainerExposeEntry = [
   exposeKey: string,
-  { import: string[]; name?: string },
+  { import: string[]; name?: string; layer?: string },
 ];
 
 const REMOTE_REFERENCE_PREFIX = /^(?:webpack|rspack)\/container\/reference\//;
 
 const isNonEmptyString = (value: unknown): value is string => {
   return typeof value === 'string' && value.trim().length > 0;
+};
+
+/**
+ * Rspack's structural shared identity, as embedded in module identifiers:
+ *
+ *   provide shared module [<key>]@<version> = <request>
+ *   consume shared module [<key>]@<requiredVersion> (strict) (fallback: ...)
+ *
+ * `<key>` is a sequence of length-prefixed components (`<len>:<value>`):
+ * the share-scope key (`s<len>:<scope>` or `m<count>:<len>:<scope>...`),
+ * then `l<len>:<layer>` or `n` (no layer), then the share key. Decoding by
+ * length keeps `]`, `@` and spaces inside values unambiguous.
+ */
+export interface StructuralSharedIdentity {
+  shareKey: string;
+  shareScope: string | string[];
+  layer?: string;
+  /** Text following `]@` (version or required-version range plus flags). */
+  suffix: string;
+}
+
+const readLengthPrefixed = (
+  source: string,
+  cursor: number,
+): [value: string, next: number] | undefined => {
+  const separator = source.indexOf(':', cursor);
+  if (separator <= cursor) return undefined;
+  const length = Number(source.slice(cursor, separator));
+  if (!Number.isInteger(length) || length < 0) return undefined;
+  const end = separator + 1 + length;
+  if (end > source.length) return undefined;
+  return [source.slice(separator + 1, end), end];
+};
+
+const decodeShareScopeKey = (key: string): string | string[] | undefined => {
+  if (key[0] === 's') {
+    const single = readLengthPrefixed(key, 1);
+    return single && single[1] === key.length ? single[0] : undefined;
+  }
+  if (key[0] === 'm') {
+    const separator = key.indexOf(':', 1);
+    if (separator < 0) return undefined;
+    const count = Number(key.slice(1, separator));
+    if (!Number.isInteger(count) || count < 0) return undefined;
+    const scopes: string[] = [];
+    let cursor = separator + 1;
+    for (let index = 0; index < count; index++) {
+      const scope = readLengthPrefixed(key, cursor);
+      if (!scope) return undefined;
+      scopes.push(scope[0]);
+      cursor = scope[1];
+    }
+    return cursor === key.length ? scopes : undefined;
+  }
+  return undefined;
+};
+
+export const parseStructuralSharedIdentifier = (
+  identifier: string,
+  prefix: string,
+): StructuralSharedIdentity | undefined => {
+  const start = `${prefix} [`;
+  if (!identifier.startsWith(start)) return undefined;
+  let cursor = start.length;
+
+  const scope = readLengthPrefixed(identifier, cursor);
+  if (!scope) return undefined;
+  const shareScope = decodeShareScopeKey(scope[0]);
+  if (shareScope === undefined) return undefined;
+  cursor = scope[1];
+
+  let layer: string | undefined;
+  if (identifier[cursor] === 'l') {
+    const layerComponent = readLengthPrefixed(identifier, cursor + 1);
+    if (!layerComponent) return undefined;
+    layer = layerComponent[0];
+    cursor = layerComponent[1];
+  } else if (identifier[cursor] === 'n') {
+    cursor += 1;
+  } else {
+    return undefined;
+  }
+
+  const shareKey = readLengthPrefixed(identifier, cursor);
+  if (!shareKey) return undefined;
+  cursor = shareKey[1];
+  if (identifier.slice(cursor, cursor + 2) !== ']@') return undefined;
+
+  return {
+    shareKey: shareKey[0],
+    shareScope,
+    ...(layer !== undefined ? { layer } : {}),
+    suffix: identifier.slice(cursor + 2),
+  };
+};
+
+const isContainerExposeEntry = (
+  value: unknown,
+): value is ContainerExposeEntry => {
+  if (!Array.isArray(value) || value.length !== 2) return false;
+  const [exposeKey, file] = value as unknown[];
+  if (typeof exposeKey !== 'string') return false;
+  if (!file || typeof file !== 'object') return false;
+  const { import: imports, name } = file as {
+    import?: unknown;
+    name?: unknown;
+  };
+  return (
+    Array.isArray(imports) &&
+    imports.length > 0 &&
+    imports.every((item) => typeof item === 'string') &&
+    (name === undefined || typeof name === 'string')
+  );
+};
+
+/**
+ * Accepts both container identifier payload generations:
+ *   legacy: `[[exposeKey, { import, name }], ...]`
+ *   layered: `[[[exposeKey, { import, name }], ...], [layer | null, ...]]`
+ * and returns entries with `layer` attached when present.
+ */
+const decodeContainerExposePayload = (
+  payload: unknown,
+): ContainerExposeEntry[] | undefined => {
+  if (!Array.isArray(payload)) return undefined;
+  if (payload.every(isContainerExposeEntry)) {
+    return payload as ContainerExposeEntry[];
+  }
+  if (
+    payload.length === 2 &&
+    Array.isArray(payload[0]) &&
+    Array.isArray(payload[1]) &&
+    payload[0].length === payload[1].length &&
+    (payload[0] as unknown[]).every(isContainerExposeEntry) &&
+    (payload[1] as unknown[]).every(
+      (layer) => layer === null || typeof layer === 'string',
+    )
+  ) {
+    const entries = payload[0] as ContainerExposeEntry[];
+    const layers = payload[1] as (string | null)[];
+    return entries.map(([exposeKey, file], index) => {
+      const layer = layers[index];
+      return [
+        exposeKey,
+        layer === null ? file : { ...file, layer },
+      ] as ContainerExposeEntry;
+    });
+  }
+  return undefined;
 };
 
 const normalizeExposeValue = (
@@ -82,15 +231,10 @@ const normalizeExposeValue = (
   return { import: normalizedImport };
 };
 
-const parseContainerExposeEntries = (
+const scanBalancedBrackets = (
   identifier: string,
-): ContainerExposeEntry[] | undefined => {
-  const startIndex = identifier.indexOf('[');
-
-  if (startIndex < 0) {
-    return undefined;
-  }
-
+  startIndex: number,
+): string | undefined => {
   let depth = 0;
   let inString = false;
   let isEscaped = false;
@@ -123,14 +267,42 @@ const parseContainerExposeEntries = (
       depth--;
 
       if (depth === 0) {
-        const serialized = identifier.slice(startIndex, cursor + 1);
-
-        try {
-          return JSON.parse(serialized) as ContainerExposeEntry[];
-        } catch {
-          return undefined;
-        }
+        return identifier.slice(startIndex, cursor + 1);
       }
+    }
+  }
+
+  return undefined;
+};
+
+/**
+ * The payload is the last balanced `[...]` group that decodes to a known
+ * expose representation. An ordered share scope is serialized before it as
+ * `[m2:...]`, which is not JSON, so every `[` is a candidate start.
+ */
+const parseContainerExposeEntries = (
+  identifier: string,
+): ContainerExposeEntry[] | undefined => {
+  for (
+    let startIndex = identifier.indexOf('[');
+    startIndex >= 0;
+    startIndex = identifier.indexOf('[', startIndex + 1)
+  ) {
+    const serialized = scanBalancedBrackets(identifier, startIndex);
+    if (serialized === undefined) {
+      return undefined;
+    }
+
+    let payload: unknown;
+    try {
+      payload = JSON.parse(serialized);
+    } catch {
+      continue;
+    }
+
+    const entries = decodeContainerExposePayload(payload);
+    if (entries) {
+      return entries;
     }
   }
 
@@ -310,12 +482,22 @@ class ModuleHandler {
     };
 
     if (moduleType === 'provide-module') {
-      // identifier(rspack) = provide shared module (default) react@18.2.0 = /temp/node_modules/.pnpm/react@18.2.0/node_modules/react/index.js
-      // identifier(webpack) = provide module (default) react@18.2.0 = /temp/node_modules/.pnpm/react@18.2.0/node_modules/react/index.js
-      const data = identifier.split(' ');
-      const nameAndVersion = this.isRspack ? data[4] : data[3];
-
-      const { name, version } = parseResolvedIdentifier(nameAndVersion);
+      // identifier(rspack, structural) = provide shared module [10:s7:defaultn5:react]@18.2.0 = /temp/node_modules/react/index.js
+      // identifier(rspack, legacy)     = provide shared module (default) react@18.2.0 = /temp/node_modules/.pnpm/react@18.2.0/node_modules/react/index.js
+      // identifier(webpack)            = provide module (default) react@18.2.0 = /temp/node_modules/.pnpm/react@18.2.0/node_modules/react/index.js
+      let name = '';
+      let version = '';
+      const structural = this.isRspack
+        ? parseStructuralSharedIdentifier(identifier, 'provide shared module')
+        : undefined;
+      if (structural) {
+        name = structural.shareKey;
+        version = structural.suffix.split(' = ')[0];
+      } else {
+        const data = identifier.split(' ');
+        const nameAndVersion = this.isRspack ? data[4] : data[3];
+        ({ name, version } = parseResolvedIdentifier(nameAndVersion));
+      }
 
       if (name && version) {
         initShared(name, version);
@@ -324,15 +506,22 @@ class ModuleHandler {
     }
 
     if (moduleType === 'consume-shared-module') {
-      // identifier(rspack) = consume shared module (default) lodash/get@^4.17.21 (strict) (fallback: /temp/node_modules/.pnpm/lodash@4.17.21/node_modules/lodash/get.js)
-      // identifier(webpack) = consume-shared-module|default|react-dom|!=1.8...2...0|false|/temp/node_modules/.pnpm/react-dom@18.2.0_react@18.2.0/node_modules/react-dom/index.js|true|false
+      // identifier(rspack, structural) = consume shared module [10:s7:defaultn10:lodash/get]@^4.17.21 (strict) (fallback: /temp/node_modules/lodash/get.js)
+      // identifier(rspack, legacy)     = consume shared module (default) lodash/get@^4.17.21 (strict) (fallback: /temp/node_modules/.pnpm/lodash@4.17.21/node_modules/lodash/get.js)
+      // identifier(webpack)            = consume-shared-module|default|react-dom|!=1.8...2...0|false|/temp/node_modules/.pnpm/react-dom@18.2.0_react@18.2.0/node_modules/react-dom/index.js|true|false
       const SEPARATOR = this.isRspack ? ' ' : '|';
       const data = identifier.split(SEPARATOR);
 
       let pkgName = '';
       let pkgVersion = '';
 
-      if (this.isRspack) {
+      const structural = this.isRspack
+        ? parseStructuralSharedIdentifier(identifier, 'consume shared module')
+        : undefined;
+      if (structural) {
+        pkgName = structural.shareKey;
+        pkgVersion = structural.suffix.split(' ')[0].replace(/[\^~>|>=]/g, '');
+      } else if (this.isRspack) {
         const nameAndVersion = data[4];
         const res = parseResolvedIdentifier(nameAndVersion);
         pkgName = res.name;

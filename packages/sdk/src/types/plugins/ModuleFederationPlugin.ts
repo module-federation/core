@@ -31,6 +31,11 @@ export interface ExposesConfig {
    * Custom chunk name for the exposed module.
    */
   name?: string;
+  /**
+   * Layer in which the exposed module should be built (bundlers with
+   * `experiments.layers`). An empty string is a valid layer.
+   */
+  layer?: string;
 }
 
 /**

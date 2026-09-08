@@ -109,9 +109,191 @@ jest.mock(
 );
 
 import type { moduleFederationPlugin } from '@module-federation/sdk';
-import { ModuleHandler } from '../src/ModuleHandler';
+import {
+  ModuleHandler,
+  parseStructuralSharedIdentifier,
+} from '../src/ModuleHandler';
+
+// Mirrors Rspack's `push_identifier_component`: `<len>:<value>`.
+const component = (value: string) => `${value.length}:${value}`;
+const structuralKey = (
+  shareScope: string | string[],
+  shareKey: string,
+  layer?: string,
+) => {
+  const scope = Array.isArray(shareScope)
+    ? `m${shareScope.length}:${shareScope.map(component).join('')}`
+    : `s${component(shareScope)}`;
+  const layerPart = layer === undefined ? 'n' : `l${component(layer)}`;
+  return `${component(scope)}${layerPart}${component(shareKey)}`;
+};
+
+describe('parseStructuralSharedIdentifier', () => {
+  it('decodes scope, layer and share key by length', () => {
+    const identifier = `provide shared module [${structuralKey(
+      'default',
+      'react]@weird key',
+      'server',
+    )}]@19.0.0 = /node_modules/react/index.js`;
+
+    expect(
+      parseStructuralSharedIdentifier(identifier, 'provide shared module'),
+    ).toEqual({
+      shareKey: 'react]@weird key',
+      shareScope: 'default',
+      layer: 'server',
+      suffix: '19.0.0 = /node_modules/react/index.js',
+    });
+  });
+
+  it('decodes ordered share scopes and the empty layer', () => {
+    const identifier = `consume shared module [${structuralKey(
+      ['primary', 'default'],
+      'lodash/get',
+      '',
+    )}]@^4.17.21 (strict)`;
+
+    expect(
+      parseStructuralSharedIdentifier(identifier, 'consume shared module'),
+    ).toEqual({
+      shareKey: 'lodash/get',
+      shareScope: ['primary', 'default'],
+      layer: '',
+      suffix: '^4.17.21 (strict)',
+    });
+  });
+
+  it('rejects legacy and malformed identifiers', () => {
+    expect(
+      parseStructuralSharedIdentifier(
+        'provide shared module (default) react@19.0.0 = /react.js',
+        'provide shared module',
+      ),
+    ).toBeUndefined();
+    expect(
+      parseStructuralSharedIdentifier(
+        'provide shared module [99:s7:defaultn5:react]@1.0.0 = /react.js',
+        'provide shared module',
+      ),
+    ).toBeUndefined();
+    expect(
+      parseStructuralSharedIdentifier(
+        'provide shared module [10:s7:defaultx5:react]@1.0.0 = /react.js',
+        'provide shared module',
+      ),
+    ).toBeUndefined();
+  });
+});
 
 describe('ModuleHandler', () => {
+  describe('rspack shared identifiers', () => {
+    const collectShared = (identifiers: [string, string][]) => {
+      const modules = identifiers.map(
+        ([moduleType, identifier]) =>
+          ({ moduleType, identifier }) as StatsModule,
+      );
+      const moduleHandler = new ModuleHandler(
+        { name: 'host', exposes: { './Button': './src/Button.tsx' } },
+        modules,
+        { bundler: 'rspack' },
+      );
+      return moduleHandler.collect().sharedMap;
+    };
+
+    it('reads legacy positional identifiers', () => {
+      const sharedMap = collectShared([
+        [
+          'provide-module',
+          'provide shared module (default) react@18.2.0 = /node_modules/react/index.js',
+        ],
+        [
+          'consume-shared-module',
+          'consume shared module (default) lodash/get@^4.17.21 (strict) (fallback: /node_modules/lodash/get.js)',
+        ],
+      ]);
+
+      expect(sharedMap.react).toMatchObject({ version: '18.2.0' });
+      expect(sharedMap['lodash/get']).toMatchObject({ version: '4.17.21' });
+    });
+
+    it('reads structural identifiers for unlayered and layered shares', () => {
+      const sharedMap = collectShared([
+        [
+          'provide-module',
+          `provide shared module [${structuralKey(
+            'default',
+            'react',
+          )}]@19.0.0 = /node_modules/react/index.js`,
+        ],
+        [
+          'provide-module',
+          `provide shared module [${structuralKey(
+            'default',
+            '@scope/pkg',
+            'server',
+          )}]@2.0.0 = /node_modules/@scope/pkg/index.js`,
+        ],
+        [
+          'consume-shared-module',
+          `consume shared module [${structuralKey(
+            ['primary', 'default'],
+            'lodash/get',
+          )}]@^4.17.21 (strict) (fallback: /node_modules/lodash/get.js)`,
+        ],
+      ]);
+
+      expect(sharedMap.react).toMatchObject({ version: '19.0.0' });
+      expect(sharedMap['@scope/pkg']).toMatchObject({ version: '2.0.0' });
+      expect(sharedMap['lodash/get']).toMatchObject({ version: '4.17.21' });
+      // the structural key never leaks into the emitted record
+      expect(Object.keys(sharedMap).some((key) => key.includes(':'))).toBe(
+        false,
+      );
+    });
+  });
+
+  describe('container identifiers', () => {
+    const collectExposes = (identifier: string) => {
+      const moduleHandler = new ModuleHandler(
+        { name: 'test-app' },
+        [{ identifier } as StatsModule],
+        { bundler: 'rspack' },
+      );
+      return moduleHandler.collect().exposesMap;
+    };
+    const exposes =
+      '[["./Button",{"import":["./src/Button.tsx"],"name":"__federation_expose_Button"}],["./Card",{"import":["./src/Card.tsx"],"name":"__federation_expose_Card"}]]';
+
+    it('reads the layered tuple payload, including array share scopes', () => {
+      for (const identifier of [
+        `container entry (default) [${exposes},[null,"server"]]`,
+        `container entry [${component(
+          `m2:${component('primary')}${component('default')}`,
+        )}] [${exposes},[null,"server"]]`,
+      ]) {
+        const exposesMap = collectExposes(identifier);
+        expect(exposesMap['./src/Button']?.path).toBe('./Button');
+        expect(exposesMap['./src/Card']?.path).toBe('./Card');
+      }
+    });
+
+    it('does not throw on an unsupported payload and falls back to options', () => {
+      const moduleHandler = new ModuleHandler(
+        { name: 'test-app', exposes: { './Button': './src/Button.tsx' } },
+        [
+          {
+            identifier: 'container entry (default) [[1,2],[3]]',
+          } as StatsModule,
+        ],
+        { bundler: 'rspack' },
+      );
+
+      const { exposesMap } = moduleHandler.collect();
+      expect(Object.keys(exposesMap)).toEqual(['./src/Button']);
+      expect(exposesMap['./src/Button']?.path).toBe('./Button');
+    });
+  });
+
   it('initializes exposes from plugin options when import paths contain spaces', () => {
     const options = {
       name: 'test-app',
