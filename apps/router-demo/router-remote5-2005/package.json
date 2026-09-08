@@ -15,7 +15,7 @@
     "@module-federation/rsbuild-plugin": "workspace:*",
     "react": "19.0.0",
     "react-dom": "19.0.0",
-    "react-router-dom": "6.30.3"
+    "react-router-dom": "6.30.6"
   },
   "devDependencies": {
     "@rsbuild/core": "2.1.4",
