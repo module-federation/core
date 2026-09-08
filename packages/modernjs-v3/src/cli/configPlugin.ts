@@ -345,14 +345,53 @@ export function patchBundlerConfig(options: {
     !isServer &&
     enableSSR &&
     splitChunkConfig &&
-    typeof splitChunkConfig === 'object' &&
-    splitChunkConfig.cacheGroups
+    typeof splitChunkConfig === 'object'
   ) {
-    const previousChunks = splitChunkConfig.chunks;
-    splitChunkConfig.chunks = 'async';
-    if (previousChunks && previousChunks !== 'async') {
+    const splitChunksValue = splitChunkConfig.chunks;
+    let shouldWarn =
+      splitChunksValue !== undefined && splitChunksValue !== 'async';
+    if (typeof splitChunksValue === 'function') {
+      splitChunkConfig.chunks = (chunk) =>
+        !chunk.canBeInitial() && splitChunksValue(chunk);
+    } else {
+      splitChunkConfig.chunks = 'async';
+    }
+
+    if (
+      splitChunkConfig.cacheGroups &&
+      typeof splitChunkConfig.cacheGroups === 'object'
+    ) {
+      for (const cacheGroup of Object.values(splitChunkConfig.cacheGroups)) {
+        if (cacheGroup && typeof cacheGroup === 'object') {
+          const { chunks } = cacheGroup;
+          if (typeof chunks === 'function') {
+            cacheGroup.chunks = (chunk) =>
+              !chunk.canBeInitial() && chunks(chunk);
+            shouldWarn = true;
+          } else if (typeof chunks === 'string' && chunks !== 'async') {
+            cacheGroup.chunks = 'async';
+            shouldWarn = true;
+          }
+        }
+      }
+    }
+
+    const { fallbackCacheGroup } = splitChunkConfig;
+    if (fallbackCacheGroup && typeof fallbackCacheGroup === 'object') {
+      const { chunks } = fallbackCacheGroup;
+      if (typeof chunks === 'function') {
+        fallbackCacheGroup.chunks = (chunk) =>
+          !chunk.canBeInitial() && chunks(chunk);
+        shouldWarn = true;
+      } else if (typeof chunks === 'string' && chunks !== 'async') {
+        fallbackCacheGroup.chunks = 'async';
+        shouldWarn = true;
+      }
+    }
+
+    if (shouldWarn) {
       logger.warn(
-        `splitChunks.chunks = "${previousChunks}" is not allowed with stream SSR mode; forcing "async"`,
+        'Stream SSR requires async-only splitChunks; constraining chunk filters to async chunks',
       );
     }
   }

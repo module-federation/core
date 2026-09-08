@@ -1,5 +1,10 @@
-import { it, expect, describe } from '@rstest/core';
-import { patchMFConfig, setDefaultOptimizationTarget } from './configPlugin';
+import { afterEach, describe, expect, it, rs } from '@rstest/core';
+import {
+  patchBundlerConfig,
+  patchMFConfig,
+  setDefaultOptimizationTarget,
+} from './configPlugin';
+import logger from '../logger';
 import { getIPV4 } from './utils';
 
 const mfConfig = {
@@ -13,6 +18,58 @@ const mfConfig = {
     'react-dom': { singleton: true, eager: true },
   },
 };
+
+const createBundlerChain = (splitChunkConfig: Record<string, unknown>): any => {
+  const outputValues = new Map<string, unknown>();
+  const fallback = {
+    set: rs.fn(() => fallback),
+  };
+
+  return {
+    get: rs.fn((key: string) => (key === 'ignoreWarnings' ? [] : undefined)),
+    ignoreWarnings: rs.fn(),
+    optimization: {
+      delete: rs.fn(),
+      splitChunks: {
+        entries: rs.fn(() => splitChunkConfig),
+      },
+      usedExports: rs.fn(),
+    },
+    output: {
+      chunkFilename: rs.fn(),
+      chunkLoadingGlobal: rs.fn((value: string) => {
+        outputValues.set('chunkLoadingGlobal', value);
+      }),
+      get: rs.fn((key: string) => outputValues.get(key)),
+      publicPath: rs.fn(),
+      uniqueName: rs.fn((value: string) => {
+        outputValues.set('uniqueName', value);
+      }),
+    },
+    resolve: {
+      fallback,
+    },
+  };
+};
+
+const patchClientBundlerConfig = (
+  splitChunkConfig: Record<string, unknown>,
+) => {
+  patchBundlerConfig({
+    chain: createBundlerChain(splitChunkConfig),
+    enableSSR: true,
+    isServer: false,
+    modernjsConfig: {},
+    mfConfig: {
+      name: 'host',
+    },
+  } as any);
+};
+
+afterEach(() => {
+  rs.restoreAllMocks();
+});
+
 describe('patchMFConfig', async () => {
   it('patchMFConfig: server', async () => {
     const patchedConfig = JSON.parse(JSON.stringify(mfConfig));
@@ -79,6 +136,168 @@ describe('patchMFConfig', async () => {
       },
     });
   });
+});
+
+describe('patchBundlerConfig', () => {
+  const warning =
+    'Stream SSR requires async-only splitChunks; constraining chunk filters to async chunks';
+
+  it.each([
+    { chunks: undefined, warns: false },
+    { chunks: 'async', warns: false },
+    { chunks: 'all', warns: true },
+    { chunks: 'initial', warns: true },
+  ])(
+    'normalizes stream SSR splitChunks from $chunks and warns: $warns',
+    ({ chunks, warns }) => {
+      const warnSpy = rs.spyOn(logger, 'warn').mockImplementation(() => {});
+      const splitChunkConfig = {
+        cacheGroups: {
+          vendors: {},
+        },
+        chunks,
+      };
+
+      patchClientBundlerConfig(splitChunkConfig);
+
+      expect(splitChunkConfig.chunks).toBe('async');
+      if (warns) {
+        expect(warnSpy).toHaveBeenCalledWith(warning);
+      } else {
+        expect(warnSpy).not.toHaveBeenCalledWith(warning);
+      }
+    },
+  );
+
+  it('normalizes stream SSR cache group chunks', () => {
+    const warnSpy = rs.spyOn(logger, 'warn').mockImplementation(() => {});
+    const splitChunkConfig = {
+      cacheGroups: {
+        vendors: {
+          chunks: 'all',
+        },
+      },
+      chunks: 'async',
+    };
+
+    patchClientBundlerConfig(splitChunkConfig);
+
+    expect(splitChunkConfig.chunks).toBe('async');
+    expect(splitChunkConfig.cacheGroups.vendors.chunks).toBe('async');
+    expect(warnSpy).toHaveBeenCalledWith(warning);
+  });
+
+  it('normalizes stream SSR fallback cache group chunks', () => {
+    const warnSpy = rs.spyOn(logger, 'warn').mockImplementation(() => {});
+    const splitChunkConfig = {
+      cacheGroups: {
+        vendors: {},
+      },
+      chunks: 'async',
+      fallbackCacheGroup: {
+        chunks: 'initial',
+      },
+    };
+
+    patchClientBundlerConfig(splitChunkConfig);
+
+    expect(splitChunkConfig.chunks).toBe('async');
+    expect(splitChunkConfig.fallbackCacheGroup.chunks).toBe('async');
+    expect(warnSpy).toHaveBeenCalledWith(warning);
+  });
+
+  it('restricts function chunk filters to async chunks while preserving their selection', () => {
+    const warnSpy = rs.spyOn(logger, 'warn').mockImplementation(() => {});
+    const splitChunks = rs.fn(
+      (chunk: { name: string }) => chunk.name === 'selected',
+    );
+    const cacheGroupChunks = rs.fn(
+      (chunk: { name: string }) => chunk.name === 'selected',
+    );
+    const fallbackCacheGroupChunks = rs.fn(
+      (chunk: { name: string }) => chunk.name === 'selected',
+    );
+    const splitChunkConfig = {
+      cacheGroups: {
+        vendors: {
+          chunks: cacheGroupChunks,
+        },
+      },
+      chunks: splitChunks,
+      fallbackCacheGroup: {
+        chunks: fallbackCacheGroupChunks,
+      },
+    };
+
+    patchClientBundlerConfig(splitChunkConfig);
+
+    const initialChunk = {
+      name: 'selected',
+      canBeInitial: () => true,
+      isOnlyInitial: () => true,
+    };
+    const mixedChunk = {
+      name: 'selected',
+      canBeInitial: () => true,
+      isOnlyInitial: () => false,
+    };
+    const selectedAsyncChunk = {
+      name: 'selected',
+      canBeInitial: () => false,
+      isOnlyInitial: () => false,
+    };
+    const unselectedAsyncChunk = {
+      ...selectedAsyncChunk,
+      name: 'unselected',
+    };
+
+    for (const [filter, original] of [
+      [splitChunkConfig.chunks, splitChunks],
+      [splitChunkConfig.cacheGroups.vendors.chunks, cacheGroupChunks],
+      [splitChunkConfig.fallbackCacheGroup.chunks, fallbackCacheGroupChunks],
+    ]) {
+      expect(original).not.toHaveBeenCalled();
+      expect(filter(initialChunk)).toBe(false);
+      expect(filter(mixedChunk)).toBe(false);
+      expect(original).not.toHaveBeenCalled();
+      expect(filter(selectedAsyncChunk)).toBe(true);
+      expect(filter(unselectedAsyncChunk)).toBe(false);
+      expect(original).toHaveBeenCalledTimes(2);
+      expect(original).toHaveBeenNthCalledWith(1, selectedAsyncChunk);
+      expect(original).toHaveBeenNthCalledWith(2, unselectedAsyncChunk);
+    }
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    expect(warnSpy).toHaveBeenCalledWith(warning);
+  });
+
+  it.each([
+    { enableSSR: false, isServer: false },
+    { enableSSR: true, isServer: true },
+  ])(
+    'preserves function filters outside browser SSR: %j',
+    ({ enableSSR, isServer }) => {
+      const warnSpy = rs.spyOn(logger, 'warn').mockImplementation(() => {});
+      const chunks = rs.fn(() => true);
+      const splitChunkConfig = {
+        chunks,
+        cacheGroups: { vendors: { chunks } },
+        fallbackCacheGroup: { chunks },
+      };
+
+      patchBundlerConfig({
+        chain: createBundlerChain(splitChunkConfig),
+        enableSSR,
+        isServer,
+        modernjsConfig: {},
+        mfConfig: { name: 'host' },
+      } as any);
+
+      expect(splitChunkConfig.chunks).toBe(chunks);
+      expect(splitChunkConfig.cacheGroups.vendors.chunks).toBe(chunks);
+      expect(splitChunkConfig.fallbackCacheGroup.chunks).toBe(chunks);
+      expect(warnSpy).not.toHaveBeenCalled();
+    },
+  );
 });
 
 describe('setDefaultOptimizationTarget', () => {
