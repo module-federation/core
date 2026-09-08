@@ -8,6 +8,36 @@ import { StatsManager } from './StatsManager';
 import { PLUGIN_IDENTIFIER } from './constants';
 import logger from './logger';
 
+const isRspackManifestSupported = (version?: string): boolean => {
+  if (!version) {
+    return false;
+  }
+
+  const match =
+    /^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?(?:\+[0-9A-Za-z.-]+)?$/.exec(
+      version,
+    );
+
+  if (!match) {
+    return false;
+  }
+
+  const [, majorValue, minorValue, patchValue, prerelease] = match;
+  const current = [Number(majorValue), Number(minorValue), Number(patchValue)];
+  const minimum = current[0] === 1 ? [1, 7, 12] : [2, 0, 0];
+
+  for (let index = 0; index < current.length; index += 1) {
+    if (current[index] > minimum[index]) {
+      return true;
+    }
+    if (current[index] < minimum[index]) {
+      return false;
+    }
+  }
+
+  return !prerelease;
+};
+
 export class StatsPlugin implements WebpackPluginInstance {
   readonly name = 'StatsPlugin';
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions = {};
@@ -42,6 +72,21 @@ export class StatsPlugin implements WebpackPluginInstance {
     if (!this._enable) {
       return;
     }
+
+    if (this._bundler === 'rspack' && this._options.manifest !== false) {
+      const rspackVersion = (
+        compiler.webpack as typeof compiler.webpack & {
+          rspackVersion?: string;
+        }
+      ).rspackVersion;
+
+      if (!isRspackManifestSupported(rspackVersion)) {
+        throw new Error(
+          `[ ${PLUGIN_IDENTIFIER} ]: Rspack ${rspackVersion || 'unknown'} does not support the required built-in manifest capability. Please upgrade to Rspack 1.7.12 or 2.0.0 and above.`,
+        );
+      }
+    }
+
     const res = this._statsManager.validate(compiler);
 
     if (!res) {
@@ -59,7 +104,7 @@ export class StatsPlugin implements WebpackPluginInstance {
             const existedStats = compilation.getAsset(
               this._statsManager.fileName,
             );
-            // new rspack should hit
+            // Rspack's built-in manifest is the only source of Rspack stats.
             if (existedStats) {
               let updatedStats = this._statsManager.updateStats(
                 JSON.parse(existedStats.source.source().toString()),
@@ -99,7 +144,13 @@ export class StatsPlugin implements WebpackPluginInstance {
               return;
             }
 
-            // webpack + legacy rspack
+            if (this._bundler === 'rspack') {
+              throw new Error(
+                `[ ${PLUGIN_IDENTIFIER} ]: Rspack's built-in manifest did not emit ${this._statsManager.fileName}.`,
+              );
+            }
+
+            // webpack
             let stats = await this._statsManager.generateStats(
               compiler,
               compilation,
