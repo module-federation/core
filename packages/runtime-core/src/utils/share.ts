@@ -78,6 +78,33 @@ function formatShare(
   };
 }
 
+export function mergeShareInfos(
+  previous: ShareInfos,
+  next: ShareInfos,
+): ShareInfos {
+  const merged = Object.keys(previous).reduce((res, shareKey) => {
+    res[shareKey] = [...previous[shareKey]];
+    return res;
+  }, {} as ShareInfos);
+
+  Object.keys(next).forEach((shareKey) => {
+    if (!merged[shareKey]) {
+      merged[shareKey] = [...next[shareKey]];
+      return;
+    }
+
+    const versions = new Set(merged[shareKey].map((shared) => shared.version));
+    next[shareKey].forEach((shared) => {
+      if (!versions.has(shared.version)) {
+        versions.add(shared.version);
+        merged[shareKey].push(shared);
+      }
+    });
+  });
+
+  return merged;
+}
+
 export function formatShareConfigs(
   prevOptions: Options,
   newOptions: UserOptions,
@@ -96,24 +123,7 @@ export function formatShareConfigs(
     return res;
   }, {} as ShareInfos);
 
-  const allShareInfos = {
-    ...prevOptions.shared,
-  };
-
-  Object.keys(newShareInfos).forEach((shareKey) => {
-    if (!allShareInfos[shareKey]) {
-      allShareInfos[shareKey] = newShareInfos[shareKey];
-    } else {
-      newShareInfos[shareKey].forEach((newUserSharedOptions) => {
-        const isSameVersion = allShareInfos[shareKey].find(
-          (sharedVal) => sharedVal.version === newUserSharedOptions.version,
-        );
-        if (!isSameVersion) {
-          allShareInfos[shareKey].push(newUserSharedOptions);
-        }
-      });
-    }
-  });
+  const allShareInfos = mergeShareInfos(prevOptions.shared, newShareInfos);
   return { allShareInfos, newShareInfos };
 }
 
