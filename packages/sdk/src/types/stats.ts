@@ -79,8 +79,27 @@ interface StatsAssetsInfo {
   async: string[];
 }
 
+export interface StatsSharedProvider {
+  version: string;
+  import: string;
+  assets: StatsAssets;
+  fallback?: string;
+  fallbackName?: string;
+}
+
+export interface StatsSharedRequirement {
+  name: string;
+  layer?: string;
+  shareScope?: string | string[];
+}
+
 export interface StatsShared {
   id: string;
+  identityId?: string;
+  layer?: string;
+  shareScope?: string | string[];
+  /** Concrete providers when more than one version/import pair is available. */
+  providers?: StatsSharedProvider[];
   name: string;
   version: string;
   singleton: boolean;
@@ -123,6 +142,8 @@ export interface ManifestModuleInfos {
 
 export interface StatsExpose {
   id: string;
+  layer?: string;
+  requiredShared?: StatsSharedRequirement[];
   name: string;
   path?: string;
   file: string;

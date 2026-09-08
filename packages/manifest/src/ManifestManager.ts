@@ -63,6 +63,8 @@ class ManifestManager {
         name: cur.name,
         assets: cur.assets,
         path: cur.path,
+        ...(cur.layer !== undefined ? { layer: cur.layer } : {}),
+        ...(cur.requiredShared ? { requiredShared: cur.requiredShared } : {}),
       };
       sum.push(expose);
       return sum;
@@ -79,6 +81,12 @@ class ManifestManager {
         fallback: cur.fallback,
         fallbackName: cur.fallbackName,
         fallbackType: cur.fallbackType,
+        ...(cur.identityId !== undefined ? { identityId: cur.identityId } : {}),
+        ...(cur.layer !== undefined ? { layer: cur.layer } : {}),
+        ...(cur.shareScope !== undefined ? { shareScope: cur.shareScope } : {}),
+        ...(cur.providers && cur.providers.length > 1
+          ? { providers: cur.providers }
+          : {}),
       };
       sum.push(shared);
       return sum;

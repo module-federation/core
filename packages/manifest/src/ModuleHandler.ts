@@ -14,54 +14,32 @@ import {
   SharedManager,
 } from '@module-federation/managers';
 import type managerTypes from '@module-federation/managers';
-import { getFileNameWithOutExt } from './utils';
+import {
+  getFileNameWithOutExt,
+  splitSharedIdentifier,
+  getSharedIdentity,
+} from './utils';
+
+export interface SharedProviderModule {
+  name: string;
+  version: string;
+  request: string;
+  module: StatsModule;
+}
 
 type ShareMap = { [sharedKey: string]: StatsShared };
-type ExposeMap = { [exposeImportValue: string]: StatsExpose };
+type ExposeMap = { [exposeKey: string]: StatsExpose };
 type RemotesConsumerMap = { [remoteKey: string]: StatsRemote };
 
 type ContainerExposeEntry = [
   exposeKey: string,
-  { import: string[]; name?: string; layer?: string },
+  { import: string[]; name?: string | null; layer?: string },
 ];
 
 const REMOTE_REFERENCE_PREFIX = /^(?:webpack|rspack)\/container\/reference\//;
 
 const isNonEmptyString = (value: unknown): value is string => {
   return typeof value === 'string' && value.trim().length > 0;
-};
-
-/**
- * Shared module identifiers carry the layer as an extra `(layer)` segment
- * right after the `(scope)` segment, in both bundlers:
- *
- *   provide module (default) (server) react@19.0.0 = <request>          webpack
- *   provide shared module (default) (server) react@19.0.0 = <request>   rspack
- *   consume shared module (default) (server) react@^19 (strict) ...     rspack
- *
- * Returns the tokens with the optional layer segment removed, so the package
- * token stays at its legacy position, plus the layer when present.
- */
-export const splitSharedIdentifier = (
-  identifier: string,
-  scopeTokenIndex: number,
-): { tokens: string[]; layer?: string } => {
-  const tokens = identifier.split(' ');
-  const candidate = tokens[scopeTokenIndex + 1];
-  if (
-    tokens[scopeTokenIndex]?.startsWith('(') &&
-    candidate?.startsWith('(') &&
-    candidate.endsWith(')')
-  ) {
-    return {
-      tokens: [
-        ...tokens.slice(0, scopeTokenIndex + 1),
-        ...tokens.slice(scopeTokenIndex + 2),
-      ],
-      layer: candidate.slice(1, -1),
-    };
-  }
-  return { tokens };
 };
 
 const isContainerExposeEntry = (
@@ -79,7 +57,7 @@ const isContainerExposeEntry = (
     Array.isArray(imports) &&
     imports.length > 0 &&
     imports.every((item) => typeof item === 'string') &&
-    (name === undefined || typeof name === 'string')
+    (name == null || typeof name === 'string')
   );
 };
 
@@ -196,11 +174,6 @@ const scanBalancedBrackets = (
  * expose representation. An ordered share scope is serialized before it as
  * `[m2:...]`, which is not JSON, so every `[` is a candidate start.
  */
-/**
- * The payload is the last balanced `[...]` group that decodes to a known
- * expose representation. An ordered share scope is serialized before it as
- * `[m2:...]`, which is not JSON, so every `[` is a candidate start.
- */
 const parseContainerExposeEntries = (
   identifier: string,
 ): ContainerExposeEntry[] | undefined => {
@@ -240,7 +213,7 @@ export function getExposeItem({
 }: {
   exposeKey: string;
   name: string;
-  file: { import: string[] };
+  file: { import: string[]; layer?: string };
 }): StatsExpose {
   const exposeModuleName = getExposeName(exposeKey);
 
@@ -248,6 +221,7 @@ export function getExposeItem({
     path: exposeKey,
     id: composeKeyWithSeparator(name, exposeModuleName),
     name: exposeModuleName,
+    ...(file.layer !== undefined ? { layer: file.layer } : {}),
     // @ts-ignore to deduplicate
     requires: [],
     file: path.relative(process.cwd(), file.import[0]),
@@ -303,7 +277,10 @@ class ModuleHandler {
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
   private _bundler: 'webpack' | 'rspack' = 'webpack';
   private _modules: StatsModule[];
+  private _moduleLayers = new Map<string, string | undefined>();
+  private _exposedModuleLayers = new Map<string, Set<string | undefined>>();
   private _containerManager: ContainerManager;
+  private _exposeImports = new Map<string, string[]>();
   private _remoteManager: RemoteManager = new RemoteManager();
   private _sharedManager: SharedManager = new SharedManager();
 
@@ -314,6 +291,19 @@ class ModuleHandler {
   ) {
     this._options = options;
     this._modules = modules;
+    for (const module of modules) {
+      if (module.identifier)
+        this._moduleLayers.set(module.identifier, module.layer ?? undefined);
+      for (const reason of module.reasons || []) {
+        if (reason.type === 'container exposed' && reason.userRequest) {
+          const layers =
+            this._exposedModuleLayers.get(reason.userRequest) ||
+            new Set<string | undefined>();
+          layers.add(module.layer ?? undefined);
+          this._exposedModuleLayers.set(reason.userRequest, layers);
+        }
+      }
+    }
     this._bundler = bundler;
 
     this._containerManager = new ContainerManager();
@@ -332,6 +322,7 @@ class ModuleHandler {
     mod: StatsModule,
     sharedMap: ShareMap,
     exposesMap: ExposeMap,
+    sharedProviderModules: SharedProviderModule[],
   ) {
     const { identifier, moduleType } = mod;
     if (!identifier) {
@@ -341,48 +332,99 @@ class ModuleHandler {
     const sharedManagerNormalizedOptions =
       this._sharedManager.normalizedOptions;
 
+    const identity = getSharedIdentity(
+      identifier,
+      moduleType === 'provide-module' && !this.isRspack ? 2 : 3,
+      mod.layer,
+    );
+    const layered =
+      identity.layer !== undefined || Array.isArray(identity.shareScope);
+    const sharedKey = (name: string) => (layered ? identity.key : name);
     const initShared = (pkgName: string, pkgVersion: string) => {
-      if (sharedMap[pkgName]) {
+      const key = sharedKey(pkgName);
+      if (sharedMap[key]) {
         return;
       }
-      sharedMap[pkgName] = getShareItem({
+      sharedMap[key] = getShareItem({
         pkgName,
         pkgVersion,
         normalizedShareOptions: sharedManagerNormalizedOptions[pkgName],
         hostName: this._options.name,
       });
+      if (layered) {
+        sharedMap[key].id = `${this._options.name}:shared:${identity.key}`;
+        if (identity.layer !== undefined) sharedMap[key].layer = identity.layer;
+        if (identity.shareScope !== 'default')
+          sharedMap[key].shareScope = identity.shareScope;
+      }
     };
 
     const collectRelationshipMap = (mod: StatsModule, pkgName: string) => {
       const { issuerName, reasons } = mod;
 
-      if (issuerName) {
-        if (exposesMap[getFileNameWithOutExt(issuerName)]) {
-          const expose = exposesMap[getFileNameWithOutExt(issuerName)];
-          // @ts-ignore use Set to deduplicate
+      const importers = [
+        { name: issuerName, identifier: mod.issuer },
+        ...(reasons || []).map(
+          ({
+            resolvedModule,
+            moduleName,
+            resolvedModuleIdentifier,
+            moduleIdentifier,
+          }) => ({
+            name: this.isRspack ? moduleName : resolvedModule,
+            identifier: this.isRspack
+              ? moduleIdentifier
+              : resolvedModuleIdentifier,
+          }),
+        ),
+      ];
+      for (const [exposeKey, expose] of Object.entries(exposesMap)) {
+        const imports = this._exposeImports.get(exposeKey) || [];
+        if (
+          imports.some((file) =>
+            importers.some(({ name, identifier }) => {
+              if (!name) return false;
+              if (
+                identifier &&
+                this._moduleLayers.has(identifier) &&
+                this._moduleLayers.get(identifier) !==
+                  (this._exposedModuleLayers.get(file)?.size === 1
+                    ? this._exposedModuleLayers.get(file)!.values().next().value
+                    : expose.layer)
+              )
+                return false;
+              return (
+                getFileNameWithOutExt(name) === getFileNameWithOutExt(file)
+              );
+            }),
+          )
+        ) {
           expose.requires.push(pkgName);
           // @ts-ignore use Set to deduplicate
-          sharedMap[pkgName].usedIn.add(expose.path);
+          sharedMap[sharedKey(pkgName)].usedIn.add(expose.path);
         }
-      }
-      if (reasons) {
-        reasons.forEach(({ resolvedModule, moduleName }) => {
-          let exposeModName = this.isRspack ? moduleName : resolvedModule;
-          // filters out entrypoints
-          if (exposeModName) {
-            if (exposesMap[getFileNameWithOutExt(exposeModName)]) {
-              const expose = exposesMap[getFileNameWithOutExt(exposeModName)];
-              // @ts-ignore to deduplicate
-              expose.requires.push(pkgName);
-              // @ts-ignore to deduplicate
-              sharedMap[pkgName].usedIn.add(expose.path);
-            }
-          }
-        });
       }
     };
 
     const parseResolvedIdentifier = (nameAndVersion: string) => {
+      if (identifier.includes(' [identity:') && identity.name) {
+        const header = identifier
+          .split(' = ')[0]
+          .split(' (fallback:')[0]
+          .split(' [identity:')[0];
+        const start = header.lastIndexOf(`${identity.name}@`);
+        if (start >= 0) {
+          const version = header
+            .slice(start + identity.name.length + 1)
+            .split(' ')[0];
+          return {
+            name: identity.name,
+            version: identity.name.startsWith('@')
+              ? version
+              : version.replace(/[\^~>|>=]/g, ''),
+          };
+        }
+      }
       let name = '';
       let version = '';
 
@@ -417,6 +459,18 @@ class ModuleHandler {
       if (name && version) {
         initShared(name, version);
         collectRelationshipMap(mod, name);
+        const separator = identifier.indexOf(' = ');
+        if (separator !== -1) {
+          const request = identifier
+            .slice(separator + 3)
+            .replace(/ \[identity:[\s\S]*\]$/, '');
+          sharedProviderModules.push({
+            name: sharedKey(name),
+            version,
+            request,
+            module: mod,
+          });
+        }
       }
     }
 
@@ -543,8 +597,8 @@ class ModuleHandler {
     }
 
     entries.forEach(([prefixedName, file]) => {
-      // TODO: support multiple import
-      exposesMap[getFileNameWithOutExt(file.import[0])] = getExposeItem({
+      this._exposeImports.set(prefixedName, file.import);
+      exposesMap[prefixedName] = getExposeItem({
         exposeKey: prefixedName,
         name: this._options.name!,
         file,
@@ -616,10 +670,9 @@ class ModuleHandler {
         return;
       }
 
-      const exposeMapKey = getFileNameWithOutExt(exposeImport);
-
-      if (!exposesMap[exposeMapKey]) {
-        exposesMap[exposeMapKey] = getExposeItem({
+      this._exposeImports.set(exposeKey, exposeOptions.import);
+      if (!exposesMap[exposeKey]) {
+        exposesMap[exposeKey] = getExposeItem({
           exposeKey,
           name: this._options.name!,
           file: exposeOptions,
@@ -632,8 +685,9 @@ class ModuleHandler {
     const remotes: StatsRemote[] = [];
     const remotesConsumerMap: { [remoteKey: string]: StatsRemote } = {};
 
-    const exposesMap: { [exposeImportValue: string]: StatsExpose } = {};
+    const exposesMap: ExposeMap = {};
     const sharedMap: { [sharedKey: string]: StatsShared } = {};
+    const sharedProviderModules: SharedProviderModule[] = [];
 
     this._initializeExposesFromOptions(exposesMap);
 
@@ -650,7 +704,14 @@ class ModuleHandler {
       return identifier.startsWith('remote ');
     };
 
-    // handle remote/expose
+    // Initialize exposes before collecting their shared dependencies, regardless
+    // of the order in which stats lists the modules.
+    for (const mod of this._modules) {
+      if (mod.identifier && isContainerModule(mod.identifier)) {
+        this._handleContainerModule(mod, exposesMap);
+      }
+    }
+
     this._modules.forEach((mod) => {
       const { identifier, reasons, nameForCondition, moduleType } = mod;
       if (!identifier) {
@@ -658,13 +719,16 @@ class ModuleHandler {
       }
 
       if (isSharedModule(moduleType)) {
-        this._handleSharedModule(mod, sharedMap, exposesMap);
+        this._handleSharedModule(
+          mod,
+          sharedMap,
+          exposesMap,
+          sharedProviderModules,
+        );
       }
 
       if (isRemoteModule(identifier)) {
         this._handleRemoteModule(mod, remotes, remotesConsumerMap);
-      } else if (isContainerModule(identifier)) {
-        this._handleContainerModule(mod, exposesMap);
       }
     });
 
@@ -672,6 +736,7 @@ class ModuleHandler {
       remotes,
       exposesMap,
       sharedMap,
+      sharedProviderModules,
     };
   }
 }

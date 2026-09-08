@@ -4,8 +4,6 @@
 '@module-federation/manifest': patch
 ---
 
-Support layered Module Federation metadata from Rspack in the public v2 wrapper.
+Preserve shared and exposed module layers when reading Rspack and webpack stats or regenerating manifests. Keep public expose aliases, resolved imports, requirements, and chunk assets associated, including multi-import exposes and disabled asset analysis.
 
-- `ContainerManager.containerPluginExposesOptions` preserves `exposes.*.layer` (including the empty string) instead of rebuilding exposes from `import`/`name` only, so layered exposes are no longer silently built unlayered.
-- The manifest reader understands the `(layer)` segment that both webpack and Rspack insert after the share scope in shared module identifiers, reads a `layer` carried inside container expose options, and validates container-entry payloads instead of casting them, falling back to plugin options for unsupported shapes.
-- `ExposesConfig` gains an optional `layer`.
+Add optional `providers` metadata for multiple concrete version/import pairs while retaining existing unlayered shared fields. Single-provider entries and older manifests remain supported without this field. Expose configuration now preserves `layer`, including an empty string.

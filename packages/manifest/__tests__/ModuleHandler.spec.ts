@@ -109,7 +109,12 @@ jest.mock(
 );
 
 import type { moduleFederationPlugin } from '@module-federation/sdk';
-import { ModuleHandler, splitSharedIdentifier } from '../src/ModuleHandler';
+import { ModuleHandler } from '../src/ModuleHandler';
+import {
+  splitSharedIdentifier,
+  getSharedModules,
+  getSharedIdentity,
+} from '../src/utils';
 
 describe('splitSharedIdentifier', () => {
   it('removes the optional layer segment after the scope', () => {
@@ -191,9 +196,15 @@ describe('ModuleHandler', () => {
         ],
       ]);
 
-      expect(sharedMap.react).toMatchObject({ version: '19.0.0' });
-      expect(sharedMap['@scope/pkg']).toMatchObject({ version: '2.0.0' });
-      expect(sharedMap['lodash/get']).toMatchObject({ version: '4.17.21' });
+      expect(
+        Object.values(sharedMap).find((shared) => shared.name === 'react'),
+      ).toMatchObject({ version: '19.0.0' });
+      expect(
+        Object.values(sharedMap).find((shared) => shared.name === '@scope/pkg'),
+      ).toMatchObject({ version: '2.0.0' });
+      expect(
+        Object.values(sharedMap).find((shared) => shared.name === 'lodash/get'),
+      ).toMatchObject({ version: '4.17.21' });
     });
 
     it('reads webpack provide identifiers with a layer segment', () => {
@@ -208,8 +219,12 @@ describe('ModuleHandler', () => {
         ],
       ]);
 
-      expect(sharedMap.react).toMatchObject({ version: '19.0.0' });
-      expect(sharedMap['react-dom']).toMatchObject({ version: '19.0.0' });
+      expect(
+        Object.values(sharedMap).find((shared) => shared.name === 'react'),
+      ).toMatchObject({ version: '19.0.0' });
+      expect(
+        Object.values(sharedMap).find((shared) => shared.name === 'react-dom'),
+      ).toMatchObject({ version: '19.0.0' });
     });
   });
 
@@ -231,8 +246,8 @@ describe('ModuleHandler', () => {
         `container entry [m2:7:primary7:default] ${exposes}`,
       ]) {
         const exposesMap = collectExposes(identifier);
-        expect(exposesMap['./src/Button']?.path).toBe('./Button');
-        expect(exposesMap['./src/Card']?.path).toBe('./Card');
+        expect(exposesMap['./Button']?.path).toBe('./Button');
+        expect(exposesMap['./Card']?.path).toBe('./Card');
       }
     });
 
@@ -248,8 +263,8 @@ describe('ModuleHandler', () => {
       );
 
       const { exposesMap } = moduleHandler.collect();
-      expect(Object.keys(exposesMap)).toEqual(['./src/Button']);
-      expect(exposesMap['./src/Button']?.path).toBe('./Button');
+      expect(Object.keys(exposesMap)).toEqual(['./Button']);
+      expect(exposesMap['./Button']?.path).toBe('./Button');
     });
   });
 
@@ -267,7 +282,7 @@ describe('ModuleHandler', () => {
 
     const { exposesMap } = moduleHandler.collect();
 
-    const expose = exposesMap['./src/path with spaces/Button'];
+    const expose = exposesMap['./Button'];
 
     expect(expose).toBeDefined();
     expect(expose?.path).toBe('./Button');
@@ -292,7 +307,7 @@ describe('ModuleHandler', () => {
 
     const { exposesMap } = moduleHandler.collect();
 
-    const expose = exposesMap['./src/path with spaces/Button'];
+    const expose = exposesMap['./Button'];
 
     expect(expose).toBeDefined();
     expect(expose?.path).toBe('./Button');
@@ -325,10 +340,10 @@ describe('ModuleHandler', () => {
 
     const { exposesMap } = moduleHandler.collect();
 
-    expect(exposesMap['./src/Button']).toBeDefined();
-    expect(exposesMap['./src/Card']).toBeDefined();
-    expect(exposesMap['./src/Button']?.path).toBe('./Button');
-    expect(exposesMap['./src/Card']?.path).toBe('./Card');
+    expect(exposesMap['./Button']).toBeDefined();
+    expect(exposesMap['./Card']).toBeDefined();
+    expect(exposesMap['./Button']?.path).toBe('./Button');
+    expect(exposesMap['./Card']?.path).toBe('./Card');
   });
 
   it.each(['webpack', 'rspack'] as const)(
@@ -364,4 +379,176 @@ describe('ModuleHandler', () => {
       });
     },
   );
+});
+
+describe('layered manifest regressions', () => {
+  it.each(['server components', 'server (components)', ''])(
+    'keeps shared metadata and asset keys for layer %j',
+    (layer) => {
+      const name = `consume shared module (default) (${layer}) react@19.0.0 (fallback: /react.js)`;
+      const shared = {
+        name,
+        identifier: name,
+        moduleType: 'consume-shared-module',
+      } as StatsModule;
+      const handler = new ModuleHandler({ name: 'host' }, [shared], {
+        bundler: 'rspack',
+      });
+      expect(Object.values(handler.collect().sharedMap)[0].version).toBe(
+        '19.0.0',
+      );
+      expect(
+        getSharedModules({ modules: [{ issuerName: name, chunks: [1] }] }, [
+          shared,
+        ])[0][0],
+      ).toBe(Object.keys(handler.collect().sharedMap)[0]);
+    },
+  );
+
+  it.each([false, true])(
+    'keeps aliased multi-import exposes regardless of module order (%s)',
+    (reverse) => {
+      const exposes = {
+        './Server': {
+          import: ['./src/setup.ts', './src/Button.tsx'],
+          layer: 'server',
+        },
+        './Client': {
+          import: ['./src/setup.ts', './src/Button.tsx'],
+          layer: 'client',
+        },
+      };
+      const modules: StatsModule[] = [
+        {
+          identifier: `container entry (default) ${JSON.stringify(Object.entries(exposes))}`,
+        },
+        {
+          identifier: 'consume shared module (default) react@19.0.0',
+          moduleType: 'consume-shared-module',
+          issuerName: './src/Button.tsx',
+        },
+      ];
+      if (reverse) modules.reverse();
+      const handler = new ModuleHandler({ name: 'host', exposes }, modules, {
+        bundler: 'rspack',
+      });
+      const { exposesMap, sharedMap } = handler.collect();
+      expect(Object.keys(exposesMap)).toEqual(['./Server', './Client']);
+      expect(exposesMap['./Server'].requires).toEqual(['react']);
+      expect(exposesMap['./Client'].requires).toEqual(['react']);
+      expect([...sharedMap.react.usedIn]).toEqual(['./Server', './Client']);
+    },
+  );
+});
+
+it('decodes native ordered scope identities with UTF-8 lengths', () => {
+  const component = (value: string) => `${Buffer.byteLength(value)}:${value}`;
+  const key = `${component(`m2:${component('server scope')}${component('default')}`)}l${component('服务端')}${component('react')}`;
+  const identifier = `provide shared module (server scope|default) (服务端) react@19.0.0 = /react.js [identity:${key}]`;
+  expect(getSharedIdentity(identifier, 3)).toEqual({
+    key,
+    name: 'react',
+    layer: '服务端',
+    shareScope: ['server scope', 'default'],
+  });
+  const { sharedMap } = new ModuleHandler(
+    { name: 'host' },
+    [{ identifier, moduleType: 'provide-module' }],
+    { bundler: 'rspack' },
+  ).collect();
+  expect(sharedMap[key]).toMatchObject({
+    id: `host:shared:${key}`,
+    name: 'react',
+    version: '19.0.0',
+    layer: '服务端',
+    shareScope: ['server scope', 'default'],
+  });
+});
+
+it('reads space-containing share keys from the structural identity suffix', () => {
+  const key = '10:s7:defaultl9:服务端4:b) c';
+  const identifier = `provide shared module (default) (服务端) b) c@19.0.0 = /first.js [identity:${key}]`;
+  const { sharedMap, sharedProviderModules } = new ModuleHandler(
+    { name: 'host' },
+    [{ identifier, moduleType: 'provide-module' }],
+    { bundler: 'rspack' },
+  ).collect();
+  expect(sharedMap[key]).toMatchObject({
+    name: 'b) c',
+    version: '19.0.0',
+    layer: '服务端',
+  });
+  expect(sharedProviderModules[0]).toMatchObject({
+    name: key,
+    version: '19.0.0',
+    request: '/first.js',
+  });
+});
+
+it('attributes same-source aliases to the resolved importer layer', () => {
+  const entries = [
+    ['./Server', { import: ['./Button.js'], layer: 'server' }],
+    ['./Client', { import: ['./Button.js'], layer: 'client' }],
+  ];
+  const modules = [
+    { identifier: `container entry (default) ${JSON.stringify(entries)}` },
+    {
+      identifier: 'javascript/auto|/Button.js|server',
+      name: './Button.js',
+      layer: 'server',
+    },
+    {
+      identifier: 'javascript/auto|/Button.js|client',
+      name: './Button.js',
+      layer: 'client',
+    },
+    {
+      identifier: 'consume shared module (default) react@19.0.0',
+      moduleType: 'consume-shared-module',
+      issuerName: './Button.js',
+      issuer: 'javascript/auto|/Button.js|server',
+      reasons: [
+        {
+          moduleName: './Button.js',
+          moduleIdentifier: 'javascript/auto|/Button.js|server',
+        },
+      ],
+    },
+  ];
+  const { exposesMap, sharedMap } = new ModuleHandler(
+    { name: 'host' },
+    modules,
+    { bundler: 'rspack' },
+  ).collect();
+  expect(exposesMap['./Server'].requires).toEqual(['react']);
+  expect(exposesMap['./Client'].requires).toEqual([]);
+  expect([...sharedMap.react.usedIn]).toEqual(['./Server']);
+});
+
+it('uses the built expose layer when a rule overrides its configured layer', () => {
+  const modules = [
+    {
+      identifier:
+        'container entry (default) [["./Button",{"import":["./Button.js"],"layer":"requested"}]]',
+    },
+    {
+      identifier: 'javascript/auto|/Button.js|effective',
+      name: './Button.js',
+      layer: 'effective',
+      reasons: [{ type: 'container exposed', userRequest: './Button.js' }],
+    },
+    {
+      identifier: 'consume shared module (default) react@19.0.0',
+      moduleType: 'consume-shared-module',
+      issuerName: './Button.js',
+      issuer: 'javascript/auto|/Button.js|effective',
+    },
+  ];
+  const { exposesMap, sharedMap } = new ModuleHandler(
+    { name: 'host' },
+    modules,
+    { bundler: 'rspack' },
+  ).collect();
+  expect(exposesMap['./Button'].requires).toEqual(['react']);
+  expect([...sharedMap.react.usedIn]).toEqual(['./Button']);
 });
