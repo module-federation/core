@@ -46,11 +46,12 @@ iOS resource provider; set `LYNX_HOST_ORIGIN` when they live elsewhere.
 
 ## Rspeedy compatibility boundary
 
-Rspeedy 0.16 resolves its own `@rspack/core`, while this repository needs
-`@rspack-canary/core` 2.1.5-canary-54a0d8f3-20260715194831 for the Lynx layer
-and chunk behavior under test. `rspack-canary-rspeedy.mjs` is the single
+Rspeedy 0.16 resolves its own `@rspack/core`, while this demo pins the
+pkg.pr.new preview of the [Rspack layers stack](https://github.com/web-infra-dev/rspack/pull/14913)
+at `843bab005b2413345eb6efc3aaaba2a398fca908`, also installed under the existing
+`@rspack-canary/core` alias. `rspack-canary-rspeedy.mjs` is the single
 compatibility boundary: it starts Rspeedy with Node resolution hooks that map
-`@rspack/core` to the pinned canary and `@rsbuild/core` to the workspace's
+`@rspack/core` to the pinned preview and `@rsbuild/core` to the workspace's
 matching package.
 
 Every demo build, development, and preview script in `package.json` invokes
@@ -59,13 +60,10 @@ the canary package. Remove the wrapper when Rspeedy supports the repository's
 Rspack package directly; then point those package scripts back to the public
 Rspeedy CLI and remove the canary alias together.
 
-The repository also applies version-scoped pnpm patches to the published
-ReactLynx, template plugin, and Web Core packages. They contain the fixes from
+The repository also pins Lynx package previews containing the fixes from
 [lynx-family/lynx-stack#3043](https://github.com/lynx-family/lynx-stack/pull/3043)
-needed by the public `FetchBundle` transport. The Web Core patch is built from
-the matching `0.22.2` source baseline, so its JavaScript keeps the WASM asset
-names shipped by that package. Remove all three patches together after those
-upstream fixes are released.
+needed by the public `FetchBundle` transport. Replace those previews with
+released versions once the upstream fixes are available.
 
 ## Run the standalone Catalog product
 

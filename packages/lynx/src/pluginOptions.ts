@@ -118,14 +118,14 @@ export const validateLayers = (
 };
 
 export const normalizeLynxExposes = (
-  exposes: Exposes | undefined,
+  exposes: Exposes<true> | undefined,
   defaultLayer: string,
-): Exposes | undefined => {
+): Exposes<true> | undefined => {
   if (!exposes) {
     return undefined;
   }
 
-  const normalized: Record<string, ExposesConfig> = {};
+  const normalized: Record<string, ExposesConfig<true>> = {};
   for (const item of Array.isArray(exposes) ? exposes : [exposes]) {
     if (typeof item === 'string') {
       normalized[item] = { import: item, layer: defaultLayer };
@@ -417,7 +417,7 @@ export const getRemoteBundleOptions = (
 
 export const createFederationOptions = (
   options: LynxModuleFederationOptions,
-  exposes: Exposes | undefined,
+  exposes: Exposes<true> | undefined,
   shared: Shared | undefined,
   runtimePlugin: string,
   runtimePluginOptions: LynxRuntimePluginOptions | undefined,

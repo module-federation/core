@@ -117,7 +117,7 @@
     "@lynx-js/web-core": "https://pkg.pr.new/ScriptedAlchemy/lynx-stack/@lynx-js/web-core@e22ca09",
     "@module-federation/runtime-tools": "workspace:*",
     "@rsbuild/core": "2.1.4",
-    "@rspack/core": "npm:@rspack-canary/core@2.1.5-canary-54a0d8f3-20260715194831",
+    "@rspack/core": "https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@843bab005b2413345eb6efc3aaaba2a398fca908",
     "@rstest/core": "^0.10.6",
     "typescript": "7.0.2"
   },

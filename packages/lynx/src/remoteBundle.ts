@@ -140,7 +140,9 @@ const normalizeRemoteBundlePlan = (
   };
 };
 
-const hasExposes = (exposes: Exposes | undefined): exposes is Exposes => {
+const hasExposes = (
+  exposes: Exposes<true> | undefined,
+): exposes is Exposes<true> => {
   if (!exposes) {
     return false;
   }
@@ -153,7 +155,7 @@ const hasExposes = (exposes: Exposes | undefined): exposes is Exposes => {
 };
 
 const findConflictingExposeLayer = (
-  exposes: Exposes,
+  exposes: Exposes<true>,
   backgroundLayer: string,
 ): string | undefined => {
   for (const item of Array.isArray(exposes) ? exposes : [exposes]) {
@@ -178,7 +180,7 @@ const findConflictingExposeLayer = (
 };
 
 const findReservedExposeKey = (
-  exposes: Exposes,
+  exposes: Exposes<true>,
   suffix: string,
 ): string | undefined => {
   for (const item of Array.isArray(exposes) ? exposes : [exposes]) {
@@ -197,10 +199,12 @@ const toChunkName = (key: string): string => {
   return name || 'expose';
 };
 
-const assertUniqueChunkNames = (exposes: Exposes): Map<string, string> => {
+const assertUniqueChunkNames = (
+  exposes: Exposes<true>,
+): Map<string, string> => {
   const normalized = normalizeLynxExposes(exposes, '') as Record<
     string,
-    ExposesConfig
+    ExposesConfig<true>
   >;
   const keysByChunkName = new Map<string, string>();
   const chunkNamesByExpose = new Map<string, string>();
@@ -219,15 +223,15 @@ const assertUniqueChunkNames = (exposes: Exposes): Map<string, string> => {
 };
 
 const createRemoteExposes = (
-  exposes: Exposes,
+  exposes: Exposes<true>,
   layer: string,
   prefix: string,
   keySuffix = '',
   chunkNameSuffix = '',
-): Record<string, ExposesConfig> => {
+): Record<string, ExposesConfig<true>> => {
   const normalized = normalizeLynxExposes(exposes, layer) as Record<
     string,
-    ExposesConfig
+    ExposesConfig<true>
   >;
 
   return Object.fromEntries(

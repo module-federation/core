@@ -57,8 +57,8 @@
     "@module-federation/runtime-tools": "workspace:*",
     "@playwright/test": "1.57.0",
     "@rsbuild/core": "2.1.4",
-    "@rspack-canary/core": "2.1.5-canary-54a0d8f3-20260715194831",
-    "@rspack/core": "npm:@rspack-canary/core@2.1.5-canary-54a0d8f3-20260715194831",
+    "@rspack-canary/core": "https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@843bab005b2413345eb6efc3aaaba2a398fca908",
+    "@rspack/core": "https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@843bab005b2413345eb6efc3aaaba2a398fca908",
     "@types/react": "18.3.28"
   },
   "engines": {

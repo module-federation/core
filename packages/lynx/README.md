@@ -5,8 +5,9 @@ applications. It preserves normal federated imports, adds a Lynx transport for
 manifest-addressed `.lynx.bundle` files, and isolates shared modules by Lynx
 JavaScript realm.
 
-The package requires a layers-capable Rspack build. The version verified by this
-repository is `2.1.5-canary-54a0d8f3-20260715194831`. The bundle transport uses
+The package requires a layers-capable Rspack build. This repository pins the
+pkg.pr.new preview of the [layers stack](https://github.com/web-infra-dev/rspack/pull/14913)
+at `843bab005b2413345eb6efc3aaaba2a398fca908`. The bundle transport uses
 `lynx.loadScript`, available in Lynx SDK 3.7 and later; `remoteBundle.engineVersion`
 therefore defaults to `3.7`.
 
