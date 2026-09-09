@@ -386,10 +386,6 @@ const getClearTarget = (
       }
     }
   }
-  if (remoteModuleIds.length === 0) {
-    throw new Error(`Cannot find remote "${name}" in remote loading data`);
-  }
-
   const externalModuleIds: ModuleId[] = [];
   pushUnique(
     externalModuleIds,
@@ -711,6 +707,48 @@ const cleanupSharedCache = (
   }
 };
 
+const hasActiveSharedConsumers = (target: ClearCacheTarget) => {
+  const shareScopeMap = globalThis.__FEDERATION__?.__SHARE__;
+  if (!shareScopeMap) {
+    return false;
+  }
+  for (const scopes of Object.values(shareScopeMap)) {
+    if (!scopes || typeof scopes !== 'object') {
+      continue;
+    }
+    for (const scope of Object.values(scopes)) {
+      if (!scope || typeof scope !== 'object') {
+        continue;
+      }
+      for (const versions of Object.values(scope)) {
+        if (!versions || typeof versions !== 'object') {
+          continue;
+        }
+        for (const shared of Object.values(versions)) {
+          if (
+            !shared ||
+            typeof shared !== 'object' ||
+            !target.remoteNames.includes((shared as any).from)
+          ) {
+            continue;
+          }
+          if (
+            Array.isArray((shared as any).useIn) &&
+            (shared as any).useIn.some(
+              (consumer: unknown) =>
+                typeof consumer === 'string' &&
+                !target.remoteNames.includes(consumer),
+            )
+          ) {
+            return true;
+          }
+        }
+      }
+    }
+  }
+  return false;
+};
+
 const getNodeChunkCacheControls = (webpackRequire: WebpackRequire) => {
   const controls = webpackRequire.chunkCacheControls;
   if (!controls) {
@@ -854,6 +892,9 @@ const cleanupStaleRemoteCache = (
   target: ClearCacheTarget,
   consumerModuleIds: ModuleId[],
 ) => {
+  if (hasActiveSharedConsumers(target)) {
+    return;
+  }
   const idToExternalAndNameMapping =
     webpackRequire.federation.bundlerRuntimeOptions.remotes
       ?.idToExternalAndNameMapping ?? {};

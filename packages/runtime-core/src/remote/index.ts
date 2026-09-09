@@ -781,31 +781,10 @@ export class RemoteHandler {
         if (loadedModule) {
           const remoteInfo = loadedModule.remoteInfo;
           const key = remoteInfo.entryGlobalName as keyof typeof CurrentGlobal;
-          clearRemoteEntryCache(loadedModule.remoteEntryExports);
-          clearRemoteEntryCache(loadedModule.lib);
-          clearRemoteEntryCache(CurrentGlobal[key] as RemoteEntryExports);
-
-          if (CurrentGlobal[key]) {
-            if (
-              Object.getOwnPropertyDescriptor(CurrentGlobal, key)?.configurable
-            ) {
-              delete CurrentGlobal[key];
-            } else {
-              // @ts-ignore
-              CurrentGlobal[key] = undefined;
-            }
-          }
-          const remoteEntryUniqueKey = getRemoteEntryUniqueKey(
-            loadedModule.remoteInfo,
-          );
-
-          if (globalLoading[remoteEntryUniqueKey]) {
-            delete globalLoading[remoteEntryUniqueKey];
-          }
-
           host.snapshotHandler.manifestCache.delete(remoteInfo.entry);
 
-          // delete unloaded shared and instance
+          // Keep a removed provider's runtime alive while another remote uses it.
+          let preserveRemoteRuntime = false;
           let remoteInsId = remoteInfo.buildVersion
             ? composeKeyWithSeparator(remoteInfo.name, remoteInfo.buildVersion)
             : remoteInfo.name;
@@ -841,13 +820,23 @@ export class RemoteHandler {
                             typeof shared === 'object' &&
                             shared.from === remoteInfo.name
                           ) {
-                            if (shared.loaded || shared.loading) {
+                            const hasExternalConsumer = shared.useIn.some(
+                              (usedHostName) =>
+                                usedHostName !== remoteInfo.name,
+                            );
+                            if (
+                              shared.loaded ||
+                              shared.loading ||
+                              hasExternalConsumer
+                            ) {
                               shared.useIn = shared.useIn.filter(
                                 (usedHostName) =>
                                   usedHostName !== remoteInfo.name,
                               );
                               if (shared.useIn.length) {
                                 isAllSharedNotUsed = false;
+                                preserveRemoteRuntime = true;
+                                shared.providerState = 1;
                               } else {
                                 needDeleteKeys.push([
                                   instId,
@@ -885,10 +874,36 @@ export class RemoteHandler {
               remoteInsIndex,
               1,
             );
-
-            host.moduleCache.delete(remote.name);
           }
 
+          if (preserveRemoteRuntime) {
+            // The shared record retains its loaded lib. The entry module cache
+            // should not keep unrelated exposed modules reachable.
+            clearRemoteEntryCache(loadedModule.remoteEntryExports);
+            clearRemoteEntryCache(loadedModule.lib);
+            host.moduleCache.delete(remote.name);
+            return;
+          }
+
+          clearRemoteEntryCache(loadedModule.remoteEntryExports);
+          clearRemoteEntryCache(loadedModule.lib);
+          clearRemoteEntryCache(CurrentGlobal[key] as RemoteEntryExports);
+          if (CurrentGlobal[key]) {
+            if (
+              Object.getOwnPropertyDescriptor(CurrentGlobal, key)?.configurable
+            ) {
+              delete CurrentGlobal[key];
+            } else {
+              // @ts-ignore
+              CurrentGlobal[key] = undefined;
+            }
+          }
+          const remoteEntryUniqueKey = getRemoteEntryUniqueKey(
+            loadedModule.remoteInfo,
+          );
+          if (globalLoading[remoteEntryUniqueKey]) {
+            delete globalLoading[remoteEntryUniqueKey];
+          }
           host.moduleCache.delete(remote.name);
         }
       })

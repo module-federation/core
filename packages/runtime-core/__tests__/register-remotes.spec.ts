@@ -293,7 +293,7 @@ describe('ModuleFederation', () => {
   it('clears loaded remote entry cache when removing a remote', async () => {
     const entry =
       'http://localhost:1111/resources/register-remotes/app1/federation-remote-entry.js';
-    const remoteEntryClear = vi.fn();
+    const remoteEntryClear = rs.fn();
     const libClear = vi.fn();
     const globalClear = vi.fn();
     const FM = new ModuleFederation({
@@ -329,7 +329,7 @@ describe('ModuleFederation', () => {
       },
     } as any);
     (globalThis as any).app1 = {
-      get: vi.fn(),
+      get: rs.fn(),
       init: vi.fn(),
       __webpack_clear_cache__: globalClear,
     };
@@ -378,6 +378,90 @@ describe('ModuleFederation', () => {
     ).toBeUndefined();
     expect(Global.__FEDERATION__.__MANIFEST_LOADING__[entry]).toBeUndefined();
     expect(FM.snapshotHandler.manifestCache.has(entry)).toBe(false);
+  });
+
+  it('keeps a removed remote runtime while another remote uses its shared module', async () => {
+    const entry =
+      'http://localhost:1111/resources/register-remotes/app1/federation-remote-entry.js';
+    const remoteEntryClear = rs.fn();
+    const shared: any = {
+      version: '1.0.0',
+      from: '@register-remotes/app1',
+      get: rs.fn(),
+      shareConfig: { requiredVersion: false },
+      scope: ['default'],
+      useIn: ['@register-remotes/app1', 'another-remote'],
+      deps: [],
+      lib: () => ({ value: 'shared from app1' }),
+      loaded: true,
+      strategy: 'version-first' as const,
+    };
+    const FM = new ModuleFederation({
+      name: '@federation/instance',
+      version: '1.0.1',
+      remotes: [
+        {
+          name: '@register-remotes/app1',
+          alias: 'app1',
+          entry,
+        },
+      ],
+    });
+    const previousInstances = [...Global.__FEDERATION__.__INSTANCES__];
+    const previousShareScope = Global.__FEDERATION__.__SHARE__;
+
+    FM.moduleCache.set('@register-remotes/app1', {
+      remoteInfo: {
+        name: '@register-remotes/app1',
+        alias: 'app1',
+        entry,
+        type: 'global',
+        entryGlobalName: 'app1',
+        shareScope: 'default',
+      },
+      remoteEntryExports: {
+        get: rs.fn(),
+        init: rs.fn(),
+        __webpack_clear_cache__: remoteEntryClear,
+      },
+    } as any);
+    (globalThis as any).app1 = {
+      __webpack_clear_cache__: remoteEntryClear,
+    };
+    Global.__FEDERATION__.__INSTANCES__.push({
+      name: '@register-remotes/app1',
+      options: { id: '@register-remotes/app1' },
+      shareScopeMap: {},
+    } as any);
+    Global.__FEDERATION__.__SHARE__ = {
+      '@register-remotes/app1': {
+        default: {
+          'shared-from-app1': {
+            '1.0.0': shared,
+          },
+        },
+      },
+    };
+
+    try {
+      await FM.removeRemote('app1');
+
+      expect(FM.options.remotes).toHaveLength(0);
+      expect(remoteEntryClear).not.toHaveBeenCalled();
+      expect(FM.moduleCache.has('@register-remotes/app1')).toBe(false);
+      expect((globalThis as any).app1).toBeDefined();
+      expect(shared.from).toBe('@register-remotes/app1');
+      expect(shared.providerState).toBe(1);
+      expect(shared.useIn).toEqual(['another-remote']);
+    } finally {
+      Global.__FEDERATION__.__INSTANCES__.splice(
+        0,
+        Global.__FEDERATION__.__INSTANCES__.length,
+        ...previousInstances,
+      );
+      Global.__FEDERATION__.__SHARE__ = previousShareScope;
+      delete (globalThis as any).app1;
+    }
   });
 
   it('keeps loaded remote cleanup context when removeRemote hook clears moduleCache first', async () => {

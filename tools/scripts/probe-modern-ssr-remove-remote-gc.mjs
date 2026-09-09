@@ -16,7 +16,7 @@ import { fileURLToPath } from 'node:url';
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(SCRIPT_DIR, '../..');
 const HOST_READY_URL = 'http://127.0.0.1:3050/';
-const HOST_PROBE_URL = 'http://127.0.0.1:3050/remove-remote-cache-fast';
+const HOST_PROBE_URL = 'http://127.0.0.1:3050/remove-remote-cache?fast=1';
 const WAIT_TIMEOUT_MS = 60_000;
 const WAIT_INTERVAL_MS = 500;
 const REQUEST_DELAY_MS = 250;
@@ -151,6 +151,10 @@ function startHost() {
   );
   const child = spawn(process.execPath, ['--expose-gc', cli, 'serve'], {
     cwd: join(REPO_ROOT, 'apps/modernjs-ssr/host'),
+    env: {
+      ...process.env,
+      MF_SSR_GC_PROBE: 'true',
+    },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
 
@@ -259,15 +263,25 @@ function validateProbeResult(result) {
       `expected reloaded remote v2, got ${result.reloadedHeavyStats?.version}`,
     );
   }
+  if (
+    result.initialRemoteName !== 'remote' ||
+    result.reloadedRemoteName !== 'replacement_remote'
+  ) {
+    throw new Error(
+      `expected remote transition remote -> replacement_remote, got ${result.initialRemoteName} -> ${result.reloadedRemoteName}`,
+    );
+  }
   if (result.removeRemoteError) {
     throw new Error(`removeRemote failed: ${result.removeRemoteError}`);
   }
   if (
-    result.clearCacheCalls.length !== 1 ||
-    result.clearCacheCalls[0].result !== 'resolved'
+    !result.v1Runtime?.captured ||
+    result.v1RuntimeAfterRemove?.hostModuleCacheHasRemote ||
+    result.v1RuntimeAfterRemove?.federationInstancesWithRemote !== 0 ||
+    result.v1RuntimeAfterRemove?.globalEntryKeysPresent?.length !== 0
   ) {
     throw new Error(
-      'removeRemote did not trigger a successful clearCache call',
+      'old remote runtime was still reachable after removeRemote',
     );
   }
 }
@@ -295,10 +309,14 @@ function analyzeProbe(result) {
       !Object.values(afterGc.hostSnapshotRemotesInfo).includes(
         'http://127.0.0.1:3051/static/mf-manifest.json',
       ) &&
-      !afterGc.moduleCacheKeys.includes('remote'),
-    newRemoteLoaded: Object.values(
-      afterReload.hostSnapshotRemotesInfo,
-    ).includes('http://127.0.0.1:3055/mf-manifest.json'),
+      !afterGc.moduleCacheKeys.includes('remote') &&
+      result.v1RuntimeAfterRemove?.hostModuleCacheHasRemote === false &&
+      result.v1RuntimeAfterRemove?.federationInstancesWithRemote === 0 &&
+      result.v1RuntimeAfterRemove?.globalEntryKeysPresent?.length === 0,
+    newRemoteLoaded:
+      Object.values(afterReload.hostSnapshotRemotesInfo).includes(
+        'http://127.0.0.1:3055/mf-manifest.json',
+      ) && afterReload.moduleCacheKeys.includes('replacement_remote'),
   };
 }
 

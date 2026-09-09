@@ -17,9 +17,19 @@ const MODERN_APPS = [
   'modernjs-ssr-nested-remote',
   'modernjs-ssr-remote',
   'modernjs-ssr-remote-new-version',
+  'modernjs-ssr-another-remote',
 ];
 
-const MODERN_PORTS = ['3050', '3051', '3052', '3053', '3054', '3055', '3056'];
+const MODERN_PORTS = [
+  '3050',
+  '3051',
+  '3052',
+  '3053',
+  '3054',
+  '3055',
+  '3056',
+  '3057',
+];
 const MODERN_MANIFEST_URLS = [
   'http://127.0.0.1:3050/mf-manifest.json',
   'http://127.0.0.1:3051/static/mf-manifest.json',
@@ -28,6 +38,7 @@ const MODERN_MANIFEST_URLS = [
   'http://127.0.0.1:3054/mf-manifest.json',
   'http://127.0.0.1:3055/mf-manifest.json',
   'http://127.0.0.1:3056/mf-manifest.json',
+  'http://127.0.0.1:3057/mf-manifest.json',
 ];
 const MODERN_WAIT_TARGETS = [
   ...MODERN_PORTS.map((port) => `tcp:${port}`),
@@ -69,13 +80,15 @@ const SCENARIOS = {
       'run',
       '--project',
       '.',
+      '--config-file',
+      'cypress.ssr-cache.config.cjs',
       '--e2e',
       '--config',
       'baseUrl=http://localhost:3050,responseTimeout=120000,pageLoadTimeout=120000,defaultCommandTimeout=120000',
       '--browser',
       'chrome',
       '--spec',
-      'cypress/e2e/remove-remote-cache.cy.ts',
+      'cypress/e2e/*.cy.js',
     ],
   },
 };

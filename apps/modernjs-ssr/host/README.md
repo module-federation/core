@@ -1,7 +1,7 @@
 # Modern SSR removeRemote cache repro
 
-This app contains a manual repro for checking whether a same-name remote can be
-removed from SSR memory and loaded again from a different URL.
+This app contains a manual repro for checking whether an unloaded remote can be
+removed from SSR memory before a separately named remote is loaded.
 
 ## Services
 
@@ -40,8 +40,8 @@ The page runs the full flow once:
 6. Snapshot memory after removal.
 7. Trigger GC and snapshot memory again.
 8. Wait 10s, 20s, and 30s, triggering GC before each delayed snapshot.
-9. Register remote v2.
-10. Load `remote/Heavy` from v2.
+9. Register the separately named `replacement_remote`.
+10. Load `replacement_remote/Heavy` from v2.
 11. Snapshot memory after loading v2.
 
 ## What To Check
@@ -82,7 +82,8 @@ Each route returns one memory row and writes one heap snapshot:
   memory.
 - `remove-remote`: calls `removeRemote('remote')`, triggers GC, then snapshots
   memory. It does not register remote v2.
-- `register-new-remote`: registers remote v2, loads `remote/Heavy`, then
+- `register-new-remote`: registers `replacement_remote`, loads
+  `replacement_remote/Heavy`, then
   snapshots memory.
 
 ## Heap Snapshot Debugging
@@ -123,7 +124,7 @@ Recommended snapshots to compare:
 - `after load`: memory after loading remote v1
 - `after gc`: memory after `removeRemote` and immediate GC
 - `after delayed gc 30s`: memory after delayed GC
-- `after reload`: memory after loading remote v2
+- `after reload`: memory after loading the separately named remote v2
 
 Open the `.heapsnapshot` files in Chrome DevTools:
 
@@ -144,15 +145,15 @@ When reporting retained memory, include:
 - the `Retainers` path for suspicious objects
 - the table from `/remove-remote-cache`
 
-## Fast Route
+## Fast Query
 
 For repeated checks without the 10s/20s/30s wait, use:
 
 ```text
-http://localhost:3050/remove-remote-cache-fast
+http://localhost:3050/remove-remote-cache?fast=1
 ```
 
-This route runs the same load, remove, GC, and reload flow, but skips delayed
+This query runs the same load, remove, GC, and reload flow, but skips delayed
 snapshots.
 
 ## Automated Checks

@@ -1,0 +1,17 @@
+{
+  "name": "modernjs-ssr-another-remote",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "build": "rslib build",
+    "dev": "rslib mf-dev",
+    "serve": "rslib mf-dev"
+  },
+  "dependencies": {
+    "antd": "4.24.15"
+  },
+  "devDependencies": {
+    "@module-federation/rsbuild-plugin": "workspace:*",
+    "@rslib/core": "^0.9.0"
+  }
+}

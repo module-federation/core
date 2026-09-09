@@ -57,6 +57,14 @@ export type ClearCacheProbeCall = {
   beforeMappedRemoteNames: string[];
 };
 
+export type RemoteRuntimeStatus = {
+  captured: boolean;
+  hostModuleCacheHasRemote: boolean;
+  federationInstancesWithRemote: number;
+  globalEntryKeysPresent: string[];
+  weakRefCollected: boolean;
+};
+
 export type HeavyRemoteModule = {
   getHeavyPayloadStats?: () => {
     version: string;
@@ -73,6 +81,8 @@ export type ProbeResult = {
   gcAvailable: boolean;
   initialRemoteEntry: string;
   reloadedRemoteEntry: string;
+  initialRemoteName: string;
+  reloadedRemoteName: string;
   heavyStats?: ReturnType<
     NonNullable<HeavyRemoteModule['getHeavyPayloadStats']>
   >;
@@ -81,11 +91,14 @@ export type ProbeResult = {
   >;
   clearCacheCalls: ClearCacheProbeCall[];
   removeRemoteError?: string;
+  v1Runtime?: RemoteRuntimeStatus;
+  v1RuntimeAfterRemove?: RemoteRuntimeStatus;
   snapshots: CacheSnapshot[];
 };
 
 type ProbeOptions = {
   delayedGcSeconds?: number[];
+  update?: boolean;
 };
 
 type SnapshotOptions = {
@@ -187,6 +200,37 @@ const getFederationGlobal = () =>
       };
     }
   ).__FEDERATION__;
+
+const getRemoteEntryGlobalKeys = () => {
+  const remoteInfos =
+    (
+      getWebpackRequire()?.federation as
+        | {
+            bundlerRuntimeOptions?: {
+              remotes?: {
+                remoteInfos?: Record<
+                  string,
+                  {
+                    name?: string;
+                    entryGlobalName?: string;
+                    globalName?: string;
+                  }
+                >;
+              };
+            };
+          }
+        | undefined
+    )?.bundlerRuntimeOptions?.remotes?.remoteInfos || {};
+  const remoteInfo = Object.values(remoteInfos).find(
+    (info) => info.name === 'remote',
+  );
+
+  return [
+    remoteInfo?.entryGlobalName,
+    remoteInfo?.globalName,
+    remoteInfo?.name,
+  ].filter((key): key is string => Boolean(key));
+};
 
 const getRemoteLoadingDataSummary = () => {
   const remotesLoadingData = getWebpackRequire()?.remotesLoadingData;
@@ -350,14 +394,73 @@ const wrapClearCacheForProbe = (calls: ClearCacheProbeCall[]) => {
   };
 };
 
-const loadHeavyStats = async () => {
-  const heavyModule = (await loadRemote('remote/Heavy')) as HeavyRemoteModule;
-  return heavyModule.getHeavyPayloadStats?.();
-};
-
+const remoteV1Name = 'remote';
+const remoteV2Name = 'replacement_remote';
 const remoteV1Entry = 'http://127.0.0.1:3051/static/mf-manifest.json';
 const remoteV2Entry = 'http://127.0.0.1:3055/mf-manifest.json';
 export const DEFAULT_DELAYED_GC_SECONDS = [10, 20, 30];
+
+const loadHeavyStats = async (remoteName = remoteV1Name) => {
+  const heavyModule = (await loadRemote(
+    `${remoteName}/Heavy`,
+  )) as HeavyRemoteModule;
+  return heavyModule.getHeavyPayloadStats?.();
+};
+
+type ActiveRemoteV1 = {
+  runtimeWeakRef?: WeakRef<object>;
+  entryGlobalKeys: string[];
+};
+
+let activeRemoteV1: ActiveRemoteV1 | undefined;
+let latestInitialSnapshots: CacheSnapshot[] = [];
+
+const captureActiveRemoteV1 = () => {
+  const instance = getFederationInstances().find(
+    (candidate) => candidate.name === 'host',
+  );
+  const remoteModule = instance?.moduleCache?.get('remote') as
+    | {
+        remoteEntryExports?: unknown;
+        lib?: unknown;
+      }
+    | undefined;
+  const runtime = remoteModule?.remoteEntryExports || remoteModule?.lib;
+  const activeRemote: ActiveRemoteV1 = {
+    entryGlobalKeys: getRemoteEntryGlobalKeys(),
+  };
+
+  if (!runtime || typeof runtime !== 'object') {
+    activeRemoteV1 = activeRemote;
+    return activeRemote;
+  }
+
+  activeRemote.runtimeWeakRef = new WeakRef(runtime);
+  activeRemoteV1 = activeRemote;
+  return activeRemote;
+};
+
+const getActiveRemoteV1Status = (
+  activeRemote: ActiveRemoteV1 | undefined = activeRemoteV1,
+): RemoteRuntimeStatus => {
+  const hostInstance = getFederationInstances().find(
+    (instance) => instance.name === 'host',
+  );
+  const remoteInstances = getFederationInstances().filter((instance) =>
+    [instance.name, instance.options?.name].some((name) => name === 'remote'),
+  );
+  const runtime = activeRemote?.runtimeWeakRef?.deref();
+
+  return {
+    captured: Boolean(activeRemote?.runtimeWeakRef),
+    hostModuleCacheHasRemote: Boolean(hostInstance?.moduleCache?.has('remote')),
+    federationInstancesWithRemote: remoteInstances.length,
+    globalEntryKeysPresent: (activeRemote?.entryGlobalKeys || []).filter(
+      (key) => Object.prototype.hasOwnProperty.call(globalThis, key),
+    ),
+    weakRefCollected: Boolean(activeRemote?.runtimeWeakRef && !runtime),
+  };
+};
 
 const delay = (ms: number) =>
   new Promise((resolve) => {
@@ -391,15 +494,12 @@ const registerRemoteV1 = () => {
 };
 
 const registerRemoteV2 = () => {
-  registerRemotes(
-    [
-      {
-        name: 'remote',
-        entry: remoteV2Entry,
-      },
-    ],
-    { force: true },
-  );
+  registerRemotes([
+    {
+      name: remoteV2Name,
+      entry: remoteV2Entry,
+    },
+  ]);
 };
 
 export const runLoadRemoteStep = async (): Promise<ProbeResult> => {
@@ -419,6 +519,8 @@ export const runLoadRemoteStep = async (): Promise<ProbeResult> => {
     gcAvailable,
     initialRemoteEntry: remoteV1Entry,
     reloadedRemoteEntry: remoteV2Entry,
+    initialRemoteName: remoteV1Name,
+    reloadedRemoteName: remoteV2Name,
     heavyStats,
     clearCacheCalls: [],
     snapshots: [afterLoad],
@@ -443,6 +545,8 @@ export const runRemoveRemoteStep = async (): Promise<ProbeResult> => {
     gcAvailable,
     initialRemoteEntry: remoteV1Entry,
     reloadedRemoteEntry: remoteV2Entry,
+    initialRemoteName: remoteV1Name,
+    reloadedRemoteName: remoteV2Name,
     clearCacheCalls,
     snapshots: [afterRemove],
   };
@@ -450,7 +554,7 @@ export const runRemoveRemoteStep = async (): Promise<ProbeResult> => {
 
 export const runRegisterNewRemoteStep = async (): Promise<ProbeResult> => {
   registerRemoteV2();
-  const reloadedHeavyStats = await loadHeavyStats();
+  const reloadedHeavyStats = await loadHeavyStats(remoteV2Name);
   const gcAvailable = forceGc();
   const afterRegister = snapshot('register new remote', {
     forceHeapSnapshot: true,
@@ -461,6 +565,8 @@ export const runRegisterNewRemoteStep = async (): Promise<ProbeResult> => {
     gcAvailable,
     initialRemoteEntry: remoteV1Entry,
     reloadedRemoteEntry: remoteV2Entry,
+    initialRemoteName: remoteV1Name,
+    reloadedRemoteName: remoteV2Name,
     reloadedHeavyStats,
     clearCacheCalls: [],
     snapshots: [afterRegister],
@@ -469,15 +575,39 @@ export const runRegisterNewRemoteStep = async (): Promise<ProbeResult> => {
 
 export const runProbe = async ({
   delayedGcSeconds = DEFAULT_DELAYED_GC_SECONDS,
+  update = false,
 }: ProbeOptions = {}): Promise<ProbeResult> => {
-  await removeRemote('remote');
-  registerRemoteV1();
+  if (!update) {
+    try {
+      await removeRemote('remote');
+    } catch {
+      // Reset state so the first request can be repeated locally.
+    }
+    registerRemoteV1();
 
-  forceGc();
-  const beforeLoad = snapshot('before load');
-  const heavyStats = await loadHeavyStats();
-  const afterLoad = snapshot('after load');
+    forceGc();
+    const beforeLoad = snapshot('before load');
+    const heavyStats = await loadHeavyStats();
+    const activeRemote = captureActiveRemoteV1();
+    const afterLoad = snapshot('after load');
+    latestInitialSnapshots = [beforeLoad, afterLoad];
 
+    return {
+      action: 'load remote v1',
+      gcAvailable: forceGc(),
+      initialRemoteEntry: remoteV1Entry,
+      reloadedRemoteEntry: remoteV2Entry,
+      initialRemoteName: remoteV1Name,
+      reloadedRemoteName: remoteV2Name,
+      heavyStats,
+      clearCacheCalls: [],
+      v1Runtime: getActiveRemoteV1Status(activeRemote),
+      snapshots: [beforeLoad, afterLoad],
+    };
+  }
+
+  const v1RuntimeBeforeUpdate = getActiveRemoteV1Status();
+  const beforeRemove = snapshot('before removeRemote');
   const clearCacheCalls: ClearCacheProbeCall[] = [];
   const restoreClearCache = wrapClearCacheForProbe(clearCacheCalls);
   let removeRemoteError: string | undefined;
@@ -493,25 +623,51 @@ export const runProbe = async ({
   const gcAvailable = forceGc();
   const afterGc = snapshot('after gc');
   const delayedGcSnapshots = await collectDelayedGcSnapshots(delayedGcSeconds);
+  const v1RuntimeAfterRemove = getActiveRemoteV1Status();
   registerRemoteV2();
-  const reloadedHeavyStats = await loadHeavyStats();
+  const reloadedHeavyStats = await loadHeavyStats(remoteV2Name);
   const afterReload = snapshot('after reload');
+  const v1Runtime = getActiveRemoteV1Status();
+  activeRemoteV1 = undefined;
 
   return {
+    action: 'update remote to v2',
     gcAvailable,
     initialRemoteEntry: remoteV1Entry,
     reloadedRemoteEntry: remoteV2Entry,
-    heavyStats,
+    initialRemoteName: remoteV1Name,
+    reloadedRemoteName: remoteV2Name,
     reloadedHeavyStats,
     clearCacheCalls,
     removeRemoteError,
+    v1Runtime: {
+      ...v1Runtime,
+      captured: v1RuntimeBeforeUpdate.captured,
+    },
+    v1RuntimeAfterRemove,
     snapshots: [
-      beforeLoad,
-      afterLoad,
+      ...latestInitialSnapshots,
+      beforeRemove,
       afterRemove,
       afterGc,
       ...delayedGcSnapshots,
       afterReload,
     ],
+  };
+};
+
+export const runFullProbe = async (
+  options: Omit<ProbeOptions, 'update'> = {},
+): Promise<ProbeResult> => {
+  const initialResult = await runProbe();
+  const updateResult = await runProbe({
+    ...options,
+    update: true,
+  });
+
+  return {
+    ...updateResult,
+    heavyStats: initialResult.heavyStats,
+    snapshots: updateResult.snapshots,
   };
 };

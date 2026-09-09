@@ -11,6 +11,9 @@ export default defineConfig({
     },
     port: 3050,
   },
+  output: {
+    disableTsChecker: process.env.MF_SSR_GC_PROBE === 'true',
+  },
   tools: {
     tsChecker: {
       typescript: {
