@@ -245,12 +245,51 @@ it. The unused moduleCache.set generation marker/wrapper was removed.
 
 The baseline now uses the production disposer before dropping CJS cache. It no
 longer manually replaces the removeRemote plugin. With the companion compiler
-and Modern entry, strict mode passes all 23 checks with zero TODOs/skips. These
-include repeated installation, cross-copy/multiple-binding unit coverage and a
-separate WeakRef check retaining the disposer and saved clear function.
+and Modern entry, the current strict artifact invocation reports 13 checks with
+zero TODOs/skips, including the separate WeakRef check retaining the disposer and
+saved clear function. Repeated installation and cross-copy/multiple-binding cases
+are covered separately by the bundler-runtime unit suite.
 
 The WeakRef test proves adapter-owned references are released, not that all
 application bundles are collectable: the retained MF control plane, active shared
 providers and business exports may still reference bundled code. Modern must
 supply application ownership and request/stream drain; production serve,
 long-running memory stability and end-to-end recovery remain later stage gates.
+
+## Dynamic registration/provider identity regression (R3 integration)
+
+The Modern production-generation test exposed a gap in the original identity
+assertion: the host's cached shared module could hide a provider factory whose
+execution cache had been cleared. With registration name `dynamic` and provider
+container name `v1`, both runtime-core and bundler cleanup matched only the
+registration name against `Shared.from`. The bundler path also lacked metadata
+for dynamically registered remotes, which are absent from compiler remoteInfos.
+
+The repair resolves names from runtime registrations and loaded-container
+metadata, uses provider/global names for shared ownership, and keeps registration
+names separate for host cache invalidation. Regression cases cover retained or
+already-detached provider runtimes, loading shared factories, and both compiler
+and runtime registration metadata. Modern's companion production test requires
+host and new-provider shared references to remain strictly identical through
+v1/v2/v3 application rebuilds and failed-generation recovery.
+
+Validation on Node 24.18.1 / local Rspack 2.2.2:
+
+```sh
+pnpm --filter @module-federation/runtime-core exec rstest run __tests__/register-remotes.spec.ts
+pnpm --filter @module-federation/runtime-core test
+pnpm --filter @module-federation/webpack-bundler-runtime test --runInBand __tests__/clearCache.spec.ts
+pnpm --filter @module-federation/webpack-bundler-runtime test --runInBand
+pnpm exec turbo run build --filter=@module-federation/runtime-tools
+SSR_CACHE_STRICT=1 SSR_CACHE_RSPACK_ENTRY=/Users/bytedance/outter/rspack/packages/rspack/dist/index.js SSR_CACHE_MODERN_ENTRY=/Users/bytedance/work/modern.js/packages/server/core/dist/cjs/adapters/node/index.js node --test tools/ssr-cache/baseline.test.cjs
+pnpm exec prettier --check .
+pnpm exec prettier --check packages/runtime-core/src/remote/index.ts packages/runtime-core/__tests__/register-remotes.spec.ts packages/webpack-bundler-runtime/src/clearCache.ts packages/webpack-bundler-runtime/__tests__/clearCache.spec.ts tools/ssr-cache/README.md
+pnpm exec changeset status
+git diff --check
+```
+
+Runtime-core: 138 passed. Bundler runtime: 122 passed. The full formatting gate
+reports 683 existing/generated or unrelated dirty files; these are not rewritten.
+The touched-file gate is checked separately. Full Cypress/browser hydration and
+load/heap endurance tests are not run for this repair; the real Modern production
+artifact test and the strict compiler baseline complement package tests. No release.
