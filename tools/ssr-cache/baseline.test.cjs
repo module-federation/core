@@ -92,15 +92,18 @@ for (const [variant, flags] of Object.entries({
         }
       }
       if (variant === 'shared') {
-        await knownFailure(
-          t,
-          'shared retention does not skip host invalidation',
-          () => assert.equal(result.static.withPageInvalidated, 'v2'),
+        await t.test('shared retention does not skip host invalidation', () =>
+          assert.equal(result.static.withPageInvalidated, 'v2'),
         );
-        await knownFailure(
-          t,
-          'consumed shared export retains strict identity',
-          () => assert.equal(result.shared.sameObject, true),
+        await t.test('consumed shared export retains strict identity', () =>
+          assert.equal(result.shared.sameObject, true),
+        );
+        await t.test(
+          'retained shared lazy dependency keeps identity after removal',
+          () => {
+            assert.equal(result.shared.lazySameObject, true);
+            assert.equal(result.shared.lazyValue, 'lazy-singleton');
+          },
         );
       } else {
         assert.equal(result.dynamic.savedHandler, 'v1');

@@ -620,6 +620,7 @@ const invalidateRemoteEntryUrlGenerations = (
 const cleanupRemoteRuntimeCache = (
   webpackRequire: WebpackRequire,
   target: ClearCacheTarget,
+  preserveProvider = false,
 ) => {
   const instance = webpackRequire.federation.instance;
   if (!instance) {
@@ -629,13 +630,17 @@ const cleanupRemoteRuntimeCache = (
     const module = instance.moduleCache?.get(remoteName) as
       | Record<string, unknown>
       | undefined;
-    cleanupRemoteEntryInternalCache(module?.remoteEntryExports);
-    cleanupRemoteEntryInternalCache(module?.lib);
+    if (!preserveProvider) {
+      cleanupRemoteEntryInternalCache(module?.remoteEntryExports);
+      cleanupRemoteEntryInternalCache(module?.lib);
+    }
     instance.moduleCache?.delete(remoteName);
   }
-  for (const remoteInfo of target.remoteInfos) {
-    for (const globalKey of getRemoteEntryGlobalKeys(remoteInfo)) {
-      cleanupRemoteEntryInternalCache((globalThis as any)[globalKey]);
+  if (!preserveProvider) {
+    for (const remoteInfo of target.remoteInfos) {
+      for (const globalKey of getRemoteEntryGlobalKeys(remoteInfo)) {
+        cleanupRemoteEntryInternalCache((globalThis as any)[globalKey]);
+      }
     }
   }
   const idToRemoteMap = instance.remoteHandler?.idToRemoteMap;
@@ -648,6 +653,11 @@ const cleanupRemoteRuntimeCache = (
         delete idToRemoteMap[id];
       }
     }
+  }
+  // Shared factories (including later lazy dependencies) still close over the
+  // provider runtime. Host caches must be cleared independently of that lifetime.
+  if (preserveProvider) {
+    return;
   }
   const federationInstances = (globalThis as any).__FEDERATION__?.__INSTANCES__;
   if (Array.isArray(federationInstances)) {
@@ -697,7 +707,11 @@ const cleanupSharedCache = (
           ) {
             continue;
           }
-          if (shared.loaded || typeof shared.lib === 'function') {
+          if (
+            shared.loaded ||
+            shared.loading ||
+            typeof shared.lib === 'function'
+          ) {
             continue;
           }
           delete versions[shareVersion];
@@ -731,6 +745,9 @@ const hasActiveSharedConsumers = (target: ClearCacheTarget) => {
             !target.remoteNames.includes((shared as any).from)
           ) {
             continue;
+          }
+          if ((shared as any).loading) {
+            return true;
           }
           if (
             Array.isArray((shared as any).useIn) &&
@@ -892,9 +909,7 @@ const cleanupStaleRemoteCache = (
   target: ClearCacheTarget,
   consumerModuleIds: ModuleId[],
 ) => {
-  if (hasActiveSharedConsumers(target)) {
-    return;
-  }
+  const preserveProvider = hasActiveSharedConsumers(target);
   const idToExternalAndNameMapping =
     webpackRequire.federation.bundlerRuntimeOptions.remotes
       ?.idToExternalAndNameMapping ?? {};
@@ -918,8 +933,10 @@ const cleanupStaleRemoteCache = (
   deleteModuleCache(webpackRequire, target.remoteModuleIds);
   deleteModuleCache(webpackRequire, target.externalModuleIds);
   deleteModuleCache(webpackRequire, consumerModuleIds);
-  cleanupRemoteEntryCache(webpackRequire, target);
-  cleanupRemoteRuntimeCache(webpackRequire, target);
+  if (!preserveProvider) {
+    cleanupRemoteEntryCache(webpackRequire, target);
+  }
+  cleanupRemoteRuntimeCache(webpackRequire, target, preserveProvider);
 };
 
 export const runStaleRemoteCleanups = (

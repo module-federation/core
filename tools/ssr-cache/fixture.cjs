@@ -21,7 +21,11 @@ async function main() {
   write('v1.js', 'export default "v1";');
   write('v2.js', 'export default "v2";');
   if (process.env.SHARED === '1') {
-    write('shared.js', 'export default {identity:"shared-singleton"};');
+    write(
+      'shared.js',
+      'export default {identity:"shared-singleton",lazy:()=>import("./shared-lazy").then(m=>m.default)};',
+    );
+    write('shared-lazy.js', 'export default {identity:"lazy-singleton"};');
     for (const v of ['v1', 'v2'])
       write(
         v + '.js',
@@ -215,9 +219,11 @@ async function main() {
   assert.equal(beforePage(), 'v1');
   assert.equal(other(), 'unrelated');
   let sharedBefore;
+  let lazyBefore;
   if (host.share) {
     sharedBefore = (await host.share()).default;
     assert.equal((await host.share()).default, sharedBefore);
+    lazyBefore = await sharedBefore.lazy();
   }
   const mapping = JSON.parse(JSON.stringify(host.req.remotesLoadingData));
   const instance = host.req.federation.instance;
@@ -255,6 +261,8 @@ async function main() {
     const sharedAfter = (await host.share()).default;
     result.shared = {
       sameObject: sharedAfter === sharedBefore,
+      lazySameObject: (await sharedBefore.lazy()) === lazyBefore,
+      lazyValue: (await sharedAfter.lazy()).identity,
       before: sharedBefore,
       after: sharedAfter,
       records: Object.values(globalThis.__FEDERATION__.__SHARE__)

@@ -212,7 +212,7 @@ describe('ModuleFederation', () => {
   });
 
   it('emits removeRemote hook before force registering an existing remote', () => {
-    const removeRemote = vi.fn();
+    const removeRemote = rs.fn();
     const FM = new ModuleFederation({
       name: '@federation/instance',
       version: '1.0.1',
@@ -249,7 +249,7 @@ describe('ModuleFederation', () => {
   });
 
   it('removes a registered remote by name and emits removeRemote hook', async () => {
-    const removeRemote = vi.fn();
+    const removeRemote = rs.fn();
     const FM = new ModuleFederation({
       name: '@federation/instance',
       version: '1.0.1',
@@ -294,8 +294,8 @@ describe('ModuleFederation', () => {
     const entry =
       'http://localhost:1111/resources/register-remotes/app1/federation-remote-entry.js';
     const remoteEntryClear = rs.fn();
-    const libClear = vi.fn();
-    const globalClear = vi.fn();
+    const libClear = rs.fn();
+    const globalClear = rs.fn();
     const FM = new ModuleFederation({
       name: '@federation/instance',
       version: '1.0.1',
@@ -318,19 +318,19 @@ describe('ModuleFederation', () => {
         shareScope: 'default',
       },
       remoteEntryExports: {
-        get: vi.fn(),
-        init: vi.fn(),
+        get: rs.fn(),
+        init: rs.fn(),
         __webpack_clear_cache__: remoteEntryClear,
       },
       lib: {
-        get: vi.fn(),
-        init: vi.fn(),
+        get: rs.fn(),
+        init: rs.fn(),
         __webpack_clear_cache__: libClear,
       },
     } as any);
     (globalThis as any).app1 = {
       get: rs.fn(),
-      init: vi.fn(),
+      init: rs.fn(),
       __webpack_clear_cache__: globalClear,
     };
     Global.__FEDERATION__.moduleInfo = {
@@ -380,7 +380,12 @@ describe('ModuleFederation', () => {
     expect(FM.snapshotHandler.manifestCache.has(entry)).toBe(false);
   });
 
-  it('keeps a removed remote runtime while another remote uses its shared module', async () => {
+  it.each([
+    { registered: true, loading: false },
+    { registered: false, loading: false },
+    { registered: true, loading: true },
+    { registered: false, loading: true },
+  ])('keeps shared provider caches: %j', async ({ registered, loading }) => {
     const entry =
       'http://localhost:1111/resources/register-remotes/app1/federation-remote-entry.js';
     const remoteEntryClear = rs.fn();
@@ -390,10 +395,15 @@ describe('ModuleFederation', () => {
       get: rs.fn(),
       shareConfig: { requiredVersion: false },
       scope: ['default'],
-      useIn: ['@register-remotes/app1', 'another-remote'],
+      useIn: loading
+        ? ['@register-remotes/app1']
+        : ['@register-remotes/app1', 'another-remote'],
       deps: [],
-      lib: () => ({ value: 'shared from app1' }),
-      loaded: true,
+      lib: loading ? undefined : () => ({ value: 'shared from app1' }),
+      loaded: !loading,
+      loading: loading
+        ? Promise.resolve(() => ({ value: 'shared from app1' }))
+        : undefined,
       strategy: 'version-first' as const,
     };
     const FM = new ModuleFederation({
@@ -428,11 +438,12 @@ describe('ModuleFederation', () => {
     (globalThis as any).app1 = {
       __webpack_clear_cache__: remoteEntryClear,
     };
-    Global.__FEDERATION__.__INSTANCES__.push({
-      name: '@register-remotes/app1',
-      options: { id: '@register-remotes/app1' },
-      shareScopeMap: {},
-    } as any);
+    if (registered)
+      Global.__FEDERATION__.__INSTANCES__.push({
+        name: '@register-remotes/app1',
+        options: { id: '@register-remotes/app1' },
+        shareScopeMap: {},
+      } as any);
     Global.__FEDERATION__.__SHARE__ = {
       '@register-remotes/app1': {
         default: {
@@ -452,7 +463,7 @@ describe('ModuleFederation', () => {
       expect((globalThis as any).app1).toBeDefined();
       expect(shared.from).toBe('@register-remotes/app1');
       expect(shared.providerState).toBe(1);
-      expect(shared.useIn).toEqual(['another-remote']);
+      expect(shared.useIn).toEqual(loading ? [] : ['another-remote']);
     } finally {
       Global.__FEDERATION__.__INSTANCES__.splice(
         0,
@@ -467,9 +478,9 @@ describe('ModuleFederation', () => {
   it('keeps loaded remote cleanup context when removeRemote hook clears moduleCache first', async () => {
     const entry =
       'http://localhost:1111/resources/register-remotes/app1/federation-remote-entry.js';
-    const remoteEntryClear = vi.fn();
-    const libClear = vi.fn();
-    const globalClear = vi.fn();
+    const remoteEntryClear = rs.fn();
+    const libClear = rs.fn();
+    const globalClear = rs.fn();
     const FM = new ModuleFederation({
       name: '@federation/instance',
       version: '1.0.1',
@@ -500,19 +511,19 @@ describe('ModuleFederation', () => {
         shareScope: 'default',
       },
       remoteEntryExports: {
-        get: vi.fn(),
-        init: vi.fn(),
+        get: rs.fn(),
+        init: rs.fn(),
         __webpack_clear_cache__: remoteEntryClear,
       },
       lib: {
-        get: vi.fn(),
-        init: vi.fn(),
+        get: rs.fn(),
+        init: rs.fn(),
         __webpack_clear_cache__: libClear,
       },
     } as any);
     (globalThis as any).app1 = {
-      get: vi.fn(),
-      init: vi.fn(),
+      get: rs.fn(),
+      init: rs.fn(),
       __webpack_clear_cache__: globalClear,
     };
     Global.__FEDERATION__.moduleInfo = {

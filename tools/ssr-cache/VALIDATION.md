@@ -57,3 +57,52 @@ covered by R0. They remain the explicit R1–R6 acceptance tasks. Other CI jobs 
 not run because this change adds a focused SSR baseline and contracts, not runtime
 behavior. No changeset or package publication is needed for these tooling/docs-only
 changes. The baseline is a documented explicit command, not yet a CI gate.
+
+## R1 shared-lifetime increment — 2026-09-10
+
+Base: merged R0 `bf33cf00f`. This increment fixes host/provider cleanup separation
+and shared identity; **R1 is not complete**. It does not change Rspack or implement
+adapter disposal. Provider-wide retention is a safe fallback, not selective GC.
+
+Commands executed:
+
+```sh
+pnpm exec turbo run build --filter=@module-federation/runtime-tools
+pnpm --filter @module-federation/webpack-bundler-runtime run test
+pnpm --filter @module-federation/runtime-core exec rstest run
+node --test tools/ssr-cache/baseline.test.cjs
+SSR_CACHE_RSPACK_ENTRY=/Users/bytedance/outter/rspack/packages/rspack/dist/index.js SSR_CACHE_MODERN_ENTRY=/Users/bytedance/work/modern.js/packages/server/core/dist/cjs/adapters/node/index.js node --test tools/ssr-cache/baseline.test.cjs
+pnpm run ci:local --only=e2e-modern-ssr
+pnpm exec prettier --check packages/runtime-core/src/remote/index.ts packages/runtime-core/__tests__/register-remotes.spec.ts packages/webpack-bundler-runtime/src/clearCache.ts packages/webpack-bundler-runtime/__tests__/clearCache.spec.ts tools/ssr-cache .changeset/clean-host-retain-shared.md
+pnpm exec prettier --check .
+python3 .codex/skills/changeset-pr/scripts/run_changeset_status.py --output /tmp/mf-ssr-r1-changeset-status.json
+git diff --check
+```
+
+- Builds: 6/6 tasks pass. Bundler package: 109/109 tests pass. Runtime-core:
+  134/134 pass, including absent provider registration and pending shared loads.
+  Initial sandbox Rstest invocation could not listen; rerun with listener permission
+  passed after replacing existing undefined `vi.fn` usages with imported `rs.fn`
+  in the touched remote-registration tests. No snapshots were updated.
+- Installed-canary artifacts: 7 pass / 5 TODO / 1 explicit Modern skip. Local
+  Rspack + Modern: 8 pass / 5 TODO / 0 skip. Two previous shared TODOs now pass;
+  a new retained lazy-dependency identity assertion passes. The remaining TODOs
+  cover transitive parent metadata and stale adapter binding.
+- Modern SSR CI: remote-cache spec passes in this run, but shared-cache spec
+  **fails at line 40**: `nonSharedPayloadCollected` is false. Retaining provider
+  execution caches protects shared identity but also retains its unrelated
+  payload. The failing memory assertion is deliberately unchanged. Selective
+  provider cleanup is needed before declaring the production memory requirement
+  complete. R0's runtime-capture failure did not reproduce in this run; this
+  change does not claim to fix its cause.
+- Changed-file formatting and diff checks pass. Full-repo formatting still reports
+  683 existing/generated files, outside this patch.
+- Changeset status succeeds; the patch release entries are only runtime-core and
+  webpack-bundler-runtime. The repository fixed release group may expand the plan.
+  The scope helper requires Python 3.10+ annotations; on this machine it was run
+  with postponed annotations under Python 3.9, without modifying the helper.
+
+General shared lazy dependency graph coverage, selective provider reclamation,
+parent closure, adapter lifecycle and Modern production stream/serve/GC acceptance
+remain open. Other CI jobs were not run: the affected packages' complete tests and
+Modern SSR integration were selected. No publication was performed.
