@@ -26,6 +26,7 @@ async function main() {
       'export default {identity:"shared-singleton",lazy:()=>import("./shared-lazy").then(m=>m.default)};',
     );
     write('shared-lazy.js', 'export default {identity:"lazy-singleton"};');
+    write('payload.js', 'export default {items:new Array(200000).fill(42)};');
     for (const v of ['v1', 'v2'])
       write(
         v + '.js',
@@ -76,9 +77,9 @@ async function main() {
     mode: 'production',
     devtool: false,
     optimization: {
-      minimize: false,
+      minimize: process.env.MINIMIZE === '1',
       concatenateModules: process.env.CONCAT === '1',
-      moduleIds: 'named',
+      moduleIds: process.env.MODULE_IDS || 'named',
       chunkIds: 'named',
     },
     output: {
@@ -98,7 +99,12 @@ async function main() {
         implementation,
         filename: v + '.cjs',
         library: { type: 'commonjs-module' },
-        exposes: { './Value': './' + v + '.js' },
+        exposes: {
+          './Value': './' + v + '.js',
+          ...(process.env.SHARED === '1'
+            ? { './Payload': './payload.js' }
+            : {}),
+        },
         shared:
           process.env.SHARED === '1'
             ? {
@@ -227,6 +233,11 @@ async function main() {
   }
   const mapping = JSON.parse(JSON.stringify(host.req.remotesLoadingData));
   const instance = host.req.federation.instance;
+  let payloadRef;
+  if (host.share)
+    payloadRef = new WeakRef(
+      (await instance.loadRemote('remote/Payload')).default,
+    );
   const template = {
     ...instance.options.remotes.find(
       (r) => r.name === 'remote' || r.alias === 'remote',
@@ -242,6 +253,11 @@ async function main() {
     rspackEntry:
       process.env.SSR_CACHE_RSPACK_ENTRY || require.resolve('@rspack/core'),
     nodeVersion: process.version,
+    completeParents: Boolean(
+      mapping.consumerModuleIdToParentModuleIds?.['./middle.js']?.includes(
+        './page.js',
+      ),
+    ),
     mapping,
     static: {
       savedHandler: beforePage(),
@@ -259,7 +275,21 @@ async function main() {
   result.static.otherSame = (await host.other()) === other;
   if (host.share) {
     const sharedAfter = (await host.share()).default;
+    let payloadCollected = false;
+    for (let i = 0; i < 30; i++) {
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      global.gc();
+      if (!payloadRef.deref()) {
+        payloadCollected = true;
+        break;
+      }
+    }
+    const selective =
+      typeof require(path.join(out, 'v1.cjs'))
+        .__webpack_clear_exposed_cache__ === 'function';
     result.shared = {
+      selective,
+      payloadCollected,
       sameObject: sharedAfter === sharedBefore,
       lazySameObject: (await sharedBefore.lazy()) === lazyBefore,
       lazyValue: (await sharedAfter.lazy()).identity,

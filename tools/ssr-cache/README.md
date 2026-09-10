@@ -173,3 +173,44 @@ shared dependency retention and adapter disposal; R2 must prove stream terminati
 R3/R4 must implement Modern resource ownership and safe publication. None is marked
 implemented by this document. Arbitrary globals, unregistered tasks, native ESM
 registry eviction and deployment-owned worker rotation remain explicit boundaries.
+
+## R1 selective provider cleanup and transitive parents
+
+With the companion Rspack branch `fix/mf-selective-cache`, enhanced containers
+export `__webpack_clear_exposed_cache__`. It removes execution-cache entries
+outside the forward dependency closure of declared and consumed shared modules,
+including async dependencies. MF calls this optional method when the provider
+must be retained for shared use. Older containers keep their execution cache.
+The existing full-cache method keeps its behavior.
+
+This is conservative: modules also reachable from shared cannot be released,
+module factories and the shared provider runtime remain, and arbitrary business
+references/global side effects are not removed. Clearing execution cache does
+not replace already-returned functions. The capability is compiler-owned, with
+no Modern-specific routing or request coordination in Rspack.
+
+The companion compiler also emits transitive static parent edges. Native tests
+cover cycles and multiple parents; the artifact matrix covers concatenation,
+deterministic numeric IDs and minification. Require these new capabilities with:
+
+```sh
+SSR_CACHE_EXPECT_NATIVE=1 SSR_CACHE_RSPACK_ENTRY=/absolute/path/to/rspack/packages/rspack/dist/index.js node --test tools/ssr-cache/baseline.test.cjs
+```
+
+This mode removes the parent-closure TODOs and requires non-shared payload GC,
+shared strict identity and retained lazy dependency identity. The three stale
+adapter TODOs remain. Without the native flag the installed older canary is still
+supported, and unsupported selective GC is explicitly skipped.
+
+For the existing full Modern SSR CI job, use the Node 24 resolver hook so both
+ESM and CJS toolchains load the local compiler (no lockfile or symlink changes):
+
+```sh
+SSR_CACHE_RSPACK_ENTRY=/absolute/path/to/rspack/packages/rspack/dist/index.js NODE_OPTIONS="--require=$PWD/tools/ssr-cache/local-rspack-hook.cjs" TURBO_ENV_MODE=loose pnpm run ci:local --only=e2e-modern-ssr
+```
+
+Verify the provider container exports the new method in the emitted artifact;
+merely finding its name inside bundled MF runtime call sites is insufficient.
+The Modern shared-cache spec now passes with this compiler. The separate
+remote-cache runtime-capture assertion still intermittently fails; the full CI
+job is not accepted as green. Adapter lifetime and R2–R6 are still open.
