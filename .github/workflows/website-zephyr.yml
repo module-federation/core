@@ -24,7 +24,9 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  DEBUG: 'zephyr*'
   SITE_ORIGIN: https://module-federation.io
+  ZE_FAIL_BUILD: true
   ZE_SECRET_TOKEN: ${{ secrets.ZE_SECRET_TOKEN }}
 
 jobs:

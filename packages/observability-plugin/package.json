@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/observability-plugin",
-  "version": "2.5.6",
+  "version": "2.6.0",
   "author": "module-federation",
   "main": "./dist/index.js",
   "module": "./dist/esm/index.js",
@@ -65,10 +65,13 @@
     }
   },
   "devDependencies": {
-    "@module-federation/runtime": "workspace:*"
+    "@module-federation/runtime": "workspace:*",
+    "@types/semver": "^7.5.8"
   },
   "dependencies": {
-    "@module-federation/sdk": "workspace:*"
+    "@module-federation/sdk": "workspace:*",
+    "@divebell/core": "0.0.23",
+    "semver": "^7.7.4"
   },
   "scripts": {
     "build": "tsdown --config tsdown.config.ts && cp *.md dist",

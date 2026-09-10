@@ -91,3 +91,16 @@ jobs:
         if: github.event.inputs.version == 'next'
         run: |
           pnpm -r publish --tag next --no-git-checks
+
+      - name: Release summary
+        if: success() && github.event.inputs.version == 'next'
+        run: |
+          VERSION=$(node -p "require('./packages/runtime/package.json').version")
+          {
+            echo "## Release summary"
+            echo ""
+            echo "- **Tag:** \`next\`"
+            echo "- **Branch:** \`${{ github.event.inputs.branch }}\`"
+            echo "- **Version:** \`$VERSION\`"
+            echo "- **Commit:** \`${{ github.sha }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"

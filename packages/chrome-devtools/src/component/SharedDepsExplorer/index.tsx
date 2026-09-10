@@ -450,7 +450,6 @@ function SharedDepsExplorer({
               <span className={styles.badgeGroup}>
                 <Box className={styles.iconSmall} />
                 <span>
-                  {stats.totalPackages}
                   {t('sharedDeps.stats.scopes.packagesBadge', {
                     count: stats.totalPackages,
                   })}

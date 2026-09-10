@@ -12,7 +12,7 @@ import {
   isRemoteInfoWithEntry,
   getRemoteEntryInfoFromSnapshot,
 } from '../../utils';
-import { PreloadOptions, RemoteInfo } from '../../type';
+import { PreloadOptions, PreloadRemoteArgs, RemoteInfo } from '../../type';
 import { preloadAssets } from '../../utils/preload';
 
 export function assignRemoteInfo(
@@ -52,34 +52,53 @@ export function snapshotPlugin(): ModuleFederationRuntimePlugin {
 
         assignRemoteInfo(remoteInfo, remoteSnapshot);
         // preloading assets
-        const preloadOptions: PreloadOptions[0] = {
-          remote,
-          preloadConfig: {
+        const preloadOps: PreloadRemoteArgs[] = [
+          {
             nameOrAlias: pkgNameOrAlias,
             exposes: [expose],
             resourceCategory: 'sync',
             share: false,
             depsRemote: false,
+            recordPreloadedAssets: true,
           },
-        };
+        ];
+        await origin.remoteHandler.hooks.lifecycle.beforePreloadRemote.emit({
+          preloadOps,
+          options: origin.options,
+          origin,
+        });
 
-        const assets =
-          await origin.remoteHandler.hooks.lifecycle.generatePreloadAssets.emit(
-            {
-              origin,
-              preloadOptions,
+        const [preloadConfig] = preloadOps;
+        if (preloadConfig) {
+          const preloadOptions: PreloadOptions[0] = {
+            remote,
+            preloadConfig,
+          };
+          const assets =
+            await origin.remoteHandler.hooks.lifecycle.generatePreloadAssets.emit(
+              {
+                origin,
+                preloadOptions,
+                remoteInfo,
+                remote,
+                remoteSnapshot,
+                globalSnapshot,
+              },
+            );
+
+          if (assets) {
+            preloadAssets(
               remoteInfo,
-              remote,
-              remoteSnapshot,
-              globalSnapshot,
-            },
-          );
-
-        if (assets) {
-          preloadAssets(remoteInfo, origin, assets, false, {
-            initiator: 'loadRemote',
-            id,
-          }).catch(() => undefined);
+              origin,
+              assets,
+              false,
+              {
+                initiator: 'loadRemote',
+                id,
+              },
+              preloadConfig.recordPreloadedAssets,
+            ).catch(() => undefined);
+          }
         }
 
         return {

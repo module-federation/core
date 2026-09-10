@@ -7,11 +7,9 @@ import { pluginSass } from '@rsbuild/plugin-sass';
 import { pluginModuleFederation } from '@module-federation/rspress-plugin';
 import mfConfig from './module-federation.config';
 
-const siteOrigin = (
-  process.env.SITE_ORIGIN || 'https://module-federation.io'
-).replace(/\/$/, '');
+const canonicalSiteOrigin = 'https://module-federation.io'.replace(/\/$/, '');
 const siteIcon = '/svg.svg';
-const socialImageUrl = `${siteOrigin}/module-federation-social.svg`;
+const socialImageUrl = `${canonicalSiteOrigin}/module-federation-social.svg`;
 const socialImageAlt = 'Module Federation icon';
 const googleAnalyticsMeasurementId = 'G-DRPXW0EEVT';
 const enableZephyr = Boolean(process.env.CI || process.env.ZE_SECRET_TOKEN);
@@ -114,7 +112,15 @@ gtag('config', '${googleAnalyticsMeasurementId}');
     },
     plugins: [moduleFederationPluginOverview, pluginSass()],
     output: {
-      assetPrefix: `${siteOrigin}/`,
+      assetPrefix: '/',
+    },
+    environments: {
+      node: {
+        output: {
+          // The federated SSG build requires an absolute public path.
+          assetPrefix: `${canonicalSiteOrigin}/`,
+        },
+      },
     },
     dev: {
       assetPrefix: true,

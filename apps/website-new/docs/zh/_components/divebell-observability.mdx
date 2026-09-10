@@ -1,0 +1,26 @@
+一次性排查真实页面时，先在 Agent 所在机器手动安装 MF Extension。安装后，
+Divebell 可以在导航前启用 Extension 提供的 MF 诊断，不需要先给应用接入
+观测插件：
+
+```bash
+npm install --global @divebell/cli
+divebell extensions add @divebell/extension-mf
+divebell setup
+divebell open "https://example.com" --mf
+```
+
+AI Coding Agent 应先读取 `divebell skill` 返回的 CLI Skill，再读取
+`divebell mf --skill` 返回的 Extension Skill。随后可以查看 MF 当前状态、
+加载链路、Shared 版本选择、Bridge 操作或模块性能。例如：
+
+```bash
+divebell mf module-perf --report --view timeline
+```
+
+[![Divebell Module Federation 性能时间线](https://raw.githubusercontent.com/2heal1/divebell/main/assets/mf-module-perf-timeline.png)](https://github.com/2heal1/divebell#quick-start)
+
+更多命令和使用方式请查看
+[Divebell MF 扩展文档](https://github.com/2heal1/divebell/blob/main/packages/extensions/mf/README.md)，
+或阅读[排查运行时问题](/guide/debug/divebell.html)。
+
+如果报告需要持续采集、长期保留或从生产环境上传，仍应保留应用侧观测插件。

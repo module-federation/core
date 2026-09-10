@@ -19,6 +19,8 @@ import {
   RemoteEntryInitOptions,
   CallFrom,
   ResourceLoadContext,
+  LoadShareExtraOptions,
+  SharedLoadContext,
 } from './type';
 import { getBuilderId, registerPlugins, getRemoteEntry, error } from './utils';
 import {
@@ -51,6 +53,12 @@ import { formatShareConfigs } from './utils/share';
 declare const FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN: boolean;
 declare const FEDERATION_OPTIMIZE_NO_REMOTE: boolean;
 declare const FEDERATION_OPTIMIZE_NO_SHARED: boolean;
+
+type BridgeHookContext = object;
+type BridgeHookResult = {
+  context: BridgeHookContext;
+  result?: unknown;
+};
 const USE_SNAPSHOT =
   typeof FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN === 'boolean'
     ? !FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN
@@ -181,6 +189,8 @@ export class ModuleFederation {
           origin: ModuleFederation;
           remoteInfo: RemoteInfo;
           remoteEntryExports?: RemoteEntryExports | false | void;
+          resourceContext?: ResourceLoadContext;
+          cached?: boolean;
           error?: unknown;
           recovered?: boolean;
         },
@@ -277,21 +287,22 @@ export class ModuleFederation {
   });
   bridgeHook = new PluginSystem({
     beforeBridgeRender: new SyncHook<
-      [Record<string, any>],
+      [Record<string, any>, BridgeHookContext?],
       void | Record<string, any>
     >(),
     afterBridgeRender: new SyncHook<
-      [Record<string, any>],
+      [Record<string, any>, BridgeHookResult?],
       void | Record<string, any>
     >(),
     beforeBridgeDestroy: new SyncHook<
-      [Record<string, any>],
+      [Record<string, any>, BridgeHookContext?],
       void | Record<string, any>
     >(),
     afterBridgeDestroy: new SyncHook<
-      [Record<string, any>],
+      [Record<string, any>, BridgeHookResult?],
       void | Record<string, any>
     >(),
+    afterBridgeRouteSync: new SyncHook<[BridgeHookResult], void>(),
   });
   moduleInfo?: GlobalModuleInfo[string];
 
@@ -344,10 +355,7 @@ export class ModuleFederation {
 
   async loadShare<T>(
     pkgName: string,
-    extraOptions?: {
-      customShareInfo?: Partial<Shared>;
-      resolver?: (sharedOptions: ShareInfos[string]) => Shared;
-    },
+    extraOptions?: LoadShareExtraOptions,
   ): Promise<false | (() => T | undefined)> {
     return this.sharedHandler.loadShare(pkgName, extraOptions);
   }
@@ -358,11 +366,7 @@ export class ModuleFederation {
   // 3. If the local get returns something other than Promise, then it will be used directly
   loadShareSync<T>(
     pkgName: string,
-    extraOptions?: {
-      customShareInfo?: Partial<Shared>;
-      from?: 'build' | 'runtime';
-      resolver?: (sharedOptions: ShareInfos[string]) => Shared;
-    },
+    extraOptions?: LoadShareExtraOptions,
   ): () => T | never {
     return this.sharedHandler.loadShareSync(pkgName, extraOptions);
   }
@@ -373,6 +377,7 @@ export class ModuleFederation {
       initScope?: InitScope;
       from?: CallFrom;
       strategy?: Shared['strategy'];
+      context?: SharedLoadContext;
     },
   ): Array<Promise<void>> {
     return this.sharedHandler.initializeSharing(shareScopeName, extraOptions);
@@ -457,15 +462,7 @@ export class ModuleFederation {
   }
 
   registerPlugins(plugins: UserOptions['plugins']) {
-    const pluginRes = registerPlugins(plugins, this);
-    // Merge plugin
-    this.options.plugins = this.options.plugins.reduce((res, plugin) => {
-      if (!plugin) return res;
-      if (res && !res.find((item) => item.name === plugin.name)) {
-        res.push(plugin);
-      }
-      return res;
-    }, pluginRes || []);
+    this.options.plugins = registerPlugins(plugins, this);
   }
   registerRemotes(remotes: Remote[], options?: { force?: boolean }): void {
     return this.remoteHandler.registerRemotes(remotes, options);

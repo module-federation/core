@@ -16,6 +16,9 @@ import {
   InitTokens,
   CallFrom,
   TreeShakingArgs,
+  LoadShareExtraOptions,
+  SharedLoadContext,
+  SharedLoadTrigger,
 } from '../type';
 import { ModuleFederation } from '../core';
 import {
@@ -54,12 +57,28 @@ export class SharedHandler {
       shared: Shared;
       origin: ModuleFederation;
     }>('beforeRegisterShare'),
+    afterRegisterShare: new SyncHook<
+      [
+        {
+          pkgName: string;
+          scope: string;
+          shared: Shared;
+          previousShared?: Shared;
+          registeredShared?: Shared;
+          shareScopeMap: ShareScopeMap;
+          trigger: SharedLoadTrigger;
+          origin: ModuleFederation;
+        },
+      ],
+      void
+    >('afterRegisterShare'),
     afterResolve: new AsyncWaterfallHook<LoadRemoteMatch>('afterResolve'),
     beforeLoadShare: new AsyncWaterfallHook<{
       pkgName: string;
       shareInfo?: Shared;
       shared: Options['shared'];
       origin: ModuleFederation;
+      loadContext?: SharedLoadContext;
     }>('beforeLoadShare'),
     // not used yet
     loadShare: new AsyncHook<[ModuleFederation, string, ShareInfos]>(),
@@ -72,6 +91,7 @@ export class SharedHandler {
           shared: Options['shared'];
           shareScopeMap: ShareScopeMap;
           lifecycle: 'loadShare' | 'loadShareSync';
+          loadContext?: SharedLoadContext;
           origin: ModuleFederation;
         },
       ],
@@ -88,6 +108,7 @@ export class SharedHandler {
           origin: ModuleFederation;
           error?: unknown;
           recovered?: boolean;
+          loadContext?: SharedLoadContext;
         },
       ],
       void
@@ -100,6 +121,7 @@ export class SharedHandler {
       shareInfo: Shared;
       GlobalFederation: Federation;
       resolver: () => { shared: Shared; useTreesShaking: boolean } | undefined;
+      loadContext?: SharedLoadContext;
     }>('resolveShare'),
     // maybe will change, temporarily for internal use only
     initContainerShareScopeMap: new SyncWaterfallHook<{
@@ -118,16 +140,36 @@ export class SharedHandler {
     this._setGlobalShareScopeMap(host.options);
   }
 
+  private emitAfterRegisterShare(
+    pkgName: string,
+    input: {
+      scope: string;
+      shared: Shared;
+      previousShared?: Shared;
+      registeredShared?: Shared;
+      trigger: SharedLoadTrigger;
+    },
+  ): void {
+    this.hooks.lifecycle.afterRegisterShare.emit({
+      pkgName,
+      ...input,
+      shareScopeMap: this.shareScopeMap,
+      origin: this.host,
+    });
+  }
+
   private emitAfterLoadShare({
     lifecycle,
     pkgName,
     shareInfo,
     selectedShared,
+    loadContext,
   }: {
     lifecycle: 'loadShare' | 'loadShareSync';
     pkgName: string;
     shareInfo?: Partial<Shared>;
     selectedShared?: Partial<Shared>;
+    loadContext?: SharedLoadContext;
   }): void {
     try {
       this.hooks.lifecycle.afterLoadShare.emit({
@@ -137,6 +179,7 @@ export class SharedHandler {
         shared: this.host.options.shared,
         shareScopeMap: this.shareScopeMap,
         lifecycle,
+        loadContext,
         origin: this.host,
       });
     } catch (error) {
@@ -150,12 +193,14 @@ export class SharedHandler {
     shareInfo,
     error,
     recovered,
+    loadContext,
   }: {
     lifecycle: 'loadShare' | 'loadShareSync';
     pkgName: string;
     shareInfo?: Partial<Shared>;
     error?: unknown;
     recovered?: boolean;
+    loadContext?: SharedLoadContext;
   }): void {
     try {
       this.hooks.lifecycle.errorLoadShare.emit({
@@ -167,6 +212,7 @@ export class SharedHandler {
         origin: this.host,
         error,
         recovered,
+        loadContext,
       });
     } catch (hookError) {
       warn(hookError);
@@ -191,6 +237,7 @@ export class SharedHandler {
             shared: sharedVal,
           });
           const registeredShared = this.shareScopeMap[sc]?.[sharedKey];
+          const previousAtVersion = registeredShared?.[sharedVal.version];
           if (!registeredShared) {
             this.setShared({
               pkgName: sharedKey,
@@ -201,6 +248,14 @@ export class SharedHandler {
               from: userOptions.name,
             });
           }
+          this.emitAfterRegisterShare(sharedKey, {
+            scope: sc,
+            shared: sharedVal,
+            previousShared: previousAtVersion,
+            registeredShared:
+              this.shareScopeMap[sc]?.[sharedKey]?.[sharedVal.version],
+            trigger: 'runtime',
+          });
         });
       });
     });
@@ -213,12 +268,10 @@ export class SharedHandler {
 
   async loadShare<T>(
     pkgName: string,
-    extraOptions?: {
-      customShareInfo?: Partial<Shared>;
-      resolver?: (sharedOptions: ShareInfos[string]) => Shared;
-    },
+    extraOptions?: LoadShareExtraOptions,
   ): Promise<false | (() => T | undefined)> {
     const { host } = this;
+    let loadContext = extraOptions?.context;
     // This function performs the following steps:
     // 1. Checks if the currently loaded share already exists, if not, it throws an error
     // 2. Searches globally for a matching share, if found, it uses it directly
@@ -238,6 +291,7 @@ export class SharedHandler {
             await Promise.all(
               this.initializeSharing(shareScope, {
                 strategy: shareOptions.strategy,
+                context: loadContext,
               }),
             );
             return;
@@ -249,9 +303,11 @@ export class SharedHandler {
         shareInfo: shareOptions,
         shared: host.options.shared,
         origin: host,
+        loadContext,
       });
 
       shareOptionsRes = loadShareRes.shareInfo;
+      loadContext = loadShareRes.loadContext || loadContext;
 
       // Assert that shareInfoRes exists, if not, throw an error
       assert(
@@ -266,6 +322,7 @@ export class SharedHandler {
           pkgName,
           shareOptionsRes,
           this.hooks.lifecycle.resolveShare,
+          loadContext,
         ) || {};
 
       if (registeredShared) {
@@ -277,6 +334,7 @@ export class SharedHandler {
             pkgName,
             shareInfo: resolvedShareOptions,
             selectedShared: registeredShared,
+            loadContext,
           });
           return targetShared.lib as () => T;
         } else if (targetShared.loading && !targetShared.loaded) {
@@ -291,6 +349,7 @@ export class SharedHandler {
             pkgName,
             shareInfo: resolvedShareOptions,
             selectedShared: registeredShared,
+            loadContext,
           });
           return factory;
         } else {
@@ -319,6 +378,7 @@ export class SharedHandler {
             pkgName,
             shareInfo: resolvedShareOptions,
             selectedShared: registeredShared,
+            loadContext,
           });
           return factory;
         }
@@ -329,6 +389,7 @@ export class SharedHandler {
             pkgName,
             shareInfo: resolvedShareOptions,
             recovered: true,
+            loadContext,
           });
           return false;
         }
@@ -348,6 +409,7 @@ export class SharedHandler {
               pkgName,
               resolvedShareOptions,
               this.hooks.lifecycle.resolveShare,
+              loadContext,
             ) || {};
           if (gShared) {
             const targetGShared = directShare(gShared, gUseTreeShaking);
@@ -375,6 +437,7 @@ export class SharedHandler {
           pkgName,
           shareInfo: resolvedShareOptions,
           selectedShared: resolvedShareOptions,
+          loadContext,
         });
         return factory;
       }
@@ -384,6 +447,7 @@ export class SharedHandler {
         pkgName,
         shareInfo: shareOptionsRes,
         error: shareError,
+        loadContext,
       });
       throw shareError;
     }
@@ -401,11 +465,14 @@ export class SharedHandler {
       initScope?: InitScope;
       from?: CallFrom;
       strategy?: ShareStrategy;
+      context?: SharedLoadContext;
     },
   ): Array<Promise<void>> {
     const { host } = this;
     const from = extraOptions?.from;
     const strategy = extraOptions?.strategy;
+    const trigger: SharedLoadTrigger =
+      extraOptions?.context?.trigger || from || 'runtime';
     let initScope = extraOptions?.initScope;
     const promises: Promise<any>[] = [];
     if (from !== 'build') {
@@ -430,23 +497,32 @@ export class SharedHandler {
       const { version, eager } = shared;
       scope[name] = scope[name] || {};
       const versions = scope[name];
+      const existingShared = versions[version];
       const activeVersion: Shared =
-        versions[version] && (directShare(versions[version]) as Shared);
+        existingShared && (directShare(existingShared) as Shared);
       const activeVersionEager = Boolean(
         activeVersion &&
         (('eager' in activeVersion && activeVersion.eager) ||
           ('shareConfig' in activeVersion && activeVersion.shareConfig?.eager)),
       );
-      if (
+      const shouldReplace = Boolean(
         !activeVersion ||
         (activeVersion.strategy !== 'loaded-first' &&
           !activeVersion.loaded &&
           (Boolean(!eager) !== !activeVersionEager
             ? eager
-            : hostName > versions[version].from))
-      ) {
+            : hostName > versions[version].from)),
+      );
+      if (shouldReplace) {
         versions[version] = shared;
       }
+      this.emitAfterRegisterShare(name, {
+        scope: shareScopeName,
+        shared,
+        previousShared: existingShared,
+        registeredShared: versions[version],
+        trigger,
+      });
     };
 
     const initRemoteModule = async (key: string): Promise<void> => {
@@ -454,8 +530,14 @@ export class SharedHandler {
         id: key,
       });
       let remoteEntryExports: RemoteEntryExports | undefined = undefined;
+      const resourceContext = {
+        initiator: 'loadShare' as const,
+        id: key,
+        resourceType: 'remoteEntry' as const,
+        url: module.remoteInfo.entry,
+      };
       try {
-        remoteEntryExports = await module.getEntry();
+        remoteEntryExports = await module.getEntry(undefined, resourceContext);
       } catch (error) {
         remoteEntryExports =
           (await host.remoteHandler.hooks.lifecycle.errorLoadRemote.emit({
@@ -473,7 +555,13 @@ export class SharedHandler {
         // prevent self load loop: when host load self , the initTokens is not the same
         if (remoteEntryExports?.init && !module.initing) {
           module.remoteEntryExports = remoteEntryExports;
-          await module.init(undefined, undefined, initScope);
+          await module.init(
+            undefined,
+            undefined,
+            initScope,
+            undefined,
+            resourceContext,
+          );
         }
       }
     };
@@ -506,13 +594,10 @@ export class SharedHandler {
   // 3. If the local get returns something other than Promise, then it will be used directly
   loadShareSync<T>(
     pkgName: string,
-    extraOptions?: {
-      from?: 'build' | 'runtime';
-      customShareInfo?: Partial<Shared>;
-      resolver?: (sharedOptions: ShareInfos[string]) => Shared;
-    },
+    extraOptions?: LoadShareExtraOptions,
   ): () => T | never {
     const { host } = this;
+    const loadContext = extraOptions?.context;
     const shareOptions = getTargetSharedOptions({
       pkgName,
       extraOptions,
@@ -524,6 +609,8 @@ export class SharedHandler {
         shareOptions.scope.forEach((shareScope) => {
           this.initializeSharing(shareScope, {
             strategy: shareOptions.strategy,
+            from: extraOptions?.from,
+            context: loadContext,
           });
         });
       }
@@ -533,6 +620,7 @@ export class SharedHandler {
           pkgName,
           shareOptions,
           this.hooks.lifecycle.resolveShare,
+          loadContext,
         ) || {};
 
       if (registeredShared) {
@@ -549,6 +637,7 @@ export class SharedHandler {
             pkgName,
             shareInfo: shareOptions,
             selectedShared: registeredShared,
+            loadContext,
           });
           return registeredShared.lib as () => T;
         }
@@ -568,6 +657,7 @@ export class SharedHandler {
               pkgName,
               shareInfo: shareOptions,
               selectedShared: registeredShared,
+              loadContext,
             });
             return module;
           }
@@ -583,6 +673,7 @@ export class SharedHandler {
           pkgName,
           shareInfo: shareOptions,
           selectedShared: shareOptions,
+          loadContext,
         });
         return shareOptions.lib as () => T;
       }
@@ -619,6 +710,7 @@ export class SharedHandler {
           pkgName,
           shareInfo: shareOptions,
           selectedShared: shareOptions,
+          loadContext,
         });
         return shareOptions.lib as () => T;
       }
@@ -639,6 +731,7 @@ export class SharedHandler {
         pkgName,
         shareInfo: shareOptions,
         error: shareError,
+        loadContext,
       });
       throw shareError;
     }
@@ -698,6 +791,7 @@ export class SharedHandler {
       merge(targetShared, 'loaded', loaded);
       merge(targetShared, 'loading', loading);
       merge(targetShared, 'get', get);
+      merge(targetShared, 'lib', lib);
     };
     scopes.forEach((sc) => {
       if (!this.shareScopeMap[sc]) {

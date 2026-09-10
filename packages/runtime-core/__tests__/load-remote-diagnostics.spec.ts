@@ -90,6 +90,8 @@ describe('loadRemote diagnostics', () => {
 
   it('emits an afterLoadRemote hook after a successful remote load', async () => {
     const events: Array<Record<string, unknown>> = [];
+    const resourceResults: Array<Record<string, unknown>> = [];
+    const manifestResults: Array<Record<string, unknown>> = [];
     const mf = new ModuleFederation({
       name: 'load-remote-diagnostics-host',
       remotes: [
@@ -99,7 +101,18 @@ describe('loadRemote diagnostics', () => {
             'http://localhost:1111/resources/main/federation-manifest.json',
         },
       ],
-      plugins: [createDiagnosticsRecorder(events)],
+      plugins: [
+        createDiagnosticsRecorder(events),
+        {
+          name: 'resource-diagnostics-test-plugin',
+          afterLoadEntry(args) {
+            resourceResults.push(args);
+          },
+          afterLoadManifest(args) {
+            manifestResults.push(args);
+          },
+        },
+      ],
     });
 
     const say = await mf.loadRemote<() => string>('@demo/main/say');
@@ -150,6 +163,34 @@ describe('loadRemote diagnostics', () => {
         }),
       ]),
     );
+    expect(resourceResults).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          resourceContext: expect.objectContaining({
+            resourceType: 'remoteEntry',
+          }),
+        }),
+      ]),
+    );
+    expect(manifestResults).toEqual([
+      expect.objectContaining({
+        manifestUrl:
+          'http://localhost:1111/resources/main/federation-manifest.json',
+        response: expect.any(Response),
+        moduleInfo: expect.objectContaining({
+          name: '@demo/main',
+        }),
+      }),
+    ]);
+    const remoteEntryResult = resourceResults.find(
+      (result) =>
+        (result.resourceContext as Record<string, unknown> | undefined)
+          ?.resourceType === 'remoteEntry',
+    );
+    expect(manifestResults[0]).not.toHaveProperty('httpStatus');
+    expect(manifestResults[0]).not.toHaveProperty('mimeType');
+    expect(remoteEntryResult).not.toHaveProperty('httpStatus');
+    expect(remoteEntryResult).not.toHaveProperty('mimeType');
   });
 
   it('emits the expose phase before a missing expose bubbles to loadRemote', async () => {

@@ -37,18 +37,6 @@ class RemoteRuntimeModule extends RuntimeModule {
     const idToRemoteMap: RemotesOptions['idToRemoteMap'] = {};
     const moduleIdToRemoteDataMapping: ModuleIdToRemoteDataMapping = {};
 
-    // let chunkReferences: Set<Chunk> = new Set();
-
-    // if (this.chunk && chunkGraph) {
-    //   const requirements = chunkGraph.getTreeRuntimeRequirements(this.chunk);
-    //   if (requirements.has('federation-entry-startup')) {
-    //     chunkReferences = this.chunk.getAllReferencedChunks();
-    //   } else {
-    //     // remote entry doesnt need federation startup, can have async chunk map only
-    //     chunkReferences = this.chunk.getAllAsyncChunks();
-    //   }
-    // }
-
     const allChunks = [
       ...Array.from(this.chunk?.getAllReferencedChunks() || []),
     ];

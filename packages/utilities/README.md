@@ -1,22 +1,24 @@
-# utils
+# @module-federation/utilities
 
-For warning： [`@module-federation/runtime`](https://module-federation.io/guide/basic/runtime/runtime.html) is recommended as a replacement
-
-This library was generated with [Nx](https://nx.dev).
+For warning: [`@module-federation/runtime`](https://module-federation.io/guide/basic/runtime/runtime.html) is recommended as a replacement.
 
 ## Building
 
-Run `nx build utils` to build the library.
+```bash
+pnpm --filter @module-federation/utilities run build
+```
 
 ## Running unit tests
 
-Run `nx test utils` to execute the unit tests via [Jest](https://jestjs.io).
+```bash
+pnpm --filter @module-federation/utilities run test
+```
 
 ## React utilities
 
 ---
 
-`FederatedBoundary`
+`FederationBoundary`
 
 A component wrapper that provides a fallback for safe imports if something were to fail when grabbing a module off of a remote host.
 
@@ -70,7 +72,7 @@ importRemote({
 );
 
 // --
-// If it's a ESM module (this is currently the default for NX):
+// If it's an ESM module:
 // --
 const Bar = lazy(() => importRemote({ url: 'http://localhost:3001', scope: 'Foo', module: 'Bar', esm: true }));
 

@@ -1,6 +1,25 @@
 import { ModuleFederationRuntimePlugin } from '@module-federation/runtime';
 import { matchRemoteWithNameAndExpose } from '@module-federation/runtime-core';
 
+function wrapCallableForChunkTracking<T extends (...args: any[]) => any>(
+  fn: T,
+  id: string,
+): T {
+  return new Proxy(fn, {
+    apply(_target, thisArg, args) {
+      globalThis.usedChunks.add(id);
+      return Reflect.apply(fn, thisArg, args);
+    },
+    construct(_target, args, newTarget) {
+      globalThis.usedChunks.add(id);
+      return Reflect.construct(fn, args, newTarget);
+    },
+    get(target, prop, receiver) {
+      return Reflect.get(target, prop, receiver);
+    },
+  });
+}
+
 export default function (): ModuleFederationRuntimePlugin {
   return {
     name: 'next-internal-plugin',
@@ -113,7 +132,7 @@ export default function (): ModuleFederationRuntimePlugin {
     afterResolve: function (args: any) {
       return args;
     },
-    onLoad: function (args: any) {
+    onLoad: async function (args: any) {
       const exposeModuleFactory = args.exposeModuleFactory;
       const exposeModule = args.exposeModule;
       const id = args.id;
@@ -128,60 +147,35 @@ export default function (): ModuleFederationRuntimePlugin {
           exposedModuleExports = moduleOrFactory;
         }
 
+        exposedModuleExports = await exposedModuleExports;
+
         const handler: ProxyHandler<any> = {
           get: function (target, prop, receiver) {
-            if (
-              target === exposedModuleExports &&
-              typeof exposedModuleExports[prop] === 'function'
-            ) {
-              return function (this: unknown) {
-                globalThis.usedChunks.add(id);
-                //eslint-disable-next-line
-                return exposedModuleExports[prop].apply(this, arguments);
-              };
+            const value = Reflect.get(target, prop, receiver);
+            if (typeof value === 'function') {
+              return wrapCallableForChunkTracking(value, id);
             }
-
-            const originalMethod = target[prop];
-            if (typeof originalMethod === 'function') {
-              const proxiedFunction = function (this: unknown) {
-                globalThis.usedChunks.add(id);
-                //eslint-disable-next-line
-                return originalMethod.apply(this, arguments);
-              };
-
-              Object.keys(originalMethod).forEach(function (prop) {
-                Object.defineProperty(proxiedFunction, prop, {
-                  value: originalMethod[prop],
-                  writable: true,
-                  enumerable: true,
-                  configurable: true,
-                });
-              });
-
-              return proxiedFunction;
-            }
-
-            return Reflect.get(target, prop, receiver);
+            return value;
           },
         };
 
         if (typeof exposedModuleExports === 'function') {
-          exposedModuleExports = new Proxy(exposedModuleExports, handler);
-
-          const staticProps = Object.getOwnPropertyNames(exposedModuleExports);
-          staticProps.forEach(function (prop) {
-            if (typeof exposedModuleExports[prop] === 'function') {
-              exposedModuleExports[prop] = new Proxy(
-                exposedModuleExports[prop],
-                handler,
-              );
-            }
-          });
+          exposedModuleExports = wrapCallableForChunkTracking(
+            exposedModuleExports,
+            id,
+          );
           return function () {
             return exposedModuleExports;
           };
-        } else {
-          exposedModuleExports = new Proxy(exposedModuleExports, handler);
+        }
+
+        exposedModuleExports = new Proxy(exposedModuleExports, handler);
+
+        if (exposeModuleFactory) {
+          const wrappedExports = exposedModuleExports;
+          return function () {
+            return wrappedExports;
+          };
         }
 
         return exposedModuleExports;

@@ -27,9 +27,19 @@ export type RemoteInfoOptionalVersion = {
 export type Remote = (RemoteWithEntry | RemoteWithVersion) & RemoteInfoCommon;
 
 export type LoadShareExtraOptions = {
+  from?: CallFrom;
   customShareInfo?: Partial<Shared>;
   resolver?: (sharedOptions: ShareInfos[string]) => Shared;
+  context?: SharedLoadContext;
 };
+
+export type SharedLoadTrigger = CallFrom | 'container-init';
+
+export interface SharedLoadContext {
+  trigger?: SharedLoadTrigger;
+  moduleId?: string | number;
+  chunkId?: string | number;
+}
 
 export interface RemoteInfo {
   alias?: string;
