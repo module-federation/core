@@ -36,21 +36,21 @@ A successful baseline run with TODOs is **not** production acceptance. When fixi
 a defect, remove its TODO and keep its desired-behavior assertion. These tests are
 an explicit development command; this change does not alter the CI workflows.
 
-| Case                 | What is exercised                                   | Current expectation                                                 |
-| -------------------- | --------------------------------------------------- | ------------------------------------------------------------------- |
-| plain                | Static multi-level consumers across emitted chunks  | Reacquired page remains stale: TODO                                 |
-| concat               | Same graph with module concatenation                | Page updates; saved function remains old                            |
-| parents              | Diagnostic JS plugin supplies missing parent edges  | Page updates; unrelated module executes once                        |
-| shared               | Real provider singleton consumed by host            | Host invalidation and shared strict identity: TODO                  |
-| all non-shared cases | Drop application CJS cache, then update again       | Dynamic reference refreshes; old adapter still called: TODO         |
-| Modern (opt-in)      | Real production resource plugin and one HTTP server | Recreate resource state to publish new manifest; PID/port unchanged |
+| Case                 | What is exercised                                   | Current expectation                                                                                      |
+| -------------------- | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| plain                | Static multi-level consumers across emitted chunks  | Reacquired page remains stale: TODO                                                                      |
+| concat               | Same graph with module concatenation                | Page updates; saved function remains old                                                                 |
+| parents              | Diagnostic JS plugin supplies missing parent edges  | Page updates; unrelated module executes once                                                             |
+| shared               | Real provider singleton consumed by host            | Host invalidation, shared strict identity and retained lazy dependency pass; parent closure remains TODO |
+| all non-shared cases | Drop application CJS cache, then update again       | Dynamic reference refreshes; old adapter still called: TODO                                              |
+| Modern (opt-in)      | Real production resource plugin and one HTTP server | Recreate resource state to publish new manifest; PID/port unchanged                                      |
 
 The `parents` plugin and manual page invalidation/hook rebinding in the fixture
 are diagnostic interventions, not the proposed production implementation. The
 fixture temporarily uses remove + register to exercise existing code; this does
 not specify atomic update semantics. No test here proves complete React streaming,
 HTTP remote transport, hydration compatibility, native ESM unloading, cyclic or
-multi-entry graph completeness, shared lazy dependency retention, or stable heap
+multi-entry graph completeness, general shared lazy dependency coverage, or stable heap
 usage. Those remain R1–R6 work.
 
 ## Cross-layer ownership
@@ -163,7 +163,12 @@ Thresholds are configurable and selected from R6 load measurements.
 
 ## Remaining stage gates
 
-R0 chooses the ownership and externally observable contracts above. R1 must prove
+R0 chooses the ownership and externally observable contracts above. The first R1
+fix separates host invalidation from provider cache retention, and covers shared
+identity plus a retained lazy dependency in real artifacts. It conservatively
+retains the provider execution cache while shared remains in use or loading; it
+does not claim selective provider GC. Parent closure and adapter disposal remain
+open. R1 must prove
 shared dependency retention and adapter disposal; R2 must prove stream termination;
 R3/R4 must implement Modern resource ownership and safe publication. None is marked
 implemented by this document. Arbitrary globals, unregistered tasks, native ESM

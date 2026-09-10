@@ -151,79 +151,105 @@ describe('clearCache', () => {
     expect((globalThis as any).remoteA).toBeUndefined();
   });
 
-  test('should retain a remote bundler runtime while another remote uses its shared module', async () => {
-    const { instance, webpackRequire } = createWebpackRequire();
-    const remoteEntryClear = jest.fn();
-    const previousFederation = (globalThis as any).__FEDERATION__;
-    const shared = {
-      from: 'remoteA',
-      loaded: true,
-      lib: () => ({ value: 'shared from remoteA' }),
-      useIn: ['remoteA', 'anotherRemote'],
-    };
+  test.each([false, true])(
+    'should invalidate host caches while preserving shared provider (loading: %s)',
+    async (loading) => {
+      const { instance, webpackRequire } = createWebpackRequire();
+      const remoteEntryClear = jest.fn();
+      const previousFederation = (globalThis as any).__FEDERATION__;
+      const shared = {
+        from: 'remoteA',
+        loaded: !loading,
+        loading: loading ? Promise.resolve() : undefined,
+        lib: loading ? undefined : () => ({ value: 'shared from remoteA' }),
+        useIn: ['remoteA', 'anotherRemote'],
+      };
 
-    instance.moduleCache.set('remoteA', {
-      remoteEntryExports: {
+      instance.moduleCache.set('remoteA', {
+        remoteEntryExports: {
+          __webpack_clear_cache__: remoteEntryClear,
+        },
+      });
+      (globalThis as any).remoteA = {
         __webpack_clear_cache__: remoteEntryClear,
-      },
-    });
-    (globalThis as any).remoteA = {
-      __webpack_clear_cache__: remoteEntryClear,
-    };
-    (globalThis as any).__FEDERATION__ = {
-      ...(previousFederation || {}),
-      __SHARE__: {
-        remoteA: {
-          default: {
-            'shared-from-remoteA': {
-              '1.0.0': shared,
+      };
+      (globalThis as any).__FEDERATION__ = {
+        ...(previousFederation || {}),
+        __SHARE__: {
+          remoteA: {
+            default: {
+              'shared-from-remoteA': {
+                '1.0.0': shared,
+              },
             },
           },
         },
-      },
-    };
-    webpackRequire.federation.bundlerRuntimeOptions.remotes.remoteInfos = {
-      remoteA: [
-        {
+      };
+      webpackRequire.federation.bundlerRuntimeOptions.remotes.remoteInfos = {
+        remoteA: [
+          {
+            name: 'remoteA',
+            entry: 'http://localhost:3001/remoteEntry.js',
+            entryGlobalName: 'remoteA',
+          },
+        ],
+      };
+      webpackRequire.remotesLoadingData = {
+        moduleIdToRemoteDataMapping: {
+          101: {
+            externalModuleId: 201,
+            remoteName: 'remoteA',
+          },
+        },
+        remoteKeyToRemoteModuleIds: {
+          remoteA: [101],
+        },
+        remoteKeyToExternalModuleIds: {
+          remoteA: [201],
+        },
+        remoteKeyToChunkIds: {
+          remoteA: [],
+        },
+      };
+
+      webpackRequire.remotesLoadingData.remoteModuleIdToConsumerModuleIds = {
+        101: [301],
+      };
+      webpackRequire.m[101] = () => null;
+      for (const id of [101, 201, 301, 302])
+        webpackRequire.c[id] = { exports: {} };
+      const previousWindow = globalThis.window;
+      const previousDocument = globalThis.document;
+      delete (globalThis as any).window;
+      delete (globalThis as any).document;
+      try {
+        await clearCache({
           name: 'remoteA',
-          entry: 'http://localhost:3001/remoteEntry.js',
-          entryGlobalName: 'remoteA',
-        },
-      ],
-    };
-    webpackRequire.remotesLoadingData = {
-      moduleIdToRemoteDataMapping: {
-        101: {
-          externalModuleId: 201,
-          remoteName: 'remoteA',
-        },
-      },
-      remoteKeyToRemoteModuleIds: {
-        remoteA: [101],
-      },
-      remoteKeyToExternalModuleIds: {
-        remoteA: [201],
-      },
-      remoteKeyToChunkIds: {
-        remoteA: [],
-      },
-    };
+          webpackRequire: webpackRequire as any,
+        });
 
-    try {
-      await clearCache({
-        name: 'remoteA',
-        webpackRequire: webpackRequire as any,
-      });
-
-      expect(remoteEntryClear).not.toHaveBeenCalled();
-      expect(instance.moduleCache.has('remoteA')).toBe(true);
-      expect((globalThis as any).remoteA).toBeDefined();
-      expect(shared.from).toBe('remoteA');
-    } finally {
-      (globalThis as any).__FEDERATION__ = previousFederation;
-      delete (globalThis as any).remoteA;
-    }
-  });
+        expect(remoteEntryClear).not.toHaveBeenCalled();
+        expect(instance.moduleCache.has('remoteA')).toBe(false);
+        expect(webpackRequire.m[101]).toBeUndefined();
+        expect(webpackRequire.c[101]).toBeUndefined();
+        expect(webpackRequire.c[201]).toBeUndefined();
+        expect(webpackRequire.c[301]).toBeUndefined();
+        expect(webpackRequire.c[302]).toBeDefined();
+        expect(
+          (globalThis as any).__FEDERATION__.__SHARE__.remoteA.default[
+            'shared-from-remoteA'
+          ]['1.0.0'],
+        ).toBe(shared);
+        expect((globalThis as any).remoteA).toBeDefined();
+        expect(shared.from).toBe('remoteA');
+      } finally {
+        (globalThis as any).__FEDERATION__ = previousFederation;
+        delete (globalThis as any).remoteA;
+        (globalThis as any).window = previousWindow;
+        (globalThis as any).document = previousDocument;
+      }
+    },
+  );
 
   test('should evict old caches before pending remote load settles', async () => {
     const { instance, webpackRequire } = createWebpackRequire();

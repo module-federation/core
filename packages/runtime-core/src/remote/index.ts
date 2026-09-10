@@ -796,55 +796,51 @@ export class RemoteHandler {
                 return ins.name === remoteInsId;
               }
             });
-          if (remoteInsIndex !== -1) {
-            const remoteIns =
-              CurrentGlobal.__FEDERATION__.__INSTANCES__[remoteInsIndex];
+          const remoteIns =
+            remoteInsIndex !== -1
+              ? CurrentGlobal.__FEDERATION__.__INSTANCES__[remoteInsIndex]
+              : undefined;
+          if (remoteIns) {
             remoteInsId = remoteIns.options.id || remoteInsId;
-            const globalShareScopeMap = getGlobalShareScope();
+          }
+          // Shared factories can outlive removal from the instance registry.
+          // Scan their ownership even when this provider was removed before.
+          const globalShareScopeMap = getGlobalShareScope();
 
-            let isAllSharedNotUsed = true;
-            const needDeleteKeys: Array<[string, string, string, string]> = [];
-            Object.keys(globalShareScopeMap).forEach((instId) => {
-              const shareScopeMap = globalShareScopeMap[instId];
-              shareScopeMap &&
-                Object.keys(shareScopeMap).forEach((shareScope) => {
-                  const shareScopeVal = shareScopeMap[shareScope];
-                  shareScopeVal &&
-                    Object.keys(shareScopeVal).forEach((shareName) => {
-                      const sharedPkgs = shareScopeVal[shareName];
-                      sharedPkgs &&
-                        Object.keys(sharedPkgs).forEach((shareVersion) => {
-                          const shared = sharedPkgs[shareVersion];
+          let isAllSharedNotUsed = true;
+          const needDeleteKeys: Array<[string, string, string, string]> = [];
+          Object.keys(globalShareScopeMap).forEach((instId) => {
+            const shareScopeMap = globalShareScopeMap[instId];
+            shareScopeMap &&
+              Object.keys(shareScopeMap).forEach((shareScope) => {
+                const shareScopeVal = shareScopeMap[shareScope];
+                shareScopeVal &&
+                  Object.keys(shareScopeVal).forEach((shareName) => {
+                    const sharedPkgs = shareScopeVal[shareName];
+                    sharedPkgs &&
+                      Object.keys(sharedPkgs).forEach((shareVersion) => {
+                        const shared = sharedPkgs[shareVersion];
+                        if (
+                          shared &&
+                          typeof shared === 'object' &&
+                          shared.from === remoteInfo.name
+                        ) {
+                          const hasExternalConsumer = shared.useIn.some(
+                            (usedHostName) => usedHostName !== remoteInfo.name,
+                          );
                           if (
-                            shared &&
-                            typeof shared === 'object' &&
-                            shared.from === remoteInfo.name
+                            shared.loaded ||
+                            shared.loading ||
+                            hasExternalConsumer
                           ) {
-                            const hasExternalConsumer = shared.useIn.some(
+                            shared.useIn = shared.useIn.filter(
                               (usedHostName) =>
                                 usedHostName !== remoteInfo.name,
                             );
-                            if (
-                              shared.loaded ||
-                              shared.loading ||
-                              hasExternalConsumer
-                            ) {
-                              shared.useIn = shared.useIn.filter(
-                                (usedHostName) =>
-                                  usedHostName !== remoteInfo.name,
-                              );
-                              if (shared.useIn.length) {
-                                isAllSharedNotUsed = false;
-                                preserveRemoteRuntime = true;
-                                shared.providerState = 1;
-                              } else {
-                                needDeleteKeys.push([
-                                  instId,
-                                  shareScope,
-                                  shareName,
-                                  shareVersion,
-                                ]);
-                              }
+                            if (shared.useIn.length || shared.loading) {
+                              isAllSharedNotUsed = false;
+                              preserveRemoteRuntime = true;
+                              shared.providerState = 1;
                             } else {
                               needDeleteKeys.push([
                                 instId,
@@ -853,23 +849,32 @@ export class RemoteHandler {
                                 shareVersion,
                               ]);
                             }
+                          } else {
+                            needDeleteKeys.push([
+                              instId,
+                              shareScope,
+                              shareName,
+                              shareVersion,
+                            ]);
                           }
-                        });
-                    });
-                });
-            });
+                        }
+                      });
+                  });
+              });
+          });
 
-            if (isAllSharedNotUsed) {
-              remoteIns.shareScopeMap = {};
-              delete globalShareScopeMap[remoteInsId];
-            }
-            needDeleteKeys.forEach(
-              ([insId, shareScope, shareName, shareVersion]) => {
-                delete globalShareScopeMap[insId]?.[shareScope]?.[shareName]?.[
-                  shareVersion
-                ];
-              },
-            );
+          if (isAllSharedNotUsed && remoteIns) {
+            remoteIns.shareScopeMap = {};
+            delete globalShareScopeMap[remoteInsId];
+          }
+          needDeleteKeys.forEach(
+            ([insId, shareScope, shareName, shareVersion]) => {
+              delete globalShareScopeMap[insId]?.[shareScope]?.[shareName]?.[
+                shareVersion
+              ];
+            },
+          );
+          if (remoteInsIndex !== -1) {
             CurrentGlobal.__FEDERATION__.__INSTANCES__.splice(
               remoteInsIndex,
               1,
@@ -877,10 +882,9 @@ export class RemoteHandler {
           }
 
           if (preserveRemoteRuntime) {
-            // The shared record retains its loaded lib. The entry module cache
-            // should not keep unrelated exposed modules reachable.
-            clearRemoteEntryCache(loadedModule.remoteEntryExports);
-            clearRemoteEntryCache(loadedModule.lib);
+            // Keeping a shared factory without its execution cache can create a
+            // second singleton or break its later lazy dependencies. Until the
+            // provider supports safe selective cleanup, retain its runtime.
             host.moduleCache.delete(remote.name);
             return;
           }
