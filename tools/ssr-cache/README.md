@@ -38,16 +38,16 @@ A successful baseline run with TODOs is **not** production acceptance. When fixi
 a defect, remove its TODO and keep its desired-behavior assertion. These tests are
 an explicit development command; this change does not alter the CI workflows.
 
-| Case                 | What is exercised                                   | Current expectation                                                                                      |
-| -------------------- | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| plain                | Static multi-level consumers across emitted chunks  | Reacquired page remains stale: TODO                                                                      |
-| concat               | Same graph with module concatenation                | Page updates; saved function remains old                                                                 |
-| parents              | Diagnostic JS plugin supplies missing parent edges  | Page updates; unrelated module executes once                                                             |
-| shared               | Real provider singleton consumed by host            | Host invalidation, shared strict identity and retained lazy dependency pass; parent closure remains TODO |
-| all non-shared cases | Drop application CJS cache, then update again       | Dynamic reference refreshes; old adapter still called: TODO                                              |
-| Modern (opt-in)      | Real production resource plugin and one HTTP server | Recreate resource state to publish new manifest; PID/port unchanged                                      |
+| Case                 | What is exercised                                   | Current expectation                                                            |
+| -------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------ |
+| plain                | Static multi-level consumers across emitted chunks  | Page updates with the companion Rspack parent metadata                         |
+| concat               | Same graph with module concatenation                | Page updates; saved function remains old                                       |
+| parents              | Diagnostic JS plugin supplies missing parent edges  | Page updates; unrelated module executes once                                   |
+| shared               | Real provider singleton consumed by host            | Host invalidation, shared strict identity and retained lazy dependency pass    |
+| all non-shared cases | Drop application CJS cache, then update again       | Dynamic reference refreshes; disposed adapter is not called on the next update |
+| Modern (opt-in)      | Real production resource plugin and one HTTP server | Recreate resource state to publish new manifest; PID/port unchanged            |
 
-The `parents` plugin and manual page invalidation/hook rebinding in the fixture
+The `parents` plugin and manual page invalidation in the fixture
 are diagnostic interventions, not the proposed production implementation. The
 fixture temporarily uses remove + register to exercise existing code; this does
 not specify atomic update semantics. No test here proves complete React streaming,
@@ -165,16 +165,13 @@ Thresholds are configurable and selected from R6 load measurements.
 
 ## Remaining stage gates
 
-R0 chooses the ownership and externally observable contracts above. The first R1
-fix separates host invalidation from provider cache retention, and covers shared
-identity plus a retained lazy dependency in real artifacts. It conservatively
-retains the provider execution cache while shared remains in use or loading; it
-does not claim selective provider GC. Parent closure and adapter disposal remain
-open. R1 must prove
-shared dependency retention and adapter disposal; R2 must prove stream termination;
-R3/R4 must implement Modern resource ownership and safe publication. None is marked
-implemented by this document. Arbitrary globals, unregistered tasks, native ESM
-registry eviction and deployment-owned worker rotation remain explicit boundaries.
+R0 chooses the ownership and externally observable contracts above. Shared
+identity, selective provider reclamation, static parent closure and explicit
+adapter disposal now pass the local artifact baseline. This does not implement
+Modern admission/drain or its application-generation owner. R2 must establish
+stream termination; R3/R4 must integrate resource ownership and safe publication.
+Arbitrary globals, unregistered tasks, native ESM registry eviction and
+deployment-owned worker rotation remain explicit boundaries.
 
 ## R1 selective provider cleanup and transitive parents
 
@@ -202,7 +199,7 @@ SSR_CACHE_EXPECT_NATIVE=1 SSR_CACHE_RSPACK_ENTRY=/absolute/path/to/rspack/packag
 
 This mode removes the parent-closure TODOs and requires non-shared payload GC,
 shared strict identity and retained lazy dependency identity. The three stale
-adapter TODOs remain. Selective cleanup is always required. The installed older canary predates this
+adapter assertions now pass with explicit disposal before application rebuild. Selective cleanup is always required. The installed older canary predates this
 capability and is not a supported validation target for shared cleanup.
 
 For the existing full Modern SSR CI job, use the Node 24 resolver hook so both
@@ -216,4 +213,44 @@ Verify the provider container exports the new method in the emitted artifact;
 merely finding its name inside bundled MF runtime call sites is insufficient.
 The Modern shared-cache spec now passes with this compiler. The separate
 remote-cache runtime-capture assertion still intermittently fails; the full CI
-job is not accepted as green. Adapter lifetime and R2–R6 are still open.
+job is not accepted as green. The explicit adapter lifecycle below closes the stale-binding baseline; Modern
+ownership and R2–R6 remain open.
+
+## R1 adapter lifecycle
+
+`installClearCache({ webpackRequire, instance })` returns an idempotent disposer
+when an instance is available. The same handle is also exposed as
+`webpackRequire.federation.disposeClearCache`. Repeated installation of the same
+live bundler/instance returns the same handle; attempting to change its owner
+without detaching fails. Bootstrap still installs the adapter automatically.
+
+The application owner must drain old work before calling the disposer, then
+release its old application references, rebuild and validate before publication.
+Disposal rejects while known cache cleanup/barriers are pending. It does not
+claim to drain arbitrary renders, loaders or business tasks. Saved clear entry
+points reject after disposal; saved idempotent disposers do not retain a bundler.
+
+A symbol-keyed registry on each MF instance coordinates every attached bundler,
+including adapters installed by separate bundled copies. The removal plugin
+captures no bundler and dispatches to that instance's live bindings. It starts
+all cleanups and waits for all outcomes before propagating a failure. Removal of
+one binding does not detach another owner. The temporary force-registration path
+also updates all live mappings; its API replacement remains a later task.
+
+Instance load/register wrappers and the createScript listener are installed once
+per registry. The last detach restores exact original methods/descriptors and
+removes its listener. A subsequently installed third-party wrapper is preserved;
+an old empty registry remains a pass-through if such a wrapper still references
+it. The unused moduleCache.set generation marker/wrapper was removed.
+
+The baseline now uses the production disposer before dropping CJS cache. It no
+longer manually replaces the removeRemote plugin. With the companion compiler
+and Modern entry, strict mode passes all 23 checks with zero TODOs/skips. These
+include repeated installation, cross-copy/multiple-binding unit coverage and a
+separate WeakRef check retaining the disposer and saved clear function.
+
+The WeakRef test proves adapter-owned references are released, not that all
+application bundles are collectable: the retained MF control plane, active shared
+providers and business exports may still reference bundled code. Modern must
+supply application ownership and request/stream drain; production serve,
+long-running memory stability and end-to-end recovery remain later stage gates.

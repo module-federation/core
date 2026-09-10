@@ -16,6 +16,7 @@ function createWebpackRequire() {
       lifecycle: {
         createScript: {
           on: jest.fn(),
+          remove: jest.fn(),
         },
       },
     },
@@ -81,13 +82,12 @@ describe('clearCache', () => {
         cleared: true as const,
       }),
     );
+    installClearCache({ webpackRequire: webpackRequire as any });
     webpackRequire.federation.clearCache = clearCache;
 
-    await createClearCacheRuntimePlugin({
-      webpackRequire: webpackRequire as any,
-    }).removeRemote?.({
+    await createClearCacheRuntimePlugin().removeRemote?.({
       remote: { name: 'remoteA' },
-      origin: {},
+      origin: webpackRequire.federation.instance,
     } as any);
 
     expect(clearCache).toHaveBeenCalledWith({ name: 'remoteA' });
@@ -357,4 +357,225 @@ describe('clearCache', () => {
       }
     }
   });
+});
+
+describe('cache adapter lifecycle', () => {
+  test('attaches once and restores exact methods and its listener on disposal', () => {
+    const { instance, webpackRequire } = createWebpackRequire();
+    const originalLoad = instance.loadRemote;
+    const originalRegister = instance.registerRemotes;
+    const originalSet = instance.moduleCache.set;
+    const dispose = installClearCache({
+      webpackRequire: webpackRequire as any,
+    })!;
+    const load = instance.loadRemote;
+    expect(installClearCache({ webpackRequire: webpackRequire as any })).toBe(
+      dispose,
+    );
+    expect(instance.loadRemote).toBe(load);
+    const hook = instance.loaderHook.lifecycle.createScript;
+    expect(hook.on).toHaveBeenCalledTimes(1);
+    dispose();
+    dispose();
+    expect(instance.loadRemote).toBe(originalLoad);
+    expect(instance.registerRemotes).toBe(originalRegister);
+    expect(instance.moduleCache.set).toBe(originalSet);
+    expect(hook.remove).toHaveBeenCalledTimes(1);
+    expect(hook.remove).toHaveBeenCalledWith(hook.on.mock.calls[0][0]);
+    expect(Object.hasOwn(webpackRequire.federation, 'clearCache')).toBe(false);
+    expect(Object.hasOwn(webpackRequire.federation, 'disposeClearCache')).toBe(
+      false,
+    );
+  });
+
+  test('routes removal to every live binding, including a different bundled copy', async () => {
+    const { instance, webpackRequire: first } = createWebpackRequire();
+    const { webpackRequire: second } = createWebpackRequire();
+    second.federation.instance = instance;
+    const disposeFirst = installClearCache({ webpackRequire: first as any })!;
+    const wrappedLoad = instance.loadRemote;
+    let other: typeof import('../src/clearCache');
+    jest.isolateModules(() => {
+      other = require('../src/clearCache');
+    });
+    expect(other!.installClearCache({ webpackRequire: first as any })).toBe(
+      disposeFirst,
+    );
+    const disposeSecond = other!.installClearCache({
+      webpackRequire: second as any,
+    })!;
+    expect(instance.loadRemote).toBe(wrappedLoad);
+    const firstClear = jest.fn(async () => ({
+      name: 'remoteA',
+      cleared: true as const,
+    }));
+    const secondClear = jest.fn(async () => ({
+      name: 'remoteA',
+      cleared: true as const,
+    }));
+    first.federation.clearCache = firstClear;
+    second.federation.clearCache = secondClear;
+    const plugin = createClearCacheRuntimePlugin();
+    await plugin.removeRemote({
+      origin: instance,
+      remote: { name: 'remoteA' },
+    });
+    expect(firstClear).toHaveBeenCalledTimes(1);
+    expect(secondClear).toHaveBeenCalledTimes(1);
+    disposeFirst();
+    await plugin.removeRemote({
+      origin: instance,
+      remote: { name: 'remoteA' },
+    });
+    expect(firstClear).toHaveBeenCalledTimes(1);
+    expect(secondClear).toHaveBeenCalledTimes(2);
+    expect(instance.loadRemote).toBe(wrappedLoad);
+    disposeSecond();
+    await plugin.removeRemote({
+      origin: instance,
+      remote: { name: 'remoteA' },
+    });
+    expect(secondClear).toHaveBeenCalledTimes(2);
+  });
+
+  test('preserves later third-party wrappers without reviving a disposed registry', async () => {
+    const { instance, webpackRequire } = createWebpackRequire();
+    const original = instance.loadRemote;
+    const dispose = installClearCache({
+      webpackRequire: webpackRequire as any,
+    })!;
+    const ours = instance.loadRemote;
+    const thirdParty = jest.fn((...args: any[]) => (ours as any)(...args));
+    instance.loadRemote = thirdParty;
+    dispose();
+    expect(instance.loadRemote).toBe(thirdParty);
+    const again = installClearCache({ webpackRequire: webpackRequire as any })!;
+    await instance.loadRemote('remoteA/X', {});
+    expect(original).toHaveBeenCalledTimes(1);
+    expect(thirdParty).toHaveBeenCalledTimes(1);
+    again();
+    expect(instance.loadRemote).toBe(thirdParty);
+    await instance.loadRemote('remoteA/Y', {});
+    expect(original).toHaveBeenCalledTimes(2);
+  });
+
+  test('rejects disposal during cleanup and rejects saved entry points after disposal', async () => {
+    const { webpackRequire } = createWebpackRequire();
+    const dispose = installClearCache({
+      webpackRequire: webpackRequire as any,
+    })!;
+    const clear = webpackRequire.federation.clearCache!;
+    const pending = clear({ name: 'remoteA' });
+    expect(dispose).toThrow('cleanup is pending');
+    await pending;
+    dispose();
+    await expect(clear({ name: 'remoteA' })).rejects.toThrow('detached');
+  });
+});
+
+describe('cache adapter ownership and removal coordination', () => {
+  test('rejects changing the owner of a live binding', () => {
+    const { webpackRequire } = createWebpackRequire();
+    const dispose = installClearCache({
+      webpackRequire: webpackRequire as any,
+    })!;
+    const { instance: other } = createWebpackRequire();
+    expect(() =>
+      installClearCache({
+        webpackRequire: webpackRequire as any,
+        instance: other as any,
+      }),
+    ).toThrow('another MF instance');
+    dispose();
+  });
+
+  test('starts every live cleanup and waits for all outcomes before rejecting', async () => {
+    const { instance, webpackRequire: first } = createWebpackRequire();
+    const { webpackRequire: second } = createWebpackRequire();
+    second.federation.instance = instance;
+    const disposeFirst = installClearCache({ webpackRequire: first as any })!;
+    const disposeSecond = installClearCache({ webpackRequire: second as any })!;
+    const deferred = createDeferred();
+    const error = new Error('first cleanup failed');
+    first.federation.clearCache = jest.fn(async () => {
+      throw error;
+    });
+    second.federation.clearCache = jest.fn(() => deferred.promise as any);
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    try {
+      const pending = createClearCacheRuntimePlugin().removeRemote({
+        origin: instance,
+        remote: { name: 'remoteA' },
+      });
+      const observed = expect(pending).rejects.toBe(error);
+      let settled = false;
+      pending.then(
+        () => {
+          settled = true;
+        },
+        () => {
+          settled = true;
+        },
+      );
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(first.federation.clearCache).toHaveBeenCalledTimes(1);
+      expect(second.federation.clearCache).toHaveBeenCalledTimes(1);
+      expect(settled).toBe(false);
+      deferred.resolve();
+      await observed;
+    } finally {
+      warn.mockRestore();
+      disposeFirst();
+      disposeSecond();
+    }
+  });
+});
+
+test('force registration updates every attached bundler once and leaves detached mappings alone', async () => {
+  const { instance, webpackRequire: first } = createWebpackRequire();
+  const { webpackRequire: second } = createWebpackRequire();
+  second.federation.instance = instance;
+  const remote = {
+    name: 'remoteA',
+    entry: 'https://example.test/old.js',
+    type: 'global',
+  };
+  instance.options.remotes.push(remote as never);
+  for (const binding of [first, second]) {
+    (
+      binding.federation.bundlerRuntimeOptions.remotes.remoteInfos as any
+    ).remoteA = [{ ...remote }];
+  }
+  const disposeFirst = installClearCache({ webpackRequire: first as any })!;
+  const disposeSecond = installClearCache({ webpackRequire: second as any })!;
+  try {
+    const entry = 'https://example.test/new.js';
+    await (instance.registerRemotes as any)([{ ...remote, entry }], {
+      force: true,
+    });
+    expect(instance.options.remotes).toHaveLength(1);
+    for (const binding of [first, second])
+      expect(
+        (binding.federation.bundlerRuntimeOptions.remotes.remoteInfos as any)
+          .remoteA[0].entry,
+      ).toBe(entry);
+    disposeFirst();
+    const finalEntry = 'https://example.test/final.js';
+    await (instance.registerRemotes as any)(
+      [{ ...remote, entry: finalEntry }],
+      { force: true },
+    );
+    expect(
+      (first.federation.bundlerRuntimeOptions.remotes.remoteInfos as any)
+        .remoteA[0].entry,
+    ).toBe(entry);
+    expect(
+      (second.federation.bundlerRuntimeOptions.remotes.remoteInfos as any)
+        .remoteA[0].entry,
+    ).toBe(finalEntry);
+  } finally {
+    disposeFirst();
+    disposeSecond();
+  }
 });
