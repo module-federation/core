@@ -389,6 +389,7 @@ describe('ModuleFederation', () => {
     const entry =
       'http://localhost:1111/resources/register-remotes/app1/federation-remote-entry.js';
     const remoteEntryClear = rs.fn();
+    const selectiveClear = rs.fn();
     const shared: any = {
       version: '1.0.0',
       from: '@register-remotes/app1',
@@ -433,10 +434,12 @@ describe('ModuleFederation', () => {
         get: rs.fn(),
         init: rs.fn(),
         __webpack_clear_cache__: remoteEntryClear,
+        __webpack_clear_exposed_cache__: selectiveClear,
       },
     } as any);
     (globalThis as any).app1 = {
       __webpack_clear_cache__: remoteEntryClear,
+      __webpack_clear_exposed_cache__: selectiveClear,
     };
     if (registered)
       Global.__FEDERATION__.__INSTANCES__.push({
@@ -459,6 +462,7 @@ describe('ModuleFederation', () => {
 
       expect(FM.options.remotes).toHaveLength(0);
       expect(remoteEntryClear).not.toHaveBeenCalled();
+      expect(selectiveClear).toHaveBeenCalledTimes(2);
       expect(FM.moduleCache.has('@register-remotes/app1')).toBe(false);
       expect((globalThis as any).app1).toBeDefined();
       expect(shared.from).toBe('@register-remotes/app1');

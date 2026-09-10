@@ -565,13 +565,22 @@ const createClearSnapshot = (
   };
 };
 
-const cleanupRemoteEntryInternalCache = (remoteEntryExports: unknown) => {
-  const clear = (
-    remoteEntryExports as
-      | { __webpack_clear_cache__?: () => void }
-      | null
-      | undefined
-  )?.__webpack_clear_cache__;
+const cleanupRemoteEntryInternalCache = (
+  remoteEntryExports: unknown,
+  preserveShared = false,
+) => {
+  const entry = remoteEntryExports as
+    | {
+        __webpack_clear_cache__?: () => void;
+        __webpack_clear_exposed_cache__?: () => void;
+      }
+    | null
+    | undefined;
+  if (preserveShared) {
+    entry?.__webpack_clear_exposed_cache__!();
+    return;
+  }
+  const clear = entry?.__webpack_clear_cache__;
   if (typeof clear === 'function') {
     clear();
   }
@@ -630,17 +639,19 @@ const cleanupRemoteRuntimeCache = (
     const module = instance.moduleCache?.get(remoteName) as
       | Record<string, unknown>
       | undefined;
-    if (!preserveProvider) {
-      cleanupRemoteEntryInternalCache(module?.remoteEntryExports);
-      cleanupRemoteEntryInternalCache(module?.lib);
-    }
+    cleanupRemoteEntryInternalCache(
+      module?.remoteEntryExports,
+      preserveProvider,
+    );
+    cleanupRemoteEntryInternalCache(module?.lib, preserveProvider);
     instance.moduleCache?.delete(remoteName);
   }
-  if (!preserveProvider) {
-    for (const remoteInfo of target.remoteInfos) {
-      for (const globalKey of getRemoteEntryGlobalKeys(remoteInfo)) {
-        cleanupRemoteEntryInternalCache((globalThis as any)[globalKey]);
-      }
+  for (const remoteInfo of target.remoteInfos) {
+    for (const globalKey of getRemoteEntryGlobalKeys(remoteInfo)) {
+      cleanupRemoteEntryInternalCache(
+        (globalThis as any)[globalKey],
+        preserveProvider,
+      );
     }
   }
   const idToRemoteMap = instance.remoteHandler?.idToRemoteMap;

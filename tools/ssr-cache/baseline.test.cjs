@@ -7,19 +7,23 @@ const { spawnSync } = require('node:child_process');
 
 // Each case owns a process: MF globals must not leak between compilations.
 function run(script, directory, flags = {}) {
-  const child = spawnSync(process.execPath, [path.join(__dirname, script)], {
-    env: {
-      ...process.env,
-      PARENTS: '0',
-      SHARED: '0',
-      CONCAT: '0',
-      ...flags,
-      SSR_CACHE_CASE_DIR: directory,
+  const child = spawnSync(
+    process.execPath,
+    ['--expose-gc', path.join(__dirname, script)],
+    {
+      env: {
+        ...process.env,
+        PARENTS: '0',
+        SHARED: '0',
+        CONCAT: '0',
+        ...flags,
+        SSR_CACHE_CASE_DIR: directory,
+      },
+      timeout: 120_000,
+      encoding: 'utf8',
+      maxBuffer: 8 * 1024 * 1024,
     },
-    timeout: 120_000,
-    encoding: 'utf8',
-    maxBuffer: 8 * 1024 * 1024,
-  });
+  );
   assert.ifError(child.error);
   assert.equal(child.status, 0, child.stderr + child.stdout);
 }
@@ -49,6 +53,16 @@ for (const [variant, flags] of Object.entries({
   concat: { CONCAT: '1' },
   parents: { PARENTS: '1' },
   shared: { SHARED: '1' },
+  ...(process.env.SSR_CACHE_EXPECT_NATIVE === '1'
+    ? {
+        'shared-concat': { SHARED: '1', CONCAT: '1' },
+        'shared-numeric': {
+          SHARED: '1',
+          MODULE_IDS: 'deterministic',
+          MINIMIZE: '1',
+        },
+      }
+    : {}),
 })) {
   test(`real Rspack artifacts: ${variant}`, async (t) => {
     const directory = fs.realpathSync(
@@ -78,7 +92,11 @@ for (const [variant, flags] of Object.entries({
         'unrelated exports retain identity',
       );
       assert.equal(result.static.executions.other, 1);
-      if (variant === 'plain' || variant === 'shared') {
+      if (
+        (variant === 'plain' || variant === 'shared') &&
+        !result.completeParents &&
+        process.env.SSR_CACHE_EXPECT_NATIVE !== '1'
+      ) {
         await knownFailure(t, 'reacquiring a static page returns v2', () =>
           assert.equal(result.static.reimport, 'v2'),
         );
@@ -91,12 +109,16 @@ for (const [variant, flags] of Object.entries({
           assert.equal(result.rebuild.afterRebindingHook.newClearCalls, 1);
         }
       }
-      if (variant === 'shared') {
+      if (flags.SHARED === '1') {
+        assert.equal(result.shared.selective, true);
         await t.test('shared retention does not skip host invalidation', () =>
           assert.equal(result.static.withPageInvalidated, 'v2'),
         );
         await t.test('consumed shared export retains strict identity', () =>
           assert.equal(result.shared.sameObject, true),
+        );
+        await t.test('unshared provider payload can be collected', () =>
+          assert.equal(result.shared.payloadCollected, true),
         );
         await t.test(
           'retained shared lazy dependency keeps identity after removal',

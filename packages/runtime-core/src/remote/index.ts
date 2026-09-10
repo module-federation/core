@@ -883,8 +883,12 @@ export class RemoteHandler {
 
           if (preserveRemoteRuntime) {
             // Keeping a shared factory without its execution cache can create a
-            // second singleton or break its later lazy dependencies. Until the
-            // provider supports safe selective cleanup, retain its runtime.
+            // second singleton or break its later lazy dependencies. Retain
+            // the shared closure and clear unrelated execution caches.
+            loadedModule.remoteEntryExports?.__webpack_clear_exposed_cache__!();
+            loadedModule.lib?.__webpack_clear_exposed_cache__!();
+            (CurrentGlobal[key] as RemoteEntryExports | undefined)
+              ?.__webpack_clear_exposed_cache__!();
             host.moduleCache.delete(remote.name);
             return;
           }

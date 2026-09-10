@@ -151,11 +151,12 @@ describe('clearCache', () => {
     expect((globalThis as any).remoteA).toBeUndefined();
   });
 
-  test.each([false, true])(
-    'should invalidate host caches while preserving shared provider (loading: %s)',
-    async (loading) => {
+  test.each([{ loading: false }, { loading: true }])(
+    'should invalidate host caches while preserving shared provider: %j',
+    async ({ loading }) => {
       const { instance, webpackRequire } = createWebpackRequire();
       const remoteEntryClear = jest.fn();
+      const selectiveClear = jest.fn();
       const previousFederation = (globalThis as any).__FEDERATION__;
       const shared = {
         from: 'remoteA',
@@ -168,10 +169,12 @@ describe('clearCache', () => {
       instance.moduleCache.set('remoteA', {
         remoteEntryExports: {
           __webpack_clear_cache__: remoteEntryClear,
+          __webpack_clear_exposed_cache__: selectiveClear,
         },
       });
       (globalThis as any).remoteA = {
         __webpack_clear_cache__: remoteEntryClear,
+        __webpack_clear_exposed_cache__: selectiveClear,
       };
       (globalThis as any).__FEDERATION__ = {
         ...(previousFederation || {}),
@@ -229,6 +232,7 @@ describe('clearCache', () => {
         });
 
         expect(remoteEntryClear).not.toHaveBeenCalled();
+        expect(selectiveClear).toHaveBeenCalled();
         expect(instance.moduleCache.has('remoteA')).toBe(false);
         expect(webpackRequire.m[101]).toBeUndefined();
         expect(webpackRequire.c[101]).toBeUndefined();
