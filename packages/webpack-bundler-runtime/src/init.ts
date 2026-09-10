@@ -137,7 +137,7 @@ export function init({ webpackRequire }: { webpackRequire: WebpackRequire }) {
     plugins.push(treeShakingSharePlugin());
   }
   const plugins = (initOptions.plugins ||= []);
-  plugins.push(createClearCacheRuntimePlugin({ webpackRequire }));
+  plugins.push(createClearCacheRuntimePlugin());
 
   const instance = runtime!.init(initOptions);
   installClearCache({ webpackRequire, instance });

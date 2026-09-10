@@ -214,3 +214,51 @@ The full Modern SSR CI rerun passes both remote-cache and shared-cache specs.
 The previously recorded capture failure did not reproduce; this correction does
 not claim to fix its intermittent cause. Changed-file Prettier and
 `git diff --check` pass. Adapter lifecycle TODOs remain open.
+
+## R1 adapter lifecycle — 2026-09-10
+
+Core base: `3b53e9619` (merged #5051). The adapter is explicitly disposed before
+application CJS cache is dropped; no diagnostic replacement of the runtime plugin
+is used. Actual Modern request draining and rebuilding remain framework work.
+
+Commands executed:
+
+```sh
+pnpm exec turbo run build --filter=@module-federation/runtime-tools
+pnpm --filter @module-federation/webpack-bundler-runtime run test
+SSR_CACHE_STRICT=1 SSR_CACHE_EXPECT_NATIVE=1 SSR_CACHE_RSPACK_ENTRY=/Users/bytedance/outter/rspack/packages/rspack/dist/index.js SSR_CACHE_MODERN_ENTRY=/Users/bytedance/work/modern.js/packages/server/core/dist/cjs/adapters/node/index.js node --test tools/ssr-cache/baseline.test.cjs
+SSR_CACHE_RSPACK_ENTRY=/Users/bytedance/outter/rspack/packages/rspack/dist/index.js NODE_OPTIONS="--require=$PWD/tools/ssr-cache/local-rspack-hook.cjs" TURBO_ENV_MODE=loose pnpm run ci:local --only=e2e-modern-ssr
+pnpm exec prettier --check .
+pnpm exec prettier --check packages/webpack-bundler-runtime/src/clearCache.ts packages/webpack-bundler-runtime/src/init.ts packages/webpack-bundler-runtime/src/types.ts packages/webpack-bundler-runtime/__tests__/clearCache.spec.ts tools/ssr-cache .changeset/dispose-bundler-cache-adapters.md
+python3 .codex/skills/changeset-pr/scripts/run_changeset_status.py --output /tmp/mf-adapter-changeset.json
+git diff --check
+```
+
+- Build: 6/6 tasks successful. An intermediate const/let edit error was corrected
+  before final build/test runs. Full bundler suite: 116/116 tests, 10 suites.
+- Strict native/Modern artifact baseline: **23/23 pass, no TODOs, skips or
+  failures**. The three previous stale-adapter assertions now pass for plain,
+  concatenated and diagnostic-parent variants. Shared identity/GC continues to
+  pass. A new child-process WeakRef test retains the disposer and saved clear
+  function while proving the disposed adapter no longer retains its runtime.
+- Unit coverage includes repeated attach/dispose, exact method restoration,
+  listener removal, separate bundled copies, multiple owners, preserving later
+  third-party wrappers, pending-cleanup detach rejection, starting all live
+  cleanups and waiting for errors, and updating only live registration mappings.
+- Full Modern SSR CI passes both existing remote-cache and shared-cache specs.
+  The emitted host was checked for the final all-binding cleanup and request-key
+  filtering logic. Earlier capture instability did not reproduce and is not
+  claimed fixed. Existing React/Helmet warnings remain.
+- Changed-file formatting, changeset planning and diff checks pass. Full-repo
+  Prettier still fails on 683 pre-existing/generated files. The new changeset
+  lists only webpack-bundler-runtime; fixed groups may broaden the release plan.
+- No Rust/compiler change in this increment, so native Rspack suites were not
+  repeated. Runtime-core sources are unchanged; its standalone suite was not
+  repeated. Other CI jobs were skipped in favor of the affected package's full
+  tests and Modern SSR integration. No package publication was performed.
+
+The GC check concerns adapter-owned references, not complete collection of an
+arbitrary old application bundle. Persistent MF instances, shared providers and
+saved business exports can still retain bundled code. Callers must drain work
+before disposal. Actual Modern production serve, stream/abort, long-running heap
+stability and rebuild recovery remain later acceptance gates.

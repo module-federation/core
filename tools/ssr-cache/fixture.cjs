@@ -348,6 +348,10 @@ async function main() {
   // Same process: drop all emitted CJS modules then reacquire the application.
   const oldInstance = host.req.federation.instance;
   const oldRequire = host.req;
+  const disposeOld = oldRequire.federation.disposeClearCache;
+  assert.equal(typeof disposeOld, 'function');
+  disposeOld();
+  disposeOld();
   for (const key of Object.keys(require.cache))
     if (key.startsWith(out + path.sep)) delete require.cache[key];
   host = require(path.join(out, 'host.cjs'));
@@ -393,33 +397,6 @@ async function main() {
   assert.equal(result.dynamic.reimport, 'v1');
   assert.equal(result.rebuild.dynamicResult, 'v2');
 
-  if (process.env.PARENTS === '1') {
-    // Diagnostic intervention only: replace stale removal callback with current bundler.
-    const current = host.req.federation.instance;
-    current.remoteHandler.hooks.removePlugin(
-      'bundler-runtime-clear-cache-plugin',
-    );
-    current.remoteHandler.hooks.applyPlugin({
-      name: 'bundler-runtime-clear-cache-plugin',
-      removeRemote({ remote }) {
-        return host.req.federation.clearCache({
-          name: remote.alias || remote.name,
-        });
-      },
-    });
-    const next = {
-      ...current.options.remotes.find(
-        (r) => r.alias === 'remote' || r.name === 'remote',
-      ),
-    };
-    await current.removeRemote('remote');
-    current.registerRemotes([next]);
-    result.rebuild.afterRebindingHook = {
-      oldClearCalls,
-      newClearCalls,
-      result: (await host.page())(),
-    };
-  }
   fs.writeFileSync(
     path.join(root, 'result.json'),
     JSON.stringify(result, null, 2),

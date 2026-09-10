@@ -105,8 +105,6 @@ for (const [variant, flags] of Object.entries({
         if (variant === 'parents') {
           for (const module of ['page', 'middle', 'leaf'])
             assert.equal(result.static.executions[module], 2);
-          assert.equal(result.rebuild.afterRebindingHook.result, 'v1');
-          assert.equal(result.rebuild.afterRebindingHook.newClearCalls, 1);
         }
       }
       if (flags.SHARED === '1') {
@@ -134,15 +132,11 @@ for (const [variant, flags] of Object.entries({
         assert.equal(result.rebuild.dynamicResult, 'v2');
         assert.equal(result.rebuild.newBundler, true);
         assert.equal(result.rebuild.hostChanged, false);
-        await knownFailure(
-          t,
-          'second update clears the current bundler',
-          () => {
-            assert.equal(result.rebuild.secondUpdate.oldClearCalls, 0);
-            assert.equal(result.rebuild.secondUpdate.newClearCalls, 1);
-            assert.equal(result.rebuild.secondUpdate.result, 'v1');
-          },
-        );
+        await t.test('second update clears the current bundler', () => {
+          assert.equal(result.rebuild.secondUpdate.oldClearCalls, 0);
+          assert.equal(result.rebuild.secondUpdate.newClearCalls, 1);
+          assert.equal(result.rebuild.secondUpdate.result, 'v1');
+        });
       }
       if (variant === 'plain') {
         await t.test(
@@ -176,3 +170,7 @@ for (const [variant, flags] of Object.entries({
     }
   });
 }
+
+test('disposed adapter releases its runtime with handles retained', () => {
+  run('adapter-fixture.cjs', process.cwd());
+});

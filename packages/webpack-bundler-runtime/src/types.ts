@@ -280,9 +280,13 @@ export interface Federation {
     clearCache: (
       options: ClearCacheRuntimeOptions,
     ) => Promise<ClearCacheResult>;
-    installClearCache: (options: InstallClearCacheOptions) => void;
+    installClearCache: (
+      options: InstallClearCacheOptions,
+    ) => (() => void) | undefined;
   };
   clearCache?: (options: ClearCacheOptions) => Promise<ClearCacheResult>;
+  /** Detach this bundler after draining application work. Idempotent. */
+  disposeClearCache?: () => void;
   bundlerRuntimeOptions: {
     remotes?: Exclude<RemotesOptions, 'chunkId' | 'promises'> & {
       remoteInfos?: RemoteInfos;

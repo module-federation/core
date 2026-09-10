@@ -61,10 +61,10 @@ type ClearCacheState = {
   remoteGenerations: Record<string, number>;
   remoteEntryUrlGenerations: Record<string, number>;
   staleRemoteCleanups: Record<string, { run: () => void; pending: number }>;
-  installed?: boolean;
+  dispose?: () => void;
 };
 
-const clearCacheStates = new WeakMap<WebpackRequire, ClearCacheState>();
+const cacheStateKey = Symbol.for('module-federation.clear-cache.state');
 
 const hasOwn = (obj: object, key: string | number) =>
   Object.prototype.hasOwnProperty.call(obj, key);
@@ -98,7 +98,9 @@ const pushUnique = <T>(target: T[], values: Array<T | undefined | null>) => {
 };
 
 const getState = (webpackRequire: WebpackRequire): ClearCacheState => {
-  let state = clearCacheStates.get(webpackRequire);
+  let state = (webpackRequire as any)[cacheStateKey] as
+    | ClearCacheState
+    | undefined;
   if (!state) {
     state = {
       remoteClearBarriers: {},
@@ -106,7 +108,7 @@ const getState = (webpackRequire: WebpackRequire): ClearCacheState => {
       remoteEntryUrlGenerations: {},
       staleRemoteCleanups: {},
     };
-    clearCacheStates.set(webpackRequire, state);
+    Object.defineProperty(webpackRequire, cacheStateKey, { value: state });
   }
   return state;
 };
@@ -1219,33 +1221,31 @@ const replaceRemoteRegistration = (instance: any, remote: RuntimeRemote) => {
 };
 
 const registerRemotesWithForce = (
-  webpackRequire: WebpackRequire,
+  bindings: WebpackRequire[],
   instance: any,
   remotes: RuntimeRemote[],
 ) => {
   const remoteList = toList(remotes);
   const registrationSnapshot = captureRemoteRegistrationSnapshot(instance);
   const bundlerSnapshots: Array<{ restore: () => void }> = [];
-  const clearTargets: Array<ClearCacheTarget | undefined> = [];
+  const clearTargets: Array<{
+    target: ClearCacheTarget;
+    binding: WebpackRequire;
+  }> = [];
   try {
     for (const remote of remoteList) {
-      let clearTarget: ClearCacheTarget | undefined;
-      try {
-        clearTarget = getClearTarget({
-          name: remote.name,
-          webpackRequire,
-        });
-      } catch {
-        clearTarget = undefined;
-      }
+      const targets = bindings.map((binding) => ({
+        binding,
+        target: getClearTarget({ name: remote.name, webpackRequire: binding }),
+      }));
       const normalizedRemote = replaceRemoteRegistration(instance, remote);
-      if (clearTarget) {
+      for (const { binding, target } of targets) {
         bundlerSnapshots.push(
-          captureBundlerRemoteInfoSnapshot(webpackRequire, clearTarget),
+          captureBundlerRemoteInfoSnapshot(binding, target),
         );
-        updateBundlerRemoteInfo(webpackRequire, clearTarget, normalizedRemote);
+        updateBundlerRemoteInfo(binding, target, normalizedRemote);
+        clearTargets.push({ binding, target });
       }
-      clearTargets.push(clearTarget);
     }
   } catch (error) {
     for (let i = bundlerSnapshots.length - 1; i >= 0; i--) {
@@ -1254,14 +1254,15 @@ const registerRemotesWithForce = (
     registrationSnapshot.restore();
     return Promise.reject(error);
   }
-  return clearTargets
-    .reduce(
-      (promise, target) =>
-        promise.then(() =>
-          target ? clearRemoteTarget(target, webpackRequire) : undefined,
-        ),
-      Promise.resolve<unknown>(undefined),
-    )
+  return Promise.allSettled(
+    clearTargets.map(({ target, binding }) =>
+      clearRemoteTarget(target, binding),
+    ),
+  )
+    .then((results) => {
+      const failure = results.find((result) => result.status === 'rejected');
+      if (failure?.status === 'rejected') throw failure.reason;
+    })
     .catch((error) => {
       for (let i = bundlerSnapshots.length - 1; i >= 0; i--) {
         bundlerSnapshots[i].restore();
@@ -1271,121 +1272,230 @@ const registerRemotesWithForce = (
     });
 };
 
-const markRemoteModuleGeneration = (
-  webpackRequire: WebpackRequire,
-  remoteName: string,
-  module: Record<string, any> | undefined,
-) => {
-  if (module && typeof module === 'object') {
-    module['__rspack_remote_generation__'] = getRemoteGeneration(
-      webpackRequire,
-      remoteName,
-    );
-  }
+type CacheAdapters = {
+  bindings: Set<WebpackRequire>;
+  restore: () => void;
 };
 
+// Bundled copies must coordinate through the logical MF instance. A module-local
+// WeakMap would create separate registries after rebuilding an application.
+const adaptersKey = Symbol.for('module-federation.clear-cache.adapters');
+const getAdapters = (instance: any): CacheAdapters | undefined =>
+  instance?.[adaptersKey];
+
+const wrapMethod = (
+  target: any,
+  key: string,
+  wrapper: (original: any) => any,
+) => {
+  const descriptor = Object.getOwnPropertyDescriptor(target, key);
+  const original = target[key];
+  const wrapped = wrapper(original);
+  target[key] = wrapped;
+  return () => {
+    // Do not replace a wrapper installed later by another owner.
+    if (target[key] !== wrapped) return;
+    if (descriptor) Object.defineProperty(target, key, descriptor);
+    else delete target[key];
+  };
+};
+
+const createAdapters = (instance: any): CacheAdapters => {
+  const bindings = new Set<WebpackRequire>();
+  const restorers: Array<() => void> = [];
+  const adapters = {
+    bindings,
+    restore: () => {
+      for (const restore of restorers.splice(0).reverse()) restore();
+      if (instance[adaptersKey] === adapters) delete instance[adaptersKey];
+    },
+  };
+  Object.defineProperty(instance, adaptersKey, {
+    value: adapters,
+    configurable: true,
+  });
+  if (typeof instance.loadRemote === 'function') {
+    restorers.push(
+      wrapMethod(
+        instance,
+        'loadRemote',
+        (original) =>
+          function (this: any, id: string, options?: Record<string, any>) {
+            const active: WebpackRequire[] = [];
+            const waits: Promise<unknown>[] = [];
+            for (const binding of bindings) {
+              const remoteKeys = getRemoteKeysForRequest(binding, id);
+              if (remoteKeys.length === 0) continue;
+              active.push(binding);
+              runStaleRemoteCleanups(binding, remoteKeys);
+              const wait = waitForRemoteClear(binding, remoteKeys);
+              if (wait) waits.push(wait);
+            }
+            const load = () => {
+              if (active.some((binding) => !bindings.has(binding)))
+                throw new Error(
+                  'Cache adapter detached while waiting to load a remote',
+                );
+              return original.call(this, id, options);
+            };
+            return waits.length ? Promise.all(waits).then(load) : load();
+          },
+      ),
+    );
+  }
+  if (typeof instance.registerRemotes === 'function') {
+    restorers.push(
+      wrapMethod(
+        instance,
+        'registerRemotes',
+        (original) =>
+          function (
+            this: any,
+            remotes: RuntimeRemote[],
+            options?: { force?: boolean },
+          ) {
+            if (!options?.force || bindings.size === 0)
+              return original.call(this, remotes, options);
+            return registerRemotesWithForce(
+              Array.from(bindings),
+              instance,
+              remotes,
+            );
+          },
+      ),
+    );
+  }
+  const createScript = instance.loaderHook?.lifecycle?.createScript;
+  const listener = ({
+    url,
+    remoteInfo,
+  }: {
+    url: string;
+    remoteInfo?: RemoteInfoLike;
+  }) => {
+    if (!remoteInfo) return;
+    const key = getRemoteEntryUrlGenerationKey(remoteInfo);
+    if (!key) return;
+    let generation = 0;
+    for (const binding of bindings)
+      generation = Math.max(
+        generation,
+        getState(binding).remoteEntryUrlGenerations[key] ?? 0,
+      );
+    if (generation)
+      return { url: withRemoteEntryUrlGeneration(url, generation) };
+  };
+  createScript?.on?.(listener);
+  restorers.push(() => createScript?.remove?.(listener));
+  return adapters;
+};
+
+// Keep the disposable handle independent of the runtime it used to own: even a
+// retained, already-called disposer must not keep the old bundler alive.
+const attachCacheAdapter = (
+  binding: WebpackRequire | undefined,
+  instance: any,
+): (() => void) => {
+  const runtime = binding!;
+  let state: ClearCacheState | undefined = getState(runtime);
+  let adapters: CacheAdapters | undefined =
+    getAdapters(instance) ?? createAdapters(instance);
+  adapters.bindings.add(runtime);
+  let restoreClear: (() => void) | undefined = wrapMethod(
+    runtime.federation,
+    'clearCache',
+    () => (options: ClearCacheOptions) => {
+      if (!binding)
+        return Promise.reject(new Error('Cache adapter is detached'));
+      return clearCache({ ...options, webpackRequire: binding });
+    },
+  );
+  let previousDispose = Object.getOwnPropertyDescriptor(
+    runtime.federation,
+    'disposeClearCache',
+  );
+  const dispose = () => {
+    if (!binding) return;
+    if (
+      Object.keys(state!.remoteClearBarriers).length ||
+      Object.keys(state!.staleRemoteCleanups).length
+    )
+      throw new Error(
+        'Cannot detach cache adapter while cache cleanup is pending',
+      );
+    const federation = binding.federation;
+    restoreClear!();
+    restoreClear = undefined;
+    adapters!.bindings.delete(binding);
+    binding = undefined;
+    state!.dispose = undefined;
+    state = undefined;
+    if (federation.disposeClearCache === dispose) {
+      if (previousDispose)
+        Object.defineProperty(federation, 'disposeClearCache', previousDispose);
+      else delete federation.disposeClearCache;
+    }
+    previousDispose = undefined;
+    if (adapters!.bindings.size === 0) adapters!.restore();
+    adapters = undefined;
+  };
+  runtime.federation.disposeClearCache = dispose;
+  state.dispose = dispose;
+  return dispose;
+};
+
+/** Attach after initialization; callers must drain old work before disposal. */
 export const installClearCache = ({
   webpackRequire,
   instance,
 }: InstallClearCacheOptions) => {
   const state = getState(webpackRequire);
-  if (state.installed) {
-    return;
-  }
-  const federation = webpackRequire.federation;
-  instance ??= federation.instance;
-  if (!instance) {
-    return;
-  }
-  state.installed = true;
-
-  federation.clearCache = (options: ClearCacheOptions) =>
-    clearCache({ ...options, webpackRequire });
-
-  const moduleCache = instance.moduleCache;
-  if (moduleCache && typeof moduleCache.set === 'function') {
-    const originalSet = moduleCache.set.bind(moduleCache);
-    (moduleCache as any).set = (
-      remoteName: string,
-      module: Record<string, any>,
-    ) => {
-      markRemoteModuleGeneration(webpackRequire, remoteName, module);
-      return originalSet(remoteName, module as any);
-    };
-  }
-
-  if (typeof instance.loadRemote === 'function') {
-    const originalLoadRemote = instance.loadRemote.bind(instance);
-    (instance as any).loadRemote = (
-      id: string,
-      options?: Record<string, any>,
-    ) => {
-      const remoteKeys = getRemoteKeysForRequest(webpackRequire, id);
-      runStaleRemoteCleanups(webpackRequire, remoteKeys);
-      const load = () => originalLoadRemote(id, options as any);
-      return (
-        waitForRemoteClear(webpackRequire, remoteKeys)?.then(load) ?? load()
+  instance ??= webpackRequire.federation.instance;
+  if (!instance) return;
+  if (state.dispose) {
+    if (!getAdapters(instance)?.bindings.has(webpackRequire))
+      throw new Error(
+        'Cache adapter is already attached to another MF instance',
       );
-    };
+    return state.dispose;
   }
-
-  if (typeof instance.registerRemotes === 'function') {
-    const originalRegisterRemotes = instance.registerRemotes.bind(instance);
-    (instance as any).registerRemotes = (
-      remotes: RuntimeRemote[],
-      options?: { force?: boolean },
-    ) => {
-      if (!options?.force) {
-        return originalRegisterRemotes(remotes as any, options as any);
-      }
-      return registerRemotesWithForce(webpackRequire, instance, remotes);
-    };
-  }
-
-  instance.loaderHook?.lifecycle?.createScript?.on?.(
-    ({ url, remoteInfo }: { url: string; remoteInfo?: RemoteInfoLike }) => {
-      if (!remoteInfo) {
-        return;
-      }
-      const key = getRemoteEntryUrlGenerationKey(remoteInfo);
-      const generation = key ? state.remoteEntryUrlGenerations[key] : undefined;
-      if (!generation) {
-        return;
-      }
-      return {
-        url: withRemoteEntryUrlGeneration(url, generation),
-      };
-    },
-  );
+  return attachCacheAdapter(webpackRequire, instance);
 };
 
 const reportRemoveRemoteClearCacheError = (error: unknown) => {
-  if (typeof console === 'undefined' || typeof console.warn !== 'function') {
+  if (typeof console === 'undefined' || typeof console.warn !== 'function')
     return;
-  }
   console.warn(
-    `clearCache after removeRemote failed: ${
-      error instanceof Error ? error.message : String(error)
-    }`,
+    `clearCache after removeRemote failed: ${error instanceof Error ? error.message : String(error)}`,
   );
 };
 
-export const createClearCacheRuntimePlugin = ({
-  webpackRequire,
-}: {
-  webpackRequire: WebpackRequire;
-}) => ({
+// This plugin may outlive many application generations. Never capture a bundler.
+export const createClearCacheRuntimePlugin = () => ({
   name: 'bundler-runtime-clear-cache-plugin',
-  removeRemote({ remote }: { remote: RuntimeRemote }) {
-    const clear =
-      webpackRequire.federation.clearCache ||
-      ((options: ClearCacheOptions) =>
-        clearCache({ ...options, webpackRequire }));
-    return clear({ name: remote.alias || remote.name })
-      .then(() => undefined)
-      .catch((error) => {
-        reportRemoveRemoteClearCacheError(error);
-        throw error;
-      });
+  async removeRemote({
+    remote,
+    origin,
+  }: {
+    remote: RuntimeRemote;
+    origin: object;
+  }) {
+    const adapters = getAdapters(origin);
+    if (!adapters) return;
+    try {
+      const results = await Promise.allSettled(
+        Array.from(adapters.bindings, async (binding) => {
+          if (!adapters.bindings.has(binding)) return;
+          await binding.federation.clearCache!({
+            name: remote.alias || remote.name,
+          });
+        }),
+      );
+      const failure = results.find((result) => result.status === 'rejected');
+      if (failure?.status === 'rejected') throw failure.reason;
+    } catch (error) {
+      reportRemoveRemoteClearCacheError(error);
+      throw error;
+    }
   },
 });
