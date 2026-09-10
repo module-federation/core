@@ -576,9 +576,11 @@ const cleanupRemoteEntryInternalCache = (
       }
     | null
     | undefined;
-  const clear = preserveShared
-    ? entry?.__webpack_clear_exposed_cache__
-    : entry?.__webpack_clear_cache__;
+  if (preserveShared) {
+    entry?.__webpack_clear_exposed_cache__!();
+    return;
+  }
+  const clear = entry?.__webpack_clear_cache__;
   if (typeof clear === 'function') {
     clear();
   }

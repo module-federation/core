@@ -151,14 +151,9 @@ describe('clearCache', () => {
     expect((globalThis as any).remoteA).toBeUndefined();
   });
 
-  test.each([
-    { loading: false, selective: false },
-    { loading: true, selective: false },
-    { loading: false, selective: true },
-    { loading: true, selective: true },
-  ])(
+  test.each([{ loading: false }, { loading: true }])(
     'should invalidate host caches while preserving shared provider: %j',
-    async ({ loading, selective }) => {
+    async ({ loading }) => {
       const { instance, webpackRequire } = createWebpackRequire();
       const remoteEntryClear = jest.fn();
       const selectiveClear = jest.fn();
@@ -174,14 +169,12 @@ describe('clearCache', () => {
       instance.moduleCache.set('remoteA', {
         remoteEntryExports: {
           __webpack_clear_cache__: remoteEntryClear,
-          __webpack_clear_exposed_cache__: selective
-            ? selectiveClear
-            : undefined,
+          __webpack_clear_exposed_cache__: selectiveClear,
         },
       });
       (globalThis as any).remoteA = {
         __webpack_clear_cache__: remoteEntryClear,
-        __webpack_clear_exposed_cache__: selective ? selectiveClear : undefined,
+        __webpack_clear_exposed_cache__: selectiveClear,
       };
       (globalThis as any).__FEDERATION__ = {
         ...(previousFederation || {}),
@@ -239,7 +232,7 @@ describe('clearCache', () => {
         });
 
         expect(remoteEntryClear).not.toHaveBeenCalled();
-        expect(selectiveClear.mock.calls.length > 0).toBe(selective);
+        expect(selectiveClear).toHaveBeenCalled();
         expect(instance.moduleCache.has('remoteA')).toBe(false);
         expect(webpackRequire.m[101]).toBeUndefined();
         expect(webpackRequire.c[101]).toBeUndefined();

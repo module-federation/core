@@ -110,22 +110,15 @@ for (const [variant, flags] of Object.entries({
         }
       }
       if (flags.SHARED === '1') {
-        if (process.env.SSR_CACHE_EXPECT_NATIVE === '1')
-          assert.equal(result.shared.selective, true);
+        assert.equal(result.shared.selective, true);
         await t.test('shared retention does not skip host invalidation', () =>
           assert.equal(result.static.withPageInvalidated, 'v2'),
         );
         await t.test('consumed shared export retains strict identity', () =>
           assert.equal(result.shared.sameObject, true),
         );
-        await t.test(
-          'unshared provider payload can be collected',
-          {
-            skip:
-              !result.shared.selective &&
-              'Provider lacks selective cleanup capability',
-          },
-          () => assert.equal(result.shared.payloadCollected, true),
+        await t.test('unshared provider payload can be collected', () =>
+          assert.equal(result.shared.payloadCollected, true),
         );
         await t.test(
           'retained shared lazy dependency keeps identity after removal',

@@ -177,3 +177,40 @@ Full compiler suites and other CI jobs were skipped in favor of the two targeted
 compiler cases, affected packages' complete tests and Modern SSR integration.
 Streaming/drain/production-serve/long-running memory tests remain later roadmap
 gates, not skipped proof of implemented behavior. No package publication ran.
+
+## Unreleased-provider contract correction — 2026-09-10
+
+The user confirmed that this cache API has not shipped. The previous increment's
+legacy-provider fallback and compatibility test matrix are therefore removed.
+Shared-preserving cleanup directly calls the selective method; a missing method
+is an error, not successful cleanup with a retained full cache. Generic remote
+entry types remain optional because not every container participates in this
+cleanup path. Shared payload GC no longer skips for a missing capability.
+
+Commands rerun:
+
+```sh
+pnpm exec turbo run build --filter=@module-federation/runtime-tools
+pnpm --filter @module-federation/runtime-core exec rstest run
+pnpm --filter @module-federation/webpack-bundler-runtime run test
+SSR_CACHE_EXPECT_NATIVE=1 SSR_CACHE_RSPACK_ENTRY=/Users/bytedance/outter/rspack/packages/rspack/dist/index.js SSR_CACHE_MODERN_ENTRY=/Users/bytedance/work/modern.js/packages/server/core/dist/cjs/adapters/node/index.js node --test tools/ssr-cache/baseline.test.cjs
+node --test tools/ssr-cache/baseline.test.cjs
+SSR_CACHE_RSPACK_ENTRY=/Users/bytedance/outter/rspack/packages/rspack/dist/index.js NODE_OPTIONS="--require=$PWD/tools/ssr-cache/local-rspack-hook.cjs" TURBO_ENV_MODE=loose pnpm run ci:local --only=e2e-modern-ssr
+pnpm exec prettier --check .
+python3 .codex/skills/changeset-pr/scripts/run_changeset_status.py --output /tmp/mf-no-compat-changeset.json
+```
+
+Build: 6/6 successful; runtime-core 134/134; bundler runtime 109/109. The six
+removed cases tested the discarded compatibility path. New compiler/Modern
+artifact matrix remains 19 passes, 3 existing adapter TODOs, no skips/failures.
+The installed older canary negative check now exits 1 with a missing selective
+method error, confirming it is no longer silently accepted. Changeset planning
+passes. Full-repo formatting still reports 683 unrelated/generated files.
+
+Rspack changes in this correction are documentation only; its native suite was
+not repeated. Other CI jobs remain outside this focused correction. No publish.
+
+The full Modern SSR CI rerun passes both remote-cache and shared-cache specs.
+The previously recorded capture failure did not reproduce; this correction does
+not claim to fix its intermittent cause. Changed-file Prettier and
+`git diff --check` pass. Adapter lifecycle TODOs remain open.

@@ -9,10 +9,12 @@ From the repository root, with Node 24 and the lockfile's pnpm version:
 
 ```sh
 pnpm exec turbo run build --filter=@module-federation/runtime-tools
-node --test tools/ssr-cache/baseline.test.cjs
+SSR_CACHE_RSPACK_ENTRY=/absolute/path/to/rspack/packages/rspack/dist/index.js node --test tools/ssr-cache/baseline.test.cjs
 ```
 
-The default uses the installed `@rspack/core` (currently the lockfile's canary).
+Without an override the runner resolves the installed `@rspack/core`, but the
+current lockfile canary lacks the required selective cleanup method. Use the
+companion Rspack build for this unreleased implementation.
 To validate a local Rspack build, set `SSR_CACHE_RSPACK_ENTRY` to its absolute
 `packages/rspack/dist/index.js` path. The test reports the resolved path and
 version; a local build's version alone does not identify its commit.
@@ -91,9 +93,9 @@ accepted dynamic update. A failed rebuild may leave no serving generation; retai
 the control plane needed to retry. This ordering must be validated in R1/R3.
 
 Consumed shared exports must retain strict object identity, including dependencies
-needed for later lazy work. The implementation may retain a provider runtime when
-safe selective invalidation is unavailable; host consumer invalidation must still
-occur. Do not promise full provider GC or mutate an in-use shared singleton into a
+needed for later lazy work. The provider must supply selective invalidation of execution caches outside
+the shared dependency closure; host consumer invalidation must still occur.
+This unreleased implementation requires matching host/provider builds. Do not promise full provider GC or mutate an in-use shared singleton into a
 new version. Shared preservation is a correctness requirement, not just a loaded
 flag. Changes to an in-use shared dependency outside this contract must be reported
 as unsupported, not silently treated as an ordinary remote update.
@@ -179,8 +181,9 @@ registry eviction and deployment-owned worker rotation remain explicit boundarie
 With the companion Rspack branch `fix/mf-selective-cache`, enhanced containers
 export `__webpack_clear_exposed_cache__`. It removes execution-cache entries
 outside the forward dependency closure of declared and consumed shared modules,
-including async dependencies. MF calls this optional method when the provider
-must be retained for shared use. Older containers keep their execution cache.
+including async dependencies. MF requires this method when the provider
+must be retained for shared use. Host and provider must use the matching
+unreleased cache implementation; there is no legacy-provider fallback.
 The existing full-cache method keeps its behavior.
 
 This is conservative: modules also reachable from shared cannot be released,
@@ -199,8 +202,8 @@ SSR_CACHE_EXPECT_NATIVE=1 SSR_CACHE_RSPACK_ENTRY=/absolute/path/to/rspack/packag
 
 This mode removes the parent-closure TODOs and requires non-shared payload GC,
 shared strict identity and retained lazy dependency identity. The three stale
-adapter TODOs remain. Without the native flag the installed older canary is still
-supported, and unsupported selective GC is explicitly skipped.
+adapter TODOs remain. Selective cleanup is always required. The installed older canary predates this
+capability and is not a supported validation target for shared cleanup.
 
 For the existing full Modern SSR CI job, use the Node 24 resolver hook so both
 ESM and CJS toolchains load the local compiler (no lockfile or symlink changes):

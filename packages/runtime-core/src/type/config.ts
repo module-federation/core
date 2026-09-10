@@ -176,6 +176,6 @@ export type RemoteEntryExports = {
     remoteEntryInitOPtions?: RemoteEntryInitOptions,
   ) => void | Promise<void>;
   __webpack_clear_cache__?: () => void;
-  /** Clear unshared execution caches while preserving shared dependency closures. */
+  /** Required for shared-preserving cleanup; clears caches outside shared dependency closures. */
   __webpack_clear_exposed_cache__?: () => void;
 };
