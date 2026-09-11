@@ -51,6 +51,8 @@
     }
   },
   "devDependencies": {
+    "@module-federation/manifest-legacy": "npm:@module-federation/manifest@2.8.2",
+    "@rspack/core": "https://pkg.pr.new/web-infra-dev/rspack/@rspack/core@c3bcff685babc4fa7d58c3249d197c85c6343208",
     "typescript": "7.0.2",
     "webpack": "^5.0.0"
   },

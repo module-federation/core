@@ -58,6 +58,9 @@ class ContainerManager extends BasicPluginOptionsManager<moduleFederationPlugin.
       (item, key) => ({
         import: Array.isArray(item.import) ? item.import : [item.import],
         name: item.name || generateExposeFilename(key, false),
+        // `layer` must survive normalization or the bundler silently builds
+        // the unlayered variant; '' is a valid layer.
+        ...(item.layer !== undefined ? { layer: item.layer } : {}),
       }),
     );
 

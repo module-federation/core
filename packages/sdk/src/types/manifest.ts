@@ -1,6 +1,7 @@
 import {
   StatsMetaData,
   StatsAssets,
+  StatsSharedProvider,
   StatsExpose,
   BasicStatsMetaData,
   RemoteEntryType,
@@ -9,6 +10,10 @@ import { RemoteWithEntry, RemoteWithVersion } from './common';
 
 export interface ManifestShared {
   id: string;
+  identityId?: string;
+  layer?: string;
+  shareScope?: string | string[];
+  providers?: StatsSharedProvider[];
   name: string;
   version: string;
   singleton: boolean;
@@ -32,7 +37,7 @@ export type ManifestRemote<T = ManifestRemoteCommonInfo> =
 
 export type ManifestExpose = Pick<
   StatsExpose,
-  'assets' | 'id' | 'name' | 'path'
+  'assets' | 'id' | 'name' | 'path' | 'layer' | 'requiredShared'
 >;
 
 export interface Manifest<

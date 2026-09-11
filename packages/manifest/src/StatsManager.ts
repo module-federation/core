@@ -10,13 +10,14 @@ import {
   StatsAssets,
   moduleFederationPlugin,
   RemoteEntryType,
-  composeKeyWithSeparator,
   getManifestFileName,
   StatsMetaDataWithGetPublicPath,
   StatsMetaDataWithPublicPath,
   StatsShared,
+  StatsSharedProvider,
 } from '@module-federation/sdk';
 import { Compilation, Compiler } from 'webpack';
+import path from 'node:path';
 import type {
   StatsCompilation,
   StatsModule,
@@ -28,7 +29,6 @@ import {
   getAssetsByChunkIDs,
   getSharedModules,
   assert,
-  getFileNameWithOutExt,
   getTypesMetaInfo,
 } from './utils';
 import logger from './logger';
@@ -43,8 +43,8 @@ import {
 import { HOT_UPDATE_SUFFIX } from './constants';
 import {
   ModuleHandler,
+  SharedProviderModule,
   getExposeItem,
-  getExposeName,
   getShareItem,
 } from './ModuleHandler';
 import { StatsInfo } from './types';
@@ -186,29 +186,24 @@ class StatsManager {
     return this.setMetaDataPublicPath(metaData, compiler);
   }
 
-  private _getFilteredModules(stats: StatsCompilation): StatsModule[] {
-    const filteredModules = stats.modules!.filter((module) => {
-      if (!module || !module.name) {
-        return false;
-      }
-      const array = [
-        module.name.includes('container entry'),
-        module.name.includes('remote '),
-        module.name.includes('shared module '),
-        module.name.includes('provide module '),
-      ];
-      return array.some((item) => item);
-    });
-
-    return filteredModules;
-  }
-
   private _getModuleAssets(
     compilation: Compilation,
     entryPointNames: string[],
   ): Record<string, StatsAssets> {
     const { chunks } = compilation;
-    const { exposeFileNameImportMap } = this._containerManager;
+    const exposes = this._containerManager.containerPluginExposesOptions;
+    const exposeKeysByChunk = new Map<string, string[]>();
+    for (const [key, options] of Object.entries(exposes)) {
+      if (
+        typeof options === 'object' &&
+        !Array.isArray(options) &&
+        options.name
+      ) {
+        const keys = exposeKeysByChunk.get(options.name) || [];
+        keys.push(key);
+        exposeKeysByChunk.set(options.name, keys);
+      }
+    }
     const assets: Record<string, StatsAssets> = {};
 
     chunks.forEach((chunk) => {
@@ -218,51 +213,52 @@ class StatsManager {
       // A chunk named "__federation_expose_Foo" may be split into
       // "__federation_expose_Foo-<hash>" chunks, so we match both exact
       // and prefix+dash patterns.
-      const matchedKey =
-        exposeFileNameImportMap[chunk.name] !== undefined
-          ? chunk.name
-          : Object.keys(exposeFileNameImportMap).find((key) =>
-              chunk.name!.startsWith(key + '-'),
-            );
+      const matchedKey = exposeKeysByChunk.has(chunk.name)
+        ? chunk.name
+        : [...exposeKeysByChunk.keys()].find((key) =>
+            chunk.name!.startsWith(key + '-'),
+          );
 
       if (!matchedKey) return;
 
-      // TODO: support multiple import
-      const exposeKey = exposeFileNameImportMap[matchedKey][0];
-      const assetKey = getFileNameWithOutExt(exposeKey);
       const chunkAssets = getAssetsByChunk(chunk, entryPointNames);
 
-      if (!assets[assetKey]) {
-        assets[assetKey] = chunkAssets;
-      } else {
-        // Merge split chunk assets, deduplicating with Set
-        assets[assetKey] = {
-          js: {
-            sync: [
-              ...new Set([...assets[assetKey].js.sync, ...chunkAssets.js.sync]),
-            ],
-            async: [
-              ...new Set([
-                ...assets[assetKey].js.async,
-                ...chunkAssets.js.async,
-              ]),
-            ],
-          },
-          css: {
-            sync: [
-              ...new Set([
-                ...assets[assetKey].css.sync,
-                ...chunkAssets.css.sync,
-              ]),
-            ],
-            async: [
-              ...new Set([
-                ...assets[assetKey].css.async,
-                ...chunkAssets.css.async,
-              ]),
-            ],
-          },
-        };
+      for (const assetKey of exposeKeysByChunk.get(matchedKey)!) {
+        if (!assets[assetKey]) {
+          assets[assetKey] = chunkAssets;
+        } else {
+          // Merge split chunk assets, deduplicating with Set
+          assets[assetKey] = {
+            js: {
+              sync: [
+                ...new Set([
+                  ...assets[assetKey].js.sync,
+                  ...chunkAssets.js.sync,
+                ]),
+              ],
+              async: [
+                ...new Set([
+                  ...assets[assetKey].js.async,
+                  ...chunkAssets.js.async,
+                ]),
+              ],
+            },
+            css: {
+              sync: [
+                ...new Set([
+                  ...assets[assetKey].css.sync,
+                  ...chunkAssets.css.sync,
+                ]),
+              ],
+              async: [
+                ...new Set([
+                  ...assets[assetKey].css.async,
+                  ...chunkAssets.css.async,
+                ]),
+              ],
+            },
+          };
+        }
       }
     });
 
@@ -343,6 +339,128 @@ class StatsManager {
     return assets;
   }
 
+  private _getSharedProviders(
+    compiler: Compiler,
+    compilation: Compilation,
+    stats: StatsCompilation,
+    providerModules: SharedProviderModule[],
+    entryPointNames: string[],
+  ): Record<string, StatsSharedProvider[]> {
+    const providers: Record<string, StatsSharedProvider[]> = {};
+    for (const {
+      name,
+      version,
+      request,
+      module: providerModule,
+    } of providerModules) {
+      const targets = (stats.modules || []).filter(
+        (module) =>
+          (providerModule.name !== undefined &&
+            module.issuerName === providerModule.name) ||
+          module.reasons?.some(
+            (reason) =>
+              (providerModule.identifier !== undefined &&
+                reason.moduleIdentifier === providerModule.identifier) ||
+              (providerModule.name !== undefined &&
+                (reason.moduleName === providerModule.name ||
+                  reason.resolvedModule === providerModule.name)),
+          ),
+      );
+      for (const target of targets) {
+        const resourceModule = target.modules?.[0] || target;
+        let resolvedRequest = resourceModule.identifier || request;
+        if (
+          resourceModule.moduleType &&
+          resolvedRequest.startsWith(`${resourceModule.moduleType}|`)
+        )
+          resolvedRequest = resolvedRequest.slice(
+            resourceModule.moduleType.length + 1,
+          );
+        if (
+          resourceModule.layer != null &&
+          resolvedRequest.endsWith(`|${resourceModule.layer}`)
+        )
+          resolvedRequest = resolvedRequest.slice(
+            0,
+            -resourceModule.layer.length - 1,
+          );
+        if (resourceModule.nameForCondition) {
+          const condition = resourceModule.nameForCondition;
+          const index = resolvedRequest.lastIndexOf(condition);
+          const suffix =
+            index >= 0 ? resolvedRequest.slice(index + condition.length) : '';
+          resolvedRequest = condition + (suffix.startsWith('?') ? suffix : '');
+        }
+        const imported = resolvedRequest
+          .split('!')
+          .map((resource) => {
+            const query = resource.indexOf('?');
+            const resourcePath =
+              query < 0 ? resource : resource.slice(0, query);
+            const suffix = query < 0 ? '' : resource.slice(query);
+            const paths =
+              path.win32.isAbsolute(resourcePath) &&
+              !path.posix.isAbsolute(resourcePath)
+                ? path.win32
+                : path.posix;
+            if (!paths.isAbsolute(resourcePath)) return resource;
+            const relative = paths
+              .relative(compiler.context, resourcePath)
+              .replace(/\\/g, '/');
+            if (paths.isAbsolute(relative)) return resource;
+            return `${relative.startsWith('../') ? '' : './'}${relative}${suffix}`;
+          })
+          .join('!');
+        const entries = (providers[name] ||= []);
+        let provider = entries.find(
+          (item) => item.version === version && item.import === imported,
+        );
+        if (!provider) {
+          provider = {
+            version,
+            import: imported,
+            assets: {
+              js: { sync: [], async: [] },
+              css: { sync: [], async: [] },
+            },
+          };
+          entries.push(provider);
+        }
+        for (const chunkID of target.chunks || []) {
+          const chunk = findChunk(chunkID, compilation.chunks);
+          if (!chunk) continue;
+          const assets = getAssetsByChunk(chunk, entryPointNames);
+          for (const file of chunk.files) {
+            if (file.includes(HOT_UPDATE_SUFFIX)) continue;
+            assets[file.endsWith('.css') ? 'css' : 'js'].sync.push(file);
+          }
+          for (const type of ['js', 'css'] as const) {
+            for (const loading of ['sync', 'async'] as const) {
+              provider.assets[type][loading] = [
+                ...new Set([
+                  ...provider.assets[type][loading],
+                  ...assets[type][loading],
+                ]),
+              ].sort();
+            }
+          }
+        }
+      }
+    }
+    for (const [name, entries] of Object.entries(providers)) {
+      if (entries.length < 2) {
+        delete providers[name];
+      } else {
+        entries.sort((a, b) => {
+          if (a.version !== b.version) return a.version < b.version ? -1 : 1;
+          if (a.import !== b.import) return a.import < b.import ? -1 : 1;
+          return 0;
+        });
+      }
+    }
+    return providers;
+  }
+
   private async _generateStats(
     compiler: Compiler,
     compilation: Compilation,
@@ -379,6 +497,7 @@ class StatsManager {
             name: name!,
             file: {
               import: exposes[exposeKey].import,
+              layer: exposes[exposeKey].layer,
             },
           });
         });
@@ -419,11 +538,15 @@ class StatsManager {
 
       const webpackStats = liveStats.toJson(statsOptions);
 
-      const filteredModules = this._getFilteredModules(webpackStats);
-      const moduleHandler = new ModuleHandler(this._options, filteredModules, {
-        bundler: this._bundler,
-      });
-      const { remotes, exposesMap, sharedMap } = moduleHandler.collect();
+      const moduleHandler = new ModuleHandler(
+        this._options,
+        webpackStats.modules || [],
+        {
+          bundler: this._bundler,
+        },
+      );
+      const { remotes, exposesMap, sharedMap, sharedProviderModules } =
+        moduleHandler.collect();
       const entryPointNames = [...compilation.entrypoints.values()]
         .map((e) => e.name)
         .filter((v) => !!v) as Array<string>;
@@ -436,7 +559,16 @@ class StatsManager {
             entryPointNames,
           );
 
+          const providers = this._getSharedProviders(
+            compiler,
+            compilation,
+            webpackStats,
+            sharedProviderModules,
+            entryPointNames,
+          );
           Object.keys(sharedMap).forEach((sharedKey) => {
+            if (providers[sharedKey])
+              sharedMap[sharedKey].providers = providers[sharedKey];
             const assets = sharedAssets[sharedKey];
             if (assets) {
               sharedMap[sharedKey].assets = assets;
@@ -499,46 +631,7 @@ class StatsManager {
           });
           return sum;
         }, new Set());
-        const { fileExposeKeyMap } = this._containerManager;
-
-        stats.exposes = [];
-        Object.entries(fileExposeKeyMap).forEach(
-          ([exposeFileWithoutExt, exposeKeySet]) => {
-            const expose = exposesMap[exposeFileWithoutExt] || {
-              assets: {
-                js: { sync: [], async: [] },
-                css: { sync: [], async: [] },
-              },
-            };
-            exposeKeySet.forEach((exposeKey) => {
-              const { js, css } = expose.assets;
-              const exposeModuleName = getExposeName(exposeKey);
-              stats.exposes.push({
-                ...expose,
-                path: exposeKey,
-                id: composeKeyWithSeparator(
-                  this._options.name!,
-                  exposeModuleName,
-                ),
-                name: exposeModuleName,
-                assets: {
-                  js: {
-                    sync: js.sync.filter((asset) => !sharedAssets.has(asset)),
-                    async: js.async.filter((asset) => !sharedAssets.has(asset)),
-                  },
-                  css: {
-                    sync: css.sync.filter((asset) => !sharedAssets.has(asset)),
-                    async: css.async.filter(
-                      (asset) => !sharedAssets.has(asset),
-                    ),
-                  },
-                },
-              });
-            });
-          },
-        );
-
-        Object.values(exposesMap).map((expose) => {
+        stats.exposes = Object.values(exposesMap).map((expose) => {
           const { js, css } = expose.assets;
           return {
             ...expose,

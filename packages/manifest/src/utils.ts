@@ -45,9 +45,123 @@ const collectAssets = (
   });
 };
 
-function getSharedModuleName(name: string): string {
-  const [_type, _shared, _module, _shareScope, sharedInfo] = name.split(' ');
-  return sharedInfo.split('@').slice(0, -1).join('@');
+/** Remove the optional `(layer)` segment without splitting spaces in its name. */
+export function splitSharedIdentifier(
+  identifier: string,
+  scopeTokenIndex: number,
+): { tokens: string[]; layer?: string } {
+  const tokens = identifier.split(' ');
+  if (!tokens[scopeTokenIndex]?.startsWith('(')) return { tokens };
+  const remainder = tokens.slice(scopeTokenIndex + 1).join(' ');
+  const layered = remainder.match(/^\((.*)\) (\S+@[\s\S]*)$/);
+  if (!layered) return { tokens };
+  return {
+    tokens: [...tokens.slice(0, scopeTokenIndex + 1), ...layered[2].split(' ')],
+    layer: layered[1],
+  };
+}
+
+export function getSharedIdentity(
+  identifier: string,
+  scopeTokenIndex: number,
+  moduleLayer?: string | null,
+) {
+  const { tokens, layer: readableLayer } = splitSharedIdentifier(
+    identifier,
+    scopeTokenIndex,
+  );
+  const webpackConsume = identifier.startsWith('consume-shared-module|')
+    ? identifier.split('|')
+    : undefined;
+  const webpackLayer = webpackConsume?.[8];
+  const layer = webpackConsume
+    ? (moduleLayer ??
+      (webpackLayer === 'undefined' || webpackLayer === 'null'
+        ? undefined
+        : webpackLayer))
+    : readableLayer;
+  const suffix = identifier.match(/ \[identity:(.*)\]$/)?.[1];
+  if (suffix) {
+    const bytes = Buffer.from(suffix);
+    let offset = 0;
+    const component = () => {
+      const end = bytes.indexOf(58, offset);
+      if (end < offset) throw new Error('Invalid shared identity');
+      const length = Number(bytes.toString('utf8', offset, end));
+      if (
+        !Number.isSafeInteger(length) ||
+        length < 0 ||
+        end + 1 + length > bytes.length
+      )
+        throw new Error('Invalid shared identity');
+      offset = end + 1 + length;
+      return bytes.toString('utf8', end + 1, offset);
+    };
+    try {
+      const scope = component();
+      const marker = String.fromCharCode(bytes[offset++]);
+      if (marker !== 'l' && marker !== 'n')
+        throw new Error('Invalid shared identity');
+      const parsedLayer = marker === 'l' ? component() : undefined;
+      const name = component();
+      if (offset !== bytes.length) throw new Error('Invalid shared identity');
+      const scopeBytes = Buffer.from(scope);
+      let cursor = scope.indexOf(':') + 1;
+      const scopes: string[] = [];
+      const count = scope[0] === 's' ? 1 : Number(scope.slice(1, cursor - 1));
+      if (scope[0] === 's') cursor = 1;
+      if (
+        (scope[0] !== 's' && scope[0] !== 'm') ||
+        !Number.isSafeInteger(count) ||
+        count < 0
+      )
+        throw new Error('Invalid shared scope');
+      for (let index = 0; index < count; index++) {
+        const end = scopeBytes.indexOf(58, cursor);
+        const length = Number(scopeBytes.toString('utf8', cursor, end));
+        if (
+          end < cursor ||
+          !Number.isSafeInteger(length) ||
+          length < 0 ||
+          end + 1 + length > scopeBytes.length
+        )
+          throw new Error('Invalid shared scope');
+        scopes.push(scopeBytes.toString('utf8', end + 1, end + 1 + length));
+        cursor = end + 1 + length;
+      }
+      if (cursor !== scopeBytes.length) throw new Error('Invalid shared scope');
+      return {
+        key: suffix,
+        name,
+        layer: parsedLayer,
+        shareScope: scope[0] === 's' ? scopes[0] : scopes,
+      };
+    } catch {
+      // Ignore unsupported suffixes and retain the readable-format fallback.
+    }
+  }
+  const shareScope =
+    webpackConsume?.[1] || tokens[scopeTokenIndex]?.slice(1, -1) || 'default';
+  const nameAndVersion = tokens[scopeTokenIndex + 1] || '';
+  const name =
+    webpackConsume?.[2] ||
+    nameAndVersion.slice(0, nameAndVersion.lastIndexOf('@'));
+  const component = (value: string) => `${Buffer.byteLength(value)}:${value}`;
+  const key = `${component(`s${component(shareScope)}`)}${layer === undefined ? 'n' : `l${component(layer)}`}${component(name)}`;
+  return { key, name, layer, shareScope };
+}
+
+function getSharedModuleName(name: string, identifier?: string): string {
+  const identity = getSharedIdentity(
+    identifier?.includes(' [identity:') ||
+      identifier?.startsWith('consume shared module ')
+      ? identifier
+      : name,
+    3,
+  );
+  return identity.layer !== undefined || Array.isArray(identity.shareScope)
+    ? identity.key
+    : identity.name;
 }
 
 export function getAssetsByChunkIDs(
@@ -107,7 +221,10 @@ export function getSharedModules(
         for (const sharedModule of sharedModules) {
           if (sharedModule.name === module.issuerName) {
             entryContentModuleNames.push(sharedModule.name!);
-            sum.push([getSharedModuleName(module.issuerName!), module]);
+            sum.push([
+              getSharedModuleName(module.issuerName!, sharedModule.identifier),
+              module,
+            ]);
             return sum;
           }
         }
@@ -134,7 +251,10 @@ export function getSharedModules(
               for (const issueModule of module.reasons) {
                 if (issueModule.moduleName === entryReExportModule.name) {
                   sum.push([
-                    getSharedModuleName(entryReExportModule.name!),
+                    getSharedModuleName(
+                      entryReExportModule.name!,
+                      entryReExportModule.identifier,
+                    ),
                     module,
                   ]);
                   flag = true;
