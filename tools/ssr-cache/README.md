@@ -12,9 +12,9 @@ pnpm exec turbo run build --filter=@module-federation/runtime-tools
 SSR_CACHE_RSPACK_ENTRY=/absolute/path/to/rspack/packages/rspack/dist/index.js node --test tools/ssr-cache/baseline.test.cjs
 ```
 
-Without an override the runner resolves the installed `@rspack/core`, but the
-current lockfile canary lacks the required selective cleanup method. Use the
-companion Rspack build for this unreleased implementation.
+Without an override the runner resolves the installed `@rspack/core`. The
+lockfile pins `2.2.3-canary-76e8f696-20260911033013`, which includes the required
+selective cleanup method; a local compiler override is no longer required.
 To validate a local Rspack build, set `SSR_CACHE_RSPACK_ENTRY` to its absolute
 `packages/rspack/dist/index.js` path. The test reports the resolved path and
 version; a local build's version alone does not identify its commit.
@@ -199,8 +199,8 @@ SSR_CACHE_EXPECT_NATIVE=1 SSR_CACHE_RSPACK_ENTRY=/absolute/path/to/rspack/packag
 
 This mode removes the parent-closure TODOs and requires non-shared payload GC,
 shared strict identity and retained lazy dependency identity. The three stale
-adapter assertions now pass with explicit disposal before application rebuild. Selective cleanup is always required. The installed older canary predates this
-capability and is not a supported validation target for shared cleanup.
+adapter assertions now pass with explicit disposal before application rebuild. Selective cleanup is always required. The earlier `8e63776c` canary predates this capability; the current pinned
+`76e8f696` preview includes it.
 
 For the existing full Modern SSR CI job, use the Node 24 resolver hook so both
 ESM and CJS toolchains load the local compiler (no lockfile or symlink changes):
@@ -298,12 +298,12 @@ artifact test and the strict compiler baseline complement package tests. No rele
 
 The failing job had three independent causes:
 
-- The lockfile pins Rspack `8e63776c`, before #15614. Its provider does not export
+- The failing revision pinned Rspack `8e63776c`, before #15614. Its provider does not export
   `__webpack_clear_exposed_cache__`, so removing an actively shared provider
   returns HTTP 500. The matching implementation is required; the unreleased
-  contract has no legacy-provider fallback. The latest published canary on the
-  integration branch still targets `8e63776c`; CI remains blocked until a preview
-  containing `ce2c7515` or a descendant is available and pinned.
+  contract has no legacy-provider fallback. The follow-up pins the published
+  `2.2.3-canary-76e8f696-20260911033013` core, CLI and native bindings, removing
+  this dependency blocker.
 - The first browser visit starts lazy compilation. Modern's repack handler clears
   SSR module caches, resetting the probe's module-local WeakRef and snapshots
   before the update request. The host fixture now compiles eagerly. Its original
@@ -336,3 +336,29 @@ The final clean-start run with the local Rspack build passed both Cypress specs
 This repair changes only private test fixtures and documentation, so no additional
 package tests or changeset are needed. The unrelated CI matrix is not rerun
 locally; its original #5053 jobs passed. Long-running memory endurance remains R6.
+
+### Published preview validation in an isolated worktree
+
+The root dependencies and overrides now agree on
+`2.2.3-canary-76e8f696-20260911033013`. pnpm regenerated the lockfile, including
+platform bindings and dependent peer snapshots. No local Rspack resolver hook or
+`SSR_CACHE_RSPACK_ENTRY` override was used for these checks:
+
+```sh
+corepack enable
+pnpm install --frozen-lockfile
+pnpm install --no-frozen-lockfile
+pnpm install --frozen-lockfile
+pnpm exec turbo run build --filter='./packages/**'
+CI=true pnpm run e2e:modern:ssr
+SSR_CACHE_STRICT=1 SSR_CACHE_EXPECT_NATIVE=1 node --test tools/ssr-cache/baseline.test.cjs
+pnpm exec prettier --check package.json pnpm-lock.yaml tools/ssr-cache/README.md
+git diff --check
+```
+
+Results: 44 package build tasks passed; both Cypress SSR specs passed; the native
+artifact baseline passed 22 tests, with no failures or TODOs. Its one Modern
+application-rebuild integration test was skipped because this isolated worktree
+does not supply a separate built Modern checkout. The worktree uses direct Turbo
+and package scripts as required by AGENTS.md. The rest of the platform E2E matrix
+is left to GitHub CI; this dependency update adds no package implementation.
