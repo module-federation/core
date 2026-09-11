@@ -321,3 +321,34 @@ Rspack/Modern HTTP regressions cover the changed behavior. Production hydration,
 entry-scope completeness and long-running resource acceptance remain R4–R6.
 No publish command was run. Changesets lists the three changed packages; fixed
 release groups can expand the eventual release plan.
+
+
+### Removal-hook ordering follow-up (2026-09-11)
+
+PR #5060 review identified that a user hook can delete moduleCache before the
+bundler cache hook. Capture a copy of resolved remoteInfo at the start of runtime
+removal, pass it through the hook payload, and prefer it during bundler target
+resolution. Registration-named business globals remain untouched even when the
+cache entry is already absent. The runtime regression verifies the later hook sees
+the captured identity after the first hook clears the cache; the bundler regression
+verifies actual resolved-container clearing and business-global retention.
+
+Commands from `/private/tmp/mf-5060-review`:
+
+```sh
+corepack enable
+pnpm install --frozen-lockfile
+pnpm exec turbo run build --filter=@module-federation/runtime-tools
+pnpm --filter @module-federation/runtime-core test
+pnpm --filter @module-federation/webpack-bundler-runtime test
+SSR_CACHE_STRICT=1 SSR_CACHE_EXPECT_NATIVE=1 SSR_CACHE_MODERN_ENTRY=/private/tmp/modern-r4-static-update/packages/server/core/dist/cjs/adapters/node/index.js node --test tools/ssr-cache/baseline.test.cjs
+pnpm exec prettier --check .
+python3 .codex/skills/changeset-pr/scripts/run_changeset_status.py --output /tmp/5060-changeset-status.json
+git diff --check
+```
+
+All six dependency build tasks pass; runtime-core 143/143 and bundler-runtime
+128/128 pass. Full browser/E2E matrices and unrelated packages are not rerun for
+this hook-payload repair; native artifact checks complement the package regressions.
+SDK behavior did not change in this follow-up, so its earlier 69-pass result was
+not rerun. No publish command is used.

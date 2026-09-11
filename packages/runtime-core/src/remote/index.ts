@@ -130,6 +130,8 @@ export class RemoteHandler {
         {
           remote: Remote;
           origin: ModuleFederation;
+          /** Resolved identity captured before user removal hooks mutate caches. */
+          remoteInfo?: RemoteInfo;
         },
       ],
       void
@@ -768,7 +770,13 @@ export class RemoteHandler {
     const { name } = remote;
     const loadedModule = host.moduleCache.get(remote.name);
     return Promise.resolve(
-      this.hooks.lifecycle.removeRemote.emit({ remote, origin: host }),
+      this.hooks.lifecycle.removeRemote.emit({
+        remote,
+        origin: host,
+        remoteInfo: loadedModule?.remoteInfo
+          ? { ...loadedModule.remoteInfo }
+          : undefined,
+      }),
     )
       .then(() => {
         const remoteIndex = host.options.remotes.findIndex(

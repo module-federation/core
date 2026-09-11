@@ -323,6 +323,48 @@ describe('clearCache', () => {
     }
   });
 
+  test('remove hook retains resolved identity after an earlier hook deletes moduleCache', async () => {
+    const { instance, webpackRequire } = createWebpackRequire();
+    const business = { dispose: jest.fn() };
+    const container = { __webpack_clear_cache__: jest.fn() };
+    const globals = globalThis as any;
+    const previous = globals.dynamic;
+    globals.dynamic = business;
+    globals.__test_resolved_container__ = container;
+    instance.options.remotes = [
+      {
+        name: 'dynamic',
+        entry: 'https://example.com/mf-manifest.json',
+        entryGlobalName: 'dynamic',
+      },
+    ] as any;
+    instance.moduleCache.set('dynamic', {
+      remoteInfo: {
+        name: 'dynamic',
+        entryGlobalName: '__test_resolved_container__',
+      },
+      remoteEntryExports: container,
+    });
+    try {
+      const remoteInfo = { ...instance.moduleCache.get('dynamic').remoteInfo };
+      instance.moduleCache.delete('dynamic');
+      installClearCache({ webpackRequire: webpackRequire as any });
+      await createClearCacheRuntimePlugin().removeRemote({
+        remote: instance.options.remotes[0],
+        origin: instance,
+        remoteInfo: remoteInfo as any,
+      });
+      expect(globals.dynamic).toBe(business);
+      expect(business.dispose).not.toHaveBeenCalled();
+      expect(globals.__test_resolved_container__).toBeUndefined();
+      expect(container.__webpack_clear_cache__).toHaveBeenCalled();
+    } finally {
+      if (previous === undefined) delete globals.dynamic;
+      else globals.dynamic = previous;
+      delete globals.__test_resolved_container__;
+    }
+  });
+
   test('should evict old caches before pending remote load settles', async () => {
     const { instance, webpackRequire } = createWebpackRequire();
     const pendingLoad = createDeferred();

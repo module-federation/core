@@ -424,10 +424,14 @@ const getClearTarget = (
   }
   for (const remoteName of remoteNames) {
     const loaded = instance?.moduleCache?.get(remoteName);
-    if (loaded?.remoteInfo) {
+    const resolved =
+      options.remoteInfo?.name === remoteName
+        ? options.remoteInfo
+        : loaded?.remoteInfo;
+    if (resolved) {
       // Resolved manifest metadata supersedes the registration's default global.
       remoteInfos = remoteInfos.filter((info) => info.name !== remoteName);
-      remoteInfos.push(loaded.remoteInfo as RemoteInfoLike);
+      remoteInfos.push(resolved as RemoteInfoLike);
     }
   }
   return {
@@ -1515,9 +1519,11 @@ export const createClearCacheRuntimePlugin = () => ({
   async removeRemote({
     remote,
     origin,
+    remoteInfo,
   }: {
     remote: RuntimeRemote;
     origin: object;
+    remoteInfo?: ClearCacheOptions['remoteInfo'];
   }) {
     const adapters = getAdapters(origin);
     if (!adapters) return;
@@ -1527,6 +1533,7 @@ export const createClearCacheRuntimePlugin = () => ({
           if (!adapters.bindings.has(binding)) return;
           await binding.federation.clearCache!({
             name: remote.alias || remote.name,
+            ...(remoteInfo ? { remoteInfo } : {}),
           });
         }),
       );

@@ -493,6 +493,7 @@ describe('ModuleFederation', () => {
   it('keeps loaded remote cleanup context when removeRemote hook clears moduleCache first', async () => {
     const entry =
       'http://localhost:1111/resources/register-remotes/app1/federation-remote-entry.js';
+    const observed = rs.fn();
     const remoteEntryClear = rs.fn();
     const libClear = rs.fn();
     const globalClear = rs.fn();
@@ -511,6 +512,15 @@ describe('ModuleFederation', () => {
           name: 'module-cache-first-remove-plugin',
           removeRemote({ origin }) {
             origin.moduleCache.delete('@register-remotes/app1');
+          },
+        },
+        {
+          name: 'later-remove-hook',
+          removeRemote({ origin, remoteInfo }) {
+            expect(origin.moduleCache.has('@register-remotes/app1')).toBe(
+              false,
+            );
+            observed(remoteInfo);
           },
         },
       ],
@@ -563,6 +573,13 @@ describe('ModuleFederation', () => {
 
     await FM.removeRemote('app1');
 
+    expect(observed).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: '@register-remotes/app1',
+        entryGlobalName: 'app1',
+        entry,
+      }),
+    );
     expect(remoteEntryClear).toHaveBeenCalledTimes(1);
     expect(libClear).toHaveBeenCalledTimes(1);
     expect(globalClear).toHaveBeenCalledTimes(1);
