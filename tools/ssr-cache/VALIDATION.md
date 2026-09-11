@@ -352,3 +352,50 @@ All six dependency build tasks pass; runtime-core 143/143 and bundler-runtime
 this hook-payload repair; native artifact checks complement the package regressions.
 SDK behavior did not change in this follow-up, so its earlier 69-pass result was
 not rerun. No publish command is used.
+## R4 static entry ownership and Modern selective publication (2026-09-11)
+
+MF worktree: `/private/tmp/mf-r4-static-update`; companion Modern worktree:
+`/private/tmp/modern-r4-static-update`. Rspack preview:
+`2.2.3-canary-76e8f696-20260911033013`. Public opt-in and scope contracts are in
+`packages/modernjs-v3/README.md`; Modern artifact commands and detailed results are
+in `packages/server/core/SSR_REQUEST_COORDINATION.md` in the companion branch.
+
+MF commands:
+
+```sh
+pnpm exec turbo run build --filter=@module-federation/modern-js-v3
+pnpm --filter @module-federation/modern-js-v3 build
+pnpm --filter @module-federation/modern-js-v3 test
+pnpm exec prettier --check .
+python3 .codex/skills/changeset-pr/scripts/run_changeset_status.py --output /tmp/r4-changeset-status.json
+git diff --check
+```
+
+Final package build and declarations pass; 31 tests pass, including per-instance
+replacement retry after registration failure. Repository-wide formatting passes.
+The initial compiler-plugin build rejected a literal runtime stage and nullable
+chunk ID; the implementation now uses RuntimeModule.STAGE_ATTACH and excludes null
+IDs. An initial sandboxed Rstest invocation could not bind its local listener
+(EPERM); the authorized rerun passes. The package build reports its existing
+root-export Publint module-type warning; this change does not alter package exports.
+
+Companion Modern server-core reports 49 passing tests, with server-core and
+prod-server dependency builds passing. Real Rspack/Modern HTTP artifact tests pass:
+static selective update (1), numeric IDs/minification (1), module-concatenation
+fallback (1), existing application HTTP regression (3), and production dynamic MF
+regression (1). The static fixture includes standalone loaders, shared ancestor
+entries, retained unrelated module identity, pending producer drain, cross-entry
+rewrites, HTML cache isolation, failed publication recovery and dynamic fallback.
+
+The optimized concatenated fixture exposes incomplete native ancestry to some
+entry roots in this preview. Its asserted result is application rebuilding with
+`incomplete-parent-closure`, not selective success. All updates retain the HTTP
+server and listening port. Default dynamic/mixed mode rebuilds the whole app;
+static-only mode requires the explicit ownership contract and complete graph.
+
+Full framework/builder E2E, browser hydration/Cypress, sustained-load and resource
+soak checks are not claimed; they remain R6 acceptance. RSC is explicitly outside
+scope. R5's generic API migration is not implemented by this Modern-only adapter.
+No workflow or publication behavior changes; no publish commands were run.
+The R4 changeset names only modern-js-v3 (minor); fixed release groups can expand
+the eventual release plan. Earlier #5060 changesets belong to the prerequisite.
