@@ -124,10 +124,63 @@ describe('getRegisteredShare import:false consume-only stubs', () => {
       };
 
       const selected = selectShare(shareScopeMap, real);
-      expect(selected?.shared).not.toBe(stub);
-      expect(selected?.shared?.shareConfig?.import).not.toBe(false);
+      expect(selected?.shared).toBe(real);
+      expect(shareScopeMap.default.react['18.3.1']).toBe(real);
     },
   );
+
+  it('promotes a real requester into a same-version slot occupied by a loaded import:false stub', () => {
+    const stub = createConsumeOnlyStub({
+      version: '19.2.7',
+      from: 'host-stub',
+      loaded: true,
+      strategy: 'version-first',
+      shareConfig: {
+        requiredVersion: '^19.0.0',
+        singleton: true,
+        eager: false,
+        strictVersion: false,
+        import: false,
+      },
+    });
+    const real = createRealProvider({
+      version: '19.2.7',
+      from: 'provider',
+      strategy: 'version-first',
+      shareConfig: {
+        requiredVersion: '^19.0.0',
+        singleton: true,
+        eager: false,
+        strictVersion: false,
+      },
+    });
+    const shareScopeMap: ShareScopeMap = {
+      default: {
+        react: {
+          '19.2.7': stub,
+        },
+      },
+    };
+
+    const selected = selectShare(shareScopeMap, real);
+    expect(selected?.shared).toBe(real);
+    expect(shareScopeMap.default.react['19.2.7']).toBe(real);
+
+    const consumer = createConsumeOnlyStub({
+      version: '19.2.7',
+      from: 'nested-consumer',
+      shareConfig: {
+        requiredVersion: '^19.0.0',
+        singleton: true,
+        eager: false,
+        strictVersion: false,
+        import: false,
+      },
+    });
+    const later = selectShare(shareScopeMap, consumer);
+    expect(later?.shared).toBe(real);
+    expect(later?.shared?.shareConfig?.import).not.toBe(false);
+  });
 
   it.each<ShareStrategy>(['version-first', 'loaded-first'])(
     'prefers a runtime-only host sentinel "0" over a higher import:false stub (%s)',
@@ -409,6 +462,26 @@ describe('loadShare import:false consume-only stubs', () => {
 
     const factory = await host.loadShare<{ name: string }>('react');
     expect(factory?.()).toEqual({ name: 'real-react-19.2.7' });
+    expect(
+      host.shareScopeMap.default.react['19.2.7'].shareConfig.import,
+    ).not.toBe(false);
+
+    const later = selectShare(
+      host.shareScopeMap,
+      createConsumeOnlyStub({
+        version: '19.2.7',
+        from: 'nested-consumer',
+        shareConfig: {
+          requiredVersion: '^19.0.0',
+          singleton: true,
+          eager: false,
+          strictVersion: false,
+          import: false,
+        },
+      }),
+    );
+    expect(later?.shared?.shareConfig?.import).not.toBe(false);
+    expect(later?.shared).toBe(host.shareScopeMap.default.react['19.2.7']);
   });
 
   it('still throws must-be-provided-by-host when only an import:false stub exists', async () => {
