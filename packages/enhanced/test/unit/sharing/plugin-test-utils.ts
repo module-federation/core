@@ -244,41 +244,63 @@ const mockAddSingletonFilterWarning = rs
 
 const mockNormalizeVersion = (versionDesc: string): string => {
   versionDesc = (versionDesc && versionDesc.trim()) || '';
+  // Mirror real normalizeVersion: keep semver-like strings, drop protocol specs.
+  if (/^([\d^=v<>~]|[*xX]$)/.test(versionDesc)) {
+    return versionDesc;
+  }
+  if (/^(catalog|workspace|npm|patch|file|link|portal):/i.test(versionDesc)) {
+    return '';
+  }
   return versionDesc;
 };
 
-const mockGetRequiredVersionFromDescriptionFile = (
+const mockGetRawDependencyVersionFromDescriptionFile = (
   data: Record<string, any>,
   packageName: string,
-): string | undefined | void => {
+): string | undefined => {
   if (
     data['optionalDependencies'] &&
     typeof data['optionalDependencies'] === 'object' &&
     packageName in data['optionalDependencies']
   ) {
-    return mockNormalizeVersion(data['optionalDependencies'][packageName]);
+    return data['optionalDependencies'][packageName];
   }
   if (
     data['dependencies'] &&
     typeof data['dependencies'] === 'object' &&
     packageName in data['dependencies']
   ) {
-    return mockNormalizeVersion(data['dependencies'][packageName]);
+    return data['dependencies'][packageName];
   }
   if (
     data['peerDependencies'] &&
     typeof data['peerDependencies'] === 'object' &&
     packageName in data['peerDependencies']
   ) {
-    return mockNormalizeVersion(data['peerDependencies'][packageName]);
+    return data['peerDependencies'][packageName];
   }
   if (
     data['devDependencies'] &&
     typeof data['devDependencies'] === 'object' &&
     packageName in data['devDependencies']
   ) {
-    return mockNormalizeVersion(data['devDependencies'][packageName]);
+    return data['devDependencies'][packageName];
   }
+};
+
+const mockGetRequiredVersionFromDescriptionFile = (
+  data: Record<string, any>,
+  packageName: string,
+): string | undefined | void => {
+  const rawVersion = mockGetRawDependencyVersionFromDescriptionFile(
+    data,
+    packageName,
+  );
+  if (rawVersion === undefined) {
+    return;
+  }
+  const normalized = mockNormalizeVersion(rawVersion);
+  return normalized || undefined;
 };
 
 const mockNormalizeConsumeShareOptions = (consumeOptions: any) => {
@@ -312,6 +334,8 @@ rs.mock('../../../src/lib/sharing/utils.ts', () => ({
   testRequestFilters: mockTestRequestFilters,
   addSingletonFilterWarning: mockAddSingletonFilterWarning,
   normalizeVersion: mockNormalizeVersion,
+  getRawDependencyVersionFromDescriptionFile:
+    mockGetRawDependencyVersionFromDescriptionFile,
   getRequiredVersionFromDescriptionFile:
     mockGetRequiredVersionFromDescriptionFile,
   normalizeConsumeShareOptions: mockNormalizeConsumeShareOptions,
@@ -324,6 +348,8 @@ rs.mock('../../../src/lib/sharing/utils', () => ({
   testRequestFilters: mockTestRequestFilters,
   addSingletonFilterWarning: mockAddSingletonFilterWarning,
   normalizeVersion: mockNormalizeVersion,
+  getRawDependencyVersionFromDescriptionFile:
+    mockGetRawDependencyVersionFromDescriptionFile,
   getRequiredVersionFromDescriptionFile:
     mockGetRequiredVersionFromDescriptionFile,
   normalizeConsumeShareOptions: mockNormalizeConsumeShareOptions,

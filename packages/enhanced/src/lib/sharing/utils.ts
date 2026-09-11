@@ -317,6 +317,15 @@ function getGitUrlVersion(gitUrl: string): string {
 }
 
 /**
+ * Package-manager protocol dependency specifiers that are not semver ranges.
+ * Examples: catalog:, catalog:react, workspace:*, npm:pkg@1.0.0, patch:, file:, link:, portal:
+ * @see https://pnpm.io/catalogs
+ * @see https://docs.npmjs.com/cli/v10/configuring-npm/package-json#dependencies
+ */
+const RE_PACKAGE_MANAGER_PROTOCOL =
+  /^(catalog|workspace|npm|patch|file|link|portal):/i;
+
+/**
  * @see https://docs.npmjs.com/cli/v7/configuring-npm/package-json#urls-as-dependencies
  * @param {string} versionDesc version to be normalized
  * @returns {string} normalized version
@@ -328,11 +337,57 @@ function normalizeVersion(versionDesc: string): string {
     return versionDesc;
   }
 
+  // Package manager protocols are not semver and are not git URLs.
+  // Return empty so callers can fall back to the installed package version.
+  if (RE_PACKAGE_MANAGER_PROTOCOL.test(versionDesc)) {
+    return '';
+  }
+
   // add handle for URL Dependencies
   return getGitUrlVersion(versionDesc.toLowerCase());
 }
 
 export { normalizeVersion };
+
+/**
+ * Return the raw dependency version string from a description file, if listed.
+ * @param {Record<string, any>} data - package.json data
+ * @param {string} packageName - dependency name
+ * @returns {string | undefined}
+ */
+export function getRawDependencyVersionFromDescriptionFile(
+  data: Record<string, any>,
+  packageName: string,
+): string | undefined {
+  if (
+    data['optionalDependencies'] &&
+    typeof data['optionalDependencies'] === 'object' &&
+    packageName in data['optionalDependencies']
+  ) {
+    return data['optionalDependencies'][packageName];
+  }
+  if (
+    data['dependencies'] &&
+    typeof data['dependencies'] === 'object' &&
+    packageName in data['dependencies']
+  ) {
+    return data['dependencies'][packageName];
+  }
+  if (
+    data['peerDependencies'] &&
+    typeof data['peerDependencies'] === 'object' &&
+    packageName in data['peerDependencies']
+  ) {
+    return data['peerDependencies'][packageName];
+  }
+  if (
+    data['devDependencies'] &&
+    typeof data['devDependencies'] === 'object' &&
+    packageName in data['devDependencies']
+  ) {
+    return data['devDependencies'][packageName];
+  }
+}
 
 /** @typedef {{ data: Record<string, any>, path: string }} DescriptionFile */
 
@@ -427,34 +482,17 @@ export function getRequiredVersionFromDescriptionFile(
   data: Record<string, any>,
   packageName: string,
 ): string | undefined | void {
-  if (
-    data['optionalDependencies'] &&
-    typeof data['optionalDependencies'] === 'object' &&
-    packageName in data['optionalDependencies']
-  ) {
-    return normalizeVersion(data['optionalDependencies'][packageName]);
+  const rawVersion = getRawDependencyVersionFromDescriptionFile(
+    data,
+    packageName,
+  );
+  if (rawVersion === undefined) {
+    return;
   }
-  if (
-    data['dependencies'] &&
-    typeof data['dependencies'] === 'object' &&
-    packageName in data['dependencies']
-  ) {
-    return normalizeVersion(data['dependencies'][packageName]);
-  }
-  if (
-    data['peerDependencies'] &&
-    typeof data['peerDependencies'] === 'object' &&
-    packageName in data['peerDependencies']
-  ) {
-    return normalizeVersion(data['peerDependencies'][packageName]);
-  }
-  if (
-    data['devDependencies'] &&
-    typeof data['devDependencies'] === 'object' &&
-    packageName in data['devDependencies']
-  ) {
-    return normalizeVersion(data['devDependencies'][packageName]);
-  }
+  const normalized = normalizeVersion(rawVersion);
+  // Protocol specs (catalog:, workspace:*, …) and other non-semver values
+  // normalize to ''. Treat that as missing so callers can fall back.
+  return normalized || undefined;
 }
 
 export function normalizeConsumeShareOptions(consumeOptions: ConsumeOptions) {
