@@ -15,7 +15,6 @@
     "@module-federation/runtime": "workspace:*",
     "@rsbuild/plugin-sass": "^2.0.1",
     "@rspress/core": "2.0.14",
-    "framer-motion": "^10.0.0",
     "react": "19.1.1",
     "react-dom": "19.1.1",
     "react-router-dom": "^7.15.1",
@@ -23,6 +22,7 @@
     "xgplayer": "^3.0.16"
   },
   "devDependencies": {
+    "@divebell/rspack-plugin": "0.0.28",
     "@types/node": "^20.19.5",
     "@types/react": "^19.1.6",
     "@types/react-dom": "^19.1.5",
