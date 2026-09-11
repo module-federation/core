@@ -515,6 +515,12 @@ export class RemoteHandler {
         force: options?.force,
       });
     });
+    // a newly registered remote may provide shared modules: forget the
+    // sharing initialization so a later version-first loadShare
+    // re-initializes the scope and the new remote's shares participate in
+    // version selection (duplicate registrations just re-init, which is
+    // idempotent)
+    host.sharedHandler.resetShareInit();
   }
 
   initRawContainer(
