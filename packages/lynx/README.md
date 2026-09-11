@@ -7,7 +7,7 @@ JavaScript realm.
 
 The package requires a layers-capable Rspack build. This repository pins the
 pkg.pr.new preview of the [layers stack](https://github.com/web-infra-dev/rspack/pull/14913)
-at `843bab005b2413345eb6efc3aaaba2a398fca908`. The bundle transport uses
+at `c3bcff685babc4fa7d58c3249d197c85c6343208`. The bundle transport uses
 `lynx.loadScript`, available in Lynx SDK 3.7 and later; `remoteBundle.engineVersion`
 therefore defaults to `3.7`.
 
