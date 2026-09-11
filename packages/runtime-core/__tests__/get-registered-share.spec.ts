@@ -335,3 +335,175 @@ describe('getRegisteredShare import:false consume-only stubs', () => {
     expect(factory?.()).toEqual({ marker: 'real-provider' });
   });
 });
+
+describe('loadShare import:false consume-only stubs', () => {
+  beforeEach(() => {
+    resetFederationGlobalInfo();
+  });
+
+  it('selects a lower-version real provider over a higher import:false stub (19.2.8 vs 19.2.7)', async () => {
+    const host = new ModuleFederation({
+      name: 'repro-host',
+      remotes: [],
+      shareStrategy: 'version-first',
+      shared: {
+        react: [
+          {
+            version: '19.2.8',
+            shareConfig: {
+              singleton: true,
+              requiredVersion: '^19.0.0',
+              import: false,
+            },
+            get: () => () => {
+              throw new Error(HOST_PROVIDED_ERROR);
+            },
+          },
+          {
+            version: '19.2.7',
+            shareConfig: {
+              singleton: true,
+              requiredVersion: '^19.0.0',
+            },
+            get: () => () => ({ name: 'real-react-19.2.7' }),
+          },
+        ],
+      },
+    });
+
+    const factory = await host.loadShare<{ name: string }>('react');
+    expect(factory?.()).toEqual({ name: 'real-react-19.2.7' });
+  });
+
+  it('selects a later real provider over a same-version import:false stub', async () => {
+    const host = new ModuleFederation({
+      name: 'same-version-host',
+      remotes: [],
+      shareStrategy: 'version-first',
+      shared: {
+        react: {
+          version: '19.2.7',
+          shareConfig: {
+            singleton: true,
+            requiredVersion: '^19.0.0',
+          },
+          get: () => () => ({ name: 'real-react-19.2.7' }),
+        },
+      },
+    });
+
+    host.shareScopeMap.default.react = {
+      '19.2.7': createConsumeOnlyStub({
+        version: '19.2.7',
+        from: 'zzz-host-stub',
+        loaded: true,
+        shareConfig: {
+          requiredVersion: '^19.0.0',
+          singleton: true,
+          eager: false,
+          strictVersion: false,
+          import: false,
+        },
+      }),
+    };
+
+    const factory = await host.loadShare<{ name: string }>('react');
+    expect(factory?.()).toEqual({ name: 'real-react-19.2.7' });
+  });
+
+  it('still throws must-be-provided-by-host when only an import:false stub exists', async () => {
+    const host = new ModuleFederation({
+      name: 'stub-only-host',
+      remotes: [],
+      shareStrategy: 'version-first',
+      shared: {
+        react: {
+          version: '19.2.8',
+          shareConfig: {
+            singleton: true,
+            requiredVersion: '^19.0.0',
+            import: false,
+          },
+          get: () => () => {
+            throw new Error(HOST_PROVIDED_ERROR);
+          },
+        },
+      },
+    });
+
+    const factory = await host.loadShare('react');
+    expect(factory).toEqual(expect.any(Function));
+    expect(() => factory?.()).toThrow(HOST_PROVIDED_ERROR);
+  });
+
+  it('keeps the consume-only stub requiredVersion when selecting a real provider', () => {
+    const stub = createConsumeOnlyStub({
+      version: '19.2.8',
+      from: 'consumer-stub',
+      shareConfig: {
+        requiredVersion: '^19.0.0',
+        singleton: true,
+        eager: false,
+        strictVersion: true,
+        import: false,
+      },
+    });
+    const real = createRealProvider({
+      version: '19.2.7',
+      from: 'provider',
+      loaded: false,
+      lib: undefined,
+      get: () => () => ({ name: 'real-react-19.2.7' }),
+    });
+
+    const selected = selectShare(
+      {
+        default: {
+          react: {
+            '19.2.8': stub,
+            '19.2.7': real,
+          },
+        },
+      },
+      stub,
+    );
+
+    expect(selected?.shared).toBe(real);
+    expect(stub.shareConfig.requiredVersion).toBe('^19.0.0');
+    expect(stub.shareConfig.strictVersion).toBe(true);
+  });
+
+  it('uses the consume-only stub strictVersion against the selected real provider', () => {
+    const stub = createConsumeOnlyStub({
+      version: '19.2.8',
+      from: 'consumer-stub',
+      shareConfig: {
+        requiredVersion: '^19.2.8',
+        singleton: true,
+        eager: false,
+        strictVersion: true,
+        import: false,
+      },
+    });
+    const real = createRealProvider({
+      version: '19.2.7',
+      from: 'provider',
+      loaded: false,
+      lib: undefined,
+    });
+
+    expect(() =>
+      selectShare(
+        {
+          default: {
+            react: {
+              '19.2.8': stub,
+              '19.2.7': real,
+            },
+          },
+        },
+        stub,
+      ),
+    ).toThrow(/does not satisfy the requirement/);
+  });
+});

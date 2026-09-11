@@ -204,14 +204,13 @@ export const findVersion = (
   shareVersionMap: ShareScopeMap[string][string],
   cb?: (prev: string, cur: string) => boolean,
 ): string => {
-  const versionMap = preferRealShareProviders(shareVersionMap);
   const callback =
     cb ||
     function (prev: string, cur: string): boolean {
       return versionLt(prev, cur);
     };
 
-  const versionKeys = Object.keys(versionMap);
+  const versionKeys = Object.keys(shareVersionMap);
   if (!versionKeys.length) {
     return '';
   }
@@ -427,6 +426,8 @@ export function getRegisteredShare(
     ) {
       const { requiredVersion } = shareConfig;
       const pkgVersions = localShareScopeMap[sc][pkgName];
+      // Skip consume-only stubs for get/lib selection, but keep using
+      // shareInfo.shareConfig (requiredVersion / strictVersion / singleton).
       const versionsForSelection = getShareVersionMapForSelection(
         pkgVersions,
         shareInfo,
