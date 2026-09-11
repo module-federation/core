@@ -324,28 +324,65 @@ class ConsumeSharedPlugin {
         if (requiredVersion !== '') {
           return Promise.resolve(undefined);
         }
-        if (!importResolved) {
-          return Promise.resolve(undefined);
+        // Resolve the configured/inferred package itself. `importResolved` may be a
+        // relative shim (e.g. import: './src/react-shim', packageName: 'react'), so
+        // walking from that path would read the application package.json version.
+        let packageName = config.packageName;
+        if (packageName === undefined) {
+          if (ABSOLUTE_PATH_REGEX.test(request)) {
+            return Promise.resolve(undefined);
+          }
+          const match = PACKAGE_NAME_REGEX.exec(request);
+          if (!match) {
+            return Promise.resolve(undefined);
+          }
+          packageName = match[0];
         }
         return new Promise((resolveFallback) => {
-          getDescriptionFile(
-            compilation.inputFileSystem,
-            path.dirname(importResolved as string),
-            ['package.json'],
-            (err, result) => {
-              if (err) {
+          const resolveContext = {
+            fileDependencies: new LazySet<string>(),
+            contextDependencies: new LazySet<string>(),
+            missingDependencies: new LazySet<string>(),
+          };
+          resolver.resolve(
+            {},
+            context,
+            packageName as string,
+            resolveContext,
+            (err, packageResolved) => {
+              compilation.contextDependencies.addAll(
+                resolveContext.contextDependencies,
+              );
+              compilation.fileDependencies.addAll(
+                resolveContext.fileDependencies,
+              );
+              compilation.missingDependencies.addAll(
+                resolveContext.missingDependencies,
+              );
+              if (err || typeof packageResolved !== 'string') {
                 return resolveFallback(undefined);
               }
-              const { data } = result || {};
-              if (
-                !data ||
-                typeof data['version'] !== 'string' ||
-                !data['version']
-              ) {
-                return resolveFallback(undefined);
-              }
-              // Match ProvideSharedPlugin / SharedManager: caret-range from installed version.
-              resolveFallback(`^${data['version']}` as SemVerRange);
+              getDescriptionFile(
+                compilation.inputFileSystem,
+                path.dirname(packageResolved),
+                ['package.json'],
+                (descErr, result) => {
+                  if (descErr) {
+                    return resolveFallback(undefined);
+                  }
+                  const { data } = result || {};
+                  if (
+                    !data ||
+                    typeof data['version'] !== 'string' ||
+                    !data['version']
+                  ) {
+                    return resolveFallback(undefined);
+                  }
+                  // Match ProvideSharedPlugin / SharedManager: caret-range from installed version.
+                  resolveFallback(`^${data['version']}` as SemVerRange);
+                },
+                (desc) => desc?.data?.['name'] === packageName,
+              );
             },
           );
         });

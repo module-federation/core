@@ -2,4 +2,4 @@
 '@module-federation/enhanced': patch
 ---
 
-Fix shared `requiredVersion` auto-detection for package-manager protocol specifiers (`catalog:`, `workspace:*`, `npm:`, etc.) by falling back to the installed package version as a caret range.
+Fix shared `requiredVersion` auto-detection for package-manager protocol specifiers (`catalog:`, `workspace:*`, `npm:`, etc.) by resolving the configured package and using its installed version as a caret range.
