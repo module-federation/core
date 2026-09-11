@@ -211,10 +211,10 @@ SSR_CACHE_RSPACK_ENTRY=/absolute/path/to/rspack/packages/rspack/dist/index.js NO
 
 Verify the provider container exports the new method in the emitted artifact;
 merely finding its name inside bundled MF runtime call sites is insufficient.
-The Modern shared-cache spec now passes with this compiler. The separate
-remote-cache runtime-capture assertion still intermittently fails; the full CI
-job is not accepted as green. The explicit adapter lifecycle below closes the stale-binding baseline; Modern
-ownership and R2–R6 remain open.
+The later CI investigation below explains the remote-cache runtime-capture
+failure and the shared-cache development-mode GC failure. The explicit adapter
+lifecycle below closes the stale-binding baseline; it does not alone complete
+Modern ownership or R2–R6.
 
 ## R1 adapter lifecycle
 
@@ -293,3 +293,46 @@ reports 683 existing/generated or unrelated dirty files; these are not rewritten
 The touched-file gate is checked separately. Full Cypress/browser hydration and
 load/heap endurance tests are not run for this repair; the real Modern production
 artifact test and the strict compiler baseline complement package tests. No release.
+
+## PR #5053: Modern SSR CI investigation
+
+The failing job had three independent causes:
+
+- The lockfile pins Rspack `8e63776c`, before #15614. Its provider does not export
+  `__webpack_clear_exposed_cache__`, so removing an actively shared provider
+  returns HTTP 500. The matching implementation is required; the unreleased
+  contract has no legacy-provider fallback. The latest published canary on the
+  integration branch still targets `8e63776c`; CI remains blocked until a preview
+  containing `ce2c7515` or a descendant is available and pinned.
+- The first browser visit starts lazy compilation. Modern's repack handler clears
+  SSR module caches, resetting the probe's module-local WeakRef and snapshots
+  before the update request. The host fixture now compiles eagerly. Its original
+  cross-request assertions remain unchanged.
+- React development elements can retain an initialization Error in `_debugStack`.
+  A failed run's heap snapshot showed `antd -> defaultEmptyImg -> _debugStack ->
+CallSiteInfo -> exposed module -> nonSharedPayload`. This is a reference outside
+  federation caches; GC success depended on development reloads and stack capture.
+  The shared-provider fixture now bundles production dependencies even when
+  served by `rslib mf-dev`. It still requires shared availability and non-shared
+  payload collection, without claiming development debug-stack reclamation.
+
+Validation commands for this CI repair:
+
+```sh
+# Reproduces the two original CI failures with the installed compiler.
+pnpm run ci:local --only=e2e-modern-ssr
+
+# Use the matching built compiler until its preview package can be pinned.
+SSR_CACHE_RSPACK_ENTRY=/absolute/path/to/rspack/packages/rspack/dist/index.js NODE_OPTIONS="--require=$PWD/tools/ssr-cache/local-rspack-hook.cjs" TURBO_ENV_MODE=loose pnpm run ci:local --only=e2e-modern-ssr
+SSR_CACHE_RSPACK_ENTRY=/absolute/path/to/rspack/packages/rspack/dist/index.js NODE_OPTIONS="--require=$PWD/tools/ssr-cache/local-rspack-hook.cjs" TURBO_ENV_MODE=loose pnpm run e2e:modern:ssr
+pnpm exec prettier --check apps/modernjs-ssr/host/modern.config.ts apps/modernjs-ssr/another_remote/rslib.config.ts tools/ssr-cache/README.md
+git diff --check
+```
+
+The full parity attempt built the packages but exposed the debug-stack GC failure;
+subsequent E2E runs exercise the same workflow command after the fixture fixes.
+The final clean-start run with the local Rspack build passed both Cypress specs
+(2/2, no skipped tests); changed-file formatting and whitespace checks passed.
+This repair changes only private test fixtures and documentation, so no additional
+package tests or changeset are needed. The unrelated CI matrix is not rerun
+locally; its original #5053 jobs passed. Long-running memory endurance remains R6.
