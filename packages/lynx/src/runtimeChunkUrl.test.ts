@@ -218,9 +218,26 @@ describe('patchLynxChunkLoading chunk URLs', () => {
       'http://assets.example/Card.bundle',
       'http://assets.example/Card.bundle',
     ],
+    [
+      'assets/',
+      'async/Card.bundle',
+      'remotes/assets/async/Card.bundle',
+      'remotes/catalog.lynx.bundle',
+    ],
+    [
+      'assets/',
+      'async/Card.bundle',
+      'assets/async/Card.bundle',
+      'catalog.lynx.bundle',
+    ],
   ])(
     'resolves split public path %s against the manifest entry',
-    async (publicPath, assetPath, expected) => {
+    async (
+      publicPath,
+      assetPath,
+      expected,
+      entry = 'https://cdn.example/remotes/catalog.lynx.bundle?version=1',
+    ) => {
       const webpackRequire = createWebpackRequire();
       webpackRequire.lynx_aci = { feature: assetPath };
       webpackRequire.p = publicPath;
@@ -232,10 +249,7 @@ describe('patchLynxChunkLoading chunk URLs', () => {
         lynx: { loadLazyBundle, loadScript: rs.fn() },
         [LYNX_BUNDLE_REGISTRY]: new Map([
           ['remote', 'lynx-cache://catalog'],
-          [
-            'remote:remote-origin',
-            'https://cdn.example/remotes/catalog.lynx.bundle?version=1',
-          ],
+          ['remote:remote-origin', entry],
         ]),
       };
 
@@ -248,36 +262,46 @@ describe('patchLynxChunkLoading chunk URLs', () => {
     },
   );
 
-  it('uses the manifest entry directory when Webpack auto-detects the Lynx Web client path', async () => {
-    const webpackRequire = createWebpackRequire();
-    webpackRequire.lynx_aci = { feature: 'async/Card.bundle' };
-    webpackRequire.lynx_public_path_auto = true;
-    webpackRequire.p =
-      'http://host.example/node_modules/@lynx-js/web-core/dist/client_prod/static/js/';
-    const loadLazyBundle = rs.fn(async () => ({
-      ids: ['feature'],
-      modules: {},
-    }));
-    const globalObject = {
-      lynx: { loadLazyBundle, loadScript: rs.fn() },
-      [LYNX_BUNDLE_REGISTRY]: new Map([
-        ['remote', 'lynx-cache://catalog'],
-        [
-          'remote:remote-origin',
-          'https://cdn.example/remotes/catalog.lynx.bundle',
-        ],
-      ]),
-    };
-
-    patchLynxChunkLoading(webpackRequire, 'remote', globalObject);
-    const promises: PromiseLike<unknown>[] = [];
-    webpackRequire.f.j!('feature', promises);
-    await Promise.all(promises);
-
-    expect(loadLazyBundle.mock.calls[0]?.[0]).toBe(
+  it.each([
+    ['remotes/catalog.lynx.bundle?version=1', 'remotes/async/Card.bundle'],
+    ['catalog.lynx.bundle', 'async/Card.bundle'],
+    ['/remotes/catalog.lynx.bundle', '/remotes/async/Card.bundle'],
+    [
+      'https://cdn.example/remotes/catalog.lynx.bundle',
       'https://cdn.example/remotes/async/Card.bundle',
-    );
-  });
+    ],
+    [
+      '//cdn.example/remotes/catalog.lynx.bundle',
+      '//cdn.example/remotes/async/Card.bundle',
+    ],
+  ])(
+    'uses entry %s when Webpack auto-detects the Lynx Web client path',
+    async (entry, expected) => {
+      const webpackRequire = createWebpackRequire();
+      webpackRequire.lynx_aci = { feature: 'async/Card.bundle' };
+      webpackRequire.lynx_public_path_auto = true;
+      webpackRequire.p =
+        'http://host.example/node_modules/@lynx-js/web-core/dist/client_prod/static/js/';
+      const loadLazyBundle = rs.fn(async () => ({
+        ids: ['feature'],
+        modules: {},
+      }));
+      const globalObject = {
+        lynx: { loadLazyBundle, loadScript: rs.fn() },
+        [LYNX_BUNDLE_REGISTRY]: new Map([
+          ['remote', 'lynx-cache://catalog'],
+          ['remote:remote-origin', entry],
+        ]),
+      };
+
+      patchLynxChunkLoading(webpackRequire, 'remote', globalObject);
+      const promises: PromiseLike<unknown>[] = [];
+      webpackRequire.f.j!('feature', promises);
+      await Promise.all(promises);
+
+      expect(loadLazyBundle.mock.calls[0]?.[0]).toBe(expected);
+    },
+  );
 
   it('preserves a protocol-relative remote origin for root public paths', async () => {
     const webpackRequire = createWebpackRequire();

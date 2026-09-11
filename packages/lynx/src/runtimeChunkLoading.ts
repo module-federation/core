@@ -60,18 +60,19 @@ const joinRemoteUrl = (
   }
 
   const entry = entryUrl.split(/[?#]/, 1)[0];
+  const entryDirectory = entry.slice(0, entry.lastIndexOf('/') + 1);
+  if (!publicPath || publicPath === 'auto') {
+    return `${entryDirectory}${assetPath.replace(/^\//, '')}`;
+  }
   const origin = entry.match(/^(?:[a-z][a-z\d+.-]*:)?\/\/[^/]+/i)?.[0] ?? '';
-  const base =
-    publicPath && publicPath !== 'auto'
-      ? publicPath
-      : entry.slice(0, entry.lastIndexOf('/') + 1);
+  const base = publicPath;
   if (/^(?:[a-z][a-z\d+.-]*:)?\/\//i.test(base)) {
     return `${base.replace(/\/$/, '')}/${assetPath.replace(/^\//, '')}`;
   }
   if (base.startsWith('/')) {
     return `${origin}${base.replace(/\/$/, '')}/${assetPath.replace(/^\//, '')}`;
   }
-  return `${entry.slice(0, entry.lastIndexOf('/') + 1)}${base.replace(/\/$/, '')}/${assetPath.replace(/^\//, '')}`;
+  return `${entryDirectory}${base.replace(/\/$/, '')}/${assetPath.replace(/^\//, '')}`;
 };
 
 const installChunk = (
