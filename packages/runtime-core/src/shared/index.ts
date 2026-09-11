@@ -133,11 +133,37 @@ export class SharedHandler {
     }>('initContainerShareScopeMap'),
   });
   initTokens: InitTokens;
+  /**
+   * Init scope shared across all loadShare/loadShareSync calls of this
+   * SharedHandler instance, so the init-token guard inside
+   * initializeSharing short-circuits repeat invocations instead of
+   * re-registering the whole host share table on every share consumption.
+   */
+  shareInitScope: InitScope;
+  /**
+   * Remote-initialization promises per share scope, captured by the call
+   * that first initialized the scope. Repeat invocations that hit the
+   * init-token guard return them so concurrent consumers also await remote
+   * share registration.
+   */
+  shareInitPromises: Record<string, Array<Promise<void>>>;
   constructor(host: ModuleFederation) {
     this.host = host;
     this.shareScopeMap = {};
     this.initTokens = {};
+    this.shareInitScope = [];
+    this.shareInitPromises = {};
     this._setGlobalShareScopeMap(host.options);
+  }
+
+  /**
+   * Forget the per-scope sharing initialization, so the next version-first
+   * loadShare re-initializes (e.g. after registerRemotes added a remote
+   * whose shares must join version selection).
+   */
+  resetShareInit(): void {
+    this.shareInitScope = [];
+    this.shareInitPromises = {};
   }
 
   private emitAfterRegisterShare(
@@ -150,6 +176,10 @@ export class SharedHandler {
       trigger: SharedLoadTrigger;
     },
   ): void {
+    // skip the emit entirely when nobody listens: registration of the host
+    // share table calls this once per shared entry, which adds up on large
+    // share tables
+    if (this.hooks.lifecycle.afterRegisterShare.listeners.size === 0) return;
     this.hooks.lifecycle.afterRegisterShare.emit({
       pkgName,
       ...input,
@@ -231,11 +261,13 @@ export class SharedHandler {
       const sharedVals = newShareInfos[sharedKey];
       sharedVals.forEach((sharedVal) => {
         sharedVal.scope.forEach((sc) => {
-          this.hooks.lifecycle.beforeRegisterShare.emit({
-            origin: this.host,
-            pkgName: sharedKey,
-            shared: sharedVal,
-          });
+          if (this.hooks.lifecycle.beforeRegisterShare.listeners.size > 0) {
+            this.hooks.lifecycle.beforeRegisterShare.emit({
+              origin: this.host,
+              pkgName: sharedKey,
+              shared: sharedVal,
+            });
+          }
           const registeredShared = this.shareScopeMap[sc]?.[sharedKey];
           const previousAtVersion = registeredShared?.[sharedVal.version];
           if (!registeredShared) {
@@ -292,6 +324,7 @@ export class SharedHandler {
               this.initializeSharing(shareScope, {
                 strategy: shareOptions.strategy,
                 context: loadContext,
+                initScope: this.shareInitScope,
               }),
             );
             return;
@@ -481,7 +514,12 @@ export class SharedHandler {
       let initToken = initTokens[shareScopeName];
       if (!initToken)
         initToken = initTokens[shareScopeName] = { from: this.host.name };
-      if (initScope.indexOf(initToken) >= 0) return promises;
+      if (initScope.indexOf(initToken) >= 0) {
+        // already initialized (or initializing): return the remote-init
+        // promises of that run so this consumer also awaits remote share
+        // registration instead of resolving against the share map too early
+        return this.shareInitPromises[shareScopeName] || promises;
+      }
       initScope.push(initToken);
     }
 
@@ -585,6 +623,20 @@ export class SharedHandler {
       });
     }
 
+    // only the call that pushed the token into the persistent init scope
+    // owns this scope's initialization: its promises are what repeat
+    // invocations must await
+    if (initScope === this.shareInitScope) {
+      this.shareInitPromises[shareScopeName] = promises;
+      // forget a failed initialization so the next loadShare retries
+      // instead of replaying the cached rejection forever
+      Promise.all(promises).catch(() => {
+        if (this.shareInitPromises[shareScopeName] === promises) {
+          this.resetShareInit();
+        }
+      });
+    }
+
     return promises;
   }
 
@@ -611,6 +663,7 @@ export class SharedHandler {
             strategy: shareOptions.strategy,
             from: extraOptions?.from,
             context: loadContext,
+            initScope: this.shareInitScope,
           });
         });
       }
