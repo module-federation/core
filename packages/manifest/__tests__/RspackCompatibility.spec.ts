@@ -29,10 +29,18 @@ const { JSDOM } = process
   .createRequire(hostRequire.resolve('jest-environment-jsdom'))('jsdom');
 
 beforeAll(() => {
+  const remotePreview =
+    nativeRequire('../package.json').devDependencies['@rspack/core'];
+  const remotePackage = nativeRequire.resolve('@rspack/core/package.json');
+  const revision = remotePreview.slice(remotePreview.lastIndexOf('@') + 1);
+  // pnpm truncates long URL dependency directory names, retaining the SHA prefix.
+  expect(remotePackage).toContain(revision.slice(0, 12));
   console.info('Federation compatibility versions', {
     host: hostRequire('@rspack/core/package.json').version,
     runtime: toolsRequire('@module-federation/runtime/package.json').version,
-    remote: nativeRequire('../package.json').devDependencies['@rspack/core'],
+    hostTools,
+    remote: remotePreview,
+    remotePackage,
   });
 });
 
