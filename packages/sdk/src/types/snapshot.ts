@@ -2,6 +2,8 @@ import { TreeShakingStatus } from '../constant';
 import { RemoteEntryType, StatsAssets } from './stats';
 
 interface BasicModuleInfo {
+  /** Provider identity from the manifest; independent of host registration/global names. */
+  providerName?: string;
   dev?: {
     version?: string;
     remotes?: { [nameWithType: string]: string };

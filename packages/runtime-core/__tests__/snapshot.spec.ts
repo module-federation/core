@@ -1,3 +1,4 @@
+import { assignRemoteInfo } from '../src/plugins/snapshot';
 import { assert, describe, it } from '@rstest/core';
 import { ModuleFederation } from '../src';
 import { getGlobalSnapshot, resetFederationGlobalInfo } from '../src/global';
@@ -46,4 +47,20 @@ describe('snapshot', () => {
       },
     });
   });
+});
+
+it('keeps manifest provider identity separate from the host registration and container global', () => {
+  const remote = { name: 'dynamic' } as any;
+  assignRemoteInfo(remote, {
+    providerName: 'provider',
+    remoteEntry: 'entry.js',
+    remoteEntryType: 'global',
+    globalName: '__FEDERATION_custom:custom__',
+    publicPath: 'https://example.com/',
+    version: '1',
+    buildVersion: 'build',
+  } as any);
+  expect(remote.name).toBe('dynamic');
+  expect(remote.providerName).toBe('provider');
+  expect(remote.entryGlobalName).toBe('__FEDERATION_custom:custom__');
 });
