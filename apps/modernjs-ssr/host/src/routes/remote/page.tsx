@@ -5,10 +5,12 @@ import {
   loadRemote,
 } from '@module-federation/modern-js-v3/runtime';
 
+type LazyRemoteModule = { default: React.ComponentType<any> };
+
 const NewRemoteCom = React.lazy(() =>
   loadRemote('remote/Image').then((m) => {
     console.log('加载');
-    return m;
+    return m as LazyRemoteModule;
   }),
 );
 

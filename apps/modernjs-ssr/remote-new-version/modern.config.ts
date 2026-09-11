@@ -5,6 +5,10 @@ const typeCheckerTypeScriptPath = require.resolve('typescript-compiler');
 
 // https://modernjs.dev/en/configure/app/usage
 export default defineConfig({
+  output: {
+    assetPrefix: 'http://127.0.0.1:3055',
+  },
+
   server: {
     ssr: {
       mode: 'stream',

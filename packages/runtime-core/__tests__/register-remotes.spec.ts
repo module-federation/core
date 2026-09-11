@@ -1,5 +1,6 @@
 import { assert, describe, it, expect, rs } from '@rstest/core';
 import { ModuleFederation } from '../src/index';
+import { Global } from '../src/global';
 
 describe('ModuleFederation', () => {
   it('registers new remotes and loads them correctly', async () => {
@@ -208,5 +209,390 @@ describe('ModuleFederation', () => {
     assert(nextAppModule);
     expect(await nextAppModule()).toBe('hello world "@snapshot/remote2"');
     expect(manifestFetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('emits removeRemote hook before force registering an existing remote', () => {
+    const removeRemote = rs.fn();
+    const FM = new ModuleFederation({
+      name: '@federation/instance',
+      version: '1.0.1',
+      remotes: [
+        {
+          name: '@register-remotes/app1',
+          entry:
+            'http://localhost:1111/resources/register-remotes/app1/federation-remote-entry.js',
+        },
+      ],
+      plugins: [
+        {
+          name: 'remove-remote-test-plugin',
+          removeRemote,
+        },
+      ],
+    });
+
+    FM.registerRemotes(
+      [
+        {
+          name: '@register-remotes/app1',
+          entry:
+            'http://localhost:1111/resources/register-remotes/app1/federation-remote-entry2.js',
+        },
+      ],
+      { force: true },
+    );
+
+    expect(removeRemote).toHaveBeenCalledWith({
+      remote: expect.objectContaining({ name: '@register-remotes/app1' }),
+      origin: FM,
+    });
+  });
+
+  it('removes a registered remote by name and emits removeRemote hook', async () => {
+    const removeRemote = rs.fn();
+    const FM = new ModuleFederation({
+      name: '@federation/instance',
+      version: '1.0.1',
+      remotes: [
+        {
+          name: '@register-remotes/app1',
+          alias: 'app1',
+          entry:
+            'http://localhost:1111/resources/register-remotes/app1/federation-remote-entry.js',
+        },
+      ],
+      plugins: [
+        {
+          name: 'direct-remove-remote-test-plugin',
+          removeRemote,
+        },
+      ],
+    });
+
+    await FM.removeRemote('app1');
+
+    expect(FM.options.remotes).toHaveLength(0);
+    expect(removeRemote).toHaveBeenCalledWith({
+      remote: expect.objectContaining({
+        name: '@register-remotes/app1',
+        alias: 'app1',
+      }),
+      origin: FM,
+    });
+
+    await FM.removeRemote('app1');
+    expect(removeRemote).toHaveBeenCalledTimes(2);
+    expect(removeRemote).toHaveBeenLastCalledWith({
+      remote: expect.objectContaining({
+        name: 'app1',
+      }),
+      origin: FM,
+    });
+  });
+
+  it('clears loaded remote entry cache when removing a remote', async () => {
+    const entry =
+      'http://localhost:1111/resources/register-remotes/app1/federation-remote-entry.js';
+    const remoteEntryClear = rs.fn();
+    const libClear = rs.fn();
+    const globalClear = rs.fn();
+    const FM = new ModuleFederation({
+      name: '@federation/instance',
+      version: '1.0.1',
+      remotes: [
+        {
+          name: '@register-remotes/app1',
+          alias: 'app1',
+          entry,
+        },
+      ],
+    });
+
+    FM.moduleCache.set('@register-remotes/app1', {
+      remoteInfo: {
+        name: '@register-remotes/app1',
+        alias: 'app1',
+        entry,
+        type: 'global',
+        entryGlobalName: 'app1',
+        shareScope: 'default',
+      },
+      remoteEntryExports: {
+        get: rs.fn(),
+        init: rs.fn(),
+        __webpack_clear_cache__: remoteEntryClear,
+      },
+      lib: {
+        get: rs.fn(),
+        init: rs.fn(),
+        __webpack_clear_cache__: libClear,
+      },
+    } as any);
+    (globalThis as any).app1 = {
+      get: rs.fn(),
+      init: rs.fn(),
+      __webpack_clear_cache__: globalClear,
+    };
+    Global.__FEDERATION__.moduleInfo = {
+      '@federation/instance:1.0.1': {
+        version: '1.0.1',
+        remoteEntry: '',
+        remotesInfo: {
+          '@register-remotes/app1': {
+            matchedVersion: entry,
+          },
+          '@register-remotes/app2': {
+            matchedVersion: 'http://localhost:1111/app2/mf-manifest.json',
+          },
+        },
+      },
+      [`@register-remotes/app1:${entry}`]: {
+        version: entry,
+        remoteEntry: 'static/remoteEntry.js',
+      },
+    } as any;
+    Global.__FEDERATION__.__MANIFEST_LOADING__[entry] = Promise.resolve(
+      {} as any,
+    );
+    FM.snapshotHandler.manifestCache.set(entry, {} as any);
+
+    await FM.removeRemote('app1');
+
+    expect(remoteEntryClear).toHaveBeenCalledTimes(1);
+    expect(libClear).toHaveBeenCalledTimes(1);
+    expect(globalClear).toHaveBeenCalledTimes(1);
+    expect(FM.moduleCache.has('@register-remotes/app1')).toBe(false);
+    expect((globalThis as any).app1).toBeUndefined();
+    expect(
+      Global.__FEDERATION__.moduleInfo['@federation/instance:1.0.1']
+        .remotesInfo?.['@register-remotes/app1'],
+    ).toBeUndefined();
+    expect(
+      Global.__FEDERATION__.moduleInfo['@federation/instance:1.0.1']
+        .remotesInfo?.['@register-remotes/app2'],
+    ).toEqual({
+      matchedVersion: 'http://localhost:1111/app2/mf-manifest.json',
+    });
+    expect(
+      Global.__FEDERATION__.moduleInfo[`@register-remotes/app1:${entry}`],
+    ).toBeUndefined();
+    expect(Global.__FEDERATION__.__MANIFEST_LOADING__[entry]).toBeUndefined();
+    expect(FM.snapshotHandler.manifestCache.has(entry)).toBe(false);
+  });
+
+  it.each(
+    [
+      { registered: true, loading: false },
+      { registered: false, loading: false },
+      { registered: true, loading: true },
+      { registered: false, loading: true },
+    ].flatMap((flags) =>
+      ['@register-remotes/app1', 'app1', 'manifest-provider'].map(
+        (providerName) => ({
+          ...flags,
+          providerName,
+        }),
+      ),
+    ),
+  )(
+    'keeps shared provider caches: %j',
+    async ({ registered, loading, providerName }) => {
+      const entry =
+        'http://localhost:1111/resources/register-remotes/app1/federation-remote-entry.js';
+      const remoteEntryClear = rs.fn();
+      const selectiveClear = rs.fn();
+      const shared: any = {
+        version: '1.0.0',
+        from: providerName,
+        get: rs.fn(),
+        shareConfig: { requiredVersion: false },
+        scope: ['default'],
+        useIn: loading ? [providerName] : [providerName, 'another-remote'],
+        deps: [],
+        lib: loading ? undefined : () => ({ value: 'shared from app1' }),
+        loaded: !loading,
+        loading: loading
+          ? Promise.resolve(() => ({ value: 'shared from app1' }))
+          : undefined,
+        strategy: 'version-first' as const,
+      };
+      const FM = new ModuleFederation({
+        name: '@federation/instance',
+        version: '1.0.1',
+        remotes: [
+          {
+            name: '@register-remotes/app1',
+            alias: 'app1',
+            entry,
+          },
+        ],
+      });
+      const previousInstances = [...Global.__FEDERATION__.__INSTANCES__];
+      const previousShareScope = Global.__FEDERATION__.__SHARE__;
+
+      FM.moduleCache.set('@register-remotes/app1', {
+        remoteInfo: {
+          name: '@register-remotes/app1',
+          providerName,
+          alias: 'app1',
+          entry,
+          type: 'global',
+          entryGlobalName: 'app1',
+          shareScope: 'default',
+        },
+        remoteEntryExports: {
+          get: rs.fn(),
+          init: rs.fn(),
+          __webpack_clear_cache__: remoteEntryClear,
+          __webpack_clear_exposed_cache__: selectiveClear,
+        },
+      } as any);
+      (globalThis as any).app1 = {
+        __webpack_clear_cache__: remoteEntryClear,
+        __webpack_clear_exposed_cache__: selectiveClear,
+      };
+      if (registered)
+        Global.__FEDERATION__.__INSTANCES__.push({
+          name: providerName,
+          options: { id: providerName },
+          shareScopeMap: {},
+        } as any);
+      Global.__FEDERATION__.__SHARE__ = {
+        [providerName]: {
+          default: {
+            'shared-from-app1': {
+              '1.0.0': shared,
+            },
+          },
+        },
+      };
+
+      try {
+        await FM.removeRemote('app1');
+
+        expect(FM.options.remotes).toHaveLength(0);
+        expect(remoteEntryClear).not.toHaveBeenCalled();
+        expect(selectiveClear).toHaveBeenCalledTimes(2);
+        expect(FM.moduleCache.has('@register-remotes/app1')).toBe(false);
+        expect((globalThis as any).app1).toBeDefined();
+        expect(shared.from).toBe(providerName);
+        expect(shared.providerState).toBe(1);
+        expect(shared.useIn).toEqual(loading ? [] : ['another-remote']);
+      } finally {
+        Global.__FEDERATION__.__INSTANCES__.splice(
+          0,
+          Global.__FEDERATION__.__INSTANCES__.length,
+          ...previousInstances,
+        );
+        Global.__FEDERATION__.__SHARE__ = previousShareScope;
+        delete (globalThis as any).app1;
+      }
+    },
+  );
+
+  it('keeps loaded remote cleanup context when removeRemote hook clears moduleCache first', async () => {
+    const entry =
+      'http://localhost:1111/resources/register-remotes/app1/federation-remote-entry.js';
+    const observed = rs.fn();
+    const remoteEntryClear = rs.fn();
+    const libClear = rs.fn();
+    const globalClear = rs.fn();
+    const FM = new ModuleFederation({
+      name: '@federation/instance',
+      version: '1.0.1',
+      remotes: [
+        {
+          name: '@register-remotes/app1',
+          alias: 'app1',
+          entry,
+        },
+      ],
+      plugins: [
+        {
+          name: 'module-cache-first-remove-plugin',
+          removeRemote({ origin }) {
+            origin.moduleCache.delete('@register-remotes/app1');
+          },
+        },
+        {
+          name: 'later-remove-hook',
+          removeRemote({ origin, remoteInfo }) {
+            expect(origin.moduleCache.has('@register-remotes/app1')).toBe(
+              false,
+            );
+            observed(remoteInfo);
+          },
+        },
+      ],
+    });
+
+    FM.moduleCache.set('@register-remotes/app1', {
+      remoteInfo: {
+        name: '@register-remotes/app1',
+        alias: 'app1',
+        entry,
+        type: 'global',
+        entryGlobalName: 'app1',
+        shareScope: 'default',
+      },
+      remoteEntryExports: {
+        get: rs.fn(),
+        init: rs.fn(),
+        __webpack_clear_cache__: remoteEntryClear,
+      },
+      lib: {
+        get: rs.fn(),
+        init: rs.fn(),
+        __webpack_clear_cache__: libClear,
+      },
+    } as any);
+    (globalThis as any).app1 = {
+      get: rs.fn(),
+      init: rs.fn(),
+      __webpack_clear_cache__: globalClear,
+    };
+    Global.__FEDERATION__.moduleInfo = {
+      '@federation/instance:1.0.1': {
+        version: '1.0.1',
+        remoteEntry: '',
+        remotesInfo: {
+          '@register-remotes/app1': {
+            matchedVersion: entry,
+          },
+        },
+      },
+      [`@register-remotes/app1:${entry}`]: {
+        version: entry,
+        remoteEntry: 'static/remoteEntry.js',
+      },
+    } as any;
+    Global.__FEDERATION__.__MANIFEST_LOADING__[entry] = Promise.resolve(
+      {} as any,
+    );
+    FM.snapshotHandler.manifestCache.set(entry, {} as any);
+
+    await FM.removeRemote('app1');
+
+    expect(observed).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: '@register-remotes/app1',
+        entryGlobalName: 'app1',
+        entry,
+      }),
+    );
+    expect(remoteEntryClear).toHaveBeenCalledTimes(1);
+    expect(libClear).toHaveBeenCalledTimes(1);
+    expect(globalClear).toHaveBeenCalledTimes(1);
+    expect(FM.moduleCache.has('@register-remotes/app1')).toBe(false);
+    expect((globalThis as any).app1).toBeUndefined();
+    expect(
+      Global.__FEDERATION__.moduleInfo['@federation/instance:1.0.1']
+        .remotesInfo?.['@register-remotes/app1'],
+    ).toBeUndefined();
+    expect(
+      Global.__FEDERATION__.moduleInfo[`@register-remotes/app1:${entry}`],
+    ).toBeUndefined();
+    expect(Global.__FEDERATION__.__MANIFEST_LOADING__[entry]).toBeUndefined();
+    expect(FM.snapshotHandler.manifestCache.has(entry)).toBe(false);
   });
 });

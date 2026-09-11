@@ -4,10 +4,10 @@
   "version": "0.1.34",
   "scripts": {
     "reset": "npx rimraf ./**/node_modules",
-    "dev": "TS_NODE_COMPILER=typescript-compiler modern dev",
+    "dev": "TS_NODE_COMPILER=typescript-compiler node --expose-gc ./node_modules/@modern-js/app-tools/bin/modern.js dev",
     "build": "TS_NODE_COMPILER=typescript-compiler modern build",
     "start": "TS_NODE_COMPILER=typescript-compiler modern start",
-    "serve": "TS_NODE_COMPILER=typescript-compiler modern serve",
+    "serve": "TS_NODE_COMPILER=typescript-compiler node --expose-gc ./node_modules/@modern-js/app-tools/bin/modern.js serve",
     "new": "TS_NODE_COMPILER=typescript-compiler modern new",
     "lint": "TS_NODE_COMPILER=typescript-compiler modern lint",
     "upgrade": "TS_NODE_COMPILER=typescript-compiler modern upgrade",
