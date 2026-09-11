@@ -130,6 +130,8 @@ export class RemoteHandler {
         {
           remote: Remote;
           origin: ModuleFederation;
+          /** Resolved identity captured before user removal hooks mutate caches. */
+          remoteInfo?: RemoteInfo;
         },
       ],
       void
@@ -768,7 +770,13 @@ export class RemoteHandler {
     const { name } = remote;
     const loadedModule = host.moduleCache.get(remote.name);
     return Promise.resolve(
-      this.hooks.lifecycle.removeRemote.emit({ remote, origin: host }),
+      this.hooks.lifecycle.removeRemote.emit({
+        remote,
+        origin: host,
+        remoteInfo: loadedModule?.remoteInfo
+          ? { ...loadedModule.remoteInfo }
+          : undefined,
+      }),
     )
       .then(() => {
         const remoteIndex = host.options.remotes.findIndex(
@@ -789,7 +797,11 @@ export class RemoteHandler {
           // name (for example dynamic -> catalog). Shared.from uses the provider
           // identity, so scanning only the registration name can clear live libs.
           const providerNames = new Set(
-            [remoteInfo.name, remoteInfo.entryGlobalName].filter(Boolean),
+            [
+              remoteInfo.providerName,
+              remoteInfo.name,
+              remoteInfo.entryGlobalName,
+            ].filter((name): name is string => Boolean(name)),
           );
           let remoteInsId = remoteInfo.buildVersion
             ? composeKeyWithSeparator(remoteInfo.name, remoteInfo.buildVersion)

@@ -1,6 +1,7 @@
 import * as runtime from '@module-federation/runtime';
 import type {
   Remote,
+  RemoteInfo,
   RemoteEntryInitOptions,
   SharedConfig,
   SharedGetter,
@@ -189,6 +190,8 @@ export type RemoteChunkMapping = Record<string, Array<ModuleId>>;
 export type ClearCacheOptions = {
   name: string;
   remoteKey?: string;
+  /** @internal Identity captured before the removeRemote hook chain. */
+  remoteInfo?: RemoteInfo;
 };
 
 export type ClearCacheRuntimeOptions = ClearCacheOptions & {

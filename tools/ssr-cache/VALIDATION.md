@@ -262,3 +262,140 @@ arbitrary old application bundle. Persistent MF instances, shared providers and
 saved business exports can still retain bundled code. Callers must drain work
 before disposal. Actual Modern production serve, stream/abort, long-running heap
 stability and rebuild recovery remain later acceptance gates.
+
+## Resolved provider identity repair — 2026-09-11
+
+Base: `97ef36f3c` (merged #5053). Independent worktree, Node 24.18.1,
+pnpm 10.28.0, published Rspack `2.2.3-canary-76e8f696-20260911033013`.
+
+The new cases distinguish registration, provider and container-global identities.
+Temporarily restoring the base `clearCache.ts` and `remote/index.ts` against the
+new tests produced **5 bundler failures and 4 runtime-core failures**. These
+include both settled/in-flight shared providers, present/removed provider
+instances, and an unrelated business global named after the registration.
+Restoring the repair makes those tests pass.
+
+Validation commands (from the isolated core worktree):
+
+```sh
+corepack enable
+pnpm install --frozen-lockfile
+pnpm exec turbo run build --filter=@module-federation/runtime-tools
+pnpm --filter @module-federation/sdk test
+pnpm --filter @module-federation/webpack-bundler-runtime test --runInBand
+pnpm --filter @module-federation/runtime-core test
+pnpm --filter @module-federation/runtime-core exec rstest
+SSR_CACHE_STRICT=1 SSR_CACHE_EXPECT_NATIVE=1 node --test tools/ssr-cache/baseline.test.cjs
+SSR_CACHE_STRICT=1 SSR_CACHE_EXPECT_NATIVE=1 SSR_CACHE_MODERN_ENTRY=/Users/bytedance/work/modern.js/packages/server/core/dist/cjs/adapters/node/index.js node --test tools/ssr-cache/baseline.test.cjs
+pnpm exec prettier --check .
+git diff --check
+python3 .codex/skills/changeset-pr/scripts/inspect_changeset_scope.py --base origin/feat/mf-ssr-clear-cache --file .changeset/ssr-resolved-provider-identity.md
+python3 .codex/skills/changeset-pr/scripts/run_changeset_status.py --output /tmp/mf-provider-changeset-status.json
+```
+
+Results: all 6 build tasks passed; SDK 69 passed with its existing disabled DOM
+link-reuse test unchanged; bundler-runtime 127 passed; runtime-core 143 passed.
+The final runtime-core command omits the package script's snapshot-update flag.
+Native Rspack baseline: 22 passed with the optional Modern test initially omitted;
+with the existing built Modern entry supplied, **23 passed, no skips or TODOs**.
+Repository-wide formatting and whitespace checks passed.
+The scope helper requires deferred annotations on this machine’s Python 3.9;
+its first direct invocation failed before inspection. Running the unchanged
+helper with Python’s `__future__.annotations` compiler flag passed. Changesets
+status also passed.
+
+One initial Jest run started before its runtime dependency build finished and
+could not resolve that package; rerunning after the build passed. SDK assertions
+initially rejected the newly retained snapshot field; expected fixtures were
+updated explicitly. No other snapshots were changed. The red/green runs restored
+all repaired sources in a `finally` block.
+
+A separate Modern worktree was installed and its existing server-core tests ran
+while examining entry-scoped coordination (first attempt hit sandbox listener
+EPERM; the permitted rerun passed). No Modern implementation change is included:
+the exploratory scope draft is not an accepted R4 implementation.
+
+The full browser/Cypress and unrelated package/E2E matrices were not rerun for
+this focused metadata/cleanup repair; targeted package tests and native
+Rspack/Modern HTTP regressions cover the changed behavior. Production hydration,
+entry-scope completeness and long-running resource acceptance remain R4–R6.
+No publish command was run. Changesets lists the three changed packages; fixed
+release groups can expand the eventual release plan.
+
+
+### Removal-hook ordering follow-up (2026-09-11)
+
+PR #5060 review identified that a user hook can delete moduleCache before the
+bundler cache hook. Capture a copy of resolved remoteInfo at the start of runtime
+removal, pass it through the hook payload, and prefer it during bundler target
+resolution. Registration-named business globals remain untouched even when the
+cache entry is already absent. The runtime regression verifies the later hook sees
+the captured identity after the first hook clears the cache; the bundler regression
+verifies actual resolved-container clearing and business-global retention.
+
+Commands from `/private/tmp/mf-5060-review`:
+
+```sh
+corepack enable
+pnpm install --frozen-lockfile
+pnpm exec turbo run build --filter=@module-federation/runtime-tools
+pnpm --filter @module-federation/runtime-core test
+pnpm --filter @module-federation/webpack-bundler-runtime test
+SSR_CACHE_STRICT=1 SSR_CACHE_EXPECT_NATIVE=1 SSR_CACHE_MODERN_ENTRY=/private/tmp/modern-r4-static-update/packages/server/core/dist/cjs/adapters/node/index.js node --test tools/ssr-cache/baseline.test.cjs
+pnpm exec prettier --check .
+python3 .codex/skills/changeset-pr/scripts/run_changeset_status.py --output /tmp/5060-changeset-status.json
+git diff --check
+```
+
+All six dependency build tasks pass; runtime-core 143/143 and bundler-runtime
+128/128 pass. Full browser/E2E matrices and unrelated packages are not rerun for
+this hook-payload repair; native artifact checks complement the package regressions.
+SDK behavior did not change in this follow-up, so its earlier 69-pass result was
+not rerun. No publish command is used.
+## R4 static entry ownership and Modern selective publication (2026-09-11)
+
+MF worktree: `/private/tmp/mf-r4-static-update`; companion Modern worktree:
+`/private/tmp/modern-r4-static-update`. Rspack preview:
+`2.2.3-canary-76e8f696-20260911033013`. Public opt-in and scope contracts are in
+`packages/modernjs-v3/README.md`; Modern artifact commands and detailed results are
+in `packages/server/core/SSR_REQUEST_COORDINATION.md` in the companion branch.
+
+MF commands:
+
+```sh
+pnpm exec turbo run build --filter=@module-federation/modern-js-v3
+pnpm --filter @module-federation/modern-js-v3 build
+pnpm --filter @module-federation/modern-js-v3 test
+pnpm exec prettier --check .
+python3 .codex/skills/changeset-pr/scripts/run_changeset_status.py --output /tmp/r4-changeset-status.json
+git diff --check
+```
+
+Final package build and declarations pass; 31 tests pass, including per-instance
+replacement retry after registration failure. Repository-wide formatting passes.
+The initial compiler-plugin build rejected a literal runtime stage and nullable
+chunk ID; the implementation now uses RuntimeModule.STAGE_ATTACH and excludes null
+IDs. An initial sandboxed Rstest invocation could not bind its local listener
+(EPERM); the authorized rerun passes. The package build reports its existing
+root-export Publint module-type warning; this change does not alter package exports.
+
+Companion Modern server-core reports 49 passing tests, with server-core and
+prod-server dependency builds passing. Real Rspack/Modern HTTP artifact tests pass:
+static selective update (1), numeric IDs/minification (1), module-concatenation
+fallback (1), existing application HTTP regression (3), and production dynamic MF
+regression (1). The static fixture includes standalone loaders, shared ancestor
+entries, retained unrelated module identity, pending producer drain, cross-entry
+rewrites, HTML cache isolation, failed publication recovery and dynamic fallback.
+
+The optimized concatenated fixture exposes incomplete native ancestry to some
+entry roots in this preview. Its asserted result is application rebuilding with
+`incomplete-parent-closure`, not selective success. All updates retain the HTTP
+server and listening port. Default dynamic/mixed mode rebuilds the whole app;
+static-only mode requires the explicit ownership contract and complete graph.
+
+Full framework/builder E2E, browser hydration/Cypress, sustained-load and resource
+soak checks are not claimed; they remain R6 acceptance. RSC is explicitly outside
+scope. R5's generic API migration is not implemented by this Modern-only adapter.
+No workflow or publication behavior changes; no publish commands were run.
+The R4 changeset names only modern-js-v3 (minor); fixed release groups can expand
+the eventual release plan. Earlier #5060 changesets belong to the prerequisite.

@@ -430,6 +430,20 @@ export const moduleFederationConfigPlugin = (
         userConfig.originPluginOptions.autoOptimization,
       );
       patchMFConfig(targetMFConfig, !isWeb);
+      if (
+        !isWeb &&
+        typeof userConfig.originPluginOptions.ssr === 'object' &&
+        userConfig.originPluginOptions.ssr.cacheUpdates
+      ) {
+        injectRuntimePlugins(
+          resolvePackageFile(
+            '@module-federation/modern-js-v3',
+            'dist/esm/cli/mfRuntimePlugins/ssr-ownership.mjs',
+            'dist/cjs/cli/mfRuntimePlugins/ssr-ownership.js',
+          ),
+          targetMFConfig.runtimePlugins as RuntimePluginEntry[],
+        );
+      }
 
       if (
         modernjsConfig.source?.enableAsyncEntry !== true &&

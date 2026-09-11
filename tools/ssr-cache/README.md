@@ -362,3 +362,24 @@ application-rebuild integration test was skipped because this isolated worktree
 does not supply a separate built Modern checkout. The worktree uses direct Turbo
 and package scripts as required by AGENTS.md. The rest of the platform E2E matrix
 is left to GitHub CI; this dependency update adds no package implementation.
+
+### Resolved provider identity
+
+A host registration such as `dynamic`, the manifest provider name such as
+`catalog`, and a container global such as `__FEDERATION_catalog:custom__` are
+three separate identities. Snapshots now retain `providerName` from the manifest
+and pass it to resolved remote metadata. Shared-provider retention uses that
+identity even after its runtime has left the instance registry. This does not
+change `Shared.from` or its deferred name/version API.
+
+Resolved container metadata supersedes the registration's default global during
+cleanup. Only the selected container global is cleared; an unrelated
+`globalThis.dynamic` is preserved. The cleanup no longer probes additional globals
+based on guessed naming conventions.
+
+This repairs the R3 foundation before R4; it does not implement the static update
+planner. Locating a page chunk alone still does not prove request isolation:
+Modern can retain shared App, runtime-hook, route and loader objects at entry
+scope. R4 must connect compiler evidence, request scope and resource replacement
+before claiming selective-update acceptance. See `VALIDATION.md` for the repair's
+red/green regression evidence.
