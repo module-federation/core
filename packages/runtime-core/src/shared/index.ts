@@ -133,10 +133,18 @@ export class SharedHandler {
     }>('initContainerShareScopeMap'),
   });
   initTokens: InitTokens;
+  /**
+   * Init scope shared across all loadShare/loadShareSync calls of this
+   * SharedHandler instance. It lets the init-token guard inside
+   * initializeSharing short-circuit repeat invocations instead of
+   * re-registering the whole host share table on every share consumption.
+   */
+  shareInitScope: InitScope;
   constructor(host: ModuleFederation) {
     this.host = host;
     this.shareScopeMap = {};
     this.initTokens = {};
+    this.shareInitScope = [];
     this._setGlobalShareScopeMap(host.options);
   }
 
@@ -150,6 +158,10 @@ export class SharedHandler {
       trigger: SharedLoadTrigger;
     },
   ): void {
+    // skip the emit entirely when nobody listens: registration of the host
+    // share table calls this once per shared entry, which adds up on large
+    // share tables
+    if (this.hooks.lifecycle.afterRegisterShare.listeners.size === 0) return;
     this.hooks.lifecycle.afterRegisterShare.emit({
       pkgName,
       ...input,
@@ -231,11 +243,13 @@ export class SharedHandler {
       const sharedVals = newShareInfos[sharedKey];
       sharedVals.forEach((sharedVal) => {
         sharedVal.scope.forEach((sc) => {
-          this.hooks.lifecycle.beforeRegisterShare.emit({
-            origin: this.host,
-            pkgName: sharedKey,
-            shared: sharedVal,
-          });
+          if (this.hooks.lifecycle.beforeRegisterShare.listeners.size > 0) {
+            this.hooks.lifecycle.beforeRegisterShare.emit({
+              origin: this.host,
+              pkgName: sharedKey,
+              shared: sharedVal,
+            });
+          }
           const registeredShared = this.shareScopeMap[sc]?.[sharedKey];
           const previousAtVersion = registeredShared?.[sharedVal.version];
           if (!registeredShared) {
@@ -292,6 +306,7 @@ export class SharedHandler {
               this.initializeSharing(shareScope, {
                 strategy: shareOptions.strategy,
                 context: loadContext,
+                initScope: this.shareInitScope,
               }),
             );
             return;
@@ -611,6 +626,7 @@ export class SharedHandler {
             strategy: shareOptions.strategy,
             from: extraOptions?.from,
             context: loadContext,
+            initScope: this.shareInitScope,
           });
         });
       }
