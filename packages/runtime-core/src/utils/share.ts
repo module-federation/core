@@ -192,10 +192,14 @@ function getShareVersionMapForSelection(
   if (preferred !== shareVersionMap) {
     return preferred;
   }
-  // Scope has no real provider. Keep consume-only stubs only when the
-  // requester is also consume-only, preserving "must be provided by host".
+  // Scope has no real provider. If the requester is a real provider, register
+  // it as the candidate so later consume-only loadShare does not keep hitting
+  // a throwing stub, and so resolveShare still runs.
   if (!isConsumeOnlyStub(shareInfo)) {
-    return {};
+    shareVersionMap[shareInfo.version] = shareInfo;
+    return {
+      [shareInfo.version]: shareInfo,
+    };
   }
   return shareVersionMap;
 }
