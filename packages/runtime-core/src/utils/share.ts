@@ -166,17 +166,57 @@ export function versionLt(a: string, b: string): boolean {
   }
 }
 
+function isConsumeOnlyStub(shared?: {
+  shareConfig?: { import?: unknown };
+}): boolean {
+  return shared?.shareConfig?.import === false;
+}
+
+function preferRealShareProviders(
+  shareVersionMap: ShareScopeMap[string][string],
+): ShareScopeMap[string][string] {
+  const realEntries = Object.entries(shareVersionMap).filter(
+    ([, shared]) => !isConsumeOnlyStub(shared),
+  );
+  if (realEntries.length > 0) {
+    return Object.fromEntries(realEntries);
+  }
+  return shareVersionMap;
+}
+
+function getShareVersionMapForSelection(
+  shareVersionMap: ShareScopeMap[string][string],
+  shareInfo: Shared,
+): ShareScopeMap[string][string] {
+  const preferred = preferRealShareProviders(shareVersionMap);
+  if (preferred !== shareVersionMap) {
+    return preferred;
+  }
+  // Scope has no real provider. Keep consume-only stubs only when the
+  // requester is also consume-only, preserving "must be provided by host".
+  if (!isConsumeOnlyStub(shareInfo)) {
+    return {};
+  }
+  return shareVersionMap;
+}
+
 export const findVersion = (
   shareVersionMap: ShareScopeMap[string][string],
   cb?: (prev: string, cur: string) => boolean,
 ): string => {
+  const versionMap = preferRealShareProviders(shareVersionMap);
   const callback =
     cb ||
     function (prev: string, cur: string): boolean {
       return versionLt(prev, cur);
     };
 
-  return Object.keys(shareVersionMap).reduce((prev: number | string, cur) => {
+  const versionKeys = Object.keys(versionMap);
+  if (!versionKeys.length) {
+    return '';
+  }
+
+  return versionKeys.reduce((prev: number | string, cur) => {
     if (!prev) {
       return cur;
     }
@@ -386,12 +426,30 @@ export function getRegisteredShare(
       localShareScopeMap[sc][pkgName]
     ) {
       const { requiredVersion } = shareConfig;
+      const pkgVersions = localShareScopeMap[sc][pkgName];
+      const versionsForSelection = getShareVersionMapForSelection(
+        pkgVersions,
+        shareInfo,
+      );
+      if (!Object.keys(versionsForSelection).length) {
+        continue;
+      }
+      const selectionShareScopeMap: ShareScopeMap = {
+        ...localShareScopeMap,
+        [sc]: {
+          ...localShareScopeMap[sc],
+          [pkgName]: versionsForSelection,
+        },
+      };
       const findShareFunction = getFindShareFunction(strategy);
       const { version: maxOrSingletonVersion, useTreesShaking } =
-        findShareFunction(localShareScopeMap, sc, pkgName, treeShaking);
+        findShareFunction(selectionShareScopeMap, sc, pkgName, treeShaking);
 
       const defaultResolver = () => {
-        const shared = localShareScopeMap[sc][pkgName][maxOrSingletonVersion];
+        const shared = versionsForSelection[maxOrSingletonVersion];
+        if (!shared) {
+          return;
+        }
         if (shareConfig.singleton) {
           if (
             typeof requiredVersion === 'string' &&
@@ -430,7 +488,7 @@ export function getRegisteredShare(
           const _usedTreeShaking = shouldUseTreeShaking(treeShaking);
           if (_usedTreeShaking) {
             for (const [versionKey, versionValue] of Object.entries(
-              localShareScopeMap[sc][pkgName],
+              versionsForSelection,
             )) {
               if (
                 !shouldUseTreeShaking(
@@ -450,7 +508,7 @@ export function getRegisteredShare(
             }
           }
           for (const [versionKey, versionValue] of Object.entries(
-            localShareScopeMap[sc][pkgName],
+            versionsForSelection,
           )) {
             if (satisfy(versionKey, requiredVersion)) {
               return {
