@@ -305,6 +305,45 @@ When `force: true` is set, the newly registered modules will overwrite already-r
 
 :::
 
+### Loading remotes with custom headers via the `fetch` hook
+
+Some remotes require specific headers to be accessed. In that case you can configure the headers through the runtime [`fetch` hook](./runtime-hooks#fetch). You can handle dynamic cases such as token refresh or per-request auth logic inside this hook.
+
+For **`module` / `esm`** remotes, when a `fetch` hook is registered the remote entry and its manifest-declared CSS are loaded through a `fetch` + blob loader so the headers you add reach every asset request. With no `fetch` hook registered, remotes load as before via native `import()` / `<link>` (which cannot carry custom headers).
+
+```ts
+import { createInstance } from '@module-federation/enhanced/runtime';
+
+const mf = createInstance({
+  name: 'mf_host',
+  remotes: [
+    {
+      name: 'sub1',
+      entry: 'https://localhost:2001/mf-manifest.json',
+      type: 'module',
+    },
+  ],
+  plugins: [
+    {
+      name: 'auth-fetch',
+      // `remoteInfo` lets you use different request options for specific remotes
+      fetch(url, init, remoteInfo) {
+        return fetch(url, {
+          ...init,
+          headers: { ...init.headers, Authorization: `Bearer ${token}` },
+        });
+      },
+    },
+  ],
+});
+```
+
+:::info
+
+Native preload hints (`<link rel="modulepreload">` / `<link rel="preload">`) cannot carry headers, so they may fail on an authenticated origin; the actual loads still go through the `fetch` hook when the asset is used. Authenticated CSS is injected directly and does not emit the `createLink` hook, so plugin-added `nonce`/SRI attributes are not applied to it.
+
+:::
+
 <Tabs>
   <Tab label="Build Plugin (Use build plugin)">
   ```tsx

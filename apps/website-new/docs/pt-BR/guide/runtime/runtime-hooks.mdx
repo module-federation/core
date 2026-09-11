@@ -726,7 +726,8 @@ const changeScriptAttributePlugin: () => ModuleFederationRuntimePlugin =
 
 `AsyncHook`
 
-O `fetch` função allows customizing o request esse fetches o manifest JSON. Uma successful `Response` deve yield uma valid JSON.
+O `fetch` função allows customizing o request esse fetches o manifest JSON; uma manifest `Response` carregada com sucesso deve retornar um JSON válido.
+Você também pode usar a função `fetch` para aplicar `headers` personalizados (por exemplo, `Authorization`) ao remote entry e aos recursos CSS declarados no manifest de remotes do tipo **`module` / `esm`**.
 
 ```typescript
 function fetch(
