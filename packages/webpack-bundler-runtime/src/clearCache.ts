@@ -32,6 +32,7 @@ type ChunkCacheControl = {
 };
 
 type RemoteInfoLike = {
+  providerName?: string;
   name?: string;
   alias?: string;
   entry?: string;
@@ -200,16 +201,11 @@ const getRemoteNames = (
 };
 
 const getRemoteEntryGlobalKeys = (remoteInfo: RemoteInfoLike) => {
-  const keys: string[] = [];
-  pushUnique(keys, [
-    remoteInfo.entryGlobalName,
-    remoteInfo.globalName,
-    remoteInfo.name,
-  ]);
-  if (remoteInfo.name) {
-    pushUnique(keys, [`__FEDERATION_${remoteInfo.name}:custom__`]);
-  }
-  return keys;
+  // An explicit container global replaces the default; registration aliases do
+  // not grant ownership of identically named business globals.
+  const key =
+    remoteInfo.entryGlobalName || remoteInfo.globalName || remoteInfo.name;
+  return key ? [key] : [];
 };
 
 const getRemoteEntryLoadingKey = (remoteInfo: RemoteInfoLike) => {
@@ -412,7 +408,7 @@ const getClearTarget = (
   }
 
   const remoteNames = getRemoteNames(webpackRequire, name, remoteKey);
-  const remoteInfos = [
+  let remoteInfos = [
     ...toList(
       webpackRequire.federation.bundlerRuntimeOptions.remotes?.remoteInfos?.[
         remoteKey
@@ -428,8 +424,11 @@ const getClearTarget = (
   }
   for (const remoteName of remoteNames) {
     const loaded = instance?.moduleCache?.get(remoteName);
-    if (loaded?.remoteInfo)
+    if (loaded?.remoteInfo) {
+      // Resolved manifest metadata supersedes the registration's default global.
+      remoteInfos = remoteInfos.filter((info) => info.name !== remoteName);
       remoteInfos.push(loaded.remoteInfo as RemoteInfoLike);
+    }
   }
   return {
     name,
@@ -656,7 +655,11 @@ const invalidateRemoteEntryUrlGenerations = (
 const getProviderNames = (target: ClearCacheTarget): string[] => {
   const names = [...target.remoteNames];
   for (const info of target.remoteInfos) {
-    pushUnique(names, [info.entryGlobalName, info.globalName]);
+    pushUnique(names, [
+      info.providerName,
+      info.entryGlobalName,
+      info.globalName,
+    ]);
   }
   return names;
 };

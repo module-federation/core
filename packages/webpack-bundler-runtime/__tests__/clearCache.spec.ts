@@ -153,7 +153,7 @@ describe('clearCache', () => {
 
   test.each(
     [false, true].flatMap((loading) =>
-      ['remoteA', 'containerA'].flatMap((providerName) =>
+      ['remoteA', 'containerA', 'manifest-provider'].flatMap((providerName) =>
         ['bundler', 'runtime'].map((source) => ({
           loading,
           providerName,
@@ -168,6 +168,10 @@ describe('clearCache', () => {
       const remoteEntryClear = jest.fn();
       const selectiveClear = jest.fn();
       const previousFederation = (globalThis as any).__FEDERATION__;
+      const globalName =
+        providerName === 'manifest-provider'
+          ? '__FEDERATION_custom:custom__'
+          : providerName;
       const shared = {
         from: providerName,
         loaded: !loading,
@@ -177,12 +181,17 @@ describe('clearCache', () => {
       };
 
       instance.moduleCache.set('remoteA', {
+        remoteInfo: {
+          name: 'remoteA',
+          entryGlobalName: globalName,
+          providerName,
+        },
         remoteEntryExports: {
           __webpack_clear_cache__: remoteEntryClear,
           __webpack_clear_exposed_cache__: selectiveClear,
         },
       });
-      (globalThis as any)[providerName] = {
+      (globalThis as any)[globalName] = {
         __webpack_clear_cache__: remoteEntryClear,
         __webpack_clear_exposed_cache__: selectiveClear,
       };
@@ -203,7 +212,7 @@ describe('clearCache', () => {
           {
             name: 'remoteA',
             entry: 'http://localhost:3001/remoteEntry.js',
-            entryGlobalName: providerName,
+            entryGlobalName: globalName,
           },
         ],
       };
@@ -212,7 +221,7 @@ describe('clearCache', () => {
           {
             name: 'remoteA',
             entry: 'http://localhost:3001/remoteEntry.js',
-            entryGlobalName: providerName,
+            entryGlobalName: globalName,
           },
         ] as any;
         webpackRequire.federation.bundlerRuntimeOptions.remotes.remoteInfos =
@@ -265,16 +274,54 @@ describe('clearCache', () => {
             'shared-from-remoteA'
           ]['1.0.0'],
         ).toBe(shared);
-        expect((globalThis as any)[providerName]).toBeDefined();
+        expect((globalThis as any)[globalName]).toBeDefined();
         expect(shared.from).toBe(providerName);
       } finally {
         (globalThis as any).__FEDERATION__ = previousFederation;
-        delete (globalThis as any)[providerName];
+        delete (globalThis as any)[globalName];
         (globalThis as any).window = previousWindow;
         (globalThis as any).document = previousDocument;
       }
     },
   );
+
+  test('resolved container identity never deletes a registration-named business global', async () => {
+    const { instance, webpackRequire } = createWebpackRequire();
+    const business = { dispose: jest.fn() };
+    const container = { __webpack_clear_cache__: jest.fn() };
+    const globals = globalThis as any;
+    const previous = globals.dynamic;
+    globals.dynamic = business;
+    globals.__test_resolved_container__ = container;
+    instance.options.remotes = [
+      {
+        name: 'dynamic',
+        entry: 'https://example.com/mf-manifest.json',
+        entryGlobalName: 'dynamic',
+      },
+    ] as any;
+    instance.moduleCache.set('dynamic', {
+      remoteInfo: {
+        name: 'dynamic',
+        entryGlobalName: '__test_resolved_container__',
+      },
+      remoteEntryExports: container,
+    });
+    try {
+      await clearCache({
+        name: 'dynamic',
+        webpackRequire: webpackRequire as any,
+      });
+      expect(globals.dynamic).toBe(business);
+      expect(business.dispose).not.toHaveBeenCalled();
+      expect(globals.__test_resolved_container__).toBeUndefined();
+      expect(container.__webpack_clear_cache__).toHaveBeenCalled();
+    } finally {
+      if (previous === undefined) delete globals.dynamic;
+      else globals.dynamic = previous;
+      delete globals.__test_resolved_container__;
+    }
+  });
 
   test('should evict old caches before pending remote load settles', async () => {
     const { instance, webpackRequire } = createWebpackRequire();

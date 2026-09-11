@@ -789,7 +789,11 @@ export class RemoteHandler {
           // name (for example dynamic -> catalog). Shared.from uses the provider
           // identity, so scanning only the registration name can clear live libs.
           const providerNames = new Set(
-            [remoteInfo.name, remoteInfo.entryGlobalName].filter(Boolean),
+            [
+              remoteInfo.providerName,
+              remoteInfo.name,
+              remoteInfo.entryGlobalName,
+            ].filter((name): name is string => Boolean(name)),
           );
           let remoteInsId = remoteInfo.buildVersion
             ? composeKeyWithSeparator(remoteInfo.name, remoteInfo.buildVersion)
