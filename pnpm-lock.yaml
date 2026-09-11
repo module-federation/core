@@ -6,8 +6,8 @@ settings:
 
 overrides:
   '@changesets/assemble-release-plan': workspace:*
-  '@rspack/core': npm:@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208
-  '@rspack/cli': npm:@rspack-canary/cli@2.2.3-canary-8e63776c-20260908113208
+  '@rspack/core': npm:@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013
+  '@rspack/cli': npm:@rspack-canary/cli@2.2.3-canary-76e8f696-20260911033013
   ajv: 8.18.0
   eslint>ajv: 6.14.0
   '@eslint/eslintrc>ajv': 6.14.0
@@ -131,14 +131,14 @@ importers:
         specifier: ^0.23.2
         version: 0.23.2(@microsoft/api-extractor@7.57.7(@types/node@20.19.5))(@module-federation/runtime-tools@2.9.0)(core-js@3.36.1)(typescript@6.0.3)
       '@rspack/cli':
-        specifier: npm:@rspack-canary/cli@2.2.3-canary-8e63776c-20260908113208
-        version: '@rspack-canary/cli@2.2.3-canary-8e63776c-20260908113208(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(@rspack/dev-server@2.1.0(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(selfsigned@5.5.0))'
+        specifier: npm:@rspack-canary/cli@2.2.3-canary-76e8f696-20260911033013
+        version: '@rspack-canary/cli@2.2.3-canary-76e8f696-20260911033013(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(@rspack/dev-server@2.1.0(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(selfsigned@5.5.0))'
       '@rspack/core':
-        specifier: npm:@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208
-        version: '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13)'
+        specifier: npm:@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013
+        version: '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13)'
       '@rspack/dev-server':
         specifier: 2.1.0
-        version: 2.1.0(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(selfsigned@5.5.0)
+        version: 2.1.0(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(selfsigned@5.5.0)
       '@rstest/core':
         specifier: ^0.10.6
         version: 0.10.6(@module-federation/runtime-tools@2.9.0)(core-js@3.36.1)(jsdom@20.0.3)
@@ -147,7 +147,7 @@ importers:
         version: 9.0.17(@types/react@19.2.14)(storybook@8.6.17(prettier@3.8.1))
       '@storybook/nextjs':
         specifier: 9.0.9
-        version: 9.0.9(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(@swc/core@1.7.26(@swc/helpers@0.5.13))(babel-plugin-macros@3.1.0)(esbuild@0.28.1)(next@14.2.35(@babel/core@7.29.0)(@playwright/test@1.57.0)(@swc/core@1.7.26(@swc/helpers@0.5.13))(babel-plugin-macros@3.1.0)(esbuild@0.28.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.100.0)(webpack-cli@5.1.4))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass-embedded@1.100.0)(sass@1.100.0)(storybook@8.6.17(prettier@3.8.1))(type-fest@2.19.0)(typescript@6.0.3)(webpack-cli@5.1.4)(webpack-dev-server@5.2.3)(webpack-hot-middleware@2.26.1)(webpack@5.104.1)
+        version: 9.0.9(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(@swc/core@1.7.26(@swc/helpers@0.5.13))(babel-plugin-macros@3.1.0)(esbuild@0.28.1)(next@14.2.35(@babel/core@7.29.0)(@playwright/test@1.57.0)(@swc/core@1.7.26(@swc/helpers@0.5.13))(babel-plugin-macros@3.1.0)(esbuild@0.28.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.100.0)(webpack-cli@5.1.4))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass-embedded@1.100.0)(sass@1.100.0)(storybook@8.6.17(prettier@3.8.1))(type-fest@2.19.0)(typescript@6.0.3)(webpack-cli@5.1.4)(webpack-dev-server@5.2.3)(webpack-hot-middleware@2.26.1)(webpack@5.104.1)
       '@svgr/webpack':
         specifier: 8.1.0
         version: 8.1.0(typescript@6.0.3)
@@ -240,7 +240,7 @@ importers:
         version: 11.0.0(webpack@5.104.1)
       css-loader:
         specifier: ^6.11.0
-        version: 6.11.0(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(webpack@5.104.1)
+        version: 6.11.0(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(webpack@5.104.1)
       cypress:
         specifier: 14.3.3
         version: 14.3.3
@@ -285,7 +285,7 @@ importers:
         version: 4.2.11
       html-webpack-plugin:
         specifier: 5.6.2
-        version: 5.6.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(webpack@5.104.1)
+        version: 5.6.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(webpack@5.104.1)
       husky:
         specifier: 8.0.3
         version: 8.0.3
@@ -690,8 +690,8 @@ importers:
         specifier: 0.5.15
         version: 0.5.15(react-refresh@0.14.2)(type-fest@2.19.0)(webpack-dev-server@5.2.3(webpack-cli@5.1.4)(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4)))(webpack-hot-middleware@2.26.1)(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4))
       '@rspack/core':
-        specifier: npm:@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208
-        version: '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)'
+        specifier: npm:@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013
+        version: '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)'
       '@rspack/plugin-react-refresh':
         specifier: ^0.7.5
         version: 0.7.5(react-refresh@0.14.2)
@@ -1093,7 +1093,7 @@ importers:
         version: 7.28.2
       '@modern-js/runtime':
         specifier: 3.5.0
-        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@module-federation/modern-js-v3':
         specifier: workspace:*
         version: link:../../../packages/modernjs-v3
@@ -1112,7 +1112,7 @@ importers:
         version: 2.59.0(@module-federation/runtime-tools@2.9.0)(typescript@7.0.2)
       '@modern-js/app-tools':
         specifier: 3.5.0
-        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(core-js@3.49.0)(encoding@0.1.13)(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(rollup@4.62.2)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@20.19.5)(typescript@7.0.2))(tsconfig-paths@4.2.0)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))
+        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(core-js@3.49.0)(encoding@0.1.13)(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(rollup@4.62.2)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@20.19.5)(typescript@7.0.2))(tsconfig-paths@4.2.0)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))
       '@modern-js/eslint-config':
         specifier: 2.59.0
         version: 2.59.0(@module-federation/runtime-tools@2.9.0)(typescript@7.0.2)
@@ -1154,7 +1154,7 @@ importers:
         version: 7.28.2
       '@modern-js/runtime':
         specifier: 3.5.0
-        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@module-federation/modern-js-v3':
         specifier: workspace:*
         version: link:../../../packages/modernjs-v3
@@ -1173,7 +1173,7 @@ importers:
         version: 2.59.0(@module-federation/runtime-tools@2.9.0)(typescript@7.0.2)
       '@modern-js/app-tools':
         specifier: 3.5.0
-        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(core-js@3.49.0)(encoding@0.1.13)(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(rollup@4.62.2)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@20.19.5)(typescript@7.0.2))(tsconfig-paths@4.2.0)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))
+        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(core-js@3.49.0)(encoding@0.1.13)(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(rollup@4.62.2)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@20.19.5)(typescript@7.0.2))(tsconfig-paths@4.2.0)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))
       '@modern-js/eslint-config':
         specifier: 2.59.0
         version: 2.59.0(@module-federation/runtime-tools@2.9.0)(typescript@7.0.2)
@@ -1264,7 +1264,7 @@ importers:
         version: 7.28.2
       '@modern-js/runtime':
         specifier: 3.5.0
-        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@module-federation/modern-js-v3':
         specifier: workspace:*
         version: link:../../../packages/modernjs-v3
@@ -1283,7 +1283,7 @@ importers:
         version: 2.59.0(@module-federation/runtime-tools@2.9.0)(typescript@7.0.2)
       '@modern-js/app-tools':
         specifier: 3.5.0
-        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(core-js@3.49.0)(encoding@0.1.13)(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(rollup@4.62.2)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@20.19.5)(typescript@7.0.2))(tsconfig-paths@4.2.0)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))
+        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(core-js@3.49.0)(encoding@0.1.13)(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(rollup@4.62.2)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@20.19.5)(typescript@7.0.2))(tsconfig-paths@4.2.0)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))
       '@modern-js/eslint-config':
         specifier: 2.59.0
         version: 2.59.0(@module-federation/runtime-tools@2.9.0)(typescript@7.0.2)
@@ -1356,7 +1356,7 @@ importers:
         version: 7.28.2
       '@modern-js/runtime':
         specifier: 3.5.0
-        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@module-federation/modern-js-v3':
         specifier: workspace:*
         version: link:../../../packages/modernjs-v3
@@ -1375,7 +1375,7 @@ importers:
         version: 2.59.0(@module-federation/runtime-tools@2.9.0)(typescript@7.0.2)
       '@modern-js/app-tools':
         specifier: 3.5.0
-        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(core-js@3.49.0)(encoding@0.1.13)(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(rollup@4.62.2)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@20.19.5)(typescript@7.0.2))(tsconfig-paths@4.2.0)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))
+        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(core-js@3.49.0)(encoding@0.1.13)(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(rollup@4.62.2)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@20.19.5)(typescript@7.0.2))(tsconfig-paths@4.2.0)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))
       '@modern-js/eslint-config':
         specifier: 2.59.0
         version: 2.59.0(@module-federation/runtime-tools@2.9.0)(typescript@7.0.2)
@@ -1417,7 +1417,7 @@ importers:
         version: 7.28.2
       '@modern-js/runtime':
         specifier: 3.5.0
-        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@module-federation/modern-js-v3':
         specifier: workspace:*
         version: link:../../../packages/modernjs-v3
@@ -1436,7 +1436,7 @@ importers:
         version: 2.59.0(@module-federation/runtime-tools@2.9.0)(typescript@7.0.2)
       '@modern-js/app-tools':
         specifier: 3.5.0
-        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(core-js@3.49.0)(encoding@0.1.13)(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(rollup@4.62.2)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@20.19.5)(typescript@7.0.2))(tsconfig-paths@4.2.0)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))
+        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(core-js@3.49.0)(encoding@0.1.13)(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(rollup@4.62.2)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@20.19.5)(typescript@7.0.2))(tsconfig-paths@4.2.0)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))
       '@modern-js/eslint-config':
         specifier: 2.59.0
         version: 2.59.0(@module-federation/runtime-tools@2.9.0)(typescript@7.0.2)
@@ -1478,7 +1478,7 @@ importers:
         version: 7.28.2
       '@modern-js/runtime':
         specifier: 3.5.0
-        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@module-federation/modern-js-v3':
         specifier: workspace:*
         version: link:../../../packages/modernjs-v3
@@ -1497,7 +1497,7 @@ importers:
         version: 2.59.0(@module-federation/runtime-tools@2.9.0)(typescript@7.0.2)
       '@modern-js/app-tools':
         specifier: 3.5.0
-        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(core-js@3.49.0)(encoding@0.1.13)(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(rollup@4.62.2)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@20.19.5)(typescript@7.0.2))(tsconfig-paths@4.2.0)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))
+        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(core-js@3.49.0)(encoding@0.1.13)(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(rollup@4.62.2)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@20.19.5)(typescript@7.0.2))(tsconfig-paths@4.2.0)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))
       '@modern-js/eslint-config':
         specifier: 2.59.0
         version: 2.59.0(@module-federation/runtime-tools@2.9.0)(typescript@7.0.2)
@@ -1539,7 +1539,7 @@ importers:
         version: 7.28.2
       '@modern-js/runtime':
         specifier: 3.5.0
-        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@module-federation/modern-js-v3':
         specifier: workspace:*
         version: link:../../../packages/modernjs-v3
@@ -1558,7 +1558,7 @@ importers:
         version: 2.59.0(@module-federation/runtime-tools@2.9.0)(typescript@7.0.2)
       '@modern-js/app-tools':
         specifier: 3.5.0
-        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(core-js@3.49.0)(encoding@0.1.13)(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(rollup@4.62.2)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@20.19.5)(typescript@7.0.2))(tsconfig-paths@4.2.0)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))
+        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(core-js@3.49.0)(encoding@0.1.13)(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(rollup@4.62.2)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@20.19.5)(typescript@7.0.2))(tsconfig-paths@4.2.0)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))
       '@modern-js/eslint-config':
         specifier: 2.59.0
         version: 2.59.0(@module-federation/runtime-tools@2.9.0)(typescript@7.0.2)
@@ -1600,7 +1600,7 @@ importers:
         version: 7.28.2
       '@modern-js/runtime':
         specifier: 3.5.0
-        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@module-federation/modern-js-v3':
         specifier: workspace:*
         version: link:../../../packages/modernjs-v3
@@ -1619,7 +1619,7 @@ importers:
         version: 2.59.0(@module-federation/runtime-tools@2.9.0)(typescript@7.0.2)
       '@modern-js/app-tools':
         specifier: 3.5.0
-        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(core-js@3.49.0)(encoding@0.1.13)(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(rollup@4.62.2)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@20.19.5)(typescript@7.0.2))(tsconfig-paths@4.2.0)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))
+        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(core-js@3.49.0)(encoding@0.1.13)(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(rollup@4.62.2)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@20.19.5)(typescript@7.0.2))(tsconfig-paths@4.2.0)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))
       '@modern-js/eslint-config':
         specifier: 2.59.0
         version: 2.59.0(@module-federation/runtime-tools@2.9.0)(typescript@7.0.2)
@@ -2198,7 +2198,7 @@ importers:
         version: 2.1.4(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)
       '@rsbuild/plugin-react':
         specifier: ^2.1.0
-        version: 2.1.0(@rsbuild/core@2.1.4(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))
+        version: 2.1.0(@rsbuild/core@2.1.4(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))
       '@rsbuild/shared':
         specifier: ^0.7.10
         version: 0.7.10(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)
@@ -2711,7 +2711,7 @@ importers:
         version: 7.28.2
       '@modern-js/runtime':
         specifier: 3.5.0
-        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@module-federation/enhanced':
         specifier: workspace:*
         version: link:../../../../packages/enhanced
@@ -2730,7 +2730,7 @@ importers:
         version: 2.59.0(@module-federation/runtime-tools@2.9.0)(typescript@7.0.2)
       '@modern-js/app-tools':
         specifier: 3.5.0
-        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(core-js@3.49.0)(encoding@0.1.13)(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(rollup@4.62.2)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@20.19.5)(typescript@7.0.2))(tsconfig-paths@3.14.2)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))
+        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(core-js@3.49.0)(encoding@0.1.13)(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(rollup@4.62.2)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@20.19.5)(typescript@7.0.2))(tsconfig-paths@3.14.2)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))
       '@modern-js/plugin-server':
         specifier: 2.68.0
         version: 2.68.0(@babel/traverse@7.29.8)(@rsbuild/core@2.1.10(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -2781,7 +2781,7 @@ importers:
         version: 7.28.2
       '@modern-js/runtime':
         specifier: 3.5.0
-        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@module-federation/enhanced':
         specifier: workspace:*
         version: link:../../../../packages/enhanced
@@ -2800,7 +2800,7 @@ importers:
         version: 2.59.0(@module-federation/runtime-tools@2.9.0)(typescript@7.0.2)
       '@modern-js/app-tools':
         specifier: 3.5.0
-        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(core-js@3.49.0)(encoding@0.1.13)(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(rollup@4.62.2)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@20.19.5)(typescript@7.0.2))(tsconfig-paths@4.2.0)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))
+        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(core-js@3.49.0)(encoding@0.1.13)(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(rollup@4.62.2)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@20.19.5)(typescript@7.0.2))(tsconfig-paths@4.2.0)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))
       '@modern-js/eslint-config':
         specifier: 2.59.0
         version: 2.59.0(@module-federation/runtime-tools@2.9.0)(typescript@7.0.2)
@@ -2848,7 +2848,7 @@ importers:
         version: 7.28.2
       '@modern-js/runtime':
         specifier: 3.5.0
-        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@module-federation/modern-js-v3':
         specifier: workspace:*
         version: link:../../../../packages/modernjs-v3
@@ -2867,7 +2867,7 @@ importers:
         version: 2.59.0(@module-federation/runtime-tools@2.9.0)(typescript@7.0.2)
       '@modern-js/app-tools':
         specifier: 3.5.0
-        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(core-js@3.49.0)(encoding@0.1.13)(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(rollup@4.62.2)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@20.19.5)(typescript@7.0.2))(tsconfig-paths@3.14.2)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))
+        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(core-js@3.49.0)(encoding@0.1.13)(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(rollup@4.62.2)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@20.19.5)(typescript@7.0.2))(tsconfig-paths@3.14.2)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))
       '@modern-js/eslint-config':
         specifier: 2.59.0
         version: 2.59.0(@module-federation/runtime-tools@2.9.0)(typescript@7.0.2)
@@ -2924,7 +2924,7 @@ importers:
         version: 7.28.2
       '@modern-js/runtime':
         specifier: 3.5.0
-        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@module-federation/modern-js-v3':
         specifier: workspace:*
         version: link:../../../../packages/modernjs-v3
@@ -2943,7 +2943,7 @@ importers:
         version: 2.59.0(@module-federation/runtime-tools@2.9.0)(typescript@7.0.2)
       '@modern-js/app-tools':
         specifier: 3.5.0
-        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(core-js@3.49.0)(encoding@0.1.13)(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(rollup@4.62.2)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@20.19.5)(typescript@7.0.2))(tsconfig-paths@4.2.0)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))
+        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(core-js@3.49.0)(encoding@0.1.13)(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(rollup@4.62.2)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@20.19.5)(typescript@7.0.2))(tsconfig-paths@4.2.0)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))
       '@modern-js/eslint-config':
         specifier: 2.59.0
         version: 2.59.0(@module-federation/runtime-tools@2.9.0)(typescript@7.0.2)
@@ -2997,7 +2997,7 @@ importers:
         version: 2.0.1(@rsbuild/core@2.1.10(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))
       '@rspress/core':
         specifier: 2.0.14
-        version: 2.0.14(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(@types/mdast@4.0.4)(@types/react@19.2.14)(core-js@3.49.0)(micromark-util-types@2.0.2)(micromark@4.0.2)
+        version: 2.0.14(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(@types/mdast@4.0.4)(@types/react@19.2.14)(core-js@3.49.0)(micromark-util-types@2.0.2)(micromark@4.0.2)
       framer-motion:
         specifier: ^10.0.0
         version: 10.18.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
@@ -3028,7 +3028,7 @@ importers:
         version: 19.2.3(@types/react@19.2.14)
       zephyr-rspress-plugin:
         specifier: ^1.2.2
-        version: 1.2.2(@rsbuild/core@2.1.10(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(@rspress/core@2.0.14(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(@types/mdast@4.0.4)(@types/react@19.2.14)(core-js@3.49.0)(micromark-util-types@2.0.2)(micromark@4.0.2))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4))
+        version: 1.2.2(@rsbuild/core@2.1.10(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(@rspress/core@2.0.14(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(@types/mdast@4.0.4)(@types/react@19.2.14)(core-js@3.49.0)(micromark-util-types@2.0.2)(micromark@4.0.2))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4))
 
   packages/assemble-release-plan:
     dependencies:
@@ -3816,13 +3816,13 @@ importers:
     devDependencies:
       '@modern-js/app-tools':
         specifier: 3.5.0
-        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(core-js@3.49.0)(encoding@0.1.13)(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(rollup@4.62.2)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.17))(@types/node@26.2.0)(typescript@7.0.2))(tsconfig-paths@4.2.0)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.28.1)(webpack-cli@5.1.4))
+        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(core-js@3.49.0)(encoding@0.1.13)(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(rollup@4.62.2)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.17))(@types/node@26.2.0)(typescript@7.0.2))(tsconfig-paths@4.2.0)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.28.1)(webpack-cli@5.1.4))
       '@modern-js/module-tools':
         specifier: 2.70.5
         version: 2.70.5(@types/node@26.2.0)(typescript@7.0.2)
       '@modern-js/runtime':
         specifier: 3.5.0
-        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+        version: 3.5.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@modern-js/server-runtime':
         specifier: 3.5.0
         version: 3.5.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -3839,8 +3839,8 @@ importers:
         specifier: 0.23.2
         version: 0.23.2(@microsoft/api-extractor@7.57.7(@types/node@26.2.0))(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(typescript@7.0.2)
       '@rspack/core':
-        specifier: npm:@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208
-        version: '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17)'
+        specifier: npm:@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013
+        version: '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17)'
       '@rstest/core':
         specifier: ^0.10.6
         version: 0.10.6(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(jsdom@20.0.3)
@@ -4138,8 +4138,8 @@ importers:
         specifier: workspace:*
         version: link:../sdk
       '@rspack/core':
-        specifier: npm:@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208
-        version: '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23)'
+        specifier: npm:@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013
+        version: '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23)'
       vue-tsc:
         specifier: '>=1.0.24'
         version: 2.2.12(typescript@7.0.2)
@@ -4277,10 +4277,10 @@ importers:
         version: link:../sdk
       '@nx/react':
         specifier: '>= 16.0.0'
-        version: 22.5.4(@babel/core@7.29.7)(@babel/traverse@7.29.8)(@module-federation/runtime-tools@0.21.6)(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23))(@swc/helpers@0.5.23)(@types/babel__core@7.20.5)(@zkochan/js-yaml@0.0.7)(esbuild@0.25.5)(eslint@9.39.3(jiti@2.7.0))(nx@22.5.4(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23)))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@7.0.2)(vite@7.3.6(@types/node@26.2.0)(jiti@2.7.0)(less@4.6.4)(sass-embedded@1.98.0)(sass@1.98.0)(terser@5.48.0)(yaml@2.9.0))(vitest@3.2.6(@edge-runtime/vm@3.2.0)(@types/debug@4.1.12)(@types/node@26.2.0)(jiti@2.7.0)(jsdom@20.0.3)(less@4.6.4)(msw@1.3.5(@types/node@20.19.5)(encoding@0.1.13)(typescript@6.0.3))(sass-embedded@1.98.0)(sass@1.98.0)(terser@5.48.0)(yaml@2.9.0))(vue-tsc@2.2.12(typescript@7.0.2))(webpack-cli@5.1.4)
+        version: 22.5.4(029b475166530f12c5c1f7c76d869fed)
       '@nx/webpack':
         specifier: '>= 16.0.0'
-        version: 22.5.4(@babel/traverse@7.29.8)(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@0.21.6)(@swc/helpers@0.5.23))(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(html-webpack-plugin@5.6.6(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@0.21.6)(@swc/helpers@0.5.23))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4)))(nx@22.5.4(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23)))(typescript@7.0.2)(vue-template-compiler@2.7.16)(webpack-cli@5.1.4)
+        version: 22.5.4(@babel/traverse@7.29.8)(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(@swc/helpers@0.5.23))(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(html-webpack-plugin@5.6.6(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(@swc/helpers@0.5.23))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4)))(nx@22.5.4(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23)))(typescript@7.0.2)(vue-template-compiler@2.7.16)(webpack-cli@5.1.4)
       storybook:
         specifier: '>= 8.2.0'
         version: 8.6.17(prettier@3.8.1)
@@ -4290,10 +4290,10 @@ importers:
         version: link:../utilities
       '@nx/module-federation':
         specifier: '>= 16.0.0'
-        version: 22.5.4(@babel/traverse@7.29.8)(@module-federation/runtime-tools@0.21.6)(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23))(@swc/helpers@0.5.23)(esbuild@0.25.5)(nx@22.5.4(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23)))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))(webpack-cli@5.1.4)
+        version: 22.5.4(@babel/traverse@7.29.8)(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23))(@swc/helpers@0.5.23)(esbuild@0.25.5)(nx@22.5.4(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23)))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))(webpack-cli@5.1.4)
       '@rsbuild/core':
         specifier: 2.1.4
-        version: 2.1.4(@module-federation/runtime-tools@0.21.6)(core-js@3.49.0)
+        version: 2.1.4(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(core-js@3.49.0)
       '@storybook/core':
         specifier: ^8.4.6
         version: 8.6.14(prettier@3.8.1)(storybook@8.6.17(prettier@3.8.1))
@@ -12318,80 +12318,80 @@ packages:
       typescript:
         optional: true
 
-  '@rspack-canary/binding-darwin-arm64@2.2.3-canary-8e63776c-20260908113208':
-    resolution: {integrity: sha512-v3dzEzY/eODNvUdDxj1yCu5+c7Vl2P8FIOf6UmgmP03Rr/D/dFZ+EyBYBUN/5wttgE9ulrEyOKvsnpy12EtlUA==}
+  '@rspack-canary/binding-darwin-arm64@2.2.3-canary-76e8f696-20260911033013':
+    resolution: {integrity: sha512-nTcTzQWehPxlrRz2FCyrkQSP7B3TgYjYwCHcXzYIvnEKEOYvf3mDzAL7EZjp5y86WWHVJVVNW6cL3xTQMlF1wg==}
     cpu: [arm64]
     os: [darwin]
 
-  '@rspack-canary/binding-darwin-x64@2.2.3-canary-8e63776c-20260908113208':
-    resolution: {integrity: sha512-dmN9h+pAvTUByZKBPVSk8upTlS2A5hWSG2Ee7dcWDwM9jteeTmbHqXfvxxTjKDN8nq8qgOx3Ibadi6E0TLVzmA==}
+  '@rspack-canary/binding-darwin-x64@2.2.3-canary-76e8f696-20260911033013':
+    resolution: {integrity: sha512-i1nbMd0zyyTwRGW0TeFXyfw/CHdsmORP3QC3DdVIy4ale1sGnejqaLUlSDSna2HP8f6I8pQYzfgN1DJX2YXFEg==}
     cpu: [x64]
     os: [darwin]
 
-  '@rspack-canary/binding-linux-arm64-gnu@2.2.3-canary-8e63776c-20260908113208':
-    resolution: {integrity: sha512-HsoTAYvlzkJ1RNOa3FKUpRWaBWBjDN01jt3bp4DHsusBPokwF0T1DDKfds20+YX9HbQHjr7oNSZOUr5os/6y9A==}
+  '@rspack-canary/binding-linux-arm64-gnu@2.2.3-canary-76e8f696-20260911033013':
+    resolution: {integrity: sha512-C+h18M7GjchBSEhoimLfyFNWzV9DtZhH7voPnNTiQzMzdLsMSkqC8U24tFtGXY357zJ2gaVMBte/T7EAcPkk8w==}
     cpu: [arm64]
     os: [linux]
 
-  '@rspack-canary/binding-linux-arm64-musl@2.2.3-canary-8e63776c-20260908113208':
-    resolution: {integrity: sha512-eu3Gq6ylNSHoBBaWi+7uJ7PmYsBwsJVPPyayKlfiDUxWM4YRBn5AxqhrJp3uIkkILAYIPFKfXbUta0J2Nb4lQA==}
+  '@rspack-canary/binding-linux-arm64-musl@2.2.3-canary-76e8f696-20260911033013':
+    resolution: {integrity: sha512-MLv22NzXGeF3pSubHTP5uEhlii2kqtTQGu3L5ii/z9+mB51dIxCv7HMRkw2OwngK0Udssg1FTsYOxJcHtRCNqQ==}
     cpu: [arm64]
     os: [linux]
 
-  '@rspack-canary/binding-linux-ppc64-gnu@2.2.3-canary-8e63776c-20260908113208':
-    resolution: {integrity: sha512-tsg7ecy0pZeTHlGjWn5/3rrkh47Dg19XJ4EhjSf0zGNFemqlKnqK8h7SBgWjPd6JgD3kzlkKIZ/hlUB3a9GIXA==}
+  '@rspack-canary/binding-linux-ppc64-gnu@2.2.3-canary-76e8f696-20260911033013':
+    resolution: {integrity: sha512-gwPiL7EqNwSo1uJmARV1oZlWctcz2XFuvrSHwC0eTlF1Txp8MAGTUlD7TqAVpd3cuvNuyChFQ+voMFRwatYivw==}
     cpu: [ppc64]
     os: [linux]
 
-  '@rspack-canary/binding-linux-riscv64-gnu@2.2.3-canary-8e63776c-20260908113208':
-    resolution: {integrity: sha512-nCPohQA/lJg0PSfFs9wPQsPwyGdIFBX83XNqnsIWI2Zeh3MY5UtXenFlLV1NtZS0D5Wnj6/TlCb3a6nfUoU3/w==}
+  '@rspack-canary/binding-linux-riscv64-gnu@2.2.3-canary-76e8f696-20260911033013':
+    resolution: {integrity: sha512-JyrEgYxQaSAyMYPqjyoqtnzKw2P2kvYjuD41e9qnau2ZTT6xmvw9un7ACNTiFDIDcI/GWA6Y4Uk0ywDR2ED+ew==}
     cpu: [riscv64]
     os: [linux]
 
-  '@rspack-canary/binding-linux-riscv64-musl@2.2.3-canary-8e63776c-20260908113208':
-    resolution: {integrity: sha512-Xxm3bCQZE8+K0SRfYQD+WreiZzS/QaBuibIo4exUwBRw7AUEtdmRcXybwgLirLZjve3OZ1sUKofPkvLBrZdrTg==}
+  '@rspack-canary/binding-linux-riscv64-musl@2.2.3-canary-76e8f696-20260911033013':
+    resolution: {integrity: sha512-VN0UWk9Tl5CGH/lmPxp8N68yMCjUT5Dp54j/Q5BALLYPinWHXWrSRvonxb4MzLGZD7N0RCb3rDA70afIJTSGqw==}
     cpu: [riscv64]
     os: [linux]
 
-  '@rspack-canary/binding-linux-s390x-gnu@2.2.3-canary-8e63776c-20260908113208':
-    resolution: {integrity: sha512-R4UjWs5r0+ucAFMeC+x7YAojAx9nxi9xr0PjrXP7TMzOKPHfTUnsBGuJWtahofDkj8RSoYFP7a8NjYyrlAzmqw==}
+  '@rspack-canary/binding-linux-s390x-gnu@2.2.3-canary-76e8f696-20260911033013':
+    resolution: {integrity: sha512-OdMH2MNFSr5bt9N3h24t/ODdA2x/ubaL0pyRd+3VkGFa9qMCQNN+6lqlAXcpyGamTBp6AHAs2jvkU5fQnHLopg==}
     cpu: [s390x]
     os: [linux]
 
-  '@rspack-canary/binding-linux-x64-gnu@2.2.3-canary-8e63776c-20260908113208':
-    resolution: {integrity: sha512-cDrVCDP5fi3wTR6hFMhvMZXv0JeLRtWu2gFXLrScj+2o321bipamK0XYD54rjvw1biJYRWs8FVAtMdh9EFMn/g==}
+  '@rspack-canary/binding-linux-x64-gnu@2.2.3-canary-76e8f696-20260911033013':
+    resolution: {integrity: sha512-AmwH22MGXHWEy5BVJ9NfOiY/9W0rU4pTwzNI96nl5MR+b8oP+ELOm9+ADzOr8biio0BFW7Gs/pGr21AD0hIY9A==}
     cpu: [x64]
     os: [linux]
 
-  '@rspack-canary/binding-linux-x64-musl@2.2.3-canary-8e63776c-20260908113208':
-    resolution: {integrity: sha512-SmdYCQufIcXYL8tHOyuR293hbluOJkmZ5oK9933OucHpRdL5N0hbs12XERDHx1gJ0e7Vn5+JTyP0J+KrHtG/kA==}
+  '@rspack-canary/binding-linux-x64-musl@2.2.3-canary-76e8f696-20260911033013':
+    resolution: {integrity: sha512-WG/6W3bYt24bRv903V8PQZ0Vr8BqVeC+polvdZjMFCfLYBUcVbo2pNb0ZLplBi195GbPWIBrcoyLEHaokGL/kw==}
     cpu: [x64]
     os: [linux]
 
-  '@rspack-canary/binding-wasm32-wasi@2.2.3-canary-8e63776c-20260908113208':
-    resolution: {integrity: sha512-GIGxRmtzXzxKTKVRYrTneP4waalPp+wS5OgO4+SyLp8WSB3a13/6qHsZ4MBYhPqx7lXngfGudqSs6057hywZ2w==}
+  '@rspack-canary/binding-wasm32-wasi@2.2.3-canary-76e8f696-20260911033013':
+    resolution: {integrity: sha512-Msvc37BaxhAKOeIGOME9SkKSIbj0vPnv3vQMfuPADLCDh5gCG5YdsxTCe6v3l1u+2TmSkVlMlTBcFq/iUwe/Bg==}
     cpu: [wasm32]
 
-  '@rspack-canary/binding-win32-arm64-msvc@2.2.3-canary-8e63776c-20260908113208':
-    resolution: {integrity: sha512-EAgbaoeE/prKtsricA46+lJDKLbbqFXIanbq+VQgDIcbuFAl3LFDpCP842HP9XE3zCTq+KsuSwCyMjixtbjBrg==}
+  '@rspack-canary/binding-win32-arm64-msvc@2.2.3-canary-76e8f696-20260911033013':
+    resolution: {integrity: sha512-SNNuig3VOzz8MN8cbQ2rB4whWGDrh2eGTT8IO8fo+4DBYAVTPlt8V9/vV43Re30H40WTvlymLzKXO4kgS6asUg==}
     cpu: [arm64]
     os: [win32]
 
-  '@rspack-canary/binding-win32-ia32-msvc@2.2.3-canary-8e63776c-20260908113208':
-    resolution: {integrity: sha512-ZFmUkIj0Sd8EdnPLAl9i9ZTr4lPFMmsSIdUOe59AX4ZbVJhqD1okMbEq4e7ClM/Kh29CHQ27VpiEuIvwjny7QQ==}
+  '@rspack-canary/binding-win32-ia32-msvc@2.2.3-canary-76e8f696-20260911033013':
+    resolution: {integrity: sha512-raco0Kvyqf9c6QBjQEcMk6YCJiYA3wQW0Xr3Brhacoh3/l0pJq74KWwxoL2Rbneia58s/SJBRUhFk2U77shjYQ==}
     cpu: [ia32]
     os: [win32]
 
-  '@rspack-canary/binding-win32-x64-msvc@2.2.3-canary-8e63776c-20260908113208':
-    resolution: {integrity: sha512-sl1nL3V4ho2s8wvFN2dmEmGw++mRpxgyU7pD5yTDi/FB/j1KuWxJKQCdSvRzWMUdXrl51pQGy3ljf5gPXYri5w==}
+  '@rspack-canary/binding-win32-x64-msvc@2.2.3-canary-76e8f696-20260911033013':
+    resolution: {integrity: sha512-23+rO/zviQ/Ly9oYjA1vA1q4d4mor/kkjKT/53JT4fOPZj+w40bGZ/9Sbh2X2edHObZ6+su/Ac0FThSRKn8h0w==}
     cpu: [x64]
     os: [win32]
 
-  '@rspack-canary/binding@2.2.3-canary-8e63776c-20260908113208':
-    resolution: {integrity: sha512-i8VcHtu3oXVDvyERMTOq6sFGVYa9bOSxKmaG1DSbdVfO1IfbLxBueCApfksGueWggxXRT1di/rWjx1+r6I+45w==}
+  '@rspack-canary/binding@2.2.3-canary-76e8f696-20260911033013':
+    resolution: {integrity: sha512-d9Cq/ieF9NW7GlDd91RfmVMy8MsKyDT0kj2kWB708EFbkBsNj/6TJpqMCytwbNgN1W31riGhg7MJHBo9Qi48Rg==}
 
-  '@rspack-canary/cli@2.2.3-canary-8e63776c-20260908113208':
-    resolution: {integrity: sha512-d2xGjTypiIHpeeWhjaCQhzUreisfuFzN/gbmftgT67MIV61m1eh9eQ4CEk3Sz9Oc7BWKHWWBT4n2dw1TryhpHg==}
+  '@rspack-canary/cli@2.2.3-canary-76e8f696-20260911033013':
+    resolution: {integrity: sha512-gM1C92N5HIKWIqhkjywJb47JMVd6zgbVGlcrigWb6swaP1pUT5yXvxiOB8aOOuBqdhmC6V1pR4xQW3rnoVyyGQ==}
     hasBin: true
     peerDependencies:
       '@rspack/core': ^2.0.0-0
@@ -12400,8 +12400,8 @@ packages:
       '@rspack/dev-server':
         optional: true
 
-  '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208':
-    resolution: {integrity: sha512-B8aS+CFJwxrrfYZHlh/owBCO64k0T7euRTKq25wYF8eDOKGc4WoZZemx23UVgcccNVJDMl6gB/QJ4xyCf5bCEw==}
+  '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013':
+    resolution: {integrity: sha512-/HWm/pPInis6vmZOCFSbHqb7mVXjkcN8b6h+5skqPKK+tQ8JkPCPS7zkBbOAAXyTZk8G6dfuA9bfjBaNcZEDVg==}
     engines: {node: ^20.19.0 || >=22.12.0}
     peerDependencies:
       '@module-federation/runtime-tools': ^0.24.1 || ^2.0.0
@@ -33096,12 +33096,12 @@ snapshots:
       - webpack-hot-middleware
       - webpack-plugin-serve
 
-  '@modern-js/app-tools@3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(core-js@3.49.0)(encoding@0.1.13)(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(rollup@4.62.2)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.17))(@types/node@26.2.0)(typescript@7.0.2))(tsconfig-paths@4.2.0)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.28.1)(webpack-cli@5.1.4))':
+  '@modern-js/app-tools@3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(core-js@3.49.0)(encoding@0.1.13)(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(rollup@4.62.2)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.17))(@types/node@26.2.0)(typescript@7.0.2))(tsconfig-paths@4.2.0)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.28.1)(webpack-cli@5.1.4))':
     dependencies:
       '@babel/parser': 7.29.7
       '@babel/traverse': 7.29.7
       '@babel/types': 7.29.7
-      '@modern-js/builder': 3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.28.1)(webpack-cli@5.1.4))
+      '@modern-js/builder': 3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.28.1)(webpack-cli@5.1.4))
       '@modern-js/i18n-utils': 3.5.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@modern-js/plugin': 3.5.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@modern-js/plugin-data-loader': 3.5.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -33149,12 +33149,12 @@ snapshots:
       - utf-8-validate
       - webpack
 
-  '@modern-js/app-tools@3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(core-js@3.49.0)(encoding@0.1.13)(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(rollup@4.62.2)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@20.19.5)(typescript@7.0.2))(tsconfig-paths@3.14.2)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))':
+  '@modern-js/app-tools@3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(core-js@3.49.0)(encoding@0.1.13)(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(rollup@4.62.2)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@20.19.5)(typescript@7.0.2))(tsconfig-paths@3.14.2)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))':
     dependencies:
       '@babel/parser': 7.29.7
       '@babel/traverse': 7.29.7
       '@babel/types': 7.29.7
-      '@modern-js/builder': 3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))
+      '@modern-js/builder': 3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))
       '@modern-js/i18n-utils': 3.5.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@modern-js/plugin': 3.5.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@modern-js/plugin-data-loader': 3.5.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -33202,12 +33202,12 @@ snapshots:
       - utf-8-validate
       - webpack
 
-  '@modern-js/app-tools@3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(core-js@3.49.0)(encoding@0.1.13)(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(rollup@4.62.2)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@20.19.5)(typescript@7.0.2))(tsconfig-paths@4.2.0)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))':
+  '@modern-js/app-tools@3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(core-js@3.49.0)(encoding@0.1.13)(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(rollup@4.62.2)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@20.19.5)(typescript@7.0.2))(tsconfig-paths@4.2.0)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))':
     dependencies:
       '@babel/parser': 7.29.7
       '@babel/traverse': 7.29.7
       '@babel/types': 7.29.7
-      '@modern-js/builder': 3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))
+      '@modern-js/builder': 3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))
       '@modern-js/i18n-utils': 3.5.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@modern-js/plugin': 3.5.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@modern-js/plugin-data-loader': 3.5.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -33387,20 +33387,20 @@ snapshots:
       - '@rsbuild/core'
       - supports-color
 
-  '@modern-js/builder@3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.28.1)(webpack-cli@5.1.4))':
+  '@modern-js/builder@3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.28.1)(webpack-cli@5.1.4))':
     dependencies:
       '@modern-js/utils': 3.5.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@rsbuild/core': 2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)
       '@rsbuild/plugin-assets-retry': 2.0.1(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))
       '@rsbuild/plugin-check-syntax': 2.0.0(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))
       '@rsbuild/plugin-css-minimizer': 2.0.1(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(esbuild@0.28.1)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.28.1)(webpack-cli@5.1.4))
-      '@rsbuild/plugin-less': 1.6.4(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.28.1)(webpack-cli@5.1.4))
-      '@rsbuild/plugin-react': 2.0.1(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))
+      '@rsbuild/plugin-less': 1.6.4(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.28.1)(webpack-cli@5.1.4))
+      '@rsbuild/plugin-react': 2.0.1(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))
       '@rsbuild/plugin-rem': 1.0.6(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))
       '@rsbuild/plugin-sass': 1.5.3(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))
       '@rsbuild/plugin-source-build': 1.0.6(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))
-      '@rsbuild/plugin-svgr': 2.0.3(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(typescript@7.0.2)
-      '@rsbuild/plugin-type-check': 1.5.0(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(tslib@2.8.1)(typescript@7.0.2)
+      '@rsbuild/plugin-svgr': 2.0.3(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(typescript@7.0.2)
+      '@rsbuild/plugin-type-check': 1.5.0(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(tslib@2.8.1)(typescript@7.0.2)
       '@rsbuild/plugin-typed-css-modules': 1.2.3(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))
       '@swc/core': 1.15.41(@swc/helpers@0.5.17)
       '@swc/helpers': 0.5.17
@@ -33418,8 +33418,8 @@ snapshots:
       postcss-media-minmax: 5.0.0(postcss@8.5.23)
       postcss-nesting: 12.1.5(postcss@8.5.23)
       postcss-page-break: 3.0.4(postcss@8.5.23)
-      rsbuild-plugin-rsc: 0.1.1(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
-      rspack-manifest-plugin: 5.2.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))
+      rsbuild-plugin-rsc: 0.1.1(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
+      rspack-manifest-plugin: 5.2.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))
       ts-deepmerge: 7.0.3
     transitivePeerDependencies:
       - '@module-federation/runtime-tools'
@@ -33439,20 +33439,20 @@ snapshots:
       - typescript
       - webpack
 
-  '@modern-js/builder@3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))':
+  '@modern-js/builder@3.5.0(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(esbuild@0.28.1)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(tslib@2.8.1)(typescript@7.0.2)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))':
     dependencies:
       '@modern-js/utils': 3.5.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@rsbuild/core': 2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)
       '@rsbuild/plugin-assets-retry': 2.0.1(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))
       '@rsbuild/plugin-check-syntax': 2.0.0(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))
       '@rsbuild/plugin-css-minimizer': 2.0.1(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(esbuild@0.28.1)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))
-      '@rsbuild/plugin-less': 1.6.4(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))
-      '@rsbuild/plugin-react': 2.0.1(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))
+      '@rsbuild/plugin-less': 1.6.4(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))
+      '@rsbuild/plugin-react': 2.0.1(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))
       '@rsbuild/plugin-rem': 1.0.6(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))
       '@rsbuild/plugin-sass': 1.5.3(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))
       '@rsbuild/plugin-source-build': 1.0.6(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))
-      '@rsbuild/plugin-svgr': 2.0.3(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(typescript@7.0.2)
-      '@rsbuild/plugin-type-check': 1.5.0(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(tslib@2.8.1)(typescript@7.0.2)
+      '@rsbuild/plugin-svgr': 2.0.3(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(typescript@7.0.2)
+      '@rsbuild/plugin-type-check': 1.5.0(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(tslib@2.8.1)(typescript@7.0.2)
       '@rsbuild/plugin-typed-css-modules': 1.2.3(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))
       '@swc/core': 1.15.41(@swc/helpers@0.5.17)
       '@swc/helpers': 0.5.17
@@ -33470,8 +33470,8 @@ snapshots:
       postcss-media-minmax: 5.0.0(postcss@8.5.23)
       postcss-nesting: 12.1.5(postcss@8.5.23)
       postcss-page-break: 3.0.4(postcss@8.5.23)
-      rsbuild-plugin-rsc: 0.1.1(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
-      rspack-manifest-plugin: 5.2.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))
+      rsbuild-plugin-rsc: 0.1.1(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
+      rspack-manifest-plugin: 5.2.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))
       ts-deepmerge: 7.0.3
     transitivePeerDependencies:
       - '@module-federation/runtime-tools'
@@ -33831,23 +33831,23 @@ snapshots:
       react-dom: 19.2.4(react@19.2.4)
       react-server-dom-webpack: 19.2.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.19))(esbuild@0.18.20)(webpack-cli@5.1.4))
 
-  '@modern-js/render@3.5.0(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)':
+  '@modern-js/render@3.5.0(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@modern-js/types': 3.5.0
       '@modern-js/utils': 3.5.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@swc/helpers': 0.5.17
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-      react-server-dom-rspack: 0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react-server-dom-rspack: 0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
-  '@modern-js/render@3.5.0(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)':
+  '@modern-js/render@3.5.0(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@modern-js/types': 3.5.0
       '@modern-js/utils': 3.5.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@swc/helpers': 0.5.17
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-      react-server-dom-rspack: 0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react-server-dom-rspack: 0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
   '@modern-js/rsbuild-plugin-esbuild@2.70.5(@swc/core@1.15.41(@swc/helpers@0.5.17))(webpack-cli@5.1.4)':
     dependencies:
@@ -33998,13 +33998,13 @@ snapshots:
       - react-server-dom-webpack
       - supports-color
 
-  '@modern-js/runtime@3.5.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)':
+  '@modern-js/runtime@3.5.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@loadable/component': 5.16.7(react@18.3.1)
       '@loadable/server': 5.16.7(@loadable/component@5.16.7(react@18.3.1))(react@18.3.1)
       '@modern-js/plugin': 3.5.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@modern-js/plugin-data-loader': 3.5.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@modern-js/render': 3.5.0(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+      '@modern-js/render': 3.5.0(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@modern-js/runtime-utils': 3.5.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@modern-js/types': 3.5.0
       '@modern-js/utils': 3.5.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -34027,13 +34027,13 @@ snapshots:
       - core-js
       - react-server-dom-rspack
 
-  '@modern-js/runtime@3.5.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)':
+  '@modern-js/runtime@3.5.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@loadable/component': 5.16.7(react@18.3.1)
       '@loadable/server': 5.16.7(@loadable/component@5.16.7(react@18.3.1))(react@18.3.1)
       '@modern-js/plugin': 3.5.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@modern-js/plugin-data-loader': 3.5.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@modern-js/render': 3.5.0(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+      '@modern-js/render': 3.5.0(react-dom@18.3.1(react@18.3.1))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@modern-js/runtime-utils': 3.5.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@modern-js/types': 3.5.0
       '@modern-js/utils': 3.5.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -34934,7 +34934,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@module-federation/enhanced@0.21.6(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@0.21.6)(@swc/helpers@0.5.23))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4))':
+  '@module-federation/enhanced@0.21.6(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(@swc/helpers@0.5.23))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4))':
     dependencies:
       '@module-federation/bridge-react-webpack-plugin': 0.21.6
       '@module-federation/cli': 0.21.6(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))
@@ -34944,7 +34944,7 @@ snapshots:
       '@module-federation/inject-external-runtime-core-plugin': 0.21.6(@module-federation/runtime-tools@0.21.6)
       '@module-federation/managers': 0.21.6
       '@module-federation/manifest': 0.21.6(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))
-      '@module-federation/rspack': 0.21.6(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@0.21.6)(@swc/helpers@0.5.23))(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))
+      '@module-federation/rspack': 0.21.6(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(@swc/helpers@0.5.23))(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))
       '@module-federation/runtime-tools': 0.21.6
       '@module-federation/sdk': 0.21.6
       btoa: 1.2.1
@@ -34963,7 +34963,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@module-federation/enhanced@2.2.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@0.21.6)(@swc/helpers@0.5.23))(node-fetch@2.7.0(encoding@0.1.13))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4))':
+  '@module-federation/enhanced@2.2.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(@swc/helpers@0.5.23))(node-fetch@2.7.0(encoding@0.1.13))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4))':
     dependencies:
       '@module-federation/bridge-react-webpack-plugin': 2.2.2(node-fetch@2.7.0(encoding@0.1.13))
       '@module-federation/cli': 2.2.2(node-fetch@2.7.0(encoding@0.1.13))(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))
@@ -34973,7 +34973,7 @@ snapshots:
       '@module-federation/inject-external-runtime-core-plugin': 2.2.2(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))
       '@module-federation/managers': 2.2.2(node-fetch@2.7.0(encoding@0.1.13))
       '@module-federation/manifest': 2.2.2(node-fetch@2.7.0(encoding@0.1.13))(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))
-      '@module-federation/rspack': 2.2.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@0.21.6)(@swc/helpers@0.5.23))(node-fetch@2.7.0(encoding@0.1.13))(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))
+      '@module-federation/rspack': 2.2.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(@swc/helpers@0.5.23))(node-fetch@2.7.0(encoding@0.1.13))(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))
       '@module-federation/runtime-tools': 2.2.2(node-fetch@2.7.0(encoding@0.1.13))
       '@module-federation/sdk': 2.2.2(node-fetch@2.7.0(encoding@0.1.13))
       '@module-federation/webpack-bundler-runtime': 2.2.2(node-fetch@2.7.0(encoding@0.1.13))
@@ -35058,9 +35058,9 @@ snapshots:
       - utf-8-validate
       - vue-tsc
 
-  '@module-federation/node@2.7.36(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@0.21.6)(@swc/helpers@0.5.23))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4))':
+  '@module-federation/node@2.7.36(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(@swc/helpers@0.5.23))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4))':
     dependencies:
-      '@module-federation/enhanced': 2.2.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@0.21.6)(@swc/helpers@0.5.23))(node-fetch@2.7.0(encoding@0.1.13))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4))
+      '@module-federation/enhanced': 2.2.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(@swc/helpers@0.5.23))(node-fetch@2.7.0(encoding@0.1.13))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4))
       '@module-federation/runtime': 2.2.2(node-fetch@2.7.0(encoding@0.1.13))
       '@module-federation/sdk': 2.2.2(node-fetch@2.7.0(encoding@0.1.13))
       btoa: 1.2.1
@@ -35080,7 +35080,7 @@ snapshots:
       - utf-8-validate
       - vue-tsc
 
-  '@module-federation/rspack@0.21.6(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@0.21.6)(@swc/helpers@0.5.23))(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))':
+  '@module-federation/rspack@0.21.6(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(@swc/helpers@0.5.23))(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))':
     dependencies:
       '@module-federation/bridge-react-webpack-plugin': 0.21.6
       '@module-federation/dts-plugin': 0.21.6(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))
@@ -35089,7 +35089,7 @@ snapshots:
       '@module-federation/manifest': 0.21.6(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))
       '@module-federation/runtime-tools': 0.21.6
       '@module-federation/sdk': 0.21.6
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@0.21.6)(@swc/helpers@0.5.23)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(@swc/helpers@0.5.23)'
       btoa: 1.2.1
     optionalDependencies:
       typescript: 7.0.2
@@ -35100,7 +35100,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@module-federation/rspack@2.2.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@0.21.6)(@swc/helpers@0.5.23))(node-fetch@2.7.0(encoding@0.1.13))(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))':
+  '@module-federation/rspack@2.2.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(@swc/helpers@0.5.23))(node-fetch@2.7.0(encoding@0.1.13))(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))':
     dependencies:
       '@module-federation/bridge-react-webpack-plugin': 2.2.2(node-fetch@2.7.0(encoding@0.1.13))
       '@module-federation/dts-plugin': 2.2.2(node-fetch@2.7.0(encoding@0.1.13))(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))
@@ -35109,7 +35109,7 @@ snapshots:
       '@module-federation/manifest': 2.2.2(node-fetch@2.7.0(encoding@0.1.13))(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))
       '@module-federation/runtime-tools': 2.2.2(node-fetch@2.7.0(encoding@0.1.13))
       '@module-federation/sdk': 2.2.2(node-fetch@2.7.0(encoding@0.1.13))
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@0.21.6)(@swc/helpers@0.5.23)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(@swc/helpers@0.5.23)'
       btoa: 1.2.1
     optionalDependencies:
       typescript: 7.0.2
@@ -35573,15 +35573,15 @@ snapshots:
       - nx
       - supports-color
 
-  '@nx/module-federation@22.5.4(@babel/traverse@7.29.8)(@module-federation/runtime-tools@0.21.6)(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23))(@swc/helpers@0.5.23)(esbuild@0.25.5)(nx@22.5.4(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23)))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))(webpack-cli@5.1.4)':
+  '@nx/module-federation@22.5.4(@babel/traverse@7.29.8)(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23))(@swc/helpers@0.5.23)(esbuild@0.25.5)(nx@22.5.4(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23)))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))(webpack-cli@5.1.4)':
     dependencies:
-      '@module-federation/enhanced': 0.21.6(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@0.21.6)(@swc/helpers@0.5.23))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4))
-      '@module-federation/node': 2.7.36(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@0.21.6)(@swc/helpers@0.5.23))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4))
+      '@module-federation/enhanced': 0.21.6(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(@swc/helpers@0.5.23))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4))
+      '@module-federation/node': 2.7.36(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(@swc/helpers@0.5.23))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4))
       '@module-federation/sdk': 0.21.6
       '@nx/devkit': 22.5.4(nx@22.5.4(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23)))
       '@nx/js': 22.5.4(@babel/traverse@7.29.8)(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23))(nx@22.5.4(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23)))
       '@nx/web': 22.5.4(@babel/traverse@7.29.8)(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23))(nx@22.5.4(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23)))
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@0.21.6)(@swc/helpers@0.5.23)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(@swc/helpers@0.5.23)'
       express: 4.22.1
       http-proxy-middleware: 3.0.5
       picocolors: 1.1.1
@@ -35637,12 +35637,12 @@ snapshots:
   '@nx/nx-win32-x64-msvc@22.5.4':
     optional: true
 
-  '@nx/react@22.5.4(@babel/core@7.29.7)(@babel/traverse@7.29.8)(@module-federation/runtime-tools@0.21.6)(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23))(@swc/helpers@0.5.23)(@types/babel__core@7.20.5)(@zkochan/js-yaml@0.0.7)(esbuild@0.25.5)(eslint@9.39.3(jiti@2.7.0))(nx@22.5.4(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23)))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@7.0.2)(vite@7.3.6(@types/node@26.2.0)(jiti@2.7.0)(less@4.6.4)(sass-embedded@1.98.0)(sass@1.98.0)(terser@5.48.0)(yaml@2.9.0))(vitest@3.2.6(@edge-runtime/vm@3.2.0)(@types/debug@4.1.12)(@types/node@26.2.0)(jiti@2.7.0)(jsdom@20.0.3)(less@4.6.4)(msw@1.3.5(@types/node@20.19.5)(encoding@0.1.13)(typescript@6.0.3))(sass-embedded@1.98.0)(sass@1.98.0)(terser@5.48.0)(yaml@2.9.0))(vue-tsc@2.2.12(typescript@7.0.2))(webpack-cli@5.1.4)':
+  '@nx/react@22.5.4(029b475166530f12c5c1f7c76d869fed)':
     dependencies:
       '@nx/devkit': 22.5.4(nx@22.5.4(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23)))
       '@nx/eslint': 22.5.4(@babel/traverse@7.29.8)(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23))(@zkochan/js-yaml@0.0.7)(eslint@9.39.3(jiti@2.7.0))(nx@22.5.4(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23)))
       '@nx/js': 22.5.4(@babel/traverse@7.29.8)(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23))(nx@22.5.4(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23)))
-      '@nx/module-federation': 22.5.4(@babel/traverse@7.29.8)(@module-federation/runtime-tools@0.21.6)(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23))(@swc/helpers@0.5.23)(esbuild@0.25.5)(nx@22.5.4(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23)))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))(webpack-cli@5.1.4)
+      '@nx/module-federation': 22.5.4(@babel/traverse@7.29.8)(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23))(@swc/helpers@0.5.23)(esbuild@0.25.5)(nx@22.5.4(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23)))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@7.0.2)(vue-tsc@2.2.12(typescript@7.0.2))(webpack-cli@5.1.4)
       '@nx/rollup': 22.5.4(@babel/core@7.29.7)(@babel/traverse@7.29.8)(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/babel__core@7.20.5)(nx@22.5.4(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23)))(typescript@7.0.2)
       '@nx/web': 22.5.4(@babel/traverse@7.29.8)(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23))(nx@22.5.4(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23)))
       '@phenomnomnominal/tsquery': 6.1.4(typescript@7.0.2)
@@ -35775,7 +35775,7 @@ snapshots:
       - supports-color
       - verdaccio
 
-  '@nx/webpack@22.5.4(@babel/traverse@7.29.8)(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@0.21.6)(@swc/helpers@0.5.23))(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(html-webpack-plugin@5.6.6(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@0.21.6)(@swc/helpers@0.5.23))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4)))(nx@22.5.4(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23)))(typescript@7.0.2)(vue-template-compiler@2.7.16)(webpack-cli@5.1.4)':
+  '@nx/webpack@22.5.4(@babel/traverse@7.29.8)(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(@swc/helpers@0.5.23))(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(html-webpack-plugin@5.6.6(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(@swc/helpers@0.5.23))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4)))(nx@22.5.4(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23)))(typescript@7.0.2)(vue-template-compiler@2.7.16)(webpack-cli@5.1.4)':
     dependencies:
       '@babel/core': 7.29.0
       '@nx/devkit': 22.5.4(nx@22.5.4(@swc-node/register@1.10.10(@swc/core@1.7.26(@swc/helpers@0.5.13))(@swc/types@0.1.27)(typescript@6.0.3))(@swc/core@1.15.41(@swc/helpers@0.5.23)))
@@ -35786,7 +35786,7 @@ snapshots:
       babel-loader: 9.2.1(@babel/core@7.29.0)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4))
       browserslist: 4.28.1
       copy-webpack-plugin: 10.2.4(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4))
-      css-loader: 6.11.0(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@0.21.6)(@swc/helpers@0.5.23))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4))
+      css-loader: 6.11.0(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(@swc/helpers@0.5.23))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4))
       css-minimizer-webpack-plugin: 5.0.1(esbuild@0.25.5)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4))
       fork-ts-checker-webpack-plugin: 7.2.13(typescript@7.0.2)(vue-template-compiler@2.7.16)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4))
       less: 4.6.4
@@ -35802,7 +35802,7 @@ snapshots:
       rxjs: 7.8.2
       sass: 1.98.0
       sass-embedded: 1.98.0
-      sass-loader: 16.0.7(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@0.21.6)(@swc/helpers@0.5.23))(sass-embedded@1.98.0)(sass@1.98.0)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4))
+      sass-loader: 16.0.7(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(@swc/helpers@0.5.23))(sass-embedded@1.98.0)(sass@1.98.0)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4))
       source-map-loader: 5.0.0(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4))
       style-loader: 3.3.4(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4))
       terser-webpack-plugin: 5.4.0(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4))
@@ -35812,7 +35812,7 @@ snapshots:
       webpack: 5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4)
       webpack-dev-server: 5.2.3(webpack-cli@5.1.4)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4))
       webpack-node-externals: 3.0.0
-      webpack-subresource-integrity: 5.1.0(html-webpack-plugin@5.6.6(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@0.21.6)(@swc/helpers@0.5.23))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4)))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4))
+      webpack-subresource-integrity: 5.1.0(html-webpack-plugin@5.6.6(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(@swc/helpers@0.5.23))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4)))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4))
     transitivePeerDependencies:
       - '@babel/traverse'
       - '@parcel/css'
@@ -38881,7 +38881,7 @@ snapshots:
 
   '@rsbuild/core@1.0.1-rc.4(@module-federation/runtime-tools@2.9.0)':
     dependencies:
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17)'
       '@rspack/lite-tapable': 1.0.1
       '@swc/helpers': 0.5.17
       caniuse-lite: 1.0.30001780
@@ -38893,7 +38893,7 @@ snapshots:
 
   '@rsbuild/core@1.3.21(@module-federation/runtime-tools@2.9.0)':
     dependencies:
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17)'
       '@rspack/lite-tapable': 1.0.1
       '@swc/helpers': 0.5.17
       core-js: 3.42.0
@@ -38903,7 +38903,7 @@ snapshots:
 
   '@rsbuild/core@1.4.0-beta.2(@module-federation/runtime-tools@2.9.0)':
     dependencies:
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17)'
       '@rspack/lite-tapable': 1.0.1
       '@swc/helpers': 0.5.17
       core-js: 3.42.0
@@ -38913,7 +38913,7 @@ snapshots:
 
   '@rsbuild/core@1.5.17(@module-federation/runtime-tools@2.9.0)':
     dependencies:
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17)'
       '@rspack/lite-tapable': 1.0.1
       '@swc/helpers': 0.5.17
       core-js: 3.46.0
@@ -38923,7 +38923,7 @@ snapshots:
 
   '@rsbuild/core@1.6.0-beta.1(@module-federation/runtime-tools@2.9.0)':
     dependencies:
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17)'
       '@rspack/lite-tapable': 1.0.1
       '@swc/helpers': 0.5.17
       core-js: 3.46.0
@@ -38933,7 +38933,7 @@ snapshots:
 
   '@rsbuild/core@1.7.3(@module-federation/runtime-tools@2.9.0)':
     dependencies:
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)'
       '@rspack/lite-tapable': 1.1.2
       '@swc/helpers': 0.5.23
       core-js: 3.47.0
@@ -38943,7 +38943,7 @@ snapshots:
 
   '@rsbuild/core@2.0.0-beta.2(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)':
     dependencies:
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)'
       '@swc/helpers': 0.5.23
       jiti: 2.6.1
     optionalDependencies:
@@ -38953,7 +38953,7 @@ snapshots:
 
   '@rsbuild/core@2.0.15(@module-federation/runtime-tools@2.9.0)(core-js@3.36.1)':
     dependencies:
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)'
       '@swc/helpers': 0.5.23
     optionalDependencies:
       core-js: 3.36.1
@@ -38962,7 +38962,7 @@ snapshots:
 
   '@rsbuild/core@2.0.15(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)':
     dependencies:
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)'
       '@swc/helpers': 0.5.23
     optionalDependencies:
       core-js: 3.49.0
@@ -38971,7 +38971,7 @@ snapshots:
 
   '@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)':
     dependencies:
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)'
       '@swc/helpers': 0.5.23
     optionalDependencies:
       core-js: 3.49.0
@@ -38980,16 +38980,16 @@ snapshots:
 
   '@rsbuild/core@2.1.10(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)':
     dependencies:
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)'
       '@swc/helpers': 0.5.23
     optionalDependencies:
       core-js: 3.49.0
     transitivePeerDependencies:
       - '@module-federation/runtime-tools'
 
-  '@rsbuild/core@2.1.4(@module-federation/runtime-tools@0.21.6)(core-js@3.49.0)':
+  '@rsbuild/core@2.1.4(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(core-js@3.49.0)':
     dependencies:
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@0.21.6)(@swc/helpers@0.5.23)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(@swc/helpers@0.5.23)'
       '@swc/helpers': 0.5.23
     optionalDependencies:
       core-js: 3.49.0
@@ -38998,7 +38998,7 @@ snapshots:
 
   '@rsbuild/core@2.1.4(@module-federation/runtime-tools@2.9.0)(core-js@3.36.1)':
     dependencies:
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)'
       '@swc/helpers': 0.5.23
     optionalDependencies:
       core-js: 3.36.1
@@ -39007,7 +39007,7 @@ snapshots:
 
   '@rsbuild/core@2.1.4(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)':
     dependencies:
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)'
       '@swc/helpers': 0.5.23
     optionalDependencies:
       core-js: 3.49.0
@@ -39194,11 +39194,11 @@ snapshots:
       deepmerge: 4.3.1
       reduce-configs: 1.1.2
 
-  '@rsbuild/plugin-less@1.6.4(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.28.1)(webpack-cli@5.1.4))':
+  '@rsbuild/plugin-less@1.6.4(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.28.1)(webpack-cli@5.1.4))':
     dependencies:
       deepmerge: 4.3.1
       less: 4.6.4
-      less-loader: 12.3.3(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(less@4.6.4)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.28.1)(webpack-cli@5.1.4))
+      less-loader: 12.3.3(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(less@4.6.4)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.28.1)(webpack-cli@5.1.4))
       reduce-configs: 1.1.2
     optionalDependencies:
       '@rsbuild/core': 2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)
@@ -39206,11 +39206,11 @@ snapshots:
       - '@rspack/core'
       - webpack
 
-  '@rsbuild/plugin-less@1.6.4(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))':
+  '@rsbuild/plugin-less@1.6.4(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))':
     dependencies:
       deepmerge: 4.3.1
       less: 4.6.4
-      less-loader: 12.3.3(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(less@4.6.4)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))
+      less-loader: 12.3.3(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(less@4.6.4)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1)))
       reduce-configs: 1.1.2
     optionalDependencies:
       '@rsbuild/core': 2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)
@@ -39315,27 +39315,27 @@ snapshots:
     transitivePeerDependencies:
       - webpack-hot-middleware
 
-  '@rsbuild/plugin-react@2.0.1(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))':
+  '@rsbuild/plugin-react@2.0.1(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))':
     dependencies:
-      '@rspack/plugin-react-refresh': 2.0.0(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(react-refresh@0.18.0)
+      '@rspack/plugin-react-refresh': 2.0.0(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(react-refresh@0.18.0)
       react-refresh: 0.18.0
     optionalDependencies:
       '@rsbuild/core': 2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)
     transitivePeerDependencies:
       - '@rspack/core'
 
-  '@rsbuild/plugin-react@2.0.1(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))':
+  '@rsbuild/plugin-react@2.0.1(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))':
     dependencies:
-      '@rspack/plugin-react-refresh': 2.0.0(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-refresh@0.18.0)
+      '@rspack/plugin-react-refresh': 2.0.0(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-refresh@0.18.0)
       react-refresh: 0.18.0
     optionalDependencies:
       '@rsbuild/core': 2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)
     transitivePeerDependencies:
       - '@rspack/core'
 
-  '@rsbuild/plugin-react@2.0.1(@rsbuild/core@2.1.4(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))':
+  '@rsbuild/plugin-react@2.0.1(@rsbuild/core@2.1.4(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))':
     dependencies:
-      '@rspack/plugin-react-refresh': 2.0.0(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-refresh@0.18.0)
+      '@rspack/plugin-react-refresh': 2.0.0(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-refresh@0.18.0)
       react-refresh: 0.18.0
     optionalDependencies:
       '@rsbuild/core': 2.1.4(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)
@@ -39351,18 +39351,18 @@ snapshots:
     transitivePeerDependencies:
       - '@rspack/core'
 
-  '@rsbuild/plugin-react@2.1.0(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))':
+  '@rsbuild/plugin-react@2.1.0(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))':
     dependencies:
-      '@rspack/plugin-react-refresh': 2.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(react-refresh@0.18.0)
+      '@rspack/plugin-react-refresh': 2.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(react-refresh@0.18.0)
       react-refresh: 0.18.0
     optionalDependencies:
       '@rsbuild/core': 2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)
     transitivePeerDependencies:
       - '@rspack/core'
 
-  '@rsbuild/plugin-react@2.1.0(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))':
+  '@rsbuild/plugin-react@2.1.0(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))':
     dependencies:
-      '@rspack/plugin-react-refresh': 2.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-refresh@0.18.0)
+      '@rspack/plugin-react-refresh': 2.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-refresh@0.18.0)
       react-refresh: 0.18.0
     optionalDependencies:
       '@rsbuild/core': 2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)
@@ -39378,9 +39378,9 @@ snapshots:
     transitivePeerDependencies:
       - '@rspack/core'
 
-  '@rsbuild/plugin-react@2.1.0(@rsbuild/core@2.1.4(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))':
+  '@rsbuild/plugin-react@2.1.0(@rsbuild/core@2.1.4(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))':
     dependencies:
-      '@rspack/plugin-react-refresh': 2.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-refresh@0.18.0)
+      '@rspack/plugin-react-refresh': 2.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-refresh@0.18.0)
       react-refresh: 0.18.0
     optionalDependencies:
       '@rsbuild/core': 2.1.4(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)
@@ -39485,9 +39485,9 @@ snapshots:
       - typescript
       - webpack-hot-middleware
 
-  '@rsbuild/plugin-svgr@2.0.3(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(typescript@7.0.2)':
+  '@rsbuild/plugin-svgr@2.0.3(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(typescript@7.0.2)':
     dependencies:
-      '@rsbuild/plugin-react': 2.1.0(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))
+      '@rsbuild/plugin-react': 2.1.0(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))
       '@svgr/core': 8.1.0(typescript@7.0.2)
       '@svgr/plugin-jsx': 8.1.0(@svgr/core@8.1.0(typescript@7.0.2))
       '@svgr/plugin-svgo': 8.1.0(@svgr/core@8.1.0(typescript@7.0.2))(typescript@7.0.2)
@@ -39500,9 +39500,9 @@ snapshots:
       - supports-color
       - typescript
 
-  '@rsbuild/plugin-svgr@2.0.3(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(typescript@7.0.2)':
+  '@rsbuild/plugin-svgr@2.0.3(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(typescript@7.0.2)':
     dependencies:
-      '@rsbuild/plugin-react': 2.1.0(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))
+      '@rsbuild/plugin-react': 2.1.0(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))
       '@svgr/core': 8.1.0(typescript@7.0.2)
       '@svgr/plugin-jsx': 8.1.0(@svgr/core@8.1.0(typescript@6.0.3))
       '@svgr/plugin-svgo': 8.1.0(@svgr/core@8.1.0(typescript@6.0.3))(typescript@7.0.2)
@@ -39547,12 +39547,12 @@ snapshots:
       - tslib
       - typescript
 
-  '@rsbuild/plugin-type-check@1.5.0(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(tslib@2.8.1)(typescript@7.0.2)':
+  '@rsbuild/plugin-type-check@1.5.0(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(tslib@2.8.1)(typescript@7.0.2)':
     dependencies:
       deepmerge: 4.3.1
       json5: 2.2.3
       reduce-configs: 1.1.2
-      ts-checker-rspack-plugin: 1.5.1(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(tslib@2.8.1)(typescript@7.0.2)
+      ts-checker-rspack-plugin: 1.5.1(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(tslib@2.8.1)(typescript@7.0.2)
     optionalDependencies:
       '@rsbuild/core': 2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)
     transitivePeerDependencies:
@@ -39560,12 +39560,12 @@ snapshots:
       - tslib
       - typescript
 
-  '@rsbuild/plugin-type-check@1.5.0(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(tslib@2.8.1)(typescript@7.0.2)':
+  '@rsbuild/plugin-type-check@1.5.0(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(tslib@2.8.1)(typescript@7.0.2)':
     dependencies:
       deepmerge: 4.3.1
       json5: 2.2.3
       reduce-configs: 1.1.2
-      ts-checker-rspack-plugin: 1.5.1(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(tslib@2.8.1)(typescript@7.0.2)
+      ts-checker-rspack-plugin: 1.5.1(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(tslib@2.8.1)(typescript@7.0.2)
     optionalDependencies:
       '@rsbuild/core': 2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)
     transitivePeerDependencies:
@@ -39621,9 +39621,9 @@ snapshots:
 
   '@rsbuild/shared@0.7.10(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)':
     dependencies:
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)'
       caniuse-lite: 1.0.30001780
-      html-webpack-plugin: html-rspack-plugin@5.7.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))
+      html-webpack-plugin: html-rspack-plugin@5.7.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))
       postcss: 8.4.49
     optionalDependencies:
       fsevents: 2.3.3
@@ -39764,106 +39764,106 @@ snapshots:
     transitivePeerDependencies:
       - '@module-federation/runtime-tools'
 
-  '@rspack-canary/binding-darwin-arm64@2.2.3-canary-8e63776c-20260908113208':
+  '@rspack-canary/binding-darwin-arm64@2.2.3-canary-76e8f696-20260911033013':
     optional: true
 
-  '@rspack-canary/binding-darwin-x64@2.2.3-canary-8e63776c-20260908113208':
+  '@rspack-canary/binding-darwin-x64@2.2.3-canary-76e8f696-20260911033013':
     optional: true
 
-  '@rspack-canary/binding-linux-arm64-gnu@2.2.3-canary-8e63776c-20260908113208':
+  '@rspack-canary/binding-linux-arm64-gnu@2.2.3-canary-76e8f696-20260911033013':
     optional: true
 
-  '@rspack-canary/binding-linux-arm64-musl@2.2.3-canary-8e63776c-20260908113208':
+  '@rspack-canary/binding-linux-arm64-musl@2.2.3-canary-76e8f696-20260911033013':
     optional: true
 
-  '@rspack-canary/binding-linux-ppc64-gnu@2.2.3-canary-8e63776c-20260908113208':
+  '@rspack-canary/binding-linux-ppc64-gnu@2.2.3-canary-76e8f696-20260911033013':
     optional: true
 
-  '@rspack-canary/binding-linux-riscv64-gnu@2.2.3-canary-8e63776c-20260908113208':
+  '@rspack-canary/binding-linux-riscv64-gnu@2.2.3-canary-76e8f696-20260911033013':
     optional: true
 
-  '@rspack-canary/binding-linux-riscv64-musl@2.2.3-canary-8e63776c-20260908113208':
+  '@rspack-canary/binding-linux-riscv64-musl@2.2.3-canary-76e8f696-20260911033013':
     optional: true
 
-  '@rspack-canary/binding-linux-s390x-gnu@2.2.3-canary-8e63776c-20260908113208':
+  '@rspack-canary/binding-linux-s390x-gnu@2.2.3-canary-76e8f696-20260911033013':
     optional: true
 
-  '@rspack-canary/binding-linux-x64-gnu@2.2.3-canary-8e63776c-20260908113208':
+  '@rspack-canary/binding-linux-x64-gnu@2.2.3-canary-76e8f696-20260911033013':
     optional: true
 
-  '@rspack-canary/binding-linux-x64-musl@2.2.3-canary-8e63776c-20260908113208':
+  '@rspack-canary/binding-linux-x64-musl@2.2.3-canary-76e8f696-20260911033013':
     optional: true
 
-  '@rspack-canary/binding-wasm32-wasi@2.2.3-canary-8e63776c-20260908113208':
+  '@rspack-canary/binding-wasm32-wasi@2.2.3-canary-76e8f696-20260911033013':
     dependencies:
       '@emnapi/core': 1.11.3
       '@emnapi/runtime': 1.11.3
       '@napi-rs/wasm-runtime': 1.1.6(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)
     optional: true
 
-  '@rspack-canary/binding-win32-arm64-msvc@2.2.3-canary-8e63776c-20260908113208':
+  '@rspack-canary/binding-win32-arm64-msvc@2.2.3-canary-76e8f696-20260911033013':
     optional: true
 
-  '@rspack-canary/binding-win32-ia32-msvc@2.2.3-canary-8e63776c-20260908113208':
+  '@rspack-canary/binding-win32-ia32-msvc@2.2.3-canary-76e8f696-20260911033013':
     optional: true
 
-  '@rspack-canary/binding-win32-x64-msvc@2.2.3-canary-8e63776c-20260908113208':
+  '@rspack-canary/binding-win32-x64-msvc@2.2.3-canary-76e8f696-20260911033013':
     optional: true
 
-  '@rspack-canary/binding@2.2.3-canary-8e63776c-20260908113208':
+  '@rspack-canary/binding@2.2.3-canary-76e8f696-20260911033013':
     optionalDependencies:
-      '@rspack/binding-darwin-arm64': '@rspack-canary/binding-darwin-arm64@2.2.3-canary-8e63776c-20260908113208'
-      '@rspack/binding-darwin-x64': '@rspack-canary/binding-darwin-x64@2.2.3-canary-8e63776c-20260908113208'
-      '@rspack/binding-linux-arm64-gnu': '@rspack-canary/binding-linux-arm64-gnu@2.2.3-canary-8e63776c-20260908113208'
-      '@rspack/binding-linux-arm64-musl': '@rspack-canary/binding-linux-arm64-musl@2.2.3-canary-8e63776c-20260908113208'
-      '@rspack/binding-linux-ppc64-gnu': '@rspack-canary/binding-linux-ppc64-gnu@2.2.3-canary-8e63776c-20260908113208'
-      '@rspack/binding-linux-riscv64-gnu': '@rspack-canary/binding-linux-riscv64-gnu@2.2.3-canary-8e63776c-20260908113208'
-      '@rspack/binding-linux-riscv64-musl': '@rspack-canary/binding-linux-riscv64-musl@2.2.3-canary-8e63776c-20260908113208'
-      '@rspack/binding-linux-s390x-gnu': '@rspack-canary/binding-linux-s390x-gnu@2.2.3-canary-8e63776c-20260908113208'
-      '@rspack/binding-linux-x64-gnu': '@rspack-canary/binding-linux-x64-gnu@2.2.3-canary-8e63776c-20260908113208'
-      '@rspack/binding-linux-x64-musl': '@rspack-canary/binding-linux-x64-musl@2.2.3-canary-8e63776c-20260908113208'
-      '@rspack/binding-wasm32-wasi': '@rspack-canary/binding-wasm32-wasi@2.2.3-canary-8e63776c-20260908113208'
-      '@rspack/binding-win32-arm64-msvc': '@rspack-canary/binding-win32-arm64-msvc@2.2.3-canary-8e63776c-20260908113208'
-      '@rspack/binding-win32-ia32-msvc': '@rspack-canary/binding-win32-ia32-msvc@2.2.3-canary-8e63776c-20260908113208'
-      '@rspack/binding-win32-x64-msvc': '@rspack-canary/binding-win32-x64-msvc@2.2.3-canary-8e63776c-20260908113208'
+      '@rspack/binding-darwin-arm64': '@rspack-canary/binding-darwin-arm64@2.2.3-canary-76e8f696-20260911033013'
+      '@rspack/binding-darwin-x64': '@rspack-canary/binding-darwin-x64@2.2.3-canary-76e8f696-20260911033013'
+      '@rspack/binding-linux-arm64-gnu': '@rspack-canary/binding-linux-arm64-gnu@2.2.3-canary-76e8f696-20260911033013'
+      '@rspack/binding-linux-arm64-musl': '@rspack-canary/binding-linux-arm64-musl@2.2.3-canary-76e8f696-20260911033013'
+      '@rspack/binding-linux-ppc64-gnu': '@rspack-canary/binding-linux-ppc64-gnu@2.2.3-canary-76e8f696-20260911033013'
+      '@rspack/binding-linux-riscv64-gnu': '@rspack-canary/binding-linux-riscv64-gnu@2.2.3-canary-76e8f696-20260911033013'
+      '@rspack/binding-linux-riscv64-musl': '@rspack-canary/binding-linux-riscv64-musl@2.2.3-canary-76e8f696-20260911033013'
+      '@rspack/binding-linux-s390x-gnu': '@rspack-canary/binding-linux-s390x-gnu@2.2.3-canary-76e8f696-20260911033013'
+      '@rspack/binding-linux-x64-gnu': '@rspack-canary/binding-linux-x64-gnu@2.2.3-canary-76e8f696-20260911033013'
+      '@rspack/binding-linux-x64-musl': '@rspack-canary/binding-linux-x64-musl@2.2.3-canary-76e8f696-20260911033013'
+      '@rspack/binding-wasm32-wasi': '@rspack-canary/binding-wasm32-wasi@2.2.3-canary-76e8f696-20260911033013'
+      '@rspack/binding-win32-arm64-msvc': '@rspack-canary/binding-win32-arm64-msvc@2.2.3-canary-76e8f696-20260911033013'
+      '@rspack/binding-win32-ia32-msvc': '@rspack-canary/binding-win32-ia32-msvc@2.2.3-canary-76e8f696-20260911033013'
+      '@rspack/binding-win32-x64-msvc': '@rspack-canary/binding-win32-x64-msvc@2.2.3-canary-76e8f696-20260911033013'
 
-  '@rspack-canary/cli@2.2.3-canary-8e63776c-20260908113208(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(@rspack/dev-server@2.1.0(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(selfsigned@5.5.0))':
+  '@rspack-canary/cli@2.2.3-canary-76e8f696-20260911033013(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(@rspack/dev-server@2.1.0(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(selfsigned@5.5.0))':
     dependencies:
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13)'
     optionalDependencies:
-      '@rspack/dev-server': 2.1.0(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(selfsigned@5.5.0)
+      '@rspack/dev-server': 2.1.0(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(selfsigned@5.5.0)
 
-  '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@0.21.6)(@swc/helpers@0.5.23)':
+  '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(@swc/helpers@0.5.23)':
     dependencies:
-      '@rspack/binding': '@rspack-canary/binding@2.2.3-canary-8e63776c-20260908113208'
+      '@rspack/binding': '@rspack-canary/binding@2.2.3-canary-76e8f696-20260911033013'
     optionalDependencies:
-      '@module-federation/runtime-tools': 0.21.6
+      '@module-federation/runtime-tools': 2.2.2(node-fetch@2.7.0(encoding@0.1.13))
       '@swc/helpers': 0.5.23
 
-  '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13)':
+  '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13)':
     dependencies:
-      '@rspack/binding': '@rspack-canary/binding@2.2.3-canary-8e63776c-20260908113208'
+      '@rspack/binding': '@rspack-canary/binding@2.2.3-canary-76e8f696-20260911033013'
     optionalDependencies:
       '@module-federation/runtime-tools': 2.9.0
       '@swc/helpers': 0.5.13
 
-  '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17)':
+  '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17)':
     dependencies:
-      '@rspack/binding': '@rspack-canary/binding@2.2.3-canary-8e63776c-20260908113208'
+      '@rspack/binding': '@rspack-canary/binding@2.2.3-canary-76e8f696-20260911033013'
     optionalDependencies:
       '@module-federation/runtime-tools': 2.9.0
       '@swc/helpers': 0.5.17
 
-  '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)':
+  '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)':
     dependencies:
-      '@rspack/binding': '@rspack-canary/binding@2.2.3-canary-8e63776c-20260908113208'
+      '@rspack/binding': '@rspack-canary/binding@2.2.3-canary-76e8f696-20260911033013'
     optionalDependencies:
       '@module-federation/runtime-tools': 2.9.0
       '@swc/helpers': 0.5.23
 
-  '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23)':
+  '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.23)':
     dependencies:
-      '@rspack/binding': '@rspack-canary/binding@2.2.3-canary-8e63776c-20260908113208'
+      '@rspack/binding': '@rspack-canary/binding@2.2.3-canary-76e8f696-20260911033013'
     optionalDependencies:
       '@module-federation/runtime-tools': link:packages/runtime-tools
       '@swc/helpers': 0.5.23
@@ -40012,14 +40012,14 @@ snapshots:
       '@swc/helpers': 0.5.23
     optional: true
 
-  '@rspack/dev-middleware@2.0.4(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))':
+  '@rspack/dev-middleware@2.0.4(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))':
     optionalDependencies:
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13)'
 
-  '@rspack/dev-server@2.1.0(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(selfsigned@5.5.0)':
+  '@rspack/dev-server@2.1.0(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(selfsigned@5.5.0)':
     dependencies:
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13)'
-      '@rspack/dev-middleware': 2.0.4(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13)'
+      '@rspack/dev-middleware': 2.0.4(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))
     optionalDependencies:
       selfsigned: 5.5.0
 
@@ -40041,17 +40041,17 @@ snapshots:
     optionalDependencies:
       webpack-hot-middleware: 2.26.1
 
-  '@rspack/plugin-react-refresh@2.0.0(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(react-refresh@0.18.0)':
+  '@rspack/plugin-react-refresh@2.0.0(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(react-refresh@0.18.0)':
     dependencies:
       react-refresh: 0.18.0
     optionalDependencies:
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17)'
 
-  '@rspack/plugin-react-refresh@2.0.0(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-refresh@0.18.0)':
+  '@rspack/plugin-react-refresh@2.0.0(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-refresh@0.18.0)':
     dependencies:
       react-refresh: 0.18.0
     optionalDependencies:
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)'
 
   '@rspack/plugin-react-refresh@2.0.0(@rspack/core@2.2.2(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-refresh@0.18.0)':
     dependencies:
@@ -40059,17 +40059,17 @@ snapshots:
     optionalDependencies:
       '@rspack/core': 2.2.2(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)
 
-  '@rspack/plugin-react-refresh@2.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(react-refresh@0.18.0)':
+  '@rspack/plugin-react-refresh@2.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(react-refresh@0.18.0)':
     dependencies:
       react-refresh: 0.18.0
     optionalDependencies:
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17)'
 
-  '@rspack/plugin-react-refresh@2.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-refresh@0.18.0)':
+  '@rspack/plugin-react-refresh@2.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-refresh@0.18.0)':
     dependencies:
       react-refresh: 0.18.0
     optionalDependencies:
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)'
 
   '@rspack/plugin-react-refresh@2.0.2(@rspack/core@2.2.2(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(react-refresh@0.18.0)':
     dependencies:
@@ -40083,12 +40083,12 @@ snapshots:
     optionalDependencies:
       '@rspack/core': 2.2.2(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)
 
-  '@rspress/core@2.0.14(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(@types/mdast@4.0.4)(@types/react@19.2.14)(core-js@3.49.0)(micromark-util-types@2.0.2)(micromark@4.0.2)':
+  '@rspress/core@2.0.14(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(@types/mdast@4.0.4)(@types/react@19.2.14)(core-js@3.49.0)(micromark-util-types@2.0.2)(micromark@4.0.2)':
     dependencies:
       '@mdx-js/mdx': 3.1.1
       '@mdx-js/react': 3.1.1(@types/react@19.2.14)(react@19.2.7)
       '@rsbuild/core': 2.1.4(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)
-      '@rsbuild/plugin-react': 2.0.1(@rsbuild/core@2.1.4(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))
+      '@rsbuild/plugin-react': 2.0.1(@rsbuild/core@2.1.4(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))
       '@rspress/shared': 2.0.14(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)
       '@shikijs/rehype': 4.2.0
       '@types/unist': 3.0.3
@@ -40535,15 +40535,15 @@ snapshots:
       - encoding
       - supports-color
 
-  '@storybook/builder-webpack5@9.0.9(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(storybook@8.6.17(prettier@3.8.1))(typescript@6.0.3)(webpack-cli@5.1.4)':
+  '@storybook/builder-webpack5@9.0.9(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(storybook@8.6.17(prettier@3.8.1))(typescript@6.0.3)(webpack-cli@5.1.4)':
     dependencies:
       '@storybook/core-webpack': 9.0.9(storybook@8.6.17(prettier@3.8.1))
       case-sensitive-paths-webpack-plugin: 2.4.0
       cjs-module-lexer: 1.3.1
-      css-loader: 6.11.0(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(webpack@5.104.1)
+      css-loader: 6.11.0(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(webpack@5.104.1)
       es-module-lexer: 1.5.3
       fork-ts-checker-webpack-plugin: 8.0.0(typescript@6.0.3)(webpack@5.104.1)
-      html-webpack-plugin: 5.6.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(webpack@5.104.1)
+      html-webpack-plugin: 5.6.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(webpack@5.104.1)
       magic-string: 0.30.21
       storybook: 8.6.17(prettier@3.8.1)
       style-loader: 3.3.4(webpack@5.104.1)
@@ -40875,7 +40875,7 @@ snapshots:
 
   '@storybook/mdx2-csf@1.1.0': {}
 
-  '@storybook/nextjs@9.0.9(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(@swc/core@1.7.26(@swc/helpers@0.5.13))(babel-plugin-macros@3.1.0)(esbuild@0.28.1)(next@14.2.35(@babel/core@7.29.0)(@playwright/test@1.57.0)(@swc/core@1.7.26(@swc/helpers@0.5.13))(babel-plugin-macros@3.1.0)(esbuild@0.28.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.100.0)(webpack-cli@5.1.4))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass-embedded@1.100.0)(sass@1.100.0)(storybook@8.6.17(prettier@3.8.1))(type-fest@2.19.0)(typescript@6.0.3)(webpack-cli@5.1.4)(webpack-dev-server@5.2.3)(webpack-hot-middleware@2.26.1)(webpack@5.104.1)':
+  '@storybook/nextjs@9.0.9(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(@swc/core@1.7.26(@swc/helpers@0.5.13))(babel-plugin-macros@3.1.0)(esbuild@0.28.1)(next@14.2.35(@babel/core@7.29.0)(@playwright/test@1.57.0)(@swc/core@1.7.26(@swc/helpers@0.5.13))(babel-plugin-macros@3.1.0)(esbuild@0.28.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.100.0)(webpack-cli@5.1.4))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass-embedded@1.100.0)(sass@1.100.0)(storybook@8.6.17(prettier@3.8.1))(type-fest@2.19.0)(typescript@6.0.3)(webpack-cli@5.1.4)(webpack-dev-server@5.2.3)(webpack-hot-middleware@2.26.1)(webpack@5.104.1)':
     dependencies:
       '@babel/core': 7.29.0
       '@babel/plugin-syntax-bigint': 7.8.3(@babel/core@7.29.0)
@@ -40891,20 +40891,20 @@ snapshots:
       '@babel/preset-typescript': 7.28.5(@babel/core@7.29.0)
       '@babel/runtime': 7.28.2
       '@pmmmwh/react-refresh-webpack-plugin': 0.5.15(react-refresh@0.14.2)(type-fest@2.19.0)(webpack-dev-server@5.2.3(webpack-cli@5.1.4)(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4)))(webpack-hot-middleware@2.26.1)(webpack@5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4))
-      '@storybook/builder-webpack5': 9.0.9(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(storybook@8.6.17(prettier@3.8.1))(typescript@6.0.3)(webpack-cli@5.1.4)
+      '@storybook/builder-webpack5': 9.0.9(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(storybook@8.6.17(prettier@3.8.1))(typescript@6.0.3)(webpack-cli@5.1.4)
       '@storybook/preset-react-webpack': 9.0.9(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@8.6.17(prettier@3.8.1))(typescript@6.0.3)(webpack-cli@5.1.4)
       '@storybook/react': 9.0.9(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@8.6.17(prettier@3.8.1))(typescript@6.0.3)
       '@types/semver': 7.5.8
       babel-loader: 9.2.1(@babel/core@7.29.0)(webpack@5.104.1)
-      css-loader: 6.11.0(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(webpack@5.104.1)
+      css-loader: 6.11.0(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(webpack@5.104.1)
       image-size: 2.0.2
       loader-utils: 3.3.1
       node-polyfill-webpack-plugin: 2.0.1(webpack@5.104.1)
       postcss: 8.5.23
-      postcss-loader: 8.2.1(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(postcss@8.5.23)(typescript@6.0.3)(webpack@5.104.1)
+      postcss-loader: 8.2.1(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(postcss@8.5.23)(typescript@6.0.3)(webpack@5.104.1)
       react-refresh: 0.14.2
       resolve-url-loader: 5.0.0
-      sass-loader: 14.2.1(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(sass-embedded@1.100.0)(sass@1.100.0)(webpack@5.104.1)
+      sass-loader: 14.2.1(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(sass-embedded@1.100.0)(sass@1.100.0)(webpack@5.104.1)
       semver: 7.6.3
       storybook: 8.6.17(prettier@3.8.1)
       style-loader: 3.3.4(webpack@5.104.1)
@@ -46350,7 +46350,7 @@ snapshots:
     dependencies:
       postcss: 8.5.23
 
-  css-loader@6.11.0(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@0.21.6)(@swc/helpers@0.5.23))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4)):
+  css-loader@6.11.0(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(@swc/helpers@0.5.23))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4)):
     dependencies:
       icss-utils: 5.1.0(postcss@8.5.23)
       postcss: 8.5.23
@@ -46361,10 +46361,10 @@ snapshots:
       postcss-value-parser: 4.2.0
       semver: 7.6.3
     optionalDependencies:
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@0.21.6)(@swc/helpers@0.5.23)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(@swc/helpers@0.5.23)'
       webpack: 5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4)
 
-  css-loader@6.11.0(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(webpack@5.104.1):
+  css-loader@6.11.0(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(webpack@5.104.1):
     dependencies:
       icss-utils: 5.1.0(postcss@8.5.23)
       postcss: 8.5.23
@@ -46375,7 +46375,7 @@ snapshots:
       postcss-value-parser: 4.2.0
       semver: 7.6.3
     optionalDependencies:
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13)'
       webpack: 5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4)
 
   css-minimizer-webpack-plugin@5.0.1(esbuild@0.25.5)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4)):
@@ -50041,9 +50041,9 @@ snapshots:
     dependencies:
       void-elements: 3.1.0
 
-  html-rspack-plugin@5.7.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)):
+  html-rspack-plugin@5.7.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)):
     optionalDependencies:
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)'
 
   html-tags@3.3.1: {}
 
@@ -50061,7 +50061,7 @@ snapshots:
 
   html-void-elements@3.0.0: {}
 
-  html-webpack-plugin@5.6.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(webpack@5.104.1):
+  html-webpack-plugin@5.6.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(webpack@5.104.1):
     dependencies:
       '@types/html-minifier-terser': 6.1.0
       html-minifier-terser: 6.1.0
@@ -50069,10 +50069,10 @@ snapshots:
       pretty-error: 4.0.0
       tapable: 2.3.0
     optionalDependencies:
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13)'
       webpack: 5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4)
 
-  html-webpack-plugin@5.6.6(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@0.21.6)(@swc/helpers@0.5.23))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4)):
+  html-webpack-plugin@5.6.6(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(@swc/helpers@0.5.23))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4)):
     dependencies:
       '@types/html-minifier-terser': 6.1.0
       html-minifier-terser: 6.1.0
@@ -50080,7 +50080,7 @@ snapshots:
       pretty-error: 4.0.0
       tapable: 2.3.0
     optionalDependencies:
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@0.21.6)(@swc/helpers@0.5.23)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(@swc/helpers@0.5.23)'
       webpack: 5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4)
     optional: true
 
@@ -51712,18 +51712,18 @@ snapshots:
       less: 4.6.4
       webpack: 5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4)
 
-  less-loader@12.3.3(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(less@4.6.4)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.28.1)(webpack-cli@5.1.4)):
+  less-loader@12.3.3(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(less@4.6.4)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.28.1)(webpack-cli@5.1.4)):
     dependencies:
       less: 4.6.4
     optionalDependencies:
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17)'
       webpack: 5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.28.1)(webpack-cli@5.1.4)
 
-  less-loader@12.3.3(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(less@4.6.4)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1))):
+  less-loader@12.3.3(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(less@4.6.4)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1))):
     dependencies:
       less: 4.6.4
     optionalDependencies:
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)'
       webpack: 5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4(webpack-dev-server@5.2.3)(webpack@5.104.1))
 
   less@4.6.4:
@@ -54622,14 +54622,14 @@ snapshots:
       semver: 7.8.5
       webpack: 5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4)
 
-  postcss-loader@8.2.1(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(postcss@8.5.23)(typescript@6.0.3)(webpack@5.104.1):
+  postcss-loader@8.2.1(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(postcss@8.5.23)(typescript@6.0.3)(webpack@5.104.1):
     dependencies:
       cosmiconfig: 9.0.1(typescript@6.0.3)
       jiti: 2.6.1
       postcss: 8.5.23
       semver: 7.8.5
     optionalDependencies:
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13)'
       webpack: 5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4)
     transitivePeerDependencies:
       - typescript
@@ -57534,15 +57534,15 @@ snapshots:
     optionalDependencies:
       react-dom: 18.3.1(react@18.3.1)
 
-  react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17)'
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)'
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
@@ -58457,15 +58457,15 @@ snapshots:
     optionalDependencies:
       '@rsbuild/core': 1.7.3(@module-federation/runtime-tools@2.9.0)
 
-  rsbuild-plugin-rsc@0.1.1(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)):
+  rsbuild-plugin-rsc@0.1.1(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)):
     dependencies:
       '@rsbuild/core': 2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)
-      react-server-dom-rspack: 0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react-server-dom-rspack: 0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
-  rsbuild-plugin-rsc@0.1.1(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)):
+  rsbuild-plugin-rsc@0.1.1(@rsbuild/core@2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)):
     dependencies:
       '@rsbuild/core': 2.1.0(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)
-      react-server-dom-rspack: 0.0.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react-server-dom-rspack: 0.0.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
   rslog@1.2.3: {}
 
@@ -58483,17 +58483,17 @@ snapshots:
     optionalDependencies:
       '@rspack/core': 1.7.9(@swc/helpers@0.5.19)
 
-  rspack-manifest-plugin@5.2.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17)):
+  rspack-manifest-plugin@5.2.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17)):
     dependencies:
       '@rspack/lite-tapable': 1.1.2
     optionalDependencies:
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17)'
 
-  rspack-manifest-plugin@5.2.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)):
+  rspack-manifest-plugin@5.2.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)):
     dependencies:
       '@rspack/lite-tapable': 1.1.2
     optionalDependencies:
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)'
 
   rspack-vue-loader@17.5.1(@rspack/core@2.2.2(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(vue@3.5.30(typescript@7.0.2)):
     dependencies:
@@ -58732,20 +58732,20 @@ snapshots:
       sass-embedded-win32-arm64: 1.98.0
       sass-embedded-win32-x64: 1.98.0
 
-  sass-loader@14.2.1(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(sass-embedded@1.100.0)(sass@1.100.0)(webpack@5.104.1):
+  sass-loader@14.2.1(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13))(sass-embedded@1.100.0)(sass@1.100.0)(webpack@5.104.1):
     dependencies:
       neo-async: 2.6.2
     optionalDependencies:
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.13)'
       sass: 1.100.0
       sass-embedded: 1.100.0
       webpack: 5.104.1(@swc/core@1.7.26(@swc/helpers@0.5.13))(esbuild@0.28.1)(webpack-cli@5.1.4)
 
-  sass-loader@16.0.7(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@0.21.6)(@swc/helpers@0.5.23))(sass-embedded@1.98.0)(sass@1.98.0)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4)):
+  sass-loader@16.0.7(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(@swc/helpers@0.5.23))(sass-embedded@1.98.0)(sass@1.98.0)(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4)):
     dependencies:
       neo-async: 2.6.2
     optionalDependencies:
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@0.21.6)(@swc/helpers@0.5.23)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(@swc/helpers@0.5.23)'
       sass: 1.98.0
       sass-embedded: 1.98.0
       webpack: 5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4)
@@ -60603,7 +60603,7 @@ snapshots:
     transitivePeerDependencies:
       - tslib
 
-  ts-checker-rspack-plugin@1.5.1(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(tslib@2.8.1)(typescript@7.0.2):
+  ts-checker-rspack-plugin@1.5.1(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17))(tslib@2.8.1)(typescript@7.0.2):
     dependencies:
       '@rspack/lite-tapable': 1.1.2
       chokidar: 3.6.0
@@ -60611,11 +60611,11 @@ snapshots:
       picocolors: 1.1.1
       typescript: 7.0.2
     optionalDependencies:
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.17)'
     transitivePeerDependencies:
       - tslib
 
-  ts-checker-rspack-plugin@1.5.1(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(tslib@2.8.1)(typescript@7.0.2):
+  ts-checker-rspack-plugin@1.5.1(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(tslib@2.8.1)(typescript@7.0.2):
     dependencies:
       '@rspack/lite-tapable': 1.1.2
       chokidar: 3.6.0
@@ -60623,7 +60623,7 @@ snapshots:
       picocolors: 1.1.1
       typescript: 7.0.2
     optionalDependencies:
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)'
     transitivePeerDependencies:
       - tslib
 
@@ -62425,12 +62425,12 @@ snapshots:
 
   webpack-sources@3.5.1: {}
 
-  webpack-subresource-integrity@5.1.0(html-webpack-plugin@5.6.6(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@0.21.6)(@swc/helpers@0.5.23))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4)))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4)):
+  webpack-subresource-integrity@5.1.0(html-webpack-plugin@5.6.6(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(@swc/helpers@0.5.23))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4)))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4)):
     dependencies:
       typed-assert: 1.0.9
       webpack: 5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4)
     optionalDependencies:
-      html-webpack-plugin: 5.6.6(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@0.21.6)(@swc/helpers@0.5.23))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4))
+      html-webpack-plugin: 5.6.6(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.2.2(node-fetch@2.7.0(encoding@0.1.13)))(@swc/helpers@0.5.23))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.25.5)(webpack-cli@5.1.4))
 
   webpack-subresource-integrity@5.1.0(html-webpack-plugin@5.6.6(@rspack/core@1.7.9(@swc/helpers@0.5.17))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.25.5)(webpack-cli@5.1.4)))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.17))(esbuild@0.25.5)(webpack-cli@5.1.4)):
     dependencies:
@@ -63161,32 +63161,32 @@ snapshots:
 
   zephyr-edge-contract@1.2.2: {}
 
-  zephyr-rsbuild-plugin@1.2.2(@rsbuild/core@2.1.10(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4)):
+  zephyr-rsbuild-plugin@1.2.2(@rsbuild/core@2.1.10(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4)):
     dependencies:
       '@rsbuild/core': 2.1.10(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)
       zephyr-agent: 1.2.2
-      zephyr-rspack-plugin: 1.2.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4))
+      zephyr-rspack-plugin: 1.2.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4))
       zephyr-xpack-internal: 1.2.2(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4))
     transitivePeerDependencies:
       - '@rspack/core'
       - supports-color
       - webpack
 
-  zephyr-rspack-plugin@1.2.2(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4)):
+  zephyr-rspack-plugin@1.2.2(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4)):
     dependencies:
-      '@rspack/core': '@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)'
+      '@rspack/core': '@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23)'
       zephyr-agent: 1.2.2
       zephyr-xpack-internal: 1.2.2(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4))
     transitivePeerDependencies:
       - supports-color
       - webpack
 
-  zephyr-rspress-plugin@1.2.2(@rsbuild/core@2.1.10(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(@rspress/core@2.0.14(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(@types/mdast@4.0.4)(@types/react@19.2.14)(core-js@3.49.0)(micromark-util-types@2.0.2)(micromark@4.0.2))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4)):
+  zephyr-rspress-plugin@1.2.2(@rsbuild/core@2.1.10(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(@rspress/core@2.0.14(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(@types/mdast@4.0.4)(@types/react@19.2.14)(core-js@3.49.0)(micromark-util-types@2.0.2)(micromark@4.0.2))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4)):
     dependencies:
-      '@rspress/core': 2.0.14(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(@types/mdast@4.0.4)(@types/react@19.2.14)(core-js@3.49.0)(micromark-util-types@2.0.2)(micromark@4.0.2)
+      '@rspress/core': 2.0.14(@module-federation/runtime-tools@2.9.0)(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(@types/mdast@4.0.4)(@types/react@19.2.14)(core-js@3.49.0)(micromark-util-types@2.0.2)(micromark@4.0.2)
       zephyr-agent: 1.2.2
       zephyr-edge-contract: 1.2.2
-      zephyr-rsbuild-plugin: 1.2.2(@rsbuild/core@2.1.10(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-8e63776c-20260908113208(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4))
+      zephyr-rsbuild-plugin: 1.2.2(@rsbuild/core@2.1.10(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0))(@rspack-canary/core@2.2.3-canary-76e8f696-20260911033013(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4))
       zephyr-xpack-internal: 1.2.2(webpack@5.104.1(@swc/core@1.15.41(@swc/helpers@0.5.23))(esbuild@0.28.1)(webpack-cli@5.1.4))
     transitivePeerDependencies:
       - '@rsbuild/core'

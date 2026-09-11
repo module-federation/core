@@ -785,15 +785,28 @@ export class RemoteHandler {
 
           // Keep a removed provider's runtime alive while another remote uses it.
           let preserveRemoteRuntime = false;
+          // A runtime registration name may differ from the container/provider
+          // name (for example dynamic -> catalog). Shared.from uses the provider
+          // identity, so scanning only the registration name can clear live libs.
+          const providerNames = new Set(
+            [remoteInfo.name, remoteInfo.entryGlobalName].filter(Boolean),
+          );
           let remoteInsId = remoteInfo.buildVersion
             ? composeKeyWithSeparator(remoteInfo.name, remoteInfo.buildVersion)
             : remoteInfo.name;
           const remoteInsIndex =
             CurrentGlobal.__FEDERATION__.__INSTANCES__.findIndex((ins) => {
               if (remoteInfo.buildVersion) {
-                return ins.options.id === remoteInsId;
+                return Array.from(providerNames).some(
+                  (providerName) =>
+                    ins.options.id ===
+                    composeKeyWithSeparator(
+                      providerName,
+                      remoteInfo.buildVersion,
+                    ),
+                );
               } else {
-                return ins.name === remoteInsId;
+                return providerNames.has(ins.name);
               }
             });
           const remoteIns =
@@ -802,6 +815,7 @@ export class RemoteHandler {
               : undefined;
           if (remoteIns) {
             remoteInsId = remoteIns.options.id || remoteInsId;
+            providerNames.add(remoteIns.name);
           }
           // Shared factories can outlive removal from the instance registry.
           // Scan their ownership even when this provider was removed before.
@@ -823,10 +837,10 @@ export class RemoteHandler {
                         if (
                           shared &&
                           typeof shared === 'object' &&
-                          shared.from === remoteInfo.name
+                          providerNames.has(shared.from)
                         ) {
                           const hasExternalConsumer = shared.useIn.some(
-                            (usedHostName) => usedHostName !== remoteInfo.name,
+                            (usedHostName) => usedHostName !== shared.from,
                           );
                           if (
                             shared.loaded ||
@@ -834,8 +848,7 @@ export class RemoteHandler {
                             hasExternalConsumer
                           ) {
                             shared.useIn = shared.useIn.filter(
-                              (usedHostName) =>
-                                usedHostName !== remoteInfo.name,
+                              (usedHostName) => usedHostName !== shared.from,
                             );
                             if (shared.useIn.length || shared.loading) {
                               isAllSharedNotUsed = false;

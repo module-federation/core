@@ -151,19 +151,29 @@ describe('clearCache', () => {
     expect((globalThis as any).remoteA).toBeUndefined();
   });
 
-  test.each([{ loading: false }, { loading: true }])(
+  test.each(
+    [false, true].flatMap((loading) =>
+      ['remoteA', 'containerA'].flatMap((providerName) =>
+        ['bundler', 'runtime'].map((source) => ({
+          loading,
+          providerName,
+          source,
+        })),
+      ),
+    ),
+  )(
     'should invalidate host caches while preserving shared provider: %j',
-    async ({ loading }) => {
+    async ({ loading, providerName, source }) => {
       const { instance, webpackRequire } = createWebpackRequire();
       const remoteEntryClear = jest.fn();
       const selectiveClear = jest.fn();
       const previousFederation = (globalThis as any).__FEDERATION__;
       const shared = {
-        from: 'remoteA',
+        from: providerName,
         loaded: !loading,
         loading: loading ? Promise.resolve() : undefined,
         lib: loading ? undefined : () => ({ value: 'shared from remoteA' }),
-        useIn: ['remoteA', 'anotherRemote'],
+        useIn: [providerName, 'anotherRemote'],
       };
 
       instance.moduleCache.set('remoteA', {
@@ -172,7 +182,7 @@ describe('clearCache', () => {
           __webpack_clear_exposed_cache__: selectiveClear,
         },
       });
-      (globalThis as any).remoteA = {
+      (globalThis as any)[providerName] = {
         __webpack_clear_cache__: remoteEntryClear,
         __webpack_clear_exposed_cache__: selectiveClear,
       };
@@ -193,10 +203,21 @@ describe('clearCache', () => {
           {
             name: 'remoteA',
             entry: 'http://localhost:3001/remoteEntry.js',
-            entryGlobalName: 'remoteA',
+            entryGlobalName: providerName,
           },
         ],
       };
+      if (source === 'runtime') {
+        instance.options.remotes = [
+          {
+            name: 'remoteA',
+            entry: 'http://localhost:3001/remoteEntry.js',
+            entryGlobalName: providerName,
+          },
+        ] as any;
+        webpackRequire.federation.bundlerRuntimeOptions.remotes.remoteInfos =
+          {};
+      }
       webpackRequire.remotesLoadingData = {
         moduleIdToRemoteDataMapping: {
           101: {
@@ -244,11 +265,11 @@ describe('clearCache', () => {
             'shared-from-remoteA'
           ]['1.0.0'],
         ).toBe(shared);
-        expect((globalThis as any).remoteA).toBeDefined();
-        expect(shared.from).toBe('remoteA');
+        expect((globalThis as any)[providerName]).toBeDefined();
+        expect(shared.from).toBe(providerName);
       } finally {
         (globalThis as any).__FEDERATION__ = previousFederation;
-        delete (globalThis as any).remoteA;
+        delete (globalThis as any)[providerName];
         (globalThis as any).window = previousWindow;
         (globalThis as any).document = previousDocument;
       }

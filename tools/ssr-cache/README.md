@@ -12,9 +12,9 @@ pnpm exec turbo run build --filter=@module-federation/runtime-tools
 SSR_CACHE_RSPACK_ENTRY=/absolute/path/to/rspack/packages/rspack/dist/index.js node --test tools/ssr-cache/baseline.test.cjs
 ```
 
-Without an override the runner resolves the installed `@rspack/core`, but the
-current lockfile canary lacks the required selective cleanup method. Use the
-companion Rspack build for this unreleased implementation.
+Without an override the runner resolves the installed `@rspack/core`. The
+lockfile pins `2.2.3-canary-76e8f696-20260911033013`, which includes the required
+selective cleanup method; a local compiler override is no longer required.
 To validate a local Rspack build, set `SSR_CACHE_RSPACK_ENTRY` to its absolute
 `packages/rspack/dist/index.js` path. The test reports the resolved path and
 version; a local build's version alone does not identify its commit.
@@ -199,8 +199,8 @@ SSR_CACHE_EXPECT_NATIVE=1 SSR_CACHE_RSPACK_ENTRY=/absolute/path/to/rspack/packag
 
 This mode removes the parent-closure TODOs and requires non-shared payload GC,
 shared strict identity and retained lazy dependency identity. The three stale
-adapter assertions now pass with explicit disposal before application rebuild. Selective cleanup is always required. The installed older canary predates this
-capability and is not a supported validation target for shared cleanup.
+adapter assertions now pass with explicit disposal before application rebuild. Selective cleanup is always required. The earlier `8e63776c` canary predates this capability; the current pinned
+`76e8f696` preview includes it.
 
 For the existing full Modern SSR CI job, use the Node 24 resolver hook so both
 ESM and CJS toolchains load the local compiler (no lockfile or symlink changes):
@@ -211,10 +211,10 @@ SSR_CACHE_RSPACK_ENTRY=/absolute/path/to/rspack/packages/rspack/dist/index.js NO
 
 Verify the provider container exports the new method in the emitted artifact;
 merely finding its name inside bundled MF runtime call sites is insufficient.
-The Modern shared-cache spec now passes with this compiler. The separate
-remote-cache runtime-capture assertion still intermittently fails; the full CI
-job is not accepted as green. The explicit adapter lifecycle below closes the stale-binding baseline; Modern
-ownership and R2–R6 remain open.
+The later CI investigation below explains the remote-cache runtime-capture
+failure and the shared-cache development-mode GC failure. The explicit adapter
+lifecycle below closes the stale-binding baseline; it does not alone complete
+Modern ownership or R2–R6.
 
 ## R1 adapter lifecycle
 
@@ -245,12 +245,120 @@ it. The unused moduleCache.set generation marker/wrapper was removed.
 
 The baseline now uses the production disposer before dropping CJS cache. It no
 longer manually replaces the removeRemote plugin. With the companion compiler
-and Modern entry, strict mode passes all 23 checks with zero TODOs/skips. These
-include repeated installation, cross-copy/multiple-binding unit coverage and a
-separate WeakRef check retaining the disposer and saved clear function.
+and Modern entry, the current strict artifact invocation reports 13 checks with
+zero TODOs/skips, including the separate WeakRef check retaining the disposer and
+saved clear function. Repeated installation and cross-copy/multiple-binding cases
+are covered separately by the bundler-runtime unit suite.
 
 The WeakRef test proves adapter-owned references are released, not that all
 application bundles are collectable: the retained MF control plane, active shared
 providers and business exports may still reference bundled code. Modern must
 supply application ownership and request/stream drain; production serve,
 long-running memory stability and end-to-end recovery remain later stage gates.
+
+## Dynamic registration/provider identity regression (R3 integration)
+
+The Modern production-generation test exposed a gap in the original identity
+assertion: the host's cached shared module could hide a provider factory whose
+execution cache had been cleared. With registration name `dynamic` and provider
+container name `v1`, both runtime-core and bundler cleanup matched only the
+registration name against `Shared.from`. The bundler path also lacked metadata
+for dynamically registered remotes, which are absent from compiler remoteInfos.
+
+The repair resolves names from runtime registrations and loaded-container
+metadata, uses provider/global names for shared ownership, and keeps registration
+names separate for host cache invalidation. Regression cases cover retained or
+already-detached provider runtimes, loading shared factories, and both compiler
+and runtime registration metadata. Modern's companion production test requires
+host and new-provider shared references to remain strictly identical through
+v1/v2/v3 application rebuilds and failed-generation recovery.
+
+Validation on Node 24.18.1 / local Rspack 2.2.2:
+
+```sh
+pnpm --filter @module-federation/runtime-core exec rstest run __tests__/register-remotes.spec.ts
+pnpm --filter @module-federation/runtime-core test
+pnpm --filter @module-federation/webpack-bundler-runtime test --runInBand __tests__/clearCache.spec.ts
+pnpm --filter @module-federation/webpack-bundler-runtime test --runInBand
+pnpm exec turbo run build --filter=@module-federation/runtime-tools
+SSR_CACHE_STRICT=1 SSR_CACHE_RSPACK_ENTRY=/Users/bytedance/outter/rspack/packages/rspack/dist/index.js SSR_CACHE_MODERN_ENTRY=/Users/bytedance/work/modern.js/packages/server/core/dist/cjs/adapters/node/index.js node --test tools/ssr-cache/baseline.test.cjs
+pnpm exec prettier --check .
+pnpm exec prettier --check packages/runtime-core/src/remote/index.ts packages/runtime-core/__tests__/register-remotes.spec.ts packages/webpack-bundler-runtime/src/clearCache.ts packages/webpack-bundler-runtime/__tests__/clearCache.spec.ts tools/ssr-cache/README.md
+pnpm exec changeset status
+git diff --check
+```
+
+Runtime-core: 138 passed. Bundler runtime: 122 passed. The full formatting gate
+reports 683 existing/generated or unrelated dirty files; these are not rewritten.
+The touched-file gate is checked separately. Full Cypress/browser hydration and
+load/heap endurance tests are not run for this repair; the real Modern production
+artifact test and the strict compiler baseline complement package tests. No release.
+
+## PR #5053: Modern SSR CI investigation
+
+The failing job had three independent causes:
+
+- The failing revision pinned Rspack `8e63776c`, before #15614. Its provider does not export
+  `__webpack_clear_exposed_cache__`, so removing an actively shared provider
+  returns HTTP 500. The matching implementation is required; the unreleased
+  contract has no legacy-provider fallback. The follow-up pins the published
+  `2.2.3-canary-76e8f696-20260911033013` core, CLI and native bindings, removing
+  this dependency blocker.
+- The first browser visit starts lazy compilation. Modern's repack handler clears
+  SSR module caches, resetting the probe's module-local WeakRef and snapshots
+  before the update request. The host fixture now compiles eagerly. Its original
+  cross-request assertions remain unchanged.
+- React development elements can retain an initialization Error in `_debugStack`.
+  A failed run's heap snapshot showed `antd -> defaultEmptyImg -> _debugStack ->
+CallSiteInfo -> exposed module -> nonSharedPayload`. This is a reference outside
+  federation caches; GC success depended on development reloads and stack capture.
+  The shared-provider fixture now bundles production dependencies even when
+  served by `rslib mf-dev`. It still requires shared availability and non-shared
+  payload collection, without claiming development debug-stack reclamation.
+
+Validation commands for this CI repair:
+
+```sh
+# Reproduces the two original CI failures with the installed compiler.
+pnpm run ci:local --only=e2e-modern-ssr
+
+# Use the matching built compiler until its preview package can be pinned.
+SSR_CACHE_RSPACK_ENTRY=/absolute/path/to/rspack/packages/rspack/dist/index.js NODE_OPTIONS="--require=$PWD/tools/ssr-cache/local-rspack-hook.cjs" TURBO_ENV_MODE=loose pnpm run ci:local --only=e2e-modern-ssr
+SSR_CACHE_RSPACK_ENTRY=/absolute/path/to/rspack/packages/rspack/dist/index.js NODE_OPTIONS="--require=$PWD/tools/ssr-cache/local-rspack-hook.cjs" TURBO_ENV_MODE=loose pnpm run e2e:modern:ssr
+pnpm exec prettier --check apps/modernjs-ssr/host/modern.config.ts apps/modernjs-ssr/another_remote/rslib.config.ts tools/ssr-cache/README.md
+git diff --check
+```
+
+The full parity attempt built the packages but exposed the debug-stack GC failure;
+subsequent E2E runs exercise the same workflow command after the fixture fixes.
+The final clean-start run with the local Rspack build passed both Cypress specs
+(2/2, no skipped tests); changed-file formatting and whitespace checks passed.
+This repair changes only private test fixtures and documentation, so no additional
+package tests or changeset are needed. The unrelated CI matrix is not rerun
+locally; its original #5053 jobs passed. Long-running memory endurance remains R6.
+
+### Published preview validation in an isolated worktree
+
+The root dependencies and overrides now agree on
+`2.2.3-canary-76e8f696-20260911033013`. pnpm regenerated the lockfile, including
+platform bindings and dependent peer snapshots. No local Rspack resolver hook or
+`SSR_CACHE_RSPACK_ENTRY` override was used for these checks:
+
+```sh
+corepack enable
+pnpm install --frozen-lockfile
+pnpm install --no-frozen-lockfile
+pnpm install --frozen-lockfile
+pnpm exec turbo run build --filter='./packages/**'
+CI=true pnpm run e2e:modern:ssr
+SSR_CACHE_STRICT=1 SSR_CACHE_EXPECT_NATIVE=1 node --test tools/ssr-cache/baseline.test.cjs
+pnpm exec prettier --check package.json pnpm-lock.yaml tools/ssr-cache/README.md
+git diff --check
+```
+
+Results: 44 package build tasks passed; both Cypress SSR specs passed; the native
+artifact baseline passed 22 tests, with no failures or TODOs. Its one Modern
+application-rebuild integration test was skipped because this isolated worktree
+does not supply a separate built Modern checkout. The worktree uses direct Turbo
+and package scripts as required by AGENTS.md. The rest of the platform E2E matrix
+is left to GitHub CI; this dependency update adds no package implementation.

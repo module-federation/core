@@ -185,6 +185,17 @@ const getRemoteNames = (
   )) {
     pushUnique(remoteNames, [remoteInfo.name, remoteInfo.alias]);
   }
+  for (const remote of toList(
+    webpackRequire.federation.instance?.options?.remotes,
+  )) {
+    if (
+      [remote.name, remote.alias].some(
+        (candidate) => candidate === name || candidate === remoteKey,
+      )
+    ) {
+      pushUnique(remoteNames, [remote.name, remote.alias]);
+    }
+  }
   return remoteNames;
 };
 
@@ -401,11 +412,25 @@ const getClearTarget = (
   }
 
   const remoteNames = getRemoteNames(webpackRequire, name, remoteKey);
-  const remoteInfos = toList(
-    webpackRequire.federation.bundlerRuntimeOptions.remotes?.remoteInfos?.[
-      remoteKey
-    ],
-  );
+  const remoteInfos = [
+    ...toList(
+      webpackRequire.federation.bundlerRuntimeOptions.remotes?.remoteInfos?.[
+        remoteKey
+      ],
+    ),
+  ];
+  // Dynamic registrations have no compilation remoteInfos. Include both the
+  // configured remote and its resolved (manifest) container identity.
+  const instance = webpackRequire.federation.instance;
+  for (const remote of toList(instance?.options?.remotes)) {
+    if (remoteNames.includes(remote.name))
+      remoteInfos.push(createBundlerRemoteInfo(remote));
+  }
+  for (const remoteName of remoteNames) {
+    const loaded = instance?.moduleCache?.get(remoteName);
+    if (loaded?.remoteInfo)
+      remoteInfos.push(loaded.remoteInfo as RemoteInfoLike);
+  }
   return {
     name,
     remoteKey,
@@ -628,12 +653,21 @@ const invalidateRemoteEntryUrlGenerations = (
   }
 };
 
+const getProviderNames = (target: ClearCacheTarget): string[] => {
+  const names = [...target.remoteNames];
+  for (const info of target.remoteInfos) {
+    pushUnique(names, [info.entryGlobalName, info.globalName]);
+  }
+  return names;
+};
+
 const cleanupRemoteRuntimeCache = (
   webpackRequire: WebpackRequire,
   target: ClearCacheTarget,
   preserveProvider = false,
 ) => {
   const instance = webpackRequire.federation.instance;
+  const providerNames = getProviderNames(target);
   if (!instance) {
     return;
   }
@@ -681,7 +715,7 @@ const cleanupRemoteRuntimeCache = (
         remoteInstance?.options?.name,
         remoteInstance?.options?.id,
       ].filter((name): name is string => typeof name === 'string');
-      if (instanceNames.some((name) => target.remoteNames.includes(name))) {
+      if (instanceNames.some((name) => providerNames.includes(name))) {
         federationInstances.splice(i, 1);
       }
     }
@@ -692,6 +726,7 @@ const cleanupSharedCache = (
   webpackRequire: WebpackRequire,
   target: ClearCacheTarget,
 ) => {
+  const providerNames = getProviderNames(target);
   const shareScopeMap = globalThis.__FEDERATION__?.__SHARE__;
   if (!shareScopeMap) {
     return;
@@ -716,7 +751,7 @@ const cleanupSharedCache = (
           if (
             !shared ||
             typeof shared !== 'object' ||
-            !target.remoteNames.includes(shared.from)
+            !providerNames.includes(shared.from)
           ) {
             continue;
           }
@@ -735,6 +770,7 @@ const cleanupSharedCache = (
 };
 
 const hasActiveSharedConsumers = (target: ClearCacheTarget) => {
+  const providerNames = getProviderNames(target);
   const shareScopeMap = globalThis.__FEDERATION__?.__SHARE__;
   if (!shareScopeMap) {
     return false;
@@ -755,7 +791,7 @@ const hasActiveSharedConsumers = (target: ClearCacheTarget) => {
           if (
             !shared ||
             typeof shared !== 'object' ||
-            !target.remoteNames.includes((shared as any).from)
+            !providerNames.includes((shared as any).from)
           ) {
             continue;
           }
@@ -767,7 +803,7 @@ const hasActiveSharedConsumers = (target: ClearCacheTarget) => {
             (shared as any).useIn.some(
               (consumer: unknown) =>
                 typeof consumer === 'string' &&
-                !target.remoteNames.includes(consumer),
+                consumer !== (shared as any).from,
             )
           ) {
             return true;
