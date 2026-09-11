@@ -1,64 +1,94 @@
-import { useEffect, useLayoutEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useI18n } from '../../theme/i18n';
-import Player from 'xgplayer';
-import 'xgplayer/dist/index.min.css';
+import styles from './AnnouncementVideo.module.scss';
 
 export default function AnnouncementVideo(props: {
   customWidthScale?: number;
 }) {
   const t = useI18n();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const playerRef = useRef<{ destroy: () => void } | null>(null);
+  const [shouldLoad, setShouldLoad] = useState(false);
+  const [isReady, setIsReady] = useState(false);
+  const widthScale = 1 - (props.customWidthScale ?? 0.3);
+  const videoUrl = t('announcementVideo');
+  const posterUrl = t('announcementVideoPoster');
+
+  const loadPlayer = useCallback(() => {
+    setShouldLoad(true);
+  }, []);
 
   useEffect(() => {
-    setTimeout(() => {
-      new Player({
-        id: 'mse-video',
-        url: t('announcementVideo'),
+    const container = containerRef.current;
+    if (!container || shouldLoad) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.4) {
+          setShouldLoad(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.4 },
+    );
+
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [shouldLoad]);
+
+  useEffect(() => {
+    if (!shouldLoad) {
+      return;
+    }
+
+    let cancelled = false;
+
+    void Promise.all([
+      import('xgplayer'),
+      import('xgplayer/dist/index.min.css'),
+    ]).then(([{ default: Player }]) => {
+      if (cancelled || !containerRef.current) {
+        return;
+      }
+
+      playerRef.current = new Player({
+        el: containerRef.current,
+        url: videoUrl,
         height: '100%',
         width: '100%',
-        poster: t('announcementVideoPoster'),
+        poster: posterUrl,
       });
-    }, 500);
-  });
-
-  function calculatescale(width: number) {
-    let customWidthScale = props.customWidthScale;
-    if (!props.customWidthScale) {
-      customWidthScale = 0.3;
-    }
-    return {
-      width: width - width * customWidthScale,
-      height: (width - width * customWidthScale) * 0.5625,
-    };
-  }
-
-  const [divWidth, setDivWidth] = useState(0);
-
-  // 更新宽度的函数
-  const updateWidth = () => {
-    setDivWidth(window.innerWidth);
-  };
-
-  useLayoutEffect(() => {
-    updateWidth();
-  }, []);
-
-  useEffect(() => {
-    window.addEventListener('resize', updateWidth);
+      setIsReady(true);
+    });
 
     return () => {
-      window.removeEventListener('resize', updateWidth);
+      cancelled = true;
+      playerRef.current?.destroy();
+      playerRef.current = null;
     };
-  }, []);
+  }, [posterUrl, shouldLoad, videoUrl]);
 
   return (
     <div
-      className="mx-auto"
+      className={`${styles.videoFrame} mx-auto`}
       style={{
-        width: `${calculatescale(divWidth).width}px`,
-        height: `${calculatescale(divWidth).height}px`,
+        width: `${widthScale * 100}vw`,
       }}
     >
-      <div id="mse-video"></div>
+      <div ref={containerRef} className={styles.player} />
+      {!isReady && (
+        <button
+          aria-label="Play announcement video"
+          className={styles.posterButton}
+          onClick={loadPlayer}
+          type="button"
+        >
+          <img alt="" className={styles.poster} src={posterUrl} />
+          <span aria-hidden="true" className={styles.playIcon} />
+        </button>
+      )}
     </div>
   );
 }

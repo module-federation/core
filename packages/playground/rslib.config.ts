@@ -5,6 +5,13 @@ import { pluginPublint } from 'rsbuild-plugin-publint';
 import mfConfig from './module-federation.config';
 import pkg from './package.json';
 
+const configuredPublicPath =
+  process.env.PLAYGROUND_PUBLIC_PATH ||
+  `https://unpkg.com/${pkg.name}@latest/dist/mf/`;
+const productionPublicPath = configuredPublicPath.endsWith('/')
+  ? configuredPublicPath
+  : `${configuredPublicPath}/`;
+
 function isTypescriptDynamicRequireWarning(warning: unknown) {
   const message =
     typeof warning === 'object' && warning && 'message' in warning
@@ -69,7 +76,7 @@ export default defineConfig({
       output: {
         assetPrefix:
           process.env.NODE_ENV === 'production'
-            ? `https://unpkg.com/${pkg.name}@latest/dist/mf/`
+            ? productionPublicPath
             : undefined,
         distPath: {
           root: './dist/mf',
