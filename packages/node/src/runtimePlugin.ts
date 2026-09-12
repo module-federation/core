@@ -1,4 +1,7 @@
-import { compileRemoteCommonJsModule } from '@module-federation/sdk';
+import {
+  compileRemoteCommonJsModule,
+  withSideEffectScope,
+} from '@module-federation/sdk';
 import type {
   ModuleFederationRuntimePlugin,
   ModuleFederation,
@@ -219,6 +222,7 @@ export const compileChunk = (source: string, filename: string): ChunkFunction =>
 export const loadFromFs = (
   filename: string,
   callback: (err: Error | null, chunk: any) => void,
+  args?: any,
 ): void => {
   const fs = __non_webpack_require__('fs') as typeof import('fs');
   const path = __non_webpack_require__('path') as typeof import('path');
@@ -228,12 +232,20 @@ export const loadFromFs = (
       if (err) return callback(err, null);
       const chunk = {};
       try {
-        compileChunk(content, filename)(
-          chunk,
-          __non_webpack_require__,
-          path.dirname(filename),
-          filename,
-        );
+        const remoteName =
+          args?.origin?.options?.name ||
+          args?.origin?.name ||
+          (typeof __webpack_require__ !== 'undefined' &&
+            __webpack_require__.federation?.initOptions?.name);
+        const scopeId = remoteName || path.basename(filename);
+        withSideEffectScope(scopeId, () => {
+          compileChunk(content, filename)(
+            chunk,
+            __non_webpack_require__,
+            path.dirname(filename),
+            filename,
+          );
+        });
         callback(null, chunk);
       } catch (e) {
         callback(
@@ -281,12 +293,15 @@ export const fetchAndRun = (
       const resolution = (url as URL & { mfMetadata?: ChunkUrlMetadata })
         .mfMetadata;
       try {
-        compileChunk(data, url.href)(
-          chunk,
-          __non_webpack_require__,
-          url.pathname.split('/').slice(0, -1).join('/'),
-          chunkName,
-        );
+        const scopeId = resolution?.remoteName || hostName || chunkName;
+        withSideEffectScope(scopeId, () => {
+          compileChunk(data, url.href)(
+            chunk,
+            __non_webpack_require__,
+            url.pathname.split('/').slice(0, -1).join('/'),
+            chunkName,
+          );
+        });
         callback(null, chunk);
       } catch (e) {
         callback(
@@ -367,7 +382,7 @@ export const loadChunk = (
   args: any,
 ): void => {
   if (strategy === 'filesystem') {
-    return loadFromFs(resolveFile(rootOutputDir, chunkId), callback);
+    return loadFromFs(resolveFile(rootOutputDir, chunkId), callback, args);
   }
 
   const url = resolveUrl(rootOutputDir, chunkId);

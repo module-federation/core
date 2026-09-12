@@ -1,3 +1,10 @@
+import {
+  withSideEffectScope,
+  disposeRemoteSideEffects,
+  getRecordedRemoteSideEffects,
+  resetRemoteSideEffectsState,
+  type RecordedRemoteSideEffects,
+} from './node-side-effects';
 import { CreateScriptHookNode, FetchHook } from './types';
 
 // Declare the ENV_TARGET constant that will be defined by DefinePlugin
@@ -296,13 +303,18 @@ export const createScriptNode =
               requireFn = eval('require') as NodeRequire;
             }
 
-            run(
-              scriptContext.exports,
-              scriptContext.module,
-              requireFn,
-              urlDirname,
-              filename,
-            );
+            const scopeId =
+              (attrs && (attrs['name'] || attrs['globalName'])) || filename;
+
+            withSideEffectScope(scopeId, () => {
+              run(
+                scriptContext.exports,
+                scriptContext.module,
+                requireFn,
+                urlDirname,
+                filename,
+              );
+            });
             const exportedInterface: Record<string, any> =
               scriptContext.module.exports || scriptContext.exports;
 
@@ -332,12 +344,15 @@ export const createScriptNode =
         getFetch()
           .then(async (f) => {
             if (attrs?.['type'] === 'esm' || attrs?.['type'] === 'module') {
+              const scopeId =
+                (attrs && (attrs['name'] || attrs['globalName'])) ||
+                urlObj.href;
               return loadModule(urlObj.href, {
                 fetch: f,
                 vm: await importNodeModule<typeof import('vm')>('vm'),
               })
                 .then(async (module) => {
-                  await module.evaluate();
+                  await withSideEffectScope(scopeId, () => module.evaluate());
                   cb(undefined, module.namespace);
                 })
                 .catch((e) => {
@@ -611,3 +626,11 @@ async function loadModule(url: string, options: LoadModuleOptions) {
 
   return sourceTextModule;
 }
+
+export {
+  withSideEffectScope,
+  disposeRemoteSideEffects,
+  getRecordedRemoteSideEffects,
+  resetRemoteSideEffectsState,
+  type RecordedRemoteSideEffects,
+};

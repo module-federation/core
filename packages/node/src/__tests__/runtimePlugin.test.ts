@@ -33,6 +33,7 @@ jest.mock('fs', () => ({
 }));
 
 jest.mock('@module-federation/sdk', () => ({
+  withSideEffectScope: jest.fn((_scopeId: string, fn: () => any) => fn()),
   // the plugin compiles fetched chunks through the sdk's Node entry point;
   // back it with the vm mock above so individual tests can shape the compile
   compileRemoteCommonJsModule: jest.fn(
@@ -340,6 +341,31 @@ describe('runtimePlugin', () => {
       loadFromFs('/path/to/file.js', callback);
 
       expect(callback).toHaveBeenCalledWith(readError, null);
+    });
+
+    it('should associate chunk evaluation with the remote name when args are provided', () => {
+      const { withSideEffectScope } = require('@module-federation/sdk');
+      require('fs').existsSync.mockReturnValue(true);
+      require('fs').readFile.mockImplementationOnce(
+        (
+          path: string,
+          encoding: string,
+          cb: (err: Error | null, content?: string) => void,
+        ) => {
+          cb(null, 'exports.ok = true;');
+        },
+      );
+
+      const callback = jest.fn();
+      loadFromFs('/path/to/chunk.js', callback, {
+        origin: { name: 'test-remote' },
+      });
+
+      expect(withSideEffectScope).toHaveBeenCalledWith(
+        'test-remote',
+        expect.any(Function),
+      );
+      expect(callback).toHaveBeenCalledWith(null, expect.any(Object));
     });
 
     it('should handle script evaluation errors', () => {

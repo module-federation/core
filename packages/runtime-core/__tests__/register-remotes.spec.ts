@@ -4,6 +4,8 @@ import {
   CurrentGlobal,
   Global,
   setGlobalFederationInstance,
+  withSideEffectScope,
+  getRecordedRemoteSideEffects,
 } from '../src/index';
 
 describe('ModuleFederation', () => {
@@ -416,5 +418,47 @@ describe('ModuleFederation', () => {
     assert(nextAppModule);
     expect(await nextAppModule()).toBe('hello world "@snapshot/remote2"');
     expect(manifestFetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('disposes recorded side effects when remote is force re-registered with disposeSideEffects: true', async () => {
+    const FM = new ModuleFederation({
+      name: '@federation/side-effects-test',
+      version: '1.0.0',
+      remotes: [
+        {
+          name: '@register-remotes/effects',
+          entry:
+            'http://localhost:1111/resources/register-remotes/app1/federation-remote-entry.js',
+        },
+      ],
+    });
+
+    const warningHandler = () => {};
+    let timerHandle: any;
+
+    withSideEffectScope('@register-remotes/effects', () => {
+      timerHandle = setTimeout(() => {}, 10000);
+      process.on('warning', warningHandler);
+    });
+
+    const before = getRecordedRemoteSideEffects('@register-remotes/effects');
+    expect(before).toBeDefined();
+    expect(before!.timers.has(timerHandle)).toBe(true);
+    expect(process.listeners('warning')).toContain(warningHandler);
+
+    FM.registerRemotes(
+      [
+        {
+          name: '@register-remotes/effects',
+          entry:
+            'http://localhost:1111/resources/register-remotes/app1/federation-remote-entry.js',
+        },
+      ],
+      { force: true, disposeSideEffects: true },
+    );
+
+    const after = getRecordedRemoteSideEffects('@register-remotes/effects');
+    expect(after).toBeUndefined();
+    expect(process.listeners('warning')).not.toContain(warningHandler);
   });
 });

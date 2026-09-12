@@ -4,7 +4,11 @@ import {
   Global,
   setGlobalFederationInstance,
 } from '@module-federation/runtime-core';
-import { ModuleFederation } from '../src/index';
+import {
+  ModuleFederation,
+  withSideEffectScope,
+  getRecordedRemoteSideEffects,
+} from '../src/index';
 
 describe('ModuleFederation', () => {
   it('registers new remotes and loads them correctly', async () => {
@@ -163,6 +167,7 @@ describe('ModuleFederation', () => {
       FM: ModuleFederation,
       registeredName = BUILD_NAME,
       entryGlobalName?: string,
+      options?: { disposeSideEffects?: boolean },
     ) => {
       const warnSpy = rs.spyOn(console, 'warn').mockImplementation(() => {});
       try {
@@ -170,6 +175,7 @@ describe('ModuleFederation', () => {
           [remoteOf(ENTRY2, registeredName, entryGlobalName)],
           {
             force: true,
+            ...options,
           },
         );
         return warnSpy.mock.calls
@@ -308,6 +314,25 @@ describe('ModuleFederation', () => {
 
       expect(instances()).not.toContain(custom);
       expect(warnings).toEqual([]);
+    });
+
+    it('disposes recorded side effects on forced re-registration when disposeSideEffects is true', async () => {
+      const FM = await loadApp1();
+      const warningHandler = () => {};
+      let timerHandle: any;
+
+      withSideEffectScope(BUILD_NAME, () => {
+        timerHandle = setTimeout(() => {}, 10000);
+        process.on('warning', warningHandler);
+      });
+
+      expect(getRecordedRemoteSideEffects(BUILD_NAME)).toBeDefined();
+      expect(process.listeners('warning')).toContain(warningHandler);
+
+      forceReRegister(FM, BUILD_NAME, undefined, { disposeSideEffects: true });
+
+      expect(getRecordedRemoteSideEffects(BUILD_NAME)).toBeUndefined();
+      expect(process.listeners('warning')).not.toContain(warningHandler);
     });
   });
 });
