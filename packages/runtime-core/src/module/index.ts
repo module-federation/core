@@ -5,7 +5,11 @@ import {
   optionsToMFContext,
   composeRemoteRequestId,
 } from '../utils';
-import { safeToString, ModuleInfo } from '@module-federation/sdk';
+import {
+  safeToString,
+  ModuleInfo,
+  withSideEffectScope,
+} from '@module-federation/sdk';
 import {
   RUNTIME_002,
   RUNTIME_014,
@@ -420,7 +424,8 @@ class Module {
     }
 
     return () => {
-      const res = moduleFactory();
+      const scopeId = this.remoteInfo.name;
+      const res = withSideEffectScope(scopeId, () => moduleFactory());
 
       if (res instanceof Promise) {
         return res.then((asyncRes) => {

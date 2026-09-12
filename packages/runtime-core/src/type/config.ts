@@ -141,6 +141,7 @@ export interface Options {
   plugins: Array<ModuleFederationRuntimePlugin>;
   inBrowser: boolean;
   shareStrategy?: ShareStrategy;
+  disposeSideEffects?: boolean;
 }
 
 export type UserOptions = Omit<
