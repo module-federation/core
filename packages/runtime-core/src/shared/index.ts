@@ -372,6 +372,13 @@ export class SharedHandler {
               ? (targetShared as TreeShakingArgs)
               : undefined,
           });
+          // Do not leave a rejected promise in the share scope. A failed load
+          // must be retryable instead of permanently poisoning this version.
+          loading.catch(() => {
+            if (targetShared.loading === loading) {
+              targetShared.loading = null;
+            }
+          });
           const factory = await loading;
           this.emitAfterLoadShare({
             lifecycle: 'loadShare',
@@ -430,6 +437,13 @@ export class SharedHandler {
           treeShaking: _useTreeShaking
             ? (targetShared as TreeShakingArgs)
             : undefined,
+        });
+        // Do not leave a rejected promise in the share scope. A failed load
+        // must be retryable instead of permanently poisoning this version.
+        loading.catch(() => {
+          if (targetShared.loading === loading) {
+            targetShared.loading = null;
+          }
         });
         const factory = await loading;
         this.emitAfterLoadShare({
