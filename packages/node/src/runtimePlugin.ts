@@ -1,4 +1,7 @@
-import { compileRemoteCommonJsModule } from '@module-federation/sdk';
+import {
+  compileRemoteCommonJsModule,
+  withSideEffectScope,
+} from '@module-federation/sdk';
 import type {
   ModuleFederationRuntimePlugin,
   ModuleFederation,
@@ -228,12 +231,15 @@ export const loadFromFs = (
       if (err) return callback(err, null);
       const chunk = {};
       try {
-        compileChunk(content, filename)(
-          chunk,
-          __non_webpack_require__,
-          path.dirname(filename),
-          filename,
-        );
+        const scopeId = path.basename(filename);
+        withSideEffectScope(scopeId, () => {
+          compileChunk(content, filename)(
+            chunk,
+            __non_webpack_require__,
+            path.dirname(filename),
+            filename,
+          );
+        });
         callback(null, chunk);
       } catch (e) {
         callback(
@@ -281,12 +287,15 @@ export const fetchAndRun = (
       const resolution = (url as URL & { mfMetadata?: ChunkUrlMetadata })
         .mfMetadata;
       try {
-        compileChunk(data, url.href)(
-          chunk,
-          __non_webpack_require__,
-          url.pathname.split('/').slice(0, -1).join('/'),
-          chunkName,
-        );
+        const scopeId = resolution?.remoteName || hostName || chunkName;
+        withSideEffectScope(scopeId, () => {
+          compileChunk(data, url.href)(
+            chunk,
+            __non_webpack_require__,
+            url.pathname.split('/').slice(0, -1).join('/'),
+            chunkName,
+          );
+        });
         callback(null, chunk);
       } catch (e) {
         callback(

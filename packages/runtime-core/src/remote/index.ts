@@ -3,6 +3,7 @@ import {
   warn,
   ModuleInfo,
   GlobalModuleInfo,
+  disposeRemoteSideEffects,
 } from '@module-federation/sdk';
 import { RUNTIME_004, runtimeDescMap } from '@module-federation/error-codes';
 import {
@@ -512,12 +513,13 @@ export class RemoteHandler {
     }
   }
 
-  registerRemotes(remotes: Remote[], options?: { force?: boolean }): void {
+  registerRemotes(
+    remotes: Remote[],
+    options?: { force?: boolean; disposeSideEffects?: boolean },
+  ): void {
     const { host } = this;
     remotes.forEach((remote) => {
-      this.registerRemote(remote, host.options.remotes, {
-        force: options?.force,
-      });
+      this.registerRemote(remote, host.options.remotes, options);
     });
   }
 
@@ -643,7 +645,7 @@ export class RemoteHandler {
   registerRemote(
     remote: Remote,
     targetRemotes: Remote[],
-    options?: { force?: boolean },
+    options?: { force?: boolean; disposeSideEffects?: boolean },
   ): void {
     const { host } = this;
     const normalizeRemote = () => {
@@ -697,7 +699,7 @@ export class RemoteHandler {
       ];
       if (options?.force) {
         // remove registered remote
-        this.removeRemote(registeredRemote);
+        this.removeRemote(registeredRemote, options);
         normalizeRemote();
         targetRemotes.push(remote);
         this.hooks.lifecycle.registerRemote.emit({ remote, origin: host });
@@ -706,13 +708,18 @@ export class RemoteHandler {
     }
   }
 
-  private removeRemote(remote: Remote): void {
+  private removeRemote(
+    remote: Remote,
+    options?: { force?: boolean; disposeSideEffects?: boolean },
+  ): void {
     try {
       const { host } = this;
       this.removeRemoteRegistration(remote);
       this.clearRemoteSnapshots(remote);
 
       const loadedModule = host.moduleCache.get(remote.name);
+      this.disposeRemoteSideEffects(remote, loadedModule?.remoteInfo, options);
+
       if (loadedModule) {
         const { remoteInfo } = loadedModule;
         this.clearRemoteEntryState(remote, remoteInfo);
@@ -733,6 +740,30 @@ export class RemoteHandler {
       logger.error(
         `removeRemote failed: ${err instanceof Error ? err.message : String(err)}`,
       );
+    }
+  }
+
+  private disposeRemoteSideEffects(
+    remote: Remote,
+    remoteInfo?: RemoteInfo,
+    options?: { force?: boolean; disposeSideEffects?: boolean },
+  ): void {
+    const shouldDispose =
+      options?.disposeSideEffects ??
+      this.host.options.disposeSideEffects ??
+      (typeof process !== 'undefined' &&
+        (process.env?.['FEDERATION_DISPOSE_SIDE_EFFECTS'] === 'true' ||
+          process.env?.['FEDERATION_DISPOSE_SIDE_EFFECTS'] === '1' ||
+          options?.force));
+    if (!shouldDispose) {
+      return;
+    }
+    disposeRemoteSideEffects(remote.name);
+    if (
+      remoteInfo?.entryGlobalName &&
+      remoteInfo.entryGlobalName !== remote.name
+    ) {
+      disposeRemoteSideEffects(remoteInfo.entryGlobalName);
     }
   }
 

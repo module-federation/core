@@ -13,6 +13,9 @@ import { getGlobalFederationInstance } from './utils';
 export {
   loadScript,
   loadScriptNode,
+  disposeRemoteSideEffects,
+  withSideEffectScope,
+  getRecordedRemoteSideEffects,
   Module,
   getRemoteEntry,
   getRemoteInfo,

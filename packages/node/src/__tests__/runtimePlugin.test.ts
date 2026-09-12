@@ -33,6 +33,7 @@ jest.mock('fs', () => ({
 }));
 
 jest.mock('@module-federation/sdk', () => ({
+  withSideEffectScope: jest.fn((_scopeId: string, fn: () => any) => fn()),
   // the plugin compiles fetched chunks through the sdk's Node entry point;
   // back it with the vm mock above so individual tests can shape the compile
   compileRemoteCommonJsModule: jest.fn(
