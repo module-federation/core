@@ -167,6 +167,32 @@ describe('shared lifecycle hooks', () => {
     });
     expect(errorEvent?.error).toBeInstanceOf(Error);
   });
+
+  it('retries an async shared after a transient load failure', async () => {
+    let attempts = 0;
+    const factory = () => ({ value: 'recovered' });
+    const mf = new ModuleFederation({
+      name: 'shared-retry-host',
+      remotes: [],
+      shared: {
+        retryable: {
+          version: '1.0.0',
+          get: () => {
+            attempts += 1;
+            return attempts === 1
+              ? Promise.reject(new Error('transient shared failure'))
+              : Promise.resolve(factory);
+          },
+        },
+      },
+    });
+
+    await expect(mf.loadShare('retryable')).rejects.toThrow(
+      'transient shared failure',
+    );
+    await expect(mf.loadShare('retryable')).resolves.toBe(factory);
+    expect(attempts).toBe(2);
+  });
 });
 
 type RawSharedEvent =
