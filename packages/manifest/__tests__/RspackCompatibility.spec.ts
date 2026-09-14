@@ -35,6 +35,30 @@ beforeAll(() => {
   const revision = remotePreview.slice(remotePreview.lastIndexOf('@') + 1);
   // pnpm truncates long URL dependency directory names, retaining the SHA prefix.
   expect(remotePackage).toContain(revision.slice(0, 12));
+  const bindingRequire = process
+    .getBuiltinModule('module')
+    .createRequire(remotePackage);
+  const bindingPath = bindingRequire.resolve('@rspack/binding');
+  expect(bindingPath).toContain(revision);
+  const platformRequire = process
+    .getBuiltinModule('module')
+    .createRequire(bindingPath);
+  const platformDependencies =
+    platformRequire('./package.json').optionalDependencies;
+  const nativeBindings = Object.keys(nativeRequire.cache).filter(
+    (file) => file.endsWith('.node') && file.includes('@rspack+binding'),
+  );
+  expect(
+    nativeBindings.some((file) => {
+      const { name } = nativeRequire(
+        path.join(path.dirname(file), 'package.json'),
+      );
+      return (
+        platformDependencies[name]?.endsWith(revision) &&
+        platformRequire.resolve(name) === file
+      );
+    }),
+  ).toBe(true);
   console.info('Federation compatibility versions', {
     host: hostRequire('@rspack/core/package.json').version,
     runtime: toolsRequire('@module-federation/runtime/package.json').version,
