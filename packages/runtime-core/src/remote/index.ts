@@ -1,7 +1,6 @@
 import {
   isBrowserEnvValue,
   warn,
-  composeKeyWithSeparator,
   ModuleInfo,
   GlobalModuleInfo,
 } from '@module-federation/sdk';
@@ -23,6 +22,7 @@ import {
   RemoteInfo,
   RemoteEntryExports,
   CallFrom,
+  GlobalShareScopeMap,
 } from '../type';
 import { ModuleFederation } from '../core';
 import {
@@ -48,6 +48,10 @@ import { Module, ModuleOptions } from '../module';
 import { formatPreloadArgs, preloadAssets } from '../utils/preload';
 import { getGlobalShareScope } from '../utils/share';
 import { getGlobalRemoteInfo } from '../plugins/snapshot/SnapshotHandler';
+import {
+  resolveRemoteRuntimeInstance,
+  type ResolvedRemoteRuntimeInstance,
+} from './resolveRemoteRuntimeInstance';
 
 export interface LoadRemoteMatch {
   id: string;
@@ -705,143 +709,180 @@ export class RemoteHandler {
   private removeRemote(remote: Remote): void {
     try {
       const { host } = this;
-      const { name } = remote;
-      const remoteIndex = host.options.remotes.findIndex(
-        (item) => item.name === name,
-      );
-      if (remoteIndex !== -1) {
-        host.options.remotes.splice(remoteIndex, 1);
-      }
-      const globalSnapshotKey = getInfoWithoutType(
-        CurrentGlobal.__FEDERATION__.moduleInfo,
-        getFMId(remote),
-      ).key;
-      delete CurrentGlobal.__FEDERATION__.moduleInfo[globalSnapshotKey];
-
-      if ('entry' in remote) {
-        host.snapshotHandler.manifestCache.delete(remote.entry);
-        delete Global.__FEDERATION__.__MANIFEST_LOADING__[remote.entry];
-      }
-
-      const { hostGlobalSnapshot } = getGlobalRemoteInfo(remote, host);
-      if (hostGlobalSnapshot) {
-        const remoteKey =
-          hostGlobalSnapshot &&
-          'remotesInfo' in hostGlobalSnapshot &&
-          hostGlobalSnapshot.remotesInfo &&
-          getInfoWithoutType(hostGlobalSnapshot.remotesInfo, remote.name).key;
-        if (remoteKey) {
-          delete hostGlobalSnapshot.remotesInfo[remoteKey];
-        }
-      }
+      this.removeRemoteRegistration(remote);
+      this.clearRemoteSnapshots(remote);
 
       const loadedModule = host.moduleCache.get(remote.name);
       if (loadedModule) {
-        const remoteInfo = loadedModule.remoteInfo;
-        const key = remoteInfo.entryGlobalName as keyof typeof CurrentGlobal;
+        const { remoteInfo } = loadedModule;
+        this.clearRemoteEntryState(remote, remoteInfo);
 
-        if (CurrentGlobal[key]) {
-          if (
-            Object.getOwnPropertyDescriptor(CurrentGlobal, key)?.configurable
-          ) {
-            delete CurrentGlobal[key];
-          } else {
-            // @ts-ignore
-            CurrentGlobal[key] = undefined;
-          }
-        }
-        const remoteEntryUniqueKey = getRemoteEntryUniqueKey(
-          loadedModule.remoteInfo,
-        );
-
-        if (globalLoading[remoteEntryUniqueKey]) {
-          delete globalLoading[remoteEntryUniqueKey];
-        }
-
-        // delete unloaded shared and instance
-        let remoteInsId = remoteInfo.buildVersion
-          ? composeKeyWithSeparator(remoteInfo.name, remoteInfo.buildVersion)
-          : remoteInfo.name;
-        const remoteInsIndex =
-          CurrentGlobal.__FEDERATION__.__INSTANCES__.findIndex((ins) => {
-            if (remoteInfo.buildVersion) {
-              return ins.options.id === remoteInsId;
-            } else {
-              return ins.name === remoteInsId;
-            }
+        const instances = CurrentGlobal.__FEDERATION__.__INSTANCES__;
+        const resolved = resolveRemoteRuntimeInstance(remoteInfo, instances);
+        if (resolved.instance) {
+          this.releaseRuntimeInstanceShares({
+            instance: resolved.instance,
+            globalShareScopeMap: getGlobalShareScope(),
           });
-        if (remoteInsIndex !== -1) {
-          const remoteIns =
-            CurrentGlobal.__FEDERATION__.__INSTANCES__[remoteInsIndex];
-          remoteInsId = remoteIns.options.id || remoteInsId;
-          const globalShareScopeMap = getGlobalShareScope();
-
-          let isAllSharedNotUsed = true;
-          const needDeleteKeys: Array<[string, string, string, string]> = [];
-          Object.keys(globalShareScopeMap).forEach((instId) => {
-            const shareScopeMap = globalShareScopeMap[instId];
-            shareScopeMap &&
-              Object.keys(shareScopeMap).forEach((shareScope) => {
-                const shareScopeVal = shareScopeMap[shareScope];
-                shareScopeVal &&
-                  Object.keys(shareScopeVal).forEach((shareName) => {
-                    const sharedPkgs = shareScopeVal[shareName];
-                    sharedPkgs &&
-                      Object.keys(sharedPkgs).forEach((shareVersion) => {
-                        const shared = sharedPkgs[shareVersion];
-                        if (
-                          shared &&
-                          typeof shared === 'object' &&
-                          shared.from === remoteInfo.name
-                        ) {
-                          if (shared.loaded || shared.loading) {
-                            shared.useIn = shared.useIn.filter(
-                              (usedHostName) =>
-                                usedHostName !== remoteInfo.name,
-                            );
-                            if (shared.useIn.length) {
-                              isAllSharedNotUsed = false;
-                            } else {
-                              needDeleteKeys.push([
-                                instId,
-                                shareScope,
-                                shareName,
-                                shareVersion,
-                              ]);
-                            }
-                          } else {
-                            needDeleteKeys.push([
-                              instId,
-                              shareScope,
-                              shareName,
-                              shareVersion,
-                            ]);
-                          }
-                        }
-                      });
-                  });
-              });
-          });
-
-          if (isAllSharedNotUsed) {
-            remoteIns.shareScopeMap = {};
-            delete globalShareScopeMap[remoteInsId];
-          }
-          needDeleteKeys.forEach(
-            ([insId, shareScope, shareName, shareVersion]) => {
-              delete globalShareScopeMap[insId]?.[shareScope]?.[shareName]?.[
-                shareVersion
-              ];
-            },
-          );
-          CurrentGlobal.__FEDERATION__.__INSTANCES__.splice(remoteInsIndex, 1);
+          instances.splice(resolved.index, 1);
+        } else {
+          this.warnUnresolvedRuntimeInstance(remote, resolved, instances);
         }
-
-        host.moduleCache.delete(remote.name);
       }
     } catch (err) {
       logger.error(
         `removeRemote failed: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
+  }
+
+  private removeRemoteRegistration(remote: Remote): void {
+    const { remotes } = this.host.options;
+    const remoteIndex = remotes.findIndex((item) => item.name === remote.name);
+    if (remoteIndex !== -1) {
+      remotes.splice(remoteIndex, 1);
+    }
+  }
+
+  private clearRemoteSnapshots(remote: Remote): void {
+    const { host } = this;
+    const globalSnapshotKey = getInfoWithoutType(
+      CurrentGlobal.__FEDERATION__.moduleInfo,
+      getFMId(remote),
+    ).key;
+    delete CurrentGlobal.__FEDERATION__.moduleInfo[globalSnapshotKey];
+
+    if ('entry' in remote) {
+      host.snapshotHandler.manifestCache.delete(remote.entry);
+      delete Global.__FEDERATION__.__MANIFEST_LOADING__[remote.entry];
+    }
+
+    const { hostGlobalSnapshot } = getGlobalRemoteInfo(remote, host);
+    if (hostGlobalSnapshot) {
+      const remoteKey =
+        'remotesInfo' in hostGlobalSnapshot &&
+        hostGlobalSnapshot.remotesInfo &&
+        getInfoWithoutType(hostGlobalSnapshot.remotesInfo, remote.name).key;
+      if (remoteKey) {
+        delete hostGlobalSnapshot.remotesInfo[remoteKey];
+      }
+    }
+  }
+
+  private clearRemoteEntryState(remote: Remote, remoteInfo: RemoteInfo): void {
+    const key = remoteInfo.entryGlobalName as keyof typeof CurrentGlobal;
+    if (CurrentGlobal[key]) {
+      if (Object.getOwnPropertyDescriptor(CurrentGlobal, key)?.configurable) {
+        delete CurrentGlobal[key];
+      } else {
+        // @ts-ignore
+        CurrentGlobal[key] = undefined;
+      }
+    }
+    const remoteEntryUniqueKey = getRemoteEntryUniqueKey(remoteInfo);
+    if (globalLoading[remoteEntryUniqueKey]) {
+      delete globalLoading[remoteEntryUniqueKey];
+    }
+    this.host.moduleCache.delete(remote.name);
+  }
+
+  // Shares are keyed by the producing runtime instance, never by the
+  // registration alias: `from` is the instance's own name and `useIn` only
+  // ever lists it under that name.
+  private releaseRuntimeInstanceShares({
+    instance,
+    globalShareScopeMap,
+  }: {
+    instance: ModuleFederation;
+    globalShareScopeMap: GlobalShareScopeMap;
+  }): void {
+    const producerName = instance.options.name ?? instance.name;
+    const instanceId = instance.options.id || producerName;
+
+    let isAllSharedNotUsed = true;
+    const needDeleteKeys: Array<[string, string, string, string]> = [];
+    Object.keys(globalShareScopeMap).forEach((instId) => {
+      const shareScopeMap = globalShareScopeMap[instId];
+      shareScopeMap &&
+        Object.keys(shareScopeMap).forEach((shareScope) => {
+          const shareScopeVal = shareScopeMap[shareScope];
+          shareScopeVal &&
+            Object.keys(shareScopeVal).forEach((shareName) => {
+              const sharedPkgs = shareScopeVal[shareName];
+              sharedPkgs &&
+                Object.keys(sharedPkgs).forEach((shareVersion) => {
+                  const shared = sharedPkgs[shareVersion];
+                  if (
+                    shared &&
+                    typeof shared === 'object' &&
+                    shared.from === producerName
+                  ) {
+                    if (shared.loaded || shared.loading) {
+                      shared.useIn = shared.useIn.filter(
+                        (usedHostName) => usedHostName !== producerName,
+                      );
+                      if (shared.useIn.length) {
+                        isAllSharedNotUsed = false;
+                      } else {
+                        needDeleteKeys.push([
+                          instId,
+                          shareScope,
+                          shareName,
+                          shareVersion,
+                        ]);
+                      }
+                    } else {
+                      needDeleteKeys.push([
+                        instId,
+                        shareScope,
+                        shareName,
+                        shareVersion,
+                      ]);
+                    }
+                  }
+                });
+            });
+        });
+    });
+
+    if (isAllSharedNotUsed) {
+      instance.shareScopeMap = {};
+      delete globalShareScopeMap[instanceId];
+    }
+    needDeleteKeys.forEach(([insId, shareScope, shareName, shareVersion]) => {
+      delete globalShareScopeMap[insId]?.[shareScope]?.[shareName]?.[
+        shareVersion
+      ];
+    });
+  }
+
+  // Only suspicious misses are reported. A container built without the
+  // federation runtime has no instance at all, which is legitimate and silent.
+  private warnUnresolvedRuntimeInstance(
+    remote: Remote,
+    resolved: ResolvedRemoteRuntimeInstance,
+    instances: ModuleFederation[],
+  ): void {
+    const { registeredName, buildName, buildVersion } = resolved.identity;
+    if (resolved.ambiguous) {
+      logger.warn(
+        `Found ${resolved.candidateCount} runtime instances matching "${resolved.level}" for remote "${remote.name}" in __FEDERATION__.__INSTANCES__; the match is ambiguous, so no instance or share scope was released.`,
+      );
+      return;
+    }
+    if (!buildVersion) {
+      return;
+    }
+    const sameNameVersions = instances
+      .filter((ins) => ins.name === registeredName || ins.name === buildName)
+      .map((ins) => ins.options.version ?? ins.options.id ?? '<unknown>');
+    if (sameNameVersions.length) {
+      logger.warn(
+        `No runtime instance named "${registeredName}"${
+          buildName && buildName !== registeredName
+            ? ` (or "${buildName}")`
+            : ''
+        } with build version "${buildVersion}" was found in __FEDERATION__.__INSTANCES__ while removing remote "${remote.name}" (found versions: ${sameNameVersions.join(', ')}), so its share scope and instance were not released.`,
       );
     }
   }
