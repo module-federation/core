@@ -13,6 +13,7 @@ if (!global.gc)
   throw new Error('Run the cache-updates E2E entry with --expose-gc');
 const assert = require('node:assert/strict');
 const { spawn } = require('node:child_process');
+const manual = process.argv.includes('--demo');
 let root;
 const { createProdServer } = packageRequire('@modern-js/prod-server');
 const { createSSRUpdateAdapter } = packageRequire(
@@ -73,7 +74,10 @@ const { createSSRUpdateAdapter } = packageRequire(
       res.end('missing');
     }
   });
-  asset.listen(0, '127.0.0.1');
+  asset.listen(
+    manual ? Number(process.env.SSR_CACHE_ASSET_PORT || 3059) : 0,
+    '127.0.0.1',
+  );
   await once(asset, 'listening');
   const assetURL = `http://127.0.0.1:${asset.address().port}`;
   const build = spawn(
@@ -144,6 +148,18 @@ const { createSSRUpdateAdapter } = packageRequire(
         },
         async bypass(request) {
           const url = new URL(request.url);
+          if (manual && url.pathname === '/__demo')
+            return new Response(
+              await fs.readFile(path.join(__dirname, '../demo.html'), 'utf8'),
+              {
+                headers: { 'content-type': 'text/html; charset=utf-8' },
+              },
+            );
+          if (manual && url.pathname === '/__status')
+            return Response.json({
+              pid: process.pid,
+              status: application.status,
+            });
           if (url.pathname === '/__live') return new Response('live');
           if (url.pathname === '/__ready')
             return new Response(application.status.phase, {
@@ -151,6 +167,8 @@ const { createSSRUpdateAdapter } = packageRequire(
             });
           if (url.pathname === '/__update') {
             const version = url.searchParams.get('v') || 'v2';
+            if (!['v1', 'v2'].includes(version))
+              return new Response('Expected v1 or v2', { status: 400 });
             try {
               const result = await adapter.update(application, 'remote', {
                 entry: `${assetURL}/${version}/mf-manifest.json`,
@@ -165,7 +183,10 @@ const { createSSRUpdateAdapter } = packageRequire(
         },
       },
     });
-    server.listen(0, '127.0.0.1');
+    server.listen(
+      manual ? Number(process.env.SSR_CACHE_DEMO_PORT || 3058) : 0,
+      '127.0.0.1',
+    );
     await once(server, 'listening');
     const hostURL = `http://127.0.0.1:${server.address().port}`;
     const originalAddress = server.address();
@@ -180,6 +201,21 @@ const { createSSRUpdateAdapter } = packageRequire(
     );
     assert.equal(response.status, 200);
     assert.ok(html.includes('v1'));
+    if (manual) {
+      console.log(
+        `SSR cache demo: ${hostURL}/__demo (PID ${process.pid}). Ctrl+C to stop.`,
+      );
+      await new Promise((resolve) => {
+        const stop = () => {
+          process.removeListener('SIGINT', stop);
+          process.removeListener('SIGTERM', stop);
+          resolve();
+        };
+        process.once('SIGINT', stop);
+        process.once('SIGTERM', stop);
+      });
+      return;
+    }
     const cypress = require(path.join(repo, 'node_modules/cypress'));
     await fs.writeFile(
       path.join(root, 'cypress.config.cjs'),

@@ -758,3 +758,37 @@ The aggregate `ci:local` wrapper was not run in this worktree; its exact E2E com
 was used. Unrelated Metro/Next/router suites, external supervisor/CDN deployment
 checks and the already-completed 300-cycle acceptance were not repeated for this
 E2E ownership migration. No packages were published.
+
+## Manual production E2E demo (2026-09-14)
+
+Added a persistent `--demo` mode to the same production runner and documented it
+in `apps/modernjs-ssr/README.md`. It builds immutable v1/v2 providers, serves the
+host on loopback port 3058 and assets on 3059, and exposes a local control page.
+The page reports actual update results and application status. This fixture uses
+whole-application mode; selective-entry behavior remains covered by the three
+native static E2E variants.
+
+Validation commands:
+
+- `pnpm --filter modernjs-ssr-cache-updates run demo`: started and retained for
+  manual use; GET /__status confirms the live production application.
+- `pnpm run e2e:modern:ssr:cache`: passed all three static artifact variants,
+  Cypress hydration, lifecycle checks and 70 updates / 560 concurrent requests.
+- `node` with
+  `require('cypress').run({project:'/tmp/ssr-demo-browser',browser:'electron',headless:true})`:
+  one browser smoke scenario passed. It clicks the embedded hydrated v1 counter,
+  updates via the real control button, checks old-page retention, requests and
+  clicks v2, checks unchanged PID/serving state and increased generation, switches
+  back to v1, and checks invalid version rejection. The first smoke attempt
+  clicked before hydration; adding the fixture's data-hydrated wait fixed the
+  test race without changing application behavior.
+- `pnpm exec prettier --check .`: passed.
+- `node --check apps/modernjs-ssr/cache-updates/e2e/production.cjs` and
+  `git diff --check`: passed.
+
+The full legacy Modern SSR job was not repeated for this increment: the preceding
+entry above records its pass, and no legacy app/runner or workflow changed here.
+Package builds, package unit tests and published-package acceptance were not
+repeated: no implementation/dependencies changed; the existing built workspace
+packages were exercised through the production fixture. No changeset is needed
+for this private demo and documentation.

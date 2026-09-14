@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-CN">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Modern SSR cache 本地体验</title>
+  <style>
+    body {
+      font: 16px/1.6 system-ui;
+      max-width: 1050px;
+      margin: 40px auto;
+      padding: 0 24px;
+      color: #203044;
+    }
+    button,
+    a {
+      margin: 4px 12px 4px 0;
+    }
+    button {
+      padding: 8px 14px;
+      cursor: pointer;
+    }
+    iframe {
+      width: 100%;
+      height: 180px;
+      border: 1px solid #bbc8d8;
+    }
+    pre {
+      background: #f2f5f9;
+      padding: 16px;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+  </style>
+  <h1>Modern SSR cache 本地体验</h1>
+  <p>真实生产构建 · 整体应用重建 · 保持 PID 和监听端口</p>
+  <p>
+    先点击页面里的计数器，再更新服务端 remote。更新不会替换已经 hydration
+    的浏览器页面；点击“重新请求 SSR 页面”查看新版。
+  </p>
+  <button id="v1">Update to v1</button>
+  <button id="v2">Update to v2</button>
+  <button id="reload">重新请求 SSR 页面</button>
+  <a href="/" target="_blank" rel="noopener">打开独立 SSR 页面（保留旧版本）</a>
+  <iframe id="preview" src="/" title="SSR 页面"></iframe>
+  <h2>服务状态</h2>
+  <pre id="status" aria-live="polite">读取中…</pre>
+  <h2>最近一次更新结果</h2>
+  <pre id="result" aria-live="polite">
+尚未更新。此 fixture 不演示局部更新；局部更新请运行静态产物 E2E。</pre
+  >
+  <script>
+    const status = document.getElementById('status');
+    const result = document.getElementById('result');
+    async function refresh() {
+      try {
+        const response = await fetch('/__status');
+        if (!response.ok) throw new Error(await response.text());
+        status.textContent = JSON.stringify(await response.json(), null, 2);
+      } catch (error) {
+        status.textContent = String(error);
+      }
+    }
+    async function update(version) {
+      document.getElementById('v1').disabled = true;
+      document.getElementById('v2').disabled = true;
+      result.textContent = '更新中…';
+      try {
+        const response = await fetch('/__update?v=' + version, {
+          method: 'POST',
+        });
+        if (!response.ok) throw new Error(await response.text());
+        result.textContent = JSON.stringify(await response.json(), null, 2);
+      } catch (error) {
+        result.textContent = String(error);
+      } finally {
+        document.getElementById('v1').disabled = false;
+        document.getElementById('v2').disabled = false;
+        await refresh();
+      }
+    }
+    document.getElementById('v1').onclick = () => update('v1');
+    document.getElementById('v2').onclick = () => update('v2');
+    document.getElementById('reload').onclick = () => {
+      document.getElementById('preview').src = '/?demo=' + Date.now();
+    };
+    refresh();
+    setInterval(refresh, 1000);
+  </script>
+</html>

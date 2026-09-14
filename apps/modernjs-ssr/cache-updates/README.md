@@ -82,3 +82,11 @@ hook, not the tested implementation.
 The native static artifact test is versioned in this E2E application. `e2e/static.cjs`
 uses a temporary dependency layout to run it against either workspace MF or the
 independent published installation. No external Modern source checkout is required.
+
+### Manual local experience
+
+Run `pnpm --filter modernjs-ssr-cache-updates run demo` after the build above.
+This reuses the production E2E fixture and leaves its servers running, with a
+control page at <http://127.0.0.1:3058/__demo>. It skips the automated scenarios.
+See [the parent README](../README.md#production-ssr-cache-update-demo) for the
+step-by-step walkthrough, inspector, port overrides and scope.

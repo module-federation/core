@@ -17,7 +17,7 @@
 # Root directory
 pnpm i
 
-nx build modern-js-plugin
+pnpm exec turbo run build --filter=@module-federation/modern-js
 
 pnpm run app:modern:dev
 
@@ -61,3 +61,48 @@ Use `chrome://inspect` with `localhost:9230`, then visit:
 - `http://localhost:3050/remove-remote-shared-cache`
 - `http://localhost:3050/remove-remote-shared-cache?load=1`
 - `http://localhost:3050/remove-remote-shared-cache?remove=another_remote`
+
+## Production SSR cache update demo
+
+The new update API has a separate manual mode using the same production fixture
+as the E2E suite. Run from the repository root (Node 24, pnpm 10.28.0):
+
+```bash
+pnpm install --frozen-lockfile
+pnpm exec turbo run build --filter=@module-federation/modern-js-v3
+pnpm --filter modernjs-ssr-cache-updates run demo
+```
+
+Wait for the printed demo URL, then open <http://127.0.0.1:3058/__demo>.
+The command builds the host and immutable v1/v2 providers before starting the
+production server. It keeps running until Ctrl+C; no separate remote terminals
+are needed. Assets use port 3059, alongside the existing 3050–3057 demos.
+
+1. Open the SSR page and click its v1 counter to verify hydration.
+2. In the control page, choose **Update to v2**. Inspect the actual update result,
+   mode, timings and server status. The PID and listening port stay unchanged.
+3. Reload the embedded SSR page (a new request) to see v2, then click its counter.
+4. Keep an old SSR tab open before updating: it retains its hydrated v1 code and
+   continues to work because both releases' assets remain available.
+5. Switch back to v1 to repeat the update without restarting the server.
+
+This mixed-consumption fixture demonstrates **whole-application rebuilds**,
+not selective entry updates. The three static artifact E2E variants separately
+verify selective updates and unrelated-entry traffic:
+
+```bash
+pnpm --filter modernjs-ssr-cache-updates exec node e2e/static.cjs
+```
+
+Use `SSR_CACHE_DEMO_PORT` and `SSR_CACHE_ASSET_PORT` to override the ports.
+For Node Inspector, replace the demo command with:
+
+```bash
+node --inspect=9231 --expose-gc apps/modernjs-ssr/cache-updates/e2e/production.cjs --demo
+```
+
+To experience the published MF preview instead of workspace MF, prefix the demo
+command with `SSR_CACHE_PACKAGES_ROOT=/absolute/path/to/installed-packages`.
+See [the package setup and E2E documentation](./cache-updates/README.md#verify-published-packages).
+Temporary build directories are printed and retained for inspection. This is a
+local loopback-only demo; its update endpoints are not a production admin API.
