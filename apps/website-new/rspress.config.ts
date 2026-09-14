@@ -5,7 +5,6 @@ import { moduleFederationPluginOverview } from './src/moduleFederationPluginOver
 // import { pluginAnnotationWords } from 'rspress-plugin-annotation-words';
 import { pluginSass } from '@rsbuild/plugin-sass';
 import { pluginModuleFederation } from '@module-federation/rspress-plugin';
-import { DivebellChunkMapRspackPlugin } from '@divebell/rspack-plugin';
 import mfConfig from './module-federation.config';
 
 const canonicalSiteOrigin = 'https://module-federation.io'.replace(/\/$/, '');
@@ -14,7 +13,6 @@ const socialImageUrl = `${canonicalSiteOrigin}/module-federation-social.svg`;
 const socialImageAlt = 'Module Federation icon';
 const googleAnalyticsMeasurementId = 'G-DRPXW0EEVT';
 const enableZephyr = Boolean(process.env.CI || process.env.ZE_SECRET_TOKEN);
-const enableCodeUsageAnalysis = process.env.CODE_USAGE_ANALYSIS === '1';
 
 export default defineConfig({
   root: path.join(__dirname, 'docs'),
@@ -115,7 +113,6 @@ gtag('config', '${googleAnalyticsMeasurementId}');
     plugins: [moduleFederationPluginOverview, pluginSass()],
     output: {
       assetPrefix: '/',
-      sourceMap: enableCodeUsageAnalysis ? { js: 'source-map' } : undefined,
     },
     environments: {
       node: {
@@ -142,15 +139,7 @@ gtag('config', '${googleAnalyticsMeasurementId}');
       postcss: (config, { addPlugins }) => {
         addPlugins([require('tailwindcss/nesting'), require('tailwindcss')]);
       },
-      rspack: (config, { appendPlugins, environment }) => {
-        if (enableCodeUsageAnalysis) {
-          appendPlugins(
-            new DivebellChunkMapRspackPlugin({
-              filename: `divebell-chunks-${environment.name}.json`,
-            }),
-          );
-        }
-
+      rspack: (config, { environment }) => {
         if (
           environment.name === 'web' &&
           config.optimization?.splitChunks &&

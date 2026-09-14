@@ -1,13 +1,6 @@
 import { createModuleFederationConfig } from '@module-federation/rsbuild-plugin';
 import pkg from './package.json';
 
-const configuredPublicPath =
-  process.env.PLAYGROUND_PUBLIC_PATH ||
-  `https://unpkg.com/${pkg.name}@latest/dist/mf/`;
-const productionPublicPath = configuredPublicPath.endsWith('/')
-  ? configuredPublicPath
-  : `${configuredPublicPath}/`;
-
 export default createModuleFederationConfig({
   name: 'mf_playground',
   filename: 'remoteEntry.js',
@@ -32,6 +25,6 @@ export default createModuleFederationConfig({
   dts: false,
   getPublicPath:
     process.env.NODE_ENV === 'production'
-      ? `function() { return ${JSON.stringify(productionPublicPath)}; }`
+      ? `function() { return "https://unpkg.com/${pkg.name}@latest/dist/mf/"; }`
       : undefined,
 });

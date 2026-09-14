@@ -2999,9 +2999,6 @@ importers:
         specifier: ^3.0.16
         version: 3.0.23(core-js@3.49.0)
     devDependencies:
-      '@divebell/rspack-plugin':
-        specifier: 0.0.28
-        version: 0.0.28
       '@types/node':
         specifier: ^20.19.5
         version: 20.19.5
@@ -6162,14 +6159,8 @@ packages:
     resolution: {integrity: sha512-dBVuXR082gk3jsFp7Rd/JI4kytwGHecnCoTtXFb7DB6CNHp4rg5k1bhg0nWdLGLnOV71lmDzGQaLMy8iPLY0pw==}
     engines: {node: '>=10.0.0'}
 
-  '@divebell/chunk-map@0.0.28':
-    resolution: {integrity: sha512-2TlaOXAsthvsuoLZnH5oRlb5QxLPBDQCIwEFyVl4M877JENk+pk/r/Q0IjJnylqEW/aTwXyYam5vAkczOlvMMg==}
-
   '@divebell/core@0.0.23':
     resolution: {integrity: sha512-BT80nvct1BhDmxhBIsTayTZGsScqQclG+djAKYblJ77mfq6V9XF7U1B9xjKdvqUxopUjzMU40JY6WGxnh3KVLg==}
-
-  '@divebell/rspack-plugin@0.0.28':
-    resolution: {integrity: sha512-T5maMP8R3c1EUcXY8Dq0Tnc/7F4y2zjmBQWOobBizL1vesf3D0NqcDmhT0EsTN+0e+ex0BcfTEheYe4KAjS3gw==}
 
   '@edge-runtime/format@2.2.1':
     resolution: {integrity: sha512-JQTRVuiusQLNNLe2W9tnzBlV/GvSVcozLl4XZHk5swnRZ/v6jp8TqR8P7sqmJsQqblDZ3EztcWmLDbhRje/+8g==}
@@ -31636,13 +31627,7 @@ snapshots:
 
   '@discoveryjs/json-ext@0.5.7': {}
 
-  '@divebell/chunk-map@0.0.28': {}
-
   '@divebell/core@0.0.23': {}
-
-  '@divebell/rspack-plugin@0.0.28':
-    dependencies:
-      '@divebell/chunk-map': 0.0.28
 
   '@edge-runtime/format@2.2.1': {}
 
