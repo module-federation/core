@@ -84,9 +84,6 @@ class ManifestManager {
         ...(cur.identityId !== undefined ? { identityId: cur.identityId } : {}),
         ...(cur.layer !== undefined ? { layer: cur.layer } : {}),
         ...(cur.shareScope !== undefined ? { shareScope: cur.shareScope } : {}),
-        ...(cur.providers && cur.providers.length > 1
-          ? { providers: cur.providers }
-          : {}),
       };
       sum.push(shared);
       return sum;

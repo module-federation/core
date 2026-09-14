@@ -1,7 +1,6 @@
 import {
   StatsMetaData,
   StatsAssets,
-  StatsSharedProvider,
   StatsExpose,
   BasicStatsMetaData,
   RemoteEntryType,
@@ -13,7 +12,6 @@ export interface ManifestShared {
   identityId?: string;
   layer?: string;
   shareScope?: string | string[];
-  providers?: StatsSharedProvider[];
   name: string;
   version: string;
   singleton: boolean;

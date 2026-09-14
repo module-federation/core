@@ -468,7 +468,7 @@ it('decodes native ordered scope identities with UTF-8 lengths', () => {
 it('reads space-containing share keys from the structural identity suffix', () => {
   const key = '10:s7:defaultl9:服务端4:b) c';
   const identifier = `provide shared module (default) (服务端) b) c@19.0.0 = /first.js [identity:${key}]`;
-  const { sharedMap, sharedProviderModules } = new ModuleHandler(
+  const { sharedMap } = new ModuleHandler(
     { name: 'host' },
     [{ identifier, moduleType: 'provide-module' }],
     { bundler: 'rspack' },
@@ -477,11 +477,6 @@ it('reads space-containing share keys from the structural identity suffix', () =
     name: 'b) c',
     version: '19.0.0',
     layer: '服务端',
-  });
-  expect(sharedProviderModules[0]).toMatchObject({
-    name: key,
-    version: '19.0.0',
-    request: '/first.js',
   });
 });
 
