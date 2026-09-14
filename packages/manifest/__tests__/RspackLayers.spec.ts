@@ -105,7 +105,11 @@ it('preserves native Rspack identities for the same source in two layers', async
       manifest.exposes[1].assets.js,
     );
     expect(
-      new Set(manifest.shared.map((item) => item.identityId ?? item.id)).size,
+      new Set(
+        manifest.shared.map((item) =>
+          JSON.stringify([item.name, item.shareScope, item.layer]),
+        ),
+      ).size,
     ).toBe(2);
   } finally {
     await rm(output, { recursive: true, force: true });

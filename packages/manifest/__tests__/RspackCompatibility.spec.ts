@@ -204,7 +204,6 @@ it.each([
         }),
       ]);
       expect(manifest.shared[0].layer).toBeUndefined();
-      expect(manifest.shared[0].identityId).toBeUndefined();
       let timeout: ReturnType<typeof setTimeout> | undefined;
       const value = await new Promise((resolve, reject) => {
         timeout = setTimeout(

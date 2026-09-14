@@ -9,7 +9,6 @@ import { RemoteWithEntry, RemoteWithVersion } from './common';
 
 export interface ManifestShared {
   id: string;
-  identityId?: string;
   layer?: string;
   shareScope?: string | string[];
   name: string;

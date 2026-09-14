@@ -81,7 +81,6 @@ class ManifestManager {
         fallback: cur.fallback,
         fallbackName: cur.fallbackName,
         fallbackType: cur.fallbackType,
-        ...(cur.identityId !== undefined ? { identityId: cur.identityId } : {}),
         ...(cur.layer !== undefined ? { layer: cur.layer } : {}),
         ...(cur.shareScope !== undefined ? { shareScope: cur.shareScope } : {}),
       };

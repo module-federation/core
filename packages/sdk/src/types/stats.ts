@@ -87,7 +87,6 @@ export interface StatsSharedRequirement {
 
 export interface StatsShared {
   id: string;
-  identityId?: string;
   layer?: string;
   shareScope?: string | string[];
   name: string;
