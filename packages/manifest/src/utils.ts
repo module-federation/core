@@ -160,7 +160,7 @@ function getSharedModuleName(name: string, identifier?: string): string {
       : name,
     3,
   );
-  return identity.layer !== undefined || Array.isArray(identity.shareScope)
+  return identity.layer !== undefined || identity.shareScope !== 'default'
     ? identity.key
     : identity.name;
 }
