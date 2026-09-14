@@ -63,6 +63,11 @@ export interface SharedConfig {
   eager?: boolean;
   strictVersion?: boolean;
   layer?: string | null;
+  /**
+   * Consume-only marker. `false` means this share-scope entry is not a real
+   * provider and must not win selection when a usable provider exists.
+   */
+  import?: false;
 }
 
 export type TreeShakingArgs = {
