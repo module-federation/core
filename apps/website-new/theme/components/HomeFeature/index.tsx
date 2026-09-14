@@ -1,5 +1,4 @@
 import styles from './index.module.scss';
-import { motion } from 'framer-motion';
 const PRESET_COUNT = [2, 3, 4];
 
 const getGridClass = (count?: number): string => {
@@ -30,14 +29,12 @@ export function HomeFeature({ features }: { features: Feature[] }) {
       {features?.map((feature, index) => {
         const { icon, title, details, link } = feature;
         return (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
+          <div
             key={title}
             className={`${
               gridClass ? styles[gridClass] : 'w-full'
-            } rounded-md hover:var(--rp-c-brand) mb-6`}
+            } ${styles.featureItem} rounded-md hover:var(--rp-c-brand) mb-6`}
+            style={{ animationDelay: `${index * 100}ms` }}
           >
             <div className="p-2 h-full">
               <article
@@ -61,7 +58,7 @@ export function HomeFeature({ features }: { features: Feature[] }) {
                 </p>
               </article>
             </div>
-          </motion.div>
+          </div>
         );
       })}
     </div>

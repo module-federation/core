@@ -390,7 +390,7 @@ describe('ConsumeSharedPlugin', () => {
         );
         expect(createLookupKeyForSharing('react', undefined)).toBe('react');
         expect(createLookupKeyForSharing('react', null)).toBe('react');
-        expect(createLookupKeyForSharing('react', '')).toBe('react');
+        expect(createLookupKeyForSharing('react', '')).toBe('()react');
       });
     });
   });

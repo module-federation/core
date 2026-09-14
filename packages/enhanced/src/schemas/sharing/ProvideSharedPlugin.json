@@ -80,13 +80,11 @@
         },
         "layer": {
           "description": "Layer in which the shared module should be placed.",
-          "type": "string",
-          "minLength": 1
+          "type": "string"
         },
         "issuerLayer": {
           "description": "Layer of the issuer.",
-          "type": "string",
-          "minLength": 1
+          "type": "string"
         },
         "version": {
           "description": "Version of the provided module. Will replace lower matching versions, but not higher.",

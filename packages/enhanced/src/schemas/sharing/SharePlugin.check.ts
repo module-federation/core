@@ -34,8 +34,8 @@ const e = {
       independentShareFileName: { type: 'string', minLength: 1 },
       version: { anyOf: [{ enum: [!1] }, { type: 'string' }] },
       request: { type: 'string', minLength: 1 },
-      layer: { type: 'string', minLength: 1 },
-      issuerLayer: { type: 'string', minLength: 1 },
+      layer: { type: 'string' },
+      issuerLayer: { type: 'string' },
       allowNodeModulesSuffixMatch: { type: 'boolean' },
     },
   },
@@ -706,43 +706,27 @@ function n(
                                   } else c = !0;
                                   if (c) {
                                     if (void 0 !== o.layer) {
-                                      let e = o.layer;
-                                      const r = u;
-                                      if (u === r) {
-                                        if ('string' != typeof e)
+                                      const e = u;
+                                      if ('string' != typeof o.layer)
+                                        return (
+                                          (n.errors = [
+                                            { params: { type: 'string' } },
+                                          ]),
+                                          !1
+                                        );
+                                      c = e === u;
+                                    } else c = !0;
+                                    if (c) {
+                                      if (void 0 !== o.issuerLayer) {
+                                        const e = u;
+                                        if ('string' != typeof o.issuerLayer)
                                           return (
                                             (n.errors = [
                                               { params: { type: 'string' } },
                                             ]),
                                             !1
                                           );
-                                        if (e.length < 1)
-                                          return (
-                                            (n.errors = [{ params: {} }]),
-                                            !1
-                                          );
-                                      }
-                                      c = r === u;
-                                    } else c = !0;
-                                    if (c) {
-                                      if (void 0 !== o.issuerLayer) {
-                                        let e = o.issuerLayer;
-                                        const r = u;
-                                        if (u === r) {
-                                          if ('string' != typeof e)
-                                            return (
-                                              (n.errors = [
-                                                { params: { type: 'string' } },
-                                              ]),
-                                              !1
-                                            );
-                                          if (e.length < 1)
-                                            return (
-                                              (n.errors = [{ params: {} }]),
-                                              !1
-                                            );
-                                        }
-                                        c = r === u;
+                                        c = e === u;
                                       } else c = !0;
                                       if (c)
                                         if (

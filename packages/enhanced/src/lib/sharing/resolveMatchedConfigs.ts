@@ -32,7 +32,7 @@ function createCompositeKey(request: string, config: ConsumeOptions): string {
   // this way we can catch unlayered requests and default them to another layer
   // example react -> layered react without (layer)react
   const layer = config.issuerLayer; //|| config.layer;
-  if (layer) {
+  if (layer != null) {
     return `(${layer})${request}`;
   }
   return request;
@@ -74,14 +74,17 @@ export async function resolveMatchedConfigs<T extends ConsumeOptions>(
                 );
                 return resolve();
               }
-              resolved.set(result as string, config);
+              resolved.set(
+                createCompositeKey(result as string, config),
+                config,
+              );
               resolve();
             },
           );
         });
       } else if (ABSOLUTE_PATH_REGEX.test(resolveRequest)) {
         // absolute path
-        resolved.set(resolveRequest, config);
+        resolved.set(createCompositeKey(resolveRequest, config), config);
         return undefined;
       } else if (resolveRequest.endsWith('/')) {
         // module request prefix

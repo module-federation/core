@@ -82,6 +82,8 @@ it.each([
     const origin = `http://127.0.0.1:${address.port}/`;
     let window: Window | undefined;
     try {
+      // Isolate fixture module rules from package.json files above the temp dir.
+      await writeFile(path.join(directory, 'package.json'), '{}');
       await writeFile(
         path.join(directory, 'component.js'),
         'export { default } from "shared-value";',
@@ -204,7 +206,6 @@ it.each([
         }),
       ]);
       expect(manifest.shared[0].layer).toBeUndefined();
-      expect(manifest.shared[0].identityId).toBeUndefined();
       let timeout: ReturnType<typeof setTimeout> | undefined;
       const value = await new Promise((resolve, reject) => {
         timeout = setTimeout(

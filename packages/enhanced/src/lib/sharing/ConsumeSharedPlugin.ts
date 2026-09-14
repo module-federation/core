@@ -155,8 +155,8 @@ class ConsumeSharedPlugin {
           eager: !!item.eager,
           exclude: item.exclude,
           include: item.include,
-          issuerLayer: item.issuerLayer ? item.issuerLayer : undefined,
-          layer: item.layer ? item.layer : undefined,
+          issuerLayer: item.issuerLayer,
+          layer: item.layer,
           request,
           allowNodeModulesSuffixMatch: item.allowNodeModulesSuffixMatch,
           treeShakingMode: item.treeShakingMode,
@@ -582,8 +582,8 @@ class ConsumeSharedPlugin {
               for (const [prefix, options] of prefixedConsumes) {
                 const lookup = options.request || prefix;
                 // Refined issuerLayer matching logic
-                if (options.issuerLayer) {
-                  if (!contextInfo.issuerLayer) {
+                if (options.issuerLayer != null) {
+                  if (contextInfo.issuerLayer == null) {
                     continue; // Option is layered, request is not: skip
                   }
                   if (contextInfo.issuerLayer !== options.issuerLayer) {
@@ -627,8 +627,8 @@ class ConsumeSharedPlugin {
                     continue;
                   }
                   // Refined issuerLayer matching logic for reconstructed path
-                  if (options.issuerLayer) {
-                    if (!contextInfo.issuerLayer) {
+                  if (options.issuerLayer != null) {
+                    if (contextInfo.issuerLayer == null) {
                       continue; // Option is layered, request is not: skip
                     }
                     if (contextInfo.issuerLayer !== options.issuerLayer) {
@@ -675,7 +675,7 @@ class ConsumeSharedPlugin {
         );
         normalModuleFactory.hooks.createModule.tapPromise(
           PLUGIN_NAME,
-          ({ resource }, { context, dependencies }) => {
+          ({ resource }, { context, dependencies, contextInfo }) => {
             // BIND `this` for createConsumeSharedModule call
             const boundCreateConsumeSharedModule =
               this.createConsumeSharedModule.bind(this);
@@ -686,7 +686,13 @@ class ConsumeSharedPlugin {
               return Promise.resolve();
             }
             if (resource) {
-              const options = resolvedConsumes.get(resource);
+              const options =
+                resolvedConsumes.get(
+                  createLookupKeyForSharing(resource, contextInfo.issuerLayer),
+                ) ||
+                resolvedConsumes.get(
+                  createLookupKeyForSharing(resource, undefined),
+                );
               if (options !== undefined) {
                 // Use the bound function
                 return boundCreateConsumeSharedModule(

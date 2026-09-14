@@ -126,7 +126,7 @@ class ConsumeSharedModule extends Module {
       importResolved
         ? ` (fallback: ${requestShortener.shorten(importResolved)})`
         : ''
-    }${eager ? ' (eager)' : ''}${layer ? ` (${layer})` : ''}`;
+    }${eager ? ' (eager)' : ''}${layer != null ? ` (${layer})` : ''}`;
   }
 
   /**
@@ -140,7 +140,7 @@ class ConsumeSharedModule extends Module {
       : shareScope;
 
     return `${
-      this.layer ? `(${this.layer})/` : ''
+      this.layer !== null ? `(${this.layer})/` : ''
     }webpack/sharing/consume/${normalizedShareScope}/${shareKey}${
       request ? `/${request}` : ''
     }`;

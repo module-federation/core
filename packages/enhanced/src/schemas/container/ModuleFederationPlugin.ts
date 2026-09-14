@@ -83,6 +83,11 @@ export default {
           description: 'Custom chunk name for the exposed module.',
           type: 'string',
         },
+        layer: {
+          description:
+            'Layer in which to build the exposed module. An empty string is a valid layer.',
+          type: 'string',
+        },
       },
       required: ['import'],
     },
@@ -465,12 +470,10 @@ export default {
         layer: {
           description: 'Layer in which the shared module should be placed.',
           type: 'string',
-          minLength: 1,
         },
         issuerLayer: {
           description: 'Layer of the issuer.',
           type: 'string',
-          minLength: 1,
         },
         packageName: {
           description:

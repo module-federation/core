@@ -276,7 +276,6 @@ it('preserves native layer metadata when rebuilding a manifest', () => {
     shared: [
       {
         id: 'host:react',
-        identityId: 'react-server',
         name: 'react',
         version: '19.0.0',
         layer: '',
@@ -305,7 +304,6 @@ it('preserves native layer metadata when rebuilding a manifest', () => {
     bundler: 'rspack',
   });
   expect(manifest.shared[0]).toMatchObject({
-    identityId: 'react-server',
     layer: '',
     shareScope: ['server', 'default'],
   });

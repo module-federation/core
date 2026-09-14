@@ -95,7 +95,6 @@ export interface StatsSharedRequirement {
 
 export interface StatsShared {
   id: string;
-  identityId?: string;
   layer?: string;
   shareScope?: string | string[];
   /** Concrete providers when more than one version/import pair is available. */

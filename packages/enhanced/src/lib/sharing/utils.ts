@@ -538,7 +538,7 @@ export function createLookupKeyForSharing(
   request: string,
   layer?: string | null,
 ): string {
-  if (layer) {
+  if (layer != null) {
     return `(${layer})${request}`;
   }
   return request;
