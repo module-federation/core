@@ -204,7 +204,7 @@ const { ManifestManager: LegacyManifestManager } = require(
   ),
 ) as { ManifestManager: typeof ManifestManager };
 
-it('preserves legacy manifest fields', () => {
+it('preserves legacy manifest fields while adding concrete provider metadata', () => {
   const assets = {
     js: { sync: ['react.js'], async: [] },
     css: { sync: [], async: [] },
@@ -244,6 +244,27 @@ it('preserves legacy manifest fields', () => {
   const legacy = generate(LegacyManifestManager, stats);
   expect(generate(ManifestManager, stats)).toEqual(legacy);
   expect('providers' in legacy.shared[0]).toBe(false);
+
+  const providers = [
+    { version: '18.0.0', import: './react18.js?mode=server', assets },
+    {
+      version: '19.0.0',
+      import: './react19.js',
+      assets: {
+        ...assets,
+        js: { sync: ['react19.js'], async: ['react19-async.js'] },
+      },
+    },
+  ];
+  stats.shared[0].providers = providers;
+  const current = generate(ManifestManager, stats);
+  expect(current.shared[0].providers).toEqual(providers);
+  const { providers: _providers, ...legacyFields } = current.shared[0];
+  expect(legacyFields).toEqual(legacy.shared[0]);
+  expect(generate(LegacyManifestManager, stats)).toEqual(legacy);
+
+  stats.shared[0].providers = [providers[0]];
+  expect(generate(ManifestManager, stats)).toEqual(legacy);
 });
 
 it('preserves native layer metadata when rebuilding a manifest', () => {

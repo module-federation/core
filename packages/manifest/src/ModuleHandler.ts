@@ -20,6 +20,13 @@ import {
   getSharedIdentity,
 } from './utils';
 
+export interface SharedProviderModule {
+  name: string;
+  version: string;
+  request: string;
+  module: StatsModule;
+}
+
 type ShareMap = { [sharedKey: string]: StatsShared };
 type ExposeMap = { [exposeKey: string]: StatsExpose };
 type RemotesConsumerMap = { [remoteKey: string]: StatsRemote };
@@ -315,6 +322,7 @@ class ModuleHandler {
     mod: StatsModule,
     sharedMap: ShareMap,
     exposesMap: ExposeMap,
+    sharedProviderModules: SharedProviderModule[],
   ) {
     const { identifier, moduleType } = mod;
     if (!identifier) {
@@ -451,6 +459,18 @@ class ModuleHandler {
       if (name && version) {
         initShared(name, version);
         collectRelationshipMap(mod, name);
+        const separator = identifier.indexOf(' = ');
+        if (separator !== -1) {
+          const request = identifier
+            .slice(separator + 3)
+            .replace(/ \[identity:[\s\S]*\]$/, '');
+          sharedProviderModules.push({
+            name: sharedKey(name),
+            version,
+            request,
+            module: mod,
+          });
+        }
       }
     }
 
@@ -667,6 +687,7 @@ class ModuleHandler {
 
     const exposesMap: ExposeMap = {};
     const sharedMap: { [sharedKey: string]: StatsShared } = {};
+    const sharedProviderModules: SharedProviderModule[] = [];
 
     this._initializeExposesFromOptions(exposesMap);
 
@@ -698,7 +719,12 @@ class ModuleHandler {
       }
 
       if (isSharedModule(moduleType)) {
-        this._handleSharedModule(mod, sharedMap, exposesMap);
+        this._handleSharedModule(
+          mod,
+          sharedMap,
+          exposesMap,
+          sharedProviderModules,
+        );
       }
 
       if (isRemoteModule(identifier)) {
@@ -710,6 +736,7 @@ class ModuleHandler {
       remotes,
       exposesMap,
       sharedMap,
+      sharedProviderModules,
     };
   }
 }
