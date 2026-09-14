@@ -17,9 +17,19 @@ const MODERN_APPS = [
   'modernjs-ssr-nested-remote',
   'modernjs-ssr-remote',
   'modernjs-ssr-remote-new-version',
+  'modernjs-ssr-another-remote',
 ];
 
-const MODERN_PORTS = ['3050', '3051', '3052', '3053', '3054', '3055', '3056'];
+const MODERN_PORTS = [
+  '3050',
+  '3051',
+  '3052',
+  '3053',
+  '3054',
+  '3055',
+  '3056',
+  '3057',
+];
 const MODERN_MANIFEST_URLS = [
   'http://127.0.0.1:3050/mf-manifest.json',
   'http://127.0.0.1:3051/static/mf-manifest.json',
@@ -28,6 +38,7 @@ const MODERN_MANIFEST_URLS = [
   'http://127.0.0.1:3054/mf-manifest.json',
   'http://127.0.0.1:3055/mf-manifest.json',
   'http://127.0.0.1:3056/mf-manifest.json',
+  'http://127.0.0.1:3057/mf-manifest.json',
 ];
 const MODERN_WAIT_TARGETS = [
   ...MODERN_PORTS.map((port) => `tcp:${port}`),
@@ -60,6 +71,25 @@ const SCENARIOS = {
     serveCmd: MODERN_SERVE_CMD,
     waitTargets: MODERN_WAIT_TARGETS,
     verifyManifest: true,
+    e2eCmd: [
+      'pnpm',
+      '--dir',
+      'apps/modernjs-ssr/host',
+      'exec',
+      'cypress',
+      'run',
+      '--project',
+      '.',
+      '--config-file',
+      'cypress.ssr-cache.config.cjs',
+      '--e2e',
+      '--config',
+      'baseUrl=http://localhost:3050,responseTimeout=120000,pageLoadTimeout=120000,defaultCommandTimeout=120000',
+      '--browser',
+      'chrome',
+      '--spec',
+      'cypress/e2e/*.cy.js',
+    ],
   },
 };
 
@@ -188,18 +218,41 @@ function buildManifestValidationScript(urls) {
   return `
     (async () => {
       const urls = ${JSON.stringify(urls)};
+      const timeoutMs = 60000;
+      const retryIntervalMs = 500;
+      const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+      async function validateManifest(url) {
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(\`\${url} responded with status \${response.status}\`);
+        }
+        const payload = await response.text();
+        try {
+          JSON.parse(payload);
+        } catch (error) {
+          throw new Error(\`\${url} did not return valid JSON\`);
+        }
+      }
+
       await Promise.all(
         urls.map(async (url) => {
-          const response = await fetch(url);
-          if (!response.ok) {
-            throw new Error(\`\${url} responded with status \${response.status}\`);
+          const startedAt = Date.now();
+          let lastError;
+
+          while (Date.now() - startedAt < timeoutMs) {
+            try {
+              await validateManifest(url);
+              return;
+            } catch (error) {
+              lastError = error;
+              await sleep(retryIntervalMs);
+            }
           }
-          const payload = await response.text();
-          try {
-            JSON.parse(payload);
-          } catch (error) {
-            throw new Error(\`\${url} did not return valid JSON\`);
-          }
+
+          throw new Error(
+            \`\${url} did not return valid JSON within \${timeoutMs}ms: \${lastError?.message || 'unknown error'}\`,
+          );
         }),
       );
     })().catch((error) => {

@@ -3,7 +3,10 @@ import {
   getInstance,
   loadRemote,
   registerRemotes,
+  updateRemotes,
 } from '@module-federation/modern-js-v3/runtime';
+
+type LazyRemoteModule = { default: React.ComponentType<any> };
 
 registerRemotes([
   {
@@ -21,27 +24,24 @@ const RemoteSSRComponent = getInstance()!.createLazyComponent({
     }
     return <div>fallback</div>;
   },
-});
+}) as React.ComponentType<{ text: string }>;
 
 const NewRemoteCom = React.lazy(() =>
   loadRemote('dynamic_remote').then((m) => {
     console.log('加载');
-    return m;
+    return m as LazyRemoteModule;
   }),
 );
 const Index = (): JSX.Element => {
   const [showComponent, setShowComponent] = useState(false);
-  const replaceRemote = () => {
+  const replaceRemote = async () => {
     console.log('replaceRemote click');
-    registerRemotes(
-      [
-        {
-          name: 'dynamic_remote',
-          entry: 'http://localhost:3056/mf-manifest.json',
-        },
-      ],
-      { force: true },
-    );
+    await updateRemotes([
+      {
+        name: 'dynamic_remote',
+        entry: 'http://localhost:3056/mf-manifest.json',
+      },
+    ]);
 
     setShowComponent(true);
   };

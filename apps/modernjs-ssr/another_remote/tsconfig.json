@@ -1,0 +1,7 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "skipLibCheck": true
+  },
+  "include": ["src", "rslib.config.ts", "module-federation.config.ts"]
+}

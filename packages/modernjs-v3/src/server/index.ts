@@ -47,3 +47,6 @@ const staticServePlugin = (): ServerPlugin => ({
 
 export default staticServePlugin;
 export { staticServePlugin };
+
+export { createSSRUpdateAdapter } from './ssrUpdate';
+export type { SSRUpdatePlan } from './ssrUpdate';

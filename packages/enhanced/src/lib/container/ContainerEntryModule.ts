@@ -156,7 +156,7 @@ class ContainerEntryModule extends Module {
     this.buildMeta = {};
     this.buildInfo = {
       strict: true,
-      topLevelDeclarations: new Set(['moduleMap', 'get', 'init']),
+      topLevelDeclarations: new Set(['moduleMap', 'get', 'init', 'clearCache']),
     };
     this.buildMeta.exportsType = 'namespace';
     this.clearDependenciesAndBlocks();
@@ -182,7 +182,7 @@ class ContainerEntryModule extends Module {
     }
     this.addDependency(
       new StaticExportsDependency(
-        ['get', 'init'],
+        ['get', 'init', '__webpack_clear_cache__'],
         false,
       ) as unknown as Dependency,
     );
@@ -202,6 +202,7 @@ class ContainerEntryModule extends Module {
       RuntimeGlobals.definePropertyGetters,
       RuntimeGlobals.hasOwnProperty,
       RuntimeGlobals.exports,
+      RuntimeGlobals.moduleCache,
     ]);
     const getters = [];
     for (const block of this.blocks) {
@@ -312,11 +313,20 @@ class ContainerEntryModule extends Module {
           '})',
         ],
       )};`,
+      `var clearCache = ${runtimeTemplate.basicFunction('', [
+        `var moduleCache = ${RuntimeGlobals.moduleCache};`,
+        'for(var moduleId in moduleCache) {',
+        Template.indent([
+          `${RuntimeGlobals.hasOwnProperty}(moduleCache, moduleId) && delete moduleCache[moduleId];`,
+        ]),
+        '}',
+      ])};`,
       '// This exports getters to disallow modifications',
       `${RuntimeGlobals.definePropertyGetters}(exports, {`,
       Template.indent([
         `get: ${runtimeTemplate.returningFunction('get')},`,
-        `init: ${runtimeTemplate.returningFunction('init')}`,
+        `init: ${runtimeTemplate.returningFunction('init')},`,
+        `__webpack_clear_cache__: ${runtimeTemplate.returningFunction('clearCache')}`,
       ]),
       '});',
     ]);

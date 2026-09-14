@@ -6,7 +6,11 @@
 import express from 'express';
 import * as path from 'path';
 import node_local_remote from 'node_local_remote/test';
-import { registerRemotes, loadRemote } from '@module-federation/runtime';
+import {
+  registerRemotes,
+  updateRemotes,
+  loadRemote,
+} from '@module-federation/runtime';
 
 registerRemotes([
   {
@@ -54,15 +58,12 @@ app.get('/dynamic-remote', async (req, res) => {
 });
 
 app.get('/upgrade-remote', async (req, res) => {
-  registerRemotes(
-    [
-      {
-        name: 'node_dynamic_remote',
-        entry: 'http://localhost:3027/remoteEntry.js',
-      },
-    ],
-    { force: true },
-  );
+  await updateRemotes([
+    {
+      name: 'node_dynamic_remote',
+      entry: 'http://localhost:3027/remoteEntry.js',
+    },
+  ]);
 
   res.send({
     message: 'Upgrade success!',

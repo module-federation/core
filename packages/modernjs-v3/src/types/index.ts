@@ -13,6 +13,8 @@ export interface PluginOptions {
   ssr?:
     | {
         distOutputDir?: string;
+        /** Emit entry ownership and reload metadata for the Modern SSR update owner. */
+        cacheUpdates?: boolean;
       }
     | boolean;
   fetchServerQuery?: Record<string, unknown>;

@@ -8,6 +8,7 @@ export default createModuleFederationConfig({
   exposes: {
     './Image': './src/components/Image.tsx',
     './Button': './src/components/Button.tsx',
+    './Heavy': './src/components/Heavy.tsx',
   },
   shared: {
     react: { singleton: true },

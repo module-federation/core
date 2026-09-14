@@ -1,3 +1,4 @@
+import { SSRDependencyPlugin } from './SSRDependencyPlugin';
 import path from 'path';
 import fs from 'fs';
 import {
@@ -313,6 +314,19 @@ export const moduleFederationSSRPlugin = (
         }
       }
 
+      if (
+        !isWeb &&
+        typeof pluginOptions.userConfig.ssr === 'object' &&
+        pluginOptions.userConfig.ssr.cacheUpdates
+      ) {
+        chain.plugin('modern-ssr-dependencies').use(SSRDependencyPlugin, [
+          {
+            name: pluginOptions.ssrConfig.name!,
+            remotes: Object.keys(pluginOptions.ssrConfig.remotes || {}),
+          },
+        ]);
+      }
+
       if (!isWeb && !secondarySharedTreeShaking) {
         chain.target('async-node');
         if (isDev()) {
@@ -391,3 +405,5 @@ export const moduleFederationSSRPlugin = (
 });
 
 export default moduleFederationSSRPlugin;
+
+export { SSRDependencyPlugin } from './SSRDependencyPlugin';

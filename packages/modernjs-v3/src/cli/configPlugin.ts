@@ -248,6 +248,30 @@ export const setDefaultOptimizationTarget = (
     enableSSR && isServer ? 'node' : 'web';
 };
 
+/** React's server dispatcher must outlive disposable application runtimes. */
+export function preserveSSRRenderer(
+  config: moduleFederationPlugin.ModuleFederationPluginOptions,
+) {
+  const shared = Object.assign(
+    {},
+    ...(Array.isArray(config.shared)
+      ? config.shared.map((item) =>
+          typeof item === 'string' ? { [item]: {} } : item,
+        )
+      : [config.shared || {}]),
+  );
+  for (const name of ['react', 'react-dom', 'react-dom/server']) {
+    const value = shared[name];
+    const entry = typeof value === 'string' ? { import: value } : value || {};
+    if (entry.singleton === false)
+      throw new Error(
+        `SSR cacheUpdates requires singleton sharing for ${name}`,
+      );
+    shared[name] = { ...entry, singleton: true };
+  }
+  config.shared = shared;
+}
+
 function patchIgnoreWarning(chain: BundlerChainConfig) {
   const ignoreWarnings = chain.get('ignoreWarnings') || [];
   const ignoredMsgs = [
@@ -430,6 +454,20 @@ export const moduleFederationConfigPlugin = (
         userConfig.originPluginOptions.autoOptimization,
       );
       patchMFConfig(targetMFConfig, !isWeb);
+      if (
+        typeof userConfig.originPluginOptions.ssr === 'object' &&
+        userConfig.originPluginOptions.ssr.cacheUpdates
+      ) {
+        if (!isWeb) preserveSSRRenderer(targetMFConfig);
+        injectRuntimePlugins(
+          resolvePackageFile(
+            '@module-federation/modern-js-v3',
+            `dist/esm/cli/mfRuntimePlugins/${isWeb ? 'ssr-release' : 'ssr-ownership'}.mjs`,
+            `dist/cjs/cli/mfRuntimePlugins/${isWeb ? 'ssr-release' : 'ssr-ownership'}.js`,
+          ),
+          targetMFConfig.runtimePlugins as RuntimePluginEntry[],
+        );
+      }
 
       if (
         modernjsConfig.source?.enableAsyncEntry !== true &&

@@ -101,6 +101,21 @@ export function registerRemotes(
   return FederationInstance.registerRemotes.apply(FederationInstance, args);
 }
 
+export function updateRemotes(
+  ...args: Parameters<ModuleFederation['updateRemotes']>
+): ReturnType<ModuleFederation['updateRemotes']> {
+  assert(FederationInstance, RUNTIME_009, runtimeDescMap);
+  return FederationInstance.updateRemotes(...args);
+}
+
+export function removeRemote(
+  ...args: Parameters<ModuleFederation['removeRemote']>
+): ReturnType<ModuleFederation['removeRemote']> {
+  assert(FederationInstance, RUNTIME_009, runtimeDescMap);
+  // eslint-disable-next-line prefer-spread
+  return FederationInstance.removeRemote.apply(FederationInstance, args);
+}
+
 export function registerPlugins(
   ...args: Parameters<ModuleFederation['registerPlugins']>
 ): ReturnType<ModuleFederation['registerRemotes']> {

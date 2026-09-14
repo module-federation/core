@@ -42,6 +42,8 @@ export interface SharedLoadContext {
 }
 
 export interface RemoteInfo {
+  /** Resolved manifest provider identity, separate from the registration name. */
+  providerName?: string;
   alias?: string;
   name: string;
   version?: string;
@@ -102,6 +104,8 @@ export type Shared = {
   scope: Array<string>;
   useIn: Array<string>;
   from: string;
+  // Undefined and 0 mean active; 1 means removed but retained by consumers.
+  providerState?: 0 | 1;
   deps: Array<string>;
   lib?: () => Module;
   loaded?: boolean;
@@ -173,4 +177,7 @@ export type RemoteEntryExports = {
     initScope?: InitScope,
     remoteEntryInitOPtions?: RemoteEntryInitOptions,
   ) => void | Promise<void>;
+  __webpack_clear_cache__?: () => void;
+  /** Required for shared-preserving cleanup; clears caches outside shared dependency closures. */
+  __webpack_clear_exposed_cache__?: () => void;
 };

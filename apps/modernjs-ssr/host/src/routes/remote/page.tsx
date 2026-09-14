@@ -1,30 +1,29 @@
 import React, { useState, Suspense } from 'react';
 import Comp from 'remote/Image';
 import {
-  registerRemotes,
+  updateRemotes,
   loadRemote,
 } from '@module-federation/modern-js-v3/runtime';
+
+type LazyRemoteModule = { default: React.ComponentType<any> };
 
 const NewRemoteCom = React.lazy(() =>
   loadRemote('remote/Image').then((m) => {
     console.log('加载');
-    return m;
+    return m as LazyRemoteModule;
   }),
 );
 
 const Index = (): JSX.Element => {
   const [showComponent, setShowComponent] = useState(false);
-  const replaceRemote = () => {
+  const replaceRemote = async () => {
     console.log('replaceRemote click');
-    registerRemotes(
-      [
-        {
-          name: 'remote',
-          entry: 'http://localhost:3055/mf-manifest.json',
-        },
-      ],
-      { force: true },
-    );
+    await updateRemotes([
+      {
+        name: 'remote',
+        entry: 'http://localhost:3055/mf-manifest.json',
+      },
+    ]);
 
     setShowComponent(true);
   };
