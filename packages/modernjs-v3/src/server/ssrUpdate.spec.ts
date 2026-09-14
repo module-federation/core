@@ -264,6 +264,83 @@ describe('SSR replacement recovery', () => {
     });
   });
 
+  it('publishes paired public targets once across alias changes and reports failure stages', async () => {
+    const { runtime } = fixture();
+    const instance = runtime.federation.instance as any;
+    instance.options = {
+      remotes: [{ name: 'remote', alias: 'alias', entry: 'private-v1' }],
+    };
+    instance.updateRemotes = async (remotes: any[]) => {
+      instance.options.remotes = remotes;
+    };
+    const adapter = createSSRUpdateAdapter({
+      name: 'host',
+      entries: ['a', 'b'],
+      hydration: {
+        remotes: [{ name: 'remote', entry: 'https://cdn.test/v1.json' }],
+      },
+    });
+    let fail = false;
+    let generation = 0;
+    const application = {
+      async update(
+        invalidate: () => Promise<void>,
+        scope?: () => readonly string[] | undefined,
+      ) {
+        scope?.();
+        await invalidate();
+        if (fail) throw new Error('candidate validation failed');
+        return ++generation;
+      },
+    };
+    const resources = { templates: { a: '<html><head></head></html>' } };
+    adapter.prepareResources(resources);
+    const old = resources.templates.a;
+    await adapter.update(application, 'alias', {
+      entry: 'private-v2',
+      client: { entry: 'https://cdn.test/v2.json' },
+    });
+    const result = await adapter.update(application, 'remote', {
+      entry: 'private-v3',
+      client: { entry: 'https://cdn.test/v3.json' },
+    });
+    adapter.prepareResources(resources);
+    expect(old).toContain('v1.json');
+    expect(resources.templates.a).toContain('v3.json');
+    expect(resources.templates.a).not.toContain('v2.json');
+    expect(resources.templates.a).not.toContain('private');
+    expect(instance.options.remotes[0]).not.toHaveProperty('client');
+    expect(Object.keys(result.timingsMs)).toEqual(
+      expect.arrayContaining([
+        'queue',
+        'analyze',
+        'drain',
+        'clear',
+        'rebuild',
+        'total',
+      ]),
+    );
+    expect(Object.values(result.timingsMs).every((value) => value >= 0)).toBe(
+      true,
+    );
+    fail = true;
+    await expect(
+      adapter.update(application, 'alias', {
+        entry: 'private-v4',
+        client: { entry: 'https://cdn.test/v4.json' },
+      }),
+    ).rejects.toMatchObject({
+      failedStage: 'rebuild',
+      appliedRevision: 2,
+      mutationStarted: true,
+    });
+    expect(adapter.status(application)).toMatchObject({
+      phase: 'failed',
+      stage: 'failed',
+      appliedRevision: 2,
+    });
+  });
+
   it('remembers each instance registration when a replacement fails after removal', async () => {
     const { runtime, adapter } = fixture();
     let fail = true;

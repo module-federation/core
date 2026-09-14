@@ -502,3 +502,119 @@ Full Modern framework/hydration combinations and sustained load/heap stabilizati
 including production capacity/timeout/health policy tuning, remain R6 acceptance;
 the passing browser cache fixtures do not close that stage. RSC/native ESM
 application roots remain excluded. No package publish or merge commands were run.
+
+## R6 production acceptance — 2026-09-14
+
+Bases: MF `656f7d03b` (merged #5074), Modern `7175a07b52` (merged #8868), both
+on `feat/mf-ssr-clear-cache`. Node 24.18.1, core pnpm 10.28.0, Modern pnpm 10.13.1.
+The production fixture uses real Modern 3.9.0 app-tools/runtime/server builds,
+React 19.2.8, Cypress bundled Chromium, and the **published** Rspack
+`2.2.3-canary-fde17bab-20260911103204`. Its compiler hook resolves that installed
+package, not a locally modified compiler.
+
+Two acceptance failures were reproduced and fixed:
+
+- Updating server remotes without pinning browser startup produced React hydration
+  error #425 in an initial React 18/Modern 3.5 probe. The new explicit public release
+  mapping passes new-v2 HTML and delayed-v1 HTML hydration and click behavior with
+  the current Modern 3.9/React 19 combination. Private server targets are excluded.
+- Whole-app rebuilds recreated bundled React server renderers. A heap snapshot found
+  a `previousDispatcher` chain retaining old renderers, pages and loader/request
+  closures. Before the fix, post-GC heap grew from 36.6 MiB at cycle 10 to 88.7 MiB
+  at cycle 70. Plugin lists, MF instances and adapter counts were stable; they were
+  not the retention source. Server cache-update builds now keep React, React DOM
+  and its server renderer singleton-shared. Explicit non-singleton configurations
+  are rejected. No React internals or arbitrary application globals are cleared.
+
+The committed production fixture passes real stream-shell draining, loader/action,
+client cancellation with unresolved loader producer work, removal of cancelled
+queued waiters, a 16-request queue with
+503 overflow/admission timeout, drain timeout before mutation, request-side update
+reentry rejection, validation failure with unavailable readiness and live liveness,
+explicit full recovery, runtime-only remote registration/consumption, and stable
+listener address/PID. Limits of 500 ms admission and 1000 ms drain are **test
+settings**, not universal deployment defaults. An action rejected while queued
+does not execute or replay; a normal action request executes successfully.
+
+A 300-cycle run issues 2400 SSR requests (eight concurrent requests per cycle), in
+addition to the lifecycle/browser checks. Every HTML response's remote version
+matches its embedded public release. Forced-GC observations:
+
+| Cycle | Heap MiB | RSS MiB | Active native resources |
+| --- | --- | --- | --- |
+| 20 | 33.06 | 193.66 | 2 servers, 20 sockets |
+| 70 | 34.24 | 209.92 | 2 servers, 20 sockets |
+| 100 | 34.39 | 222.75 | 2 servers, 20 sockets |
+| 200 | 34.58 | 228.12 | 2 servers, 18 sockets |
+| 300 | 34.81 | 234.61 | 2 servers, 18 sockets |
+
+The post-warm-up heap peak is 34.81 MiB, below the fixture's +8 MiB regression
+budget. Two logical MF instances and two host bindings remain, with zero pending or
+active requests at each sample. RSS includes V8/native allocator retention and is
+reported independently; the test does not equate RSS with live JS heap or prove
+unbounded production stability.
+
+After 20 warm-up cycles, measured update p50/p95/max (milliseconds):
+
+| Stage | p50 | p95 | max |
+| --- | --- | --- | --- |
+| queue | 0.09 | 0.15 | 0.34 |
+| analyze | 0.01 | 0.02 | 0.04 |
+| drain | 0.00 | 0.00 | 0.01 |
+| clear | 1.61 | 1.94 | 2.86 |
+| rebuild | 6.76 | 9.01 | 11.48 |
+| total | 8.47 | 10.77 | 14.44 |
+
+The soak has no deliberately held old requests; its near-zero drain times are not
+latency promises. Separate barrier tests cover held streams and cancellation.
+
+Commands run from the isolated MF worktree:
+
+```sh
+pnpm exec turbo run build --filter=@module-federation/modern-js-v3
+pnpm --filter @module-federation/modern-js-v3 exec rstest run
+NODE_ENV=production SSR_CACHE_MODERN_ROOT=/private/tmp/modern-r4-static-update node --expose-gc tools/ssr-cache/production.cjs
+NODE_ENV=production SSR_CACHE_MODERN_ROOT=/private/tmp/modern-r4-static-update SSR_CACHE_PRODUCTION_CYCLES=300 node --expose-gc tools/ssr-cache/production.cjs
+pnpm exec prettier --check .
+node --check tools/ssr-cache/production.cjs
+node --check tools/ssr-cache/production-fixture.cjs
+git diff --check
+pnpm exec changeset status --output /tmp/r6-changeset-status.json
+```
+
+Build: 20/20 tasks succeed. Modern MF tests: 40/40 pass. Full-repository Prettier
+passes. The changeset scope is only `@module-federation/modern-js-v3` (minor).
+Formatting used `pnpm exec prettier --write` on the changed files. The changeset
+scope helper is run against `origin/feat/mf-ssr-clear-cache` with Python 3.9's
+postponed annotations, as in earlier stages.
+
+Commands run from the companion Modern worktree:
+
+```sh
+pnpm exec biome check --write packages/server/core/tests/application.static-mf.test.cjs
+SSR_CACHE_MF_ROOT=/private/tmp/mf-r4-static-update node --test packages/server/core/tests/application.static-mf.test.cjs
+SSR_CACHE_MF_ROOT=/private/tmp/mf-r4-static-update SSR_STATIC_NUMERIC=1 node --test packages/server/core/tests/application.static-mf.test.cjs
+SSR_CACHE_MF_ROOT=/private/tmp/mf-r4-static-update SSR_STATIC_OPTIMIZE=1 node --test packages/server/core/tests/application.static-mf.test.cjs
+```
+
+All three static artifact variants pass (readable, numeric IDs, numeric + minified
++ concatenated). An initial run used unsupported `SSR_CACHE_*` optimization flags;
+that only reran the default variant and is **not** counted as optimized coverage.
+The subsequent commands above use the actual test switches. Only the expected
+result assertion changes in Modern to verify the newly added timing fields; no
+Modern runtime behavior changes in this increment.
+
+Probe corrections: the first native `fetch` Suspense request was treated as a bot
+and waited for all content, so the harness now sends a real browser User-Agent and
+an explicit timeout. Cypress success is verified by exact test/pass/failure counts;
+its Node API does not return a `status: finished` property. These initial harness
+failures are not reported as passing production runs.
+
+Not run: the aggregate `ci:local` runner (worktree rules require package/direct
+commands); unrelated Metro/Next/router/devtools pipelines; external process-manager
+and CDN lifecycle tests. The actual production server preserves PID/port, but this
+does not certify a particular supervisor configuration. Native ESM roots and RSC
+remain excluded. Arbitrary global side effects are not undone. A final run against
+newly published MF/Modern preview packages, after these changes merge, is still a
+release gate: local-source success is not certification of an unpublished package
+combination. No publish command was run.
