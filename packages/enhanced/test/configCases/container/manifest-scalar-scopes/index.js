@@ -14,9 +14,12 @@ it('retains and selects both same-version singletons in scalar scopes', async ()
     const factory = entry && (await entry.get());
     registered.push(factory?.().default);
   }
-  const artifacts = ['mf-stats.json', 'mf-manifest.json'].map((filename) => {
+  const artifacts = ['mf-stats.json', 'mf.json'].map((filename) => {
     const artifact = JSON.parse(
-      fs.readFileSync(path.join(__dirname, filename), 'utf8'),
+      fs.readFileSync(
+        path.join(__dirname, `${TEST_PREFIX}${filename}`),
+        'utf8',
+      ),
     );
     return artifact.shared
       .filter((item) => item.name === 'react')
@@ -29,27 +32,29 @@ it('retains and selects both same-version singletons in scalar scopes', async ()
         assets: item.assets.js.sync,
       }));
   });
-  for (const filename of ['a_js.js', 'b_js.js']) {
-    expect(fs.existsSync(path.join(__dirname, filename))).toBe(true);
-  }
   const expectedRows = [
     {
       scope: 'a',
-      layer: undefined,
+      layer: TEST_LAYER,
       version: '1.0.0',
       singleton: true,
       requiredVersion: false,
-      assets: ['a_js.js'],
+      assets: [TEST_LAYER ? 'common-_common_a_js.js' : 'a_js.js'],
     },
     {
       scope: 'b',
-      layer: undefined,
+      layer: TEST_LAYER,
       version: '1.0.0',
       singleton: true,
       requiredVersion: '1.0.0',
-      assets: ['b_js.js'],
+      assets: [TEST_LAYER ? 'common-_common_b_js.js' : 'b_js.js'],
     },
   ];
+  for (const row of expectedRows) {
+    for (const filename of row.assets) {
+      expect(fs.existsSync(path.join(__dirname, filename))).toBe(true);
+    }
+  }
   expect({ registered, stats: artifacts[0], manifest: artifacts[1] }).toEqual({
     registered: [a, b],
     stats: expectedRows,
