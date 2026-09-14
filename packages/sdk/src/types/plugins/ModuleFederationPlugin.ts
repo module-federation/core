@@ -32,8 +32,7 @@ export interface ExposesConfig {
    */
   name?: string;
   /**
-   * Layer in which the exposed module should be built (bundlers with
-   * `experiments.layers`). An empty string is a valid layer.
+   * Layer in which to build the exposed module. An empty string is a valid layer.
    */
   layer?: string;
 }

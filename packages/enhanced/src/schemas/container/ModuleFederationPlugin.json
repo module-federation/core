@@ -70,6 +70,10 @@
         "name": {
           "description": "Custom chunk name for the exposed module.",
           "type": "string"
+        },
+        "layer": {
+          "description": "Layer in which to build the exposed module. An empty string is a valid layer.",
+          "type": "string"
         }
       },
       "required": ["import"]
@@ -427,13 +431,11 @@
         },
         "layer": {
           "description": "Layer in which the shared module should be placed.",
-          "type": "string",
-          "minLength": 1
+          "type": "string"
         },
         "issuerLayer": {
           "description": "Layer of the issuer.",
-          "type": "string",
-          "minLength": 1
+          "type": "string"
         },
         "packageName": {
           "description": "Package name to determine required version from description file. This is only needed when package name can't be automatically determined from request.",

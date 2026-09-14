@@ -96,12 +96,10 @@ export default {
         layer: {
           description: 'Layer in which the shared module should be placed.',
           type: 'string',
-          minLength: 1,
         },
         issuerLayer: {
           description: 'Layer of the issuer.',
           type: 'string',
-          minLength: 1,
         },
         version: {
           description:

@@ -32,7 +32,7 @@ function createCompositeKey(request: string, config: ConsumeOptions): string {
   // this way we can catch unlayered requests and default them to another layer
   // example react -> layered react without (layer)react
   const layer = config.issuerLayer; //|| config.layer;
-  if (layer) {
+  if (layer != null) {
     return `(${layer})${request}`;
   }
   return request;

@@ -84,13 +84,11 @@
         },
         "layer": {
           "description": "Layer in which the shared module should be placed.",
-          "type": "string",
-          "minLength": 1
+          "type": "string"
         },
         "issuerLayer": {
           "description": "Layer of the issuer.",
-          "type": "string",
-          "minLength": 1
+          "type": "string"
         },
         "request": {
           "description": "Import request to match on",

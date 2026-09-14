@@ -200,23 +200,30 @@ class StatsManager {
     const assets: Record<string, StatsAssets> = {};
 
     chunks.forEach((chunk) => {
-      if (typeof chunk.name !== 'string') return;
-
-      // Support split chunks caused by splitChunks.maxSize:
-      // A chunk named "__federation_expose_Foo" may be split into
-      // "__federation_expose_Foo-<hash>" chunks, so we match both exact
-      // and prefix+dash patterns.
-      const matchedKey = exposeKeysByChunk.has(chunk.name)
-        ? chunk.name
-        : [...exposeKeysByChunk.keys()].find((key) =>
-            chunk.name!.startsWith(key + '-'),
-          );
-
-      if (!matchedKey) return;
-
+      // Optimizers can merge equal expose chunks under just one chunk name.
+      // Their named groups still identify every expose that loads those assets.
+      const names = new Set([
+        chunk.name,
+        ...[...chunk.groupsIterable].map((group) => group.name),
+      ]);
+      const assetKeys = new Set<string>();
+      for (const name of names) {
+        if (typeof name !== 'string') continue;
+        // Split chunks retain the expose name followed by a hash suffix.
+        const matchedKey = exposeKeysByChunk.has(name)
+          ? name
+          : [...exposeKeysByChunk.keys()].find((key) =>
+              name.startsWith(key + '-'),
+            );
+        if (matchedKey) {
+          for (const key of exposeKeysByChunk.get(matchedKey)!)
+            assetKeys.add(key);
+        }
+      }
+      if (!assetKeys.size) return;
       const chunkAssets = getAssetsByChunk(chunk, entryPointNames);
 
-      for (const assetKey of exposeKeysByChunk.get(matchedKey)!) {
+      for (const assetKey of assetKeys) {
         if (!assets[assetKey]) {
           assets[assetKey] = chunkAssets;
         } else {

@@ -130,13 +130,11 @@
         },
         "layer": {
           "description": "Layer in which the shared module should be placed.",
-          "type": "string",
-          "minLength": 1
+          "type": "string"
         },
         "issuerLayer": {
           "description": "Layer of the issuer.",
-          "type": "string",
-          "minLength": 1
+          "type": "string"
         },
         "allowNodeModulesSuffixMatch": {
           "description": "Enable reconstructed lookup for node_modules paths for this share item",

@@ -18,15 +18,17 @@ import type {
 
 class ContainerExposedDependency extends dependencies.ModuleDependency {
   exposedName: string;
+  layer?: string;
   override request: string;
 
   /**
    * @param {string} exposedName public name
    * @param {string} request request to module
    */
-  constructor(exposedName: string, request: string) {
+  constructor(exposedName: string, request: string, layer?: string) {
     super(request);
     this.exposedName = exposedName;
+    this.layer = layer;
     this.request = request;
   }
 
@@ -50,6 +52,7 @@ class ContainerExposedDependency extends dependencies.ModuleDependency {
    */
   override serialize(context: ObjectSerializerContext): void {
     context.write(this.exposedName);
+    context.write(this.layer);
     super.serialize(context);
   }
 
@@ -58,6 +61,7 @@ class ContainerExposedDependency extends dependencies.ModuleDependency {
    */
   override deserialize(context: ObjectDeserializerContext): void {
     this.exposedName = context.read();
+    this.layer = context.read();
     super.deserialize(context);
   }
 }

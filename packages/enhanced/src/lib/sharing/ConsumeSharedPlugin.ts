@@ -155,8 +155,8 @@ class ConsumeSharedPlugin {
           eager: !!item.eager,
           exclude: item.exclude,
           include: item.include,
-          issuerLayer: item.issuerLayer ? item.issuerLayer : undefined,
-          layer: item.layer ? item.layer : undefined,
+          issuerLayer: item.issuerLayer,
+          layer: item.layer,
           request,
           allowNodeModulesSuffixMatch: item.allowNodeModulesSuffixMatch,
           treeShakingMode: item.treeShakingMode,
@@ -582,8 +582,8 @@ class ConsumeSharedPlugin {
               for (const [prefix, options] of prefixedConsumes) {
                 const lookup = options.request || prefix;
                 // Refined issuerLayer matching logic
-                if (options.issuerLayer) {
-                  if (!contextInfo.issuerLayer) {
+                if (options.issuerLayer != null) {
+                  if (contextInfo.issuerLayer == null) {
                     continue; // Option is layered, request is not: skip
                   }
                   if (contextInfo.issuerLayer !== options.issuerLayer) {
@@ -627,8 +627,8 @@ class ConsumeSharedPlugin {
                     continue;
                   }
                   // Refined issuerLayer matching logic for reconstructed path
-                  if (options.issuerLayer) {
-                    if (!contextInfo.issuerLayer) {
+                  if (options.issuerLayer != null) {
+                    if (contextInfo.issuerLayer == null) {
                       continue; // Option is layered, request is not: skip
                     }
                     if (contextInfo.issuerLayer !== options.issuerLayer) {
