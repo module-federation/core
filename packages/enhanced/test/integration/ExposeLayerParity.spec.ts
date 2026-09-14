@@ -141,10 +141,15 @@ it.each([
           './List': ruleLayer ?? null,
           ...(arrayForm ? { './source.js': ruleLayer ?? null } : {}),
         };
+        const instances = new Set();
         for (const [key, layer] of Object.entries(expected)) {
           const factory = await container.get(key);
-          expect(factory().default).toEqual({ layer });
+          const value = factory().default;
+          expect(value).toEqual({ layer });
+          if (['./Server', './Client', './Empty', './Inherited'].includes(key))
+            instances.add(value);
         }
+        expect(instances.size).toBe(ruleLayer ? 1 : 4);
         expect(globalThis.exposeSideEffect).toBe(true);
         delete globalThis.exposeSideEffect;
         if (manifest) {

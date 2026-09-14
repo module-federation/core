@@ -10,3 +10,5 @@ Preserve shared and exposed module layers when reading Rspack and webpack stats 
 Expose configuration now preserves `layer`, including an empty string.
 
 Support explicit expose layers in enhanced Webpack, including empty layers through shared modules and imports. Preserve module-rule precedence and assets for merged expose chunks, and accept the same layer configuration with manifests enabled or disabled.
+
+Resolve relative shared requests and fallbacks with an explicit issuer layer from the importing module's directory.

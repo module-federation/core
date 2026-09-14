@@ -179,7 +179,9 @@ class ConsumeSharedPlugin {
       compilation.warnings.push(error);
     };
     const directFallback =
-      config.import && DIRECT_FALLBACK_REGEX.test(config.import);
+      config.import &&
+      DIRECT_FALLBACK_REGEX.test(config.import) &&
+      (config.issuerLayer == null || ABSOLUTE_PATH_REGEX.test(config.import));
 
     const resolver: ResolverWithOptions = compilation.resolverFactory.get(
       'normal',

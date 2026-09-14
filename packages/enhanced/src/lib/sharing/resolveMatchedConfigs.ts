@@ -56,7 +56,14 @@ export async function resolveMatchedConfigs<T extends ConsumeOptions>(
   await Promise.all(
     configs.map(([request, config]) => {
       const resolveRequest = config.request || request;
-      if (RELATIVE_REQUEST_REGEX.test(resolveRequest)) {
+      if (
+        config.issuerLayer != null &&
+        RELATIVE_REQUEST_REGEX.test(resolveRequest)
+      ) {
+        // A layered relative consume is resolved where its issuer imports it.
+        unresolved.set(createCompositeKey(resolveRequest, config), config);
+        return undefined;
+      } else if (RELATIVE_REQUEST_REGEX.test(resolveRequest)) {
         // relative request
         return new Promise<void>((resolve) => {
           resolver.resolve(
