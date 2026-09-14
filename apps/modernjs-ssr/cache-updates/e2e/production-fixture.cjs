@@ -1,31 +1,17 @@
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
-const mf = path.resolve(__dirname, '../..');
 const root = process.env.SSR_CACHE_PRODUCTION_DIR;
-const installed = process.env.SSR_CACHE_PACKAGES_ROOT;
-const deps = path.join(
-  installed || path.join(mf, 'apps/modernjs-ssr/host'),
-  'node_modules',
-);
-const modern = process.env.SSR_CACHE_MODERN_ROOT;
-const appTools = installed
-  ? path.join(deps, '@modern-js/app-tools')
-  : path.join(modern || '', 'packages/solutions/app-tools');
-const runtime = installed
-  ? path.join(deps, '@modern-js/runtime')
-  : path.join(modern || '', 'packages/runtime/plugin-runtime');
-const react = installed
-  ? path.join(deps, 'react')
-  : path.join(runtime, 'node_modules/react');
-const reactDOM = installed
-  ? path.join(deps, 'react-dom')
-  : path.join(runtime, 'node_modules/react-dom');
+const installed =
+  process.env.SSR_CACHE_PACKAGES_ROOT || path.resolve(__dirname, '..');
+const deps = path.join(installed, 'node_modules');
+const appTools = path.join(deps, '@modern-js/app-tools');
+const runtime = path.join(deps, '@modern-js/runtime');
+const react = path.join(deps, 'react');
+const reactDOM = path.join(deps, 'react-dom');
 const assetURL = process.env.SSR_CACHE_ASSET_URL;
-if (!root || (!modern && !installed) || !assetURL)
-  throw new Error(
-    'Run production.cjs with SSR_CACHE_MODERN_ROOT or SSR_CACHE_PACKAGES_ROOT',
-  );
+if (!root || !installed || !assetURL)
+  throw new Error('Run the cache-updates E2E entry');
 (async () => {
   for (const app of ['remote', 'host']) {
     const dir = path.join(root, app);

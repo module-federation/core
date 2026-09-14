@@ -442,87 +442,10 @@ Revisions and retained targets live in this worker's persistent adapter. A proce
 restart requires the control plane to supply its current desired configuration;
 this is not durable configuration storage or cross-worker synchronization.
 
-## R6 production application acceptance
+## R6 production E2E
 
-Build the companion Modern integration checkout's app-tools, runtime, server-core
-and prod-server packages first, and install the core workspace dependencies. Then:
-
-```sh
-pnpm exec turbo run build --filter=@module-federation/modern-js-v3
-NODE_ENV=production SSR_CACHE_MODERN_ROOT=/absolute/path/to/modern.js node --expose-gc tools/ssr-cache/production.cjs
-# Longer resource run (minimum 70 cycles):
-NODE_ENV=production SSR_CACHE_MODERN_ROOT=/absolute/path/to/modern.js SSR_CACHE_PRODUCTION_CYCLES=300 node --expose-gc tools/ssr-cache/production.cjs
-```
-
-This builds actual Modern host/provider applications with the core workspace's
-installed Rspack package, starts production HTTP servers on ephemeral local ports,
-and runs Cypress's bundled Chromium. The fixture owns its generated files and
-package links in a fresh temporary directory; it does not modify either checkout's
-installed dependencies. It prints the fixture and `metrics.json` paths for review.
-Temporary build artifacts are retained for failure diagnosis; remove that printed
-directory after reviewing it. Test servers are closed on completion.
-
-The test pairs public v1/v2 release mappings, hydrates new HTML and delayed old HTML,
-uses real React Suspense, loader/action requests and a dynamically registered remote,
-injects validation failure, checks bounded queue/drain behavior and request reentry,
-and then performs eight HTTP requests per update. Each response's HTML release must
-match its embedded client mapping. Post-GC heap growth after warm-up must stay below
-8 MiB in this small fixture; instance/binding counts and idle request counters must
-remain stable. This threshold catches the reproduced renderer retention leak, not
-all possible business memory leaks. Metrics include RSS and active resource counts.
-
-The test uses compiled production output and Modern's `createProdServer`; it does
-not install or configure an external process supervisor or a CDN. Retaining old
-public assets and selecting service-specific limits remain deployment contracts.
-See the R6 section of `VALIDATION.md` before treating a package combination as
-accepted. R0 observations above are historical, not current acceptance results.
-
-### Verify published packages
-
-For release acceptance, install packages into an independent directory without
-workspace links. The accepted combination is:
-
-```json
-{
-  "private": true,
-  "packageManager": "pnpm@10.28.0",
-  "dependencies": {
-    "@module-federation/modern-js-v3": "0.0.0-feat-mf-ssr-clear-cache-20260914081229",
-    "@modern-js/app-tools": "0.0.0-canary-20260914082926",
-    "@modern-js/runtime": "0.0.0-canary-20260914082926",
-    "@modern-js/prod-server": "0.0.0-canary-20260914082926",
-    "@modern-js/server-core": "0.0.0-canary-20260914082926",
-    "@rspack/core": "npm:@rspack-canary/core@2.2.3-canary-fde17bab-20260911103204",
-    "react": "19.2.8",
-    "react-dom": "19.2.8",
-    "typescript": "5.9.3"
-  },
-  "pnpm": {
-    "overrides": {
-      "@rspack/core": "npm:@rspack-canary/core@2.2.3-canary-fde17bab-20260911103204"
-    }
-  }
-}
-```
-
-Run `pnpm install --registry=https://registry.npmjs.org/` there, then from this
-repository's installed test workspace:
-
-```sh
-NODE_ENV=production SSR_CACHE_PACKAGES_ROOT=/absolute/path/to/installed-packages SSR_CACHE_PRODUCTION_CYCLES=300 node --expose-gc tools/ssr-cache/production.cjs
-SSR_CACHE_PACKAGES_ROOT=/absolute/path/to/installed-packages SSR_CACHE_MODERN_ROOT=/absolute/path/to/modern.js node tools/ssr-cache/published-static.cjs
-```
-
-Published mode resolves the production server, MF adapter, compiler, CLI, runtime
-and React from the independent installation. The production test writes
-`packages.json` beside its metrics, containing exact versions and real paths. The
-local repository supplies only test tooling/Cypress and the compiler-selection
-hook, not the tested implementation.
-
-`published-static.cjs` copies the companion Modern test source unchanged into a
-fresh temporary layout and points all implementation/dependency paths to installed
-packages. It runs readable, numeric/minified, and concatenated/minified artifacts.
-`SSR_CACHE_MODERN_ROOT` supplies only the test source in this command; no Modern
-source or locally built runtime is loaded. The temporary layout includes the
-runtime-tools package's own pnpm dependency context for native Rspack resolution.
-No installed package is rewritten.
+The production and static SSR cache suites now live in
+[`apps/modernjs-ssr/cache-updates`](../../apps/modernjs-ssr/cache-updates/README.md)
+and run through `pnpm run e2e:modern:ssr:cache`. The existing Modern SSR CI job runs
+that suite together with its manifest checks. The R0–R5 probes above remain
+historical diagnostics; they are not the normal E2E entry.

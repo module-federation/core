@@ -155,7 +155,7 @@ Use a trusted direct bypass for liveness so failed publication does not trigger 
 unnecessary process restart. Queue limits and timeouts must be chosen for the
 service's measured capacity; the fixture's limits are test settings.
 
-The reproducible production fixture is `tools/ssr-cache/production.cjs`. It builds
+The reproducible production fixture is `apps/modernjs-ssr/cache-updates/e2e/production.cjs`. It builds
 real Modern host/provider applications, serves their compiled output, checks new
 and delayed old HTML hydration in Chromium, exercises stream/loader/action and
 failure paths, and measures repeated same-process rebuilds after GC. See

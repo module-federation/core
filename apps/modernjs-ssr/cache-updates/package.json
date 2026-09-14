@@ -1,0 +1,21 @@
+{
+  "name": "modernjs-ssr-cache-updates",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "e2e": "node e2e/static.cjs && node --expose-gc e2e/production.cjs",
+    "test:e2e": "pnpm run e2e"
+  },
+  "dependencies": {
+    "@modern-js/app-tools": "0.0.0-canary-20260914082926",
+    "@modern-js/runtime": "0.0.0-canary-20260914082926",
+    "@modern-js/server-core": "0.0.0-canary-20260914082926",
+    "@modern-js/prod-server": "0.0.0-canary-20260914082926",
+    "@module-federation/modern-js-v3": "workspace:*",
+    "@module-federation/runtime-tools": "workspace:*",
+    "@rspack/core": "2.2.3",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "typescript": "5.9.3"
+  }
+}

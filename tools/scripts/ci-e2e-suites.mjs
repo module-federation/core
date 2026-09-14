@@ -31,6 +31,7 @@ export const E2E_SUITE_DEFINITIONS = {
       '@module-federation/modern-js',
       '@module-federation/modern-js-v3',
       'modernjs-ssr-host',
+      'modernjs-ssr-cache-updates',
       'modernjs-ssr-remote',
       'modernjs-ssr-remote-new-version',
       'modernjs-ssr-nested-remote',
@@ -44,6 +45,7 @@ export const E2E_SUITE_DEFINITIONS = {
     inputs: [
       '.github/workflows/e2e-modern-ssr.yml',
       'tools/scripts/run-modern-e2e.mjs',
+      'tools/ssr-cache/local-rspack-hook.cjs',
     ],
   },
   next: {

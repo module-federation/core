@@ -44,5 +44,5 @@ jobs:
       - name: Build shared packages
         run: pnpm run build:packages
 
-      - name: Manifest verification for ModernJS SSR
-        run: node tools/scripts/run-modern-e2e.mjs --mode=manifest
+      - name: ModernJS SSR E2E
+        run: pnpm run e2e:modern:ssr

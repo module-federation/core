@@ -697,3 +697,64 @@ The bounded resource test does not certify arbitrary business side effects or
 infinite uptime; CommonJS application roots and ordinary HTML SSR remain the
 supported scope, with RSC/native ESM excluded. Those are documented boundaries,
 not unclosed defects in this package combination.
+
+## E2E ownership and CI integration — 2026-09-14
+
+The production acceptance scenarios are end-to-end tests. Keeping their executable
+entry under `tools/ssr-cache` without normal E2E integration was incomplete. They
+now belong to the private `modernjs-ssr-cache-updates` application under
+`apps/modernjs-ssr/cache-updates/e2e`. Historical command paths above describe the
+runs actually performed; use the application's README for current commands.
+
+The Cypress hydration spec is a checked-in `release.cy.cjs`, and the native static
+artifact test is checked in as `static.test.cjs`. Neither normal E2E nor published
+acceptance requires another Modern source checkout. Normal runs use workspace MF
+code with fixed Modern canary dependencies; published runs accept an independent
+installation through `SSR_CACHE_PACKAGES_ROOT`. The production fixture retains
+mixed-consumption/full-application mode, while the separate three-mode native
+suite verifies selective updates and independent-entry traffic.
+
+`pnpm run e2e:modern:ssr:cache` runs all new scenarios. The existing
+`pnpm run e2e:modern:ssr` preserves manifest and legacy-cache checks, then runs this
+new suite. The GitHub Modern SSR workflow now calls that same root command, as the
+local CI parity runner already does. Affected-suite detection includes the new
+private application and the shared compiler-selection hook.
+
+Commands executed:
+
+```sh
+corepack enable
+pnpm install --lockfile-only --ignore-scripts
+pnpm install --frozen-lockfile
+pnpm exec turbo run build --filter=@module-federation/modern-js-v3
+pnpm run e2e:modern:ssr:cache
+pnpm run e2e:modern:ssr
+SSR_CACHE_PACKAGES_ROOT=/private/tmp/mf-ssr-published-20260914 pnpm run e2e:modern:ssr:cache
+node --test tools/scripts/ci-is-affected.test.mjs
+pnpm exec prettier --check .
+node --check apps/modernjs-ssr/cache-updates/e2e/production.cjs
+node --check apps/modernjs-ssr/cache-updates/e2e/production-fixture.cjs
+node --check apps/modernjs-ssr/cache-updates/e2e/static.cjs
+node --check apps/modernjs-ssr/cache-updates/e2e/static.test.cjs
+node --check apps/modernjs-ssr/cache-updates/e2e/release.cy.cjs
+git diff --check
+```
+
+Results: 20 dependency/package builds pass; the complete root E2E command exits 0
+with both legacy Cypress specs passing, three static modes passing and the new
+hydration/production suite passing. The published-package mode also passes.
+Each new E2E run includes 70 updates/560 requests and the existing lifecycle/fault
+matrix. All 19 affected-routing checks and whole-repository formatting pass.
+Existing dev TypeScript diagnostics and non-TTY Chrome messages appeared during
+the legacy run but did not fail either spec or the command; they are not silently
+reported as fixed. A transient attempt to require selective mode for the mixed
+production fixture was reverted; that fixture intentionally tests full rebuilding,
+and selective behavior is asserted by the native static E2E suite.
+
+The pnpm-generated lockfile includes the new Modern preview dependency graph and
+its peer-resolution changes. It was verified by frozen installation and the full
+Modern SSR E2E run. No publishable implementation changes or changeset are required.
+The aggregate `ci:local` wrapper was not run in this worktree; its exact E2E command
+was used. Unrelated Metro/Next/router suites, external supervisor/CDN deployment
+checks and the already-completed 300-cycle acceptance were not repeated for this
+E2E ownership migration. No packages were published.

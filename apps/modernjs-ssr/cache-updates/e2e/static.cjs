@@ -2,12 +2,8 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 const { createRequire } = require('node:module');
 const { spawnSync } = require('node:child_process');
-const installed = process.env.SSR_CACHE_PACKAGES_ROOT;
-const modernSource = process.env.SSR_CACHE_MODERN_ROOT;
-if (!installed || !modernSource)
-  throw new Error(
-    'Set SSR_CACHE_PACKAGES_ROOT and SSR_CACHE_MODERN_ROOT; the latter supplies only the test source',
-  );
+const installed =
+  process.env.SSR_CACHE_PACKAGES_ROOT || path.resolve(__dirname, '..');
 const r = createRequire(path.join(installed, 'package.json'));
 function packageRoot(entry) {
   let dir = path.dirname(entry);
@@ -44,10 +40,7 @@ function packageRoot(entry) {
   ])
     await fs.symlink(from, to);
   await fs.copyFile(
-    path.join(
-      modernSource,
-      'packages/server/core/tests/application.static-mf.test.cjs',
-    ),
+    path.join(__dirname, 'static.test.cjs'),
     path.join(modern, 'tests/application.static-mf.test.cjs'),
   );
   console.log(
