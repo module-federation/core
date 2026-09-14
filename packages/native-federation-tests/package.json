@@ -92,7 +92,7 @@
     "axios": "1.18.0",
     "rambda": "^9.2.1",
     "tsdown": "0.20.3",
-    "unplugin": "^1.10.1"
+    "unplugin": "^3.3.0"
   },
   "devDependencies": {
     "@rstest/core": "^0.10.6",
