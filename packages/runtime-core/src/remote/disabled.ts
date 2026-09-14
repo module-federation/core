@@ -24,6 +24,10 @@ export class DisabledRemoteHandler {
     throw new Error(REMOTE_DISABLED_MESSAGE);
   }
 
+  updateRemotes(): never {
+    throw new Error(REMOTE_DISABLED_MESSAGE);
+  }
+
   registerRemotes(): never {
     throw new Error(REMOTE_DISABLED_MESSAGE);
   }

@@ -9,6 +9,7 @@ import {
   preloadRemote,
   registerPlugins,
   registerRemotes,
+  updateRemotes,
 } from '@module-federation/runtime';
 import { observability } from './observability';
 
@@ -349,7 +350,7 @@ export default function ObservabilityDemo() {
       setErrorMessage('');
       setRemoteComponent(null);
 
-      registerRemotes([scenario.remote], { force: true });
+      await updateRemotes([scenario.remote]);
 
       try {
         await loadRemote(scenario.request);
@@ -399,16 +400,13 @@ export default function ObservabilityDemo() {
     setRemoteComponent(null);
 
     registerPlugins([observabilityRetryRecoveryPlugin]);
-    registerRemotes(
-      [
-        {
-          name: retryRecoveryRemoteName,
-          alias: 'observability-retry-recovered',
-          entry: retryRecoveryManifestEntry,
-        },
-      ],
-      { force: true },
-    );
+    await updateRemotes([
+      {
+        name: retryRecoveryRemoteName,
+        alias: 'observability-retry-recovered',
+        entry: retryRecoveryManifestEntry,
+      },
+    ]);
 
     try {
       const remoteModule = await loadRemote(retryRecoveryRequest);

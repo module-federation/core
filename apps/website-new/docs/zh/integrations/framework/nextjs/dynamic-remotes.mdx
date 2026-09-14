@@ -1,19 +1,12 @@
 # 动态远程模块
 
 ```js
-import { loadRemote, createInstance } from '@module-federation/runtime';
-// if i have remotes in my federation plugin, i can pass the name of the remote
-loadRemote('home/exposedModule')
-// if i want to load a custom remote not known at build time.
-const mf = createInstance({
-  name: 'hostname',
-  remotes: [
-    {
-      name: 'home',
-      entry: 'http://somthing.com/remoteEntry.js'
-    }
-  ],
-  force: true // may be needed to sideload remotes after the fact.
-})
-mf.loadRemote('home/exposedModule')
+import { loadRemote, updateRemotes } from '@module-federation/runtime';
+
+// The build plugin initializes the host instance. Add or replace a remote,
+// then wait for its previous cache cleanup before loading the new entry.
+await updateRemotes([
+  { name: 'home', entry: 'http://example.com/remoteEntry.js' },
+]);
+await loadRemote('home/exposedModule');
 ```

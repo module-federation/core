@@ -299,16 +299,32 @@ interface RemoteWithVersion {
 
 </Collapse>
 
-:::warning
+`registerRemotes` adiciona apenas novos remotes. Repetir uma configuração
+idêntica não altera o estado. Configurações conflitantes e `force: true`
+geram um erro; use `await updateRemotes(...)` para substituir um remote.
 
-Quando `force: true` é definir, o newly registered módulos vai overwrite já-registered e carregado módulos, e o cache do carregado módulos vai ser automatically deleted. Uma aviso vai também ser printed para o console para inform você esse este operation é risky.
+## updateRemotes
 
-:::
+```typescript
+function updateRemotes(remotes: Remote[]): Promise<void>;
+```
+
+A lista adiciona nomes novos e substitui nomes existentes; remotes omitidos
+permanecem registrados. O lote inteiro é validado antes da limpeza. Atualizações
+são serializadas por instância MF e rejeitam a Promise em caso de falha.
+Trate o erro antes de tentar novamente. Um lote não é uma transação e não
+desfaz alterações que já ocorreram.
+
+Aguarde a conclusão antes de carregar o remote atualizado. O runtime genérico
+não drena requisições HTTP, reinicia renderizadores ou desfaz efeitos colaterais.
+No Modern SSR, use o adaptador de atualização do proprietário da aplicação
+para coordenar requisições, invalidação, reconstrução e publicação.
+Não aguarde uma atualização aninhada em um hook de atualização.
 
 <Tabs>
   <Tab label="Build Plugin (Use build plugin)">
   ```tsx
-  import { registerRemotes } from '@module-federation/enhanced/runtime';
+  import { registerRemotes, updateRemotes } from '@module-federation/enhanced/runtime';
 
   // register new remote sub2
   registerRemotes([
@@ -319,12 +335,12 @@ Quando `force: true` é definir, o newly registered módulos vai overwrite já-r
   ]);
 
   // override remote sub1
-  registerRemotes([
+  await updateRemotes([
     {
       name: 'sub1',
       entry: 'http://localhost:2003/mf-manifest.json',
     }
-  ], { force: true });
+  ]);
   ```
   </Tab>
   <Tab label="Pure Runtime (Not use build plugin)">
@@ -350,12 +366,12 @@ Quando `force: true` é definir, o newly registered módulos vai overwrite já-r
   ]);
 
   // override remote sub1
-  mf.registerRemotes([
+  await mf.updateRemotes([
     {
       name: 'sub1',
       entry: 'http://localhost:2003/mf-manifest.json',
     }
-  ], { force: true });
+  ]);
   ```
   </Tab>
 </Tabs>

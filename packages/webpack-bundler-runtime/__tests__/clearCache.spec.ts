@@ -1,3 +1,4 @@
+import { ModuleFederation } from '@module-federation/runtime';
 import {
   clearCache,
   createClearCacheRuntimePlugin,
@@ -642,16 +643,21 @@ describe('cache adapter ownership and removal coordination', () => {
   });
 });
 
-test('force registration updates every attached bundler once and leaves detached mappings alone', async () => {
-  const { instance, webpackRequire: first } = createWebpackRequire();
+test('explicit update updates every attached bundler once and leaves detached mappings alone', async () => {
+  const { webpackRequire: first } = createWebpackRequire();
   const { webpackRequire: second } = createWebpackRequire();
-  second.federation.instance = instance;
   const remote = {
     name: 'remoteA',
     entry: 'https://example.test/old.js',
     type: 'global',
   };
-  instance.options.remotes.push(remote as never);
+  const instance = new ModuleFederation({
+    name: 'multi-bundler-update',
+    remotes: [remote],
+    plugins: [createClearCacheRuntimePlugin()],
+  });
+  first.federation.instance = instance as any;
+  second.federation.instance = instance as any;
   for (const binding of [first, second]) {
     (
       binding.federation.bundlerRuntimeOptions.remotes.remoteInfos as any
@@ -661,9 +667,7 @@ test('force registration updates every attached bundler once and leaves detached
   const disposeSecond = installClearCache({ webpackRequire: second as any })!;
   try {
     const entry = 'https://example.test/new.js';
-    await (instance.registerRemotes as any)([{ ...remote, entry }], {
-      force: true,
-    });
+    await instance.updateRemotes([{ ...remote, entry }]);
     expect(instance.options.remotes).toHaveLength(1);
     for (const binding of [first, second])
       expect(
@@ -672,10 +676,7 @@ test('force registration updates every attached bundler once and leaves detached
       ).toBe(entry);
     disposeFirst();
     const finalEntry = 'https://example.test/final.js';
-    await (instance.registerRemotes as any)(
-      [{ ...remote, entry: finalEntry }],
-      { force: true },
-    );
+    await instance.updateRemotes([{ ...remote, entry: finalEntry }]);
     expect(
       (first.federation.bundlerRuntimeOptions.remotes.remoteInfos as any)
         .remoteA[0].entry,

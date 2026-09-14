@@ -277,7 +277,10 @@ export class RemoteHandler {
     const userRemotes = userOptions.remotes || [];
 
     return userRemotes.reduce((res, remote) => {
-      this.registerRemote(remote, res, { force: false });
+      // Rebuilt bundlers may repeat their original bootstrap configuration.
+      // The persistent runtime registration remains authoritative.
+      if (!res.some((item) => item.name === remote.name))
+        this.registerRemote(remote, res);
       return res;
     }, globalOptions.remotes);
   }
@@ -571,13 +574,115 @@ export class RemoteHandler {
     }
   }
 
-  registerRemotes(remotes: Remote[], options?: { force?: boolean }): void {
-    const { host } = this;
-    remotes.forEach((remote) => {
-      this.registerRemote(remote, host.options.remotes, {
-        force: options?.force,
-      });
+  private updateQueue: Promise<void> = Promise.resolve();
+
+  private prepareRemotes(remotes: Remote[], replacing = false): Remote[] {
+    assert(Array.isArray(remotes), 'Remotes must be an array');
+    const names = new Set<string>();
+    const prepared = remotes.map((remote) => {
+      assert(
+        remote && typeof remote.name === 'string' && remote.name.length > 0,
+        'Remote name is required',
+      );
+      assert(!names.has(remote.name), `Duplicate remote: ${remote.name}`);
+      names.add(remote.name);
+      const result = { ...remote };
+      if (Array.isArray(remote.shareScope))
+        result.shareScope = [...remote.shareScope];
+      if ('entry' in result) {
+        assert(
+          typeof result.entry === 'string' && result.entry.length > 0,
+          'Remote entry is required',
+        );
+        if (
+          isBrowserEnvValue &&
+          typeof window !== 'undefined' &&
+          !result.entry.startsWith('http')
+        )
+          result.entry = new URL(result.entry, window.location.origin).href;
+      } else
+        assert(
+          'version' in result &&
+            typeof result.version === 'string' &&
+            result.version.length > 0,
+          'Remote entry or version is required',
+        );
+      result.shareScope ||= DEFAULT_SCOPE;
+      result.type ||= DEFAULT_REMOTE_TYPE;
+      return result;
     });
+    const existing = this.host.options.remotes;
+    const final = replacing
+      ? existing.filter((remote) => !names.has(remote.name))
+      : [...existing];
+    for (const remote of prepared) {
+      const previous = final.find((item) => item.name === remote.name);
+      if (previous) {
+        const signature = (value: Remote) =>
+          JSON.stringify(
+            Object.entries(value)
+              .filter(([, v]) => v !== undefined)
+              .sort(([a], [b]) => a.localeCompare(b)),
+          );
+        assert(
+          signature(previous) === signature(remote),
+          `Remote "${remote.name}" is already registered with different options; use updateRemotes`,
+        );
+        continue;
+      }
+      final.push(remote);
+    }
+    for (const remote of final)
+      if (remote.alias) {
+        assert(
+          typeof remote.alias === 'string',
+          'Remote alias must be a string',
+        );
+        assert(
+          !final.some(
+            (other) =>
+              other !== remote &&
+              (other.name.startsWith(remote.alias!) ||
+                other.alias?.startsWith(remote.alias!)),
+          ),
+          `Remote alias conflicts with another registration: ${remote.alias}`,
+        );
+      }
+    return prepared;
+  }
+
+  registerRemotes(remotes: Remote[], options?: { force?: boolean }): void {
+    assert(
+      !options?.force,
+      'registerRemotes force is no longer supported; await updateRemotes instead',
+    );
+    for (const remote of this.prepareRemotes(remotes)) {
+      if (!this.host.options.remotes.some((item) => item.name === remote.name))
+        this.registerRemote(remote, this.host.options.remotes);
+    }
+  }
+
+  updateRemotes(remotes: Remote[]): Promise<void> {
+    let captured: Remote[];
+    try {
+      // Capture caller-owned values immediately; validate again when the queue runs.
+      captured = this.prepareRemotes(remotes, true);
+    } catch (error) {
+      return Promise.reject(error);
+    }
+    const operation = this.updateQueue.then(async () => {
+      const prepared = this.prepareRemotes(captured, true);
+      for (const remote of prepared) {
+        const previous = this.host.options.remotes.find(
+          (item) => item.name === remote.name,
+        );
+        if (previous) await this.removeRemote(previous);
+      }
+      for (const remote of prepared)
+        this.registerRemote(remote, this.host.options.remotes);
+    });
+    this.updateQueue = operation.catch(() => {});
+    return operation;
   }
 
   initRawContainer(
@@ -699,11 +804,7 @@ export class RemoteHandler {
     };
   }
 
-  registerRemote(
-    remote: Remote,
-    targetRemotes: Remote[],
-    options?: { force?: boolean },
-  ): void {
+  registerRemote(remote: Remote, targetRemotes: Remote[]): void {
     const { host } = this;
     const normalizeRemote = () => {
       if (remote.alias) {
@@ -749,19 +850,6 @@ export class RemoteHandler {
       normalizeRemote();
       targetRemotes.push(remote);
       this.hooks.lifecycle.registerRemote.emit({ remote, origin: host });
-    } else {
-      const messages = [
-        `The remote "${remote.name}" is already registered.`,
-        'Please note that overriding it may cause unexpected errors.',
-      ];
-      if (options?.force) {
-        // remove registered remote
-        void this.removeRemote(registeredRemote);
-        normalizeRemote();
-        targetRemotes.push(remote);
-        this.hooks.lifecycle.registerRemote.emit({ remote, origin: host });
-        warn(messages.join(' '));
-      }
     }
   }
 

@@ -9,7 +9,7 @@ afterEach(() => {
   (globalThis as any)[key] = previous;
 });
 function fixture() {
-  const state = { dynamic: false };
+  const state = { dynamic: false, context: new AsyncLocalStorage() };
   const runtime = {
     federation: { instance: { [stateKey]: state } },
     remotesLoadingData: {
@@ -99,6 +99,171 @@ describe('SSR static scope proof', () => {
 });
 
 describe('SSR replacement recovery', () => {
+  it('publishes a batch once and includes a previously failed target in whole-application recovery', async () => {
+    const { adapter, runtime } = fixture();
+    const instance = runtime.federation.instance as any;
+    instance.options = { remotes: [{ name: 'remote', entry: 'v1' }] };
+    let fail = true;
+    const batches: any[][] = [];
+    instance.updateRemotes = async (remotes: any[]) => {
+      batches.push(remotes);
+      instance.options.remotes = [];
+      if (fail) throw new Error('partial mutation');
+      instance.options.remotes = remotes;
+    };
+    let publications = 0;
+    const application = {
+      status: { phase: 'serving' },
+      async update(
+        invalidate: (entries?: readonly string[]) => Promise<void>,
+        scope?: () => readonly string[] | undefined,
+      ) {
+        const entries = scope?.();
+        try {
+          await invalidate(
+            this.status.phase === 'unavailable' ? undefined : entries,
+          );
+        } catch (error) {
+          this.status.phase = 'unavailable';
+          throw error;
+        }
+        this.status.phase = 'serving';
+        return ++publications;
+      },
+    };
+    await expect(
+      adapter.update(application, 'remote', { entry: 'v2' }, { revision: 1 }),
+    ).rejects.toThrow('SSR remote replacement failed');
+    expect(adapter.status(application)).toMatchObject({
+      mutationStarted: true,
+      application: { phase: 'unavailable' },
+    });
+    fail = false;
+    const result = await adapter.updateRemotes(
+      application,
+      [
+        { name: 'new-a', entry: 'a' },
+        { name: 'new-b', entry: 'b' },
+      ],
+      { revision: 2 },
+    );
+    expect(result).toMatchObject({
+      mode: 'application',
+      reasons: ['failed-update-recovery'],
+      generation: 1,
+    });
+    expect(batches[1].map(({ name, entry }) => [name, entry])).toEqual([
+      ['remote', 'v2'],
+      ['new-a', 'a'],
+      ['new-b', 'b'],
+    ]);
+    expect(publications).toBe(1);
+  });
+
+  it('deduplicates pending and applied revisions and rejects stale or conflicting messages', async () => {
+    const { adapter, runtime } = fixture();
+    const instance = runtime.federation.instance as any;
+    instance.options = { remotes: [{ name: 'remote', entry: 'v1' }] };
+    instance.updateRemotes = async (remotes: any[]) => {
+      instance.options.remotes = remotes;
+    };
+    instance[stateKey].context = new AsyncLocalStorage();
+    let release!: () => void;
+    const barrier = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    let publications = 0;
+    const application = {
+      async update(
+        invalidate: (entries?: readonly string[]) => Promise<void>,
+        scope?: () => readonly string[] | undefined,
+      ) {
+        const entries = scope?.();
+        await barrier;
+        await invalidate(entries);
+        return ++publications;
+      },
+    };
+    const first = adapter.update(
+      application,
+      'remote',
+      { entry: 'v2' },
+      { revision: 2 },
+    );
+    expect(
+      adapter.update(application, 'remote', { entry: 'v2' }, { revision: 2 }),
+    ).toBe(first);
+    expect(adapter.status(application)).toMatchObject({
+      phase: 'pending',
+      revision: 2,
+    });
+    await expect(
+      adapter.update(application, 'remote', { entry: 'v1' }, { revision: 1 }),
+    ).rejects.toThrow('Stale');
+    await expect(
+      adapter.update(
+        application,
+        'remote',
+        { entry: 'other' },
+        { revision: 2 },
+      ),
+    ).rejects.toThrow('different replacement');
+    release();
+    expect(await first).toMatchObject({ generation: 1, revision: 2 });
+    await adapter.update(
+      application,
+      'remote',
+      { entry: 'v2' },
+      { revision: 2 },
+    );
+    expect(publications).toBe(1);
+    expect(adapter.status(application)).toMatchObject({
+      phase: 'applied',
+      appliedRevision: 2,
+    });
+    await adapter.update(
+      application,
+      'remote',
+      { entry: 'v1' },
+      { revision: 3 },
+    );
+    expect(publications).toBe(2);
+    expect(instance.options.remotes[0].entry).toBe('v1');
+  });
+
+  it('keeps appliedRevision unchanged on failure and retries the same revision explicitly', async () => {
+    const { adapter } = fixture();
+    let fail = true;
+    let attempts = 0;
+    const application = {
+      async update() {
+        attempts++;
+        if (fail) throw new Error('load failed');
+        return 1;
+      },
+    };
+    await expect(
+      adapter.update(application, 'remote', { entry: 'v2' }, { revision: 7 }),
+    ).rejects.toThrow('load failed');
+    expect(adapter.status(application)).toMatchObject({
+      revision: 7,
+      phase: 'failed',
+      appliedRevision: undefined,
+    });
+    fail = false;
+    await adapter.update(
+      application,
+      'remote',
+      { entry: 'v2' },
+      { revision: 7 },
+    );
+    expect(attempts).toBe(2);
+    expect(adapter.status(application)).toMatchObject({
+      appliedRevision: 7,
+      phase: 'applied',
+    });
+  });
+
   it('remembers each instance registration when a replacement fails after removal', async () => {
     const { runtime, adapter } = fixture();
     let fail = true;
@@ -107,7 +272,8 @@ describe('SSR replacement recovery', () => {
       removeRemote() {
         this.options.remotes = [];
       },
-      registerRemotes(remotes: any[]) {
+      async updateRemotes(remotes: any[]) {
+        this.removeRemote();
         if (fail) {
           fail = false;
           throw new Error('registration failed');
@@ -157,9 +323,9 @@ describe('SSR replacement recovery', () => {
           },
         },
         'unknown',
-        { entry: 'v2' },
+        { entry: '' },
       ),
-    ).rejects.toThrow('Remote is not registered');
+    ).rejects.toThrow('replacement entries are required');
     expect(mutated).toBe(false);
   });
 });

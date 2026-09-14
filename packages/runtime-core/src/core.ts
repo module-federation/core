@@ -464,8 +464,16 @@ export class ModuleFederation {
   registerPlugins(plugins: UserOptions['plugins']) {
     this.options.plugins = registerPlugins(plugins, this);
   }
-  registerRemotes(remotes: Remote[], options?: { force?: boolean }): void {
+  registerRemotes(
+    remotes: Remote[],
+    options?: { /** @deprecated Use updateRemotes. */ force?: boolean },
+  ): void {
     return this.remoteHandler.registerRemotes(remotes, options);
+  }
+
+  /** Caller coordinates application work; updates are serialized per instance. */
+  updateRemotes(remotes: Remote[]): Promise<void> {
+    return this.remoteHandler.updateRemotes(remotes);
   }
 
   removeRemote(remote: Remote | string): Promise<void> {

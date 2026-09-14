@@ -1,6 +1,6 @@
 import {
   loadRemote,
-  registerRemotes,
+  updateRemotes,
   removeRemote,
 } from '@module-federation/modern-js-v3/runtime';
 import { mkdirSync } from 'node:fs';
@@ -127,7 +127,7 @@ export const runSharedProviderProbe = async ({
     } catch {
       // Reset the state for a fresh SSR request sequence.
     }
-    registerRemotes(remoteEntries, { force: true });
+    await updateRemotes(remoteEntries);
     const consumer = (await loadRemote(
       `${consumerName}/SharedConsumer`,
     )) as SharedModule;
