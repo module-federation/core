@@ -154,6 +154,7 @@ export function getSharedIdentity(
 function getSharedModuleName(name: string, identifier?: string): string {
   const identity = getSharedIdentity(
     identifier?.includes(' [identity:') ||
+      identifier?.startsWith('consume-shared-module|') ||
       identifier?.startsWith('consume shared module ')
       ? identifier
       : name,
