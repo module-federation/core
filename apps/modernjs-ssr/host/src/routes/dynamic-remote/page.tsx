@@ -3,6 +3,7 @@ import {
   getInstance,
   loadRemote,
   registerRemotes,
+  updateRemotes,
 } from '@module-federation/modern-js-v3/runtime';
 
 type LazyRemoteModule = { default: React.ComponentType<any> };
@@ -33,17 +34,14 @@ const NewRemoteCom = React.lazy(() =>
 );
 const Index = (): JSX.Element => {
   const [showComponent, setShowComponent] = useState(false);
-  const replaceRemote = () => {
+  const replaceRemote = async () => {
     console.log('replaceRemote click');
-    registerRemotes(
-      [
-        {
-          name: 'dynamic_remote',
-          entry: 'http://localhost:3056/mf-manifest.json',
-        },
-      ],
-      { force: true },
-    );
+    await updateRemotes([
+      {
+        name: 'dynamic_remote',
+        entry: 'http://localhost:3056/mf-manifest.json',
+      },
+    ]);
 
     setShowComponent(true);
   };

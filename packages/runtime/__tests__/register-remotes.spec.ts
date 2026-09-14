@@ -48,14 +48,16 @@ describe('ModuleFederation', () => {
         },
       ],
     });
-    FM.registerRemotes([
-      {
-        name: '@register-remotes/app1',
-        // Entry is different from the registered remote
-        entry:
-          'http://localhost:1111/resources/register-remotes/app1/federation-remote-entry2.js',
-      },
-    ]);
+    expect(() =>
+      FM.registerRemotes([
+        {
+          name: '@register-remotes/app1',
+          // Entry is different from the registered remote
+          entry:
+            'http://localhost:1111/resources/register-remotes/app1/federation-remote-entry2.js',
+        },
+      ]),
+    ).toThrow('use updateRemotes');
 
     const app1Module = await FM.loadRemote<Promise<() => string>>(
       '@register-remotes/app1/say',
@@ -64,7 +66,7 @@ describe('ModuleFederation', () => {
     const app1Res = await app1Module();
     expect(app1Res).toBe('hello app1 entry1');
   });
-  it('merges loaded remote by setting "force: true"', async () => {
+  it('updates loaded remote explicitly', async () => {
     const FM = new ModuleFederation({
       name: '@federation/instance',
       version: '1.0.1',
@@ -83,17 +85,14 @@ describe('ModuleFederation', () => {
     const app1Res = await app1Module();
     expect(app1Res).toBe('hello app1 entry1');
 
-    FM.registerRemotes(
-      [
-        {
-          name: '@register-remotes/app1',
-          // Entry is different from the registered remote
-          entry:
-            'http://localhost:1111/resources/register-remotes/app1/federation-remote-entry2.js',
-        },
-      ],
-      { force: true },
-    );
+    await FM.updateRemotes([
+      {
+        name: '@register-remotes/app1',
+        // Entry is different from the registered remote
+        entry:
+          'http://localhost:1111/resources/register-remotes/app1/federation-remote-entry2.js',
+      },
+    ]);
     const newApp1Module = await FM.loadRemote<Promise<() => string>>(
       '@register-remotes/app1/say',
     );

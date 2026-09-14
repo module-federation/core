@@ -299,16 +299,34 @@ interface RemoteWithVersion {
 
 </Collapse>
 
-:::warning
+`registerRemotes` only adds new remotes. Registering an identical configuration
+again is a no-op. Conflicting configurations and `force: true` throw an error;
+use `await updateRemotes(...)` to replace an existing remote.
 
-When `force: true` is set, the newly registered modules will overwrite already-registered and loaded modules, and the cache of the loaded modules will be automatically deleted. A warning will also be printed to the console to inform you that this operation is risky.
+## updateRemotes
 
-:::
+```typescript
+function updateRemotes(remotes: Remote[]): Promise<void>;
+```
+
+The list is an upsert: unknown names are added, existing names are replaced,
+and unspecified remotes are preserved. The complete batch is validated before
+cleanup. Updates are serialized per MF instance and reject if cleanup or
+registration fails. Retry explicitly after handling the failure; a batch is not
+a transaction and does not roll back mutations that already happened.
+
+Await completion before loading the updated remote. The generic runtime does
+not drain HTTP requests, reset framework renderers, or undo business side effects.
+For Modern SSR, use the application owner's SSR update adapter so request
+admission, entry invalidation or application rebuilding, and publication are
+coordinated together. Do not await a nested update from an update lifecycle hook.
+
+
 
 <Tabs>
   <Tab label="Build Plugin (Use build plugin)">
   ```tsx
-  import { registerRemotes } from '@module-federation/enhanced/runtime';
+  import { registerRemotes, updateRemotes } from '@module-federation/enhanced/runtime';
 
   // register new remote sub2
   registerRemotes([
@@ -319,12 +337,12 @@ When `force: true` is set, the newly registered modules will overwrite already-r
   ]);
 
   // override remote sub1
-  registerRemotes([
+  await updateRemotes([
     {
       name: 'sub1',
       entry: 'http://localhost:2003/mf-manifest.json',
     }
-  ], { force: true });
+  ]);
   ```
   </Tab>
   <Tab label="Pure Runtime (Not use build plugin)">
@@ -350,12 +368,12 @@ When `force: true` is set, the newly registered modules will overwrite already-r
   ]);
 
   // override remote sub1
-  mf.registerRemotes([
+  await mf.updateRemotes([
     {
       name: 'sub1',
       entry: 'http://localhost:2003/mf-manifest.json',
     }
-  ], { force: true });
+  ]);
   ```
   </Tab>
 </Tabs>

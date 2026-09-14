@@ -1162,30 +1162,6 @@ export const clearCache = (
   return clearRemoteTarget(target, options.webpackRequire);
 };
 
-const normalizeRemote = (remote: RuntimeRemote): RuntimeRemote => ({
-  ...remote,
-  shareScope: remote.shareScope || 'default',
-  type: remote.type || 'global',
-});
-
-const captureRemoteRegistrationSnapshot = (instance: any) => {
-  const remotes = toList<RuntimeRemote>(instance.options?.remotes).map(
-    (remote) => ({
-      ...remote,
-    }),
-  );
-  return {
-    restore() {
-      instance.options.remotes.splice(0, instance.options.remotes.length);
-      instance.options.remotes.push(
-        ...remotes.map((remote) => ({
-          ...remote,
-        })),
-      );
-    },
-  };
-};
-
 const createBundlerRemoteInfo = (remote: RuntimeRemote) => {
   const shareScope = Array.isArray(remote.shareScope)
     ? remote.shareScope[0]
@@ -1196,32 +1172,6 @@ const createBundlerRemoteInfo = (remote: RuntimeRemote) => {
     alias: remote.alias || remote.name,
     externalType: 'script',
     shareScope: shareScope || 'default',
-  };
-};
-
-const captureBundlerRemoteInfoSnapshot = (
-  webpackRequire: WebpackRequire,
-  target: ClearCacheTarget,
-) => {
-  const remotesOptions =
-    webpackRequire.federation.bundlerRuntimeOptions.remotes!;
-  const idToRemoteMap = remotesOptions.idToRemoteMap ?? {};
-  const remoteInfos = remotesOptions.remoteInfos ?? {};
-  const idToRemoteMapEntries = target.remoteModuleIds.map((remoteModuleId) => ({
-    key: remoteModuleId,
-    had: Object.prototype.hasOwnProperty.call(idToRemoteMap, remoteModuleId),
-    value: idToRemoteMap[remoteModuleId],
-  }));
-  const remoteInfoEntry = {
-    key: target.remoteKey,
-    had: Object.prototype.hasOwnProperty.call(remoteInfos, target.remoteKey),
-    value: remoteInfos[target.remoteKey],
-  };
-  return {
-    restore() {
-      restoreEntries(idToRemoteMap as any, idToRemoteMapEntries);
-      restoreEntries(remoteInfos as any, [remoteInfoEntry]);
-    },
   };
 };
 
@@ -1238,81 +1188,6 @@ const updateBundlerRemoteInfo = (
   }
   remotesOptions.remoteInfos ||= {};
   remotesOptions.remoteInfos[target.remoteKey] = [remoteInfo];
-};
-
-const replaceRemoteRegistration = (instance: any, remote: RuntimeRemote) => {
-  const normalizedRemote = normalizeRemote(remote);
-  const targetRemotes = instance.options.remotes;
-  const hooks = instance.remoteHandler?.hooks?.lifecycle;
-  hooks?.beforeRegisterRemote?.emit({
-    remote: normalizedRemote,
-    origin: instance,
-  });
-  const index = targetRemotes.findIndex(
-    (item: RuntimeRemote) => item.name === normalizedRemote.name,
-  );
-  if (index === -1) {
-    targetRemotes.push(normalizedRemote);
-  } else {
-    targetRemotes.splice(index, 1, normalizedRemote);
-  }
-  hooks?.registerRemote?.emit({
-    remote: normalizedRemote,
-    origin: instance,
-  });
-  return normalizedRemote;
-};
-
-const registerRemotesWithForce = (
-  bindings: WebpackRequire[],
-  instance: any,
-  remotes: RuntimeRemote[],
-) => {
-  const remoteList = toList(remotes);
-  const registrationSnapshot = captureRemoteRegistrationSnapshot(instance);
-  const bundlerSnapshots: Array<{ restore: () => void }> = [];
-  const clearTargets: Array<{
-    target: ClearCacheTarget;
-    binding: WebpackRequire;
-  }> = [];
-  try {
-    for (const remote of remoteList) {
-      const targets = bindings.map((binding) => ({
-        binding,
-        target: getClearTarget({ name: remote.name, webpackRequire: binding }),
-      }));
-      const normalizedRemote = replaceRemoteRegistration(instance, remote);
-      for (const { binding, target } of targets) {
-        bundlerSnapshots.push(
-          captureBundlerRemoteInfoSnapshot(binding, target),
-        );
-        updateBundlerRemoteInfo(binding, target, normalizedRemote);
-        clearTargets.push({ binding, target });
-      }
-    }
-  } catch (error) {
-    for (let i = bundlerSnapshots.length - 1; i >= 0; i--) {
-      bundlerSnapshots[i].restore();
-    }
-    registrationSnapshot.restore();
-    return Promise.reject(error);
-  }
-  return Promise.allSettled(
-    clearTargets.map(({ target, binding }) =>
-      clearRemoteTarget(target, binding),
-    ),
-  )
-    .then((results) => {
-      const failure = results.find((result) => result.status === 'rejected');
-      if (failure?.status === 'rejected') throw failure.reason;
-    })
-    .catch((error) => {
-      for (let i = bundlerSnapshots.length - 1; i >= 0; i--) {
-        bundlerSnapshots[i].restore();
-      }
-      registrationSnapshot.restore();
-      throw error;
-    });
 };
 
 type CacheAdapters = {
@@ -1382,28 +1257,6 @@ const createAdapters = (instance: any): CacheAdapters => {
               return original.call(this, id, options);
             };
             return waits.length ? Promise.all(waits).then(load) : load();
-          },
-      ),
-    );
-  }
-  if (typeof instance.registerRemotes === 'function') {
-    restorers.push(
-      wrapMethod(
-        instance,
-        'registerRemotes',
-        (original) =>
-          function (
-            this: any,
-            remotes: RuntimeRemote[],
-            options?: { force?: boolean },
-          ) {
-            if (!options?.force || bindings.size === 0)
-              return original.call(this, remotes, options);
-            return registerRemotesWithForce(
-              Array.from(bindings),
-              instance,
-              remotes,
-            );
           },
       ),
     );
@@ -1516,6 +1369,31 @@ const reportRemoveRemoteClearCacheError = (error: unknown) => {
 // This plugin may outlive many application generations. Never capture a bundler.
 export const createClearCacheRuntimePlugin = () => ({
   name: 'bundler-runtime-clear-cache-plugin',
+  registerRemote({
+    remote,
+    origin,
+  }: {
+    remote: RuntimeRemote;
+    origin: object;
+  }) {
+    for (const binding of getAdapters(origin)?.bindings || []) {
+      const keys = getRemoteKeysForRequest(
+        binding,
+        remote.alias || remote.name,
+      );
+      for (const key of keys.length ? keys : [remote.alias || remote.name]) {
+        updateBundlerRemoteInfo(
+          binding,
+          getClearTarget({
+            name: remote.name,
+            remoteKey: key,
+            webpackRequire: binding,
+          }),
+          remote,
+        );
+      }
+    }
+  },
   async removeRemote({
     remote,
     origin,

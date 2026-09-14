@@ -49,14 +49,16 @@ describe('ModuleFederation', () => {
         },
       ],
     });
-    FM.registerRemotes([
-      {
-        name: '@register-remotes/app1',
-        // Entry is different from the registered remote
-        entry:
-          'http://localhost:1111/resources/register-remotes/app1/federation-remote-entry2.js',
-      },
-    ]);
+    expect(() =>
+      FM.registerRemotes([
+        {
+          name: '@register-remotes/app1',
+          // Entry is different from the registered remote
+          entry:
+            'http://localhost:1111/resources/register-remotes/app1/federation-remote-entry2.js',
+        },
+      ]),
+    ).toThrow('use updateRemotes');
 
     const app1Module = await FM.loadRemote<Promise<() => string>>(
       '@register-remotes/app1/say',
@@ -65,7 +67,7 @@ describe('ModuleFederation', () => {
     const app1Res = await app1Module();
     expect(app1Res).toBe('hello app1 entry1');
   });
-  it('merges loaded remote by setting "force: true"', async () => {
+  it('updates a loaded remote through the async API', async () => {
     const FM = new ModuleFederation({
       name: '@federation/instance',
       version: '1.0.1',
@@ -84,17 +86,14 @@ describe('ModuleFederation', () => {
     const app1Res = await app1Module();
     expect(app1Res).toBe('hello app1 entry1');
 
-    FM.registerRemotes(
-      [
-        {
-          name: '@register-remotes/app1',
-          // Entry is different from the registered remote
-          entry:
-            'http://localhost:1111/resources/register-remotes/app1/federation-remote-entry2.js',
-        },
-      ],
-      { force: true },
-    );
+    await FM.updateRemotes([
+      {
+        name: '@register-remotes/app1',
+        // Entry is different from the registered remote
+        entry:
+          'http://localhost:1111/resources/register-remotes/app1/federation-remote-entry2.js',
+      },
+    ]);
     const newApp1Module = await FM.loadRemote<Promise<() => string>>(
       '@register-remotes/app1/say',
     );
@@ -103,7 +102,7 @@ describe('ModuleFederation', () => {
     // Value is different from the registered remote
     expect(newApp1Res).toBe('hello app1 entry2');
   });
-  it('reloads manifest snapshots when a manifest remote is force registered with the same entry', async () => {
+  it('reloads manifest snapshots when a manifest remote is explicitly updated with the same entry', async () => {
     const manifestUrl =
       'http://localhost:1111/resources/register-remotes/manifest/federation-manifest.json';
     const manifests = [
@@ -193,15 +192,12 @@ describe('ModuleFederation', () => {
     assert(appModule);
     expect(await appModule()).toBe('hello world "@snapshot/remote1"');
 
-    FM.registerRemotes(
-      [
-        {
-          name: '@register-remotes/manifest',
-          entry: manifestUrl,
-        },
-      ],
-      { force: true },
-    );
+    await FM.updateRemotes([
+      {
+        name: '@register-remotes/manifest',
+        entry: manifestUrl,
+      },
+    ]);
 
     const nextAppModule = await FM.loadRemote<Promise<() => string>>(
       '@register-remotes/manifest/say',
@@ -211,7 +207,7 @@ describe('ModuleFederation', () => {
     expect(manifestFetch).toHaveBeenCalledTimes(2);
   });
 
-  it('emits removeRemote hook before force registering an existing remote', () => {
+  it('emits removeRemote hook before updating an existing remote', async () => {
     const removeRemote = rs.fn();
     const FM = new ModuleFederation({
       name: '@federation/instance',
@@ -231,16 +227,13 @@ describe('ModuleFederation', () => {
       ],
     });
 
-    FM.registerRemotes(
-      [
-        {
-          name: '@register-remotes/app1',
-          entry:
-            'http://localhost:1111/resources/register-remotes/app1/federation-remote-entry2.js',
-        },
-      ],
-      { force: true },
-    );
+    await FM.updateRemotes([
+      {
+        name: '@register-remotes/app1',
+        entry:
+          'http://localhost:1111/resources/register-remotes/app1/federation-remote-entry2.js',
+      },
+    ]);
 
     expect(removeRemote).toHaveBeenCalledWith({
       remote: expect.objectContaining({ name: '@register-remotes/app1' }),

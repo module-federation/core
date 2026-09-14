@@ -37,3 +37,25 @@ it('authorizes registration by async context rather than a process-wide flag', a
   });
   expect(register).toHaveBeenCalledTimes(1);
 });
+
+it('rejects an external asynchronous update while another owner is active', async () => {
+  const update = rs.fn(async () => {});
+  const instance = {
+    loadRemote: rs.fn(),
+    registerRemotes: rs.fn(),
+    updateRemotes: update,
+  } as any;
+  plugin().apply!(instance);
+  const state = instance[ownershipKey];
+  const token = {};
+  state.owner = token;
+  await expect(instance.updateRemotes([])).rejects.toThrow(
+    'outside the active SSR update owner',
+  );
+  expect(update).not.toHaveBeenCalled();
+  await state.context.run(token, async () => {
+    await Promise.resolve();
+    await instance.updateRemotes([]);
+  });
+  expect(update).toHaveBeenCalledTimes(1);
+});

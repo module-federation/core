@@ -39,6 +39,17 @@ export default function ssrOwnership(): ModuleFederationRuntimePlugin {
         }
         return register.apply(this, args);
       };
+      const update = instance.updateRemotes;
+      host.updateRemotes = function (...args: Parameters<typeof update>) {
+        if (!state.owner || state.context.getStore() !== state.owner) {
+          state.dynamic = true;
+          if (state.owner)
+            return Promise.reject(
+              new Error('Remote update outside the active SSR update owner'),
+            );
+        }
+        return update.apply(this, args);
+      };
       const remove = instance.removeRemote;
       host.removeRemote = function (...args: Parameters<typeof remove>) {
         if (!state.owner || state.context.getStore() !== state.owner) {

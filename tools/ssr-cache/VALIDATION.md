@@ -437,3 +437,68 @@ checks pass. No new changeset: root development dependencies and documentation
 only, with no publishable package source behavior change. Full Cypress/browser,
 workspace test and sustained-load matrices were not rerun for this preview pin;
 R6 acceptance remains open. RSC remains excluded. No package publication occurs.
+
+## R5 explicit update API and revisions (2026-09-14)
+
+Core base `4f9c26058` (#5072), Modern base `27ec9d9c50` (#8866), both on the
+`feat/mf-ssr-clear-cache` integration line. Published Rspack remains
+`2.2.3-canary-fde17bab-20260911103204`; no local compiler override.
+
+Commands run from the isolated MF worktree:
+
+```sh
+pnpm exec turbo run build --filter=@module-federation/modern-js-v3
+pnpm --filter @module-federation/runtime-core test
+pnpm --filter @module-federation/runtime test
+pnpm --filter @module-federation/webpack-bundler-runtime test
+pnpm --filter @module-federation/modern-js-v3 test
+pnpm exec turbo run test --filter=@module-federation/runtime-core --filter=@module-federation/runtime --filter=@module-federation/webpack-bundler-runtime --filter=@module-federation/modern-js-v3 --force
+SSR_CACHE_STRICT=1 SSR_CACHE_EXPECT_NATIVE=1 SSR_CACHE_MODERN_ENTRY=/private/tmp/modern-r4-static-update/packages/server/core/dist/cjs/adapters/node/index.js node --test tools/ssr-cache/baseline.test.cjs
+pnpm run e2e:node
+pnpm run e2e:runtime
+pnpm run e2e:modern:ssr
+pnpm exec prettier --check .
+git diff --check
+python3 .codex/skills/changeset-pr/scripts/run_changeset_status.py --verbose
+```
+
+Final results: all 20 build tasks; runtime-core 147, runtime 94, bundler 128,
+Modern adapter 35 tests passed. The forced Turbo run passed all 24 build/test
+tasks; the subsequently added ownership test passed in the final Modern suite.
+Strict native artifacts passed 23 tests. Node E2E passed 1 test, runtime browser
+E2E passed 26, Modern SSR cache/retained-shared browser E2E passed both tests.
+Prettier and whitespace checks passed. Changesets parsed the breaking migration;
+the fixed release group expands the resulting plan to 3.0.0.
+
+Modern companion regression commands, from its isolated worktree:
+
+```sh
+pnpm exec biome format --write packages/server/core/tests/application.static-mf.test.cjs
+pnpm exec biome check packages/server/core/tests/application.static-mf.test.cjs
+SSR_STATIC_OPTIMIZE=1 SSR_CACHE_MF_ROOT=/private/tmp/mf-r4-static-update node --test packages/server/core/tests/application.static-mf.test.cjs
+SSR_STATIC_NUMERIC=1 SSR_CACHE_MF_ROOT=/private/tmp/mf-r4-static-update node --test packages/server/core/tests/application.static-mf.test.cjs
+SSR_CACHE_MF_ROOT=/private/tmp/mf-r4-static-update node --test packages/server/core/tests/application.static-mf.test.cjs
+NODE_ENV=production SSR_CACHE_RSPACK_ENTRY=/private/tmp/mf-r4-static-update/node_modules/@rspack/core/dist/index.js SSR_CACHE_MF_ROOT=/private/tmp/mf-r4-static-update node --test packages/server/core/tests/application.mf.test.cjs
+NODE_ENV=production node --test packages/server/core/tests/application.http.test.cjs
+```
+
+Three static artifact variants passed (1 each), production MF passed 1, production
+HTTP passed 3. The static fixture now checks pending/applied revision deduplication,
+stale message rejection, and a batch containing a replacement and an unknown
+remote, with exactly one new application generation. The existing held-producer,
+page/loader, unaffected request/cache/identity, and stable server address assertions
+remain active. Modern changes are tests only; no server behavior or changeset.
+
+Initial failures were test expectations using relative URLs in jsdom and conflating
+resource generations with revisions; both expectations were corrected. Rstest
+initially hit sandbox EPERM on its loopback listener and passed with test network
+permissions. Existing Modern package export-condition/type warnings and the E2E
+nested-remote DTS generation warning remain non-fatal; they are not new failures.
+
+Worktree rules require direct Turbo/package scripts instead of the aggregate
+ci:local wrapper. The matching E2E job scripts above were run. Unrelated workspace,
+Metro, Next and builder matrices were not run because they are outside this change.
+Full Modern framework/hydration combinations and sustained load/heap stabilization,
+including production capacity/timeout/health policy tuning, remain R6 acceptance;
+the passing browser cache fixtures do not close that stage. RSC/native ESM
+application roots remain excluded. No package publish or merge commands were run.

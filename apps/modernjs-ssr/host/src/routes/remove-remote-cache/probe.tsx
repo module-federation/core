@@ -1,6 +1,7 @@
 import {
   loadRemote,
   registerRemotes,
+  updateRemotes,
   removeRemote,
 } from '@module-federation/modern-js-v3/runtime';
 import { mkdirSync } from 'node:fs';
@@ -481,16 +482,13 @@ const collectDelayedGcSnapshots = async (delayedGcSeconds: number[]) => {
   return snapshots;
 };
 
-const registerRemoteV1 = () => {
-  registerRemotes(
-    [
-      {
-        name: 'remote',
-        entry: remoteV1Entry,
-      },
-    ],
-    { force: true },
-  );
+const registerRemoteV1 = async () => {
+  await updateRemotes([
+    {
+      name: 'remote',
+      entry: remoteV1Entry,
+    },
+  ]);
 };
 
 const registerRemoteV2 = () => {
@@ -508,7 +506,7 @@ export const runLoadRemoteStep = async (): Promise<ProbeResult> => {
   } catch {
     // This route is the first step and should be repeatable after prior runs.
   }
-  registerRemoteV1();
+  await registerRemoteV1();
 
   const heavyStats = await loadHeavyStats();
   const gcAvailable = forceGc();
@@ -583,7 +581,7 @@ export const runProbe = async ({
     } catch {
       // Reset state so the first request can be repeated locally.
     }
-    registerRemoteV1();
+    await registerRemoteV1();
 
     forceGc();
     const beforeLoad = snapshot('before load');

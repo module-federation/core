@@ -299,16 +299,29 @@ interface RemoteWithVersion {
 
 </Collapse>
 
-:::warning
+`registerRemotes` 只新增 remote。重复注册相同配置不会产生修改；配置冲突或传入
+`force: true` 会报错。更新已有 remote 请使用 `await updateRemotes(...)`。
 
-设置 `force: true` 后，新注册的模块会覆盖已经注册且加载的模块，并且自动删除已经加载过的模块缓存。此时在控制台会输出警告，告知操作存在风险性。
+## updateRemotes
 
-:::
+```typescript
+function updateRemotes(remotes: Remote[]): Promise<void>;
+```
+
+列表按名称新增或替换 remote，未列出的 remote 保持不变。开始清理前会校验整批配置。
+同一 MF 实例中的更新串行执行，清理或注册失败时 Promise 会拒绝，需要处理失败后显式重试。
+批量更新不是事务，不会自动回滚已经发生的修改。
+
+加载新 remote 前必须等待更新完成。通用 runtime 不负责排空 HTTP 请求、重建框架渲染器或撤销业务副作用。
+Modern SSR 应使用应用 owner 的 SSR 更新适配器，统一协调请求准入、入口失效或应用重建和发布。
+不要在更新生命周期钩子中等待嵌套的更新调用。
+
+
 
 <Tabs>
   <Tab label="Build Plugin（使用构建插件）">
   ```tsx
-  import { registerRemotes } from '@module-federation/enhanced/runtime';
+  import { registerRemotes, updateRemotes } from '@module-federation/enhanced/runtime';
 
   // 增加新的 remote sub2
   registerRemotes([
@@ -319,12 +332,12 @@ interface RemoteWithVersion {
   ]);
 
   // 覆盖之前的 remote sub1
-  registerRemotes([
+  await updateRemotes([
     {
       name: 'sub1',
       entry: 'http://localhost:2003/mf-manifest.json',
     }
-  ], { force: true });
+  ]);
   ```
   </Tab>
   <Tab label="Pure Runtime（未使用构建插件）">
@@ -350,12 +363,12 @@ interface RemoteWithVersion {
   ]);
 
   // 覆盖之前的 remote sub1
-  mf.registerRemotes([
+  await mf.updateRemotes([
     {
       name: 'sub1',
       entry: 'http://localhost:2003/mf-manifest.json',
     }
-  ], { force: true });
+  ]);
   ```
   </Tab>
 </Tabs>

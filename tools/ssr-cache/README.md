@@ -234,10 +234,10 @@ A symbol-keyed registry on each MF instance coordinates every attached bundler,
 including adapters installed by separate bundled copies. The removal plugin
 captures no bundler and dispatches to that instance's live bindings. It starts
 all cleanups and waits for all outcomes before propagating a failure. Removal of
-one binding does not detach another owner. The temporary force-registration path
-also updates all live mappings; its API replacement remains a later task.
+one binding does not detach another owner. Explicit `updateRemotes` awaits removal
+and uses the registration hook to update every live bundler mapping.
 
-Instance load/register wrappers and the createScript listener are installed once
+The instance load wrapper and the createScript listener are installed once
 per registry. The last detach restores exact original methods/descriptors and
 removes its listener. A subsequently installed third-party wrapper is preserved;
 an old empty registry remains a pass-through if such a wrapper still references
@@ -383,3 +383,61 @@ Modern can retain shared App, runtime-hook, route and loader objects at entry
 scope. R4 must connect compiler evidence, request scope and resource replacement
 before claiming selective-update acceptance. See `VALIDATION.md` for the repair's
 red/green regression evidence.
+
+## R5: explicit updates and publication revisions
+
+`registerRemotes` is synchronous and new-only. Repeating an identical normalized
+configuration is a no-op. A conflicting configuration or `force: true` throws a
+migration error. `await instance.updateRemotes(remotes)` (also exported by the
+runtime facade) validates and captures the batch, serializes updates per instance,
+awaits cleanup, and registers replacements. The list is an upsert; omitted names
+are retained. Bootstrap attachment preserves the persistent registration and does
+not replay stale addresses embedded in rebuilt bundles.
+
+Use one persistent adapter per Modern application, outside disposable entry
+modules. It coordinates requests through the existing Modern application queue:
+
+```ts
+await adapter.updateRemotes(
+  application,
+  [
+    { name: 'remoteA', entry: 'https://example.test/a/mf-manifest.json' },
+    { name: 'remoteB', entry: 'https://example.test/b/mf-manifest.json' },
+  ],
+  { revision: 42 },
+);
+const status = adapter.status(application);
+```
+
+The existing `adapter.update(application, name, replacement, { revision })`
+convenience API follows the same queue and revision contract. Entry replacements
+preserve each registered remote's name/alias and remaining options. New names
+trigger whole-application rebuilding. A batch unions proven entry scopes; any
+unproven target requires whole-application rebuilding.
+
+A revision is a positive safe integer ordered within this application/worker,
+not a provider version or a Modern resource generation. Successful and pending
+replays of the latest revision share its Promise. A different payload for that
+revision rejects; an older revision rejects. Intentional rollback uses a higher
+revision pointing to the earlier entry. Without an explicit revision, calls get
+arrival-order revisions and cannot deduplicate external message delivery.
+
+`appliedRevision` advances only after Modern publication succeeds. Results contain
+`operationId`, `revision`, `appliedRevision`, mode, scope, fallback reasons and
+resource generation. Status includes pending/applied/failed, mutation start,
+original error through `cause`, and the Modern coordinator's serving/draining/
+updating/unavailable state. Rejected operation errors carry their own operation
+metadata, even when another revision has already been submitted.
+
+There is one attempt per call, with no automatic retry loop. Replaying the latest
+failed revision retries explicitly. Post-mutation failures remain unavailable;
+recovery rebuilds the whole application and includes retained target registrations
+from earlier failed operations, even when the next batch names different remotes.
+Pre-admission validation failures leave serving resources alone. A batch does not
+promise rollback of plugin or business side effects. Update lifecycle hooks must
+not await a nested update on the same instance. Generic runtime callers coordinate
+their own application work; the generic API is not an HTTP request barrier.
+
+Revisions and retained targets live in this worker's persistent adapter. A process
+restart requires the control plane to supply its current desired configuration;
+this is not durable configuration storage or cross-worker synchronization.
