@@ -44,7 +44,7 @@ const t = {
             ],
           },
           name: { type: 'string' },
-          layer: { type: 'string' },
+          layer: { type: 'string', minLength: 1 },
         },
         required: ['import'],
       },
@@ -661,10 +661,14 @@ function i(
             } else f = !0;
             if (f)
               if (void 0 !== e.layer) {
-                const t = l;
-                if ('string' != typeof e.layer)
-                  return ((i.errors = [{ params: { type: 'string' } }]), !1);
-                f = t === l;
+                let t = e.layer;
+                const r = l;
+                if (l === r) {
+                  if ('string' != typeof t)
+                    return ((i.errors = [{ params: { type: 'string' } }]), !1);
+                  if (t.length < 1) return ((i.errors = [{ params: {} }]), !1);
+                }
+                f = r === l;
               } else f = !0;
           }
         }
