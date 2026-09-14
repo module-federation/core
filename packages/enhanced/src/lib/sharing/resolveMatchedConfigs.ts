@@ -74,14 +74,17 @@ export async function resolveMatchedConfigs<T extends ConsumeOptions>(
                 );
                 return resolve();
               }
-              resolved.set(result as string, config);
+              resolved.set(
+                createCompositeKey(result as string, config),
+                config,
+              );
               resolve();
             },
           );
         });
       } else if (ABSOLUTE_PATH_REGEX.test(resolveRequest)) {
         // absolute path
-        resolved.set(resolveRequest, config);
+        resolved.set(createCompositeKey(resolveRequest, config), config);
         return undefined;
       } else if (resolveRequest.endsWith('/')) {
         // module request prefix

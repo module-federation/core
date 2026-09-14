@@ -675,7 +675,7 @@ class ConsumeSharedPlugin {
         );
         normalModuleFactory.hooks.createModule.tapPromise(
           PLUGIN_NAME,
-          ({ resource }, { context, dependencies }) => {
+          ({ resource }, { context, dependencies, contextInfo }) => {
             // BIND `this` for createConsumeSharedModule call
             const boundCreateConsumeSharedModule =
               this.createConsumeSharedModule.bind(this);
@@ -686,7 +686,13 @@ class ConsumeSharedPlugin {
               return Promise.resolve();
             }
             if (resource) {
-              const options = resolvedConsumes.get(resource);
+              const options =
+                resolvedConsumes.get(
+                  createLookupKeyForSharing(resource, contextInfo.issuerLayer),
+                ) ||
+                resolvedConsumes.get(
+                  createLookupKeyForSharing(resource, undefined),
+                );
               if (options !== undefined) {
                 // Use the bound function
                 return boundCreateConsumeSharedModule(
