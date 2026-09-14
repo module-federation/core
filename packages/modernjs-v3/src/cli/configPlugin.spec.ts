@@ -3,8 +3,27 @@ import {
   moduleFederationConfigPlugin,
   patchMFConfig,
   setDefaultOptimizationTarget,
+  preserveSSRRenderer,
 } from './configPlugin';
 import logger from '../logger';
+
+it('keeps the SSR renderer and React singletons across application rebuilds', () => {
+  const config = {
+    shared: { react: { requiredVersion: '^19' }, other: { singleton: false } },
+  };
+  preserveSSRRenderer(config);
+  expect(config.shared).toEqual({
+    react: { requiredVersion: '^19', singleton: true },
+    'react-dom': { singleton: true },
+    'react-dom/server': { singleton: true },
+    other: { singleton: false },
+  });
+  expect(() =>
+    preserveSSRRenderer({
+      shared: { 'react-dom/server': { singleton: false } },
+    }),
+  ).toThrow('requires singleton');
+});
 
 const mfConfig = {
   name: 'host',

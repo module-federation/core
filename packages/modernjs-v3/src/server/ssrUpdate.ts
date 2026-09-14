@@ -1,3 +1,9 @@
+import {
+  clientRemote,
+  releaseScript,
+  type SSRClientRemote,
+} from '../ssr-runtime/release';
+
 /** This protocol is owned by the Modern adapter, not the generic MF runtime. */
 export interface SSREntryRecord {
   application: string;
@@ -25,8 +31,17 @@ export function createSSRUpdateAdapter(options: {
   name: string;
   entries: string[];
   staticOnly?: boolean;
+  /** Immutable public entries paired with the initial server release. */
+  hydration?: { remotes: SSRClientRemote[] };
 }) {
   options = { ...options, entries: [...options.entries] };
+  const clientTargets = new Map(
+    options.hydration?.remotes.map((value) => {
+      const remote = clientRemote(value);
+      return [remote.name, remote] as const;
+    }),
+  );
+  let targetRevision = 0;
   const registry = () =>
     (globalThis as any)[Symbol.for('modern-js.mf.ssr.entries')] as
       | Map<string, SSREntryRecord>
@@ -50,6 +65,26 @@ export function createSSRUpdateAdapter(options: {
       (instance) => instance[Symbol.for('modern-js.mf.ssr.consumption')],
     );
   const registrations = new WeakMap<object, Map<string, any>>();
+  const canonicalName = (name: string) => {
+    for (const instance of instances()) {
+      const remote =
+        instance.options.remotes.find(
+          (item: any) => item.name === name || item.alias === name,
+        ) ||
+        [...(registrations.get(instance)?.values() || [])].find(
+          (item: any) => item.name === name || item.alias === name,
+        );
+      if (remote) return remote.name as string;
+    }
+    return name;
+  };
+  const canonicalClientTargets = () =>
+    new Map(
+      [...clientTargets.values()].map((remote) => {
+        const name = canonicalName(remote.name);
+        return [name, { ...remote, name }] as const;
+      }),
+    );
   const plan = (remote: string): SSRUpdatePlan => {
     const all = records();
     const reasons = new Set<string>();
@@ -121,7 +156,12 @@ export function createSSRUpdateAdapter(options: {
       return { mode: 'application', reasons: ['unknown-runtime-owner'] };
     return { mode: 'entries', entries: [...owners].sort(), reasons: [] };
   };
-  type Replacement = { entry: string; type?: string; entryGlobalName?: string };
+  type Replacement = {
+    entry: string;
+    type?: string;
+    entryGlobalName?: string;
+    client?: Omit<SSRClientRemote, 'name'>;
+  };
   type Change = { name: string; replacement: Replacement };
   async function performUpdate(
     application: {
@@ -133,6 +173,7 @@ export function createSSRUpdateAdapter(options: {
     },
     changes: Change[],
     onMutation: () => void,
+    onStage: (stage: string) => void,
   ) {
     let selected: SSRUpdatePlan = { mode: 'application', reasons: [] };
     let recovering = false;
@@ -142,6 +183,7 @@ export function createSSRUpdateAdapter(options: {
       const execute = () =>
         application.update(
           async (entries) => {
+            onStage('clear');
             if (!entries && selected.mode === 'entries') recovering = true;
             if (recovering)
               selected = {
@@ -166,9 +208,10 @@ export function createSSRUpdateAdapter(options: {
                   }
                   const previous = registered ||
                     remembered.get(name) || { name };
+                  const { client: _client, ...serverReplacement } = replacement;
                   const target = {
                     ...previous,
-                    ...replacement,
+                    ...serverReplacement,
                     name: previous.name,
                     alias: previous.alias,
                   };
@@ -204,8 +247,10 @@ export function createSSRUpdateAdapter(options: {
                 failures.map((result) => result.reason),
                 'SSR remote replacement failed',
               );
+            onStage('rebuild');
           },
           () => {
+            onStage('analyze');
             const hosts = instances();
             if (!hosts.length)
               throw new Error('Missing MF application instance');
@@ -251,6 +296,7 @@ export function createSSRUpdateAdapter(options: {
                 state.selective = selected.mode === 'entries';
                 ownedStates.add(state);
               }
+            onStage('drain');
             return selected.entries;
           },
         );
@@ -275,6 +321,7 @@ export function createSSRUpdateAdapter(options: {
     revision: number;
     appliedRevision: number;
     operationId: string;
+    timingsMs: Record<string, number>;
   };
   const updates = new WeakMap<
     Application,
@@ -283,6 +330,8 @@ export function createSSRUpdateAdapter(options: {
       fingerprint: string;
       operationId: string;
       mutationStarted: boolean;
+      stage: string;
+      timingsMs: Record<string, number>;
       phase: 'pending' | 'applied' | 'failed';
       appliedRevision?: number;
       promise: Promise<Result>;
@@ -317,9 +366,20 @@ export function createSSRUpdateAdapter(options: {
           'Unique remote names and replacement entries are required',
         ),
       );
+    if (options.hydration) {
+      try {
+        for (const { name, replacement } of changes)
+          clientRemote({ ...replacement.client, name } as SSRClientRemote);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+    }
     const captured = changes.map(({ name, replacement }) => ({
       name,
-      replacement: { ...replacement },
+      replacement: {
+        ...replacement,
+        ...(replacement.client ? { client: { ...replacement.client } } : {}),
+      },
     }));
     const fingerprint = JSON.stringify(
       captured.map(({ name, replacement }) => [
@@ -346,6 +406,8 @@ export function createSSRUpdateAdapter(options: {
       operationId: `${revision}:${++attempt}`,
       mutationStarted: false,
       phase: 'pending' as 'pending' | 'applied' | 'failed',
+      stage: 'queue',
+      timingsMs: {} as Record<string, number>,
       appliedRevision: previous?.appliedRevision,
       promise: undefined as unknown as Promise<Result>,
       error: undefined as unknown,
@@ -353,10 +415,41 @@ export function createSSRUpdateAdapter(options: {
     // The application queue serializes resource publication. Retain only the
     // latest message; older pending completions may advance appliedRevision.
     updates.set(application, state);
-    state.promise = performUpdate(application, captured, () => {
-      state.mutationStarted = true;
-    }).then(
+    const started = performance.now();
+    let stageStarted = started;
+    const onStage = (stage: string) => {
+      const now = performance.now();
+      state.timingsMs[state.stage] =
+        (state.timingsMs[state.stage] || 0) + now - stageStarted;
+      stageStarted = now;
+      state.stage = stage;
+    };
+    state.promise = performUpdate(
+      application,
+      captured,
+      () => {
+        state.mutationStarted = true;
+        if (options.hydration) {
+          const normalized = canonicalClientTargets();
+          clientTargets.clear();
+          for (const [name, remote] of normalized)
+            clientTargets.set(name, remote);
+          for (const { name, replacement } of captured)
+            clientTargets.set(
+              canonicalName(name),
+              clientRemote({
+                ...replacement.client,
+                name: canonicalName(name),
+              } as SSRClientRemote),
+            );
+          targetRevision = revision;
+        }
+      },
+      onStage,
+    ).then(
       (result) => {
+        onStage('applied');
+        state.timingsMs.total = performance.now() - started;
         state.phase = 'applied';
         const latest = updates.get(application)!;
         latest.appliedRevision = Math.max(
@@ -368,9 +461,13 @@ export function createSSRUpdateAdapter(options: {
           revision,
           appliedRevision: revision,
           operationId: state.operationId,
+          timingsMs: { ...state.timingsMs },
         };
       },
       (error) => {
+        const failedStage = state.stage;
+        onStage('failed');
+        state.timingsMs.total = performance.now() - started;
         state.phase = 'failed';
         const failure = Object.assign(
           new Error(
@@ -382,6 +479,8 @@ export function createSSRUpdateAdapter(options: {
             revision,
             appliedRevision: updates.get(application)?.appliedRevision,
             mutationStarted: state.mutationStarted,
+            failedStage,
+            timingsMs: { ...state.timingsMs },
             application: application.status,
           },
         );
@@ -393,6 +492,27 @@ export function createSSRUpdateAdapter(options: {
   }
   return {
     plan,
+    /** Run in Modern's unpublished resource validation hook, before publication. */
+    prepareResources(resources: { templates: Record<string, string> }) {
+      if (!options.hydration) return;
+      const script = releaseScript(options.name, targetRevision, [
+        ...canonicalClientTargets().values(),
+      ]);
+      resources.templates = Object.fromEntries(
+        Object.entries(resources.templates).map(([key, html]) => {
+          const clean = html.replace(
+            /<script type="application\/json" data-modern-mf-release>[\s\S]*?<\/script>/g,
+            '',
+          );
+          if (!/<head(?:\s[^>]*)?>/i.test(clean))
+            throw new Error('SSR release bootstrap requires an HTML head');
+          return [
+            key,
+            clean.replace(/<head(?:\s[^>]*)?>/i, (head) => head + script),
+          ];
+        }),
+      );
+    },
     status(application: Application) {
       const state = updates.get(application);
       return state
@@ -403,6 +523,8 @@ export function createSSRUpdateAdapter(options: {
             error: state.error,
             operationId: state.operationId,
             mutationStarted: state.mutationStarted,
+            stage: state.stage,
+            timingsMs: { ...state.timingsMs },
             application: application.status,
           }
         : undefined;
