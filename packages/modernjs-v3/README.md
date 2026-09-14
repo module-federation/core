@@ -8,7 +8,7 @@ See [documentation](https://module-federation.io/guide/framework/modernjs.html) 
 
 This requires the companion Modern `server-core` selective application owner and
 Rspack's MF invalidation graph (verified with
-`2.2.3-canary-76e8f696-20260911033013`). Enable `ssr: { cacheUpdates: true }` in
+`2.2.3-canary-fde17bab-20260911103204`). Enable `ssr: { cacheUpdates: true }` in
 this plugin's options to emit entry ownership metadata and install its Node-only
 consumption tracker. Browser behavior is unchanged.
 
@@ -70,10 +70,12 @@ Modern entry share App/runtime hooks and therefore update together.
 With dynamic/mixed consumption (the default when `staticOnly` is omitted), missing
 ownership, or an incomplete native graph, the adapter reports reasons and rebuilds
 the whole application in the same process. The HTTP server and listening port
-remain. Numeric module IDs and minification pass selective artifact tests. **With
-module concatenation, the tested preview can omit a path to an entry root; this
-returns `incomplete-parent-closure` and uses whole-application rebuilding.** R4 does
-not claim fine-grained updates for every optimized graph.
+remain. Numeric module IDs, minification and module concatenation pass selective
+artifact tests with the verified preview. It fixes the missing concatenated
+consumer ancestry in the earlier 76e8f696 preview. An incomplete graph still returns
+`incomplete-parent-closure` and triggers whole-application rebuilding. Code merged
+inside one affected emitted module necessarily executes again with that module;
+unrelated emitted modules remain cached.
 
 `staticOnly` is a contract, not a claim to analyze arbitrary JavaScript. Runtime
 `loadRemote` or out-of-owner registrations/removals permanently invalidate the

@@ -399,3 +399,41 @@ scope. R5's generic API migration is not implemented by this Modern-only adapter
 No workflow or publication behavior changes; no publish commands were run.
 The R4 changeset names only modern-js-v3 (minor); fixed release groups can expand
 the eventual release plan. Earlier #5060 changesets belong to the prerequisite.
+
+
+## Published concatenation fix preview (2026-09-14)
+
+Upgrade root Rspack core/CLI aliases and workspace overrides to
+`2.2.3-canary-fde17bab-20260911103204`; pnpm regenerates the lockfile. MF base:
+`d33266f95`; merged Modern base: `27ec9d9c50` (#8866). No local compiler override
+is used. The installed package version was checked with
+`node -p "require('@rspack/core/package.json').version"`.
+
+Commands from `/private/tmp/mf-r4-static-update`:
+
+```sh
+pnpm install --no-frozen-lockfile
+pnpm install --frozen-lockfile
+pnpm exec turbo run build --filter=@module-federation/modern-js-v3
+pnpm --filter @module-federation/modern-js-v3 test
+SSR_CACHE_STRICT=1 SSR_CACHE_EXPECT_NATIVE=1 SSR_CACHE_MODERN_ENTRY=/private/tmp/modern-r4-static-update/packages/server/core/dist/cjs/adapters/node/index.js node --test tools/ssr-cache/baseline.test.cjs
+pnpm exec prettier --check .
+git diff --check
+```
+
+From `/private/tmp/modern-r4-static-update`, using its merged test:
+
+```sh
+SSR_STATIC_OPTIMIZE=1 SSR_CACHE_MF_ROOT=/private/tmp/mf-r4-static-update node --test packages/server/core/tests/application.static-mf.test.cjs
+SSR_STATIC_NUMERIC=1 SSR_CACHE_MF_ROOT=/private/tmp/mf-r4-static-update node --test packages/server/core/tests/application.static-mf.test.cjs
+SSR_CACHE_MF_ROOT=/private/tmp/mf-r4-static-update node --test packages/server/core/tests/application.static-mf.test.cjs
+```
+
+All 20 build tasks pass, package tests 31/31, native baseline 23/23 and all three
+Modern artifact variants pass. The concatenated production artifact now requires
+actual selective success, including affected page/loader refresh and retained
+unrelated traffic/identity. Frozen installation, full formatting and whitespace
+checks pass. No new changeset: root development dependencies and documentation
+only, with no publishable package source behavior change. Full Cypress/browser,
+workspace test and sustained-load matrices were not rerun for this preview pin;
+R6 acceptance remains open. RSC remains excluded. No package publication occurs.
