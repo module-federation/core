@@ -126,18 +126,3 @@ this environment variable:
 ```text
 SKILLS_PROVIDER_ORIGIN=http://127.0.0.1:43110
 ```
-
-## Limits and trust
-
-The remote modules execute inside the gateway process with its full
-permissions. Module Federation is a code loader, not a sandbox. Only load
-remotes you trust and pin production deployments to an exact build.
-
-An `mf-manifest.json` describes remote code and assets. It does not replace the
-complete per-file digest list required by SEP-2640. Those SHA-256 digests prove
-that the bytes match the skill entry. They do not prove who wrote the skill or
-that its instructions are safe.
-
-This proof does not implement authentication, signatures, live replacement of
-an already loaded remote, or user approval. Those belong around the gateway if
-this moves beyond an experiment.
