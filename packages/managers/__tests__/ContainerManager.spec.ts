@@ -1,6 +1,23 @@
 import { ContainerManager } from '../src/ContainerManager';
 
 describe('ContainerManager', () => {
+  it.each([false, true])(
+    'preserves shorthand import arrays (array form: %s)',
+    (arrayForm) => {
+      const imports = ['./setup.js', './component.js'];
+      const exposes = { './Multi': imports };
+      const manager = new ContainerManager();
+      manager.init({
+        name: 'arrays',
+        exposes: arrayForm ? [exposes] : exposes,
+      });
+      expect(manager.containerPluginExposesOptions['./Multi']).toMatchObject({
+        import: imports,
+      });
+      expect(Object.values(manager.exposeFileNameImportMap)).toEqual([imports]);
+    },
+  );
+
   it('will not use containerPlugin while expose is empty', () => {
     const options = {
       name: '@module-federation/container-managers-test',
