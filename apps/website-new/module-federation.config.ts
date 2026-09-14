@@ -5,12 +5,11 @@ const LANGUAGE = 'LANGUAGE';
 const LANGUAGES = ['zh', 'en'];
 const MF_DOC_PUBLIC_PATH_KEY = '__MF_DOC_PUBLIC_PATH__';
 const PLAYGROUND_REMOTE_NAME = 'mf_playground';
-const isProduction = process.env.NODE_ENV === 'production';
-const PLAYGROUND_REMOTE_ENTRY_URL =
-  process.env.PLAYGROUND_REMOTE_URL ||
-  (isProduction
-    ? 'https://unpkg.com/@module-federation/playground@next/dist/mf/remoteEntry.js'
-    : 'http://localhost:3006/mf-manifest.json');
+const PLAYGROUND_REMOTE_MANIFEST_URL =
+  process.env.NODE_ENV === 'development'
+    ? 'http://localhost:3006/mf-manifest.json'
+    : // : 'https://unpkg.com/@module-federation/playground@latest/dist/mf/mf-manifest.json';
+      'https://unpkg.com/@module-federation/playground@next/dist/mf/mf-manifest.json';
 
 const exposes = {
   // basic
@@ -80,15 +79,9 @@ export default createModuleFederationConfig({
   filename: 'remoteEntry.js',
   name: 'mf_doc',
   shareStrategy: 'loaded-first',
-  experiments: {
-    optimization: {
-      disableSnapshot: isProduction,
-      target: 'web',
-    },
-  },
-  getPublicPath: `return typeof window === 'undefined' ? 'https://module-federation.io/mf-ssg/' : window[${JSON.stringify(MF_DOC_PUBLIC_PATH_KEY)}] || 'https://module-federation.io/';`,
+  getPublicPath: `return typeof window === 'undefined' ? 'https://module-federation.io/mf-ssg/' : 'https://module-federation.io/';`,
   remotes: {
-    [PLAYGROUND_REMOTE_NAME]: `${PLAYGROUND_REMOTE_NAME}@${PLAYGROUND_REMOTE_ENTRY_URL}`,
+    [PLAYGROUND_REMOTE_NAME]: `${PLAYGROUND_REMOTE_NAME}@${PLAYGROUND_REMOTE_MANIFEST_URL}`,
   },
   exposes: Object.entries(exposes).reduce((acc, [key, value]) => {
     LANGUAGES.forEach((lang) => {
