@@ -67,7 +67,6 @@ it.each([
       ? ([
           ['Server', 'server'],
           ['Client', 'client'],
-          ['Empty', ''],
           ['Omitted', undefined],
         ] as const)
       : ([['Omitted', undefined]] as const);
@@ -101,15 +100,11 @@ it.each([
       ] as const) {
         const isHost = role === 'host';
         const shared = Object.fromEntries(
-          (layered ? [undefined, '', 'server', 'client'] : [undefined]).map(
+          (layered ? [undefined, 'server', 'client'] : [undefined]).map(
             (layer) => {
-              const scope = separateScopes
-                ? layer === ''
-                  ? 'empty'
-                  : (layer ?? 'default')
-                : 'default';
+              const scope = separateScopes ? (layer ?? 'default') : 'default';
               return [
-                layer === '' ? 'empty' : (layer ?? 'shared-value'),
+                layer ?? 'shared-value',
                 {
                   request: emitManifest
                     ? './shared.js'
@@ -174,7 +169,7 @@ it.each([
                 name: role,
                 // Declare every scope exchanged at the container boundary.
                 shareScope: separateScopes
-                  ? ['default', 'empty', 'server', 'client']
+                  ? ['default', 'server', 'client']
                   : 'default',
                 filename: 'remoteEntry.js',
                 dts: false,
@@ -261,7 +256,7 @@ it.each([
         );
         for (const artifact of [manifest, stats]) {
           expect(artifact.exposes).toHaveLength(variants.length);
-          expect(artifact.shared).toHaveLength(layered ? 4 : 1);
+          expect(artifact.shared).toHaveLength(layered ? 3 : 1);
           for (const shared of artifact.shared) {
             expect(shared).toMatchObject({
               name: 'shared-value',
@@ -301,15 +296,13 @@ it.each([
               (item) => item.name === 'Client',
             )!.assets.js;
             expect(serverAssets).not.toEqual(clientAssets);
-            for (const layer of ['', 'server', 'client']) {
+            for (const layer of ['server', 'client']) {
               expect(artifact.shared).toEqual(
                 expect.arrayContaining([
                   expect.objectContaining({
                     name: 'shared-value',
                     layer,
-                    ...(separateScopes
-                      ? { shareScope: layer === '' ? 'empty' : layer }
-                      : {}),
+                    ...(separateScopes ? { shareScope: layer } : {}),
                   }),
                 ]),
               );

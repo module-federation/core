@@ -257,7 +257,7 @@ it('preserves native layer metadata when rebuilding a manifest', () => {
         id: 'host:react',
         name: 'react',
         version: '19.0.0',
-        layer: '',
+        layer: 'server',
         shareScope: ['server', 'default'],
         assets: {},
       },
@@ -267,9 +267,9 @@ it('preserves native layer metadata when rebuilding a manifest', () => {
         id: 'host:App',
         name: 'App',
         path: './App',
-        layer: '',
+        layer: 'server',
         requiredShared: [
-          { name: 'react', layer: '', shareScope: ['server', 'default'] },
+          { name: 'react', layer: 'server', shareScope: ['server', 'default'] },
         ],
         assets: {},
       },
@@ -283,11 +283,11 @@ it('preserves native layer metadata when rebuilding a manifest', () => {
     bundler: 'rspack',
   });
   expect(manifest.shared[0]).toMatchObject({
-    layer: '',
+    layer: 'server',
     shareScope: ['server', 'default'],
   });
   expect(manifest.exposes[0]).toMatchObject({
-    layer: '',
+    layer: 'server',
     requiredShared: stats.exposes[0].requiredShared,
   });
 });

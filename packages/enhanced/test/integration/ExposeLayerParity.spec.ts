@@ -54,7 +54,6 @@ it.each([
             name: 'client',
             layer: 'client',
           },
-          './Empty': { import: './source.js', layer: '' },
           './Inherited': { import: './source.js' },
           './String': './source.js',
           './List': ['./side-effect.js', './source.js'],
@@ -135,7 +134,6 @@ it.each([
         const expected = {
           './Server': ruleLayer ?? (pass === 2 ? 'updated' : 'server'),
           './Client': ruleLayer ?? 'client',
-          './Empty': ruleLayer ?? '',
           './Inherited': ruleLayer ?? null,
           './String': ruleLayer ?? null,
           './List': ruleLayer ?? null,
@@ -146,10 +144,10 @@ it.each([
           const factory = await container.get(key);
           const value = factory().default;
           expect(value).toEqual({ layer });
-          if (['./Server', './Client', './Empty', './Inherited'].includes(key))
+          if (['./Server', './Client', './Inherited'].includes(key))
             instances.add(value);
         }
-        expect(instances.size).toBe(ruleLayer ? 1 : 4);
+        expect(instances.size).toBe(ruleLayer ? 1 : 3);
         expect(globalThis.exposeSideEffect).toBe(true);
         delete globalThis.exposeSideEffect;
         if (manifest) {
@@ -158,9 +156,6 @@ it.each([
               await readFile(path.join(output, filename), 'utf8'),
             );
             expect(artifact.exposes).toHaveLength(Object.keys(expected).length);
-            expect(
-              artifact.exposes.find((item: any) => item.name === 'Empty').layer,
-            ).toBe('');
             expect(
               artifact.exposes.find((item: any) => item.name === 'Server')
                 .layer,

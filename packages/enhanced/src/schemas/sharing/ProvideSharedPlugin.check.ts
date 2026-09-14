@@ -22,8 +22,8 @@ const r = {
       requiredVersion: { anyOf: [{ enum: [!1] }, { type: 'string' }] },
       strictVersion: { type: 'boolean' },
       singleton: { type: 'boolean' },
-      layer: { type: 'string' },
-      issuerLayer: { type: 'string' },
+      layer: { type: 'string', minLength: 1 },
+      issuerLayer: { type: 'string', minLength: 1 },
       version: { anyOf: [{ enum: [!1] }, { type: 'string' }] },
       exclude: { $ref: '#/definitions/IncludeExcludeOptions' },
       include: { $ref: '#/definitions/IncludeExcludeOptions' },
@@ -200,23 +200,33 @@ function t(
                     } else f = !0;
                     if (f) {
                       if (void 0 !== s.layer) {
-                        const r = p;
-                        if ('string' != typeof s.layer)
-                          return (
-                            (t.errors = [{ params: { type: 'string' } }]),
-                            !1
-                          );
-                        f = r === p;
-                      } else f = !0;
-                      if (f) {
-                        if (void 0 !== s.issuerLayer) {
-                          const r = p;
-                          if ('string' != typeof s.issuerLayer)
+                        let r = s.layer;
+                        const e = p;
+                        if (p === e) {
+                          if ('string' != typeof r)
                             return (
                               (t.errors = [{ params: { type: 'string' } }]),
                               !1
                             );
-                          f = r === p;
+                          if (r.length < 1)
+                            return ((t.errors = [{ params: {} }]), !1);
+                        }
+                        f = e === p;
+                      } else f = !0;
+                      if (f) {
+                        if (void 0 !== s.issuerLayer) {
+                          let r = s.issuerLayer;
+                          const e = p;
+                          if (p === e) {
+                            if ('string' != typeof r)
+                              return (
+                                (t.errors = [{ params: { type: 'string' } }]),
+                                !1
+                              );
+                            if (r.length < 1)
+                              return ((t.errors = [{ params: {} }]), !1);
+                          }
+                          f = e === p;
                         } else f = !0;
                         if (f) {
                           if (void 0 !== s.version) {

@@ -84,8 +84,7 @@ export default {
           type: 'string',
         },
         layer: {
-          description:
-            'Layer in which to build the exposed module. An empty string is a valid layer.',
+          description: 'Layer in which to build the exposed module.',
           type: 'string',
         },
       },
@@ -470,10 +469,12 @@ export default {
         layer: {
           description: 'Layer in which the shared module should be placed.',
           type: 'string',
+          minLength: 1,
         },
         issuerLayer: {
           description: 'Layer of the issuer.',
           type: 'string',
+          minLength: 1,
         },
         packageName: {
           description:
