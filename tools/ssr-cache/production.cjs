@@ -4,24 +4,57 @@ const path = require('node:path');
 const { once } = require('node:events');
 const mf = path.resolve(__dirname, '../..');
 const modern = process.env.SSR_CACHE_MODERN_ROOT;
-if (!modern || !global.gc)
+const installed = process.env.SSR_CACHE_PACKAGES_ROOT;
+const packageRequire = installed
+  ? require('node:module').createRequire(path.join(installed, 'package.json'))
+  : require;
+if ((!modern && !installed) || !global.gc)
   throw new Error(
-    'Set SSR_CACHE_MODERN_ROOT and run node --expose-gc tools/ssr-cache/production.cjs',
+    'Set SSR_CACHE_MODERN_ROOT or SSR_CACHE_PACKAGES_ROOT and run node --expose-gc tools/ssr-cache/production.cjs',
   );
 const assert = require('node:assert/strict');
 const { spawn } = require('node:child_process');
 let root;
-const { createProdServer } = require(
-  path.join(modern, 'packages/server/prod-server/dist/cjs'),
-);
-const { createSSRUpdateAdapter } = require(
-  path.join(mf, 'packages/modernjs-v3/dist/cjs/server/ssrUpdate.js'),
-);
+const { createProdServer } = installed
+  ? packageRequire('@modern-js/prod-server')
+  : require(path.join(modern, 'packages/server/prod-server/dist/cjs'));
+const { createSSRUpdateAdapter } = installed
+  ? packageRequire('@module-federation/modern-js-v3/server')
+  : require(path.join(mf, 'packages/modernjs-v3/dist/cjs/server/ssrUpdate.js'));
 (async () => {
   root = await fs.mkdtemp(
     path.join(require('node:os').tmpdir(), 'mf-production-'),
   );
   console.log('Production fixture', root);
+  if (installed) {
+    const audit = {};
+    for (const name of [
+      '@module-federation/modern-js-v3',
+      '@modern-js/app-tools',
+      '@modern-js/runtime',
+      '@modern-js/server-core',
+      '@modern-js/prod-server',
+      '@rspack/core',
+      'react',
+      'react-dom',
+    ]) {
+      const directory = await fs.realpath(
+        path.join(installed, 'node_modules', name),
+      );
+      assert.ok(
+        directory.startsWith((await fs.realpath(installed)) + path.sep),
+      );
+      const metadata = JSON.parse(
+        await fs.readFile(path.join(directory, 'package.json')),
+      );
+      audit[name] = { version: metadata.version, directory };
+    }
+    await fs.writeFile(
+      path.join(root, 'packages.json'),
+      JSON.stringify(audit, null, 2),
+    );
+    console.log('Published package audit', audit);
+  }
   const asset = http.createServer(async (req, res) => {
     try {
       const file = path.resolve(
@@ -56,7 +89,7 @@ const { createSSRUpdateAdapter } = require(
         SSR_CACHE_PRODUCTION_DIR: root,
         SSR_CACHE_ASSET_URL: assetURL,
         SSR_CACHE_RSPACK_ENTRY: require('node:fs').realpathSync(
-          require.resolve('@rspack/core'),
+          packageRequire.resolve('@rspack/core'),
         ),
         NODE_OPTIONS: `--require=${path.join(__dirname, 'local-rspack-hook.cjs')}`,
       },

@@ -476,3 +476,53 @@ not install or configure an external process supervisor or a CDN. Retaining old
 public assets and selecting service-specific limits remain deployment contracts.
 See the R6 section of `VALIDATION.md` before treating a package combination as
 accepted. R0 observations above are historical, not current acceptance results.
+
+### Verify published packages
+
+For release acceptance, install packages into an independent directory without
+workspace links. The accepted combination is:
+
+```json
+{
+  "private": true,
+  "packageManager": "pnpm@10.28.0",
+  "dependencies": {
+    "@module-federation/modern-js-v3": "0.0.0-feat-mf-ssr-clear-cache-20260914081229",
+    "@modern-js/app-tools": "0.0.0-canary-20260914082926",
+    "@modern-js/runtime": "0.0.0-canary-20260914082926",
+    "@modern-js/prod-server": "0.0.0-canary-20260914082926",
+    "@modern-js/server-core": "0.0.0-canary-20260914082926",
+    "@rspack/core": "npm:@rspack-canary/core@2.2.3-canary-fde17bab-20260911103204",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "typescript": "5.9.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "@rspack/core": "npm:@rspack-canary/core@2.2.3-canary-fde17bab-20260911103204"
+    }
+  }
+}
+```
+
+Run `pnpm install --registry=https://registry.npmjs.org/` there, then from this
+repository's installed test workspace:
+
+```sh
+NODE_ENV=production SSR_CACHE_PACKAGES_ROOT=/absolute/path/to/installed-packages SSR_CACHE_PRODUCTION_CYCLES=300 node --expose-gc tools/ssr-cache/production.cjs
+SSR_CACHE_PACKAGES_ROOT=/absolute/path/to/installed-packages SSR_CACHE_MODERN_ROOT=/absolute/path/to/modern.js node tools/ssr-cache/published-static.cjs
+```
+
+Published mode resolves the production server, MF adapter, compiler, CLI, runtime
+and React from the independent installation. The production test writes
+`packages.json` beside its metrics, containing exact versions and real paths. The
+local repository supplies only test tooling/Cypress and the compiler-selection
+hook, not the tested implementation.
+
+`published-static.cjs` copies the companion Modern test source unchanged into a
+fresh temporary layout and points all implementation/dependency paths to installed
+packages. It runs readable, numeric/minified, and concatenated/minified artifacts.
+`SSR_CACHE_MODERN_ROOT` supplies only the test source in this command; no Modern
+source or locally built runtime is loaded. The temporary layout includes the
+runtime-tools package's own pnpm dependency context for native Rspack resolution.
+No installed package is rewritten.

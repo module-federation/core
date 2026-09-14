@@ -3,11 +3,29 @@ const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 const mf = path.resolve(__dirname, '../..');
 const root = process.env.SSR_CACHE_PRODUCTION_DIR;
-const deps = path.join(mf, 'apps/modernjs-ssr/host/node_modules');
+const installed = process.env.SSR_CACHE_PACKAGES_ROOT;
+const deps = path.join(
+  installed || path.join(mf, 'apps/modernjs-ssr/host'),
+  'node_modules',
+);
 const modern = process.env.SSR_CACHE_MODERN_ROOT;
+const appTools = installed
+  ? path.join(deps, '@modern-js/app-tools')
+  : path.join(modern || '', 'packages/solutions/app-tools');
+const runtime = installed
+  ? path.join(deps, '@modern-js/runtime')
+  : path.join(modern || '', 'packages/runtime/plugin-runtime');
+const react = installed
+  ? path.join(deps, 'react')
+  : path.join(runtime, 'node_modules/react');
+const reactDOM = installed
+  ? path.join(deps, 'react-dom')
+  : path.join(runtime, 'node_modules/react-dom');
 const assetURL = process.env.SSR_CACHE_ASSET_URL;
-if (!root || !modern || !assetURL)
-  throw new Error('Run production.cjs with SSR_CACHE_MODERN_ROOT');
+if (!root || (!modern && !installed) || !assetURL)
+  throw new Error(
+    'Run production.cjs with SSR_CACHE_MODERN_ROOT or SSR_CACHE_PACKAGES_ROOT',
+  );
 (async () => {
   for (const app of ['remote', 'host']) {
     const dir = path.join(root, app);
@@ -17,19 +35,10 @@ if (!root || !modern || !assetURL)
       await fs.unlink(modules);
     await fs.mkdir(modules, { recursive: true });
     const overrides = {
-      '@modern-js/app-tools': path.join(modern, 'packages/solutions/app-tools'),
-      '@modern-js/runtime': path.join(
-        modern,
-        'packages/runtime/plugin-runtime',
-      ),
-      react: path.join(
-        modern,
-        'packages/runtime/plugin-runtime/node_modules/react',
-      ),
-      'react-dom': path.join(
-        modern,
-        'packages/runtime/plugin-runtime/node_modules/react-dom',
-      ),
+      '@modern-js/app-tools': appTools,
+      '@modern-js/runtime': runtime,
+      react,
+      'react-dom': reactDOM,
     };
     for (const generated of ['.modern-js', '.cache']) {
       const target = path.join(modules, generated);
@@ -59,9 +68,14 @@ if (!root || !modern || !assetURL)
         name: `r6-${app}`,
         private: true,
         dependencies: {
-          react: '19.2.8',
-          'react-dom': '19.2.8',
-          '@modern-js/runtime': '3.9.0',
+          react: JSON.parse(await fs.readFile(path.join(react, 'package.json')))
+            .version,
+          'react-dom': JSON.parse(
+            await fs.readFile(path.join(reactDOM, 'package.json')),
+          ).version,
+          '@modern-js/runtime': JSON.parse(
+            await fs.readFile(path.join(runtime, 'package.json')),
+          ).version,
         },
       }),
     );
@@ -92,7 +106,7 @@ if (!root || !modern || !assetURL)
           };
     await fs.writeFile(
       path.join(dir, 'modern.config.ts'),
-      `import {appTools,defineConfig} from '@modern-js/app-tools'; import {moduleFederationPlugin} from '@module-federation/modern-js-v3'; export default defineConfig({output:{disableTsChecker:true,${app === 'remote' ? `assetPrefix:'${assetURL}/v1/',` : ''}},source:{alias:{react:'${path.join(modern, 'packages/runtime/plugin-runtime/node_modules/react')}', 'react-dom':'${path.join(modern, 'packages/runtime/plugin-runtime/node_modules/react-dom')}'}},server:{ssr:{mode:'stream'}},plugins:[appTools(),moduleFederationPlugin({ssr:{cacheUpdates:true},config:${JSON.stringify(config)}})]});`,
+      `import {appTools,defineConfig} from '@modern-js/app-tools'; import {moduleFederationPlugin} from '@module-federation/modern-js-v3'; export default defineConfig({output:{disableTsChecker:true,${app === 'remote' ? `assetPrefix:'${assetURL}/v1/',` : ''}},source:{alias:{react:${JSON.stringify(react)}, 'react-dom':${JSON.stringify(reactDOM)}}},server:{ssr:{mode:'stream'}},plugins:[appTools(),moduleFederationPlugin({ssr:{cacheUpdates:true},config:${JSON.stringify(config)}})]});`,
     );
     await fs.writeFile(
       path.join(dir, 'src/routes/layout.tsx'),
@@ -116,10 +130,7 @@ if (!root || !modern || !assetURL)
       );
     const result = spawnSync(
       process.execPath,
-      [
-        path.join(modern, 'packages/solutions/app-tools/bin/modern.js'),
-        'build',
-      ],
+      [path.join(appTools, 'bin/modern.js'), 'build'],
       {
         cwd: dir,
         env: {
@@ -144,7 +155,7 @@ if (!root || !modern || !assetURL)
   }
   const result = spawnSync(
     process.execPath,
-    [path.join(modern, 'packages/solutions/app-tools/bin/modern.js'), 'build'],
+    [path.join(appTools, 'bin/modern.js'), 'build'],
     {
       cwd: dir,
       env: { ...process.env, NODE_ENV: 'production' },

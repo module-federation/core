@@ -618,3 +618,82 @@ remain excluded. Arbitrary global side effects are not undone. A final run again
 newly published MF/Modern preview packages, after these changes merge, is still a
 release gate: local-source success is not certification of an unpublished package
 combination. No publish command was run.
+
+## R6 published-package gate closed — 2026-09-14
+
+The user published MF `0.0.0-feat-mf-ssr-clear-cache-20260914081229` and Modern
+`0.0.0-canary-20260914082926` after merging #5075 / Modern #8870. Both package
+families were installed from npm into `/private/tmp/mf-ssr-published-20260914`,
+with no workspace package links. Rspack is pinned through the published
+`npm:@rspack-canary/core@2.2.3-canary-fde17bab-20260911103204` alias, including
+transitive compiler dependencies. React/React DOM 19.2.8 and TypeScript 5.9.3 are
+installed there. The exact installation manifest is in `README.md`.
+
+**The final published combination passes.** The production CLI, renderer/runtime,
+server-core, prod-server, MF adapter and compiler resolve inside the independent
+installation's pnpm store. `packages.json` records their versions and real paths.
+MF's internal package dependencies use the same MF preview version; Modern's
+internal package dependencies use the same Modern preview version. Repository
+sources supply only the harness, Cypress and compiler selection hook. No local
+MF/Modern `dist` implementation is used in these acceptance runs.
+
+The real production build/server run passes browser hydration of current and
+delayed-old HTML; React stream draining; loader/action handling; cancelled active
+producer tracking; cancelled queued waiter removal; queue overflow and admission
+expiry; drain timeout before mutation; request-side update reentry rejection;
+runtime-only remote registration/load; failed publication, liveness/readiness and
+explicit recovery. An action rejected while queued does not execute. Listener PID
+and port remain unchanged.
+
+300 updates with eight concurrent SSR requests each pass (2400 requests after the
+lifecycle checks). Every response's server release matches its public HTML mapping.
+Post-GC heap remains within the regression budget; two MF instances/two host
+bindings remain stable and idle active/pending request counts are zero:
+
+| Cycle | Heap MiB | RSS MiB | Active native resources |
+| --- | --- | --- | --- |
+| 20 | 33.36 | 197.91 | 2 servers, 20 sockets |
+| 100 | 34.64 | 211.67 | 2 servers, 20 sockets |
+| 200 | 34.76 | 226.78 | 2 servers, 18 sockets |
+| 300 | 34.92 | 227.98 | 2 servers, 18 sockets |
+
+All three published static artifact variants pass, including independent-entry
+traffic during selective updates, preserved unrelated modules, revisions, recovery,
+and shared/concatenated ownership. The companion Modern test source is copied
+unchanged; all modules under test are published packages.
+
+Commands run:
+
+```sh
+# In the isolated installation (manifest recorded in README.md):
+pnpm install --no-frozen-lockfile
+# In the MF test worktree:
+NODE_ENV=production SSR_CACHE_PACKAGES_ROOT=/private/tmp/mf-ssr-published-20260914 SSR_CACHE_PRODUCTION_CYCLES=300 node --expose-gc tools/ssr-cache/production.cjs
+SSR_CACHE_PACKAGES_ROOT=/private/tmp/mf-ssr-published-20260914 SSR_CACHE_MODERN_ROOT=/private/tmp/modern-r4-static-update node tools/ssr-cache/published-static.cjs
+pnpm exec prettier --check .
+node --check tools/ssr-cache/production.cjs
+node --check tools/ssr-cache/production-fixture.cjs
+node --check tools/ssr-cache/published-static.cjs
+git diff --check
+```
+
+The install uses an explicit npm registry in the isolated `.npmrc`. Initial setup
+incorrectly requested the canary under `@rspack/core` directly; correcting the
+alias to `@rspack-canary/core` resolved that installation error. The first copied
+static fixture lacked the published runtime-tools dependency context in its
+synthetic layout, causing a module-resolution failure before compilation. Adding
+that package's actual dependency directory to the temporary layout fixed the
+harness; no published package was patched. The committed helper includes this
+mapping, and all three variants were rerun successfully.
+
+No package implementation changes or changeset are needed for this gate: the
+committed changes only add published-package harness resolution and acceptance
+records. Package builds/unit tests were not rerun because rebuilding from source
+would not validate the published artifacts; the full production and static
+artifact matrices were used instead. The worktree uses direct commands rather
+than the aggregate `ci:local` runner. Unrelated CI pipelines, external CDN retention
+and a particular deployment supervisor remain outside this acceptance scope.
+The bounded resource test does not certify arbitrary business side effects or
+infinite uptime; CommonJS application roots and ordinary HTML SSR remain the
+supported scope, with RSC/native ESM excluded. Those are documented boundaries,
+not unclosed defects in this package combination.
