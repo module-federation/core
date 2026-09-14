@@ -27,7 +27,43 @@ export function initContainerEntry(
   });
 
   const hostShareScopeKeys = remoteEntryInitOptions?.shareScopeKeys;
-  const hostShareScopeMap = remoteEntryInitOptions?.shareScopeMap;
+  const hostShareScopeMap = remoteEntryInitOptions?.shareScopeMap || {};
+  const existingShareScopeMap = federationInstance.shareScopeMap || {};
+
+  const hasOwnScope = (scopeMap: Record<string, any>, key: string) =>
+    Object.prototype.hasOwnProperty.call(scopeMap, key);
+  const isEmptyShareScope = (scope: Record<string, any> | undefined) =>
+    !scope || !Object.keys(scope).length;
+  const resolveShareScope = (
+    key: string,
+    fallbackShareScope: Record<string, any>,
+    options: { fallbackWhenEmpty?: boolean } = {},
+  ) => {
+    const currentShareScope = hostShareScopeMap[key];
+
+    if (
+      hasOwnScope(hostShareScopeMap, key) &&
+      !isEmptyShareScope(currentShareScope)
+    ) {
+      return currentShareScope;
+    }
+
+    if (
+      hasOwnScope(existingShareScopeMap, key) &&
+      (!hasOwnScope(hostShareScopeMap, key) ||
+        isEmptyShareScope(currentShareScope))
+    ) {
+      return existingShareScopeMap[key];
+    }
+
+    if (hasOwnScope(hostShareScopeMap, key)) {
+      return options.fallbackWhenEmpty && isEmptyShareScope(currentShareScope)
+        ? fallbackShareScope
+        : currentShareScope;
+    }
+
+    return fallbackShareScope;
+  };
 
   // host: 'default' remote: 'default'  remote['default'] = hostShareScopeMap['default']
   // host: ['default', 'scope1'] remote: 'default'  remote['default'] = hostShareScopeMap['default']; remote['scope1'] = hostShareScopeMap['scop1']
@@ -36,43 +72,35 @@ export function initContainerEntry(
   if (!shareScopeKey || typeof shareScopeKey === 'string') {
     const key = shareScopeKey || 'default';
     if (Array.isArray(hostShareScopeKeys)) {
-      // const sc = hostShareScopeMap![key];
-      // if (!sc) {
-      //   throw new Error('shareScopeKey is not exist in hostShareScopeMap');
-      // }
-      // federationInstance.initShareScopeMap(key, sc, {
-      //   hostShareScopeMap: remoteEntryInitOptions?.shareScopeMap || {},
-      // });
-
       hostShareScopeKeys.forEach((hostKey) => {
-        if (!hostShareScopeMap![hostKey]) {
-          hostShareScopeMap![hostKey] = {};
+        const sc = resolveShareScope(hostKey, {});
+        if (
+          !hasOwnScope(hostShareScopeMap, hostKey) ||
+          (hasOwnScope(existingShareScopeMap, hostKey) &&
+            isEmptyShareScope(hostShareScopeMap[hostKey]))
+        ) {
+          hostShareScopeMap[hostKey] = sc;
         }
-        const sc = hostShareScopeMap![hostKey];
         federationInstance.initShareScopeMap(hostKey, sc, {
-          hostShareScopeMap: remoteEntryInitOptions?.shareScopeMap || {},
+          hostShareScopeMap,
         });
       });
     } else {
-      federationInstance.initShareScopeMap(key, shareScope, {
-        hostShareScopeMap: remoteEntryInitOptions?.shareScopeMap || {},
+      const sc = resolveShareScope(key, shareScope, {
+        fallbackWhenEmpty: true,
+      });
+      federationInstance.initShareScopeMap(key, sc, {
+        hostShareScopeMap,
       });
     }
   } else {
     shareScopeKey.forEach((key) => {
-      if (!hostShareScopeKeys || !hostShareScopeMap) {
-        federationInstance.initShareScopeMap(key, shareScope, {
-          hostShareScopeMap: remoteEntryInitOptions?.shareScopeMap || {},
-        });
-        return;
-      }
-
-      if (!hostShareScopeMap[key]) {
-        hostShareScopeMap[key] = {};
-      }
-      const sc = hostShareScopeMap[key];
+      const sc =
+        !hostShareScopeKeys || !remoteEntryInitOptions?.shareScopeMap
+          ? resolveShareScope(key, shareScope, { fallbackWhenEmpty: true })
+          : resolveShareScope(key, {});
       federationInstance.initShareScopeMap(key, sc, {
-        hostShareScopeMap: remoteEntryInitOptions?.shareScopeMap || {},
+        hostShareScopeMap,
       });
     });
   }
@@ -86,7 +114,7 @@ export function initContainerEntry(
     return webpackRequire.I(shareScopeKey || 'default', initScope);
   }
 
-  var proxyInitializeSharing = Boolean(
+  const proxyInitializeSharing = Boolean(
     webpackRequire.federation.initOptions.shared,
   );
 
