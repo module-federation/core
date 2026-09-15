@@ -199,6 +199,13 @@ export class NextFederationPlugin {
     if (this._extraOptions.debug) {
       compiler.options.devtool = false;
     }
+    if (this._extraOptions.scriptTimeout !== undefined) {
+      new compiler.webpack.DefinePlugin({
+        FEDERATION_NEXTJS_SCRIPT_TIMEOUT: JSON.stringify(
+          this._extraOptions.scriptTimeout,
+        ),
+      }).apply(compiler);
+    }
 
     if (isServer) {
       configureServerCompilerOptions(compiler);
@@ -226,16 +233,9 @@ export class NextFederationPlugin {
       remoteType: 'script',
       runtimePlugins: [
         ...(isServer ? [resolveNodeRuntimePluginPath()] : []),
-        [
-          resolveRuntimePluginPath(),
-          { scriptTimeout: this._extraOptions.scriptTimeout },
-        ] as const,
+        resolveRuntimePluginPath(),
         ...(this._options.runtimePlugins || []),
-      ].map((plugin) =>
-        Array.isArray(plugin)
-          ? [plugin[0] + '?runtimePlugin', plugin[1]]
-          : plugin + '?runtimePlugin',
-      ),
+      ].map((plugin) => plugin + '?runtimePlugin'),
       //@ts-ignore
       exposes: {
         ...this._options.exposes,
