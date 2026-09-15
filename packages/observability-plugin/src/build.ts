@@ -200,12 +200,14 @@ interface ViteResolvedConfigLike {
     target?: unknown;
     ssr?: unknown;
   };
-  plugins?: unknown[];
+  readonly plugins?: readonly unknown[];
 }
 
 interface VitePluginContextLike {
-  warn?: (message: string) => void;
+  warn?: (message: string, ...args: unknown[]) => void;
   meta?: {
+    rollupVersion?: string;
+    watchMode?: boolean;
     viteVersion?: string;
   };
   environment?: {
@@ -1758,13 +1760,21 @@ function getViteOutDir(
 
 function isViteServerEnvironment(
   pluginContext: VitePluginContextLike | undefined,
+  config: ViteResolvedConfigLike | undefined,
 ) {
   const environmentName = getString(pluginContext?.environment?.name);
+  if (environmentName === 'client') {
+    return false;
+  }
   if (environmentName === 'ssr' || environmentName === 'server') {
     return true;
   }
 
-  return pluginContext?.environment?.config?.consumer === 'server';
+  if (pluginContext?.environment?.config?.consumer === 'server') {
+    return true;
+  }
+
+  return Boolean(config?.build?.ssr);
 }
 
 function getViteCompilerOptions(config: ViteResolvedConfigLike | undefined) {
@@ -1823,7 +1833,7 @@ export function ObservabilityVitePlugin(
       return;
     }
 
-    if (isViteServerEnvironment(pluginContext)) {
+    if (isViteServerEnvironment(pluginContext, resolvedConfig)) {
       return;
     }
 

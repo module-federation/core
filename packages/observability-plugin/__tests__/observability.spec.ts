@@ -11,6 +11,7 @@ import {
   ObservabilityVitePlugin,
   createObservabilityBuildInfo,
 } from '../src/build';
+import { ObservabilityVitePlugin as ObservabilityViteEntryPlugin } from '../src/vite';
 import { ChromeObservabilityPlugin } from '../src/chrome-devtool';
 import { createNodeObservability as ObservabilityNode } from '../src/node';
 
@@ -530,6 +531,13 @@ describe('ObservabilityBuildPlugin', () => {
 });
 
 describe('ObservabilityVitePlugin', () => {
+  it('is assignable to Vite Plugin[] from the /vite entry', () => {
+    const plugins: import('vite').Plugin[] = [ObservabilityViteEntryPlugin()];
+
+    expect(plugins[0]?.name).toBe('module-federation-observability-build');
+    expect(plugins[0]?.apply).toBe('build');
+  });
+
   it('writes build observability from disk manifest after emit', async () => {
     const directory = fs.mkdtempSync(
       path.join(os.tmpdir(), 'mf-vite-observability-'),
@@ -808,6 +816,65 @@ describe('ObservabilityVitePlugin', () => {
       );
 
       expect(fs.readFileSync(outputFile, 'utf8')).toBe(original);
+    } finally {
+      fs.rmSync(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('skips Vite 5 SSR builds that set build.ssr without an Environment API', () => {
+    const directory = fs.mkdtempSync(
+      path.join(os.tmpdir(), 'mf-vite-observability-'),
+    );
+    try {
+      const { writeBundle: writeClient } = createVitePluginFixture(directory);
+      writeClient();
+
+      const outputFile = path.join(
+        directory,
+        '.mf/observability/build-info.json',
+      );
+      const original = fs.readFileSync(outputFile, 'utf8');
+
+      for (const ssr of [true, 'src/entry-server.ts'] as const) {
+        const { writeBundle: writeSsr } = createVitePluginFixture(directory, {
+          ssr,
+        });
+        writeSsr();
+        expect(fs.readFileSync(outputFile, 'utf8')).toBe(original);
+      }
+    } finally {
+      fs.rmSync(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('still captures the client environment when build.ssr is configured', () => {
+    const directory = fs.mkdtempSync(
+      path.join(os.tmpdir(), 'mf-vite-observability-'),
+    );
+    try {
+      const { plugin } = createVitePluginFixture(directory, {
+        ssr: 'src/entry-server.ts',
+      });
+      const warn = rs.fn();
+
+      plugin.writeBundle?.call(
+        {
+          warn,
+          meta: {
+            viteVersion: '6.1.0',
+          },
+          environment: {
+            name: 'client',
+          },
+        },
+        { dir: path.join(directory, 'dist') },
+      );
+
+      expect(
+        fs.existsSync(
+          path.join(directory, '.mf/observability/build-info.json'),
+        ),
+      ).toBe(true);
     } finally {
       fs.rmSync(directory, { recursive: true, force: true });
     }
@@ -1195,6 +1262,7 @@ const createVitePluginFixture = (
     error?: Error;
     enabled?: boolean;
     omitExplicitModuleFederation?: boolean;
+    ssr?: boolean | string;
   } = {},
 ) => {
   const warn = rs.fn();
@@ -1243,6 +1311,7 @@ const createVitePluginFixture = (
     build: {
       outDir: 'dist',
       target: ['esnext'],
+      ssr: options.ssr,
     },
     plugins: [
       {
