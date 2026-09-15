@@ -19,17 +19,6 @@ jest.mock(
       init(options: { exposes?: object }) {
         this.containerPluginExposesOptions = options.exposes || {};
       }
-      get fileExposeKeyMap() {
-        const files: Record<string, Set<string>> = {};
-        for (const [key, value] of Object.entries(
-          this.containerPluginExposesOptions,
-        )) {
-          for (const file of (value as { import: string[] }).import) {
-            (files[file.replace(/\.[^/.]+$/, '')] ||= new Set()).add(key);
-          }
-        }
-        return files;
-      }
     },
     RemoteManager: class {
       statsRemoteWithEmptyUsedIn = [];
