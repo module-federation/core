@@ -135,7 +135,7 @@ describe('resolveMatchedConfigs', () => {
 
   describe('relative path resolution', () => {
     it.each(['./shared.js', '/resolved/shared.js'])(
-      'keeps resolved issuer layers separate for %s',
+      'keeps issuer layers separate for %s',
       async (request) => {
         mockResolver.resolve.mockImplementation(
           (_context, _base, _request, _resolveContext, callback) =>
@@ -153,7 +153,12 @@ describe('resolveMatchedConfigs', () => {
           toConsumeOptionsArray(configs),
         );
         expect(
-          [...result.resolved.values()]
+          [
+            ...(request.startsWith('.')
+              ? result.unresolved
+              : result.resolved
+            ).values(),
+          ]
             .map((config) => config.issuerLayer)
             .sort(),
         ).toEqual(['client', 'server']);

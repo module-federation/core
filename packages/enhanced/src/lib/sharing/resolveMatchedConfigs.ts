@@ -32,7 +32,7 @@ function createCompositeKey(request: string, config: ConsumeOptions): string {
   // this way we can catch unlayered requests and default them to another layer
   // example react -> layered react without (layer)react
   const layer = config.issuerLayer; //|| config.layer;
-  if (layer != null) {
+  if (layer) {
     return `(${layer})${request}`;
   }
   return request;
@@ -56,7 +56,11 @@ export async function resolveMatchedConfigs<T extends ConsumeOptions>(
   await Promise.all(
     configs.map(([request, config]) => {
       const resolveRequest = config.request || request;
-      if (RELATIVE_REQUEST_REGEX.test(resolveRequest)) {
+      if (config.issuerLayer && RELATIVE_REQUEST_REGEX.test(resolveRequest)) {
+        // A layered relative consume is resolved where its issuer imports it.
+        unresolved.set(createCompositeKey(resolveRequest, config), config);
+        return undefined;
+      } else if (RELATIVE_REQUEST_REGEX.test(resolveRequest)) {
         // relative request
         return new Promise<void>((resolve) => {
           resolver.resolve(

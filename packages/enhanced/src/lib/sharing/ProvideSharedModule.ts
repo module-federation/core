@@ -85,7 +85,7 @@ class ProvideSharedModule extends Module {
    */
   override identifier(): string {
     return `provide module (${this._shareScope})${
-      this.layer !== null ? ` (${this.layer})` : ''
+      this.layer ? ` (${this.layer})` : ''
     } ${this._name}@${this._version} = ${this._request}`;
   }
 
@@ -95,7 +95,7 @@ class ProvideSharedModule extends Module {
    */
   override readableIdentifier(requestShortener: RequestShortener): string {
     return `provide shared module (${this._shareScope})${
-      this.layer !== null ? ` (${this.layer})` : ''
+      this.layer ? ` (${this.layer})` : ''
     } ${this._name}@${this._version} = ${requestShortener.shorten(this._request)}`;
   }
 
@@ -104,7 +104,7 @@ class ProvideSharedModule extends Module {
    * @returns {string | null} an identifier for library inclusion
    */
   override libIdent(options: LibIdentOptions): string | null {
-    return `${this.layer !== null ? `(${this.layer})/` : ''}webpack/sharing/provide/${
+    return `${this.layer ? `(${this.layer})/` : ''}webpack/sharing/provide/${
       this._shareScope
     }/${this._name}`;
   }

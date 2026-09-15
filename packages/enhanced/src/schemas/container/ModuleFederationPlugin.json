@@ -72,8 +72,9 @@
           "type": "string"
         },
         "layer": {
-          "description": "Layer in which to build the exposed module. An empty string is a valid layer.",
-          "type": "string"
+          "description": "Layer in which to build the exposed module.",
+          "type": "string",
+          "minLength": 1
         }
       },
       "required": ["import"]
@@ -431,11 +432,13 @@
         },
         "layer": {
           "description": "Layer in which the shared module should be placed.",
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         },
         "issuerLayer": {
           "description": "Layer of the issuer.",
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         },
         "packageName": {
           "description": "Package name to determine required version from description file. This is only needed when package name can't be automatically determined from request.",

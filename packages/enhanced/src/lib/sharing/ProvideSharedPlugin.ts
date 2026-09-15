@@ -186,7 +186,7 @@ class ProvideSharedPlugin {
             const moduleLayer = module.layer;
             const lookupKeyForResource = createLookupKeyForSharing(
               resource || '',
-              moduleLayer ?? undefined,
+              moduleLayer || undefined,
             );
 
             if (resource && resolvedProvideMap.has(lookupKeyForResource)) {
@@ -198,7 +198,7 @@ class ProvideSharedPlugin {
             // --- Stage 1a: Direct match with originalRequestString ---
             const originalRequestLookupKey = createLookupKeyForSharing(
               originalRequestString,
-              moduleLayer ?? undefined,
+              moduleLayer || undefined,
             );
             const configFromOriginalDirect = matchProvides.get(
               originalRequestLookupKey,
@@ -239,8 +239,8 @@ class ProvideSharedPlugin {
                   originalPrefixConfig.request || prefixLookupKey.split('?')[0];
 
                 // Refined layer matching logic
-                if (originalPrefixConfig.layer != null) {
-                  if (moduleLayer == null) {
+                if (originalPrefixConfig.layer) {
+                  if (!moduleLayer) {
                     continue; // Option is layered, request is not: skip
                   }
                   if (moduleLayer !== originalPrefixConfig.layer) {
@@ -337,7 +337,7 @@ class ProvideSharedPlugin {
                 // 2a. Direct match with reconstructed path
                 const reconstructedLookupKey = createLookupKeyForSharing(
                   modulePathAfterNodeModules,
-                  moduleLayer ?? undefined,
+                  moduleLayer || undefined,
                 );
                 const configFromReconstructedDirect = matchProvides.get(
                   reconstructedLookupKey,
@@ -373,8 +373,8 @@ class ProvideSharedPlugin {
                       prefixLookupKey.split('?')[0];
 
                     // Refined layer matching logic for reconstructed path
-                    if (originalPrefixConfig.layer != null) {
-                      if (moduleLayer == null) {
+                    if (originalPrefixConfig.layer) {
+                      if (!moduleLayer) {
                         continue; // Option is layered, request is not: skip
                       }
                       if (moduleLayer !== originalPrefixConfig.layer) {

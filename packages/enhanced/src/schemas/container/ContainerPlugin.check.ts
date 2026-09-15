@@ -107,10 +107,14 @@ function n(
             } else f = !0;
             if (f)
               if (void 0 !== r.layer) {
-                const t = l;
-                if ('string' != typeof r.layer)
-                  return ((n.errors = [{ params: { type: 'string' } }]), !1);
-                f = t === l;
+                let t = r.layer;
+                const e = l;
+                if (l === e) {
+                  if ('string' != typeof t)
+                    return ((n.errors = [{ params: { type: 'string' } }]), !1);
+                  if (t.length < 1) return ((n.errors = [{ params: {} }]), !1);
+                }
+                f = e === l;
               } else f = !0;
           }
         }

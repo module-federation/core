@@ -239,7 +239,7 @@ export const getShareItem = ({
 }: {
   pkgName: string;
   hostName?: string;
-  normalizedShareOptions: managerTypes.types.NormalizedSharedOptions[string];
+  normalizedShareOptions?: managerTypes.types.NormalizedSharedOptions[string];
   pkgVersion: string;
 }): StatsShared => {
   return {

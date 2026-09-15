@@ -137,7 +137,7 @@ describe('splitSharedIdentifier', () => {
     });
     expect(
       splitSharedIdentifier(
-        'provide module (default) () react@19.0.0 = /react.js',
+        'provide module (default) (client) react@19.0.0 = /react.js',
         2,
       ),
     ).toEqual({
@@ -149,7 +149,7 @@ describe('splitSharedIdentifier', () => {
         '=',
         '/react.js',
       ],
-      layer: '',
+      layer: 'client',
     });
   });
 
