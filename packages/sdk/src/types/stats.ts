@@ -83,8 +83,6 @@ export interface StatsSharedProvider {
   version: string;
   import: string;
   assets: StatsAssets;
-  fallback?: string;
-  fallbackName?: string;
 }
 
 export interface StatsSharedRequirement {
