@@ -5,9 +5,9 @@ import type {
   StatsExpose,
   StatsRemote,
   StatsShared,
-  moduleFederationPlugin,
+  Stats,
 } from '@module-federation/sdk';
-import {
+import type {
   ContainerManager,
   RemoteManager,
   SharedManager,
@@ -37,8 +37,18 @@ type RemoteModule = Module & { request: string; internalRequest: string };
 
 export function collectGraph(
   compilation: Compilation,
-  options: moduleFederationPlugin.ModuleFederationPluginOptions,
-) {
+  {
+    name: hostName,
+    exposes,
+    shared,
+    remotes: configuredRemotes,
+  }: {
+    name: string;
+    exposes: ContainerManager['containerPluginExposesOptions'];
+    shared: SharedManager['normalizedOptions'];
+    remotes: RemoteManager['normalizedOptions'];
+  },
+): Pick<Stats, 'exposes' | 'shared' | 'remotes'> | undefined {
   const { moduleGraph, chunkGraph, codeGenerationResults } = compilation;
   if (!codeGenerationResults) return undefined;
   const sharedData = new Map<Module, SharedData>();
@@ -58,12 +68,6 @@ export function collectGraph(
     }
   }
 
-  const containerManager = new ContainerManager();
-  containerManager.init(options);
-  const sharedManager = new SharedManager();
-  sharedManager.init(options);
-  const remoteManager = new RemoteManager();
-  remoteManager.init(options);
   const exposesMap: Record<string, StatsExpose> = {};
   const sharedMap: Record<string, StatsShared> = {};
   const remotes: StatsRemote[] = [];
@@ -88,16 +92,17 @@ export function collectGraph(
     for (const child of block.blocks) yield* dependencies(child);
   };
 
-  for (const [key, file] of Object.entries(
-    containerManager.containerPluginExposesOptions,
-  )) {
+  for (const [key, file] of Object.entries(exposes || {})) {
     exposesMap[key] = getExposeItem({
       exposeKey: key,
-      name: options.name!,
+      name: hostName,
       file,
     });
   }
 
+  const configuredShared = Object.entries(shared).sort(
+    ([a, av], [b, bv]) => (bv.shareKey || b).length - (av.shareKey || a).length,
+  );
   const providersFirst = [...sharedData].sort(
     ([a], [b]) =>
       Number(a.type === 'consume-shared-module') -
@@ -110,20 +115,14 @@ export function collectGraph(
     const layer = data.shareConfig.layer ?? undefined;
     const layered = layer !== undefined || Array.isArray(scope);
     const key = layered ? getSharedIdentityKey(name, scope, layer) : name;
-    const configured = Object.entries(sharedManager.normalizedOptions)
-      .filter(([key, value]) => {
-        const shareKey = value.shareKey || key;
-        return (
-          (shareKey === name ||
-            (shareKey.endsWith('/') && name.startsWith(shareKey))) &&
-          JSON.stringify(value.shareScope ?? 'default') ===
-            JSON.stringify(scope)
-        );
-      })
-      .sort(
-        ([a, av], [b, bv]) =>
-          (bv.shareKey || b).length - (av.shareKey || a).length,
+    const configured = configuredShared.filter(([key, value]) => {
+      const shareKey = value.shareKey || key;
+      return (
+        (shareKey === name ||
+          (shareKey.endsWith('/') && name.startsWith(shareKey))) &&
+        JSON.stringify(value.shareScope ?? 'default') === JSON.stringify(scope)
       );
+    });
     const normalized = (configured.find(([, value]) => value.layer === layer) ??
       configured.find(([, value]) => value.layer === undefined))?.[1];
     const version =
@@ -136,11 +135,11 @@ export function collectGraph(
       const row = getShareItem({
         pkgName: name,
         pkgVersion: version,
-        normalizedShareOptions: normalized,
-        hostName: options.name,
+        normalizedShareOptions: layered ? normalized : shared[name],
+        hostName,
       });
       if (layered) {
-        row.id = `${options.name}:shared:${key}`;
+        row.id = `${hostName}:shared:${key}`;
         if (layer !== undefined) row.layer = layer;
         if (scope !== 'default') row.shareScope = scope;
       }
@@ -169,11 +168,12 @@ export function collectGraph(
   for (const module of compilation.modules) {
     if (module.type !== 'remote-module') continue;
     const { request, internalRequest } = module as RemoteModule;
-    const alias = Object.keys(remoteManager.normalizedOptions)
-      .filter((key) => request === key || request.startsWith(`${key}/`))
-      .sort((a, b) => b.length - a.length)[0];
-    if (!alias) continue;
-    const normalized = remoteManager.normalizedOptions[alias];
+    const alias =
+      internalRequest === '.'
+        ? request
+        : request.slice(0, -internalRequest.slice(1).length);
+    if (!configuredRemotes[alias]) continue;
+    const normalized = configuredRemotes[alias];
     const usedIn = new Set<string>();
     for (const connection of moduleGraph.getIncomingConnections(module)) {
       const resource = connection.originModule?.nameForCondition();
@@ -187,7 +187,7 @@ export function collectGraph(
     }
     const row: StatsRemote = {
       alias: normalized.alias,
-      consumingFederationContainerName: options.name || '',
+      consumingFederationContainerName: hostName,
       federationContainerName: normalized.name,
       moduleName: internalRequest.replace('./', ''),
       usedIn: [...usedIn],
@@ -222,5 +222,9 @@ export function collectGraph(
       }
     }
   }
-  return { exposesMap, sharedMap, remotes };
+  return {
+    exposes: Object.values(exposesMap),
+    shared: Object.values(sharedMap),
+    remotes,
+  };
 }
