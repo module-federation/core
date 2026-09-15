@@ -5,6 +5,42 @@ function frame(title) {
     .should('not.be.empty')
     .then(cy.wrap);
 }
+function checkBModuleUpdate(update, rebuilt) {
+  frame('B 入口 · 新请求的页面').find('[data-hydrated="true"]').should('exist');
+  frame('B 入口 · 新请求的页面')
+    .find('[data-testid="evidence"]')
+    .invoke('text')
+    .then((text) => {
+      const before = JSON.parse(text);
+      cy.get('iframe[title="B 入口 · 新请求的页面"]')
+        .invoke('attr', 'src')
+        .then((src) => {
+          update();
+          cy.get('iframe[title="B 入口 · 新请求的页面"]').should(
+            'not.have.attr',
+            'src',
+            src,
+          );
+          frame('B 入口 · 新请求的页面')
+            .find('[data-testid="evidence"]')
+            .should(($data) => {
+              const after = JSON.parse($data.text());
+              expect(after.requestId).not.to.equal(before.requestId);
+              expect(after.pid).to.equal(before.pid);
+              if (rebuilt)
+                expect(after.loaderModuleInstance).not.to.equal(
+                  before.loaderModuleInstance,
+                );
+              else {
+                expect(after.loaderModuleInstance).to.equal(
+                  before.loaderModuleInstance,
+                );
+                expect(after.loaderCalls).to.be.greaterThan(before.loaderCalls);
+              }
+            });
+        });
+    });
+}
 describe('Modern-native SSR review demo', () => {
   it('renders the console itself with Modern SSR, then updates real host hydration', () => {
     cy.request('/').its('body').should('contain', '此控制台由 Modern SSR 渲染');
@@ -12,7 +48,11 @@ describe('Modern-native SSR review demo', () => {
     frame('保留的旧页面').find('[data-hydrated="true"]').should('exist');
     frame('保留的旧页面').find('[aria-label="增加 BPM"]').click();
     frame('保留的旧页面').find('[data-testid="bpm"]').should('contain', '125');
-    cy.contains('button', '更新到 v2').should('not.be.disabled').click();
+    checkBModuleUpdate(
+      () =>
+        cy.contains('button', '更新到 v2').should('not.be.disabled').click(),
+      false,
+    );
     cy.get('iframe[title="新请求的页面"]').should((f) =>
       expect(
         f[0].contentDocument.body.querySelector('[data-release="v2"]'),
@@ -31,7 +71,10 @@ describe('Modern-native SSR review demo', () => {
     frame('新请求的页面').find('[data-hydrated="true"]').should('exist');
     frame('新请求的页面').contains('button', '加载配色面板').click();
     frame('新请求的页面').should('contain', 'Choose a mood.');
-    cy.contains('button', '注册动态 Remote 并 SSR').click();
+    checkBModuleUpdate(
+      () => cy.contains('button', '注册动态 Remote 并 SSR').click(),
+      true,
+    );
     cy.contains('button', '查看真实 HTML').should('not.be.disabled').click();
     cy.get('[role="dialog"]').should('contain', 'Choose a mood.');
     cy.contains('button', '关闭').click();

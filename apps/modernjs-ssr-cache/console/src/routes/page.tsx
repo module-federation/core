@@ -290,6 +290,31 @@ export default function Console() {
                 <Browser url={oldURL} title="保留的旧页面" />
                 <Browser url={newURL} title="新请求的页面" />
               </div>
+              <h3>B 入口：更新 A 后，宿主模块是否保留？</h3>
+              <p>
+                左侧保留首次请求，右侧随上方更新按钮重新请求 /b。比较初始化
+                ID：局部更新应保持一致，整体重建应发生变化；两者 PID
+                都应保持一致。
+                计数包含其他窗口和实验请求，并非只统计你的点击次数。
+              </p>
+              <div className="comparison">
+                <Browser
+                  url={
+                    oldURL && current
+                      ? oldURL.replace(current.url + '/', current.url + '/b')
+                      : ''
+                  }
+                  title="B 入口 · 保留的旧页面"
+                />
+                <Browser
+                  url={
+                    newURL && current
+                      ? newURL.replace(current.url + '/', current.url + '/b')
+                      : ''
+                  }
+                  title="B 入口 · 新请求的页面"
+                />
+              </div>
             </section>
             <section>
               <h2>让请求撞上更新。</h2>

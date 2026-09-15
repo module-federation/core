@@ -183,3 +183,30 @@ summary {
     animation: none;
   }
 }
+
+.server-state {
+  margin-top: 24px;
+  padding: 16px;
+  border: 1px solid #343847;
+  border-left: 3px solid #72dac8;
+  border-radius: 8px;
+  font-size: 12px;
+}
+.server-state dl {
+  display: grid;
+  gap: 10px;
+}
+.server-state dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.server-state dt,
+.server-state p {
+  color: #aaa8b8;
+}
+.server-state dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-family: ui-monospace, monospace;
+}

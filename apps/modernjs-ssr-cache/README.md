@@ -201,7 +201,15 @@ and `git diff --check` passed. The old SSR CI entry and unrelated package/framew
 suites remain skipped because this changes the independent demo only; no runtime
 package or dependencies changed.
 
-### 内存实验的逐轮页面
+### 观察局部更新与整体重建的宿主状态
+
+“功能体验”里的 A、B 页面都展示服务端 loader 模块的初始化 ID、初始化时间、累计调用次数和 Host PID。ID 和计数存放在各入口 `page.data.ts` 的模块变量中，不依赖控制台、浏览器或 `globalThis`。计数统计 loader 调用，包括其他窗口、预热和实验请求，不代表成功渲染次数。
+
+更新 Remote A 后，对比“B 入口 · 保留的旧页面”和“B 入口 · 新请求的页面”：静态 Host 的 B 初始化 ID 应保持一致、计数继续累计；动态 Host 整体重建后 B 初始化 ID 应变化、计数重新开始。两种更新都不应改变 PID。旧窗口保留的是首次请求的状态，切换 Host 或重新打开控制台会重新建立对比基准。
+
+验证：`node apps/modernjs-ssr-cache/e2e.cjs` 通过（日志 `/tmp/modern-module-state.log`），Cypress 对新的 B 请求断言静态更新保留 ID 且计数增加、动态重建改变 ID、两种更新 PID 均不变。已检查页面截图。`pnpm exec prettier --check apps/modernjs-ssr-cache/host/src apps/modernjs-ssr-cache/dynamic-host/src apps/modernjs-ssr-cache/console/src/routes/page.tsx apps/modernjs-ssr-cache/review.cy.cjs apps/modernjs-ssr-cache/README.md`、`git diff --check` 通过。未运行旧 SSR CI 入口或无关包测试，因为本次只改独立 demo。
+
+### 内存采样与逐轮更新
 
 手动对比时，在“内存观察”先点击“GC 后采样”，再点击“更新 remote 到 v1/v2”。按钮更新所选 Host 的 Remote A，并让“手动内存对比的 SSR 页面”发起真实导航；看到新版本加载完成后再次点击“GC 后采样”，比较表格中的 Heap / RSS。按钮按当前版本切换到另一个版本，不自动采样。这里测量的是 Host 进程内存，不是 remote 文件或下载体积。
 
