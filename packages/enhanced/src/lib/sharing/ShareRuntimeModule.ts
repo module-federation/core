@@ -78,14 +78,16 @@ class ShareRuntimeModule extends RuntimeModule {
         if (sharedOption) {
           sharedInitOptions[sharedOption.name] =
             sharedInitOptions[sharedOption.name] || [];
-          const isSameVersionAndLayer = sharedInitOptions[
+          const isSameVersionLayerAndScope = sharedInitOptions[
             sharedOption.name
           ].find(
             (s) =>
               s.version === sharedOption.version &&
-              s.shareConfig?.layer === sharedOption.shareConfig?.layer,
+              s.shareConfig?.layer === sharedOption.shareConfig?.layer &&
+              JSON.stringify([s.shareScope].flat()) ===
+                JSON.stringify([sharedOption.shareScope].flat()),
           );
-          if (!isSameVersionAndLayer) {
+          if (!isSameVersionLayerAndScope) {
             sharedInitOptions[sharedOption.name].push(sharedOption);
           }
         }
