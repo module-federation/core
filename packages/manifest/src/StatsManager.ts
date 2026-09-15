@@ -16,10 +16,7 @@ import {
   StatsShared,
 } from '@module-federation/sdk';
 import { Compilation, Compiler } from 'webpack';
-import type {
-  StatsCompilation,
-  StatsModule,
-} from 'webpack/lib/stats/DefaultStatsFactoryPlugin';
+import type { StatsCompilation } from 'webpack/lib/stats/DefaultStatsFactoryPlugin';
 import {
   isDev,
   getAssetsByChunk,
@@ -398,130 +395,101 @@ class StatsManager {
       }
 
       const graph =
-        this._bundler === 'webpack'
-          ? collectGraph(compilation, this._options)
+        this._bundler === 'webpack' &&
+        !(typeof manifestOptions === 'object' && manifestOptions.useLegacyStats)
+          ? collectGraph(compilation, {
+              name: name!,
+              exposes: this._containerManager.containerPluginExposesOptions,
+              shared: this._sharedManager.normalizedOptions,
+              remotes: this._remoteManager.normalizedOptions,
+            })
           : undefined;
-      const statsOptions: Record<string, boolean> = {
-        all: false,
-        modules: true,
-        builtAt: true,
-        hash: true,
-        ids: true,
-        version: true,
-        entrypoints: true,
-        assets: false,
-        chunks: false,
-        reasons: true,
-      };
-      if (this._bundler === 'webpack') {
-        statsOptions['cached'] = true;
-      }
-      statsOptions['cachedModules'] = true;
 
-      const webpackStats = graph
-        ? undefined
-        : compilation.getStats().toJson(statsOptions);
-
-      const { remotes, exposesMap, sharedMap } =
-        graph ??
-        new ModuleHandler(this._options, webpackStats?.modules || [], {
-          bundler: this._bundler,
-        }).collect();
-      const entryPointNames = [...compilation.entrypoints.values()]
-        .map((e) => e.name)
-        .filter((v) => !!v) as Array<string>;
-
-      await Promise.all([
-        new Promise<void>((resolve) => {
-          if (graph) {
-            resolve();
-            return;
-          }
-          const sharedAssets = this._getProvideSharedAssets(
-            compilation,
-            webpackStats!,
-            entryPointNames,
-          );
-
-          Object.keys(sharedMap).forEach((sharedKey) => {
-            const assets = sharedAssets[sharedKey];
-            if (assets) {
-              sharedMap[sharedKey].assets = assets;
-            }
-          });
-          resolve();
-        }),
-        new Promise<void>((resolve) => {
-          const moduleAssets = graph
-            ? {}
-            : this._getModuleAssets(compilation, entryPointNames);
-
-          Object.keys(exposesMap).forEach((exposeKey) => {
-            const assets = moduleAssets[exposeKey];
-            if (assets) {
-              exposesMap[exposeKey].assets = assets;
-            }
-            exposesMap[exposeKey].requires = Array.from(
-              new Set(exposesMap[exposeKey].requires),
-            );
-          });
-          resolve();
-        }),
-      ]);
-
-      await Promise.all([
-        new Promise<void>((resolve) => {
-          const remoteMemo: Set<string> = new Set();
-          stats.remotes = remotes.map((remote) => {
-            remoteMemo.add(remote.federationContainerName);
-            return {
-              ...remote,
-              usedIn: Array.from(remote.usedIn.values()),
-            };
-          });
-          const statsRemoteWithEmptyUsedIn =
-            this._remoteManager.statsRemoteWithEmptyUsedIn;
-          statsRemoteWithEmptyUsedIn.forEach((remoteInfo) => {
-            if (!remoteMemo.has(remoteInfo.federationContainerName)) {
-              stats.remotes.push(remoteInfo);
-            }
-          });
-          resolve();
-        }),
-        new Promise<void>((resolve) => {
-          stats.shared = Object.values(sharedMap).map((shared) => ({
-            ...shared,
-            usedIn: Array.from(shared.usedIn),
-          }));
-          resolve();
-        }),
-      ]);
-
-      await new Promise<void>((resolve) => {
-        const sharedAssets = stats.shared.reduce((sum, shared) => {
-          const { js, css } = shared.assets;
-          [...js.sync, ...js.async, ...css.async, css.sync].forEach((asset) => {
-            sum.add(asset);
-          });
-          return sum;
-        }, new Set());
-        stats.exposes = Object.values(exposesMap).map((expose) => {
-          const { js, css } = expose.assets;
-          return {
-            ...expose,
-            assets: {
-              js: {
-                sync: js.sync.filter((asset) => !sharedAssets.has(asset)),
-                async: js.async.filter((asset) => !sharedAssets.has(asset)),
-              },
-              css: {
-                sync: css.sync.filter((asset) => !sharedAssets.has(asset)),
-                async: css.async.filter((asset) => !sharedAssets.has(asset)),
-              },
-            },
-          };
+      if (graph) {
+        Object.assign(stats, graph);
+      } else {
+        const webpackStats = compilation.getStats().toJson({
+          all: false,
+          modules: true,
+          builtAt: true,
+          hash: true,
+          ids: true,
+          version: true,
+          entrypoints: true,
+          assets: false,
+          chunks: false,
+          reasons: true,
+          ...(this._bundler === 'webpack' ? { cached: true } : {}),
+          cachedModules: true,
         });
-        resolve();
+        const moduleHandler = new ModuleHandler(
+          this._options,
+          webpackStats.modules || [],
+          { bundler: this._bundler },
+        );
+        const { remotes, exposesMap, sharedMap } = moduleHandler.collect();
+        const entryPointNames = [...compilation.entrypoints.keys()];
+        const sharedAssets = this._getProvideSharedAssets(
+          compilation,
+          webpackStats,
+          entryPointNames,
+        );
+        const moduleAssets = this._getModuleAssets(
+          compilation,
+          entryPointNames,
+        );
+        for (const [key, shared] of Object.entries(sharedMap)) {
+          if (sharedAssets[key]) shared.assets = sharedAssets[key];
+        }
+        for (const [key, expose] of Object.entries(exposesMap)) {
+          if (moduleAssets[key]) expose.assets = moduleAssets[key];
+        }
+        stats.remotes = remotes;
+        stats.shared = Object.values(sharedMap);
+        stats.exposes = Object.values(exposesMap);
+      }
+
+      const remoteNames = new Set(
+        stats.remotes.map((remote) => remote.federationContainerName),
+      );
+      stats.remotes = stats.remotes.map((remote) => ({
+        ...remote,
+        usedIn: Array.from(remote.usedIn),
+      }));
+      for (const remote of this._remoteManager.statsRemoteWithEmptyUsedIn) {
+        if (!remoteNames.has(remote.federationContainerName))
+          stats.remotes.push(remote);
+      }
+      stats.shared = stats.shared.map((shared) => ({
+        ...shared,
+        usedIn: Array.from(shared.usedIn),
+      }));
+      const sharedAssets = new Set<unknown>(
+        stats.shared.flatMap(({ assets: { js, css } }) => [
+          ...js.sync,
+          ...js.async,
+          ...css.async,
+          css.sync,
+        ]),
+      );
+      stats.exposes = stats.exposes.map((expose) => {
+        const { js, css } = expose.assets;
+        return {
+          ...expose,
+          ...(expose.requires
+            ? { requires: [...new Set(expose.requires)] }
+            : {}),
+          assets: {
+            js: {
+              sync: js.sync.filter((asset) => !sharedAssets.has(asset)),
+              async: js.async.filter((asset) => !sharedAssets.has(asset)),
+            },
+            css: {
+              sync: css.sync.filter((asset) => !sharedAssets.has(asset)),
+              async: css.async.filter((asset) => !sharedAssets.has(asset)),
+            },
+          },
+        };
       });
 
       return stats;

@@ -346,6 +346,8 @@ export interface AdditionalDataOptions {
 export interface PluginManifestOptions {
   filePath?: string;
   disableAssetsAnalyze?: boolean;
+  /** Use the legacy JavaScript stats reader for Webpack. Defaults to false. Native Rspack stats are unaffected. */
+  useLegacyStats?: boolean;
   fileName?: string;
   additionalData?: (
     options: AdditionalDataOptions,
