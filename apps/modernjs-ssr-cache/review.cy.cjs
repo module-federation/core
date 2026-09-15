@@ -35,6 +35,12 @@ describe('Modern-native SSR review demo', () => {
     cy.contains('button', '查看真实 HTML').should('not.be.disabled').click();
     cy.get('[role="dialog"]').should('contain', 'Choose a mood.');
     cy.contains('button', '关闭').click();
+    cy.get('[data-testid="experiment"]').click();
+    cy.get('[data-testid="traffic-window"] .waiting').should('have.length', 4);
+    cy.get('[data-testid="experiment"]').should('not.be.disabled');
+    for (const title of ['A1 · /', 'A2 · /', 'A3 · /', 'B1 · /b'])
+      frame(title).find('[data-hydrated="true"]').should('exist');
+    cy.contains('.metrics span', '拒绝').find('b').should('have.text', '0');
   });
   it('opens a real iframe during update, allows unaffected B, and samples memory', () => {
     cy.visit('/');
@@ -42,17 +48,21 @@ describe('Modern-native SSR review demo', () => {
     cy.get('[data-testid="experiment"]').click();
     cy.get('[data-testid="traffic-window"] .waiting').should('be.visible');
     cy.get('[data-testid="experiment"]').should('not.be.disabled');
-    frame('更新期间打开的页面').should('contain', 'Find your rhythm.');
-    frame('更新期间打开的页面').find('[data-hydrated="true"]').should('exist');
-    frame('更新期间打开的页面').find('[aria-label="增加 BPM"]').click();
-    frame('更新期间打开的页面')
-      .find('[data-testid="bpm"]')
-      .should('contain', '125');
+    cy.get('[data-testid="traffic-window"] iframe').should('have.length', 4);
+    for (const label of ['A1', 'A2', 'A3'])
+      frame(label + ' · /')
+        .find('[data-hydrated="true"]')
+        .should('exist');
+    frame('B1 · /b').should('contain', 'Choose a mood.');
+    frame('A1 · /').should('contain', 'Find your rhythm.');
+    frame('A1 · /').find('[data-hydrated="true"]').should('exist');
+    frame('A1 · /').find('[aria-label="增加 BPM"]').click();
+    frame('A1 · /').find('[data-testid="bpm"]').should('contain', '125');
     cy.get('[data-testid="traffic-window"]').screenshot('modern-update-window');
     cy.contains('label', '模式').find('select').select('manual');
-    cy.contains('label', '窗口入口').find('select').select('/b');
     cy.get('[data-testid="experiment"]').click();
-    frame('更新期间打开的页面').should('contain', 'Choose a mood.');
+    frame('B1 · /b').find('[data-hydrated="true"]').should('exist');
+    cy.get('[data-testid="traffic-window"] .waiting').should('have.length', 3);
     cy.get('[data-testid="phase"]').should('contain', 'draining');
     cy.contains('button', '释放旧请求').click();
     cy.get('[data-testid="experiment"]').should('not.be.disabled');

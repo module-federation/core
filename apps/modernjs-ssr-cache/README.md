@@ -36,15 +36,15 @@ The console and the two tested SSR applications run in separate processes.
 这些脚本负责启动、实验控制和自动验证。页面与 Remote 组件仍由各项目的
 `modern.config.ts`、Modern 构建以及 React 源码实现。
 
-| 脚本 | 谁调用 / 何时执行 | 具体职责 |
-| --- | --- | --- |
-| [`start.cjs`](./start.cjs) | 手动启动入口；或由 `e2e.cjs` 启动 | 启动版本化静态资源服务，调用 `build.cjs`；分别启动两个 Host 进程和 Modern 控制台进程。它还提供内部控制 API，汇总 Host 状态、请求结果和内存样本，按需启动流量进程，并在退出时清理子进程。 |
-| [`build.cjs`](./build.cjs) | `start.cjs` 启动服务前调用 | 依次执行七个 Modern 子项目的 `pnpm run build`。把四个 Remote 的 `dist` 复制到对应的 `releases/v1`、`releases/v2`、`releases/palette/v1`、`releases/palette/v2`，供静态资源服务模拟 CDN。会覆盖对应的旧发布产物，不修改源码或生成配置。 |
-| [`host.cjs`](./host.cjs) | `start.cjs` 启动两次，每个 Host 一个进程 | 根据 `LAB_KIND` 加载 `host/dist` 或 `dynamic-host/dist`，通过 Modern 的 `createProdServer` 提供真实 SSR。把 MF 的 `createSSRUpdateAdapter` 接到 Modern 的应用生命周期，设置请求排队、超时和更新范围；提供更新、扣住/释放旧 loader、状态、内存采样和堆快照等 `/__lab/*` 控制接口。 |
-| [`console-server.cjs`](./console-server.cjs) | `start.cjs` 单独启动 | 用 Modern 的 `createProdServer` 提供 `console/dist` 的 SSR 页面，默认监听 3059。将 `/api/*` 请求通过 bypass 转发给 `start.cjs` 的内部控制服务；控制台自身不参与被测 Host 的更新，因此 Host 排空时仍可操作。 |
-| [`traffic.cjs`](./traffic.cjs) | 点击并发或重复更新实验后，由 `start.cjs` fork | 独立 Node 流量发生器的入口。目前复用 [`../modernjs-ssr/cache-updates/playground/traffic.cjs`](../modernjs-ssr/cache-updates/playground/traffic.cjs) 的实现。通过真实 HTTP 扣住旧请求、触发更新、发送并发请求并收集状态/版本/耗时；按模式自动释放或等待手动释放。内存实验则循环更新、发送请求并请求 Host 采样，通过进程消息把结果返回给控制服务。 |
-| [`e2e.cjs`](./e2e.cjs) | 独立自动测试入口 | 默认以测试模式启动 demo，给控制台和资源服务分配随机端口并为 Host 开启 GC。运行 `review.cy.cjs`，随后验证静态/动态更新的真实 HTTP 排队、队列满、等待超时、返回版本、PID 不变和内存采样，最后关闭自己启动的服务。 |
-| [`review.cy.cjs`](./review.cy.cjs) | 由 `e2e.cjs` 交给 Cypress 执行 | 浏览器场景，不是用 `node` 直接运行的服务脚本。验证控制台自身的 Modern SSR、Host/Remote 水合与交互、动态加载、真实 HTML，以及更新期间 iframe 的等待和恢复、B 入口不受局部更新影响、内存页和移动端布局。 |
+| 脚本                                         | 谁调用 / 何时执行                             | 具体职责                                                                                                                                                                                                                                                                                                                                         |
+| -------------------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [`start.cjs`](./start.cjs)                   | 手动启动入口；或由 `e2e.cjs` 启动             | 启动版本化静态资源服务，调用 `build.cjs`；分别启动两个 Host 进程和 Modern 控制台进程。它还提供内部控制 API，汇总 Host 状态、请求结果和内存样本，按需启动流量进程，并在退出时清理子进程。                                                                                                                                                         |
+| [`build.cjs`](./build.cjs)                   | `start.cjs` 启动服务前调用                    | 依次执行七个 Modern 子项目的 `pnpm run build`。把四个 Remote 的 `dist` 复制到对应的 `releases/v1`、`releases/v2`、`releases/palette/v1`、`releases/palette/v2`，供静态资源服务模拟 CDN。会覆盖对应的旧发布产物，不修改源码或生成配置。                                                                                                           |
+| [`host.cjs`](./host.cjs)                     | `start.cjs` 启动两次，每个 Host 一个进程      | 根据 `LAB_KIND` 加载 `host/dist` 或 `dynamic-host/dist`，通过 Modern 的 `createProdServer` 提供真实 SSR。把 MF 的 `createSSRUpdateAdapter` 接到 Modern 的应用生命周期，设置请求排队、超时和更新范围；提供更新、扣住/释放旧 loader、状态、内存采样和堆快照等 `/__lab/*` 控制接口。                                                                |
+| [`console-server.cjs`](./console-server.cjs) | `start.cjs` 单独启动                          | 用 Modern 的 `createProdServer` 提供 `console/dist` 的 SSR 页面，默认监听 3059。将 `/api/*` 请求通过 bypass 转发给 `start.cjs` 的内部控制服务；控制台自身不参与被测 Host 的更新，因此 Host 排空时仍可操作。                                                                                                                                      |
+| [`traffic.cjs`](./traffic.cjs)               | 点击并发或重复更新实验后，由 `start.cjs` fork | 独立 Node 流量发生器的入口。目前复用 [`../modernjs-ssr/cache-updates/playground/traffic.cjs`](../modernjs-ssr/cache-updates/playground/traffic.cjs) 的实现。通过真实 HTTP 扣住旧请求、触发更新、发送并发请求并收集状态/版本/耗时；按模式自动释放或等待手动释放。内存实验则循环更新、发送请求并请求 Host 采样，通过进程消息把结果返回给控制服务。 |
+| [`e2e.cjs`](./e2e.cjs)                       | 独立自动测试入口                              | 默认以测试模式启动 demo，给控制台和资源服务分配随机端口并为 Host 开启 GC。运行 `review.cy.cjs`，随后验证静态/动态更新的真实 HTTP 排队、队列满、等待超时、返回版本、PID 不变和内存采样，最后关闭自己启动的服务。                                                                                                                                  |
+| [`review.cy.cjs`](./review.cy.cjs)           | 由 `e2e.cjs` 交给 Cypress 执行                | 浏览器场景，不是用 `node` 直接运行的服务脚本。验证控制台自身的 Modern SSR、Host/Remote 水合与交互、动态加载、真实 HTML，以及更新期间 iframe 的等待和恢复、B 入口不受局部更新影响、内存页和移动端布局。                                                                                                                                           |
 
 启动关系如下；`host.cjs` 的两次启动是两个独立 SSR 进程：
 
@@ -64,8 +64,8 @@ The console and the two tested SSR applications run in separate processes.
 
 点击“开始并发实验”时，控制台 React 页面请求 `/api/experiment`，经
 `console-server.cjs` 转发给 `start.cjs`，再由流量进程访问目标 Host 的
-`/__lab/*` 控制接口和实际 SSR 路由。页面中的 iframe 是浏览器额外发起的一次
-真实导航，不是 `traffic.cjs` 生成的窗口；它计入 Host 的实际排队数量，但不计入
+`/__lab/*` 控制接口和实际 SSR 路由。页面中的四个 iframe 是浏览器额外发起的四次
+真实导航（A1/A2/A3 访问 `/`，B1 访问 `/b`），不是 `traffic.cjs` 生成的窗口；它计入 Host 的实际排队数量，但不计入
 Node 请求列表。
 
 **`build.cjs` 只在启动阶段执行，更新 Remote 时不会再次执行。** 更新切换的是已构建
@@ -90,9 +90,13 @@ SSR 渲染器。之所以保留这些服务入口，是为了接入本次实验�
 3. Select the dynamic host. Load the palette in the browser, then register it for
    SSR and inspect the raw HTML containing “Choose a mood.”.
 4. Start the traffic experiment. A held loader keeps the update in draining;
-   twelve new Node requests target A/B, and an additional real iframe opens while
-   draining. Default release is automatic. Select B with manual release to see
-   an unaffected entry complete before the static A update finishes.
+   twelve new Node requests target A/B (nine `/`, three `/b`). Four additional
+   iframes open during draining: A1/A2/A3 and B1, each with its own real URL and
+   loading status. These labels describe page routes, not component counts.
+   Default release is automatic. With manual release, B1 can finish while all
+   three A windows still wait for the static A update. A dynamic whole-app update
+   affects both routes. The four browser requests are additional to the Node
+   traffic; at most 16 new requests queue in the default whole-app experiment.
 5. The memory tab samples only the selected host PID, can request GC, perform
    twenty updates, and generate an explicit heap snapshot. No periodic heap
    sampling occurs. Queue counters include the iframe; Node result counts do not.
@@ -169,3 +173,30 @@ versioned asset server (port 3066) and the update/admission controls. Ordinary
   churn failed lock validation and was discarded.
 - `pnpm exec prettier --check apps/modernjs-ssr-cache pnpm-workspace.yaml pnpm-lock.yaml`
   and `git diff --check`: passed.
+
+### Multiple request windows
+
+The traffic panel shows four independent iframe navigations (A1/A2/A3/B1). Each
+window retains its own page and hydration state. The 9A/3B numbers refer to Node
+requests to host routes `/` and `/b`, not numbers of Remote components. The four
+browser requests are additional, and count toward the real admission queue.
+
+The console matches navigation to the returned experiment ID so an old polling
+response cannot trigger a new experiment's windows. Load events also match the
+iframe URL so an old navigation cannot clear the new window's waiting state.
+The host assigns immutable `/static/` resources a separate scope: an A-only
+update must not block B's CSS/JS. Whole-application updates still use the global
+request gate.
+
+Multi-window validation: `node apps/modernjs-ssr-cache/e2e.cjs` passed (log:
+`/tmp/modern-multi-frame-verified.log`). Cypress verifies all four windows hydrate,
+B hydrates while three A windows still wait during a selective update, and all
+four wait/recover with zero Node rejections during a whole-application update.
+The earlier browser failure exposed B asset requests being assigned to A's scope;
+that fixture classification is corrected rather than relaxing the assertion.
+The four-window screenshot was visually inspected.
+
+`pnpm exec prettier --check apps/modernjs-ssr-cache/console/src/routes/page.tsx apps/modernjs-ssr-cache/console/src/style.css apps/modernjs-ssr-cache/review.cy.cjs apps/modernjs-ssr-cache/host.cjs apps/modernjs-ssr-cache/start.cjs apps/modernjs-ssr-cache/README.md`
+and `git diff --check` passed. The old SSR CI entry and unrelated package/framework
+suites remain skipped because this changes the independent demo only; no runtime
+package or dependencies changed.

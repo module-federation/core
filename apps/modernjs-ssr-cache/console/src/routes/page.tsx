@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useLoaderData } from '@modern-js/runtime/router';
 import '../style.css';
 function Browser({ url, title }: { url: string; title: string }) {
-  const [loaded, setLoaded] = useState(false);
-  useEffect(() => setLoaded(false), [url]);
+  const [loadedURL, setLoadedURL] = useState('');
+  const loaded = loadedURL === url;
   return (
     <section className="browser">
       <header>
@@ -18,7 +18,7 @@ function Browser({ url, title }: { url: string; title: string }) {
             key={url}
             title={title}
             src={url}
-            onLoad={() => setLoaded(true)}
+            onLoad={() => setLoadedURL(url)}
           />
         ) : (
           <p>更新开始后，在这里打开一次真实的 SSR 页面访问。</p>
@@ -40,11 +40,10 @@ export default function Console() {
   const [oldURL, setOldURL] = useState('');
   const [newURL, setNewURL] = useState('');
   const [visit, setVisit] = useState('');
-  const [entry, setEntry] = useState('/');
   const [preset, setPreset] = useState('auto');
   const [count, setCount] = useState(12);
   const [html, setHTML] = useState<string | null>(null);
-  const intent = useRef(false),
+  const intent = useRef<number | null>(null),
     observed = useRef(0),
     base = useRef('');
   async function refresh() {
@@ -79,7 +78,7 @@ export default function Console() {
       setOldURL(current.url + '/');
       setNewURL(current.url + '/');
       setVisit('');
-      intent.current = false;
+      intent.current = null;
     }
   }, [current?.url]);
   useEffect(() => {
@@ -87,17 +86,18 @@ export default function Console() {
       !current ||
       !exp ||
       !intent.current ||
+      exp.started !== intent.current ||
       exp.kind !== host ||
       exp.mode !== 'traffic'
     )
       return;
     if (!exp.events.some((e: any) => e.type === 'draining')) return;
-    intent.current = false;
+    intent.current = null;
     if (current.status.phase === 'draining') {
-      setVisit(current.url + entry + '?id=iframe-' + exp.started);
+      setVisit(String(exp.started));
       observed.current = exp.started;
     } else setError('未赶上更新等待阶段。保持页面可见后重新运行实验。');
-  }, [state, host, entry]);
+  }, [state, host]);
   useEffect(() => {
     if (
       current &&
@@ -254,7 +254,9 @@ export default function Console() {
               <h2>让请求撞上更新。</h2>
               <p>
                 点击后自动触发更新，默认同时发送 12 个新请求：9 个访问 A，3
-                个访问 B。下方小窗口额外发起一次浏览器访问。
+                个访问 B。A 是 / 页面，B 是 /b
+                页面，不是组件数量。下方四个窗口额外发起 3 次 A 和 1 次 B
+                的真实浏览器访问。
               </p>
               <div className="actions">
                 <label>
@@ -281,29 +283,18 @@ export default function Console() {
                     />
                   </label>
                 )}
-                <label>
-                  窗口入口{' '}
-                  <select
-                    value={entry}
-                    disabled={disabled}
-                    onChange={(e) => setEntry(e.target.value)}
-                  >
-                    <option value="/">A · /</option>
-                    <option value="/b">B · /b</option>
-                  </select>
-                </label>
                 <button
                   className="primary"
                   disabled={disabled}
                   data-testid="experiment"
                   onClick={() =>
                     run(async () => {
-                      await action('experiment', {
+                      const experiment = await action('experiment', {
                         preset,
                         count: String(count),
                         v: current.version === 'v1' ? 'v2' : 'v1',
                       });
-                      intent.current = true;
+                      intent.current = experiment.experimentId;
                       setVisit('');
                     })
                   }
@@ -323,10 +314,27 @@ export default function Console() {
               </div>
               <p className="hint">
                 默认约 1.4 秒后自动释放。队列容量 16，排队超时 3 秒。iframe
-                是真实请求，会占用一个队列位置；错误响应也会原样显示。
+                是真实请求，各自占用队列位置；四个窗口与 Node
+                请求分开计数。静态更新时观察 A 等待、B
+                返回；动态整体更新时两者都需要等待。
               </p>
-              <div data-testid="traffic-window">
-                <Browser url={visit} title="更新期间打开的页面" />
+              <div data-testid="traffic-window" className="traffic-grid">
+                {['A1', 'A2', 'A3', 'B1'].map((label) => (
+                  <Browser
+                    key={label}
+                    title={label + (label.startsWith('A') ? ' · /' : ' · /b')}
+                    url={
+                      visit && current
+                        ? current.url +
+                          (label.startsWith('A') ? '/' : '/b') +
+                          '?id=iframe-' +
+                          visit +
+                          '-' +
+                          label
+                        : ''
+                    }
+                  />
+                ))}
               </div>
               <div className="metrics">
                 <span>

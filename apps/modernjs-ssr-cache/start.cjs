@@ -214,7 +214,9 @@ async function forward(kind, route, method = 'GET') {
             experiment.running = false;
             experiment.exitCode = code;
           });
-          res.end(JSON.stringify({ started: true }));
+          res.end(
+            JSON.stringify({ started: true, experimentId: experiment.started }),
+          );
           return;
         }
         if (!['update', 'release', 'sample', 'snapshot'].includes(action)) {

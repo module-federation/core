@@ -136,7 +136,11 @@ function release() {
         application = a;
       },
       resolveScope(request) {
-        return [new URL(request.url).pathname.startsWith('/b') ? 'b' : 'index'];
+        const pathname = new URL(request.url).pathname;
+        // Immutable host build assets are shared by both entries. An A-only
+        // remote update must not block B's CSS/JS behind the A SSR gate.
+        if (pathname.startsWith('/static/')) return ['$assets'];
+        return [pathname.startsWith('/b') ? 'b' : 'index'];
       },
       reloadEntry: adapter.reload,
       async dispose(_, entries) {
