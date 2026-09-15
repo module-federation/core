@@ -3,6 +3,7 @@ let selected = 'static',
   state,
   busy = false,
   initialized = false;
+let previewedExperiment;
 const isMemory = location.pathname === '/memory';
 $('memory').hidden = !isMemory;
 $('experience').hidden = isMemory;
@@ -146,9 +147,82 @@ async function refresh() {
     metrics('counters', [
       ['实际在途', status.activeRequests],
       ['实际排队', status.pendingRequests],
-      ['已完成', requests.filter((r) => r.state === 'complete').length],
+      [
+        '已完成（含旧请求）',
+        requests.filter((r) => r.state === 'complete').length,
+      ],
       ['被拒绝', requests.filter((r) => r.state === 'rejected').length],
     ]);
+    const events = belongs ? exp.events : [],
+      has = (type) => events.some((e) => e.type === type),
+      peak = Math.max(
+        0,
+        ...events.filter((e) => e.type === 'queue').map((e) => e.peak),
+      ),
+      failed = events.find((e) => e.type === 'error');
+    $('traffic-steps').innerHTML = [
+      ['held', '旧请求进入'],
+      ['draining', '更新等待排空'],
+      ['queue', '新请求排队'],
+      ['released', '旧请求释放'],
+      ['update', '更新完成'],
+    ]
+      .map(
+        ([type, label]) =>
+          '<span class="' +
+          (has(type) ? 'observed' : '') +
+          '">' +
+          (has(type) ? '✓ ' : '○ ') +
+          label +
+          '</span>',
+      )
+      .join('');
+    if (belongs && exp.mode === 'traffic') {
+      const a = requests.filter((r) => r.id !== 'held' && r.route === '/'),
+        b = requests.filter((r) => r.route === '/b'),
+        rejected = requests.filter((r) => r.state === 'rejected').length;
+      $('traffic-story').textContent = failed
+        ? '实验失败：' + failed.error
+        : exp.running
+          ? has('released')
+            ? '已释放旧请求，等待更新与响应完成。'
+            : '更新正在等待旧请求结束。实际排队峰值 ' +
+              peak +
+              '；' +
+              (exp.preset === 'manual'
+                ? '请点击「释放旧请求」。'
+                : '实验会自动释放，无需操作。')
+          : '实验结束 · 实际排队峰值 ' +
+            peak +
+            ' · 旧请求 ' +
+            (requests.find((r) => r.id === 'held')?.release || '—') +
+            ' → A 返回 ' +
+            a.filter((r) => r.status === 200).length +
+            ' 条成功响应（' +
+            [...new Set(a.filter((r) => r.release).map((r) => r.release))].join(
+              '、',
+            ) +
+            '）· B 成功 ' +
+            b.filter((r) => r.status === 200).length +
+            ' 条 · 拒绝 ' +
+            rejected +
+            ' 条。' +
+            (selected === 'static'
+              ? 'B 不在本次更新范围内，可在更新等待期间完成。'
+              : '整应用更新，A、B 都受排队限制。') +
+            ' 右侧已刷新，可与左侧旧页面比较。';
+      if (
+        !exp.running &&
+        has('update') &&
+        !failed &&
+        previewedExperiment !== exp.started &&
+        !isMemory
+      ) {
+        previewedExperiment = exp.started;
+        $('reload').click();
+      }
+    } else
+      $('traffic-story').textContent = '点击开始，观察真实请求排队与恢复。';
     $('empty').hidden = requests.length > 0;
     const now = Date.now(),
       duration = Math.max(1, ...requests.map((r) => (r.end || now) - r.sent));
@@ -162,10 +236,18 @@ async function refresh() {
             ? entered
               ? '已进入 loader'
               : '已发送 · 等待响应'
-            : r.state;
+            : r.state === 'complete'
+              ? '完成'
+              : r.state === 'error'
+                ? '网络错误：' + r.error
+                : r.reason?.includes('queue is full')
+                  ? '队列已满 · 503'
+                  : r.reason?.includes('wait timed out')
+                    ? '排队超过 3 秒 · 503'
+                    : '请求被拒绝：' + (r.reason || r.status);
         return (
           '<tr><td>' +
-          escape(r.id) +
+          escape(r.id === 'held' ? '旧请求（阻挡更新）' : r.id) +
           '</td><td>' +
           escape(r.route) +
           '</td><td class="' +
@@ -176,7 +258,13 @@ async function refresh() {
           Math.round((((r.end || now) - r.sent) / duration) * 150) +
           'px"></i>' +
           ((r.end || now) - r.sent) +
-          ' ms</td><td>' +
+          ' ms' +
+          (entered && r.id !== 'held'
+            ? '<br><small>发送 → loader：' +
+              Math.max(0, entered.at - r.sent) +
+              ' ms（含网络）</small>'
+            : '') +
+          '</td><td>' +
           escape(r.status || '—') +
           ' / ' +
           escape(r.release || '—') +
@@ -201,7 +289,7 @@ async function refresh() {
       'html',
     ])
       $(id).disabled = busy || exp.running;
-    $('release').disabled = !host.held;
+    $('release').disabled = !host.held || status.phase !== 'draining';
     const samples = state.samples[selected],
       gc = samples.filter((s) => s.gc),
       warm = gc.filter((s) => !s.cycle || s.cycle > 10);
@@ -275,11 +363,21 @@ $('entry').onchange = () => $('reload').click();
 $('run').onclick = () =>
   perform(() =>
     action('experiment', {
+      preset: $('preset').value,
       count: $('count').value,
       interval: $('interval').value,
       v: state.hosts[selected].version === 'v1' ? 'v2' : 'v1',
     }),
   );
+$('preset').onchange = () => {
+  const manual = $('preset').value === 'manual';
+  $('count').disabled = $('interval').disabled = !manual;
+  if (!manual) {
+    $('count').value = $('preset').value === 'overflow' ? 32 : 12;
+    $('interval').value = 0;
+  }
+};
+$('preset').onchange();
 $('release').onclick = () => perform(() => action('release'));
 $('sample').onclick = () => perform(() => action('sample'));
 $('gc').onclick = () => perform(() => action('sample', { gc: '1' }));

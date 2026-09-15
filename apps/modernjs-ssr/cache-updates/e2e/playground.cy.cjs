@@ -67,13 +67,23 @@ describe('SSR playground', () => {
   });
   it('starts real traffic, releases the held loader and samples the host heap', () => {
     cy.visit('/');
-    cy.get('#count').clear().type('8');
+    cy.get('#preset').should('have.value', 'auto');
     cy.get('#run').click();
     cy.get('#release').should('not.be.disabled');
     cy.get('#counters').should('contain', '实际排队');
-    cy.get('#release').click();
+    cy.get('#traffic-steps .observed').should('contain', '新请求排队');
     cy.get('#run').should('not.be.disabled');
-    cy.get('#requests').should('contain', 'complete');
+    cy.get('#requests').should('contain', '完成').and('not.contain', '503');
+    cy.get('#traffic-story')
+      .should('contain', '实验结束')
+      .and('contain', '拒绝 0');
+    cy.get('#traffic-story').scrollIntoView();
+    cy.screenshot('playground-traffic', { capture: 'viewport' });
+    cy.get('#preset').select('timeout');
+    cy.get('#run').click();
+    cy.get('#requests').should('contain', '排队超过 3 秒');
+    cy.get('#run').should('not.be.disabled');
+    cy.get('#traffic-story').should('contain', '拒绝 9');
     cy.visit('/memory');
     cy.get('#gc').click();
     cy.get('#samples tr')

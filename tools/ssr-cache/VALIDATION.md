@@ -869,3 +869,44 @@ command/UI is documented. Existing legacy fixtures remain regression-only until
 their distinct nested/manifest/shared semantics are migrated; their UI is no
 longer part of the manual walkthrough. No MF changeset is required for private
 test tooling; the Modern runtime PR includes its patch changeset.
+
+
+### Traffic demo usability correction (2026-09-15)
+
+The original default sent 20 requests while requiring manual release of the old
+loader. With a three-second admission timeout, a user reading the UI would often
+see 503 responses before releasing it. The UI also discarded the visible queue
+count on completion and reported only `rejected`.
+
+Default traffic now sends 12 new requests and releases automatically after about
+1.4 seconds. Real coordinator queue observations and lifecycle events remain
+visible, response rows retain Modern's rejection message, and the right preview
+refreshes after a successful update. Explicit overflow, timeout and custom manual
+presets retain failure/debugging coverage. No Modern queue limits were relaxed.
+
+Validation commands from `/private/tmp/mf-r4-static-update`:
+
+- `pnpm --filter modernjs-ssr-cache-updates run e2e:playground`: passed (three
+  browser scenarios and existing HTTP/memory checks). The first sandboxed attempt
+  failed to bind loopback with EPERM; rerunning with local-port permission passed.
+- `pnpm run e2e:modern:ssr`: passed, including all existing suites and the expanded
+  playground assertions. Both static/dynamic automatic runs return 13 HTTP 200s
+  (12 new plus one held), queue peak is nonzero, A returns the target version and
+  the PID stays unchanged. Dynamic overflow produces 16 queue-full 503s; timeout
+  produces 12 wait-timeout 503s. Cypress also verifies the default requires no
+  release click and that the timeout reason appears in the UI.
+- `pnpm exec prettier --check .`: passed.
+- `node --check apps/modernjs-ssr/cache-updates/playground/traffic.cjs`,
+  `node --check apps/modernjs-ssr/cache-updates/playground/start.cjs`, and
+  `node --check apps/modernjs-ssr/cache-updates/playground/app.js`: passed.
+- `git diff --check`: passed.
+
+Logs: `/tmp/lab-traffic-fix-test.log`, `/tmp/lab-traffic-full.log`,
+`/tmp/lab-traffic-format.log`. Traffic, desktop, memory and mobile screenshots were
+captured by Cypress; the traffic results screenshot was visually inspected.
+
+The `ci:local` wrapper was skipped in accordance with the worktree rule; its
+matching Modern SSR package entry was executed directly. Unrelated package unit
+suites, dependency reinstall and other framework jobs were skipped because this
+correction changes private demo tooling only, with no dependency/runtime changes.
+No release or changeset is needed for this correction.

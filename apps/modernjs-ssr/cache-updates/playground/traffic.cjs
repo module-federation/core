@@ -1,5 +1,7 @@
 // Separate process: real HTTP traffic never contributes to the SSR host's heap.
-const { url, mode, count, interval, version } = JSON.parse(process.argv[2]);
+const { url, mode, count, interval, version, preset } = JSON.parse(
+  process.argv[2],
+);
 const emit = (data) => process.send?.(data);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 async function control(route) {
@@ -28,6 +30,7 @@ async function request(id, route = '/') {
       end: Date.now(),
       state: response.ok ? 'complete' : 'rejected',
       status: response.status,
+      reason: response.ok ? undefined : html.slice(0, 500),
       release: html.match(/data-release="(v[12])"/)?.[1],
       bytes: Buffer.byteLength(html),
     });
@@ -68,9 +71,14 @@ async function request(id, route = '/') {
         throw Error('Held request did not enter loader');
       await sleep(20);
     }
+    emit({ type: 'held', at: Date.now() });
+    let updateError;
     const update = control('update?v=' + version).then(
-      (result) => emit({ type: 'update', result }),
-      (e) => emit({ type: 'error', error: String(e) }),
+      (result) => emit({ type: 'update', at: Date.now(), result }),
+      (e) => {
+        updateError = e;
+        emit({ type: 'error', error: String(e) });
+      },
     );
     while (
       (await (await fetch(url + '/__lab/status')).json()).status.phase !==
@@ -85,9 +93,29 @@ async function request(id, route = '/') {
       jobs.push(request('request-' + i, i % 4 === 3 ? '/b' : '/'));
       if (interval) await sleep(interval);
     }
+    // Read the real coordinator while requests are held; retain evidence after release.
+    const releaseAt = Date.now() + (preset === 'timeout' ? 3500 : 1400);
+    let peak = 0;
+    while (true) {
+      const current = await (await fetch(url + '/__lab/status')).json();
+      if (current.status.pendingRequests > peak) {
+        peak = current.status.pendingRequests;
+        emit({ type: 'queue', at: Date.now(), peak });
+      }
+      if (!current.held) break;
+      if (preset !== 'manual' && Date.now() >= releaseAt) {
+        await control('release');
+        break;
+      }
+      if (Date.now() > deadline + 10000)
+        throw Error('Manual release deadline exceeded');
+      await sleep(50);
+    }
+    emit({ type: 'released', at: Date.now() });
     await Promise.all(jobs);
     await old;
     await update;
+    if (updateError) throw updateError;
   }
   emit({ type: 'done' });
 })()

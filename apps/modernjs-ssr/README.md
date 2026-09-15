@@ -55,17 +55,21 @@ Choose **开始并发实验**. A separate Node process:
 3. Waits for Modern's draining state, then sends the configured HTTP requests.
 4. Reads every complete response and reports timing, HTTP status and release.
 
-Use **释放旧请求** before three seconds to observe queued requests resume.
-Delay release to observe real queue timeouts. Raise the request count to exceed
-the 16-request queue and observe real 503 responses. The drain timeout is 15
-seconds. A failed drain is reported; release the old request and retry the update.
+The default **排队后自动恢复** preset sends 12 requests and automatically
+releases the held loader after approximately 1.4 seconds. No manual timing is
+needed. The process steps and peak queue count remain visible after completion;
+the right preview refreshes to compare the new SSR version with the old page.
+Request rows show actual HTTP status, returned release and server rejection text.
+The send-to-loader duration includes network time, rather than claiming an exact
+per-request queue duration.
 
-Every fourth new request targets entry B. It continues during a selective entry A
-update, but waits during a whole-app update. Server counters are actual admission
-state. “Sent, waiting for response” is deliberately distinct from confirmed
-loader entry: transport latency is not asserted to be Modern queue time.
-The timeline measures send-to-completion latency, not a fabricated internal
-stage breakdown. A 503 is a rejected request, not an automatic stale-HTML fallback.
+Use **观察队列满（503）** for 32 simultaneous requests with automatic release,
+or **观察排队超时（503）** for 12 requests held beyond the three-second wait
+limit. **手动释放 / 自定义并发** retains editable request counts/intervals and the
+**释放旧请求** button. Queue capacity is 16; waiting requests time out after
+three seconds, and drain fails after 15 seconds. A 503 is a rejection, not stale
+HTML fallback. Every fourth request goes to entry B: static A updates allow B to
+continue, while dynamic application updates block both entries.
 
 ## Memory and manual debugging
 

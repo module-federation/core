@@ -158,7 +158,10 @@ async function forward(kind, route, method = 'GET') {
             res.end('Experiment already running');
             return;
           }
-          const count = Number(url.searchParams.get('count') || 20),
+          const preset = url.searchParams.get('preset') || 'auto';
+          if (!['auto', 'manual', 'overflow', 'timeout'].includes(preset))
+            throw Error('Unknown experiment preset');
+          let count = Number(url.searchParams.get('count') || 12),
             interval = Number(url.searchParams.get('interval') || 0);
           const mode =
             url.searchParams.get('mode') === 'memory' ? 'memory' : 'traffic';
@@ -171,7 +174,12 @@ async function forward(kind, route, method = 'GET') {
             interval > 100
           )
             throw Error('Invalid experiment limits');
+          if (mode === 'traffic' && preset !== 'manual') {
+            count = preset === 'overflow' ? 32 : 12;
+            interval = 0;
+          }
           experiment = {
+            preset,
             running: true,
             kind,
             mode,
@@ -180,6 +188,7 @@ async function forward(kind, route, method = 'GET') {
             events: [],
           };
           const args = {
+            preset,
             url: hosts[kind].url,
             mode,
             count,

@@ -480,3 +480,21 @@ dialog::backdrop {
     display: none;
   }
 }
+
+.traffic-story {
+  padding: 18px;
+  border-left: 3px solid #b5a0ff;
+  background: #242333;
+  margin: 16px 0;
+  line-height: 1.8;
+}
+.traffic-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  color: #8e8d9d;
+  margin-bottom: 20px;
+}
+.traffic-steps .observed {
+  color: #72dac8;
+}

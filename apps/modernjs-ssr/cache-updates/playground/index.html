@@ -87,13 +87,21 @@
           </div>
           <div class="traffic-controls">
             <label
-              >请求数
+              >实验模式<select id="preset">
+                <option value="auto">排队后自动恢复</option>
+                <option value="overflow">观察队列满（503）</option>
+                <option value="timeout">观察排队超时（503）</option>
+                <option value="manual">手动释放 / 自定义并发</option>
+              </select></label
+            >
+            <label
+              >新请求数
               <input
                 id="count"
                 type="number"
                 min="1"
                 max="300"
-                value="20" /></label
+                value="12" /></label
             ><label
               >发送间隔 / ms
               <input
@@ -106,10 +114,20 @@
             ><button id="release">释放旧请求</button>
           </div>
           <p class="muted small">
-            队列容量 16 · 排队超时 3 秒 · 排空超时 15
-            秒。开始后及时释放可观察恢复，延迟释放可观察
-            503。每四个请求中有一个访问入口 B。
+            默认发送 12 个真实请求，约 1.4
+            秒后自动释放旧请求。每四个请求中有一个访问入口 B。 队列容量
+            16、排队超时 3 秒；手动模式需及时释放，超过 15
+            秒会导致更新排空失败。
           </p>
+          <div
+            id="traffic-story"
+            class="traffic-story"
+            role="status"
+            aria-live="polite"
+          >
+            点击开始，观察旧请求阻挡更新、新请求等待、释放后返回新版本。
+          </div>
+          <div id="traffic-steps" class="traffic-steps"></div>
           <div id="counters" class="counters"></div>
           <div class="table-wrap">
             <table>

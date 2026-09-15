@@ -102,7 +102,12 @@ async function waitFor(check, ms = 15000) {
     await action('update', kind, { v: 'v1' });
     const before = await state();
     const pid = before.hosts[kind].pid;
-    await action('experiment', kind, { count: '12', interval: '0', v: 'v2' });
+    await action('experiment', kind, {
+      preset: 'manual',
+      count: '12',
+      interval: '0',
+      v: 'v2',
+    });
     await waitFor(async () => {
       const s = await state();
       return (
@@ -155,6 +160,7 @@ async function waitFor(check, ms = 15000) {
   }
   // Overflow and queue timeout use real Modern admission, no synthetic 503.
   await action('experiment', 'dynamic', {
+    preset: 'manual',
     count: '32',
     interval: '0',
     v: 'v1',
@@ -177,6 +183,53 @@ async function waitFor(check, ms = 15000) {
   await action('release', 'dynamic');
   await waitFor(async () => !(await state()).experiment.running);
   assert.equal((await state()).hosts.dynamic.status.phase, 'serving');
+  // The default UI must demonstrate successful queue/release without user timing.
+  for (const kind of ['static', 'dynamic']) {
+    const before = await state();
+    const target = before.hosts[kind].version === 'v1' ? 'v2' : 'v1';
+    await action('experiment', kind, { v: target });
+    await waitFor(async () => !(await state()).experiment.running);
+    const after = await state(),
+      exp = after.experiment;
+    assert.equal(exp.exitCode, 0);
+    assert.equal(exp.requests.length, 13);
+    assert.ok(
+      exp.requests.every((r) => r.status === 200),
+      JSON.stringify(exp),
+    );
+    assert.ok(exp.events.some((e) => e.type === 'queue' && e.peak > 0));
+    assert.ok(exp.events.some((e) => e.type === 'released'));
+    assert.ok(
+      exp.requests
+        .filter((r) => r.route === '/')
+        .every((r) => r.release === target && r.end - r.sent >= 1000),
+    );
+    assert.equal(after.hosts[kind].pid, before.hosts[kind].pid);
+  }
+  for (const preset of ['overflow', 'timeout']) {
+    await action('experiment', 'dynamic', {
+      preset,
+      v: preset === 'overflow' ? 'v1' : 'v2',
+    });
+    await waitFor(async () => !(await state()).experiment.running);
+    const exp = (await state()).experiment;
+    assert.equal(exp.exitCode, 0);
+    const rejected = exp.requests.filter((r) => r.status === 503);
+    assert.equal(rejected.length, preset === 'overflow' ? 16 : 12);
+    assert.ok(
+      rejected.every((r) =>
+        r.reason.includes(
+          preset === 'overflow' ? 'queue is full' : 'wait timed out',
+        ),
+      ),
+      JSON.stringify(exp),
+    );
+    assert.ok(
+      exp.requests
+        .filter((r) => r.status !== 503)
+        .every((r) => r.status === 200),
+    );
+  }
   await action('experiment', 'dynamic', { mode: 'memory', count: '20' });
   await waitFor(async () => !(await state()).experiment.running, 60000);
   current = await state();
