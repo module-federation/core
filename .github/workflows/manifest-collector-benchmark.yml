@@ -1,0 +1,85 @@
+name: Manifest Collector Benchmark
+
+on:
+  push:
+    branches: [codex/manifest-benchmark-ci-07527]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: manifest-collector-benchmark-07527
+  cancel-in-progress: false
+
+jobs:
+  expose-benchmark:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      FOUNDATION_REF: 07527d3fd31a95f98b544c8eec39095cc184504a
+      BENCHMARK_OUTPUT: ${{ github.workspace }}/benchmark-results
+      CYPRESS_INSTALL_BINARY: '0'
+      TURBO_TELEMETRY_DISABLED: '1'
+    steps:
+      - name: Checkout benchmark harness
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          persist-credentials: false
+
+      - name: Checkout immutable foundation
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          ref: 07527d3fd31a95f98b544c8eec39095cc184504a
+          path: foundation
+          persist-credentials: false
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+
+      - name: Setup exact repository Node version
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: '24.18.0'
+          cache: pnpm
+          cache-dependency-path: foundation/pnpm-lock.yaml
+
+      - name: Install frozen foundation dependencies
+        working-directory: foundation
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Enhanced and dependencies once
+        working-directory: foundation
+        run: pnpm exec turbo run build --filter=@module-federation/enhanced
+
+      - name: Verify foundation and runtime
+        working-directory: foundation
+        run: |
+          test "$(git rev-parse HEAD)" = "$FOUNDATION_REF"
+          test -z "$(git status --porcelain)"
+          node -e 'require("node:assert/strict").equal(process.version, "v24.18.0")'
+
+      - name: Measure five alternating pairs with real HMR
+        run: |
+          set +e
+          node tools/manifest-benchmark/run-observed.cjs \
+            --core="$GITHUB_WORKSPACE/foundation" --selection=flag \
+            --samples=5 --warmup=1 --exposes=100 --common=20 --rebuilds=3 \
+            --output="$BENCHMARK_OUTPUT"
+          benchmark_exit=$?
+          set -e
+          echo "Benchmark exit: $benchmark_exit (2 expected for documented relationship additions)"
+          test "$benchmark_exit" -eq 2
+
+      - name: Audit exact differences and process observations
+        run: |
+          node tools/manifest-benchmark/audit.cjs "$BENCHMARK_OUTPUT/report.json"
+          node tools/manifest-benchmark/verify-ci.cjs "$BENCHMARK_OUTPUT"
+
+      - name: Upload raw fixtures, measurements, and process evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: manifest-exposes-node24-07527
+          path: ${{ env.BENCHMARK_OUTPUT }}
+          if-no-files-found: warn
+          retention-days: 14
