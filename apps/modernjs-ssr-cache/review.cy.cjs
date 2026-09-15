@@ -67,6 +67,19 @@ describe('Modern-native SSR review demo', () => {
     cy.contains('button', '释放旧请求').click();
     cy.get('[data-testid="experiment"]').should('not.be.disabled');
     cy.contains('button', '内存观察').click();
+    frame('手动内存对比的 SSR 页面')
+      .find('[data-hydrated="true"]')
+      .should('exist');
+    cy.get('[data-testid="memory-update"]').then(($button) => {
+      const target = $button.text().includes('v2') ? 'v2' : 'v1';
+      cy.wrap($button).click();
+      frame('手动内存对比的 SSR 页面')
+        .find('[data-release="' + target + '"][data-hydrated="true"]')
+        .should('exist');
+      cy.get('[data-testid="memory-update"]')
+        .should('not.be.disabled')
+        .and('contain', target === 'v2' ? 'v1' : 'v2');
+    });
     cy.contains('button', 'GC 后采样').click();
     cy.get('tbody').should('contain', 'true');
     const pages = [];

@@ -457,7 +457,26 @@ export default function Console() {
           <section>
             <h2>内存观察</h2>
             <p>只测量所选 SSR Host；控制台、构建和流量发生器不计入。</p>
+            <p>
+              当前 Remote A：{current?.version || '加载中'}。先采样，再更新
+              remote，等下方页面加载完成后再次采样，即可对比更新前后的内存。
+              更新按钮不自动采样；建议前后都使用「GC 后采样」。
+            </p>
             <div className="actions">
+              <button
+                data-testid="memory-update"
+                disabled={disabled}
+                onClick={() =>
+                  run(async () => {
+                    await action('update', {
+                      v: current.version === 'v1' ? 'v2' : 'v1',
+                    });
+                    setNewURL(current.url + '/?manual-memory=' + Date.now());
+                  })
+                }
+              >
+                更新 remote 到 {current?.version === 'v1' ? 'v2' : 'v1'}
+              </button>
               <button
                 disabled={disabled}
                 onClick={() => run(() => action('sample'))}
@@ -495,6 +514,8 @@ export default function Console() {
                 生成堆快照
               </button>
             </div>
+            <h3>手动更新的真实页面</h3>
+            <Browser url={newURL} title="手动内存对比的 SSR 页面" />
             <h3>逐轮更新的真实页面</h3>
             <p data-testid="memory-progress">
               {memory
