@@ -498,3 +498,38 @@ dialog::backdrop {
 .traffic-steps .observed {
   color: #72dac8;
 }
+
+.traffic-browser {
+  margin: 24px 0;
+  border: 1px solid #363747;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #171923;
+}
+.traffic-browser > p {
+  margin: 14px 18px;
+}
+#traffic-browser-window {
+  min-height: 360px;
+  position: relative;
+  background: #11131b;
+}
+#traffic-browser-window > p {
+  padding: 32px;
+}
+#traffic-browser-window iframe {
+  display: block;
+  width: 100%;
+  height: 420px;
+  border: 0;
+}
+#traffic-browser-window.waiting::after {
+  content: '请求已发出 · 等待服务器返回页面';
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: #171923;
+  color: #b5a0ff;
+  pointer-events: none;
+}

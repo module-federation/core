@@ -119,6 +119,31 @@
             16、排队超时 3 秒；手动模式需及时释放，超过 15
             秒会导致更新排空失败。
           </p>
+          <section class="traffic-browser" aria-label="更新期间的真实页面请求">
+            <div class="preview-label">
+              <strong>更新期间打开的新页面</strong>
+              <label
+                >预览入口
+                <select id="traffic-entry">
+                  <option value="/">A · /</option>
+                  <option value="/b">B · /b</option>
+                </select></label
+              >
+            </div>
+            <p id="traffic-browser-status" role="status">
+              开始实验后，这里会在更新等待期间发起一次真实页面导航。
+            </p>
+            <div id="traffic-browser-window">
+              <p class="muted">
+                等待开始 · 此窗口会显示实际 SSR 页面，恢复后可以直接操作。
+              </p>
+            </div>
+            <p class="muted small">
+              这个 iframe 是额外的一次浏览器请求，不计入下方 Node
+              并发请求列表，但计入服务端在途和排队数量。加载中显示等待提示；若返回
+              503，窗口会保留真实错误页面。
+            </p>
+          </section>
           <div
             id="traffic-story"
             class="traffic-story"

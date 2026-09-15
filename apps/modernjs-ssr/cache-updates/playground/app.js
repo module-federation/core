@@ -3,7 +3,7 @@ let selected = 'static',
   state,
   busy = false,
   initialized = false;
-let previewedExperiment;
+let previewedExperiment, trafficPreview;
 const isMemory = location.pathname === '/memory';
 $('memory').hidden = !isMemory;
 $('experience').hidden = isMemory;
@@ -160,6 +160,38 @@ async function refresh() {
         ...events.filter((e) => e.type === 'queue').map((e) => e.peak),
       ),
       failed = events.find((e) => e.type === 'error');
+    if (
+      trafficPreview &&
+      !trafficPreview.started &&
+      belongs &&
+      exp.mode === 'traffic' &&
+      has('draining')
+    ) {
+      trafficPreview.started = true;
+      if (status.phase !== 'draining') {
+        $('traffic-browser-status').textContent =
+          '本次未赶上更新等待阶段，请保持页面可见后再次开始实验。';
+      } else {
+        const visit = trafficPreview,
+          frame = document.createElement('iframe');
+        frame.id = 'traffic-preview';
+        frame.title = '更新期间发起的真实 SSR 页面请求';
+        frame.src = host.url + visit.entry + '?id=iframe-' + exp.started;
+        $('traffic-browser-status').textContent =
+          '正在请求 ' + host.url + visit.entry + ' · 等待真实页面响应…';
+        frame.onload = () => {
+          if (trafficPreview !== visit) return;
+          $('traffic-browser-window').classList.remove('waiting');
+          $('traffic-browser-status').textContent =
+            '页面导航已完成 · ' +
+            (Date.now() - visit.sent) +
+            ' ms · 下方是实际响应，可直接交互；错误响应也会原样显示。';
+        };
+        visit.sent = Date.now();
+        $('traffic-browser-window').classList.add('waiting');
+        $('traffic-browser-window').replaceChildren(frame);
+      }
+    }
     $('traffic-steps').innerHTML = [
       ['held', '旧请求进入'],
       ['draining', '更新等待排空'],
@@ -361,14 +393,18 @@ $('reload').onclick = () => {
 };
 $('entry').onchange = () => $('reload').click();
 $('run').onclick = () =>
-  perform(() =>
-    action('experiment', {
+  perform(async () => {
+    await action('experiment', {
       preset: $('preset').value,
       count: $('count').value,
       interval: $('interval').value,
       v: state.hosts[selected].version === 'v1' ? 'v2' : 'v1',
-    }),
-  );
+    });
+    trafficPreview = { entry: $('traffic-entry').value, started: false };
+    $('traffic-browser-window').replaceChildren();
+    $('traffic-browser-status').textContent =
+      '正在启动更新，等待进入排空阶段后打开页面…';
+  });
 $('preset').onchange = () => {
   const manual = $('preset').value === 'manual';
   $('count').disabled = $('interval').disabled = !manual;

@@ -59,6 +59,12 @@ The default **排队后自动恢复** preset sends 12 requests and automatically
 releases the held loader after approximately 1.4 seconds. No manual timing is
 needed. The process steps and peak queue count remain visible after completion;
 the right preview refreshes to compare the new SSR version with the old page.
+The inline browser window starts a real iframe navigation only after the update
+enters draining. It shows a waiting overlay until navigation completes, then
+retains the actual interactive SSR page (or the actual error response). Select A
+or B to compare admission scopes. This is one additional browser request: it is
+included in Modern's live queue counters but not in the Node request table.
+Background tabs that miss the draining window report that explicitly.
 Request rows show actual HTTP status, returned release and server rejection text.
 The send-to-loader duration includes network time, rather than claiming an exact
 per-request queue duration.

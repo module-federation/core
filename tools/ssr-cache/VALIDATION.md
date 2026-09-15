@@ -910,3 +910,31 @@ matching Modern SSR package entry was executed directly. Unrelated package unit
 suites, dependency reinstall and other framework jobs were skipped because this
 correction changes private demo tooling only, with no dependency/runtime changes.
 No release or changeset is needed for this correction.
+
+### Inline traffic browser (2026-09-15)
+
+Added a real iframe in the traffic section. After the browser observes draining,
+it navigates to the selected host's A or B entry. The loading overlay ends on the
+iframe load event, and the actual page or error response remains visible. This
+extra request is counted by Modern but is not part of the Node generator table.
+A background tab that misses draining is explicitly reported rather than claiming
+to have observed a blocked request.
+
+Validation in `/private/tmp/mf-r4-static-update`:
+
+- `pnpm run e2e:modern:ssr`: passed; log `/tmp/lab-iframe-e2e.log`.
+  Cypress verifies the waiting window and real SSR page for A, and that B can
+  complete navigation while a static A update is still draining. Existing
+  HTTP admission, timeout/overflow, hydration and memory regressions pass.
+- `pnpm exec prettier --check apps/modernjs-ssr/README.md apps/modernjs-ssr/cache-updates/playground/app.js apps/modernjs-ssr/cache-updates/playground/index.html apps/modernjs-ssr/cache-updates/playground/style.css apps/modernjs-ssr/cache-updates/e2e/playground.cy.cjs`: passed.
+- `node --check apps/modernjs-ssr/cache-updates/playground/app.js`: passed.
+- `git diff --check`: passed.
+
+The CI wrapper, unrelated framework/package suites and dependency reinstall were
+skipped for the same worktree/private-demo reasons documented above. No runtime
+or dependency changes were required.
+
+`pnpm --filter modernjs-ssr-cache-updates run e2e:playground` also passed after
+adding the dedicated inline-browser screenshot (log `/tmp/lab-iframe-browser.log`).
+The screenshot was visually inspected and shows the actual metronome SSR page
+inside the compact frame after its blocked navigation completed.
