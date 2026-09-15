@@ -225,19 +225,17 @@ export class NextFederationPlugin {
       runtime: false,
       remoteType: 'script',
       runtimePlugins: [
-        ...(isServer
-          ? [resolveNodeRuntimePluginPath() + '?runtimePlugin']
-          : []),
-        this._extraOptions.scriptTimeout === undefined
-          ? resolveRuntimePluginPath() + '?runtimePlugin'
-          : [
-              resolveRuntimePluginPath() + '?runtimePlugin',
-              { scriptTimeout: this._extraOptions.scriptTimeout },
-            ],
-        ...(this._options.runtimePlugins || []).map(
-          (plugin) => plugin + '?runtimePlugin',
-        ),
-      ],
+        ...(isServer ? [resolveNodeRuntimePluginPath()] : []),
+        [
+          resolveRuntimePluginPath(),
+          { scriptTimeout: this._extraOptions.scriptTimeout },
+        ] as const,
+        ...(this._options.runtimePlugins || []),
+      ].map((plugin) =>
+        Array.isArray(plugin)
+          ? [plugin[0] + '?runtimePlugin', plugin[1]]
+          : plugin + '?runtimePlugin',
+      ),
       //@ts-ignore
       exposes: {
         ...this._options.exposes,
