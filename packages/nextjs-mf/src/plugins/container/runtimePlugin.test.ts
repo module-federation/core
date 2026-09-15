@@ -371,3 +371,45 @@ describe('next-internal-plugin onLoad', () => {
     });
   });
 });
+
+describe('next-internal-plugin createScript', () => {
+  const originalWindow = global.window;
+  const originalDocument = global.document;
+
+  beforeEach(() => {
+    global.window = {} as Window & typeof globalThis;
+    global.document = {
+      createElement: () => ({}),
+    } as unknown as Document;
+  });
+
+  afterEach(() => {
+    global.window = originalWindow;
+    global.document = originalDocument;
+  });
+
+  const createScript = (options?: Parameters<typeof createRuntimePlugin>[0]) =>
+    createRuntimePlugin(options).createScript!({
+      url: 'https://cdn.example.com/remoteEntry.js',
+      attrs: {},
+    });
+
+  it('defaults the remote entry timeout to 8000ms', () => {
+    expect(createScript()).toMatchObject({ timeout: 8000 });
+  });
+
+  it('uses the configured scriptTimeout', () => {
+    expect(createScript({ scriptTimeout: 30000 })).toMatchObject({
+      timeout: 30000,
+    });
+  });
+
+  it.each([0, -1, NaN, Infinity, null])(
+    'falls back to 8000ms for an invalid scriptTimeout (%p)',
+    (scriptTimeout) => {
+      expect(
+        createScript({ scriptTimeout: scriptTimeout as number }),
+      ).toMatchObject({ timeout: 8000 });
+    },
+  );
+});
