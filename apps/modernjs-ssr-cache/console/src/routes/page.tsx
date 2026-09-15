@@ -1,7 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLoaderData } from '@modern-js/runtime/router';
 import '../style.css';
-function Browser({ url, title }: { url: string; title: string }) {
+function Browser({
+  url,
+  title,
+  onReady,
+}: {
+  url: string;
+  title: string;
+  onReady?: () => void;
+}) {
   const [loadedURL, setLoadedURL] = useState('');
   const loaded = loadedURL === url;
   return (
@@ -18,7 +26,10 @@ function Browser({ url, title }: { url: string; title: string }) {
             key={url}
             title={title}
             src={url}
-            onLoad={() => setLoadedURL(url)}
+            onLoad={() => {
+              setLoadedURL(url);
+              onReady?.();
+            }}
           />
         ) : (
           <p>更新开始后，在这里打开一次真实的 SSR 页面访问。</p>
@@ -141,6 +152,31 @@ export default function Console() {
     ...events.filter((e: any) => e.type === 'queue').map((e: any) => e.peak),
   );
   const samples = state?.samples[host] || [];
+  const memory = exp?.kind === host && exp.mode === 'memory' && exp.visual;
+  const cycles = memory
+    ? events.filter((e: any) => e.type === 'memory-cycle')
+    : [];
+  const latestCycle = cycles.at(-1);
+  const completed = memory
+    ? events.filter((e: any) => e.type === 'memory-complete').length
+    : 0;
+  const acknowledged = useRef('');
+  const memoryURL =
+    latestCycle && current
+      ? current.url + '/?id=memory-' + exp.started + '-' + latestCycle.cycle
+      : '';
+  function pageReady() {
+    const key = exp.started + ':' + latestCycle.cycle;
+    if (acknowledged.current === key || !exp.running) return;
+    acknowledged.current = key;
+    void action('page-ready', {
+      experimentId: String(exp.started),
+      cycle: String(latestCycle.cycle),
+    }).catch((e) => {
+      acknowledged.current = '';
+      setError(String(e));
+    });
+  }
   return (
     <div className="shell">
       <aside>
@@ -148,7 +184,12 @@ export default function Console() {
           mf<span>/modern</span>
         </strong>
         <p>SSR CACHE LAB</p>
-        <button onClick={() => setTab('experience')}>功能体验</button>
+        <button
+          disabled={Boolean(exp?.running && exp?.visual)}
+          onClick={() => setTab('experience')}
+        >
+          功能体验
+        </button>
         <button onClick={() => setTab('memory')}>内存观察</button>
         <small>
           控制台 · Host · Remote
@@ -433,7 +474,11 @@ export default function Console() {
                 disabled={disabled}
                 onClick={() =>
                   run(() =>
-                    action('experiment', { mode: 'memory', count: '20' }),
+                    action('experiment', {
+                      mode: 'memory',
+                      count: '20',
+                      visual: '1',
+                    }),
                   )
                 }
               >
@@ -450,6 +495,65 @@ export default function Console() {
                 生成堆快照
               </button>
             </div>
+            <h3>逐轮更新的真实页面</h3>
+            <p data-testid="memory-progress">
+              {memory
+                ? `已完成 ${completed} / ${exp.total} 轮 · ${latestCycle ? '当前第 ' + latestCycle.cycle + ' 轮，目标 ' + latestCycle.release : '准备更新'}`
+                : '点击运行 20 次更新，逐轮查看 v2 / v1 页面。'}
+            </p>
+            <p className="hint">
+              每轮更新后发送 8 个 Node 请求，再打开一次真实 iframe
+              页面。等导航完成并展示至少 0.8 秒后，才进入下一轮；每 5 轮 GC
+              后采样。请保持此页打开，15 秒未收到页面加载确认会报告失败。
+            </p>
+            <div data-testid="memory-window">
+              <Browser
+                url={memoryURL}
+                title="本轮内存实验的 SSR 页面"
+                onReady={latestCycle ? pageReady : undefined}
+              />
+            </div>
+            <details open={Boolean(memory)}>
+              <summary>每轮更新记录</summary>
+              <div className="table">
+                <table data-testid="memory-cycles">
+                  <thead>
+                    <tr>
+                      <th>轮次</th>
+                      <th>目标版本</th>
+                      <th>页面导航</th>
+                      <th>本轮状态</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {cycles.map((cycle: any) => (
+                      <tr key={cycle.cycle}>
+                        <td>{cycle.cycle}</td>
+                        <td>{cycle.release}</td>
+                        <td>
+                          {events.some(
+                            (e: any) =>
+                              e.type === 'memory-page' &&
+                              e.cycle === cycle.cycle,
+                          )
+                            ? '已加载'
+                            : '等待页面'}
+                        </td>
+                        <td>
+                          {events.some(
+                            (e: any) =>
+                              e.type === 'memory-complete' &&
+                              e.cycle === cycle.cycle,
+                          )
+                            ? '已完成'
+                            : '进行中'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </details>
             <svg viewBox="0 0 600 180" role="img" aria-label="Heap used MiB">
               <polyline
                 fill="none"

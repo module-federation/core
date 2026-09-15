@@ -136,6 +136,30 @@ async function forward(kind, route, method = 'GET') {
         const kind = url.searchParams.get('host') || 'static';
         if (!hosts[kind]) throw Error('Unknown host');
         const action = url.pathname.slice(5);
+        if (action === 'page-ready') {
+          const cycle = Number(url.searchParams.get('cycle'));
+          if (
+            !experiment.running ||
+            !experiment.visual ||
+            experiment.kind !== kind ||
+            Number(url.searchParams.get('experimentId')) !==
+              experiment.started ||
+            !experiment.events.some(
+              (e) => e.type === 'memory-cycle' && e.cycle === cycle,
+            )
+          ) {
+            res.writeHead(409);
+            res.end('No matching memory cycle');
+            return;
+          }
+          worker.send({
+            type: 'page-ready',
+            cycle,
+            experimentId: experiment.started,
+          });
+          res.end(JSON.stringify({ accepted: true }));
+          return;
+        }
         if (action === 'html') {
           const route = url.searchParams.get('entry') === '/b' ? '/b' : '/';
           const response = await fetch(hosts[kind].url + route);
@@ -174,7 +198,11 @@ async function forward(kind, route, method = 'GET') {
             count = preset === 'overflow' ? 32 : 12;
             interval = 0;
           }
+          const visual =
+            mode === 'memory' && url.searchParams.get('visual') === '1';
           experiment = {
+            visual,
+            total: count,
             preset,
             running: true,
             kind,
@@ -184,6 +212,8 @@ async function forward(kind, route, method = 'GET') {
             events: [],
           };
           const args = {
+            visual,
+            experimentId: experiment.started,
             preset,
             url: hosts[kind].url,
             mode,

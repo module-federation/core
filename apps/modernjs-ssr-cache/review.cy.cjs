@@ -69,6 +69,38 @@ describe('Modern-native SSR review demo', () => {
     cy.contains('button', '内存观察').click();
     cy.contains('button', 'GC 后采样').click();
     cy.get('tbody').should('contain', 'true');
+    const pages = [];
+    cy.intercept('GET', '**/?id=memory-*', (req) => {
+      req.on('response', (res) =>
+        pages.push({
+          url: req.url,
+          status: res.statusCode,
+          html: String(res.body),
+        }),
+      );
+    });
+    cy.contains('button', '运行 20 次更新').click();
+    cy.get('[data-testid="memory-window"] iframe').should('exist');
+    cy.get('[data-testid="memory-progress"]', { timeout: 60000 }).should(
+      'contain',
+      '已完成 20 / 20',
+    );
+    cy.contains('button', '运行 20 次更新').should('not.be.disabled');
+    cy.get('[data-testid="memory-cycles"] tbody tr').should('have.length', 20);
+    cy.then(() => {
+      expect(pages).to.have.length(20);
+      expect(new Set(pages.map((page) => page.url)).size).to.equal(20);
+      pages.forEach((page, index) => {
+        expect(page.status).to.equal(200);
+        expect(page.html).to.contain(
+          'data-release="' + (index % 2 ? 'v1' : 'v2') + '"',
+        );
+      });
+    });
+    frame('本轮内存实验的 SSR 页面')
+      .find('[data-hydrated="true"]')
+      .should('exist');
+    cy.get('[data-testid="memory-window"]').screenshot('memory-update-window');
     cy.viewport(390, 844);
     cy.document().then((doc) =>
       expect(doc.documentElement.scrollWidth).to.be.at.most(390),
