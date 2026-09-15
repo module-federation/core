@@ -371,3 +371,47 @@ describe('next-internal-plugin onLoad', () => {
     });
   });
 });
+
+describe('next-internal-plugin createScript', () => {
+  const originalWindow = global.window;
+  const originalDocument = global.document;
+  const federationGlobal = globalThis as typeof globalThis & {
+    FEDERATION_NEXTJS_SCRIPT_TIMEOUT?: unknown;
+  };
+
+  beforeEach(() => {
+    global.window = {} as Window & typeof globalThis;
+    global.document = {
+      createElement: () => ({}),
+    } as unknown as Document;
+  });
+
+  afterEach(() => {
+    global.window = originalWindow;
+    global.document = originalDocument;
+    delete federationGlobal.FEDERATION_NEXTJS_SCRIPT_TIMEOUT;
+  });
+
+  const createScript = () =>
+    createRuntimePlugin().createScript!({
+      url: 'https://cdn.example.com/remoteEntry.js',
+      attrs: {},
+    });
+
+  it('defaults the remote entry timeout to 8000ms', () => {
+    expect(createScript()).toMatchObject({ timeout: 8000 });
+  });
+
+  it('uses FEDERATION_NEXTJS_SCRIPT_TIMEOUT when it is defined', () => {
+    federationGlobal.FEDERATION_NEXTJS_SCRIPT_TIMEOUT = 30000;
+    expect(createScript()).toMatchObject({ timeout: 30000 });
+  });
+
+  it.each([0, -1, NaN, null])(
+    'falls back to 8000ms for an invalid value (%p)',
+    (value) => {
+      federationGlobal.FEDERATION_NEXTJS_SCRIPT_TIMEOUT = value;
+      expect(createScript()).toMatchObject({ timeout: 8000 });
+    },
+  );
+});
