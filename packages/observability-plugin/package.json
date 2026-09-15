@@ -43,6 +43,11 @@
       "types": "./dist/build.d.ts",
       "import": "./dist/esm/build.js",
       "require": "./dist/build.js"
+    },
+    "./vite": {
+      "types": "./dist/vite.d.ts",
+      "import": "./dist/esm/vite.js",
+      "require": "./dist/vite.js"
     }
   },
   "typesVersions": {
@@ -61,12 +66,23 @@
       ],
       "build": [
         "./dist/build.d.ts"
+      ],
+      "vite": [
+        "./dist/vite.d.ts"
       ]
     }
   },
   "devDependencies": {
     "@module-federation/runtime": "workspace:*",
     "@types/semver": "^7.5.8"
+  },
+  "peerDependencies": {
+    "vite": ">=5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "vite": {
+      "optional": true
+    }
   },
   "dependencies": {
     "@module-federation/sdk": "workspace:*",
