@@ -109,7 +109,10 @@ export function collectGraph(
     const scope = data.shareScope;
     const layer = data.shareConfig.layer ?? undefined;
     const layered = layer !== undefined || Array.isArray(scope);
-    const key = layered ? getSharedIdentityKey(name, scope, layer) : name;
+    const key =
+      layered || scope !== 'default'
+        ? getSharedIdentityKey(name, scope, layer)
+        : name;
     const configured = Object.entries(sharedManager.normalizedOptions)
       .filter(([key, value]) => {
         const shareKey = value.shareKey || key;
@@ -142,8 +145,8 @@ export function collectGraph(
       if (layered) {
         row.id = `${options.name}:shared:${key}`;
         if (layer !== undefined) row.layer = layer;
-        if (scope !== 'default') row.shareScope = scope;
       }
+      if (scope !== 'default') row.shareScope = scope;
       sharedMap[key] = row;
     }
     if (consume) {
