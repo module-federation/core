@@ -354,6 +354,61 @@ module.exports = {
 };
 ```
 
+No Vite, use um adaptador irmão ao lado de `federation()` de
+`@module-federation/vite`. Passe as mesmas opções de Module Federation
+explicitamente, ou deixe o adaptador lê-las da lista de plugins Vite
+resolvida. A observabilidade de runtime não muda: continue usando
+`ObservabilityPlugin` com `createInstance` ou `runtimePlugins`.
+
+```ts title="vite.config.ts"
+import { defineConfig } from 'vite';
+import { federation } from '@module-federation/vite';
+import { ObservabilityVitePlugin } from '@module-federation/observability-plugin/vite';
+
+const moduleFederationOptions = {
+  name: 'runtime_host',
+  remotes: {
+    remote1: {
+      type: 'module',
+      name: 'remote1',
+      entry: 'https://example.com/mf-manifest.json',
+    },
+  },
+  exposes: {
+    './Button': './src/Button.tsx',
+  },
+  shared: {
+    react: { singleton: true, requiredVersion: '^18.0.0' },
+  },
+  manifest: true,
+};
+
+export default defineConfig({
+  plugins: [
+    federation(moduleFederationOptions),
+    ObservabilityVitePlugin({
+      moduleFederation: moduleFederationOptions,
+    }),
+  ],
+});
+```
+
+`ObservabilityBuildPlugin` e `ObservabilityVitePlugin` aceitam as mesmas
+opções. O adaptador Vite define `bundler: "vite"` e lê `mf-manifest.json` /
+`mf-stats.json` do disco após o emit, não a partir de webpack assets.
+
+| Opção | Tipo | Padrão | Descrição |
+| --- | --- | --- | --- |
+| `enabled` | `boolean` | `true` | Habilita o plugin de observabilidade de build. |
+| `outputFile` | `string` | `'.mf/observability/build-info.json'` | Resumo de build escrito após uma captura bem-sucedida. |
+| `errorReport` | `false \| object` | `{}` | Escreve um relatório de erro de build. Use `false` para desligar. |
+| `errorReport.outputFile` | `string` | `'.mf/observability/build-report.json'` | Caminho do relatório de erro de build. |
+| `cwd` | `string` | contexto do compiler ou `root` do Vite | Diretório base para caminhos de saída relativos. |
+| `bundler` | `string` | `webpack` / `rspack` / `vite` | Sobrescreve o nome do bundler. |
+| `bundlerVersion` | `string` | auto | Sobrescreve a versão do bundler. |
+| `pluginVersion` | `string` | auto | Sobrescreve a versão do plugin de Module Federation. |
+| `moduleFederation` | `unknown` | auto | Configuração explícita de Module Federation para remotes, exposes e shared. |
+
 Build observability pode write:
 
 - `.mf/observability/build-info.json`

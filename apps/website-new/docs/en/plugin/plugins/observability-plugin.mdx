@@ -355,6 +355,61 @@ module.exports = {
 };
 ```
 
+Vite uses a sibling build adapter next to `federation()` from
+`@module-federation/vite`. Pass the same Module Federation options explicitly,
+or let the adapter read them from the resolved Vite plugin list. Runtime
+observability is unchanged: keep using `ObservabilityPlugin` with
+`createInstance` or `runtimePlugins`.
+
+```ts title="vite.config.ts"
+import { defineConfig } from 'vite';
+import { federation } from '@module-federation/vite';
+import { ObservabilityVitePlugin } from '@module-federation/observability-plugin/vite';
+
+const moduleFederationOptions = {
+  name: 'runtime_host',
+  remotes: {
+    remote1: {
+      type: 'module',
+      name: 'remote1',
+      entry: 'https://example.com/mf-manifest.json',
+    },
+  },
+  exposes: {
+    './Button': './src/Button.tsx',
+  },
+  shared: {
+    react: { singleton: true, requiredVersion: '^18.0.0' },
+  },
+  manifest: true,
+};
+
+export default defineConfig({
+  plugins: [
+    federation(moduleFederationOptions),
+    ObservabilityVitePlugin({
+      moduleFederation: moduleFederationOptions,
+    }),
+  ],
+});
+```
+
+`ObservabilityBuildPlugin` and `ObservabilityVitePlugin` accept the same
+options. The Vite adapter sets `bundler: "vite"` and reads `mf-manifest.json` /
+`mf-stats.json` from disk after emit instead of from webpack assets.
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `enabled` | `boolean` | `true` | Enable the build observability plugin. |
+| `outputFile` | `string` | `'.mf/observability/build-info.json'` | Build summary written after a successful capture. |
+| `errorReport` | `false \| object` | `{}` | Write a build error report. Set to `false` to disable. |
+| `errorReport.outputFile` | `string` | `'.mf/observability/build-report.json'` | Build error report path. |
+| `cwd` | `string` | compiler context or Vite `root` | Base directory for relative output paths. |
+| `bundler` | `string` | `webpack` / `rspack` / `vite` | Override the bundler name. |
+| `bundlerVersion` | `string` | auto-detected | Override the bundler version. |
+| `pluginVersion` | `string` | auto-detected | Override the Module Federation plugin version. |
+| `moduleFederation` | `unknown` | auto-read | Explicit Module Federation config for remotes, exposes, and shared. |
+
 Build observability can write:
 
 - `.mf/observability/build-info.json`

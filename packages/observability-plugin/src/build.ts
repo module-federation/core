@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import { createRequire } from 'node:module';
 import path from 'node:path';
 import { simpleJoinRemoteEntry } from '@module-federation/sdk';
 
@@ -169,6 +170,77 @@ export interface ObservabilityBuildPluginOptions {
   bundlerVersion?: string;
   pluginVersion?: string;
   moduleFederation?: unknown;
+}
+
+export type ObservabilityVitePluginOptions = ObservabilityBuildPluginOptions;
+
+interface ObservabilityBuildWriteContext {
+  options: ObservabilityBuildPluginOptions;
+  cwd: string;
+  moduleFederation?: unknown;
+  manifest?: unknown;
+  stats?: unknown;
+  compilerOptions?: Record<string, unknown>;
+  bundler?: string;
+  bundlerVersion?: string;
+  pluginVersion?: string;
+  errors?: unknown[];
+  startedAt?: number;
+  warn?: (error: unknown, action?: string) => void;
+}
+
+interface ViteResolvedConfigLike {
+  root?: string;
+  mode?: string;
+  base?: string;
+  command?: string;
+  viteVersion?: string;
+  build?: {
+    outDir?: string;
+    target?: unknown;
+    ssr?: unknown;
+  };
+  plugins?: unknown[];
+}
+
+interface VitePluginContextLike {
+  warn?: (message: string) => void;
+  meta?: {
+    viteVersion?: string;
+  };
+  environment?: {
+    name?: string;
+    config?: {
+      consumer?: string;
+      build?: {
+        ssr?: unknown;
+      };
+    };
+  };
+}
+
+interface ViteOutputOptionsLike {
+  dir?: string;
+  file?: string;
+}
+
+export interface ObservabilityVitePluginResult {
+  name: string;
+  enforce?: 'pre' | 'post';
+  apply?: 'build' | 'serve';
+  buildStart?: () => void;
+  configResolved?: (config: ViteResolvedConfigLike) => void;
+  buildEnd?: (error?: Error) => void;
+  writeBundle?: (
+    this: VitePluginContextLike,
+    outputOptions: ViteOutputOptionsLike,
+    bundle?: unknown,
+  ) => void;
+  closeBundle?: {
+    sequential: true;
+    order: 'post';
+    handler: (this: VitePluginContextLike) => void;
+  };
 }
 
 interface CompilerLike {
@@ -1317,40 +1389,33 @@ function getProcessAssetsStage(
   );
 }
 
-function getOutputFile(
+function resolveCwd(configuredCwd?: string, fallbackCwd?: string) {
+  return configuredCwd || fallbackCwd || process.cwd();
+}
+
+function getCompilerCwd(
   options: ObservabilityBuildPluginOptions,
   compiler: CompilerLike,
 ) {
-  return getResolvedOutputFile(options.outputFile || DEFAULT_OUTPUT_FILE, {
-    cwd: options.cwd,
-    compiler,
-  });
+  return resolveCwd(
+    options.cwd,
+    getString(compiler.options?.['context']) || compiler.context,
+  );
 }
 
-function getResolvedOutputFile(
-  outputFile: string,
-  {
-    cwd: configuredCwd,
-    compiler,
-  }: {
-    cwd?: string;
-    compiler: CompilerLike;
-  },
-) {
-  const cwd =
-    configuredCwd ||
-    getString(compiler.options?.['context']) ||
-    compiler.context ||
-    process.cwd();
-
+function getResolvedOutputFile(outputFile: string, cwd: string) {
   return path.isAbsolute(outputFile)
     ? outputFile
     : path.resolve(cwd, outputFile);
 }
 
+function getOutputFile(options: ObservabilityBuildPluginOptions, cwd: string) {
+  return getResolvedOutputFile(options.outputFile || DEFAULT_OUTPUT_FILE, cwd);
+}
+
 function getBuildReportOutputFile(
   options: ObservabilityBuildPluginOptions,
-  compiler: CompilerLike,
+  cwd: string,
 ) {
   const reportOptions = options.errorReport;
   const outputFile =
@@ -1358,17 +1423,15 @@ function getBuildReportOutputFile(
       ? undefined
       : reportOptions?.outputFile || DEFAULT_REPORT_FILE;
 
-  return outputFile
-    ? getResolvedOutputFile(outputFile, { cwd: options.cwd, compiler })
-    : undefined;
+  return outputFile ? getResolvedOutputFile(outputFile, cwd) : undefined;
 }
 
 function writeBuildInfo(
   buildInfo: ObservabilityBuildInfo,
   options: ObservabilityBuildPluginOptions,
-  compiler: CompilerLike,
+  cwd: string,
 ) {
-  const outputFile = getOutputFile(options, compiler);
+  const outputFile = getOutputFile(options, cwd);
   fs.mkdirSync(path.dirname(outputFile), { recursive: true });
   fs.writeFileSync(
     outputFile,
@@ -1380,9 +1443,9 @@ function writeBuildInfo(
 function writeBuildReport(
   report: ObservabilityBuildReport,
   options: ObservabilityBuildPluginOptions,
-  compiler: CompilerLike,
+  cwd: string,
 ) {
-  const outputFile = getBuildReportOutputFile(options, compiler);
+  const outputFile = getBuildReportOutputFile(options, cwd);
   if (!outputFile) {
     return;
   }
@@ -1393,9 +1456,9 @@ function writeBuildReport(
 
 function removeStaleBuildReport(
   options: ObservabilityBuildPluginOptions,
-  compiler: CompilerLike,
+  cwd: string,
 ) {
-  const outputFile = getBuildReportOutputFile(options, compiler);
+  const outputFile = getBuildReportOutputFile(options, cwd);
   if (!outputFile || !fs.existsSync(outputFile)) {
     return;
   }
@@ -1403,31 +1466,171 @@ function removeStaleBuildReport(
   fs.rmSync(outputFile, { force: true });
 }
 
+function formatBuildWarnMessage(
+  error: unknown,
+  action = 'write build observability',
+  pluginName = PLUGIN_NAME,
+) {
+  const message =
+    getRawText(error instanceof Error ? error.message : String(error)) ||
+    'unknown error';
+  return `[${pluginName}] Failed to ${action}: ${message}`;
+}
+
 function warn(
   compiler: CompilerLike,
   error: unknown,
   action = 'write build observability',
 ) {
-  const message =
-    getRawText(error instanceof Error ? error.message : String(error)) ||
-    'unknown error';
   const logger = compiler.getInfrastructureLogger?.(PLUGIN_NAME);
-  logger?.warn?.(`[${PLUGIN_NAME}] Failed to ${action}: ${message}`);
+  logger?.warn?.(formatBuildWarnMessage(error, action));
 }
 
 function writeBuildReportSafely(
   report: ObservabilityBuildReport | undefined,
   options: ObservabilityBuildPluginOptions,
-  compiler: CompilerLike,
+  cwd: string,
+  warnFn: (error: unknown, action?: string) => void,
 ) {
   if (!report) {
     return;
   }
 
   try {
-    writeBuildReport(report, options, compiler);
+    writeBuildReport(report, options, cwd);
   } catch (error) {
-    warn(compiler, error, 'write build observability report');
+    warnFn(error, 'write build observability report');
+  }
+}
+
+function readJsonFile(filePath: string): Record<string, unknown> | undefined {
+  if (!fs.existsSync(filePath)) {
+    return undefined;
+  }
+
+  try {
+    return getRecord(JSON.parse(fs.readFileSync(filePath, 'utf8')));
+  } catch {
+    return undefined;
+  }
+}
+
+function uniquePaths(paths: Array<string | undefined>): string[] {
+  const seen = new Set<string>();
+  const result: string[] = [];
+
+  for (const value of paths) {
+    if (!value || seen.has(value)) {
+      continue;
+    }
+    seen.add(value);
+    result.push(value);
+  }
+
+  return result;
+}
+
+function resolveObservabilityJsonFile(
+  fileName: string,
+  searchDirs: Array<string | undefined>,
+): Record<string, unknown> | undefined {
+  const candidates = uniquePaths(
+    searchDirs.flatMap((dir) => {
+      if (!dir) {
+        return path.isAbsolute(fileName) ? [fileName] : [];
+      }
+
+      return [
+        path.isAbsolute(fileName) ? fileName : path.resolve(dir, fileName),
+        path.resolve(dir, path.basename(fileName)),
+      ];
+    }),
+  );
+
+  for (const candidate of candidates) {
+    const json = readJsonFile(candidate);
+    if (json) {
+      return json;
+    }
+  }
+
+  return undefined;
+}
+
+function writeObservabilityBuildCapture(
+  context: ObservabilityBuildWriteContext,
+): void {
+  const startedAt = context.startedAt || Date.now();
+  const warnFn = context.warn || (() => undefined);
+  const pluginVersion = context.pluginVersion || context.options.pluginVersion;
+
+  try {
+    const buildInfo = createObservabilityBuildInfo({
+      moduleFederation: context.moduleFederation,
+      manifest: context.manifest,
+      stats: context.stats,
+      compilerOptions: context.compilerOptions,
+      bundler: context.bundler,
+      bundlerVersion: context.bundlerVersion,
+      pluginVersion,
+    });
+    let observabilityOutputFailed = false;
+
+    try {
+      writeBuildInfo(buildInfo, context.options, context.cwd);
+    } catch (error) {
+      observabilityOutputFailed = true;
+      warnFn(error);
+      writeBuildReportSafely(
+        createBuildReport(
+          buildInfo,
+          [error],
+          'observability-output',
+          startedAt,
+        ),
+        context.options,
+        context.cwd,
+        warnFn,
+      );
+    }
+
+    const errors = context.errors || [];
+    if (errors.length) {
+      writeBuildReportSafely(
+        createBuildReport(buildInfo, errors, 'compilation', startedAt),
+        context.options,
+        context.cwd,
+        warnFn,
+      );
+    } else if (!observabilityOutputFailed) {
+      try {
+        removeStaleBuildReport(context.options, context.cwd);
+      } catch (error) {
+        warnFn(error, 'remove stale build observability report');
+      }
+    }
+  } catch (error) {
+    const fallbackBuildInfo = createObservabilityBuildInfo({
+      moduleFederation:
+        context.moduleFederation || context.options.moduleFederation,
+      compilerOptions: context.compilerOptions,
+      bundler: context.bundler,
+      bundlerVersion: context.bundlerVersion,
+      pluginVersion,
+    });
+
+    warnFn(error);
+    writeBuildReportSafely(
+      createBuildReport(
+        fallbackBuildInfo,
+        [error],
+        'observability-output',
+        startedAt,
+      ),
+      context.options,
+      context.cwd,
+      warnFn,
+    );
   }
 }
 
@@ -1451,100 +1654,253 @@ export class ObservabilityBuildPlugin {
           stage: getProcessAssetsStage(compiler, compilation),
         },
         async () => {
-          const startedAt = Date.now();
-          try {
-            const moduleFederation = getModuleFederationOptions(
+          const cwd = getCompilerCwd(this.options, compiler);
+          const moduleFederation = getModuleFederationOptions(
+            this.options,
+            compiler,
+          );
+          const fileNames = getManifestFileName(
+            getRecord(moduleFederation)?.['manifest'],
+          );
+
+          writeObservabilityBuildCapture({
+            options: this.options,
+            cwd,
+            moduleFederation,
+            manifest: readJsonAsset(compilation, fileNames.manifestFileName),
+            stats: readJsonAsset(compilation, fileNames.statsFileName),
+            compilerOptions: getCompilerOptions(compiler),
+            bundler: getBundlerFromCompiler(this.options, compiler),
+            bundlerVersion: getBundlerVersionFromCompiler(
               this.options,
               compiler,
-            );
-            const fileNames = getManifestFileName(
-              getRecord(moduleFederation)?.['manifest'],
-            );
-            const manifest = readJsonAsset(
-              compilation,
-              fileNames.manifestFileName,
-            );
-            const stats = readJsonAsset(compilation, fileNames.statsFileName);
-            const buildInfo = createObservabilityBuildInfo({
-              moduleFederation,
-              manifest,
-              stats,
-              compilerOptions: getCompilerOptions(compiler),
-              bundler: getBundlerFromCompiler(this.options, compiler),
-              bundlerVersion: getBundlerVersionFromCompiler(
-                this.options,
-                compiler,
-              ),
-              pluginVersion: this.options.pluginVersion,
-            });
-            let observabilityOutputFailed = false;
-
-            try {
-              writeBuildInfo(buildInfo, this.options, compiler);
-            } catch (error) {
-              observabilityOutputFailed = true;
-              warn(compiler, error);
-              writeBuildReportSafely(
-                createBuildReport(
-                  buildInfo,
-                  [error],
-                  'observability-output',
-                  startedAt,
-                ),
-                this.options,
-                compiler,
-              );
-            }
-
-            const compilationErrors = compilation.errors || [];
-            if (compilationErrors.length) {
-              writeBuildReportSafely(
-                createBuildReport(
-                  buildInfo,
-                  compilationErrors,
-                  'compilation',
-                  startedAt,
-                ),
-                this.options,
-                compiler,
-              );
-            } else if (!observabilityOutputFailed) {
-              try {
-                removeStaleBuildReport(this.options, compiler);
-              } catch (error) {
-                warn(
-                  compiler,
-                  error,
-                  'remove stale build observability report',
-                );
-              }
-            }
-          } catch (error) {
-            const fallbackBuildInfo = createObservabilityBuildInfo({
-              moduleFederation: this.options.moduleFederation,
-              compilerOptions: getCompilerOptions(compiler),
-              bundler: getBundlerFromCompiler(this.options, compiler),
-              bundlerVersion: getBundlerVersionFromCompiler(
-                this.options,
-                compiler,
-              ),
-              pluginVersion: this.options.pluginVersion,
-            });
-
-            warn(compiler, error);
-            writeBuildReportSafely(
-              createBuildReport(
-                fallbackBuildInfo,
-                [error],
-                'observability-output',
-                startedAt,
-              ),
-              this.options,
-              compiler,
-            );
-          }
+            ),
+            errors: compilation.errors || [],
+            warn: (error, action) => warn(compiler, error, action),
+          });
         },
       );
     });
   }
+}
+
+const VITE_PLUGIN_NAME = 'module-federation-observability-build';
+const VITE_MF_PLUGIN_NAMES = new Set([
+  'module-federation-vite',
+  'module-federation',
+]);
+
+function flattenPlugins(plugins: unknown): unknown[] {
+  if (!Array.isArray(plugins)) {
+    return plugins ? [plugins] : [];
+  }
+
+  return plugins.flatMap((plugin) => flattenPlugins(plugin));
+}
+
+function getViteModuleFederationOptions(
+  options: ObservabilityVitePluginOptions,
+  config: ViteResolvedConfigLike | undefined,
+): unknown {
+  if (options.moduleFederation) {
+    return options.moduleFederation;
+  }
+
+  for (const plugin of flattenPlugins(config?.plugins)) {
+    const pluginRecord = getRecord(plugin);
+    if (!pluginRecord) {
+      continue;
+    }
+
+    const pluginName = getString(pluginRecord['name']);
+    if (!pluginName || !VITE_MF_PLUGIN_NAMES.has(pluginName)) {
+      continue;
+    }
+
+    return pluginRecord['_options'] || pluginRecord['options'];
+  }
+
+  return undefined;
+}
+
+function getInstalledPackageVersion(
+  packageName: string,
+  cwd: string,
+): string | undefined {
+  try {
+    const requireFromCwd = createRequire(path.join(cwd, 'package.json'));
+    const pkg = requireFromCwd(`${packageName}/package.json`) as {
+      version?: unknown;
+    };
+    return getSanitizedString(pkg.version, 80);
+  } catch {
+    return undefined;
+  }
+}
+
+function getViteOutDir(
+  config: ViteResolvedConfigLike | undefined,
+  outputOptions: ViteOutputOptionsLike | undefined,
+) {
+  const root = config?.root || process.cwd();
+  const configuredOutDir = getString(config?.build?.['outDir']) || 'dist';
+
+  return uniquePaths([
+    getString(outputOptions?.dir),
+    path.isAbsolute(configuredOutDir)
+      ? configuredOutDir
+      : path.resolve(root, configuredOutDir),
+    getString(outputOptions?.file)
+      ? path.dirname(outputOptions?.file as string)
+      : undefined,
+  ]);
+}
+
+function isViteServerEnvironment(
+  pluginContext: VitePluginContextLike | undefined,
+) {
+  const environmentName = getString(pluginContext?.environment?.name);
+  if (environmentName === 'ssr' || environmentName === 'server') {
+    return true;
+  }
+
+  return pluginContext?.environment?.config?.consumer === 'server';
+}
+
+function getViteCompilerOptions(config: ViteResolvedConfigLike | undefined) {
+  return {
+    mode: config?.mode,
+    target: config?.build?.target,
+    output: {
+      publicPath: config?.base,
+    },
+  };
+}
+
+function getViteBundlerVersion(
+  options: ObservabilityVitePluginOptions,
+  config: ViteResolvedConfigLike | undefined,
+  pluginContext: VitePluginContextLike | undefined,
+  cwd: string,
+) {
+  return (
+    options.bundlerVersion ||
+    getSanitizedString(pluginContext?.meta?.viteVersion, 80) ||
+    getSanitizedString(config?.viteVersion, 80) ||
+    getInstalledPackageVersion('vite', cwd)
+  );
+}
+
+function getVitePluginVersion(
+  options: ObservabilityVitePluginOptions,
+  cwd: string,
+) {
+  return (
+    options.pluginVersion ||
+    getInstalledPackageVersion('@module-federation/vite', cwd)
+  );
+}
+
+/**
+ * Vite build adapter for Module Federation observability.
+ *
+ * Use it as a second Vite plugin beside `federation(...)` from
+ * `@module-federation/vite`. Runtime observability stays on
+ * `ObservabilityPlugin` via runtime plugins / `createInstance`.
+ */
+export function ObservabilityVitePlugin(
+  options: ObservabilityVitePluginOptions = {},
+): ObservabilityVitePluginResult {
+  let resolvedConfig: ViteResolvedConfigLike | undefined;
+  let buildError: Error | undefined;
+  let captured = false;
+
+  const capture = (
+    pluginContext: VitePluginContextLike | undefined,
+    outputOptions?: ViteOutputOptionsLike,
+  ) => {
+    if (options.enabled === false || captured) {
+      return;
+    }
+
+    if (isViteServerEnvironment(pluginContext)) {
+      return;
+    }
+
+    captured = true;
+
+    const cwd = resolveCwd(options.cwd, resolvedConfig?.root);
+    const moduleFederation = getViteModuleFederationOptions(
+      options,
+      resolvedConfig,
+    );
+    const fileNames = getManifestFileName(
+      getRecord(moduleFederation)?.['manifest'],
+    );
+    const searchDirs = uniquePaths([
+      cwd,
+      resolvedConfig?.root,
+      ...getViteOutDir(resolvedConfig, outputOptions),
+    ]);
+    const warnFn = (error: unknown, action?: string) => {
+      const message = formatBuildWarnMessage(
+        error,
+        action,
+        'ObservabilityVitePlugin',
+      );
+      if (typeof pluginContext?.warn === 'function') {
+        pluginContext.warn(message);
+        return;
+      }
+      console.warn(message);
+    };
+
+    writeObservabilityBuildCapture({
+      options,
+      cwd,
+      moduleFederation,
+      manifest: resolveObservabilityJsonFile(
+        fileNames.manifestFileName,
+        searchDirs,
+      ),
+      stats: resolveObservabilityJsonFile(fileNames.statsFileName, searchDirs),
+      compilerOptions: getViteCompilerOptions(resolvedConfig),
+      bundler: options.bundler || 'vite',
+      bundlerVersion: getViteBundlerVersion(
+        options,
+        resolvedConfig,
+        pluginContext,
+        cwd,
+      ),
+      pluginVersion: getVitePluginVersion(options, cwd),
+      errors: buildError ? [buildError] : [],
+      warn: warnFn,
+    });
+  };
+
+  return {
+    name: VITE_PLUGIN_NAME,
+    enforce: 'post',
+    apply: 'build',
+    buildStart() {
+      captured = false;
+      buildError = undefined;
+    },
+    configResolved(config) {
+      resolvedConfig = config;
+    },
+    buildEnd(error) {
+      buildError = error;
+    },
+    writeBundle(outputOptions) {
+      capture(this, outputOptions);
+    },
+    closeBundle: {
+      sequential: true,
+      order: 'post',
+      handler() {
+        capture(this);
+      },
+    },
+  };
 }
