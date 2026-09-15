@@ -1,0 +1,68 @@
+function frame(title) {
+  return cy
+    .get('iframe[title="' + title + '"]')
+    .its('0.contentDocument.body')
+    .should('not.be.empty')
+    .then(cy.wrap);
+}
+describe('Modern-native SSR review demo', () => {
+  it('renders the console itself with Modern SSR, then updates real host hydration', () => {
+    cy.request('/').its('body').should('contain', '此控制台由 Modern SSR 渲染');
+    cy.visit('/');
+    frame('保留的旧页面').find('[data-hydrated="true"]').should('exist');
+    frame('保留的旧页面').find('[aria-label="增加 BPM"]').click();
+    frame('保留的旧页面').find('[data-testid="bpm"]').should('contain', '125');
+    cy.contains('button', '更新到 v2').should('not.be.disabled').click();
+    cy.get('iframe[title="新请求的页面"]').should((f) =>
+      expect(
+        f[0].contentDocument.body.querySelector('[data-release="v2"]'),
+      ).not.to.equal(null),
+    );
+    frame('新请求的页面').find('[data-hydrated="true"]').should('exist');
+    frame('保留的旧页面').find('[data-testid="bpm"]').should('contain', '125');
+    cy.contains('button', '查看真实 HTML').click();
+    cy.get('[role="dialog"]').should('contain', 'data-release="v2"');
+    cy.contains('button', '关闭').click();
+    cy.screenshot('modern-console', { capture: 'fullPage' });
+  });
+  it('loads a dynamic remote in the browser and then includes it in SSR', () => {
+    cy.visit('/');
+    cy.contains('button', '动态 Host').click();
+    frame('新请求的页面').find('[data-hydrated="true"]').should('exist');
+    frame('新请求的页面').contains('button', '加载配色面板').click();
+    frame('新请求的页面').should('contain', 'Choose a mood.');
+    cy.contains('button', '注册动态 Remote 并 SSR').click();
+    cy.contains('button', '查看真实 HTML').should('not.be.disabled').click();
+    cy.get('[role="dialog"]').should('contain', 'Choose a mood.');
+    cy.contains('button', '关闭').click();
+  });
+  it('opens a real iframe during update, allows unaffected B, and samples memory', () => {
+    cy.visit('/');
+    cy.contains('button', '静态 Host').click();
+    cy.get('[data-testid="experiment"]').click();
+    cy.get('[data-testid="traffic-window"] .waiting').should('be.visible');
+    cy.get('[data-testid="experiment"]').should('not.be.disabled');
+    frame('更新期间打开的页面').should('contain', 'Find your rhythm.');
+    frame('更新期间打开的页面').find('[data-hydrated="true"]').should('exist');
+    frame('更新期间打开的页面').find('[aria-label="增加 BPM"]').click();
+    frame('更新期间打开的页面')
+      .find('[data-testid="bpm"]')
+      .should('contain', '125');
+    cy.get('[data-testid="traffic-window"]').screenshot('modern-update-window');
+    cy.contains('label', '模式').find('select').select('manual');
+    cy.contains('label', '窗口入口').find('select').select('/b');
+    cy.get('[data-testid="experiment"]').click();
+    frame('更新期间打开的页面').should('contain', 'Choose a mood.');
+    cy.get('[data-testid="phase"]').should('contain', 'draining');
+    cy.contains('button', '释放旧请求').click();
+    cy.get('[data-testid="experiment"]').should('not.be.disabled');
+    cy.contains('button', '内存观察').click();
+    cy.contains('button', 'GC 后采样').click();
+    cy.get('tbody').should('contain', 'true');
+    cy.viewport(390, 844);
+    cy.document().then((doc) =>
+      expect(doc.documentElement.scrollWidth).to.be.at.most(390),
+    );
+    cy.screenshot('modern-memory-mobile', { capture: 'viewport' });
+  });
+});
