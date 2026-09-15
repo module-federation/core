@@ -618,3 +618,323 @@ remain excluded. Arbitrary global side effects are not undone. A final run again
 newly published MF/Modern preview packages, after these changes merge, is still a
 release gate: local-source success is not certification of an unpublished package
 combination. No publish command was run.
+
+## R6 published-package gate closed — 2026-09-14
+
+The user published MF `0.0.0-feat-mf-ssr-clear-cache-20260914081229` and Modern
+`0.0.0-canary-20260914082926` after merging #5075 / Modern #8870. Both package
+families were installed from npm into `/private/tmp/mf-ssr-published-20260914`,
+with no workspace package links. Rspack is pinned through the published
+`npm:@rspack-canary/core@2.2.3-canary-fde17bab-20260911103204` alias, including
+transitive compiler dependencies. React/React DOM 19.2.8 and TypeScript 5.9.3 are
+installed there. The exact installation manifest is in `README.md`.
+
+**The final published combination passes.** The production CLI, renderer/runtime,
+server-core, prod-server, MF adapter and compiler resolve inside the independent
+installation's pnpm store. `packages.json` records their versions and real paths.
+MF's internal package dependencies use the same MF preview version; Modern's
+internal package dependencies use the same Modern preview version. Repository
+sources supply only the harness, Cypress and compiler selection hook. No local
+MF/Modern `dist` implementation is used in these acceptance runs.
+
+The real production build/server run passes browser hydration of current and
+delayed-old HTML; React stream draining; loader/action handling; cancelled active
+producer tracking; cancelled queued waiter removal; queue overflow and admission
+expiry; drain timeout before mutation; request-side update reentry rejection;
+runtime-only remote registration/load; failed publication, liveness/readiness and
+explicit recovery. An action rejected while queued does not execute. Listener PID
+and port remain unchanged.
+
+300 updates with eight concurrent SSR requests each pass (2400 requests after the
+lifecycle checks). Every response's server release matches its public HTML mapping.
+Post-GC heap remains within the regression budget; two MF instances/two host
+bindings remain stable and idle active/pending request counts are zero:
+
+| Cycle | Heap MiB | RSS MiB | Active native resources |
+| --- | --- | --- | --- |
+| 20 | 33.36 | 197.91 | 2 servers, 20 sockets |
+| 100 | 34.64 | 211.67 | 2 servers, 20 sockets |
+| 200 | 34.76 | 226.78 | 2 servers, 18 sockets |
+| 300 | 34.92 | 227.98 | 2 servers, 18 sockets |
+
+All three published static artifact variants pass, including independent-entry
+traffic during selective updates, preserved unrelated modules, revisions, recovery,
+and shared/concatenated ownership. The companion Modern test source is copied
+unchanged; all modules under test are published packages.
+
+Commands run:
+
+```sh
+# In the isolated installation (manifest recorded in README.md):
+pnpm install --no-frozen-lockfile
+# In the MF test worktree:
+NODE_ENV=production SSR_CACHE_PACKAGES_ROOT=/private/tmp/mf-ssr-published-20260914 SSR_CACHE_PRODUCTION_CYCLES=300 node --expose-gc tools/ssr-cache/production.cjs
+SSR_CACHE_PACKAGES_ROOT=/private/tmp/mf-ssr-published-20260914 SSR_CACHE_MODERN_ROOT=/private/tmp/modern-r4-static-update node tools/ssr-cache/published-static.cjs
+pnpm exec prettier --check .
+node --check tools/ssr-cache/production.cjs
+node --check tools/ssr-cache/production-fixture.cjs
+node --check tools/ssr-cache/published-static.cjs
+git diff --check
+```
+
+The install uses an explicit npm registry in the isolated `.npmrc`. Initial setup
+incorrectly requested the canary under `@rspack/core` directly; correcting the
+alias to `@rspack-canary/core` resolved that installation error. The first copied
+static fixture lacked the published runtime-tools dependency context in its
+synthetic layout, causing a module-resolution failure before compilation. Adding
+that package's actual dependency directory to the temporary layout fixed the
+harness; no published package was patched. The committed helper includes this
+mapping, and all three variants were rerun successfully.
+
+No package implementation changes or changeset are needed for this gate: the
+committed changes only add published-package harness resolution and acceptance
+records. Package builds/unit tests were not rerun because rebuilding from source
+would not validate the published artifacts; the full production and static
+artifact matrices were used instead. The worktree uses direct commands rather
+than the aggregate `ci:local` runner. Unrelated CI pipelines, external CDN retention
+and a particular deployment supervisor remain outside this acceptance scope.
+The bounded resource test does not certify arbitrary business side effects or
+infinite uptime; CommonJS application roots and ordinary HTML SSR remain the
+supported scope, with RSC/native ESM excluded. Those are documented boundaries,
+not unclosed defects in this package combination.
+
+## E2E ownership and CI integration — 2026-09-14
+
+The production acceptance scenarios are end-to-end tests. Keeping their executable
+entry under `tools/ssr-cache` without normal E2E integration was incomplete. They
+now belong to the private `modernjs-ssr-cache-updates` application under
+`apps/modernjs-ssr/cache-updates/e2e`. Historical command paths above describe the
+runs actually performed; use the application's README for current commands.
+
+The Cypress hydration spec is a checked-in `release.cy.cjs`, and the native static
+artifact test is checked in as `static.test.cjs`. Neither normal E2E nor published
+acceptance requires another Modern source checkout. Normal runs use workspace MF
+code with fixed Modern canary dependencies; published runs accept an independent
+installation through `SSR_CACHE_PACKAGES_ROOT`. The production fixture retains
+mixed-consumption/full-application mode, while the separate three-mode native
+suite verifies selective updates and independent-entry traffic.
+
+`pnpm run e2e:modern:ssr:cache` runs all new scenarios. The existing
+`pnpm run e2e:modern:ssr` preserves manifest and legacy-cache checks, then runs this
+new suite. The GitHub Modern SSR workflow now calls that same root command, as the
+local CI parity runner already does. Affected-suite detection includes the new
+private application and the shared compiler-selection hook.
+
+Commands executed:
+
+```sh
+corepack enable
+pnpm install --lockfile-only --ignore-scripts
+pnpm install --frozen-lockfile
+pnpm exec turbo run build --filter=@module-federation/modern-js-v3
+pnpm run e2e:modern:ssr:cache
+pnpm run e2e:modern:ssr
+SSR_CACHE_PACKAGES_ROOT=/private/tmp/mf-ssr-published-20260914 pnpm run e2e:modern:ssr:cache
+node --test tools/scripts/ci-is-affected.test.mjs
+pnpm exec prettier --check .
+node --check apps/modernjs-ssr/cache-updates/e2e/production.cjs
+node --check apps/modernjs-ssr/cache-updates/e2e/production-fixture.cjs
+node --check apps/modernjs-ssr/cache-updates/e2e/static.cjs
+node --check apps/modernjs-ssr/cache-updates/e2e/static.test.cjs
+node --check apps/modernjs-ssr/cache-updates/e2e/release.cy.cjs
+git diff --check
+```
+
+Results: 20 dependency/package builds pass; the complete root E2E command exits 0
+with both legacy Cypress specs passing, three static modes passing and the new
+hydration/production suite passing. The published-package mode also passes.
+Each new E2E run includes 70 updates/560 requests and the existing lifecycle/fault
+matrix. All 19 affected-routing checks and whole-repository formatting pass.
+Existing dev TypeScript diagnostics and non-TTY Chrome messages appeared during
+the legacy run but did not fail either spec or the command; they are not silently
+reported as fixed. A transient attempt to require selective mode for the mixed
+production fixture was reverted; that fixture intentionally tests full rebuilding,
+and selective behavior is asserted by the native static E2E suite.
+
+The pnpm-generated lockfile includes the new Modern preview dependency graph and
+its peer-resolution changes. It was verified by frozen installation and the full
+Modern SSR E2E run. No publishable implementation changes or changeset are required.
+The aggregate `ci:local` wrapper was not run in this worktree; its exact E2E command
+was used. Unrelated Metro/Next/router suites, external supervisor/CDN deployment
+checks and the already-completed 300-cycle acceptance were not repeated for this
+E2E ownership migration. No packages were published.
+
+## Manual production E2E demo (2026-09-14)
+
+Added a persistent `--demo` mode to the same production runner and documented it
+in `apps/modernjs-ssr/README.md`. It builds immutable v1/v2 providers, serves the
+host on loopback port 3058 and assets on 3059, and exposes a local control page.
+The page reports actual update results and application status. This fixture uses
+whole-application mode; selective-entry behavior remains covered by the three
+native static E2E variants.
+
+Validation commands:
+
+- `pnpm --filter modernjs-ssr-cache-updates run demo`: started and retained for
+  manual use; GET /__status confirms the live production application.
+- `pnpm run e2e:modern:ssr:cache`: passed all three static artifact variants,
+  Cypress hydration, lifecycle checks and 70 updates / 560 concurrent requests.
+- `node` with
+  `require('cypress').run({project:'/tmp/ssr-demo-browser',browser:'electron',headless:true})`:
+  one browser smoke scenario passed. It clicks the embedded hydrated v1 counter,
+  updates via the real control button, checks old-page retention, requests and
+  clicks v2, checks unchanged PID/serving state and increased generation, switches
+  back to v1, and checks invalid version rejection. The first smoke attempt
+  clicked before hydration; adding the fixture's data-hydrated wait fixed the
+  test race without changing application behavior.
+- `pnpm exec prettier --check .`: passed.
+- `node --check apps/modernjs-ssr/cache-updates/e2e/production.cjs` and
+  `git diff --check`: passed.
+
+The full legacy Modern SSR job was not repeated for this increment: the preceding
+entry above records its pass, and no legacy app/runner or workflow changed here.
+Package builds, package unit tests and published-package acceptance were not
+repeated: no implementation/dependencies changed; the existing built workspace
+packages were exercised through the production fixture. No changeset is needed
+for this private demo and documentation.
+
+
+## Unified SSR playground (2026-09-15)
+
+Replaced the earlier one-page manual control demo with a unified functionality
+page and a memory page. Two real Modern production MPA hosts run in separate
+processes; each has entry A (remote metronome) and independent entry B (local
+palette). The dynamic host registers and loads a separately built palette
+provider at runtime. Immutable v1/v2 assets remain available for old hydration.
+
+The independent Node traffic process arms a real loader barrier, waits for loader
+entry and Modern draining, sends real requests, consumes complete responses and
+reports results. Static entry A queues while B completes; both queue for the
+dynamic host. Server queue/active counters and loader events are not simulated.
+Memory samples come from the selected SSR PID, with bounded observation buffers.
+No auto-GC or periodic memory sampling occurs in ordinary mode.
+
+Evidence and checks:
+
+- `pnpm run e2e:modern:ssr`: passed (exit 0). Includes legacy manifest/cache
+  regressions, three static artifact modes, production hydration/lifecycle and
+  70-update/560-request soak, plus the new playground.
+- `node apps/modernjs-ssr/cache-updates/e2e/playground.cjs`: passed. Three Cypress
+  scenarios verify SSR HTML, both releases and old-page interaction, browser and
+  server dynamic loading, traffic UI and GC sample UI. HTTP assertions verify
+  selective/full gating before loader entry, unchanged PID, recovery, actual
+  queue-full/timeouts (503), and a 20-update memory experiment.
+- `pnpm install --frozen-lockfile --ignore-scripts`: validates the committed
+  preview patch and lockfile.
+- `pnpm exec prettier --check .`: passed after formatting the ignored generated
+  `packages/playground/src/generated/bridgeRuntimeFiles.ts` from installation.
+  No change to that generated file is committed.
+- Syntax checks for the playground scripts and `git diff --check`: passed.
+- Cypress desktop, mobile and memory screenshots were reviewed; mobile document
+  width is also asserted by the browser test.
+
+The actual integration exposed a Modern runtime bug: a ready callback re-entered
+pipeline setup after a lazy remote resolved, causing React to reject a second
+pipe and abort subsequent all-ready SSR responses. The fix is
+[Modern #8872](https://github.com/web-infra-dev/modern.js/pull/8872), targeting
+`feat/mf-ssr-clear-cache`. This checkout uses the same guard as a pnpm-managed
+patch to the pinned preview. This is patched-preview acceptance; the unmodified
+preview does **not** pass the new dynamic SSR scenario.
+
+Modern verification (companion worktree):
+
+- `pnpm --filter @modern-js/runtime exec rstest tests/ssr/streamLifecycle.test.tsx`:
+  18/18 pass.
+- Removing the guard and running the new targeted test with `-t 'pipes once'`
+  fails with an aborted stream; the fixed source was restored. An initial
+  plain repeated-lazy test did not reproduce callback re-entry with Modern's
+  unit-test React version, so the regression deterministically re-enters the
+  callback while retaining real React streaming. The cross-project E2E reproduces
+  the original failure naturally.
+- `pnpm --filter @modern-js/runtime run build`: passed.
+- `pnpm exec biome check` on both changed TypeScript files and
+  `git diff --check`: passed.
+
+Other findings are explicit fixture constraints, not claimed runtime fixes:
+server splitChunks is disabled because the default shared-entry output failed
+MPA SSR initialization in this preview; workspace MF outputs are materialized
+under temporary node_modules so linked MF internals are not classified as
+business dynamic calls. Dynamic registrations use the actual provider name.
+
+Earlier Node fs/chunk errors came from registering a provider under an unrelated
+name; the fixture now uses provider name `lab_palette`. Early browser smoke
+failures also exposed a disabled-button race and stale iframe references, both
+corrected without weakening the SSR assertion.
+
+Unrelated package unit suites, other framework integrations and the full Modern
+monorepo build were skipped because no MF implementation changed and the Modern
+fix is confined to Node stream startup. Heap snapshot file generation was not
+automated because it pauses the host and creates large artifacts; the manual
+command/UI is documented. Existing legacy fixtures remain regression-only until
+their distinct nested/manifest/shared semantics are migrated; their UI is no
+longer part of the manual walkthrough. No MF changeset is required for private
+test tooling; the Modern runtime PR includes its patch changeset.
+
+
+### Traffic demo usability correction (2026-09-15)
+
+The original default sent 20 requests while requiring manual release of the old
+loader. With a three-second admission timeout, a user reading the UI would often
+see 503 responses before releasing it. The UI also discarded the visible queue
+count on completion and reported only `rejected`.
+
+Default traffic now sends 12 new requests and releases automatically after about
+1.4 seconds. Real coordinator queue observations and lifecycle events remain
+visible, response rows retain Modern's rejection message, and the right preview
+refreshes after a successful update. Explicit overflow, timeout and custom manual
+presets retain failure/debugging coverage. No Modern queue limits were relaxed.
+
+Validation commands from `/private/tmp/mf-r4-static-update`:
+
+- `pnpm --filter modernjs-ssr-cache-updates run e2e:playground`: passed (three
+  browser scenarios and existing HTTP/memory checks). The first sandboxed attempt
+  failed to bind loopback with EPERM; rerunning with local-port permission passed.
+- `pnpm run e2e:modern:ssr`: passed, including all existing suites and the expanded
+  playground assertions. Both static/dynamic automatic runs return 13 HTTP 200s
+  (12 new plus one held), queue peak is nonzero, A returns the target version and
+  the PID stays unchanged. Dynamic overflow produces 16 queue-full 503s; timeout
+  produces 12 wait-timeout 503s. Cypress also verifies the default requires no
+  release click and that the timeout reason appears in the UI.
+- `pnpm exec prettier --check .`: passed.
+- `node --check apps/modernjs-ssr/cache-updates/playground/traffic.cjs`,
+  `node --check apps/modernjs-ssr/cache-updates/playground/start.cjs`, and
+  `node --check apps/modernjs-ssr/cache-updates/playground/app.js`: passed.
+- `git diff --check`: passed.
+
+Logs: `/tmp/lab-traffic-fix-test.log`, `/tmp/lab-traffic-full.log`,
+`/tmp/lab-traffic-format.log`. Traffic, desktop, memory and mobile screenshots were
+captured by Cypress; the traffic results screenshot was visually inspected.
+
+The `ci:local` wrapper was skipped in accordance with the worktree rule; its
+matching Modern SSR package entry was executed directly. Unrelated package unit
+suites, dependency reinstall and other framework jobs were skipped because this
+correction changes private demo tooling only, with no dependency/runtime changes.
+No release or changeset is needed for this correction.
+
+### Inline traffic browser (2026-09-15)
+
+Added a real iframe in the traffic section. After the browser observes draining,
+it navigates to the selected host's A or B entry. The loading overlay ends on the
+iframe load event, and the actual page or error response remains visible. This
+extra request is counted by Modern but is not part of the Node generator table.
+A background tab that misses draining is explicitly reported rather than claiming
+to have observed a blocked request.
+
+Validation in `/private/tmp/mf-r4-static-update`:
+
+- `pnpm run e2e:modern:ssr`: passed; log `/tmp/lab-iframe-e2e.log`.
+  Cypress verifies the waiting window and real SSR page for A, and that B can
+  complete navigation while a static A update is still draining. Existing
+  HTTP admission, timeout/overflow, hydration and memory regressions pass.
+- `pnpm exec prettier --check apps/modernjs-ssr/README.md apps/modernjs-ssr/cache-updates/playground/app.js apps/modernjs-ssr/cache-updates/playground/index.html apps/modernjs-ssr/cache-updates/playground/style.css apps/modernjs-ssr/cache-updates/e2e/playground.cy.cjs`: passed.
+- `node --check apps/modernjs-ssr/cache-updates/playground/app.js`: passed.
+- `git diff --check`: passed.
+
+The CI wrapper, unrelated framework/package suites and dependency reinstall were
+skipped for the same worktree/private-demo reasons documented above. No runtime
+or dependency changes were required.
+
+`pnpm --filter modernjs-ssr-cache-updates run e2e:playground` also passed after
+adding the dedicated inline-browser screenshot (log `/tmp/lab-iframe-browser.log`).
+The screenshot was visually inspected and shows the actual metronome SSR page
+inside the compact frame after its blocked navigation completed.

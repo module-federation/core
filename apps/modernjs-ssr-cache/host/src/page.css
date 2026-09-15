@@ -1,0 +1,212 @@
+:root {
+  color-scheme: dark;
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+  background: #161923;
+  color: #ebeaf1;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+button {
+  font: inherit;
+  cursor: pointer;
+  color: inherit;
+  border: 1px solid #444656;
+  background: #252936;
+  border-radius: 8px;
+  padding: 10px 18px;
+}
+button:hover {
+  border-color: #b5a0ff;
+}
+button:focus-visible {
+  outline: 2px solid #72dac8;
+  outline-offset: 3px;
+}
+.scene {
+  max-width: 700px;
+  margin: auto;
+  padding: 24px;
+}
+header,
+.eyebrow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.brand {
+  font-size: 11px;
+  letter-spacing: 2px;
+}
+.mode,
+.caption {
+  font-size: 11px;
+  color: #aaa8b8;
+}
+.instrument,
+.palette {
+  padding: 30px 28px;
+  background: #20232f;
+  border: 1px solid #343847;
+  border-radius: 16px;
+  margin-top: 24px;
+  text-align: center;
+}
+.eyebrow {
+  font:
+    11px ui-monospace,
+    monospace;
+  letter-spacing: 1px;
+  color: #b5a0ff;
+}
+h2 {
+  font-size: 32px;
+  font-weight: 500;
+  letter-spacing: -1px;
+  margin: 24px 0;
+}
+.rhythm {
+  height: 135px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 9px;
+  margin: 20px;
+}
+.rhythm i {
+  width: 16px;
+  background: #b5a0ff;
+  border-radius: 20px;
+}
+.v2 .eyebrow {
+  color: #72dac8;
+}
+.v2 .rhythm {
+  width: 135px;
+  margin: 20px auto;
+  border: 4px solid #72dac8;
+  border-radius: 50%;
+  gap: 3px;
+}
+.v2 .rhythm i {
+  width: 6px;
+  background: #72dac8;
+  max-height: 60%;
+}
+.playing i {
+  animation: pulse var(--beat) ease-in-out infinite alternate;
+}
+@keyframes pulse {
+  to {
+    transform: scaleY(0.3);
+    opacity: 0.5;
+  }
+}
+.tempo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+}
+.tempo strong {
+  font-size: 44px;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+.tempo small {
+  display: block;
+  font:
+    10px ui-monospace,
+    monospace;
+  color: #aaa8b8;
+  letter-spacing: 3px;
+}
+.play {
+  margin-top: 22px;
+  min-width: 160px;
+}
+.hydration {
+  display: block;
+  font:
+    11px ui-monospace,
+    monospace;
+  color: #aaa8b8;
+  margin-top: 24px;
+}
+.color-field {
+  height: 100px;
+  background: var(--selected);
+  display: grid;
+  place-items: center;
+  color: #18202a;
+  border-radius: 8px;
+}
+.swatches {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin: 20px;
+}
+.swatches button {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid #ccc3;
+}
+.dynamic {
+  margin-top: 24px;
+}
+.evidence {
+  font-size: 12px;
+  color: #aaa8b8;
+  margin-top: 24px;
+}
+pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 11px;
+}
+summary {
+  cursor: pointer;
+}
+@media (prefers-reduced-motion: reduce) {
+  .playing i {
+    animation: none;
+  }
+}
+
+.server-state {
+  margin-top: 24px;
+  padding: 16px;
+  border: 1px solid #343847;
+  border-left: 3px solid #72dac8;
+  border-radius: 8px;
+  font-size: 12px;
+}
+.server-state dl {
+  display: grid;
+  gap: 10px;
+}
+.server-state dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.server-state dt,
+.server-state p {
+  color: #aaa8b8;
+}
+.server-state dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-family: ui-monospace, monospace;
+}

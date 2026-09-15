@@ -1,27 +1,57 @@
+process.env.NODE_ENV = 'production';
 const http = require('node:http');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const { once } = require('node:events');
-const mf = path.resolve(__dirname, '../..');
-const modern = process.env.SSR_CACHE_MODERN_ROOT;
-if (!modern || !global.gc)
-  throw new Error(
-    'Set SSR_CACHE_MODERN_ROOT and run node --expose-gc tools/ssr-cache/production.cjs',
-  );
+const repo = path.resolve(__dirname, '../../../..');
+const installed =
+  process.env.SSR_CACHE_PACKAGES_ROOT || path.resolve(__dirname, '..');
+const packageRequire = require('node:module').createRequire(
+  path.join(installed, 'package.json'),
+);
+if (!global.gc)
+  throw new Error('Run the cache-updates E2E entry with --expose-gc');
 const assert = require('node:assert/strict');
 const { spawn } = require('node:child_process');
 let root;
-const { createProdServer } = require(
-  path.join(modern, 'packages/server/prod-server/dist/cjs'),
-);
-const { createSSRUpdateAdapter } = require(
-  path.join(mf, 'packages/modernjs-v3/dist/cjs/server/ssrUpdate.js'),
+const { createProdServer } = packageRequire('@modern-js/prod-server');
+const { createSSRUpdateAdapter } = packageRequire(
+  '@module-federation/modern-js-v3/server',
 );
 (async () => {
   root = await fs.mkdtemp(
     path.join(require('node:os').tmpdir(), 'mf-production-'),
   );
   console.log('Production fixture', root);
+  if (process.env.SSR_CACHE_PACKAGES_ROOT) {
+    const audit = {};
+    for (const name of [
+      '@module-federation/modern-js-v3',
+      '@modern-js/app-tools',
+      '@modern-js/runtime',
+      '@modern-js/server-core',
+      '@modern-js/prod-server',
+      '@rspack/core',
+      'react',
+      'react-dom',
+    ]) {
+      const directory = await fs.realpath(
+        path.join(installed, 'node_modules', name),
+      );
+      assert.ok(
+        directory.startsWith((await fs.realpath(installed)) + path.sep),
+      );
+      const metadata = JSON.parse(
+        await fs.readFile(path.join(directory, 'package.json')),
+      );
+      audit[name] = { version: metadata.version, directory };
+    }
+    await fs.writeFile(
+      path.join(root, 'packages.json'),
+      JSON.stringify(audit, null, 2),
+    );
+    console.log('Published package audit', audit);
+  }
   const asset = http.createServer(async (req, res) => {
     try {
       const file = path.resolve(
@@ -56,9 +86,9 @@ const { createSSRUpdateAdapter } = require(
         SSR_CACHE_PRODUCTION_DIR: root,
         SSR_CACHE_ASSET_URL: assetURL,
         SSR_CACHE_RSPACK_ENTRY: require('node:fs').realpathSync(
-          require.resolve('@rspack/core'),
+          packageRequire.resolve('@rspack/core'),
         ),
-        NODE_OPTIONS: `--require=${path.join(__dirname, 'local-rspack-hook.cjs')}`,
+        NODE_OPTIONS: `--require=${path.join(repo, 'tools/ssr-cache/local-rspack-hook.cjs')}`,
       },
     },
   );
@@ -121,6 +151,8 @@ const { createSSRUpdateAdapter } = require(
             });
           if (url.pathname === '/__update') {
             const version = url.searchParams.get('v') || 'v2';
+            if (!['v1', 'v2'].includes(version))
+              return new Response('Expected v1 or v2', { status: 400 });
             try {
               const result = await adapter.update(application, 'remote', {
                 entry: `${assetURL}/${version}/mf-manifest.json`,
@@ -150,14 +182,14 @@ const { createSSRUpdateAdapter } = require(
     );
     assert.equal(response.status, 200);
     assert.ok(html.includes('v1'));
-    const cypress = require(path.join(mf, 'node_modules/cypress'));
+    const cypress = require(path.join(repo, 'node_modules/cypress'));
     await fs.writeFile(
       path.join(root, 'cypress.config.cjs'),
       `module.exports={video:false,screenshotOnRunFailure:false,e2e:{supportFile:false,specPattern:'release.cy.cjs',baseUrl:'${hostURL}'}}`,
     );
-    await fs.writeFile(
+    await fs.copyFile(
+      path.join(__dirname, 'release.cy.cjs'),
       path.join(root, 'release.cy.cjs'),
-      `describe('release hydration',()=>{it('pins old and new HTML',()=>{let old;cy.request('/').then(r=>{old=r.body;expect(old).to.contain('v1');});cy.visit('/');cy.get('body').should(b=>expect(b.text()).to.contain('v1:0'));cy.get('#remote-counter').should('have.attr','data-hydrated','true').should('have.text','v1:0').click().should('have.text','v1:1');cy.request('/__update?v=v2').its('status').should('eq',200);cy.request('/').its('body').should('contain','v2');cy.visit('/',{onBeforeLoad(win){cy.spy(win.console,'error').as('errors')}});cy.get('#remote-counter').should('have.attr','data-hydrated','true').should('have.text','v2:0').click().should('have.text','v2:1');cy.get('@errors').should('not.have.been.called');cy.then(()=>cy.intercept('GET','${hostURL}/',{statusCode:200,headers:{'content-type':'text/html'},body:old}));cy.visit('/',{onBeforeLoad(win){cy.spy(win.console,'error').as('oldErrors')}});cy.get('#remote-counter').should('have.attr','data-hydrated','true').should('have.text','v1:0').click().should('have.text','v1:1');cy.get('@oldErrors').should('not.have.been.called');});});`,
     );
     const result = await cypress.run({
       project: root,

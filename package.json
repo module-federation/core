@@ -35,7 +35,8 @@
     "e2e:next:prod": "pnpm exec turbo run test:e2e:production --filter=@module-federation/3000-home",
     "e2e:treeshake:server": "pnpm exec turbo run test --filter=@module-federation/treeshake-server",
     "e2e:treeshake:frontend": "pnpm exec turbo run e2e --filter=@module-federation/treeshake-frontend",
-    "e2e:modern:ssr": "node tools/scripts/run-modern-e2e.mjs --mode=manifest",
+    "e2e:modern:ssr": "node tools/scripts/run-modern-e2e.mjs --mode=manifest && pnpm run e2e:modern:ssr:cache",
+    "e2e:modern:ssr:cache": "pnpm --filter modernjs-ssr-cache-updates run e2e",
     "probe:modern:ssr-gc": "node tools/scripts/probe-modern-ssr-remove-remote-gc.mjs",
     "e2e:router": "node tools/scripts/run-router-e2e.mjs --mode=dev",
     "e2e:shared-tree-shaking:runtime-infer": "npx kill-port --port 3001,3002 && pnpm exec turbo run test:e2e --filter=shared-tree-shaking-no-server-host && lsof -ti tcp:3001,3002 | xargs kill",
@@ -87,7 +88,10 @@
     "commitgen:main": "./commit-gen.js --path ./packages",
     "changeset:status": "changeset status",
     "generate:schema": "pnpm --filter @module-federation/enhanced run generate:schema && git diff --name-only | xargs pnpm exec prettier --write --ignore-unknown",
-    "lint:deps": "node scripts/check-ghost-deps.mjs"
+    "lint:deps": "node scripts/check-ghost-deps.mjs",
+    "demo:modern:ssr": "pnpm --filter modernjs-ssr-cache-updates run demo",
+    "demo:modern:ssr:memory": "pnpm --filter modernjs-ssr-cache-updates run demo:memory",
+    "demo:modern:ssr:debug": "pnpm --filter modernjs-ssr-cache-updates run demo:debug"
   },
   "pnpm": {
     "packageExtensions": {
@@ -170,7 +174,10 @@
       "msw",
       "sharp",
       "unrs-resolver"
-    ]
+    ],
+    "patchedDependencies": {
+      "@modern-js/runtime@0.0.0-canary-20260914082926": "patches/@modern-js__runtime@0.0.0-canary-20260914082926.patch"
+    }
   },
   "dependencies": {
     "adm-zip": "0.6.0",

@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>SSR Playground</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <aside>
+      <a class="logo" href="/">mf<span> / lab</span></a>
+      <div class="nav-title">MODERN SSR</div>
+      <a class="nav" href="/">功能体验 <span>↗</span></a
+      ><a class="nav" href="/memory">内存观察 <span>↗</span></a>
+      <p class="aside-note">同一套真实应用<br />手动体验与 E2E 验证</p>
+    </aside>
+    <main>
+      <header>
+        <div>
+          <p class="eyebrow">MODULE FEDERATION × MODERN</p>
+          <h1 id="title">看见每一次更新。</h1>
+          <p id="intro" class="muted">
+            在真实的服务端渲染与浏览器交互之间，观察模块如何替换。
+          </p>
+        </div>
+        <span id="connection" class="badge">连接中</span>
+      </header>
+      <div class="toolbar">
+        <div class="segmented">
+          <button id="static" class="selected">静态 remote</button
+          ><button id="dynamic">动态 remote</button>
+        </div>
+        <span id="host-info" class="mono"></span
+        ><span id="plan" class="badge"></span>
+      </div>
+      <div id="error" role="alert" hidden></div>
+      <section id="experience">
+        <div class="workbench">
+          <div class="controls">
+            <p class="eyebrow">RELEASE CONTROL</p>
+            <h2>更新与水合</h2>
+            <p class="muted">
+              先调整 BPM，再更新服务端。保留的旧页面继续使用原来的版本。
+            </p>
+            <div class="button-row">
+              <button id="v1">更新至 v1</button
+              ><button id="v2" class="primary">更新至 v2</button>
+            </div>
+            <button id="reload">重新请求右侧页面 ↗</button
+            ><button id="register" hidden>注册 remote B 并在 SSR 加载</button>
+            <button id="html">查看原始 SSR HTML</button
+            ><a id="standalone" target="_blank" rel="noopener"
+              >打开独立页面 ↗</a
+            >
+            <details>
+              <summary>更新结果与耗时</summary>
+              <pre id="update-result">还没有执行更新</pre>
+            </details>
+          </div>
+          <div class="preview">
+            <div class="preview-label">
+              保留的页面 <span>浏览器状态保持</span>
+            </div>
+            <iframe id="old" title="保留的 SSR 页面"></iframe>
+          </div>
+          <div class="preview">
+            <div class="preview-label">
+              新请求的页面
+              <select id="entry" aria-label="预览入口">
+                <option value="/">入口 A · 节拍器</option>
+                <option value="/b">入口 B · 配色面板</option>
+              </select>
+            </div>
+            <iframe id="new" title="新请求的 SSR 页面"></iframe>
+          </div>
+        </div>
+        <section class="traffic section">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">REAL HTTP TRAFFIC</p>
+              <h2>让请求撞上更新。</h2>
+            </div>
+            <span class="muted"
+              >独立 Node 进程发起请求 · iframe 只用于页面预览</span
+            >
+          </div>
+          <div class="traffic-controls">
+            <label
+              >实验模式<select id="preset">
+                <option value="auto">排队后自动恢复</option>
+                <option value="overflow">观察队列满（503）</option>
+                <option value="timeout">观察排队超时（503）</option>
+                <option value="manual">手动释放 / 自定义并发</option>
+              </select></label
+            >
+            <label
+              >新请求数
+              <input
+                id="count"
+                type="number"
+                min="1"
+                max="300"
+                value="12" /></label
+            ><label
+              >发送间隔 / ms
+              <input
+                id="interval"
+                type="number"
+                min="0"
+                max="100"
+                value="20" /></label
+            ><button id="run" class="primary">开始并发实验</button
+            ><button id="release">释放旧请求</button>
+          </div>
+          <p class="muted small">
+            默认发送 12 个真实请求，约 1.4
+            秒后自动释放旧请求。每四个请求中有一个访问入口 B。 队列容量
+            16、排队超时 3 秒；手动模式需及时释放，超过 15
+            秒会导致更新排空失败。
+          </p>
+          <section class="traffic-browser" aria-label="更新期间的真实页面请求">
+            <div class="preview-label">
+              <strong>更新期间打开的新页面</strong>
+              <label
+                >预览入口
+                <select id="traffic-entry">
+                  <option value="/">A · /</option>
+                  <option value="/b">B · /b</option>
+                </select></label
+              >
+            </div>
+            <p id="traffic-browser-status" role="status">
+              开始实验后，这里会在更新等待期间发起一次真实页面导航。
+            </p>
+            <div id="traffic-browser-window">
+              <p class="muted">
+                等待开始 · 此窗口会显示实际 SSR 页面，恢复后可以直接操作。
+              </p>
+            </div>
+            <p class="muted small">
+              这个 iframe 是额外的一次浏览器请求，不计入下方 Node
+              并发请求列表，但计入服务端在途和排队数量。加载中显示等待提示；若返回
+              503，窗口会保留真实错误页面。
+            </p>
+          </section>
+          <div
+            id="traffic-story"
+            class="traffic-story"
+            role="status"
+            aria-live="polite"
+          >
+            点击开始，观察旧请求阻挡更新、新请求等待、释放后返回新版本。
+          </div>
+          <div id="traffic-steps" class="traffic-steps"></div>
+          <div id="counters" class="counters"></div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>请求</th>
+                  <th>入口</th>
+                  <th>状态</th>
+                  <th>从发送到完成</th>
+                  <th>HTTP / 版本</th>
+                </tr>
+              </thead>
+              <tbody id="requests"></tbody>
+            </table>
+          </div>
+          <p id="empty" class="muted">开始实验后，这里会显示每一条真实请求。</p>
+          <details>
+            <summary>服务端事件与更新结果</summary>
+            <pre id="events"></pre>
+          </details>
+        </section>
+      </section>
+      <section id="memory" hidden>
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">PROCESS MEMORY</p>
+            <h2>观察保留，而非波动。</h2>
+          </div>
+          <span class="muted">默认不自动采样，也不自动 GC</span>
+        </div>
+        <div class="traffic-controls">
+          <button id="sample">采样一次</button
+          ><button id="gc" class="primary">GC 后采样</button
+          ><label
+            >更新轮数
+            <input
+              id="cycles"
+              type="number"
+              min="5"
+              max="300"
+              value="30" /></label
+          ><button id="soak">运行重复更新实验</button
+          ><button id="export">导出 JSON</button>
+        </div>
+        <p class="muted small">
+          实验每轮更新后发送 8 个请求，每 5 轮做 GC 后采样。前 10
+          轮为预热；只比较同一 PID、同种采样方式。RSS
+          包含堆以外的内存，不代表存活 JS 对象。
+        </p>
+        <div id="memory-summary" class="counters"></div>
+        <div class="charts">
+          <div>
+            <h3>GC 后 JS 堆 <span>MiB</span></h3>
+            <svg
+              id="heap-chart"
+              viewBox="0 0 600 180"
+              role="img"
+              aria-label="GC 后 JS 堆趋势"
+            ></svg>
+          </div>
+          <div>
+            <h3>进程 RSS <span>MiB</span></h3>
+            <svg
+              id="rss-chart"
+              viewBox="0 0 600 180"
+              role="img"
+              aria-label="进程 RSS 趋势"
+            ></svg>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>时间 / 轮数</th>
+                <th>GC</th>
+                <th>Heap / MiB</th>
+                <th>RSS / MiB</th>
+                <th>External / MiB</th>
+                <th>ArrayBuffer / MiB</th>
+                <th>MF 实例</th>
+              </tr>
+            </thead>
+            <tbody id="samples"></tbody>
+          </table>
+        </div>
+        <details class="snapshot">
+          <summary>手动调试与 Heap snapshot</summary>
+          <p>快照会暂停选中的 SSR 进程。请等待实验结束后手动执行。</p>
+          <button id="snapshot">保存 Heap snapshot</button>
+          <pre id="snapshot-result">
+使用 pnpm run demo:modern:ssr:debug 启动，再在 chrome://inspect 连接 9230（静态）或 9231（动态）。</pre
+          >
+        </details>
+      </section>
+      <footer>SSR 模块缓存实验 · 更新不会自动替换已经水合的浏览器页面</footer>
+    </main>
+    <dialog id="source">
+      <button id="close-source">关闭</button>
+      <h2>服务端原始 HTML</h2>
+      <p class="muted">这是执行浏览器脚本之前，真实 HTTP 响应中的内容。</p>
+      <pre id="source-text"></pre>
+    </dialog>
+  </body>
+</html>

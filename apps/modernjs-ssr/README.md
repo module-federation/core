@@ -1,63 +1,163 @@
-# modernjs-ssr
+# Modern SSR Playground
 
-## Running Demo
+One workspace for SSR rendering, static and dynamic remotes, cache updates,
+hydration, concurrent traffic, and process memory.
 
-- host: [localhost:3050](http://localhost:3050/)
-- remote: [localhost:3051](http://localhost:3051/)
-- nested-remote: [localhost:3052](http://localhost:3052/)
-- dynamic-remote: [localhost:3053](http://localhost:3053/)
-- dynamic-nested-remote: [localhost:3054](http://localhost:3054/)
-- remote-new-version: [localhost:3055](http://localhost:3055/)
-- dynamic-remote-new-version: [localhost:3056](http://localhost:3056/)
-- another_remote: [localhost:3057](http://localhost:3057/)
+## Start locally
 
-## How to start the demos ?
+Use Node 24 and pnpm 10.28.0 from the repository root:
 
 ```bash
-# Root directory
-pnpm i
-
-nx build modern-js-plugin
-
-pnpm run app:modern:dev
-
-open http://localhost:3050/
+pnpm install --frozen-lockfile
+pnpm exec turbo run build --filter=@module-federation/modern-js-v3
+pnpm run demo:modern:ssr
 ```
 
-## Debugging SSR Cache Tests
+Open <http://127.0.0.1:3058/> after the terminal prints `PLAYGROUND_READY`.
+The command builds two hosts and immutable v1/v2 providers, then serves their
+production output. It keeps running until Ctrl+C. Host processes, asset serving
+and the traffic generator are managed automatically; no remote terminals are
+needed. Set `SSR_CACHE_DEMO_PORT` to change the control page port.
 
-Start the remote fixtures:
+The workspace has two pages:
+
+- **Functionality** (`/`): SSR previews, version updates and real concurrent traffic.
+- **Memory** (`/memory`): explicit samples, GC comparisons and repeated updates.
+
+### SSR, cache and hydration
+
+1. Select **静态 remote**. The two previews are actual SSR documents in iframes.
+2. Wait for **Hydrated**, then increase the BPM in the left preview.
+3. Choose **更新至 v2**, then **重新请求右侧页面**. The new release changes the purple
+   bars to a mint ring. The old preview retains its release and BPM.
+4. Open **本次服务端渲染信息** to inspect the request ID, server PID, generation,
+   loader module instance and (entry A) remote module instance/release.
+5. Use **查看原始 SSR HTML** to inspect the actual response before browser scripts.
+6. Switch the right preview to entry B. It is an independent local palette panel.
+   Static updates target entry A; entry B's modules and traffic are retained.
+
+The dynamic host is a separate process/build. Choose **动态 remote** to load the
+independent palette provider in the browser, or **注册 remote B 并在 SSR 加载**
+to register it on the server and request HTML that contains it. Its name is the
+provider's actual MF name (`lab_palette`); it is absent from the host's compiled
+remote configuration. Dynamic/mixed updates rebuild the application in place.
+
+“Cache” here means SSR/MF module caching, not a whole-page HTML cache. Actual
+adapter plans and results are shown; the UI does not infer success from a color
+change. In particular, an application fallback is never labelled selective.
+
+### Real requests during updates
+
+Choose **开始并发实验**. A separate Node process:
+
+1. Starts an SSR request that waits inside the real loader.
+2. Waits for that loader to enter, then initiates an actual remote update.
+3. Waits for Modern's draining state, then sends the configured HTTP requests.
+4. Reads every complete response and reports timing, HTTP status and release.
+
+The default **排队后自动恢复** preset sends 12 requests and automatically
+releases the held loader after approximately 1.4 seconds. No manual timing is
+needed. The process steps and peak queue count remain visible after completion;
+the right preview refreshes to compare the new SSR version with the old page.
+The inline browser window starts a real iframe navigation only after the update
+enters draining. It shows a waiting overlay until navigation completes, then
+retains the actual interactive SSR page (or the actual error response). Select A
+or B to compare admission scopes. This is one additional browser request: it is
+included in Modern's live queue counters but not in the Node request table.
+Background tabs that miss the draining window report that explicitly.
+Request rows show actual HTTP status, returned release and server rejection text.
+The send-to-loader duration includes network time, rather than claiming an exact
+per-request queue duration.
+
+Use **观察队列满（503）** for 32 simultaneous requests with automatic release,
+or **观察排队超时（503）** for 12 requests held beyond the three-second wait
+limit. **手动释放 / 自定义并发** retains editable request counts/intervals and the
+**释放旧请求** button. Queue capacity is 16; waiting requests time out after
+three seconds, and drain fails after 15 seconds. A 503 is a rejection, not stale
+HTML fallback. Every fourth request goes to entry B: static A updates allow B to
+continue, while dynamic application updates block both entries.
+
+## Memory and manual debugging
+
+Start with GC enabled:
 
 ```bash
-cd /Users/bytedance/outter/core
-
-pnpm exec turbo run dev \
-  --filter=modernjs-ssr-dynamic-nested-remote \
-  --filter=modernjs-ssr-dynamic-remote \
-  --filter=modernjs-ssr-dynamic-remote-new-version \
-  --filter=modernjs-ssr-nested-remote \
-  --filter=modernjs-ssr-remote \
-  --filter=modernjs-ssr-remote-new-version \
-  --filter=modernjs-ssr-another-remote \
-  --concurrency=20
+pnpm run demo:modern:ssr:memory
 ```
 
-Start the SSR host in a separate terminal with Node Inspector and heap snapshots:
+Open <http://127.0.0.1:3058/memory>. Select the host process, then use **采样一次**,
+**GC 后采样**, or **运行重复更新实验**. GC/snapshots require an idle application.
+The experiment sends eight real requests per update and samples after GC every
+five updates. Treat the first ten cycles as warm-up; use more than ten cycles to
+compare the retained heap. Samples and server event buffers are bounded.
+
+The charts separate GC heap and RSS; the table includes external memory,
+ArrayBuffers and MF instance count. PID identifies the measured SSR process.
+Controller/build/load-generator memory is excluded. Export JSON for comparison.
+These trends are diagnostic, not proof that arbitrary business code cannot leak.
+
+For Node Inspector:
 
 ```bash
-cd /Users/bytedance/outter/core/apps/modernjs-ssr/host
-
-MF_SSR_HEAP_SNAPSHOT=all \
-MF_SSR_HEAP_SNAPSHOT_DIR=/tmp/mf-ssr-cache-probe \
-TS_NODE_COMPILER=typescript-compiler \
-node --inspect=9230 --expose-gc \
-  ./node_modules/@modern-js/app-tools/bin/modern.js dev
+pnpm run demo:modern:ssr:debug
 ```
 
-Use `chrome://inspect` with `localhost:9230`, then visit:
+This starts the static host with `--inspect=9230 --expose-gc` and the dynamic host
+with `--inspect=9231 --expose-gc`. Open `chrome://inspect`, connect to the desired
+process and take heap snapshots before/after updates. The memory page also has
+an explicit snapshot button; it pauses the selected process and prints the saved
+file path. Snapshots are never taken by periodic polling.
 
-- `http://localhost:3050/remove-remote-cache`
-- `http://localhost:3050/remove-remote-cache?update=1`
-- `http://localhost:3050/remove-remote-shared-cache`
-- `http://localhost:3050/remove-remote-shared-cache?load=1`
-- `http://localhost:3050/remove-remote-shared-cache?remove=another_remote`
+The underlying manual startup command is:
+
+```bash
+node apps/modernjs-ssr/cache-updates/playground/start.cjs --debug
+```
+
+The terminal prints the generated build directory, host URLs and PIDs. All
+fixtures are temporary and retained for diagnosis. The demo control endpoints
+listen on loopback and are local test tooling, not a production administration API.
+
+## Preview dependency fix
+
+This checkout applies a pnpm patch to the pinned Modern runtime preview for
+[Modern #8872](https://github.com/web-infra-dev/modern.js/pull/8872). The playground
+reproduced a repeated React `pipe()` call after a lazy remote resolved; without
+the fix, subsequent all-ready SSR responses can abort. The patch contains the
+same one-time pipeline-start guard as the upstream source PR. Frozen installs
+apply it automatically. Remove it after switching to a preview containing that
+fix; an independently installed published-package directory must also contain
+the fix before running the new playground suite.
+
+## E2E
+
+```bash
+# The same playground UI, real traffic and memory experiment:
+pnpm --filter modernjs-ssr-cache-updates run e2e:playground
+
+# Static artifact variants, production lifecycle/resource regression, playground:
+pnpm run e2e:modern:ssr:cache
+
+# Full Modern SSR CI entry, including retained legacy regressions:
+pnpm run e2e:modern:ssr
+```
+
+The former demo page has been replaced by this playground. Older app fixtures
+remain internal regression inputs for manifest/nested/shared-cache coverage;
+they are not additional manual setup steps. Their removal requires migrating
+those distinct compatibility assertions, not simply deleting the tests.
+
+Workspace MF build outputs are copied into a temporary consumer-style
+`node_modules` layout. Static analysis treats application sources outside
+`node_modules` conservatively, so testing linked MF internals directly would
+produce an application fallback. This copy uses current workspace code, not
+an older published version.
+
+The demo disables server splitChunks to give its MPA entries independent,
+loadable runtimes. The default shared-entry split output failed SSR startup in
+the tested preview combination; this demo does not claim that configuration is
+fixed. Numeric/minified/concatenated artifact cases remain separately tested.
+
+For the exact published-package combination and full validation history, see
+[cache E2E](./cache-updates/README.md) and
+[validation](../../tools/ssr-cache/VALIDATION.md).
