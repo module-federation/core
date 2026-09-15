@@ -8,6 +8,7 @@ import { ModuleFederation } from '@module-federation/runtime';
 import { createObservability, ObservabilityPlugin } from '../src';
 import {
   ObservabilityBuildPlugin,
+  ObservabilityVitePlugin,
   createObservabilityBuildInfo,
 } from '../src/build';
 import { ChromeObservabilityPlugin } from '../src/chrome-devtool';
@@ -528,6 +529,291 @@ describe('ObservabilityBuildPlugin', () => {
   });
 });
 
+describe('ObservabilityVitePlugin', () => {
+  it('writes build observability from disk manifest after emit', async () => {
+    const directory = fs.mkdtempSync(
+      path.join(os.tmpdir(), 'mf-vite-observability-'),
+    );
+    try {
+      const { writeBundle, warn } = createVitePluginFixture(directory, {
+        manifest: {
+          name: 'runtime_host',
+          metaData: {
+            pluginVersion: '2.4.0',
+            globalName: 'runtime_host_global',
+            publicPath: 'auto',
+            buildInfo: {
+              buildVersion: '202601010000',
+            },
+            remoteEntry: {
+              name: 'remoteEntry.js',
+              type: 'module',
+            },
+          },
+          remotes: [],
+          exposes: [{ name: './Button' }],
+          shared: [{ name: 'react', requiredVersion: '^18.2.0' }],
+        },
+      });
+
+      writeBundle();
+
+      const outputFile = path.join(
+        directory,
+        '.mf/observability/build-info.json',
+      );
+      await waitForFile(outputFile);
+      const buildInfo = JSON.parse(fs.readFileSync(outputFile, 'utf8'));
+
+      expect(buildInfo).toMatchObject({
+        source: 'manifest',
+        bundler: {
+          name: 'vite',
+          version: '6.1.0',
+          mode: 'production',
+          target: ['esnext'],
+        },
+        moduleFederation: {
+          name: 'runtime_host',
+          pluginVersion: '2.4.0',
+          buildVersion: '202601010000',
+          remoteEntry: {
+            name: 'remoteEntry.js',
+            type: 'module',
+            publicPath: 'auto',
+            publicPathMode: 'auto',
+          },
+        },
+        summary: {
+          exposeCount: 1,
+          sharedCount: 1,
+        },
+      });
+      expect(warn).not.toHaveBeenCalled();
+    } finally {
+      fs.rmSync(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('does not fail the Vite build when observability file output fails', () => {
+    const directory = fs.mkdtempSync(
+      path.join(os.tmpdir(), 'mf-vite-observability-'),
+    );
+    try {
+      const blocker = path.join(directory, 'blocker');
+      fs.writeFileSync(blocker, 'not a directory', 'utf8');
+      const { writeBundle, warn } = createVitePluginFixture(directory, {
+        outputFile: path.join(blocker, 'build-info.json'),
+      });
+
+      expect(() => writeBundle()).not.toThrow();
+
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to write build observability'),
+      );
+      const report = JSON.parse(
+        fs.readFileSync(
+          path.join(directory, '.mf/observability/build-report.json'),
+          'utf8',
+        ),
+      );
+      expect(report).toMatchObject({
+        source: 'build',
+        status: 'error',
+        failedPhase: 'observability-output',
+        summary: {
+          outcome: 'failed',
+          error: {
+            failedPhase: 'observability-output',
+            ownerHint: 'build',
+            retryable: false,
+          },
+        },
+        diagnosis: {
+          status: 'error',
+          outcome: 'failed',
+          ownerHint: 'build',
+          failedPhase: 'observability-output',
+          actions: [
+            expect.objectContaining({
+              id: 'check-observability-output',
+              ownerHint: 'build',
+            }),
+          ],
+        },
+      });
+    } finally {
+      fs.rmSync(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('writes a build report for Vite build errors', () => {
+    const directory = fs.mkdtempSync(
+      path.join(os.tmpdir(), 'mf-vite-observability-'),
+    );
+    try {
+      const error = new Error(
+        '[ Federation Build ] remoteEntry failed #BUILD-001 token=demo-secret http://localhost:3001/remoteEntry.js?token=demo-secret#hash',
+      );
+      error.stack = [
+        'Error: token=demo-secret remoteEntry failed',
+        '    at build (/Users/bytedance/private/vite.config.ts:1:1)',
+        '    at remote (http://localhost:3001/remoteEntry.js?token=demo-secret#hash:1:1)',
+      ].join('\n');
+
+      const { writeBundle, warn } = createVitePluginFixture(directory, {
+        error,
+      });
+
+      writeBundle();
+
+      const report = JSON.parse(
+        fs.readFileSync(
+          path.join(directory, '.mf/observability/build-report.json'),
+          'utf8',
+        ),
+      );
+      expect(report).toMatchObject({
+        schemaVersion: 1,
+        source: 'build',
+        status: 'error',
+        failedPhase: 'compilation',
+        build: {
+          bundler: {
+            name: 'vite',
+          },
+          moduleFederation: {
+            name: 'runtime_host',
+          },
+        },
+        summary: {
+          outcome: 'failed',
+          error: {
+            errorCode: 'BUILD-001',
+            failedPhase: 'compilation',
+            ownerHint: 'remote',
+            retryable: false,
+          },
+        },
+      });
+      expect(JSON.stringify(report)).toContain('demo-secret');
+      expect(warn).not.toHaveBeenCalled();
+    } finally {
+      fs.rmSync(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('removes stale Vite build reports after a clean build', () => {
+    const directory = fs.mkdtempSync(
+      path.join(os.tmpdir(), 'mf-vite-observability-'),
+    );
+    try {
+      const reportFile = path.join(
+        directory,
+        '.mf/observability/build-report.json',
+      );
+      fs.mkdirSync(path.dirname(reportFile), { recursive: true });
+      fs.writeFileSync(reportFile, '{"status":"error"}', 'utf8');
+
+      const { writeBundle } = createVitePluginFixture(directory);
+
+      writeBundle();
+
+      expect(fs.existsSync(reportFile)).toBe(false);
+    } finally {
+      fs.rmSync(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('discovers federation options from the Vite plugin list', () => {
+    const directory = fs.mkdtempSync(
+      path.join(os.tmpdir(), 'mf-vite-observability-'),
+    );
+    try {
+      const { writeBundle } = createVitePluginFixture(directory, {
+        omitExplicitModuleFederation: true,
+      });
+
+      writeBundle();
+
+      const buildInfo = JSON.parse(
+        fs.readFileSync(
+          path.join(directory, '.mf/observability/build-info.json'),
+          'utf8',
+        ),
+      );
+      expect(buildInfo).toMatchObject({
+        bundler: {
+          name: 'vite',
+        },
+        moduleFederation: {
+          name: 'runtime_host',
+          remotes: [
+            expect.objectContaining({
+              alias: 'remote1',
+              name: 'runtime_remote1',
+            }),
+          ],
+        },
+      });
+    } finally {
+      fs.rmSync(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('does not capture when the Vite plugin is disabled', () => {
+    const directory = fs.mkdtempSync(
+      path.join(os.tmpdir(), 'mf-vite-observability-'),
+    );
+    try {
+      const { writeBundle } = createVitePluginFixture(directory, {
+        enabled: false,
+      });
+
+      writeBundle();
+
+      expect(
+        fs.existsSync(
+          path.join(directory, '.mf/observability/build-info.json'),
+        ),
+      ).toBe(false);
+    } finally {
+      fs.rmSync(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('skips SSR environments so client build info is not overwritten', () => {
+    const directory = fs.mkdtempSync(
+      path.join(os.tmpdir(), 'mf-vite-observability-'),
+    );
+    try {
+      const { plugin, writeBundle } = createVitePluginFixture(directory);
+      writeBundle();
+
+      const outputFile = path.join(
+        directory,
+        '.mf/observability/build-info.json',
+      );
+      const original = fs.readFileSync(outputFile, 'utf8');
+
+      plugin.buildStart?.();
+      plugin.writeBundle?.call(
+        {
+          environment: {
+            name: 'ssr',
+            config: { consumer: 'server' },
+          },
+        },
+        { dir: path.join(directory, 'dist') },
+      );
+
+      expect(fs.readFileSync(outputFile, 'utf8')).toBe(original);
+    } finally {
+      fs.rmSync(directory, { recursive: true, force: true });
+    }
+  });
+});
+
 const emitRemoteLoaded = (
   observability: ReturnType<typeof createObservability>,
   overrides: Record<string, unknown> = {},
@@ -874,6 +1160,109 @@ const createBuildCompilerFixture = (
   return {
     processAssetsCallbacks,
     warn,
+  };
+};
+
+const defaultViteModuleFederation = {
+  name: 'runtime_host',
+  remotes: {
+    remote1:
+      'runtime_remote1@http://localhost:3006/mf-manifest.json?token=secret#hash',
+  },
+  exposes: {
+    './Button': './src/Button.tsx',
+  },
+  shared: {
+    react: {
+      singleton: true,
+      requiredVersion: '^18.2.0',
+    },
+  },
+};
+
+const createVitePluginFixture = (
+  tempDir: string,
+  options: {
+    manifest?: Record<string, unknown>;
+    stats?: Record<string, unknown>;
+    moduleFederation?: Record<string, unknown>;
+    outputFile?: string;
+    errorReport?:
+      | false
+      | {
+          outputFile?: string;
+        };
+    error?: Error;
+    enabled?: boolean;
+    omitExplicitModuleFederation?: boolean;
+  } = {},
+) => {
+  const warn = rs.fn();
+  const moduleFederation =
+    options.moduleFederation || defaultViteModuleFederation;
+  const outDir = path.join(tempDir, 'dist');
+  fs.mkdirSync(outDir, { recursive: true });
+
+  if (options.manifest) {
+    fs.writeFileSync(
+      path.join(outDir, 'mf-manifest.json'),
+      JSON.stringify(options.manifest),
+      'utf8',
+    );
+  }
+  if (options.stats) {
+    fs.writeFileSync(
+      path.join(outDir, 'mf-stats.json'),
+      JSON.stringify(options.stats),
+      'utf8',
+    );
+  }
+
+  const plugin = ObservabilityVitePlugin({
+    enabled: options.enabled,
+    outputFile: options.outputFile,
+    errorReport: options.errorReport,
+    cwd: tempDir,
+    bundlerVersion: '6.1.0',
+    moduleFederation: options.omitExplicitModuleFederation
+      ? undefined
+      : moduleFederation,
+  });
+  const pluginContext = {
+    warn,
+    meta: {
+      viteVersion: '6.1.0',
+    },
+  };
+
+  plugin.configResolved?.({
+    root: tempDir,
+    mode: 'production',
+    base: '/',
+    viteVersion: '6.1.0',
+    build: {
+      outDir: 'dist',
+      target: ['esnext'],
+    },
+    plugins: [
+      {
+        name: 'module-federation-vite',
+        _options: moduleFederation,
+      },
+    ],
+  });
+  plugin.buildStart?.();
+  if (options.error) {
+    plugin.buildEnd?.(options.error);
+  }
+
+  return {
+    plugin,
+    warn,
+    writeBundle: () =>
+      plugin.writeBundle?.call(pluginContext, {
+        dir: outDir,
+      }),
   };
 };
 
