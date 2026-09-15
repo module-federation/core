@@ -324,6 +324,8 @@ export const describeCases = (config: any) => {
     for (const category of selectedCategories) {
       describe(category.name, () => {
         for (const testName of category.tests) {
+          if (config.includeTests && !config.includeTests.includes(testName))
+            continue;
           describe(testName, () => {
             const testDirectory = path.join(casesPath, category.name, testName);
             const filterPath = path.join(testDirectory, 'test.filter.js');
@@ -438,6 +440,7 @@ export const describeCases = (config: any) => {
                   };
                   opt.infrastructureLogging = {
                     debug: true,
+                    ...opt.infrastructureLogging,
                     console: createLogger(infraStructureLog),
                   };
                 }

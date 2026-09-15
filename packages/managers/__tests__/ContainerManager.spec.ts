@@ -1,6 +1,23 @@
 import { ContainerManager } from '../src/ContainerManager';
 
 describe('ContainerManager', () => {
+  it.each([false, true])(
+    'preserves shorthand import arrays (array form: %s)',
+    (arrayForm) => {
+      const imports = ['./setup.js', './component.js'];
+      const exposes = { './Multi': imports };
+      const manager = new ContainerManager();
+      manager.init({
+        name: 'arrays',
+        exposes: arrayForm ? [exposes] : exposes,
+      });
+      expect(manager.containerPluginExposesOptions['./Multi']).toMatchObject({
+        import: imports,
+      });
+      expect(Object.values(manager.exposeFileNameImportMap)).toEqual([imports]);
+    },
+  );
+
   it('will not use containerPlugin while expose is empty', () => {
     const options = {
       name: '@module-federation/container-managers-test',
@@ -66,6 +83,25 @@ describe('ContainerManager', () => {
     expect(
       containerManager.containerPluginExposesOptions['./Button'].name,
     ).toEqual('__federation_expose_Button');
+  });
+
+  it('preserves named and omitted expose layers', () => {
+    const options = {
+      name: '@module-federation/container-managers-test',
+      exposes: {
+        './Server': { import: './src/Server.jsx', layer: 'server' },
+        './Plain': { import: './src/Plain.jsx' },
+      },
+    };
+    const containerManager = new ContainerManager();
+    containerManager.init(options);
+
+    const exposes = containerManager.containerPluginExposesOptions as Record<
+      string,
+      { import: string[]; name: string; layer?: string }
+    >;
+    expect(exposes['./Server'].layer).toEqual('server');
+    expect('layer' in exposes['./Plain']).toEqual(false);
   });
 
   it('set expose import as array', () => {

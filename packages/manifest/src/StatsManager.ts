@@ -10,17 +10,13 @@ import {
   StatsAssets,
   moduleFederationPlugin,
   RemoteEntryType,
-  composeKeyWithSeparator,
   getManifestFileName,
   StatsMetaDataWithGetPublicPath,
   StatsMetaDataWithPublicPath,
   StatsShared,
 } from '@module-federation/sdk';
 import { Compilation, Compiler } from 'webpack';
-import type {
-  StatsCompilation,
-  StatsModule,
-} from 'webpack/lib/stats/DefaultStatsFactoryPlugin';
+import type { StatsCompilation } from 'webpack/lib/stats/DefaultStatsFactoryPlugin';
 import {
   isDev,
   getAssetsByChunk,
@@ -28,7 +24,6 @@ import {
   getAssetsByChunkIDs,
   getSharedModules,
   assert,
-  getFileNameWithOutExt,
   getTypesMetaInfo,
 } from './utils';
 import logger from './logger';
@@ -41,12 +36,7 @@ import {
   UNKNOWN_MODULE_NAME,
 } from '@module-federation/managers';
 import { HOT_UPDATE_SUFFIX } from './constants';
-import {
-  ModuleHandler,
-  getExposeItem,
-  getExposeName,
-  getShareItem,
-} from './ModuleHandler';
+import { ModuleHandler, getExposeItem, getShareItem } from './ModuleHandler';
 import { StatsInfo } from './types';
 import { collectGraph } from './collectGraph';
 
@@ -187,83 +177,86 @@ class StatsManager {
     return this.setMetaDataPublicPath(metaData, compiler);
   }
 
-  private _getFilteredModules(stats: StatsCompilation): StatsModule[] {
-    const filteredModules = stats.modules!.filter((module) => {
-      if (!module || !module.name) {
-        return false;
-      }
-      const array = [
-        module.name.includes('container entry'),
-        module.name.includes('remote '),
-        module.name.includes('shared module '),
-        module.name.includes('provide module '),
-      ];
-      return array.some((item) => item);
-    });
-
-    return filteredModules;
-  }
-
   private _getModuleAssets(
     compilation: Compilation,
     entryPointNames: string[],
   ): Record<string, StatsAssets> {
     const { chunks } = compilation;
-    const { exposeFileNameImportMap } = this._containerManager;
+    const exposes = this._containerManager.containerPluginExposesOptions;
+    const exposeKeysByChunk = new Map<string, string[]>();
+    for (const [key, options] of Object.entries(exposes)) {
+      if (
+        typeof options === 'object' &&
+        !Array.isArray(options) &&
+        options.name
+      ) {
+        const keys = exposeKeysByChunk.get(options.name) || [];
+        keys.push(key);
+        exposeKeysByChunk.set(options.name, keys);
+      }
+    }
     const assets: Record<string, StatsAssets> = {};
 
     chunks.forEach((chunk) => {
-      if (typeof chunk.name !== 'string') return;
-
-      // Support split chunks caused by splitChunks.maxSize:
-      // A chunk named "__federation_expose_Foo" may be split into
-      // "__federation_expose_Foo-<hash>" chunks, so we match both exact
-      // and prefix+dash patterns.
-      const matchedKey =
-        exposeFileNameImportMap[chunk.name] !== undefined
-          ? chunk.name
-          : Object.keys(exposeFileNameImportMap).find((key) =>
-              chunk.name!.startsWith(key + '-'),
+      // Optimizers can merge equal expose chunks under just one chunk name.
+      // Their named groups still identify every expose that loads those assets.
+      const names = new Set([
+        chunk.name,
+        ...[...chunk.groupsIterable].map((group) => group.name),
+      ]);
+      const assetKeys = new Set<string>();
+      for (const name of names) {
+        if (typeof name !== 'string') continue;
+        // Split chunks retain the expose name followed by a hash suffix.
+        const matchedKey = exposeKeysByChunk.has(name)
+          ? name
+          : [...exposeKeysByChunk.keys()].find((key) =>
+              name.startsWith(key + '-'),
             );
-
-      if (!matchedKey) return;
-
-      // TODO: support multiple import
-      const exposeKey = exposeFileNameImportMap[matchedKey][0];
-      const assetKey = getFileNameWithOutExt(exposeKey);
+        if (matchedKey) {
+          for (const key of exposeKeysByChunk.get(matchedKey)!)
+            assetKeys.add(key);
+        }
+      }
+      if (!assetKeys.size) return;
       const chunkAssets = getAssetsByChunk(chunk, entryPointNames);
 
-      if (!assets[assetKey]) {
-        assets[assetKey] = chunkAssets;
-      } else {
-        // Merge split chunk assets, deduplicating with Set
-        assets[assetKey] = {
-          js: {
-            sync: [
-              ...new Set([...assets[assetKey].js.sync, ...chunkAssets.js.sync]),
-            ],
-            async: [
-              ...new Set([
-                ...assets[assetKey].js.async,
-                ...chunkAssets.js.async,
-              ]),
-            ],
-          },
-          css: {
-            sync: [
-              ...new Set([
-                ...assets[assetKey].css.sync,
-                ...chunkAssets.css.sync,
-              ]),
-            ],
-            async: [
-              ...new Set([
-                ...assets[assetKey].css.async,
-                ...chunkAssets.css.async,
-              ]),
-            ],
-          },
-        };
+      for (const assetKey of assetKeys) {
+        if (!assets[assetKey]) {
+          assets[assetKey] = chunkAssets;
+        } else {
+          // Merge split chunk assets, deduplicating with Set
+          assets[assetKey] = {
+            js: {
+              sync: [
+                ...new Set([
+                  ...assets[assetKey].js.sync,
+                  ...chunkAssets.js.sync,
+                ]),
+              ],
+              async: [
+                ...new Set([
+                  ...assets[assetKey].js.async,
+                  ...chunkAssets.js.async,
+                ]),
+              ],
+            },
+            css: {
+              sync: [
+                ...new Set([
+                  ...assets[assetKey].css.sync,
+                  ...chunkAssets.css.sync,
+                ]),
+              ],
+              async: [
+                ...new Set([
+                  ...assets[assetKey].css.async,
+                  ...chunkAssets.css.async,
+                ]),
+              ],
+            },
+          };
+        }
       }
     });
 
@@ -380,6 +373,7 @@ class StatsManager {
             name: name!,
             file: {
               import: exposes[exposeKey].import,
+              layer: exposes[exposeKey].layer,
             },
           });
         });
@@ -430,7 +424,7 @@ class StatsManager {
         });
         const moduleHandler = new ModuleHandler(
           this._options,
-          this._getFilteredModules(webpackStats),
+          webpackStats.modules || [],
           { bundler: this._bundler },
         );
         const { remotes, exposesMap, sharedMap } = moduleHandler.collect();
@@ -452,25 +446,7 @@ class StatsManager {
         }
         stats.remotes = remotes;
         stats.shared = Object.values(sharedMap);
-        for (const [file, keys] of Object.entries(
-          this._containerManager.fileExposeKeyMap,
-        )) {
-          const expose = exposesMap[file] || {
-            assets: {
-              js: { sync: [], async: [] },
-              css: { sync: [], async: [] },
-            },
-          };
-          for (const key of keys) {
-            const exposeName = getExposeName(key);
-            stats.exposes.push({
-              ...expose,
-              path: key,
-              id: composeKeyWithSeparator(name!, exposeName),
-              name: exposeName,
-            });
-          }
-        }
+        stats.exposes = Object.values(exposesMap);
       }
 
       const remoteNames = new Set(

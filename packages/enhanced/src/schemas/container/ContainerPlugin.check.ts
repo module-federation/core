@@ -53,7 +53,7 @@ function n(
       {
         const s = l;
         for (const t in r)
-          if ('import' !== t && 'name' !== t)
+          if ('import' !== t && 'name' !== t && 'layer' !== t)
             return ((n.errors = [{ params: { additionalProperty: t } }]), !1);
         if (s === l) {
           if (void 0 !== r.import) {
@@ -98,13 +98,25 @@ function n(
             ((l = u), null !== i && (u ? (i.length = u) : (i = null)));
             var f = a === l;
           } else f = !0;
-          if (f)
+          if (f) {
             if (void 0 !== r.name) {
               const t = l;
               if ('string' != typeof r.name)
                 return ((n.errors = [{ params: { type: 'string' } }]), !1);
               f = t === l;
             } else f = !0;
+            if (f)
+              if (void 0 !== r.layer) {
+                let t = r.layer;
+                const e = l;
+                if (l === e) {
+                  if ('string' != typeof t)
+                    return ((n.errors = [{ params: { type: 'string' } }]), !1);
+                  if (t.length < 1) return ((n.errors = [{ params: {} }]), !1);
+                }
+                f = e === l;
+              } else f = !0;
+          }
         }
       }
     }
