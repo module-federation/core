@@ -1,14 +1,5 @@
-import { access, lstat, readFile } from 'fs/promises';
+import { lstat, readFile } from 'fs/promises';
 import { SizeLimitedCache } from '@module-federation/bridge-react/size-limited-cache';
-
-const pathExists = async (filepath: string): Promise<boolean> => {
-  try {
-    await access(filepath);
-    return true;
-  } catch {
-    return false;
-  }
-};
 
 export interface FileResult {
   content: string;
@@ -28,12 +19,8 @@ export class FileCache {
    * @returns FileResult or null if file doesn't exist
    */
   async getFile(filepath: string): Promise<FileResult | null> {
-    // Check if file exists
-    if (!(await pathExists(filepath))) {
-      return null;
-    }
-
     try {
+      // lstat alone is enough: ENOENT / access errors return null below.
       const stat = await lstat(filepath);
       const currentModified = stat.mtimeMs;
 
@@ -53,9 +40,9 @@ export class FileCache {
         lastModified: currentModified,
       };
 
-      this.cache.set(filepath, newEntry, {
-        size: stat.size || content.length,
-      });
+      // Charge UTF-8 bytes (never 0 — SizeLimitedCache rejects non-positive sizes).
+      const size = Math.max(Buffer.byteLength(content, 'utf8'), 1);
+      this.cache.set(filepath, newEntry, { size });
 
       return {
         content,
