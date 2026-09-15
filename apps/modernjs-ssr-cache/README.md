@@ -1,5 +1,7 @@
 # Modern SSR cache review demo
 
+首次体验请阅读 [中文 Demo 体验指南](./DEMO_GUIDE.zh-CN.md)，包含启动步骤、页面关系、更新范围验证、并发实验和内存观察。
+
 Independent review directory. The previous demo, E2E entry and CI configuration
 are unchanged. Review this locally before promoting it to the primary tests.
 
