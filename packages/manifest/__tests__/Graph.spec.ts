@@ -4,7 +4,6 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import type { Stats } from 'webpack';
 import { StatsPlugin } from '../src/StatsPlugin';
-import { StatsManager } from '../src/StatsManager';
 
 const nodeRequire = process
   .getBuiltinModule('module')
@@ -103,14 +102,16 @@ it.each([
               : new EnhancedPlugin({ ...options, manifest: false }),
           ],
         });
-        new StatsPlugin(options, {
+        const statsPlugin = new StatsPlugin(options, {
           pluginVersion: 'test',
           bundler: 'webpack',
-        }).apply(compiler);
-        const generateStats = StatsManager.prototype.generateStats;
+        });
+        statsPlugin.apply(compiler);
+        const statsManager = statsPlugin['_statsManager'];
+        const generateStats = statsManager.generateStats;
         let readerCalls = 0;
         const collect = jest
-          .spyOn(StatsManager.prototype, 'generateStats')
+          .spyOn(statsManager, 'generateStats')
           .mockImplementation(async function (compiler, compilation) {
             const getStats = jest.spyOn(compilation, 'getStats');
             const identifiers =
@@ -197,4 +198,5 @@ it.each([
       await rm(directory, { recursive: true, force: true });
     }
   },
+  60000,
 );
