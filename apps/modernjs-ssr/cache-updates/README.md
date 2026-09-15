@@ -85,8 +85,12 @@ independent published installation. No external Modern source checkout is requir
 
 ### Manual local experience
 
-Run `pnpm --filter modernjs-ssr-cache-updates run demo` after the build above.
-This reuses the production E2E fixture and leaves its servers running, with a
-control page at <http://127.0.0.1:3058/__demo>. It skips the automated scenarios.
-See [the parent README](../README.md#production-ssr-cache-update-demo) for the
-step-by-step walkthrough, inspector, port overrides and scope.
+Run `pnpm run demo:modern:ssr` after the package build above. The unified
+playground uses separate production static/dynamic hosts, real iframe previews
+and a separate Node traffic process. `demo:modern:ssr:memory` enables GC, while
+`demo:modern:ssr:debug` enables Inspector for both hosts.
+
+See [the parent README](../README.md) for the walkthrough and manual commands.
+`e2e/playground.cjs` runs the same application and checked-in Cypress scenarios,
+then asserts real admission and memory behavior. It is part of the standard E2E
+entry. Existing lifecycle/soak tests remain independent regression coverage.

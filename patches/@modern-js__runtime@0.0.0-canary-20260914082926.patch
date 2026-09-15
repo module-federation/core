@@ -1,0 +1,44 @@
+diff --git a/dist/cjs/core/server/stream/createReadableStream.js b/dist/cjs/core/server/stream/createReadableStream.js
+index 38f6041284278bbe7db6a07e5e3878f88d129ad8..78636db09e36dd893536ab02dd64a8b31e3777ce 100644
+--- a/dist/cjs/core/server/stream/createReadableStream.js
++++ b/dist/cjs/core/server/stream/createReadableStream.js
+@@ -73,6 +73,7 @@ const createReadableStreamFromElement = async (request, rootElement, options)=>{
+         const cancellation = new AbortController();
+         const streams = new Set();
+         let stopped = false;
++        let started = false;
+         let abortReact = ()=>{};
+         let renderingDone;
+         const rendering = new Promise((done)=>{
+@@ -114,7 +115,8 @@ const createReadableStreamFromElement = async (request, rootElement, options)=>{
+             },
+             [onReady] () {
+                 if ('onAllReady' === onReady) renderingDone();
+-                if (stopped) return;
++                if (stopped || started) return;
++                started = true;
+                 const templateWork = Promise.resolve().then(async ()=>{
+                     let styledComponentsStyleTags = '';
+                     extenders.forEach((extender)=>{
+diff --git a/dist/esm/core/server/stream/createReadableStream.mjs b/dist/esm/core/server/stream/createReadableStream.mjs
+index e0b21299d80b9dddfe30b82cc5202ccd475dd0f7..d123861d654b69d213276b6d51f6d7b31ca42f0a 100644
+--- a/dist/esm/core/server/stream/createReadableStream.mjs
++++ b/dist/esm/core/server/stream/createReadableStream.mjs
+@@ -41,6 +41,7 @@ const createReadableStreamFromElement = async (request, rootElement, options)=>{
+         const cancellation = new AbortController();
+         const streams = new Set();
+         let stopped = false;
++        let started = false;
+         let abortReact = ()=>{};
+         let renderingDone;
+         const rendering = new Promise((done)=>{
+@@ -82,7 +83,8 @@ const createReadableStreamFromElement = async (request, rootElement, options)=>{
+             },
+             [onReady] () {
+                 if ('onAllReady' === onReady) renderingDone();
+-                if (stopped) return;
++                if (stopped || started) return;
++                started = true;
+                 const templateWork = Promise.resolve().then(async ()=>{
+                     let styledComponentsStyleTags = '';
+                     extenders.forEach((extender)=>{

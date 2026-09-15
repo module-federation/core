@@ -17,6 +17,11 @@ overrides:
 
 packageExtensionsChecksum: sha256-kYpp54Qa8oxHK52n1gCLre9EEtYoXU9UlxKnD05EOBo=
 
+patchedDependencies:
+  '@modern-js/runtime@0.0.0-canary-20260914082926':
+    hash: 1e8d3d760dba67925d08d2a52e3894f8955ca2dca8c4641c104e28d71e8d4404
+    path: patches/@modern-js__runtime@0.0.0-canary-20260914082926.patch
+
 importers:
 
   .:
@@ -845,7 +850,7 @@ importers:
         version: 0.80.0(@babel/core@7.29.0)
       '@react-native/eslint-config':
         specifier: 0.80.0
-        version: 0.80.0(eslint@8.57.1)(jest@29.7.0(@types/node@20.19.5)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@20.19.5)(typescript@7.0.2)))(prettier@2.8.8)(typescript@7.0.2)
+        version: 0.80.0(eslint@8.57.1)(jest@29.7.0(@types/node@26.2.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@26.2.0)(typescript@7.0.2)))(prettier@2.8.8)(typescript@7.0.2)
       '@react-native/gradle-plugin':
         specifier: 0.80.0
         version: 0.80.0
@@ -884,7 +889,7 @@ importers:
         version: 8.57.1
       jest:
         specifier: ^29.6.3
-        version: 29.7.0(@types/node@20.19.5)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@20.19.5)(typescript@7.0.2))
+        version: 29.7.0(@types/node@26.2.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@26.2.0)(typescript@7.0.2))
       nodemon:
         specifier: ^3.1.9
         version: 3.1.14
@@ -939,7 +944,7 @@ importers:
         version: 0.80.0(@babel/core@7.29.0)
       '@react-native/eslint-config':
         specifier: 0.80.0
-        version: 0.80.0(eslint@8.57.1)(jest@29.7.0(@types/node@26.2.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@26.2.0)(typescript@7.0.2)))(prettier@2.8.8)(typescript@7.0.2)
+        version: 0.80.0(eslint@8.57.1)(jest@29.7.0(@types/node@20.19.5)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@20.19.5)(typescript@7.0.2)))(prettier@2.8.8)(typescript@7.0.2)
       '@react-native/metro-config':
         specifier: 0.80.0
         version: 0.80.0(@babel/core@7.29.0)
@@ -975,7 +980,7 @@ importers:
         version: 8.57.1
       jest:
         specifier: ^29.6.3
-        version: 29.7.0(@types/node@26.2.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@26.2.0)(typescript@7.0.2))
+        version: 29.7.0(@types/node@20.19.5)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.41(@swc/helpers@0.5.23))(@types/node@20.19.5)(typescript@7.0.2))
       nodemon:
         specifier: ^3.1.9
         version: 3.1.14
@@ -1267,7 +1272,7 @@ importers:
         version: 0.0.0-canary-20260914082926(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@modern-js/runtime':
         specifier: 0.0.0-canary-20260914082926
-        version: 0.0.0-canary-20260914082926(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-fde17bab-20260911103204(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.17))(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
+        version: 0.0.0-canary-20260914082926(patch_hash=1e8d3d760dba67925d08d2a52e3894f8955ca2dca8c4641c104e28d71e8d4404)(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-fde17bab-20260911103204(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.17))(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
       '@modern-js/server-core':
         specifier: 0.0.0-canary-20260914082926
         version: 0.0.0-canary-20260914082926(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -34488,7 +34493,7 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@modern-js/runtime@0.0.0-canary-20260914082926(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-fde17bab-20260911103204(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.17))(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)':
+  '@modern-js/runtime@0.0.0-canary-20260914082926(patch_hash=1e8d3d760dba67925d08d2a52e3894f8955ca2dca8c4641c104e28d71e8d4404)(@module-federation/runtime-tools@packages+runtime-tools)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-fde17bab-20260911103204(@module-federation/runtime-tools@packages+runtime-tools)(@swc/helpers@0.5.17))(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@loadable/component': 5.16.7(react@19.2.8)
       '@loadable/server': 5.16.7(@loadable/component@5.16.7(react@19.2.8))(react@19.2.8)

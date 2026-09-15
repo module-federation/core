@@ -3,9 +3,12 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "e2e": "node e2e/static.cjs && node --expose-gc e2e/production.cjs",
+    "e2e": "node e2e/static.cjs && node --expose-gc e2e/production.cjs && node e2e/playground.cjs",
     "test:e2e": "pnpm run e2e",
-    "demo": "node --expose-gc e2e/production.cjs --demo"
+    "demo": "node playground/start.cjs",
+    "demo:memory": "node playground/start.cjs --memory",
+    "demo:debug": "node playground/start.cjs --debug",
+    "e2e:playground": "node e2e/playground.cjs"
   },
   "dependencies": {
     "@modern-js/app-tools": "0.0.0-canary-20260914082926",

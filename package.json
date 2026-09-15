@@ -88,7 +88,10 @@
     "commitgen:main": "./commit-gen.js --path ./packages",
     "changeset:status": "changeset status",
     "generate:schema": "pnpm --filter @module-federation/enhanced run generate:schema && git diff --name-only | xargs pnpm exec prettier --write --ignore-unknown",
-    "lint:deps": "node scripts/check-ghost-deps.mjs"
+    "lint:deps": "node scripts/check-ghost-deps.mjs",
+    "demo:modern:ssr": "pnpm --filter modernjs-ssr-cache-updates run demo",
+    "demo:modern:ssr:memory": "pnpm --filter modernjs-ssr-cache-updates run demo:memory",
+    "demo:modern:ssr:debug": "pnpm --filter modernjs-ssr-cache-updates run demo:debug"
   },
   "pnpm": {
     "packageExtensions": {
@@ -171,7 +174,10 @@
       "msw",
       "sharp",
       "unrs-resolver"
-    ]
+    ],
+    "patchedDependencies": {
+      "@modern-js/runtime@0.0.0-canary-20260914082926": "patches/@modern-js__runtime@0.0.0-canary-20260914082926.patch"
+    }
   },
   "dependencies": {
     "adm-zip": "0.6.0",
