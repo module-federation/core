@@ -18,6 +18,7 @@ const baseConfig = {
     'node:fs',
     'node:module',
     'node:path',
+    'vite',
   ],
 };
 
