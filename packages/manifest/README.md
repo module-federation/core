@@ -4,13 +4,15 @@
 
 This package contains the manifest plugin for webpack/rspack internal.
 
-### Deferred provider metadata proposal
+### Provider metadata proposal
 
 The independent provider-metadata draft records multiple concrete version/import
 pairs and their assets in an optional `shared[].providers` array. Existing shared
 fields remain unchanged; singleton and consumer-only rows omit the array.
-This proposal is deferred pending [RFC #5082](https://github.com/module-federation/core/issues/5082) and is not part of the active
-layers stack.
+This draft implements [RFC #5082](https://github.com/module-federation/core/issues/5082)
+for review independently of the active layers stack. It preserves the mapping
+between each concrete provider and its import/assets that a single shared
+summary cannot express.
 
 Webpack/Rspack parity is a goal for that RFC. This main-based draft uses the
 existing stats collector; graph collection, layer/scope identity integration and
