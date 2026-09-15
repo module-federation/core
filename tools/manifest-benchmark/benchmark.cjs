@@ -308,6 +308,10 @@ async function worker() {
   let buildStart;
   let editStart;
   let watch;
+  const invalidations = [];
+  compiler.hooks.invalid.tap('benchmark-edit-evidence', (file) => {
+    invalidations.push({ file, at: performance.now() });
+  });
   compiler.hooks.watchRun.tap('benchmark-clock', () => {
     phase = emptyPhase();
     buildStart = performance.now();
@@ -316,91 +320,108 @@ async function worker() {
     const timeout = setTimeout(() => {
       watch.close(() => reject(new Error('Watch build timed out after 120s')));
     }, 120000);
-    watch = compiler.watch({ aggregateTimeout: 20 }, async (error, stats) => {
-      const end = performance.now();
-      try {
-        if (error) throw error;
-        if (stats.hasErrors())
-          throw new Error(stats.toString({ all: false, errors: true }));
-        const measured = { ...phase };
-        const artifacts = {
-          stats: readArtifact(output, 'mf-stats.json', directory),
-          manifest: readArtifact(output, 'mf-manifest.json', directory),
-        };
-        const builtModules = [...stats.compilation.modules].filter((module) =>
-          stats.compilation.builtModules.has(module),
-        ).length;
-        const hotUpdateAssets = stats.compilation
-          .getAssets()
-          .filter((asset) => asset.name.includes('.hot-update.')).length;
-        if (results.length) {
+    watch = compiler.watch(
+      { aggregateTimeout: 20, ignored: `${output}/**` },
+      async (error, stats) => {
+        const end = performance.now();
+        try {
+          if (error) throw error;
+          if (stats.hasErrors())
+            throw new Error(stats.toString({ all: false, errors: true }));
+          const measured = { ...phase };
+          const artifacts = {
+            stats: readArtifact(output, 'mf-stats.json', directory),
+            manifest: readArtifact(output, 'mf-manifest.json', directory),
+          };
+          const builtModules = [...stats.compilation.modules].filter((module) =>
+            stats.compilation.builtModules.has(module),
+          ).length;
+          const hotUpdateAssets = stats.compilation
+            .getAssets()
+            .filter((asset) => asset.name.includes('.hot-update.')).length;
+          if (results.length) {
+            assert.equal(
+              builtModules,
+              1,
+              'A watch edit must rebuild exactly one source module',
+            );
+            assert(
+              hotUpdateAssets > 0,
+              'Incremental build must emit actual HMR updates',
+            );
+          }
           assert.equal(
-            builtModules,
+            measured.collectorCalls,
             1,
-            'A watch edit must rebuild exactly one source module',
+            'Collector instrumentation must cover each real build',
           );
-          assert(
-            hotUpdateAssets > 0,
-            'Incremental build must emit actual HMR updates',
+          if (mode === 'legacy')
+            assert(
+              measured.toJsonCalls > 0,
+              'Legacy selection must invoke Stats.toJson',
+            );
+          else
+            assert.equal(
+              measured.toJsonCalls,
+              0,
+              'Graph selection unexpectedly fell back to Stats.toJson',
+            );
+          results.push({
+            kind: results.length ? 'incremental' : 'cold',
+            index: results.length,
+            buildMs: end - buildStart,
+            editToDoneMs: editStart ? end - editStart : null,
+            ...measured,
+            peakRssMiB: process.resourceUsage().maxRSS / 1024,
+            modules: stats.compilation.modules.size,
+            chunks: stats.compilation.chunks.size,
+            builtModules,
+            hotUpdateAssets,
+            warnings: stats.compilation.warnings.map(
+              (warning) => warning.message,
+            ),
+            assetCounts: checkAssets(artifacts.stats, output),
+            artifacts,
+          });
+          if (results.length > parameters.rebuilds) {
+            clearTimeout(timeout);
+            watch.close((closeError) =>
+              closeError ? reject(closeError) : resolve(),
+            );
+            return;
+          }
+          const editFile = path.join(
+            directory,
+            scenario === 'exposes' ? 'expose-0.js' : 'unrelated-0.js',
           );
-        }
-        assert.equal(
-          measured.collectorCalls,
-          1,
-          'Collector instrumentation must cover each real build',
-        );
-        if (mode === 'legacy')
-          assert(
-            measured.toJsonCalls > 0,
-            'Legacy selection must invoke Stats.toJson',
+          // Let Webpack finish installing watchers before the genuine single-file edit.
+          setTimeout(() => {
+            editStart = performance.now();
+            fs.appendFileSync(
+              editFile,
+              `\nconsole.log('edit-${results.length}');\n`,
+            );
+          }, 100);
+        } catch (failure) {
+          fs.writeFileSync(
+            path.join(directory, 'failure.json'),
+            JSON.stringify(
+              {
+                error: failure.message,
+                editStart,
+                invalidations,
+                modifiedFiles: [...(compiler.modifiedFiles || [])],
+                results,
+              },
+              null,
+              2,
+            ),
           );
-        else
-          assert.equal(
-            measured.toJsonCalls,
-            0,
-            'Graph selection unexpectedly fell back to Stats.toJson',
-          );
-        results.push({
-          kind: results.length ? 'incremental' : 'cold',
-          index: results.length,
-          buildMs: end - buildStart,
-          editToDoneMs: editStart ? end - editStart : null,
-          ...measured,
-          peakRssMiB: process.resourceUsage().maxRSS / 1024,
-          modules: stats.compilation.modules.size,
-          chunks: stats.compilation.chunks.size,
-          builtModules,
-          hotUpdateAssets,
-          warnings: stats.compilation.warnings.map(
-            (warning) => warning.message,
-          ),
-          assetCounts: checkAssets(artifacts.stats, output),
-          artifacts,
-        });
-        if (results.length > parameters.rebuilds) {
           clearTimeout(timeout);
-          watch.close((closeError) =>
-            closeError ? reject(closeError) : resolve(),
-          );
-          return;
+          watch.close(() => reject(failure));
         }
-        const editFile = path.join(
-          directory,
-          scenario === 'exposes' ? 'expose-0.js' : 'unrelated-0.js',
-        );
-        // Let Webpack finish installing watchers before the genuine single-file edit.
-        setTimeout(() => {
-          editStart = performance.now();
-          fs.appendFileSync(
-            editFile,
-            `\nconsole.log('edit-${results.length}');\n`,
-          );
-        }, 100);
-      } catch (failure) {
-        clearTimeout(timeout);
-        watch.close(() => reject(failure));
-      }
-    });
+      },
+    );
   });
   await new Promise((resolve, reject) =>
     compiler.close((error) => (error ? reject(error) : resolve())),
@@ -419,6 +440,7 @@ async function worker() {
     parameters,
     directory,
     results,
+    invalidations,
     builtManifestSha256: require('node:crypto')
       .createHash('sha256')
       .update(

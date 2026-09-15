@@ -17,7 +17,7 @@ jobs:
     timeout-minutes: 30
     env:
       FOUNDATION_REF: 07527d3fd31a95f98b544c8eec39095cc184504a
-      BENCHMARK_OUTPUT: ${{ github.workspace }}/benchmark-results
+      BENCHMARK_OUTPUT: /tmp/manifest-exposes-${{ github.run_id }}-${{ github.run_attempt }}
       CYPRESS_INSTALL_BINARY: '0'
       TURBO_TELEMETRY_DISABLED: '1'
     steps:
