@@ -1,9 +1,0 @@
-{
-  "name": "modern-ssr-review-console",
-  "private": true,
-  "dependencies": {
-    "react": "19.2.8",
-    "react-dom": "19.2.8",
-    "@modern-js/runtime": "0.0.0-canary-20260914082926"
-  }
-}

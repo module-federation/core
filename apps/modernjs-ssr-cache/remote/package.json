@@ -1,0 +1,23 @@
+{
+  "name": "modernjs-ssr-cache-remote",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "modern dev",
+    "build": "modern build",
+    "serve": "modern serve"
+  },
+  "dependencies": {
+    "@modern-js/runtime": "0.0.0-canary-20260914082926",
+    "@module-federation/modern-js-v3": "0.0.0-feat-mf-ssr-clear-cache-20260914081229",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@modern-js/app-tools": "0.0.0-canary-20260914082926",
+    "@modern-js/prod-server": "0.0.0-canary-20260914082926",
+    "@modern-js/server-core": "0.0.0-canary-20260914082926",
+    "@rspack/core": "2.2.3",
+    "typescript": "5.9.3"
+  }
+}
