@@ -23,8 +23,8 @@ const r = {
           { type: 'array', items: { type: 'string', minLength: 1 } },
         ],
       },
-      layer: { type: 'string' },
-      issuerLayer: { type: 'string' },
+      layer: { type: 'string', minLength: 1 },
+      issuerLayer: { type: 'string', minLength: 1 },
       request: { type: 'string', minLength: 1 },
       singleton: { type: 'boolean' },
       strictVersion: { type: 'boolean' },
@@ -227,23 +227,33 @@ function t(
                   } else f = !0;
                   if (f) {
                     if (void 0 !== s.layer) {
-                      const r = p;
-                      if ('string' != typeof s.layer)
-                        return (
-                          (t.errors = [{ params: { type: 'string' } }]),
-                          !1
-                        );
-                      f = r === p;
-                    } else f = !0;
-                    if (f) {
-                      if (void 0 !== s.issuerLayer) {
-                        const r = p;
-                        if ('string' != typeof s.issuerLayer)
+                      let r = s.layer;
+                      const e = p;
+                      if (p === e) {
+                        if ('string' != typeof r)
                           return (
                             (t.errors = [{ params: { type: 'string' } }]),
                             !1
                           );
-                        f = r === p;
+                        if (r.length < 1)
+                          return ((t.errors = [{ params: {} }]), !1);
+                      }
+                      f = e === p;
+                    } else f = !0;
+                    if (f) {
+                      if (void 0 !== s.issuerLayer) {
+                        let r = s.issuerLayer;
+                        const e = p;
+                        if (p === e) {
+                          if ('string' != typeof r)
+                            return (
+                              (t.errors = [{ params: { type: 'string' } }]),
+                              !1
+                            );
+                          if (r.length < 1)
+                            return ((t.errors = [{ params: {} }]), !1);
+                        }
+                        f = e === p;
                       } else f = !0;
                       if (f) {
                         if (void 0 !== s.request) {

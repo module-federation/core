@@ -4,7 +4,7 @@
  * Compatibility of the identifiers emitted by Rspack's layer-aware Module
  * Federation stack with the published (pre-layers) manifest reader.
  *
- * `@module-federation/manifest-legacy` is the last published reader
+ * `@module-federation/manifest-legacy` is the older published reader
  * (2.8.2, before this change); `../src` is the current one. Both run the
  * real @module-federation/sdk and @module-federation/managers.
  */
@@ -29,7 +29,7 @@ const { ModuleHandler: LegacyModuleHandler } = require(
 type Handler = typeof ModuleHandler;
 
 const readers: [string, Handler][] = [
-  ['legacy reader (2.8.2)', LegacyModuleHandler],
+  ['published reader (2.8.2)', LegacyModuleHandler],
   ['current reader', ModuleHandler],
 ];
 
@@ -157,14 +157,14 @@ describe('Rspack identifiers against the published manifest reader', () => {
     });
   });
 
-  it('the legacy reader skips layered shares instead of failing', () => {
+  it('the published reader skips layered shares instead of failing', () => {
     // Layered shares are a new feature; the old reader does not record them
     // (same as for webpack's `(layer)` segment), but the build must not break.
     const { sharedMap } = collect(LegacyModuleHandler, layeredShared);
     expect(sharedVersions(sharedMap)).toEqual({});
   });
 
-  it('guards against identifier layouts the legacy reader cannot handle', () => {
+  it('guards against identifier layouts the published reader cannot handle', () => {
     // Shapes considered and rejected during the layers work: a structural key
     // in place of the scope/name tokens drops every shared entry, and a
     // `[exposes, layers]` tuple payload crashes the reader.
@@ -278,7 +278,7 @@ it('preserves native layer metadata when rebuilding a manifest', () => {
         id: 'host:react',
         name: 'react',
         version: '19.0.0',
-        layer: '',
+        layer: 'server',
         shareScope: ['server', 'default'],
         assets: {},
       },
@@ -288,9 +288,9 @@ it('preserves native layer metadata when rebuilding a manifest', () => {
         id: 'host:App',
         name: 'App',
         path: './App',
-        layer: '',
+        layer: 'server',
         requiredShared: [
-          { name: 'react', layer: '', shareScope: ['server', 'default'] },
+          { name: 'react', layer: 'server', shareScope: ['server', 'default'] },
         ],
         assets: {},
       },
@@ -304,11 +304,11 @@ it('preserves native layer metadata when rebuilding a manifest', () => {
     bundler: 'rspack',
   });
   expect(manifest.shared[0]).toMatchObject({
-    layer: '',
+    layer: 'server',
     shareScope: ['server', 'default'],
   });
   expect(manifest.exposes[0]).toMatchObject({
-    layer: '',
+    layer: 'server',
     requiredShared: stats.exposes[0].requiredShared,
   });
 });

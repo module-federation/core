@@ -17,13 +17,13 @@ import {
   StatsSharedProvider,
 } from '@module-federation/sdk';
 import { Compilation, Compiler } from 'webpack';
-import path from 'node:path';
 import type {
   StatsCompilation,
   StatsModule,
 } from 'webpack/lib/stats/DefaultStatsFactoryPlugin';
 import {
   isDev,
+  getProviderImport,
   getAssetsByChunk,
   findChunk,
   getAssetsByChunkIDs,
@@ -48,6 +48,7 @@ import {
   getShareItem,
 } from './ModuleHandler';
 import { StatsInfo } from './types';
+import { collectGraph } from './collectGraph';
 
 class StatsManager {
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions = {};
@@ -398,26 +399,7 @@ class StatsManager {
             index >= 0 ? resolvedRequest.slice(index + condition.length) : '';
           resolvedRequest = condition + (suffix.startsWith('?') ? suffix : '');
         }
-        const imported = resolvedRequest
-          .split('!')
-          .map((resource) => {
-            const query = resource.indexOf('?');
-            const resourcePath =
-              query < 0 ? resource : resource.slice(0, query);
-            const suffix = query < 0 ? '' : resource.slice(query);
-            const paths =
-              path.win32.isAbsolute(resourcePath) &&
-              !path.posix.isAbsolute(resourcePath)
-                ? path.win32
-                : path.posix;
-            if (!paths.isAbsolute(resourcePath)) return resource;
-            const relative = paths
-              .relative(compiler.context, resourcePath)
-              .replace(/\\/g, '/');
-            if (paths.isAbsolute(relative)) return resource;
-            return `${relative.startsWith('../') ? '' : './'}${relative}${suffix}`;
-          })
-          .join('!');
+        const imported = getProviderImport(compiler.context, resolvedRequest);
         const entries = (providers[name] ||= []);
         let provider = entries.find(
           (item) => item.version === version && item.import === imported,
@@ -525,7 +507,10 @@ class StatsManager {
         return stats;
       }
 
-      const liveStats = compilation.getStats();
+      const graph =
+        this._bundler === 'webpack'
+          ? collectGraph(compilation, this._options)
+          : undefined;
       const statsOptions: Record<string, boolean> = {
         all: false,
         modules: true,
@@ -543,34 +528,37 @@ class StatsManager {
       }
       statsOptions['cachedModules'] = true;
 
-      const webpackStats = liveStats.toJson(statsOptions);
+      const webpackStats = graph
+        ? undefined
+        : compilation.getStats().toJson(statsOptions);
 
-      const moduleHandler = new ModuleHandler(
-        this._options,
-        webpackStats.modules || [],
-        {
-          bundler: this._bundler,
-        },
-      );
-      const { remotes, exposesMap, sharedMap, sharedProviderModules } =
-        moduleHandler.collect();
+      const fallback = graph
+        ? undefined
+        : new ModuleHandler(this._options, webpackStats?.modules || [], {
+            bundler: this._bundler,
+          }).collect();
+      const { remotes, exposesMap, sharedMap } = graph ?? fallback!;
       const entryPointNames = [...compilation.entrypoints.values()]
         .map((e) => e.name)
         .filter((v) => !!v) as Array<string>;
 
       await Promise.all([
         new Promise<void>((resolve) => {
+          if (graph) {
+            resolve();
+            return;
+          }
           const sharedAssets = this._getProvideSharedAssets(
             compilation,
-            webpackStats,
+            webpackStats!,
             entryPointNames,
           );
 
           const providers = this._getSharedProviders(
             compiler,
             compilation,
-            webpackStats,
-            sharedProviderModules,
+            webpackStats!,
+            fallback!.sharedProviderModules,
             entryPointNames,
           );
           Object.keys(sharedMap).forEach((sharedKey) => {
@@ -584,10 +572,9 @@ class StatsManager {
           resolve();
         }),
         new Promise<void>((resolve) => {
-          const moduleAssets = this._getModuleAssets(
-            compilation,
-            entryPointNames,
-          );
+          const moduleAssets = graph
+            ? {}
+            : this._getModuleAssets(compilation, entryPointNames);
 
           Object.keys(exposesMap).forEach((exposeKey) => {
             const assets = moduleAssets[exposeKey];

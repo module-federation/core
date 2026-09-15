@@ -163,21 +163,6 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
    * @returns {void}
    */
   apply(compiler: Compiler): void {
-    compiler.hooks.normalModuleFactory.tap(
-      'ModuleFederationPlugin',
-      (factory) => {
-        factory.hooks.afterResolve.tap('ModuleFederationPlugin', (data) => {
-          // Preserve an explicitly empty layer through exposes, shared fallbacks,
-          // and their imports. A module rule's non-null layer still takes priority.
-          if (
-            data.contextInfo.issuerLayer === '' &&
-            data.createData.layer === null
-          ) {
-            data.createData.layer = '';
-          }
-        });
-      },
-    );
     bindLoggerToCompiler(
       infrastructureLogger,
       compiler,

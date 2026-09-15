@@ -61,6 +61,18 @@ export function splitSharedIdentifier(
   };
 }
 
+export function getSharedIdentityKey(
+  name: string,
+  shareScope: string | string[],
+  layer?: string,
+) {
+  const component = (value: string) => `${Buffer.byteLength(value)}:${value}`;
+  const scope = Array.isArray(shareScope)
+    ? `m${shareScope.length}:${shareScope.map(component).join('')}`
+    : `s${component(shareScope)}`;
+  return `${component(scope)}${layer === undefined ? 'n' : `l${component(layer)}`}${component(name)}`;
+}
+
 export function getSharedIdentity(
   identifier: string,
   scopeTokenIndex: number,
@@ -146,8 +158,7 @@ export function getSharedIdentity(
   const name =
     webpackConsume?.[2] ||
     nameAndVersion.slice(0, nameAndVersion.lastIndexOf('@'));
-  const component = (value: string) => `${Buffer.byteLength(value)}:${value}`;
-  const key = `${component(`s${component(shareScope)}`)}${layer === undefined ? 'n' : `l${component(layer)}`}${component(name)}`;
+  const key = getSharedIdentityKey(name, shareScope, layer);
   return { key, name, layer, shareScope };
 }
 
@@ -293,7 +304,7 @@ export function getAssetsByChunk(
     type: 'sync' | 'async',
   ): void => {
     [...targetChunk.groupsIterable].forEach((chunkGroup) => {
-      if (chunkGroup.name && !entryPointNames.includes(chunkGroup.name)) {
+      if (!chunkGroup.name || !entryPointNames.includes(chunkGroup.name)) {
         collectAssets(
           chunkGroup.getFiles(),
           assesSet.js[type],
@@ -402,4 +413,26 @@ export function getTypesMetaInfo(
     );
     return defaultTypesMetaInfo;
   }
+}
+
+export function getProviderImport(context: string, request: string): string {
+  return request
+    .split('!')
+    .map((resource) => {
+      const query = resource.indexOf('?');
+      const resourcePath = query < 0 ? resource : resource.slice(0, query);
+      const suffix = query < 0 ? '' : resource.slice(query);
+      const paths =
+        path.win32.isAbsolute(resourcePath) &&
+        !path.posix.isAbsolute(resourcePath)
+          ? path.win32
+          : path.posix;
+      if (!paths.isAbsolute(resourcePath)) return resource;
+      const relative = paths
+        .relative(context, resourcePath)
+        .replace(/\\/g, '/');
+      if (paths.isAbsolute(relative)) return resource;
+      return `${relative.startsWith('../') ? '' : './'}${relative}${suffix}`;
+    })
+    .join('!');
 }

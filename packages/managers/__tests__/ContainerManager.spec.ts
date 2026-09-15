@@ -85,12 +85,11 @@ describe('ContainerManager', () => {
     ).toEqual('__federation_expose_Button');
   });
 
-  it('preserves expose layer, including the empty string', () => {
+  it('preserves named and omitted expose layers', () => {
     const options = {
       name: '@module-federation/container-managers-test',
       exposes: {
         './Server': { import: './src/Server.jsx', layer: 'server' },
-        './Base': { import: './src/Base.jsx', layer: '' },
         './Plain': { import: './src/Plain.jsx' },
       },
     };
@@ -102,7 +101,6 @@ describe('ContainerManager', () => {
       { import: string[]; name: string; layer?: string }
     >;
     expect(exposes['./Server'].layer).toEqual('server');
-    expect(exposes['./Base'].layer).toEqual('');
     expect('layer' in exposes['./Plain']).toEqual(false);
   });
 

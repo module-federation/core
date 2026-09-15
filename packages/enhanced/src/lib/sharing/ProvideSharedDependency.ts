@@ -77,7 +77,7 @@ class ProvideSharedDependency extends Dependency {
       ? this.shareScope.join('|')
       : this.shareScope;
 
-    return `provide module (${scopeStr})${this.layer != null ? ` (${this.layer})` : ''} ${this.request} as ${
+    return `provide module (${scopeStr})${this.layer ? ` (${this.layer})` : ''} ${this.request} as ${
       this.name
     } @ ${this.version}${this.eager ? ' (eager)' : ''}`;
   }

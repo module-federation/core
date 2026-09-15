@@ -32,7 +32,7 @@ export interface ExposesConfig {
    */
   name?: string;
   /**
-   * Layer in which to build the exposed module. An empty string is a valid layer.
+   * Layer in which to build the exposed module.
    */
   layer?: string;
 }

@@ -84,9 +84,9 @@ export default {
           type: 'string',
         },
         layer: {
-          description:
-            'Layer in which to build the exposed module. An empty string is a valid layer.',
+          description: 'Layer in which to build the exposed module.',
           type: 'string',
+          minLength: 1,
         },
       },
       required: ['import'],

@@ -297,7 +297,11 @@ it.each([false, true])(
           name: 'server',
           layer: 'server',
         },
-        './Client': { import: ['./src/Button.tsx'], name: 'client', layer: '' },
+        './Client': {
+          import: ['./src/Button.tsx'],
+          name: 'client',
+          layer: 'client',
+        },
       },
     };
     const consume = {
@@ -368,7 +372,7 @@ it.each([false, true])(
       id: 'host:Client',
       name: 'Client',
       file: 'src/Button.tsx',
-      layer: '',
+      layer: 'client',
       requires: [],
       assets: {
         js: { sync: disableAssetsAnalyze ? [] : ['client.js'], async: [] },
@@ -382,7 +386,10 @@ it.each([false, true])(
       publicPath: '/',
       bundler: 'rspack',
     });
-    expect(manifest.exposes.map(({ layer }) => layer)).toEqual(['server', '']);
+    expect(manifest.exposes.map(({ layer }) => layer)).toEqual([
+      'server',
+      'client',
+    ]);
     expect(manifest.exposes[0].assets).toEqual(stats.exposes[0].assets);
   },
 );
