@@ -165,6 +165,45 @@ it.each([
               uniqueName: role,
             },
             plugins: [
+              {
+                apply(compiler) {
+                  if (bundler !== 'webpack') return;
+                  compiler.hooks.thisCompilation.tap(
+                    'graph manifest check',
+                    (compilation) => {
+                      compilation.hooks.processAssets.intercept({
+                        register(tap) {
+                          if (tap.name !== 'generateStats') return tap;
+                          const generate = tap.fn;
+                          tap.fn = async (...args) => {
+                            const originals = [
+                              [compilation, 'getStats', compilation.getStats],
+                              ...[...compilation.modules].flatMap((module) =>
+                                ['identifier', 'readableIdentifier'].map(
+                                  (key) => [module, key, module[key]],
+                                ),
+                              ),
+                            ];
+                            for (const [target, key] of originals)
+                              target[key] = () => {
+                                throw new Error(
+                                  'Manifest must use the module graph',
+                                );
+                              };
+                            try {
+                              return await generate(...args);
+                            } finally {
+                              for (const [target, key, value] of originals)
+                                target[key] = value;
+                            }
+                          };
+                          return tap;
+                        },
+                      });
+                    },
+                  );
+                },
+              },
               new Plugin({
                 name: role,
                 // Declare every scope exchanged at the container boundary.
@@ -245,6 +284,12 @@ it.each([
         }
       }
       if (emitManifest) {
+        const hostStats: Stats = JSON.parse(
+          await readFile(path.join(directory, 'host/mf-stats.json'), 'utf8'),
+        );
+        expect(hostStats.shared).toHaveLength(layered ? 3 : 1);
+        for (const shared of hostStats.shared)
+          expect(shared.version).toBe('2.0.0');
         const manifest: Manifest = JSON.parse(
           await readFile(
             path.join(directory, 'remote/mf-manifest.json'),
