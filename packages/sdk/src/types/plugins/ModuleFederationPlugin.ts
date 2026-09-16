@@ -531,6 +531,12 @@ export interface ModuleFederationPluginOptions {
      * @default false
      */
     disableAlias?: boolean;
+    /**
+     * Prints router alias debug logs emitted by the React bridge webpack plugin.
+     *
+     * @default false
+     */
+    showBridgeRouterLogs?: boolean;
   };
   /**
    * Configuration for async boundary plugin
