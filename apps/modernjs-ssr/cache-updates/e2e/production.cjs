@@ -136,7 +136,7 @@ const { createSSRUpdateAdapter } = packageRequire(
         },
         reloadEntry: adapter.reload,
         async dispose(_, entries) {
-          adapter.dispose(entries);
+          await adapter.dispose(entries);
         },
         async validate(resources) {
           if (failValidation) throw new Error('injected validation failure');
@@ -443,7 +443,7 @@ const { createSSRUpdateAdapter } = packageRequire(
     if (server) await new Promise((r) => server.close(r));
     asset.closeAllConnections();
     await new Promise((r) => asset.close(r));
-    adapter.dispose();
+    await adapter.dispose();
     delete globalThis.__r6Actions;
     delete globalThis.__r6Loader;
     delete globalThis.__r6Stream;

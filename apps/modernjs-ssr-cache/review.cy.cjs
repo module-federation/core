@@ -73,10 +73,28 @@ describe('One Modern host: weather SSR updates', () => {
     cy.get('[data-testid="temperature"]').should('contain', '60.8');
     state().then((s) => {
       expect(s.result.mode).eq('application');
+      expect(s.result.mf.hostInstances).eq(1);
+      expect(s.result.mf.oldInstanceDisposed).eq(true);
+      cy.log(JSON.stringify(s.result.mf));
       expect(s.result.beforeMemo.id).not.eq(s.result.afterMemo.id);
       expect(s.result.before.pid).eq(s.result.after.pid);
     });
+    cy.get('[data-testid="gc-result"]').should('contain', 'GC 已完成');
     cy.screenshot('weather-full', { capture: 'viewport' });
+    for (let index = 0; index < 20; index++) {
+      cy.request('POST', '/__weather/update', { day: 'day-after' }).then(
+        ({ body }) => {
+          expect(body.result.mode).eq('application');
+          expect(body.result.mf.hostInstances).eq(1);
+          expect(body.result.mf.oldInstanceDisposed).eq(true);
+          expect(body.result.after.gc).eq('completed');
+          if (index === 19)
+            expect(body.result.mf.oldInstanceCollected).eq(true);
+          expect(body.result.before.pid).eq(body.result.after.pid);
+          cy.writeFile('full-rebuild-evidence.json', body.result);
+        },
+      );
+    }
     cy.contains('a', '明天').click();
     ready();
     cy.contains('已启用服务端动态消费').should('exist');

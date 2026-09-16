@@ -59,3 +59,45 @@ it('rejects an external asynchronous update while another owner is active', asyn
   });
   expect(update).toHaveBeenCalledTimes(1);
 });
+
+it('releases owned remote entries but preserves an externally consumed container', async () => {
+  const previous = (globalThis as any).__FEDERATION__;
+  const previousLoading = (globalThis as any).__GLOBAL_LOADING_REMOTE_ENTRY__;
+  try {
+    const clear = rs.fn();
+    const container = { __webpack_clear_cache__: clear };
+    const other = {
+      name: 'other',
+      moduleCache: new Map([['remote', { remoteEntryExports: container }]]),
+    };
+    (globalThis as any).__FEDERATION__ = {
+      __INSTANCES__: [other],
+      __SHARE__: {},
+    };
+    const pending = Promise.resolve(container);
+    (globalThis as any).__GLOBAL_LOADING_REMOTE_ENTRY__ = {
+      'remote:entry': pending,
+    };
+    const owner = plugin();
+    await owner.afterLoadEntry!({
+      remoteInfo: { name: 'remote', entry: 'entry' },
+      remoteEntryExports: container,
+    } as any);
+    await owner.dispose!({ origin: { name: 'host' } } as any);
+    expect(clear).not.toHaveBeenCalled();
+    const next = plugin();
+    await next.afterLoadEntry!({
+      remoteInfo: { name: 'remote', entry: 'entry' },
+      remoteEntryExports: container,
+    } as any);
+    (globalThis as any).__FEDERATION__.__INSTANCES__ = [];
+    await next.dispose!({ origin: { name: 'host' } } as any);
+    expect(clear).toHaveBeenCalledTimes(1);
+    expect(
+      (globalThis as any).__GLOBAL_LOADING_REMOTE_ENTRY__['remote:entry'],
+    ).toBeUndefined();
+  } finally {
+    (globalThis as any).__FEDERATION__ = previous;
+    (globalThis as any).__GLOBAL_LOADING_REMOTE_ENTRY__ = previousLoading;
+  }
+});

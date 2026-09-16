@@ -30,16 +30,6 @@ export default function Shell({ children }) {
       if (!r.ok) throw Error(v.error);
       if (reset) {
         sessionStorage.removeItem('weather-repeat');
-        const deadline = Date.now() + 15000;
-        while (true) {
-          await new Promise((r) => setTimeout(r, 300));
-          try {
-            const state = await (await fetch('/__weather/state')).json();
-            if (state.pid !== v.pid) break;
-          } catch {}
-          if (Date.now() > deadline)
-            throw Error('宿主重启超时，请查看启动终端');
-        }
       } else {
         const n = Number(sessionStorage.getItem('weather-repeat') || 0);
         if (n > 0) sessionStorage.setItem('weather-repeat', String(n - 1));
@@ -157,7 +147,7 @@ export default function Shell({ children }) {
         <span className="eyebrow">这次发生了什么</span>
         <p data-testid="update-result">
           {busy
-            ? '正在切换 remote 并准备新的 SSR 页面…'
+            ? '正在切换 remote、渲染并执行 GC 采样…'
             : result
               ? result.summary
               : '先记录几次出行准备，再更新预报，看看备忘是否保留。'}
@@ -173,7 +163,7 @@ export default function Shell({ children }) {
       <section className="memory">
         <div>
           <b>宿主内存</b>
-          <small>更新前后均执行 GC · JS Heap</small>
+          <small>JS Heap · 更新前 GC 后 → 更新后 GC 后</small>
         </div>
         <strong data-testid="memory-result">
           {result
@@ -183,6 +173,13 @@ export default function Shell({ children }) {
               ' MiB'
             : '更新后自动显示对比'}
         </strong>
+        {result && (
+          <small data-testid="gc-result">
+            本次 GC 已完成：{mib(result.after.preGC.heapUsed)} →{' '}
+            {mib(result.after.heapUsed)} MiB · 耗时{' '}
+            {result.after.gcMs.toFixed(1)} ms · {result.after.sampledAt}
+          </small>
+        )}
       </section>
       {remaining > 0 && (
         <p role="status">
@@ -194,7 +191,7 @@ export default function Shell({ children }) {
         <span>演示天气，不是真实预报。</span>
         {data.dynamic && (
           <button disabled={busy} onClick={() => update(true)}>
-            重置体验（重启宿主）
+            重置体验（重建应用）
           </button>
         )}
         <details>

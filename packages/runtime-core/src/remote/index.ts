@@ -995,6 +995,7 @@ export class RemoteHandler {
           }
 
           if (preserveRemoteRuntime) {
+            if (remoteIns) host.retainedProviders.add(remoteIns);
             // Keeping a shared factory without its execution cache can create a
             // second singleton or break its later lazy dependencies. Retain
             // the shared closure and clear unrelated execution caches.

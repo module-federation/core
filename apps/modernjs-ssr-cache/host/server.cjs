@@ -36,7 +36,7 @@ const options = {
   },
   hydration: { remotes: [remote('tomorrow', 'v1'), remote('day-after', 'v1')] },
 };
-const adapter = createSSRUpdateAdapter(options);
+let adapter = createSSRUpdateAdapter(options);
 function instance() {
   const inst = globalThis.__FEDERATION__?.__INSTANCES__?.find(
     (i) => i.name === 'lab_static',
@@ -84,6 +84,8 @@ async function sample() {
     preGC,
     gcMs: performance.now() - started,
     pid: process.pid,
+    sampledAt: new Date().toISOString(),
+    gc: 'completed',
   };
 }
 async function html(route) {
@@ -105,6 +107,7 @@ async function update(day) {
   if (!['tomorrow', 'day-after'].includes(day)) throw Error('Unknown page');
   busy = true;
   try {
+    const oldInstance = new WeakRef(instance());
     const beforeMemo = await memo();
     const before = await sample();
     const next = versions[day] === 'v1' ? 'v2' : 'v1';
@@ -120,6 +123,16 @@ async function update(day) {
     {
       const preserved = beforeMemo.id === afterMemo.id;
       result = {
+        mf: {
+          oldInstanceCollected: !oldInstance.deref(),
+          oldInstanceDisposed: oldInstance.deref()?.disposed ?? true,
+          hostInstances: globalThis.__FEDERATION__.__INSTANCES__.filter(
+            (i) => i.name === 'lab_static',
+          ).length,
+          registeredInstances: globalThis.__FEDERATION__.__INSTANCES__.map(
+            (i) => i.name,
+          ),
+        },
         summary:
           (day === 'tomorrow' ? '明天' : '后天') +
           '预报已更新 · ' +
@@ -178,7 +191,7 @@ async function update(day) {
       },
       reloadEntry: adapter.reload,
       dispose(_, entries) {
-        adapter.dispose(entries);
+        return adapter.dispose(entries);
       },
       validate(resources) {
         adapter.prepareResources(resources);
@@ -203,13 +216,26 @@ async function update(day) {
             return new Response('POST required', { status: 405 });
           if (url.pathname === '/__weather/reset') {
             if (busy) throw Error('请等待更新完成');
-            if (!process.send) throw Error('请通过 start.cjs 启动以支持重置');
             busy = true;
-            setTimeout(() => {
-              process.send({ restart: true });
-              void stop();
-            }, 200);
-            return Response.json({ restarting: true, pid: process.pid });
+            try {
+              await application.update(async () => {
+                await adapter.dispose(undefined, { preserveRemotes: false });
+                dynamic = false;
+                versions.tomorrow = versions['day-after'] = 'v1';
+                result = undefined;
+                history.length = 0;
+                adapter = createSSRUpdateAdapter(options);
+              });
+              await html('/tomorrow');
+              await memo();
+              return Response.json({
+                rebuilt: true,
+                pid: process.pid,
+                memory: await sample(),
+              });
+            } finally {
+              busy = false;
+            }
           }
           if (url.pathname === '/__weather/update') {
             const body = await request.json();
@@ -228,6 +254,7 @@ async function update(day) {
           }
           return new Response('Unknown action', { status: 404 });
         } catch (e) {
+          console.dir(e, { depth: 10 });
           return Response.json({ error: String(e) }, { status: 500 });
         }
       },
@@ -247,7 +274,7 @@ async function update(day) {
 async function stop() {
   server?.closeAllConnections();
   if (server) await new Promise((r) => server.close(r));
-  adapter.dispose();
+  await adapter.dispose();
   process.exit();
 }
 process.once('SIGTERM', stop);

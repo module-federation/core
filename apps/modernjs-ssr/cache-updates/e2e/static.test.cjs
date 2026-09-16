@@ -207,7 +207,7 @@ test('compiled static imports reload their Modern entries while independent requ
       },
       reloadEntry: adapter.reload,
       async dispose(_, entries) {
-        adapter.dispose(entries);
+        return adapter.dispose(entries);
       },
       async validate() {
         if (fail) throw new Error('candidate failed');
@@ -346,7 +346,11 @@ test('compiled static imports reload their Modern entries while independent requ
     assert.ok(incomplete.reasons.includes('missing-native-invalidation-graph'));
     assert.equal(await get('/a'), 'v1');
     assert.ok(globalThis.__staticRuns.b > beforeFallback);
-    instance.registerRemotes([
+    const rebuiltInstance = require(path.join(out, 'a.cjs')).req.federation
+      .instance;
+    assert.notEqual(rebuiltInstance, instance);
+    assert.equal(instance.disposed, true);
+    rebuiltInstance.registerRemotes([
       {
         name: 'dynamic',
         entry: path.join(out, 'v1.cjs'),
@@ -375,9 +379,15 @@ test('compiled static imports reload their Modern entries while independent requ
     );
     assert.equal(dynamic.mode, 'application');
     assert.ok(dynamic.reasons.includes('runtime-consumption-observed'));
-    assert.equal((await instance.loadRemote('dynamic/Value')).default, 'v2');
+    const currentInstance = require(path.join(out, 'a.cjs')).req.federation
+      .instance;
+    assert.notEqual(currentInstance, rebuiltInstance);
     assert.equal(
-      (await instance.loadRemote('new-dynamic/Value')).default,
+      (await currentInstance.loadRemote('dynamic/Value')).default,
+      'v2',
+    );
+    assert.equal(
+      (await currentInstance.loadRemote('new-dynamic/Value')).default,
       'v2',
     );
     assert.equal(dynamic.generation, beforeGeneration + 1);
@@ -389,7 +399,7 @@ test('compiled static imports reload their Modern entries while independent requ
     globalThis.__staticProducer = undefined;
     http.closeAllConnections();
     await new Promise((resolve) => http.close(resolve));
-    adapter.dispose();
+    await adapter.dispose();
     await fs.rm(root, { recursive: true, force: true });
     delete globalThis.__staticRuns;
   }

@@ -52,7 +52,7 @@ const ssrApplication = {
     // Validate any other unpublished application resources here.
   },
   async dispose(_resources, entries) {
-    adapter.dispose(entries);
+    await adapter.dispose(entries);
     // Await any additional cleanup owned by this application here.
   },
 };

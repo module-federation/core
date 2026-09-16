@@ -406,3 +406,30 @@ describe('SSR replacement recovery', () => {
     expect(mutated).toBe(false);
   });
 });
+
+describe('whole application instance handoff', () => {
+  it('awaits teardown, retains only remote declarations and removes owned entry records', async () => {
+    const { adapter, runtime } = fixture();
+    const host = runtime.federation.instance as any;
+    host.options = { remotes: [{ name: 'remote', entry: 'v2' }] };
+    let disposed = false;
+    host.destroy = async () => {
+      await Promise.resolve();
+      disposed = true;
+    };
+    await adapter.dispose(['a']);
+    expect(disposed).toBe(false);
+    await adapter.dispose();
+    expect(disposed).toBe(true);
+    expect(
+      [...(globalThis as any)[key].values()].map((r: any) => r.application),
+    ).toEqual(['host:other']);
+    const handoffs = (globalThis as any)[
+      Symbol.for('modern-js.mf.ssr.registrations')
+    ];
+    expect(handoffs.get('host')).toEqual([{ name: 'remote', entry: 'v2' }]);
+    expect(handoffs.get('host')[0]).not.toBe(host.options.remotes[0]);
+    adapter.prepareResources({ templates: {} });
+    expect(handoffs.has('host')).toBe(false);
+  });
+});

@@ -134,7 +134,7 @@ function release() {
       },
       reloadEntry: adapter.reload,
       async dispose(_, entries) {
-        adapter.dispose(entries);
+        return adapter.dispose(entries);
       },
       async validate(resources) {
         adapter.prepareResources(resources);
@@ -248,7 +248,7 @@ async function stop() {
   release();
   server?.closeAllConnections();
   if (server) await new Promise((r) => server.close(r));
-  adapter.dispose();
+  await adapter.dispose();
   process.exit();
 }
 process.once('SIGTERM', stop);

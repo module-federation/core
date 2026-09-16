@@ -214,6 +214,8 @@ h2 {
 }
 .memory {
   display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   align-items: center;
   justify-content: space-between;
   padding: 16px 0;
@@ -295,4 +297,9 @@ pre {
   footer {
     flex-wrap: wrap;
   }
+}
+
+.memory > small {
+  flex-basis: 100%;
+  margin-left: 0;
 }

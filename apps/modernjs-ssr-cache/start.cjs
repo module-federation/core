@@ -45,7 +45,6 @@ const mime = {
   });
   const [code] = await once(build, 'exit');
   if (code !== 0) throw Error('Build failed');
-  let restarting = false;
   function launch() {
     host = fork(path.join(root, 'host/server.cjs'), [], {
       env,
@@ -56,7 +55,6 @@ const mime = {
       stdio: ['ignore', 'inherit', 'inherit', 'ipc'],
     });
     host.on('message', (m) => {
-      if (m.restart) restarting = true;
       if (m.ready) {
         env.WEATHER_PORT = new URL(m.url).port;
         console.log('PLAYGROUND_READY ' + JSON.stringify(m));
@@ -64,13 +62,8 @@ const mime = {
       }
     });
     host.on('exit', (code) => {
-      if (restarting && !stopping) {
-        restarting = false;
-        launch();
-      } else {
-        if (code) console.error('Host exited', code);
-        stop(code || 0);
-      }
+      if (code) console.error('Host exited', code);
+      stop(code || 0);
     });
   }
   launch();

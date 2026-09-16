@@ -9,6 +9,8 @@
 ```sh
 corepack enable
 pnpm install --frozen-lockfile
+pnpm exec turbo run build --filter=@module-federation/modern-js-v3...
+node apps/modernjs-ssr-cache/use-workspace.cjs
 node apps/modernjs-ssr-cache/start.cjs --memory
 ```
 
@@ -42,7 +44,7 @@ WEATHER_PORT=3079 WEATHER_ASSET_PORT=3086 node apps/modernjs-ssr-cache/start.cjs
 
 首次动态加载本身不会清空备忘。发生服务端动态消费后，后续 remote 更新才走整体重建。回到明天天气页也会显示已启用动态消费，不能假装仍是局部更新。
 
-想从头体验时，点击「重置体验（重启宿主）」。**只有这个重置操作会重启 Host、清空备忘和实验历史**，以真正恢复未发生动态消费的初始环境。普通更新预报，无论局部更新还是整体重建，都不重启进程。
+想从头体验时，点击「重置体验（重建应用）」。它清空备忘、实验历史和动态注册，释放旧 MF 实例并在同一进程创建新应用，恢复静态体验。**更新和重置都不退出 Node 进程，PID、端口不变。**
 
 ## 内存怎么看
 
@@ -53,6 +55,8 @@ WEATHER_PORT=3079 WEATHER_ASSET_PORT=3086 node apps/modernjs-ssr-cache/start.cjs
   → 更新 remote → 请求新版 SSR 页面和备忘
   → 等待 SSR 完成 → GC 后采样 → 返回结果并刷新浏览器页面
 ```
+
+结果区明确显示“更新前 GC 后 → 更新后 GC 后”，下一行显示本次采样 GC 前后的 Heap、GC 耗时和采样时间。
 
 同屏显示的内存是 Host 进程的 JS Heap，不是 remote 文件体积，也不包含浏览器。两个样本都在服务端执行两次同步 GC，中间让出一次事件循环。新版页面已经在服务端完成渲染后才取后样本；最终浏览器导航和水合发生在采样之后。
 
