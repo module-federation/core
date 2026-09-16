@@ -329,7 +329,27 @@ export function createSSRUpdateAdapter(options: {
           (next, state) => () => state.context.run(token, next),
           execute,
         );
-      const generation = await authorized();
+      let generation: number;
+      try {
+        generation = await authorized();
+      } catch (error) {
+        if (
+          selected.mode !== 'entries' ||
+          application.status?.phase !== 'unavailable'
+        )
+          throw error;
+        // Modern keeps a failed scope closed and widens its next update to the
+        // whole application. Retry once using the same intended remote targets.
+        onStage('fallback');
+        try {
+          generation = await authorized();
+        } catch (recoveryError) {
+          throw new AggregateError(
+            [error, recoveryError],
+            'SSR update and application recovery failed',
+          );
+        }
+      }
       return { ...selected, generation };
     } finally {
       for (const state of ownedStates)

@@ -99,6 +99,48 @@ describe('SSR static scope proof', () => {
 });
 
 describe('SSR replacement recovery', () => {
+  it('automatically rebuilds once when selective entry preparation fails', async () => {
+    const { adapter, runtime } = fixture();
+    const instance = runtime.federation.instance as any;
+    instance.options = { remotes: [{ name: 'remote', entry: 'v1' }] };
+    instance.updateRemotes = async (remotes: any[]) => {
+      instance.options.remotes = remotes;
+    };
+    const scopes: (readonly string[] | undefined)[] = [];
+    const application = {
+      status: { phase: 'serving' },
+      async update(
+        invalidate: (entries?: readonly string[]) => Promise<void>,
+        scope?: () => readonly string[] | undefined,
+      ) {
+        const requested = scope?.();
+        const entries =
+          this.status.phase === 'unavailable' ? undefined : requested;
+        scopes.push(entries);
+        await invalidate(entries);
+        if (entries) {
+          this.status.phase = 'unavailable';
+          throw new Error('Cannot synchronize SSR entry startup exports');
+        }
+        this.status.phase = 'serving';
+        return 1;
+      },
+    };
+    expect(
+      await adapter.updateRemotes(application, [
+        { name: 'remote', entry: 'v2' },
+      ]),
+    ).toMatchObject({
+      mode: 'application',
+      reasons: ['failed-update-recovery'],
+      generation: 1,
+    });
+    expect(scopes).toEqual([['a', 'b'], undefined]);
+    expect(instance.options.remotes).toEqual([
+      { name: 'remote', entry: 'v2', alias: undefined },
+    ]);
+  });
+
   it('publishes a batch once and includes a previously failed target in whole-application recovery', async () => {
     const { adapter, runtime } = fixture();
     const instance = runtime.federation.instance as any;
@@ -133,7 +175,7 @@ describe('SSR replacement recovery', () => {
     };
     await expect(
       adapter.update(application, 'remote', { entry: 'v2' }, { revision: 1 }),
-    ).rejects.toThrow('SSR remote replacement failed');
+    ).rejects.toThrow('SSR update and application recovery failed');
     expect(adapter.status(application)).toMatchObject({
       mutationStarted: true,
       application: { phase: 'unavailable' },
@@ -152,7 +194,7 @@ describe('SSR replacement recovery', () => {
       reasons: ['failed-update-recovery'],
       generation: 1,
     });
-    expect(batches[1].map(({ name, entry }) => [name, entry])).toEqual([
+    expect(batches[2].map(({ name, entry }) => [name, entry])).toEqual([
       ['remote', 'v2'],
       ['new-a', 'a'],
       ['new-b', 'b'],
