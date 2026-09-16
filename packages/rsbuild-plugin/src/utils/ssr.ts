@@ -184,6 +184,15 @@ export function createSSRREnvConfig(
   return ssrEnvConfig;
 }
 
+/**
+ * Node-target MF defaults for Rsbuild SSR builds.
+ *
+ * `@module-federation/rstest` has a sibling helper (`withNodeDefaults` in
+ * packages/rstest/src/node-defaults.ts). Both default remotes to script
+ * transport and container output to CommonJS. Rstest additionally forces
+ * `library.name` to the container name so test workers can resolve it; Rsbuild
+ * keeps the bundler-derived name.
+ */
 export function patchNodeMFConfig(
   mfConfig: moduleFederationPlugin.ModuleFederationPluginOptions,
 ) {
@@ -193,7 +202,6 @@ export function patchNodeMFConfig(
   mfConfig.exposes = { ...mfConfig.exposes };
   mfConfig.library = {
     ...mfConfig.library,
-    name: mfConfig.name,
     type: mfConfig.library?.type ?? 'commonjs-module',
   };
   mfConfig.runtimePlugins = [...(mfConfig.runtimePlugins || [])];

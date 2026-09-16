@@ -1,12 +1,12 @@
-import {
-  createObservability as createBaseObservability,
-  type ObservabilityController,
-  type ObservabilityEvent,
-  type ObservabilityEventContext,
-  type ObservabilityRuntimePlugin,
-  type ObservabilityPluginOptions,
-  type ObservabilityReport,
-} from './core';
+import { createObservability as createBaseObservability } from './core';
+import type {
+  ObservabilityController,
+  ObservabilityEvent,
+  ObservabilityEventContext,
+  ObservabilityPluginOptions,
+  ObservabilityReport,
+  ObservabilityRuntimePlugin,
+} from './type';
 
 export interface ObservabilityNodeOptions extends Omit<
   ObservabilityPluginOptions,

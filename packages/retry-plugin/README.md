@@ -100,13 +100,18 @@ export default () =>
 | `successTimes`    | `number`                                | `0`         | Number of successful requests required                                                           |
 | `domains`         | `string[]`                              | `[]`        | Alternative domains for script resources                                                         |
 | `manifestDomains` | `string[]`                              | `[]`        | Alternative domains for manifest files                                                           |
-| `addQuery`        | `boolean \| function`                   | `false`     | Add query parameters for cache busting                                                           |
+| `addQuery`        | `boolean \| function`                   | See below   | Add query parameters for cache busting                                                           |
 | `fetchOptions`    | `RequestInit`                           | `{}`        | Additional fetch options                                                                         |
 | `onRetry`         | `function`                              | `undefined` | Callback when retry occurs                                                                       |
 | `onSuccess`       | `function`                              | `undefined` | Callback when request succeeds                                                                   |
 | `onError`         | `function`                              | `undefined` | Callback when all retries fail                                                                   |
 
 ### addQuery Function
+
+When omitted, `addQuery` defaults to `true` only for `esm` and `module` remote
+entry retries. This gives failed dynamic imports a new URL because browsers cache
+their failures by URL. Manifest, fetch, and classic script retries still default
+to no query parameter. Set `addQuery: false` to disable the ESM/module default.
 
 ```ts
 addQuery: ({ times, originalQuery }) => {
