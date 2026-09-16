@@ -349,7 +349,20 @@ describe('ModuleFederation', () => {
     );
     FM.snapshotHandler.manifestCache.set(entry, {} as any);
 
+    const settledShared = {
+      from: '@register-remotes/app1',
+      useIn: [],
+      loaded: true,
+      loading: Promise.resolve(() => ({})),
+    } as any;
+    Global.__FEDERATION__.__SHARE__.settledRemote = {
+      default: { react: { '1': settledShared } },
+    };
     await FM.removeRemote('app1');
+    expect(
+      Global.__FEDERATION__.__SHARE__.settledRemote.default.react['1'],
+    ).toBeUndefined();
+    delete Global.__FEDERATION__.__SHARE__.settledRemote;
 
     expect(remoteEntryClear).toHaveBeenCalledTimes(1);
     expect(libClear).toHaveBeenCalledTimes(1);

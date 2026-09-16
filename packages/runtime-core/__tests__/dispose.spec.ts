@@ -52,6 +52,26 @@ describe('instance disposal', () => {
     await other.destroy();
   });
 
+  it('removes loaded shared records even when their settled promise remains', async () => {
+    const host = new ModuleFederation({ name: 'dispose-settled' });
+    const lib = () => ({ value: true });
+    const shared = {
+      from: host.name,
+      useIn: [host.name],
+      loaded: true,
+      loading: Promise.resolve(lib),
+      lib,
+      get: () => Promise.resolve(lib),
+    } as any;
+    host.shareScopeMap.default = { react: { '1': shared } };
+    const scope = host.shareScopeMap;
+    CurrentGlobal.__FEDERATION__.__SHARE__.settled = scope;
+    setGlobalFederationInstance(host);
+    await host.destroy();
+    expect(scope.default.react['1']).toBeUndefined();
+    expect(CurrentGlobal.__FEDERATION__.__SHARE__.settled).toBeUndefined();
+  });
+
   it('runs all cleanup hooks and remains closed when cleanup fails', async () => {
     const host = new ModuleFederation({ name: 'dispose-failure' });
     const cleanup = rs.fn();

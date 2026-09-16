@@ -23,7 +23,7 @@ export async function disposeInstance(host: ModuleFederation): Promise<void> {
             if (
               shared.from === host.name &&
               !shared.useIn.length &&
-              !shared.loading
+              (!shared.loading || shared.loaded)
             )
               delete versions[version];
           }
@@ -65,7 +65,7 @@ export async function disposeInstance(host: ModuleFederation): Promise<void> {
             if (
               shared.from === host.name &&
               !shared.useIn.length &&
-              !shared.loading
+              (!shared.loading || shared.loaded)
             )
               delete versions[version];
     for (let index = global.__INSTANCES__.length - 1; index >= 0; index--)
@@ -79,7 +79,7 @@ export async function disposeInstance(host: ModuleFederation): Promise<void> {
             Object.values(versions).some(
               (shared) =>
                 shared.from === host.name &&
-                (shared.useIn.length || shared.loading),
+                (shared.useIn.length || (shared.loading && !shared.loaded)),
             ),
           ),
         )

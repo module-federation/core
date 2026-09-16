@@ -950,7 +950,10 @@ export class RemoteHandler {
                             shared.useIn = shared.useIn.filter(
                               (usedHostName) => usedHostName !== shared.from,
                             );
-                            if (shared.useIn.length || shared.loading) {
+                            if (
+                              shared.useIn.length ||
+                              (shared.loading && !shared.loaded)
+                            ) {
                               isAllSharedNotUsed = false;
                               preserveRemoteRuntime = true;
                               shared.providerState = 1;
