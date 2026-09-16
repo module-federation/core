@@ -176,7 +176,8 @@
       "unrs-resolver"
     ],
     "patchedDependencies": {
-      "@modern-js/runtime@0.0.0-canary-20260914082926": "patches/@modern-js__runtime@0.0.0-canary-20260914082926.patch"
+      "@modern-js/runtime@0.0.0-canary-20260914082926": "patches/@modern-js__runtime@0.0.0-canary-20260914082926.patch",
+      "@modern-js/server-core@0.0.0-canary-20260914082926": "patches/@modern-js__server-core@0.0.0-canary-20260914082926.patch"
     }
   },
   "dependencies": {

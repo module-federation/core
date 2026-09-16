@@ -33,7 +33,7 @@
 
 ## 保留的限制
 
-- 沿用已锁定 MF/Modern/Rspack 预览版本和 Modern 重复 pipe 的 pnpm patch。
+- 沿用已锁定 MF/Modern/Rspack 预览版本和 Modern 重复 pipe 与局部更新同步 Node 入口导出的 pnpm patch。
 - Host 服务端 splitChunks 仍禁用；本次界面重做没有解决既有共享入口初始化限制。
 - 备忘是演示用进程内模块状态，不是持久化业务数据；重启或整体重建会清空。
 - 动态激活后影响整个宿主更新策略，不只是后天页面。
