@@ -96,10 +96,10 @@ node apps/modernjs-ssr-cache/e2e.cjs
 
 E2E 使用真实浏览器验证原始 SSR HTML、更新前后水合交互、备忘保留/重置、正常更新 PID 不变、重置后恢复静态更新、20 轮更新以及桌面同屏/手机布局。
 
-## 为什么示例更新需要 application
+## 内置后的接入示范
 
-示例当前调用 `adapter.updateRemotes(application, changes)`，传入的是 Modern SSR 应用实例，用于协调请求等待、新 handler 发布和失败恢复。它不是 MF 的消费者实例。
+示例已通过临时 workspace 包 `@demo/modern-mf-server` 代理更新：消费者创建自己的集成对象，解构得到 `updateRemotes`，之后只传 remote 列表，无需 application 参数。
 
-未来 Modern 内置 MF 后，可以在应用初始化时完成绑定，向业务导出 `updateRemotes(changes)`，无需每次传 application；内部的请求协调和重建步骤仍然保留。**这是未来集成方式，当前 demo 尚未提供已绑定的导出。** 多个 MPA entry 可以共用同一应用绑定，独立应用应分别绑定。
+包内部在 Modern 应用就绪时自动绑定 application，仍执行真实的请求排队、缓存更新、handler 发布和失败恢复。多入口共用同一应用绑定，独立应用分别绑定。重置后导出的更新函数仍然有效。
 
-详细分工及示意代码见 [README：为什么更新要传入 application](./README.md#为什么更新要传入-application)。
+这是可运行的集成示范，**不是已发布的 Modern 官方 API**。详见 [临时包接入文档](./modern-mf-server/README.md) 和 [完整消费者入口](./host/server.cjs)。

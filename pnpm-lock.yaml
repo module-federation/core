@@ -1316,6 +1316,9 @@ importers:
 
   apps/modernjs-ssr-cache/host:
     dependencies:
+      '@demo/modern-mf-server':
+        specifier: workspace:*
+        version: link:../modern-mf-server
       '@modern-js/runtime':
         specifier: 0.0.0-canary-20260914082926
         version: 0.0.0-canary-20260914082926(patch_hash=1e8d3d760dba67925d08d2a52e3894f8955ca2dca8c4641c104e28d71e8d4404)(@module-federation/runtime-tools@2.9.0)(core-js@3.49.0)(react-dom@19.2.8(react@19.2.8))(react-server-dom-rspack@0.0.2(@rspack-canary/core@2.2.3-canary-fde17bab-20260911103204(@module-federation/runtime-tools@2.9.0)(@swc/helpers@0.5.23))(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
@@ -1344,6 +1347,12 @@ importers:
       typescript:
         specifier: 5.9.3
         version: 5.9.3
+
+  apps/modernjs-ssr-cache/modern-mf-server:
+    dependencies:
+      '@module-federation/modern-js-v3':
+        specifier: workspace:*
+        version: link:../../../packages/modernjs-v3
 
   apps/modernjs-ssr-cache/remote:
     dependencies:

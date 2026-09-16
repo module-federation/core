@@ -3,13 +3,10 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 const { once } = require('node:events');
 const { createProdServer } = require('@modern-js/prod-server');
-const {
-  createSSRUpdateAdapter,
-} = require('@module-federation/modern-js-v3/server');
+const { createFederationServer } = require('@demo/modern-mf-server');
 const root = __dirname;
 const assets = process.env.SSR_CACHE_ASSET_URL;
-let application,
-  server,
+let server,
   origin,
   busy = false,
   dynamic = false,
@@ -36,7 +33,8 @@ const options = {
   },
   hydration: { remotes: [remote('tomorrow', 'v1'), remote('day-after', 'v1')] },
 };
-let adapter = createSSRUpdateAdapter(options);
+const federation = createFederationServer(options);
+const { updateRemotes } = federation;
 function instance() {
   const inst = globalThis.__FEDERATION__?.__INSTANCES__?.find(
     (i) => i.name === 'lab_static',
@@ -64,8 +62,8 @@ globalThis.__weatherLoad = () => instance().loadRemote('lab_palette/Weather');
 async function idle() {
   const deadline = Date.now() + 15000;
   while (
-    application.status.activeRequests ||
-    application.status.pendingRequests
+    federation.status.activeRequests ||
+    federation.status.pendingRequests
   ) {
     if (Date.now() > deadline) throw Error('SSR requests have not settled');
     await new Promise((r) => setTimeout(r, 10));
@@ -112,7 +110,7 @@ async function update(day) {
     const before = await sample();
     const next = versions[day] === 'v1' ? 'v2' : 'v1';
     const changes = [remote(day, next)];
-    const outcome = await adapter.updateRemotes(application, changes);
+    const outcome = await updateRemotes(changes);
     versions[day] = next;
     const route = day;
     const body = await html('/' + route);
@@ -170,13 +168,10 @@ async function update(day) {
     appContext: { apiDirectory: '', lambdaDirectory: '' },
     routes: JSON.parse(await fs.readFile(path.join(root, 'dist/route.json')))
       .routes,
-    ssrApplication: {
+    ssrApplication: federation.configureApplication({
       maxPendingRequests: 16,
       requestTimeoutMs: 3000,
       drainTimeoutMs: 15000,
-      onReady(value) {
-        application = value;
-      },
       resolveScope(request) {
         const p = new URL(request.url).pathname;
         return [
@@ -189,13 +184,6 @@ async function update(day) {
                 : 'tomorrow',
         ];
       },
-      reloadEntry: adapter.reload,
-      dispose(_, entries) {
-        return adapter.dispose(entries);
-      },
-      validate(resources) {
-        adapter.prepareResources(resources);
-      },
       async bypass(request) {
         const url = new URL(request.url);
         if (url.pathname === '/')
@@ -207,8 +195,8 @@ async function update(day) {
               pid: process.pid,
               dynamic,
               versions,
-              status: application.status,
-              plan: adapter.plan('remote'),
+              status: federation.status,
+              plan: federation.plan('remote'),
               result,
               history,
             });
@@ -218,13 +206,11 @@ async function update(day) {
             if (busy) throw Error('请等待更新完成');
             busy = true;
             try {
-              await application.update(async () => {
-                await adapter.dispose(undefined, { preserveRemotes: false });
+              await federation.reset(() => {
                 dynamic = false;
                 versions.tomorrow = versions['day-after'] = 'v1';
                 result = undefined;
                 history.length = 0;
-                adapter = createSSRUpdateAdapter(options);
               });
               await html('/tomorrow');
               await memo();
@@ -258,7 +244,7 @@ async function update(day) {
           return Response.json({ error: String(e) }, { status: 500 });
         }
       },
-    },
+    }),
   });
   server.listen(Number(process.env.WEATHER_PORT || 3059), '127.0.0.1');
   await once(server, 'listening');
@@ -274,7 +260,7 @@ async function update(day) {
 async function stop() {
   server?.closeAllConnections();
   if (server) await new Promise((r) => server.close(r));
-  await adapter.dispose();
+  await federation.close();
   process.exit();
 }
 process.once('SIGTERM', stop);

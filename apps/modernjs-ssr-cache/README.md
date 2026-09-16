@@ -6,6 +6,7 @@
 
 | 目录 / 脚本                                      | 职责                                                                                            |
 | ------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| `modern-mf-server/`                              | 私有 workspace 代理包，自动绑定 Modern application，提供不带 application 参数的更新函数         |
 | `host/`                                          | 唯一消费者，普通 Modern 配置、源码、build/dev/serve 脚本                                        |
 | `host/server.cjs`                                | 消费者的生产服务入口，获取 Modern application，接入 MF adapter、动态 remote、更新/采样/快照接口 |
 | `host/src/tomorrow/`                             | 静态引用 `remote/Weather` 的明天页面                                                            |
@@ -19,24 +20,22 @@
 
 从仓库根目录执行 `node apps/modernjs-ssr-cache/start.cjs --memory`，访问 http://127.0.0.1:3059/tomorrow。普通 `modern serve` 不安装实验控制接口，因此完整体验使用此启动脚本。所有页面仍由 Modern 生产 SSR 渲染。
 
-## 为什么更新要传入 application
+## 内置后的接入示范
 
-当前 `host/server.cjs` 在 `ssrApplication.onReady` 中取得 Modern 的 SSR 应用实例，然后调用：
-
-```js
-await adapter.updateRemotes(application, changes);
-```
-
-这里的 `application` 是 Modern SSR 应用，不是 MF 消费者实例。它负责请求排队、等待旧请求结束、加载并发布新的 SSR handler，以及更新失败后的恢复；adapter 负责分析入口影响范围并调用 MF runtime 替换 remote。直接调用 MF 实例的 `updateRemotes()` 不会自动完成这些 Modern 步骤。
-
-未来 Modern 内置 MF 时，可以在应用初始化阶段绑定对应的 application，由 **Modern 集成入口**导出已绑定的更新函数，业务侧不再传入 application：
+当前消费者通过私有临时包 [@demo/modern-mf-server](./modern-mf-server/README.md) 接入，业务更新不再传入 application：
 
 ```js
-// 未来集成方式示意，当前 demo 尚未提供这个已绑定的导出。
-await updateRemotes([{ name: 'remote', entry: 'https://example.com/mf-manifest.json' }]);
+const { createFederationServer } = require('@demo/modern-mf-server');
+const federation = createFederationServer(options);
+const { updateRemotes } = federation;
+
+// createProdServer 的 ssrApplication 使用 federation.configureApplication(...)。
+await updateRemotes(changes);
 ```
 
-内部仍调用 `adapter.updateRemotes(application, changes)`。绑定按 SSR 应用隔离：本例的多个 MPA entry 共用一个 application；同一进程中的独立应用各自绑定，不能用“最后创建的 application”作为进程级默认值。应用尚未就绪时应明确报错。MF runtime 的通用 API 不因此依赖 Modern。
+临时包自动安装 Modern 生命周期钩子，在 `onReady` 绑定对应应用，内部仍调用真实 `adapter.updateRemotes(application, changes)`。同一应用的 MPA entry 共用绑定，独立应用各自创建集成对象。应用未就绪或已关闭时更新会报错；应用重建和 demo 重置不会令导出的函数持有过期 adapter。
+
+这已经是可运行的代理示范，但包名和 API 不是正式 Modern 接口。未来内置时，框架还可以自动创建集成对象并挂载钩子。完整示例见 [host/server.cjs](./host/server.cjs)，包内 README 解释了真实更新流程和生命周期。
 
 ## 动态消费与重置边界
 
@@ -110,3 +109,28 @@ git diff --check
 天气 E2E 另外验证 20 次整体重建、第 20 次的旧 Host WeakRef 已不可达、Host 注册数量为 1、PID 不变，以及重置后再次静态更新。GC 数值不是 remote 文件大小，RSS 也不保证立即下降。
 
 没有运行包含其他 SSR 示例的整个 `e2e-modern-ssr` CI job、无关包测试或 Modern/Rspack 全仓构建；本次使用对应包脚本与上述实际生产/浏览器回归，未修改 Modern/Rspack 源码。Changesets status 能生成计划，但会提示演示项目锁定的预览版本与工作区版本不同，保留这一既有预览依赖设计。
+
+### 临时集成包验证
+
+`@demo/modern-mf-server` 已接入真实宿主。以下命令通过：
+
+```sh
+pnpm install --ignore-scripts
+pnpm install --frozen-lockfile --lockfile-only --ignore-scripts
+pnpm --filter @demo/modern-mf-server test
+node --check apps/modernjs-ssr-cache/host/server.cjs
+node --check apps/modernjs-ssr-cache/modern-mf-server/index.cjs
+pnpm exec prettier --check apps/modernjs-ssr-cache/modern-mf-server apps/modernjs-ssr-cache/host/server.cjs apps/modernjs-ssr-cache/host/package.json apps/modernjs-ssr-cache/README.md apps/modernjs-ssr-cache/DEMO_GUIDE.zh-CN.md
+git diff --check
+```
+
+代理生命周期测试 2 个通过，覆盖独立应用隔离和重置后使用新 adapter。本次浏览器验证先执行 `node apps/modernjs-ssr-cache/use-workspace.cjs`，通过本地 resolve hook 加载包含 Rspack #15720 的构建，再运行：
+
+```sh
+WEATHER_PORT=3079 WEATHER_ASSET_PORT=3086 NODE_OPTIONS='--require=/tmp/weather-local-rspack.cjs' node apps/modernjs-ssr-cache/start.cjs --memory
+WEATHER_TEST_URL=http://127.0.0.1:3079 node apps/modernjs-ssr-cache/e2e.cjs
+```
+
+真实浏览器 E2E 3 个通过，覆盖 SSR、水合、连续更新、动态整体重建及重置后的静态局部更新。上述 `/tmp` hook 是本机验证辅助文件，不属于常规启动依赖；发布包验证仍需新的 Rspack 预览。
+
+本次未运行旧示例的整个 `e2e-modern-ssr` CI job，使用天气 demo 对应 E2E；未重复无关包及 Modern/Rspack 全仓测试，本次仅改动私有 demo 集成包和接线。
