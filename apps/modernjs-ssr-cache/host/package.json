@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "modern dev",
     "build": "modern build",
-    "serve": "modern serve"
+    "serve": "node --expose-gc ../modern-mf-server/serve.cjs weather.config.cjs"
   },
   "dependencies": {
     "@modern-js/runtime": "0.0.0-canary-20260914082926",

@@ -46,14 +46,18 @@ const mime = {
   const [code] = await once(build, 'exit');
   if (code !== 0) throw Error('Build failed');
   function launch() {
-    host = fork(path.join(root, 'host/server.cjs'), [], {
-      env,
-      execArgv: [
-        '--expose-gc',
-        ...(process.argv.includes('--debug') ? ['--inspect=9230'] : []),
-      ],
-      stdio: ['ignore', 'inherit', 'inherit', 'ipc'],
-    });
+    host = fork(
+      path.join(root, 'modern-mf-server/serve.cjs'),
+      [path.join(root, 'host/weather.config.cjs')],
+      {
+        env,
+        execArgv: [
+          '--expose-gc',
+          ...(process.argv.includes('--debug') ? ['--inspect=9230'] : []),
+        ],
+        stdio: ['ignore', 'inherit', 'inherit', 'ipc'],
+      },
+    );
     host.on('message', (m) => {
       if (m.ready) {
         env.WEATHER_PORT = new URL(m.url).port;

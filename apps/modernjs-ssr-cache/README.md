@@ -4,19 +4,19 @@
 
 ## 目录与运行方式
 
-| 目录 / 脚本                                      | 职责                                                                                            |
-| ------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
-| `modern-mf-server/`                              | 私有 workspace 代理包，自动绑定 Modern application，提供不带 application 参数的更新函数         |
-| `host/`                                          | 唯一消费者，普通 Modern 配置、源码、build/dev/serve 脚本                                        |
-| `host/server.cjs`                                | 消费者的生产服务入口，获取 Modern application，接入 MF adapter、动态 remote、更新/采样/快照接口 |
-| `host/src/tomorrow/`                             | 静态引用 `remote/Weather` 的明天页面                                                            |
-| `host/src/day-after/`                            | 后天天气页面，通过 server/client 两个薄封装动态加载组件                                         |
-| `host/src/memo/`                                 | 独立 SSR 入口，模块级备忘计数和内部 ID；同源小 iframe 嵌入天气页                                |
-| `remote/`、`remote-new-version/`                 | 明天天气的 v1/v2 Modern 生产者                                                                  |
-| `dynamic-remote/`、`dynamic-remote-new-version/` | 后天天气的 v1/v2 Modern 生产者                                                                  |
-| `build.cjs`                                      | 构建上述五个项目并复制版本化 provider 产物                                                      |
-| `start.cjs`                                      | 启动模拟 CDN 和唯一 Host；更新和重置均在 Host 进程内完成                                        |
-| `e2e.cjs`、`review.cy.cjs`                       | 独立浏览器 E2E；旧 `apps/modernjs-ssr` 回归和 CI 入口不变                                       |
+| 目录 / 脚本                                      | 职责                                                                                    |
+| ------------------------------------------------ | --------------------------------------------------------------------------------------- |
+| `modern-mf-server/`                              | 私有 workspace 代理包，自动绑定 Modern application，提供不带 application 参数的更新函数 |
+| `host/`                                          | 唯一消费者，普通 Modern 配置、源码、build/dev/serve 脚本                                |
+| `host/weather.config.cjs`                        | 天气业务配置：动态 remote、更新/采样/快照接口；不负责服务启动和生命周期接线             |
+| `host/src/tomorrow/`                             | 静态引用 `remote/Weather` 的明天页面                                                    |
+| `host/src/day-after/`                            | 后天天气页面，通过 server/client 两个薄封装动态加载组件                                 |
+| `host/src/memo/`                                 | 独立 SSR 入口，模块级备忘计数和内部 ID；同源小 iframe 嵌入天气页                        |
+| `remote/`、`remote-new-version/`                 | 明天天气的 v1/v2 Modern 生产者                                                          |
+| `dynamic-remote/`、`dynamic-remote-new-version/` | 后天天气的 v1/v2 Modern 生产者                                                          |
+| `build.cjs`                                      | 构建上述五个项目并复制版本化 provider 产物                                              |
+| `start.cjs`                                      | 启动模拟 CDN 和唯一 Host；更新和重置均在 Host 进程内完成                                |
+| `e2e.cjs`、`review.cy.cjs`                       | 独立浏览器 E2E；旧 `apps/modernjs-ssr` 回归和 CI 入口不变                               |
 
 从仓库根目录执行 `node apps/modernjs-ssr-cache/start.cjs --memory`，访问 http://127.0.0.1:3059/tomorrow。普通 `modern serve` 不安装实验控制接口，因此完整体验使用此启动脚本。所有页面仍由 Modern 生产 SSR 渲染。
 
@@ -29,13 +29,13 @@ const { createFederationServer } = require('@demo/modern-mf-server');
 const federation = createFederationServer(options);
 const { updateRemotes } = federation;
 
-// createProdServer 的 ssrApplication 使用 federation.configureApplication(...)。
+// 在 weather.config.cjs 中提供天气业务配置；服务启动和生命周期由临时包负责。
 await updateRemotes(changes);
 ```
 
 临时包自动安装 Modern 生命周期钩子，在 `onReady` 绑定对应应用，内部仍调用真实 `adapter.updateRemotes(application, changes)`。同一应用的 MPA entry 共用绑定，独立应用各自创建集成对象。应用未就绪或已关闭时更新会报错；应用重建和 demo 重置不会令导出的函数持有过期 adapter。
 
-这已经是可运行的代理示范，但包名和 API 不是正式 Modern 接口。未来内置时，框架还可以自动创建集成对象并挂载钩子。完整示例见 [host/server.cjs](./host/server.cjs)，包内 README 解释了真实更新流程和生命周期。
+这已经是可运行的代理示范，但包名和 API 不是正式 Modern 接口。本地包的 serve 入口已负责启动 Modern 服务并挂载钩子。完整示例见 [host/weather.config.cjs](./host/weather.config.cjs)，包内 README 解释了真实更新流程和生命周期。
 
 ## 动态消费与重置边界
 
@@ -63,7 +63,7 @@ await updateRemotes(changes);
 ```sh
 node apps/modernjs-ssr-cache/e2e.cjs
 pnpm exec prettier --check apps/modernjs-ssr-cache
-node --check apps/modernjs-ssr-cache/host/server.cjs
+node --check apps/modernjs-ssr-cache/host/weather.config.cjs
 node --check apps/modernjs-ssr-cache/start.cjs
 node --check apps/modernjs-ssr-cache/e2e.cjs
 git diff --check
@@ -98,7 +98,7 @@ pnpm --filter modernjs-ssr-cache-updates run e2e
 node apps/modernjs-ssr-cache/use-workspace.cjs
 node apps/modernjs-ssr-cache/e2e.cjs
 pnpm exec prettier --check .
-node --check apps/modernjs-ssr-cache/host/server.cjs
+node --check apps/modernjs-ssr-cache/host/weather.config.cjs
 node --check apps/modernjs-ssr-cache/start.cjs
 node --check apps/modernjs-ssr-cache/use-workspace.cjs
 git diff --check
@@ -118,9 +118,9 @@ git diff --check
 pnpm install --ignore-scripts
 pnpm install --frozen-lockfile --lockfile-only --ignore-scripts
 pnpm --filter @demo/modern-mf-server test
-node --check apps/modernjs-ssr-cache/host/server.cjs
+node --check apps/modernjs-ssr-cache/host/weather.config.cjs
 node --check apps/modernjs-ssr-cache/modern-mf-server/index.cjs
-pnpm exec prettier --check apps/modernjs-ssr-cache/modern-mf-server apps/modernjs-ssr-cache/host/server.cjs apps/modernjs-ssr-cache/host/package.json apps/modernjs-ssr-cache/README.md apps/modernjs-ssr-cache/DEMO_GUIDE.zh-CN.md
+pnpm exec prettier --check apps/modernjs-ssr-cache/modern-mf-server apps/modernjs-ssr-cache/host/weather.config.cjs apps/modernjs-ssr-cache/host/package.json apps/modernjs-ssr-cache/README.md apps/modernjs-ssr-cache/DEMO_GUIDE.zh-CN.md
 git diff --check
 ```
 
@@ -134,3 +134,26 @@ WEATHER_TEST_URL=http://127.0.0.1:3079 node apps/modernjs-ssr-cache/e2e.cjs
 真实浏览器 E2E 3 个通过，覆盖 SSR、水合、连续更新、动态整体重建及重置后的静态局部更新。上述 `/tmp` hook 是本机验证辅助文件，不属于常规启动依赖；发布包验证仍需新的 Rspack 预览。
 
 本次未运行旧示例的整个 `e2e-modern-ssr` CI job，使用天气 demo 对应 E2E；未重复无关包及 Modern/Rspack 全仓测试，本次仅改动私有 demo 集成包和接线。
+
+### 一体化启动与局部更新内存复测
+
+服务启动已移到 `modern-mf-server/serve.cjs`，消费者只保留 `weather.config.cjs` 的天气业务配置。`pnpm --filter modernjs-ssr-cache-host run serve` 调用本地集成入口；完整 demo 仍由 `start.cjs` 构建并启动模拟 CDN。
+
+本次执行 `pnpm --filter @demo/modern-mf-server test`（2 个通过）、`WEATHER_TEST_URL=http://127.0.0.1:3079 node apps/modernjs-ssr-cache/e2e.cjs`（3 个真实浏览器 E2E 通过），以及 `node --check apps/modernjs-ssr-cache/host/weather.config.cjs`、`node --check apps/modernjs-ssr-cache/modern-mf-server/serve.cjs`、`git diff --check`。格式检查：
+
+```sh
+pnpm exec prettier --check apps/modernjs-ssr-cache/modern-mf-server apps/modernjs-ssr-cache/host/weather.config.cjs apps/modernjs-ssr-cache/host/package.json apps/modernjs-ssr-cache/start.cjs apps/modernjs-ssr-cache/README.md apps/modernjs-ssr-cache/DEMO_GUIDE.zh-CN.md
+```
+
+额外用本机脚本 `node /tmp/weather-integrated-memory.cjs` 调用真实更新、采样和快照接口：120 次预热后，再连续 600 次静态局部更新，全部返回 `entries`，PID 保持 48375。GC 后 JS Heap：
+
+| 阶段          |   MiB |
+| ------------- | ----: |
+| 预热后        | 36.55 |
+| 再更新 300 次 | 36.53 |
+| 再更新 600 次 | 37.01 |
+| 空闲 15 秒后  | 35.92 |
+
+比较四份堆快照，每份只有宿主和当前 provider 两个 `ModuleFederation` 对象，宿主 ID 不变，之前采样的 provider 在后续更新快照中消失。新增占用主要是 V8 code 及其内部关联对象；本轮未复现旧 provider 持续累积。此结果不保证所有场景无泄漏，也不保证 RSS 回落；堆快照自身会影响进程内存，因此不要用此次 RSS 判断更新泄漏。
+
+本次仍使用本地 MF / Rspack 构建，没有替换发布依赖；发布包 E2E 待新 Rspack 预览。旧示例整个 CI job 和无关包全仓测试没有重复，原因同上一节。

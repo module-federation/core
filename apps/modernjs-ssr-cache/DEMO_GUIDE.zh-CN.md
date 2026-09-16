@@ -102,4 +102,4 @@ E2E 使用真实浏览器验证原始 SSR HTML、更新前后水合交互、备�
 
 包内部在 Modern 应用就绪时自动绑定 application，仍执行真实的请求排队、缓存更新、handler 发布和失败恢复。多入口共用同一应用绑定，独立应用分别绑定。重置后导出的更新函数仍然有效。
 
-这是可运行的集成示范，**不是已发布的 Modern 官方 API**。详见 [临时包接入文档](./modern-mf-server/README.md) 和 [完整消费者入口](./host/server.cjs)。
+这是可运行的集成示范，**不是已发布的 Modern 官方 API**。详见 [临时包接入文档](./modern-mf-server/README.md) 和 [完整消费者入口](./host/weather.config.cjs)。
