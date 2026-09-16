@@ -2,6 +2,10 @@
 
 这是一个 Modern 消费者应用，没有独立控制台。明天和后天是同一宿主的两个页面；天气由 remote 提供，出行备忘由宿主提供。天气是固定演示数据，不是真实预报。
 
+## 先确认体验版本
+
+对应 [MF PR #5088](https://github.com/module-federation/core/pull/5088)。本轮局部更新内存修复还依赖 [Rspack PR #15720](https://github.com/web-infra-dev/rspack/pull/15720)；当前锁文件中的旧预览包不包含这项新能力。完整验证使用了本地 Rspack 构建，待新预览发布并替换依赖后，下面的常规启动命令才覆盖本轮全部修复。仅运行 `use-workspace.cjs` 会替换 MF 包，不会替换 Rspack。
+
 ## 启动
 
 在包含此目录的仓库根目录，使用 Node.js 24、pnpm 10.28.0：
@@ -91,3 +95,11 @@ node apps/modernjs-ssr-cache/e2e.cjs
 ```
 
 E2E 使用真实浏览器验证原始 SSR HTML、更新前后水合交互、备忘保留/重置、正常更新 PID 不变、重置后恢复静态更新、20 轮更新以及桌面同屏/手机布局。
+
+## 为什么示例更新需要 application
+
+示例当前调用 `adapter.updateRemotes(application, changes)`，传入的是 Modern SSR 应用实例，用于协调请求等待、新 handler 发布和失败恢复。它不是 MF 的消费者实例。
+
+未来 Modern 内置 MF 后，可以在应用初始化时完成绑定，向业务导出 `updateRemotes(changes)`，无需每次传 application；内部的请求协调和重建步骤仍然保留。**这是未来集成方式，当前 demo 尚未提供已绑定的导出。** 多个 MPA entry 可以共用同一应用绑定，独立应用应分别绑定。
+
+详细分工及示意代码见 [README：为什么更新要传入 application](./README.md#为什么更新要传入-application)。

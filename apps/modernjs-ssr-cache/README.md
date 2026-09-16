@@ -19,6 +19,25 @@
 
 从仓库根目录执行 `node apps/modernjs-ssr-cache/start.cjs --memory`，访问 http://127.0.0.1:3059/tomorrow。普通 `modern serve` 不安装实验控制接口，因此完整体验使用此启动脚本。所有页面仍由 Modern 生产 SSR 渲染。
 
+## 为什么更新要传入 application
+
+当前 `host/server.cjs` 在 `ssrApplication.onReady` 中取得 Modern 的 SSR 应用实例，然后调用：
+
+```js
+await adapter.updateRemotes(application, changes);
+```
+
+这里的 `application` 是 Modern SSR 应用，不是 MF 消费者实例。它负责请求排队、等待旧请求结束、加载并发布新的 SSR handler，以及更新失败后的恢复；adapter 负责分析入口影响范围并调用 MF runtime 替换 remote。直接调用 MF 实例的 `updateRemotes()` 不会自动完成这些 Modern 步骤。
+
+未来 Modern 内置 MF 时，可以在应用初始化阶段绑定对应的 application，由 **Modern 集成入口**导出已绑定的更新函数，业务侧不再传入 application：
+
+```js
+// 未来集成方式示意，当前 demo 尚未提供这个已绑定的导出。
+await updateRemotes([{ name: 'remote', entry: 'https://example.com/mf-manifest.json' }]);
+```
+
+内部仍调用 `adapter.updateRemotes(application, changes)`。绑定按 SSR 应用隔离：本例的多个 MPA entry 共用一个 application；同一进程中的独立应用各自绑定，不能用“最后创建的 application”作为进程级默认值。应用尚未就绪时应明确报错。MF runtime 的通用 API 不因此依赖 Modern。
+
 ## 动态消费与重置边界
 
 初始配置只有静态天气 remote。后天页面的服务器端 React.lazy 封装调用消费者服务入口提供的 `__weatherLoad`，实际执行 MF `loadRemote()`；浏览器使用正常 MF API 对相同 release 水合。动态调用位于消费者服务入口，不通过改写 `from` 或绕过运行时追踪来冒充静态调用。
