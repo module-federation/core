@@ -1,0 +1,71 @@
+{
+  "name": "@module-federation/devframe",
+  "version": "0.0.0",
+  "description": "Read-only current Module Federation state for Devframe hosts and agents",
+  "author": "module-federation",
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/module-federation/core.git",
+    "directory": "packages/devframe"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist/",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./client": {
+      "import": {
+        "types": "./dist/client.d.mts",
+        "default": "./dist/client.mjs"
+      },
+      "require": {
+        "types": "./dist/client.d.ts",
+        "default": "./dist/client.cjs"
+      }
+    },
+    "./reader": {
+      "import": {
+        "types": "./dist/reader.d.mts",
+        "default": "./dist/reader.mjs"
+      },
+      "require": {
+        "types": "./dist/reader.d.ts",
+        "default": "./dist/reader.cjs"
+      }
+    }
+  },
+  "peerDependencies": {
+    "devframe": "^1.0.0"
+  },
+  "dependencies": {
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "devframe": "1.0.0",
+    "@devframes/hub": "1.0.0"
+  },
+  "scripts": {
+    "build": "tsdown --config tsdown.config.ts",
+    "test": "rstest",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\""
+  }
+}
