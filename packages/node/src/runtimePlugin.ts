@@ -1,3 +1,7 @@
+import {
+  compileRemoteCommonJsModule,
+  withSideEffectScope,
+} from '@module-federation/sdk';
 import type {
   ModuleFederationRuntimePlugin,
   ModuleFederation,
@@ -177,35 +181,71 @@ export const returnFromGlobalInstances = (
   return null;
 };
 
+export const CHUNK_WRAPPER_PARAMS = [
+  'exports',
+  'require',
+  '__dirname',
+  '__filename',
+];
+
+type ChunkFunction = (
+  exports: any,
+  require: any,
+  dirname: string,
+  filename: string,
+) => void;
+
+const getVmConstants = ():
+  | { USE_MAIN_CONTEXT_DEFAULT_LOADER?: any }
+  | undefined => {
+  try {
+    return __non_webpack_require__('vm').constants;
+  } catch {
+    return undefined;
+  }
+};
+
+// Compiles a chunk body into a callable without direct `eval` (whose functions
+// capture the enclosing scope and pin the chunk source string). The compile
+// backend and V8 compilation-cache policy live in the sdk's Node code; this
+// plugin only decides that fetched chunks are remote code that needs them.
+export const compileChunk = (source: string, filename: string): ChunkFunction =>
+  compileRemoteCommonJsModule({
+    source,
+    filename,
+    parameters: CHUNK_WRAPPER_PARAMS,
+    importModuleDynamically:
+      getVmConstants()?.USE_MAIN_CONTEXT_DEFAULT_LOADER ?? importNodeModule,
+  }) as ChunkFunction;
+
 // Hoisted utility function to load chunks from filesystem
 export const loadFromFs = (
   filename: string,
   callback: (err: Error | null, chunk: any) => void,
+  args?: any,
 ): void => {
   const fs = __non_webpack_require__('fs') as typeof import('fs');
   const path = __non_webpack_require__('path') as typeof import('path');
-  const vm = __non_webpack_require__('vm') as typeof import('vm');
 
   if (fs.existsSync(filename)) {
     fs.readFile(filename, 'utf-8', (err, content) => {
       if (err) return callback(err, null);
       const chunk = {};
       try {
-        const script = new vm.Script(
-          `(function(exports, require, __dirname, __filename) {${content}\n})`,
-          {
+        const remoteName =
+          args?.origin?.options?.name ||
+          args?.origin?.name ||
+          (typeof __webpack_require__ !== 'undefined' &&
+            __webpack_require__.federation?.initOptions?.name);
+        const scopeId = remoteName || path.basename(filename);
+        withSideEffectScope(scopeId, () => {
+          compileChunk(content, filename)(
+            chunk,
+            __non_webpack_require__,
+            path.dirname(filename),
             filename,
-            importModuleDynamically:
-              //@ts-ignore
-              vm.constants?.USE_MAIN_CONTEXT_DEFAULT_LOADER ?? importNodeModule,
-          },
-        );
-        script.runInThisContext()(
-          chunk,
-          __non_webpack_require__,
-          path.dirname(filename),
-          filename,
-        );
+          );
+        });
         callback(null, chunk);
       } catch (e) {
         callback(
@@ -253,12 +293,15 @@ export const fetchAndRun = (
       const resolution = (url as URL & { mfMetadata?: ChunkUrlMetadata })
         .mfMetadata;
       try {
-        eval(`(function(exports, require, __dirname, __filename) {${data}\n})`)(
-          chunk,
-          __non_webpack_require__,
-          url.pathname.split('/').slice(0, -1).join('/'),
-          chunkName,
-        );
+        const scopeId = resolution?.remoteName || hostName || chunkName;
+        withSideEffectScope(scopeId, () => {
+          compileChunk(data, url.href)(
+            chunk,
+            __non_webpack_require__,
+            url.pathname.split('/').slice(0, -1).join('/'),
+            chunkName,
+          );
+        });
         callback(null, chunk);
       } catch (e) {
         callback(
@@ -339,7 +382,7 @@ export const loadChunk = (
   args: any,
 ): void => {
   if (strategy === 'filesystem') {
-    return loadFromFs(resolveFile(rootOutputDir, chunkId), callback);
+    return loadFromFs(resolveFile(rootOutputDir, chunkId), callback, args);
   }
 
   const url = resolveUrl(rootOutputDir, chunkId);
