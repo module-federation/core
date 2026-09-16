@@ -101,3 +101,34 @@ it('releases owned remote entries but preserves an externally consumed container
     (globalThis as any).__GLOBAL_LOADING_REMOTE_ENTRY__ = previousLoading;
   }
 });
+
+it('forgets all removed remote URLs without clearing another remote or the replacement', async () => {
+  const owner = plugin();
+  const oldClear = rs.fn();
+  const olderClear = rs.fn();
+  const otherClear = rs.fn();
+  const newClear = rs.fn();
+  for (const [name, entry, clear] of [
+    ['remote', 'v1', oldClear],
+    ['remote', 'v0', olderClear],
+    ['other', 'v1', otherClear],
+  ] as const) {
+    await owner.afterLoadEntry!({
+      remoteInfo: { name, entry },
+      remoteEntryExports: { __webpack_clear_cache__: clear },
+    } as any);
+  }
+  await owner.removeRemote!({
+    remote: { name: 'remote', alias: 'alias' },
+  } as any);
+  expect(oldClear).not.toHaveBeenCalled();
+  await owner.afterLoadEntry!({
+    remoteInfo: { name: 'remote', entry: 'v1' },
+    remoteEntryExports: { __webpack_clear_cache__: newClear },
+  } as any);
+  await owner.dispose!({ origin: { name: 'host' } } as any);
+  expect(oldClear).not.toHaveBeenCalled();
+  expect(olderClear).not.toHaveBeenCalled();
+  expect(otherClear).toHaveBeenCalledTimes(1);
+  expect(newClear).toHaveBeenCalledTimes(1);
+});

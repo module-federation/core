@@ -13,3 +13,5 @@ Install Node chunk loaders for each bundle even when its provider reuses an exis
 Release unused shared records after loading completes even when their settled loading promise remains, allowing old SSR application runtimes to be collected.
 
 Release the old application generation’s shared consumer records before destroying instances during full Modern SSR rebuilds.
+
+Drop Modern ownership records for removed remotes so previous remote entry exports and loading promises are not retained until full application disposal.

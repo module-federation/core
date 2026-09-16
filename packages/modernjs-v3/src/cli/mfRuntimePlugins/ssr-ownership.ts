@@ -25,6 +25,12 @@ export default function ssrOwnership(): ModuleFederationRuntimePlugin {
         loading: (globalThis as any).__GLOBAL_LOADING_REMOTE_ENTRY__?.[key],
       });
     },
+    removeRemote({ remote }) {
+      // Runtime removal owns container/shared cleanup. This bookkeeping must not
+      // retain an entry after the runtime releases it, including old URL versions.
+      for (const [key, entry] of entries)
+        if (entry.info.name === remote.name) entries.delete(key);
+    },
     dispose({ origin }) {
       const owners =
         (origin as any)[ownershipKey]?.disposingNames || new Set([origin.name]);
@@ -60,7 +66,7 @@ export default function ssrOwnership(): ModuleFederationRuntimePlugin {
         if (externallyUsed || externallyLoaded) continue;
         entry.exports.__webpack_clear_cache__?.();
         const loading = (globalThis as any).__GLOBAL_LOADING_REMOTE_ENTRY__;
-        if (loading?.[key] === entry.loading) delete loading[key];
+        if (loading && loading[key] === entry.loading) delete loading[key];
         const globalName = entry.info.entryGlobalName;
         if (globalName && (globalThis as any)[globalName] === entry.exports) {
           if (
