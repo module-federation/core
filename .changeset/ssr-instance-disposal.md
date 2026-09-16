@@ -11,3 +11,5 @@ Dispose application-owned MF instances and runtime bindings during full Modern S
 Install Node chunk loaders for each bundle even when its provider reuses an existing MF instance.
 
 Release unused shared records after loading completes even when their settled loading promise remains, allowing old SSR application runtimes to be collected.
+
+Release the old application generation’s shared consumer records before destroying instances during full Modern SSR rebuilds.

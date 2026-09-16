@@ -408,6 +408,30 @@ describe('SSR replacement recovery', () => {
 });
 
 describe('whole application instance handoff', () => {
+  it('releases the entire generation shared usage before destroying any instance', async () => {
+    const { adapter, runtime } = fixture();
+    const host = runtime.federation.instance as any;
+    host.name = 'host';
+    host.options = { remotes: [{ name: 'remote', entry: 'v2' }] };
+    const shared = { from: 'host', useIn: ['host', 'remote'] };
+    const previousFederation = (globalThis as any).__FEDERATION__;
+    (globalThis as any).__FEDERATION__ = {
+      __INSTANCES__: [host],
+      __SHARE__: { host: { default: { react: { '1': shared } } } },
+    };
+    host.destroy = async () => {
+      expect(shared.useIn).toEqual([]);
+    };
+    try {
+      await adapter.dispose(['a']);
+      expect(shared.useIn).toEqual(['host', 'remote']);
+      await adapter.dispose();
+      expect(shared.useIn).toEqual([]);
+    } finally {
+      (globalThis as any).__FEDERATION__ = previousFederation;
+    }
+  });
+
   it('awaits teardown, retains only remote declarations and removes owned entry records', async () => {
     const { adapter, runtime } = fixture();
     const host = runtime.federation.instance as any;

@@ -623,6 +623,23 @@ export function createSSRUpdateAdapter(options: {
       const names = new Set(
         [...hosts, ...providers].map((instance) => instance.name),
       );
+      // Full application rebuilds retire all consumers together. Release their
+      // shared usage before any provider decides whether its runtime must survive.
+      // Include registrations already removed from the instance registry by update.
+      const retiringNames = new Set([
+        ...names,
+        ...hosts.flatMap((host) =>
+          (host.options.remotes || []).map((remote: any) => remote.name),
+        ),
+      ]);
+      const sharedScopes = (globalThis as any).__FEDERATION__?.__SHARE__ || {};
+      for (const scopes of Object.values(sharedScopes) as any[])
+        for (const packages of Object.values(scopes) as any[])
+          for (const versions of Object.values(packages) as any[])
+            for (const shared of Object.values(versions) as any[])
+              shared.useIn = (shared.useIn || []).filter(
+                (name: string) => !retiringNames.has(name),
+              );
       for (const provider of providers) {
         const scopes = (globalThis as any).__FEDERATION__?.__SHARE__ || {};
         const externallyUsed = Object.values(scopes).some((scope: any) =>
