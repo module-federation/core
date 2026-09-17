@@ -24,4 +24,21 @@ describe('csr with fetch data', () => {
       expect(win.globalThis._mfSSRDowngrade).to.not.exist;
     });
   });
+
+  it('[ /csr ] - should load a CSR component without a data loader once', () => {
+    cy.visit('/csr');
+
+    cy.get('#provider-csr-without-data-loader').should('be.visible');
+    cy.window().then((win) => {
+      const metrics = (
+        win as typeof win & {
+          __MF_NO_DATA_METRICS__: {
+            loaderCalls: number;
+          };
+        }
+      ).__MF_NO_DATA_METRICS__;
+
+      expect(metrics.loaderCalls).to.equal(1);
+    });
+  });
 });

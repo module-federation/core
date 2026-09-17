@@ -97,6 +97,33 @@ describe('createLazyComponent', () => {
     });
   });
 
+  it('should load a CSR component without a data loader once', async () => {
+    mockGetDataFetchMapKey.mockReturnValue(undefined);
+    const loader = jest.fn().mockResolvedValue({
+      default: MockComponent,
+      [Symbol.for('mf_module_id')]: 'remoteApp/Component',
+    });
+    const LazyComponent = createLazyComponent({
+      loader,
+      instance: mockInstance,
+      loading: <LoadingComponent />,
+      fallback: <ErrorComponent />,
+      noSSR: true,
+    });
+
+    render(
+      <Suspense fallback={<LoadingComponent />}>
+        <LazyComponent />
+      </Suspense>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Mock Component')).toBeInTheDocument();
+    });
+    expect(loader).toHaveBeenCalledTimes(1);
+    expect(mockFetchData).not.toHaveBeenCalled();
+  });
+
   it('should render fallback component on data fetch error', async () => {
     mockFetchData.mockRejectedValue(new Error('Data fetch failed'));
     const LazyComponentWithDataFetch = createLazyComponent({
