@@ -178,6 +178,29 @@ pnpm exec prettier --check package.json pnpm-lock.yaml apps/modernjs-ssr-cache/R
 git diff --check
 ```
 
-天气浏览器 E2E 3 个通过，包括局部更新、整体重建、水合与重置。冻结锁文件和格式检查通过。额外的旧 SSR 回归中，static 和 production 阶段通过；playground 阶段及其独立复跑均失败：动态宿主并发更新后出现 `Cannot read properties of null (reading 'useState')`，随后在 `e2e/playground.cjs:202` 的版本/等待时间断言失败。尚未确认该问题是否由 canary 升级引入，不能将整个 SSR 回归报告为通过。
+天气浏览器 E2E 3 个通过，包括局部更新、整体重建、水合与重置。冻结锁文件和格式检查通过。额外的旧 SSR 回归中，static 和 production 阶段通过；playground 阶段及其独立复跑均失败：动态宿主并发更新后出现 `Cannot read properties of null (reading 'useState')`，随后在 `e2e/playground.cjs:202` 的版本/等待时间断言失败。当时该回归未通过；后续已定位到 MF removeRemote 保留旧容器入口的遗漏，修复见下文。
 
-本次没有修改 runtime 行为来掩盖失败。未跑整个 `e2e-modern-ssr` CI job 或无关包测试，使用上述对应 package 脚本及天气 E2E；旧 playground 失败仍需单独定位。
+本次没有修改 runtime 行为来掩盖失败。未跑整个 `e2e-modern-ssr` CI job 或无关包测试，使用上述对应 package 脚本及天气 E2E；旧 playground 失败已在后续 remote 容器清理修复中解决，见下文。
+
+### 旧 playground 动态重建修复（2026-09-17）
+
+`removeRemote` 在保留仍被其他消费者使用的 shared runtime 时提前返回，没有清除旧 remoteEntry 的全局引用和加载 Promise。之后同一 remote 再次加载可能取回旧 container，导致旧 React 与新 renderer 混用。修复保留 shared 工厂和执行缓存的规则，仅确保两种清理路径都移除 remote 的全局入口、加载 Promise 和宿主 moduleCache。单测同时断言 shared 工厂身份不变与加载入口被移除。
+
+验证命令：
+
+```sh
+pnpm exec turbo run build --filter=@module-federation/modern-js-v3...
+pnpm --filter @module-federation/runtime-core run test
+pnpm --filter modernjs-ssr-cache-updates run e2e:playground
+pnpm --filter modernjs-ssr-cache-updates run e2e
+node apps/modernjs-ssr-cache/use-workspace.cjs
+env -u NODE_OPTIONS WEATHER_PORT=3079 WEATHER_ASSET_PORT=3086 node apps/modernjs-ssr-cache/start.cjs --memory
+WEATHER_TEST_URL=http://127.0.0.1:3079 node apps/modernjs-ssr-cache/e2e.cjs
+pnpm exec prettier --check .
+pnpm exec changeset status
+git diff --check
+```
+
+不重复整个旧 SSR CI job 或无关包测试，使用对应 SSR package 回归和天气浏览器 E2E；此修复不需要改动 Rspack 或 Modern 源码。Changesets 检查保留现有预览版本与 workspace 版本不一致的提示。
+
+结果：依赖构建 20 个任务成功，runtime-core 151 个测试通过，playground 独立回归及完整 static/production/playground 回归均通过，天气浏览器 E2E 3 个通过。全仓格式、Changesets 和 diff 检查通过。

@@ -17,3 +17,5 @@ Release the old application generation’s shared consumer records before destro
 Drop Modern ownership records for removed remotes so previous remote entry exports and loading promises are not retained until full application disposal.
 
 Synchronize retained Rspack startup exports during selective SSR reloads and automatically rebuild the application once if entry preparation fails, waiting for pending handler initialization before disposal.
+
+Remove retired remote entry globals and loading promises even when shared factories retain the provider runtime, preventing a later SSR generation from reusing the old container and React singleton.
