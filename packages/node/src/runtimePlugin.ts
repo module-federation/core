@@ -489,6 +489,19 @@ export const setupWebpackRequirePatching = (
 };
 
 export default function (): ModuleFederationRuntimePlugin {
+  // A second bundle can reuse the same MF instance. Its named plugin hooks
+  // are deduplicated, but its own Node chunk handler still needs installation.
+  setupScriptLoader();
+  setupWebpackRequirePatching(
+    setupChunkHandler(
+      {},
+      {
+        get origin() {
+          return __webpack_require__.federation.instance;
+        },
+      },
+    ),
+  );
   return {
     name: 'node-federation-plugin',
     beforeInit(args) {

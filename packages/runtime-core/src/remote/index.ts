@@ -950,7 +950,10 @@ export class RemoteHandler {
                             shared.useIn = shared.useIn.filter(
                               (usedHostName) => usedHostName !== shared.from,
                             );
-                            if (shared.useIn.length || shared.loading) {
+                            if (
+                              shared.useIn.length ||
+                              (shared.loading && !shared.loaded)
+                            ) {
                               isAllSharedNotUsed = false;
                               preserveRemoteRuntime = true;
                               shared.providerState = 1;
@@ -995,6 +998,7 @@ export class RemoteHandler {
           }
 
           if (preserveRemoteRuntime) {
+            if (remoteIns) host.retainedProviders.add(remoteIns);
             // Keeping a shared factory without its execution cache can create a
             // second singleton or break its later lazy dependencies. Retain
             // the shared closure and clear unrelated execution caches.
@@ -1002,13 +1006,13 @@ export class RemoteHandler {
             loadedModule.lib?.__webpack_clear_exposed_cache__!();
             (CurrentGlobal[key] as RemoteEntryExports | undefined)
               ?.__webpack_clear_exposed_cache__!();
-            host.moduleCache.delete(remote.name);
-            return;
+          } else {
+            clearRemoteEntryCache(loadedModule.remoteEntryExports);
+            clearRemoteEntryCache(loadedModule.lib);
+            clearRemoteEntryCache(CurrentGlobal[key] as RemoteEntryExports);
           }
-
-          clearRemoteEntryCache(loadedModule.remoteEntryExports);
-          clearRemoteEntryCache(loadedModule.lib);
-          clearRemoteEntryCache(CurrentGlobal[key] as RemoteEntryExports);
+          // Shared factories may retain their runtime, but future loads must not
+          // rediscover the retired container through globals or loading promises.
           if (CurrentGlobal[key]) {
             if (
               Object.getOwnPropertyDescriptor(CurrentGlobal, key)?.configurable

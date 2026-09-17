@@ -1,226 +1,214 @@
-# Modern SSR cache review demo
+# Modern 单宿主天气 SSR Demo
 
-首次体验请阅读 [中文 Demo 体验指南](./DEMO_GUIDE.zh-CN.md)，包含启动步骤、页面关系、更新范围验证、并发实验和内存观察。
+先看 [中文体验指南](./DEMO_GUIDE.zh-CN.md)。正常操作只有更新预报、记录备忘、切换温度单位；天气、备忘、结果和内存集中在桌面一屏。旧的独立控制台和第二个 Host 已删除。
 
-Independent review directory. The previous demo, E2E entry and CI configuration
-are unchanged. Review this locally before promoting it to the primary tests.
+当前 Rspack 依赖为已发布的 `2.2.3-canary-ba52386c-20260916132656`，包含入口导出同步修复；启动无需本地 Rspack hook。MF 仍需按下文使用本分支构建产物，Modern 保留仓库中的预览 patch。
 
-## Run
+## 目录与运行方式
 
-From the repository root, with the existing workspace dependencies and MF builds:
+| 目录 / 脚本                                      | 职责                                                                                    |
+| ------------------------------------------------ | --------------------------------------------------------------------------------------- |
+| `modern-mf-server/`                              | 私有 workspace 代理包，自动绑定 Modern application，提供不带 application 参数的更新函数 |
+| `host/`                                          | 唯一消费者，普通 Modern 配置、源码、build/dev/serve 脚本                                |
+| `host/weather.config.cjs`                        | 天气业务配置：动态 remote、更新/采样/快照接口；不负责服务启动和生命周期接线             |
+| `host/src/tomorrow/`                             | 静态引用 `remote/Weather` 的明天页面                                                    |
+| `host/src/day-after/`                            | 后天天气页面，通过 server/client 两个薄封装动态加载组件                                 |
+| `host/src/memo/`                                 | 独立 SSR 入口，模块级备忘计数和内部 ID；同源小 iframe 嵌入天气页                        |
+| `remote/`、`remote-new-version/`                 | 明天天气的 v1/v2 Modern 生产者                                                          |
+| `dynamic-remote/`、`dynamic-remote-new-version/` | 后天天气的 v1/v2 Modern 生产者                                                          |
+| `build.cjs`                                      | 构建上述五个项目并复制版本化 provider 产物                                              |
+| `start.cjs`                                      | 启动模拟 CDN 和唯一 Host；更新和重置均在 Host 进程内完成                                |
+| `e2e.cjs`、`review.cy.cjs`                       | 独立浏览器 E2E；旧 `apps/modernjs-ssr` 回归和 CI 入口不变                               |
 
-```sh
-node apps/modernjs-ssr-cache/start.cjs --memory
+从仓库根目录执行 `node apps/modernjs-ssr-cache/start.cjs --memory`，访问 http://127.0.0.1:3059/tomorrow。普通 `modern serve` 不安装实验控制接口，因此完整体验使用此启动脚本。所有页面仍由 Modern 生产 SSR 渲染。
+
+## 内置后的接入示范
+
+当前消费者通过私有临时包 [@demo/modern-mf-server](./modern-mf-server/README.md) 接入，业务更新不再传入 application：
+
+```js
+const { createFederationServer } = require('@demo/modern-mf-server');
+const federation = createFederationServer(options);
+const { updateRemotes } = federation;
+
+// 在 weather.config.cjs 中提供天气业务配置；服务启动和生命周期由临时包负责。
+await updateRemotes(changes);
 ```
 
-Open <http://127.0.0.1:3059/>. The old demo can continue using port 3058.
-The launcher runs each project’s `pnpm run build` in place and starts its compiled
-SSR host. Source files and `modern.config.ts` are never generated or rewritten.
-Remote v1/v2 are separate directories, just like `modernjs-ssr` examples.
+临时包自动安装 Modern 生命周期钩子，在 `onReady` 绑定对应应用，内部仍调用真实 `adapter.updateRemotes(application, changes)`。同一应用的 MPA entry 共用绑定，独立应用各自创建集成对象。应用未就绪或已关闭时更新会报错；应用重建和 demo 重置不会令导出的函数持有过期 adapter。
 
-- `console/`: Modern SSR route, loader and React controls, including iframe windows.
-- `host/`: Modern MPA host with a statically consumed Remote A and independent B.
-- `dynamic-host/`: Modern MPA host with runtime remote registration/loading.
-- `remote/`, `remote-new-version/`, `dynamic-remote/`, `dynamic-remote-new-version/`: Modern providers, built into separate v1/v2 releases.
-- Each directory owns a complete `modern.config.ts`, `package.json`, `src/` and
-  `tsconfig.json`, with ordinary `dev`, `build`, and `serve` scripts.
-- `start.cjs`, `console-server.cjs`: process orchestration and Modern production
-  serving. Control API requests pass through Modern's bypass to a local control
-  service, keeping the console responsive while either host is draining.
+这已经是可运行的代理示范，但包名和 API 不是正式 Modern 接口。本地包的 serve 入口已负责启动 Modern 服务并挂载钩子。完整示例见 [host/weather.config.cjs](./host/weather.config.cjs)，包内 README 解释了真实更新流程和生命周期。
 
-The versioned asset server represents a CDN. Remote components and their manifests
-are built by Modern with the MF plugin. The Node control service and traffic
-worker reuse the existing acceptance harness; they do not render the console.
-The console and the two tested SSR applications run in separate processes.
+## 动态消费与重置边界
 
-## CJS 脚本的职责与调用关系
+初始配置只有静态天气 remote。后天页面的服务器端 React.lazy 封装调用消费者服务入口提供的 `__weatherLoad`，实际执行 MF `loadRemote()`；浏览器使用正常 MF API 对相同 release 水合。动态调用位于消费者服务入口，不通过改写 `from` 或绕过运行时追踪来冒充静态调用。
 
-这些脚本负责启动、实验控制和自动验证。页面与 Remote 组件仍由各项目的
-`modern.config.ts`、Modern 构建以及 React 源码实现。
+首次后天请求在 loader 中激活动态消费，MF ownership tracker 观察真实注册/加载，使静态分析证明失效。后续更新使用整体应用重建。出行备忘放在独立编译入口，局部天气更新保留它，整体重建使其重新初始化。结果由实际前后备忘 ID 比较得出。
 
-| 脚本                                         | 谁调用 / 何时执行                             | 具体职责                                                                                                                                                                                                                                                                          |
-| -------------------------------------------- | --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`start.cjs`](./start.cjs)                   | 手动启动入口；或由 `e2e.cjs` 启动             | 启动版本化静态资源服务，调用 `build.cjs`；分别启动两个 Host 进程和 Modern 控制台进程。它还提供内部控制 API，汇总 Host 状态、请求结果和内存样本，按需启动流量进程，并在退出时清理子进程。                                                                                          |
-| [`build.cjs`](./build.cjs)                   | `start.cjs` 启动服务前调用                    | 依次执行七个 Modern 子项目的 `pnpm run build`。把四个 Remote 的 `dist` 复制到对应的 `releases/v1`、`releases/v2`、`releases/palette/v1`、`releases/palette/v2`，供静态资源服务模拟 CDN。会覆盖对应的旧发布产物，不修改源码或生成配置。                                            |
-| [`host.cjs`](./host.cjs)                     | `start.cjs` 启动两次，每个 Host 一个进程      | 根据 `LAB_KIND` 加载 `host/dist` 或 `dynamic-host/dist`，通过 Modern 的 `createProdServer` 提供真实 SSR。把 MF 的 `createSSRUpdateAdapter` 接到 Modern 的应用生命周期，设置请求排队、超时和更新范围；提供更新、扣住/释放旧 loader、状态、内存采样和堆快照等 `/__lab/*` 控制接口。 |
-| [`console-server.cjs`](./console-server.cjs) | `start.cjs` 单独启动                          | 用 Modern 的 `createProdServer` 提供 `console/dist` 的 SSR 页面，默认监听 3059。将 `/api/*` 请求通过 bypass 转发给 `start.cjs` 的内部控制服务；控制台自身不参与被测 Host 的更新，因此 Host 排空时仍可操作。                                                                       |
-| [`traffic.cjs`](./traffic.cjs)               | 点击并发或重复更新实验后，由 `start.cjs` fork | 本目录独立的 Node 流量发生器。通过真实 HTTP 扣住旧请求、触发更新、发送并发请求并收集状态/版本/耗时；按模式自动释放或等待手动释放。内存实验循环更新、发送请求并请求 Host 采样；可视模式逐轮等待 iframe 加载确认后继续，通过进程消息把结果返回给控制服务。                          |
-| [`e2e.cjs`](./e2e.cjs)                       | 独立自动测试入口                              | 默认以测试模式启动 demo，给控制台和资源服务分配随机端口并为 Host 开启 GC。运行 `review.cy.cjs`，随后验证静态/动态更新的真实 HTTP 排队、队列满、等待超时、返回版本、PID 不变和内存采样，最后关闭自己启动的服务。                                                                   |
-| [`review.cy.cjs`](./review.cy.cjs)           | 由 `e2e.cjs` 交给 Cypress 执行                | 浏览器场景，不是用 `node` 直接运行的服务脚本。验证控制台自身的 Modern SSR、Host/Remote 水合与交互、动态加载、真实 HTML，以及更新期间 iframe 的等待和恢复、B 入口不受局部更新影响、内存页和移动端布局。                                                                            |
+整体重建现在销毁旧 MF 实例、归属此应用的 provider、缓存绑定和入口登记，只交接 remote 声明给新的实例。仍被其他消费者使用的 shared 保留。「重置体验（重建应用）」清空实验状态、恢复初始注册并整体重建；PID 和监听端口不变，随后可重新体验静态局部更新。
 
-启动关系如下；`host.cjs` 的两次启动是两个独立 SSR 进程：
+此清理不会撤销任意业务自行创建的全局变量、定时器或监听器。业务插件可使用 MF 的 `dispose` hook 释放自己拥有的资源。GC 只能回收不可达对象，不能承诺整个进程的所有内存清零。
 
-```text
-手动执行 start.cjs                 自动执行 e2e.cjs
-        │                                  │
-        │                          启动 start.cjs --test
-        │                          运行 review.cy.cjs + HTTP 检查
-        ▼
-  启动资源服务 → build.cjs → 所有构建完成
-        │
-        ├── host.cjs（static） → host/dist
-        ├── host.cjs（dynamic）→ dynamic-host/dist
-        ├── console-server.cjs → console/dist
-        └── 收到实验请求时 fork traffic.cjs
-```
+更新会先后取两个 GC 样本，中间执行 adapter 更新并真实请求新的 SSR HTML 和备忘；最终浏览器导航、水合发生在取样之后。天气版本、module 状态与内存来自真实执行，非人工修改结果。
 
-点击“开始并发实验”时，控制台 React 页面请求 `/api/experiment`，经
-`console-server.cjs` 转发给 `start.cjs`，再由流量进程访问目标 Host 的
-`/__lab/*` 控制接口和实际 SSR 路由。页面中的四个 iframe 是浏览器额外发起的四次
-真实导航（A1/A2/A3 访问 `/`，B1 访问 `/b`），不是 `traffic.cjs` 生成的窗口；它计入 Host 的实际排队数量，但不计入
-Node 请求列表。
+## 保留的限制
 
-**`build.cjs` 只在启动阶段执行，更新 Remote 时不会再次执行。** 更新切换的是已构建
-的 v1/v2 manifest 地址，再由 MF/Modern 清理缓存或重建应用资源；运行中的 Host
-进程保持不变。
+- 沿用已锁定 MF/Modern/Rspack 预览版本和 Modern 重复 pipe 与局部更新同步 Node 入口导出的 pnpm patch。
+- Host 服务端 splitChunks 仍禁用；本次界面重做没有解决既有共享入口初始化限制。
+- 备忘是演示用进程内模块状态，不是持久化业务数据；重启或整体重建会清空。
+- 动态激活后影响整个宿主更新策略，不只是后天页面。
+- 控制接口仅用于本地演示，不作为生产管理接口。原并发故障覆盖仍在旧 SSR 回归中，本界面不再堆放请求窗口和故障按钮。
+- 同一 checkout 的构建和运行服务共用产物；E2E 前停止体验服务，结束后重新启动。
 
-`host.cjs` 和 `console-server.cjs` 都使用 Modern 的生产服务 API，并非自行实现
-SSR 渲染器。之所以保留这些服务入口，是为了接入本次实验的更新适配器、请求闸门和
-控制接口。普通 `modern serve` 不会自动安装这些实验接口。
-
-日常只需执行上面的 `start.cjs` 或下方的 `e2e.cjs`。其余脚本由入口传入环境变量、
-端口和进程通信配置，不需要逐个手动启动。内存样本由 `host.cjs` 在被测进程内采集；
-控制台、控制服务、构建和流量进程的内存不混入 Host 样本。
-
-## What to try
-
-1. The console itself displays server-rendered PID/time evidence. The left/right
-   frames show actual Modern host pages. Change BPM on the old page, update to v2,
-   and compare the new SSR version while the old page retains its client state.
-2. Use “查看真实 HTML” to inspect a freshly fetched server response. The provider
-   version and loader module identity help distinguish SSR cache reuse/reload.
-3. Select the dynamic host. Load the palette in the browser, then register it for
-   SSR and inspect the raw HTML containing “Choose a mood.”.
-4. Start the traffic experiment. A held loader keeps the update in draining;
-   twelve new Node requests target A/B (nine `/`, three `/b`). Four additional
-   iframes open during draining: A1/A2/A3 and B1, each with its own real URL and
-   loading status. These labels describe page routes, not component counts.
-   Default release is automatic. With manual release, B1 can finish while all
-   three A windows still wait for the static A update. A dynamic whole-app update
-   affects both routes. The four browser requests are additional to the Node
-   traffic; at most 16 new requests queue in the default whole-app experiment.
-5. The memory tab samples only the selected host PID, can request GC, perform
-   twenty updates, and generate an explicit heap snapshot. No periodic heap
-   sampling occurs. Queue counters include the iframe; Node result counts do not.
-
-Fault presets intentionally produce queue-full or timeout 503 responses. A failed
-iframe response stays visible; the UI does not fabricate a stale-page fallback.
-If a background tab misses draining, it reports that instead of claiming blocking.
-
-Manual debugger startup:
-
-```sh
-node apps/modernjs-ssr-cache/start.cjs --debug
-```
-
-Attach via `chrome://inspect` to ports 9230 (static) / 9231 (dynamic). This also
-enables GC. The console PID and load-generator PID are excluded from host samples.
-
-## Independent validation
+## 验证
 
 ```sh
 node apps/modernjs-ssr-cache/e2e.cjs
+pnpm exec prettier --check apps/modernjs-ssr-cache
+node --check apps/modernjs-ssr-cache/host/weather.config.cjs
+node --check apps/modernjs-ssr-cache/start.cjs
+node --check apps/modernjs-ssr-cache/e2e.cjs
+git diff --check
 ```
 
-This runs the new console's Cypress scenarios and real HTTP admission/memory
-checks without replacing the existing suite. Cypress uses isolated Electron with
-cross-origin iframe access enabled for assertions; production UI code does not
-read cross-origin DOM. Screenshots and temporary project paths are printed.
+这是独立 demo 的对应 E2E，原 Modern SSR CI 入口不变。测试覆盖静态局部更新、连续动态整体重建、重置后恢复静态更新、SSR/水合及 GC 返回值。
 
-## Explicit constraints
+## 使用本地 MF 改动
 
-- Uses the installed Modern preview and existing pnpm patch for repeated SSR pipe
-  startup, as documented in the current cache-updates fixture. A corrected Modern
-  preview is still needed before removing that patch.
-- Server splitChunks remains disabled for these MPA fixtures because the tested
-  preview's shared-entry output previously failed initialization. This demo does
-  not claim to fix that limitation.
-- Static and dynamic contracts stay in separate host builds. Providers have v1/v2
-  artifacts prepared by Modern builds; updates swap the manifest URL without
-  rebuilding/restarting the running host process.
-- Node orchestration is local test infrastructure, not a production admin API.
-  No deployment worker rotation, RSC or arbitrary global side-effect cleanup is
-  claimed. Heap trends alone do not prove absence of business-code leaks.
-
-### Dependency and build setup
-
-The projects are regular pnpm workspaces, registered under
-`apps/modernjs-ssr-cache/*`. They pin the published MF/Modern previews used in the
-acceptance work; the root keeps the Rspack preview override and Modern patch.
-This avoids converting linked workspace implementation files into app graph
-nodes or manufacturing a temporary consumer installation.
+当前已发布预览包不包含本次销毁生命周期。安装依赖后，在本 worktree 执行：
 
 ```sh
-pnpm install --frozen-lockfile
-pnpm --filter modernjs-ssr-cache-host run build
+pnpm exec turbo run build --filter=@module-federation/modern-js-v3...
+node apps/modernjs-ssr-cache/use-workspace.cjs
+node apps/modernjs-ssr-cache/start.cjs --memory
 ```
 
-For the complete update experience use the launcher above: it also starts the
-versioned asset server (port 3066) and the update/admission controls. Ordinary
-`modern serve` alone does not install those experimental server controls.
+`use-workspace.cjs` 将工作区 MF 构建产物复制到临时 node_modules，再替换这五个 demo 应用中的 MF 符号链接；不会修改 pnpm 全局 store。每次重新构建 MF 后需再次执行。重新安装依赖可恢复锁定的预览包。
 
-### Verification after restructuring
+## 本次验证记录（2026-09-16）
 
-- `node apps/modernjs-ssr-cache/e2e.cjs`: passed; three browser scenarios plus
-  real HTTP admission, queue-full/timeout and memory-update checks. Log:
-  `/tmp/modern-sibling-e2e.log`.
-- This tests the ordinary installed MF preview, direct per-project Modern builds,
-  and the existing patched Modern preview. No temporary project generation or
-  copied MF installation is involved.
-- Existing SSR CI and unrelated framework suites were not rerun: this remains an
-  independently reviewed demo and does not replace the original tests.
-- `pnpm install --no-frozen-lockfile --ignore-scripts`, followed by
-  `pnpm install --frozen-lockfile --ignore-scripts`: passed. The final lockfile is
-  pnpm-generated; an intermediate attempt to trim unrelated peer-resolution
-  churn failed lock validation and was discarded.
-- `pnpm exec prettier --check apps/modernjs-ssr-cache pnpm-workspace.yaml pnpm-lock.yaml`
-  and `git diff --check`: passed.
+执行命令：
 
-### Multiple request windows
+```sh
+pnpm exec turbo run build --filter=@module-federation/modern-js-v3...
+pnpm --filter @module-federation/runtime-core run test
+pnpm --filter @module-federation/runtime run test
+pnpm --filter @module-federation/webpack-bundler-runtime run test
+pnpm --filter @module-federation/modern-js-v3 run test
+pnpm --filter @module-federation/node run test
+pnpm --filter modernjs-ssr-cache-updates run e2e
+node apps/modernjs-ssr-cache/use-workspace.cjs
+node apps/modernjs-ssr-cache/e2e.cjs
+pnpm exec prettier --check .
+node --check apps/modernjs-ssr-cache/host/weather.config.cjs
+node --check apps/modernjs-ssr-cache/start.cjs
+node --check apps/modernjs-ssr-cache/use-workspace.cjs
+git diff --check
+```
 
-The traffic panel shows four independent iframe navigations (A1/A2/A3/B1). Each
-window retains its own page and hydration state. The 9A/3B numbers refer to Node
-requests to host routes `/` and `/b`, not numbers of Remote components. The four
-browser requests are additional, and count toward the real admission queue.
+五个包分别通过 150、95、128、42、53 个测试。原 SSR 回归涵盖静态更新、失败恢复、流式请求排队/溢出/超时、水合及 70 轮生产更新，每轮并发 8 个真实请求；预热后的 GC Heap 从约 31.10 MiB 到峰值 32.00 MiB，增长约 0.90 MiB。该数值是本机本次运行结果，不是内存上限承诺。
 
-The console matches navigation to the returned experiment ID so an old polling
-response cannot trigger a new experiment's windows. Load events also match the
-iframe URL so an old navigation cannot clear the new window's waiting state.
-The host assigns immutable `/static/` resources a separate scope: an A-only
-update must not block B's CSS/JS. Whole-application updates still use the global
-request gate.
+天气 E2E 另外验证 20 次整体重建、第 20 次的旧 Host WeakRef 已不可达、Host 注册数量为 1、PID 不变，以及重置后再次静态更新。GC 数值不是 remote 文件大小，RSS 也不保证立即下降。
 
-Multi-window validation: `node apps/modernjs-ssr-cache/e2e.cjs` passed (log:
-`/tmp/modern-multi-frame-verified.log`). Cypress verifies all four windows hydrate,
-B hydrates while three A windows still wait during a selective update, and all
-four wait/recover with zero Node rejections during a whole-application update.
-The earlier browser failure exposed B asset requests being assigned to A's scope;
-that fixture classification is corrected rather than relaxing the assertion.
-The four-window screenshot was visually inspected.
+没有运行包含其他 SSR 示例的整个 `e2e-modern-ssr` CI job、无关包测试或 Modern/Rspack 全仓构建；本次使用对应包脚本与上述实际生产/浏览器回归，未修改 Modern/Rspack 源码。Changesets status 能生成计划，但会提示演示项目锁定的预览版本与工作区版本不同，保留这一既有预览依赖设计。
 
-`pnpm exec prettier --check apps/modernjs-ssr-cache/console/src/routes/page.tsx apps/modernjs-ssr-cache/console/src/style.css apps/modernjs-ssr-cache/review.cy.cjs apps/modernjs-ssr-cache/host.cjs apps/modernjs-ssr-cache/start.cjs apps/modernjs-ssr-cache/README.md`
-and `git diff --check` passed. The old SSR CI entry and unrelated package/framework
-suites remain skipped because this changes the independent demo only; no runtime
-package or dependencies changed.
+### 临时集成包验证
 
-### 观察局部更新与整体重建的宿主状态
+`@demo/modern-mf-server` 已接入真实宿主。以下命令通过：
 
-“功能体验”里的 A、B 页面都展示服务端 loader 模块的初始化 ID、初始化时间、累计调用次数和 Host PID。ID 和计数存放在各入口 `page.data.ts` 的模块变量中，不依赖控制台、浏览器或 `globalThis`。计数统计 loader 调用，包括其他窗口、预热和实验请求，不代表成功渲染次数。
+```sh
+pnpm install --ignore-scripts
+pnpm install --frozen-lockfile --lockfile-only --ignore-scripts
+pnpm --filter @demo/modern-mf-server test
+node --check apps/modernjs-ssr-cache/host/weather.config.cjs
+node --check apps/modernjs-ssr-cache/modern-mf-server/index.cjs
+pnpm exec prettier --check apps/modernjs-ssr-cache/modern-mf-server apps/modernjs-ssr-cache/host/weather.config.cjs apps/modernjs-ssr-cache/host/package.json apps/modernjs-ssr-cache/README.md apps/modernjs-ssr-cache/DEMO_GUIDE.zh-CN.md
+git diff --check
+```
 
-更新 Remote A 后，对比“B 入口 · 保留的旧页面”和“B 入口 · 新请求的页面”：静态 Host 的 B 初始化 ID 应保持一致、计数继续累计；动态 Host 整体重建后 B 初始化 ID 应变化、计数重新开始。两种更新都不应改变 PID。旧窗口保留的是首次请求的状态，切换 Host 或重新打开控制台会重新建立对比基准。
+代理生命周期测试 2 个通过，覆盖独立应用隔离和重置后使用新 adapter。本次浏览器验证先执行 `node apps/modernjs-ssr-cache/use-workspace.cjs`，通过本地 resolve hook 加载包含 Rspack #15720 的构建，再运行：
 
-验证：`node apps/modernjs-ssr-cache/e2e.cjs` 通过（日志 `/tmp/modern-module-state.log`），Cypress 对新的 B 请求断言静态更新保留 ID 且计数增加、动态重建改变 ID、两种更新 PID 均不变。已检查页面截图。`pnpm exec prettier --check apps/modernjs-ssr-cache/host/src apps/modernjs-ssr-cache/dynamic-host/src apps/modernjs-ssr-cache/console/src/routes/page.tsx apps/modernjs-ssr-cache/review.cy.cjs apps/modernjs-ssr-cache/README.md`、`git diff --check` 通过。未运行旧 SSR CI 入口或无关包测试，因为本次只改独立 demo。
+```sh
+WEATHER_PORT=3079 WEATHER_ASSET_PORT=3086 NODE_OPTIONS='--require=/tmp/weather-local-rspack.cjs' node apps/modernjs-ssr-cache/start.cjs --memory
+WEATHER_TEST_URL=http://127.0.0.1:3079 node apps/modernjs-ssr-cache/e2e.cjs
+```
 
-### 内存采样与逐轮更新
+真实浏览器 E2E 3 个通过，覆盖 SSR、水合、连续更新、动态整体重建及重置后的静态局部更新。上述 `/tmp` hook 是本机验证辅助文件，不属于常规启动依赖；这是 9 月 16 日的历史验证；9 月 17 日已替换为新 Rspack canary，见下文。
 
-手动对比时，在“内存观察”先点击“GC 后采样”，再点击“更新 remote 到 v1/v2”。按钮更新所选 Host 的 Remote A，并让“手动内存对比的 SSR 页面”发起真实导航；看到新版本加载完成后再次点击“GC 后采样”，比较表格中的 Heap / RSS。按钮按当前版本切换到另一个版本，不自动采样。这里测量的是 Host 进程内存，不是 remote 文件或下载体积。
+本次未运行旧示例的整个 `e2e-modern-ssr` CI job，使用天气 demo 对应 E2E；未重复无关包及 Modern/Rspack 全仓测试，本次仅改动私有 demo 集成包和接线。
 
-点击“运行 20 次更新”会启用可视模式：每轮等待 Remote 更新和 8 条 Node SSR 请求完成，再让 iframe 以唯一 URL 打开本轮页面。控制台收到 iframe 加载事件后向流量进程确认，页面至少展示 0.8 秒再进入下一轮，不会因为轮询遗漏而跳到最后一个版本。
+### 一体化启动与局部更新内存复测
 
-页面保留“已完成 N / 20”、当前目标版本和逐轮记录。完整实验产生 20 次更新、160 条 Node SSR 请求及额外 20 次 iframe 导航；每 5 轮在 iframe 加载后执行 GC 并采样，共 4 次。加载事件表示导航完成，具体页面或错误响应原样呈现。请保持内存页打开；15 秒未收到确认会报告失败，不会假装完成剩余轮次。
+服务启动已移到 `modern-mf-server/serve.cjs`，消费者只保留 `weather.config.cjs` 的天气业务配置。`pnpm --filter modernjs-ssr-cache-host run serve` 调用本地集成入口；完整 demo 仍由 `start.cjs` 构建并启动模拟 CDN。
 
-命令行 HTTP 内存检查默认不启用可视模式，仍可在没有浏览器时运行原来的 20 次更新 / 160 条请求。两种模式请求数量不同，比较内存曲线时应使用同一模式。
+本次执行 `pnpm --filter @demo/modern-mf-server test`（2 个通过）、`WEATHER_TEST_URL=http://127.0.0.1:3079 node apps/modernjs-ssr-cache/e2e.cjs`（3 个真实浏览器 E2E 通过），以及 `node --check apps/modernjs-ssr-cache/host/weather.config.cjs`、`node --check apps/modernjs-ssr-cache/modern-mf-server/serve.cjs`、`git diff --check`。格式检查：
 
-验证：`node apps/modernjs-ssr-cache/e2e.cjs` 通过，日志 `/tmp/modern-memory-iframe.log`。Cypress 捕获了 20 个不同 URL 的 iframe 请求，全部返回 HTTP 200，HTML 中的版本按 v2/v1 交替，并验证 20 轮完成记录及最终水合。截图已检查。
+```sh
+pnpm exec prettier --check apps/modernjs-ssr-cache/modern-mf-server apps/modernjs-ssr-cache/host/weather.config.cjs apps/modernjs-ssr-cache/host/package.json apps/modernjs-ssr-cache/start.cjs apps/modernjs-ssr-cache/README.md apps/modernjs-ssr-cache/DEMO_GUIDE.zh-CN.md
+```
 
-`pnpm exec prettier --check apps/modernjs-ssr-cache/console/src/routes/page.tsx apps/modernjs-ssr-cache/start.cjs apps/modernjs-ssr-cache/traffic.cjs apps/modernjs-ssr-cache/review.cy.cjs apps/modernjs-ssr-cache/README.md` 和 `git diff --check` 通过。未运行旧 SSR CI 入口和无关框架测试：本次只修改独立 demo，不改变运行时包、依赖或原测试入口。
+额外用本机脚本 `node /tmp/weather-integrated-memory.cjs` 调用真实更新、采样和快照接口：120 次预热后，再连续 600 次静态局部更新，全部返回 `entries`，PID 保持 48375。GC 后 JS Heap：
+
+| 阶段          |   MiB |
+| ------------- | ----: |
+| 预热后        | 36.55 |
+| 再更新 300 次 | 36.53 |
+| 再更新 600 次 | 37.01 |
+| 空闲 15 秒后  | 35.92 |
+
+比较四份堆快照，每份只有宿主和当前 provider 两个 `ModuleFederation` 对象，宿主 ID 不变，之前采样的 provider 在后续更新快照中消失。新增占用主要是 V8 code 及其内部关联对象；本轮未复现旧 provider 持续累积。此结果不保证所有场景无泄漏，也不保证 RSS 回落；堆快照自身会影响进程内存，因此不要用此次 RSS 判断更新泄漏。
+
+本次仍使用本地 MF / Rspack 构建，没有替换发布依赖；该等待项已由 9 月 17 日的版本升级解除，见下文。旧示例整个 CI job 和无关包全仓测试没有重复，原因同上一节。
+
+### Rspack 发布 canary 验证（2026-09-17）
+
+根依赖及 overrides 中的 Rspack core/cli 已统一到 `2.2.3-canary-ba52386c-20260916132656`，锁文件由 pnpm 重新生成。宿主实际解析到 pnpm 安装的 `@rspack-canary/core`，不是 `/private/tmp/rspack-entry-exports`。MF 使用当前分支构建产物，Modern 使用仓库中的预览 patch；这不是 MF/Modern 全部发布包的验收。
+
+执行命令：
+
+```sh
+pnpm install --ignore-scripts
+pnpm install --frozen-lockfile --lockfile-only --ignore-scripts
+node apps/modernjs-ssr-cache/use-workspace.cjs
+env -u NODE_OPTIONS WEATHER_PORT=3079 WEATHER_ASSET_PORT=3086 node apps/modernjs-ssr-cache/start.cjs --memory
+WEATHER_TEST_URL=http://127.0.0.1:3079 node apps/modernjs-ssr-cache/e2e.cjs
+pnpm --filter modernjs-ssr-cache-updates run e2e
+pnpm --filter modernjs-ssr-cache-updates run e2e:playground
+pnpm exec prettier --check package.json pnpm-lock.yaml apps/modernjs-ssr-cache/README.md apps/modernjs-ssr-cache/DEMO_GUIDE.zh-CN.md apps/modernjs-ssr/cache-updates/README.md packages/modernjs-v3/README.md
+git diff --check
+```
+
+天气浏览器 E2E 3 个通过，包括局部更新、整体重建、水合与重置。冻结锁文件和格式检查通过。额外的旧 SSR 回归中，static 和 production 阶段通过；playground 阶段及其独立复跑均失败：动态宿主并发更新后出现 `Cannot read properties of null (reading 'useState')`，随后在 `e2e/playground.cjs:202` 的版本/等待时间断言失败。当时该回归未通过；后续已定位到 MF removeRemote 保留旧容器入口的遗漏，修复见下文。
+
+本次没有修改 runtime 行为来掩盖失败。未跑整个 `e2e-modern-ssr` CI job 或无关包测试，使用上述对应 package 脚本及天气 E2E；旧 playground 失败已在后续 remote 容器清理修复中解决，见下文。
+
+### 旧 playground 动态重建修复（2026-09-17）
+
+`removeRemote` 在保留仍被其他消费者使用的 shared runtime 时提前返回，没有清除旧 remoteEntry 的全局引用和加载 Promise。之后同一 remote 再次加载可能取回旧 container，导致旧 React 与新 renderer 混用。修复保留 shared 工厂和执行缓存的规则，仅确保两种清理路径都移除 remote 的全局入口、加载 Promise 和宿主 moduleCache。单测同时断言 shared 工厂身份不变与加载入口被移除。
+
+验证命令：
+
+```sh
+pnpm exec turbo run build --filter=@module-federation/modern-js-v3...
+pnpm --filter @module-federation/runtime-core run test
+pnpm --filter modernjs-ssr-cache-updates run e2e:playground
+pnpm --filter modernjs-ssr-cache-updates run e2e
+node apps/modernjs-ssr-cache/use-workspace.cjs
+env -u NODE_OPTIONS WEATHER_PORT=3079 WEATHER_ASSET_PORT=3086 node apps/modernjs-ssr-cache/start.cjs --memory
+WEATHER_TEST_URL=http://127.0.0.1:3079 node apps/modernjs-ssr-cache/e2e.cjs
+pnpm exec prettier --check .
+pnpm exec changeset status
+git diff --check
+```
+
+不重复整个旧 SSR CI job 或无关包测试，使用对应 SSR package 回归和天气浏览器 E2E；此修复不需要改动 Rspack 或 Modern 源码。Changesets 检查保留现有预览版本与 workspace 版本不一致的提示。
+
+结果：依赖构建 20 个任务成功，runtime-core 151 个测试通过，playground 独立回归及完整 static/production/playground 回归均通过，天气浏览器 E2E 3 个通过。全仓格式、Changesets 和 diff 检查通过。
+
+### IPv4 分享验证
+
+`WEATHER_HOST=0.0.0.0` 让宿主与资源服务监听 IPv4；`SSR_CACHE_ASSET_URL` 可指定同事可访问的资源地址，并传入全部生产构建。默认仍只监听本机。启动命令见[中文指南](./DEMO_GUIDE.zh-CN.md#分享给同一网络的同事)。
+
+验证命令：`node --check apps/modernjs-ssr-cache/start.cjs`、`node --check apps/modernjs-ssr-cache/modern-mf-server/serve.cjs`、`pnpm --filter @demo/modern-mf-server test`（2 个通过）；通过本机非回环 IPv4 设置 `WEATHER_TEST_URL` 后执行 `node apps/modernjs-ssr-cache/e2e.cjs`（3 个真实浏览器测试通过，覆盖 SSR、水合、两种更新及 20 次更新）。启动完成四个 remote 与一个 host 的生产构建；变更文件 Prettier、diff 和 commitlint 检查通过。没有从另一台电脑验证网络路由或防火墙。
+
+本轮仅修改私有 demo 的监听与资源地址配置，未重复旧 demo 的完整 `e2e-modern-ssr` CI job 或无关包回归；worktree 使用上述直接测试命令。无需发布包的 changeset。

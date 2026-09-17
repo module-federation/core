@@ -19,6 +19,12 @@ export class SSRDependencyPlugin {
           if (!entrypoints.length) return;
           requirements.add(RuntimeGlobals.require);
           requirements.add(RuntimeGlobals.moduleCache);
+          const updateEntryExports = (
+            RuntimeGlobals as typeof RuntimeGlobals & {
+              updateEntryExports?: string;
+            }
+          ).updateEntryExports;
+          if (updateEntryExports) requirements.add(updateEntryExports);
           class EntryOwnership extends RuntimeModule {
             constructor() {
               super('modern SSR entry ownership', RuntimeModule.STAGE_ATTACH);
@@ -100,7 +106,21 @@ export class SSRDependencyPlugin {
 var registry = globalThis[key] || (globalThis[key] = new Map());
 ${JSON.stringify(records)}.forEach(function(record) {
   record.runtime = __webpack_require__;
-  record.load = function() { return __webpack_require__(record.rootIds[0]); };
+  record.load = async function() {
+    var exports = await __webpack_require__(record.rootIds[0]);
+    try {
+      if (typeof __webpack_require__.updateEntryExports !== 'function' ||
+          !__webpack_require__.updateEntryExports(record.rootIds[0], exports)) {
+        throw new Error('Cannot synchronize SSR entry startup exports: ' + record.entry);
+      }
+    } catch (error) {
+      // Modern's render root starts an async import immediately. Settle it before
+      // recovery disposes MF; otherwise its late provider can cross generations.
+      await Promise.allSettled([exports && exports.requestHandler]);
+      throw error;
+    }
+    return exports;
+  };
   registry.set(JSON.stringify([${JSON.stringify(name)}, record.entry]), record);
 });`;
             }

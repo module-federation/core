@@ -349,7 +349,20 @@ describe('ModuleFederation', () => {
     );
     FM.snapshotHandler.manifestCache.set(entry, {} as any);
 
+    const settledShared = {
+      from: '@register-remotes/app1',
+      useIn: [],
+      loaded: true,
+      loading: Promise.resolve(() => ({})),
+    } as any;
+    Global.__FEDERATION__.__SHARE__.settledRemote = {
+      default: { react: { '1': settledShared } },
+    };
     await FM.removeRemote('app1');
+    expect(
+      Global.__FEDERATION__.__SHARE__.settledRemote.default.react['1'],
+    ).toBeUndefined();
+    delete Global.__FEDERATION__.__SHARE__.settledRemote;
 
     expect(remoteEntryClear).toHaveBeenCalledTimes(1);
     expect(libClear).toHaveBeenCalledTimes(1);
@@ -460,6 +473,11 @@ describe('ModuleFederation', () => {
         },
       };
 
+      const loadingKey = '@register-remotes/app1:' + entry;
+      const loadingEntries = (globalThis as any)
+        .__GLOBAL_LOADING_REMOTE_ENTRY__;
+      loadingEntries[loadingKey] = Promise.resolve((globalThis as any).app1);
+      const sharedFactory = shared.lib || shared.loading;
       try {
         await FM.removeRemote('app1');
 
@@ -467,7 +485,9 @@ describe('ModuleFederation', () => {
         expect(remoteEntryClear).not.toHaveBeenCalled();
         expect(selectiveClear).toHaveBeenCalledTimes(2);
         expect(FM.moduleCache.has('@register-remotes/app1')).toBe(false);
-        expect((globalThis as any).app1).toBeDefined();
+        expect((globalThis as any).app1).toBeUndefined();
+        expect(loadingEntries[loadingKey]).toBeUndefined();
+        expect(shared.lib || shared.loading).toBe(sharedFactory);
         expect(shared.from).toBe(providerName);
         expect(shared.providerState).toBe(1);
         expect(shared.useIn).toEqual(loading ? [] : ['another-remote']);
@@ -479,6 +499,7 @@ describe('ModuleFederation', () => {
         );
         Global.__FEDERATION__.__SHARE__ = previousShareScope;
         delete (globalThis as any).app1;
+        delete loadingEntries[loadingKey];
       }
     },
   );

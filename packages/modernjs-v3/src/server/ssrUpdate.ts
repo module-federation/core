@@ -35,6 +35,9 @@ export function createSSRUpdateAdapter(options: {
   hydration?: { remotes: SSRClientRemote[] };
 }) {
   options = { ...options, entries: [...options.entries] };
+  const handoffKey = Symbol.for('modern-js.mf.ssr.registrations');
+  const handoffs: Map<string, any[]> = ((globalThis as any)[handoffKey] ||=
+    new Map());
   const clientTargets = new Map(
     options.hydration?.remotes.map((value) => {
       const remote = clientRemote(value);
@@ -192,8 +195,28 @@ export function createSSRUpdateAdapter(options: {
               };
             for (const state of ownedStates) state.selective = Boolean(entries);
             const hosts = instances();
-            if (!hosts.length)
-              throw new Error('Missing MF application instance');
+            if (!hosts.length) {
+              const previous = handoffs.get(options.name);
+              if (!previous) throw new Error('Missing MF application instance');
+              const targets = new Map(
+                previous.map((remote) => [remote.name, remote]),
+              );
+              for (const { name, replacement } of changes) {
+                const existing = previous.find(
+                  (remote) => remote.name === name || remote.alias === name,
+                );
+                const { client: _client, ...server } = replacement;
+                targets.set(existing?.name || name, {
+                  ...existing,
+                  ...server,
+                  name: existing?.name || name,
+                });
+              }
+              handoffs.set(options.name, [...targets.values()]);
+              onMutation();
+              onStage('rebuild');
+              return;
+            }
             const outcomes = await Promise.allSettled(
               hosts.map(async (instance) => {
                 const next = changes.map(({ name, replacement }) => {
@@ -252,7 +275,7 @@ export function createSSRUpdateAdapter(options: {
           () => {
             onStage('analyze');
             const hosts = instances();
-            if (!hosts.length)
+            if (!hosts.length && !handoffs.has(options.name))
               throw new Error('Missing MF application instance');
             recovering = application.status?.phase === 'unavailable';
             for (const instance of hosts) {
@@ -306,7 +329,27 @@ export function createSSRUpdateAdapter(options: {
           (next, state) => () => state.context.run(token, next),
           execute,
         );
-      const generation = await authorized();
+      let generation: number;
+      try {
+        generation = await authorized();
+      } catch (error) {
+        if (
+          selected.mode !== 'entries' ||
+          application.status?.phase !== 'unavailable'
+        )
+          throw error;
+        // Modern keeps a failed scope closed and widens its next update to the
+        // whole application. Retry once using the same intended remote targets.
+        onStage('fallback');
+        try {
+          generation = await authorized();
+        } catch (recoveryError) {
+          throw new AggregateError(
+            [error, recoveryError],
+            'SSR update and application recovery failed',
+          );
+        }
+      }
       return { ...selected, generation };
     } finally {
       for (const state of ownedStates)
@@ -494,6 +537,7 @@ export function createSSRUpdateAdapter(options: {
     plan,
     /** Run in Modern's unpublished resource validation hook, before publication. */
     prepareResources(resources: { templates: Record<string, string> }) {
+      handoffs.delete(options.name);
       if (!options.hydration) return;
       const script = releaseScript(options.name, targetRevision, [
         ...canonicalClientTargets().values(),
@@ -558,7 +602,10 @@ export function createSSRUpdateAdapter(options: {
       // unrelated modules and shared singleton closures.
       return await record.load();
     },
-    dispose(entries?: readonly string[]) {
+    async dispose(
+      entries?: readonly string[],
+      { preserveRemotes = true } = {},
+    ) {
       // Partial updates reuse runtimes. Full rebuilds release their registrations.
       if (entries) return;
       const owned = records();
@@ -568,6 +615,97 @@ export function createSSRUpdateAdapter(options: {
           Symbol.for('module-federation.clear-cache.adapters')
         ]?.bindings || [])
           runtimes.add(runtime);
+      const hosts = instances();
+      // Carry only declarative registrations across generations, never factories
+      // or plugins from the old application bundle.
+      if (!preserveRemotes) handoffs.delete(options.name);
+      if (preserveRemotes && hosts.length)
+        handoffs.set(
+          options.name,
+          hosts[0].options.remotes.map((remote: any) => ({ ...remote })),
+        );
+      const providers = new Set<any>(
+        hosts.flatMap((host) => [...(host.retainedProviders || [])]),
+      );
+      const globalInstances: any[] =
+        (globalThis as any).__FEDERATION__?.__INSTANCES__ || [];
+      for (const host of hosts)
+        for (const module of host.moduleCache?.values() || []) {
+          const info = module.remoteInfo;
+          for (const candidate of globalInstances)
+            if (
+              [info.providerName, info.name, info.entryGlobalName].includes(
+                candidate.name,
+              )
+            )
+              providers.add(candidate);
+        }
+      const names = new Set(
+        [...hosts, ...providers].map((instance) => instance.name),
+      );
+      // Full application rebuilds retire all consumers together. Release their
+      // shared usage before any provider decides whether its runtime must survive.
+      // Include registrations already removed from the instance registry by update.
+      const retiringNames = new Set([
+        ...names,
+        ...hosts.flatMap((host) =>
+          (host.options.remotes || []).map((remote: any) => remote.name),
+        ),
+      ]);
+      const sharedScopes = (globalThis as any).__FEDERATION__?.__SHARE__ || {};
+      for (const scopes of Object.values(sharedScopes) as any[])
+        for (const packages of Object.values(scopes) as any[])
+          for (const versions of Object.values(packages) as any[])
+            for (const shared of Object.values(versions) as any[])
+              shared.useIn = (shared.useIn || []).filter(
+                (name: string) => !retiringNames.has(name),
+              );
+      for (const provider of providers) {
+        const scopes = (globalThis as any).__FEDERATION__?.__SHARE__ || {};
+        const externallyUsed = Object.values(scopes).some((scope: any) =>
+          Object.values(scope).some((packages: any) =>
+            Object.values(packages).some((versions: any) =>
+              Object.values(versions).some(
+                (shared: any) =>
+                  shared.from === provider.name &&
+                  shared.useIn?.some((name: string) => !names.has(name)),
+              ),
+            ),
+          ),
+        );
+        const externallyLoaded = globalInstances.some(
+          (other) =>
+            !names.has(other.name) &&
+            !other.disposed &&
+            [...(other.moduleCache?.values() || [])].some((module: any) =>
+              [
+                module.remoteInfo.providerName,
+                module.remoteInfo.name,
+                module.remoteInfo.entryGlobalName,
+              ].includes(provider.name),
+            ),
+        );
+        if (externallyUsed || externallyLoaded) providers.delete(provider);
+      }
+      for (const host of [...hosts, ...providers]) {
+        const state = host[Symbol.for('modern-js.mf.ssr.consumption')];
+        if (state)
+          state.disposingNames = new Set(
+            [...hosts, ...providers].map((instance) => instance.name),
+          );
+      }
+      // Close the entire owned generation before releasing shared ownership.
+      const disposed = await Promise.allSettled(
+        [...new Set([...hosts, ...providers])].map((host) => host.destroy()),
+      );
+      const failures = disposed.filter(
+        (result) => result.status === 'rejected',
+      );
+      if (failures.length)
+        throw new AggregateError(
+          failures.map((result) => result.reason),
+          'SSR instance disposal failed',
+        );
       for (const runtime of runtimes) runtime.federation?.disposeClearCache?.();
       for (const [key, record] of registry() || [])
         if (owned.includes(record)) registry()!.delete(key);

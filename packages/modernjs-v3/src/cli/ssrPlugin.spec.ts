@@ -189,3 +189,88 @@ describe('moduleFederationSSRPlugin', () => {
     }
   });
 });
+
+describe('SSR entry startup exports', () => {
+  it('synchronizes reloaded exports and rejects unsupported entry updates', async () => {
+    const { SSRDependencyPlugin } = await import('./SSRDependencyPlugin');
+    const root = {};
+    const chunk = {};
+    const point = {
+      getRuntimeChunk: () => chunk,
+      getEntrypointChunk: () => chunk,
+    };
+    let generate: () => string;
+    const requirements = new Set();
+    const compilation = {
+      entrypoints: new Map([['tomorrow', point]]),
+      hooks: {
+        additionalTreeRuntimeRequirements: {
+          tap: (_name: string, callback: Function) =>
+            callback(chunk, requirements),
+        },
+      },
+      chunkGraph: {
+        getChunkEntryModulesIterable: () => [root],
+        getModuleId: () => 42,
+        getModuleChunksIterable: () => [],
+      },
+      moduleGraph: { getOutgoingConnections: () => [] },
+      addRuntimeModule: (_chunk: unknown, runtime: { generate(): string }) => {
+        generate = () => runtime.generate();
+      },
+    };
+    Object.assign(root, { originalSource: () => undefined });
+    new SSRDependencyPlugin({ name: 'host', remotes: [] }).apply({
+      webpack: {
+        RuntimeModule: class {},
+        RuntimeGlobals: {
+          require: 'require',
+          moduleCache: 'cache',
+          updateEntryExports: 'updateEntryExports',
+        },
+      },
+      hooks: {
+        thisCompilation: {
+          tap: (_name: string, callback: Function) => callback(compilation),
+        },
+      },
+    } as any);
+    expect(requirements.has('updateEntryExports')).toBe(true);
+    const exports = { requestHandler: Promise.resolve(() => {}) };
+    const runtime = Object.assign(
+      rs.fn(() => exports),
+      {
+        updateEntryExports: rs.fn(() => true),
+      },
+    );
+    const global = {} as any;
+    new Function('__webpack_require__', 'globalThis', generate!())(
+      runtime,
+      global,
+    );
+    const record = global[Symbol.for('modern-js.mf.ssr.entries')].get(
+      JSON.stringify(['host', 'tomorrow']),
+    );
+    expect(await record.load()).toBe(exports);
+    expect(runtime.updateEntryExports).toHaveBeenCalledWith(42, exports);
+    runtime.updateEntryExports.mockReturnValue(false);
+    let release!: () => void;
+    exports.requestHandler = new Promise((resolve) => {
+      release = () => resolve(() => {});
+    });
+    let settled = false;
+    const failed = record.load().catch((error: Error) => {
+      settled = true;
+      throw error;
+    });
+    const rejection = expect(failed).rejects.toThrow(
+      'Cannot synchronize SSR entry',
+    );
+    await new Promise(setImmediate);
+    expect(settled).toBe(false);
+    release();
+    await rejection;
+    delete (runtime as any).updateEntryExports;
+    await expect(record.load()).rejects.toThrow('Cannot synchronize SSR entry');
+  });
+});

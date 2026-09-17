@@ -1,0 +1,240 @@
+diff --git a/dist/cjs/adapters/node/plugins/resource.js b/dist/cjs/adapters/node/plugins/resource.js
+index 85b04b22bfadff1c7e769c3c79a41691cdc5ab99..b609cea8e7309f415cf40d324671d0cb9eff5986 100644
+--- a/dist/cjs/adapters/node/plugins/resource.js
++++ b/dist/cjs/adapters/node/plugins/resource.js
+@@ -48,6 +48,7 @@ __webpack_require__.d(__webpack_exports__, {
+     injectTemplates: ()=>injectTemplates
+ });
+ const external_node_module_namespaceObject = require("node:module");
++var external_node_module_default = /*#__PURE__*/ __webpack_require__.n(external_node_module_namespaceObject);
+ const external_path_namespaceObject = require("path");
+ var external_path_default = /*#__PURE__*/ __webpack_require__.n(external_path_namespaceObject);
+ const fileReader_namespaceObject = require("@modern-js/runtime-utils/fileReader");
+@@ -122,6 +123,10 @@ async function getServerManifest(pwd, routes, monitors, options = {}) {
+         const renderBundle = options.reloadEntry ? await options.reloadEntry(entryName) : await loadBundle(renderBundlePath, monitors, options.reloadable);
+         if (options.reloadable && route.isSSR && 'function' != typeof await renderBundle?.requestHandler) throw new Error(`Invalid SSR entry: ${entryName}`);
+         const loaderBundle = options.reloadEntry && await utils_namespaceObject.fs.pathExists(loaderBundlePath) ? await options.reloadEntry(`${entryName}-server-loaders`) : await loadBundle(loaderBundlePath, monitors, options.reloadable);
++        if (options.reloadEntry) {
++            options.onReloadedBundle?.(renderBundlePath, renderBundle);
++            if (loaderBundle) options.onReloadedBundle?.(loaderBundlePath, loaderBundle);
++        }
+         renderBundle && (renderBundles[entryName] = renderBundle);
+         loaderBundle && (loaderBundles[entryName] = loaderBundle?.loadModules ? await loaderBundle?.loadModules() : loaderBundle);
+     }));
+@@ -227,13 +232,17 @@ const injectResourcePlugin = (applicationOptions)=>({
+                                     delete require1.cache[require1.resolve(filename)];
+                                 }
+                             }
++                            const reloadedBundles = new Map();
+                             const loaded = await Promise.allSettled([
+                                 getHtmlTemplates(pwd, selectedRoutes, {
+                                     fresh: true
+                                 }),
+                                 getServerManifest(pwd, selectedRoutes, void 0, {
+                                     reloadable: true,
+-                                    reloadEntry: entries ? applicationOptions.reloadEntry : void 0
++                                    reloadEntry: entries ? applicationOptions.reloadEntry : void 0,
++                                    onReloadedBundle: (filename, exports1)=>{
++                                        reloadedBundles.set(filename, exports1);
++                                    }
+                                 }),
+                                 (0, inject_js_namespaceObject.getRenderHandler)(context.getRenderOptions)
+                             ]);
+@@ -277,6 +286,38 @@ const injectResourcePlugin = (applicationOptions)=>({
+                                 render
+                             };
+                             await applicationOptions.validate?.(resources);
++                            const cacheUpdates = [];
++                            for (const [filename, exports1] of reloadedBundles){
++                                const require1 = (0, external_node_module_namespaceObject.createRequire)(external_path_default().resolve(filename));
++                                const cached = require1.cache[require1.resolve(external_path_default().resolve(filename))];
++                                if (cached) cacheUpdates.push([
++                                    cached,
++                                    exports1
++                                ]);
++                            }
++                            const replacements = new Map();
++                            const nodeCache = (0, external_node_module_namespaceObject.createRequire)(external_path_default().resolve(pwd, 'package.json')).cache;
++                            for (const [cached, exports1] of cacheUpdates){
++                                const next = new (external_node_module_default())(cached.id, cached.parent || void 0);
++                                next.filename = cached.filename;
++                                next.paths = cached.paths;
++                                next.loaded = cached.loaded;
++                                next.children = cached.children;
++                                next.exports = exports1;
++                                replacements.set(cached, next);
++                            }
++                            const parents = new Set([
++                                ...Object.values(nodeCache),
++                                ...replacements.values(),
++                                ...cacheUpdates.map(([cached])=>cached.parent)
++                            ]);
++                            for (const parent of parents)if (parent) {
++                                if (parent.parent && replacements.has(parent.parent)) parent.parent = replacements.get(parent.parent);
++                                parent.children = [
++                                    ...new Set(parent.children.map((child)=>replacements.get(child) || child))
++                                ];
++                            }
++                            for (const [cached, next] of replacements)if (nodeCache[cached.filename] === cached) nodeCache[cached.filename] = next;
+                             published = resources;
+                             return resources;
+                         }
+diff --git a/dist/esm/adapters/node/plugins/resource.mjs b/dist/esm/adapters/node/plugins/resource.mjs
+index a19c3b8cdcb79e033cae889db9f910b2efe6dd05..3b5139ff89581472fb7b64eddfd5ab2247dc88c3 100644
+--- a/dist/esm/adapters/node/plugins/resource.mjs
++++ b/dist/esm/adapters/node/plugins/resource.mjs
+@@ -1,4 +1,4 @@
+-import { createRequire } from "node:module";
++import node_module, { createRequire } from "node:module";
+ import path from "path";
+ import { fileReader } from "@modern-js/runtime-utils/fileReader";
+ import { LOADABLE_STATS_FILE, MAIN_ENTRY_NAME, NESTED_ROUTE_SPEC_FILE, ROUTE_MANIFEST_FILE, SERVER_BUNDLE_DIRECTORY, compatibleRequire, fs, isProd } from "@modern-js/utils";
+@@ -72,6 +72,10 @@ async function getServerManifest(pwd, routes, monitors, options = {}) {
+         const renderBundle = options.reloadEntry ? await options.reloadEntry(entryName) : await loadBundle(renderBundlePath, monitors, options.reloadable);
+         if (options.reloadable && route.isSSR && 'function' != typeof await renderBundle?.requestHandler) throw new Error(`Invalid SSR entry: ${entryName}`);
+         const loaderBundle = options.reloadEntry && await fs.pathExists(loaderBundlePath) ? await options.reloadEntry(`${entryName}-server-loaders`) : await loadBundle(loaderBundlePath, monitors, options.reloadable);
++        if (options.reloadEntry) {
++            options.onReloadedBundle?.(renderBundlePath, renderBundle);
++            if (loaderBundle) options.onReloadedBundle?.(loaderBundlePath, loaderBundle);
++        }
+         renderBundle && (renderBundles[entryName] = renderBundle);
+         loaderBundle && (loaderBundles[entryName] = loaderBundle?.loadModules ? await loaderBundle?.loadModules() : loaderBundle);
+     }));
+@@ -177,13 +181,17 @@ const injectResourcePlugin = (applicationOptions)=>({
+                                     delete require.cache[require.resolve(filename)];
+                                 }
+                             }
++                            const reloadedBundles = new Map();
+                             const loaded = await Promise.allSettled([
+                                 getHtmlTemplates(pwd, selectedRoutes, {
+                                     fresh: true
+                                 }),
+                                 getServerManifest(pwd, selectedRoutes, void 0, {
+                                     reloadable: true,
+-                                    reloadEntry: entries ? applicationOptions.reloadEntry : void 0
++                                    reloadEntry: entries ? applicationOptions.reloadEntry : void 0,
++                                    onReloadedBundle: (filename, exports)=>{
++                                        reloadedBundles.set(filename, exports);
++                                    }
+                                 }),
+                                 getRenderHandler(context.getRenderOptions)
+                             ]);
+@@ -227,6 +235,38 @@ const injectResourcePlugin = (applicationOptions)=>({
+                                 render
+                             };
+                             await applicationOptions.validate?.(resources);
++                            const cacheUpdates = [];
++                            for (const [filename, exports] of reloadedBundles){
++                                const require = createRequire(path.resolve(filename));
++                                const cached = require.cache[require.resolve(path.resolve(filename))];
++                                if (cached) cacheUpdates.push([
++                                    cached,
++                                    exports
++                                ]);
++                            }
++                            const replacements = new Map();
++                            const nodeCache = createRequire(path.resolve(pwd, 'package.json')).cache;
++                            for (const [cached, exports] of cacheUpdates){
++                                const next = new node_module(cached.id, cached.parent || void 0);
++                                next.filename = cached.filename;
++                                next.paths = cached.paths;
++                                next.loaded = cached.loaded;
++                                next.children = cached.children;
++                                next.exports = exports;
++                                replacements.set(cached, next);
++                            }
++                            const parents = new Set([
++                                ...Object.values(nodeCache),
++                                ...replacements.values(),
++                                ...cacheUpdates.map(([cached])=>cached.parent)
++                            ]);
++                            for (const parent of parents)if (parent) {
++                                if (parent.parent && replacements.has(parent.parent)) parent.parent = replacements.get(parent.parent);
++                                parent.children = [
++                                    ...new Set(parent.children.map((child)=>replacements.get(child) || child))
++                                ];
++                            }
++                            for (const [cached, next] of replacements)if (nodeCache[cached.filename] === cached) nodeCache[cached.filename] = next;
+                             published = resources;
+                             return resources;
+                         }
+diff --git a/dist/esm-node/adapters/node/plugins/resource.mjs b/dist/esm-node/adapters/node/plugins/resource.mjs
+index f121ceae4d879df631a10528cf814ce3de678097..4cd9688e6b6c09e99af4bdc52e443df4ed177558 100644
+--- a/dist/esm-node/adapters/node/plugins/resource.mjs
++++ b/dist/esm-node/adapters/node/plugins/resource.mjs
+@@ -1,5 +1,5 @@
+ import "node:module";
+-import { createRequire } from "node:module";
++import node_module, { createRequire } from "node:module";
+ import path from "path";
+ import { fileReader } from "@modern-js/runtime-utils/fileReader";
+ import { LOADABLE_STATS_FILE, MAIN_ENTRY_NAME, NESTED_ROUTE_SPEC_FILE, ROUTE_MANIFEST_FILE, SERVER_BUNDLE_DIRECTORY, compatibleRequire, fs, isProd } from "@modern-js/utils";
+@@ -73,6 +73,10 @@ async function getServerManifest(pwd, routes, monitors, options = {}) {
+         const renderBundle = options.reloadEntry ? await options.reloadEntry(entryName) : await loadBundle(renderBundlePath, monitors, options.reloadable);
+         if (options.reloadable && route.isSSR && 'function' != typeof await renderBundle?.requestHandler) throw new Error(`Invalid SSR entry: ${entryName}`);
+         const loaderBundle = options.reloadEntry && await fs.pathExists(loaderBundlePath) ? await options.reloadEntry(`${entryName}-server-loaders`) : await loadBundle(loaderBundlePath, monitors, options.reloadable);
++        if (options.reloadEntry) {
++            options.onReloadedBundle?.(renderBundlePath, renderBundle);
++            if (loaderBundle) options.onReloadedBundle?.(loaderBundlePath, loaderBundle);
++        }
+         renderBundle && (renderBundles[entryName] = renderBundle);
+         loaderBundle && (loaderBundles[entryName] = loaderBundle?.loadModules ? await loaderBundle?.loadModules() : loaderBundle);
+     }));
+@@ -178,13 +182,17 @@ const injectResourcePlugin = (applicationOptions)=>({
+                                     delete require.cache[require.resolve(filename)];
+                                 }
+                             }
++                            const reloadedBundles = new Map();
+                             const loaded = await Promise.allSettled([
+                                 getHtmlTemplates(pwd, selectedRoutes, {
+                                     fresh: true
+                                 }),
+                                 getServerManifest(pwd, selectedRoutes, void 0, {
+                                     reloadable: true,
+-                                    reloadEntry: entries ? applicationOptions.reloadEntry : void 0
++                                    reloadEntry: entries ? applicationOptions.reloadEntry : void 0,
++                                    onReloadedBundle: (filename, exports)=>{
++                                        reloadedBundles.set(filename, exports);
++                                    }
+                                 }),
+                                 getRenderHandler(context.getRenderOptions)
+                             ]);
+@@ -228,6 +236,38 @@ const injectResourcePlugin = (applicationOptions)=>({
+                                 render
+                             };
+                             await applicationOptions.validate?.(resources);
++                            const cacheUpdates = [];
++                            for (const [filename, exports] of reloadedBundles){
++                                const require = createRequire(path.resolve(filename));
++                                const cached = require.cache[require.resolve(path.resolve(filename))];
++                                if (cached) cacheUpdates.push([
++                                    cached,
++                                    exports
++                                ]);
++                            }
++                            const replacements = new Map();
++                            const nodeCache = createRequire(path.resolve(pwd, 'package.json')).cache;
++                            for (const [cached, exports] of cacheUpdates){
++                                const next = new node_module(cached.id, cached.parent || void 0);
++                                next.filename = cached.filename;
++                                next.paths = cached.paths;
++                                next.loaded = cached.loaded;
++                                next.children = cached.children;
++                                next.exports = exports;
++                                replacements.set(cached, next);
++                            }
++                            const parents = new Set([
++                                ...Object.values(nodeCache),
++                                ...replacements.values(),
++                                ...cacheUpdates.map(([cached])=>cached.parent)
++                            ]);
++                            for (const parent of parents)if (parent) {
++                                if (parent.parent && replacements.has(parent.parent)) parent.parent = replacements.get(parent.parent);
++                                parent.children = [
++                                    ...new Set(parent.children.map((child)=>replacements.get(child) || child))
++                                ];
++                            }
++                            for (const [cached, next] of replacements)if (nodeCache[cached.filename] === cached) nodeCache[cached.filename] = next;
+                             published = resources;
+                             return resources;
+                         }

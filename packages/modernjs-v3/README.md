@@ -8,7 +8,7 @@ See [documentation](https://module-federation.io/guide/framework/modernjs.html) 
 
 This requires the companion Modern `server-core` selective application owner and
 Rspack's MF invalidation graph (verified with
-`2.2.3-canary-fde17bab-20260911103204`). Enable `ssr: { cacheUpdates: true }` in
+`2.2.3-canary-ba52386c-20260916132656`). Enable `ssr: { cacheUpdates: true }` in
 this plugin's options to emit entry ownership metadata and install its Node-only
 consumption tracker. It also installs a browser release bootstrap reader and
 shares `react`, `react-dom` and `react-dom/server` as singletons on the server.
@@ -52,7 +52,7 @@ const ssrApplication = {
     // Validate any other unpublished application resources here.
   },
   async dispose(_resources, entries) {
-    adapter.dispose(entries);
+    await adapter.dispose(entries);
     // Await any additional cleanup owned by this application here.
   },
 };

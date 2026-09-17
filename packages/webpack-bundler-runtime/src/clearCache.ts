@@ -1369,6 +1369,14 @@ const reportRemoveRemoteClearCacheError = (error: unknown) => {
 // This plugin may outlive many application generations. Never capture a bundler.
 export const createClearCacheRuntimePlugin = () => ({
   name: 'bundler-runtime-clear-cache-plugin',
+  dispose({ origin }: { origin: object }) {
+    for (const binding of [...(getAdapters(origin)?.bindings || [])]) {
+      binding.federation.disposeClearCache?.();
+      if (binding.federation.instance === origin) {
+        binding.federation.instance = undefined as any;
+      }
+    }
+  },
   registerRemote({
     remote,
     origin,

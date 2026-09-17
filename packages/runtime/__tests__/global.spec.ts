@@ -89,3 +89,16 @@ describe('global', () => {
     });
   });
 });
+
+it('releases the default instance and creates a fresh one after destroy', async () => {
+  const { getInstance, ModuleFederation } = await import('../src/index');
+  globalThis.__FEDERATION__.__DEBUG_CONSTRUCTOR__ = ModuleFederation;
+  const first = init({ name: 'runtime-dispose-default', remotes: [] });
+  expect(getInstance()).toBe(first);
+  await first.destroy();
+  expect(getInstance()).toBeNull();
+  const second = init({ name: 'runtime-dispose-default', remotes: [] });
+  expect(second).not.toBe(first);
+  expect(getInstance()).toBe(second);
+  await second.destroy();
+});

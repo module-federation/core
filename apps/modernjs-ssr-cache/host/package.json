@@ -5,13 +5,14 @@
   "scripts": {
     "dev": "modern dev",
     "build": "modern build",
-    "serve": "modern serve"
+    "serve": "node --expose-gc ../modern-mf-server/serve.cjs weather.config.cjs"
   },
   "dependencies": {
     "@modern-js/runtime": "0.0.0-canary-20260914082926",
     "@module-federation/modern-js-v3": "0.0.0-feat-mf-ssr-clear-cache-20260914081229",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "@demo/modern-mf-server": "workspace:*"
   },
   "devDependencies": {
     "@modern-js/app-tools": "0.0.0-canary-20260914082926",

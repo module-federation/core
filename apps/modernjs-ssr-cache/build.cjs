@@ -8,8 +8,6 @@ const { spawnSync } = require('node:child_process');
     'dynamic-remote',
     'dynamic-remote-new-version',
     'host',
-    'dynamic-host',
-    'console',
   ]) {
     const result = spawnSync(
       'pnpm',
