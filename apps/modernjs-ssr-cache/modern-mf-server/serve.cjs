@@ -41,7 +41,10 @@ async function stop(code = 0) {
       .routes,
     ssrApplication: federation.configureApplication(config.application),
   });
-  server.listen(Number(process.env.WEATHER_PORT || 3059), '127.0.0.1');
+  server.listen(
+    Number(process.env.WEATHER_PORT || 3059),
+    process.env.WEATHER_HOST || '127.0.0.1',
+  );
   await once(server, 'listening');
   const url = 'http://127.0.0.1:' + server.address().port;
   await config.onReady?.(url);

@@ -28,6 +28,20 @@ WEATHER_PORT=3079 WEATHER_ASSET_PORT=3086 node apps/modernjs-ssr-cache/start.cjs
 
 这时访问 http://127.0.0.1:3079/tomorrow。不要同时在同一个 checkout 运行构建、E2E 和体验服务，它们共用构建产物。
 
+## 分享给同一网络的同事
+
+将下面的 `192.168.1.10` 替换为你的电脑 IPv4 地址，再启动：
+
+```sh
+WEATHER_HOST=0.0.0.0 WEATHER_PORT=3079 WEATHER_ASSET_PORT=3086 \
+SSR_CACHE_ASSET_URL=http://192.168.1.10:3086 \
+node apps/modernjs-ssr-cache/start.cjs --memory
+```
+
+同事打开 `http://192.168.1.10:3079/tomorrow`。宿主和资源服务分别使用 3079、3086 端口，两个端口都需要能从同事电脑访问。资源 URL 必须填写你的 IPv4，不能填写 `127.0.0.1` 或 `0.0.0.0`，否则浏览器无法加载 remote。更换网络 IP 后，按新地址重新启动并构建。
+
+不传 `WEATHER_HOST` 时仍仅监听本机。分享的是同一个宿主，大家的更新操作、备忘和内存记录也是共享的。
+
 ## 第一步：明天天气，体验局部更新
 
 1. 在右侧「出行备忘」点击两次「记录一次」，让计数变成 2。这是宿主服务端模块中的计数，普通刷新会保留。

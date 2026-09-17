@@ -33,11 +33,16 @@ const mime = {
       res.end('Not found');
     }
   });
-  assets.listen(Number(process.env.WEATHER_ASSET_PORT || 3066), '127.0.0.1');
+  assets.listen(
+    Number(process.env.WEATHER_ASSET_PORT || 3066),
+    process.env.WEATHER_HOST || '127.0.0.1',
+  );
   await once(assets, 'listening');
   const env = {
     ...process.env,
-    SSR_CACHE_ASSET_URL: 'http://127.0.0.1:' + assets.address().port,
+    SSR_CACHE_ASSET_URL:
+      process.env.SSR_CACHE_ASSET_URL ||
+      'http://127.0.0.1:' + assets.address().port,
   };
   build = spawn(process.execPath, [path.join(root, 'build.cjs')], {
     env,

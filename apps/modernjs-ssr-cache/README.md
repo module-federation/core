@@ -204,3 +204,11 @@ git diff --check
 不重复整个旧 SSR CI job 或无关包测试，使用对应 SSR package 回归和天气浏览器 E2E；此修复不需要改动 Rspack 或 Modern 源码。Changesets 检查保留现有预览版本与 workspace 版本不一致的提示。
 
 结果：依赖构建 20 个任务成功，runtime-core 151 个测试通过，playground 独立回归及完整 static/production/playground 回归均通过，天气浏览器 E2E 3 个通过。全仓格式、Changesets 和 diff 检查通过。
+
+### IPv4 分享验证
+
+`WEATHER_HOST=0.0.0.0` 让宿主与资源服务监听 IPv4；`SSR_CACHE_ASSET_URL` 可指定同事可访问的资源地址，并传入全部生产构建。默认仍只监听本机。启动命令见[中文指南](./DEMO_GUIDE.zh-CN.md#分享给同一网络的同事)。
+
+验证命令：`node --check apps/modernjs-ssr-cache/start.cjs`、`node --check apps/modernjs-ssr-cache/modern-mf-server/serve.cjs`、`pnpm --filter @demo/modern-mf-server test`（2 个通过）；通过本机非回环 IPv4 设置 `WEATHER_TEST_URL` 后执行 `node apps/modernjs-ssr-cache/e2e.cjs`（3 个真实浏览器测试通过，覆盖 SSR、水合、两种更新及 20 次更新）。启动完成四个 remote 与一个 host 的生产构建；变更文件 Prettier、diff 和 commitlint 检查通过。没有从另一台电脑验证网络路由或防火墙。
+
+本轮仅修改私有 demo 的监听与资源地址配置，未重复旧 demo 的完整 `e2e-modern-ssr` CI job 或无关包回归；worktree 使用上述直接测试命令。无需发布包的 changeset。
