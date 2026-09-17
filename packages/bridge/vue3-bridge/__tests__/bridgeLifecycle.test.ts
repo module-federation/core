@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, rs } from '@rstest/core';
-import { h, nextTick, onUnmounted } from 'vue';
+import { h, nextTick, onMounted, onUnmounted } from 'vue';
 import { createMemoryHistory, createRouter } from 'vue-router';
 import { createBridgeComponent } from '../src/provider';
 
@@ -146,6 +146,72 @@ describe('Vue Bridge operation lifecycle', () => {
     expect(onRootUnmounted).toHaveBeenCalledTimes(1);
     bridge.destroy({ dom });
     expect(onRootUnmounted).toHaveBeenCalledTimes(2);
+  });
+
+  it('cancels a pending memory-route render when destroyed', async () => {
+    const dom = document.createElement('div');
+    document.body.appendChild(dom);
+    const onRootMounted = rs.fn();
+    let releaseNavigation!: () => void;
+    let markNavigationStarted!: () => void;
+    const navigationStarted = new Promise<void>((resolve) => {
+      markNavigationStarted = resolve;
+    });
+    const navigationReleased = new Promise<void>((resolve) => {
+      releaseNavigation = resolve;
+    });
+    const sourceRouter = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/start', component: { render: () => h('div', 'start') } },
+      ],
+    });
+    const bridge = createBridgeComponent({
+      rootComponent: {
+        setup: () => {
+          onMounted(onRootMounted);
+          return () => h('div', 'committed');
+        },
+      },
+      appOptions: () => ({
+        router: sourceRouter,
+        afterRouterCreate(router) {
+          router.beforeEach(async () => {
+            markNavigationStarted();
+            await navigationReleased;
+          });
+        },
+      }),
+    })();
+
+    const renderPromise = bridge.render({
+      dom,
+      moduleName: 'remote/App',
+      memoryRoute: { entryPath: '/start' },
+    });
+    await navigationStarted;
+    bridge.destroy({ dom });
+    releaseNavigation();
+    await renderPromise;
+    await nextTick();
+
+    expect(onRootMounted).not.toHaveBeenCalled();
+    expect(dom.textContent).toBe('');
+    expect(
+      lifecycleEvents.some(
+        (event) =>
+          event.lifecycle === 'afterBridgeRender' &&
+          getContext(event).operation === 'render',
+      ),
+    ).toBe(false);
+
+    await bridge.render({
+      dom,
+      moduleName: 'remote/App',
+      memoryRoute: { entryPath: '/start' },
+    });
+    expect(onRootMounted).toHaveBeenCalledTimes(1);
+    bridge.destroy({ dom });
   });
 
   it('does not retain a root when appOptions fails before mounting', async () => {

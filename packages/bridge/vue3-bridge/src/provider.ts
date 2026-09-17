@@ -34,6 +34,7 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
     // A provider instance owns the roots it mounts. Keeping this map here
     // prevents roots from leaking across independently created providers.
     const rootMap = new Map<HTMLElement, Vue.App<Vue.Component>>();
+    const renderGenerations = new WeakMap<HTMLElement, number>();
 
     return {
       __APP_VERSION__,
@@ -47,6 +48,10 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
           hashRoute,
           ...propsInfo
         } = info;
+        const renderGeneration = (renderGenerations.get(dom) ?? 0) + 1;
+        renderGenerations.set(dom, renderGeneration);
+        const isCurrentRender = () =>
+          renderGenerations.get(dom) === renderGeneration;
         const operationContext: BridgeOperationContext = {
           side: 'producer',
           framework: 'vue',
@@ -61,6 +66,10 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
             info,
             operationContext,
           );
+
+        if (!isCurrentRender()) {
+          return;
+        }
 
         const extraProps =
           beforeBridgeRenderRes &&
@@ -118,6 +127,9 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
               route,
             };
             const result = await router.push(memoryRoute.entryPath);
+            if (!isCurrentRender()) {
+              return;
+            }
             instance?.bridgeHook?.lifecycle?.afterBridgeRouteSync?.emit({
               context: routeContext,
               result,
@@ -134,6 +146,9 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
           previousApp.unmount();
           rootMap.delete(dom);
         }
+        if (!isCurrentRender()) {
+          return;
+        }
         app.mount(dom);
         rootMap.set(dom, app);
         instance?.bridgeHook?.lifecycle?.afterBridgeRender?.emit(info, {
@@ -142,6 +157,12 @@ export function createBridgeComponent(bridgeInfo: ProviderFnParams) {
       },
       destroy(info: { dom: HTMLElement; moduleName?: string }) {
         LoggerInstance.debug(`createBridgeComponent destroy Info`, info);
+        if (info?.dom) {
+          renderGenerations.set(
+            info.dom,
+            (renderGenerations.get(info.dom) ?? 0) + 1,
+          );
+        }
         const root = rootMap.get(info?.dom);
         const operationContext: BridgeOperationContext = {
           side: 'producer',
