@@ -226,17 +226,26 @@ export function createLazyComponent<T, E extends keyof T>(
       ? ReactKey
       : Parameters<T[E]>[0] & ReactKey
     : ReactKey;
+  type LoadedModule = Record<string, React.FC> & Record<symbol, string>;
   const exportName = options?.export || 'default';
+  let loaderPromise: Promise<LoadedModule> | undefined;
 
-  const callLoader = async () => {
-    logger.debug('callLoader start', Date.now());
-    const m = (await options.loader()) as Record<string, React.FC> &
-      Record<symbol, string>;
-    logger.debug('callLoader end', Date.now());
-    if (!m) {
-      throw new Error('load remote failed');
+  const callLoader = () => {
+    if (!loaderPromise) {
+      logger.debug('callLoader start', Date.now());
+      loaderPromise = (async () => {
+        const m = (await options.loader()) as LoadedModule;
+        logger.debug('callLoader end', Date.now());
+        if (!m) {
+          throw new Error('load remote failed');
+        }
+        return m;
+      })().catch((error) => {
+        loaderPromise = undefined;
+        throw error;
+      });
     }
-    return m;
+    return loaderPromise;
   };
 
   const getData = async (noSSR?: boolean) => {

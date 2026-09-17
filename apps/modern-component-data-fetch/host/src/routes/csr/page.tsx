@@ -1,5 +1,9 @@
 import { getInstance } from '@module-federation/modern-js-v3/runtime';
 
+type NoDataMetrics = {
+  loaderCalls: number;
+};
+
 const CsrWithFetchDataFromServerComponent = getInstance()!.createLazyComponent({
   noSSR: true,
   loader: () => {
@@ -17,6 +21,23 @@ const CsrWithFetchDataFromServerComponent = getInstance()!.createLazyComponent({
   },
 });
 
+const CsrWithoutDataLoaderComponent = getInstance()!.createLazyComponent({
+  noSSR: true,
+  loader: () => {
+    const globalWithMetrics = globalThis as typeof globalThis & {
+      __MF_NO_DATA_METRICS__?: NoDataMetrics;
+    };
+    const metrics = (globalWithMetrics.__MF_NO_DATA_METRICS__ ||= {
+      loaderCalls: 0,
+    });
+    metrics.loaderCalls += 1;
+    return import('provider-csr/no-data');
+  },
+  loading: 'loading...',
+  export: 'default',
+  fallback: <div>fallback</div>,
+});
+
 const Index = (): JSX.Element => {
   return (
     <div>
@@ -24,6 +45,7 @@ const Index = (): JSX.Element => {
         The component will be render in csr but <i>fetch data from server</i>
       </h1>
       <CsrWithFetchDataFromServerComponent />
+      <CsrWithoutDataLoaderComponent />
     </div>
   );
 };
