@@ -2,6 +2,8 @@
 
 先看 [中文体验指南](./DEMO_GUIDE.zh-CN.md)。正常操作只有更新预报、记录备忘、切换温度单位；天气、备忘、结果和内存集中在桌面一屏。旧的独立控制台和第二个 Host 已删除。
 
+当前 Rspack 依赖为已发布的 `2.2.3-canary-ba52386c-20260916132656`，包含入口导出同步修复；启动无需本地 Rspack hook。MF 仍需按下文使用本分支构建产物，Modern 保留仓库中的预览 patch。
+
 ## 目录与运行方式
 
 | 目录 / 脚本                                      | 职责                                                                                    |
@@ -131,7 +133,7 @@ WEATHER_PORT=3079 WEATHER_ASSET_PORT=3086 NODE_OPTIONS='--require=/tmp/weather-l
 WEATHER_TEST_URL=http://127.0.0.1:3079 node apps/modernjs-ssr-cache/e2e.cjs
 ```
 
-真实浏览器 E2E 3 个通过，覆盖 SSR、水合、连续更新、动态整体重建及重置后的静态局部更新。上述 `/tmp` hook 是本机验证辅助文件，不属于常规启动依赖；发布包验证仍需新的 Rspack 预览。
+真实浏览器 E2E 3 个通过，覆盖 SSR、水合、连续更新、动态整体重建及重置后的静态局部更新。上述 `/tmp` hook 是本机验证辅助文件，不属于常规启动依赖；这是 9 月 16 日的历史验证；9 月 17 日已替换为新 Rspack canary，见下文。
 
 本次未运行旧示例的整个 `e2e-modern-ssr` CI job，使用天气 demo 对应 E2E；未重复无关包及 Modern/Rspack 全仓测试，本次仅改动私有 demo 集成包和接线。
 
@@ -156,4 +158,26 @@ pnpm exec prettier --check apps/modernjs-ssr-cache/modern-mf-server apps/modernj
 
 比较四份堆快照，每份只有宿主和当前 provider 两个 `ModuleFederation` 对象，宿主 ID 不变，之前采样的 provider 在后续更新快照中消失。新增占用主要是 V8 code 及其内部关联对象；本轮未复现旧 provider 持续累积。此结果不保证所有场景无泄漏，也不保证 RSS 回落；堆快照自身会影响进程内存，因此不要用此次 RSS 判断更新泄漏。
 
-本次仍使用本地 MF / Rspack 构建，没有替换发布依赖；发布包 E2E 待新 Rspack 预览。旧示例整个 CI job 和无关包全仓测试没有重复，原因同上一节。
+本次仍使用本地 MF / Rspack 构建，没有替换发布依赖；该等待项已由 9 月 17 日的版本升级解除，见下文。旧示例整个 CI job 和无关包全仓测试没有重复，原因同上一节。
+
+### Rspack 发布 canary 验证（2026-09-17）
+
+根依赖及 overrides 中的 Rspack core/cli 已统一到 `2.2.3-canary-ba52386c-20260916132656`，锁文件由 pnpm 重新生成。宿主实际解析到 pnpm 安装的 `@rspack-canary/core`，不是 `/private/tmp/rspack-entry-exports`。MF 使用当前分支构建产物，Modern 使用仓库中的预览 patch；这不是 MF/Modern 全部发布包的验收。
+
+执行命令：
+
+```sh
+pnpm install --ignore-scripts
+pnpm install --frozen-lockfile --lockfile-only --ignore-scripts
+node apps/modernjs-ssr-cache/use-workspace.cjs
+env -u NODE_OPTIONS WEATHER_PORT=3079 WEATHER_ASSET_PORT=3086 node apps/modernjs-ssr-cache/start.cjs --memory
+WEATHER_TEST_URL=http://127.0.0.1:3079 node apps/modernjs-ssr-cache/e2e.cjs
+pnpm --filter modernjs-ssr-cache-updates run e2e
+pnpm --filter modernjs-ssr-cache-updates run e2e:playground
+pnpm exec prettier --check package.json pnpm-lock.yaml apps/modernjs-ssr-cache/README.md apps/modernjs-ssr-cache/DEMO_GUIDE.zh-CN.md apps/modernjs-ssr/cache-updates/README.md packages/modernjs-v3/README.md
+git diff --check
+```
+
+天气浏览器 E2E 3 个通过，包括局部更新、整体重建、水合与重置。冻结锁文件和格式检查通过。额外的旧 SSR 回归中，static 和 production 阶段通过；playground 阶段及其独立复跑均失败：动态宿主并发更新后出现 `Cannot read properties of null (reading 'useState')`，随后在 `e2e/playground.cjs:202` 的版本/等待时间断言失败。尚未确认该问题是否由 canary 升级引入，不能将整个 SSR 回归报告为通过。
+
+本次没有修改 runtime 行为来掩盖失败。未跑整个 `e2e-modern-ssr` CI job 或无关包测试，使用上述对应 package 脚本及天气 E2E；旧 playground 失败仍需单独定位。

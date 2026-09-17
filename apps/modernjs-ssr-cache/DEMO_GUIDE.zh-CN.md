@@ -4,7 +4,7 @@
 
 ## 先确认体验版本
 
-对应 [MF PR #5088](https://github.com/module-federation/core/pull/5088)。本轮局部更新内存修复还依赖 [Rspack PR #15720](https://github.com/web-infra-dev/rspack/pull/15720)；当前锁文件中的旧预览包不包含这项新能力。完整验证使用了本地 Rspack 构建，待新预览发布并替换依赖后，下面的常规启动命令才覆盖本轮全部修复。仅运行 `use-workspace.cjs` 会替换 MF 包，不会替换 Rspack。
+对应 [MF PR #5088](https://github.com/module-federation/core/pull/5088)。Rspack 已锁定发布的 `2.2.3-canary-ba52386c-20260916132656`，包含 [Rspack PR #15720](https://github.com/web-infra-dev/rspack/pull/15720) 的入口导出同步修复，无需本地 Rspack 构建或额外 NODE_OPTIONS hook。MF 使用当前分支构建产物（通过 `use-workspace.cjs` 接入），Modern 使用现有预览及仓库 patch。
 
 ## 启动
 
