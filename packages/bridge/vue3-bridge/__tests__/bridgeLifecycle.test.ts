@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, rs } from '@rstest/core';
-import { h, nextTick } from 'vue';
+import { h, nextTick, onMounted, onUnmounted } from 'vue';
 import { createMemoryHistory, createRouter } from 'vue-router';
 import { createBridgeComponent } from '../src/provider';
 
@@ -79,6 +79,170 @@ describe('Vue Bridge operation lifecycle', () => {
           getContext(event).operation === 'destroy',
       ).length,
     ).toBe(1);
+  });
+
+  it('allows appOptions to be omitted', async () => {
+    const dom = document.createElement('div');
+    document.body.appendChild(dom);
+    const bridge = createBridgeComponent({
+      rootComponent: { render: () => h('div', 'committed') },
+    })();
+
+    await bridge.render({ dom, moduleName: 'remote/App' });
+
+    expect(dom.textContent).toBe('committed');
+    bridge.destroy({ dom });
+  });
+
+  it('releases the mounted app so a remount is a fresh render', async () => {
+    const dom = document.createElement('div');
+    document.body.appendChild(dom);
+    const bridge = createBridgeComponent({
+      rootComponent: { render: () => h('div', 'committed') },
+      appOptions: () => undefined,
+    })();
+
+    await bridge.render({ dom, moduleName: 'remote/App' });
+    bridge.destroy({ dom });
+    await bridge.render({ dom, moduleName: 'remote/App' });
+
+    const operations = lifecycleEvents
+      .filter(
+        (event) =>
+          event.lifecycle === 'beforeBridgeRender' &&
+          ['render', 'update'].includes(getContext(event).operation),
+      )
+      .map((event) => getContext(event).operation);
+    expect(operations).toEqual(['render', 'render']);
+    bridge.destroy({ dom });
+  });
+
+  it('remounts the app for an update without leaving two roots mounted', async () => {
+    const dom = document.createElement('div');
+    document.body.appendChild(dom);
+    const onRootUnmounted = rs.fn();
+    const bridge = createBridgeComponent({
+      rootComponent: {
+        setup: () => {
+          onUnmounted(onRootUnmounted);
+          return () => h('div', 'committed');
+        },
+      },
+      appOptions: () => undefined,
+    })();
+
+    await bridge.render({ dom, moduleName: 'remote/App' });
+    await bridge.render({ dom, moduleName: 'remote/App' });
+
+    const operations = lifecycleEvents
+      .filter(
+        (event) =>
+          event.lifecycle === 'beforeBridgeRender' &&
+          ['render', 'update'].includes(getContext(event).operation),
+      )
+      .map((event) => getContext(event).operation);
+    expect(operations).toEqual(['render', 'update']);
+    expect(dom.textContent).toBe('committed');
+    expect(onRootUnmounted).toHaveBeenCalledTimes(1);
+    bridge.destroy({ dom });
+    expect(onRootUnmounted).toHaveBeenCalledTimes(2);
+  });
+
+  it('cancels a pending memory-route render when destroyed', async () => {
+    const dom = document.createElement('div');
+    document.body.appendChild(dom);
+    const onRootMounted = rs.fn();
+    let releaseNavigation!: () => void;
+    let markNavigationStarted!: () => void;
+    const navigationStarted = new Promise<void>((resolve) => {
+      markNavigationStarted = resolve;
+    });
+    const navigationReleased = new Promise<void>((resolve) => {
+      releaseNavigation = resolve;
+    });
+    const sourceRouter = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/start', component: { render: () => h('div', 'start') } },
+      ],
+    });
+    const bridge = createBridgeComponent({
+      rootComponent: {
+        setup: () => {
+          onMounted(onRootMounted);
+          return () => h('div', 'committed');
+        },
+      },
+      appOptions: () => ({
+        router: sourceRouter,
+        afterRouterCreate(router) {
+          router.beforeEach(async () => {
+            markNavigationStarted();
+            await navigationReleased;
+          });
+        },
+      }),
+    })();
+
+    const renderPromise = bridge.render({
+      dom,
+      moduleName: 'remote/App',
+      memoryRoute: { entryPath: '/start' },
+    });
+    await navigationStarted;
+    bridge.destroy({ dom });
+    releaseNavigation();
+    await renderPromise;
+    await nextTick();
+
+    expect(onRootMounted).not.toHaveBeenCalled();
+    expect(dom.textContent).toBe('');
+    expect(
+      lifecycleEvents.some(
+        (event) =>
+          event.lifecycle === 'afterBridgeRender' &&
+          getContext(event).operation === 'render',
+      ),
+    ).toBe(false);
+
+    await bridge.render({
+      dom,
+      moduleName: 'remote/App',
+      memoryRoute: { entryPath: '/start' },
+    });
+    expect(onRootMounted).toHaveBeenCalledTimes(1);
+    bridge.destroy({ dom });
+  });
+
+  it('does not retain a root when appOptions fails before mounting', async () => {
+    const dom = document.createElement('div');
+    document.body.appendChild(dom);
+    let shouldFail = true;
+    const bridge = createBridgeComponent({
+      rootComponent: { render: () => h('div', 'committed') },
+      appOptions: () => {
+        if (shouldFail) {
+          throw new Error('options failed');
+        }
+        return undefined;
+      },
+    })();
+
+    await expect(
+      bridge.render({ dom, moduleName: 'remote/App' }),
+    ).rejects.toThrow('options failed');
+    shouldFail = false;
+    await bridge.render({ dom, moduleName: 'remote/App' });
+
+    const operations = lifecycleEvents
+      .filter(
+        (event) =>
+          event.lifecycle === 'beforeBridgeRender' &&
+          ['render', 'update'].includes(getContext(event).operation),
+      )
+      .map((event) => getContext(event).operation);
+    expect(operations).toEqual(['render', 'render']);
+    bridge.destroy({ dom });
   });
 
   it('preserves render and destroy errors without reporting completion', async () => {
