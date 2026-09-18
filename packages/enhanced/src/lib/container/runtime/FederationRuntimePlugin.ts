@@ -15,6 +15,12 @@ import {
   createHash,
   normalizeToPosixPath,
 } from './utils';
+import {
+  expectedEntry,
+  finalizeRuntimeSelection,
+  getSelectionSlot,
+  resolveRuntimeImplementation,
+} from '@module-federation/managers/runtime-selection';
 import { TEMP_DIR } from '../constant';
 import EmbedFederationRuntimePlugin from './EmbedFederationRuntimePlugin';
 import FederationModulesPlugin from './FederationModulesPlugin';
@@ -61,49 +67,40 @@ function resolveRuntimeEntry(
   throw lastError;
 }
 
-function resolveRuntimeEntryWithFallback(
-  spec: RuntimeEntrySpec,
-  implementation: string | undefined,
-  resolve: ResolveFn = require.resolve,
-) {
-  if (implementation) {
-    try {
-      return resolveRuntimeEntry(spec, implementation, resolve);
-    } catch {
-      // Fall back to the workspace runtime packages when a custom
-      // implementation hasn't published the newer subpath yet.
-    }
-  }
-
-  return resolveRuntimeEntry(spec, undefined, resolve);
-}
 export function resolveRuntimePaths(
   implementation?: string,
   resolve: ResolveFn = require.resolve,
 ) {
-  // Prefer the dedicated bundler subpath so webpack can tree-shake across the
-  // runtime package boundary. Fall back to the legacy dist contract for older
-  // custom implementations that have not published /bundler yet.
-  const runtimeToolsPath = resolveRuntimeEntryWithFallback(
-    {
-      bundler: '@module-federation/runtime-tools/bundler',
-      esm: '@module-federation/runtime-tools/dist/index.js',
-      cjs: '@module-federation/runtime-tools/dist/index.cjs',
-    },
-    implementation,
-    resolve,
-  );
-  const moduleBase = implementation || runtimeToolsPath;
+  if (implementation) {
+    const family = resolveRuntimeImplementation(implementation);
+    return {
+      runtimeToolsPath:
+        expectedEntry(family, '@module-federation/runtime-tools$') ??
+        family.family.members['runtime-tools'].entry,
+      bundlerRuntimePath: family.facadeEntry,
+      runtimePath:
+        expectedEntry(family, '@module-federation/runtime$') ??
+        family.family.members.runtime.entry,
+    };
+  }
 
   return {
-    runtimeToolsPath,
+    runtimeToolsPath: resolveRuntimeEntry(
+      {
+        bundler: '@module-federation/runtime-tools/bundler',
+        esm: '@module-federation/runtime-tools/dist/index.js',
+        cjs: '@module-federation/runtime-tools/dist/index.cjs',
+      },
+      undefined,
+      resolve,
+    ),
     bundlerRuntimePath: resolveRuntimeEntry(
       {
         bundler: '@module-federation/webpack-bundler-runtime/bundler',
         esm: '@module-federation/webpack-bundler-runtime/dist/index.js',
         cjs: '@module-federation/webpack-bundler-runtime/dist/index.cjs',
       },
-      moduleBase,
+      undefined,
       resolve,
     ),
     runtimePath: resolveRuntimeEntry(
@@ -112,7 +109,7 @@ export function resolveRuntimePaths(
         esm: '@module-federation/runtime/dist/index.js',
         cjs: '@module-federation/runtime/dist/index.cjs',
       },
-      moduleBase,
+      undefined,
       resolve,
     ),
   };
@@ -125,8 +122,22 @@ const {
 } = resolveRuntimePaths();
 const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
-const onceForCompiler = new WeakSet<Compiler>();
-const onceForCompilerEntryMap = new WeakMap<Compiler, string>();
+const runtimePluginStateKey = Symbol.for(
+  'module-federation.runtime-plugin-state.v1',
+);
+type RuntimePluginState = {
+  entryFilePath?: string;
+  installed: boolean;
+};
+
+function getRuntimePluginState(compiler: Compiler): RuntimePluginState {
+  const statefulCompiler = compiler as Compiler & {
+    [runtimePluginStateKey]?: RuntimePluginState;
+  };
+  return (statefulCompiler[runtimePluginStateKey] ??= {
+    installed: false,
+  });
+}
 
 class FederationRuntimePlugin {
   options?: moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -235,7 +246,8 @@ class FederationRuntimePlugin {
       return '';
     }
 
-    const existedFilePath = onceForCompilerEntryMap.get(compiler);
+    const state = getRuntimePluginState(compiler);
+    const existedFilePath = state.entryFilePath;
 
     if (existedFilePath) {
       return existedFilePath;
@@ -263,7 +275,7 @@ class FederationRuntimePlugin {
       ).toString('base64')}`;
     }
 
-    onceForCompilerEntryMap.set(compiler, entryFilePath);
+    state.entryFilePath = entryFilePath;
 
     return entryFilePath;
   }
@@ -304,6 +316,9 @@ class FederationRuntimePlugin {
     if (this.federationRuntimeDependency)
       return this.federationRuntimeDependency;
 
+    if (!this.entryFilePath) {
+      this.prepareRuntime(compiler);
+    }
     this.ensureFile(compiler);
 
     this.federationRuntimeDependency = new FederationRuntimeDependency(
@@ -313,10 +328,6 @@ class FederationRuntimePlugin {
   }
 
   prependEntry(compiler: Compiler) {
-    if (!this.options?.virtualRuntimeEntry) {
-      this.ensureFile(compiler);
-    }
-
     compiler.hooks.thisCompilation.tap(
       this.constructor.name,
       (compilation: Compilation, { normalModuleFactory }) => {
@@ -436,15 +447,42 @@ class FederationRuntimePlugin {
     return this.runtimePath;
   }
 
-  setRuntimeAlias(compiler: Compiler) {
+  prepareRuntime(compiler: Compiler) {
+    const selection = getSelectionSlot(compiler);
+    if (!selection.finalized) {
+      finalizeRuntimeSelection(
+        compiler,
+        compiler.options.target,
+        this.options?.implementation ??
+          require.resolve('@module-federation/runtime-tools'),
+      );
+    }
+    const image = selection.image;
+    if (!image) {
+      throw new Error('Runtime family selection did not produce an image.');
+    }
+    this.bundlerRuntimePath = image.facadeEntry;
+    this.runtimePath =
+      expectedEntry(image, '@module-federation/runtime$') ??
+      image.family.members.runtime.entry;
+    this.runtimeToolsPath =
+      expectedEntry(image, '@module-federation/runtime-tools$') ??
+      image.family.members['runtime-tools'].entry;
+    this.setRuntimeAlias(compiler, true);
+    this.entryFilePath = this.getFilePath(compiler);
+  }
+
+  setRuntimeAlias(compiler: Compiler, usePreparedPaths = false) {
     const { implementation } = this.options || {};
     const alias: any = compiler.options.resolve.alias || {};
-    const runtimePath = this.getRuntimeAlias(compiler);
+    const runtimePath = usePreparedPaths
+      ? this.runtimePath
+      : this.getRuntimeAlias(compiler);
     alias['@module-federation/runtime$'] =
       alias['@module-federation/runtime$'] || runtimePath;
     alias['@module-federation/runtime-tools$'] =
       alias['@module-federation/runtime-tools$'] ||
-      implementation ||
+      (usePreparedPaths ? this.runtimeToolsPath : implementation) ||
       this.runtimeToolsPath;
 
     // Set up aliases for the federation runtime and tools
@@ -504,23 +542,18 @@ class FederationRuntimePlugin {
         compiler.options.output.uniqueName || `container_${Date.now()}`;
     }
 
-    const resolvedPaths = resolveRuntimePaths(this.options?.implementation);
-    this.bundlerRuntimePath = resolvedPaths.bundlerRuntimePath;
-    this.runtimePath = resolvedPaths.runtimePath;
-    this.runtimeToolsPath = resolvedPaths.runtimeToolsPath;
-
-    this.entryFilePath = this.getFilePath(compiler);
-
     new EmbedFederationRuntimePlugin().apply(compiler);
 
     new HoistContainerReferences().apply(compiler);
 
-    // dont run multiple times on every apply()
-    if (!onceForCompiler.has(compiler)) {
+    const state = getRuntimePluginState(compiler);
+    if (!state.installed) {
       this.prependEntry(compiler);
       this.injectRuntime(compiler);
-      this.setRuntimeAlias(compiler);
-      onceForCompiler.add(compiler);
+      compiler.hooks.afterResolvers.tap(this.constructor.name, () => {
+        this.prepareRuntime(compiler);
+      });
+      state.installed = true;
     }
   }
 }

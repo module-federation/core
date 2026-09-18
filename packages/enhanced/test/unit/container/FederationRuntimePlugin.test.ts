@@ -220,9 +220,7 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
 
     it('prefers the bundler runtime entry when IS_ESM_BUILD is false', () => {
       process.env.IS_ESM_BUILD = 'false';
-      const plugin = new FederationRuntimePlugin({
-        implementation: '/legacy/runtime-tools',
-      } as any);
+      const plugin = new FederationRuntimePlugin({} as any);
       const runtimePath = plugin.getRuntimeAlias({
         options: { resolve: { alias: {} }, output: {} },
       } as unknown as Compiler);
@@ -232,131 +230,15 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
       );
     });
 
-    it('falls back to legacy esm runtime entries for older implementations', () => {
-      const resolve = rs.fn(
-        (request: string, options?: { paths?: string[] }) => {
-          const basedFromLegacy =
-            options?.paths?.[0] === '/legacy/runtime-tools';
-
-          if (request === '@module-federation/runtime-tools/bundler') {
-            return '/workspace/runtime-tools/dist/bundler.js';
-          }
-          if (basedFromLegacy && request.endsWith('/bundler')) {
-            throw new Error(`Cannot find module '${request}'`);
-          }
-          if (request === '@module-federation/runtime/dist/index.js') {
-            return '/legacy/runtime/dist/index.js';
-          }
-          if (
-            request ===
-            '@module-federation/webpack-bundler-runtime/dist/index.js'
-          ) {
-            return '/legacy/webpack-bundler-runtime/dist/index.js';
-          }
-
-          throw new Error(`Unexpected request: ${request}`);
-        },
-      );
-
-      const resolved = resolveRuntimePaths('/legacy/runtime-tools', resolve);
-
-      expect(normalizePath(resolved.runtimeToolsPath)).toBe(
-        '/workspace/runtime-tools/dist/bundler.js',
-      );
-      expect(normalizePath(resolved.runtimePath)).toBe(
-        '/legacy/runtime/dist/index.js',
-      );
-      expect(normalizePath(resolved.bundlerRuntimePath)).toBe(
-        '/legacy/webpack-bundler-runtime/dist/index.js',
-      );
-    });
-
-    it('prefers the provided runtime-tools implementation when available', () => {
-      const resolve = rs.fn(
-        (request: string, options?: { paths?: string[] }) => {
-          const basedFromLegacy =
-            options?.paths?.[0] === '/legacy/runtime-tools';
-
-          if (
-            basedFromLegacy &&
-            request === '@module-federation/runtime-tools/bundler'
-          ) {
-            return '/legacy/runtime-tools/dist/bundler.js';
-          }
-          if (
-            basedFromLegacy &&
-            request === '@module-federation/runtime/bundler'
-          ) {
-            return '/legacy/runtime/dist/bundler.js';
-          }
-          if (
-            basedFromLegacy &&
-            request === '@module-federation/webpack-bundler-runtime/bundler'
-          ) {
-            return '/legacy/webpack-bundler-runtime/dist/bundler.js';
-          }
-
-          throw new Error(`Unexpected request: ${request}`);
-        },
-      );
-
-      const resolved = resolveRuntimePaths('/legacy/runtime-tools', resolve);
-
-      expect(normalizePath(resolved.runtimeToolsPath)).toBe(
-        '/legacy/runtime-tools/dist/bundler.js',
-      );
-      expect(normalizePath(resolved.runtimePath)).toBe(
-        '/legacy/runtime/dist/bundler.js',
-      );
-      expect(normalizePath(resolved.bundlerRuntimePath)).toBe(
-        '/legacy/webpack-bundler-runtime/dist/bundler.js',
-      );
-    });
-
-    it('falls back to legacy cjs runtime entries when esm legacy builds are unavailable', () => {
-      const resolve = rs.fn(
-        (request: string, options?: { paths?: string[] }) => {
-          const basedFromLegacy =
-            options?.paths?.[0] === '/legacy/runtime-tools';
-
-          if (request === '@module-federation/runtime-tools/bundler') {
-            return '/workspace/runtime-tools/dist/bundler.js';
-          }
-          if (
-            basedFromLegacy &&
-            (request.endsWith('/bundler') || request.endsWith('/dist/index.js'))
-          ) {
-            throw new Error(`Cannot find module '${request}'`);
-          }
-          if (request === '@module-federation/runtime/dist/index.cjs') {
-            return '/legacy/runtime/dist/index.cjs';
-          }
-          if (
-            request ===
-            '@module-federation/webpack-bundler-runtime/dist/index.cjs'
-          ) {
-            return '/legacy/webpack-bundler-runtime/dist/index.cjs';
-          }
-
-          throw new Error(`Unexpected request: ${request}`);
-        },
-      );
-
-      const resolved = resolveRuntimePaths('/legacy/runtime-tools', resolve);
-
-      expect(normalizePath(resolved.runtimePath)).toBe(
-        '/legacy/runtime/dist/index.cjs',
-      );
-      expect(normalizePath(resolved.bundlerRuntimePath)).toBe(
-        '/legacy/webpack-bundler-runtime/dist/index.cjs',
+    it('does not replace a missing custom family member from the workspace install', () => {
+      expect(() => resolveRuntimePaths('/legacy/runtime-tools')).toThrow(
+        /No package\.json found|missing-anchor|ENOENT|Could not resolve/,
       );
     });
 
     it('prefers the bundler runtime entry when IS_ESM_BUILD is true', () => {
       process.env.IS_ESM_BUILD = 'true';
-      const plugin = new FederationRuntimePlugin({
-        implementation: '/legacy/runtime-tools',
-      } as any);
+      const plugin = new FederationRuntimePlugin({} as any);
       const runtimePath = plugin.getRuntimeAlias({
         options: {
           resolve: { alias: {} },

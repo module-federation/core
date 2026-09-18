@@ -61,6 +61,16 @@
       }
     },
     "./bundler": "./dist/bundler.js",
+    "./federation-facade": {
+      "import": {
+        "types": "./dist/federation-facade.d.ts",
+        "default": "./dist/federation-facade.js"
+      },
+      "require": {
+        "types": "./dist/federation-facade.d.ts",
+        "default": "./dist/federation-facade.cjs"
+      }
+    },
     "./*": "./*"
   },
   "typesVersions": {
@@ -79,7 +89,19 @@
       ],
       "bundler": [
         "./dist/bundler.d.ts"
+      ],
+      "federation-facade": [
+        "./dist/federation-facade.d.ts"
       ]
+    }
+  },
+  "federationRuntime": {
+    "contract": 1,
+    "compatibilityId": "module-federation.runtime-family.1",
+    "mode": "legacy-defines",
+    "facade": {
+      "import": "./dist/federation-facade.js",
+      "require": "./dist/federation-facade.cjs"
     }
   },
   "dependencies": {

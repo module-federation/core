@@ -6,6 +6,7 @@
 'use strict';
 import { DtsPlugin } from '@module-federation/dts-plugin';
 import { ContainerManager, utils } from '@module-federation/managers';
+import { participantFromOptions } from '@module-federation/managers/runtime-selection';
 import { StatsPlugin } from '@module-federation/manifest';
 import {
   bindLoggerToCompiler,
@@ -21,6 +22,7 @@ import SharePlugin from '../sharing/SharePlugin';
 import ContainerPlugin from './ContainerPlugin';
 import ContainerReferencePlugin from './ContainerReferencePlugin';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
+import { installRuntimeSelection } from './runtime/FederationSelectionPlugin';
 import { RemoteEntryPlugin } from '@module-federation/rspack/remote-entry-plugin';
 import StartupChunkDependenciesPlugin from '../startup/MfStartupChunkDependenciesPlugin';
 import FederationModulesPlugin from './runtime/FederationModulesPlugin';
@@ -97,7 +99,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
   }
 
   private _patchBundlerConfig(compiler: Compiler): void {
-    const { name, experiments, exposes } = this._options;
+    const { name } = this._options;
     const definePluginOptions: Record<string, string | boolean> = {};
 
     const MFPluginNum = compiler.options.plugins.filter(
@@ -111,50 +113,9 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
       );
     }
 
-    const disableSnapshot = experiments?.optimization?.disableSnapshot ?? false;
-    definePluginOptions['FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN'] =
-      disableSnapshot;
-    definePluginOptions['FEDERATION_OPTIMIZE_NO_REMOTE'] =
-      experiments?.optimization?.disableRemote ?? false;
-    definePluginOptions['FEDERATION_OPTIMIZE_NO_SHARED'] =
-      experiments?.optimization?.disableShared ?? false;
-    definePluginOptions['FEDERATION_HAS_EXPOSES'] =
-      hasExposes(exposes) ||
-      compiler.options.plugins.some((plugin) => {
-        if (!plugin || typeof plugin !== 'object') {
-          return false;
-        }
-
-        const namedPlugin = plugin as WebpackPluginInstance & {
-          name?: string;
-          _options?: moduleFederationPlugin.ModuleFederationPluginOptions;
-        };
-        if (namedPlugin.name !== 'ModuleFederationPlugin') {
-          return false;
-        }
-
-        return hasExposes(namedPlugin._options?.exposes);
-      });
-
-    // Determine ENV_TARGET: only if manually specified in experiments.optimization.target
-    if (
-      experiments?.optimization &&
-      typeof experiments.optimization === 'object' &&
-      experiments.optimization !== null &&
-      'target' in experiments.optimization
-    ) {
-      const manualTarget = experiments.optimization.target as
-        | 'web'
-        | 'node'
-        | undefined;
-      // Ensure the target is one of the expected values before setting
-      if (manualTarget === 'web' || manualTarget === 'node') {
-        definePluginOptions['ENV_TARGET'] = JSON.stringify(manualTarget);
-      }
+    if (Object.keys(definePluginOptions).length > 0) {
+      new compiler.webpack.DefinePlugin(definePluginOptions).apply(compiler);
     }
-    // No inference for ENV_TARGET. If not manually set and valid, it's not defined.
-
-    new compiler.webpack.DefinePlugin(definePluginOptions).apply(compiler);
   }
 
   /**
@@ -173,6 +134,10 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     if (!name) {
       throw new Error('ModuleFederationPlugin name is required');
     }
+    installRuntimeSelection(
+      compiler,
+      participantFromOptions('ModuleFederationPlugin', options),
+    );
     // must before ModuleFederationPlugin
     (new RemoteEntryPlugin(options) as unknown as WebpackPluginInstance).apply(
       compiler,
