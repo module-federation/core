@@ -70,6 +70,8 @@ FEDERATION_HAS_EXPOSES=false \
 pnpm build
 ```
 
+Esses defines `FEDERATION_*` ficam até um major futuro. Conditions como `module-federation:no-remote` já podem tirar os módulos correspondentes do grafo, mas as folhas padrão ainda leem esses defines.
+
 No Webpack, os valores devem ser substituídos explicitamente:
 
 ```ts title="webpack.config.ts"

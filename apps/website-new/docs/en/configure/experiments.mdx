@@ -117,3 +117,7 @@ The following table demonstrates how different combinations of the `disableSnaps
 - Enabling both `disableSnapshot` and `target: 'web'` provides the greatest reduction in bundle size, especially when combined with `externalRuntime: true`.
 - Using the external runtime (`externalRuntime: true`) can dramatically reduce the size of your remote entry, but requires that the consumer provides the runtime.
 - Smaller bundle sizes can lead to faster load times and improved performance, but may disable certain features (see above for details on what each flag does).
+
+`FEDERATION_OPTIMIZE_*` and `ENV_TARGET` still control the default runtime leaves. A future major release can remove these defines after every supported bundler uses `module-federation:*` package conditions.
+
+The package contract reserves `module-federation:target-web`, `module-federation:target-node`, `module-federation:target-worker`, and `module-federation:target-universal`. Compiler plugins do not add these conditions while the selected family reports `legacy-defines`.

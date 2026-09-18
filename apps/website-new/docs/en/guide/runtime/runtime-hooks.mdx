@@ -944,6 +944,8 @@ type LoadEntryErrorOptions = {
 };
 ```
 
+The remote-entry cache key stays `name` plus `entry`. Compatibility metadata is stored beside that promise and is not part of the key.
+
 ## afterLoadEntry
 
 `AsyncHook`
