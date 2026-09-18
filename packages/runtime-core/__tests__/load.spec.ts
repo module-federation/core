@@ -5,7 +5,15 @@ import {
   getRemoteInfo,
 } from '../src/utils/load';
 import { ModuleFederation } from '../src/core';
-import { globalLoading, resetFederationGlobalInfo } from '../src/global';
+import {
+  globalLoading,
+  globalLoadingMeta,
+  resetFederationGlobalInfo,
+} from '../src/global';
+import {
+  attachRuntimeImage,
+  type RuntimeImageDescriptorV1,
+} from '../src/runtimeImage';
 import {
   RUNTIME_001,
   RUNTIME_008,
@@ -28,6 +36,18 @@ mockStaticServer({
 });
 
 const createMF = () => new ModuleFederation({ name: 'test-host', remotes: [] });
+const runtimeImage = (
+  overrides: Partial<RuntimeImageDescriptorV1> = {},
+): RuntimeImageDescriptorV1 => ({
+  contract: 1,
+  compatibilityId: 'runtime-family',
+  required: ['remote'],
+  forbidden: [],
+  available: ['remote', 'shared'],
+  target: 'web',
+  entryLoadingIdentity: 'web-loader',
+  ...overrides,
+});
 const createDataUrlEntry = (code: string) =>
   `data:text/javascript;charset=utf-8,${encodeURIComponent(code)}`;
 
@@ -493,6 +513,132 @@ describe('getRemoteEntry - globalLoading rejection cache', () => {
     expect(attempts).toBe(1);
     expect(globalLoading[uniqueKey]).toBe(cached);
     await expect(cached).resolves.toBe(container);
+  });
+
+  it('rejects cache reuse across known runtime families', async () => {
+    const container = { get: rs.fn(), init: rs.fn() };
+    let secondOriginAttempts = 0;
+    const firstOrigin = new ModuleFederation({
+      name: 'cache-family-a',
+      remotes: [],
+      plugins: [
+        {
+          name: 'family-a-entry',
+          loadEntry() {
+            return container;
+          },
+        },
+      ],
+    });
+    const secondOrigin = new ModuleFederation({
+      name: 'cache-family-b',
+      remotes: [],
+      plugins: [
+        {
+          name: 'family-b-entry',
+          loadEntry() {
+            secondOriginAttempts += 1;
+            return container;
+          },
+        },
+      ],
+    });
+    attachRuntimeImage(firstOrigin, runtimeImage());
+    attachRuntimeImage(
+      secondOrigin,
+      runtimeImage({ compatibilityId: 'other-family' }),
+    );
+    const remoteInfo = getRemoteInfo({
+      name: 'family-cache-remote',
+      entry: 'https://remote.test/family-cache.js',
+    });
+
+    await expect(
+      getRemoteEntry({ origin: firstOrigin, remoteInfo }),
+    ).resolves.toBe(container);
+    await expect(
+      getRemoteEntry({ origin: secondOrigin, remoteInfo }),
+    ).rejects.toThrow(
+      'compatibilityId changed from runtime-family to other-family',
+    );
+    expect(secondOriginAttempts).toBe(0);
+  });
+
+  it('rejects cache reuse with a different URL policy', async () => {
+    const container = { get: rs.fn(), init: rs.fn() };
+    const origin = new ModuleFederation({
+      name: 'cache-url-policy',
+      remotes: [],
+      plugins: [
+        {
+          name: 'url-policy-entry',
+          loadEntry() {
+            return container;
+          },
+        },
+      ],
+    });
+    attachRuntimeImage(origin, runtimeImage());
+    const remoteInfo = getRemoteInfo({
+      name: 'url-policy-remote',
+      entry: 'https://remote.test/url-policy.js',
+    });
+    const firstPolicy = (url: string) => `${url}?source=first`;
+    const secondPolicy = (url: string) => `${url}?source=second`;
+
+    await expect(
+      getRemoteEntry({
+        origin,
+        remoteInfo,
+        getEntryUrl: firstPolicy,
+      }),
+    ).resolves.toBe(container);
+    await expect(
+      getRemoteEntry({
+        origin,
+        remoteInfo,
+        getEntryUrl: secondPolicy,
+      }),
+    ).rejects.toThrow('different URL policy');
+  });
+
+  it('does not pair stale metadata with a replacement promise', async () => {
+    const firstContainer = { get: rs.fn(), init: rs.fn() };
+    const replacementContainer = { get: rs.fn(), init: rs.fn() };
+    const firstOrigin = new ModuleFederation({
+      name: 'cache-metadata-first',
+      remotes: [],
+      plugins: [
+        {
+          name: 'cache-metadata-entry',
+          loadEntry() {
+            return firstContainer;
+          },
+        },
+      ],
+    });
+    const secondOrigin = new ModuleFederation({
+      name: 'cache-metadata-second',
+      remotes: [],
+    });
+    attachRuntimeImage(firstOrigin, runtimeImage());
+    attachRuntimeImage(
+      secondOrigin,
+      runtimeImage({ compatibilityId: 'replacement-family' }),
+    );
+    const remoteInfo = getRemoteInfo({
+      name: 'metadata-replacement-remote',
+      entry: 'https://remote.test/metadata-replacement.js',
+    });
+    const uniqueKey = getRemoteEntryUniqueKey(remoteInfo);
+
+    await getRemoteEntry({ origin: firstOrigin, remoteInfo });
+    globalLoading[uniqueKey] = Promise.resolve(replacementContainer);
+
+    await expect(
+      getRemoteEntry({ origin: secondOrigin, remoteInfo }),
+    ).resolves.toBe(replacementContainer);
+    expect(globalLoadingMeta[uniqueKey]).toBeUndefined();
   });
 
   it('shares one in-flight promise across concurrent callers', async () => {

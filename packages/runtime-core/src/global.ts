@@ -12,6 +12,11 @@ import {
   isDebugMode,
 } from '@module-federation/sdk';
 import { warn, error } from './utils/logger';
+import {
+  assertRuntimeImageCompatible,
+  readRuntimeImage,
+  type RuntimeImageDescriptorV1,
+} from './runtimeImage';
 import { ModuleFederationRuntimePlugin } from './type/plugin';
 
 export interface Federation {
@@ -19,11 +24,28 @@ export interface Federation {
   __DEBUG_CONSTRUCTOR_VERSION__?: string;
   moduleInfo: GlobalModuleInfo;
   __DEBUG_CONSTRUCTOR__?: typeof ModuleFederation;
+  __DEBUG_CONSTRUCTOR_RUNTIME_IMAGE__?: RuntimeImageDescriptorV1;
+  __DEFAULT_INSTANCE__?: ModuleFederation;
   __INSTANCES__: Array<ModuleFederation>;
   __SHARE__: GlobalShareScopeMap;
   __MANIFEST_LOADING__: Record<string, Promise<ModuleInfo>>;
   __PRELOADED_MAP__: Map<string, boolean>;
   __PRELOADED_ASSETS__: Set<string>;
+}
+
+export interface RemoteEntryCacheDescriptorV1 {
+  contract: 1;
+  compatibilityId?: string;
+  target?: string;
+  entryLoadingIdentity?: string;
+  remoteType: string;
+  entryGlobalName: string;
+  loaderPolicy?: (url: string) => string;
+}
+
+export interface RemoteEntryCacheMetadataV1 {
+  promise: Promise<RemoteEntryExports | void>;
+  descriptor: RemoteEntryCacheDescriptorV1;
 }
 
 const MAX_PRELOADED_ASSETS = 2000;
@@ -50,6 +72,11 @@ declare global {
       string,
       undefined | Promise<RemoteEntryExports | void>
     >;
+  // eslint-disable-next-line no-var
+  var __GLOBAL_LOADING_REMOTE_ENTRY_META__: Record<
+    string,
+    RemoteEntryCacheMetadataV1 | undefined
+  >;
 }
 
 function definePropertyGlobalVal(
@@ -74,8 +101,19 @@ function includeOwnProperty(target: typeof CurrentGlobal, key: string) {
 if (!includeOwnProperty(CurrentGlobal, '__GLOBAL_LOADING_REMOTE_ENTRY__')) {
   definePropertyGlobalVal(CurrentGlobal, '__GLOBAL_LOADING_REMOTE_ENTRY__', {});
 }
+if (
+  !includeOwnProperty(CurrentGlobal, '__GLOBAL_LOADING_REMOTE_ENTRY_META__')
+) {
+  definePropertyGlobalVal(
+    CurrentGlobal,
+    '__GLOBAL_LOADING_REMOTE_ENTRY_META__',
+    {},
+  );
+}
 
 export const globalLoading = CurrentGlobal.__GLOBAL_LOADING_REMOTE_ENTRY__;
+export const globalLoadingMeta =
+  CurrentGlobal.__GLOBAL_LOADING_REMOTE_ENTRY_META__;
 
 function setGlobalDefaultVal(target: typeof CurrentGlobal) {
   if (
@@ -118,16 +156,25 @@ export function resetFederationGlobalInfo(): void {
   CurrentGlobal.__FEDERATION__.__SHARE__ = {};
   CurrentGlobal.__FEDERATION__.__MANIFEST_LOADING__ = {};
   CurrentGlobal.__FEDERATION__.__PRELOADED_ASSETS__.clear();
+  CurrentGlobal.__FEDERATION__.__DEFAULT_INSTANCE__ = undefined;
 
   Object.keys(globalLoading).forEach((key) => {
     delete globalLoading[key];
+  });
+  Object.keys(globalLoadingMeta).forEach((key) => {
+    delete globalLoadingMeta[key];
   });
 }
 
 export function setGlobalFederationInstance(
   FederationInstance: ModuleFederation,
 ): void {
+  const next = readRuntimeImage(FederationInstance);
+  for (const instance of CurrentGlobal.__FEDERATION__.__INSTANCES__) {
+    assertRuntimeImageCompatible(readRuntimeImage(instance), next);
+  }
   CurrentGlobal.__FEDERATION__.__INSTANCES__.push(FederationInstance);
+  CurrentGlobal.__FEDERATION__.__DEFAULT_INSTANCE__ ??= FederationInstance;
 }
 
 export function getGlobalFederationConstructor():
@@ -141,8 +188,19 @@ export function setGlobalFederationConstructor(
   isDebug = isDebugMode(),
 ): void {
   if (isDebug) {
+    const current = CurrentGlobal.__FEDERATION__.__DEBUG_CONSTRUCTOR__;
+    if (current && FederationConstructor) {
+      assertRuntimeImageCompatible(
+        readRuntimeImage(current),
+        readRuntimeImage(FederationConstructor),
+      );
+    }
     CurrentGlobal.__FEDERATION__.__DEBUG_CONSTRUCTOR__ = FederationConstructor;
     CurrentGlobal.__FEDERATION__.__DEBUG_CONSTRUCTOR_VERSION__ = __VERSION__;
+    CurrentGlobal.__FEDERATION__.__DEBUG_CONSTRUCTOR_RUNTIME_IMAGE__ =
+      FederationConstructor
+        ? readRuntimeImage(FederationConstructor)
+        : undefined;
   }
 }
 
