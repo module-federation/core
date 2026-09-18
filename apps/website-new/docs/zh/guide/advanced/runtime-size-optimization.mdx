@@ -70,6 +70,8 @@ FEDERATION_HAS_EXPOSES=false \
 pnpm build
 ```
 
+这些 `FEDERATION_*` define 会保留到下一个主版本。`module-federation:no-remote` 这类 package condition 已经可以让打包器不把对应模块放进图里，但默认叶子仍然读取这些 define。
+
 Webpack 配置需要显式完成替换：
 
 ```ts title="webpack.config.ts"

@@ -117,3 +117,7 @@
 - 同时开启 `disableSnapshot` 与 `target: 'web'` 可获得更明显的体积下降，配合 `externalRuntime: true` 时效果最佳。
 - 使用外部运行时（`externalRuntime: true`）可大幅缩小 remote entry 体积，但前提是消费者侧提供运行时。
 - 更小的包体积通常意味着更快的加载速度与更好的性能，但也可能禁用部分能力（各标记行为见上文）。
+
+`FEDERATION_OPTIMIZE_*` 和 `ENV_TARGET` 仍然控制默认叶子模块。只有所有受支持的打包器都改用 `module-federation:*` 条件之后，未来的主版本才会删除这些 define。
+
+Package contract 预留了 `module-federation:target-web`、`module-federation:target-node`、`module-federation:target-worker` 和 `module-federation:target-universal`。所选 family 仍声明 `legacy-defines` 时，compiler plugin 不会添加这些 condition。

@@ -70,6 +70,8 @@ FEDERATION_HAS_EXPOSES=false \
 pnpm build
 ```
 
+These `FEDERATION_*` defines stay until a future major release. Package conditions such as `module-federation:no-remote` can already omit the matching modules from a bundler graph, but the default leaves still honor the defines.
+
 Webpack must replace the values explicitly:
 
 ```ts title="webpack.config.ts"

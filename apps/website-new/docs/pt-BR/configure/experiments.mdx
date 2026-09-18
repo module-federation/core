@@ -117,3 +117,7 @@ O seguinte table demonstrates como diferente combinations do `disableSnapshot`, 
 - Enabling both `disableSnapshot` e `target: 'web'` fornece uma ferramenta greatest reduction em bundle size, especialmente quando combined com `externalRuntime: true`.
 - Usando o external runtime (`externalRuntime: true`) pode dramatically reduce o size de your remote entry, but requires esse o consumer fornece uma ferramenta runtime.
 - Smaller bundle sizes pode lead para faster carregue times e improved performance, but may disable certain features (see above for details no que each flag does).
+
+`FEDERATION_OPTIMIZE_*` e `ENV_TARGET` ainda controlam os módulos padrão. Um major futuro pode remover esses defines depois que todos os bundlers suportados usarem as condições `module-federation:*`.
+
+O contrato do pacote reserva `module-federation:target-web`, `module-federation:target-node`, `module-federation:target-worker` e `module-federation:target-universal`. Os plugins do compilador não adicionam essas condições enquanto a família selecionada declara `legacy-defines`.
