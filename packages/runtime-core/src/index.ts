@@ -23,6 +23,12 @@ export type {
 export { assert, error } from './utils/logger';
 export { registerGlobalPlugins } from './global';
 export {
+  assertRuntimeImageCompatible,
+  attachRuntimeImage,
+  readRuntimeImage,
+  type RuntimeImageDescriptorV1,
+} from './runtimeImage';
+export {
   getRemoteEntry,
   getRemoteInfo,
   isStaticResourcesEqual,

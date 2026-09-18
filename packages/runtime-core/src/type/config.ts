@@ -6,6 +6,7 @@ import type {
   TreeShakingStatus,
 } from '@module-federation/sdk';
 import { ModuleFederationRuntimePlugin } from './plugin';
+import type { RuntimeImageDescriptorV1 } from '../runtimeImage';
 
 export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<T>;
 export type PartialOptional<T, K extends keyof T> = Omit<T, K> & {
@@ -141,6 +142,7 @@ export interface Options {
   plugins: Array<ModuleFederationRuntimePlugin>;
   inBrowser: boolean;
   shareStrategy?: ShareStrategy;
+  runtimeImage?: RuntimeImageDescriptorV1;
 }
 
 export type UserOptions = Omit<
