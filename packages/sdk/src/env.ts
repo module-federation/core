@@ -5,13 +5,7 @@ declare global {
   var FEDERATION_DEBUG: string | undefined;
 }
 
-// Declare the ENV_TARGET constant that will be defined by DefinePlugin
-declare const ENV_TARGET: 'web' | 'node';
-
-const isBrowserEnvValue =
-  typeof ENV_TARGET !== 'undefined'
-    ? ENV_TARGET === 'web'
-    : typeof window !== 'undefined' && typeof window.document !== 'undefined';
+import { isBrowserEnvValue } from '#mf/env';
 
 function isBrowserEnv(): boolean {
   return isBrowserEnvValue;
