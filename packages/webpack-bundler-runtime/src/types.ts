@@ -8,7 +8,7 @@ import type {
 } from '@module-federation/runtime/types';
 import { initializeSharing } from './initializeSharing';
 import { attachShareScopeMap } from './attachShareScopeMap';
-import { initContainerEntry } from './initContainerEntry';
+import type { initContainerEntry } from './initContainerEntry';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 
 // FIXME: ideal situation => import { GlobalShareScope,UserOptions } from '@module-federation/runtime/types'

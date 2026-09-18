@@ -1,0 +1,1 @@
+export { remotes } from '../../remotes';
