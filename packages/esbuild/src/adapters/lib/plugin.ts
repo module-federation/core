@@ -233,13 +233,17 @@ export const moduleFederationPlugin = (config: NormalizedFederationConfig) => ({
 
           if (!(value as any).entryPoint.endsWith(remoteFile)) continue;
 
-          const container = fs.readFileSync(outputPath, 'utf-8');
+          const outputFile = path.resolve(
+            build.initialOptions.absWorkingDir || process.cwd(),
+            outputPath,
+          );
+          const container = fs.readFileSync(outputFile, 'utf-8');
 
           const withExports = container
             .replace('"__MODULE_MAP__"', `${JSON.stringify(exposedEntries)}`)
             .replace("'__MODULE_MAP__'", `${JSON.stringify(exposedEntries)}`);
 
-          fs.writeFileSync(outputPath, withExports, 'utf-8');
+          fs.writeFileSync(outputFile, withExports, 'utf-8');
         }
       }
       await writeRemoteManifest(config, result);
