@@ -20,6 +20,10 @@ function wrapCallableForChunkTracking<T extends (...args: any[]) => any>(
   });
 }
 
+declare const FEDERATION_NEXTJS_SCRIPT_TIMEOUT: number;
+
+const DEFAULT_SCRIPT_TIMEOUT = 8000;
+
 export default function (): ModuleFederationRuntimePlugin {
   return {
     name: 'next-internal-plugin',
@@ -35,7 +39,13 @@ export default function (): ModuleFederationRuntimePlugin {
         script.async = true;
         delete attrs?.['crossorigin'];
 
-        return { script: script, timeout: 8000 };
+        const timeout =
+          typeof FEDERATION_NEXTJS_SCRIPT_TIMEOUT === 'number' &&
+          FEDERATION_NEXTJS_SCRIPT_TIMEOUT > 0
+            ? FEDERATION_NEXTJS_SCRIPT_TIMEOUT
+            : DEFAULT_SCRIPT_TIMEOUT;
+
+        return { script: script, timeout };
       }
       return undefined;
     },
