@@ -133,7 +133,9 @@ const mf = createInstance({
 **addQuery**
 - 类型：`boolean | ((context: { times: number; originalQuery: string }) => string)`
 - 可选
-- 是否在重试时添加查询参数，默认为 false
+- 是否在重试时添加查询参数
+- `esm` 和 `module` 类型的远程入口重试默认会添加缓存破坏参数，因为浏览器会按 URL 缓存失败的动态导入。其他重试路径默认不添加查询参数
+- 可设置 `addQuery: false` 关闭 ESM/module 远程入口的默认缓存破坏行为
 - 当为函数时，接收重试次数和原始查询字符串，返回新的查询字符串
 
 **fetchOptions**
@@ -198,6 +200,16 @@ const retryPlugin = RetryPlugin({
 ### 缓存破坏
 
 通过 `addQuery` 参数可以在重试时添加查询参数，避免浏览器缓存影响：
+
+对于 `esm` 或 `module` 类型的远程入口，插件默认添加 `retryCount`，确保每次动态导入重试使用新的 URL。此默认行为不会影响 manifest、fetch 或传统 script 重试。如需关闭：
+
+```javascript
+const retryPlugin = RetryPlugin({
+  addQuery: false,
+});
+```
+
+如需为所有重试路径启用缓存破坏：
 
 ```javascript
 const retryPlugin = RetryPlugin({

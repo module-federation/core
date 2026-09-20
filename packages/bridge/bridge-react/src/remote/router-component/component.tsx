@@ -1,7 +1,11 @@
 import React, { useContext, useEffect, useState, forwardRef } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
-import { dispatchPopstateEnv } from '@module-federation/bridge-shared';
+import {
+  dispatchPopstateEnv,
+  type BridgeOperationContext,
+} from '@module-federation/bridge-shared';
 import { LoggerInstance, pathJoin } from '../../utils';
+import { federationRuntime } from '../../provider/plugin';
 import { RemoteAppWrapper } from '../RemoteAppWrapper';
 
 interface ExtraDataProps {
@@ -87,7 +91,26 @@ export function withRouterData<
               pathname: location.pathname,
             },
           );
+          const route = {
+            action: 'host-to-remote' as const,
+            mechanism: 'popstate' as const,
+            from: pathname,
+            to: location.pathname,
+            basename,
+          };
+          const operationContext: BridgeOperationContext = {
+            side: 'consumer',
+            framework: 'react',
+            operation: 'route-sync',
+            moduleName: props.moduleName,
+            route,
+          };
           dispatchPopstateEnv();
+          federationRuntime.instance?.bridgeHook.lifecycle.afterBridgeRouteSync.emit(
+            {
+              context: operationContext,
+            },
+          );
         }
         setPathname(location.pathname);
       }, [location]);

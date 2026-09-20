@@ -789,6 +789,9 @@ type PreloadRemoteArgs = {
   // When not configured, resources are not filtered
   // After configuration, unnecessary resources will be filtered
   filter?: (assetUrl: string) => boolean;
+  // Whether to record preloaded JS and CSS URLs and skip duplicate loading
+  // Defaults to true
+  recordPreloadedAssets?: boolean;
 };
 ```
 
@@ -869,6 +872,8 @@ preloadRemote([
 ```
 
 When `exposes` is not specified, the resource id for this preload is `remoteName/*`. When `exposes` is specified, the runtime generates resources per expose, and the resource id is `remoteName/expose`.
+
+By default, the runtime records each JS and CSS URL before starting its preload. Later attempts to preload the same loading or loaded URL are skipped and reported as `cached`. This URL tracking does not change the existing lifecycle of the generated link or script element. Up to 2,000 URLs are retained; when the limit is exceeded, the oldest URL is removed. Set `recordPreloadedAssets: false` to disable both URL lookup and recording for a preload operation.
 
 <Tabs>
   <Tab label="Build Plugin (Use build plugin)">

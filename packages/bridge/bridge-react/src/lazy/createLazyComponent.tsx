@@ -3,6 +3,7 @@ import type { BasicProviderModuleInfo } from '@module-federation/sdk';
 import React, { ReactNode, useState, useEffect } from 'react';
 import type { ErrorInfo } from './AwaitDataFetch';
 import type { DataFetchParams, NoSSRRemoteInfo } from './types';
+import { HydratedStylesheetAssets } from './HydratedStylesheetAssets';
 
 import logger from './logger';
 import {
@@ -48,6 +49,11 @@ export type CreateLazyComponentOptions<T, E extends keyof T> = {
 };
 
 type ReactKey = { key?: React.Key | null };
+
+type SSRAssetDescriptors = {
+  scriptSrcs: string[];
+  stylesheetHrefs: string[];
+};
 
 function getTargetModuleInfo(
   id: string,
@@ -98,61 +104,62 @@ function getTargetModuleInfo(
   };
 }
 
-export function collectSSRAssets(options: IProps) {
+function collectSSRAssetDescriptors(options: IProps): SSRAssetDescriptors {
   const {
     id,
     injectLink = true,
     injectScript = false,
   } = typeof options === 'string' ? { id: options } : options;
-  const links: React.ReactNode[] = [];
-  const scripts: React.ReactNode[] = [];
+  const stylesheetHrefs: string[] = [];
+  const scriptSrcs: string[] = [];
   const instance = options.instance;
   if (!instance || (!injectLink && !injectScript)) {
-    return [...scripts, ...links];
+    return { scriptSrcs, stylesheetHrefs };
   }
 
   const moduleAndPublicPath = getTargetModuleInfo(id, instance);
   if (!moduleAndPublicPath) {
-    return [...scripts, ...links];
+    return { scriptSrcs, stylesheetHrefs };
   }
   const { module: targetModule, publicPath, remoteEntry } = moduleAndPublicPath;
   if (injectLink) {
+    const seenStylesheetHrefs = new Set<string>();
     [...targetModule.assets.css.sync, ...targetModule.assets.css.async]
       .sort()
-      .forEach((file, index) => {
-        links.push(
-          <link
-            key={`${file.split('.')[0]}_${index}`}
-            href={`${publicPath}${file}`}
-            rel="stylesheet"
-            type="text/css"
-          />,
-        );
+      .forEach((file) => {
+        const href = `${publicPath}${file}`;
+        if (seenStylesheetHrefs.has(href)) {
+          return;
+        }
+        seenStylesheetHrefs.add(href);
+        stylesheetHrefs.push(href);
       });
   }
 
   if (injectScript) {
-    scripts.push(
-      <script
-        async={true}
-        key={remoteEntry.split('.')[0]}
-        src={`${publicPath}${remoteEntry}`}
-        crossOrigin="anonymous"
-      />,
-    );
-    [...targetModule.assets.js.sync].sort().forEach((file, index) => {
-      scripts.push(
-        <script
-          key={`${file.split('.')[0]}_${index}`}
-          async={true}
-          src={`${publicPath}${file}`}
-          crossOrigin="anonymous"
-        />,
-      );
+    scriptSrcs.push(`${publicPath}${remoteEntry}`);
+    [...targetModule.assets.js.sync].sort().forEach((file) => {
+      scriptSrcs.push(`${publicPath}${file}`);
     });
   }
 
-  return [...scripts, ...links];
+  return { scriptSrcs, stylesheetHrefs };
+}
+
+function renderScriptAssets(scriptSrcs: string[]) {
+  return scriptSrcs.map((src) => (
+    <script key={src} async={true} src={src} crossOrigin="anonymous" />
+  ));
+}
+
+export function collectSSRAssets(options: IProps): React.ReactNode[] {
+  const { scriptSrcs, stylesheetHrefs } = collectSSRAssetDescriptors(options);
+  return [
+    ...renderScriptAssets(scriptSrcs),
+    ...stylesheetHrefs.map((href) => (
+      <link key={href} href={href} rel="stylesheet" type="text/css" />
+    )),
+  ];
 }
 
 function getServerNeedRemoteInfo(
@@ -301,12 +308,16 @@ export function createLazyComponent<T, E extends keyof T>(
       : undefined;
     logger.debug('LazyComponent dataFetchMapKey: ', dataFetchMapKey);
 
-    const assets = collectSSRAssets({
+    const { scriptSrcs, stylesheetHrefs } = collectSSRAssetDescriptors({
       id: moduleId,
       instance,
       injectLink,
       injectScript,
     });
+    const assets = [
+      ...renderScriptAssets(scriptSrcs),
+      <HydratedStylesheetAssets key="stylesheets" hrefs={stylesheetHrefs} />,
+    ];
 
     const Com = m[exportName] as React.FC<ComponentType>;
     if (exportName in m && typeof Com === 'function') {

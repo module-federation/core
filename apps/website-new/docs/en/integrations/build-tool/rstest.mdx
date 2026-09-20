@@ -1,0 +1,219 @@
+# Rstest
+
+`@module-federation/rstest` enables Module Federation inside
+[Rstest](https://rstest.rs/) test builds. Use it when your tests should load
+real federated remotes instead of replacing the federation boundary with mocks.
+
+## Supports
+
+- Rstest Node and JSDOM test environments.
+- Rstest browser mode.
+- URL remotes such as `remote@http://localhost:3001/remoteEntry.js`.
+- `commonjs ...` path remotes for Node-based integration tests.
+- Automatic Rstest federation compatibility mode for Node-targeted test builds.
+
+## Requirements
+
+:::tip
+
+Use `@rstest/core@0.11.4` or newer. Rstest's federation support shipped in
+`0.11.4`.
+
+:::
+
+Rstest versions before `0.11.4` do not include the `federation` compatibility
+mode this plugin enables for Node test builds.
+
+## Quick Start
+
+### Installation
+
+import { PackageManagerTabs } from '@theme';
+
+<PackageManagerTabs
+  command={{
+    npm: 'npm add @module-federation/rstest @rstest/core --save-dev',
+    yarn: 'yarn add @module-federation/rstest @rstest/core --dev',
+    pnpm: 'pnpm add @module-federation/rstest @rstest/core --save-dev',
+    bun: 'bun add @module-federation/rstest @rstest/core --dev',
+  }}
+/>
+
+### Register Plugin
+
+```ts title='rstest.config.ts'
+import { federation } from '@module-federation/rstest';
+import { defineConfig } from '@rstest/core';
+
+export default defineConfig({
+  plugins: [
+    federation({
+      name: 'host',
+      remotes: {
+        'component-app': 'component_app@http://localhost:3001/remoteEntry.js',
+      },
+      shared: {
+        react: { singleton: true },
+        'react-dom': { singleton: true },
+      },
+    }),
+  ],
+});
+```
+
+:::warning
+
+Do not set `federation: true` in `rstest.config.ts` when using this plugin. For
+Node and JSDOM test environments, `@module-federation/rstest` enables Rstest's
+federation compatibility mode automatically.
+
+:::
+
+Run your tests with Rstest as usual:
+
+```bash
+npx rstest run
+```
+
+### Reuse an Rsbuild Federation Configuration
+
+When the test project already registers `@module-federation/rsbuild-plugin`,
+pass no options to `federation()`:
+
+```ts title='rstest.config.ts'
+import {
+  createModuleFederationConfig,
+  pluginModuleFederation,
+} from '@module-federation/rsbuild-plugin';
+import { federation } from '@module-federation/rstest';
+import { defineConfig } from '@rstest/core';
+
+const options = createModuleFederationConfig({
+  name: 'host',
+  remotes: {
+    'component-app': 'component_app@http://localhost:3001/remoteEntry.js',
+  },
+});
+
+export default defineConfig({
+  plugins: [
+    pluginModuleFederation(options, {
+      environment: 'rstest',
+      target: 'node',
+    }),
+    federation(),
+  ],
+});
+```
+
+The plugin order is significant: register `pluginModuleFederation` first so
+`federation()` can normalize the same typed options. This creates one
+`ModuleFederationPlugin` and avoids duplicating the remote configuration.
+
+## Test a Federated Remote
+
+Build or start the remote in Rstest's `globalSetup`, then import exposed modules
+the same way application code does:
+
+```ts title='remote.test.ts'
+import { expect, it } from '@rstest/core';
+import Button from 'component-app/Button';
+
+it('loads a remote through a static import', () => {
+  expect(Button).toBeDefined();
+});
+
+it('loads a remote through a dynamic import', async () => {
+  const remote = await import('component-app/Button');
+  expect(remote.default).toBeDefined();
+});
+```
+
+The official
+[Rstest federation example](https://github.com/web-infra-dev/rstest/tree/v0.11.4/examples/federation)
+combines an HTTP component remote with a locally built `commonjs ...` remote
+and runs both Node and JSDOM projects.
+
+## How It Works
+
+For both Node and browser targets, `dts`, `manifest`, and `dev` default to
+`false`; explicit values are preserved.
+
+### Node Test Defaults
+
+For Node-targeted Rstest builds, the plugin applies Module Federation defaults
+that match the Node runtime:
+
+- `target: async-node`
+- `experiments.asyncStartup = true`
+- CommonJS container output; `module` and `modern-module` library types are
+  normalized
+- `@module-federation/node/runtimePlugin`
+- Node-targeted federation optimization
+- Script remote transport by default
+
+Standard URL remotes use `remoteType: 'script'`. Inline transport prefixes such
+as `commonjs ...` override that default.
+
+### Browser Mode
+
+Rstest browser mode is detected automatically from its resolved
+`browser.enabled` configuration:
+
+Install `@rstest/browser` and a Playwright browser first. See
+[Rstest's Browser Mode setup](https://rstest.rs/guide/browser-testing/getting-started).
+
+```ts title='rstest.config.ts'
+import { federation } from '@module-federation/rstest';
+import { defineConfig } from '@rstest/core';
+
+export default defineConfig({
+  browser: {
+    enabled: true,
+    provider: 'playwright',
+  },
+  plugins: [
+    federation({
+      name: 'browser_host',
+      remotes: {
+        app2: 'app2@http://localhost:3001/remoteEntry.js',
+      },
+    }),
+  ],
+});
+```
+
+Browser mode avoids node-only defaults while enabling
+`experiments.asyncStartup` and applying the shared defaults above. Pass an
+explicit `target` only to override the detected mode.
+
+## Configuration
+
+`federation(options, rstestOptions)` accepts the standard
+[Module Federation configuration](/configure/index.html) as the first argument.
+
+```ts
+federation(moduleFederationOptions, {
+  target: 'node', // or 'browser'
+});
+```
+
+### moduleFederationOptions
+
+[Module Federation Configuration](/configure/index.html)
+
+### rstestOptions
+
+- Type: `{ target?: 'node' | 'browser' }`
+- Default: auto-detected from Rstest's resolved `browser.enabled`
+  configuration. Browser Mode defaults to `'browser'`; other builds default to
+  `'node'`.
+
+## Producer Builds
+
+Use `@module-federation/rsbuild-plugin` or another Module Federation build
+plugin to build the remote application. Use `@module-federation/rstest` only in
+the Rstest test project that consumes those remotes.
+
+For Rsbuild producers, continue with the
+[Rsbuild plugin guide](/integrations/build-tool/rsbuild.html).

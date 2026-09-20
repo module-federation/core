@@ -13,12 +13,6 @@ interface StreamingTargetOptions extends ModuleFederationPluginOptions {
   debug?: boolean;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-/**
- * Interface for StreamingTargetContext
- */
-interface StreamingTargetContext {}
-
 /**
  * Class representing a StreamingTargetPlugin
  */

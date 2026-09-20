@@ -1,10 +1,14 @@
-import { describe, it, expect, rs } from '@rstest/core';
+import { afterEach, describe, it, expect, rs } from '@rstest/core';
 import { createSSRMFConfig, patchSSRRspackConfig, SSR_DIR } from './ssr';
 import type { Rspack } from '@rsbuild/core';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 
 const RECORD_DYNAMIC_REMOTE_ENTRY_HASH_PLUGIN_PATTERN =
   /record(?:-dynamic-remote-entry-hash-plugin|DynamicRemoteEntryHashPlugin)(\.js)?$/;
+
+afterEach(() => {
+  rs.unstubAllEnvs();
+});
 
 describe('createSSRMFConfig', () => {
   const baseMFConfig: moduleFederationPlugin.ModuleFederationPluginOptions = {
@@ -15,48 +19,45 @@ describe('createSSRMFConfig', () => {
     const ssrMFConfig = createSSRMFConfig(baseMFConfig);
     expect(ssrMFConfig.name).toBe('testApp');
     expect(ssrMFConfig.library?.type).toBe('commonjs-module');
+    expect(ssrMFConfig.library?.name).toBeUndefined();
     expect(ssrMFConfig.dts).toBe(false);
     expect(ssrMFConfig.dev).toBe(false);
     expect(ssrMFConfig.runtimePlugins).toHaveLength(1);
     expect(ssrMFConfig.runtimePlugins?.[0]).toMatch(/runtimePlugin(\.js)?$/);
   });
 
-  it('should preserve library.type if already defined', () => {
+  it('should preserve a preconfigured library', () => {
     const mfConfigWithLibraryType: moduleFederationPlugin.ModuleFederationPluginOptions =
       {
         ...baseMFConfig,
         library: {
-          name: 'testApp',
+          name: 'customLibrary',
           type: 'umd',
         },
       };
     const ssrMFConfig = createSSRMFConfig(mfConfigWithLibraryType);
     expect(ssrMFConfig.library?.type).toBe('umd');
+    expect(ssrMFConfig.library?.name).toBe('customLibrary');
   });
 
   it('should add record-dynamic-remote-entry-hash-plugin in development', () => {
-    const originalNodeEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = 'development';
+    rs.stubEnv('NODE_ENV', 'development');
     const ssrMFConfig = createSSRMFConfig(baseMFConfig);
     expect(ssrMFConfig.runtimePlugins?.[0]).toMatch(/runtimePlugin(\.js)?$/);
     expect(ssrMFConfig.runtimePlugins?.[1]).toMatch(
       RECORD_DYNAMIC_REMOTE_ENTRY_HASH_PLUGIN_PATTERN,
     );
-    process.env.NODE_ENV = originalNodeEnv; // Restore original NODE_ENV
   });
 
   it('should not add record-dynamic-remote-entry-hash-plugin in production', () => {
-    const originalNodeEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = 'production';
+    rs.stubEnv('NODE_ENV', 'production');
     const ssrMFConfig = createSSRMFConfig(baseMFConfig);
     expect(ssrMFConfig.runtimePlugins).toHaveLength(1);
     expect(ssrMFConfig.runtimePlugins?.[0]).toMatch(/runtimePlugin(\.js)?$/);
-    process.env.NODE_ENV = originalNodeEnv; // Restore original NODE_ENV
   });
 
   it('should initialize runtimePlugins if it is undefined', () => {
-    const originalNodeEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = 'production';
+    rs.stubEnv('NODE_ENV', 'production');
     const mfConfigWithoutRuntimePlugins: moduleFederationPlugin.ModuleFederationPluginOptions =
       {
         name: 'testApp',
@@ -65,7 +66,6 @@ describe('createSSRMFConfig', () => {
     const ssrMFConfig = createSSRMFConfig(mfConfigWithoutRuntimePlugins);
     expect(ssrMFConfig.runtimePlugins).toHaveLength(1);
     expect(ssrMFConfig.runtimePlugins?.[0]).toMatch(/runtimePlugin(\.js)?$/);
-    process.env.NODE_ENV = originalNodeEnv;
   });
 });
 
@@ -111,8 +111,7 @@ describe('patchSSRRspackConfig', () => {
   });
 
   it('should add UniverseEntryChunkTrackerPlugin to plugins', () => {
-    const env = process.env.NODE_ENV;
-    process.env.NODE_ENV = 'development';
+    rs.stubEnv('NODE_ENV', 'development');
     const config = JSON.parse(JSON.stringify(baseConfig));
     const patchedConfig = patchSSRRspackConfig(config, baseMfConfig, 'ssr');
     expect(patchedConfig.plugins).toHaveLength(1);
@@ -120,7 +119,6 @@ describe('patchSSRRspackConfig', () => {
     expect(patchedConfig.plugins?.[0].constructor.name).toBe(
       'UniverseEntryChunkTrackerPlugin',
     );
-    process.env.NODE_ENV = env;
   });
 
   describe('chunkFilename modification', () => {

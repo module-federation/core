@@ -36,13 +36,15 @@ type RemoteLifeCycleCyclePartial = Partial<{
   [k in keyof RemoteLifeCycle]: Parameters<RemoteLifeCycle[k]['on']>[0];
 }>;
 
-export type ModuleFederationRuntimePlugin = CoreLifeCyclePartial &
+export type RuntimePluginHooks = CoreLifeCyclePartial &
   SnapshotLifeCycleCyclePartial &
   SharedLifeCycleCyclePartial &
   RemoteLifeCycleCyclePartial &
   ModuleLifeCycleCyclePartial &
-  ModuleBridgeLifeCycleCyclePartial & {
-    name: string;
-    version?: string;
-    apply?: (instance: ModuleFederation) => void;
-  };
+  ModuleBridgeLifeCycleCyclePartial;
+
+export type ModuleFederationRuntimePlugin = RuntimePluginHooks & {
+  name: string;
+  version?: string;
+  apply?: (instance: ModuleFederation) => void | RuntimePluginHooks;
+};
