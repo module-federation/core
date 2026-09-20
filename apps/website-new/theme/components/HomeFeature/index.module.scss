@@ -47,6 +47,10 @@
   overflow: hidden;
 }
 
+.featureItem {
+  animation: feature-enter 0.5s ease both;
+}
+
 .featureCard {
   padding: 32px;
   height: 100%;
@@ -58,4 +62,22 @@
 
 .featureCard:hover {
   border: 1px solid var(--rp-c-brand);
+}
+
+@keyframes feature-enter {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .featureItem {
+    animation: none;
+  }
 }

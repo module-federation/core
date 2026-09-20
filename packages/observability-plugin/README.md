@@ -84,6 +84,13 @@ main flow started, succeeded, or failed. This plugin listens to those hooks,
 derives detailed reasons like shared version mismatch or eager boundary issues,
 and exposes the final loading state through a small `summary` object:
 
+Runtime Core deliberately keeps this boundary narrow. It registers and invokes
+the lifecycle hooks with raw facts from the real execution path. Candidate
+lists, shared selection and registration reasons, resource and Bridge timing,
+error classification, correlation, and sanitization are all derived here in
+the observability plugin. Applications that do not install this plugin do not
+pay for report construction or keep observability state in Runtime Core.
+
 - `runtime-loaded`: Module Federation finished loading the remote module.
 - `component-loaded`: business code called `markComponentLoaded`, or a producer
   called the injected `onMFRemoteLoaded` callback.
@@ -125,9 +132,9 @@ arrays.
 
 Runtime resource hooks also receive a `resourceContext` object on manifest,
 remoteEntry, preload JS, and preload CSS resource loads. It contains
-`initiator`, `id`, `resourceType`, and `url`, so custom loaders can tell whether
-the resource was requested by `loadRemote` or `preloadRemote` without parsing
-the URL.
+`initiator`, `id`, `resourceType`, `url`, and `expose` when available, so custom
+loaders can tell whether the resource was requested by `loadRemote`,
+`preloadRemote`, or `loadShare` without parsing the URL.
 
 The report also keeps compact loading state under `summary`. It contains the
 final outcome, per-phase status and duration under `summary.phases`, safe
@@ -147,6 +154,216 @@ the raw `events` timeline.
 For agent-led debugging, use the repository's single `mf` skill entry with the
 `observability` sub-command. The skill is the maintained guide for reading
 reports and deciding the next debugging step.
+
+## Divebell targets
+
+When `divebell` is enabled, the observability plugin syncs Module Federation
+loading state into Divebell targets. The host application does not need to
+import Divebell directly.
+
+```ts
+ObservabilityPlugin({
+  level: 'verbose',
+  divebell: {
+    source: 'module-federation',
+  },
+});
+```
+
+`divebell: true` uses the Divebell runtime found on `window`, or creates and
+installs one when needed. The object form also accepts `enabled`, `source`, a
+custom `runtime`, or a custom browser `host`. Set `enabled: false` to keep a
+shared configuration object while disabling synchronization.
+
+Use the Divebell CLI to inspect the page:
+
+```bash
+divebell targets --url "http://127.0.0.1:3005/observability"
+divebell snapshot --url "http://127.0.0.1:3005/observability"
+```
+
+### `mf:remote:<remoteName>`
+
+Type: `mf.remote`
+
+This target represents the remote instance as a whole. Use it to understand
+whether a remote is currently known, loading, ready, failed, or recovered. Do
+not use the remote target to prove that a specific exposed module is ready; use
+the expose target for that.
+
+Statuses:
+
+- `registered`: the remote is known, but no clear loading result has been
+  observed yet.
+- `loading`: a remote lifecycle phase is currently in progress.
+- `ready`: the latest relevant remote lifecycle phase completed successfully.
+- `error`: a remote lifecycle phase failed and no recovery result was observed.
+- `recovered`: loading hit an error path, but Module Federation returned a
+  recovery result.
+
+Snapshot data:
+
+- `instanceRef`: stable observability reference for the latest MF instance.
+- `hostName`: array of host or consumer names observed for this remote.
+- `runtimeVersion`: Module Federation runtime version from the latest report.
+- `remote`: remote definition fields such as `name`, `alias`, `entry`,
+  `entryGlobalName`, and `type`.
+- `exposes`: array of `{ targetId }` entries. Each target id points to a
+  `mf:remote:<remoteName>:expose:<exposeName>` target.
+- `reportCount`: number of related reports used to build this remote snapshot.
+
+The plugin does not create separate `mf:manifest:*`, `mf:remote-entry:*`, or
+`mf:consumer:*` targets. Manifest and remoteEntry details are kept as phases on
+the remote or expose data.
+
+Common wait:
+
+```bash
+divebell wait-for mf:remote:runtime_remote2 ready --url "http://127.0.0.1:3005/observability"
+```
+
+### `mf:remote:<remoteName>:expose:<exposeName>`
+
+Type: `mf.remote.expose`
+
+This target represents one exposed module request from a remote. Use it when an
+agent needs to wait until a specific remote module is usable.
+
+Statuses are the same as `mf.remote`:
+
+- `registered`
+- `loading`
+- `ready`
+- `error`
+- `recovered`
+
+Snapshot data:
+
+- `instanceRef`: stable observability reference for the MF instance.
+- `traceId`: report id for the latest matching trace.
+- `requestId`: requested remote module id, for example
+  `runtime_remote2/ButtonOldAnt`.
+- `requestAlias`: request alias when Module Federation provides one.
+- `hostName`: array of host or consumer names observed for this expose.
+- `runtimeVersion`: Module Federation runtime version from the latest report.
+- `consumers`: consumer names that loaded this expose.
+- `lastPhase`: latest phase name from the report summary.
+- `phases`: phase summary, including entries such as `matchRemote`,
+  `manifest`, `remoteEntry`, `remoteEntryInit`, `expose`, and `loadRemote`.
+- `loadedBefore`: cached producer/consumer information when the runtime reports
+  that this module was already loaded.
+
+The expose target does not repeat `remote`, `expose`, `status`, `state`,
+`outcome`, or `currentPhase` inside `data`. The target id and outer target
+status already carry that information.
+
+Common wait:
+
+```bash
+divebell wait-for mf:remote:runtime_remote2:expose:ButtonOldAnt ready --url "http://127.0.0.1:3005/observability"
+```
+
+### `mf:shared:<sharedName>:<version>:<shareScope>`
+
+Type: `mf.shared`
+
+This target represents one observed shared dependency entry. The id includes
+the shared package name, selected or requested version, and share scope. The
+plugin only registers shared targets that have been observed by the runtime.
+
+Statuses:
+
+- `unloaded`: the shared dependency was observed, but no active loading or
+  loaded signal was seen.
+- `loading`: shared loading has started or the shared entry is currently
+  loading.
+- `loaded`: the shared entry was loaded or resolved successfully.
+- `recovered`: shared loading hit a handled fallback path, such as a
+  bundler-runtime provided shared entry.
+- `error`: shared loading failed.
+
+Snapshot data:
+
+- `instanceRef`: stable observability reference for the MF instance.
+- `traceId`: report id for the latest matching trace.
+- `requestId`: shared request id.
+- `hostName`: Module Federation host name that resolved the shared dependency.
+- `runtimeVersion`: Module Federation runtime version.
+- `shared.name`: shared package name.
+- `shared.shareScope`: share scope array.
+- `shared.version`: version used in the target id.
+- `shared.requiredVersion`: requested version range when available.
+- `shared.provider`: selected provider when available.
+- `shared.singleton`, `shared.strictVersion`, `shared.eager`,
+  `shared.strategy`: shared config details when available.
+- `shared.loaded`: whether the shared entry is loaded.
+- `shared.loading`: included only while the shared entry is loading. It is
+  omitted once `loaded` is true.
+- `shared.reason`: reason such as `sync-async-boundary` or
+  `custom-share-info-unmatched`.
+- `shared.definedBy`: `bundler-runtime` when the runtime reports a handled
+  bundler-runtime shared path.
+- `lastPhase`: latest phase name from the report summary.
+- `phases`: phase summary for shared loading.
+
+The shared snapshot intentionally omits `selectedVersion`,
+`availableVersions`, `get`, `useIn`, and `from`. If a user needs broader
+runtime global state, use the Divebell actions below.
+
+Common waits:
+
+```bash
+divebell wait-for mf:shared:observability-provider-choice:2.0.0:observability-provider-scope loaded --url "http://127.0.0.1:3005/observability"
+divebell wait-for mf:shared:observability-async-shared:1.0.0:default error --url "http://127.0.0.1:3005/observability"
+```
+
+### `mf:shared-conflict:<sharedName>:<shareScope>`
+
+Type: `mf.shared.conflict`
+
+This target is created when the plugin observes multiple versions of a
+singleton shared dependency. Its status is `warning`. Snapshot data includes
+the stable `instanceRef`, `traceId`, shared name and scope, current provider and
+version, all observed versions, and the compact shared snapshot. Use the normal
+`mf:shared:*` target to inspect loading state; use this conflict target to
+diagnose singleton version drift.
+
+### Actions
+
+The plugin also registers safe Divebell actions for deeper inspection:
+
+- `mf:list-reports`: list report summaries. Supports filters such as `remote`,
+  `expose`, `shared`, `traceId`, `instanceRef`, `status`, and `outcome`.
+- `mf:get-runtime-state`: read the current safe multi-instance runtime state.
+- `mf:get-latest-report`: read the latest report.
+- `mf:get-report`: read one report by `traceId`.
+- `mf:export-report`: export a report, defaulting to the latest report.
+- `mf:get-federation-global`: read a compact summary of the current
+  `__FEDERATION__` or `__VMOK__` global.
+- `mf:get-federation-module-info`: read `moduleInfo` or one `moduleInfo` entry.
+- `mf:list-federation-instances`: list current runtime instances.
+- `mf:get-federation-instance-config`: read one runtime instance config.
+
+Example:
+
+```bash
+divebell run-action mf:list-reports --url "http://127.0.0.1:3005/observability" --payload '{"remote":"runtime_remote2"}'
+```
+
+### Multi-instance runtime state
+
+The browser reader and `mf:get-runtime-state` action return the same safe state
+model:
+
+```ts
+window.__FEDERATION__.__OBSERVABILITY__.host.getRuntimeState();
+```
+
+The result includes stable `instanceRef` values, instance roles and evidence,
+known remotes and loaded producers, share-scope summaries, Bridge state,
+consumer-to-producer relationships, deployment `moduleInfo`, and capability
+completeness. Use `instanceRef` when filtering reports or selecting an instance;
+array indexes are only a compatibility fallback and are not stable identifiers.
 
 `errorLoadShare` is used only for observation. Shared dependency miss, version
 mismatch, and eager boundary errors are not retried by the retry plugin by

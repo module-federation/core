@@ -161,6 +161,12 @@ jobs:
     uses: ./.github/workflows/e2e-node.yml
     secrets: inherit
 
+  e2e-rstest:
+    needs: checkout-install
+    if: ${{ fromJSON(needs.checkout-install.outputs.e2e_suites).rstest }}
+    uses: ./.github/workflows/e2e-rstest.yml
+    secrets: inherit
+
   e2e-next-dev:
     needs: checkout-install
     if: ${{ fromJSON(needs.checkout-install.outputs.e2e_suites).next }}

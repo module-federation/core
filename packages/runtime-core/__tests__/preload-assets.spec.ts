@@ -1,6 +1,7 @@
 import type { ModuleInfo } from '@module-federation/sdk';
 import { describe, it, rs } from '@rstest/core';
 import { ModuleFederation } from '../src/core';
+import { Global, setPreloadedAsset } from '../src/global';
 import type { RemoteInfo } from '../src/type';
 import type {
   ResourceLoadContext,
@@ -166,6 +167,12 @@ describe('preloadAssets', () => {
     const moduleUrl = 'https://remote.test/expose.js';
     const calls = createResourceCalls();
     const lifecycle: string[] = [];
+    let automaticPreloadDefault: boolean | undefined;
+    let automaticPreloadArgs:
+      | Parameters<
+          NonNullable<ModuleFederationRuntimePlugin['beforePreloadRemote']>
+        >[0]
+      | undefined;
     const remoteSnapshot: ModuleInfo = {
       version: '1.0.0',
       buildVersion: '',
@@ -192,6 +199,11 @@ describe('preloadAssets', () => {
         createResourceCapturePlugin(calls),
         {
           name: 'capture-container-initialization',
+          beforePreloadRemote(args) {
+            automaticPreloadArgs = args;
+            automaticPreloadDefault = args.preloadOps[0].recordPreloadedAssets;
+            args.preloadOps[0].recordPreloadedAssets = false;
+          },
           loadEntry() {
             return {
               init() {
@@ -214,10 +226,13 @@ describe('preloadAssets', () => {
     rs.spyOn(
       host.remoteHandler.hooks.lifecycle.generatePreloadAssets,
       'emit',
-    ).mockResolvedValue({
-      cssAssets: [],
-      jsAssetsWithoutEntry: [moduleUrl],
-      entryAssets: [],
+    ).mockImplementation(async ({ preloadOptions }) => {
+      expect(preloadOptions.preloadConfig.recordPreloadedAssets).toBe(false);
+      return {
+        cssAssets: [],
+        jsAssetsWithoutEntry: [moduleUrl],
+        entryAssets: [],
+      };
     });
 
     await expect(host.loadRemote<string>(`${remoteName}/Expose`)).resolves.toBe(
@@ -225,6 +240,21 @@ describe('preloadAssets', () => {
     );
 
     expect(lifecycle).toEqual(['init', 'get']);
+    expect(automaticPreloadDefault).toBe(true);
+    expect(automaticPreloadArgs).toMatchObject({
+      preloadOps: [
+        {
+          nameOrAlias: remoteName,
+          exposes: ['./Expose'],
+          resourceCategory: 'sync',
+          share: false,
+          depsRemote: false,
+          recordPreloadedAssets: false,
+        },
+      ],
+      options: host.options,
+      origin: host,
+    });
     expect(calls.scripts).toHaveLength(0);
     expect(calls.links).toHaveLength(1);
     expect(calls.links[0]).toMatchObject({
@@ -244,6 +274,9 @@ describe('preloadAssets', () => {
         url: moduleUrl,
       },
     });
+    expect(Global.__FEDERATION__.__PRELOADED_ASSETS__.has(moduleUrl)).toBe(
+      false,
+    );
   });
 
   it('keeps executing classic chunks during loadRemote', async () => {
@@ -324,5 +357,124 @@ describe('preloadAssets', () => {
         url: scriptUrl,
       },
     });
+  });
+
+  it('skips loading and loaded preload asset URLs without changing tag cleanup', async () => {
+    const moduleUrl = 'https://remote.test/deduplicated-expose.js';
+    const calls = createResourceCalls();
+    const host = createHost(calls);
+    const assets = {
+      cssAssets: [],
+      jsAssetsWithoutEntry: [moduleUrl],
+      entryAssets: [],
+    };
+    const context = {
+      initiator: 'preloadRemote' as const,
+      id: 'preload-assets-remote/DeduplicatedExpose',
+    };
+
+    const loadingResults = preloadAssets(
+      createRemoteInfo('module'),
+      host,
+      assets,
+      true,
+      context,
+    );
+    const duplicateLoadingResults = await preloadAssets(
+      createRemoteInfo('module'),
+      host,
+      assets,
+      true,
+      context,
+    );
+
+    expect(duplicateLoadingResults).toMatchObject([
+      {
+        url: moduleUrl,
+        status: 'cached',
+        resourceType: 'js',
+      },
+    ]);
+    expect(calls.links).toHaveLength(1);
+    expect(Global.__FEDERATION__.__PRELOADED_ASSETS__.has(moduleUrl)).toBe(
+      true,
+    );
+
+    await expect(loadingResults).resolves.toMatchObject([
+      {
+        url: moduleUrl,
+        status: 'success',
+        resourceType: 'js',
+      },
+    ]);
+    await expect(
+      preloadAssets(createRemoteInfo('module'), host, assets, true, context),
+    ).resolves.toMatchObject([
+      {
+        url: moduleUrl,
+        status: 'cached',
+        resourceType: 'js',
+      },
+    ]);
+
+    expect(calls.links).toHaveLength(1);
+    expect(
+      Array.from(document.head.querySelectorAll('link')).some(
+        (link) => link.href === moduleUrl,
+      ),
+    ).toBe(false);
+  });
+
+  it('loads duplicate assets without recording their URLs when disabled', async () => {
+    const moduleUrl = 'https://remote.test/unrecorded-expose.js';
+    const calls = createResourceCalls();
+    const host = createHost(calls);
+    const assets = {
+      cssAssets: [],
+      jsAssetsWithoutEntry: [moduleUrl],
+      entryAssets: [],
+    };
+    const context = {
+      initiator: 'preloadRemote' as const,
+      id: 'preload-assets-remote/UnrecordedExpose',
+    };
+
+    await preloadAssets(
+      createRemoteInfo('module'),
+      host,
+      assets,
+      true,
+      context,
+      false,
+    );
+    await preloadAssets(
+      createRemoteInfo('module'),
+      host,
+      assets,
+      true,
+      context,
+      false,
+    );
+
+    expect(calls.links).toHaveLength(2);
+    expect(Global.__FEDERATION__.__PRELOADED_ASSETS__.has(moduleUrl)).toBe(
+      false,
+    );
+  });
+
+  it('evicts the oldest preload asset URL when the cache reaches its limit', () => {
+    const maximumPreloadedAssets = 2000;
+    const urls = Array.from(
+      { length: maximumPreloadedAssets + 1 },
+      (_, index) => `https://remote.test/preloaded-asset-${index}.js`,
+    );
+
+    urls.forEach(setPreloadedAsset);
+
+    const preloadedAssets = Global.__FEDERATION__.__PRELOADED_ASSETS__;
+    expect(preloadedAssets.size).toBe(maximumPreloadedAssets);
+    expect(preloadedAssets.has(urls[0])).toBe(false);
+    expect(preloadedAssets.has(urls[1])).toBe(true);
+    expect(preloadedAssets.has(urls[urls.length - 1])).toBe(true);
   });
 });
