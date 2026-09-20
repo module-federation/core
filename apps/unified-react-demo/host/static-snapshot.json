@@ -1,0 +1,424 @@
+{
+  "unified_provider": {
+    "version": "http://localhost:5103/mf-manifest.json",
+    "buildVersion": "0.0.0",
+    "globalName": "unified_provider",
+    "remoteEntry": "remoteEntry.js",
+    "remoteEntryType": "global",
+    "remoteTypes": "",
+    "remoteTypesZip": "@mf-types.zip",
+    "remoteTypesAPI": "@mf-types.d.ts",
+    "remotesInfo": {},
+    "shared": [
+      {
+        "assets": {
+          "js": {
+            "async": [],
+            "sync": [
+              "static/js/async/vendors-node_modules_pnpm_react-dom_18_3_1_react_18_3_1_node_modules_react-dom_index_js.js"
+            ]
+          },
+          "css": {
+            "async": [],
+            "sync": []
+          }
+        },
+        "sharedName": "react-dom",
+        "version": "18.3.1",
+        "usedExports": []
+      },
+      {
+        "assets": {
+          "js": {
+            "async": [],
+            "sync": [
+              "static/js/async/vendors-node_modules_pnpm_react_18_3_1_node_modules_react_index_js.js"
+            ]
+          },
+          "css": {
+            "async": [],
+            "sync": []
+          }
+        },
+        "sharedName": "react",
+        "version": "18.3.1",
+        "usedExports": []
+      }
+    ],
+    "modules": [
+      {
+        "moduleName": "App",
+        "modulePath": "./App",
+        "assets": {
+          "js": {
+            "sync": [
+              "static/js/async/lib-router.js",
+              "static/js/async/vendors-node_modules_pnpm_react_18_3_1_node_modules_react_jsx-dev-runtime_js.js",
+              "static/js/async/vendors-node_modules_pnpm_react_18_3_1_node_modules_react_jsx-runtime_js-node_modules_pnpm_mo-9f009e.js",
+              "static/js/async/__federation_expose_App.js"
+            ],
+            "async": []
+          },
+          "css": {
+            "sync": [],
+            "async": []
+          }
+        }
+      },
+      {
+        "moduleName": "Plain",
+        "modulePath": "./Plain",
+        "assets": {
+          "js": {
+            "sync": [
+              "static/js/async/vendors-node_modules_pnpm_react_18_3_1_node_modules_react_jsx-dev-runtime_js.js",
+              "static/js/async/__federation_expose_Plain.js"
+            ],
+            "async": []
+          },
+          "css": {
+            "sync": [],
+            "async": []
+          }
+        }
+      },
+      {
+        "moduleName": "Data",
+        "modulePath": "./Data",
+        "assets": {
+          "js": {
+            "sync": [
+              "static/js/async/vendors-node_modules_pnpm_react_18_3_1_node_modules_react_jsx-dev-runtime_js.js",
+              "static/js/async/__federation_expose_Data.js"
+            ],
+            "async": []
+          },
+          "css": {
+            "sync": [],
+            "async": []
+          }
+        }
+      },
+      {
+        "moduleName": "DataByLoader",
+        "modulePath": "./DataByLoader",
+        "assets": {
+          "js": {
+            "sync": [
+              "static/js/async/vendors-node_modules_pnpm_react_18_3_1_node_modules_react_jsx-dev-runtime_js.js",
+              "static/js/async/__federation_expose_DataByLoader.js"
+            ],
+            "async": []
+          },
+          "css": {
+            "sync": [],
+            "async": []
+          }
+        }
+      },
+      {
+        "moduleName": "DataCSR",
+        "modulePath": "./DataCSR",
+        "assets": {
+          "js": {
+            "sync": [
+              "static/js/async/vendors-node_modules_pnpm_react_18_3_1_node_modules_react_jsx-dev-runtime_js.js",
+              "static/js/async/__federation_expose_DataCSR.js"
+            ],
+            "async": []
+          },
+          "css": {
+            "sync": [],
+            "async": []
+          }
+        }
+      },
+      {
+        "moduleName": "Data.data",
+        "modulePath": "./Data.data",
+        "assets": {
+          "js": {
+            "sync": ["static/js/async/__federation_expose_Data.data.js"],
+            "async": []
+          },
+          "css": {
+            "sync": [],
+            "async": []
+          }
+        }
+      },
+      {
+        "moduleName": "DataByLoader.data",
+        "modulePath": "./DataByLoader.data",
+        "assets": {
+          "js": {
+            "sync": [
+              "static/js/async/__federation_expose_DataByLoader.data.js"
+            ],
+            "async": []
+          },
+          "css": {
+            "sync": [],
+            "async": []
+          }
+        }
+      },
+      {
+        "moduleName": "DataCSR.data",
+        "modulePath": "./DataCSR.data",
+        "assets": {
+          "js": {
+            "sync": ["static/js/async/__federation_expose_DataCSR.data.js"],
+            "async": []
+          },
+          "css": {
+            "sync": [],
+            "async": []
+          }
+        }
+      }
+    ],
+    "publicPath": "http://localhost:5103/",
+    "ssrPublicPath": "http://localhost:5103/bundles/",
+    "ssrRemoteEntry": "remoteEntry.js",
+    "ssrRemoteEntryType": "commonjs-module",
+    "reactExposes": {
+      "App": {
+        "default": {
+          "type": "app"
+        }
+      },
+      "Plain": {
+        "default": {
+          "type": "component"
+        }
+      },
+      "Data": {
+        "default": {
+          "type": "component"
+        }
+      },
+      "DataByLoader": {
+        "default": {
+          "type": "component"
+        }
+      },
+      "DataCSR": {
+        "default": {
+          "type": "component"
+        }
+      }
+    }
+  },
+  "unified_provider:http://localhost:5103/mf-manifest.json": {
+    "version": "http://localhost:5103/mf-manifest.json",
+    "buildVersion": "0.0.0",
+    "globalName": "unified_provider",
+    "remoteEntry": "remoteEntry.js",
+    "remoteEntryType": "global",
+    "remoteTypes": "",
+    "remoteTypesZip": "@mf-types.zip",
+    "remoteTypesAPI": "@mf-types.d.ts",
+    "remotesInfo": {},
+    "shared": [
+      {
+        "assets": {
+          "js": {
+            "async": [],
+            "sync": [
+              "static/js/async/vendors-node_modules_pnpm_react-dom_18_3_1_react_18_3_1_node_modules_react-dom_index_js.js"
+            ]
+          },
+          "css": {
+            "async": [],
+            "sync": []
+          }
+        },
+        "sharedName": "react-dom",
+        "version": "18.3.1",
+        "usedExports": []
+      },
+      {
+        "assets": {
+          "js": {
+            "async": [],
+            "sync": [
+              "static/js/async/vendors-node_modules_pnpm_react_18_3_1_node_modules_react_index_js.js"
+            ]
+          },
+          "css": {
+            "async": [],
+            "sync": []
+          }
+        },
+        "sharedName": "react",
+        "version": "18.3.1",
+        "usedExports": []
+      }
+    ],
+    "modules": [
+      {
+        "moduleName": "App",
+        "modulePath": "./App",
+        "assets": {
+          "js": {
+            "sync": [
+              "static/js/async/lib-router.js",
+              "static/js/async/vendors-node_modules_pnpm_react_18_3_1_node_modules_react_jsx-dev-runtime_js.js",
+              "static/js/async/vendors-node_modules_pnpm_react_18_3_1_node_modules_react_jsx-runtime_js-node_modules_pnpm_mo-9f009e.js",
+              "static/js/async/__federation_expose_App.js"
+            ],
+            "async": []
+          },
+          "css": {
+            "sync": [],
+            "async": []
+          }
+        }
+      },
+      {
+        "moduleName": "Plain",
+        "modulePath": "./Plain",
+        "assets": {
+          "js": {
+            "sync": [
+              "static/js/async/vendors-node_modules_pnpm_react_18_3_1_node_modules_react_jsx-dev-runtime_js.js",
+              "static/js/async/__federation_expose_Plain.js"
+            ],
+            "async": []
+          },
+          "css": {
+            "sync": [],
+            "async": []
+          }
+        }
+      },
+      {
+        "moduleName": "Data",
+        "modulePath": "./Data",
+        "assets": {
+          "js": {
+            "sync": [
+              "static/js/async/vendors-node_modules_pnpm_react_18_3_1_node_modules_react_jsx-dev-runtime_js.js",
+              "static/js/async/__federation_expose_Data.js"
+            ],
+            "async": []
+          },
+          "css": {
+            "sync": [],
+            "async": []
+          }
+        }
+      },
+      {
+        "moduleName": "DataByLoader",
+        "modulePath": "./DataByLoader",
+        "assets": {
+          "js": {
+            "sync": [
+              "static/js/async/vendors-node_modules_pnpm_react_18_3_1_node_modules_react_jsx-dev-runtime_js.js",
+              "static/js/async/__federation_expose_DataByLoader.js"
+            ],
+            "async": []
+          },
+          "css": {
+            "sync": [],
+            "async": []
+          }
+        }
+      },
+      {
+        "moduleName": "DataCSR",
+        "modulePath": "./DataCSR",
+        "assets": {
+          "js": {
+            "sync": [
+              "static/js/async/vendors-node_modules_pnpm_react_18_3_1_node_modules_react_jsx-dev-runtime_js.js",
+              "static/js/async/__federation_expose_DataCSR.js"
+            ],
+            "async": []
+          },
+          "css": {
+            "sync": [],
+            "async": []
+          }
+        }
+      },
+      {
+        "moduleName": "Data.data",
+        "modulePath": "./Data.data",
+        "assets": {
+          "js": {
+            "sync": ["static/js/async/__federation_expose_Data.data.js"],
+            "async": []
+          },
+          "css": {
+            "sync": [],
+            "async": []
+          }
+        }
+      },
+      {
+        "moduleName": "DataByLoader.data",
+        "modulePath": "./DataByLoader.data",
+        "assets": {
+          "js": {
+            "sync": [
+              "static/js/async/__federation_expose_DataByLoader.data.js"
+            ],
+            "async": []
+          },
+          "css": {
+            "sync": [],
+            "async": []
+          }
+        }
+      },
+      {
+        "moduleName": "DataCSR.data",
+        "modulePath": "./DataCSR.data",
+        "assets": {
+          "js": {
+            "sync": ["static/js/async/__federation_expose_DataCSR.data.js"],
+            "async": []
+          },
+          "css": {
+            "sync": [],
+            "async": []
+          }
+        }
+      }
+    ],
+    "publicPath": "http://localhost:5103/",
+    "ssrPublicPath": "http://localhost:5103/bundles/",
+    "ssrRemoteEntry": "remoteEntry.js",
+    "ssrRemoteEntryType": "commonjs-module",
+    "reactExposes": {
+      "App": {
+        "default": {
+          "type": "app"
+        }
+      },
+      "Plain": {
+        "default": {
+          "type": "component"
+        }
+      },
+      "Data": {
+        "default": {
+          "type": "component"
+        }
+      },
+      "DataByLoader": {
+        "default": {
+          "type": "component"
+        }
+      },
+      "DataCSR": {
+        "default": {
+          "type": "component"
+        }
+      }
+    }
+  }
+}
