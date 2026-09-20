@@ -1,16 +1,12 @@
 import type { ModuleFederation, getInstance } from '@module-federation/runtime';
 import type { BasicProviderModuleInfo } from '@module-federation/sdk';
-import React, { ReactNode, useState, useEffect } from 'react';
+import React, { ReactNode, useState } from 'react';
 import type { ErrorInfo } from './AwaitDataFetch';
 import type { DataFetchParams, NoSSRRemoteInfo } from './types';
 import { HydratedStylesheetAssets } from './HydratedStylesheetAssets';
 
 import logger from './logger';
-import {
-  AwaitDataFetch,
-  DelayedLoading,
-  transformError,
-} from './AwaitDataFetch';
+import { AwaitDataFetch, DelayedLoading } from './AwaitDataFetch';
 import {
   fetchData,
   getDataFetchItem,
@@ -299,6 +295,11 @@ export function createLazyComponent<T, E extends keyof T>(
     }
   };
 
+  const getNoSSRData = () =>
+    getData(true).catch((error) => {
+      throw error instanceof Error ? error.message : error;
+    });
+
   const LazyComponent = React.lazy(async () => {
     const m = await callLoader();
     const moduleId = m && m[Symbol.for('mf_module_id')];
@@ -375,39 +376,11 @@ export function createLazyComponent<T, E extends keyof T>(
         </AwaitDataFetch>
       );
     } else {
-      // Client-side rendering logic
-      const [data, setData] = useState<unknown>(null);
-      const [loading, setLoading] = useState<boolean>(true);
-      const [error, setError] = useState<ErrorInfo | null>(null);
+      const [dataPromise] = useState(() =>
+        typeof window === 'undefined' ? undefined : getNoSSRData(),
+      );
 
-      useEffect(() => {
-        let isMounted = true;
-        const fetchDataAsync = async () => {
-          try {
-            setLoading(true);
-            const result = await getData(options.noSSR);
-            if (isMounted) {
-              setData(result);
-            }
-          } catch (e) {
-            if (isMounted) {
-              setError(transformError(e as Error));
-            }
-          } finally {
-            if (isMounted) {
-              setLoading(false);
-            }
-          }
-        };
-
-        fetchDataAsync();
-
-        return () => {
-          isMounted = false;
-        };
-      }, []);
-
-      if (loading) {
+      if (!dataPromise) {
         return (
           <DelayedLoading delayLoading={options.delayLoading}>
             {options.loading}
@@ -415,17 +388,17 @@ export function createLazyComponent<T, E extends keyof T>(
         );
       }
 
-      if (error) {
-        return (
-          <>
-            {typeof options.fallback === 'function'
-              ? options.fallback(error)
-              : options.fallback}
-          </>
-        );
-      }
-      // @ts-expect-error ignore
-      return <LazyComponent {...args} mfData={data} />;
+      return (
+        <AwaitDataFetch
+          resolve={dataPromise}
+          loading={options.loading}
+          delayLoading={options.delayLoading}
+          errorElement={options.fallback}
+        >
+          {/* @ts-expect-error ignore */}
+          {(data) => <LazyComponent {...args} mfData={data} />}
+        </AwaitDataFetch>
+      );
     }
   };
 }

@@ -1,10 +1,11 @@
 import React, { Suspense } from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import { renderToString } from 'react-dom/server';
 import {
   createLazyComponent,
   collectSSRAssets,
 } from '../src/lazy/createLazyComponent';
+import { ERROR_TYPE } from '../src/lazy/constant';
 import * as runtime from '@module-federation/runtime';
 import * as utils from '../src/lazy/utils';
 
@@ -20,6 +21,14 @@ const mockFetchData = utils.fetchData as jest.Mock;
 const MockComponent = () => <div>Mock Component</div>;
 const LoadingComponent = () => <div>Loading...</div>;
 const ErrorComponent = () => <div>Error!</div>;
+
+const createDeferred = <T,>() => {
+  let resolve!: (value: T | PromiseLike<T>) => void;
+  const promise = new Promise<T>((resolvePromise) => {
+    resolve = resolvePromise;
+  });
+  return { promise, resolve };
+};
 
 const renderAssetsToFragment = (assets: React.ReactNode[]) => {
   const template = document.createElement('template');
@@ -122,6 +131,100 @@ describe('createLazyComponent', () => {
     });
     expect(loader).toHaveBeenCalledTimes(1);
     expect(mockFetchData).not.toHaveBeenCalled();
+  });
+
+  it('should keep one delayed loading instance while loading module and data', async () => {
+    const moduleDeferred = createDeferred<any>();
+    const dataDeferred = createDeferred<{ message: string }>();
+    const loadingMounted = jest.fn();
+    const Loading = () => {
+      React.useEffect(() => {
+        loadingMounted();
+      }, []);
+      return <div>Loading continuously...</div>;
+    };
+    const loader = jest.fn(() => moduleDeferred.promise);
+    mockFetchData.mockReturnValue(dataDeferred.promise);
+
+    const LazyComponent = createLazyComponent({
+      loader,
+      instance: mockInstance,
+      loading: <Loading />,
+      delayLoading: 10,
+      fallback: <ErrorComponent />,
+      noSSR: true,
+      dataFetchParams: {
+        query: { source: 'test' },
+        isDowngrade: true,
+      },
+    });
+
+    render(<LazyComponent />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Loading continuously...')).toBeInTheDocument();
+    });
+
+    await act(async () => {
+      moduleDeferred.resolve({
+        default: (props: { mfData: { message: string } }) => (
+          <div>{props.mfData.message}</div>
+        ),
+        [Symbol.for('mf_module_id')]: 'remoteApp/Component',
+      });
+      await moduleDeferred.promise;
+    });
+
+    expect(screen.getByText('Loading continuously...')).toBeInTheDocument();
+
+    await act(async () => {
+      dataDeferred.resolve({ message: 'Loaded with data' });
+      await dataDeferred.promise;
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Loaded with data')).toBeInTheDocument();
+    });
+    expect(loader).toHaveBeenCalledTimes(1);
+    expect(loadingMounted).toHaveBeenCalledTimes(1);
+    expect(mockFetchData).toHaveBeenCalledWith(
+      'data-fetch-key',
+      {
+        query: { source: 'test' },
+        isDowngrade: false,
+      },
+      expect.any(Object),
+    );
+  });
+
+  it('should preserve load error details in a CSR fallback', async () => {
+    const fallback = jest.fn(({ error, errorType }) => (
+      <div>
+        {errorType}: {error.message}
+      </div>
+    ));
+    const LazyComponent = createLazyComponent({
+      loader: jest.fn().mockRejectedValue(new Error('Remote unavailable')),
+      instance: mockInstance,
+      loading: <LoadingComponent />,
+      fallback,
+      noSSR: true,
+    });
+
+    render(<LazyComponent />);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          `${ERROR_TYPE.LOAD_REMOTE}: Error: Remote unavailable`,
+        ),
+      ).toBeInTheDocument();
+    });
+    expect(fallback).toHaveBeenCalledWith(
+      expect.objectContaining({
+        errorType: ERROR_TYPE.LOAD_REMOTE,
+      }),
+    );
   });
 
   it('should render fallback component on data fetch error', async () => {
