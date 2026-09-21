@@ -32,6 +32,7 @@ function host({
   let release = existing && structuredClone(existing);
   const request = async (route, options = {}) => {
     calls.push({ route, ...options });
+    const requestUrl = new URL(route, 'https://api.github.com');
     if (route.includes('/git/ref/tags/')) return ref;
     if (route.includes('/git/tags/')) return { object: annotated };
     if (route.includes('/commits/')) return { sha: target };
@@ -51,7 +52,11 @@ function host({
     if (route === `${base}/releases/12/assets?per_page=100&page=1`)
       return assets;
     if (route === `${base}/releases/assets/77`) return archive;
-    if (route.startsWith('https://uploads.github.com')) {
+    if (
+      requestUrl.origin === 'https://uploads.github.com' &&
+      requestUrl.pathname === `${base}/releases/12/assets` &&
+      requestUrl.searchParams.get('name') === assetName
+    ) {
       if (failUpload) throw new Error('Upload interrupted');
       assets.push({
         id: 77,
@@ -220,8 +225,12 @@ test('managed download section is updated without duplicating or losing surround
 });
 
 test('API transport rejects foreign origins before transmitting credentials', async () => {
-  await assert.rejects(
-    githubRequest('test-only-token')('https://example.com/upload'),
-    /origin/,
+  await Promise.all(
+    [
+      'https://example.com/upload',
+      'https://uploads.github.com.evil.example/upload',
+    ].map((url) =>
+      assert.rejects(githubRequest('test-only-token')(url), /origin/),
+    ),
   );
 });
