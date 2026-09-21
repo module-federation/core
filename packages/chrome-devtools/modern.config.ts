@@ -13,6 +13,7 @@ export default defineConfig({
     },
   },
   output: {
+    distPath: { root: 'dist/.extension-build' },
     disableInlineRuntimeChunk: true,
     disableFilenameHash: true,
     disableMinimize: true,
@@ -33,6 +34,7 @@ export default defineConfig({
     webpack: (config: Record<string, any>) => {
       config.entry = config.entry || {};
       config.entry.worker = './src/worker/index.ts';
+      config.entry.webmcp = './src/utils/chrome/webmcp-entry.ts';
       config.entry['fast-refresh'] = './src/utils/chrome/fast-refresh.ts';
       config.entry['override-remote'] = './src/utils/chrome/override-remote.ts';
       config.entry['snapshot-plugin'] = './src/utils/chrome/snapshot-plugin.ts';

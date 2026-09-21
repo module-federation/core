@@ -5,7 +5,10 @@ import {
 
 const SIDE_PANEL_PATH = 'html/main/index.html';
 
-const getSidePanel = () => (chrome as any)?.sidePanel;
+const getSidePanel = () =>
+  chrome.runtime.getManifest().side_panel
+    ? (chrome as any)?.sidePanel
+    : undefined;
 
 const resolveTabId = async (tabId?: number) => {
   if (typeof tabId === 'number') {
