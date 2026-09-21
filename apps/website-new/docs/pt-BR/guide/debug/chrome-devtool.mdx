@@ -24,6 +24,55 @@ MF.
 
 :::
 
+## Escolha da extensão
+
+O Module Federation Devtools oferece duas interfaces e suporte a **WebMCP**, para que agentes de IA possam chamar ferramentas de depuração registradas na página.
+
+| Cenário                                                                                                                    | Variante                 | Interface                                           |
+| -------------------------------------------------------------------------------------------------------------------------- | ------------------------ | --------------------------------------------------- |
+| Chrome desktop, com suporte a painel lateral e DevTools                                                                    | Chrome (`dist/chrome`)   | Painel lateral ou aba Module Federation no DevTools |
+| Navegador integrado a um aplicativo de IA que aceita extensões Chrome, mas não painéis laterais, como o navegador do Codex | Browser (`dist/browser`) | Popup compacto pelo ícone da extensão               |
+
+As duas variantes mantêm as mesmas funcionalidades implementadas: **proxy e troca de versões de módulos, informações de módulos, grafo de dependências, dependências compartilhadas, React HMR / Fast Refresh, Loading Trace e exportação de relatórios**. Ambas incluem WebMCP. A variante Browser adapta a interface sem remover essas funcionalidades.
+
+A compatibilidade com GPT e outros aplicativos depende das APIs de extensão disponíveis no navegador integrado. O acesso pelo agente também exige suporte do host ao registro, à descoberta e à chamada de ferramentas WebMCP. A descoberta e uma chamada de leitura foram verificadas no navegador integrado do Codex; isso não garante suporte em todos os navegadores de IA. Sem WebMCP, ainda é possível usar a interface da extensão.
+
+### Download e instalação da variante Browser
+
+1. Abra [Module Federation Releases](https://github.com/module-federation/core/releases), escolha uma versão com o anexo Browser e baixe o ZIP pelas notas ou pela seção **Assets**. Não use os arquivos **Source code** gerados automaticamente pelo GitHub.
+2. Extraia o ZIP e carregue o diretório que contém `manifest.json` no gerenciador de extensões do navegador integrado. Uma extensão instalada no Chrome desktop não é instalada automaticamente nesse navegador.
+3. Atualize a página e clique no ícone da extensão. Após atualizar a extensão, recarregue-a e atualize as páginas abertas.
+
+Se a versão ainda não incluir o anexo, execute `pnpm --filter @module-federation/devtools run build:devtool` no repositório e carregue `packages/chrome-devtools/dist/browser`. Ative apenas uma variante por navegador. A instalação pela Chrome Web Store está descrita abaixo; os novos recursos dependem da versão publicada na loja.
+
+### Ferramentas WebMCP
+
+O registro ocorre automaticamente na inicialização da página, mesmo com o popup fechado. A aplicação não precisa adicionar um SDK WebMCP.
+
+| Ferramenta                        | Função                                             |
+| --------------------------------- | -------------------------------------------------- |
+| `mf_get_state`                    | Estado do runtime, configurações e relatórios      |
+| `mf_get_modules`                  | Informações de módulos                             |
+| `mf_get_dependencies`             | Dados do grafo de dependências                     |
+| `mf_get_shared`                   | Versões e estado das dependências compartilhadas   |
+| `mf_set_proxy` / `mf_clear_proxy` | Configurar ou limpar proxies                       |
+| `mf_set_hmr`                      | Configurar React de desenvolvimento e Fast Refresh |
+| `mf_configure_loading_trace`      | Configurar Loading Trace                           |
+| `mf_get_loading_reports`          | Ler relatórios                                     |
+| `mf_export_snapshot`              | Exportar diagnóstico em JSON                       |
+
+Peça ao agente para ler o estado atual, preservar as regras existentes, configurar o proxy de `mf_playground` para `https://localhost:3006/mf-manifest.json`, ativar HMR e atualizar a página após salvar. `mf_set_proxy` substitui a lista inteira de regras. As ferramentas de configuração retornam `reloadRequired`; o agente deve receber a resposta antes de atualizar a página. Os scripts de inicialização aplicam as configurações antes do carregamento do React. Com HMR ativo, React 19.x usa os bundles **development** de React e ReactDOM de `umd-react@19.2.4`; `react-dom/client` reutiliza a mesma instância de ReactDOM.
+
+WebMCP cobre as funcionalidades implementadas de depuração do runtime. Layout do grafo, filtros, tema e idioma continuam na interface. O agente recebe dados estruturados e a exportação retorna JSON. O painel Performance ainda é um placeholder.
+
+Para diagnosticar ferramentas ausentes, consulte `window.__MF_DEVTOOLS_WEBMCP__` no console: `registered` indica sucesso, `unavailable` indica ausência de uma API utilizável após 30 segundos, e `error` contém a mensagem da falha. O host precisa oferecer `registerTool` em `document.modelContext` ou `navigator.modelContext`; `unregisterTool` é opcional.
+
+::: warning Limites de proxy e configuração
+
+A extensão não ignora CSP, CORS ou restrições de rede do navegador. Configure protocolos, políticas e cabeçalhos compatíveis ao acessar serviços locais. WebMCP e a interface compartilham configurações no localStorage da origem; abas da mesma origem podem compartilhar essas configurações.
+
+:::
+
 ## Uso Scenarios
 
 DevTools fornece multiple functional panels suitable for diferente debugging needs em desenvolvimento e ambiente de produçãos:
@@ -60,7 +109,7 @@ DevTools fornece multiple functional panels suitable for diferente debugging nee
 O plugin fornece uma Devtools panel.
 
 - F12 open developer tools, select click `Module Federation` tab, enter o proxy page, e você pode debug o dependent módulos.
-![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/launch-devtool.jpg)
+  ![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/launch-devtool.jpg)
 
 ## Overall Interaction
 
@@ -69,7 +118,7 @@ As shown below, o proxy page fornece opções such as `add new proxy module`, `p
 - Select um módulo esse o target page precisa proxy by selecting `producer selector`;
 - Select ou enter o specified address (including port number e address ending com `mf-manifest.json`) por meio de `version or local port` for proxy operation;
 - Se você precisa proxy multiple módulos at o mesmo time, click o `add new proxy module` area para adicionar o corresponding proxy módulo.
-- **Suporte Multi-Tab Isolation**: Quando opening pages usando Module Federation em multiple tabs simultaneously, o proxy rules e módulo information de each tab são independent. Proxy rules definir em Tab Uma vai não affect Tab B, e vice versa. Este allows você para depurar multiple environments ou aplicação states simultaneously.
+- **Inspeção da aba atual**: O painel lê o runtime da aba selecionada. As configurações ficam no localStorage da origem e podem ser compartilhadas entre abas da mesma origem.
 
 ![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/proxy.png)
 
@@ -126,7 +175,6 @@ Please tell me whether the load succeeded, where it failed, who likely owns the 
 <paste the exported JSON>
 ```
 
-
 ## How para Proxy Locally Developed Módulos para Online
 
 - First, você precisa começa o producer locally.
@@ -140,13 +188,9 @@ Please tell me whether the load succeeded, where it failed, who likely owns the 
 
 ## FAQ
 
-### Does it suporte multi-tab isolation debugging?
+### As abas têm configurações isoladas?
 
-Yes, quando você debug com multiple tabs open simultaneously, o Chrome DevTool plugin automatically identifies o current active tab e stores o proxy rules for each tab em isolation.
-
-- **Independent Storage**: Proxy configuração for Tab Uma apenas affects Tab Uma. Depois switching para Tab B, o panel automatically carrega Tab B's configuração.
-- **Estado Persistence**: Even se multiple tabs carregue o mesmo URL, their proxy states são physically isolated e não interfere com each other.
-- **Automatic Switching**: Clicking o "Focus Tab" tag em DevTools confirms o target page currently being debugged.
+O painel consulta o runtime da aba selecionada, mas as configurações de proxy, HMR e Loading Trace ficam no localStorage da origem. Abas da mesma origem podem compartilhar configurações após atualizar a página. Use origens ou perfis de navegador diferentes para configurações conflitantes.
 
 ### Quando does o configuração take effect?
 

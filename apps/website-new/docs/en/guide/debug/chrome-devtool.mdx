@@ -23,6 +23,67 @@ evidence for an MF runtime failure, loading chain, or performance bottleneck.
 
 :::
 
+## Choose an extension variant
+
+Module Federation Devtools provides two interface variants and supports **WebMCP**, allowing an AI agent to call debugging tools registered on the page.
+
+| Scenario                                                                                                                   | Variant                  | Interface                                                |
+| -------------------------------------------------------------------------------------------------------------------------- | ------------------------ | -------------------------------------------------------- |
+| Desktop Chrome with side panel or developer tools support                                                                  | Chrome (`dist/chrome`)   | Extension side panel or Module Federation DevTools panel |
+| An AI application's embedded browser that supports Chrome extensions but not side panels, such as Codex's embedded browser | Browser (`dist/browser`) | Compact popup opened from the extension icon             |
+
+Both variants retain the same implemented debugging features: **module proxying and version switching, module information, dependency graphs, shared dependencies, React HMR / Fast Refresh, Loading Trace, and report export**. The Browser variant adapts the entry point and layout without removing these features. Both include WebMCP.
+
+Compatibility with GPT and other AI applications depends on the embedded browser supporting extension loading and the required extension APIs. Agent access also requires a host that supports WebMCP registration, discovery, and invocation. Tool discovery and a read-only state call have been verified in Codex's embedded browser; this does not imply support in every AI browser. Hosts without WebMCP can still use the extension UI.
+
+### Download and install the Browser variant
+
+1. Open [Module Federation Releases](https://github.com/module-federation/core/releases), choose a release containing a Browser extension asset, and download its Browser ZIP from the release notes or **Assets**. Do not download GitHub's automatically generated **Source code** archives.
+2. Extract the ZIP and use the target embedded browser's extension manager to load the directory containing `manifest.json`. Installing the extension in desktop Chrome does not install it in an embedded browser.
+3. Open or refresh the target page, then click the extension icon. After an update, reload the extension and refresh existing pages.
+
+If a release does not yet include a Browser asset, run `pnpm --filter @module-federation/devtools run build:devtool` in the repository and load `packages/chrome-devtools/dist/browser`. Enable only one MF extension variant per browser to avoid duplicate injection. See below for Chrome Web Store installation; new feature availability depends on the published store version.
+
+### Work with an agent through WebMCP
+
+The extension registers tools automatically at page startup. The popup can remain closed, and the application does not need an additional WebMCP SDK.
+
+| Tool                              | Purpose                                                          |
+| --------------------------------- | ---------------------------------------------------------------- |
+| `mf_get_state`                    | Runtime state, proxy/HMR configuration, and loading reports      |
+| `mf_get_modules`                  | All modules or a specific module                                 |
+| `mf_get_dependencies`             | Module dependency data                                           |
+| `mf_get_shared`                   | Shared dependency versions and loading state                     |
+| `mf_set_proxy` / `mf_clear_proxy` | Configure or clear module proxies                                |
+| `mf_set_hmr`                      | Enable or disable development React replacement and Fast Refresh |
+| `mf_configure_loading_trace`      | Configure Loading Trace                                          |
+| `mf_get_loading_reports`          | Read loading reports                                             |
+| `mf_export_snapshot`              | Export a diagnostic JSON snapshot                                |
+
+For example, ask a WebMCP-capable agent:
+
+```text
+Read the current MF state and preserve existing proxy rules.
+Proxy mf_playground to https://localhost:3006/mf-manifest.json,
+enable HMR, save, reload the page, and verify the configuration.
+```
+
+`mf_set_proxy` replaces the complete rule list, so read the existing state before editing. Configuration tools save settings and return `reloadRequired`; the agent reloads after receiving the response. Startup scripts apply settings before application React loads. With HMR enabled, all React 19.x versions use the React and ReactDOM **development** bundles from `umd-react@19.2.4`; `react-dom/client` reuses the same ReactDOM instance.
+
+WebMCP covers implemented runtime debugging capabilities. Graph layout, filtering, theme, and language remain UI controls. Agents receive structured dependency data, and export tools return JSON. The Performance panel is currently a placeholder, not an implemented performance analysis feature.
+
+::: tip Tools are not discovered
+
+Reload the extension and refresh the page, then inspect `window.__MF_DEVTOOLS_WEBMCP__` in the page console. `registered` means registration succeeded; `unavailable` means no usable host API appeared within 30 seconds; `error` includes an error message. Registration supports `document.modelContext` or `navigator.modelContext` with `registerTool`; `unregisterTool` is optional. After registration, the agent must discover tools through the host.
+
+:::
+
+::: warning Proxy and configuration boundaries
+
+The extension does not bypass CSP, CORS, or browser network restrictions. Proxying an HTTPS page to a local HTTP server still requires compatible page policies, protocols, and server CORS headers. WebMCP and the UI share page settings stored in the origin's localStorage. Same-origin tabs may share settings; do not rely on them to keep conflicting configurations separate.
+
+:::
+
 ## Usage Scenarios
 
 DevTools provides multiple functional panels suitable for different debugging needs in development and production environments:
@@ -59,7 +120,7 @@ DevTools provides multiple functional panels suitable for different debugging ne
 The plugin provides a Devtools panel.
 
 - F12 open developer tools, select click `Module Federation` tab, enter the proxy page, and you can debug the dependent modules.
-![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/launch-devtool.jpg)
+  ![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/launch-devtool.jpg)
 
 ## Overall Interaction
 
@@ -68,7 +129,7 @@ As shown below, the proxy page provides options such as `add new proxy module`, 
 - Select a module that the target page needs to proxy by selecting `producer selector`;
 - Select or enter the specified address (including port number and address ending with `mf-manifest.json`) through `version or local port` for proxy operation;
 - If you need to proxy multiple modules at the same time, click the `add new proxy module` area to add the corresponding proxy module.
-- **Support Multi-Tab Isolation**: When opening pages using Module Federation in multiple tabs simultaneously, the proxy rules and module information of each tab are independent. Proxy rules set in Tab A will not affect Tab B, and vice versa. This allows you to debug multiple environments or application states simultaneously.
+- **Current-tab inspection**: The panel reads the target tab’s runtime and module information. Settings are stored in the page origin’s localStorage and may be shared by same-origin tabs.
 
 ![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/proxy.png)
 
@@ -125,7 +186,6 @@ Please tell me whether the load succeeded, where it failed, who likely owns the 
 <paste the exported JSON>
 ```
 
-
 ## How to Proxy Locally Developed Modules to Online
 
 - First, you need to start the producer locally.
@@ -141,11 +201,7 @@ Please tell me whether the load succeeded, where it failed, who likely owns the 
 
 ### Does it support multi-tab isolation debugging?
 
-Yes, when you debug with multiple tabs open simultaneously, the Chrome DevTool plugin automatically identifies the current active tab and stores the proxy rules for each tab in isolation.
-
-- **Independent Storage**: Proxy configuration for Tab A only affects Tab A. After switching to Tab B, the panel automatically loads Tab B's configuration.
-- **State Persistence**: Even if multiple tabs load the same URL, their proxy states are physically isolated and do not interfere with each other.
-- **Automatic Switching**: Clicking the "Focus Tab" tag in DevTools confirms the target page currently being debugged.
+Runtime inspection targets a tab, but proxy, HMR, and Loading Trace settings are stored in the page origin’s localStorage. Same-origin tabs may share settings and read the same configuration after reload. Use separate origins or browser profiles for conflicting configurations.
 
 ### When does the configuration take effect?
 

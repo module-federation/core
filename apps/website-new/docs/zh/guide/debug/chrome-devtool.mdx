@@ -23,6 +23,67 @@
 
 :::
 
+## 选择哪种插件
+
+Module Federation Devtools 提供两种界面产物，并支持通过 **WebMCP** 让 AI Agent 直接调用页面上的调试工具。
+
+| 使用场景                                                                              | 选择                         | 打开方式                                        |
+| ------------------------------------------------------------------------------------- | ---------------------------- | ----------------------------------------------- |
+| 在桌面 Chrome 中调试，需要侧边栏或开发者工具面板                                      | Chrome 版（`dist/chrome`）   | 扩展侧边栏或 DevTools 的 Module Federation 面板 |
+| 在支持 Chrome 扩展的 AI 应用内置浏览器中调试，例如 Codex 内置浏览器；宿主不支持侧边栏 | Browser 版（`dist/browser`） | 点击扩展图标，打开适配过的紧凑弹窗              |
+
+两种产物保留相同的已实现调试功能：**模块代理与版本切换、模块信息、依赖关系图、共享依赖、React HMR / Fast Refresh、加载追踪和报告导出**。Browser 版调整了入口和弹窗布局，不会因为没有侧边栏而删减这些功能。两种产物都包含 WebMCP。
+
+是否能在 GPT 等 AI 应用中使用，取决于其内置浏览器是否支持加载扩展及所需的扩展 API；是否能由 Agent 调用，还取决于宿主是否提供 WebMCP 注册、发现和调用能力。已在 Codex 内置浏览器验证工具发现和只读状态调用，不代表所有 AI 内置浏览器都已适配。未提供 WebMCP 的宿主仍可通过插件 UI 调试。
+
+### 下载与安装 Browser 版
+
+1. 打开 [Module Federation Releases](https://github.com/module-federation/core/releases)，选择包含 Browser 插件附件的版本，在 release notes 或 **Assets** 中下载 Browser 版 ZIP。不要下载 GitHub 自动生成的 **Source code** 压缩包。
+2. 解压 ZIP，在目标内置浏览器的扩展管理入口中加载包含 `manifest.json` 的目录。安装在桌面 Chrome 中的扩展不会自动安装到内置浏览器。
+3. 打开或刷新目标页面，点击扩展图标即可使用弹窗。更新插件后，需要重载扩展并刷新已打开的页面。
+
+若所选 Release 尚无 Browser 附件，可在仓库中执行 `pnpm --filter @module-federation/devtools run build:devtool`，然后加载 `packages/chrome-devtools/dist/browser`。同一个浏览器中只启用一种 MF 插件产物，避免重复注入。桌面 Chrome 的商店安装方式见下文；商店版是否包含新功能以已发布版本为准。
+
+### 通过 WebMCP 与 Agent 配合
+
+安装后，插件在页面启动时自动注册以下工具，不需要保持弹窗打开，也不需要业务页面额外接入 WebMCP SDK。
+
+| 工具                              | 用途                                       |
+| --------------------------------- | ------------------------------------------ |
+| `mf_get_state`                    | 读取运行时、代理和 HMR 配置及加载报告      |
+| `mf_get_modules`                  | 查看全部模块或指定模块                     |
+| `mf_get_dependencies`             | 获取模块依赖关系数据                       |
+| `mf_get_shared`                   | 查看共享依赖版本及加载状态                 |
+| `mf_set_proxy` / `mf_clear_proxy` | 设置或清除模块代理                         |
+| `mf_set_hmr`                      | 开启或关闭开发版 React 替换及 Fast Refresh |
+| `mf_configure_loading_trace`      | 配置加载追踪                               |
+| `mf_get_loading_reports`          | 读取加载报告                               |
+| `mf_export_snapshot`              | 导出诊断快照 JSON                          |
+
+可以直接告诉支持 WebMCP 的 Agent：
+
+```text
+读取当前页面的 MF 状态，保留现有代理规则，
+把 mf_playground 代理到 https://localhost:3006/mf-manifest.json，
+开启 HMR，保存后刷新页面，再检查配置是否生效。
+```
+
+`mf_set_proxy` 会替换完整规则列表，修改前应先读取现有状态。配置工具先保存设置并返回 `reloadRequired`，由 Agent 收到结果后刷新页面；页面启动脚本会在业务 React 加载前应用配置。React 19.x 开启 HMR 时统一使用 `umd-react@19.2.4` 的 React 和 ReactDOM **development** 产物，`react-dom/client` 复用同一 ReactDOM 实例。
+
+WebMCP 覆盖已实现的运行时调试能力；依赖图布局、筛选、主题和语言等界面操作仍在 UI 中完成。Agent 获取结构化依赖数据，导出工具返回 JSON。Performance 面板目前是占位功能，不属于已支持的性能分析能力。
+
+::: tip 排查工具未被发现
+
+先重载扩展并刷新页面，在页面 Console 查看 `window.__MF_DEVTOOLS_WEBMCP__`：`registered` 表示注册成功；`unavailable` 表示等待 30 秒后仍无可用宿主 API；`error` 的详细原因在 `error` 字段中。支持 `document.modelContext` 或 `navigator.modelContext` 的 `registerTool`，不要求宿主提供 `unregisterTool`。注册成功后，Agent 仍需通过宿主重新发现工具。
+
+:::
+
+::: warning 代理与配置的边界
+
+插件不会绕过页面的 CSP、CORS 或浏览器网络限制。HTTPS 页面代理到本地 HTTP 服务时，仍需为页面和本地服务配置允许的地址、协议及跨域响应。WebMCP 与 UI 共享页面配置；配置保存在该 origin 的 localStorage，同源标签页可能共享设置，不适合用来同时保存两套互相冲突的配置。
+
+:::
+
 ## 使用场景
 
 DevTools 提供了多个功能面板，适用于开发环境以及生产环境的不同调试需求：
@@ -59,7 +120,7 @@ DevTools 提供了多个功能面板，适用于开发环境以及生产环境�
 插件提供了 Devtools 面板
 
 - F12 打开开发者工具，选择点击 `Module Federation` tab，进入代理页面，便可对依赖的模块进行代理调试
-![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/launch-devtool.jpg)
+  ![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/launch-devtool.jpg)
 
 ## 整体交互
 
@@ -68,7 +129,7 @@ DevTools 提供了多个功能面板，适用于开发环境以及生产环境�
 - 通过选择 `producer selector` 选择出目标页面需要代理的一个模块;
 - 通过 `version or local port` 选择或者输入指定的地址（包括端口号和 `mf-manifest.json` 结尾的地址），进行代理操作;
 - 如果需要同时代理多个模块，点击 `add new proxy module` 区域，增加对应的代理模块。
-- **支持多 Tab 隔离**：在多个标签页中同时打开使用了 Module Federation 的页面时，每个 Tab 的代理规则和模块信息都是相互独立的。你在 Tab A 中设置的代理规则不会影响 Tab B，反之亦然。这允许你同时调试多个环境或应用状态。
+- **按当前 Tab 查看**：面板显示当前目标页面的模块和运行时信息。配置存储在页面 origin 的 localStorage 中，同源标签页可能共享配置。
 
 ![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/proxy.png)
 
@@ -125,7 +186,6 @@ DevTools 提供了多个功能面板，适用于开发环境以及生产环境�
 <粘贴导出的 JSON>
 ```
 
-
 ## 如何将本地开发的模块代理到线上
 
 - 首先需要在本地启动生产者
@@ -141,13 +201,7 @@ DevTools 提供了多个功能面板，适用于开发环境以及生产环境�
 
 ### 是否支持多 Tab 隔离调试
 
-> 不支持同一域名多个 Tab 同时调试
-
-支持，当你同时打开多个标签页（Tabs）进行调试时，Chrome DevTool 插件会自动识别当前的活动 Tab，并隔离存储每个 Tab 的代理规则。
-
-- **独立存储**：Tab A 的代理配置仅对 Tab A 生效，切换到 Tab B 后，面板会自动加载 Tab B 的配置。
-- **状态保持**：即使多个 Tab 加载的是同一个 URL，它们的代理状态也是物理隔离的，互不干扰。
-- **自动切换**：点击 DevTools 中的 "Focus Tab" 标签可以确认当前正在调试的目标页面。
+面板按目标 Tab 读取运行时信息，但代理、HMR 和加载追踪配置保存在页面 origin 的 localStorage 中。同源标签页可能共享设置，刷新后会读取同一份配置。需要同时使用互相冲突的配置时，请使用不同 origin 或独立浏览器配置文件。
 
 ### 配置何时生效
 
