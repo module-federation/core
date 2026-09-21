@@ -5,8 +5,8 @@
 '@module-federation/inject-external-runtime-core-plugin': patch
 ---
 
-Carry runtime-image metadata into runtime instances and global external-core
-state. Known incompatible families, targets, capabilities, and entry loaders
-now fail before shared state or a cached remote entry is reused.
+Store runtime-image metadata on runtime instances and on the global
+external-core state. A known mismatch of family, target, capability, or entry
+loader fails before the runtime reuses shared state or a cached remote entry.
 
-The remote-entry cache key remains unchanged.
+The remote-entry cache key does not change.

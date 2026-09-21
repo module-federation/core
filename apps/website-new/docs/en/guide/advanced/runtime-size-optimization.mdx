@@ -70,7 +70,7 @@ FEDERATION_HAS_EXPOSES=false \
 pnpm build
 ```
 
-These `FEDERATION_*` defines stay until a future major release. Package conditions such as `module-federation:no-remote` can already omit the matching modules from a bundler graph, but the default leaves still honor the defines.
+These `FEDERATION_*` defines remain until a later major version. A bundler that sets a package condition such as `module-federation:no-remote` can already leave the matching module out of the graph. The default modules still read these defines.
 
 Webpack must replace the values explicitly:
 

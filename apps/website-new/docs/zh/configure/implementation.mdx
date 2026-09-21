@@ -6,11 +6,11 @@
 
 用于修改实际 bundler runtime 版本。 值为 `@module-federation/runtime-tools` 的路径。
 
-这个路径必须解析成一整套 runtime family。编译器不会用插件旁边安装的另一份包去补齐缺失成员。
+这个路径必须解析出一整套 runtime family。缺少其中某个包时，编译器不会用插件旁边安装的另一份去补。
 
-`runtime`、`runtime-core`、`webpack-bundler-runtime` 和 `sdk` 都必须来自以所选 `runtime-tools` 路径为根的依赖图。
+`runtime`、`runtime-core`、`webpack-bundler-runtime` 和 `sdk` 都必须从所选 `runtime-tools` 的依赖图里解析。
 
-Vite 和 Rolldown 没有按 issuer 拆分的 resolver rule。支持 condition 的 Vite 集成必须在整个进程中使用同一套 family，并拒绝第二套 family。核心 esbuild 适配器继续使用完整的 `@module-federation/webpack-bundler-runtime` 入口。
+Vite 和 Rolldown 不能按导入文件使用不同的解析规则。开启 package condition 的 Vite 配置必须在整个进程里只用一套 family，出现第二套就失败。本仓库的 esbuild 适配器仍然导入完整的 `@module-federation/webpack-bundler-runtime` 入口。
 
 ```javascript
 module.exports = {

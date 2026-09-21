@@ -4,9 +4,9 @@
 '@module-federation/runtime-tools': minor
 ---
 
-Coordinate runtime-family selection once per compiler. Enhanced and Rspack now
-aggregate capability requirements before they apply compatibility defines.
-Custom runtime implementations fail when their family is incomplete.
+Select the runtime family once per compiler. Enhanced and Rspack now collect
+capability requirements before they apply compatibility defines. A custom
+runtime implementation fails when its family is incomplete.
 
-Add the default-only runtime facade. Rspack keeps its legacy bootstrap until
-the native plugin reports support for the facade contract.
+Add the default-only runtime facade. Rspack keeps its old bootstrap until the
+native plugin supports the facade contract.

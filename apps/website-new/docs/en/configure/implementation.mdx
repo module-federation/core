@@ -10,11 +10,11 @@ When working with Module Federation, the runtime is responsible for handling the
 
 By specifying the `implementation` option, you can provide a path to the desired runtime implementation. This is particularly useful if you need to use features from a newer or older version of the runtime that are not available in the default version provided by the bundler.
 
-The value must resolve one complete runtime family. The compiler does not replace a missing member with the copy installed next to the bundler plugin.
+The path must resolve one complete runtime family. If a package in that family is missing, the compiler does not fill it from the copy installed next to the bundler plugin.
 
-`runtime`, `runtime-core`, `webpack-bundler-runtime`, and `sdk` must resolve from the package graph rooted at the selected `runtime-tools` path.
+`runtime`, `runtime-core`, `webpack-bundler-runtime`, and `sdk` must resolve from the dependency graph of the chosen `runtime-tools` path.
 
-Vite and Rolldown do not have issuer-scoped resolver rules. A condition-aware Vite integration must use one family for the whole process and reject a second family. The core esbuild adapter stays on the full `@module-federation/webpack-bundler-runtime` entry.
+Vite and Rolldown cannot apply different resolver rules per importing file. A Vite setup that uses package conditions must use one family for the whole process and fail if a second family appears. The esbuild adapter in this repo still imports the full `@module-federation/webpack-bundler-runtime` entry.
 
 For example, if you want to use a specific version of `@module-federation/runtime-tools`, you can set the `implementation` option in your configuration file:
 

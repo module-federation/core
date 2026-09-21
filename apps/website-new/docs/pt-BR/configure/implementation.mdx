@@ -6,11 +6,11 @@
 
 O `implementation` opção é usado para modificar o actual bundler runtime versão. It deve ser definir para o caminho de `@module-federation/runtime-tools`.
 
-O valor precisa resolver uma família de runtime inteira. O compilador não substitui um membro ausente pela cópia instalada ao lado do plugin.
+O caminho precisa resolver uma família de runtime completa. Se faltar um pacote dessa família, o compilador não completa com a cópia instalada ao lado do plugin.
 
-`runtime`, `runtime-core`, `webpack-bundler-runtime` e `sdk` precisam vir do grafo de pacotes que começa no caminho escolhido de `runtime-tools`.
+`runtime`, `runtime-core`, `webpack-bundler-runtime` e `sdk` precisam ser resolvidos a partir do grafo de dependências do caminho escolhido de `runtime-tools`.
 
-Vite e Rolldown não têm regras de resolução por issuer. Uma integração Vite compatível com condições precisa usar uma família no processo inteiro e rejeitar uma segunda família. O adaptador esbuild deste repositório continua no entry completo de `@module-federation/webpack-bundler-runtime`.
+Vite e Rolldown não aplicam regras de resolução diferentes por arquivo importador. Uma configuração Vite que usa package conditions precisa usar uma família no processo inteiro e falhar se aparecer uma segunda. O adaptador esbuild deste repositório ainda importa o entry completo de `@module-federation/webpack-bundler-runtime`.
 
 Quando working com Module Federation, o runtime é responsible for handling o carregamento e compartilhamento de módulos remotos. Por padrão, o bundler usa uma specific versão do runtime esse é compatible com its versão. However, em some cases, você might precisa use uma diferente versão do runtime ou uma custom implementation.
 
