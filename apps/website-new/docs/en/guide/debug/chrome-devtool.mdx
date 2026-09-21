@@ -1,212 +1,154 @@
 # Chrome Devtool
 
-The `Micro-frontend` architecture differs from the traditional monolithic application development model. Its characteristics of separate development, deployment, and debugging require a new set of debugging tools to meet new usage scenarios. For example: how to verify the effect of modules in actual projects during development, whether a producer's dependencies are reused with the host environment, which modules are loaded on the current page, and what the dependency relationships and data flow between modules look like.
+Module Federation Devtools lets you inspect Federation modules, dependency relationships, and shared dependencies on a page. You can also proxy remote modules to a local or specific version and trace the module loading process.
 
-`Chrome Devtool` provides the following capabilities:
+::: tip Requirement
 
-- Supports proxying remote modules from an online page to a local one.
-- Switch online remote module versions for quick functional verification.
-- Support viewing module dependency information.
-- Support filtering specified module dependency information.
-- Support Loading Trace for remote, shared, component-ready signals, and failure reports.
-
-::: tip Limitations of Chrome Devtool
-
-You must use `mf-manifest.json` to use the visualization and proxy capabilities provided by `Chrome devtool`.
+The visualization and proxy features require `mf-manifest.json`.
 
 :::
 
-::: tip Debugging with an AI coding agent
+## Use in different browsers
 
-Use [Divebell](/guide/debug/divebell.html) when an agent needs structured
-evidence for an MF runtime failure, loading chain, or performance bottleneck.
+Module Federation Devtools is a Chrome extension with two versions for different browser environments. Both versions provide the same debugging features; only their installation and entry points differ:
+
+| Use case | Extension version | How to open |
+| --- | --- | --- |
+| Standard desktop Chrome | Desktop Chrome (`dist/chrome`) | Extension side panel or the `Module Federation` panel in Chrome DevTools |
+| An AI application's embedded browser that supports Chrome extensions, such as ChatGPT's embedded browser | Embedded browser (`dist/browser`) | Click the extension icon to open the compact popup |
+
+Both versions support module proxying and version switching, module information, dependency graphs, shared dependencies, React HMR / Fast Refresh, Loading Trace, report export, and WebMCP.
+
+Enable only one version in the same browser to avoid duplicate injection.
+
+::: tip Headless browsers and CI
+
+The two versions above are designed for interactive browser environments. For headless browsers or CI automation, use [Divebell](https://github.com/2heal1/divebell) with its [Module Federation Extension](https://github.com/2heal1/divebell/tree/main/packages/extensions/mf).
+
+Divebell can load pages through its CLI, collect Module Federation runtime information, and return structured diagnostic results without opening an extension UI. See [Diagnose runtime issues with Divebell](/guide/debug/divebell.html) for installation and usage.
 
 :::
 
-## Choose an extension variant
+## Installation
 
-Module Federation Devtools provides two interface variants and supports **WebMCP**, allowing an AI agent to call debugging tools registered on the page.
+### Desktop Chrome
 
-| Scenario                                                                                               | Variant                  | Interface                                                |
-| ------------------------------------------------------------------------------------------------------ | ------------------------ | -------------------------------------------------------- |
-| Desktop Chrome with side panel or developer tools support                                              | Chrome (`dist/chrome`)   | Extension side panel or Module Federation DevTools panel |
-| An AI application's embedded browser that supports Chrome extensions, such as Codex's embedded browser | Browser (`dist/browser`) | Compact popup opened from the extension icon             |
+Open the [Module Federation extension page](https://chromewebstore.google.com/detail/module-federation/aeoilchhomapofiopejjlecddfldpeom) and click `Add to Chrome`.
 
-Both variants provide the same debugging features: **module proxying and version switching, module information, dependency graphs, shared dependencies, React HMR / Fast Refresh, Loading Trace, and report export**, and both support WebMCP. WebMCP tool discovery and invocation have been verified in Codex's embedded browser.
+![](@public/guide/chrome-devtools/chrome-store-add-devtool.png)
 
-### Download and install the Browser variant
+### Embedded browser
 
-1. Open [Module Federation Releases](https://github.com/module-federation/core/releases), choose a stable release containing a Browser extension asset, and download its Browser ZIP from the release notes or **Assets**. Browser ZIPs are published with `latest` releases; `next` previews do not create GitHub Releases or assets. Do not download GitHub's automatically generated **Source code** archives.
-2. Extract the ZIP and load the extracted folder in the target embedded browser's extension manager.
-3. Open or refresh the target page, then click the extension icon. After an update, reload the extension and refresh existing pages.
+1. Open [Module Federation Releases](https://github.com/module-federation/core/releases) and download the Browser ZIP from the **Assets** section of a stable release. Do not download GitHub's automatically generated **Source code** archives.
+2. Extract the ZIP and load the extracted directory from the embedded browser's extension manager.
+3. Open or refresh the target page, then click the extension icon.
 
-If a release does not yet include a Browser asset, run `pnpm --filter @module-federation/devtools run build:devtool` in the repository and load `packages/chrome-devtools/dist/browser`. Enable only one MF extension variant per browser to avoid duplicate injection. See below for Chrome Web Store installation; new feature availability depends on the published store version.
+Browser assets are published for `latest` stable releases. `next` previews do not create GitHub Releases. If the target release has no Browser asset, run:
 
-### Work with an agent through WebMCP
+```bash
+pnpm --filter @module-federation/devtools run build:devtool
+```
 
-The extension registers tools automatically at page startup. The popup can remain closed, and the application does not need an additional WebMCP SDK.
+Then load `packages/chrome-devtools/dist/browser`. After updating the extension, reload it and refresh any open pages.
 
-| Tool                              | Purpose                                                          |
-| --------------------------------- | ---------------------------------------------------------------- |
-| `mf_get_state`                    | Runtime state, proxy/HMR configuration, and loading reports      |
-| `mf_get_modules`                  | All modules or a specific module                                 |
-| `mf_get_dependencies`             | Module dependency data                                           |
-| `mf_get_shared`                   | Shared dependency versions and loading state                     |
-| `mf_set_proxy` / `mf_clear_proxy` | Configure or clear module proxies                                |
-| `mf_set_hmr`                      | Enable or disable development React replacement and Fast Refresh |
-| `mf_configure_loading_trace`      | Configure Loading Trace                                          |
-| `mf_get_loading_reports`          | Read loading reports                                             |
-| `mf_export_snapshot`              | Export a diagnostic JSON snapshot                                |
+## Features
+
+| Panel | Purpose |
+| --- | --- |
+| Proxy | Switch a remote module to a local service, a specific version, or a custom `mf-manifest.json` URL |
+| Module Info | Inspect the Federation modules loaded on the current page, including their versions and entry URLs |
+| Dependency Graph | Inspect and filter dependency relationships between modules |
+| Shared | Inspect shared dependency loading, version reuse, and settings such as Singleton and Strict Version |
+| Loading Trace | Trace remote, shared, and component loading, diagnose failures, and export reports |
+
+![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/shared-overview.png)
+
+## Use the extension
+
+In desktop Chrome, open the target page, press F12, and select `Module Federation` in DevTools. In an embedded browser, click the extension icon.
+
+![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/launch-devtool.jpg)
+
+### Proxy a module
+
+1. Select the module to proxy in the Proxy panel.
+2. Select a target version, or enter a local port or full `mf-manifest.json` URL, such as `http://localhost:3000/mf-manifest.json`.
+3. To proxy multiple modules, click `add new proxy module` to add another rule.
+4. Save the configuration and refresh the page.
+
+![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/proxy.png)
+
+For local development, start the producer first and enter its manifest URL in the proxy rule. The consumer page reloads automatically when you update the producer code.
+
+![](@public/guide/chrome-devtools/dev-to-proxy.png)
+
+![](@public/guide/chrome-devtools/proxy-to-local.png)
+
+### Loading Trace
+
+Loading Trace helps diagnose blank pages, components stuck in loading, unexpected shared versions, and producer loading failures.
+
+![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/loading-trace-overview-en.png)
+
+Panel states:
+
+- `OFF`: no readable loading report is available on the current page.
+- `ON`: the extension is collecting data for the current tab.
+- `CUSTOM`: the page uses the [Observability Plugin](/plugin/plugins/observability-plugin.html), and Devtools is reading its reports.
+
+To trace a load:
+
+1. Open Loading Trace. If the state is `OFF`, click `Observe now`; the page reloads once.
+2. Reproduce the issue or trigger the remote component load you want to inspect.
+3. Select a report and inspect the result, event timeline, failure stage, and suggested actions.
+4. Click `Export` to save the complete report.
+
+The main report states are success, failure, pending, and recovered. The exported JSON contains `config`, `scopes`, and `reports`. Focus on:
+
+- `diagnosis`: the conclusion, evidence, and suggested actions.
+- `summary`: the final loading state.
+- `remote` / `shared`: the loaded target, provider, and version details.
+- `loadedBefore`: whether another consumer had already loaded the same producer.
+- `events`: the complete event sequence.
+
+![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/loading-trace-shared-report-en.png)
+
+## Work with a coding agent through WebMCP
+
+::: tip Desktop Chrome release status
+
+WebMCP support for desktop Chrome is currently under review for release on the Chrome Web Store. Until the review is complete, the store version does not support the features described in this section.
+
+:::
+
+Both extension versions automatically register WebMCP tools when the page starts. The extension UI does not need to remain open, and the application does not need an additional WebMCP SDK.
+
+| Tool | Purpose |
+| --- | --- |
+| `mf_get_state` | Read runtime state, proxy and HMR configuration, and loading reports |
+| `mf_get_modules` | Inspect all modules or a specific module |
+| `mf_get_dependencies` | Get module dependency relationships |
+| `mf_get_shared` | Inspect shared dependency versions and loading state |
+| `mf_set_proxy` / `mf_clear_proxy` | Configure or clear module proxies |
+| `mf_set_hmr` | Enable or disable React HMR / Fast Refresh |
+| `mf_configure_loading_trace` | Configure Loading Trace |
+| `mf_get_loading_reports` | Read loading reports |
+| `mf_export_snapshot` | Export a diagnostic JSON snapshot |
 
 For example, ask a WebMCP-capable agent:
 
 ```text
-Read the current MF state and preserve existing proxy rules.
+Read the current MF state and preserve the existing proxy rules.
 Proxy mf_playground to https://localhost:3006/mf-manifest.json,
-enable HMR, save, reload the page, and verify the configuration.
+enable HMR, reload the page, and verify that the configuration took effect.
 ```
 
-`mf_set_proxy` replaces the complete rule list, so read the existing state before editing. Configuration tools save settings and return `reloadRequired`; the agent reloads after receiving the response. Startup scripts apply settings before application React loads. With HMR enabled, all React 19.x versions use the React and ReactDOM **development** bundles from `umd-react@19.2.4`; `react-dom/client` reuses the same ReactDOM instance.
+`mf_set_proxy` replaces the complete proxy rule list, so read the current state before making changes. Configuration tools return `reloadRequired`; the agent should reload the page based on that result.
 
-WebMCP covers implemented runtime debugging capabilities. Graph layout, filtering, theme, and language remain UI controls. Agents receive structured dependency data, and export tools return JSON. The Performance panel is currently a placeholder, not an implemented performance analysis feature.
+Graph layout, filtering, theme, and language remain UI operations. For deeper analysis of runtime errors or performance bottlenecks, use [Divebell](/guide/debug/divebell.html).
 
-::: tip Tools are not discovered
+## Notes
 
-Reload the extension and refresh the page, then inspect `window.__MF_DEVTOOLS_WEBMCP__` in the page console. `registered` means registration succeeded; `unavailable` means no usable host API appeared within 30 seconds; `error` includes an error message. Registration supports `document.modelContext` or `navigator.modelContext` with `registerTool`; `unregisterTool` is optional. After registration, the agent must discover tools through the host.
-
-:::
-
-::: warning Proxy and configuration boundaries
-
-The extension does not bypass CSP, CORS, or browser network restrictions. Proxying an HTTPS page to a local HTTP server still requires compatible page policies, protocols, and server CORS headers. WebMCP and the UI share page settings stored in the origin's localStorage. Same-origin tabs may share settings; do not rely on them to keep conflicting configurations separate.
-
-:::
-
-## Usage Scenarios
-
-DevTools provides multiple functional panels suitable for different debugging needs in development and production environments:
-
-- **Proxy**: Used to proxy modules from online or test environments to the local development environment.
-  - Supports local service port numbers, e.g., key: appA -> value: `http://localhost:3000/mf-manifest.json`, the page will directly load `Module Federation` content from port 3000.
-  - Supports using `mf-manifest.json` file address format, e.g., key: appA -> value: `https://xxx/static/mf-manifest.json`, the page will directly load `Module Federation` content from the specified address.
-
-- **Module Info**: Used to view detailed information of all Federation modules loaded on the current page, including version, entry address, etc.
-
-- **Dependency Graph**: Visually displays the dependency reference relationships between modules, helping to clarify complex micro-frontend architectures.
-
-- **Shared**: In-depth analysis of Shared Dependencies usage.
-  - View loaded and unloaded shared dependencies.
-  - Analyze version reuse of shared dependencies (Loaded / Reused).
-  - Check the effective status of configurations such as Singleton and Strict Version.
-
-- **Loading Trace**: Records Module Federation loading on the current page.
-  - Inspect `loadRemote` and `loadShare` start, success, failure, and recovery states.
-  - See which consumer loaded which remote and expose, and which shared provider/version was selected.
-  - If the page already uses the [Observability Plugin](/plugin/plugins/observability-plugin.html), the panel reads those reports and shows `CUSTOM`.
-  - If the page does not use the plugin, click `Observe now` to temporarily inject the Chrome collection plugin for the current tab.
-
-![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/shared-overview.png)
-
-## How to Install
-
-1. Open the [Module Federation Plugin Details Page](https://chromewebstore.google.com/detail/module-federation/aeoilchhomapofiopejjlecddfldpeom), click the `Add to Chrome` button.
-
-![](@public/guide/chrome-devtools/chrome-store-add-devtool.png)
-
-## How to Use
-
-The plugin provides a Devtools panel.
-
-- F12 open developer tools, select click `Module Federation` tab, enter the proxy page, and you can debug the dependent modules.
-  ![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/launch-devtool.jpg)
-
-## Overall Interaction
-
-As shown below, the proxy page provides options such as `add new proxy module`, `producer selector`, `version or local port or custom entry`, etc.
-
-- Select a module that the target page needs to proxy by selecting `producer selector`;
-- Select or enter the specified address (including port number and address ending with `mf-manifest.json`) through `version or local port` for proxy operation;
-- If you need to proxy multiple modules at the same time, click the `add new proxy module` area to add the corresponding proxy module.
-- **Current-tab inspection**: The panel reads the target tab’s runtime and module information. Settings are stored in the page origin’s localStorage and may be shared by same-origin tabs.
-
-![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/proxy.png)
-
-## Loading Trace
-
-The `Loading Trace` tab answers what actually happened during Module Federation loading. Use it when the page is blank, a component stays in loading, shared versions are unclear, or a producer fails intermittently.
-
-![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/loading-trace-overview-en.png)
-
-The top status means:
-
-- `OFF`: no readable loading report has been found on the current page.
-- `ON`: Chrome collection is enabled for the current tab.
-- `CUSTOM`: the inspected page already registered its own observability plugin, and DevTools is reading those reports.
-
-Common workflow:
-
-1. Open the target page.
-2. Open Chrome DevTools and choose the `Module Federation` panel.
-3. Open `Loading Trace`.
-4. If the status is `OFF`, click `Observe now`. The page reloads once.
-5. Reproduce the issue or trigger the remote component load you want to inspect.
-6. Select a report and inspect current loading, previous loading records, the event timeline, and troubleshooting suggestions.
-7. Click `Export` to save the full report.
-
-Report states:
-
-- `Success`: the MF chain completed. Remote reports show the remote result; shared reports show the selected provider and version.
-- `Failed`: the chain failed. Start from the failed phase, error code, and suggested actions.
-- `Pending`: a start event was recorded, but no completion, failure, or recovery event was seen yet.
-- `Recovered`: loading hit a problem first, then continued through fallback or recovery.
-- `Basic observability`: the runtime version is too low or cannot be detected, so detailed phases may be missing.
-
-### Analyze an exported report
-
-The exported JSON contains `config`, `scopes`, and `reports`. For each report, start with:
-
-![](https://module-federation-assest.netlify.app/document/guide/chrome-devtools/loading-trace-shared-report-en.png)
-
-- `diagnosis`: the troubleshooting conclusion, facts, and next actions.
-- `summary`: the final state, such as `runtime-loaded`, `component-loaded`, `shared-resolved`, `failed`, `recovered`, or `pending`.
-- `remote` / `shared`: what was loaded. For shared reports, inspect provider, required version, selected version, and available versions.
-- `loadedBefore`: whether the same producer had already been loaded by another consumer.
-- `events`: the ordered timeline, useful for finding the phase that got stuck.
-
-You can give the exported report directly to an AI coding agent:
-
-```text
-/mf obs
-
-I have an MF Loading Trace report exported from Chrome DevTools.
-Please tell me whether the load succeeded, where it failed, who likely owns the issue, and how to fix it.
-
-<paste the exported JSON>
-```
-
-## How to Proxy Locally Developed Modules to Online
-
-- First, you need to start the producer locally.
-
-![](@public/guide/chrome-devtools/dev-to-proxy.png)
-
-- Then enter the successful manifest address into the version selection input box on the proxy page.
-- Afterward, adjust the local producer code, and the consumer page will automatically Reload.
-
-![](@public/guide/chrome-devtools/proxy-to-local.png)
-
-## FAQ
-
-### Does it support multi-tab isolation debugging?
-
-Runtime inspection targets a tab, but proxy, HMR, and Loading Trace settings are stored in the page origin’s localStorage. Same-origin tabs may share settings and read the same configuration after reload. Use separate origins or browser profiles for conflicting configurations.
-
-### When does the configuration take effect?
-
-- ✅ Matches verification rules
-- ✅ Configuration rule is checked
-- ✅ Configuration filled in correctly, page displays: Proxy configuration has taken effect, remote module obtained successfully, corresponding page has been automatically refreshed.
-
-### Partial configuration matches rules
-
-The plugin will filter out **modules that match the configuration rules** for proxying.
+- The extension does not bypass CSP, CORS, or browser network restrictions. Proxying from an HTTPS page to a local HTTP service still requires compatible page policies, protocols, and cross-origin response headers.
+- Proxy, HMR, and Loading Trace settings are stored in the page origin's localStorage. Same-origin tabs may share settings. Use different origins or separate browser profiles when you need conflicting configurations.
+- If an agent cannot discover the WebMCP tools, reload the extension and refresh the page, then inspect `window.__MF_DEVTOOLS_WEBMCP__` in the console. `registered` means registration succeeded, `unavailable` means the host did not provide a usable API, and `error` contains the specific cause.
