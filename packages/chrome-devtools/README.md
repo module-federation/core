@@ -93,6 +93,15 @@ to verify. Saved configuration is distinct from the currently running runtime.
 Eager React shares may cause one additional automatic refresh while the existing
 Fast Refresh plugin records their version and share scopes.
 
+React 19 development replacement is pinned to the same pair used by Divebell:
+`umd-react@19.2.4/dist/react.development.js` and
+`umd-react@19.2.4/dist/react-dom.development.js` from unpkg. All `19.x` React,
+ReactDOM and `react-dom/client` registrations use version `19.2.4` while HMR is
+enabled. The client entry reuses ReactDOM's development bundle. Both async and
+eager loading initialize React before ReactDOM; React 19 eager shares can load
+synchronously without the first-discovery refresh. React 17/18 keep their existing
+official development UMD URLs. Disabling HMR preserves the application's providers.
+
 The UI reads the same page configuration; opening it does not replay a stale
 global HMR preference or trigger a reload. Open extension views receive a snapshot
 notification after a tool changes configuration. Settings are origin-scoped and
