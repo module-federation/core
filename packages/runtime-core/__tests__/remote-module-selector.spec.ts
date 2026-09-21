@@ -64,7 +64,7 @@ function selectedModules(
   return new Promise((resolve, reject) => {
     const compiler = compilerFactory({
       context: packageDir,
-      mode: 'production',
+      mode: 'none',
       entry: path.join(root, 'entry.js'),
       output: { path: path.join(root, name), filename: 'out.js' },
       resolve: {
@@ -77,9 +77,7 @@ function selectedModules(
         conditionNames: ['module-federation:no-remote', 'import', '...'],
       },
       optimization: {
-        concatenateModules: false,
-        minimize: true,
-        usedExports: false,
+        minimize: false,
       },
       externals: [
         (
