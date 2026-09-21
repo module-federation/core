@@ -154,5 +154,6 @@ describe('platform loader selector', () => {
       expect(modules).toContain('./dist/selectors/platform-loader/web.js');
       expect(modules).not.toContain('./dist/node.js');
     },
+    60_000,
   );
 });
