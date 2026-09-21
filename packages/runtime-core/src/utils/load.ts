@@ -1,10 +1,8 @@
 import {
   loadScript,
   loadScriptNode,
-  composeKeyWithSeparator,
   isBrowserEnvValue,
 } from '@module-federation/sdk';
-import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { ModuleFederation } from '../core';
 import {
   globalLoading,
@@ -14,18 +12,20 @@ import {
   type RemoteEntryCacheMetadataV1,
 } from '../global';
 import { readRuntimeImage } from '../runtimeImage';
-import {
-  Remote,
-  RemoteEntryExports,
-  RemoteInfo,
-  ResourceLoadContext,
-} from '../type';
+import { RemoteEntryExports, RemoteInfo, ResourceLoadContext } from '../type';
 import { assert, error, warn } from './logger';
 import {
   RUNTIME_001,
   RUNTIME_008,
   runtimeDescMap,
 } from '@module-federation/error-codes';
+import { getRemoteEntryUniqueKey, isEsmRemoteType } from './remoteInfo';
+
+export {
+  getRemoteEntryUniqueKey,
+  getRemoteInfo,
+  isEsmRemoteType,
+} from './remoteInfo';
 
 const importCallback = '.then(callbacks[0]).catch(callbacks[1])';
 const remoteEntryLoadingOrigins = new WeakMap<
@@ -47,10 +47,6 @@ function isEsmRemoteEntryLoadError(err: unknown): boolean {
   return esmRemoteEntryLoadErrorMessages.some((loadErrorMessage) =>
     err.message.includes(loadErrorMessage),
   );
-}
-
-export function isEsmRemoteType(type: RemoteInfo['type']): boolean {
-  return type === 'esm' || type === 'module';
 }
 
 async function loadEsmEntry({
@@ -332,11 +328,6 @@ async function loadEntryNode({
     });
 }
 
-export function getRemoteEntryUniqueKey(remoteInfo: RemoteInfo): string {
-  const { entry, name } = remoteInfo;
-  return composeKeyWithSeparator(name, entry);
-}
-
 const warnedLegacyCacheEntries = new WeakSet<
   Promise<RemoteEntryExports | void>
 >();
@@ -598,14 +589,4 @@ export async function getRemoteEntry(params: {
   }
 
   return remoteEntryLoading;
-}
-
-export function getRemoteInfo(remote: Remote): RemoteInfo {
-  return {
-    ...remote,
-    entry: 'entry' in remote ? remote.entry : '',
-    type: remote.type || DEFAULT_REMOTE_TYPE,
-    entryGlobalName: remote.entryGlobalName || remote.name,
-    shareScope: remote.shareScope || DEFAULT_SCOPE,
-  };
 }

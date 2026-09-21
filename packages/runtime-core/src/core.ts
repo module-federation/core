@@ -22,7 +22,8 @@ import {
   LoadShareExtraOptions,
   SharedLoadContext,
 } from './type';
-import { getBuilderId, registerPlugins, getRemoteEntry, error } from './utils';
+import { getBuilderId, registerPlugins, error } from './utils';
+import type { getRemoteEntry } from './utils/load';
 import {
   getShortErrorMsg,
   RUNTIME_010,
@@ -36,9 +37,6 @@ import {
   SyncHook,
   SyncWaterfallHook,
 } from './utils/hooks';
-import type { SnapshotHandler } from './plugins/snapshot/SnapshotHandler';
-import type { RemoteHandler } from './remote';
-import type { SharedHandler } from './shared';
 import { DEFAULT_SCOPE } from './constant';
 import { createDefaultPlugins } from '#mf/default-plugins';
 import { createRemoteHandler } from '#mf/remote-handler';
@@ -95,9 +93,9 @@ export class ModuleFederation {
   version: string = __VERSION__;
   name: string;
   moduleCache: Map<string, Module> = new Map();
-  snapshotHandler: SnapshotHandler;
-  sharedHandler: SharedHandler;
-  remoteHandler: RemoteHandler;
+  snapshotHandler: ReturnType<typeof createSnapshotHandler>;
+  sharedHandler: ReturnType<typeof createSharedHandler>;
+  remoteHandler: ReturnType<typeof createRemoteHandler>;
   shareScopeMap: ShareScopeMap;
   loaderHook = new PluginSystem({
     // FIXME: may not be suitable , not open to the public yet

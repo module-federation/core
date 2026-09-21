@@ -1,4 +1,3 @@
-import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import os from 'node:os';
@@ -6,6 +5,7 @@ import path from 'node:path';
 import { clearImmediate, setImmediate } from 'node:timers';
 import { TextDecoder, TextEncoder } from 'node:util';
 import type webpack from 'webpack';
+import { runNodeWithConditions } from '../../../tools/testing/runNodeWithConditions';
 
 const packageDir = path.resolve(__dirname, '..');
 type CompilerFactory = typeof webpack;
@@ -14,18 +14,6 @@ type StatsModule = {
   identifier?: string;
   modules?: StatsModule[];
 };
-
-function containerEntryType(condition?: string): string {
-  return execFileSync(
-    process.execPath,
-    [
-      ...(condition ? [`--conditions=${condition}`] : []),
-      '-e',
-      "console.log(typeof require('#mf/container-entry').initContainerEntry)",
-    ],
-    { cwd: packageDir, encoding: 'utf8' },
-  ).trim();
-}
 
 function compilerCases(): [string, CompilerFactory][] {
   Object.defineProperties(globalThis, {
@@ -60,6 +48,7 @@ function flattenModules(modules: StatsModule[]): StatsModule[] {
 function compileRuntime(
   compilerFactory: CompilerFactory,
   compilerName: string,
+  condition: string,
 ): Promise<string[]> {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'mf-entry-selector-'));
   fs.writeFileSync(
@@ -82,11 +71,7 @@ function compileRuntime(
             'dist/index.js',
           ),
         },
-        conditionNames: [
-          'module-federation:no-container-entry',
-          'import',
-          '...',
-        ],
+        conditionNames: [condition, 'import', '...'],
       },
       optimization: {
         concatenateModules: false,
@@ -132,24 +117,70 @@ function compileRuntime(
 
 describe('container entry selector', () => {
   it('keeps container initialization available by default', () => {
-    expect(containerEntryType()).toBe('function');
+    expect(
+      runNodeWithConditions(
+        packageDir,
+        [],
+        "console.log(typeof require('#mf/container-entry').initContainerEntry)",
+      ),
+    ).toBe('function');
   });
 
   it('removes container initialization for the namespaced condition', () => {
-    expect(containerEntryType('module-federation:no-container-entry')).toBe(
-      'undefined',
+    expect(
+      runNodeWithConditions(
+        packageDir,
+        ['module-federation:no-container-entry'],
+        "console.log(typeof require('#mf/container-entry').initContainerEntry)",
+      ),
+    ).toBe('undefined');
+  });
+
+  it('removes the tree-shaking plugin only when shared is disabled', () => {
+    const code =
+      "const { createTreeShakingSharePlugin } = require('#mf/tree-shaking-share-plugin'); console.log(createTreeShakingSharePlugin({ webpackRequire: { federation: {} } })?.name || 'none')";
+    expect(runNodeWithConditions(packageDir, [], code)).toBe(
+      'tree-shake-plugin',
     );
+    expect(
+      runNodeWithConditions(packageDir, ['module-federation:no-shared'], code),
+    ).toBe('none');
   });
 
   it.each(compilerCases())(
     'removes the enabled entry from the %s graph',
     async (name, compiler) => {
-      const modules = await compileRuntime(compiler, name);
+      const modules = await compileRuntime(
+        compiler,
+        name,
+        'module-federation:no-container-entry',
+      );
       expect(modules).toContain('./dist/selectors/container-entry/disabled.js');
       expect(modules).not.toContain(
         './dist/selectors/container-entry/legacy.js',
       );
       expect(modules).not.toContain('./dist/initContainerEntry.js');
+    },
+  );
+
+  it.each(compilerCases())(
+    'removes shared adapters and the tree-shaking plugin from the %s graph',
+    async (name, compiler) => {
+      const modules = await compileRuntime(
+        compiler,
+        name,
+        'module-federation:no-shared',
+      );
+      expect(modules).toContain(
+        './dist/selectors/tree-shaking-share-plugin/disabled.js',
+      );
+      expect(modules).not.toContain(
+        './dist/selectors/tree-shaking-share-plugin/legacy.js',
+      );
+      expect(modules).not.toContain('./dist/consumes.js');
+      expect(modules).not.toContain('./dist/initializeSharing.js');
+      expect(modules).not.toContain('./dist/installInitialConsumes.js');
+      expect(modules).not.toContain('./dist/getSharedFallbackGetter.js');
     },
   );
 });

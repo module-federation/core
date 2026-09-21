@@ -42,6 +42,20 @@
     }
   },
   "imports": {
+    "#mf/remote-entry": {
+      "module-federation:no-remote": {
+        "types": "./dist/selectors/remote-entry/disabled.d.ts",
+        "import": "./dist/selectors/remote-entry/disabled.js",
+        "require": "./dist/selectors/remote-entry/disabled.cjs",
+        "default": "./dist/selectors/remote-entry/disabled.js"
+      },
+      "default": {
+        "types": "./dist/selectors/remote-entry/legacy.d.ts",
+        "import": "./dist/selectors/remote-entry/legacy.js",
+        "require": "./dist/selectors/remote-entry/legacy.cjs",
+        "default": "./dist/selectors/remote-entry/legacy.js"
+      }
+    },
     "#mf/remote-handler": {
       "module-federation:no-remote": {
         "types": "./dist/selectors/remote-handler/disabled.d.ts",

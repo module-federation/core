@@ -1,4 +1,3 @@
-import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import os from 'node:os';
@@ -6,6 +5,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { TextDecoder, TextEncoder } from 'node:util';
 import type webpack from 'webpack';
+import { runNodeWithConditions } from '../../../tools/testing/runNodeWithConditions';
 
 const packageDir = path.resolve(__dirname, '..');
 type CompilerFactory = typeof webpack;
@@ -14,15 +14,6 @@ type StatsModule = {
   identifier?: string;
   modules?: StatsModule[];
 };
-
-function runNode(conditions: string[], code: string): string {
-  const output = execFileSync(
-    process.execPath,
-    [...conditions.map((condition) => `--conditions=${condition}`), '-e', code],
-    { cwd: packageDir, encoding: 'utf8' },
-  );
-  return output.trim();
-}
 
 function compilerCases(): [string, CompilerFactory][] {
   Object.defineProperties(globalThis, {
@@ -120,7 +111,8 @@ function selectedModules(
 describe('remote module selector packaging', () => {
   it('keeps the remote module available by default', () => {
     expect(
-      runNode(
+      runNodeWithConditions(
+        packageDir,
         [],
         "const { Module } = require('#mf/remote-module'); console.log(new Module({ remoteInfo: { name: 'remote' }, host: {} }).remoteInfo.name)",
       ),
@@ -129,7 +121,8 @@ describe('remote module selector packaging', () => {
 
   it('exports the unavailable module for the no-remote condition', () => {
     expect(
-      runNode(
+      runNodeWithConditions(
+        packageDir,
         ['module-federation:no-remote'],
         "const { Module } = require('#mf/remote-module'); try { new Module() } catch (error) { console.log(error.message) }",
       ),
@@ -146,9 +139,11 @@ describe('remote module selector packaging', () => {
     );
     for (const modules of selected) {
       expect(modules).toContain('./dist/selectors/remote-module/disabled.js');
+      expect(modules).toContain('./dist/selectors/remote-entry/disabled.js');
       expect(modules).toContain('./dist/remote/disabled.js');
       expect(modules).not.toContain('./dist/selectors/remote-module/legacy.js');
       expect(modules).not.toContain('./dist/module/index.js');
+      expect(modules).not.toContain('./dist/utils/load.js');
     }
   });
 
@@ -161,13 +156,15 @@ describe('remote module selector packaging', () => {
       path.join(packageDir, 'dist/selectors/remote-module/enabled.js'),
     ).href;
     expect(
-      runNode(
+      runNodeWithConditions(
+        packageDir,
         [],
         `const { Module } = require(${JSON.stringify(cjsPath)}); console.log(new Module({ remoteInfo: { name: 'remote' }, host: {} }).remoteInfo.name)`,
       ),
     ).toBe('remote');
     expect(
-      runNode(
+      runNodeWithConditions(
+        packageDir,
         [],
         `import(${JSON.stringify(esmUrl)}).then(({ Module }) => console.log(new Module({ remoteInfo: { name: 'remote' }, host: {} }).remoteInfo.name))`,
       ),

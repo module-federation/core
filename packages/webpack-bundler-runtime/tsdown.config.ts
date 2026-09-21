@@ -30,6 +30,12 @@ export default defineConfig([
           'src/selectors/shared-runtime/enabled.ts',
         'selectors/shared-runtime/disabled':
           'src/selectors/shared-runtime/disabled.ts',
+        'selectors/tree-shaking-share-plugin/legacy':
+          'src/selectors/tree-shaking-share-plugin/legacy.ts',
+        'selectors/tree-shaking-share-plugin/enabled':
+          'src/selectors/tree-shaking-share-plugin/enabled.ts',
+        'selectors/tree-shaking-share-plugin/disabled':
+          'src/selectors/tree-shaking-share-plugin/disabled.ts',
       },
       external: ['@module-federation/*', 'webpack', /^#mf\//],
       noExternal: ['@module-federation/error-codes'],

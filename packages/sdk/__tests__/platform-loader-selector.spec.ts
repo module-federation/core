@@ -1,4 +1,3 @@
-import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import os from 'node:os';
@@ -6,6 +5,7 @@ import path from 'node:path';
 import { clearImmediate, setImmediate } from 'node:timers';
 import { TextDecoder, TextEncoder } from 'node:util';
 import type webpack from 'webpack';
+import { runNodeWithConditions } from '../../../tools/testing/runNodeWithConditions';
 
 const packageDir = path.resolve(__dirname, '..');
 type CompilerFactory = typeof webpack;
@@ -14,14 +14,6 @@ type StatsModule = {
   identifier?: string;
   modules?: StatsModule[];
 };
-
-function runSdk(condition: string, code: string): string {
-  return execFileSync(
-    process.execPath,
-    [`--conditions=${condition}`, '-e', code],
-    { cwd: packageDir, encoding: 'utf8' },
-  ).trim();
-}
 
 function compilerCases(): [string, CompilerFactory][] {
   Object.defineProperties(globalThis, {
@@ -113,8 +105,9 @@ describe('platform loader selector', () => {
     ['module-federation:target-universal', 'false'],
   ])('reports the %s environment', (condition, expected) => {
     expect(
-      runSdk(
-        condition,
+      runNodeWithConditions(
+        packageDir,
+        [condition],
         "console.log(require('./dist/index.cjs').isBrowserEnvValue)",
       ),
     ).toBe(expected);
@@ -122,8 +115,9 @@ describe('platform loader selector', () => {
 
   it('rejects Node evaluation in a web runtime', () => {
     expect(
-      runSdk(
-        'module-federation:target-web',
+      runNodeWithConditions(
+        packageDir,
+        ['module-federation:target-web'],
         "require('./dist/index.cjs').loadScriptNode('unused', {}).catch((error) => console.log(error.message))",
       ),
     ).toBe('Node script loading is disabled by module-federation:target-web.');
@@ -131,8 +125,9 @@ describe('platform loader selector', () => {
 
   it('evaluates a classic remote script in a worker runtime', () => {
     expect(
-      runSdk(
-        'module-federation:target-worker',
+      runNodeWithConditions(
+        packageDir,
+        ['module-federation:target-worker'],
         "globalThis.importScripts = () => { globalThis.__worker_remote__ = { value: 42 } }; require('./dist/index.cjs').loadScriptNode('remote.js', { attrs: { globalName: '__worker_remote__' } }).then((value) => console.log(JSON.stringify(value)))",
       ),
     ).toBe('{"value":42}');
@@ -140,8 +135,9 @@ describe('platform loader selector', () => {
 
   it('imports a module remote in a worker runtime', () => {
     expect(
-      runSdk(
-        'module-federation:target-worker',
+      runNodeWithConditions(
+        packageDir,
+        ['module-federation:target-worker'],
         "require('./dist/index.cjs').loadScriptNode('data:text/javascript,export default { value: 42 }', { attrs: { type: 'module' } }).then((value) => console.log(value.default.value))",
       ),
     ).toBe('42');
