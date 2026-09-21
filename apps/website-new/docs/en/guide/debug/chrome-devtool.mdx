@@ -27,19 +27,17 @@ evidence for an MF runtime failure, loading chain, or performance bottleneck.
 
 Module Federation Devtools provides two interface variants and supports **WebMCP**, allowing an AI agent to call debugging tools registered on the page.
 
-| Scenario                                                                                                                   | Variant                  | Interface                                                |
-| -------------------------------------------------------------------------------------------------------------------------- | ------------------------ | -------------------------------------------------------- |
-| Desktop Chrome with side panel or developer tools support                                                                  | Chrome (`dist/chrome`)   | Extension side panel or Module Federation DevTools panel |
-| An AI application's embedded browser that supports Chrome extensions but not side panels, such as Codex's embedded browser | Browser (`dist/browser`) | Compact popup opened from the extension icon             |
+| Scenario                                                                                               | Variant                  | Interface                                                |
+| ------------------------------------------------------------------------------------------------------ | ------------------------ | -------------------------------------------------------- |
+| Desktop Chrome with side panel or developer tools support                                              | Chrome (`dist/chrome`)   | Extension side panel or Module Federation DevTools panel |
+| An AI application's embedded browser that supports Chrome extensions, such as Codex's embedded browser | Browser (`dist/browser`) | Compact popup opened from the extension icon             |
 
-Both variants retain the same implemented debugging features: **module proxying and version switching, module information, dependency graphs, shared dependencies, React HMR / Fast Refresh, Loading Trace, and report export**. The Browser variant adapts the entry point and layout without removing these features. Both include WebMCP.
-
-Compatibility with GPT and other AI applications depends on the embedded browser supporting extension loading and the required extension APIs. Agent access also requires a host that supports WebMCP registration, discovery, and invocation. Tool discovery and a read-only state call have been verified in Codex's embedded browser; this does not imply support in every AI browser. Hosts without WebMCP can still use the extension UI.
+Both variants provide the same debugging features: **module proxying and version switching, module information, dependency graphs, shared dependencies, React HMR / Fast Refresh, Loading Trace, and report export**, and both support WebMCP. WebMCP tool discovery and invocation have been verified in Codex's embedded browser.
 
 ### Download and install the Browser variant
 
 1. Open [Module Federation Releases](https://github.com/module-federation/core/releases), choose a stable release containing a Browser extension asset, and download its Browser ZIP from the release notes or **Assets**. Browser ZIPs are published with `latest` releases; `next` previews do not create GitHub Releases or assets. Do not download GitHub's automatically generated **Source code** archives.
-2. Extract the ZIP and use the target embedded browser's extension manager to load the directory containing `manifest.json`. Installing the extension in desktop Chrome does not install it in an embedded browser.
+2. Extract the ZIP and load the extracted folder in the target embedded browser's extension manager.
 3. Open or refresh the target page, then click the extension icon. After an update, reload the extension and refresh existing pages.
 
 If a release does not yet include a Browser asset, run `pnpm --filter @module-federation/devtools run build:devtool` in the repository and load `packages/chrome-devtools/dist/browser`. Enable only one MF extension variant per browser to avoid duplicate injection. See below for Chrome Web Store installation; new feature availability depends on the published store version.
