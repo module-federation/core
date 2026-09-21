@@ -162,3 +162,5 @@ export function createRemoteHandlerHooks() {
     >(),
   });
 }
+
+export type RemoteHandlerHooks = ReturnType<typeof createRemoteHandlerHooks>;

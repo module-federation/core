@@ -37,7 +37,7 @@ import {
 } from '../utils';
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { Module, ModuleOptions } from '../module';
-import { createRemoteHandlerHooks } from './hooks';
+import { createRemoteHandlerHooks, type RemoteHandlerHooks } from './hooks';
 import { formatPreloadArgs, preloadAssets } from '../utils/preload';
 import { getGlobalShareScope } from '../utils/share';
 import { getGlobalRemoteInfo } from '../plugins/snapshot/SnapshotHandler';
@@ -57,7 +57,7 @@ export class RemoteHandler {
   host: ModuleFederation;
   idToRemoteMap: Record<string, { name: string; expose: string }>;
 
-  hooks = createRemoteHandlerHooks();
+  hooks: RemoteHandlerHooks = createRemoteHandlerHooks();
 
   constructor(host: ModuleFederation) {
     this.host = host;
