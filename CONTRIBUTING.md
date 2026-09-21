@@ -170,8 +170,8 @@ Merge changes to `.github/workflows/` into the default branch before cutting a r
 2. Run the [release action](https://github.com/module-federation/core/actions/workflows/release.yml) to publish packages to npm.
 3. Select `next` as the release version.
 4. Wait reviewers to approve.
-5. Review the generated prerelease draft linked in the workflow summary. It includes the Browser ZIP and remains unpublished until you click **Publish release**.
 
+Preview releases publish packages to the npm `next` channel only. They do not create GitHub Release drafts or Browser extension assets.
 
 ## Release the official version
 

@@ -118,23 +118,20 @@ test('creates a draft with GitHub notes, explicit previous tag and exact source;
   assert.ok(writes.every((c) => c.body?.draft !== false));
 });
 
-test('next creates a prerelease draft and leaves previous-tag selection to GitHub when omitted', async () => {
+test('next metadata is rejected before any GitHub request', async () => {
   const api = host();
-  await run(api, {
-    metadata: {
-      ...metadata,
-      version: '0.0.0-next-123',
-      tag: 'v0.0.0-next-123',
-      channel: 'next',
-    },
-  });
-  assert.equal(api.release.prerelease, true);
-  assert.equal(api.release.draft, true);
-  assert.equal(
-    api.calls.find((c) => c.route.endsWith('/generate-notes')).body
-      .previous_tag_name,
-    undefined,
+  await assert.rejects(
+    run(api, {
+      metadata: {
+        ...metadata,
+        version: '0.0.0-next-123',
+        tag: 'v0.0.0-next-123',
+        channel: 'next',
+      },
+    }),
+    /Invalid release metadata|only created for stable/,
   );
+  assert.equal(api.calls.length, 0);
 });
 
 test('rerun preserves manual notes and matching assets without regenerating or uploading', async () => {

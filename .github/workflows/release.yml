@@ -108,6 +108,7 @@ jobs:
       # Prepare the downloadable extension before npm publishing. Move extension
       # output out of dist so the existing npm library tarball is not enlarged.
       - name: Build Browser release asset
+        if: inputs.version == 'latest'
         env:
           RELEASE_CHANNEL: ${{ inputs.version }}
         run: |
@@ -117,6 +118,7 @@ jobs:
           mv packages/chrome-devtools/dist/{browser,chrome,.extension-build} "$RUNNER_TEMP/mf-extension-build/"
 
       - name: Save Browser release asset
+        if: inputs.version == 'latest'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: ${{ steps.source.outputs.artifact_name }}
@@ -135,7 +137,8 @@ jobs:
         run: |
           pnpm -r publish --tag next --no-git-checks
 
-      - name: Release summary
+      - name: Latest release summary
+        if: inputs.version == 'latest'
         run: |
           node --input-type=module <<'JS'
           import { appendFileSync, readFileSync } from 'node:fs';
@@ -144,9 +147,24 @@ jobs:
             `## npm release\n\n- Channel: ${release.channel}\n- Version: ${release.version}\n- Commit: ${release.sha}\n\nThe following job prepares the GitHub Release draft.\n`);
           JS
 
+      - name: Preview release summary
+        if: inputs.version == 'next'
+        run: |
+          VERSION=$(node -p "require('./packages/runtime/package.json').version")
+          {
+            echo "## npm preview release"
+            echo ""
+            echo "- **Channel:** \`next\`"
+            echo "- **Version:** \`$VERSION\`"
+            echo "- **Commit:** \`$(git rev-parse HEAD)\`"
+            echo ""
+            echo "Preview releases do not create GitHub Release drafts or Browser extension assets."
+          } >> "$GITHUB_STEP_SUMMARY"
+
   release-draft:
     name: Prepare GitHub Release draft
     needs: release
+    if: inputs.version == 'latest'
     runs-on: ubuntu-latest
     permissions:
       contents: write

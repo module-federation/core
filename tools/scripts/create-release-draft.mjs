@@ -40,14 +40,16 @@ export async function createReleaseDraft({
     !/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(metadata.version) ||
     metadata.tag !== `v${metadata.version}` ||
     !/^[a-f0-9]{40}$/.test(metadata.sha) ||
-    !['latest', 'next'].includes(metadata.channel) ||
+    metadata.channel !== 'latest' ||
     metadata.asset !== assetName ||
     !/^[a-f0-9]{64}$/.test(metadata.sha256) ||
     hash(archive) !== metadata.sha256
   )
     throw new Error('Invalid release metadata or archive checksum');
-  if ((metadata.channel === 'next') !== metadata.version.includes('-'))
-    throw new Error('Release channel and version disagree');
+  if (metadata.version.includes('-'))
+    throw new Error(
+      'GitHub Release drafts are only created for stable latest versions',
+    );
   const base = `/repos/${repository}`;
   const tag = encodeURIComponent(metadata.tag);
   const ref = await request(`${base}/git/ref/tags/${tag}`, { allow404: true });
@@ -81,7 +83,7 @@ export async function createReleaseDraft({
       if (target.sha !== metadata.sha)
         throw new Error('Existing draft targets a different commit');
     }
-    if (release.prerelease !== (metadata.channel === 'next'))
+    if (release.prerelease)
       throw new Error('Existing draft has a different release channel');
   } else {
     const notes = await request(`${base}/releases/generate-notes`, {
@@ -100,7 +102,7 @@ export async function createReleaseDraft({
         target_commitish: metadata.sha,
         name: metadata.tag,
         draft: true,
-        prerelease: metadata.channel === 'next',
+        prerelease: false,
         body: notes.body,
       },
     });
