@@ -409,11 +409,17 @@ export const createDevtoolsTools = (): DevtoolsTool[] => {
   ];
 };
 
+export const getModelContext = (): ModelContext | undefined =>
+  [(document as any).modelContext, (navigator as any).modelContext].find(
+    (context) =>
+      typeof context?.registerTool === 'function' &&
+      typeof context?.unregisterTool === 'function',
+  );
+
 // No polyfill: a JS shim cannot make a browser expose tools to an agent.
 // Support current document.modelContext and earlier navigator.modelContext hosts.
 export const registerDevtoolsWebMCP = async (
-  context: ModelContext | undefined = (document as any).modelContext ||
-    (navigator as any).modelContext,
+  context: ModelContext | undefined = getModelContext(),
 ): Promise<() => Promise<void>> => {
   if (!context?.registerTool || !context.unregisterTool) return async () => {};
   const registered: string[] = [];
@@ -436,4 +442,64 @@ export const registerDevtoolsWebMCP = async (
     throw error;
   }
   return cleanup;
+};
+
+// Start immediately, but allow an asynchronously installed host API to arrive.
+// The diagnostic contains no page data and can be inspected from the console.
+export const startDevtoolsWebMCP = (retryMs = 250, maxAttempts = 120) => {
+  const diagnostic = {
+    status: 'waiting' as
+      | 'waiting'
+      | 'registering'
+      | 'registered'
+      | 'unavailable'
+      | 'error',
+    attempts: 0,
+    tools: [] as string[],
+    error: undefined as string | undefined,
+  };
+  (window as any).__MF_DEVTOOLS_WEBMCP__ = diagnostic;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  let stopped = false;
+  let cleanup: (() => Promise<void>) | undefined;
+  const attempt = async () => {
+    if (stopped) return;
+    diagnostic.attempts++;
+    const context = getModelContext();
+    if (!context) {
+      if (diagnostic.attempts < maxAttempts) {
+        timer = setTimeout(() => void attempt(), retryMs);
+      } else {
+        diagnostic.status = 'unavailable';
+        console.warn(
+          '[Module Federation Devtools] WebMCP host API unavailable',
+          diagnostic,
+        );
+      }
+      return;
+    }
+    diagnostic.status = 'registering';
+    try {
+      cleanup = await registerDevtoolsWebMCP(context);
+      if (stopped) {
+        await cleanup();
+        return;
+      }
+      diagnostic.tools = createDevtoolsTools().map(({ name }) => name);
+      diagnostic.status = 'registered';
+    } catch (error) {
+      diagnostic.status = 'error';
+      diagnostic.error = error instanceof Error ? error.message : String(error);
+      console.warn(
+        '[Module Federation Devtools] WebMCP registration failed',
+        error,
+      );
+    }
+  };
+  void attempt();
+  return async () => {
+    stopped = true;
+    clearTimeout(timer);
+    await cleanup?.();
+  };
 };

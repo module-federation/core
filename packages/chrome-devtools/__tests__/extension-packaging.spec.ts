@@ -51,7 +51,8 @@ describe('extension packaging', () => {
         browser.content_scripts.some(
           (script: any) =>
             script.js.includes('static/js/webmcp.js') &&
-            script.world === 'MAIN',
+            script.world === 'MAIN' &&
+            script.run_at === 'document_start',
         ),
       ).toBe(true);
       for (const variant of ['chrome', 'browser'])

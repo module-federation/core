@@ -1,8 +1,3 @@
-import { registerDevtoolsWebMCP } from './webmcp';
+import { startDevtoolsWebMCP } from './webmcp';
 
-void registerDevtoolsWebMCP().catch((error) => {
-  console.warn(
-    '[Module Federation Devtools] WebMCP registration failed',
-    error,
-  );
-});
+startDevtoolsWebMCP();

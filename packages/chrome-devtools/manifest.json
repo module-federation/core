@@ -53,7 +53,7 @@
       "matches": ["<all_urls>"],
       "js": ["static/js/webmcp.js"],
       "world": "MAIN",
-      "run_at": "document_idle"
+      "run_at": "document_start"
     }
   ],
   "background": {

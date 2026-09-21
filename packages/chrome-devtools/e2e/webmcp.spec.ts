@@ -45,6 +45,12 @@ for (const variant of ['chrome', 'browser']) {
       await page.waitForFunction(
         () => (window as any).registeredTools?.size === 10,
       );
+      expect(
+        await page.evaluate(() => (window as any).__MF_DEVTOOLS_WEBMCP__),
+      ).toMatchObject({
+        status: 'registered',
+        tools: expect.arrayContaining(['mf_get_state', 'mf_set_hmr']),
+      });
       const execute = (name: string, input = {}) =>
         page.evaluate(
           async ({ name, input }) => {

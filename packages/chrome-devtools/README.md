@@ -40,8 +40,13 @@ registration when migrating; do not enable two variants on the same page.
 ## WebMCP
 
 Both extensions register page-scoped tools from a MAIN-world content script at
-`document_idle`. Tools remain available with the extension UI closed. Registration
+`document_start`. Tools remain available with the extension UI closed. Registration
 uses native `document.modelContext` or the earlier `navigator.modelContext` API.
+The entry retries host API detection every 250 ms for up to 30 seconds. Inspect
+`window.__MF_DEVTOOLS_WEBMCP__` in the page console for `waiting`, `registering`,
+`registered`, `unavailable` or `error`, tool names, and registration errors.
+After installing/reloading the extension, refresh existing pages. If the host API
+arrives after the retry window, refresh the page once it is available.
 When neither API is available, the extension continues to work normally without
 WebMCP. No polyfill is installed: the browser/agent must support discovering and
 calling registered tools. A page exposing tools alone does not establish that

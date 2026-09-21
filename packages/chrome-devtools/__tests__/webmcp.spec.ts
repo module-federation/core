@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, rs } from '@rstest/core';
 import {
   createDevtoolsTools,
+  startDevtoolsWebMCP,
   registerDevtoolsWebMCP,
 } from '../src/utils/chrome/webmcp';
 import { OBSERVABILITY_DEVTOOLS_STORAGE_KEY } from '../src/utils/chrome/messages';
@@ -202,5 +203,62 @@ describe('page WebMCP tools', () => {
     await expect(registerDevtoolsWebMCP(undefined)).resolves.toBeInstanceOf(
       Function,
     );
+  });
+});
+
+describe('WebMCP startup', () => {
+  afterEach(() => {
+    delete (document as any).modelContext;
+    delete (navigator as any).modelContext;
+    delete (window as any).__MF_DEVTOOLS_WEBMCP__;
+    rs.restoreAllMocks();
+  });
+
+  it('registers a late host once and reports registered names', async () => {
+    const stop = startDevtoolsWebMCP(5, 100);
+    expect((window as any).__MF_DEVTOOLS_WEBMCP__.status).toBe('waiting');
+    const context = { registerTool: rs.fn(), unregisterTool: rs.fn() };
+    (document as any).modelContext = {}; // An incomplete API must not hide the fallback.
+    (navigator as any).modelContext = context;
+    await new Promise((resolve) => setTimeout(resolve, 30));
+    expect(context.registerTool).toHaveBeenCalledTimes(10);
+    expect((window as any).__MF_DEVTOOLS_WEBMCP__).toMatchObject({
+      status: 'registered',
+      tools: createDevtoolsTools().map((t) => t.name),
+    });
+    await new Promise((resolve) => setTimeout(resolve, 15));
+    expect(context.registerTool).toHaveBeenCalledTimes(10);
+    await stop();
+    expect(context.unregisterTool).toHaveBeenCalledTimes(10);
+  });
+
+  it('reports an unavailable host and stops retrying', async () => {
+    rs.spyOn(console, 'warn').mockImplementation(() => {});
+    const stop = startDevtoolsWebMCP(5, 2);
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect((window as any).__MF_DEVTOOLS_WEBMCP__).toMatchObject({
+      status: 'unavailable',
+      attempts: 2,
+    });
+    await stop();
+  });
+
+  it('reports registration errors and rolls back without retrying duplicates', async () => {
+    rs.spyOn(console, 'warn').mockImplementation(() => {});
+    const context = {
+      registerTool: rs.fn(() => {
+        throw new Error('rejected');
+      }),
+      unregisterTool: rs.fn(),
+    };
+    (document as any).modelContext = context;
+    const stop = startDevtoolsWebMCP(5, 2);
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect((window as any).__MF_DEVTOOLS_WEBMCP__).toMatchObject({
+      status: 'error',
+      error: 'rejected',
+    });
+    expect(context.registerTool).toHaveBeenCalledTimes(1);
+    await stop();
   });
 });
