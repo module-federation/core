@@ -42,6 +42,9 @@ registration when migrating; do not enable two variants on the same page.
 Both extensions register page-scoped tools from a MAIN-world content script at
 `document_start`. Tools remain available with the extension UI closed. Registration
 uses native `document.modelContext` or the earlier `navigator.modelContext` API.
+`registerTool` is required; `unregisterTool` is optional. On hosts without
+unregistration, tools live until the document is destroyed; partial registration
+failures cannot be rolled back and require a page reload.
 The entry retries host API detection every 250 ms for up to 30 seconds. Inspect
 `window.__MF_DEVTOOLS_WEBMCP__` in the page console for `waiting`, `registering`,
 `registered`, `unavailable` or `error`, tool names, and registration errors.

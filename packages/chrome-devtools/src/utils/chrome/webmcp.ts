@@ -35,7 +35,7 @@ export interface DevtoolsTool {
 }
 export interface ModelContext {
   registerTool: (tool: DevtoolsTool) => void | Promise<void>;
-  unregisterTool: (name: string) => void | Promise<void>;
+  unregisterTool?: (name: string) => void | Promise<void>;
 }
 
 const isRecord = (value: unknown): value is Input =>
@@ -411,9 +411,7 @@ export const createDevtoolsTools = (): DevtoolsTool[] => {
 
 export const getModelContext = (): ModelContext | undefined =>
   [(document as any).modelContext, (navigator as any).modelContext].find(
-    (context) =>
-      typeof context?.registerTool === 'function' &&
-      typeof context?.unregisterTool === 'function',
+    (context) => typeof context?.registerTool === 'function',
   );
 
 // No polyfill: a JS shim cannot make a browser expose tools to an agent.
@@ -421,12 +419,13 @@ export const getModelContext = (): ModelContext | undefined =>
 export const registerDevtoolsWebMCP = async (
   context: ModelContext | undefined = getModelContext(),
 ): Promise<() => Promise<void>> => {
-  if (!context?.registerTool || !context.unregisterTool) return async () => {};
+  if (typeof context?.registerTool !== 'function') return async () => {};
   const registered: string[] = [];
   const cleanup = async () => {
     for (const name of registered.splice(0)) {
       try {
-        await context.unregisterTool(name);
+        if (typeof context.unregisterTool === 'function')
+          await context.unregisterTool(name);
       } catch {
         /* Host may already have disposed the document. */
       }

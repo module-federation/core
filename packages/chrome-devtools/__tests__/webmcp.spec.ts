@@ -232,6 +232,16 @@ describe('WebMCP startup', () => {
     expect(context.unregisterTool).toHaveBeenCalledTimes(10);
   });
 
+  it('registers on a document host without an unregister API', async () => {
+    const context = { registerTool: rs.fn() };
+    (document as any).modelContext = context;
+    const stop = startDevtoolsWebMCP();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(context.registerTool).toHaveBeenCalledTimes(10);
+    expect((window as any).__MF_DEVTOOLS_WEBMCP__.status).toBe('registered');
+    await expect(stop()).resolves.toBeUndefined();
+  });
+
   it('reports an unavailable host and stops retrying', async () => {
     rs.spyOn(console, 'warn').mockImplementation(() => {});
     const stop = startDevtoolsWebMCP(5, 2);

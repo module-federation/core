@@ -23,7 +23,14 @@ for (const variant of ['chrome', 'browser']) {
   test(`${variant}: page tools, startup state and popup layout`, async ({}, testInfo) => {
     const server = createServer((_request, response) => {
       response.setHeader('Content-Type', 'text/html');
-      response.end(fixture);
+      response.end(
+        variant === 'browser'
+          ? fixture.replace(
+              'unregisterTool(name) { window.registeredTools.delete(name); }',
+              '',
+            )
+          : fixture,
+      );
     });
     await new Promise<void>((resolve) =>
       server.listen(0, '127.0.0.1', resolve),
