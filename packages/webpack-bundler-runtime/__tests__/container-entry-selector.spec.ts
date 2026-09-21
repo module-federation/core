@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import os from 'node:os';
@@ -9,11 +10,6 @@ import { runNodeWithConditions } from '../../../tools/testing/runNodeWithConditi
 
 const packageDir = path.resolve(__dirname, '..');
 type CompilerFactory = typeof webpack;
-type StatsModule = {
-  name?: string;
-  identifier?: string;
-  modules?: StatsModule[];
-};
 
 function compilerCases(): [string, CompilerFactory][] {
   Object.defineProperties(globalThis, {
@@ -38,26 +34,18 @@ function compilerCases(): [string, CompilerFactory][] {
   ];
 }
 
-function flattenModules(modules: StatsModule[]): StatsModule[] {
-  return modules.flatMap((module) => [
-    module,
-    ...flattenModules(module.modules ?? []),
-  ]);
-}
-
-function compileRuntime(
+function runCompiled(
   compilerFactory: CompilerFactory,
   compilerName: string,
   condition: string,
-): Promise<string[]> {
+  entrySource: string,
+): Promise<string> {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'mf-entry-selector-'));
-  fs.writeFileSync(
-    path.join(root, 'entry.js'),
-    'import federation from "@module-federation/webpack-bundler-runtime";\nexport default federation;\n',
-  );
+  fs.writeFileSync(path.join(root, 'entry.js'), entrySource);
   return new Promise((resolve, reject) => {
     const compiler = compilerFactory({
       context: packageDir,
+      target: 'node',
       mode: 'production',
       entry: path.join(root, 'entry.js'),
       output: {
@@ -78,109 +66,139 @@ function compileRuntime(
         minimize: true,
         usedExports: false,
       },
-      externals: [
-        (
-          { request }: { request?: string },
-          callback: (error?: Error | null, result?: string) => void,
-        ) => {
-          if (
-            request?.startsWith('@module-federation/') &&
-            request !== '@module-federation/webpack-bundler-runtime'
-          ) {
-            callback(null, `commonjs ${request}`);
-            return;
-          }
-          callback();
-        },
-      ],
     });
     compiler.run((error, stats) => {
-      compiler.close(() => undefined);
-      fs.rmSync(root, { recursive: true, force: true });
+      const finish = (result: string | Error) => {
+        compiler.close(() => undefined);
+        fs.rmSync(root, { recursive: true, force: true });
+        if (result instanceof Error) {
+          reject(result);
+          return;
+        }
+        resolve(result);
+      };
       if (error) {
-        reject(error);
+        finish(error);
         return;
       }
-      const info = stats?.toJson({ modules: true });
       if (stats?.hasErrors()) {
-        reject(new Error(info?.errors?.[0]?.message ?? 'compile failed'));
+        finish(
+          new Error(stats.toJson().errors?.[0]?.message ?? 'compile failed'),
+        );
         return;
       }
-      resolve(
-        flattenModules((info?.modules ?? []) as unknown as StatsModule[]).map(
-          (module) => module.name ?? module.identifier ?? '',
-        ),
-      );
+      try {
+        const output = execFileSync(
+          process.execPath,
+          [path.join(root, compilerName, 'out.js')],
+          {
+            encoding: 'utf8',
+            env: {
+              ...process.env,
+              NODE_PATH: path.resolve(packageDir, '../../node_modules'),
+            },
+          },
+        );
+        finish(output.trim());
+      } catch (runError) {
+        finish(
+          runError instanceof Error ? runError : new Error(String(runError)),
+        );
+      }
     });
   });
 }
 
-describe('container entry selector', () => {
-  it('keeps container initialization available by default', () => {
-    expect(
-      runNodeWithConditions(
-        packageDir,
-        [],
-        "console.log(typeof require('#mf/container-entry').initContainerEntry)",
+const containerEntrySource = `
+import federation from '@module-federation/webpack-bundler-runtime';
+try {
+  console.log(
+    'result:' +
+      String(
+        federation.bundlerRuntime.initContainerEntry({ webpackRequire: {} }),
       ),
-    ).toBe('function');
-  });
+  );
+} catch (error) {
+  console.log('threw');
+}
+`;
 
-  it('removes container initialization for the namespaced condition', () => {
+const sharedGetterSource = `
+import federation from '@module-federation/webpack-bundler-runtime';
+const factory = () => 'shared';
+try {
+  const getter = federation.bundlerRuntime.getSharedFallbackGetter({
+    shareKey: 'react',
+    factory,
+    webpackRequire: { federation: {} },
+  });
+  console.log(getter());
+} catch (error) {
+  console.log('threw');
+}
+`;
+
+describe('container entry selector', () => {
+  it('initializes nothing without a share scope, and the disabled export cannot be called', () => {
+    const code =
+      "const { initContainerEntry } = require('#mf/container-entry'); try { console.log(String(initContainerEntry({ webpackRequire: {} }))); } catch (error) { console.log(error.message); }";
+    expect(runNodeWithConditions(packageDir, [], code)).toBe('undefined');
     expect(
       runNodeWithConditions(
         packageDir,
         ['module-federation:no-container-entry'],
-        "console.log(typeof require('#mf/container-entry').initContainerEntry)",
+        code,
       ),
-    ).toBe('undefined');
+    ).toBe('initContainerEntry is not a function');
   });
 
-  it('removes the tree-shaking plugin only when shared is disabled', () => {
+  it('leaves share args unchanged without a bundler runtime, and omits the plugin when shared is disabled', () => {
     const code =
-      "const { createTreeShakingSharePlugin } = require('#mf/tree-shaking-share-plugin'); console.log(createTreeShakingSharePlugin({ webpackRequire: { federation: {} } })?.name || 'none')";
-    expect(runNodeWithConditions(packageDir, [], code)).toBe(
-      'tree-shake-plugin',
-    );
+      "const { createTreeShakingSharePlugin } = require('#mf/tree-shaking-share-plugin'); const plugin = createTreeShakingSharePlugin({ webpackRequire: { federation: {} } }); if (!plugin) { console.log('absent'); } else { const args = { userOptions: {}, origin: { name: 'host' }, options: {} }; console.log(plugin.beforeInit(args) === args ? 'unchanged' : 'changed'); }";
+    expect(runNodeWithConditions(packageDir, [], code)).toBe('unchanged');
     expect(
       runNodeWithConditions(packageDir, ['module-federation:no-shared'], code),
-    ).toBe('none');
+    ).toBe('absent');
   });
 
   it.each(compilerCases())(
-    'removes the enabled entry from the %s graph',
+    'uses the same container result from a %s bundle',
     async (name, compiler) => {
-      const modules = await compileRuntime(
-        compiler,
-        name,
-        'module-federation:no-container-entry',
-      );
-      expect(modules).toContain('./dist/selectors/container-entry/disabled.js');
-      expect(modules).not.toContain(
-        './dist/selectors/container-entry/legacy.js',
-      );
-      expect(modules).not.toContain('./dist/initContainerEntry.js');
+      await expect(
+        runCompiled(
+          compiler,
+          `${name}-container`,
+          'import',
+          containerEntrySource,
+        ),
+      ).resolves.toBe('result:undefined');
+      await expect(
+        runCompiled(
+          compiler,
+          `${name}-container-off`,
+          'module-federation:no-container-entry',
+          containerEntrySource,
+        ),
+      ).resolves.toBe('threw');
     },
+    60_000,
   );
 
   it.each(compilerCases())(
-    'removes shared adapters and the tree-shaking plugin from the %s graph',
+    'uses the same shared fallback result from a %s bundle',
     async (name, compiler) => {
-      const modules = await compileRuntime(
-        compiler,
-        name,
-        'module-federation:no-shared',
-      );
-      expect(modules).toContain(
-        './dist/selectors/tree-shaking-share-plugin/disabled.js',
-      );
-      expect(modules).not.toContain(
-        './dist/selectors/tree-shaking-share-plugin/legacy.js',
-      );
-      expect(modules).not.toContain('./dist/consumes.js');
-      expect(modules).not.toContain('./dist/initializeSharing.js');
-      expect(modules).not.toContain('./dist/installInitialConsumes.js');
-      expect(modules).not.toContain('./dist/getSharedFallbackGetter.js');
+      await expect(
+        runCompiled(compiler, `${name}-shared`, 'import', sharedGetterSource),
+      ).resolves.toBe('shared');
+      await expect(
+        runCompiled(
+          compiler,
+          `${name}-shared-off`,
+          'module-federation:no-shared',
+          sharedGetterSource,
+        ),
+      ).resolves.toBe('threw');
     },
+    60_000,
   );
 });

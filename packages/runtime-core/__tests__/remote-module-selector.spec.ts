@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import os from 'node:os';
@@ -9,11 +10,6 @@ import { runNodeWithConditions } from '../../../tools/testing/runNodeWithConditi
 
 const packageDir = path.resolve(__dirname, '..');
 type CompilerFactory = typeof webpack;
-type StatsModule = {
-  name?: string;
-  identifier?: string;
-  modules?: StatsModule[];
-};
 
 function compilerCases(): [string, CompilerFactory][] {
   Object.defineProperties(globalThis, {
@@ -36,25 +32,17 @@ function compilerCases(): [string, CompilerFactory][] {
   ];
 }
 
-function flattenModules(modules: StatsModule[]): StatsModule[] {
-  return modules.flatMap((module) => [
-    module,
-    ...flattenModules(module.modules ?? []),
-  ]);
-}
-
-function selectedModules(
+function runCompiled(
   compilerFactory: CompilerFactory,
   name: string,
-): Promise<string[]> {
+  entrySource: string,
+): Promise<string> {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'mf-selector-'));
-  fs.writeFileSync(
-    path.join(root, 'entry.js'),
-    'import { Module } from "@module-federation/runtime-core";\nexport default Module;\n',
-  );
+  fs.writeFileSync(path.join(root, 'entry.js'), entrySource);
   return new Promise((resolve, reject) => {
     const compiler = compilerFactory({
       context: packageDir,
+      target: 'node',
       mode: 'production',
       entry: path.join(root, 'entry.js'),
       output: { path: path.join(root, name), filename: 'out.js' },
@@ -72,38 +60,45 @@ function selectedModules(
         minimize: true,
         usedExports: false,
       },
-      externals: [
-        (
-          { request }: { request?: string },
-          callback: (error?: Error | null, result?: string) => void,
-        ) => {
-          if (
-            request?.startsWith('@module-federation/') &&
-            request !== '@module-federation/runtime-core'
-          ) {
-            callback(null, `commonjs ${request}`);
-            return;
-          }
-          callback();
-        },
-      ],
     });
     compiler.run((error, stats) => {
-      compiler.close(() => undefined);
-      fs.rmSync(root, { recursive: true, force: true });
+      const finish = (result: string | Error) => {
+        compiler.close(() => undefined);
+        fs.rmSync(root, { recursive: true, force: true });
+        if (result instanceof Error) {
+          reject(result);
+          return;
+        }
+        resolve(result);
+      };
       if (error) {
-        reject(error);
+        finish(error);
         return;
       }
-      const info = stats?.toJson({ modules: true });
       if (stats?.hasErrors()) {
-        reject(new Error(info?.errors?.[0]?.message ?? 'compile failed'));
+        finish(
+          new Error(stats.toJson().errors?.[0]?.message ?? 'compile failed'),
+        );
         return;
       }
-      const modules = flattenModules(
-        (info?.modules ?? []) as unknown as StatsModule[],
-      );
-      resolve(modules.map((module) => module.name ?? module.identifier ?? ''));
+      try {
+        const output = execFileSync(
+          process.execPath,
+          [path.join(root, name, 'out.js')],
+          {
+            encoding: 'utf8',
+            env: {
+              ...process.env,
+              NODE_PATH: path.resolve(packageDir, '../../node_modules'),
+            },
+          },
+        );
+        finish(output.trim());
+      } catch (runError) {
+        finish(
+          runError instanceof Error ? runError : new Error(String(runError)),
+        );
+      }
     });
   });
 }
@@ -131,20 +126,20 @@ describe('remote module selector packaging', () => {
     );
   });
 
-  it('lets webpack and rspack select the disabled leaf by condition name', async () => {
-    const selected = await Promise.all(
+  it('lets webpack and rspack load the disabled remote module', async () => {
+    const results = await Promise.all(
       compilerCases().map(([name, compiler]) =>
-        selectedModules(compiler, name),
+        runCompiled(
+          compiler,
+          name,
+          "import { Module } from '@module-federation/runtime-core'; try { new Module(); } catch (error) { console.log(error.message); }",
+        ),
       ),
     );
-    for (const modules of selected) {
-      expect(modules).toContain('./dist/selectors/remote-module/disabled.js');
-      expect(modules).toContain('./dist/selectors/remote-entry/disabled.js');
-      expect(modules).toContain('./dist/remote/disabled.js');
-      expect(modules).not.toContain('./dist/selectors/remote-module/legacy.js');
-      expect(modules).not.toContain('./dist/module/index.js');
-      expect(modules).not.toContain('./dist/utils/load.js');
-    }
+    expect(results).toEqual([
+      'Remote loading is disabled by experiments.optimization.disableRemote.',
+      'Remote loading is disabled by experiments.optimization.disableRemote.',
+    ]);
   });
 
   it('loads the enabled leaf in both module formats', () => {

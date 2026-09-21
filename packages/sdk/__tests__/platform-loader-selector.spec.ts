@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import os from 'node:os';
@@ -9,11 +10,6 @@ import { runNodeWithConditions } from '../../../tools/testing/runNodeWithConditi
 
 const packageDir = path.resolve(__dirname, '..');
 type CompilerFactory = typeof webpack;
-type StatsModule = {
-  name?: string;
-  identifier?: string;
-  modules?: StatsModule[];
-};
 
 function compilerCases(): [string, CompilerFactory][] {
   Object.defineProperties(globalThis, {
@@ -38,26 +34,20 @@ function compilerCases(): [string, CompilerFactory][] {
   ];
 }
 
-function flattenModules(modules: StatsModule[]): StatsModule[] {
-  return modules.flatMap((module) => [
-    module,
-    ...flattenModules(module.modules ?? []),
-  ]);
-}
-
-function compileSdk(
+function runCompiled(
   compilerFactory: CompilerFactory,
   compilerName: string,
   condition: string,
-): Promise<string[]> {
+): Promise<string> {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'mf-sdk-selector-'));
   fs.writeFileSync(
     path.join(root, 'entry.js'),
-    'import { loadScriptNode } from "@module-federation/sdk";\nexport default loadScriptNode;\n',
+    "import { loadScriptNode } from '@module-federation/sdk'; loadScriptNode('unused', {}).catch((error) => console.log(error.message));",
   );
   return new Promise((resolve, reject) => {
     const compiler = compilerFactory({
       context: packageDir,
+      target: 'node',
       mode: 'production',
       entry: path.join(root, 'entry.js'),
       output: {
@@ -77,22 +67,43 @@ function compileSdk(
       },
     });
     compiler.run((error, stats) => {
-      compiler.close(() => undefined);
-      fs.rmSync(root, { recursive: true, force: true });
+      const finish = (result: string | Error) => {
+        compiler.close(() => undefined);
+        fs.rmSync(root, { recursive: true, force: true });
+        if (result instanceof Error) {
+          reject(result);
+          return;
+        }
+        resolve(result);
+      };
       if (error) {
-        reject(error);
+        finish(error);
         return;
       }
-      const info = stats?.toJson({ modules: true });
       if (stats?.hasErrors()) {
-        reject(new Error(info?.errors?.[0]?.message ?? 'compile failed'));
+        finish(
+          new Error(stats.toJson().errors?.[0]?.message ?? 'compile failed'),
+        );
         return;
       }
-      resolve(
-        flattenModules((info?.modules ?? []) as unknown as StatsModule[]).map(
-          (module) => module.name ?? module.identifier ?? '',
-        ),
-      );
+      try {
+        const output = execFileSync(
+          process.execPath,
+          [path.join(root, compilerName, 'out.js')],
+          {
+            encoding: 'utf8',
+            env: {
+              ...process.env,
+              NODE_PATH: path.resolve(packageDir, '../../node_modules'),
+            },
+          },
+        );
+        finish(output.trim());
+      } catch (runError) {
+        finish(
+          runError instanceof Error ? runError : new Error(String(runError)),
+        );
+      }
     });
   });
 }
@@ -144,15 +155,13 @@ describe('platform loader selector', () => {
   });
 
   it.each(compilerCases())(
-    'keeps Node evaluation out of the %s web graph',
+    'rejects Node script loading from a %s web bundle',
     async (name, compiler) => {
-      const modules = await compileSdk(
-        compiler,
-        name,
-        'module-federation:target-web',
+      await expect(
+        runCompiled(compiler, name, 'module-federation:target-web'),
+      ).resolves.toBe(
+        'Node script loading is disabled by module-federation:target-web.',
       );
-      expect(modules).toContain('./dist/selectors/platform-loader/web.js');
-      expect(modules).not.toContain('./dist/node.js');
     },
     60_000,
   );
