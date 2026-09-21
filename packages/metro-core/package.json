@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/metro",
-  "version": "2.9.0",
+  "version": "2.9.1",
   "description": "Module Federation for Metro bundler",
   "keywords": [
     "module-federation",

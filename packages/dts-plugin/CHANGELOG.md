@@ -1,5 +1,15 @@
 # @module-federation/dts-plugin
 
+## 2.9.1
+
+### Patch Changes
+
+- 796d6ad: Update ws to 8.21.3 to address CVE-2026-62389.
+  - @module-federation/sdk@2.9.1
+  - @module-federation/managers@2.9.1
+  - @module-federation/third-party-dts-extractor@2.9.1
+  - @module-federation/error-codes@2.9.1
+
 ## 2.9.0
 
 ### Patch Changes

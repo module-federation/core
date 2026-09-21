@@ -1,5 +1,18 @@
 # @module-federation/nextjs-mf
 
+## 8.8.75
+
+### Patch Changes
+
+- 85d78e2: Fix server-side onLoad crash when async remote module factories are used during the webpack build/SSR path. Await async factory results before proxy-wrapping, return a wrapper factory for exposeModuleFactory, and preserve class constructor semantics via Proxy apply/construct traps.
+- Updated dependencies [92afef1]
+  - @module-federation/runtime-core@2.9.1
+  - @module-federation/enhanced@2.9.1
+  - @module-federation/runtime@2.9.1
+  - @module-federation/node@2.7.51
+  - @module-federation/webpack-bundler-runtime@2.9.1
+  - @module-federation/sdk@2.9.1
+
 ## 8.8.74
 
 ### Patch Changes

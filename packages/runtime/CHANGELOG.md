@@ -1,5 +1,14 @@
 # @module-federation/runtime
 
+## 2.9.1
+
+### Patch Changes
+
+- Updated dependencies [92afef1]
+  - @module-federation/runtime-core@2.9.1
+  - @module-federation/sdk@2.9.1
+  - @module-federation/error-codes@2.9.1
+
 ## 2.9.0
 
 ### Minor Changes
