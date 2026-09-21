@@ -48,7 +48,7 @@ function runCompiled(
     const compiler = compilerFactory({
       context: packageDir,
       target: 'node',
-      mode: 'production',
+      mode: 'none',
       entry: path.join(root, 'entry.js'),
       output: {
         path: path.join(root, compilerName),
@@ -61,9 +61,7 @@ function runCompiled(
         conditionNames: [condition, 'import', '...'],
       },
       optimization: {
-        concatenateModules: false,
-        minimize: true,
-        usedExports: false,
+        minimize: false,
       },
     });
     compiler.run((error, stats) => {
