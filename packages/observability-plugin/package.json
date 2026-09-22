@@ -83,6 +83,7 @@
   },
   "scripts": {
     "build": "tsdown --config tsdown.config.ts && cp *.md dist",
+    "size": "pnpm run build && node ./scripts/browser-size.mjs",
     "test": "rstest -u",
     "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",
     "pre-release": "pnpm run test && pnpm run build"
