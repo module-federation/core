@@ -1,18 +1,23 @@
 import type { ModuleFederation, getInstance } from '@module-federation/runtime';
 import type { BasicProviderModuleInfo } from '@module-federation/sdk';
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode, useEffect, useRef, useState } from 'react';
 import type { ErrorInfo } from './AwaitDataFetch';
 import type { DataFetchParams, NoSSRRemoteInfo } from './types';
 import { HydratedStylesheetAssets } from './HydratedStylesheetAssets';
 
 import logger from './logger';
-import { AwaitDataFetch, DelayedLoading } from './AwaitDataFetch';
+import {
+  AwaitDataFetch,
+  DelayedLoading,
+  transformError,
+} from './AwaitDataFetch';
 import {
   fetchData,
   getDataFetchItem,
   getDataFetchMapKey,
   getDataFetchInfo,
   getLoadedRemoteInfos,
+  resetDataFetchResult,
   setDataFetchItemLoadedStatus,
   wrapDataFetchId,
 } from './utils';
@@ -223,6 +228,15 @@ export function createLazyComponent<T, E extends keyof T>(
       : Parameters<T[E]>[0] & ReactKey
     : ReactKey;
   type LoadedModule = Record<string, React.FC> & Record<symbol, string>;
+  type NoSSRState =
+    | { status: 'loading' }
+    | {
+        status: 'loaded';
+        Component: React.FC<Omit<ComponentType, 'key'> & { mfData?: unknown }>;
+        data: unknown;
+      }
+    | { status: 'error'; error: ErrorInfo };
+  type NoSSRLoadedState = Extract<NoSSRState, { status: 'loaded' }>;
   const exportName = options?.export || 'default';
   let loaderPromise: Promise<LoadedModule> | undefined;
 
@@ -292,6 +306,10 @@ export function createLazyComponent<T, E extends keyof T>(
       const errMsg = `${DATA_FETCH_ERROR_PREFIX}${wrapDataFetchId(dataFetchMapKey)}${err}`;
       logger.debug(errMsg);
       throw new Error(errMsg);
+    } finally {
+      if (noSSR && dataFetchMapKey) {
+        resetDataFetchResult(dataFetchMapKey);
+      }
     }
   };
 
@@ -300,8 +318,7 @@ export function createLazyComponent<T, E extends keyof T>(
       throw error instanceof Error ? error.message : error;
     });
 
-  const LazyComponent = React.lazy(async () => {
-    const m = await callLoader();
+  const createLoadedComponent = (m: LoadedModule) => {
     const moduleId = m && m[Symbol.for('mf_module_id')];
     const loadedRemoteInfo = getLoadedRemoteInfos(moduleId, instance);
     loadedRemoteInfo?.snapshot;
@@ -331,25 +348,23 @@ export function createLazyComponent<T, E extends keyof T>(
 
     const Com = m[exportName] as React.FC<ComponentType>;
     if (exportName in m && typeof Com === 'function') {
-      return {
-        default: (props: Omit<ComponentType, 'key'> & { mfData?: unknown }) => (
-          <>
-            {globalThis.FEDERATION_SSR && dataFetchMapKey && (
-              <script
-                suppressHydrationWarning
-                dangerouslySetInnerHTML={{
-                  __html: String.raw`
+      return (props: Omit<ComponentType, 'key'> & { mfData?: unknown }) => (
+        <>
+          {globalThis.FEDERATION_SSR && dataFetchMapKey && (
+            <script
+              suppressHydrationWarning
+              dangerouslySetInnerHTML={{
+                __html: String.raw`
                   globalThis['${DATA_FETCH_FUNCTION}'] = globalThis['${DATA_FETCH_FUNCTION}'] || [];
                   globalThis['${DATA_FETCH_FUNCTION}'].push(['${dataFetchMapKey}',${JSON.stringify(props.mfData)}]);
                   `,
-                }}
-              ></script>
-            )}
-            {globalThis.FEDERATION_SSR && assets}
-            <Com {...props} />
-          </>
-        ),
-      };
+              }}
+            ></script>
+          )}
+          {globalThis.FEDERATION_SSR && assets}
+          <Com {...props} />
+        </>
+      );
       // eslint-disable-next-line max-lines
     } else {
       throw Error(
@@ -358,6 +373,13 @@ export function createLazyComponent<T, E extends keyof T>(
         )}`,
       );
     }
+  };
+
+  const LazyComponent = React.lazy(async () => {
+    const m = await callLoader();
+    return {
+      default: createLoadedComponent(m),
+    };
   });
 
   return (props: ComponentType) => {
@@ -376,11 +398,41 @@ export function createLazyComponent<T, E extends keyof T>(
         </AwaitDataFetch>
       );
     } else {
-      const [dataPromise] = useState(() =>
-        typeof window === 'undefined' ? undefined : getNoSSRData(),
-      );
+      const [state, setState] = useState<NoSSRState>({ status: 'loading' });
+      const loadPromiseRef = useRef<Promise<NoSSRLoadedState>>();
 
-      if (!dataPromise) {
+      useEffect(() => {
+        let isMounted = true;
+
+        loadPromiseRef.current ??= (async () => {
+          const data = await getNoSSRData();
+          const m = await callLoader();
+          const Component = createLoadedComponent(m);
+          return { status: 'loaded', Component, data };
+        })();
+
+        loadPromiseRef.current.then(
+          (loadedState) => {
+            if (isMounted) {
+              setState(loadedState);
+            }
+          },
+          (error) => {
+            if (isMounted) {
+              setState({
+                status: 'error',
+                error: transformError(error as Error),
+              });
+            }
+          },
+        );
+
+        return () => {
+          isMounted = false;
+        };
+      }, []);
+
+      if (typeof window === 'undefined') {
         return (
           <DelayedLoading delayLoading={options.delayLoading}>
             {options.loading}
@@ -388,17 +440,26 @@ export function createLazyComponent<T, E extends keyof T>(
         );
       }
 
-      return (
-        <AwaitDataFetch
-          resolve={dataPromise}
-          loading={options.loading}
-          delayLoading={options.delayLoading}
-          errorElement={options.fallback}
-        >
-          {/* @ts-expect-error ignore */}
-          {(data) => <LazyComponent {...args} mfData={data} />}
-        </AwaitDataFetch>
-      );
+      if (state.status === 'error') {
+        return (
+          <>
+            {typeof options.fallback === 'function'
+              ? options.fallback(state.error)
+              : options.fallback}
+          </>
+        );
+      }
+
+      if (state.status === 'loading') {
+        return (
+          <DelayedLoading delayLoading={options.delayLoading}>
+            {options.loading}
+          </DelayedLoading>
+        );
+      }
+
+      const LoadedComponent = state.Component;
+      return <LoadedComponent {...args} mfData={state.data} />;
     }
   };
 }

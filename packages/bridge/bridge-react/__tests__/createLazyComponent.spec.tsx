@@ -17,6 +17,7 @@ const mockGetInstance = runtime.getInstance as jest.Mock;
 const mockGetLoadedRemoteInfos = utils.getLoadedRemoteInfos as jest.Mock;
 const mockGetDataFetchMapKey = utils.getDataFetchMapKey as jest.Mock;
 const mockFetchData = utils.fetchData as jest.Mock;
+const mockResetDataFetchResult = utils.resetDataFetchResult as jest.Mock;
 
 const MockComponent = () => <div>Mock Component</div>;
 const LoadingComponent = () => <div>Loading...</div>;
@@ -187,6 +188,7 @@ describe('createLazyComponent', () => {
     });
     expect(loader).toHaveBeenCalledTimes(1);
     expect(loadingMounted).toHaveBeenCalledTimes(1);
+    expect(mockFetchData).toHaveBeenCalledTimes(1);
     expect(mockFetchData).toHaveBeenCalledWith(
       'data-fetch-key',
       {
@@ -194,6 +196,108 @@ describe('createLazyComponent', () => {
         isDowngrade: false,
       },
       expect.any(Object),
+    );
+  });
+
+  it('should not fetch data again on a CSR component rerender', async () => {
+    const dataDeferred = createDeferred<{ message: string }>();
+    mockFetchData.mockReturnValue(dataDeferred.promise);
+    const LazyComponent = createLazyComponent({
+      loader: jest.fn().mockResolvedValue({
+        default: (props: { mfData: { message: string } }) => (
+          <div>{props.mfData.message}</div>
+        ),
+        [Symbol.for('mf_module_id')]: 'remoteApp/Component',
+      }),
+      instance: mockInstance,
+      loading: <LoadingComponent />,
+      fallback: <ErrorComponent />,
+      noSSR: true,
+    });
+
+    const { rerender } = render(<LazyComponent />);
+    rerender(<LazyComponent />);
+
+    await waitFor(() => {
+      expect(mockFetchData).toHaveBeenCalledTimes(1);
+    });
+
+    await act(async () => {
+      dataDeferred.resolve({ message: 'Rerendered data' });
+      await dataDeferred.promise;
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Rerendered data')).toBeInTheDocument();
+    });
+    expect(mockFetchData).toHaveBeenCalledTimes(1);
+  });
+
+  it('should reuse the in-flight CSR request when StrictMode replays effects', async () => {
+    mockFetchData.mockResolvedValue({ message: 'Strict mode data' });
+    const loader = jest.fn().mockResolvedValue({
+      default: (props: { mfData: { message: string } }) => (
+        <div>{props.mfData.message}</div>
+      ),
+      [Symbol.for('mf_module_id')]: 'remoteApp/Component',
+    });
+    const LazyComponent = createLazyComponent({
+      loader,
+      instance: mockInstance,
+      loading: <LoadingComponent />,
+      fallback: <ErrorComponent />,
+      noSSR: true,
+    });
+
+    render(
+      <React.StrictMode>
+        <LazyComponent />
+      </React.StrictMode>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Strict mode data')).toBeInTheDocument();
+    });
+    expect(loader).toHaveBeenCalledTimes(1);
+    expect(mockFetchData).toHaveBeenCalledTimes(1);
+  });
+
+  it('should fetch data again after the CSR component remounts', async () => {
+    mockFetchData
+      .mockResolvedValueOnce({ message: 'First mount' })
+      .mockResolvedValueOnce({ message: 'Second mount' });
+    const LazyComponent = createLazyComponent({
+      loader: jest.fn().mockResolvedValue({
+        default: (props: { mfData: { message: string } }) => (
+          <div>{props.mfData.message}</div>
+        ),
+        [Symbol.for('mf_module_id')]: 'remoteApp/Component',
+      }),
+      instance: mockInstance,
+      loading: <LoadingComponent />,
+      fallback: <ErrorComponent />,
+      noSSR: true,
+    });
+
+    const firstRender = render(<LazyComponent />);
+    await waitFor(() => {
+      expect(screen.getByText('First mount')).toBeInTheDocument();
+    });
+    firstRender.unmount();
+
+    render(<LazyComponent />);
+    await waitFor(() => {
+      expect(screen.getByText('Second mount')).toBeInTheDocument();
+    });
+    expect(mockFetchData).toHaveBeenCalledTimes(2);
+    expect(mockResetDataFetchResult).toHaveBeenCalledTimes(2);
+    expect(mockResetDataFetchResult).toHaveBeenNthCalledWith(
+      1,
+      'data-fetch-key',
+    );
+    expect(mockResetDataFetchResult).toHaveBeenNthCalledWith(
+      2,
+      'data-fetch-key',
     );
   });
 
