@@ -1,4 +1,4 @@
-import { satisfies } from 'semver';
+import { satisfy } from '@module-federation/runtime';
 import type {
   ObservabilityRuntimeOrigin,
   ObservabilityRuntimeShareScopeMap,
@@ -323,9 +323,7 @@ export function getRuntimeSharedCompatibility(
     return true;
   }
   try {
-    return satisfies(version, requiredVersion, {
-      includePrerelease: true,
-    });
+    return satisfy(version, requiredVersion);
   } catch {
     return false;
   }

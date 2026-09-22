@@ -64,14 +64,14 @@
       ]
     }
   },
+  "peerDependencies": {
+    "@module-federation/runtime": "^2.5.0"
+  },
   "devDependencies": {
-    "@module-federation/runtime": "workspace:*",
-    "@types/semver": "^7.5.8"
+    "@module-federation/runtime": "workspace:*"
   },
   "dependencies": {
-    "@module-federation/sdk": "workspace:*",
-    "@divebell/core": "0.0.23",
-    "semver": "^7.7.4"
+    "@module-federation/sdk": "workspace:*"
   },
   "scripts": {
     "build": "tsdown --config tsdown.config.ts && cp *.md dist",
