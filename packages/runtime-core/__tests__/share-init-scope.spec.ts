@@ -200,7 +200,7 @@ describe('share re-registration guard', () => {
         lodash: {
           version: '4.17.20',
           strategy: 'version-first',
-          lib: () => ({ version: 'host-4.17.20' }),
+          get: () => Promise.resolve(() => ({ version: 'host-4.17.20' })),
         },
       },
     });
@@ -229,8 +229,7 @@ describe('share re-registration guard', () => {
           version: '4.17.21',
           scope: ['default'],
           from: 'remote1',
-          lib: () => ({ version: 'remote-4.17.21' }),
-          loaded: true,
+          get: () => () => ({ version: 'remote-4.17.21' }),
         };
       },
     });
