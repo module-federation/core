@@ -182,6 +182,72 @@ describe('share re-registration guard', () => {
     expect(remote.getEntryCalls).toBe(1);
   });
 
+  it('initializes remotes for a later version-first consumer when a loaded-first consumer initialized the scope first', async () => {
+    // Mixed strategies within one share scope: the first consumer is
+    // loaded-first, so the scope is marked initialized without fetching any
+    // remote entries. The second consumer is version-first and must still
+    // initialize the scope's remotes so remote-provided shares join version
+    // selection.
+    const mf = new ModuleFederation({
+      name: 'mixed-strategy-host',
+      remotes: [],
+      shared: {
+        react: {
+          version: '18.2.0',
+          strategy: 'loaded-first',
+          lib: () => ({ name: 'host-react' }),
+        },
+        lodash: {
+          version: '4.17.20',
+          strategy: 'version-first',
+          lib: () => ({ version: 'host-4.17.20' }),
+        },
+      },
+    });
+
+    mf.registerRemotes([
+      {
+        name: 'remote1',
+        entry: 'https://example.com/remoteEntry.js',
+        shareScope: 'default',
+      },
+    ]);
+    const module = mf.initRawContainer(
+      'remote1',
+      'https://example.com/remoteEntry.js',
+      {},
+    ) as any;
+
+    const state = { initCalls: 0 };
+    module.getEntry = async () => ({
+      init: (shareScope: Record<string, any>) => {
+        state.initCalls += 1;
+        // Register the remote's share into the host's share scope, like a
+        // real remote entry does during container init.
+        shareScope.lodash = shareScope.lodash || {};
+        shareScope.lodash['4.17.21'] = {
+          version: '4.17.21',
+          scope: ['default'],
+          from: 'remote1',
+          lib: () => ({ version: 'remote-4.17.21' }),
+          loaded: true,
+        };
+      },
+    });
+
+    // loaded-first consumer: pushes the init token without remote init.
+    await mf.loadShare('react');
+    expect(state.initCalls).toBe(0);
+
+    // version-first consumer: the guard must not hide the missing remote
+    // initialization from the first (loaded-first) run.
+    const lodash = await mf.loadShare<{ version: string }>('lodash');
+
+    expect(state.initCalls).toBe(1);
+    // The remote-provided higher version participates in resolution.
+    expect(lodash?.()).toEqual({ version: 'remote-4.17.21' });
+  });
+
   it('retries share scope initialization after a failed initialization', async () => {
     const mf = createVersionFirstHost([
       {
