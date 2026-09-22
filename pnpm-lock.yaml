@@ -3999,6 +3999,9 @@ importers:
         specifier: workspace:*
         version: link:../sdk
     devDependencies:
+      '@divebell/core':
+        specifier: 0.0.23
+        version: 0.0.23
       '@module-federation/runtime':
         specifier: workspace:*
         version: link:../runtime
