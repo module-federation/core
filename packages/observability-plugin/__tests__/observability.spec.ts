@@ -53,6 +53,11 @@ const createShared = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
+const flushDivebell = () =>
+  new Promise<void>((resolve) => {
+    setTimeout(resolve, 0);
+  });
+
 const createBridgeOperation = (overrides: Record<string, unknown> = {}) => ({
   side: 'consumer',
   framework: 'react',
@@ -1241,6 +1246,7 @@ describe('ObservabilityPlugin', () => {
     });
     (first as any).markComponentLoaded({ requestId: 'remote/Button' });
     (second as any).markComponentLoaded({ requestId: 'remote/Button' });
+    await flushDivebell();
 
     expect(
       observability.findReports({ instanceRef: 'mf-1' })[0].summary
@@ -1559,6 +1565,7 @@ describe('ObservabilityPlugin', () => {
       });
       observability.plugin.apply?.(first as any);
       observability.plugin.apply?.(second as any);
+      await flushDivebell();
       const runtimeStateResult = await runtime.runAction(
         'mf:get-runtime-state',
       );
@@ -2445,6 +2452,7 @@ describe('ObservabilityPlugin', () => {
         ],
       },
     });
+    await flushDivebell();
 
     expect(runtime.getSnapshot().targets['mf:remote:remote']).toMatchObject({
       status: 'loading',
@@ -2761,6 +2769,7 @@ describe('ObservabilityPlugin', () => {
       emitRemoteStart(observability, {
         origin: (globalObject.__FEDERATION__ as any).__INSTANCES__[0],
       });
+      await flushDivebell();
 
       const globalSummary = await runtime.runAction('mf:get-federation-global');
       expect(globalSummary.success).toBe(true);
@@ -2843,6 +2852,7 @@ describe('ObservabilityPlugin', () => {
         ],
       },
     });
+    await flushDivebell();
 
     expect(host.__DIVEBELL__).toBeDefined();
     expect(
@@ -2852,6 +2862,24 @@ describe('ObservabilityPlugin', () => {
       type: 'mf.remote',
       source: 'mf-test',
     });
+  });
+
+  it('does not load the optional Divebell adapter when disabled', async () => {
+    const host: DivebellWindowHost = {};
+    const observability = createObservability({
+      level: 'verbose',
+      console: false,
+      divebell: {
+        enabled: false,
+        host,
+        source: 'mf-test',
+      },
+    });
+
+    emitRemoteStart(observability);
+    await flushDivebell();
+
+    expect(host.__DIVEBELL__).toBeUndefined();
   });
 
   it('posts events to the local collector outside debug mode', () => {
@@ -5282,6 +5310,7 @@ describe('ObservabilityPlugin', () => {
     const plugin = observability.plugin as SharedHookFixturePlugin;
 
     plugin.beforeLoadShare?.(sharedArgs);
+    await flushDivebell();
 
     expect(runtime.getSnapshot().targets[sharedTargetId]).toMatchObject({
       status: 'loading',
@@ -5389,6 +5418,7 @@ describe('ObservabilityPlugin', () => {
         },
       },
     });
+    await flushDivebell();
 
     const report = observability.getLatestReport();
 
@@ -5657,6 +5687,7 @@ describe('ObservabilityPlugin', () => {
       origin: enabledOrigin,
       recovered: true,
     });
+    await flushDivebell();
 
     const waitResult = await runtime.waitFor({
       id: sharedTargetId,
@@ -5710,6 +5741,7 @@ describe('ObservabilityPlugin', () => {
       origin: enabledOrigin,
       error: new Error('[ Federation Runtime ]: RUNTIME-005 shared failed'),
     });
+    await flushDivebell();
 
     const waitResult = await runtime.waitFor({
       id: sharedTargetId,

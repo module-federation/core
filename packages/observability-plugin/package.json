@@ -65,9 +65,16 @@
     }
   },
   "peerDependencies": {
+    "@divebell/core": ">=0.0.23",
     "@module-federation/runtime": "^2.5.0"
   },
+  "peerDependenciesMeta": {
+    "@divebell/core": {
+      "optional": true
+    }
+  },
   "devDependencies": {
+    "@divebell/core": "0.0.23",
     "@module-federation/runtime": "workspace:*"
   },
   "dependencies": {
