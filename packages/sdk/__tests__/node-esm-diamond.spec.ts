@@ -101,11 +101,9 @@ describe('Node ESM graphs that reach one module twice', () => {
     expect(namespace?.a).toBe('abcc');
   });
 
-  // Two modules that import each other are both reachable from the entry, so
-  // neither is the other's creation parent. Waiting on a module whose own
-  // linking is blocked on the waiter has to be refused by reachability through
-  // the wait graph, not by a parent chain, or both sides wait forever.
-  it('reports an error rather than hanging when two siblings of the entry import each other', async () => {
+  // b.js and c.js read each other's const export during evaluation, so native
+  // Node links this graph and then throws a TDZ ReferenceError.
+  it('reports the TDZ error rather than hanging when two siblings of the entry read each other during init', async () => {
     setModuleFetchMock({
       [`${ORIGIN}/a.js`]: `
         import { b } from './b.js'
@@ -124,14 +122,10 @@ describe('Node ESM graphs that reach one module twice', () => {
 
     const { error } = await loadNodeEsmScript(`${ORIGIN}/a.js`);
 
-    expect(error).toBeInstanceOf(Error);
+    expect(error?.message).toMatch(/Cannot access '.+' before initialization/);
   }, 15000);
 
-  // A module in a cycle has to keep receiving the unlinked instance from the
-  // cache: waiting for it to finish linking would wait on the request it is
-  // already serving. This loader does not support cyclic entry graphs, and
-  // this pins that they fail rather than hang.
-  it('reports an error rather than hanging when two modules import each other', async () => {
+  it('links two modules that import each other through function exports', async () => {
     setModuleFetchMock({
       [`${ORIGIN}/a.js`]: `
         import { b } from './b.js'
@@ -143,8 +137,37 @@ describe('Node ESM graphs that reach one module twice', () => {
       `,
     });
 
-    const { error } = await loadNodeEsmScript(`${ORIGIN}/a.js`);
+    const { error, namespace } = await loadNodeEsmScript<{
+      a: () => string;
+    }>(`${ORIGIN}/a.js`);
 
-    expect(error).toBeInstanceOf(Error);
+    expect(error).toBeUndefined();
+    expect(namespace?.a()).toBe('ab');
+  }, 15000);
+
+  it('links an entry whose two sibling imports import each other through function exports', async () => {
+    setModuleFetchMock({
+      [`${ORIGIN}/a.js`]: `
+        import { b } from './b.js'
+        import { c } from './c.js'
+        export const a = b() + c()
+      `,
+      [`${ORIGIN}/b.js`]: `
+        import { c } from './c.js'
+        export function b() { return 'b' + c() }
+      `,
+      [`${ORIGIN}/c.js`]: `
+        import { b } from './b.js'
+        export function c() { return 'c' }
+        export function getB() { return b }
+      `,
+    });
+
+    const { error, namespace } = await loadNodeEsmScript<{ a: string }>(
+      `${ORIGIN}/a.js`,
+    );
+
+    expect(error).toBeUndefined();
+    expect(namespace?.a).toBe('bcc');
   }, 15000);
 });

@@ -2,4 +2,4 @@
 '@module-federation/sdk': patch
 ---
 
-Wait for a concurrently-linking ESM module before handing it to a second importer, so a remote entry graph that reaches one module by two sibling paths links when that module has imports of its own. Cyclic graphs still receive the in-progress instance rather than deadlocking.
+Link Node ESM remote entry graphs from the root module only and let `vm` link the rest, so a module reached by two sibling paths links when it has imports of its own, and cyclic graphs link and evaluate the way native Node ESM does instead of failing with an unlinked-module error.

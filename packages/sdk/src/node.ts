@@ -247,67 +247,9 @@ export const loadScriptNode =
       };
 
 const esmModuleCache = new Map<string, any>();
-// Resolves once a cached module has finished linking. The instance itself has
-// to be published to `esmModuleCache` before linking starts, so a cyclic
-// import can still see it - which means a cache hit can hand back a module
-// whose own requests are not resolved yet. Anything that is not part of that
-// cycle has to wait here instead.
-const esmModuleLinking = new Map<string, Promise<unknown>>();
-// url -> the urls whose linking that url's own link() is currently blocked on,
-// because its linker asked for them or because it is waiting for one below.
-// Reachability through this map is what identifies a cycle: waiting on a module
-// that is already blocked on the waiter, directly or through other modules,
-// would deadlock. A module-creation parent chain is not enough, because two
-// modules that import each other can both be reached from the same importer.
-const esmLinkBlockedOn = new Map<string, Set<string>>();
-
-function blockLinkOn(waiter: string, awaited: string): void {
-  const blocked = esmLinkBlockedOn.get(waiter);
-
-  if (blocked) {
-    blocked.add(awaited);
-    return;
-  }
-
-  esmLinkBlockedOn.set(waiter, new Set([awaited]));
-}
-
-function unblockLinkOn(waiter: string, awaited: string): void {
-  const blocked = esmLinkBlockedOn.get(waiter);
-  if (!blocked) {
-    return;
-  }
-
-  blocked.delete(awaited);
-  if (blocked.size === 0) {
-    esmLinkBlockedOn.delete(waiter);
-  }
-}
-
-function linkOfBlocksOn(start: string, target: string): boolean {
-  const pending = [start];
-  const seen = new Set<string>();
-
-  while (pending.length > 0) {
-    const current = pending.pop()!;
-
-    if (current === target) {
-      return true;
-    }
-
-    if (seen.has(current)) {
-      continue;
-    }
-    seen.add(current);
-
-    const blocked = esmLinkBlockedOn.get(current);
-    if (blocked) {
-      pending.push(...blocked);
-    }
-  }
-
-  return false;
-}
+// Only a root load calls link(); Node recursively links the unlinked modules
+// the linker returns. This lets a second root load await one already in flight.
+const esmRootLinking = new Map<string, Promise<unknown>>();
 
 type LoadModuleOptions = {
   vm: typeof import('vm') & {
@@ -429,13 +371,12 @@ async function loadNodeBuiltinModule(
   return createSyntheticModuleFromExports(cacheKey, moduleExports, vm);
 }
 
-async function loadResolvedModule(
+async function resolveModuleSpecifier(
   specifier: string,
   parentUrl: string,
-  options: LoadModuleOptions,
-) {
+): Promise<{ builtin: true } | { builtin: false; url: string }> {
   if (await isNodeBuiltinSpecifier(specifier)) {
-    return loadNodeBuiltinModule(specifier, options.vm);
+    return { builtin: true };
   }
 
   if (isBareModuleSpecifier(specifier)) {
@@ -451,7 +392,38 @@ async function loadResolvedModule(
     );
   }
 
-  return loadModule(resolvedUrl, options, parentUrl);
+  return { builtin: false, url: resolvedUrl };
+}
+
+// Must not link what it returns: a nested link() instantiates its subgraph
+// while a sibling may still be resolving requests inside it.
+async function linkModuleRequest(
+  specifier: string,
+  referencingModule: any,
+  options: LoadModuleOptions,
+) {
+  const parentUrl = referencingModule.identifier;
+  const resolved = await resolveModuleSpecifier(specifier, parentUrl);
+
+  if (resolved.builtin) {
+    return loadNodeBuiltinModule(specifier, options.vm);
+  }
+
+  return getOrCreateModule(resolved.url, options);
+}
+
+async function loadResolvedModule(
+  specifier: string,
+  parentUrl: string,
+  options: LoadModuleOptions,
+) {
+  const resolved = await resolveModuleSpecifier(specifier, parentUrl);
+
+  if (resolved.builtin) {
+    return loadNodeBuiltinModule(specifier, options.vm);
+  }
+
+  return loadModule(resolved.url, options);
 }
 
 async function evaluateDynamicModule(module: any) {
@@ -466,35 +438,10 @@ async function evaluateDynamicModule(module: any) {
   return module;
 }
 
-async function loadModule(
-  url: string,
-  options: LoadModuleOptions,
-  parentUrl?: string,
-) {
-  // Check cache to prevent infinite recursion in ESM loading
-  if (esmModuleCache.has(url)) {
-    const cachedModule = esmModuleCache.get(url)!;
-    const linking = esmModuleLinking.get(url);
-
-    // Still linking. A sibling that merely raced it must get the finished
-    // module, otherwise Node reports the child's own imports as unresolved
-    // requests on an unlinked module. Waiting is only wrong when this module's
-    // linking is itself blocked on the requester - that is a cycle, and it has
-    // to keep receiving the in-progress instance rather than hang.
-    if (linking) {
-      if (!parentUrl) {
-        await linking;
-      } else if (!linkOfBlocksOn(url, parentUrl)) {
-        blockLinkOn(parentUrl, url);
-        try {
-          await linking;
-        } finally {
-          unblockLinkOn(parentUrl, url);
-        }
-      }
-    }
-
-    return cachedModule;
+async function getOrCreateModule(url: string, options: LoadModuleOptions) {
+  const cached = esmModuleCache.get(url);
+  if (cached) {
+    return cached;
   }
 
   const { fetch, vm } = options;
@@ -521,27 +468,31 @@ async function loadModule(
     },
   });
 
-  // Cache the module before linking to prevent cycles
   esmModuleCache.set(url, sourceTextModule);
-  if (parentUrl) {
-    // The requester's own link() cannot finish until this one does.
-    blockLinkOn(parentUrl, url);
+
+  return sourceTextModule;
+}
+
+async function loadModule(url: string, options: LoadModuleOptions) {
+  const sourceTextModule = await getOrCreateModule(url, options);
+
+  const inFlight = esmRootLinking.get(url);
+  if (inFlight) {
+    await inFlight;
+    return sourceTextModule;
   }
 
-  const linking = sourceTextModule
-    .link(async (specifier: string) => {
-      return loadResolvedModule(specifier, url, options);
-    })
-    .finally(() => {
-      esmModuleLinking.delete(url);
-      esmLinkBlockedOn.delete(url);
-      if (parentUrl) {
-        unblockLinkOn(parentUrl, url);
-      }
-    });
-  esmModuleLinking.set(url, linking);
-
-  await linking;
+  if (sourceTextModule.status === 'unlinked') {
+    const linking = sourceTextModule
+      .link((specifier: string, referencingModule: any) =>
+        linkModuleRequest(specifier, referencingModule, options),
+      )
+      .finally(() => {
+        esmRootLinking.delete(url);
+      });
+    esmRootLinking.set(url, linking);
+    await linking;
+  }
 
   return sourceTextModule;
 }
