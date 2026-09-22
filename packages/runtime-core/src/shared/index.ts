@@ -524,6 +524,12 @@ export class SharedHandler {
       if (!initToken)
         initToken = initTokens[shareScopeName] = { from: this.host.name };
       if (initScope.indexOf(initToken) >= 0) {
+        // Only the call that owns the persistent share init scope may use
+        // the cached initialization. Recursive/nested container init passes
+        // its own initScope down; returning the owning run's remote-init
+        // promises to such a call can deadlock in circular remote graphs
+        // (the promise resolves only when the in-flight remote finishes).
+        if (initScope !== this.shareInitScope) return promises;
         const cachedPromises =
           this.shareInitPromises[shareScopeName] || promises;
         // Mixed strategies within one scope: the run that pushed the token

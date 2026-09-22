@@ -272,4 +272,30 @@ describe('share re-registration guard', () => {
     expect(remote.getEntryCalls).toBe(2);
     expect(result?.()).toEqual({ value: 'one' });
   });
+
+  it('does not hand cached remote-init promises to foreign init scopes (recursive container init)', async () => {
+    // Recursive/nested container initialization passes its own initScope
+    // down. If such a foreign scope already contains the init token, the
+    // call must fall through to the old, safe behavior (return its local
+    // promises array) instead of the owning run's remote-init promises:
+    // in a circular remote graph those promises resolve only when the
+    // in-flight remote finishes, which would deadlock.
+    const mf = createVersionFirstHost();
+    stubRemote(mf);
+
+    // Initialize the scope once so the cache is populated.
+    await mf.loadShare('shared-one');
+    const handler = (mf as any).sharedHandler;
+    expect(handler.shareInitPromises.default.length).toBeGreaterThan(0);
+
+    const token = handler.initTokens.default;
+    const foreignScope = [token];
+    const result = await handler.initializeSharing('default', {
+      initScope: foreignScope,
+    });
+
+    // Must be the call's own local promises array, not the cached one.
+    expect(result).toEqual([]);
+    expect(result).not.toBe(handler.shareInitPromises.default);
+  });
 });
