@@ -353,14 +353,22 @@ export class SharedHandler {
           });
           return factory;
         } else {
+          let loading: Promise<(() => T) | undefined>;
           const asyncLoadProcess = async () => {
-            const factory = await targetShared.get!();
-            addUseIn(targetShared, host.options.name);
-            targetShared.loaded = true;
-            targetShared.lib = factory;
-            return factory as () => T;
+            try {
+              const factory = await targetShared.get!();
+              addUseIn(targetShared, host.options.name);
+              targetShared.loaded = true;
+              targetShared.lib = factory;
+              return factory as () => T;
+            } catch (e) {
+              if (targetShared.loading === loading) {
+                targetShared.loading = null;
+              }
+              throw e;
+            }
           };
-          const loading = asyncLoadProcess();
+          loading = Promise.resolve().then(asyncLoadProcess);
           this.setShared({
             pkgName,
             loaded: false,
@@ -396,30 +404,38 @@ export class SharedHandler {
         const _useTreeShaking = shouldUseTreeShaking(
           resolvedShareOptions.treeShaking,
         );
-        const targetShared = directShare(resolvedShareOptions, _useTreeShaking);
+        let targetShared = directShare(resolvedShareOptions, _useTreeShaking);
 
+        let loading: Promise<(() => T) | undefined>;
         const asyncLoadProcess = async () => {
-          const factory = await targetShared.get!();
-          targetShared.lib = factory;
-          targetShared.loaded = true;
-          addUseIn(targetShared, host.options.name);
-          const { shared: gShared, useTreesShaking: gUseTreeShaking } =
-            getRegisteredShare(
-              this.shareScopeMap,
-              pkgName,
-              resolvedShareOptions,
-              this.hooks.lifecycle.resolveShare,
-              loadContext,
-            ) || {};
-          if (gShared) {
-            const targetGShared = directShare(gShared, gUseTreeShaking);
-            targetGShared.lib = factory;
-            targetGShared.loaded = true;
-            gShared.from = resolvedShareOptions.from;
+          try {
+            const factory = await targetShared.get!();
+            targetShared.lib = factory;
+            targetShared.loaded = true;
+            addUseIn(targetShared, host.options.name);
+            const { shared: gShared, useTreesShaking: gUseTreeShaking } =
+              getRegisteredShare(
+                this.shareScopeMap,
+                pkgName,
+                resolvedShareOptions,
+                this.hooks.lifecycle.resolveShare,
+                loadContext,
+              ) || {};
+            if (gShared) {
+              const targetGShared = directShare(gShared, gUseTreeShaking);
+              targetGShared.lib = factory;
+              targetGShared.loaded = true;
+              gShared.from = resolvedShareOptions.from;
+            }
+            return factory as () => T;
+          } catch (e) {
+            if (targetShared.loading === loading) {
+              targetShared.loading = null;
+            }
+            throw e;
           }
-          return factory as () => T;
         };
-        const loading = asyncLoadProcess();
+        loading = Promise.resolve().then(asyncLoadProcess);
         this.setShared({
           pkgName,
           loaded: false,
@@ -431,6 +447,16 @@ export class SharedHandler {
             ? (targetShared as TreeShakingArgs)
             : undefined,
         });
+        const firstScope = Array.isArray(resolvedShareOptions.scope)
+          ? resolvedShareOptions.scope[0]
+          : resolvedShareOptions.scope || 'default';
+        const registeredLoadShared =
+          this.shareScopeMap[firstScope]?.[pkgName]?.[
+            resolvedShareOptions.version
+          ];
+        if (registeredLoadShared) {
+          targetShared = directShare(registeredLoadShared, _useTreeShaking);
+        }
         const factory = await loading;
         this.emitAfterLoadShare({
           lifecycle: 'loadShare',
@@ -775,7 +801,7 @@ export class SharedHandler {
     const { version, scope = 'default', ...shareInfo } = shared;
     const scopes: string[] = Array.isArray(scope) ? scope : [scope];
 
-    const mergeAttrs = (shared: Shared) => {
+    const mergeAttrs = (shared: Shared): void => {
       const merge = <K extends keyof TreeShakingArgs>(
         s: TreeShakingArgs,
         key: K,
@@ -792,13 +818,6 @@ export class SharedHandler {
       merge(targetShared, 'loading', loading);
       merge(targetShared, 'get', get);
       merge(targetShared, 'lib', lib);
-      if (loading) {
-        loading.catch(() => {
-          if (targetShared.loading === loading) {
-            targetShared.loading = null;
-          }
-        });
-      }
     };
     scopes.forEach((sc) => {
       if (!this.shareScopeMap[sc]) {

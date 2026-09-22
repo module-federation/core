@@ -239,6 +239,33 @@ describe('shared lifecycle hooks', () => {
     );
     expect(attempts).toBe(2);
   });
+
+  it('retries a shared when the provider throws synchronously', async () => {
+    let attempts = 0;
+    const factory = () => ({ value: 'recovered' });
+    const mf = new ModuleFederation({
+      name: 'sync-throw-shared-retry-host',
+      remotes: [],
+      shared: {
+        retryable: {
+          version: '1.0.0',
+          get: () => {
+            attempts += 1;
+            if (attempts === 1) {
+              throw new Error('synchronous shared failure');
+            }
+            return factory;
+          },
+        },
+      },
+    });
+
+    await expect(mf.loadShare('retryable')).rejects.toThrow(
+      'synchronous shared failure',
+    );
+    await expect(mf.loadShare('retryable')).resolves.toBe(factory);
+    expect(attempts).toBe(2);
+  });
 });
 
 type RawSharedEvent =
