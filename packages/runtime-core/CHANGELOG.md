@@ -1,5 +1,13 @@
 # @module-federation/runtime
 
+## 2.9.1
+
+### Patch Changes
+
+- 92afef1: Clear rejected remote-entry loading promises from `globalLoading` so a later independent request can start a fresh load.
+  - @module-federation/sdk@2.9.1
+  - @module-federation/error-codes@2.9.1
+
 ## 2.9.0
 
 ### Minor Changes
