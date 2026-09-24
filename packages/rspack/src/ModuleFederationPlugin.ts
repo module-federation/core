@@ -20,7 +20,6 @@ import {
   getSelectionSlot,
   inheritRuntimeSelection,
   participantFromOptions,
-  reduceCapabilityProfile,
   registerRuntimeParticipant,
   resolveRuntimeImplementation,
 } from '@module-federation/managers/runtime-selection';
@@ -93,23 +92,6 @@ export function resolveRspackRuntimeAlias(implementation: string) {
   );
 }
 
-export function runtimeCapabilityDefines(
-  options: moduleFederationPlugin.ModuleFederationPluginOptions,
-  compilerTarget?: string | readonly string[] | false,
-) {
-  return capabilityDefines(finalizeProfile(options, compilerTarget));
-}
-
-function finalizeProfile(
-  options: moduleFederationPlugin.ModuleFederationPluginOptions,
-  compilerTarget?: string | readonly string[] | false,
-) {
-  return reduceCapabilityProfile(
-    [participantFromOptions(PLUGIN_NAME, options)],
-    compilerTarget,
-  );
-}
-
 export class ModuleFederationPlugin implements RspackPluginInstance {
   readonly name = PLUGIN_NAME;
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -147,18 +129,16 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
           `[ ModuleFederationPlugin ]: Unable to resolve runtime family (paths: [${anchor}]): ${detail}`,
         );
       }
-      if (!result.profile || !result.image) {
-        return;
-      }
       new compiler.webpack.DefinePlugin(
-        capabilityDefines(result.profile),
+        capabilityDefines(result.profile!),
       ).apply(compiler);
       if (typeof userRuntimeAlias !== 'string') {
+        const image = result.image!;
         compiler.options.resolve.alias = {
           ...compiler.options.resolve.alias,
           '@module-federation/runtime$':
-            expectedEntry(result.image, '@module-federation/runtime$') ??
-            result.image.family.members.runtime.entry,
+            expectedEntry(image, '@module-federation/runtime$') ??
+            image.family.members.runtime.entry,
         };
       }
     };
