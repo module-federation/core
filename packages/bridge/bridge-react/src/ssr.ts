@@ -3,6 +3,8 @@ import type { BridgeProvider, BridgeSSRRenderParams } from './types';
 
 /** A fresh value must be provided for every host SSR request. */
 export interface BridgeSSRContextValue {
+  /** The stream adapter owns these styles before exposing the remote HTML. */
+  registerStyles?(instanceId: string, hrefs: string[]): void;
   register(
     instanceId: string,
     providerFactory: () => BridgeProvider | Promise<BridgeProvider>,

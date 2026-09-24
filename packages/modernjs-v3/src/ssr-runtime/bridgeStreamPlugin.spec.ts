@@ -173,6 +173,47 @@ describe('Modern Bridge stream plugin', () => {
     );
   });
 
+  it('deduplicates known CSS in the head and transports late CSS before that instance HTML', async () => {
+    const { extender, context } = createExtender();
+    const a = producer('A');
+    const b = producer('B');
+    const shared = 'https://cdn.example/shared.css?v=1&theme=light';
+    context.register('a', a.factory, { props: {} });
+    context.register('b', b.factory, { props: {} });
+    context.registerStyles!('a', [shared, shared]);
+    context.registerStyles!('b', [shared]);
+    const head = extender.getStyleTags();
+    expect(head.match(/rel="stylesheet"/g)).toHaveLength(1);
+    expect(head).toContain(
+      'href="https://cdn.example/shared.css?v=1&amp;theme=light" nonce="test-nonce"',
+    );
+    expect(head.indexOf('<link')).toBeLessThan(head.indexOf('<script'));
+    // The head has already been generated; the meta frame is the fallback path
+    // for dependencies discovered by a later Host Suspense boundary.
+    context.registerStyles!('b', [shared, 'https://cdn.example/late.css']);
+    const input = new PassThrough();
+    const output = extender.processStream(input);
+    let text = '';
+    output.on('data', (chunk: Buffer) => {
+      text += chunk.toString();
+    });
+    const done = once(output, 'end');
+    input.end(
+      '<main><div id="a"></div><div id="b"></div></main>' + MODERN_SHELL_MARKER,
+    );
+    a.write('<p>A styled</p>');
+    a.end();
+    b.write('<p>B styled</p>');
+    b.end();
+    await done;
+    expect(text).toContain(
+      '"stylesheets":["https://cdn.example/shared.css?v=1&theme=light","https://cdn.example/late.css"]',
+    );
+    expect(text.indexOf('https://cdn.example/late.css')).toBeLessThan(
+      text.indexOf('B styled'),
+    );
+  });
+
   it('includes applications discovered after the Host shell', async () => {
     const { extender, context } = createExtender();
     const input = new PassThrough();

@@ -6,6 +6,7 @@ export type BridgeStreamFrame =
       type: 'meta';
       protocol: typeof BRIDGE_STREAM_PROTOCOL;
       identifierPrefix: string;
+      stylesheets?: string[];
     }
   | { type: 'html'; html: string }
   | { type: 'data'; snapshot: unknown }

@@ -37,6 +37,23 @@ export function configureBridgeApplications(
   const { appDirectory, internalDirectory } = api.getAppContext();
   const requireFromApp = createRequire(path.join(appDirectory, 'package.json'));
   const generatedDirectory = path.join(internalDirectory, 'mf-bridge');
+  // Bundler runtime plugins are imported as ESM. Use the same entry as the
+  // Bridge components so their module-scoped federationRuntime is shared.
+  const bridgePlugin =
+    require.resolve('@module-federation/bridge-react/dist/plugin.es.js');
+  const bridgePluginRequests = [
+    '@module-federation/bridge-react/plugin',
+    '@module-federation/bridge-react/dist/plugin.cjs.js',
+    '@module-federation/bridge-react/dist/plugin.es.js',
+  ];
+  const bridgePluginPaths = new Set(bridgePluginRequests);
+  for (const request of bridgePluginRequests) {
+    bridgePluginPaths.add(require.resolve(request));
+    // The application may resolve its direct dependency from another location.
+    try {
+      bridgePluginPaths.add(requireFromApp.resolve(request));
+    } catch {}
+  }
   const entries = Object.entries(exposes).map(([expose, entry]) => {
     if (!expose.startsWith('./'))
       throw new Error(`Bridge expose must start with ./ : ${expose}`);
@@ -80,15 +97,32 @@ export function configureBridgeApplications(
         'Independent Bridge applications must not share React, ReactDOM, React Router or the Modern runtime.',
       );
     }
-    const plugin = require.resolve('@module-federation/bridge-react/plugin');
-    target.runtimePlugins ||= [];
-    if (
-      !target.runtimePlugins.some(
-        (item) => (typeof item === 'string' ? item : item[0]) === plugin,
-      )
-    ) {
-      target.runtimePlugins.push(plugin);
+    const runtimePlugins: NonNullable<typeof target.runtimePlugins> = [];
+    let bridgePluginIndex = -1;
+    for (const item of target.runtimePlugins || []) {
+      const request = typeof item === 'string' ? item : item[0];
+      if (!bridgePluginPaths.has(request)) {
+        runtimePlugins.push(item);
+      } else if (bridgePluginIndex === -1) {
+        bridgePluginIndex = runtimePlugins.length;
+        runtimePlugins.push(
+          typeof item === 'string' ? bridgePlugin : [bridgePlugin, item[1]],
+        );
+      } else if (typeof item !== 'string') {
+        const previous = runtimePlugins[bridgePluginIndex];
+        // A bare duplicate must not erase explicit tuple options. Merge tuple
+        // options in configuration order when aliases register the plugin twice.
+        runtimePlugins[bridgePluginIndex] = [
+          bridgePlugin,
+          {
+            ...(typeof previous === 'string' ? {} : previous[1]),
+            ...item[1],
+          },
+        ];
+      }
     }
+    if (bridgePluginIndex === -1) runtimePlugins.push(bridgePlugin);
+    target.runtimePlugins = runtimePlugins;
   }
   api.generateEntryCode(async ({ entrypoints }) => {
     await fs.mkdir(generatedDirectory, { recursive: true });

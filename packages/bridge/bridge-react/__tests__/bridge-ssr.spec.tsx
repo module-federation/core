@@ -6,6 +6,7 @@ import { createBridgeComponent } from '../src/v18';
 import { RemoteAppWrapper } from '../src/remote/RemoteAppWrapper';
 import { BridgeSSRContext } from '../src/ssr';
 import { ErrorBoundary } from '../src/error-boundary';
+import { federationRuntime } from '../src/provider/plugin';
 import type { BridgeSSRBrowserSnapshot } from '../src/ssr';
 
 function deferred<T>() {
@@ -35,6 +36,73 @@ describe('independent Bridge SSR roots', () => {
     host = undefined;
     delete window.__MF_BRIDGE_SSR__;
     document.body.innerHTML = '';
+  });
+
+  it('registers only the loaded expose styles with its stream instead of rendering unmanaged links', () => {
+    const previous = federationRuntime.instance;
+    federationRuntime.instance = {
+      remoteHandler: {
+        idToRemoteMap: {
+          'products/App': { name: 'products', expose: './App' },
+        },
+      },
+      moduleCache: new Map([
+        ['products', { remoteInfo: { name: 'products' } }],
+      ]),
+      snapshotHandler: {
+        getGlobalRemoteInfo: () => ({
+          remoteSnapshot: {
+            publicPath: 'https://cdn.example/products/',
+            remoteEntry: 'remoteEntry.js',
+            modules: [
+              {
+                modulePath: './App',
+                assets: {
+                  css: { sync: ['app.css', 'app.css'], async: ['details.css'] },
+                },
+              },
+              {
+                modulePath: './Other',
+                assets: { css: { sync: ['other.css'], async: [] } },
+              },
+            ],
+          },
+        }),
+      },
+    } as any;
+    try {
+      const registerStyles = jest.fn();
+      const render = (managed: boolean) =>
+        renderToString(
+          <BridgeSSRContext.Provider
+            value={{
+              register: jest.fn(),
+              ...(managed ? { registerStyles } : {}),
+            }}
+          >
+            <RemoteAppWrapper
+              moduleName="products/App"
+              ssrInstanceId="product-instance"
+              providerInfo={() => ({ render() {}, destroy() {} })}
+              exportName="default"
+              loading={<p>Loading</p>}
+              fallback={() => null}
+            />
+          </BridgeSSRContext.Provider>,
+        );
+      const managed = render(true);
+      expect(registerStyles).toHaveBeenCalledWith('product-instance', [
+        'https://cdn.example/products/app.css',
+        'https://cdn.example/products/details.css',
+      ]);
+      expect(managed).not.toContain('<link');
+      // Existing SSR integrations without a resource-aware transport retain links.
+      expect(render(false)).toContain(
+        'href="https://cdn.example/products/app.css"',
+      );
+    } finally {
+      federationRuntime.instance = previous;
+    }
   });
 
   it('hydrates with the producer root, preserves DOM through host updates, and reuses the root', async () => {

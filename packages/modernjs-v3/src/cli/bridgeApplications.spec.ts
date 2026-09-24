@@ -60,11 +60,62 @@ describe('independent Modern application configuration', () => {
       expect(await fs.readFile(server, 'utf8')).toContain(
         "from '@modern-js/runtime/application/server'",
       );
-      expect(options.csrConfig!.runtimePlugins).toHaveLength(1);
-      expect(options.ssrConfig!.runtimePlugins).toHaveLength(1);
+      const bridgePlugin =
+        require.resolve('@module-federation/bridge-react/dist/plugin.es.js');
+      expect(options.csrConfig!.runtimePlugins).toEqual([bridgePlugin]);
+      expect(options.ssrConfig!.runtimePlugins).toEqual([bridgePlugin]);
     } finally {
       await fs.rm(directory, { recursive: true, force: true });
     }
+  });
+
+  it('normalizes standard Bridge entries to ESM while retaining tuple options', () => {
+    const esmPlugin =
+      require.resolve('@module-federation/bridge-react/dist/plugin.es.js');
+    const pluginOptions = { customOption: true };
+    for (const plugin of [
+      '@module-federation/bridge-react/plugin',
+      '@module-federation/bridge-react/dist/plugin.cjs.js',
+      '@module-federation/bridge-react/dist/plugin.es.js',
+      require.resolve('@module-federation/bridge-react/plugin'),
+      esmPlugin,
+    ]) {
+      const { api, options } = setup('/unused', true);
+      options.csrConfig!.runtimePlugins = [plugin];
+      options.ssrConfig!.runtimePlugins = [[plugin, pluginOptions]];
+      configureBridgeApplications(api as any, options);
+      expect(options.csrConfig!.runtimePlugins).toEqual([esmPlugin]);
+      expect(options.ssrConfig!.runtimePlugins).toEqual([
+        [esmPlugin, pluginOptions],
+      ]);
+      expect(options.ssrConfig!.runtimePlugins![0][1]).toBe(pluginOptions);
+    }
+  });
+
+  it('deduplicates Bridge aliases without changing custom plugins or losing options', () => {
+    const esmPlugin =
+      require.resolve('@module-federation/bridge-react/dist/plugin.es.js');
+    const customPlugin: [string, Record<string, unknown>] = [
+      '/custom/plugin.cjs.js',
+      { custom: true },
+    ];
+    const { api, options } = setup('/unused', true);
+    options.csrConfig!.runtimePlugins = [
+      customPlugin,
+      '@module-federation/bridge-react/plugin',
+      '/custom/plugin.es.js',
+      [require.resolve('@module-federation/bridge-react/plugin'), { a: 1 }],
+      [esmPlugin, { b: 2 }],
+      '@module-federation/bridge-react/dist/plugin.cjs.js',
+    ];
+    configureBridgeApplications(api as any, options);
+    expect(options.csrConfig!.runtimePlugins).toEqual([
+      customPlugin,
+      [esmPlugin, { a: 1, b: 2 }],
+      '/custom/plugin.es.js',
+    ]);
+    expect(options.csrConfig!.runtimePlugins![0]).toBe(customPlugin);
+    expect(customPlugin[1]).toEqual({ custom: true });
   });
 
   it('rejects sharing the renderer instead of silently breaking React version isolation', () => {

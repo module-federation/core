@@ -257,9 +257,22 @@ export const RemoteAppWrapper = forwardRef<
           )
           .map((asset) => asset.props.href)
       : [];
+  // A streaming adapter keeps stylesheet DOM outside the Host React tree and
+  // waits for it before inserting Remote HTML. Preserve the legacy asset path
+  // for consumers that do not implement this transport.
+  const streamOwnsStyles =
+    Boolean(ssr?.registerStyles) ||
+    (!ssr &&
+      typeof window !== 'undefined' &&
+      Boolean(instanceId && window.__MF_BRIDGE_SSR__?.get(instanceId)));
+  if (ssr?.registerStyles && instanceId) {
+    ssr.registerStyles(instanceId, stylesheetHrefs);
+  }
   return (
     <>
-      <HydratedStylesheetAssets hrefs={stylesheetHrefs} />
+      <HydratedStylesheetAssets
+        hrefs={streamOwnsStyles ? [] : stylesheetHrefs}
+      />
       {serverHTML ? (
         <div
           {...containerProps}

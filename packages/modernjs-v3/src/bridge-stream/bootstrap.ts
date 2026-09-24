@@ -21,6 +21,106 @@ export function bridgeStreamBootstrap(
     return;
   }
   const entries: Record<string, any> = Object.create(null);
+  const stylesheets = new Map<
+    string,
+    {
+      link: HTMLLinkElement;
+      ready: Promise<void>;
+      users: number;
+      settled: boolean;
+      owned: boolean;
+      detach(): void;
+    }
+  >();
+  const releaseStyles = (state: any) => {
+    (state.releaseStyles || []).forEach((release: () => void) => release());
+    state.releaseStyles = [];
+  };
+  const acquireStylesheet = (href: string) => {
+    const url = new URL(href, document.baseURI).href;
+    let resource = stylesheets.get(url);
+    if (!resource) {
+      const existing = Array.prototype.find.call(
+        document.querySelectorAll('link[href]'),
+        (link: HTMLLinkElement) => {
+          const rel = link.rel.toLowerCase().split(/\s+/);
+          const media = link.media.trim().toLowerCase();
+          const type = link.type.trim().toLowerCase().split(';', 1)[0].trim();
+          return (
+            rel.indexOf('stylesheet') !== -1 &&
+            rel.indexOf('alternate') === -1 &&
+            !link.disabled &&
+            !link.hasAttribute('disabled') &&
+            (!media || media === 'all') &&
+            (!type || type === 'text/css') &&
+            link.href === url
+          );
+        },
+      ) as HTMLLinkElement | undefined;
+      const link = existing || document.createElement('link');
+      let resolve!: () => void;
+      let reject!: (reason: unknown) => void;
+      const ready = new Promise<void>((yes, no) => {
+        resolve = yes;
+        reject = no;
+      });
+      // A metadata validation failure can release a partly acquired resource set.
+      void ready.catch(() => {});
+      const value = {
+        link,
+        ready,
+        users: 0,
+        settled: false,
+        owned: !existing,
+        detach() {
+          link.removeEventListener('load', loaded);
+          link.removeEventListener('error', failed);
+        },
+      };
+      const loaded = () => {
+        if (value.settled) return;
+        value.settled = true;
+        value.detach();
+        resolve();
+      };
+      const failed = () => {
+        if (value.settled) return;
+        value.settled = true;
+        value.detach();
+        reject(Error(`Bridge stylesheet failed to load: ${url}`));
+      };
+      resource = value;
+      stylesheets.set(url, value);
+      link.addEventListener('load', loaded);
+      link.addEventListener('error', failed);
+      if (!existing) {
+        link.rel = 'stylesheet';
+        link.href = url;
+        if (options.nonce) link.nonce = options.nonce;
+        document.head.appendChild(link);
+      }
+      // Existing links may have finished loading before bootstrap was installed.
+      // Reading sheet is cross-origin safe; inspecting cssRules would not be.
+      if (link.sheet) loaded();
+    }
+    const value = resource;
+    value.users++;
+    let released = false;
+    return {
+      ready: value.ready,
+      release() {
+        if (released) return;
+        released = true;
+        value.users--;
+        if (!value.users && !value.settled) {
+          value.detach();
+          stylesheets.delete(url);
+          // Existing page styles belong to the document, not to this instance.
+          if (value.owned) value.link.remove();
+        }
+      },
+    };
+  };
   const timeout = options.timeoutMs || 30000;
   const limit = options.maxQueuedBytes || 8 * 1024 * 1024;
   let redirecting = false;
@@ -55,6 +155,7 @@ export function bridgeStreamBootstrap(
     state.pending = [];
     state.queuedBytes = 0;
     clearTimeout(state.timer);
+    releaseStyles(state);
     state.reject(error);
     fallback(error);
   };
@@ -77,6 +178,7 @@ export function bridgeStreamBootstrap(
       cancelled: false,
       hasHTML: false,
       hasData: false,
+      stylesReady: true,
     };
     entries[id] = state;
     state.timer = setTimeout(
@@ -131,7 +233,13 @@ export function bridgeStreamBootstrap(
     });
   };
   const finish = (id: string, state: any) => {
-    if (!state.streamDone || state.complete || state.cancelled) return;
+    if (
+      !state.streamDone ||
+      !state.stylesReady ||
+      state.complete ||
+      state.cancelled
+    )
+      return;
     const container = document.getElementById(id);
     if (!container) return;
     // React 19 may schedule its boundary insertion after the last script returns.
@@ -151,6 +259,7 @@ export function bridgeStreamBootstrap(
     if (!state.hasHTML) container.replaceChildren();
     state.complete = true;
     clearTimeout(state.timer);
+    releaseStyles(state);
     state.resolve({
       snapshot: state.snapshot,
       identifierPrefix: state.identifierPrefix,
@@ -163,7 +272,10 @@ export function bridgeStreamBootstrap(
       const next = state.pending[0];
       const frame = next.frame as BridgeStreamFrame;
       const container = document.getElementById(id);
-      if ((frame.type === 'html' || frame.type === 'done') && !container)
+      if (
+        (frame.type === 'html' || frame.type === 'done') &&
+        (!container || !state.stylesReady)
+      )
         return;
       state.pending.shift();
       state.queuedBytes -= next.bytes;
@@ -180,6 +292,32 @@ export function bridgeStreamBootstrap(
           }
           state.meta = true;
           state.identifierPrefix = frame.identifierPrefix;
+          if (
+            frame.stylesheets !== undefined &&
+            (!Array.isArray(frame.stylesheets) ||
+              frame.stylesheets.some(
+                (href) => typeof href !== 'string' || !href.trim(),
+              ))
+          )
+            throw Error('Invalid Bridge stylesheet metadata');
+          if (frame.stylesheets?.length) {
+            state.stylesReady = false;
+            const resources = Array.from(new Set(frame.stylesheets)).map(
+              (href) => {
+                const resource = acquireStylesheet(href);
+                (state.releaseStyles ||= []).push(resource.release);
+                return resource.ready;
+              },
+            );
+            Promise.all(resources).then(
+              () => {
+                if (state.cancelled || state.complete || leaving) return;
+                state.stylesReady = true;
+                drain(id);
+              },
+              (error) => fail(state, error),
+            );
+          }
         } else if (!state.meta) throw Error('Missing Bridge stream metadata');
         else if (frame.type === 'html') {
           if (state.hasData || typeof frame.html !== 'string')
@@ -223,6 +361,7 @@ export function bridgeStreamBootstrap(
       state.pending = [];
       state.queuedBytes = 0;
       clearTimeout(state.timer);
+      releaseStyles(state);
       if (!state.complete) state.reject(Error('Bridge instance unmounted'));
     },
     accept(id, frame) {
@@ -234,6 +373,11 @@ export function bridgeStreamBootstrap(
         return;
       }
       try {
+        // A server failure must not wait behind HTML held for pending CSS.
+        if (frame.type === 'error') {
+          fail(state, Error(frame.message));
+          return;
+        }
         const bytes = new TextEncoder().encode(
           JSON.stringify(frame),
         ).byteLength;
@@ -266,7 +410,12 @@ export function bridgeStreamBootstrap(
     () => {
       leaving = true;
       observer.disconnect();
-      Object.keys(entries).forEach((id) => clearTimeout(entries[id].timer));
+      Object.keys(entries).forEach((id) => {
+        const state = entries[id];
+        state.cancelled = true;
+        clearTimeout(state.timer);
+        releaseStyles(state);
+      });
     },
     { once: true },
   );

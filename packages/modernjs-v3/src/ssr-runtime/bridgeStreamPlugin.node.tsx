@@ -45,6 +45,7 @@ type RequestContext = {
 type Job = {
   controller: AbortController;
   prefix: string;
+  stylesheets: string[];
   ready: Promise<BridgeSSRResult>;
   done?: Promise<void>;
   activate(params: BridgeSSRRenderParams): void;
@@ -85,6 +86,10 @@ export function bridgeStreamPlugin(
         let startJob: ((id: string, job: Job) => void) | undefined;
         let stopped = false;
         const context: BridgeSSRContextValue = {
+          registerStyles(id, hrefs) {
+            const job = jobs.get(id);
+            if (job) job.stylesheets = [...new Set(hrefs)];
+          },
           register(id, factory, params, registrationOptions) {
             const existing = jobs.get(id);
             if (existing) {
@@ -154,6 +159,7 @@ export function bridgeStreamPlugin(
             const job: Job = {
               controller,
               prefix,
+              stylesheets: [],
               ready,
               activate,
               clear() {
@@ -199,7 +205,17 @@ export function bridgeStreamPlugin(
             const attribute = nonce
               ? ` nonce="${escapeHTMLAttribute(nonce)}"`
               : '';
-            return `<script${attribute}>(${bridgeStreamBootstrap.toString()})(${encoded})</script>`;
+            const stylesheets = [
+              ...new Set(
+                Array.from(jobs.values()).flatMap((job) => job.stylesheets),
+              ),
+            ]
+              .map(
+                (href) =>
+                  `<link rel="stylesheet" href="${escapeHTMLAttribute(href)}"${attribute}>`,
+              )
+              .join('');
+            return `${stylesheets}<script${attribute}>(${bridgeStreamBootstrap.toString()})(${encoded})</script>`;
           },
           processStream(input) {
             const output = new PassThrough();
@@ -250,6 +266,7 @@ export function bridgeStreamPlugin(
                     type: 'meta',
                     protocol: BRIDGE_STREAM_PROTOCOL,
                     identifierPrefix: job.prefix,
+                    stylesheets: job.stylesheets,
                   });
                   for await (const html of framed) {
                     if (signal.aborted) throw signal.reason;

@@ -169,3 +169,182 @@ describe('Bridge early bootstrap', () => {
     expect(container.textContent).toBe('');
   });
 });
+
+describe('Bridge stylesheet readiness', () => {
+  const completeFrames = (
+    runtime: BridgeStreamBrowserRuntime,
+    id: string,
+    stylesheets: string[],
+  ) => {
+    runtime.accept(id, { ...meta(`${id}-`), stylesheets });
+    runtime.accept(id, { type: 'html', html: `<p>styled ${id}</p>` });
+    runtime.accept(id, { type: 'data', snapshot: { id } });
+    runtime.accept(id, { type: 'done' });
+  };
+
+  it('requests CSS on metadata but retains loading content until all stylesheets load', async () => {
+    const { dom, runtime } = createDocument();
+    const document = dom.window.document;
+    runtime.accept('a', {
+      ...meta('a-'),
+      stylesheets: ['/a.css', '/shared.css'],
+    });
+    const links = document.head.querySelectorAll('link');
+    expect(links).toHaveLength(2);
+    expect(links[0].rel).toBe('stylesheet');
+    expect(links[0].nonce).toBe('test-nonce');
+    runtime.accept('a', { type: 'html', html: '<p>styled A</p>' });
+    runtime.accept('a', { type: 'data', snapshot: {} });
+    runtime.accept('a', { type: 'done' });
+    let completed = false;
+    void runtime.get('a')!.done.then(() => {
+      completed = true;
+    });
+    expect(document.getElementById('a')!.textContent).toBe('loading A');
+    links[0].dispatchEvent(new dom.window.Event('load'));
+    await Promise.resolve();
+    expect(document.getElementById('a')!.textContent).toBe('loading A');
+    expect(completed).toBe(false);
+    links[1].dispatchEvent(new dom.window.Event('load'));
+    await runtime.get('a')!.done;
+    expect(document.getElementById('a')!.textContent).toBe('styled A');
+    expect(completed).toBe(true);
+  });
+
+  it('reuses an already loaded document stylesheet without waiting for a past load event', async () => {
+    const { dom, runtime } = createDocument();
+    const document = dom.window.document;
+    const existing = document.createElement('link');
+    existing.rel = 'stylesheet';
+    existing.href = '/shared.css';
+    Object.defineProperty(existing, 'sheet', { value: {} });
+    document.head.appendChild(existing);
+    completeFrames(runtime, 'a', ['/shared.css']);
+    await runtime.get('a')!.done;
+    expect(document.querySelectorAll('link')).toHaveLength(1);
+    expect(document.querySelector('link')).toBe(existing);
+    runtime.release('a', document.getElementById('a')!);
+    expect(existing.isConnected).toBe(true);
+  });
+
+  it('shares one pending stylesheet across instances while keeping their other CSS independent', async () => {
+    const { dom, runtime } = createDocument();
+    const document = dom.window.document;
+    const existing = document.createElement('link');
+    existing.rel = 'stylesheet';
+    existing.href = '/shared.css';
+    document.head.appendChild(existing);
+    completeFrames(runtime, 'a', ['/shared.css', '/a.css']);
+    completeFrames(runtime, 'b', ['https://host.example/shared.css', '/b.css']);
+    expect(document.querySelectorAll('link')).toHaveLength(3);
+    existing.dispatchEvent(new dom.window.Event('load'));
+    document
+      .querySelector('link[href="https://host.example/b.css"]')!
+      .dispatchEvent(new dom.window.Event('load'));
+    await runtime.get('b')!.done;
+    expect(document.getElementById('b')!.textContent).toBe('styled b');
+    expect(document.getElementById('a')!.textContent).toBe('loading A');
+    document
+      .querySelector('link[href="https://host.example/a.css"]')!
+      .dispatchEvent(new dom.window.Event('load'));
+    await runtime.get('a')!.done;
+    expect(document.getElementById('a')!.textContent).toBe('styled a');
+  });
+
+  it('does not treat preload, inactive or non-CSS links as applied styles', async () => {
+    const { dom, runtime } = createDocument();
+    const document = dom.window.document;
+    document.head.innerHTML =
+      '<link rel="preload" as="style" href="/preload.css">' +
+      '<link rel="alternate stylesheet" href="/alternate.css">' +
+      '<link rel="stylesheet" href="/disabled.css">' +
+      '<link rel="stylesheet" media="print" href="/print.css">' +
+      '<link rel="stylesheet" disabled href="/disabled-attribute.css">' +
+      '<link rel="stylesheet" type="text/plain" href="/text.css">';
+    (document.head.children[2] as HTMLLinkElement).disabled = true;
+    const originals = Array.from(document.head.children);
+    completeFrames(runtime, 'a', [
+      '/preload.css',
+      '/alternate.css',
+      '/disabled.css',
+      '/print.css',
+      '/disabled-attribute.css',
+      '/text.css',
+    ]);
+    const added = Array.from(document.querySelectorAll('link')).slice(6);
+    expect(added).toHaveLength(6);
+    added.forEach((link) => link.dispatchEvent(new dom.window.Event('load')));
+    await runtime.get('a')!.done;
+    expect(originals.every((link) => link.isConnected)).toBe(true);
+  });
+
+  it('fails once if a stylesheet errors and never reveals queued unstyled HTML', async () => {
+    const { dom, runtime } = createDocument();
+    const document = dom.window.document;
+    completeFrames(runtime, 'a', ['/broken.css']);
+    const link = document.querySelector('link')!;
+    link.dispatchEvent(new dom.window.Event('error'));
+    await expect(runtime.get('a')!.done).rejects.toThrow('stylesheet failed');
+    link.dispatchEvent(new dom.window.Event('load'));
+    await Promise.resolve();
+    expect(document.getElementById('a')!.textContent).toBe('loading A');
+    expect(document.querySelectorAll('#mf-bridge-fatal-error')).toHaveLength(1);
+  });
+
+  it('keeps the stream deadline active for CSS and detaches cancelled requests', async () => {
+    const { dom, runtime } = createDocument(undefined, 10);
+    const document = dom.window.document;
+    completeFrames(runtime, 'a', ['/never.css']);
+    const link = document.querySelector('link')!;
+    await expect(runtime.get('a')!.done).rejects.toThrow('timed out');
+    expect(link.isConnected).toBe(false);
+    link.dispatchEvent(new dom.window.Event('load'));
+    await Promise.resolve();
+    expect(document.getElementById('a')!.textContent).toBe('loading A');
+    expect(document.querySelectorAll('#mf-bridge-fatal-error')).toHaveLength(1);
+  });
+
+  it('releases an instance while allowing another to finish using the shared stylesheet', async () => {
+    const { dom, runtime } = createDocument();
+    const document = dom.window.document;
+    completeFrames(runtime, 'a', ['/shared.css']);
+    completeFrames(runtime, 'b', ['/shared.css']);
+    const link = document.querySelector('link')!;
+    runtime.release('a', document.getElementById('a')!);
+    await expect(runtime.get('a')!.done).rejects.toThrow('unmounted');
+    expect(link.isConnected).toBe(true);
+    link.dispatchEvent(new dom.window.Event('load'));
+    await runtime.get('b')!.done;
+    expect(document.getElementById('a')!.textContent).toBe('loading A');
+    expect(document.getElementById('b')!.textContent).toBe('styled b');
+    expect(document.querySelector('#mf-bridge-fatal-error')).toBeNull();
+  });
+
+  it('preserves an existing pending page stylesheet when the instance is released', async () => {
+    const { dom, runtime } = createDocument();
+    const document = dom.window.document;
+    const existing = document.createElement('link');
+    existing.rel = 'stylesheet';
+    existing.href = '/shared.css';
+    document.head.appendChild(existing);
+    completeFrames(runtime, 'a', ['/shared.css']);
+    runtime.release('a', document.getElementById('a')!);
+    await expect(runtime.get('a')!.done).rejects.toThrow('unmounted');
+    existing.dispatchEvent(new dom.window.Event('load'));
+    await Promise.resolve();
+    expect(existing.isConnected).toBe(true);
+    expect(document.getElementById('a')!.textContent).toBe('loading A');
+  });
+
+  it('handles a server error immediately even while CSS blocks queued HTML', async () => {
+    const { dom, runtime } = createDocument();
+    completeFrames(runtime, 'a', ['/pending.css']);
+    runtime.accept('a', { type: 'error', message: 'Remote render failed' });
+    await expect(runtime.get('a')!.done).rejects.toThrow(
+      'Remote render failed',
+    );
+    expect(dom.window.document.getElementById('a')!.textContent).toBe(
+      'loading A',
+    );
+  });
+});
