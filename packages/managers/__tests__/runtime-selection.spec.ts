@@ -362,6 +362,22 @@ describe('capability profile reduction', () => {
     });
   });
 
+  it('lets a participant disable a capability it also configures', () => {
+    const profile = reduceCapabilityProfile([
+      {
+        pluginName: 'host',
+        remotes: { app: 'app@url' },
+        shared: { react: {} },
+        experiments: {
+          optimization: { disableRemote: true, disableShared: true },
+        },
+      },
+    ]);
+
+    expect(profile.remote).toBe('forbidden');
+    expect(profile.shared).toBe('forbidden');
+  });
+
   it('fails when one participant requires a capability another forbids', () => {
     expect(() =>
       reduceCapabilityProfile([
@@ -369,6 +385,15 @@ describe('capability profile reduction', () => {
         {
           pluginName: 'other',
           experiments: { optimization: { disableRemote: true } },
+        },
+      ]),
+    ).toThrow(expect.objectContaining({ code: 'capability-conflict' }));
+    expect(() =>
+      reduceCapabilityProfile([
+        { pluginName: 'host', shared: { react: {} } },
+        {
+          pluginName: 'other',
+          experiments: { optimization: { disableShared: true } },
         },
       ]),
     ).toThrow(expect.objectContaining({ code: 'capability-conflict' }));

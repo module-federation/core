@@ -40,18 +40,7 @@ export function hasConfiguredRecord(value: unknown): boolean {
   return isPresentRecord(value) && Object.keys(value).length > 0;
 }
 
-function intent(
-  forbidden: boolean,
-  required: boolean,
-  capability: CapabilityName,
-  pluginName: string,
-): CapabilityIntent {
-  if (forbidden && required) {
-    throw new RuntimeSelectionError(
-      'capability-conflict',
-      `${pluginName} both requires and disables ${capability}.`,
-    );
-  }
+function intent(forbidden: boolean, required: boolean): CapabilityIntent {
   if (forbidden) {
     return 'forbidden';
   }
@@ -79,21 +68,12 @@ export function participantIntent(
     remote: intent(
       optimization.disableRemote === true,
       hasConfiguredRecord(request.remotes),
-      'remote',
-      request.pluginName,
     ),
     shared: intent(
       optimization.disableShared === true,
       hasConfiguredRecord(request.shared),
-      'shared',
-      request.pluginName,
     ),
-    snapshotPlugins: intent(
-      optimization.disableSnapshot === true,
-      false,
-      'snapshotPlugins',
-      request.pluginName,
-    ),
+    snapshotPlugins: intent(optimization.disableSnapshot === true, false),
     containerEntry: hasExposes(request.exposes) ? 'required' : 'neutral',
     explicitTarget: normalizeExplicitTarget(
       optimization.target,
