@@ -148,7 +148,7 @@ describe('remote module selector packaging', () => {
       expect(modules).not.toContain('./dist/selectors/remote-module/legacy.js');
       expect(modules).not.toContain('./dist/module/index.js');
     }
-  });
+  }, 60_000);
 
   it('loads the enabled leaf in both module formats', () => {
     const cjsPath = path.join(

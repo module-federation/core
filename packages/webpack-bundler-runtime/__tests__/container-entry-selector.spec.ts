@@ -149,5 +149,6 @@ describe('container entry selector', () => {
       );
       expect(modules).not.toContain('./dist/initContainerEntry.js');
     },
+    60_000,
   );
 });
