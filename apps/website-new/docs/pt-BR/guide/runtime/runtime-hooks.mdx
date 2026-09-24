@@ -835,7 +835,7 @@ type LoadEntryErrorOptions = {
 };
 ```
 
-A chave de cache do remote entry ainda é `name` mais `entry`. Os metadados de compatibilidade ficam ao lado dessa promise. Eles não entram na chave.
+A chave de cache do remote entry ainda é `name` mais `entry`. A verificação de compatibilidade só roda quando a entrada em cache e a nova requisição carregam metadados de runtime-image, algo que nenhum build emite por padrão. Quando os dois lados carregam esses metadados e divergem em compatibility, target, remote type ou global name, a reutilização falha; caso contrário, o comportamento é o mesmo de antes.
 
 ## afterLoadEntry
 

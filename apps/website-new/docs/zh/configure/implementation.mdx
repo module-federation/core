@@ -10,7 +10,7 @@
 
 `runtime`、`runtime-core`、`webpack-bundler-runtime` 和 `sdk` 都必须从所选 `runtime-tools` 的依赖图里解析。
 
-Vite 和 Rolldown 不能按导入文件使用不同的解析规则。开启 package condition 的 Vite 配置必须在整个进程里只用一套 family，出现第二套就失败。本仓库的 esbuild 适配器仍然导入完整的 `@module-federation/webpack-bundler-runtime` 入口。
+Vite 尚未覆盖。
 
 ```javascript
 module.exports = {

@@ -5,6 +5,6 @@
 ---
 
 Add package-owned selectors for runtime capabilities and runtime targets.
-Namespaced package conditions can select disabled modules without pulling the
-enabled implementations into the module graph. Default selectors keep the
-existing `FEDERATION_*` define behavior.
+Namespaced package conditions can select disabled leaves without adding enabled
+implementations to the module graph. Default leaves retain the existing
+`FEDERATION_*` define behavior.
