@@ -370,3 +370,118 @@
       var(--color-bg-2, #020617) 100%
     );
 }
+
+// The popup has a bounded viewport. Keep navigation and the inspected-page
+// header visible while long proxy forms, graphs and traces scroll below them.
+:global(html[data-devtools-view='popup']) {
+  overflow: hidden;
+
+  :global(body) {
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .shell {
+    height: 100vh;
+    min-height: 0;
+    padding: 10px;
+    gap: 8px;
+    flex-direction: column;
+    background: var(--color-bg-1, #fff);
+  }
+
+  .sidebar {
+    flex: 0 0 auto;
+    width: 100%;
+    min-width: 0;
+    padding: 4px;
+    gap: 2px;
+    border-radius: 8px;
+    box-shadow: none;
+  }
+
+  .tabItem {
+    padding: 7px 9px;
+    font-size: 12px;
+    border-radius: 5px;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .tabItem:focus-visible {
+    outline: 2px solid var(--color-primary-6, #165dff);
+    outline-offset: -2px;
+  }
+
+  .panel {
+    flex: 1 1 0;
+    min-height: 0;
+    padding: 12px;
+    gap: 10px;
+    border-radius: 8px;
+    box-shadow: none;
+    overflow: hidden;
+  }
+
+  .header {
+    flex: 0 0 auto;
+    gap: 6px;
+  }
+  .logo {
+    font-size: 16px;
+  }
+  .subtitle,
+  .scopeLabel {
+    display: none;
+  }
+  .headerActions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .meta {
+    align-items: center;
+    gap: 8px;
+    flex-wrap: nowrap;
+  }
+  .scope {
+    min-width: 0;
+    flex: 1;
+    overflow: hidden;
+  }
+  .scope :global(.arco-tag) {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .stats {
+    flex: 0 0 auto;
+    gap: 12px;
+    width: auto;
+  }
+  .statBlock {
+    padding: 0;
+    min-width: 0;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 4px;
+    border: 0;
+    background: none;
+    box-shadow: none;
+  }
+  .statValue {
+    font-size: 14px;
+  }
+  .statLabel {
+    font-size: 10px;
+    text-transform: none;
+  }
+  .body {
+    flex: 1 1 0;
+  }
+  .content {
+    flex: 1 1 0;
+    overscroll-behavior: contain;
+  }
+}
