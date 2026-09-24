@@ -137,23 +137,27 @@ try {
 `;
 
 describe('container entry selector', () => {
-  it('initializes nothing without a share scope, and the disabled export cannot be called', () => {
+  it('initializes nothing without a share scope, and the disabled leaf has no callable export', () => {
     const code =
-      "const { initContainerEntry } = require('#mf/container-entry'); try { console.log(String(initContainerEntry({ webpackRequire: {} }))); } catch (error) { console.log(error.message); }";
-    expect(runNodeWithConditions(packageDir, [], code)).toBe('undefined');
+      "const { initContainerEntry } = require('#mf/container-entry'); console.log(typeof initContainerEntry === 'function' ? 'result:' + String(initContainerEntry({ webpackRequire: {} })) : 'export:' + typeof initContainerEntry);";
+    expect(runNodeWithConditions(packageDir, [], code)).toBe(
+      'result:undefined',
+    );
     expect(
       runNodeWithConditions(
         packageDir,
         ['module-federation:no-container-entry'],
         code,
       ),
-    ).toBe('initContainerEntry is not a function');
+    ).toBe('export:undefined');
   });
 
-  it('leaves share args unchanged without a bundler runtime, and omits the plugin when shared is disabled', () => {
+  it('patches tree-shaking status without a bundler runtime, and omits the plugin when shared is disabled', () => {
     const code =
-      "const { createTreeShakingSharePlugin } = require('#mf/tree-shaking-share-plugin'); const plugin = createTreeShakingSharePlugin({ webpackRequire: { federation: {} } }); if (!plugin) { console.log('absent'); } else { const args = { userOptions: {}, origin: { name: 'host' }, options: {} }; console.log(plugin.beforeInit(args) === args ? 'unchanged' : 'changed'); }";
-    expect(runNodeWithConditions(packageDir, [], code)).toBe('unchanged');
+      "require('@module-federation/runtime/helpers').default.global.addGlobalSnapshot({ host: { shared: [{ sharedName: 'react', treeShakingStatus: 2 }] } }); const { createTreeShakingSharePlugin } = require('#mf/tree-shaking-share-plugin'); const plugin = createTreeShakingSharePlugin({ webpackRequire: { federation: { sharedFallback: { react: [] } } } }); if (!plugin) { console.log('absent'); } else { const factory = () => 'react'; const react = { get: factory, treeShaking: { status: 1 } }; plugin.beforeInit({ userOptions: { shared: { react } }, origin: { name: 'host' }, options: {} }); console.log(`status:${react.treeShaking.status} getter:${react.get === factory ? 'original' : 'wrapped'}`); }";
+    expect(runNodeWithConditions(packageDir, [], code)).toBe(
+      'status:2 getter:original',
+    );
     expect(
       runNodeWithConditions(packageDir, ['module-federation:no-shared'], code),
     ).toBe('absent');

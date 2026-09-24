@@ -8,7 +8,6 @@ import type { ShareArgs, SharedGetter } from '@module-federation/runtime/types';
 import type { Federation } from '../../types';
 import type { TreeShakingSharePluginOptions } from './types';
 
-type BundlerRuntime = NonNullable<Federation['bundlerRuntime']>;
 type ShareModuleFactory = Extract<
   ReturnType<SharedGetter>,
   (...args: never[]) => unknown
@@ -18,7 +17,7 @@ type ShareModuleFactory = Extract<
 interface TreeShakenShareEntry {
   init(
     mfInstance: ModuleFederation,
-    bundlerRuntime: BundlerRuntime,
+    bundlerRuntime: Federation['bundlerRuntime'],
   ): void | Promise<unknown>;
   get(): ShareModuleFactory;
 }
@@ -44,7 +43,7 @@ export function createTreeShakingSharePlugin({
     beforeInit(args) {
       const { userOptions, origin, options: registeredOptions } = args;
       const version = userOptions.version || registeredOptions.version;
-      if (!sharedFallback || !bundlerRuntime) {
+      if (!sharedFallback) {
         return args;
       }
 
@@ -57,7 +56,7 @@ export function createTreeShakingSharePlugin({
           : [currentShared[sharedName]];
         sharedArgs.forEach((sharedArg) => {
           shared.push([sharedName, sharedArg]);
-          if ('get' in sharedArg) {
+          if ('get' in sharedArg && bundlerRuntime) {
             sharedArg.treeShaking ||= {};
             sharedArg.treeShaking.get = sharedArg.get;
             sharedArg.get = bundlerRuntime.getSharedFallbackGetter({
