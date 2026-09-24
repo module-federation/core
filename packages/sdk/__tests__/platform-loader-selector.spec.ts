@@ -1,4 +1,3 @@
-import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import os from 'node:os';
@@ -6,6 +5,7 @@ import path from 'node:path';
 import { clearImmediate, setImmediate } from 'node:timers';
 import { TextDecoder, TextEncoder } from 'node:util';
 import type webpack from 'webpack';
+import { runNodeWithConditions } from '../../../tools/testing/runNodeWithConditions';
 
 const packageDir = path.resolve(__dirname, '..');
 type CompilerFactory = typeof webpack;
@@ -16,11 +16,7 @@ type StatsModule = {
 };
 
 function runSdk(condition: string, code: string): string {
-  return execFileSync(
-    process.execPath,
-    [`--conditions=${condition}`, '-e', code],
-    { cwd: packageDir, encoding: 'utf8' },
-  ).trim();
+  return runNodeWithConditions(packageDir, [condition], code);
 }
 
 function compilerCases(): [string, CompilerFactory][] {
