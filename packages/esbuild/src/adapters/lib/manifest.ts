@@ -1,7 +1,6 @@
 import fs from 'fs';
 import path from 'path';
 import { resolve } from './collect-exports.js';
-import { resolveFromWorkingDir } from './utils.js';
 import { BuildResult } from 'esbuild';
 interface OutputFile {
   entryPoint?: string;
@@ -83,7 +82,8 @@ export const writeRemoteManifest = async (
 
   let packageJson: { name: string };
   try {
-    const packageJsonPath = resolveFromWorkingDir(cwd, 'package.json');
+    const packageJsonPath =
+      (await resolve(process.cwd(), '/package.json')) || '';
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     packageJson = require(packageJsonPath);
   } catch (e) {
@@ -263,7 +263,7 @@ export const writeRemoteManifest = async (
     exposes,
   };
 
-  const manifestPath = resolveFromWorkingDir(
+  const manifestPath = path.resolve(
     cwd,
     path.join(path.dirname(outputMap[containerName].chunk), 'mf-manifest.json'),
   );

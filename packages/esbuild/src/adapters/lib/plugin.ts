@@ -6,7 +6,6 @@ import { createContainerPlugin } from './containerPlugin';
 import { initializeHostPlugin } from './containerReference';
 import { linkRemotesPlugin } from './linkRemotesPlugin';
 import { commonjs } from './commonjs';
-import { resolveFromWorkingDir } from './utils';
 import {
   BuildOptions,
   PluginBuild,
@@ -235,7 +234,7 @@ export const moduleFederationPlugin = (config: NormalizedFederationConfig) => ({
 
           if (!(value as any).entryPoint.endsWith(remoteFile)) continue;
 
-          const outputFile = resolveFromWorkingDir(cwd, outputPath);
+          const outputFile = path.resolve(cwd, outputPath);
           const container = fs.readFileSync(outputFile, 'utf-8');
 
           const withExports = container
