@@ -34,11 +34,19 @@ function compilerCases(): [string, CompilerFactory][] {
   ];
 }
 
+interface CompiledRun {
+  output: string;
+  bundle: string;
+}
+
+const NODE_LOADER_MARKER =
+  'vm.SyntheticModule is required to load Node.js built-in modules in ESM remote entries.';
+
 function runCompiled(
   compilerFactory: CompilerFactory,
   compilerName: string,
   condition: string,
-): Promise<string> {
+): Promise<CompiledRun> {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'mf-sdk-selector-'));
   fs.writeFileSync(
     path.join(root, 'entry.js'),
@@ -65,7 +73,7 @@ function runCompiled(
       },
     });
     compiler.run((error, stats) => {
-      const finish = (result: string | Error) => {
+      const finish = (result: CompiledRun | Error) => {
         compiler.close(() => undefined);
         fs.rmSync(root, { recursive: true, force: true });
         if (result instanceof Error) {
@@ -85,18 +93,18 @@ function runCompiled(
         return;
       }
       try {
-        const output = execFileSync(
-          process.execPath,
-          [path.join(root, compilerName, 'out.js')],
-          {
-            encoding: 'utf8',
-            env: {
-              ...process.env,
-              NODE_PATH: path.resolve(packageDir, '../../node_modules'),
-            },
+        const bundlePath = path.join(root, compilerName, 'out.js');
+        const output = execFileSync(process.execPath, [bundlePath], {
+          encoding: 'utf8',
+          env: {
+            ...process.env,
+            NODE_PATH: path.resolve(packageDir, '../../node_modules'),
           },
-        );
-        finish(output.trim());
+        });
+        finish({
+          output: output.trim(),
+          bundle: fs.readFileSync(bundlePath, 'utf8'),
+        });
       } catch (runError) {
         finish(
           runError instanceof Error ? runError : new Error(String(runError)),
@@ -153,13 +161,20 @@ describe('platform loader selector', () => {
   });
 
   it.each(compilerCases())(
-    'rejects Node script loading from a %s web bundle',
+    'rejects Node script loading from a %s web bundle and drops the Node loader',
     async (name, compiler) => {
-      await expect(
-        runCompiled(compiler, name, 'module-federation:target-web'),
-      ).resolves.toBe(
+      const web = await runCompiled(
+        compiler,
+        `${name}-web`,
+        'module-federation:target-web',
+      );
+      expect(web.output).toBe(
         'Node script loading is disabled by module-federation:target-web.',
       );
+      expect(web.bundle).not.toContain(NODE_LOADER_MARKER);
+
+      const legacy = await runCompiled(compiler, `${name}-legacy`, 'import');
+      expect(legacy.bundle).toContain(NODE_LOADER_MARKER);
     },
     60_000,
   );
