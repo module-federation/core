@@ -10,8 +10,6 @@ const useRemote =
 
 export function createSnapshotHandler(
   host: ConstructorParameters<typeof SnapshotHandler>[0],
-): SnapshotHandler {
-  return (
-    useRemote ? new SnapshotHandler(host) : new DisabledSnapshotHandler()
-  ) as SnapshotHandler;
+) {
+  return useRemote ? new SnapshotHandler(host) : new DisabledSnapshotHandler();
 }
