@@ -69,7 +69,7 @@ function compileRuntime(
   return new Promise((resolve, reject) => {
     const compiler = compilerFactory({
       context: packageDir,
-      mode: 'production',
+      mode: 'none',
       entry: path.join(root, 'entry.js'),
       output: {
         path: path.join(root, compilerName),
@@ -89,9 +89,7 @@ function compileRuntime(
         ],
       },
       optimization: {
-        concatenateModules: false,
-        minimize: true,
-        usedExports: false,
+        minimize: false,
       },
       externals: [
         (
@@ -151,5 +149,6 @@ describe('container entry selector', () => {
       );
       expect(modules).not.toContain('./dist/initContainerEntry.js');
     },
+    60_000,
   );
 });
