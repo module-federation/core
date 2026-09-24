@@ -587,4 +587,24 @@ describe('compiler selection slot', () => {
     );
     expect(getSelectionSlot(child).profile?.remote).toBe('neutral');
   });
+
+  it('rejects a federation plugin applied directly to a child compiler', () => {
+    const dirs = installLegacy(root);
+    const parent = {};
+    const child = {};
+    registerRuntimeParticipant(parent, { pluginName: 'host' });
+    finalizeRuntimeSelection(
+      parent,
+      'web',
+      path.join(dirs['runtime-tools'], 'index.js'),
+    );
+    registerRuntimeParticipant(child, { pluginName: 'child-remote' });
+
+    expect(() => inheritRuntimeSelection(parent, child)).toThrow(
+      expect.objectContaining({
+        code: 'child-participant',
+        message: expect.stringContaining('child-remote'),
+      }),
+    );
+  });
 });

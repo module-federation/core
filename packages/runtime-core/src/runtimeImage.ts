@@ -58,19 +58,14 @@ export function assertRuntimeImageCompatible(
       `Refusing to reuse entry loader ${current.entryLoadingIdentity} with ${next.entryLoadingIdentity}.`,
     );
   }
-  for (const capability of next.required) {
-    const provided =
-      current.available.includes(capability) ||
-      current.required.includes(capability);
-    if (!provided) {
-      error(`Runtime image is missing required capability ${capability}.`);
+  const provided = new Set([...current.available, ...current.required]);
+  for (const capability of new Set([...next.required, ...next.available])) {
+    if (!provided.has(capability)) {
+      error(`Runtime image is missing capability ${capability}.`);
     }
   }
   for (const capability of next.forbidden) {
-    const exposed =
-      current.available.includes(capability) ||
-      current.required.includes(capability);
-    if (exposed) {
+    if (provided.has(capability)) {
       error(`Runtime image exposes forbidden capability ${capability}.`);
     }
   }
