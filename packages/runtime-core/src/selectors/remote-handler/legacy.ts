@@ -10,8 +10,6 @@ const useRemote =
 
 export function createRemoteHandler(
   host: ConstructorParameters<typeof RemoteHandler>[0],
-): RemoteHandler {
-  return (
-    useRemote ? new RemoteHandler(host) : new DisabledRemoteHandler()
-  ) as RemoteHandler;
+) {
+  return useRemote ? new RemoteHandler(host) : new DisabledRemoteHandler();
 }
