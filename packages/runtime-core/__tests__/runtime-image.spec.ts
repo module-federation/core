@@ -37,6 +37,24 @@ describe('runtime image compatibility', () => {
     ).toThrow(/forbidden capability shared/);
   });
 
+  it('rejects reuse in either order when only one image can load shared modules', () => {
+    const withoutShared = image({
+      forbidden: ['shared'],
+      available: ['remote'],
+    });
+    const withShared = image({ available: ['remote', 'shared'] });
+
+    expect(() =>
+      assertRuntimeImageCompatible(withoutShared, withShared),
+    ).toThrow(/missing capability shared/);
+    expect(() =>
+      assertRuntimeImageCompatible(withShared, withoutShared),
+    ).toThrow(/forbidden capability shared/);
+    expect(() =>
+      assertRuntimeImageCompatible(withShared, image()),
+    ).not.toThrow();
+  });
+
   it('stores the descriptor on the instance without changing enumerable keys', () => {
     const instance = {};
     attachRuntimeImage(instance, image());

@@ -10,8 +10,6 @@ const useShared =
 
 export function createSharedHandler(
   host: ConstructorParameters<typeof SharedHandler>[0],
-): SharedHandler {
-  return (
-    useShared ? new SharedHandler(host) : new DisabledSharedHandler()
-  ) as SharedHandler;
+) {
+  return useShared ? new SharedHandler(host) : new DisabledSharedHandler();
 }

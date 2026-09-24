@@ -22,7 +22,8 @@ import {
   LoadShareExtraOptions,
   SharedLoadContext,
 } from './type';
-import { getBuilderId, registerPlugins, getRemoteEntry, error } from './utils';
+import { getBuilderId, registerPlugins, error } from './utils';
+import type { getRemoteEntry } from './utils/load';
 import {
   getShortErrorMsg,
   RUNTIME_010,
@@ -301,9 +302,12 @@ export class ModuleFederation {
 
     this.name = userOptions.name;
     this.options = defaultOptions;
-    this.snapshotHandler = createSnapshotHandler(this);
-    this.sharedHandler = createSharedHandler(this);
-    this.remoteHandler = createRemoteHandler(this);
+    // The public field types stay the enabled classes during the
+    // compatibility window. A disabled handler keeps the members the runtime
+    // calls and rejects or returns empty results from the rest.
+    this.snapshotHandler = createSnapshotHandler(this) as SnapshotHandler;
+    this.sharedHandler = createSharedHandler(this) as SharedHandler;
+    this.remoteHandler = createRemoteHandler(this) as RemoteHandler;
     this.shareScopeMap = this.sharedHandler.shareScopeMap;
     this.registerPlugins([
       ...defaultOptions.plugins,

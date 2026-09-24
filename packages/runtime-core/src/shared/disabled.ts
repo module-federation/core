@@ -1,14 +1,32 @@
+import type { Federation } from '../global';
 import type { LoadRemoteMatch } from '../remote';
-import type { ShareScopeMap } from '../type';
-import { AsyncWaterfallHook, PluginSystem } from '../utils/hooks';
+import type { ShareScopeMap, Shared, SharedLoadContext } from '../type';
+import {
+  AsyncWaterfallHook,
+  PluginSystem,
+  SyncWaterfallHook,
+} from '../utils/hooks';
 
 export class DisabledSharedHandler {
   shareScopeMap: ShareScopeMap = {};
   hooks = new PluginSystem({
     afterResolve: new AsyncWaterfallHook<LoadRemoteMatch>('afterResolve'),
+    resolveShare: new SyncWaterfallHook<{
+      shareScopeMap: ShareScopeMap;
+      scope: string;
+      pkgName: string;
+      version: string;
+      shareInfo: Shared;
+      GlobalFederation: Federation;
+      resolver: () => { shared: Shared; useTreesShaking: boolean } | undefined;
+      loadContext?: SharedLoadContext;
+    }>('resolveShare'),
   });
 
-  registerShared() {
+  registerShared(): {
+    newShareInfos: Record<string, never>;
+    allShareInfos: Record<string, never>;
+  } {
     return {
       newShareInfos: {},
       allShareInfos: {},

@@ -1,4 +1,4 @@
-import { PluginSystem } from '../utils/hooks';
+import { createRemoteHandlerHooks, type RemoteHandlerHooks } from './hooks';
 
 const REMOTE_DISABLED_MESSAGE =
   'Remote loading is disabled by experiments.optimization.disableRemote.';
@@ -10,7 +10,8 @@ export class UnavailableRemoteModule {
 }
 
 export class DisabledRemoteHandler {
-  hooks = new PluginSystem({});
+  hooks: RemoteHandlerHooks = createRemoteHandlerHooks();
+  idToRemoteMap: Record<string, { name: string; expose: string }> = {};
 
   formatAndRegisterRemote() {
     return [];
