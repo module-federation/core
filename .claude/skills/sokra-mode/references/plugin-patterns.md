@@ -2,6 +2,8 @@
 
 Blob links point at webpack v5.75.0 (`8241da7`), sokra's last release. Later code in webpack HEAD was reshaped by other maintainers. PR and commit links are on webpack/webpack.
 
+In this repo, translate the webpack mechanics. Require internals through `normalizeWebpackPath`. `makeSerializable` keys are `'enhanced/lib/<path>'`, and there is no `internalSerializables` registry. Use TypeScript types instead of JSDoc. Run `generate:schema` instead of `yarn special-lint-fix`. Put tests in `packages/enhanced/test/configCases`. Runtime logic lives in `runtime-core` and `webpack-bundler-runtime`, behind thin RuntimeModules.
+
 ## Plugin shape
 
 - **Validate options at module level.** Create the validator with `createSchemaValidation(require("../schemas/plugins/X.check.js"), () => require("../schemas/plugins/X.json"), { name: "X Plugin", baseDataPath: "options" })` and call `validate(options)` in the constructor. [ContainerPlugin.js#L17][v-cp], commit [e21b1d46f](https://github.com/webpack/webpack/commit/e21b1d46f).
