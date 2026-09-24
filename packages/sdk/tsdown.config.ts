@@ -1,6 +1,7 @@
 import { defineConfig } from 'tsdown';
 import {
   createDualFormatConfig,
+  externalWithSelectors,
   packageDirFromMetaUrl,
 } from '../../tools/scripts/tsdown/config-helpers.mjs';
 
@@ -29,12 +30,11 @@ export default defineConfig([
         'selectors/platform-loader/universal':
           'src/selectors/platform-loader/universal.ts',
       },
-      external: [
+      external: externalWithSelectors([
         '@module-federation/*',
         'isomorphic-rslog',
         'webpack',
-        /^#mf\//,
-      ],
+      ]),
       define: {},
       outExtensions: undefined,
       copyLicense: true,

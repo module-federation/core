@@ -1,6 +1,7 @@
 import { defineConfig } from 'tsdown';
 import {
   createDualFormatConfig,
+  externalWithSelectors,
   createIifeDebugConfig,
   packageDirFromMetaUrl,
   readPackageVersion,
@@ -63,7 +64,7 @@ const buildConfig = createDualFormatConfig({
     'selectors/preload/enabled': 'src/selectors/preload/enabled.ts',
     'selectors/preload/disabled': 'src/selectors/preload/disabled.ts',
   },
-  external: ['@module-federation/*', /^#mf\//],
+  external: externalWithSelectors(['@module-federation/*']),
   dts: {
     resolver: 'tsc',
   },
