@@ -24,7 +24,7 @@ export const createScriptNode: typeof NodeScriptFactory = (
   const workerGlobal = globalThis as WorkerGlobal;
   let load: Promise<unknown>;
   if (attributes?.['type'] === 'module' || attributes?.['type'] === 'esm') {
-    load = import(url);
+    load = import(/* webpackIgnore: true */ /* @vite-ignore */ url);
   } else if (workerGlobal.importScripts) {
     load = Promise.resolve().then(() => {
       workerGlobal.importScripts?.(url);

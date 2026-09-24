@@ -5,7 +5,7 @@ import type {
   ParticipantRequest,
   RuntimeTarget,
 } from './types';
-import { RuntimeSelectionError } from './types';
+import { isRecord, RuntimeSelectionError } from './types';
 
 export interface ParticipantIntent {
   remote: CapabilityIntent;
@@ -16,42 +16,14 @@ export interface ParticipantIntent {
   externalCore: boolean;
 }
 
-function isPresentRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && !Array.isArray(value) && typeof value === 'object';
-}
-
-export function hasExposes(exposes: unknown): boolean {
-  if (!exposes) {
-    return false;
-  }
-  if (Array.isArray(exposes)) {
-    return exposes.length > 0;
-  }
-  return isPresentRecord(exposes) && Object.keys(exposes).length > 0;
-}
-
 export function hasConfiguredRecord(value: unknown): boolean {
-  if (!value) {
-    return false;
-  }
   if (Array.isArray(value)) {
     return value.length > 0;
   }
-  return isPresentRecord(value) && Object.keys(value).length > 0;
+  return isRecord(value) && Object.keys(value).length > 0;
 }
 
-function intent(
-  forbidden: boolean,
-  required: boolean,
-  capability: CapabilityName,
-  pluginName: string,
-): CapabilityIntent {
-  if (forbidden && required) {
-    throw new RuntimeSelectionError(
-      'capability-conflict',
-      `${pluginName} both requires and disables ${capability}.`,
-    );
-  }
+function intent(forbidden: boolean, required: boolean): CapabilityIntent {
   if (forbidden) {
     return 'forbidden';
   }
@@ -79,44 +51,26 @@ export function participantIntent(
     remote: intent(
       optimization.disableRemote === true,
       hasConfiguredRecord(request.remotes),
-      'remote',
-      request.pluginName,
     ),
     shared: intent(
       optimization.disableShared === true,
       hasConfiguredRecord(request.shared),
-      'shared',
-      request.pluginName,
     ),
-    snapshotPlugins: intent(
-      optimization.disableSnapshot === true,
-      false,
-      'snapshotPlugins',
-      request.pluginName,
-    ),
-    containerEntry: hasExposes(request.exposes) ? 'required' : 'neutral',
-    explicitTarget: normalizeExplicitTarget(
-      optimization.target,
-      request.pluginName,
-    ),
+    snapshotPlugins: intent(optimization.disableSnapshot === true, false),
+    containerEntry: hasConfiguredRecord(request.exposes)
+      ? 'required'
+      : 'neutral',
+    explicitTarget: normalizeExplicitTarget(optimization.target),
     externalCore: request.experiments?.externalRuntime === true,
   };
 }
 
 function normalizeExplicitTarget(
-  target: string | undefined,
-  pluginName: string,
+  target: unknown,
 ): Exclude<RuntimeTarget, 'universal'> | null {
-  if (target === undefined) {
-    return null;
-  }
-  if (target === 'web' || target === 'node' || target === 'worker') {
-    return target;
-  }
-  throw new RuntimeSelectionError(
-    'invalid-target',
-    `${pluginName} has unsupported runtime target "${target}".`,
-  );
+  return target === 'web' || target === 'node' || target === 'worker'
+    ? target
+    : null;
 }
 
 function reduceIntent(

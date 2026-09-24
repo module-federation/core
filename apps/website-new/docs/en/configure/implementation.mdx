@@ -14,7 +14,7 @@ The path must resolve one complete runtime family. If a package in that family i
 
 `runtime`, `runtime-core`, `webpack-bundler-runtime`, and `sdk` must resolve from the dependency graph of the chosen `runtime-tools` path.
 
-Vite and Rolldown cannot apply different resolver rules per importing file. A Vite setup that uses package conditions must use one family for the whole process and fail if a second family appears. The esbuild adapter in this repo still imports the full `@module-federation/webpack-bundler-runtime` entry.
+Vite is not covered yet.
 
 For example, if you want to use a specific version of `@module-federation/runtime-tools`, you can set the `implementation` option in your configuration file:
 

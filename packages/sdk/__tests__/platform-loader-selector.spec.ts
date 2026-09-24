@@ -37,6 +37,7 @@ function compilerCases(): [string, CompilerFactory][] {
 interface CompiledRun {
   output: string;
   bundle: string;
+  warnings: string[];
 }
 
 const NODE_LOADER_MARKER =
@@ -104,6 +105,9 @@ function runCompiled(
         finish({
           output: output.trim(),
           bundle: fs.readFileSync(bundlePath, 'utf8'),
+          warnings: (stats?.toJson({ warnings: true }).warnings ?? []).map(
+            (warning) => warning.message,
+          ),
         });
       } catch (runError) {
         finish(
@@ -175,6 +179,19 @@ describe('platform loader selector', () => {
 
       const legacy = await runCompiled(compiler, `${name}-legacy`, 'import');
       expect(legacy.bundle).toContain(NODE_LOADER_MARKER);
+    },
+    60_000,
+  );
+
+  it.each(compilerCases())(
+    'leaves the worker module import to the %s runtime',
+    async (name, compiler) => {
+      const worker = await runCompiled(
+        compiler,
+        `${name}-worker`,
+        'module-federation:target-worker',
+      );
+      expect(worker.warnings).toEqual([]);
     },
     60_000,
   );

@@ -120,4 +120,4 @@
 
 `FEDERATION_OPTIMIZE_*` 和 `ENV_TARGET` 仍然决定默认运行时模块。等所有受支持的打包器都传入 `module-federation:*` 条件后，后续主版本可以去掉这些 define。
 
-包还可以接受 `module-federation:target-web`、`module-federation:target-node`、`module-federation:target-worker` 和 `module-federation:target-universal`。family 模式为 `legacy-defines` 时，编译器插件不会设置这些条件。
+包还可以接受 `module-federation:target-web`、`module-federation:target-node`、`module-federation:target-worker` 和 `module-federation:target-universal`。本轮 rollout 中，Enhanced 和 Rspack 都不会设置这些条件。
