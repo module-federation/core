@@ -38,6 +38,8 @@ export interface RenderParams {
     initialState?: Record<string, unknown>;
   };
   dom: HTMLElement;
+  /** Aborted when this consumer instance is permanently unmounted. */
+  signal?: AbortSignal;
   /**
    * Options to pass to createRoot for React 18 and 19
    * @example
@@ -94,6 +96,18 @@ export interface ProviderFnParams<T> {
     container: Element | DocumentFragment,
     options?: CreateRootOptions,
   ) => Root;
+  /** Hydrate an existing server-rendered root using the producer's React. */
+  hydrateRoot?: (
+    container: Element | DocumentFragment,
+    children: React.ReactNode,
+    options?: CreateRootOptions,
+  ) => Root;
+  /** Framework integrations can restore their own router and loader snapshot. */
+  hydrate?: (
+    App: React.ReactElement,
+    container: HTMLElement,
+    info: HydrateParams,
+  ) => RootType | Promise<RootType>;
   /**
    * Default options to pass to createRoot for React 18 and 19
    * These options will be used when creating a root unless overridden by rootOptions in render params
@@ -134,16 +148,49 @@ export interface RemoteComponentParams<
  * Interface for a remote module provider
  */
 export interface RemoteModule {
-  provider: () => {
-    render: (info: RenderFnParams) => void;
-    destroy: (info: { dom: any }) => void;
-  };
+  provider: () => BridgeProvider;
+}
+
+export interface HydrateParams extends RenderParams {
+  snapshot: unknown;
+}
+
+/** Plain values crossing the host/producer boundary; never a React element. */
+export interface BridgeSSRRenderParams {
+  moduleName?: string;
+  basename?: string;
+  memoryRoute?: RenderParams['memoryRoute'];
+  props: Record<string, unknown>;
+}
+
+export interface BridgeSSRRequest extends BridgeSSRRenderParams {
+  instanceId: string;
+  identifierPrefix: string;
+  url: string;
+  headers?: Record<string, string>;
+  nonce?: string;
+  signal: AbortSignal;
+}
+
+export interface BridgeSSRResult {
+  stream: ReadableStream<Uint8Array>;
+  snapshot: Promise<unknown>;
+  abort(reason?: unknown): void;
+}
+
+export interface BridgeProvider {
+  render(info: RenderParams): void | Promise<void>;
+  destroy(info: DestroyParams): void;
+  hydrate?(info: HydrateParams): void | Promise<void>;
+  renderStream?(info: BridgeSSRRequest): Promise<BridgeSSRResult>;
 }
 
 /**
  * Parameters for a remote app component
  */
 export interface RemoteAppParams extends ProviderParams {
+  /** Internal identity reserved before the remote module starts loading. */
+  ssrInstanceId?: string;
   moduleName: string;
   providerInfo: NonNullable<RemoteModule['provider']>;
   exportName: string | number | symbol;

@@ -253,6 +253,15 @@ export const moduleFederationSSRPlugin = (
       if (secondarySharedTreeShaking) {
         return { entrypoint, plugins };
       }
+      if (pluginOptions.originPluginOptions.bridge) {
+        const bridge = pluginOptions.originPluginOptions.bridge;
+        plugins.push({
+          name: 'bridgeStream',
+          path: '@module-federation/modern-js-v3/ssr-bridge-plugin',
+          config:
+            typeof bridge === 'object' ? { timeoutMs: bridge.timeoutMs } : {},
+        });
+      }
       const { fetchServerQuery } = pluginOptions;
       plugins.push({
         name: 'injectDataFetchFunction',

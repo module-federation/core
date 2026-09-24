@@ -1,4 +1,6 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useContext } from 'react';
+import { BridgeSSRContext, getBridgeSSRRenderParams } from '../ssr';
+import type { BridgeProvider } from '../types';
 import { ErrorBoundary } from '../error-boundary';
 import { LoggerInstance } from '../utils';
 import {
@@ -98,8 +100,42 @@ export function createRemoteAppComponentFactory(
     T = Record<string, unknown>,
     E extends keyof T = keyof T,
   >(info: LazyRemoteComponentInfo<T, E>) {
-    const LazyComponent = createLazyRemoteComponent(info);
+    // One module load is shared with React.lazy; each mounted instance still gets
+    // its own provider, request context, timeout and renderer.
+    let modulePromise: Promise<T> | undefined;
+    const loadModule = () =>
+      (modulePromise ||= Promise.resolve().then(info.loader));
+    const LazyComponent = createLazyRemoteComponent({
+      ...info,
+      loader: loadModule,
+    });
+    const loadProvider = async (): Promise<BridgeProvider> => {
+      const remote = await loadModule();
+      const exportName = info.export || 'default';
+      const factory = (remote as Record<PropertyKey, unknown>)?.[exportName];
+      if (typeof factory !== 'function') {
+        throw new Error(
+          `Bridge module is missing provider export ${String(exportName)}`,
+        );
+      }
+      return factory();
+    };
     return forwardRef<HTMLDivElement, RemoteComponentProps>((props, ref) => {
+      const ssr = useContext(BridgeSSRContext);
+      const reactId = React.useId?.();
+      const instanceId = reactId ? `mf-bridge-${reactId}` : undefined;
+      if (ssr) {
+        if (!instanceId)
+          throw new Error(
+            'Independent Bridge SSR requires React 18 or newer in the host.',
+          );
+        ssr.register(
+          instanceId,
+          loadProvider,
+          getBridgeSSRRenderParams(props),
+          { deferRender: true },
+        );
+      }
       return (
         <ErrorBoundary
           FallbackComponent={
@@ -107,7 +143,7 @@ export function createRemoteAppComponentFactory(
           }
         >
           <React.Suspense fallback={info.loading}>
-            <LazyComponent {...props} ref={ref} />
+            <LazyComponent {...props} ssrInstanceId={instanceId} ref={ref} />
           </React.Suspense>
         </ErrorBoundary>
       );
