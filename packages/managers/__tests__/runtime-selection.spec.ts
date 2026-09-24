@@ -204,18 +204,22 @@ describe('runtime family resolution', () => {
           {
             role: 'runtime-tools',
             package: '@acme/runtime-tools',
-            dependsOn: ['runtime'],
+            dependsOn: ['runtime', 'bundler-runtime'],
           },
-          { role: 'runtime', package: '@acme/runtime', dependsOn: [] },
+          {
+            role: 'runtime',
+            package: '@acme/runtime',
+            dependsOn: ['runtime-core', 'sdk'],
+          },
           {
             role: 'runtime-core',
             package: '@acme/runtime-core',
-            dependsOn: [],
+            dependsOn: ['sdk'],
           },
           {
             role: 'bundler-runtime',
             package: '@acme/bundler-runtime',
-            dependsOn: [],
+            dependsOn: ['runtime', 'sdk'],
           },
           { role: 'sdk', package: '@acme/sdk', dependsOn: [] },
         ],
@@ -225,6 +229,62 @@ describe('runtime family resolution', () => {
     expect(() =>
       resolveRuntimeImplementation(path.join(tools, 'index.js')),
     ).toThrow(expect.objectContaining({ code: 'missing-member' }));
+  });
+
+  it('reports a topology that cannot reach every role as malformed', () => {
+    const dirs = installLegacy(root);
+    for (const role of Object.keys(dirs) as (keyof typeof dirs)[]) {
+      stampConditions(dirs[role], 'family-a', role);
+    }
+    const file = path.join(dirs['runtime-tools'], 'package.json');
+    const pkg = JSON.parse(fs.readFileSync(file, 'utf8')) as {
+      federationRuntime: { members: { role: string; dependsOn: unknown }[] };
+    };
+    for (const member of pkg.federationRuntime.members) {
+      if (member.role === 'runtime') {
+        member.dependsOn = ['sdk'];
+      }
+    }
+    fs.writeFileSync(file, JSON.stringify(pkg));
+
+    expect(() =>
+      resolveRuntimeImplementation(
+        path.join(dirs['runtime-tools'], 'index.js'),
+      ),
+    ).toThrow(
+      expect.objectContaining({
+        code: 'malformed-contract',
+        message: expect.stringContaining('runtime-core'),
+      }),
+    );
+  });
+
+  it('rejects a dependsOn that is not an array', () => {
+    const dirs = installLegacy(root);
+    for (const role of Object.keys(dirs) as (keyof typeof dirs)[]) {
+      stampConditions(dirs[role], 'family-a', role);
+    }
+    const file = path.join(dirs['runtime-tools'], 'package.json');
+    const pkg = JSON.parse(fs.readFileSync(file, 'utf8')) as {
+      federationRuntime: { members: { role: string; dependsOn: unknown }[] };
+    };
+    for (const member of pkg.federationRuntime.members) {
+      if (member.role === 'runtime') {
+        member.dependsOn = 'runtime-core';
+      }
+    }
+    fs.writeFileSync(file, JSON.stringify(pkg));
+
+    expect(() =>
+      resolveRuntimeImplementation(
+        path.join(dirs['runtime-tools'], 'index.js'),
+      ),
+    ).toThrow(
+      expect.objectContaining({
+        code: 'malformed-contract',
+        message: expect.stringContaining('members[1].dependsOn'),
+      }),
+    );
   });
 
   it('resolves one root per role for an older package without federationRuntime', () => {
@@ -474,16 +534,50 @@ describe('capability profile reduction', () => {
 });
 
 describe('compiler selection slot', () => {
+  let root = '';
+
+  beforeEach(() => {
+    root = fs.mkdtempSync(path.join(os.tmpdir(), 'mf-runtime-slot-'));
+  });
+
+  afterEach(() => {
+    fs.rmSync(root, { recursive: true, force: true });
+  });
+
+  it('names both families when participants request different ones', () => {
+    const first = installLegacy(path.join(root, 'first'));
+    const second = installLegacy(path.join(root, 'second'));
+    const compiler = {};
+    registerRuntimeParticipant(compiler, {
+      pluginName: 'host',
+      implementation: path.join(first['runtime-tools'], 'index.js'),
+    });
+    registerRuntimeParticipant(compiler, {
+      pluginName: 'other',
+      implementation: path.join(second['runtime-tools'], 'index.js'),
+    });
+
+    expect(() => finalizeRuntimeSelection(compiler, 'web', '')).toThrow(
+      expect.objectContaining({
+        code: 'split-family',
+        message: expect.stringMatching(
+          new RegExp(
+            `${fs.realpathSync(first['runtime-tools'])}[\\s\\S]*${fs.realpathSync(second['runtime-tools'])}`,
+          ),
+        ),
+      }),
+    );
+  });
+
   it('keeps a child on the parent family and rejects participants after finalization', () => {
+    const dirs = installLegacy(root);
     const parent = {};
     const child = {};
     registerRuntimeParticipant(parent, { pluginName: 'host' });
     const slot = finalizeRuntimeSelection(
       parent,
       'web',
-      path.join(
-        path.dirname(require.resolve('@module-federation/runtime-tools')),
-      ),
+      path.join(dirs['runtime-tools'], 'index.js'),
     );
     inheritRuntimeSelection(parent, child);
     expect(() =>

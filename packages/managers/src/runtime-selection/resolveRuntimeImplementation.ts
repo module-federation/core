@@ -144,7 +144,13 @@ function readTopology(
         `federationRuntime.members[${index}] is malformed.`,
       );
     }
-    const dependsOn = Array.isArray(member.dependsOn) ? member.dependsOn : [];
+    const dependsOn = member.dependsOn ?? [];
+    if (!Array.isArray(dependsOn)) {
+      throw new RuntimeSelectionError(
+        'malformed-contract',
+        `federationRuntime.members[${index}].dependsOn must be an array.`,
+      );
+    }
     return {
       role: memberRole(member.role, `members[${index}].role`),
       packageName: member.package,
@@ -338,6 +344,19 @@ export function resolveRuntimeImplementation(
       'A runtime family is missing runtime-tools.',
     );
   }
+  const reachable = new Set<MemberRole>(['runtime-tools']);
+  for (const role of reachable) {
+    for (const dependency of byRole.get(role)?.dependsOn ?? []) {
+      reachable.add(dependency);
+    }
+  }
+  const unreachable = MEMBER_ROLES.filter((role) => !reachable.has(role));
+  if (unreachable.length > 0) {
+    throw new RuntimeSelectionError(
+      'malformed-contract',
+      `No dependsOn edge reaches ${unreachable.join(', ')} from runtime-tools.`,
+    );
+  }
   if (pkg.name && pkg.name !== tools.packageName && mode === 'conditions') {
     throw new RuntimeSelectionError(
       'malformed-contract',
@@ -433,15 +452,6 @@ export function resolveRuntimeImplementation(
         seen.add(dependency);
         queue.push(dependency);
       }
-    }
-  }
-
-  for (const role of MEMBER_ROLES) {
-    if (!members[role]) {
-      throw new RuntimeSelectionError(
-        'missing-member',
-        `Runtime family is missing ${role}. No member is replaced from another installation.`,
-      );
     }
   }
 
