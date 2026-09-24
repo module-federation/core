@@ -52,7 +52,6 @@ export interface FamilyMember {
   packageName: string;
   version: string;
   canonicalRoot: string;
-  resolverVisibleRoots: readonly string[];
   entry: string;
   packageJsonPath: string;
 }
@@ -101,7 +100,7 @@ export interface ParticipantRequest {
       disableRemote?: boolean;
       disableShared?: boolean;
       disableSnapshot?: boolean;
-      target?: string;
+      target?: string | null;
     };
   };
 }
@@ -122,4 +121,8 @@ export class RuntimeSelectionError extends Error {
     this.name = 'RuntimeSelectionError';
     this.code = code;
   }
+}
+
+export function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && !Array.isArray(value) && typeof value === 'object';
 }
