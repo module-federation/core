@@ -31,9 +31,6 @@ const buildConfig = createDualFormatConfig({
     'selectors/remote-module/enabled': 'src/selectors/remote-module/enabled.ts',
     'selectors/remote-module/disabled':
       'src/selectors/remote-module/disabled.ts',
-    'selectors/remote-entry/legacy': 'src/selectors/remote-entry/legacy.ts',
-    'selectors/remote-entry/enabled': 'src/selectors/remote-entry/enabled.ts',
-    'selectors/remote-entry/disabled': 'src/selectors/remote-entry/disabled.ts',
     'selectors/remote-handler/legacy': 'src/selectors/remote-handler/legacy.ts',
     'selectors/remote-handler/enabled':
       'src/selectors/remote-handler/enabled.ts',

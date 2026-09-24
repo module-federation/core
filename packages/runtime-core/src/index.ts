@@ -34,7 +34,7 @@ export {
   matchRemoteWithNameAndExpose,
   safeWrapper,
 } from './utils';
-export { getRemoteEntry } from '#mf/remote-entry';
+export { getRemoteEntry } from './utils/load';
 export { getRegisteredShare } from '#mf/share-utils';
 export { loadScript, loadScriptNode } from '@module-federation/sdk';
 export { Module } from '#mf/remote-module';

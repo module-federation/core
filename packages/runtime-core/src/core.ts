@@ -37,6 +37,9 @@ import {
   SyncHook,
   SyncWaterfallHook,
 } from './utils/hooks';
+import type { SnapshotHandler } from './plugins/snapshot/SnapshotHandler';
+import type { RemoteHandler } from './remote';
+import type { SharedHandler } from './shared';
 import { DEFAULT_SCOPE } from './constant';
 import { createDefaultPlugins } from '#mf/default-plugins';
 import { createRemoteHandler } from '#mf/remote-handler';
@@ -93,9 +96,9 @@ export class ModuleFederation {
   version: string = __VERSION__;
   name: string;
   moduleCache: Map<string, Module> = new Map();
-  snapshotHandler: ReturnType<typeof createSnapshotHandler>;
-  sharedHandler: ReturnType<typeof createSharedHandler>;
-  remoteHandler: ReturnType<typeof createRemoteHandler>;
+  snapshotHandler: SnapshotHandler;
+  sharedHandler: SharedHandler;
+  remoteHandler: RemoteHandler;
   shareScopeMap: ShareScopeMap;
   loaderHook = new PluginSystem({
     // FIXME: may not be suitable , not open to the public yet
@@ -299,9 +302,12 @@ export class ModuleFederation {
 
     this.name = userOptions.name;
     this.options = defaultOptions;
-    this.snapshotHandler = createSnapshotHandler(this);
-    this.sharedHandler = createSharedHandler(this);
-    this.remoteHandler = createRemoteHandler(this);
+    // The public field types stay the enabled classes during the
+    // compatibility window. A disabled handler keeps the members the runtime
+    // calls and rejects or returns empty results from the rest.
+    this.snapshotHandler = createSnapshotHandler(this) as SnapshotHandler;
+    this.sharedHandler = createSharedHandler(this) as SharedHandler;
+    this.remoteHandler = createRemoteHandler(this) as RemoteHandler;
     this.shareScopeMap = this.sharedHandler.shareScopeMap;
     this.registerPlugins([
       ...defaultOptions.plugins,

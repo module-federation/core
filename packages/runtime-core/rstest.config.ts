@@ -16,10 +16,6 @@ export default defineConfig({
         __dirname,
         'src/selectors/remote-module/legacy.ts',
       ),
-      '#mf/remote-entry': path.resolve(
-        __dirname,
-        'src/selectors/remote-entry/legacy.ts',
-      ),
       '#mf/remote-handler': path.resolve(
         __dirname,
         'src/selectors/remote-handler/legacy.ts',

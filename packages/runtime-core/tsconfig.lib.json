@@ -6,7 +6,6 @@
     "types": ["node"],
     "paths": {
       "#mf/remote-module": ["./src/selectors/remote-module/legacy.ts"],
-      "#mf/remote-entry": ["./src/selectors/remote-entry/legacy.ts"],
       "#mf/remote-handler": ["./src/selectors/remote-handler/legacy.ts"],
       "#mf/shared-handler": ["./src/selectors/shared-handler/legacy.ts"],
       "#mf/snapshot-handler": ["./src/selectors/snapshot-handler/legacy.ts"],

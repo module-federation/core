@@ -3,16 +3,32 @@ import { runNodeWithConditions } from '../../../tools/testing/runNodeWithConditi
 
 const packageDir = path.resolve(__dirname, '..');
 
+const REMOTE_DISABLED_MESSAGE =
+  'Remote loading is disabled by experiments.optimization.disableRemote.';
+
 describe('disabled handler selectors', () => {
-  it('preserves the remote-disabled error through the public loader', () => {
+  it('keeps the public entry loader working when remotes are disabled', () => {
     expect(
       runNodeWithConditions(
         packageDir,
         ['module-federation:no-remote'],
-        "const { getRemoteEntry } = require('./dist/index.cjs'); getRemoteEntry({}).catch((error) => console.log(error.message));",
+        "globalThis.FEDERATION_OPTIMIZE_NO_REMOTE = true; const { ModuleFederation, getRemoteEntry } = require('./dist/index.cjs'); const origin = new ModuleFederation({ name: 'host', remotes: [], plugins: [{ name: 'fallback-entry', loadEntry: () => ({ init() {}, get: () => () => 'fallback loaded' }) }] }); getRemoteEntry({ origin, remoteInfo: { name: 'fallback', entry: 'http://localhost/fallback.js', type: 'global', entryGlobalName: 'fallback', shareScope: 'default' } }).then((entry) => console.log(entry.get()()));",
       ),
-    ).toBe(
-      'Remote loading is disabled by experiments.optimization.disableRemote.',
+    ).toBe('fallback loaded');
+  });
+
+  it('follows the FEDERATION_OPTIMIZE_NO_REMOTE define without a condition', () => {
+    const code = (value: string) =>
+      `globalThis.FEDERATION_OPTIMIZE_NO_REMOTE = ${value}; const { ModuleFederation } = require('./dist/index.cjs'); new ModuleFederation({ name: 'host', remotes: [] }).loadRemote('app/value').catch((error) => console.log(error.message.split('\\n')[0]));`;
+
+    expect(runNodeWithConditions(packageDir, [], code('true'))).toBe(
+      REMOTE_DISABLED_MESSAGE,
+    );
+    expect(runNodeWithConditions(packageDir, [], code('false'))).toContain(
+      '#RUNTIME-004',
+    );
+    expect(runNodeWithConditions(packageDir, [], code('undefined'))).toContain(
+      '#RUNTIME-004',
     );
   });
 
@@ -23,9 +39,7 @@ describe('disabled handler selectors', () => {
         ['module-federation:no-remote'],
         "const { ModuleFederation } = require('./dist/index.cjs'); new ModuleFederation({ name: 'host', remotes: [] }).loadRemote('app/value').catch((error) => console.log(error.message));",
       ),
-    ).toBe(
-      'Remote loading is disabled by experiments.optimization.disableRemote.',
-    );
+    ).toBe(REMOTE_DISABLED_MESSAGE);
   });
 
   it('keeps share-scope storage and rejects shared loading', () => {

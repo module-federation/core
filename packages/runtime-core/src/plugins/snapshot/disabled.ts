@@ -1,3 +1,4 @@
+import type { Manifest } from '@module-federation/sdk';
 import { getGlobalSnapshot } from '../../global';
 import type { ModuleFederation } from '../../core';
 import type { Options, Remote } from '../../type';
@@ -8,6 +9,8 @@ const SNAPSHOT_DISABLED_MESSAGE =
   'Snapshot loading is disabled by experiments.optimization.disableRemote.';
 
 export class DisabledSnapshotHandler {
+  // Never emitted here. The enabled SnapshotHandler declares this hook, so
+  // plugins that register it keep resolving when snapshots are disabled.
   hooks = new PluginSystem({
     beforeLoadRemoteSnapshot: new AsyncHook<
       [
@@ -20,9 +23,9 @@ export class DisabledSnapshotHandler {
       void
     >('beforeLoadRemoteSnapshot'),
   });
-  manifestCache = new Map<string, never>();
+  manifestCache = new Map<string, Manifest>();
 
-  loadRemoteSnapshotInfo(
+  async loadRemoteSnapshotInfo(
     ..._args: Parameters<SnapshotHandler['loadRemoteSnapshotInfo']>
   ): ReturnType<SnapshotHandler['loadRemoteSnapshotInfo']> {
     throw new Error(SNAPSHOT_DISABLED_MESSAGE);
