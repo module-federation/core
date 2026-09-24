@@ -85,6 +85,12 @@ export function finalizeRuntimeSelection(
 export function inheritRuntimeSelection(parent: object, child: object): void {
   const source = getSelectionSlot(parent);
   const target = getSelectionSlot(child);
+  if (target.participants.length > 0) {
+    throw new RuntimeSelectionError(
+      'child-participant',
+      `${target.participants[0].pluginName} was applied to a child compiler. Apply federation plugins to the top-level compiler.`,
+    );
+  }
   target.participants = [...source.participants];
   target.finalized = source.finalized;
   target.installed = true;
