@@ -53,6 +53,10 @@ export const loadScriptNode: typeof NodeScriptLoader = (url, info) =>
           reject(error);
           return;
         }
+        const remoteEntryKey =
+          info?.attrs?.['globalName'] ||
+          `__FEDERATION_${info?.attrs?.['name']}:custom__`;
+        (globalThis as Record<string, unknown>)[remoteEntryKey] = scriptContext;
         resolve(scriptContext);
       },
       info.attrs,
