@@ -28,7 +28,6 @@ const createConfig = ({
   disableRemote,
   disableShared,
   exposes = commonConfig.exposes,
-  remotes = commonConfig.remotes,
   uniqueName,
   containerName,
   filename,
@@ -60,7 +59,7 @@ const createConfig = ({
             name: containerName,
           },
       exposes,
-      remotes,
+      remotes: commonConfig.remotes,
       experiments: {
         optimization: {
           target: optimizationTarget,
@@ -125,7 +124,6 @@ module.exports = [
     optimizationTarget: 'web',
     disableSnapshot: true,
     disableRemote: true,
-    remotes: {},
     uniqueName: 'experiments-optimization-capabilities-no-remote',
     containerName: 'capabilities_no_remote',
     filename: 'remoteEntry-capabilities-no-remote.js',

@@ -20,6 +20,7 @@ import {
   type ResolvedRuntimeImplementation,
   type SelectorLeaf,
   type SelectorManifestEntry,
+  isRecord,
   RuntimeSelectionError,
 } from './types';
 
@@ -65,10 +66,6 @@ const SELECTOR_LEAVES: readonly SelectorLeaf[] = [
   'disabled',
   'legacy',
 ];
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && !Array.isArray(value) && typeof value === 'object';
-}
 
 function readPackage(packageJsonPath: string): PackageRecord {
   try {
@@ -144,7 +141,13 @@ function readTopology(
         `federationRuntime.members[${index}] is malformed.`,
       );
     }
-    const dependsOn = Array.isArray(member.dependsOn) ? member.dependsOn : [];
+    const dependsOn = member.dependsOn ?? [];
+    if (!Array.isArray(dependsOn)) {
+      throw new RuntimeSelectionError(
+        'malformed-contract',
+        `federationRuntime.members[${index}].dependsOn must be an array.`,
+      );
+    }
     return {
       role: memberRole(member.role, `members[${index}].role`),
       packageName: member.package,
@@ -263,7 +266,7 @@ function instanceId(
 }
 
 function resolveLeaf(member: FamilyMember, relative: string): string {
-  const root = member.resolverVisibleRoots[0];
+  const root = member.canonicalRoot;
   const absolute = path.resolve(root, relative);
   const relativeToRoot = path.relative(root, absolute);
   if (
@@ -338,6 +341,19 @@ export function resolveRuntimeImplementation(
       'A runtime family is missing runtime-tools.',
     );
   }
+  const reachable = new Set<MemberRole>(['runtime-tools']);
+  for (const role of reachable) {
+    for (const dependency of byRole.get(role)?.dependsOn ?? []) {
+      reachable.add(dependency);
+    }
+  }
+  const unreachable = MEMBER_ROLES.filter((role) => !reachable.has(role));
+  if (unreachable.length > 0) {
+    throw new RuntimeSelectionError(
+      'malformed-contract',
+      `No dependsOn edge reaches ${unreachable.join(', ')} from runtime-tools.`,
+    );
+  }
   if (pkg.name && pkg.name !== tools.packageName && mode === 'conditions') {
     throw new RuntimeSelectionError(
       'malformed-contract',
@@ -352,7 +368,6 @@ export function resolveRuntimeImplementation(
     packageName: tools.packageName,
     version: pkg.version ?? '0.0.0',
     canonicalRoot: fs.realpathSync(root),
-    resolverVisibleRoots: [root],
     entry:
       fs.existsSync(anchor) && fs.statSync(anchor).isFile()
         ? path.resolve(anchor)
@@ -399,12 +414,15 @@ export function resolveRuntimeImplementation(
         packageName: declared.packageName,
         version: dependencyPackage.version ?? '0.0.0',
         canonicalRoot: fs.realpathSync(dependencyRoot),
-        resolverVisibleRoots: [dependencyRoot],
         entry,
         packageJsonPath: dependencyPackageJson,
       };
       const previous = members[dependency];
-      if (previous && previous.canonicalRoot !== next.canonicalRoot) {
+      const sameMember =
+        mode === 'conditions'
+          ? previous?.canonicalRoot === next.canonicalRoot
+          : previous?.version === next.version;
+      if (previous && !sameMember) {
         throw new RuntimeSelectionError(
           'split-family',
           `${declared.packageName} resolved to two roots: ${previous.canonicalRoot} and ${next.canonicalRoot}.`,
@@ -429,15 +447,6 @@ export function resolveRuntimeImplementation(
         seen.add(dependency);
         queue.push(dependency);
       }
-    }
-  }
-
-  for (const role of MEMBER_ROLES) {
-    if (!members[role]) {
-      throw new RuntimeSelectionError(
-        'missing-member',
-        `Runtime family is missing ${role}. No member is replaced from another installation.`,
-      );
     }
   }
 
@@ -482,7 +491,7 @@ export function resolveRuntimeImplementation(
     }
     allowedEntries[alias] = fs.realpathSync(resolved);
   }
-  const selectors = { ...(readSelectors(raw?.selectors) ?? {}) };
+  const selectors = readSelectors(raw?.selectors) ?? {};
   if (mode === 'conditions' && Object.keys(selectors).length === 0) {
     throw new RuntimeSelectionError(
       'malformed-contract',
