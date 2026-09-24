@@ -20,7 +20,6 @@ import {
   expectedEntry,
   finalizeRuntimeSelection,
   getSelectionSlot,
-  resolveRuntimeImplementation,
 } from '@module-federation/managers/runtime-selection';
 import { TEMP_DIR } from '../constant';
 import EmbedFederationRuntimePlugin from './EmbedFederationRuntimePlugin';
@@ -39,27 +38,18 @@ const { mkdirpSync } = require(
   normalizeWebpackPath('webpack/lib/util/fs'),
 ) as typeof import('webpack/lib/util/fs');
 
-type ResolveFn = typeof require.resolve;
 type RuntimeEntrySpec = {
   bundler: string;
   esm: string;
   cjs: string;
 };
 
-function resolveRuntimeEntry(
-  spec: RuntimeEntrySpec,
-  implementation: string | undefined,
-  resolve: ResolveFn = require.resolve,
-) {
-  const candidates = [spec.bundler, spec.esm, spec.cjs];
-  const modulePaths = implementation ? [implementation] : undefined;
+function resolveRuntimeEntry(spec: RuntimeEntrySpec) {
   let lastError: unknown;
 
-  for (const candidate of candidates) {
+  for (const candidate of [spec.bundler, spec.esm, spec.cjs]) {
     try {
-      return modulePaths
-        ? resolve(candidate, { paths: modulePaths })
-        : resolve(candidate);
+      return require.resolve(candidate);
     } catch (error) {
       lastError = error;
     }
@@ -68,51 +58,23 @@ function resolveRuntimeEntry(
   throw lastError;
 }
 
-export function resolveRuntimePaths(
-  implementation?: string,
-  resolve: ResolveFn = require.resolve,
-) {
-  if (implementation) {
-    const family = resolveRuntimeImplementation(implementation);
-    return {
-      runtimeToolsPath:
-        expectedEntry(family, '@module-federation/runtime-tools$') ??
-        family.family.members['runtime-tools'].entry,
-      bundlerRuntimePath: family.facadeEntry,
-      runtimePath:
-        expectedEntry(family, '@module-federation/runtime$') ??
-        family.family.members.runtime.entry,
-    };
-  }
-
+export function resolveRuntimePaths() {
   return {
-    runtimeToolsPath: resolveRuntimeEntry(
-      {
-        bundler: '@module-federation/runtime-tools/bundler',
-        esm: '@module-federation/runtime-tools/dist/index.js',
-        cjs: '@module-federation/runtime-tools/dist/index.cjs',
-      },
-      undefined,
-      resolve,
-    ),
-    bundlerRuntimePath: resolveRuntimeEntry(
-      {
-        bundler: '@module-federation/webpack-bundler-runtime/bundler',
-        esm: '@module-federation/webpack-bundler-runtime/dist/index.js',
-        cjs: '@module-federation/webpack-bundler-runtime/dist/index.cjs',
-      },
-      undefined,
-      resolve,
-    ),
-    runtimePath: resolveRuntimeEntry(
-      {
-        bundler: '@module-federation/runtime/bundler',
-        esm: '@module-federation/runtime/dist/index.js',
-        cjs: '@module-federation/runtime/dist/index.cjs',
-      },
-      undefined,
-      resolve,
-    ),
+    runtimeToolsPath: resolveRuntimeEntry({
+      bundler: '@module-federation/runtime-tools/bundler',
+      esm: '@module-federation/runtime-tools/dist/index.js',
+      cjs: '@module-federation/runtime-tools/dist/index.cjs',
+    }),
+    bundlerRuntimePath: resolveRuntimeEntry({
+      bundler: '@module-federation/webpack-bundler-runtime/bundler',
+      esm: '@module-federation/webpack-bundler-runtime/dist/index.js',
+      cjs: '@module-federation/webpack-bundler-runtime/dist/index.cjs',
+    }),
+    runtimePath: resolveRuntimeEntry({
+      bundler: '@module-federation/runtime/bundler',
+      esm: '@module-federation/runtime/dist/index.js',
+      cjs: '@module-federation/runtime/dist/index.cjs',
+    }),
   };
 }
 
@@ -431,25 +393,6 @@ class FederationRuntimePlugin {
     );
   }
 
-  getRuntimeAlias(compiler: Compiler) {
-    const { implementation } = this.options || {};
-    const alias: any = compiler.options.resolve.alias || {};
-
-    const resolvedPaths = resolveRuntimePaths(implementation);
-
-    this.runtimeToolsPath = resolvedPaths.runtimeToolsPath;
-    this.bundlerRuntimePath = resolvedPaths.bundlerRuntimePath;
-
-    if (alias['@module-federation/runtime$']) {
-      this.runtimePath = alias['@module-federation/runtime$'];
-      return this.runtimePath;
-    }
-
-    this.runtimePath = resolvedPaths.runtimePath;
-
-    return this.runtimePath;
-  }
-
   prepareRuntime(compiler: Compiler) {
     const selection = getSelectionSlot(compiler);
     if (!selection.finalized) {
@@ -498,22 +441,16 @@ class FederationRuntimePlugin {
         entryLoadingIdentity: image.entryLoadingIdentity,
       };
     }
-    this.setRuntimeAlias(compiler, true);
+    this.setRuntimeAlias(compiler);
     this.entryFilePath = this.getFilePath(compiler);
   }
 
-  setRuntimeAlias(compiler: Compiler, usePreparedPaths = false) {
-    const { implementation } = this.options || {};
+  setRuntimeAlias(compiler: Compiler) {
     const alias: any = compiler.options.resolve.alias || {};
-    const runtimePath = usePreparedPaths
-      ? this.runtimePath
-      : this.getRuntimeAlias(compiler);
     alias['@module-federation/runtime$'] =
-      alias['@module-federation/runtime$'] || runtimePath;
+      alias['@module-federation/runtime$'] || this.runtimePath;
     alias['@module-federation/runtime-tools$'] =
-      alias['@module-federation/runtime-tools$'] ||
-      (usePreparedPaths ? this.runtimeToolsPath : implementation) ||
-      this.runtimeToolsPath;
+      alias['@module-federation/runtime-tools$'] || this.runtimeToolsPath;
 
     // Set up aliases for the federation runtime and tools
     // This ensures that the correct versions are used throughout the project
