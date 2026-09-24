@@ -1,6 +1,8 @@
 import type {
   Compiler,
+  Falsy,
   ModuleFederationPluginOptions,
+  RspackPluginFunction,
   RspackPluginInstance,
 } from '@rspack/core';
 import {
@@ -186,6 +188,26 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     }).apply(compiler);
   }
 
+  private _checkSingleton(compiler: Compiler): void {
+    let count = 0;
+    compiler.options.plugins.forEach(
+      (p: Falsy | RspackPluginInstance | RspackPluginFunction) => {
+        if (typeof p !== 'object' || !p) {
+          return;
+        }
+
+        if (p['name'] === this.name) {
+          count++;
+          if (count > 1) {
+            throw new Error(
+              `Detect duplicate register ${this.name},please ensure ${this.name} is singleton!`,
+            );
+          }
+        }
+      },
+    );
+  }
+
   apply(compiler: Compiler): void {
     bindLoggerToCompiler(logger, compiler, PLUGIN_NAME);
     const { _options: options } = this;
@@ -193,6 +215,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     if (!options.name) {
       throw new Error('[ ModuleFederationPlugin ]: name is required');
     }
+    this._checkSingleton(compiler);
     this._patchBundlerConfig(compiler);
     const containerManager = new ContainerManager();
     containerManager.init(options);
