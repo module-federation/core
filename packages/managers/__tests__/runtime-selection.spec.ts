@@ -43,21 +43,16 @@ function writePackage(
   );
 }
 
-function installLegacy(root: string, sdkDir = path.join(root, 'sdk')) {
+function installLegacy(root: string) {
   const dirs = {
     'runtime-tools': path.join(root, 'runtime-tools'),
     runtime: path.join(root, 'runtime'),
     'runtime-core': path.join(root, 'runtime-core'),
     'bundler-runtime': path.join(root, 'bundler-runtime'),
-    sdk: sdkDir,
+    sdk: path.join(root, 'sdk'),
   };
   for (const [role, directory] of Object.entries(dirs)) {
-    if (
-      directory !== sdkDir ||
-      !fs.existsSync(path.join(sdkDir, 'package.json'))
-    ) {
-      writePackage(directory, NAMES[role as keyof typeof NAMES]);
-    }
+    writePackage(directory, NAMES[role as keyof typeof NAMES]);
   }
   link(
     dirs.runtime,

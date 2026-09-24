@@ -20,6 +20,7 @@ import {
   type ResolvedRuntimeImplementation,
   type SelectorLeaf,
   type SelectorManifestEntry,
+  isRecord,
   RuntimeSelectionError,
 } from './types';
 
@@ -65,10 +66,6 @@ const SELECTOR_LEAVES: readonly SelectorLeaf[] = [
   'disabled',
   'legacy',
 ];
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && !Array.isArray(value) && typeof value === 'object';
-}
 
 function readPackage(packageJsonPath: string): PackageRecord {
   try {
@@ -269,7 +266,7 @@ function instanceId(
 }
 
 function resolveLeaf(member: FamilyMember, relative: string): string {
-  const root = member.resolverVisibleRoots[0];
+  const root = member.canonicalRoot;
   const absolute = path.resolve(root, relative);
   const relativeToRoot = path.relative(root, absolute);
   if (
@@ -371,7 +368,6 @@ export function resolveRuntimeImplementation(
     packageName: tools.packageName,
     version: pkg.version ?? '0.0.0',
     canonicalRoot: fs.realpathSync(root),
-    resolverVisibleRoots: [root],
     entry:
       fs.existsSync(anchor) && fs.statSync(anchor).isFile()
         ? path.resolve(anchor)
@@ -418,7 +414,6 @@ export function resolveRuntimeImplementation(
         packageName: declared.packageName,
         version: dependencyPackage.version ?? '0.0.0',
         canonicalRoot: fs.realpathSync(dependencyRoot),
-        resolverVisibleRoots: [dependencyRoot],
         entry,
         packageJsonPath: dependencyPackageJson,
       };
@@ -496,7 +491,7 @@ export function resolveRuntimeImplementation(
     }
     allowedEntries[alias] = fs.realpathSync(resolved);
   }
-  const selectors = { ...(readSelectors(raw?.selectors) ?? {}) };
+  const selectors = readSelectors(raw?.selectors) ?? {};
   if (mode === 'conditions' && Object.keys(selectors).length === 0) {
     throw new RuntimeSelectionError(
       'malformed-contract',
