@@ -21,6 +21,7 @@ import {
 } from '@module-federation/error-codes';
 import { mockStaticServer, removeScriptTags } from './mock/utils';
 import type { ModuleFederationRuntimePlugin } from '../src/type/plugin';
+import { logger } from '../src/utils/logger';
 
 // All fixture URLs are served via two complementary mechanisms both pointing to __tests__/:
 //   1. mockScriptDomResponse (setup.ts) — patches Element.prototype.appendChild, executes
@@ -564,8 +565,9 @@ describe('getRemoteEntry - globalLoading rejection cache', () => {
     expect(secondOriginAttempts).toBe(0);
   });
 
-  it('rejects cache reuse with a different URL policy', async () => {
+  it('reuses a cached entry when the retry URL policy changes', async () => {
     const container = { get: rs.fn(), init: rs.fn() };
+    let attempts = 0;
     const origin = new ModuleFederation({
       name: 'cache-url-policy',
       remotes: [],
@@ -573,33 +575,80 @@ describe('getRemoteEntry - globalLoading rejection cache', () => {
         {
           name: 'url-policy-entry',
           loadEntry() {
+            attempts += 1;
             return container;
           },
         },
       ],
     });
-    attachRuntimeImage(origin, runtimeImage());
     const remoteInfo = getRemoteInfo({
       name: 'url-policy-remote',
       entry: 'https://remote.test/url-policy.js',
     });
-    const firstPolicy = (url: string) => `${url}?source=first`;
-    const secondPolicy = (url: string) => `${url}?source=second`;
 
     await expect(
       getRemoteEntry({
         origin,
         remoteInfo,
-        getEntryUrl: firstPolicy,
+        getEntryUrl: (url) => `${url}?retry=1`,
       }),
     ).resolves.toBe(container);
     await expect(
       getRemoteEntry({
         origin,
         remoteInfo,
-        getEntryUrl: secondPolicy,
+        getEntryUrl: (url) => `${url}?retry=2`,
       }),
-    ).rejects.toThrow('different URL policy');
+    ).resolves.toBe(container);
+    await expect(getRemoteEntry({ origin, remoteInfo })).resolves.toBe(
+      container,
+    );
+    expect(attempts).toBe(1);
+  });
+
+  it('ignores cache identity fields without runtime images', async () => {
+    const container = { get: rs.fn(), init: rs.fn() };
+    const warnSpy = rs.spyOn(logger, 'warn').mockImplementation(() => {});
+    const imageOrigin = new ModuleFederation({
+      name: 'cache-legacy-image',
+      remotes: [],
+      plugins: [
+        {
+          name: 'legacy-image-entry',
+          loadEntry() {
+            return container;
+          },
+        },
+      ],
+    });
+    attachRuntimeImage(imageOrigin, runtimeImage());
+    const legacyOrigin = new ModuleFederation({
+      name: 'cache-legacy-plain',
+      remotes: [],
+    });
+    const remote = {
+      name: 'legacy-identity-remote',
+      entry: 'https://remote.test/legacy-identity.js',
+    };
+
+    await expect(
+      getRemoteEntry({
+        origin: imageOrigin,
+        remoteInfo: getRemoteInfo(remote),
+      }),
+    ).resolves.toBe(container);
+    await expect(
+      getRemoteEntry({
+        origin: legacyOrigin,
+        remoteInfo: getRemoteInfo({
+          ...remote,
+          type: 'module',
+          entryGlobalName: 'renamed-global',
+        }),
+      }),
+    ).resolves.toBe(container);
+    expect(warnSpy).not.toHaveBeenCalled();
+    warnSpy.mockRestore();
   });
 
   it('does not pair stale metadata with a replacement promise', async () => {

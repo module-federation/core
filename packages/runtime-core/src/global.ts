@@ -12,11 +12,6 @@ import {
   isDebugMode,
 } from '@module-federation/sdk';
 import { warn, error } from './utils/logger';
-import {
-  assertRuntimeImageCompatible,
-  readRuntimeImage,
-  type RuntimeImageDescriptorV1,
-} from './runtimeImage';
 import { ModuleFederationRuntimePlugin } from './type/plugin';
 
 export interface Federation {
@@ -24,8 +19,6 @@ export interface Federation {
   __DEBUG_CONSTRUCTOR_VERSION__?: string;
   moduleInfo: GlobalModuleInfo;
   __DEBUG_CONSTRUCTOR__?: typeof ModuleFederation;
-  __DEBUG_CONSTRUCTOR_RUNTIME_IMAGE__?: RuntimeImageDescriptorV1;
-  __DEFAULT_INSTANCE__?: ModuleFederation;
   __INSTANCES__: Array<ModuleFederation>;
   __SHARE__: GlobalShareScopeMap;
   __MANIFEST_LOADING__: Record<string, Promise<ModuleInfo>>;
@@ -35,12 +28,11 @@ export interface Federation {
 
 export interface RemoteEntryCacheDescriptorV1 {
   contract: 1;
-  compatibilityId?: string;
-  target?: string;
-  entryLoadingIdentity?: string;
+  compatibilityId: string;
+  target: string;
+  entryLoadingIdentity: string;
   remoteType: string;
   entryGlobalName: string;
-  loaderPolicy?: (url: string) => string;
 }
 
 export interface RemoteEntryCacheMetadataV1 {
@@ -156,7 +148,6 @@ export function resetFederationGlobalInfo(): void {
   CurrentGlobal.__FEDERATION__.__SHARE__ = {};
   CurrentGlobal.__FEDERATION__.__MANIFEST_LOADING__ = {};
   CurrentGlobal.__FEDERATION__.__PRELOADED_ASSETS__.clear();
-  CurrentGlobal.__FEDERATION__.__DEFAULT_INSTANCE__ = undefined;
 
   Object.keys(globalLoading).forEach((key) => {
     delete globalLoading[key];
@@ -169,12 +160,7 @@ export function resetFederationGlobalInfo(): void {
 export function setGlobalFederationInstance(
   FederationInstance: ModuleFederation,
 ): void {
-  const next = readRuntimeImage(FederationInstance);
-  for (const instance of CurrentGlobal.__FEDERATION__.__INSTANCES__) {
-    assertRuntimeImageCompatible(readRuntimeImage(instance), next);
-  }
   CurrentGlobal.__FEDERATION__.__INSTANCES__.push(FederationInstance);
-  CurrentGlobal.__FEDERATION__.__DEFAULT_INSTANCE__ ??= FederationInstance;
 }
 
 export function getGlobalFederationConstructor():
@@ -188,19 +174,8 @@ export function setGlobalFederationConstructor(
   isDebug = isDebugMode(),
 ): void {
   if (isDebug) {
-    const current = CurrentGlobal.__FEDERATION__.__DEBUG_CONSTRUCTOR__;
-    if (current && FederationConstructor) {
-      assertRuntimeImageCompatible(
-        readRuntimeImage(current),
-        readRuntimeImage(FederationConstructor),
-      );
-    }
     CurrentGlobal.__FEDERATION__.__DEBUG_CONSTRUCTOR__ = FederationConstructor;
     CurrentGlobal.__FEDERATION__.__DEBUG_CONSTRUCTOR_VERSION__ = __VERSION__;
-    CurrentGlobal.__FEDERATION__.__DEBUG_CONSTRUCTOR_RUNTIME_IMAGE__ =
-      FederationConstructor
-        ? readRuntimeImage(FederationConstructor)
-        : undefined;
   }
 }
 

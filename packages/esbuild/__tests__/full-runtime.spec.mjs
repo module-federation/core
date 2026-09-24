@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { build } from 'esbuild';
@@ -65,5 +66,63 @@ test('the public plugin bundles the full default runtime', async () => {
     );
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('the plugin rewrites the module map and writes the manifest under absWorkingDir', async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'mf-esbuild-manifest-'));
+  fs.writeFileSync(path.join(root, 'entry.js'), 'export const host = true;\n');
+  fs.writeFileSync(path.join(root, 'value.js'), 'export const value = 42;\n');
+
+  const strayManifest = path.join(packageDir, 'dist', 'mf-manifest.json');
+  fs.rmSync(strayManifest, { force: true });
+
+  try {
+    await build({
+      absWorkingDir: root,
+      bundle: true,
+      entryPoints: ['entry.js'],
+      external: [
+        '@module-federation/error-codes',
+        '@module-federation/runtime',
+        '@module-federation/sdk',
+        '@module-federation/webpack-bundler-runtime',
+      ],
+      format: 'esm',
+      metafile: true,
+      outdir: 'dist',
+      plugins: [
+        moduleFederationPlugin({
+          name: 'esbuild_manifest_test',
+          filename: 'remoteEntry.js',
+          exposes: { './value': './value.js' },
+          remotes: {},
+          shared: {},
+        }),
+      ],
+    });
+
+    const remoteEntry = fs.readFileSync(
+      path.join(root, 'dist', 'remoteEntry.js'),
+      'utf-8',
+    );
+    assert(
+      !remoteEntry.includes('__MODULE_MAP__'),
+      'remoteEntry.js still contains the unresolved module map placeholder',
+    );
+
+    const manifestPath = path.join(root, 'dist', 'mf-manifest.json');
+    assert(
+      fs.existsSync(manifestPath),
+      'mf-manifest.json was not written under absWorkingDir',
+    );
+
+    assert(
+      !fs.existsSync(strayManifest),
+      'mf-manifest.json leaked into the package directory instead of absWorkingDir',
+    );
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+    fs.rmSync(strayManifest, { force: true });
   }
 });

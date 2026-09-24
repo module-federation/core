@@ -10,7 +10,6 @@ declare global {
   var _FEDERATION_RUNTIME_CORE_FROM: {
     version: string;
     name: string;
-    entryLoadingIdentity?: string;
     runtimeImage?: RuntimeImageDescriptorV1;
   };
 }
@@ -32,35 +31,23 @@ function injectExternalRuntimeCorePlugin(): ModuleFederationRuntimePlugin {
       const version = __VERSION__;
       const runtimeImage =
         args.userOptions?.runtimeImage ?? args.options.runtimeImage;
-      if (globalRef._FEDERATION_RUNTIME_CORE) {
-        const provider = globalRef._FEDERATION_RUNTIME_CORE_FROM;
-        if (provider) {
-          runtimeCore.assertRuntimeImageCompatible(
-            provider.runtimeImage,
-            runtimeImage,
-          );
-        }
-        if (
-          provider &&
-          !provider.runtimeImage &&
-          (provider.name !== name || provider.version !== version)
-        ) {
+      const provider = globalRef._FEDERATION_RUNTIME_CORE_FROM;
+      if (globalRef._FEDERATION_RUNTIME_CORE && provider) {
+        runtimeCore.assertRuntimeImageCompatible(
+          provider.runtimeImage,
+          runtimeImage,
+        );
+        if (provider.name !== name || provider.version !== version) {
           console.warn(
             `Detect multiple module federation runtime! Injected runtime from ${provider.name}@${provider.version} and current is ${name}@${version}, pleasure ensure there is only one consumer to provider runtime!`,
           );
+          return args;
         }
-        return args;
-      }
-      if (!runtimeImage) {
-        console.warn(
-          'External runtime-core metadata is missing. Reuse stays in legacy compatibility mode.',
-        );
       }
       globalRef._FEDERATION_RUNTIME_CORE = runtimeCore;
       globalRef._FEDERATION_RUNTIME_CORE_FROM = {
         version,
         name,
-        entryLoadingIdentity: `@module-federation/runtime-core@${version}:1`,
         ...(runtimeImage ? { runtimeImage } : {}),
       };
       return args;
