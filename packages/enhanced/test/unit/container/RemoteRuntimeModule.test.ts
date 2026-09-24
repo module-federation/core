@@ -105,7 +105,7 @@ describe('RemoteRuntimeModule', () => {
   let mockChunk: Chunk;
   let remoteRuntimeModule: InstanceType<typeof RemoteRuntimeModule>;
   let chunkModulesBySourceTypeMock: Mock<
-    NonNullable<ChunkGraph['getChunkModulesIterableBySourceType']>
+    NonNullable<ChunkGraph['getOrderedChunkModulesIterableBySourceType']>
   >;
   let moduleIdMock: ModuleIdMock;
   let moduleGraphGetModuleMock: Mock<ModuleGraph['getModule']>;
@@ -119,8 +119,8 @@ describe('RemoteRuntimeModule', () => {
     mockRuntimeTemplate = compilationMocks.mockRuntimeTemplate;
 
     chunkModulesBySourceTypeMock =
-      mockChunkGraph.getChunkModulesIterableBySourceType as unknown as Mock<
-        NonNullable<ChunkGraph['getChunkModulesIterableBySourceType']>
+      mockChunkGraph.getOrderedChunkModulesIterableBySourceType as unknown as Mock<
+        NonNullable<ChunkGraph['getOrderedChunkModulesIterableBySourceType']>
       >;
     moduleIdMock = mockChunkGraph.getModuleId as unknown as ModuleIdMock;
     moduleGraphGetModuleMock = mockModuleGraph.getModule as unknown as Mock<
