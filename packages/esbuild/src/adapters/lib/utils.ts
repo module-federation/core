@@ -1,3 +1,12 @@
+import path from 'path';
+
+// Resolves a path against esbuild's configured working directory, so build
+// output (files read or written after the build) lands next to the emitted
+// files instead of wherever the process happened to be started from.
+export function resolveFromWorkingDir(cwd: string, target: string): string {
+  return path.resolve(cwd, target);
+}
+
 export function orderedUniq<T>(array: T[]): T[] {
   // prettier-ignore
   const ret: T[] = [], visited = new Set<T>();

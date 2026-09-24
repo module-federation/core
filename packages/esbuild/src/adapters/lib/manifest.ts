@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { resolve } from './collect-exports.js';
+import { resolveFromWorkingDir } from './utils.js';
 import { BuildResult } from 'esbuild';
 interface OutputFile {
   entryPoint?: string;
@@ -70,7 +71,11 @@ interface Manifest {
   exposes: ExposeConfig[];
 }
 
-export const writeRemoteManifest = async (config: any, result: BuildResult) => {
+export const writeRemoteManifest = async (
+  config: any,
+  result: BuildResult,
+  cwd: string,
+) => {
   if (result.errors && result.errors.length > 0) {
     console.warn('Build errors detected, skipping writeRemoteManifest.');
     return;
@@ -78,8 +83,7 @@ export const writeRemoteManifest = async (config: any, result: BuildResult) => {
 
   let packageJson: { name: string };
   try {
-    const packageJsonPath =
-      (await resolve(process.cwd(), '/package.json')) || '';
+    const packageJsonPath = resolveFromWorkingDir(cwd, 'package.json');
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     packageJson = require(packageJsonPath);
   } catch (e) {
@@ -259,9 +263,9 @@ export const writeRemoteManifest = async (config: any, result: BuildResult) => {
     exposes,
   };
 
-  const manifestPath = path.join(
-    path.dirname(outputMap[containerName].chunk),
-    'mf-manifest.json',
+  const manifestPath = resolveFromWorkingDir(
+    cwd,
+    path.join(path.dirname(outputMap[containerName].chunk), 'mf-manifest.json'),
   );
   fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2), 'utf-8');
 };
