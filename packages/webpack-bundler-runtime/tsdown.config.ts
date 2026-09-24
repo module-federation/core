@@ -1,6 +1,7 @@
 import { defineConfig } from 'tsdown';
 import {
   createDualFormatConfig,
+  externalWithSelectors,
   packageDirFromMetaUrl,
 } from '../../tools/scripts/tsdown/config-helpers.mjs';
 
@@ -31,7 +32,7 @@ export default defineConfig([
         'selectors/shared-runtime/disabled':
           'src/selectors/shared-runtime/disabled.ts',
       },
-      external: ['@module-federation/*', 'webpack', /^#mf\//],
+      external: externalWithSelectors(['@module-federation/*', 'webpack']),
       noExternal: ['@module-federation/error-codes'],
       dts: {
         resolver: 'tsc',

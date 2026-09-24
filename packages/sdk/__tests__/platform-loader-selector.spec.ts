@@ -57,7 +57,7 @@ function compileSdk(
   compilerFactory: CompilerFactory,
   compilerName: string,
   condition: string,
-): Promise<string[]> {
+): Promise<{ modules: string[]; warnings: string[] }> {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'mf-sdk-selector-'));
   fs.writeFileSync(
     path.join(root, 'entry.js'),
@@ -89,16 +89,17 @@ function compileSdk(
         reject(error);
         return;
       }
-      const info = stats?.toJson({ modules: true });
+      const info = stats?.toJson({ modules: true, warnings: true });
       if (stats?.hasErrors()) {
         reject(new Error(info?.errors?.[0]?.message ?? 'compile failed'));
         return;
       }
-      resolve(
-        flattenModules((info?.modules ?? []) as unknown as StatsModule[]).map(
-          (module) => module.name ?? module.identifier ?? '',
-        ),
-      );
+      resolve({
+        modules: flattenModules(
+          (info?.modules ?? []) as unknown as StatsModule[],
+        ).map((module) => module.name ?? module.identifier ?? ''),
+        warnings: (info?.warnings ?? []).map((warning) => warning.message),
+      });
     });
   });
 }
@@ -148,13 +149,27 @@ describe('platform loader selector', () => {
   it.each(compilerCases())(
     'keeps Node evaluation out of the %s web graph',
     async (name, compiler) => {
-      const modules = await compileSdk(
+      const { modules } = await compileSdk(
         compiler,
         name,
         'module-federation:target-web',
       );
       expect(modules).toContain('./dist/selectors/platform-loader/web.js');
       expect(modules).not.toContain('./dist/node.js');
+    },
+    60_000,
+  );
+
+  it.each(compilerCases())(
+    'leaves the worker module import to the %s runtime',
+    async (name, compiler) => {
+      const { modules, warnings } = await compileSdk(
+        compiler,
+        name,
+        'module-federation:target-worker',
+      );
+      expect(modules).toContain('./dist/selectors/platform-loader/worker.js');
+      expect(warnings).toEqual([]);
     },
     60_000,
   );

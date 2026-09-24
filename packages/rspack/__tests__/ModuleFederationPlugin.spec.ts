@@ -1,23 +1,75 @@
+import fs from 'node:fs';
+import { createRequire } from 'node:module';
+import os from 'node:os';
+import path from 'node:path';
+import { rspack, type Compiler } from '@rspack/core';
+import { getSelectionSlot } from '@module-federation/managers/runtime-selection';
 import {
   ModuleFederationPlugin,
   resolveRspackRuntimeAlias,
   resolveRspackRuntimeImplementation,
-  runtimeCapabilityDefines,
 } from '../src/ModuleFederationPlugin';
 
-function getOptimizationDefines(
-  optimization?: NonNullable<
-    NonNullable<
-      ConstructorParameters<typeof ModuleFederationPlugin>[0]['experiments']
-    >['optimization']
-  >,
-  exposes?: ConstructorParameters<typeof ModuleFederationPlugin>[0]['exposes'],
-) {
-  return runtimeCapabilityDefines({
-    name: 'test',
-    exposes,
-    experiments: { optimization },
+type PluginOptions = ConstructorParameters<typeof ModuleFederationPlugin>[0];
+
+const definesEntry = `module.exports = {
+  noRemote: FEDERATION_OPTIMIZE_NO_REMOTE,
+  noShared: FEDERATION_OPTIMIZE_NO_SHARED,
+  noSnapshot: FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN,
+  hasExposes: FEDERATION_HAS_EXPOSES,
+  envTarget: typeof ENV_TARGET === 'undefined' ? undefined : ENV_TARGET,
+};
+`;
+
+let tempDirs: string[] = [];
+
+afterEach(() => {
+  for (const dir of tempDirs) {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+  tempDirs = [];
+});
+
+function createCompiler(plugins: Array<{ apply(compiler: Compiler): void }>) {
+  const context = fs.mkdtempSync(path.join(os.tmpdir(), 'mf-rspack-select-'));
+  tempDirs.push(context);
+  fs.writeFileSync(path.join(context, 'index.js'), definesEntry);
+  fs.writeFileSync(path.join(context, 'value.js'), 'module.exports = 1;\n');
+  return rspack({
+    mode: 'development',
+    devtool: false,
+    context,
+    target: 'node',
+    entry: { main: './index.js' },
+    output: {
+      path: path.join(context, 'dist'),
+      library: { type: 'commonjs2' },
+      uniqueName: 'rspack-selection',
+    },
+    plugins,
   });
+}
+
+function run(compiler: Compiler) {
+  return new Promise<void>((resolve, reject) => {
+    compiler.run((err, stats) => {
+      compiler.close(() => undefined);
+      if (err) return reject(err);
+      if (stats?.hasErrors()) {
+        return reject(new Error(stats.toString({ all: false, errors: true })));
+      }
+      resolve();
+    });
+  });
+}
+
+async function buildDefines(options: PluginOptions) {
+  const compiler = createCompiler([
+    new ModuleFederationPlugin({ dts: false, manifest: false, ...options }),
+  ]);
+  await run(compiler);
+  const output = path.join(compiler.options.output.path!, 'main.js');
+  return createRequire(output)(output);
 }
 
 describe('runtime resolution compatibility', () => {
@@ -42,37 +94,83 @@ describe('runtime resolution compatibility', () => {
   });
 });
 
-describe('runtime capability optimization defines', () => {
-  it('keeps all runtime capabilities enabled by default', () => {
-    expect(getOptimizationDefines()).toMatchObject({
-      FEDERATION_OPTIMIZE_NO_REMOTE: false,
-      FEDERATION_OPTIMIZE_NO_SHARED: false,
-      FEDERATION_HAS_EXPOSES: false,
+describe('ModuleFederationPlugin runtime selection', () => {
+  jest.setTimeout(30000);
+
+  it('rejects a second ModuleFederationPlugin in one compiler', () => {
+    expect(() =>
+      createCompiler([
+        new ModuleFederationPlugin({
+          name: 'first',
+          dts: false,
+          manifest: false,
+        }),
+        new ModuleFederationPlugin({
+          name: 'second',
+          dts: false,
+          manifest: false,
+        }),
+      ]),
+    ).toThrow(/Detect duplicate register RspackModuleFederationPlugin/);
+  });
+
+  it('keeps all runtime capabilities enabled by default', async () => {
+    await expect(buildDefines({ name: 'host' })).resolves.toEqual({
+      noRemote: false,
+      noShared: false,
+      noSnapshot: false,
+      hasExposes: false,
+      envTarget: undefined,
     });
   });
 
-  it('derives expose capability from the container configuration', () => {
-    expect(getOptimizationDefines(undefined, {})).toMatchObject({
-      FEDERATION_HAS_EXPOSES: false,
-    });
-    expect(
-      getOptimizationDefines(undefined, {
-        './Button': './src/Button',
+  it('defines the capabilities the plugin options disable', async () => {
+    await expect(
+      buildDefines({
+        name: 'provider',
+        exposes: { './value': './value.js' },
+        experiments: {
+          optimization: {
+            disableRemote: true,
+            disableShared: true,
+            disableSnapshot: true,
+            target: 'node',
+          },
+        },
       }),
-    ).toMatchObject({
-      FEDERATION_HAS_EXPOSES: true,
+    ).resolves.toEqual({
+      noRemote: true,
+      noShared: true,
+      noSnapshot: true,
+      hasExposes: true,
+      envTarget: 'node',
     });
   });
 
-  it('defines each disabled runtime capability independently', () => {
-    expect(
-      getOptimizationDefines({
-        disableRemote: true,
-        disableShared: true,
+  it('gives child compilers the parent selection', async () => {
+    let child: Compiler | undefined;
+    const compiler = createCompiler([
+      new ModuleFederationPlugin({
+        name: 'host',
+        dts: false,
+        manifest: false,
+        experiments: { optimization: { disableShared: true } },
       }),
-    ).toMatchObject({
-      FEDERATION_OPTIMIZE_NO_REMOTE: true,
-      FEDERATION_OPTIMIZE_NO_SHARED: true,
-    });
+      {
+        apply(compiler) {
+          compiler.hooks.make.tap('ChildProbe', (compilation) => {
+            child = compilation.createChildCompiler('probe', {}, []);
+          });
+        },
+      },
+    ]);
+    await run(compiler);
+
+    const parentSlot = getSelectionSlot(compiler);
+    const childSlot = getSelectionSlot(child!);
+    expect(childSlot.finalized).toBe(true);
+    expect(childSlot.profile).toEqual(parentSlot.profile);
+    expect(childSlot.profile?.shared).toBe('forbidden');
+    expect(childSlot.image).toBe(parentSlot.image);
   });
 });

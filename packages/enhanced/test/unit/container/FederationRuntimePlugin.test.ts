@@ -206,95 +206,52 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
     });
   });
 
-  describe('runtime module resolution compatibility', () => {
+  describe('runtime module resolution', () => {
     const normalizePath = (filePath: string) => filePath.replace(/\\/g, '/');
-    const originalIsEsmBuild = process.env.IS_ESM_BUILD;
 
-    afterEach(() => {
-      if (originalIsEsmBuild === undefined) {
-        delete process.env.IS_ESM_BUILD;
-      } else {
-        process.env.IS_ESM_BUILD = originalIsEsmBuild;
-      }
-    });
+    it('resolves the default runtime family to bundler entries', () => {
+      const paths = resolveRuntimePaths();
 
-    it('prefers the bundler runtime entry when IS_ESM_BUILD is false', () => {
-      process.env.IS_ESM_BUILD = 'false';
-      const plugin = new FederationRuntimePlugin({} as any);
-      const runtimePath = plugin.getRuntimeAlias({
-        options: { resolve: { alias: {} }, output: {} },
-      } as unknown as Compiler);
-
-      expect(normalizePath(runtimePath)).toMatch(
+      expect(normalizePath(paths.runtimePath)).toMatch(
         /\/runtime\/dist\/bundler\.js$/,
+      );
+      expect(normalizePath(paths.runtimeToolsPath)).toMatch(
+        /\/runtime-tools\/dist\/bundler\.js$/,
       );
     });
 
     it('does not replace a missing custom family member from the workspace install', () => {
-      expect(() => resolveRuntimePaths('/legacy/runtime-tools')).toThrow(
+      const plugin = new FederationRuntimePlugin({
+        implementation: '/legacy/runtime-tools',
+      } as any);
+
+      expect(() =>
+        plugin.prepareRuntime({
+          options: { target: 'web', resolve: { alias: {} }, output: {} },
+        } as unknown as Compiler),
+      ).toThrow(
         /No package\.json found|missing-anchor|ENOENT|Could not resolve/,
       );
     });
 
-    it('prefers the bundler runtime entry when IS_ESM_BUILD is true', () => {
-      process.env.IS_ESM_BUILD = 'true';
+    it('keeps a preset runtime alias and aliases runtime-tools to the bundler entry', () => {
       const plugin = new FederationRuntimePlugin({} as any);
-      const runtimePath = plugin.getRuntimeAlias({
+      const compiler = {
         options: {
-          resolve: { alias: {} },
+          resolve: {
+            alias: { '@module-federation/runtime$': '/custom/runtime' },
+          },
           output: {},
         },
-      } as unknown as Compiler);
+      } as unknown as Compiler;
 
-      expect(normalizePath(runtimePath)).toMatch(
-        /\/runtime\/dist\/bundler\.js$/,
+      plugin.setRuntimeAlias(compiler);
+
+      const alias = (compiler.options.resolve as any).alias;
+      expect(alias['@module-federation/runtime$']).toBe('/custom/runtime');
+      expect(normalizePath(alias['@module-federation/runtime-tools$'])).toMatch(
+        /\/runtime-tools\/dist\/bundler\.js$/,
       );
-    });
-
-    it('resolves runtime-tools alias to esm when IS_ESM_BUILD is false', () => {
-      process.env.IS_ESM_BUILD = 'false';
-      const plugin = new FederationRuntimePlugin({} as any);
-      const compiler = {
-        options: {
-          resolve: {
-            alias: { '@module-federation/runtime$': '/custom/runtime' },
-          },
-          output: {},
-        },
-      } as unknown as Compiler;
-
-      plugin.setRuntimeAlias(compiler);
-
-      expect(
-        normalizePath(
-          (compiler.options.resolve as any).alias[
-            '@module-federation/runtime-tools$'
-          ],
-        ),
-      ).toMatch(/\/runtime-tools\/dist\/bundler\.js$/);
-    });
-
-    it('resolves runtime-tools alias for ESM mode when runtime alias is preset', () => {
-      process.env.IS_ESM_BUILD = 'true';
-      const plugin = new FederationRuntimePlugin({} as any);
-      const compiler = {
-        options: {
-          resolve: {
-            alias: { '@module-federation/runtime$': '/custom/runtime' },
-          },
-          output: {},
-        },
-      } as unknown as Compiler;
-
-      plugin.setRuntimeAlias(compiler);
-
-      expect(
-        normalizePath(
-          (compiler.options.resolve as any).alias[
-            '@module-federation/runtime-tools$'
-          ],
-        ),
-      ).toMatch(/\/runtime-tools\/dist\/bundler\.js$/);
     });
   });
 });

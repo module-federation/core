@@ -64,13 +64,14 @@ export function finalizeRuntimeSelection(
         ),
     ),
   ];
-  const image = resolveRuntimeImplementation(implementations[0] ?? anchor);
+  const first = implementations[0] ?? anchor;
+  const image = resolveRuntimeImplementation(first);
   for (const implementation of implementations.slice(1)) {
     const next = resolveRuntimeImplementation(implementation);
     if (next.family.instanceId !== image.family.instanceId) {
       throw new RuntimeSelectionError(
         'split-family',
-        'Federation participants request different runtime families.',
+        `Federation participants request different runtime families: ${first} (${image.anchor}) and ${implementation} (${next.anchor}).`,
       );
     }
   }
