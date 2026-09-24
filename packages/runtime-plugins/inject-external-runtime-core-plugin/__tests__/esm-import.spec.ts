@@ -28,7 +28,6 @@ function expectInjectedRuntime(appName: string, version: string) {
   expect(globalThis._FEDERATION_RUNTIME_CORE_FROM).toEqual({
     name: appName,
     version,
-    entryLoadingIdentity: `@module-federation/runtime-core@${version}:1`,
   });
 }
 
@@ -76,6 +75,25 @@ describe('@module-federation/inject-external-runtime-core-plugin', () => {
 
     plugin.beforeInit({ options: { name: 'cjs-test-app' } });
     expectInjectedRuntime('cjs-test-app', plugin.version);
+  });
+
+  it('stays silent and re-publishes for providers without runtime images', () => {
+    const cjsEntry = path.join(__dirname, '..', 'dist', 'index.cjs');
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const createPlugin = require(cjsEntry) as PluginFactoryModule['default'];
+    const plugin = createPlugin();
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+    plugin.beforeInit({ options: { name: 'legacy-provider' } });
+    expectInjectedRuntime('legacy-provider', plugin.version);
+
+    globalThis._FEDERATION_RUNTIME_CORE =
+      {} as typeof globalThis._FEDERATION_RUNTIME_CORE;
+    plugin.beforeInit({ options: { name: 'legacy-provider' } });
+    expectInjectedRuntime('legacy-provider', plugin.version);
+
+    expect(warnSpy).not.toHaveBeenCalled();
+    warnSpy.mockRestore();
   });
 
   it('publishes runtime-image metadata and rejects an incompatible provider', () => {
