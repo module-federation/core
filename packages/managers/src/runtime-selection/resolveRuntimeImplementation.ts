@@ -404,7 +404,11 @@ export function resolveRuntimeImplementation(
         packageJsonPath: dependencyPackageJson,
       };
       const previous = members[dependency];
-      if (previous && previous.canonicalRoot !== next.canonicalRoot) {
+      const sameMember =
+        mode === 'conditions'
+          ? previous?.canonicalRoot === next.canonicalRoot
+          : previous?.version === next.version;
+      if (previous && !sameMember) {
         throw new RuntimeSelectionError(
           'split-family',
           `${declared.packageName} resolved to two roots: ${previous.canonicalRoot} and ${next.canonicalRoot}.`,

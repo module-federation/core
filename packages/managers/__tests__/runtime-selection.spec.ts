@@ -81,6 +81,70 @@ function installLegacy(root: string, sdkDir = path.join(root, 'sdk')) {
   return dirs;
 }
 
+function stampConditions(directory: string, id: string, role: string) {
+  const file = path.join(directory, 'package.json');
+  const pkg = JSON.parse(fs.readFileSync(file, 'utf8')) as {
+    federationRuntime?: Record<string, unknown>;
+  };
+  pkg.federationRuntime = {
+    contract: 1,
+    compatibilityId: id,
+    mode: 'conditions',
+    role,
+    ...(role === 'runtime-tools'
+      ? {
+          entryLoadingIdentity: 'family-a-loader',
+          facade: { require: './index.js' },
+          allowedRequests: {
+            '@module-federation/runtime-tools$': {
+              role: 'runtime-tools',
+              export: '.',
+            },
+          },
+          selectors: {
+            'remote-module': {
+              ownerRole: 'runtime-tools',
+              disabledCondition: 'module-federation:no-remote',
+              leaves: {
+                enabled: './index.js',
+                disabled: './index.js',
+                legacy: './index.js',
+              },
+            },
+          },
+          members: [
+            {
+              role: 'runtime-tools',
+              package: NAMES['runtime-tools'],
+              dependsOn: ['runtime', 'bundler-runtime'],
+            },
+            {
+              role: 'runtime',
+              package: NAMES.runtime,
+              dependsOn: ['runtime-core', 'sdk'],
+            },
+            {
+              role: 'runtime-core',
+              package: NAMES['runtime-core'],
+              dependsOn: ['sdk'],
+            },
+            {
+              role: 'bundler-runtime',
+              package: NAMES['bundler-runtime'],
+              dependsOn: ['runtime', 'sdk'],
+            },
+            {
+              role: 'sdk',
+              package: NAMES.sdk,
+              dependsOn: [],
+            },
+          ],
+        }
+      : {}),
+  };
+  fs.writeFileSync(file, JSON.stringify(pkg));
+}
+
 describe('runtime family resolution', () => {
   let root = '';
 
@@ -236,6 +300,51 @@ describe('runtime family resolution', () => {
     ).toThrow(expect.objectContaining({ code: 'split-family' }));
   });
 
+  it('accepts two nested copies of a legacy member at the same version', () => {
+    const dirs = installLegacy(root);
+    const nestedSdk = path.join(dirs['bundler-runtime'], 'nested-sdk');
+    writePackage(nestedSdk, NAMES.sdk);
+    fs.rmSync(path.join(dirs['bundler-runtime'], 'node_modules', NAMES.sdk), {
+      recursive: true,
+      force: true,
+    });
+    link(
+      nestedSdk,
+      path.join(dirs['bundler-runtime'], 'node_modules', NAMES.sdk),
+    );
+
+    const resolved = resolveRuntimeImplementation(
+      path.join(dirs['runtime-tools'], 'index.js'),
+    );
+    expect(resolved.family.members.sdk.canonicalRoot).toBe(
+      fs.realpathSync(dirs.sdk),
+    );
+  });
+
+  it('keeps root identity for condition-mode members at the same version', () => {
+    const dirs = installLegacy(root);
+    const nestedSdk = path.join(dirs['bundler-runtime'], 'nested-sdk');
+    writePackage(nestedSdk, NAMES.sdk);
+    fs.rmSync(path.join(dirs['bundler-runtime'], 'node_modules', NAMES.sdk), {
+      recursive: true,
+      force: true,
+    });
+    link(
+      nestedSdk,
+      path.join(dirs['bundler-runtime'], 'node_modules', NAMES.sdk),
+    );
+    for (const role of Object.keys(dirs) as (keyof typeof dirs)[]) {
+      stampConditions(dirs[role], 'family-a', role);
+    }
+    stampConditions(nestedSdk, 'family-a', 'sdk');
+
+    expect(() =>
+      resolveRuntimeImplementation(
+        path.join(dirs['runtime-tools'], 'index.js'),
+      ),
+    ).toThrow(expect.objectContaining({ code: 'split-family' }));
+  });
+
   it('treats a linked package as the same member when realpaths match', () => {
     const dirs = installLegacy(root);
     const alias = path.join(root, 'sdk-link');
@@ -256,74 +365,11 @@ describe('runtime family resolution', () => {
 
   it('requires every condition-mode member to carry the same compatibility id', () => {
     const dirs = installLegacy(root);
-    const stamp = (directory: string, id: string, role: string) => {
-      const file = path.join(directory, 'package.json');
-      const pkg = JSON.parse(fs.readFileSync(file, 'utf8')) as {
-        federationRuntime?: Record<string, unknown>;
-      };
-      pkg.federationRuntime = {
-        contract: 1,
-        compatibilityId: id,
-        mode: 'conditions',
-        role,
-        ...(role === 'runtime-tools'
-          ? {
-              entryLoadingIdentity: 'family-a-loader',
-              facade: { require: './index.js' },
-              allowedRequests: {
-                '@module-federation/runtime-tools$': {
-                  role: 'runtime-tools',
-                  export: '.',
-                },
-              },
-              selectors: {
-                'remote-module': {
-                  ownerRole: 'runtime-tools',
-                  disabledCondition: 'module-federation:no-remote',
-                  leaves: {
-                    enabled: './index.js',
-                    disabled: './index.js',
-                    legacy: './index.js',
-                  },
-                },
-              },
-              members: [
-                {
-                  role: 'runtime-tools',
-                  package: NAMES['runtime-tools'],
-                  dependsOn: ['runtime', 'bundler-runtime'],
-                },
-                {
-                  role: 'runtime',
-                  package: NAMES.runtime,
-                  dependsOn: ['runtime-core', 'sdk'],
-                },
-                {
-                  role: 'runtime-core',
-                  package: NAMES['runtime-core'],
-                  dependsOn: ['sdk'],
-                },
-                {
-                  role: 'bundler-runtime',
-                  package: NAMES['bundler-runtime'],
-                  dependsOn: ['runtime', 'sdk'],
-                },
-                {
-                  role: 'sdk',
-                  package: NAMES.sdk,
-                  dependsOn: [],
-                },
-              ],
-            }
-          : {}),
-      };
-      fs.writeFileSync(file, JSON.stringify(pkg));
-    };
-    stamp(dirs['runtime-tools'], 'family-a', 'runtime-tools');
-    stamp(dirs.runtime, 'family-a', 'runtime');
-    stamp(dirs['runtime-core'], 'family-b', 'runtime-core');
-    stamp(dirs['bundler-runtime'], 'family-a', 'bundler-runtime');
-    stamp(dirs.sdk, 'family-a', 'sdk');
+    stampConditions(dirs['runtime-tools'], 'family-a', 'runtime-tools');
+    stampConditions(dirs.runtime, 'family-a', 'runtime');
+    stampConditions(dirs['runtime-core'], 'family-b', 'runtime-core');
+    stampConditions(dirs['bundler-runtime'], 'family-a', 'bundler-runtime');
+    stampConditions(dirs.sdk, 'family-a', 'sdk');
 
     expect(() =>
       resolveRuntimeImplementation(
