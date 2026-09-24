@@ -101,11 +101,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     this._options = options;
   }
 
-  private installSelection(
-    compiler: Compiler,
-    anchor: string,
-    userRuntimeAlias: unknown,
-  ): void {
+  private installSelection(compiler: Compiler, anchor: string): void {
     registerRuntimeParticipant(
       compiler,
       participantFromOptions(PLUGIN_NAME, this._options),
@@ -132,15 +128,13 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       new compiler.webpack.DefinePlugin(
         capabilityDefines(result.profile!),
       ).apply(compiler);
-      if (typeof userRuntimeAlias !== 'string') {
-        const image = result.image!;
-        compiler.options.resolve.alias = {
-          ...compiler.options.resolve.alias,
-          '@module-federation/runtime$':
-            expectedEntry(image, '@module-federation/runtime$') ??
-            image.family.members.runtime.entry,
-        };
-      }
+      const image = result.image!;
+      compiler.options.resolve.alias = {
+        ...compiler.options.resolve.alias,
+        '@module-federation/runtime$':
+          expectedEntry(image, '@module-federation/runtime$') ??
+          image.family.members.runtime.entry,
+      };
     };
     compiler.hooks.afterResolvers.tap('FederationSelectionPlugin', finalize);
     compiler.hooks.compilation.tap(
@@ -227,13 +221,11 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       }).apply(compiler);
     }
 
-    const userRuntimeAlias =
-      compiler.options.resolve.alias?.['@module-federation/runtime$'];
     const implementationPath = options.implementation
       ? options.implementation
       : resolveRspackRuntimeImplementation();
     options.implementation = implementationPath;
-    this.installSelection(compiler, implementationPath, userRuntimeAlias);
+    this.installSelection(compiler, implementationPath);
     let disableManifest = options.manifest === false;
     let disableDts = options.dts === false;
 
