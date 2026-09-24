@@ -101,7 +101,7 @@ export interface ParticipantRequest {
       disableRemote?: boolean;
       disableShared?: boolean;
       disableSnapshot?: boolean;
-      target?: string;
+      target?: string | null;
     };
   };
 }

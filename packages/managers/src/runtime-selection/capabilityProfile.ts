@@ -75,28 +75,17 @@ export function participantIntent(
     ),
     snapshotPlugins: intent(optimization.disableSnapshot === true, false),
     containerEntry: hasExposes(request.exposes) ? 'required' : 'neutral',
-    explicitTarget: normalizeExplicitTarget(
-      optimization.target,
-      request.pluginName,
-    ),
+    explicitTarget: normalizeExplicitTarget(optimization.target),
     externalCore: request.experiments?.externalRuntime === true,
   };
 }
 
 function normalizeExplicitTarget(
-  target: string | undefined,
-  pluginName: string,
+  target: unknown,
 ): Exclude<RuntimeTarget, 'universal'> | null {
-  if (target === undefined) {
-    return null;
-  }
-  if (target === 'web' || target === 'node' || target === 'worker') {
-    return target;
-  }
-  throw new RuntimeSelectionError(
-    'invalid-target',
-    `${pluginName} has unsupported runtime target "${target}".`,
-  );
+  return target === 'web' || target === 'node' || target === 'worker'
+    ? target
+    : null;
 }
 
 function reduceIntent(

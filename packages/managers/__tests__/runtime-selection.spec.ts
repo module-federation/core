@@ -445,6 +445,25 @@ describe('capability profile reduction', () => {
     ).toThrow(expect.objectContaining({ code: 'capability-conflict' }));
   });
 
+  it('ignores an unknown or null optimization target and infers from the compiler', () => {
+    const profile = reduceCapabilityProfile(
+      [
+        {
+          pluginName: 'odd',
+          experiments: { optimization: { target: 'toaster' } },
+        },
+        {
+          pluginName: 'nullish',
+          experiments: { optimization: { target: null } },
+        },
+      ],
+      'node',
+    );
+
+    expect(profile.explicitTarget).toBeNull();
+    expect(profile.target).toBe('node');
+  });
+
   it('chooses universal when compiler target properties are mixed', () => {
     const profile = reduceCapabilityProfile(
       [{ pluginName: 'app' }],
