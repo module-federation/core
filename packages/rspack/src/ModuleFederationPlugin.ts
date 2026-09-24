@@ -1,6 +1,8 @@
 import type {
   Compiler,
+  Falsy,
   ModuleFederationPluginOptions,
+  RspackPluginFunction,
   RspackPluginInstance,
 } from '@rspack/core';
 import {
@@ -18,7 +20,6 @@ import {
   getSelectionSlot,
   inheritRuntimeSelection,
   participantFromOptions,
-  reduceCapabilityProfile,
   registerRuntimeParticipant,
   resolveRuntimeImplementation,
 } from '@module-federation/managers/runtime-selection';
@@ -91,23 +92,6 @@ export function resolveRspackRuntimeAlias(implementation: string) {
   );
 }
 
-export function runtimeCapabilityDefines(
-  options: moduleFederationPlugin.ModuleFederationPluginOptions,
-  compilerTarget?: string | readonly string[] | false,
-) {
-  return capabilityDefines(finalizeProfile(options, compilerTarget));
-}
-
-function finalizeProfile(
-  options: moduleFederationPlugin.ModuleFederationPluginOptions,
-  compilerTarget?: string | readonly string[] | false,
-) {
-  return reduceCapabilityProfile(
-    [participantFromOptions(PLUGIN_NAME, options)],
-    compilerTarget,
-  );
-}
-
 export class ModuleFederationPlugin implements RspackPluginInstance {
   readonly name = PLUGIN_NAME;
   private _options: moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -117,11 +101,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     this._options = options;
   }
 
-  private installSelection(
-    compiler: Compiler,
-    anchor: string,
-    userRuntimeAlias: unknown,
-  ): void {
+  private installSelection(compiler: Compiler, anchor: string): void {
     registerRuntimeParticipant(
       compiler,
       participantFromOptions(PLUGIN_NAME, this._options),
@@ -145,20 +125,16 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
           `[ ModuleFederationPlugin ]: Unable to resolve runtime family (paths: [${anchor}]): ${detail}`,
         );
       }
-      if (!result.profile || !result.image) {
-        return;
-      }
       new compiler.webpack.DefinePlugin(
-        capabilityDefines(result.profile),
+        capabilityDefines(result.profile!),
       ).apply(compiler);
-      if (typeof userRuntimeAlias !== 'string') {
-        compiler.options.resolve.alias = {
-          ...compiler.options.resolve.alias,
-          '@module-federation/runtime$':
-            expectedEntry(result.image, '@module-federation/runtime$') ??
-            result.image.family.members.runtime.entry,
-        };
-      }
+      const image = result.image!;
+      compiler.options.resolve.alias = {
+        ...compiler.options.resolve.alias,
+        '@module-federation/runtime$':
+          expectedEntry(image, '@module-federation/runtime$') ??
+          image.family.members.runtime.entry,
+      };
     };
     compiler.hooks.afterResolvers.tap('FederationSelectionPlugin', finalize);
     compiler.hooks.compilation.tap(
@@ -186,6 +162,26 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     }).apply(compiler);
   }
 
+  private _checkSingleton(compiler: Compiler): void {
+    let count = 0;
+    compiler.options.plugins.forEach(
+      (p: Falsy | RspackPluginInstance | RspackPluginFunction) => {
+        if (typeof p !== 'object' || !p) {
+          return;
+        }
+
+        if (p['name'] === this.name) {
+          count++;
+          if (count > 1) {
+            throw new Error(
+              `Detect duplicate register ${this.name},please ensure ${this.name} is singleton!`,
+            );
+          }
+        }
+      },
+    );
+  }
+
   apply(compiler: Compiler): void {
     bindLoggerToCompiler(logger, compiler, PLUGIN_NAME);
     const { _options: options } = this;
@@ -193,6 +189,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     if (!options.name) {
       throw new Error('[ ModuleFederationPlugin ]: name is required');
     }
+    this._checkSingleton(compiler);
     this._patchBundlerConfig(compiler);
     const containerManager = new ContainerManager();
     containerManager.init(options);
@@ -224,13 +221,11 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       }).apply(compiler);
     }
 
-    const userRuntimeAlias =
-      compiler.options.resolve.alias?.['@module-federation/runtime$'];
     const implementationPath = options.implementation
       ? options.implementation
       : resolveRspackRuntimeImplementation();
     options.implementation = implementationPath;
-    this.installSelection(compiler, implementationPath, userRuntimeAlias);
+    this.installSelection(compiler, implementationPath);
     let disableManifest = options.manifest === false;
     let disableDts = options.dts === false;
 
