@@ -11,7 +11,6 @@ import {
   globalLoadingMeta,
   getRemoteEntryExports,
   type RemoteEntryCacheDescriptorV1,
-  type RemoteEntryCacheMetadataV1,
 } from '../global';
 import { readRuntimeImage } from '../runtimeImage';
 import {
@@ -20,7 +19,7 @@ import {
   RemoteInfo,
   ResourceLoadContext,
 } from '../type';
-import { assert, error, warn } from './logger';
+import { assert, error } from './logger';
 import {
   RUNTIME_001,
   RUNTIME_008,
@@ -337,94 +336,51 @@ export function getRemoteEntryUniqueKey(remoteInfo: RemoteInfo): string {
   return composeKeyWithSeparator(name, entry);
 }
 
-const warnedLegacyCacheEntries = new WeakSet<
-  Promise<RemoteEntryExports | void>
->();
-
 function getRemoteEntryCacheDescriptor(
   origin: ModuleFederation,
   remoteInfo: RemoteInfo,
-  loaderPolicy: ((url: string) => string) | undefined,
-): RemoteEntryCacheDescriptorV1 {
+): RemoteEntryCacheDescriptorV1 | undefined {
   const image = readRuntimeImage(origin);
+  if (!image) {
+    return undefined;
+  }
   return {
     contract: 1,
-    compatibilityId: image?.compatibilityId,
-    target: image?.target,
-    entryLoadingIdentity: image?.entryLoadingIdentity,
+    compatibilityId: image.compatibilityId,
+    target: image.target,
+    entryLoadingIdentity: image.entryLoadingIdentity,
     remoteType: remoteInfo.type,
     entryGlobalName: remoteInfo.entryGlobalName,
-    loaderPolicy,
   };
 }
+
+const cacheIdentityFields = [
+  'compatibilityId',
+  'target',
+  'entryLoadingIdentity',
+  'remoteType',
+  'entryGlobalName',
+] as const;
 
 function assertRemoteEntryCacheCompatible(
   uniqueKey: string,
   promise: Promise<RemoteEntryExports | void>,
-  metadata: RemoteEntryCacheMetadataV1 | undefined,
   next: RemoteEntryCacheDescriptorV1,
 ): void {
-  if (!metadata || metadata.promise !== promise) {
-    if (globalLoadingMeta[uniqueKey] === metadata) {
-      delete globalLoadingMeta[uniqueKey];
-    }
-    if (!warnedLegacyCacheEntries.has(promise)) {
-      warnedLegacyCacheEntries.add(promise);
-      warn(
-        `Remote entry ${uniqueKey} has no cache compatibility metadata. Reusing the legacy entry.`,
-      );
-    }
+  const metadata = globalLoadingMeta[uniqueKey];
+  if (!metadata) {
     return;
   }
-  const current = metadata.descriptor;
-  const knownFields: Array<
-    keyof Pick<
-      RemoteEntryCacheDescriptorV1,
-      | 'compatibilityId'
-      | 'target'
-      | 'entryLoadingIdentity'
-      | 'remoteType'
-      | 'entryGlobalName'
-    >
-  > = [
-    'compatibilityId',
-    'target',
-    'entryLoadingIdentity',
-    'remoteType',
-    'entryGlobalName',
-  ];
-  for (const field of knownFields) {
-    const currentValue = current[field];
-    const nextValue = next[field];
-    if (
-      currentValue !== undefined &&
-      nextValue !== undefined &&
-      currentValue !== nextValue
-    ) {
-      throw new Error(
-        `Refusing to reuse remote entry ${uniqueKey}. ${field} changed from ${currentValue} to ${nextValue}.`,
+  if (metadata.promise !== promise) {
+    delete globalLoadingMeta[uniqueKey];
+    return;
+  }
+  for (const field of cacheIdentityFields) {
+    if (metadata.descriptor[field] !== next[field]) {
+      error(
+        `Refusing to reuse remote entry ${uniqueKey}. ${field} changed from ${metadata.descriptor[field]} to ${next[field]}.`,
       );
     }
-  }
-  if (
-    (current.loaderPolicy || next.loaderPolicy) &&
-    current.loaderPolicy !== next.loaderPolicy
-  ) {
-    throw new Error(
-      `Refusing to reuse remote entry ${uniqueKey} with a different URL policy.`,
-    );
-  }
-  if (
-    (!current.compatibilityId ||
-      !next.compatibilityId ||
-      !current.entryLoadingIdentity ||
-      !next.entryLoadingIdentity) &&
-    !warnedLegacyCacheEntries.has(promise)
-  ) {
-    warnedLegacyCacheEntries.add(promise);
-    warn(
-      `Remote entry ${uniqueKey} has incomplete cache compatibility metadata. Reusing the legacy entry.`,
-    );
   }
 }
 
@@ -445,11 +401,7 @@ export async function getRemoteEntry(params: {
     _inErrorHandling = false,
   } = params;
   const uniqueKey = getRemoteEntryUniqueKey(remoteInfo);
-  const cacheDescriptor = getRemoteEntryCacheDescriptor(
-    origin,
-    remoteInfo,
-    getEntryUrl,
-  );
+  const cacheDescriptor = getRemoteEntryCacheDescriptor(origin, remoteInfo);
 
   if (remoteEntryExports) {
     await origin.loaderHook.lifecycle.afterLoadEntry.emit({
@@ -462,12 +414,10 @@ export async function getRemoteEntry(params: {
     return remoteEntryExports;
   }
 
-  if (globalLoading[uniqueKey]) {
-    const cachedPromise = globalLoading[uniqueKey];
+  if (cacheDescriptor && globalLoading[uniqueKey]) {
     assertRemoteEntryCacheCompatible(
       uniqueKey,
-      cachedPromise,
-      globalLoadingMeta[uniqueKey],
+      globalLoading[uniqueKey],
       cacheDescriptor,
     );
   }
@@ -557,10 +507,12 @@ export async function getRemoteEntry(params: {
       });
 
     globalLoading[uniqueKey] = loading;
-    globalLoadingMeta[uniqueKey] = {
-      promise: loading,
-      descriptor: cacheDescriptor,
-    };
+    if (cacheDescriptor) {
+      globalLoadingMeta[uniqueKey] = {
+        promise: loading,
+        descriptor: cacheDescriptor,
+      };
+    }
     // Clear rejected entries so a later call can retry. Keep the original
     // promise identity in the cache (do not replace with a cleanup thenable).
     // Identity check: an older rejection must not delete a newer in-flight request.

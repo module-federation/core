@@ -1,4 +1,4 @@
-import { warn } from './utils/logger';
+import { error, warn } from './utils/logger';
 
 export const RUNTIME_IMAGE = Symbol.for('module-federation.runtime-image.v1');
 
@@ -44,17 +44,17 @@ export function assertRuntimeImageCompatible(
     return;
   }
   if (current.compatibilityId !== next.compatibilityId) {
-    throw new Error(
+    error(
       `Refusing to reuse runtime state from ${current.compatibilityId} with ${next.compatibilityId}.`,
     );
   }
   if (current.target !== next.target) {
-    throw new Error(
+    error(
       `Refusing to reuse a ${current.target} runtime image for ${next.target}.`,
     );
   }
   if (current.entryLoadingIdentity !== next.entryLoadingIdentity) {
-    throw new Error(
+    error(
       `Refusing to reuse entry loader ${current.entryLoadingIdentity} with ${next.entryLoadingIdentity}.`,
     );
   }
@@ -63,9 +63,7 @@ export function assertRuntimeImageCompatible(
       current.available.includes(capability) ||
       current.required.includes(capability);
     if (!provided) {
-      throw new Error(
-        `Runtime image is missing required capability ${capability}.`,
-      );
+      error(`Runtime image is missing required capability ${capability}.`);
     }
   }
   for (const capability of next.forbidden) {
@@ -73,9 +71,7 @@ export function assertRuntimeImageCompatible(
       current.available.includes(capability) ||
       current.required.includes(capability);
     if (exposed) {
-      throw new Error(
-        `Runtime image exposes forbidden capability ${capability}.`,
-      );
+      error(`Runtime image exposes forbidden capability ${capability}.`);
     }
   }
 }
