@@ -22,6 +22,18 @@ module.exports = {
             request: /node_modules/,
           },
         },
+        'lodash/map.js': {
+          allowNodeModulesSuffixMatch: true,
+          include: {
+            request: 'lodash/map.js',
+          },
+        },
+        'lodash/pick.js': {
+          allowNodeModulesSuffixMatch: true,
+          include: {
+            request: 'lodash/map.js',
+          },
+        },
       },
     }),
   ],
