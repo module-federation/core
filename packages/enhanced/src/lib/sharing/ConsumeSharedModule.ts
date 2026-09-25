@@ -26,7 +26,7 @@ import { normalizeConsumeShareOptions } from './utils';
 import { WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE } from '../Constants';
 import type { ConsumeOptions } from '@module-federation/sdk';
 
-const { rangeToString, stringifyHoley } = require(
+const { parseRange, rangeToString, stringifyHoley } = require(
   normalizeWebpackPath('webpack/lib/util/semver'),
 ) as typeof import('webpack/lib/util/semver');
 const { AsyncDependenciesBlock, Module, RuntimeGlobals } = require(
@@ -39,13 +39,21 @@ const makeSerializable = require(
   normalizeWebpackPath('webpack/lib/util/makeSerializable'),
 ) as typeof import('webpack/lib/util/makeSerializable');
 
+const requiredVersionToString = (requiredVersion: string): string => {
+  try {
+    return rangeToString(parseRange(requiredVersion));
+  } catch {
+    return requiredVersion;
+  }
+};
+
 /**
  * @typedef {Object} ConsumeOptions
  * @property {string=} import fallback request
  * @property {string=} importResolved resolved fallback request
  * @property {string} shareKey global share key
  * @property {string} shareScope share scope
- * @property {SemVerRange | false | undefined} requiredVersion version requirement
+ * @property {string | false | undefined} requiredVersion version requirement
  * @property {string} packageName package name to determine required version automatically
  * @property {boolean} strictVersion don't use shared version even if version isn't valid
  * @property {boolean} singleton use single global version
@@ -97,7 +105,7 @@ class ConsumeSharedModule extends Module {
       : shareScope;
 
     return `${WEBPACK_MODULE_TYPE_CONSUME_SHARED_MODULE}|${normalizedShareScope}|${shareKey}|${
-      requiredVersion && rangeToString(requiredVersion)
+      requiredVersion && requiredVersionToString(requiredVersion)
     }|${strictVersion}|${importResolved}|${singleton}|${eager}|${layer}`;
   }
 
@@ -121,7 +129,7 @@ class ConsumeSharedModule extends Module {
       : shareScope;
 
     return `consume shared module (${normalizedShareScope}) ${shareKey}@${
-      requiredVersion ? rangeToString(requiredVersion) : '*'
+      requiredVersion ? requiredVersionToString(requiredVersion) : '*'
     }${strictVersion ? ' (strict)' : ''}${singleton ? ' (singleton)' : ''}${
       importResolved
         ? ` (fallback: ${requestShortener.shorten(importResolved)})`
