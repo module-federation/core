@@ -14,23 +14,22 @@ export function readPackageVersion(packageDir) {
   return readPackageJson(packageDir).version;
 }
 
+const DTS_EXTENSION = { '.js': '.d.ts', '.cjs': '.d.cts', '.mjs': '.d.mts' };
+
+// tsdown passes rolldown's format name, so ESM arrives as 'es'. The dts
+// extension mirrors the js extension so the CJS and ESM passes never write
+// the same declaration path.
 function createModernOutExtensions(pkgType, preferNonModuleCjs) {
   return ({ format }) => {
+    let js;
     if (format === 'cjs') {
-      return {
-        js: pkgType === 'module' || preferNonModuleCjs ? '.cjs' : '.js',
-        dts: '.d.ts',
-      };
+      js = pkgType === 'module' || preferNonModuleCjs ? '.cjs' : '.js';
+    } else if (format === 'es') {
+      js = pkgType === 'module' ? '.js' : '.mjs';
+    } else {
+      return undefined;
     }
-
-    if (format === 'esm') {
-      return {
-        js: pkgType === 'module' ? '.js' : '.mjs',
-        dts: '.d.mts',
-      };
-    }
-
-    return undefined;
+    return { js, dts: DTS_EXTENSION[js] };
   };
 }
 
