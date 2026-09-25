@@ -1,6 +1,6 @@
 import { composeKeyWithSeparator } from '@module-federation/sdk/core';
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
-import { FederationKernel } from '../core';
+import type { ModuleFederation } from '../index';
 import { globalLoading, getRemoteEntryExports } from '../global';
 import {
   Remote,
@@ -17,7 +17,7 @@ import {
 
 const remoteEntryLoadingOrigins = new WeakMap<
   Promise<RemoteEntryExports | void>,
-  FederationKernel
+  ModuleFederation
 >();
 
 export function isEsmRemoteType(type: RemoteInfo['type']): boolean {
@@ -51,7 +51,7 @@ export function getRemoteEntryUniqueKey(remoteInfo: RemoteInfo): string {
 }
 
 export async function getRemoteEntry(params: {
-  origin: FederationKernel;
+  origin: ModuleFederation;
   remoteInfo: RemoteInfo;
   remoteEntryExports?: RemoteEntryExports | undefined;
   getEntryUrl?: (url: string) => string;

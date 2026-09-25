@@ -1,6 +1,6 @@
 import { loadScript } from '@module-federation/sdk/core';
 import { RUNTIME_008, runtimeDescMap } from '@module-federation/error-codes';
-import type { FederationKernel } from '../core';
+import type { ModuleFederation } from '../index';
 import { getRemoteEntryExports } from '../global';
 import type {
   Platform,
@@ -130,7 +130,7 @@ async function loadEntryScript({
   globalName: string;
   entry: string;
   remoteInfo: RemoteInfo;
-  loaderHook: FederationKernel['loaderHook'];
+  loaderHook: ModuleFederation['loaderHook'];
   getEntryUrl?: (url: string) => string;
   resourceContext?: ResourceLoadContext;
 }): Promise<RemoteEntryExports> {
@@ -207,7 +207,7 @@ export async function loadEntryDom({
 }: {
   remoteInfo: RemoteInfo;
   remoteEntryExports?: RemoteEntryExports;
-  loaderHook: FederationKernel['loaderHook'];
+  loaderHook: ModuleFederation['loaderHook'];
   getEntryUrl?: (url: string) => string;
   resourceContext?: ResourceLoadContext;
 }) {

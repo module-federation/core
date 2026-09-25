@@ -1,14 +1,14 @@
 import {
   setGlobalFederationInstance,
-  type FederationKernel,
+  type ModuleFederation,
   type UserOptions,
 } from '@module-federation/runtime-core/kernel';
 import { getGlobalFederationInstance, isMatchingInstance } from './utils';
 
 // The instance this bundle's init created or adopted, shared by the public API and ./compose.
-export let current: FederationKernel | null = null;
+export let current: ModuleFederation | null = null;
 
-export function createInstance<T extends FederationKernel>(
+export function createInstance<T extends ModuleFederation>(
   options: UserOptions,
   construct: (options: UserOptions) => T,
 ): T {
@@ -20,7 +20,7 @@ export function createInstance<T extends FederationKernel>(
   return instance;
 }
 
-export function initInstance<T extends FederationKernel>(
+export function initInstance<T extends ModuleFederation>(
   options: UserOptions,
   construct: (options: UserOptions) => T,
 ): T {

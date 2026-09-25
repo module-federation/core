@@ -1,4 +1,4 @@
-import { FederationKernel } from '../core';
+import type { ModuleFederation } from '../index';
 import {
   ModuleFederationRuntimePlugin,
   RuntimePluginHooks,
@@ -46,7 +46,7 @@ function getInstancePlugin(
 
 export function registerPlugins(
   plugins: UserOptions['plugins'],
-  instance: FederationKernel,
+  instance: ModuleFederation,
 ) {
   const registeredPlugins = new Map<string, ModuleFederationRuntimePlugin>();
   instance.options.plugins.forEach((plugin) => {

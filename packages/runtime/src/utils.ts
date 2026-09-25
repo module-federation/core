@@ -1,6 +1,6 @@
 import {
   CurrentGlobal,
-  type FederationKernel,
+  type ModuleFederation,
 } from '@module-federation/runtime-core/kernel';
 
 // injected by bundler, so it can not use runtime-core stuff
@@ -13,7 +13,7 @@ export function getBuilderId(): string {
 }
 
 export function isMatchingInstance(
-  instance: FederationKernel,
+  instance: ModuleFederation,
   name: string,
   version: string | undefined,
 ): boolean {
@@ -36,7 +36,7 @@ export function isMatchingInstance(
 export function getGlobalFederationInstance(
   name: string,
   version: string | undefined,
-): FederationKernel | undefined {
+): ModuleFederation | undefined {
   return CurrentGlobal.__FEDERATION__.__INSTANCES__.find((instance) =>
     isMatchingInstance(instance, name, version),
   );

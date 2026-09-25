@@ -17,7 +17,7 @@ import {
 } from '../type';
 import { assignRemoteInfo } from './snapshot';
 import { getInfoWithoutType, getPreloaded, setPreloaded } from '../global';
-import { FederationKernel } from '../core';
+import type { ModuleFederation } from '../index';
 import { defaultPreloadArgs, normalizePreloadExposes } from '../utils/preload';
 import { getRegisteredShare } from '../utils/share';
 import {
@@ -109,7 +109,7 @@ const isExisted = (type: 'link' | 'script', url: string) => {
 
 // eslint-disable-next-line max-lines-per-function
 export function generatePreloadAssets(
-  origin: FederationKernel,
+  origin: ModuleFederation,
   preloadOptions: PreloadOptions[number],
   remote: RemoteInfoOptionalVersion,
   globalSnapshot: GlobalModuleInfo,

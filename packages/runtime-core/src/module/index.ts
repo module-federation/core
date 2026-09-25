@@ -13,7 +13,7 @@ import {
   runtimeDescMap,
 } from '@module-federation/error-codes';
 import { getRemoteEntry } from '../utils/load';
-import { FederationKernel } from '../core';
+import type { ModuleFederation } from '../index';
 import {
   RemoteEntryExports,
   RemoteInfo,
@@ -95,14 +95,14 @@ class Module {
   initPromise?: Promise<void>;
   remoteEntryExports?: RemoteEntryExports;
   lib: RemoteEntryExports | undefined = undefined;
-  host: FederationKernel;
+  host: ModuleFederation;
 
   constructor({
     remoteInfo,
     host,
   }: {
     remoteInfo: RemoteInfo;
-    host: FederationKernel;
+    host: ModuleFederation;
   }) {
     this.remoteInfo = remoteInfo;
     this.host = host;

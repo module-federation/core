@@ -27,11 +27,11 @@ import {
   getInfoWithoutType,
 } from '../../global';
 import { PluginSystem, AsyncHook, AsyncWaterfallHook } from '../../utils/hooks';
-import { FederationKernel } from '../../core';
+import type { ModuleFederation } from '../../index';
 
 export function getGlobalRemoteInfo(
   moduleInfo: Remote,
-  origin: FederationKernel,
+  origin: ModuleFederation,
 ): {
   hostGlobalSnapshot: ModuleInfo | undefined;
   globalSnapshot: ReturnType<typeof getGlobalSnapshot>;
@@ -72,7 +72,7 @@ export function getGlobalRemoteInfo(
 
 export class SnapshotHandler {
   loadingHostSnapshot: Promise<GlobalModuleInfo | void> | null = null;
-  HostInstance: FederationKernel;
+  HostInstance: ModuleFederation;
   manifestCache: Map<string, Manifest> = new Map();
   hooks = new PluginSystem({
     beforeLoadRemoteSnapshot: new AsyncHook<
@@ -80,7 +80,7 @@ export class SnapshotHandler {
         {
           options: Options;
           moduleInfo: Remote;
-          origin: FederationKernel;
+          origin: ModuleFederation;
         },
       ],
       void
@@ -102,7 +102,7 @@ export class SnapshotHandler {
     }>('loadRemoteSnapshot'),
     afterLoadSnapshot: new AsyncWaterfallHook<{
       id?: string;
-      host: FederationKernel;
+      host: ModuleFederation;
       options: Options;
       moduleInfo: Remote;
       remoteSnapshot: ModuleInfo;
@@ -116,7 +116,7 @@ export class SnapshotHandler {
             initiator: ResourceLoadInitiator;
             id: string;
           };
-          origin: FederationKernel;
+          origin: ModuleFederation;
         },
       ],
       void
@@ -135,17 +135,17 @@ export class SnapshotHandler {
           error?: unknown;
           cached?: boolean;
           recovered?: boolean;
-          origin: FederationKernel;
+          origin: ModuleFederation;
         },
       ],
       void
     >('afterLoadManifest'),
   });
-  loaderHook: FederationKernel['loaderHook'];
+  loaderHook: ModuleFederation['loaderHook'];
   manifestLoading: Record<string, Promise<ModuleInfo>> =
     Global.__FEDERATION__.__MANIFEST_LOADING__;
 
-  constructor(HostInstance: FederationKernel) {
+  constructor(HostInstance: ModuleFederation) {
     this.HostInstance = HostInstance;
     this.loaderHook = HostInstance.loaderHook;
   }
