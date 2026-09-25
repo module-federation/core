@@ -2,7 +2,7 @@ import type { Rspack } from '@rsbuild/core';
 
 import { NODE_RUNTIME_PLUGIN } from './runtime-plugin';
 
-const DATA_JAVASCRIPT_REQUEST = /!=!data:text\/javascript(?:;|,)/i;
+const DATA_JAVASCRIPT_REQUEST = /(?:^|!=!)data:text\/javascript(?:;|,)/i;
 // Rspack's native plugin imports this path, and the rspack wrapper aliases it to a virtual module.
 const BUNDLER_RUNTIME_REQUEST =
   /[\\/]webpack-bundler-runtime[\\/]dist[\\/]index\.c?js$/;

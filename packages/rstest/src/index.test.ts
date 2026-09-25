@@ -278,6 +278,14 @@ describe('shouldKeepBundledForFederation', () => {
     ).toBe(true);
   });
 
+  it('keeps plain data: javascript requests bundled', () => {
+    expect(
+      shouldKeepBundledForFederation(
+        'data:text/javascript,export default function(){}',
+      ),
+    ).toBe(true);
+  });
+
   it('keeps @module-federation/* requests bundled', () => {
     expect(shouldKeepBundledForFederation('@module-federation/node')).toBe(
       true,
