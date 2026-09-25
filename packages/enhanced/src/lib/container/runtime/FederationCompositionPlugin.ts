@@ -13,6 +13,7 @@ import {
   type GraphModule,
   type Participant,
   type RuntimeFamily,
+  type RuntimeMode,
 } from '@module-federation/managers';
 import {
   composeKeyWithSeparator,
@@ -38,9 +39,8 @@ export interface ComposedEntry {
 
 interface Outcome {
   family: RuntimeFamily;
+  mode: RuntimeMode;
   entry?: ComposedEntry;
-  legacyReason?: string;
-  unsupportedReason?: string;
 }
 
 export interface CompositionSlot {
@@ -160,17 +160,14 @@ class FederationCompositionPlugin {
       alias: compiler.options.resolve.alias as never,
       aliasExemptions: this._ownAliasTargets(compiler),
     });
-    if (mode.mode === 'unsupported') {
-      return { family, unsupportedReason: mode.reason };
-    }
-    if (mode.mode === 'legacy') return { family, legacyReason: mode.reason };
+    if (mode.mode !== 'composed') return { family, mode };
     const composition = renderComposition(
       plan,
       resolveImports(plan, family),
       this._buildId(compiler),
     );
     slot.entry = { ...this._createEntry(composition), adapters: plan.adapters };
-    return { family, entry: slot.entry };
+    return { family, mode, entry: slot.entry };
   }
 
   // FederationRuntimePlugin writes these aliases itself; they are not user aliases.
@@ -196,29 +193,19 @@ class FederationCompositionPlugin {
       : undefined;
   }
 
-  private _check(
-    compilation: Compilation,
-    { family, entry, legacyReason, unsupportedReason }: Outcome,
-  ) {
-    if (unsupportedReason !== undefined) {
+  private _check(compilation: Compilation, { family, mode, entry }: Outcome) {
+    if (mode.mode === 'unsupported') {
       compilation.errors.push(
         new WebpackError(
-          `The federation runtime cannot be composed: ${unsupportedReason}.`,
+          `The federation runtime cannot be composed: ${mode.reason}.`,
         ),
       );
       return;
     }
-    const { externalRuntime, provideExternalRuntime } =
-      this._options.experiments ?? {};
-    // An externalized runtime is the full runtime by request; the other reasons are worth a warning.
-    if (
-      legacyReason !== undefined &&
-      !externalRuntime &&
-      !provideExternalRuntime
-    ) {
+    if (mode.mode === 'legacy' && !mode.requested) {
       compilation.warnings.push(
         new WebpackError(
-          `This build uses the full federation runtime because ${legacyReason}.`,
+          `This build uses the full federation runtime because ${mode.reason}.`,
         ),
       );
     }

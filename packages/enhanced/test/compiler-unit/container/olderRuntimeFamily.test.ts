@@ -1,10 +1,10 @@
-// @ts-nocheck
 /*
  * @rstest-environment node
  */
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import type { Stats } from 'webpack';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
 import { MIN_RUNTIME_VERSION } from '@module-federation/managers';
 import ModuleFederationPlugin from '../../../src/lib/container/ModuleFederationPlugin';
@@ -36,7 +36,7 @@ describe('an older runtime family', () => {
     context = fs.mkdtempSync(path.join(os.tmpdir(), 'mf-older-family-'));
     fs.writeFileSync(path.join(context, 'index.js'), 'export default 1;');
 
-    const stats = await new Promise((resolve, reject) =>
+    const stats = await new Promise<Stats>((resolve, reject) =>
       webpack(
         {
           context,
@@ -57,12 +57,12 @@ describe('an older runtime family', () => {
             }),
           ],
         },
-        (err, result) => (err ? reject(err) : resolve(result)),
+        (err, result) => (err ? reject(err) : resolve(result!)),
       ),
     );
 
     const errors = stats.toJson({ all: false, errors: true }).errors;
-    expect(errors.map(({ message }) => message)).toEqual([
+    expect(errors?.map(({ message }) => message)).toEqual([
       expect.stringMatching(
         new RegExp(
           `webpack-bundler-runtime at .* does not export "\\./compose"; the federation runtime packages must be ${MIN_RUNTIME_VERSION.replace(/\./g, '\\.')} or newer`,

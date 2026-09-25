@@ -30,7 +30,12 @@ export interface ModeInputs {
 
 export type RuntimeMode =
   | { mode: 'composed' }
-  | { mode: 'legacy'; reason: string }
+  | {
+      mode: 'legacy';
+      reason: string;
+      /** Set when experiments.externalRuntime or provideExternalRuntime asks for the full runtime. */
+      requested?: true;
+    }
   | { mode: 'unsupported'; reason: string };
 
 const hasOwn = (object: object, key: string) =>
@@ -47,8 +52,11 @@ export async function selectMode(
       reason: `${problem}; the federation runtime packages must be ${MIN_RUNTIME_VERSION} or newer`,
     };
   }
+  const requested = experimentProblem(inputs);
+  if (requested !== undefined) {
+    return { mode: 'legacy', reason: requested, requested: true };
+  }
   const reason =
-    experimentProblem(inputs) ??
     (await externalsProblem(inputs)) ??
     aliasProblem(inputs) ??
     (inputs.virtualModulesPlugin === false

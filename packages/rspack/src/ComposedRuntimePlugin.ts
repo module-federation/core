@@ -82,14 +82,7 @@ export class ComposedRuntimePlugin {
         );
         return;
       }
-      const { externalRuntime, provideExternalRuntime } =
-        this._options.experiments ?? {};
-      // An externalized runtime is the full runtime by request; the other reasons are worth a warning.
-      if (
-        mode?.mode === 'legacy' &&
-        !externalRuntime &&
-        !provideExternalRuntime
-      ) {
+      if (mode?.mode === 'legacy' && !mode.requested) {
         compilation.warnings.push(
           new WebpackError(
             `This build uses the full federation runtime because ${mode.reason}.`,

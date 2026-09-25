@@ -92,7 +92,11 @@ describe('selectMode', () => {
     ['externalRuntime', { externalRuntime: true }],
     ['provideExternalRuntime', { provideExternalRuntime: true }],
   ])('selects legacy on experiments.%s', async (_, experiments) => {
-    expect(await legacyReason({ experiments })).toMatch(/experiments\./);
+    expect(await selectMode(composable(), { experiments })).toEqual({
+      mode: 'legacy',
+      reason: expect.stringMatching(/experiments\./),
+      requested: true,
+    });
   });
 
   describe('externals', () => {
