@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/bridge-react",
-  "version": "2.9.0",
+  "version": "2.9.1",
   "sideEffects": false,
   "publishConfig": {
     "access": "public"
@@ -189,6 +189,6 @@
     "vite": "^5.4.21",
     "@module-federation/runtime": "workspace:*",
     "@module-federation/runtime-core": "workspace:*",
-    "hono": "4.13.1"
+    "hono": "4.13.5"
   }
 }
