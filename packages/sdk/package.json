@@ -47,7 +47,7 @@
       },
       "require": {
         "types": "./dist/core.d.ts",
-        "default": "./dist/core.cjs"
+        "default": "./dist/index.cjs"
       }
     },
     "./node": {

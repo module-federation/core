@@ -33,6 +33,7 @@ export function createFederation({
   capabilities: Capabilities;
   adapters: Adapter[];
 }): ComposedFederation {
+  let instance: FederationKernel | undefined;
   const federation: ComposedFederation = {
     instance: undefined,
     initOptions: undefined,
@@ -46,17 +47,17 @@ export function createFederation({
         for (const adapter of adapters) {
           adapter.beforeInit?.(webpackRequire, initOptions);
         }
-        return composeInit(
+        return (instance = composeInit(
           { ...initOptions, id: initOptions.id || buildId },
           capabilities,
-        );
+        ));
       },
     },
     attachShareScopeMap,
     bundlerRuntimeOptions: {},
     runtime: {
       loadScriptNode(url, info) {
-        const platform = federation.instance?.platform as
+        const platform = instance?.platform as
           | Partial<NodePlatform>
           | undefined;
         if (!platform?.loadScriptNode) {

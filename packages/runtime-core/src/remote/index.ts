@@ -23,6 +23,7 @@ import {
   RemoteInfo,
   RemoteEntryExports,
   CallFrom,
+  RemoteCapability,
 } from '../type';
 import type { ModuleFederation } from '../index';
 import {
@@ -46,7 +47,10 @@ import {
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { Module, ModuleOptions } from '../module';
 import { formatPreloadArgs, preloadAssets } from '../utils/preload';
-import { getGlobalRemoteInfo } from '../plugins/snapshot/SnapshotHandler';
+import {
+  getGlobalRemoteInfo,
+  SnapshotHandler,
+} from '../plugins/snapshot/SnapshotHandler';
 
 export interface LoadRemoteMatch {
   id: string;
@@ -845,3 +849,10 @@ export class RemoteHandler {
     }
   }
 }
+
+export const remote: RemoteCapability = {
+  create: (host) => ({
+    snapshot: new SnapshotHandler(host),
+    remote: new RemoteHandler(host),
+  }),
+};
