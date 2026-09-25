@@ -1,5 +1,7 @@
-import type { ModuleFederation } from '@module-federation/runtime-core';
-import { CurrentGlobal } from '@module-federation/runtime-core';
+import {
+  CurrentGlobal,
+  ModuleFederation,
+} from '@module-federation/runtime-core';
 
 // injected by bundler, so it can not use runtime-core stuff
 export function getBuilderId(): string {
@@ -17,6 +19,13 @@ export function getGlobalFederationInstance(
   const buildId = getBuilderId();
   return CurrentGlobal.__FEDERATION__.__INSTANCES__.find(
     (GMInstance: ModuleFederation) => {
+      // An instance from an older runtime has no capabilities to compare, so it is not reused.
+      if (
+        GMInstance.runtimeCapabilities !== ModuleFederation.runtimeCapabilities
+      ) {
+        return false;
+      }
+
       if (buildId && GMInstance.options.id === buildId) {
         return true;
       }
