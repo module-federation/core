@@ -23,6 +23,7 @@ import {
   RemoteEntryExports,
   CallFrom,
   GlobalShareScopeMap,
+  ResourceLoadContext,
 } from '../type';
 import { ModuleFederation } from '../core';
 import {
