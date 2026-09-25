@@ -9,7 +9,7 @@
 '@module-federation/managers': major
 ---
 
-The composed federation runtime is the default and only bootstrap. `ModuleFederationPlugin` now always generates a bootstrap that imports only the runtime parts the build uses, and `experiments.composedRuntime` is removed.
+The composed federation runtime is the default. `ModuleFederationPlugin` generates a bootstrap that imports only the runtime parts the build uses, and `experiments.composedRuntime` is removed. A build that cannot compose gets the define-free full-runtime bootstrap: an external runtime (`experiments.externalRuntime`, `provideExternalRuntime`), a runtime package in `externals` or in a user `resolve.alias`, or rspack without `experiments.VirtualModulesPlugin`. It warns, except for the two external-runtime experiments, which ask for the full runtime.
 
 Removed:
 
