@@ -8,7 +8,6 @@
   ],
   "files": [
     "dist/",
-    "client/",
     "README.md"
   ],
   "publishConfig": {

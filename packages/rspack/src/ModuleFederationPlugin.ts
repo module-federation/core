@@ -18,7 +18,7 @@ import ReactBridgePlugin from '@module-federation/bridge-react-webpack-plugin';
 import path from 'node:path';
 import fs from 'node:fs';
 import { RemoteEntryPlugin } from './RemoteEntryPlugin';
-import { LazyCompilationClientPlugin } from './LazyCompilationClientPlugin';
+import { LazyCompilationEndpointPlugin } from './LazyCompilationEndpointPlugin';
 import logger from './logger';
 
 type ExcludeFalse<T> = T extends undefined | false ? never : T;
@@ -186,7 +186,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     }
 
     if (hasExposes(options.exposes)) {
-      new LazyCompilationClientPlugin().apply(compiler);
+      new LazyCompilationEndpointPlugin().apply(compiler);
     }
 
     // must before ModuleFederationPlugin
