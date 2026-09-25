@@ -102,9 +102,6 @@ module.exports = (_env, argv = {}) => {
         },
       }),
     ],
-    // `rspack serve` enables lazy compilation for web targets; its proxy calls
-    // back to the page origin, which for a remote is the host, not this server.
-    lazyCompilation: false,
     devServer: {
       hot: false,
       liveReload: false,
