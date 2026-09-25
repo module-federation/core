@@ -12,13 +12,13 @@ const { ModuleFederationPlugin } = createRequire(import.meta.url)(
 
 const withoutVirtualModules = {
   apply(compiler) {
-    const core = compiler.rspack;
-    Object.defineProperty(compiler, 'rspack', {
-      value: {
-        ...core,
-        experiments: { ...core.experiments, VirtualModulesPlugin: undefined },
-      },
-    });
+    const core = compiler.webpack;
+    const value = {
+      ...core,
+      experiments: { ...core.experiments, VirtualModulesPlugin: undefined },
+    };
+    Object.defineProperty(compiler, 'rspack', { value });
+    Object.defineProperty(compiler, 'webpack', { value });
   },
 };
 

@@ -58,7 +58,7 @@ export class ComposedRuntimePlugin {
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation) => {
       if (legacyReason === undefined) return;
       compilation.warnings.push(
-        new compiler.rspack.WebpackError(
+        new compiler.webpack.WebpackError(
           `experiments.composedRuntime is set, but this build uses the full federation runtime because ${legacyReason}.`,
         ),
       );
@@ -67,8 +67,7 @@ export class ComposedRuntimePlugin {
 
   private _render(compiler: Compiler): Composition {
     const family = resolveRuntimeFamily(this._native.runtimeTools);
-    const VirtualModulesPlugin =
-      compiler.rspack.experiments.VirtualModulesPlugin;
+    const VirtualModulesPlugin = virtualModulesPluginOf(compiler);
     if (!VirtualModulesPlugin) return { family };
     const plan = planComposition(
       [optionsParticipant(this._options)],
@@ -109,9 +108,7 @@ export class ComposedRuntimePlugin {
       context: compiler.context,
       alias: alias as never,
       aliasExemptions: [this._native.runtimeTools, this._native.runtime],
-      virtualModulesPlugin: Boolean(
-        compiler.rspack.experiments.VirtualModulesPlugin,
-      ),
+      virtualModulesPlugin: Boolean(virtualModulesPluginOf(compiler)),
     });
     if (mode.mode === 'legacy') return mode.reason;
     if (!bootstrapPath) throw renderError;
@@ -130,13 +127,17 @@ export class ComposedRuntimePlugin {
   }
 
   private _applyDefines(compiler: Compiler, composed: boolean) {
-    const { DefinePlugin } = compiler.rspack;
+    const { DefinePlugin } = compiler.webpack;
     if (!composed) return new DefinePlugin(this._defines).apply(compiler);
     const { ENV_TARGET } = this._defines;
     if (ENV_TARGET !== undefined)
       new DefinePlugin({ ENV_TARGET }).apply(compiler);
   }
 }
+
+// @rspack/core 0.7 has no compiler.rspack and no experiments export.
+const virtualModulesPluginOf = (compiler: Compiler) =>
+  compiler.webpack.experiments?.VirtualModulesPlugin;
 
 function resolveRuntimeEsm({ members }: RuntimeFamily): string {
   return require.resolve(`${RUNTIME}/bundler`, {
