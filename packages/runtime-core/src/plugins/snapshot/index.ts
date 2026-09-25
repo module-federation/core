@@ -30,7 +30,7 @@ export function assignRemoteInfo(
     error(RUNTIME_011, runtimeDescMap, { remoteName: remoteInfo.name });
   }
 
-  let entryUrl = getResourceUrl(remoteSnapshot, remoteEntryInfo.url);
+  let entryUrl = getResourceUrl(remoteSnapshot, remoteEntryInfo.url, inBrowser);
 
   if (!inBrowser && !entryUrl.startsWith('http')) {
     entryUrl = `https:${entryUrl}`;

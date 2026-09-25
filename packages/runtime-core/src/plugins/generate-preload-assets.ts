@@ -155,12 +155,11 @@ export function generatePreloadAssets(
         }
       }
 
+      const inBrowser = origin.platform.isBrowser();
       const remoteEntryUrl = getResourceUrl(
         moduleInfoSnapshot,
-        getRemoteEntryInfoFromSnapshot(
-          moduleInfoSnapshot,
-          origin.platform.isBrowser(),
-        ).url,
+        getRemoteEntryInfoFromSnapshot(moduleInfoSnapshot, inBrowser).url,
+        inBrowser,
       );
 
       if (remoteEntryUrl) {
@@ -209,7 +208,7 @@ export function generatePreloadAssets(
 
       function handleAssets(assets: string[]): string[] {
         const assetsRes = assets.map((asset) =>
-          getResourceUrl(moduleInfoSnapshot, asset),
+          getResourceUrl(moduleInfoSnapshot, asset, inBrowser),
         );
         if (preloadConfig.filter) {
           return assetsRes.filter(preloadConfig.filter);
