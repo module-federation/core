@@ -417,11 +417,14 @@ describe('ContainerEntryModule', () => {
   });
 
   describe('codeGeneration', () => {
-    it('reports a missing expose and generates a runtime rejection', () => {
+    it('reports only missing imports while preserving the full runtime request', () => {
       const module = new ContainerEntryModule(
         'container',
         [
-          ['./Missing', { import: ['./does-not-exist.js'], name: '' }],
+          [
+            './Mixed',
+            { import: ['./found.js', './does-not-exist.js'], name: '' },
+          ],
           ['./Valid', { import: ['./valid.js'], name: '' }],
         ],
         'default',
@@ -441,6 +444,7 @@ describe('ContainerEntryModule', () => {
         moduleGraph: {
           getModule: rs
             .fn()
+            .mockReturnValueOnce({})
             .mockReturnValueOnce(undefined)
             .mockReturnValueOnce({}),
         },
@@ -458,6 +462,7 @@ describe('ContainerEntryModule', () => {
       expect(logError).toHaveBeenCalledWith(
         expect.stringContaining('Failed to find expose module. #BUILD-001'),
       );
+      expect(logError).toHaveBeenCalledTimes(1);
       expect(logError.mock.calls[0][0]).toContain('./does-not-exist.js');
       expect(logError.mock.calls[0][0]).toContain(
         'troubleshooting/build#build-001',
@@ -471,15 +476,15 @@ describe('ContainerEntryModule', () => {
       expect(diagnostic.mfConfig).toEqual({
         name: 'container',
         exposes: {
-          './Missing': './does-not-exist.js',
+          './Mixed': './does-not-exist.js',
           './Valid': './valid.js',
         },
       });
       expect(diagnostic.latestErrorEvent.args.exposeModules).toEqual([
-        { name: './Missing', request: './does-not-exist.js' },
+        { name: './Mixed', request: './does-not-exist.js' },
       ]);
       expect(throwMissingModuleErrorBlock).toHaveBeenCalledWith({
-        request: './does-not-exist.js',
+        request: './found.js, ./does-not-exist.js',
       });
       expect(result.sources.get('javascript').source()).toContain(
         'throw missing module;',
