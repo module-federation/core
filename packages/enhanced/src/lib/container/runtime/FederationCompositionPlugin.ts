@@ -52,14 +52,6 @@ type SlotCompiler = Compiler & { [SLOT]?: CompositionSlot };
 export const COVERED_BY_OPTIONS = Symbol('covered by ModuleFederationPlugin');
 export type CoveredByOptions = typeof COVERED_BY_OPTIONS;
 
-const usesSharedContainerPlugin = (compiler: Compiler) =>
-  compiler.options.plugins.some(
-    (plugin) =>
-      typeof plugin === 'object' &&
-      plugin !== null &&
-      (plugin as { name?: unknown }).name === 'SharedContainerPlugin',
-  );
-
 function slotOf(compiler: Compiler): CompositionSlot {
   const target = compiler as SlotCompiler;
   return (target[SLOT] ??= { participants: [], sealed: false });
@@ -95,7 +87,6 @@ class FederationCompositionPlugin {
   }
 
   apply(compiler: Compiler): void {
-    if (usesSharedContainerPlugin(compiler)) return;
     const slot = slotOf(compiler);
     if (slot.planner) return;
     slot.planner = this;
