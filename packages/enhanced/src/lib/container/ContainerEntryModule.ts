@@ -5,7 +5,10 @@
 
 'use strict';
 import { normalizeWebpackPath } from '@module-federation/sdk/normalize-webpack-path';
-import type { Compilation, Dependency } from 'webpack';
+import { infrastructureLogger as logger } from '@module-federation/sdk';
+import { buildDescMap, BUILD_001 } from '@module-federation/error-codes';
+import { logAndReport } from '@module-federation/error-codes/node';
+import type { Compilation, Dependency, Module as WebpackModule } from 'webpack';
 import type {
   InputFileSystem,
   LibIdentOptions,
@@ -204,19 +207,53 @@ class ContainerEntryModule extends Module {
     for (const block of this.blocks) {
       const { dependencies } = block;
 
-      const modules = dependencies.map((dependency: Dependency) => {
+      const modules: {
+        name: string;
+        module: WebpackModule | null;
+        request: string;
+      }[] = [];
+      let missingModules: typeof modules | undefined;
+      let requests = '';
+      for (const dependency of dependencies) {
         const dep = dependency as unknown as ContainerExposedDependency;
-        return {
+        const exposedModule = {
           name: dep.exposedName,
           module: moduleGraph.getModule(dep),
           request: dep.userRequest,
         };
-      });
+        modules.push(exposedModule);
+        if (!exposedModule.module) {
+          (missingModules ??= []).push(exposedModule);
+        }
+        requests += `${modules.length > 1 ? ', ' : ''}${dep.userRequest}`;
+      }
 
       let str;
-      if (modules.some((m) => !m.module)) {
+      if (missingModules) {
+        logAndReport(
+          BUILD_001,
+          buildDescMap,
+          {
+            exposeModules: missingModules,
+            FEDERATION_WEBPACK_PATH: process.env['FEDERATION_WEBPACK_PATH'],
+          },
+          logger.error.bind(logger),
+          undefined,
+          {
+            bundler: { name: 'webpack' },
+            mfConfig: {
+              name: this._name,
+              exposes: Object.fromEntries(
+                this._exposes.map(([key, opts]) => [
+                  key,
+                  opts.import[opts.import.length - 1],
+                ]),
+              ),
+            },
+          },
+        );
         str = runtimeTemplate.throwMissingModuleErrorBlock({
-          request: modules.map((m) => m.request).join(', '),
+          request: requests,
         });
       } else {
         str = `return ${runtimeTemplate.blockPromise({
