@@ -1,8 +1,9 @@
-import type {
-  CreateLinkHookReturnDom,
-  CreateScriptHookReturn,
-  GlobalModuleInfo,
-  ModuleInfo,
+import {
+  isBrowserEnvValue,
+  type CreateLinkHookReturnDom,
+  type CreateScriptHookReturn,
+  type GlobalModuleInfo,
+  type ModuleInfo,
 } from '@module-federation/sdk/core';
 import {
   Options,
@@ -21,10 +22,11 @@ import {
   LoadShareExtraOptions,
   SharedLoadContext,
   ResolvedCapabilities,
-  Platform,
+  Capabilities,
   RemoteHandlerContract,
   SharedHandlerContract,
   SnapshotHandlerContract,
+  Platform,
 } from './type';
 import { getBuilderId, registerPlugins, getRemoteEntry, error } from './utils';
 import {
@@ -41,7 +43,12 @@ import {
   SyncWaterfallHook,
 } from './utils/hooks';
 import type { ModuleFederation } from './index';
+import type { RemoteHandler } from './remote';
+import type { SharedHandler } from './shared';
+import type { SnapshotHandler } from './plugins/snapshot/SnapshotHandler';
 import { DEFAULT_SCOPE } from './constant';
+import { disabledRemote } from './remote/disabled';
+import { disabledShared } from './shared/disabled';
 
 type BridgeHookContext = object;
 type BridgeHookResult = {
@@ -92,9 +99,9 @@ export class FederationCore {
   version: string = __VERSION__;
   name: string;
   moduleCache: Map<string, Module> = new Map();
-  snapshotHandler: SnapshotHandlerContract;
-  sharedHandler: SharedHandlerContract;
-  remoteHandler: RemoteHandlerContract;
+  snapshotHandler: SnapshotHandler;
+  sharedHandler: SharedHandler;
+  remoteHandler: RemoteHandler;
   platform: Platform;
   shareScopeMap: ShareScopeMap;
   loaderHook = new PluginSystem({
@@ -303,9 +310,11 @@ export class FederationCore {
     this.options = defaultOptions;
     this.platform = platform;
     const handlers = remote.create(this);
-    this.snapshotHandler = handlers.snapshot;
-    this.sharedHandler = shared.create(this);
-    this.remoteHandler = handlers.remote;
+    // A disabled capability hands back its contract-only stand-in; the
+    // public type keeps the full handler, as it did before capabilities.
+    this.snapshotHandler = handlers.snapshot as SnapshotHandler;
+    this.sharedHandler = shared.create(this) as SharedHandler;
+    this.remoteHandler = handlers.remote as RemoteHandler;
     this.shareScopeMap = this.sharedHandler.shareScopeMap;
     this.registerPlugins([
       ...defaultOptions.plugins,
@@ -449,3 +458,41 @@ export class FederationCore {
     });
   }
 }
+
+export const PLATFORM_UNAVAILABLE_MESSAGE =
+  'No platform capability: pass capabilities.platform to load entries.';
+
+const unavailable = () =>
+  Promise.reject(new Error(PLATFORM_UNAVAILABLE_MESSAGE));
+
+export const unavailablePlatform: Platform = {
+  isBrowser: () => isBrowserEnvValue,
+  loadScript: unavailable,
+  loadEntry: unavailable,
+};
+
+class Kernel extends FederationCore {
+  constructor(userOptions: UserOptions, capabilities: Capabilities = {}) {
+    super(userOptions, {
+      shared: capabilities.shared || disabledShared,
+      remote: capabilities.remote || disabledRemote,
+      snapshot: capabilities.remote && capabilities.snapshot,
+      platform: capabilities.platform || unavailablePlatform,
+    });
+  }
+}
+
+// Handlers of capabilities the caller left out are disabled, so a kernel
+// promises only the handler contracts.
+export type FederationKernel = Omit<
+  Kernel,
+  'remoteHandler' | 'sharedHandler' | 'snapshotHandler'
+> & {
+  remoteHandler: RemoteHandlerContract;
+  sharedHandler: SharedHandlerContract;
+  snapshotHandler: SnapshotHandlerContract;
+};
+export const FederationKernel = Kernel as new (
+  userOptions: UserOptions,
+  capabilities?: Capabilities,
+) => FederationKernel;

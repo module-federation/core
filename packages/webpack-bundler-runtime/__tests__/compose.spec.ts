@@ -185,6 +185,31 @@ describe('createFederation', () => {
     ).not.toContain('tree-shake-plugin');
   });
 
+  test('runtime.loadScriptNode reaches the node platform through the embed template copy', () => {
+    const loadScriptNode = jest.fn(() => Promise.resolve());
+    const composed = createFederation({
+      buildId: 'host:1.0.0',
+      capabilities: {
+        platform: { ...fakePlatform, loadScriptNode } as Platform,
+      },
+      adapters: [],
+    });
+    // FederationRuntimePlugin's embed template copies the keys into a fresh object.
+    const federation: any = {};
+    for (const key in composed) {
+      federation[key] = (composed as any)[key];
+    }
+    federation.initOptions = { name: `host${++seq}`, remotes: [] };
+    federation.instance = federation.bundlerRuntime.init({
+      webpackRequire: { federation },
+    });
+    federation.runtime.loadScriptNode('http://localhost/chunk.js', {});
+    expect(loadScriptNode).toHaveBeenCalledWith(
+      'http://localhost/chunk.js',
+      {},
+    );
+  });
+
   test('runtime.loadScriptNode names the missing node platform', () => {
     const { federation } = boot({}, []);
     expect(() => federation.runtime.loadScriptNode('x.js', {})).toThrow(

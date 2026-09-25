@@ -9,7 +9,6 @@ import type { ResourceLoadContext } from './preload';
 export type RemoteHandlerContract = Pick<
   RemoteHandler,
   | 'hooks'
-  | 'idToRemoteMap'
   | 'formatAndRegisterRemote'
   | 'loadRemote'
   | 'preloadRemote'
@@ -30,10 +29,7 @@ export type SharedHandlerContract = Pick<
   | 'initShareScopeMap'
 >;
 
-export type SnapshotHandlerContract = Pick<
-  SnapshotHandler,
-  'hooks' | 'manifestCache' | 'loadRemoteSnapshotInfo' | 'getGlobalRemoteInfo'
->;
+export type SnapshotHandlerContract = Pick<SnapshotHandler, 'hooks'>;
 
 export type ScriptInfo = { attrs?: Record<string, any> };
 
