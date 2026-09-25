@@ -68,7 +68,7 @@ const hasEntries = (value: unknown) =>
 
 export function optionsParticipant(
   options: moduleFederationPlugin.ModuleFederationPluginOptions,
-): Participant {
+): Extract<Participant, { kind: 'options' }> {
   const optimization = options.experiments?.optimization;
   const disable: Extract<Participant, { kind: 'options' }>['disable'] = {};
   if (optimization?.disableShared) disable.shared = true;
