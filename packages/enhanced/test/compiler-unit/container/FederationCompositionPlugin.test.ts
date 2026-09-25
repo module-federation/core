@@ -141,6 +141,7 @@ describe('FederationCompositionPlugin', () => {
   it('fails the build for an older runtime family and names the minimum version', async () => {
     const context = fixture({ 'index.js': 'export default 1;' });
     const { stats } = await compile(context, {
+      optimization: { minimize: false, emitOnErrors: true },
       plugins: [host(undefined, { implementation: olderRuntimeTools() })],
     });
 
