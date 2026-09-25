@@ -2,7 +2,6 @@ import {
   ModuleFederation,
   type UserOptions,
   CurrentGlobal,
-  getGlobalFederationConstructor,
   assert,
   setGlobalFederationConstructor,
 } from '@module-federation/runtime-core';
@@ -28,15 +27,15 @@ export {
 
 export { ModuleFederation };
 
-const constructWithDebugOverride = (options: UserOptions): ModuleFederation =>
-  new (getGlobalFederationConstructor() || ModuleFederation)(options);
+const construct = (options: UserOptions): ModuleFederation =>
+  new ModuleFederation(options);
 
 export function createInstance(options: UserOptions): ModuleFederation {
-  return createInstanceWith(options, constructWithDebugOverride);
+  return createInstanceWith(options, construct);
 }
 
 export function init(options: UserOptions): ModuleFederation {
-  return initInstance(options, constructWithDebugOverride);
+  return initInstance(options, ModuleFederation.runtimeCapabilities, construct);
 }
 
 export function loadRemote<T>(
