@@ -371,10 +371,10 @@ export const deleteChunk = (
   return true;
 };
 
-const NO_NODE_LOADER =
-  'Loading a remote entry in Node needs a node or universal platform capability.';
-
 // Hoisted function to set up webpack script loader
+const NO_NODE_LOADER =
+  'No Node script loader: the federation instance needs a node or universal platform to load remote entries in Node.';
+
 export const setupScriptLoader = (): void => {
   __webpack_require__.l = (
     url: string,

@@ -33,7 +33,7 @@ const federation: Federation = {
   bundlerRuntime,
   attachShareScopeMap,
   bundlerRuntimeOptions: {},
-  // @rspack/core before 2.0.0-beta.1: its native runtime calls federation.runtime.init.
+  // rspack native runtimes before 2.0.0-beta.1 call federation.runtime.init.
   runtime: { init },
 };
 

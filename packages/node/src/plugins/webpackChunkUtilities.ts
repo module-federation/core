@@ -291,7 +291,7 @@ export function generateLoadScript(runtimeTemplate: any): string {
             try {
               const instance = ${RuntimeGlobals.require}.federation.instance;
               if (!instance.platform.loadScriptNode) {
-                throw new Error('Loading a remote entry in Node needs a node or universal platform capability.');
+                throw new Error('No Node script loader: the federation instance needs a node or universal platform to load remote entries in Node.');
               }
               const res = await instance.platform.loadScriptNode(url, { attrs: {} });
               const enhancedRemote = instance.initRawContainer(name, url, res);

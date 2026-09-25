@@ -21,7 +21,9 @@ export type ComposedFederation = Omit<
     S: BundlerRuntime['S'];
     init(options: { webpackRequire: WebpackRequire }): FederationKernel;
   };
-  runtime: { init(options: UserOptions): FederationKernel };
+  runtime: {
+    init(options: UserOptions): FederationKernel;
+  };
 };
 
 export function createFederation({
@@ -53,7 +55,7 @@ export function createFederation({
     },
     attachShareScopeMap,
     bundlerRuntimeOptions: {},
-    // @rspack/core before 2.0.0-beta.1: its native runtime calls federation.runtime.init.
+    // rspack native runtimes before 2.0.0-beta.1 call federation.runtime.init.
     runtime: { init },
   };
   for (const adapter of adapters) {

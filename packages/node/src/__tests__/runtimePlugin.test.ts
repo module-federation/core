@@ -891,6 +891,37 @@ describe('runtimePlugin', () => {
       }
     });
 
+    it('rejects with a named error when nothing can load a Node script', async () => {
+      const federation = (global as any).__webpack_require__.federation;
+      const originalInstance = federation.instance;
+      const originalRuntime = federation.runtime;
+      federation.runtime = {};
+      federation.instance = {
+        platform: { isBrowser: () => false },
+        initRawContainer: jest.fn(),
+      };
+      try {
+        setupScriptLoader();
+        const done = jest.fn();
+        expect(() =>
+          (global as any).__webpack_require__.l(
+            'http://localhost:3001/remoteEntry.js',
+            done,
+            'no-loader-remote',
+            '',
+          ),
+        ).not.toThrow();
+        await new Promise(process.nextTick);
+
+        expect(done).toHaveBeenCalledWith(expect.any(Error));
+        expect(done.mock.calls[0][0].message).toMatch(/Node script loader/);
+        expect(federation.instance.initRawContainer).not.toHaveBeenCalled();
+      } finally {
+        federation.instance = originalInstance;
+        federation.runtime = originalRuntime;
+      }
+    });
+
     it('should throw error when key is missing', () => {
       setupScriptLoader();
 
