@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { rspack } from '@rspack/core';
+import * as defaultCore from '@rspack/core';
 
 const FIXTURE = path.dirname(fileURLToPath(import.meta.url));
 const { ModuleFederationPlugin } = createRequire(import.meta.url)(
@@ -121,7 +121,13 @@ function watchTwice(compiler) {
   });
 }
 
-const { outRoot, builds, multi, watch } = JSON.parse(process.argv[2]);
+const { outRoot, builds, multi, watch, rspackCore } = JSON.parse(
+  process.argv[2],
+);
+// rspackCore names another installed @rspack/core directory, such as a 1.x release.
+const { rspack } = rspackCore
+  ? createRequire(path.join(rspackCore, 'package.json'))(rspackCore)
+  : defaultCore;
 const results = [];
 if (multi) {
   results.push(

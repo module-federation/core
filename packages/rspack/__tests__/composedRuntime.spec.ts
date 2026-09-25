@@ -56,7 +56,7 @@ afterAll(() => fs.rmSync(outRoot, { recursive: true, force: true }));
 
 async function harness(
   builds: BuildSpec[],
-  mode: { multi?: boolean; watch?: boolean } = {},
+  mode: { multi?: boolean; watch?: boolean; rspackCore?: string } = {},
 ): Promise<Build[]> {
   const { stdout } = await promisify(execFile)(
     process.execPath,
@@ -125,44 +125,63 @@ function serve(root: string): Promise<http.Server> {
   );
 }
 
-describe('composed runtime', () => {
-  it('runs a composed host against a composed remote with one shared singleton', async () => {
-    const server = await serve(outRoot);
-    try {
-      const { port } = server.address() as { port: number };
-      const [remoteBuild, hostBuild] = await harness([
+async function runHostAndRemote(out: string, rspackCore?: string) {
+  const server = await serve(outRoot);
+  try {
+    const { port } = server.address() as { port: number };
+    const [remoteBuild, hostBuild] = await harness(
+      [
         {
-          out: 'run/remote',
+          out: `${out}/remote`,
           target: 'node',
           singleChunk: true,
           mf: remote('node', { shared: SHARED }),
         },
         {
-          out: 'run/host',
+          out: `${out}/host`,
           target: 'node',
           mf: host(
             { shared: SHARED },
-            `http://127.0.0.1:${port}/run/remote/remoteEntry.js`,
+            `http://127.0.0.1:${port}/${out}/remote/remoteEntry.js`,
           ),
         },
-      ]);
-      expectComposed(remoteBuild, 'remoteApp');
-      expectComposed(hostBuild, 'host');
+      ],
+      { rspackCore },
+    );
+    expectComposed(remoteBuild, 'remoteApp');
+    expectComposed(hostBuild, 'host');
 
-      const { stdout } = await promisify(execFile)(process.execPath, [
-        '-e',
-        'require(process.argv[1]).default.then((r) => console.log(JSON.stringify(r)))',
-        path.join(outRoot, 'run/host/main.js'),
-      ]);
-      const result = JSON.parse(stdout);
-      expect(result.button).toBe(
-        `Button from remoteApp, shared-lib#${result.hostToken}`,
-      );
-      expect(result.evaluations).toBe(1);
-    } finally {
-      server.close();
-    }
-  });
+    const { stdout } = await promisify(execFile)(process.execPath, [
+      '-e',
+      'require(process.argv[1]).default.then((r) => console.log(JSON.stringify(r)))',
+      path.join(outRoot, `${out}/host/main.js`),
+    ]);
+    const result = JSON.parse(stdout);
+    expect(result.button).toBe(
+      `Button from remoteApp, shared-lib#${result.hostToken}`,
+    );
+    expect(result.evaluations).toBe(1);
+  } finally {
+    server.close();
+  }
+}
+
+describe('composed runtime', () => {
+  it('runs a composed host against a composed remote with one shared singleton', () =>
+    runHostAndRemote('run'));
+
+  // Before 2.0.0-beta.1, rspack's native runtime calls federation.runtime.init.
+  it.each(['1.5.8', '1.7.9'])(
+    'runs a composed host and remote built with @rspack/core %s',
+    async (version) => {
+      const store = path.resolve(__dirname, '../../../node_modules/.pnpm');
+      const dir = fs
+        .readdirSync(store)
+        .find((d) => d.startsWith(`@rspack+core@${version}_`))!;
+      const rspackCore = path.join(store, dir, 'node_modules/@rspack/core');
+      await runHostAndRemote(`rspack-${version}`, rspackCore);
+    },
+  );
 
   it('builds a remotes-only host without the shared, snapshot, consumes, or container parts', async () => {
     const [b] = await harness([

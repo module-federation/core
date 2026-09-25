@@ -2,6 +2,7 @@ import { init as composeInit } from '@module-federation/runtime/compose';
 import type {
   Capabilities,
   FederationKernel,
+  UserOptions,
 } from '@module-federation/runtime-core/kernel';
 import { attachShareScopeMap } from './attachShareScopeMap';
 import type {
@@ -13,13 +14,14 @@ import type {
 
 export type ComposedFederation = Omit<
   Federation,
-  'instance' | 'bundlerRuntime'
+  'instance' | 'bundlerRuntime' | 'runtime'
 > & {
   instance?: FederationKernel;
   bundlerRuntime: Partial<BundlerRuntime> & {
     S: BundlerRuntime['S'];
     init(options: { webpackRequire: WebpackRequire }): FederationKernel;
   };
+  runtime: { init(options: UserOptions): FederationKernel };
 };
 
 export function createFederation({
@@ -31,6 +33,8 @@ export function createFederation({
   capabilities: Capabilities;
   adapters: Adapter[];
 }): ComposedFederation {
+  const init = (options: UserOptions) =>
+    composeInit({ ...options, id: options.id || buildId }, capabilities);
   const federation: ComposedFederation = {
     instance: undefined,
     initOptions: undefined,
@@ -44,14 +48,13 @@ export function createFederation({
         for (const adapter of adapters) {
           adapter.beforeInit?.(webpackRequire, initOptions);
         }
-        return composeInit(
-          { ...initOptions, id: initOptions.id || buildId },
-          capabilities,
-        );
+        return init(initOptions);
       },
     },
     attachShareScopeMap,
     bundlerRuntimeOptions: {},
+    // @rspack/core before 2.0.0-beta.1: its native runtime calls federation.runtime.init.
+    runtime: { init },
   };
   for (const adapter of adapters) {
     Object.assign(federation.bundlerRuntime, adapter.bundlerRuntime);

@@ -144,7 +144,7 @@ describe('createFederation', () => {
       'S',
       'init',
     ]);
-    expect(federation).not.toHaveProperty('runtime');
+    expect(Object.keys(federation.runtime)).toEqual(['init']);
   });
 
   test('init passes buildId as the default id', () => {
@@ -182,6 +182,24 @@ describe('createFederation', () => {
     expect(
       federation.instance!.options.plugins.map((plugin) => plugin.name),
     ).not.toContain('tree-shake-plugin');
+  });
+
+  test('rspack 1.x initializes through runtime.init on the copied keys', () => {
+    const name = `host${++seq}`;
+    const composed = createFederation({
+      buildId: `${name}:1.0.0`,
+      capabilities: { platform: fakePlatform },
+      adapters: [shareScope],
+    });
+    // @rspack/core 1.x moduleFederationDefaultRuntime: copy the keys, then call runtime.init.
+    const federation: any = {};
+    for (const key in composed) {
+      federation[key] = (composed as any)[key];
+    }
+    federation.initOptions = { name, remotes: [] };
+    federation.instance = federation.runtime.init(federation.initOptions);
+    expect(federation.instance.options.id).toBe(`${name}:1.0.0`);
+    expect(federation.runtime).not.toHaveProperty('loadScriptNode');
   });
 });
 
