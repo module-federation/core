@@ -9,7 +9,7 @@ import {
 import { runtimeDescMap, RUNTIME_009 } from '@module-federation/error-codes';
 import {
   createInstance as createInstanceWith,
-  current,
+  bundleInstance,
   initInstance,
 } from './instance';
 
@@ -28,67 +28,69 @@ export {
 
 export { ModuleFederation };
 
-// The debug constructor lets a debugging tool substitute its own class.
-const construct = (options: UserOptions): ModuleFederation =>
+const constructWithDebugOverride = (options: UserOptions): ModuleFederation =>
   new (getGlobalFederationConstructor() || ModuleFederation)(options);
 
 export function createInstance(options: UserOptions): ModuleFederation {
-  return createInstanceWith(options, construct);
+  return createInstanceWith(options, constructWithDebugOverride);
 }
 
 export function init(options: UserOptions): ModuleFederation {
-  return initInstance(options, construct);
+  return initInstance(options, constructWithDebugOverride);
 }
 
 export function loadRemote<T>(
   ...args: Parameters<ModuleFederation['loadRemote']>
 ): Promise<T | null> {
-  assert(current, RUNTIME_009, runtimeDescMap);
-  const loadRemote: typeof current.loadRemote<T> = current.loadRemote;
+  assert(bundleInstance, RUNTIME_009, runtimeDescMap);
+  const loadRemote: typeof bundleInstance.loadRemote<T> =
+    bundleInstance.loadRemote;
   // eslint-disable-next-line prefer-spread
-  return loadRemote.apply(current, args);
+  return loadRemote.apply(bundleInstance, args);
 }
 
 export function loadShare<T>(
   ...args: Parameters<ModuleFederation['loadShare']>
 ): Promise<false | (() => T | undefined)> {
-  assert(current, RUNTIME_009, runtimeDescMap);
+  assert(bundleInstance, RUNTIME_009, runtimeDescMap);
   // eslint-disable-next-line prefer-spread
-  const loadShare: typeof current.loadShare<T> = current.loadShare;
-  return loadShare.apply(current, args);
+  const loadShare: typeof bundleInstance.loadShare<T> =
+    bundleInstance.loadShare;
+  return loadShare.apply(bundleInstance, args);
 }
 
 export function loadShareSync<T>(
   ...args: Parameters<ModuleFederation['loadShareSync']>
 ): () => T | never {
-  assert(current, RUNTIME_009, runtimeDescMap);
-  const loadShareSync: typeof current.loadShareSync<T> = current.loadShareSync;
+  assert(bundleInstance, RUNTIME_009, runtimeDescMap);
+  const loadShareSync: typeof bundleInstance.loadShareSync<T> =
+    bundleInstance.loadShareSync;
   // eslint-disable-next-line prefer-spread
-  return loadShareSync.apply(current, args);
+  return loadShareSync.apply(bundleInstance, args);
 }
 
 export function preloadRemote(
   ...args: Parameters<ModuleFederation['preloadRemote']>
 ): ReturnType<ModuleFederation['preloadRemote']> {
-  assert(current, RUNTIME_009, runtimeDescMap);
+  assert(bundleInstance, RUNTIME_009, runtimeDescMap);
   // eslint-disable-next-line prefer-spread
-  return current.preloadRemote.apply(current, args);
+  return bundleInstance.preloadRemote.apply(bundleInstance, args);
 }
 
 export function registerRemotes(
   ...args: Parameters<ModuleFederation['registerRemotes']>
 ): ReturnType<ModuleFederation['registerRemotes']> {
-  assert(current, RUNTIME_009, runtimeDescMap);
+  assert(bundleInstance, RUNTIME_009, runtimeDescMap);
   // eslint-disable-next-line prefer-spread
-  return current.registerRemotes.apply(current, args);
+  return bundleInstance.registerRemotes.apply(bundleInstance, args);
 }
 
 export function registerPlugins(
   ...args: Parameters<ModuleFederation['registerPlugins']>
 ): ReturnType<ModuleFederation['registerRemotes']> {
-  assert(current, RUNTIME_009, runtimeDescMap);
+  assert(bundleInstance, RUNTIME_009, runtimeDescMap);
   // eslint-disable-next-line prefer-spread
-  return current.registerPlugins.apply(current, args);
+  return bundleInstance.registerPlugins.apply(bundleInstance, args);
 }
 
 export function getInstance(): ModuleFederation | null;
@@ -97,7 +99,7 @@ export function getInstance(
 ): ModuleFederation | null;
 export function getInstance(finder?: (instance: ModuleFederation) => boolean) {
   if (!finder) {
-    return current;
+    return bundleInstance;
   }
 
   return CurrentGlobal.__FEDERATION__.__INSTANCES__.find(finder) || null;
@@ -106,9 +108,9 @@ export function getInstance(finder?: (instance: ModuleFederation) => boolean) {
 export function registerShared(
   ...args: Parameters<ModuleFederation['registerShared']>
 ): ReturnType<ModuleFederation['registerShared']> {
-  assert(current, RUNTIME_009, runtimeDescMap);
+  assert(bundleInstance, RUNTIME_009, runtimeDescMap);
   // eslint-disable-next-line prefer-spread
-  return current.registerShared.apply(current, args);
+  return bundleInstance.registerShared.apply(bundleInstance, args);
 }
 
 // Inject for debug

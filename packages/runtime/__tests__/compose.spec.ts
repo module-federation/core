@@ -6,7 +6,6 @@ import {
 import { init as composeInit } from '../src/compose';
 import { init } from '../src/index';
 
-// An instance with the same name that another bundle on the page registered first.
 function registerForeignInstance(name: string) {
   const foreign = new FederationKernel({ name });
   CurrentGlobal.__FEDERATION__.__INSTANCES__.unshift(foreign);
