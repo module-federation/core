@@ -8,3 +8,11 @@ export { UNKNOWN_MODULE_NAME } from './constant';
 
 export * as utils from './utils';
 export * as types from './types';
+
+export { planComposition, ADAPTERS } from './composition/plan';
+export type {
+  AdapterName,
+  CompositionPlan,
+  CompositionPlatform,
+  Participant,
+} from './composition/plan';
