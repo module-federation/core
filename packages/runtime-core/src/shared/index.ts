@@ -20,7 +20,7 @@ import {
   SharedLoadContext,
   SharedLoadTrigger,
 } from '../type';
-import { ModuleFederation } from '../core';
+import type { ModuleFederation } from '../index';
 import {
   PluginSystem,
   AsyncHook,
@@ -220,6 +220,10 @@ export class SharedHandler {
   }
 
   // register shared in shareScopeMap
+  formatShareInfos(globalOptions: Options, userOptions: UserOptions) {
+    return formatShareConfigs(globalOptions, userOptions).allShareInfos;
+  }
+
   registerShared(globalOptions: Options, userOptions: UserOptions) {
     const { newShareInfos, allShareInfos } = formatShareConfigs(
       globalOptions,

@@ -1,3 +1,4 @@
+import type { RemoteHandlerContract } from '../type';
 import { PluginSystem } from '../utils/hooks';
 
 const REMOTE_DISABLED_MESSAGE =
@@ -9,8 +10,12 @@ export class UnavailableRemoteModule {
   }
 }
 
-export class DisabledRemoteHandler {
-  hooks = new PluginSystem({});
+export class DisabledRemoteHandler implements RemoteHandlerContract {
+  // No lifecycle: plugins that tap remote hooks register nothing.
+  hooks: RemoteHandlerContract['hooks'] = new PluginSystem(
+    {} as RemoteHandlerContract['hooks']['lifecycle'],
+  );
+  idToRemoteMap = {};
 
   formatAndRegisterRemote() {
     return [];

@@ -33,6 +33,16 @@
         "default": "./dist/index.cjs"
       }
     },
+    "./compose": {
+      "import": {
+        "types": "./dist/compose.d.ts",
+        "default": "./dist/compose.js"
+      },
+      "require": {
+        "types": "./dist/compose.d.ts",
+        "default": "./dist/compose.cjs"
+      }
+    },
     "./helpers": {
       "import": {
         "types": "./dist/helpers.d.ts",
@@ -70,6 +80,9 @@
     "*": {
       ".": [
         "./dist/index.d.ts"
+      ],
+      "compose": [
+        "./dist/compose.d.ts"
       ],
       "helpers": [
         "./dist/helpers.d.ts"

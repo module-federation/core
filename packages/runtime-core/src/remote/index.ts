@@ -1,10 +1,9 @@
 import {
-  isBrowserEnvValue,
   warn,
   composeKeyWithSeparator,
   ModuleInfo,
   GlobalModuleInfo,
-} from '@module-federation/sdk';
+} from '@module-federation/sdk/core';
 import { RUNTIME_004, runtimeDescMap } from '@module-federation/error-codes';
 import {
   Global,
@@ -24,7 +23,7 @@ import {
   RemoteEntryExports,
   CallFrom,
 } from '../type';
-import { ModuleFederation } from '../core';
+import type { ModuleFederation } from '../index';
 import {
   PluginSystem,
   AsyncHook,
@@ -664,7 +663,7 @@ export class RemoteHandler {
       // Set the remote entry to a complete path
       if ('entry' in remote) {
         if (
-          isBrowserEnvValue &&
+          host.platform.isBrowser() &&
           typeof window !== 'undefined' &&
           !remote.entry.startsWith('http')
         ) {

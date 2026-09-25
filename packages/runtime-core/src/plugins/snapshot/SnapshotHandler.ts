@@ -4,8 +4,7 @@ import {
   ModuleInfo,
   generateSnapshotFromManifest,
   isManifestProvider,
-  isBrowserEnvValue,
-} from '@module-federation/sdk';
+} from '@module-federation/sdk/core';
 import {
   RUNTIME_003,
   RUNTIME_007,
@@ -28,7 +27,7 @@ import {
   getInfoWithoutType,
 } from '../../global';
 import { PluginSystem, AsyncHook, AsyncWaterfallHook } from '../../utils/hooks';
-import { ModuleFederation } from '../../core';
+import type { ModuleFederation } from '../../index';
 
 export function getGlobalRemoteInfo(
   moduleInfo: Remote,
@@ -226,7 +225,7 @@ export class SnapshotHandler {
     // global snapshot includes manifest or module info includes manifest
     if (globalRemoteSnapshot) {
       if (isManifestProvider(globalRemoteSnapshot)) {
-        const remoteEntry = isBrowserEnvValue
+        const remoteEntry = this.HostInstance.platform.isBrowser()
           ? globalRemoteSnapshot.remoteEntry
           : globalRemoteSnapshot.ssrRemoteEntry ||
             globalRemoteSnapshot.remoteEntry ||

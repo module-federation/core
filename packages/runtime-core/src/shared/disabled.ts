@@ -1,12 +1,17 @@
 import type { LoadRemoteMatch } from '../remote';
-import type { ShareScopeMap } from '../type';
+import type { ShareScopeMap, SharedHandlerContract } from '../type';
 import { AsyncWaterfallHook, PluginSystem } from '../utils/hooks';
 
-export class DisabledSharedHandler {
+export class DisabledSharedHandler implements SharedHandlerContract {
   shareScopeMap: ShareScopeMap = {};
-  hooks = new PluginSystem({
+  // Only afterResolve: RemoteHandler emits it on every loadRemote.
+  hooks: SharedHandlerContract['hooks'] = new PluginSystem({
     afterResolve: new AsyncWaterfallHook<LoadRemoteMatch>('afterResolve'),
-  });
+  } as SharedHandlerContract['hooks']['lifecycle']);
+
+  formatShareInfos() {
+    return {};
+  }
 
   registerShared() {
     return {
