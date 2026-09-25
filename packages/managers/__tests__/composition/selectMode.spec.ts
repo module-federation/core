@@ -250,9 +250,12 @@ describe('selectMode', () => {
       ['a scope key', { '@module-federation': '/fork' }],
       ['a false value', { '@module-federation/sdk': false }],
       ['the array form', [{ name: RUNTIME, alias: '/fork/runtime' }]],
-    ])('selects legacy on %s', async (_, alias) => {
-      expect(await legacyReason({ alias })).toMatch(/is aliased/);
-    });
+    ] as [string, ModeInputs['alias']][])(
+      'selects legacy on %s',
+      async (_, alias) => {
+        expect(await legacyReason({ alias })).toMatch(/is aliased/);
+      },
+    );
 
     it('ignores aliases whose value is exempt', async () => {
       expect(
