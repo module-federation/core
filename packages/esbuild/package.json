@@ -69,6 +69,7 @@
   "scripts": {
     "build": "rslib build",
     "lint": "ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --ignore-pattern node_modules \"**/*.ts\" \"package.json\"",
+    "test": "pnpm exec jest --config jest.config.js --passWithNoTests",
     "build-debug": "FEDERATION_DEBUG=true rslib build",
     "pre-release": "pnpm run build"
   }
