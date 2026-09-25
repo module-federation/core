@@ -17,7 +17,7 @@ import {
 } from '../type';
 import { matchRemote } from './manifest';
 import { assert } from './logger';
-import { FederationKernel } from '../core';
+import type { ModuleFederation } from '../index';
 import { getRemoteEntry, isEsmRemoteType } from './load';
 import { getPreloadedAsset, setPreloadedAsset } from '../global';
 
@@ -114,7 +114,7 @@ function preloadAssetOnce(
 }
 
 async function waitForRemoteEntryPreload(
-  host: FederationKernel,
+  host: ModuleFederation,
   remoteInfo: RemoteInfo,
   entryRemoteInfo: RemoteInfo,
   context: ResourceLoadContext,
@@ -157,7 +157,7 @@ function waitForLinkPreload({
   context,
   needDeleteLink,
 }: {
-  host: FederationKernel;
+  host: ModuleFederation;
   remoteInfo: RemoteInfo;
   url: string;
   attrs: Record<string, string>;
@@ -212,7 +212,7 @@ function waitForScriptPreload({
   attrs,
   context,
 }: {
-  host: FederationKernel;
+  host: ModuleFederation;
   remoteInfo: RemoteInfo;
   url: string;
   attrs: Record<string, string>;
@@ -271,7 +271,7 @@ function createResourceContext(
 
 export function preloadAssets(
   remoteInfo: RemoteInfo,
-  host: FederationKernel,
+  host: ModuleFederation,
   assets: PreloadAssets,
   // It is used to distinguish preload from load remote parallel loading
   useLinkPreload = true,

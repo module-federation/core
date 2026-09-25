@@ -1,4 +1,4 @@
-import type { FederationKernel } from '../core';
+import type { ModuleFederation } from '../index';
 import type { RemoteHandler } from '../remote';
 import type { SharedHandler } from '../shared';
 import type { SnapshotHandler } from '../plugins/snapshot/SnapshotHandler';
@@ -40,7 +40,7 @@ export type ScriptInfo = { attrs?: Record<string, any> };
 export type LoadEntryOptions = {
   remoteInfo: RemoteInfo;
   remoteEntryExports?: RemoteEntryExports;
-  loaderHook: FederationKernel['loaderHook'];
+  loaderHook: ModuleFederation['loaderHook'];
   getEntryUrl?: (url: string) => string;
   resourceContext?: ResourceLoadContext;
 };
@@ -66,11 +66,11 @@ export interface NodePlatform extends Platform {
 }
 
 export interface SharedCapability {
-  create(host: FederationKernel): SharedHandlerContract;
+  create(host: ModuleFederation): SharedHandlerContract;
 }
 
 export interface RemoteCapability {
-  create(host: FederationKernel): {
+  create(host: ModuleFederation): {
     remote: RemoteHandlerContract;
     snapshot: SnapshotHandlerContract;
   };

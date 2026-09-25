@@ -1,4 +1,4 @@
-import { FederationKernel } from './core';
+import type { ModuleFederation } from './index';
 import {
   RemoteEntryExports,
   GlobalShareScopeMap,
@@ -18,8 +18,8 @@ export interface Federation {
   __GLOBAL_PLUGIN__: Array<ModuleFederationRuntimePlugin>;
   __DEBUG_CONSTRUCTOR_VERSION__?: string;
   moduleInfo: GlobalModuleInfo;
-  __DEBUG_CONSTRUCTOR__?: typeof FederationKernel;
-  __INSTANCES__: Array<FederationKernel>;
+  __DEBUG_CONSTRUCTOR__?: typeof ModuleFederation;
+  __INSTANCES__: Array<ModuleFederation>;
   __SHARE__: GlobalShareScopeMap;
   __MANIFEST_LOADING__: Record<string, Promise<ModuleInfo>>;
   __PRELOADED_MAP__: Map<string, boolean>;
@@ -125,19 +125,19 @@ export function resetFederationGlobalInfo(): void {
 }
 
 export function setGlobalFederationInstance(
-  FederationInstance: FederationKernel,
+  FederationInstance: ModuleFederation,
 ): void {
   CurrentGlobal.__FEDERATION__.__INSTANCES__.push(FederationInstance);
 }
 
 export function getGlobalFederationConstructor():
-  | typeof FederationKernel
+  | typeof ModuleFederation
   | undefined {
   return CurrentGlobal.__FEDERATION__.__DEBUG_CONSTRUCTOR__;
 }
 
 export function setGlobalFederationConstructor(
-  FederationConstructor: typeof FederationKernel | undefined,
+  FederationConstructor: typeof ModuleFederation | undefined,
   isDebug = isDebugMode(),
 ): void {
   if (isDebug) {
