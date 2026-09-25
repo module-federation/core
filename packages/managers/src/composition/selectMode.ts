@@ -55,21 +55,19 @@ function familyProblem({ anchor, members }: RuntimeFamily): string | undefined {
     if (member.name !== pkg) {
       return `${pkg} at ${member.root} is named ${JSON.stringify(member.name)}`;
     }
-    const exportsField = member.exports;
-    for (const key of RUNTIME_FAMILY[pkg]) {
-      // Own keys only: a "./*" pattern key does not prove the subpath exists.
-      if (
-        typeof exportsField !== 'object' ||
-        exportsField === null ||
-        !hasOwn(exportsField, key)
-      ) {
-        return `${pkg} at ${member.root} does not export "${key}"`;
-      }
-    }
+    const missing = RUNTIME_FAMILY[pkg].find(
+      (key) => !declaresExportKey(member.exports, key),
+    );
+    if (missing) return `${pkg} at ${member.root} does not export "${missing}"`;
     from = member.root;
   }
   return undefined;
 }
+
+const declaresExportKey = (exportsField: unknown, key: string) =>
+  typeof exportsField === 'object' &&
+  exportsField !== null &&
+  hasOwn(exportsField, key);
 
 function experimentProblem({ experiments }: ModeInputs): string | undefined {
   if (experiments?.externalRuntime) return 'experiments.externalRuntime is set';

@@ -52,7 +52,6 @@ export function writePackage(
 export const packageDir = (base: string, name: string) =>
   path.join(base, 'node_modules', name);
 
-// A flat node_modules with every family member exporting every required subpath.
 export function composableFamily(
   root: string,
   override: Partial<

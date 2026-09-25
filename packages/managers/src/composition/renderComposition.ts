@@ -18,7 +18,9 @@ export function renderComposition(
   });
   const capabilities = planned
     .filter(({ slot }) => slot === 'capabilities')
-    .map(({ binding, key }) => (key ? `${key}: ${binding}` : binding));
+    .map(({ binding, capabilityKey }) =>
+      capabilityKey ? `${capabilityKey}: ${binding}` : binding,
+    );
   const adapters = planned
     .filter(({ slot }) => slot === 'adapters')
     .map(({ binding }) => binding);

@@ -9,7 +9,6 @@ const family: RuntimeFamily = {
       name: CORE,
       root: '/nm/core',
       exports: {},
-      resolvedFrom: '/nm/runtime',
     },
   },
 };

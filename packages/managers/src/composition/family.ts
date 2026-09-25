@@ -1,9 +1,8 @@
 import fs from 'node:fs';
-import { createRequire } from 'node:module';
 import path from 'node:path';
+import enhancedResolve from 'enhanced-resolve';
 import { findPackageJson } from '../findPackageJson';
 
-// Walk order: each package is resolved from the real directory of the one before it.
 export const RUNTIME_FAMILY = {
   '@module-federation/runtime-tools': [],
   '@module-federation/webpack-bundler-runtime': [
@@ -26,6 +25,12 @@ export const RUNTIME_FAMILY = {
   '@module-federation/sdk': ['./core', './node'],
 } as const satisfies Record<string, readonly string[]>;
 
+const resolveAnyEntry = enhancedResolve.create.sync({
+  conditionNames: ['node', 'require', 'import', 'default'],
+  exportsFields: ['exports'],
+  mainFields: ['main', 'module'],
+});
+
 export type FamilyPackage = keyof typeof RUNTIME_FAMILY;
 export const FAMILY_PACKAGES = Object.keys(RUNTIME_FAMILY) as FamilyPackage[];
 
@@ -33,7 +38,6 @@ export interface FamilyMember {
   name: unknown;
   root: string;
   exports: unknown;
-  resolvedFrom: string;
 }
 
 export interface RuntimeFamily {
@@ -57,25 +61,24 @@ function readMember(
   request: FamilyPackage,
   from: string,
 ): FamilyMember | undefined {
-  let entry: string;
+  let entry: string | false;
   try {
-    entry = createRequire(path.join(from, 'index.js')).resolve(request);
+    entry = resolveAnyEntry(from, request);
   } catch {
     return undefined;
   }
+  if (!entry) return undefined;
   // Older packages do not export ./package.json, so walk up from the entry.
-  // A nameless package.json (dist/package.json with only "type") is skipped.
-  let file = findPackageJson(path.dirname(entry));
+  return findNamedPackage(path.dirname(entry));
+}
+
+function findNamedPackage(dir: string): FamilyMember | undefined {
+  let file = findPackageJson(dir);
   while (file) {
     const data = JSON.parse(fs.readFileSync(file, 'utf-8'));
     const root = path.dirname(file);
     if (data.name !== undefined) {
-      return {
-        name: data.name,
-        root,
-        exports: data.exports,
-        resolvedFrom: from,
-      };
+      return { name: data.name, root, exports: data.exports };
     }
     const parent = path.dirname(root);
     file = parent === root ? undefined : findPackageJson(parent);

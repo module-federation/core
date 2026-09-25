@@ -44,9 +44,6 @@ describe('resolveRuntimeFamily', () => {
     expect(family.members['@module-federation/runtime-core']!.root).toBe(
       nested,
     );
-    expect(
-      family.members['@module-federation/runtime-core']!.resolvedFrom,
-    ).toBe(runtimeDir);
   });
 
   it('records real paths through symlinked members', () => {

@@ -73,12 +73,9 @@ export interface PlannedImport {
   pkg: typeof WBR | typeof CORE;
   subpath: string;
   slot: 'createFederation' | 'adapters' | 'capabilities';
-  /** The capabilities key, when it differs from the binding. */
-  key?: string;
+  capabilityKey?: string;
 }
 
-// Bootstrap imports in their rendered order. Snapshot needs remote and remote
-// needs a platform, so a kernel without remote gets no loader at all.
 export function plannedImports(plan: CompositionPlan): PlannedImport[] {
   const imports: PlannedImport[] = [
     {
@@ -96,8 +93,18 @@ export function plannedImports(plan: CompositionPlan): PlannedImport[] {
       }),
     ),
   ];
-  const capability = (binding: string, subpath: string, key?: string) =>
-    imports.push({ binding, pkg: CORE, subpath, slot: 'capabilities', key });
+  const capability = (
+    binding: string,
+    subpath: string,
+    capabilityKey?: string,
+  ) =>
+    imports.push({
+      binding,
+      pkg: CORE,
+      subpath,
+      slot: 'capabilities',
+      capabilityKey,
+    });
   if (plan.shared) capability('shared', './shared');
   if (plan.remote) {
     capability('remote', './remote');
