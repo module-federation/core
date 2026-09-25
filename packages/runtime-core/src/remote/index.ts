@@ -10,6 +10,7 @@ import {
   getInfoWithoutType,
   globalLoading,
   CurrentGlobal,
+  getGlobalShareScope,
 } from '../global';
 import {
   Options,
@@ -45,7 +46,6 @@ import {
 import { DEFAULT_REMOTE_TYPE, DEFAULT_SCOPE } from '../constant';
 import { Module, ModuleOptions } from '../module';
 import { formatPreloadArgs, preloadAssets } from '../utils/preload';
-import { getGlobalShareScope } from '../utils/share';
 import { getGlobalRemoteInfo } from '../plugins/snapshot/SnapshotHandler';
 
 export interface LoadRemoteMatch {
