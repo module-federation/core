@@ -20,6 +20,9 @@ import EmbedFederationRuntimePlugin from './EmbedFederationRuntimePlugin';
 import FederationModulesPlugin from './FederationModulesPlugin';
 import HoistContainerReferences from '../HoistContainerReferencesPlugin';
 import FederationRuntimeDependency from './FederationRuntimeDependency';
+import FederationCompositionPlugin, {
+  composedEntryOf,
+} from './FederationCompositionPlugin';
 
 const ModuleDependency = require(
   normalizeWebpackPath('webpack/lib/dependencies/ModuleDependency'),
@@ -149,6 +152,7 @@ class FederationRuntimePlugin {
     compiler: Compiler,
     options: moduleFederationPlugin.ModuleFederationPluginOptions,
     bundlerRuntimePath?: string,
+    composition?: string,
   ) {
     // internal runtime plugin
     const runtimePlugins = options.runtimePlugins;
@@ -184,7 +188,9 @@ class FederationRuntimePlugin {
       });
     }
     const embedRuntimeLines = Template.asString([
-      `if(!${federationGlobal}.runtime || !${federationGlobal}.bundlerRuntime){`,
+      composition === undefined
+        ? `if(!${federationGlobal}.runtime || !${federationGlobal}.bundlerRuntime){`
+        : `if(!${federationGlobal}.bundlerRuntime){`,
       Template.indent([
         `var prevFederation = ${federationGlobal};`,
         `${federationGlobal} = {}`,
@@ -199,7 +205,8 @@ class FederationRuntimePlugin {
     ]);
 
     return Template.asString([
-      `import federation from '${normalizedBundlerRuntimePath}';`,
+      composition ??
+        `import federation from '${normalizedBundlerRuntimePath}';`,
       runtimePluginTemplates,
       embedRuntimeLines,
       `if(!${federationGlobal}.instance){`,
@@ -241,34 +248,35 @@ class FederationRuntimePlugin {
       return existedFilePath;
     }
 
-    let entryFilePath = '';
-    if (!this.options?.virtualRuntimeEntry) {
-      const containerName = this.options.name;
-      const hash = createHash(
-        `${containerName} ${FederationRuntimePlugin.getTemplate(
-          compiler,
-          this.options,
-          this.bundlerRuntimePath,
-        )}`,
-      );
-      entryFilePath = path.join(TEMP_DIR, `entry.${hash}.js`);
-    } else {
-      entryFilePath = `data:text/javascript;charset=utf-8;base64,${Buffer.from(
-        FederationRuntimePlugin.getTemplate(
-          compiler,
-          this.options,
-          this.bundlerRuntimePath,
-        ),
-        'utf8',
-      ).toString('base64')}`;
-    }
+    const entryFilePath = FederationRuntimePlugin.entryFilePathFor(
+      this.options,
+      FederationRuntimePlugin.getTemplate(
+        compiler,
+        this.options,
+        this.bundlerRuntimePath,
+      ),
+    );
 
     onceForCompilerEntryMap.set(compiler, entryFilePath);
 
     return entryFilePath;
   }
 
-  ensureFile(compiler: Compiler) {
+  static entryFilePathFor(
+    options: moduleFederationPlugin.ModuleFederationPluginOptions,
+    template: string,
+  ) {
+    if (options.virtualRuntimeEntry) {
+      return `data:text/javascript;charset=utf-8;base64,${Buffer.from(
+        template,
+        'utf8',
+      ).toString('base64')}`;
+    }
+    const hash = createHash(`${options.name} ${template}`);
+    return path.join(TEMP_DIR, `entry.${hash}.js`);
+  }
+
+  ensureFile(compiler: Compiler, composedSource?: string) {
     if (!this.options) {
       return;
     }
@@ -291,11 +299,12 @@ class FederationRuntimePlugin {
       mkdirpSync(fsLike as any, TEMP_DIR);
       fsLike.writeFileSync(
         filePath,
-        FederationRuntimePlugin.getTemplate(
-          compiler,
-          this.options,
-          this.bundlerRuntimePath,
-        ),
+        composedSource ??
+          FederationRuntimePlugin.getTemplate(
+            compiler,
+            this.options,
+            this.bundlerRuntimePath,
+          ),
       );
     }
   }
@@ -304,7 +313,9 @@ class FederationRuntimePlugin {
     if (this.federationRuntimeDependency)
       return this.federationRuntimeDependency;
 
-    this.ensureFile(compiler);
+    const composed = composedEntryOf(compiler);
+    if (composed) this.entryFilePath = composed.path;
+    this.ensureFile(compiler, composed?.source);
 
     this.federationRuntimeDependency = new FederationRuntimeDependency(
       this.entryFilePath,
@@ -517,6 +528,28 @@ class FederationRuntimePlugin {
 
     // dont run multiple times on every apply()
     if (!onceForCompiler.has(compiler)) {
+      const options = this.options;
+      if (options?.experiments?.composedRuntime) {
+        new FederationCompositionPlugin(
+          options,
+          (composition) => {
+            const source = FederationRuntimePlugin.getTemplate(
+              compiler,
+              options,
+              undefined,
+              composition,
+            );
+            return {
+              path: FederationRuntimePlugin.entryFilePathFor(options, source),
+              source,
+            };
+          },
+          [
+            resolvedPaths.runtimePath,
+            options.implementation || resolvedPaths.runtimeToolsPath,
+          ],
+        ).apply(compiler);
+      }
       this.prependEntry(compiler);
       this.injectRuntime(compiler);
       this.setRuntimeAlias(compiler);

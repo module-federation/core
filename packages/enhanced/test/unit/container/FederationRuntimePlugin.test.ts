@@ -197,7 +197,6 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
         compiler as Compiler,
         mockOptions,
         'bundler-runtime.js',
-        {},
       );
 
       expect(template).toContain(

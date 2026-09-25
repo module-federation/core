@@ -484,6 +484,11 @@ export interface ModuleFederationPluginOptions {
   dts?: boolean | PluginDtsOptions;
   virtualRuntimeEntry?: boolean;
   experiments?: {
+    /**
+     * Generate a federation bootstrap that imports only the runtime capabilities this build uses.
+     * Falls back to the full runtime when the installed runtime cannot be composed.
+     */
+    composedRuntime?: boolean;
     externalRuntime?: boolean;
     provideExternalRuntime?: boolean;
     asyncStartup?: boolean;
