@@ -1,6 +1,6 @@
-// Bundles independent copies of @module-federation/runtime, each composed with its own
-// capabilities and build id, and runs one scenario. Each scenario runs in its own
-// process, so every scenario starts with an empty __FEDERATION__ global.
+// Bundles independent copies of @module-federation/runtime, each with its own build-time
+// flags, and runs one scenario. Each scenario runs in its own process, so every scenario
+// starts with an empty __FEDERATION__ global.
 import { createServer } from 'node:http';
 import { createRequire } from 'node:module';
 import path from 'node:path';
@@ -13,17 +13,20 @@ const coreSrc = path.join(packageDir, 'runtime-core/src');
 
 const bundleEntry = `
 export * from ${JSON.stringify(path.join(runtimeDir, 'src/index.ts'))};
-export { init as composeInit, createInstance as composeCreateInstance } from ${JSON.stringify(path.join(runtimeDir, 'src/compose.ts'))};
+export { init as composeInit } from ${JSON.stringify(path.join(runtimeDir, 'src/compose.ts'))};
 export { remote } from ${JSON.stringify(path.join(coreSrc, 'remote/capability.ts'))};
 export { shared } from ${JSON.stringify(path.join(coreSrc, 'shared/capability.ts'))};
 export { snapshot } from ${JSON.stringify(path.join(coreSrc, 'plugins/snapshot/capability.ts'))};
 export { node } from ${JSON.stringify(path.join(coreSrc, 'platform/node.ts'))};
-export { web } from ${JSON.stringify(path.join(coreSrc, 'platform/web.ts'))};
 `;
 
-// Like the bundler's composed bootstrap, init and createInstance pass the bundle's
-// capabilities to runtime/compose, and init passes the build id as options.id.
-async function bundle({ id, without = [], target = 'node' } = {}) {
+async function bundle({
+  buildId,
+  disableRemote = false,
+  disableShared = false,
+  disableSnapshot = false,
+  target = 'node',
+}) {
   const result = await build({
     stdin: { contents: bundleEntry, resolveDir: runtimeDir, loader: 'ts' },
     bundle: true,
@@ -44,6 +47,10 @@ async function bundle({ id, without = [], target = 'node' } = {}) {
     define: {
       __VERSION__: '"test"',
       FEDERATION_DEBUG: '"true"',
+      FEDERATION_OPTIMIZE_NO_REMOTE: String(disableRemote),
+      FEDERATION_OPTIMIZE_NO_SHARED: String(disableShared),
+      FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN: String(disableSnapshot),
+      FEDERATION_BUILD_IDENTIFIER: JSON.stringify(buildId),
       ENV_TARGET: JSON.stringify(target),
     },
   });
@@ -53,26 +60,8 @@ async function bundle({ id, without = [], target = 'node' } = {}) {
     module,
     module.exports,
   );
-  const runtime = module.exports;
-  const capabilities = Object.fromEntries(
-    Object.entries({
-      remote: runtime.remote,
-      shared: runtime.shared,
-      snapshot: runtime.snapshot,
-      platform: runtime[target],
-    }).filter(([part]) => !without.includes(part)),
-  );
-  return {
-    ...runtime,
-    rootInit: runtime.init,
-    init: (options) =>
-      runtime.composeInit({ ...options, id: options.id || id }, capabilities),
-    createInstance: (options) =>
-      runtime.composeCreateInstance(options, capabilities),
-  };
+  return module.exports;
 }
-
-const noRemote = ['remote', 'snapshot'];
 
 const server = createServer((request, response) => {
   if (request.url === '/mf-manifest.json') {
@@ -138,10 +127,10 @@ const instances = (pick) => globalThis.__FEDERATION__.__INSTANCES__.map(pick);
 
 const scenarios = {
   async 'distinct-last-disabled'() {
-    const full = await bundle({ id: 'full-app@1.0.0' });
+    const full = await bundle({ buildId: 'full-app@1.0.0' });
     const disabled = await bundle({
-      id: 'disabled-app@1.0.0',
-      without: noRemote,
+      buildId: 'disabled-app@1.0.0',
+      disableRemote: true,
     });
     const disabledInstance = disabled.createInstance(options('disabled-app'));
     const created = full.createInstance(options('full-created'));
@@ -157,10 +146,10 @@ const scenarios = {
 
   async 'distinct-last-full'() {
     const disabled = await bundle({
-      id: 'disabled-app@1.0.0',
-      without: noRemote,
+      buildId: 'disabled-app@1.0.0',
+      disableRemote: true,
     });
-    const full = await bundle({ id: 'full-app@1.0.0' });
+    const full = await bundle({ buildId: 'full-app@1.0.0' });
     const initialized = full.init(options('full-app'));
     const disabledInstance = disabled.init(options('disabled-app'));
     return {
@@ -173,10 +162,10 @@ const scenarios = {
   },
 
   async 'version-isolated'() {
-    const full = await bundle({ id: 'app@2.0.0' });
+    const full = await bundle({ buildId: 'app@2.0.0' });
     const disabled = await bundle({
-      id: 'app@1.0.0',
-      without: noRemote,
+      buildId: 'app@1.0.0',
+      disableRemote: true,
     });
     const disabledInstance = disabled.init(options('app', '1.0.0'));
     const initialized = full.init(options('app', '2.0.0'));
@@ -189,8 +178,8 @@ const scenarios = {
   },
 
   async 'compatible-reuse'() {
-    const full = await bundle({ id: 'app@1.0.0' });
-    const compatible = await bundle({ id: 'app@2.0.0' });
+    const full = await bundle({ buildId: 'app@1.0.0' });
+    const compatible = await bundle({ buildId: 'app@2.0.0' });
     const first = full.init({
       ...options('app', '1.0.0'),
       shared: sharedToken,
@@ -209,19 +198,20 @@ const scenarios = {
     };
   },
 
-  'collision-different-build': () => disabledThenFull({ fullId: 'app@2.0.0' }),
+  'collision-different-build': () =>
+    disabledThenFull({ fullBuildId: 'app@2.0.0' }),
 
-  'collision-same-build': () => disabledThenFull({ fullId: 'app@1.0.0' }),
+  'collision-same-build': () => disabledThenFull({ fullBuildId: 'app@1.0.0' }),
 
   // Without snapshot plugins, only the remote capability tells the two builds apart.
   'collision-remote-without-snapshot': () =>
-    disabledThenFull({ fullId: 'app@1.0.0', without: ['snapshot'] }),
+    disabledThenFull({ fullBuildId: 'app@1.0.0', disableSnapshot: true }),
 
   async 'collision-full-first'() {
-    const full = await bundle({ id: 'app@2.0.0' });
+    const full = await bundle({ buildId: 'app@2.0.0' });
     const disabled = await bundle({
-      id: 'app@1.0.0',
-      without: noRemote,
+      buildId: 'app@1.0.0',
+      disableRemote: true,
     });
     const initialized = full.init(options('app', '1.0.0'));
     const disabledInstance = disabled.init(options('app', '1.0.0'));
@@ -234,10 +224,10 @@ const scenarios = {
   },
 
   async 'collision-shared'() {
-    const full = await bundle({ id: 'app@2.0.0' });
+    const full = await bundle({ buildId: 'app@2.0.0' });
     const disabled = await bundle({
-      id: 'app@1.0.0',
-      without: ['shared'],
+      buildId: 'app@1.0.0',
+      disableShared: true,
     });
     const sharedOptions = { ...options('app', '1.0.0'), shared: sharedToken };
     const disabledInstance = disabled.init(sharedOptions);
@@ -254,8 +244,11 @@ const scenarios = {
   },
 
   async 'collision-snapshot'() {
-    const full = await bundle({ id: 'app@2.0.0' });
-    const disabled = await bundle({ id: 'app@1.0.0', without: ['snapshot'] });
+    const full = await bundle({ buildId: 'app@2.0.0' });
+    const disabled = await bundle({
+      buildId: 'app@1.0.0',
+      disableSnapshot: true,
+    });
     const direct = disabled.init(options('app', '1.0.0'));
     const initialized = full.init({
       name: 'app',
@@ -276,8 +269,8 @@ const scenarios = {
 
   // A web-target runtime loads entries with the DOM loader, which cannot run in Node.
   async 'collision-target'() {
-    const web = await bundle({ id: 'app@1.0.0', target: 'web' });
-    const node = await bundle({ id: 'app@1.0.0' });
+    const web = await bundle({ buildId: 'app@1.0.0', target: 'web' });
+    const node = await bundle({ buildId: 'app@1.0.0' });
     const webInstance = web.init(options('app', '1.0.0'));
     const nodeInstance = node.init(options('app', '1.0.0'));
     return {
@@ -288,11 +281,17 @@ const scenarios = {
   },
 
   async 'compose-distinct-capabilities'() {
-    const full = await bundle();
-    const sharedOnly = await bundle({ without: noRemote });
+    const full = await bundle({ buildId: 'app@1.0.0' });
+    const sharedOnly = await bundle({ buildId: 'app@1.0.0' });
     const composedOptions = { ...options('app', '1.0.0'), shared: sharedToken };
-    const remoteInstance = full.init(composedOptions);
-    const sharedInstance = sharedOnly.init(composedOptions);
+    const remoteInstance = full.composeInit(
+      composedOptions,
+      fullCapabilities(full),
+    );
+    const sharedInstance = sharedOnly.composeInit(composedOptions, {
+      shared: sharedOnly.shared,
+      platform: sharedOnly.node,
+    });
     const shared = await sharedInstance.loadShare('token');
     return {
       separate: sharedInstance !== remoteInstance,
@@ -304,10 +303,13 @@ const scenarios = {
   },
 
   async 'compose-root-reuse'() {
-    const root = await bundle();
-    const composed = await bundle();
-    const rootInstance = root.rootInit(options('app', '1.0.0'));
-    const kernel = composed.init(options('app', '1.0.0'));
+    const root = await bundle({ buildId: 'app@1.0.0' });
+    const composed = await bundle({ buildId: 'app@1.0.0' });
+    const rootInstance = root.init(options('app', '1.0.0'));
+    const kernel = composed.composeInit(
+      options('app', '1.0.0'),
+      fullCapabilities(composed),
+    );
     return {
       reused: kernel === rootInstance,
       moduleValue: await value(composed),
@@ -316,8 +318,11 @@ const scenarios = {
   },
 
   async 'compose-capabilities-string'() {
-    const runtime = await bundle();
-    const kernel = runtime.init(options('app', '1.0.0'));
+    const runtime = await bundle({ buildId: 'app@1.0.0' });
+    const kernel = runtime.composeInit(
+      options('app', '1.0.0'),
+      fullCapabilities(runtime),
+    );
     return {
       root: runtime.ModuleFederation.runtimeCapabilities,
       rootInstance: new runtime.ModuleFederation({ name: 'root' })
@@ -327,9 +332,16 @@ const scenarios = {
   },
 };
 
-async function disabledThenFull({ fullId, without = [] }) {
-  const full = await bundle({ id: fullId, without });
-  const disabled = await bundle({ id: 'app@1.0.0', without: noRemote });
+const fullCapabilities = ({ shared, remote, snapshot, node }) => ({
+  shared,
+  remote,
+  snapshot,
+  platform: node,
+});
+
+async function disabledThenFull({ fullBuildId, disableSnapshot = false }) {
+  const full = await bundle({ buildId: fullBuildId, disableSnapshot });
+  const disabled = await bundle({ buildId: 'app@1.0.0', disableRemote: true });
   const disabledInstance = disabled.init(options('app', '1.0.0'));
   const initialized = full.init(options('app', '1.0.0'));
   const repeated = full.init(options('app', '1.0.0'));
