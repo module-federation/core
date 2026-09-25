@@ -21,6 +21,11 @@ import SharePlugin from '../sharing/SharePlugin';
 import ContainerPlugin from './ContainerPlugin';
 import ContainerReferencePlugin from './ContainerReferencePlugin';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
+import FederationCompositionPlugin, {
+  COVERED_BY_OPTIONS,
+  composedEntryOf,
+  optionsParticipant,
+} from './runtime/FederationCompositionPlugin';
 import { RemoteEntryPlugin } from '@module-federation/rspack/remote-entry-plugin';
 import StartupChunkDependenciesPlugin from '../startup/MfStartupChunkDependenciesPlugin';
 import FederationModulesPlugin from './runtime/FederationModulesPlugin';
@@ -155,6 +160,16 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
     // No inference for ENV_TARGET. If not manually set and valid, it's not defined.
 
     new compiler.webpack.DefinePlugin(definePluginOptions).apply(compiler);
+
+    if (experiments?.composedRuntime) {
+      // DefinePlugin reads its definitions per compilation, after the plan picked a mode.
+      compiler.hooks.compile.tap('ModuleFederationPlugin', () => {
+        if (!composedEntryOf(compiler)) return;
+        for (const key of Object.keys(definePluginOptions)) {
+          if (key !== 'ENV_TARGET') delete definePluginOptions[key];
+        }
+      });
+    }
   }
 
   /**
@@ -200,6 +215,7 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
 
     // federation hooks
     new FederationModulesPlugin().apply(compiler);
+    FederationCompositionPlugin.register(compiler, optionsParticipant(options));
 
     if (experiments?.asyncStartup) {
       new StartupChunkDependenciesPlugin({
@@ -251,15 +267,18 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
 
     compiler.hooks.afterPlugins.tap('ModuleFederationPlugin', () => {
       if (useContainerPlugin) {
-        new ContainerPlugin({
-          name,
-          library,
-          filename: options.filename,
-          runtime: options.runtime,
-          shareScope: options.shareScope,
-          exposes: options.exposes!,
-          runtimePlugins: options.runtimePlugins,
-        }).apply(compiler);
+        new ContainerPlugin(
+          {
+            name,
+            library,
+            filename: options.filename,
+            runtime: options.runtime,
+            shareScope: options.shareScope,
+            exposes: options.exposes!,
+            runtimePlugins: options.runtimePlugins,
+          },
+          COVERED_BY_OPTIONS,
+        ).apply(compiler);
       }
       if (
         remotes &&
@@ -267,20 +286,26 @@ class ModuleFederationPlugin implements WebpackPluginInstance {
           ? remotes.length > 0
           : Object.keys(remotes).length > 0)
       ) {
-        new ContainerReferencePlugin({
-          remoteType: containerRemoteType,
-          shareScope,
-          remotes,
-        }).apply(compiler);
+        new ContainerReferencePlugin(
+          {
+            remoteType: containerRemoteType,
+            shareScope,
+            remotes,
+          },
+          COVERED_BY_OPTIONS,
+        ).apply(compiler);
       }
       if (shared) {
         new TreeShakingSharedPlugin({
           mfConfig: options,
         }).apply(compiler);
-        new SharePlugin({
-          shared,
-          shareScope,
-        }).apply(compiler);
+        new SharePlugin(
+          {
+            shared,
+            shareScope,
+          },
+          COVERED_BY_OPTIONS,
+        ).apply(compiler);
       }
     });
 

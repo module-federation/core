@@ -18,6 +18,9 @@ import type {
   moduleFederationPlugin,
 } from '@module-federation/sdk';
 import FederationRuntimePlugin from './runtime/FederationRuntimePlugin';
+import FederationCompositionPlugin, {
+  type CoveredByOptions,
+} from './runtime/FederationCompositionPlugin';
 import FederationModulesPlugin from './runtime/FederationModulesPlugin';
 
 const { ExternalsPlugin } = require(
@@ -30,9 +33,13 @@ class ContainerReferencePlugin {
   private _remoteType: moduleFederationPlugin.ExternalsType;
   private _remotes: [string, moduleFederationPlugin.RemotesConfig][];
 
+  private _covered?: CoveredByOptions;
+
   constructor(
     options: containerReferencePlugin.ContainerReferencePluginOptions,
+    covered?: CoveredByOptions,
   ) {
+    this._covered = covered;
     // validate(options);
 
     this._remoteType = options.remoteType;
@@ -58,6 +65,12 @@ class ContainerReferencePlugin {
    */
   apply(compiler: Compiler): void {
     const { _remotes: remotes, _remoteType: remoteType } = this;
+    if (!this._covered) {
+      FederationCompositionPlugin.register(compiler, {
+        kind: 'needs',
+        needs: ['remotes'],
+      });
+    }
     new FederationRuntimePlugin().apply(compiler);
     /** @type {Record<string, string>} */
     const remoteExternals: Record<string, string> = {};
