@@ -383,7 +383,7 @@ export const setupScriptLoader = (): void => {
     if (!key || chunkId)
       throw new Error(`__webpack_require__.l name is required for ${url}`);
     const { instance, runtime } = __webpack_require__.federation;
-    const platform = instance.platform as
+    const platform = instance?.platform as
       | (ModuleFederation['platform'] & { loadScriptNode?: LoadScriptNode })
       | undefined;
     const info = { attrs: { globalName: key } };
