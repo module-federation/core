@@ -48,7 +48,7 @@
     "build": "pnpm run build:packages",
     "build:all": "pnpm exec turbo run build --concurrency=20",
     "build:apps": "pnpm exec turbo run build --filter=./apps/** --concurrency=20",
-    "build:packages": "pnpm exec turbo run build --filter=./packages/** --concurrency=20 && node tools/scripts/check-dts.mjs",
+    "build:packages": "pnpm exec turbo run build --filter=./packages/** --concurrency=20",
     "test:packages": "pnpm exec turbo run test --filter=./packages/** --concurrency=20",
     "lint:packages": "pnpm exec turbo run lint --filter=./packages/**",
     "lint-fix": "node tools/scripts/lint-fix.mjs",

@@ -5,6 +5,7 @@
 '@module-federation/webpack-bundler-runtime': patch
 '@module-federation/sdk': patch
 '@module-federation/error-codes': patch
+'@module-federation/inject-external-runtime-core-plugin': patch
 ---
 
 Emit CommonJS declarations as `.d.cts` and point the `require` types
