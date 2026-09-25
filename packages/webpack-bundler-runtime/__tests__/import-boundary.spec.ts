@@ -2,8 +2,15 @@ import { readdirSync, readFileSync } from 'fs';
 import { join, relative } from 'path';
 
 const srcDir = join(__dirname, '../src');
-const forbidden =
-  /^import(?!\s+type\b)[^;]*?from\s+'@module-federation\/(runtime|runtime-core|runtime\/helpers)'/gm;
+const target = `['"]@module-federation/(?:runtime|runtime-core|runtime/helpers)['"]`;
+const forbidden = new RegExp(
+  [
+    `^\\s*(?:import|export)(?!\\s+type\\b)[^;]*?\\bfrom\\s*${target}`,
+    `^\\s*import\\s*${target}`,
+    `\\b(?:require|import)\\(\\s*${target}\\s*\\)`,
+  ].join('|'),
+  'gm',
+);
 
 function sourceFiles(dir: string): string[] {
   return readdirSync(dir, { withFileTypes: true }).flatMap((entry) =>

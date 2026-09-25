@@ -1,15 +1,15 @@
 import type { RemoteCapability, RemoteHandlerContract } from '../type';
-import { PluginSystem } from '../utils/hooks';
+import { AsyncHook, PluginSystem } from '../utils/hooks';
 import { DisabledSnapshotHandler } from '../plugins/snapshot/disabled';
 
 const REMOTE_DISABLED_MESSAGE =
   'Remote loading is disabled by experiments.optimization.disableRemote.';
 
 export class DisabledRemoteHandler implements RemoteHandlerContract {
-  hooks: RemoteHandlerContract['hooks'] = new PluginSystem(
-    {} as RemoteHandlerContract['hooks']['lifecycle'],
-  );
-  idToRemoteMap = {};
+  // getRemoteEntry emits loadEntry for shared fallback entries, which load without remotes.
+  hooks: RemoteHandlerContract['hooks'] = new PluginSystem({
+    loadEntry: new AsyncHook(),
+  } as RemoteHandlerContract['hooks']['lifecycle']);
 
   formatAndRegisterRemote() {
     return [];
