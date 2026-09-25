@@ -3,4 +3,4 @@
 '@module-federation/runtime-core': patch
 ---
 
-Keep each runtime's constructor and reuse only global instances with matching remote, shared, and snapshot capabilities. This prevents updated runtimes with the same identity from inheriting another build's disabled features. Older runtimes without capability metadata are not reused by updated callers; their own instance lookup remains unchanged.
+`createInstance` now constructs the runtime's own `ModuleFederation` class, not a debug constructor that another bundle set on the global. `init` reuses a global instance only when it supports the same remote loading, shared loading, snapshot plugins, and build target as the calling runtime. Updated runtimes do not reuse instances created by older runtimes.
