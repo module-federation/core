@@ -18,6 +18,7 @@ import ReactBridgePlugin from '@module-federation/bridge-react-webpack-plugin';
 import path from 'node:path';
 import fs from 'node:fs';
 import { RemoteEntryPlugin } from './RemoteEntryPlugin';
+import { LazyCompilationClientPlugin } from './LazyCompilationClientPlugin';
 import logger from './logger';
 
 type ExcludeFalse<T> = T extends undefined | false ? never : T;
@@ -29,11 +30,6 @@ type CacheGroup = CacheGroups[string];
 
 declare const __VERSION__: string;
 export const PLUGIN_NAME = 'RspackModuleFederationPlugin';
-
-// Rspack's default web client posts to a relative endpoint, which resolves
-// against the page. A remote runs on the host's page, so it hits the host.
-const RSPACK_LAZY_COMPILATION_WEB_CLIENT =
-  /^[^?]*[\\/]@rspack[\\/]core[\\/]hot[\\/]lazy-compilation-web\.js(?=\?|$)/;
 
 type ResolveFn = typeof require.resolve;
 type RuntimeEntrySpec = {
@@ -153,27 +149,6 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     new compiler.webpack.DefinePlugin(definePluginOptions).apply(compiler);
   }
 
-  // `rspack serve` and Rsbuild enable lazy compilation after plugins apply,
-  // so the option can't be patched here. Swap the client module instead.
-  // Rspack 1 ships a different client protocol, so only Rspack 2+ is patched.
-  private _patchLazyCompilationClient(compiler: Compiler): void {
-    if (!(parseInt(compiler.webpack.rspackVersion, 10) >= 2)) {
-      return;
-    }
-    const client = require.resolve('../client/lazy-compilation-web.js');
-    compiler.hooks.normalModuleFactory.tap(PLUGIN_NAME, (nmf) => {
-      if (!compiler.options.lazyCompilation) {
-        return;
-      }
-      nmf.hooks.beforeResolve.tap(PLUGIN_NAME, (resolveData) => {
-        resolveData.request = resolveData.request.replace(
-          RSPACK_LAZY_COMPILATION_WEB_CLIENT,
-          client,
-        );
-      });
-    });
-  }
-
   private _checkSingleton(compiler: Compiler): void {
     let count = 0;
     compiler.options.plugins.forEach(
@@ -211,7 +186,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     }
 
     if (hasExposes(options.exposes)) {
-      this._patchLazyCompilationClient(compiler);
+      new LazyCompilationClientPlugin().apply(compiler);
     }
 
     // must before ModuleFederationPlugin
