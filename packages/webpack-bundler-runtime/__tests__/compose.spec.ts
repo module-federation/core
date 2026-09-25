@@ -144,8 +144,10 @@ describe('createFederation', () => {
       'S',
       'init',
     ]);
-    expect(Object.keys(federation.runtime)).toEqual(['loadScriptNode']);
-    expect(federation).not.toHaveProperty('runtime.init');
+    expect(Object.keys(federation.runtime).sort()).toEqual([
+      'init',
+      'loadScriptNode',
+    ]);
   });
 
   test('init passes buildId as the default id', () => {
@@ -203,6 +205,31 @@ describe('createFederation', () => {
     federation.instance = federation.bundlerRuntime.init({
       webpackRequire: { federation },
     });
+    federation.runtime.loadScriptNode('http://localhost/chunk.js', {});
+    expect(loadScriptNode).toHaveBeenCalledWith(
+      'http://localhost/chunk.js',
+      {},
+    );
+  });
+
+  test('rspack 1.x initializes through runtime.init on the copied keys', () => {
+    const loadScriptNode = jest.fn(() => Promise.resolve());
+    const name = `host${++seq}`;
+    const composed = createFederation({
+      buildId: `${name}:1.0.0`,
+      capabilities: {
+        platform: { ...fakePlatform, loadScriptNode } as Platform,
+      },
+      adapters: [shareScope],
+    });
+    // @rspack/core 1.x moduleFederationDefaultRuntime: copy the keys, then call runtime.init.
+    const federation: any = {};
+    for (const key in composed) {
+      federation[key] = (composed as any)[key];
+    }
+    federation.initOptions = { name, remotes: [] };
+    federation.instance = federation.runtime.init(federation.initOptions);
+    expect(federation.instance.options.id).toBe(`${name}:1.0.0`);
     federation.runtime.loadScriptNode('http://localhost/chunk.js', {});
     expect(loadScriptNode).toHaveBeenCalledWith(
       'http://localhost/chunk.js',
