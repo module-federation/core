@@ -2,9 +2,13 @@ import helpersDefault, { type IGlobalUtils, type IShareUtils } from './helpers';
 import { Module as RemoteModule } from './module';
 import { UnavailableRemoteModule, disabledRemote } from './remote/disabled';
 import { disabledShared } from './shared/disabled';
-import { FederationCore, unavailablePlatform } from './core';
+import {
+  FederationCore,
+  runtimeCapabilitiesOf,
+  unavailablePlatform,
+} from './core';
 
-export { FederationKernel } from './core';
+export { FederationKernel, runtimeCapabilitiesOf } from './core';
 import { shared } from './shared';
 import { remote } from './remote';
 import { snapshot } from './plugins/snapshot';
@@ -14,6 +18,7 @@ import type { ResolvedCapabilities, UserOptions } from './type';
 declare const FEDERATION_OPTIMIZE_NO_REMOTE: boolean;
 declare const FEDERATION_OPTIMIZE_NO_SHARED: boolean;
 declare const FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN: boolean;
+declare const ENV_TARGET: 'web' | 'node';
 
 const helpers = helpersDefault;
 const Module = (
@@ -48,11 +53,17 @@ const legacyCapabilities = (): ResolvedCapabilities => ({
     FEDERATION_OPTIMIZE_NO_REMOTE &&
     typeof FEDERATION_OPTIMIZE_NO_SHARED === 'boolean' &&
     FEDERATION_OPTIMIZE_NO_SHARED
-      ? unavailablePlatform
+      ? {
+          ...unavailablePlatform,
+          target: typeof ENV_TARGET !== 'undefined' ? ENV_TARGET : 'universal',
+        }
       : universal,
 });
 
 export class ModuleFederation extends FederationCore {
+  static readonly runtimeCapabilities =
+    runtimeCapabilitiesOf(legacyCapabilities());
+
   constructor(userOptions: UserOptions) {
     super(userOptions, legacyCapabilities());
   }
