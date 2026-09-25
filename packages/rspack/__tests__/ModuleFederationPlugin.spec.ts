@@ -99,37 +99,19 @@ describe('runtime resolution compatibility', () => {
   });
 });
 
-describe('runtime capability optimization defines', () => {
-  it('keeps all runtime capabilities enabled by default', () => {
-    expect(getOptimizationDefines()).toMatchObject({
-      FEDERATION_OPTIMIZE_NO_REMOTE: false,
-      FEDERATION_OPTIMIZE_NO_SHARED: false,
-      FEDERATION_HAS_EXPOSES: false,
-    });
+describe('runtime optimization defines', () => {
+  it('defines only ENV_TARGET, from experiments.optimization.target', () => {
+    expect(
+      getOptimizationDefines(
+        { target: 'web', disableRemote: true, disableShared: true },
+        { './Button': './src/Button' },
+      ),
+    ).toEqual({ ENV_TARGET: '"web"' });
   });
 
-  it('derives expose capability from the container configuration', () => {
-    expect(getOptimizationDefines(undefined, {})).toMatchObject({
-      FEDERATION_HAS_EXPOSES: false,
-    });
+  it('defines nothing without a target', () => {
     expect(
-      getOptimizationDefines(undefined, {
-        './Button': './src/Button',
-      }),
-    ).toMatchObject({
-      FEDERATION_HAS_EXPOSES: true,
-    });
-  });
-
-  it('defines each disabled runtime capability independently', () => {
-    expect(
-      getOptimizationDefines({
-        disableRemote: true,
-        disableShared: true,
-      }),
-    ).toMatchObject({
-      FEDERATION_OPTIMIZE_NO_REMOTE: true,
-      FEDERATION_OPTIMIZE_NO_SHARED: true,
-    });
+      getOptimizationDefines({ disableSnapshot: true }, { './Button': './B' }),
+    ).toEqual({});
   });
 });

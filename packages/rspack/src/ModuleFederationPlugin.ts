@@ -7,12 +7,11 @@ import type {
 } from '@rspack/core';
 import {
   bindLoggerToCompiler,
-  composeKeyWithSeparator,
   moduleFederationPlugin,
 } from '@module-federation/sdk';
 
 import { StatsPlugin } from '@module-federation/manifest';
-import { ContainerManager, utils } from '@module-federation/managers';
+import { ContainerManager } from '@module-federation/managers';
 import { DtsPlugin } from '@module-federation/dts-plugin';
 import ReactBridgePlugin from '@module-federation/bridge-react-webpack-plugin';
 import path from 'node:path';
@@ -36,17 +35,6 @@ type RuntimeEntrySpec = {
   esm: string;
   cjs: string;
 };
-
-function hasExposes(
-  exposes: moduleFederationPlugin.ModuleFederationPluginOptions['exposes'],
-): boolean {
-  return Boolean(
-    exposes &&
-    (Array.isArray(exposes)
-      ? exposes.length > 0
-      : Object.keys(exposes).length > 0),
-  );
-}
 
 function resolveRuntimeEntry(
   spec: RuntimeEntrySpec,
@@ -110,22 +98,8 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
   }
 
   private _patchBundlerConfig(compiler: Compiler): void {
-    const { name, experiments, exposes } = this._options;
+    const { experiments } = this._options;
     const definePluginOptions: Record<string, string | boolean> = {};
-    if (name) {
-      definePluginOptions['FEDERATION_BUILD_IDENTIFIER'] = JSON.stringify(
-        composeKeyWithSeparator(name, utils.getBuildVersion()),
-      );
-    }
-    // Add FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN
-    const disableSnapshot = experiments?.optimization?.disableSnapshot ?? false;
-    definePluginOptions['FEDERATION_OPTIMIZE_NO_SNAPSHOT_PLUGIN'] =
-      disableSnapshot;
-    definePluginOptions['FEDERATION_OPTIMIZE_NO_REMOTE'] =
-      experiments?.optimization?.disableRemote ?? false;
-    definePluginOptions['FEDERATION_OPTIMIZE_NO_SHARED'] =
-      experiments?.optimization?.disableShared ?? false;
-    definePluginOptions['FEDERATION_HAS_EXPOSES'] = hasExposes(exposes);
 
     // Determine ENV_TARGET: only if manually specified in experiments.optimization.target
     if (
