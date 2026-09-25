@@ -1,5 +1,6 @@
-import type { RemoteHandlerContract } from '../type';
+import type { RemoteCapability, RemoteHandlerContract } from '../type';
 import { PluginSystem } from '../utils/hooks';
+import { DisabledSnapshotHandler } from '../plugins/snapshot/disabled';
 
 const REMOTE_DISABLED_MESSAGE =
   'Remote loading is disabled by experiments.optimization.disableRemote.';
@@ -11,7 +12,6 @@ export class UnavailableRemoteModule {
 }
 
 export class DisabledRemoteHandler implements RemoteHandlerContract {
-  // No lifecycle: plugins that tap remote hooks register nothing.
   hooks: RemoteHandlerContract['hooks'] = new PluginSystem(
     {} as RemoteHandlerContract['hooks']['lifecycle'],
   );
@@ -41,3 +41,10 @@ export class DisabledRemoteHandler implements RemoteHandlerContract {
     throw new Error(REMOTE_DISABLED_MESSAGE);
   }
 }
+
+export const disabledRemote: RemoteCapability = {
+  create: () => ({
+    remote: new DisabledRemoteHandler(),
+    snapshot: new DisabledSnapshotHandler(),
+  }),
+};
