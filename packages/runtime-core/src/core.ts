@@ -86,8 +86,10 @@ const RUNTIME_CAPABILITIES = [
   .join(',');
 
 export class ModuleFederation {
-  /** @internal */
-  static readonly runtimeCapabilities = RUNTIME_CAPABILITIES;
+  /** @internal A getter, because a static field compiles to a static block that Metro's Babel rejects. */
+  static get runtimeCapabilities(): string {
+    return RUNTIME_CAPABILITIES;
+  }
   /** @internal Read by other bundles, so it lives on the instance. */
   readonly runtimeCapabilities = RUNTIME_CAPABILITIES;
 
