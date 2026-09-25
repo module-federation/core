@@ -292,6 +292,19 @@ describe('shouldKeepBundledForFederation', () => {
     ).toBe(true);
   });
 
+  it('keeps the absolute bundler runtime path that rspack aliases to the composed bootstrap bundled', () => {
+    expect(
+      shouldKeepBundledForFederation(
+        '/app/node_modules/@module-federation/webpack-bundler-runtime/dist/index.cjs',
+      ),
+    ).toBe(true);
+    expect(
+      shouldKeepBundledForFederation(
+        'C:\\app\\node_modules\\@module-federation\\webpack-bundler-runtime\\dist\\index.cjs',
+      ),
+    ).toBe(true);
+  });
+
   it('keeps webpack container reference requests bundled', () => {
     expect(
       shouldKeepBundledForFederation(
