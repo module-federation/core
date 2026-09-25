@@ -165,7 +165,7 @@
     ]
   },
   "dependencies": {
-    "adm-zip": "0.6.0",
+    "adm-zip": "^0.6.1",
     "ansi-colors": "4.1.3",
     "antd": "5.19.1",
     "axios": "1.18.0",
@@ -217,7 +217,7 @@
     "@swc/jest": "0.2.36",
     "@tailwindcss/forms": "0.5.9",
     "@testing-library/react": "16.1.0",
-    "@types/adm-zip": "0.5.5",
+    "@types/adm-zip": "^0.5.5",
     "@types/chrome": "0.0.277",
     "@types/download": "8.0.5",
     "@types/eslint": "~9.6.1",
