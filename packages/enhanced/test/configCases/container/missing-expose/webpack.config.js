@@ -1,6 +1,7 @@
 const { ContainerPlugin } = require('../../../../dist/src');
 
 module.exports = {
+  optimization: { emitOnErrors: true },
   plugins: [
     new ContainerPlugin({
       name: 'container',
@@ -9,7 +10,9 @@ module.exports = {
         type: 'commonjs-module',
       },
       exposes: {
-        './Missing': './does-not-exist.js',
+        './Missing': {
+          import: ['./test', './does-not-exist.js'],
+        },
         './test': './test',
       },
     }),

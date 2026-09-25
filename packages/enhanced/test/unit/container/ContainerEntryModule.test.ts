@@ -2,8 +2,6 @@
  * @rstest-environment node
  */
 
-import fs from 'node:fs';
-import { infrastructureLogger } from '@module-federation/sdk';
 import type {
   ObjectDeserializerContext,
   ObjectSerializerContext,
@@ -52,10 +50,6 @@ describe('ContainerEntryModule', () => {
       write: rs.fn(),
       read: rs.fn(),
     };
-  });
-
-  afterEach(() => {
-    rs.restoreAllMocks();
   });
 
   describe('constructor', () => {
@@ -417,80 +411,6 @@ describe('ContainerEntryModule', () => {
   });
 
   describe('codeGeneration', () => {
-    it('reports only missing imports while preserving the full runtime request', () => {
-      const module = new ContainerEntryModule(
-        'container',
-        [
-          [
-            './Mixed',
-            { import: ['./found.js', './does-not-exist.js'], name: '' },
-          ],
-          ['./Valid', { import: ['./valid.js'], name: '' }],
-        ],
-        'default',
-        '',
-      );
-      module.build({} as any, mockCompilation, {} as any, {} as any, rs.fn());
-      const writeFile = rs
-        .spyOn(fs, 'writeFileSync')
-        .mockImplementation(() => {});
-      const logError = rs
-        .spyOn(infrastructureLogger, 'error')
-        .mockImplementation(() => {});
-      const throwMissingModuleErrorBlock = rs
-        .fn()
-        .mockReturnValue('throw missing module;');
-      const result = module.codeGeneration({
-        moduleGraph: {
-          getModule: rs
-            .fn()
-            .mockReturnValueOnce({})
-            .mockReturnValueOnce(undefined)
-            .mockReturnValueOnce({}),
-        },
-        chunkGraph: {},
-        runtimeTemplate: {
-          throwMissingModuleErrorBlock,
-          basicFunction: (args: string, body: string) =>
-            `function(${args}) { ${body} }`,
-          blockPromise: () => 'Promise.resolve()',
-          returningFunction: (body: string) => `function() { ${body} }`,
-          moduleRaw: () => 'valid module',
-        },
-      });
-
-      expect(logError).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to find expose module. #BUILD-001'),
-      );
-      expect(logError).toHaveBeenCalledTimes(1);
-      expect(logError.mock.calls[0][0]).toContain('./does-not-exist.js');
-      expect(logError.mock.calls[0][0]).toContain(
-        'troubleshooting/build#build-001',
-      );
-      const diagnosticWrite = writeFile.mock.calls.find(([file]) =>
-        String(file).endsWith('.mf/diagnostics/latest.json'),
-      );
-      expect(diagnosticWrite).toBeDefined();
-      const diagnostic = JSON.parse(String(diagnosticWrite![1]));
-      expect(diagnostic.bundler.name).toBe('webpack');
-      expect(diagnostic.mfConfig).toEqual({
-        name: 'container',
-        exposes: {
-          './Mixed': './does-not-exist.js',
-          './Valid': './valid.js',
-        },
-      });
-      expect(diagnostic.latestErrorEvent.args.exposeModules).toEqual([
-        { name: './Mixed', request: './does-not-exist.js' },
-      ]);
-      expect(throwMissingModuleErrorBlock).toHaveBeenCalledWith({
-        request: './found.js, ./does-not-exist.js',
-      });
-      expect(result.sources.get('javascript').source()).toContain(
-        'throw missing module;',
-      );
-    });
-
     it('should generate code with correct requirements', () => {
       const name = 'test-container';
       const shareScope = 'default';
