@@ -46,6 +46,7 @@ function config(
       alias: { 'shared-lib': path.join(FIXTURE, 'shared-lib'), ...alias },
     },
     optimization: { minimize: false },
+    performance: false,
     infrastructureLogging: { level: 'error' },
     cache: cacheDir
       ? {
