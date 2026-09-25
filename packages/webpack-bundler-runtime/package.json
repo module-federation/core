@@ -28,6 +28,7 @@
   "dependencies": {
     "@module-federation/error-codes": "workspace:*",
     "@module-federation/runtime": "workspace:*",
+    "@module-federation/runtime-core": "workspace:*",
     "@module-federation/sdk": "workspace:*"
   },
   "exports": {
@@ -39,6 +40,56 @@
       "require": {
         "types": "./dist/index.d.ts",
         "default": "./dist/index.cjs"
+      }
+    },
+    "./compose": {
+      "import": {
+        "types": "./dist/compose.d.ts",
+        "default": "./dist/compose.js"
+      },
+      "require": {
+        "types": "./dist/compose.d.ts",
+        "default": "./dist/compose.cjs"
+      }
+    },
+    "./adapters/remotes": {
+      "import": {
+        "types": "./dist/adapters/remotes.d.ts",
+        "default": "./dist/adapters/remotes.js"
+      },
+      "require": {
+        "types": "./dist/adapters/remotes.d.ts",
+        "default": "./dist/adapters/remotes.cjs"
+      }
+    },
+    "./adapters/consumes": {
+      "import": {
+        "types": "./dist/adapters/consumes.d.ts",
+        "default": "./dist/adapters/consumes.js"
+      },
+      "require": {
+        "types": "./dist/adapters/consumes.d.ts",
+        "default": "./dist/adapters/consumes.cjs"
+      }
+    },
+    "./adapters/share-scope": {
+      "import": {
+        "types": "./dist/adapters/share-scope.d.ts",
+        "default": "./dist/adapters/share-scope.js"
+      },
+      "require": {
+        "types": "./dist/adapters/share-scope.d.ts",
+        "default": "./dist/adapters/share-scope.cjs"
+      }
+    },
+    "./adapters/container": {
+      "import": {
+        "types": "./dist/adapters/container.d.ts",
+        "default": "./dist/adapters/container.js"
+      },
+      "require": {
+        "types": "./dist/adapters/container.d.ts",
+        "default": "./dist/adapters/container.cjs"
       }
     },
     "./constant": {
@@ -58,6 +109,21 @@
     "*": {
       ".": [
         "./dist/index.d.ts"
+      ],
+      "compose": [
+        "./dist/compose.d.ts"
+      ],
+      "adapters/remotes": [
+        "./dist/adapters/remotes.d.ts"
+      ],
+      "adapters/consumes": [
+        "./dist/adapters/consumes.d.ts"
+      ],
+      "adapters/share-scope": [
+        "./dist/adapters/share-scope.d.ts"
+      ],
+      "adapters/container": [
+        "./dist/adapters/container.d.ts"
       ],
       "constant": [
         "./dist/constant.d.ts"
