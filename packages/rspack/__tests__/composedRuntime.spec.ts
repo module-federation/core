@@ -107,7 +107,9 @@ function expectComposed(b: Build, name: string) {
     expect.stringMatching(new RegExp(`/${name}\\.[0-9a-f]{12}\\.mjs$`)),
   ]);
   expect(b.modules.filter((m) => LEGACY_ENTRY.test(m))).toEqual([]);
-  expect(b.warnings.filter((w) => w.includes('composedRuntime'))).toEqual([]);
+  expect(
+    b.warnings.filter((w) => w.includes('full federation runtime')),
+  ).toEqual([]);
 }
 
 function serve(root: string): Promise<http.Server> {
@@ -249,15 +251,26 @@ describe('experiments.composedRuntime', () => {
     );
     expect(b.warnings).toEqual([
       expect.stringContaining(
-        'this @rspack/core has no experiments.VirtualModulesPlugin',
+        'This build uses the full federation runtime because this @rspack/core has no experiments.VirtualModulesPlugin',
       ),
     ]);
   });
 
-  it('keeps the full runtime without the experiment', async () => {
+  it('composes by default', async () => {
     const [b] = await harness([{ out: 'off/host', target: 'web', mf: host() }]);
+    expectComposed(b, 'host');
+    expect(b.warnings).toEqual([]);
+  });
+
+  it('keeps the full runtime, without a warning, for experiments.externalRuntime', async () => {
+    const [b] = await harness([
+      {
+        out: 'external/host',
+        target: 'web',
+        mf: host({ experiments: { externalRuntime: true } }),
+      },
+    ]);
     expect(composedEntries(b)).toEqual([]);
-    expect(mainCode('off/host')).not.toContain('FEDERATION_BUILD_IDENTIFIER');
     expect(b.modules.some((m) => LEGACY_ENTRY.test(m))).toBe(true);
     expect(b.warnings).toEqual([]);
   });

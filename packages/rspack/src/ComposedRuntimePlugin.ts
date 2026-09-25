@@ -10,6 +10,7 @@ import {
   type AdapterName,
   type Participant,
   type RuntimeFamily,
+  type RuntimeMode,
 } from '@module-federation/managers';
 import type { moduleFederationPlugin } from '@module-federation/sdk';
 
@@ -52,13 +53,12 @@ export class ComposedRuntimePlugin {
       runtime: string;
     },
     private readonly _buildId: string,
-    private readonly _defines: Record<string, string | boolean>,
   ) {}
 
   apply(compiler: Compiler): void {
     let composition: Composition | undefined;
-    let deciding: Promise<string | undefined> | undefined;
-    let legacyReason: string | undefined;
+    let deciding: Promise<RuntimeMode> | undefined;
+    let mode: RuntimeMode | undefined;
 
     // VirtualModulesPlugin reads its modules in afterEnvironment.
     compiler.hooks.environment.tap(PLUGIN_NAME, () => {
@@ -67,21 +67,35 @@ export class ComposedRuntimePlugin {
     // rspack reads resolve.alias and its builtin plugins when it creates its native
     // compiler, after beforeRun and watchRun.
     const decide = async () => {
-      deciding ??= this._decide(compiler, composition!).then((reason) => {
-        this._applyDefines(compiler, reason === undefined);
-        return reason;
-      });
-      legacyReason = await deciding;
+      deciding ??= this._decide(compiler, composition!);
+      mode = await deciding;
     };
     compiler.hooks.beforeRun.tapPromise(PLUGIN_NAME, decide);
     compiler.hooks.watchRun.tapPromise(PLUGIN_NAME, decide);
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation) => {
-      if (legacyReason === undefined) return;
-      compilation.warnings.push(
-        new compiler.rspack.WebpackError(
-          `experiments.composedRuntime is set, but this build uses the full federation runtime because ${legacyReason}.`,
-        ),
-      );
+      const { WebpackError } = compiler.rspack;
+      if (mode?.mode === 'unsupported') {
+        compilation.errors.push(
+          new WebpackError(
+            `The federation runtime cannot be composed: ${mode.reason}.`,
+          ),
+        );
+        return;
+      }
+      const { externalRuntime, provideExternalRuntime } =
+        this._options.experiments ?? {};
+      // An externalized runtime is the full runtime by request; the other reasons are worth a warning.
+      if (
+        mode?.mode === 'legacy' &&
+        !externalRuntime &&
+        !provideExternalRuntime
+      ) {
+        compilation.warnings.push(
+          new WebpackError(
+            `This build uses the full federation runtime because ${mode.reason}.`,
+          ),
+        );
+      }
     });
   }
 
@@ -120,7 +134,7 @@ export class ComposedRuntimePlugin {
   private async _decide(
     compiler: Compiler,
     { family, bootstrapPath, renderError }: Composition,
-  ): Promise<string | undefined> {
+  ): Promise<RuntimeMode> {
     const { resolve } = compiler.options;
     const alias = (resolve.alias ?? {}) as Record<string, unknown>;
     const mode = await selectMode(family, {
@@ -133,10 +147,13 @@ export class ComposedRuntimePlugin {
         compiler.rspack.experiments.VirtualModulesPlugin,
       ),
     });
-    if (mode.mode === 'legacy') return mode.reason;
+    if (mode.mode !== 'composed') return mode;
     if (!bootstrapPath) throw renderError;
     if (alias[this._native.bundlerRuntime] !== undefined) {
-      return `resolve.alias already maps ${this._native.bundlerRuntime}`;
+      return {
+        mode: 'legacy',
+        reason: `resolve.alias already maps ${this._native.bundlerRuntime}`,
+      };
     }
     const runtime = alias[RUNTIME];
     resolve.alias = {
@@ -146,15 +163,7 @@ export class ComposedRuntimePlugin {
         [RUNTIME]: resolveRuntimeEsm(family),
       }),
     } as typeof resolve.alias;
-    return undefined;
-  }
-
-  private _applyDefines(compiler: Compiler, composed: boolean) {
-    const { DefinePlugin } = compiler.rspack;
-    if (!composed) return new DefinePlugin(this._defines).apply(compiler);
-    const { ENV_TARGET } = this._defines;
-    if (ENV_TARGET !== undefined)
-      new DefinePlugin({ ENV_TARGET }).apply(compiler);
+    return mode;
   }
 }
 

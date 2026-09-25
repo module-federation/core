@@ -100,9 +100,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     this._options = options;
   }
 
-  private _patchBundlerConfig(
-    compiler: Compiler,
-  ): Record<string, string | boolean> {
+  private _patchBundlerConfig(compiler: Compiler): void {
     const { experiments } = this._options;
     const definePluginOptions: Record<string, string | boolean> = {};
 
@@ -124,10 +122,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
     }
     // No inference for ENV_TARGET. If not manually set and valid, it's not defined.
 
-    if (!experiments?.composedRuntime) {
-      new compiler.webpack.DefinePlugin(definePluginOptions).apply(compiler);
-    }
-    return definePluginOptions;
+    new compiler.webpack.DefinePlugin(definePluginOptions).apply(compiler);
   }
 
   private _checkSingleton(compiler: Compiler): void {
@@ -158,7 +153,7 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       throw new Error('[ ModuleFederationPlugin ]: name is required');
     }
     this._checkSingleton(compiler);
-    const defines = this._patchBundlerConfig(compiler);
+    this._patchBundlerConfig(compiler);
     const containerManager = new ContainerManager();
     containerManager.init(options);
 
@@ -218,24 +213,21 @@ export class ModuleFederationPlugin implements RspackPluginInstance {
       options as unknown as ModuleFederationPluginOptions,
     ).apply(compiler);
 
-    if (options.experiments?.composedRuntime) {
-      new ComposedRuntimePlugin(
-        options,
-        {
-          runtimeTools: implementationPath,
-          // The same resolutions as rspack's native plugin, which imports bundlerRuntime.
-          bundlerRuntime: require.resolve(
-            '@module-federation/webpack-bundler-runtime',
-            { paths: [implementationPath] },
-          ),
-          runtime: require.resolve('@module-federation/runtime', {
-            paths: [implementationPath],
-          }),
-        },
-        composeKeyWithSeparator(options.name, utils.getBuildVersion()),
-        defines,
-      ).apply(compiler);
-    }
+    new ComposedRuntimePlugin(
+      options,
+      {
+        runtimeTools: implementationPath,
+        // The same resolutions as rspack's native plugin, which imports bundlerRuntime.
+        bundlerRuntime: require.resolve(
+          '@module-federation/webpack-bundler-runtime',
+          { paths: [implementationPath] },
+        ),
+        runtime: require.resolve('@module-federation/runtime', {
+          paths: [implementationPath],
+        }),
+      },
+      composeKeyWithSeparator(options.name, utils.getBuildVersion()),
+    ).apply(compiler);
 
     if (!disableManifest) {
       this._statsPlugin = new StatsPlugin(options, {
