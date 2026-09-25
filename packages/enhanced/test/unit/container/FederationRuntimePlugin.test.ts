@@ -3,17 +3,11 @@ import FederationRuntimePlugin, {
 } from '../../../src/lib/container/runtime/FederationRuntimePlugin';
 import type { Compiler } from 'webpack';
 import { rs } from '@rstest/core';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
 
 const webpack = require('webpack') as typeof import('webpack');
-
-function importSources(template: string): string[] {
-  const { ast } = webpack.javascript.JavascriptParser._parse(template, {
-    sourceType: 'module',
-  });
-  return ast.body
-    .filter((node) => node.type === 'ImportDeclaration')
-    .map((node) => String(node.source.value));
-}
 
 // Use rs.hoisted() to create mock functions that are hoisted along with rs.mock()
 const mocks = rs.hoisted(() => ({
@@ -145,7 +139,7 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
         {},
       );
 
-      expect(importSources(template)).toContain('/absolute/path/plugin1.js');
+      expect(template).toContain('from "/absolute/path/plugin1.js";');
     });
 
     it('resolves relative paths in runtimePlugins against compiler.context, not process.cwd()', () => {
@@ -161,9 +155,24 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
         {},
       );
 
-      expect(importSources(template)).toContain(
-        '/test/path/relative/path/plugin1.js',
+      expect(template).toContain('from "/test/path/relative/path/plugin1.js";');
+    });
+
+    it('falls back to a path relative to process.cwd() when only that one exists', () => {
+      const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'mf-cwd-'));
+      fs.writeFileSync(path.join(cwd, 'rt.js'), '');
+      Object.defineProperty(process, 'cwd', { value: () => cwd });
+      compiler.context = fs.mkdtempSync(path.join(os.tmpdir(), 'mf-context-'));
+
+      const template = FederationRuntimePlugin.getTemplate(
+        compiler as Compiler,
+        { ...mockOptions, runtimePlugins: ['./rt.js'] },
+        'bundler-runtime.js',
+        {},
       );
+
+      const expected = path.join(cwd, 'rt.js').replace(/\\/g, '/');
+      expect(template).toContain(`from ${JSON.stringify(expected)};`);
     });
 
     it('emits paths that contain a quote as valid JS string literals', () => {
@@ -176,7 +185,10 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
         {},
       );
 
-      expect(importSources(template)).toEqual([bundlerRuntimePath, pluginPath]);
+      expect(template).toContain(
+        `import federation from ${JSON.stringify(bundlerRuntimePath)};`,
+      );
+      expect(template).toContain(`from ${JSON.stringify(pluginPath)};`);
     });
 
     it('should filter out false plugins in runtimePluginCalls', () => {
@@ -231,11 +243,11 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
 
   describe('fallback container name', () => {
     // A context without a package.json gives webpack an empty uniqueName.
-    function applyTo(context: string) {
+    function applyTo(context: string, name?: string) {
       const plugin = new FederationRuntimePlugin({
         virtualRuntimeEntry: true,
       } as any);
-      webpack({ mode: 'none', context, plugins: [plugin] });
+      webpack({ mode: 'none', name, context, plugins: [plugin] });
       return plugin.options!.name;
     }
 
@@ -243,15 +255,17 @@ describe('FederationRuntimePlugin runtimePluginCalls', () => {
       rs.restoreAllMocks();
     });
 
-    it('does not change between builds and differs between contexts', () => {
+    it('does not change between builds and differs between contexts and compiler names', () => {
       const now = rs.spyOn(Date, 'now').mockReturnValue(1_000);
       const first = applyTo('/test/path');
       now.mockReturnValue(2_000);
       const second = applyTo('/test/path');
-      const other = applyTo('/test/other');
+      const otherContext = applyTo('/test/other');
+      const named = applyTo('/test/path', 'server');
 
       expect(second).toBe(first);
-      expect(other).not.toBe(first);
+      expect(otherContext).not.toBe(first);
+      expect(named).not.toBe(first);
     });
   });
 

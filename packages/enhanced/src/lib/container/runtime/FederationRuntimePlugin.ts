@@ -127,6 +127,32 @@ const federationGlobal = getFederationGlobalScope(RuntimeGlobals);
 
 const onceForCompiler = new WeakSet<Compiler>();
 const onceForCompilerEntryMap = new WeakMap<Compiler, string>();
+const fallbackWarnings = new WeakMap<Compiler, Set<string>>();
+
+function warn(compiler: Compiler, message: string) {
+  let messages = fallbackWarnings.get(compiler);
+  if (!messages) {
+    messages = new Set();
+    fallbackWarnings.set(compiler, messages);
+  }
+  messages.add(message);
+}
+
+function resolveRuntimePluginPath(compiler: Compiler, entry: string) {
+  const fromContext = path.resolve(compiler.context, entry);
+  if (path.isAbsolute(entry) || fs.existsSync(fromContext)) {
+    return fromContext;
+  }
+  const fromCwd = path.resolve(entry);
+  if (!fs.existsSync(fromCwd)) {
+    return fromContext;
+  }
+  warn(
+    compiler,
+    `runtimePlugins entry ${JSON.stringify(entry)} was found relative to the working directory, not the compiler context ${compiler.context}. Relative runtimePlugins paths resolve against the context. Update the path; the working-directory fallback will be removed.`,
+  );
+  return fromCwd;
+}
 
 class FederationRuntimePlugin {
   options?: moduleFederationPlugin.ModuleFederationPluginOptions;
@@ -169,7 +195,7 @@ class FederationRuntimePlugin {
           ? runtimePlugin[0]
           : runtimePlugin;
         const runtimePluginPath = normalizeToPosixPath(
-          path.resolve(compiler.context, runtimePluginEntry),
+          resolveRuntimePluginPath(compiler, runtimePluginEntry),
         );
         const paramsStr =
           Array.isArray(runtimePlugin) && runtimePlugin.length > 1
@@ -498,9 +524,16 @@ class FederationRuntimePlugin {
     }
     if (this.options && !this.options?.name) {
       //! the instance may get the same one if the name is the same https://github.com/module-federation/core/blob/main/packages/runtime/src/index.ts#L18
+      const uniqueName = compiler.options.output.uniqueName;
       this.options.name =
-        compiler.options.output.uniqueName ||
-        `container_${createHash(compiler.context).slice(0, 8)}`;
+        uniqueName ||
+        `container_${createHash(`${compiler.options.name ?? ''} ${compiler.context}`).slice(0, 8)}`;
+      if (!uniqueName) {
+        warn(
+          compiler,
+          `The federation runtime has no container name. Set output.uniqueName or the plugin name option. The fallback name ${JSON.stringify(this.options.name)} is derived from the compiler name and context and is not the same on every machine.`,
+        );
+      }
     }
 
     const resolvedPaths = resolveRuntimePaths(this.options?.implementation);
@@ -519,6 +552,17 @@ class FederationRuntimePlugin {
       this.prependEntry(compiler);
       this.injectRuntime(compiler);
       this.setRuntimeAlias(compiler);
+      compiler.hooks.thisCompilation.tap(
+        this.constructor.name,
+        (compilation: Compilation) => {
+          for (const message of fallbackWarnings.get(compiler) ?? []) {
+            const warning = new compiler.webpack.WebpackError(message);
+            warning.name = 'FederationRuntimePluginWarning';
+            warning.hideStack = true;
+            compilation.warnings.push(warning);
+          }
+        },
+      );
       onceForCompiler.add(compiler);
     }
   }
