@@ -886,6 +886,7 @@ describe('runtimePlugin', () => {
         await new Promise(process.nextTick);
 
         expect(done).toHaveBeenCalledWith(expect.any(Error));
+        expect(done.mock.calls[0][0].message).toMatch(/no federation instance/);
       } finally {
         federation.instance = originalInstance;
       }
