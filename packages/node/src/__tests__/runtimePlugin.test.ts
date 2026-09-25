@@ -794,6 +794,88 @@ describe('runtimePlugin', () => {
       });
     });
 
+    it('loads through the instance platform when it has loadScriptNode', async () => {
+      const federation = (global as any).__webpack_require__.federation;
+      const calls: unknown[][] = [];
+      const container = { get: jest.fn() };
+      const legacyLoader = jest.fn();
+      const originalInstance = federation.instance;
+      const originalRuntime = federation.runtime;
+      federation.runtime = { loadScriptNode: legacyLoader };
+      federation.instance = {
+        platform: {
+          loadScriptNode: async (...args: unknown[]) => {
+            calls.push(args);
+            return container;
+          },
+        },
+        initRawContainer: (_name: string, _url: string, res: unknown) => ({
+          wrapped: res,
+        }),
+      };
+      try {
+        setupScriptLoader();
+        const done = jest.fn();
+        (global as any).__webpack_require__.l(
+          'http://localhost:3001/remoteEntry.js',
+          done,
+          'platform-remote',
+          '',
+        );
+        await new Promise(process.nextTick);
+
+        expect(calls).toEqual([
+          [
+            'http://localhost:3001/remoteEntry.js',
+            { attrs: { globalName: 'platform-remote' } },
+          ],
+        ]);
+        expect(legacyLoader).not.toHaveBeenCalled();
+        expect(done).toHaveBeenCalledWith({ wrapped: container });
+      } finally {
+        federation.instance = originalInstance;
+        federation.runtime = originalRuntime;
+        delete (globalThis as any)['platform-remote'];
+      }
+    });
+
+    it('falls back to federation.runtime.loadScriptNode without a platform loader', async () => {
+      const federation = (global as any).__webpack_require__.federation;
+      const container = { get: jest.fn() };
+      const originalInstance = federation.instance;
+      const originalRuntime = federation.runtime;
+      federation.runtime = {
+        loadScriptNode: jest.fn().mockResolvedValue(container),
+      };
+      federation.instance = {
+        platform: { isBrowser: () => false },
+        initRawContainer: (_name: string, _url: string, res: unknown) => ({
+          wrapped: res,
+        }),
+      };
+      try {
+        setupScriptLoader();
+        const done = jest.fn();
+        (global as any).__webpack_require__.l(
+          'http://localhost:3001/remoteEntry.js',
+          done,
+          'legacy-remote',
+          '',
+        );
+        await new Promise(process.nextTick);
+
+        expect(federation.runtime.loadScriptNode).toHaveBeenCalledWith(
+          'http://localhost:3001/remoteEntry.js',
+          { attrs: { globalName: 'legacy-remote' } },
+        );
+        expect(done).toHaveBeenCalledWith({ wrapped: container });
+      } finally {
+        federation.instance = originalInstance;
+        federation.runtime = originalRuntime;
+        delete (globalThis as any)['legacy-remote'];
+      }
+    });
+
     it('should throw error when key is missing', () => {
       setupScriptLoader();
 
